@@ -12,8 +12,9 @@ namespace Custom_AspNet_Mvc_ActionResult_CacheAttribute.Models
 {
 	public class ActionResultCacheAttribute : ActionFilterAttribute
 	{
-		private static readonly ConcurrentDictionary<string, string[]> _varyByParamsSplitCache = new ConcurrentDictionary<string, string[]>();
-		private static readonly MemoryCache _cache = new MemoryCache("ActionResultCacheAttribute");
+		private const string ActionresultcacheattributeCachekey = "__actionresultcacheattribute_cachekey";
+		private static readonly ConcurrentDictionary<string, string[]> VaryByParamsSplitCache = new ConcurrentDictionary<string, string[]>();
+		private static readonly MemoryCache Cache = new MemoryCache("ActionResultCacheAttribute");
 
 		public string VaryByParam { get; set; }
 		public int Duration { get; set; }
@@ -22,15 +23,13 @@ namespace Custom_AspNet_Mvc_ActionResult_CacheAttribute.Models
 		{
 			var cacheKey = CreateCacheKey(filterContext.RouteData.Values, filterContext.ActionParameters);
 
-			var result = _cache.Get(cacheKey) as ActionResult;
-			if (result != null)
+			if (Cache.Get(cacheKey) is ActionResult result)
 			{
 				filterContext.Result = result;
 				return;
 			}
 
-			// Store to HttpContext Items
-			filterContext.HttpContext.Items["__actionresultcacheattribute_cachekey"] = cacheKey;
+			filterContext.HttpContext.Items[ActionresultcacheattributeCachekey] = cacheKey;
 		}
 
 		public override void OnActionExecuted(ActionExecutedContext filterContext)
@@ -41,7 +40,7 @@ namespace Custom_AspNet_Mvc_ActionResult_CacheAttribute.Models
 			}
 
 			// Get the cache key from HttpContext Items
-			var cacheKey = filterContext.HttpContext.Items["__actionresultcacheattribute_cachekey"] as string;
+			var cacheKey = filterContext.HttpContext.Items[ActionresultcacheattributeCachekey] as string;
 			if (string.IsNullOrWhiteSpace(cacheKey))
 			{
 				return;
@@ -49,11 +48,11 @@ namespace Custom_AspNet_Mvc_ActionResult_CacheAttribute.Models
 
 			if (Duration != 0)
 			{
-				_cache.Add(cacheKey, filterContext.Result, DateTime.UtcNow.AddSeconds(Duration));
+				Cache.Add(cacheKey, filterContext.Result, DateTime.UtcNow.AddSeconds(Duration));
 				return;
 			}
 
-			_cache.Add(cacheKey, filterContext.Result, DateTime.UtcNow.AddSeconds(60 * 60));
+			Cache.Add(cacheKey, filterContext.Result, DateTime.UtcNow.AddSeconds(60 * 60));
 		}
 
 		private string CreateCacheKey(RouteValueDictionary routeValues,
@@ -77,11 +76,11 @@ namespace Custom_AspNet_Mvc_ActionResult_CacheAttribute.Models
 				return sb.ToString();
 			}
 
-			if (!_varyByParamsSplitCache.TryGetValue(VaryByParam, out var varyByParamsSplit))
+			if (!VaryByParamsSplitCache.TryGetValue(VaryByParam, out var varyByParamsSplit))
 			{
 				varyByParamsSplit = VaryByParam.Split(new[] { ',', ' ' },
 					StringSplitOptions.RemoveEmptyEntries);
-				_varyByParamsSplitCache[VaryByParam] = varyByParamsSplit;
+				VaryByParamsSplitCache[VaryByParam] = varyByParamsSplit;
 			}
 
 			foreach (var varyByParam in varyByParamsSplit)
