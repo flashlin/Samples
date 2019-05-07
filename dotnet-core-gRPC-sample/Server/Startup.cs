@@ -61,6 +61,8 @@ namespace Server
 		}
 
 		//https://github.com/grpc/grpc
+		//https://grpc.io/docs/tutorials/basic/csharp/
+		//https://github.com/grpc/grpc/blob/master/src/csharp/BUILD-INTEGRATION.md
 		private void StartGrpc()
 		{
 			int Port = 50051;
