@@ -13,7 +13,7 @@
     "test:unit": "vue-cli-service test:unit",
     "package-win": "electron-packager . electron-csharp-demo --overwrite --asar=true --platform=win32 --arch=ia32 --icon=public/favicon.ico --prune=true --out=release-builds --version-string.CompanyName=FlashHome --version-string.FileDescription=CE --version-string.ProductName=\"Electron-demo\""
   },
-  "main": "background.js",
+  "main2": "dist_electron/index.js",
   "dependencies": {
     "core-js": "^2.6.5",
     "register-service-worker": "^1.6.2",
