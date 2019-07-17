@@ -12,7 +12,7 @@ export abstract class Tetromino {
 
    leftRotate(): void {
       let newPlane: MinoType[][] = [];
-      let rowLength = this.getRowLength();
+      let rowLength = this.getRowLength(this._plane);
       let nx = -1;
       for (let y = 0; y < this._plane.length; y++) {
          let ny = rowLength - 1;
@@ -32,15 +32,85 @@ export abstract class Tetromino {
             ny--;
          }
       }
-      this._plane = newPlane;
+      this._plane = this.normalizePlane(newPlane);
    }
 
    rightRotate(): void {}
 
-   getRowLength(): number {
-      let rowLength = this._plane.length;
-      for (let y = 0; y < this._plane.length; y++) {
-         let columns = this._plane[y];
+   normalizePlane(plane: MinoType[][]): MinoType[][] {
+      let rowLength = this.getRowLength(plane);
+      plane = this.fillPlane(plane);
+      plane = this.trimYPlane(plane);
+      plane = this.trimXPlane(plane);
+      return plane;
+   }
+
+   trimYPlane(plane: MinoType[][]): MinoType[][] {
+      let rowLength = this.getRowLength(plane);
+      let newPlane: MinoType[][] = [];
+      for (let y = 0; y < rowLength; y++) {
+         let columns = plane[y];
+         let countX = 0;
+         for (let x = 0; x < rowLength; x++) {
+            if( columns[x] === MinoType.None ) {
+               countX++;
+            }
+         }
+         if( countX !== rowLength ){
+            newPlane.push(columns);
+         }
+      }
+      return newPlane;
+   }
+
+   trimXPlane(plane: MinoType[][]): MinoType[][] {
+      let rowLength = this.getRowLength(plane);
+      let newPlane: MinoType[][] = [];
+      let idx = -1;
+      for (let x = 0; x < rowLength; x++) {
+         let countY = 0;
+         for (let y = 0; y < rowLength; y++) {
+            if( plane[y][x] === MinoType.None ) {
+               countY++;
+            }
+         }
+         if( countY !== rowLength ){
+            idx = x;
+            break;
+         }
+      }
+      for (let y = 0; y < rowLength; y++) {
+         for(let n=0; n<idx; n++){
+            plane[y].shift();
+         }
+      } 
+      return newPlane;
+   }
+
+   fillPlane(plane: MinoType[][]): MinoType[][] {
+      let rowLength = this.getRowLength(plane);
+      let newPlane: MinoType[][] = [];
+      for (let y = 0; y < rowLength; y++) {
+         let columns = plane[y];
+         newPlane[y] = [];
+         columns = newPlane[y];
+
+         for (let x = 0; x < rowLength; x++) {
+            let old = plane[y][x];
+            if( old === undefined) {
+               columns[x] = MinoType.None;
+            } else {
+               columns[x] = old;
+            }
+         }
+      }
+      return newPlane;
+   }
+
+   getRowLength(plane: MinoType[][]): number {
+      let rowLength = plane.length;
+      for (let y = 0; y < plane.length; y++) {
+         let columns = plane[y];
          if( columns === undefined) {
             continue;
          } 
