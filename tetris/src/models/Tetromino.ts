@@ -117,12 +117,14 @@ export abstract class Tetromino {
       let rowLength = this.getRowLength(plane);
       let newPlane: MinoType[][] = [];
       for (let y = 0; y < rowLength; y++) {
-         let columns = plane[y];
+         let oldColumns = plane[y];
+         oldColumns = oldColumns || [];
+
          newPlane[y] = [];
-         columns = newPlane[y];
+         let columns = newPlane[y];
 
          for (let x = 0; x < rowLength; x++) {
-            let old = plane[y][x];
+            let old = oldColumns[x];
             if( old === undefined) {
                columns[x] = MinoType.None;
             } else {
