@@ -65,6 +65,21 @@ describe("Tetromino", () => {
       [MinoType.Solid],
       [MinoType.Solid]
    ]}
+
+
+   ${[
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None]
+   ]} 
+   | 
+   ${[
+      [MinoType.Solid],
+      [MinoType.Solid],
+      [MinoType.Solid],
+      [MinoType.Solid]
+   ]}
    
    `.test("trimXPlane $input", ({ input, expectedResult }) => {
       const actualPlane = _mino.trimXPlane(input as MinoType[][]);
