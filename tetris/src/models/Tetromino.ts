@@ -13,8 +13,10 @@ export abstract class Tetromino {
    leftRotate(): void {
       let newPlane: MinoType[][] = [];
       let rowLength = this.getRowLength();
+      let nx = -1;
       for (let y = 0; y < this._plane.length; y++) {
-         let nx = 0 + y;
+         let ny = rowLength - 1;
+         nx++;
 
          let columns = this._plane[y];
          if( columns === undefined) {
@@ -22,12 +24,12 @@ export abstract class Tetromino {
          }
 
          for (let x = 0; x < columns.length; x++) {
-            let ny = rowLength - 1 - x;
-            newPlane[ny] = [];
+            newPlane[ny] = newPlane[ny] || [];
             let old = columns[x];
             if( old !== undefined) {
-                newPlane[ny][nx] = columns[x];
+               newPlane[ny][nx] = columns[x];
             }
+            ny--;
          }
       }
       this._plane = newPlane;

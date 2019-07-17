@@ -2,7 +2,11 @@ import { MinoType } from "@/models/Tetromino";
 import { StraightPolyomino } from "@/models/StraightPolyomino";
 
 describe("StraightPolyomino", () => {
-   const _mino = new StraightPolyomino();
+   let _mino: StraightPolyomino;
+
+   beforeEach(() => {
+      _mino = new StraightPolyomino();
+   });
 
    it("Horizontal Straight Poly", () => {
       const actualPlane = _mino.getPlane();
@@ -34,6 +38,9 @@ describe("StraightPolyomino", () => {
       const actualPlane = _mino.getPlane();
 
       const expectedPlane = [
+         undefined, 
+         undefined,
+         undefined,
          [MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.Solid]
       ];
 
