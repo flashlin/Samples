@@ -86,5 +86,35 @@ describe("Tetromino", () => {
       expect(actualPlane).toEqual(expectedResult);
    });
 
+
+   each`
+   input | expectedResult
+   ${[
+      [MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.Solid],
+      [MinoType.None, MinoType.None, MinoType.None, MinoType.None],
+      [MinoType.None, MinoType.None, MinoType.None, MinoType.None],
+      [MinoType.None, MinoType.None, MinoType.None, MinoType.None]
+   ]} 
+   | 
+   ${[
+      [MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.Solid]
+   ]}
+
+
+   ${[
+      [MinoType.None, MinoType.None, MinoType.None, MinoType.None],
+      [MinoType.None, MinoType.None, MinoType.None, MinoType.None],
+      [MinoType.None, MinoType.None, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.Solid]
+   ]} 
+   | 
+   ${[
+      [MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.Solid]
+   ]}
+   
+   `.test("trimYPlane $input", ({ input, expectedResult }) => {
+      const actualPlane = _mino.trimYPlane(input as MinoType[][]);
+      expect(actualPlane).toEqual(expectedResult);
+   });
 });
 
