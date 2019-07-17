@@ -19,14 +19,14 @@ export abstract class Tetromino {
          nx++;
 
          let columns = this._plane[y];
-         if( columns === undefined) {
+         if (columns === undefined) {
             continue;
          }
 
          for (let x = 0; x < columns.length; x++) {
             newPlane[ny] = newPlane[ny] || [];
             let old = columns[x];
-            if( old !== undefined) {
+            if (old !== undefined) {
                newPlane[ny][nx] = columns[x];
             }
             ny--;
@@ -35,10 +35,9 @@ export abstract class Tetromino {
       this._plane = this.normalizePlane(newPlane);
    }
 
-   rightRotate(): void {}
+   rightRotate(): void { }
 
    normalizePlane(plane: MinoType[][]): MinoType[][] {
-      let rowLength = this.getRowLength(plane);
       plane = this.fillPlane(plane);
       plane = this.trimYPlane(plane);
       plane = this.trimXPlane(plane);
@@ -52,11 +51,11 @@ export abstract class Tetromino {
          let columns = plane[y];
          let countX = 0;
          for (let x = 0; x < rowLength; x++) {
-            if( columns[x] === MinoType.None ) {
+            if (columns[x] === MinoType.None) {
                countX++;
             }
          }
-         if( countX !== rowLength ){
+         if (countX !== rowLength) {
             newPlane.push(columns);
          }
       }
@@ -73,21 +72,23 @@ export abstract class Tetromino {
       let rowLength = this.getRowLength(plane);
       let newPlane: MinoType[][] = [];
       let idx = -1;
-      for (let x = rowLength-1; x > 0; x--) {
+      for (let x = rowLength - 1; x > 0; x--) {
          let countY = 0;
          for (let y = 0; y < rowLength; y++) {
-            if( plane[y][x] === MinoType.None ) {
+            if (plane[y] === undefined || plane[y][x] === MinoType.None) {
                countY++;
             }
          }
-         if( countY !== rowLength ){
+         if (countY !== rowLength) {
             idx = x;
             break;
          }
       }
       for (let y = 0; y < rowLength; y++) {
-         newPlane[y] = plane[y].slice(0, rowLength-idx);
-      } 
+         if (plane[y] !== undefined) {
+            newPlane[y] = plane[y].slice(0, rowLength - idx);
+         }
+      }
       return newPlane;
    }
 
@@ -98,18 +99,20 @@ export abstract class Tetromino {
       for (let x = 0; x < rowLength; x++) {
          let countY = 0;
          for (let y = 0; y < rowLength; y++) {
-            if( plane[y][x] === MinoType.None ) {
+            if (plane[y] === undefined || plane[y][x] === MinoType.None) {
                countY++;
             }
          }
-         if( countY !== rowLength ){
+         if (countY !== rowLength) {
             idx = x;
             break;
          }
       }
       for (let y = 0; y < rowLength; y++) {
-         newPlane[y] = plane[y].slice(idx);
-      } 
+         if (plane[y] !== undefined) {
+            newPlane[y] = plane[y].slice(idx);
+         }
+      }
       return newPlane;
    }
 
@@ -125,7 +128,7 @@ export abstract class Tetromino {
 
          for (let x = 0; x < rowLength; x++) {
             let old = oldColumns[x];
-            if( old === undefined) {
+            if (old === undefined) {
                columns[x] = MinoType.None;
             } else {
                columns[x] = old;
@@ -139,9 +142,9 @@ export abstract class Tetromino {
       let rowLength = plane.length;
       for (let y = 0; y < plane.length; y++) {
          let columns = plane[y];
-         if( columns === undefined) {
+         if (columns === undefined) {
             continue;
-         } 
+         }
          if (rowLength < columns.length) {
             rowLength = columns.length;
          }
