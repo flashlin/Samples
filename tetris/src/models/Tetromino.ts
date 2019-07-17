@@ -65,6 +65,11 @@ export abstract class Tetromino {
 
    trimXPlane(plane: MinoType[][]): MinoType[][] {
       plane = this.leftTrimXPlane(plane);
+      plane = this.rightTrimXPlane(plane);
+      return plane;
+   }
+
+   rightTrimXPlane(plane: MinoType[][]): MinoType[][] {
       let rowLength = this.getRowLength(plane);
       let newPlane: MinoType[][] = [];
       let idx = -1;
