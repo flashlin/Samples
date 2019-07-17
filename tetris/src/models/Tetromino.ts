@@ -75,7 +75,7 @@ export abstract class Tetromino {
       for (let x = rowLength - 1; x > 0; x--) {
          let countY = 0;
          for (let y = 0; y < rowLength; y++) {
-            if (plane[y] === undefined || plane[y][x] === MinoType.None) {
+            if ( plane[y] === undefined || plane[y][x] === MinoType.None) {
                countY++;
             }
          }
@@ -84,9 +84,12 @@ export abstract class Tetromino {
             break;
          }
       }
+
+      let ny = 0;
       for (let y = 0; y < rowLength; y++) {
          if (plane[y] !== undefined) {
-            newPlane[y] = plane[y].slice(0, rowLength - idx);
+            newPlane[ny] = plane[y].slice(0, rowLength - idx);
+            ny++;
          }
       }
       return newPlane;

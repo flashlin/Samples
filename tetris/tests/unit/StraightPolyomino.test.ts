@@ -19,37 +19,28 @@ describe("StraightPolyomino", () => {
       expect(actualPlane).toEqual(expectedPlane);
    });
 
-   it("Vertical Straight Poly", () => {
-      GiveMinoLeftRotate(1);
-      const actualPlane = _mino.getPlane();
-
-      const expectedPlane = [
+   each`
+      times | expectedResult
+      ${1} |
+      ${[
          [MinoType.Solid],
          [MinoType.Solid],
          [MinoType.Solid],
          [MinoType.Solid]
-      ];
+      ]}
 
-      expect(actualPlane).toEqual(expectedPlane);
-   });
-
-   each`
-      times | expectedResult
       ${2} | 
       ${[
-         undefined,
-         undefined,
-         undefined,
          [MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.Solid]
       ]}
 
       ${3} |
       ${
       [
-         [undefined, undefined, undefined, MinoType.Solid],
-         [undefined, undefined, undefined, MinoType.Solid],
-         [undefined, undefined, undefined, MinoType.Solid],
-         [undefined, undefined, undefined, MinoType.Solid]
+         [MinoType.Solid],
+         [MinoType.Solid],
+         [MinoType.Solid],
+         [MinoType.Solid]
       ]}
 
       ${4} |
