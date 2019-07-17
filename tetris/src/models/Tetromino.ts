@@ -80,9 +80,7 @@ export abstract class Tetromino {
          }
       }
       for (let y = 0; y < rowLength; y++) {
-         for(let n=0; n<idx; n++){
-            plane[y].shift();
-         }
+         newPlane[y] = plane[y].slice(idx);
       } 
       return newPlane;
    }
