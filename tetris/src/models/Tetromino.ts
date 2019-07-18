@@ -68,19 +68,29 @@ export abstract class Tetromino {
       return plane;
    }
 
+   isNone(data: MinoType): boolean {
+      if( data === undefined ) {
+         return true;
+      }
+      if( data == MinoType.None ){
+         return true;
+      }
+      return false;
+   }
+
    rightTrimXPlane(plane: MinoType[][]): MinoType[][] {
       let rowLength = this.getRowLength(plane);
       let newPlane: MinoType[][] = [];
       let idx = -1;
-      for (let x = rowLength - 1; x > 0; x--) {
+      for (let x = rowLength - 1; x >= 0; x--) {
          let countY = 0;
          for (let y = 0; y < rowLength; y++) {
-            if ( plane[y] === undefined || plane[y][x] === MinoType.None) {
+            if ( plane[y] === undefined || this.isNone(plane[y][x]) ) {
                countY++;
             }
          }
          if (countY !== rowLength) {
-            idx = x;
+            idx = x + 1;
             break;
          }
       }
@@ -88,7 +98,7 @@ export abstract class Tetromino {
       let ny = 0;
       for (let y = 0; y < rowLength; y++) {
          if (plane[y] !== undefined) {
-            newPlane[ny] = plane[y].slice(0, rowLength - idx);
+            newPlane[ny] = plane[y].slice(0, idx);
             ny++;
          }
       }

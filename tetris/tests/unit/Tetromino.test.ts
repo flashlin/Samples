@@ -17,6 +17,43 @@ describe("Tetromino", () => {
    desc | input | expectedResult
    ${1} |
    ${[
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None]
+   ]} 
+   | 
+   ${[
+      [MinoType.Solid],
+      [MinoType.Solid],
+      [MinoType.Solid],
+      [MinoType.Solid]
+   ]}
+   
+   ${2} |
+   ${[
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None],
+      [MinoType.Solid, MinoType.None, MinoType.None]
+   ]} 
+   | 
+   ${[
+      [MinoType.Solid],
+      [MinoType.Solid],
+      [MinoType.Solid],
+      [MinoType.Solid]
+   ]}
+   `.test("rightTrimXPlane case$desc", ({ desc, input, expectedResult }) => {
+      const actualPlane = _mino.rightTrimXPlane(input as MinoType[][]);
+      expect(actualPlane).toEqual(expectedResult);
+   });
+
+   each`
+   // trimXPlane
+   desc | input | expectedResult
+   ${1} |
+   ${[
       [MinoType.None, MinoType.None, MinoType.None, MinoType.Solid],
       [MinoType.None, MinoType.None, MinoType.None, MinoType.Solid],
       [MinoType.None, MinoType.None, MinoType.None, MinoType.Solid],
