@@ -12,9 +12,10 @@ namespace ChargeLimitConfig_DesignPattern1.Rules
 				return;
 			}
 
-			new CannotIncreaseRule().Handle(args);
+			var rules = new CannotIncreaseRule()
+				.SetNext(new CannotLimitToUnlimitRule());
 
-			new CannotLimitToUnlimitRule().Handle(args);
+			rules.Handle(args);
 		}
 	}
 }
