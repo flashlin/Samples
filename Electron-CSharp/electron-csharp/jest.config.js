@@ -12,8 +12,7 @@ module.exports = {
   },
   snapshotSerializers: ["jest-serializer-vue"],
   testMatch: [
-    "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)",
-    "**/tests/**/*.test.(js|jsx|ts|tsx)"
+    "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
   ],
   testURL: "http://localhost/",
   watchPlugins: [
@@ -22,7 +21,7 @@ module.exports = {
   ],
   globals: {
     "ts-jest": {
-      babelConfig: false,
+      babelConfig: true
     }
-  },
+  }
 };
