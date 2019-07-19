@@ -9,7 +9,7 @@ namespace ChargeLimitConfig_DesignPattern1.Rules
 		{
 			if (!args.OldLimit.IsUnlimit && args.NewLimit.IsUnlimit )
 			{
-				throw new Exception();
+				throw new ValidationException();
 			}
 		}
 	}

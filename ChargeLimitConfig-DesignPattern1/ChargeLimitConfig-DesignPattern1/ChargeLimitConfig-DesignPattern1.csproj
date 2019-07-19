@@ -158,6 +158,7 @@
     <Compile Include="Rules\IChargeLimitUpdateRule.cs" />
     <Compile Include="Rules\In24HrRule.cs" />
     <Compile Include="Rules\Out24HrRule.cs" />
+    <Compile Include="Rules\ValidationException.cs" />
     <Compile Include="TimeHelper.cs" />
     <Compile Include="ValidateChargeLimitArgs.cs" />
   </ItemGroup>

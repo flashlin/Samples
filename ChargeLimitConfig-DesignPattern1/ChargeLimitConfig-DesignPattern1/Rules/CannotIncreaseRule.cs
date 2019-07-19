@@ -9,7 +9,7 @@ namespace ChargeLimitConfig_DesignPattern1.Rules
 		{
 			if (args.OldLimit.Amount < args.NewLimit.Amount)
 			{
-				throw new Exception("");
+				throw new ValidationException();
 			}
 		}
 	}

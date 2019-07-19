@@ -42,10 +42,9 @@ namespace ChargeLimitConfig_DesignPattern1
 				{
 					rule.Handle(limit);
 				}
-
 				return true;
 			}
-			catch
+			catch(ValidationException)
 			{
 				return false;
 			}
