@@ -153,6 +153,7 @@
     <Compile Include="ChargeLimit.cs" />
     <Compile Include="ChargeLimitsConfigUpdateValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rules\Amount.cs" />
     <Compile Include="Rules\CannotIncreaseRule.cs" />
     <Compile Include="Rules\CannotLimitToUnlimitRule.cs" />
     <Compile Include="Rules\IChargeLimitUpdateRule.cs" />
