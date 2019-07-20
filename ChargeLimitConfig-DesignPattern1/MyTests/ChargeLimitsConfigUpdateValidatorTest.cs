@@ -50,7 +50,27 @@ namespace MyTests
 			});
 
 			ValidateShouldBe(false);
-		}		
+		}
+		
+		[Fact]
+		public void Player_Change_ChargeUnLimit_To_Limit_In24hr()
+		{
+			GiveOldChargeLimitsConfig("2019/01/01", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = ChargeLimit.UnlimitAmount },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			GiveNewChargeLimitsConfig("2019/01/01 10:00", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 900 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			ValidateShouldBe(true);
+		}
+		
+
 
 		private static ChargeLimitsConfig CreateChargeLimits(string modifiedTime, params ChargeLimit[] chargeLimits)
 		{

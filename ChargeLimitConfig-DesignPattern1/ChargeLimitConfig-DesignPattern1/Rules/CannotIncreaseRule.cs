@@ -7,11 +7,13 @@ namespace ChargeLimitConfig_DesignPattern1.Rules
 	{
 		public override void Handle(ValidateChargeLimitArgs args)
 		{
-			if (args.OldLimit.Amount < args.NewLimit.Amount)
+			if (!args.OldLimit.IsUnlimit && !args.NewLimit.IsUnlimit)
 			{
-				throw new ValidationException();
+				if (args.OldLimit.Amount < args.NewLimit.Amount)
+				{
+					throw new ValidationException();
+				}
 			}
-
 			base.Handle(args);
 		}
 	}
