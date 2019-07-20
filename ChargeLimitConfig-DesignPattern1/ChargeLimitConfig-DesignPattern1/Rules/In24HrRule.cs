@@ -14,7 +14,8 @@ namespace ChargeLimitConfig_DesignPattern1.Rules
 
 			var rules = ChainOfResponsibilityHandler.Chain(
 				new CannotIncreaseRule(),
-				new CannotLimitToUnlimitRule());
+				new CannotLimitToUnlimitRule()
+				);
 
 			rules.Handle(args);
 		}

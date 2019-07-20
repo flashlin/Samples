@@ -12,13 +12,30 @@ namespace ChargeLimitConfig_DesignPattern1
 	{
 		public bool Validate(ChargeLimitsConfig oldConfig, ChargeLimitsConfig newConfig)
 		{
-			var allChargeLimits = GetAllChargeLimits(oldConfig, newConfig);
+			var allChargeLimits = GetAllChargeLimits(oldConfig, newConfig)
+				.ToList();
+
+			if (!IsNoAnyChanged(allChargeLimits))
+			{
+				return false;
+			}
 
 			var rule = ChainOfResponsibilityHandler.Chain(
 				new In24HrRule(),
 				new Out24HrRule());
 
 			return HandleAllChargeLimitsByRule(allChargeLimits, rule);
+		}
+
+
+		private static bool IsNoAnyChanged(IEnumerable<ValidateChargeLimitArgs> allChargeLimits)
+		{
+			var validateChargeLimitArgses = allChargeLimits as ValidateChargeLimitArgs[] ?? allChargeLimits.ToArray();
+
+			var equalsCount = validateChargeLimitArgses
+				.Count(x => x.OldLimit.Amount == x.NewLimit.Amount);
+
+			return validateChargeLimitArgses.Count() == equalsCount;
 		}
 
 		private static IEnumerable<ValidateChargeLimitArgs> GetAllChargeLimits(ChargeLimitsConfig oldConfig, ChargeLimitsConfig newConfig)

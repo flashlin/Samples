@@ -124,6 +124,25 @@ namespace MyTests
 			ValidateShouldBe(true);
 		}
 
+		[Fact]
+		public void Player_No_Change_In24hr()
+		{
+			GiveOldChargeLimitsConfig("2019/01/01", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 100 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			GiveNewChargeLimitsConfig("2019/01/02", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 100 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			ValidateShouldBe(false);
+		}
+
+
 		private static ChargeLimitsConfig CreateChargeLimits(string modifiedTime, params ChargeLimit[] chargeLimits)
 		{
 			var chargeLimitsConfig = new ChargeLimitsConfig()
