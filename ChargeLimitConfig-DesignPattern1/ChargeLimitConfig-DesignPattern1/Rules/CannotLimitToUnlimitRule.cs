@@ -11,6 +11,8 @@ namespace ChargeLimitConfig_DesignPattern1.Rules
 			{
 				throw new ValidationException();
 			}
+
+			base.Handle(args);
 		}
 	}
 }

@@ -5,20 +5,19 @@ using Xunit;
 
 namespace MyTests
 {
-	public class UnitTest1
+	public class ChargeLimitsConfigUpdateValidatorTest
 	{
 		private ChargeLimitsConfig _newChargeLimitsConfig;
 		private ChargeLimitsConfig _oldChargeLimitsConfig;
-		private ChargeLimitsConfigUpdateValidator _updateValidator;
+		private readonly ChargeLimitsConfigUpdateValidator _updateValidator;
 
-		public UnitTest1()
+		public ChargeLimitsConfigUpdateValidatorTest()
 		{
 			_updateValidator = new ChargeLimitsConfigUpdateValidator();
-
 		}
 
 		[Fact]
-		public void Test1()
+		public void Player_Increase_ChargeLimit_In24Hr()
 		{
 			GiveOldChargeLimitsConfig("2019/01/01", new[] {
 				new ChargeLimit { PeriodDays = 1, Amount = 100 },
@@ -32,10 +31,26 @@ namespace MyTests
 				new ChargeLimit { PeriodDays = 30, Amount = 100 }
 			});
 
-			var actual = _updateValidator.Validate(_oldChargeLimitsConfig, _newChargeLimitsConfig);
-			var expected = false;
-			Assert.Equal(expected, actual);
+			ValidateShouldBe(false);
 		}
+
+		[Fact]
+		public void Player_Change_ChargeLimit_To_Unlimit_In24hr()
+		{
+			GiveOldChargeLimitsConfig("2019/01/01", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 100 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			GiveNewChargeLimitsConfig("2019/01/01 10:00", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = ChargeLimit.UnlimitAmount },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			ValidateShouldBe(false);
+		}		
 
 		private static ChargeLimitsConfig CreateChargeLimits(string modifiedTime, params ChargeLimit[] chargeLimits)
 		{
@@ -62,6 +77,12 @@ namespace MyTests
 		{
 			_oldChargeLimitsConfig = CreateChargeLimits(lastModifiedTime,
 				chargeLimits);
+		}
+
+		private void ValidateShouldBe(bool expected)
+		{
+			var actual = _updateValidator.Validate(_oldChargeLimitsConfig, _newChargeLimitsConfig);
+			Assert.Equal(expected, actual);
 		}
 	}
 }
