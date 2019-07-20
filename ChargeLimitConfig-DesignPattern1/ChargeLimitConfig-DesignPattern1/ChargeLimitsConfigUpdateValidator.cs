@@ -14,8 +14,9 @@ namespace ChargeLimitConfig_DesignPattern1
 		{
 			var allChargeLimits = GetAllChargeLimits(oldConfig, newConfig);
 
-			var rule = new In24HrRule()
-				.SetNext(new Out24HrRule());
+			var rule = ChainOfResponsibilityHandler.Chain(
+				new In24HrRule(),
+				new Out24HrRule());
 
 			return HandleAllChargeLimitsByRule(allChargeLimits, rule);
 		}
@@ -29,7 +30,7 @@ namespace ChargeLimitConfig_DesignPattern1
 							OldLimit = tb1,
 							LastModifiedTime = oldConfig.LastModifiedTime,
 							NewLimit = tb2,
-							ModifyTime = DateTime.Now
+							ModifyTime = newConfig.LastModifiedTime
 						};
 			return q1;
 		}

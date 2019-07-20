@@ -143,8 +143,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="T1.Standard, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\T1.Standard.1.0.4\lib\netstandard2.0\T1.Standard.dll</HintPath>
+    <Reference Include="T1.Standard, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\T1.Standard.1.0.5\lib\netstandard2.0\T1.Standard.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>

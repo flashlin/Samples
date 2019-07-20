@@ -6,10 +6,11 @@ namespace ChargeLimitConfig_DesignPattern1.Rules
 	{
 		public override void Handle(ValidateChargeLimitArgs args)
 		{
-			if (TimeHelper.IsIn24Hr(args.LastModifiedTime, args.ModifyTime))
+			if (!TimeHelper.IsIn24Hr(args.LastModifiedTime, args.ModifyTime))
 			{
-				
+				//implement
 			}
+			base.Handle(args);
 		}
 	}
 }
