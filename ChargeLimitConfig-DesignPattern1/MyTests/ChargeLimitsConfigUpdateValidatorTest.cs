@@ -69,8 +69,60 @@ namespace MyTests
 
 			ValidateShouldBe(true);
 		}
-		
 
+		[Fact]
+		public void Player_Increase_ChargeLimit_Out24hr()
+		{
+			GiveOldChargeLimitsConfig("2019/01/01", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 100 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			GiveNewChargeLimitsConfig("2019/01/02", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 900 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			ValidateShouldBe(true);
+		}
+
+		[Fact]
+		public void Player_Decrease_ChargeLimit_Out24hr()
+		{
+			GiveOldChargeLimitsConfig("2019/01/01", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 100 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			GiveNewChargeLimitsConfig("2019/01/02", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 90 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			ValidateShouldBe(true);
+		}
+
+		[Fact]
+		public void Player_Change_ChargeLimit_ToUnlimit_Out24hr()
+		{
+			GiveOldChargeLimitsConfig("2019/01/01", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = 100 },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			GiveNewChargeLimitsConfig("2019/01/02", new[] {
+				new ChargeLimit { PeriodDays = 1, Amount = 100 },
+				new ChargeLimit { PeriodDays = 7, Amount = ChargeLimit.UnlimitAmount },
+				new ChargeLimit { PeriodDays = 30, Amount = 100 }
+			});
+
+			ValidateShouldBe(true);
+		}
 
 		private static ChargeLimitsConfig CreateChargeLimits(string modifiedTime, params ChargeLimit[] chargeLimits)
 		{
