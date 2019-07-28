@@ -1,7 +1,22 @@
 import { MinoType, Tetromino } from "./Tetromino";
-import { MovableTetromino } from './MovableTetromino';
+import { MovableTetromino } from "./MovableTetromino";
 
 export class TetSquareRectangle {
+   dump() {
+      let text = "";
+      for (let y = 0; y < this.height; y++) {
+         for (let x = 0; x < this.height; x++) {
+            let box = this._plane[y][x];
+            if (box == MinoType.None) {
+               text += ".";
+            } else {
+               text += "*";
+            }
+         }
+         text += "\r\n";
+      }
+      console.log(text);
+   }
    protected _plane: MinoType[][] = [];
    width: number;
    height: number;
@@ -21,7 +36,7 @@ export class TetSquareRectangle {
 
    dropCube(): boolean {
       let cube = this.cube;
-      if( cube == MovableTetromino.Empty){
+      if (cube == MovableTetromino.Empty) {
          return false;
       }
       if (cube.y + cube.height >= this.height) {
