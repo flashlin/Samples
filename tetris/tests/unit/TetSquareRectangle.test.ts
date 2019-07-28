@@ -17,18 +17,106 @@ describe("TetSquareRectangle", () => {
       expect(flag).toEqual(false);
    });
 
-   it("add StraightPolyomino and put", () => {
+   it("add StraightPolyomino and fixCube", () => {
       _tet.addTetromino(new StraightPolyomino());
 
       _tet.fixCube();
 
       let plane = _tet.getPlane();
+
       expect(plane).toEqual([
-          [ MinoType.None, MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.None],
-          [ MinoType.None, MinoType.None, MinoType.None, MinoType.None, MinoType.None, MinoType.None],
-          [ MinoType.None, MinoType.None, MinoType.None, MinoType.None, MinoType.None, MinoType.None],
-          [ MinoType.None, MinoType.None, MinoType.None, MinoType.None, MinoType.None, MinoType.None],
-          [ MinoType.None, MinoType.None, MinoType.None, MinoType.None, MinoType.None, MinoType.None],
+         [
+            MinoType.None,
+            MinoType.Solid,
+            MinoType.Solid,
+            MinoType.Solid,
+            MinoType.Solid,
+            MinoType.None
+         ],
+         [
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None
+         ],
+         [
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None
+         ],
+         [
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None
+         ],
+         [
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None
+         ]
+      ]);
+   });
+
+   it("add StraightPolyomino and dropCube", () => {
+      _tet.addTetromino(new StraightPolyomino());
+
+      _tet.dropCube();
+      _tet.fixCube();
+
+      let plane = _tet.getPlane();
+
+      expect(plane).toEqual([
+         [
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None
+         ],
+         [
+            MinoType.None,
+            MinoType.Solid,
+            MinoType.Solid,
+            MinoType.Solid,
+            MinoType.Solid,
+            MinoType.None
+         ],
+         [
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None
+         ],
+         [
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None
+         ],
+         [
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None,
+            MinoType.None
+         ]
       ]);
    });
 });

@@ -1,9 +1,9 @@
 import { MinoType, Tetromino } from "./Tetromino";
 
 export class MovableTetromino {
-	getBox(x: number, y: number): MinoType {
-		return this.cube.getBox(x, y);
-	}
+   getBox(x: number, y: number): MinoType {
+      return this.cube.getBox(x, y);
+   }
    static Empty: MovableTetromino = new MovableTetromino(Tetromino.Empty);
 
    constructor(cube: Tetromino) {
@@ -34,11 +34,15 @@ export class TetSquareRectangle {
       this.cleanPlane();
    }
 
-	cube: MovableTetromino = MovableTetromino.Empty;
-	startX: number = 1;
+   cube: MovableTetromino = MovableTetromino.Empty;
+   startX: number = 1;
 
    getPlane(): MinoType[][] {
       return this._plane;
+   }
+
+   dropCube(): void {
+      this.cube.y++;
    }
 
    cleanPlane(): void {
@@ -63,16 +67,16 @@ export class TetSquareRectangle {
 
    fixCube(): void {
       let cube = this.cube;
-      let y = 0;
-      for (let y0 = cube.y; y0 < cube.y + cube.height; y0++) {
-			let x = 0;
-			for (let x0 = cube.x; x0 < cube.x + cube.width; x0++) {
-				let box = cube.getBox(x++, y);
-				if( box != MinoType.None ){
-					this._plane[y][x] = box;
-				}
-			}
-			y++;
+      let cubeY = 0;
+      for (let y = cube.y; y < cube.y + cube.height; y++) {
+         let cubeX = 0;
+         for (let x = cube.x; x < cube.x + cube.width; x++) {
+            let box = cube.getBox(cubeX++, cubeY);
+            if (box != MinoType.None) {
+               this._plane[y][x] = box;
+            }
+         }
+         cubeY++;
       }
    }
 
