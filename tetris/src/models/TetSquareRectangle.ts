@@ -19,15 +19,16 @@ export class TetSquareRectangle {
       return this._plane;
    }
 
-   dropCube(): void {
+   dropCube(): boolean {
       let cube = this.cube;
       if( cube == MovableTetromino.Empty){
-         return;
+         return false;
       }
       if (cube.y + cube.height >= this.height) {
-         return;
+         return false;
       }
       cube.y++;
+      return false;
    }
 
    cleanPlane(): void {

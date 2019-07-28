@@ -131,4 +131,14 @@ describe("TetSquareRectangle", () => {
 
       expect(_tet.cube.y).toEqual(_tet.height - 1);
    });
+
+   it("add 2 StraightPolyomino and dropCube", () => {
+      _tet.addTetromino(new StraightPolyomino());
+      _tet.dropCube();
+      _tet.fixCube();
+
+      _tet.addTetromino(new StraightPolyomino());
+      let flag = _tet.dropCube();
+      expect(flag).toEqual(false);
+   });
 });
