@@ -1,8 +1,5 @@
 import { MinoType, Tetromino } from "./Tetromino";
 export class MovableTetromino {
-   getBox(x: number, y: number): MinoType {
-      return this.cube.getBox(x, y);
-   }
    static Empty: MovableTetromino = new MovableTetromino(Tetromino.Empty);
    constructor(cube: Tetromino) {
       this.cube = cube;
@@ -15,5 +12,8 @@ export class MovableTetromino {
    }
    get height(): number {
       return this.cube.height;
+   }
+   getBox(x: number, y: number): MinoType {
+      return this.cube.getBox(x, y);
    }
 }
