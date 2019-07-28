@@ -13,6 +13,8 @@ describe("TetSquareRectangle", () => {
    it("add StraightPolyomino", () => {
       _tet.addTetromino(new StraightPolyomino());
 
+      expect(_tet.cube.height).toEqual(1);
+
       let flag = _tet.isCollision();
       expect(flag).toEqual(false);
    });
@@ -118,5 +120,15 @@ describe("TetSquareRectangle", () => {
             MinoType.None
          ]
       ]);
+   });
+
+   it("add StraightPolyomino and dropCube 6 times", () => {
+      _tet.addTetromino(new StraightPolyomino());
+
+      for (let n = 0; n < 6; n++) {
+         _tet.dropCube();
+      }
+
+      expect(_tet.cube.y).toEqual(_tet.height - 1);
    });
 });

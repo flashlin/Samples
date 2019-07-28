@@ -4,14 +4,17 @@ export enum MinoType {
 }
 
 export class Tetromino {
-	getBox(x: number, y: number): MinoType {
+   getBox(x: number, y: number): MinoType {
       return this._plane[y][x];
-	}
+   }
    static Empty: Tetromino = new Tetromino();
 
    protected _plane: MinoType[][] = [];
 
    get width(): number {
+      if (this._plane[0] == undefined) {
+         return 0;
+      }
       return this._plane[0].length;
    }
 

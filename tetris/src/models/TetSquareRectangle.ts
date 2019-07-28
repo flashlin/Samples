@@ -42,7 +42,11 @@ export class TetSquareRectangle {
    }
 
    dropCube(): void {
-      this.cube.y++;
+      let cube = this.cube;
+      if (cube.y + cube.height >= this.height) {
+         return;
+      }
+      cube.y++;
    }
 
    cleanPlane(): void {
