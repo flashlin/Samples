@@ -1,6 +1,6 @@
 <template>
    <div>
-      <gameRect :rect="rect" />
+      <gameRect v-bind:rect="rect" />
    </div>
 </template>
 

@@ -10,9 +10,8 @@ import { MinoType } from '@/models/Tetromino';
 export default class GameRect extends Vue {
    rect!: MinoType[][];
 
-   flatRect: MinoBoxRow[] = [];
-
-   mounted() {
+   get flatRect(): MinoBoxRow[] {
+      let result: MinoBoxRow[] = []
       for (let y = 0; y < this.rect.length; y++) {
          let row = new MinoBoxRow();
          row.rowId = y;
@@ -23,8 +22,13 @@ export default class GameRect extends Vue {
             b.klass = b.box == MinoType.None ? '' : 'c';
             row.cols.push(b);
          }
-         this.flatRect.push(row);
+         result.push(row);
       }
+      return result;
+   }
+
+   mounted() {
+      
    }
 }
 

@@ -1,5 +1,6 @@
 const types = {
-   LOADING: 'LOADING'
+   LOADING: 'LOADING',
+   START: 'Start'
 };
 
 export default types;

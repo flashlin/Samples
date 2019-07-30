@@ -11,7 +11,4 @@ const state: IState = {
    gameRect: []
 };
 
-let game = new TetrisGame();
-state.gameRect = game.gameRect.getPlane();
-
 export default state;
