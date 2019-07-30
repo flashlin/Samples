@@ -1,5 +1,5 @@
 const types = {
-   LOADING: "LOADING"
+   LOADING: 'LOADING'
 };
 
 export default types;

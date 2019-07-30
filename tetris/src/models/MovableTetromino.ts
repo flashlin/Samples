@@ -1,4 +1,4 @@
-import { MinoType, Tetromino } from "./Tetromino";
+import { MinoType, Tetromino } from './Tetromino';
 export class MovableTetromino {
    static Empty: MovableTetromino = new MovableTetromino(Tetromino.Empty);
    constructor(cube: Tetromino) {

@@ -37,8 +37,10 @@
     "rxjs": "^6.5.2",
     "sass": "^1.18.0",
     "sass-loader": "^7.1.0",
+    "t1-scripts": "^1.0.3",
     "ts-jest": "^24.0.2",
     "typescript": "^3.4.3",
-    "vue-template-compiler": "^2.6.10"
+    "vue-template-compiler": "^2.6.10",
+    "vuex-class": "^0.3.2"
   }
 }

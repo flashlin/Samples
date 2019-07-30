@@ -1,7 +1,7 @@
-import { timer, Observable, Subscription } from "rxjs";
-import { TetSquareRectangle } from "./TetSquareRectangle";
-import { MovableTetromino } from "./MovableTetromino";
-import { StraightPolyomino } from "./StraightPolyomino";
+import { timer, Observable, Subscription, Subject } from 'rxjs';
+import { TetSquareRectangle } from './TetSquareRectangle';
+import { MovableTetromino } from './MovableTetromino';
+import { StraightPolyomino } from './StraightPolyomino';
 
 export class TetrisGame {
    private _gameTimerSource: Observable<number>;
@@ -19,7 +19,7 @@ export class TetrisGame {
          if (gameRect.cube == MovableTetromino.Empty) {
             gameRect.addTetromino(new StraightPolyomino());
          } else {
-            if( !gameRect.dropCube() ){
+            if (!gameRect.dropCube()) {
                gameRect.fixCube();
             }
          }

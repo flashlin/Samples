@@ -1,19 +1,19 @@
-import { MinoType, Tetromino } from "./Tetromino";
-import { MovableTetromino } from "./MovableTetromino";
+import { MinoType, Tetromino } from './Tetromino';
+import { MovableTetromino } from './MovableTetromino';
 
 export class TetSquareRectangle {
    dump() {
-      let text = "";
+      let text = '';
       for (let y = 0; y < this.height; y++) {
          for (let x = 0; x < this.height; x++) {
             let box = this._plane[y][x];
             if (box == MinoType.None) {
-               text += ".";
+               text += '.';
             } else {
-               text += "*";
+               text += '*';
             }
          }
-         text += "\r\n";
+         text += '\r\n';
       }
       console.log(text);
    }
