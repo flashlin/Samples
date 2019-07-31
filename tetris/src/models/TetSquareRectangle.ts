@@ -43,7 +43,11 @@ export class TetSquareRectangle {
          return false;
       }
       cube.y++;
-      return false;
+      if( this.isCollision() ){
+         cube.y--;
+         return false;
+      }
+      return true;
    }
 
    cleanPlane(): void {
@@ -83,6 +87,20 @@ export class TetSquareRectangle {
    }
 
    isCollision(): boolean {
+      let cube = this.cube;
+      let cubeY = 0;
+      for (let y = cube.y; y < cube.y + cube.height; y++) {
+         let cubeX = 0;
+         for (let x = cube.x; x < cube.x + cube.width; x++) {
+            let box = cube.getBox(cubeX++, cubeY);
+            if (box != MinoType.None) {
+               if( this._plane[y][x] != MinoType.None) {
+                  return true;
+               }
+            }
+         }
+         cubeY++;
+      }
       return false;
    }
 }

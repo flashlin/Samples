@@ -1,16 +1,17 @@
-import { MinoType, Tetromino } from "@/models/Tetromino";
-import { StraightPolyomino } from "@/models/StraightPolyomino";
-import each from "jest-each";
-import { TetSquareRectangle } from "@/models/TetSquareRectangle";
+import { MinoType, Tetromino } from '@/models/Tetromino';
+import { StraightPolyomino } from '@/models/StraightPolyomino';
+import each from 'jest-each';
+import { TetSquareRectangle } from '@/models/TetSquareRectangle';
+import './utils';
 
-describe("TetSquareRectangle", () => {
+describe('TetSquareRectangle', () => {
    let _tet: TetSquareRectangle;
 
    beforeEach(() => {
       _tet = new TetSquareRectangle(6, 5);
    });
 
-   it("add StraightPolyomino", () => {
+   it('add StraightPolyomino', () => {
       _tet.addTetromino(new StraightPolyomino());
 
       expect(_tet.cube.height).toEqual(1);
@@ -19,7 +20,7 @@ describe("TetSquareRectangle", () => {
       expect(flag).toEqual(false);
    });
 
-   it("add StraightPolyomino and fixCube", () => {
+   it('add StraightPolyomino and fixCube', () => {
       _tet.addTetromino(new StraightPolyomino());
 
       _tet.fixCube();
@@ -70,7 +71,7 @@ describe("TetSquareRectangle", () => {
       ]);
    });
 
-   it("add StraightPolyomino and dropCube", () => {
+   it('add StraightPolyomino and dropCube', () => {
       _tet.addTetromino(new StraightPolyomino());
 
       _tet.dropCube();
@@ -122,7 +123,7 @@ describe("TetSquareRectangle", () => {
       ]);
    });
 
-   it("add StraightPolyomino and dropCube 6 times", () => {
+   it('add StraightPolyomino and dropCube 6 times', () => {
       _tet.addTetromino(new StraightPolyomino());
 
       for (let n = 0; n < 6; n++) {
@@ -132,7 +133,7 @@ describe("TetSquareRectangle", () => {
       expect(_tet.cube.y).toEqual(_tet.height - 1);
    });
 
-   it("add 2 StraightPolyomino and dropCube", () => {
+   it('add 2 StraightPolyomino and dropCube', () => {
       _tet.addTetromino(new StraightPolyomino());
       _tet.dropCube();
       _tet.fixCube();
@@ -141,4 +142,13 @@ describe("TetSquareRectangle", () => {
       let flag = _tet.dropCube();
       expect(flag).toEqual(false);
    });
+
+   it('drop 5 times', () => {
+      _tet.addTetromino(new StraightPolyomino());
+      for (let n = 0; n < 4; n++) {
+         expect(_tet.dropCube(), `drop ${n}`).toEqual(true);
+      }
+      expect(_tet.dropCube()).toEqual(false);
+   });
 });
+
