@@ -1,5 +1,5 @@
-import url from "url";
-import path from "path";
+import * as url from "url";
+import * as path from "path";
 
 import { app, BrowserWindow } from "electron";
 

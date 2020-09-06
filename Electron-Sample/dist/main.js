@@ -111,8 +111,8 @@ var createWindow = function createWindow() {
     width: 800,
     height: 600
   });
-  window.loadURL(url__WEBPACK_IMPORTED_MODULE_0___default.a.format({
-    pathname: path__WEBPACK_IMPORTED_MODULE_1___default.a.join(__dirname, "index.html"),
+  window.loadURL(url__WEBPACK_IMPORTED_MODULE_0__["format"]({
+    pathname: path__WEBPACK_IMPORTED_MODULE_1__["join"](__dirname, "index.html"),
     protocol: "file:",
     slashes: true
   }));

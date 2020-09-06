@@ -3,8 +3,24 @@ export enum MinoType {
    Solid
 }
 
-export abstract class Tetromino {
+export class Tetromino {
+   getBox(x: number, y: number): MinoType {
+      return this._plane[y][x];
+   }
+   static Empty: Tetromino = new Tetromino();
+
    protected _plane: MinoType[][] = [];
+
+   get width(): number {
+      if (this._plane[0] == undefined) {
+         return 0;
+      }
+      return this._plane[0].length;
+   }
+
+   get height(): number {
+      return this._plane.length;
+   }
 
    getPlane(): MinoType[][] {
       return this._plane;
@@ -35,7 +51,7 @@ export abstract class Tetromino {
       this._plane = this.normalizePlane(newPlane);
    }
 
-   rightRotate(): void { }
+   rightRotate(): void {}
 
    normalizePlane(plane: MinoType[][]): MinoType[][] {
       plane = this.fillPlane(plane);
@@ -69,10 +85,10 @@ export abstract class Tetromino {
    }
 
    isNone(data: MinoType): boolean {
-      if( data === undefined ) {
+      if (data === undefined) {
          return true;
       }
-      if( data == MinoType.None ){
+      if (data == MinoType.None) {
          return true;
       }
       return false;
@@ -85,7 +101,7 @@ export abstract class Tetromino {
       for (let x = rowLength - 1; x >= 0; x--) {
          let countY = 0;
          for (let y = 0; y < rowLength; y++) {
-            if ( plane[y] === undefined || this.isNone(plane[y][x]) ) {
+            if (plane[y] === undefined || this.isNone(plane[y][x])) {
                countY++;
             }
          }

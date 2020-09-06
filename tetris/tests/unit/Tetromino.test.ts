@@ -2,15 +2,11 @@ import { MinoType, Tetromino } from "@/models/Tetromino";
 import { StraightPolyomino } from "@/models/StraightPolyomino";
 import each from "jest-each";
 
-class BaseTetromino extends Tetromino
-{
-}
-
 describe("Tetromino", () => {
-   let _mino: BaseTetromino;
+   let _mino: Tetromino;
 
    beforeEach(() => {
-      _mino = new BaseTetromino();
+      _mino = new Tetromino();
    });
 
    each`

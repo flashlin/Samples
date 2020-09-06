@@ -16,6 +16,7 @@ describe("StraightPolyomino", () => {
          [MinoType.Solid, MinoType.Solid, MinoType.Solid, MinoType.Solid]
       ];
 
+      expect(_mino.height).toEqual(1);
       expect(actualPlane).toEqual(expectedPlane);
    });
 
