@@ -639,7 +639,7 @@ namespace PreviewLibrary
 
 		protected ExecuteExpr ParseExec()
 		{
-			if (!_token.TryIgnoreCase("EXEC", out var execStr))
+			if (!_token.TryIgnoreCase(new[] { "EXECUTE", "EXEC" }, out var execStr))
 			{
 				throw new PrecursorException("Expect EXEC");
 			}
@@ -821,12 +821,12 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseParameterNameAssign()
 		{
-			if(!_token.TryMatch(SqlTokenizer.SqlVariable, out var varName))
-			{	
+			if (!_token.TryMatch(SqlTokenizer.SqlVariable, out var varName))
+			{
 				throw new PrecursorException("Expect SqlVariable");
 			}
 
-			if(!_token.Try("="))
+			if (!_token.Try("="))
 			{
 				return new SqlVariableExpr
 				{
