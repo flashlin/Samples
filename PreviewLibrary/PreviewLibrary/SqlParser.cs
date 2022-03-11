@@ -46,9 +46,9 @@ namespace PreviewLibrary
 			{
 				return selectExpr;
 			}
-			if (_token.IsMultiLineComment)
+			if (TryGet(ParseMultiLineComment, out var multiLineCommentExpr))
 			{
-				return ParseMultiLineComment();
+				return multiLineCommentExpr;
 			}
 			if (TryGet(ParseGo, out var goExpr))
 			{
