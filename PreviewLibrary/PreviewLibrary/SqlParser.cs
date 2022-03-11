@@ -66,13 +66,13 @@ namespace PreviewLibrary
 			{
 				return ParseOnCondition();
 			}
-			if (_token.IgnoreCase("IF"))
+			if (TryGet(ParseIf, out var ifExpr))
 			{
-				return ParseIf();
+				return ifExpr;
 			}
-			if (_token.IgnoreCase("PRINT"))
+			if (TryGet(ParsePrint, out var printExpr))
 			{
-				return ParsePrint();
+				return printExpr;
 			}
 
 			if (TryGet(ParseUse, out var useExpr))
