@@ -74,9 +74,10 @@ namespace PreviewLibrary
 			{
 				return ParsePrint();
 			}
-			if (_token.IgnoreCase("USE"))
+
+			if (TryGet(ParseUse, out var useExpr))
 			{
-				return ParseUse();
+				return useExpr;
 			}
 
 			if (TryGet(ParseExec, out var execExpr))
