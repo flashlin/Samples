@@ -42,50 +42,26 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseExpr()
 		{
-
-			if (TryGet(ParseSelect, out var selectExpr))
+			var parses = new Func<SqlExpr>[]
 			{
-				return selectExpr;
-			}
-			if (TryGet(ParseMultiLineComment, out var multiLineCommentExpr))
+				ParseSelect,
+				ParseMultiLineComment,
+				ParseGo,
+				ParseSetOptionsOnOff,
+				ParseSetvar,
+				ParseOnCondition,
+				ParseIf,
+				ParsePrint,
+				ParseUse,
+				ParseExec
+			};
+			for (var i = 0; i < parses.Length; i++)
 			{
-				return multiLineCommentExpr;
+				if (TryGet(parses[i], out var expr))
+				{
+					return expr;
+				}
 			}
-			if (TryGet(ParseGo, out var goExpr))
-			{
-				return goExpr;
-			}
-			if (TryGet(ParseSetOptionsOnOff, out var setExpr))
-			{
-				return setExpr;
-			}
-			if (TryGet(ParseSetvar, out var setvarExpr))
-			{
-				return setvarExpr;
-			}
-			if (TryGet(ParseOnCondition, out var onExpr))
-			{
-				return onExpr;
-			}
-			if (TryGet(ParseIf, out var ifExpr))
-			{
-				return ifExpr;
-			}
-			if (TryGet(ParsePrint, out var printExpr))
-			{
-				return printExpr;
-			}
-
-			if (TryGet(ParseUse, out var useExpr))
-			{
-				return useExpr;
-			}
-
-			if (TryGet(ParseExec, out var execExpr))
-			{
-				return execExpr;
-			}
-
 			throw new NotSupportedException(GetLastLineCh());
 		}
 
