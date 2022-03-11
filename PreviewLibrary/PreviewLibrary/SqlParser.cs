@@ -58,13 +58,13 @@ namespace PreviewLibrary
 			{
 				return setExpr;
 			}
-			if (_token.IgnoreCase(":SETVAR"))
+			if (TryGet(ParseSetvar, out var setvarExpr))
 			{
-				return ParseSetvar();
+				return setvarExpr;
 			}
-			if (_token.IgnoreCase(":ON"))
+			if (TryGet(ParseOnCondition, out var onExpr))
 			{
-				return ParseOnCondition();
+				return onExpr;
 			}
 			if (TryGet(ParseIf, out var ifExpr))
 			{
