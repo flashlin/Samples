@@ -88,6 +88,15 @@ namespace PreviewLibrary
 		{
 		}
 
+		public bool IsIdentWord
+		{
+			get
+			{
+				char c = Ch;
+				return char.IsLower(c) || char.IsUpper(c) || c == '_';
+			}
+		}
+
 		public bool IsIdent
 		{
 			get

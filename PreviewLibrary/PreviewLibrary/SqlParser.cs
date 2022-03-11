@@ -53,7 +53,8 @@ namespace PreviewLibrary
 				ParseIf,
 				ParsePrint,
 				ParseUse,
-				ParseExec
+				ParseExec,
+				ParseGrant
 			};
 			for (var i = 0; i < parses.Length; i++)
 			{
@@ -63,6 +64,24 @@ namespace PreviewLibrary
 				}
 			}
 			throw new NotSupportedException(GetLastLineCh());
+		}
+
+		protected GrantToExpr ParseGrant()
+		{
+			if(!_token.TryIgnoreCase("GRANT"))
+			{
+				throw new PrecursorException("Expect GRANT");
+			}
+
+			var permission = ParseIdentWord().Name;
+			ReadKeyword("TO");
+
+			var objectId = ParseSqlIdent();
+			return new GrantToExpr
+			{
+				Permission = permission,
+				ToObjectId = objectId
+			};
 		}
 
 		protected GoExpr ParseGo()
@@ -334,6 +353,18 @@ namespace PreviewLibrary
 				return ParseNot();
 			}
 			return ParseSimpleColumn();
+		}
+
+		private IdentExpr ParseIdentWord()
+		{
+			if (!_token.Try(_token.IsIdentWord, out var word))
+			{
+				throw new Exception($"{_token.Text} should be <Ident Word>");
+			}
+			return new IdentExpr
+			{
+				Name = word
+			};
 		}
 
 		private IdentExpr ParseIdent()
