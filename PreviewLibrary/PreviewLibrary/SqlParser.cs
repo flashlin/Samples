@@ -79,11 +79,11 @@ namespace PreviewLibrary
 				return ParseUse();
 			}
 
-			var execExpr = Get(ParseExec);
-			if (execExpr != null)
+			if (TryGet(ParseExec, out var execExpr))
 			{
 				return execExpr;
 			}
+
 			throw new NotSupportedException(GetLastLineCh());
 		}
 
@@ -691,6 +691,12 @@ namespace PreviewLibrary
 			{
 				return default(T);
 			}
+		}
+
+		private bool TryGet<T>(Func<T> parse, out T output)
+		{
+			output = Get<T>(parse);
+			return output != null;
 		}
 
 		private T Get<T>(Func<SqlExpr, T> parse, SqlExpr left)
