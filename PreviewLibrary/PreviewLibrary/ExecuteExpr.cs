@@ -6,6 +6,7 @@ namespace PreviewLibrary
 	{
 		public IdentExpr Method { get; set; }
 		public SqlExpr[] Arguments { get; set; }
+		public string ExecName { get; set; }
 
 		public override string ToString()
 		{

@@ -242,6 +242,7 @@ end";
 			var expr = Parse(sql);
 			new ExecuteExpr
 			{
+				ExecName = "exec",
 				Method = new IdentExpr
 				{
 					ObjectId = "sys",
@@ -264,6 +265,7 @@ end";
 			var expr = Parse(sql);
 			new ExecuteExpr
 			{
+				ExecName = "exec",
 				Method = new IdentExpr
 				{
 					ObjectId = "sys",
@@ -287,6 +289,33 @@ end";
 							Text = "N'Confidential.'"
 						}
 					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void execute_func_arg1()
+		{
+			var sql = @"execute sys.sp_addextendedproperty @name = N'MS_Description';";
+			var expr = Parse(sql);
+			new ExecuteExpr
+			{
+				ExecName = "execute",
+				Method = new IdentExpr
+				{
+					ObjectId = "sys",
+					Name = "sp_addextendedproperty"
+				},
+				Arguments = new SqlExpr[]
+				{
+					new SpParameterExpr
+					{
+						Name = "@name",
+						Value = new StringExpr
+						{
+							Text = "N'MS_Description'"
+						}
+					},
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}

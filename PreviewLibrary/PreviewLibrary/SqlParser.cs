@@ -78,9 +78,11 @@ namespace PreviewLibrary
 			{
 				return ParseUse();
 			}
-			if (_token.IgnoreCase("EXEC"))
+
+			var execExpr = Get(ParseExec);
+			if (execExpr != null)
 			{
-				return ParseExec();
+				return execExpr;
 			}
 			throw new NotSupportedException(GetLastLineCh());
 		}
@@ -673,6 +675,7 @@ namespace PreviewLibrary
 
 			return new ExecuteExpr
 			{
+				ExecName = execStr,
 				Method = method,
 				Arguments = arguments.ToArray(),
 			};
