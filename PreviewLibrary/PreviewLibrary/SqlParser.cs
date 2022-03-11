@@ -42,21 +42,21 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseExpr()
 		{
-			if (_token.IgnoreCase("SELECT"))
+			if (TryGet(ParseSelect, out var selectExpr))
 			{
-				return ParseSelect();
+				return selectExpr;
 			}
 			if (_token.IsMultiLineComment)
 			{
 				return ParseMultiLineComment();
 			}
-			if (_token.TryIgnoreCase("GO"))
+			if (TryGet(ParseGo, out var goExpr))
 			{
-				return new GoExpr();
+				return goExpr;
 			}
-			if (_token.IgnoreCase("SET"))
+			if (TryGet(ParseSetOptionsOnOff, out var setExpr))
 			{
-				return ParseSetOptionsOnOff();
+				return setExpr;
 			}
 			if (_token.IgnoreCase(":SETVAR"))
 			{
@@ -86,6 +86,15 @@ namespace PreviewLibrary
 			}
 
 			throw new NotSupportedException(GetLastLineCh());
+		}
+
+		protected GoExpr ParseGo()
+		{
+			if (!_token.TryIgnoreCase("GO"))
+			{
+				throw new PrecursorException("Expect GO");
+			}
+			return new GoExpr();
 		}
 
 		public SqlExpr ParseSubExpr()
