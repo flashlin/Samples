@@ -113,13 +113,13 @@ namespace PreviewLibrary
 			{
 				return constantExpr;
 			}
-			if (_token.IgnoreCase("SELECT"))
+			if (TryGet(ParseSelect, out var selectExpr))
 			{
-				return ParseSelect();
+				return selectExpr;
 			}
-			if (_token.IgnoreCase("EXEC"))
+			if (TryGet(ParseExec, out var execExpr))
 			{
-				return ParseExec();
+				return execExpr;
 			}
 			throw new Exception(GetLastLineCh() + " Expect sub expr");
 		}
