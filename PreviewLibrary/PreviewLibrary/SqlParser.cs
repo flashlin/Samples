@@ -650,7 +650,7 @@ namespace PreviewLibrary
 			var first = true;
 			do
 			{
-				var sqlParam = Get(ParseConstant);
+				var sqlParam = GetAny(ParseParameterNameAssign, ParseConstant);
 				if (sqlParam != null)
 				{
 					arguments.Add(sqlParam);
@@ -819,7 +819,7 @@ namespace PreviewLibrary
 			};
 		}
 
-		public SqlExpr ParseStoreprocedureParameterNameAssign()
+		public SqlExpr ParseParameterNameAssign()
 		{
 			if(!_token.TryMatch(SqlTokenizer.SqlVariable, out var varName))
 			{	
@@ -838,7 +838,7 @@ namespace PreviewLibrary
 			return new SpParameterExpr
 			{
 				Name = varName,
-				value = value
+				Value = value
 			};
 		}
 

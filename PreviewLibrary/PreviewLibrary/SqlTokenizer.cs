@@ -195,6 +195,7 @@ namespace PreviewLibrary
 			{
 				str = Text;
 				Move();
+				return success;
 			}
 			str = null;
 			return success;

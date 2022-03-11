@@ -3,6 +3,6 @@
 	public class SpParameterExpr : SqlExpr
 	{
 		public string Name { get; set; }
-		public SqlExpr value { get; set; }
+		public SqlExpr Value { get; set; }
 	}
 }
