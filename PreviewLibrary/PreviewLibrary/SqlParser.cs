@@ -42,6 +42,7 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseExpr()
 		{
+
 			if (TryGet(ParseSelect, out var selectExpr))
 			{
 				return selectExpr;
@@ -99,9 +100,9 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseSubExpr()
 		{
-			if (_token.IgnoreCase("NOT"))
+			if (TryGet(ParseNot, out var notExpr))
 			{
-				return ParseNot();
+				return notExpr;
 			}
 			if (_token.IsFuncName(out _))
 			{
