@@ -15,11 +15,20 @@
 	{
 		public string Name { get; set; }
 		public string Value { get; set; }
+		public override string ToString()
+		{
+			return $":SETVAR {Name} {Value}";
+		}
 	}
 
 	public class OnConditionThenExpr : SqlExpr
 	{
 		public string Condition { get; set; }
 		public string ActionName { get; set; }
+
+		public override string ToString()
+		{
+			return $":ON {Condition} {ActionName}";
+		}
 	}
 }
