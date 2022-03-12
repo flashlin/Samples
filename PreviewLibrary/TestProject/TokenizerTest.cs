@@ -7,13 +7,24 @@ namespace TestProject
 	public class TokenizerTest
 	{
 		[Fact]
-		public void token()
+		public void sql_ident()
 		{
-			var sql = "select DB_NAME";
+			var token = GetToken("DB_NAME xxx");
+			"DB_NAME".ToExpectedObject().ShouldEqual(token);
+		}
+		
+		[Fact]
+		public void sql_float()
+		{
+			var token = GetToken("0.0010 xxx");
+			"0.0010".ToExpectedObject().ShouldEqual(token);
+		}
+
+		private string GetToken(string text)
+		{
 			var token = new SqlTokenizer();
-			token.PredicateParse(sql);
-			token.Move();
-			"DB_NAME".ToExpectedObject().ShouldEqual(token.Text);
+			token.PredicateParse(text);
+			return token.Text;
 		}
 	}
 }
