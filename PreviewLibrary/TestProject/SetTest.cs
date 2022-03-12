@@ -9,7 +9,6 @@ using Xunit.Abstractions;
 
 namespace TestProject
 {
-
 	public class SetTest : SqlTestBase
 	{
 		public SetTest(ITestOutputHelper outputHelper) : base(outputHelper)

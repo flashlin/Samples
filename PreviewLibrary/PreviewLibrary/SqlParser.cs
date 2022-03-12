@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
 
@@ -46,6 +47,7 @@ namespace PreviewLibrary
 			{
 				ParseSemicolon,
 				ParseSelect,
+				ParseInsert,
 				ParseMultiLineComment,
 				ParseGo,
 				ParseSet_Permission_ObjectId_OnOff,
@@ -205,7 +207,19 @@ namespace PreviewLibrary
 		private string GetLastLineCh()
 		{
 			var lnch = _token.GetLineCh(_sql);
-			return $"{lnch} LastToken:'{_token.Text}'";
+
+			var sb = new StringBuilder();
+			sb.AppendLine($"Line:{lnch.LineNumber} Ch:{lnch.ChNumber} ErrorToken:{_token.Text}");
+			sb.AppendLine();
+			var line = lnch.Line.Replace("\t", " ");
+			var spaces = new String(' ', line.Length);
+
+			var down = new String('v', _token.Text.Length);
+			sb.AppendLine(spaces + down);
+			sb.AppendLine(line + $"{_token.Text}");
+			var upper = new String('^', _token.Text.Length);
+			sb.AppendLine(spaces + upper);
+			return sb.ToString();
 		}
 
 		protected OnConditionThenExpr ParseOnCondition()
@@ -237,6 +251,53 @@ namespace PreviewLibrary
 			{
 				Name = name,
 				Value = value
+			};
+		}
+
+		protected InsertValuesExpr ParseInsert()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!_token.TryIgnoreCase("INSERT"))
+			{
+				throw new PrecursorException("INSERT");
+			}
+
+			var table = Get(ParseSqlIdent);
+			if (table == null)
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<table>");
+			}
+
+			if (!_token.Try("("))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("(");
+			}
+			var fields = WithComma(ParseSqlIdent1);
+			ReadKeyword(")");
+
+
+			ReadKeyword("VALUES");
+
+			var valuesList = new List<List<SqlExpr>>();
+			do
+			{
+				ReadKeyword("(");
+				var values = WithComma(ParseConstant);
+				valuesList.Add(values);
+				ReadKeyword(")");
+				if (!_token.Try(","))
+				{
+					break;
+				}
+			} while (true);
+
+			return new InsertValuesExpr
+			{
+				Table = table,
+				Fields = fields,
+				ValuesList = valuesList
 			};
 		}
 
@@ -436,6 +497,18 @@ namespace PreviewLibrary
 				aliasName = ParseIdent().Name;
 			}
 			return aliasName;
+		}
+
+		private IdentExpr ParseSqlIdent1()
+		{
+			if (!_token.Try(_token.IsSqlIdent, out var str))
+			{
+				throw new PrecursorException($"<Ident>");
+			}
+			return new IdentExpr
+			{
+				Name = str
+			};
 		}
 
 		private IdentExpr ParseSqlIdent()
