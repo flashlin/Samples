@@ -112,16 +112,11 @@ namespace PreviewLibrary
 			{
 				return notExpr;
 			}
-			if (TryGet(ParseCast, out var castExpr))
+			if (TryGet(ParseSqlFunc, out var funcExpr))
 			{
-				return castExpr;
+				return funcExpr;
 			}
-			if (_token.IsFuncName(out _))
-			{
-				return ParseSqlFunc();
-			}
-			var constantExpr = Get(ParseConstant);
-			if (constantExpr != null)
+			if (TryGet(ParseConstant, out var constantExpr))
 			{
 				return constantExpr;
 			}
@@ -212,7 +207,7 @@ namespace PreviewLibrary
 		{
 			var dataTypes = new string[]
 			{
-				"INT", "DATETIME"
+				"INT", "DATETIME", "DECIMAL", "BIT"
 			};
 			if (!_token.TryIgnoreCase(dataTypes, out var dataType))
 			{
@@ -648,7 +643,7 @@ namespace PreviewLibrary
 
 		protected Hex16NumberExpr ParseHex16Number()
 		{
-			if(!_token.TryMatch(SqlTokenizer.Hex16Number, out var hex))
+			if (!_token.TryMatch(SqlTokenizer.Hex16Number, out var hex))
 			{
 				throw new PrecursorException("<HEX16>");
 			}
