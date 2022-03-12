@@ -319,5 +319,16 @@ end";
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void set_identity_insert_objectId_on()
+		{
+			var sql = "SET IDENTITY_INSERT [dbo].[customer] ON";
+			var expr = Parse(sql);
+			new SetIdentityInsertExpr
+			{
+				Toggle = true,
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
 	}
 }

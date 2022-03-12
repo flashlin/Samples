@@ -47,7 +47,7 @@ namespace PreviewLibrary
 				ParseSelect,
 				ParseMultiLineComment,
 				ParseGo,
-				ParseSetOptionsOnOff,
+				ParseSet_Options_OnOff,
 				ParseSetvar,
 				ParseOnCondition,
 				ParseIf,
@@ -68,7 +68,7 @@ namespace PreviewLibrary
 
 		protected GrantToExpr ParseGrant()
 		{
-			if(!_token.TryIgnoreCase("GRANT"))
+			if (!_token.TryIgnoreCase("GRANT"))
 			{
 				throw new PrecursorException("Expect GRANT");
 			}
@@ -229,7 +229,29 @@ namespace PreviewLibrary
 			};
 		}
 
-		private SetOptionsExpr ParseSetOptionsOnOff()
+		protected SetPermissionExpr ParseSet_Permission_ObjectId_OnOff()
+		{
+			if (!_token.TryIgnoreCase("SET"))
+			{
+				throw new PrecursorException("SET");
+			}
+
+			if (!_token.TryMatch(RegexPattern.Ident, out var permission))
+			{
+				throw new Exception("Expect <Permission>");
+			}
+
+			var objectId = ParseSqlIdent();
+			var toggle = ReadAnyKeyword(new[] { "ON", "OFF" });
+			return new SetPermissionExpr
+			{
+				Permission = permission,
+				ToObjectId = objectId,
+				Toggle = string.Equals(toggle, "on", StringComparison.OrdinalIgnoreCase) ? true : false
+			};
+		}
+
+		private SetOptionsExpr ParseSet_Options_OnOff()
 		{
 			if (!_token.TryIgnoreCase("SET"))
 			{

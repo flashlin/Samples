@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PreviewLibrary.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,8 @@ namespace PreviewLibrary
 	public abstract class TokenizerBase : LineChInfo
 	{
 		private readonly string _pattern;
-		private IEnumerator<Group> _tokens;
+		//private IEnumerator<Group> _tokens;
+		private ITwoWayEnumerator<Group> _tokens;
 
 		public TokenizerBase(IEnumerable<string> regexPatternList)
 		{
@@ -110,7 +112,7 @@ namespace PreviewLibrary
 		{
 			_tokens = Regex.Matches(s, _pattern, RegexOptions.Compiled).Cast<Match>()
 						 .Select(m => m.Groups[1])
-						 .GetEnumerator();
+						 .GetTwoWayEnumerator();
 			Move();
 		}
 
@@ -120,6 +122,16 @@ namespace PreviewLibrary
 			do
 			{
 				success = _tokens.MoveNext();
+			} while (success && Text == "\r\n");
+			return success;
+		}
+
+		public bool MovePrevious()
+		{
+			var success = false;
+			do
+			{
+				success = _tokens.MovePrevious();
 			} while (success && Text == "\r\n");
 			return success;
 		}
