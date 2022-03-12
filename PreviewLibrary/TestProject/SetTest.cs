@@ -325,9 +325,15 @@ end";
 		{
 			var sql = "SET IDENTITY_INSERT [dbo].[customer] ON";
 			var expr = Parse(sql);
-			new SetIdentityInsertExpr
+			new SetPermissionExpr
 			{
-				Toggle = true,
+				Permission = "IDENTITY_INSERT",
+				ToObjectId = new IdentExpr
+				{
+					Name = "[customer]",
+					ObjectId = "[dbo]"
+				},
+				Toggle = true
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}

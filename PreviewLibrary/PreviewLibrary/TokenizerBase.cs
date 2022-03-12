@@ -21,6 +21,14 @@ namespace PreviewLibrary
 				+ @")\s*";
 		}
 
+		public int CurrentIndex
+		{
+			get
+			{
+				return _tokens.CurrentIndex;
+			}
+		}
+
 		public Group Curr
 		{
 			get
@@ -134,6 +142,11 @@ namespace PreviewLibrary
 				success = _tokens.MovePrevious();
 			} while (success && Text == "\r\n");
 			return success;
+		}
+
+		public bool MoveTo(int index)
+		{
+			return _tokens.MoveTo(index);
 		}
 
 		protected void Abort(string msg)

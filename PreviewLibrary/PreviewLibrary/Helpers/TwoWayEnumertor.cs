@@ -6,7 +6,10 @@ namespace PreviewLibrary.Helpers
 {
 	public interface ITwoWayEnumerator<T> : IEnumerator<T>
 	{
+		int CurrentIndex { get; }
+
 		bool MovePrevious();
+		bool MoveTo(int index);
 	}
 
 	public class TwoWayEnumerator<T> : ITwoWayEnumerator<T>
@@ -23,6 +26,14 @@ namespace PreviewLibrary.Helpers
 			_enumerator = enumerator;
 			_buffer = new List<T>();
 			_index = -1;
+		}
+
+		public int CurrentIndex
+		{
+			get
+			{
+				return _index;
+			}
 		}
 
 		public bool MovePrevious()
@@ -53,6 +64,14 @@ namespace PreviewLibrary.Helpers
 
 			_index = _buffer.Count;
 			return false;
+		}
+
+		public bool MoveTo(int index)
+		{
+			if (_index < 0 || _index > _buffer.Count)
+				return false;
+			_index = index;
+			return true;
 		}
 
 		public T Current

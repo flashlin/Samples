@@ -47,6 +47,7 @@ namespace PreviewLibrary
 				ParseSelect,
 				ParseMultiLineComment,
 				ParseGo,
+				ParseSet_Permission_ObjectId_OnOff,
 				ParseSet_Options_OnOff,
 				ParseSetvar,
 				ParseOnCondition,
@@ -231,6 +232,7 @@ namespace PreviewLibrary
 
 		protected SetPermissionExpr ParseSet_Permission_ObjectId_OnOff()
 		{
+			var startIndex = _token.CurrentIndex;
 			if (!_token.TryIgnoreCase("SET"))
 			{
 				throw new PrecursorException("SET");
@@ -238,10 +240,17 @@ namespace PreviewLibrary
 
 			if (!_token.TryMatch(RegexPattern.Ident, out var permission))
 			{
-				throw new Exception("Expect <Permission>");
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("Expect <Permission>");
 			}
 
-			var objectId = ParseSqlIdent();
+			var objectId = Get(ParseSqlIdent);
+			if (objectId == null)
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("Expect <objectId>");
+			}
+
 			var toggle = ReadAnyKeyword(new[] { "ON", "OFF" });
 			return new SetPermissionExpr
 			{
