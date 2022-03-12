@@ -112,6 +112,10 @@ namespace PreviewLibrary
 			{
 				return notExpr;
 			}
+			if (TryGet(ParseCast, out var castExpr))
+			{
+				return castExpr;
+			}
 			if (_token.IsFuncName(out _))
 			{
 				return ParseSqlFunc();
@@ -147,6 +151,11 @@ namespace PreviewLibrary
 
 		protected SqlFuncExpr ParseSqlFunc()
 		{
+			if (TryGet(ParseCast, out var castExpr))
+			{
+				return castExpr;
+			}
+
 			if (!_token.Try(_token.IsFuncName(out var funcArgsCount), out var funcName))
 			{
 				throw new PrecursorException($"Expect funcname");
@@ -170,6 +179,76 @@ namespace PreviewLibrary
 			{
 				Name = funcName,
 				Arguments = argsExprs.ToArray(),
+			};
+		}
+
+		protected SqlFuncExpr ParseCast()
+		{
+			if (!_token.TryIgnoreCase("CAST"))
+			{
+				throw new PrecursorException("CAST");
+			}
+
+			ReadKeyword("(");
+			var expr = ParseSubExpr();
+			ReadKeyword("AS");
+			var dataType = ParseDataType();
+			ReadKeyword(")");
+
+			var asDataType = new AsDataTypeExpr
+			{
+				Object = expr,
+				DataType = dataType,
+			};
+
+			return new SqlFuncExpr
+			{
+				Name = "CAST",
+				Arguments = new SqlExpr[] { asDataType },
+			};
+		}
+
+		protected DataTypeExpr ParseDataType()
+		{
+			var dataTypes = new string[]
+			{
+				"INT", "DATETIME"
+			};
+			if (!_token.TryIgnoreCase(dataTypes, out var dataType))
+			{
+				throw new PrecursorException("<SqlDataType>");
+			}
+
+			var dataSize = Get(ParseDataTypeSize);
+
+			return new DataTypeExpr
+			{
+				DataType = dataType,
+				DataSize = dataSize
+			};
+		}
+
+		protected DataTypeSizeExpr ParseDataTypeSize()
+		{
+			if (!_token.Try("("))
+			{
+				throw new PrecursorException("(");
+			}
+
+			var size = ParseInteger().Value;
+
+			int? scaleSize = null;
+			if (_token.Try(","))
+			{
+				scaleSize = ParseInteger().Value;
+			}
+
+			ReadKeyword(")");
+
+			return new DataTypeSizeExpr
+			{
+				Size = size,
+				ScaleSize = scaleSize
 			};
 		}
 
@@ -209,7 +288,7 @@ namespace PreviewLibrary
 			var lnch = _token.GetLineCh(_sql);
 
 			var sb = new StringBuilder();
-			sb.AppendLine($"Line:{lnch.LineNumber} Ch:{lnch.ChNumber} ErrorToken:{_token.Text}");
+			sb.AppendLine($"Line:{lnch.LineNumber} Ch:{lnch.ChNumber} ErrorToken:'{_token.Text}'");
 			sb.AppendLine();
 			var line = lnch.Line.Replace("\t", " ");
 			var spaces = new String(' ', line.Length);
@@ -284,7 +363,7 @@ namespace PreviewLibrary
 			do
 			{
 				ReadKeyword("(");
-				var values = WithComma(ParseConstant);
+				var values = WithComma(() => Any("Constant or FUNC", ParseSqlFunc, ParseConstant));
 				valuesList.Add(values);
 				ReadKeyword(")");
 				if (!_token.Try(","))
@@ -567,6 +646,19 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected Hex16NumberExpr ParseHex16Number()
+		{
+			if(!_token.TryMatch(SqlTokenizer.Hex16Number, out var hex))
+			{
+				throw new PrecursorException("<HEX16>");
+			}
+
+			return new Hex16NumberExpr
+			{
+				Value = hex
+			};
+		}
+
 		public IntegerExpr ParseInteger()
 		{
 			if (!_token.TryInteger(out var intValue))
@@ -730,9 +822,21 @@ namespace PreviewLibrary
 			return -1;
 		}
 
+		protected NullExpr ParseNull()
+		{
+			if (!_token.TryIgnoreCase("NULL", out var token))
+			{
+				throw new PrecursorException("NULL");
+			}
+			return new NullExpr
+			{
+				Token = token
+			};
+		}
+
 		private SqlExpr ParseConstant()
 		{
-			var expr = GetAny(ParseString, ParseInteger, ParseSqlIdent);
+			var expr = GetAny(ParseNull, ParseHex16Number, ParseString, ParseInteger, ParseSqlIdent);
 			if (expr == null)
 			{
 				ThrowLastLineCh("Expect constant");
@@ -845,6 +949,16 @@ namespace PreviewLibrary
 			{
 				return default(T);
 			}
+		}
+
+		private SqlExpr Any(string expect, params Func<SqlExpr>[] parseList)
+		{
+			var expr = GetAny(parseList);
+			if (expr == null)
+			{
+				throw new Exception(expect);
+			}
+			return expr;
 		}
 
 		private SqlExpr GetAny(params Func<SqlExpr>[] parseList)

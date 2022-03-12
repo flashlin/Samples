@@ -2,6 +2,7 @@
 using PreviewLibrary;
 using ExpectedObjects;
 using Xunit.Abstractions;
+using System.Collections.Generic;
 
 namespace TestProject
 {
@@ -21,7 +22,53 @@ namespace TestProject
 
 			new InsertValuesExpr
 			{
-
+				Table = new IdentExpr
+				{
+					ObjectId = "[dbo]",
+					Name = "[customer]",
+				},
+				Fields = new List<IdentExpr>
+				{
+					new IdentExpr { Name = "[id]" },
+					new IdentExpr { Name = "[name]" },
+					new IdentExpr { Name = "[lastname]" },
+					new IdentExpr { Name = "[birth]" },
+					new IdentExpr { Name = "[price]" }
+				},
+				ValuesList = new List<List<SqlExpr>>
+				{
+					new List<SqlExpr>
+					{
+						new IntegerExpr
+						{
+							Value = 267467
+						},
+						new StringExpr
+						{
+							Text = "N''"
+						},
+						new NullExpr
+						{
+							Token = "NULL"
+						},
+						new SqlFuncExpr
+						{
+							Name = "CAST",
+							Arguments = new SqlExpr[]
+							{
+								new AsDataTypeExpr
+								{
+									Object = new Hex16NumberExpr { Value = "0x0000A5E5006236FB" },
+									DataType = new DataTypeExpr { DataType = "DateTime" }
+								}
+							}
+						},
+						new IntegerExpr
+						{
+							Value = 1
+						}
+					}
+				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}

@@ -16,10 +16,11 @@ namespace PreviewLibrary
 		static readonly string BatchInstruction = @"\:" + RegexPattern.Ident;
 		public static readonly string SqlDoubleQuotedString = @"""[^""]*""";
 		public static readonly string SqlNString = @"N" + RegexPattern.QuotedString;
+		public static readonly string Hex16Number = "0x" + "[0-9a-fA-F]+";
 		public static readonly string[] _keywords = new[]
 		{
 			"SELECT", "FROM", "WHERE", "AS", "WITH",
-			"AND", "OR", "BEGIN", "END", "EXEC", "EXECUTE"
+			"AND", "OR", "BEGIN", "END", "EXEC", "EXECUTE", "NULL"
 		};
 		public static readonly string[] SqlFunc0Names = new[]
 		{
@@ -64,6 +65,7 @@ namespace PreviewLibrary
 			{
 				BatchInstruction,
 				CStyleMultiLineComment,
+				Hex16Number,
 				IntegerOrFloat,
 				SqlIdent,
 				SqlVariable,

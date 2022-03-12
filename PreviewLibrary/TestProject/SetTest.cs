@@ -15,6 +15,23 @@ namespace TestProject
 		{
 		}
 
+		//[Fact]
+		//public void select_cast()
+		//{
+		//	var sql = "select CAST(0x0000A5E5006236FB AS DateTime)";
+		//	var expr = Parse(sql);
+		//	new SelectExpr
+		//	{
+		//		Fields = new List<SqlExpr>
+		//		{
+		//			new ColumnExpr
+		//			{
+		//				Name = "CAST"
+		//			}
+		//		}
+		//	}.ToExpectedObject().ShouldEqual(expr);
+		//}
+
 		[Fact]
 		public void set_xxx_off()
 		{
