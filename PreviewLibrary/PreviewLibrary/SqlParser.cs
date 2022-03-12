@@ -44,6 +44,7 @@ namespace PreviewLibrary
 		{
 			var parses = new Func<SqlExpr>[]
 			{
+				ParseSemicolon,
 				ParseSelect,
 				ParseMultiLineComment,
 				ParseGo,
@@ -83,6 +84,15 @@ namespace PreviewLibrary
 				Permission = permission,
 				ToObjectId = objectId
 			};
+		}
+
+		protected SemicolonExpr ParseSemicolon()
+		{
+			if (!_token.TryIgnoreCase(";"))
+			{
+				throw new PrecursorException("Expect <;>");
+			}
+			return new SemicolonExpr();
 		}
 
 		protected GoExpr ParseGo()
@@ -251,7 +261,11 @@ namespace PreviewLibrary
 				throw new PrecursorException("Expect <objectId>");
 			}
 
-			var toggle = ReadAnyKeyword(new[] { "ON", "OFF" });
+			if (!_token.TryIgnoreCase(new string[] { "ON", "OFF" }, out var toggle))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("Expect ON/OFF");
+			}
 			return new SetPermissionExpr
 			{
 				Permission = permission,

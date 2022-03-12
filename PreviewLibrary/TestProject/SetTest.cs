@@ -17,6 +17,21 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void set_xxx_off()
+		{
+			var sql = "SET NUMERIC_ROUNDABORT OFF";
+			var expr = Parse(sql);
+			new SetOptionsExpr
+			{
+				Options = new List<string>
+				{
+					"NUMERIC_ROUNDABORT"
+				},
+				Toggle = "OFF"
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void SetManyOptionsOn()
 		{
 			var sql = "SET ANSI_NULLS, ANSI_PADDING ON;";
