@@ -229,11 +229,7 @@ namespace PreviewLibrary
 
 		protected DataTypeExpr ParseDataType()
 		{
-			var dataTypes = new string[]
-			{
-				"INT", "DATETIME", "DECIMAL", "BIT", "NUMERIC"
-			};
-			if (!_token.TryIgnoreCase(dataTypes, out var dataType))
+			if (!_token.TryIgnoreCase(SqlTokenizer.DataTypes, out var dataType))
 			{
 				throw new PrecursorException("<SqlDataType>");
 			}

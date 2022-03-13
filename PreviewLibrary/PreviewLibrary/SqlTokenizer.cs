@@ -33,6 +33,12 @@ namespace PreviewLibrary
 			"EXISTS", "SUSER_SNAME"
 		};
 
+
+		public static string[] DataTypes = new string[]
+		{
+			"INT", "DATETIME", "DECIMAL", "BIT", "NUMERIC", "SMALLDATETIME"
+		};
+
 		private static readonly Dictionary<int, string[]> _sqlFuncArgsCount_SqlFuncNames = new Dictionary<int, string[]>()
 		{
 			{ 0, SqlFunc0Names },
