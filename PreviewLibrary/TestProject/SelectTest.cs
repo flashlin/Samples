@@ -4,11 +4,16 @@ using System.Linq;
 using FluentAssertions;
 using System.Collections.Generic;
 using ExpectedObjects;
+using Xunit.Abstractions;
 
 namespace TestProject
 {
-	public class SelectTest
+	public class SelectTest : SqlTestBase
 	{
+		public SelectTest(ITestOutputHelper outputHelper) : base(outputHelper)
+		{
+		}
+
 		[Fact]
 		public void select_name()
 		{
@@ -92,6 +97,64 @@ namespace TestProject
 			};
 
 			expected.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void if_func_select_where_is_null()
+		{
+			var sql = @"if exists (select 1 from customer where name is null)
+ Begin
+		select 1
+ End";
+			var expr = Parse(sql);
+			new IfExpr()
+			{
+				Condition = new SqlFuncExpr
+				{
+					Name = "exists",
+					Arguments = new SqlExpr[] { 
+						new SelectExpr
+						{
+							Fields = new List<SqlExpr> { 
+								new IntegerExpr
+								{
+									Value = 1
+								}
+							},
+							From = new TableExpr
+							{
+								Name = new IdentExpr
+								{
+									 Name = "customer"
+								}
+							},
+							WhereExpr = new CompareExpr
+							{
+								Left = new IdentExpr
+								{
+									 Name = "name"
+								},
+								Oper = "is",
+								Right = new NullExpr
+								{
+									 Token = "null"
+								}
+							}
+						}
+					}
+				},
+				Body = new List<SqlExpr> { 
+					new SelectExpr
+					{
+						Fields = new List<SqlExpr> { 
+							new IntegerExpr
+							{
+								Value = 1
+							}
+						}
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}
 }

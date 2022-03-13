@@ -110,7 +110,7 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseSubExpr()
 		{
-			if( TryGet(ParseGroup, out var groupExpr))
+			if (TryGet(ParseGroup, out var groupExpr))
 			{
 				return groupExpr;
 			}
@@ -152,7 +152,7 @@ namespace PreviewLibrary
 
 		protected DeleteExpr ParseDelete()
 		{
-			if(!_token.TryIgnoreCase("DELETE"))
+			if (!_token.TryIgnoreCase("DELETE"))
 			{
 				throw new PrecursorException("DELETE");
 			}
@@ -164,7 +164,7 @@ namespace PreviewLibrary
 			return new DeleteExpr
 			{
 				Table = table,
-				WhereExpr = whereExpr	
+				WhereExpr = whereExpr
 			};
 		}
 
@@ -357,7 +357,7 @@ namespace PreviewLibrary
 			}
 
 			var intoToggle = false;
-			if(_token.TryIgnoreCase("INTO"))
+			if (_token.TryIgnoreCase("INTO"))
 			{
 				intoToggle = true;
 			}
@@ -471,10 +471,10 @@ namespace PreviewLibrary
 				Text = str,
 			};
 		}
-		
+
 		protected CommentExpr ParseSingleLineComment()
 		{
-			if(!_token.TryMatch(SqlTokenizer.SingleLineComment, out var token))
+			if (!_token.TryMatch(SqlTokenizer.SingleLineComment, out var token))
 			{
 				throw new PrecursorException("--");
 			}
@@ -869,7 +869,7 @@ namespace PreviewLibrary
 
 		protected DecimalExpr ParseDecimal()
 		{
-			if(!_token.TryMatch(SqlTokenizer.DecimalNumber, out var decimalStr))
+			if (!_token.TryMatch(SqlTokenizer.DecimalNumber, out var decimalStr))
 			{
 				throw new PrecursorException("<Float>");
 			}
@@ -920,6 +920,14 @@ namespace PreviewLibrary
 			if (compareExpr != null)
 			{
 				return compareExpr;
+			}
+
+			if (left is SqlFuncExpr funcExpr)
+			{
+				if (funcExpr.Name.IsSql("exists"))
+				{
+					return left;
+				}
 			}
 
 			throw new NotSupportedException(GetLastLineCh());
@@ -973,7 +981,7 @@ namespace PreviewLibrary
 			{
 				return parse();
 			}
-			catch(PrecursorException)
+			catch (PrecursorException)
 			{
 				return default(T);
 			}
@@ -1041,7 +1049,7 @@ namespace PreviewLibrary
 			var op = string.Empty;
 			CompareExpr parseAction()
 			{
-				var right = ParseSubExpr(); //ParseSqlIdent();
+				var right = ParseSubExpr();
 				return new CompareExpr
 				{
 					Left = left,
@@ -1058,14 +1066,14 @@ namespace PreviewLibrary
 
 			if (!_token.Try(_token.IsCompareOp, out op))
 			{
-				Throw("should be compare oper");
+				throw new PrecursorException("<compare oper>");
 			}
 			return parseAction();
 		}
 
 		protected GroupExpr ParseGroup()
 		{
-			if(!_token.Try("("))
+			if (!_token.Try("("))
 			{
 				throw new PrecursorException("(");
 			}
@@ -1222,6 +1230,14 @@ namespace PreviewLibrary
 		{
 			enumerator.MoveNext();
 			return enumerator.Current;
+		}
+	}
+
+	public static class SqlStringExtension
+	{
+		public static bool IsSql(this string text, string other)
+		{
+			return string.Equals(text, other, StringComparison.OrdinalIgnoreCase);
 		}
 	}
 }

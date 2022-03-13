@@ -55,7 +55,7 @@ namespace PreviewLibrary
 
 		static readonly string[] CompareOps = new []
 		{
-			"LIKE", "IN"
+			"LIKE", "IN", "IS"
 		}.Concat(CompareOperSymbols).ToArray();
 
 		static IEnumerable<string> Escape(IEnumerable<string> patterns)
