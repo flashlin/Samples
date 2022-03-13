@@ -12,9 +12,11 @@ namespace PreviewLibrary
 	{
 		private SqlTokenizer _token;
 		private string _sql;
+		private InfixToPostfix<SqlExpr> _arithmetic;
 
 		public SqlParser()
 		{
+			Initialize();
 			_token = new SqlTokenizer();
 		}
 
@@ -49,6 +51,7 @@ namespace PreviewLibrary
 				ParseSelect,
 				ParseInsert,
 				ParseDelete,
+				ParseUpdate,
 				ParseSingleLineComment,
 				ParseMultiLineComment,
 				ParseGo,
@@ -399,6 +402,37 @@ namespace PreviewLibrary
 				Table = table,
 				Fields = fields,
 				ValuesList = valuesList
+			};
+		}
+
+		protected UpdateExpr ParseUpdate()
+		{
+			if (!_token.TryIgnoreCase("UPDATE"))
+			{
+				throw new PrecursorException("UPDATE");
+			}
+
+			var table = ParseSqlIdent();
+			ReadKeyword("SET");
+
+			var setFields = WithComma(() =>
+			{
+				var field = ParseSqlIdent();
+				ReadKeyword("=");
+				
+				//var value = ParseSubExpr();
+				var value = ParseArithmeticList();
+
+				return new AssignSetExpr
+				{
+					Field = field,
+					Value = value
+				};
+			});
+
+			return new UpdateExpr
+			{
+				Fields = setFields,
 			};
 		}
 
@@ -767,6 +801,11 @@ namespace PreviewLibrary
 				Condition = filter,
 				Body = body,
 			};
+		}
+
+		protected ArithmeticExpr ParseArithmeticList()
+		{
+			return (ArithmeticExpr)_arithmetic.Parse();
 		}
 
 		private SqlExpr ParseFilterList()
@@ -1214,6 +1253,24 @@ namespace PreviewLibrary
 		private void Throw(string message)
 		{
 			throw new Exception(CreateThrowMessage(message));
+		}
+
+		private void Initialize()
+		{
+			var arithmeticOptions = new InfixToPostfixOptions<SqlExpr>()
+			{
+				Operators = new[] { "*", "/", "+", "-" },
+				CreateBinaryOperator = (left, op, right) => new ArithmeticExpr
+				{
+					Left = left,
+					Oper = op,
+					Right = right
+				},
+				GetCurrentTokenText = () => _token.Text,
+				NextToken = () => _token.Move(),
+				ReadToken = () => ParseSubExpr(),
+			};
+			_arithmetic = new InfixToPostfix<SqlExpr>(arithmeticOptions);
 		}
 	}
 
