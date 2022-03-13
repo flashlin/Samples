@@ -10,7 +10,7 @@ namespace PreviewLibrary
 	{
 		static readonly string PositiveInteger = @"\d+";
 		static readonly string IntegerNumber = @"-?" + PositiveInteger;
-		public static readonly string DecimalNumber = @"\d+\.\d*";
+		public static readonly string DecimalNumber = @"[-]?\d+\.\d*";
 		static readonly string SqlIdent = @"\[[^\]]+\]";
 		public static readonly string SqlVariable = @"\@" + RegexPattern.Ident;
 		public static readonly string MultiLineComment = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
