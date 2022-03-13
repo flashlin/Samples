@@ -92,26 +92,5 @@ on tb2.id = tb1.id";
 
 			expected.ToExpectedObject().ShouldEqual(expr);
 		}
-
-		[Fact]
-		public void TestAllSqlFiles()
-		{
-			var sqlFolder = @"D:\VDisk\MyGitHub\SQL";
-			var p = new SqlParser();
-			foreach(var sqlFile in ReadSqlFiles(sqlFolder))
-			{
-				outputHelper.WriteLine(sqlFile);
-				var sql = File.ReadAllText(sqlFile);
-				outputHelper.WriteLine(sql);
-				p.ParseAll(sql).ToList();
-			}
-		}
-
-		public IEnumerable<string> ReadSqlFiles(string folder)
-		{
-			var sqlFiles = Directory.EnumerateFiles(folder, "*.sql");
-			var subDirs = Directory.EnumerateDirectories(folder);
-			return sqlFiles.Concat(subDirs.SelectMany(x => ReadSqlFiles(x)));
-		}
 	}
 }

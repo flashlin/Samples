@@ -5,7 +5,7 @@ namespace TestProject
 {
 	public abstract class SqlTestBase
 	{
-		private readonly ITestOutputHelper _outputHelper;
+		protected readonly ITestOutputHelper _outputHelper;
 
 		public SqlTestBase(ITestOutputHelper outputHelper)
 		{
