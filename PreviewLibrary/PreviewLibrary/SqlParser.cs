@@ -337,6 +337,12 @@ namespace PreviewLibrary
 				throw new PrecursorException("INSERT");
 			}
 
+			var intoToggle = false;
+			if(_token.TryIgnoreCase("INTO"))
+			{
+				intoToggle = true;
+			}
+
 			var table = Get(ParseSqlIdent);
 			if (table == null)
 			{
@@ -370,6 +376,7 @@ namespace PreviewLibrary
 
 			return new InsertExpr
 			{
+				IntoToggle = intoToggle,
 				Table = table,
 				Fields = fields,
 				ValuesList = valuesList
