@@ -13,7 +13,8 @@ namespace PreviewLibrary
 		public static readonly string DecimalNumber = @"\d+\.\d*";
 		static readonly string SqlIdent = @"\[[^\]]+\]";
 		public static readonly string SqlVariable = @"\@" + RegexPattern.Ident;
-		static readonly string CStyleMultiLineComment = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
+		public static readonly string MultiLineComment = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
+		public static readonly string SingleLineComment = @"--[^\r\n]*";
 		static readonly string BatchInstruction = @"\:" + RegexPattern.Ident;
 		public static readonly string SqlDoubleQuotedString = @"""[^""]*""";
 		public static readonly string SqlNString = @"N" + RegexPattern.QuotedString;
@@ -65,7 +66,8 @@ namespace PreviewLibrary
 			.Concat(new[]
 			{
 				BatchInstruction,
-				CStyleMultiLineComment,
+				SingleLineComment,
+				MultiLineComment,
 				Hex16Number,
 				DecimalNumber,
 				IntegerNumber,
@@ -111,14 +113,6 @@ namespace PreviewLibrary
 				}
 				char c = Ch;
 				return char.IsLower(c) || char.IsUpper(c) || c == '_';
-			}
-		}
-
-		public bool IsMultiLineComment
-		{
-			get
-			{
-				return new Regex(CStyleMultiLineComment).IsMatch(Text);
 			}
 		}
 

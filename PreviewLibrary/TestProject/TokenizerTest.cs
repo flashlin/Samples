@@ -22,6 +22,13 @@ namespace TestProject
 
 
 		[Fact]
+		public void gingle_comment()
+		{
+			var token = GetToken("-- 123\r\nxxx");
+			"-- 123".ToExpectedObject().ShouldEqual(token);
+		}
+
+		[Fact]
 		public void sql_float()
 		{
 			var token = GetToken("0.0010 xxx");

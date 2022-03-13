@@ -85,7 +85,7 @@ on tb2.id = tb1.id";
 123
 */";
 			var expr = new SqlParser().Parse(sql);
-			var expected = new MultiLineCommentExpr
+			var expected = new CommentExpr
 			{
 				Text = sql
 			};

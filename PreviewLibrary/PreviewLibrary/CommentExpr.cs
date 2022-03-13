@@ -1,6 +1,6 @@
 ﻿namespace PreviewLibrary
 {
-	public class MultiLineCommentExpr : SqlExpr
+	public class CommentExpr : SqlExpr
 	{
 		public string Text { get; set; }
 

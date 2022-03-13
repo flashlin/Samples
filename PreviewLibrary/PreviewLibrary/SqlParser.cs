@@ -48,6 +48,7 @@ namespace PreviewLibrary
 				ParseSemicolon,
 				ParseSelect,
 				ParseInsert,
+				ParseSingleLineComment,
 				ParseMultiLineComment,
 				ParseGo,
 				ParseSet_Permission_ObjectId_OnOff,
@@ -433,16 +434,27 @@ namespace PreviewLibrary
 			};
 		}
 
-
-		private MultiLineCommentExpr ParseMultiLineComment()
+		protected CommentExpr ParseMultiLineComment()
 		{
-			if (!_token.Try(_token.IsMultiLineComment, out var str))
+			if (!_token.TryMatch(SqlTokenizer.MultiLineComment, out var str))
 			{
-				throw new PrecursorException("should /* */");
+				throw new PrecursorException("/* */");
 			}
-			return new MultiLineCommentExpr
+			return new CommentExpr
 			{
 				Text = str,
+			};
+		}
+		
+		protected CommentExpr ParseSingleLineComment()
+		{
+			if(!_token.TryMatch(SqlTokenizer.SingleLineComment, out var token))
+			{
+				throw new PrecursorException("--");
+			}
+			return new CommentExpr
+			{
+				Text = token,
 			};
 		}
 
