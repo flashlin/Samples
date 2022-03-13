@@ -231,7 +231,7 @@ namespace PreviewLibrary
 		{
 			var dataTypes = new string[]
 			{
-				"INT", "DATETIME", "DECIMAL", "BIT"
+				"INT", "DATETIME", "DECIMAL", "BIT", "NUMERIC"
 			};
 			if (!_token.TryIgnoreCase(dataTypes, out var dataType))
 			{
@@ -344,7 +344,7 @@ namespace PreviewLibrary
 			}
 
 			var name = ParseIdent().Name;
-			var value = _token.Read(SqlTokenizer.SqlDoubleQuotedString, nameof(SqlTokenizer.SqlDoubleQuotedString));
+			var value = _token.Read(SqlTokenizer.DoubleQuotedString, nameof(SqlTokenizer.DoubleQuotedString));
 			return new SetBatchVariableExpr
 			{
 				Name = name,

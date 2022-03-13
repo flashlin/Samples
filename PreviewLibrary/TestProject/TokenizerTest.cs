@@ -28,7 +28,7 @@ namespace TestProject
 		}
 
 		[Fact]
-		public void gingle_comment()
+		public void single_comment()
 		{
 			var token = GetToken("-- 123\r\nxxx");
 			"-- 123".ToExpectedObject().ShouldEqual(token);
@@ -39,6 +39,13 @@ namespace TestProject
 		{
 			var token = GetToken("0.0010 xxx");
 			"0.0010".ToExpectedObject().ShouldEqual(token);
+		}
+
+		[Fact]
+		public void sigle_string()
+		{
+			var token = GetToken("N'aaa D''bbb'");
+			"N'aaa D''bbb'".ToExpectedObject().ShouldEqual(token);
 		}
 
 		private string GetToken(string text)
