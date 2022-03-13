@@ -20,7 +20,7 @@ namespace TestProject
 
 			var expr = Parse(sql);
 
-			new InsertValuesExpr
+			new InsertExpr
 			{
 				Table = new IdentExpr
 				{
@@ -77,7 +77,7 @@ namespace TestProject
 		{
 			var sql = "INSERT [dbo].[customer] ([id]) VALUES ( CAST(0.0100 AS Decimal(5, 4)) )";
 			var expr = Parse(sql);
-			new InsertValuesExpr
+			new InsertExpr
 			{
 				Table = new IdentExpr
 				{
@@ -130,7 +130,7 @@ namespace TestProject
 (N'127.0.0.1', 267467)";
 
 			var expr = Parse(sql);
-			new InsertValuesExpr
+			new InsertExpr
 			{
 				Table = new IdentExpr
 				{

@@ -329,7 +329,7 @@ namespace PreviewLibrary
 			};
 		}
 
-		protected InsertValuesExpr ParseInsert()
+		protected InsertExpr ParseInsert()
 		{
 			var startIndex = _token.CurrentIndex;
 			if (!_token.TryIgnoreCase("INSERT"))
@@ -368,7 +368,7 @@ namespace PreviewLibrary
 				}
 			} while (true);
 
-			return new InsertValuesExpr
+			return new InsertExpr
 			{
 				Table = table,
 				Fields = fields,

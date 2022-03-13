@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace PreviewLibrary
 {
-	public class InsertValuesExpr : SqlExpr
+	public class InsertExpr : SqlExpr
 	{
 		public IdentExpr Table { get; set; }
 		public List<IdentExpr> Fields { get; set; }
