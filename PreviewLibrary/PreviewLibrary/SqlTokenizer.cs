@@ -18,7 +18,6 @@ namespace PreviewLibrary
 		static readonly string BatchInstruction = @"\:" + RegexPattern.Ident;
 		public static readonly string DoubleQuotedString = @"""[^""]*""";
 		public static readonly string QuotedString = @"N?'[^']*(?:''[^']*)*'";
-		public static readonly string SqlNString = @"N" + RegexPattern.QuotedString;
 		public static readonly string Hex16Number = "0x" + "[0-9a-fA-F]+";
 		public static readonly string[] _keywords = new[]
 		{
@@ -67,7 +66,6 @@ namespace PreviewLibrary
 		static readonly string[] AllStrings = new[]
 		{
 			QuotedString,
-			SqlNString,
 			DoubleQuotedString,
 		};
 
