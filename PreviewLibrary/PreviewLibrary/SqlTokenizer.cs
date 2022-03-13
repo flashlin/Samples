@@ -41,11 +41,21 @@ namespace PreviewLibrary
 
 		private static readonly Dictionary<string, int> _sqlFuncName_ArgsCount = new Dictionary<string, int>();
 
-		static readonly string[] CompareOps = new[]
+		static readonly string[] CompareOperSymbols = new[]
 		{
-			"LIKE", "!=", "<=", ">=", "<>",
+			"!=", "<=", ">=", "<>",
 			">", "<", "="
-		}.Select(e => Regex.Escape(e)).ToArray();
+		};
+
+		static readonly string[] CompareOps = new []
+		{
+			"LIKE", "IN"
+		}.Concat(CompareOperSymbols).ToArray();
+
+		static IEnumerable<string> Escape(IEnumerable<string> patterns)
+		{
+			return patterns.Select(e => Regex.Escape(e));
+		}
 
 		static readonly string[] OtherSymbols = new[]
 		{
@@ -61,7 +71,7 @@ namespace PreviewLibrary
 		};
 
 		static readonly string[] AllPatterns =
-			CompareOps
+			Escape(CompareOperSymbols)
 			.Concat(AllStrings)
 			.Concat(new[]
 			{

@@ -20,6 +20,12 @@ namespace TestProject
 			"1".ToExpectedObject().ShouldEqual(token);
 		}
 
+		[Fact]
+		public void insert()
+		{
+			var token = GetToken("INSERT xxx");
+			"INSERT".ToExpectedObject().ShouldEqual(token);
+		}
 
 		[Fact]
 		public void gingle_comment()

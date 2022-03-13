@@ -48,6 +48,7 @@ namespace PreviewLibrary
 				ParseSemicolon,
 				ParseSelect,
 				ParseInsert,
+				ParseDelete,
 				ParseSingleLineComment,
 				ParseMultiLineComment,
 				ParseGo,
@@ -109,6 +110,10 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseSubExpr()
 		{
+			if( TryGet(ParseGroup, out var groupExpr))
+			{
+				return groupExpr;
+			}
 			if (TryGet(ParseNot, out var notExpr))
 			{
 				return notExpr;
@@ -142,6 +147,24 @@ namespace PreviewLibrary
 			return new NotExpr
 			{
 				Right = right
+			};
+		}
+
+		protected DeleteExpr ParseDelete()
+		{
+			if(!_token.TryIgnoreCase("DELETE"))
+			{
+				throw new PrecursorException("DELETE");
+			}
+
+			ReadKeyword("FROM");
+			var table = ParseSqlIdent();
+
+			var whereExpr = Option(ParseWhere);
+			return new DeleteExpr
+			{
+				Table = table,
+				WhereExpr = whereExpr	
 			};
 		}
 
@@ -948,6 +971,18 @@ namespace PreviewLibrary
 			};
 		}
 
+		private T Option<T>(Func<T> parse)
+		{
+			try
+			{
+				return parse();
+			}
+			catch(PrecursorException)
+			{
+				return default(T);
+			}
+		}
+
 		private T Get<T>(Func<T> parse)
 		{
 			try
@@ -1030,6 +1065,21 @@ namespace PreviewLibrary
 				Throw("should be compare oper");
 			}
 			return parseAction();
+		}
+
+		protected GroupExpr ParseGroup()
+		{
+			if(!_token.Try("("))
+			{
+				throw new PrecursorException("(");
+			}
+			var subExpr = ParseSubExpr();
+			ReadKeyword(")");
+
+			return new GroupExpr
+			{
+				Expr = subExpr,
+			};
 		}
 
 		private bool IsKeyword(string keyword)
