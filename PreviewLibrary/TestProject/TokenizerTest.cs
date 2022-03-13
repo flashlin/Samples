@@ -12,7 +12,15 @@ namespace TestProject
 			var token = GetToken("DB_NAME xxx");
 			"DB_NAME".ToExpectedObject().ShouldEqual(token);
 		}
-		
+
+		[Fact]
+		public void sql_int()
+		{
+			var token = GetToken("1 xxx");
+			"1".ToExpectedObject().ShouldEqual(token);
+		}
+
+
 		[Fact]
 		public void sql_float()
 		{

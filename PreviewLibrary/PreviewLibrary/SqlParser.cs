@@ -829,9 +829,22 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected DecimalExpr ParseDecimal()
+		{
+			if(!_token.TryMatch(SqlTokenizer.DecimalNumber, out var decimalStr))
+			{
+				throw new PrecursorException("<Float>");
+			}
+			var decimalValue = Decimal.Parse(decimalStr);
+			return new DecimalExpr
+			{
+				Value = decimalValue,
+			};
+		}
+
 		private SqlExpr ParseConstant()
 		{
-			var expr = GetAny(ParseNull, ParseHex16Number, ParseString, ParseInteger, ParseSqlIdent);
+			var expr = GetAny(ParseNull, ParseHex16Number, ParseDecimal, ParseString, ParseInteger, ParseSqlIdent);
 			if (expr == null)
 			{
 				ThrowLastLineCh("Expect constant");

@@ -71,5 +71,56 @@ namespace TestProject
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void insert_table_cast_float_as_decimal()
+		{
+			var sql = "INSERT [dbo].[customer] ([id]) VALUES ( CAST(0.0100 AS Decimal(5, 4)) )";
+			var expr = Parse(sql);
+			new InsertValuesExpr
+			{
+				Table = new IdentExpr
+				{
+					Name = "[customer]",
+					ObjectId = "[dbo]"
+				},
+				Fields = new List<IdentExpr>
+				{
+					new IdentExpr
+					{
+						Name = "[id]"
+					}
+				},
+				ValuesList = new List<List<SqlExpr>>
+				{
+					new List<SqlExpr>
+					{
+						new SqlFuncExpr
+						{
+							Name = "CAST",
+							Arguments = new SqlExpr[] 
+							{
+								new AsDataTypeExpr
+								{
+									Object = new DecimalExpr
+									{
+										Value = 0.0100m
+									},
+									DataType = new DataTypeExpr
+									{
+										DataType = "Decimal",
+										DataSize = new DataTypeSizeExpr
+										{
+											 Size = 5,
+											 ScaleSize = 4
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
 	}
 }

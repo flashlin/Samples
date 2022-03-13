@@ -8,8 +8,9 @@ namespace PreviewLibrary
 {
 	public class SqlTokenizer : TokenizerBase
 	{
-		static readonly string PositiveIntegerOrFloat = @"\d+(?:\.\d+)?";
-		static readonly string IntegerOrFloat = @"-?" + PositiveIntegerOrFloat;
+		static readonly string PositiveInteger = @"\d+";
+		static readonly string IntegerNumber = @"-?" + PositiveInteger;
+		public static readonly string DecimalNumber = @"\d+\.\d*";
 		static readonly string SqlIdent = @"\[[^\]]+\]";
 		public static readonly string SqlVariable = @"\@" + RegexPattern.Ident;
 		static readonly string CStyleMultiLineComment = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
@@ -66,7 +67,8 @@ namespace PreviewLibrary
 				BatchInstruction,
 				CStyleMultiLineComment,
 				Hex16Number,
-				IntegerOrFloat,
+				DecimalNumber,
+				IntegerNumber,
 				SqlIdent,
 				SqlVariable,
 				RegexPattern.Ident,
