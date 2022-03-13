@@ -216,7 +216,7 @@ namespace PreviewLibrary
 
 		public bool IsMatch(string pattern)
 		{
-			return new Regex(pattern).IsMatch(Text);
+			return new Regex("^" + pattern + "$").IsMatch(Text);
 		}
 
 		public bool IsMatchAny(params string[] patterns)

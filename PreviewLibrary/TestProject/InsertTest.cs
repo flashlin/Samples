@@ -98,7 +98,7 @@ namespace TestProject
 						new SqlFuncExpr
 						{
 							Name = "CAST",
-							Arguments = new SqlExpr[] 
+							Arguments = new SqlExpr[]
 							{
 								new AsDataTypeExpr
 								{
@@ -117,6 +117,44 @@ namespace TestProject
 									}
 								}
 							}
+						}
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void insert_table_field_values_nstring_integer()
+		{
+			var sql = @"INSERT [dbo].[customer] ([id]) VALUES 
+(N'127.0.0.1', 267467)";
+
+			var expr = Parse(sql);
+			new InsertValuesExpr
+			{
+				Table = new IdentExpr
+				{
+					Name = "[customer]",
+					ObjectId = "[dbo]"
+				},
+				Fields = new List<IdentExpr>
+				{
+					new IdentExpr
+					{
+						Name = "[id]"
+					}
+				},
+				ValuesList = new List<List<SqlExpr>>
+				{
+					new List<SqlExpr>
+					{
+						new StringExpr
+						{
+							Text = "N'127.0.0.1'"
+						},
+						new IntegerExpr
+						{
+							Value = 267467
 						}
 					}
 				}
