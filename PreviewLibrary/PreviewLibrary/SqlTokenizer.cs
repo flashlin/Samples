@@ -26,7 +26,7 @@ namespace PreviewLibrary
 		};
 		public static readonly string[] SqlFunc0Names = new[]
 		{
-			"DB_NAME"
+			"DB_NAME", "GETDATE"
 		};
 		public static readonly string[] SqlFunc1Names = new[]
 		{
