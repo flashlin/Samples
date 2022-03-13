@@ -307,7 +307,7 @@ namespace PreviewLibrary
 			var lnch = _token.GetLineCh(_sql);
 
 			var sb = new StringBuilder();
-			sb.AppendLine($"Line:{lnch.LineNumber} Ch:{lnch.ChNumber} ErrorToken:'{_token.Text}'");
+			sb.AppendLine($"Line:{lnch.LineNumber} Ch:{lnch.ChNumber} CurrToken:'{_token.Text}'");
 			sb.AppendLine();
 			var line = lnch.Line.Replace("\t", " ");
 			var spaces = new String(' ', line.Length);
