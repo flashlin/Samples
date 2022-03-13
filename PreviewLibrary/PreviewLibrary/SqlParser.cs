@@ -54,6 +54,7 @@ namespace PreviewLibrary
 				ParseUpdate,
 				ParseSingleLineComment,
 				ParseMultiLineComment,
+				ParseCreateSp,
 				ParseGo,
 				ParseSet_Permission_ObjectId_OnOff,
 				ParseSet_Options_OnOff,
@@ -351,6 +352,78 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected CreateSpExpr ParseCreateSp()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!_token.TryIgnoreCase("CREATE"))
+			{
+				throw new PrecursorException("CREATE");
+			}
+
+			if (!_token.TryIgnoreCase("PROCEDURE"))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("PROCEDURE");
+			}
+
+			var spName = ParseSqlIdent();
+
+			var spArgs = new List<ArgumentExpr>();
+			var mustHaveArg = false;
+			do
+			{
+				if (!_token.TryMatch(SqlTokenizer.SqlVariable, out var argName))
+				{
+					if (mustHaveArg)
+					{
+						throw new Exception("argument");
+					}
+					break;
+				}
+				var dataType = ParseDataType();
+
+				SqlExpr defaultValue = null;
+				if (_token.Try("="))
+				{
+					defaultValue = ParseConstant();
+				}
+
+				spArgs.Add(new ArgumentExpr
+				{
+					Name = argName,
+					DataType = dataType,
+					DefaultValue = defaultValue
+				});
+
+				if (!_token.Try(","))
+				{
+					break;
+				}
+
+				mustHaveArg = true;
+			} while (true);
+
+			ReadKeyword("AS");
+			ReadKeyword("BEGIN");
+			var body = new List<SqlExpr>();
+			do
+			{
+				var expr = Get(ParseExpr);
+				if (expr == null)
+				{
+					break;
+				}
+				body.Add(expr);
+			} while (true);
+			ReadKeyword("END");
+			return new CreateSpExpr
+			{
+				Name = spName,
+				Arguments = spArgs,
+				Body = body
+			};
+		}
+
 		protected InsertExpr ParseInsert()
 		{
 			var startIndex = _token.CurrentIndex;
@@ -419,7 +492,7 @@ namespace PreviewLibrary
 			{
 				var field = ParseSqlIdent();
 				ReadKeyword("=");
-				
+
 				//var value = ParseSubExpr();
 				var value = ParseArithmeticList();
 
