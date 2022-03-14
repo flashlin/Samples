@@ -64,12 +64,29 @@ namespace PreviewLibrary
 			return patterns.Select(e => Regex.Escape(e));
 		}
 
+		public static string[] Op1 = new []
+		{
+			"*", "/"
+		};
+
+		public static string[] Op2 = new []
+		{
+			"+", "-"
+		};
+		
+		public static string[] Terms = new []
+		{
+			"(", ")"
+		};
+
 		static readonly string[] OtherSymbols = new[]
 		{
 			"--", "\r\n",
 			"&", "|", ".", ",", "(", ")", "@", ";",
 			"+", "-", "*", "/",
 		}.Select(e => Regex.Escape(e)).ToArray();
+
+
 
 		static readonly string[] AllStrings = new[]
 		{

@@ -34,7 +34,100 @@ namespace PreviewLibrary
 			return ParseAllExpr();
 		}
 
-		public IEnumerable<SqlExpr> ParseAllExpr()
+		public SqlExpr ParseArithmeticExpression(string sql)
+		{
+			_sql = sql;
+			_token.PredicateParse(sql);
+			var ops = new string[] { "(", ")", "*", "/", "+", "-" };
+			return ParseConcat(() => ParseSubExpr(), ops);
+		}
+
+		private SqlExpr ParseConcat(Func<SqlExpr> readExpr, string[] opers)
+		{
+			var postfixExprs = new List<object>();
+			var ops = new Stack<string>();
+			do
+			{
+				postfixExprs.Add(readExpr());
+				if (!_token.TryIgnoreCase(opers, out var curr_op))
+				{
+					break;
+				}
+				if (ops.Count >= 1)
+				{
+					var stack_op = ops.Pop();
+					if (CompareOperPriority(opers, stack_op, curr_op) > 0)
+					{
+						ops.Push(curr_op);
+						postfixExprs.Add(stack_op);
+					}
+					else
+					{
+						ops.Push(stack_op);
+						ops.Push(curr_op);
+					}
+				}
+				else
+				{
+					ops.Push(curr_op);
+				}
+			} while (true);
+
+			postfixExprs.AddRange(ops.ToArray());
+
+			return ReducePostfixExprs(postfixExprs);
+		}
+
+		private SqlExpr ReducePostfixExprs(List<object> postfixExprs)
+		{
+			var st = new Stack<SqlExpr>();
+			var iter = postfixExprs.GetEnumerator();
+			while (iter.MoveNext())
+			{
+				var item = iter.Current;
+				if (item is SqlExpr sqlExpr)
+				{
+					st.Push(sqlExpr);
+				}
+				else
+				{
+					var oper = item as string;
+					var right = st.Pop();
+					var left = st.Pop();
+					var expr = new AndOrExpr
+					{
+						Left = left,
+						Oper = oper,
+						Right = right,
+					};
+					st.Push(expr);
+				}
+			}
+
+			//if (st.Count > 1)
+			//{
+			//	throw new Exception();
+			//}
+			return st.Pop();
+		}
+
+		private int CompareOperPriority(string[] opers, string op1, string op2)
+		{
+			var opersPriority = opers.Reverse().ToArray();
+			var op1Priority = opersPriority.IndexOf(op1);
+			var op2Priority = opersPriority.IndexOf(op2);
+			if (op1Priority == op2Priority)
+			{
+				return 0;
+			}
+			if (op1Priority > op2Priority)
+			{
+				return 1;
+			}
+			return -1;
+		}
+
+		protected IEnumerable<SqlExpr> ParseAllExpr()
 		{
 			do
 			{
