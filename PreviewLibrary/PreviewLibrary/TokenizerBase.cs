@@ -187,6 +187,18 @@ namespace PreviewLibrary
 			return string.Equals(Text, text, StringComparison.OrdinalIgnoreCase);
 		}
 
+		public bool IgnoreCaseAny(params string[] strs)
+		{
+			for (var i = 0; i < strs.Length; i++)
+			{
+				if (IgnoreCase(strs[i]))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public bool TryIgnoreCase(string text)
 		{
 			return TryIgnoreCase(text, out var _);
@@ -230,7 +242,7 @@ namespace PreviewLibrary
 
 		public LineChInfo GetLineCh(string content)
 		{
-			if( Curr == null)
+			if (Curr == null)
 			{
 				return new LineChInfo
 				{
@@ -247,8 +259,8 @@ namespace PreviewLibrary
 			var prevLines = lines.SkipLast(1).TakeLast(3).ToArray();
 			return new LineChInfo
 			{
-				LineNumber = lines.Length, 
-				ChNumber = line.Length + 1, 
+				LineNumber = lines.Length,
+				ChNumber = line.Length + 1,
 				PrevLines = prevLines,
 				Line = line
 			};

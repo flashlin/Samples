@@ -42,40 +42,97 @@ namespace PreviewLibrary
 			return ParseConcat(() => ParseSubExpr(), ops);
 		}
 
+		private bool IsOperator(string[] opers)
+		{
+			return _token.IsMatchAny(opers.Select(x => Regex.Escape(x)).ToArray());
+		}
+
 		private SqlExpr ParseConcat(Func<SqlExpr> readExpr, string[] opers)
 		{
-			var postfixExprs = new List<object>();
+			var operands = new Stack<SqlExpr>();
 			var ops = new Stack<string>();
-			do
+			while (_token.Text != "")
 			{
-				postfixExprs.Add(readExpr());
+				if (_token.IgnoreCaseAny("AND", "OR"))
+				{
+					break;
+				}
+
+				if (!IsOperator(opers))
+				{
+					operands.Push(readExpr());
+					continue;
+				}
+
 				if (!_token.TryIgnoreCase(opers, out var curr_op))
 				{
 					break;
 				}
-				if (ops.Count >= 1)
+
+				if (curr_op == ")")
 				{
-					var stack_op = ops.Pop();
-					if (CompareOperPriority(opers, stack_op, curr_op) > 0)
-					{
-						ops.Push(curr_op);
-						postfixExprs.Add(stack_op);
-					}
-					else
-					{
-						ops.Push(stack_op);
-						ops.Push(curr_op);
-					}
+					ClearStackUnitlPopLeftTerm(operands, ops);
+					continue;
 				}
-				else
+
+				if (ops.Count == 0)
 				{
 					ops.Push(curr_op);
+					continue;
 				}
+
+				do
+				{
+					var stack_op = ops.Peek();
+					if (CompareOperPriority(opers, stack_op, curr_op) < 0)
+					{
+						ops.Push(curr_op);
+						break;
+					}
+
+					ClearStack(operands, ops);
+
+					if (ops.Count == 0)
+					{
+						ops.Push(curr_op);
+						break;
+					}
+				} while (true);
+
+			}
+
+			while (ops.Count > 0)
+			{
+				ClearStack(operands, ops);
+			}
+
+			return operands.Pop();
+		}
+
+		private static void ClearStackUnitlPopLeftTerm(Stack<SqlExpr> operands, Stack<string> ops)
+		{
+			do
+			{
+				var stack_op = ops.Peek();
+				if (stack_op == "(")
+				{
+					ops.Pop();
+					break;
+				}
+				ClearStack(operands, ops);
 			} while (true);
+		}
 
-			postfixExprs.AddRange(ops.ToArray());
-
-			return ReducePostfixExprs(postfixExprs);
+		private static void ClearStack(Stack<SqlExpr> operands, Stack<string> ops)
+		{
+			var stack_op = ops.Pop();
+			var combo = new AndOrExpr
+			{
+				Right = operands.Pop(),
+				Oper = stack_op,
+				Left = operands.Pop(),
+			};
+			operands.Push(combo);
 		}
 
 		private SqlExpr ReducePostfixExprs(List<object> postfixExprs)
@@ -113,6 +170,10 @@ namespace PreviewLibrary
 
 		private int CompareOperPriority(string[] opers, string op1, string op2)
 		{
+			if (op1 == "(" && op2 != "(")
+			{
+				return -1;
+			}
 			var opersPriority = opers.Reverse().ToArray();
 			var op1Priority = opersPriority.IndexOf(op1);
 			var op2Priority = opersPriority.IndexOf(op2);
