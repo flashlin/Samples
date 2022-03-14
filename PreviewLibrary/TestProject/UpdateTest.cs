@@ -18,29 +18,29 @@ namespace TestProject
 			var sql = "Update customer set price = rate + 1";
 			var expr = Parse(sql);
 			new UpdateExpr
-			{
-				Fields = new List<AssignSetExpr> { 
-					new AssignSetExpr
-					{
-						Field = new IdentExpr
-						{
-							Name = "price"
-						},
-						Value = new ArithmeticExpr
-						{
-							Left = new IdentExpr
-							{
-								Name = "rate"
-							},
-							Oper = "+",
-							Right = new IntegerExpr
-							{
-								Value = 1
-							}
-						}
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+         {     
+            Fields = new List<AssignSetExpr> { 
+               new AssignSetExpr
+               { 
+                  Field = new IdentExpr
+                  { 
+                     Name = "price"
+                  },
+                  Value = new AndOrExpr
+                  { 
+                     Left = new IdentExpr
+                     { 
+                        Name = "rate"
+                     },
+                     Oper = "+",
+                     Right = new IntegerExpr
+                     { 
+                        Value = 1
+                     }
+                  }
+               }
+            }
+         }.ToExpectedObject().ShouldEqual(expr);
 		}
 	}
 }

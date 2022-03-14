@@ -38,6 +38,11 @@ namespace PreviewLibrary
 		{
 			_sql = sql;
 			_token.PredicateParse(sql);
+			return ParseArithmeticExpr();
+		}
+
+		protected SqlExpr ParseArithmeticExpr()
+		{
 			var ops = new string[] { "(", ")", "*", "/", "+", "-" };
 			return ParseConcat(() => ParseSubExpr(), ops);
 		}
@@ -648,7 +653,8 @@ namespace PreviewLibrary
 				ReadKeyword("=");
 
 				//var value = ParseSubExpr();
-				var value = ParseArithmeticList();
+				//var value = ParseArithmeticList();
+				var value = ParseArithmeticExpr();
 
 				return new AssignSetExpr
 				{
