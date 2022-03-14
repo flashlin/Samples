@@ -131,7 +131,7 @@ namespace PreviewLibrary
 		private static void ClearStack(Stack<SqlExpr> operands, Stack<string> ops)
 		{
 			var stack_op = ops.Pop();
-			var combo = new AndOrExpr
+			var combo = new OperandExpr
 			{
 				Right = operands.Pop(),
 				Oper = stack_op,
@@ -156,7 +156,7 @@ namespace PreviewLibrary
 					var oper = item as string;
 					var right = st.Pop();
 					var left = st.Pop();
-					var expr = new AndOrExpr
+					var expr = new OperandExpr
 					{
 						Left = left,
 						Oper = oper,
@@ -1097,7 +1097,7 @@ namespace PreviewLibrary
 					var oper = item as string;
 					var right = st.Pop();
 					var left = st.Pop();
-					var expr = new AndOrExpr
+					var expr = new OperandExpr
 					{
 						Left = left,
 						Oper = oper,

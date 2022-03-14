@@ -244,9 +244,9 @@ namespace TestProject
 						}
 					}
 				},
-				WhereExpr = new AndOrExpr
+				WhereExpr = new OperandExpr
 				{
-					Left = new AndOrExpr
+					Left = new OperandExpr
 					{
 						Left = new LikeExpr
 						{

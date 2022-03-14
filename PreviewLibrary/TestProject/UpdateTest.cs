@@ -19,14 +19,15 @@ namespace TestProject
 			var expr = Parse(sql);
 			new UpdateExpr
          {     
-            Fields = new List<AssignSetExpr> { 
+            Fields = new List<AssignSetExpr> 
+            { 
                new AssignSetExpr
                { 
                   Field = new IdentExpr
                   { 
                      Name = "price"
                   },
-                  Value = new AndOrExpr
+                  Value = new OperandExpr
                   { 
                      Left = new IdentExpr
                      { 

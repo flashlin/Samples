@@ -1,6 +1,6 @@
 ﻿namespace PreviewLibrary
 {
-	public class AndOrExpr : SqlExpr
+	public class OperandExpr : SqlExpr
 	{
 		public SqlExpr Left { get; set; }
 		public string Oper { get; set; }

@@ -16,14 +16,14 @@ namespace TestProject
 		{
 			var sql = "1 + 2 * 3";
 			var expr = new SqlParser().ParseArithmeticExpression(sql);
-			new AndOrExpr
+			new OperandExpr
 			{
 				Left = new IntegerExpr
 				{
 					Value = 1
 				},
 				Oper = "+",
-				Right = new AndOrExpr
+				Right = new OperandExpr
 				{
 					Left = new IntegerExpr
 					{
@@ -43,16 +43,16 @@ namespace TestProject
 		{
 			var sql = "1 + 2 * 3 + 4";
 			var expr = new SqlParser().ParseArithmeticExpression(sql);
-			new AndOrExpr
+			new OperandExpr
 			{
-				Left = new AndOrExpr
+				Left = new OperandExpr
 				{
 					Left = new IntegerExpr
 					{
 						Value = 1
 					},
 					Oper = "+",
-					Right = new AndOrExpr
+					Right = new OperandExpr
 					{
 						Left = new IntegerExpr
 						{
@@ -78,14 +78,14 @@ namespace TestProject
 		{
 			var sql = "1 * ( 2 + 3)";
 			var expr = new SqlParser().ParseArithmeticExpression(sql);
-			new AndOrExpr
+			new OperandExpr
 			{
 				Left = new IntegerExpr
 				{
 					Value = 1
 				},
 				Oper = "*",
-				Right = new AndOrExpr
+				Right = new OperandExpr
 				{
 					Left = new IntegerExpr
 					{

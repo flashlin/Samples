@@ -146,7 +146,7 @@ namespace TestProject
 						Name = "databases"
 					}
 				},
-				WhereExpr = new AndOrExpr
+				WhereExpr = new OperandExpr
 				{
 					Left = new CompareExpr
 					{
