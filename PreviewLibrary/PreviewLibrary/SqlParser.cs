@@ -669,9 +669,12 @@ namespace PreviewLibrary
 				};
 			});
 
+			TryGet(ParseWhere, out var whereExpr);
+
 			return new UpdateExpr
 			{
 				Fields = setFields,
+				WhereExpr = whereExpr
 			};
 		}
 

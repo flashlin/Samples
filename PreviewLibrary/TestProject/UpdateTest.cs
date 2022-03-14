@@ -18,43 +18,43 @@ namespace TestProject
 			var sql = "Update customer set price = rate + 1";
 			var expr = Parse(sql);
 			new UpdateExpr
-         {     
-            Fields = new List<AssignSetExpr> 
-            { 
-               new AssignSetExpr
-               { 
-                  Field = new IdentExpr
-                  { 
-                     Name = "price"
-                  },
-                  Value = new OperandExpr
-                  { 
-                     Left = new IdentExpr
-                     { 
-                        Name = "rate"
-                     },
-                     Oper = "+",
-                     Right = new IntegerExpr
-                     { 
-                        Value = 1
-                     }
-                  }
-               }
-            }
-         }.ToExpectedObject().ShouldEqual(expr);
+			{
+				Fields = new List<AssignSetExpr>
+				{
+					new AssignSetExpr
+					{
+						Field = new IdentExpr
+						{
+							Name = "price"
+						},
+						Value = new OperandExpr
+						{
+							Left = new IdentExpr
+							{
+								Name = "rate"
+							},
+							Oper = "+",
+							Right = new IntegerExpr
+							{
+								Value = 1
+							}
+						}
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
 		}
 
-      [Fact]
-      public void update_table_set_field_eq_variable()
+		[Fact]
+		public void update_table_set_field_eq_variable()
 		{
-         var sql = "UPDATE [dbo].[TracDelay] SET [Status] = @Status WHERE[Id] = @Id";
-         var expr = Parse(sql);
-         new UpdateExpr
-         {
-            Fields = new List<AssignSetExpr> 
-            { 
-               new AssignSetExpr
-               {
+			var sql = "UPDATE [dbo].[TracDelay] SET [Status] = @Status WHERE[Id] = @Id";
+			var expr = Parse(sql);
+			new UpdateExpr
+			{
+				Fields = new List<AssignSetExpr>
+				{
+					new AssignSetExpr
+					{
 						Field = new IdentExpr
 						{
 							 Name = "[Status]"
@@ -63,9 +63,21 @@ namespace TestProject
 						{
 							 Name = "@Status"
 						}
-               }
-            }
-         }.ToExpectedObject().ShouldEqual(expr);
+					}
+				},
+				WhereExpr = new CompareExpr
+				{
+					Left = new IdentExpr
+					{
+						Name = "[Id]"
+					},
+					Oper = "=",
+					Right = new IdentExpr
+					{
+						Name = "@Id"
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}
 }
