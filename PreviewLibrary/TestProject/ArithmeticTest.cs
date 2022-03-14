@@ -43,8 +43,33 @@ namespace TestProject
       {
          var sql = "1 + 2 * 3 + 4";
          var expr = new SqlParser().ParseArithmeticExpression(sql);
-         new IntegerExpr
+         new AndOrExpr
          {
+            Left = new IntegerExpr
+            {
+               Value = 1
+            },
+            Oper = "+",
+            Right = new AndOrExpr
+            {
+               Left = new AndOrExpr
+               {
+                  Left = new IntegerExpr
+                  {
+                     Value = 2
+                  },
+                  Oper = "*",
+                  Right = new IntegerExpr
+                  {
+                     Value = 3
+                  }
+               },
+               Oper = "+",
+               Right = new IntegerExpr
+               {
+                  Value = 4
+               }
+            }
          }.ToExpectedObject().ShouldEqual(expr);
       }
    }
