@@ -43,5 +43,29 @@ namespace TestProject
             }
          }.ToExpectedObject().ShouldEqual(expr);
 		}
+
+      [Fact]
+      public void update_table_set_field_eq_variable()
+		{
+         var sql = "UPDATE [dbo].[TracDelay] SET [Status] = @Status WHERE[Id] = @Id";
+         var expr = Parse(sql);
+         new UpdateExpr
+         {
+            Fields = new List<AssignSetExpr> 
+            { 
+               new AssignSetExpr
+               {
+						Field = new IdentExpr
+						{
+							 Name = "[Status]"
+						},
+						Value = new IdentExpr
+						{
+							 Name = "@Status"
+						}
+               }
+            }
+         }.ToExpectedObject().ShouldEqual(expr);
+		}
 	}
 }

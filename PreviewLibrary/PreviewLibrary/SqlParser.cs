@@ -58,16 +58,22 @@ namespace PreviewLibrary
 			var ops = new Stack<string>();
 			while (_token.Text != "")
 			{
-				if (_token.IgnoreCaseAny("AND", "OR"))
+				var startIndex = _token.CurrentIndex;
+				if (TryGet(readExpr, out var expr))
+				{
+					operands.Push(expr);
+					continue;
+				}
+				else if (!IsOperator(opers))
 				{
 					break;
 				}
 
-				if (!IsOperator(opers))
-				{
-					operands.Push(readExpr());
-					continue;
-				}
+				//if (!IsOperator(opers))
+				//{
+				//	operands.Push(readExpr());
+				//	continue;
+				//}
 
 				if (!_token.TryIgnoreCase(opers, out var curr_op))
 				{
@@ -273,10 +279,10 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseSubExpr()
 		{
-			if (TryGet(ParseGroup, out var groupExpr))
-			{
-				return groupExpr;
-			}
+			//if (TryGet(ParseGroup, out var groupExpr))
+			//{
+			//	return groupExpr;
+			//}
 			if (TryGet(ParseNot, out var notExpr))
 			{
 				return notExpr;
@@ -1321,7 +1327,15 @@ namespace PreviewLibrary
 			var op = string.Empty;
 			CompareExpr parseAction()
 			{
-				var right = ParseSubExpr();
+				SqlExpr right = null;
+				if (op.IsSql("in"))
+				{
+					right = ParseGroup();
+				}
+				else
+				{
+					right = ParseSubExpr();
+				}
 				return new CompareExpr
 				{
 					Left = left,
