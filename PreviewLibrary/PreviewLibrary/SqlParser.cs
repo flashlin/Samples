@@ -787,19 +787,7 @@ namespace PreviewLibrary
 			var table = ParseSqlIdent();
 			ReadKeyword("SET");
 
-			var setFields = WithComma(() =>
-			{
-				return ParseFieldAssignValue();
-				//var field = ParseSqlIdent();
-				//ReadKeyword("=");
-				//var value = ParseArithmeticExpr();
-
-				//return new AssignSetExpr
-				//{
-				//	Field = field,
-				//	Value = value
-				//};
-			});
+			var setFields = WithComma(ParseFieldAssignValue);
 
 			TryGet(ParseWhere, out var whereExpr);
 
