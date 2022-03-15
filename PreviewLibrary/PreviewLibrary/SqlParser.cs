@@ -211,7 +211,7 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseExpr()
 		{
-			var parses = new Func<SqlExpr>[]
+			var parseList = new Func<SqlExpr>[]
 			{
 				ParseSemicolon,
 				ParseSelect,
@@ -233,9 +233,9 @@ namespace PreviewLibrary
 				ParseExec,
 				ParseGrant
 			};
-			for (var i = 0; i < parses.Length; i++)
+			for (var i = 0; i < parseList.Length; i++)
 			{
-				if (TryGet(parses[i], out var expr))
+				if (TryGet(parseList[i], out var expr))
 				{
 					return expr;
 				}
@@ -394,33 +394,23 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseSubExpr()
 		{
-			if (TryGet(ParseCase, out var caseExpr))
+			var parseList = new Func<SqlExpr>[]
 			{
-				return caseExpr;
-			}
-			if (TryGet(ParseNot, out var notExpr))
+				ParseCase,
+				ParseNot,
+				ParseCreateFunction,
+				ParseSqlFunc,
+				ParseConstant,
+				ParseSelect,
+				ParseExec
+			};
+			for (var i = 0; i < parseList.Length; i++)
 			{
-				return notExpr;
-			}
-			if (TryGet(ParseCreateFunction, out var createFuncExpr))
-			{
-				return createFuncExpr;
-			}
-			if (TryGet(ParseSqlFunc, out var funcExpr))
-			{
-				return funcExpr;
-			}
-			if (TryGet(ParseConstant, out var constantExpr))
-			{
-				return constantExpr;
-			}
-			if (TryGet(ParseSelect, out var selectExpr))
-			{
-				return selectExpr;
-			}
-			if (TryGet(ParseExec, out var execExpr))
-			{
-				return execExpr;
+				var parse = parseList[i];
+				if (TryGet(parse, out var expr))
+				{
+					return expr;
+				}
 			}
 			throw new Exception(GetLastLineCh() + " Expect sub expr");
 		}
