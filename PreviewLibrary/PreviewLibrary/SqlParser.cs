@@ -42,6 +42,30 @@ namespace PreviewLibrary
 			return ParseArithmeticExpr();
 		}
 
+		protected DeclareVariableExpr ParseDeclare()
+		{
+			if (!TryKeyword("DECLARE", out _))
+			{
+				throw new PrecursorException("DECLARE");
+			}
+			var varName = ParseVariableName();
+			var dataType = ParseDataType();
+			return new DeclareVariableExpr
+			{
+				Name = varName,
+				DataType = dataType,
+			};
+		}
+
+		protected string ParseVariableName()
+		{
+			if(!_token.TryMatch(SqlTokenizer.SqlVariable, out var name) )
+			{
+				throw new PrecursorException("<Variable>");
+			}
+			return name;
+		}
+
 		protected SqlExpr ParseArithmeticExpr()
 		{
 			var ops = new string[] { "(", ")", "*", "/", "+", "-" };
@@ -180,6 +204,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseDeclare,
 				ParseSemicolon,
 				ParseSelect,
 				ParseInsert,

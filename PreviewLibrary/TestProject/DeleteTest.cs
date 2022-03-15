@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 namespace TestProject
 {
+
 	public class DeleteTest : SqlTestBase
 	{
 		public DeleteTest(ITestOutputHelper outputHelper) : base(outputHelper)
