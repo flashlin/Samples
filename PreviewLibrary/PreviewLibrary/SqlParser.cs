@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
@@ -279,6 +280,53 @@ namespace PreviewLibrary
 			};
 		}
 
+		public SqlExpr ParseCasePartial(string sql)
+		{
+			return ParsePartial(ParseCase, sql);
+		}
+
+		protected SqlExpr ParsePartial(Func<SqlExpr> parse, string sql)
+		{
+			_sql = sql;
+			_token.PredicateParse(sql);
+			return parse();
+		}
+
+		protected CaseExpr ParseCase()
+		{
+			if (!TryKeyword("CASE", out _))
+			{
+				throw new PrecursorException("CASE");
+			}
+
+			var whenList = new List<WhenThenExpr>();
+			do
+			{
+				if (!TryKeyword("WHEN", out _))
+				{
+					break;
+				}
+				var conditionExpr = ParseFilterList();
+				ReadKeyword("THEN");
+				var thenExpr = ParseSubExpr();
+				whenList.Add(new WhenThenExpr
+				{
+					When = conditionExpr,
+					Then = thenExpr
+				});
+			} while (true);
+
+			ReadKeyword("ELSE");
+			var elseExpr = ParseSubExpr();
+			ReadKeyword("END");
+
+			return new CaseExpr
+			{
+				WhenList = whenList,
+				Else = elseExpr
+			};
+		}
+
 		protected GrantExecuteOnExpr ParseGrantExecuteOn()
 		{
 			if (!TryAllKeywords(new[] { "GRANT", "EXECUTE", "ON" }, out var tokens))
@@ -302,6 +350,11 @@ namespace PreviewLibrary
 				ToRoleId = roleId,
 				AsDbo = dbo
 			};
+		}
+
+		private bool TryKeyword(string keyword, out string token)
+		{
+			return _token.TryIgnoreCase(keyword, out token);
 		}
 
 		private bool TryAllKeywords(string[] keywords, out string[] output)
@@ -707,6 +760,23 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected AssignSetExpr ParseFieldAssignValue()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryGet(ParseSqlIdent, out var fieldExpr))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<Field>");
+			}
+			ReadKeyword("=");
+			var valueExpr = ParseArithmeticExpr();
+			return new AssignSetExpr
+			{
+				Field = fieldExpr,
+				Value = valueExpr
+			};
+		}
+
 		protected UpdateExpr ParseUpdate()
 		{
 			if (!_token.TryIgnoreCase("UPDATE"))
@@ -719,18 +789,16 @@ namespace PreviewLibrary
 
 			var setFields = WithComma(() =>
 			{
-				var field = ParseSqlIdent();
-				ReadKeyword("=");
+				return ParseFieldAssignValue();
+				//var field = ParseSqlIdent();
+				//ReadKeyword("=");
+				//var value = ParseArithmeticExpr();
 
-				//var value = ParseSubExpr();
-				//var value = ParseArithmeticList();
-				var value = ParseArithmeticExpr();
-
-				return new AssignSetExpr
-				{
-					Field = field,
-					Value = value
-				};
+				//return new AssignSetExpr
+				//{
+				//	Field = field,
+				//	Value = value
+				//};
 			});
 
 			TryGet(ParseWhere, out var whereExpr);
