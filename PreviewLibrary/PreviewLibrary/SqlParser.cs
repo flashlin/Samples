@@ -147,39 +147,6 @@ namespace PreviewLibrary
 			operands.Push(combo);
 		}
 
-		private SqlExpr ReducePostfixExprs(List<object> postfixExprs)
-		{
-			var st = new Stack<SqlExpr>();
-			var iter = postfixExprs.GetEnumerator();
-			while (iter.MoveNext())
-			{
-				var item = iter.Current;
-				if (item is SqlExpr sqlExpr)
-				{
-					st.Push(sqlExpr);
-				}
-				else
-				{
-					var oper = item as string;
-					var right = st.Pop();
-					var left = st.Pop();
-					var expr = new OperandExpr
-					{
-						Left = left,
-						Oper = oper,
-						Right = right,
-					};
-					st.Push(expr);
-				}
-			}
-
-			//if (st.Count > 1)
-			//{
-			//	throw new Exception();
-			//}
-			return st.Pop();
-		}
-
 		private int CompareOperPriority(string[] opers, string op1, string op2)
 		{
 			if (op1 == "(" && op2 != "(")
