@@ -393,10 +393,10 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseSubExpr()
 		{
-			//if (TryGet(ParseGroup, out var groupExpr))
-			//{
-			//	return groupExpr;
-			//}
+			if (TryGet(ParseCase, out var caseExpr))
+			{
+				return caseExpr;
+			}
 			if (TryGet(ParseNot, out var notExpr))
 			{
 				return notExpr;
@@ -787,7 +787,7 @@ namespace PreviewLibrary
 			var table = ParseSqlIdent();
 			ReadKeyword("SET");
 
-			var setFields = WithComma(ParseFieldAssignValue);
+			var setFields = WithComma(() => Any("<CASE> or <assign>", ParseCase, ParseFieldAssignValue));
 
 			TryGet(ParseWhere, out var whereExpr);
 

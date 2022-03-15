@@ -21,6 +21,13 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void sql_negative_int()
+		{
+			var token = GetToken("-1 xxx");
+			"-1".ToExpectedObject().ShouldEqual(token);
+		}
+
+		[Fact]
 		public void insert()
 		{
 			var token = GetToken("INSERT xxx");

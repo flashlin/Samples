@@ -4,7 +4,7 @@ namespace PreviewLibrary
 {
 	public class UpdateExpr : SqlExpr
 	{
-		public List<AssignSetExpr> Fields { get; set; }
+		public List<SqlExpr> Fields { get; set; }
 		public SqlExpr WhereExpr { get; set; }
 	}
 }
