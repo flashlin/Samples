@@ -241,8 +241,13 @@ namespace PreviewLibrary
 			throw new NotSupportedException(GetLastLineCh());
 		}
 
-		protected GrantToExpr ParseGrant()
+		protected SqlExpr ParseGrant()
 		{
+			if (TryGet(ParseGrantExecuteOn, out var grantExecuteOnExpr))
+			{
+				return grantExecuteOnExpr;
+			}
+
 			if (!_token.TryIgnoreCase("GRANT"))
 			{
 				throw new PrecursorException("Expect GRANT");
@@ -257,6 +262,62 @@ namespace PreviewLibrary
 				Permission = permission,
 				ToObjectId = objectId
 			};
+		}
+
+		protected ObjectIdExpr ParseObjectId()
+		{
+			if (!TryAllKeywords(new[] { "OBJECT", "::" }, out _))
+			{
+				throw new PrecursorException("OBJECT::");
+			}
+
+			var name = ParseSqlIdent();
+
+			return new ObjectIdExpr
+			{
+				Name = name,
+			};
+		}
+
+		protected GrantExecuteOnExpr ParseGrantExecuteOn()
+		{
+			if (!TryAllKeywords(new[] { "GRANT", "EXECUTE", "ON" }, out var tokens))
+			{
+				throw new PrecursorException("GRANT EXECUTE ON");
+			}
+
+			var objectId = ParseObjectId();
+
+			ReadKeyword("TO");
+
+			var roleId = ParseSqlIdent();
+
+			ReadKeyword("AS");
+
+			var dbo = ParseSqlIdent1();
+
+			return new GrantExecuteOnExpr
+			{
+				OnObjectId = objectId,
+				ToRoleId = roleId,
+				AsDbo = dbo
+			};
+		}
+
+		private bool TryAllKeywords(string[] keywords, out string[] output)
+		{
+			var startIndex = _token.CurrentIndex;
+			output = new string[keywords.Length];
+			for (var i = 0; i < keywords.Length; i++)
+			{
+				if (!_token.TryIgnoreCase(keywords[i], out output[i]))
+				{
+					_token.MoveTo(startIndex);
+					output[i] = string.Empty;
+					return false;
+				}
+			}
+			return true;
 		}
 
 		protected SemicolonExpr ParseSemicolon()
@@ -474,6 +535,9 @@ namespace PreviewLibrary
 			var sb = new StringBuilder();
 			sb.AppendLine($"Line:{lnch.LineNumber} Ch:{lnch.ChNumber} CurrToken:'{_token.Text}'");
 			sb.AppendLine();
+
+			sb.AppendLine(string.Join("\r\n", lnch.PrevLines));
+
 			var line = lnch.Line.Replace("\t", " ");
 			var spaces = new String(' ', line.Length);
 

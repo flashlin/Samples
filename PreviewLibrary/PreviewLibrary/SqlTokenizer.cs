@@ -81,7 +81,7 @@ namespace PreviewLibrary
 
 		static readonly string[] OtherSymbols = new[]
 		{
-			"--", "\r\n",
+			"--", "\r\n", "::",
 			"&", "|", ".", ",", "(", ")", "@", ";",
 			"+", "-", "*", "/",
 		}.Select(e => Regex.Escape(e)).ToArray();
