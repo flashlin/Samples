@@ -220,6 +220,7 @@ namespace PreviewLibrary
 				ParseUpdate,
 				ParseSingleLineComment,
 				ParseMultiLineComment,
+				ParseCreateFunction,
 				ParseCreateSp,
 				ParseGo,
 				ParseSet_Permission_ObjectId_OnOff,
@@ -401,6 +402,10 @@ namespace PreviewLibrary
 			{
 				return notExpr;
 			}
+			if (TryGet(ParseCreateFunction, out var createFuncExpr))
+			{
+				return createFuncExpr;
+			}
 			if (TryGet(ParseSqlFunc, out var funcExpr))
 			{
 				return funcExpr;
@@ -418,6 +423,35 @@ namespace PreviewLibrary
 				return execExpr;
 			}
 			throw new Exception(GetLastLineCh() + " Expect sub expr");
+		}
+
+		protected CreateFunctionExpr ParseCreateFunction()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryAllKeywords(new[] { "CREATE", "FUNCTION" }, out _))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("CREATE FUNCTION");
+			}
+
+			var funcName = ParseSqlIdent();
+
+			ReadKeyword("(");
+			var funcArguments = WithComma(ParseArgumentsList);
+			ReadKeyword(")");
+			ReadKeyword("RETURNS");
+			var dataType = ParseDataType();
+			ReadKeyword("AS");
+			ReadKeyword("BEGIN");
+			var body = ParseBody();
+			ReadKeyword("END");
+			return new CreateFunctionExpr
+			{
+				Name = funcName,
+				ArgumentsList = funcArguments,
+				ReturnDataType = dataType,
+				Body = body
+			};
 		}
 
 		protected NotExpr ParseNot()
@@ -650,6 +684,31 @@ namespace PreviewLibrary
 
 			var spName = ParseSqlIdent();
 
+			var spArgs = ParseArgumentsList();
+
+			ReadKeyword("AS");
+			ReadKeyword("BEGIN");
+			var body = new List<SqlExpr>();
+			do
+			{
+				var expr = Get(ParseExpr);
+				if (expr == null)
+				{
+					break;
+				}
+				body.Add(expr);
+			} while (true);
+			ReadKeyword("END");
+			return new CreateSpExpr
+			{
+				Name = spName,
+				Arguments = spArgs,
+				Body = body
+			};
+		}
+
+		private List<ArgumentExpr> ParseArgumentsList()
+		{
 			var spArgs = new List<ArgumentExpr>();
 			var mustHaveArg = false;
 			do
@@ -684,26 +743,7 @@ namespace PreviewLibrary
 
 				mustHaveArg = true;
 			} while (true);
-
-			ReadKeyword("AS");
-			ReadKeyword("BEGIN");
-			var body = new List<SqlExpr>();
-			do
-			{
-				var expr = Get(ParseExpr);
-				if (expr == null)
-				{
-					break;
-				}
-				body.Add(expr);
-			} while (true);
-			ReadKeyword("END");
-			return new CreateSpExpr
-			{
-				Name = spName,
-				Arguments = spArgs,
-				Body = body
-			};
+			return spArgs;
 		}
 
 		protected InsertExpr ParseInsert()
@@ -1146,8 +1186,19 @@ namespace PreviewLibrary
 				throw new PrecursorException("Expect IF");
 			}
 			var filter = ParseFilterList();
-			var body = new List<SqlExpr>();
 			ReadKeyword("BEGIN");
+			var body = ParseBody();
+			ReadKeyword("END");
+			return new IfExpr
+			{
+				Condition = filter,
+				Body = body,
+			};
+		}
+
+		private List<SqlExpr> ParseBody()
+		{
+			var body = new List<SqlExpr>();
 			do
 			{
 				var expr = Get(ParseExpr);
@@ -1157,12 +1208,7 @@ namespace PreviewLibrary
 				}
 				body.Add(expr);
 			} while (true);
-			ReadKeyword("END");
-			return new IfExpr
-			{
-				Condition = filter,
-				Body = body,
-			};
+			return body;
 		}
 
 		protected ArithmeticExpr ParseArithmeticList()
