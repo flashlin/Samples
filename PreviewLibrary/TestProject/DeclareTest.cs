@@ -2,6 +2,7 @@
 using Xunit;
 using Xunit.Abstractions;
 using ExpectedObjects;
+using PreviewLibrary.Expressions;
 
 namespace TestProject
 {

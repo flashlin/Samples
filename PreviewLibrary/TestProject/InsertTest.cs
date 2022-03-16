@@ -4,6 +4,7 @@ using ExpectedObjects;
 using Xunit.Abstractions;
 using System.Collections.Generic;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 
 namespace TestProject
 {
