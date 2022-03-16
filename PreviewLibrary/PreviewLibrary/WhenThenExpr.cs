@@ -1,4 +1,6 @@
-﻿namespace PreviewLibrary
+﻿using PreviewLibrary.Exceptions;
+
+namespace PreviewLibrary
 {
 	public class WhenThenExpr : SqlExpr
 	{

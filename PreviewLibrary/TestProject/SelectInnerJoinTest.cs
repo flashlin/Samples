@@ -5,6 +5,7 @@ using ExpectedObjects;
 using System.Linq;
 using System.IO;
 using Xunit.Abstractions;
+using PreviewLibrary.Exceptions;
 
 namespace TestProject
 {

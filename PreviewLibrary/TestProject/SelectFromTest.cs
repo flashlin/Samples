@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using FluentAssertions.Equivalency;
 using ExpectedObjects;
 using System.Linq;
+using PreviewLibrary.Exceptions;
 
 namespace TestProject
 {

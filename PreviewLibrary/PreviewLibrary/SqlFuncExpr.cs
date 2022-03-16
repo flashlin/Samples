@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using PreviewLibrary.Exceptions;
+using System.Linq;
 
 namespace PreviewLibrary
 {

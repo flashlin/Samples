@@ -6,6 +6,7 @@ using FluentAssertions.Equivalency;
 using ExpectedObjects;
 using System.Linq;
 using Xunit.Abstractions;
+using PreviewLibrary.Exceptions;
 
 namespace TestProject
 {

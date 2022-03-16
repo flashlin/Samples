@@ -3,6 +3,7 @@ using Xunit;
 using Xunit.Abstractions;
 using ExpectedObjects;
 using System.Collections.Generic;
+using PreviewLibrary.Exceptions;
 
 namespace TestProject
 {

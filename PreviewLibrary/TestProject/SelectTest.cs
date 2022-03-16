@@ -5,6 +5,7 @@ using FluentAssertions;
 using System.Collections.Generic;
 using ExpectedObjects;
 using Xunit.Abstractions;
+using PreviewLibrary.Exceptions;
 
 namespace TestProject
 {

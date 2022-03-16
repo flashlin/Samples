@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary;
+using PreviewLibrary.Exceptions;
 using Xunit.Abstractions;
 
 namespace TestProject
