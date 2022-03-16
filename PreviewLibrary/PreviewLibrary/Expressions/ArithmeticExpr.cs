@@ -1,6 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.Expressions
 {
 	public class ArithmeticExpr : SqlExpr
 	{

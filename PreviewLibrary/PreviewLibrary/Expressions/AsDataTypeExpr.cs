@@ -1,6 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.Expressions
 {
 	public class AsDataTypeExpr : SqlExpr
 	{
@@ -10,17 +10,6 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			return $"{Object} AS {DataType}";
-		}
-	}
-
-	public class DataTypeExpr : SqlExpr
-	{
-		public string DataType { get; set; }
-		public DataTypeSizeExpr DataSize { get; set; }
-
-		public override string ToString()
-		{
-			return $"{DataType}{DataSize}";
 		}
 	}
 }
