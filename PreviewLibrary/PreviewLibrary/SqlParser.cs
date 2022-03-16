@@ -473,6 +473,12 @@ namespace PreviewLibrary
 			};
 		}
 
+		public SqlFuncExpr ParseFuncPartial(string sql)
+		{
+			PredicateParse(sql);
+			return ParseSqlFunc();
+		}
+
 		protected SqlFuncExpr ParseSqlFunc()
 		{
 			if (TryGet(ParseCast, out var castExpr))

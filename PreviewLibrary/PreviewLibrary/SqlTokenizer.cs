@@ -32,6 +32,10 @@ namespace PreviewLibrary
 		{
 			"EXISTS", "SUSER_SNAME"
 		};
+		public static readonly string[] SqlFunc2Names = new[]
+		{
+			"ISNULL",
+		};
 
 
 		public static string[] DataTypes = new string[]
@@ -44,6 +48,7 @@ namespace PreviewLibrary
 		{
 			{ 0, SqlFunc0Names },
 			{ 1, SqlFunc1Names },
+			{ 2, SqlFunc2Names },
 		};
 
 		private static readonly Dictionary<string, int> _sqlFuncName_ArgsCount = new Dictionary<string, int>();

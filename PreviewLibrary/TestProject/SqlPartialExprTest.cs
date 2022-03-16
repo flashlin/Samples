@@ -79,5 +79,26 @@ namespace TestProject
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void isnull()
+		{
+			var sql = "isnull(@betCondition, '')";
+			var expr = _sqlParser.ParseFuncPartial(sql);
+			new SqlFuncExpr
+			{
+				Name = "isnull",
+				Arguments = new SqlExpr[] 
+				{ 
+					new IdentExpr
+					{
+						Name = "@betCondition"
+					},new StringExpr
+					{
+						Text = "''"
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
 	}
 }
