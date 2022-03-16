@@ -1,6 +1,7 @@
 ﻿using ExpectedObjects;
 using PreviewLibrary;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 using System.Collections.Generic;
 using Xunit;
 using Xunit.Abstractions;

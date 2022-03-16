@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

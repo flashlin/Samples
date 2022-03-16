@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 using System.Collections.Generic;
 
 namespace PreviewLibrary
