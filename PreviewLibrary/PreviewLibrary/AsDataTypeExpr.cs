@@ -3,7 +3,7 @@
 	public class AsDataTypeExpr : SqlExpr
 	{
 		public SqlExpr Object { get; set; }
-		public DataTypeExpr DataType { get; set; }
+		public SqlExpr DataType { get; set; }
 
 		public override string ToString()
 		{

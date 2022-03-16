@@ -37,9 +37,14 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseArithmeticExpression(string sql)
 		{
+			PredicateParse(sql);
+			return ParseArithmeticExpr();
+		}
+
+		private void PredicateParse(string sql)
+		{
 			_sql = sql;
 			_token.PredicateParse(sql);
-			return ParseArithmeticExpr();
 		}
 
 		protected DeclareVariableExpr ParseDeclare()
@@ -59,7 +64,7 @@ namespace PreviewLibrary
 
 		protected string ParseVariableName()
 		{
-			if(!_token.TryMatch(SqlTokenizer.SqlVariable, out var name) )
+			if (!_token.TryMatch(SqlTokenizer.SqlVariable, out var name))
 			{
 				throw new PrecursorException("<Variable>");
 			}
@@ -526,8 +531,33 @@ namespace PreviewLibrary
 			};
 		}
 
-		protected DataTypeExpr ParseDataType()
+		public SqlExpr ParseDataTypePartial(string sql)
 		{
+			PredicateParse(sql);
+			return ParseDataType();
+		}
+
+		protected DefineColumnTypeExpr ParseDefineColumnType()
+		{
+			if (!TryGet(ParseSqlIdent1, out var columnNameExpr))
+			{
+				throw new PrecursorException("<ColumnName>");
+			}
+			var dataType = ParseDataType();
+			return new DefineColumnTypeExpr
+			{
+				Name = columnNameExpr,
+				DataType = dataType
+			};
+		}
+
+		protected SqlExpr ParseDataType()
+		{
+			if (TryGet(ParseTableType, out var tableTypeExpr))
+			{
+				return tableTypeExpr;
+			}
+
 			if (!_token.TryIgnoreCase(SqlTokenizer.DataTypes, out var dataType))
 			{
 				throw new PrecursorException("<SqlDataType>");
@@ -539,6 +569,38 @@ namespace PreviewLibrary
 			{
 				DataType = dataType,
 				DataSize = dataSize
+			};
+		}
+
+		protected TableTypeExpr ParseTableType()
+		{
+			if (!TryKeyword("TABLE", out var dataType))
+			{
+				throw new PrecursorException("TABLE");
+			}
+
+			ReadKeyword("(");
+
+			var columnTypeList = new List<SqlExpr>();
+			do
+			{
+				if (!TryGet(ParseDefineColumnType, out var columnType))
+				{
+					break;
+				}
+				columnTypeList.Add(columnType);
+			} while (true);
+
+			if (columnTypeList.Count == 0)
+			{
+				throw new Exception("Must once FieldType");
+			}
+
+			ReadKeyword(")");
+
+			return new TableTypeExpr
+			{
+				ColumnTypeList = columnTypeList,
 			};
 		}
 

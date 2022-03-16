@@ -18,9 +18,9 @@ namespace TestProject
 			var sql = "CASE WHEN @ExchangeRate = -1 THEN [ExchangeRate] ELSE @ExchangeRate END";
 			var expr = _sqlParser.ParseCasePartial(sql);
 			new CaseExpr
-         {
-            WhenList = new List<WhenThenExpr> { 
-               new WhenThenExpr
+			{
+				WhenList = new List<WhenThenExpr> {
+					new WhenThenExpr
 					{
 						 When = new CompareExpr
 						 {
@@ -40,11 +40,42 @@ namespace TestProject
 						 }
 					}
 				},
-            Else = new IdentExpr
-            {
-               Name = "@ExchangeRate"
-            }
-         }.ToExpectedObject().ShouldEqual(expr);
+				Else = new IdentExpr
+				{
+					Name = "@ExchangeRate"
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void table()
+		{
+			var sql = @"table
+(
+	BetOption nvarchar(10)
+)";
+			var expr = _sqlParser.ParseDataTypePartial(sql);
+			new TableTypeExpr
+			{
+				ColumnTypeList = new List<SqlExpr> 
+				{ 
+					new DefineColumnTypeExpr
+					{
+						 Name = new IdentExpr
+						 {
+							  Name = "BetOption"
+						 },
+						 DataType = new DataTypeExpr
+						 {
+							  DataType = "nvarchar",
+							  DataSize = new DataTypeSizeExpr
+							  {
+									Size = 10
+							  }
+						 }
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}
 }

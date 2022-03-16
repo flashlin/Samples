@@ -6,7 +6,7 @@ namespace PreviewLibrary
 	{
 		public IdentExpr Name { get; set; }
 		public List<List<ArgumentExpr>> ArgumentsList { get; set; }
-		public DataTypeExpr ReturnDataType { get; set; }
+		public SqlExpr ReturnDataType { get; set; }
 		public List<SqlExpr> Body { get; set; }
 	}
 }
