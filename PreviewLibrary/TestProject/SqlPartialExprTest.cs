@@ -100,6 +100,16 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void func_notEqual_expr()
+		{
+			var sql = "isnull(@name, '') <> ''";
+			var expr = _sqlParser.ParseFilterPartial(sql);
+			new SelectExpr
+			{
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void isnull()
 		{
 			var sql = "isnull(@betCondition, '')";
