@@ -1221,13 +1221,19 @@ namespace PreviewLibrary
 			};
 		}
 
-		public SqlExpr ParseWhere()
+		protected SqlExpr ParseWhere()
 		{
 			if (!_token.TryIgnoreCase("where"))
 			{
 				throw new PrecursorException("should is 'WHERE'");
 			}
 			return ParseFilterList();
+		}
+
+		public SqlExpr ParseIfPartial(string sql)
+		{
+			PredicateParse(sql);
+			return ParseIf();
 		}
 
 		protected SqlExpr ParseIf()

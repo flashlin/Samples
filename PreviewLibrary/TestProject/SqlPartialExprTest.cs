@@ -103,7 +103,7 @@ namespace TestProject
 		public void if_notEqual_expr()
 		{
 			var sql = "if( isnull(@name, '') <> '' )";
-			var expr = _sqlParser.ParseFilterPartial(sql);
+			var expr = _sqlParser.ParseIfPartial(sql);
 			new SelectExpr
 			{
 			}.ToExpectedObject().ShouldEqual(expr);
