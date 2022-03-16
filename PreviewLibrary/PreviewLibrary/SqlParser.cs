@@ -1400,6 +1400,12 @@ namespace PreviewLibrary
 			};
 		}
 
+		public SqlExpr ParseFilterPartial(string sql)
+		{
+			PredicateParse(sql);
+			return ParseFilter();
+		}
+
 		private SqlExpr ParseFilter()
 		{
 			if (IsKeyword("("))

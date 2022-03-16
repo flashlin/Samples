@@ -81,6 +81,25 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void expr_notEqual_expr()
+		{
+			var sql = "1 <> 2";
+			var expr = _sqlParser.ParseFilterPartial(sql);
+			new CompareExpr
+			{
+				Left = new IntegerExpr
+				{
+					Value = 1
+				},
+				Oper = "<>",
+				Right = new IntegerExpr
+				{
+					Value = 2
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void isnull()
 		{
 			var sql = "isnull(@betCondition, '')";
