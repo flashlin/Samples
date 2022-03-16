@@ -1,6 +1,4 @@
-﻿using PreviewLibrary.Exceptions;
-
-namespace PreviewLibrary
+﻿namespace PreviewLibrary.Exceptions
 {
 	public class ColumnExpr : SqlExpr
 	{
@@ -14,26 +12,17 @@ namespace PreviewLibrary
 			var b3 = string.IsNullOrEmpty(Database);
 			var b2 = string.IsNullOrEmpty(Table);
 
-			if( b3 && b2)
+			if (b3 && b2)
 			{
 				return Name;
 			}
 
-			if(b3)
+			if (b3)
 			{
 				return $"{Table}.{Name}";
 			}
 
 			return $"{Database}.{Table}.{Name}";
-		}
-	}
-
-	public class IntegerExpr : SqlExpr
-	{
-		public int Value { get; set; }
-		public override string ToString()
-		{
-			return $"{Value}";
 		}
 	}
 }
