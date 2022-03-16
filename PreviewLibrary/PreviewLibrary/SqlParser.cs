@@ -1396,6 +1396,11 @@ namespace PreviewLibrary
 
 		private SqlExpr ParseFilter()
 		{
+			if (IsKeyword("("))
+			{
+				return ParseGroup();
+			}
+
 			if (_token.IgnoreCase("NOT"))
 			{
 				return ParseNot();

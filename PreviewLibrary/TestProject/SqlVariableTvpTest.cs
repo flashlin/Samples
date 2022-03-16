@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace TestProject
 {
-	public class UnitTest1
+	public class SqlVariableTvpTest
 	{
 		public class User
 		{
