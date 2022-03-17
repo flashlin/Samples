@@ -6,6 +6,7 @@ using System.Linq;
 using System.IO;
 using Xunit.Abstractions;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 
 namespace TestProject
 {
@@ -29,11 +30,14 @@ on tb2.id = tb1.id";
 
 			var expected = new SelectExpr
 			{
-				Fields = new List<SqlExpr>
-				{
-					new ColumnExpr
+				Fields = new SqlExprList
+				{ 
+					Items = new List<SqlExpr>
 					{
-						Name = "name"
+						new ColumnExpr
+						{
+							Name = "name"
+						}
 					}
 				},
 				From = new TableExpr

@@ -6,11 +6,17 @@ using FluentAssertions.Equivalency;
 using ExpectedObjects;
 using System.Linq;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
+using Xunit.Abstractions;
 
 namespace TestProject
 {
-	public class SelectFromTest
+	public class SelectFromTest : SqlTestBase
 	{
+		public SelectFromTest(ITestOutputHelper outputHelper) : base(outputHelper)
+		{
+		}
+
 		[Fact]
 		public void select_column_from_table()
 		{
@@ -19,17 +25,20 @@ namespace TestProject
 
 			var expected = new SelectExpr()
 			{
-				Fields = new List<SqlExpr>
+				Fields = new SqlExprList
 				{
-					new ColumnExpr
+					Items = new List<SqlExpr>
 					{
-						Name = "name"
+						new ColumnExpr
+						{
+							Name = "name"
+						}
 					}
 				},
 				From = new TableExpr
 				{
-					Name = new IdentExpr 
-					{ 
+					Name = new IdentExpr
+					{
 						Name = "user"
 					}
 				},
@@ -46,17 +55,16 @@ namespace TestProject
 
 			var expected = new SelectExpr()
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new ColumnExpr
 					{
 						Name = "name"
 					}
-				},
+				),
 				From = new TableExpr
 				{
-					Name = new IdentExpr 
-					{ 
+					Name = new IdentExpr
+					{
 						Name = "[user]"
 					}
 				},
@@ -73,14 +81,13 @@ namespace TestProject
 
 			var expected = new SelectExpr()
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new ColumnExpr
 					{
 						Name = "name",
 						AliasName = "n1",
 					}
-				},
+				),
 				From = new TableExpr
 				{
 					Name = new IdentExpr
@@ -101,19 +108,18 @@ namespace TestProject
 
 			var expected = new SelectExpr()
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new ColumnExpr
 					{
 						Name = "name",
 						AliasName = "n1",
 					}
-				},
+				),
 				From = new TableExpr
 				{
-					Name = new IdentExpr 
-					{ 
-						Name = "user" 
+					Name = new IdentExpr
+					{
+						Name = "user"
 					}
 				},
 			};
@@ -129,14 +135,13 @@ namespace TestProject
 
 			var expected = new SelectExpr()
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new ColumnExpr
 					{
 						Name = "name",
 						AliasName = "n1",
 					}
-				},
+				),
 				From = new TableExpr
 				{
 					Name = new IdentExpr { Name = "user" },
@@ -155,14 +160,13 @@ namespace TestProject
 
 			var expected = new SelectExpr()
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new ColumnExpr
 					{
 						Name = "name",
 						AliasName = "n1",
 					}
-				},
+				),
 				From = new TableExpr
 				{
 					Name = new IdentExpr { Name = "user" },
@@ -181,14 +185,13 @@ namespace TestProject
 
 			var expected = new SelectExpr()
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new ColumnExpr
 					{
 						Name = "name",
 						AliasName = "n1",
 					}
-				},
+				),
 				From = new TableExpr
 				{
 					Name = new IdentExpr { Name = "user" },
@@ -219,8 +222,7 @@ namespace TestProject
 
 			var expected = new SelectExpr()
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new ColumnExpr
 					{
 						Name = "CustID"
@@ -232,8 +234,8 @@ namespace TestProject
 					new ColumnExpr
 					{
 						Name = "TransDate"
-					},
-				},
+					}
+				),
 				From = new TableExpr
 				{
 					Name = new IdentExpr { Name = "Statement" },
@@ -302,23 +304,21 @@ select 2";
 			{
 				new SelectExpr()
 				{
-					Fields = new List<SqlExpr>
-					{
+					Fields = CreateSqlExprList(
 						new IntegerExpr
 						{
 								Value = 1
 						}
-					}
-				}, 
+					)
+				},
 				new SelectExpr()
 				{
-					Fields = new List<SqlExpr>
-					{
+					Fields = CreateSqlExprList(
 						new IntegerExpr
 						{
 							Value = 2
 						}
-					}
+					)
 				}
 			};
 

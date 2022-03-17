@@ -36,38 +36,35 @@ END";
 					Name = "[fAOSBetWin_6.7]",
 					ObjectId = "[dbo]"
 				},
-				ArgumentsList = new List<List<ArgumentExpr>>
-				{
-					new List<ArgumentExpr> {
-						new ArgumentExpr
+				Arguments = CreateSqlExprList(
+					new ArgumentExpr
+					{
+						Name = "@finalHomeScore",
+						DataType = new DataTypeExpr
 						{
-							Name = "@finalHomeScore",
-							DataType = new DataTypeExpr
-							{
-								DataType = "int"
-							}
-						},new ArgumentExpr
+							DataType = "int"
+						}
+					},new ArgumentExpr
+					{
+						Name = "@finalAwayScore",
+						DataType = new DataTypeExpr
 						{
-							Name = "@finalAwayScore",
-							DataType = new DataTypeExpr
-							{
-								DataType = "int"
-							}
-						},
-						new ArgumentExpr
+							DataType = "int"
+						}
+					},
+					new ArgumentExpr
+					{
+						Name = "@betCondition",
+						DataType = new DataTypeExpr
 						{
-							Name = "@betCondition",
-							DataType = new DataTypeExpr
+							DataType = "nvarchar",
+							DataSize = new DataTypeSizeExpr
 							{
-								DataType = "nvarchar",
-								DataSize = new DataTypeSizeExpr
-								{
-									Size = 127
-							  }
-							}
+								Size = 127
+						  }
 						}
 					}
-				},
+				),
 				ReturnDataType = new DataTypeExpr
 				{
 					DataType = "bit"
@@ -75,12 +72,12 @@ END";
 				Body = new List<SqlExpr> {
 					new SelectExpr
 					{
-						Fields = new List<SqlExpr> { 
+						Fields = CreateSqlExprList(
 							new IntegerExpr
 							{
 								Value = 1
 							}
-						}
+						)
 					}
 				}
 			}.ToExpectedObject().ShouldEqual(expr);

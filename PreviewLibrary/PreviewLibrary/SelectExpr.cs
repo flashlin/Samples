@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ namespace PreviewLibrary
 {
 	public class SelectExpr : SqlExpr
 	{
-		public List<SqlExpr> Fields { get; set; }
+		public SqlExprList Fields { get; set; }
 		public SqlExpr From { get; set; }
 		public SqlExpr WhereExpr { get; set; }
 		public List<JoinExpr> Joins { get; set; }
@@ -15,8 +16,7 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
-			var fields = string.Join(",", Fields.Select(x => $"{x}"));
-			sb.Append($"SELECT {fields}");
+			sb.Append($"SELECT {Fields}");
 			if (From != null)
 			{
 				sb.Append($" FROM {From}");

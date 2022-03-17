@@ -102,10 +102,45 @@ namespace TestProject
 		[Fact]
 		public void if_notEqual_expr()
 		{
-			var sql = "if( isnull(@name, '') <> '' )";
+			var sql = @"if( isnull(@name, '') <> '' )
+BEGIN select 1 END";
 			var expr = _sqlParser.ParseIfPartial(sql);
-			new SelectExpr
+			new IfExpr
 			{
+				Condition = new GroupExpr
+				{
+					Expr = new CompareExpr
+					{
+						Left = new SqlFuncExpr
+						{
+							Name = "isnull",
+							Arguments = new SqlExpr[] { new IdentExpr
+								{
+									 Name = "@name"
+								},new StringExpr
+								{
+									 Text = "''"
+								}}
+						},
+						Oper = "<>",
+						Right = new StringExpr
+						{
+							Text = "''"
+						}
+					}
+				},
+				Body = new List<SqlExpr>
+				{ 
+					new SelectExpr
+					{
+						Fields = CreateSqlExprList(
+							new IntegerExpr
+							{
+								Value = 1
+							}
+						)
+					}
+				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 

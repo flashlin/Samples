@@ -356,6 +356,19 @@ namespace PreviewLibrary
 			return _token.TryIgnoreCase(keyword, out token);
 		}
 
+		private bool TryAnyKeywords(string[] keywords, out string token)
+		{
+			for (var i = 0; i < keywords.Length; i++)
+			{
+				if (_token.TryIgnoreCase(keywords[i], out token))
+				{
+					return true;
+				}
+			}
+			token = null;
+			return false;
+		}
+
 		private bool TryAllKeywords(string[] keywords, out string[] output)
 		{
 			var startIndex = _token.CurrentIndex;
@@ -425,7 +438,8 @@ namespace PreviewLibrary
 			var funcName = ParseSqlIdent();
 
 			ReadKeyword("(");
-			var funcArguments = WithComma(ParseArgumentsList);
+			//var funcArguments = WithComma(ParseArgumentsList);
+			var funcArguments = ParseArgumentsList();
 			ReadKeyword(")");
 			ReadKeyword("RETURNS");
 			var dataType = ParseDataType();
@@ -436,7 +450,7 @@ namespace PreviewLibrary
 			return new CreateFunctionExpr
 			{
 				Name = funcName,
-				ArgumentsList = funcArguments,
+				Arguments = funcArguments,
 				ReturnDataType = dataType,
 				Body = body
 			};
@@ -758,9 +772,9 @@ namespace PreviewLibrary
 			};
 		}
 
-		private List<ArgumentExpr> ParseArgumentsList()
+		private SqlExprList ParseArgumentsList()
 		{
-			var spArgs = new List<ArgumentExpr>();
+			var spArgs = new List<SqlExpr>();
 			var mustHaveArg = false;
 			do
 			{
@@ -794,7 +808,11 @@ namespace PreviewLibrary
 
 				mustHaveArg = true;
 			} while (true);
-			return spArgs;
+
+			return new SqlExprList
+			{
+				Items = spArgs
+			};
 		}
 
 		protected InsertExpr ParseInsert()
@@ -829,12 +847,16 @@ namespace PreviewLibrary
 
 			ReadKeyword("VALUES");
 
-			var valuesList = new List<List<SqlExpr>>();
+			var valuesList = new SqlExprList()
+			{
+				Items = new List<SqlExpr>()
+			};
+
 			do
 			{
 				ReadKeyword("(");
 				var values = WithComma(() => Any("Constant or FUNC", ParseSqlFunc, ParseConstant));
-				valuesList.Add(values);
+				valuesList.Items.Add(values);
 				ReadKeyword(")");
 				if (!_token.Try(","))
 				{
@@ -860,12 +882,33 @@ namespace PreviewLibrary
 				throw new PrecursorException("<Field>");
 			}
 			ReadKeyword("=");
-			var valueExpr = ParseArithmeticExpr();
-			return new AssignSetExpr
+
+			if(TryGet(ParseArithmeticExpr, out var arithemeticExpr))
 			{
-				Field = fieldExpr,
-				Value = valueExpr
-			};
+				return new AssignSetExpr
+				{
+					Field = fieldExpr,
+					Value = arithemeticExpr
+				};
+			}
+
+			if (TryGet(ParseSubExpr, out var subExpr))
+			{
+				return new AssignSetExpr
+				{
+					Field = fieldExpr,
+					Value = subExpr
+				};
+			}
+
+			throw new Exception();
+
+			//var valueExpr = ParseArithmeticExpr();
+			//return new AssignSetExpr
+			//{
+			//	Field = fieldExpr,
+			//	Value = valueExpr
+			//};
 		}
 
 		protected UpdateExpr ParseUpdate()
@@ -932,7 +975,7 @@ namespace PreviewLibrary
 
 			var options = new List<string>();
 			var optionExprs = WithComma(ParseIdent);
-			options.AddRange(optionExprs.Select(x => x.Name));
+			options.AddRange(optionExprs.Items.Cast<IdentExpr>().Select(x => x.Name));
 			if (options.Count == 0)
 			{
 				Throw("SET should have option");
@@ -1022,25 +1065,35 @@ namespace PreviewLibrary
 			};
 		}
 
-		private List<T> WithComma<T>(Func<T> parse)
+		private SqlExprList WithComma<T>(Func<T> parse)
+			where T : SqlExpr
 		{
-			var list = new List<T>();
+			var list = new List<SqlExpr>();
 			do
 			{
 				var item = parse();
+
+				if (item is SqlExprList itemList)
+				{
+					return itemList;
+				}
+
 				list.Add(item);
 				if (!_token.Try(","))
 				{
 					break;
 				}
 			} while (true);
-			return list;
+			return new SqlExprList
+			{
+				Items = list
+			};
 		}
 
-		private List<SqlExpr> ParseManyColumns()
+		private SqlExprList ParseManyColumns()
 		{
 			var columns = WithComma(ParseSelectColumn);
-			if (columns.Count == 0)
+			if (columns.Items.Count == 0)
 			{
 				throw new Exception("field");
 			}
@@ -1268,11 +1321,6 @@ namespace PreviewLibrary
 			return body;
 		}
 
-		protected ArithmeticExpr ParseArithmeticList()
-		{
-			return (ArithmeticExpr)_arithmetic.Parse();
-		}
-
 		private SqlExpr ParseFilterList()
 		{
 			var postfixExprs = new List<object>();
@@ -1412,6 +1460,25 @@ namespace PreviewLibrary
 			return ParseFilter();
 		}
 
+		private SqlExpr ParseWithCompareOp(Func<SqlExpr> leftParse)
+		{
+			var leftExpr = leftParse();
+
+			var likeExpr = Get(ParseLike, leftExpr);
+			if (likeExpr != null)
+			{
+				return likeExpr;
+			}
+
+			var compareExpr = Get(ParseCompareOp, leftExpr);
+			if (compareExpr != null)
+			{
+				return compareExpr;
+			}
+
+			return leftExpr;
+		}
+
 		private SqlExpr ParseFilter()
 		{
 			if (IsKeyword("("))
@@ -1423,6 +1490,8 @@ namespace PreviewLibrary
 			{
 				return ParseNot();
 			}
+
+			//var left = ParseWithCompareOp(ParseSubExpr);
 
 			var left = ParseSubExpr();
 			var likeExpr = Get(ParseLike, left);
@@ -1443,6 +1512,11 @@ namespace PreviewLibrary
 				{
 					return left;
 				}
+			}
+
+			if (left is CompareExpr compareExpr2)
+			{
+				return compareExpr2;
 			}
 
 			throw new NotSupportedException(GetLastLineCh());
@@ -1600,7 +1674,7 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("(");
 			}
-			var subExpr = ParseSubExpr();
+			var subExpr = ParseWithCompareOp(ParseSubExpr);
 			ReadKeyword(")");
 
 			return new GroupExpr

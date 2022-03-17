@@ -4,6 +4,7 @@ using Xunit.Abstractions;
 using ExpectedObjects;
 using System.Collections.Generic;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 
 namespace TestProject
 {
@@ -27,34 +28,37 @@ namespace TestProject
 					Name = "customer"
 				},
 				WhereExpr = new CompareExpr
-            {
-               Left = new IdentExpr
-               {
-                  Name = "id"
-               },
-               Oper = "in",
-               Right = new GroupExpr
-               {
-                  Expr = new SelectExpr
-                  {
-                     Fields = new List<SqlExpr> 
-                     { 
-                        new ColumnExpr
-                        {
-                           Name = "pid"
-                        }
-                     },
-                     From = new TableExpr
-                     {
-                        Name = new IdentExpr
-                        {
-                           Name = "products"
-                        }
-                     }
-                  }
-               }
-            }
-         }.ToExpectedObject().ShouldEqual(expr);
+				{
+					Left = new IdentExpr
+					{
+						Name = "id"
+					},
+					Oper = "in",
+					Right = new GroupExpr
+					{
+						Expr = new SelectExpr
+						{
+							Fields = new SqlExprList
+							{
+								Items = new List<SqlExpr>
+								{
+									new ColumnExpr
+									{
+										Name = "pid"
+									}
+								}
+							},
+							From = new TableExpr
+							{
+								Name = new IdentExpr
+								{
+									Name = "products"
+								}
+							}
+						}
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}
 }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using ExpectedObjects;
 using Xunit.Abstractions;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 
 namespace TestProject
 {
@@ -21,18 +22,7 @@ namespace TestProject
 			var sql = "select name";
 			var expr = new SqlParser().Parse(sql);
 
-			var expected = new SelectExpr()
-			{
-				Fields = new List<SqlExpr>
-				{
-					new ColumnExpr
-					{
-						Name = "name"
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT name".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -41,19 +31,7 @@ namespace TestProject
 			var sql = "select tb1.name";
 			var expr = new SqlParser().Parse(sql);
 
-			var expected = new SelectExpr()
-			{
-				Fields = new List<SqlExpr>
-				{
-					new ColumnExpr
-					{
-						Table = "tb1",
-						Name = "name"
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT tb1.name".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -62,22 +40,7 @@ namespace TestProject
 			var sql = "select id, name";
 			var expr = new SqlParser().Parse(sql);
 
-			var expected = new SelectExpr()
-			{
-				Fields = new List<SqlExpr>
-				{
-					new ColumnExpr
-					{
-						Name = "id"
-					},
-					new ColumnExpr
-					{
-						Name = "name"
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT id,name".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -86,18 +49,7 @@ namespace TestProject
 			var sql = "select 1";
 			var expr = new SqlParser().Parse(sql);
 
-			var expected =new SelectExpr()
-			{
-				Fields = new List<SqlExpr>
-				{
-					new IntegerExpr
-					{
-						Value = 1
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT 1".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -116,10 +68,14 @@ namespace TestProject
 					Arguments = new SqlExpr[] { 
 						new SelectExpr
 						{
-							Fields = new List<SqlExpr> { 
-								new IntegerExpr
-								{
-									Value = 1
+							Fields = new SqlExprList
+							{
+								Items = new List<SqlExpr> 
+								{ 
+									new IntegerExpr
+									{
+										Value = 1
+									}
 								}
 							},
 							From = new TableExpr
@@ -144,13 +100,18 @@ namespace TestProject
 						}
 					}
 				},
-				Body = new List<SqlExpr> { 
+				Body = new List<SqlExpr> 
+				{ 
 					new SelectExpr
 					{
-						Fields = new List<SqlExpr> { 
-							new IntegerExpr
-							{
-								Value = 1
+						Fields = new SqlExprList 
+						{
+							Items = new List<SqlExpr> 
+							{ 
+								new IntegerExpr
+								{
+									Value = 1
+								}
 							}
 						}
 					}

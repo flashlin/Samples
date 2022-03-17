@@ -15,11 +15,11 @@ namespace PreviewLibrary.Expressions
 			sb.AppendLine("CASE");
 			foreach (var whenExpr in WhenList)
 			{
-				sb.AppendLine($"	WHEN {whenExpr}");
+				sb.AppendLine($"	{whenExpr}");
 			}
 			if (Else != null)
 			{
-				sb.Append($"	ELSE {Else}");
+				sb.AppendLine($"	ELSE {Else}");
 			}
 			sb.Append("END");
 			return sb.ToString();

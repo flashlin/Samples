@@ -21,8 +21,7 @@ namespace TestProject
 			var expr = Parse(sql);
 			new UpdateExpr
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new AssignSetExpr
 					{
 						Field = new IdentExpr
@@ -42,7 +41,7 @@ namespace TestProject
 							}
 						}
 					}
-				}
+				)
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 
@@ -53,8 +52,7 @@ namespace TestProject
 			var expr = Parse(sql);
 			new UpdateExpr
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new AssignSetExpr
 					{
 						Field = new IdentExpr
@@ -66,7 +64,7 @@ namespace TestProject
 							 Name = "@Status"
 						}
 					}
-				},
+				),
 				WhereExpr = new CompareExpr
 				{
 					Left = new IdentExpr
@@ -86,11 +84,14 @@ namespace TestProject
 		public void update_set_case_when()
 		{
 			var sql = @"UPDATE [dbo].[TracDelay] 
-SET [ExchangeRate] = CASE WHEN @ExchangeRate = -1 THEN[ExchangeRate] ELSE @ExchangeRate END";
+SET [ExchangeRate] = CASE WHEN @ExchangeRate = -1 THEN [ExchangeRate] ELSE @ExchangeRate END";
 			var expr = Parse(sql);
+
+			var exprSql = expr.ToString();
+
 			new UpdateExpr
 			{
-				Fields = new List<SqlExpr> { 
+				Fields = CreateSqlExprList(
 					new AssignSetExpr
 					{
 						Field = new IdentExpr
@@ -126,7 +127,7 @@ SET [ExchangeRate] = CASE WHEN @ExchangeRate = -1 THEN[ExchangeRate] ELSE @Excha
 							}
 						}
 					}
-				}
+				)
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}

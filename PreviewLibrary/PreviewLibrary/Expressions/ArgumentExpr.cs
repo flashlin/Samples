@@ -1,4 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PreviewLibrary.Expressions
 {
@@ -16,6 +18,16 @@ namespace PreviewLibrary.Expressions
 				defaultValue = $"={DefaultValue}";
 			}
 			return $"{Name} {DataType}{defaultValue}";
+		}
+	}
+
+	public class SqlExprList : SqlExpr
+	{
+		public List<SqlExpr> Items { get; set; }
+
+		public override string ToString()
+		{
+			return string.Join(",", Items.Select(x => $"{x}"));
 		}
 	}
 }

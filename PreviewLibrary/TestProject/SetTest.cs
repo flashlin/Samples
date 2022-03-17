@@ -7,6 +7,7 @@ using ExpectedObjects;
 using System.Linq;
 using Xunit.Abstractions;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary.Expressions;
 
 namespace TestProject
 {
@@ -108,8 +109,7 @@ namespace TestProject
 			var expr = Parse(sql);
 			new SelectExpr
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new NotExpr
 					{
 						Right = new SqlFuncExpr
@@ -124,7 +124,7 @@ namespace TestProject
 							}
 						}
 					}
-				}
+				)
 			}
 			.ToExpectedObject().ShouldEqual(expr);
 		}
@@ -136,10 +136,9 @@ namespace TestProject
 			var expr = Parse(sql);
 			new SelectExpr
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new IntegerExpr { Value = 1 }
-				},
+				),
 				From = new TableExpr
 				{
 					Name = new IdentExpr
@@ -185,10 +184,9 @@ namespace TestProject
 			var expr = Parse(sql);
 			new SelectExpr
 			{
-				Fields = new List<SqlExpr>
-				{
+				Fields = CreateSqlExprList(
 					new IntegerExpr { Value = 1 }
-				},
+				),
 				From = new TableExpr
 				{
 					Name = new IdentExpr
@@ -228,7 +226,7 @@ end";
 						{
 							new SelectExpr
 							{
-								Fields = new List<SqlExpr>{ new IntegerExpr { Value = 1 } },
+								Fields = CreateSqlExprList( new IntegerExpr { Value = 1 } ),
 								From = new TableExpr
 								{
 									Name = new IdentExpr
@@ -245,7 +243,7 @@ end";
 				{
 					new SelectExpr
 					{
-						Fields = new List<SqlExpr> { new IntegerExpr { Value = 1 } },
+						Fields = CreateSqlExprList(new IntegerExpr { Value = 1 } ),
 					}
 				}
 			}.ToExpectedObject().ShouldEqual(expr);

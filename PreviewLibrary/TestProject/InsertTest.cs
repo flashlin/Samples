@@ -29,18 +29,19 @@ namespace TestProject
 					ObjectId = "[dbo]",
 					Name = "[customer]",
 				},
-				Fields = new List<IdentExpr>
+				Fields = new SqlExprList
 				{
-					new IdentExpr { Name = "[id]" },
-					new IdentExpr { Name = "[name]" },
-					new IdentExpr { Name = "[lastname]" },
-					new IdentExpr { Name = "[birth]" },
-					new IdentExpr { Name = "[price]" }
-				},
-				ValuesList = new List<List<SqlExpr>>
-				{
-					new List<SqlExpr>
+					Items = new List<SqlExpr>
 					{
+						new IdentExpr { Name = "[id]" },
+						new IdentExpr { Name = "[name]" },
+						new IdentExpr { Name = "[lastname]" },
+						new IdentExpr { Name = "[birth]" },
+						new IdentExpr { Name = "[price]" }
+					}
+				},
+				ValuesList = CreateSqlExprList(
+					CreateSqlExprList(
 						new IntegerExpr
 						{
 							Value = 267467
@@ -69,8 +70,8 @@ namespace TestProject
 						{
 							Value = 1
 						}
-					}
-				}
+					)
+				)
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 
@@ -79,6 +80,7 @@ namespace TestProject
 		{
 			var sql = "INSERT [dbo].[customer] ([id]) VALUES ( CAST(0.0100 AS Decimal(5, 4)) )";
 			var expr = Parse(sql);
+
 			new InsertExpr
 			{
 				Table = new IdentExpr
@@ -86,17 +88,14 @@ namespace TestProject
 					Name = "[customer]",
 					ObjectId = "[dbo]"
 				},
-				Fields = new List<IdentExpr>
-				{
+				Fields = CreateSqlExprList(
 					new IdentExpr
 					{
 						Name = "[id]"
 					}
-				},
-				ValuesList = new List<List<SqlExpr>>
-				{
-					new List<SqlExpr>
-					{
+				),
+				ValuesList = CreateSqlExprList(
+					CreateSqlExprList(
 						new SqlFuncExpr
 						{
 							Name = "CAST",
@@ -120,8 +119,8 @@ namespace TestProject
 								}
 							}
 						}
-					}
-				}
+					)
+				)
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 
@@ -139,17 +138,14 @@ namespace TestProject
 					Name = "[customer]",
 					ObjectId = "[dbo]"
 				},
-				Fields = new List<IdentExpr>
-				{
+				Fields = CreateSqlExprList(
 					new IdentExpr
 					{
 						Name = "[id]"
 					}
-				},
-				ValuesList = new List<List<SqlExpr>>
-				{
-					new List<SqlExpr>
-					{
+				),
+				ValuesList = CreateSqlExprList(
+					CreateSqlExprList(
 						new StringExpr
 						{
 							Text = "N'127.0.0.1'"
@@ -158,8 +154,8 @@ namespace TestProject
 						{
 							Value = 267467
 						}
-					}
-				}
+					)
+				)
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}
