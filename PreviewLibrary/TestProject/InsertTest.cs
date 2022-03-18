@@ -169,9 +169,33 @@ namespace TestProject
 
 			var expr = Parse(sql);
 
-			new SelectExpr
+			new InsertFromSelectExpr
 			{
-
+				IntoToggle = true,
+				Table = new IdentExpr
+				{
+					Name = "@table"
+				},
+				FromSelect = new SelectExpr
+				{
+					Fields = new SqlExprList
+					{
+						Items = new List<SqlExpr> 
+						{
+							new ColumnExpr
+							{
+								Name = "Val"
+							}
+						}
+					},
+					From = new TableExpr
+					{
+						Name = new IdentExpr
+						{
+							Name = "strsplitmax"
+						}
+					}
+				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}

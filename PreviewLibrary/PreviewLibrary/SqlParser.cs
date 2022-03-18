@@ -844,7 +844,7 @@ namespace PreviewLibrary
 			};
 		}
 
-		protected InsertExpr ParseInsert()
+		protected SqlExpr ParseInsert()
 		{
 			var startIndex = _token.CurrentIndex;
 			if (!_token.TryIgnoreCase("INSERT"))
@@ -863,6 +863,17 @@ namespace PreviewLibrary
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<table>");
+			}
+
+			if (IsKeyword("SELECT"))
+			{
+				var selectExpr = ParseSelect();
+				return new InsertFromSelectExpr
+				{
+					IntoToggle = intoToggle,
+					Table = table,
+					FromSelect = selectExpr
+				};
 			}
 
 			if (!_token.Try("("))
