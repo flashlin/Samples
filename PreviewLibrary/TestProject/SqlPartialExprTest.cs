@@ -59,8 +59,8 @@ namespace TestProject
 			var expr = _sqlParser.ParseDataTypePartial(sql);
 			new TableTypeExpr
 			{
-				ColumnTypeList = new List<SqlExpr> 
-				{ 
+				ColumnTypeList = new List<SqlExpr>
+				{
 					new DefineColumnTypeExpr
 					{
 						 Name = new IdentExpr
@@ -130,7 +130,7 @@ BEGIN select 1 END";
 					}
 				},
 				Body = new List<SqlExpr>
-				{ 
+				{
 					new SelectExpr
 					{
 						Fields = CreateSqlExprList(
@@ -154,8 +154,8 @@ BEGIN select 1 END";
 				Left = new SqlFuncExpr
 				{
 					Name = "isnull",
-					Arguments = new SqlExpr[] 
-					{ 
+					Arguments = new SqlExpr[]
+					{
 						new IdentExpr
 						{
 						  Name = "@name"
@@ -182,14 +182,38 @@ BEGIN select 1 END";
 			new SqlFuncExpr
 			{
 				Name = "isnull",
-				Arguments = new SqlExpr[] 
-				{ 
+				Arguments = new SqlExpr[]
+				{
 					new IdentExpr
 					{
 						Name = "@betCondition"
 					},new StringExpr
 					{
 						Text = "''"
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void unknown_custom_func()
+		{
+			var sql = "strsplitmax(@a, N',')";
+			var expr = _sqlParser.ParseFuncPartial(sql);
+			new CustomFuncExpr
+			{
+				ObjectId = new IdentExpr
+				{
+					Name = "strsplitmax"
+				},
+				Name = "strsplitmax",
+				Arguments = new SqlExpr[] { 
+					new IdentExpr
+					{
+						Name = "@a"
+					},new StringExpr
+					{
+						Text = "N','"
 					}
 				}
 			}.ToExpectedObject().ShouldEqual(expr);

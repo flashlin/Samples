@@ -493,6 +493,30 @@ namespace PreviewLibrary
 			return ParseSqlFunc();
 		}
 
+		protected CustomFuncExpr ParseCustomFunc()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryGet(ParseSqlIdent, out var funcName))
+			{
+				throw new PrecursorException("<Custom Function Name>");
+			}
+
+			if (!TryKeyword("(", out _))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("(");
+			}
+			var subExprList = WithComma(ParseSubExpr);
+			ReadKeyword(")");
+
+			return new CustomFuncExpr
+			{
+				Name = funcName.Name,
+				ObjectId = funcName,
+				Arguments = subExprList.Items.ToArray(),
+			};
+		}
+
 		protected SqlFuncExpr ParseSqlFunc()
 		{
 			if (TryGet(ParseCast, out var castExpr))
@@ -502,6 +526,11 @@ namespace PreviewLibrary
 
 			if (!_token.Try(_token.IsFuncName(out var funcArgsCount), out var funcName))
 			{
+				if (TryGet(ParseCustomFunc, out var customFuncExpr))
+				{
+					return customFuncExpr;
+				}
+
 				throw new PrecursorException($"Expect funcname");
 			}
 
@@ -883,7 +912,7 @@ namespace PreviewLibrary
 			}
 			ReadKeyword("=");
 
-			if(TryGet(ParseArithmeticExpr, out var arithemeticExpr))
+			if (TryGet(ParseArithmeticExpr, out var arithemeticExpr))
 			{
 				return new AssignSetExpr
 				{

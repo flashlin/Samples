@@ -158,5 +158,21 @@ namespace TestProject
 				)
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void insert_into_variable_select_from()
+		{
+			var sql = @"insert into @table
+		select Val
+		from
+			strsplitmax(@betCondition, N',')";
+
+			var expr = Parse(sql);
+
+			new SelectExpr
+			{
+
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
 	}
 }
