@@ -901,7 +901,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			throw new Exception();
+			throw new NotSupportedException("Field = xxx Expr");
 
 			//var valueExpr = ParseArithmeticExpr();
 			//return new AssignSetExpr
