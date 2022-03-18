@@ -1089,14 +1089,24 @@ namespace PreviewLibrary
 			{
 				throw new Exception();
 			}
-			return ParseTableToken();
+
+			return GetAny(ParseSqlFunc, ParseTableToken);
+			//return ParseTableToken();
 		}
 
 		private TableExpr ParseTableToken()
 		{
-			var tableName = ParseSqlIdent();
-			var aliasName = GetAliasName();
-			var withOptions = Get(ParseWithOptions);
+			var startIndex = _token.CurrentIndex;
+			if(!TryGet(ParseSqlIdent, out var tableName))
+			{
+				throw new PrecursorException("<TableName>");
+			}
+
+			TryGet(GetAliasName, out var aliasName);
+			TryGet(ParseWithOptions, out var withOptions);
+			//var tableName = ParseSqlIdent();
+			//var aliasName = GetAliasName();
+			//var withOptions = Get(ParseWithOptions);
 			return new TableExpr
 			{
 				Name = tableName,
@@ -1289,7 +1299,7 @@ namespace PreviewLibrary
 		{
 			if (!_token.TryIgnoreCase("with"))
 			{
-				throw new Exception("WITH");
+				throw new PrecursorException("WITH");
 			}
 
 			if (!_token.Try("("))

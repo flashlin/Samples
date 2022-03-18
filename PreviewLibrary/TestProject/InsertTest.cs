@@ -180,19 +180,109 @@ namespace TestProject
 				{
 					Fields = new SqlExprList
 					{
-						Items = new List<SqlExpr> 
-						{
+						Items = new List<SqlExpr> { 
 							new ColumnExpr
 							{
 								Name = "Val"
 							}
 						}
 					},
-					From = new TableExpr
+					From = new CustomFuncExpr
 					{
-						Name = new IdentExpr
+						ObjectId = new IdentExpr
 						{
 							Name = "strsplitmax"
+						},
+						Name = "strsplitmax",
+						Arguments = new SqlExpr[] 
+						{ 
+							new IdentExpr
+							{
+								Name = "@betCondition"
+							},new StringExpr
+							{
+								Text = "N','"
+							}
+						}
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void if_func_begin_insert_into_from_select_end()
+		{
+			var sql = @"if(isnull(@b1, '') <> '')
+	begin
+		insert into @a1
+		select Val
+		from
+			strsplitmax(@str, N',')
+	end";
+
+			var expr = Parse(sql);
+			new IfExpr
+			{
+				Condition = new GroupExpr
+				{
+					Expr = new CompareExpr
+					{
+						Left = new SqlFuncExpr
+						{
+							Name = "isnull",
+							Arguments = new SqlExpr[] { 
+								new IdentExpr
+								{
+									Name = "@b1"
+								},new StringExpr
+								{
+									Text = "''"
+								}
+							}
+						},
+						Oper = "<>",
+						Right = new StringExpr
+						{
+							Text = "''"
+						}
+					}
+				},
+				Body = new List<SqlExpr> { 
+					new InsertFromSelectExpr
+					{
+						IntoToggle = true,
+						Table = new IdentExpr
+						{
+							Name = "@a1"
+						},
+						FromSelect = new SelectExpr
+						{
+							Fields = new SqlExprList
+							{
+								Items = new List<SqlExpr> { 
+									new ColumnExpr
+									{
+										Name = "Val"
+									}
+								}
+							},
+							From = new CustomFuncExpr
+							{
+								ObjectId = new IdentExpr
+								{
+									Name = "strsplitmax"
+								},
+								Name = "strsplitmax",
+								Arguments = new SqlExpr[] { 
+									new IdentExpr
+									{
+										Name = "@str"
+									},new StringExpr
+									{
+										Text = "N','"
+									}
+								}
+							}
 						}
 					}
 				}
