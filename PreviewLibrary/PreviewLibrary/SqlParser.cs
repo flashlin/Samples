@@ -36,7 +36,7 @@ namespace PreviewLibrary
 			return ParseAllExpr();
 		}
 
-		public SqlExpr ParseArithmeticExpression(string sql)
+		public SqlExpr ParseArithmeticPartial(string sql)
 		{
 			PredicateParse(sql);
 			return ParseArithmeticExpr();
@@ -89,7 +89,6 @@ namespace PreviewLibrary
 			var ops = new Stack<string>();
 			while (_token.Text != "")
 			{
-				var startIndex = _token.CurrentIndex;
 				if (TryGet(readExpr, out var expr))
 				{
 					operands.Push(expr);
@@ -99,12 +98,6 @@ namespace PreviewLibrary
 				{
 					break;
 				}
-
-				//if (!IsOperator(opers))
-				//{
-				//	operands.Push(readExpr());
-				//	continue;
-				//}
 
 				if (!_token.TryIgnoreCase(opers, out var curr_op))
 				{
@@ -140,7 +133,6 @@ namespace PreviewLibrary
 						break;
 					}
 				} while (true);
-
 			}
 
 			while (ops.Count > 0)
@@ -746,6 +738,46 @@ namespace PreviewLibrary
 			};
 		}
 
+		public SqlExpr ParseSetPartial(string sql)
+		{
+			PredicateParse(sql);
+			return ParseSet();
+		}
+
+		protected SqlExpr ParseSet()
+		{
+			return Any("<SET xxx>", 
+				ParseSetVariableEqual, 
+				ParseSet_Permission_ObjectId_OnOff,
+				ParseSet_Options_OnOff,
+				ParseSetvar
+			);
+		}
+
+		protected SetVariableExpr ParseSetVariableEqual()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryKeyword("SET", out _))
+			{
+				throw new PrecursorException("SET");
+			}
+
+			if (!TryGet(ParseVariableName, out var variableName))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<VariableName>");
+			}
+
+			ReadKeyword("=");
+			var valueExpr = ParseSubExpr();
+
+			return new SetVariableExpr
+			{
+				Name = variableName,
+				Value = valueExpr
+			};
+		}
+
 		protected SetBatchVariableExpr ParseSetvar()
 		{
 			if (!_token.TryIgnoreCase(":setvar"))
@@ -1054,7 +1086,13 @@ namespace PreviewLibrary
 			};
 		}
 
-		public SelectExpr ParseSelect()
+		public SelectExpr ParseSelectPartial(string sql)
+		{
+			PredicateParse(sql);
+			return ParseSelect();
+		}
+
+		protected SelectExpr ParseSelect()
 		{
 			if (!_token.TryIgnoreCase("select", out var _))
 			{
@@ -1097,7 +1135,7 @@ namespace PreviewLibrary
 		private TableExpr ParseTableToken()
 		{
 			var startIndex = _token.CurrentIndex;
-			if(!TryGet(ParseSqlIdent, out var tableName))
+			if (!TryGet(ParseSqlIdent, out var tableName))
 			{
 				throw new PrecursorException("<TableName>");
 			}
@@ -1321,6 +1359,12 @@ namespace PreviewLibrary
 			};
 		}
 
+		public SqlExpr ParseWherePartial(string sql)
+		{
+			PredicateParse(sql);
+			return ParseWhere();
+		}
+
 		protected SqlExpr ParseWhere()
 		{
 			if (!_token.TryIgnoreCase("where"))
@@ -1538,9 +1582,10 @@ namespace PreviewLibrary
 				return ParseNot();
 			}
 
-			//var left = ParseWithCompareOp(ParseSubExpr);
-
+			//var left = Any("Arithmetic or SubExpr", ParseArithmeticExpr, ParseSubExpr);
 			var left = ParseSubExpr();
+			//var left = ParseArithmeticExpr();
+
 			var likeExpr = Get(ParseLike, left);
 			if (likeExpr != null)
 			{

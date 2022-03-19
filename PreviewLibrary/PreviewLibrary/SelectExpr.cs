@@ -27,7 +27,7 @@ namespace PreviewLibrary
 			}
 			if (WhereExpr != null)
 			{
-				sb.Append($" {WhereExpr}");
+				sb.Append($" WHERE {WhereExpr}");
 			}
 			return sb.ToString();
 		}

@@ -1,0 +1,10 @@
+﻿using PreviewLibrary.Exceptions;
+
+namespace PreviewLibrary
+{
+	public class SetVariableExpr : SqlExpr
+	{
+		public string Name { get; set; }
+		public SqlExpr Value { get; set; }
+	}
+}

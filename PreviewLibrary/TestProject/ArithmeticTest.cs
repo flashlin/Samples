@@ -15,7 +15,7 @@ namespace TestProject
 		public void add_mul()
 		{
 			var sql = "1 + 2 * 3";
-			var expr = new SqlParser().ParseArithmeticExpression(sql);
+			var expr = new SqlParser().ParseArithmeticPartial(sql);
 			new OperandExpr
 			{
 				Left = new IntegerExpr
@@ -42,7 +42,7 @@ namespace TestProject
 		public void add_mul_add()
 		{
 			var sql = "1 + 2 * 3 + 4";
-			var expr = new SqlParser().ParseArithmeticExpression(sql);
+			var expr = new SqlParser().ParseArithmeticPartial(sql);
 			new OperandExpr
 			{
 				Left = new OperandExpr
@@ -77,7 +77,7 @@ namespace TestProject
 		public void mul_first_add()
 		{
 			var sql = "1 * ( 2 + 3)";
-			var expr = new SqlParser().ParseArithmeticExpression(sql);
+			var expr = new SqlParser().ParseArithmeticPartial(sql);
 			new OperandExpr
 			{
 				Left = new IntegerExpr
