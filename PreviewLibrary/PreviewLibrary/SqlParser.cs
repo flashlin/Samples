@@ -1104,9 +1104,6 @@ namespace PreviewLibrary
 
 			TryGet(GetAliasName, out var aliasName);
 			TryGet(ParseWithOptions, out var withOptions);
-			//var tableName = ParseSqlIdent();
-			//var aliasName = GetAliasName();
-			//var withOptions = Get(ParseWithOptions);
 			return new TableExpr
 			{
 				Name = tableName,
