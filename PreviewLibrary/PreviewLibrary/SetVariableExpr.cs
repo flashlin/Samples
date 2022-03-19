@@ -6,5 +6,10 @@ namespace PreviewLibrary
 	{
 		public string Name { get; set; }
 		public SqlExpr Value { get; set; }
+
+		public override string ToString()
+		{
+			return $"SET {Name} = {Value}";
+		}
 	}
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using Xunit.Abstractions;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
+using System.IO;
 
 namespace TestProject
 {
@@ -19,32 +20,40 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void variable_eq_1()
+		{
+			var sql = "@a = 1";
+			var expr = _sqlParser.ParseEqualOpPartial(sql);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
 		public void select_1_from_table_where_cast_add_cast()
 		{
-			var sql = "select 1 from @a where name = cast(@b as nvarchar(3)) + ':' + cast(@c as nvarchar(3))";
+			var sql = "SELECT 1 FROM @a WHERE name = CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) )";
 			var expr = _sqlParser.ParseSelectPartial(sql);
-			"SELECT 1 FROM @a WHERE name = CAST(@b AS nvarchar(3)) + ':' + CAST(@c AS nvarchar(3))".ToExpectedObject().ShouldEqual(expr.ToString());
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void exists_select()
 		{
 			var sql = @"exists(
-								select 1 from @a
-								where name = 
-									cast(@b as nvarchar(3)) + ':' + cast(@c as nvarchar(3)) 
+								SELECT 1 FROM @a
+								WHERE name = 
+									CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) ) 
 							)";
 			var expr = _sqlParser.ParseFuncPartial(sql);
-			new SelectExpr
-			{
 
-			}.ToExpectedObject().ShouldEqual(expr);
+			sql.MergeToCode()
+				.ToExpectedObject()
+				.ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void set_variable_eq_case()
 		{
-			var sql = @"set @returnValue = case when exists(
+			var sql = @"SET @returnValue = CASE WHEN exists(
 								select 1 from @A
 								where name = 
 									cast(@b as nvarchar(3)) + ':' + cast(@c as nvarchar(3)) 
@@ -53,16 +62,16 @@ namespace TestProject
 							else 1
 							end";
 			var expr = _sqlParser.ParseSetPartial(sql);
-			new SelectExpr
-			{
-
-			}.ToExpectedObject().ShouldEqual(expr);
+			@"SET @returnValue = CASE
+	WHEN exists( SELECT 1 FROM @A WHERE name = CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) ) ) THEN 0
+	ELSE 1
+END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void where_field_eq_cast_add_cast()
 		{
-			var sql = "WHERE name = CAST(@a as nvarchar(3)) + ':' + CAST(@b as nvarchar(3))";
+			var sql = "WHERE name = CAST( @a AS nvarchar(3) ) + ':' + CAST( @b AS nvarchar(3) )";
 			var expr = _sqlParser.ParseWherePartial(sql);
 			sql.ToExpectedObject().ShouldEqual("WHERE " + expr.ToString());
 		}

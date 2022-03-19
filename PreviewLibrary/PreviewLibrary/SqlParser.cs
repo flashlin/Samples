@@ -2,6 +2,7 @@
 using PreviewLibrary.Expressions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -78,6 +79,12 @@ namespace PreviewLibrary
 			return ParseConcat(() => ParseSubExpr(), ops);
 		}
 
+		protected SqlExpr ParseAndOrExpr()
+		{
+			var ops = new string[] { "(", ")", "AND", "OR" };
+			return ParseConcat(() => ParseSubExpr(), ops);
+		}
+
 		private bool IsOperator(string[] opers)
 		{
 			return _token.IsMatchAny(opers.Select(x => Regex.Escape(x)).ToArray());
@@ -95,6 +102,10 @@ namespace PreviewLibrary
 					continue;
 				}
 				else if (!IsOperator(opers))
+				{
+					break;
+				}
+				else if (_token.Text == ")" && !ops.Contains("("))
 				{
 					break;
 				}
@@ -746,8 +757,8 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseSet()
 		{
-			return Any("<SET xxx>", 
-				ParseSetVariableEqual, 
+			return Any("<SET xxx>",
+				ParseSetVariableEqual,
 				ParseSet_Permission_ObjectId_OnOff,
 				ParseSet_Options_OnOff,
 				ParseSetvar
@@ -1561,13 +1572,33 @@ namespace PreviewLibrary
 				return likeExpr;
 			}
 
-			var compareExpr = Get(ParseCompareOp, leftExpr);
+			var compareExpr = Get(ParseCompareOp, leftExpr, leftParse);
 			if (compareExpr != null)
 			{
 				return compareExpr;
 			}
 
 			return leftExpr;
+		}
+
+		public SqlExpr ParseEqualOpPartial(string sql)
+		{
+			return ParsePartial(() => ParseEqualOp(ParseSubExpr()), sql);
+		}
+
+		protected SqlExpr ParseEqualOp(SqlExpr leftExpr)
+		{
+			if (!TryKeyword("=", out _))
+			{
+				throw new PrecursorException("=");
+			}
+
+			return new OperandExpr
+			{
+				Left = leftExpr,
+				Oper = "=",
+				Right = ParseSubExpr()
+			};
 		}
 
 		private SqlExpr ParseFilter()
@@ -1592,7 +1623,7 @@ namespace PreviewLibrary
 				return likeExpr;
 			}
 
-			var compareExpr = Get(ParseCompareOp, left);
+			var compareExpr = Get(ParseCompareOp, left, ParseArithmeticExpr);
 			if (compareExpr != null)
 			{
 				return compareExpr;
@@ -1680,12 +1711,6 @@ namespace PreviewLibrary
 			}
 		}
 
-		private bool TryGet<T>(Func<T> parse, out T output)
-		{
-			output = Get<T>(parse);
-			return output != null;
-		}
-
 		private T Get<T>(Func<SqlExpr, T> parse, SqlExpr left)
 		{
 			try
@@ -1696,6 +1721,25 @@ namespace PreviewLibrary
 			{
 				return default(T);
 			}
+		}
+
+		private T Get<T>(Func<SqlExpr, Func<SqlExpr>, T> parse, SqlExpr left, Func<SqlExpr> rightParse)
+		{
+			try
+			{
+				return parse(left, rightParse);
+			}
+			catch (PrecursorException)
+			{
+				return default(T);
+			}
+		}
+
+
+		private bool TryGet<T>(Func<T> parse, out T output)
+		{
+			output = Get<T>(parse);
+			return output != null;
 		}
 
 		private SqlExpr Any(string expect, params Func<SqlExpr>[] parseList)
@@ -1725,7 +1769,7 @@ namespace PreviewLibrary
 			return default(SqlExpr);
 		}
 
-		private CompareExpr ParseCompareOp(SqlExpr left)
+		private CompareExpr ParseCompareOp(SqlExpr left, Func<SqlExpr> parseRight)
 		{
 			var op = string.Empty;
 			CompareExpr parseAction()
@@ -1737,7 +1781,8 @@ namespace PreviewLibrary
 				}
 				else
 				{
-					right = ParseSubExpr();
+					//right = ParseSubExpr();
+					right = parseRight();
 				}
 				return new CompareExpr
 				{
@@ -1945,6 +1990,22 @@ namespace PreviewLibrary
 		public static bool IsSql(this string text, string other)
 		{
 			return string.Equals(text, other, StringComparison.OrdinalIgnoreCase);
+		}
+
+		public static string MergeToCode(this string sql)
+		{
+			var sr = new StringReader(sql);
+			var lines = new List<string>();
+			do { 
+				var line = sr.ReadLine();
+				if(line == null)
+				{
+					break;
+				}
+				lines.Add(line);
+			}while(true);
+			var singleLine = string.Join(" ", lines.Select(x => x.Trim()));
+			return singleLine;
 		}
 	}
 }

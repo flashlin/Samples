@@ -11,7 +11,7 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var args = string.Join(",", Arguments.Select(x => $"{x}"));
-			return $"{Name}({args})";
+			return $"{Name}( {args} )";
 		}
 	}
 }

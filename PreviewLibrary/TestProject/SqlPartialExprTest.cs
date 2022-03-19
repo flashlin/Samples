@@ -17,36 +17,9 @@ namespace TestProject
 		[Fact]
 		public void case_when()
 		{
-			var sql = "CASE WHEN @ExchangeRate = -1 THEN [ExchangeRate] ELSE @ExchangeRate END";
+			var sql = "CASE WHEN @a = -1 THEN [b] ELSE @c END";
 			var expr = _sqlParser.ParseCasePartial(sql);
-			new CaseExpr
-			{
-				WhenList = new List<WhenThenExpr> {
-					new WhenThenExpr
-					{
-						 When = new CompareExpr
-						 {
-							  Left = new IdentExpr
-							  {
-									Name = "@ExchangeRate"
-							  },
-							  Oper = "=",
-							  Right = new IntegerExpr
-							  {
-									Value = -1
-							  }
-						 },
-						 Then = new IdentExpr
-						 {
-							  Name = "[ExchangeRate]"
-						 }
-					}
-				},
-				Else = new IdentExpr
-				{
-					Name = "@ExchangeRate"
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
