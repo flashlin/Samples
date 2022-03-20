@@ -17,11 +17,11 @@ namespace TestProject
 		[Fact]
 		public void create_function()
 		{
-			var sql = @"CREATE FUNCTION [dbo].[fAOSBetWin_6.7]
+			var sql = @"CREATE FUNCTION [dbo].[f1]
 (
-	@finalHomeScore int,
-	@finalAwayScore int,	
-	@betCondition nvarchar(127)
+	@a int,
+	@b int,	
+	@c nvarchar(127)
 )
 RETURNS bit
 AS
@@ -33,20 +33,20 @@ END";
 			{
 				Name = new IdentExpr
 				{
-					Name = "[fAOSBetWin_6.7]",
+					Name = "[f1]",
 					ObjectId = "[dbo]"
 				},
 				Arguments = CreateSqlExprList(
 					new ArgumentExpr
 					{
-						Name = "@finalHomeScore",
+						Name = "@a",
 						DataType = new DataTypeExpr
 						{
 							DataType = "int"
 						}
 					},new ArgumentExpr
 					{
-						Name = "@finalAwayScore",
+						Name = "@b",
 						DataType = new DataTypeExpr
 						{
 							DataType = "int"
@@ -54,7 +54,7 @@ END";
 					},
 					new ArgumentExpr
 					{
-						Name = "@betCondition",
+						Name = "@c",
 						DataType = new DataTypeExpr
 						{
 							DataType = "nvarchar",
