@@ -44,7 +44,7 @@ END";
 						{
 							DataType = "int"
 						}
-					},new ArgumentExpr
+					}, new ArgumentExpr
 					{
 						Name = "@b",
 						DataType = new DataTypeExpr
@@ -61,7 +61,7 @@ END";
 							DataSize = new DataTypeSizeExpr
 							{
 								Size = 127
-						  }
+							}
 						}
 					}
 				),
@@ -80,6 +80,82 @@ END";
 						)
 					}
 				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void create_func_returns_table()
+		{
+			var sql = @"create function a1( @b int )
+returns @res table ( IsPersion bit, Reason nvarchar(100))
+as
+begin select 1 end";
+			var expr = _sqlParser.Parse(sql);
+			new CreateFunctionExpr
+			{
+				Name = new IdentExpr
+				{
+					Name = "a1"
+				},
+				Arguments = new SqlExprList
+				{
+					Items = new List<SqlExpr> { 
+						new ArgumentExpr
+						{
+							Name = "@b",
+							DataType = new DataTypeExpr
+							{
+								DataType = "int"
+							}
+						}
+					}
+				},
+				ReturnDataType = new DefineColumnTypeExpr
+				{
+					Name = new IdentExpr
+					{
+						Name = "@res"
+					},
+					DataType = new TableTypeExpr
+					{
+						ColumnTypeList = new List<SqlExpr> { new DefineColumnTypeExpr
+					 {
+						  Name = new IdentExpr
+						  {
+								Name = "IsPersion"
+						  },
+						  DataType = new DataTypeExpr
+						  {
+								DataType = "bit"
+						  }
+					 },new DefineColumnTypeExpr
+					 {
+						  Name = new IdentExpr
+						  {
+								Name = "Reason"
+						  },
+						  DataType = new DataTypeExpr
+						  {
+								DataType = "nvarchar",
+								DataSize = new DataTypeSizeExpr
+								{
+									 Size = 100
+								}
+						  }
+					 }}
+					}
+				},
+				Body = new List<SqlExpr> { new SelectExpr
+				{
+					Fields = new SqlExprList
+					{
+						Items = new List<SqlExpr> { new IntegerExpr
+						{
+						  Value = 1
+						}
+					}
+				}
+			}}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
 	}

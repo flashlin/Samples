@@ -245,7 +245,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseReturn()
 		{
-			if(!TryKeyword("RETURN", out _))
+			if (!TryKeyword("RETURN", out _))
 			{
 				throw new PrecursorException("RETURN");
 			}
@@ -456,7 +456,7 @@ namespace PreviewLibrary
 			var funcArguments = ParseArgumentsList();
 			ReadKeyword(")");
 			ReadKeyword("RETURNS");
-			var dataType = ParseDataType();
+			var dataType = Any("<Variable DataType> or <DataType>", ParseColumnDataType, ParseDataType);
 			ReadKeyword("AS");
 			ReadKeyword("BEGIN");
 			var body = ParseBody();
@@ -601,13 +601,18 @@ namespace PreviewLibrary
 			return ParseDataType();
 		}
 
-		protected DefineColumnTypeExpr ParseDefineColumnType()
+		protected DefineColumnTypeExpr ParseColumnDataType()
 		{
+			var startIndex = _token.CurrentIndex;
 			if (!TryGet(ParseSqlIdent1, out var columnNameExpr))
 			{
 				throw new PrecursorException("<ColumnName>");
 			}
-			var dataType = ParseDataType();
+			if (!TryGet(ParseDataType, out var dataType))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<DataType>");
+			}
 			return new DefineColumnTypeExpr
 			{
 				Name = columnNameExpr,
@@ -645,20 +650,26 @@ namespace PreviewLibrary
 
 			ReadKeyword("(");
 
-			var columnTypeList = new List<SqlExpr>();
-			do
-			{
-				if (!TryGet(ParseDefineColumnType, out var columnType))
-				{
-					break;
-				}
-				columnTypeList.Add(columnType);
-			} while (true);
+			var columnTypeList = WithComma(ParseColumnDataType).Items;
 
-			if (columnTypeList.Count == 0)
-			{
-				throw new Exception("Must once FieldType");
-			}
+			//var columnTypeList = new List<SqlExpr>();
+			//do
+			//{
+			//	if (!TryGet(ParseColumnDataType, out var columnType))
+			//	{
+			//		break;
+			//	}
+			//	columnTypeList.Add(columnType);
+			//	if (!IsKeyword(","))
+			//	{
+			//		break;
+			//	}
+			//} while (true);
+
+			//if (columnTypeList.Count == 0)
+			//{
+			//	throw new Exception("Must once FieldType");
+			//}
 
 			ReadKeyword(")");
 
@@ -2007,14 +2018,15 @@ namespace PreviewLibrary
 		{
 			var sr = new StringReader(sql);
 			var lines = new List<string>();
-			do { 
+			do
+			{
 				var line = sr.ReadLine();
-				if(line == null)
+				if (line == null)
 				{
 					break;
 				}
 				lines.Add(line);
-			}while(true);
+			} while (true);
 			var singleLine = string.Join(" ", lines.Select(x => x.Trim()));
 			return singleLine;
 		}
