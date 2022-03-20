@@ -22,7 +22,8 @@ namespace PreviewLibrary
 		public static readonly string[] _keywords = new[]
 		{
 			"SELECT", "FROM", "WHERE", "AS", "WITH",
-			"AND", "OR", "BEGIN", "END", "EXEC", "EXECUTE", "NULL"
+			"AND", "OR", "BEGIN", "END", "EXEC", "EXECUTE", "NULL",
+			"CASE", "THEN", "ELSE"
 		};
 		public static readonly string[] SqlFunc0Names = new[]
 		{

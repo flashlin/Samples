@@ -19,7 +19,10 @@ namespace TestProject
 		{
 			var sql = "CASE WHEN @a = -1 THEN [b] ELSE @c END";
 			var expr = _sqlParser.ParseCasePartial(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+			@"CASE
+	WHEN @a = -1 THEN [b]
+	ELSE @c
+END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
