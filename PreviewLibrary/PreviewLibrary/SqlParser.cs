@@ -230,7 +230,8 @@ namespace PreviewLibrary
 				ParsePrint,
 				ParseUse,
 				ParseExec,
-				ParseGrant
+				ParseGrant,
+				ParseReturn
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
@@ -240,6 +241,18 @@ namespace PreviewLibrary
 				}
 			}
 			throw new NotSupportedException(GetLastLineCh());
+		}
+
+		protected SqlExpr ParseReturn()
+		{
+			if(!TryKeyword("RETURN", out _))
+			{
+				throw new PrecursorException("RETURN");
+			}
+			return new ReturnExpr
+			{
+				Value = ParseSubExpr()
+			};
 		}
 
 		protected SqlExpr ParseGrant()
