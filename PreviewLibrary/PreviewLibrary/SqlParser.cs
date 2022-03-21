@@ -49,6 +49,11 @@ namespace PreviewLibrary
 			_token.PredicateParse(sql);
 		}
 
+		public DeclareVariableExpr ParseDeclarePartial(string sql)
+		{
+			return ParsePartial(ParseDeclare, sql);
+		}
+
 		protected DeclareVariableExpr ParseDeclare()
 		{
 			if (!TryKeyword("DECLARE", out _))
@@ -57,10 +62,18 @@ namespace PreviewLibrary
 			}
 			var varName = ParseVariableName();
 			var dataType = ParseDataType();
+
+			SqlExpr defaultValueExpr = null;
+			if (TryKeyword("=", out _))
+			{
+				defaultValueExpr = ParseConstant();
+			}
+
 			return new DeclareVariableExpr
 			{
 				Name = varName,
 				DataType = dataType,
+				DefaultValue = defaultValueExpr
 			};
 		}
 
@@ -298,7 +311,7 @@ namespace PreviewLibrary
 			return ParsePartial(ParseCase, sql);
 		}
 
-		protected SqlExpr ParsePartial(Func<SqlExpr> parse, string sql)
+		protected T ParsePartial<T>(Func<T> parse, string sql)
 		{
 			_sql = sql;
 			_token.PredicateParse(sql);

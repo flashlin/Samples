@@ -26,5 +26,13 @@ namespace TestProject
             }
          }.ToExpectedObject().ShouldEqual(expr);
 		}
-	}
+
+      [Fact]
+      public void declare_varname_int_eq_default()
+      {
+         var sql = "DECLARE @returnValue bit = 1";
+         var expr = _sqlParser.ParseDeclarePartial(sql);
+         sql.ToExpectedObject().ShouldEqual(expr.ToString());
+      }
+   }
 }
