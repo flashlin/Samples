@@ -248,9 +248,14 @@ namespace PreviewLibrary
 			return success;
 		}
 
-		public bool IsMatch(string pattern)
+		public override bool Move()
 		{
-			return new Regex("^" + pattern + "$").IsMatch(Text);
+			var success = false;
+			do
+			{
+				success = base.Move();
+			} while (success && IsMatch(SingleLineComment));
+			return success;
 		}
 
 		public bool IsMatchAny(params string[] patterns)

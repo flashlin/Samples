@@ -124,7 +124,13 @@ namespace PreviewLibrary
 			Move();
 		}
 
-		public bool Move()
+
+		public bool IsMatch(string pattern)
+		{
+			return new Regex("^" + pattern + "$").IsMatch(Text);
+		}
+
+		public virtual bool Move()
 		{
 			var success = false;
 			do

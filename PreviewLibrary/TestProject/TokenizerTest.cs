@@ -38,7 +38,7 @@ namespace TestProject
 		public void single_comment()
 		{
 			var token = GetToken("-- 123\r\nxxx");
-			"-- 123".ToExpectedObject().ShouldEqual(token);
+			"xxx".ToExpectedObject().ShouldEqual(token);
 		}
 
 		[Fact]

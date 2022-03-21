@@ -226,6 +226,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseCte,
 				ParseDeclare,
 				ParseSemicolon,
 				ParseSelect,
@@ -434,6 +435,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseCte,
 				ParseCase,
 				ParseNot,
 				ParseCreateFunction,
