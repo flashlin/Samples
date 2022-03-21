@@ -1252,6 +1252,47 @@ namespace PreviewLibrary
 			return ParseSimpleColumn();
 		}
 
+		public CommonTableExpressionExpr ParseCtePartial(string sql)
+		{
+			return ParsePartial(ParseCte, sql);
+		}
+
+		protected CommonTableExpressionExpr ParseCte()
+		{
+			var startIndex = _token.CurrentIndex;
+			if(!TryKeyword("WITH", out _))
+			{
+				throw new PrecursorException("WITH");
+			}
+
+			if(!TryGet(ParseIdent, out var cteTableName))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<CTE TableName>");
+			}
+
+			ReadKeyword("(");
+			var cteColumnNames = WithComma(ParseSqlIdent1);
+			ReadKeyword(")");
+			ReadKeyword("AS");
+			ReadKeyword("(");
+			var select1Expr = ParseSelect();
+			ReadKeyword("UNION");
+			ReadKeyword("ALL");
+			var select2Expr = ParseSelect();
+			ReadKeyword(")");
+			var select3Expr = ParseSelect();
+
+			return new CommonTableExpressionExpr
+			{
+				TableName = cteTableName,
+				Columns = cteColumnNames,
+				FirstSelect = select1Expr,
+				RecursiveSelect = select2Expr,
+				Query = select3Expr
+			};
+		}
+
 		private IdentExpr ParseIdentWord()
 		{
 			if (!_token.Try(_token.IsIdentWord, out var word))
