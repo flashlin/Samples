@@ -17,6 +17,14 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void select_var_eq_field_from_table()
+		{
+			var sql = "SELECT @id = id FROM customer";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
 		public void select_name()
 		{
 			var sql = "select name";

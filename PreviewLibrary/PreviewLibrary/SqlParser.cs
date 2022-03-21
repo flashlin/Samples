@@ -1134,8 +1134,7 @@ namespace PreviewLibrary
 
 		public SelectExpr ParseSelectPartial(string sql)
 		{
-			PredicateParse(sql);
-			return ParseSelect();
+			return ParsePartial(ParseSelect, sql);
 		}
 
 		protected SelectExpr ParseSelect()
@@ -1240,6 +1239,15 @@ namespace PreviewLibrary
 			if (_token.IgnoreCase("NOT"))
 			{
 				return ParseNot();
+			}
+			if(TryGet(ParseVariableName, out var variableName))
+			{
+				ReadKeyword("=");
+				return new ColumnSetExpr
+				{
+					SetVariableName = variableName,
+					Column = ParseSimpleColumn(),
+				};
 			}
 			return ParseSimpleColumn();
 		}
