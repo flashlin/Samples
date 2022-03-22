@@ -91,6 +91,14 @@ or TransDate2 < @to".MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString(
 		}
 
 		[Fact]
+		public void select_variable_eq_1_from_table()
+		{
+			var sql = "select @id = 1 from tb1";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			"SELECT @id = 1 FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
 		public void Select2()
 		{
 			var sql = @"select 1

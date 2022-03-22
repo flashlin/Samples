@@ -1247,7 +1247,7 @@ namespace PreviewLibrary
 				return new ColumnSetExpr
 				{
 					SetVariableName = variableName,
-					Column = ParseSimpleColumn(),
+					Column = Any("<SimpleColumn> or <constant>", ParseSimpleColumn, ParseConstant),
 				};
 			}
 			return ParseSimpleColumn();
