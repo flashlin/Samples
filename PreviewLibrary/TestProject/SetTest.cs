@@ -221,7 +221,10 @@ BEGIN
 	SELECT 1
 END";
 			var expr = Parse(sql);
-			sql.MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString());
+			@"IF NOT exists( SELECT 1 FROM sys.databases )
+BEGIN
+SELECT 1
+END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]

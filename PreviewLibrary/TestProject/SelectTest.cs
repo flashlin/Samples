@@ -90,7 +90,10 @@ SELECT field1,field2 FROM cte1";
 		SELECT 1
  END";
 			var expr = Parse(sql);
-			sql.MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString());
+			@"IF exists( SELECT 1 FROM customer WHERE name is NULL )
+BEGIN
+SELECT 1
+END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 	}
 }

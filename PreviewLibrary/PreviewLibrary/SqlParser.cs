@@ -1472,13 +1472,12 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseIfPartial(string sql)
 		{
-			PredicateParse(sql);
-			return ParseIf();
+			return ParsePartial(ParseIf, sql);
 		}
 
 		protected SqlExpr ParseIf()
 		{
-			if (!_token.TryIgnoreCase("IF", out var ifStr))
+			if (!TryKeyword("IF", out _))
 			{
 				throw new PrecursorException("Expect IF");
 			}
@@ -1486,10 +1485,20 @@ namespace PreviewLibrary
 			ReadKeyword("BEGIN");
 			var body = ParseBody();
 			ReadKeyword("END");
+
+			List<SqlExpr> elseBody = new List<SqlExpr>();
+			if(TryKeyword("ELSE", out _))
+			{
+				ReadKeyword("BEGIN");
+				elseBody = ParseBody();
+				ReadKeyword("END");
+			}
+
 			return new IfExpr
 			{
 				Condition = filter,
 				Body = body,
+				ElseBody = elseBody
 			};
 		}
 

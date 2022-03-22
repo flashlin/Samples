@@ -57,11 +57,11 @@ namespace TestProject
 					{
 						Field = new IdentExpr
 						{
-							 Name = "[Status]"
+							Name = "[Status]"
 						},
 						Value = new IdentExpr
 						{
-							 Name = "@Status"
+							Name = "@Status"
 						}
 					}
 				),
@@ -100,7 +100,7 @@ SET [ExchangeRate] = CASE WHEN @ExchangeRate = -1 THEN [ExchangeRate] ELSE @Exch
 						},
 						Value = new CaseExpr
 						{
-							WhenList = new List<WhenThenExpr> { 
+							WhenList = new List<WhenThenExpr> {
 								new WhenThenExpr
 								{
 									When = new CompareExpr
