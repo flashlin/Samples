@@ -18,47 +18,9 @@ namespace TestProject
 		[Fact]
 		public void delete_from_table_where_id_in_selectExpr()
 		{
-			var sql = "delete from customer where id in (select pid from products)";
+			var sql = "DELETE FROM customer WHERE id IN (SELECT pid FROM products)";
 			var expr = Parse(sql);
-
-			new DeleteExpr
-			{
-				Table = new IdentExpr
-				{
-					Name = "customer"
-				},
-				WhereExpr = new CompareExpr
-				{
-					Left = new IdentExpr
-					{
-						Name = "id"
-					},
-					Oper = "in",
-					Right = new GroupExpr
-					{
-						Expr = new SelectExpr
-						{
-							Fields = new SqlExprList
-							{
-								Items = new List<SqlExpr>
-								{
-									new ColumnExpr
-									{
-										Name = "pid"
-									}
-								}
-							},
-							From = new TableExpr
-							{
-								Name = new IdentExpr
-								{
-									Name = "products"
-								}
-							}
-						}
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 	}
 }

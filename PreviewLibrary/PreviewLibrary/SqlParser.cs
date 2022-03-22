@@ -1175,8 +1175,7 @@ namespace PreviewLibrary
 				throw new Exception();
 			}
 
-			return GetAny(ParseSqlFunc, ParseTableToken);
-			//return ParseTableToken();
+			return GetAny(ParseSqlFunc, () => WithComma(ParseTableToken));
 		}
 
 		private TableExpr ParseTableToken()

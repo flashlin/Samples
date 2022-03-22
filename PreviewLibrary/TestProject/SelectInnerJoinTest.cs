@@ -22,65 +22,14 @@ namespace TestProject
 		[Fact]
 		public void select_name_from_table1_inner_join_table2_on_tb2_id_eq_tb1_id()
 		{
-			var sql = @"select name from user tb1 
-INNER JOIN books tb2 with(nolock) 
-on tb2.id = tb1.id";
+			var sql = @"SELECT name FROM user tb1 
+Inner JOIN books tb2 WITH(nolock) 
+ON tb2.id = tb1.id";
 
 			var expr = new SqlParser().Parse(sql);
-
-			var expected = new SelectExpr
-			{
-				Fields = new SqlExprList
-				{ 
-					Items = new List<SqlExpr>
-					{
-						new ColumnExpr
-						{
-							Name = "name"
-						}
-					}
-				},
-				From = new TableExpr
-				{
-					Name = new IdentExpr { Name = "user" },
-					AliasName = "tb1"
-				},
-				Joins = new []
-				{
-					new JoinExpr
-					{
-						Table = new TableExpr
-						{
-							Name = new IdentExpr { Name = "books" },
-							AliasName = "tb2",
-							WithOptions = new WithOptionsExpr
-							{
-								Options = new List<string>
-								{
-									"nolock"
-								}
-							}
-						},
-						JoinType = JoinType.Inner,
-						Filter = new CompareExpr
-						{
-							Left = new IdentExpr
-							{
-								ObjectId = "tb2",
-								Name = "id"
-							},
-							Oper = "=",
-							Right = new IdentExpr
-							{
-								ObjectId = "tb1",
-								Name = "id"
-							}
-						}
-					}
-				}.ToList()
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			@"SELECT name FROM user as tb1
+Inner JOIN books as tb2 WITH(nolock)
+ON tb2.id = tb1.id".MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]

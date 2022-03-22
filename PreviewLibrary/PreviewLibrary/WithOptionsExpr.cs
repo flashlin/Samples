@@ -8,11 +8,11 @@ namespace PreviewLibrary
 
 		public override string ToString()
 		{
-			if( Options == null)
+			if (Options == null)
 			{
 				return string.Empty;
 			}
-			return string.Join(",", Options);
+			return "WITH(" + string.Join(",", Options) + ")";
 		}
 	}
 }

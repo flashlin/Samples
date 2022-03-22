@@ -17,7 +17,7 @@ namespace PreviewLibrary
 			sb.Append($"{Name}");
 			if (!string.IsNullOrEmpty(AliasName))
 			{
-				sb.Append($" {AliasName}");
+				sb.Append($" as {AliasName}");
 			}
 			if( WithOptions != null)
 			{

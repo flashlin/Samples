@@ -190,121 +190,30 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		[Fact]
 		public void select_1_from_table_where_name_eq_func0_and_func1_eq_string()
 		{
-			var sql = @"select 1 from sys.databases where name = DB_NAME() and SUSER_SNAME(owner_sid) = 'sa'";
+			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME() AND SUSER_SNAME( owner_sid ) = 'sa'";
 			var expr = Parse(sql);
-			new SelectExpr
-			{
-				Fields = CreateSqlExprList(
-					new IntegerExpr { Value = 1 }
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr
-					{
-						ObjectId = "sys",
-						Name = "databases"
-					}
-				},
-				WhereExpr = new OperandExpr
-				{
-					Left = new CompareExpr
-					{
-						Left = new IdentExpr { Name = "name" },
-						Oper = "=",
-						Right = new SqlFuncExpr { Name = "DB_NAME", Arguments = new SqlExpr[0] }
-					},
-					Oper = "and",
-					Right = new CompareExpr
-					{
-						Left = new SqlFuncExpr
-						{
-							Name = "SUSER_SNAME",
-							Arguments = new SqlExpr[]
-							{
-								new IdentExpr { Name = "owner_sid" }
-							}
-						},
-						Oper = "=",
-						Right = new StringExpr
-						{
-							Text = "'sa'"
-						}
-					}
-				}
-			}
-			.ToExpectedObject().ShouldEqual(expr);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void select_1_from_table_where_name_eq_func0()
 		{
-			var sql = @"select 1 from sys.databases where name = DB_NAME()";
+			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME()";
 			var expr = Parse(sql);
-			new SelectExpr
-			{
-				Fields = CreateSqlExprList(
-					new IntegerExpr { Value = 1 }
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr
-					{
-						ObjectId = "sys",
-						Name = "databases"
-					}
-				},
-				WhereExpr = new CompareExpr
-				{
-					Left = new IdentExpr { Name = "name" },
-					Oper = "=",
-					Right = new SqlFuncExpr { Name = "DB_NAME", Arguments = new SqlExpr[0] }
-				},
-			}
-			.ToExpectedObject().ShouldEqual(expr);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void if_not_func1_selectExpr_begin_selectExpr_end()
 		{
-			var sql = @"if not exists(
-    select 1 from sys.databases
+			var sql = @"IF NOT exists(
+    SELECT 1 FROM sys.databases
 )
-begin
-	select 1
-end";
+BEGIN
+	SELECT 1
+END";
 			var expr = Parse(sql);
-			new IfExpr
-			{
-				Condition = new NotExpr
-				{
-					Right = new SqlFuncExpr
-					{
-						Name = "exists",
-						Arguments = new SqlExpr[]
-						{
-							new SelectExpr
-							{
-								Fields = CreateSqlExprList( new IntegerExpr { Value = 1 } ),
-								From = new TableExpr
-								{
-									Name = new IdentExpr
-									{
-										ObjectId = "sys",
-										Name = "databases"
-									}
-								}
-							}
-						}
-					}
-				},
-				Body = new List<SqlExpr>
-				{
-					new SelectExpr
-					{
-						Fields = CreateSqlExprList(new IntegerExpr { Value = 1 } ),
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			sql.MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]

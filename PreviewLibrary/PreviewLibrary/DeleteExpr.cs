@@ -12,9 +12,9 @@ namespace PreviewLibrary
 			var whereStr = "";
 			if( WhereExpr != null)
 			{
-				whereStr = $" {WhereExpr}";
+				whereStr = $" WHERE {WhereExpr}";
 			}
-			return $"DELETE {Table}{whereStr}";
+			return $"DELETE FROM {Table}{whereStr}";
 		}
 	}
 }

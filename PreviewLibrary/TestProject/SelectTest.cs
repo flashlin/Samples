@@ -17,6 +17,14 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void select_1_from_tb1_tb2()
+		{
+			var sql = @"SELECT id FROM tb1,tb2";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
 		public void select_xxx_union_all_select_xxx()
 		{
 			var sql = @"WITH Cte1 (field1,field2)
@@ -77,68 +85,12 @@ SELECT field1,field2 FROM cte1";
 		[Fact]
 		public void if_func_select_where_is_null()
 		{
-			var sql = @"if exists (select 1 from customer where name is null)
- Begin
-		select 1
- End";
+			var sql = @"IF exists( SELECT 1 FROM customer WHERE name is NULL )
+ BEGIN
+		SELECT 1
+ END";
 			var expr = Parse(sql);
-			new IfExpr()
-			{
-				Condition = new SqlFuncExpr
-				{
-					Name = "exists",
-					Arguments = new SqlExpr[] { 
-						new SelectExpr
-						{
-							Fields = new SqlExprList
-							{
-								Items = new List<SqlExpr> 
-								{ 
-									new IntegerExpr
-									{
-										Value = 1
-									}
-								}
-							},
-							From = new TableExpr
-							{
-								Name = new IdentExpr
-								{
-									 Name = "customer"
-								}
-							},
-							WhereExpr = new CompareExpr
-							{
-								Left = new IdentExpr
-								{
-									 Name = "name"
-								},
-								Oper = "is",
-								Right = new NullExpr
-								{
-									 Token = "null"
-								}
-							}
-						}
-					}
-				},
-				Body = new List<SqlExpr> 
-				{ 
-					new SelectExpr
-					{
-						Fields = new SqlExprList 
-						{
-							Items = new List<SqlExpr> 
-							{ 
-								new IntegerExpr
-								{
-									Value = 1
-								}
-							}
-						}
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			sql.MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 	}
 }

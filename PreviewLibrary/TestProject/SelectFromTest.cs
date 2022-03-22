@@ -22,29 +22,7 @@ namespace TestProject
 		{
 			var sql = "select name from user";
 			var expr = new SqlParser().Parse(sql);
-
-			var expected = new SelectExpr()
-			{
-				Fields = new SqlExprList
-				{
-					Items = new List<SqlExpr>
-					{
-						new ColumnExpr
-						{
-							Name = "name"
-						}
-					}
-				},
-				From = new TableExpr
-				{
-					Name = new IdentExpr
-					{
-						Name = "user"
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT name FROM user".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -52,52 +30,15 @@ namespace TestProject
 		{
 			var sql = "select name from [user]";
 			var expr = new SqlParser().Parse(sql);
-
-			var expected = new SelectExpr()
-			{
-				Fields = CreateSqlExprList(
-					new ColumnExpr
-					{
-						Name = "name"
-					}
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr
-					{
-						Name = "[user]"
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT name FROM [user]".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void select_column_aliasName_from_table()
 		{
-			var sql = "select name n1 from user";
+			var sql = "SELECT name n1 FROM user";
 			var expr = new SqlParser().Parse(sql);
-
-			var expected = new SelectExpr()
-			{
-				Fields = CreateSqlExprList(
-					new ColumnExpr
-					{
-						Name = "name",
-						AliasName = "n1",
-					}
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr
-					{
-						Name = "user"
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT name as n1 FROM user".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -105,108 +46,31 @@ namespace TestProject
 		{
 			var sql = "select name as n1 from user";
 			var expr = new SqlParser().Parse(sql);
-
-			var expected = new SelectExpr()
-			{
-				Fields = CreateSqlExprList(
-					new ColumnExpr
-					{
-						Name = "name",
-						AliasName = "n1",
-					}
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr
-					{
-						Name = "user"
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT name as n1 FROM user".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void select_column_as_aliasName_from_table_aliasName()
 		{
-			var sql = "select name as n1 from user tb1";
+			var sql = "SELECT name as n1 FROM user tb1";
 			var expr = new SqlParser().Parse(sql);
-
-			var expected = new SelectExpr()
-			{
-				Fields = CreateSqlExprList(
-					new ColumnExpr
-					{
-						Name = "name",
-						AliasName = "n1",
-					}
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr { Name = "user" },
-					AliasName = "tb1"
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"SELECT name as n1 FROM user as tb1".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void select_column_as_aliasName_from_table_as_aliasName()
 		{
-			var sql = "select name as n1 from user as tb1";
+			var sql = "SELECT name as n1 FROM user as tb1";
 			var expr = new SqlParser().Parse(sql);
-
-			var expected = new SelectExpr()
-			{
-				Fields = CreateSqlExprList(
-					new ColumnExpr
-					{
-						Name = "name",
-						AliasName = "n1",
-					}
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr { Name = "user" },
-					AliasName = "tb1"
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void select_column_as_aliasName_from_table_as_aliasName_with_nolock()
 		{
-			var sql = "select name as n1 from user as tb1 with(nolock)";
+			var sql = "SELECT name as n1 FROM user as tb1 WITH(nolock)";
 			var expr = new SqlParser().Parse(sql);
-
-			var expected = new SelectExpr()
-			{
-				Fields = CreateSqlExprList(
-					new ColumnExpr
-					{
-						Name = "name",
-						AliasName = "n1",
-					}
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr { Name = "user" },
-					AliasName = "tb1",
-					WithOptions = new WithOptionsExpr
-					{
-						Options = new List<string>
-						{
-							"nolock"
-						}
-					}
-				},
-			};
-
-			expected.ToExpectedObject().ShouldEqual(expr);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -219,78 +83,11 @@ namespace TestProject
 		or TransDate2 < @to";
 
 			var expr = new SqlParser().Parse(sql) as SelectExpr;
-
-			var expected = new SelectExpr()
-			{
-				Fields = CreateSqlExprList(
-					new ColumnExpr
-					{
-						Name = "CustID"
-					},
-					new ColumnExpr
-					{
-						Name = "Transid"
-					},
-					new ColumnExpr
-					{
-						Name = "TransDate"
-					}
-				),
-				From = new TableExpr
-				{
-					Name = new IdentExpr { Name = "Statement" },
-					WithOptions = new WithOptionsExpr
-					{
-						Options = new List<string>
-						{
-							"nolock"
-						}
-					}
-				},
-				WhereExpr = new OperandExpr
-				{
-					Left = new OperandExpr
-					{
-						Left = new LikeExpr
-						{
-							Left = new IdentExpr
-							{
-								Name = "TransDesc"
-							},
-							Right = "'Full Transfer%'"
-						},
-						Oper = "and",
-						Right = new CompareExpr
-						{
-							Left = new IdentExpr
-							{
-								Name = "TransDate1"
-							},
-							Oper = ">=",
-							Right = new IdentExpr
-							{
-								Name = "@from"
-							},
-						}
-					},
-					Oper = "or",
-					Right = new CompareExpr
-					{
-						Left = new IdentExpr
-						{
-							Name = "TransDate2"
-						},
-						Oper = "<",
-						Right = new IdentExpr
-						{
-							Name = "@to"
-						}
-					}
-				}
-			};
-
-			//expr.Should().BeEquivalentTo(expected, o => o.RespectingRuntimeTypes());
-			expected.ToExpectedObject().ShouldEqual(expr);
+			@"SELECT CustID,Transid,TransDate
+FROM Statement WITH(nolock)
+WHERE TransDesc LIKE 'Full Transfer%'
+and TransDate1 >= @from
+or TransDate2 < @to".MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
