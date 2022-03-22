@@ -99,5 +99,13 @@ namespace TestProject
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void a_and_b()
+		{
+			var sql = "a & @b";
+			var expr = _sqlParser.ParseArithmeticPartial(sql);
+			"a & @b".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
 	}
 }

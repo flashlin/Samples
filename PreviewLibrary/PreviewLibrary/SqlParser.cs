@@ -88,7 +88,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseArithmeticExpr()
 		{
-			var ops = new string[] { "(", ")", "*", "/", "+", "-" };
+			var ops = new string[] { "(", ")", "&", "*", "/", "+", "-" };
 			return ParseConcat(() => ParseSubExpr(), ops);
 		}
 
