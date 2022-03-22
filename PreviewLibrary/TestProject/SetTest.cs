@@ -51,6 +51,14 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void set_variable_eq_xx()
+		{
+			var sql = "set @id = 1";
+			var expr = _sqlParser.ParseSetPartial(sql);
+			"SET @id = 1".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
 		public void set_variable_eq_case()
 		{
 			var sql = @"SET @returnValue = CASE WHEN exists(
