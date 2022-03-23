@@ -42,6 +42,7 @@ namespace PreviewLibrary
 		public static string[] DataTypes = new string[]
 		{
 			"INT", "DATETIME", "DECIMAL", "BIT", "NUMERIC", "SMALLDATETIME",
+			"FLOAT",
 			"DATETIME2", "NVARCHAR", "VARCHAR",
 			"TINYINT"
 		};
