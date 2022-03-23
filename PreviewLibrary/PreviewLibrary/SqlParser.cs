@@ -470,10 +470,24 @@ namespace PreviewLibrary
 				var parse = parseList[i];
 				if (TryGet(parse, out var expr))
 				{
-					return ParseCompareOpExpr(ParseInExpr(expr));
+					//return ParseCompareOpExpr(ParseInExpr(expr));
+
+					return ParseRightExpr(expr, 
+						ParseNotLikeExpr,
+						ParseInExpr,
+						ParseCompareOpExpr);
 				}
 			}
 			throw new Exception(GetLastLineCh() + " Expect sub expr");
+		}
+
+		protected SqlExpr ParseRightExpr(SqlExpr leftExpr, params Func<SqlExpr, SqlExpr>[] rightParseList)
+		{
+			for (var i = 0; i < rightParseList.Length; i++)
+			{
+				leftExpr = rightParseList[i](leftExpr);
+			}
+			return leftExpr;
 		}
 
 		protected CreateFunctionExpr ParseCreateFunction()
@@ -563,12 +577,34 @@ namespace PreviewLibrary
 		{
 			if (!_token.TryIgnoreCase("NOT"))
 			{
-				throw new PrecursorException("Expect NOT");
+				throw new PrecursorException("NOT");
 			}
 			var right = ParseSubExpr();
 			return new NotExpr
 			{
 				Right = right
+			};
+		}
+
+		protected SqlExpr ParseNotLikeExpr(SqlExpr leftExpr)
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryKeyword("NOT", out _))
+			{
+				return leftExpr;
+			}
+
+			if (!TryKeyword("LIKE", out _))
+			{
+				_token.MoveTo(startIndex);
+				return leftExpr;
+			}
+
+			var valueExpr = ParseSubExpr();
+			return new NotLikeExpr
+			{
+				Left = leftExpr,
+				Right = valueExpr
 			};
 		}
 
@@ -1825,6 +1861,7 @@ namespace PreviewLibrary
 			//var left = ParseCompareOp(ParseArithmeticExpr);
 			//var left = ParseCompareOp(ParseSubExpr);
 			var left = ParseAnd(() => ParseCompareOp(() => ParseArithmeticExpr(() => ParseCompareOp(ParseSubExpr))));
+
 			return left;
 
 			var likeExpr = Get(ParseLike, left);
