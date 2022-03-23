@@ -123,10 +123,12 @@ namespace PreviewLibrary
 		{
 			var operands = new Stack<SqlExpr>();
 			var ops = new Stack<string>();
+			var readOperand = true;
 			while (_token.Text != "")
 			{
-				if (TryGet(readExpr, out var expr))
+				if (readOperand && TryGet(readExpr, out var expr))
 				{
+					readOperand = false;
 					operands.Push(expr);
 					continue;
 				}
@@ -138,6 +140,8 @@ namespace PreviewLibrary
 				{
 					break;
 				}
+
+				readOperand = true;
 
 				if (!_token.TryIgnoreCase(opers, out var curr_op))
 				{
@@ -458,6 +462,7 @@ namespace PreviewLibrary
 				ParseSqlFunc,
 				ParseConstant,
 				ParseSelect,
+				ParseDelete,
 				ParseExec
 			};
 			for (var i = 0; i < parseList.Length; i++)
@@ -1551,7 +1556,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseCompareOpExpr(SqlExpr leftExpr)
 		{
-			if(!_token.TryEqual(SqlTokenizer.CompareOps, out var op))
+			if (!_token.TryEqual(SqlTokenizer.CompareOps, out var op))
 			{
 				return leftExpr;
 			}
@@ -1566,7 +1571,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseInExpr(SqlExpr leftExpr)
 		{
-			if(!TryKeyword("IN", out _))
+			if (!TryKeyword("IN", out _))
 			{
 				return leftExpr;
 			}
