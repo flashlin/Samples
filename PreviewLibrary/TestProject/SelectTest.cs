@@ -89,8 +89,10 @@ SELECT field1,field2 FROM cte1";
  BEGIN
 		SELECT 1
  END";
+			
 			var expr = Parse(sql);
-			@"IF exists( SELECT 1 FROM customer WHERE name is NULL )
+
+			@"IF exists( SELECT 1 FROM customer WHERE name IS NULL )
 BEGIN
 SELECT 1
 END".ToExpectedObject().ShouldEqual(expr.ToString());

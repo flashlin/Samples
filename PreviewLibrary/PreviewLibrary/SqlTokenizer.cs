@@ -60,27 +60,32 @@ namespace PreviewLibrary
 			">", "<", "="
 		};
 
-		static readonly string[] CompareOps = new []
+		public static readonly string[] CompareOps = new[]
 		{
 			"LIKE", "IN", "IS"
 		}.Concat(CompareOperSymbols).ToArray();
+
+		public static readonly string[] ConcatOps = new[]
+		{
+			"AND", "OR"
+		};
 
 		static IEnumerable<string> Escape(IEnumerable<string> patterns)
 		{
 			return patterns.Select(e => Regex.Escape(e));
 		}
 
-		public static string[] Op1 = new []
+		public static string[] Op1 = new[]
 		{
 			"*", "/"
 		};
 
-		public static string[] Op2 = new []
+		public static string[] Op2 = new[]
 		{
 			"+", "-"
 		};
-		
-		public static string[] Terms = new []
+
+		public static string[] Terms = new[]
 		{
 			"(", ")"
 		};
@@ -268,6 +273,18 @@ namespace PreviewLibrary
 					return true;
 				}
 			}
+			return false;
+		}
+
+		public bool TryEqual(string[] keywords, out string token)
+		{
+			if (keywords.Any(x => IgnoreCase(x)))
+			{
+				token = Text;
+				Move();
+				return true;
+			}
+			token = null;
 			return false;
 		}
 	}

@@ -86,10 +86,25 @@ namespace PreviewLibrary
 			return name;
 		}
 
+		protected SqlExpr ParseArithmeticExpr<T>(Func<T> leftParse)
+			where T : SqlExpr
+		{
+			var ops = new string[] { "(", ")", "&", "*", "/", "+", "-" };
+			return ParseConcat(() => leftParse(), ops);
+		}
+
 		protected SqlExpr ParseArithmeticExpr()
 		{
 			var ops = new string[] { "(", ")", "&", "*", "/", "+", "-" };
 			return ParseConcat(() => ParseSubExpr(), ops);
+		}
+
+
+		protected SqlExpr ParseAndOrExpr<T>(Func<T> leftParse)
+			where T : SqlExpr
+		{
+			var ops = new string[] { "(", ")", "AND", "OR" };
+			return ParseConcat(() => leftParse(), ops);
 		}
 
 		protected SqlExpr ParseAndOrExpr()
@@ -100,7 +115,8 @@ namespace PreviewLibrary
 
 		private bool IsOperator(string[] opers)
 		{
-			return _token.IsMatchAny(opers.Select(x => Regex.Escape(x)).ToArray());
+			//return _token.IsMatchAny(opers.Select(x => Regex.Escape(x)).ToArray());
+			return opers.Any(x => _token.IgnoreCase(x));
 		}
 
 		private SqlExpr ParseConcat(Func<SqlExpr> readExpr, string[] opers)
@@ -449,7 +465,7 @@ namespace PreviewLibrary
 				var parse = parseList[i];
 				if (TryGet(parse, out var expr))
 				{
-					return expr;
+					return ParseInExpr(expr);
 				}
 			}
 			throw new Exception(GetLastLineCh() + " Expect sub expr");
@@ -482,6 +498,59 @@ namespace PreviewLibrary
 				Arguments = funcArguments,
 				ReturnDataType = dataType,
 				Body = body
+			};
+		}
+
+		protected SqlExpr ParseAnd<T>(Func<T> leftParse)
+			where T : SqlExpr
+		{
+			var ops = new[] { "(", ")", "AND", "OR" };
+			return ParseConcat(leftParse, ops);
+		}
+
+		protected SqlExpr ParseCompareOp<T>(Func<T> leftParse)
+			where T : SqlExpr
+		{
+			var leftExpr = leftParse();
+			if (_token.TryEqual(SqlTokenizer.CompareOps, out var op))
+			{
+				return new CompareExpr
+				{
+					Left = leftExpr,
+					Oper = op.ToUpper(),
+					Right = ParseCompareOp(leftParse)
+				};
+			}
+			return leftExpr;
+		}
+
+		protected T ParseIsNull<T>(Func<T> leftParse)
+			where T : SqlExpr
+		{
+			var leftExpr = leftParse();
+			return (T)ParseIsNull(leftExpr);
+		}
+
+		protected SqlExpr ParseIsNull(SqlExpr left)
+		{
+			if (!TryKeyword("IS", out _))
+			{
+				return left;
+			}
+
+			if (!TryKeyword("NULL", out var nullToken))
+			{
+				throw new Exception("<NULL>");
+			}
+
+			return new CompareExpr
+			{
+				Left = left,
+				Oper = "IS",
+				Right = new NullExpr
+				{
+					Token = nullToken
+				}
 			};
 		}
 
@@ -1241,7 +1310,7 @@ namespace PreviewLibrary
 			{
 				return ParseNot();
 			}
-			if(TryGet(ParseVariableName, out var variableName))
+			if (TryGet(ParseVariableName, out var variableName))
 			{
 				ReadKeyword("=");
 				return new ColumnSetExpr
@@ -1261,12 +1330,12 @@ namespace PreviewLibrary
 		protected CommonTableExpressionExpr ParseCte()
 		{
 			var startIndex = _token.CurrentIndex;
-			if(!TryKeyword("WITH", out _))
+			if (!TryKeyword("WITH", out _))
 			{
 				throw new PrecursorException("WITH");
 			}
 
-			if(!TryGet(ParseIdent, out var cteTableName))
+			if (!TryGet(ParseIdent, out var cteTableName))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<CTE TableName>");
@@ -1457,8 +1526,7 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseWherePartial(string sql)
 		{
-			PredicateParse(sql);
-			return ParseWhere();
+			return ParsePartial(ParseWhere, sql);
 		}
 
 		protected SqlExpr ParseWhere()
@@ -1475,6 +1543,24 @@ namespace PreviewLibrary
 			return ParsePartial(ParseIf, sql);
 		}
 
+		protected SqlExpr ParseInExpr(SqlExpr leftExpr)
+		{
+			if(!TryKeyword("IN", out _))
+			{
+				return leftExpr;
+			}
+
+			ReadKeyword("(");
+			var values = ParseSubExpr();
+			ReadKeyword(")");
+
+			return new InExpr
+			{
+				LeftExpr = leftExpr,
+				Values = values
+			};
+		}
+
 		protected SqlExpr ParseIf()
 		{
 			if (!TryKeyword("IF", out _))
@@ -1487,7 +1573,7 @@ namespace PreviewLibrary
 			ReadKeyword("END");
 
 			List<SqlExpr> elseBody = new List<SqlExpr>();
-			if(TryKeyword("ELSE", out _))
+			if (TryKeyword("ELSE", out _))
 			{
 				ReadKeyword("BEGIN");
 				elseBody = ParseBody();
@@ -1707,9 +1793,12 @@ namespace PreviewLibrary
 				return ParseNot();
 			}
 
-			//var left = Any("Arithmetic or SubExpr", ParseArithmeticExpr, ParseSubExpr);
-			var left = ParseSubExpr();
+			//var left = ParseSubExpr();
 			//var left = ParseArithmeticExpr();
+			//var left = ParseCompareOp(ParseArithmeticExpr);
+			//var left = ParseCompareOp(ParseSubExpr);
+			var left = ParseAnd(() => ParseCompareOp(() => ParseArithmeticExpr(() => ParseCompareOp(ParseSubExpr))));
+			return left;
 
 			var likeExpr = Get(ParseLike, left);
 			if (likeExpr != null)
@@ -1917,6 +2006,11 @@ namespace PreviewLibrary
 		private bool IsKeyword(string keyword)
 		{
 			return _token.IgnoreCase(keyword);
+		}
+
+		private bool IsAnyKeyword(params string[] keywords)
+		{
+			return keywords.Any(keyword => IsKeyword(keyword));
 		}
 
 		private string ReadKeyword(string keyword)
