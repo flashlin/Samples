@@ -1376,7 +1376,7 @@ namespace PreviewLibrary
 				return new ColumnSetExpr
 				{
 					SetVariableName = variableName,
-					Column = Any("<SimpleColumn> or <constant>", ParseSimpleColumn, ParseConstant),
+					Column = Any("<SimpleColumn> or <constant>", ParseSimpleColumn, ParseConstant, ParseSubExpr),
 				};
 			}
 			return ParseSimpleColumn();
@@ -1795,7 +1795,7 @@ namespace PreviewLibrary
 			var expr = GetAny(ParseNull, ParseHex16Number, ParseDecimal, ParseString, ParseInteger, ParseSqlIdent);
 			if (expr == null)
 			{
-				ThrowLastLineCh("Expect constant");
+				throw new PrecursorException("<Constant>");
 			}
 			return expr;
 		}

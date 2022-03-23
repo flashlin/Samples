@@ -97,5 +97,13 @@ BEGIN
 SELECT 1
 END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+		[Fact]
+		public void select_a_eq_sum()
+		{
+			var sql = "select @a=sum(b) from tb1";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			"SELECT @a = sum( b ) FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
 	}
 }
