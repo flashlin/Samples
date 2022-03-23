@@ -283,6 +283,20 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("RETURN");
 			}
+
+			if (TryKeyword("(", out _))
+			{
+				var valueExpr = ParseSubExpr();
+				ReadKeyword(")");
+				return new GroupExpr
+				{
+					Expr = new ReturnExpr
+					{
+						Value = valueExpr,
+					},
+				};
+			}
+
 			return new ReturnExpr
 			{
 				Value = ParseSubExpr()
@@ -472,7 +486,7 @@ namespace PreviewLibrary
 				{
 					//return ParseCompareOpExpr(ParseInExpr(expr));
 
-					return ParseRightExpr(expr, 
+					return ParseRightExpr(expr,
 						ParseNotLikeExpr,
 						ParseInExpr,
 						ParseCompareOpExpr);
