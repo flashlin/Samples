@@ -1627,7 +1627,7 @@ namespace PreviewLibrary
 			}
 
 			ReadKeyword("(");
-			var values = ParseSubExpr();
+			var values = WithComma(ParseSubExpr);
 			ReadKeyword(")");
 
 			return new InExpr
