@@ -465,7 +465,7 @@ namespace PreviewLibrary
 				var parse = parseList[i];
 				if (TryGet(parse, out var expr))
 				{
-					return ParseInExpr(expr);
+					return ParseCompareOpExpr(ParseInExpr(expr));
 				}
 			}
 			throw new Exception(GetLastLineCh() + " Expect sub expr");
@@ -565,6 +565,11 @@ namespace PreviewLibrary
 			{
 				Right = right
 			};
+		}
+
+		public DeleteExpr ParseDeletePartial(string sql)
+		{
+			return ParsePartial(ParseDelete, sql);
 		}
 
 		protected DeleteExpr ParseDelete()
@@ -1543,6 +1548,22 @@ namespace PreviewLibrary
 			return ParsePartial(ParseIf, sql);
 		}
 
+
+		protected SqlExpr ParseCompareOpExpr(SqlExpr leftExpr)
+		{
+			if(!_token.TryEqual(SqlTokenizer.CompareOps, out var op))
+			{
+				return leftExpr;
+			}
+
+			return new CompareExpr
+			{
+				Left = leftExpr,
+				Oper = op.ToUpper(),
+				Right = ParseSubExpr()
+			};
+		}
+
 		protected SqlExpr ParseInExpr(SqlExpr leftExpr)
 		{
 			if(!TryKeyword("IN", out _))
@@ -1763,7 +1784,8 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseEqualOpPartial(string sql)
 		{
-			return ParsePartial(() => ParseEqualOp(ParseSubExpr()), sql);
+			return ParsePartial(ParseSubExpr, sql);
+			//return ParsePartial(() => ParseEqualOp(ParseSubExpr()), sql);
 		}
 
 		protected SqlExpr ParseEqualOp(SqlExpr leftExpr)
