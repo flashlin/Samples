@@ -39,8 +39,7 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseArithmeticPartial(string sql)
 		{
-			PredicateParse(sql);
-			return ParseArithmeticExpr();
+			return ParsePartial(ParseArithmeticExpr, sql);
 		}
 
 		private void PredicateParse(string sql)
@@ -76,7 +75,7 @@ namespace PreviewLibrary
 				DefaultValue = defaultValueExpr
 			};
 		}
-		
+
 		protected VariableExpr ParseVariable()
 		{
 			if (!_token.TryMatch(SqlTokenizer.SqlVariable, out var name))
@@ -130,7 +129,7 @@ namespace PreviewLibrary
 			var readOperand = true;
 			while (_token.Text != "")
 			{
-				if (readOperand && TryGet(readExpr, out var expr))
+				if (readOperand && !IsOperator(opers) && TryGet(readExpr, out var expr))
 				{
 					readOperand = false;
 					operands.Push(expr);
@@ -167,7 +166,7 @@ namespace PreviewLibrary
 				do
 				{
 					var stack_op = ops.Peek();
-					if (CompareOperPriority(opers, stack_op, curr_op) < 0)
+					if (CompareOperPriority(opers, stack_op, curr_op) <= 0)
 					{
 						ops.Push(curr_op);
 						break;
@@ -284,7 +283,7 @@ namespace PreviewLibrary
 
 		protected AnyExpr ParseStar()
 		{
-			if(!TryKeyword("*", out _))
+			if (!TryKeyword("*", out _))
 			{
 				throw new PrecursorException("*");
 			}
@@ -391,7 +390,7 @@ namespace PreviewLibrary
 				}
 				var conditionExpr = ParseFilterList();
 				ReadKeyword("THEN");
-				
+
 				var thenExpr = ParseArithmeticExpr();
 
 				whenList.Add(new WhenThenExpr
@@ -674,8 +673,7 @@ namespace PreviewLibrary
 
 		public SqlFuncExpr ParseFuncPartial(string sql)
 		{
-			PredicateParse(sql);
-			return ParseSqlFunc();
+			return ParsePartial(ParseSqlFunc, sql);
 		}
 
 		protected CustomFuncExpr ParseCustomFunc()
@@ -691,7 +689,8 @@ namespace PreviewLibrary
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("(");
 			}
-			var subExprList = WithComma(ParseSubExpr);
+			//var subExprList = WithComma(ParseSubExpr);
+			var subExprList = WithComma(ParseArithmeticExpr);
 			ReadKeyword(")");
 
 			return new CustomFuncExpr
@@ -1843,7 +1842,7 @@ namespace PreviewLibrary
 
 		private SqlExpr ParseConstant()
 		{
-			var expr = GetAny(ParseNull, ParseHex16Number, ParseDecimal, ParseString, ParseInteger, 
+			var expr = GetAny(ParseNull, ParseHex16Number, ParseDecimal, ParseString, ParseInteger,
 				ParseSqlIdent,
 				ParseVariable,
 				ParseStar);

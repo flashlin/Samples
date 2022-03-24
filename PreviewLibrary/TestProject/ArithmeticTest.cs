@@ -43,34 +43,7 @@ namespace TestProject
 		{
 			var sql = "1 + 2 * 3 + 4";
 			var expr = new SqlParser().ParseArithmeticPartial(sql);
-			new OperandExpr
-			{
-				Left = new OperandExpr
-				{
-					Left = new IntegerExpr
-					{
-						Value = 1
-					},
-					Oper = "+",
-					Right = new OperandExpr
-					{
-						Left = new IntegerExpr
-						{
-							Value = 2
-						},
-						Oper = "*",
-						Right = new IntegerExpr
-						{
-							Value = 3
-						}
-					}
-				},
-				Oper = "+",
-				Right = new IntegerExpr
-				{
-					Value = 4
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			"1 + 2 * 3 + 4".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -106,6 +79,14 @@ namespace TestProject
 			var sql = "a & @b";
 			var expr = _sqlParser.ParseArithmeticPartial(sql);
 			"a & @b".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
+		public void multiple_group()
+		{
+			var sql = "((a + 1) * b)";
+			var expr = _sqlParser.ParseArithmeticPartial(sql);
+			"a + 1 * b".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 	}
 }
