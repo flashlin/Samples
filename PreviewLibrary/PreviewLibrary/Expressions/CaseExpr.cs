@@ -8,11 +8,16 @@ namespace PreviewLibrary.Expressions
 	{
 		public List<WhenThenExpr> WhenList { get; set; }
 		public SqlExpr Else { get; set; }
+		public SqlExpr InputExpr { get; set; }
 
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
 			sb.AppendLine("CASE");
+			if( InputExpr != null )
+			{
+				sb.AppendLine($"	{InputExpr}");
+			}
 			foreach (var whenExpr in WhenList)
 			{
 				sb.AppendLine($"	{whenExpr}");

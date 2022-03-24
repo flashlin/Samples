@@ -76,6 +76,18 @@ namespace PreviewLibrary
 				DefaultValue = defaultValueExpr
 			};
 		}
+		
+		protected VariableExpr ParseVariable()
+		{
+			if (!_token.TryMatch(SqlTokenizer.SqlVariable, out var name))
+			{
+				throw new PrecursorException("<Variable>");
+			}
+			return new VariableExpr
+			{
+				Name = name,
+			};
+		}
 
 		protected string ParseVariableName()
 		{
@@ -365,6 +377,8 @@ namespace PreviewLibrary
 				throw new PrecursorException("CASE");
 			}
 
+			TryGet(ParseVariable, out var inputExpr);
+
 			var whenList = new List<WhenThenExpr>();
 			do
 			{
@@ -388,6 +402,7 @@ namespace PreviewLibrary
 
 			return new CaseExpr
 			{
+				InputExpr = inputExpr,
 				WhenList = whenList,
 				Else = elseExpr
 			};
