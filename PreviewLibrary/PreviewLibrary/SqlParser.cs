@@ -265,6 +265,7 @@ namespace PreviewLibrary
 				ParseSet,
 				ParseOnCondition,
 				ParseIf,
+				ParseWhile,
 				ParsePrint,
 				ParseUse,
 				ParseExec,
