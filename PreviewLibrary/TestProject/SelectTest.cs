@@ -105,5 +105,14 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 			var expr = _sqlParser.ParseSelectPartial(sql);
 			"SELECT @a = sum( b ) FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+		[Fact]
+		public void select_var_eq_a_or_b()
+		{
+			var sql = "select @a = @b | c from tb1";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT @a = @b | c FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
 	}
 }

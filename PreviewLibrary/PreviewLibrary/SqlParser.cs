@@ -98,19 +98,11 @@ namespace PreviewLibrary
 			return name;
 		}
 
-		protected SqlExpr ParseArithmeticExpr<T>(Func<T> leftParse)
-			where T : SqlExpr
-		{
-			var ops = new string[] { "(", ")", "&", "*", "/", "+", "-" };
-			return ParseConcat(() => leftParse(), ops);
-		}
-
 		protected SqlExpr ParseArithmeticExpr()
 		{
-			var ops = new string[] { "(", ")", "&", "*", "/", "+", "-" };
+			var ops = new string[] { "(", ")", "&", "|", "*", "/", "+", "-" };
 			return ParseConcat(() => ParseSubExpr(), ops);
 		}
-
 
 		protected SqlExpr ParseAndOrExpr<T>(Func<T> leftParse)
 			where T : SqlExpr
@@ -1400,7 +1392,7 @@ namespace PreviewLibrary
 				return new ColumnSetExpr
 				{
 					SetVariableName = variableName,
-					Column = Any("<SimpleColumn> or <constant>", ParseSimpleColumn, ParseConstant, ParseSubExpr),
+					Column = Any("<SimpleColumn> or <constant>", ParseArithmeticExpr, ParseSimpleColumn, ParseConstant, ParseSubExpr),
 				};
 			}
 			return ParseSimpleColumn();
