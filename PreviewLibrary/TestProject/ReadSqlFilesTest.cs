@@ -30,11 +30,21 @@ namespace TestProject
 		{
 			var sqlFolder = @"D:\VDisk\MyGitHub\SQL";
 			var p = new SqlParser();
+			var fileCount = 0;
 			foreach (var sqlFile in ReadSqlFiles(sqlFolder))
 			{
-				_outputHelper.WriteLine(sqlFile);
 				var sql = File.ReadAllText(sqlFile);
-				p.ParseAll(sql).ToList();
+				try
+				{
+					p.ParseAll(sql).ToList();
+				}
+				catch
+				{
+					_outputHelper.WriteLine($"parsedCount={fileCount}");
+					_outputHelper.WriteLine($"'{sqlFile}'");
+					throw;
+				}
+				fileCount++;
 			}
 		}
 
