@@ -17,7 +17,6 @@ namespace TestProject
 		}
 
 		[Theory]
-		//[InlineData(@"D:\VDisk\MyGitHub\SQL\TigerSoft\Consus.Account\AccountDB\bin\Release\AccountDB.publish.sql")]
 		[InlineData(@"D:\Demo\1.sql")]
 		public void TestSqlFile(string file)
 		{

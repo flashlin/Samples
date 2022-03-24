@@ -1653,11 +1653,35 @@ namespace PreviewLibrary
 			};
 		}
 
+		public WhileExpr ParseWhilePartial(string sql)
+		{
+			return ParsePartial(ParseWhile, sql);
+		}
+
+		protected WhileExpr ParseWhile()
+		{
+			if (!TryKeyword("WHILE", out _))
+			{
+				throw new PrecursorException("WHILE");
+			}
+
+			var booleanExpr = ParseArithmeticExpr();
+			ReadKeyword("BEGIN");
+			var body = ParseBody();
+			ReadKeyword("END");
+
+			return new WhileExpr
+			{
+				Condition = booleanExpr,
+				Body = body
+			};
+		}
+
 		protected SqlExpr ParseIf()
 		{
 			if (!TryKeyword("IF", out _))
 			{
-				throw new PrecursorException("Expect IF");
+				throw new PrecursorException("IF");
 			}
 			var filter = ParseFilterList();
 			ReadKeyword("BEGIN");
