@@ -1277,7 +1277,6 @@ namespace PreviewLibrary
 
 			var fields = ParseManyColumns();
 			var fromExpr = Get(ParseFrom);
-			var whereExpr = Get(ParseWhere);
 			var joinTable = Get(ParseJoin);
 			var joinTableList = (List<JoinExpr>)null;
 			if (joinTable != null)
@@ -1287,6 +1286,7 @@ namespace PreviewLibrary
 					joinTable,
 				};
 			}
+			var whereExpr = Get(ParseWhere);
 
 			return new SelectExpr
 			{
@@ -1593,7 +1593,7 @@ namespace PreviewLibrary
 		{
 			if (!_token.TryIgnoreCase("where"))
 			{
-				throw new PrecursorException("should is 'WHERE'");
+				throw new PrecursorException("WHERE");
 			}
 			return ParseFilterList();
 		}
@@ -2143,6 +2143,13 @@ namespace PreviewLibrary
 		private JoinExpr ParseJoin()
 		{
 			ReadKeywordOption(new[] { "inner", "left", "right" }, out var joinTypeStr);
+
+			var outerToken = string.Empty;
+			if (!string.IsNullOrEmpty(joinTypeStr))
+			{
+				TryKeyword("OUTER", out outerToken);
+			}
+
 			ReadKeyword("join");
 
 			var table = ParseTableToken();
@@ -2155,6 +2162,7 @@ namespace PreviewLibrary
 			{
 				Table = table,
 				JoinType = joinType,
+				OuterToken = outerToken,
 				Filter = filterList
 			};
 		}
