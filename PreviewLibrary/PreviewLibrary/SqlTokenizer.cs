@@ -33,7 +33,7 @@ namespace PreviewLibrary
 		};
 		public static readonly string[] SqlFunc1Names = new[]
 		{
-			"EXISTS", "SUSER_SNAME", "SUM"
+			"EXISTS", "SUSER_SNAME", "SUM", "COUNT"
 		};
 		public static readonly string[] SqlFunc2Names = new[]
 		{

@@ -282,6 +282,16 @@ namespace PreviewLibrary
 			throw new NotSupportedException(GetLastLineCh());
 		}
 
+		protected AnyExpr ParseStar()
+		{
+			if(!TryKeyword("*", out _))
+			{
+				throw new PrecursorException("*");
+			}
+
+			return new AnyExpr();
+		}
+
 		protected SqlExpr ParseReturn()
 		{
 			if (!TryKeyword("RETURN", out _))
@@ -1835,7 +1845,8 @@ namespace PreviewLibrary
 		{
 			var expr = GetAny(ParseNull, ParseHex16Number, ParseDecimal, ParseString, ParseInteger, 
 				ParseSqlIdent,
-				ParseVariable);
+				ParseVariable,
+				ParseStar);
 			if (expr == null)
 			{
 				throw new PrecursorException("<Constant>");
