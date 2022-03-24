@@ -122,6 +122,24 @@ namespace PreviewLibrary
 			return opers.Any(x => _token.IgnoreCase(x));
 		}
 
+		protected NegativeExpr ParseNegativeExpr(Func<SqlExpr> readExpr)
+		{
+			if (!TryKeyword("-", out _))
+			{
+				throw new PrecursorException("-");
+			}
+
+			if( TryGet(readExpr, out var negativeExpr) )
+			{
+				return new NegativeExpr
+				{
+					Value = negativeExpr
+				};
+			}
+
+			throw new Exception();
+		}
+
 		private SqlExpr ParseConcat(Func<SqlExpr> readExpr, string[] opers)
 		{
 			var operands = new Stack<SqlExpr>();
@@ -129,7 +147,13 @@ namespace PreviewLibrary
 			var readOperand = true;
 			while (_token.Text != "")
 			{
-				if (readOperand && !IsOperator(opers) && TryGet(readExpr, out var expr))
+				if (readOperand && TryGet(() => ParseNegativeExpr(readExpr), out var negativeExpr))
+				{
+					readOperand = false;
+					operands.Push(negativeExpr);
+					continue;
+				}
+				else if (readOperand && !IsOperator(opers) && TryGet(readExpr, out var expr))
 				{
 					readOperand = false;
 					operands.Push(expr);
@@ -1591,7 +1615,7 @@ namespace PreviewLibrary
 
 		private ColumnExpr ParseSimpleColumn()
 		{
-			if(!TryGet(ParseSqlIdent, out var identExpr))
+			if (!TryGet(ParseSqlIdent, out var identExpr))
 			{
 				throw new PrecursorException("<Identifier>");
 			}
