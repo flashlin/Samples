@@ -66,7 +66,7 @@ namespace PreviewLibrary
 			SqlExpr defaultValueExpr = null;
 			if (TryKeyword("=", out _))
 			{
-				defaultValueExpr = ParseConstant();
+				defaultValueExpr = Any("<Constant>", ParseArithmeticExpr, ParseConstant);
 			}
 
 			return new DeclareVariableExpr
