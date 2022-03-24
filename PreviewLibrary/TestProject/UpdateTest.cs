@@ -85,50 +85,13 @@ namespace TestProject
 		{
 			var sql = @"UPDATE [dbo].[TracDelay] 
 SET [ExchangeRate] = CASE WHEN @ExchangeRate = -1 THEN [ExchangeRate] ELSE @ExchangeRate END";
-			var expr = Parse(sql);
+			var expr = _sqlParser.ParseUpdatePartial(sql);
 
-			var exprSql = expr.ToString();
-
-			new UpdateExpr
-			{
-				Fields = CreateSqlExprList(
-					new AssignSetExpr
-					{
-						Field = new IdentExpr
-						{
-							Name = "[ExchangeRate]"
-						},
-						Value = new CaseExpr
-						{
-							WhenList = new List<WhenThenExpr> {
-								new WhenThenExpr
-								{
-									When = new CompareExpr
-									{
-										Left = new IdentExpr
-										{
-											Name = "@ExchangeRate"
-										},
-										Oper = "=",
-										Right = new IntegerExpr
-										{
-											Value = -1
-										}
-									},
-									Then = new IdentExpr
-									{
-										Name = "[ExchangeRate]"
-									}
-								}
-							},
-							Else = new IdentExpr
-							{
-								Name = "@ExchangeRate"
-							}
-						}
-					}
-				)
-			}.ToExpectedObject().ShouldEqual(expr);
+			@"UPDATE SET 
+[ExchangeRate] = CASE
+	WHEN @ExchangeRate = -1 THEN [ExchangeRate]
+	ELSE @ExchangeRate
+END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 	}
 }

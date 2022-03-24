@@ -173,26 +173,7 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		{
 			var sql = "select not exists(1)";
 			var expr = Parse(sql);
-			new SelectExpr
-			{
-				Fields = CreateSqlExprList(
-					new NotExpr
-					{
-						Right = new SqlFuncExpr
-						{
-							Name = "exists",
-							Arguments = new SqlExpr[]
-							{
-								new IntegerExpr
-								{
-									Value = 1
-								}
-							}
-						}
-					}
-				)
-			}
-			.ToExpectedObject().ShouldEqual(expr);
+			"SELECT NOT exists( 1 )".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]

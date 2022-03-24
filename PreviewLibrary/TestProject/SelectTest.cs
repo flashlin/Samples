@@ -83,6 +83,15 @@ SELECT field1,field2 FROM cte1";
 		}
 
 		[Fact]
+		public void select_navigate_1()
+		{
+			var sql = "select - 1";
+			var expr = new SqlParser().Parse(sql);
+
+			"SELECT -1".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
 		public void if_func_select_where_is_null()
 		{
 			var sql = @"IF exists( SELECT 1 FROM customer WHERE name is NULL )

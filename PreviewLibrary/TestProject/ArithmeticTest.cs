@@ -88,5 +88,13 @@ namespace TestProject
 			var expr = _sqlParser.ParseArithmeticPartial(sql);
 			"a + 1 * b".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+		[Fact]
+		public void a_sub_b()
+		{
+			var sql = "a -1";
+			var expr = _sqlParser.ParseArithmeticPartial(sql);
+			"a - 1".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
 	}
 }

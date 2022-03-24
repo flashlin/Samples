@@ -1186,6 +1186,11 @@ namespace PreviewLibrary
 			//};
 		}
 
+		public UpdateExpr ParseUpdatePartial(string sql)
+		{
+			return ParsePartial(ParseUpdate, sql);
+		}
+
 		protected UpdateExpr ParseUpdate()
 		{
 			if (!_token.TryIgnoreCase("UPDATE"))
@@ -1386,12 +1391,31 @@ namespace PreviewLibrary
 			return columns;
 		}
 
+		protected SqlExpr ParseEqualExpr(SqlExpr leftExpr)
+		{
+			if (!TryKeyword("=", out _))
+			{
+				return leftExpr;
+			}
+
+			return new EqualExpr
+			{
+				Left = leftExpr,
+				Right = ParseArithmeticExpr()
+			};
+		}
+
 		private SqlExpr ParseSelectColumn()
 		{
-			if (_token.IsNumber)
+			if (TryGet(ParseConstant, out var constantExpr))
 			{
-				return ParseInteger();
+				return ParseSimpleColumnExpr(ParseEqualExpr(constantExpr));
 			}
+
+			//if (_token.IsNumber)
+			//{
+			//	return ParseInteger();
+			//}
 			if (_token.IgnoreCase("NOT"))
 			{
 				return ParseNot();
@@ -1465,12 +1489,25 @@ namespace PreviewLibrary
 		{
 			if (!_token.Try(_token.IsIdent, out var s1))
 			{
-				throw new Exception($"{_token.Text} should be <Ident>");
+				throw new PrecursorException("<Ident>");
 			}
 			return new IdentExpr
 			{
 				Name = s1
 			};
+		}
+
+		protected IdentExpr ParseAlias()
+		{
+			if (TryGet(ParseIdent, out var aliasName))
+			{
+				return aliasName;
+			}
+			if (TryKeyword("AS", out _))
+			{
+				return ParseIdent();
+			}
+			throw new Exception("AS <Ident>");
 		}
 
 		private string GetAliasName()
@@ -1541,16 +1578,29 @@ namespace PreviewLibrary
 			};
 		}
 
+		private ColumnExpr ParseSimpleColumnExpr(SqlExpr fieldExpr)
+		{
+			TryGet(ParseAlias, out var aliasName);
+
+			return new ColumnExpr
+			{
+				Name = fieldExpr,
+				AliasName = aliasName?.Name,
+			};
+		}
+
 		private ColumnExpr ParseSimpleColumn()
 		{
-			var identExpr = ParseSqlIdent();
+			if(!TryGet(ParseSqlIdent, out var identExpr))
+			{
+				throw new PrecursorException("<Identifier>");
+			}
+
 			var aliasName = GetAliasName();
 
 			return new ColumnExpr
 			{
-				Database = identExpr.DatabaseId,
-				Table = identExpr.ObjectId,
-				Name = identExpr.Name,
+				Name = identExpr,
 				AliasName = aliasName,
 			};
 		}
@@ -1840,9 +1890,35 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected NegativeExpr ParseNegativeNumber()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryKeyword("-", out _))
+			{
+				throw new PrecursorException("-");
+			}
+
+			if (!TryGetAny(out var numberExp, ParseHex16Number, ParseDecimal, ParseInteger))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<Number>");
+			}
+
+			return new NegativeExpr
+			{
+				Value = numberExp
+			};
+		}
+
 		private SqlExpr ParseConstant()
 		{
-			var expr = GetAny(ParseNull, ParseHex16Number, ParseDecimal, ParseString, ParseInteger,
+			var expr = GetAny(
+				ParseNull,
+				ParseNegativeNumber,
+				ParseHex16Number,
+				ParseDecimal,
+				ParseInteger,
+				ParseString,
 				ParseSqlIdent,
 				ParseVariable,
 				ParseStar);
@@ -2054,6 +2130,20 @@ namespace PreviewLibrary
 		{
 			output = Get<T>(parse);
 			return output != null;
+		}
+
+
+		private bool TryGetAny(out SqlExpr output, params Func<SqlExpr>[] parseList)
+		{
+			for (var i = 0; i < parseList.Length; i++)
+			{
+				if (TryGet(parseList[i], out output))
+				{
+					return true;
+				}
+			}
+			output = default;
+			return false;
 		}
 
 		private SqlExpr Any(string expect, params Func<SqlExpr>[] parseList)

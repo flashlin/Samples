@@ -164,49 +164,11 @@ namespace TestProject
 		{
 			var sql = @"insert into @table
 		select Val
-		from
-			strsplitmax(@betCondition, N',')";
+		from strsplitmax(@str, N',')";
 
 			var expr = Parse(sql);
 
-			new InsertFromSelectExpr
-			{
-				IntoToggle = true,
-				Table = new IdentExpr
-				{
-					Name = "@table"
-				},
-				FromSelect = new SelectExpr
-				{
-					Fields = new SqlExprList
-					{
-						Items = new List<SqlExpr> { 
-							new ColumnExpr
-							{
-								Name = "Val"
-							}
-						}
-					},
-					From = new CustomFuncExpr
-					{
-						ObjectId = new IdentExpr
-						{
-							Name = "strsplitmax"
-						},
-						Name = "strsplitmax",
-						Arguments = new SqlExpr[] 
-						{ 
-							new IdentExpr
-							{
-								Name = "@betCondition"
-							},new StringExpr
-							{
-								Text = "N','"
-							}
-						}
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			"INSERT INTO @table SELECT Val FROM strsplitmax( @str,N',' )".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]

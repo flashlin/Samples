@@ -24,7 +24,7 @@ namespace TestProject
 		public void sql_negative_int()
 		{
 			var token = GetToken("-1 xxx");
-			"-1".ToExpectedObject().ShouldEqual(token);
+			"-".ToExpectedObject().ShouldEqual(token);
 		}
 
 		[Fact]

@@ -29,58 +29,15 @@ BEGIN
 	select 1
 END";
 			var expr = Parse(sql);
-			new CreateFunctionExpr
-			{
-				Name = new IdentExpr
-				{
-					Name = "[f1]",
-					ObjectId = "[dbo]"
-				},
-				Arguments = CreateSqlExprList(
-					new ArgumentExpr
-					{
-						Name = "@a",
-						DataType = new DataTypeExpr
-						{
-							DataType = "int"
-						}
-					}, new ArgumentExpr
-					{
-						Name = "@b",
-						DataType = new DataTypeExpr
-						{
-							DataType = "int"
-						}
-					},
-					new ArgumentExpr
-					{
-						Name = "@c",
-						DataType = new DataTypeExpr
-						{
-							DataType = "nvarchar",
-							DataSize = new DataTypeSizeExpr
-							{
-								Size = 127
-							}
-						}
-					}
-				),
-				ReturnDataType = new DataTypeExpr
-				{
-					DataType = "bit"
-				},
-				Body = new List<SqlExpr> {
-					new SelectExpr
-					{
-						Fields = CreateSqlExprList(
-							new IntegerExpr
-							{
-								Value = 1
-							}
-						)
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+
+			@"CREATE FUNCTION [dbo].[f1]
+(
+@a int,@b int,@c nvarchar(127)
+)
+RETURNS bit
+AS BEGIN
+SELECT 1
+END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
@@ -90,73 +47,17 @@ END";
 returns @res table ( IsPersion bit, Reason nvarchar(100))
 as
 begin select 1 end";
+
 			var expr = _sqlParser.Parse(sql);
-			new CreateFunctionExpr
-			{
-				Name = new IdentExpr
-				{
-					Name = "a1"
-				},
-				Arguments = new SqlExprList
-				{
-					Items = new List<SqlExpr> { 
-						new ArgumentExpr
-						{
-							Name = "@b",
-							DataType = new DataTypeExpr
-							{
-								DataType = "int"
-							}
-						}
-					}
-				},
-				ReturnDataType = new DefineColumnTypeExpr
-				{
-					Name = new IdentExpr
-					{
-						Name = "@res"
-					},
-					DataType = new TableTypeExpr
-					{
-						ColumnTypeList = new List<SqlExpr> { new DefineColumnTypeExpr
-					 {
-						  Name = new IdentExpr
-						  {
-								Name = "IsPersion"
-						  },
-						  DataType = new DataTypeExpr
-						  {
-								DataType = "bit"
-						  }
-					 },new DefineColumnTypeExpr
-					 {
-						  Name = new IdentExpr
-						  {
-								Name = "Reason"
-						  },
-						  DataType = new DataTypeExpr
-						  {
-								DataType = "nvarchar",
-								DataSize = new DataTypeSizeExpr
-								{
-									 Size = 100
-								}
-						  }
-					 }}
-					}
-				},
-				Body = new List<SqlExpr> { new SelectExpr
-				{
-					Fields = new SqlExprList
-					{
-						Items = new List<SqlExpr> { new IntegerExpr
-						{
-						  Value = 1
-						}
-					}
-				}
-			}}
-			}.ToExpectedObject().ShouldEqual(expr);
+
+			@"CREATE FUNCTION a1
+(
+@b int
+)
+RETURNS PreviewLibrary.DefineColumnTypeExpr
+AS BEGIN
+SELECT 1
+END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 	}
 }

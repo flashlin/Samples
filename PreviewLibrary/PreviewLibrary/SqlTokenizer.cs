@@ -9,8 +9,8 @@ namespace PreviewLibrary
 	public class SqlTokenizer : TokenizerBase
 	{
 		static readonly string PositiveInteger = @"\d+";
-		static readonly string IntegerNumber = @"-?" + PositiveInteger;
-		public static readonly string DecimalNumber = @"[-]?\d+\.\d*";
+		static readonly string IntegerNumber = PositiveInteger;
+		public static readonly string DecimalNumber = @"\d+\.\d*";
 		static readonly string SqlIdent = @"\[[^\]]+\]";
 		public static readonly string SqlVariable = @"\@" + RegexPattern.Ident;
 		public static readonly string MultiLineComment = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
@@ -25,7 +25,8 @@ namespace PreviewLibrary
 			"AND", "OR", "BEGIN", "END", "EXEC", "EXECUTE", "NULL",
 			"CASE", "THEN", "ELSE", "UNION", "ALL", "SET",
 			"ON",
-			"LEFT", "RIGHT", "FULL", "CROSS", "INNER", "OUTER"
+			"LEFT", "RIGHT", "FULL", "CROSS", "INNER", "OUTER",
+			"NOT"
 		};
 		public static readonly string[] SqlFunc0Names = new[]
 		{

@@ -37,7 +37,7 @@ namespace TestProject
 		public void select_column_aliasName_from_table()
 		{
 			var sql = "SELECT name n1 FROM user";
-			var expr = new SqlParser().Parse(sql);
+			var expr = _sqlParser.ParseSelectPartial(sql);
 			"SELECT name as n1 FROM user".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
@@ -105,29 +105,20 @@ or TransDate2 < @to".MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString(
 select 2";
 			var exprs = new SqlParser().ParseAll(sql).ToList();
 
-			var expected = new List<SqlExpr>
-			{
-				new SelectExpr()
-				{
-					Fields = CreateSqlExprList(
-						new IntegerExpr
-						{
-								Value = 1
-						}
-					)
-				},
-				new SelectExpr()
-				{
-					Fields = CreateSqlExprList(
-						new IntegerExpr
-						{
-							Value = 2
-						}
-					)
-				}
-			};
+			var exprsCode = string.Join("\r\n", exprs.Select(x => $"{x}"));
 
-			expected.ToExpectedObject().ShouldEqual(exprs);
+			@"SELECT 1
+SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
+		}
+
+		[Fact]
+		public void select_variableName_eq_func1_from_tb1()
+		{
+			var sql = @"select @a = round((@b -1), 0) from tb1";
+			
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT @a = round( @b - 1,0 ) FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 	}
 }

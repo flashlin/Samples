@@ -23,7 +23,7 @@ namespace PreviewLibrary
 			sb.AppendLine($"RETURNS {ReturnDataType}");
 			sb.AppendLine("AS BEGIN");
 			sb.AppendLine(string.Join("\r\n", Body.Select(x => $"{x}")));
-			sb.AppendLine("END");
+			sb.Append("END");
 			return sb.ToString();
 		}
 	}

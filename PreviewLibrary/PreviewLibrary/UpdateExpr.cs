@@ -21,11 +21,11 @@ namespace PreviewLibrary
 				{
 					sb.Append(",");
 				}
-				sb.AppendLine($"{field}");
+				sb.Append($"{field}");
 			}
 			if( WhereExpr != null)
 			{
-				sb.Append($"WHERE {WhereExpr}");
+				sb.Append($" WHERE {WhereExpr}");
 			}
 			return sb.ToString();
 		}
