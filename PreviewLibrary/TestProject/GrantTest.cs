@@ -36,5 +36,13 @@ namespace TestProject
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void grant_execute_on_dbobject_to_role()
+		{
+			var sql = "grant execute on [dbo].[fn_name] TO RolePlayer";
+			var expr = _sqlParser.ParseGrantPartial(sql);
+			"GRANT EXECUTE ON [dbo].[fn_name] TO RolePlayer".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
 	}
 }

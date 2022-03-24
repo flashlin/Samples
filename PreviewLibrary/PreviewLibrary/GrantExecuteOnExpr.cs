@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Exceptions;
+using System.Text;
 
 namespace PreviewLibrary
 {
@@ -6,11 +7,17 @@ namespace PreviewLibrary
 	{
 		public IdentExpr ToRoleId { get; set; }
 		public IdentExpr AsDbo { get; set; }
-		public ObjectIdExpr OnObjectId { get; set; }
+		public SqlExpr OnObjectId { get; set; }
 
 		public override string ToString()
 		{
-			return $"GRANT EXECUTE ON {OnObjectId} TO {ToRoleId} AS {AsDbo}";
+			var sb = new StringBuilder();
+			sb.Append($"GRANT EXECUTE ON {OnObjectId} TO {ToRoleId}");
+			if( AsDbo != null)
+			{
+				sb.Append($" AS {AsDbo}");
+			}
+			return sb.ToString();
 		}
 	}
 }

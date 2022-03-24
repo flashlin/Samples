@@ -303,6 +303,11 @@ namespace PreviewLibrary
 			};
 		}
 
+		public SqlExpr ParseGrantPartial(string sql)
+		{
+			return ParsePartial(ParseGrant, sql);
+		}
+
 		protected SqlExpr ParseGrant()
 		{
 			if (TryGet(ParseGrantExecuteOn, out var grantExecuteOnExpr))
@@ -395,21 +400,23 @@ namespace PreviewLibrary
 				throw new PrecursorException("GRANT EXECUTE ON");
 			}
 
-			var objectId = ParseObjectId();
+			var objectId = Any("<OBJECT_ID>", ParseObjectId, ParseSqlIdent);
 
 			ReadKeyword("TO");
 
 			var roleId = ParseSqlIdent();
 
-			ReadKeyword("AS");
-
-			var dbo = ParseSqlIdent1();
+			IdentExpr asDbo = null;
+			if (TryKeyword("AS", out _))
+			{
+				asDbo = ParseSqlIdent1();
+			}
 
 			return new GrantExecuteOnExpr
 			{
 				OnObjectId = objectId,
 				ToRoleId = roleId,
-				AsDbo = dbo
+				AsDbo = asDbo
 			};
 		}
 
