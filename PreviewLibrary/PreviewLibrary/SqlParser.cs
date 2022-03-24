@@ -388,7 +388,9 @@ namespace PreviewLibrary
 				}
 				var conditionExpr = ParseFilterList();
 				ReadKeyword("THEN");
-				var thenExpr = ParseSubExpr();
+				
+				var thenExpr = ParseArithmeticExpr();
+
 				whenList.Add(new WhenThenExpr
 				{
 					When = conditionExpr,
@@ -397,7 +399,7 @@ namespace PreviewLibrary
 			} while (true);
 
 			ReadKeyword("ELSE");
-			var elseExpr = ParseSubExpr();
+			var elseExpr = ParseArithmeticExpr();
 			ReadKeyword("END");
 
 			return new CaseExpr
@@ -1814,7 +1816,9 @@ namespace PreviewLibrary
 
 		private SqlExpr ParseConstant()
 		{
-			var expr = GetAny(ParseNull, ParseHex16Number, ParseDecimal, ParseString, ParseInteger, ParseSqlIdent);
+			var expr = GetAny(ParseNull, ParseHex16Number, ParseDecimal, ParseString, ParseInteger, 
+				ParseSqlIdent,
+				ParseVariable);
 			if (expr == null)
 			{
 				throw new PrecursorException("<Constant>");
@@ -1893,10 +1897,10 @@ namespace PreviewLibrary
 			}
 
 			//var left = ParseSubExpr();
-			//var left = ParseArithmeticExpr();
+			var left = ParseArithmeticExpr();
 			//var left = ParseCompareOp(ParseArithmeticExpr);
 			//var left = ParseCompareOp(ParseSubExpr);
-			var left = ParseAnd(() => ParseCompareOp(() => ParseArithmeticExpr(() => ParseCompareOp(ParseSubExpr))));
+			//var left = ParseAnd(() => ParseCompareOp(() => ParseArithmeticExpr(() => ParseCompareOp(ParseSubExpr))));
 
 			return left;
 

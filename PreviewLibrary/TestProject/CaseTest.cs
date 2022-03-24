@@ -41,5 +41,22 @@ end
 	ELSE SELECT 3
 END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+		[Fact]
+		public void case_when_then_arithmetic()
+		{
+			var sql = @"case @a
+when 1 then @b + 1
+else @b + 2
+end";
+
+			var expr = _sqlParser.ParseCasePartial(sql);
+
+			@"CASE
+	@a
+	WHEN 1 THEN @b + 1
+	ELSE @b + 2
+END".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
 	}
 }
