@@ -164,19 +164,19 @@ namespace PreviewLibrary
 			var readOperand = true;
 			while (_token.Text != "")
 			{
-				if (readOperand && TryGet(ParseStar, out var starExpr))
+				if (readOperand && Try(ParseStar, out var starExpr))
 				{
 					readOperand = false;
 					operands.Push(starExpr);
 					continue;
 				}
-				else if (readOperand && TryGet(() => ParseNegativeExpr(readExpr), out var negativeExpr))
+				else if (readOperand && Try(() => ParseNegativeExpr(readExpr), out var negativeExpr))
 				{
 					readOperand = false;
 					operands.Push(negativeExpr);
 					continue;
 				}
-				else if (readOperand && !IsOperator(opers) && TryGet(readExpr, out var expr))
+				else if (readOperand && !IsOperator(opers) && Try(readExpr, out var expr))
 				{
 					readOperand = false;
 					operands.Push(expr);
