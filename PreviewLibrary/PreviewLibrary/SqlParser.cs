@@ -376,7 +376,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseGrant()
 		{
-			if (TryGet(ParseGrantExecuteOn, out var grantExecuteOnExpr))
+			if (Try(ParseGrantExecuteOn, out var grantExecuteOnExpr))
 			{
 				return grantExecuteOnExpr;
 			}
