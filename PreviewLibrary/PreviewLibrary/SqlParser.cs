@@ -1580,7 +1580,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("WITH");
 			}
 
-			if (!TryGet(ParseIdent, out var cteTableName))
+			if (!Try(ParseIdent, out var cteTableName))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<CTE TableName>");
