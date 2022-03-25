@@ -1211,14 +1211,14 @@ namespace PreviewLibrary
 		protected AssignSetExpr ParseFieldAssignValue()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!TryGet(ParseSqlIdent, out var fieldExpr))
+			if (!Try(ParseSqlIdent, out var fieldExpr))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<Field>");
 			}
 			ReadKeyword("=");
 
-			if (TryGet(ParseArithmeticExpr, out var arithemeticExpr))
+			if (Try(ParseArithmeticExpr, out var arithemeticExpr))
 			{
 				return new AssignSetExpr
 				{
@@ -1227,7 +1227,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (TryGet(ParseSubExpr, out var subExpr))
+			if (Try(ParseSubExpr, out var subExpr))
 			{
 				return new AssignSetExpr
 				{
