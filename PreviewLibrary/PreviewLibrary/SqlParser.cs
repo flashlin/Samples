@@ -1388,10 +1388,10 @@ namespace PreviewLibrary
 
 			var fields = ParseManyColumns();
 
-			TryGet(ParseFrom, out var fromExpr);
+			Try(ParseFrom, out var fromExpr);
 
 			//var joinTableList = Many(ParseJoin);
-			if (!TryGet(() => Many(ParseInnerJoin), out var joinTableList))
+			if (!Try(() => Many(ParseInnerJoin), out var joinTableList))
 			{
 				joinTableList = new SqlExprList()
 				{
@@ -1401,7 +1401,7 @@ namespace PreviewLibrary
 
 			var whereExpr = Get(ParseWhere);
 
-			TryGet(ParseGroupBy, out var groupByExpr);
+			Try(ParseGroupBy, out var groupByExpr);
 
 			var joinAllList = Many(ParseUnionJoinAll);
 
