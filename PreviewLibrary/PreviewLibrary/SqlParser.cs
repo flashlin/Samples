@@ -351,20 +351,21 @@ namespace PreviewLibrary
 
 			if (TryKeyword("(", out _))
 			{
-				var valueExpr = ParseSubExpr();
+				var innerValueExpr = ParseSubExpr();
 				ReadKeyword(")");
 				return new GroupExpr
 				{
 					Expr = new ReturnExpr
 					{
-						Value = valueExpr,
+						Value = innerValueExpr,
 					},
 				};
 			}
 
+			TryGet(ParseSubExpr, out var valueExpr);
 			return new ReturnExpr
 			{
-				Value = ParseSubExpr()
+				Value = valueExpr
 			};
 		}
 
