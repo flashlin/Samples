@@ -83,6 +83,15 @@ SELECT field1,field2 FROM cte1";
 		}
 
 		[Fact]
+		public void select_count_star()
+		{
+			var sql = "select count(*)";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT count( * )".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void select_navigate_1()
 		{
 			var sql = "select - 1";

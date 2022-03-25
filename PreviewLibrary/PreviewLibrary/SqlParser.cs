@@ -147,7 +147,13 @@ namespace PreviewLibrary
 			var readOperand = true;
 			while (_token.Text != "")
 			{
-				if (readOperand && TryGet(() => ParseNegativeExpr(readExpr), out var negativeExpr))
+				if (readOperand && TryGet(ParseStar, out var starExpr))
+				{
+					readOperand = false;
+					operands.Push(starExpr);
+					continue;
+				}
+				else if (readOperand && TryGet(() => ParseNegativeExpr(readExpr), out var negativeExpr))
 				{
 					readOperand = false;
 					operands.Push(negativeExpr);
@@ -169,6 +175,10 @@ namespace PreviewLibrary
 				}
 
 				readOperand = true;
+				if (_token.Text == ")")
+				{
+					readOperand = false;
+				}
 
 				if (!_token.TryIgnoreCase(opers, out var curr_op))
 				{
@@ -1478,6 +1488,12 @@ namespace PreviewLibrary
 					Column = Any("<SimpleColumn> or <constant>", ParseArithmeticExpr, ParseSimpleColumn, ParseConstant, ParseSubExpr),
 				};
 			}
+
+			if (TryGet(ParseArithmeticExpr, out var subExprColumn))
+			{
+				return ParseSimpleColumnExpr(subExprColumn);
+			}
+
 			return ParseSimpleColumn();
 		}
 
