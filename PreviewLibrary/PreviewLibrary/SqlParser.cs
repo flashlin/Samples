@@ -835,11 +835,11 @@ namespace PreviewLibrary
 		protected DefineColumnTypeExpr ParseColumnDataType()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!TryGet(ParseSqlIdent1, out var columnNameExpr))
+			if (!Try(ParseSqlIdent1, out var columnNameExpr))
 			{
 				throw new PrecursorException("<ColumnName>");
 			}
-			if (!TryGet(ParseDataType, out var dataType))
+			if (!Try(ParseDataType, out var dataType))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<DataType>");
