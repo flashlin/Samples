@@ -27,7 +27,7 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
-		public void case_when()
+		public void case_variable_when_constant_then()
 		{
 			var sql = @"case @a
 when 1 then select 2
@@ -73,6 +73,19 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 	datepart( DW,getdate() )
 	WHEN 2 THEN dateadd( dd,datediff( dd,0,GETDATE() ),0 )
 	WHEN 1 THEN dateadd( dd,datediff( dd,0,GETDATE() - 3 ),0 )
+END".ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void case_when_arithmetic_then_arithmetic()
+		{
+			var sql = @"case when (a + b) < (c - d) 
+			then (a + d) end";
+
+			var expr = _sqlParser.ParseCasePartial(sql);
+
+			@"CASE
+	WHEN (a + b) < (c - d) THEN a + d
 END".ShouldEqual(expr);
 		}
 	}

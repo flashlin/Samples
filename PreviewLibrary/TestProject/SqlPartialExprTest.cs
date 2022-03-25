@@ -3,6 +3,7 @@ using PreviewLibrary;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 using System.Collections.Generic;
+using TestProject.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -80,11 +81,13 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		{
 			var sql = @"if( isnull(@name, '') <> '' )
 BEGIN select 1 END";
+
 			var expr = _sqlParser.ParseIfPartial(sql);
+
 			@"IF (isnull( @name,'' ) <> '')
 BEGIN
 SELECT 1
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 
 		[Fact]

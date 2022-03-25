@@ -129,5 +129,14 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 
 			"SELECT 1 FROM (SELECT 2)".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_1_from_group_by()
+		{
+			var sql = "select 1 from tb1 group by id, name";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			@"SELECT 1 FROM tb1
+	GROUP BY id,name".ShouldEqual(expr);
+		}
 	}
 }

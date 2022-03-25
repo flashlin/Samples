@@ -1,4 +1,5 @@
 ﻿using ExpectedObjects;
+using TestProject.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -22,7 +23,7 @@ end
 			@"WHILE @a = 1
 BEGIN
 SELECT 1
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 	}
 	}

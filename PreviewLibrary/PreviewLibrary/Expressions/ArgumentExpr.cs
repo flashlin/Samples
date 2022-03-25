@@ -25,9 +25,12 @@ namespace PreviewLibrary.Expressions
 	{
 		public List<SqlExpr> Items { get; set; }
 
+		public bool HasComma { get; set; } = true;
+
 		public override string ToString()
 		{
-			return string.Join(",", Items.Select(x => $"{x}"));
+			var comma = HasComma ? "," : "\r\n";
+			return string.Join(comma, Items.Select(x => $"{x}"));
 		}
 	}
 }

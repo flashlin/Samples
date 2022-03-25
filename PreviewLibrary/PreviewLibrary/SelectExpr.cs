@@ -11,7 +11,8 @@ namespace PreviewLibrary
 		public SqlExprList Fields { get; set; }
 		public SqlExpr From { get; set; }
 		public SqlExpr WhereExpr { get; set; }
-		public List<JoinExpr> Joins { get; set; }
+		public List<SqlExpr> Joins { get; set; }
+		public GroupByExpr GroupByExpr { get; set; }
 
 		public override string ToString()
 		{
@@ -21,13 +22,17 @@ namespace PreviewLibrary
 			{
 				sb.Append($" FROM {From}");
 			}
-			if (Joins != null)
+			if (Joins != null && Joins.Count > 0)
 			{
 				sb.Append(" " + string.Join("\r\n", Joins));
 			}
 			if (WhereExpr != null)
 			{
 				sb.Append($" WHERE {WhereExpr}");
+			}
+			if(GroupByExpr != null)
+			{
+				sb.Append($"\r\n\t{GroupByExpr}");
 			}
 			return sb.ToString();
 		}

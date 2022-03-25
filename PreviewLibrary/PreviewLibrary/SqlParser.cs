@@ -2,7 +2,6 @@
 using PreviewLibrary.Expressions;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -138,6 +137,24 @@ namespace PreviewLibrary
 			}
 
 			throw new Exception();
+		}
+
+		protected GroupByExpr ParseGroupBy()
+		{
+			if (!TryAllKeywords(new[] { "GROUP", "BY" }, out _))
+			{
+				throw new PrecursorException("GROUP BY");
+			}
+
+			var groupExpr = WithComma(() =>
+			{
+				return ParseSqlIdent();
+			});
+
+			return new GroupByExpr
+			{
+				Items = groupExpr,
+			};
 		}
 
 		private SqlExpr ParseConcat(Func<SqlExpr> readExpr, string[] opers)
@@ -414,7 +431,8 @@ namespace PreviewLibrary
 			}
 
 			//TryGet(ParseVariable, out var inputExpr);
-			TryGet(ParseArithmeticExpr, out var inputExpr);
+			//TryGet(ParseArithmeticExpr, out var inputExpr);
+			TryGet(ParseParenthesesExpr, out var inputExpr);
 
 			var whenList = new List<WhenThenExpr>();
 			do
@@ -543,7 +561,8 @@ namespace PreviewLibrary
 				ParseConstant,
 				ParseSelect,
 				ParseDelete,
-				ParseExec
+				ParseExec,
+				ParseParentheses
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
@@ -1351,23 +1370,29 @@ namespace PreviewLibrary
 			//var fromExpr = Get(ParseFrom);
 			TryGet(ParseFrom, out var fromExpr);
 
-			var joinTable = Get(ParseJoin);
-			var joinTableList = (List<JoinExpr>)null;
-			if (joinTable != null)
-			{
-				joinTableList = new List<JoinExpr>
-				{
-					joinTable,
-				};
-			}
+			//var joinTable = Get(ParseJoin);
+			//var joinTableList = (List<JoinExpr>)null;
+			//if (joinTable != null)
+			//{
+			//	joinTableList = new List<JoinExpr>
+			//	{
+			//		joinTable,
+			//	};
+			//}
+
+			var joinTableList = Many(ParseJoin);
+
 			var whereExpr = Get(ParseWhere);
+
+			TryGet(ParseGroupBy, out var groupByExpr);
 
 			return new SelectExpr
 			{
 				Fields = fields,
 				From = fromExpr,
+				Joins = joinTableList.Items,
 				WhereExpr = whereExpr,
-				Joins = joinTableList
+				GroupByExpr = groupByExpr,
 			};
 		}
 
@@ -1380,7 +1405,7 @@ namespace PreviewLibrary
 
 			var fromList = WithComma(() =>
 			{
-				var sourceExpr = ParseAliasExpr(GetAny(ParseGroup, ParseSubExpr));
+				var sourceExpr = ParseAliasExpr(GetAny(ParseParentheses, ParseSubExpr));
 				TryGet(ParseAlias, out var aliasExpr);
 				TryGet(ParseWithOptions, out var withOptionsExpr);
 
@@ -1412,6 +1437,31 @@ namespace PreviewLibrary
 				Name = tableName,
 				AliasName = aliasName,
 				WithOptions = withOptions
+			};
+		}
+
+		private SqlExprList Many(Func<SqlExpr> parse)
+		{
+			var list = new List<SqlExpr>();
+			do
+			{
+				if (!TryGet(parse, out var itemExpr))
+				{
+					break;
+				}
+
+				if (itemExpr is SqlExprList itemList)
+				{
+					return itemList;
+				}
+
+				list.Add(itemExpr);
+			} while (true);
+
+			return new SqlExprList
+			{
+				HasComma = false,
+				Items = list
 			};
 		}
 
@@ -1863,7 +1913,9 @@ namespace PreviewLibrary
 			var ops = new Stack<string>();
 			do
 			{
-				var filter = ParseFilter();
+				//var filter = ParseFilter();
+				//var filter = ParseCompareOpExpr(ParseArithmeticExpr());
+				var filter = ParseParenthesesExpr();
 				postfixExprs.Add(filter);
 				if (!_token.TryIgnoreCase(new[] { "AND", "OR" }, out var op))
 				{
@@ -2069,7 +2121,7 @@ namespace PreviewLibrary
 		{
 			if (IsKeyword("("))
 			{
-				return ParseGroup();
+				return ParseParentheses();
 			}
 
 			if (_token.IgnoreCase("NOT"))
@@ -2276,7 +2328,7 @@ namespace PreviewLibrary
 				SqlExpr right = null;
 				if (op.IsSql("in"))
 				{
-					right = ParseGroup();
+					right = ParseParentheses();
 				}
 				else
 				{
@@ -2304,13 +2356,32 @@ namespace PreviewLibrary
 			return parseAction();
 		}
 
-		protected GroupExpr ParseGroup()
+		protected SqlExpr ParseParenthesesExpr()
+		{
+			if (!TryKeyword("(", out _))
+			{
+				return ParseWithCompareOp(ParseArithmeticExpr);
+			}
+			var subExpr = ParseWithCompareOp(ParseArithmeticExpr);
+			ReadKeyword(")");
+
+
+			var groupExpr = new GroupExpr
+			{
+				Expr = subExpr,
+			};
+
+			return ParseCompareOpExpr(groupExpr);
+		}
+
+		protected GroupExpr ParseParentheses()
 		{
 			if (!_token.Try("("))
 			{
 				throw new PrecursorException("(");
 			}
-			var subExpr = ParseWithCompareOp(ParseSubExpr);
+			//var subExpr = ParseWithCompareOp(ParseSubExpr);
+			var subExpr = ParseWithCompareOp(ParseArithmeticExpr);
 			ReadKeyword(")");
 
 			return new GroupExpr
@@ -2494,31 +2565,6 @@ namespace PreviewLibrary
 		{
 			enumerator.MoveNext();
 			return enumerator.Current;
-		}
-	}
-
-	public static class SqlStringExtension
-	{
-		public static bool IsSql(this string text, string other)
-		{
-			return string.Equals(text, other, StringComparison.OrdinalIgnoreCase);
-		}
-
-		public static string MergeToCode(this string sql)
-		{
-			var sr = new StringReader(sql);
-			var lines = new List<string>();
-			do
-			{
-				var line = sr.ReadLine();
-				if (line == null)
-				{
-					break;
-				}
-				lines.Add(line);
-			} while (true);
-			var singleLine = string.Join(" ", lines.Select(x => x.Trim()));
-			return singleLine;
 		}
 	}
 }

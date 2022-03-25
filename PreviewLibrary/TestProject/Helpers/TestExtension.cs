@@ -1,5 +1,6 @@
 ﻿using ExpectedObjects;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary;
 using TestProject.Helpers;
 
 namespace TestProject.Helpers
@@ -8,7 +9,7 @@ namespace TestProject.Helpers
 	{
 		public static void ShouldEqual(this string expected, SqlExpr sqlExpr)
 		{
-			expected.ToExpectedObject().ShouldEqual(sqlExpr.ToString());
+			expected.TrimCode().ToExpectedObject().ShouldEqual(sqlExpr.ToString().TrimCode());
 		}
 	}
 }

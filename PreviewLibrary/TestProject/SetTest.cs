@@ -44,11 +44,11 @@ namespace TestProject
 								WHERE name = 
 									CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) ) 
 							)";
+
 			var expr = _sqlParser.ParseFuncPartial(sql);
 
-			sql.MergeToCode()
-				.ToExpectedObject()
-				.ShouldEqual(expr.ToString());
+			"exists( SELECT 1 FROM @a WHERE name = CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) ) )"
+				.ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -214,7 +214,7 @@ END";
 			@"IF NOT exists( SELECT 1 FROM sys.databases )
 BEGIN
 SELECT 1
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 
 		[Fact]
