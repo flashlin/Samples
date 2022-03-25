@@ -853,7 +853,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseDataType()
 		{
-			if (TryGet(ParseTableType, out var tableTypeExpr))
+			if (Try(ParseTableType, out var tableTypeExpr))
 			{
 				return tableTypeExpr;
 			}
