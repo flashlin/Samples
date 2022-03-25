@@ -1734,7 +1734,7 @@ namespace PreviewLibrary
 
 		private ColumnExpr ParseSimpleColumnExpr(SqlExpr fieldExpr)
 		{
-			TryGet(ParseAlias, out var aliasName);
+			Try(ParseAlias, out var aliasName);
 
 			return new ColumnExpr
 			{
@@ -1745,7 +1745,7 @@ namespace PreviewLibrary
 
 		private ColumnExpr ParseSimpleColumn()
 		{
-			if (!TryGet(ParseSqlIdent, out var identExpr))
+			if (!Try(ParseSqlIdent, out var identExpr))
 			{
 				throw new PrecursorException("<Identifier>");
 			}
