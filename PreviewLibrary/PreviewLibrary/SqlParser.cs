@@ -128,7 +128,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("-");
 			}
 
-			if (TryGet(readExpr, out var negativeExpr))
+			if (Try(readExpr, out var negativeExpr))
 			{
 				return new NegativeExpr
 				{
@@ -2155,40 +2155,8 @@ namespace PreviewLibrary
 				return ParseNot();
 			}
 
-			//var left = ParseSubExpr();
 			var left = ParseArithmeticExpr();
-			//var left = ParseCompareOp(ParseArithmeticExpr);
-			//var left = ParseCompareOp(ParseSubExpr);
-			//var left = ParseAnd(() => ParseCompareOp(() => ParseArithmeticExpr(() => ParseCompareOp(ParseSubExpr))));
-
 			return left;
-
-			var likeExpr = Get(ParseLike, left);
-			if (likeExpr != null)
-			{
-				return likeExpr;
-			}
-
-			var compareExpr = Get(ParseCompareOp, left, ParseArithmeticExpr);
-			if (compareExpr != null)
-			{
-				return compareExpr;
-			}
-
-			if (left is SqlFuncExpr funcExpr)
-			{
-				if (funcExpr.Name.IsSql("exists"))
-				{
-					return left;
-				}
-			}
-
-			if (left is CompareExpr compareExpr2)
-			{
-				return compareExpr2;
-			}
-
-			throw new NotSupportedException(GetLastLineCh());
 		}
 
 		protected ExecuteExpr ParseExec()
