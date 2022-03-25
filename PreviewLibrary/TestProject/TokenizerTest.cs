@@ -55,6 +55,13 @@ namespace TestProject
 			"N'aaa D''bbb'".ToExpectedObject().ShouldEqual(token);
 		}
 
+		[Fact]
+		public void great_equal()
+		{
+			var token = GetToken("> =");
+			">=".ToExpectedObject().ShouldEqual(token);
+		}
+
 		private string GetToken(string text)
 		{
 			var token = new SqlTokenizer();

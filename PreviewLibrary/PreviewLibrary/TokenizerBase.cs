@@ -45,7 +45,9 @@ namespace PreviewLibrary
 				{
 					return string.Empty;
 				}
-				return Curr.Value ?? string.Empty;
+
+				return GetCurrentText(Curr.Value);
+				//return Curr.Value ?? string.Empty;
 			}
 		}
 
@@ -124,6 +126,10 @@ namespace PreviewLibrary
 			Move();
 		}
 
+		protected virtual string GetCurrentText(string text)
+		{
+			return text;
+		}
 
 		public bool IsMatch(string pattern)
 		{

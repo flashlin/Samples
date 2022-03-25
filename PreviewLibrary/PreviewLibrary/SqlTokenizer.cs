@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
 
@@ -66,6 +67,42 @@ namespace PreviewLibrary
 			">", "<", "="
 		};
 
+		static readonly string[] CompareOperSymbolsContainsSpacesPattern =
+			CompareOperSymbols.Where(x => x.Length > 1)
+				.Select(SymbolContainsSpacesPattern)
+				.ToArray();
+
+		static string SymbolContainsSpacesPattern(string symbol)
+		{
+			var sb = new StringBuilder();
+			for (var i = 0; i < symbol.Length; i++)
+			{
+				if (i != 0)
+				{
+					sb.Append(@"\s*");
+				}
+				sb.Append(Regex.Escape($"{symbol[i]}"));
+			}
+			return sb.ToString();
+		}
+
+		string PackSymbol(string text)
+		{
+			bool isMatch(string pattern)
+			{
+				return new Regex("^" + pattern + "$").IsMatch(text);
+			}
+
+			foreach (var pattern in CompareOperSymbolsContainsSpacesPattern)
+			{
+				if (isMatch(pattern))
+				{
+					return text.Replace(" ", "");
+				}
+			}
+			return text;
+		}
+
 		public static readonly string[] CompareOps = new[]
 		{
 			"LIKE", "IN", "IS"
@@ -111,22 +148,51 @@ namespace PreviewLibrary
 			DoubleQuotedString,
 		};
 
+		//static readonly string[] AllPatterns =
+		//	Escape(CompareOperSymbols)
+		//	.Concat(AllStrings)
+		//	.Concat(new[]
+		//	{
+		//		BatchInstruction,
+		//		SingleLineComment,
+		//		MultiLineComment,
+		//		Hex16Number,
+		//		DecimalNumber,
+		//		IntegerNumber,
+		//		SqlIdent,
+		//		SqlVariable,
+		//		RegexPattern.Ident,
+		//	}).Concat(OtherSymbols)
+		//	.ToArray();
+
 		static readonly string[] AllPatterns =
-			Escape(CompareOperSymbols)
-			.Concat(AllStrings)
-			.Concat(new[]
-			{
-				BatchInstruction,
-				SingleLineComment,
-				MultiLineComment,
-				Hex16Number,
-				DecimalNumber,
-				IntegerNumber,
-				SqlIdent,
-				SqlVariable,
-				RegexPattern.Ident,
-			}).Concat(OtherSymbols)
+			ConcatArray(
+				CompareOperSymbolsContainsSpacesPattern,
+				Escape(CompareOperSymbols),
+				AllStrings,
+				new[] {
+					BatchInstruction,
+					SingleLineComment,
+					MultiLineComment,
+					Hex16Number,
+					DecimalNumber,
+					IntegerNumber,
+					SqlIdent,
+					SqlVariable,
+					RegexPattern.Ident,
+				},
+				OtherSymbols)
 			.ToArray();
+
+		static string[] ConcatArray(params IEnumerable<string>[] patternsList)
+		{
+			var list = new List<string>();
+			foreach (var patterns in patternsList)
+			{
+				list.AddRange(patterns);
+			}
+			return list.ToArray();
+		}
 
 		static SqlTokenizer()
 		{
@@ -143,6 +209,11 @@ namespace PreviewLibrary
 
 		public SqlTokenizer() : base(AllPatterns)
 		{
+		}
+
+		protected override string GetCurrentText(string text)
+		{
+			return PackSymbol(text);
 		}
 
 		public bool IsIdentWord

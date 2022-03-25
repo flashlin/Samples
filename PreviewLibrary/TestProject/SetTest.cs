@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 using System.IO;
+using TestProject.Helpers;
 
 namespace TestProject
 {

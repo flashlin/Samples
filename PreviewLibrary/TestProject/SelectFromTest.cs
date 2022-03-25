@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using FluentAssertions.Equivalency;
 using ExpectedObjects;
 using System.Linq;
-using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 using Xunit.Abstractions;
+using TestProject.Helpers;
 
 namespace TestProject
 {
@@ -128,14 +128,6 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 			var expr = _sqlParser.ParseSelectPartial(sql);
 
 			"SELECT 1 FROM (SELECT 2)".ShouldEqual(expr);
-		}
-	}
-
-	public static class TestExtension
-	{
-		public static void ShouldEqual(this string expected, SqlExpr sqlExpr)
-		{
-			expected.ToExpectedObject().ShouldEqual(sqlExpr.ToString());
 		}
 	}
 }

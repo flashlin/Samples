@@ -7,6 +7,7 @@ using ExpectedObjects;
 using Xunit.Abstractions;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
+using TestProject.Helpers;
 
 namespace TestProject
 {
