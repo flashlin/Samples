@@ -763,14 +763,14 @@ namespace PreviewLibrary
 
 		protected SqlFuncExpr ParseSqlFunc()
 		{
-			if (TryGet(ParseCast, out var castExpr))
+			if (Try(ParseCast, out var castExpr))
 			{
 				return castExpr;
 			}
 
 			if (!_token.Try(_token.IsFuncName(out var funcArgsCount), out var funcName))
 			{
-				if (TryGet(ParseCustomFunc, out var customFuncExpr))
+				if (Try(ParseCustomFunc, out var customFuncExpr))
 				{
 					return customFuncExpr;
 				}
