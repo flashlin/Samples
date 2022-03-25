@@ -739,7 +739,7 @@ namespace PreviewLibrary
 		protected CustomFuncExpr ParseCustomFunc()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!TryGet(ParseSqlIdent, out var funcName))
+			if (!Try(ParseSqlIdent, out var funcName))
 			{
 				throw new PrecursorException("<Custom Function Name>");
 			}
