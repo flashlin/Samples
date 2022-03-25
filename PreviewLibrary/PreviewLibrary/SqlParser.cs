@@ -362,7 +362,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			TryGet(ParseSubExpr, out var valueExpr);
+			Try(ParseSubExpr, out var valueExpr);
 			return new ReturnExpr
 			{
 				Value = valueExpr
