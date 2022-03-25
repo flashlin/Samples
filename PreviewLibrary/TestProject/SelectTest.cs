@@ -36,7 +36,14 @@ AS (
 )
 SELECT field1,field2 FROM cte1";
 			var expr = _sqlParser.ParseCtePartial(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+
+			@"WITH Cte1
+(field1,field2)
+AS (
+SELECT 1 FROM tb1
+UNION ALL
+SELECT 2 FROM tb2
+)".ShouldEqual(expr);
 		}
 
 		[Fact]

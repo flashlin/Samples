@@ -1359,6 +1359,26 @@ namespace PreviewLibrary
 			return ParsePartial(ParseSelect, sql);
 		}
 
+		protected SqlExpr ParseUnionJoinAll()
+		{
+			if (TryAllKeywords(new[] { "UNION", "ALL" }, out _))
+			{
+				return new UnionAllExpr
+				{
+					Next = ParseSubExpr()
+				};
+			}
+
+			if (!TryAllKeywords(new[] { "JOIN", "ALL" }, out _))
+			{
+				throw new PrecursorException("JOIN ALL");
+			}
+			return new JoinAllExpr 
+			{
+				Next = ParseSubExpr()
+			};
+		}
+
 		protected SelectExpr ParseSelect()
 		{
 			if (!_token.TryIgnoreCase("select", out var _))
@@ -1368,24 +1388,22 @@ namespace PreviewLibrary
 
 			var fields = ParseManyColumns();
 
-			//var fromExpr = Get(ParseFrom);
 			TryGet(ParseFrom, out var fromExpr);
 
-			//var joinTable = Get(ParseJoin);
-			//var joinTableList = (List<JoinExpr>)null;
-			//if (joinTable != null)
-			//{
-			//	joinTableList = new List<JoinExpr>
-			//	{
-			//		joinTable,
-			//	};
-			//}
-
-			var joinTableList = Many(ParseJoin);
+			//var joinTableList = Many(ParseJoin);
+			if (!TryGet(() => Many(ParseInnerJoin), out var joinTableList))
+			{
+				joinTableList = new SqlExprList()
+				{
+					Items = new List<SqlExpr>()
+				};
+			}
 
 			var whereExpr = Get(ParseWhere);
 
 			TryGet(ParseGroupBy, out var groupByExpr);
+
+			var joinAllList = Many(ParseUnionJoinAll);
 
 			return new SelectExpr
 			{
@@ -1394,6 +1412,7 @@ namespace PreviewLibrary
 				Joins = joinTableList.Items,
 				WhereExpr = whereExpr,
 				GroupByExpr = groupByExpr,
+				JoinAllList = joinAllList.Items,
 			};
 		}
 
@@ -1446,7 +1465,7 @@ namespace PreviewLibrary
 			var list = new List<SqlExpr>();
 			do
 			{
-				if (!TryGet(parse, out var itemExpr))
+				if (!Try(parse, out var itemExpr))
 				{
 					break;
 				}
@@ -1567,25 +1586,31 @@ namespace PreviewLibrary
 				throw new PrecursorException("<CTE TableName>");
 			}
 
-			ReadKeyword("(");
-			var cteColumnNames = WithComma(ParseSqlIdent1);
-			ReadKeyword(")");
+			var cteColumns = new SqlExprList();
+			if (TryKeyword("(", out _))
+			{
+				cteColumns = WithComma(ParseSqlIdent1);
+				ReadKeyword(")");
+			}
+
 			ReadKeyword("AS");
 			ReadKeyword("(");
-			var select1Expr = ParseSelect();
-			ReadKeyword("UNION");
-			ReadKeyword("ALL");
-			var select2Expr = ParseSelect();
+			//var select1Expr = ParseSelect();
+			//ReadKeyword("UNION");
+			//ReadKeyword("ALL");
+			//var select2Expr = ParseSelect();
+
+			var innerExpr = ParseSubExpr();
+
 			ReadKeyword(")");
-			var select3Expr = ParseSelect();
 
 			return new CommonTableExpressionExpr
 			{
 				TableName = cteTableName,
-				Columns = cteColumnNames,
-				FirstSelect = select1Expr,
-				RecursiveSelect = select2Expr,
-				Query = select3Expr
+				Columns = cteColumns,
+				InnerExpr = innerExpr,
+				//FirstSelect = select1Expr,
+				//RecursiveSelect = select2Expr,
 			};
 		}
 
@@ -1636,7 +1661,7 @@ namespace PreviewLibrary
 			{
 				return ParseIdent();
 			}
-			throw new Exception("AS <Ident>");
+			throw new PrecursorException("AS <Ident>");
 		}
 
 		private string GetAliasName()
@@ -2256,6 +2281,25 @@ namespace PreviewLibrary
 			}
 		}
 
+		private bool Try<T>(Func<T> parse, out T output)
+		{
+			try
+			{
+				if (_token.Text == String.Empty)
+				{
+					throw new PrecursorException();
+				}
+
+				output = parse();
+				return true;
+			}
+			catch (PrecursorException)
+			{
+				output = default(T);
+				return false;
+			}
+		}
+
 
 		private bool TryGet<T>(Func<T> parse, out T output)
 		{
@@ -2375,6 +2419,20 @@ namespace PreviewLibrary
 			return ParseCompareOpExpr(groupExpr);
 		}
 
+		protected SqlExpr WithParentheses(Func<SqlExpr> parse)
+		{
+			if (!_token.Try("("))
+			{
+				return parse();
+			}
+			var innerExpr = parse();
+			ReadKeyword(")");
+			return new GroupExpr
+			{
+				Expr = innerExpr,
+			};
+		}
+
 		protected GroupExpr ParseParentheses()
 		{
 			if (!_token.Try("("))
@@ -2450,8 +2508,9 @@ namespace PreviewLibrary
 			throw new Exception(CreateThrowMessage($"Expect any keyword in {msg}, but got {_token.Text}"));
 		}
 
-		private JoinExpr ParseJoin()
+		private JoinExpr ParseInnerJoin()
 		{
+			var startIndex = _token.CurrentIndex;
 			ReadKeywordOption(new[] { "inner", "left", "right" }, out var joinTypeStr);
 
 			var outerToken = string.Empty;
@@ -2460,14 +2519,26 @@ namespace PreviewLibrary
 				TryKeyword("OUTER", out outerToken);
 			}
 
-			ReadKeyword("join");
+			if (startIndex == _token.CurrentIndex && !IsKeyword("JOIN"))
+			{
+				throw new PrecursorException("JOIN");
+			}
+
+			ReadKeyword("JOIN");
+
+			if (IsKeyword("ALL"))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<TABLE>");
+			}
 
 			var table = ParseTableToken();
-			var joinType = (JoinType)Enum.Parse(typeof(JoinType), joinTypeStr, true);
 
 			ReadKeyword("on");
+
 			var filterList = ParseFilterList();
 
+			var joinType = (JoinType)Enum.Parse(typeof(JoinType), joinTypeStr, true);
 			return new JoinExpr
 			{
 				Table = table,

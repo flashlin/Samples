@@ -29,6 +29,11 @@ namespace PreviewLibrary.Expressions
 
 		public override string ToString()
 		{
+			if (Items == null)
+			{
+				return string.Empty;
+			}
+
 			var comma = HasComma ? "," : "\r\n";
 			return string.Join(comma, Items.Select(x => $"{x}"));
 		}

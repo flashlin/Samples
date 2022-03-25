@@ -29,7 +29,8 @@ namespace PreviewLibrary
 			"LEFT", "RIGHT", "FULL", "CROSS", "INNER", "OUTER",
 			"NOT",
 			"INSERT", "INTO",
-			"GROUP", "BY"
+			"GROUP", "BY",
+			"JOIN", "ALL"
 		};
 		public static readonly string[] SqlFunc0Names = new[]
 		{

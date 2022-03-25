@@ -13,6 +13,7 @@ namespace PreviewLibrary
 		public SqlExpr WhereExpr { get; set; }
 		public List<SqlExpr> Joins { get; set; }
 		public GroupByExpr GroupByExpr { get; set; }
+		public List<SqlExpr> JoinAllList { get; set; }
 
 		public override string ToString()
 		{
@@ -30,9 +31,14 @@ namespace PreviewLibrary
 			{
 				sb.Append($" WHERE {WhereExpr}");
 			}
-			if(GroupByExpr != null)
+			if (GroupByExpr != null)
 			{
 				sb.Append($"\r\n\t{GroupByExpr}");
+			}
+			if (JoinAllList != null && JoinAllList.Count > 0)
+			{
+				sb.Append("\r\n");
+				sb.Append(string.Join("\r\n", JoinAllList.Select(x => $"{x}")));
 			}
 			return sb.ToString();
 		}

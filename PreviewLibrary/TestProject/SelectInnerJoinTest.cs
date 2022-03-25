@@ -7,16 +7,14 @@ using System.IO;
 using Xunit.Abstractions;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
+using TestProject.Helpers;
 
 namespace TestProject
 {
-	public class SelectInnerJoinTest
+	public class SelectInnerJoinTest : SqlTestBase
 	{
-		private readonly ITestOutputHelper outputHelper;
-
-		public SelectInnerJoinTest(ITestOutputHelper outputHelper)
+		public SelectInnerJoinTest(ITestOutputHelper outputHelper) : base(outputHelper)
 		{
-			this.outputHelper = outputHelper;
 		}
 
 		[Fact]
@@ -45,6 +43,20 @@ ON tb2.id = tb1.id".MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString()
 			};
 
 			expected.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void select_join_all_select()
+		{
+			var sql = @"select 1
+join all
+select 2";
+
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			@"SELECT 1
+JOIN ALL
+SELECT 2".ShouldEqual(expr);
 		}
 	}
 }

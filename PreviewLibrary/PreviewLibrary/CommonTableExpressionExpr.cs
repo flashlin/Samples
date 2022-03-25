@@ -8,20 +8,21 @@ namespace PreviewLibrary
 	{
 		public IdentExpr TableName { get; set; }
 		public SqlExprList Columns { get; set; }
-		public SelectExpr FirstSelect { get; set; }
-		public SelectExpr RecursiveSelect { get; set; }
-		public SelectExpr Query { get; set; }
+		public SqlExpr InnerExpr { get; set; }
 
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
-			sb.AppendLine($"WITH {TableName} ({Columns})");
-			sb.AppendLine($"AS (");
-			sb.AppendLine("\t" + FirstSelect.ToString());
-			sb.AppendLine("\tUNION ALL");
-			sb.AppendLine("\t" + RecursiveSelect.ToString());
-			sb.AppendLine($")");
-			sb.Append(Query.ToString());
+			sb.AppendLine($"WITH {TableName}");
+
+			if (Columns != null && Columns.Items?.Count > 0)
+			{
+				sb.AppendLine($" ({Columns})");
+			}
+
+			sb.AppendLine($" AS (");
+			sb.AppendLine($"\t{InnerExpr}");
+			sb.Append($")");
 			return sb.ToString();
 		}
 	}
