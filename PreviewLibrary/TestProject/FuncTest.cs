@@ -27,5 +27,15 @@ namespace TestProject
 
 			"round( @a - @b * c,0 )".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+
+		[Fact]
+		public void sum()
+		{
+			var sql = "sum(a - b)";
+			var expr = _sqlParser.ParseFuncPartial(sql);
+
+			"sum( a - b )".ShouldEqual(expr);
+		}
 	}
 }

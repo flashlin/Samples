@@ -757,7 +757,8 @@ namespace PreviewLibrary
 				{
 					Throw("Expect ,");
 				}
-				var expr = ParseSubExpr();
+				//var expr = ParseSubExpr();
+				var expr = ParseArithmeticExpr();
 				argsExprs.Add(expr);
 			}
 			ReadKeyword(")");
