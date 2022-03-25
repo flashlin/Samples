@@ -129,7 +129,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("-");
 			}
 
-			if( TryGet(readExpr, out var negativeExpr) )
+			if (TryGet(readExpr, out var negativeExpr))
 			{
 				return new NegativeExpr
 				{
@@ -1331,7 +1331,10 @@ namespace PreviewLibrary
 			}
 
 			var fields = ParseManyColumns();
-			var fromExpr = Get(ParseFrom);
+
+			//var fromExpr = Get(ParseFrom);
+			TryGet(ParseFrom, out var fromExpr);
+
 			var joinTable = Get(ParseJoin);
 			var joinTableList = (List<JoinExpr>)null;
 			if (joinTable != null)
@@ -1352,14 +1355,30 @@ namespace PreviewLibrary
 			};
 		}
 
-		private SqlExpr ParseFrom()
+		protected SqlExpr ParseFrom()
 		{
 			if (!_token.TryIgnoreCase("from", out var _))
 			{
-				throw new Exception();
+				throw new PrecursorException("FROM");
 			}
 
-			return GetAny(ParseSqlFunc, () => WithComma(ParseTableToken));
+			var fromList = WithComma(() =>
+			{
+				var sourceExpr = ParseAliasExpr(GetAny(ParseGroup, ParseSubExpr));
+				TryGet(ParseAlias, out var aliasExpr);
+				TryGet(ParseWithOptions, out var withOptionsExpr);
+
+				return new TableExpr
+				{
+					Name = sourceExpr,
+					AliasName = aliasExpr?.Name,
+					WithOptions = withOptionsExpr
+				};
+			});
+
+			return fromList;
+
+			//return GetAny(ParseSqlFunc, () => WithComma(ParseTableToken));
 		}
 
 		private TableExpr ParseTableToken()
@@ -1518,6 +1537,19 @@ namespace PreviewLibrary
 			return new IdentExpr
 			{
 				Name = s1
+			};
+		}
+
+		protected SqlExpr ParseAliasExpr(SqlExpr leftExpr)
+		{
+			if (!TryGet(ParseAlias, out var aliasName))
+			{
+				return leftExpr;
+			}
+			return new AliasExpr
+			{
+				Left = leftExpr,
+				AliasName = aliasName,
 			};
 		}
 
@@ -2178,6 +2210,23 @@ namespace PreviewLibrary
 				throw new Exception(expect);
 			}
 			return expr;
+		}
+
+		private SqlExpr EatAny(params Func<SqlExpr>[] parseList)
+		{
+			for (var i = 0; i < parseList.Length; i++)
+			{
+				var parse = parseList[i];
+				try
+				{
+					return parse();
+				}
+				catch (PrecursorException)
+				{
+					continue;
+				}
+			}
+			throw new Exception();
 		}
 
 		private SqlExpr GetAny(params Func<SqlExpr>[] parseList)

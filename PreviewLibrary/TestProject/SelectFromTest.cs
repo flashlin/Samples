@@ -54,13 +54,13 @@ namespace TestProject
 		{
 			var sql = "SELECT name as n1 FROM user tb1";
 			var expr = new SqlParser().Parse(sql);
-			"SELECT name as n1 FROM user as tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT name as n1 FROM user AS tb1".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
 		public void select_column_as_aliasName_from_table_as_aliasName()
 		{
-			var sql = "SELECT name as n1 FROM user as tb1";
+			var sql = "SELECT name as n1 FROM user AS tb1";
 			var expr = new SqlParser().Parse(sql);
 			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
@@ -68,7 +68,7 @@ namespace TestProject
 		[Fact]
 		public void select_column_as_aliasName_from_table_as_aliasName_with_nolock()
 		{
-			var sql = "SELECT name as n1 FROM user as tb1 WITH(nolock)";
+			var sql = "SELECT name as n1 FROM user AS tb1 WITH(nolock)";
 			var expr = new SqlParser().Parse(sql);
 			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
@@ -119,6 +119,23 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 			var expr = _sqlParser.ParseSelectPartial(sql);
 
 			"SELECT @a = round( @b - 1,0 ) FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
+		public void select_1_from_group_select_2()
+		{
+			var sql = "select 1 from (select 2)";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT 1 FROM (SELECT 2)".ShouldEqual(expr);
+		}
+	}
+
+	public static class TestExtension
+	{
+		public static void ShouldEqual(this string expected, SqlExpr sqlExpr)
+		{
+			expected.ToExpectedObject().ShouldEqual(sqlExpr.ToString());
 		}
 	}
 }

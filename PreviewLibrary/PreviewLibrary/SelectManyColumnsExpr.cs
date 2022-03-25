@@ -7,7 +7,7 @@ namespace PreviewLibrary
 {
 	public class TableExpr : SqlExpr
 	{
-		public IdentExpr Name { get; set; }
+		public SqlExpr Name { get; set; }
 		public string AliasName { get; set; }
 		public WithOptionsExpr WithOptions { get; set; }
 
