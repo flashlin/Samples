@@ -403,7 +403,8 @@ namespace PreviewLibrary
 				throw new PrecursorException("CASE");
 			}
 
-			TryGet(ParseVariable, out var inputExpr);
+			//TryGet(ParseVariable, out var inputExpr);
+			TryGet(ParseArithmeticExpr, out var inputExpr);
 
 			var whenList = new List<WhenThenExpr>();
 			do
@@ -424,8 +425,13 @@ namespace PreviewLibrary
 				});
 			} while (true);
 
-			ReadKeyword("ELSE");
-			var elseExpr = ParseArithmeticExpr();
+
+			SqlExpr elseExpr = null;
+			if (TryKeyword("ELSE", out _))
+			{
+				elseExpr = ParseArithmeticExpr();
+			}
+
 			ReadKeyword("END");
 
 			return new CaseExpr

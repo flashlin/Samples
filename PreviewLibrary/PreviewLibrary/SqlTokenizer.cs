@@ -23,10 +23,11 @@ namespace PreviewLibrary
 		{
 			"SELECT", "FROM", "WHERE", "AS", "WITH",
 			"AND", "OR", "BEGIN", "END", "EXEC", "EXECUTE", "NULL",
-			"CASE", "THEN", "ELSE", "UNION", "ALL", "SET",
+			"CASE", "WHEN", "THEN", "ELSE", "UNION", "ALL", "SET",
 			"ON",
 			"LEFT", "RIGHT", "FULL", "CROSS", "INNER", "OUTER",
-			"NOT"
+			"NOT",
+			"INSERT", "INTO"
 		};
 		public static readonly string[] SqlFunc0Names = new[]
 		{

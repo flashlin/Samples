@@ -58,5 +58,21 @@ end";
 	ELSE @b + 2
 END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+		[Fact]
+		public void case_func_when_number_then_func()
+		{
+			var sql = @"case datepart(DW, getdate()) 
+			    when 2 then dateadd(dd, datediff(dd, 0,GETDATE()), 0 )
+			    when 1 then dateadd(dd, datediff(dd, 0,GETDATE()-3), 0)
+		    end";
+
+			var expr = _sqlParser.ParseCasePartial(sql);
+			@"CASE
+	datepart( DW,getdate() )
+	WHEN 2 THEN dateadd( dd,datediff( dd,0,GETDATE() ),0 )
+	WHEN 1 THEN dateadd( dd,datediff( dd,0,GETDATE() - 3 ),0 )
+END".ShouldEqual(expr);
+		}
 	}
 }
