@@ -1640,7 +1640,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseAliasExpr(SqlExpr leftExpr)
 		{
-			if (!TryGet(ParseAlias, out var aliasName))
+			if (!Try(ParseAlias, out var aliasName))
 			{
 				return leftExpr;
 			}
@@ -1653,7 +1653,7 @@ namespace PreviewLibrary
 
 		protected IdentExpr ParseAlias()
 		{
-			if (TryGet(ParseIdent, out var aliasName))
+			if (Try(ParseIdent, out var aliasName))
 			{
 				return aliasName;
 			}
