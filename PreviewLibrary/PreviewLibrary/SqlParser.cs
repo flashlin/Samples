@@ -1263,7 +1263,7 @@ namespace PreviewLibrary
 
 			var setFields = WithComma(() => Any("<CASE> or <assign>", ParseCase, ParseFieldAssignValue));
 
-			TryGet(ParseWhere, out var whereExpr);
+			Try(ParseWhere, out var whereExpr);
 
 			return new UpdateExpr
 			{
