@@ -2280,7 +2280,7 @@ namespace PreviewLibrary
 		{
 			for (var i = 0; i < parseList.Length; i++)
 			{
-				if (TryGet(parseList[i], out output))
+				if (Try(parseList[i], out output))
 				{
 					return true;
 				}
