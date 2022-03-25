@@ -1445,13 +1445,13 @@ namespace PreviewLibrary
 		private TableExpr ParseTableToken()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!TryGet(ParseSqlIdent, out var tableName))
+			if (!Try(ParseSqlIdent, out var tableName))
 			{
 				throw new PrecursorException("<TableName>");
 			}
 
-			TryGet(GetAliasName, out var aliasName);
-			TryGet(ParseWithOptions, out var withOptions);
+			Try(GetAliasName, out var aliasName);
+			Try(ParseWithOptions, out var withOptions);
 			return new TableExpr
 			{
 				Name = tableName,
