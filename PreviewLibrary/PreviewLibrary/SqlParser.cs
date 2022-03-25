@@ -1426,8 +1426,8 @@ namespace PreviewLibrary
 			var fromList = WithComma(() =>
 			{
 				var sourceExpr = ParseAliasExpr(GetAny(ParseParentheses, ParseSubExpr));
-				TryGet(ParseAlias, out var aliasExpr);
-				TryGet(ParseWithOptions, out var withOptionsExpr);
+				Try(ParseAlias, out var aliasExpr);
+				Try(ParseWithOptions, out var withOptionsExpr);
 
 				return new TableExpr
 				{
