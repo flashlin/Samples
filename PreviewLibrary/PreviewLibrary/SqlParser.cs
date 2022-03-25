@@ -1025,7 +1025,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("SET");
 			}
 
-			if (!TryGet(ParseVariableName, out var variableName))
+			if (!Try(ParseVariableName, out var variableName))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<VariableName>");
