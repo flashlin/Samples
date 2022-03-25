@@ -967,8 +967,7 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseSetPartial(string sql)
 		{
-			PredicateParse(sql);
-			return ParseSet();
+			return ParsePartial(ParseSet, sql);
 		}
 
 		protected SqlExpr ParseSet()
@@ -996,7 +995,7 @@ namespace PreviewLibrary
 			}
 
 			ReadKeyword("=");
-			var valueExpr = ParseSubExpr();
+			var valueExpr = ParseArithmeticExpr();
 
 			return new SetVariableExpr
 			{

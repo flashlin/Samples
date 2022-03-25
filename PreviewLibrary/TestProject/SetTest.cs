@@ -117,6 +117,14 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
+		public void set_variable_eq_arithmetic()
+		{
+			var sql = "set @a = 1 + 2";
+			var expr = _sqlParser.ParseSetPartial(sql);
+			"SET @a = 1 + 2".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void SetVariable()
 		{
 			var sql = ":setvar DatabaseName \"AccountDB\"";
