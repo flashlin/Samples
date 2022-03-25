@@ -1536,7 +1536,7 @@ namespace PreviewLibrary
 
 		private SqlExpr ParseSelectColumn()
 		{
-			if (TryGet(ParseConstant, out var constantExpr))
+			if (Try(ParseConstant, out var constantExpr))
 			{
 				return ParseSimpleColumnExpr(ParseEqualExpr(constantExpr));
 			}
@@ -1549,7 +1549,7 @@ namespace PreviewLibrary
 			{
 				return ParseNot();
 			}
-			if (TryGet(ParseVariableName, out var variableName))
+			if (Try(ParseVariableName, out var variableName))
 			{
 				ReadKeyword("=");
 				return new ColumnSetExpr
@@ -1559,7 +1559,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (TryGet(ParseArithmeticExpr, out var subExprColumn))
+			if (Try(ParseArithmeticExpr, out var subExprColumn))
 			{
 				return ParseSimpleColumnExpr(subExprColumn);
 			}
