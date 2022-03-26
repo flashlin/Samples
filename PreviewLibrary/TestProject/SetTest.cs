@@ -13,7 +13,6 @@ using TestProject.Helpers;
 
 namespace TestProject
 {
-
 	public class SetTest : SqlTestBase
 	{
 		public SetTest(ITestOutputHelper outputHelper) : base(outputHelper)
@@ -215,29 +214,6 @@ END";
 BEGIN
 SELECT 1
 END".ShouldEqual(expr);
-		}
-
-		[Fact]
-		public void exec_objectId_arg1()
-		{
-			var sql = @"exec sys.sp_changedbowner 'sa'";
-			var expr = Parse(sql);
-			new ExecuteExpr
-			{
-				ExecName = "exec",
-				Method = new IdentExpr
-				{
-					ObjectId = "sys",
-					Name = "sp_changedbowner"
-				},
-				Arguments = new SqlExpr[]
-				{
-					new StringExpr
-					{
-						Text = "'sa'"
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
 		}
 
 		[Fact]
