@@ -3,6 +3,7 @@ using Xunit;
 using Xunit.Abstractions;
 using ExpectedObjects;
 using PreviewLibrary.Expressions;
+using TestProject.Helpers;
 
 namespace TestProject
 {
@@ -16,15 +17,21 @@ namespace TestProject
       public void declare_variableName_int()
 		{
          var sql = "declare @returnValue bit";
+         
          var expr = Parse(sql);
-         new DeclareVariableExpr
-         {
-            Name = "@returnValue",
-            DataType = new DataTypeExpr
-            {
-               DataType = "bit"
-            }
-         }.ToExpectedObject().ShouldEqual(expr);
+
+         "DECLARE @returnValue bit".ShouldEqual(expr);
+		}
+
+      [Fact]
+      public void declare_two_variable()
+		{
+         var sql = "declare @a decimal(19, 6) = 1, @b decimal(19, 6) = 2";
+         
+         var expr = _sqlParser.ParseDeclarePartial(sql);
+
+         @"DECLARE @a decimal(19,6) = 1
+DECLARE @b decimal(19,6) = 2".ShouldEqual(expr);
 		}
 
       [Fact]

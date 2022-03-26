@@ -47,32 +47,55 @@ namespace PreviewLibrary
 			_token.PredicateParse(sql);
 		}
 
-		public DeclareVariableExpr ParseDeclarePartial(string sql)
+		public SqlExpr ParseDeclarePartial(string sql)
 		{
 			return ParsePartial(ParseDeclare, sql);
 		}
 
-		protected DeclareVariableExpr ParseDeclare()
+		protected SqlExprList AtLeast(Func<SqlExpr> parse)
+		{
+			var list = Many(parse);
+			if (list.Items.Count == 0)
+			{
+				throw new Exception();
+			}
+			return list;
+		}
+
+		protected SqlExpr ParseDeclare()
 		{
 			if (!TryKeyword("DECLARE", out _))
 			{
 				throw new PrecursorException("DECLARE");
 			}
-			var varName = ParseVariableName();
-			var dataType = ParseDataType();
 
-			SqlExpr defaultValueExpr = null;
-			if (TryKeyword("=", out _))
+			DeclareVariableExpr variableDataType()
 			{
-				defaultValueExpr = Any("<Constant>", ParseArithmeticExpr, ParseConstant);
+				var varName = ParseVariableName();
+				var dataType = ParseDataType();
+
+				SqlExpr defaultValueExpr = null;
+				if (TryKeyword("=", out _))
+				{
+					defaultValueExpr = Any("<Constant>", ParseArithmeticExpr, ParseConstant);
+				}
+
+				return new DeclareVariableExpr
+				{
+					Name = varName,
+					DataType = dataType,
+					DefaultValue = defaultValueExpr
+				};
 			}
 
-			return new DeclareVariableExpr
+			var listExpr = WithComma(variableDataType);
+			if( listExpr.Items.Count == 0)
 			{
-				Name = varName,
-				DataType = dataType,
-				DefaultValue = defaultValueExpr
-			};
+				throw new Exception("<Variable> <DataType>");
+			}
+
+			listExpr.HasComma = false;
+			return listExpr;
 		}
 
 		protected VariableExpr ParseVariable()
@@ -1578,7 +1601,7 @@ namespace PreviewLibrary
 
 		protected BreakExpr ParseBreak()
 		{
-			if(!TryKeyword(";", out _))
+			if (!TryKeyword(";", out _))
 			{
 				throw new PrecursorException(";");
 			}
