@@ -324,7 +324,7 @@ namespace PreviewLibrary
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
-				if (TryGet(parseList[i], out var expr))
+				if (Try(parseList[i], out var expr))
 				{
 					return expr;
 				}
@@ -2291,12 +2291,19 @@ namespace PreviewLibrary
 
 		private SqlExpr Any(string expect, params Func<SqlExpr>[] parseList)
 		{
-			var expr = GetAny(parseList);
-			if (expr == null)
+			for (var i = 0; i < parseList.Length; i++)
 			{
-				throw new Exception(expect);
+				var parse = parseList[i];
+				try
+				{
+					return parse();
+				}
+				catch (PrecursorException)
+				{
+					continue;
+				}
 			}
-			return expr;
+			throw new PrecursorException(expect);
 		}
 
 		private SqlExpr EatAny(params Func<SqlExpr>[] parseList)

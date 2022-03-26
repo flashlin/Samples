@@ -22,15 +22,23 @@ namespace PreviewLibrary
 		public static readonly string Hex16Number = "0x" + "[0-9a-fA-F]+";
 		public static readonly string[] _keywords = new[]
 		{
-			"SELECT", "FROM", "WHERE", "AS", "WITH",
-			"AND", "OR", "BEGIN", "END", "EXEC", "EXECUTE", "NULL",
-			"CASE", "WHEN", "THEN", "ELSE", "UNION", "ALL", "SET",
-			"ON",
-			"LEFT", "RIGHT", "FULL", "CROSS", "INNER", "OUTER",
-			"NOT",
-			"INSERT", "INTO",
-			"GROUP", "BY",
-			"JOIN", "ALL"
+			"ALL", "AND",  "AS", 
+			"BEGIN", "BY",
+			"CASE", "CROSS", 
+			"END", "EXEC", "EXECUTE", "ELSE", 
+			"FROM", "FULL", 
+			"GROUP", "GRANT", 
+			"INNER",	"INSERT", "INTO",
+			"JOIN", 
+			"LEFT", 
+
+			"THEN", 
+			"OR", "ON", "OUTER",
+			"RIGHT", 
+			"SET", "SELECT", 
+			"UNION", 
+			"WHEN", "WHERE", "WITH",
+			"NULL", "NOT",
 		};
 		public static readonly string[] SqlFunc0Names = new[]
 		{
