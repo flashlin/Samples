@@ -40,5 +40,20 @@ BEGIN
 SELECT 1
 END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+		[Fact]
+		public void if_parentheses_arithmetic()
+		{
+			var sql = @"if (@a>=1 or @b + @c >=2)
+BEGIN
+	select 1
+END";
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF (@a >= 1 or @b + @c >= 2)
+BEGIN
+SELECT 1
+END".ShouldEqual(expr);
+		}
 	}
 }

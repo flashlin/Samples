@@ -135,7 +135,7 @@ namespace PreviewLibrary
 		protected SqlExpr ParseAndOrExpr()
 		{
 			var ops = new string[] { "(", ")", "AND", "OR" };
-			return ParseConcat(() => ParseSubExpr(), ops);
+			return ParseConcat(() => ParseArithmeticExpr(), ops);
 		}
 
 		private bool IsOperator(string[] opers)
@@ -1874,7 +1874,6 @@ namespace PreviewLibrary
 			return ParsePartial(ParseIf, sql);
 		}
 
-
 		protected SqlExpr ParseCompareOpExpr(SqlExpr leftExpr)
 		{
 			if (!_token.TryEqual(SqlTokenizer.CompareOps, out var op))
@@ -2417,22 +2416,9 @@ namespace PreviewLibrary
 			return parseAction();
 		}
 
-		protected SqlExpr ParseParenthesesExpr()
+		public SqlExpr ParseParenthesesPartial(string sql)
 		{
-			if (!TryKeyword("(", out _))
-			{
-				return ParseWithCompareOp(ParseArithmeticExpr);
-			}
-			var subExpr = ParseWithCompareOp(ParseArithmeticExpr);
-			ReadKeyword(")");
-
-
-			var groupExpr = new GroupExpr
-			{
-				Expr = subExpr,
-			};
-
-			return ParseCompareOpExpr(groupExpr);
+			return ParsePartial(ParseParentheses, sql);
 		}
 
 		protected SqlExpr WithParentheses(Func<SqlExpr> parse)
@@ -2449,20 +2435,38 @@ namespace PreviewLibrary
 			};
 		}
 
-		protected GroupExpr ParseParentheses()
+		protected SqlExpr ParseNestExpr()
 		{
-			if (!_token.Try("("))
+			return ParseWithCompareOp(ParseAndOrExpr);
+		}
+
+		protected SqlExpr ParseParentheses()
+		{
+			if (!TryKeyword("(", out _))
 			{
 				throw new PrecursorException("(");
 			}
 			//var subExpr = ParseWithCompareOp(ParseSubExpr);
-			var subExpr = ParseWithCompareOp(ParseArithmeticExpr);
+			//var subExpr = ParseWithCompareOp(ParseArithmeticExpr);
+			var subExpr = ParseNestExpr();
+
 			ReadKeyword(")");
 
-			return new GroupExpr
+			var groupExpr = new GroupExpr
 			{
 				Expr = subExpr,
 			};
+
+			return ParseCompareOpExpr(groupExpr);
+		}
+
+		protected SqlExpr ParseParenthesesExpr()
+		{
+			if (!Try(ParseParentheses, out var parenthesesExpr))
+			{
+				return ParseNestExpr();
+			}
+			return parenthesesExpr;
 		}
 
 		private bool IsKeyword(string keyword)
