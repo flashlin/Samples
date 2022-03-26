@@ -19,12 +19,16 @@ namespace PreviewLibrary
 			sb.AppendLine($"IF {Condition}");
 			sb.Append($"{Body}");
 
-			if( ElseIfList != null)
+			if (ElseIfList != null)
 			{
-				sb.Append($"\r\n{ElseIfList}");
+				var elseIfList = $"{ElseIfList}";
+				if (!string.IsNullOrEmpty(elseIfList))
+				{
+					sb.Append($"\r\n{elseIfList}");
+				}
 			}
 
-			if( ElseBody!=null )
+			if (ElseBody != null)
 			{
 				sb.Append($"\r\nELSE {ElseBody}");
 			}
