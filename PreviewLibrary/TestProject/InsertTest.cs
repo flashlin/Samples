@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 using System.Collections.Generic;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
+using TestProject.Helpers;
 
 namespace TestProject
 {
@@ -168,7 +169,7 @@ namespace TestProject
 
 			var expr = Parse(sql);
 
-			"INSERT INTO @table SELECT Val FROM strsplitmax( @str,N',' )".ToExpectedObject().ShouldEqual(expr.ToString());
+			"INSERT INTO @table SELECT Val FROM strsplitmax( @str,N',' )".ShouldEqual(expr);
 		}
 
 		[Fact]
