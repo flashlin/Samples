@@ -10,9 +10,9 @@ namespace PreviewLibrary
 		{
 			if (Value == null)
 			{
-				return string.Empty;
+				return "RETURN";
 			}
-			return $"{Value}";
+			return $"RETURN {Value}";
 		}
 	}
 }

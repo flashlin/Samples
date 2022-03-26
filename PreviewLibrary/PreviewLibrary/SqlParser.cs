@@ -320,7 +320,8 @@ namespace PreviewLibrary
 				ParseUse,
 				ParseExec,
 				ParseGrant,
-				ParseReturn
+				ParseReturn,
+				ParseBreak
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
@@ -340,6 +341,11 @@ namespace PreviewLibrary
 			}
 
 			return new AnyExpr();
+		}
+
+		public SqlExpr ParseReturnPartial(string sql)
+		{
+			return ParsePartial(ParseReturn, sql);
 		}
 
 		protected SqlExpr ParseReturn()
@@ -362,11 +368,15 @@ namespace PreviewLibrary
 				};
 			}
 
-			Try(ParseSubExpr, out var valueExpr);
-			return new ReturnExpr
+			if (Try(ParseSubExpr, out var valueExpr))
 			{
-				Value = valueExpr
-			};
+				return new ReturnExpr
+				{
+					Value = valueExpr
+				};
+			}
+
+			return new ReturnExpr();
 		}
 
 		public SqlExpr ParseGrantPartial(string sql)
@@ -561,7 +571,8 @@ namespace PreviewLibrary
 				ParseSelect,
 				ParseDelete,
 				ParseExec,
-				ParseParentheses
+				ParseParentheses,
+				ParseBreak
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
@@ -1371,7 +1382,7 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("JOIN ALL");
 			}
-			return new JoinAllExpr 
+			return new JoinAllExpr
 			{
 				Next = ParseSubExpr()
 			};
@@ -1563,6 +1574,15 @@ namespace PreviewLibrary
 			}
 
 			return ParseSimpleColumn();
+		}
+
+		protected BreakExpr ParseBreak()
+		{
+			if(!TryKeyword(";", out _))
+			{
+				throw new PrecursorException(";");
+			}
+			return new BreakExpr();
 		}
 
 		public CommonTableExpressionExpr ParseCtePartial(string sql)
