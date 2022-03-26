@@ -187,7 +187,7 @@ namespace TestProject
 			@"IF (isnull( @b1,'' ) <> '')
 BEGIN
 INSERT INTO @a1 SELECT Val FROM strsplitmax( @str,N',' )
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 	}
 }
