@@ -431,8 +431,6 @@ namespace PreviewLibrary
 				throw new PrecursorException("CASE");
 			}
 
-			//TryGet(ParseVariable, out var inputExpr);
-			//TryGet(ParseArithmeticExpr, out var inputExpr);
 			TryGet(ParseParenthesesExpr, out var inputExpr);
 
 			var whenList = new List<WhenThenExpr>();
