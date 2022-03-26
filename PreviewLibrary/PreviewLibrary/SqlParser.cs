@@ -568,7 +568,7 @@ namespace PreviewLibrary
 			for (var i = 0; i < parseList.Length; i++)
 			{
 				var parse = parseList[i];
-				if (TryGet(parse, out var expr))
+				if (Try(parse, out var expr))
 				{
 					//return ParseCompareOpExpr(ParseInExpr(expr));
 
