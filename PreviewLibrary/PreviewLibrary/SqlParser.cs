@@ -2446,8 +2446,6 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("(");
 			}
-			//var subExpr = ParseWithCompareOp(ParseSubExpr);
-			//var subExpr = ParseWithCompareOp(ParseArithmeticExpr);
 			var subExpr = ParseNestExpr();
 
 			ReadKeyword(")");
@@ -2456,7 +2454,6 @@ namespace PreviewLibrary
 			{
 				Expr = subExpr,
 			};
-
 			return ParseCompareOpExpr(groupExpr);
 		}
 
