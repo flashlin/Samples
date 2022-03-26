@@ -89,7 +89,7 @@ namespace PreviewLibrary
 			}
 
 			var listExpr = WithComma(variableDataType);
-			if( listExpr.Items.Count == 0)
+			if (listExpr.Items.Count == 0)
 			{
 				throw new Exception("<Variable> <DataType>");
 			}
@@ -1937,29 +1937,69 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected SqlExpr ParseBegin()
+		{
+			if (!TryKeyword("BEGIN", out _))
+			{
+				throw new PrecursorException("BEGIN");
+			}
+			var body = ParseBody();
+			ReadKeyword("END");
+			return new BeginExpr
+			{
+				Body = body
+			};
+		}
+
+		protected SqlExpr ParseBeginEndOrOneExpr()
+		{
+			if (!Try(ParseBegin, out SqlExpr body))
+			{
+				body = ParseExpr();
+			}
+			return body;
+		}
+
+		protected ElseIfExpr ParseElseIf()
+		{
+			if (!TryAllKeywords(new[] { "ELSE", "IF" }, out _))
+			{
+				throw new PrecursorException("ELSE IF");
+			}
+
+			var condition = ParseFilterList();
+			var body = ParseBeginEndOrOneExpr();
+
+			return new ElseIfExpr
+			{
+				Condition = condition,
+				Body = body
+			};
+		}
+
 		protected SqlExpr ParseIf()
 		{
 			if (!TryKeyword("IF", out _))
 			{
 				throw new PrecursorException("IF");
 			}
-			var filter = ParseFilterList();
-			ReadKeyword("BEGIN");
-			var body = ParseBody();
-			ReadKeyword("END");
+			var condition = ParseFilterList();
 
-			List<SqlExpr> elseBody = new List<SqlExpr>();
+			var body = ParseBeginEndOrOneExpr();
+
+			var elseIfList = Many(ParseElseIf);
+			
+			SqlExpr elseBody = null;
 			if (TryKeyword("ELSE", out _))
 			{
-				ReadKeyword("BEGIN");
-				elseBody = ParseBody();
-				ReadKeyword("END");
+				elseBody = ParseBeginEndOrOneExpr();
 			}
 
 			return new IfExpr
 			{
-				Condition = filter,
+				Condition = condition,
 				Body = body,
+				ElseIfList = elseIfList,
 				ElseBody = elseBody
 			};
 		}

@@ -55,5 +55,27 @@ BEGIN
 SELECT 1
 END".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void if_condition_expr_else_if_condition_expr_else_expr()
+		{
+			var sql = @"
+if a = 1
+   set @a = 1
+else if a = 2
+   set @a = 2
+else 
+   set @a = 3
+";
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF a = 1
+SET @a = 1
+ELSE IF a = 2
+SET @a = 2
+ELSE SET @a = 3".ShouldEqual(expr);
+		}
+
+
 	}
 }
