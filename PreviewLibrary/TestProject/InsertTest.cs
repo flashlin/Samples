@@ -189,5 +189,23 @@ BEGIN
 INSERT INTO @a1 SELECT Val FROM strsplitmax( @str,N',' )
 END".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void insert_values_parentheses()
+		{
+			var sql = @"insert into @tb (a, b)
+      values
+        (
+            (case when @c>=1 then 2 else 3 end), -- desc
+            @d
+        )";
+
+			var expr = _sqlParser.ParseInsertPartial(sql);
+
+			@"INSERT INTO @tb (a,b) VALUES( (CASE
+WHEN @c >= 1 THEN 2
+ELSE 3
+END),@d )".ShouldEqual(expr);
+		}
 	}
 }

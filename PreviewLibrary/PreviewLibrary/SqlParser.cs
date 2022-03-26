@@ -1171,6 +1171,11 @@ namespace PreviewLibrary
 			};
 		}
 
+		public SqlExpr ParseInsertPartial(string sql)
+		{
+			return ParsePartial(ParseInsert, sql);
+		}
+
 		protected SqlExpr ParseInsert()
 		{
 			var startIndex = _token.CurrentIndex;
@@ -1222,7 +1227,8 @@ namespace PreviewLibrary
 			do
 			{
 				ReadKeyword("(");
-				var values = WithComma(() => Any("Constant or FUNC", ParseSqlFunc, ParseConstant));
+				//var values = WithComma(() => Any("Constant or FUNC", ParseSqlFunc, ParseConstant));
+				var values = WithComma(() => ParseParenthesesExpr());
 				valuesList.Items.Add(values);
 				ReadKeyword(")");
 				if (!_token.Try(","))

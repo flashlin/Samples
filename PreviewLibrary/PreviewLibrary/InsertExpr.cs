@@ -15,7 +15,7 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var intoToken = IntoToggle ? "INTO" : "";
-			return $"INSERT {intoToken} {Table} ({Fields}) VALUES {ValuesList}";
+			return $"INSERT {intoToken} {Table} ({Fields}) VALUES( {ValuesList} )";
 		}
 	}
 }
