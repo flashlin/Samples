@@ -61,7 +61,7 @@ namespace TestProject
 			var sql = "ROUND(748.58, -1, 1)";
 			var expr = _sqlParser.ParseFuncPartial(sql);
 
-			"ROUND( 748.58,-1,1 )".ToExpectedObject().ShouldEqual(expr.ToString());
+			"ROUND( 748.58,-1,1 )".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -70,7 +70,7 @@ namespace TestProject
 			var sql = "round(((@a - @b) * c), 0)";
 			var expr = _sqlParser.ParseFuncPartial(sql);
 
-			"round( @a - @b * c,0 )".ToExpectedObject().ShouldEqual(expr.ToString());
+			"round( @a - @b * c,0 )".ShouldEqual(expr);
 		}
 
 
