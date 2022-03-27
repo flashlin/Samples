@@ -1317,6 +1317,8 @@ namespace PreviewLibrary
 				throw new PrecursorException("<table>");
 			}
 
+			TryGet(() => EatInsertFields(), out var fields);
+
 			if (IsKeyword("SELECT"))
 			{
 				var selectExpr = ParseSelect();
@@ -1327,8 +1329,6 @@ namespace PreviewLibrary
 					FromSelect = selectExpr
 				};
 			}
-
-			TryGet(() => EatInsertFields(), out var fields);
 
 			ReadKeyword("VALUES");
 

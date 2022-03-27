@@ -133,6 +133,17 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void insert_into_table_columns_select_from()
+		{
+			var sql = @"insert into customer(id,name)
+		select id, name from other";
+
+			var expr = Parse(sql);
+
+			"INSERT INTO customer SELECT id,name FROM other".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void if_func_begin_insert_into_from_select_end()
 		{
 			var sql = @"if(isnull(@b1, '') <> '')
