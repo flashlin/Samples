@@ -41,6 +41,23 @@ SELECT 1
 END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
+
+		[Fact]
+		public void if_not_func1_selectExpr_begin_selectExpr_end()
+		{
+			var sql = @"IF NOT exists(
+    SELECT 1 FROM sys.databases
+)
+BEGIN
+	SELECT 1
+END";
+			var expr = Parse(sql);
+			@"IF NOT exists( SELECT 1 FROM sys.databases )
+BEGIN
+SELECT 1
+END".ShouldEqual(expr);
+		}
+
 		[Fact]
 		public void if_parentheses_arithmetic()
 		{
