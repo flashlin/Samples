@@ -103,7 +103,17 @@ or TransDate2 < @to".MergeToCode().ShouldEqual(expr);
 		{
 			var sql = "select @id = 1 from tb1";
 			var expr = _sqlParser.ParseSelectPartial(sql);
-			"SELECT @id = 1 FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT @id = 1 FROM tb1".ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void select_func_from_table()
+		{
+			var sql = @"select CAST(@a as date) from customer";
+
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT CAST( @a AS date ) FROM customer".ShouldEqual(expr);
 		}
 
 		[Fact]

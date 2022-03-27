@@ -22,21 +22,21 @@ namespace PreviewLibrary
 		public static readonly string Hex16Number = "0x" + "[0-9a-fA-F]+";
 		public static readonly string[] _keywords = new[]
 		{
-			"ALL", "AND",  "AS", 
+			"ALL", "AND",  "AS",
 			"BEGIN", "BY",
-			"CASE", "CROSS", 
-			"END", "EXEC", "EXECUTE", "ELSE", 
-			"FROM", "FULL", 
-			"GROUP", "GRANT", 
-			"INNER",	"INSERT", "INTO",
-			"JOIN", 
-			"LEFT", 
+			"CASE", "CROSS",
+			"END", "EXEC", "EXECUTE", "ELSE",
+			"FROM", "FULL",
+			"GROUP", "GRANT",
+			"INNER", "INSERT", "INTO",
+			"JOIN",
+			"LEFT",
 
 			"THEN", "TOP",
 			"OR", "ON", "OUTER", "ORDER",
-			"RIGHT", 
-			"SET", "SELECT", 
-			"UNION", 
+			"RIGHT",
+			"SET", "SELECT",
+			"UNION",
 			"WHEN", "WHERE", "WITH",
 			"MAX",
 			"NULL", "NOT",
@@ -61,8 +61,8 @@ namespace PreviewLibrary
 			"CHAR",
 			"DATETIME", "DATETIME2", "DECIMAL", "DATE",
 			"FLOAT",
-			"INT", 
-			"NUMERIC", "NVARCHAR", 
+			"INT",
+			"NUMERIC", "NVARCHAR",
 			"SMALLDATETIME",
 			"TINYINT",
 			"VARCHAR",
@@ -74,6 +74,13 @@ namespace PreviewLibrary
 			{ 1, SqlFunc1Names },
 			{ 2, SqlFunc2Names },
 		};
+
+		public static string[] SqlFunctionNames =
+			_sqlFuncArgsCount_SqlFuncNames.Values.SelectMany(x => x)
+			.Concat(new[]
+			{
+				"CAST"
+			}).ToArray();
 
 		private static readonly Dictionary<string, int> _sqlFuncName_ArgsCount = new Dictionary<string, int>();
 
@@ -241,11 +248,23 @@ namespace PreviewLibrary
 			}
 		}
 
+		private static HashSet<string> _reverseKeywords = 
+			_keywords.Concat(SqlFunctionNames).ToHashSet();
+
+		private static bool IsReverseKeyword(string text)
+		{
+			return _reverseKeywords.Contains(text.ToUpper());
+		}
+
 		public bool IsIdent
 		{
 			get
 			{
-				if (_keywords.Contains(Text.ToUpper()))
+				//if (_keywords.Contains(Text.ToUpper()))
+				//{
+				//	return false;
+				//}
+				if (IsReverseKeyword(Text))
 				{
 					return false;
 				}
@@ -274,14 +293,15 @@ namespace PreviewLibrary
 		{
 			get
 			{
-				if (_keywords.Contains(Text.ToUpper()))
+				//if (_keywords.Contains(Text.ToUpper()))
+				if (IsReverseKeyword(Text))
 				{
 					return false;
 				}
-				if (IsFuncName(out _))
-				{
-					return false;
-				}
+				//if (IsFuncName(out _))
+				//{
+				//	return false;
+				//}
 				if (Text.StartsWith("[") && Text.EndsWith("]"))
 				{
 					return true;
