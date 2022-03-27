@@ -12,6 +12,21 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void exists_select()
+		{
+			var sql = @"exists(
+								SELECT 1 FROM @a
+								WHERE name = 
+									CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) ) 
+							)";
+
+			var expr = _sqlParser.ParseFuncPartial(sql);
+
+			"exists( SELECT 1 FROM @a WHERE name = CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) ) )"
+				.ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void round()
 		{
 			var sql = "ROUND(748.58, -1, 1)";
