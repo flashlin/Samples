@@ -33,7 +33,7 @@ namespace PreviewLibrary
 			"LEFT", 
 
 			"THEN", "TOP",
-			"OR", "ON", "OUTER",
+			"OR", "ON", "OUTER", "ORDER",
 			"RIGHT", 
 			"SET", "SELECT", 
 			"UNION", 

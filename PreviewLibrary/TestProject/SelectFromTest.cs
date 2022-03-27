@@ -170,5 +170,14 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 			var expr = _sqlParser.ParseSelectPartial(sql);
 			"SELECT 1 FROM [remoteServer].[db].[dbo].[customer]".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_1_from_table_order_by_desc()
+		{
+			var sql = @"SELECT 1 FROM [customer] order by id desc";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			@"SELECT 1 FROM [customer]
+ORDER BY id desc".ShouldEqual(expr);
+		}
 	}
 }

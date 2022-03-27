@@ -1532,7 +1532,7 @@ namespace PreviewLibrary
 
 		protected TopExpr ParseTop()
 		{
-			if(!TryKeyword("TOP", out _))
+			if (!TryKeyword("TOP", out _))
 			{
 				throw new PrecursorException("TOP");
 			}
@@ -1541,6 +1541,38 @@ namespace PreviewLibrary
 			{
 				Count = count
 			};
+		}
+
+		protected OrderColumnExpr ParseColumnDesc()
+		{
+			if (!TryGet(ParseSqlIdent, out var column))
+			{
+				throw new PrecursorException("<Column>");
+			}
+
+			TryAnyKeywords(new[] { "ASC", "DESC" }, out var orderTypeExpr);
+
+			return new OrderColumnExpr
+			{
+				Column = column,
+				OrderType = orderTypeExpr
+			};
+		}
+
+		protected SqlExprList ParseOrderBy()
+		{
+			if (!TryGet(Keywords("ORDER", "BY"), out _))
+			{
+				throw new PrecursorException("ORDER BY");
+			}
+
+			var columnList = WithComma(ParseColumnDesc);
+			if (columnList.Items.Count <= 0)
+			{
+				throw new ParseException("<Column>");
+			}
+
+			return columnList;
 		}
 
 		protected SelectExpr ParseSelect()
@@ -1569,6 +1601,8 @@ namespace PreviewLibrary
 
 			TryGet(ParseGroupBy, out var groupByExpr);
 
+			TryGet(ParseOrderBy, out var orderByExpr);
+
 			var joinAllList = Many(ParseUnionJoinAll);
 
 			return new SelectExpr
@@ -1579,6 +1613,7 @@ namespace PreviewLibrary
 				Joins = joinTableList.Items,
 				WhereExpr = whereExpr,
 				GroupByExpr = groupByExpr,
+				OrderByExpr = orderByExpr,
 				JoinAllList = joinAllList.Items,
 			};
 		}
@@ -1931,20 +1966,20 @@ namespace PreviewLibrary
 				};
 			}
 
-			switch(dot_token_list.Count)
+			switch (dot_token_list.Count)
 			{
 				case 1:
 					return new IdentExpr
 					{
 						ObjectId = s1,
-						Name = dot_token_list[0], 
+						Name = dot_token_list[0],
 					};
 				case 2:
 					return new IdentExpr
 					{
 						DatabaseId = s1,
 						ObjectId = dot_token_list[0],
-						Name = dot_token_list[1], 
+						Name = dot_token_list[1],
 					};
 				case 3:
 					return new IdentExpr
@@ -1952,7 +1987,7 @@ namespace PreviewLibrary
 						ServerId = s1,
 						DatabaseId = dot_token_list[0],
 						ObjectId = dot_token_list[1],
-						Name = dot_token_list[2], 
+						Name = dot_token_list[2],
 					};
 			}
 

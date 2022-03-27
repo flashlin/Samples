@@ -15,6 +15,7 @@ namespace PreviewLibrary
 		public List<SqlExpr> Joins { get; set; }
 		public GroupByExpr GroupByExpr { get; set; }
 		public List<SqlExpr> JoinAllList { get; set; }
+		public SqlExprList OrderByExpr { get; set; }
 
 		public override string ToString()
 		{
@@ -40,6 +41,10 @@ namespace PreviewLibrary
 			if (GroupByExpr != null)
 			{
 				sb.Append($"\r\n\t{GroupByExpr}");
+			}
+			if( OrderByExpr != null)
+			{
+				sb.Append($"\r\n\tORDER BY {OrderByExpr}");
 			}
 			if (JoinAllList != null && JoinAllList.Count > 0)
 			{
