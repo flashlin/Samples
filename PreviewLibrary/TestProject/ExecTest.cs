@@ -13,6 +13,69 @@ namespace TestProject
 		{
 		}
 
+
+		[Fact]
+		public void exec_func_arg1_arg2()
+		{
+			var sql = @"exec sys.sp_addextendedproperty @name = N'MS_Description', @value = N'Confidential.';";
+			var expr = Parse(sql);
+			new ExecuteExpr
+			{
+				ExecName = "exec",
+				Method = new IdentExpr
+				{
+					ObjectId = "sys",
+					Name = "sp_addextendedproperty"
+				},
+				Arguments = new SqlExpr[]
+				{
+					new SpParameterExpr
+					{
+						Name = "@name",
+						Value = new StringExpr
+						{
+							Text = "N'MS_Description'"
+						}
+					},
+					new SpParameterExpr
+					{
+						Name = "@value",
+						Value = new StringExpr
+						{
+							Text = "N'Confidential.'"
+						}
+					}
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void execute_func_arg1()
+		{
+			var sql = @"execute sys.sp_addextendedproperty @name = N'MS_Description';";
+			var expr = Parse(sql);
+			new ExecuteExpr
+			{
+				ExecName = "execute",
+				Method = new IdentExpr
+				{
+					ObjectId = "sys",
+					Name = "sp_addextendedproperty"
+				},
+				Arguments = new SqlExpr[]
+				{
+					new SpParameterExpr
+					{
+						Name = "@name",
+						Value = new StringExpr
+						{
+							Text = "N'MS_Description'"
+						}
+					},
+				}
+			}.ToExpectedObject().ShouldEqual(expr);
+		}
+
 		[Fact]
 		public void exec_objectId_arg1()
 		{
