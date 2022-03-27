@@ -945,6 +945,15 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected MaxExpr ParseMax()
+		{
+			if(!TryKeyword("MAX", out _))
+			{
+				throw new PrecursorException("MAX");
+			}
+			return new MaxExpr();
+		}
+
 		protected DataTypeSizeExpr ParseDataTypeSize()
 		{
 			if (!_token.Try("("))
@@ -952,7 +961,10 @@ namespace PreviewLibrary
 				throw new PrecursorException("(");
 			}
 
-			var size = ParseInteger().Value;
+			if(!Try(ParseMax, out SqlExpr size))
+			{ 
+				size = ParseInteger();
+			}
 
 			int? scaleSize = null;
 			if (_token.Try(","))

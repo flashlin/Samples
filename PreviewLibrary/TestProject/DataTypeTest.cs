@@ -22,5 +22,14 @@ id int PRIMARY KEY
 ,rank int
 )".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void max()
+		{
+			var sql = "nvarchar(max)";
+			var expr = _sqlParser.ParseDataTypePartial(sql);
+
+			"nvarchar(MAX)".ShouldEqual(expr);
+		}
 	}
 }

@@ -82,47 +82,7 @@ namespace TestProject
 			var sql = "INSERT [dbo].[customer] ([id]) VALUES ( CAST(0.0100 AS Decimal(5, 4)) )";
 			var expr = Parse(sql);
 
-			new InsertExpr
-			{
-				Table = new IdentExpr
-				{
-					Name = "[customer]",
-					ObjectId = "[dbo]"
-				},
-				Fields = CreateSqlExprList(
-					new IdentExpr
-					{
-						Name = "[id]"
-					}
-				),
-				ValuesList = CreateSqlExprList(
-					CreateSqlExprList(
-						new SqlFuncExpr
-						{
-							Name = "CAST",
-							Arguments = new SqlExpr[]
-							{
-								new AsDataTypeExpr
-								{
-									Object = new DecimalExpr
-									{
-										Value = 0.0100m
-									},
-									DataType = new DataTypeExpr
-									{
-										DataType = "Decimal",
-										DataSize = new DataTypeSizeExpr
-										{
-											 Size = 5,
-											 ScaleSize = 4
-										}
-									}
-								}
-							}
-						}
-					)
-				)
-			}.ToExpectedObject().ShouldEqual(expr);
+			"INSERT [dbo].[customer]([id]) VALUES( CAST( 0.0100 AS Decimal(5,4) ) )".ShouldEqual(expr);
 		}
 
 		[Fact]

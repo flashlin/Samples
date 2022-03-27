@@ -38,6 +38,7 @@ namespace PreviewLibrary
 			"SET", "SELECT", 
 			"UNION", 
 			"WHEN", "WHERE", "WITH",
+			"MAX",
 			"NULL", "NOT",
 		};
 		public static readonly string[] SqlFunc0Names = new[]

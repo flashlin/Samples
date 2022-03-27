@@ -4,7 +4,7 @@ namespace PreviewLibrary
 {
 	public class DataTypeSizeExpr : SqlExpr
 	{
-		public int Size { get; set; }
+		public SqlExpr Size { get; set; }
 		public int? ScaleSize { get; set; }
 
 		public override string ToString()

@@ -34,27 +34,10 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 	BetOption nvarchar(10)
 )";
 			var expr = _sqlParser.ParseDataTypePartial(sql);
-			new TableTypeExpr
-			{
-				ColumnTypeList = new List<SqlExpr>
-				{
-					new DefineColumnTypeExpr
-					{
-						 Name = new IdentExpr
-						 {
-							  Name = "BetOption"
-						 },
-						 DataType = new DataTypeExpr
-						 {
-							  DataType = "nvarchar",
-							  DataSize = new DataTypeSizeExpr
-							  {
-									Size = 10
-							  }
-						 }
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+
+			@"TABLE (
+BetOption nvarchar(10)
+)".ShouldEqual(expr);
 		}
 
 		[Fact]
