@@ -51,7 +51,7 @@ SELECT 2 FROM tb2
 		{
 			var sql = "SELECT @id = id FROM customer";
 			var expr = _sqlParser.ParseSelectPartial(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+			sql.ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -60,7 +60,7 @@ SELECT 2 FROM tb2
 			var sql = "select name";
 			var expr = new SqlParser().Parse(sql);
 
-			"SELECT name".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT name".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -69,7 +69,7 @@ SELECT 2 FROM tb2
 			var sql = "select tb1.name";
 			var expr = new SqlParser().Parse(sql);
 
-			"SELECT tb1.name".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT tb1.name".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -78,7 +78,7 @@ SELECT 2 FROM tb2
 			var sql = "select id, name";
 			var expr = new SqlParser().Parse(sql);
 
-			"SELECT id,name".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT id,name".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -95,7 +95,7 @@ SELECT 2 FROM tb2
 			var sql = "select 1";
 			var expr = new SqlParser().Parse(sql);
 
-			"SELECT 1".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT 1".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -124,7 +124,7 @@ SELECT 2 FROM tb2
 			var sql = "select - 1";
 			var expr = new SqlParser().Parse(sql);
 
-			"SELECT -1".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT -1".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -140,7 +140,7 @@ SELECT 2 FROM tb2
 			@"IF exists( SELECT 1 FROM customer WHERE name IS NULL )
 BEGIN
 SELECT 1
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -148,7 +148,7 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		{
 			var sql = "select @a=sum(b) from tb1";
 			var expr = _sqlParser.ParseSelectPartial(sql);
-			"SELECT @a = sum( b ) FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT @a = sum( b ) FROM tb1".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -157,7 +157,7 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 			var sql = "select @a = @b | c from tb1";
 			var expr = _sqlParser.ParseSelectPartial(sql);
 
-			"SELECT @a = @b | c FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT @a = @b | c FROM tb1".ShouldEqual(expr);
 		}
 	}
 }
