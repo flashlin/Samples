@@ -79,5 +79,23 @@ FOR VALUES (
 0,1,3
 )".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void create_partition_scheme()
+		{
+			var sql = @"CREATE PARTITION SCHEME [a]
+				AS PARTITION [b]
+				TO ([PRIMARY], [PRIMARY])";
+
+			var expr = _sqlParser.Parse(sql);
+
+			@"CREATE PARTITION SCHEME [a]
+AS PARTITION [b]
+TO (
+[PRIMARY],[PRIMARY]
+)".ShouldEqual(expr);
+		}
+
+
 	}
 }

@@ -324,6 +324,7 @@ namespace PreviewLibrary
 			var parseList = new Func<SqlExpr>[]
 			{
 				ParseCreatePartitionFunction,
+				ParseCreatePartitionScheme,
 				ParseAlter,
 				ParseCte,
 				ParseDeclare,
@@ -554,6 +555,26 @@ namespace PreviewLibrary
 			return false;
 		}
 
+
+		private Func<string[]> Keywords(params string[] keywords)
+		{
+			return () =>
+			{
+				var startIndex = _token.CurrentIndex;
+				var output = new string[keywords.Length];
+				for (var i = 0; i < keywords.Length; i++)
+				{
+					if (!_token.TryIgnoreCase(keywords[i], out output[i]))
+					{
+						_token.MoveTo(startIndex);
+						output[i] = string.Empty;
+						throw new PrecursorException(string.Join(" ", keywords));
+					}
+				}
+				return output;
+			};
+		}
+
 		private bool TryAllKeywords(string[] keywords, out string[] output)
 		{
 			var startIndex = _token.CurrentIndex;
@@ -629,9 +650,38 @@ namespace PreviewLibrary
 			return leftExpr;
 		}
 
+		protected CreatePartitionSchemeExpr ParseCreatePartitionScheme()
+		{
+			if (!TryGet(Keywords("CREATE", "PARTITION", "SCHEME"), out _))
+			{
+				throw new PrecursorException("CREATE PARITION SCHEME");
+			}
+
+			var partitionSchemeName = ParseSqlIdent();
+			if (!TryGet(Keywords("AS", "PARTITION"), out _))
+			{
+				throw new ParseException("AS PARITION");
+			}
+			var partitionFunctionName = ParseSqlIdent();
+
+			TryKeyword("ALL", out var allExpr);
+			ReadKeyword("TO");
+			ReadKeyword("(");
+			var fileGroupNameList = WithComma(ParseSqlIdent1);
+			ReadKeyword(")");
+
+			return new CreatePartitionSchemeExpr
+			{
+				SchemeName = partitionSchemeName,
+				FunctionName = partitionFunctionName,
+				All = allExpr,
+				FileGroupList = fileGroupNameList,
+			};
+		}
+
 		protected CreatePartitionFunctionExpr ParseCreatePartitionFunction()
 		{
-			if(!TryAllKeywords(new[] {"CREATE", "PARTITION", "FUNCTION" }, out _))
+			if (!TryAllKeywords(new[] { "CREATE", "PARTITION", "FUNCTION" }, out _))
 			{
 				throw new PrecursorException("CREATE PARTITION FUNCTION");
 			}
@@ -2733,7 +2783,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("ALTER");
 			}
 
-			if(Try(EatDatabase, out var alterDatabaseExpr))
+			if (Try(EatDatabase, out var alterDatabaseExpr))
 			{
 				return alterDatabaseExpr;
 			}
