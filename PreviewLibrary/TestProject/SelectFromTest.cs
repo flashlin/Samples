@@ -189,5 +189,13 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 			@"SELECT 1 FROM [customer]
 ORDER BY id desc".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_max_id_from_table()
+		{
+			var sql = @"select max(id) from customer";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			@"SELECT max( id ) FROM customer".ShouldEqual(expr);
+		}
 	}
 }
