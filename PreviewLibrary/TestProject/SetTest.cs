@@ -28,14 +28,6 @@ namespace TestProject
 		}
 
 		[Fact]
-		public void select_1_from_table_where_cast_add_cast()
-		{
-			var sql = "SELECT 1 FROM @a WHERE name = CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) )";
-			var expr = _sqlParser.ParseSelectPartial(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
-		}
-
-		[Fact]
 		public void exists_select()
 		{
 			var sql = @"exists(
