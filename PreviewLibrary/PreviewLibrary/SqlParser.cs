@@ -323,6 +323,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseAlter,
 				ParseCte,
 				ParseDeclare,
 				ParseSemicolon,
@@ -378,7 +379,8 @@ namespace PreviewLibrary
 				throw new PrecursorException("RETURN");
 			}
 
-			SqlExpr parseValue(){
+			SqlExpr parseValue()
+			{
 				return ParseArithmeticExpr();
 			}
 
@@ -951,7 +953,7 @@ namespace PreviewLibrary
 
 		protected MaxExpr ParseMax()
 		{
-			if(!TryKeyword("MAX", out _))
+			if (!TryKeyword("MAX", out _))
 			{
 				throw new PrecursorException("MAX");
 			}
@@ -965,8 +967,8 @@ namespace PreviewLibrary
 				throw new PrecursorException("(");
 			}
 
-			if(!Try(ParseMax, out SqlExpr size))
-			{ 
+			if (!Try(ParseMax, out SqlExpr size))
+			{
 				size = ParseInteger();
 			}
 
@@ -1905,7 +1907,7 @@ namespace PreviewLibrary
 
 		protected MarkPrimaryKeyExpr ParsePrimaryKey()
 		{
-			if(!TryAllKeywords(new[] { "PRIMARY", "KEY" }, out _))
+			if (!TryAllKeywords(new[] { "PRIMARY", "KEY" }, out _))
 			{
 				throw new PrecursorException("PRIMARY KEY");
 			}
@@ -2020,7 +2022,7 @@ namespace PreviewLibrary
 			var body = ParseBeginEndOrOneExpr();
 
 			var elseIfList = Many(ParseElseIf);
-			
+
 			SqlExpr elseBody = null;
 			if (TryKeyword("ELSE", out _))
 			{
@@ -2682,6 +2684,48 @@ namespace PreviewLibrary
 			{
 				Left = left,
 				Right = likeStr
+			};
+		}
+
+		public SqlExpr ParseAlterPartial(string sql)
+		{
+			return ParsePartial(ParseAlter, sql);
+		}
+
+		protected SqlExpr ParseAlter()
+		{
+			if (!TryKeyword("ALTER", out _))
+			{
+				throw new PrecursorException("ALTER");
+			}
+
+			if(Try(EatDatabase, out var alterDatabaseExpr))
+			{
+				return alterDatabaseExpr;
+			}
+
+			throw new ParseException($"'{_token.Text}' Not Support");
+		}
+
+		protected AlterDatabaseExpr EatDatabase()
+		{
+			if (!TryKeyword("DATABASE", out _))
+			{
+				throw new PrecursorException("DATABASE");
+			}
+
+			var dbNameExpr = ParseSqlIdent1();
+			if (!TryAllKeywords(new[] { "ADD", "FILEGROUP" }, out _))
+			{
+				throw new ParseException("ADD FILEGROUP");
+			}
+
+			var filegroupName = ParseSqlIdent1();
+			return new AlterDatabaseExpr
+			{
+				DbName = dbNameExpr,
+				ActionName = "ADD",
+				FileGroupName = filegroupName,
 			};
 		}
 
