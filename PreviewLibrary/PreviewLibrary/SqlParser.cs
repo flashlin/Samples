@@ -151,7 +151,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("-");
 			}
 
-			if (Try(readExpr, out var negativeExpr))
+			if (TryGet(readExpr, out var negativeExpr))
 			{
 				return new NegativeExpr
 				{
@@ -187,19 +187,19 @@ namespace PreviewLibrary
 			var readOperand = true;
 			while (_token.Text != "")
 			{
-				if (readOperand && Try(ParseStar, out var starExpr))
+				if (readOperand && TryGet(ParseStar, out var starExpr))
 				{
 					readOperand = false;
 					operands.Push(starExpr);
 					continue;
 				}
-				else if (readOperand && Try(() => ParseNegativeExpr(readExpr), out var negativeExpr))
+				else if (readOperand && TryGet(() => ParseNegativeExpr(readExpr), out var negativeExpr))
 				{
 					readOperand = false;
 					operands.Push(negativeExpr);
 					continue;
 				}
-				else if (readOperand && !IsOperator(opers) && Try(readExpr, out var expr))
+				else if (readOperand && !IsOperator(opers) && TryGet(readExpr, out var expr))
 				{
 					readOperand = false;
 					operands.Push(expr);
@@ -351,7 +351,7 @@ namespace PreviewLibrary
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
-				if (Try(parseList[i], out var expr))
+				if (TryGet(parseList[i], out var expr))
 				{
 					return expr;
 				}
@@ -399,7 +399,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (Try(parseValue, out var valueExpr))
+			if (TryGet(parseValue, out var valueExpr))
 			{
 				return new ReturnExpr
 				{
@@ -417,7 +417,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseGrant()
 		{
-			if (Try(ParseGrantExecuteOn, out var grantExecuteOnExpr))
+			if (TryGet(ParseGrantExecuteOn, out var grantExecuteOnExpr))
 			{
 				return grantExecuteOnExpr;
 			}
@@ -475,7 +475,7 @@ namespace PreviewLibrary
 			SqlExpr inputExpr = null;
 			if (!IsKeyword("WHEN"))
 			{
-				Try(ParseParenthesesExpr, out inputExpr);
+				TryGet(ParseParenthesesExpr, out inputExpr);
 			}
 
 			var whenList = new List<WhenThenExpr>();
@@ -632,7 +632,7 @@ namespace PreviewLibrary
 			for (var i = 0; i < parseList.Length; i++)
 			{
 				var parse = parseList[i];
-				if (Try(parse, out var expr))
+				if (TryGet(parse, out var expr))
 				{
 					//return ParseCompareOpExpr(ParseInExpr(expr));
 
@@ -656,13 +656,13 @@ namespace PreviewLibrary
 
 		protected CreatePartitionSchemeExpr ParseCreatePartitionScheme()
 		{
-			if (!Try(Keywords("CREATE", "PARTITION", "SCHEME"), out _))
+			if (!TryGet(Keywords("CREATE", "PARTITION", "SCHEME"), out _))
 			{
 				throw new PrecursorException("CREATE PARITION SCHEME");
 			}
 
 			var partitionSchemeName = ParseSqlIdent();
-			if (!Try(Keywords("AS", "PARTITION"), out _))
+			if (!TryGet(Keywords("AS", "PARTITION"), out _))
 			{
 				throw new ParseException("AS PARITION");
 			}
@@ -865,7 +865,7 @@ namespace PreviewLibrary
 		protected CustomFuncExpr ParseCustomFunc()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!Try(ParseSqlIdent, out var funcName))
+			if (!TryGet(ParseSqlIdent, out var funcName))
 			{
 				throw new PrecursorException("<Custom Function Name>");
 			}
@@ -889,14 +889,14 @@ namespace PreviewLibrary
 
 		protected SqlFuncExpr ParseSqlFunc()
 		{
-			if (Try(ParseCast, out var castExpr))
+			if (TryGet(ParseCast, out var castExpr))
 			{
 				return castExpr;
 			}
 
 			if (!_token.Try(_token.IsFuncName(out var funcArgsCount), out var funcName))
 			{
-				if (Try(ParseCustomFunc, out var customFuncExpr))
+				if (TryGet(ParseCustomFunc, out var customFuncExpr))
 				{
 					return customFuncExpr;
 				}
@@ -961,11 +961,11 @@ namespace PreviewLibrary
 		protected DefineColumnTypeExpr ParseColumnDataType()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!Try(ParseSqlIdent1, out var columnNameExpr))
+			if (!TryGet(ParseSqlIdent1, out var columnNameExpr))
 			{
 				throw new PrecursorException("<ColumnName>");
 			}
-			if (!Try(ParseDataType, out var dataType))
+			if (!TryGet(ParseDataType, out var dataType))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<DataType>");
@@ -979,7 +979,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseDataType()
 		{
-			if (Try(ParseTableType, out var tableTypeExpr))
+			if (TryGet(ParseTableType, out var tableTypeExpr))
 			{
 				return tableTypeExpr;
 			}
@@ -991,7 +991,7 @@ namespace PreviewLibrary
 
 			var dataSize = Get(ParseDataTypeSize);
 
-			Try(ParsePrimaryKey, out var primaryKeyExpr);
+			TryGet(ParsePrimaryKey, out var primaryKeyExpr);
 
 			return new DataTypeExpr
 			{
@@ -1055,7 +1055,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("(");
 			}
 
-			if (!Try(ParseMax, out SqlExpr size))
+			if (!TryGet(ParseMax, out SqlExpr size))
 			{
 				size = ParseInteger();
 			}
@@ -1166,7 +1166,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("SET");
 			}
 
-			if (!Try(ParseVariableName, out var variableName))
+			if (!TryGet(ParseVariableName, out var variableName))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<VariableName>");
@@ -1328,7 +1328,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			Try(() => EatInsertFields(), out var fields);
+			TryGet(() => EatInsertFields(), out var fields);
 
 			ReadKeyword("VALUES");
 
@@ -1362,14 +1362,14 @@ namespace PreviewLibrary
 		protected AssignSetExpr ParseFieldAssignValue()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!Try(ParseSqlIdent, out var fieldExpr))
+			if (!TryGet(ParseSqlIdent, out var fieldExpr))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<Field>");
 			}
 			ReadKeyword("=");
 
-			if (Try(ParseArithmeticExpr, out var arithemeticExpr))
+			if (TryGet(ParseArithmeticExpr, out var arithemeticExpr))
 			{
 				return new AssignSetExpr
 				{
@@ -1378,7 +1378,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (Try(ParseSubExpr, out var subExpr))
+			if (TryGet(ParseSubExpr, out var subExpr))
 			{
 				return new AssignSetExpr
 				{
@@ -1414,7 +1414,7 @@ namespace PreviewLibrary
 
 			var setFields = WithComma(() => Any("<CASE> or <assign>", ParseCase, ParseFieldAssignValue));
 
-			Try(ParseWhere, out var whereExpr);
+			TryGet(ParseWhere, out var whereExpr);
 
 			return new UpdateExpr
 			{
@@ -1539,10 +1539,10 @@ namespace PreviewLibrary
 
 			var fields = ParseManyColumns();
 
-			Try(ParseFrom, out var fromExpr);
+			TryGet(ParseFrom, out var fromExpr);
 
 			//var joinTableList = Many(ParseJoin);
-			if (!Try(() => Many(ParseInnerJoin), out var joinTableList))
+			if (!TryGet(() => Many(ParseInnerJoin), out var joinTableList))
 			{
 				joinTableList = new SqlExprList()
 				{
@@ -1552,7 +1552,7 @@ namespace PreviewLibrary
 
 			var whereExpr = Get(ParseWhere);
 
-			Try(ParseGroupBy, out var groupByExpr);
+			TryGet(ParseGroupBy, out var groupByExpr);
 
 			var joinAllList = Many(ParseUnionJoinAll);
 
@@ -1577,8 +1577,8 @@ namespace PreviewLibrary
 			var fromList = WithComma(() =>
 			{
 				var sourceExpr = ParseAliasExpr(GetAny(ParseParentheses, ParseSubExpr));
-				Try(ParseAlias, out var aliasExpr);
-				Try(ParseWithOptions, out var withOptionsExpr);
+				TryGet(ParseAlias, out var aliasExpr);
+				TryGet(ParseWithOptions, out var withOptionsExpr);
 
 				return new TableExpr
 				{
@@ -1596,13 +1596,13 @@ namespace PreviewLibrary
 		private TableExpr ParseTableToken()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!Try(ParseSqlIdent, out var tableName))
+			if (!TryGet(ParseSqlIdent, out var tableName))
 			{
 				throw new PrecursorException("<TableName>");
 			}
 
-			Try(GetAliasName, out var aliasName);
-			Try(ParseWithOptions, out var withOptions);
+			TryGet(GetAliasName, out var aliasName);
+			TryGet(ParseWithOptions, out var withOptions);
 			return new TableExpr
 			{
 				Name = tableName,
@@ -1616,7 +1616,7 @@ namespace PreviewLibrary
 			var list = new List<SqlExpr>();
 			do
 			{
-				if (!Try(parse, out var itemExpr))
+				if (!TryGet(parse, out var itemExpr))
 				{
 					break;
 				}
@@ -1687,7 +1687,7 @@ namespace PreviewLibrary
 
 		private SqlExpr ParseSelectColumn()
 		{
-			if (Try(ParseConstant, out var constantExpr))
+			if (TryGet(ParseConstant, out var constantExpr))
 			{
 				return ParseSimpleColumnExpr(ParseEqualExpr(constantExpr));
 			}
@@ -1700,7 +1700,7 @@ namespace PreviewLibrary
 			{
 				return ParseNot();
 			}
-			if (Try(ParseVariableName, out var variableName))
+			if (TryGet(ParseVariableName, out var variableName))
 			{
 				ReadKeyword("=");
 				return new ColumnSetExpr
@@ -1710,7 +1710,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (Try(ParseArithmeticExpr, out var subExprColumn))
+			if (TryGet(ParseArithmeticExpr, out var subExprColumn))
 			{
 				return ParseSimpleColumnExpr(subExprColumn);
 			}
@@ -1740,7 +1740,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("WITH");
 			}
 
-			if (!Try(ParseIdent, out var cteTableName))
+			if (!TryGet(ParseIdent, out var cteTableName))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<CTE TableName>");
@@ -1800,7 +1800,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseAliasExpr(SqlExpr leftExpr)
 		{
-			if (!Try(ParseAlias, out var aliasName))
+			if (!TryGet(ParseAlias, out var aliasName))
 			{
 				return leftExpr;
 			}
@@ -1813,7 +1813,7 @@ namespace PreviewLibrary
 
 		protected IdentExpr ParseAlias()
 		{
-			if (Try(ParseIdent, out var aliasName))
+			if (TryGet(ParseIdent, out var aliasName))
 			{
 				return aliasName;
 			}
@@ -1894,7 +1894,7 @@ namespace PreviewLibrary
 
 		private ColumnExpr ParseSimpleColumnExpr(SqlExpr fieldExpr)
 		{
-			Try(ParseAlias, out var aliasName);
+			TryGet(ParseAlias, out var aliasName);
 
 			return new ColumnExpr
 			{
@@ -1905,7 +1905,7 @@ namespace PreviewLibrary
 
 		private ColumnExpr ParseSimpleColumn()
 		{
-			if (!Try(ParseSqlIdent, out var identExpr))
+			if (!TryGet(ParseSqlIdent, out var identExpr))
 			{
 				throw new PrecursorException("<Identifier>");
 			}
@@ -2075,7 +2075,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseBeginEndOrOneExpr()
 		{
-			if (!Try(ParseBegin, out SqlExpr body))
+			if (!TryGet(ParseBegin, out SqlExpr body))
 			{
 				body = ParseExpr();
 			}
@@ -2457,7 +2457,7 @@ namespace PreviewLibrary
 			}
 		}
 
-		private bool Try<T>(Func<T> parse, out T output)
+		private bool TryGet<T>(Func<T> parse, out T output)
 		{
 			try
 			{
@@ -2480,7 +2480,7 @@ namespace PreviewLibrary
 		{
 			for (var i = 0; i < parseList.Length; i++)
 			{
-				if (Try(parseList[i], out output))
+				if (TryGet(parseList[i], out output))
 				{
 					return true;
 				}
@@ -2619,7 +2619,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseParenthesesExpr()
 		{
-			if (!Try(ParseParentheses, out var parenthesesExpr))
+			if (!TryGet(ParseParentheses, out var parenthesesExpr))
 			{
 				return ParseNestExpr();
 			}
@@ -2779,7 +2779,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("ALTER");
 			}
 
-			if (Try(EatDatabase, out var alterDatabaseExpr))
+			if (TryGet(EatDatabase, out var alterDatabaseExpr))
 			{
 				return alterDatabaseExpr;
 			}
