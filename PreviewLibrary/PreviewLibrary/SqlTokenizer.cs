@@ -172,23 +172,6 @@ namespace PreviewLibrary
 			DoubleQuotedString,
 		};
 
-		//static readonly string[] AllPatterns =
-		//	Escape(CompareOperSymbols)
-		//	.Concat(AllStrings)
-		//	.Concat(new[]
-		//	{
-		//		BatchInstruction,
-		//		SingleLineComment,
-		//		MultiLineComment,
-		//		Hex16Number,
-		//		DecimalNumber,
-		//		IntegerNumber,
-		//		SqlIdent,
-		//		SqlVariable,
-		//		RegexPattern.Ident,
-		//	}).Concat(OtherSymbols)
-		//	.ToArray();
-
 		static readonly string[] AllPatterns =
 			ConcatArray(
 				CompareOperSymbolsContainsSpacesPattern,
