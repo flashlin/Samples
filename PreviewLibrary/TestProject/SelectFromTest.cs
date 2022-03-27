@@ -95,7 +95,7 @@ namespace TestProject
 FROM Statement WITH(nolock)
 WHERE TransDesc LIKE 'Full Transfer%'
 and TransDate1 >= @from
-or TransDate2 < @to".MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString());
+or TransDate2 < @to".MergeToCode().ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -126,7 +126,7 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 			
 			var expr = _sqlParser.ParseSelectPartial(sql);
 
-			"SELECT @a = round( @b - 1,0 ) FROM tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT @a = round( @b - 1,0 ) FROM tb1".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -152,7 +152,7 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 		{
 			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME() AND SUSER_SNAME( owner_sid ) = 'sa'";
 			var expr = Parse(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+			sql.ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -160,7 +160,7 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 		{
 			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME()";
 			var expr = Parse(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+			sql.ShouldEqual(expr);
 		}
 
 		[Fact]
