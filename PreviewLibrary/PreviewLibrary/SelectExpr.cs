@@ -8,6 +8,7 @@ namespace PreviewLibrary
 {
 	public class SelectExpr : SqlExpr
 	{
+		public TopExpr TopExpr { get; set; }
 		public SqlExprList Fields { get; set; }
 		public SqlExpr From { get; set; }
 		public SqlExpr WhereExpr { get; set; }
@@ -18,7 +19,12 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
-			sb.Append($"SELECT {Fields}");
+			sb.Append($"SELECT");
+			if( TopExpr != null)
+			{
+				sb.Append($" {TopExpr}");
+			}
+			sb.Append($" {Fields}");
 			if (From != null)
 			{
 				sb.Append($" FROM {From}");

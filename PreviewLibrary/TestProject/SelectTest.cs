@@ -99,6 +99,17 @@ SELECT 2 FROM tb2
 		}
 
 		[Fact]
+		public void select_top_1()
+		{
+			var sql = "select top 1 1";
+			var expr = new SqlParser().Parse(sql);
+
+			"SELECT TOP 1 1".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void select_count_star()
 		{
 			var sql = "select count(*)";

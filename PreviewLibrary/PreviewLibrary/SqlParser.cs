@@ -1530,12 +1530,27 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected TopExpr ParseTop()
+		{
+			if(!TryKeyword("TOP", out _))
+			{
+				throw new PrecursorException("TOP");
+			}
+			var count = ParseConstant();
+			return new TopExpr
+			{
+				Count = count
+			};
+		}
+
 		protected SelectExpr ParseSelect()
 		{
 			if (!_token.TryIgnoreCase("select", out var _))
 			{
 				throw new PrecursorException();
 			}
+
+			TryGet(ParseTop, out var topExpr);
 
 			var fields = ParseManyColumns();
 
@@ -1558,6 +1573,7 @@ namespace PreviewLibrary
 
 			return new SelectExpr
 			{
+				TopExpr = topExpr,
 				Fields = fields,
 				From = fromExpr,
 				Joins = joinTableList.Items,

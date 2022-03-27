@@ -32,7 +32,7 @@ namespace PreviewLibrary
 			"JOIN", 
 			"LEFT", 
 
-			"THEN", 
+			"THEN", "TOP",
 			"OR", "ON", "OUTER",
 			"RIGHT", 
 			"SET", "SELECT", 
