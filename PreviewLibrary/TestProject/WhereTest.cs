@@ -41,5 +41,13 @@ namespace TestProject
 			var expr = _sqlParser.ParseWherePartial(sql);
 			"id IN (SELECT pid FROM products)".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+		[Fact]
+		public void where_field_eq_cast_add_cast()
+		{
+			var sql = "WHERE name = CAST( @a AS nvarchar(3) ) + ':' + CAST( @b AS nvarchar(3) )";
+			var expr = _sqlParser.ParseWherePartial(sql);
+			sql.ToExpectedObject().ShouldEqual("WHERE " + expr.ToString());
+		}
 	}
 }
