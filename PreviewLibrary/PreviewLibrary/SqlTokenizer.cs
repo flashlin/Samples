@@ -14,6 +14,7 @@ namespace PreviewLibrary
 		public static readonly string DecimalNumber = @"\d+\.\d*";
 		static readonly string SqlIdent = @"\[[^\]]+\]";
 		public static readonly string SqlVariable = @"\@" + RegexPattern.Ident;
+		public static readonly string SystemVariable = @"\@\@" + RegexPattern.Ident;
 		public static readonly string MultiLineComment = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
 		public static readonly string SingleLineComment = @"--[^\r\n]*";
 		static readonly string BatchInstruction = @"\:" + RegexPattern.Ident;
@@ -201,6 +202,7 @@ namespace PreviewLibrary
 					DecimalNumber,
 					IntegerNumber,
 					SqlIdent,
+					SystemVariable,
 					SqlVariable,
 					RegexPattern.Ident,
 				},
