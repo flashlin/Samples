@@ -82,6 +82,14 @@ SELECT 2 FROM tb2
 		}
 
 		[Fact]
+		public void select_not_exists()
+		{
+			var sql = "select not exists(1)";
+			var expr = Parse(sql);
+			"SELECT NOT exists( 1 )".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void select_1()
 		{
 			var sql = "select 1";

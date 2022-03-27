@@ -146,14 +146,6 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
-		public void select_not_exists()
-		{
-			var sql = "select not exists(1)";
-			var expr = Parse(sql);
-			"SELECT NOT exists( 1 )".ToExpectedObject().ShouldEqual(expr.ToString());
-		}
-
-		[Fact]
 		public void select_1_from_table_where_name_eq_func0_and_func1_eq_string()
 		{
 			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME() AND SUSER_SNAME( owner_sid ) = 'sa'";
