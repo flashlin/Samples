@@ -378,9 +378,13 @@ namespace PreviewLibrary
 				throw new PrecursorException("RETURN");
 			}
 
+			SqlExpr parseValue(){
+				return ParseArithmeticExpr();
+			}
+
 			if (TryKeyword("(", out _))
 			{
-				var innerValueExpr = ParseSubExpr();
+				var innerValueExpr = parseValue();
 				ReadKeyword(")");
 				return new GroupExpr
 				{
@@ -391,7 +395,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (Try(ParseSubExpr, out var valueExpr))
+			if (Try(parseValue, out var valueExpr))
 			{
 				return new ReturnExpr
 				{

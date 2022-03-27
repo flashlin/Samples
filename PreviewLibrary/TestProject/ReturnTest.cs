@@ -20,5 +20,15 @@ namespace TestProject
 			
 			"RETURN".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void return_or()
+		{
+			var sql = "return @a | @b";
+
+			var expr = _sqlParser.ParseReturnPartial(sql);
+
+			"RETURN @a | @b".ShouldEqual(expr);
+		}
 	}
 }
