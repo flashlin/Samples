@@ -63,29 +63,5 @@ namespace TestProject
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
-
-		[Fact]
-		public void unknown_custom_func()
-		{
-			var sql = "strsplitmax(@a, N',')";
-			var expr = _sqlParser.ParseFuncPartial(sql);
-			new CustomFuncExpr
-			{
-				ObjectId = new IdentExpr
-				{
-					Name = "strsplitmax"
-				},
-				Name = "strsplitmax",
-				Arguments = new SqlExpr[] { 
-					new IdentExpr
-					{
-						Name = "@a"
-					},new StringExpr
-					{
-						Text = "N','"
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
-		}
 	}
 }

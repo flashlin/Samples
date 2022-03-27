@@ -12,6 +12,15 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void unknown_custom_func()
+		{
+			var sql = "strsplitmax(@a, N',')";
+			var expr = _sqlParser.ParseFuncPartial(sql);
+
+			"strsplitmax( @a,N',' )".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void isnull()
 		{
 			var sql = "isnull(@betCondition, '')";
