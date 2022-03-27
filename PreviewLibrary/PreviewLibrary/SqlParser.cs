@@ -2506,23 +2506,6 @@ namespace PreviewLibrary
 			throw new PrecursorException(expect);
 		}
 
-		private SqlExpr EatAny(params Func<SqlExpr>[] parseList)
-		{
-			for (var i = 0; i < parseList.Length; i++)
-			{
-				var parse = parseList[i];
-				try
-				{
-					return parse();
-				}
-				catch (PrecursorException)
-				{
-					continue;
-				}
-			}
-			throw new Exception();
-		}
-
 		private SqlExpr GetAny(params Func<SqlExpr>[] parseList)
 		{
 			for (var i = 0; i < parseList.Length; i++)

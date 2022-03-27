@@ -57,7 +57,7 @@ namespace PreviewLibrary
 
 		public static string[] DataTypes = new string[]
 		{
-			"BIT", 
+			"BIT", "BIGINT",
 			"CHAR",
 			"DATETIME", "DATETIME2", "DECIMAL", 
 			"FLOAT",
