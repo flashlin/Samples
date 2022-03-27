@@ -185,6 +185,15 @@ END".ShouldEqual(expr);
 			"SELECT @a + @b as name".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void select_a_as_stringOfAliasName()
+		{
+			var sql = "select a as 'name'";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT a as 'name'".ShouldEqual(expr);
+		}
+
 
 	}
 }

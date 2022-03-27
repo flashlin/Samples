@@ -1890,6 +1890,13 @@ namespace PreviewLibrary
 			}
 			if (TryKeyword("AS", out _))
 			{
+				if(TryGet(ParseString, out var stringName))
+				{
+					return new IdentExpr
+					{
+						Name = stringName.Text
+					};
+				}
 				return ParseIdent();
 			}
 			throw new PrecursorException("AS <Ident>");
@@ -1897,16 +1904,19 @@ namespace PreviewLibrary
 
 		private string GetAliasName()
 		{
-			var aliasName = (string)null;
-			if (_token.IsIdent)
-			{
-				aliasName = ParseIdent().Name;
-			}
-			if (_token.TryIgnoreCase("as"))
-			{
-				aliasName = ParseIdent().Name;
-			}
-			return aliasName;
+			var aliasNameExpr = ParseAlias();
+			return aliasNameExpr.Name;
+
+			//var aliasName = (string)null;
+			//if (_token.IsIdent)
+			//{
+			//	aliasName = ParseIdent().Name;
+			//}
+			//if (_token.TryIgnoreCase("as"))
+			//{
+			//	aliasName = ParseIdent().Name;
+			//}
+			//return aliasName;
 		}
 
 		private IdentExpr ParseSqlIdent1()
