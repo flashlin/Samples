@@ -107,7 +107,23 @@ SELECT 2 FROM tb2
 			"SELECT TOP 1 1".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void select_a_as_b()
+		{
+			var sql = "select id as [dd]";
+			var expr = _sqlParser.ParseSelectPartial(sql);
 
+			"SELECT id AS [dd]".ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void select_a_as_ident()
+		{
+			var sql = "select id as idname";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT id as idname".ShouldEqual(expr);
+		}
 
 		[Fact]
 		public void select_count_star()

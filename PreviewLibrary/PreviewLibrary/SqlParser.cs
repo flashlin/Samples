@@ -1758,17 +1758,14 @@ namespace PreviewLibrary
 		{
 			if (TryGet(ParseConstant, out var constantExpr))
 			{
-				return ParseSimpleColumnExpr(ParseEqualExpr(constantExpr));
+				return ParseAliasExpr(ParseSimpleColumnExpr(ParseEqualExpr(constantExpr)));
 			}
 
-			//if (_token.IsNumber)
-			//{
-			//	return ParseInteger();
-			//}
 			if (_token.IgnoreCase("NOT"))
 			{
 				return ParseNot();
 			}
+
 			if (TryGet(ParseVariableName, out var variableName))
 			{
 				ReadKeyword("=");
@@ -1882,7 +1879,7 @@ namespace PreviewLibrary
 
 		protected IdentExpr ParseAlias()
 		{
-			if (TryGet(ParseIdent, out var aliasName))
+			if (TryGet(ParseSqlIdent1, out var aliasName))
 			{
 				return aliasName;
 			}
