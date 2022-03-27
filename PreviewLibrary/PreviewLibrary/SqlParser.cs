@@ -323,6 +323,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseCreatePartitionFunction,
 				ParseAlter,
 				ParseCte,
 				ParseDeclare,
@@ -627,6 +628,39 @@ namespace PreviewLibrary
 			}
 			return leftExpr;
 		}
+
+		protected CreatePartitionFunctionExpr ParseCreatePartitionFunction()
+		{
+			if(!TryAllKeywords(new[] {"CREATE", "PARTITION", "FUNCTION" }, out _))
+			{
+				throw new PrecursorException("CREATE PARTITION FUNCTION");
+			}
+
+			var partitionFunctionName = ParseSqlIdent();
+			ReadKeyword("(");
+			var inputParameterType = ParseDataType();
+			ReadKeyword(")");
+			if (!TryAllKeywords(new[] { "AS", "RANGE" }, out _))
+			{
+				throw new ParseException("AS RANGE");
+			}
+
+			if (!TryAllKeywords(new[] { "FOR", "VALUES" }, out _))
+			{
+				throw new ParseException("FOR VALUES");
+			}
+			ReadKeyword("(");
+			var boundaryValueList = WithComma(ParseConstant);
+			ReadKeyword(")");
+
+			return new CreatePartitionFunctionExpr
+			{
+				FuncName = partitionFunctionName,
+				InputParameterType = inputParameterType,
+				BoundaryValueList = boundaryValueList
+			};
+		}
+
 
 		protected CreateFunctionExpr ParseCreateFunction()
 		{

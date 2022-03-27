@@ -63,5 +63,21 @@ AS BEGIN
 	SELECT 1
 END".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void create_partition_function()
+		{
+			var sql = @"CREATE PARTITION FUNCTION [a](INT)
+    AS RANGE
+    FOR VALUES (0, 1, 3)";
+
+			var expr = _sqlParser.Parse(sql);
+
+			@"CREATE PARTITION FUNCTION [a]( INT )
+AS RANGE
+FOR VALUES (
+0,1,3
+)".ShouldEqual(expr);
+		}
 	}
 }
