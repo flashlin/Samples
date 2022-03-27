@@ -472,7 +472,11 @@ namespace PreviewLibrary
 				throw new PrecursorException("CASE");
 			}
 
-			TryGet(ParseParenthesesExpr, out var inputExpr);
+			SqlExpr inputExpr = null;
+			if (!IsKeyword("WHEN"))
+			{
+				Try(ParseParenthesesExpr, out inputExpr);
+			}
 
 			var whenList = new List<WhenThenExpr>();
 			do
@@ -638,7 +642,7 @@ namespace PreviewLibrary
 						ParseCompareOpExpr);
 				}
 			}
-			throw new Exception(GetLastLineCh() + " Expect sub expr");
+			throw new NotSupportedException(GetLastLineCh() + " Expect sub expr");
 		}
 
 		protected SqlExpr ParseRightExpr(SqlExpr leftExpr, params Func<SqlExpr, SqlExpr>[] rightParseList)
