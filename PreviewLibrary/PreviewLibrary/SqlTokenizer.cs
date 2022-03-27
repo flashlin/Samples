@@ -260,10 +260,6 @@ namespace PreviewLibrary
 		{
 			get
 			{
-				//if (_keywords.Contains(Text.ToUpper()))
-				//{
-				//	return false;
-				//}
 				if (IsReverseKeyword(Text))
 				{
 					return false;
@@ -293,15 +289,10 @@ namespace PreviewLibrary
 		{
 			get
 			{
-				//if (_keywords.Contains(Text.ToUpper()))
 				if (IsReverseKeyword(Text))
 				{
 					return false;
 				}
-				//if (IsFuncName(out _))
-				//{
-				//	return false;
-				//}
 				if (Text.StartsWith("[") && Text.EndsWith("]"))
 				{
 					return true;
