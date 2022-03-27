@@ -175,5 +175,16 @@ END".ShouldEqual(expr);
 
 			"SELECT @a = @b | c FROM tb1".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_a_add_b_as_d()
+		{
+			var sql = "select @a + @b as name";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT @a + @b as name".ShouldEqual(expr);
+		}
+
+
 	}
 }

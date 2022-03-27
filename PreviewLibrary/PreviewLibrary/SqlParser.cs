@@ -1756,6 +1756,11 @@ namespace PreviewLibrary
 
 		private SqlExpr ParseSelectColumn()
 		{
+			if (TryGet(ParseArithmeticExpr, out var arithmeticExpr))
+			{
+				return ParseAliasExpr(ParseSimpleColumnExpr(ParseEqualExpr(arithmeticExpr)));
+			}
+
 			if (TryGet(ParseConstant, out var constantExpr))
 			{
 				return ParseAliasExpr(ParseSimpleColumnExpr(ParseEqualExpr(constantExpr)));
