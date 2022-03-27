@@ -2,6 +2,7 @@
 using PreviewLibrary.Expressions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace PreviewLibrary
 {
@@ -14,8 +15,19 @@ namespace PreviewLibrary
 
 		public override string ToString()
 		{
-			var intoToken = IntoToggle ? "INTO" : "";
-			return $"INSERT {intoToken} {Table} ({Fields}) VALUES( {ValuesList} )";
+			var sb = new StringBuilder();
+			sb.Append("INSERT");
+			if(IntoToggle)
+			{
+				sb.Append(" INTO");
+			}
+			sb.Append($" {Table}");
+			if(Fields != null)
+			{
+				sb.Append($"({Fields})");
+			}
+			sb.Append($" VALUES( {ValuesList} )");
+			return sb.ToString();
 		}
 	}
 }

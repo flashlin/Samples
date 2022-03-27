@@ -202,10 +202,20 @@ END".ShouldEqual(expr);
 
 			var expr = _sqlParser.ParseInsertPartial(sql);
 
-			@"INSERT INTO @tb (a,b) VALUES( (CASE
+			@"INSERT INTO @tb(a,b) VALUES( (CASE
 WHEN @c >= 1 THEN 2
 ELSE 3
 END),@d )".ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void insert_into_variableName_values_()
+		{
+			var sql = @"insert into @a values(@d, @c)";
+
+			var expr = _sqlParser.ParseInsertPartial(sql);
+
+			@"INSERT INTO @a VALUES( @d,@c )".ShouldEqual(expr);
 		}
 	}
 }

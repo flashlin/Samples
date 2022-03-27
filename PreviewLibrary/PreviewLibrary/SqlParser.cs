@@ -1179,6 +1179,17 @@ namespace PreviewLibrary
 			return ParsePartial(ParseInsert, sql);
 		}
 
+		private SqlExprList EatInsertFields()
+		{
+			if (!_token.Try("("))
+			{
+				throw new PrecursorException($"'(' , but got {_token.Text}");
+			}
+			var fields = WithComma(ParseSqlIdent1);
+			ReadKeyword(")");
+			return fields;
+		}
+
 		protected SqlExpr ParseInsert()
 		{
 			var startIndex = _token.CurrentIndex;
@@ -1211,14 +1222,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (!_token.Try("("))
-			{
-				_token.MoveTo(startIndex);
-				throw new PrecursorException("(");
-			}
-			var fields = WithComma(ParseSqlIdent1);
-			ReadKeyword(")");
-
+			Try(() => EatInsertFields(), out var fields);
 
 			ReadKeyword("VALUES");
 
