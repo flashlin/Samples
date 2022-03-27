@@ -2476,14 +2476,6 @@ namespace PreviewLibrary
 			}
 		}
 
-
-		private bool TryGet<T>(Func<T> parse, out T output)
-		{
-			output = Get<T>(parse);
-			return output != null;
-		}
-
-
 		private bool TryGetAny(out SqlExpr output, params Func<SqlExpr>[] parseList)
 		{
 			for (var i = 0; i < parseList.Length; i++)
