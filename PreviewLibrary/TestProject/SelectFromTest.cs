@@ -146,5 +146,21 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 			@"SELECT 1 FROM tb1
 	GROUP BY id,name".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_1_from_table_where_name_eq_func0_and_func1_eq_string()
+		{
+			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME() AND SUSER_SNAME( owner_sid ) = 'sa'";
+			var expr = Parse(sql);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
+		public void select_1_from_table_where_name_eq_func0()
+		{
+			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME()";
+			var expr = Parse(sql);
+			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+		}
 	}
 }

@@ -146,22 +146,6 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
-		public void select_1_from_table_where_name_eq_func0_and_func1_eq_string()
-		{
-			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME() AND SUSER_SNAME( owner_sid ) = 'sa'";
-			var expr = Parse(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
-		}
-
-		[Fact]
-		public void select_1_from_table_where_name_eq_func0()
-		{
-			var sql = @"SELECT 1 FROM sys.databases WHERE name = DB_NAME()";
-			var expr = Parse(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
-		}
-
-		[Fact]
 		public void if_not_func1_selectExpr_begin_selectExpr_end()
 		{
 			var sql = @"IF NOT exists(
