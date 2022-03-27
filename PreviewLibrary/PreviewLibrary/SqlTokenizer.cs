@@ -56,10 +56,15 @@ namespace PreviewLibrary
 
 		public static string[] DataTypes = new string[]
 		{
-			"INT", "DATETIME", "DECIMAL", "BIT", "NUMERIC", "SMALLDATETIME",
+			"BIT", 
+			"CHAR",
+			"DATETIME", "DATETIME2", "DECIMAL", 
 			"FLOAT",
-			"DATETIME2", "NVARCHAR", "VARCHAR",
-			"TINYINT"
+			"INT", 
+			"NUMERIC", "NVARCHAR", 
+			"SMALLDATETIME",
+			"TINYINT",
+			"VARCHAR",
 		};
 
 		private static readonly Dictionary<int, string[]> _sqlFuncArgsCount_SqlFuncNames = new Dictionary<int, string[]>()

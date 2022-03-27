@@ -3,6 +3,7 @@ using PreviewLibrary;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 using System.Collections.Generic;
+using TestProject.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -37,7 +38,7 @@ END";
 RETURNS bit
 AS BEGIN
 SELECT 1
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -57,7 +58,7 @@ begin select 1 end";
 RETURNS PreviewLibrary.DefineColumnTypeExpr
 AS BEGIN
 SELECT 1
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 	}
 }
