@@ -1636,6 +1636,24 @@ namespace PreviewLibrary
 			};
 		}
 
+		private List<T> Many<T>(Func<T> parse, int maxCount)
+		{
+			var list = new List<T>();
+			do
+			{
+				if (!TryGet(parse, out var itemExpr))
+				{
+					break;
+				}
+				list.Add(itemExpr);
+				if (list.Count >= maxCount)
+				{
+					break;
+				}
+			} while (true);
+			return list;
+		}
+
 		private SqlExprList WithComma<T>(Func<T> parse)
 			where T : SqlExpr
 		{
@@ -1850,14 +1868,46 @@ namespace PreviewLibrary
 			};
 		}
 
-		private IdentExpr ParseSqlIdent()
+		public SqlExpr ParseSqlIdentPartial(string sql)
+		{
+			return ParsePartial(ParseSqlIdent, sql);
+		}
+
+		private string Parse_SqlIdent_Token()
+		{
+			if (!_token.Try(_token.IsSqlIdent, out var token))
+			{
+				throw new PrecursorException("<SqlIdent>");
+			}
+			return token;
+		}
+
+		private string Parse_Dot_SqlIdent_Token()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryKeyword(".", out _))
+			{
+				throw new PrecursorException(".");
+			}
+
+			if (!TryGet(Parse_SqlIdent_Token, out var identToken))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<SqlIdent>");
+			}
+
+			return identToken;
+		}
+
+		protected IdentExpr ParseSqlIdent()
 		{
 			if (!_token.Try(_token.IsSqlIdent, out var s1))
 			{
 				throw new PrecursorException($"{_token.Text} should be <Ident>");
 			}
 
-			if (!_token.Try("."))
+			var dot_token_list = Many(Parse_Dot_SqlIdent_Token, 3);
+			if (dot_token_list.Count == 0)
 			{
 				return new IdentExpr
 				{
@@ -1865,31 +1915,32 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (!_token.Try(_token.IsSqlIdent, out var s2))
+			switch(dot_token_list.Count)
 			{
-				throw new Exception($"{s1}.<Ident>");
+				case 1:
+					return new IdentExpr
+					{
+						ObjectId = s1,
+						Name = dot_token_list[0], 
+					};
+				case 2:
+					return new IdentExpr
+					{
+						DatabaseId = s1,
+						ObjectId = dot_token_list[0],
+						Name = dot_token_list[1], 
+					};
+				case 3:
+					return new IdentExpr
+					{
+						ServerId = s1,
+						DatabaseId = dot_token_list[0],
+						ObjectId = dot_token_list[1],
+						Name = dot_token_list[2], 
+					};
 			}
 
-			if (!_token.Try("."))
-			{
-				return new IdentExpr
-				{
-					ObjectId = s1,
-					Name = s2,
-				};
-			}
-
-			if (!_token.Try(_token.IsSqlIdent, out var s3))
-			{
-				throw new Exception($"{s1}.{s2}.<Ident>");
-			}
-
-			return new IdentExpr
-			{
-				DatabaseId = s1,
-				ObjectId = s2,
-				Name = s3,
-			};
+			throw new ParseException();
 		}
 
 		private ColumnExpr ParseSimpleColumnExpr(SqlExpr fieldExpr)

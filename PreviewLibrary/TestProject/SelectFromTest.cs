@@ -162,5 +162,13 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 			var expr = Parse(sql);
 			sql.ToExpectedObject().ShouldEqual(expr.ToString());
 		}
+
+		[Fact]
+		public void select_1_from_remote_table()
+		{
+			var sql = @"SELECT 1 FROM [remoteServer].[db].[dbo].[customer]";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			"SELECT 1 FROM [remoteServer].[db].[dbo].[customer]".ShouldEqual(expr);
+		}
 	}
 }
