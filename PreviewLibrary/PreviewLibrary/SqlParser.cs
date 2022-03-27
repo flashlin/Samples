@@ -652,13 +652,13 @@ namespace PreviewLibrary
 
 		protected CreatePartitionSchemeExpr ParseCreatePartitionScheme()
 		{
-			if (!TryGet(Keywords("CREATE", "PARTITION", "SCHEME"), out _))
+			if (!Try(Keywords("CREATE", "PARTITION", "SCHEME"), out _))
 			{
 				throw new PrecursorException("CREATE PARITION SCHEME");
 			}
 
 			var partitionSchemeName = ParseSqlIdent();
-			if (!TryGet(Keywords("AS", "PARTITION"), out _))
+			if (!Try(Keywords("AS", "PARTITION"), out _))
 			{
 				throw new ParseException("AS PARITION");
 			}
