@@ -53,11 +53,14 @@ begin select 1 end";
 
 			@"CREATE FUNCTION a1
 (
-@b int
+	@b int
 )
-RETURNS PreviewLibrary.DefineColumnTypeExpr
+RETURNS @res TABLE (
+	IsPersion bit
+	,Reason nvarchar(100)
+)
 AS BEGIN
-SELECT 1
+	SELECT 1
 END".ShouldEqual(expr);
 		}
 	}

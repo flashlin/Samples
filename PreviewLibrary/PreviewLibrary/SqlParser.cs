@@ -897,10 +897,13 @@ namespace PreviewLibrary
 
 			var dataSize = Get(ParseDataTypeSize);
 
+			Try(ParsePrimaryKey, out var primaryKeyExpr);
+
 			return new DataTypeExpr
 			{
 				DataType = dataType,
-				DataSize = dataSize
+				DataSize = dataSize,
+				PrimaryKey = primaryKeyExpr
 			};
 		}
 
@@ -1878,6 +1881,15 @@ namespace PreviewLibrary
 		public SqlExpr ParseIfPartial(string sql)
 		{
 			return ParsePartial(ParseIf, sql);
+		}
+
+		protected MarkPrimaryKeyExpr ParsePrimaryKey()
+		{
+			if(!TryAllKeywords(new[] { "PRIMARY", "KEY" }, out _))
+			{
+				throw new PrecursorException("PRIMARY KEY");
+			}
+			return new MarkPrimaryKeyExpr();
 		}
 
 		protected SqlExpr ParseCompareOpExpr(SqlExpr leftExpr)
