@@ -59,7 +59,7 @@ namespace PreviewLibrary
 		{
 			"BIT", "BIGINT",
 			"CHAR",
-			"DATETIME", "DATETIME2", "DECIMAL", 
+			"DATETIME", "DATETIME2", "DECIMAL", "DATE",
 			"FLOAT",
 			"INT", 
 			"NUMERIC", "NVARCHAR", 

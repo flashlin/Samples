@@ -108,5 +108,22 @@ ELSE SET @a = 3".ShouldEqual(expr);
 		}
 
 
+		[Fact]
+		public void if_select_condition()
+		{
+			var sql = @"
+	if( select 1 from customer where a = CAST(@currTime as date) )
+ 
+begin
+	select 1
+end
+";
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF (SELECT 1 FROM customer WHERE a = CAST( @currTime AS date ))
+BEGIN
+SELECT 1
+END".ShouldEqual(expr);
+		}
 	}
 }

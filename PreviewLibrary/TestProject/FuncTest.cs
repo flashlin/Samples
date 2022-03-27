@@ -21,6 +21,17 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void cast()
+		{
+			var sql = "cast(@a as date)";
+			var expr = _sqlParser.ParseFuncPartial(sql);
+
+			"CAST( @a AS date )".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void isnull()
 		{
 			var sql = "isnull(@betCondition, '')";
