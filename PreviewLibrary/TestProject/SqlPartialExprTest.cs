@@ -16,31 +16,6 @@ namespace TestProject
 		}
 
 		[Fact]
-		public void case_when()
-		{
-			var sql = "CASE WHEN @a = -1 THEN [b] ELSE @c END";
-			var expr = _sqlParser.ParseCasePartial(sql);
-			@"CASE
-	WHEN @a = -1 THEN [b]
-	ELSE @c
-END".ToExpectedObject().ShouldEqual(expr.ToString());
-		}
-
-		[Fact]
-		public void table()
-		{
-			var sql = @"table
-(
-	BetOption nvarchar(10)
-)";
-			var expr = _sqlParser.ParseDataTypePartial(sql);
-
-			@"TABLE (
-BetOption nvarchar(10)
-)".ShouldEqual(expr);
-		}
-
-		[Fact]
 		public void expr_notEqual_expr()
 		{
 			var sql = "1 <> 2";
@@ -57,20 +32,6 @@ BetOption nvarchar(10)
 					Value = 2
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
-		}
-
-		[Fact]
-		public void if_notEqual_expr()
-		{
-			var sql = @"if( isnull(@name, '') <> '' )
-BEGIN select 1 END";
-
-			var expr = _sqlParser.ParseIfPartial(sql);
-
-			@"IF (isnull( @name,'' ) <> '')
-BEGIN
-SELECT 1
-END".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -99,27 +60,6 @@ END".ShouldEqual(expr);
 				Right = new StringExpr
 				{
 					Text = "''"
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
-		}
-
-		[Fact]
-		public void isnull()
-		{
-			var sql = "isnull(@betCondition, '')";
-			var expr = _sqlParser.ParseFuncPartial(sql);
-			new SqlFuncExpr
-			{
-				Name = "isnull",
-				Arguments = new SqlExpr[]
-				{
-					new IdentExpr
-					{
-						Name = "@betCondition"
-					},new StringExpr
-					{
-						Text = "''"
-					}
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}

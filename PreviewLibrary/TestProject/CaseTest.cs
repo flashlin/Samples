@@ -88,5 +88,16 @@ END".ShouldEqual(expr);
 	WHEN (a + b) < (c - d) THEN a + d
 END".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void case_when()
+		{
+			var sql = "CASE WHEN @a = -1 THEN [b] ELSE @c END";
+			var expr = _sqlParser.ParseCasePartial(sql);
+			@"CASE
+	WHEN @a = -1 THEN [b]
+	ELSE @c
+END".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
 	}
 }

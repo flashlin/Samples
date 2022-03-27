@@ -12,6 +12,15 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void isnull()
+		{
+			var sql = "isnull(@betCondition, '')";
+			var expr = _sqlParser.ParseFuncPartial(sql);
+
+			"isnull( @betCondition,'' )".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void exists_select()
 		{
 			var sql = @"exists(

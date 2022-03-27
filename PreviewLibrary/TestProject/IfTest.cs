@@ -12,6 +12,20 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void if_notEqual_expr()
+		{
+			var sql = @"if( isnull(@name, '') <> '' )
+BEGIN select 1 END";
+
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF (isnull( @name,'' ) <> '')
+BEGIN
+SELECT 1
+END".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void if_begin_end_else_begin_end()
 		{
 			var sql = @"if @id = 1

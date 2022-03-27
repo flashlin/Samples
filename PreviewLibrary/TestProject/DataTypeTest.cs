@@ -31,5 +31,19 @@ id int PRIMARY KEY
 
 			"nvarchar(MAX)".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void table_dataSize()
+		{
+			var sql = @"table
+(
+	BetOption nvarchar(10)
+)";
+			var expr = _sqlParser.ParseDataTypePartial(sql);
+
+			@"TABLE (
+BetOption nvarchar(10)
+)".ShouldEqual(expr);
+		}
 	}
 }
