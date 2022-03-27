@@ -1,5 +1,6 @@
 ﻿using ExpectedObjects;
 using PreviewLibrary;
+using TestProject.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -95,6 +96,14 @@ namespace TestProject
 			var sql = "a -1";
 			var expr = _sqlParser.ParseArithmeticPartial(sql);
 			"a - 1".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
+		public void a_or_b()
+		{
+			var sql = "@a | @b";
+			var expr = _sqlParser.ParseArithmeticPartial(sql);
+			"@a | @b".ShouldEqual(expr);
 		}
 	}
 }
