@@ -272,6 +272,8 @@ namespace PreviewLibrary
 				if (stack_op == "(")
 				{
 					ops.Pop();
+					var expr = operands.Pop();
+					operands.Push(new GroupExpr{ Expr = expr });
 					break;
 				}
 				ClearStack(operands, ops);
@@ -287,6 +289,7 @@ namespace PreviewLibrary
 				Oper = stack_op,
 				Left = operands.Pop(),
 			};
+			//operands.Push(new GroupExpr{ Expr = combo });
 			operands.Push(combo);
 		}
 
@@ -1411,6 +1414,22 @@ namespace PreviewLibrary
 			return ParsePartial(ParseUpdate, sql);
 		}
 
+		protected SqlExpr ParseBetweenExpr(SqlExpr leftExpr)
+		{
+			if(!TryKeyword("BETWEEN", out _))
+			{
+				return leftExpr;
+			}
+			var fromValue = ParseSubExpr();
+			ReadKeyword("AND");
+			var toValue = ParseSubExpr();
+			return new BetweenExpr
+			{
+				From = fromValue,
+				To = toValue,
+			};
+		}
+
 		protected UpdateExpr ParseUpdate()
 		{
 			if (!_token.TryIgnoreCase("UPDATE"))
@@ -2305,9 +2324,8 @@ namespace PreviewLibrary
 			var ops = new Stack<string>();
 			do
 			{
-				//var filter = ParseFilter();
-				//var filter = ParseCompareOpExpr(ParseArithmeticExpr());
-				var filter = ParseParenthesesExpr();
+				//var filter = ParseParenthesesExpr();
+				var filter = ParseNestExpr();
 				postfixExprs.Add(filter);
 				if (!_token.TryIgnoreCase(new[] { "AND", "OR" }, out var op))
 				{
@@ -2478,6 +2496,8 @@ namespace PreviewLibrary
 			{
 				return likeExpr;
 			}
+
+			leftExpr = ParseBetweenExpr(leftExpr);
 
 			var compareExpr = Get(ParseCompareOp, leftExpr, leftParse);
 			if (compareExpr != null)

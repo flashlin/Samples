@@ -136,7 +136,7 @@ SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
 			
 			var expr = _sqlParser.ParseSelectPartial(sql);
 
-			"SELECT @a = round( @b - 1,0 ) FROM tb1".ShouldEqual(expr);
+			"SELECT @a = round( (@b - 1),0 ) FROM tb1".ShouldEqual(expr);
 		}
 
 		[Fact]

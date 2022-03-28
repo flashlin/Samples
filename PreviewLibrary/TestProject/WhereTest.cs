@@ -1,4 +1,5 @@
 ﻿using ExpectedObjects;
+using TestProject.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -48,6 +49,14 @@ namespace TestProject
 			var sql = "WHERE name = CAST( @a AS nvarchar(3) ) + ':' + CAST( @b AS nvarchar(3) )";
 			var expr = _sqlParser.ParseWherePartial(sql);
 			sql.ToExpectedObject().ShouldEqual("WHERE " + expr.ToString());
+		}
+
+		[Fact]
+		public void where_field_between()
+		{
+			var sql = "WHERE id between 1 and 8";
+			var expr = _sqlParser.ParseWherePartial(sql);
+			"BETWEEN 1 AND 8".ShouldEqual(expr);
 		}
 	}
 }

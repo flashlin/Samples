@@ -85,7 +85,7 @@ END".ShouldEqual(expr);
 			var expr = _sqlParser.ParseCasePartial(sql);
 
 			@"CASE
-	WHEN (a + b) < (c - d) THEN a + d
+	WHEN (a + b) < (c - d) THEN (a + d)
 END".ShouldEqual(expr);
 		}
 

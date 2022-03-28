@@ -20,7 +20,7 @@ begin
 end
 ";
 			var expr = _sqlParser.ParseWhilePartial(sql);
-			@"WHILE @a = 1
+			@"WHILE (@a = 1)
 BEGIN
 SELECT 1
 END".ShouldEqual(expr);

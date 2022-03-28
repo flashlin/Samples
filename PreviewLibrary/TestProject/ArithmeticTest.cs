@@ -101,27 +101,8 @@ namespace TestProject
 		public void mul_first_add()
 		{
 			var sql = "1 * ( 2 + 3)";
-			var expr = new SqlParser().ParseArithmeticPartial(sql);
-			new OperandExpr
-			{
-				Left = new IntegerExpr
-				{
-					Value = 1
-				},
-				Oper = "*",
-				Right = new OperandExpr
-				{
-					Left = new IntegerExpr
-					{
-						Value = 2
-					},
-					Oper = "+",
-					Right = new IntegerExpr
-					{
-						Value = 3
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			var expr = _sqlParser.ParseArithmeticPartial(sql);
+			"1 * (2 + 3)".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -137,7 +118,7 @@ namespace TestProject
 		{
 			var sql = "((a + 1) * b)";
 			var expr = _sqlParser.ParseArithmeticPartial(sql);
-			"a + 1 * b".ToExpectedObject().ShouldEqual(expr.ToString());
+			"((a + 1) * b)".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]

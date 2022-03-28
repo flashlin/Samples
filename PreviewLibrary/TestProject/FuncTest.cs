@@ -70,7 +70,7 @@ namespace TestProject
 			var sql = "round(((@a - @b) * c), 0)";
 			var expr = _sqlParser.ParseFuncPartial(sql);
 
-			"round( @a - @b * c,0 )".ShouldEqual(expr);
+			"round( ((@a - @b) * c),0 )".ShouldEqual(expr);
 		}
 
 
