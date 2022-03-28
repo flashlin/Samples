@@ -644,6 +644,7 @@ namespace PreviewLibrary
 					//return ParseCompareOpExpr(ParseInExpr(expr));
 
 					return ParseRightExpr(expr,
+						ParseBetweenExpr,
 						ParseNotLikeExpr,
 						ParseInExpr,
 						ParseCompareOpExpr);
@@ -1416,9 +1417,19 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseBetweenExpr(SqlExpr leftExpr)
 		{
-			if(!TryKeyword("BETWEEN", out _))
+			if(!TryGet(ParseBetween, out var betweenExpr))
 			{
 				return leftExpr;
+			}
+			betweenExpr.Left = leftExpr;
+			return betweenExpr;
+		}
+
+		protected BetweenExpr ParseBetween()
+		{
+			if(!TryKeyword("BETWEEN", out _))
+			{
+				throw new PrecursorException("BETWEEN");
 			}
 			var fromValue = ParseSubExpr();
 			ReadKeyword("AND");
@@ -2701,10 +2712,10 @@ namespace PreviewLibrary
 			return default(SqlExpr);
 		}
 
-		private CompareExpr ParseCompareOp(SqlExpr left, Func<SqlExpr> parseRight)
+		private SqlExpr ParseCompareOp(SqlExpr left, Func<SqlExpr> parseRight)
 		{
 			var op = string.Empty;
-			CompareExpr parseAction()
+			SqlExpr parseAction()
 			{
 				SqlExpr right = null;
 				if (op.IsSql("in"))
@@ -2713,7 +2724,6 @@ namespace PreviewLibrary
 				}
 				else
 				{
-					//right = ParseSubExpr();
 					right = parseRight();
 				}
 				return new CompareExpr
@@ -2729,6 +2739,7 @@ namespace PreviewLibrary
 				op = $"{op1} {op2}";
 				return parseAction();
 			}
+
 
 			if (!_token.Try(_token.IsCompareOp, out op))
 			{

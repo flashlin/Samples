@@ -24,14 +24,14 @@ namespace PreviewLibrary
 		public static readonly string[] _keywords = new[]
 		{
 			"ALL", "AND",  "AS",
-			"BEGIN", "BY",
+			"BEGIN", "BY", "BETWEEN",
 			"CASE", "CROSS",
 			"END", "EXEC", "EXECUTE", "ELSE",
 			"FROM", "FULL",
 			"GROUP", "GRANT",
 			"INNER", "INSERT", "INTO",
 			"JOIN",
-			"LEFT",
+			"LEFT", "LIKE",
 
 			"THEN", "TOP",
 			"OR", "ON", "OUTER", "ORDER",
@@ -133,7 +133,7 @@ namespace PreviewLibrary
 
 		public static readonly string[] CompareOps = new[]
 		{
-			"LIKE", "IN", "IS"
+			"LIKE", "IN", "IS",
 		}.Concat(CompareOperSymbols).ToArray();
 
 		public static readonly string[] ConcatOps = new[]

@@ -56,7 +56,17 @@ namespace TestProject
 		{
 			var sql = "WHERE id between 1 and 8";
 			var expr = _sqlParser.ParseWherePartial(sql);
-			"BETWEEN 1 AND 8".ShouldEqual(expr);
+			"id BETWEEN 1 AND 8".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void where_field_between_or_in()
+		{
+			var sql = @"WHERE a > 1 and (b between 1 and 10 or c in (1, 2, 3))";
+			var expr = _sqlParser.ParseWherePartial(sql);
+			"a > 1 and (b BETWEEN 1 AND 10 or c IN (1,2,3))".ShouldEqual(expr);
+		}
+
+
 	}
 }
