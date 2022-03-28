@@ -356,6 +356,10 @@ namespace PreviewLibrary
 					return expr;
 				}
 			}
+			if (string.IsNullOrEmpty(_token.Text))
+			{
+				return default;
+			}
 			throw new NotSupportedException(GetLastLineCh());
 		}
 
@@ -1198,6 +1202,11 @@ namespace PreviewLibrary
 			};
 		}
 
+		public CreateSpExpr ParseCreateSpPartial(string sql)
+		{
+			return ParsePartial(ParseCreateSp, sql);
+		}
+
 		protected CreateSpExpr ParseCreateSp()
 		{
 			var startIndex = _token.CurrentIndex;
@@ -1890,7 +1899,7 @@ namespace PreviewLibrary
 			}
 			if (TryKeyword("AS", out _))
 			{
-				if(TryGet(ParseString, out var stringName))
+				if (TryGet(ParseString, out var stringName))
 				{
 					return new IdentExpr
 					{

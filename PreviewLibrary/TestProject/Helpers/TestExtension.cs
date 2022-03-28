@@ -9,7 +9,8 @@ namespace TestProject.Helpers
 	{
 		public static void ShouldEqual(this string expected, SqlExpr sqlExpr)
 		{
-			expected.TrimCode().ToExpectedObject().ShouldEqual(sqlExpr.ToString().TrimCode());
+			var sqlExprCode = $"{sqlExpr}";
+			expected.TrimCode().ToExpectedObject().ShouldEqual(sqlExprCode.TrimCode());
 		}
 	}
 }

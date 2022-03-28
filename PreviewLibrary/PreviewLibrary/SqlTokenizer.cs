@@ -49,10 +49,10 @@ namespace PreviewLibrary
 		public static readonly string[] SqlFunc1Names = new[]
 		{
 			"COUNT",
-			"EXISTS", 
+			"EXISTS",
 			"MAX",
-			"SUM", 
-			"SUSER_SNAME", 
+			"SUM",
+			"SUSER_SNAME",
 		};
 		public static readonly string[] SqlFunc2Names = new[]
 		{
@@ -237,7 +237,7 @@ namespace PreviewLibrary
 			}
 		}
 
-		private static HashSet<string> _reverseKeywords = 
+		private static HashSet<string> _reverseKeywords =
 			_keywords.Concat(SqlFunctionNames).ToHashSet();
 
 		private static bool IsReverseKeyword(string text)
@@ -348,11 +348,18 @@ namespace PreviewLibrary
 
 		public override bool Move()
 		{
+			bool isComment()
+			{
+				if (IsMatch(SingleLineComment)) return true;
+				if (IsMatch(MultiLineComment)) return true;
+				return false;
+			}
+
 			var success = false;
 			do
 			{
 				success = base.Move();
-			} while (success && IsMatch(SingleLineComment));
+			} while (success && isComment());
 			return success;
 		}
 

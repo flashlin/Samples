@@ -1,6 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 using System.Collections.Generic;
+using System.Text;
 
 namespace PreviewLibrary
 {
@@ -9,5 +10,17 @@ namespace PreviewLibrary
 		public IdentExpr Name { get; set; }
 		public SqlExprList Arguments { get; set; }
 		public List<SqlExpr> Body { get; set; }
+
+		public override string ToString()
+		{
+			var sb = new StringBuilder();
+			sb.AppendLine($"CREATE PROCEDURE {Name}");
+			sb.Append($"{Arguments}");
+			sb.AppendLine($"\r\nAS");
+			sb.AppendLine($"BEGIN");
+			sb.AppendLine($"{Body.MergeCodeLines()}");
+			sb.Append($"END");
+			return sb.ToString();
+		}
 	}
 }

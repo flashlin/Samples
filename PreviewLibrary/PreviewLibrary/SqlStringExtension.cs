@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PreviewLibrary.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -43,6 +44,11 @@ namespace PreviewLibrary
 				lines.Add(line.Trim());
 			} while (true);
 			return string.Join("\r\n", lines);
+		}
+
+		public static string MergeCodeLines(this IEnumerable<SqlExpr> codes)
+		{
+			return string.Join("\r\n", codes.Select(x => $"{x}"));
 		}
 	}
 }

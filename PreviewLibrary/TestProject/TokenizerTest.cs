@@ -66,7 +66,7 @@ namespace TestProject
 		public void c_comment()
 		{
 			var token = GetToken("/* 123 */");
-			"/* 123 */".ToExpectedObject().ShouldEqual(token);
+			"".ToExpectedObject().ShouldEqual(token);
 		}
 
 		private string GetToken(string text)

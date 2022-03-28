@@ -36,13 +36,9 @@ ON tb2.id = tb1.id".MergeToCode().ToExpectedObject().ShouldEqual(expr.ToString()
 			var sql = @"/*
 123
 */";
-			var expr = new SqlParser().Parse(sql);
-			var expected = new CommentExpr
-			{
-				Text = sql
-			};
+			var expr = _sqlParser.Parse(sql);
 
-			expected.ToExpectedObject().ShouldEqual(expr);
+			"".ShouldEqual(expr);
 		}
 
 		[Fact]
