@@ -1483,6 +1483,8 @@ namespace PreviewLibrary
 
 			TryGet(ParseFrom, out var fromListExpr);
 
+			var joinTableList = ParseInnerJonList();
+
 			TryGet(ParseWhere, out var whereExpr);
 
 			return new UpdateExpr
@@ -1492,6 +1494,7 @@ namespace PreviewLibrary
 				WithOptions = withOptions,
 				Fields = setFields,
 				FromTableList = fromListExpr,
+				JoinTableList = joinTableList,
 				WhereExpr = whereExpr
 			};
 		}
@@ -1660,6 +1663,18 @@ namespace PreviewLibrary
 			return columnList;
 		}
 
+		protected SqlExprList ParseInnerJonList()
+		{
+			if (!TryGet(() => Many(ParseInnerJoin), out var joinTableList))
+			{
+				joinTableList = new SqlExprList()
+				{
+					Items = new List<SqlExpr>()
+				};
+			}
+			return joinTableList;
+		}
+
 		protected SelectExpr ParseSelect()
 		{
 			if (!_token.TryIgnoreCase("select", out var _))
@@ -1674,13 +1689,7 @@ namespace PreviewLibrary
 			TryGet(ParseFrom, out var fromExpr);
 
 			//var joinTableList = Many(ParseJoin);
-			if (!TryGet(() => Many(ParseInnerJoin), out var joinTableList))
-			{
-				joinTableList = new SqlExprList()
-				{
-					Items = new List<SqlExpr>()
-				};
-			}
+			var joinTableList = ParseInnerJonList();
 
 			var whereExpr = Get(ParseWhere);
 

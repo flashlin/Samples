@@ -13,18 +13,19 @@ namespace PreviewLibrary
 		public WithOptionsExpr WithOptions { get; set; }
 		public SqlExprList Fields { get; set; }
 		public SqlExpr FromTableList { get; set; }
+		public SqlExprList JoinTableList { get; set; }
 		public SqlExpr WhereExpr { get; set; }
 
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
 			sb.Append($"UPDATE");
-			if(Top != null)
+			if (Top != null)
 			{
 				sb.Append($" {Top}");
 			}
 			sb.Append($" {Table}");
-			if(WithOptions != null)
+			if (WithOptions != null)
 			{
 				sb.Append($" {WithOptions}");
 			}
@@ -32,20 +33,26 @@ namespace PreviewLibrary
 			sb.Append("SET ");
 			foreach (var field in Fields.Items)
 			{
-				if( field != Fields.Items.First() )
+				if (field != Fields.Items.First())
 				{
 					sb.Append(",");
 				}
 				sb.Append($"{field}");
 			}
 
-			if(FromTableList!= null)
+			if (FromTableList != null)
 			{
 				sb.AppendLine();
 				sb.Append($"{FromTableList}");
 			}
 
-			if( WhereExpr != null)
+			if (JoinTableList.Items.Count > 0)
+			{
+				sb.AppendLine();
+				sb.Append($"{JoinTableList}");
+			}
+
+			if (WhereExpr != null)
 			{
 				sb.AppendLine();
 				sb.Append($"WHERE {WhereExpr}");

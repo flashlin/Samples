@@ -88,7 +88,7 @@ SET cc.a = 1
 customer AS cc WITH(nolock)".ShouldEqual(expr);
 		}
 
-		//[Fact]
+		[Fact]
 		public void update_alias_table_from_table_inner_join()
 		{
 			var sql = @"UPDATE cc
@@ -99,7 +99,10 @@ customer AS cc WITH(nolock)".ShouldEqual(expr);
 
 			var expr = _sqlParser.ParseUpdatePartial(sql);
 
-			@"".ShouldEqual(expr);
+			@"UPDATE cc
+SET cc.a = 1
+customer AS cc WITH(nolock)
+Inner JOIN @aTable as u ON cc.Id = u.Id".ShouldEqual(expr);
 		}
 	}
 }
