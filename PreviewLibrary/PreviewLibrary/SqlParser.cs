@@ -991,7 +991,7 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("<TVP TYPE>");
 			}
-			
+
 			if (!TryKeyword("READONLY", out _))
 			{
 				_token.MoveTo(startIndex);
@@ -1472,6 +1472,8 @@ namespace PreviewLibrary
 				throw new PrecursorException("UPDATE");
 			}
 
+			TryGet(ParseTop, out var topExpr);
+
 			var table = ParseSqlIdent();
 
 			TryGet(ParseWithOptions, out var withOptions);
@@ -1483,6 +1485,7 @@ namespace PreviewLibrary
 
 			return new UpdateExpr
 			{
+				Top = topExpr,
 				Table = table,
 				WithOptions = withOptions,
 				Fields = setFields,
@@ -1603,9 +1606,21 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("TOP");
 			}
+
+			var hasParentheses = false;
+			if (TryKeyword("(", out _))
+			{
+				hasParentheses = true;
+			}
 			var count = ParseConstant();
+			if (hasParentheses)
+			{
+				ReadKeyword(")");
+			}
+
 			return new TopExpr
 			{
+				HasParentheses = hasParentheses,
 				Count = count
 			};
 		}

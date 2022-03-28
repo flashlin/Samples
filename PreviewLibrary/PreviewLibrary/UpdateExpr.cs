@@ -8,6 +8,7 @@ namespace PreviewLibrary
 {
 	public class UpdateExpr : SqlExpr
 	{
+		public TopExpr Top { get; set; }
 		public IdentExpr Table { get; set; }
 		public WithOptionsExpr WithOptions { get; set; }
 		public SqlExprList Fields { get; set; }
@@ -16,7 +17,12 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
-			sb.Append($"UPDATE ${Table}");
+			sb.Append($"UPDATE");
+			if(Top != null)
+			{
+				sb.Append($" {Top}");
+			}
+			sb.Append($" {Table}");
 			if(WithOptions != null)
 			{
 				sb.Append($" {WithOptions}");

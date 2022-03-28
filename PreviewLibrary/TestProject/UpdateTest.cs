@@ -20,7 +20,7 @@ namespace TestProject
 		{
 			var sql = "Update customer set price = rate + 1";
 			var expr = Parse(sql);
-			@"UPDATE $customer
+			@"UPDATE customer
 SET price = rate + 1".ShouldEqual(expr);
 		}
 
@@ -29,7 +29,7 @@ SET price = rate + 1".ShouldEqual(expr);
 		{
 			var sql = "UPDATE [dbo].[TracDelay] SET [Status] = @Status WHERE[Id] = @Id";
 			var expr = Parse(sql);
-			@"UPDATE $[dbo].[TracDelay]
+			@"UPDATE [dbo].[TracDelay]
 SET [Status] = @Status
 WHERE [Id] = @Id".ShouldEqual(expr);
 		}
@@ -41,7 +41,7 @@ WHERE [Id] = @Id".ShouldEqual(expr);
 SET [ExchangeRate] = CASE WHEN @ExchangeRate = -1 THEN [ExchangeRate] ELSE @ExchangeRate END";
 			var expr = _sqlParser.ParseUpdatePartial(sql);
 
-			@"UPDATE $[dbo].[TracDelay]
+			@"UPDATE [dbo].[TracDelay]
 SET [ExchangeRate] = CASE
 	WHEN @ExchangeRate = -1 THEN [ExchangeRate]
 	ELSE @ExchangeRate
@@ -57,9 +57,23 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 
 			var expr = _sqlParser.ParseUpdatePartial(sql);
 
-			@"UPDATE $customer WITH(ROWLOCK)
+			@"UPDATE customer WITH(ROWLOCK)
 SET name = @name,birth = @birth
 WHERE id = @id".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void update_top_parthese_10()
+		{
+			var sql = @"UPDATE top(10) customer	set name='123' WHERE	id=@id";
+
+			var expr = _sqlParser.ParseUpdatePartial(sql);
+
+			@"UPDATE TOP(10) customer
+SET name = '123'
+WHERE id = @id".ShouldEqual(expr);
+		}
+
+
 	}
 }
