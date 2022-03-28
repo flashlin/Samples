@@ -8,13 +8,21 @@ namespace PreviewLibrary
 {
 	public class UpdateExpr : SqlExpr
 	{
+		public IdentExpr Table { get; set; }
+		public WithOptionsExpr WithOptions { get; set; }
 		public SqlExprList Fields { get; set; }
 		public SqlExpr WhereExpr { get; set; }
 
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
-			sb.AppendLine("UPDATE SET ");
+			sb.Append($"UPDATE ${Table}");
+			if(WithOptions != null)
+			{
+				sb.Append($" {WithOptions}");
+			}
+			sb.AppendLine();
+			sb.Append("SET ");
 			foreach (var field in Fields.Items)
 			{
 				if( field != Fields.Items.First() )
@@ -25,7 +33,8 @@ namespace PreviewLibrary
 			}
 			if( WhereExpr != null)
 			{
-				sb.Append($" WHERE {WhereExpr}");
+				sb.AppendLine();
+				sb.Append($"WHERE {WhereExpr}");
 			}
 			return sb.ToString();
 		}

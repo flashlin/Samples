@@ -1419,14 +1419,18 @@ namespace PreviewLibrary
 			}
 
 			var table = ParseSqlIdent();
-			ReadKeyword("SET");
 
+			TryGet(ParseWithOptions, out var withOptions);
+
+			ReadKeyword("SET");
 			var setFields = WithComma(() => Any("<CASE> or <assign>", ParseCase, ParseFieldAssignValue));
 
 			TryGet(ParseWhere, out var whereExpr);
 
 			return new UpdateExpr
 			{
+				Table = table,
+				WithOptions = withOptions,
 				Fields = setFields,
 				WhereExpr = whereExpr
 			};
@@ -1714,8 +1718,30 @@ namespace PreviewLibrary
 			return list;
 		}
 
+		private List<T> ManyWithComma<T>(Func<T> parse, int maxCount)
+		{
+			var list = new List<T>();
+			do
+			{
+				if (!TryGet(parse, out var itemExpr))
+				{
+					break;
+				}
+				list.Add(itemExpr);
+				if (list.Count >= maxCount)
+				{
+					break;
+				}
+				if (!_token.Try(","))
+				{
+					break;
+				}
+			} while (true);
+			return list;
+		}
+
 		private SqlExprList WithComma<T>(Func<T> parse)
-			where T : SqlExpr
+		where T : SqlExpr
 		{
 			var list = new List<SqlExpr>();
 			do
@@ -2080,11 +2106,20 @@ namespace PreviewLibrary
 				throw new Exception("(");
 			}
 
-			var withOptions = new List<string>();
-			if (_token.TryIgnoreCase("nolock", out var nolockToken))
+			//var withOptions = new List<string>();
+			//if (_token.TryIgnoreCase("nolock", out var nolockToken))
+			//{
+			//	withOptions.Add(nolockToken);
+			//}
+			string eatWithOption()
 			{
-				withOptions.Add(nolockToken);
+				if(!TryAnyKeywords(new[] { "NOLOCK", "ROWLOCK" }, out var token))
+				{
+					throw new PrecursorException("NOLOCK or ROWLOCK");
+				}
+				return token;
 			}
+			var withOptions =	ManyWithComma(eatWithOption, 10);
 
 			if (!_token.Try(")"))
 			{

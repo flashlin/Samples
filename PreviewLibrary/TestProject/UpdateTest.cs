@@ -3,6 +3,7 @@ using PreviewLibrary;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 using System.Collections.Generic;
+using TestProject.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,30 +20,8 @@ namespace TestProject
 		{
 			var sql = "Update customer set price = rate + 1";
 			var expr = Parse(sql);
-			new UpdateExpr
-			{
-				Fields = CreateSqlExprList(
-					new AssignSetExpr
-					{
-						Field = new IdentExpr
-						{
-							Name = "price"
-						},
-						Value = new OperandExpr
-						{
-							Left = new IdentExpr
-							{
-								Name = "rate"
-							},
-							Oper = "+",
-							Right = new IntegerExpr
-							{
-								Value = 1
-							}
-						}
-					}
-				)
-			}.ToExpectedObject().ShouldEqual(expr);
+			@"UPDATE $customer
+SET price = rate + 1".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -50,34 +29,9 @@ namespace TestProject
 		{
 			var sql = "UPDATE [dbo].[TracDelay] SET [Status] = @Status WHERE[Id] = @Id";
 			var expr = Parse(sql);
-			new UpdateExpr
-			{
-				Fields = CreateSqlExprList(
-					new AssignSetExpr
-					{
-						Field = new IdentExpr
-						{
-							Name = "[Status]"
-						},
-						Value = new IdentExpr
-						{
-							Name = "@Status"
-						}
-					}
-				),
-				WhereExpr = new CompareExpr
-				{
-					Left = new IdentExpr
-					{
-						Name = "[Id]"
-					},
-					Oper = "=",
-					Right = new IdentExpr
-					{
-						Name = "@Id"
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			@"UPDATE $[dbo].[TracDelay]
+SET [Status] = @Status
+WHERE [Id] = @Id".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -87,11 +41,25 @@ namespace TestProject
 SET [ExchangeRate] = CASE WHEN @ExchangeRate = -1 THEN [ExchangeRate] ELSE @ExchangeRate END";
 			var expr = _sqlParser.ParseUpdatePartial(sql);
 
-			@"UPDATE SET 
-[ExchangeRate] = CASE
+			@"UPDATE $[dbo].[TracDelay]
+SET [ExchangeRate] = CASE
 	WHEN @ExchangeRate = -1 THEN [ExchangeRate]
 	ELSE @ExchangeRate
 END".ToExpectedObject().ShouldEqual(expr.ToString());
+		}
+
+		[Fact]
+		public void update_table_with_nolock()
+		{
+			var sql = @"UPDATE customer WITH(ROWLOCK)
+	SET name=@name, birth=@birth
+	WHERE	id=@id";
+
+			var expr = _sqlParser.ParseUpdatePartial(sql);
+
+			@"UPDATE $customer WITH(ROWLOCK)
+SET name = @name,birth = @birth
+WHERE id = @id".ShouldEqual(expr);
 		}
 	}
 }
