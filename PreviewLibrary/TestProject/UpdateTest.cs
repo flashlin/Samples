@@ -74,6 +74,32 @@ SET name = '123'
 WHERE id = @id".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void update_alias_table_from_table()
+		{
+			var sql = @"UPDATE cc
+				SET cc.a = 1
+				FROM customer cc with(nolock)";
 
+			var expr = _sqlParser.ParseUpdatePartial(sql);
+
+			@"UPDATE cc
+SET cc.a = 1
+customer AS cc WITH(nolock)".ShouldEqual(expr);
+		}
+
+		//[Fact]
+		public void update_alias_table_from_table_inner_join()
+		{
+			var sql = @"UPDATE cc
+				SET cc.a = 1
+				FROM customer cc with(nolock)
+				inner join @aTable u on cc.Id = u.Id
+			";
+
+			var expr = _sqlParser.ParseUpdatePartial(sql);
+
+			@"".ShouldEqual(expr);
+		}
 	}
 }

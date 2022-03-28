@@ -1481,6 +1481,8 @@ namespace PreviewLibrary
 			ReadKeyword("SET");
 			var setFields = WithComma(() => Any("<CASE> or <assign>", ParseCase, ParseFieldAssignValue));
 
+			TryGet(ParseFrom, out var fromListExpr);
+
 			TryGet(ParseWhere, out var whereExpr);
 
 			return new UpdateExpr
@@ -1489,6 +1491,7 @@ namespace PreviewLibrary
 				Table = table,
 				WithOptions = withOptions,
 				Fields = setFields,
+				FromTableList = fromListExpr,
 				WhereExpr = whereExpr
 			};
 		}
