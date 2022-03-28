@@ -273,7 +273,7 @@ namespace PreviewLibrary
 				{
 					ops.Pop();
 					var expr = operands.Pop();
-					operands.Push(new GroupExpr{ Expr = expr });
+					operands.Push(new GroupExpr { Expr = expr });
 					break;
 				}
 				ClearStack(operands, ops);
@@ -962,8 +962,7 @@ namespace PreviewLibrary
 
 		public SqlExpr ParseDataTypePartial(string sql)
 		{
-			PredicateParse(sql);
-			return ParseDataType();
+			return ParsePartial(ParseDataType, sql);
 		}
 
 		protected DefineColumnTypeExpr ParseColumnDataType()
@@ -985,11 +984,36 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected TvpTableTypeExpr ParseTvpTable()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryGet(ParseIdent, out var tvpName))
+			{
+				throw new PrecursorException("<TVP TYPE>");
+			}
+			
+			if (!TryKeyword("READONLY", out _))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("READONLY");
+			}
+
+			return new TvpTableTypeExpr
+			{
+				Name = tvpName,
+			};
+		}
+
 		protected SqlExpr ParseDataType()
 		{
 			if (TryGet(ParseTableType, out var tableTypeExpr))
 			{
 				return tableTypeExpr;
+			}
+
+			if (TryGet(ParseTvpTable, out var tvpName))
+			{
+				return tvpName;
 			}
 
 			if (!_token.TryIgnoreCase(SqlTokenizer.DataTypes, out var dataType))
@@ -1417,7 +1441,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseBetweenExpr(SqlExpr leftExpr)
 		{
-			if(!TryGet(ParseBetween, out var betweenExpr))
+			if (!TryGet(ParseBetween, out var betweenExpr))
 			{
 				return leftExpr;
 			}
@@ -1427,7 +1451,7 @@ namespace PreviewLibrary
 
 		protected BetweenExpr ParseBetween()
 		{
-			if(!TryKeyword("BETWEEN", out _))
+			if (!TryKeyword("BETWEEN", out _))
 			{
 				throw new PrecursorException("BETWEEN");
 			}
@@ -2143,13 +2167,13 @@ namespace PreviewLibrary
 			//}
 			string eatWithOption()
 			{
-				if(!TryAnyKeywords(new[] { "NOLOCK", "ROWLOCK" }, out var token))
+				if (!TryAnyKeywords(new[] { "NOLOCK", "ROWLOCK" }, out var token))
 				{
 					throw new PrecursorException("NOLOCK or ROWLOCK");
 				}
 				return token;
 			}
-			var withOptions =	ManyWithComma(eatWithOption, 10);
+			var withOptions = ManyWithComma(eatWithOption, 10);
 
 			if (!_token.Try(")"))
 			{

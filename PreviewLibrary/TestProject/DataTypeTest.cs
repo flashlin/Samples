@@ -45,5 +45,14 @@ id int PRIMARY KEY
 BetOption nvarchar(10)
 )".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void tvpTable()
+		{
+			var sql = "tvpTable READONLY";
+			var expr = _sqlParser.ParseDataTypePartial(sql);
+
+			"tvpTable READONLY".ShouldEqual(expr);
+		}
 	}
 }
