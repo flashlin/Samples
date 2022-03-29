@@ -893,7 +893,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("DELETE");
 			}
 
-			ReadKeyword("FROM");
+			TryKeyword("FROM", out _);
 			var table = ParseSqlIdent();
 
 			var whereExpr = Option(ParseWhere);
