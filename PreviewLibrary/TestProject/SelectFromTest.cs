@@ -22,7 +22,7 @@ namespace TestProject
 		{
 			var sql = "SELECT 1 FROM @a WHERE name = CAST( @b AS nvarchar(3) ) + ':' + CAST( @c AS nvarchar(3) )";
 			var expr = _sqlParser.ParseSelectPartial(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+			sql.ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -30,7 +30,7 @@ namespace TestProject
 		{
 			var sql = "select name from user";
 			var expr = new SqlParser().Parse(sql);
-			"SELECT name FROM user".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT name FROM user".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -38,15 +38,17 @@ namespace TestProject
 		{
 			var sql = "select name from [user]";
 			var expr = new SqlParser().Parse(sql);
-			"SELECT name FROM [user]".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT name FROM [user]".ShouldEqual(expr);
 		}
 
 		[Fact]
 		public void select_column_aliasName_from_table()
 		{
 			var sql = "SELECT name n1 FROM user";
+			
 			var expr = _sqlParser.ParseSelectPartial(sql);
-			"SELECT name as n1 FROM user".ToExpectedObject().ShouldEqual(expr.ToString());
+
+			"SELECT name as n1 FROM user".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -54,7 +56,7 @@ namespace TestProject
 		{
 			var sql = "select name as n1 from user";
 			var expr = new SqlParser().Parse(sql);
-			"SELECT name as n1 FROM user".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT name as n1 FROM user".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -62,7 +64,7 @@ namespace TestProject
 		{
 			var sql = "SELECT name as n1 FROM user tb1";
 			var expr = new SqlParser().Parse(sql);
-			"SELECT name as n1 FROM user AS tb1".ToExpectedObject().ShouldEqual(expr.ToString());
+			"SELECT name as n1 FROM user AS tb1".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -70,15 +72,15 @@ namespace TestProject
 		{
 			var sql = "SELECT name as n1 FROM user AS tb1";
 			var expr = new SqlParser().Parse(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+			sql.ShouldEqual(expr);
 		}
 
 		[Fact]
 		public void select_column_as_aliasName_from_table_as_aliasName_with_nolock()
 		{
 			var sql = "SELECT name as n1 FROM user AS tb1 WITH(nolock)";
-			var expr = new SqlParser().Parse(sql);
-			sql.ToExpectedObject().ShouldEqual(expr.ToString());
+			var expr = _sqlParser.Parse(sql);
+			sql.ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -90,7 +92,8 @@ namespace TestProject
 		and TransDate1 >= @from
 		or TransDate2 < @to";
 
-			var expr = new SqlParser().Parse(sql) as SelectExpr;
+			var expr = _sqlParser.Parse(sql);
+
 			@"SELECT CustID,Transid,TransDate
 FROM Statement WITH(nolock)
 WHERE TransDesc LIKE 'Full Transfer%'
@@ -121,12 +124,11 @@ or TransDate2 < @to".MergeToCode().ShouldEqual(expr);
 		{
 			var sql = @"select 1
 select 2";
+
 			var exprs = new SqlParser().ParseAll(sql).ToList();
 
-			var exprsCode = string.Join("\r\n", exprs.Select(x => $"{x}"));
-
 			@"SELECT 1
-SELECT 2".ToExpectedObject().ShouldEqual(exprsCode);
+SELECT 2".ShouldEqual(exprs);
 		}
 
 		[Fact]

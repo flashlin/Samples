@@ -2,6 +2,8 @@
 using PreviewLibrary.Exceptions;
 using PreviewLibrary;
 using TestProject.Helpers;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace TestProject.Helpers
 {
@@ -11,6 +13,12 @@ namespace TestProject.Helpers
 		{
 			var sqlExprCode = $"{sqlExpr}";
 			expected.TrimCode().ToExpectedObject().ShouldEqual(sqlExprCode.TrimCode());
+		}
+
+		public static void ShouldEqual(this string expected, IEnumerable<SqlExpr> sqlExprList)
+		{
+			var exprsCode = string.Join("\r\n", sqlExprList.Select(x => $"{x}"));
+			expected.TrimCode().ToExpectedObject().ShouldEqual(exprsCode.TrimCode());
 		}
 	}
 }
