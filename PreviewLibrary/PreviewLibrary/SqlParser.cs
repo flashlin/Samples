@@ -1342,8 +1342,47 @@ namespace PreviewLibrary
 			return ParsePartial(ParseCreateSp, sql);
 		}
 
+		protected CreateSpExpr CreateSpSingleBody()
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!_token.TryIgnoreCase("CREATE"))
+			{
+				throw new PrecursorException("CREATE");
+			}
+
+			if (!_token.TryIgnoreCase("PROCEDURE"))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("PROCEDURE");
+			}
+
+			var spName = ParseSqlIdent();
+			var spArgs = ParseArgumentsList();
+			
+			ReadKeyword("AS");
+			
+			if(IsKeyword("BEGIN"))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("<NO NEED BEGIN>");
+			}
+
+			var body = new [] { ParseExpr() }.ToList();
+			return new CreateSpExpr
+			{
+				Name = spName,
+				Arguments = spArgs,
+				Body = body
+			};
+		}
+
 		protected CreateSpExpr ParseCreateSp()
 		{
+			if(TryGet(CreateSpSingleBody, out var createSpSingleBodyExpr))
+			{
+				return createSpSingleBodyExpr;
+			}
+
 			var startIndex = _token.CurrentIndex;
 			if (!_token.TryIgnoreCase("CREATE"))
 			{
@@ -2517,8 +2556,8 @@ namespace PreviewLibrary
 				{
 					break;
 				}
-				//var expr = Get(ParseExpr);
-				TryGet(ParseExpr, out var expr);
+				var expr = Get(ParseExpr);
+				//TryGet(ParseExpr, out var expr);
 				if (expr == null)
 				{
 					break;

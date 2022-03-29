@@ -117,5 +117,25 @@ SELECT 1
 END".ShouldEqual(expr);
 		}
 
+	[Fact]
+		public void create_procedure_single_body()
+		{
+			var sql = @"create procedure xx
+@name varchar(50) 
+as
+	select 1
+";
+
+			var expr = _sqlParser.ParseCreateSpPartial(sql);
+
+			@"CREATE PROCEDURE xx
+@name varchar(50)
+AS
+BEGIN
+SELECT 1
+END".ShouldEqual(expr);
+		}
+
+		
 	}
 }
