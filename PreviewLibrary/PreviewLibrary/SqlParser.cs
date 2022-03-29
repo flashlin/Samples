@@ -989,7 +989,7 @@ namespace PreviewLibrary
 		protected TvpTableTypeExpr ParseTvpTable()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!TryGet(ParseIdent, out var tvpName))
+			if (!TryGet(ParseSqlIdent, out var tvpName))
 			{
 				throw new PrecursorException("<TVP TYPE>");
 			}

@@ -54,5 +54,16 @@ BetOption nvarchar(10)
 
 			"tvpTable READONLY".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void dbo_tvpTable()
+		{
+			var sql = "dbo.tvpTable READONLY";
+			var expr = _sqlParser.ParseDataTypePartial(sql);
+
+			"dbo.tvpTable READONLY".ShouldEqual(expr);
+		}
+
+
 	}
 }
