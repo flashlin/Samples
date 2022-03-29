@@ -13,15 +13,15 @@ namespace TestProject
 		}
 
 		[Fact]
-		public void grant_execute_on()
+		public void grant_execute_on_object()
 		{
-			var sql = "GRANT EXECUTE ON OBJECT::[dbo].[Leo_Account_UpdateTracDelayStatus_18.08] TO [RoleLeo] AS[dbo]";
+			var sql = "GRANT EXECUTE ON OBJECT::[dbo].[aaa] TO [RoleName] AS[dbo]";
 			var expr = Parse(sql);
-			"GRANT EXECUTE ON OBJECT::[dbo].[Leo_Account_UpdateTracDelayStatus_18.08] TO [RoleLeo] AS [dbo]".ShouldEqual(expr);
+			"GRANT EXECUTE ON OBJECT::[dbo].[aaa] TO [RoleName] AS [dbo]".ShouldEqual(expr);
 		}
 
 		[Fact]
-		public void grant_execute_on_dbobject_to_role()
+		public void grant_execute_on_dbo_object_to_role()
 		{
 			var sql = "grant execute on [dbo].[fn_name] TO RolePlayer";
 			var expr = _sqlParser.ParseGrantPartial(sql);
