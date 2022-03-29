@@ -1442,13 +1442,15 @@ namespace PreviewLibrary
 
 		protected MergeInsertExpr ParseMergeInsert()
 		{
+			var startIndex = _token.CurrentIndex;
 			if (!TryKeyword("INSERT", out _))
 			{
 				throw new PrecursorException("INSERT");
 			}
 			if(!TryGet(() => EatInsertFields(), out var fields))
 			{
-				throw new ParseException("(<FIELDS>)");
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("(<FIELDS>)");
 			}
 			var valuesList = ParseValuesList();
 			return new MergeInsertExpr
@@ -2511,6 +2513,10 @@ namespace PreviewLibrary
 			var body = new List<SqlExpr>();
 			do
 			{
+				if (IsKeyword("END"))
+				{
+					break;
+				}
 				//var expr = Get(ParseExpr);
 				TryGet(ParseExpr, out var expr);
 				if (expr == null)
