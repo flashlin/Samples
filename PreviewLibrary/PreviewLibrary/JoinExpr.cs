@@ -5,10 +5,11 @@ namespace PreviewLibrary
 {
 	public class JoinExpr : SqlExpr
 	{
-		public TableExpr Table { get; set; }
-		public SqlExpr Filter { get; set; }
 		public JoinType JoinType { get; set; }
 		public string OuterToken { get; set; }
+		public SqlExpr Table { get; set; }
+		public IdentExpr AliasName { get; set; }
+		public SqlExpr OnFilter { get; set; }
 
 		public override string ToString()
 		{
@@ -18,7 +19,12 @@ namespace PreviewLibrary
 			{
 				sb.Append($" {OuterToken}");
 			}
-			sb.Append($" JOIN {Table} ON {Filter}");
+			sb.Append($" JOIN {Table}");
+			if( AliasName != null)
+			{
+				sb.Append($" AS {AliasName}");
+			}
+			sb.Append($" ON {OnFilter}");
 			return sb.ToString();
 		}
 	}

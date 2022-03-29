@@ -661,6 +661,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseRankOver,
 				ParseMergeInsert,
 				ParseWaitforDelay,
 				ParseCte,
@@ -2109,7 +2110,10 @@ namespace PreviewLibrary
 				return new ColumnSetExpr
 				{
 					SetVariableName = variableName,
-					Column = Any("<SimpleColumn> or <constant>", ParseArithmeticExpr, ParseSimpleColumn, ParseConstant, ParseSubExpr),
+					Column = Any("<SimpleColumn> or <constant>", 
+						ParseArithmeticExpr, 
+						ParseSimpleColumn, 
+						ParseConstant, ParseSubExpr),
 				};
 			}
 
@@ -2347,6 +2351,67 @@ namespace PreviewLibrary
 				Name = fieldExpr,
 				AliasName = aliasName?.Name,
 			};
+		}
+
+		protected RankOverExpr ParseRankOver()
+		{
+			if (!TryAllKeywords(new[] { "RANK", "(", ")", "OVER" }, out _))
+			{
+				throw new PrecursorException("RANK() OVER");
+			}
+			ReadKeyword("(");
+
+			SqlExpr partitionBy = null;
+			var partitionDescending = "";
+			if (TryAllKeywords(new[] { "PARTITION", "BY" }, out var _))
+			{
+				partitionBy = ParseSubExpr();
+				partitionDescending = ParseAscOrDescToken();
+			}
+
+			if (!TryAllKeywords(new[] { "ORDER", "BY" }, out _))
+			{
+				throw new ParseException("ORDER BY");
+			}
+			var orderByList = WithComma(ParseColumnDescending);
+			ReadKeyword(")");
+
+			var aliasName = ParseAlias();
+
+			return new RankOverExpr
+			{
+				PartitionBy = partitionBy,
+				PartitionDescending = partitionDescending,
+				OrderByList = orderByList,
+				AliasName = aliasName
+			};
+		}
+
+		protected ColumnDescendingExpr ParseColumnDescending()
+		{
+			if (!TryGet(ParseSqlIdent, out var ident))
+			{
+				throw new PrecursorException("<ObjectId>");
+			}
+			var descending = ParseAscOrDescToken();
+			return new ColumnDescendingExpr
+			{
+				Name = ident,
+				Descending = descending,
+			};
+		}
+
+		protected string ParseAscOrDescToken()
+		{
+			if (TryKeyword("ASC", out _))
+			{
+				return "ASC";
+			}
+			if (TryKeyword("DESC", out _))
+			{
+				return "DESC";
+			}
+			return string.Empty;
 		}
 
 		private ColumnExpr ParseSimpleColumn()
@@ -3153,7 +3218,10 @@ namespace PreviewLibrary
 				throw new PrecursorException("<TABLE>");
 			}
 
-			var table = ParseTableToken();
+			//var table = ParseTableToken();
+			var table = Any("<SubExpr> or <Table>", ParseParentheses, ParseTableToken);
+
+			TryGet(ParseAlias, out var aliasName);
 
 			ReadKeyword("ON");
 
@@ -3163,9 +3231,10 @@ namespace PreviewLibrary
 			return new JoinExpr
 			{
 				Table = table,
+				AliasName = aliasName,
 				JoinType = joinType,
 				OuterToken = outerToken,
-				Filter = filterList
+				OnFilter = filterList
 			};
 		}
 

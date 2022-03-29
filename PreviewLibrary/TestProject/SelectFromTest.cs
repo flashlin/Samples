@@ -197,5 +197,19 @@ ORDER BY id desc".ShouldEqual(expr);
 			var expr = _sqlParser.ParseSelectPartial(sql);
 			@"SELECT max( id ) FROM customer".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_rank_over()
+		{
+			var sql = @"select field1, RANK() OVER (ORDER BY t.id DESC, t.price DESC) AS newRanking
+				FROM @tb1, customer c with(nolock) where c.id = t.id
+			";
+
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			@"SELECT field1,RANK() OVER(
+ORDER BY t.id DESC,t.price DESC
+) AS newRanking FROM @tb1,customer AS c WITH(nolock) WHERE c.id = t.id".ShouldEqual(expr);
+		}
 	}
 }
