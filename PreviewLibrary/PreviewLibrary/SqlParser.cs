@@ -330,10 +330,12 @@ namespace PreviewLibrary
 				ParseCreatePartitionScheme,
 				ParseAlter,
 				ParseWaitforDelay,
+				ParseMerge,
 				ParseCte,
 				ParseDeclare,
 				ParseSemicolon,
 				ParseSelect,
+				ParseMergeInsert,
 				ParseInsert,
 				ParseDelete,
 				ParseUpdate,
@@ -625,6 +627,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseMergeInsert,
 				ParseWaitforDelay,
 				ParseCte,
 				ParseCase,
@@ -986,6 +989,108 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected WhenMatchedExpr ParseWhenMatched()
+		{
+			if (!TryAllKeywords(new[] { "WHEN", "MATCHED" }, out _))
+			{
+				throw new PrecursorException("WHEN MATCHED");
+			}
+			TryGet(ParseFilterList, out var searchCondition);
+			ReadKeyword("THEN");
+			var body = ParseBody();
+
+			return new WhenMatchedExpr
+			{
+				Condition = searchCondition,
+				Body = body
+			};
+		}
+
+		protected WhenNotMatchedExpr ParseWhenNotMatchedByTarget()
+		{
+			if (!TryAllKeywords(new[] { "WHEN", "NOT", "MATCHED" }, out _))
+			{
+				throw new PrecursorException("WHEN NOT MATCHED");
+			}
+
+			TryAllKeywords(new[] { "BY", "TARGET" }, out var byTargetExpr);
+			var byTargetToken = string.Join(" ", byTargetExpr);
+
+			SqlExpr searchCondition = null;
+			if (!IsKeyword("THEN"))
+			{
+				TryGet(ParseFilterList, out searchCondition);
+			}
+			ReadKeyword("THEN");
+			var body = ParseBody();
+
+			return new WhenNotMatchedExpr
+			{
+				Condition = searchCondition,
+				ByToken = byTargetToken,
+				Body = body
+			};
+		}
+
+
+		protected WhenNotMatchedExpr ParseWhenNotMatchedBySource()
+		{
+			if (!TryAllKeywords(new[] { "WHEN", "NOT", "MATCHED" }, out _))
+			{
+				throw new PrecursorException("WHEN NOT MATCHED");
+			}
+
+			ReadKeyword("BY");
+			ReadKeyword("SOURCE");
+
+			TryGet(ParseFilterList, out var searchCondition);
+			ReadKeyword("THEN");
+			var body = ParseBody();
+
+			return new WhenNotMatchedExpr
+			{
+				Condition = searchCondition,
+				ByToken = "BY SOURCE",
+				Body = body
+			};
+		}
+
+		protected MergeExpr ParseMerge()
+		{
+			if (!TryKeyword("MERGE", out _))
+			{
+				throw new PrecursorException("MERGE");
+			}
+			TryKeyword("INTO", out var intoToken);
+
+			var targetTable = ParseSubExpr();
+			TryGet(ParseAlias, out var targetAlias);
+
+			ReadKeyword("USING");
+			var sourceTable = ParseSubExpr();
+			TryGet(ParseAlias, out var sourceAlias);
+
+			ReadKeyword("ON");
+			var onFilterList = ParseFilterList();
+
+			TryGet(ParseWhenMatched, out var whenMatchedExpr);
+			TryGet(ParseWhenNotMatchedByTarget, out var whenNotMatchedByTargetExpr);
+			TryGet(ParseWhenNotMatchedBySource, out var whenNotMatchedBySourceExpr);
+
+			return new MergeExpr
+			{
+				IntoToken = intoToken,
+				TargetTable = targetTable,
+				TargetAlias = targetAlias,
+				SourceTable = sourceTable,
+				SourceAlias = sourceAlias,
+				OnCondition = onFilterList,
+				WhenMatched = whenMatchedExpr,
+				WhenNotMatched = whenNotMatchedByTargetExpr,
+				WhenNotMatchedBySource = whenNotMatchedBySourceExpr,
+			};
+		}
+
 		protected TvpTableTypeExpr ParseTvpTable()
 		{
 			var startIndex = _token.CurrentIndex;
@@ -1335,6 +1440,24 @@ namespace PreviewLibrary
 			return fields;
 		}
 
+		protected MergeInsertExpr ParseMergeInsert()
+		{
+			if (!TryKeyword("INSERT", out _))
+			{
+				throw new PrecursorException("INSERT");
+			}
+			if(!TryGet(() => EatInsertFields(), out var fields))
+			{
+				throw new ParseException("(<FIELDS>)");
+			}
+			var valuesList = ParseValuesList();
+			return new MergeInsertExpr
+			{
+				Fields = fields,
+				Values = valuesList
+			};
+		}
+
 		protected SqlExpr ParseInsert()
 		{
 			var startIndex = _token.CurrentIndex;
@@ -1369,25 +1492,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			ReadKeyword("VALUES");
-
-			var valuesList = new SqlExprList()
-			{
-				Items = new List<SqlExpr>()
-			};
-
-			do
-			{
-				ReadKeyword("(");
-				//var values = WithComma(() => Any("Constant or FUNC", ParseSqlFunc, ParseConstant));
-				var values = WithComma(() => ParseParenthesesExpr());
-				valuesList.Items.Add(values);
-				ReadKeyword(")");
-				if (!_token.Try(","))
-				{
-					break;
-				}
-			} while (true);
+			var valuesList = ParseValuesList();
 
 			return new InsertExpr
 			{
@@ -1396,6 +1501,27 @@ namespace PreviewLibrary
 				Fields = fields,
 				ValuesList = valuesList
 			};
+		}
+
+		protected SqlExprList ParseValuesList()
+		{
+			ReadKeyword("VALUES");
+			var valuesList = new SqlExprList()
+			{
+				Items = new List<SqlExpr>()
+			};
+			do
+			{
+				ReadKeyword("(");
+				var values = WithComma(() => ParseParenthesesExpr());
+				valuesList.Items.Add(values);
+				ReadKeyword(")");
+				if (!_token.Try(","))
+				{
+					break;
+				}
+			} while (true);
+			return valuesList;
 		}
 
 		protected AssignSetExpr ParseFieldAssignValue()
@@ -1469,7 +1595,7 @@ namespace PreviewLibrary
 
 		protected WaitforDelayExpr ParseWaitforDelay()
 		{
-			if(!TryAllKeywords(new[] { "WAITFOR", "DELAY"}, out _))
+			if (!TryAllKeywords(new[] { "WAITFOR", "DELAY" }, out _))
 			{
 				throw new PrecursorException("WAITFOR DELAY");
 			}
@@ -2385,7 +2511,8 @@ namespace PreviewLibrary
 			var body = new List<SqlExpr>();
 			do
 			{
-				var expr = Get(ParseExpr);
+				//var expr = Get(ParseExpr);
+				TryGet(ParseExpr, out var expr);
 				if (expr == null)
 				{
 					break;
@@ -2949,7 +3076,7 @@ namespace PreviewLibrary
 
 			var table = ParseTableToken();
 
-			ReadKeyword("on");
+			ReadKeyword("ON");
 
 			var filterList = ParseFilterList();
 

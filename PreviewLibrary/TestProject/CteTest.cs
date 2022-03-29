@@ -24,4 +24,5 @@ SELECT 1
 )".ShouldEqual(expr);
 		}
 	}
-	}
+
+}

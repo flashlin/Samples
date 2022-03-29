@@ -188,5 +188,17 @@ END),@d )".ShouldEqual(expr);
 
 			@"INSERT INTO @a VALUES( @d,@c )".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void insert_values()
+		{
+			var sql = @"INSERT (id, name) VALUES (source.id, source.name)";
+
+			var expr = _sqlParser.Parse(sql);
+
+			@"INSERT (id,name) VALUES(source.id,source.name)".ShouldEqual(expr);
+		}
+
+
 	}
 }
