@@ -329,6 +329,7 @@ namespace PreviewLibrary
 				ParseCreatePartitionFunction,
 				ParseCreatePartitionScheme,
 				ParseAlter,
+				ParseWaitforDelay,
 				ParseCte,
 				ParseDeclare,
 				ParseSemicolon,
@@ -624,6 +625,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseWaitforDelay,
 				ParseCte,
 				ParseCase,
 				ParseNot,
@@ -1462,6 +1464,19 @@ namespace PreviewLibrary
 			{
 				From = fromValue,
 				To = toValue,
+			};
+		}
+
+		protected WaitforDelayExpr ParseWaitforDelay()
+		{
+			if(!TryAllKeywords(new[] { "WAITFOR", "DELAY"}, out _))
+			{
+				throw new PrecursorException("WAITFOR DELAY");
+			}
+			var value = ParseSubExpr();
+			return new WaitforDelayExpr
+			{
+				Value = value,
 			};
 		}
 
