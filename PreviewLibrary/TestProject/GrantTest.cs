@@ -2,6 +2,7 @@
 using PreviewLibrary;
 using ExpectedObjects;
 using Xunit.Abstractions;
+using TestProject.Helpers;
 
 namespace TestProject
 {
@@ -16,25 +17,7 @@ namespace TestProject
 		{
 			var sql = "GRANT EXECUTE ON OBJECT::[dbo].[Leo_Account_UpdateTracDelayStatus_18.08] TO [RoleLeo] AS[dbo]";
 			var expr = Parse(sql);
-			new GrantExecuteOnExpr
-			{
-				ToRoleId = new IdentExpr
-				{
-					Name = "[RoleLeo]"
-				},
-				AsDbo = new IdentExpr
-				{
-					Name = "[dbo]"
-				},
-				OnObjectId = new ObjectIdExpr
-				{
-					Name = new IdentExpr
-					{
-						Name = "[Leo_Account_UpdateTracDelayStatus_18.08]",
-						ObjectId = "[dbo]"
-					}
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
+			"GRANT EXECUTE ON OBJECT::[dbo].[Leo_Account_UpdateTracDelayStatus_18.08] TO [RoleLeo] AS [dbo]".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -42,7 +25,17 @@ namespace TestProject
 		{
 			var sql = "grant execute on [dbo].[fn_name] TO RolePlayer";
 			var expr = _sqlParser.ParseGrantPartial(sql);
-			"GRANT EXECUTE ON [dbo].[fn_name] TO RolePlayer".ToExpectedObject().ShouldEqual(expr.ToString());
+			"GRANT EXECUTE ON [dbo].[fn_name] TO RolePlayer".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void grant_execute_on_objectId()
+		{
+			var sql = "GRANT EXEC ON [dbo].[a] TO RoleUser";
+			var expr = _sqlParser.ParseGrantPartial(sql);
+			"GRANT EXEC ON [dbo].[a] TO RoleUser".ShouldEqual(expr);
+		}
+
+
 	}
 }

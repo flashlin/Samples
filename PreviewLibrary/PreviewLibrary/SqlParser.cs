@@ -432,6 +432,11 @@ namespace PreviewLibrary
 				return grantExecuteOnExpr;
 			}
 
+			if (TryGet(ParseGrantExecOn, out var grantExecOnExpr))
+			{
+				return grantExecOnExpr;
+			}
+
 			if (!_token.TryIgnoreCase("GRANT"))
 			{
 				throw new PrecursorException("Expect GRANT");
@@ -526,7 +531,7 @@ namespace PreviewLibrary
 
 		protected GrantExecuteOnExpr ParseGrantExecuteOn()
 		{
-			if (!TryAllKeywords(new[] { "GRANT", "EXECUTE", "ON" }, out var tokens))
+			if (!TryAllKeywords(new[] { "GRANT", "EXECUTE", "ON" }, out _))
 			{
 				throw new PrecursorException("GRANT EXECUTE ON");
 			}
@@ -545,6 +550,35 @@ namespace PreviewLibrary
 
 			return new GrantExecuteOnExpr
 			{
+				ExecAction = "EXECUTE",
+				OnObjectId = objectId,
+				ToRoleId = roleId,
+				AsDbo = asDbo
+			};
+		}
+
+		protected GrantExecuteOnExpr ParseGrantExecOn()
+		{
+			if (!TryAllKeywords(new[] { "GRANT", "EXEC", "ON" }, out _))
+			{
+				throw new PrecursorException("GRANT EXEC ON");
+			}
+
+			var objectId = Any("<OBJECT_ID>", ParseObjectId, ParseSqlIdent);
+
+			ReadKeyword("TO");
+
+			var roleId = ParseSqlIdent();
+
+			IdentExpr asDbo = null;
+			if (TryKeyword("AS", out _))
+			{
+				asDbo = ParseSqlIdent1();
+			}
+
+			return new GrantExecuteOnExpr
+			{
+				ExecAction = "EXEC",
 				OnObjectId = objectId,
 				ToRoleId = roleId,
 				AsDbo = asDbo
@@ -1358,16 +1392,16 @@ namespace PreviewLibrary
 
 			var spName = ParseSqlIdent();
 			var spArgs = ParseArgumentsList();
-			
+
 			ReadKeyword("AS");
-			
-			if(IsKeyword("BEGIN"))
+
+			if (IsKeyword("BEGIN"))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<NO NEED BEGIN>");
 			}
 
-			var body = new [] { ParseExpr() }.ToList();
+			var body = new[] { ParseExpr() }.ToList();
 			return new CreateSpExpr
 			{
 				Name = spName,
@@ -1378,7 +1412,7 @@ namespace PreviewLibrary
 
 		protected CreateSpExpr ParseCreateSp()
 		{
-			if(TryGet(CreateSpSingleBody, out var createSpSingleBodyExpr))
+			if (TryGet(CreateSpSingleBody, out var createSpSingleBodyExpr))
 			{
 				return createSpSingleBodyExpr;
 			}
@@ -1486,7 +1520,7 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("INSERT");
 			}
-			if(!TryGet(() => EatInsertFields(), out var fields))
+			if (!TryGet(() => EatInsertFields(), out var fields))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("(<FIELDS>)");
