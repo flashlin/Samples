@@ -42,6 +42,22 @@ END".ShouldEqual(expr);
 		}
 
 		[Fact]
+		public void create_procedure_arg_as_datatype()
+		{
+			var sql = @"create PROCEDURE [dbo].[f1]
+	@a as int
+AS
+BEGIN
+	select 1
+END";
+			var expr = _sqlParser.ParseCreateSpPartial(sql);
+
+			@"CREATE PROCEDURE [dbo].[f1] @a int AS BEGIN SELECT 1 END".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void create_func_returns_table()
 		{
 			var sql = @"create function a1( @b int )

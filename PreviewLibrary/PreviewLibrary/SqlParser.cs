@@ -1381,12 +1381,12 @@ namespace PreviewLibrary
 		protected CreateSpExpr CreateSpSingleBody()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!_token.TryIgnoreCase("CREATE"))
+			if (!TryKeyword("CREATE", out _))
 			{
 				throw new PrecursorException("CREATE");
 			}
 
-			if (!_token.TryIgnoreCase("PROCEDURE"))
+			if (!TryKeyword("PROCEDURE", out _))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("PROCEDURE");
@@ -1470,6 +1470,8 @@ namespace PreviewLibrary
 					}
 					break;
 				}
+
+				TryKeyword("AS", out _);
 				var dataType = ParseDataType();
 
 				SqlExpr defaultValue = null;
@@ -2502,7 +2504,7 @@ namespace PreviewLibrary
 			ReadKeyword(".");
 
 			var columnName = ParseSqlIdent();
-			TryGet(ParseAlias, out var aliasName);	
+			TryGet(ParseAlias, out var aliasName);
 
 			return new OutputColumnExpr
 			{
@@ -2514,13 +2516,13 @@ namespace PreviewLibrary
 
 		protected OutputExpr ParseOutput()
 		{
-			if(!TryKeyword("OUTPUT", out _))
+			if (!TryKeyword("OUTPUT", out _))
 			{
 				throw new PrecursorException("OUTPUT");
 			}
 
 			var outputList = WithComma(Parse_OutputInsert);
-			if( outputList.Items.Count == 0)
+			if (outputList.Items.Count == 0)
 			{
 				throw new ParseException("<INSERTED EXPR>");
 			}
