@@ -2501,14 +2501,9 @@ namespace PreviewLibrary
 				throw new Exception("(");
 			}
 
-			//var withOptions = new List<string>();
-			//if (_token.TryIgnoreCase("nolock", out var nolockToken))
-			//{
-			//	withOptions.Add(nolockToken);
-			//}
 			string eatWithOption()
 			{
-				if (!TryAnyKeywords(new[] { "NOLOCK", "ROWLOCK" }, out var token))
+				if (!TryAnyKeywords(new[] { "NOLOCK", "ROWLOCK", "UPDLOCK" }, out var token))
 				{
 					throw new PrecursorException("NOLOCK or ROWLOCK");
 				}
