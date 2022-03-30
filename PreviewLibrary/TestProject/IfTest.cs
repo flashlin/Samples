@@ -149,5 +149,17 @@ BEGIN
 	SELECT 2
 END".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void if_return()
+		{
+			var sql = @"if @a=1 return";
+
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF @a = 1 RETURN".ShouldEqual(expr);
+		}
+
+
 	}
 }

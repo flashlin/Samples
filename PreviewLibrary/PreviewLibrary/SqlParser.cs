@@ -121,10 +121,17 @@ namespace PreviewLibrary
 			return name;
 		}
 
-		protected SqlExpr ParseArithmeticExpr()
+		protected SqlExpr ParseArithmeticExpr(Func<SqlExpr> innerParse)
 		{
 			var ops = new string[] { "(", ")", "&", "|", "*", "/", "+", "-" };
-			return ParseConcat(() => ParseSubExpr(), ops);
+			return ParseConcat(() => innerParse(), ops);
+		}
+
+		protected SqlExpr ParseArithmeticExpr()
+		{
+			//var ops = new string[] { "(", ")", "&", "|", "*", "/", "+", "-" };
+			//return ParseConcat(() => ParseSubExpr(), ops);
+			return ParseArithmeticExpr(ParseSubExpr);
 		}
 
 		protected SqlExpr ParseAndOrExpr<T>(Func<T> leftParse)
@@ -269,6 +276,11 @@ namespace PreviewLibrary
 				ClearStack(operands, ops);
 			}
 
+			if( operands.Count == 0 )
+			{
+				throw new PrecursorException();
+			}
+
 			return operands.Pop();
 		}
 
@@ -402,7 +414,11 @@ namespace PreviewLibrary
 
 			SqlExpr parseValue()
 			{
+				//TryGet(ParseArithmeticExpr, out var expr);
+				//return expr;
 				return ParseArithmeticExpr();
+				//TryGet(() => ParseArithmeticExpr(ParseConstant), out var expr);
+				//return expr;
 			}
 
 			if (TryKeyword("(", out _))
@@ -683,7 +699,8 @@ namespace PreviewLibrary
 				ParseDelete,
 				ParseExec,
 				ParseParentheses,
-				ParseBreak
+				ParseBreak,
+				ParseIf,
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
