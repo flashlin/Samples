@@ -125,5 +125,29 @@ BEGIN
 SELECT 1
 END".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void if_else_if()
+		{
+			var sql = @"
+	if a=1
+	begin
+		select 1
+	end 
+	else if b=2
+	begin
+		select 2
+	end
+";
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF a = 1 BEGIN 
+	SELECT 1 
+END 
+ELSE IF b = 2 
+BEGIN 
+	SELECT 2
+END".ShouldEqual(expr);
+		}
 	}
 }
