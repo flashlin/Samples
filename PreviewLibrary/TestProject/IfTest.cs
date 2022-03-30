@@ -38,7 +38,7 @@ SELECT 2
 END
 ELSE BEGIN
 SELECT 3
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 
 		[Fact]
@@ -52,7 +52,7 @@ END";
 			@"IF N'a' NOT LIKE N'True'
 BEGIN
 SELECT 1
-END".ToExpectedObject().ShouldEqual(expr.ToString());
+END".ShouldEqual(expr);
 		}
 
 
