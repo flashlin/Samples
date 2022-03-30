@@ -1341,6 +1341,27 @@ namespace PreviewLibrary
 			);
 		}
 
+		protected InvokeFunctionExpr ParseFunctionWithParentheses()
+		{
+			var startIndex = _token.CurrentIndex;
+			if(!TryGet(ParseSqlIdent, out var funcName))
+			{
+				throw new PrecursorException("<FUNCTION NAME>");
+			}
+			
+			if(!TryKeyword("(", out _))
+			{
+				_token.MoveTo(startIndex);
+				throw new PrecursorException("(");
+			}
+
+			ReadKeyword(")");
+			return new InvokeFunctionExpr
+			{
+				Name = funcName,
+			};
+		}
+
 		protected SetVariableExpr ParseSetVariableEqual()
 		{
 			var startIndex = _token.CurrentIndex;
@@ -1356,7 +1377,7 @@ namespace PreviewLibrary
 			}
 
 			ReadKeyword("=");
-			var valueExpr = ParseArithmeticExpr();
+			var valueExpr = Any("", ParseFunctionWithParentheses, ParseArithmeticExpr);
 
 			return new SetVariableExpr
 			{

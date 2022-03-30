@@ -161,5 +161,15 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 				Toggle = true
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void set_variable_eq_customFunc()
+		{
+			var sql = "set @a = [dbo].[myFunc]()";
+			var expr = _sqlParser.ParseSetPartial(sql);
+			"SET @a = [dbo].[myFunc]()".ShouldEqual(expr);
+		}
+
+
 	}
 }
