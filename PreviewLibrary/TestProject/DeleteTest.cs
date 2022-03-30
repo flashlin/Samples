@@ -59,6 +59,16 @@ INTO otherCustomer([id],[ModifiedOn])
 WHERE id = @id".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void delete_from_table_with_rowlock_where()
+		{
+			var sql = @"delete from customer with(rowlock) where id=@id";
+
+			var expr = _sqlParser.ParseDeletePartial(sql);
+
+			@"DELETE FROM customer WITH(rowlock) WHERE id = @id".ShouldEqual(expr);
+		}
+
 
 	}
 }
