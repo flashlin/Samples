@@ -44,6 +44,21 @@ select id from customer where loginname like 'abc%'
 			"DELETE FROM customer WHERE id = @testId".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void delete_from_table_output_x_into_table_columns_where()
+		{
+			var sql = @"delete from customer
+				output deleted.id, GETDATE()
+				into otherCustomer([id],[ModifiedOn])
+				where id = @id";
+			var expr = _sqlParser.ParseDeletePartial(sql);
+
+			@"DELETE FROM customer
+OUTPUT deleted.id,GETDATE() 
+INTO otherCustomer([id],[ModifiedOn]) 
+WHERE id = @id".ShouldEqual(expr);
+		}
+
 
 	}
 }

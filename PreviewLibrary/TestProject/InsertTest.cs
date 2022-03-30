@@ -211,7 +211,7 @@ END),@d )".ShouldEqual(expr);
 
 			@"INSERT INTO customer 
 OUTPUT 'customer',inserted.id,GETDATE() 
-INPUT customerTracker([id],[name])
+INTO customerTracker([id],[name])
 SELECT id,name FROM otherCustomer".ShouldEqual(expr);
 		}
 

@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Exceptions;
+using System.Text;
 
 namespace PreviewLibrary
 {
@@ -6,15 +7,30 @@ namespace PreviewLibrary
 	{
 		public IdentExpr Table { get; set; }
 		public SqlExpr WhereExpr { get; set; }
+		public OutputExpr OutputExpr { get; set; }
+		public IntoExpr IntoExpr { get; set; }
 
 		public override string ToString()
 		{
-			var whereStr = "";
-			if( WhereExpr != null)
+			var sb = new StringBuilder();
+			sb.Append($"DELETE FROM {Table}");
+			if(OutputExpr != null)
 			{
-				whereStr = $" WHERE {WhereExpr}";
+				sb.AppendLine();
+				sb.Append($"{OutputExpr}");
 			}
-			return $"DELETE FROM {Table}{whereStr}";
+
+			if(IntoExpr != null)
+			{
+				sb.AppendLine();
+				sb.Append($"{IntoExpr}");
+			}
+
+			if(WhereExpr != null)
+			{
+				sb.Append($" WHERE {WhereExpr}");
+			}
+			return sb.ToString();
 		}
 	}
 }

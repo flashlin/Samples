@@ -12,7 +12,7 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
-			sb.Append($"INPUT {Table}");
+			sb.Append($"INTO {Table}");
 			sb.Append("(");
 			sb.Append($"{Columns}");
 			sb.Append(")");

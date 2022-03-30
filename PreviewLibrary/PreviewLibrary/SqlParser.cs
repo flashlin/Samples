@@ -898,10 +898,15 @@ namespace PreviewLibrary
 			TryKeyword("FROM", out _);
 			var table = ParseSqlIdent();
 
+			TryGet(ParseOutput, out var outputExpr);
+			TryGet(ParseInto, out var intoExpr);
+
 			var whereExpr = Option(ParseWhere);
 			return new DeleteExpr
 			{
 				Table = table,
+				OutputExpr = outputExpr,
+				IntoExpr = intoExpr,
 				WhereExpr = whereExpr
 			};
 		}
