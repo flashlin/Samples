@@ -1699,6 +1699,8 @@ namespace PreviewLibrary
 			ReadKeyword("SET");
 			var setFields = WithComma(() => Any("<CASE> or <assign>", ParseCase, ParseFieldAssignValue));
 
+			TryGet(ParseOutput, out var outputExpr);
+
 			TryGet(ParseFrom, out var fromListExpr);
 
 			var joinTableList = ParseInnerJonList();
@@ -1711,6 +1713,7 @@ namespace PreviewLibrary
 				Table = table,
 				WithOptions = withOptions,
 				Fields = setFields,
+				OutputExpr = outputExpr,
 				FromTableList = fromListExpr,
 				JoinTableList = joinTableList,
 				WhereExpr = whereExpr
@@ -2489,7 +2492,46 @@ namespace PreviewLibrary
 			};
 		}
 
-		public WithOptionsExpr ParseWithOptions()
+		protected OutputColumnExpr Parse_OutputInsert()
+		{
+			if (!TryAnyKeywords(new[] { "INSERTED", "DELETED" }, out var token))
+			{
+				throw new PrecursorException("INSERTED or DELETED");
+			}
+
+			ReadKeyword(".");
+
+			var columnName = ParseSqlIdent();
+			TryGet(ParseAlias, out var aliasName);	
+
+			return new OutputColumnExpr
+			{
+				ActionName = token,
+				Column = columnName,
+				Alias = aliasName,
+			};
+		}
+
+		protected OutputExpr ParseOutput()
+		{
+			if(!TryKeyword("OUTPUT", out _))
+			{
+				throw new PrecursorException("OUTPUT");
+			}
+
+			var outputList = WithComma(Parse_OutputInsert);
+			if( outputList.Items.Count == 0)
+			{
+				throw new ParseException("<INSERTED EXPR>");
+			}
+
+			return new OutputExpr
+			{
+				ColumnList = outputList,
+			};
+		}
+
+		protected WithOptionsExpr ParseWithOptions()
 		{
 			if (!_token.TryIgnoreCase("with"))
 			{

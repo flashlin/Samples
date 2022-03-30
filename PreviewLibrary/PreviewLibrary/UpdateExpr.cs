@@ -12,6 +12,7 @@ namespace PreviewLibrary
 		public IdentExpr Table { get; set; }
 		public WithOptionsExpr WithOptions { get; set; }
 		public SqlExprList Fields { get; set; }
+		public OutputExpr OutputExpr { get; set; }
 		public SqlExpr FromTableList { get; set; }
 		public SqlExprList JoinTableList { get; set; }
 		public SqlExpr WhereExpr { get; set; }
@@ -38,6 +39,12 @@ namespace PreviewLibrary
 					sb.Append(",");
 				}
 				sb.Append($"{field}");
+			}
+
+			if(OutputExpr != null)
+			{
+				sb.AppendLine();
+				sb.Append($"{OutputExpr}");
 			}
 
 			if (FromTableList != null)

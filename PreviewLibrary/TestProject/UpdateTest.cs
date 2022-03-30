@@ -104,5 +104,22 @@ SET cc.a = 1
 customer AS cc WITH(nolock)
 Inner JOIN @aTable as u ON cc.Id = u.Id".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void update_output()
+		{
+			var sql = @"UPDATE cc
+				SET cc.a = 1
+				output deleted.id
+				where id = @id
+			";
+
+			var expr = _sqlParser.ParseUpdatePartial(sql);
+
+			@"UPDATE cc SET cc.a = 1 OUTPUT deleted.id WHERE id = @id"
+			.ShouldEqual(expr);
+		}
+
+
 	}
 }
