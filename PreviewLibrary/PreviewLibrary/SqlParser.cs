@@ -1504,7 +1504,7 @@ namespace PreviewLibrary
 				{
 					if (mustHaveArg)
 					{
-						throw new Exception("argument");
+						throw new Exception($"argument, '{_token.Text}'");
 					}
 					break;
 				}

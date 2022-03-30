@@ -13,7 +13,7 @@ namespace PreviewLibrary
 		static readonly string IntegerNumber = PositiveInteger;
 		public static readonly string DecimalNumber = @"\d+\.\d*";
 		static readonly string SqlIdent = @"\[[^\]]+\]";
-		public static readonly string SqlVariable = @"\@" + RegexPattern.Ident;
+		public static readonly string SqlVariable = @"\@([A-Za-z]|\d|_)+";
 		public static readonly string SystemVariable = @"\@\@" + RegexPattern.Ident;
 		public static readonly string MultiLineComment = "/\\*[^*]*\\*+(?:[^/*][^*]*\\*+)*/";
 		public static readonly string SingleLineComment = @"--[^\r\n]*";
