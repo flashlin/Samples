@@ -1420,12 +1420,12 @@ namespace PreviewLibrary
 			}
 
 			var startIndex = _token.CurrentIndex;
-			if (!_token.TryIgnoreCase("CREATE"))
+			if (!TryKeyword("CREATE", out _))
 			{
 				throw new PrecursorException("CREATE");
 			}
 
-			if (!_token.TryIgnoreCase("PROCEDURE"))
+			if (!TryKeyword("PROCEDURE", out _))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("PROCEDURE");
