@@ -33,6 +33,17 @@ id int PRIMARY KEY
 		}
 
 		[Fact]
+		public void timestamp()
+		{
+			var sql = "timestamp";
+			var expr = _sqlParser.ParseDataTypePartial(sql);
+
+			"timestamp".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void table_dataSize()
 		{
 			var sql = @"table

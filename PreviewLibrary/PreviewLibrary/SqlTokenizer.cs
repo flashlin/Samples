@@ -69,7 +69,7 @@ namespace PreviewLibrary
 			"INT",
 			"NUMERIC", "NVARCHAR",
 			"SMALLDATETIME",
-			"TINYINT",
+			"TINYINT", "TIMESTAMP",
 			"VARCHAR",
 		};
 
