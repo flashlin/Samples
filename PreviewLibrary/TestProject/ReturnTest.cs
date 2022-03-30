@@ -30,5 +30,28 @@ namespace TestProject
 
 			"RETURN @a | @b".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void return_case()
+		{
+			var sql = @"return case @a
+when 1 then 2
+end";
+
+			var expr = _sqlParser.ParseReturnPartial(sql);
+
+			"RETURN CASE @a WHEN 1 THEN 2 END"
+				.ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void return_declare_var()
+		{
+			var sql = "return declare @a int = 1";
+
+			var expr = _sqlParser.ParseReturnPartial(sql);
+
+			"RETURN".ShouldEqual(expr);
+		}
 	}
 }

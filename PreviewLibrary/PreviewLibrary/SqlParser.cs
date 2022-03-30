@@ -412,15 +412,6 @@ namespace PreviewLibrary
 				throw new PrecursorException("RETURN");
 			}
 
-			SqlExpr parseValue()
-			{
-				//TryGet(ParseArithmeticExpr, out var expr);
-				//return expr;
-				//return ParseArithmeticExpr();
-				TryGet(() => ParseArithmeticExpr(ParseConstant), out var expr);
-				return expr;
-			}
-
 			if (TryKeyword("(", out _))
 			{
 				var innerValueExpr = ParseArithmeticExpr();
@@ -442,7 +433,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if(TryGet(() => ParseArithmeticExpr(ParseConstant), out var valueExpr))
+			if(TryGet(() => ParseArithmeticExpr(ParseConstantForReturn), out var valueExpr))
 			{
 				return new ReturnExpr
 				{
@@ -450,11 +441,11 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (TryGet(ParseSubExpr, out var subExpr))
+			if (TryGet(ParseCase, out var caseExpr))
 			{
 				return new ReturnExpr
 				{
-					Value = subExpr
+					Value = caseExpr
 				};
 			}
 
@@ -3014,6 +3005,20 @@ namespace PreviewLibrary
 				throw new PrecursorException("<Constant>");
 			}
 			return expr;
+		}
+
+		private SqlExpr ParseConstantForReturn()
+		{
+			return Any(
+				"",
+				ParseNull,
+				ParseNegativeNumber,
+				ParseHex16Number,
+				ParseDecimal,
+				ParseInteger,
+				ParseString,
+				ParseVariable,
+				ParseStar);
 		}
 
 		private StringExpr ParseString()
