@@ -185,6 +185,12 @@ namespace PreviewLibrary
 			var operands = new Stack<SqlExpr>();
 			var ops = new Stack<string>();
 			var readOperand = true;
+
+			if (IsKeyword(")"))
+			{
+				throw new PrecursorException("(");
+			}
+
 			while (_token.Text != "")
 			{
 				if (readOperand && TryGet(ParseStar, out var starExpr))
@@ -1344,21 +1350,24 @@ namespace PreviewLibrary
 		protected InvokeFunctionExpr ParseFunctionWithParentheses()
 		{
 			var startIndex = _token.CurrentIndex;
-			if(!TryGet(ParseSqlIdent, out var funcName))
+			if (!TryGet(ParseSqlIdent, out var funcName))
 			{
 				throw new PrecursorException("<FUNCTION NAME>");
 			}
-			
-			if(!TryKeyword("(", out _))
+
+			if (!TryKeyword("(", out _))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("(");
 			}
 
+			var argsList = WithComma(ParseNestExpr);
+
 			ReadKeyword(")");
 			return new InvokeFunctionExpr
 			{
 				Name = funcName,
+				ArgumentsList = argsList
 			};
 		}
 
