@@ -72,6 +72,8 @@ namespace PreviewLibrary
 			DeclareVariableExpr variableDataType()
 			{
 				var varName = ParseVariableName();
+
+				TryKeyword("AS", out _);
 				var dataType = ParseDataType();
 
 				SqlExpr defaultValueExpr = null;

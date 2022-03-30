@@ -49,5 +49,17 @@ DECLARE @b decimal(19,6) = 2".ShouldEqual(expr);
          var expr = _sqlParser.ParseDeclarePartial(sql);
          "DECLARE @a decimal(19,3) = @b + @c".ShouldEqual(expr);
 		}
+
+      [Fact]
+      public void declare_variableName_as_datatype()
+		{
+         var sql = "declare @a as int";
+         
+         var expr = _sqlParser.ParseDeclarePartial(sql);
+
+         "DECLARE @a int".ShouldEqual(expr);
+		}
+
+
    }
 }
