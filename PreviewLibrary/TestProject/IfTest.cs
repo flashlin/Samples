@@ -160,6 +160,26 @@ END".ShouldEqual(expr);
 			@"IF @a = 1 RETURN".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void if_return_func()
+		{
+			var sql = @"if @a=1 return isnull(@b,0)";
+
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF @a = 1 RETURN isnull( @b,0 )".ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void if_return_customFunc()
+		{
+			var sql = @"if @a=1 return aa(@b,0)";
+
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF @a = 1 RETURN aa( @b,0 )".ShouldEqual(expr);
+		}
+
 
 	}
 }

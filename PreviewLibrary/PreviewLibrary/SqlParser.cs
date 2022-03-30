@@ -416,14 +416,14 @@ namespace PreviewLibrary
 			{
 				//TryGet(ParseArithmeticExpr, out var expr);
 				//return expr;
-				return ParseArithmeticExpr();
-				//TryGet(() => ParseArithmeticExpr(ParseConstant), out var expr);
-				//return expr;
+				//return ParseArithmeticExpr();
+				TryGet(() => ParseArithmeticExpr(ParseConstant), out var expr);
+				return expr;
 			}
 
 			if (TryKeyword("(", out _))
 			{
-				var innerValueExpr = parseValue();
+				var innerValueExpr = ParseArithmeticExpr();
 				ReadKeyword(")");
 				return new GroupExpr
 				{
@@ -433,12 +433,28 @@ namespace PreviewLibrary
 					},
 				};
 			}
+			
+			if (TryGet(ParseFunctionWithParentheses, out var funcExpr))
+			{
+				return new ReturnExpr
+				{
+					Value = funcExpr
+				};
+			}
 
-			if (TryGet(parseValue, out var valueExpr))
+			if(TryGet(() => ParseArithmeticExpr(ParseConstant), out var valueExpr))
 			{
 				return new ReturnExpr
 				{
 					Value = valueExpr
+				};
+			}
+
+			if (TryGet(ParseSubExpr, out var subExpr))
+			{
+				return new ReturnExpr
+				{
+					Value = subExpr
 				};
 			}
 
@@ -1369,7 +1385,7 @@ namespace PreviewLibrary
 		protected InvokeFunctionExpr ParseFunctionWithParentheses()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!TryGet(ParseSqlIdent, out var funcName))
+			if (!TryGet(() => (IdentExpr)Any("", ParseSqlIdent, ParseFuncName), out var funcName))
 			{
 				throw new PrecursorException("<FUNCTION NAME>");
 			}
@@ -2396,6 +2412,18 @@ namespace PreviewLibrary
 			}
 
 			return identToken;
+		}
+
+		protected IdentExpr ParseFuncName()
+		{
+			if (!_token.Try(_token.IsFuncName(out var funcArgsCount), out var funcName))
+			{
+				throw new PrecursorException("FUNCTION NAME");
+			}
+			return new IdentExpr
+			{
+				Name = funcName,
+			};
 		}
 
 		protected IdentExpr ParseSqlIdent()
