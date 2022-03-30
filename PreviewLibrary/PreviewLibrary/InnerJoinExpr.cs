@@ -3,7 +3,7 @@ using System.Text;
 
 namespace PreviewLibrary
 {
-	public class JoinExpr : SqlExpr
+	public class InnerJoinExpr : SqlExpr
 	{
 		public JoinType JoinType { get; set; }
 		public string OuterToken { get; set; }

@@ -11,6 +11,7 @@ namespace PreviewLibrary
 		public TopExpr TopExpr { get; set; }
 		public SqlExprList Fields { get; set; }
 		public SqlExpr From { get; set; }
+		public SqlExprList FromJoinList { get; set; }
 		public SqlExpr WhereExpr { get; set; }
 		public List<SqlExpr> Joins { get; set; }
 		public GroupByExpr GroupByExpr { get; set; }
@@ -30,6 +31,13 @@ namespace PreviewLibrary
 			{
 				sb.Append($" FROM {From}");
 			}
+
+			if( FromJoinList != null && FromJoinList.Items.Count > 0)
+			{
+				sb.AppendLine();
+				sb.AppendLine($"{FromJoinList}");
+			}
+
 			if (Joins != null && Joins.Count > 0)
 			{
 				sb.Append(" " + string.Join("\r\n", Joins));

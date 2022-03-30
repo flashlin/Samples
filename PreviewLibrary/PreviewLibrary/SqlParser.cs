@@ -1880,6 +1880,19 @@ namespace PreviewLibrary
 			return columnList;
 		}
 
+		protected SqlExprList GetMany(Func<SqlExpr> parse, bool hasComma = true)
+		{
+			if (!TryGet(() => Many(parse), out var exprList))
+			{
+				exprList = new SqlExprList()
+				{
+					HasComma = hasComma,
+					Items = new List<SqlExpr>()
+				};
+			}
+			return exprList;
+		}
+
 		protected SqlExprList ParseInnerJonList()
 		{
 			if (!TryGet(() => Many(ParseInnerJoin), out var joinTableList))
@@ -1905,8 +1918,10 @@ namespace PreviewLibrary
 
 			TryGet(ParseFrom, out var fromExpr);
 
-			//var joinTableList = Many(ParseJoin);
-			var joinTableList = ParseInnerJonList();
+			//
+			var fromJoinTableList = WithComma(() => Any("<INNER JOIN> or <FROM JOIN>", ParseInnerJoin, ParseFromJoin));
+
+			var innerJoinTableList = ParseInnerJonList();
 
 			var whereExpr = Get(ParseWhere);
 
@@ -1921,7 +1936,8 @@ namespace PreviewLibrary
 				TopExpr = topExpr,
 				Fields = fields,
 				From = fromExpr,
-				Joins = joinTableList.Items,
+				FromJoinList = fromJoinTableList,
+				Joins = innerJoinTableList.Items,
 				WhereExpr = whereExpr,
 				GroupByExpr = groupByExpr,
 				OrderByExpr = orderByExpr,
@@ -2044,14 +2060,30 @@ namespace PreviewLibrary
 			var list = new List<SqlExpr>();
 			do
 			{
-				var item = parse();
+				var item = default(T);
+
+				try
+				{
+					item = parse();
+				}
+				catch (PrecursorException)
+				{
+					break;
+				}
 
 				if (item is SqlExprList itemList)
 				{
-					return itemList;
+					//return itemList;
+					if (itemList.Items.Count > 0)
+					{
+						list.Add(item);
+					}
+				}
+				else
+				{
+					list.Add(item);
 				}
 
-				list.Add(item);
 				if (!_token.Try(","))
 				{
 					break;
@@ -2110,9 +2142,9 @@ namespace PreviewLibrary
 				return new ColumnSetExpr
 				{
 					SetVariableName = variableName,
-					Column = Any("<SimpleColumn> or <constant>", 
-						ParseArithmeticExpr, 
-						ParseSimpleColumn, 
+					Column = Any("<SimpleColumn> or <constant>",
+						ParseArithmeticExpr,
+						ParseSimpleColumn,
 						ParseConstant, ParseSubExpr),
 				};
 			}
@@ -3194,7 +3226,25 @@ namespace PreviewLibrary
 			throw new Exception(CreateThrowMessage($"Expect any keyword in {msg}, but got {_token.Text}"));
 		}
 
-		private JoinExpr ParseInnerJoin()
+
+		private FromJoinExpr ParseFromJoin()
+		{
+			if (!TryGet(ParseSqlIdent, out var fromTable))
+			{
+				throw new PrecursorException("<TABLE>");
+			}
+			TryGet(ParseAlias, out var aliasName);
+			TryGet(ParseWithOptions, out var withOptions);
+
+			return new FromJoinExpr
+			{
+				Table = fromTable,
+				AliasName = aliasName,
+				WithOptions = withOptions
+			};
+		}
+
+		private InnerJoinExpr ParseInnerJoin()
 		{
 			var startIndex = _token.CurrentIndex;
 			ReadKeywordOption(new[] { "inner", "left", "right" }, out var joinTypeStr);
@@ -3207,6 +3257,7 @@ namespace PreviewLibrary
 
 			if (startIndex == _token.CurrentIndex && !IsKeyword("JOIN"))
 			{
+				_token.MoveTo(startIndex);
 				throw new PrecursorException("JOIN");
 			}
 
@@ -3228,7 +3279,7 @@ namespace PreviewLibrary
 			var filterList = ParseFilterList();
 
 			var joinType = (JoinType)Enum.Parse(typeof(JoinType), joinTypeStr, true);
-			return new JoinExpr
+			return new InnerJoinExpr
 			{
 				Table = table,
 				AliasName = aliasName,

@@ -21,7 +21,7 @@ where tb1.id = 1";
 			var expr = _sqlParser.ParseSelectPartial(sql);
 
 			"SELECT id FROM tb1 Left outer JOIN tb2 ON tb2.id = tb1.id and tb2.p = tb1.p WHERE tb1.id = 1"
-				.ToExpectedObject().ShouldEqual(expr.ToString());
+				.ShouldEqual(expr);
 		}
 
 

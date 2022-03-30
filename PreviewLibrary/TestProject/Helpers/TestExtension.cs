@@ -12,7 +12,7 @@ namespace TestProject.Helpers
 		public static void ShouldEqual(this string expected, SqlExpr sqlExpr)
 		{
 			var sqlExprCode = $"{sqlExpr}";
-			expected.TrimCode().ToExpectedObject().ShouldEqual(sqlExprCode.TrimCode());
+			expected.MergeToCode().TrimCode().ToExpectedObject().ShouldEqual(sqlExprCode.MergeToCode().TrimCode());
 		}
 
 		public static void ShouldEqual(this string expected, IEnumerable<SqlExpr> sqlExprList)

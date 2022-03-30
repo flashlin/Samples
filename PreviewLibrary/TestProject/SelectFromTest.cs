@@ -213,5 +213,23 @@ ORDER BY id desc".ShouldEqual(expr);
 ORDER BY t.id DESC,t.price DESC
 ) AS newRanking FROM @tb1,customer AS c WITH(nolock) WHERE c.id = t.id".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_from_join_from()
+		{
+			var sql = @"select f1 from tb1
+				left join tb2 on tb1.id = tb2.id,
+				tb3 as tb3 with(nolock),
+				tb4
+				where tb1.id = 123
+			";
+
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			@"SELECT f1 FROM tb1
+Left JOIN tb2 ON tb1.id = tb2.id,tb3 AS tb3 WITH(nolock),tb4 WHERE tb1.id = 123".ShouldEqual(expr);
+		}
+
+
 	}
 }

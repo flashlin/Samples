@@ -24,9 +24,9 @@ namespace PreviewLibrary
 				{
 					break;
 				}
-				lines.Add(line);
+				lines.Add(line.Trim());
 			} while (true);
-			var singleLine = string.Join(" ", lines.Select(x => x.Trim()));
+			var singleLine = string.Join(" ", lines.Select(x => x));
 			return singleLine;
 		}
 
