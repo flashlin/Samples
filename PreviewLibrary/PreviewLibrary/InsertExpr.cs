@@ -26,6 +26,7 @@ namespace PreviewLibrary
 			{
 				sb.Append($"({Fields})");
 			}
+
 			sb.Append($" VALUES( {ValuesList} )");
 			return sb.ToString();
 		}

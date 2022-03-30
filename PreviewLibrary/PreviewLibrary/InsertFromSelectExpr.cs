@@ -7,6 +7,8 @@ namespace PreviewLibrary
 	{
 		public bool IntoToggle { get; set; }
 		public IdentExpr Table { get; set; }
+		public OutputExpr OutputExpr { get; set; }
+		public IntoExpr IntoExpr { get; set; }
 		public SelectExpr FromSelect { get; set; }
 
 		public override string ToString()
@@ -18,6 +20,20 @@ namespace PreviewLibrary
 				sb.Append(" INTO");
 			}
 			sb.Append($" {Table}");
+
+			if(OutputExpr != null)
+			{
+				sb.AppendLine();
+				sb.Append($"{OutputExpr}");
+			}
+			
+			if(IntoExpr != null)
+			{
+				sb.AppendLine();
+				sb.Append($"{IntoExpr}");
+			}
+
+
 			if( FromSelect != null)
 			{
 				sb.Append($" {FromSelect}");

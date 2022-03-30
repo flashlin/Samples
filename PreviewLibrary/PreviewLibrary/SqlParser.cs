@@ -1560,6 +1560,9 @@ namespace PreviewLibrary
 
 			TryGet(() => EatInsertFields(), out var fields);
 
+			TryGet(ParseOutput, out var outputExpr);
+			TryGet(ParseInto, out var inputExpr);
+
 			if (IsKeyword("SELECT"))
 			{
 				var selectExpr = ParseSelect();
@@ -1567,6 +1570,8 @@ namespace PreviewLibrary
 				{
 					IntoToggle = intoToggle,
 					Table = table,
+					OutputExpr = outputExpr,
+					IntoExpr = inputExpr,
 					FromSelect = selectExpr
 				};
 			}
@@ -2494,6 +2499,23 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected OutputColumnExpr Parse_OutputOther()
+		{
+			if (!TryGet(ParseSubExpr, out var outputExpr))
+			{
+				throw new PrecursorException("<OUTPUT Column EXPR>");
+			}
+
+			TryGet(ParseAlias, out var aliasName);
+
+			return new OutputColumnExpr
+			{
+				ActionName = String.Empty,
+				Column = outputExpr,
+				Alias = aliasName
+			};
+		}
+
 		protected OutputColumnExpr Parse_OutputInsert()
 		{
 			if (!TryAnyKeywords(new[] { "INSERTED", "DELETED" }, out var token))
@@ -2521,7 +2543,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("OUTPUT");
 			}
 
-			var outputList = WithComma(Parse_OutputInsert);
+			var outputList = WithComma(() => Any("<OUTPUT COLUMNS>", Parse_OutputInsert, Parse_OutputOther));
 			if (outputList.Items.Count == 0)
 			{
 				throw new ParseException("<INSERTED EXPR>");
@@ -2530,6 +2552,26 @@ namespace PreviewLibrary
 			return new OutputExpr
 			{
 				ColumnList = outputList,
+			};
+		}
+
+
+		protected IntoExpr ParseInto()
+		{
+			if (!TryKeyword("INTO", out _))
+			{
+				throw new PrecursorException("INTO");
+			}
+
+			var table = ParseSqlIdent();
+			ReadKeyword("(");
+			var columns = WithComma(ParseSqlIdent1);
+			ReadKeyword(")");
+
+			return new IntoExpr
+			{
+				Table = table,
+				Columns = columns,
 			};
 		}
 

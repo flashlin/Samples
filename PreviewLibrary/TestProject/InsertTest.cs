@@ -199,6 +199,22 @@ END),@d )".ShouldEqual(expr);
 			@"INSERT (id,name) VALUES(source.id,source.name)".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void insert_into_table_output_inserted_into_table_columns()
+		{
+			var sql = @"insert into customer([id],[name]) 
+				output 'customer', inserted.id, GETDATE()
+				into customerTracker([id], [name])
+				select id,name from otherCustomer";
+
+			var expr = _sqlParser.ParseInsertPartial(sql);
+
+			@"INSERT INTO customer 
+OUTPUT 'customer',inserted.id,GETDATE() 
+INPUT customerTracker([id],[name])
+SELECT id,name FROM otherCustomer".ShouldEqual(expr);
+		}
+
 
 	}
 }
