@@ -18,6 +18,14 @@ namespace TestProject
 			var expr = _sqlParser.Parse(sql);
 			"WAITFOR DELAY '00:00:00.300'".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void begin_end()
+		{
+			var sql = @"begin select 1 end";
+			var expr = _sqlParser.Parse(sql);
+			"BEGIN SELECT 1 END".ShouldEqual(expr);
+		}
 	}
 
 }

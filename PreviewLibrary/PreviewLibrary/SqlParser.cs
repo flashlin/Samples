@@ -326,6 +326,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseBegin,
 				ParseCreatePartitionFunction,
 				ParseCreatePartitionScheme,
 				ParseAlter,
