@@ -39,7 +39,7 @@ DECLARE @b decimal(19,6) = 2".ShouldEqual(expr);
       {
          var sql = "DECLARE @returnValue bit = 1";
          var expr = _sqlParser.ParseDeclarePartial(sql);
-         sql.ToExpectedObject().ShouldEqual(expr.ToString());
+         sql.ShouldEqual(expr);
       }
 
       [Fact]
@@ -47,7 +47,7 @@ DECLARE @b decimal(19,6) = 2".ShouldEqual(expr);
 		{
          var sql = "declare @a decimal(19,3) = @b + @c";
          var expr = _sqlParser.ParseDeclarePartial(sql);
-         "DECLARE @a decimal(19,3) = @b + @c".ToExpectedObject().ShouldEqual(expr.ToString());
+         "DECLARE @a decimal(19,3) = @b + @c".ShouldEqual(expr);
 		}
    }
 }
