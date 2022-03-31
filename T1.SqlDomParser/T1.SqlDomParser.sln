@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32319.34
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T1.SqlDom", "T1.SqlDom\T1.SqlDom.csproj", "{9626C144-288A-41FE-89E1-49CA31E49C62}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlDomTests", "SqlDomTests\SqlDomTests.csproj", "{1C9D7608-89C3-4857-8178-934EBD5AB9AF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9626C144-288A-41FE-89E1-49CA31E49C62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9626C144-288A-41FE-89E1-49CA31E49C62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9626C144-288A-41FE-89E1-49CA31E49C62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9626C144-288A-41FE-89E1-49CA31E49C62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C9D7608-89C3-4857-8178-934EBD5AB9AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C9D7608-89C3-4857-8178-934EBD5AB9AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C9D7608-89C3-4857-8178-934EBD5AB9AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C9D7608-89C3-4857-8178-934EBD5AB9AF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B700A8DD-617A-4002-9116-BDFD8235DCD2}
+	EndGlobalSection
+EndGlobal
