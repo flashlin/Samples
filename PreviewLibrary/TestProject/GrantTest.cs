@@ -36,6 +36,14 @@ namespace TestProject
 			"GRANT EXEC ON [dbo].[a] TO RoleUser".ShouldEqual(expr);
 		}
 
+	[Fact]
+		public void grant_execute_on_objectId_to_role1_roleN()
+		{
+			var sql = "grant EXEC ON [dbo].[a] TO Role1, Role2";
+			var expr = _sqlParser.ParseGrantPartial(sql);
+			"GRANT EXEC ON [dbo].[a] TO Role1,Role2".ShouldEqual(expr);
+		}
 
+		
 	}
 }

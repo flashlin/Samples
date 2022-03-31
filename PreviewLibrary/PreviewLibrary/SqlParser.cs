@@ -477,11 +477,11 @@ namespace PreviewLibrary
 			var permission = ParseIdentWord().Name;
 			ReadKeyword("TO");
 
-			var objectId = ParseSqlIdent();
+			var objectIds = WithComma(ParseSqlIdent);
 			return new GrantToExpr
 			{
 				Permission = permission,
-				ToObjectId = objectId
+				ToObjectIds = objectIds
 			};
 		}
 
@@ -572,7 +572,7 @@ namespace PreviewLibrary
 
 			ReadKeyword("TO");
 
-			var roleId = ParseSqlIdent();
+			var roleIds = WithComma(ParseSqlIdent);
 
 			IdentExpr asDbo = null;
 			if (TryKeyword("AS", out _))
@@ -584,7 +584,7 @@ namespace PreviewLibrary
 			{
 				ExecAction = "EXECUTE",
 				OnObjectId = objectId,
-				ToRoleId = roleId,
+				ToRoleIds = roleIds,
 				AsDbo = asDbo
 			};
 		}
@@ -600,7 +600,7 @@ namespace PreviewLibrary
 
 			ReadKeyword("TO");
 
-			var roleId = ParseSqlIdent();
+			var roleIds = WithComma(ParseSqlIdent);
 
 			IdentExpr asDbo = null;
 			if (TryKeyword("AS", out _))
@@ -612,7 +612,7 @@ namespace PreviewLibrary
 			{
 				ExecAction = "EXEC",
 				OnObjectId = objectId,
-				ToRoleId = roleId,
+				ToRoleIds = roleIds,
 				AsDbo = asDbo
 			};
 		}

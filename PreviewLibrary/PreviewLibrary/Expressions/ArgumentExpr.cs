@@ -1,6 +1,4 @@
 ﻿using PreviewLibrary.Exceptions;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace PreviewLibrary.Expressions
 {
@@ -18,24 +16,6 @@ namespace PreviewLibrary.Expressions
 				defaultValue = $"={DefaultValue}";
 			}
 			return $"{Name} {DataType}{defaultValue}";
-		}
-	}
-
-	public class SqlExprList : SqlExpr
-	{
-		public List<SqlExpr> Items { get; set; }
-
-		public bool HasComma { get; set; } = true;
-
-		public override string ToString()
-		{
-			if (Items == null)
-			{
-				return string.Empty;
-			}
-
-			var comma = HasComma ? "," : "\r\n";
-			return string.Join(comma, Items.Select(x => $"{x}"));
 		}
 	}
 }
