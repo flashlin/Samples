@@ -50,6 +50,16 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void exec_func_arg_out()
+		{
+			var sql = @"exec [my_func] @a out";
+			var expr = _sqlParser.ParseExecPartial(sql);
+			"EXEC [my_func] @a OUT".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void execute_func_arg1()
 		{
 			var sql = @"execute sys.sp_addextendedproperty @name = N'MS_Description';";

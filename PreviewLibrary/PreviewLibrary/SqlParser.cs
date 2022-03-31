@@ -276,7 +276,7 @@ namespace PreviewLibrary
 				ClearStack(operands, ops);
 			}
 
-			if( operands.Count == 0 )
+			if (operands.Count == 0)
 			{
 				throw new PrecursorException();
 			}
@@ -424,7 +424,7 @@ namespace PreviewLibrary
 					},
 				};
 			}
-			
+
 			if (TryGet(ParseFunctionWithParentheses, out var funcExpr))
 			{
 				return new ReturnExpr
@@ -433,7 +433,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if(TryGet(() => ParseArithmeticExpr(ParseConstantForReturn), out var valueExpr))
+			if (TryGet(() => ParseArithmeticExpr(ParseConstantForReturn), out var valueExpr))
 			{
 				return new ReturnExpr
 				{
@@ -3097,6 +3097,11 @@ namespace PreviewLibrary
 			return left;
 		}
 
+		public ExecuteExpr ParseExecPartial(string sql)
+		{
+			return ParsePartial(ParseExec, sql);
+		}
+
 		protected ExecuteExpr ParseExec()
 		{
 			if (!_token.TryIgnoreCase(new[] { "EXECUTE", "EXEC" }, out var execStr))
@@ -3468,19 +3473,24 @@ namespace PreviewLibrary
 				throw new PrecursorException("Expect SqlVariable");
 			}
 
+			var outToken = string.Empty;
 			if (!_token.Try("="))
 			{
-				return new SqlVariableExpr
+				TryKeyword("OUT", out outToken);
+				return new SpParameterExpr
 				{
-					Name = varName
+					Name = varName,
+					OutToken = outToken?.ToUpper()
 				};
 			}
 
 			var value = ParseConstant();
+			TryKeyword("OUT", out outToken);
 			return new SpParameterExpr
 			{
 				Name = varName,
-				Value = value
+				Value = value,
+				OutToken= outToken?.ToUpper(),
 			};
 		}
 
