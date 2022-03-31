@@ -1363,9 +1363,32 @@ namespace PreviewLibrary
 			return ParsePartial(ParseSet, sql);
 		}
 
+		protected SqlExpr ParseSet_DEADLOCK_PRIORITY()
+		{
+			if(!TryAllKeywords(new[] { "SET", "DEADLOCK_PRIORITY" }, out _))
+			{
+				throw new PrecursorException("SET DEADLOCK_PRIORITY");
+			}
+			var actionName = ReadToken();
+			return new SetOptionsExpr
+			{
+				Options = new List<string> { "DEADLOCK_PRIORITY" },
+				Toggle = actionName
+			};
+		}
+
+		protected string ReadToken()
+		{
+			var token = _token.Text;
+			_token.Move();
+			return token;
+		}
+
+
 		protected SqlExpr ParseSet()
 		{
 			return Any("<SET xxx>",
+				ParseSet_DEADLOCK_PRIORITY,
 				ParseSetVariableEqual,
 				ParseSet_Permission_ObjectId_OnOff,
 				ParseSet_Options_OnOff,

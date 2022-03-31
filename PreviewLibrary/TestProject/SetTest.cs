@@ -177,5 +177,15 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 			var expr = _sqlParser.ParseSetPartial(sql);
 			"SET @a = [dbo].[myFunc]( @a,@b )".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void set_DEADLOCK_PRIORITY_low()
+		{
+			var sql = "set DEADLOCK_PRIORITY low";
+			var expr = _sqlParser.ParseSetPartial(sql);
+			"SET DEADLOCK_PRIORITY low".ShouldEqual(expr);
+		}
+
+
 	}
 }
