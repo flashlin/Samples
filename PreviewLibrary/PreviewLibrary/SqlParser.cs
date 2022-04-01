@@ -363,7 +363,8 @@ namespace PreviewLibrary
 				ParseExec,
 				ParseGrant,
 				ParseReturn,
-				ParseBreak
+				ParseBreak,
+				ParseCommit,
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
@@ -682,6 +683,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseCommit,
 				ParseRankOver,
 				ParseMergeInsert,
 				ParseWaitforDelay,
@@ -3526,6 +3528,15 @@ namespace PreviewLibrary
 				OuterToken = outerToken,
 				OnFilter = filterList
 			};
+		}
+
+		protected CommitExpr ParseCommit()
+		{
+			if(!TryKeyword("COMMIT", out _))
+			{
+				throw new PrecursorException("COMMIT");
+			}
+			return new CommitExpr();
 		}
 
 		public SqlExpr ParseParameterNameAssign()

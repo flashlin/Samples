@@ -26,6 +26,16 @@ namespace TestProject
 			var expr = _sqlParser.Parse(sql);
 			"BEGIN SELECT 1 END".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void commit()
+		{
+			var sql = @"commit";
+			var expr = _sqlParser.Parse(sql);
+			"COMMIT".ShouldEqual(expr);
+		}
+
+
 	}
 
 }
