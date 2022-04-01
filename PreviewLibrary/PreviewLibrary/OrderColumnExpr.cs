@@ -4,7 +4,7 @@ namespace PreviewLibrary
 {
 	public class OrderColumnExpr : SqlExpr
 	{
-		public IdentExpr Column { get; set; }
+		public SqlExpr Column { get; set; }
 		public string OrderType { get; set; }
 
 		public override string ToString()

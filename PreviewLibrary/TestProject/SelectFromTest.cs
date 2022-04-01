@@ -241,6 +241,18 @@ ORDER BY t.id DESC,t.price DESC
 Left JOIN tb2 ON tb1.id = tb2.id,tb3 AS tb3 WITH(nolock),tb4 WHERE tb1.id = 123".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void select_from_table_order_by_func()
+		{
+			var sql = @"select f1 from tb1
+							order by id, isnull(name, '')
+			";
+
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			@"SELECT f1 FROM tb1 ORDER BY id,isnull( name,'' )".ShouldEqual(expr);
+		}
+
 
 	}
 }

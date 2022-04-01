@@ -1988,7 +1988,12 @@ namespace PreviewLibrary
 
 		protected OrderColumnExpr ParseColumnDesc()
 		{
-			if (!TryGet(ParseSqlIdent, out var column))
+			//if (!TryGet(ParseSqlIdent, out var column))
+			//{
+			//	throw new PrecursorException("<Column>");
+			//}
+
+			if (!TryGet(ParseArithmeticExpr, out var column))
 			{
 				throw new PrecursorException("<Column>");
 			}
