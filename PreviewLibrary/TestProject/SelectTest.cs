@@ -55,7 +55,7 @@ SELECT 2 FROM tb2
 		}
 
 		[Fact]
-		public void select_name()
+		public void select_field()
 		{
 			var sql = "select name";
 			var expr = new SqlParser().Parse(sql);
@@ -64,7 +64,15 @@ SELECT 2 FROM tb2
 		}
 
 		[Fact]
-		public void select_table_name()
+		public void select_field_stringAliasName()
+		{
+			var sql = "select name 'date'";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			"SELECT name as 'date'".ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void select_tableDotName()
 		{
 			var sql = "select tb1.name";
 			var expr = new SqlParser().Parse(sql);

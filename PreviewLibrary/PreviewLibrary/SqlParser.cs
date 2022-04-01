@@ -2387,17 +2387,25 @@ namespace PreviewLibrary
 
 		protected IdentExpr ParseAlias()
 		{
+			if (TryGet(ParseString, out var stringName))
+			{
+				return new IdentExpr
+				{
+					Name = stringName.Text
+				};
+			}
+
 			if (TryGet(ParseSqlIdent1, out var aliasName))
 			{
 				return aliasName;
 			}
 			if (TryKeyword("AS", out _))
 			{
-				if (TryGet(ParseString, out var stringName))
+				if (TryGet(ParseString, out var stringName2))
 				{
 					return new IdentExpr
 					{
-						Name = stringName.Text
+						Name = stringName2.Text
 					};
 				}
 				return ParseIdent();
