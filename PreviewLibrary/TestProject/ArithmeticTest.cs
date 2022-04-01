@@ -14,55 +14,6 @@ namespace TestProject
 		}
 
 		[Fact]
-		public void func_notEqual_expr()
-		{
-			var sql = "isnull(@name, '') <> ''";
-			var expr = _sqlParser.ParseFilterPartial(sql);
-			new CompareExpr
-			{
-				Left = new SqlFuncExpr
-				{
-					Name = "isnull",
-					Arguments = new SqlExpr[]
-					{
-						new IdentExpr
-						{
-						  Name = "@name"
-						},
-						new StringExpr
-						{
-						  Text = "''"
-						}
-					}
-				},
-				Oper = "<>",
-				Right = new StringExpr
-				{
-					Text = "''"
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
-		}
-
-		[Fact]
-		public void expr_notEqual_expr()
-		{
-			var sql = "1 <> 2";
-			var expr = _sqlParser.ParseFilterPartial(sql);
-			new CompareExpr
-			{
-				Left = new IntegerExpr
-				{
-					Value = 1
-				},
-				Oper = "<>",
-				Right = new IntegerExpr
-				{
-					Value = 2
-				}
-			}.ToExpectedObject().ShouldEqual(expr);
-		}
-
-		[Fact]
 		public void add_mul()
 		{
 			var sql = "1 + 2 * 3";
@@ -135,6 +86,44 @@ namespace TestProject
 			var sql = "@a | @b";
 			var expr = _sqlParser.ParseArithmeticPartial(sql);
 			"@a | @b".ShouldEqual(expr);
+		}
+
+
+		[Fact]
+		public void nest()
+		{
+			var sql = @"
+   (
+		(@a - @b) + (@c - @d) + 
+		(@b1 -b2) + (b3 - b4)
+	)";
+			var expr = _sqlParser.ParseArithmeticPartial(sql);
+
+			"((@a - @b) + (@c - @d) + (@b1 - b2) + (b3 - b4))".ShouldEqual(expr);
+		}
+	}
+
+
+	public class FilterTest : SqlTestBase
+	{
+		public FilterTest(ITestOutputHelper outputHelper) : base(outputHelper)
+		{
+		}
+
+		[Fact]
+		public void expr_notEqual_expr()
+		{
+			var sql = "1 <> 2";
+			var expr = _sqlParser.ParseFilterPartial(sql);
+			"1 <> 2".ShouldEqual(expr);
+		}
+		
+		[Fact]
+		public void func_notEqual_expr()
+		{
+			var sql = "isnull(@name, '') <> ''";
+			var expr = _sqlParser.ParseFilterPartial(sql);
+			"isnull( @name,'' ) <> ''".ShouldEqual(expr);
 		}
 	}
 }

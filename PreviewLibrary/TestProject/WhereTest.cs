@@ -67,6 +67,18 @@ namespace TestProject
 			"a > 1 and (b BETWEEN 1 AND 10 or c IN (1,2,3))".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void where_field_p()
+		{
+			var sql = @"WHERE id=1 and 
+   (
+		(@a - @b) + (@c - @d) + 
+		(@b1 -b2) + (b3 - b4)
+	)";
+			var expr = _sqlParser.ParseWherePartial(sql);
+			"id = 1 and ((@a - @b) + (@c - @d) + (@b1 - b2) + (b3 - b4))".ShouldEqual(expr);
+		}
 
+		
 	}
 }
