@@ -69,6 +69,13 @@ namespace TestProject
 			"".ToExpectedObject().ShouldEqual(token);
 		}
 
+		[Fact]
+		public void temp_table()
+		{
+			var token = GetToken("#tmp1");
+			"#tmp1".ToExpectedObject().ShouldEqual(token);
+		}
+
 		private string GetToken(string text)
 		{
 			var token = new SqlTokenizer();

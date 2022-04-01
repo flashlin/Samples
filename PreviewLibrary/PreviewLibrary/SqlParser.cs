@@ -2040,6 +2040,21 @@ namespace PreviewLibrary
 			return joinTableList;
 		}
 
+		protected IntoNewTableExpr ParseInto_NewTable()
+		{
+			if(!TryKeyword("INTO", out _))
+			{
+				throw new PrecursorException();
+			}
+
+			var newTable = ParseSqlIdent();
+
+			return new IntoNewTableExpr
+			{
+				Table = newTable,
+			};
+		}
+
 		protected SelectExpr ParseSelect()
 		{
 			if (!_token.TryIgnoreCase("select", out var _))
@@ -2064,6 +2079,8 @@ namespace PreviewLibrary
 
 			TryGet(ParseOrderBy, out var orderByExpr);
 
+			TryGet(ParseInto_NewTable, out var intoNewTableExpr);
+
 			var joinAllList = Many(ParseUnionJoinAll);
 
 			return new SelectExpr
@@ -2076,6 +2093,7 @@ namespace PreviewLibrary
 				WhereExpr = whereExpr,
 				GroupByExpr = groupByExpr,
 				OrderByExpr = orderByExpr,
+				IntoNewTable = intoNewTableExpr,
 				JoinAllList = joinAllList.Items,
 			};
 		}

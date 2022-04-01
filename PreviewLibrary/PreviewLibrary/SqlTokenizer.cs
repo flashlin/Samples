@@ -46,6 +46,7 @@ namespace PreviewLibrary
 		public static readonly string Hex16Number = "0x" + "[0-9a-fA-F]+";
 		public static readonly string NOT_LIKE = Word("NOT") + $"{RegexPattern.Blank}+" + Word("LIKE");
 		public static readonly string NOT_IN = Word("NOT") + $"{RegexPattern.Blank}+" + Word("IN");
+		public static readonly string TEMP_TABLE_NAME = Word("#") + RegexPattern.Ident;
 
 		public static readonly string[] _keywords = new[]
 		{
@@ -209,6 +210,7 @@ namespace PreviewLibrary
 				Escape(CompareOperSymbols),
 				AllStrings,
 				new[] {
+					TEMP_TABLE_NAME,
 					NOT_LIKE,
 					NOT_IN,
 					BatchInstruction,
@@ -316,6 +318,10 @@ namespace PreviewLibrary
 					return true;
 				}
 				if (Text.StartsWith("@"))
+				{
+					return true;
+				}
+				if (Text.StartsWith("#"))
 				{
 					return true;
 				}

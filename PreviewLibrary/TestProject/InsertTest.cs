@@ -214,7 +214,5 @@ OUTPUT 'customer',inserted.id,GETDATE()
 INTO customerTracker([id],[name])
 SELECT id,name FROM otherCustomer".ShouldEqual(expr);
 		}
-
-
 	}
 }

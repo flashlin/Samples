@@ -17,6 +17,7 @@ namespace PreviewLibrary
 		public GroupByExpr GroupByExpr { get; set; }
 		public List<SqlExpr> JoinAllList { get; set; }
 		public SqlExprList OrderByExpr { get; set; }
+		public IntoNewTableExpr IntoNewTable { get; set; }
 
 		public override string ToString()
 		{
@@ -54,9 +55,14 @@ namespace PreviewLibrary
 			{
 				sb.Append($"\r\n\tORDER BY {OrderByExpr}");
 			}
+			if(IntoNewTable != null)
+			{
+				sb.AppendLine();
+				sb.Append($"{IntoNewTable}");
+			}
 			if (JoinAllList != null && JoinAllList.Count > 0)
 			{
-				sb.Append("\r\n");
+				sb.AppendLine();
 				sb.Append(string.Join("\r\n", JoinAllList.Select(x => $"{x}")));
 			}
 			return sb.ToString();

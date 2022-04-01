@@ -237,6 +237,14 @@ END".ShouldEqual(expr);
 			"SELECT a as 'name'".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void select_star_into_tempTable()
+		{
+			var sql = @"select * into #tmp";
 
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			@"SELECT * INTO #tmp".ShouldEqual(expr);
+		}
 	}
 }
