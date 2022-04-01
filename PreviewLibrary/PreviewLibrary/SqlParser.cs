@@ -1564,7 +1564,7 @@ namespace PreviewLibrary
 
 			do
 			{
-				if (IsKeyword("END"))
+				if (hasBegin && IsKeyword("END"))
 				{
 					break;
 				}
@@ -1585,11 +1585,6 @@ namespace PreviewLibrary
 					}
 					throw;
 				}
-				//var expr = Get(ParseExpr);
-				//if (expr == null)
-				//{
-				//	break;
-				//}
 				body.Add(expr);
 			} while (true);
 
