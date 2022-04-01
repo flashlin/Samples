@@ -1549,6 +1549,8 @@ namespace PreviewLibrary
 				TryKeyword("AS", out _);
 				var dataType = ParseDataType();
 
+				TryKeyword("OUTPUT", out var outputToken);
+
 				SqlExpr defaultValue = null;
 				if (_token.Try("="))
 				{
@@ -1559,6 +1561,7 @@ namespace PreviewLibrary
 				{
 					Name = argName,
 					DataType = dataType,
+					OutputToken = outputToken,
 					DefaultValue = defaultValue
 				});
 
