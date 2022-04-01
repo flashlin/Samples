@@ -16,7 +16,8 @@ namespace TestProject
 		{
 		}
 
-		[Theory]
+		//??
+		//[Theory]
 		[InlineData(@"D:\Demo\1.sql")]
 		public void TestSqlFile(string file)
 		{
@@ -24,7 +25,8 @@ namespace TestProject
 			_sqlParser.ParseAll(sql).ToList();
 		}
 
-		[Fact]
+		//??
+		//[Fact]
 		public void TestAllSqlFiles()
 		{
 			var sqlFolder = @"D:\VDisk\MyGitHub\SQL";

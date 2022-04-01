@@ -1223,7 +1223,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("<SqlDataType>");
 			}
 
-			var dataSize = Get(ParseDataTypeSize);
+			TryGet(ParseDataTypeSize, out var dataSize);
 
 			TryGet(ParsePrimaryKey, out var primaryKeyExpr);
 
@@ -1564,11 +1564,32 @@ namespace PreviewLibrary
 
 			do
 			{
-				var expr = Get(ParseExpr);
-				if (expr == null)
+				if (IsKeyword("END"))
 				{
 					break;
 				}
+
+				SqlExpr expr = null;
+				try
+				{
+					if (!TryGet(ParseExpr, out expr))
+					{
+						break;
+					}
+				}
+				catch (NotSupportedException)
+				{
+					if (!hasBegin)
+					{
+						break;
+					}
+					throw;
+				}
+				//var expr = Get(ParseExpr);
+				//if (expr == null)
+				//{
+				//	break;
+				//}
 				body.Add(expr);
 			} while (true);
 
@@ -1873,8 +1894,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("Expect <Permission>");
 			}
 
-			var objectId = Get(ParseSqlIdent);
-			if (objectId == null)
+			if (!TryGet(ParseSqlIdent, out var objectId))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("Expect <objectId>");
@@ -2104,12 +2124,11 @@ namespace PreviewLibrary
 
 			TryGet(ParseFrom, out var fromExpr);
 
-			//
 			var fromJoinTableList = WithComma(() => Any("<INNER JOIN> or <FROM JOIN>", ParseInnerJoin, ParseFromJoin));
 
 			var innerJoinTableList = ParseInnerJonList();
 
-			var whereExpr = Get(ParseWhere);
+			TryGet(ParseWhere, out var whereExpr);
 
 			TryGet(ParseGroupBy, out var groupByExpr);
 
@@ -3013,12 +3032,12 @@ namespace PreviewLibrary
 				{
 					break;
 				}
-				var expr = Get(ParseExpr);
-				//TryGet(ParseExpr, out var expr);
-				if (expr == null)
+
+				if (!TryGet(ParseExpr, out var expr))
 				{
 					break;
 				}
+
 				body.Add(expr);
 			} while (true);
 			return body;
