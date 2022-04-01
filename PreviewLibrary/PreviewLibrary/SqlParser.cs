@@ -2050,7 +2050,7 @@ namespace PreviewLibrary
 
 		protected IntoNewTableExpr ParseInto_NewTable()
 		{
-			if(!TryKeyword("INTO", out _))
+			if (!TryKeyword("INTO", out _))
 			{
 				throw new PrecursorException();
 			}
@@ -2882,11 +2882,26 @@ namespace PreviewLibrary
 			return new BeginTransactionExpr();
 		}
 
+		protected BeginTransactionExpr ParseBegin_Tran()
+		{
+			if (!TryAllKeywords("BEGIN TRAN", out _))
+			{
+				throw new PrecursorException("BEGIN TRAN");
+			}
+
+			return new BeginTransactionExpr();
+		}
+
 		protected SqlExpr ParseBegin()
 		{
 			if (TryGet(ParseBegin_Transaction, out var transactionExpr))
 			{
 				return transactionExpr;
+			}
+
+			if (TryGet(ParseBegin_Tran, out var tranExpr))
+			{
+				return tranExpr;
 			}
 
 			if (!TryKeyword("BEGIN", out _))
@@ -3238,7 +3253,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("Expect EXEC");
 			}
 
-			if(TryKeyword("(", out _))
+			if (TryKeyword("(", out _))
 			{
 				var varName = ParseVariable();
 				ReadKeyword(")");
@@ -3247,7 +3262,7 @@ namespace PreviewLibrary
 					ExecName = execStr,
 					Method = new GroupExpr
 					{
-						InnerExpr = varName 
+						InnerExpr = varName
 					},
 				};
 			}

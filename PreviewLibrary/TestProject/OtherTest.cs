@@ -42,6 +42,14 @@ namespace TestProject
 			var expr = _sqlParser.Parse(sql);
 			"SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void begin_tran()
+		{
+			var sql = @"begin tran";
+			var expr = _sqlParser.Parse(sql);
+			"BEGIN TRANSACTION".ShouldEqual(expr);
+		}
 	}
 
 }
