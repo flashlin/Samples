@@ -3381,18 +3381,6 @@ namespace PreviewLibrary
 			}
 		}
 
-		private T Get<T>(Func<T> parse)
-		{
-			try
-			{
-				return parse();
-			}
-			catch
-			{
-				return default(T);
-			}
-		}
-
 		private T Get<T>(Func<SqlExpr, T> parse, SqlExpr left)
 		{
 			try
