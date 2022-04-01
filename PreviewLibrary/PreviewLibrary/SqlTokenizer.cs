@@ -52,6 +52,7 @@ namespace PreviewLibrary
 			"ALL", "AND",  "AS",
 			"BEGIN", "BY", "BETWEEN",
 			"CASE", "CROSS",
+			"DISTINCT",
 			"END", "EXEC", "EXECUTE", "ELSE",
 			"FROM", "FULL",
 			"GROUP", "GRANT",

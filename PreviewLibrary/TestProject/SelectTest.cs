@@ -159,6 +159,17 @@ SELECT 2".ShouldEqual(expr);
 		}
 
 		[Fact]
+		public void select_DISTINCT_count()
+		{
+			var sql = "select DISTINCT id";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT DISTINCT id".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void select_navigate_1()
 		{
 			var sql = "select - 1";

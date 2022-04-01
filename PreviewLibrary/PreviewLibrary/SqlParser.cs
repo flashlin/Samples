@@ -692,6 +692,7 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
+				ParseDistinct,
 				ParseCommit,
 				ParseRankOver,
 				ParseMergeInsert,
@@ -1906,6 +1907,19 @@ namespace PreviewLibrary
 			return new CommentExpr
 			{
 				Text = token,
+			};
+		}
+
+		protected DistinctExpr ParseDistinct()
+		{
+			if(!TryKeyword("DISTINCT", out _))
+			{
+				throw new PrecursorException("DISTINCT");
+			}
+			var rightSide = ParseArithmeticExpr();
+			return new DistinctExpr
+			{
+				RightSide = rightSide,
 			};
 		}
 
