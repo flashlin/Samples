@@ -108,5 +108,13 @@ namespace TestProject
 				}
 			}.ToExpectedObject().ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void exec_variable_eq_funcname()
+		{
+			var sql = @"exec @a = customFunc";
+			var expr = _sqlParser.ParseExecPartial(sql);
+			"EXEC @a = customFunc".ShouldEqual(expr);
+		}
 	}
 }

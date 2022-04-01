@@ -1,5 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Linq;
+using System.Text;
 
 namespace PreviewLibrary
 {
@@ -8,11 +9,26 @@ namespace PreviewLibrary
 		public IdentExpr Method { get; set; }
 		public SqlExpr[] Arguments { get; set; }
 		public string ExecName { get; set; }
+		public string LeftSide { get; set; }
 
 		public override string ToString()
 		{
-			var args = string.Join(",", Arguments.Select(x => $"{x}"));
-			return $"EXEC {Method} {args}";
+			var sb = new StringBuilder();
+			sb.Append($"{ExecName.ToUpper()}");
+			
+			if (!string.IsNullOrEmpty(LeftSide))
+			{
+				sb.Append($" {LeftSide} =");
+			}
+			
+			sb.Append($" {Method}");
+
+			if (Arguments != null)
+			{
+				var args = string.Join(",", Arguments.Select(x => $"{x}"));
+				sb.Append($" {args}");
+			}
+			return sb.ToString();
 		}
 	}
 }

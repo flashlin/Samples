@@ -2756,8 +2756,22 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected BeginTransactionExpr ParseBegin_Transaction()
+		{
+			if(!TryAllKeywords(new[] { "BEGIN", "TRANSACTION"}, out _))
+			{
+				throw new PrecursorException("BEGIN TRANSACTION");
+			}
+			return new BeginTransactionExpr();
+		}
+
 		protected SqlExpr ParseBegin()
 		{
+			if(TryGet(ParseBegin_Transaction, out var transactionExpr))
+			{
+				return transactionExpr;
+			}
+
 			if (!TryKeyword("BEGIN", out _))
 			{
 				throw new PrecursorException("BEGIN");
@@ -3088,6 +3102,18 @@ namespace PreviewLibrary
 			return ParsePartial(ParseExec, sql);
 		}
 
+		protected ExecuteExpr Parse_variable_eq_function()
+		{
+			if(!_token.TryMatch(SqlTokenizer.SqlVariable, out var variableName))
+			{
+				throw new PrecursorException();
+			}
+			ReadKeyword("=");
+			var execExpr = Eat_function_args();
+			execExpr.LeftSide = variableName;
+			return execExpr;
+		}
+
 		protected ExecuteExpr ParseExec()
 		{
 			if (!_token.TryIgnoreCase(new[] { "EXECUTE", "EXEC" }, out var execStr))
@@ -3095,6 +3121,20 @@ namespace PreviewLibrary
 				throw new PrecursorException("Expect EXEC");
 			}
 
+			if(TryGet(Parse_variable_eq_function, out var variableEqExpr))
+			{
+				variableEqExpr.ExecName = execStr;
+				return variableEqExpr;
+			}
+
+			var execExpr = Eat_function_args();
+			execExpr.ExecName = execStr;
+
+			return execExpr;
+		}
+
+		protected ExecuteExpr Eat_function_args()
+		{
 			var method = ParseSqlIdent();
 			var arguments = new List<SqlExpr>();
 
@@ -3124,7 +3164,6 @@ namespace PreviewLibrary
 
 			return new ExecuteExpr
 			{
-				ExecName = execStr,
 				Method = method,
 				Arguments = arguments.ToArray(),
 			};
