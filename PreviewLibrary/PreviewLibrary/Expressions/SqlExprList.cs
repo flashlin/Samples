@@ -12,6 +12,10 @@ namespace PreviewLibrary.Expressions
 
 		public bool IsEmpty()
 		{
+			if (Items == null)
+			{
+				return true;
+			}
 			return Items.Count == 0;
 		}
 

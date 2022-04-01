@@ -336,7 +336,6 @@ namespace PreviewLibrary
 		{
 			var parseList = new Func<SqlExpr>[]
 			{
-				ParseWith_AliasName_AS,
 				ParseBegin,
 				ParseCreatePartitionFunction,
 				ParseCreatePartitionScheme,
@@ -694,7 +693,6 @@ namespace PreviewLibrary
 			var parseList = new Func<SqlExpr>[]
 			{
 				ParseDistinct,
-				ParseWith_AliasName_AS,
 				ParseCommit,
 				ParseRankOver,
 				ParseMergeInsert,
@@ -2310,43 +2308,53 @@ namespace PreviewLibrary
 
 		protected CommonTableExpressionExpr ParseCte()
 		{
+			WithAsItemExpr parseAliasName()
+			{
+				var startIndex = _token.CurrentIndex;
+				if (!TryGet(ParseIdent, out var cteTableName))
+				{
+					throw new PrecursorException("<CTE TableName>");
+				}
+
+				var cteColumns = new SqlExprList();
+				if (TryKeyword("(", out _))
+				{
+					cteColumns = WithComma(ParseSqlIdent1);
+					ReadKeyword(")");
+				}
+
+				TryGet(ParseSqlIdent1, out var aliasName);
+
+				if (!TryKeyword("AS", out _))
+				{
+					throw new ParseException("AS");
+				}
+
+				ReadKeyword("(");
+				var innerSide = ParseArithmeticExpr();
+				ReadKeyword(")");
+				return new WithAsItemExpr
+				{
+					TableName = cteTableName,
+					Columns = cteColumns,
+					AliasName = aliasName,
+					InnerSide = innerSide,
+				};
+			}
+
+
 			var startIndex = _token.CurrentIndex;
 			if (!TryKeyword("WITH", out _))
 			{
 				throw new PrecursorException("WITH");
 			}
 
-			if (!TryGet(ParseIdent, out var cteTableName))
-			{
-				_token.MoveTo(startIndex);
-				throw new PrecursorException("<CTE TableName>");
-			}
-
-			var cteColumns = new SqlExprList();
-			if (TryKeyword("(", out _))
-			{
-				cteColumns = WithComma(ParseSqlIdent1);
-				ReadKeyword(")");
-			}
-
-			ReadKeyword("AS");
-			ReadKeyword("(");
-			//var select1Expr = ParseSelect();
-			//ReadKeyword("UNION");
-			//ReadKeyword("ALL");
-			//var select2Expr = ParseSelect();
-
-			var innerExpr = ParseSubExpr();
-
-			ReadKeyword(")");
+			//var innerExpr = ParseArithmeticExpr();
+			var innerExpr = WithComma(parseAliasName);
 
 			return new CommonTableExpressionExpr
 			{
-				TableName = cteTableName,
-				Columns = cteColumns,
 				InnerExpr = innerExpr,
-				//FirstSelect = select1Expr,
-				//RecursiveSelect = select2Expr,
 			};
 		}
 
@@ -2718,52 +2726,6 @@ namespace PreviewLibrary
 			{
 				Table = table,
 				Columns = columns,
-			};
-		}
-
-		public WithAsExpr ParseWithAliasnameAsPartial(string sql)
-		{
-			return ParsePartial(ParseWith_AliasName_AS, sql);
-		}
-
-		protected WithAsExpr ParseWith_AliasName_AS()
-		{
-			WithAsItemExpr parseAliasName()
-			{
-				var startIndex = _token.CurrentIndex;
-				if (!TryGet(ParseSqlIdent1, out var aliasName))
-				{
-					throw new PrecursorException("WITH <AliasName>");
-				}
-
-				if (!TryKeyword("AS", out _))
-				{
-					_token.MoveTo(startIndex);
-					throw new PrecursorException("WITH <AliasName> AS");
-				}
-
-				ReadKeyword("(");
-				var innerSide = ParseArithmeticExpr();
-				ReadKeyword(")");
-				return new WithAsItemExpr
-				{
-					AliasName = aliasName,
-					InnerSide = innerSide,
-				};
-			}
-
-
-			var startIndex = _token.CurrentIndex;
-			if (!TryKeyword("WITH", out _))
-			{
-				throw new PrecursorException("WITH");
-			}
-
-			var aliasExprList = WithComma(parseAliasName);
-
-			return new WithAsExpr 
-			{
-				AliasExprList = aliasExprList,
 			};
 		}
 
