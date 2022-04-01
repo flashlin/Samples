@@ -29,6 +29,16 @@ namespace TestProject
 			"CAST( @a AS date )".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void cast_otherFunc_arithmetic_as_date()
+		{
+			var sql = "cast( getdate()+1 as date)";
+			var expr = _sqlParser.ParseFuncPartial(sql);
+
+			"CAST( getdate() + 1 AS date )".ShouldEqual(expr);
+		}
+
+
 
 
 		[Fact]

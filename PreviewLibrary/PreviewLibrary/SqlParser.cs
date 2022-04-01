@@ -125,10 +125,10 @@ namespace PreviewLibrary
 		protected SqlExpr ParseArithmeticExpr(Func<SqlExpr> innerParse)
 		{
 			//var ops = new string[] { "(", ")", "&", "|", "*", "/", "+", "-" };
-			var ops = new string[] { "(", ")", "AND", "OR", 
+			var ops = new string[] { "(", ")", "AND", "OR",
 				"LIKE", "NOT LIKE", "NOT IN",
 				"&", "|", "*", "/", "+", "-",
-				"<>", ">=", "<", ">", "=", 
+				"<>", ">=", "<", ">", "=",
 				};
 			return ParseConcat(() => innerParse(), ops);
 		}
@@ -1035,7 +1035,9 @@ namespace PreviewLibrary
 			}
 
 			ReadKeyword("(");
-			var expr = ParseSubExpr();
+			//var expr = ParseSubExpr();
+			var expr = ParseArithmeticExpr();
+
 			ReadKeyword("AS");
 			var dataType = ParseDataType();
 			ReadKeyword(")");
@@ -1378,16 +1380,16 @@ namespace PreviewLibrary
 
 		protected SetTransactionIsolationLevelExpr ParseSetTransaction()
 		{
-			if(!TryAllKeywords(new[] {"SET", "TRANSACTION", "ISOLATION", "LEVEL" }, out var tokens))
+			if (!TryAllKeywords(new[] { "SET", "TRANSACTION", "ISOLATION", "LEVEL" }, out var tokens))
 			{
-				throw new PrecursorException("SET TRANSACTION");	
+				throw new PrecursorException("SET TRANSACTION");
 			}
 
-			if(!TryAllKeywords("READ UNCOMMITTED", out var actionNameExpr))
+			if (!TryAllKeywords("READ UNCOMMITTED", out var actionNameExpr))
 			{
 				throw new ParseException();
 			}
-			
+
 			var actionName = string.Join(" ", actionNameExpr);
 
 			return new SetTransactionIsolationLevelExpr
@@ -1431,7 +1433,7 @@ namespace PreviewLibrary
 				ArgumentsList = argsList
 			};
 		}
- 
+
 
 		protected InvokeFunctionExpr ParseFunctionWithParentheses()
 		{
@@ -1912,7 +1914,7 @@ namespace PreviewLibrary
 
 		protected DistinctExpr ParseDistinct()
 		{
-			if(!TryKeyword("DISTINCT", out _))
+			if (!TryKeyword("DISTINCT", out _))
 			{
 				throw new PrecursorException("DISTINCT");
 			}
@@ -1937,7 +1939,7 @@ namespace PreviewLibrary
 					Next = ParseSubExpr()
 				};
 			}
-			
+
 			if (TryKeyword("UNION", out _))
 			{
 				return new UnionAllExpr
@@ -2829,7 +2831,7 @@ namespace PreviewLibrary
 
 		protected BeginTransactionExpr ParseBegin_Transaction()
 		{
-			if(!TryAllKeywords(new[] { "BEGIN", "TRANSACTION"}, out _))
+			if (!TryAllKeywords(new[] { "BEGIN", "TRANSACTION" }, out _))
 			{
 				throw new PrecursorException("BEGIN TRANSACTION");
 			}
@@ -2838,7 +2840,7 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseBegin()
 		{
-			if(TryGet(ParseBegin_Transaction, out var transactionExpr))
+			if (TryGet(ParseBegin_Transaction, out var transactionExpr))
 			{
 				return transactionExpr;
 			}
@@ -3175,7 +3177,7 @@ namespace PreviewLibrary
 
 		protected ExecuteExpr Parse_variable_eq_function()
 		{
-			if(!_token.TryMatch(SqlTokenizer.SqlVariable, out var variableName))
+			if (!_token.TryMatch(SqlTokenizer.SqlVariable, out var variableName))
 			{
 				throw new PrecursorException();
 			}
@@ -3192,7 +3194,7 @@ namespace PreviewLibrary
 				throw new PrecursorException("Expect EXEC");
 			}
 
-			if(TryGet(Parse_variable_eq_function, out var variableEqExpr))
+			if (TryGet(Parse_variable_eq_function, out var variableEqExpr))
 			{
 				variableEqExpr.ExecName = execStr;
 				return variableEqExpr;
@@ -3572,7 +3574,12 @@ namespace PreviewLibrary
 
 			var filterList = ParseFilterList();
 
-			var joinType = (JoinType)Enum.Parse(typeof(JoinType), joinTypeStr, true);
+			var joinType = JoinType.Inner;
+			if (!string.IsNullOrEmpty(joinTypeStr))
+			{
+				joinType = (JoinType)Enum.Parse(typeof(JoinType), joinTypeStr, true);
+			}
+
 			return new InnerJoinExpr
 			{
 				Table = table,
@@ -3586,7 +3593,7 @@ namespace PreviewLibrary
 
 		protected CommitExpr ParseCommit()
 		{
-			if(!TryKeyword("COMMIT", out _))
+			if (!TryKeyword("COMMIT", out _))
 			{
 				throw new PrecursorException("COMMIT");
 			}

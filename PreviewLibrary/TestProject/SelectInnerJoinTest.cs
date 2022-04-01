@@ -54,5 +54,22 @@ select 2";
 JOIN ALL
 SELECT 2".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_join_where_field_func_func_arithmetic()
+		{
+			var sql = @"select 1
+	from customer
+	join country c on c.id = b.id
+	--Where createdDate = CAST(getdate()-1 as Date) 
+";
+
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			@"SELECT 1 FROM customer 
+Inner JOIN country AS c ON c.id = b.id".ShouldEqual(expr);
+		}
+
+
 	}
 }

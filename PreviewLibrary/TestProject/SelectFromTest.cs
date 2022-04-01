@@ -176,6 +176,17 @@ SELECT 2".ShouldEqual(exprs);
 		}
 
 		[Fact]
+		public void select_1_from_table_where_name_eq_func1()
+		{
+			var sql = @"select 1 
+from customer
+Where createdDate = CAST(getdate()-1 as Date)";
+			var expr = _sqlParser.Parse(sql);
+
+			"SELECT 1 FROM customer WHERE createdDate = CAST( getdate() - 1 AS Date )".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void select_1_from_remote_table()
 		{
 			var sql = @"SELECT 1 FROM [remoteServer].[db].[dbo].[customer]";
