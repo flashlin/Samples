@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace PreviewLibrary.Helpers
@@ -123,6 +124,19 @@ namespace PreviewLibrary.Helpers
 			if (source == null)
 				throw new ArgumentNullException("source");
 			return new TwoWayEnumerator<T>(source);
+		}
+	}
+
+	public static class StringExtension
+	{
+		public static string CondenseSpaces(this string s)
+		{
+			return s.Aggregate(new StringBuilder(), (acc, c) =>
+			{
+				if (c != ' ' || acc.Length == 0 || acc[acc.Length - 1] != ' ')
+					acc.Append(c);
+				return acc;
+			}).ToString();
 		}
 	}
 }

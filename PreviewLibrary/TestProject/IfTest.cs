@@ -26,6 +26,19 @@ END".ShouldEqual(expr);
 		}
 
 		[Fact]
+		public void if_var_not_in()
+		{
+			var sql = @"if @a not in (1,2)
+BEGIN select 1 END";
+
+			var expr = _sqlParser.ParseIfPartial(sql);
+
+			@"IF @a NOT IN( 1,2 ) BEGIN SELECT 1 END".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void if_begin_end_else_begin_end()
 		{
 			var sql = @"if @id = 1

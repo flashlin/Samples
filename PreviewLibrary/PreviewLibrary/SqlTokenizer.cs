@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using PreviewLibrary.Helpers;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -9,6 +11,27 @@ namespace PreviewLibrary
 {
 	public class SqlTokenizer : TokenizerBase
 	{
+		static string Word(string words)
+		{
+			var sb = new StringBuilder();
+			foreach (var word in words)
+			{
+				if (char.IsLetter(word))
+				{
+					sb.Append($"[{Char.ToLower(word)}{Char.ToUpper(word)}]");
+				}
+				else if (char.IsDigit(word))
+				{
+					sb.Append(word);
+				}
+				else
+				{
+					sb.Append(Regex.Escape($"{word}"));
+				}
+			}
+			return sb.ToString();
+		}
+
 		static readonly string PositiveInteger = @"\d+";
 		static readonly string IntegerNumber = PositiveInteger;
 		public static readonly string DecimalNumber = @"\d+\.\d*";
@@ -21,6 +44,9 @@ namespace PreviewLibrary
 		public static readonly string DoubleQuotedString = @"""[^""]*""";
 		public static readonly string QuotedString = @"N?'[^']*(?:''[^']*)*'";
 		public static readonly string Hex16Number = "0x" + "[0-9a-fA-F]+";
+		public static readonly string NOT_LIKE = Word("NOT") + $"{RegexPattern.Blank}+" + Word("LIKE");
+		public static readonly string NOT_IN = Word("NOT") + $"{RegexPattern.Blank}+" + Word("IN");
+
 		public static readonly string[] _keywords = new[]
 		{
 			"ALL", "AND",  "AS",
@@ -128,7 +154,7 @@ namespace PreviewLibrary
 					return text.Replace(" ", "");
 				}
 			}
-			return text;
+			return text.CondenseSpaces();
 		}
 
 		public static readonly string[] CompareOps = new[]
@@ -182,6 +208,8 @@ namespace PreviewLibrary
 				Escape(CompareOperSymbols),
 				AllStrings,
 				new[] {
+					NOT_LIKE,
+					NOT_IN,
 					BatchInstruction,
 					SingleLineComment,
 					MultiLineComment,

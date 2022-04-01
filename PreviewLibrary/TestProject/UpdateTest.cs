@@ -102,7 +102,7 @@ customer AS cc WITH(nolock)".ShouldEqual(expr);
 			@"UPDATE cc
 SET cc.a = 1
 customer AS cc WITH(nolock)
-Inner JOIN @aTable as u ON cc.Id = u.Id".ShouldEqual(expr);
+Inner JOIN @aTable AS u ON cc.Id = u.Id".ShouldEqual(expr);
 		}
 
 		[Fact]

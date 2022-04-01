@@ -10,6 +10,7 @@ namespace PreviewLibrary
 		public SqlExpr Table { get; set; }
 		public IdentExpr AliasName { get; set; }
 		public SqlExpr OnFilter { get; set; }
+		public WithOptionsExpr WithOptions { get; set; }
 
 		public override string ToString()
 		{
@@ -23,6 +24,10 @@ namespace PreviewLibrary
 			if( AliasName != null)
 			{
 				sb.Append($" AS {AliasName}");
+			}
+			if(WithOptions != null)
+			{
+				sb.Append($" {WithOptions}");
 			}
 			sb.Append($" ON {OnFilter}");
 			return sb.ToString();

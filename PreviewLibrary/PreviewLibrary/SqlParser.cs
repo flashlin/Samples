@@ -125,9 +125,10 @@ namespace PreviewLibrary
 		{
 			//var ops = new string[] { "(", ")", "&", "|", "*", "/", "+", "-" };
 			var ops = new string[] { "(", ")", "AND", "OR", 
+				"LIKE", "NOT LIKE", "NOT IN",
 				"&", "|", "*", "/", "+", "-",
 				"<>", ">=", "<", ">", "=", 
-				"LIKE", "NOT LIKE" };
+				};
 			return ParseConcat(() => innerParse(), ops);
 		}
 
@@ -705,6 +706,7 @@ namespace PreviewLibrary
 					return ParseRightExpr(expr,
 						ParseBetweenExpr,
 						ParseNotLikeExpr,
+						ParseNotInExpr,
 						ParseInExpr,
 						ParseCompareOpExpr);
 				}
@@ -872,6 +874,7 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("NOT");
 			}
+
 			var right = ParseArithmeticExpr();
 			return new NotExpr
 			{
@@ -881,20 +884,32 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseNotLikeExpr(SqlExpr leftExpr)
 		{
-			var startIndex = _token.CurrentIndex;
-			if (!TryKeyword("NOT", out _))
+			if (!TryKeyword("NOT LIKE", out _))
 			{
-				return leftExpr;
-			}
-
-			if (!TryKeyword("LIKE", out _))
-			{
-				_token.MoveTo(startIndex);
 				return leftExpr;
 			}
 
 			var valueExpr = ParseSubExpr();
 			return new NotLikeExpr
+			{
+				Left = leftExpr,
+				Right = valueExpr
+			};
+		}
+
+		protected SqlExpr ParseNotInExpr(SqlExpr leftExpr)
+		{
+			var startIndex = _token.CurrentIndex;
+			if (!TryKeyword("NOT IN", out _))
+			{
+				return leftExpr;
+			}
+
+			ReadKeyword("(");
+			var valueExpr = WithComma(ParseSubExpr);
+			ReadKeyword(")");
+
+			return new NotInExpr
 			{
 				Left = leftExpr,
 				Right = valueExpr
@@ -3363,7 +3378,8 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseParentheses()
 		{
-			return ParseParenthesesExpr(ParseNestExpr);
+			return ParseArithmeticExpr();
+			//return ParseParenthesesExpr(ParseNestExpr);
 			//if (!TryKeyword("(", out _))
 			//{
 			//	throw new PrecursorException("(");
@@ -3494,6 +3510,7 @@ namespace PreviewLibrary
 			var table = Any("<SubExpr> or <Table>", ParseParentheses, ParseTableToken);
 
 			TryGet(ParseAlias, out var aliasName);
+			TryGet(ParseWithOptions, out var withOptions);
 
 			ReadKeyword("ON");
 
@@ -3504,6 +3521,7 @@ namespace PreviewLibrary
 			{
 				Table = table,
 				AliasName = aliasName,
+				WithOptions = withOptions,
 				JoinType = joinType,
 				OuterToken = outerToken,
 				OnFilter = filterList

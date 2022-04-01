@@ -26,7 +26,7 @@ ON tb2.id = tb1.id";
 
 			var expr = new SqlParser().Parse(sql);
 			@"SELECT name FROM user AS tb1
-Inner JOIN books as tb2 WITH(nolock)
+Inner JOIN books AS tb2 WITH(nolock)
 ON tb2.id = tb1.id".ShouldEqual(expr);
 		}
 
