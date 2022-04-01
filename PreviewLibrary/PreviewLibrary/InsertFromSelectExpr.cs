@@ -6,7 +6,7 @@ namespace PreviewLibrary
 	public class InsertFromSelectExpr : SqlExpr
 	{
 		public bool IntoToggle { get; set; }
-		public IdentExpr Table { get; set; }
+		public SqlExpr Table { get; set; }
 		public OutputExpr OutputExpr { get; set; }
 		public IntoExpr IntoExpr { get; set; }
 		public SelectExpr FromSelect { get; set; }

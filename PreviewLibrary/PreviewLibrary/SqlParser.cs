@@ -1068,7 +1068,7 @@ namespace PreviewLibrary
 		protected DefineColumnTypeExpr ParseColumnDataType()
 		{
 			var startIndex = _token.CurrentIndex;
-			if (!TryGet(ParseSqlIdent1, out var columnNameExpr))
+			if (!TryGet(() => Any("", ParseSqlIdent1, ParseVariable), out var columnNameExpr))
 			{
 				throw new PrecursorException("<ColumnName>");
 			}
@@ -1683,12 +1683,19 @@ namespace PreviewLibrary
 				intoToggle = true;
 			}
 
-			var table = Get(ParseSqlIdent);
-			if (table == null)
+
+			if (!TryGet(() => Any("", ParseSqlIdent, ParseVariable), out var table))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<table>");
 			}
+
+			//var table = Get(ParseSqlIdent);
+			//if (table == null)
+			//{
+			//	_token.MoveTo(startIndex);
+			//	throw new PrecursorException("<table>");
+			//}
 
 			TryGet(() => EatInsertFields(), out var fields);
 

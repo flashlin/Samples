@@ -8,7 +8,7 @@ namespace PreviewLibrary
 {
 	public class InsertExpr : SqlExpr
 	{
-		public IdentExpr Table { get; set; }
+		public SqlExpr Table { get; set; }
 		public SqlExprList Fields { get; set; }
 		public SqlExprList ValuesList { get; set; }
 		public bool IntoToggle { get; set; }

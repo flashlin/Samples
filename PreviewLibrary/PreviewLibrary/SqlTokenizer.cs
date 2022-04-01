@@ -317,10 +317,10 @@ namespace PreviewLibrary
 				{
 					return true;
 				}
-				if (Text.StartsWith("@"))
-				{
-					return true;
-				}
+				//if (Text.StartsWith("@"))
+				//{
+				//	return true;
+				//}
 				if (Text.StartsWith("#"))
 				{
 					return true;
