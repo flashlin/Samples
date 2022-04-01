@@ -99,6 +99,21 @@ SELECT 2 FROM tb2
 		}
 
 		[Fact]
+		public void select_1_union_select_2()
+		{
+			var sql = @"select 1
+union
+select 2";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			@"SELECT 1 
+UNION ALL
+SELECT 2".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void select_top_1()
 		{
 			var sql = "select top 1 1";

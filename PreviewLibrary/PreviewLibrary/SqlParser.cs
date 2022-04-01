@@ -1894,6 +1894,14 @@ namespace PreviewLibrary
 					Next = ParseSubExpr()
 				};
 			}
+			
+			if (TryKeyword("UNION", out _))
+			{
+				return new UnionAllExpr
+				{
+					Next = ParseSubExpr()
+				};
+			}
 
 			if (!TryAllKeywords(new[] { "JOIN", "ALL" }, out _))
 			{
