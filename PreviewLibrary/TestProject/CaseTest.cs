@@ -12,7 +12,7 @@ namespace TestProject
 		}
 
 		[Fact]
-		public void case_when_a_in()
+		public void case_when_var_in()
 		{
 			var sql = @"case when @a in (1,2) then select 1
 else select 2
@@ -27,7 +27,7 @@ END".ToExpectedObject().ShouldEqual(expr.ToString());
 		}
 
 		[Fact]
-		public void case_variable_when_constant_then()
+		public void case_var_when_number_then()
 		{
 			var sql = @"case @a
 when 1 then select 2
@@ -90,7 +90,7 @@ END".ShouldEqual(expr);
 		}
 
 		[Fact]
-		public void case_when()
+		public void case_when_var_eq_number()
 		{
 			var sql = "CASE WHEN @a = -1 THEN [b] ELSE @c END";
 			var expr = _sqlParser.ParseCasePartial(sql);
