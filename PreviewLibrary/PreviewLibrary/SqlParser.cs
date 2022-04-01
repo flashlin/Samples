@@ -1,5 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
+using PreviewLibrary.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -659,6 +660,14 @@ namespace PreviewLibrary
 				}
 			}
 			return true;
+		}
+
+
+		private bool TryAllKeywords(string keywords, out string[] output)
+		{
+			var condense = keywords.CondenseSpaces();
+			var keywordsList = condense.Split(' ');
+			return TryAllKeywords(keywordsList, out output);
 		}
 
 		protected SemicolonExpr ParseSemicolon()
@@ -1366,10 +1375,30 @@ namespace PreviewLibrary
 			return token;
 		}
 
+		protected SetTransactionIsolationLevelExpr ParseSetTransaction()
+		{
+			if(!TryAllKeywords(new[] {"SET", "TRANSACTION", "ISOLATION", "LEVEL" }, out var tokens))
+			{
+				throw new PrecursorException("SET TRANSACTION");	
+			}
+
+			if(!TryAllKeywords("READ UNCOMMITTED", out var actionNameExpr))
+			{
+				throw new ParseException();
+			}
+			
+			var actionName = string.Join(" ", actionNameExpr);
+
+			return new SetTransactionIsolationLevelExpr
+			{
+				ActionName = actionName
+			};
+		}
 
 		protected SqlExpr ParseSet()
 		{
 			return Any("<SET xxx>",
+				ParseSetTransaction,
 				ParseSet_DEADLOCK_PRIORITY,
 				ParseSetVariableEqual,
 				ParseSet_Permission_ObjectId_OnOff,

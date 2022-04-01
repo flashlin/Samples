@@ -35,7 +35,13 @@ namespace TestProject
 			"COMMIT".ShouldEqual(expr);
 		}
 
-
+		[Fact]
+		public void set_transaction_isolation_level_read_uncommitted()
+		{
+			var sql = @"set transaction isolation level read uncommitted";
+			var expr = _sqlParser.Parse(sql);
+			"SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED".ShouldEqual(expr);
+		}
 	}
 
 }
