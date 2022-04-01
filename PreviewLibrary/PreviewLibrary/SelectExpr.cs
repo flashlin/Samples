@@ -28,6 +28,13 @@ namespace PreviewLibrary
 				sb.Append($" {TopExpr}");
 			}
 			sb.Append($" {Fields}");
+
+			if(IntoNewTable != null)
+			{
+				sb.AppendLine();
+				sb.Append($"{IntoNewTable}");
+			}
+
 			if (From != null)
 			{
 				sb.Append($" FROM {From}");
@@ -54,11 +61,6 @@ namespace PreviewLibrary
 			if( OrderByExpr != null)
 			{
 				sb.Append($"\r\n\tORDER BY {OrderByExpr}");
-			}
-			if(IntoNewTable != null)
-			{
-				sb.AppendLine();
-				sb.Append($"{IntoNewTable}");
 			}
 			if (JoinAllList != null && JoinAllList.Count > 0)
 			{

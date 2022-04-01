@@ -2066,6 +2066,8 @@ namespace PreviewLibrary
 
 			var fields = ParseManyColumns();
 
+			TryGet(ParseInto_NewTable, out var intoNewTableExpr);
+
 			TryGet(ParseFrom, out var fromExpr);
 
 			//
@@ -2078,8 +2080,6 @@ namespace PreviewLibrary
 			TryGet(ParseGroupBy, out var groupByExpr);
 
 			TryGet(ParseOrderBy, out var orderByExpr);
-
-			TryGet(ParseInto_NewTable, out var intoNewTableExpr);
 
 			var joinAllList = Many(ParseUnionJoinAll);
 

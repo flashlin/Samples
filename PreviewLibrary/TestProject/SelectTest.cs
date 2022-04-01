@@ -246,5 +246,15 @@ END".ShouldEqual(expr);
 
 			@"SELECT * INTO #tmp".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void select_star_into_tempTable_from_table_where()
+		{
+			var sql = @"select * into #tmp from customer where id=1";
+
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			@"SELECT * INTO #tmp FROM customer WHERE id = 1".ShouldEqual(expr);
+		}
 	}
 }
