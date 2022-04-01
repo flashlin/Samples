@@ -50,6 +50,16 @@ namespace TestProject
 			var expr = _sqlParser.Parse(sql);
 			"BEGIN TRANSACTION".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void rollback_transaction()
+		{
+			var sql = @"rollback transaction";
+			var expr = _sqlParser.Parse(sql);
+			"ROLLBACK TRANSACTION".ShouldEqual(expr);
+		}
+
+
 	}
 
 }

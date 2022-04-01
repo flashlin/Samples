@@ -9,4 +9,12 @@ namespace PreviewLibrary
 			return $"BEGIN TRANSACTION";
 		}
 	}
+	
+	public class RollbackTransactionExpr : SqlExpr
+	{
+		public override string ToString()
+		{
+			return $"ROLLBACK TRANSACTION";
+		}
+	}
 }

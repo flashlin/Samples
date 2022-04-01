@@ -1,12 +1,21 @@
 ﻿using PreviewLibrary.Exceptions;
+using System.Text;
 
 namespace PreviewLibrary
 {
 	public class CommitExpr : SqlExpr
 	{
+		public string ActionName { get; set; }
+
 		public override string ToString()
 		{
-			return $"COMMIT";
+			var sb = new StringBuilder();
+			sb.Append($"COMMIT");
+			if(!string.IsNullOrEmpty(ActionName))
+			{
+				sb.Append($" {ActionName}");
+			}
+			return sb.ToString();
 		}
 	}
 }

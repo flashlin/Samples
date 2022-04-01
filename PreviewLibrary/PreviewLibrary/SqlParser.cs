@@ -337,6 +337,7 @@ namespace PreviewLibrary
 			var parseList = new Func<SqlExpr>[]
 			{
 				ParseBegin,
+				ParseRollback,
 				ParseCreatePartitionFunction,
 				ParseCreatePartitionScheme,
 				ParseAlter,
@@ -693,6 +694,7 @@ namespace PreviewLibrary
 			var parseList = new Func<SqlExpr>[]
 			{
 				ParseDistinct,
+				ParseRollback,
 				ParseCommit,
 				ParseRankOver,
 				ParseMergeInsert,
@@ -1546,8 +1548,20 @@ namespace PreviewLibrary
 			var spArgs = ParseArgumentsList();
 
 			ReadKeyword("AS");
-			ReadKeyword("BEGIN");
+
+
+			var hasBegin = false;
+			if (!TryGet(() => Any("", ParseBegin_Tran, ParseBegin_Transaction), out var beginTranExpr))
+			{
+				hasBegin = TryKeyword("BEGIN", out _);
+			}
+
 			var body = new List<SqlExpr>();
+			if (beginTranExpr != null)
+			{
+				body.Add(beginTranExpr);
+			}
+
 			do
 			{
 				var expr = Get(ParseExpr);
@@ -1557,7 +1571,12 @@ namespace PreviewLibrary
 				}
 				body.Add(expr);
 			} while (true);
-			ReadKeyword("END");
+
+			if (hasBegin)
+			{
+				ReadKeyword("END");
+			}
+
 			return new CreateSpExpr
 			{
 				Name = spName,
@@ -2873,6 +2892,15 @@ namespace PreviewLibrary
 			};
 		}
 
+		protected RollbackTransactionExpr ParseRollback()
+		{
+			if (!TryAllKeywords("ROLLBACK TRANSACTION", out _))
+			{
+				throw new PrecursorException("ROLLBACK TRANSACTION");
+			}
+			return new RollbackTransactionExpr();
+		}
+
 		protected BeginTransactionExpr ParseBegin_Transaction()
 		{
 			if (!TryAllKeywords(new[] { "BEGIN", "TRANSACTION" }, out _))
@@ -3670,7 +3698,13 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("COMMIT");
 			}
-			return new CommitExpr();
+
+			TryAnyKeywords(new[] { "TRAN", "TRANSACTION" }, out var actionName);
+
+			return new CommitExpr
+			{
+				ActionName = actionName
+			};
 		}
 
 		public SqlExpr ParseParameterNameAssign()

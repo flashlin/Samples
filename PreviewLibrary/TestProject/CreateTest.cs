@@ -166,6 +166,26 @@ SELECT 1
 END".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void create_procedure_as_begin_tran()
+		{
+			var sql = @"create procedure xx
+@name varchar(50) 
+as
+	begin tran
+	rollback transaction
+";
+
+			var expr = _sqlParser.ParseCreateSpPartial(sql);
+
+			@"CREATE PROCEDURE xx @name varchar(50) 
+AS BEGIN 
+	BEGIN TRANSACTION 
+	ROLLBACK TRANSACTION 
+END".ShouldEqual(expr);
+		}
+
+
 		
 	}
 }
