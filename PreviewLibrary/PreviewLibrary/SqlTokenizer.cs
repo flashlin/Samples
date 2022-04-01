@@ -277,10 +277,10 @@ namespace PreviewLibrary
 		{
 			get
 			{
-				if (IsReverseKeyword(Text))
-				{
-					return false;
-				}
+				//if (IsReverseKeyword(Text))
+				//{
+				//	return false;
+				//}
 				char c = Ch;
 				return char.IsLower(c) || char.IsUpper(c) || c == '_';
 			}

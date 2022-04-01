@@ -141,6 +141,15 @@ SELECT 2".ShouldEqual(expr);
 		}
 
 		[Fact]
+		public void select_countFunc_as_count()
+		{
+			var sql = "select count(1) as count";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+
+			"SELECT count( 1 ) as count".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void select_count_star()
 		{
 			var sql = "select count(*)";
