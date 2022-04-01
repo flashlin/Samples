@@ -5,6 +5,7 @@ namespace PreviewLibrary
 {
 	public class DeleteExpr : SqlExpr
 	{
+		public TopExpr Top { get; set; }
 		public IdentExpr Table { get; set; }
 		public WithOptionsExpr WithOptions { get; set; }
 		public SqlExpr WhereExpr { get; set; }
@@ -14,7 +15,14 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var sb = new StringBuilder();
-			sb.Append($"DELETE FROM {Table}");
+			sb.Append($"DELETE");
+
+			if(Top != null)
+			{
+				sb.Append($" {Top}");
+			}
+
+			sb.Append($" FROM {Table}");
 
 			if(WithOptions != null)
 			{

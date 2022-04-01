@@ -940,6 +940,8 @@ namespace PreviewLibrary
 				throw new PrecursorException("DELETE");
 			}
 
+			TryGet(ParseTop, out var topExpr);
+
 			TryKeyword("FROM", out _);
 			var table = ParseSqlIdent();
 
@@ -951,6 +953,7 @@ namespace PreviewLibrary
 			var whereExpr = Option(ParseWhere);
 			return new DeleteExpr
 			{
+				Top = topExpr,
 				Table = table,
 				WithOptions = withOptionsExpr,
 				OutputExpr = outputExpr,

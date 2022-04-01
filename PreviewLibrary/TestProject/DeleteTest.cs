@@ -17,7 +17,7 @@ namespace TestProject
 		}
 
 		[Fact]
-		public void delete_from_table_where_id_in_selectExpr()
+		public void delete_from_table_where_field_in_selectExpr()
 		{
 			var sql = "DELETE FROM customer WHERE id IN (SELECT pid FROM products)";
 			var expr = Parse(sql);
@@ -25,7 +25,7 @@ namespace TestProject
 		}
 
 		[Fact]
-		public void delete_from_tb1_where_id_in()
+		public void delete_from_table_where_field_in()
 		{
 			var sql = @"delete from customer
 where id in (
@@ -36,7 +36,7 @@ select id from customer where loginname like 'abc%'
 		}
 
 		[Fact]
-		public void delete_table_where_field_eq_variable()
+		public void delete_table_where_field_eq_var()
 		{
 			var sql = @"DELETE customer WHERE id=@testId";
 			var expr = _sqlParser.ParseDeletePartial(sql);
@@ -45,7 +45,7 @@ select id from customer where loginname like 'abc%'
 		}
 
 		[Fact]
-		public void delete_from_table_output_x_into_table_columns_where()
+		public void delete_from_table_output_x1_x2_into_table_columns_where()
 		{
 			var sql = @"delete from customer
 				output deleted.id, GETDATE()
@@ -69,6 +69,14 @@ WHERE id = @id".ShouldEqual(expr);
 			@"DELETE FROM customer WITH(rowlock) WHERE id = @id".ShouldEqual(expr);
 		}
 
+		[Fact]
+		public void delete_top_var_from_table()
+		{
+			var sql = @"delete top(@a) from customer";
 
+			var expr = _sqlParser.ParseDeletePartial(sql);
+
+			@"DELETE TOP(@a) FROM customer".ShouldEqual(expr);
+		}
 	}
 }
