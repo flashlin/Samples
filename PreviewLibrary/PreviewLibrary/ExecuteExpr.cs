@@ -6,10 +6,10 @@ namespace PreviewLibrary
 {
 	public class ExecuteExpr : SqlExpr
 	{
-		public IdentExpr Method { get; set; }
 		public SqlExpr[] Arguments { get; set; }
 		public string ExecName { get; set; }
 		public string LeftSide { get; set; }
+		public SqlExpr Method { get; set; }
 
 		public override string ToString()
 		{

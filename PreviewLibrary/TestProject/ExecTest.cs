@@ -57,7 +57,13 @@ namespace TestProject
 			"EXEC [my_func] @a OUT".ShouldEqual(expr);
 		}
 
-
+		[Fact]
+		public void exec_lparen_var()
+		{
+			var sql = @"exec (@code)";
+			var expr = _sqlParser.ParseExecPartial(sql);
+			"EXEC (@code)".ShouldEqual(expr);
+		}
 
 		[Fact]
 		public void execute_func_arg1()

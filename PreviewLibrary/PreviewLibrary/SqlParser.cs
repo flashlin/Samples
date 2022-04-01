@@ -283,7 +283,7 @@ namespace PreviewLibrary
 				{
 					ops.Pop();
 					var expr = operands.Pop();
-					operands.Push(new GroupExpr { Expr = expr });
+					operands.Push(new GroupExpr { InnerExpr = expr });
 					break;
 				}
 				ClearStack(operands, ops);
@@ -409,7 +409,7 @@ namespace PreviewLibrary
 				ReadKeyword(")");
 				return new GroupExpr
 				{
-					Expr = new ReturnExpr
+					InnerExpr = new ReturnExpr
 					{
 						Value = innerValueExpr,
 					},
@@ -3230,6 +3230,20 @@ namespace PreviewLibrary
 				throw new PrecursorException("Expect EXEC");
 			}
 
+			if(TryKeyword("(", out _))
+			{
+				var varName = ParseVariable();
+				ReadKeyword(")");
+				return new ExecuteExpr
+				{
+					ExecName = execStr,
+					Method = new GroupExpr
+					{
+						InnerExpr = varName 
+					},
+				};
+			}
+
 			if (TryGet(Parse_variable_eq_function, out var variableEqExpr))
 			{
 				variableEqExpr.ExecName = execStr;
@@ -3443,7 +3457,7 @@ namespace PreviewLibrary
 			ReadKeyword(")");
 			return new GroupExpr
 			{
-				Expr = innerExpr,
+				InnerExpr = innerExpr,
 			};
 		}
 
@@ -3465,7 +3479,7 @@ namespace PreviewLibrary
 
 			var groupExpr = new GroupExpr
 			{
-				Expr = innerExpr,
+				InnerExpr = innerExpr,
 			};
 			return ParseCompareOpExpr(groupExpr);
 		}
