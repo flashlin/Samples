@@ -693,6 +693,7 @@ namespace PreviewLibrary
 			var parseList = new Func<SqlExpr>[]
 			{
 				ParseDistinct,
+				ParseWith_AliasName_AS,
 				ParseCommit,
 				ParseRankOver,
 				ParseMergeInsert,
@@ -2716,6 +2717,52 @@ namespace PreviewLibrary
 			{
 				Table = table,
 				Columns = columns,
+			};
+		}
+
+		public WithAsExpr ParseWithAliasnameAsPartial(string sql)
+		{
+			return ParsePartial(ParseWith_AliasName_AS, sql);
+		}
+
+		protected WithAsExpr ParseWith_AliasName_AS()
+		{
+			WithAsItemExpr parseAliasName()
+			{
+				var startIndex = _token.CurrentIndex;
+				if (!TryGet(ParseSqlIdent1, out var aliasName))
+				{
+					throw new PrecursorException("WITH <AliasName>");
+				}
+
+				if (!TryKeyword("AS", out _))
+				{
+					_token.MoveTo(startIndex);
+					throw new PrecursorException("WITH <AliasName> AS");
+				}
+
+				ReadKeyword("(");
+				var innerSide = ParseArithmeticExpr();
+				ReadKeyword(")");
+				return new WithAsItemExpr
+				{
+					AliasName = aliasName,
+					InnerSide = innerSide,
+				};
+			}
+
+
+			var startIndex = _token.CurrentIndex;
+			if (!TryKeyword("WITH", out _))
+			{
+				throw new PrecursorException("WITH");
+			}
+
+			var aliasExprList = WithComma(parseAliasName);
+
+			return new WithAsExpr 
+			{
+				AliasExprList = aliasExprList,
 			};
 		}
 
