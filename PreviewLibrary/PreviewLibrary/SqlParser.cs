@@ -41,12 +41,6 @@ namespace PreviewLibrary
 			return ParsePartial(ParseArithmeticExpr, sql);
 		}
 
-		private void PredicateParse(string sql)
-		{
-			_sql = sql;
-			_token.PredicateParse(sql);
-		}
-
 		public SqlExpr ParseDeclarePartial(string sql)
 		{
 			return ParsePartial(ParseDeclare, sql);
@@ -139,34 +133,11 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseArithmeticExpr()
 		{
-			//var ops = new string[] { "(", ")", "&", "|", "*", "/", "+", "-" };
-			//return ParseConcat(() => ParseSubExpr(), ops);
 			return ParseArithmeticExpr(ParseSubExpr);
-			//return ParseArithmeticExpr(ParseSubExpr);
 		}
-
-		//protected SqlExpr ParseCompareOpPostfix(Func<SqlExpr> innerParse)
-		//{
-		//	var ops = new string[] { "(", ")", "<>", ">=", "<=", ">", "<", "=", "LIKE", "IN" };
-		//	return ParseConcat(() => innerParse(), ops);
-		//}
-
-		//protected SqlExpr ParseAndOrExpr<T>(Func<T> leftParse)
-		//	where T : SqlExpr
-		//{
-		//	var ops = new string[] { "(", ")", "AND", "OR" };
-		//	return ParseConcat(() => leftParse(), ops);
-		//}
-
-		//protected SqlExpr ParseAndOrExpr()
-		//{
-		//	var ops = new string[] { "(", ")", "AND", "OR" };
-		//	return ParseConcat(() => ParseArithmeticExpr(), ops);
-		//}
 
 		private bool IsOperator(string[] opers)
 		{
-			//return _token.IsMatchAny(opers.Select(x => Regex.Escape(x)).ToArray());
 			return opers.Any(x => _token.IgnoreCase(x));
 		}
 
@@ -329,43 +300,6 @@ namespace PreviewLibrary
 			//operands.Push(new GroupExpr{ Expr = combo });
 			operands.Push(combo);
 		}
-
-		//??
-		//protected SqlExprList ReadArithmeticList()
-		//{
-		//	//(
-		//	//constant +
-		//	//
-		//}
-
-		//protected SqlExpr ReadParenthesesList(Func<SqlExpr> innerParse)
-		//{
-		//	if(!TryKeyword("(", out _))
-		//	{
-		//		throw new PrecursorException("(");
-		//	}
-		//	var parenthesesCount = 1;
-		//	var tokensList = new List<string>();
-		//	tokensList.Add("(");
-		//	do
-		//	{
-		//		if(IsKeyword(")"))
-		//		{
-		//			parenthesesCount--;
-		//			if(parenthesesCount == 0)
-		//			{
-		//				tokensList.Add(")");
-		//				_token.Move();
-		//				break;
-		//			}
-		//		}
-		//		tokensList.Add(_token.Text);
-		//	}while(_token.Move());
-
-		//	var parenthesesText = string.Join(" ", tokensList);
-		//	var expr = new SqlParser().ParseParenthesesFull(parenthesesText);
-		//	return expr;
-		//}
 
 		private int CompareOperPriority(string[] opers, string op1, string op2)
 		{
@@ -768,8 +702,6 @@ namespace PreviewLibrary
 				var parse = parseList[i];
 				if (TryGet(parse, out var expr))
 				{
-					//return ParseCompareOpExpr(ParseInExpr(expr));
-
 					return ParseRightExpr(expr,
 						ParseBetweenExpr,
 						ParseNotLikeExpr,
@@ -940,7 +872,6 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("NOT");
 			}
-			//var right = ParseSubExpr();
 			var right = ParseArithmeticExpr();
 			return new NotExpr
 			{
@@ -1057,7 +988,6 @@ namespace PreviewLibrary
 				{
 					Throw("Expect ,");
 				}
-				//var expr = ParseSubExpr();
 				var expr = ParseArithmeticExpr();
 				argsExprs.Add(expr);
 			}
@@ -1281,26 +1211,6 @@ namespace PreviewLibrary
 			ReadKeyword("(");
 
 			var columnTypeList = WithComma(ParseColumnDataType).Items;
-
-			//var columnTypeList = new List<SqlExpr>();
-			//do
-			//{
-			//	if (!TryGet(ParseColumnDataType, out var columnType))
-			//	{
-			//		break;
-			//	}
-			//	columnTypeList.Add(columnType);
-			//	if (!IsKeyword(","))
-			//	{
-			//		break;
-			//	}
-			//} while (true);
-
-			//if (columnTypeList.Count == 0)
-			//{
-			//	throw new Exception("Must once FieldType");
-			//}
-
 			ReadKeyword(")");
 
 			return new TableTypeExpr
@@ -1479,26 +1389,6 @@ namespace PreviewLibrary
 		protected InvokeFunctionExpr ParseFunctionWithParentheses()
 		{
 			return ParseFunctionWithParenthesesExpr(ParseNestExpr);
-			//var startIndex = _token.CurrentIndex;
-			//if (!TryGet(() => (IdentExpr)Any("", ParseSqlIdent, ParseFuncName), out var funcName))
-			//{
-			//	throw new PrecursorException("<FUNCTION NAME>");
-			//}
-
-			//if (!TryKeyword("(", out _))
-			//{
-			//	_token.MoveTo(startIndex);
-			//	throw new PrecursorException("(");
-			//}
-
-			//var argsList = WithComma(ParseNestExpr);
-
-			//ReadKeyword(")");
-			//return new InvokeFunctionExpr
-			//{
-			//	Name = funcName,
-			//	ArgumentsList = argsList
-			//};
 		}
 
 		protected SetVariableExpr ParseSetVariableEqual()
@@ -1805,13 +1695,6 @@ namespace PreviewLibrary
 			}
 
 			throw new NotSupportedException("Field = xxx Expr");
-
-			//var valueExpr = ParseArithmeticExpr();
-			//return new AssignSetExpr
-			//{
-			//	Field = fieldExpr,
-			//	Value = valueExpr
-			//};
 		}
 
 		public UpdateExpr ParseUpdatePartial(string sql)
@@ -3418,7 +3301,6 @@ namespace PreviewLibrary
 
 		protected SqlExpr ParseNestExpr()
 		{
-			//return ParseWithCompareOp(ParseAndOrExpr);
 			return ParseWithCompareOp(ParseArithmeticExpr);
 		}
 
