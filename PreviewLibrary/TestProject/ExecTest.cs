@@ -122,5 +122,18 @@ namespace TestProject
 			var expr = _sqlParser.ParseExecPartial(sql);
 			"EXEC @a = customFunc".ShouldEqual(expr);
 		}
+
+		[Fact]
+		public void exec_fuction_break_select_systemVariable()
+		{
+			var sql = @"exec myfunc
+select @@error";
+			var expr = _sqlParser.ParseAll(sql);
+
+			@"EXEC myfunc
+SELECT @@error".ShouldEqual(expr);
+		}
+
+
 	}
 }

@@ -2117,7 +2117,7 @@ namespace PreviewLibrary
 
 		protected SelectExpr ParseSelect()
 		{
-			if (!_token.TryIgnoreCase("select", out var _))
+			if (!TryKeyword("SELECT", out var _))
 			{
 				throw new PrecursorException();
 			}
@@ -3360,11 +3360,17 @@ namespace PreviewLibrary
 					break;
 				}
 
-				var sqlParam = Any("", ParseParameterNameAssign, ParseConstant);
-				if (sqlParam != null)
+				if (!TryGet(() => Any("", ParseParameterNameAssign, ParseConstant), out var sqlParam))
 				{
-					arguments.Add(sqlParam);
+					break;
 				}
+
+				arguments.Add(sqlParam);
+				//var sqlParam = Any("", ParseParameterNameAssign, ParseConstant);
+				//if (sqlParam != null)
+				//{
+				//	arguments.Add(sqlParam);
+				//}
 
 				if (first && sqlParam == null)
 				{
