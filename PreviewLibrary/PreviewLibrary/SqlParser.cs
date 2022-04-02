@@ -817,9 +817,9 @@ namespace PreviewLibrary
 			ReadKeyword("RETURNS");
 			var dataType = Any("<Variable DataType> or <DataType>", ParseColumnDataType, ParseDataType);
 			ReadKeyword("AS");
-			ReadKeyword("BEGIN");
-			var body = ParseBody();
-			ReadKeyword("END");
+			//ReadKeyword("BEGIN");
+			var body = ParseBody(RequestReadType.Yes);
+			//ReadKeyword("END");
 			return new CreateFunctionExpr
 			{
 				Name = funcName,
@@ -1092,7 +1092,7 @@ namespace PreviewLibrary
 			}
 			TryGet(ParseFilterList, out var searchCondition);
 			ReadKeyword("THEN");
-			var body = ParseBody();
+			var body = ParseBody(RequestReadType.No);
 
 			return new WhenMatchedExpr
 			{
@@ -1117,7 +1117,7 @@ namespace PreviewLibrary
 				TryGet(ParseFilterList, out searchCondition);
 			}
 			ReadKeyword("THEN");
-			var body = ParseBody();
+			var body = ParseBody(RequestReadType.No);
 
 			return new WhenNotMatchedExpr
 			{
@@ -1140,7 +1140,7 @@ namespace PreviewLibrary
 
 			TryGet(ParseFilterList, out var searchCondition);
 			ReadKeyword("THEN");
-			var body = ParseBody();
+			var body = ParseBody(RequestReadType.No);
 
 			return new WhenNotMatchedExpr
 			{
@@ -2902,9 +2902,9 @@ namespace PreviewLibrary
 			}
 
 			var booleanExpr = ParseArithmeticExpr();
-			ReadKeyword("BEGIN");
-			var body = ParseBody();
-			ReadKeyword("END");
+			//ReadKeyword("BEGIN");
+			var body = ParseBody(RequestReadType.Yes);
+			//ReadKeyword("END");
 
 			return new WhileExpr
 			{
@@ -2953,12 +2953,12 @@ namespace PreviewLibrary
 				return tranExpr;
 			}
 
-			if (!TryKeyword("BEGIN", out _))
-			{
-				throw new PrecursorException("BEGIN");
-			}
-			var body = ParseBody();
-			ReadKeyword("END");
+			//if (!TryKeyword("BEGIN", out _))
+			//{
+			//	throw new PrecursorException("BEGIN");
+			//}
+			var body = ParseBody(RequestReadType.Yes);
+			//ReadKeyword("END");
 			return new BeginExpr
 			{
 				Body = body
@@ -3018,13 +3018,29 @@ namespace PreviewLibrary
 			};
 		}
 
-		private List<SqlExpr> ParseBody()
+		private List<SqlExpr> ParseBody(RequestReadType readBeginEnd)
 		{
+			var hasBegin = TryKeyword("BEGIN", out _);
+			if (readBeginEnd == RequestReadType.Yes && !hasBegin)
+			{
+				throw new PrecursorException("BEGIN");
+			}
+
+			if (readBeginEnd == RequestReadType.No && hasBegin)
+			{
+				throw new ParseException("No need BEGIN, but get BEGIN");
+			}
+
 			var body = new List<SqlExpr>();
 			do
 			{
-				if (IsKeyword("END"))
+				if (hasBegin && IsKeyword("END"))
 				{
+					if (readBeginEnd == RequestReadType.No)
+					{
+						throw new ParseException("No need END, but get END");
+					}
+					ReadKeyword("END");
 					break;
 				}
 
@@ -3837,6 +3853,13 @@ namespace PreviewLibrary
 			};
 			_arithmetic = new InfixToPostfix<SqlExpr>(arithmeticOptions);
 		}
+	}
+
+	public enum RequestReadType
+	{
+		No,
+		Yes,
+		Option
 	}
 
 	public enum JoinType
