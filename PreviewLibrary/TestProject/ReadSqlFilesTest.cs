@@ -16,8 +16,7 @@ namespace TestProject
 		{
 		}
 
-		//??
-		//[Theory]
+		[Theory]
 		[InlineData(@"D:\Demo\1.sql")]
 		public void TestSqlFile(string file)
 		{

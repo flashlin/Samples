@@ -2153,7 +2153,7 @@ namespace PreviewLibrary
 
 			var fromList = WithComma(() =>
 			{
-				var sourceExpr = ParseAliasExpr(GetAny(ParseParentheses, ParseSubExpr));
+				var sourceExpr = ParseAliasExpr(Any("", ParseParentheses, ParseSubExpr));
 				TryGet(ParseAlias, out var aliasExpr);
 				TryGet(ParseWithOptions, out var withOptionsExpr);
 
@@ -3181,7 +3181,7 @@ namespace PreviewLibrary
 
 		private SqlExpr ParseConstant()
 		{
-			var expr = GetAny(
+			var expr = Any("",
 				ParseNull,
 				ParseNegativeNumber,
 				ParseHex16Number,
@@ -3340,12 +3340,17 @@ namespace PreviewLibrary
 		protected ExecuteExpr Eat_function_args()
 		{
 			var method = ParseSqlIdent();
-			var arguments = new List<SqlExpr>();
 
+			var arguments = new List<SqlExpr>();
 			var first = true;
 			do
 			{
-				var sqlParam = GetAny(ParseParameterNameAssign, ParseConstant);
+				if (IsKeyword(""))
+				{
+					break;
+				}
+
+				var sqlParam = Any("", ParseParameterNameAssign, ParseConstant);
 				if (sqlParam != null)
 				{
 					arguments.Add(sqlParam);
@@ -3456,23 +3461,6 @@ namespace PreviewLibrary
 				}
 			}
 			throw new PrecursorException(expect);
-		}
-
-		private SqlExpr GetAny(params Func<SqlExpr>[] parseList)
-		{
-			for (var i = 0; i < parseList.Length; i++)
-			{
-				var parse = parseList[i];
-				try
-				{
-					return parse();
-				}
-				catch (PrecursorException)
-				{
-					continue;
-				}
-			}
-			return default(SqlExpr);
 		}
 
 		private SqlExpr ParseCompareOp(SqlExpr left, Func<SqlExpr> parseRight)
