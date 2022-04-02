@@ -1,23 +1,23 @@
-using FluentAssertions;
+using SqlDomTests.Helpers;
 using System.Linq;
 using T1.SqlDomParser;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace SqlDomTests
 {
-	public class SqlTestBase
+	public class ArithmeticTest : SqlTestBase
 	{
+		public ArithmeticTest(ITestOutputHelper outputHelper) : base(outputHelper)
+		{
+		}
 
-	}
-
-	public class ArithmeticTest
-	{
 		[Fact]
 		public void add()
 		{
 			var sql = "1 +2";
 
-			var expr = new SqlParser().ParseSql(sql);
+			var expr = _sqlParser.ParseSql(sql);
 
 			var arithmeticExpr = expr as BinaryExpr;
 
@@ -29,7 +29,7 @@ namespace SqlDomTests
 		{
 			var sql = "1 * 2";
 
-			var expr = new SqlParser().ParseSql(sql);
+			var expr = _sqlParser.ParseSql(sql);
 
 			var arithmeticExpr = expr as BinaryExpr;
 
@@ -41,20 +41,11 @@ namespace SqlDomTests
 		{
 			var sql = "1 + 2 * 3";
 
-			var expr = new SqlParser().ParseSql(sql);
+			var expr = _sqlParser.ParseSql(sql);
 
 			var arithmeticExpr = expr as BinaryExpr;
 
 			arithmeticExpr!.ShouldBe("1 + 2 * 3");
-		}
-	}
-
-	public static class TestExtensions
-	{
-		public static void ShouldBe(this SqlExpr sqlExpr, string expected)
-		{
-			sqlExpr.Should().NotBeNull();
-			sqlExpr.ToSqlCode().Should().Be(expected);
 		}
 	}
 }
