@@ -3366,11 +3366,6 @@ namespace PreviewLibrary
 				}
 
 				arguments.Add(sqlParam);
-				//var sqlParam = Any("", ParseParameterNameAssign, ParseConstant);
-				//if (sqlParam != null)
-				//{
-				//	arguments.Add(sqlParam);
-				//}
 
 				if (first && sqlParam == null)
 				{
