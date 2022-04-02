@@ -2953,12 +2953,7 @@ namespace PreviewLibrary
 				return tranExpr;
 			}
 
-			//if (!TryKeyword("BEGIN", out _))
-			//{
-			//	throw new PrecursorException("BEGIN");
-			//}
 			var body = ParseBody(RequestReadType.Yes);
-			//ReadKeyword("END");
 			return new BeginExpr
 			{
 				Body = body
