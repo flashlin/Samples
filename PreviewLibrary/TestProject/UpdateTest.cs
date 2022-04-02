@@ -63,6 +63,19 @@ WHERE id = @id".ShouldEqual(expr);
 		}
 
 		[Fact]
+		public void update_table_with_rowlock_set_var_eq_field_field_add_1()
+		{
+			var sql = @"update customer with(rowlock)
+	set @id=id=id+1";
+
+			var expr = _sqlParser.ParseUpdatePartial(sql);
+
+			@"UPDATE customer WITH(rowlock) SET @id = id = id + 1".ShouldEqual(expr);
+		}
+
+
+
+		[Fact]
 		public void update_top_parthese_10()
 		{
 			var sql = @"UPDATE top(10) customer	set name='123' WHERE	id=@id";

@@ -1776,33 +1776,63 @@ namespace PreviewLibrary
 
 		protected AssignSetExpr ParseFieldAssignValue()
 		{
+			AssignExpr parseAssign()
+			{
+				if (!TryKeyword("=", out _))
+				{
+					throw new PrecursorException("=");
+				}
+
+				if (!TryGet(() => Any("", ParseArithmeticExpr, ParseSubExpr), out var expr))
+				{
+					throw new ParseException();
+				}
+
+				return new AssignExpr
+				{
+					Value = expr
+				};
+			}
+
+
 			var startIndex = _token.CurrentIndex;
-			if (!TryGet(ParseSqlIdent, out var fieldExpr))
+			if (!TryGet(() => Any("", ParseSqlIdent, ParseVariable), out var fieldExpr))
 			{
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<Field>");
 			}
-			ReadKeyword("=");
 
-			if (TryGet(ParseArithmeticExpr, out var arithemeticExpr))
+			var assignValuesList = Many(parseAssign);
+			if (assignValuesList.IsEmpty())
 			{
-				return new AssignSetExpr
-				{
-					Field = fieldExpr,
-					Value = arithemeticExpr
-				};
+				throw new ParseException("= <value>");
 			}
 
-			if (TryGet(ParseSubExpr, out var subExpr))
+			return new AssignSetExpr
 			{
-				return new AssignSetExpr
-				{
-					Field = fieldExpr,
-					Value = subExpr
-				};
-			}
+				Field = fieldExpr,
+				Value = assignValuesList
+			};
 
-			throw new NotSupportedException("Field = xxx Expr");
+			//ReadKeyword("=");
+			//if (TryGet(ParseArithmeticExpr, out var arithemeticExpr))
+			//{
+			//	return new AssignSetExpr
+			//	{
+			//		Field = fieldExpr,
+			//		Value = arithemeticExpr
+			//	};
+			//}
+
+			//if (TryGet(ParseSubExpr, out var subExpr))
+			//{
+			//	return new AssignSetExpr
+			//	{
+			//		Field = fieldExpr,
+			//		Value = subExpr
+			//	};
+			//}
+			//throw new NotSupportedException("Field = xxx Expr");
 		}
 
 		public UpdateExpr ParseUpdatePartial(string sql)
@@ -1864,6 +1894,10 @@ namespace PreviewLibrary
 
 			ReadKeyword("SET");
 			var setFields = WithComma(() => Any("<CASE> or <assign>", ParseCase, ParseFieldAssignValue));
+			if (setFields.Items.Count == 0)
+			{
+				throw new ParseException("SET <xxx>");
+			}
 
 			TryGet(ParseOutput, out var outputExpr);
 
