@@ -5,11 +5,15 @@
 		None,
 		Plus,
 		Minus,
-		Times,
+		Star,
 		Divide,
 		LParen,
 		RParen,
 		Number,
 		Comment,
+		Identifier,
+		SqlIdentifier,
+		And,
+		Or,
 	}
 }

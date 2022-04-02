@@ -8,16 +8,32 @@ namespace T1.SqlDomParser
 {
 	public class SqlParser
 	{
+		public static TextParser<string> Identifier =
+			from first in Character.Letter.Or(Character.EqualTo('_'))
+			from rest in Character.LetterOrDigit.Or(Character.EqualTo('_')).Many()
+			select first + new string(rest);
+
+		public static TextParser<string> SqlIdentifier =
+			from first in Character.EqualTo('[')
+			from mid in Character.ExceptIn(']').AtLeastOnce()
+			from last in Character.EqualTo(']')
+			select new string($"{first}{mid}{last}");
+
+		public static TokenListParser<SqlToken, Token<SqlToken>> AND = Token.EqualToValueIgnoreCase(SqlToken.And, "AND");
+
 		public static Tokenizer<SqlToken> Tokenizer = new TokenizerBuilder<SqlToken>()
 			.Ignore(Span.WhiteSpace)
 			.Match(Character.EqualTo('+'), SqlToken.Plus)
 			.Match(Character.EqualTo('-'), SqlToken.Minus)
-			.Match(Character.EqualTo('*'), SqlToken.Times)
+			.Match(Character.EqualTo('*'), SqlToken.Star)
 			.Match(Character.EqualTo('/'), SqlToken.Divide)
 			.Match(Character.EqualTo('('), SqlToken.LParen)
 			.Match(Character.EqualTo(')'), SqlToken.RParen)
+			.Match(Identifier, SqlToken.Identifier)
+			.Match(SqlIdentifier, SqlToken.SqlIdentifier)
 			.Match(Numerics.Natural, SqlToken.Number)
 			.Build();
+
 
 		//static readonly TokenListParser<SqlToken, ParsedValue<Operators.Binary>> Add =
 		//	Token.EqualTo(SqlToken.Plus).Select(t => Operators.Binary.Add.ToParsedValue(t.Span));
@@ -141,7 +157,9 @@ namespace T1.SqlDomParser
 		{
 			[SqlToken.Plus] = Operators.Binary.Add,
 			[SqlToken.Minus] = Operators.Binary.Sub,
-			[SqlToken.Times] = Operators.Binary.Mul,
+			[SqlToken.Star] = Operators.Binary.Mul,
+			[SqlToken.Or] = Operators.Binary.Or,
+			[SqlToken.And] = Operators.Binary.And,
 		};
 	}
 }
