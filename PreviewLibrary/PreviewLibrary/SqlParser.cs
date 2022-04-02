@@ -438,7 +438,7 @@ namespace PreviewLibrary
 				};
 			}
 
-			if (TryGet(() => ParseArithmeticExpr(ParseConstantForReturn), out var valueExpr))
+			if (TryGet(() => ParseArithmeticExpr(Parse_ReturnValue), out var valueExpr))
 			{
 				return new ReturnExpr
 				{
@@ -3194,7 +3194,7 @@ namespace PreviewLibrary
 
 		private SqlExpr ParseConstant()
 		{
-			var expr = Any("",
+			return Any("<Constant>",
 				ParseNull,
 				ParseNegativeNumber,
 				ParseHex16Number,
@@ -3205,14 +3205,9 @@ namespace PreviewLibrary
 				ParseVariable,
 				ParseSystemVariable,
 				ParseStar);
-			if (expr == null)
-			{
-				throw new PrecursorException("<Constant>");
-			}
-			return expr;
 		}
 
-		private SqlExpr ParseConstantForReturn()
+		private SqlExpr Parse_ReturnValue()
 		{
 			return Any(
 				"",
