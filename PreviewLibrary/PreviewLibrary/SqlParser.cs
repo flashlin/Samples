@@ -1512,8 +1512,8 @@ namespace PreviewLibrary
 				_token.MoveTo(startIndex);
 				throw new PrecursorException("<NO NEED BEGIN>");
 			}
+			var body = ParseBody(RequestReadType.No);
 
-			var body = new[] { ParseExpr() }.ToList();
 			return new CreateSpExpr
 			{
 				Name = spName,
