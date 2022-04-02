@@ -24,8 +24,7 @@ namespace TestProject
 			_sqlParser.ParseAll(sql).ToList();
 		}
 
-		//??
-		//[Fact]
+		[Fact]
 		public void TestAllSqlFiles()
 		{
 			var sqlFolder = @"D:\VDisk\MyGitHub\SQL";

@@ -119,15 +119,20 @@ UNION ALL
 SELECT 2".ShouldEqual(expr);
 		}
 
-
-
 		[Fact]
 		public void select_top_1()
 		{
 			var sql = "select top 1 1";
-			var expr = new SqlParser().Parse(sql);
-
+			var expr = _sqlParser.ParseSelectPartial(sql);
 			"SELECT TOP 1 1".ShouldEqual(expr);
+		}
+
+		[Fact]
+		public void select_systemVariable()
+		{
+			var sql = "select @@error";
+			var expr = _sqlParser.ParseSelectPartial(sql);
+			"SELECT @@error".ShouldEqual(expr);
 		}
 
 		[Fact]
