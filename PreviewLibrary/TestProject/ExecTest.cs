@@ -50,6 +50,14 @@ namespace TestProject
 		}
 
 		[Fact]
+		public void exec_func_string()
+		{
+			var sql = @"exec my_func 'sa'";
+			var expr = _sqlParser.Parse(sql);
+			"EXEC my_func 'sa'".ShouldEqual(expr);
+		}
+
+		[Fact]
 		public void exec_func_arg_out()
 		{
 			var sql = @"exec [my_func] @a out";

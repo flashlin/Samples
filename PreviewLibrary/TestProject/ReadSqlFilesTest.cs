@@ -35,6 +35,7 @@ namespace TestProject
 				var sql = File.ReadAllText(sqlFile);
 				try
 				{
+					_outputHelper.WriteLine($"parsing='{sqlFile}'");
 					p.ParseAll(sql).ToList();
 				}
 				catch
@@ -45,6 +46,8 @@ namespace TestProject
 				}
 				fileCount++;
 			}
+			_outputHelper.WriteLine($"Total parsed Count={fileCount}");
+			_outputHelper.WriteLine($"=== END ===");
 		}
 
 		public IEnumerable<string> ReadSqlFiles(string folder)

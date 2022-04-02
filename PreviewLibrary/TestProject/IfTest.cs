@@ -86,6 +86,24 @@ END".ShouldEqual(expr);
 		}
 
 		[Fact]
+		public void if_not_exists_selectExpr_begin_execExpr_end()
+		{
+			var sql = @"IF NOT exists(
+    SELECT 1 FROM sys.databases
+)
+BEGIN
+	EXEC my_func 'sa'
+END";
+			var expr = _sqlParser.Parse(sql);
+
+			@"IF NOT exists( SELECT 1 FROM sys.databases )
+BEGIN 
+	EXEC my_func 'sa' 
+END".ShouldEqual(expr);
+		}
+
+
+		[Fact]
 		public void if_parentheses_arithmetic()
 		{
 			var sql = @"if (@a>=1 or @b + @c >=2)
