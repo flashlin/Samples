@@ -16,36 +16,24 @@ namespace SqlDomTests
 		public void add()
 		{
 			var sql = "1 +2";
-
 			var expr = _sqlParser.ParseSql(sql);
-
-			var arithmeticExpr = expr as BinaryExpr;
-
-			arithmeticExpr!.ShouldBe("1 + 2");
+			expr.ShouldBe("1 + 2");
 		}
 
 		[Fact]
 		public void mul()
 		{
 			var sql = "1 * 2";
-
 			var expr = _sqlParser.ParseSql(sql);
-
-			var arithmeticExpr = expr as BinaryExpr;
-
-			arithmeticExpr!.ShouldBe("1 * 2");
+			expr.ShouldBe("1 * 2");
 		}
 
 		[Fact]
 		public void add_mul()
 		{
 			var sql = "1 + 2 * 3";
-
 			var expr = _sqlParser.ParseSql(sql);
-
-			var arithmeticExpr = expr as BinaryExpr;
-
-			arithmeticExpr!.ShouldBe("1 + 2 * 3");
+			expr.ShouldBe("1 + 2 * 3");
 		}
 	}
 }
