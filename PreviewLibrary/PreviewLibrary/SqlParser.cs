@@ -95,6 +95,19 @@ namespace PreviewLibrary
 			return listExpr;
 		}
 
+
+		protected SystemVariableExpr ParseSystemVariable()
+		{
+			if (!_token.TryMatch(SqlTokenizer.SystemVariable, out var name))
+			{
+				throw new PrecursorException("<SystemVariable>");
+			}
+			return new SystemVariableExpr
+			{
+				Name = name,
+			};
+		}
+
 		protected VariableExpr ParseVariable()
 		{
 			if (!_token.TryMatch(SqlTokenizer.SqlVariable, out var name))
@@ -708,9 +721,9 @@ namespace PreviewLibrary
 				ParseSelect,
 				ParseDelete,
 				ParseExec,
-				ParseParentheses,
 				ParseBreak,
 				ParseIf,
+				ParseParentheses,
 			};
 			for (var i = 0; i < parseList.Length; i++)
 			{
@@ -3190,6 +3203,7 @@ namespace PreviewLibrary
 				ParseString,
 				ParseSqlIdent,
 				ParseVariable,
+				ParseSystemVariable,
 				ParseStar);
 			if (expr == null)
 			{
@@ -3209,6 +3223,7 @@ namespace PreviewLibrary
 				ParseInteger,
 				ParseString,
 				ParseVariable,
+				ParseSystemVariable,
 				ParseStar);
 		}
 
