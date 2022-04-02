@@ -1794,7 +1794,6 @@ namespace PreviewLibrary
 				};
 			}
 
-
 			var startIndex = _token.CurrentIndex;
 			if (!TryGet(() => Any("", ParseSqlIdent, ParseVariable), out var fieldExpr))
 			{
@@ -1813,26 +1812,6 @@ namespace PreviewLibrary
 				Field = fieldExpr,
 				Value = assignValuesList
 			};
-
-			//ReadKeyword("=");
-			//if (TryGet(ParseArithmeticExpr, out var arithemeticExpr))
-			//{
-			//	return new AssignSetExpr
-			//	{
-			//		Field = fieldExpr,
-			//		Value = arithemeticExpr
-			//	};
-			//}
-
-			//if (TryGet(ParseSubExpr, out var subExpr))
-			//{
-			//	return new AssignSetExpr
-			//	{
-			//		Field = fieldExpr,
-			//		Value = subExpr
-			//	};
-			//}
-			//throw new NotSupportedException("Field = xxx Expr");
 		}
 
 		public UpdateExpr ParseUpdatePartial(string sql)
