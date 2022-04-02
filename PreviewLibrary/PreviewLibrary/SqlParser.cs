@@ -817,9 +817,7 @@ namespace PreviewLibrary
 			ReadKeyword("RETURNS");
 			var dataType = Any("<Variable DataType> or <DataType>", ParseColumnDataType, ParseDataType);
 			ReadKeyword("AS");
-			//ReadKeyword("BEGIN");
 			var body = ParseBody(RequestReadType.Yes);
-			//ReadKeyword("END");
 			return new CreateFunctionExpr
 			{
 				Name = funcName,
