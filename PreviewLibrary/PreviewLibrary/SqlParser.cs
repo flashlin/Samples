@@ -3373,7 +3373,7 @@ namespace PreviewLibrary
 					break;
 				}
 
-				if (!TryGet(() => Any("", ParseParameterNameAssign, ParseConstant), out var sqlParam))
+				if (!TryGetAny(out var sqlParam, ParseParameterNameAssign, ParseConstant))
 				{
 					break;
 				}
@@ -3485,6 +3485,23 @@ namespace PreviewLibrary
 				}
 			}
 			throw new PrecursorException(expect);
+		}
+
+		private SqlExpr Any(params Func<SqlExpr>[] parseList)
+		{
+			for (var i = 0; i < parseList.Length; i++)
+			{
+				var parse = parseList[i];
+				try
+				{
+					return parse();
+				}
+				catch (PrecursorException)
+				{
+					continue;
+				}
+			}
+			throw new PrecursorException();
 		}
 
 		private SqlExpr ParseCompareOp(SqlExpr left, Func<SqlExpr> parseRight)
