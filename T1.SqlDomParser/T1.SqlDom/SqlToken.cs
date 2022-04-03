@@ -15,5 +15,12 @@
 		SqlIdentifier,
 		And,
 		Or,
+		GreaterThan,
+		LessThan,
+		Equal,
+		LessThanOrEqual,
+		GreaterThanOrEqual,
+		HexNumber,
+		NotEqual,
 	}
 }

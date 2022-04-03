@@ -36,4 +36,5 @@ namespace SqlDomTests
 			expr.ShouldBe("1 + 2 * 3");
 		}
 	}
+
 }

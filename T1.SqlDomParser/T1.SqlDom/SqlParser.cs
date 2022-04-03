@@ -19,7 +19,61 @@ namespace T1.SqlDomParser
 			from last in Character.EqualTo(']')
 			select new string($"{first}{mid}{last}");
 
-		public static TokenListParser<SqlToken, Token<SqlToken>> AND = Token.EqualToValueIgnoreCase(SqlToken.And, "AND");
+		public static TextParser<string> HexInteger =
+			Span.EqualTo("0x")
+				.IgnoreThen(Character.Digit.Or(Character.Matching(ch => ch >= 'a' && ch <= 'f' || ch >= 'A' && ch <= 'F', "a-f"))
+				.Named("hex digit")
+				.AtLeastOnce())
+				.Select(chrs => new string(chrs));
+
+		public static TextParser<TextSpan> Real =
+			Numerics.Integer
+				.Then(n => Character.EqualTo('.').IgnoreThen(Numerics.Integer).OptionalOrDefault()
+					.Select(f => f == TextSpan.None ? n : new TextSpan(n.Source!, n.Position, n.Length + f.Length + 1))
+				);
+
+		public static TextParser<char> SqlStringContentChar =
+			Span.EqualTo("''").Value('\'').Try().Or(Character.ExceptIn('\'', '\r', '\n'));
+
+		public static TextParser<string> SqlString =
+			Character.EqualTo('\'')
+			  .IgnoreThen(SqlStringContentChar.Many())
+			  .Then(s => Character.EqualTo('\'').Value(new string(s)));
+
+		public static TextParser<SqlToken> LessOrEqual = Span.EqualTo("<=").Value(SqlToken.LessThanOrEqual);
+		public static TextParser<SqlToken> GreaterThanOrEqual = Span.EqualTo(">=").Value(SqlToken.GreaterThanOrEqual);
+		public static TextParser<SqlToken> NotEqual = Span.EqualTo("<>").Value(SqlToken.NotEqual);
+		public static TextParser<SqlToken> GreaterThan = Span.EqualTo(">").Value(SqlToken.GreaterThan);
+		public static TextParser<SqlToken> LessThan = Span.EqualTo("<").Value(SqlToken.LessThan);
+		public static TextParser<SqlToken> Equal = Span.EqualTo("=").Value(SqlToken.Equal);
+
+		public static TextParser<SqlToken> CompareOps =
+			OneOf(
+				LessOrEqual,
+				GreaterThanOrEqual,
+				NotEqual,
+				GreaterThan,
+				LessThan,
+				Equal
+			);
+
+		public static TextParser<SqlToken> Plus = Word(SqlToken.Plus, "+");
+		public static TextParser<SqlToken> Minus = Word(SqlToken.Minus, "-");
+		public static TextParser<SqlToken> Star = Word(SqlToken.Star, "*");
+		public static TextParser<SqlToken> Divide = Word(SqlToken.Divide, "/");
+		public static TextParser<SqlToken> LParen = Word(SqlToken.LParen, "(");
+		public static TextParser<SqlToken> RParen = Word(SqlToken.RParen, ")");
+
+		public static TextParser<SqlToken> BinaryOps =
+			OneOf(
+				Plus,
+				Minus,
+				Star,
+				Divide,
+				LParen,
+				RParen
+			);
+
 
 		public static Tokenizer<SqlToken> Tokenizer = new TokenizerBuilder<SqlToken>()
 			.Ignore(Span.WhiteSpace)
@@ -88,7 +142,8 @@ namespace T1.SqlDomParser
 		public SqlExpr ParseSql(string expression)
 		{
 			//var expression = "1 * (2 + 3)";
-			var tokenizer = Tokenizer;
+			//var tokenizer = Tokenizer;
+			var tokenizer = new SqlTokenizer();
 			var tokenList = tokenizer.Tokenize(expression);
 
 			var expressionTree = Expr.AtEnd().Parse(
@@ -151,6 +206,21 @@ namespace T1.SqlDomParser
 				expr = expr.Or(p);
 			}
 			return expr;
+		}
+
+		private static TextParser<SqlToken> OneOf(params TextParser<SqlToken>[] parsers)
+		{
+			TextParser<SqlToken> expr = parsers[0].Try();
+			foreach (var p in parsers.Skip(1))
+			{
+				expr = expr.Or(p);
+			}
+			return expr;
+		}
+
+		private static TextParser<SqlToken> Word(SqlToken token, string word)
+		{
+			return Span.EqualToIgnoreCase(word).Value(token);
 		}
 
 		private static readonly IReadOnlyDictionary<SqlToken, Operators.Binary> BinaryOperatorMap = new Dictionary<SqlToken, Operators.Binary>()
