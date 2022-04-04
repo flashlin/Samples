@@ -58,7 +58,15 @@ void ProcessTransList(string args)
 		Console.WriteLine(item.GetDisplayValue());
 	}
 
-	//rc.Sum(x=> x.Balance);
+	var summary = new TransHistory
+	{
+		TranTime = DateTime.Now,
+		TranType = "Summary",
+		NumberOfShare = rc.Sum(x => x.NumberOfShare),
+		HandlingFee = rc.Sum(x => x.HandlingFee),
+		Balance = rc.Sum(x => x.Balance),
+	};
+	Console.WriteLine(summary.GetDisplayValue());
 }
 
 bool ParseDateRange(string args, ListTransReq req)
