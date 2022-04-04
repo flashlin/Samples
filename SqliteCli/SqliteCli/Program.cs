@@ -41,13 +41,13 @@ do
 
 } while (true);
 
-void ProcessTransList(string args)
+void ProcessTransList(string dateRange)
 {
 	var req = new ListTransReq();
 
-	if (!ParseDateRange(args, req))
+	if (!ParseDateRange(dateRange, req))
 	{
-		ParseStartDate(args, req);
+		ParseStartDate(dateRange, req);
 	}
 
 	var db = new StockRepo();
@@ -59,19 +59,21 @@ void ProcessTransList(string args)
 	}
 	foreach (var item in rc)
 	{
-		//Console.WriteLine(item.ToString());
 		Console.WriteLine(item.GetDisplayValue());
 	}
 
-	var summary = new TransHistory
+	if (rc.Count > 0)
 	{
-		TranTime = DateTime.Now,
-		TranType = "Summary",
-		NumberOfShare = rc.Sum(x => x.NumberOfShare),
-		HandlingFee = rc.Sum(x => x.HandlingFee),
-		Balance = rc.Sum(x => x.Balance),
-	};
-	Console.WriteLine(summary.GetDisplayValue());
+		var summary = new TransHistory
+		{
+			TranTime = DateTime.Now,
+			TranType = "Summary",
+			NumberOfShare = rc.Sum(x => x.NumberOfShare),
+			HandlingFee = rc.Sum(x => x.HandlingFee),
+			Balance = rc.Sum(x => x.Balance),
+		};
+		Console.WriteLine(summary.GetDisplayValue());
+	}
 }
 
 bool ParseDateRange(string args, ListTransReq req)
