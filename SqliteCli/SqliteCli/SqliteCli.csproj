@@ -14,6 +14,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.3" />
     <PackageReference Include="SQLite" Version="3.13.0" />
+    <PackageReference Include="T1.Standard" Version="1.0.58" />
+    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="6.13.16" />
   </ItemGroup>
 
 </Project>

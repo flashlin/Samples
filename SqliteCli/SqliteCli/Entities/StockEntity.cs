@@ -2,9 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using SqliteCli.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
@@ -21,6 +23,7 @@ namespace SqliteCli.Entities
 		Stock,
 	}
 
+	[Table("StockMap")]
 	public class StockEntity
 	{
 		[Key]
@@ -28,9 +31,9 @@ namespace SqliteCli.Entities
 		public string Id { get; set; }
 
 		[StringLength(100)]
-		public string Name { get; set; }
+		public string StockName { get; set; }
 		public StockType StockType { get; set; }
-		public decimal HandFee { get; set; }
+		public decimal HandlingFee { get; set; }
 	}
 
 	public class TransEntity
@@ -38,10 +41,11 @@ namespace SqliteCli.Entities
 		[Key]
 		public long Id { get; set; }
 		public DateTime TranTime { get; set; }
+		public string TranType { get; set; }
 		public string StockId { get; set; }
 		public decimal StockPrice { get; set; }
-		public int NumberOfShares { get;set;}
-		public decimal HandFee { get; set; }
+		public int NumberOfShare { get; set; }
+		public decimal HandlingFee { get; set; }
 		public decimal Balance { get; set; }
 	}
 
@@ -54,7 +58,7 @@ namespace SqliteCli.Entities
 			this._sqliteFile = sqliteFile;
 		}
 
-		public DbSet<StockEntity> Stocks { get; set; }
+		public DbSet<StockEntity> StocksMap { get; set; }
 		public DbSet<TransEntity> Trans { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -67,11 +71,11 @@ namespace SqliteCli.Entities
 	{
 		public DateTime TranTime { get; set; }
 		public string TranType { get; set; }
-		public string StockId { set; get; }	
+		public string StockId { set; get; }
 		public string StockName { set; get; }
 		public decimal StockPrice { get; set; }
-		public int NumberOfShares { get; set; }
-		public decimal HandFee { get; set; }
+		public int NumberOfShare { get; set; }
+		public decimal HandlingFee { get; set; }
 		public decimal Balance { get; set; }
 
 		public override string ToString()
@@ -82,8 +86,8 @@ namespace SqliteCli.Entities
 			sb.Append($" {StockId}");
 			sb.Append($" {StockName}");
 			sb.Append($" {StockPrice}");
-			sb.Append($" {NumberOfShares}");
-			sb.Append($" {HandFee}");
+			sb.Append($" {NumberOfShare}");
+			sb.Append($" {HandlingFee}");
 			sb.Append($" {Balance}");
 			return sb.ToString();
 		}
@@ -106,14 +110,137 @@ namespace SqliteCli.Entities
 			return connection.Query<TransHistory>(cmd);
 		}
 
-		public void ListTrans(ListTransReq req)
+		public List<TransHistory> ListTrans3(ListTransReq req)
 		{
 			using var db = GetDatabase();
-			var query = db.Trans;
-			if(req.StartTime != null)
-			{ 
-				//query = query.Where(x => req.StartTime <= x.TranTime);
+
+			var queryFilter = new List<QueryableFilter>();
+			if (req.StartTime != null)
+			{
+				queryFilter.Add(
+					new QueryableFilter
+					{
+						Name = nameof(TransEntity.TranTime),
+						Value = req.StartTime,
+						Compare = QueryableFilterCompareEnum.GreaterThanOrEqual
+					}
+				);
 			}
+
+			if (req.EndTime != null)
+			{
+				queryFilter.Add(
+					new QueryableFilter
+					{
+						Name = nameof(TransEntity.TranTime),
+						Value = req.EndTime,
+						Compare = QueryableFilterCompareEnum.LessThanOrEqual
+					}
+				);
+			}
+
+			var trans = new DynamicFilters<TransEntity>(db)
+				.Filter(queryFilter)
+				.ToList();
+
+			var q2 = trans.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+				(tran, stock) => new TransHistory
+				{
+					TranTime = tran.TranTime,
+					TranType = tran.TranType,
+					StockId = tran.StockId,
+					StockName = stock.StockName,
+					StockPrice = tran.StockPrice,
+					NumberOfShare = tran.NumberOfShare,
+					HandlingFee = tran.HandlingFee,
+					Balance = tran.Balance,
+				});
+
+			return q2.ToList();
+		}
+
+		public List<TransHistory> ListTrans2(ListTransReq req)
+		{
+			using var db = GetDatabase();
+
+			var q1 = db.Trans.AsQueryable();
+
+			if (req.StartTime != null)
+			{
+				q1 = q1.Where(x => x.TranTime >= req.StartTime);
+			}
+
+			if (req.EndTime != null)
+			{
+				q1 = q1.Where(x => x.TranTime <= req.EndTime);
+			}
+			//.WhereDynamic(x => x.TranTime <= req.StartTime);
+
+			var code = q1.ToQueryString();
+
+			var trans = q1.ToList();
+
+			var q2 = trans.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+				(tran, stock) => new TransHistory
+				{
+					TranTime = tran.TranTime,
+					TranType = tran.TranType,
+					StockId = tran.StockId,
+					StockName = stock.StockName,
+					StockPrice = tran.StockPrice,
+					NumberOfShare = tran.NumberOfShare,
+					HandlingFee = tran.HandlingFee,
+					Balance = tran.Balance,
+				});
+
+			return q2.ToList();
+		}
+
+		public IEnumerable<TransHistory> ListTrans1(ListTransReq req)
+		{
+			using var db = GetDatabase();
+
+			var queryFilter = new List<QueryableFilter>();
+			if (req.StartTime != null)
+			{
+				queryFilter.Add(
+					new QueryableFilter
+					{
+						Name = nameof(TransEntity.TranTime),
+						Value = req.StartTime,
+						Compare = QueryableFilterCompareEnum.GreaterThanOrEqual
+					}
+				);
+			}
+
+			if (req.EndTime != null)
+			{
+				queryFilter.Add(
+					new QueryableFilter
+					{
+						Name = nameof(TransEntity.TranTime),
+						Value = req.EndTime,
+						Compare = QueryableFilterCompareEnum.LessThanOrEqual
+					}
+				);
+			}
+
+			var query = new DynamicFilters<TransEntity>(db)
+				.Filter(queryFilter)
+				.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+				(tran, stock) => new TransHistory
+				{
+					TranTime = tran.TranTime,
+					TranType = tran.TranType,
+					StockId = tran.StockId,
+					StockName = stock.StockName,
+					StockPrice = tran.StockPrice,
+					NumberOfShare = tran.NumberOfShare,
+					HandlingFee = tran.HandlingFee,
+					Balance = tran.Balance,
+				});
+
+			return query;
 		}
 
 		protected StockDatabase GetDatabase()
@@ -124,7 +251,7 @@ namespace SqliteCli.Entities
 
 	public static class DbContextExtension
 	{
-		public static IEnumerable<T> FromSqlQuery<T>(this DbContext context, string query, 
+		public static IEnumerable<T> FromSqlQuery<T>(this DbContext context, string query,
 			Func<DbDataReader, T> map, params object[] parameters)
 		{
 			using (var command = context.Database.GetDbConnection().CreateCommand())
