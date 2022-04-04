@@ -1,5 +1,6 @@
 ﻿
 using SqliteCli.Entities;
+using SqliteCli.Repos;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
 

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace SqliteCli.Entities
+namespace SqliteCli.Repos
 {
 	public class TransHistory
 	{

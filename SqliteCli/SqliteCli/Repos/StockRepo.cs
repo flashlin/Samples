@@ -1,9 +1,10 @@
 ﻿using Dapper;
 using Microsoft.EntityFrameworkCore;
+using SqliteCli.Entities;
 using SqliteCli.Helpers;
 using System.Data;
 
-namespace SqliteCli.Entities
+namespace SqliteCli.Repos
 {
 	public class StockRepo
 	{

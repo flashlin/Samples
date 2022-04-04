@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SqliteCli.Entities;
 
-namespace SqliteCli.Entities
+namespace SqliteCli.Repos
 {
 	public class StockDatabase : DbContext
 	{
@@ -8,7 +9,7 @@ namespace SqliteCli.Entities
 
 		public StockDatabase(string sqliteFile)
 		{
-			this._sqliteFile = sqliteFile;
+			_sqliteFile = sqliteFile;
 		}
 
 		public DbSet<StockEntity> StocksMap { get; set; }

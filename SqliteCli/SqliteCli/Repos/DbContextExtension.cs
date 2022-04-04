@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Storage;
 using System.Data;
 using System.Data.Common;
 
-namespace SqliteCli.Entities
+namespace SqliteCli.Repos
 {
 	public static class DbContextExtension
 	{
-		public static IEnumerable<T> FromSqlQuery<T>(this DbContext context, 
+		public static IEnumerable<T> FromSqlQuery<T>(this DbContext context,
 			string query,
 			Func<DbDataReader, T> map, params object[] parameters)
 		{

@@ -1,4 +1,4 @@
-﻿namespace SqliteCli.Entities
+﻿namespace SqliteCli.Repos
 {
 	public class ListTransReq
 	{
