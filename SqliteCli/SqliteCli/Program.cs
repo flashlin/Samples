@@ -22,6 +22,11 @@ do
 		case "q":
 			Console.WriteLine("END");
 			return;
+		case "?":
+			Console.WriteLine("l                       :list trans history");
+			Console.WriteLine("l 2022/04/04            :list trans history from 2022/04/04");
+			Console.WriteLine("l 2022/04/04-2022-04-05 :list trans history from 2022/04/04~2022/04/05");
+			continue;
 		case "l":
 			{
 				var cmdArgs = string.Empty;
