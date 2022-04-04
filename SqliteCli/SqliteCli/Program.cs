@@ -23,9 +23,10 @@ do
 			Console.WriteLine("END");
 			return;
 		case "?":
-			Console.WriteLine("l                       :list trans history");
-			Console.WriteLine("l 2022/04/04            :list trans history from 2022/04/04");
-			Console.WriteLine("l 2022/04/04-2022-04-05 :list trans history from 2022/04/04~2022/04/05");
+			Console.WriteLine("l                            :list trans history");
+			Console.WriteLine("l 2022/04/04                 :list trans history from 2022/04/04");
+			Console.WriteLine("l 2022/04/04-2022-04-05      :list trans history from 2022/04/04~2022/04/05");
+			Console.WriteLine("b 2022/04/04,0056,12.34,1000 :add 2022/04/04 buy stockId:0056 stockPrice:12.34 numberOfShare:1000");
 			continue;
 		case "l":
 			{
