@@ -83,18 +83,43 @@ namespace SqliteCli.Repos
 
 			var trans = q1.ToList();
 
-			var q2 = trans.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
-				(tran, stock) => new TransHistory
+			//var q2 = trans.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+			//	(tran, stock) => new TransHistory
+			//	{
+			//		TranTime = tran.TranTime,
+			//		TranType = tran.TranType,
+			//		StockId = tran.StockId,
+			//		StockName = stock.StockName,
+			//		StockPrice = tran.StockPrice,
+			//		NumberOfShare = tran.NumberOfShare,
+			//		HandlingFee = tran.HandlingFee,
+			//		Balance = tran.Balance,
+			//	});
+
+			var q2 = trans.GroupJoin(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+				(tran, stock) => new
 				{
-					TranTime = tran.TranTime,
-					TranType = tran.TranType,
-					StockId = tran.StockId,
-					StockName = stock.StockName,
-					StockPrice = tran.StockPrice,
-					NumberOfShare = tran.NumberOfShare,
-					HandlingFee = tran.HandlingFee,
-					Balance = tran.Balance,
-				});
+					tran,
+					stock
+				})
+				.SelectMany(
+					g => g.stock.DefaultIfEmpty(new StockEntity
+					{
+						StockName = String.Empty,
+						StockType = String.Empty
+					}),
+					(c, stock) => new TransHistory
+					{
+						TranTime = c.tran.TranTime,
+						TranType = c.tran.TranType,
+						StockId = c.tran.StockId,
+						StockName = stock.StockName,
+						StockPrice = c.tran.StockPrice,
+						NumberOfShare = c.tran.NumberOfShare,
+						HandlingFee = c.tran.HandlingFee,
+						Balance = c.tran.Balance,
+					}
+				);
 
 			return q2.ToList();
 		}
