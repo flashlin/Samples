@@ -83,19 +83,6 @@ namespace SqliteCli.Repos
 
 			var trans = q1.ToList();
 
-			//var q2 = trans.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
-			//	(tran, stock) => new TransHistory
-			//	{
-			//		TranTime = tran.TranTime,
-			//		TranType = tran.TranType,
-			//		StockId = tran.StockId,
-			//		StockName = stock.StockName,
-			//		StockPrice = tran.StockPrice,
-			//		NumberOfShare = tran.NumberOfShare,
-			//		HandlingFee = tran.HandlingFee,
-			//		Balance = tran.Balance,
-			//	});
-
 			var q2 = trans.GroupJoin(db.StocksMap, tran => tran.StockId, stock => stock.Id,
 				(tran, stock) => new
 				{

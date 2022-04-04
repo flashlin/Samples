@@ -117,7 +117,7 @@ namespace SqliteCli.Repos
 				if (decimalAttr != null)
 				{
 					var value = prop.Getter(obj);
-					if(!first)
+					if (!first)
 					{
 						sb.Append(" ");
 						delimiter.Append(" ");
@@ -132,7 +132,7 @@ namespace SqliteCli.Repos
 				var displayAttr = propInfo.GetCustomAttribute<DisplayStringAttribute>(false);
 				if (displayAttr != null)
 				{
-					if(!first)
+					if (!first)
 					{
 						sb.Append(" ");
 						delimiter.Append(" ");
@@ -144,7 +144,45 @@ namespace SqliteCli.Repos
 					continue;
 				}
 			}
-			return sb.ToString() + "\r\n" + delimiter.ToString(); 
+			return sb.ToString() + "\r\n" + delimiter.ToString();
+		}
+
+		public static string GetDisplayValue(this object obj)
+		{
+			var sb = new StringBuilder();
+			var clazz = ReflectionClass.Reflection(obj.GetType());
+			var first = true;
+			foreach (var prop in clazz.Properties.Values)
+			{
+				var propInfo = (PropertyInfo)prop.Info;
+				var decimalAttr = propInfo.GetCustomAttribute<DecimalStringAttribute>(false);
+				if (decimalAttr != null)
+				{
+					var value = (decimal)prop.Getter(obj);
+					if (!first)
+					{
+						sb.Append(" ");
+					}
+
+					sb.Append(value.ToNumberString(decimalAttr.MaxLength));
+					first = false;
+					continue;
+				}
+
+				var displayAttr = propInfo.GetCustomAttribute<DisplayStringAttribute>(false);
+				if (displayAttr != null)
+				{
+					if (!first)
+					{
+						sb.Append(" ");
+					}
+					var value = prop.Getter(obj);
+					sb.Append($"{value}".ToFixLenString(displayAttr.MaxLength));
+					first = false;
+					continue;
+				}
+			}
+			return sb.ToString();
 		}
 
 		public static int GetLength(this string text)

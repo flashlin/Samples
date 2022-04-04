@@ -54,8 +54,11 @@ void ProcessTransList(string args)
 	}
 	foreach (var item in rc)
 	{
-		Console.WriteLine(item.ToString());
+		//Console.WriteLine(item.ToString());
+		Console.WriteLine(item.GetDisplayValue());
 	}
+
+	//rc.Sum(x=> x.Balance);
 }
 
 bool ParseDateRange(string args, ListTransReq req)
