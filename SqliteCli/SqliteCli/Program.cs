@@ -4,6 +4,7 @@ using SqliteCli.Repos;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
 
+
 do
 {
 	Console.Write("$ ");
@@ -22,8 +23,15 @@ do
 			Console.WriteLine("END");
 			return;
 		case "l":
-			ProcessTransList(ss[1]);
-			break;
+			{
+				var cmdArgs = string.Empty;
+				if (ss.Length > 1)
+				{
+					cmdArgs = ss[1];
+				}
+				ProcessTransList(cmdArgs);
+				break;
+			}
 	}
 
 } while (true);
@@ -39,6 +47,7 @@ void ProcessTransList(string args)
 
 	var db = new StockRepo();
 	var rc = db.ListTrans2(req);
+	Console.WriteLine("");
 	foreach (var item in rc)
 	{
 		Console.WriteLine(item.ToString());
