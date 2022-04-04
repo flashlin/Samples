@@ -117,7 +117,6 @@ namespace SqliteCli.Repos
 				if (decimalAttr != null)
 				{
 					var value = prop.Getter(obj);
-					//sb.Append(decimalAttr.ToDisplayString((decimal)value));
 					if(!first)
 					{
 						sb.Append(" ");
@@ -139,7 +138,6 @@ namespace SqliteCli.Repos
 						delimiter.Append(" ");
 					}
 					var value = prop.Getter(obj);
-					//sb.Append(displayAttr.ToDisplayString(value));
 					sb.Append(prop.Name.ToFixLenString(displayAttr.MaxLength));
 					delimiter.Append(new String('-', displayAttr.MaxLength));
 					first = false;
