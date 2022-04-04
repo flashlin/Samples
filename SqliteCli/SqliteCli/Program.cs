@@ -37,9 +37,69 @@ do
 				ProcessTransList(cmdArgs);
 				break;
 			}
+		case "b":
+			{
+				var cmdArgs = string.Empty;
+				if (ss.Length > 1)
+				{
+					cmdArgs = ss[1];
+				}
+				ProcessBuyStock(cmdArgs);
+				break;
+			}
 	}
 
 } while (true);
+
+//data = "2022/04/04,0050,10.0,1000"
+void ProcessBuyStock(string dataText)
+{
+	var tranDatePattern = RegexPattern.Group("tranDate", @"\d{4}/\d{2}/\d{2}");
+	var stockIdPattern = RegexPattern.Group("stockId", @"[^,]+");
+	var stockPricePattern = RegexPattern.Group("stockPrice", @"[^,]+");
+	var numberOfSharePattern = RegexPattern.Group("numberOfShare", @"[^,]+");
+	var rg = new Regex($"{tranDatePattern},{stockIdPattern},{stockPricePattern},{numberOfSharePattern}");
+	var m = rg.Match(dataText);
+	if (!m.Success)
+	{
+		Console.WriteLine("parse fail, please input 2022/04/04,0056,33.1,1000");
+		return;
+	}
+
+	var tranDateStr = m.Groups["tranDate"].Value;
+	if (!DateTime.TryParse(tranDateStr, out var tranDate))
+	{
+		Console.WriteLine($"parse '{tranDateStr}' fail, please input <2022/04/04>,0056,33.1,1000");
+		return;
+	}
+
+	var stockId = m.Groups["stockId"].Value;
+
+	var stockPriceStr = m.Groups["stockPrice"].Value;
+	if (!decimal.TryParse(stockPriceStr, out var stockPrice))
+	{
+		Console.WriteLine($"Parse '{stockPriceStr}' fail, please input 2022/04/04,0056,<33.1>,1000");
+		return;
+	}
+
+	var numberOfShareStr = m.Groups["numberOfShare"].Value;
+	if(!int.TryParse(numberOfShareStr, out var numberOfShare))
+	{
+		Console.WriteLine($"Parse '{numberOfShareStr}' fail, please input 2022/04/04,0056,33.1,<1000>");
+		return;
+	}
+
+	var db = new StockRepo();
+	var tranData = new TransEntity
+	{
+		TranTime = tranDate,
+		StockId = stockId,
+		StockPrice = stockPrice,
+		NumberOfShare = numberOfShare
+	};
+	db.BuyStock(tranData);
+}
+
 
 void ProcessTransList(string dateRange)
 {

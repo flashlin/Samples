@@ -10,6 +10,9 @@ namespace SqliteCli.Repos
 {
 	public class TransHistory
 	{
+		[DisplayString(5)]
+		public long Id { get; set; }
+
 		[DisplayString(10)]
 		public DateTime TranTime { get; set; }
 

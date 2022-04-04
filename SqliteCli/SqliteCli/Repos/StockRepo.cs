@@ -16,6 +16,35 @@ namespace SqliteCli.Repos
 			return connection.Query<TransHistory>(cmd);
 		}
 
+		public void BuyStock(TransEntity data)
+		{
+			if (data.TranTime == DateTime.MinValue)
+			{
+				data.TranTime = DateTime.Now;
+			}
+			data.TranType = "Buy";
+
+			using var db = GetDatabase();
+
+			var stock = db.StocksMap.Where(x => x.Id == data.StockId).FirstOrDefault();
+			if (stock == null)
+			{
+				Console.WriteLine($"Can't found stockId:{data.StockId}");
+				return;
+			}
+
+			if (data.StockPrice <= 0)
+			{
+				Console.WriteLine($"Stock price:{data.StockPrice} ERROR");
+				return;
+			}
+			data.HandlingFee = Math.Ceiling(data.StockPrice * data.NumberOfShare * stock.HandlingFee);
+			data.Balance = -(data.StockPrice * data.NumberOfShare + data.HandlingFee);
+
+			db.Trans.Add(data);
+			db.SaveChanges();
+		}
+
 		public List<TransHistory> ListTrans3(ListTransReq req)
 		{
 			using var db = GetDatabase();
@@ -97,6 +126,7 @@ namespace SqliteCli.Repos
 					}),
 					(c, stock) => new TransHistory
 					{
+						Id = c.tran.Id,
 						TranTime = c.tran.TranTime,
 						TranType = c.tran.TranType,
 						StockId = c.tran.StockId,
