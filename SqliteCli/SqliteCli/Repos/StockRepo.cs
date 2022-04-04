@@ -65,7 +65,7 @@ namespace SqliteCli.Repos
 			return q2.ToList();
 		}
 
-		public List<TransHistory> ListTrans2(ListTransReq req)
+		public List<TransHistory> ListTrans(ListTransReq req)
 		{
 			using var db = GetDatabase();
 

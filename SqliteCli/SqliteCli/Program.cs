@@ -46,8 +46,12 @@ void ProcessTransList(string args)
 	}
 
 	var db = new StockRepo();
-	var rc = db.ListTrans2(req);
-	Console.WriteLine("");
+	var rc = db.ListTrans(req);
+	if (rc.Count > 0)
+	{
+		var title = rc.First().GetDisplayTitle();
+		Console.WriteLine(title);
+	}
 	foreach (var item in rc)
 	{
 		Console.WriteLine(item.ToString());
