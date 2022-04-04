@@ -6,6 +6,12 @@ using System.Data;
 
 namespace SqliteCli.Repos
 {
+	public class ReportTransReq
+	{
+		public DateTime? StartDate { get; set; }
+		public DateTime? EndDate { get; set; }
+	}
+
 	public class StockRepo
 	{
 		public IEnumerable<TransHistory> QueryTrans(string cmd)
@@ -92,6 +98,40 @@ namespace SqliteCli.Repos
 				});
 
 			return q2.ToList();
+		}
+
+		public List<ReportTranItem> ReportTrans(ReportTransReq req)
+		{
+			using var db = GetDatabase();
+
+			var sql = @"
+select 
+    st.Id StockId,
+    t.TranType,
+    st.StockName,
+    MIN(t.StockPrice) minStockPrice,
+    AVG(t.StockPrice) avgStockPrice,
+    MAX(t.StockPrice) maxStockPrice,
+    SUM(t.NumberOfShare) NumberOfShare,
+	 SUM(t.HandlingFee) HandlingFee,
+    SUM(t.Balance) Balance
+from stockMap st 
+left join trans t on st.Id = t.StockId
+group by st.Id, t.TranType
+";
+
+			req.StartDate = DateTime.MinValue;
+			req.EndDate = DateTime.Now;
+
+			var connection = db.Database.GetDbConnection();
+
+			var q1 = connection.Query<ReportTranItem>(sql, new
+			{
+				startTime = req.StartDate,
+				endTime = req.EndDate,
+			});
+
+			return q1.ToList();
 		}
 
 		public List<TransHistory> ListTrans(ListTransReq req)

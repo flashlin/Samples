@@ -48,9 +48,26 @@ do
 				ProcessBuyStock(cmdArgs);
 				break;
 			}
+		case "r":
+			{
+				var cmdArgs = string.Empty;
+				if (ss.Length > 1)
+				{
+					cmdArgs = ss[1];
+				}
+				ProcessReport(cmdArgs);
+				break;
+			}
 	}
 
 } while (true);
+
+void ProcessReport(string cmdArgs)
+{
+	var db = new StockRepo();
+	var rc = db.ReportTrans(new ReportTransReq());
+	rc.Dump();
+}
 
 //data = "2022/04/04,0050,10.0,1000"
 void ProcessBuyStock(string dataText)
@@ -113,28 +130,7 @@ void ProcessTransList(string dateRange)
 
 	var db = new StockRepo();
 	var rc = db.ListTrans(req);
-	if (rc.Count > 0)
-	{
-		var title = rc.First().GetDisplayTitle();
-		Console.WriteLine(title);
-	}
-	foreach (var item in rc)
-	{
-		Console.WriteLine(item.GetDisplayValue());
-	}
-
-	if (rc.Count > 0)
-	{
-		var summary = new TransHistory
-		{
-			TranTime = DateTime.Now,
-			TranType = "Summary",
-			NumberOfShare = rc.Sum(x => x.NumberOfShare),
-			HandlingFee = rc.Sum(x => x.HandlingFee),
-			Balance = rc.Sum(x => x.Balance),
-		};
-		Console.WriteLine(summary.GetDisplayValue());
-	}
+	rc.Dump();
 }
 
 bool ParseDateRange(string args, ListTransReq req)
