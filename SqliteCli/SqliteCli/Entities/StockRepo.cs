@@ -1,0 +1,154 @@
+﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
+using SqliteCli.Helpers;
+using System.Data;
+
+namespace SqliteCli.Entities
+{
+	public class StockRepo
+	{
+		public IEnumerable<TransHistory> QueryTrans(string cmd)
+		{
+			using var stockDb = GetDatabase();
+			//stockDb.Trans.FromSqlRaw(cmd);
+			using var connection = stockDb.Database.GetDbConnection();
+			return connection.Query<TransHistory>(cmd);
+		}
+
+		public List<TransHistory> ListTrans3(ListTransReq req)
+		{
+			using var db = GetDatabase();
+
+			var queryFilter = new List<QueryableFilter>();
+			if (req.StartTime != null)
+			{
+				queryFilter.Add(
+					new QueryableFilter
+					{
+						Name = nameof(TransEntity.TranTime),
+						Value = req.StartTime,
+						Compare = QueryableFilterCompareEnum.GreaterThanOrEqual
+					}
+				);
+			}
+
+			if (req.EndTime != null)
+			{
+				queryFilter.Add(
+					new QueryableFilter
+					{
+						Name = nameof(TransEntity.TranTime),
+						Value = req.EndTime,
+						Compare = QueryableFilterCompareEnum.LessThanOrEqual
+					}
+				);
+			}
+
+			var trans = new DynamicFilters<TransEntity>(db)
+				.Filter(queryFilter)
+				.ToList();
+
+			var q2 = trans.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+				(tran, stock) => new TransHistory
+				{
+					TranTime = tran.TranTime,
+					TranType = tran.TranType,
+					StockId = tran.StockId,
+					StockName = stock.StockName,
+					StockPrice = tran.StockPrice,
+					NumberOfShare = tran.NumberOfShare,
+					HandlingFee = tran.HandlingFee,
+					Balance = tran.Balance,
+				});
+
+			return q2.ToList();
+		}
+
+		public List<TransHistory> ListTrans2(ListTransReq req)
+		{
+			using var db = GetDatabase();
+
+			var q1 = db.Trans.AsQueryable();
+
+			if (req.StartTime != null)
+			{
+				q1 = q1.Where(x => x.TranTime >= req.StartTime);
+			}
+
+			if (req.EndTime != null)
+			{
+				q1 = q1.Where(x => x.TranTime <= req.EndTime);
+			}
+
+			var trans = q1.ToList();
+
+			var q2 = trans.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+				(tran, stock) => new TransHistory
+				{
+					TranTime = tran.TranTime,
+					TranType = tran.TranType,
+					StockId = tran.StockId,
+					StockName = stock.StockName,
+					StockPrice = tran.StockPrice,
+					NumberOfShare = tran.NumberOfShare,
+					HandlingFee = tran.HandlingFee,
+					Balance = tran.Balance,
+				});
+
+			return q2.ToList();
+		}
+
+		public IEnumerable<TransHistory> ListTrans1(ListTransReq req)
+		{
+			using var db = GetDatabase();
+
+			var queryFilter = new List<QueryableFilter>();
+			if (req.StartTime != null)
+			{
+				queryFilter.Add(
+					new QueryableFilter
+					{
+						Name = nameof(TransEntity.TranTime),
+						Value = req.StartTime,
+						Compare = QueryableFilterCompareEnum.GreaterThanOrEqual
+					}
+				);
+			}
+
+			if (req.EndTime != null)
+			{
+				queryFilter.Add(
+					new QueryableFilter
+					{
+						Name = nameof(TransEntity.TranTime),
+						Value = req.EndTime,
+						Compare = QueryableFilterCompareEnum.LessThanOrEqual
+					}
+				);
+			}
+
+			var query = new DynamicFilters<TransEntity>(db)
+				.Filter(queryFilter)
+				.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+				(tran, stock) => new TransHistory
+				{
+					TranTime = tran.TranTime,
+					TranType = tran.TranType,
+					StockId = tran.StockId,
+					StockName = stock.StockName,
+					StockPrice = tran.StockPrice,
+					NumberOfShare = tran.NumberOfShare,
+					HandlingFee = tran.HandlingFee,
+					Balance = tran.Balance,
+				});
+
+			return query;
+		}
+
+		protected StockDatabase GetDatabase()
+		{
+			return new StockDatabase("d:/VDisk/SNL/flash_stock.db");
+		}
+	}
+
+}
