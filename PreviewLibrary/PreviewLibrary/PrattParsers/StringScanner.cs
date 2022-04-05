@@ -41,6 +41,18 @@ namespace PreviewLibrary.PrattParsers
 			return token;
 		}
 
+		public bool Match(string expect)
+		{
+			var tokenStr = Peek().GetString(_textSpan.Span);
+			return tokenStr == expect;
+		}
+
+		public bool MatchIgnoreCase(string expect)
+		{
+			var tokenStr = Peek().GetString(_textSpan.Span);
+			return string.Equals(tokenStr, expect, StringComparison.OrdinalIgnoreCase);
+		}
+
 		private TextSpan ScanNext()
 		{
 			var ch = SkipWhiteSpaceAtFront();
