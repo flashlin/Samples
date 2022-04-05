@@ -34,14 +34,13 @@ namespace PreviewLibrary.PrattParsers
 			 // Register all of the parselets for the grammar.
 
 			 // Register the ones that need special parselets.
-			 //{ Name     , Parselets.Name },
+			 { SqlToken.Number, Parselets.Number },
 			 //{ Assign   , Precedence.Assignment, Parselets.Assign },
 			 //{ Question , Precedence.Conditional, Parselets.Conditional },
 			 { SqlToken.LParen, Parselets.Group },
 			 { SqlToken.LParen, Precedence.Call, Parselets.Call },
 
-			 // Register the simple operator parselets.
-			 //{ Plus , Parselets.PrefixOperator(Precedence.Prefix) },
+			 { SqlToken.Plus , Parselets.PrefixOperator(Precedence.Prefix) },
 			 //{ Minus, Parselets.PrefixOperator(Precedence.Prefix) },
 			 //{ Tilde, Parselets.PrefixOperator(Precedence.Prefix) },
 			 //{ Bang , Parselets.PrefixOperator(Precedence.Prefix) },

@@ -21,6 +21,11 @@ namespace PreviewLibrary.PrattParsers
 			_scanner.Consume(expect);
 		}
 
+		public string GetSpanString(TextSpan span)
+		{
+			return _scanner.GetSpanString(span);
+		}
+
 		public SqlDom ParseExp(int ctxPrecedence)
 		{
 			var prefixToken = _scanner.Consume();

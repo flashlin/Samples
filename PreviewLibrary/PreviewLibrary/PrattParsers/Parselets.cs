@@ -17,6 +17,29 @@ namespace PreviewLibrary.PrattParsers
 {
 	public static class Parselets
 	{
+		public static readonly PrefixParselet Number =
+			(token, parser) => new NumberSqlDom
+			{
+				Value = parser.GetSpanString(token)
+			};
+
+		public static PrefixParselet PrefixOperator(int precedence) =>
+			(token, parser) => new PrefixSqlDom
+			{
+				ValueType = token.Type,
+				Value = parser.ParseExp(precedence) 
+			};
+
+		public static InfixParselet BinaryOperator(int precedence, bool isRight) =>
+			(token, left, parser) =>
+				new OperatorSqlDom
+				{
+					Left = left,
+					OpType = token.Type,
+					Right = parser.ParseExp(precedence - (isRight ? 1 : 0))
+				};
+
+
 		public static readonly PrefixParselet Group =
 			  (token, parser) =>
 			  {

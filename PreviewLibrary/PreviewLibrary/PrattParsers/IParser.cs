@@ -6,5 +6,6 @@
 		SqlDom ParseExp(int ctxPrecedence);
 		bool Match(string expect);
 		void Consume(string expect);
+		string GetSpanString(TextSpan span);
 	}
 }

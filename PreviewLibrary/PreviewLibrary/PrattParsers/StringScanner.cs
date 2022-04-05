@@ -82,11 +82,9 @@ namespace PreviewLibrary.PrattParsers
 			return ReadSymbol(ch);
 		}
 
-
-
 		private TextSpan ReadSymbol(TextSpan head)
 		{
-			var rg = new Regex(@"^\W$");
+			var rg = new Regex(@"^\S$");
 			var token = ReadUntil(head, (ch) =>
 			{
 				return rg.Match($"{ch}").Success;

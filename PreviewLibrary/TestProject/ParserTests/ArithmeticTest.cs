@@ -1,5 +1,5 @@
-﻿using FluentAssertions;
-using System;
+﻿using System;
+using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -21,7 +21,7 @@ namespace TestProject.ParserTests
 
 		protected void ThenExprShouldBe(string expect)
 		{
-			_expr.Token.Should().Be(expect);
+			_expr.ToString().Should().Be(expect);
 		}
 	}
 }
