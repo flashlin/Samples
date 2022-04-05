@@ -13,5 +13,6 @@
 		StarSign,
 		Slash,
 		Select,
+		As,
 	}
 }

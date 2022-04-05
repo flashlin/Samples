@@ -18,6 +18,14 @@ namespace TestProject.ParserTests
 		}
 
 		[Fact]
+		public void select_number_as_aliasName()
+		{
+			var sql = "select 1 as id";
+			Parse(sql);
+			ThenExprShouldBe("SELECT 1 AS id");
+		}
+
+		[Fact]
 		public void select_field_from_table()
 		{
 			var sql = "select name from customer";

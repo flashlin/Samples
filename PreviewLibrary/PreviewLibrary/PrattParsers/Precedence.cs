@@ -10,5 +10,6 @@
 		public const int Prefix = 6;
 		public const int Postfix = 7;
 		public const int Call = 8;
+		public const int As = 9;
 	}
 }

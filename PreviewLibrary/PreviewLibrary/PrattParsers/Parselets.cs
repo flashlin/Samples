@@ -100,6 +100,16 @@ namespace PreviewLibrary.PrattParsers
 				};
 			};
 
+		public static readonly InfixParselet As =
+			(token, left, parser) =>
+			{
+				var aliasName = parser.ParseExp(0);
+				return new AliasSqlDom
+				{
+					Left = left,
+					Name = aliasName,
+				};
+			};
 
 		public static readonly PrefixParselet SelectNoFrom =
 		  (token, parser) =>

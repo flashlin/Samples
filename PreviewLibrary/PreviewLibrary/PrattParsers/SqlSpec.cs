@@ -28,6 +28,7 @@ namespace PreviewLibrary.PrattParsers
 			 { SqlToken.LParen, Parselets.Group },
 			 { SqlToken.LParen, Precedence.Call, Parselets.Call },
 			 { SqlToken.Select, Parselets.Select },
+			 { SqlToken.As, Precedence.As, Parselets.As },
 
 			 { SqlToken.Plus , Parselets.PrefixOperator(Precedence.Prefix) },
 			 { SqlToken.Minus, Parselets.PrefixOperator(Precedence.Prefix) },
