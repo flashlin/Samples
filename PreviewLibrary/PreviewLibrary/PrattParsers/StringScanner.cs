@@ -38,7 +38,7 @@ namespace PreviewLibrary.PrattParsers
 			if (!string.IsNullOrEmpty(expect))
 			{
 				var tokenStr = token.GetString(_textSpan.Span);
-				if (tokenStr != expect)
+				if (!string.Equals(tokenStr, expect, StringComparison.OrdinalIgnoreCase))
 				{
 					throw new Exception($"expect token '{expect}', but got '{tokenStr}'");
 				}

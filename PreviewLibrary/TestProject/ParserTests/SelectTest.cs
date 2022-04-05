@@ -16,5 +16,13 @@ namespace TestProject.ParserTests
 			Parse(sql);
 			ThenExprShouldBe("SELECT 1");
 		}
+
+		[Fact]
+		public void select_field_from_table()
+		{
+			var sql = "select name from customer";
+			Parse(sql);
+			ThenExprShouldBe("SELECT name FROM customer");
+		}
 	}
 }

@@ -23,6 +23,12 @@ namespace PreviewLibrary.PrattParsers
 				Value = parser.GetSpanString(token)
 			};
 
+		public static readonly PrefixParselet Identifier =
+			(token, parser) => new IdentifierSqlDom
+			{
+				Value = parser.GetSpanString(token)
+			};
+
 		public static PrefixParselet PrefixOperator(int precedence) =>
 			(token, parser) => new PrefixSqlDom
 			{
@@ -67,6 +73,33 @@ namespace PreviewLibrary.PrattParsers
 				return new CallSqlDom(left, args.ToImmutable());
 			};
 
+		public static readonly PrefixParselet Select =
+			(token, parser) =>
+			{
+				var columns = ImmutableArray.CreateBuilder<SqlDom>();
+				do
+				{
+					columns.Add(parser.ParseExp(0));
+				} while (parser.Match(","));
+
+				if(!parser.Match("FROM"))
+				{
+					return new SelectNoFromSqlDom
+					{
+						Columns = columns
+					};
+				}
+				parser.Consume("FROM");
+				
+				var table = parser.ParseExp(0);
+
+				return new SelectSqlDom
+				{
+					Columns = columns,
+					From = table
+				};
+			};
+
 
 		public static readonly PrefixParselet SelectNoFrom =
 		  (token, parser) =>
@@ -76,7 +109,6 @@ namespace PreviewLibrary.PrattParsers
 			  {
 				  columns.Add(parser.ParseExp(0));
 			  } while (parser.Match(","));
-			  //var conditionExpr = parser.ParseExp(0);
 			  return new SelectNoFromSqlDom
 			  {
 				  Columns = columns
