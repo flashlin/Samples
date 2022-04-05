@@ -15,6 +15,7 @@ namespace PreviewLibrary.PrattParsers
 			{ "(", SqlToken.LParen },
 			{ ")", SqlToken.RParen },
 			{ ">=", SqlToken.GreaterThanOrEqual },
+			{ "SELECT", SqlToken.Select },
 		};
 
 		private ReadOnlyMemory<char> _textSpan;
@@ -119,7 +120,12 @@ namespace PreviewLibrary.PrattParsers
 			{
 				return IsIdentifierBody(ch);
 			});
-			token.Type = SqlToken.Identifier;
+			var tokenStr = GetSpanString(token).ToUpper();
+			if (!_tokenMap.TryGetValue(tokenStr, out var tokenType))
+			{
+				tokenType = SqlToken.Identifier;
+			}
+			token.Type = tokenType;
 			return token;
 		}
 

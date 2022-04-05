@@ -26,7 +26,7 @@ namespace PreviewLibrary.PrattParsers
 			 //{ Question , Precedence.Conditional, Parselets.Conditional },
 			 { SqlToken.LParen, Parselets.Group },
 			 { SqlToken.LParen, Precedence.Call, Parselets.Call },
-			 //{ SqlToken.Select, Precedence.Select, Parselets.Call },
+			 { SqlToken.Select, Parselets.SelectNoFrom },
 
 			 { SqlToken.Plus , Parselets.PrefixOperator(Precedence.Prefix) },
 			 { SqlToken.Minus, Parselets.PrefixOperator(Precedence.Prefix) },

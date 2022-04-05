@@ -11,6 +11,7 @@ namespace PreviewLibrary.PrattParsers
 
 		public override void WriteToStream(IndentStream stream)
 		{
+			stream.Write("SELECT ");
 			foreach (var column in Columns.Select((value, index) => new { value, index }))
 			{
 				if (column.index != 0)

@@ -32,7 +32,7 @@ namespace PreviewLibrary.PrattParsers
 			var prefixToken = _scanner.Consume();
 			if (prefixToken.IsEmpty)
 			{
-				throw new Exception($"expect token but found none");
+				throw new Exception($"expect token but found NONE");
 			}
 
 			var prefixParse = SqlSpec.Instance.Prefix(prefixToken.Type);

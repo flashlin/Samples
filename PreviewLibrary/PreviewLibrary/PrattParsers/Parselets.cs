@@ -76,7 +76,7 @@ namespace PreviewLibrary.PrattParsers
 			  {
 				  columns.Add(parser.ParseExp(0));
 			  } while (parser.Match(","));
-			  var conditionExpr = parser.ParseExp(0);
+			  //var conditionExpr = parser.ParseExp(0);
 			  return new SelectNoFromSqlDom
 			  {
 				  Columns = columns

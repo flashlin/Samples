@@ -12,5 +12,6 @@
 		Minus,
 		StarSign,
 		Slash,
+		Select,
 	}
 }

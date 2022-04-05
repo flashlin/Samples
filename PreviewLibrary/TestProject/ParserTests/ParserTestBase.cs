@@ -1,4 +1,5 @@
-﻿using PreviewLibrary.PrattParsers;
+﻿using FluentAssertions;
+using PreviewLibrary.PrattParsers;
 using PreviewLibrary.PrattParsers.Expressions;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,11 @@ namespace TestProject.ParserTests
 			var scanner = new StringScanner(text);
 			_parser = new SqlParser(scanner);
 			_expr = _parser.ParseProgram();
+		}
+		
+		protected void ThenExprShouldBe(string expect)
+		{
+			_expr.ToString().Should().Be(expect);
 		}
 	}
 }

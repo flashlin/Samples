@@ -32,6 +32,10 @@ namespace PreviewLibrary.PrattParsers
 
 		public string GetString(ReadOnlySpan<char> textSpan)
 		{
+			if (IsEmpty)
+			{
+				return String.Empty;
+			}
 			return textSpan.Slice(Offset, Length).ToString();
 		}
 	}

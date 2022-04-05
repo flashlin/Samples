@@ -42,10 +42,5 @@ namespace TestProject.ParserTests
 			Parse(sql);
 			ThenExprShouldBe("( 1 + 2 )");
 		}
-
-		protected void ThenExprShouldBe(string expect)
-		{
-			_expr.ToString().Should().Be(expect);
-		}
 	}
 }
