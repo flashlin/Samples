@@ -2,7 +2,6 @@
 {
 	static class Precedence
 	{
-		// Ordered in increasing precedence.
 		public const int Assignment = 1;
 		public const int Conditional = 2;
 		public const int Sum = 3;

@@ -66,5 +66,21 @@ namespace PreviewLibrary.PrattParsers
 				}
 				return new CallSqlDom(left, args.ToImmutable());
 			};
+
+
+		public static readonly PrefixParselet SelectNoFrom =
+		  (token, parser) =>
+		  {
+			  var columns = ImmutableArray.CreateBuilder<SqlDom>();
+			  do
+			  {
+				  columns.Add(parser.ParseExp(0));
+			  } while (parser.Match(","));
+			  var conditionExpr = parser.ParseExp(0);
+			  return new SelectNoFromSqlDom
+			  {
+				  Columns = columns
+			  };
+		  };
 	}
 }
