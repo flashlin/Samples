@@ -14,8 +14,4 @@
     <PackageReference Include="T1.Standard" Version="1.0.58" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="PrattParsers\Expressions\" />
-  </ItemGroup>
-
 </Project>
