@@ -48,7 +48,7 @@ namespace PreviewLibrary.PrattParsers
 			 // For kicks, we'll make "!" both prefix and postfix, kind of like ++.
 			 //{ Bang, Precedence.Postfix, Parselets.PostfixOperator },
 
-			 //{ Plus,     Precedence.Sum     , Parselets.BinaryOperator(Precedence.Sum     , isRight: false) },
+			 { SqlToken.Plus, Precedence.Sum, Parselets.BinaryOperator(Precedence.Sum, isRight: false) },
 			 //{ Minus,    Precedence.Sum     , Parselets.BinaryOperator(Precedence.Sum     , isRight: false) },
 			 //{ Asterisk, Precedence.Product , Parselets.BinaryOperator(Precedence.Product , isRight: false) },
 			 //{ Slash,    Precedence.Product , Parselets.BinaryOperator(Precedence.Product , isRight: false) },

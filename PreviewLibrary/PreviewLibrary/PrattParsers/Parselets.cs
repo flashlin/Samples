@@ -35,7 +35,8 @@ namespace PreviewLibrary.PrattParsers
 				new OperatorSqlDom
 				{
 					Left = left,
-					OpType = token.Type,
+					OperType = token.Type,
+					Oper = parser.GetSpanString(token),
 					Right = parser.ParseExp(precedence - (isRight ? 1 : 0))
 				};
 

@@ -155,7 +155,7 @@ namespace PreviewLibrary.PrattParsers
 
 		private TextSpan NextChar()
 		{
-			if (_index >= _textSpan.Length)
+			if (_index + 1 >= _textSpan.Length)
 			{
 				return TextSpan.Empty;
 			}

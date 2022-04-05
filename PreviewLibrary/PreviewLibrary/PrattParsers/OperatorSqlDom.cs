@@ -5,13 +5,14 @@ namespace PreviewLibrary.PrattParsers
 	public class OperatorSqlDom : SqlDom
 	{
 		public SqlDom Left { get; set; }
-		public SqlToken OpType { get; set; }
+		public SqlToken OperType { get; set; }
 		public SqlDom Right { get; set; }
+		public string Oper { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
 			Left.WriteToStream(stream);
-			stream.Write(OpType.ToString());
+			stream.Write($" {Oper} ");
 			Right.WriteToStream(stream);
 		}
 	}
