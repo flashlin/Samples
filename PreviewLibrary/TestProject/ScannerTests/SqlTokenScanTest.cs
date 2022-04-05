@@ -42,6 +42,16 @@ namespace TestProject.ScannerTests
 			ThenTokenShouldBe("(");
 		}
 
+		[Fact]
+		public void add_space()
+		{
+			var sql = "+ ";
+			Scan(sql);
+			ThenTokenShouldBe("+");
+		}
+
+
+
 		protected void ThenTokenShouldBe(string expected)
 		{
 			var token = _scanner.Consume();

@@ -92,6 +92,10 @@ namespace PreviewLibrary.PrattParsers
 			var rg = new Regex(@"^\W$");
 			var token = ReadUntil(head, (ch) =>
 			{
+				if (char.IsWhiteSpace(ch))
+				{
+					return false;
+				}
 				return rg.Match($"{ch}").Success;
 			});
 			var tokenStr = GetSpanString(token);
