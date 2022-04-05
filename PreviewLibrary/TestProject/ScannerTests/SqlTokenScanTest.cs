@@ -37,7 +37,8 @@ namespace TestProject.ScannerTests
 		protected void ThenTokenShouldBe(string expected)
 		{
 			var token = _scanner.Consume();
-			token.ToString().Should().Be(expected);
+			var tokenStr = _scanner.GetSpanString(token);
+			tokenStr.Should().Be(expected);
 		}
 	}
 }

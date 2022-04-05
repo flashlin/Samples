@@ -14,17 +14,26 @@ namespace PreviewLibrary.PrattParsers
 			_index = -1;
 		}
 
-		public ReadOnlySpan<char> Consume(string expect)
+		public string GetSpanString(TextSpan span)
+		{
+			return span.GetString(_textSpan.Span);
+		}
+
+		public TextSpan Consume(string expect)
 		{
 			var token = ScanNext();
-			if (expect != null && token != expect)
+			if (!string.IsNullOrEmpty(expect))
 			{
-				throw new Exception($"expect token '{expect}', but got '{token.ToString()}'");
+				var tokenStr = token.GetString(_textSpan.Span);
+				if (tokenStr != expect)
+				{
+					throw new Exception($"expect token '{expect}', but got '{tokenStr}'");
+				}
 			}
 			return token;
 		}
 
-		public ReadOnlySpan<char> Peek()
+		public TextSpan Peek()
 		{
 			var startIndex = _index;
 			var token = ScanNext();
@@ -32,7 +41,7 @@ namespace PreviewLibrary.PrattParsers
 			return token;
 		}
 
-		private ReadOnlySpan<char> ScanNext()
+		private TextSpan ScanNext()
 		{
 			var ch = SkipWhiteSpaceAtFront();
 			if (ch.IsEmpty)
@@ -40,12 +49,13 @@ namespace PreviewLibrary.PrattParsers
 				return ch;
 			}
 
-			if (IsIdentifierHead(ch))
+			var character = ch.GetCh(_textSpan.Span, 0);
+			if (IsIdentifierHead(character))
 			{
 				return ReadIdentifier(ch);
 			}
 
-			if (char.IsDigit(ch[0]))
+			if (char.IsDigit(character))
 			{
 				return ReadNumber(ch);
 			}
@@ -53,7 +63,7 @@ namespace PreviewLibrary.PrattParsers
 			return ReadSymbol(ch);
 		}
 
-		private ReadOnlySpan<char> ReadSymbol(ReadOnlySpan<char> head)
+		private TextSpan ReadSymbol(TextSpan head)
 		{
 			var rg = new Regex(@"^\W$");
 			return ReadUntil(head, (ch) =>
@@ -62,7 +72,7 @@ namespace PreviewLibrary.PrattParsers
 			});
 		}
 
-		private ReadOnlySpan<char> ReadNumber(ReadOnlySpan<char> head)
+		private TextSpan ReadNumber(TextSpan head)
 		{
 			return ReadUntil(head, (ch) =>
 			{
@@ -70,7 +80,7 @@ namespace PreviewLibrary.PrattParsers
 			});
 		}
 
-		private ReadOnlySpan<char> ReadIdentifier(ReadOnlySpan<char> head)
+		private TextSpan ReadIdentifier(TextSpan head)
 		{
 			return ReadUntil(head, (ch) =>
 			{
@@ -78,7 +88,7 @@ namespace PreviewLibrary.PrattParsers
 			});
 		}
 
-		private ReadOnlySpan<char> ReadUntil(ReadOnlySpan<char> head, Func<char, bool> predicate)
+		private TextSpan ReadUntil(TextSpan head, Func<char, bool> predicate)
 		{
 			var token = head;
 			do
@@ -88,19 +98,28 @@ namespace PreviewLibrary.PrattParsers
 				{
 					break;
 				}
-				if (!predicate(ch[0]))
+				if (!predicate(ch.GetCh(_textSpan.Span, 0)))
 				{
 					break;
 				}
-				token = SpanTool.Concat(token, ch);
+				token = Concat(token, ch);
 				NextChar();
 			} while (true);
 			return token;
 		}
 
-		private bool IsIdentifierHead(ReadOnlySpan<char> ch)
+		private TextSpan Concat(TextSpan span0, TextSpan span1)
 		{
-			return ch[0] == '_' || char.IsLetter(ch[0]);
+			return new TextSpan
+			{
+				Offset = span0.Offset,
+				Length = span0.Length + span1.Length
+			};
+		}
+
+		private bool IsIdentifierHead(char ch)
+		{
+			return ch == '_' || char.IsLetter(ch);
 		}
 
 		private bool IsIdentifierBody(char ch)
@@ -108,28 +127,36 @@ namespace PreviewLibrary.PrattParsers
 			return ch == '_' || char.IsLetterOrDigit(ch);
 		}
 
-		private ReadOnlySpan<char> NextChar()
+		private TextSpan NextChar()
 		{
 			if (_index >= _textSpan.Length)
 			{
-				return ReadOnlySpan<char>.Empty;
+				return TextSpan.Empty;
 			}
 			_index++;
-			return _textSpan.Slice(_index, 1).Span;
+			return new TextSpan
+			{
+				Offset = _index,
+				Length = 1
+			};
 		}
 
-		private ReadOnlySpan<char> PeekChar()
+		private TextSpan PeekChar()
 		{
 			if (_index + 1 >= _textSpan.Length)
 			{
-				return ReadOnlySpan<char>.Empty;
+				return TextSpan.Empty;
 			}
-			return _textSpan.Slice(_index + 1, 1).Span;
+			return new TextSpan
+			{
+				Offset = (_index + 1),
+				Length = 1,
+			};
 		}
 
-		private ReadOnlySpan<char> SkipWhiteSpaceAtFront()
+		private TextSpan SkipWhiteSpaceAtFront()
 		{
-			var ch = ReadOnlySpan<char>.Empty;
+			TextSpan ch;
 			do
 			{
 				ch = NextChar();
@@ -137,7 +164,7 @@ namespace PreviewLibrary.PrattParsers
 				{
 					break;
 				}
-				if (!char.IsWhiteSpace(ch[0]))
+				if (!char.IsWhiteSpace(ch.GetCh(_textSpan.Span, 0)))
 				{
 					break;
 				}

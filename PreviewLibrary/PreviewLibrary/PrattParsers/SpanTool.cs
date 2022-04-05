@@ -1,7 +1,11 @@
 ﻿using System;
 
+
 namespace PreviewLibrary.PrattParsers
 {
+
+
+
 	public static class SpanTool
 	{
 		public static unsafe ReadOnlySpan<char> Concat(ReadOnlySpan<char> span0, ReadOnlySpan<char> span1)
