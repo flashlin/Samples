@@ -40,7 +40,7 @@ namespace TestProject.ParserTests
 		{
 			var sql = "(1 + 2)";
 			Parse(sql);
-			ThenExprShouldBe("1 + 2");
+			ThenExprShouldBe("( 1 + 2 )");
 		}
 
 		protected void ThenExprShouldBe(string expect)

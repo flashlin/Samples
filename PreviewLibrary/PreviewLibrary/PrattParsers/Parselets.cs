@@ -27,7 +27,7 @@ namespace PreviewLibrary.PrattParsers
 			(token, parser) => new PrefixSqlDom
 			{
 				ValueType = token.Type,
-				Value = parser.ParseExp(precedence) 
+				Value = parser.ParseExp(precedence)
 			};
 
 		public static InfixParselet BinaryOperator(int precedence, bool isRight) =>
@@ -46,7 +46,10 @@ namespace PreviewLibrary.PrattParsers
 			  {
 				  var expression = parser.ParseExp(0);
 				  parser.Consume(")");
-				  return expression;
+				  return new GroupSqlDom
+				  {
+					  Inner = expression
+				  };
 			  };
 
 		public static readonly InfixParselet Call =
