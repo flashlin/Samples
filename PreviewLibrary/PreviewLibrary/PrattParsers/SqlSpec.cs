@@ -4,13 +4,13 @@
 using PrefixParselet = System.Func<
 	PreviewLibrary.PrattParsers.TextSpan,
 	PreviewLibrary.PrattParsers.IParser,
-	PreviewLibrary.PrattParsers.SqlDom>;
+	PreviewLibrary.PrattParsers.Expressions.SqlDom>;
 
 using InfixParselet = System.Func<
 	PreviewLibrary.PrattParsers.TextSpan,
-	PreviewLibrary.PrattParsers.SqlDom,
+	PreviewLibrary.PrattParsers.Expressions.SqlDom,
 	PreviewLibrary.PrattParsers.IParser,
-	PreviewLibrary.PrattParsers.SqlDom>;
+	PreviewLibrary.PrattParsers.Expressions.SqlDom>;
 using System.Linq;
 using System.Collections;
 

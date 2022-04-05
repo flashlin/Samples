@@ -1,6 +1,6 @@
 ﻿using T1.Standard.IO;
 
-namespace PreviewLibrary.PrattParsers
+namespace PreviewLibrary.PrattParsers.Expressions
 {
 	public class OperatorSqlDom : SqlDom
 	{

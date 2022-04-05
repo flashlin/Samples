@@ -1,4 +1,6 @@
-﻿namespace PreviewLibrary.PrattParsers
+﻿using PreviewLibrary.PrattParsers.Expressions;
+
+namespace PreviewLibrary.PrattParsers
 {
 	public interface IParser
 	{

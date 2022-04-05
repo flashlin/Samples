@@ -2,7 +2,7 @@
 using System.Text;
 using T1.Standard.IO;
 
-namespace PreviewLibrary.PrattParsers
+namespace PreviewLibrary.PrattParsers.Expressions
 {
 	public abstract class SqlDom
 	{
