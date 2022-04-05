@@ -51,7 +51,11 @@ namespace PreviewLibrary.PrattParsers
 				{
 					break;
 				}
-				if (infixParselet.precedence <= ctxPrecedence) break;
+
+				if (infixParselet.precedence <= ctxPrecedence)
+				{
+					break;
+				}
 				_scanner.Consume();
 				left = infixParselet.parse(infixToken, left, this);
 			}
