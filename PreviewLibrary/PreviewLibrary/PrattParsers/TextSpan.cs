@@ -6,9 +6,12 @@ namespace PreviewLibrary.PrattParsers
 	{
 		public static TextSpan Empty = new TextSpan
 		{
+			Type = SqlToken.None,
 			Offset = -1,
 			Length = 0,
 		};
+
+		public SqlToken Type;
 		
 		public int Offset;
 		

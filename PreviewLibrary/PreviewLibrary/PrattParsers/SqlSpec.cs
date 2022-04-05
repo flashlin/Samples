@@ -16,6 +16,17 @@ using System.Collections;
 
 namespace PreviewLibrary.PrattParsers
 {
+	public enum SqlToken
+	{
+		None,
+		LParen,
+		RParen,
+		Identifier,
+		Number,
+		Plus,
+		GreaterThanOrEqual,
+	}
+
 	public sealed class SqlSpec : IEnumerable
 	{
 		public static readonly SqlSpec Instance = new SqlSpec
@@ -26,8 +37,8 @@ namespace PreviewLibrary.PrattParsers
 			 //{ Name     , Parselets.Name },
 			 //{ Assign   , Precedence.Assignment, Parselets.Assign },
 			 //{ Question , Precedence.Conditional, Parselets.Conditional },
-			 { "(", Parselets.Group },
-			 { "(", Precedence.Call, Parselets.Call },
+			 { SqlToken.LParen, Parselets.Group },
+			 { SqlToken.LParen, Precedence.Call, Parselets.Call },
 
 			 // Register the simple operator parselets.
 			 //{ Plus , Parselets.PrefixOperator(Precedence.Prefix) },
@@ -45,21 +56,21 @@ namespace PreviewLibrary.PrattParsers
 			 //{ Caret,    Precedence.Exponent, Parselets.BinaryOperator(Precedence.Exponent, isRight: true ) },
 		};
 
-		readonly Dictionary<string, PrefixParselet> _prefixes = new Dictionary<string, PrefixParselet>();
-		readonly Dictionary<string, (int, InfixParselet)> _infixes = new Dictionary<string, (int, InfixParselet)>();
+		readonly Dictionary<SqlToken, PrefixParselet> _prefixes = new Dictionary<SqlToken, PrefixParselet>();
+		readonly Dictionary<SqlToken, (int, InfixParselet)> _infixes = new Dictionary<SqlToken, (int, InfixParselet)>();
 
-		void Add(string token, PrefixParselet prefix) =>
+		void Add(SqlToken token, PrefixParselet prefix) =>
 			_prefixes.Add(token, prefix);
 
-		void Add(string token, int precedence, InfixParselet prefix) =>
+		void Add(SqlToken token, int precedence, InfixParselet prefix) =>
 			_infixes.Add(token, (precedence, prefix));
 
 		IEnumerator IEnumerable.GetEnumerator() =>
 			_prefixes.Cast<object>().Concat(_infixes.Cast<object>()).GetEnumerator();
 
-		public PrefixParselet Prefix(string token) => _prefixes[token];
+		public PrefixParselet Prefix(SqlToken token) => _prefixes[token];
 
-		public (int precedence, InfixParselet parse) Infix(string token)
+		public (int precedence, InfixParselet parse) Infix(SqlToken token)
 		{
 			if (!_infixes.TryGetValue(token, out var infix))
 			{

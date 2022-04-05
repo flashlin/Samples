@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace PreviewLibrary.PrattParsers
 {
 	public class StringScanner : IScanner
 	{
+		private Dictionary<string, SqlToken> _tokenMap = new Dictionary<string, SqlToken>()
+		{
+			{ "+", SqlToken.Plus },
+			{ ">=", SqlToken.GreaterThanOrEqual },
+		};
+
 		private ReadOnlyMemory<char> _textSpan;
 		private int _index;
 
@@ -75,29 +82,38 @@ namespace PreviewLibrary.PrattParsers
 			return ReadSymbol(ch);
 		}
 
+
+
 		private TextSpan ReadSymbol(TextSpan head)
 		{
 			var rg = new Regex(@"^\W$");
-			return ReadUntil(head, (ch) =>
+			var token = ReadUntil(head, (ch) =>
 			{
 				return rg.Match($"{ch}").Success;
 			});
+			var tokenStr = GetSpanString(token);
+			token.Type = _tokenMap[tokenStr];
+			return token;
 		}
 
 		private TextSpan ReadNumber(TextSpan head)
 		{
-			return ReadUntil(head, (ch) =>
+			var token = ReadUntil(head, (ch) =>
 			{
 				return char.IsDigit(ch);
 			});
+			token.Type = SqlToken.Number;
+			return token;
 		}
 
 		private TextSpan ReadIdentifier(TextSpan head)
 		{
-			return ReadUntil(head, (ch) =>
+			var token = ReadUntil(head, (ch) =>
 			{
 				return IsIdentifierBody(ch);
 			});
+			token.Type = SqlToken.Identifier;
+			return token;
 		}
 
 		private TextSpan ReadUntil(TextSpan head, Func<char, bool> predicate)

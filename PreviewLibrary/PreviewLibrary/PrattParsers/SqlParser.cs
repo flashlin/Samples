@@ -29,8 +29,7 @@ namespace PreviewLibrary.PrattParsers
 				throw new Exception($"expect token but found none");
 			}
 
-			var prefixTokenStr = _scanner.GetSpanString(prefixToken);
-			var prefixParse = SqlSpec.Instance.Prefix(prefixTokenStr);
+			var prefixParse = SqlSpec.Instance.Prefix(prefixToken.Type);
 
 			var left = prefixParse(prefixToken, this);
 
@@ -42,8 +41,7 @@ namespace PreviewLibrary.PrattParsers
 					break;
 				}
 
-				var infixTokenStr = _scanner.GetSpanString(infixToken);
-				var infixParselet = SqlSpec.Instance.Infix(infixTokenStr);
+				var infixParselet = SqlSpec.Instance.Infix(infixToken.Type);
 				if (infixParselet.parse == null)
 				{
 					break;
