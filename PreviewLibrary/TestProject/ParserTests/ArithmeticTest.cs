@@ -35,6 +35,13 @@ namespace TestProject.ParserTests
 			ThenExprShouldBe("1 / 2");
 		}
 
+		[Fact]
+		public void paren_add()
+		{
+			var sql = "(1 + 2)";
+			Parse(sql);
+			ThenExprShouldBe("");
+		}
 
 		protected void ThenExprShouldBe(string expect)
 		{

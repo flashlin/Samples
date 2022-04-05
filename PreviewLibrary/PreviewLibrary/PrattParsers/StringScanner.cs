@@ -12,6 +12,8 @@ namespace PreviewLibrary.PrattParsers
 			{ "-", SqlToken.Minus },
 			{ "*", SqlToken.StarSign },
 			{ "/", SqlToken.Slash },
+			{ "(", SqlToken.LParen },
+			{ ")", SqlToken.RParen },
 			{ ">=", SqlToken.GreaterThanOrEqual },
 		};
 
@@ -87,7 +89,7 @@ namespace PreviewLibrary.PrattParsers
 
 		private TextSpan ReadSymbol(TextSpan head)
 		{
-			var rg = new Regex(@"^\S$");
+			var rg = new Regex(@"^\W$");
 			var token = ReadUntil(head, (ch) =>
 			{
 				return rg.Match($"{ch}").Success;

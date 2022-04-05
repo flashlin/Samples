@@ -34,6 +34,14 @@ namespace TestProject.ScannerTests
 			ThenTokenShouldBe(">=");
 		}
 
+		[Fact]
+		public void lparen_number()
+		{
+			var sql = "(1";
+			Scan(sql);
+			ThenTokenShouldBe("(");
+		}
+
 		protected void ThenTokenShouldBe(string expected)
 		{
 			var token = _scanner.Consume();
