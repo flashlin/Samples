@@ -19,6 +19,23 @@ namespace TestProject.ParserTests
 			ThenExprShouldBe("1 + 2");
 		}
 
+		[Fact]
+		public void mul()
+		{
+			var sql = "1 * 2";
+			Parse(sql);
+			ThenExprShouldBe("1 * 2");
+		}
+
+		[Fact]
+		public void divide()
+		{
+			var sql = "1 / 2";
+			Parse(sql);
+			ThenExprShouldBe("1 / 2");
+		}
+
+
 		protected void ThenExprShouldBe(string expect)
 		{
 			_expr.ToString().Should().Be(expect);
