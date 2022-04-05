@@ -9,7 +9,7 @@ namespace PreviewLibrary.PrattParsers
 	public interface IScanner
 	{
 		ReadOnlySpan<char> Peek();
-		ReadOnlySpan<char> Consume(string expect);
+		ReadOnlySpan<char> Consume(string expect = null);
 	}
 
 	public class StringScanner : IScanner
@@ -26,7 +26,7 @@ namespace PreviewLibrary.PrattParsers
 		public ReadOnlySpan<char> Consume(string expect)
 		{
 			var token = ScanNext();
-			if( token != expect)
+			if (expect != null && token != expect)
 			{
 				throw new Exception($"expect token '{expect}', but got '{token.ToString()}'");
 			}
@@ -34,7 +34,7 @@ namespace PreviewLibrary.PrattParsers
 		}
 
 		public ReadOnlySpan<char> Peek()
-		{ 
+		{
 			var startIndex = _index;
 			var token = ScanNext();
 			_index = startIndex;
@@ -93,6 +93,10 @@ namespace PreviewLibrary.PrattParsers
 			do
 			{
 				var ch = PeekChar();
+				if (ch.IsEmpty)
+				{
+					break;
+				}
 				if (!predicate(ch[0]))
 				{
 					break;
@@ -125,7 +129,7 @@ namespace PreviewLibrary.PrattParsers
 
 		private ReadOnlySpan<char> PeekChar()
 		{
-			if (_index >= _textSpan.Length)
+			if (_index + 1 >= _textSpan.Length)
 			{
 				return ReadOnlySpan<char>.Empty;
 			}
