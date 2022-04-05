@@ -9,6 +9,7 @@ namespace PreviewLibrary.PrattParsers
 		private Dictionary<string, SqlToken> _tokenMap = new Dictionary<string, SqlToken>()
 		{
 			{ "+", SqlToken.Plus },
+			{ "-", SqlToken.Minus },
 			{ ">=", SqlToken.GreaterThanOrEqual },
 		};
 

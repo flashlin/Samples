@@ -16,17 +16,6 @@ using System.Collections;
 
 namespace PreviewLibrary.PrattParsers
 {
-	public enum SqlToken
-	{
-		None,
-		LParen,
-		RParen,
-		Identifier,
-		Number,
-		Plus,
-		GreaterThanOrEqual,
-	}
-
 	public sealed class SqlSpec : IEnumerable
 	{
 		public static readonly SqlSpec Instance = new SqlSpec
@@ -48,8 +37,8 @@ namespace PreviewLibrary.PrattParsers
 			 // For kicks, we'll make "!" both prefix and postfix, kind of like ++.
 			 //{ Bang, Precedence.Postfix, Parselets.PostfixOperator },
 
-			 { SqlToken.Plus, Precedence.Sum, Parselets.BinaryOperator(Precedence.Sum, isRight: false) },
-			 //{ Minus,    Precedence.Sum     , Parselets.BinaryOperator(Precedence.Sum     , isRight: false) },
+			 { SqlToken.Plus,		Precedence.Sum, Parselets.BinaryOperator(Precedence.Sum, isRight: false) },
+			 { SqlToken.Minus,	Precedence.Sum, Parselets.BinaryOperator(Precedence.Sum, isRight: false) },
 			 //{ Asterisk, Precedence.Product , Parselets.BinaryOperator(Precedence.Product , isRight: false) },
 			 //{ Slash,    Precedence.Product , Parselets.BinaryOperator(Precedence.Product , isRight: false) },
 			 //{ Caret,    Precedence.Exponent, Parselets.BinaryOperator(Precedence.Exponent, isRight: true ) },
