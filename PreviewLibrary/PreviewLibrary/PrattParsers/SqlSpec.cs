@@ -30,7 +30,7 @@ namespace PreviewLibrary.PrattParsers
 			 { SqlToken.LParen, Precedence.Call, Parselets.Call },
 
 			 { SqlToken.Plus , Parselets.PrefixOperator(Precedence.Prefix) },
-			 //{ Minus, Parselets.PrefixOperator(Precedence.Prefix) },
+			 { SqlToken.Minus, Parselets.PrefixOperator(Precedence.Prefix) },
 			 //{ Tilde, Parselets.PrefixOperator(Precedence.Prefix) },
 			 //{ Bang , Parselets.PrefixOperator(Precedence.Prefix) },
 
@@ -39,8 +39,8 @@ namespace PreviewLibrary.PrattParsers
 
 			 { SqlToken.Plus,		Precedence.Sum, Parselets.BinaryOperator(Precedence.Sum, isRight: false) },
 			 { SqlToken.Minus,	Precedence.Sum, Parselets.BinaryOperator(Precedence.Sum, isRight: false) },
-			 //{ Asterisk, Precedence.Product , Parselets.BinaryOperator(Precedence.Product , isRight: false) },
-			 //{ Slash,    Precedence.Product , Parselets.BinaryOperator(Precedence.Product , isRight: false) },
+			 { SqlToken.StarSign, Precedence.Product, Parselets.BinaryOperator(Precedence.Product , isRight: false) },
+			 { SqlToken.Slash,	Precedence.Product, Parselets.BinaryOperator(Precedence.Product , isRight: false) },
 			 //{ Caret,    Precedence.Exponent, Parselets.BinaryOperator(Precedence.Exponent, isRight: true ) },
 		};
 

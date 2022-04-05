@@ -10,5 +10,7 @@
 		Plus,
 		GreaterThanOrEqual,
 		Minus,
+		StarSign,
+		Slash,
 	}
 }

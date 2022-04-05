@@ -10,6 +10,8 @@ namespace PreviewLibrary.PrattParsers
 		{
 			{ "+", SqlToken.Plus },
 			{ "-", SqlToken.Minus },
+			{ "*", SqlToken.StarSign },
+			{ "/", SqlToken.Slash },
 			{ ">=", SqlToken.GreaterThanOrEqual },
 		};
 
