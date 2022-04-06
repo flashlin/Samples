@@ -6,12 +6,6 @@ using System.Data;
 
 namespace SqliteCli.Repos
 {
-	public class ReportTransReq
-	{
-		public DateTime? StartDate { get; set; }
-		public DateTime? EndDate { get; set; }
-	}
-
 	public class StockRepo
 	{
 		public IEnumerable<TransHistory> QueryTrans(string cmd)
@@ -44,7 +38,7 @@ namespace SqliteCli.Repos
 				Console.WriteLine($"Stock price:{data.StockPrice} ERROR");
 				return;
 			}
-			data.HandlingFee = Math.Ceiling(data.StockPrice * data.NumberOfShare * stock.HandlingFee);
+			data.HandlingFee = Math.Round(data.StockPrice * data.NumberOfShare * stock.HandlingFee, 0, MidpointRounding.AwayFromZero);
 			data.Balance = -(data.StockPrice * data.NumberOfShare + data.HandlingFee);
 
 			db.Trans.Add(data);

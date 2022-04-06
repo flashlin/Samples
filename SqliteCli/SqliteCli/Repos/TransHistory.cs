@@ -10,25 +10,25 @@ namespace SqliteCli.Repos
 {
 	public class TransHistory
 	{
-		[DisplayString(5)]
+		[DisplayString("", 5)]
 		public long Id { get; set; }
 
-		[DisplayString(10)]
+		[DisplayString("yyyy/MM/dd", 10)]
 		public DateTime TranTime { get; set; }
 
-		[DisplayString(7)]
+		[DisplayString("", 7)]
 		public string TranType { get; set; }
 
-		[DisplayString(9)]
+		[DisplayString("", 9)]
 		public string StockId { set; get; }
 
-		[DisplayString(30)]
+		[DisplayString("", 30)]
 		public string StockName { set; get; }
 
 		[DecimalString(6)]
 		public decimal StockPrice { get; set; }
 
-		[DisplayString(7)]
+		[DisplayString("", 7, AlignType.Right)]
 		public int NumberOfShare { get; set; }
 
 		[DecimalString(7)]
@@ -36,47 +36,33 @@ namespace SqliteCli.Repos
 
 		[DecimalString(20)]
 		public decimal Balance { get; set; }
-
-		public override string ToString()
-		{
-			var sb = new StringBuilder();
-			sb.Append($"{TranTime.ToString("yyyy/MM/dd")}");
-			sb.Append($" {TranType.ToFixLenString(7)}");
-			sb.Append($" {StockId.ToFixLenString(9)}");
-			sb.Append($" {StockName.ToFixLenString(30)}");
-			sb.Append($" {StockPrice.ToNumberString(6)}");
-			sb.Append($" {NumberOfShare.ToString().ToFixLenString(7)}");
-			sb.Append($" {HandlingFee.ToNumberString(7)}");
-			sb.Append($" {Balance.ToNumberString(20)}");
-			return sb.ToString();
-		}
 	}
 
 	public class ReportTranItem
 	{
-		[DisplayString(7)]
+		[StringFixed(7)]
 		public string TranType { get; set; }
 
-		[DisplayString(9)]
+		[StringFixed(9)]
 		public string StockId { set; get; }
 
-		[DisplayString(30)]
+		[StringFixed(30)]
 		public string StockName { set; get; }
 
 		//2022-04-04
 		//假如這邊 property 用 decimal or double
 		//卻噴出 ERROR: Sqlite AVG(xxx) 出來是 double, but dapper 卻 parse to int64
 		//只好改為 string
-		[DisplayString(6)]
+		[StringFixed(6)]
 		public string MinStockPrice { get; set; }
 
-		[DisplayString(6)]
+		[StringFixed(6)]
 		public string AvgStockPrice { get; set; }
-		
-		[DisplayString(6)]
+
+		[StringFixed(6)]
 		public string MaxStockPrice { get; set; }
 
-		[DisplayString(7)]
+		[StringFixed(7)]
 		public int NumberOfShare { get; set; }
 
 		[DecimalString(7)]
@@ -87,15 +73,33 @@ namespace SqliteCli.Repos
 	}
 
 
-		public interface IDisplayString
+	public interface IDisplayString
 	{
 		string ToDisplayString(object value);
 	}
 
+	//[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+	//public class StringFixedAttribute : Attribute, IDisplayString
+	//{
+	//	public StringFixedAttribute(int maxLength, AlignType alignType = AlignType.Left)
+	//	{
+	//		MaxLength = maxLength;
+	//		AlignType = alignType;
+	//	}
+
+	//	public int MaxLength { get; }
+	//	public AlignType AlignType { get; }
+
+	//	public string ToDisplayString(object value)
+	//	{
+	//		return $"{value}".ToFixLenString(MaxLength, AlignType);
+	//	}
+	//}
+
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-	public class DisplayStringAttribute : Attribute, IDisplayString
+	public class StringFixedAttribute : Attribute, IDisplayString
 	{
-		public DisplayStringAttribute(int maxLength, AlignType alignType = AlignType.Left)
+		public StringFixedAttribute(int maxLength, AlignType alignType = AlignType.Left)
 		{
 			MaxLength = maxLength;
 			AlignType = alignType;
@@ -176,7 +180,9 @@ namespace SqliteCli.Repos
 						delimiter.Append(" ");
 					}
 					var value = prop.Getter(obj);
-					sb.Append(prop.Name.ToFixLenString(displayAttr.MaxLength));
+					
+					sb.Append(displayAttr.ToDisplayString(prop.Name));
+
 					delimiter.Append(new String('-', displayAttr.MaxLength));
 					first = false;
 					continue;
@@ -215,7 +221,7 @@ namespace SqliteCli.Repos
 						sb.Append(" ");
 					}
 					var value = prop.Getter(obj);
-					sb.Append($"{value}".ToFixLenString(displayAttr.MaxLength));
+					sb.Append(displayAttr.ToDisplayString(value));
 					first = false;
 					continue;
 				}
@@ -258,11 +264,5 @@ namespace SqliteCli.Repos
 					return $"{spaces}{text}";
 			}
 		}
-	}
-
-	public enum AlignType
-	{
-		Left,
-		Right
 	}
 }
