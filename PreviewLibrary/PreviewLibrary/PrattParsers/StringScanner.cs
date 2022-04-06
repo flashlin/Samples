@@ -16,6 +16,7 @@ namespace PreviewLibrary.PrattParsers
 			{ ")", SqlToken.RParen },
 			{ ">=", SqlToken.GreaterThanOrEqual },
 			{ "SELECT", SqlToken.Select },
+			{ "FROM", SqlToken.From },
 			{ "AS", SqlToken.As },
 		};
 
@@ -58,14 +59,29 @@ namespace PreviewLibrary.PrattParsers
 		public bool Match(string expect)
 		{
 			var tokenStr = Peek().GetString(_textSpan.Span);
-			return tokenStr == expect;
-		}
-
-		public bool MatchIgnoreCase(string expect)
-		{
-			var tokenStr = Peek().GetString(_textSpan.Span);
 			return string.Equals(tokenStr, expect, StringComparison.OrdinalIgnoreCase);
 		}
+
+		public bool Match(SqlToken expectToken)
+		{
+			var tokenStr = Peek().GetString(_textSpan.Span).ToUpper();
+			if (string.IsNullOrEmpty(tokenStr))
+			{
+				return false;
+			}
+
+			if (!_tokenMap.TryGetValue(tokenStr, out var tokenType))
+			{
+				tokenType = SqlToken.Identifier;
+			}
+			return tokenType == expectToken;
+		}
+
+		//public bool MatchIgnoreCase(string expect)
+		//{
+		//	var tokenStr = Peek().GetString(_textSpan.Span);
+		//	return string.Equals(tokenStr, expect, StringComparison.OrdinalIgnoreCase);
+		//}
 
 		private TextSpan ScanNext()
 		{
@@ -128,6 +144,15 @@ namespace PreviewLibrary.PrattParsers
 			}
 			token.Type = tokenType;
 			return token;
+		}
+
+		private SqlToken GetTokenTypeOrIdentifier(string token)
+		{
+			if (!_tokenMap.TryGetValue(token, out var tokenType))
+			{
+				tokenType = SqlToken.Identifier;
+			}
+			return tokenType;
 		}
 
 		private TextSpan ReadUntil(TextSpan head, Func<char, bool> predicate)

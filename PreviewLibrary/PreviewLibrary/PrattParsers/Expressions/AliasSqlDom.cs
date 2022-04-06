@@ -5,13 +5,13 @@ namespace PreviewLibrary.PrattParsers.Expressions
 	public class AliasSqlDom : SqlDom
 	{
 		public SqlDom Left { get; set; }
-		public SqlDom Name { get; set; }
+		public SqlDom AliasName { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
 			Left.WriteToStream(stream);
 			stream.Write(" AS ");
-			Name.WriteToStream(stream);
+			AliasName.WriteToStream(stream);
 		}
 	}
 }

@@ -14,7 +14,12 @@ namespace PreviewLibrary.PrattParsers
 
 		public bool Match(string expect)
 		{
-			return _scanner.MatchIgnoreCase(expect);
+			return _scanner.Match(expect);
+		}
+
+		public bool Match(SqlToken expectToken)
+		{
+			return _scanner.Match(expectToken);
 		}
 
 		public void Consume(string expect)

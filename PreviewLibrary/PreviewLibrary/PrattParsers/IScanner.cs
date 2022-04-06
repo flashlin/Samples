@@ -9,6 +9,7 @@ namespace PreviewLibrary.PrattParsers
 		TextSpan Consume(string expect = null);
 		string GetSpanString(TextSpan span);
 		bool Match(string expect);
-		bool MatchIgnoreCase(string expect);
+		//bool MatchIgnoreCase(string expect);
+		bool Match(SqlToken expectToken);
 	}
 }

@@ -14,5 +14,6 @@
 		Slash,
 		Select,
 		As,
+		From,
 	}
 }

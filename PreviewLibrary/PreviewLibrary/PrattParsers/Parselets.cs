@@ -18,15 +18,43 @@ namespace PreviewLibrary.PrattParsers
 	public static class Parselets
 	{
 		public static readonly PrefixParselet Number =
-			(token, parser) => new NumberSqlDom
+			(token, parser) =>
 			{
-				Value = parser.GetSpanString(token)
+				var number = new NumberSqlDom
+				{
+					Value = parser.GetSpanString(token)
+				};
+
+				if (parser.Match(SqlToken.Identifier))
+				{
+					return new AliasSqlDom
+					{
+						Left = number,
+						AliasName = parser.ParseExp(0)
+					};
+				}
+
+				return number;
 			};
 
 		public static readonly PrefixParselet Identifier =
-			(token, parser) => new IdentifierSqlDom
+			(token, parser) =>
 			{
-				Value = parser.GetSpanString(token)
+				var identifier = new IdentifierSqlDom
+				{
+					Value = parser.GetSpanString(token)
+				};
+
+				if (parser.Match(SqlToken.Identifier))
+				{
+					return new AliasSqlDom
+					{
+						Left = identifier,
+						AliasName = parser.ParseExp(0)
+					};
+				}
+
+				return identifier;
 			};
 
 		public static PrefixParselet PrefixOperator(int precedence) =>
@@ -82,7 +110,7 @@ namespace PreviewLibrary.PrattParsers
 					columns.Add(parser.ParseExp(0));
 				} while (parser.Match(","));
 
-				if(!parser.Match("FROM"))
+				if (!parser.Match("FROM"))
 				{
 					return new SelectNoFromSqlDom
 					{
@@ -90,7 +118,7 @@ namespace PreviewLibrary.PrattParsers
 					};
 				}
 				parser.Consume("FROM");
-				
+
 				var table = parser.ParseExp(0);
 
 				return new SelectSqlDom
@@ -107,7 +135,7 @@ namespace PreviewLibrary.PrattParsers
 				return new AliasSqlDom
 				{
 					Left = left,
-					Name = aliasName,
+					AliasName = aliasName,
 				};
 			};
 
