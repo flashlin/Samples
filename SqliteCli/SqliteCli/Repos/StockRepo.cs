@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using SqliteCli.Entities;
 using SqliteCli.Helpers;
 using System.Data;
+using System.Reflection;
+using System.Text.Json;
 
 namespace SqliteCli.Repos
 {
@@ -119,13 +121,26 @@ group by st.Id, t.TranType
 
 			var connection = db.Database.GetDbConnection();
 
-			var q1 = connection.Query<ReportTranItem>(sql, new
+			var q1 = connection.Query(sql, new
 			{
 				startTime = req.StartDate,
 				endTime = req.EndDate,
 			});
 
-			return q1.ToList();
+			var dapperList = q1.ToList();
+
+			var dictList = dapperList.Select(x => (IDictionary<string, object>)x)
+				.ToList();
+
+
+			var list = new List<ReportTranItem>();
+			foreach (var dict in dictList)
+			{
+				var item = dict.ConvertToObject<ReportTranItem>();
+				list.Add(item);
+			}
+
+			return list;
 		}
 
 		public List<TransHistory> ListTrans(ListTransReq req)
@@ -227,5 +242,4 @@ group by st.Id, t.TranType
 			return new StockDatabase("d:/VDisk/SNL/flash_stock.db");
 		}
 	}
-
 }

@@ -16,13 +16,13 @@
 		//卻噴出 ERROR: Sqlite AVG(xxx) 出來是 double, but dapper 卻 parse to int64
 		//只好改為 string
 		[DisplayString("", 6)]
-		public string MinStockPrice { get; set; }
+		public decimal MinStockPrice { get; set; }
 
 		[DisplayString("", 6)]
-		public string AvgStockPrice { get; set; }
+		public decimal AvgStockPrice { get; set; }
 
 		[DisplayString("", 6)]
-		public string MaxStockPrice { get; set; }
+		public decimal MaxStockPrice { get; set; }
 
 		[DisplayString("", 7)]
 		public int NumberOfShare { get; set; }
