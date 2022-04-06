@@ -45,24 +45,6 @@ namespace SqliteCli.Repos
 	}
 
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-	public class StringFixedAttribute : Attribute, IDisplayString
-	{
-		public StringFixedAttribute(int maxLength, AlignType alignType = AlignType.Left)
-		{
-			MaxLength = maxLength;
-			AlignType = alignType;
-		}
-
-		public int MaxLength { get; }
-		public AlignType AlignType { get; }
-
-		public string ToDisplayString(object value)
-		{
-			return $"{value}".ToFixLenString(MaxLength, AlignType);
-		}
-	}
-
-	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 	public class DecimalStringAttribute : Attribute, IDisplayString
 	{
 		public DecimalStringAttribute(int maxLength)
