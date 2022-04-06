@@ -34,6 +34,19 @@ namespace SqliteCli.Repos
 		}
 
 		public static void Dump<T>(this List<T> result)
+			where T : class, new()
+		{
+			result.DumpList();
+			if (result.Count > 0)
+			{
+				var summary = result.ToSummary<T>();
+				var line = summary.GetDisplayValue();
+				Console.WriteLine(line);
+			}
+		}
+
+		public static void DumpList<T>(this List<T> result)
+			where T : class, new()
 		{
 			if (result.Count > 0)
 			{
@@ -44,18 +57,6 @@ namespace SqliteCli.Repos
 			{
 				Console.WriteLine(item.GetDisplayValue());
 			}
-			//if (result.Count > 0)
-			//{
-			//	var summary = new TransHistory
-			//	{
-			//		TranTime = DateTime.Now,
-			//		TranType = "Summary",
-			//		NumberOfShare = result.Sum(x => x.NumberOfShare),
-			//		HandlingFee = result.Sum(x => x.HandlingFee),
-			//		Balance = result.Sum(x => x.Balance),
-			//	};
-			//	Console.WriteLine(summary.GetDisplayValue());
-			//}
 		}
 	}
 }
