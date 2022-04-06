@@ -14,6 +14,7 @@ namespace TestProject.ParserTests
 		protected readonly ITestOutputHelper _outputHelper;
 		protected IParser _parser;
 		protected SqlDom _expr;
+		protected List<SqlDom> _exprsList;
 
 		public ParserTestBase(ITestOutputHelper outputHelper)
 		{
@@ -24,7 +25,14 @@ namespace TestProject.ParserTests
 		{
 			var scanner = new StringScanner(text);
 			_parser = new SqlParser(scanner);
-			_expr = _parser.ParseProgram();
+			_expr = _parser.ParseProgram().First();
+		}
+
+		protected void ParseAll(string text)
+		{
+			var scanner = new StringScanner(text);
+			_parser = new SqlParser(scanner);
+			_exprsList = _parser.ParseProgram().ToList();
 		}
 		
 		protected void ThenExprShouldBe(string expect)

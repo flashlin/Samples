@@ -1,10 +1,11 @@
 ﻿using PreviewLibrary.PrattParsers.Expressions;
+using System.Collections.Generic;
 
 namespace PreviewLibrary.PrattParsers
 {
 	public interface IParser
 	{
-		SqlDom ParseProgram();
+		IEnumerable<SqlDom> ParseProgram();
 		SqlDom ParseExp(int ctxPrecedence);
 		bool Match(string expect);
 		void Consume(string expect);

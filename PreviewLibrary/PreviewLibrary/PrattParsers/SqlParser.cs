@@ -1,5 +1,6 @@
 ﻿using PreviewLibrary.PrattParsers.Expressions;
 using System;
+using System.Collections.Generic;
 
 namespace PreviewLibrary.PrattParsers
 {
@@ -68,9 +69,13 @@ namespace PreviewLibrary.PrattParsers
 			return left;
 		}
 
-		public SqlDom ParseProgram()
+		public IEnumerable<SqlDom> ParseProgram()
 		{
-			return ParseExp(0);
+			while (!_scanner.Peek().IsEmpty)
+			{
+				yield return ParseExp(0);
+			}
+			//return ParseExp(0);
 		}
 	}
 }
