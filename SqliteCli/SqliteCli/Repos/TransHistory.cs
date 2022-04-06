@@ -38,63 +38,11 @@ namespace SqliteCli.Repos
 		public decimal Balance { get; set; }
 	}
 
-	public class ReportTranItem
-	{
-		[StringFixed(7)]
-		public string TranType { get; set; }
-
-		[StringFixed(9)]
-		public string StockId { set; get; }
-
-		[StringFixed(30)]
-		public string StockName { set; get; }
-
-		//2022-04-04
-		//假如這邊 property 用 decimal or double
-		//卻噴出 ERROR: Sqlite AVG(xxx) 出來是 double, but dapper 卻 parse to int64
-		//只好改為 string
-		[StringFixed(6)]
-		public string MinStockPrice { get; set; }
-
-		[StringFixed(6)]
-		public string AvgStockPrice { get; set; }
-
-		[StringFixed(6)]
-		public string MaxStockPrice { get; set; }
-
-		[StringFixed(7)]
-		public int NumberOfShare { get; set; }
-
-		[DecimalString(7)]
-		public decimal HandlingFee { get; set; }
-
-		[DecimalString(20)]
-		public decimal Balance { get; set; }
-	}
-
 
 	public interface IDisplayString
 	{
 		string ToDisplayString(object value);
 	}
-
-	//[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
-	//public class StringFixedAttribute : Attribute, IDisplayString
-	//{
-	//	public StringFixedAttribute(int maxLength, AlignType alignType = AlignType.Left)
-	//	{
-	//		MaxLength = maxLength;
-	//		AlignType = alignType;
-	//	}
-
-	//	public int MaxLength { get; }
-	//	public AlignType AlignType { get; }
-
-	//	public string ToDisplayString(object value)
-	//	{
-	//		return $"{value}".ToFixLenString(MaxLength, AlignType);
-	//	}
-	//}
 
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
 	public class StringFixedAttribute : Attribute, IDisplayString
