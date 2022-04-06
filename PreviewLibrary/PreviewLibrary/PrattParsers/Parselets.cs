@@ -17,6 +17,15 @@ namespace PreviewLibrary.PrattParsers
 {
 	public static class Parselets
 	{
+		public static readonly PrefixParselet MultiComment =
+			(token, parser) =>
+			{
+				return new MultiCommentSqlDom
+				{
+					Content = parser.GetSpanString(token),
+				};
+			};
+
 		public static readonly PrefixParselet Number =
 			(token, parser) =>
 			{
