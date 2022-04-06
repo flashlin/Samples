@@ -92,7 +92,42 @@ namespace PreviewLibrary.PrattParsers
 				return ReadNumber(ch);
 			}
 
+			if (character == '/')
+			{
+				var multiComment = ReadMultiComment(ch);
+				if (!multiComment.IsEmpty)
+				{
+					return multiComment;
+				}
+			}
+
 			return ReadSymbol(ch);
+		}
+
+		private TextSpan ReadMultiComment(TextSpan head)
+		{
+			if (PeekCh() != '*')
+			{
+				return TextSpan.Empty;
+			}
+
+			var content = ReadUntil(head, ch =>
+			{
+				if (ch != '*')
+				{
+					return true;
+				}
+				if (PeekCh(1) == '/')
+				{
+					return false;
+				}
+				return true;
+			});
+
+			var tail = ConsumeCharacters("*/");
+			content = Concat(content, tail);
+			content.Type = SqlToken.MultiComment;
+			return content;
 		}
 
 		private TextSpan ReadSymbol(TextSpan head)
@@ -146,7 +181,7 @@ namespace PreviewLibrary.PrattParsers
 			var token = head;
 			do
 			{
-				var ch = PeekChar();
+				var ch = PeekSpan();
 				if (ch.IsEmpty)
 				{
 					break;
@@ -194,17 +229,59 @@ namespace PreviewLibrary.PrattParsers
 			};
 		}
 
-		private TextSpan PeekChar()
+		//private TextSpan PeekSpan()
+		//{
+		//	if (_index + 1 >= _textSpan.Length)
+		//	{
+		//		return TextSpan.Empty;
+		//	}
+		//	return new TextSpan
+		//	{
+		//		Offset = (_index + 1),
+		//		Length = 1,
+		//	};
+		//}
+
+		private TextSpan PeekSpan(int offset = 0)
 		{
-			if (_index + 1 >= _textSpan.Length)
+			if (_index + 1 + offset >= _textSpan.Length)
 			{
 				return TextSpan.Empty;
 			}
 			return new TextSpan
 			{
-				Offset = (_index + 1),
+				Offset = (_index + 1 + offset),
 				Length = 1,
 			};
+		}
+
+		private char PeekCh(int offset = 0)
+		{
+			var ch = PeekSpan(offset);
+			return GetSpanString(ch)[0];
+		}
+
+		private TextSpan ConsumeCharacters(string expect)
+		{
+			var expectLength = expect.Length;
+			if (_index + expectLength >= _textSpan.Length)
+			{
+				throw new Exception($"expect read {expectLength} length, but remaining {_textSpan.Length - _index}.");
+			}
+
+			var span = new TextSpan
+			{
+				Offset = _index + 1,
+				Length = expectLength,
+			};
+			var spanStr = GetSpanString(span);
+			if (!string.Equals(spanStr, expect, StringComparison.OrdinalIgnoreCase))
+			{
+				throw new Exception($"expect '{expect}', but got '{spanStr}'.");
+			}
+
+			_index += expectLength;
+			return span;
 		}
 
 		private TextSpan SkipWhiteSpaceAtFront()

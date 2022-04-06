@@ -15,5 +15,6 @@
 		Select,
 		As,
 		From,
+		MultiComment,
 	}
 }

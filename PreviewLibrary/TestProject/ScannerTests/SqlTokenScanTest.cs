@@ -50,7 +50,13 @@ namespace TestProject.ScannerTests
 			ThenTokenShouldBe("+");
 		}
 
-
+		[Fact]
+		public void multiComment()
+		{
+			var sql = " /* 12*34 **/";
+			Scan(sql);
+			ThenTokenShouldBe("/* 12*34 **/");
+		}
 
 		protected void ThenTokenShouldBe(string expected)
 		{
