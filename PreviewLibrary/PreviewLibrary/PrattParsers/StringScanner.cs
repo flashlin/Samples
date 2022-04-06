@@ -69,19 +69,9 @@ namespace PreviewLibrary.PrattParsers
 			{
 				return false;
 			}
-
-			if (!_tokenMap.TryGetValue(tokenStr, out var tokenType))
-			{
-				tokenType = SqlToken.Identifier;
-			}
+			var tokenType = GetTokenTypeOrIdentifier(tokenStr);
 			return tokenType == expectToken;
 		}
-
-		//public bool MatchIgnoreCase(string expect)
-		//{
-		//	var tokenStr = Peek().GetString(_textSpan.Span);
-		//	return string.Equals(tokenStr, expect, StringComparison.OrdinalIgnoreCase);
-		//}
 
 		private TextSpan ScanNext()
 		{
@@ -138,11 +128,7 @@ namespace PreviewLibrary.PrattParsers
 				return IsIdentifierBody(ch);
 			});
 			var tokenStr = GetSpanString(token).ToUpper();
-			if (!_tokenMap.TryGetValue(tokenStr, out var tokenType))
-			{
-				tokenType = SqlToken.Identifier;
-			}
-			token.Type = tokenType;
+			token.Type = GetTokenTypeOrIdentifier(tokenStr);
 			return token;
 		}
 
