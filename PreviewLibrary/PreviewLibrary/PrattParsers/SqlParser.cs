@@ -86,6 +86,23 @@ namespace PreviewLibrary.PrattParsers
 			return _scanner.GetSpanString(span);
 		}
 
+		public SqlDom ParseBy(SqlToken expectPrefixToken, int ctxPrecedence)
+		{
+			var prefixToken = _scanner.Consume();
+			if (prefixToken.IsEmpty)
+			{
+				throw new Exception($"expect token but found NONE");
+			}
+
+			if( prefixToken.Type != expectPrefixToken)
+			{
+				throw new Exception($"expect '{expectPrefixToken}' but found '{prefixToken.Type}'");
+			}
+
+			PrefixParselet prefixParse = SqlSpec.Instance.Prefix(expectPrefixToken);
+			return ProcessPrefix(prefixToken, prefixParse, ctxPrecedence);
+		}
+
 		public SqlDom ParseExp(int ctxPrecedence)
 		{
 			var prefixToken = _scanner.Consume();
@@ -95,7 +112,6 @@ namespace PreviewLibrary.PrattParsers
 			}
 
 			PrefixParselet prefixParse = null;
-
 			try
 			{
 				prefixParse = SqlSpec.Instance.Prefix(prefixToken.Type);
@@ -107,6 +123,11 @@ namespace PreviewLibrary.PrattParsers
 				throw new Exception($"Prefix '{tokenStr}' Parse fail.\r\n" + message);
 			}
 
+			return ProcessPrefix(prefixToken, prefixParse, ctxPrecedence);
+		}
+
+		private SqlDom ProcessPrefix(TextSpan prefixToken, PrefixParselet prefixParse, int ctxPrecedence)
+		{
 			var left = prefixParse(prefixToken, this);
 			while (true)
 			{

@@ -220,8 +220,7 @@ namespace PreviewLibrary.PrattParsers
 			  var procToken = parser.Consume();
 			  var createProcToken = token.Concat(procToken);
 
-			  var procedureName = parser.ParseExp(0);
-
+			  var procedureName = parser.ParseBy(SqlToken.SqlIdentifier, 0);
 
 			  var columns = ImmutableArray.CreateBuilder<SqlDom>();
 			  do
