@@ -17,9 +17,12 @@ namespace PreviewLibrary.PrattParsers
 			{ "(", SqlToken.LParen },
 			{ ")", SqlToken.RParen },
 			{ ">=", SqlToken.GreaterThanOrEqual },
-			{ "SELECT", SqlToken.Select },
-			{ "FROM", SqlToken.From },
 			{ "AS", SqlToken.As },
+			{ "CREATE", SqlToken.Create },
+			{ "FROM", SqlToken.From },
+			{ "PROCEDURE", SqlToken.Procedure },
+			{ "PROC", SqlToken.Procedure },
+			{ "SELECT", SqlToken.Select },
 		};
 
 		private ReadOnlyMemory<char> _textSpan;

@@ -17,5 +17,7 @@
 		From,
 		MultiComment,
 		SqlIdentifier,
+		Create,
+		Procedure,
 	}
 }
