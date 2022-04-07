@@ -122,7 +122,23 @@ namespace PreviewLibrary.PrattParsers
 				}
 			}
 
+			if (character == '@' && TryRead(ReadVariable, ch, out var variable))
+			{
+				return variable;
+			}
+
 			return ReadSymbol(ch);
+		}
+
+		private TextSpan ReadVariable(TextSpan head)
+		{
+			var rgSpaces = new Regex(@"^\S$");
+			var content = ReadUntil(head, ch =>
+			{
+				return !rgSpaces.Match($"{ch}").Success;
+			});
+			content.Type = SqlToken.Variable;
+			return content;
 		}
 
 		private bool TryRead(Func<TextSpan, TextSpan> readSpan, TextSpan head, out TextSpan token)
@@ -178,7 +194,7 @@ namespace PreviewLibrary.PrattParsers
 
 		private TextSpan ReadSymbol(TextSpan head)
 		{
-			var rg = new Regex(@"^\W$");
+			var rgNotWord = new Regex(@"^\W$");
 			var acc = new StringBuilder();
 			acc.Append(GetSpanString(head));
 			var token = ReadUntil(head, (ch) =>
@@ -194,7 +210,7 @@ namespace PreviewLibrary.PrattParsers
 				}
 
 				acc.Append($"{ch}");
-				return rg.Match($"{ch}").Success;
+				return rgNotWord.Match($"{ch}").Success;
 			});
 			var tokenStr = GetSpanString(token);
 			token.Type = _tokenMap[tokenStr];

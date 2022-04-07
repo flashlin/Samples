@@ -20,5 +20,6 @@
 		Create,
 		Procedure,
 		Dot,
+		Variable,
 	}
 }
