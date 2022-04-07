@@ -19,5 +19,6 @@
 		SqlIdentifier,
 		Create,
 		Procedure,
+		Dot,
 	}
 }

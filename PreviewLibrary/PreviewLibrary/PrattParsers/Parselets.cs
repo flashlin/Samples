@@ -66,6 +66,48 @@ namespace PreviewLibrary.PrattParsers
 				return identifier;
 			};
 
+		public static readonly PrefixParselet ObjectId =
+			(token, parser) =>
+			{
+				if (parser.TryConsumes(out var tokens2,
+						new[] { SqlToken.Dot },
+						new[] { SqlToken.Identifier, SqlToken.SqlIdentifier },
+						new[] { SqlToken.Dot },
+						new[] { SqlToken.Identifier, SqlToken.SqlIdentifier }))
+				{
+					var databaseName = parser.GetSpanString(token);
+					var schemaName = parser.GetSpanString(tokens2[1]);
+					var objectName = parser.GetSpanString(tokens2[3]);
+					return new ObjectIdSqlDom
+					{
+						DatabaseName = databaseName,
+						SchemaName = schemaName,
+						ObjectName = objectName
+					};
+				}
+
+				if (parser.TryConsumes(out var tokens1,
+					new[] { SqlToken.Dot },
+					new[] { SqlToken.Identifier, SqlToken.SqlIdentifier }))
+				{
+					var schemaName = parser.GetSpanString(token);
+					var objectName = parser.GetSpanString(tokens1[1]);
+					return new ObjectIdSqlDom
+					{
+						DatabaseName = string.Empty,
+						SchemaName = schemaName,
+						ObjectName = objectName
+					};
+				}
+
+				return new ObjectIdSqlDom
+				{
+					DatabaseName = string.Empty,
+					SchemaName = string.Empty,
+					ObjectName = parser.GetSpanString(token)
+				};
+			};
+
 		public static PrefixParselet PrefixOperator(int precedence) =>
 			(token, parser) => new PrefixSqlDom
 			{
@@ -172,7 +214,7 @@ namespace PreviewLibrary.PrattParsers
 		public static readonly PrefixParselet Create =
 		  (token, parser) =>
 		  {
-			  if(parser.Match(SqlToken.Procedure))
+			  if (parser.Match(SqlToken.Procedure))
 			  {
 				  return CreateProcedure(token, parser);
 			  }

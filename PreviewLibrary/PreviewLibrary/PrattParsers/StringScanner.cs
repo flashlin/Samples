@@ -16,6 +16,7 @@ namespace PreviewLibrary.PrattParsers
 			{ "/", SqlToken.Slash },
 			{ "(", SqlToken.LParen },
 			{ ")", SqlToken.RParen },
+			{ ".", SqlToken.Dot },
 			{ ">=", SqlToken.GreaterThanOrEqual },
 			{ "AS", SqlToken.As },
 			{ "CREATE", SqlToken.Create },
@@ -37,6 +38,16 @@ namespace PreviewLibrary.PrattParsers
 		public string GetSpanString(TextSpan span)
 		{
 			return span.GetString(_textSpan.Span);
+		}
+
+		public int GetOffset()
+		{
+			return _index;
+		}
+
+		public void SetOffset(int offset)
+		{
+			_index = offset;
 		}
 
 		public TextSpan Consume(string expect)
@@ -168,12 +179,21 @@ namespace PreviewLibrary.PrattParsers
 		private TextSpan ReadSymbol(TextSpan head)
 		{
 			var rg = new Regex(@"^\W$");
+			var acc = new StringBuilder();
+			acc.Append(GetSpanString(head));
 			var token = ReadUntil(head, (ch) =>
 			{
 				if (char.IsWhiteSpace(ch))
 				{
 					return false;
 				}
+
+				if (_tokenMap.ContainsKey(acc.ToString()))
+				{
+					return false;
+				}
+
+				acc.Append($"{ch}");
 				return rg.Match($"{ch}").Success;
 			});
 			var tokenStr = GetSpanString(token);

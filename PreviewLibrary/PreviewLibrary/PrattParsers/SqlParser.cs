@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.PrattParsers.Expressions;
 using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using PrefixParselet = System.Func<
 	PreviewLibrary.PrattParsers.TextSpan,
 	PreviewLibrary.PrattParsers.IParser,
@@ -29,9 +29,56 @@ namespace PreviewLibrary.PrattParsers
 			return _scanner.Match(expectToken);
 		}
 
-		public TextSpan Consume(string expect=null)
+		public TextSpan Consume(string expect = null)
 		{
 			return _scanner.Consume(expect);
+		}
+
+		public bool TryConsume(SqlToken expectToken, out TextSpan token)
+		{
+			if (!Match(expectToken))
+			{
+				token = TextSpan.Empty;
+				return false;
+			}
+			token = _scanner.Consume();
+			return true;
+		}
+
+		public bool TryConsumes(out List<TextSpan> tokenList, params SqlToken[] expectTokens)
+		{
+			var startIndex = _scanner.GetOffset();
+			tokenList = new List<TextSpan>();
+			foreach (var expectToken in expectTokens)
+			{
+				if (!Match(expectToken))
+				{
+					_scanner.SetOffset(startIndex);
+					tokenList = new List<TextSpan>();
+					return false;
+				}
+				var token = _scanner.Consume();
+				tokenList.Add(token);
+			}
+			return true;
+		}
+
+		public bool TryConsumes(out List<TextSpan> tokenList, params SqlToken[][] expectTokens)
+		{
+			var startIndex = _scanner.GetOffset();
+			tokenList = new List<TextSpan>();
+			foreach (var anyExpectTokens in expectTokens)
+			{
+				if (!anyExpectTokens.Any(expect => Match(expect)))
+				{
+					_scanner.SetOffset(startIndex);
+					tokenList = new List<TextSpan>();
+					return false;
+				}
+				var token = _scanner.Consume();
+				tokenList.Add(token);
+			}
+			return true;
 		}
 
 		public string GetSpanString(TextSpan span)

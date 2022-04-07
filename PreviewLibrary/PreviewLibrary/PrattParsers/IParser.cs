@@ -11,5 +11,8 @@ namespace PreviewLibrary.PrattParsers
 		TextSpan Consume(string expect="");
 		string GetSpanString(TextSpan span);
 		bool Match(SqlToken expectToken);
+		bool TryConsume(SqlToken expectToken, out TextSpan token);
+		bool TryConsumes(out List<TextSpan> tokenList, params SqlToken[] expectTokens);
+		bool TryConsumes(out List<TextSpan> tokenList, params SqlToken[][] expectTokens);
 	}
 }
