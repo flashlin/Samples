@@ -38,5 +38,14 @@ namespace PreviewLibrary.PrattParsers
 			}
 			return textSpan.Slice(Offset, Length).ToString();
 		}
+
+		public TextSpan Concat(TextSpan span1)
+		{
+			return new TextSpan
+			{
+				Offset = Offset,
+				Length = Length + span1.Length
+			};
+		}
 	}
 }

@@ -29,9 +29,9 @@ namespace PreviewLibrary.PrattParsers
 			return _scanner.Match(expectToken);
 		}
 
-		public void Consume(string expect)
+		public TextSpan Consume(string expect)
 		{
-			_scanner.Consume(expect);
+			return _scanner.Consume(expect);
 		}
 
 		public string GetSpanString(TextSpan span)

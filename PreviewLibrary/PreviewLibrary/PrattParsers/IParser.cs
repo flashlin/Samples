@@ -8,7 +8,7 @@ namespace PreviewLibrary.PrattParsers
 		IEnumerable<SqlDom> ParseProgram();
 		SqlDom ParseExp(int ctxPrecedence);
 		bool Match(string expect);
-		void Consume(string expect);
+		TextSpan Consume(string expect="");
 		string GetSpanString(TextSpan span);
 		bool Match(SqlToken expectToken);
 	}

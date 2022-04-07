@@ -161,5 +161,40 @@ namespace PreviewLibrary.PrattParsers
 				  Columns = columns
 			  };
 		  };
+
+		//public static readonly PrefixParselet ObjectId = 
+		//	(token, parser) =>
+		//	{
+		//		if(parser.Match(Sql))
+		//	};
+
+
+		public static readonly PrefixParselet Create =
+		  (token, parser) =>
+		  {
+			  if(parser.Match(SqlToken.Procedure))
+			  {
+				  return CreateProcedure(token, parser);
+			  }
+			  throw new System.Exception("");
+		  };
+
+		public static readonly PrefixParselet CreateProcedure =
+		  (token, parser) =>
+		  {
+			  var procToken = parser.Consume();
+			  var createProcToken = token.Concat(procToken);
+
+
+			  var columns = ImmutableArray.CreateBuilder<SqlDom>();
+			  do
+			  {
+				  columns.Add(parser.ParseExp(0));
+			  } while (parser.Match(","));
+			  return new SelectNoFromSqlDom
+			  {
+				  Columns = columns
+			  };
+		  };
 	}
 }
