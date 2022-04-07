@@ -14,13 +14,13 @@ namespace TestProject.ParserTests
 		SqlDom _exp;
 
 		[Fact]
-		public void as_identifier()
+		public void identifier()
 		{
 			var sql = "d123";
 
 			Prefix(Parselets.Identifier, sql);
 
-			ThenExprShouldBe(" AS d123");
+			ThenExprShouldBe("d123");
 		}
 
 		private void ThenExprShouldBe(string expected)
@@ -32,7 +32,8 @@ namespace TestProject.ParserTests
 		{
 			var scanner = new StringScanner(sql);
 			var parser = new SqlParser(scanner);
-			_exp = prefixParselet(TextSpan.Empty, parser);
+			var head = parser.Consume();
+			_exp = prefixParselet(head, parser);
 		}
 	}
 }

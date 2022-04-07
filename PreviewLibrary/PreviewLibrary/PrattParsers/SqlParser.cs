@@ -29,7 +29,7 @@ namespace PreviewLibrary.PrattParsers
 			return _scanner.Match(expectToken);
 		}
 
-		public TextSpan Consume(string expect)
+		public TextSpan Consume(string expect=null)
 		{
 			return _scanner.Consume(expect);
 		}
