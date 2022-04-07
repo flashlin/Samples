@@ -204,13 +204,6 @@ namespace PreviewLibrary.PrattParsers
 			  };
 		  };
 
-		//public static readonly PrefixParselet ObjectId = 
-		//	(token, parser) =>
-		//	{
-		//		if(parser.Match(Sql))
-		//	};
-
-
 		public static readonly PrefixParselet Create =
 		  (token, parser) =>
 		  {
@@ -226,6 +219,8 @@ namespace PreviewLibrary.PrattParsers
 		  {
 			  var procToken = parser.Consume();
 			  var createProcToken = token.Concat(procToken);
+
+			  var procedureName = parser.ParseExp(0);
 
 
 			  var columns = ImmutableArray.CreateBuilder<SqlDom>();
