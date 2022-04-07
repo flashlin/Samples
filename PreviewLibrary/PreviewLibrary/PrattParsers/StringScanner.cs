@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace PreviewLibrary.PrattParsers
@@ -92,6 +94,11 @@ namespace PreviewLibrary.PrattParsers
 				return ReadNumber(ch);
 			}
 
+			if (character == '[' && TryRead(ReadSqlIdentifier, ch, out var sqlIdentifier))
+			{
+				return sqlIdentifier;
+			}
+
 			if (character == '/')
 			{
 				var multiComment = ReadMultiComment(ch);
@@ -102,6 +109,31 @@ namespace PreviewLibrary.PrattParsers
 			}
 
 			return ReadSymbol(ch);
+		}
+
+		private bool TryRead(Func<TextSpan, TextSpan> readSpan, TextSpan head, out TextSpan token)
+		{
+			token = readSpan(head);
+			return !token.IsEmpty;
+		}
+
+		private TextSpan ReadSqlIdentifier(TextSpan head)
+		{
+			if (PeekCh() == ']')
+			{
+				return TextSpan.Empty;
+			}
+
+			var content = ReadUntil(head, ch =>
+			{
+				return ch != ']';
+			});
+
+			var tail = ConsumeCharacters("]");
+
+			content = Concat(content, tail);
+			content.Type = SqlToken.SqlIdentifier;
+			return content;
 		}
 
 		private TextSpan ReadMultiComment(TextSpan head)
@@ -229,18 +261,54 @@ namespace PreviewLibrary.PrattParsers
 			};
 		}
 
-		//private TextSpan PeekSpan()
-		//{
-		//	if (_index + 1 >= _textSpan.Length)
-		//	{
-		//		return TextSpan.Empty;
-		//	}
-		//	return new TextSpan
-		//	{
-		//		Offset = (_index + 1),
-		//		Length = 1,
-		//	};
-		//}
+		public LineChInfo GetLineCh(TextSpan currentSpan)
+		{
+			if (currentSpan.IsEmpty)
+			{
+				return new LineChInfo
+				{
+					LineNumber = 0,
+					ChNumber = 0,
+					PrevLines = new string[0],
+					Line = String.Empty,
+				};
+			}
+
+			var content = _textSpan.ToString();
+			var previewContent = content.Substring(0, currentSpan.Offset);
+			var lines = previewContent.Split("\r\n");
+			var line = lines[lines.Length - 1];
+			var prevLines = lines.SkipLast(1).TakeLast(3).ToArray();
+			return new LineChInfo
+			{
+				LineNumber = lines.Length,
+				ChNumber = line.Length + 1,
+				PrevLines = prevLines,
+				Line = line
+			};
+		}
+
+		public string GetHelpMessage(TextSpan currentSpan)
+		{
+			var lnch = GetLineCh(currentSpan);
+			var currentToken = GetSpanString(currentSpan);
+
+			var sb = new StringBuilder();
+			sb.AppendLine($"Line:{lnch.LineNumber} Ch:{lnch.ChNumber} CurrToken:'{currentToken}'");
+			sb.AppendLine();
+
+			sb.AppendLine(string.Join("\r\n", lnch.PrevLines));
+
+			var line = lnch.Line.Replace("\t", " ");
+			var spaces = new String(' ', line.Length);
+
+			var down = new String('v', currentToken.Length);
+			sb.AppendLine(spaces + down);
+			sb.AppendLine(line + $"{currentToken}");
+			var upper = new String('^', currentToken.Length);
+			sb.AppendLine(spaces + upper);
+			return sb.ToString();
+		}
 
 		private TextSpan PeekSpan(int offset = 0)
 		{

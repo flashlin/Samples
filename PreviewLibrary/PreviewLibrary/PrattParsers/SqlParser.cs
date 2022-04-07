@@ -2,6 +2,12 @@
 using System;
 using System.Collections.Generic;
 
+using PrefixParselet = System.Func<
+	PreviewLibrary.PrattParsers.TextSpan,
+	PreviewLibrary.PrattParsers.IParser,
+	PreviewLibrary.PrattParsers.Expressions.SqlDom>;
+
+
 namespace PreviewLibrary.PrattParsers
 {
 	public class SqlParser : IParser
@@ -41,10 +47,20 @@ namespace PreviewLibrary.PrattParsers
 				throw new Exception($"expect token but found NONE");
 			}
 
-			var prefixParse = SqlSpec.Instance.Prefix(prefixToken.Type);
+			PrefixParselet prefixParse = null;
+
+			try
+			{
+				prefixParse = SqlSpec.Instance.Prefix(prefixToken.Type);
+			}
+			catch (KeyNotFoundException)
+			{
+				var tokenStr = _scanner.GetSpanString(prefixToken);
+				var message = _scanner.GetHelpMessage(prefixToken);
+				throw new Exception($"Prefix {tokenStr} FAIL\r\n" + message);
+			}
 
 			var left = prefixParse(prefixToken, this);
-
 			while (true)
 			{
 				var infixToken = _scanner.Peek();

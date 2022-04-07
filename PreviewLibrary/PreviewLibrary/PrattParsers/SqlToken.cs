@@ -16,5 +16,6 @@
 		As,
 		From,
 		MultiComment,
+		SqlIdentifier,
 	}
 }

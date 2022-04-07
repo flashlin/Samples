@@ -11,5 +11,6 @@ namespace PreviewLibrary.PrattParsers
 		bool Match(string expect);
 		//bool MatchIgnoreCase(string expect);
 		bool Match(SqlToken expectToken);
+		string GetHelpMessage(TextSpan currentSpan);
 	}
 }
