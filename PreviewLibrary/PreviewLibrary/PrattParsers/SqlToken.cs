@@ -26,5 +26,6 @@
 		Begin,
 		End,
 		Comma,
+		Update,
 	}
 }

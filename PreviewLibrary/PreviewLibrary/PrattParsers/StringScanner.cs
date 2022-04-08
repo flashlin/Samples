@@ -29,6 +29,7 @@ namespace PreviewLibrary.PrattParsers
 			{ "PROCEDURE", SqlToken.Procedure },
 			{ "PROC", SqlToken.Procedure },
 			{ "SELECT", SqlToken.Select },
+			{ "UPDATE", SqlToken.Update },
 			{ "INT", SqlToken.DataType },
 			{ "NVARCHAR", SqlToken.DataType },
 		};

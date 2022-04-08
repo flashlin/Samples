@@ -274,6 +274,15 @@ namespace PreviewLibrary.PrattParsers
 				};
 			};
 
+		public static readonly PrefixParselet Update =
+			(token, parser) =>
+			{
+				return new UpdateSqlDom
+				{
+
+				};
+			};
+
 		public static readonly InfixParselet As =
 			(token, left, parser) =>
 			{
