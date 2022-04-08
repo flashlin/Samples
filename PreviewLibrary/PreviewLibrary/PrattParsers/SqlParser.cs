@@ -138,7 +138,7 @@ namespace PreviewLibrary.PrattParsers
 			{
 				var tokenStr = _scanner.GetSpanString(prefixToken);
 				var message = _scanner.GetHelpMessage(prefixToken);
-				throw new Exception($"Prefix '{tokenStr}' Parse fail.\r\n" + message);
+				throw new ParseException($"Prefix '{tokenStr}' Parse fail.\r\n" + message);
 			}
 
 			return ProcessPrefix(prefixToken, prefixParse, ctxPrecedence);

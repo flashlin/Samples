@@ -74,6 +74,16 @@ namespace TestProject.ScannerTests
 			ThenTokenShouldBe("-- 123");
 		}
 
+		[Fact]
+		public void singleComment_crlf()
+		{
+			var sql = " -- 123\r\n";
+			Scan(sql);
+			ThenTokenShouldBe("-- 123");
+		}
+
+
+
 		protected void ThenTokenShouldBe(string expected)
 		{
 			var token = _scanner.Consume();

@@ -203,13 +203,16 @@ namespace PreviewLibrary.PrattParsers
 
 			var content = ReadUntil(head, ch =>
 			{
-				return ch != '\n';
+				return ch != '\r';
 			});
 
+			if (PeekCh() == '\r')
+			{
+				ConsumeCharacters("\r");
+			}
 			if (PeekCh() == '\n')
 			{
-				var tail = ConsumeCharacters("\n");
-				content = Concat(content, tail);
+				ConsumeCharacters("\n");
 			}
 			content.Type = SqlToken.SingleComment;
 			return content;
