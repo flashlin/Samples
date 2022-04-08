@@ -27,5 +27,6 @@ namespace PreviewLibrary.PrattParsers
 		string Peek();
 		TextSpan Consume(SqlToken expectToken);
 		bool TryConsume(string expectToken, out TextSpan token);
+		bool TryParseBy(Parselet parse, out SqlDom sqlDom);
 	}
 }

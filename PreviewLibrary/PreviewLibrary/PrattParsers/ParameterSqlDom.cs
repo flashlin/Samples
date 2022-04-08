@@ -7,12 +7,14 @@ namespace PreviewLibrary.PrattParsers
 	{
 		public VariableSqlDom Name { get; set; }
 		public SqlDom DataType { get; set; }
+		public SqlDom Size { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
 			Name.WriteToStream(stream);
 			stream.Write(" ");
 			DataType.WriteToStream(stream);
+			Size?.WriteToStream(stream);
 		}
 	}
 }

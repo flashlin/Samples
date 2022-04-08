@@ -93,8 +93,6 @@ namespace PreviewLibrary.PrattParsers
 		public static readonly Parselet Parameter =
 			(parser) =>
 			{
-				var t = parser.Peek();
-
 				if (!parser.Match(SqlToken.Variable))
 				{
 					return null;
@@ -109,12 +107,42 @@ namespace PreviewLibrary.PrattParsers
 
 				var dataType = parser.ParseBy(SqlToken.DataType);
 
+				parser.TryParseBy(Size, out var sizeExpr);
+
 				return new ParameterSqlDom
 				{
 					Name = variableName,
 					DataType = dataType,
+					Size = sizeExpr
 				};
 			};
+
+		public static readonly Parselet Size =
+			(parser) =>
+			{
+				if (!parser.TryConsume(SqlToken.LParen, out _))
+				{
+					return null;
+				}
+
+				var sizeToken = parser.Consume(SqlToken.Number);
+				var size = int.Parse(parser.GetSpanString(sizeToken));
+
+				int? scale = null;
+				if (parser.TryConsume(SqlToken.Comma, out _))
+				{
+					var scaleToken = parser.Consume(SqlToken.Number);
+					scale = int.Parse(parser.GetSpanString(scaleToken));
+				}
+
+				parser.Consume(SqlToken.RParen);
+				return new SizeSqlDom
+				{
+					Size = size,
+					Scale = scale
+				};
+			};
+
 
 		public static readonly PrefixParselet Variable =
 			(token, parser) =>

@@ -26,10 +26,11 @@ namespace PreviewLibrary.PrattParsers
 			{ "CREATE", SqlToken.Create },
 			{ "END", SqlToken.End },
 			{ "FROM", SqlToken.From },
-			{ "INT", SqlToken.DataType },
 			{ "PROCEDURE", SqlToken.Procedure },
 			{ "PROC", SqlToken.Procedure },
 			{ "SELECT", SqlToken.Select },
+			{ "INT", SqlToken.DataType },
+			{ "NVARCHAR", SqlToken.DataType },
 		};
 
 		private ReadOnlyMemory<char> _textSpan;

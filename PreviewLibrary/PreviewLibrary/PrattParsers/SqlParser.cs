@@ -121,7 +121,18 @@ namespace PreviewLibrary.PrattParsers
 
 		public SqlDom ParseBy(Parselet parse)
 		{
-			return parse(this);
+			var sqlDom = parse(this);
+			if( sqlDom == null)
+			{
+				throw new ParseException();
+			}
+			return sqlDom;
+		}
+		
+		public bool TryParseBy(Parselet parse, out SqlDom sqlDom)
+		{
+			sqlDom = parse(this);
+			return sqlDom != null;
 		}
 
 		public SqlDom ParseBy(SqlToken expectPrefixToken)
