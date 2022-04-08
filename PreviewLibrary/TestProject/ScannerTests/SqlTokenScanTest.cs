@@ -51,6 +51,14 @@ namespace TestProject.ScannerTests
 		}
 
 		[Fact]
+		public void variable()
+		{
+			var sql = " @name";
+			Scan(sql);
+			ThenTokenShouldBe("@name");
+		}
+
+		[Fact]
 		public void multiComment()
 		{
 			var sql = " /* 12*34 **/";

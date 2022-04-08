@@ -132,10 +132,10 @@ namespace PreviewLibrary.PrattParsers
 
 		private TextSpan ReadVariable(TextSpan head)
 		{
-			var rgSpaces = new Regex(@"^\S$");
+			var rgNonSpaces = new Regex(@"^\S$");
 			var content = ReadUntil(head, ch =>
 			{
-				return !rgSpaces.Match($"{ch}").Success;
+				return rgNonSpaces.Match($"{ch}").Success;
 			});
 			content.Type = SqlToken.Variable;
 			return content;

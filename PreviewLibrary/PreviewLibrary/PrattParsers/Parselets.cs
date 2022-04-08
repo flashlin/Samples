@@ -12,6 +12,7 @@ using InfixParselet = System.Func<
 	PreviewLibrary.PrattParsers.Expressions.SqlDom>;
 using System.Collections.Immutable;
 using PreviewLibrary.PrattParsers.Expressions;
+using PreviewLibrary.Exceptions;
 
 namespace PreviewLibrary.PrattParsers
 {
@@ -228,7 +229,7 @@ namespace PreviewLibrary.PrattParsers
 			  {
 				  return CreateProcedure(token, parser);
 			  }
-			  throw new System.Exception("");
+			  throw new ParseException("");
 		  };
 
 		public static readonly PrefixParselet CreateProcedure =
@@ -242,11 +243,12 @@ namespace PreviewLibrary.PrattParsers
 			  var columns = ImmutableArray.CreateBuilder<SqlDom>();
 			  do
 			  {
-				  columns.Add(parser.ParseExp(0));
+				  columns.Add(parser.ParseBy(SqlToken.Variable, 0));
+
 			  } while (parser.Match(","));
-			  return new SelectNoFromSqlDom
+			  return new CreateProcedureSqlDom
 			  {
-				  Columns = columns
+				  Name = procedureName,
 			  };
 		  };
 	}
