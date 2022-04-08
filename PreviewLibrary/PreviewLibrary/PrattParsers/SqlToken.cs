@@ -25,5 +25,6 @@
 		SingleComment,
 		Begin,
 		End,
+		Comma,
 	}
 }

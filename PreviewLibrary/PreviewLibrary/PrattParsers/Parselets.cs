@@ -294,7 +294,7 @@ namespace PreviewLibrary.PrattParsers
 			  {
 				  columns.Add(parser.ParseBy(Parameter));
 
-			  } while (parser.Match(","));
+			  } while (parser.TryConsume(",", out _));
 
 			  parser.Consume(SqlToken.As);
 			  parser.Consume(SqlToken.Begin);

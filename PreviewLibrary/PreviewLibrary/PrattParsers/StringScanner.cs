@@ -19,6 +19,7 @@ namespace PreviewLibrary.PrattParsers
 			{ "(", SqlToken.LParen },
 			{ ")", SqlToken.RParen },
 			{ ".", SqlToken.Dot },
+			{ ",", SqlToken.Comma },
 			{ ">=", SqlToken.GreaterThanOrEqual },
 			{ "AS", SqlToken.As },
 			{ "BEGIN", SqlToken.Begin },

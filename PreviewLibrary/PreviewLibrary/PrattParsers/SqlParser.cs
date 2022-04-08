@@ -56,6 +56,17 @@ namespace PreviewLibrary.PrattParsers
 			return token;
 		}
 
+		public bool TryConsume(string expectToken, out TextSpan token)
+		{
+			if (!Match(expectToken))
+			{
+				token = TextSpan.Empty;
+				return false;
+			}
+			token = _scanner.Consume();
+			return true;
+		}
+
 		public bool TryConsume(SqlToken expectToken, out TextSpan token)
 		{
 			if (!Match(expectToken))
@@ -124,7 +135,7 @@ namespace PreviewLibrary.PrattParsers
 			if (prefixToken.Type != expectPrefixToken)
 			{
 				var prefixTokenStr = _scanner.GetSpanString(prefixToken);
-				throw new ParseException($"expect '{expectPrefixToken}' but found '{prefixTokenStr}' as '{prefixToken.Type}'");
+				throw new ParseException($"expect TokenType='{expectPrefixToken}' but found '{prefixTokenStr}' as TokenType='{prefixToken.Type}'");
 			}
 
 			var prefixParse = SqlSpec.Instance.Prefix(expectPrefixToken);
