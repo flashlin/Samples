@@ -24,6 +24,7 @@ namespace PreviewLibrary.PrattParsers
 			{ "PROCEDURE", SqlToken.Procedure },
 			{ "PROC", SqlToken.Procedure },
 			{ "SELECT", SqlToken.Select },
+			{ "INT", SqlToken.DataType },
 		};
 
 		private ReadOnlyMemory<char> _textSpan;

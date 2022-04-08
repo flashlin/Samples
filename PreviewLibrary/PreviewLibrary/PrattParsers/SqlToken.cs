@@ -21,5 +21,6 @@
 		Procedure,
 		Dot,
 		Variable,
+		DataType,
 	}
 }
