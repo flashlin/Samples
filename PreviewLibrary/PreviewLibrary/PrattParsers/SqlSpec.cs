@@ -23,6 +23,7 @@ namespace PreviewLibrary.PrattParsers
 			 // Register the ones that need special parselets.
 			 { SqlToken.Number, Parselets.Number },
 			 { SqlToken.Identifier, Parselets.Identifier },
+			 { SqlToken.Variable, Parselets.Variable },
 			 { SqlToken.SqlIdentifier, Parselets.ObjectId },
 			 { SqlToken.MultiComment, Parselets.MultiComment },
 			 //{ Assign   , Precedence.Assignment, Parselets.Assign },

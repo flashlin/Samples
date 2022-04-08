@@ -66,6 +66,23 @@ namespace PreviewLibrary.PrattParsers
 				return identifier;
 			};
 
+		public static readonly PrefixParselet Variable =
+			(token, parser) =>
+			{
+				var variableName = new VariableSqlDom
+				{
+					Value = parser.GetSpanString(token)
+				};
+
+				if (parser.TryParseBy<AliasSqlDom>(SqlToken.Identifier, 0, out var aliasName))
+				{
+					aliasName.Left = variableName;
+					return aliasName;
+				}
+
+				return variableName;
+			};
+
 		public static readonly PrefixParselet ObjectId =
 			(token, parser) =>
 			{

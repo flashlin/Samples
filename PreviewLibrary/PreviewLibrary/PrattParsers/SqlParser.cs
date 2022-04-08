@@ -1,4 +1,5 @@
-﻿using PreviewLibrary.PrattParsers.Expressions;
+﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.PrattParsers.Expressions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -91,16 +92,33 @@ namespace PreviewLibrary.PrattParsers
 			var prefixToken = _scanner.Consume();
 			if (prefixToken.IsEmpty)
 			{
-				throw new Exception($"expect token but found NONE");
+				throw new ParseException($"expect token but found NONE");
 			}
 
-			if( prefixToken.Type != expectPrefixToken)
+			if (prefixToken.Type != expectPrefixToken)
 			{
-				throw new Exception($"expect '{expectPrefixToken}' but found '{prefixToken.Type}'");
+				throw new ParseException($"expect '{expectPrefixToken}' but found '{prefixToken.Type}'");
 			}
 
 			PrefixParselet prefixParse = SqlSpec.Instance.Prefix(expectPrefixToken);
 			return ProcessPrefix(prefixToken, prefixParse, ctxPrecedence);
+		}
+
+		public bool TryParseBy<TSqlDom>(SqlToken expectPrefixToken, int ctxPrecedence, out TSqlDom sqlDom)
+			where TSqlDom : SqlDom
+		{
+			var startIndex = _scanner.GetOffset();
+			try
+			{
+				sqlDom = (TSqlDom)ParseBy(expectPrefixToken, ctxPrecedence);
+				return true;
+			}
+			catch (ParseException)
+			{
+				_scanner.SetOffset(startIndex);
+				sqlDom = default;
+				return false;
+			}
 		}
 
 		public SqlDom ParseExp(int ctxPrecedence)

@@ -15,5 +15,7 @@ namespace PreviewLibrary.PrattParsers
 		bool TryConsumes(out List<TextSpan> tokenList, params SqlToken[] expectTokens);
 		bool TryConsumes(out List<TextSpan> tokenList, params SqlToken[][] expectTokens);
 		SqlDom ParseBy(SqlToken expectPrefixToken, int ctxPrecedence);
+		bool TryParseBy<TSqlDom>(SqlToken expectPrefixToken, int ctxPrecedence, out TSqlDom sqlDom)
+			where TSqlDom: SqlDom;
 	}
 }
