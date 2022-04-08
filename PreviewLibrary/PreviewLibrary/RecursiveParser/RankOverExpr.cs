@@ -2,7 +2,7 @@
 using PreviewLibrary.Expressions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class RankOverExpr : SqlExpr
 	{
@@ -13,12 +13,12 @@ namespace PreviewLibrary
 
 		public override string ToString()
 		{
-			var sb= new StringBuilder();
+			var sb = new StringBuilder();
 			sb.AppendLine("RANK() OVER(");
-			if(PartitionBy != null)
+			if (PartitionBy != null)
 			{
 				sb.Append($"{PartitionBy}");
-				if( string.IsNullOrEmpty(PartitionDescending) )
+				if (string.IsNullOrEmpty(PartitionDescending))
 				{
 					sb.AppendLine($" {PartitionDescending}");
 				}
@@ -26,7 +26,7 @@ namespace PreviewLibrary
 			sb.Append($"ORDER BY {OrderByList}");
 			sb.AppendLine();
 			sb.Append(")");
-			if( AliasName != null )
+			if (AliasName != null)
 			{
 				sb.Append($" AS {AliasName}");
 			}

@@ -1,6 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class IdentExpr : SqlExpr
 	{
@@ -11,16 +11,16 @@ namespace PreviewLibrary
 
 		public override string ToString()
 		{
-			if( !string.IsNullOrEmpty(ServerId) )
-			{ 
+			if (!string.IsNullOrEmpty(ServerId))
+			{
 				return $"{ServerId}.{DatabaseId}.{ObjectId}.{Name}";
 			}
-			if( !string.IsNullOrEmpty(DatabaseId) )
-			{ 
+			if (!string.IsNullOrEmpty(DatabaseId))
+			{
 				return $"{DatabaseId}.{ObjectId}.{Name}";
 			}
-			if( !string.IsNullOrEmpty(ObjectId) )
-			{ 
+			if (!string.IsNullOrEmpty(ObjectId))
+			{
 				return $"{ObjectId}.{Name}";
 			}
 			return $"{Name}";

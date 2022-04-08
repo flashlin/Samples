@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class SelectExpr : SqlExpr
 	{
@@ -23,13 +23,13 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append($"SELECT");
-			if( TopExpr != null)
+			if (TopExpr != null)
 			{
 				sb.Append($" {TopExpr}");
 			}
 			sb.Append($" {Fields}");
 
-			if(IntoNewTable != null)
+			if (IntoNewTable != null)
 			{
 				sb.AppendLine();
 				sb.Append($"{IntoNewTable}");
@@ -40,7 +40,7 @@ namespace PreviewLibrary
 				sb.Append($" FROM {From}");
 			}
 
-			if( FromJoinList != null && FromJoinList.Items.Count > 0)
+			if (FromJoinList != null && FromJoinList.Items.Count > 0)
 			{
 				sb.AppendLine();
 				sb.AppendLine($"{FromJoinList}");
@@ -58,7 +58,7 @@ namespace PreviewLibrary
 			{
 				sb.Append($"\r\n\t{GroupByExpr}");
 			}
-			if( OrderByExpr != null)
+			if (OrderByExpr != null)
 			{
 				sb.Append($"\r\n\tORDER BY {OrderByExpr}");
 			}

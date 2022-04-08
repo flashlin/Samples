@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class CommitExpr : SqlExpr
 	{
@@ -11,7 +11,7 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append($"COMMIT");
-			if(!string.IsNullOrEmpty(ActionName))
+			if (!string.IsNullOrEmpty(ActionName))
 			{
 				sb.Append($" {ActionName}");
 			}

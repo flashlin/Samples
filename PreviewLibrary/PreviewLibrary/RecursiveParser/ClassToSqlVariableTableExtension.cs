@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using T1.Standard.DynamicCode;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public static class ClassToSqlVariableTableExtension
 	{

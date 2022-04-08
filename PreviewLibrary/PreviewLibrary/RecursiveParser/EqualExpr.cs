@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class EqualExpr : SqlExpr
 	{

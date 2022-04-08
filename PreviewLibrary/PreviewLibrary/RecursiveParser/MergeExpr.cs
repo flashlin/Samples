@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class MergeExpr : SqlExpr
 	{
@@ -19,31 +19,31 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append("MERGE");
-			if(!string.IsNullOrEmpty(IntoToken))
+			if (!string.IsNullOrEmpty(IntoToken))
 			{
 				sb.Append(" INTO");
 			}
 			sb.Append($" {TargetTable}");
-			if(TargetAlias != null)
+			if (TargetAlias != null)
 			{
 				sb.Append($" {TargetAlias}");
 			}
 			sb.AppendLine();
 			sb.Append($"ON {SourceTable}");
-			if(SourceAlias != null)
+			if (SourceAlias != null)
 			{
 				sb.Append($" {SourceAlias}");
 			}
 			sb.AppendLine();
-			if(WhenMatched != null)
+			if (WhenMatched != null)
 			{
 				sb.AppendLine($"{WhenMatched}");
 			}
-			if(WhenNotMatched != null)
+			if (WhenNotMatched != null)
 			{
 				sb.AppendLine($"{WhenNotMatched}");
 			}
-			if(WhenNotMatchedBySource != null)
+			if (WhenNotMatchedBySource != null)
 			{
 				sb.AppendLine($"{WhenNotMatchedBySource}");
 			}

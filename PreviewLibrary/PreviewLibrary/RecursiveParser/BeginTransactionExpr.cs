@@ -1,6 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class BeginTransactionExpr : SqlExpr
 	{
@@ -9,7 +9,7 @@ namespace PreviewLibrary
 			return $"BEGIN TRANSACTION";
 		}
 	}
-	
+
 	public class RollbackTransactionExpr : SqlExpr
 	{
 		public override string ToString()

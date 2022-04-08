@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class DeleteExpr : SqlExpr
 	{
@@ -17,31 +17,31 @@ namespace PreviewLibrary
 			var sb = new StringBuilder();
 			sb.Append($"DELETE");
 
-			if(Top != null)
+			if (Top != null)
 			{
 				sb.Append($" {Top}");
 			}
 
 			sb.Append($" FROM {Table}");
 
-			if(WithOptions != null)
+			if (WithOptions != null)
 			{
 				sb.Append($" {WithOptions}");
 			}
 
-			if(OutputExpr != null)
+			if (OutputExpr != null)
 			{
 				sb.AppendLine();
 				sb.Append($"{OutputExpr}");
 			}
 
-			if(IntoExpr != null)
+			if (IntoExpr != null)
 			{
 				sb.AppendLine();
 				sb.Append($"{IntoExpr}");
 			}
 
-			if(WhereExpr != null)
+			if (WhereExpr != null)
 			{
 				sb.Append($" WHERE {WhereExpr}");
 			}

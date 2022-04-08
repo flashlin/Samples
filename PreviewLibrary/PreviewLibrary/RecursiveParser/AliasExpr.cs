@@ -1,6 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class AliasExpr : SqlExpr
 	{
@@ -9,7 +9,7 @@ namespace PreviewLibrary
 
 		public override string ToString()
 		{
-			if( AliasName != null )
+			if (AliasName != null)
 			{
 				return $"{Left} AS {AliasName}";
 			}

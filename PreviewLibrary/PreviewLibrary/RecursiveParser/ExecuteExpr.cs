@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class ExecuteExpr : SqlExpr
 	{
@@ -15,12 +15,12 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append($"{ExecName.ToUpper()}");
-			
+
 			if (!string.IsNullOrEmpty(LeftSide))
 			{
 				sb.Append($" {LeftSide} =");
 			}
-			
+
 			sb.Append($" {Method}");
 
 			if (Arguments != null)

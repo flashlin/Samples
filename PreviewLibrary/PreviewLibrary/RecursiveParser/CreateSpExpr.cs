@@ -4,7 +4,7 @@ using PreviewLibrary.Extensions;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class CreateSpExpr : SqlExpr
 	{

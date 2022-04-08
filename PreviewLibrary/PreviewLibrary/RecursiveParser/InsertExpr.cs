@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class InsertExpr : SqlExpr
 	{
@@ -17,12 +17,12 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append("INSERT");
-			if(IntoToggle)
+			if (IntoToggle)
 			{
 				sb.Append(" INTO");
 			}
 			sb.Append($" {Table}");
-			if(Fields != null)
+			if (Fields != null)
 			{
 				sb.Append($"({Fields})");
 			}

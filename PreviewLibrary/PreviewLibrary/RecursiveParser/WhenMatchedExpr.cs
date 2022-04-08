@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Collections.Generic;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class WhenMatchedExpr : SqlExpr
 	{

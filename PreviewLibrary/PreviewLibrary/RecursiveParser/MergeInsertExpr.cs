@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class MergeInsertExpr : SqlExpr
 	{

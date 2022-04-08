@@ -1,6 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class DeclareVariableExpr : SqlExpr
 	{
@@ -11,7 +11,7 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var defaultValue = "";
-			if(DefaultValue != null)
+			if (DefaultValue != null)
 			{
 				defaultValue = " = " + DefaultValue.ToString();
 			}

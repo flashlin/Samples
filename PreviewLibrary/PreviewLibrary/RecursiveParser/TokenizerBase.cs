@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public abstract class TokenizerBase : LineChInfo
 	{
@@ -63,7 +63,7 @@ namespace PreviewLibrary
 		{
 			get
 			{
-				return Int32.TryParse(Text, out var _);
+				return int.TryParse(Text, out var _);
 			}
 		}
 
@@ -185,7 +185,7 @@ namespace PreviewLibrary
 		public bool Try(string text, out string output)
 		{
 			output = null;
-			var success = (Text == text);
+			var success = Text == text;
 			if (success)
 			{
 				output = Text;
@@ -244,7 +244,7 @@ namespace PreviewLibrary
 
 		public bool TryInteger(out int output)
 		{
-			var success = Int32.TryParse(Text, out output);
+			var success = int.TryParse(Text, out output);
 			if (success)
 			{
 				Move();
@@ -261,7 +261,7 @@ namespace PreviewLibrary
 					LineNumber = 0,
 					ChNumber = 0,
 					PrevLines = new string[0],
-					Line = String.Empty,
+					Line = string.Empty,
 				};
 			}
 

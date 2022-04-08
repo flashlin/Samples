@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class SqlParser
 	{
@@ -1343,12 +1343,12 @@ namespace PreviewLibrary
 			sb.AppendLine(string.Join("\r\n", lnch.PrevLines));
 
 			var line = lnch.Line.Replace("\t", " ");
-			var spaces = new String(' ', line.Length);
+			var spaces = new string(' ', line.Length);
 
-			var down = new String('v', _token.Text.Length);
+			var down = new string('v', _token.Text.Length);
 			sb.AppendLine(spaces + down);
 			sb.AppendLine(line + $"{_token.Text}");
-			var upper = new String('^', _token.Text.Length);
+			var upper = new string('^', _token.Text.Length);
 			sb.AppendLine(spaces + upper);
 			return sb.ToString();
 		}
@@ -2755,7 +2755,7 @@ namespace PreviewLibrary
 
 			return new OutputColumnExpr
 			{
-				ActionName = String.Empty,
+				ActionName = string.Empty,
 				Column = outputExpr,
 				Alias = aliasName
 			};
@@ -3179,7 +3179,7 @@ namespace PreviewLibrary
 			{
 				throw new PrecursorException("<Float>");
 			}
-			var decimalValue = Decimal.Parse(decimalStr);
+			var decimalValue = decimal.Parse(decimalStr);
 			return new DecimalExpr
 			{
 				Value = decimalValue,
@@ -3411,7 +3411,7 @@ namespace PreviewLibrary
 			}
 			catch (PrecursorException)
 			{
-				return default(T);
+				return default;
 			}
 		}
 
@@ -3423,7 +3423,7 @@ namespace PreviewLibrary
 			}
 			catch (PrecursorException)
 			{
-				return default(T);
+				return default;
 			}
 		}
 
@@ -3435,7 +3435,7 @@ namespace PreviewLibrary
 			}
 			catch (PrecursorException)
 			{
-				return default(T);
+				return default;
 			}
 		}
 
@@ -3443,7 +3443,7 @@ namespace PreviewLibrary
 		{
 			try
 			{
-				if (_token.Text == String.Empty)
+				if (_token.Text == string.Empty)
 				{
 					throw new PrecursorException();
 				}
@@ -3453,7 +3453,7 @@ namespace PreviewLibrary
 			}
 			catch (PrecursorException)
 			{
-				output = default(T);
+				output = default;
 				return false;
 			}
 		}

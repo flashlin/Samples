@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 using TestProject.Helpers;
+using PreviewLibrary.RecursiveParser;
 
 namespace TestProject
 {

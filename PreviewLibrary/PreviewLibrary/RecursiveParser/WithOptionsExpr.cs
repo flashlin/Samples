@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class WithOptionsExpr
 	{

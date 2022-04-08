@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Linq;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class SqlFuncExpr : SqlExpr
 	{
@@ -11,7 +11,7 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var args = string.Join(",", Arguments.Select(x => $"{x}"));
-			if( args == string.Empty )
+			if (args == string.Empty)
 			{
 				return $"{Name}()";
 			}

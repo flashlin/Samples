@@ -10,6 +10,7 @@ using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
 using System.IO;
 using TestProject.Helpers;
+using PreviewLibrary.RecursiveParser;
 
 namespace TestProject
 {

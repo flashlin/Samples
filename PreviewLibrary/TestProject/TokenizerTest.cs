@@ -1,5 +1,6 @@
 ﻿using ExpectedObjects;
 using PreviewLibrary;
+using PreviewLibrary.RecursiveParser;
 using Xunit;
 
 namespace TestProject

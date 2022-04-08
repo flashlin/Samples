@@ -58,7 +58,7 @@ SELECT 2 FROM tb2
 		public void select_field()
 		{
 			var sql = "select name";
-			var expr = new SqlParser().Parse(sql);
+			var expr = _sqlParser.Parse(sql);
 
 			"SELECT name".ShouldEqual(expr);
 		}
@@ -75,7 +75,7 @@ SELECT 2 FROM tb2
 		public void select_tableDotName()
 		{
 			var sql = "select tb1.name";
-			var expr = new SqlParser().Parse(sql);
+			var expr = _sqlParser.Parse(sql);
 
 			"SELECT tb1.name".ShouldEqual(expr);
 		}
@@ -84,7 +84,7 @@ SELECT 2 FROM tb2
 		public void select_column1_column2()
 		{
 			var sql = "select id, name";
-			var expr = new SqlParser().Parse(sql);
+			var expr = _sqlParser.Parse(sql);
 
 			"SELECT id,name".ShouldEqual(expr);
 		}
@@ -101,7 +101,7 @@ SELECT 2 FROM tb2
 		public void select_1()
 		{
 			var sql = "select 1";
-			var expr = new SqlParser().Parse(sql);
+			var expr = _sqlParser.Parse(sql);
 
 			"SELECT 1".ShouldEqual(expr);
 		}
@@ -186,7 +186,7 @@ SELECT 2".ShouldEqual(expr);
 		public void select_navigate_1()
 		{
 			var sql = "select - 1";
-			var expr = new SqlParser().Parse(sql);
+			var expr = _sqlParser.Parse(sql);
 
 			"SELECT -1".ShouldEqual(expr);
 		}

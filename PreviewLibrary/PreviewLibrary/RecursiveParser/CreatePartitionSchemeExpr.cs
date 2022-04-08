@@ -2,7 +2,7 @@
 using PreviewLibrary.Expressions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class CreatePartitionSchemeExpr : SqlExpr
 	{

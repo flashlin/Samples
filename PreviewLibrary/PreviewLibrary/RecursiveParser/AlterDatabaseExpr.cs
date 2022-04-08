@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class AlterDatabaseExpr : SqlExpr
 	{

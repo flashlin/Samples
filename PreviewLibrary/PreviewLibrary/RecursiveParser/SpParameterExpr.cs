@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class SpParameterExpr : SqlExpr
 	{
@@ -13,11 +13,11 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append($"{Name}");
-			if(Value != null)
+			if (Value != null)
 			{
 				sb.Append($"={Value}");
 			}
-			if(!string.IsNullOrEmpty(OutToken))
+			if (!string.IsNullOrEmpty(OutToken))
 			{
 				sb.Append(" " + OutToken);
 			}

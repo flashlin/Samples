@@ -7,7 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class SqlTokenizer : TokenizerBase
 	{
@@ -18,7 +18,7 @@ namespace PreviewLibrary
 			{
 				if (char.IsLetter(word))
 				{
-					sb.Append($"[{Char.ToLower(word)}{Char.ToUpper(word)}]");
+					sb.Append($"[{char.ToLower(word)}{char.ToUpper(word)}]");
 				}
 				else if (char.IsDigit(word))
 				{
@@ -361,7 +361,7 @@ namespace PreviewLibrary
 				{
 					name = patternName;
 				}
-				throw new System.Exception($"Expect match '{name}' pattern, but got '{Text}'");
+				throw new Exception($"Expect match '{name}' pattern, but got '{Text}'");
 			}
 			var text = Text;
 			Move();

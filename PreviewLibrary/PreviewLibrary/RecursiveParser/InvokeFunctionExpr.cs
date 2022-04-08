@@ -2,7 +2,7 @@
 using PreviewLibrary.Expressions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class InvokeFunctionExpr : SqlExpr
 	{
@@ -13,7 +13,7 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append($"{Name}(");
-			if(ArgumentsList != null && ArgumentsList.Items.Count > 0)
+			if (ArgumentsList != null && ArgumentsList.Items.Count > 0)
 			{
 				sb.Append($" {ArgumentsList} ");
 			}

@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class InsertFromSelectExpr : SqlExpr
 	{
@@ -15,26 +15,26 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append("INSERT");
-			if( IntoToggle)
+			if (IntoToggle)
 			{
 				sb.Append(" INTO");
 			}
 			sb.Append($" {Table}");
 
-			if(OutputExpr != null)
+			if (OutputExpr != null)
 			{
 				sb.AppendLine();
 				sb.Append($"{OutputExpr}");
 			}
-			
-			if(IntoExpr != null)
+
+			if (IntoExpr != null)
 			{
 				sb.AppendLine();
 				sb.Append($"{IntoExpr}");
 			}
 
 
-			if( FromSelect != null)
+			if (FromSelect != null)
 			{
 				sb.Append($" {FromSelect}");
 			}

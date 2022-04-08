@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class TableExpr : SqlExpr
 	{
@@ -19,7 +19,7 @@ namespace PreviewLibrary
 			{
 				sb.Append($" as {AliasName}");
 			}
-			if( WithOptions != null)
+			if (WithOptions != null)
 			{
 				sb.Append($" {WithOptions}");
 			}

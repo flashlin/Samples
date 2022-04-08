@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class InfixToPostfixOptions<T>
 	{

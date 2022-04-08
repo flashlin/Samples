@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class InnerJoinExpr : SqlExpr
 	{
@@ -16,16 +16,16 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append($"{JoinType}");
-			if(!string.IsNullOrEmpty(OuterToken))
+			if (!string.IsNullOrEmpty(OuterToken))
 			{
 				sb.Append($" {OuterToken}");
 			}
 			sb.Append($" JOIN {Table}");
-			if( AliasName != null)
+			if (AliasName != null)
 			{
 				sb.Append($" AS {AliasName}");
 			}
-			if(WithOptions != null)
+			if (WithOptions != null)
 			{
 				sb.Append($" {WithOptions}");
 			}

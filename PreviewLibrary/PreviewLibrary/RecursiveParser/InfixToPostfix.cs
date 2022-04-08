@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class InfixToPostfix<T>
 	{
@@ -11,7 +11,7 @@ namespace PreviewLibrary
 
 		public InfixToPostfix(InfixToPostfixOptions<T> options)
 		{
-			this._options = options;
+			_options = options;
 			foreach (var item in _options.Operators.Reverse().Select((value, index) => new { value, index }))
 			{
 				_operatorsPriority[item.value] = item.index + 1;
@@ -22,7 +22,7 @@ namespace PreviewLibrary
 		{
 			return _operatorsPriority.ContainsKey(token);
 		}
-		
+
 		public T Parse()
 		{
 			var postfixExprs = new List<object>();

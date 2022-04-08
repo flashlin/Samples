@@ -4,6 +4,7 @@ using ExpectedObjects;
 using Xunit.Abstractions;
 using PreviewLibrary.Exceptions;
 using TestProject.Helpers;
+using PreviewLibrary.RecursiveParser;
 
 namespace TestProject
 {

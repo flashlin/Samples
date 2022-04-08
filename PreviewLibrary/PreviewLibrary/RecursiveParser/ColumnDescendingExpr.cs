@@ -1,6 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class ColumnDescendingExpr : SqlExpr
 	{
@@ -9,7 +9,7 @@ namespace PreviewLibrary
 
 		public override string ToString()
 		{
-			if(string.IsNullOrEmpty(Descending))
+			if (string.IsNullOrEmpty(Descending))
 			{
 				return $"{Name}";
 			}

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class UpdateExpr : SqlExpr
 	{
@@ -41,7 +41,7 @@ namespace PreviewLibrary
 				sb.Append($"{field}");
 			}
 
-			if(OutputExpr != null)
+			if (OutputExpr != null)
 			{
 				sb.AppendLine();
 				sb.Append($"{OutputExpr}");

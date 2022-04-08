@@ -1,6 +1,6 @@
-﻿using PreviewLibrary;
-using PreviewLibrary.Exceptions;
+﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
+using PreviewLibrary.RecursiveParser;
 using System.Linq;
 using Xunit.Abstractions;
 

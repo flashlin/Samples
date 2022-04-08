@@ -8,6 +8,7 @@ using System.Linq;
 using Xunit.Abstractions;
 using TestProject.Helpers;
 using PreviewLibrary.Extensions;
+using PreviewLibrary.RecursiveParser;
 
 namespace TestProject
 {

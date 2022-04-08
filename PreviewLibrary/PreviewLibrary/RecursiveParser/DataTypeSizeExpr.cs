@@ -1,6 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class DataTypeSizeExpr : SqlExpr
 	{
@@ -10,7 +10,7 @@ namespace PreviewLibrary
 		public override string ToString()
 		{
 			var scale = "";
-			if( ScaleSize != null)
+			if (ScaleSize != null)
 			{
 				scale = $",{ScaleSize}";
 			}

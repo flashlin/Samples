@@ -2,7 +2,7 @@
 using PreviewLibrary.Expressions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class WithAsItemExpr : SqlExpr
 	{
@@ -18,7 +18,7 @@ namespace PreviewLibrary
 			{
 				sb.Append($"{TableName}");
 			}
-			if ( Columns!= null && !Columns.IsEmpty())
+			if (Columns != null && !Columns.IsEmpty())
 			{
 				sb.Append($" ({Columns})");
 			}

@@ -2,7 +2,7 @@
 using PreviewLibrary.Expressions;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class GrantExecuteOnExpr : SqlExpr
 	{
@@ -15,7 +15,7 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append($"GRANT {ExecAction} ON {OnObjectId} TO {ToRoleIds}");
-			if( AsDbo != null)
+			if (AsDbo != null)
 			{
 				sb.Append($" AS {AsDbo}");
 			}

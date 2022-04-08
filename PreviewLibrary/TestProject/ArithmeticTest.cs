@@ -1,6 +1,7 @@
 ﻿using ExpectedObjects;
 using PreviewLibrary;
 using PreviewLibrary.Exceptions;
+using PreviewLibrary.RecursiveParser;
 using TestProject.Helpers;
 using Xunit;
 using Xunit.Abstractions;

@@ -3,7 +3,7 @@ using PreviewLibrary.Extensions;
 using System.Collections.Generic;
 using System.Text;
 
-namespace PreviewLibrary
+namespace PreviewLibrary.RecursiveParser
 {
 	public class WhenNotMatchedExpr : SqlExpr
 	{
@@ -15,7 +15,7 @@ namespace PreviewLibrary
 		{
 			var sb = new StringBuilder();
 			sb.Append($"WHEN NOT MATCHED");
-			if(!string.IsNullOrEmpty(ByToken))
+			if (!string.IsNullOrEmpty(ByToken))
 			{
 				sb.Append($" {ByToken}");
 			}
