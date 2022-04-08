@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using PreviewLibrary.Exceptions;
+using System.Buffers;
 using System.Text;
 
 namespace PreviewLibrary.PrattParsers
@@ -14,5 +15,7 @@ namespace PreviewLibrary.PrattParsers
 		string GetHelpMessage(TextSpan currentSpan);
 		int GetOffset();
 		void SetOffset(int offset);
+		ParseException CreateParseException(TextSpan currentSpan);
+		string PeekString();
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using PreviewLibrary.Extensions;
 using PreviewLibrary.PrattParsers;
 using PreviewLibrary.PrattParsers.Expressions;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace TestProject.ParserTests
 		
 		protected void ThenExprShouldBe(string expect)
 		{
-			_expr.ToString().Should().Be(expect);
+			_expr.ToString().MergeToCode().Should().Be(expect.MergeToCode());
 		}
 	}
 }

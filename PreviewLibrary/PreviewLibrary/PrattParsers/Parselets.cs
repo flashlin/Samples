@@ -10,6 +10,11 @@ using InfixParselet = System.Func<
 	PreviewLibrary.PrattParsers.Expressions.SqlDom,
 	PreviewLibrary.PrattParsers.IParser,
 	PreviewLibrary.PrattParsers.Expressions.SqlDom>;
+
+using Parselet = System.Func<
+	PreviewLibrary.PrattParsers.IParser,
+	PreviewLibrary.PrattParsers.Expressions.SqlDom>;
+
 using System.Collections.Immutable;
 using PreviewLibrary.PrattParsers.Expressions;
 using PreviewLibrary.Exceptions;
@@ -22,6 +27,15 @@ namespace PreviewLibrary.PrattParsers
 			(token, parser) =>
 			{
 				return new MultiCommentSqlDom
+				{
+					Content = parser.GetSpanString(token),
+				};
+			};
+
+		public static readonly PrefixParselet SingleComment =
+			(token, parser) =>
+			{
+				return new SingleCommentSqlDom
 				{
 					Content = parser.GetSpanString(token),
 				};
@@ -55,16 +69,51 @@ namespace PreviewLibrary.PrattParsers
 					Value = parser.GetSpanString(token)
 				};
 
-				if (parser.Match(SqlToken.Identifier))
-				{
-					return new AliasSqlDom
-					{
-						Left = identifier,
-						AliasName = parser.ParseExp(0)
-					};
-				}
+				//if (parser.Match(SqlToken.Identifier))
+				//{
+				//	return new AliasSqlDom
+				//	{
+				//		Left = identifier,
+				//		AliasName = parser.ParseExp(0)
+				//	};
+				//}
 
 				return identifier;
+			};
+
+		public static readonly PrefixParselet DataType =
+			(token, parser) =>
+			{
+				return new DataTypeSqlDom
+				{
+					DataType = parser.GetSpanString(token)
+				};
+			};
+
+		public static readonly Parselet Parameter =
+			(parser) =>
+			{
+				var t = parser.Peek();
+
+				if (!parser.Match(SqlToken.Variable))
+				{
+					return null;
+				}
+
+				var token = parser.Consume();
+
+				var variableName = new VariableSqlDom
+				{
+					Value = parser.GetSpanString(token)
+				};
+
+				var dataType = parser.ParseBy(SqlToken.DataType);
+
+				return new ParameterSqlDom
+				{
+					Name = variableName,
+					DataType = dataType,
+				};
 			};
 
 		public static readonly PrefixParselet Variable =
@@ -75,7 +124,7 @@ namespace PreviewLibrary.PrattParsers
 					Value = parser.GetSpanString(token)
 				};
 
-				if (parser.TryParseBy<AliasSqlDom>(SqlToken.Identifier, 0, out var aliasName))
+				if (parser.TryParseBy<AliasSqlDom>(SqlToken.Identifier, out var aliasName))
 				{
 					aliasName.Left = variableName;
 					return aliasName;
@@ -229,7 +278,7 @@ namespace PreviewLibrary.PrattParsers
 			  {
 				  return CreateProcedure(token, parser);
 			  }
-			  throw new ParseException("");
+			  throw parser.CreateParseException(token);
 		  };
 
 		public static readonly PrefixParselet CreateProcedure =
@@ -238,17 +287,27 @@ namespace PreviewLibrary.PrattParsers
 			  var procToken = parser.Consume();
 			  var createProcToken = token.Concat(procToken);
 
-			  var procedureName = parser.ParseBy(SqlToken.SqlIdentifier, 0);
+			  var procedureName = parser.ParseByAny(SqlToken.SqlIdentifier, SqlToken.Identifier);
 
 			  var columns = ImmutableArray.CreateBuilder<SqlDom>();
 			  do
 			  {
-				  columns.Add(parser.ParseBy(SqlToken.Variable, 0));
+				  columns.Add(parser.ParseBy(Parameter));
 
 			  } while (parser.Match(","));
+
+			  parser.Consume(SqlToken.As);
+			  parser.Consume(SqlToken.Begin);
+
+			  var body = parser.ParseExp(0);
+
+			  parser.Consume(SqlToken.End);
+
 			  return new CreateProcedureSqlDom
 			  {
 				  Name = procedureName,
+				  Parameters = columns,
+				  Body = body
 			  };
 		  };
 	}

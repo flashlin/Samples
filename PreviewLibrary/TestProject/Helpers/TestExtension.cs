@@ -1,9 +1,9 @@
 ﻿using ExpectedObjects;
 using PreviewLibrary.Exceptions;
-using PreviewLibrary;
 using TestProject.Helpers;
 using System.Collections.Generic;
 using System.Linq;
+using PreviewLibrary.Extensions;
 
 namespace TestProject.Helpers
 {

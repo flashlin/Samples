@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PreviewLibrary.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,12 +20,14 @@ namespace PreviewLibrary.PrattParsers
 			{ ".", SqlToken.Dot },
 			{ ">=", SqlToken.GreaterThanOrEqual },
 			{ "AS", SqlToken.As },
+			{ "BEGIN", SqlToken.Begin },
 			{ "CREATE", SqlToken.Create },
+			{ "END", SqlToken.End },
 			{ "FROM", SqlToken.From },
+			{ "INT", SqlToken.DataType },
 			{ "PROCEDURE", SqlToken.Procedure },
 			{ "PROC", SqlToken.Procedure },
 			{ "SELECT", SqlToken.Select },
-			{ "INT", SqlToken.DataType },
 		};
 
 		private ReadOnlyMemory<char> _textSpan;
@@ -73,6 +76,12 @@ namespace PreviewLibrary.PrattParsers
 			return token;
 		}
 
+		public string PeekString()
+		{
+			var token = Peek();
+			return GetSpanString(token);
+		}
+
 		public bool Match(string expect)
 		{
 			var tokenStr = Peek().GetString(_textSpan.Span);
@@ -81,13 +90,12 @@ namespace PreviewLibrary.PrattParsers
 
 		public bool Match(SqlToken expectToken)
 		{
-			var tokenStr = Peek().GetString(_textSpan.Span).ToUpper();
-			if (string.IsNullOrEmpty(tokenStr))
+			var token = Peek();
+			if ( token.IsEmpty )
 			{
 				return false;
 			}
-			var tokenType = GetTokenTypeOrIdentifier(tokenStr);
-			return tokenType == expectToken;
+			return token.Type == expectToken;
 		}
 
 		private TextSpan ScanNext()
@@ -373,6 +381,13 @@ namespace PreviewLibrary.PrattParsers
 			var upper = new String('^', currentToken.Length);
 			sb.AppendLine(spaces + upper);
 			return sb.ToString();
+		}
+
+		public ParseException CreateParseException(TextSpan currentSpan)
+		{
+			var tokenStr = GetSpanString(currentSpan);
+			var message = GetHelpMessage(currentSpan);
+			return new ParseException($"Prefix '{tokenStr}' Parse fail.\r\n" + message);
 		}
 
 		private TextSpan PeekSpan(int offset = 0)

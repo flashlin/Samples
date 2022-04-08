@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using FluentAssertions.Equivalency;
 using ExpectedObjects;
 using System.Linq;
-using PreviewLibrary.Expressions;
 using Xunit.Abstractions;
 using TestProject.Helpers;
+using PreviewLibrary.Extensions;
 
 namespace TestProject
 {

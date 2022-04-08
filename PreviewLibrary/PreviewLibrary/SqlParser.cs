@@ -1,5 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Expressions;
+using PreviewLibrary.Extensions;
 using PreviewLibrary.Helpers;
 using System;
 using System.Collections.Generic;

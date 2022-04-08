@@ -1,5 +1,10 @@
-﻿using PreviewLibrary.PrattParsers.Expressions;
+﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.PrattParsers.Expressions;
 using System.Collections.Generic;
+
+using Parselet = System.Func<
+	PreviewLibrary.PrattParsers.IParser,
+	PreviewLibrary.PrattParsers.Expressions.SqlDom>;
 
 namespace PreviewLibrary.PrattParsers
 {
@@ -14,8 +19,12 @@ namespace PreviewLibrary.PrattParsers
 		bool TryConsume(SqlToken expectToken, out TextSpan token);
 		bool TryConsumes(out List<TextSpan> tokenList, params SqlToken[] expectTokens);
 		bool TryConsumes(out List<TextSpan> tokenList, params SqlToken[][] expectTokens);
-		SqlDom ParseBy(SqlToken expectPrefixToken, int ctxPrecedence);
-		bool TryParseBy<TSqlDom>(SqlToken expectPrefixToken, int ctxPrecedence, out TSqlDom sqlDom)
-			where TSqlDom: SqlDom;
+		SqlDom ParseBy(SqlToken expectPrefixToken);
+		bool TryParseBy<TSqlDom>(SqlToken expectPrefixToken, out TSqlDom sqlDom) where TSqlDom: SqlDom;
+		ParseException CreateParseException(TextSpan currentSpan);
+		SqlDom ParseByAny(params SqlToken[] expectPrefixToken);
+		SqlDom ParseBy(Parselet parse);
+		string Peek();
+		TextSpan Consume(SqlToken expectToken);
 	}
 }

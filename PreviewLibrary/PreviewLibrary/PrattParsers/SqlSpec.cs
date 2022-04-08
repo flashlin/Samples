@@ -22,10 +22,12 @@ namespace PreviewLibrary.PrattParsers
 		{
 			 // Register the ones that need special parselets.
 			 { SqlToken.Number, Parselets.Number },
-			 { SqlToken.Identifier, Parselets.Identifier },
-			 { SqlToken.Variable, Parselets.Variable },
+			 { SqlToken.Identifier, Parselets.ObjectId },
 			 { SqlToken.SqlIdentifier, Parselets.ObjectId },
+			 { SqlToken.Variable, Parselets.Variable },
 			 { SqlToken.MultiComment, Parselets.MultiComment },
+			 { SqlToken.SingleComment, Parselets.SingleComment },
+			 { SqlToken.DataType, Parselets.DataType },
 			 //{ Assign   , Precedence.Assignment, Parselets.Assign },
 			 //{ Question , Precedence.Conditional, Parselets.Conditional },
 			 { SqlToken.LParen, Parselets.Group },

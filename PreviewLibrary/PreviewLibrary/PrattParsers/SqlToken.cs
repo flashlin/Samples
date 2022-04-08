@@ -23,5 +23,7 @@
 		Variable,
 		DataType,
 		SingleComment,
+		Begin,
+		End,
 	}
 }
