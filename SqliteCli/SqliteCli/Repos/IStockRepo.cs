@@ -1,0 +1,10 @@
+﻿using SqliteCli.Entities;
+
+namespace SqliteCli.Repos
+{
+	public interface IStockRepo
+	{
+		void BuyStock(TransEntity data);
+		List<ReportTranItem> ReportTrans(ReportTransReq req);
+	}
+}

@@ -1,9 +1,26 @@
 ﻿
+using Microsoft.Extensions.DependencyInjection;
 using SqliteCli.Entities;
 using SqliteCli.Repos;
 using System.Text.RegularExpressions;
 using T1.Standard.Extensions;
+using T1.Standard.Web;
 
+var services = new ServiceCollection();
+services.AddHttpClient();
+services.AddHttpClient<IWebApiClient, WebApiClient>();
+services.AddTransient<IStockExchangeApi, TwseStockExchangeApi>();
+services.AddTransient<IStockRepo, StockRepo>();
+
+var serviceProvider = services.BuildServiceProvider();
+
+
+var api = serviceProvider.GetService<IStockExchangeApi>();
+var data = await api.GetStockTranListAsync(new GetStockReq()
+{
+	Date = DateTime.Parse("2022/04/07"),
+	StockId = "0050"
+});
 
 do
 {
@@ -64,7 +81,7 @@ do
 
 void ProcessReport(string cmdArgs)
 {
-	var db = new StockRepo();
+	var db = serviceProvider.GetService<IStockRepo>();// new StockRepo();
 	var rc = db.ReportTrans(new ReportTransReq());
 	rc.Dump();
 }

@@ -5,10 +5,13 @@ using SqliteCli.Helpers;
 using System.Data;
 using System.Reflection;
 using System.Text.Json;
+using T1.Standard.Common;
+using T1.Standard.DynamicCode;
+using T1.Standard.Web;
 
 namespace SqliteCli.Repos
 {
-	public class StockRepo
+	public class StockRepo : IStockRepo
 	{
 		public IEnumerable<TransHistory> QueryTrans(string cmd)
 		{
@@ -240,6 +243,137 @@ group by st.Id, t.TranType
 		protected StockDatabase GetDatabase()
 		{
 			return new StockDatabase("d:/VDisk/SNL/flash_stock.db");
+		}
+	}
+
+	public interface IStockExchangeApi
+	{
+		Task<IEnumerable<StockExchangeData>> GetStockTranListAsync(GetStockReq req);
+	}
+
+	public class TwseStockExchangeApi : IStockExchangeApi
+	{
+		static string _baseUrl = "https://www.twse.com.tw";
+		private readonly IWebApiClient _webApi;
+
+		public TwseStockExchangeApi(IWebApiClient webApi)
+		{
+			this._webApi = webApi;
+		}
+
+		public async Task<IEnumerable<StockExchangeData>> GetStockTranListAsync(GetStockReq req)
+		{
+			var date = req.Date.ToString("yyyyMMdd");
+			var jsonData = await _webApi.GetAsync(
+				$"{_baseUrl}/exchangeReport/STOCK_DAY?response=json&date={date}&stockNo={req.StockId}",
+				new Dictionary<string, string>());
+			var options = new JsonSerializerOptions
+			{
+				ReadCommentHandling = JsonCommentHandling.Skip,
+				AllowTrailingCommas = true,
+				PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+			};
+			var rawData = JsonSerializer.Deserialize<StockExchangeRawData>(jsonData, options);
+			if (rawData == null)
+			{
+				return Enumerable.Empty<StockExchangeData>();
+			}
+			return rawData.GetStockList(req.StockId);
+		}
+	}
+
+	public class GetStockReq
+	{
+		public DateTime Date { get; set; }
+		public string StockId { get; set; }
+	}
+
+	public class StockExchangeData
+	{
+		[DisplayString("", 10)]
+		public DateTime Date { get; set; }
+		
+		[DisplayString("", 7)]
+		public string StockId { get; set; }
+		
+		[DisplayString("", 7)]
+		public long TradeVolume { get; set; }
+
+		[DisplayString("", 7)]
+		public decimal DollorVolume { get; set; }
+		
+		[DisplayString("", 7)]
+		public decimal OpeningPrice { get; set; }
+
+		[DisplayString("", 7)]
+		public decimal HighestPrice { get; set; }
+
+		[DisplayString("", 7)]
+		public decimal LowestPrice { get; set; }
+		
+		[DisplayString("", 7)]
+		public decimal ClosingPrice { get; set; }
+		
+		[DisplayString("", 7)]
+		public decimal Change { get; set; }
+
+		[DisplayString("", 7)]
+		public long Transaction { get; set; }
+	}
+
+	public class StockExchangeRawData
+	{
+		public static Dictionary<string, string> FieldNames = new Dictionary<string, string>
+		{
+			{ "日期", nameof(StockExchangeData.Date) },
+			{ "成交股數", nameof(StockExchangeData.TradeVolume) },
+			{ "成交金額", nameof(StockExchangeData.DollorVolume) },
+			{ "開盤價", nameof(StockExchangeData.OpeningPrice) },
+			{ "最高價", nameof(StockExchangeData.HighestPrice) },
+			{ "最低價", nameof(StockExchangeData.LowestPrice) },
+			{ "收盤價", nameof(StockExchangeData.ClosingPrice) },
+			{ "漲跌價差", nameof(StockExchangeData.Change) },
+			{ "成交筆數", nameof(StockExchangeData.Transaction) },
+		};
+
+		public string Stat { get; set; }
+		public string Date { get; set; }
+		public string Title { get; set; }
+		public List<string> Fields { get; set; }
+		public List<List<string>> Data { get; set; }
+		public List<string> Notes { get; set; }
+
+		public IEnumerable<StockExchangeData> GetStockList(string stockId)
+		{
+			var stockTranObjInfo = ReflectionClass.Reflection(typeof(StockExchangeData));
+			foreach (var dataItem in Data)
+			{
+				var stockTran = new StockExchangeData();
+				stockTran.StockId = stockId;
+				foreach (var item in Fields.Select((value, idx) => new { name = FieldNames[value], idx }))
+				{
+					var valueStr = dataItem[item.idx];
+					var propInfo = stockTranObjInfo.Properties[item.name];
+					var value = (object)valueStr;
+					if (propInfo.PropertyType != typeof(string))
+					{
+						if (propInfo.PropertyType.IsValueType)
+						{
+							valueStr = valueStr.Replace(",", "");
+						}
+						value = valueStr.ChangeType(propInfo.PropertyType);
+
+						if( propInfo.Name == nameof(StockExchangeData.Date))
+						{
+							var date = (DateTime)value;
+							date = date.AddYears(1911);
+							value = date;
+						}
+					}
+					propInfo.Setter(stockTran, value);
+				}
+				yield return stockTran;
+			}
 		}
 	}
 }
