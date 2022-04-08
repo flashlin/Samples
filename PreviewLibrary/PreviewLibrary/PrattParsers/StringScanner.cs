@@ -114,13 +114,14 @@ namespace PreviewLibrary.PrattParsers
 				return sqlIdentifier;
 			}
 
-			if (character == '/')
+			if (character == '/' && TryRead(ReadMultiComment, ch, out var multiComment))
 			{
-				var multiComment = ReadMultiComment(ch);
-				if (!multiComment.IsEmpty)
-				{
-					return multiComment;
-				}
+				return multiComment;
+			}
+
+			if (character == '-' && TryRead(ReadSingleComment, ch, out var signleComment))
+			{
+				return signleComment;
 			}
 
 			if (character == '@' && TryRead(ReadVariable, ch, out var variable))
@@ -190,6 +191,27 @@ namespace PreviewLibrary.PrattParsers
 			var tail = ConsumeCharacters("*/");
 			content = Concat(content, tail);
 			content.Type = SqlToken.MultiComment;
+			return content;
+		}
+
+		private TextSpan ReadSingleComment(TextSpan head)
+		{
+			if (PeekCh() != '-')
+			{
+				return TextSpan.Empty;
+			}
+
+			var content = ReadUntil(head, ch =>
+			{
+				return ch != '\n';
+			});
+
+			if (PeekCh() == '\n')
+			{
+				var tail = ConsumeCharacters("\n");
+				content = Concat(content, tail);
+			}
+			content.Type = SqlToken.SingleComment;
 			return content;
 		}
 
@@ -365,8 +387,12 @@ namespace PreviewLibrary.PrattParsers
 
 		private char PeekCh(int offset = 0)
 		{
-			var ch = PeekSpan(offset);
-			return GetSpanString(ch)[0];
+			var chSpan = PeekSpan(offset);
+			if (chSpan.IsEmpty)
+			{
+				return char.MinValue;
+			}
+			return GetSpanString(chSpan)[0];
 		}
 
 		private TextSpan ConsumeCharacters(string expect)

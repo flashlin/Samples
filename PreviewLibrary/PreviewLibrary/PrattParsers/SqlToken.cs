@@ -22,5 +22,6 @@
 		Dot,
 		Variable,
 		DataType,
+		SingleComment,
 	}
 }

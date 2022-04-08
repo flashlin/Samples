@@ -66,6 +66,14 @@ namespace TestProject.ScannerTests
 			ThenTokenShouldBe("/* 12*34 **/");
 		}
 
+		[Fact]
+		public void singleComment()
+		{
+			var sql = " -- 123";
+			Scan(sql);
+			ThenTokenShouldBe("-- 123");
+		}
+
 		protected void ThenTokenShouldBe(string expected)
 		{
 			var token = _scanner.Consume();
