@@ -11,6 +11,7 @@
 		Identifier,
 		Dot,
 		As,
-		MultiComment
+		MultiComment,
+		Go
 	}
 }
