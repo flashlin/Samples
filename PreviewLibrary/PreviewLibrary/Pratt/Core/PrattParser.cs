@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.Core.Parselets;
 using System.Collections.Generic;
 
@@ -7,8 +8,8 @@ namespace PreviewLibrary.Pratt.Core
 	public class PrattParser : IParser
 	{
 		protected readonly IScanner _scanner;
-		private Dictionary<string, PrefixParselet> _prefixParselets = new Dictionary<string, PrefixParselet>();
-		private Dictionary<string, InfixParselet> _infixParselets = new Dictionary<string, InfixParselet>();
+		private Dictionary<string, IPrefixParselet> _prefixParselets = new Dictionary<string, IPrefixParselet>();
+		private Dictionary<string, IInfixParselet> _infixParselets = new Dictionary<string, IInfixParselet>();
 
 		public PrattParser(IScanner scanner)
 		{
@@ -62,17 +63,17 @@ namespace PreviewLibrary.Pratt.Core
 			}
 		}
 
-		protected virtual InfixParselet CodeSpecInfix(TextSpan token)
+		protected virtual IInfixParselet CodeSpecInfix(TextSpan token)
 		{
 			return _infixParselets[token.Type];
 		}
 
-		protected virtual PrefixParselet CodeSpecPrefix(TextSpan token)
+		protected virtual IPrefixParselet CodeSpecPrefix(TextSpan token)
 		{
 			return _prefixParselets[token.Type];
 		}
 
-		protected void Register(string tokenType, PrefixParselet parselet)
+		protected void Register(string tokenType, IPrefixParselet parselet)
 		{
 			_prefixParselets.Add(tokenType, parselet);
 		}

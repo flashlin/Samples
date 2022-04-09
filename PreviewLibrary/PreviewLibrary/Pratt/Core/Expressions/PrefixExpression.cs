@@ -1,6 +1,4 @@
-﻿using PreviewLibrary.Pratt.Core;
-
-namespace PreviewLibrary.Pratt.Core.Expressions
+﻿namespace PreviewLibrary.Pratt.Core.Expressions
 {
 	public class PrefixExpression : IExpression
 	{

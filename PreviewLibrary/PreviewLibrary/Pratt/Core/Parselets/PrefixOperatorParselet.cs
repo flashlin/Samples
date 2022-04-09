@@ -1,10 +1,9 @@
-﻿using PreviewLibrary.Pratt.Core;
-using PreviewLibrary.Pratt.Core.Expressions;
+﻿using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.TSql;
 
 namespace PreviewLibrary.Pratt.Core.Parselets
 {
-	public class PrefixOperatorParselet : PrefixParselet
+	public class PrefixOperatorParselet : IPrefixParselet
 	{
 		private readonly int _precedence;
 

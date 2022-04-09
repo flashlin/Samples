@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using PreviewLibrary.Pratt.Core.Expressions;
+using System.Collections.Generic;
 
 namespace PreviewLibrary.Pratt.Core
 {

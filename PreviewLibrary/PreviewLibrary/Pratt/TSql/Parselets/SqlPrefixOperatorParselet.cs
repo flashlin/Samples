@@ -1,9 +1,10 @@
 ﻿using PreviewLibrary.Pratt.Core;
+using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.Core.Parselets;
 
 namespace PreviewLibrary.Pratt.TSql.Parselets
 {
-	public class SqlPrefixOperatorParselet : PrefixParselet
+	public class SqlPrefixOperatorParselet : IPrefixParselet
 	{
 		private PrefixOperatorParselet _prefix;
 

@@ -1,5 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Pratt.Core;
+using PreviewLibrary.Pratt.Core.Parselets;
 using PreviewLibrary.Pratt.TSql.Expressions;
 using PreviewLibrary.Pratt.TSql.Parselets;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ namespace PreviewLibrary.Pratt.TSql
 	{
 		public TSqlParser(IScanner scanner) : base(scanner)
 		{
+			Register(SqlToken.Select, new SelectParselet());
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}
 
@@ -18,12 +20,17 @@ namespace PreviewLibrary.Pratt.TSql
 			return (SqlCodeExpr)ParseExp(0);
 		}
 
+		protected void Register(SqlToken tokenType, IPrefixParselet parselet)
+		{
+			Register(tokenType.ToString(), parselet);
+		}
+
 		protected void Prefix(SqlToken tokenType, Precedence precedence)
 		{
 			Register(tokenType.ToString(), new SqlPrefixOperatorParselet(precedence));
 		}
 
-		protected override PrefixParselet CodeSpecPrefix(TextSpan token)
+		protected override IPrefixParselet CodeSpecPrefix(TextSpan token)
 		{
 			try
 			{

@@ -1,4 +1,4 @@
-﻿using PreviewLibrary.Pratt.Core;
+﻿using PreviewLibrary.Pratt.Core.Expressions;
 
 namespace PreviewLibrary.Pratt.TSql.Expressions
 {

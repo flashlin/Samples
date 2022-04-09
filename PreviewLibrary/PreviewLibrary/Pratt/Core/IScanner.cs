@@ -12,19 +12,4 @@ namespace PreviewLibrary.Pratt.Core
 		void SetOffset(int offset);
 		string GetHelpMessage(TextSpan currentSpan);
 	}
-
-	public interface IExpression
-	{
-	}
-
-	public interface InfixParselet
-	{
-		IExpression Parse(IExpression left, TextSpan token, IParser parser);
-		int GetPrecedence();
-	}
-
-	public interface PrefixParselet
-	{
-		IExpression Parse(TextSpan token, IParser parser);
-	}
 }
