@@ -10,6 +10,7 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			AddToken("AS", SqlToken.As);
 			AddToken("GO", SqlToken.Go);
+			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
 			AddToken(",", SqlToken.Comma);
 		}

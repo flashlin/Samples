@@ -12,6 +12,7 @@
 		Dot,
 		As,
 		MultiComment,
-		Go
+		Go,
+		Set
 	}
 }
