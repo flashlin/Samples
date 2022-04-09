@@ -1,6 +1,6 @@
 ﻿namespace PreviewLibrary.Pratt.TSql
 {
-	public enum SqlToken
+	public enum SqlToken 
 	{
 		None,
 		Select,

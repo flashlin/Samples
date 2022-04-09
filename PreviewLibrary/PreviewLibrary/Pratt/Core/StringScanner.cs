@@ -21,7 +21,30 @@ namespace PreviewLibrary.Pratt.Core
 
 		public void AddToken(string token, int tokenType)
 		{
-			_tokenMap.Add(token, tokenType);
+			int maxTokenTypeValue = GetMaxTokenTypeValue() + 1;
+			_tokenMap.Add(token, tokenType + maxTokenTypeValue);
+		}
+
+		private static int GetMaxTokenTypeValue()
+		{
+			var tokenTypeValues = (int[])Enum.GetValues(typeof(TokenType));
+			var maxTokenTypeValue = tokenTypeValues.Last();
+			return maxTokenTypeValue;
+		}
+
+		public string GetTokenTypeName<TTokenType>(int tokenTypeNumber)
+		{
+			int maxTokenTypeValue = GetMaxTokenTypeValue() + 1;
+			try
+			{
+				var tokenType = Enum.ToObject(typeof(TokenType), tokenTypeNumber);
+				return tokenType.ToString();
+			}
+			catch
+			{
+				var tokenType = Enum.ToObject(typeof(TTokenType), tokenTypeNumber - maxTokenTypeValue);
+				return tokenType.ToString();
+			}
 		}
 
 		public TextSpan Consume(string expect = null)
@@ -97,10 +120,10 @@ namespace PreviewLibrary.Pratt.Core
 				return ReadIdentifier(ch);
 			}
 
-			//if (char.IsDigit(character))
-			//{
-			//	return ReadNumber(ch);
-			//}
+			if (char.IsDigit(character))
+			{
+				return ReadNumber(ch);
+			}
 
 			//if (character == '[' && TryRead(ReadSqlIdentifier, ch, out var sqlIdentifier))
 			//{
@@ -137,7 +160,17 @@ namespace PreviewLibrary.Pratt.Core
 			return token;
 		}
 
-		protected int GetTokenType(string token, int defaultTokenType)
+		protected TextSpan ReadNumber(TextSpan head)
+		{
+			var token = ReadUntil(head, (ch) =>
+			{
+				return char.IsDigit(ch);
+			});
+			token.Type = (int)TokenType.Number;
+			return token;
+		}
+
+		protected virtual int GetTokenType(string token, int defaultTokenType)
 		{
 			if (!_tokenMap.TryGetValue(token, out var tokenType))
 			{

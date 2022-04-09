@@ -11,6 +11,7 @@ namespace PreviewLibrary.Pratt.Core
 		int GetOffset();
 		void SetOffset(int offset);
 		string GetHelpMessage(TextSpan currentSpan);
+		string GetTokenTypeName<TTokenType>(int tokenTypeNumber);
 	}
 
 	public interface IExpression

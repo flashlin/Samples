@@ -4,6 +4,7 @@
 	{
 		None,
 		Identifier,
-		MultiComment
+		Number,
+		MultiComment,
 	}
 }

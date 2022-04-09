@@ -25,10 +25,10 @@ namespace PreviewLibrary.Pratt.Core
 			var prefixToken = _scanner.Consume();
 			if (prefixToken.IsEmpty)
 			{
-				throw new ParseException($"expect token but found NONE");
+				throw new ParseException($"Expect token but found NONE.");
 			}
 
-			var prefixParselet = CodeSpecPrefix(prefixToken.Type);
+			var prefixParselet = CodeSpecPrefix(prefixToken);
 			var left = prefixParselet.Parse(prefixToken, this);
 			while (true)
 			{
@@ -62,14 +62,14 @@ namespace PreviewLibrary.Pratt.Core
 			}
 		}
 
-		protected InfixParselet CodeSpecInfix(int tokenType)
+		protected virtual InfixParselet CodeSpecInfix(int tokenType)
 		{
 			return _infixParselets[tokenType];
 		}
 
-		protected PrefixParselet CodeSpecPrefix(int tokenType)
+		protected virtual PrefixParselet CodeSpecPrefix(TextSpan token)
 		{
-			return _prefixParselets[tokenType];
+			return _prefixParselets[token.Type];
 		}
 
 		protected void Register(int tokenType, PrefixParselet parselet)

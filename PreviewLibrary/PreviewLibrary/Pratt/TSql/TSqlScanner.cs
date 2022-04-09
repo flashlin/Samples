@@ -8,6 +8,17 @@ namespace PreviewLibrary.Pratt.TSql
 		public TSqlScanner(string text)
 			: base(text)
 		{
+			AddToken("SELECT", SqlToken.Select);
+		}
+
+		protected void AddToken(string token, SqlToken tokenType)
+		{
+			base.AddToken(token.ToUpper(), (int)tokenType);
+		}
+
+		protected override int GetTokenType(string token, int defaultTokenType)
+		{
+			return base.GetTokenType(token.ToUpper(), defaultTokenType);
 		}
 
 		protected override TextSpan ScanNext()
