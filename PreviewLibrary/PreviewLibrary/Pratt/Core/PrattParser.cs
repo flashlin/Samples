@@ -7,8 +7,8 @@ namespace PreviewLibrary.Pratt.Core
 	public class PrattParser : IParser
 	{
 		protected readonly IScanner _scanner;
-		private Dictionary<int, PrefixParselet> _prefixParselets = new Dictionary<int, PrefixParselet>();
-		private Dictionary<int, InfixParselet> _infixParselets = new Dictionary<int, InfixParselet>();
+		private Dictionary<string, PrefixParselet> _prefixParselets = new Dictionary<string, PrefixParselet>();
+		private Dictionary<string, InfixParselet> _infixParselets = new Dictionary<string, InfixParselet>();
 
 		public PrattParser(IScanner scanner)
 		{
@@ -38,7 +38,7 @@ namespace PreviewLibrary.Pratt.Core
 					break;
 				}
 
-				var infixParselet = CodeSpecInfix(infixToken.Type);
+				var infixParselet = CodeSpecInfix(infixToken);
 				if (infixParselet == null)
 				{
 					break;
@@ -62,9 +62,9 @@ namespace PreviewLibrary.Pratt.Core
 			}
 		}
 
-		protected virtual InfixParselet CodeSpecInfix(int tokenType)
+		protected virtual InfixParselet CodeSpecInfix(TextSpan token)
 		{
-			return _infixParselets[tokenType];
+			return _infixParselets[token.Type];
 		}
 
 		protected virtual PrefixParselet CodeSpecPrefix(TextSpan token)
@@ -72,7 +72,7 @@ namespace PreviewLibrary.Pratt.Core
 			return _prefixParselets[token.Type];
 		}
 
-		protected void Register(int tokenType, PrefixParselet parselet)
+		protected void Register(string tokenType, PrefixParselet parselet)
 		{
 			_prefixParselets.Add(tokenType, parselet);
 		}

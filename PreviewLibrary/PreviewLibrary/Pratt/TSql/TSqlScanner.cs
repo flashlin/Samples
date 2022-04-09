@@ -50,7 +50,7 @@ namespace PreviewLibrary.Pratt.TSql
 			var tail = ConsumeCharacters("]");
 
 			content = content.Concat(tail);
-			content.Type = (int)SqlToken.SqlIdentifier;
+			content.Type = SqlToken.SqlIdentifier.ToString();
 			return content;
 		}
 	}

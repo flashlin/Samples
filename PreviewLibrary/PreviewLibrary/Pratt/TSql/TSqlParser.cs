@@ -20,7 +20,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 		protected void Prefix(SqlToken tokenType, Precedence precedence)
 		{
-			Register((int)tokenType, new SqlPrefixOperatorParselet(precedence));
+			Register(tokenType.ToString(), new SqlPrefixOperatorParselet(precedence));
 		}
 
 		protected override PrefixParselet CodeSpecPrefix(TextSpan token)
@@ -32,8 +32,7 @@ namespace PreviewLibrary.Pratt.TSql
 			catch (KeyNotFoundException)
 			{
 				var tokenStr = _scanner.GetSpanString(token);
-				var tokenTypeName = _scanner.GetTokenTypeName<SqlToken>(token.Type);
-				throw new ParseException($"Not found SqlType.{tokenTypeName} '{tokenStr}' in PrefixParselets map.");
+				throw new ParseException($"Not found SqlType.{token.Type} '{tokenStr}' in PrefixParselets map.");
 			}
 		}
 	}

@@ -10,7 +10,7 @@ namespace PreviewLibrary.Pratt.Core
 			Length = 0,
 		};
 
-		public int Type;
+		public string Type;
 
 		public int Offset;
 

@@ -21,30 +21,7 @@ namespace PreviewLibrary.Pratt.Core
 
 		public void AddToken(string token, int tokenType)
 		{
-			int maxTokenTypeValue = GetMaxTokenTypeValue() + 1;
-			_tokenMap.Add(token, tokenType + maxTokenTypeValue);
-		}
-
-		private static int GetMaxTokenTypeValue()
-		{
-			var tokenTypeValues = (int[])Enum.GetValues(typeof(TokenType));
-			var maxTokenTypeValue = tokenTypeValues.Last();
-			return maxTokenTypeValue;
-		}
-
-		public string GetTokenTypeName<TTokenType>(int tokenTypeNumber)
-		{
-			int maxTokenTypeValue = GetMaxTokenTypeValue() + 1;
-			try
-			{
-				var tokenType = Enum.ToObject(typeof(TokenType), tokenTypeNumber);
-				return tokenType.ToString();
-			}
-			catch
-			{
-				var tokenType = Enum.ToObject(typeof(TTokenType), tokenTypeNumber - maxTokenTypeValue);
-				return tokenType.ToString();
-			}
+			_tokenMap.Add(token, tokenType);
 		}
 
 		public TextSpan Consume(string expect = null)
@@ -156,7 +133,7 @@ namespace PreviewLibrary.Pratt.Core
 				return IsIdentifierBody(ch);
 			});
 			var tokenStr = GetSpanString(token).ToUpper();
-			token.Type = (int)TokenType.Identifier;
+			token.Type = TokenType.Identifier.ToString();
 			return token;
 		}
 
@@ -166,7 +143,7 @@ namespace PreviewLibrary.Pratt.Core
 			{
 				return char.IsDigit(ch);
 			});
-			token.Type = (int)TokenType.Number;
+			token.Type = TokenType.Number.ToString();
 			return token;
 		}
 
@@ -211,7 +188,7 @@ namespace PreviewLibrary.Pratt.Core
 
 			var tail = ConsumeCharacters("*/");
 			content = content.Concat(tail);
-			content.Type = (int)TokenType.MultiComment;
+			content.Type = TokenType.MultiComment.ToString();
 			return content;
 		}
 
