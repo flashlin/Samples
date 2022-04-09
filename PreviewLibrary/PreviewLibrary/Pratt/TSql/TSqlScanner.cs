@@ -13,10 +13,10 @@ namespace PreviewLibrary.Pratt.TSql
 
 		protected void AddToken(string token, SqlToken tokenType)
 		{
-			base.AddToken(token.ToUpper(), (int)tokenType);
+			AddTokenMap(token.ToUpper(), tokenType.ToString());
 		}
 
-		protected override int GetTokenType(string token, int defaultTokenType)
+		protected override string GetTokenType(string token, string defaultTokenType)
 		{
 			return base.GetTokenType(token.ToUpper(), defaultTokenType);
 		}

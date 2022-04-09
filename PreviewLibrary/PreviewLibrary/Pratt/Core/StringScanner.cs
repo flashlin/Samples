@@ -9,7 +9,7 @@ namespace PreviewLibrary.Pratt.Core
 {
 	public class StringScanner : IScanner
 	{
-		private Dictionary<string, int> _tokenMap = new Dictionary<string, int>();
+		private Dictionary<string, string> _tokenToTokenTypeMap = new Dictionary<string, string>();
 		private ReadOnlyMemory<char> _textSpan;
 		private int _index;
 
@@ -19,9 +19,9 @@ namespace PreviewLibrary.Pratt.Core
 			_index = -1;
 		}
 
-		public void AddToken(string token, int tokenType)
+		public void AddTokenMap(string token, string tokenType)
 		{
-			_tokenMap.Add(token, tokenType);
+			_tokenToTokenTypeMap.Add(token, tokenType);
 		}
 
 		public TextSpan Consume(string expect = null)
@@ -132,8 +132,9 @@ namespace PreviewLibrary.Pratt.Core
 			{
 				return IsIdentifierBody(ch);
 			});
-			var tokenStr = GetSpanString(token).ToUpper();
-			token.Type = TokenType.Identifier.ToString();
+
+			var tokenStr = GetSpanString(token);
+			token.Type = GetTokenType(tokenStr, TokenType.Identifier.ToString());
 			return token;
 		}
 
@@ -147,9 +148,9 @@ namespace PreviewLibrary.Pratt.Core
 			return token;
 		}
 
-		protected virtual int GetTokenType(string token, int defaultTokenType)
+		protected virtual string GetTokenType(string token, string defaultTokenType)
 		{
-			if (!_tokenMap.TryGetValue(token, out var tokenType))
+			if (!_tokenToTokenTypeMap.TryGetValue(token, out var tokenType))
 			{
 				tokenType = defaultTokenType;
 			}
