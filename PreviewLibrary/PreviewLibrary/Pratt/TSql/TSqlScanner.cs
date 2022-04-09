@@ -24,6 +24,10 @@ namespace PreviewLibrary.Pratt.TSql
 		protected override TextSpan ScanNext()
 		{
 			var span = base.ScanNext();
+			if (span.IsEmpty)
+			{
+				return span;
+			}
 
 			var head = GetSpanString(span)[0];
 			if (head == '[' && TryRead(ReadSqlIdentifier, span, out var sqlIdentifier))

@@ -12,6 +12,7 @@ namespace PreviewLibrary.Pratt.TSql
 		public TSqlParser(IScanner scanner) : base(scanner)
 		{
 			Register(SqlToken.Select, new SelectParselet());
+			Register(SqlToken.Number, new NumberParselet());
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}
 

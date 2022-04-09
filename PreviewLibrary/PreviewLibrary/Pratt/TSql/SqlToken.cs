@@ -6,6 +6,7 @@
 		Select,
 		SqlIdentifier,
 		PLUS,
-		Comma
+		Comma,
+		Number
 	}
 }

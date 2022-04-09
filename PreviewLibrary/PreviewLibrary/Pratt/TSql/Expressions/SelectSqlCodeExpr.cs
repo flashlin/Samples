@@ -1,12 +1,24 @@
-﻿using T1.Standard.IO;
+﻿using System.Collections.Generic;
+using System.Linq;
+using T1.Standard.IO;
 
 namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class SelectSqlCodeExpr : SqlCodeExpr
 	{
+		public List<SqlCodeExpr> Columns { get; set; }
+
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write("SELECT");
+			stream.Write("SELECT ");
+			foreach (var column in Columns.Select((value, idx) => new { value, idx }))
+			{
+				if (column.idx != 0)
+				{
+					stream.Write(", ");
+				}
+				column.value.WriteToStream(stream);
+			}
 		}
 	}
 }

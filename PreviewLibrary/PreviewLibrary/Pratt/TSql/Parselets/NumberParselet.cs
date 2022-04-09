@@ -2,23 +2,17 @@
 using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.Core.Parselets;
 using PreviewLibrary.Pratt.TSql.Expressions;
-using System.Collections.Generic;
 
 namespace PreviewLibrary.Pratt.TSql.Parselets
 {
-	public class SelectParselet : IPrefixParselet
+	public class NumberParselet : IPrefixParselet
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			var columns = new List<SqlCodeExpr>();
-			do
+			var tokenStr = parser.Scanner.GetSpanString(token);
+			return new NumberSqlCodeExpr
 			{
-				columns.Add(parser.ParseExp() as SqlCodeExpr);
-			} while (parser.Match(SqlToken.Comma));
-
-			return new SelectSqlCodeExpr
-			{
-				Columns = columns,
+				Value = tokenStr
 			};
 		}
 	}
