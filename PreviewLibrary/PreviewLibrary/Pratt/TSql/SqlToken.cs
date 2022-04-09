@@ -5,6 +5,7 @@
 		None,
 		Select,
 		SqlIdentifier,
-		PLUS
+		PLUS,
+		Comma
 	}
 }

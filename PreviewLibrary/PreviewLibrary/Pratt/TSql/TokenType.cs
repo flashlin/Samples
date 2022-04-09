@@ -6,5 +6,6 @@
 		Identifier,
 		Number,
 		MultiComment,
+		Symbol,
 	}
 }

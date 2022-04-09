@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace PreviewLibrary.Pratt.Core
 {
@@ -122,8 +123,32 @@ namespace PreviewLibrary.Pratt.Core
 			//	return variable;
 			//}
 
-			//return ReadSymbol(ch);
-			return ch;
+			return ReadSymbol(ch);
+		}
+
+		private TextSpan ReadSymbol(TextSpan head)
+		{
+			var rgNotWord = new Regex(@"^\W$");
+			var acc = new StringBuilder();
+			acc.Append(GetSpanString(head));
+			var token = ReadUntil(head, (ch) =>
+			{
+				if (char.IsWhiteSpace(ch))
+				{
+					return false;
+				}
+
+				//if (_tokenToTokenTypeMap.ContainsKey(acc.ToString()))
+				//{
+				//	return false;
+				//}
+
+				acc.Append($"{ch}");
+				return rgNotWord.Match($"{ch}").Success;
+			});
+			var tokenStr = GetSpanString(token);
+			token.Type = GetTokenType(tokenStr, TokenType.Symbol.ToString());
+			return token;
 		}
 
 		protected TextSpan ReadIdentifier(TextSpan head)
