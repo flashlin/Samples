@@ -17,6 +17,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Identifier, new ObjectIdParselet());
 			Register(SqlToken.MultiComment, new CommentParselet());
 			Register(SqlToken.Go, new GoParselet());
+			Register(SqlToken.Set, new SetParselet());
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}
 

@@ -1,4 +1,6 @@
-﻿using PreviewLibrary.Pratt.Core.Expressions;
+﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.Pratt.Core.Expressions;
+using System.Linq;
 
 namespace PreviewLibrary.Pratt.Core
 {
@@ -14,6 +16,17 @@ namespace PreviewLibrary.Pratt.Core
 			}
 			expr = null;
 			return false;
+		}
+
+		public static IExpression ConsumeAny<TTokenType>(this IParser parser, params TTokenType[] tokenTypes)
+			where TTokenType : struct
+		{
+			if (!TryConsumeAny(parser, out var expr, tokenTypes))
+			{
+				var tokensStr = string.Join(",", tokenTypes.Select(x => x.ToString()));
+				throw new ParseException($"Expect one of {tokensStr}");
+			}
+			return expr;
 		}
 
 		public static IExpression PrefixParse<TTokenType>(this IParser parser, TTokenType tokenType)

@@ -9,6 +9,14 @@ namespace PreviewLibrary.Pratt.TSql
 			: base(text)
 		{
 			AddToken("AS", SqlToken.As);
+			AddToken("ANSI_NULLS", SqlToken.ANSI_NULLS);
+			AddToken("ANSI_PADDING", SqlToken.ANSI_PADDING);
+			AddToken("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
+			AddToken("ARITHABORT", SqlToken.ARITHABORT);
+			AddToken("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
+			AddToken("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
+			AddToken("ON", SqlToken.On);
+			AddToken("OFF", SqlToken.Off);
 			AddToken("GO", SqlToken.Go);
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);

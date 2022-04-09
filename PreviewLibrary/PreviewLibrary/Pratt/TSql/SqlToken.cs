@@ -13,6 +13,14 @@
 		As,
 		MultiComment,
 		Go,
-		Set
+		Set,
+		ANSI_NULLS,
+		ANSI_PADDING,
+		ANSI_WARNINGS,
+		ARITHABORT,
+		CONCAT_NULL_YIELDS_NULL,
+		QUOTED_IDENTIFIER,
+		On,
+		Off
 	}
 }
