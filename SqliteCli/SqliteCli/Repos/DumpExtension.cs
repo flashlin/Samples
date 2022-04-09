@@ -50,7 +50,7 @@ namespace SqliteCli.Repos
 		{
 			if (result.Count > 0)
 			{
-				var title = result[0]!.GetDisplayTitle();
+				var title = result[0].GetDisplayTitle();
 				Console.WriteLine(title);
 			}
 			foreach (var item in result)

@@ -14,14 +14,6 @@ services.AddTransient<IStockRepo, StockRepo>();
 
 var serviceProvider = services.BuildServiceProvider();
 
-
-var api = serviceProvider.GetService<IStockExchangeApi>();
-var data = await api.GetStockTranListAsync(new GetStockReq()
-{
-	Date = DateTime.Parse("2022/04/07"),
-	StockId = "0050"
-});
-
 do
 {
 	Console.Write("$ ");
@@ -72,17 +64,25 @@ do
 				{
 					cmdArgs = ss[1];
 				}
-				ProcessReport(cmdArgs);
+				ProcessReportAsync(cmdArgs);
 				break;
 			}
 	}
 
 } while (true);
 
-void ProcessReport(string cmdArgs)
+async Task ProcessReportAsync(string cmdArgs)
 {
-	var db = serviceProvider.GetService<IStockRepo>();// new StockRepo();
+	var db = serviceProvider.GetService<IStockRepo>();
 	var rc = db.ReportTrans(new ReportTransReq());
+
+	var api = serviceProvider.GetService<IStockExchangeApi>();
+	foreach (var stock in rc.Where(x => x.TranType == "Buy"))
+	{
+		var data = await api.GetLastDataAsync(stock.StockId);
+		stock.CurrentPrice = data.ClosingPrice * stock.NumberOfShare;
+	}
+
 	rc.Dump();
 }
 
@@ -118,13 +118,13 @@ void ProcessBuyStock(string dataText)
 	}
 
 	var numberOfShareStr = m.Groups["numberOfShare"].Value;
-	if(!int.TryParse(numberOfShareStr, out var numberOfShare))
+	if (!int.TryParse(numberOfShareStr, out var numberOfShare))
 	{
 		Console.WriteLine($"Parse '{numberOfShareStr}' fail, please input 2022/04/04,0056,33.1,<1000>");
 		return;
 	}
 
-	var db = new StockRepo();
+	var db = serviceProvider.GetService<IStockRepo>();
 	var tranData = new TransEntity
 	{
 		TranTime = tranDate,

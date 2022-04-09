@@ -32,5 +32,8 @@
 
 		[DecimalString(20)]
 		public decimal Balance { get; set; }
+		
+		[DecimalString(20)]
+		public decimal CurrentPrice { get; set; }
 	}
 }
