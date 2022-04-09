@@ -15,12 +15,12 @@ namespace PreviewLibrary.Pratt.Core
 
 	public interface InfixParselet<TExpr>
 	{
-		TExpr Parse(TExpr left, TextSpan token, IParser parser);
+		TExpr Parse(TExpr left, TextSpan token, IParser<TExpr> parser);
 		int GetPrecedence();
 	}
 
 	public interface PrefixParselet<TExpr>
 	{
-		TExpr Parse(TextSpan token, IParser parser);
+		TExpr Parse(TextSpan token, IParser<TExpr> parser);
 	}
 }

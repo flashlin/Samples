@@ -1,6 +1,10 @@
-﻿namespace PreviewLibrary.Pratt.Core
+﻿using System.Collections.Generic;
+
+namespace PreviewLibrary.Pratt.Core
 {
-	public interface IParser
+	public interface IParser<TExpr>
 	{
+		TExpr ParseExpression();
+		IEnumerable<TExpr> ParseProgram();
 	}
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace PreviewLibrary.Pratt.Core
 {
-	public class PrattParser<TExpr> : IParser
+	public class PrattParser<TExpr> : IParser<TExpr>
 	{
 		protected readonly IScanner _scanner;
 		private Dictionary<int, PrefixParselet<TExpr>> _prefixParselets = new Dictionary<int, PrefixParselet<TExpr>>();
@@ -12,6 +12,11 @@ namespace PreviewLibrary.Pratt.Core
 		public PrattParser(IScanner scanner)
 		{
 			_scanner = scanner;
+		}
+
+		public TExpr ParseExpression()
+		{
+			return ParseExp(0);
 		}
 
 		public TExpr ParseExp(int ctxPrecedence)

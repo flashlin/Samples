@@ -2,8 +2,10 @@
 
 namespace PreviewLibrary.Pratt.TSql
 {
-	public class TSqlParser : IParser
+	public class TSqlParser : PrattParser<SqlCodeDom>
 	{
-
+		public TSqlParser(IScanner scanner) : base(scanner)
+		{
+		}
 	}
 }

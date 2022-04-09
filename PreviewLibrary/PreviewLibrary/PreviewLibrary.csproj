@@ -14,9 +14,4 @@
     <PackageReference Include="T1.Standard" Version="1.0.58" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pratt\TSql\Expressions\" />
-    <Folder Include="Pratt\Parselets\" />
-  </ItemGroup>
-
 </Project>
