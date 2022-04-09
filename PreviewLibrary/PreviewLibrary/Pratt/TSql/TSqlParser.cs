@@ -13,6 +13,8 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			Register(SqlToken.Select, new SelectParselet());
 			Register(SqlToken.Number, new NumberParselet());
+			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());
+			Register(SqlToken.Identifier, new ObjectIdParselet());
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}
 

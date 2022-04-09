@@ -7,6 +7,8 @@
 		SqlIdentifier,
 		PLUS,
 		Comma,
-		Number
+		Number,
+		Identifier,
+		Dot
 	}
 }
