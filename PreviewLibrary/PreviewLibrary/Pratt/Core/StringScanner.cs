@@ -192,32 +192,6 @@ namespace PreviewLibrary.Pratt.Core
 			return ch == '_' || char.IsLetterOrDigit(ch);
 		}
 
-		protected TextSpan ReadMultiComment(TextSpan head)
-		{
-			if (PeekCh() != '*')
-			{
-				return TextSpan.Empty;
-			}
-
-			var content = ReadUntil(head, ch =>
-			{
-				if (ch != '*')
-				{
-					return true;
-				}
-				if (PeekCh(1) == '/')
-				{
-					return false;
-				}
-				return true;
-			});
-
-			var tail = ConsumeCharacters("*/");
-			content = content.Concat(tail);
-			content.Type = TokenType.MultiComment.ToString();
-			return content;
-		}
-
 		protected TextSpan ReadUntil(TextSpan head, Func<char, bool> predicate)
 		{
 			var token = head;

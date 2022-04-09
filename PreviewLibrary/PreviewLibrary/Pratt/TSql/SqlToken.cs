@@ -10,6 +10,7 @@
 		Number,
 		Identifier,
 		Dot,
-		As
+		As,
+		MultiComment
 	}
 }

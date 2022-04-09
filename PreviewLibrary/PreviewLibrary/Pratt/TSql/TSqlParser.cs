@@ -15,6 +15,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Number, new NumberParselet());
 			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());
 			Register(SqlToken.Identifier, new ObjectIdParselet());
+			Register(SqlToken.MultiComment, new CommentParselet());
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}
 
@@ -44,14 +45,6 @@ namespace PreviewLibrary.Pratt.TSql
 				var tokenStr = _scanner.GetSpanString(token);
 				throw new ParseException($"Not found SqlType.{token.Type} '{tokenStr}' in PrefixParselets map.");
 			}
-		}
-	}
-	
-	public static class SqlParserExtensions
-	{
-		public static bool Match(this IParser parser, SqlToken tokenType)
-		{
-			return parser.MatchTokenType(tokenType.ToString());
 		}
 	}
 }

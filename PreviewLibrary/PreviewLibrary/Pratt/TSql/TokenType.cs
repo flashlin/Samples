@@ -5,7 +5,6 @@
 		None,
 		Identifier,
 		Number,
-		MultiComment,
 		Symbol,
 	}
 }
