@@ -43,7 +43,9 @@ namespace PreviewLibrary.Pratt.TSql
 			catch (KeyNotFoundException)
 			{
 				var tokenStr = _scanner.GetSpanString(token);
-				throw new ParseException($"Not found SqlType.{token.Type} '{tokenStr}' in PrefixParselets map.");
+
+				var helpMessage = _scanner.GetHelpMessage(token);
+				throw new ParseException($"Not found SqlType.{token.Type} '{tokenStr}' in PrefixParselets map.\r\n{helpMessage}");
 			}
 		}
 	}
