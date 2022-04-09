@@ -16,5 +16,13 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SELECT 1");
 		}
+
+		[Fact]
+		public void select_name()
+		{
+			var sql = "select name";
+			Parse(sql);
+			ThenExprShouldBe("SELECT name");
+		}
 	}
 }
