@@ -1,38 +1,46 @@
-﻿using System;
+﻿using PreviewLibrary.Pratt.Core;
+using System;
 
 namespace PreviewLibrary.Pratt.TSql
 {
-
-	public class TSqlScanner : IScanner<SqlToken>
+	public class TSqlScanner : StringScanner
 	{
-		public TextSpan<SqlToken> Consume(string expect = null)
+		public TSqlScanner(string text)
+			: base(text)
 		{
-			throw new NotImplementedException();
 		}
 
-		public string GetHelpMessage(TextSpan<SqlToken> currentSpan)
+		protected override TextSpan ScanNext()
 		{
-			throw new NotImplementedException();
+			var span = base.ScanNext();
+
+			var head = GetSpanString(span)[0];
+			if (head == '[' && TryRead(ReadSqlIdentifier, span, out var sqlIdentifier))
+			{
+				return sqlIdentifier;
+			}
+
+			return span;
 		}
 
-		public int GetOffset()
-		{
-			throw new NotImplementedException();
-		}
 
-		public string GetSpanString(TextSpan<SqlToken> span)
+		protected TextSpan ReadSqlIdentifier(TextSpan head)
 		{
-			throw new NotImplementedException();
-		}
+			if (PeekCh() == ']')
+			{
+				return TextSpan.Empty;
+			}
 
-		public TextSpan<SqlToken> Peek()
-		{
-			throw new NotImplementedException();
-		}
+			var content = ReadUntil(head, ch =>
+			{
+				return ch != ']';
+			});
 
-		public void SetOffset(int offset)
-		{
-			throw new NotImplementedException();
+			var tail = ConsumeCharacters("]");
+
+			content = content.Concat(tail);
+			content.Type = (int)SqlToken.SqlIdentifier;
+			return content;
 		}
 	}
 }

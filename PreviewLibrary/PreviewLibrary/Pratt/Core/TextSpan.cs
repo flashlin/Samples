@@ -1,16 +1,16 @@
 ﻿using System;
 
-namespace PreviewLibrary.Pratt
+namespace PreviewLibrary.Pratt.Core
 {
-	public struct TextSpan<TTokenType>
+	public struct TextSpan
 	{
-		public static TextSpan<TTokenType> Empty = new TextSpan<TTokenType>
+		public static TextSpan Empty = new TextSpan
 		{
 			Offset = -1,
 			Length = 0,
 		};
 
-		public TTokenType Type;
+		public int Type;
 
 		public int Offset;
 
@@ -38,9 +38,9 @@ namespace PreviewLibrary.Pratt
 			return textSpan.Slice(Offset, Length).ToString();
 		}
 
-		public TextSpan<TTokenType> Concat(TextSpan<TTokenType> span1)
+		public TextSpan Concat(TextSpan span1)
 		{
-			return new TextSpan<TTokenType>
+			return new TextSpan
 			{
 				Offset = Offset,
 				Length = Length + span1.Length

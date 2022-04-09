@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace PreviewLibrary.Pratt
+namespace PreviewLibrary.Pratt.Core
 {
-	public interface IScanner<TTokenType>
+	public interface IScanner
 	{
-		TextSpan<TTokenType> Peek();
-		TextSpan<TTokenType> Consume(string expect=null);
-		string GetSpanString(TextSpan<TTokenType> span);
+		TextSpan Peek();
+		TextSpan Consume(string expect = null);
+		string GetSpanString(TextSpan span);
 		int GetOffset();
 		void SetOffset(int offset);
-		string GetHelpMessage(TextSpan<TTokenType> currentSpan);
+		string GetHelpMessage(TextSpan currentSpan);
 	}
 
 	public interface IParser
@@ -19,7 +19,7 @@ namespace PreviewLibrary.Pratt
 
 	public interface InfixParselet<TToken, TExpr>
 	{
-		TExpr parse(IParser parser, TExpr left, TextSpan<TToken> token);
+		TExpr parse(IParser parser, TExpr left, TextSpan token);
 		int getPrecedence();
 	}
 }

@@ -1,14 +1,15 @@
-﻿using PreviewLibrary.RecursiveParser;
+﻿using PreviewLibrary.Pratt.TSql;
+using PreviewLibrary.RecursiveParser;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace PreviewLibrary.Pratt.TSql
+namespace PreviewLibrary.Pratt.Core
 {
-	public class StringScanner<TTokenType> : IScanner<TTokenType>
+	public class StringScanner : IScanner
 	{
-		private Dictionary<string, TTokenType> _tokenMap = new Dictionary<string, TTokenType>();
+		private Dictionary<string, int> _tokenMap = new Dictionary<string, int>();
 		private ReadOnlyMemory<char> _textSpan;
 		private int _index;
 
@@ -18,7 +19,12 @@ namespace PreviewLibrary.Pratt.TSql
 			_index = -1;
 		}
 
-		public TextSpan<TTokenType> Consume(string expect=null)
+		public void AddToken(string token, int tokenType)
+		{
+			_tokenMap.Add(token, tokenType);
+		}
+
+		public TextSpan Consume(string expect = null)
 		{
 			var token = ScanNext();
 			if (!string.IsNullOrEmpty(expect))
@@ -32,7 +38,7 @@ namespace PreviewLibrary.Pratt.TSql
 			return token;
 		}
 
-		public string GetHelpMessage(TextSpan<TTokenType> currentSpan)
+		public string GetHelpMessage(TextSpan currentSpan)
 		{
 			var lnch = GetLineCh(currentSpan);
 			var currentToken = GetSpanString(currentSpan);
@@ -44,12 +50,12 @@ namespace PreviewLibrary.Pratt.TSql
 			sb.AppendLine(string.Join("\r\n", lnch.PrevLines));
 
 			var line = lnch.Line.Replace("\t", " ");
-			var spaces = new String(' ', line.Length);
+			var spaces = new string(' ', line.Length);
 
-			var down = new String('v', currentToken.Length);
+			var down = new string('v', currentToken.Length);
 			sb.AppendLine(spaces + down);
 			sb.AppendLine(line + $"{currentToken}");
-			var upper = new String('^', currentToken.Length);
+			var upper = new string('^', currentToken.Length);
 			sb.AppendLine(spaces + upper);
 			return sb.ToString();
 		}
@@ -59,12 +65,12 @@ namespace PreviewLibrary.Pratt.TSql
 			return _index;
 		}
 
-		public string GetSpanString(TextSpan<TTokenType> span)
+		public string GetSpanString(TextSpan span)
 		{
-			throw new NotImplementedException();
+			return span.GetString(_textSpan.Span);
 		}
 
-		public TextSpan<TTokenType> Peek()
+		public TextSpan Peek()
 		{
 			var startIndex = _index;
 			var token = Consume();
@@ -77,7 +83,7 @@ namespace PreviewLibrary.Pratt.TSql
 			_index = offset;
 		}
 
-		protected virtual TextSpan<TTokenType> ScanNext()
+		protected virtual TextSpan ScanNext()
 		{
 			var ch = SkipWhiteSpaceAtFront();
 			if (ch.IsEmpty)
@@ -117,22 +123,21 @@ namespace PreviewLibrary.Pratt.TSql
 			//}
 
 			//return ReadSymbol(ch);
-			throw new InvalidOperationException();
+			return ch;
 		}
 
-		protected TextSpan<TTokenType> ReadIdentifier(TextSpan<TTokenType> head)
+		protected TextSpan ReadIdentifier(TextSpan head)
 		{
 			var token = ReadUntil(head, (ch) =>
 			{
 				return IsIdentifierBody(ch);
 			});
 			var tokenStr = GetSpanString(token).ToUpper();
-			//??
-			//token.Type = GetTokenType(tokenStr);
+			token.Type = (int)TokenType.Identifier;
 			return token;
 		}
 
-		protected TTokenType GetTokenType(string token, TTokenType defaultTokenType)
+		protected int GetTokenType(string token, int defaultTokenType)
 		{
 			if (!_tokenMap.TryGetValue(token, out var tokenType))
 			{
@@ -151,11 +156,11 @@ namespace PreviewLibrary.Pratt.TSql
 			return ch == '_' || char.IsLetterOrDigit(ch);
 		}
 
-		protected TextSpan<TTokenType> ReadMultiComment(TextSpan<TTokenType> head)
+		protected TextSpan ReadMultiComment(TextSpan head)
 		{
 			if (PeekCh() != '*')
 			{
-				return TextSpan<TTokenType>.Empty;
+				return TextSpan.Empty;
 			}
 
 			var content = ReadUntil(head, ch =>
@@ -173,12 +178,11 @@ namespace PreviewLibrary.Pratt.TSql
 
 			var tail = ConsumeCharacters("*/");
 			content = content.Concat(tail);
-			//??
-			//content.Type = SqlToken.MultiComment;
+			content.Type = (int)TokenType.MultiComment;
 			return content;
 		}
 
-		protected TextSpan<TTokenType> ReadUntil(TextSpan<TTokenType> head, Func<char, bool> predicate)
+		protected TextSpan ReadUntil(TextSpan head, Func<char, bool> predicate)
 		{
 			var token = head;
 			do
@@ -198,9 +202,9 @@ namespace PreviewLibrary.Pratt.TSql
 			return token;
 		}
 
-		protected TextSpan<TTokenType> SkipWhiteSpaceAtFront()
+		protected TextSpan SkipWhiteSpaceAtFront()
 		{
-			TextSpan<TTokenType> ch;
+			TextSpan ch;
 			do
 			{
 				ch = NextChar();
@@ -226,7 +230,7 @@ namespace PreviewLibrary.Pratt.TSql
 			return GetSpanString(chSpan)[0];
 		}
 
-		protected TextSpan<TTokenType> ConsumeCharacters(string expect)
+		protected TextSpan ConsumeCharacters(string expect)
 		{
 			var expectLength = expect.Length;
 			if (_index + expectLength >= _textSpan.Length)
@@ -234,7 +238,7 @@ namespace PreviewLibrary.Pratt.TSql
 				throw new ScanException($"expect read {expectLength} length, but remaining {_textSpan.Length - _index} length.");
 			}
 
-			var span = new TextSpan<TTokenType>
+			var span = new TextSpan
 			{
 				Offset = _index + 1,
 				Length = expectLength,
@@ -249,41 +253,41 @@ namespace PreviewLibrary.Pratt.TSql
 			return span;
 		}
 
-		protected bool TryRead(Func<TextSpan<TTokenType>, TextSpan<TTokenType>> readSpan, 
-			TextSpan<TTokenType> head, out TextSpan<TTokenType> token)
+		protected bool TryRead(Func<TextSpan, TextSpan> readSpan,
+			TextSpan head, out TextSpan token)
 		{
 			token = readSpan(head);
 			return !token.IsEmpty;
 		}
 
-		protected TextSpan<TTokenType> PeekSpan(int offset = 0)
+		protected TextSpan PeekSpan(int offset = 0)
 		{
 			if (_index + 1 + offset >= _textSpan.Length)
 			{
-				return TextSpan<TTokenType>.Empty;
+				return TextSpan.Empty;
 			}
-			return new TextSpan<TTokenType>
+			return new TextSpan
 			{
-				Offset = (_index + 1 + offset),
+				Offset = _index + 1 + offset,
 				Length = 1,
 			};
 		}
 
-		protected TextSpan<TTokenType> NextChar()
+		protected TextSpan NextChar()
 		{
 			if (_index + 1 >= _textSpan.Length)
 			{
-				return TextSpan<TTokenType>.Empty;
+				return TextSpan.Empty;
 			}
 			_index++;
-			return new TextSpan<TTokenType>
+			return new TextSpan
 			{
 				Offset = _index,
 				Length = 1
 			};
 		}
 
-		protected LineChInfo GetLineCh(TextSpan<TTokenType> currentSpan)
+		protected LineChInfo GetLineCh(TextSpan currentSpan)
 		{
 			if (currentSpan.IsEmpty)
 			{
@@ -292,7 +296,7 @@ namespace PreviewLibrary.Pratt.TSql
 					LineNumber = 0,
 					ChNumber = 0,
 					PrevLines = new string[0],
-					Line = String.Empty,
+					Line = string.Empty,
 				};
 			}
 
