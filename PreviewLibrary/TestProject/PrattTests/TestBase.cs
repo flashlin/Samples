@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 using Xunit.Abstractions;
 using PreviewLibrary.Extensions;
 using FluentAssertions;
+using PreviewLibrary.Pratt.TSql.Expressions;
 
 namespace TestProject.PrattTests
 {
 	public abstract class TestBase
 	{
 		protected readonly ITestOutputHelper _outputHelper;
-		protected IParser<SqlCodeDom> _parser;
-		private SqlCodeDom _expr;
+		protected TSqlParser _parser;
+		private SqlCodeExpr _expr;
 
 		public TestBase(ITestOutputHelper outputHelper)
 		{

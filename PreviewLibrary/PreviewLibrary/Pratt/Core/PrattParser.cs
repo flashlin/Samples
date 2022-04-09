@@ -1,25 +1,26 @@
 ﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.Pratt.Core.Parselets;
 using System.Collections.Generic;
 
 namespace PreviewLibrary.Pratt.Core
 {
-	public class PrattParser<TExpr> : IParser<TExpr>
+	public class PrattParser : IParser
 	{
 		protected readonly IScanner _scanner;
-		private Dictionary<int, PrefixParselet<TExpr>> _prefixParselets = new Dictionary<int, PrefixParselet<TExpr>>();
-		private Dictionary<int, InfixParselet<TExpr>> _infixParselets = new Dictionary<int, InfixParselet<TExpr>>();
+		private Dictionary<int, PrefixParselet> _prefixParselets = new Dictionary<int, PrefixParselet>();
+		private Dictionary<int, InfixParselet> _infixParselets = new Dictionary<int, InfixParselet>();
 
 		public PrattParser(IScanner scanner)
 		{
 			_scanner = scanner;
 		}
 
-		public TExpr ParseExpression()
+		public IScanner Scanner
 		{
-			return ParseExp(0);
+			get { return _scanner; }
 		}
 
-		public TExpr ParseExp(int ctxPrecedence)
+		public IExpression ParseExp(int ctxPrecedence)
 		{
 			var prefixToken = _scanner.Consume();
 			if (prefixToken.IsEmpty)
@@ -53,7 +54,7 @@ namespace PreviewLibrary.Pratt.Core
 			return left;
 		}
 
-		public IEnumerable<TExpr> ParseProgram()
+		public IEnumerable<IExpression> ParseProgram()
 		{
 			while (!_scanner.Peek().IsEmpty)
 			{
@@ -61,14 +62,19 @@ namespace PreviewLibrary.Pratt.Core
 			}
 		}
 
-		protected InfixParselet<TExpr> CodeSpecInfix(int tokenType)
+		protected InfixParselet CodeSpecInfix(int tokenType)
 		{
 			return _infixParselets[tokenType];
 		}
 
-		protected PrefixParselet<TExpr> CodeSpecPrefix(int tokenType)
+		protected PrefixParselet CodeSpecPrefix(int tokenType)
 		{
 			return _prefixParselets[tokenType];
+		}
+
+		protected void Register(int tokenType, PrefixParselet parselet)
+		{
+			_prefixParselets.Add(tokenType, parselet);
 		}
 	}
 }

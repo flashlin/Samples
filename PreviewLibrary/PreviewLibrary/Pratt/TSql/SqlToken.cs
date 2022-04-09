@@ -4,6 +4,7 @@
 	{
 		None,
 		Select,
-		SqlIdentifier
+		SqlIdentifier,
+		PLUS
 	}
 }

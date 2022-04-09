@@ -13,14 +13,18 @@ namespace PreviewLibrary.Pratt.Core
 		string GetHelpMessage(TextSpan currentSpan);
 	}
 
-	public interface InfixParselet<TExpr>
+	public interface IExpression
 	{
-		TExpr Parse(TExpr left, TextSpan token, IParser<TExpr> parser);
+	}
+
+	public interface InfixParselet
+	{
+		IExpression Parse(IExpression left, TextSpan token, IParser parser);
 		int GetPrecedence();
 	}
 
-	public interface PrefixParselet<TExpr>
+	public interface PrefixParselet
 	{
-		TExpr Parse(TextSpan token, IParser<TExpr> parser);
+		IExpression Parse(TextSpan token, IParser parser);
 	}
 }

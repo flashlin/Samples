@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PreviewLibrary.Pratt.TSql
+namespace PreviewLibrary.Pratt.Core
 {
 	public class ScanException : Exception
 	{

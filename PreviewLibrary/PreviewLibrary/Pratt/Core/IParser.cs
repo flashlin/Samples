@@ -2,9 +2,11 @@
 
 namespace PreviewLibrary.Pratt.Core
 {
-	public interface IParser<TExpr>
+	public interface IParser
 	{
-		TExpr ParseExpression();
-		IEnumerable<TExpr> ParseProgram();
+		IScanner Scanner { get; }
+
+		IEnumerable<IExpression> ParseProgram();
+		IExpression ParseExp(int ctxPrecedence);
 	}
 }
