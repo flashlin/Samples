@@ -9,6 +9,7 @@ namespace PreviewLibrary.Pratt.TSql
 			: base(text)
 		{
 			AddToken("SELECT", SqlToken.Select);
+			AddToken("AS", SqlToken.As);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)

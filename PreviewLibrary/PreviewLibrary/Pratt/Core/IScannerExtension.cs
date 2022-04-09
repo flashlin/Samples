@@ -11,10 +11,30 @@
 				var token = scanner.Peek();
 				if (token.Type == tokenType)
 				{
+					scanner.Consume();
 					return token;
 				}
 			}
 			throw new ScanException();
+		}
+
+
+		public static bool TryConsumeAny<TTokenType>(this IScanner scanner, out TextSpan outSpan, params TTokenType[] tokenTypes)
+			where TTokenType : struct
+		{
+			for (var i = 0; i < tokenTypes.Length; i++)
+			{
+				var tokenType = tokenTypes[i].ToString();
+				var token = scanner.Peek();
+				if (token.Type == tokenType)
+				{
+					scanner.Consume();
+					outSpan = token;
+					return true;
+				}
+			}
+			outSpan = TextSpan.Empty;
+			return false;
 		}
 
 		public static string PeekString(this IScanner scanner)

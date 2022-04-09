@@ -39,7 +39,11 @@ namespace PreviewLibrary.Pratt.Core
 			{
 				throw new ParseException($"Expect token but found NONE.");
 			}
+			return PrefixParse(prefixToken, ctxPrecedence);
+		}
 
+		public IExpression PrefixParse(TextSpan prefixToken, int ctxPrecedence)
+		{
 			var prefixParselet = CodeSpecPrefix(prefixToken);
 			var left = prefixParselet.Parse(prefixToken, this);
 			while (true)
@@ -76,7 +80,11 @@ namespace PreviewLibrary.Pratt.Core
 
 		protected virtual IInfixParselet CodeSpecInfix(TextSpan token)
 		{
-			return _infixParselets[token.Type];
+			if (_infixParselets.TryGetValue(token.Type, out var infixParselet))
+			{
+				return infixParselet;
+			}
+			return null;
 		}
 
 		protected virtual IPrefixParselet CodeSpecPrefix(TextSpan token)

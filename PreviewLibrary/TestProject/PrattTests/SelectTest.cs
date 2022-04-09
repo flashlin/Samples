@@ -24,5 +24,21 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SELECT name");
 		}
+
+		[Fact]
+		public void select_name_without_as_name()
+		{
+			var sql = "select customerName name";
+			Parse(sql);
+			ThenExprShouldBe("SELECT customerName AS name");
+		}
+
+		[Fact]
+		public void select_name_as_name()
+		{
+			var sql = "select customerName as name";
+			Parse(sql);
+			ThenExprShouldBe("SELECT customerName AS name");
+		}
 	}
 }

@@ -9,6 +9,7 @@
 		Comma,
 		Number,
 		Identifier,
-		Dot
+		Dot,
+		As
 	}
 }
