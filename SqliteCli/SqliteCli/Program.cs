@@ -16,6 +16,7 @@ var serviceProvider = services.BuildServiceProvider();
 
 do
 {
+	Console.WriteLine();
 	Console.Write("$ ");
 	var commandLine = Console.ReadLine();
 	if (string.IsNullOrEmpty(commandLine))
@@ -64,7 +65,7 @@ do
 				{
 					cmdArgs = ss[1];
 				}
-				ProcessReportAsync(cmdArgs);
+				await ProcessReportAsync(cmdArgs);
 				break;
 			}
 	}
@@ -80,7 +81,12 @@ async Task ProcessReportAsync(string cmdArgs)
 	foreach (var stock in rc.Where(x => x.TranType == "Buy"))
 	{
 		var data = await api.GetLastDataAsync(stock.StockId);
-		stock.CurrentPrice = data.ClosingPrice * stock.NumberOfShare;
+		stock.CurrentPrice = data.ClosingPrice;
+		stock.CurrTotalPrice = data.ClosingPrice * stock.NumberOfShare;
+		if (stock.CurrentPrice != 0)
+		{
+			stock.Profit = stock.Balance + stock.CurrTotalPrice;
+		}
 	}
 
 	rc.Dump();
