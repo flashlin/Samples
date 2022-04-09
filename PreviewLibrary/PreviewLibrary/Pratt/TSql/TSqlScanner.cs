@@ -9,6 +9,7 @@ namespace PreviewLibrary.Pratt.TSql
 			: base(text)
 		{
 			AddToken("AS", SqlToken.As);
+			AddToken("BREAK", SqlToken.Break);
 			AddToken("ANSI_NULLS", SqlToken.ANSI_NULLS);
 			AddToken("ANSI_PADDING", SqlToken.ANSI_PADDING);
 			AddToken("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
@@ -21,6 +22,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
 			AddToken(",", SqlToken.Comma);
+			AddToken(";", SqlToken.Semicolon);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)

@@ -1,4 +1,6 @@
-﻿namespace PreviewLibrary.Pratt.Core
+﻿using System.Linq;
+
+namespace PreviewLibrary.Pratt.Core
 {
 	public static class IScannerExtension
 	{
@@ -15,7 +17,10 @@
 					return token;
 				}
 			}
-			throw new ScanException();
+
+			var helpMessage = scanner.GetHelpMessage(scanner.Peek());
+			var tokenTypesStr = string.Join(",", tokenTypes.Select(x => x.ToString()));
+			throw new ScanException($"Expect one of {tokenTypesStr}.\r\n{helpMessage}");
 		}
 
 

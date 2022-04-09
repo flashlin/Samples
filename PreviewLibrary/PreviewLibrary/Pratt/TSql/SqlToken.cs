@@ -21,6 +21,8 @@
 		CONCAT_NULL_YIELDS_NULL,
 		QUOTED_IDENTIFIER,
 		On,
-		Off
+		Off,
+		Break,
+		Semicolon
 	}
 }
