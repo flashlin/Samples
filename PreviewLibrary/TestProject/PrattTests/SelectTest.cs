@@ -26,6 +26,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_name_number()
+		{
+			var sql = "select name, 1";
+			Parse(sql);
+			ThenExprShouldBe("SELECT name, 1");
+		}
+
+		[Fact]
 		public void select_name_without_as_name()
 		{
 			var sql = "select customerName name";

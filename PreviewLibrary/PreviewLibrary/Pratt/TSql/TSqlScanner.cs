@@ -8,8 +8,9 @@ namespace PreviewLibrary.Pratt.TSql
 		public TSqlScanner(string text)
 			: base(text)
 		{
-			AddToken("SELECT", SqlToken.Select);
 			AddToken("AS", SqlToken.As);
+			AddToken("SELECT", SqlToken.Select);
+			AddToken(",", SqlToken.Comma);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)
