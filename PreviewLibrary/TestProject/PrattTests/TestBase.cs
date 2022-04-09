@@ -9,6 +9,8 @@ using Xunit.Abstractions;
 using PreviewLibrary.Extensions;
 using FluentAssertions;
 using PreviewLibrary.Pratt.TSql.Expressions;
+using System.IO;
+using PreviewLibrary.Pratt.Core.Expressions;
 
 namespace TestProject.PrattTests
 {
@@ -16,6 +18,7 @@ namespace TestProject.PrattTests
 	{
 		protected readonly ITestOutputHelper _outputHelper;
 		protected TSqlParser _parser;
+		private List<IExpression> _exprList;
 		private SqlCodeExpr _expr;
 
 		public TestBase(ITestOutputHelper outputHelper)
@@ -30,9 +33,23 @@ namespace TestProject.PrattTests
 			_expr = _parser.ParseExpression();
 		}
 
+		public void ParseAll(string text)
+		{
+			var scanner = new TSqlScanner(text);
+			_parser = new TSqlParser(scanner);
+			_exprList = _parser.ParseProgram().ToList();
+		}
+
 		protected void ThenExprShouldBe(string expectCode)
 		{
 			_expr.ToString().MergeToCode().Should().Be(expectCode.MergeToCode());
+		}
+
+		protected IEnumerable<string> ReadSqlFiles(string folder)
+		{
+			var sqlFiles = Directory.EnumerateFiles(folder, "*.sql");
+			var subDirs = Directory.EnumerateDirectories(folder);
+			return sqlFiles.Concat(subDirs.SelectMany(x => ReadSqlFiles(x)));
 		}
 	}
 }
