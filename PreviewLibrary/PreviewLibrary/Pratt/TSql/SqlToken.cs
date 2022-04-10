@@ -23,6 +23,7 @@
 		On,
 		Off,
 		Break,
-		Semicolon
+		Semicolon,
+		NUMERIC_ROUNDABORT
 	}
 }

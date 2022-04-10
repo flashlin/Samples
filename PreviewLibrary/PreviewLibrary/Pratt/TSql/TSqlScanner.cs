@@ -16,6 +16,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("ARITHABORT", SqlToken.ARITHABORT);
 			AddToken("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddToken("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
+			AddToken("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
 			AddToken("ON", SqlToken.On);
 			AddToken("OFF", SqlToken.Off);
 			AddToken("GO", SqlToken.Go);
