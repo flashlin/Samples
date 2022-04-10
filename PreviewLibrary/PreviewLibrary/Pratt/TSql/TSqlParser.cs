@@ -23,6 +23,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.ScriptSetVar, new ScriptSetvarParselet());
 			Register(SqlToken.ScriptOn, new ScriptOnParselet());
 			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
+			Register(SqlToken.QuoteString, new QuoteStringParselet());
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}
 
