@@ -16,5 +16,13 @@ namespace TestProject.PrattTests
 			Scan(sql);
 			ThenTokenShouldBe(":setvar");
 		}
+
+		[Fact]
+		public void quote_string()
+		{
+			var sql = " \"12\\\"34\" ";
+			Scan(sql);
+			ThenTokenShouldBe("\"12\\\"34\"");
+		}
 	}
 }

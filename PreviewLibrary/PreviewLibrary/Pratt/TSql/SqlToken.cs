@@ -24,6 +24,7 @@
 		Off,
 		Break,
 		Semicolon,
-		NUMERIC_ROUNDABORT
+		NUMERIC_ROUNDABORT,
+		DoubleQuoteString
 	}
 }

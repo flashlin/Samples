@@ -1,5 +1,6 @@
 ﻿using PreviewLibrary.Pratt.Core;
 using System;
+using System.Text;
 
 namespace PreviewLibrary.Pratt.TSql
 {
@@ -60,6 +61,11 @@ namespace PreviewLibrary.Pratt.TSql
 				return multiComment;
 			}
 
+			if (head == "\"" && TryRead(ReadDoubleQuoteString, span, out var doubleQuoteString))
+			{
+				return doubleQuoteString;
+			}
+
 			return span;
 		}
 
@@ -81,6 +87,26 @@ namespace PreviewLibrary.Pratt.TSql
 			var tail = ConsumeCharacters("*/");
 			content = content.Concat(tail);
 			content.Type = SqlToken.MultiComment.ToString();
+			return content;
+		}
+
+		protected TextSpan ReadDoubleQuoteString(TextSpan head)
+		{
+			var prevChar = char.MinValue;
+			var content = ReadUntil(head, ch =>
+			{
+				if (prevChar == '\\' && ch == '"')
+				{
+					prevChar = ch;
+					return true;
+				}
+				prevChar = ch;
+				return ch != '"';
+			});
+
+			var tail = ConsumeCharacters("\"");
+			content = content.Concat(tail);
+			content.Type = SqlToken.DoubleQuoteString.ToString();
 			return content;
 		}
 
