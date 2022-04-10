@@ -20,6 +20,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Set, new SetParselet());
 			Register(SqlToken.Semicolon, new SemicolonParselet());
 			Register(SqlToken.ScriptSetVar, new ScriptSetvarParselet());
+			Register(SqlToken.ScriptOn, new ScriptOnParselet());
 			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}

@@ -21,5 +21,15 @@ namespace TestProject.PrattTests
 123
 */");
 		}
+
+		[Fact]
+		public void script_on_error_exit()
+		{
+			var sql = ":on error exit";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(":ON ERROR EXIT");
+		}
 	}
-	}
+}

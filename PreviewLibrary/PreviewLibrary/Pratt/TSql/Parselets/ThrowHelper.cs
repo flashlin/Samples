@@ -11,5 +11,12 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var helpMessage = parser.Scanner.GetHelpMessage(token);
 			throw new ParseException($"{errorMessage}\r\n{helpMessage}");
 		}
+		
+		public static void ThrowScanException(IScanner scanner, string errorMessage)
+		{
+			var token = scanner.Peek();
+			var helpMessage = scanner.GetHelpMessage(token);
+			throw new ScanException($"{errorMessage}\r\n{helpMessage}");
+		}
 	}
 }

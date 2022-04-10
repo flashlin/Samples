@@ -11,5 +11,6 @@ namespace PreviewLibrary.Pratt.Core
 		int GetOffset();
 		void SetOffset(int offset);
 		string GetHelpMessage(TextSpan currentSpan);
+		TextSpan ConsumeTokenType(string expectTokenType);
 	}
 }

@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Pratt.TSql;
+using PreviewLibrary.Pratt.TSql.Parselets;
 using PreviewLibrary.RecursiveParser;
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,21 @@ namespace PreviewLibrary.Pratt.Core
 				{
 					throw new ScanException($"expect token '{expect}', but got '{tokenStr}'.");
 				}
+			}
+			return token;
+		}
+
+
+		public TextSpan ConsumeTokenType(string expectTokenType)
+		{
+			var token = ScanNext();
+			if (token.IsEmpty)
+			{
+				ThrowHelper.ThrowScanException(this, $"Expect scan '{expectTokenType}', but got NONE.");
+			}
+			if (token.Type != expectTokenType)
+			{
+				ThrowHelper.ThrowScanException(this, $"Expect scan {expectTokenType}, but got {token.Type}.");
 			}
 			return token;
 		}

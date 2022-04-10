@@ -18,6 +18,8 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddToken("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddToken("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
+			AddToken("ERROR", SqlToken.Error);
+			AddToken("EXIT", SqlToken.Exit);
 			AddToken("ON", SqlToken.On);
 			AddToken("OFF", SqlToken.Off);
 			AddToken("GO", SqlToken.Go);
@@ -26,6 +28,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken(",", SqlToken.Comma);
 			AddToken(";", SqlToken.Semicolon);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
+			AddToken(":ON", SqlToken.ScriptOn);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)

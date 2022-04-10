@@ -27,6 +27,9 @@
 		NUMERIC_ROUNDABORT,
 		DoubleQuoteString,
 		ScriptIdentifier,
-		ScriptSetVar
+		ScriptSetVar,
+		ScriptOn,
+		Error,
+		Exit
 	}
 }
