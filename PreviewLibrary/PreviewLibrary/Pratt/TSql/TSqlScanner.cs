@@ -47,7 +47,7 @@ namespace PreviewLibrary.Pratt.TSql
 			tokenSpan = TextSpan.Empty;
 
 			var head = GetSpanString(headSpan);
-			if (head == "N" && TryConsume('\'', out var head2))
+			if (head == "N" && TryNextChar('\'', out var head2))
 			{
 				headSpan = headSpan.Concat(head2);
 				if (!TryRead(ReadQuoteString, headSpan, out var nstring))
