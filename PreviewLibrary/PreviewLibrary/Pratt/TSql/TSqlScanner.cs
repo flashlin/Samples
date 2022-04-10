@@ -50,6 +50,11 @@ namespace PreviewLibrary.Pratt.TSql
 				return sqlIdentifier;
 			}
 
+			if (head == ":" && TryRead(ReadIdentifier, span, out var scriptIdentifier))
+			{
+				return scriptIdentifier;
+			}
+
 			if (head == "/*" && TryRead(ReadMultiComment, span, out var multiComment))
 			{
 				return multiComment;
