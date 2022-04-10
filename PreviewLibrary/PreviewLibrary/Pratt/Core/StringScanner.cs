@@ -12,6 +12,7 @@ namespace PreviewLibrary.Pratt.Core
 	public class StringScanner : IScanner
 	{
 		private Dictionary<string, string> _tokenToTokenTypeMap = new Dictionary<string, string>();
+		private Dictionary<string, string> _symbolToTokenTypeMap = new Dictionary<string, string>();
 		private ReadOnlyMemory<char> _textSpan;
 		private int _index;
 
@@ -24,6 +25,11 @@ namespace PreviewLibrary.Pratt.Core
 		public void AddTokenMap(string token, string tokenType)
 		{
 			_tokenToTokenTypeMap.Add(token, tokenType);
+		}
+
+		protected void AddSymbolMap(string symbol, string tokenType)
+		{
+			_symbolToTokenTypeMap.Add(symbol, tokenType);
 		}
 
 		public TextSpan Consume(string expect = null)
@@ -130,7 +136,19 @@ namespace PreviewLibrary.Pratt.Core
 				return ReadNumber(headSpan);
 			}
 
-			return ReadSymbol(headSpan);
+			_index--;
+			var symbols = _symbolToTokenTypeMap.Keys.OrderByDescending(x => x.Length).ToArray();
+			for (var i = 0; i < symbols.Length; i++)
+			{
+				var symbol = symbols[i];
+				if (TryNextString(symbol, out var symbolSpan))
+				{
+					symbolSpan.Type = GetSymbolType(symbol, TokenType.Symbol.ToString());
+					return symbolSpan;
+				}
+			}
+
+			throw new ScanException($"Scan to '{character}' Fail.");
 		}
 
 		private TextSpan ReadSymbol(TextSpan head)
@@ -183,6 +201,15 @@ namespace PreviewLibrary.Pratt.Core
 		protected virtual string GetTokenType(string token, string defaultTokenType)
 		{
 			if (!_tokenToTokenTypeMap.TryGetValue(token, out var tokenType))
+			{
+				tokenType = defaultTokenType;
+			}
+			return tokenType;
+		}
+
+		protected string GetSymbolType(string symbol, string defaultTokenType)
+		{
+			if (!_symbolToTokenTypeMap.TryGetValue(symbol, out var tokenType))
 			{
 				tokenType = defaultTokenType;
 			}
@@ -266,6 +293,25 @@ namespace PreviewLibrary.Pratt.Core
 			return true;
 		}
 
+		protected bool TryNextString(string expectString, out TextSpan tokenSpan)
+		{
+			var peekSpan = PeekSpan(0, expectString.Length);
+			if (peekSpan.IsEmpty)
+			{
+				tokenSpan = TextSpan.Empty;
+				return false;
+			}
+			var peekString = GetSpanString(peekSpan);
+			if (peekString != expectString)
+			{
+				tokenSpan = TextSpan.Empty;
+				return false;
+			}
+			tokenSpan = peekSpan;
+			_index += peekString.Length;
+			return true;
+		}
+
 		protected TextSpan ConsumeCharacters(string expect)
 		{
 			var expectLength = expect.Length;
@@ -306,6 +352,27 @@ namespace PreviewLibrary.Pratt.Core
 			{
 				Offset = _index + 1 + offset,
 				Length = 1,
+			};
+		}
+
+		protected TextSpan PeekSpan(int offset, int length)
+		{
+			var startIndex = _index + 1 + offset;
+			if (startIndex >= _textSpan.Length)
+			{
+				return TextSpan.Empty;
+			}
+
+			var maxLength = _textSpan.Length - startIndex;
+			if (length > maxLength)
+			{
+				return TextSpan.Empty;
+			}
+
+			return new TextSpan
+			{
+				Offset = startIndex,
+				Length = length,
 			};
 		}
 

@@ -24,20 +24,27 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("EXIT", SqlToken.Exit);
 			AddToken("ON", SqlToken.On);
 			AddToken("OFF", SqlToken.Off);
-			AddToken("(", SqlToken.LParent);
-			AddToken(")", SqlToken.RParent);
 			AddToken("GO", SqlToken.Go);
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
-			AddToken(",", SqlToken.Comma);
-			AddToken(";", SqlToken.Semicolon);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
 			AddToken(":ON", SqlToken.ScriptOn);
+
+
+			AddSymbol("(", SqlToken.LParent);
+			AddSymbol(")", SqlToken.RParent);
+			AddSymbol(",", SqlToken.Comma);
+			AddSymbol(";", SqlToken.Semicolon);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)
 		{
 			AddTokenMap(token.ToUpper(), tokenType.ToString());
+		}
+
+		protected void AddSymbol(string symbol, SqlToken tokenType)
+		{
+			AddSymbolMap(symbol, tokenType.ToString());
 		}
 
 		protected override string GetTokenType(string token, string defaultTokenType)
