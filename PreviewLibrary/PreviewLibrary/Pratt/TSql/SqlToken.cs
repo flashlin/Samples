@@ -34,7 +34,7 @@
 		QuoteString,
 		NString,
 		NOEXEC,
-		LParent,
-		RParent
+		LParen,
+		RParen
 	}
 }

@@ -31,8 +31,8 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken(":ON", SqlToken.ScriptOn);
 
 
-			AddSymbol("(", SqlToken.LParent);
-			AddSymbol(")", SqlToken.RParent);
+			AddSymbol("(", SqlToken.LParen);
+			AddSymbol(")", SqlToken.RParen);
 			AddSymbol(",", SqlToken.Comma);
 			AddSymbol(";", SqlToken.Semicolon);
 		}
