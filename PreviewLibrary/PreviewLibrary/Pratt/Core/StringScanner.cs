@@ -55,7 +55,7 @@ namespace PreviewLibrary.Pratt.Core
 
 			var down = new string('v', currentToken.Length);
 			sb.AppendLine(spaces + down);
-			sb.AppendLine(line + $"{currentToken}");
+			sb.AppendLine(line + $"{currentToken}{lnch.BackContent}");
 			var upper = new string('^', currentToken.Length);
 			sb.AppendLine(spaces + upper);
 			return sb.ToString();
@@ -315,12 +315,20 @@ namespace PreviewLibrary.Pratt.Core
 			var lines = previewContent.Split("\r\n");
 			var line = lines[lines.Length - 1];
 			var prevLines = lines.SkipLast(1).TakeLast(3).ToArray();
+
+			var maxLen = content.Length - (currentSpan.Offset + currentSpan.Length);
+			maxLen = Math.Min(maxLen, 50);
+
+			var backContent = content.Substring(currentSpan.Offset + currentSpan.Length, maxLen);
+			var backLine = backContent.Split("\r\n").First();
+
 			return new LineChInfo
 			{
 				LineNumber = lines.Length,
 				ChNumber = line.Length + 1,
 				PrevLines = prevLines,
-				Line = line
+				Line = line,
+				BackContent = backLine,
 			};
 		}
 	}

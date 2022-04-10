@@ -9,6 +9,7 @@ namespace PreviewLibrary.RecursiveParser
 		public int ChNumber { get; set; }
 		public string Line { get; set; }
 		public string[] PrevLines { get; set; }
+		public string BackContent { get; set; }
 
 		public override string ToString()
 		{
