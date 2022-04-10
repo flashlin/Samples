@@ -31,6 +31,7 @@
 		ScriptOn,
 		Error,
 		Exit,
-		QuoteString
+		QuoteString,
+		NString
 	}
 }

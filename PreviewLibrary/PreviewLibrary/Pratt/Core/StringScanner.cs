@@ -247,6 +247,25 @@ namespace PreviewLibrary.Pratt.Core
 			return GetSpanString(chSpan)[0];
 		}
 
+		protected bool TryConsume(char expectCharacter, out TextSpan tokenSpan)
+		{
+			var chSpan = PeekSpan();
+			if (chSpan.IsEmpty)
+			{
+				tokenSpan = TextSpan.Empty;
+				return false;
+			}
+			var ch = GetSpanString(chSpan)[0];
+			if (ch != expectCharacter)
+			{
+				tokenSpan = TextSpan.Empty;
+				return false;
+			}
+			tokenSpan = chSpan;
+			NextChar();
+			return true;
+		}
+
 		protected TextSpan ConsumeCharacters(string expect)
 		{
 			var expectLength = expect.Length;

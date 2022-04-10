@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Pratt.Core;
+using PreviewLibrary.Pratt.TSql.Parselets;
 using System;
 using System.Text;
 
@@ -46,6 +47,19 @@ namespace PreviewLibrary.Pratt.TSql
 			tokenSpan = TextSpan.Empty;
 
 			var head = GetSpanString(headSpan);
+			if (head == "N" && TryConsume('\'', out var head2))
+			{
+				headSpan = headSpan.Concat(head2);
+				if (!TryRead(ReadQuoteString, headSpan, out var nstring))
+				{
+					ThrowHelper.ThrowScanException(this, $"Scan NString Error.");
+				}
+				nstring.Type = SqlToken.NString.ToString();
+				tokenSpan = nstring;
+				return true;
+			}
+
+
 			if (head == "[" && TryRead(ReadSqlIdentifier, headSpan, out var sqlIdentifier))
 			{
 				tokenSpan = sqlIdentifier;
@@ -88,7 +102,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 		protected TextSpan ReadMultiComment(TextSpan head)
 		{
-			if( PeekCh() != '*' )
+			if (PeekCh() != '*')
 			{
 				return TextSpan.Empty;
 			}

@@ -49,6 +49,12 @@ namespace TestProject.PrattTests
 			ThenTokenShouldBe("/* 123 */");
 		}
 
-
+		[Fact]
+		public void nstring()
+		{
+			var sql = "N'123'";
+			Scan(sql);
+			ThenTokenShouldBe("N'123'");
+		}
 	}
 }
