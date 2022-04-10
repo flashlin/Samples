@@ -108,15 +108,8 @@ namespace PreviewLibrary.Pratt.TSql
 
 		protected TextSpan ReadDoubleQuoteString(TextSpan head)
 		{
-			//var prevChar = char.MinValue;
 			var content = ReadUntil(head, ch =>
 			{
-				//if (prevChar == '\\' && ch == '"')
-				//{
-				//	prevChar = ch;
-				//	return true;
-				//}
-				//prevChar = ch;
 				return ch != '"';
 			});
 
