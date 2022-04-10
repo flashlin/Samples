@@ -1,4 +1,4 @@
-﻿namespace PreviewLibrary.Pratt.TSql
+﻿namespace PreviewLibrary.Pratt.Core
 {
 	public enum TokenType
 	{
