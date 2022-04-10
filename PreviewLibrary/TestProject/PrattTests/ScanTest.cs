@@ -40,5 +40,15 @@ namespace TestProject.PrattTests
 			Scan(sql);
 			ThenTokenShouldBe("'1''6'");
 		}
+
+		[Fact]
+		public void multiComment()
+		{
+			var sql = @"/* 123 */";
+			Scan(sql);
+			ThenTokenShouldBe("/* 123 */");
+		}
+
+
 	}
 }

@@ -100,46 +100,37 @@ namespace PreviewLibrary.Pratt.Core
 			_index = offset;
 		}
 
-		protected virtual TextSpan ScanNext()
+		protected virtual bool TryScanNext(TextSpan head, out TextSpan tokenSpan)
 		{
-			var ch = SkipWhiteSpaceAtFront();
-			if (ch.IsEmpty)
+			tokenSpan = TextSpan.Empty;
+			return false;
+		}
+
+		protected TextSpan ScanNext()
+		{
+			var headSpan = SkipWhiteSpaceAtFront();
+			if (headSpan.IsEmpty)
 			{
-				return ch;
+				return headSpan;
 			}
 
-			var character = ch.GetCh(_textSpan.Span, 0);
+			if (TryScanNext(headSpan, out var tokenSpan))
+			{
+				return tokenSpan;
+			}
+
+			var character = headSpan.GetCh(_textSpan.Span, 0);
 			if (IsIdentifierHead(character))
 			{
-				return ReadIdentifier(ch);
+				return ReadIdentifier(headSpan);
 			}
 
 			if (char.IsDigit(character))
 			{
-				return ReadNumber(ch);
+				return ReadNumber(headSpan);
 			}
 
-			//if (character == '[' && TryRead(ReadSqlIdentifier, ch, out var sqlIdentifier))
-			//{
-			//	return sqlIdentifier;
-			//}
-
-			//if (character == '/' && TryRead(ReadMultiComment, ch, out var multiComment))
-			//{
-			//	return multiComment;
-			//}
-
-			//if (character == '-' && TryRead(ReadSingleComment, ch, out var signleComment))
-			//{
-			//	return signleComment;
-			//}
-
-			//if (character == '@' && TryRead(ReadVariable, ch, out var variable))
-			//{
-			//	return variable;
-			//}
-
-			return ReadSymbol(ch);
+			return ReadSymbol(headSpan);
 		}
 
 		private TextSpan ReadSymbol(TextSpan head)

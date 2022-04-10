@@ -41,42 +41,43 @@ namespace PreviewLibrary.Pratt.TSql
 			return base.GetTokenType(token.ToUpper(), defaultTokenType);
 		}
 
-		protected override TextSpan ScanNext()
+		protected override bool TryScanNext(TextSpan headSpan, out TextSpan tokenSpan)
 		{
-			var span = base.ScanNext();
-			if (span.IsEmpty)
+			tokenSpan = TextSpan.Empty;
+
+			var head = GetSpanString(headSpan);
+			if (head == "[" && TryRead(ReadSqlIdentifier, headSpan, out var sqlIdentifier))
 			{
-				return span;
+				tokenSpan = sqlIdentifier;
+				return true;
 			}
 
-			var head = GetSpanString(span);
-			if (head == "[" && TryRead(ReadSqlIdentifier, span, out var sqlIdentifier))
-			{
-				return sqlIdentifier;
-			}
-
-			if (head == ":" && TryRead(ReadIdentifier, span, out var scriptIdentifier))
+			if (head == ":" && TryRead(ReadIdentifier, headSpan, out var scriptIdentifier))
 			{
 				scriptIdentifier.Type = GetTokenType(scriptIdentifier, SqlToken.ScriptIdentifier);
-				return scriptIdentifier;
+				tokenSpan = scriptIdentifier;
+				return true;
 			}
 
-			if (head == "/*" && TryRead(ReadMultiComment, span, out var multiComment))
+			if (head == "/" && TryRead(ReadMultiComment, headSpan, out var multiComment))
 			{
-				return multiComment;
+				tokenSpan = multiComment;
+				return true;
 			}
 
-			if (head == "\"" && TryRead(ReadDoubleQuoteString, span, out var doubleQuoteString))
+			if (head == "\"" && TryRead(ReadDoubleQuoteString, headSpan, out var doubleQuoteString))
 			{
-				return doubleQuoteString;
+				tokenSpan = doubleQuoteString;
+				return true;
 			}
 
-			if (head == "'" && TryRead(ReadQuoteString, span, out var quoteString))
+			if (head == "'" && TryRead(ReadQuoteString, headSpan, out var quoteString))
 			{
-				return quoteString;
+				tokenSpan = quoteString;
+				return true;
 			}
 
-			return span;
+			return false;
 		}
 
 		private string GetTokenType(TextSpan span, SqlToken defaultTokenType)
@@ -87,6 +88,11 @@ namespace PreviewLibrary.Pratt.TSql
 
 		protected TextSpan ReadMultiComment(TextSpan head)
 		{
+			if( PeekCh() != '*' )
+			{
+				return TextSpan.Empty;
+			}
+
 			var content = ReadUntil(head, ch =>
 			{
 				if (ch != '*')
