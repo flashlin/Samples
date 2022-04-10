@@ -24,6 +24,8 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("EXIT", SqlToken.Exit);
 			AddToken("ON", SqlToken.On);
 			AddToken("OFF", SqlToken.Off);
+			AddToken("(", SqlToken.LParent);
+			AddToken(")", SqlToken.RParent);
 			AddToken("GO", SqlToken.Go);
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);

@@ -33,6 +33,8 @@
 		Exit,
 		QuoteString,
 		NString,
-		NOEXEC
+		NOEXEC,
+		LParent,
+		RParent
 	}
 }
