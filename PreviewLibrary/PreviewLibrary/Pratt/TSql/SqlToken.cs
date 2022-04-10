@@ -25,6 +25,8 @@
 		Break,
 		Semicolon,
 		NUMERIC_ROUNDABORT,
-		DoubleQuoteString
+		DoubleQuoteString,
+		ScriptIdentifier,
+		ScriptSetVar
 	}
 }

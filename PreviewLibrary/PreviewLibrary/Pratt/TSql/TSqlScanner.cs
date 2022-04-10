@@ -25,6 +25,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("SELECT", SqlToken.Select);
 			AddToken(",", SqlToken.Comma);
 			AddToken(";", SqlToken.Semicolon);
+			AddToken(":SETVAR", SqlToken.ScriptSetVar);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)
@@ -53,6 +54,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 			if (head == ":" && TryRead(ReadIdentifier, span, out var scriptIdentifier))
 			{
+				scriptIdentifier.Type = GetTokenType(scriptIdentifier, SqlToken.ScriptIdentifier);
 				return scriptIdentifier;
 			}
 
@@ -67,6 +69,12 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 
 			return span;
+		}
+
+		private string GetTokenType(TextSpan span, SqlToken defaultTokenType)
+		{
+			var tokenStr = GetSpanString(span);
+			return GetTokenType(tokenStr, defaultTokenType.ToString());
 		}
 
 		protected TextSpan ReadMultiComment(TextSpan head)
