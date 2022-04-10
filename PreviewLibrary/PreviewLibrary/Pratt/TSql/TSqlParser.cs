@@ -19,6 +19,8 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Go, new GoParselet());
 			Register(SqlToken.Set, new SetParselet());
 			Register(SqlToken.Semicolon, new SemicolonParselet());
+			Register(SqlToken.ScriptSetVar, new ScriptSetvarParselet());
+			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}
 

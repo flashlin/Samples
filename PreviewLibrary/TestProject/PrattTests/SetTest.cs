@@ -16,5 +16,15 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SET ANSI_NULLS OFF");
 		}
+
+		[Fact]
+		public void script_servar_var_doubleQuoteString()
+		{
+			var sql = ":setvar id \"123\"";
+			Parse(sql);
+			ThenExprShouldBe(":SETVAR id \"123\"");
+		}
+
+
 	}
 }
