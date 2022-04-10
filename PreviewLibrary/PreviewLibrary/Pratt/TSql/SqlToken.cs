@@ -30,6 +30,7 @@
 		ScriptSetVar,
 		ScriptOn,
 		Error,
-		Exit
+		Exit,
+		QuoteString
 	}
 }

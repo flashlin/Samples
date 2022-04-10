@@ -71,6 +71,11 @@ namespace PreviewLibrary.Pratt.TSql
 				return doubleQuoteString;
 			}
 
+			if (head == "'" && TryRead(ReadQuoteString, span, out var quoteString))
+			{
+				return quoteString;
+			}
+
 			return span;
 		}
 
@@ -121,6 +126,31 @@ namespace PreviewLibrary.Pratt.TSql
 			return content;
 		}
 
+		protected TextSpan ReadQuoteString(TextSpan head)
+		{
+			var prevCh = Char.MinValue;
+			var content = ReadUntil(head, ch =>
+			{
+				var nextCh = PeekCh(1);
+				if (ch == '\'' && nextCh == '\'')
+				{
+					prevCh = ch;
+					return true;
+				}
+				if (ch == '\'' && prevCh == '\'')
+				{
+					prevCh = ch;
+					return true;
+				}
+				prevCh = ch;
+				return ch != '\'';
+			});
+
+			var tail = ConsumeCharacters("'");
+			content = content.Concat(tail);
+			content.Type = SqlToken.QuoteString.ToString();
+			return content;
+		}
 
 		protected TextSpan ReadSqlIdentifier(TextSpan head)
 		{

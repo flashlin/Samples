@@ -261,7 +261,7 @@ namespace PreviewLibrary.Pratt.Core
 			var expectLength = expect.Length;
 			if (_index + expectLength >= _textSpan.Length)
 			{
-				throw new ScanException($"expect read {expectLength} length, but remaining {_textSpan.Length - _index} length.");
+				throw new ScanException($"expect read {expectLength} length, but remaining {_textSpan.Length - _index - 1} length.");
 			}
 
 			var span = new TextSpan

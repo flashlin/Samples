@@ -18,7 +18,7 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
-		public void quoteString()
+		public void doubleQuoteString()
 		{
 			var sql = " \"12\\\"34\" ";
 			Scan(sql);
@@ -26,11 +26,19 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
-		public void quoteString_contain_slash()
+		public void doubleQuoteString_contain_slash()
 		{
 			var sql = @" ""C:\abc"" ";
 			Scan(sql);
 			ThenTokenShouldBe("\"C:\\abc\"");
+		}
+
+		[Fact]
+		public void quoteString_contain_quoteString()
+		{
+			var sql = @" '1''6' ";
+			Scan(sql);
+			ThenTokenShouldBe("'1''6'");
 		}
 	}
 }
