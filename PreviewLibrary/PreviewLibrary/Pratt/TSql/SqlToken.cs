@@ -32,6 +32,7 @@
 		Error,
 		Exit,
 		QuoteString,
-		NString
+		NString,
+		NOEXEC
 	}
 }

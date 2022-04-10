@@ -20,6 +20,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				SqlToken.CONCAT_NULL_YIELDS_NULL,
 				SqlToken.QUOTED_IDENTIFIER,
 				SqlToken.NUMERIC_ROUNDABORT,
+				SqlToken.NOEXEC,
 			};
 
 			var setOptions = new List<string>();
