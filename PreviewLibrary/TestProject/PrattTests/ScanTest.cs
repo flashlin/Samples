@@ -18,11 +18,19 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
-		public void quote_string()
+		public void quoteString()
 		{
 			var sql = " \"12\\\"34\" ";
 			Scan(sql);
-			ThenTokenShouldBe("\"12\\\"34\"");
+			ThenTokenShouldBe("\"12\\\"");
+		}
+
+		[Fact]
+		public void quoteString_contain_slash()
+		{
+			var sql = @" ""C:\abc"" ";
+			Scan(sql);
+			ThenTokenShouldBe("\"C:\\abc\"");
 		}
 	}
 }
