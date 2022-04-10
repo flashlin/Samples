@@ -147,7 +147,8 @@ namespace PreviewLibrary.Pratt.Core
 				}
 			}
 
-			throw new ScanException($"Scan to '{character}' Fail.");
+			var helpMessage = GetHelpMessage(headSpan);
+			throw new ScanException($"Scan to '{character}' Fail.\r\n{helpMessage}");
 		}
 
 		protected TextSpan ReadIdentifier(TextSpan head)
