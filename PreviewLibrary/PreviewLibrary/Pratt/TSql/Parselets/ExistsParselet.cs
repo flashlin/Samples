@@ -9,7 +9,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			parser.Scanner.ConsumeAny(SqlToken.LParen);
+			parser.Scanner.Consume(SqlToken.LParen);
 			var innerExpr = parser.ParseExp() as SqlCodeExpr;
 			parser.Scanner.ConsumeAny(SqlToken.RParen);
 			return new ExistsSqlCodeExpr

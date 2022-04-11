@@ -39,7 +39,25 @@ namespace PreviewLibrary.Pratt.Core
 			return token;
 		}
 
-		public TextSpan ConsumeTokenType<TTokenType>(TTokenType expectTokenType)
+		public TextSpan ConsumeAny<TTokenType>(params TTokenType[] tokenTypes)
+			where TTokenType : struct
+		{
+			for (var i = 0; i < tokenTypes.Length; i++)
+			{
+				var tokenType = tokenTypes[i].ToString();
+				var token = Peek();
+				if (token.Type == tokenType)
+				{
+					Consume();
+					return token;
+				}
+			}
+			var helpMessage = GetHelpMessage(Peek());
+			var tokenTypesStr = string.Join(",", tokenTypes.Select(x => x.ToString()));
+			throw new ScanException($"Expect one of {tokenTypesStr}.\r\n{helpMessage}");
+		}
+
+		public TextSpan Consume<TTokenType>(TTokenType expectTokenType)
 			where TTokenType : struct
 		{
 			var token = ScanNext();

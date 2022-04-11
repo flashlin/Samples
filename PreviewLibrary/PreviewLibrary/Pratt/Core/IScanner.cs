@@ -3,19 +3,24 @@ using System.Text;
 
 namespace PreviewLibrary.Pratt.Core
 {
-    public interface IScanner
-    {
-        TextSpan Peek();
-        TextSpan Consume(string expect = null);
-        string GetSpanString(TextSpan span);
-        int GetOffset();
-        void SetOffset(int offset);
-        string GetHelpMessage(TextSpan currentSpan);
+	public interface IScanner
+	{
+		TextSpan Consume(string expect = null);
 
-        TextSpan ConsumeTokenType<TTokenType>(TTokenType expectTokenType)
-            where TTokenType : struct;
+		TextSpan Consume<TTokenType>(TTokenType expectTokenType)
+			where TTokenType : struct;
 
-        bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
-            where TTokenType: struct;
-    }
+		TextSpan ConsumeAny<TTokenType>(params TTokenType[] tokenTypes)
+					where TTokenType : struct;
+		string GetHelpMessage(TextSpan currentSpan);
+
+		int GetOffset();
+
+		string GetSpanString(TextSpan span);
+
+		TextSpan Peek();
+		void SetOffset(int offset);
+		bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
+			where TTokenType : struct;
+	}
 }

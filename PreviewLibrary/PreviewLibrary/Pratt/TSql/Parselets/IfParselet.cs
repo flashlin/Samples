@@ -11,7 +11,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
         public IExpression Parse(TextSpan token, IParser parser)
         {
             var conditionExpr = parser.ParseExp();
-            parser.Scanner.ConsumeTokenType(SqlToken.Begin);
+            parser.Scanner.Consume(SqlToken.Begin);
             var bodyList = new List<SqlCodeExpr>();
             do
             {
