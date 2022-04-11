@@ -31,6 +31,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("GO", SqlToken.Go);
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
+			AddToken("EXISTS", SqlToken.Exists);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
 			AddToken(":ON", SqlToken.ScriptOn);
 

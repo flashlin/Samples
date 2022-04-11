@@ -41,6 +41,7 @@
 		Like,
 		Variable,
 		Begin,
-		End
+		End,
+		Exists
 	}
 }
