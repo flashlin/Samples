@@ -14,5 +14,8 @@ namespace PreviewLibrary.Pratt.Core
 
         TextSpan ConsumeTokenType<TTokenType>(TTokenType expectTokenType)
             where TTokenType : struct;
+
+        bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
+            where TTokenType: struct;
     }
 }

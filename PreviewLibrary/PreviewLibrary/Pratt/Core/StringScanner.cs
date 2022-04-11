@@ -60,6 +60,24 @@ namespace PreviewLibrary.Pratt.Core
 			}
 			return token;
 		}
+		
+		public bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
+			where TTokenType: struct
+		{
+			var token = ScanNext();
+			if (token.IsEmpty)
+			{
+				tokenSpan = TextSpan.Empty;
+				return false;
+			}
+			if (token.Type != expectTokenType.ToString())
+			{
+				tokenSpan = TextSpan.Empty;
+				return false;
+			}
+			tokenSpan = token;
+			return true;
+		}
 
 		public string GetHelpMessage(TextSpan currentSpan)
 		{
