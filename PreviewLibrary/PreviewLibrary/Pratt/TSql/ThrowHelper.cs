@@ -1,7 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Pratt.Core;
 
-namespace PreviewLibrary.Pratt.TSql.Parselets
+namespace PreviewLibrary.Pratt.TSql
 {
 	public static class ThrowHelper
 	{
@@ -11,7 +11,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var helpMessage = parser.Scanner.GetHelpMessage(token);
 			throw new ParseException($"{errorMessage}\r\n{helpMessage}");
 		}
-		
+
 		public static void ThrowScanException(IScanner scanner, string errorMessage)
 		{
 			var token = scanner.Peek();
