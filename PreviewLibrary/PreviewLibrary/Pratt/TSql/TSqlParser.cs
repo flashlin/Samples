@@ -33,6 +33,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.If, new IfParselet());
 			
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
+			InfixLeft(SqlToken.Equal, Precedence.SUM);
 		}
 
 		public SqlCodeExpr ParseExpression()
@@ -53,6 +54,11 @@ namespace PreviewLibrary.Pratt.TSql
 		protected void Prefix(SqlToken tokenType, Precedence precedence)
 		{
 			Register(tokenType.ToString(), new SqlPrefixOperatorParselet(precedence));
+		}
+
+		public void InfixLeft(SqlToken tokenType, Precedence precedence)
+		{
+			Register(tokenType.ToString(), new BinaryOperatorParselet(precedence, false));
 		}
 
 		protected override IPrefixParselet CodeSpecPrefix(TextSpan token)

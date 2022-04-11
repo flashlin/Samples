@@ -27,10 +27,17 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				} while (parser.Scanner.TryConsume(SqlToken.Comma, out _));
 			}
 
+			SqlCodeExpr whereExpr = null;
+			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
+			{
+				whereExpr = parser.ParseExp() as SqlCodeExpr;
+			}
+
 			return new SelectSqlCodeExpr
 			{
 				Columns = columns,
-				FromSourceList = fromSourceList
+				FromSourceList = fromSourceList,
+				WhereExpr = whereExpr
 			};
 		}
 

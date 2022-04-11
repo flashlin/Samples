@@ -44,6 +44,7 @@
 		End,
 		Exists,
 		From,
-		Equal
+		Equal,
+		Where
 	}
 }
