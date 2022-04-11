@@ -15,6 +15,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Number, new NumberParselet());
 			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());
 			Register(SqlToken.Identifier, new ObjectIdParselet());
+			Register(SqlToken.Variable, new VariableParselet());
 			Register(SqlToken.NString, new NStringParselet());
 			Register(SqlToken.MultiComment, new CommentParselet());
 			Register(SqlToken.Go, new GoParselet());
@@ -26,6 +27,8 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.QuoteString, new QuoteStringParselet());
 			Register(SqlToken.LParen, new GroupParselet());
 
+			Register(SqlToken.Not, new NotParselet());
+			
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}
 
@@ -35,6 +38,11 @@ namespace PreviewLibrary.Pratt.TSql
 		}
 
 		protected void Register(SqlToken tokenType, IPrefixParselet parselet)
+		{
+			Register(tokenType.ToString(), parselet);
+		}
+		
+		protected void Register(SqlToken tokenType, IInfixParselet parselet)
 		{
 			Register(tokenType.ToString(), parselet);
 		}

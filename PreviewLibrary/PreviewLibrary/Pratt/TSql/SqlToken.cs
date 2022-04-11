@@ -38,6 +38,7 @@
 		RParen,
 		If,
 		Not,
-		Like
+		Like,
+		Variable
 	}
 }

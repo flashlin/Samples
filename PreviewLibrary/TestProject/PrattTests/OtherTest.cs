@@ -31,5 +31,15 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe(":ON ERROR EXIT");
 		}
+		
+		[Fact]
+		public void identifier_not_like_var()
+		{
+			var sql = "name not like @name";
+			
+			Parse(sql);
+
+			ThenExprShouldBe("name NOT LIKE @name");
+		}
 	}
 }

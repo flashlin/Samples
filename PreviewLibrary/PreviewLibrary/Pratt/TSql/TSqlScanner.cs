@@ -104,6 +104,14 @@ namespace PreviewLibrary.Pratt.TSql
 				tokenSpan = quoteString;
 				return true;
 			}
+			
+			if (head == "@" && TryRead(ReadIdentifier, headSpan, out var variable))
+			{
+				tokenSpan = variable;
+				tokenSpan.Type = SqlToken.Variable.ToString();
+				return true;
+			}
+
 
 			return false;
 		}

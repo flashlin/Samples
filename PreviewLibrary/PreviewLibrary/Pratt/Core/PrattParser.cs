@@ -96,5 +96,10 @@ namespace PreviewLibrary.Pratt.Core
 		{
 			_prefixParselets.Add(tokenType, parselet);
 		}
+		
+		protected void Register(string tokenType, IInfixParselet parselet)
+		{
+			_infixParselets.Add(tokenType, parselet);
+		}
 	}
 }
