@@ -9,8 +9,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			parser.Scanner.ConsumeTokenType(SqlToken.Error.ToString());
-			parser.Scanner.ConsumeTokenType(SqlToken.Exit.ToString());
+			parser.Scanner.ConsumeTokenType(SqlToken.Error);
+			parser.Scanner.ConsumeTokenType(SqlToken.Exit);
 			return new ScriptOnSqlCodeExpr();
 		}
 	}

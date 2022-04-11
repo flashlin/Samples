@@ -16,4 +16,17 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			};
 		}
 	}
+	
+	// public class IfParselet : IPrefixParselet
+	// {
+	// 	public IExpression Parse(TextSpan token, IParser parser)
+	// 	{
+	// 		var conditionExpr = parser.ParseExp();
+	// 		parser.Scanner.ConsumeTokenType(SqlToken.B)
+	// 		return new IfSqlCodeExpr
+	// 		{
+	// 			Condition = conditionExpr,
+	// 		};
+	// 	}
+	// }
 }

@@ -46,14 +46,15 @@ namespace PreviewLibrary.Pratt.Core
 		}
 
 
-		public TextSpan ConsumeTokenType(string expectTokenType)
+		public TextSpan ConsumeTokenType<TTokenType>(TTokenType expectTokenType)
+			where TTokenType: struct
 		{
 			var token = ScanNext();
 			if (token.IsEmpty)
 			{
 				ThrowHelper.ThrowScanException(this, $"Expect scan '{expectTokenType}', but got NONE.");
 			}
-			if (token.Type != expectTokenType)
+			if (token.Type != expectTokenType.ToString())
 			{
 				ThrowHelper.ThrowScanException(this, $"Expect scan {expectTokenType}, but got {token.Type}.");
 			}
