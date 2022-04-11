@@ -10,11 +10,10 @@ namespace PreviewLibrary.Pratt.Core
 {
 	public class StringScanner : IScanner
 	{
-		private Dictionary<string, string> _tokenToTokenTypeMap = new Dictionary<string, string>();
+		private int _index;
 		private Dictionary<string, string> _symbolToTokenTypeMap = new Dictionary<string, string>();
 		private ReadOnlyMemory<char> _textSpan;
-		private int _index;
-
+		private Dictionary<string, string> _tokenToTokenTypeMap = new Dictionary<string, string>();
 		public StringScanner(string text)
 		{
 			_textSpan = text.AsMemory();
@@ -24,11 +23,6 @@ namespace PreviewLibrary.Pratt.Core
 		public void AddTokenMap(string token, string tokenType)
 		{
 			_tokenToTokenTypeMap.Add(token, tokenType);
-		}
-
-		protected void AddSymbolMap(string symbol, string tokenType)
-		{
-			_symbolToTokenTypeMap.Add(symbol, tokenType);
 		}
 
 		public TextSpan Consume(string expect = null)
@@ -45,9 +39,8 @@ namespace PreviewLibrary.Pratt.Core
 			return token;
 		}
 
-
 		public TextSpan ConsumeTokenType<TTokenType>(TTokenType expectTokenType)
-			where TTokenType: struct
+			where TTokenType : struct
 		{
 			var token = ScanNext();
 			if (token.IsEmpty)
@@ -59,24 +52,6 @@ namespace PreviewLibrary.Pratt.Core
 				ThrowHelper.ThrowScanException(this, $"Expect scan {expectTokenType}, but got {token.Type}.");
 			}
 			return token;
-		}
-		
-		public bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
-			where TTokenType: struct
-		{
-			var token = ScanNext();
-			if (token.IsEmpty)
-			{
-				tokenSpan = TextSpan.Empty;
-				return false;
-			}
-			if (token.Type != expectTokenType.ToString())
-			{
-				tokenSpan = TextSpan.Empty;
-				return false;
-			}
-			tokenSpan = token;
-			return true;
 		}
 
 		public string GetHelpMessage(TextSpan currentSpan)
@@ -124,10 +99,212 @@ namespace PreviewLibrary.Pratt.Core
 			_index = offset;
 		}
 
-		protected virtual bool TryScanNext(TextSpan head, out TextSpan tokenSpan)
+		public bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
+			where TTokenType : struct
 		{
-			tokenSpan = TextSpan.Empty;
-			return false;
+			var token = ScanNext();
+			if (token.IsEmpty)
+			{
+				tokenSpan = TextSpan.Empty;
+				return false;
+			}
+			if (token.Type != expectTokenType.ToString())
+			{
+				tokenSpan = TextSpan.Empty;
+				return false;
+			}
+			tokenSpan = token;
+			return true;
+		}
+
+		protected void AddSymbolMap(string symbol, string tokenType)
+		{
+			_symbolToTokenTypeMap.Add(symbol, tokenType);
+		}
+		protected TextSpan ConsumeCharacters(string expect)
+		{
+			var expectLength = expect.Length;
+			if (_index + expectLength >= _textSpan.Length)
+			{
+				throw new ScanException($"expect read {expectLength} length, but remaining {_textSpan.Length - _index - 1} length.");
+			}
+
+			var span = new TextSpan
+			{
+				Offset = _index + 1,
+				Length = expectLength,
+			};
+			var spanStr = GetSpanString(span);
+			if (!string.Equals(spanStr, expect, StringComparison.OrdinalIgnoreCase))
+			{
+				throw new ScanException($"expect '{expect}', but got '{spanStr}'.");
+			}
+
+			_index += expectLength;
+			return span;
+		}
+
+		protected LineChInfo GetLineCh(TextSpan currentSpan)
+		{
+			if (currentSpan.IsEmpty)
+			{
+				return new LineChInfo
+				{
+					LineNumber = 0,
+					ChNumber = 0,
+					PrevLines = new string[0],
+					Line = string.Empty,
+				};
+			}
+
+			var content = _textSpan.ToString();
+			var previewContent = content.Substring(0, currentSpan.Offset);
+			var lines = previewContent.Split("\r\n");
+			var line = lines[lines.Length - 1];
+			var prevLines = lines.SkipLast(1).TakeLast(3).ToArray();
+
+			var maxLen = content.Length - (currentSpan.Offset + currentSpan.Length);
+			maxLen = Math.Min(maxLen, 50);
+
+			var backContent = content.Substring(currentSpan.Offset + currentSpan.Length, maxLen);
+			var backLine = backContent.Split("\r\n").First();
+
+			return new LineChInfo
+			{
+				LineNumber = lines.Length,
+				ChNumber = line.Length + 1,
+				PrevLines = prevLines,
+				Line = line,
+				BackContent = backLine,
+			};
+		}
+
+		protected string GetSymbolType(string symbol, string defaultTokenType)
+		{
+			if (!_symbolToTokenTypeMap.TryGetValue(symbol, out var tokenType))
+			{
+				tokenType = defaultTokenType;
+			}
+			return tokenType;
+		}
+
+		protected virtual string GetTokenType(string token, string defaultTokenType)
+		{
+			if (!_tokenToTokenTypeMap.TryGetValue(token, out var tokenType))
+			{
+				tokenType = defaultTokenType;
+			}
+			return tokenType;
+		}
+
+		protected bool IsIdentifierBody(char ch)
+		{
+			return ch == '_' || char.IsLetterOrDigit(ch);
+		}
+
+		protected bool IsIdentifierHead(char ch)
+		{
+			return ch == '_' || char.IsLetter(ch);
+		}
+
+		protected TextSpan NextChar()
+		{
+			if (_index + 1 >= _textSpan.Length)
+			{
+				return TextSpan.Empty;
+			}
+			_index++;
+			return new TextSpan
+			{
+				Offset = _index,
+				Length = 1
+			};
+		}
+
+		protected char PeekCh(int offset = 0)
+		{
+			var chSpan = PeekSpan(offset);
+			if (chSpan.IsEmpty)
+			{
+				return char.MinValue;
+			}
+			return GetSpanString(chSpan)[0];
+		}
+
+		protected TextSpan PeekSpan(int offset = 0)
+		{
+			if (_index + 1 + offset >= _textSpan.Length)
+			{
+				return TextSpan.Empty;
+			}
+			return new TextSpan
+			{
+				Offset = _index + 1 + offset,
+				Length = 1,
+			};
+		}
+
+		protected TextSpan PeekSpan(int offset, int length)
+		{
+			var startIndex = _index + 1 + offset;
+			if (startIndex >= _textSpan.Length)
+			{
+				return TextSpan.Empty;
+			}
+
+			var maxLength = _textSpan.Length - startIndex;
+			if (length > maxLength)
+			{
+				return TextSpan.Empty;
+			}
+
+			return new TextSpan
+			{
+				Offset = startIndex,
+				Length = length,
+			};
+		}
+
+		protected TextSpan ReadIdentifier(TextSpan head)
+		{
+			var token = ReadUntil(head, (ch) =>
+			{
+				return IsIdentifierBody(ch);
+			});
+
+			var tokenStr = GetSpanString(token);
+			token.Type = GetTokenType(tokenStr, TokenType.Identifier.ToString());
+			return token;
+		}
+
+		protected TextSpan ReadNumber(TextSpan head)
+		{
+			var token = ReadUntil(head, (ch) =>
+			{
+				return char.IsDigit(ch);
+			});
+			token.Type = TokenType.Number.ToString();
+			return token;
+		}
+
+		protected TextSpan ReadUntil(TextSpan head, Func<char, bool> predicate)
+		{
+			var token = head;
+			do
+			{
+				var ch = PeekSpan();
+				if (ch.IsEmpty)
+				{
+					break;
+				}
+				if (!predicate(ch.GetCh(_textSpan.Span, 0)))
+				{
+					break;
+				}
+				token = token.Concat(ch);
+				NextChar();
+			} while (true);
+			return token;
 		}
 
 		protected TextSpan ScanNext()
@@ -170,76 +347,6 @@ namespace PreviewLibrary.Pratt.Core
 			throw new ScanException($"Scan to '{character}' Fail.\r\n{helpMessage}");
 		}
 
-		protected TextSpan ReadIdentifier(TextSpan head)
-		{
-			var token = ReadUntil(head, (ch) =>
-			{
-				return IsIdentifierBody(ch);
-			});
-
-			var tokenStr = GetSpanString(token);
-			token.Type = GetTokenType(tokenStr, TokenType.Identifier.ToString());
-			return token;
-		}
-
-		protected TextSpan ReadNumber(TextSpan head)
-		{
-			var token = ReadUntil(head, (ch) =>
-			{
-				return char.IsDigit(ch);
-			});
-			token.Type = TokenType.Number.ToString();
-			return token;
-		}
-
-		protected virtual string GetTokenType(string token, string defaultTokenType)
-		{
-			if (!_tokenToTokenTypeMap.TryGetValue(token, out var tokenType))
-			{
-				tokenType = defaultTokenType;
-			}
-			return tokenType;
-		}
-
-		protected string GetSymbolType(string symbol, string defaultTokenType)
-		{
-			if (!_symbolToTokenTypeMap.TryGetValue(symbol, out var tokenType))
-			{
-				tokenType = defaultTokenType;
-			}
-			return tokenType;
-		}
-
-		protected bool IsIdentifierHead(char ch)
-		{
-			return ch == '_' || char.IsLetter(ch);
-		}
-
-		protected bool IsIdentifierBody(char ch)
-		{
-			return ch == '_' || char.IsLetterOrDigit(ch);
-		}
-
-		protected TextSpan ReadUntil(TextSpan head, Func<char, bool> predicate)
-		{
-			var token = head;
-			do
-			{
-				var ch = PeekSpan();
-				if (ch.IsEmpty)
-				{
-					break;
-				}
-				if (!predicate(ch.GetCh(_textSpan.Span, 0)))
-				{
-					break;
-				}
-				token = token.Concat(ch);
-				NextChar();
-			} while (true);
-			return token;
-		}
-
 		protected TextSpan SkipWhiteSpaceAtFront()
 		{
 			TextSpan ch;
@@ -256,16 +363,6 @@ namespace PreviewLibrary.Pratt.Core
 				}
 			} while (true);
 			return ch;
-		}
-
-		protected char PeekCh(int offset = 0)
-		{
-			var chSpan = PeekSpan(offset);
-			if (chSpan.IsEmpty)
-			{
-				return char.MinValue;
-			}
-			return GetSpanString(chSpan)[0];
 		}
 
 		protected bool TryNextChar(char expectCharacter, out TextSpan tokenSpan)
@@ -306,29 +403,6 @@ namespace PreviewLibrary.Pratt.Core
 			return true;
 		}
 
-		protected TextSpan ConsumeCharacters(string expect)
-		{
-			var expectLength = expect.Length;
-			if (_index + expectLength >= _textSpan.Length)
-			{
-				throw new ScanException($"expect read {expectLength} length, but remaining {_textSpan.Length - _index - 1} length.");
-			}
-
-			var span = new TextSpan
-			{
-				Offset = _index + 1,
-				Length = expectLength,
-			};
-			var spanStr = GetSpanString(span);
-			if (!string.Equals(spanStr, expect, StringComparison.OrdinalIgnoreCase))
-			{
-				throw new ScanException($"expect '{expect}', but got '{spanStr}'.");
-			}
-
-			_index += expectLength;
-			return span;
-		}
-
 		protected bool TryRead(Func<TextSpan, TextSpan> readSpan,
 			TextSpan head, out TextSpan token)
 		{
@@ -336,87 +410,10 @@ namespace PreviewLibrary.Pratt.Core
 			return !token.IsEmpty;
 		}
 
-		protected TextSpan PeekSpan(int offset = 0)
+		protected virtual bool TryScanNext(TextSpan head, out TextSpan tokenSpan)
 		{
-			if (_index + 1 + offset >= _textSpan.Length)
-			{
-				return TextSpan.Empty;
-			}
-			return new TextSpan
-			{
-				Offset = _index + 1 + offset,
-				Length = 1,
-			};
-		}
-
-		protected TextSpan PeekSpan(int offset, int length)
-		{
-			var startIndex = _index + 1 + offset;
-			if (startIndex >= _textSpan.Length)
-			{
-				return TextSpan.Empty;
-			}
-
-			var maxLength = _textSpan.Length - startIndex;
-			if (length > maxLength)
-			{
-				return TextSpan.Empty;
-			}
-
-			return new TextSpan
-			{
-				Offset = startIndex,
-				Length = length,
-			};
-		}
-
-		protected TextSpan NextChar()
-		{
-			if (_index + 1 >= _textSpan.Length)
-			{
-				return TextSpan.Empty;
-			}
-			_index++;
-			return new TextSpan
-			{
-				Offset = _index,
-				Length = 1
-			};
-		}
-
-		protected LineChInfo GetLineCh(TextSpan currentSpan)
-		{
-			if (currentSpan.IsEmpty)
-			{
-				return new LineChInfo
-				{
-					LineNumber = 0,
-					ChNumber = 0,
-					PrevLines = new string[0],
-					Line = string.Empty,
-				};
-			}
-
-			var content = _textSpan.ToString();
-			var previewContent = content.Substring(0, currentSpan.Offset);
-			var lines = previewContent.Split("\r\n");
-			var line = lines[lines.Length - 1];
-			var prevLines = lines.SkipLast(1).TakeLast(3).ToArray();
-
-			var maxLen = content.Length - (currentSpan.Offset + currentSpan.Length);
-			maxLen = Math.Min(maxLen, 50);
-
-			var backContent = content.Substring(currentSpan.Offset + currentSpan.Length, maxLen);
-			var backLine = backContent.Split("\r\n").First();
-
-			return new LineChInfo
-			{
-				LineNumber = lines.Length,
-				ChNumber = line.Length + 1,
-				PrevLines = prevLines,
-				Line = line,
-				BackContent = backLine,
-			};
+			tokenSpan = TextSpan.Empty;
+			return false;
 		}
 	}
 }
