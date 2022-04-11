@@ -5,7 +5,7 @@ using T1.Standard.IO;
 
 namespace PreviewLibrary.Pratt.TSql.Expressions
 {
-	public class ExistsSqlCodeExpr : SqlCodeExpr
+	public class FuncSqlCodeExpr : SqlCodeExpr
 	{
 		public string Name { get; set; }
 		public List<SqlCodeExpr> Parameters { get; set; }

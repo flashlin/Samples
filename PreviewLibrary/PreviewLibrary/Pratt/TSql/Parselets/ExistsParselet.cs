@@ -17,7 +17,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			arguments.Add(innerExpr);
 			
 			parser.Scanner.ConsumeAny(SqlToken.RParen);
-			return new ExistsSqlCodeExpr
+			return new FuncSqlCodeExpr
 			{
 				Name = "EXISTS",
 				Parameters = arguments
