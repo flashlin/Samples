@@ -21,11 +21,5 @@ namespace PreviewLibrary.Pratt.Core
 		TextSpan Peek();
 
 		void SetOffset(int offset);
-
-		bool TryConsumeAny<TTokenType>(out TextSpan outSpan, params TTokenType[] tokenTypes)
-			where TTokenType : struct;
-
-		bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
-					where TTokenType : struct;
 	}
 }

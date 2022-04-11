@@ -17,7 +17,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
             {
                 var body = parser.ParseExp();
                 bodyList.Add(body as SqlCodeExpr);
-            } while (!parser.Scanner.TryConsumeTokenType(SqlToken.End, out _));
+            } while (!parser.Scanner.TryConsume(SqlToken.End, out _));
 
             return new IfSqlCodeExpr
             {

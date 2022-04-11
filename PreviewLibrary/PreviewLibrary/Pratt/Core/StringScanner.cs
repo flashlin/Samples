@@ -25,24 +25,6 @@ namespace PreviewLibrary.Pratt.Core
 			_tokenToTokenTypeMap.Add(token, tokenType);
 		}
 
-		public bool TryConsumeAny<TTokenType>(out TextSpan outSpan, params TTokenType[] tokenTypes)
-			where TTokenType : struct
-		{
-			for (var i = 0; i < tokenTypes.Length; i++)
-			{
-				var tokenType = tokenTypes[i].ToString();
-				var token = Peek();
-				if (token.Type == tokenType)
-				{
-					Consume();
-					outSpan = token;
-					return true;
-				}
-			}
-			outSpan = TextSpan.Empty;
-			return false;
-		}
-
 		public TextSpan Consume(string expect = null)
 		{
 			var token = ScanNext();
@@ -135,31 +117,11 @@ namespace PreviewLibrary.Pratt.Core
 			_index = offset;
 		}
 
-		public bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
-			where TTokenType : struct
-		{
-			var startIndex = _index;
-			var token = ScanNext();
-			if (token.IsEmpty)
-			{
-				_index = startIndex;
-				tokenSpan = TextSpan.Empty;
-				return false;
-			}
-			if (token.Type != expectTokenType.ToString())
-			{
-				_index = startIndex;
-				tokenSpan = TextSpan.Empty;
-				return false;
-			}
-			tokenSpan = token;
-			return true;
-		}
-
 		protected void AddSymbolMap(string symbol, string tokenType)
 		{
 			_symbolToTokenTypeMap.Add(symbol, tokenType);
 		}
+
 		protected TextSpan ConsumeCharacters(string expect)
 		{
 			var expectLength = expect.Length;
