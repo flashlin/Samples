@@ -39,6 +39,8 @@
 		If,
 		Not,
 		Like,
-		Variable
+		Variable,
+		Begin,
+		End
 	}
 }

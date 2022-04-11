@@ -12,6 +12,7 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			AddToken("AS", SqlToken.As);
 			AddToken("BREAK", SqlToken.Break);
+			AddToken("BEGIN", SqlToken.Begin);
 			AddToken("ANSI_NULLS", SqlToken.ANSI_NULLS);
 			AddToken("ANSI_PADDING", SqlToken.ANSI_PADDING);
 			AddToken("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
@@ -22,6 +23,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("NOEXEC", SqlToken.NOEXEC);
 			AddToken("ERROR", SqlToken.Error);
 			AddToken("EXIT", SqlToken.Exit);
+			AddToken("END", SqlToken.End);
 			AddToken("IF", SqlToken.If);
 			AddToken("NOT", SqlToken.Not);
 			AddToken("LIKE", SqlToken.Like);
