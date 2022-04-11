@@ -25,6 +25,24 @@ namespace PreviewLibrary.Pratt.Core
 			_tokenToTokenTypeMap.Add(token, tokenType);
 		}
 
+		public bool TryConsumeAny<TTokenType>(out TextSpan outSpan, params TTokenType[] tokenTypes)
+			where TTokenType : struct
+		{
+			for (var i = 0; i < tokenTypes.Length; i++)
+			{
+				var tokenType = tokenTypes[i].ToString();
+				var token = Peek();
+				if (token.Type == tokenType)
+				{
+					Consume();
+					outSpan = token;
+					return true;
+				}
+			}
+			outSpan = TextSpan.Empty;
+			return false;
+		}
+
 		public TextSpan Consume(string expect = null)
 		{
 			var token = ScanNext();
