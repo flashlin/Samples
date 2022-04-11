@@ -43,6 +43,7 @@
 		Begin,
 		End,
 		Exists,
-		From
+		From,
+		Equal
 	}
 }

@@ -72,5 +72,13 @@ namespace TestProject.PrattTests
 			Scan(sql);
 			ThenTokenShouldBe("@name");
 		}
+
+		[Fact]
+		public void equal()
+		{
+			var sql = "=";
+			Scan(sql);
+			ThenTokenShouldBe("=");
+		}
 	}
 }
