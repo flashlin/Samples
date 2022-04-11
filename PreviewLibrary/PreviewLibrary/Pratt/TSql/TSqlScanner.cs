@@ -22,6 +22,9 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("NOEXEC", SqlToken.NOEXEC);
 			AddToken("ERROR", SqlToken.Error);
 			AddToken("EXIT", SqlToken.Exit);
+			AddToken("IF", SqlToken.If);
+			AddToken("NOT", SqlToken.Not);
+			AddToken("LIKE", SqlToken.Like);
 			AddToken("ON", SqlToken.On);
 			AddToken("OFF", SqlToken.Off);
 			AddToken("GO", SqlToken.Go);

@@ -35,6 +35,9 @@
 		NString,
 		NOEXEC,
 		LParen,
-		RParen
+		RParen,
+		If,
+		Not,
+		Like
 	}
 }
