@@ -7,6 +7,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	public class SelectSqlCodeExpr : SqlCodeExpr
 	{
 		public List<SqlCodeExpr> Columns { get; set; }
+		public List<SqlCodeExpr> FromSourceList { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -18,6 +19,22 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 					stream.Write(", ");
 				}
 				column.value.WriteToStream(stream);
+			}
+			if (FromSourceList.Count > 0)
+			{
+				stream.WriteLine();
+				stream.Write("FROM ");
+				stream.Indent++;
+				for (int i = 0; i < FromSourceList.Count; i++)
+				{
+					if (i != 0)
+					{
+						stream.WriteLine(", ");
+					}
+					var fromSource = FromSourceList[i];
+					fromSource.WriteToStream(stream);
+				}
+				stream.Indent--;
 			}
 		}
 	}

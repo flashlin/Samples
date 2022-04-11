@@ -23,6 +23,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("ERROR", SqlToken.Error);
 			AddToken("EXIT", SqlToken.Exit);
 			AddToken("END", SqlToken.End);
+			AddToken("FROM", SqlToken.From);
 			AddToken("IF", SqlToken.If);
 			AddToken("NOT", SqlToken.Not);
 			AddToken("LIKE", SqlToken.Like);

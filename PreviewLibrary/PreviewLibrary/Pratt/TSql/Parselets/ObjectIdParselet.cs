@@ -31,16 +31,16 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var fixCount = 3 - identTokens.Count;
 			for (var i = 0; i < fixCount; i++)
 			{
-				identTokens.Add(TextSpan.Empty);
+				identTokens.Insert(0, TextSpan.Empty);
 			}
 
 			var identStr = identTokens.Select(x => parser.Scanner.GetSpanString(x)).ToList();
 
 			return new ObjectIdSqlCodeExpr
 			{
-				DatabaseName = identStr[2],
+				DatabaseName = identStr[0],
 				SchemaName = identStr[1],
-				ObjectName = identStr[0],
+				ObjectName = identStr[2],
 			};
 		}
 	}

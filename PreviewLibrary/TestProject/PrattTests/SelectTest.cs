@@ -48,5 +48,13 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SELECT customerName AS name");
 		}
+
+		[Fact]
+		public void select_number_from_dbo_table()
+		{
+			var sql = @"select 1 from dbo.customer";
+			Parse(sql);
+			ThenExprShouldBe("SELECT 1 FROM dbo.customer");
+		}
 	}
 }

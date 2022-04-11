@@ -17,9 +17,20 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				columns.Add(ParseColumnAs(parser));
 			} while (parser.Match(SqlToken.Comma));
 
+			var fromSourceList = new List<SqlCodeExpr>();
+			if (parser.Scanner.TryConsume(SqlToken.From, out _))
+			{
+				do
+				{
+					var fromSourceExpr = parser.ParseExp() as SqlCodeExpr;
+					fromSourceList.Add(fromSourceExpr);
+				} while (parser.Scanner.TryConsume(SqlToken.Comma, out _));
+			}
+
 			return new SelectSqlCodeExpr
 			{
 				Columns = columns,
+				FromSourceList = fromSourceList
 			};
 		}
 
@@ -32,7 +43,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				aliasNameToken = parser.Scanner.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier);
 				return new ColumnSqlCodeExpr
-				{ 
+				{
 					Name = name,
 					AliasName = parser.Scanner.GetSpanString(aliasNameToken),
 				};

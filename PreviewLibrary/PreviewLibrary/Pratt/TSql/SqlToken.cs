@@ -42,6 +42,7 @@
 		Variable,
 		Begin,
 		End,
-		Exists
+		Exists,
+		From
 	}
 }
