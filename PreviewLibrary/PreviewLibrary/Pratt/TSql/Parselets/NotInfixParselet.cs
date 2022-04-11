@@ -6,7 +6,7 @@ using PreviewLibrary.Pratt.TSql.Expressions;
 
 namespace PreviewLibrary.Pratt.TSql.Parselets
 {
-    public class NotParselet : IInfixParselet
+    public class NotInfixParselet : IInfixParselet
     {
         public IExpression Parse(IExpression left, TextSpan token, IParser parser)
         {

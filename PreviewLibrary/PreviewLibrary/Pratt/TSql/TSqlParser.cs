@@ -27,7 +27,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.QuoteString, new QuoteStringParselet());
 			Register(SqlToken.LParen, new GroupParselet());
 
-			Register(SqlToken.Not, new NotParselet());
+			Register(SqlToken.Not, new NotInfixParselet());
 			Register(SqlToken.If, new IfParselet());
 			
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
