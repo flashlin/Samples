@@ -1,7 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
-using PreviewLibrary.Pratt.Core;
 
-namespace PreviewLibrary.Pratt.TSql
+namespace PreviewLibrary.Pratt.Core
 {
 	public static class ThrowHelper
 	{

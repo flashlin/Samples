@@ -7,9 +7,6 @@ namespace PreviewLibrary.Pratt.Core
 	{
 		TextSpan Consume(string expect = null);
 
-		TextSpan Consume<TTokenType>(TTokenType expectTokenType)
-			where TTokenType : struct;
-
 		string GetHelpMessage(TextSpan currentSpan);
 
 		int GetOffset();
@@ -19,5 +16,6 @@ namespace PreviewLibrary.Pratt.Core
 		TextSpan Peek();
 
 		void SetOffset(int offset);
+		TextSpan ScanNext();
 	}
 }

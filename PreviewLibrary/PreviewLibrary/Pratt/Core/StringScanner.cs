@@ -39,21 +39,6 @@ namespace PreviewLibrary.Pratt.Core
 			return token;
 		}
 
-		public TextSpan Consume<TTokenType>(TTokenType expectTokenType)
-			where TTokenType : struct
-		{
-			var token = ScanNext();
-			if (token.IsEmpty)
-			{
-				ThrowHelper.ThrowScanException(this, $"Expect scan '{expectTokenType}', but got NONE.");
-			}
-			if (token.Type != expectTokenType.ToString())
-			{
-				ThrowHelper.ThrowScanException(this, $"Expect scan {expectTokenType}, but got {token.Type}.");
-			}
-			return token;
-		}
-
 		public string GetHelpMessage(TextSpan currentSpan)
 		{
 			var lnch = GetLineCh(currentSpan);
@@ -290,7 +275,7 @@ namespace PreviewLibrary.Pratt.Core
 			return token;
 		}
 
-		protected TextSpan ScanNext()
+		public TextSpan ScanNext()
 		{
 			var headSpan = SkipWhiteSpaceAtFront();
 			if (headSpan.IsEmpty)

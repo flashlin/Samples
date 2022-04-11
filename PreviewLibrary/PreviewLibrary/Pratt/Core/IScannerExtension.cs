@@ -22,6 +22,21 @@ namespace PreviewLibrary.Pratt.Core
 			return false;
 		}
 
+		public static TextSpan Consume<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
+			where TTokenType : struct
+		{
+			var token = scanner.ScanNext();
+			if (token.IsEmpty)
+			{
+				ThrowHelper.ThrowScanException(scanner, $"Expect scan '{expectTokenType}', but got NONE.");
+			}
+			if (token.Type != expectTokenType.ToString())
+			{
+				ThrowHelper.ThrowScanException(scanner, $"Expect scan {expectTokenType}, but got {token.Type}.");
+			}
+			return token;
+		}
+
 		public static bool TryConsume<TTokenType>(this IScanner scanner, TTokenType expectTokenType, out TextSpan tokenSpan)
 			where TTokenType : struct
 		{
