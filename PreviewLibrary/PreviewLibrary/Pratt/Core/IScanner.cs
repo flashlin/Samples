@@ -10,8 +10,6 @@ namespace PreviewLibrary.Pratt.Core
 		TextSpan Consume<TTokenType>(TTokenType expectTokenType)
 			where TTokenType : struct;
 
-		TextSpan ConsumeAny<TTokenType>(params TTokenType[] tokenTypes)
-					where TTokenType : struct;
 		string GetHelpMessage(TextSpan currentSpan);
 
 		int GetOffset();
