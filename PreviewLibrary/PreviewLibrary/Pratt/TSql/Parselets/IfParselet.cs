@@ -21,7 +21,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
             return new IfSqlCodeExpr
             {
-                Condition = conditionExpr,
+                Condition = conditionExpr as SqlCodeExpr,
                 Body = bodyList
             };
         }

@@ -19,7 +19,7 @@ namespace TestProject.PrattTests
 		protected readonly ITestOutputHelper _outputHelper;
 		protected TSqlParser _parser;
 		private List<IExpression> _exprList;
-		private SqlCodeExpr _expr;
+		protected SqlCodeExpr _expr;
 		private TSqlScanner _scanner;
 		private TextSpan _token;
 

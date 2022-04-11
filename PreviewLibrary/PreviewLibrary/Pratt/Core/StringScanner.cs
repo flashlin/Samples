@@ -102,14 +102,17 @@ namespace PreviewLibrary.Pratt.Core
 		public bool TryConsumeTokenType<TTokenType>(TTokenType expectTokenType, out TextSpan tokenSpan)
 			where TTokenType : struct
 		{
+			var startIndex = _index;
 			var token = ScanNext();
 			if (token.IsEmpty)
 			{
+				_index = startIndex;
 				tokenSpan = TextSpan.Empty;
 				return false;
 			}
 			if (token.Type != expectTokenType.ToString())
 			{
+				_index = startIndex;
 				tokenSpan = TextSpan.Empty;
 				return false;
 			}

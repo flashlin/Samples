@@ -28,6 +28,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.LParen, new GroupParselet());
 
 			Register(SqlToken.Not, new NotParselet());
+			Register(SqlToken.If, new IfParselet());
 			
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 		}

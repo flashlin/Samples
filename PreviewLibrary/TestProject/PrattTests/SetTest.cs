@@ -24,7 +24,5 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe(":SETVAR id \"123\"");
 		}
-
-
 	}
 }
