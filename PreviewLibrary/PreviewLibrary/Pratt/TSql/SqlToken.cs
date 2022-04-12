@@ -55,6 +55,7 @@
 		Insert,
 		Grant,
 		To,
-		HexNumber
+		HexNumber,
+		CONNECT
 	}
 }

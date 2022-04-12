@@ -41,5 +41,15 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe("name NOT LIKE @name");
 		}
+
+		[Fact]
+		public void grant_connect_to_user()
+		{
+			var sql = "grant connect to [user_Name]";
+			
+			Parse(sql);
+
+			ThenExprShouldBe("GRANT CONNECT TO [user_Name]");
+		}
 	}
 }

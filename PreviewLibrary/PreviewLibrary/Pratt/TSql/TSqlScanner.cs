@@ -40,6 +40,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("ANSI_PADDING", SqlToken.ANSI_PADDING);
 			AddToken("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
 			AddToken("ARITHABORT", SqlToken.ARITHABORT);
+			AddToken("CONNECT", SqlToken.CONNECT);
 			AddToken("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddToken("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddToken("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
