@@ -56,6 +56,8 @@
 		Grant,
 		To,
 		HexNumber,
-		CONNECT
+		CONNECT,
+		Delete,
+		Update
 	}
 }

@@ -13,6 +13,10 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var permissionPrincipal = new[]
 			{
 				SqlToken.CONNECT,
+				SqlToken.Delete,
+				SqlToken.Insert,
+				SqlToken.Select,
+				SqlToken.Update,
 			};
 
 			var permissionList = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, permissionPrincipal)

@@ -13,6 +13,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("AND", SqlToken.And);
 			AddToken("BREAK", SqlToken.Break);
 			AddToken("BEGIN", SqlToken.Begin);
+			AddToken("DELETE", SqlToken.Delete);
 			AddToken("ERROR", SqlToken.Error);
 			AddToken("EXIT", SqlToken.Exit);
 			AddToken("END", SqlToken.End);
@@ -31,6 +32,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
 			AddToken("TO", SqlToken.To);
+			AddToken("UPDATE", SqlToken.Update);
 			AddToken("WHERE", SqlToken.Where);
 			AddToken("WITH", SqlToken.With);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
