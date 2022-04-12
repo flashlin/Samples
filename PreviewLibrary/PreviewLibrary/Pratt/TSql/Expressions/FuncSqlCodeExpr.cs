@@ -7,12 +7,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class FuncSqlCodeExpr : SqlCodeExpr
 	{
-		public string Name { get; set; }
+		public SqlCodeExpr Name { get; set; }
 		public List<SqlCodeExpr> Parameters { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write($"{Name}(");
+			Name.WriteToStream(stream);
+			stream.Write("(");
 			if (Parameters.Count > 0)
 			{
 				stream.Write(" ");

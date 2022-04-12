@@ -35,13 +35,33 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			}
 
 			var identStr = identTokens.Select(x => parser.Scanner.GetSpanString(x)).ToList();
-
-			return new ObjectIdSqlCodeExpr
+			var identExpr = new ObjectIdSqlCodeExpr
 			{
 				DatabaseName = identStr[0],
 				SchemaName = identStr[1],
 				ObjectName = identStr[2],
 			};
+
+			if (parser.Scanner.TryConsume(SqlToken.LParen, out _))
+			{
+				var parametersList = new List<SqlCodeExpr>();
+				if (!parser.Scanner.TryConsume(SqlToken.RParen, out _))
+				{
+					do
+					{
+						var parameter = parser.ParseExp();
+						parametersList.Add(parameter as SqlCodeExpr);
+					} while (parser.Scanner.TryConsume(SqlToken.Comma, out _));
+					parser.Scanner.Consume(SqlToken.RParen);
+				}
+				return new FuncSqlCodeExpr
+				{
+					Name = identExpr,
+					Parameters = parametersList
+				};
+			}
+
+			return identExpr;
 		}
 	}
 }

@@ -15,11 +15,18 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var arguments = new List<SqlCodeExpr>();
 			var innerExpr = parser.ParseExp() as SqlCodeExpr;
 			arguments.Add(innerExpr);
+
+			var existsNameExpr = new ObjectIdSqlCodeExpr
+			{
+				DatabaseName = string.Empty,
+				SchemaName = string.Empty,
+				ObjectName = "EXISTS"
+			};
 			
 			parser.Scanner.ConsumeAny(SqlToken.RParen);
 			return new FuncSqlCodeExpr
 			{
-				Name = "EXISTS",
+				Name = existsNameExpr,
 				Parameters = arguments
 			};
 		}
