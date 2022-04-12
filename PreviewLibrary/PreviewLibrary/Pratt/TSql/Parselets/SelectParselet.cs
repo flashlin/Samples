@@ -18,33 +18,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				columns.Add(ParseColumnAs(parser));
 			} while (parser.Match(SqlToken.Comma));
 
-			var fromSourceList = new List<SqlCodeExpr>();
-			if (parser.Scanner.TryConsume(SqlToken.From, out _))
-			{
-				fromSourceList = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
-					{
-						var sourceExpr = parser.ParseExp() as SqlCodeExpr;
-						var userWithOptions = new List<string>();
-
-						if (parser.Scanner.Match(SqlToken.With))
-						{
-							parser.Scanner.Consume(SqlToken.LParen);
-							var withOptions = new[]
-							{
-								SqlToken.NOLOCK
-							};
-							userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
-								.ToList();
-							parser.Scanner.Consume(SqlToken.RParen);
-						}
-
-						return new FromSourceSqlCodeExpr
-						{
-							Left = sourceExpr,
-							Options = userWithOptions,
-						} as SqlCodeExpr;
-					}).ToList();
-			}
+			var fromSourceList = ParseFromSourceList(parser);
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
@@ -58,6 +32,39 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				FromSourceList = fromSourceList,
 				WhereExpr = whereExpr
 			};
+		}
+
+		private static List<SqlCodeExpr> ParseFromSourceList(IParser parser)
+		{
+			var fromSourceList = new List<SqlCodeExpr>();
+			if (parser.Scanner.TryConsume(SqlToken.From, out _))
+			{
+				fromSourceList = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
+				{
+					var sourceExpr = parser.ParseExp() as SqlCodeExpr;
+					var userWithOptions = new List<string>();
+
+					if (parser.Scanner.Match(SqlToken.With))
+					{
+						parser.Scanner.Consume(SqlToken.LParen);
+						var withOptions = new[]
+						{
+								SqlToken.NOLOCK
+							};
+						userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
+							.ToList();
+						parser.Scanner.Consume(SqlToken.RParen);
+					}
+
+					return new FromSourceSqlCodeExpr
+					{
+						Left = sourceExpr,
+						Options = userWithOptions,
+					} as SqlCodeExpr;
+				}).ToList();
+			}
+
+			return fromSourceList;
 		}
 
 		protected SqlCodeExpr ParseColumnAs(IParser parser)
