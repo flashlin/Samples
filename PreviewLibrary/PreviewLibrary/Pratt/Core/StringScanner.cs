@@ -233,6 +233,18 @@ namespace PreviewLibrary.Pratt.Core
 			};
 		}
 
+		protected TextSpan ReadHexNumber(TextSpan head)
+		{
+			var token = ReadUntil(head, (ch) =>
+			{
+				return char.IsLetterOrDigit(ch);
+			});
+
+			var tokenStr = GetSpanString(token);
+			token.Type = GetTokenType(tokenStr, SqlToken.HexNumber.ToString());
+			return token;
+		}
+
 		protected TextSpan ReadIdentifier(TextSpan head)
 		{
 			var token = ReadUntil(head, (ch) =>

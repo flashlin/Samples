@@ -54,6 +54,7 @@
 		IDENTITY_INSERT,
 		Insert,
 		Grant,
-		To
+		To,
+		HexNumber
 	}
 }

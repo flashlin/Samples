@@ -87,6 +87,17 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
+			if (head == "0" && TryNextChar('x', out var hexHead))
+			{
+				headSpan = headSpan.Concat(hexHead);
+				if (!TryRead(ReadHexNumber, headSpan, out var hexString))
+				{
+					ThrowHelper.ThrowScanException(this, $"Scan NString Error.");
+				}
+				tokenSpan = hexString;
+				return true;
+			}
+
 
 			if (head == "[" && TryRead(ReadSqlIdentifier, headSpan, out var sqlIdentifier))
 			{

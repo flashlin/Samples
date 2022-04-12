@@ -80,5 +80,13 @@ namespace TestProject.PrattTests
 			Scan(sql);
 			ThenTokenShouldBe("=");
 		}
+
+		[Fact]
+		public void hex()
+		{
+			var sql = "0x013FA";
+			Scan(sql);
+			ThenTokenShouldBe("0x013FA");
+		}
 	}
 }
