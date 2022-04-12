@@ -1,4 +1,8 @@
 ﻿using PreviewLibrary.Pratt.Core;
+using PreviewLibrary.Pratt.TSql.Expressions;
+using System.Collections.Generic;
+using System.Linq;
+using T1.Standard.IO;
 
 namespace PreviewLibrary.Pratt.TSql
 {
@@ -7,6 +11,21 @@ namespace PreviewLibrary.Pratt.TSql
 		public static bool Match(this IParser parser, SqlToken tokenType)
 		{
 			return parser.MatchTokenType(tokenType.ToString());
+		}
+	}
+
+	public static class SqlCodeExprExtension
+	{
+		public static void WriteToStreamWithComma(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream)
+		{
+			foreach (var expr in exprList.Select((val, idx) => new { val, idx }))
+			{
+				if (expr.idx != 0)
+				{
+					stream.Write(", ");
+				}
+				expr.val.WriteToStream(stream);
+			}
 		}
 	}
 }

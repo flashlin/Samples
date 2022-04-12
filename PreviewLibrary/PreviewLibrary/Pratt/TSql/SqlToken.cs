@@ -49,6 +49,7 @@
 		And,
 		Or,
 		NOLOCK,
-		With
+		With,
+		Exec
 	}
 }

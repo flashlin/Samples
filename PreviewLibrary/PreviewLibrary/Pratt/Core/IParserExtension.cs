@@ -20,6 +20,12 @@ namespace PreviewLibrary.Pratt.Core
 			return false;
 		}
 
+		public static bool TryConsume<TTokenType>(this IParser parser, TTokenType tokenType, out IExpression expr)
+			where TTokenType : struct
+		{
+			return TryConsumeAny<TTokenType>(parser, out expr, tokenType);
+		}
+
 		public static IExpression ConsumeAny<TTokenType>(this IParser parser, params TTokenType[] tokenTypes)
 			where TTokenType : struct
 		{

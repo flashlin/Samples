@@ -11,7 +11,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
 			parser.Scanner.Consume(SqlToken.LParen);
-			
+
 			var arguments = new List<SqlCodeExpr>();
 			var innerExpr = parser.ParseExp() as SqlCodeExpr;
 			arguments.Add(innerExpr);
@@ -22,7 +22,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				SchemaName = string.Empty,
 				ObjectName = "EXISTS"
 			};
-			
+
 			parser.Scanner.ConsumeAny(SqlToken.RParen);
 			return new FuncSqlCodeExpr
 			{
