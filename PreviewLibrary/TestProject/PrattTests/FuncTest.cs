@@ -17,5 +17,16 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe(@"EXISTS( 1 )");
 		}
+
+		[Fact]
+		public void cast()
+		{
+			var sql = @"cast(0x0FB AS DateTime)";
+			Parse(sql);
+
+			ThenExprShouldBe(@"CAST( 0x0FB AS DATETIME )");
+		}
+
+
 	}
 }

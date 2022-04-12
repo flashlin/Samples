@@ -13,8 +13,10 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("AND", SqlToken.And);
 			AddToken("BREAK", SqlToken.Break);
 			AddToken("BEGIN", SqlToken.Begin);
+			AddToken("CAST", SqlToken.Cast);
 			AddToken("DELETE", SqlToken.Delete);
 			AddToken("DEFAULT", SqlToken.Default);
+			AddToken("DATETIME", SqlToken.DateTime);
 			AddToken("ERROR", SqlToken.Error);
 			AddToken("EXIT", SqlToken.Exit);
 			AddToken("END", SqlToken.End);

@@ -62,6 +62,8 @@
 		Into,
 		Top,
 		Values,
-		Default
+		Default,
+		Cast,
+		DateTime
 	}
 }

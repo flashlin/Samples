@@ -78,6 +78,43 @@ namespace PreviewLibrary.Pratt.TSql
 			return true;
 		}
 
+		public static SqlCodeExpr ConsumeDataType(this IParser parser)
+		{
+			var dataTypes = new[]
+			{
+				SqlToken.DateTime
+			};
+
+			var dataTypeToken = parser.Scanner.ConsumeAny(dataTypes);
+			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
+
+			if (!parser.Scanner.Match(SqlToken.LParen))
+			{
+				return new DataTypeSqlCodeExpr
+				{
+					DataType = dataTypeStr
+				};
+			}
+
+			var sizeToken = parser.Scanner.Consume(SqlToken.Number);
+			var sizeStr = parser.Scanner.GetSpanString(sizeToken);
+			var size = int.Parse(sizeStr);
+
+			int? scale = null;
+			if (parser.Scanner.Match(SqlToken.Comma))
+			{
+				var scaleToken = parser.Scanner.Consume(SqlToken.Number);
+				scale = int.Parse(parser.Scanner.GetSpanString(scaleToken));
+			}
+
+			parser.Scanner.Consume(SqlToken.RParen);
+			return new DataTypeSqlCodeExpr
+			{
+				DataType = dataTypeStr,
+				Size = size,
+				Scale = scale
+			};
+		}
 
 		public static SqlCodeExpr ConsumeObjectId(this IScanner scanner)
 		{
@@ -86,7 +123,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 		public delegate bool TryConsumeDelegate(IScanner scanner, out SqlCodeExpr expr);
 
-		public static SqlCodeExpr Consume(this IScanner scanner, TryConsumeDelegate predicate)
+		private static SqlCodeExpr Consume(this IScanner scanner, TryConsumeDelegate predicate)
 		{
 			if (!predicate(scanner, out var expr))
 			{

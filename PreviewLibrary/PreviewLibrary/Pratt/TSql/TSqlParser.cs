@@ -11,6 +11,7 @@ namespace PreviewLibrary.Pratt.TSql
 	{
 		public TSqlParser(IScanner scanner) : base(scanner)
 		{
+			Register(SqlToken.Cast, new CastParselet());
 			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
 			Register(SqlToken.Exists, new ExistsParselet());
 			Register(SqlToken.Exec, new ExecParselet());
