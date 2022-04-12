@@ -84,8 +84,9 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			tokenSpan = TextSpan.Empty;
 
-			var head = GetSpanString(headSpan);
-			if (head == "N" && TryNextChar('\'', out var head2))
+			var head = GetSpanString(headSpan)[0];
+
+			if (head == 'N' && TryNextChar('\'', out var head2))
 			{
 				headSpan = headSpan.Concat(head2);
 				if (!TryRead(ReadQuoteString, headSpan, out var nstring))
@@ -97,7 +98,7 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
-			if (head == "0" && TryNextChar('x', out var hexHead))
+			if (head == '0' && TryNextChar('x', out var hexHead))
 			{
 				headSpan = headSpan.Concat(hexHead);
 				if (!TryRead(ReadHexNumber, headSpan, out var hexString))
@@ -108,50 +109,74 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
-			if (head == "0" && TryNextChar('.', out var floatHead))
+			if (char.IsDigit(head))
 			{
-				headSpan = headSpan.Concat(floatHead);
-				if (!TryRead(ReadNumber, headSpan, out var floatString))
+				if (!TryRead(ReadNumber, headSpan, out var numberString))
 				{
-					ThrowHelper.ThrowScanException(this, $"Scan float Error.");
+					ThrowHelper.ThrowScanException(this, $"Scan number Error.");
 				}
-				tokenSpan = floatString;
+
+				if (TryNextChar('.', out var floatHead))
+				{
+					headSpan = numberString.Concat(floatHead);
+					if (!TryRead(ReadNumber, headSpan, out var floatString))
+					{
+						ThrowHelper.ThrowScanException(this, $"Scan float Error.");
+					}
+					tokenSpan = floatString;
+					tokenSpan.Type = SqlToken.Number.ToString();
+					return true;
+				}
+
+				tokenSpan = numberString;
 				tokenSpan.Type = SqlToken.Number.ToString();
 				return true;
 			}
 
-			if (head == "[" && TryRead(ReadSqlIdentifier, headSpan, out var sqlIdentifier))
+			//if (head == "0" && TryNextChar('.', out var floatHead))
+			//{
+			//	headSpan = headSpan.Concat(floatHead);
+			//	if (!TryRead(ReadNumber, headSpan, out var floatString))
+			//	{
+			//		ThrowHelper.ThrowScanException(this, $"Scan float Error.");
+			//	}
+			//	tokenSpan = floatString;
+			//	tokenSpan.Type = SqlToken.Number.ToString();
+			//	return true;
+			//}
+
+			if (head == '[' && TryRead(ReadSqlIdentifier, headSpan, out var sqlIdentifier))
 			{
 				tokenSpan = sqlIdentifier;
 				return true;
 			}
 
-			if (head == ":" && TryRead(ReadIdentifier, headSpan, out var scriptIdentifier))
+			if (head == ':' && TryRead(ReadIdentifier, headSpan, out var scriptIdentifier))
 			{
 				scriptIdentifier.Type = GetTokenType(scriptIdentifier, SqlToken.ScriptIdentifier);
 				tokenSpan = scriptIdentifier;
 				return true;
 			}
 
-			if (head == "/" && TryRead(ReadMultiComment, headSpan, out var multiComment))
+			if (head == '/' && TryRead(ReadMultiComment, headSpan, out var multiComment))
 			{
 				tokenSpan = multiComment;
 				return true;
 			}
 
-			if (head == "\"" && TryRead(ReadDoubleQuoteString, headSpan, out var doubleQuoteString))
+			if (head == '\"' && TryRead(ReadDoubleQuoteString, headSpan, out var doubleQuoteString))
 			{
 				tokenSpan = doubleQuoteString;
 				return true;
 			}
 
-			if (head == "'" && TryRead(ReadQuoteString, headSpan, out var quoteString))
+			if (head == '\'' && TryRead(ReadQuoteString, headSpan, out var quoteString))
 			{
 				tokenSpan = quoteString;
 				return true;
 			}
-			
-			if (head == "@" && TryRead(ReadIdentifier, headSpan, out var variable))
+
+			if (head == '@' && TryRead(ReadIdentifier, headSpan, out var variable))
 			{
 				tokenSpan = variable;
 				tokenSpan.Type = SqlToken.Variable.ToString();

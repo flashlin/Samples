@@ -97,6 +97,12 @@ namespace TestProject.PrattTests
 			ThenTokenShouldBe("0.0010");
 		}
 
-
+		[Fact]
+		public void sql_float2()
+		{
+			var sql = "10.0010";
+			Scan(sql);
+			ThenTokenShouldBe("10.0010");
+		}
 	}
 }

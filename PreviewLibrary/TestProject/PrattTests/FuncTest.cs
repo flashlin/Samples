@@ -19,12 +19,21 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
-		public void cast()
+		public void cast_hex()
 		{
 			var sql = @"cast(0x0FB AS DateTime)";
 			Parse(sql);
 
 			ThenExprShouldBe(@"CAST( 0x0FB AS DATETIME )");
+		}
+
+		[Fact]
+		public void cast_float()
+		{
+			var sql = @"cast(100.00 as Decimal(19, 2))";
+			Parse(sql);
+
+			ThenExprShouldBe(@"CAST( 100.00 AS DECIMAL(19,2) )");
 		}
 
 
