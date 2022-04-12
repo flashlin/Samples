@@ -50,6 +50,7 @@
 		Or,
 		NOLOCK,
 		With,
-		Exec
+		Exec,
+		IDENTITY_INSERT
 	}
 }
