@@ -45,6 +45,8 @@
 		Exists,
 		From,
 		Equal,
-		Where
+		Where,
+		And,
+		Or
 	}
 }

@@ -10,6 +10,7 @@ namespace PreviewLibrary.Pratt.TSql
 			: base(text)
 		{
 			AddToken("AS", SqlToken.As);
+			AddToken("AND", SqlToken.And);
 			AddToken("BREAK", SqlToken.Break);
 			AddToken("BEGIN", SqlToken.Begin);
 			AddToken("ANSI_NULLS", SqlToken.ANSI_NULLS);
@@ -30,6 +31,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("LIKE", SqlToken.Like);
 			AddToken("ON", SqlToken.On);
 			AddToken("OFF", SqlToken.Off);
+			AddToken("OR", SqlToken.Or);
 			AddToken("GO", SqlToken.Go);
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
