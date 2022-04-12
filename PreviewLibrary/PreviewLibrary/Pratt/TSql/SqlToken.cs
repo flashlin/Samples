@@ -48,6 +48,7 @@
 		Where,
 		And,
 		Or,
-		NOLOCK
+		NOLOCK,
+		With
 	}
 }

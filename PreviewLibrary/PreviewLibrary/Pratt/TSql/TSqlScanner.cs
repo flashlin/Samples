@@ -28,7 +28,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
 			AddToken("WHERE", SqlToken.Where);
-			AddToken("WITH", SqlToken.Where);
+			AddToken("WITH", SqlToken.With);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
 			AddToken(":ON", SqlToken.ScriptOn);
 

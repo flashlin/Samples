@@ -4,6 +4,7 @@ using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.Core.Parselets;
 using PreviewLibrary.Pratt.TSql.Expressions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PreviewLibrary.Pratt.TSql.Parselets
 {
@@ -20,11 +21,29 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var fromSourceList = new List<SqlCodeExpr>();
 			if (parser.Scanner.TryConsume(SqlToken.From, out _))
 			{
-				do
-				{
-					var fromSourceExpr = parser.ParseExp() as SqlCodeExpr;
-					fromSourceList.Add(fromSourceExpr);
-				} while (parser.Scanner.TryConsume(SqlToken.Comma, out _));
+				fromSourceList = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
+					{
+						var sourceExpr = parser.ParseExp() as SqlCodeExpr;
+						var userWithOptions = new List<string>();
+
+						if (parser.Scanner.Match(SqlToken.With))
+						{
+							parser.Scanner.Consume(SqlToken.LParen);
+							var withOptions = new[]
+							{
+								SqlToken.NOLOCK
+							};
+							userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
+								.ToList();
+							parser.Scanner.Consume(SqlToken.RParen);
+						}
+
+						return new FromSourceSqlCodeExpr
+						{
+							Left = sourceExpr,
+							Options = userWithOptions,
+						} as SqlCodeExpr;
+					}).ToList();
 			}
 
 			SqlCodeExpr whereExpr = null;

@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PreviewLibrary.Pratt.Core
 {
@@ -49,6 +51,12 @@ namespace PreviewLibrary.Pratt.Core
 			return TryConsumeAny(scanner, out tokenSpan, expectTokenType);
 		}
 
+		public static bool Match<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
+			where TTokenType : struct
+		{
+			return TryConsume(scanner, expectTokenType, out _);
+		}
+
 		public static bool TryConsumeAny<TTokenType>(this IScanner scanner, out TextSpan outSpan, params TTokenType[] tokenTypes)
 			where TTokenType : struct
 		{
@@ -65,6 +73,20 @@ namespace PreviewLibrary.Pratt.Core
 			}
 			outSpan = TextSpan.Empty;
 			return false;
+		}
+
+		public static IEnumerable<string> ConsumeToStringListByDelimiter<TTokenType>(this IScanner scanner,
+			TTokenType delimiter, params TTokenType[] tokenTypes)
+			where TTokenType : struct
+		{
+			do
+			{
+				if (scanner.TryConsumeAny(out var token, tokenTypes))
+				{
+					var tokenStr = scanner.GetSpanString(token);
+					yield return tokenStr;
+				}
+			} while (scanner.Match(delimiter));
 		}
 	}
 }
