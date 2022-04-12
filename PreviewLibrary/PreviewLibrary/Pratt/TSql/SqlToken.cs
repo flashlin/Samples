@@ -51,6 +51,9 @@
 		NOLOCK,
 		With,
 		Exec,
-		IDENTITY_INSERT
+		IDENTITY_INSERT,
+		Insert,
+		Grant,
+		To
 	}
 }
