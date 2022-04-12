@@ -88,5 +88,15 @@ namespace TestProject.PrattTests
 			Scan(sql);
 			ThenTokenShouldBe("0x013FA");
 		}
+
+		[Fact]
+		public void sql_float()
+		{
+			var sql = "0.0010";
+			Scan(sql);
+			ThenTokenShouldBe("0.0010");
+		}
+
+
 	}
 }

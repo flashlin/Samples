@@ -101,12 +101,23 @@ namespace PreviewLibrary.Pratt.TSql
 				headSpan = headSpan.Concat(hexHead);
 				if (!TryRead(ReadHexNumber, headSpan, out var hexString))
 				{
-					ThrowHelper.ThrowScanException(this, $"Scan NString Error.");
+					ThrowHelper.ThrowScanException(this, $"Scan HexString Error.");
 				}
 				tokenSpan = hexString;
 				return true;
 			}
 
+			if (head == "0" && TryNextChar('.', out var floatHead))
+			{
+				headSpan = headSpan.Concat(floatHead);
+				if (!TryRead(ReadNumber, headSpan, out var floatString))
+				{
+					ThrowHelper.ThrowScanException(this, $"Scan float Error.");
+				}
+				tokenSpan = floatString;
+				tokenSpan.Type = SqlToken.Number.ToString();
+				return true;
+			}
 
 			if (head == "[" && TryRead(ReadSqlIdentifier, headSpan, out var sqlIdentifier))
 			{
