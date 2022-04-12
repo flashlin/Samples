@@ -47,6 +47,7 @@
 		Equal,
 		Where,
 		And,
-		Or
+		Or,
+		NOLOCK
 	}
 }

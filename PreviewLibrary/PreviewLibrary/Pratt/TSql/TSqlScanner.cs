@@ -13,14 +13,6 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("AND", SqlToken.And);
 			AddToken("BREAK", SqlToken.Break);
 			AddToken("BEGIN", SqlToken.Begin);
-			AddToken("ANSI_NULLS", SqlToken.ANSI_NULLS);
-			AddToken("ANSI_PADDING", SqlToken.ANSI_PADDING);
-			AddToken("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
-			AddToken("ARITHABORT", SqlToken.ARITHABORT);
-			AddToken("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
-			AddToken("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
-			AddToken("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
-			AddToken("NOEXEC", SqlToken.NOEXEC);
 			AddToken("ERROR", SqlToken.Error);
 			AddToken("EXIT", SqlToken.Exit);
 			AddToken("END", SqlToken.End);
@@ -36,9 +28,19 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
 			AddToken("WHERE", SqlToken.Where);
+			AddToken("WITH", SqlToken.Where);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
 			AddToken(":ON", SqlToken.ScriptOn);
 
+			AddToken("ANSI_NULLS", SqlToken.ANSI_NULLS);
+			AddToken("ANSI_PADDING", SqlToken.ANSI_PADDING);
+			AddToken("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
+			AddToken("ARITHABORT", SqlToken.ARITHABORT);
+			AddToken("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
+			AddToken("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
+			AddToken("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
+			AddToken("NOEXEC", SqlToken.NOEXEC);
+			AddToken("NOLOCK", SqlToken.NOLOCK);
 
 			AddSymbol("(", SqlToken.LParen);
 			AddSymbol(")", SqlToken.RParen);
