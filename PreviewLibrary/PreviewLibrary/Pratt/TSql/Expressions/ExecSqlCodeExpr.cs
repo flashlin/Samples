@@ -1,10 +1,9 @@
 ﻿using PreviewLibrary.Pratt.Core.Expressions;
-using PreviewLibrary.Pratt.TSql.Expressions;
 using System.Collections.Generic;
 using System.Linq;
 using T1.Standard.IO;
 
-namespace PreviewLibrary.Pratt.TSql.Parselets
+namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class ExecSqlCodeExpr : SqlCodeExpr
 	{

@@ -11,26 +11,27 @@ namespace PreviewLibrary.Pratt.TSql
 	{
 		public TSqlParser(IScanner scanner) : base(scanner)
 		{
-			Register(SqlToken.Select, new SelectParselet());
-			Register(SqlToken.Number, new NumberParselet());
-			Register(SqlToken.HexNumber, new HexNumberParselet());
-			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());
-			Register(SqlToken.Identifier, new ObjectIdParselet());
-			Register(SqlToken.Variable, new VariableParselet());
-			Register(SqlToken.NString, new NStringParselet());
-			Register(SqlToken.MultiComment, new CommentParselet());
+			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
+			Register(SqlToken.Exists, new ExistsParselet());
+			Register(SqlToken.Exec, new ExecParselet());
 			Register(SqlToken.Go, new GoParselet());
 			Register(SqlToken.Grant, new GrantParselet());
+			Register(SqlToken.HexNumber, new HexNumberParselet());
+			Register(SqlToken.Identifier, new ObjectIdParselet());
+			Register(SqlToken.Insert, new InsertParselet());
+			Register(SqlToken.LParen, new GroupParselet());
+			Register(SqlToken.Select, new SelectParselet());
+			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());
 			Register(SqlToken.Set, new SetParselet());
 			Register(SqlToken.Semicolon, new SemicolonParselet());
 			Register(SqlToken.ScriptSetVar, new ScriptSetvarParselet());
 			Register(SqlToken.ScriptOn, new ScriptOnParselet());
-			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
-			Register(SqlToken.QuoteString, new QuoteStringParselet());
-			Register(SqlToken.LParen, new GroupParselet());
+			Register(SqlToken.Number, new NumberParselet());
+			Register(SqlToken.NString, new NStringParselet());
 			Register(SqlToken.Not, new NotParselet());
-			Register(SqlToken.Exists, new ExistsParselet());
-			Register(SqlToken.Exec, new ExecParselet());
+			Register(SqlToken.MultiComment, new CommentParselet());
+			Register(SqlToken.QuoteString, new QuoteStringParselet());
+			Register(SqlToken.Variable, new VariableParselet());
 
 			Register(SqlToken.Not, new NotInfixParselet());
 			Register(SqlToken.If, new IfParselet());

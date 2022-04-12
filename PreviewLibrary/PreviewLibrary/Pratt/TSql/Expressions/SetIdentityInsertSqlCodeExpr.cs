@@ -1,10 +1,9 @@
 ﻿using PreviewLibrary.Pratt.Core.Expressions;
-using PreviewLibrary.Pratt.TSql.Expressions;
 using T1.Standard.IO;
 
-namespace PreviewLibrary.Pratt.TSql.Parselets
+namespace PreviewLibrary.Pratt.TSql.Expressions
 {
-	public class SetIdentityInsertSqlCodeExpr : SqlCodeExpr 
+	public class SetIdentityInsertSqlCodeExpr : SqlCodeExpr
 	{
 		public SqlCodeExpr ObjectId { get; set; }
 		public string Toggle { get; set; }

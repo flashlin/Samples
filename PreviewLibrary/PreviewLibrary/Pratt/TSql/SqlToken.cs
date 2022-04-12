@@ -58,6 +58,10 @@
 		HexNumber,
 		CONNECT,
 		Delete,
-		Update
+		Update,
+		Into,
+		Top,
+		Values,
+		Default
 	}
 }
