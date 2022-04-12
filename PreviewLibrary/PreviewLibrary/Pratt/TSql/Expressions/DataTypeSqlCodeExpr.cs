@@ -1,8 +1,7 @@
 ﻿using PreviewLibrary.Pratt.Core;
-using PreviewLibrary.Pratt.TSql.Expressions;
 using T1.Standard.IO;
 
-namespace PreviewLibrary.Pratt.TSql
+namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class DataTypeSqlCodeExpr : SqlCodeExpr
 	{

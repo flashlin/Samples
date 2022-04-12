@@ -8,16 +8,13 @@ using T1.Standard.IO;
 
 namespace PreviewLibrary.Pratt.TSql
 {
-	public static class SqlParserExtensions
+	public static class SqlParserExtension
 	{
 		public static bool Match(this IParser parser, SqlToken tokenType)
 		{
 			return parser.MatchTokenType(tokenType.ToString());
 		}
-	}
 
-	public static class SqlCodeExprExtension
-	{
 		public static void WriteToStreamWithComma(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream)
 		{
 			foreach (var expr in exprList.Select((val, idx) => new { val, idx }))
