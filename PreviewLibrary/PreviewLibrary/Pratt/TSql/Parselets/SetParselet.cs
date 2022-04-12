@@ -11,6 +11,18 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if (parser.Scanner.Match(SqlToken.IDENTITY_INSERT))
+			{
+				var objectId = parser.PrefixParseAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
+				var toggle = parser.Scanner.ConsumeAny(SqlToken.On, SqlToken.Off);
+				var toggleStr = parser.Scanner.GetSpanString(toggle);
+				return new SetIdentityInsertSqlCodeExpr
+				{
+					ObjectId = objectId,
+					Toggle = toggleStr
+				};
+			}
+
 			var sqlOptions = new[]
 			{
 				SqlToken.ANSI_NULLS,

@@ -24,5 +24,15 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe(":SETVAR id \"123\"");
 		}
+
+		[Fact]
+		public void set_identity_insert_table_off()
+		{
+			var sql = "set identity_insert customer off";
+			Parse(sql);
+			ThenExprShouldBe("SET IDENTITY_INSERT customer OFF");
+		}
+
+
 	}
 }

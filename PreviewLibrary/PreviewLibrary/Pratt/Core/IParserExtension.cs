@@ -44,6 +44,12 @@ namespace PreviewLibrary.Pratt.Core
 			return parser.PrefixParse(token, 0);
 		}
 
+		public static IExpression PrefixParseAny<TTokenType>(this IParser parser, params TTokenType[] tokenTypes)
+			where TTokenType : struct
+		{
+			var token = parser.Scanner.ConsumeAny(tokenTypes);
+			return parser.PrefixParse(token, 0);
+		}
 
 		public static IEnumerable<TExpression> ConsumeByDelimiter<TTokenType, TExpression>(this IParser parser, 
 			TTokenType delimiter, 
