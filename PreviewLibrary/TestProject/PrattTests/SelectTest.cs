@@ -64,5 +64,13 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SELECT 1 FROM dbo.customer WHERE name = customFunc()");
 		}
+
+		[Fact]
+		public void select_number_from_dbo_table_where_and()
+		{
+			var sql = @"select 1 from dbo.customer where a=1 and b=2";
+			Parse(sql);
+			ThenExprShouldBe("SELECT 1 FROM dbo.customer WHERE a = 1 AND b = 2");
+		}
 	}
 }

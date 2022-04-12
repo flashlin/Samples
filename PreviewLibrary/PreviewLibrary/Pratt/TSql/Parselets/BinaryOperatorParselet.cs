@@ -28,7 +28,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			return new OperatorSqlCodeExpr
 			{
 				Left = left as SqlCodeExpr,
-				Oper = oper,
+				Oper = oper.ToUpper(),
 				Right = right as SqlCodeExpr
 			};
 		}
