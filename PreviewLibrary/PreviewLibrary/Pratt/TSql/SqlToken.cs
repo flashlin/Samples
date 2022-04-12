@@ -64,6 +64,7 @@
 		Values,
 		Default,
 		Cast,
-		DateTime
+		DateTime,
+		Decimal
 	}
 }
