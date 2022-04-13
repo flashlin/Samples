@@ -265,12 +265,19 @@ namespace PreviewLibrary.Pratt.TSql
 					prevCh = ch;
 					return true;
 				}
-				prevCh = ch;
-				return ch != '\'';
+				var isMeet = ch != '\'';
+				if (isMeet)
+				{
+					prevCh = ch;
+				}
+				return isMeet;
 			});
 
-			var tail = ConsumeCharacters("'");
-			content = content.Concat(tail);
+			if (prevCh != '\'')
+			{
+				var tail = ConsumeCharacters("'");
+				content = content.Concat(tail);
+			}
 			content.Type = SqlToken.QuoteString.ToString();
 			return content;
 		}

@@ -68,9 +68,9 @@ namespace TestProject.PrattTests
 		[Fact]
 		public void nstring_2_quote()
 		{
-			var sql = "N';'' '";
+			var sql = "N';'''";
 			Scan(sql);
-			ThenTokenShouldBe("N';'' '");
+			ThenTokenShouldBe("N';'''");
 		}
 
 		[Fact]

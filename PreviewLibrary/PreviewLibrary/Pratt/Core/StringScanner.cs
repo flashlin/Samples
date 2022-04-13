@@ -272,16 +272,16 @@ namespace PreviewLibrary.Pratt.Core
 			var token = head;
 			do
 			{
-				var ch = PeekSpan();
-				if (ch.IsEmpty)
+				var charToken = PeekSpan();
+				if (charToken.IsEmpty)
 				{
 					break;
 				}
-				if (!predicate(ch.GetCh(_textSpan.Span, 0)))
+				if (!predicate(charToken.GetCh(_textSpan.Span, 0)))
 				{
 					break;
 				}
-				token = token.Concat(ch);
+				token = token.Concat(charToken);
 				NextChar();
 			} while (true);
 			return token;
