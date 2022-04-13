@@ -80,7 +80,8 @@ namespace PreviewLibrary.Pratt.TSql
 			var dataTypes = new[]
 			{
 				SqlToken.DateTime,
-				SqlToken.Decimal
+				SqlToken.Decimal,
+				SqlToken.Numeric
 			};
 
 			var dataTypeToken = parser.Scanner.ConsumeAny(dataTypes);
