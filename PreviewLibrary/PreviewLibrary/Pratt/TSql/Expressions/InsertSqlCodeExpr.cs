@@ -7,6 +7,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class InsertSqlCodeExpr : SqlCodeExpr
 	{
+		public string IntoStr { get; set; }
 		public SqlCodeExpr TableName { get; set; }
 		public List<string> Columns { get; set; }
 		public List<ExprListSqlCodeExpr> ValuesList { get; set; }
@@ -14,8 +15,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public override void WriteToStream(IndentStream stream)
 		{
 			stream.Write("INSERT ");
+			if (!string.IsNullOrEmpty(IntoStr))
+			{
+				stream.Write($"{IntoStr.ToUpper()} ");
+			}
 			TableName.WriteToStream(stream);
-			
+
 			stream.Write("(");
 			Columns.WriteToStreamWithComma(stream);
 			stream.Write(")");

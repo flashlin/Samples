@@ -11,6 +11,12 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			var intoStr = string.Empty;
+			if (parser.Scanner.TryConsume(SqlToken.Into, out var intoToken))
+			{
+				intoStr = parser.Scanner.GetSpanString(intoToken);
+			}
+
 			var tableName = parser.Scanner.ConsumeObjectId();
 
 			parser.Scanner.Consume(SqlToken.LParen);
@@ -43,6 +49,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			return new InsertSqlCodeExpr
 			{
+				IntoStr = intoStr,
 				TableName = tableName,
 				Columns = columns,
 				ValuesList = valuesList
