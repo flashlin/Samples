@@ -47,6 +47,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("TOP", SqlToken.Top);
 			AddToken("UPDATE", SqlToken.Update);
 			AddToken("VALUES", SqlToken.Values);
+			AddToken("VARCHAR", SqlToken.Varchar);
 			AddToken("WHERE", SqlToken.Where);
 			AddToken("WITH", SqlToken.With);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);

@@ -76,6 +76,7 @@
 		DateTime2,
 		Create,
 		Procedure,
-		Int
+		Int,
+		Varchar
 	}
 }

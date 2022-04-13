@@ -22,10 +22,11 @@ end";
 			Parse(sql);
 
 			ThenExprShouldBe(@"CREATE PROCEDURE myProc
-@id INT,
+@id INT, 
 @name VARCHAR(50)
 BEGIN
-	SET NOEXEC ON ;
+	SET NOEXEC ON
+	; 
 END");
 		}
 	}

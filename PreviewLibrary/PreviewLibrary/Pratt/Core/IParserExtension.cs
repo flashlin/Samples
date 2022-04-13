@@ -51,8 +51,8 @@ namespace PreviewLibrary.Pratt.Core
 			return parser.PrefixParse(token, 0);
 		}
 
-		public static IEnumerable<TExpression> ConsumeByDelimiter<TTokenType, TExpression>(this IParser parser, 
-			TTokenType delimiter, 
+		public static IEnumerable<TExpression> ConsumeByDelimiter<TTokenType, TExpression>(this IParser parser,
+			TTokenType delimiter,
 			Func<TExpression> predicateExpr)
 			where TTokenType : struct
 			where TExpression : IExpression
@@ -60,6 +60,10 @@ namespace PreviewLibrary.Pratt.Core
 			do
 			{
 				var expr = predicateExpr();
+				if (expr == null)
+				{
+					yield break;
+				}
 				yield return expr;
 			} while (parser.Scanner.TryConsume(delimiter, out _));
 		}

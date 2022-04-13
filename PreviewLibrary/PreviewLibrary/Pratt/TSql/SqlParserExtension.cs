@@ -15,6 +15,24 @@ namespace PreviewLibrary.Pratt.TSql
 			return parser.MatchTokenType(tokenType.ToString());
 		}
 
+		public static void WriteToStream(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream,
+			Action<IndentStream> writeDelimiter = null)
+		{
+			if (writeDelimiter == null)
+			{
+				writeDelimiter = (stream1) => stream1.WriteLine();
+			}
+
+			foreach (var expr in exprList.Select((val, idx) => new { val, idx }))
+			{
+				if (expr.idx != 0)
+				{
+					writeDelimiter(stream);
+				}
+				expr.val.WriteToStream(stream);
+			}
+		}
+
 		public static void WriteToStreamWithComma(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream)
 		{
 			foreach (var expr in exprList.Select((val, idx) => new { val, idx }))
@@ -84,7 +102,8 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlToken.Decimal,
 				SqlToken.Numeric,
 				SqlToken.Int,
-				SqlToken.SmallDateTime
+				SqlToken.SmallDateTime,
+				SqlToken.Varchar
 			};
 
 			var dataTypeToken = parser.Scanner.ConsumeAny(dataTypes);
@@ -121,6 +140,18 @@ namespace PreviewLibrary.Pratt.TSql
 		public static SqlCodeExpr ConsumeObjectId(this IScanner scanner)
 		{
 			return Consume(scanner, TryConsumeObjectId);
+		}
+
+		public static List<SqlCodeExpr> ConsumeBeginBody(this IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.Begin);
+			var bodyList = new List<SqlCodeExpr>();
+			do
+			{
+				var body = parser.ParseExp();
+				bodyList.Add(body as SqlCodeExpr);
+			} while (!parser.Scanner.TryConsume(SqlToken.End, out _));
+			return bodyList;
 		}
 
 		public delegate bool TryConsumeDelegate(IScanner scanner, out SqlCodeExpr expr);

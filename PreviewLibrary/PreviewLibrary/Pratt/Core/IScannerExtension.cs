@@ -88,5 +88,11 @@ namespace PreviewLibrary.Pratt.Core
 				}
 			} while (scanner.Match(delimiter));
 		}
+
+		public static string GetHelpMessage(this IScanner scanner)
+		{
+			var token = scanner.Peek();
+			return scanner.GetHelpMessage(token);
+		}
 	}
 }

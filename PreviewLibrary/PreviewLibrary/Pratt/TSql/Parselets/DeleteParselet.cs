@@ -11,9 +11,9 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		{
 			parser.Scanner.Consume(SqlToken.From);
 			var table = parser.Scanner.ConsumeObjectId();
-			
+
 			SqlCodeExpr whereExpr = null;
-			if(parser.Scanner.Match(SqlToken.Where))
+			if (parser.Scanner.Match(SqlToken.Where))
 			{
 				whereExpr = parser.ParseExp() as SqlCodeExpr;
 			}
