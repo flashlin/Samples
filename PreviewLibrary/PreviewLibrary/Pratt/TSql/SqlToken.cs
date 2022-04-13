@@ -78,6 +78,7 @@
 		Procedure,
 		Int,
 		Varchar,
-		NVarchar
+		NVarchar,
+		Execute
 	}
 }

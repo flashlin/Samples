@@ -17,6 +17,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Delete, new DeleteParselet());
 			Register(SqlToken.Exists, new ExistsParselet());
 			Register(SqlToken.Exec, new ExecParselet());
+			Register(SqlToken.Execute, new ExecParselet());
 			Register(SqlToken.Go, new GoParselet());
 			Register(SqlToken.Grant, new GrantParselet());
 			Register(SqlToken.HexNumber, new HexNumberParselet());

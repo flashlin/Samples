@@ -24,6 +24,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("EXIT", SqlToken.Exit);
 			AddToken("END", SqlToken.End);
 			AddToken("EXISTS", SqlToken.Exists);
+			AddToken("EXECUTE", SqlToken.Execute);
 			AddToken("EXEC", SqlToken.Exec);
 			AddToken("FROM", SqlToken.From);
 			AddToken("GRANT", SqlToken.Grant);

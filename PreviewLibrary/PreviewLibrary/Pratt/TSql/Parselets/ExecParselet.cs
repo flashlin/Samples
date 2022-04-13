@@ -14,15 +14,6 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var parameters = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
 			{
-				//if (parser.TryConsume(SqlToken.Variable, out var varName))
-				//{
-				//	return varName as SqlCodeExpr;
-				//}
-				//else
-				//{
-				//	var valueExpr = parser.ParseExp() as SqlCodeExpr;
-				//	return valueExpr;
-				//}
 				return parser.ParseExp() as SqlCodeExpr;
 			}).ToList();
 
