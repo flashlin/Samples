@@ -17,6 +17,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("DELETE", SqlToken.Delete);
 			AddToken("DEFAULT", SqlToken.Default);
 			AddToken("DATETIME", SqlToken.DateTime);
+			AddToken("DATETIME2", SqlToken.DateTime2);
 			AddToken("DECIMAL", SqlToken.Decimal);
 			AddToken("ERROR", SqlToken.Error);
 			AddToken("EXIT", SqlToken.Exit);

@@ -80,6 +80,7 @@ namespace PreviewLibrary.Pratt.TSql
 			var dataTypes = new[]
 			{
 				SqlToken.DateTime,
+				SqlToken.DateTime2,
 				SqlToken.Decimal,
 				SqlToken.Numeric,
 				SqlToken.SmallDateTime

@@ -72,6 +72,7 @@
 		Slash,
 		Numeric,
 		SmallDateTime,
-		Is
+		Is,
+		DateTime2
 	}
 }
