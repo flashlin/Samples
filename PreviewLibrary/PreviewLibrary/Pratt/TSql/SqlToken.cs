@@ -65,6 +65,7 @@
 		Default,
 		Cast,
 		DateTime,
-		Decimal
+		Decimal,
+		SingleComment
 	}
 }

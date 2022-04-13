@@ -133,18 +133,6 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
-			//if (head == "0" && TryNextChar('.', out var floatHead))
-			//{
-			//	headSpan = headSpan.Concat(floatHead);
-			//	if (!TryRead(ReadNumber, headSpan, out var floatString))
-			//	{
-			//		ThrowHelper.ThrowScanException(this, $"Scan float Error.");
-			//	}
-			//	tokenSpan = floatString;
-			//	tokenSpan.Type = SqlToken.Number.ToString();
-			//	return true;
-			//}
-
 			if (head == '[' && TryRead(ReadSqlIdentifier, headSpan, out var sqlIdentifier))
 			{
 				tokenSpan = sqlIdentifier;
@@ -161,6 +149,17 @@ namespace PreviewLibrary.Pratt.TSql
 			if (head == '/' && TryRead(ReadMultiComment, headSpan, out var multiComment))
 			{
 				tokenSpan = multiComment;
+				return true;
+			}
+
+			if (head == '-' && TryNextChar('-', out var singleHead))
+			{
+				headSpan = headSpan.Concat(singleHead);
+				if (!TryRead(ReadSingleComment, headSpan, out var singleComment))
+				{
+					ThrowHelper.ThrowScanException(this, $"Scan single comment Error.");
+				}
+				tokenSpan = singleComment;
 				return true;
 			}
 
@@ -216,6 +215,17 @@ namespace PreviewLibrary.Pratt.TSql
 			var tail = ConsumeCharacters("*/");
 			content = content.Concat(tail);
 			content.Type = SqlToken.MultiComment.ToString();
+			return content;
+		}
+
+		protected TextSpan ReadSingleComment(TextSpan head)
+		{
+			var content = ReadUntil(head, ch =>
+			{
+				return (ch != '\r');
+			});
+
+			content.Type = SqlToken.SingleComment.ToString();
 			return content;
 		}
 

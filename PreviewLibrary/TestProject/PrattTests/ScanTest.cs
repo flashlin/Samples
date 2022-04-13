@@ -50,6 +50,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void singleComment()
+		{
+			var sql = @"-- 123";
+			Scan(sql);
+			ThenTokenShouldBe("-- 123");
+		}
+
+		[Fact]
 		public void nstring()
 		{
 			var sql = "N'123'";
