@@ -14,7 +14,7 @@ namespace TestProject.PrattTests
 		{
 			var sql = "case when @id = -1 then [Name] else @Name end";
 			Parse(sql);
-			ThenExprShouldBe("");
+			ThenExprShouldBe("CASE WHEN @id = -1 THEN [Name] ELSE @Name END");
 		}
 	}
 }

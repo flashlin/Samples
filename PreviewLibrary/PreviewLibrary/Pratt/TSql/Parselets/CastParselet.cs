@@ -19,7 +19,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var datetype = parser.ConsumeDataType();
 
 			parser.Scanner.Consume(SqlToken.RParen);
-			
+
 			var asExpr = new AsSqlCodeExpr
 			{
 				Left = expr,
