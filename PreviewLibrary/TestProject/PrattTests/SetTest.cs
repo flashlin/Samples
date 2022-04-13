@@ -32,7 +32,5 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SET IDENTITY_INSERT customer OFF");
 		}
-
-
 	}
 }

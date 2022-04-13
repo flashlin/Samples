@@ -15,6 +15,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("BEGIN", SqlToken.Begin);
 			AddToken("BIT", SqlToken.Bit);
 			AddToken("CAST", SqlToken.Cast);
+			AddToken("CASE", SqlToken.Case);
 			AddToken("CREATE", SqlToken.Create);
 			AddToken("DELETE", SqlToken.Delete);
 			AddToken("DEFAULT", SqlToken.Default);
@@ -27,6 +28,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("EXISTS", SqlToken.Exists);
 			AddToken("EXECUTE", SqlToken.Execute);
 			AddToken("EXEC", SqlToken.Exec);
+			AddToken("ELSE", SqlToken.Else);
 			AddToken("FROM", SqlToken.From);
 			AddToken("GRANT", SqlToken.Grant);
 			AddToken("GO", SqlToken.Go);
@@ -49,11 +51,13 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("SMALLDATETIME", SqlToken.SmallDateTime);
 			AddToken("TO", SqlToken.To);
 			AddToken("TOP", SqlToken.Top);
+			AddToken("THEN", SqlToken.Then);
 			AddToken("UPDATE", SqlToken.Update);
 			AddToken("VALUES", SqlToken.Values);
 			AddToken("VARCHAR", SqlToken.Varchar);
 			AddToken("WHERE", SqlToken.Where);
 			AddToken("WITH", SqlToken.With);
+			AddToken("WHEN", SqlToken.When);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
 			AddToken(":ON", SqlToken.ScriptOn);
 
