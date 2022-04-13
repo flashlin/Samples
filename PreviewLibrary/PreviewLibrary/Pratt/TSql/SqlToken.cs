@@ -81,6 +81,7 @@
 		NVarchar,
 		Execute,
 		Object,
-		ColonColon
+		ColonColon,
+		Bit
 	}
 }
