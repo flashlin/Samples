@@ -10,6 +10,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public List<string> PermissionList { get; set; }
 		public SqlCodeExpr OnObjectId { get; set; }
 		public List<SqlCodeExpr> TargetList { get; set; }
+		public SqlCodeExpr AsDbo { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -25,6 +26,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 
 			stream.Write(" TO ");
 			TargetList.WriteToStreamWithComma(stream);
+
+			if( AsDbo != null)
+			{
+				stream.Write(" AS ");
+				AsDbo.WriteToStream(stream);
+			}
 		}
 	}
 }

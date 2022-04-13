@@ -43,11 +43,19 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				return parser.ParseExp() as SqlCodeExpr;
 			}).ToList();
 
+
+			SqlCodeExpr asDbo = null;
+			if (parser.Scanner.Match(SqlToken.As))
+			{
+				asDbo = parser.Scanner.ConsumeObjectId();
+			}
+
 			return new GrantSqlCodeExpr
 			{
 				PermissionList = permissionList,
 				OnObjectId = onObjectId,
-				TargetList = targetList
+				TargetList = targetList,
+				AsDbo = asDbo
 			};
 		}
 	}
