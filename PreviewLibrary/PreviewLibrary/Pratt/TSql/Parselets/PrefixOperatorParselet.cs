@@ -1,7 +1,10 @@
-﻿using PreviewLibrary.Pratt.Core.Expressions;
+﻿using PreviewLibrary.Pratt.Core;
+using PreviewLibrary.Pratt.Core.Expressions;
+using PreviewLibrary.Pratt.Core.Parselets;
 using PreviewLibrary.Pratt.TSql;
+using PreviewLibrary.Pratt.TSql.Expressions;
 
-namespace PreviewLibrary.Pratt.Core.Parselets
+namespace PreviewLibrary.Pratt.TSql.Parselets
 {
 	public class PrefixOperatorParselet : IPrefixParselet
 	{
@@ -18,7 +21,7 @@ namespace PreviewLibrary.Pratt.Core.Parselets
 			// lower precedence when parsing the right-hand side. This will let a
 			// parselet with the same precedence appear on the right, which will then
 			// take *this* parselet's result as its left-hand argument.
-			var right = parser.ParseExp(_precedence);
+			var right = parser.ParseExp(_precedence) as SqlCodeExpr;
 
 			return new PrefixExpression
 			{

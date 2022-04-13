@@ -32,13 +32,10 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				var values = new List<SqlCodeExpr>();
 				do
 				{
-					var expr = parser.ParseExp() as SqlCodeExpr;
+					var expression = parser.ParseExp();
+					var expr = expression as SqlCodeExpr;
 					values.Add(expr);
 				} while (parser.Scanner.Match(SqlToken.Comma));
-				//var values = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
-				//{
-				//	return parser.ParseExp() as SqlCodeExpr;
-				//});
 				parser.Scanner.Consume(SqlToken.RParen);
 
 				return new ExprListSqlCodeExpr

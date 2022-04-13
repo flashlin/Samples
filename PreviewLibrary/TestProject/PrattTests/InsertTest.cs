@@ -27,6 +27,13 @@ namespace TestProject.PrattTests
 (1, 'a')");
 		}
 
+		[Fact]
+		public void insert_table_columns_values_negative()
+		{
+			var sql = "insert customer ([id], [name]) VALUES (-1, 'a')";
+			Parse(sql);
+			ThenExprShouldBe(@"INSERT customer([id], [name]) VALUES (-1, 'a')");
+		}
 
 	}
 }
