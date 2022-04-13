@@ -34,6 +34,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("INTO", SqlToken.Into);
 			AddToken("INT", SqlToken.Int);
 			AddToken("LIKE", SqlToken.Like);
+			AddToken("NVARCHAR", SqlToken.NVarchar);
 			AddToken("NOT", SqlToken.Not);
 			AddToken("NUMERIC", SqlToken.Numeric);
 			AddToken("ON", SqlToken.On);

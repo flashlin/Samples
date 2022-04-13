@@ -77,6 +77,7 @@
 		Create,
 		Procedure,
 		Int,
-		Varchar
+		Varchar,
+		NVarchar
 	}
 }

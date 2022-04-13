@@ -100,8 +100,9 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlToken.DateTime,
 				SqlToken.DateTime2,
 				SqlToken.Decimal,
-				SqlToken.Numeric,
 				SqlToken.Int,
+				SqlToken.Numeric,
+				SqlToken.NVarchar,
 				SqlToken.SmallDateTime,
 				SqlToken.Varchar
 			};
