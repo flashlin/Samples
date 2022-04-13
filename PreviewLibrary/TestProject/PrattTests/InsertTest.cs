@@ -38,9 +38,9 @@ namespace TestProject.PrattTests
 		[Fact]
 		public void insert_table_columns_values_1()
 		{
-			var sql = @"INSERT [dbo].[Countries] ([CountryID], [CountryName]) VALUES (N';''', N';'' ', N'""; '':', NULL, -1)";
+			var sql = @"insert [dbo].[Countries] ([CountryID], [CountryName]) values (N';''', N';'' ', N'""; '':', NULL, -1)";
 			Parse(sql);
-			ThenExprShouldBe(@"");
+			ThenExprShouldBe(@"INSERT [dbo].[Countries]([CountryID], [CountryName]) VALUES (N';''', N';'' ', N'""; '':', NULL, -1)");
 		}
 
 

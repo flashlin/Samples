@@ -251,33 +251,36 @@ namespace PreviewLibrary.Pratt.TSql
 
 		protected TextSpan ReadQuoteString(TextSpan head)
 		{
-			var prevCh = Char.MinValue;
-			var content = ReadUntil(head, ch =>
+			var content = head;
+			do
 			{
-				var nextCh = PeekCh(1);
-				if (ch == '\'' && nextCh == '\'')
+				var charSpan = PeekSpan();
+				if (charSpan.IsEmpty)
 				{
-					prevCh = ch;
-					return true;
+					break;
 				}
-				if (ch == '\'' && prevCh == '\'')
+				var currChar = PeekCh();
+				var nextChar = PeekCh(1);
+				if (currChar == '\'' && nextChar == '\'')
 				{
-					prevCh = ch;
-					return true;
+					var nextCharSpan = PeekSpan(1);
+					content = content.Concat(charSpan);
+					content = content.Concat(nextCharSpan);
+					NextChar();
+					NextChar();
+					continue;
 				}
-				var isMeet = ch != '\'';
-				if (isMeet)
+				if (currChar == '\'')
 				{
-					prevCh = ch;
+					break;
 				}
-				return isMeet;
-			});
+				content = content.Concat(charSpan);
+				NextChar();
+			} while (true);
 
-			if (prevCh != '\'')
-			{
-				var tail = ConsumeCharacters("'");
-				content = content.Concat(tail);
-			}
+
+			var tail = ConsumeCharacters("'");
+			content = content.Concat(tail);
 			content.Type = SqlToken.QuoteString.ToString();
 			return content;
 		}

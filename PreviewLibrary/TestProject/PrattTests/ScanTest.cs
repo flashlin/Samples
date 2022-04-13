@@ -74,6 +74,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void nstring_2_quote2()
+		{
+			var sql = "N';''', N'";
+			Scan(sql);
+			ThenTokenShouldBe("N';'''");
+		}
+
+		[Fact]
 		public void lparent()
 		{
 			var sql = "(-";
