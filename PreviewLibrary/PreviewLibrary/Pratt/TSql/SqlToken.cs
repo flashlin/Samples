@@ -70,6 +70,7 @@
 		Minus,
 		Asterisk,
 		Slash,
-		Numeric
+		Numeric,
+		SmallDateTime
 	}
 }

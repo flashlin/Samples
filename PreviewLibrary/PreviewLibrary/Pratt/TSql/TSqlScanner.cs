@@ -29,6 +29,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("INSERT", SqlToken.Insert);
 			AddToken("INTO", SqlToken.Into);
 			AddToken("NOT", SqlToken.Not);
+			AddToken("NUMERIC", SqlToken.Numeric);
 			AddToken("LIKE", SqlToken.Like);
 			AddToken("ON", SqlToken.On);
 			AddToken("OFF", SqlToken.Off);
@@ -36,13 +37,13 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("GO", SqlToken.Go);
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
+			AddToken("SMALLDATETIME", SqlToken.SmallDateTime);
 			AddToken("TO", SqlToken.To);
 			AddToken("TOP", SqlToken.Top);
 			AddToken("UPDATE", SqlToken.Update);
 			AddToken("VALUES", SqlToken.Values);
 			AddToken("WHERE", SqlToken.Where);
 			AddToken("WITH", SqlToken.With);
-			AddToken("NUMERIC", SqlToken.Numeric);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
 			AddToken(":ON", SqlToken.ScriptOn);
 
