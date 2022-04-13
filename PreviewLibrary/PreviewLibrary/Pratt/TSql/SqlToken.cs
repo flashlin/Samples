@@ -73,6 +73,9 @@
 		Numeric,
 		SmallDateTime,
 		Is,
-		DateTime2
+		DateTime2,
+		Create,
+		Procedure,
+		Int
 	}
 }
