@@ -26,6 +26,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("FROM", SqlToken.From);
 			AddToken("GRANT", SqlToken.Grant);
 			AddToken("IF", SqlToken.If);
+			AddToken("IS", SqlToken.Is);
 			AddToken("INSERT", SqlToken.Insert);
 			AddToken("INTO", SqlToken.Into);
 			AddToken("NOT", SqlToken.Not);

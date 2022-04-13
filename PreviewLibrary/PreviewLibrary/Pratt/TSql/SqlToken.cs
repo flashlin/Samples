@@ -71,6 +71,7 @@
 		Asterisk,
 		Slash,
 		Numeric,
-		SmallDateTime
+		SmallDateTime,
+		Is
 	}
 }
