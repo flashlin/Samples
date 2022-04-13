@@ -38,6 +38,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 			Register(SqlToken.Not, new NotInfixParselet());
 			Register(SqlToken.If, new IfParselet());
+			Register(SqlToken.Like, new LikeParselet());
 			
 			Prefix(SqlToken.PLUS, Precedence.PREFIX);
 			InfixLeft(SqlToken.Equal, Precedence.SUM);
