@@ -8,6 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	{
 		public SqlCodeExpr Table { get; set; }
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
+		public SqlCodeExpr WhereExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -15,6 +16,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			Table.WriteToStream(stream);
 			stream.Write(" SET ");
 			SetColumnsList.WriteToStreamWithComma(stream);
+			if (WhereExpr != null)
+			{
+				stream.WriteLine();
+				stream.Write("WHERE ");
+				WhereExpr.WriteToStream(stream);
+			}
 		}
 	}
 }
