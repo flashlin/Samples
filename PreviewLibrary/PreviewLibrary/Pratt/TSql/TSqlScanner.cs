@@ -39,6 +39,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("NOT", SqlToken.Not);
 			AddToken("NUMERIC", SqlToken.Numeric);
 			AddToken("ON", SqlToken.On);
+			AddToken("OBJECT", SqlToken.Object);
 			AddToken("OFF", SqlToken.Off);
 			AddToken("OR", SqlToken.Or);
 			AddToken("PROCEDURE", SqlToken.Procedure);
@@ -150,6 +151,13 @@ namespace PreviewLibrary.Pratt.TSql
 			if (head == '[' && TryRead(ReadSqlIdentifier, headSpan, out var sqlIdentifier))
 			{
 				tokenSpan = sqlIdentifier;
+				return true;
+			}
+
+			if (head == ':' && TryNextChar(':', out var colonHead))
+			{
+				tokenSpan = tokenSpan.Concat(colonHead);
+				tokenSpan.Type = SqlToken.ColonColon.ToString();
 				return true;
 			}
 

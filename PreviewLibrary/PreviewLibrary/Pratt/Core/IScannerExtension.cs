@@ -9,13 +9,16 @@ namespace PreviewLibrary.Pratt.Core
 		public static TextSpan Consume<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
 			where TTokenType : struct
 		{
+			var startIndex = scanner.GetOffset();
 			var token = scanner.ScanNext();
 			if (token.IsEmpty)
 			{
+				scanner.SetOffset(startIndex);
 				ThrowHelper.ThrowScanException(scanner, $"Expect scan '{expectTokenType}', but got NONE.");
 			}
 			if (token.Type != expectTokenType.ToString())
 			{
+				scanner.SetOffset(startIndex);
 				ThrowHelper.ThrowScanException(scanner, $"Expect scan {expectTokenType}, but got {token.Type}.");
 			}
 			return token;

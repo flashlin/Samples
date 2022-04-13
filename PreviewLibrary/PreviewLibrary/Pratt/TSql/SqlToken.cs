@@ -79,6 +79,8 @@
 		Int,
 		Varchar,
 		NVarchar,
-		Execute
+		Execute,
+		Object,
+		ColonColon
 	}
 }

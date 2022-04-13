@@ -17,10 +17,24 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				SqlToken.Insert,
 				SqlToken.Select,
 				SqlToken.Update,
+				SqlToken.Execute
 			};
 
 			var permissionList = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, permissionPrincipal)
 				.ToList();
+
+			if (permissionList.Count == 0)
+			{
+				var permissionPrincipalStr = string.Join(",", permissionPrincipal);
+				ThrowHelper.ThrowParseException(parser, $"Expect one of {permissionPrincipalStr}.");
+			}
+
+			SqlCodeExpr onObjectId = null;
+			if (parser.Scanner.Match(SqlToken.On))
+			{
+				//onObjectId = parser.Scanner.ConsumeObjectId();
+				onObjectId = parser.ConsumeAny(SqlToken.Object, SqlToken.SqlIdentifier, SqlToken.Identifier) as SqlCodeExpr;
+			}
 
 			parser.Scanner.Consume(SqlToken.To);
 
@@ -32,6 +46,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			return new GrantSqlCodeExpr
 			{
 				PermissionList = permissionList,
+				OnObjectId = onObjectId,
 				TargetList = targetList
 			};
 		}
