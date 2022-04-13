@@ -13,6 +13,7 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			Register(SqlToken.Cast, new CastParselet());
 			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
+			Register(SqlToken.Delete, new DeleteParselet());
 			Register(SqlToken.Exists, new ExistsParselet());
 			Register(SqlToken.Exec, new ExecParselet());
 			Register(SqlToken.Go, new GoParselet());
