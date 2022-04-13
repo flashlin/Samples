@@ -82,6 +82,10 @@
 		Execute,
 		Object,
 		ColonColon,
-		Bit
+		Bit,
+		Case,
+		When,
+		Else,
+		Then
 	}
 }
