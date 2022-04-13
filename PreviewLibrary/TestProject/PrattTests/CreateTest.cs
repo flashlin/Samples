@@ -29,5 +29,28 @@ BEGIN
 	; 
 END");
 		}
+
+		[Fact]
+		public void create_procedure_arg1_eq()
+		{
+			var sql = @"create procedure myProc
+@id int,
+@name varchar(50) = 'a'
+as
+begin
+	set noexec on;
+end";
+			Parse(sql);
+
+			ThenExprShouldBe(@"CREATE PROCEDURE myProc
+@id INT, 
+@name VARCHAR(50) = 'a'
+BEGIN
+	SET NOEXEC ON
+	; 
+END");
+		}
+
+
 	}
 }

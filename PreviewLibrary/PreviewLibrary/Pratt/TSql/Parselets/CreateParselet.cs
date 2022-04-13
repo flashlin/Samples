@@ -32,10 +32,17 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 				var dataType = parser.ConsumeDataType();
 
+				SqlCodeExpr defaultValueExpr = null;
+				if (parser.Scanner.Match(SqlToken.Equal))
+				{
+					defaultValueExpr = parser.ParseExp() as SqlCodeExpr;
+				}
+
 				return new ArgumentSqlCodeExpr
 				{
 					Name = varName as SqlCodeExpr,
 					DataType = dataType,
+					DefaultValueExpr = defaultValueExpr
 				};
 			}).ToList();
 

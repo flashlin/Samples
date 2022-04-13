@@ -7,12 +7,18 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	{
 		public SqlCodeExpr Name { get; set; }
 		public SqlCodeExpr DataType { get; set; }
+		public SqlCodeExpr DefaultValueExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
 			Name.WriteToStream(stream);
 			stream.Write(" ");
 			DataType.WriteToStream(stream);
+			if(DefaultValueExpr != null)
+			{
+				stream.Write(" = ");
+				DefaultValueExpr.WriteToStream(stream);
+			}
 		}
 	}
 }
