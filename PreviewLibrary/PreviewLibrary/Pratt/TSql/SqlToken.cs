@@ -5,7 +5,7 @@
 		None,
 		Select,
 		SqlIdentifier,
-		PLUS,
+		Plus,
 		Comma,
 		Number,
 		Identifier,
@@ -66,6 +66,10 @@
 		Cast,
 		DateTime,
 		Decimal,
-		SingleComment
+		SingleComment,
+		Minus,
+		Asterisk,
+		Slash,
+		Numeric
 	}
 }

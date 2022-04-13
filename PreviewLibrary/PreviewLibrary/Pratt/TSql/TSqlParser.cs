@@ -40,7 +40,8 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.If, new IfParselet());
 			Register(SqlToken.Like, new LikeParselet());
 			
-			Prefix(SqlToken.PLUS, Precedence.PREFIX);
+			Prefix(SqlToken.Plus, Precedence.PREFIX);
+			Prefix(SqlToken.Minus, Precedence.PREFIX);
 			InfixLeft(SqlToken.Equal, Precedence.SUM);
 			InfixLeft(SqlToken.And, Precedence.CONCAT);
 			InfixLeft(SqlToken.Or, Precedence.CONCAT);

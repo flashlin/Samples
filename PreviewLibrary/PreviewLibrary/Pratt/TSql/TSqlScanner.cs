@@ -42,6 +42,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("VALUES", SqlToken.Values);
 			AddToken("WHERE", SqlToken.Where);
 			AddToken("WITH", SqlToken.With);
+			AddToken("NUMERIC", SqlToken.Numeric);
 			AddToken(":SETVAR", SqlToken.ScriptSetVar);
 			AddToken(":ON", SqlToken.ScriptOn);
 
@@ -63,6 +64,10 @@ namespace PreviewLibrary.Pratt.TSql
 			AddSymbol(";", SqlToken.Semicolon);
 			AddSymbol(".", SqlToken.Dot);
 			AddSymbol("=", SqlToken.Equal);
+			AddSymbol("+", SqlToken.Plus);
+			AddSymbol("-", SqlToken.Minus);
+			AddSymbol("*", SqlToken.Asterisk);
+			AddSymbol("/", SqlToken.Slash);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)
