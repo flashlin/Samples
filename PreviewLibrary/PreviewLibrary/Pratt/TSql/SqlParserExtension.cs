@@ -10,6 +10,21 @@ namespace PreviewLibrary.Pratt.TSql
 {
 	public static class SqlParserExtension
 	{
+		public static bool TryConsumeVariable(this IScanner scanner, out VariableSqlCodeExpr sqlExpr)
+		{
+			if (!scanner.TryConsume(SqlToken.Variable, out var returnVariableSpan))
+			{
+				sqlExpr = null;
+				return false;
+			}
+
+			sqlExpr = new VariableSqlCodeExpr
+			{
+				Name = scanner.GetSpanString(returnVariableSpan)
+			};
+			return true;
+		}
+
 		public static bool Match(this IParser parser, SqlToken tokenType)
 		{
 			return parser.MatchTokenType(tokenType.ToString());

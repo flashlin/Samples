@@ -8,6 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	{
 		public SqlCodeExpr Name { get; set; }
 		public List<ArgumentSqlCodeExpr> Arguments { get; set; }
+		public VariableSqlCodeExpr ReturnVariable { get; set; }
 		public SqlCodeExpr ReturnType { get; set; }
 		public List<SqlCodeExpr> Body { get; set; }
 
@@ -19,6 +20,11 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			Arguments.WriteToStreamWithComma(stream);
 			stream.WriteLine(")");
 			stream.Write("RETURNS ");
+			if( ReturnVariable != null)
+			{
+				ReturnVariable.WriteToStream(stream);
+				stream.Write(" ");
+			}
 			ReturnType.WriteToStream(stream);
 			stream.WriteLine();
 			stream.WriteLine("AS BEGIN");

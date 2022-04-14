@@ -33,6 +33,10 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.RParen);
 
 			parser.Scanner.Consume(SqlToken.Returns);
+
+			parser.Scanner.TryConsumeVariable(out var returnVariableExpr);
+
+
 			var returnTypeExpr = parser.ConsumeDataType();
 
 			parser.Scanner.Consume(SqlToken.As);
@@ -43,6 +47,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				Name = nameExpr,
 				Arguments = arguments,
+				ReturnVariable = returnVariableExpr,
 				ReturnType = returnTypeExpr,
 				Body = body
 			};
