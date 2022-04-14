@@ -8,6 +8,12 @@ namespace PreviewLibrary.Pratt.TSql
 	{
 		public delegate bool TryConsumeDelegate(IScanner scanner, out SqlCodeExpr expr);
 
+		public static bool Match(this IScanner scanner, SqlToken tokenType)
+		{
+			scanner.IgnoreComments();
+			return scanner.Match<SqlToken>(tokenType);
+		}
+
 		public static SqlCodeExpr ConsumeObjectId(this IScanner scanner)
 		{
 			return Consume(scanner, TryConsumeObjectId);
