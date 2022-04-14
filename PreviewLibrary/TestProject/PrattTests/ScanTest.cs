@@ -136,5 +136,21 @@ namespace TestProject.PrattTests
 			Scan(sql);
 			ThenTokenShouldBe("<>");
 		}
+
+		[Fact]
+		public void colon_colon()
+		{
+			var sql = "::";
+			Scan(sql);
+			ThenTokenShouldBe("::");
+		}
+
+		[Fact]
+		public void scan_all()
+		{
+			var sql = "OBJECT::";
+			ScanAll(sql);
+			ThenTokenListShouldBe("OBJECT", "::");
+		}
 	}
 }

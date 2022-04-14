@@ -21,6 +21,7 @@ namespace TestProject.PrattTests
 		private List<IExpression> _exprList;
 		protected SqlCodeExpr _expr;
 		private TSqlScanner _scanner;
+		private List<TextSpan> _tokenList;
 		private TextSpan _token;
 
 		public TestBase(ITestOutputHelper outputHelper)
@@ -48,10 +49,34 @@ namespace TestProject.PrattTests
 			_token = _scanner.Consume();
 		}
 
+		protected void ScanAll(string text)
+		{
+			_scanner = new TSqlScanner(text);
+			_tokenList = new List<TextSpan>();
+			do
+			{
+				_token = _scanner.Consume();
+				if (_token.IsEmpty)
+				{
+					break;
+				}
+				_tokenList.Add(_token);
+			} while (true);
+		}
+
 		protected void ThenTokenShouldBe(string expectToken)
 		{
 			var tokenStr = _scanner.GetSpanString(_token);
 			tokenStr.Should().Be(expectToken);
+		}
+
+		protected void ThenTokenListShouldBe(params string[] expectTokenList)
+		{
+			foreach (var expectToken in expectTokenList.Select((val, idx) => new { val, idx }))
+			{
+				var tokenStr = _scanner.GetSpanString(_tokenList[expectToken.idx]);
+				tokenStr.Should().Be(expectToken.val);
+			}
 		}
 
 		protected void ThenExprShouldBe(string expectCode)

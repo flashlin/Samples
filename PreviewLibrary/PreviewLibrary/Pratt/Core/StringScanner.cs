@@ -11,7 +11,7 @@ namespace PreviewLibrary.Pratt.Core
 	public class StringScanner : IScanner
 	{
 		private int _index;
-		protected Dictionary<string, string> _symbolToTokenTypeMap = new Dictionary<string, string>();
+		private Dictionary<string, string> _symbolToTokenTypeMap = new Dictionary<string, string>();
 		private ReadOnlyMemory<char> _textSpan;
 		private Dictionary<string, string> _tokenToTokenTypeMap = new Dictionary<string, string>();
 		public StringScanner(string text)
@@ -311,20 +311,43 @@ namespace PreviewLibrary.Pratt.Core
 				return ReadNumber(headSpan);
 			}
 
-			_index--;
-			var symbols = _symbolToTokenTypeMap.Keys.OrderByDescending(x => x.Length).ToArray();
-			for (var i = 0; i < symbols.Length; i++)
+			//_index--;
+			//var symbols = _symbolToTokenTypeMap.Keys.OrderByDescending(x => x.Length).ToArray();
+			//for (var i = 0; i < symbols.Length; i++)
+			//{
+			//	var symbol = symbols[i];
+			//	if (TryNextString(symbol, out var symbolSpan))
+			//	{
+			//		symbolSpan.Type = GetSymbolType(symbol, TokenType.Symbol.ToString());
+			//		return symbolSpan;
+			//	}
+			//}
+
+			if (TryRead(ReadSymbol, headSpan, out var symbol))
 			{
-				var symbol = symbols[i];
-				if (TryNextString(symbol, out var symbolSpan))
-				{
-					symbolSpan.Type = GetSymbolType(symbol, TokenType.Symbol.ToString());
-					return symbolSpan;
-				}
+				return symbol;
 			}
 
 			var helpMessage = GetHelpMessage(headSpan);
 			throw new ScanException($"Scan to '{character}' Fail.\r\n{helpMessage}");
+		}
+
+		protected TextSpan ReadSymbol(TextSpan headSpan)
+		{
+			var maxSymbolLen = _symbolToTokenTypeMap.Keys.OrderByDescending(x => x.Length).First().Length;
+			for (var tailLen = maxSymbolLen - 1; tailLen >= 0; tailLen--)
+			{
+				var tailSpan = PeekSpan(0, tailLen);
+				var span = headSpan.Concat(tailSpan);
+				var spanStr = GetSpanString(span);
+				if (_symbolToTokenTypeMap.TryGetValue(spanStr, out var symbolType))
+				{
+					_index += tailLen;
+					span.Type = symbolType;
+					return span;
+				}
+			}
+			return TextSpan.Empty;
 		}
 
 		protected TextSpan SkipWhiteSpaceAtFront()

@@ -89,6 +89,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddSymbol("*", SqlToken.Asterisk);
 			AddSymbol("/", SqlToken.Slash);
 			AddSymbol("<>", SqlToken.SmallerBiggerThan);
+			AddSymbol("::", SqlToken.ColonColon);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)
@@ -165,14 +166,15 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
-			if (head == ':' && TryNextChar(':', out var colonHead))
-			{
-				tokenSpan = tokenSpan.Concat(colonHead);
-				tokenSpan.Type = SqlToken.ColonColon.ToString();
-				return true;
-			}
+			//if (head == ':' && TryNextChar(':', out var colonHead))
+			//{
+			//	tokenSpan = headSpan.Concat(colonHead);
+			//	tokenSpan.Type = SqlToken.ColonColon.ToString();
+			//	return true;
+			//}
 
-			if (head == ':' && TryRead(ReadIdentifier, headSpan, out var scriptIdentifier))
+			var nextChar = PeekCh();
+			if (head == ':' &&  char.IsLetter(nextChar) && TryRead(ReadIdentifier, headSpan, out var scriptIdentifier))
 			{
 				scriptIdentifier.Type = GetTokenType(scriptIdentifier, SqlToken.ScriptIdentifier);
 				tokenSpan = scriptIdentifier;
@@ -215,30 +217,7 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
-			if (TryRead(ReadSymbol, headSpan, out var symbol))
-			{
-				tokenSpan = symbol;
-				return true;
-			}
-
 			return false;
-		}
-
-		protected TextSpan ReadSymbol(TextSpan headSpan)
-		{
-			var maxSymbolLen = _symbolToTokenTypeMap.Keys.OrderByDescending(x => x.Length).First().Length;
-			for (var tailLen = maxSymbolLen - 1; tailLen >= 0; tailLen--)
-			{
-				var tailSpan = PeekSpan(0, tailLen);
-				var span = headSpan.Concat(tailSpan);
-				var spanStr = GetSpanString(span);
-				if (_symbolToTokenTypeMap.TryGetValue(spanStr, out var symbolType))
-				{
-					span.Type = symbolType;
-					return span;
-				}
-			}
-			return TextSpan.Empty;
 		}
 
 		private string GetTokenType(TextSpan span, SqlToken defaultTokenType)
