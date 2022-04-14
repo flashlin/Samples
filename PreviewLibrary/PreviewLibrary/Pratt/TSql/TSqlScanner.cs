@@ -33,6 +33,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("EXEC", SqlToken.Exec);
 			AddTokenMap("ELSE", SqlToken.Else);
 			AddTokenMap("FROM", SqlToken.From);
+			AddTokenMap("FLOAT", SqlToken.Float);
 			AddTokenMap("FUNCTION", SqlToken.Function);
 			AddTokenMap("GRANT", SqlToken.Grant);
 			AddTokenMap("GO", SqlToken.Go);

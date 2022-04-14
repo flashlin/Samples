@@ -100,6 +100,7 @@
 		BiggerThanOrEqual,
 		SmallerThanOrEqual,
 		In,
-		TinyInt
+		TinyInt,
+		Float
 	}
 }
