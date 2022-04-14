@@ -8,6 +8,8 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	{
 		public List<SqlCodeExpr> Body { get; set; }
 		public SqlCodeExpr Condition { get; set; }
+		public List<SqlCodeExpr> ElseExpr { get; set; }
+
 		public override void WriteToStream(IndentStream stream)
 		{
 			stream.Write("IF ");
@@ -21,7 +23,18 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				stream.WriteLine();
 			}
 			stream.Indent--;
-			stream.WriteLine("END");
+			stream.Write("END");
+
+			if( ElseExpr != null)
+			{
+				stream.WriteLine();
+				stream.WriteLine("ELSE BEGIN");
+				stream.Indent++;
+				ElseExpr.WriteToStream(stream);
+				stream.Indent--;
+				//stream.WriteLine();
+				stream.Write("END");
+			}
 		}
 	}
 }

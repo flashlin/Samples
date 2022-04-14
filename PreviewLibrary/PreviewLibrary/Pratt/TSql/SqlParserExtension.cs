@@ -198,6 +198,10 @@ namespace PreviewLibrary.Pratt.TSql
 			do
 			{
 				var body = parser.ParseExp();
+				if (body == null)
+				{
+					break;
+				}
 				bodyList.Add(body as SqlCodeExpr);
 			} while (!parser.Scanner.TryConsume(SqlToken.End, out _));
 			return bodyList;

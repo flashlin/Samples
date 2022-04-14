@@ -81,7 +81,9 @@ namespace TestProject.PrattTests
 
 		protected void ThenExprShouldBe(string expectCode)
 		{
-			_expr.ToString().MergeToCode().Should().Be(expectCode.MergeToCode());
+			var actual = _expr.ToString().MergeToCode();
+			var expected = expectCode.MergeToCode();
+			actual.Should().Be(expected, GetCompareStringHelpMessage(actual, expected));
 		}
 
 		protected IEnumerable<string> ReadSqlFiles(string folder)
@@ -89,6 +91,34 @@ namespace TestProject.PrattTests
 			var sqlFiles = Directory.EnumerateFiles(folder, "*.sql");
 			var subDirs = Directory.EnumerateDirectories(folder);
 			return sqlFiles.Concat(subDirs.SelectMany(x => ReadSqlFiles(x)));
+		}
+
+		protected string GetCompareStringHelpMessage(string text, string expect)
+		{
+			var diffIndex = DiffersAtIndex(text, expect);
+			var sb = new StringBuilder();
+			if (diffIndex > 0)
+			{
+				sb.Append(new String(' ', diffIndex));
+			}
+			sb.AppendLine("v");
+			sb.AppendLine(text);
+			if (diffIndex > 0)
+			{
+				sb.Append(new String(' ', diffIndex));
+				sb.AppendLine("^");
+			}
+			sb.AppendLine(expect);
+			return sb.ToString();
+		}
+
+		static int DiffersAtIndex(string s1, string s2)
+		{
+			int index = 0;
+			int min = Math.Min(s1.Length, s2.Length);
+			while (index < min && s1[index] == s2[index])
+				index++;
+			return (index == min && s1.Length == s2.Length) ? -1 : index;
 		}
 	}
 }

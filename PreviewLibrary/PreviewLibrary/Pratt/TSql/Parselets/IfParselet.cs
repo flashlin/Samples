@@ -19,11 +19,24 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				bodyList.Add(body as SqlCodeExpr);
 			} while (!parser.Scanner.TryConsume(SqlToken.End, out _));
 
+			var elseExpr = new List<SqlCodeExpr>();
+			if(parser.Scanner.TryConsume(SqlToken.Else, out var elseSpan))
+			{
+				elseExpr = ParseElseBegin(elseSpan, parser);
+			}
+
 			return new IfSqlCodeExpr
 			{
 				Condition = conditionExpr as SqlCodeExpr,
-				Body = bodyList
+				Body = bodyList,
+				ElseExpr = elseExpr
 			};
+		}
+
+		private List<SqlCodeExpr> ParseElseBegin(TextSpan elseToken, IParser parser)
+		{
+			var innerExpr = parser.ConsumeBeginBody();
+			return innerExpr;
 		}
 	}
 }
