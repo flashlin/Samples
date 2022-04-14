@@ -32,5 +32,14 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SET IDENTITY_INSERT customer OFF");
 		}
+
+		[Fact]
+		public void set_var_eq()
+		{
+			var sql = "set @id = 1";
+			Parse(sql);
+			ThenExprShouldBe("SET @id = 1");
+		}
+
 	}
 }

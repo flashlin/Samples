@@ -11,6 +11,11 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if (parser.Scanner.TryConsume(SqlToken.Variable, out var variableSpan))
+			{
+				return SetVariable(variableSpan, parser);
+			}
+
 			if (parser.Scanner.Match(SqlToken.IDENTITY_INSERT))
 			{
 				var objectId = parser.PrefixParseAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
@@ -59,6 +64,23 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				Options = setOptions,
 				Toggle = onOffStr,
+			};
+		}
+
+		private IExpression SetVariable(TextSpan variableSpan, IParser parser)
+		{
+			var variableExpr = new VariableSqlCodeExpr
+			{
+				Name = parser.Scanner.GetSpanString(variableSpan),
+			};
+
+			parser.Scanner.Consume(SqlToken.Equal);
+
+			var valueExpr = parser.ParseExp() as SqlCodeExpr;
+			return new SetVariableSqlCodeExpr
+			{
+				Name = variableExpr,
+				Value = valueExpr
 			};
 		}
 	}
