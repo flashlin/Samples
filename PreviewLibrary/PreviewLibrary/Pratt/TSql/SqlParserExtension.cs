@@ -107,23 +107,6 @@ namespace PreviewLibrary.Pratt.TSql
 			};
 		}
 
-		public static TextSpan ConsumeIgnoreComment(this IScanner scanner, SqlToken tokenType)
-		{
-			return scanner.GetConsumeIgnoreCommentFunc(tokenType)();
-		}
-
-
-		public static Func<TextSpan> GetConsumeIgnoreCommentFunc(this IScanner scanner, SqlToken tokenType)
-		{
-			return () =>
-			{
-				var comments = scanner.IgnoreComments();
-				var span = scanner.Consume(tokenType);
-				span.Comments = comments;
-				return span;
-			};
-		}
-
 		public static Func<SqlCodeExpr> GetParseExpIgnoreCommentFunc(this IParser parser)
 		{
 			var comments = new List<CommentSqlCodeExpr>();
