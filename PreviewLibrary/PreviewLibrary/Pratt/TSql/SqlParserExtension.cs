@@ -10,8 +10,6 @@ namespace PreviewLibrary.Pratt.TSql
 {
 	public static class SqlParserExtension
 	{
-		public delegate bool TryConsumeDelegate(IScanner scanner, out SqlCodeExpr expr);
-
 		public static List<ArgumentSqlCodeExpr> ConsumeArgumentList(this IParser parser)
 		{
 			var arguments = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
@@ -112,10 +110,6 @@ namespace PreviewLibrary.Pratt.TSql
 			return scanner.GetConsumeIgnoreCommentFunc(tokenType)();
 		}
 
-		public static SqlCodeExpr ConsumeObjectId(this IScanner scanner)
-		{
-			return Consume(scanner, TryConsumeObjectId);
-		}
 
 		public static Func<TextSpan> GetConsumeIgnoreCommentFunc(this IScanner scanner, SqlToken tokenType)
 		{
@@ -181,46 +175,6 @@ namespace PreviewLibrary.Pratt.TSql
 			return parser.GetParseExpIgnoreCommentFunc()();
 		}
 
-		public static bool TryConsumeObjectId(this IScanner scanner, out SqlCodeExpr expr)
-		{
-			var identTokens = new List<string>();
-			do
-			{
-				if (identTokens.Count >= 3)
-				{
-					var prevTokens = string.Join(".", identTokens);
-					var currTokenStr = scanner.PeekString();
-					throw new ScanException($"Expect Identifier.Identifier.Identifier, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
-				}
-				if (!scanner.TryConsumeAny(out var identifier, SqlToken.Identifier, SqlToken.SqlIdentifier))
-				{
-					break;
-				}
-				identTokens.Add(scanner.GetSpanString(identifier));
-			} while (scanner.Match(SqlToken.Dot));
-
-			if (identTokens.Count == 0)
-			{
-				expr = null;
-				return false;
-			}
-
-			var fixCount = 3 - identTokens.Count;
-			for (var i = 0; i < fixCount; i++)
-			{
-				identTokens.Insert(0, string.Empty);
-			}
-
-			var identExpr = new ObjectIdSqlCodeExpr
-			{
-				DatabaseName = identTokens[0],
-				SchemaName = identTokens[1],
-				ObjectName = identTokens[2],
-			};
-
-			expr = identExpr;
-			return true;
-		}
 
 		public static bool TryConsumeVariable(this IScanner scanner, out VariableSqlCodeExpr sqlExpr)
 		{
@@ -277,16 +231,6 @@ namespace PreviewLibrary.Pratt.TSql
 				stream.Write(str.val);
 			}
 		}
-		private static SqlCodeExpr Consume(this IScanner scanner, TryConsumeDelegate predicate)
-		{
-			if (!predicate(scanner, out var expr))
-			{
-				var currentToken = scanner.Peek();
-				var helpMessage = scanner.GetHelpMessage(currentToken);
-				throw new ScanException(helpMessage);
-			}
-			return expr;
-		}
 
 		private static SqlCodeExpr ConsumeDataTableType(IParser parser)
 		{
@@ -308,6 +252,68 @@ namespace PreviewLibrary.Pratt.TSql
 			{
 				Columns = columnDataTypeList
 			};
+		}
+	}
+
+	public static class SqlScannerExtension
+	{
+		public delegate bool TryConsumeDelegate(IScanner scanner, out SqlCodeExpr expr);
+
+		public static SqlCodeExpr ConsumeObjectId(this IScanner scanner)
+		{
+			return Consume(scanner, TryConsumeObjectId);
+		}
+
+		public static bool TryConsumeObjectId(this IScanner scanner, out SqlCodeExpr expr)
+		{
+			var identTokens = new List<string>();
+			do
+			{
+				if (identTokens.Count >= 3)
+				{
+					var prevTokens = string.Join(".", identTokens);
+					var currTokenStr = scanner.PeekString();
+					throw new ScanException($"Expect Identifier.Identifier.Identifier, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
+				}
+				if (!scanner.TryConsumeAny(out var identifier, SqlToken.Identifier, SqlToken.SqlIdentifier))
+				{
+					break;
+				}
+				identTokens.Add(scanner.GetSpanString(identifier));
+			} while (scanner.Match(SqlToken.Dot));
+
+			if (identTokens.Count == 0)
+			{
+				expr = null;
+				return false;
+			}
+
+			var fixCount = 3 - identTokens.Count;
+			for (var i = 0; i < fixCount; i++)
+			{
+				identTokens.Insert(0, string.Empty);
+			}
+
+			var identExpr = new ObjectIdSqlCodeExpr
+			{
+				DatabaseName = identTokens[0],
+				SchemaName = identTokens[1],
+				ObjectName = identTokens[2],
+			};
+
+			expr = identExpr;
+			return true;
+		}
+
+		private static SqlCodeExpr Consume(this IScanner scanner, TryConsumeDelegate predicate)
+		{
+			if (!predicate(scanner, out var expr))
+			{
+				var currentToken = scanner.Peek();
+				var helpMessage = scanner.GetHelpMessage(currentToken);
+				throw new ScanException(helpMessage);
+			}
+			return expr;
 		}
 	}
 }
