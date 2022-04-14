@@ -45,7 +45,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				WhereExpr.WriteToStream(stream);
 			}
 
-			if(UnionSelectList != null)
+			if(UnionSelectList != null && UnionSelectList.Count > 0)
 			{
 				stream.WriteLine();
 				UnionSelectList.WriteToStream(stream);

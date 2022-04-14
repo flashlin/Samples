@@ -30,6 +30,22 @@ namespace PreviewLibrary.Extensions
 			return singleLine;
 		}
 
+		public static List<string> ToLines(this string sql)
+		{
+			var sr = new StringReader(sql);
+			var lines = new List<string>();
+			do
+			{
+				var line = sr.ReadLine();
+				if (line == null)
+				{
+					break;
+				}
+				lines.Add(line.Trim());
+			} while (true);
+			return lines;
+		}
+
 		public static string TrimCode(this string sql)
 		{
 			var sr = new StringReader(sql);

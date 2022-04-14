@@ -25,14 +25,14 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			stream.Indent--;
 			stream.Write("END");
 
-			if( ElseExpr != null)
+			if( ElseExpr != null && ElseExpr.Count > 0)
 			{
 				stream.WriteLine();
 				stream.WriteLine("ELSE BEGIN");
 				stream.Indent++;
 				ElseExpr.WriteToStream(stream);
 				stream.Indent--;
-				//stream.WriteLine();
+				stream.WriteLine();
 				stream.Write("END");
 			}
 		}

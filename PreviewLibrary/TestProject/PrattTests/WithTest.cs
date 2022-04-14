@@ -19,7 +19,8 @@ as (
 			Parse(sql);
 			ThenExprShouldBe(@"WITH tb1(id, name)
 AS (
-	SELECT id, name FROM customer
+	SELECT id, name
+	FROM customer
 )");
 		}
 	}

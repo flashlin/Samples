@@ -20,7 +20,8 @@ end";
 
 			ThenExprShouldBe(@"IF 'a' NOT LIKE 'b'
 BEGIN
-	SET NOEXEC ON ;
+	SET NOEXEC ON 
+	;
 END");
 		}
 
@@ -37,7 +38,8 @@ end";
 
 			ThenExprShouldBe(@"IF 'a' NOT LIKE 'b'
 BEGIN
-	SET NOEXEC ON ;
+	SET NOEXEC ON
+	;
 END
 ELSE BEGIN
 	SELECT 2

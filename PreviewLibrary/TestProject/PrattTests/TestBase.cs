@@ -81,9 +81,8 @@ namespace TestProject.PrattTests
 
 		protected void ThenExprShouldBe(string expectCode)
 		{
-			var actual = _expr.ToString().MergeToCode();
-			var expected = expectCode.MergeToCode();
-			actual.Should().Be(expected, GetCompareStringHelpMessage(actual, expected));
+			var exprCode = _expr.ToString();
+			exprCode.MergeToCode().Should().Be(expectCode.MergeToCode(), GetCompareCodeHelpMessage(exprCode, expectCode));
 		}
 
 		protected IEnumerable<string> ReadSqlFiles(string folder)
@@ -91,6 +90,38 @@ namespace TestProject.PrattTests
 			var sqlFiles = Directory.EnumerateFiles(folder, "*.sql");
 			var subDirs = Directory.EnumerateDirectories(folder);
 			return sqlFiles.Concat(subDirs.SelectMany(x => ReadSqlFiles(x)));
+		}
+
+		protected string GetCompareCodeHelpMessage(string text, string expect)
+		{
+			var textLines = text.ToLines();
+			var expectLines = expect.ToLines();
+
+			var sb = new StringBuilder();
+			var isEqual = true;
+			var minLines = Math.Min(textLines.Count, expectLines.Count);
+			for (var line = 0; line < minLines; line++)
+			{
+				var s1 = textLines[line];
+				var s2 = expectLines[line];
+				if (s1 != s2)
+				{
+					isEqual = false;
+					var help = GetCompareStringHelpMessage(s1, s2);
+					sb.AppendLine(help);
+				}
+			}
+
+			if (isEqual)
+			{
+				return String.Empty;
+			}
+
+			var sb2 = new StringBuilder();
+			sb2.AppendLine("=== BEGIN ===");
+			sb2.AppendLine(sb.ToString());
+			sb2.AppendLine("=== END ===");
+			return sb2.ToString();
 		}
 
 		protected string GetCompareStringHelpMessage(string text, string expect)
@@ -106,8 +137,8 @@ namespace TestProject.PrattTests
 			if (diffIndex > 0)
 			{
 				sb.Append(new String(' ', diffIndex));
-				sb.AppendLine("^");
 			}
+			sb.AppendLine("^");
 			sb.AppendLine(expect);
 			return sb.ToString();
 		}
