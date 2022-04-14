@@ -6,13 +6,6 @@ namespace PreviewLibrary.Pratt.Core
 {
 	public static class IScannerExtension
 	{
-		public static string ConsumeString<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
-			where TTokenType : struct
-		{
-			var span = scanner.Consume(expectTokenType);
-			return scanner.GetSpanString(span);
-		}
-
 		public static TextSpan Consume<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
 			where TTokenType : struct
 		{
@@ -49,42 +42,12 @@ namespace PreviewLibrary.Pratt.Core
 			throw new ScanException($"Expect one of {tokenTypesStr}.\r\n{helpMessage}");
 		}
 
-		public static string PeekString(this IScanner scanner)
+		public static string ConsumeString<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
+							where TTokenType : struct
 		{
-			var token = scanner.Peek();
-			return scanner.GetSpanString(token);
+			var span = scanner.Consume(expectTokenType);
+			return scanner.GetSpanString(span);
 		}
-
-		public static bool TryConsume<TTokenType>(this IScanner scanner, TTokenType expectTokenType, out TextSpan tokenSpan)
-			where TTokenType : struct
-		{
-			return TryConsumeAny(scanner, out tokenSpan, expectTokenType);
-		}
-
-		public static bool Match<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
-			where TTokenType : struct
-		{
-			return TryConsume(scanner, expectTokenType, out _);
-		}
-
-		public static bool TryConsumeAny<TTokenType>(this IScanner scanner, out TextSpan outSpan, params TTokenType[] tokenTypes)
-			where TTokenType : struct
-		{
-			for (var i = 0; i < tokenTypes.Length; i++)
-			{
-				var tokenType = tokenTypes[i].ToString();
-				var token = scanner.Peek();
-				if (token.Type == tokenType)
-				{
-					scanner.Consume();
-					outSpan = token;
-					return true;
-				}
-			}
-			outSpan = TextSpan.Empty;
-			return false;
-		}
-
 		public static IEnumerable<string> ConsumeToStringListByDelimiter<TTokenType>(this IScanner scanner,
 			TTokenType delimiter, params TTokenType[] tokenTypes)
 			where TTokenType : struct
@@ -103,6 +66,41 @@ namespace PreviewLibrary.Pratt.Core
 		{
 			var token = scanner.Peek();
 			return scanner.GetHelpMessage(token);
+		}
+
+		public static bool Match<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
+			where TTokenType : struct
+		{
+			return TryConsume(scanner, expectTokenType, out _);
+		}
+
+		public static string PeekString(this IScanner scanner)
+		{
+			var token = scanner.Peek();
+			return scanner.GetSpanString(token);
+		}
+
+		public static bool TryConsume<TTokenType>(this IScanner scanner, TTokenType expectTokenType, out TextSpan tokenSpan)
+			where TTokenType : struct
+		{
+			return TryConsumeAny(scanner, out tokenSpan, expectTokenType);
+		}
+		public static bool TryConsumeAny<TTokenType>(this IScanner scanner, out TextSpan outSpan, params TTokenType[] tokenTypes)
+			where TTokenType : struct
+		{
+			for (var i = 0; i < tokenTypes.Length; i++)
+			{
+				var tokenType = tokenTypes[i].ToString();
+				var token = scanner.Peek();
+				if (token.Type == tokenType)
+				{
+					scanner.Consume();
+					outSpan = token;
+					return true;
+				}
+			}
+			outSpan = TextSpan.Empty;
+			return false;
 		}
 	}
 }
