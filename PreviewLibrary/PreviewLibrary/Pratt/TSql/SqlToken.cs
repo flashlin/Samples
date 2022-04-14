@@ -91,6 +91,8 @@
 		Returns,
 		Declare,
 		Table,
-		SmallerBiggerThan
+		SmallerBiggerThan,
+		Union,
+		All
 	}
 }

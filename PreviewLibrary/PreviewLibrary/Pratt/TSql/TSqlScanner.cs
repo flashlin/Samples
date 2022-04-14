@@ -12,6 +12,7 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			AddTokenMap("AS", SqlToken.As);
 			AddTokenMap("AND", SqlToken.And);
+			AddTokenMap("ALL", SqlToken.All);
 			AddTokenMap("BREAK", SqlToken.Break);
 			AddTokenMap("BEGIN", SqlToken.Begin);
 			AddTokenMap("BIT", SqlToken.Bit);
@@ -58,6 +59,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("TABLE", SqlToken.Table);
 			AddTokenMap("THEN", SqlToken.Then);
 			AddTokenMap("UPDATE", SqlToken.Update);
+			AddTokenMap("UNION", SqlToken.Union);
 			AddTokenMap("VALUES", SqlToken.Values);
 			AddTokenMap("VARCHAR", SqlToken.Varchar);
 			AddTokenMap("WHERE", SqlToken.Where);
