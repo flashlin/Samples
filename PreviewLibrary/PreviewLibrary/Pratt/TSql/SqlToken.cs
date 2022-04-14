@@ -93,6 +93,7 @@
 		Table,
 		SmallerBiggerThan,
 		Union,
-		All
+		All,
+		Ampersand
 	}
 }

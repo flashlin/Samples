@@ -56,6 +56,7 @@ namespace PreviewLibrary.Pratt.TSql
 			InfixLeft(SqlToken.Is, Precedence.COMPARE);
 			InfixLeft(SqlToken.SmallerBiggerThan, Precedence.COMPARE);
 			InfixLeft(SqlToken.Plus, Precedence.SUM);
+			InfixLeft(SqlToken.Ampersand, Precedence.PRODUCT);
 		}
 
 		public SqlCodeExpr ParseExpression()
