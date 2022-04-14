@@ -17,9 +17,9 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				{
 					break;
 				}
-				var whenConditionExpr = parser.ParseExp() as SqlCodeExpr;
-				parser.Scanner.Consume(SqlToken.Then);
-				var thenExpr = parser.ParseExp() as SqlCodeExpr;
+				var whenConditionExpr = parser.ParseExpIgnoreComment();
+				parser.Scanner.ConsumeIgnoreComment(SqlToken.Then);
+				var thenExpr = parser.ParseExpIgnoreComment();
 				whenList.Add(new WhenSqlCodeExpr
 				{
 					ConditionExpr = whenConditionExpr,

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PreviewLibrary.Pratt.Core
 {
@@ -23,6 +24,8 @@ namespace PreviewLibrary.Pratt.Core
 				return Offset == -1 && Length == 0;
 			}
 		}
+
+		public List<TextSpan> Comments { get; set; }
 
 		public char GetCh(ReadOnlySpan<char> textSpan, int index)
 		{

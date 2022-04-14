@@ -269,5 +269,43 @@ namespace PreviewLibrary.Pratt.TSql
 				return expr;
 			};
 		}
+
+		public static SqlCodeExpr ParseExpIgnoreComment(this IParser parser)
+		{
+			return parser.GetParseExpIgnoreCommentFunc()();
+		}
+
+		public static Func<TextSpan> GetConsumeIgnoreCommentFunc(this IScanner scanner, SqlToken tokenType)
+		{
+			var commentTypes = new[]
+			{
+				SqlToken.SingleComment.ToString(),
+				SqlToken.MultiComment.ToString(),
+			};
+			var comments = new List<TextSpan>();
+			return () =>
+			{
+				var span = TextSpan.Empty;
+				do
+				{
+					span = scanner.Peek();
+					if (commentTypes.Contains(span.Type))
+					{
+						scanner.Consume();
+						comments.Add(span);
+						continue;
+					}
+					break;
+				} while (true);
+				span = scanner.Consume(tokenType);
+				span.Comments = comments;
+				return span;
+			};
+		}
+
+		public static TextSpan ConsumeIgnoreComment(this IScanner scanner, SqlToken tokenType)
+		{
+			return scanner.GetConsumeIgnoreCommentFunc(tokenType)();
+		}
 	}
 }
