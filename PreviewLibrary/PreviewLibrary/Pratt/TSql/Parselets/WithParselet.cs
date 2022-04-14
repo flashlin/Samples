@@ -23,7 +23,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			parser.Scanner.Consume(SqlToken.As);
 			parser.Scanner.Consume(SqlToken.LParen);
-			var innerExpr = parser.ParseExp() as SqlCodeExpr;
+			var innerExpr = parser.GetParseExpIgnoreCommentFunc()();
 			parser.Scanner.Consume(SqlToken.RParen);
 
 			return new WithSqlCodeExpr

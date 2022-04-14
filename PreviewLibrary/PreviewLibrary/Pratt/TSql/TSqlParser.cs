@@ -1,5 +1,6 @@
 ﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Pratt.Core;
+using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.Core.Parselets;
 using PreviewLibrary.Pratt.TSql.Expressions;
 using PreviewLibrary.Pratt.TSql.Parselets;
@@ -46,7 +47,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Not, new NotInfixParselet());
 			Register(SqlToken.If, new IfParselet());
 			Register(SqlToken.Like, new LikeParselet());
-			
+
 			Prefix(SqlToken.Plus, Precedence.PREFIX);
 			Prefix(SqlToken.Minus, Precedence.PREFIX);
 			InfixLeft(SqlToken.Equal, Precedence.SUM);
@@ -66,7 +67,7 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			Register(tokenType.ToString(), parselet);
 		}
-		
+
 		protected void Register(SqlToken tokenType, IInfixParselet parselet)
 		{
 			Register(tokenType.ToString(), parselet);

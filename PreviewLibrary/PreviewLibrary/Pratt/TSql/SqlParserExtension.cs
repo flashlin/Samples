@@ -243,5 +243,27 @@ namespace PreviewLibrary.Pratt.TSql
 
 			return arguments.ToList();
 		}
+
+
+		public static Func<SqlCodeExpr> GetParseExpIgnoreCommentFunc(this IParser parser)
+		{
+			var comments = new List<CommentSqlCodeExpr>();
+			return () =>
+			{
+				SqlCodeExpr expr = null;
+				while (true)
+				{
+					expr = parser.ParseExp(0) as SqlCodeExpr;
+					if (expr is CommentSqlCodeExpr commentExpr)
+					{
+						comments.Add(commentExpr);
+						continue;
+					}
+					expr.Comments = comments;
+					break;
+				}
+				return expr;
+			};
+		}
 	}
 }
