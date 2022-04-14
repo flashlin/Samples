@@ -75,6 +75,11 @@ namespace PreviewLibrary.Pratt.TSql
 				identTokens.Add(scanner.GetSpanString(identifier));
 			} while (scanner.Match(SqlToken.Dot));
 
+			if (identTokens.Count == 0)
+			{
+				var helpMessage = scanner.GetHelpMessage();
+				throw new ScanException($"Expect Identifier. \r\n{helpMessage}");
+			}
 
 			var fixCount = 3 - identTokens.Count;
 			for (var i = 0; i < fixCount; i++)

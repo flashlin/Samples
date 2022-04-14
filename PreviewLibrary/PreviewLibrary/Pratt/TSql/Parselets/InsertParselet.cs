@@ -18,6 +18,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			}
 
 			var tableName = parser.Scanner.ConsumeObjectId();
+			//var tableName = parser.ConsumeAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Object) as SqlCodeExpr;
 
 			parser.Scanner.Consume(SqlToken.LParen);
 			var columns = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier)
@@ -25,7 +26,6 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.RParen);
 
 			parser.Scanner.Consume(SqlToken.Values);
-
 			var valuesList = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
 			{
 				parser.Scanner.Consume(SqlToken.LParen);
