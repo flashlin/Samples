@@ -60,6 +60,12 @@ namespace PreviewLibrary.Pratt.TSql
 			return true;
 		}
 
+		public static TextSpan Consume(this IScanner scanner, SqlToken tokenType)
+		{
+			scanner.IgnoreComments();
+			return scanner.Consume<SqlToken>(tokenType);
+		}
+
 		private static SqlCodeExpr Consume(this IScanner scanner, TryConsumeDelegate predicate)
 		{
 			if (!predicate(scanner, out var expr))
