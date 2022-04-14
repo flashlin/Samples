@@ -20,9 +20,10 @@ namespace PreviewLibrary.Pratt.Core
 			_index = -1;
 		}
 
-		public void AddTokenMap(string token, string tokenType)
+		protected void AddTokenMap<TTokenType>(string token, TTokenType tokenType)
+			where TTokenType : struct
 		{
-			_tokenToTokenTypeMap.Add(token, tokenType);
+			_tokenToTokenTypeMap.Add(token, tokenType.ToString());
 		}
 
 		public TextSpan Consume(string expect = null)
