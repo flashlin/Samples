@@ -38,6 +38,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("GO", SqlToken.Go);
 			AddTokenMap("IF", SqlToken.If);
 			AddTokenMap("IS", SqlToken.Is);
+			AddTokenMap("IN", SqlToken.In);
 			AddTokenMap("INSERT", SqlToken.Insert);
 			AddTokenMap("INTO", SqlToken.Into);
 			AddTokenMap("INT", SqlToken.Int);

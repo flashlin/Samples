@@ -98,6 +98,7 @@
 		SmallerThan,
 		BiggerThan,
 		BiggerThanOrEqual,
-		SmallerThanOrEqual
+		SmallerThanOrEqual,
+		In
 	}
 }
