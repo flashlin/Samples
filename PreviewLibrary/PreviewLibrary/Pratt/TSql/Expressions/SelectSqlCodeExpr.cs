@@ -9,6 +9,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public List<SqlCodeExpr> Columns { get; set; }
 		public List<SqlCodeExpr> FromSourceList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
+		public List<SqlCodeExpr> UnionSelectList { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -42,6 +43,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				stream.WriteLine();
 				stream.Write("WHERE ");
 				WhereExpr.WriteToStream(stream);
+			}
+
+			if(UnionSelectList != null)
+			{
+				stream.WriteLine();
+				UnionSelectList.WriteToStream(stream);
 			}
 		}
 	}

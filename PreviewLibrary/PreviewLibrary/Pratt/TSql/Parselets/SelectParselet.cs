@@ -26,11 +26,24 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				whereExpr = parser.ParseExp() as SqlCodeExpr;
 			}
 
+
+			var unionSelectList = new List<SqlCodeExpr>();
+			do
+			{
+				if (!parser.Scanner.TryConsume(SqlToken.Union, out var unionSpan))
+				{
+					break;
+				}
+				var unionSelect = ParseUnionSelect(unionSpan, parser);
+				unionSelectList.Add(unionSelect);
+			} while (true);
+
 			return new SelectSqlCodeExpr
 			{
 				Columns = columns,
 				FromSourceList = fromSourceList,
-				WhereExpr = whereExpr
+				WhereExpr = whereExpr,
+				UnionSelectList = unionSelectList
 			};
 		}
 
@@ -77,7 +90,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				return true;
 			}
 
-			if( parser.Scanner.Match(SqlToken.As))
+			if (parser.Scanner.Match(SqlToken.As))
 			{
 				return parser.Scanner.TryConsumeObjectId(out aliasNameExpr);
 			}
@@ -107,6 +120,21 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				Name = name,
 				AliasName = parser.Scanner.GetSpanString(aliasNameToken),
+			};
+		}
+
+		protected SqlCodeExpr ParseUnionSelect(TextSpan unionToken, IParser parser)
+		{
+			var unionMethod = string.Empty;
+			if (parser.Scanner.Match(SqlToken.All))
+			{
+				unionMethod = "ALL";
+			}
+			var rightExpr = parser.GetParseExpIgnoreCommentFunc()();
+			return new UnionSelectSqlCodeExpr
+			{
+				UnionMethod = unionMethod,
+				RightExpr = rightExpr,
 			};
 		}
 	}

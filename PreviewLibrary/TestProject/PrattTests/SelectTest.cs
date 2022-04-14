@@ -80,5 +80,15 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SELECT 1 FROM dbo.customer WHERE a = 1 AND b = 2");
 		}
+
+		[Fact]
+		public void select_number_union_all_select_number()
+		{
+			var sql = @"select 1 
+union all
+select 2";
+			Parse(sql);
+			ThenExprShouldBe("SELECT 1 UNION ALL SELECT 2");
+		}
 	}
 }
