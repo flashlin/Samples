@@ -48,7 +48,7 @@ namespace TestProject.PrattTests
 		{
 			var sql = @"insert into @tmp select name from customer";
 			Parse(sql);
-			ThenExprShouldBe(@"");
+			ThenExprShouldBe(@"INSERT INTO @tmp SELECT name FROM customer");
 		}
 	}
 }

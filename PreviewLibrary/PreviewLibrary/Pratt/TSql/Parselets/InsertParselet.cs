@@ -20,6 +20,16 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			//var tableName = parser.Scanner.ConsumeObjectId();
 			var tableName = ConsumeObjectIdOrVariable(parser);
 
+			if(parser.Scanner.TryConsume(SqlToken.Select, out var selectToken))
+			{
+				var selectExpr = new SelectParselet().Parse(selectToken, parser) as SqlCodeExpr;
+				return new InsertIntoFromSqlCodeExpr
+				{
+					Table = tableName,
+					SelectFromExpr = selectExpr,
+				};
+			}
+
 			parser.Scanner.Consume(SqlToken.LParen);
 			var columns = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier)
 				.ToList();
