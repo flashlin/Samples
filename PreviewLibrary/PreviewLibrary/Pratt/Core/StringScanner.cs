@@ -311,18 +311,6 @@ namespace PreviewLibrary.Pratt.Core
 				return ReadNumber(headSpan);
 			}
 
-			//_index--;
-			//var symbols = _symbolToTokenTypeMap.Keys.OrderByDescending(x => x.Length).ToArray();
-			//for (var i = 0; i < symbols.Length; i++)
-			//{
-			//	var symbol = symbols[i];
-			//	if (TryNextString(symbol, out var symbolSpan))
-			//	{
-			//		symbolSpan.Type = GetSymbolType(symbol, TokenType.Symbol.ToString());
-			//		return symbolSpan;
-			//	}
-			//}
-
 			if (TryRead(ReadSymbol, headSpan, out var symbol))
 			{
 				return symbol;

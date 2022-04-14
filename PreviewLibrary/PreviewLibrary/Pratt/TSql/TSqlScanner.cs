@@ -166,13 +166,6 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
-			//if (head == ':' && TryNextChar(':', out var colonHead))
-			//{
-			//	tokenSpan = headSpan.Concat(colonHead);
-			//	tokenSpan.Type = SqlToken.ColonColon.ToString();
-			//	return true;
-			//}
-
 			var nextChar = PeekCh();
 			if (head == ':' &&  char.IsLetter(nextChar) && TryRead(ReadIdentifier, headSpan, out var scriptIdentifier))
 			{
