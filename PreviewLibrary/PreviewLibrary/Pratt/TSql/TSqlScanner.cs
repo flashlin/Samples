@@ -91,6 +91,10 @@ namespace PreviewLibrary.Pratt.TSql
 			AddSymbolMap("*", SqlToken.Asterisk);
 			AddSymbolMap("/", SqlToken.Slash);
 			AddSymbolMap("<>", SqlToken.SmallerBiggerThan);
+			AddSymbolMap("<", SqlToken.SmallerThan);
+			AddSymbolMap("<=", SqlToken.SmallerThanOrEqual);
+			AddSymbolMap(">", SqlToken.BiggerThan);
+			AddSymbolMap(">=", SqlToken.BiggerThanOrEqual);
 			AddSymbolMap("::", SqlToken.ColonColon);
 			AddSymbolMap("&", SqlToken.Ampersand);
 		}
