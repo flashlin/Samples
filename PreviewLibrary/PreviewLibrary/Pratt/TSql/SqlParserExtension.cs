@@ -108,6 +108,11 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlToken.Varchar
 			};
 
+			if (parser.Scanner.Match(SqlToken.Table))
+			{
+				return ConsumeDataTableType(parser);
+			}
+
 			var dataTypeToken = parser.Scanner.ConsumeAny(dataTypes);
 			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
 
@@ -136,6 +141,28 @@ namespace PreviewLibrary.Pratt.TSql
 				DataType = dataTypeStr,
 				Size = size,
 				Scale = scale
+			};
+		}
+
+		private static SqlCodeExpr ConsumeDataTableType(IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.LParen);
+
+			var columnDataTypeList = new List<SqlCodeExpr>();
+			do
+			{
+				var name = parser.Scanner.ConsumeString(SqlToken.Identifier);
+				var dataType = parser.ConsumeDataType();
+				columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
+				{
+					Name = name,
+					DataType = dataType
+				});
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			parser.Scanner.Consume(SqlToken.RParen);
+			return new DataTableTypeSqlCodeExpr
+			{
+				Columns = columnDataTypeList
 			};
 		}
 

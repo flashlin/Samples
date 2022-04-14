@@ -89,6 +89,7 @@
 		Then,
 		Function,
 		Returns,
-		Declare
+		Declare,
+		Table
 	}
 }

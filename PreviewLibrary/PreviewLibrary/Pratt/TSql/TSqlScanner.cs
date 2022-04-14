@@ -54,6 +54,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("SMALLDATETIME", SqlToken.SmallDateTime);
 			AddToken("TO", SqlToken.To);
 			AddToken("TOP", SqlToken.Top);
+			AddToken("TABLE", SqlToken.Table);
 			AddToken("THEN", SqlToken.Then);
 			AddToken("UPDATE", SqlToken.Update);
 			AddToken("VALUES", SqlToken.Values);
