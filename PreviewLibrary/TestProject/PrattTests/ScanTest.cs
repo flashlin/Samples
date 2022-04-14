@@ -128,5 +128,13 @@ namespace TestProject.PrattTests
 			Scan(sql);
 			ThenTokenShouldBe("10.0010");
 		}
+
+		[Fact]
+		public void smaller_bigger_than()
+		{
+			var sql = "<>";
+			Scan(sql);
+			ThenTokenShouldBe("<>");
+		}
 	}
 }

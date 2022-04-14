@@ -1,5 +1,6 @@
 ﻿using PreviewLibrary.Pratt.Core;
 using System;
+using System.Linq;
 using System.Text;
 
 namespace PreviewLibrary.Pratt.TSql
@@ -87,6 +88,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddSymbol("-", SqlToken.Minus);
 			AddSymbol("*", SqlToken.Asterisk);
 			AddSymbol("/", SqlToken.Slash);
+			AddSymbol("<>", SqlToken.SmallerBiggerThan);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)
@@ -213,8 +215,30 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
+			if (TryRead(ReadSymbol, headSpan, out var symbol))
+			{
+				tokenSpan = symbol;
+				return true;
+			}
 
 			return false;
+		}
+
+		protected TextSpan ReadSymbol(TextSpan headSpan)
+		{
+			var maxSymbolLen = _symbolToTokenTypeMap.Keys.OrderByDescending(x => x.Length).First().Length;
+			for (var tailLen = maxSymbolLen - 1; tailLen >= 0; tailLen--)
+			{
+				var tailSpan = PeekSpan(0, tailLen);
+				var span = headSpan.Concat(tailSpan);
+				var spanStr = GetSpanString(span);
+				if (_symbolToTokenTypeMap.TryGetValue(spanStr, out var symbolType))
+				{
+					span.Type = symbolType;
+					return span;
+				}
+			}
+			return TextSpan.Empty;
 		}
 
 		private string GetTokenType(TextSpan span, SqlToken defaultTokenType)

@@ -90,6 +90,7 @@
 		Function,
 		Returns,
 		Declare,
-		Table
+		Table,
+		SmallerBiggerThan
 	}
 }

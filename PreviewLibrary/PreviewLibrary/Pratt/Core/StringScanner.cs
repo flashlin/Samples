@@ -11,7 +11,7 @@ namespace PreviewLibrary.Pratt.Core
 	public class StringScanner : IScanner
 	{
 		private int _index;
-		private Dictionary<string, string> _symbolToTokenTypeMap = new Dictionary<string, string>();
+		protected Dictionary<string, string> _symbolToTokenTypeMap = new Dictionary<string, string>();
 		private ReadOnlyMemory<char> _textSpan;
 		private Dictionary<string, string> _tokenToTokenTypeMap = new Dictionary<string, string>();
 		public StringScanner(string text)
