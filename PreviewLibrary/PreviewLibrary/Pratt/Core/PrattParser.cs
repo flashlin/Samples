@@ -21,17 +21,6 @@ namespace PreviewLibrary.Pratt.Core
 			get { return _scanner; }
 		}
 
-		public bool MatchTokenType(string tokenType)
-		{
-			var token = _scanner.Peek();
-			if (token.Type == tokenType)
-			{
-				_scanner.Consume();
-				return true;
-			}
-			return false;
-		}
-
 		public IExpression ParseExp(int ctxPrecedence)
 		{
 			var prefixToken = _scanner.Consume();

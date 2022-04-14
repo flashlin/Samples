@@ -173,7 +173,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 		public static bool Match(this IParser parser, SqlToken tokenType)
 		{
-			return parser.MatchTokenType(tokenType.ToString());
+			return parser.Scanner.Match(tokenType);
 		}
 
 		public static SqlCodeExpr ParseExpIgnoreComment(this IParser parser)

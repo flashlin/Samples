@@ -8,7 +8,6 @@ namespace PreviewLibrary.Pratt.Core
 		IScanner Scanner { get; }
 		IEnumerable<IExpression> ParseProgram();
 		IExpression ParseExp(int ctxPrecedence=0);
-		bool MatchTokenType(string tokenType);
 		IExpression PrefixParse(TextSpan prefixToken, int ctxPrecedence=0);
 	}
 }
