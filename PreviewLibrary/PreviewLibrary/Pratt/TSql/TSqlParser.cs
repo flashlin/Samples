@@ -52,6 +52,7 @@ namespace PreviewLibrary.Pratt.TSql
 			InfixLeft(SqlToken.And, Precedence.CONCAT);
 			InfixLeft(SqlToken.Or, Precedence.CONCAT);
 			InfixLeft(SqlToken.Is, Precedence.COMPARE);
+			InfixLeft(SqlToken.SmallerBiggerThan, Precedence.COMPARE);
 		}
 
 		public SqlCodeExpr ParseExpression()
