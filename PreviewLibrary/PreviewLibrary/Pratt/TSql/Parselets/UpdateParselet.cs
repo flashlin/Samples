@@ -19,7 +19,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				var column = parser.Scanner.ConsumeObjectId();
 				parser.Scanner.Consume(SqlToken.Equal);
-				var valueExpr = parser.ParseExp() as SqlCodeExpr;
+				var expression = parser.ParseExp();
+				var valueExpr = expression as SqlCodeExpr;
 				setList.Add(new AssignSqlCodeExpr
 				{
 					Left = column,

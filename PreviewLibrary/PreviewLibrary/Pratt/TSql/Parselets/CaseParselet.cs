@@ -36,6 +36,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				elseExpr = parser.ParseExp() as SqlCodeExpr;
 			}
 
+			parser.Scanner.Consume(SqlToken.End);
+
 			return new CaseSqlCodeExpr
 			{
 				WhenList = whenList,
