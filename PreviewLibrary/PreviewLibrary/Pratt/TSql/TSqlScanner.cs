@@ -78,28 +78,23 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("NOLOCK", SqlToken.NOLOCK);
 			AddToken("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 
-			AddSymbol("(", SqlToken.LParen);
-			AddSymbol(")", SqlToken.RParen);
-			AddSymbol(",", SqlToken.Comma);
-			AddSymbol(";", SqlToken.Semicolon);
-			AddSymbol(".", SqlToken.Dot);
-			AddSymbol("=", SqlToken.Equal);
-			AddSymbol("+", SqlToken.Plus);
-			AddSymbol("-", SqlToken.Minus);
-			AddSymbol("*", SqlToken.Asterisk);
-			AddSymbol("/", SqlToken.Slash);
-			AddSymbol("<>", SqlToken.SmallerBiggerThan);
-			AddSymbol("::", SqlToken.ColonColon);
+			AddSymbolMap("(", SqlToken.LParen);
+			AddSymbolMap(")", SqlToken.RParen);
+			AddSymbolMap(",", SqlToken.Comma);
+			AddSymbolMap(";", SqlToken.Semicolon);
+			AddSymbolMap(".", SqlToken.Dot);
+			AddSymbolMap("=", SqlToken.Equal);
+			AddSymbolMap("+", SqlToken.Plus);
+			AddSymbolMap("-", SqlToken.Minus);
+			AddSymbolMap("*", SqlToken.Asterisk);
+			AddSymbolMap("/", SqlToken.Slash);
+			AddSymbolMap("<>", SqlToken.SmallerBiggerThan);
+			AddSymbolMap("::", SqlToken.ColonColon);
 		}
 
 		protected void AddToken(string token, SqlToken tokenType)
 		{
 			AddTokenMap(token.ToUpper(), tokenType.ToString());
-		}
-
-		protected void AddSymbol(string symbol, SqlToken tokenType)
-		{
-			AddSymbolMap(symbol, tokenType.ToString());
 		}
 
 		protected override string GetTokenType(string token, string defaultTokenType)

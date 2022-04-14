@@ -84,9 +84,10 @@ namespace PreviewLibrary.Pratt.Core
 			_index = offset;
 		}
 
-		protected void AddSymbolMap(string symbol, string tokenType)
+		protected void AddSymbolMap<TTokenType>(string symbol, TTokenType tokenType)
+			where TTokenType : struct
 		{
-			_symbolToTokenTypeMap.Add(symbol, tokenType);
+			_symbolToTokenTypeMap.Add(symbol, tokenType.ToString());
 		}
 
 		protected TextSpan ConsumeCharacters(string expect)
