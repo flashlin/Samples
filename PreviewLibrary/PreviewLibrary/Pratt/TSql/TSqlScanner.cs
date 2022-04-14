@@ -59,6 +59,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("TOP", SqlToken.Top);
 			AddTokenMap("TABLE", SqlToken.Table);
 			AddTokenMap("THEN", SqlToken.Then);
+			AddTokenMap("TINYINT", SqlToken.TinyInt);
 			AddTokenMap("UPDATE", SqlToken.Update);
 			AddTokenMap("UNION", SqlToken.Union);
 			AddTokenMap("VALUES", SqlToken.Values);

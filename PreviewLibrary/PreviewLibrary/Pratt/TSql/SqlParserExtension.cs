@@ -66,6 +66,7 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlToken.Numeric,
 				SqlToken.NVarchar,
 				SqlToken.SmallDateTime,
+				SqlToken.TinyInt,
 				SqlToken.Varchar
 			};
 

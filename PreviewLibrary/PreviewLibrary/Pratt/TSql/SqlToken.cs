@@ -99,6 +99,7 @@
 		BiggerThan,
 		BiggerThanOrEqual,
 		SmallerThanOrEqual,
-		In
+		In,
+		TinyInt
 	}
 }
