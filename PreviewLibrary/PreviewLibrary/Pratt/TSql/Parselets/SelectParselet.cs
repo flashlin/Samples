@@ -42,8 +42,10 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				fromSourceList = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
 				{
 					var sourceExpr = parser.ParseExp() as SqlCodeExpr;
-					var userWithOptions = new List<string>();
 
+					TryConsumeAliasName(parser, out var aliasNameExpr);
+
+					var userWithOptions = new List<string>();
 					if (parser.Scanner.Match(SqlToken.With))
 					{
 						parser.Scanner.Consume(SqlToken.LParen);
@@ -59,12 +61,29 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 					return new FromSourceSqlCodeExpr
 					{
 						Left = sourceExpr,
+						AliasName = aliasNameExpr,
 						Options = userWithOptions,
 					} as SqlCodeExpr;
 				}).ToList();
 			}
 
 			return fromSourceList;
+		}
+
+		private static bool TryConsumeAliasName(IParser parser, out SqlCodeExpr aliasNameExpr)
+		{
+			if (parser.Scanner.TryConsumeObjectId(out aliasNameExpr))
+			{
+				return true;
+			}
+
+			if( parser.Scanner.Match(SqlToken.As))
+			{
+				return parser.Scanner.TryConsumeObjectId(out aliasNameExpr);
+			}
+
+			aliasNameExpr = null;
+			return false;
 		}
 
 		protected SqlCodeExpr ParseColumnAs(IParser parser)

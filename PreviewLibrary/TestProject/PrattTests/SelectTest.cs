@@ -58,6 +58,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_number_from_table_aliasName()
+		{
+			var sql = @"select 1 from dbo.customer tb1";
+			Parse(sql);
+			ThenExprShouldBe("SELECT 1 FROM dbo.customer AS tb1");
+		}
+
+		[Fact]
 		public void select_number_from_dbo_table_where()
 		{
 			var sql = @"select 1 from dbo.customer where name=customFunc()";
