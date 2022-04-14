@@ -40,6 +40,5 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SET @id = 1");
 		}
-
 	}
 }

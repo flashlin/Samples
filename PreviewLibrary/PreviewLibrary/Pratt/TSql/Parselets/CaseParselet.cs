@@ -10,8 +10,6 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-
-
 			var whenList = new List<SqlCodeExpr>();
 			do
 			{
