@@ -77,8 +77,8 @@ namespace PreviewLibrary.Pratt.TSql
 
 			if (identTokens.Count == 0)
 			{
-				var helpMessage = scanner.GetHelpMessage();
-				throw new ScanException($"Expect Identifier. \r\n{helpMessage}");
+				expr = null;
+				return false;
 			}
 
 			var fixCount = 3 - identTokens.Count;

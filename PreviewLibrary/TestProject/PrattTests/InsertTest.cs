@@ -42,5 +42,13 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe(@"INSERT [dbo].[Countries]([CountryID], [CountryName]) VALUES (N';''', N';'' ', N'""; '':', NULL, -1)");
 		}
+
+		[Fact]
+		public void insert__into_var_select()
+		{
+			var sql = @"insert into @tmp select name from customer";
+			Parse(sql);
+			ThenExprShouldBe(@"");
+		}
 	}
 }
