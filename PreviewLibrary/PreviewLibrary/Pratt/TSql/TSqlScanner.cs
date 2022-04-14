@@ -43,7 +43,9 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("INSERT", SqlToken.Insert);
 			AddTokenMap("INTO", SqlToken.Into);
 			AddTokenMap("INT", SqlToken.Int);
+			AddTokenMap("JOIN", SqlToken.Join);
 			AddTokenMap("LIKE", SqlToken.Like);
+			AddTokenMap("LEFT", SqlToken.Left);
 			AddTokenMap("NVARCHAR", SqlToken.NVarchar);
 			AddTokenMap("NOT", SqlToken.Not);
 			AddTokenMap("NUMERIC", SqlToken.Numeric);
@@ -51,6 +53,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("OBJECT", SqlToken.Object);
 			AddTokenMap("OFF", SqlToken.Off);
 			AddTokenMap("OR", SqlToken.Or);
+			AddTokenMap("OUTER", SqlToken.Outer);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);
 			AddTokenMap("RETURNS", SqlToken.Returns);
 			AddTokenMap("SET", SqlToken.Set);

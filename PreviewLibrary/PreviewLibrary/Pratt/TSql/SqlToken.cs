@@ -101,6 +101,9 @@
 		SmallerThanOrEqual,
 		In,
 		TinyInt,
-		Float
+		Float,
+		Left,
+		Outer,
+		Join
 	}
 }
