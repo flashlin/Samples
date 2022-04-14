@@ -275,7 +275,7 @@ namespace PreviewLibrary.Pratt.TSql
 			return parser.GetParseExpIgnoreCommentFunc()();
 		}
 
-		public static Func<TextSpan> GetConsumeIgnoreCommentFunc(this IScanner scanner, SqlToken tokenType)
+		public static List<TextSpan> IgnoreComments(this IScanner scanner)
 		{
 			var commentTypes = new[]
 			{
@@ -283,21 +283,26 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlToken.MultiComment.ToString(),
 			};
 			var comments = new List<TextSpan>();
+			do
+			{
+				var span = scanner.Peek();
+				if (commentTypes.Contains(span.Type))
+				{
+					scanner.Consume();
+					comments.Add(span);
+					continue;
+				}
+				break;
+			} while (true);
+			return comments;
+		}
+
+		public static Func<TextSpan> GetConsumeIgnoreCommentFunc(this IScanner scanner, SqlToken tokenType)
+		{
 			return () =>
 			{
-				var span = TextSpan.Empty;
-				do
-				{
-					span = scanner.Peek();
-					if (commentTypes.Contains(span.Type))
-					{
-						scanner.Consume();
-						comments.Add(span);
-						continue;
-					}
-					break;
-				} while (true);
-				span = scanner.Consume(tokenType);
+				var comments = scanner.IgnoreComments();
+				var span = scanner.Consume(tokenType);
 				span.Comments = comments;
 				return span;
 			};
