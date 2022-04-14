@@ -88,6 +88,7 @@
 		Else,
 		Then,
 		Function,
-		Returns
+		Returns,
+		Declare
 	}
 }

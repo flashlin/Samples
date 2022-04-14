@@ -17,6 +17,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("CAST", SqlToken.Cast);
 			AddToken("CASE", SqlToken.Case);
 			AddToken("CREATE", SqlToken.Create);
+			AddToken("DECLARE", SqlToken.Declare);
 			AddToken("DELETE", SqlToken.Delete);
 			AddToken("DEFAULT", SqlToken.Default);
 			AddToken("DATETIME", SqlToken.DateTime);
