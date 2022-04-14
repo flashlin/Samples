@@ -30,6 +30,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("EXEC", SqlToken.Exec);
 			AddToken("ELSE", SqlToken.Else);
 			AddToken("FROM", SqlToken.From);
+			AddToken("FUNCTION", SqlToken.Function);
 			AddToken("GRANT", SqlToken.Grant);
 			AddToken("GO", SqlToken.Go);
 			AddToken("IF", SqlToken.If);
@@ -46,6 +47,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddToken("OFF", SqlToken.Off);
 			AddToken("OR", SqlToken.Or);
 			AddToken("PROCEDURE", SqlToken.Procedure);
+			AddToken("RETURNS", SqlToken.Returns);
 			AddToken("SET", SqlToken.Set);
 			AddToken("SELECT", SqlToken.Select);
 			AddToken("SMALLDATETIME", SqlToken.SmallDateTime);

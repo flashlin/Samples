@@ -86,6 +86,8 @@
 		Case,
 		When,
 		Else,
-		Then
+		Then,
+		Function,
+		Returns
 	}
 }

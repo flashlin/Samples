@@ -15,39 +15,44 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				return CreateProcedure(token, parser);
 			}
+
+			if(parser.Scanner.Match(SqlToken.Function))
+			{
+				return CreateFunction(token, parser);
+			}
+
 			var helpMessage = parser.Scanner.GetHelpMessage();
 			throw new ParseException($"Parse CREATE Error, {helpMessage}");
+		}
+
+		private IExpression CreateFunction(TextSpan token, IParser parser)
+		{
+			var nameExpr = parser.Scanner.ConsumeObjectId();
+			parser.Scanner.Consume(SqlToken.LParen);
+			var arguments = parser.ConsumeArgumentList();
+			parser.Scanner.Consume(SqlToken.RParen);
+
+			parser.Scanner.Consume(SqlToken.Returns);
+			var returnTypeExpr = parser.ConsumeDataType();
+
+			parser.Scanner.Consume(SqlToken.As);
+
+			var body = parser.ConsumeBeginBody();
+
+			return new CreateFunctionSqlCodeExpr
+			{
+				Name = nameExpr,
+				Arguments = arguments,
+				ReturnType = returnTypeExpr,
+				Body = body
+			};
 		}
 
 		private IExpression CreateProcedure(TextSpan token, IParser parser)
 		{
 			var nameExpr = parser.Scanner.ConsumeObjectId();
-
-			var arguments = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
-			{
-				if (!parser.TryConsume(SqlToken.Variable, out var varName))
-				{
-					return null;
-				}
-
-				var dataType = parser.ConsumeDataType();
-
-				SqlCodeExpr defaultValueExpr = null;
-				if (parser.Scanner.Match(SqlToken.Equal))
-				{
-					defaultValueExpr = parser.ParseExp() as SqlCodeExpr;
-				}
-
-				return new ArgumentSqlCodeExpr
-				{
-					Name = varName as SqlCodeExpr,
-					DataType = dataType,
-					DefaultValueExpr = defaultValueExpr
-				};
-			}).ToList();
-
+			var arguments = parser.ConsumeArgumentList();
 			parser.Scanner.Consume(SqlToken.As);
-
 			var bodyList = parser.ConsumeBeginBody();
 
 			return new CreateProcedureSqlCodeExpr

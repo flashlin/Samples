@@ -168,5 +168,33 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 			return expr;
 		}
+
+		public static List<ArgumentSqlCodeExpr> ConsumeArgumentList(this IParser parser)
+		{
+			var arguments = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
+			{
+				if (!parser.TryConsume(SqlToken.Variable, out var varName))
+				{
+					return null;
+				}
+
+				var dataType = parser.ConsumeDataType();
+
+				SqlCodeExpr defaultValueExpr = null;
+				if (parser.Scanner.Match(SqlToken.Equal))
+				{
+					defaultValueExpr = parser.ParseExp() as SqlCodeExpr;
+				}
+
+				return new ArgumentSqlCodeExpr
+				{
+					Name = varName as SqlCodeExpr,
+					DataType = dataType,
+					DefaultValueExpr = defaultValueExpr
+				};
+			});
+
+			return arguments.ToList();
+		}
 	}
 }
