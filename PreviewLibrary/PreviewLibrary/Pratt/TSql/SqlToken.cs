@@ -94,6 +94,10 @@
 		SmallerBiggerThan,
 		Union,
 		All,
-		Ampersand
+		Ampersand,
+		SmallerThan,
+		BiggerThan,
+		BiggerThanOrEqual,
+		SmallerThanOrEqual
 	}
 }
