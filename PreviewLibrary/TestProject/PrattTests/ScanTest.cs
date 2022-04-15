@@ -152,5 +152,21 @@ namespace TestProject.PrattTests
 			ScanAll(sql);
 			ThenTokenListShouldBe("OBJECT", "::");
 		}
+
+		[Fact]
+		public void biggerThan_equal()
+		{
+			var sql = ">  =1";
+			ScanAll(sql);
+			ThenTokenListShouldBe(">  =", "1");
+		}
+
+		[Fact]
+		public void biggerThan_1()
+		{
+			var sql = ">  1";
+			ScanAll(sql);
+			ThenTokenListShouldBe(">", "1");
+		}
 	}
 }

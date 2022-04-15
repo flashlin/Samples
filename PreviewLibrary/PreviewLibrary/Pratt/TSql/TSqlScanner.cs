@@ -7,6 +7,11 @@ namespace PreviewLibrary.Pratt.TSql
 {
 	public class TSqlScanner : StringScanner
 	{
+		char[] _magnetHeadChars = new char[]
+		{
+			'>', '<'
+		};
+
 		public TSqlScanner(string text)
 			: base(text)
 		{
@@ -178,7 +183,7 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 
 			var nextChar = PeekCh();
-			if (head == ':' &&  char.IsLetter(nextChar) && TryRead(ReadIdentifier, headSpan, out var scriptIdentifier))
+			if (head == ':' && char.IsLetter(nextChar) && TryRead(ReadIdentifier, headSpan, out var scriptIdentifier))
 			{
 				scriptIdentifier.Type = GetTokenType(scriptIdentifier, SqlToken.ScriptIdentifier);
 				tokenSpan = scriptIdentifier;
@@ -221,7 +226,52 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
+			if (_magnetHeadChars.Contains(head) && TryRead(ReadMagnetCompareSymbol, headSpan, out var magnetSymbol))
+			{
+				tokenSpan = magnetSymbol;
+				return true;
+			}
+
 			return false;
+		}
+
+		private TextSpan ReadMagnetCompareSymbol(TextSpan head)
+		{
+			var startIndex = GetOffset();
+			var index = 0;
+			var sb = new StringBuilder();
+			sb.Append(GetSpanString(head));
+			do
+			{
+				var ch = PeekCh(index);
+				if (ch == Char.MinValue)
+				{
+					break;
+				}
+				if (!char.IsWhiteSpace(ch))
+				{
+					sb.Append(ch);
+					break;
+				}
+				index++;
+			} while (true);
+
+			var tail = new TextSpan
+			{
+				Offset = startIndex,
+				Length = index + 1
+			};
+
+			var peekSymbol = sb.ToString();
+			if (index > 0 && _symbolToTokenTypeMap.ContainsKey(peekSymbol))
+			{
+				SetOffset(tail.Offset + tail.Length);
+				var span = head.Concat(tail);
+				span.Type = _symbolToTokenTypeMap[peekSymbol];
+				return span;
+			}
+
+			return TextSpan.Empty;
 		}
 
 		private string GetTokenType(TextSpan span, SqlToken defaultTokenType)
