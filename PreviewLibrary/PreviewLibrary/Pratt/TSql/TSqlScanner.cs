@@ -22,6 +22,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("BEGIN", SqlToken.Begin);
 			AddTokenMap("BIT", SqlToken.Bit);
 			AddTokenMap("CONTINUE", SqlToken.Continue);
+			AddTokenMap("CHAR", SqlToken.Char);
 			AddTokenMap("CAST", SqlToken.Cast);
 			AddTokenMap("CASE", SqlToken.Case);
 			AddTokenMap("CROSS", SqlToken.Cross);

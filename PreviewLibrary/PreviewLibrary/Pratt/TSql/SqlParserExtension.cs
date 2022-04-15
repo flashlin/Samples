@@ -68,6 +68,7 @@ namespace PreviewLibrary.Pratt.TSql
 			var dataTypes = new[]
 			{
 				SqlToken.Bit,
+				SqlToken.Char,
 				SqlToken.DateTime,
 				SqlToken.DateTime2,
 				SqlToken.Decimal,

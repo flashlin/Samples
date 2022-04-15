@@ -112,6 +112,7 @@
 		VerticalBar,
 		While,
 		Continue,
-		Convert
+		Convert,
+		Char
 	}
 }
