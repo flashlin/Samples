@@ -111,6 +111,7 @@
 		Cross,
 		VerticalBar,
 		While,
-		Continue
+		Continue,
+		Convert
 	}
 }
