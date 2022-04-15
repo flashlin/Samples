@@ -5,11 +5,19 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class ExprListSqlCodeExpr : SqlCodeExpr
 	{
+		public bool IsComma { get; set; } = true;
+
 		public List<SqlCodeExpr> Items { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			Items.WriteToStreamWithComma(stream);
+			if (IsComma)
+			{
+				Items.WriteToStreamWithComma(stream);
+				return;
+			}
+
+			Items.WriteToStream(stream);
 		}
 	}
 }

@@ -24,5 +24,16 @@ name varchar(50)
 	name VARCHAR(50)
 )");
 		}
+
+		[Fact]
+		public void declare_var_eq_1()
+		{
+			var sql = @"declare @amount decimal (10,3)=1, @id int";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"DECLARE @amount DECIMAL(10,3) = 1
+DECLARE @id INT");
+		}
 	}
 }
