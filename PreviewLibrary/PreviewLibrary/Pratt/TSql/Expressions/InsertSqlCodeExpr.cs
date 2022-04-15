@@ -21,9 +21,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			}
 			TableName.WriteToStream(stream);
 
-			stream.Write("(");
-			Columns.WriteToStreamWithComma(stream);
-			stream.Write(")");
+			if (Columns != null && Columns.Count > 0)
+			{
+				stream.Write("(");
+				Columns.WriteToStreamWithComma(stream);
+				stream.Write(")");
+			}
+
 			stream.Write(" VALUES");
 			stream.WriteLine();
 			foreach (var values in ValuesList.Select((val, idx) => new { val, idx }))

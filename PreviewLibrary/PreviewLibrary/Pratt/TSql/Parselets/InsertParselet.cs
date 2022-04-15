@@ -20,7 +20,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			//var tableName = parser.Scanner.ConsumeObjectId();
 			var tableName = ConsumeObjectIdOrVariable(parser);
 
-			if(parser.Scanner.TryConsume(SqlToken.Select, out var selectToken))
+			if (parser.Scanner.TryConsume(SqlToken.Select, out var selectToken))
 			{
 				var selectExpr = new SelectParselet().Parse(selectToken, parser) as SqlCodeExpr;
 				return new InsertIntoFromSqlCodeExpr
@@ -30,10 +30,13 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				};
 			}
 
-			parser.Scanner.Consume(SqlToken.LParen);
-			var columns = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier)
-				.ToList();
-			parser.Scanner.Consume(SqlToken.RParen);
+			var columns = new List<string>();
+			if (parser.Scanner.Match(SqlToken.LParen))
+			{
+				columns = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier)
+					.ToList();
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
 
 			parser.Scanner.Consume(SqlToken.Values);
 			var valuesList = parser.ConsumeByDelimiter(SqlToken.Comma, () =>

@@ -54,7 +54,7 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
-		public void insert__into_var_columns_values()
+		public void insert_into_var_columns_values()
 		{
 			var sql = @"insert into @customer (id, name)
       values
@@ -78,6 +78,17 @@ ELSE 0
 END ), @id3, @name3)");
 		}
 
+
+		[Fact]
+		public void insert_into_var_values()
+		{
+			var sql = @"insert into @res  values ( @start, @i, @word)";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO @res VALUES
+(@start, @i, @word)");
+		}
 
 	}
 }
