@@ -43,6 +43,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Update, new UpdateParselet());
 			Register(SqlToken.Variable, new VariableParselet());
 			Register(SqlToken.With, new WithParselet());
+			Register(SqlToken.While, new WhileParselet());
 
 			Register(SqlToken.Not, new NotInfixParselet());
 			Register(SqlToken.If, new IfParselet());

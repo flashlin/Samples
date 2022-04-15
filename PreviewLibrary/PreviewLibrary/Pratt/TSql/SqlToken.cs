@@ -110,6 +110,7 @@
 		Full,
 		Cross,
 		VerticalBar,
-		While
+		While,
+		Continue
 	}
 }
