@@ -238,5 +238,21 @@ namespace PreviewLibrary.Pratt.TSql
 				Columns = columnDataTypeList
 			};
 		}
+
+		public static bool TryConsumeAliasName(this IParser parser, out SqlCodeExpr aliasNameExpr)
+		{
+			if (parser.Scanner.TryConsumeObjectId(out aliasNameExpr))
+			{
+				return true;
+			}
+
+			if (parser.Scanner.Match(SqlToken.As))
+			{
+				return parser.Scanner.TryConsumeObjectId(out aliasNameExpr);
+			}
+
+			aliasNameExpr = null;
+			return false;
+		}
 	}
 }

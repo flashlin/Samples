@@ -8,6 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public string JoinType { get; set; }
 		public string OuterType { get; set; }
 		public SqlCodeExpr SecondTable { get; set; }
+		public SqlCodeExpr AliasName { get; set; }
 		public SqlCodeExpr JoinOnExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -18,7 +19,14 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				stream.Write($"{OuterType.ToUpper()} ");
 			}
 			stream.Write("JOIN ");
+
 			SecondTable.WriteToStream(stream);
+			if (AliasName != null)
+			{
+				stream.Write(" ");
+				AliasName.WriteToStream(stream);
+			}
+
 			if (JoinOnExpr != null)
 			{
 				stream.Write(" ");

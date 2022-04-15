@@ -18,5 +18,20 @@ namespace TestProject.PrattTests
 FROM customer
 LEFT JOIN secondTable");
 		}
+
+		[Fact]
+		public void left_join_nolock()
+		{
+			var sql = @"select 1 from customer
+left join secondTable tb2 with(nolock)";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT 1
+FROM customer
+LEFT JOIN secondTable tb2 WITH(nolock)");
+		}
+
+
 	}
 }

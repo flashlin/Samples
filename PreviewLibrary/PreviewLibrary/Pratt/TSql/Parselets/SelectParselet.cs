@@ -28,6 +28,20 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var joinSelectList = ParseJoinSelectList(parser);
 
+			var unionSelectList = ParseUnionSelectList(parser);
+
+			return new SelectSqlCodeExpr
+			{
+				Columns = columns,
+				FromSourceList = fromSourceList,
+				JoinSelectList = joinSelectList,
+				WhereExpr = whereExpr,
+				UnionSelectList = unionSelectList
+			};
+		}
+
+		private List<SqlCodeExpr> ParseUnionSelectList(IParser parser)
+		{
 			var unionSelectList = new List<SqlCodeExpr>();
 			do
 			{
@@ -38,15 +52,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				var unionSelect = ParseUnionSelect(unionSpan, parser);
 				unionSelectList.Add(unionSelect);
 			} while (true);
-
-			return new SelectSqlCodeExpr
-			{
-				Columns = columns,
-				FromSourceList = fromSourceList,
-				JoinSelectList = joinSelectList,
-				WhereExpr = whereExpr,
-				UnionSelectList = unionSelectList
-			};
+			return unionSelectList;
 		}
 
 		private List<SqlCodeExpr> ParseJoinSelectList(IParser parser)
@@ -79,7 +85,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				{
 					var sourceExpr = parser.ParseExp() as SqlCodeExpr;
 
-					TryConsumeAliasName(parser, out var aliasNameExpr);
+					parser.TryConsumeAliasName(out var aliasNameExpr);
 
 					var userWithOptions = new List<string>();
 					if (parser.Scanner.Match(SqlToken.With))
@@ -104,22 +110,6 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			}
 
 			return fromSourceList;
-		}
-
-		private static bool TryConsumeAliasName(IParser parser, out SqlCodeExpr aliasNameExpr)
-		{
-			if (parser.Scanner.TryConsumeObjectId(out aliasNameExpr))
-			{
-				return true;
-			}
-
-			if (parser.Scanner.Match(SqlToken.As))
-			{
-				return parser.Scanner.TryConsumeObjectId(out aliasNameExpr);
-			}
-
-			aliasNameExpr = null;
-			return false;
 		}
 
 		protected SqlCodeExpr ParseColumnAs(IParser parser)
