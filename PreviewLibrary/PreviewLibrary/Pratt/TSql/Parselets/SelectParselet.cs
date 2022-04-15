@@ -103,7 +103,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		protected SqlCodeExpr ParseColumnAs(IParser parser)
 		{
-			var name = parser.ParseExp() as SqlCodeExpr;
+			var name = parser.ParseExpIgnoreComment();
 
 			TextSpan aliasNameToken;
 			if (parser.Scanner.TryConsumeAny(out _, SqlToken.As))

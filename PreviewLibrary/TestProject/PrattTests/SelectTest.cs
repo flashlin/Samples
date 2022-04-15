@@ -18,6 +18,17 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_number_comment_number_from_table()
+		{
+			var sql = @"select 1, --test
+2 from customer";
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT 1, 2 FROM customer");
+		}
+
+
+		[Fact]
 		public void select_name()
 		{
 			var sql = "select name";
