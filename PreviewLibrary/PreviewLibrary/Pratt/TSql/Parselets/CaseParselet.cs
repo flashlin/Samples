@@ -10,6 +10,25 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			var whenList = ParseWhenList(parser);
+
+			SqlCodeExpr elseExpr = null;
+			if (parser.Scanner.Match(SqlToken.Else))
+			{
+				elseExpr = parser.ParseExp() as SqlCodeExpr;
+			}
+
+			parser.Scanner.Consume(SqlToken.End);
+
+			return new CaseSqlCodeExpr
+			{
+				WhenList = whenList,
+				ElseExpr = elseExpr,
+			};
+		}
+
+		private static List<SqlCodeExpr> ParseWhenList(IParser parser)
+		{
 			var whenList = new List<SqlCodeExpr>();
 			do
 			{
@@ -26,21 +45,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 					ThenExpr = thenExpr
 				});
 			} while (true);
-
-
-			SqlCodeExpr elseExpr = null;
-			if (parser.Scanner.Match(SqlToken.Else))
-			{
-				elseExpr = parser.ParseExp() as SqlCodeExpr;
-			}
-
-			parser.Scanner.Consume(SqlToken.End);
-
-			return new CaseSqlCodeExpr
-			{
-				WhenList = whenList,
-				ElseExpr = elseExpr,
-			};
+			return whenList;
 		}
 	}
 }
