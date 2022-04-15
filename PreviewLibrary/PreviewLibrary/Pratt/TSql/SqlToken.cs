@@ -114,6 +114,7 @@
 		Continue,
 		Convert,
 		Char,
-		Primary
+		Primary,
+		Key
 	}
 }

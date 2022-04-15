@@ -55,6 +55,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("INT", SqlToken.Int);
 			AddTokenMap("INNER", SqlToken.Inner);
 			AddTokenMap("JOIN", SqlToken.Join);
+			AddTokenMap("KEY", SqlToken.Key);
 			AddTokenMap("LIKE", SqlToken.Like);
 			AddTokenMap("LEFT", SqlToken.Left);
 			AddTokenMap("NVARCHAR", SqlToken.NVarchar);
