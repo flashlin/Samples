@@ -82,7 +82,8 @@ namespace TestProject.PrattTests
 		protected void ThenExprShouldBe(string expectCode)
 		{
 			var exprCode = _expr.ToString();
-			exprCode.MergeToCode().Should().Be(expectCode.MergeToCode(), GetCompareCodeHelpMessage(exprCode, expectCode));
+			//exprCode.MergeToCode().Should().Be(expectCode.MergeToCode(), GetCompareCodeHelpMessage(exprCode, expectCode));
+			exprCode.MergeToCode().Should().Be(expectCode.MergeToCode());
 		}
 
 		protected IEnumerable<string> ReadSqlFiles(string folder)

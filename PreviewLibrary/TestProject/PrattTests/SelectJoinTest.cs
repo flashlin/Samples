@@ -32,6 +32,21 @@ FROM customer
 LEFT JOIN secondTable tb2 WITH(nolock)");
 		}
 
+		[Fact]
+		public void left_join_where()
+		{
+			var sql = @"select 1 from customer
+left join secondTable tb2 with(nolock)
+where id = 1";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT 1
+FROM customer
+LEFT JOIN secondTable tb2 WITH(nolock)
+WHERE id = 1");
+		}
+
 
 	}
 }

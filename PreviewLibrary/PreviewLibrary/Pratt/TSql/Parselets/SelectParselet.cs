@@ -20,13 +20,13 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var fromSourceList = ParseFromSourceList(parser);
 
+			var joinSelectList = ParseJoinSelectList(parser);
+
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
 			{
 				whereExpr = parser.ParseExp() as SqlCodeExpr;
 			}
-
-			var joinSelectList = ParseJoinSelectList(parser);
 
 			var unionSelectList = ParseUnionSelectList(parser);
 

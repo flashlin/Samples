@@ -47,7 +47,9 @@ namespace TestProject.PrattTests
 		public void insert__into_var_select()
 		{
 			var sql = @"insert into @tmp select name from customer";
+			
 			Parse(sql);
+
 			ThenExprShouldBe(@"INSERT INTO @tmp SELECT name FROM customer");
 		}
 	}
