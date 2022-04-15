@@ -10,6 +10,15 @@ namespace PreviewLibrary.Pratt.TSql
 {
 	public static class SqlParserExtension
 	{
+		public static IEnumerable<TExpression> ConsumeByDelimiter<TExpression>(this IParser parser,
+			SqlToken delimiter,
+			Func<TExpression> predicateExpr)
+			where TExpression : SqlCodeExpr
+		{
+			parser.Scanner.IgnoreComments();
+			return parser.ConsumeByDelimiter<SqlToken, TExpression>(delimiter, predicateExpr);
+		}
+
 		public static List<ArgumentSqlCodeExpr> ConsumeArgumentList(this IParser parser)
 		{
 			var arguments = parser.ConsumeByDelimiter(SqlToken.Comma, () =>

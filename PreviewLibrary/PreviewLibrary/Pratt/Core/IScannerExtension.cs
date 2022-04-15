@@ -92,6 +92,7 @@ namespace PreviewLibrary.Pratt.Core
 		{
 			return TryConsumeAny(scanner, out tokenSpan, expectTokenType);
 		}
+
 		public static bool TryConsumeAny<TTokenType>(this IScanner scanner, out TextSpan outSpan, params TTokenType[] tokenTypes)
 			where TTokenType : struct
 		{

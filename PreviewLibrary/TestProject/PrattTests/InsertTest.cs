@@ -52,5 +52,32 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe(@"INSERT INTO @tmp SELECT name FROM customer");
 		}
+
+		[Fact]
+		public void insert__into_var_columns_values()
+		{
+			var sql = @"insert into @customer (id, name)
+      values
+        (
+            (case when @id>=0 then 0 else abs(@id1) end), -- test1
+            (case when @id>=2 then abs(@id2) else 0 end), -- test2
+            @id3, @name3
+        )";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO @customer(id, name) VALUES
+(( CASE
+WHEN @id >= 0
+THEN 0
+ELSE abs( @id1 )
+END ), ( CASE
+WHEN @id >= 2
+THEN abs( @id2 )
+ELSE 0
+END ), @id3, @name3)");
+		}
+
+
 	}
 }
