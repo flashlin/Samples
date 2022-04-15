@@ -13,7 +13,7 @@ namespace PreviewLibrary.Pratt.Core
 
 		string GetSpanString(TextSpan span);
 
-		TextSpan Peek();
+		TextSpan Peek(int n = 0);
 
 		void SetOffset(int offset);
 		TextSpan ScanNext();

@@ -81,6 +81,21 @@ namespace PreviewLibrary.Pratt.Core
 			return token.Type == tokenType.ToString();
 		}
 
+		public static bool IsTokenList<TTokenType>(this IScanner scanner, params TTokenType[] tokenTypeList)
+			where TTokenType : struct
+		{
+			for (var i = 0; i < tokenTypeList.Length; i++)
+			{
+				var tokenType = tokenTypeList[i];
+				var token = scanner.Peek(i);
+				if (token.Type != tokenType.ToString())
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
 		public static string PeekString(this IScanner scanner)
 		{
 			var token = scanner.Peek();

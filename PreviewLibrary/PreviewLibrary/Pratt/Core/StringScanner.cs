@@ -72,10 +72,14 @@ namespace PreviewLibrary.Pratt.Core
 			return span.GetString(_textSpan.Span);
 		}
 
-		public TextSpan Peek()
+		public TextSpan Peek(int n = 0)
 		{
 			var startIndex = _index;
-			var token = Consume();
+			TextSpan token = TextSpan.Empty;
+			for (var i = 0; i < n + 1; i++)
+			{
+				token = Consume();
+			}
 			_index = startIndex;
 			return token;
 		}

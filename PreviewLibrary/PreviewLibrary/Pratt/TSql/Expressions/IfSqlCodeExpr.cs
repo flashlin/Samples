@@ -8,6 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	{
 		public List<SqlCodeExpr> Body { get; set; }
 		public SqlCodeExpr Condition { get; set; }
+		public List<SqlCodeExpr> ElseIfList { get; set; }
 		public List<SqlCodeExpr> ElseExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -24,6 +25,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			}
 			stream.Indent--;
 			stream.Write("END");
+
+			if( ElseIfList != null && ElseIfList.Count > 0)
+			{
+				stream.WriteLine();
+				ElseIfList.WriteToStream(stream);
+			}
 
 			if( ElseExpr != null && ElseExpr.Count > 0)
 			{

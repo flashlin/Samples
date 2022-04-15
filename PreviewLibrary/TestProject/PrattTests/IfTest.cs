@@ -45,5 +45,30 @@ ELSE BEGIN
 	SELECT 2
 END");
 		}
+
+		[Fact]
+		public void if_else_if_else()
+		{
+			var sql = @"if @id in (1,2) --test
+           set @r = 0
+        else if @id = 2 -- or
+           set @r = 1
+        else  --test
+           set @r = 3
+";
+			Parse(sql);
+
+			ThenExprShouldBe(@"IF @id IN (1, 2)
+BEGIN
+SET @r = 0
+END
+ELSE IF @id = 2
+BEGIN
+SET @r = 1
+END
+ELSE BEGIN
+SET @r = 3
+END");
+		}
 	}
 }
