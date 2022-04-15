@@ -108,6 +108,7 @@
 		Inner,
 		Right,
 		Full,
-		Cross
+		Cross,
+		VerticalBar
 	}
 }
