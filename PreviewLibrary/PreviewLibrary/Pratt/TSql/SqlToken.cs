@@ -113,6 +113,7 @@
 		While,
 		Continue,
 		Convert,
-		Char
+		Char,
+		Primary
 	}
 }

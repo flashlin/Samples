@@ -65,6 +65,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("OFF", SqlToken.Off);
 			AddTokenMap("OR", SqlToken.Or);
 			AddTokenMap("OUTER", SqlToken.Outer);
+			AddTokenMap("PRIMARY", SqlToken.Primary);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);
 			AddTokenMap("RETURNS", SqlToken.Returns);
 			AddTokenMap("RIGHT", SqlToken.Right);
