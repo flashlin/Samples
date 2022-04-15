@@ -75,6 +75,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("WHERE", SqlToken.Where);
 			AddTokenMap("WITH", SqlToken.With);
 			AddTokenMap("WHEN", SqlToken.When);
+			AddTokenMap("WHILE", SqlToken.While);
 			AddTokenMap(":SETVAR", SqlToken.ScriptSetVar);
 			AddTokenMap(":ON", SqlToken.ScriptOn);
 

@@ -109,6 +109,7 @@
 		Right,
 		Full,
 		Cross,
-		VerticalBar
+		VerticalBar,
+		While
 	}
 }
