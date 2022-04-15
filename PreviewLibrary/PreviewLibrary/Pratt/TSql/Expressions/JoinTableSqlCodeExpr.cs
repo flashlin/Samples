@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Pratt.Core.Expressions;
+using System.Collections.Generic;
 using T1.Standard.IO;
 
 namespace PreviewLibrary.Pratt.TSql.Expressions
@@ -9,6 +10,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public string OuterType { get; set; }
 		public SqlCodeExpr SecondTable { get; set; }
 		public SqlCodeExpr AliasName { get; set; }
+		public List<string> WithOptions { get; set; }
 		public SqlCodeExpr JoinOnExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -25,6 +27,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			{
 				stream.Write(" ");
 				AliasName.WriteToStream(stream);
+			}
+
+			if(WithOptions != null && WithOptions.Count > 0)
+			{
+				stream.Write(" WITH(");
+				WithOptions.WriteToStreamWithComma(stream);
+				stream.Write(")");
 			}
 
 			if (JoinOnExpr != null)

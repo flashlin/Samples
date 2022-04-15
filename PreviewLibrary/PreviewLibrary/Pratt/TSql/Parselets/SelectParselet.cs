@@ -87,18 +87,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 					parser.TryConsumeAliasName(out var aliasNameExpr);
 
-					var userWithOptions = new List<string>();
-					if (parser.Scanner.Match(SqlToken.With))
-					{
-						parser.Scanner.Consume(SqlToken.LParen);
-						var withOptions = new[]
-						{
-								SqlToken.NOLOCK
-							};
-						userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
-							.ToList();
-						parser.Scanner.Consume(SqlToken.RParen);
-					}
+					var userWithOptions = parser.ParseWithOptions();
 
 					return new FromSourceSqlCodeExpr
 					{

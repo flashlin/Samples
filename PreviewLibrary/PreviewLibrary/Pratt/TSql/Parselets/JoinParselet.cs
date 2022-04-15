@@ -28,6 +28,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var secondTable = parser.Scanner.ConsumeObjectId();
 			parser.TryConsumeAliasName(out var aliasNameExpr);
 
+			var userWithOptions = parser.ParseWithOptions();
+
 			SqlCodeExpr joinOnExpr = null;
 			if(parser.Scanner.Match(SqlToken.On))
 			{
@@ -40,6 +42,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				OuterType = outerType,
 				SecondTable = secondTable,
 				AliasName = aliasNameExpr,
+				WithOptions = userWithOptions,
 				JoinOnExpr = joinOnExpr,
 			};
 		}
