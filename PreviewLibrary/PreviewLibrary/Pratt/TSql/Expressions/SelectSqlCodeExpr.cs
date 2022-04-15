@@ -8,6 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	{
 		public List<SqlCodeExpr> Columns { get; set; }
 		public List<SqlCodeExpr> FromSourceList { get; set; }
+		public List<SqlCodeExpr> JoinSelectList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 		public List<SqlCodeExpr> UnionSelectList { get; set; }
 
@@ -22,6 +23,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				}
 				column.value.WriteToStream(stream);
 			}
+
 			if (FromSourceList.Count > 0)
 			{
 				stream.WriteLine();
@@ -38,6 +40,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				}
 				stream.Indent--;
 			}
+
+			if (JoinSelectList != null && JoinSelectList.Count > 0)
+			{
+				stream.WriteLine();
+				JoinSelectList.WriteToStream(stream);
+			}
+
 			if (WhereExpr != null)
 			{
 				stream.WriteLine();
@@ -45,7 +54,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				WhereExpr.WriteToStream(stream);
 			}
 
-			if(UnionSelectList != null && UnionSelectList.Count > 0)
+			if (UnionSelectList != null && UnionSelectList.Count > 0)
 			{
 				stream.WriteLine();
 				UnionSelectList.WriteToStream(stream);

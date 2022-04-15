@@ -18,6 +18,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("BIT", SqlToken.Bit);
 			AddTokenMap("CAST", SqlToken.Cast);
 			AddTokenMap("CASE", SqlToken.Case);
+			AddTokenMap("CROSS", SqlToken.Cross);
 			AddTokenMap("CREATE", SqlToken.Create);
 			AddTokenMap("DECLARE", SqlToken.Declare);
 			AddTokenMap("DELETE", SqlToken.Delete);
@@ -34,6 +35,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("ELSE", SqlToken.Else);
 			AddTokenMap("FROM", SqlToken.From);
 			AddTokenMap("FLOAT", SqlToken.Float);
+			AddTokenMap("FULL", SqlToken.Full);
 			AddTokenMap("FUNCTION", SqlToken.Function);
 			AddTokenMap("GRANT", SqlToken.Grant);
 			AddTokenMap("GO", SqlToken.Go);
@@ -43,6 +45,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("INSERT", SqlToken.Insert);
 			AddTokenMap("INTO", SqlToken.Into);
 			AddTokenMap("INT", SqlToken.Int);
+			AddTokenMap("INNER", SqlToken.Inner);
 			AddTokenMap("JOIN", SqlToken.Join);
 			AddTokenMap("LIKE", SqlToken.Like);
 			AddTokenMap("LEFT", SqlToken.Left);
@@ -56,6 +59,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("OUTER", SqlToken.Outer);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);
 			AddTokenMap("RETURNS", SqlToken.Returns);
+			AddTokenMap("RIGHT", SqlToken.Right);
 			AddTokenMap("SET", SqlToken.Set);
 			AddTokenMap("SELECT", SqlToken.Select);
 			AddTokenMap("SMALLDATETIME", SqlToken.SmallDateTime);

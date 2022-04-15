@@ -104,6 +104,10 @@
 		Float,
 		Left,
 		Outer,
-		Join
+		Join,
+		Inner,
+		Right,
+		Full,
+		Cross
 	}
 }
