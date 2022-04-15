@@ -115,6 +115,7 @@
 		Convert,
 		Char,
 		Primary,
-		Key
+		Key,
+		Max
 	}
 }

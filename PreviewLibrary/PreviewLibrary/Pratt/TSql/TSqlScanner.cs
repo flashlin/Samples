@@ -61,6 +61,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("NVARCHAR", SqlToken.NVarchar);
 			AddTokenMap("NOT", SqlToken.Not);
 			AddTokenMap("NUMERIC", SqlToken.Numeric);
+			AddTokenMap("MAX", SqlToken.Max);
 			AddTokenMap("ON", SqlToken.On);
 			AddTokenMap("OBJECT", SqlToken.Object);
 			AddTokenMap("OFF", SqlToken.Off);

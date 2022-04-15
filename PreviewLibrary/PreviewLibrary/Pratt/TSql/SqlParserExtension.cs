@@ -100,9 +100,7 @@ namespace PreviewLibrary.Pratt.TSql
 				};
 			}
 
-			var sizeToken = parser.Scanner.Consume(SqlToken.Number);
-			var sizeStr = parser.Scanner.GetSpanString(sizeToken);
-			var size = int.Parse(sizeStr);
+			var size = ParseSize(parser);
 
 			int? scale = null;
 			if (parser.Scanner.Match(SqlToken.Comma))
@@ -121,6 +119,22 @@ namespace PreviewLibrary.Pratt.TSql
 				Size = size,
 				Scale = scale
 			};
+		}
+
+		private static int? ParseSize(IParser parser)
+		{
+			int? size = null;
+			if (parser.Scanner.Match(SqlToken.Max))
+			{
+				size = int.MaxValue;
+			}
+			else
+			{
+				var sizeToken = parser.Scanner.Consume(SqlToken.Number);
+				var sizeStr = parser.Scanner.GetSpanString(sizeToken);
+				size = int.Parse(sizeStr);
+			}
+			return size;
 		}
 
 		private static bool ParseIsPrimaryKey(IParser parser)

@@ -15,7 +15,16 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			stream.Write(DataType.ToUpper());
 			if (Size != null)
 			{
-				stream.Write($"({Size}");
+				stream.Write($"(");
+				if (Size == int.MaxValue)
+				{
+					stream.Write($"MAX");
+				}
+				else
+				{
+					stream.Write($"{Size}");
+				}
+
 				if (Scale != null)
 				{
 					stream.Write($",{Scale}");
