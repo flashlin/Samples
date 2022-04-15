@@ -10,6 +10,13 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			SqlCodeExpr inputExpr = null;
+
+			if (!parser.Scanner.IsToken(SqlToken.When))
+			{
+				inputExpr = parser.ParseExpIgnoreComment() as SqlCodeExpr;
+			}
+
 			var whenList = ParseWhenList(parser);
 
 			SqlCodeExpr elseExpr = null;
@@ -22,6 +29,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			return new CaseSqlCodeExpr
 			{
+				InputExpr = inputExpr,
 				WhenList = whenList,
 				ElseExpr = elseExpr,
 			};
