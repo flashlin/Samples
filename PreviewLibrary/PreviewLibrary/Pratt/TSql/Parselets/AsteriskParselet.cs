@@ -5,11 +5,11 @@ using PreviewLibrary.Pratt.TSql.Expressions;
 
 namespace PreviewLibrary.Pratt.TSql.Parselets
 {
-	public class AsterickParselet : IPrefixParselet
+	public class AsteriskParselet : IPrefixParselet
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			return new AsterickSqlCodeExpr();
+			return new AsteriskSqlCodeExpr();
 		}
 	}
 }

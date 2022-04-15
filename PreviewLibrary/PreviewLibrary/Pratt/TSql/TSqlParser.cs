@@ -12,7 +12,7 @@ namespace PreviewLibrary.Pratt.TSql
 	{
 		public TSqlParser(IScanner scanner) : base(scanner)
 		{
-			Register(SqlToken.Asterisk, new AsterickParselet());
+			Register(SqlToken.Asterisk, new AsteriskParselet());
 			Register(SqlToken.Cast, new CastParselet());
 			Register(SqlToken.Case, new CaseParselet());
 			Register(SqlToken.Create, new CreateParselet());
@@ -65,6 +65,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 			InfixLeft(SqlToken.Plus, Precedence.SUM);
 			InfixLeft(SqlToken.Minus, Precedence.SUM);
+			InfixLeft(SqlToken.Asterisk, Precedence.PRODUCT);
 			InfixLeft(SqlToken.Ampersand, Precedence.PRODUCT);
 			InfixLeft(SqlToken.Slash, Precedence.PRODUCT);
 			InfixLeft(SqlToken.VerticalBar, Precedence.BINARY);

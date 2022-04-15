@@ -3,7 +3,7 @@ using T1.Standard.IO;
 
 namespace PreviewLibrary.Pratt.TSql.Expressions
 {
-	public class AsterickSqlCodeExpr : SqlCodeExpr
+	public class AsteriskSqlCodeExpr : SqlCodeExpr
 	{
 		public override void WriteToStream(IndentStream stream)
 		{
