@@ -89,11 +89,14 @@ namespace PreviewLibrary.Pratt.TSql
 			var dataTypeToken = parser.Scanner.ConsumeAny(dataTypes);
 			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
 
+			var isPrimaryKey = ParseIsPrimaryKey(parser);
+
 			if (!parser.Scanner.Match(SqlToken.LParen))
 			{
 				return new DataTypeSqlCodeExpr
 				{
-					DataType = dataTypeStr
+					DataType = dataTypeStr,
+					IsPrimaryKey = isPrimaryKey,
 				};
 			}
 
@@ -107,14 +110,29 @@ namespace PreviewLibrary.Pratt.TSql
 				var scaleToken = parser.Scanner.Consume(SqlToken.Number);
 				scale = int.Parse(parser.Scanner.GetSpanString(scaleToken));
 			}
-
 			parser.Scanner.Consume(SqlToken.RParen);
+
+			isPrimaryKey = ParseIsPrimaryKey(parser);
+
 			return new DataTypeSqlCodeExpr
 			{
 				DataType = dataTypeStr,
+				IsPrimaryKey = isPrimaryKey,
 				Size = size,
 				Scale = scale
 			};
+		}
+
+		private static bool ParseIsPrimaryKey(IParser parser)
+		{
+			var isPrimaryKey = false;
+			if (parser.Scanner.IsTokenList(SqlToken.Primary, SqlToken.Key))
+			{
+				parser.Scanner.Consume(SqlToken.Primary);
+				parser.Scanner.Consume(SqlToken.Key);
+				isPrimaryKey = true;
+			}
+			return isPrimaryKey;
 		}
 
 		public static Func<SqlCodeExpr> GetParseExpIgnoreCommentFunc(this IParser parser)

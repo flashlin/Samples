@@ -14,7 +14,8 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			Name.WriteToStream(stream);
 			stream.Write(" ");
 			DataType.WriteToStream(stream);
-			if(DefaultValueExpr != null)
+
+			if (DefaultValueExpr != null)
 			{
 				stream.Write(" = ");
 				DefaultValueExpr.WriteToStream(stream);
