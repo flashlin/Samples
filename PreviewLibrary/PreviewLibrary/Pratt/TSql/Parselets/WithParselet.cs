@@ -13,13 +13,15 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var table = parser.Scanner.ConsumeObjectId();
 
 			var columns = new List<SqlCodeExpr>();
-			parser.Scanner.Consume(SqlToken.LParen);
-			do
+			if (parser.Scanner.Match(SqlToken.LParen))
 			{
-				var column = parser.Scanner.ConsumeObjectId();
-				columns.Add(column);
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			parser.Scanner.Consume(SqlToken.RParen);
+				do
+				{
+					var column = parser.Scanner.ConsumeObjectId();
+					columns.Add(column);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
 
 			parser.Scanner.Consume(SqlToken.As);
 			parser.Scanner.Consume(SqlToken.LParen);

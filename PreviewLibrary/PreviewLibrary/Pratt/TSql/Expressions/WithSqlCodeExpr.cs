@@ -15,10 +15,14 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			stream.Write("WITH ");
 			Table.WriteToStream(stream);
 
-			stream.Write("(");
-			Columns.WriteToStreamWithComma(stream);
-			stream.WriteLine(")");
+			if (Columns.Count > 0)
+			{
+				stream.Write("(");
+				Columns.WriteToStreamWithComma(stream);
+				stream.Write(")");
+			}
 
+			stream.WriteLine();
 			stream.WriteLine("AS (");
 			stream.Indent++;
 			InnerExpr.WriteToStream(stream);
