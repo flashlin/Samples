@@ -6,6 +6,18 @@ namespace PreviewLibrary.Pratt.Core
 {
 	public static class IScannerExtension
 	{
+		public static bool TryConsumeString<TTokenType>(this IScanner scanner, TTokenType tokenType, out string spanText)
+			where TTokenType : struct
+		{
+			if (scanner.TryConsume(tokenType, out var span))
+			{
+				spanText = scanner.GetSpanString(span);
+				return true;
+			}
+			spanText = String.Empty;
+			return false;
+		}
+
 		public static TextSpan Consume<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
 			where TTokenType : struct
 		{

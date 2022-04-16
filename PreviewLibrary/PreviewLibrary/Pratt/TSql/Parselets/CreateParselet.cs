@@ -33,6 +33,11 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		private IExpression CreatePartitionFunction(TextSpan token, IParser parser)
 		{
+			if (parser.Scanner.IsToken(SqlToken.Scheme))
+			{
+				return CreatePartitionScheme(token, parser);
+			}
+
 			parser.Scanner.Consume(SqlToken.Function);
 
 			var name = parser.Scanner.ConsumeObjectId();
@@ -71,6 +76,39 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			};
 		}
 
+		private IExpression CreatePartitionScheme(TextSpan token, IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.Scheme);
+			var schemeName = parser.Scanner.ConsumeObjectId();
+
+			parser.Scanner.Consume(SqlToken.As);
+			parser.Scanner.Consume(SqlToken.Partition);
+
+			var funcName = parser.Scanner.ConsumeObjectId();
+
+			parser.Scanner.TryConsumeString(SqlToken.All, out var allToken);
+			parser.Scanner.Consume(SqlToken.To);
+
+			var groupNameList = new List<SqlCodeExpr>();
+			parser.Scanner.Consume(SqlToken.LParen);
+			do
+			{
+				parser.Scanner.Consume(SqlToken.Primary);
+				groupNameList.Add(new ObjectIdSqlCodeExpr
+				{
+					ObjectName = "PRIMARY"
+				});
+			}while(parser.Scanner.Match(SqlToken.Comma));
+			parser.Scanner.Consume(SqlToken.RParen);
+
+			return new CreatePartitionSchemeSqlCodeExpr
+			{
+				SchemeName = schemeName,
+				FuncName = funcName,
+				AllToken = allToken,
+				GroupNameList = groupNameList
+			};
+		}
 
 		private IExpression CreateFunction(TextSpan token, IParser parser)
 		{

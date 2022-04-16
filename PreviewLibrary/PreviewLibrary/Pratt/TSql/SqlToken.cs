@@ -120,6 +120,7 @@
 		Tilde,
 		Partition,
 		Range,
-		For
+		For,
+		Scheme
 	}
 }
