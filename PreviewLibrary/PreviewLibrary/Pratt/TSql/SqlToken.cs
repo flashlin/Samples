@@ -117,6 +117,9 @@
 		Primary,
 		Key,
 		Max,
-		Tilde
+		Tilde,
+		Partition,
+		Range,
+		For
 	}
 }

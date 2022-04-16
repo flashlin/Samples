@@ -3,6 +3,7 @@ using PreviewLibrary.Pratt.Core;
 using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.Core.Parselets;
 using PreviewLibrary.Pratt.TSql.Expressions;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PreviewLibrary.Pratt.TSql.Parselets
@@ -16,14 +17,60 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				return CreateProcedure(token, parser);
 			}
 
-			if(parser.Scanner.Match(SqlToken.Function))
+			if (parser.Scanner.Match(SqlToken.Function))
 			{
 				return CreateFunction(token, parser);
+			}
+
+			if (parser.Scanner.Match(SqlToken.Partition))
+			{
+				return CreatePartitionFunction(token, parser);
 			}
 
 			var helpMessage = parser.Scanner.GetHelpMessage();
 			throw new ParseException($"Parse CREATE Error, {helpMessage}");
 		}
+
+		private IExpression CreatePartitionFunction(TextSpan token, IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.Function);
+
+			var name = parser.Scanner.ConsumeObjectId();
+
+			parser.Scanner.Consume(SqlToken.LParen);
+			var dataType = parser.ConsumeDataType();
+			parser.Scanner.Consume(SqlToken.RParen);
+
+			parser.Scanner.Consume(SqlToken.As);
+			parser.Scanner.Consume(SqlToken.Range);
+
+			var rangeType = string.Empty;
+			if (parser.Scanner.TryConsumeAny(out var rangeTypeSpan, SqlToken.Left, SqlToken.Right))
+			{
+				rangeType = parser.Scanner.GetSpanString(rangeTypeSpan);
+			}
+
+			parser.Scanner.Consume(SqlToken.For);
+			parser.Scanner.Consume(SqlToken.Values);
+
+			var boundaryValueList = new List<SqlCodeExpr>();
+			parser.Scanner.Consume(SqlToken.LParen);
+			do
+			{
+				var boundaryValue = parser.ParseExpIgnoreComment();
+				boundaryValueList.Add(boundaryValue);
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			parser.Scanner.Consume(SqlToken.RParen);
+
+			return new CreatePartitionFunctionSqlCodeExpr
+			{
+				Name = name,
+				DataType = dataType,
+				RangeType = rangeType,
+				BoundaryValueList = boundaryValueList,
+			};
+		}
+
 
 		private IExpression CreateFunction(TextSpan token, IParser parser)
 		{

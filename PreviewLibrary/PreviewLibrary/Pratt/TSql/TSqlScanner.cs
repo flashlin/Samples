@@ -41,6 +41,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("EXECUTE", SqlToken.Execute);
 			AddTokenMap("EXEC", SqlToken.Exec);
 			AddTokenMap("ELSE", SqlToken.Else);
+			AddTokenMap("FOR", SqlToken.For);
 			AddTokenMap("FROM", SqlToken.From);
 			AddTokenMap("FLOAT", SqlToken.Float);
 			AddTokenMap("FULL", SqlToken.Full);
@@ -67,10 +68,12 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("OFF", SqlToken.Off);
 			AddTokenMap("OR", SqlToken.Or);
 			AddTokenMap("OUTER", SqlToken.Outer);
+			AddTokenMap("PARTITION", SqlToken.Partition);
 			AddTokenMap("PRIMARY", SqlToken.Primary);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);
 			AddTokenMap("RETURNS", SqlToken.Returns);
 			AddTokenMap("RIGHT", SqlToken.Right);
+			AddTokenMap("RANGE", SqlToken.Range);
 			AddTokenMap("SET", SqlToken.Set);
 			AddTokenMap("SELECT", SqlToken.Select);
 			AddTokenMap("SMALLDATETIME", SqlToken.SmallDateTime);
