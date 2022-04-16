@@ -106,6 +106,9 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 
 			var dataTypeToken = parser.Scanner.ConsumeAny(allTypes);
+
+			//var userIdentifierDataType = parser.PrefixParseAny(int.MaxValue, SqlToken.Identifier, SqlToken.SqlIdentifier);
+
 			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
 
 			if (dataTypes.Select(x => x.ToString()).Contains(dataTypeToken.Type))
@@ -346,20 +349,38 @@ namespace PreviewLibrary.Pratt.TSql
 			return userWithOptions;
 		}
 
-		public static SqlCodeExpr PrefixParseAny(this IParser parser, int ctxPrecedence, params SqlToken[] prefixTokenTypeList)
+		public static bool TryPrefixParseAny(this IParser parser, int ctxPrecedence, out SqlCodeExpr expr, params SqlToken[] prefixTokenTypeList)
 		{
 			var prefixTokenTypeStrList = prefixTokenTypeList.Select(x => x.ToString()).ToArray();
-			for (var i = 0; i < prefixTokenTypeList.Length; i++)
+			var prefixToken = parser.Scanner.Consume();
+			if (!prefixTokenTypeStrList.Contains(prefixToken.Type))
 			{
-				var prefixTokenType = prefixTokenTypeList[i];
-				var prefixToken = parser.Scanner.Consume();
-				if (!prefixTokenTypeStrList.Contains(prefixToken.Type))
-				{
-					ThrowHelper.ThrowParseException(parser, "");
-				}
-				return parser.PrefixParse(prefixToken, ctxPrecedence) as SqlCodeExpr;
+				expr = null;
+				return false;
 			}
-			throw new ParseException("");
+			expr = parser.PrefixParse(prefixToken, ctxPrecedence) as SqlCodeExpr;
+			return true;
+		}
+
+		public static SqlCodeExpr PrefixParseAny(this IParser parser, int ctxPrecedence, params SqlToken[] prefixTokenTypeList)
+		{
+			if (!TryPrefixParseAny(parser, ctxPrecedence, out SqlCodeExpr expr, prefixTokenTypeList))
+			{
+				ThrowHelper.ThrowParseException(parser, "");
+			}
+			return expr;
+			//var prefixTokenTypeStrList = prefixTokenTypeList.Select(x => x.ToString()).ToArray();
+			//for (var i = 0; i < prefixTokenTypeList.Length; i++)
+			//{
+			//	var prefixTokenType = prefixTokenTypeList[i];
+			//	var prefixToken = parser.Scanner.Consume();
+			//	if (!prefixTokenTypeStrList.Contains(prefixToken.Type))
+			//	{
+			//		ThrowHelper.ThrowParseException(parser, "");
+			//	}
+			//	return parser.PrefixParse(prefixToken, ctxPrecedence) as SqlCodeExpr;
+			//}
+			//throw new ParseException("");
 		}
 
 		public static int? ParseTopCount(this IParser parser)
@@ -402,7 +423,7 @@ namespace PreviewLibrary.Pratt.TSql
 			} while (true);
 			return joinSelectList;
 		}
-		
+
 		private static SqlCodeExpr ParseJoinSelect(TextSpan joinTypeSpan, IParser parser)
 		{
 			var parselet = new JoinParselet();
