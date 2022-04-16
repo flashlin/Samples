@@ -30,11 +30,11 @@ namespace PreviewLibrary.Pratt.TSql
 			var identTokens = new List<string>();
 			do
 			{
-				if (identTokens.Count >= 3)
+				if (identTokens.Count >= 4)
 				{
 					var prevTokens = string.Join(".", identTokens);
 					var currTokenStr = scanner.PeekString();
-					throw new ScanException($"Expect Identifier.Identifier.Identifier, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
+					throw new ScanException($"Expect RemoteServer.Database.dbo.name, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
 				}
 				if (!scanner.TryConsumeAny(out var identifier, SqlToken.Identifier, SqlToken.SqlIdentifier))
 				{
@@ -49,7 +49,7 @@ namespace PreviewLibrary.Pratt.TSql
 				return false;
 			}
 
-			var fixCount = 3 - identTokens.Count;
+			var fixCount = 4 - identTokens.Count;
 			for (var i = 0; i < fixCount; i++)
 			{
 				identTokens.Insert(0, string.Empty);
@@ -57,9 +57,10 @@ namespace PreviewLibrary.Pratt.TSql
 
 			var identExpr = new ObjectIdSqlCodeExpr
 			{
-				DatabaseName = identTokens[0],
-				SchemaName = identTokens[1],
-				ObjectName = identTokens[2],
+				RemoteServer = identTokens[0],
+				DatabaseName = identTokens[1],
+				SchemaName = identTokens[2],
+				ObjectName = identTokens[3],
 			};
 
 			expr = identExpr;
