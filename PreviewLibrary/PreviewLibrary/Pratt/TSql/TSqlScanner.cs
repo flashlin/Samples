@@ -86,10 +86,12 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("RANGE", SqlToken.Range);
 			AddTokenMap("READONLY", SqlToken.ReadOnly);
 			AddTokenMap("SET", SqlToken.Set);
+			AddTokenMap("SOURCE", SqlToken.Source);
 			AddTokenMap("SCHEME", SqlToken.Scheme);
 			AddTokenMap("SELECT", SqlToken.Select);
 			AddTokenMap("SMALLDATETIME", SqlToken.SmallDateTime);
 			AddTokenMap("TO", SqlToken.To);
+			AddTokenMap("TARGET", SqlToken.Target);
 			AddTokenMap("TOP", SqlToken.Top);
 			AddTokenMap("TABLE", SqlToken.Table);
 			AddTokenMap("THEN", SqlToken.Then);

@@ -333,9 +333,15 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
+			var startIndex = parser.Scanner.GetOffset();
 			if (parser.Scanner.Match(SqlToken.As))
 			{
-				return parser.TryConsumeObjectId(out aliasNameExpr);
+				var success = parser.TryConsumeObjectId(out aliasNameExpr);
+				if (!success)
+				{
+					parser.Scanner.SetOffset(startIndex);
+				}
+				return success;
 			}
 
 			aliasNameExpr = null;
@@ -502,6 +508,15 @@ namespace PreviewLibrary.Pratt.TSql
 
 			expr = identExpr;
 			return true;
+		}
+
+		public static SqlCodeExpr ConsumeObjectIdOrVariable(this IParser parser)
+		{
+			if (parser.TryConsumeObjectId(out var objectIdExpr))
+			{
+				return objectIdExpr;
+			}
+			return parser.PrefixParse(SqlToken.Variable) as SqlCodeExpr;
 		}
 	}
 }

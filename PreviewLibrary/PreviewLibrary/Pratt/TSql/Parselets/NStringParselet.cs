@@ -16,4 +16,32 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			};
 		}
 	}
+
+
+	public class TargetParselet : IPrefixParselet
+	{
+		public IExpression Parse(TextSpan token, IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.Dot);
+			var identifier = parser.PrefixParse(SqlToken.Identifier) as SqlCodeExpr;
+			return new TargetSqlCodeExpr
+			{
+				Column = identifier
+			};
+		}
+	}
+
+
+	public class SourceParselet : IPrefixParselet
+	{
+		public IExpression Parse(TextSpan token, IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.Dot);
+			var identifier = parser.PrefixParse(SqlToken.Identifier) as SqlCodeExpr;
+			return new SourceSqlCodeExpr
+			{
+				Column = identifier
+			};
+		}
+	}
 }

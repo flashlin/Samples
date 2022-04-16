@@ -175,15 +175,4 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			};
 		}
 	}
-
-	//?
-	//public class MergeParselet : IPrefixParselet
-	//{
-	//	public IExpression Parse(TextSpan token, IParser parser)
-	//	{
-	//		parser.Scanner.Consume(SqlToken.Into);
-
-	//		var targetTable = parser.Consume
-	//	}
-	//}
 }

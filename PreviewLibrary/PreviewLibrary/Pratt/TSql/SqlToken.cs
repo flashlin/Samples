@@ -136,6 +136,8 @@
 		ReadOnly,
 		Merge,
 		Using,
-		Matched
+		Matched,
+		Target,
+		Source
 	}
 }

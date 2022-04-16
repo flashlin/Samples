@@ -17,7 +17,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				intoStr = parser.Scanner.GetSpanString(intoToken);
 			}
 
-			var tableName = ConsumeObjectIdOrVariable(parser);
+			var tableName = parser.ConsumeObjectIdOrVariable();
 
 			var columns = new List<string>();
 			if (parser.Scanner.Match(SqlToken.LParen))
@@ -63,15 +63,6 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				Columns = columns,
 				ValuesList = valuesList
 			};
-		}
-
-		private static SqlCodeExpr ConsumeObjectIdOrVariable(IParser parser)
-		{
-			if (parser.TryConsumeObjectId(out var objectIdExpr))
-			{
-				return objectIdExpr;
-			}
-			return parser.PrefixParse(SqlToken.Variable) as SqlCodeExpr;
 		}
 	}
 }

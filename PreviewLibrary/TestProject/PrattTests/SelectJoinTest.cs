@@ -61,7 +61,5 @@ FROM customer
 LEFT JOIN @tb1
 WHERE id = 1");
 		}
-
-
 	}
 }
