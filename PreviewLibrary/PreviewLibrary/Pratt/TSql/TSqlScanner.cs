@@ -70,6 +70,8 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("NOT", SqlToken.Not);
 			AddTokenMap("NUMERIC", SqlToken.Numeric);
 			AddTokenMap("MAX", SqlToken.Max);
+			AddTokenMap("MERGE", SqlToken.Merge);
+			AddTokenMap("MATCHED", SqlToken.Matched);
 			AddTokenMap("ON", SqlToken.On);
 			AddTokenMap("OBJECT", SqlToken.Object);
 			AddTokenMap("OFF", SqlToken.Off);
@@ -93,6 +95,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("THEN", SqlToken.Then);
 			AddTokenMap("TINYINT", SqlToken.TinyInt);
 			AddTokenMap("UPDATE", SqlToken.Update);
+			AddTokenMap("USING", SqlToken.Using);
 			AddTokenMap("UNION", SqlToken.Union);
 			AddTokenMap("VALUES", SqlToken.Values);
 			AddTokenMap("VARCHAR", SqlToken.Varchar);

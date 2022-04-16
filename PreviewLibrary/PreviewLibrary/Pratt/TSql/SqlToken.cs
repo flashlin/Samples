@@ -133,6 +133,9 @@
 		SystemVariable,
 		ROWLOCK,
 		Between,
-		ReadOnly
+		ReadOnly,
+		Merge,
+		Using,
+		Matched
 	}
 }
