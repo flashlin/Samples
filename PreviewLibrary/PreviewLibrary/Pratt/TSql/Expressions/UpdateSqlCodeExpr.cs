@@ -6,6 +6,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class UpdateSqlCodeExpr : SqlCodeExpr
 	{
+		public int? TopCount { get; set; }
 		public SqlCodeExpr Table { get; set; }
 		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
@@ -14,6 +15,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public override void WriteToStream(IndentStream stream)
 		{
 			stream.Write("UPDATE ");
+
+			if(TopCount != null)
+			{
+				stream.Write($"TOP {TopCount} ");
+			}
+
 			Table.WriteToStream(stream);
 
 			if(WithOptions != null && WithOptions.Count>0)

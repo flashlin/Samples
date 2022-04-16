@@ -95,20 +95,25 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlToken.SmallDateTime,
 				SqlToken.TinyInt,
 				SqlToken.Varchar,
-				SqlToken.Identifier
 			};
+
+			var allTypes = dataTypes.Concat(new[] { SqlToken.Identifier }).ToArray();
 
 			if (parser.Scanner.Match(SqlToken.Table))
 			{
 				return ConsumeDataTableType(parser);
 			}
 
-			var dataTypeToken = parser.Scanner.ConsumeAny(dataTypes);
+			var dataTypeToken = parser.Scanner.ConsumeAny(allTypes);
 			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
 
+			if (dataTypes.Select(x => x.ToString()).Contains(dataTypeToken.Type))
+			{
+				dataTypeStr = dataTypeStr.ToUpper();
+			}
 
 			var isReadonly = false;
-			if( parser.Scanner.Match(SqlToken.ReadOnly) )
+			if (parser.Scanner.Match(SqlToken.ReadOnly))
 			{
 				isReadonly = true;
 			}
@@ -174,7 +179,7 @@ namespace PreviewLibrary.Pratt.TSql
 			return isPrimaryKey;
 		}
 
-		public static Func<SqlCodeExpr> GetParseExpIgnoreCommentFunc(this IParser parser, int ctxPrecedence=0)
+		public static Func<SqlCodeExpr> GetParseExpIgnoreCommentFunc(this IParser parser, int ctxPrecedence = 0)
 		{
 			var comments = new List<CommentSqlCodeExpr>();
 			return () =>
@@ -222,7 +227,7 @@ namespace PreviewLibrary.Pratt.TSql
 			return parser.Scanner.Match(tokenType);
 		}
 
-		public static SqlCodeExpr ParseExpIgnoreComment(this IParser parser, int ctxPrecedence=0)
+		public static SqlCodeExpr ParseExpIgnoreComment(this IParser parser, int ctxPrecedence = 0)
 		{
 			return parser.GetParseExpIgnoreCommentFunc(ctxPrecedence)();
 		}
@@ -343,11 +348,11 @@ namespace PreviewLibrary.Pratt.TSql
 		public static SqlCodeExpr PrefixParseAny(this IParser parser, int ctxPrecedence, params SqlToken[] prefixTokenTypeList)
 		{
 			var prefixTokenTypeStrList = prefixTokenTypeList.Select(x => x.ToString()).ToArray();
-			for(var i=0; i < prefixTokenTypeList.Length; i++)
+			for (var i = 0; i < prefixTokenTypeList.Length; i++)
 			{
 				var prefixTokenType = prefixTokenTypeList[i];
 				var prefixToken = parser.Scanner.Consume();
-				if(!prefixTokenTypeStrList.Contains(prefixToken.Type))
+				if (!prefixTokenTypeStrList.Contains(prefixToken.Type))
 				{
 					ThrowHelper.ThrowParseException(parser, "");
 				}

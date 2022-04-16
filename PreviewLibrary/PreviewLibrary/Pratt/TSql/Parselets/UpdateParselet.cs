@@ -10,6 +10,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			var topCount = parser.ParseTopCount();
+
 			var table = parser.Scanner.ConsumeObjectId();
 
 			var withOptions = parser.ParseWithOptions();
@@ -38,6 +40,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			return new UpdateSqlCodeExpr
 			{
+				TopCount = topCount,
 				Table = table,
 				WithOptions = withOptions,
 				SetColumnsList = setList,
