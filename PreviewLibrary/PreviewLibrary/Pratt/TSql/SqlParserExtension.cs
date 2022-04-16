@@ -80,41 +80,15 @@ namespace PreviewLibrary.Pratt.TSql
 
 		public static SqlCodeExpr ConsumeDataType(this IParser parser)
 		{
-			var dataTypes = new[]
-			{
-				SqlToken.Bit,
-				SqlToken.Bigint,
-				SqlToken.Char,
-				SqlToken.Date,
-				SqlToken.DateTime,
-				SqlToken.DateTime2,
-				SqlToken.Decimal,
-				SqlToken.Float,
-				SqlToken.Int,
-				SqlToken.Numeric,
-				SqlToken.NVarchar,
-				SqlToken.SmallDateTime,
-				SqlToken.TinyInt,
-				SqlToken.Varchar,
-			};
-
-			var allTypes = dataTypes.Concat(new[] { SqlToken.Identifier }).ToArray();
-
 			if (parser.Scanner.Match(SqlToken.Table))
 			{
 				return ConsumeDataTableType(parser);
 			}
 
-			var dataTypeToken = parser.Scanner.ConsumeAny(allTypes);
-
-			//var userIdentifierDataType = parser.PrefixParseAny(int.MaxValue, SqlToken.Identifier, SqlToken.SqlIdentifier);
-
-			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
-
-			if (dataTypes.Select(x => x.ToString()).Contains(dataTypeToken.Type))
-			{
-				dataTypeStr = dataTypeStr.ToUpper();
-			}
+			var dataType = ParseDataType(parser);
+			//if( parser.TryPrefixParseAny(int.MaxValue, out var userIdentifierDataType, SqlToken.Identifier, SqlToken.SqlIdentifier) )
+			//{
+			//}
 
 			var isReadonly = false;
 			if (parser.Scanner.Match(SqlToken.ReadOnly))
@@ -128,7 +102,7 @@ namespace PreviewLibrary.Pratt.TSql
 			{
 				return new DataTypeSqlCodeExpr
 				{
-					DataType = dataTypeStr,
+					DataType = dataType,
 					IsReadOnly = isReadonly,
 					IsPrimaryKey = isPrimaryKey,
 				};
@@ -148,10 +122,42 @@ namespace PreviewLibrary.Pratt.TSql
 
 			return new DataTypeSqlCodeExpr
 			{
-				DataType = dataTypeStr,
+				DataType = dataType,
 				IsPrimaryKey = isPrimaryKey,
 				Size = size,
 				Scale = scale
+			};
+		}
+
+		private static ObjectIdSqlCodeExpr ParseDataType(IParser parser)
+		{
+			var dataTypes = new[]
+			{
+				SqlToken.Bit,
+				SqlToken.Bigint,
+				SqlToken.Char,
+				SqlToken.Date,
+				SqlToken.DateTime,
+				SqlToken.DateTime2,
+				SqlToken.Decimal,
+				SqlToken.Float,
+				SqlToken.Int,
+				SqlToken.Numeric,
+				SqlToken.NVarchar,
+				SqlToken.SmallDateTime,
+				SqlToken.TinyInt,
+				SqlToken.Varchar,
+			};
+			var allTypes = dataTypes.Concat(new[] { SqlToken.Identifier }).ToArray();
+			var dataTypeToken = parser.Scanner.ConsumeAny(allTypes);
+			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
+			if (dataTypes.Select(x => x.ToString()).Contains(dataTypeToken.Type))
+			{
+				dataTypeStr = dataTypeStr.ToUpper();
+			}
+			return new ObjectIdSqlCodeExpr
+			{
+				ObjectName = dataTypeStr,
 			};
 		}
 

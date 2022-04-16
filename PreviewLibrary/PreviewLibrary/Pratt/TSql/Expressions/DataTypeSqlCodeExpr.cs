@@ -5,7 +5,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class DataTypeSqlCodeExpr : SqlCodeExpr
 	{
-		public string DataType { get; set; }
+		public SqlCodeExpr DataType { get; set; }
 		public bool IsReadOnly { get; set; }
 		public int? Size { get; internal set; }
 		public int? Scale { get; internal set; }
@@ -13,7 +13,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write(DataType);
+			DataType.WriteToStream(stream);
 
 			if(IsReadOnly)
 			{
