@@ -120,6 +120,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddSymbolMap("::", SqlToken.ColonColon);
 			AddSymbolMap("&", SqlToken.Ampersand);
 			AddSymbolMap("|", SqlToken.VerticalBar);
+			AddSymbolMap("~", SqlToken.Tilde);
 		}
 
 		protected override string GetTokenType(string token, string defaultTokenType)

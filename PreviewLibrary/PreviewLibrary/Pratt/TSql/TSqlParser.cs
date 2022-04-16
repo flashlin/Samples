@@ -54,6 +54,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 			Prefix(SqlToken.Plus, Precedence.PREFIX);
 			Prefix(SqlToken.Minus, Precedence.PREFIX);
+			Prefix(SqlToken.Tilde, Precedence.PREFIX);
 			InfixLeft(SqlToken.Equal, Precedence.SUM);
 			InfixLeft(SqlToken.And, Precedence.CONCAT);
 			InfixLeft(SqlToken.Or, Precedence.CONCAT);

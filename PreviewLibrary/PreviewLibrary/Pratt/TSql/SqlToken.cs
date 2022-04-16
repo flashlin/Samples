@@ -116,6 +116,7 @@
 		Char,
 		Primary,
 		Key,
-		Max
+		Max,
+		Tilde
 	}
 }
