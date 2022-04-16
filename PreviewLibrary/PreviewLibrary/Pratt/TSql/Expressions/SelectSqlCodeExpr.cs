@@ -12,6 +12,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public List<SqlCodeExpr> JoinSelectList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 		public List<SqlCodeExpr> UnionSelectList { get; set; }
+		public List<OrderItemSqlCodeExpr> OrderByList { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -59,6 +60,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				stream.WriteLine();
 				stream.Write("WHERE ");
 				WhereExpr.WriteToStream(stream);
+			}
+
+			if (OrderByList.Count > 0)
+			{
+				stream.WriteLine();
+				stream.Write("ORDER BY ");
+				OrderByList.WriteToStreamWithComma(stream);
 			}
 
 			if (UnionSelectList != null && UnionSelectList.Count > 0)

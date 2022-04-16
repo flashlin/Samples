@@ -37,6 +37,16 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_name_from_table_order_by()
+		{
+			var sql = "select name from customer order by id";
+			Parse(sql);
+			ThenExprShouldBe(@"SELECT name
+FROM customer
+ORDER BY id ASC");
+		}
+
+		[Fact]
 		public void select_top_1_name()
 		{
 			var sql = "select top 1 name";

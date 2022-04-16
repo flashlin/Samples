@@ -16,11 +16,13 @@ namespace PreviewLibrary.Pratt.TSql
 			: base(text)
 		{
 			AddTokenMap("AS", SqlToken.As);
+			AddTokenMap("ASC", SqlToken.Asc);
 			AddTokenMap("AND", SqlToken.And);
 			AddTokenMap("ALL", SqlToken.All);
 			AddTokenMap("BREAK", SqlToken.Break);
 			AddTokenMap("BEGIN", SqlToken.Begin);
 			AddTokenMap("BIT", SqlToken.Bit);
+			AddTokenMap("BY", SqlToken.By);
 			AddTokenMap("BIGINT", SqlToken.Bigint);
 			AddTokenMap("CONTINUE", SqlToken.Continue);
 			AddTokenMap("CHAR", SqlToken.Char);
@@ -29,6 +31,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("CROSS", SqlToken.Cross);
 			AddTokenMap("CREATE", SqlToken.Create);
 			AddTokenMap("CONVERT", SqlToken.Convert);
+			AddTokenMap("DESC", SqlToken.Desc);
 			AddTokenMap("DECLARE", SqlToken.Declare);
 			AddTokenMap("DELETE", SqlToken.Delete);
 			AddTokenMap("DEFAULT", SqlToken.Default);
@@ -68,6 +71,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("OBJECT", SqlToken.Object);
 			AddTokenMap("OFF", SqlToken.Off);
 			AddTokenMap("OR", SqlToken.Or);
+			AddTokenMap("ORDER", SqlToken.Order);
 			AddTokenMap("OUTER", SqlToken.Outer);
 			AddTokenMap("PARTITION", SqlToken.Partition);
 			AddTokenMap("PRIMARY", SqlToken.Primary);

@@ -123,6 +123,10 @@
 		For,
 		Scheme,
 		NOCOUNT,
-		Bigint
+		Bigint,
+		Order,
+		By,
+		Asc,
+		Desc
 	}
 }

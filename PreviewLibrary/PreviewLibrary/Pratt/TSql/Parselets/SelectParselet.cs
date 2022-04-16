@@ -35,6 +35,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				whereExpr = parser.ParseExp() as SqlCodeExpr;
 			}
 
+			var orderBy = ParseOrderBy(parser);
+
 			var unionSelectList = ParseUnionSelectList(parser);
 
 			return new SelectSqlCodeExpr
@@ -44,8 +46,38 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				FromSourceList = fromSourceList,
 				JoinSelectList = joinSelectList,
 				WhereExpr = whereExpr,
+				OrderByList = orderBy,
 				UnionSelectList = unionSelectList
 			};
+		}
+
+		private List<OrderItemSqlCodeExpr> ParseOrderBy(IParser parser)
+		{
+			var orderByList = new List<OrderItemSqlCodeExpr>();
+
+			if (!parser.Scanner.TryConsume(SqlToken.Order, out _))
+			{
+				return orderByList;
+			}
+
+			parser.Scanner.Consume(SqlToken.By);
+			do
+			{
+				var name = parser.Scanner.ConsumeObjectId();
+				var ascOrDesc = "ASC";
+				parser.Scanner.TryConsumeAny(out var ascOrDescSpan, SqlToken.Asc, SqlToken.Desc);
+				if (!ascOrDescSpan.IsEmpty)
+				{
+					ascOrDesc = parser.Scanner.GetSpanString(ascOrDescSpan);
+				}
+				orderByList.Add(new OrderItemSqlCodeExpr
+				{
+					Name = name,
+					AscOrDesc = ascOrDesc,
+				});
+			} while (parser.Scanner.Match(SqlToken.Comma));
+
+			return orderByList;
 		}
 
 		private List<SqlCodeExpr> ParseUnionSelectList(IParser parser)
