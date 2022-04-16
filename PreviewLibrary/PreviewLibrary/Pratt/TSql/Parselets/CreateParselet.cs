@@ -93,11 +93,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.LParen);
 			do
 			{
-				parser.Scanner.Consume(SqlToken.Primary);
-				groupNameList.Add(new ObjectIdSqlCodeExpr
-				{
-					ObjectName = "PRIMARY"
-				});
+				groupNameList.Add(parser.ConsumePrimary());
 			}while(parser.Scanner.Match(SqlToken.Comma));
 			parser.Scanner.Consume(SqlToken.RParen);
 

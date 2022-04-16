@@ -10,6 +10,20 @@ namespace PreviewLibrary.Pratt.TSql
 {
 	public static class SqlParserExtension
 	{
+		public static SqlCodeExpr ConsumePrimary(this IParser parser)
+		{
+			if (parser.Scanner.TryConsumeAny(out var identifier, SqlToken.SqlIdentifier))
+			{
+				return parser.PrefixParse(identifier) as SqlCodeExpr;
+			}
+			parser.Scanner.Consume(SqlToken.Primary);
+			return new ObjectIdSqlCodeExpr
+			{
+				ObjectName = "PRIMARY"
+			};
+		}
+
+
 		public static IEnumerable<TExpression> ConsumeByDelimiter<TExpression>(this IParser parser,
 			SqlToken delimiter,
 			Func<TExpression> predicateExpr)
