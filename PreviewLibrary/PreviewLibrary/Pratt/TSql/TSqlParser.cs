@@ -47,6 +47,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.MultiComment, new CommentParselet());
 			Register(SqlToken.Object, new ObjectParselet());
 			Register(SqlToken.QuoteString, new QuoteStringParselet());
+			Register(SqlToken.Rank, new RankParselet());
 			Register(SqlToken.Update, new UpdateParselet());
 			Register(SqlToken.Variable, new VariableParselet());
 			Register(SqlToken.With, new WithParselet());
