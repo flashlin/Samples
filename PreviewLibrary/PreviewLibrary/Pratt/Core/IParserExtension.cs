@@ -32,7 +32,7 @@ namespace PreviewLibrary.Pratt.Core
 			if (!TryConsumeAny(parser, out var expr, tokenTypes))
 			{
 				var tokensStr = string.Join(",", tokenTypes.Select(x => x.ToString()));
-				throw new ParseException($"Expect one of {tokensStr}");
+				ThrowHelper.ThrowParseException(parser, $"Expect one of {tokensStr}");
 			}
 			return expr;
 		}
