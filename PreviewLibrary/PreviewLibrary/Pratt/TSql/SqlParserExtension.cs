@@ -84,6 +84,7 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlToken.Bit,
 				SqlToken.Bigint,
 				SqlToken.Char,
+				SqlToken.Date,
 				SqlToken.DateTime,
 				SqlToken.DateTime2,
 				SqlToken.Decimal,

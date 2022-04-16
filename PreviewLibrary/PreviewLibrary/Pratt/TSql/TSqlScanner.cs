@@ -35,6 +35,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("DECLARE", SqlToken.Declare);
 			AddTokenMap("DELETE", SqlToken.Delete);
 			AddTokenMap("DEFAULT", SqlToken.Default);
+			AddTokenMap("DATE", SqlToken.Date);
 			AddTokenMap("DATETIME", SqlToken.DateTime);
 			AddTokenMap("DATETIME2", SqlToken.DateTime2);
 			AddTokenMap("DECIMAL", SqlToken.Decimal);

@@ -128,6 +128,7 @@
 		By,
 		Asc,
 		Desc,
-		Group
+		Group,
+		Date
 	}
 }
