@@ -9,6 +9,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public SqlCodeExpr Left { get; set; }
 		public SqlCodeExpr AliasName { get; set; }
 		public List<string> Options { get; set; }
+		public List<SqlCodeExpr> JoinList { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -32,6 +33,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 					stream.Write($"{option.val}");
 				}
 				stream.Write(" )");
+			}
+
+			if( JoinList != null && JoinList.Count > 0)
+			{
+				stream.WriteLine();
+				JoinList.WriteToStream(stream);
 			}
 		}
 	}

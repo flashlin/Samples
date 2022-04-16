@@ -9,7 +9,6 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public int? TopCount { get; set; }
 		public List<SqlCodeExpr> Columns { get; set; }
 		public List<SqlCodeExpr> FromSourceList { get; set; }
-		public List<SqlCodeExpr> JoinSelectList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 		public List<SqlCodeExpr> UnionSelectList { get; set; }
 		public List<SqlCodeExpr> GroupByList { get; set; }
@@ -48,12 +47,6 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 					fromSource.WriteToStream(stream);
 				}
 				stream.Indent--;
-			}
-
-			if (JoinSelectList != null && JoinSelectList.Count > 0)
-			{
-				stream.WriteLine();
-				JoinSelectList.WriteToStream(stream);
 			}
 
 			if (WhereExpr != null)

@@ -22,11 +22,6 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var fromSourceList = GetFrom_SourceList(parser);
 
-			var joinSelectList = parser.GetJoinSelectList();
-
-
-
-
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
 			{
@@ -43,7 +38,6 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				TopCount = topCount,
 				Columns = columns,
 				FromSourceList = fromSourceList,
-				JoinSelectList = joinSelectList,
 				WhereExpr = whereExpr,
 				GroupByList = groupBy,
 				OrderByList = orderBy,
@@ -139,11 +133,15 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var sourceExpr = parser.ParseExpIgnoreComment();
 			parser.TryConsumeAliasName(out var aliasNameExpr);
 			var userWithOptions = parser.ParseWithOptions();
+
+			var joinList = parser.GetJoinSelectList();
+
 			return new FromSourceSqlCodeExpr
 			{
 				Left = sourceExpr,
 				AliasName = aliasNameExpr,
 				Options = userWithOptions,
+				JoinList = joinList
 			};
 		}
 
