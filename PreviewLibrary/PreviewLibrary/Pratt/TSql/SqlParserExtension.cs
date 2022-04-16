@@ -1,6 +1,7 @@
 ﻿using PreviewLibrary.Exceptions;
 using PreviewLibrary.Pratt.Core;
 using PreviewLibrary.Pratt.TSql.Expressions;
+using PreviewLibrary.Pratt.TSql.Parselets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -384,6 +385,28 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 
 			return topCount;
+		}
+
+
+		public static List<SqlCodeExpr> ParseJoinSelectList(this IParser parser)
+		{
+			var joinSelectList = new List<SqlCodeExpr>();
+			do
+			{
+				if (!parser.Scanner.TryConsumeAny(out var joinTypeSpan, SqlToken.Inner, SqlToken.Left, SqlToken.Right, SqlToken.Full, SqlToken.Cross))
+				{
+					break;
+				}
+				var joinSelect = ParseJoinSelect(joinTypeSpan, parser);
+				joinSelectList.Add(joinSelect);
+			} while (true);
+			return joinSelectList;
+		}
+		
+		private static SqlCodeExpr ParseJoinSelect(TextSpan joinTypeSpan, IParser parser)
+		{
+			var parselet = new JoinParselet();
+			return parselet.Parse(joinTypeSpan, parser) as SqlCodeExpr;
 		}
 	}
 }

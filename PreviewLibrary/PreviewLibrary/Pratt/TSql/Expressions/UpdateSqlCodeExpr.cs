@@ -10,6 +10,8 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public SqlCodeExpr Table { get; set; }
 		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
+		public SqlCodeExpr FromTable { get; set; }
+		public List<SqlCodeExpr> JoinSelectList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -32,6 +34,20 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 
 			stream.Write(" SET ");
 			SetColumnsList.WriteToStreamWithComma(stream);
+
+			if( FromTable != null)
+			{
+				stream.WriteLine();
+				stream.Write("FROM ");
+				FromTable.WriteToStream(stream);
+			}
+
+			if( JoinSelectList != null && JoinSelectList.Count > 0)
+			{
+				stream.WriteLine();
+				JoinSelectList.WriteToStream(stream);
+			}
+
 			if (WhereExpr != null)
 			{
 				stream.WriteLine();

@@ -22,7 +22,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var fromSourceList = ParseFromSourceList(parser);
 
-			var joinSelectList = ParseJoinSelectList(parser);
+			var joinSelectList = parser.ParseJoinSelectList();
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
@@ -109,27 +109,6 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				unionSelectList.Add(unionSelect);
 			} while (true);
 			return unionSelectList;
-		}
-
-		private List<SqlCodeExpr> ParseJoinSelectList(IParser parser)
-		{
-			var joinSelectList = new List<SqlCodeExpr>();
-			do
-			{
-				if (!parser.Scanner.TryConsumeAny(out var joinTypeSpan, SqlToken.Inner, SqlToken.Left, SqlToken.Right, SqlToken.Full, SqlToken.Cross))
-				{
-					break;
-				}
-				var joinSelect = ParseJoinSelect(joinTypeSpan, parser);
-				joinSelectList.Add(joinSelect);
-			} while (true);
-			return joinSelectList;
-		}
-
-		private SqlCodeExpr ParseJoinSelect(TextSpan joinTypeSpan, IParser parser)
-		{
-			var parselet = new JoinParselet();
-			return parselet.Parse(joinTypeSpan, parser) as SqlCodeExpr;
 		}
 
 		private static List<SqlCodeExpr> ParseFromSourceList(IParser parser)
