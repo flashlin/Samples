@@ -40,7 +40,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			parser.Scanner.Consume(SqlToken.Function);
 
-			var name = parser.Scanner.ConsumeObjectId();
+			var name = parser.ConsumeObjectId();
 
 			parser.Scanner.Consume(SqlToken.LParen);
 			var dataType = parser.ConsumeDataType();
@@ -79,12 +79,12 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		private IExpression CreatePartitionScheme(TextSpan token, IParser parser)
 		{
 			parser.Scanner.Consume(SqlToken.Scheme);
-			var schemeName = parser.Scanner.ConsumeObjectId();
+			var schemeName = parser.ConsumeObjectId();
 
 			parser.Scanner.Consume(SqlToken.As);
 			parser.Scanner.Consume(SqlToken.Partition);
 
-			var funcName = parser.Scanner.ConsumeObjectId();
+			var funcName = parser.ConsumeObjectId();
 
 			parser.Scanner.TryConsumeString(SqlToken.All, out var allToken);
 			parser.Scanner.Consume(SqlToken.To);
@@ -108,7 +108,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		private IExpression CreateFunction(TextSpan token, IParser parser)
 		{
-			var nameExpr = parser.Scanner.ConsumeObjectId();
+			var nameExpr = parser.ConsumeObjectId();
 			parser.Scanner.Consume(SqlToken.LParen);
 			var arguments = parser.ConsumeArgumentList();
 			parser.Scanner.Consume(SqlToken.RParen);
@@ -136,7 +136,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		private IExpression CreateProcedure(TextSpan token, IParser parser)
 		{
-			var nameExpr = parser.Scanner.ConsumeObjectId();
+			var nameExpr = parser.ConsumeObjectId();
 			var arguments = parser.ConsumeArgumentList();
 			parser.Scanner.Consume(SqlToken.As);
 			var bodyList = parser.ConsumeBeginBody();

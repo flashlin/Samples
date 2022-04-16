@@ -10,14 +10,14 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			var table = parser.Scanner.ConsumeObjectId();
+			var table = parser.ConsumeObjectId();
 
 			var columns = new List<SqlCodeExpr>();
 			if (parser.Scanner.Match(SqlToken.LParen))
 			{
 				do
 				{
-					var column = parser.Scanner.ConsumeObjectId();
+					var column = parser.ConsumeObjectId();
 					columns.Add(column);
 				} while (parser.Scanner.Match(SqlToken.Comma));
 				parser.Scanner.Consume(SqlToken.RParen);

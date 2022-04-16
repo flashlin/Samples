@@ -60,7 +60,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.By);
 			do
 			{
-				var name = parser.Scanner.ConsumeObjectId();
+				var name = parser.ConsumeObjectId();
 				var ascOrDesc = "ASC";
 				parser.Scanner.TryConsumeAny(out var ascOrDescSpan, SqlToken.Asc, SqlToken.Desc);
 				if (!ascOrDescSpan.IsEmpty)
@@ -175,4 +175,15 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			};
 		}
 	}
+
+	//?
+	//public class MergeParselet : IPrefixParselet
+	//{
+	//	public IExpression Parse(TextSpan token, IParser parser)
+	//	{
+	//		parser.Scanner.Consume(SqlToken.Into);
+
+	//		var targetTable = parser.Consume
+	//	}
+	//}
 }

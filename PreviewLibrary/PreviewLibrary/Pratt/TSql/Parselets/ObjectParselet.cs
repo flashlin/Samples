@@ -12,7 +12,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		{
 			if (parser.Scanner.Match(SqlToken.ColonColon))
 			{
-				var id = parser.Scanner.ConsumeObjectId();
+				var id = parser.ConsumeObjectId();
 				return new ObjectSqlCodeExpr
 				{
 					Id = id

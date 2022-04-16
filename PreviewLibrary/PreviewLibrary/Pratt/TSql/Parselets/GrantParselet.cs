@@ -47,7 +47,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			SqlCodeExpr asDbo = null;
 			if (parser.Scanner.Match(SqlToken.As))
 			{
-				asDbo = parser.Scanner.ConsumeObjectId();
+				asDbo = parser.ConsumeObjectId();
 			}
 
 			return new GrantSqlCodeExpr

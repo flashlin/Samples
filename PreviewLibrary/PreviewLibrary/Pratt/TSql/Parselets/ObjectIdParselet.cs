@@ -13,7 +13,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
 			parser.Scanner.SetOffset(token.Offset - 1);
-			var identExpr = parser.Scanner.ConsumeObjectId();
+			var identExpr = parser.ConsumeObjectId();
 
 			if (parser.Scanner.TryConsume(SqlToken.LParen, out _))
 			{

@@ -10,7 +10,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
 			parser.Scanner.Consume(SqlToken.From);
-			var table = parser.Scanner.ConsumeObjectId();
+			var table = parser.ConsumeObjectId();
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))

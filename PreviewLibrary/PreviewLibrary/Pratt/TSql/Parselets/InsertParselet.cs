@@ -67,7 +67,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		private static SqlCodeExpr ConsumeObjectIdOrVariable(IParser parser)
 		{
-			if (parser.Scanner.TryConsumeObjectId(out var objectIdExpr))
+			if (parser.TryConsumeObjectId(out var objectIdExpr))
 			{
 				return objectIdExpr;
 			}

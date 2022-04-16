@@ -328,14 +328,14 @@ namespace PreviewLibrary.Pratt.TSql
 
 		public static bool TryConsumeAliasName(this IParser parser, out SqlCodeExpr aliasNameExpr)
 		{
-			if (parser.Scanner.TryConsumeObjectId(out aliasNameExpr))
+			if (parser.TryConsumeObjectId(out aliasNameExpr))
 			{
 				return true;
 			}
 
 			if (parser.Scanner.Match(SqlToken.As))
 			{
-				return parser.Scanner.TryConsumeObjectId(out aliasNameExpr);
+				return parser.TryConsumeObjectId(out aliasNameExpr);
 			}
 
 			aliasNameExpr = null;
@@ -441,6 +441,67 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			var parselet = new JoinParselet();
 			return parselet.Parse(joinTypeSpan, parser) as SqlCodeExpr;
+		}
+
+
+		public static SqlCodeExpr ConsumeObjectId(this IParser parser)
+		{
+			return Consume(parser, TryConsumeObjectId);
+		}
+
+		private static SqlCodeExpr Consume(this IParser parser, TryConsumeDelegate predicate)
+		{
+			if (!predicate(parser, out var expr))
+			{
+				var currentToken = parser.Scanner.Peek();
+				var helpMessage = parser.Scanner.GetHelpMessage(currentToken);
+				throw new ParseException(helpMessage);
+			}
+			return expr;
+		}
+
+		public delegate bool TryConsumeDelegate(IParser scanner, out SqlCodeExpr expr);
+
+		public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr)
+		{
+			var identTokens = new List<string>();
+			do
+			{
+				if (identTokens.Count >= 4)
+				{
+					var prevTokens = string.Join(".", identTokens);
+					var currTokenStr = parser.Scanner.PeekString();
+					throw new ParseException($"Expect RemoteServer.Database.dbo.name, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
+				}
+				if (!parser.Scanner.TryConsumeAny(out var identifier, SqlToken.Identifier, SqlToken.SqlIdentifier))
+				{
+					break;
+				}
+				identTokens.Add(parser.Scanner.GetSpanString(identifier));
+			} while (parser.Scanner.Match(SqlToken.Dot));
+
+			if (identTokens.Count == 0)
+			{
+				expr = null;
+				return false;
+			}
+
+			var fixCount = 4 - identTokens.Count;
+			for (var i = 0; i < fixCount; i++)
+			{
+				identTokens.Insert(0, string.Empty);
+			}
+
+			var identExpr = new ObjectIdSqlCodeExpr
+			{
+				RemoteServer = identTokens[0],
+				DatabaseName = identTokens[1],
+				SchemaName = identTokens[2],
+				ObjectName = identTokens[3],
+			};
+
+			expr = identExpr;
+			return true;
 		}
 	}
 }

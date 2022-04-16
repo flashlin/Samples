@@ -12,7 +12,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		{
 			var topCount = parser.ParseTopCount();
 
-			var table = parser.Scanner.ConsumeObjectId();
+			var table = parser.ConsumeObjectId();
 
 			var withOptions = parser.ParseWithOptions();
 
@@ -59,7 +59,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var setList = new List<SqlCodeExpr>();
 			do
 			{
-				var column = parser.Scanner.ConsumeObjectId();
+				var column = parser.ConsumeObjectId();
 				parser.Scanner.Consume(SqlToken.Equal);
 				var expression = parser.ParseExp();
 				var valueExpr = expression as SqlCodeExpr;
