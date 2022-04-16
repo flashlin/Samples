@@ -37,6 +37,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_top_1_name()
+		{
+			var sql = "select top 1 name";
+			Parse(sql);
+			ThenExprShouldBe("SELECT TOP 1 name");
+		}
+
+		[Fact]
 		public void select_name_number()
 		{
 			var sql = "select name, 1";

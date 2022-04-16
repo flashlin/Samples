@@ -12,6 +12,13 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			int? topCount = null;
+			if (parser.Scanner.Match(SqlToken.Top))
+			{
+				var number = parser.Scanner.ConsumeString(SqlToken.Number);
+				topCount = int.Parse(number);
+			}
+
 			var columns = new List<SqlCodeExpr>();
 			do
 			{
@@ -32,6 +39,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			return new SelectSqlCodeExpr
 			{
+				TopCount = topCount,
 				Columns = columns,
 				FromSourceList = fromSourceList,
 				JoinSelectList = joinSelectList,

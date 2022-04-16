@@ -6,6 +6,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class SelectSqlCodeExpr : SqlCodeExpr
 	{
+		public int? TopCount { get; set; }
 		public List<SqlCodeExpr> Columns { get; set; }
 		public List<SqlCodeExpr> FromSourceList { get; set; }
 		public List<SqlCodeExpr> JoinSelectList { get; set; }
@@ -15,6 +16,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public override void WriteToStream(IndentStream stream)
 		{
 			stream.Write("SELECT ");
+
+			if (TopCount != null)
+			{
+				stream.Write($"TOP {TopCount} ");
+			}
+
 			foreach (var column in Columns.Select((value, idx) => new { value, idx }))
 			{
 				if (column.idx != 0)
