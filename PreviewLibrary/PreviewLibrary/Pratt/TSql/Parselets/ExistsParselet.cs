@@ -1,4 +1,5 @@
-﻿using PreviewLibrary.Pratt.Core;
+﻿using PreviewLibrary.Exceptions;
+using PreviewLibrary.Pratt.Core;
 using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.Core.Parselets;
 using PreviewLibrary.Pratt.TSql.Expressions;

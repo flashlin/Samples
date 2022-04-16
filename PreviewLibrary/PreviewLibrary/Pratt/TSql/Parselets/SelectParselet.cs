@@ -169,7 +169,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			TextSpan aliasNameToken;
 			if (parser.Scanner.TryConsumeAny(out _, SqlToken.As))
 			{
-				aliasNameToken = parser.Scanner.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier);
+				aliasNameToken = parser.Scanner.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString);
 				return new ColumnSqlCodeExpr
 				{
 					Name = name,
