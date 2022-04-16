@@ -35,6 +35,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				whereExpr = parser.ParseExp() as SqlCodeExpr;
 			}
 
+			var groupBy = ParseGroupBy(parser);
 			var orderBy = ParseOrderBy(parser);
 
 			var unionSelectList = ParseUnionSelectList(parser);
@@ -46,6 +47,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				FromSourceList = fromSourceList,
 				JoinSelectList = joinSelectList,
 				WhereExpr = whereExpr,
+				GroupByList = groupBy,
 				OrderByList = orderBy,
 				UnionSelectList = unionSelectList
 			};
@@ -78,6 +80,25 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			} while (parser.Scanner.Match(SqlToken.Comma));
 
 			return orderByList;
+		}
+
+		private List<SqlCodeExpr> ParseGroupBy(IParser parser)
+		{
+			var groupByList = new List<SqlCodeExpr>();
+
+			if (!parser.Scanner.TryConsume(SqlToken.Group, out _))
+			{
+				return groupByList;
+			}
+
+			parser.Scanner.Consume(SqlToken.By);
+			do
+			{
+				var name = parser.ParseExpIgnoreComment();
+				groupByList.Add(name);
+			} while (parser.Scanner.Match(SqlToken.Comma));
+
+			return groupByList;
 		}
 
 		private List<SqlCodeExpr> ParseUnionSelectList(IParser parser)

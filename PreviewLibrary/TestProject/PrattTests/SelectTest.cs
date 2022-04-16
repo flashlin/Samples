@@ -47,6 +47,18 @@ ORDER BY id ASC");
 		}
 
 		[Fact]
+		public void select_name_from_table_group_by()
+		{
+			var sql = "select name from customer group by id";
+			Parse(sql);
+			ThenExprShouldBe(@"SELECT name
+FROM customer
+GROUP BY id");
+		}
+
+
+
+		[Fact]
 		public void select_top_1_name()
 		{
 			var sql = "select top 1 name";

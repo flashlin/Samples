@@ -127,6 +127,7 @@
 		Order,
 		By,
 		Asc,
-		Desc
+		Desc,
+		Group
 	}
 }
