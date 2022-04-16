@@ -85,10 +85,15 @@ namespace PreviewLibrary.Pratt.TSql
 				return ConsumeDataTableType(parser);
 			}
 
-			var dataType = ParseDataType(parser);
-			//if( parser.TryPrefixParseAny(int.MaxValue, out var userIdentifierDataType, SqlToken.Identifier, SqlToken.SqlIdentifier) )
-			//{
-			//}
+			SqlCodeExpr dataType;
+			if (parser.TryPrefixParseAny(int.MaxValue, out var userIdentifierDataType, SqlToken.Identifier, SqlToken.SqlIdentifier))
+			{
+				dataType = userIdentifierDataType;
+			}
+			else
+			{
+				dataType = ParseDataType(parser);
+			}
 
 			var isReadonly = false;
 			if (parser.Scanner.Match(SqlToken.ReadOnly))
@@ -358,9 +363,11 @@ namespace PreviewLibrary.Pratt.TSql
 		public static bool TryPrefixParseAny(this IParser parser, int ctxPrecedence, out SqlCodeExpr expr, params SqlToken[] prefixTokenTypeList)
 		{
 			var prefixTokenTypeStrList = prefixTokenTypeList.Select(x => x.ToString()).ToArray();
+			var startIndex = parser.Scanner.GetOffset();
 			var prefixToken = parser.Scanner.Consume();
 			if (!prefixTokenTypeStrList.Contains(prefixToken.Type))
 			{
+				parser.Scanner.SetOffset(startIndex);
 				expr = null;
 				return false;
 			}
