@@ -11,12 +11,12 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		{
 			var outerType = string.Empty;
 			var joinTypeStr = parser.Scanner.GetSpanString(token);
-			switch(joinTypeStr.ToUpper())
+			switch (joinTypeStr.ToUpper())
 			{
 				case "LEFT":
 				case "RIGHT":
 				case "FULL":
-					if( parser.Scanner.Match(SqlToken.Outer) )
+					if (parser.Scanner.Match(SqlToken.Outer))
 					{
 						outerType = "OUTER";
 					}
@@ -33,7 +33,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var userWithOptions = parser.ParseWithOptions();
 
 			SqlCodeExpr joinOnExpr = null;
-			if(parser.Scanner.Match(SqlToken.On))
+			if (parser.Scanner.Match(SqlToken.On))
 			{
 				joinOnExpr = parser.ParseExpIgnoreComment();
 			}

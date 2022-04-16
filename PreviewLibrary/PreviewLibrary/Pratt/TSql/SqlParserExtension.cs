@@ -444,7 +444,7 @@ namespace PreviewLibrary.Pratt.TSql
 		}
 
 
-		public static List<SqlCodeExpr> ParseJoinSelectList(this IParser parser)
+		public static List<SqlCodeExpr> GetJoinSelectList(this IParser parser)
 		{
 			var joinSelectList = new List<SqlCodeExpr>();
 			do

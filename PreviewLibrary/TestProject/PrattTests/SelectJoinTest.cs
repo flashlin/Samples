@@ -20,6 +20,22 @@ LEFT JOIN secondTable");
 		}
 
 		[Fact]
+		public void select_from_table_left_join_from()
+		{
+			var sql = @"select 1 
+from customer as c
+left join secondTable,
+otherTable
+where c.id = 1";
+			Parse(sql);
+			ThenExprShouldBe(@"SELECT 1
+FROM customer AS c
+LEFT JOIN secondTable ,
+otherTable
+WHERE c.id = 1");
+		}
+
+		[Fact]
 		public void left_join_nolock()
 		{
 			var sql = @"select 1 from customer

@@ -34,7 +34,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				};
 			}
 
-			var joinSelectList = parser.ParseJoinSelectList();
+			var joinSelectList = parser.GetJoinSelectList();
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))

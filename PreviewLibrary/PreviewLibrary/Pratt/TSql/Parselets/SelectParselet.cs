@@ -20,9 +20,12 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				columns.Add(ParseColumnAs(parser));
 			} while (parser.Match(SqlToken.Comma));
 
-			var fromSourceList = ParseFromSourceList(parser);
+			var fromSourceList = GetFrom_SourceList(parser);
 
-			var joinSelectList = parser.ParseJoinSelectList();
+			var joinSelectList = parser.GetJoinSelectList();
+
+
+
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
@@ -111,29 +114,37 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			return unionSelectList;
 		}
 
+		private static List<SqlCodeExpr> GetFrom_SourceList(IParser parser)
+		{
+			if (!parser.Scanner.TryConsume(SqlToken.From, out _))
+			{
+				return new List<SqlCodeExpr>();
+			}
+			return ParseFromSourceList(parser);
+		}
+
 		private static List<SqlCodeExpr> ParseFromSourceList(IParser parser)
 		{
 			var fromSourceList = new List<SqlCodeExpr>();
-			if (parser.Scanner.TryConsume(SqlToken.From, out _))
+			do
 			{
-				fromSourceList = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
-				{
-					var sourceExpr = parser.ParseExp() as SqlCodeExpr;
-
-					parser.TryConsumeAliasName(out var aliasNameExpr);
-
-					var userWithOptions = parser.ParseWithOptions();
-
-					return new FromSourceSqlCodeExpr
-					{
-						Left = sourceExpr,
-						AliasName = aliasNameExpr,
-						Options = userWithOptions,
-					} as SqlCodeExpr;
-				}).ToList();
-			}
-
+				FromSourceSqlCodeExpr item = ParseFromSource(parser);
+				fromSourceList.Add(item);
+			} while (parser.Scanner.Match(SqlToken.Comma));
 			return fromSourceList;
+		}
+
+		private static FromSourceSqlCodeExpr ParseFromSource(IParser parser)
+		{
+			var sourceExpr = parser.ParseExpIgnoreComment();
+			parser.TryConsumeAliasName(out var aliasNameExpr);
+			var userWithOptions = parser.ParseWithOptions();
+			return new FromSourceSqlCodeExpr
+			{
+				Left = sourceExpr,
+				AliasName = aliasNameExpr,
+				Options = userWithOptions,
+			};
 		}
 
 		protected SqlCodeExpr ParseColumnAs(IParser parser)
