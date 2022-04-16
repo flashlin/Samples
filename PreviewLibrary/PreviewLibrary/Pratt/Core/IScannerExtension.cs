@@ -54,12 +54,27 @@ namespace PreviewLibrary.Pratt.Core
 			throw new ScanException($"Expect one of {tokenTypesStr}.\r\n{helpMessage}");
 		}
 
+		public static string ConsumeStringAny<TTokenType>(this IScanner scanner, params TTokenType[] expectTokenTypeList)
+							where TTokenType : struct
+		{
+			var span = scanner.Peek();
+			var expectTokenTypeStrList = expectTokenTypeList.Select(x => x.ToString());
+			if( !expectTokenTypeStrList.Contains(span.Type) )
+			{
+				ThrowHelper.ThrowScanException(scanner, "");
+			}
+			scanner.Consume();
+			return scanner.GetSpanString(span);
+		}
+
 		public static string ConsumeString<TTokenType>(this IScanner scanner, TTokenType expectTokenType)
 							where TTokenType : struct
 		{
-			var span = scanner.Consume(expectTokenType);
-			return scanner.GetSpanString(span);
+			//var span = scanner.Consume(expectTokenType);
+			//return scanner.GetSpanString(span);
+			return ConsumeStringAny(scanner, expectTokenType);
 		}
+
 		public static IEnumerable<string> ConsumeToStringListByDelimiter<TTokenType>(this IScanner scanner,
 			TTokenType delimiter, params TTokenType[] tokenTypes)
 			where TTokenType : struct
