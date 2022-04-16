@@ -25,7 +25,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			parser.Scanner.Consume(SqlToken.Join);
 
-			var secondTable = parser.ConsumeAny(SqlToken.Variable, SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
+			//var secondTable = parser.ConsumeAny(SqlToken.Variable, SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
+			var secondTable = parser.ParseExpIgnoreComment();
 
 			parser.TryConsumeAliasName(out var aliasNameExpr);
 
