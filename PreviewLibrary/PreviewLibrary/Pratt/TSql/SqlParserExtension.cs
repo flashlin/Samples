@@ -355,5 +355,30 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 			throw new ParseException("");
 		}
+
+		public static int? ParseTopCount(this IParser parser)
+		{
+			int? topCount = null;
+			if (!parser.Scanner.Match(SqlToken.Top))
+			{
+				return null;
+			}
+
+			var isParen = false;
+			if (parser.Match(SqlToken.LParen))
+			{
+				isParen = true;
+			}
+
+			var number = parser.Scanner.ConsumeString(SqlToken.Number);
+			topCount = int.Parse(number);
+
+			if (isParen)
+			{
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+
+			return topCount;
+		}
 	}
 }
