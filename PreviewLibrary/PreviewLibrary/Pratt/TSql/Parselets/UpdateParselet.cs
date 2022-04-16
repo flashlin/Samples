@@ -18,19 +18,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			parser.Scanner.Consume(SqlToken.Set);
 
-			var setList = new List<SqlCodeExpr>();
-			do
-			{
-				var column = parser.Scanner.ConsumeObjectId();
-				parser.Scanner.Consume(SqlToken.Equal);
-				var expression = parser.ParseExp();
-				var valueExpr = expression as SqlCodeExpr;
-				setList.Add(new AssignSqlCodeExpr
-				{
-					Left = column,
-					Right = valueExpr
-				});
-			} while (parser.Scanner.Match(SqlToken.Comma));
+			var setList = ParseSetItemList(parser);
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))
@@ -46,6 +34,24 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				SetColumnsList = setList,
 				WhereExpr = whereExpr
 			};
+		}
+
+		private static List<SqlCodeExpr> ParseSetItemList(IParser parser)
+		{
+			var setList = new List<SqlCodeExpr>();
+			do
+			{
+				var column = parser.Scanner.ConsumeObjectId();
+				parser.Scanner.Consume(SqlToken.Equal);
+				var expression = parser.ParseExp();
+				var valueExpr = expression as SqlCodeExpr;
+				setList.Add(new AssignSqlCodeExpr
+				{
+					Left = column,
+					Right = valueExpr
+				});
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			return setList;
 		}
 	}
 }
