@@ -37,6 +37,19 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_where_eq_and_between()
+		{
+			var sql = @"select id from customer where 
+id1=@id and
+id2 between 1 and 38 ";
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT id
+FROM customer
+WHERE id1 = @id AND id2 BETWEEN 1 AND 38");
+		}
+
+		[Fact]
 		public void select_var_eq_var_from_table_where_column_in_var()
 		{
 			var sql = @"select @id = @id + 1	

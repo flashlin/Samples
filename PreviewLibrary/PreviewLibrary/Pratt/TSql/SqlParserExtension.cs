@@ -330,5 +330,21 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 			return userWithOptions;
 		}
+
+		public static SqlCodeExpr PrefixParseAny(this IParser parser, int ctxPrecedence, params SqlToken[] prefixTokenTypeList)
+		{
+			var prefixTokenTypeStrList = prefixTokenTypeList.Select(x => x.ToString()).ToArray();
+			for(var i=0; i < prefixTokenTypeList.Length; i++)
+			{
+				var prefixTokenType = prefixTokenTypeList[i];
+				var prefixToken = parser.Scanner.Consume();
+				if(!prefixTokenTypeStrList.Contains(prefixToken.Type))
+				{
+					ThrowHelper.ThrowParseException(parser, "");
+				}
+				return parser.PrefixParse(prefixToken, ctxPrecedence) as SqlCodeExpr;
+			}
+			throw new ParseException("");
+		}
 	}
 }

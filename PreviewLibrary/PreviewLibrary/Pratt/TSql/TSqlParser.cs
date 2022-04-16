@@ -49,6 +49,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.With, new WithParselet());
 			Register(SqlToken.While, new WhileParselet());
 
+			Register(SqlToken.Between, new BetweenParselet());
 			Register(SqlToken.Not, new NotInfixParselet());
 			Register(SqlToken.If, new IfParselet());
 			Register(SqlToken.Like, new LikeParselet());
@@ -57,7 +58,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Prefix(SqlToken.Plus, Precedence.PREFIX);
 			Prefix(SqlToken.Minus, Precedence.PREFIX);
 			Prefix(SqlToken.Tilde, Precedence.PREFIX);
-			InfixLeft(SqlToken.Equal, Precedence.SUM);
+			InfixLeft(SqlToken.Equal, Precedence.COMPARE);
 			InfixLeft(SqlToken.And, Precedence.CONCAT);
 			InfixLeft(SqlToken.Or, Precedence.CONCAT);
 			InfixLeft(SqlToken.Is, Precedence.COMPARE);

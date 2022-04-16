@@ -131,6 +131,7 @@
 		Group,
 		Date,
 		SystemVariable,
-		ROWLOCK
+		ROWLOCK,
+		Between
 	}
 }
