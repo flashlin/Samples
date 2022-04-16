@@ -7,6 +7,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	public class UpdateSqlCodeExpr : SqlCodeExpr
 	{
 		public SqlCodeExpr Table { get; set; }
+		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 
@@ -14,6 +15,14 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		{
 			stream.Write("UPDATE ");
 			Table.WriteToStream(stream);
+
+			if(WithOptions != null && WithOptions.Count>0)
+			{
+				stream.Write(" WITH(");
+				WithOptions.WriteToStreamWithComma(stream);
+				stream.Write(")");
+			}
+
 			stream.Write(" SET ");
 			SetColumnsList.WriteToStreamWithComma(stream);
 			if (WhereExpr != null)

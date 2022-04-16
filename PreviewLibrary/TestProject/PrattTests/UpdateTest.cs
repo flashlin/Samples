@@ -22,5 +22,16 @@ set [name] = case when @id = -1 then [name] else @name end,
 SET [name] = CASE WHEN @id = -1 THEN [name] ELSE @name END,
 [desc] = @desc");
 		}
+
+		[Fact]
+		public void update_table_with_rowlock()
+		{
+			var sql = @"update customer with(rowlock)
+set id = 1";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE customer WITH(rowlock) SET id = 1");
+		}
 	}
 }

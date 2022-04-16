@@ -12,6 +12,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		{
 			var table = parser.Scanner.ConsumeObjectId();
 
+			var withOptions = parser.ParseWithOptions();
+
 			parser.Scanner.Consume(SqlToken.Set);
 
 			var setList = new List<SqlCodeExpr>();
@@ -37,6 +39,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			return new UpdateSqlCodeExpr
 			{
 				Table = table,
+				WithOptions = withOptions,
 				SetColumnsList = setList,
 				WhereExpr = whereExpr
 			};

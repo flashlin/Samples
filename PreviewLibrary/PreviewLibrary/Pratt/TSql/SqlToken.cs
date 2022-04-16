@@ -130,6 +130,7 @@
 		Desc,
 		Group,
 		Date,
-		SystemVariable
+		SystemVariable,
+		ROWLOCK
 	}
 }
