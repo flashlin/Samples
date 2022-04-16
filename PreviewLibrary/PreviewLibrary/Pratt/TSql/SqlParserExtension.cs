@@ -78,6 +78,22 @@ namespace PreviewLibrary.Pratt.TSql
 			return bodyList;
 		}
 
+		public static List<SqlCodeExpr> ConsumeBeginBodyOrSingle(this IParser parser)
+		{
+			if (parser.Scanner.IsToken(SqlToken.Begin))
+			{
+				return ConsumeBeginBody(parser);
+			}
+			var bodyList = new List<SqlCodeExpr>();
+			var body = parser.ParseExpIgnoreComment();
+			if (body == null)
+			{
+				return bodyList;
+			}
+			bodyList.Add(body as SqlCodeExpr);
+			return bodyList;
+		}
+
 		public static SqlCodeExpr ConsumeDataType(this IParser parser)
 		{
 			if (parser.Scanner.Match(SqlToken.Table))

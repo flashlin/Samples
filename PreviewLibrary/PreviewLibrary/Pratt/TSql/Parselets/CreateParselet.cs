@@ -139,7 +139,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var nameExpr = parser.ConsumeObjectId();
 			var arguments = parser.ConsumeArgumentList();
 			parser.Scanner.Consume(SqlToken.As);
-			var bodyList = parser.ConsumeBeginBody();
+			var bodyList = parser.ConsumeBeginBodyOrSingle();
 
 			return new CreateProcedureSqlCodeExpr
 			{
