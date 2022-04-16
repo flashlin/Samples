@@ -17,7 +17,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				SqlToken.Insert,
 				SqlToken.Select,
 				SqlToken.Update,
-				SqlToken.Execute
+				SqlToken.Execute,
+				SqlToken.Exec
 			};
 
 			var permissionList = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, permissionPrincipal)
