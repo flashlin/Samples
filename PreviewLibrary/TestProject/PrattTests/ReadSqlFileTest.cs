@@ -11,6 +11,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void read_sql_file()
+		{
+			var sqlFile = @"D:\demo\1.sql";
+			ReadSqlFile(0, sqlFile);
+		}
+
+
+		[Fact]
 		public void read_all_sql_files()
 		{
 			var sqlFolder = @"D:\VDisk\MyGitHub\SQL";

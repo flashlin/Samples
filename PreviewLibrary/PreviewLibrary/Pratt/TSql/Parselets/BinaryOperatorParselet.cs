@@ -24,7 +24,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		public IExpression Parse(IExpression left, TextSpan token, IParser parser)
 		{
 			var oper = parser.Scanner.GetSpanString(token);
-			var right = parser.ParseExp(_precedence - (_isRight ? 1 : 0));
+			var right = parser.ParseExpIgnoreComment(_precedence - (_isRight ? 1 : 0));
 			return new OperatorSqlCodeExpr
 			{
 				Left = left as SqlCodeExpr,

@@ -32,7 +32,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
 			{
-				whereExpr = parser.ParseExp() as SqlCodeExpr;
+				whereExpr = parser.ParseExpIgnoreComment();
 			}
 
 			var groupBy = ParseGroupBy(parser);
@@ -193,7 +193,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				unionMethod = "ALL";
 			}
-			var rightExpr = parser.GetParseExpIgnoreCommentFunc()();
+			var rightExpr = parser.ParseExpIgnoreComment();
 			return new UnionSelectSqlCodeExpr
 			{
 				UnionMethod = unionMethod,

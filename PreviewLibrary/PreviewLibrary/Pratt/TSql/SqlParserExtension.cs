@@ -67,7 +67,7 @@ namespace PreviewLibrary.Pratt.TSql
 			var bodyList = new List<SqlCodeExpr>();
 			do
 			{
-				var body = parser.ParseExp();
+				var body = parser.ParseExpIgnoreComment();
 				if (body == null)
 				{
 					break;
@@ -164,7 +164,7 @@ namespace PreviewLibrary.Pratt.TSql
 			return isPrimaryKey;
 		}
 
-		public static Func<SqlCodeExpr> GetParseExpIgnoreCommentFunc(this IParser parser)
+		public static Func<SqlCodeExpr> GetParseExpIgnoreCommentFunc(this IParser parser, int ctxPrecedence=0)
 		{
 			var comments = new List<CommentSqlCodeExpr>();
 			return () =>
@@ -172,7 +172,7 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlCodeExpr expr = null;
 				while (true)
 				{
-					expr = parser.ParseExp(0) as SqlCodeExpr;
+					expr = parser.ParseExp(ctxPrecedence) as SqlCodeExpr;
 					if (expr is CommentSqlCodeExpr commentExpr)
 					{
 						comments.Add(commentExpr);
@@ -212,9 +212,9 @@ namespace PreviewLibrary.Pratt.TSql
 			return parser.Scanner.Match(tokenType);
 		}
 
-		public static SqlCodeExpr ParseExpIgnoreComment(this IParser parser)
+		public static SqlCodeExpr ParseExpIgnoreComment(this IParser parser, int ctxPrecedence=0)
 		{
-			return parser.GetParseExpIgnoreCommentFunc()();
+			return parser.GetParseExpIgnoreCommentFunc(ctxPrecedence)();
 		}
 
 
