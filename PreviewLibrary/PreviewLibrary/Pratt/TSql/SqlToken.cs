@@ -121,6 +121,7 @@
 		Partition,
 		Range,
 		For,
-		Scheme
+		Scheme,
+		NOCOUNT
 	}
 }

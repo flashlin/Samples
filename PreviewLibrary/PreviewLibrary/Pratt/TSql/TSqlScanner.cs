@@ -104,6 +104,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
 			AddTokenMap("NOEXEC", SqlToken.NOEXEC);
 			AddTokenMap("NOLOCK", SqlToken.NOLOCK);
+			AddTokenMap("NOCOUNT", SqlToken.NOCOUNT);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 
 			AddSymbolMap("(", SqlToken.LParen);

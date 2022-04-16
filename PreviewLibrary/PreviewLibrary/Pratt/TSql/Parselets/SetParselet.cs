@@ -38,6 +38,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				SqlToken.QUOTED_IDENTIFIER,
 				SqlToken.NUMERIC_ROUNDABORT,
 				SqlToken.NOEXEC,
+				SqlToken.NOCOUNT,
 			};
 
 			var setOptions = new List<string>();
