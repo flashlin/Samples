@@ -21,6 +21,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("BREAK", SqlToken.Break);
 			AddTokenMap("BEGIN", SqlToken.Begin);
 			AddTokenMap("BIT", SqlToken.Bit);
+			AddTokenMap("BIGINT", SqlToken.Bigint);
 			AddTokenMap("CONTINUE", SqlToken.Continue);
 			AddTokenMap("CHAR", SqlToken.Char);
 			AddTokenMap("CAST", SqlToken.Cast);

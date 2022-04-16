@@ -90,5 +90,17 @@ END ), @id3, @name3)");
 (@start, @i, @word)");
 		}
 
+		[Fact]
+		public void insert_into_table_columns_select()
+		{
+			var sql = @"insert into customer([id],[name])
+select id,name from other_customer";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO customer
+SELECT id, name
+FROM other_customer");
+		}
 	}
 }

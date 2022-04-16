@@ -122,6 +122,7 @@
 		Range,
 		For,
 		Scheme,
-		NOCOUNT
+		NOCOUNT,
+		Bigint
 	}
 }
