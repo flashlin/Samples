@@ -32,6 +32,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Select, new SelectParselet());
 			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());
 			Register(SqlToken.Set, new SetParselet());
+			Register(SqlToken.SystemVariable, new SystemVariableParselet());
 			Register(SqlToken.SingleComment, new CommentParselet());
 			Register(SqlToken.Semicolon, new SemicolonParselet());
 			Register(SqlToken.ScriptSetVar, new ScriptSetvarParselet());
