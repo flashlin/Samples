@@ -132,6 +132,7 @@
 		Date,
 		SystemVariable,
 		ROWLOCK,
-		Between
+		Between,
+		ReadOnly
 	}
 }

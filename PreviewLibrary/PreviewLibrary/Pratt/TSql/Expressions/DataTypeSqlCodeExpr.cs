@@ -6,13 +6,20 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	public class DataTypeSqlCodeExpr : SqlCodeExpr
 	{
 		public string DataType { get; set; }
+		public bool IsReadOnly { get; set; }
 		public int? Size { get; internal set; }
 		public int? Scale { get; internal set; }
 		public bool IsPrimaryKey { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write(DataType.ToUpper());
+			stream.Write(DataType);
+
+			if(IsReadOnly)
+			{
+				stream.Write(" READONLY");
+			}
+
 			if (Size != null)
 			{
 				stream.Write($"(");

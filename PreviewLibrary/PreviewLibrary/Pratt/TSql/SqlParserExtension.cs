@@ -94,7 +94,8 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlToken.NVarchar,
 				SqlToken.SmallDateTime,
 				SqlToken.TinyInt,
-				SqlToken.Varchar
+				SqlToken.Varchar,
+				SqlToken.Identifier
 			};
 
 			if (parser.Scanner.Match(SqlToken.Table))
@@ -105,6 +106,13 @@ namespace PreviewLibrary.Pratt.TSql
 			var dataTypeToken = parser.Scanner.ConsumeAny(dataTypes);
 			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
 
+
+			var isReadonly = false;
+			if( parser.Scanner.Match(SqlToken.ReadOnly) )
+			{
+				isReadonly = true;
+			}
+
 			var isPrimaryKey = ParseIsPrimaryKey(parser);
 
 			if (!parser.Scanner.Match(SqlToken.LParen))
@@ -112,6 +120,7 @@ namespace PreviewLibrary.Pratt.TSql
 				return new DataTypeSqlCodeExpr
 				{
 					DataType = dataTypeStr,
+					IsReadOnly = isReadonly,
 					IsPrimaryKey = isPrimaryKey,
 				};
 			}
