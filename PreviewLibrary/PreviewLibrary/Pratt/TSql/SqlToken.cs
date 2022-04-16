@@ -91,7 +91,7 @@
 		Returns,
 		Declare,
 		Table,
-		SmallerBiggerThan,
+		NotEqual,
 		Union,
 		All,
 		Ampersand,

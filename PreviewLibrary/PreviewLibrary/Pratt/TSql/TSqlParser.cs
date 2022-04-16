@@ -60,7 +60,7 @@ namespace PreviewLibrary.Pratt.TSql
 			InfixLeft(SqlToken.And, Precedence.CONCAT);
 			InfixLeft(SqlToken.Or, Precedence.CONCAT);
 			InfixLeft(SqlToken.Is, Precedence.COMPARE);
-			InfixLeft(SqlToken.SmallerBiggerThan, Precedence.COMPARE);
+			InfixLeft(SqlToken.NotEqual, Precedence.COMPARE);
 			InfixLeft(SqlToken.SmallerThan, Precedence.COMPARE);
 			InfixLeft(SqlToken.BiggerThan, Precedence.COMPARE);
 			InfixLeft(SqlToken.BiggerThanOrEqual, Precedence.COMPARE);

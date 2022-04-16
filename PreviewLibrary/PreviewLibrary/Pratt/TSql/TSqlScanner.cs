@@ -124,7 +124,8 @@ namespace PreviewLibrary.Pratt.TSql
 			AddSymbolMap("-", SqlToken.Minus);
 			AddSymbolMap("*", SqlToken.Asterisk);
 			AddSymbolMap("/", SqlToken.Slash);
-			AddSymbolMap("<>", SqlToken.SmallerBiggerThan);
+			AddSymbolMap("<>", SqlToken.NotEqual);
+			AddSymbolMap("!=", SqlToken.NotEqual);
 			AddSymbolMap("<", SqlToken.SmallerThan);
 			AddSymbolMap("<=", SqlToken.SmallerThanOrEqual);
 			AddSymbolMap(">", SqlToken.BiggerThan);
