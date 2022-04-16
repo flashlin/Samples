@@ -236,6 +236,18 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
+			if (head == '@' && TryNextChar('@', out var atHead2))
+			{
+				headSpan = headSpan.Concat(atHead2);
+				if (!TryRead(ReadIdentifier, headSpan, out var sysVariable))
+				{
+					throw new ScanException("Expect @@xxxx");
+				}
+				tokenSpan = sysVariable;
+				tokenSpan.Type = SqlToken.SystemVariable.ToString();
+				return true;
+			}
+
 			if (head == '@' && TryRead(ReadIdentifier, headSpan, out var variable))
 			{
 				tokenSpan = variable;

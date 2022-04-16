@@ -129,6 +129,7 @@
 		Asc,
 		Desc,
 		Group,
-		Date
+		Date,
+		SystemVariable
 	}
 }
