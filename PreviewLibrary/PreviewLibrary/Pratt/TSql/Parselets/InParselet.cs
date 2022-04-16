@@ -17,17 +17,18 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		{
 			parser.Scanner.Consume(SqlToken.LParen);
 
-			var startIndex = parser.Scanner.GetOffset();
-			SqlCodeExpr rightExpr = null;
-			if (parser.TryConsumeAny(out var constantExpr, SqlToken.Number, SqlToken.NString, SqlToken.QuoteString))
+			var valueList = new List<SqlCodeExpr>();
+			do
 			{
-				rightExpr = ParseConstantList(constantExpr as SqlCodeExpr, parser);
-			}
-			else
-			{
-				rightExpr = parser.ParseExp() as SqlCodeExpr;
-			}
+				var valueExpr = parser.ParseExpIgnoreComment();
+				valueList.Add(valueExpr);
+			} while (parser.Scanner.Match(SqlToken.Comma));
 			parser.Scanner.Consume(SqlToken.RParen);
+
+			var rightExpr = new ExprListSqlCodeExpr
+			{
+				Items = valueList
+			};
 
 			return new InSqlCodeExpr
 			{

@@ -37,6 +37,20 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_var_eq_var_from_table_where_column_in_var()
+		{
+			var sql = @"select @id = @id + 1	
+from customer with(nolock)
+where id in (@id1, @id2)";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT @id = @id + 1
+FROM customer WITH( nolock )
+WHERE id IN (@id1, @id2)");
+		}
+
+		[Fact]
 		public void select_name_from_table_order_by()
 		{
 			var sql = "select name from customer order by id";
