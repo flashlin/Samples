@@ -13,6 +13,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var table = parser.ConsumeObjectId();
 
+			var withOptions = parser.ParseWithOptions();
+
 			var outputList = parser.GetOutputListExpr();
 			var outputInto = parser.GetOutputIntoExpr();
 
@@ -25,6 +27,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			return new DeleteSqlCodeExpr
 			{
 				Table = table,
+				WithOptions = withOptions,
 				OutputList = outputList,
 				OutputInto = outputInto,
 				WhereExpr = whereExpr

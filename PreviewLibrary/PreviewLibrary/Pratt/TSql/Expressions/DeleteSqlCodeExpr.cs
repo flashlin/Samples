@@ -7,6 +7,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	public class DeleteSqlCodeExpr : SqlCodeExpr
 	{
 		public SqlCodeExpr Table { get; set; }
+		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> OutputList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 		public SqlCodeExpr OutputInto { get; set; }
@@ -15,6 +16,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		{
 			stream.Write("DELETE FROM ");
 			Table.WriteToStream(stream);
+
+			if (WithOptions != null && WithOptions.Count > 0)
+			{
+				stream.Write(" WITH(");
+				WithOptions.WriteToStreamWithComma(stream);
+				stream.Write(")");
+			}
 
 			if (OutputList != null && OutputList.Count > 0)
 			{

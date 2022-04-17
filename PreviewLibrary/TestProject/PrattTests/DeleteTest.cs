@@ -18,6 +18,15 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void delete_from_with_rowlock()
+		{
+			var sql = @"delete from customer with(rowlock) WHERE id=@id";
+			Parse(sql);
+			ThenExprShouldBe(@"DELETE FROM customer WITH(rowlock)
+WHERE id = @id");
+		}
+
+		[Fact]
 		public void delete_output()
 		{
 			var sql = @"delete from customer

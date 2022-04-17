@@ -115,7 +115,7 @@ select id,name from other_customer";
 
 			ThenExprShouldBe(@"INSERT INTO customer([id], [name])
 OUTPUT 'customer', inserted.id, GETDATE()
-INTO trackCustomer id, name
+INTO trackCustomer (id, name)
 SELECT id, name
 FROM other_customer");
 		}
