@@ -17,6 +17,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				{
 					break;
 				}
+
+				parser.Scanner.Match(SqlToken.As);
 				var dataTypeExpr = parser.ConsumeDataType();
 
 				SqlCodeExpr variableDataType = new DeclareSqlCodeExpr
