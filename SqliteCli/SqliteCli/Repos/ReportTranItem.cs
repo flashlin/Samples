@@ -8,8 +8,11 @@
 		[DisplayString("", 9)]
 		public string StockId { set; get; }
 
-		[DisplayString("", 30)]
+		[DisplayString("", 26)]
 		public string StockName { set; get; }
+
+		[DisplayString("yyyy/MM/dd", 10)]
+		public DateTime MinTranTime { get; set; }
 
 		//2022-04-04
 		//假如這邊 property 用 decimal or double
