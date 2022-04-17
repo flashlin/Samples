@@ -293,6 +293,7 @@ namespace PreviewLibrary.Pratt.TSql
 			};
 			return true;
 		}
+
 		public static void WriteToStream(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream,
 			Action<IndentStream> writeDelimiter = null)
 		{
