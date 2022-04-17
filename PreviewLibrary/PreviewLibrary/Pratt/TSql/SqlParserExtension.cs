@@ -55,11 +55,18 @@ namespace PreviewLibrary.Pratt.TSql
 					defaultValueExpr = parser.ParseExp() as SqlCodeExpr;
 				}
 
+				var isOutput = false;
+				if (parser.Scanner.Match(SqlToken.Output))
+				{
+					isOutput = true;
+				}
+
 				return new ArgumentSqlCodeExpr
 				{
 					Comments = comments,
 					Name = varName as SqlCodeExpr,
 					DataType = dataType,
+					IsOutput = isOutput,
 					DefaultValueExpr = defaultValueExpr
 				};
 			});
