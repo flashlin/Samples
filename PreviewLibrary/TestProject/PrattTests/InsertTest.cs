@@ -98,7 +98,7 @@ select id,name from other_customer";
 			
 			Parse(sql);
 
-			ThenExprShouldBe(@"INSERT INTO customer
+			ThenExprShouldBe(@"INSERT INTO customer([id], [name])
 SELECT id, name
 FROM other_customer");
 		}
@@ -113,7 +113,11 @@ select id,name from other_customer";
 			
 			Parse(sql);
 
-			ThenExprShouldBe(@"");
+			ThenExprShouldBe(@"INSERT INTO customer([id], [name])
+OUTPUT 'customer', inserted.id, GETDATE()
+INTO trackCustomer id, name
+SELECT id, name
+FROM other_customer");
 		}
 
 

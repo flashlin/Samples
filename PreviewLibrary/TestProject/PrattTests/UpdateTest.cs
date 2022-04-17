@@ -46,7 +46,7 @@ set id = 1";
 			Parse(sql);
 
 			ThenExprShouldBe(@"UPDATE [dbo].[customer] WITH(rowlock, updlock) SET name = @name
-OUTPUT  deleted.Name
+OUTPUT deleted.Name
 WHERE id = @id");
 		}
 

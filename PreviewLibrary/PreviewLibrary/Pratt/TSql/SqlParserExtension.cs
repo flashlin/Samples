@@ -546,9 +546,15 @@ namespace PreviewLibrary.Pratt.TSql
 			{
 				do
 				{
-					var actionName = parser.Scanner.ConsumeStringAny(SqlToken.Deleted, SqlToken.Inserted);
-					parser.Scanner.Consume(SqlToken.Dot);
-					var columnName = parser.ConsumeObjectId();
+
+					//var actionName = parser.Scanner.ConsumeStringAny(SqlToken.Deleted, SqlToken.Inserted);
+					if (parser.Scanner.TryConsumeStringAny(out var actionName, SqlToken.Deleted, SqlToken.Inserted))
+					{
+						parser.Scanner.Consume(SqlToken.Dot);
+					}
+					//var columnName = parser.ConsumeObjectId();
+					var columnName = parser.ParseExpIgnoreComment();
+
 					outputList.Add(new OutputSqlCodeExpr
 					{
 						OutputActionName = actionName,
@@ -558,6 +564,32 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 
 			return outputList;
+		}
+
+		public static SqlCodeExpr GetOutputIntoExpr(this IParser parser)
+		{
+			if (!parser.Scanner.Match(SqlToken.Into))
+			{
+				return null;
+			}
+			var intoTable = parser.ConsumeObjectIdOrVariable();
+
+			var columnsList = new List<SqlCodeExpr>();
+			if (parser.Scanner.Match(SqlToken.LParen))
+			{
+				do
+				{
+					var columnName = parser.ConsumeAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
+					columnsList.Add(columnName);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+
+			return new OutputIntoSqlCodeExpr
+			{
+				IntoTable = intoTable,
+				ColumnsList = columnsList
+			};
 		}
 	}
 }

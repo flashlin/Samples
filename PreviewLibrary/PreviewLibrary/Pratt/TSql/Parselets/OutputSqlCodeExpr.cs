@@ -10,7 +10,10 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write($" {OutputActionName}.");
+			if (!string.IsNullOrEmpty(OutputActionName))
+			{
+				stream.Write($"{OutputActionName}.");
+			}
 			ColumnName.WriteToStream(stream);
 		}
 	}

@@ -19,13 +19,10 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var tableName = parser.ConsumeObjectIdOrVariable();
 
-			var columns = new List<string>();
-			if (parser.Scanner.Match(SqlToken.LParen))
-			{
-				columns = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier)
-					.ToList();
-				parser.Scanner.Consume(SqlToken.RParen);
-			}
+			var columns = GetColumnsList(parser);
+
+			var outputList = parser.GetOutputList();
+			var outputInto = parser.GetOutputIntoExpr();
 
 			if (parser.Scanner.TryConsume(SqlToken.Select, out var selectToken))
 			{
@@ -33,6 +30,9 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				return new InsertIntoFromSqlCodeExpr
 				{
 					Table = tableName,
+					ColumnsList = columns,
+					OutputList = outputList,
+					OutputIntoExpr = outputInto,
 					SelectFromExpr = selectExpr,
 				};
 			}
@@ -63,6 +63,19 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				Columns = columns,
 				ValuesList = valuesList
 			};
+		}
+
+		private static List<string> GetColumnsList(IParser parser)
+		{
+			var columns = new List<string>();
+			if (parser.Scanner.Match(SqlToken.LParen))
+			{
+				columns = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier)
+					.ToList();
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+
+			return columns;
 		}
 	}
 }
