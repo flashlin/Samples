@@ -470,7 +470,7 @@ namespace PreviewLibrary.Pratt.TSql
 			var meetColumnNameList = new[]
 			{
 				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
-				SqlToken.Date
+				SqlToken.Date, SqlToken.Asterisk
 			};
 
 			var identTokens = new List<string>();

@@ -170,5 +170,28 @@ select 2";
 INTO #tmp
 FROM customer");
 		}
+
+	[Fact]
+		public void select_from_select()
+		{
+			var sql = @"SELECT c.id, p.*
+        FROM (
+                SELECT *
+                FROM otherTable
+                WHERE id = @id
+        ) AS p
+        JOIN customer c WITH (NOLOCK) ON p.id = c.id
+        ORDER BY c.name, c.id;";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT c.id, p.*
+FROM ( SELECT *
+FROM otherTable
+WHERE id = @id ) AS p
+JOIN customer c WITH(NOLOCK) p.id = c.id
+ORDER BY c.name ASC, c.id ASC");
+		}
+		
 	}
 }
