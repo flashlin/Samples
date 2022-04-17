@@ -28,7 +28,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		private static SqlCodeExpr ParseConstant(IParser parser)
 		{
-			return parser.PrefixParseAny(int.MaxValue, SqlToken.Number, SqlToken.QuoteString, SqlToken.HexNumber);
+			return parser.PrefixParseAny(int.MaxValue, SqlToken.Number, SqlToken.QuoteString, SqlToken.HexNumber,
+				SqlToken.Variable);
 		}
 	}
 }
