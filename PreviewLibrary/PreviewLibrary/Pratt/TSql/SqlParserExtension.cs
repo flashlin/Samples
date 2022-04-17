@@ -43,6 +43,8 @@ namespace PreviewLibrary.Pratt.TSql
 					return null;
 				}
 
+				parser.Scanner.Match(SqlToken.As);
+
 				var dataType = parser.ConsumeDataType();
 
 				SqlCodeExpr defaultValueExpr = null;
