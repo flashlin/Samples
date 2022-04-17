@@ -1,6 +1,7 @@
 ﻿using PreviewLibrary.Pratt.Core;
 using PreviewLibrary.Pratt.TSql.Expressions;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PreviewLibrary.Pratt.TSql
 {
@@ -16,6 +17,19 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			scanner.IgnoreComments();
 			return scanner.Match<SqlToken>(tokenType);
+		}
+		
+		public static bool MatchAny(this IScanner scanner, params SqlToken[] tokenTypeList)
+		{
+			scanner.IgnoreComments();
+			var expectTokenTypeList = tokenTypeList.Select(x => x.ToString()).ToList();
+			var span = scanner.Peek();
+			if (!expectTokenTypeList.Contains(span.Type))
+			{
+				return false;
+			}
+			scanner.Consume();
+			return true;
 		}
 
 		public static TextSpan Consume(this IScanner scanner, SqlToken tokenType)
