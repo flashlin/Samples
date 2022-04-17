@@ -13,6 +13,7 @@ namespace PreviewLibrary.Pratt.TSql
 		public TSqlParser(IScanner scanner) : base(scanner)
 		{
 			Register(SqlToken.Asterisk, new AsteriskParselet());
+			Register(SqlToken.Begin, new BeginParselet());
 			Register(SqlToken.Cast, new CastParselet());
 			Register(SqlToken.Case, new CaseParselet());
 			Register(SqlToken.Convert, new ConvertParselet());

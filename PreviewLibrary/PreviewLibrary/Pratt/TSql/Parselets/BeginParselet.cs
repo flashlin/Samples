@@ -1,0 +1,19 @@
+﻿using PreviewLibrary.Pratt.Core;
+using PreviewLibrary.Pratt.Core.Expressions;
+using PreviewLibrary.Pratt.Core.Parselets;
+
+namespace PreviewLibrary.Pratt.TSql.Parselets
+{
+	public class BeginParselet : IPrefixParselet
+	{
+		public IExpression Parse(TextSpan token, IParser parser)
+		{
+			parser.Scanner.SetOffset(token.Offset - 1);
+			var exprList = parser.ConsumeBeginBody();
+			return new BeginSqlCodeExpr()
+			{
+				Items = exprList,
+			};
+		}
+	}
+}
