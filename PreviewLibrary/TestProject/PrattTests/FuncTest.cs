@@ -36,6 +36,14 @@ namespace TestProject.PrattTests
 			ThenExprShouldBe(@"CAST( 100.00 AS DECIMAL(19,2) )");
 		}
 
+		[Fact]
+		public void convert()
+		{
+			var sql = @"CONVERT(varchar(100), GETDATE(), 120)";
 
+			Parse(sql);
+
+			ThenExprShouldBe(@"CONVERT( VARCHAR(100), GETDATE(), 120 )");
+		}
 	}
 }

@@ -10,27 +10,30 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			var parametersList = new List<SqlCodeExpr>();
+
 			parser.Scanner.Consume(SqlToken.LParen);
 
 			var dataType = parser.ConsumeDataType();
+			parametersList.Add(dataType);
 
 			parser.Scanner.Consume(SqlToken.Comma);
 
 			var expr = parser.ParseExpIgnoreComment();
+			parametersList.Add(expr);
 
-			//var style = string.Empty;
+			if(parser.Scanner.Match(SqlToken.Comma))
+			{
+				var styleSpan = parser.Scanner.Consume();
+				var style = parser.PrefixParse(styleSpan) as SqlCodeExpr;
+				parametersList.Add(style);
+			}
 
 			parser.Scanner.Consume(SqlToken.RParen);
-
-
 			var funcName = new ObjectIdSqlCodeExpr
 			{
 				ObjectName = "CONVERT"
 			};
-
-			var parametersList = new List<SqlCodeExpr>();
-			parametersList.Add(dataType);
-			parametersList.Add(expr);
 
 			return new FuncSqlCodeExpr
 			{
