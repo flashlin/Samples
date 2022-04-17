@@ -342,7 +342,7 @@ namespace PreviewLibrary.Pratt.TSql
 			var columnDataTypeList = new List<SqlCodeExpr>();
 			do
 			{
-				var name = parser.Scanner.ConsumeStringAny(SqlToken.Identifier, SqlToken.Rank);
+				var name = parser.Scanner.ConsumeStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
 				var dataType = parser.ConsumeDataType();
 				columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
 				{
