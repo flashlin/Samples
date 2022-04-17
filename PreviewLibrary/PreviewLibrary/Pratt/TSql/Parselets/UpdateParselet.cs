@@ -20,23 +20,11 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var setList = ParseSetItemList(parser);
 
-			//SqlCodeExpr fromTable = null;
 			var fromTableList = new List<SqlCodeExpr>();
 			if (parser.Scanner.Match(SqlToken.From))
 			{
-				//fromTable = parser.PrefixParseAny(int.MaxValue, SqlToken.Identifier);
-				//parser.TryConsumeAliasName(out var aliasName);
-				//var fromTableWithOptions = parser.ParseWithOptions();
-				//fromTable = new FromSourceSqlCodeExpr
-				//{
-				//	Left = fromTable,
-				//	AliasName = aliasName,
-				//	Options = fromTableWithOptions
-				//};
 				fromTableList = parser.ParseFromSourceList();
 			}
-
-			//var joinSelectList = parser.GetJoinSelectList();
 
 			var outputList = parser.GetOutputListExpr();
 
