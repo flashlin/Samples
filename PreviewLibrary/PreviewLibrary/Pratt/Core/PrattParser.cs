@@ -21,14 +21,30 @@ namespace PreviewLibrary.Pratt.Core
 			get { return _scanner; }
 		}
 
-		public IExpression ParseExp(int ctxPrecedence)
+		public IExpression GetParseExp(int ctxPrecedence)
 		{
 			var prefixToken = _scanner.Consume();
 			if (prefixToken.IsEmpty)
 			{
-				throw new ParseException($"Expect token but found NONE.");
+				return null;
 			}
 			return PrefixParse(prefixToken, ctxPrecedence);
+		}
+
+		public IExpression ParseExp(int ctxPrecedence)
+		{
+			var expr = GetParseExp(ctxPrecedence);
+			if (expr == null)
+			{
+				throw new ParseException($"Expect token but found NONE.");
+			}
+			return expr;
+			//var prefixToken = _scanner.Consume();
+			//if (prefixToken.IsEmpty)
+			//{
+			//	throw new ParseException($"Expect token but found NONE.");
+			//}
+			//return PrefixParse(prefixToken, ctxPrecedence);
 		}
 
 		public IExpression PrefixParse(TextSpan prefixToken, int ctxPrecedence)
@@ -85,7 +101,7 @@ namespace PreviewLibrary.Pratt.Core
 		{
 			_prefixParselets.Add(tokenType, parselet);
 		}
-		
+
 		protected void Register(string tokenType, IInfixParselet parselet)
 		{
 			_infixParselets.Add(tokenType, parselet);

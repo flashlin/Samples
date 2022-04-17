@@ -223,7 +223,11 @@ namespace PreviewLibrary.Pratt.TSql
 				SqlCodeExpr expr = null;
 				while (true)
 				{
-					expr = parser.ParseExp(ctxPrecedence) as SqlCodeExpr;
+					expr = parser.GetParseExp(ctxPrecedence) as SqlCodeExpr;
+					if (expr == null)
+					{
+						return null;
+					}
 					if (expr is CommentSqlCodeExpr commentExpr)
 					{
 						comments.Add(commentExpr);
@@ -267,7 +271,6 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			return parser.GetParseExpIgnoreCommentFunc(ctxPrecedence)();
 		}
-
 
 		public static bool TryConsumeVariable(this IScanner scanner, out VariableSqlCodeExpr sqlExpr)
 		{
