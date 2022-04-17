@@ -166,6 +166,7 @@
 		ROLLBACK,
 		TRAN,
 		Commit,
-		Drop
+		Drop,
+		Pivot
 	}
 }

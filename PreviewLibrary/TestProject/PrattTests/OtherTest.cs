@@ -61,5 +61,17 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe("BEGIN TRANSACTION");
 		}
+
+	[Fact]
+		public void pivot()
+		{
+			var sql = "pivot (max(id) for idType in( [4], [3], [2] ) ) piv";
+			
+			Parse(sql);
+
+			ThenExprShouldBe("PIVOT(max( id ) FOR idType IN ([4], [3], [2])) AS piv");
+		}
+
+		
 	}
 }

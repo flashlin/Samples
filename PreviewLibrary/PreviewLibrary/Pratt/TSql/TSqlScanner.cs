@@ -89,6 +89,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("OUTPUT", SqlToken.Output);
 			AddTokenMap("PARTITION", SqlToken.Partition);
 			AddTokenMap("PRIMARY", SqlToken.Primary);
+			AddTokenMap("PIVOT", SqlToken.Pivot);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);
 			AddTokenMap("PROC", SqlToken.Procedure);
 			AddTokenMap("RANK", SqlToken.Rank);

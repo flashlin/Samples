@@ -36,6 +36,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.LParen, new GroupParselet());
 			Register(SqlToken.Left, new LeftOrRightFunctionParselet());
 			Register(SqlToken.Object, new ObjectParselet());
+			Register(SqlToken.Pivot, new PivotParselet());
 			Register(SqlToken.QuoteString, new QuoteStringParselet());
 			Register(SqlToken.Rank, new RankParselet());
 			Register(SqlToken.Right, new LeftOrRightFunctionParselet());
