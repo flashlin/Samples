@@ -121,10 +121,15 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		{
 			var name = parser.ParseExpIgnoreComment();
 
+			var meetColumnAliasNameList = new []
+			{
+				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString
+			};
+
 			TextSpan aliasNameToken;
 			if (parser.Scanner.TryConsumeAny(out _, SqlToken.As))
 			{
-				aliasNameToken = parser.Scanner.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString);
+				aliasNameToken = parser.Scanner.ConsumeAny(meetColumnAliasNameList);
 				return new ColumnSqlCodeExpr
 				{
 					Name = name,
@@ -132,7 +137,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				};
 			}
 
-			parser.Scanner.TryConsumeAny(out aliasNameToken, SqlToken.SqlIdentifier, SqlToken.Identifier);
+			parser.Scanner.TryConsumeAny(out aliasNameToken, meetColumnAliasNameList);
 
 			return new ColumnSqlCodeExpr
 			{
