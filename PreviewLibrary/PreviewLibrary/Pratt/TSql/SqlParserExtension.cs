@@ -553,13 +553,13 @@ namespace PreviewLibrary.Pratt.TSql
 			}).ToList();
 		}
 
-		public static SqlCodeExpr ConsumeObjectIdOrVariable(this IParser parser)
+		public static SqlCodeExpr ConsumeObjectIdOrVariable(this IParser parser, int ctxPrecedence=0)
 		{
 			if (parser.TryConsumeObjectId(out var objectIdExpr))
 			{
 				return objectIdExpr;
 			}
-			return parser.PrefixParse(SqlToken.Variable) as SqlCodeExpr;
+			return parser.PrefixParse(SqlToken.Variable, ctxPrecedence) as SqlCodeExpr;
 		}
 
 

@@ -53,7 +53,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var setList = new List<SqlCodeExpr>();
 			do
 			{
-				var column = parser.ConsumeObjectId();
+				var column = parser.ConsumeObjectIdOrVariable(int.MaxValue);
 				parser.Scanner.Consume(SqlToken.Equal);
 				var valueExpr = parser.ParseExpIgnoreComment();
 				setList.Add(new AssignSqlCodeExpr

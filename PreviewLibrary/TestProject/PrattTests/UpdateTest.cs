@@ -81,5 +81,17 @@ from customer c
 			ThenExprShouldBe(@"UPDATE c SET name = @name, id = @id
 FROM customer AS c");
 		}
+
+		[Fact]
+		public void update_set_var_eq()
+		{
+			var sql = @"UPDATE customer with (rowlock) SET @id=id=id+1";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE customer WITH(rowlock) SET @id = id = id + 1");
+		}
+
+
 	}
 }

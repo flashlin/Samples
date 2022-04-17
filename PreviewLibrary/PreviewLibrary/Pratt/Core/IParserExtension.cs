@@ -37,11 +37,11 @@ namespace PreviewLibrary.Pratt.Core
 			return expr;
 		}
 
-		public static IExpression PrefixParse<TTokenType>(this IParser parser, TTokenType tokenType)
+		public static IExpression PrefixParse<TTokenType>(this IParser parser, TTokenType tokenType, int ctxPrecedence=0)
 			where TTokenType : struct
 		{
 			var token = parser.Scanner.ConsumeAny(tokenType);
-			return parser.PrefixParse(token, 0);
+			return parser.PrefixParse(token, ctxPrecedence);
 		}
 
 		public static IExpression PrefixParseAny<TTokenType>(this IParser parser, params TTokenType[] tokenTypes)
