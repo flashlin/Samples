@@ -140,6 +140,7 @@
 		Target,
 		Source,
 		Rank,
-		Over
+		Over,
+		UPDLOCK
 	}
 }

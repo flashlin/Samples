@@ -123,6 +123,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("NOCOUNT", SqlToken.NOCOUNT);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
+			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);
 
 			AddSymbolMap("(", SqlToken.LParen);
 			AddSymbolMap(")", SqlToken.RParen);

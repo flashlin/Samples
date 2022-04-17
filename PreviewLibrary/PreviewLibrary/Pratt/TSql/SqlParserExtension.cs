@@ -374,6 +374,7 @@ namespace PreviewLibrary.Pratt.TSql
 				{
 					SqlToken.NOLOCK,
 					SqlToken.ROWLOCK,
+					SqlToken.UPDLOCK
 				};
 				userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
 					.ToList();
