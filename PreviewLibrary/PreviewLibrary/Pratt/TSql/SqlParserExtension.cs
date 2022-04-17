@@ -323,6 +323,18 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 		}
 
+		public static void WriteToStreamWithCommaLine(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream)
+		{
+			foreach (var expr in exprList.Select((val, idx) => new { val, idx }))
+			{
+				if (expr.idx != 0)
+				{
+					stream.WriteLine(",");
+				}
+				expr.val.WriteToStream(stream);
+			}
+		}
+
 		public static void WriteToStreamWithComma(this IEnumerable<string> strList, IndentStream stream)
 		{
 			foreach (var str in strList.Select((val, idx) => new { val, idx }))

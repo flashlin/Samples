@@ -4,7 +4,7 @@ using T1.Standard.IO;
 
 namespace PreviewLibrary.Pratt.TSql.Expressions
 {
-	public class WithSqlCodeExpr : SqlCodeExpr
+	public class WithItemSqlCodeExpr : SqlCodeExpr
 	{
 		public SqlCodeExpr Table { get; set; }
 		public List<SqlCodeExpr> Columns { get; set; }
@@ -12,7 +12,6 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write("WITH ");
 			Table.WriteToStream(stream);
 
 			if (Columns.Count > 0)
@@ -29,6 +28,17 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			stream.Indent--;
 			stream.WriteLine();
 			stream.Write(")");
+		}
+	}
+
+	public class WithSqlCodeExpr : SqlCodeExpr
+	{
+		public List<WithItemSqlCodeExpr> Items { get; set; }
+
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write("WITH ");
+			Items.WriteToStreamWithCommaLine(stream);
 		}
 	}
 }

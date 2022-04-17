@@ -10,29 +10,38 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			var table = parser.ConsumeObjectId();
-
-			var columns = new List<SqlCodeExpr>();
-			if (parser.Scanner.Match(SqlToken.LParen))
+			var items = new List<WithItemSqlCodeExpr>();
+			do
 			{
-				do
-				{
-					var column = parser.ConsumeObjectId();
-					columns.Add(column);
-				} while (parser.Scanner.Match(SqlToken.Comma));
-				parser.Scanner.Consume(SqlToken.RParen);
-			}
+				var table = parser.ConsumeObjectId();
 
-			parser.Scanner.Consume(SqlToken.As);
-			parser.Scanner.Consume(SqlToken.LParen);
-			var innerExpr = parser.ParseExpIgnoreComment();
-			parser.Scanner.Consume(SqlToken.RParen);
+				var columns = new List<SqlCodeExpr>();
+				if (parser.Scanner.Match(SqlToken.LParen))
+				{
+					do
+					{
+						var column = parser.ConsumeObjectId();
+						columns.Add(column);
+					} while (parser.Scanner.Match(SqlToken.Comma));
+					parser.Scanner.Consume(SqlToken.RParen);
+				}
+
+				parser.Scanner.Consume(SqlToken.As);
+				parser.Scanner.Consume(SqlToken.LParen);
+				var innerExpr = parser.ParseExpIgnoreComment();
+				parser.Scanner.Consume(SqlToken.RParen);
+
+				items.Add(new WithItemSqlCodeExpr
+				{
+					Table = table,
+					Columns = columns,
+					InnerExpr = innerExpr
+				});
+			} while (parser.Scanner.Match(SqlToken.Comma));
 
 			return new WithSqlCodeExpr
 			{
-				Table = table,
-				Columns = columns,
-				InnerExpr = innerExpr
+				Items = items
 			};
 		}
 	}
