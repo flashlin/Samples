@@ -18,6 +18,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Case, new CaseParselet());
 			Register(SqlToken.Convert, new ConvertParselet());
 			Register(SqlToken.Create, new CreateParselet());
+			Register(SqlToken.Commit, new CommitParselet());
 			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
 			Register(SqlToken.Delete, new DeleteParselet());
 			Register(SqlToken.Declare, new DeclareParselet());

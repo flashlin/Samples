@@ -164,6 +164,7 @@
 		TempTable,
 		IsNull,
 		ROLLBACK,
-		TRAN
+		TRAN,
+		Commit
 	}
 }

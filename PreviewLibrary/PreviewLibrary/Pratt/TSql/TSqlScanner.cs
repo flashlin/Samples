@@ -123,6 +123,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("ARITHABORT", SqlToken.ARITHABORT);
 			AddTokenMap("COMMITTED", SqlToken.COMMITTED);
 			AddTokenMap("CONNECT", SqlToken.CONNECT);
+			AddTokenMap("COMMIT", SqlToken.Commit);
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
 			AddTokenMap("HIGH", SqlToken.HIGH);
