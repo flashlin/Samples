@@ -51,5 +51,18 @@ WHERE id = @id");
 		}
 
 
+		[Fact]
+		public void update_from_2table()
+		{
+			var sql = @"update c
+set name = @name
+from customer c, otherTable
+    where c.id = @id
+";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"");
+		}
 	}
 }
