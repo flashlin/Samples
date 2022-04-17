@@ -18,7 +18,20 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				parser.Scanner.Consume(SqlToken.Equal);
 			}
 
-			var funcName = parser.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier) as SqlCodeExpr;
+			SqlCodeExpr funcName = null;
+
+			if (parser.Scanner.Match(SqlToken.LParen))
+			{
+				funcName = new GroupSqlCodeExpr
+				{
+					InnerExpr = parser.ParseExpIgnoreComment()
+				};
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+			else
+			{
+				funcName = parser.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier) as SqlCodeExpr;
+			}
 
 			var parameters = new List<SqlCodeExpr>();
 			do
@@ -45,23 +58,5 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				Parameters = parameters
 			};
 		}
-
-		//private List<AssignSqlCodeExpr> ConsumeVariableAssignValueExpr(IParser parser)
-		//{
-		//	var items = new List<AssignSqlCodeExpr>();
-		//	do
-		//	{
-		//		var variableSpan = parser.Scanner.Consume(SqlToken.Variable);
-		//		var name = parser.PrefixParse(variableSpan, int.MaxValue) as SqlCodeExpr;
-		//		parser.Scanner.Consume(SqlToken.Equal);
-		//		var valueExpr = parser.ParseExpIgnoreComment();
-		//		items.Add(new AssignSqlCodeExpr
-		//		{
-		//			Left = name,
-		//			Right = valueExpr,
-		//		});
-		//	} while (parser.Scanner.Match(SqlToken.Comma));
-		//	return items;
-		//}
 	}
 }
