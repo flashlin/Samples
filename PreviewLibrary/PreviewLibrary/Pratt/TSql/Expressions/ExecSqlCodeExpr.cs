@@ -13,8 +13,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write($"{ExecToken} ");
-			Name.WriteToStream(stream);
+			stream.Write($"{ExecToken}");
+			if (Name != null)
+			{
+				stream.Write(" ");
+				Name.WriteToStream(stream);
+			}
 			stream.Write(" ");
 			Parameters.WriteToStreamWithComma(stream);
 		}

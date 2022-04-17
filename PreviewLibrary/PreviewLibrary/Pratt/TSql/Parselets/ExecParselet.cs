@@ -11,6 +11,16 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if (parser.Scanner.IsToken(SqlToken.Variable))
+			{
+				var valueExpr = ConsumeVariableAssignValueExpr(parser) as SqlCodeExpr;
+				return new ExecSqlCodeExpr
+				{
+					ExecToken = "EXEC",
+					Parameters = new[] { valueExpr }.ToList()
+				};
+			}
+
 			var funcName = parser.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier) as SqlCodeExpr;
 
 			var parameters = new List<SqlCodeExpr>();
@@ -35,6 +45,19 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				ExecToken = "EXEC",
 				Name = funcName,
 				Parameters = parameters
+			};
+		}
+
+		private AssignSqlCodeExpr ConsumeVariableAssignValueExpr(IParser parser)
+		{
+			var variableSpan = parser.Scanner.Consume(SqlToken.Variable);
+			var name = parser.PrefixParse(variableSpan, int.MaxValue) as SqlCodeExpr;
+			parser.Scanner.Consume(SqlToken.Equal);
+			var valueExpr = parser.ParseExpIgnoreComment();
+			return new AssignSqlCodeExpr
+			{
+				Left = name,
+				Right = valueExpr,
 			};
 		}
 	}
