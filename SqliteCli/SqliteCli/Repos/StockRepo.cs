@@ -104,6 +104,8 @@ select
     st.Id StockId,
     t.TranType,
     st.StockName,
+	 MIN(t.tranTime) minTranTime,
+	 MAX(t.tranTime) maxTranTime,
     MIN(t.StockPrice) minStockPrice,
     AVG(t.StockPrice) avgStockPrice,
     MAX(t.StockPrice) maxStockPrice,
