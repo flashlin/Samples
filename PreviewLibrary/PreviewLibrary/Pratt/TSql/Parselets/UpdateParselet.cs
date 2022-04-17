@@ -36,22 +36,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var joinSelectList = parser.GetJoinSelectList();
 
-
-			var outputList = new List<SqlCodeExpr>();
-			if (parser.Scanner.Match(SqlToken.Output))
-			{
-				do
-				{
-					var actionName = parser.Scanner.ConsumeStringAny(SqlToken.Deleted, SqlToken.Inserted);
-					parser.Scanner.Consume(SqlToken.Dot);
-					var columnName = parser.ConsumeObjectId();
-					outputList.Add(new OutputSqlCodeExpr
-					{
-						OutputActionName = actionName,
-						ColumnName = columnName,
-					});
-				} while (parser.Scanner.Match(SqlToken.Comma));
-			}
+			var outputList = parser.GetOutputList();
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))

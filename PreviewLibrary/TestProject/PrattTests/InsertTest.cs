@@ -102,5 +102,20 @@ select id,name from other_customer";
 SELECT id, name
 FROM other_customer");
 		}
+
+		[Fact]
+		public void insert_into_table_columns_output_into_select()
+		{
+			var sql = @"insert into customer([id],[name])
+output 'customer', inserted.id, GETDATE()
+into trackCustomer(id,name)
+select id,name from other_customer";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"");
+		}
+
+
 	}
 }

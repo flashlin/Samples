@@ -537,5 +537,27 @@ namespace PreviewLibrary.Pratt.TSql
 			}
 			return parser.PrefixParse(SqlToken.Variable) as SqlCodeExpr;
 		}
+
+
+		public static List<SqlCodeExpr> GetOutputList(this IParser parser)
+		{
+			var outputList = new List<SqlCodeExpr>();
+			if (parser.Scanner.Match(SqlToken.Output))
+			{
+				do
+				{
+					var actionName = parser.Scanner.ConsumeStringAny(SqlToken.Deleted, SqlToken.Inserted);
+					parser.Scanner.Consume(SqlToken.Dot);
+					var columnName = parser.ConsumeObjectId();
+					outputList.Add(new OutputSqlCodeExpr
+					{
+						OutputActionName = actionName,
+						ColumnName = columnName,
+					});
+				} while (parser.Scanner.Match(SqlToken.Comma));
+			}
+
+			return outputList;
+		}
 	}
 }
