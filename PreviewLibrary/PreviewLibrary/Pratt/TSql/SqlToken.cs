@@ -165,6 +165,7 @@
 		IsNull,
 		ROLLBACK,
 		TRAN,
-		Commit
+		Commit,
+		Drop
 	}
 }
