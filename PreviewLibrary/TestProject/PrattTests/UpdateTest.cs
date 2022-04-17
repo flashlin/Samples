@@ -66,5 +66,20 @@ from customer c, otherTable
 FROM customer AS c, otherTable
 WHERE c.id = @id");
 		}
+
+		[Fact]
+		public void update_set_comment()
+		{
+			var sql = @"update c
+set name = @name, --test
+id =@id
+from customer c
+";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE c SET name = @name, id = @id
+FROM customer AS c");
+		}
 	}
 }

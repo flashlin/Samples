@@ -489,6 +489,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 		public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr)
 		{
+			var comments = parser.IgnoreComments();
 			var identTokens = new List<string>();
 			do
 			{
@@ -519,6 +520,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 			var identExpr = new ObjectIdSqlCodeExpr
 			{
+				Comments = comments,
 				RemoteServer = identTokens[0],
 				DatabaseName = identTokens[1],
 				SchemaName = identTokens[2],
@@ -527,6 +529,15 @@ namespace PreviewLibrary.Pratt.TSql
 
 			expr = identExpr;
 			return true;
+		}
+
+		public static List<CommentSqlCodeExpr> IgnoreComments(this IParser parser)
+		{
+			var commentsSpanList = parser.Scanner.IgnoreComments();
+			return commentsSpanList.Select(x => new CommentSqlCodeExpr
+			{
+				Content = parser.Scanner.GetSpanString(x),
+			}).ToList();
 		}
 
 		public static SqlCodeExpr ConsumeObjectIdOrVariable(this IParser parser)
