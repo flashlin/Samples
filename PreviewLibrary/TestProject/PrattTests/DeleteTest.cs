@@ -41,5 +41,15 @@ OUTPUT deleted.id, deleted.name, 'System Message'
 INTO TrackCustomer ([Id], [Name], [Desc])
 WHERE id = @id");
 		}
+
+		[Fact]
+		public void delete_top()
+		{
+			var sql = @"delete top (@batch) from customer";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"DELETE TOP ( @batch ) FROM customer");
+		}
 	}
 }

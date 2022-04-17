@@ -446,6 +446,36 @@ namespace PreviewLibrary.Pratt.TSql
 			//throw new ParseException("");
 		}
 
+		public static SqlCodeExpr ParseTopCountExpr(this IParser parser)
+		{
+			if (!parser.Scanner.Match(SqlToken.Top))
+			{
+				return null;
+			}
+
+			var isParen = false;
+			if (parser.Match(SqlToken.LParen))
+			{
+				isParen = true;
+			}
+
+			var topNumberExpr = parser.ParseExpIgnoreComment();
+
+			if (isParen)
+			{
+				topNumberExpr = new GroupSqlCodeExpr
+				{
+					InnerExpr = topNumberExpr,
+				};
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+
+			return new TopSqlCodeExpr
+			{
+				NumberExpr = topNumberExpr
+			};
+		}
+
 		public static int? ParseTopCount(this IParser parser)
 		{
 			int? topCount = null;

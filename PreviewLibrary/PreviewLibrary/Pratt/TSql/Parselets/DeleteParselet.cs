@@ -9,6 +9,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			var topCount = parser.ParseTopCountExpr();
+
 			parser.Scanner.Match(SqlToken.From);
 
 			var table = parser.ConsumeObjectId();
@@ -26,6 +28,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			return new DeleteSqlCodeExpr
 			{
+				TopExpr = topCount,
 				Table = table,
 				WithOptions = withOptions,
 				OutputList = outputList,
