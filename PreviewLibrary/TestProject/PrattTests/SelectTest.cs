@@ -158,5 +158,17 @@ select 2";
 			Parse(sql);
 			ThenExprShouldBe("SELECT 1 UNION ALL SELECT 2");
 		}
+
+		[Fact]
+		public void select_star_into_tmp()
+		{
+			var sql = @"select * into #tmp from customer";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT *
+INTO #tmp
+FROM customer");
+		}
 	}
 }

@@ -160,6 +160,7 @@
 		REPEATABLE,
 		SNAPSHOT,
 		SERIALIZABLE,
-		Distinct
+		Distinct,
+		TempTable
 	}
 }

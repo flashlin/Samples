@@ -41,6 +41,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.ScriptOn, new ScriptOnParselet());
 			Register(SqlToken.Source, new SourceParselet());
 			Register(SqlToken.Target, new TargetParselet());
+			Register(SqlToken.TempTable, new TempTableParselet());
 			Register(SqlToken.Number, new NumberParselet());
 			Register(SqlToken.NString, new NStringParselet());
 			Register(SqlToken.Not, new NotParselet());

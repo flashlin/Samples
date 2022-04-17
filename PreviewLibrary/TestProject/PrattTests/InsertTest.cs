@@ -119,7 +119,5 @@ INTO trackCustomer (id, name)
 SELECT id, name
 FROM other_customer");
 		}
-
-
 	}
 }

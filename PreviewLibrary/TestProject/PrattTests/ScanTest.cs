@@ -168,5 +168,13 @@ namespace TestProject.PrattTests
 			ScanAll(sql);
 			ThenTokenListShouldBe(">", "1");
 		}
+
+		[Fact]
+		public void temp()
+		{
+			var sql = "#tmp";
+			ScanAll(sql);
+			ThenTokenListShouldBe("#tmp");
+		}
 	}
 }

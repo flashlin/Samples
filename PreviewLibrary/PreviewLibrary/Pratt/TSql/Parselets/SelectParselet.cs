@@ -20,6 +20,12 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				columns.Add(ParseColumnAs(parser));
 			} while (parser.Match(SqlToken.Comma));
 
+			SqlCodeExpr intoTable = null;
+			if(parser.Scanner.Match(SqlToken.Into))
+			{
+				intoTable = parser.ConsumeAny(SqlToken.TempTable) as SqlCodeExpr;
+			}
+
 			var fromSourceList = GetFrom_SourceList(parser);
 
 			SqlCodeExpr whereExpr = null;
@@ -37,6 +43,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				TopCount = topCount,
 				Columns = columns,
+				IntoTable = intoTable,
 				FromSourceList = fromSourceList,
 				WhereExpr = whereExpr,
 				GroupByList = groupBy,

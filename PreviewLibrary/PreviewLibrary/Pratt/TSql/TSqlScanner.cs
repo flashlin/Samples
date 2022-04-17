@@ -286,6 +286,13 @@ namespace PreviewLibrary.Pratt.TSql
 				return true;
 			}
 
+			if (head == '#' && TryRead(ReadIdentifier, headSpan, out var tmpTable))
+			{
+				tokenSpan = tmpTable;
+				tokenSpan.Type = SqlToken.TempTable.ToString();
+				return true;
+			}
+
 			if (_magnetHeadChars.Contains(head) && TryRead(ReadMagnetCompareSymbol, headSpan, out var magnetSymbol))
 			{
 				tokenSpan = magnetSymbol;

@@ -8,6 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 	{
 		public int? TopCount { get; set; }
 		public List<SqlCodeExpr> Columns { get; set; }
+		public SqlCodeExpr IntoTable { get; set; }
 		public List<SqlCodeExpr> FromSourceList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 		public List<SqlCodeExpr> UnionSelectList { get; set; }
@@ -30,6 +31,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 					stream.Write(", ");
 				}
 				column.value.WriteToStream(stream);
+			}
+
+			if( IntoTable != null)
+			{
+				stream.WriteLine();
+				stream.Write("INTO ");
+				IntoTable.WriteToStream(stream);
 			}
 
 			if (FromSourceList.Count > 0)
