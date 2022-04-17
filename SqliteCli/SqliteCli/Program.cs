@@ -37,6 +37,7 @@ do
 			Console.WriteLine("l 2022/04/04                 :list trans history from 2022/04/04");
 			Console.WriteLine("l 2022/04/04-2022-04-05      :list trans history from 2022/04/04~2022/04/05");
 			Console.WriteLine("b 2022/04/04,0056,12.34,1000 :add 2022/04/04 buy stockId:0056 stockPrice:12.34 numberOfShare:1000");
+			Console.WriteLine("d 2022/04/04,1000            :deposit 2022/04/04 amount:1000");
 			continue;
 		case "l":
 			{
@@ -68,6 +69,16 @@ do
 				await ProcessReportAsync(cmdArgs);
 				break;
 			}
+		case "d":
+			{
+				var cmdArgs = string.Empty;
+				if (ss.Length > 1)
+				{
+					cmdArgs = ss[1];
+				}
+				ProcessDeposit(cmdArgs);
+				break;
+			}
 	}
 
 } while (true);
@@ -90,6 +101,40 @@ async Task ProcessReportAsync(string cmdArgs)
 	}
 
 	rc.Dump();
+}
+
+void ProcessDeposit(string dataText)
+{
+	var tranDatePattern = RegexPattern.Group("tranDate", @"\d{4}/\d{2}/\d{2}");
+	var amountPattern = RegexPattern.Group("amount", @"\d+");
+	var rg = new Regex($"{tranDatePattern},{amountPattern}");
+	var m = rg.Match(dataText);
+	if (!m.Success)
+	{
+		Console.WriteLine("parse fail, please input 2022/04/04,12345");
+		return;
+	}
+
+	var tranDateStr = m.Groups["tranDate"].Value;
+	if (!DateTime.TryParse(tranDateStr, out var tranDate))
+	{
+		Console.WriteLine($"parse '{tranDateStr}' fail, example: 2022/04/04");
+		return;
+	}
+
+	var amountStr = m.Groups["amount"].Value;
+	if (!decimal.TryParse(amountStr, out var amount))
+	{
+		Console.WriteLine($"Parse '{amountStr}' fail, example: 12345");
+		return;
+	}
+
+	var db = serviceProvider.GetService<IStockRepo>();
+	db.Deposit(new DepositReq
+	{
+		TranTime = tranDate,
+		Balance = amount
+	});
 }
 
 //data = "2022/04/04,0050,10.0,1000"

@@ -30,16 +30,16 @@
 		[DecimalString(7)]
 		public decimal HandlingFee { get; set; }
 
-		[DecimalString(15)]
+		[AmountString(14)]
 		public decimal Balance { get; set; }
 
 		[DecimalString(6)]
 		public decimal CurrentPrice { get; set; }
 		
-		[DecimalString(15)]
+		[AmountString(15)]
 		public decimal CurrTotalPrice { get; set; }
 
-		[DecimalString(10)]
+		[AmountString(11)]
 		public decimal Profit { get; set; }
 	}
 }

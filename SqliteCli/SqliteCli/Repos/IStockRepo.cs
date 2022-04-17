@@ -6,5 +6,6 @@ namespace SqliteCli.Repos
 	{
 		void BuyStock(TransEntity data);
 		List<ReportTranItem> ReportTrans(ReportTransReq req);
+		void Deposit(DepositReq depositReq);
 	}
 }

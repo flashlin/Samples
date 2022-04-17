@@ -240,5 +240,18 @@ group by st.Id, t.TranType
 		{
 			return new StockDatabase("d:/VDisk/SNL/flash_stock.db");
 		}
+
+		public void Deposit(DepositReq depositReq)
+		{
+			using var db = GetDatabase();
+			db.Trans.Add(new TransEntity
+			{
+				TranTime = depositReq.TranTime,
+				TranType = "Deposit",
+				StockId = string.Empty,
+				Balance = depositReq.Balance,
+			});
+			db.SaveChanges();
+		}
 	}
 }

@@ -8,4 +8,13 @@
 		{
 		}
 	}
+
+	[AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+	public class AmountStringAttribute : DisplayStringAttribute
+	{
+		public AmountStringAttribute(int maxLength)
+			: base("###,###,##0", maxLength, AlignType.Right)
+		{
+		}
+	}
 }
