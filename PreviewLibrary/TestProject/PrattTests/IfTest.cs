@@ -70,5 +70,23 @@ ELSE BEGIN
 SET @r = 3
 END");
 		}
+
+		[Fact]
+		public void if_not_in()
+		{
+			var sql = @"if @id not in (1,2)
+begin
+	select 1
+end
+";
+			Parse(sql);
+
+			ThenExprShouldBe(@"IF @id NOT IN (1, 2)
+BEGIN
+	SELECT 1
+END");
+		}
+
+
 	}
 }

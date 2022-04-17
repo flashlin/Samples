@@ -10,13 +10,24 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(IExpression left, TextSpan token, IParser parser)
 		{
-			if (parser.Scanner.TryConsumeAny(out var nextToken, SqlToken.Like))
+			if (parser.Scanner.TryConsumeAny(out var likeSpan, SqlToken.Like))
 			{
 				var right = parser.ParseExp();
 				return new NotLikeSqlCodeExpr
 				{
 					Left = left as SqlCodeExpr,
 					Right = right as SqlCodeExpr
+				};
+			}
+
+			if (parser.Scanner.TryConsumeAny(out var inSpan, SqlToken.In))
+			{
+				var right = parser.ConsumeValueList();
+
+				return new NotInSqlCodeExpr
+				{
+					Left = left as SqlCodeExpr,
+					Right = right
 				};
 			}
 

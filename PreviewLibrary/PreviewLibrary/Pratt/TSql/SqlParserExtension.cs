@@ -648,5 +648,21 @@ namespace PreviewLibrary.Pratt.TSql
 				JoinList = joinList
 			};
 		}
+
+		public static ExprListSqlCodeExpr ConsumeValueList(this IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.LParen);
+			var valueList = new List<SqlCodeExpr>();
+			do
+			{
+				var valueExpr = parser.ParseExpIgnoreComment();
+				valueList.Add(valueExpr);
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			parser.Scanner.Consume(SqlToken.RParen);
+			return new ExprListSqlCodeExpr
+			{
+				Items = valueList
+			};
+		}
 	}
 }

@@ -15,21 +15,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		public IExpression Parse(IExpression left, TextSpan token, IParser parser)
 		{
-			parser.Scanner.Consume(SqlToken.LParen);
-
-			var valueList = new List<SqlCodeExpr>();
-			do
-			{
-				var valueExpr = parser.ParseExpIgnoreComment();
-				valueList.Add(valueExpr);
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			parser.Scanner.Consume(SqlToken.RParen);
-
-			var rightExpr = new ExprListSqlCodeExpr
-			{
-				Items = valueList
-			};
-
+			var rightExpr = parser.ConsumeValueList();
 			return new InSqlCodeExpr
 			{
 				Left = left as SqlCodeExpr,
