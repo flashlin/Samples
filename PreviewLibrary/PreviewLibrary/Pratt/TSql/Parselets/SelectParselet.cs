@@ -114,35 +114,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				return new List<SqlCodeExpr>();
 			}
-			return ParseFromSourceList(parser);
-		}
-
-		private static List<SqlCodeExpr> ParseFromSourceList(IParser parser)
-		{
-			var fromSourceList = new List<SqlCodeExpr>();
-			do
-			{
-				FromSourceSqlCodeExpr item = ParseFromSource(parser);
-				fromSourceList.Add(item);
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			return fromSourceList;
-		}
-
-		private static FromSourceSqlCodeExpr ParseFromSource(IParser parser)
-		{
-			var sourceExpr = parser.ParseExpIgnoreComment();
-			parser.TryConsumeAliasName(out var aliasNameExpr);
-			var userWithOptions = parser.ParseWithOptions();
-
-			var joinList = parser.GetJoinSelectList();
-
-			return new FromSourceSqlCodeExpr
-			{
-				Left = sourceExpr,
-				AliasName = aliasNameExpr,
-				Options = userWithOptions,
-				JoinList = joinList
-			};
+			return parser.ParseFromSourceList();
 		}
 
 		protected SqlCodeExpr ParseColumnAs(IParser parser)

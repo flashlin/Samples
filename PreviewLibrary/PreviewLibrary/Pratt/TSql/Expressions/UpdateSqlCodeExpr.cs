@@ -10,8 +10,9 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public SqlCodeExpr Table { get; set; }
 		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
-		public SqlCodeExpr FromTable { get; set; }
-		public List<SqlCodeExpr> JoinSelectList { get; set; }
+		//public SqlCodeExpr FromTable { get; set; }
+		//public List<SqlCodeExpr> JoinSelectList { get; set; }
+		public List<SqlCodeExpr> FromTableList { get; set; }
 		public List<SqlCodeExpr> OutputList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 
@@ -19,14 +20,14 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		{
 			stream.Write("UPDATE ");
 
-			if(TopCount != null)
+			if (TopCount != null)
 			{
 				stream.Write($"TOP {TopCount} ");
 			}
 
 			Table.WriteToStream(stream);
 
-			if(WithOptions != null && WithOptions.Count>0)
+			if (WithOptions != null && WithOptions.Count > 0)
 			{
 				stream.Write(" WITH(");
 				WithOptions.WriteToStreamWithComma(stream);
@@ -36,20 +37,27 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			stream.Write(" SET ");
 			SetColumnsList.WriteToStreamWithComma(stream);
 
-			if( FromTable != null)
+			if (FromTableList != null && FromTableList.Count > 0)
 			{
 				stream.WriteLine();
 				stream.Write("FROM ");
-				FromTable.WriteToStream(stream);
+				FromTableList.WriteToStreamWithComma(stream);
 			}
 
-			if( JoinSelectList != null && JoinSelectList.Count > 0)
-			{
-				stream.WriteLine();
-				JoinSelectList.WriteToStream(stream);
-			}
+			//if( FromTable != null)
+			//{
+			//	stream.WriteLine();
+			//	stream.Write("FROM ");
+			//	FromTable.WriteToStream(stream);
+			//}
 
-			if( OutputList != null && OutputList.Count > 0)
+			//if( JoinSelectList != null && JoinSelectList.Count > 0)
+			//{
+			//	stream.WriteLine();
+			//	JoinSelectList.WriteToStream(stream);
+			//}
+
+			if (OutputList != null && OutputList.Count > 0)
 			{
 				stream.WriteLine();
 				stream.Write("OUTPUT ");

@@ -62,7 +62,9 @@ from customer c, otherTable
 
 			Parse(sql);
 
-			ThenExprShouldBe(@"");
+			ThenExprShouldBe(@"UPDATE c SET name = @name
+FROM customer AS c, otherTable
+WHERE c.id = @id");
 		}
 	}
 }
