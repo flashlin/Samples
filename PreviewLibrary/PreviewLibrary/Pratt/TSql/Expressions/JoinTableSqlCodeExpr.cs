@@ -15,7 +15,11 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write($"{JoinType.ToUpper()} ");
+			if (!string.IsNullOrEmpty(JoinType))
+			{
+				stream.Write($"{JoinType.ToUpper()} ");
+			}
+
 			if (!string.IsNullOrEmpty(OuterType))
 			{
 				stream.Write($"{OuterType.ToUpper()} ");
@@ -29,7 +33,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				AliasName.WriteToStream(stream);
 			}
 
-			if(WithOptions != null && WithOptions.Count > 0)
+			if (WithOptions != null && WithOptions.Count > 0)
 			{
 				stream.Write(" WITH(");
 				WithOptions.WriteToStreamWithComma(stream);

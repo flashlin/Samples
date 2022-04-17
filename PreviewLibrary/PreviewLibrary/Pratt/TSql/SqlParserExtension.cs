@@ -465,6 +465,12 @@ namespace PreviewLibrary.Pratt.TSql
 			var joinSelectList = new List<SqlCodeExpr>();
 			do
 			{
+				if(parser.Scanner.IsToken(SqlToken.Join))
+				{
+					joinSelectList.Add(ParseJoinSelect(TextSpan.Empty, parser));
+					continue;
+				}
+
 				if (!parser.Scanner.TryConsumeAny(out var joinTypeSpan, SqlToken.Inner, SqlToken.Left, SqlToken.Right, SqlToken.Full, SqlToken.Cross))
 				{
 					break;

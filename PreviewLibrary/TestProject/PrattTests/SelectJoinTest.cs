@@ -77,5 +77,21 @@ FROM customer
 LEFT JOIN @tb1
 WHERE id = 1");
 		}
+
+		[Fact]
+		public void nolock_join_table()
+		{
+			var sql = @"select 1
+    	from customer c with (nolock)
+     join otherTable o1";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT 1
+FROM customer AS c WITH( nolock )
+JOIN otherTable o1");
+		}
+
+
 	}
 }
