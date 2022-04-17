@@ -6,10 +6,11 @@ using System.Collections.Generic;
 
 namespace PreviewLibrary.Pratt.TSql.Parselets
 {
-	public class LeftFunctionParselet : IPrefixParselet
+	public class LeftOrRightFunctionParselet : IPrefixParselet
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			var name = parser.Scanner.GetSpanString(token);
 			parser.Scanner.Consume(SqlToken.LParen);
 			var characterExpression = parser.ParseExpIgnoreComment();
 			parser.Scanner.Consume(SqlToken.Comma);
@@ -24,7 +25,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				Name = new ObjectIdSqlCodeExpr 
 				{ 
-					ObjectName = "LEFT"
+					ObjectName = name
 				},
 				Parameters = parametersList
 			};

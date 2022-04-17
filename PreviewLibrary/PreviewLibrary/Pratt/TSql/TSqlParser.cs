@@ -32,10 +32,11 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Insert, new InsertParselet());
 			Register(SqlToken.IsNull, new IsNullParselet());
 			Register(SqlToken.LParen, new GroupParselet());
-			Register(SqlToken.Left, new LeftFunctionParselet());
+			Register(SqlToken.Left, new LeftOrRightFunctionParselet());
 			Register(SqlToken.Object, new ObjectParselet());
 			Register(SqlToken.QuoteString, new QuoteStringParselet());
 			Register(SqlToken.Rank, new RankParselet());
+			Register(SqlToken.Right, new LeftOrRightFunctionParselet());
 			Register(SqlToken.ROLLBACK, new RollbackParselet());
 			Register(SqlToken.Select, new SelectParselet());
 			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());
