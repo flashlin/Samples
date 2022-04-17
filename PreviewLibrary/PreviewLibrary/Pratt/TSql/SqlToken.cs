@@ -162,6 +162,8 @@
 		SERIALIZABLE,
 		Distinct,
 		TempTable,
-		IsNull
+		IsNull,
+		ROLLBACK,
+		TRAN
 	}
 }

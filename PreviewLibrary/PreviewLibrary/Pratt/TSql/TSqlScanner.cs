@@ -139,9 +139,11 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("READ", SqlToken.READ);
 			AddTokenMap("REPEATABLE", SqlToken.REPEATABLE);
+			AddTokenMap("ROLLBACK", SqlToken.ROLLBACK);
 			AddTokenMap("SNAPSHOT", SqlToken.SNAPSHOT);
 			AddTokenMap("SERIALIZABLE", SqlToken.SERIALIZABLE);
 			AddTokenMap("TRANSACTION", SqlToken.TRANSACTION);
+			AddTokenMap("TRAN", SqlToken.TRAN);
 			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);
 			AddTokenMap("UNCOMMITTED", SqlToken.UNCOMMITTED);
 

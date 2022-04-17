@@ -32,6 +32,10 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Insert, new InsertParselet());
 			Register(SqlToken.IsNull, new IsNullParselet());
 			Register(SqlToken.LParen, new GroupParselet());
+			Register(SqlToken.Object, new ObjectParselet());
+			Register(SqlToken.QuoteString, new QuoteStringParselet());
+			Register(SqlToken.Rank, new RankParselet());
+			Register(SqlToken.ROLLBACK, new RollbackParselet());
 			Register(SqlToken.Select, new SelectParselet());
 			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());
 			Register(SqlToken.Set, new SetParselet());
@@ -50,9 +54,6 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Merge, new MergeParselet());
 			Register(SqlToken.Max, new FuncParselet(1));
 			Register(SqlToken.MultiComment, new CommentParselet());
-			Register(SqlToken.Object, new ObjectParselet());
-			Register(SqlToken.QuoteString, new QuoteStringParselet());
-			Register(SqlToken.Rank, new RankParselet());
 			Register(SqlToken.Update, new UpdateParselet());
 			Register(SqlToken.Variable, new VariableParselet());
 			Register(SqlToken.With, new WithParselet());
