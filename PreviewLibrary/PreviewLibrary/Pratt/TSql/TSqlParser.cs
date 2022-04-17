@@ -21,6 +21,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
 			Register(SqlToken.Delete, new DeleteParselet());
 			Register(SqlToken.Declare, new DeclareParselet());
+			Register(SqlToken.Distinct, new DistinctParselet());
 			Register(SqlToken.Exists, new ExistsParselet());
 			Register(SqlToken.Exec, new ExecParselet());
 			Register(SqlToken.Execute, new ExecParselet());

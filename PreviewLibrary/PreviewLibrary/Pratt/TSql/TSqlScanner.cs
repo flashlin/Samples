@@ -33,6 +33,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("CREATE", SqlToken.Create);
 			AddTokenMap("CONVERT", SqlToken.Convert);
 			AddTokenMap("DESC", SqlToken.Desc);
+			AddTokenMap("DISTINCT", SqlToken.Distinct);
 			AddTokenMap("DECLARE", SqlToken.Declare);
 			AddTokenMap("DELETE", SqlToken.Delete);
 			AddTokenMap("DEFAULT", SqlToken.Default);
