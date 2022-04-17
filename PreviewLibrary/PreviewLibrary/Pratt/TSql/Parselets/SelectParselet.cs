@@ -28,6 +28,12 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var fromSourceList = GetFrom_SourceList(parser);
 
+			SqlCodeExpr pivotExpr = null;
+			if (parser.Scanner.TryConsume(SqlToken.Pivot, out var pivotSpan))
+			{
+				pivotExpr = parser.PrefixParse(pivotSpan) as SqlCodeExpr;
+			}
+
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
 			{
@@ -45,6 +51,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				Columns = columns,
 				IntoTable = intoTable,
 				FromSourceList = fromSourceList,
+				PivotExpr = pivotExpr,
 				WhereExpr = whereExpr,
 				GroupByList = groupBy,
 				OrderByList = orderBy,

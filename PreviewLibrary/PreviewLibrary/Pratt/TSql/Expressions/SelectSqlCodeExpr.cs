@@ -10,6 +10,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public List<SqlCodeExpr> Columns { get; set; }
 		public SqlCodeExpr IntoTable { get; set; }
 		public List<SqlCodeExpr> FromSourceList { get; set; }
+		public SqlCodeExpr PivotExpr { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 		public List<SqlCodeExpr> UnionSelectList { get; set; }
 		public List<SqlCodeExpr> GroupByList { get; set; }
@@ -33,7 +34,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				column.value.WriteToStream(stream);
 			}
 
-			if( IntoTable != null)
+			if (IntoTable != null)
 			{
 				stream.WriteLine();
 				stream.Write("INTO ");
@@ -57,6 +58,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				stream.Indent--;
 			}
 
+			if (PivotExpr != null)
+			{
+				stream.WriteLine();
+				PivotExpr.WriteToStream(stream);
+			}
+
 			if (WhereExpr != null)
 			{
 				stream.WriteLine();
@@ -64,7 +71,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				WhereExpr.WriteToStream(stream);
 			}
 
-			if( GroupByList.Count > 0)
+			if (GroupByList.Count > 0)
 			{
 				stream.WriteLine();
 				stream.Write("GROUP BY ");
