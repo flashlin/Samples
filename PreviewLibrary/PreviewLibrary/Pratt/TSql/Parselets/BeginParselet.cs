@@ -8,7 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			if (parser.Scanner.IsToken(SqlToken.TRANSACTION))
+			if (parser.Scanner.IsTokenAny(SqlToken.TRANSACTION, SqlToken.TRAN))
 			{
 				return ParseBeginTransaction(parser);
 			}
@@ -23,7 +23,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 		private BeginTransactionSqlCodeExpr ParseBeginTransaction(IParser parser)
 		{
-			parser.Scanner.Consume(SqlToken.TRANSACTION);
+			parser.Scanner.ConsumeAny(SqlToken.TRANSACTION, SqlToken.TRAN);
 			return new BeginTransactionSqlCodeExpr();
 		}
 	}

@@ -51,5 +51,15 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe("GRANT CONNECT TO [user_Name]");
 		}
+
+		[Fact]
+		public void begin_tran()
+		{
+			var sql = "begin tran";
+			
+			Parse(sql);
+
+			ThenExprShouldBe("BEGIN TRANSACTION");
+		}
 	}
 }

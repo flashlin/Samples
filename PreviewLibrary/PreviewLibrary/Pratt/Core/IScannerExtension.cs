@@ -111,6 +111,15 @@ namespace PreviewLibrary.Pratt.Core
 			return TryConsume(scanner, expectTokenType, out _);
 		}
 
+		
+		public static bool IsTokenAny<TTokenType>(this IScanner scanner, params TTokenType[] tokenTypeList)
+			where TTokenType : struct
+		{
+			var token = scanner.Peek();
+			var expectTokenTypeList = tokenTypeList.Select(x => x.ToString());
+			return expectTokenTypeList.Contains(token.Type);
+		}
+
 		public static bool IsToken<TTokenType>(this IScanner scanner, TTokenType tokenType)
 			where TTokenType : struct
 		{
