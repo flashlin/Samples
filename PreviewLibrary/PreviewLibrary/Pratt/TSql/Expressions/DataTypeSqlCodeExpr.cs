@@ -10,6 +10,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public int? Size { get; internal set; }
 		public int? Scale { get; internal set; }
 		public bool IsPrimaryKey { get; set; }
+		public bool IsAllowNull { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -42,6 +43,11 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			if (IsPrimaryKey)
 			{
 				stream.Write(" PRIMARY KEY");
+			}
+
+			if(IsAllowNull)
+			{
+				stream.Write(" NULL");
 			}
 		}
 	}

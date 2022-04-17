@@ -119,6 +119,8 @@ namespace PreviewLibrary.Pratt.TSql
 
 			var isPrimaryKey = ParseIsPrimaryKey(parser);
 
+			var isAllowNull = parser.Scanner.Match(SqlToken.Null);
+
 			if (!parser.Scanner.Match(SqlToken.LParen))
 			{
 				return new DataTypeSqlCodeExpr
@@ -126,6 +128,7 @@ namespace PreviewLibrary.Pratt.TSql
 					DataType = dataType,
 					IsReadOnly = isReadonly,
 					IsPrimaryKey = isPrimaryKey,
+					IsAllowNull = isAllowNull
 				};
 			}
 
@@ -145,6 +148,7 @@ namespace PreviewLibrary.Pratt.TSql
 			{
 				DataType = dataType,
 				IsPrimaryKey = isPrimaryKey,
+				IsAllowNull = isAllowNull,
 				Size = size,
 				Scale = scale
 			};
