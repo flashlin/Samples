@@ -36,7 +36,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var joinSelectList = parser.GetJoinSelectList();
 
-			var outputList = parser.GetOutputList();
+			var outputList = parser.GetOutputListExpr();
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))

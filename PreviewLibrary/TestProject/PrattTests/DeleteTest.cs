@@ -16,5 +16,21 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe(@"DELETE FROM customer WHERE id = @id");
 		}
+
+		[Fact]
+		public void delete_output()
+		{
+			var sql = @"delete from customer
+	output deleted.id, deleted.name, 'System Message'
+	into TrackCustomer([Id],[Name],[Desc])
+	WHERE id = @id";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"DELETE FROM customer
+OUTPUT deleted.id, deleted.name, 'System Message'
+INTO TrackCustomer ([Id], [Name], [Desc])
+WHERE id = @id");
+		}
 	}
 }

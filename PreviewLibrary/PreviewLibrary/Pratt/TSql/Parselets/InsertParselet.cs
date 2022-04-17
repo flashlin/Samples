@@ -21,7 +21,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var columns = GetColumnsList(parser);
 
-			var outputList = parser.GetOutputList();
+			var outputList = parser.GetOutputListExpr();
 			var outputInto = parser.GetOutputIntoExpr();
 
 			if (parser.Scanner.TryConsume(SqlToken.Select, out var selectToken))

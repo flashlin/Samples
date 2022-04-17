@@ -539,7 +539,7 @@ namespace PreviewLibrary.Pratt.TSql
 		}
 
 
-		public static List<SqlCodeExpr> GetOutputList(this IParser parser)
+		public static List<SqlCodeExpr> GetOutputListExpr(this IParser parser)
 		{
 			var outputList = new List<SqlCodeExpr>();
 			if (parser.Scanner.Match(SqlToken.Output))
@@ -590,6 +590,21 @@ namespace PreviewLibrary.Pratt.TSql
 				IntoTable = intoTable,
 				ColumnsList = columnsList
 			};
+		}
+
+		public static List<SqlCodeExpr> GetColumnsListExpr(this IParser parser)
+		{
+			var columnsList = new List<SqlCodeExpr>();
+			if (parser.Scanner.Match(SqlToken.LParen))
+			{
+				do
+				{
+					var column = parser.ParseExpIgnoreComment();
+					columnsList.Add(column);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+			return columnsList;
 		}
 	}
 }

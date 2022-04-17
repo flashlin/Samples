@@ -15,8 +15,9 @@ namespace PreviewLibrary.Pratt.TSql
 			IntoTable.WriteToStream(stream);
 			if (ColumnsList != null && ColumnsList.Count > 0)
 			{
-				stream.Write(" ");
+				stream.Write(" (");
 				ColumnsList.WriteToStreamWithComma(stream);
+				stream.Write(")");
 			}
 		}
 	}
