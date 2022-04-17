@@ -64,7 +64,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.By);
 			do
 			{
-				var name = parser.ConsumeObjectId();
+				var name = parser.ParseExpIgnoreComment();
 				var ascOrDesc = "ASC";
 				parser.Scanner.TryConsumeAny(out var ascOrDescSpan, SqlToken.Asc, SqlToken.Desc);
 				if (!ascOrDescSpan.IsEmpty)
