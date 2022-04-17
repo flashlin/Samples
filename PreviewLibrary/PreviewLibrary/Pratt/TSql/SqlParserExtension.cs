@@ -38,6 +38,8 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			var arguments = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
 			{
+				var comments = parser.IgnoreComments();
+
 				if (!parser.TryConsume(SqlToken.Variable, out var varName))
 				{
 					return null;
@@ -55,6 +57,7 @@ namespace PreviewLibrary.Pratt.TSql
 
 				return new ArgumentSqlCodeExpr
 				{
+					Comments = comments,
 					Name = varName as SqlCodeExpr,
 					DataType = dataType,
 					DefaultValueExpr = defaultValueExpr
