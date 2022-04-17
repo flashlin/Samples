@@ -12,6 +12,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
 		public SqlCodeExpr FromTable { get; set; }
 		public List<SqlCodeExpr> JoinSelectList { get; set; }
+		public List<SqlCodeExpr> OutputList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -46,6 +47,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			{
 				stream.WriteLine();
 				JoinSelectList.WriteToStream(stream);
+			}
+
+			if( OutputList != null && OutputList.Count > 0)
+			{
+				stream.WriteLine();
+				stream.Write("OUTPUT ");
+				OutputList.WriteToStreamWithComma(stream);
 			}
 
 			if (WhereExpr != null)

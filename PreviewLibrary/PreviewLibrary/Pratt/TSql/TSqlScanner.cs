@@ -40,6 +40,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("DATETIME", SqlToken.DateTime);
 			AddTokenMap("DATETIME2", SqlToken.DateTime2);
 			AddTokenMap("DECIMAL", SqlToken.Decimal);
+			AddTokenMap("DELETED", SqlToken.Deleted);
 			AddTokenMap("ERROR", SqlToken.Error);
 			AddTokenMap("EXIT", SqlToken.Exit);
 			AddTokenMap("END", SqlToken.End);
@@ -61,6 +62,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("INSERT", SqlToken.Insert);
 			AddTokenMap("INTO", SqlToken.Into);
 			AddTokenMap("INT", SqlToken.Int);
+			AddTokenMap("INSERTED", SqlToken.Inserted);
 			AddTokenMap("INNER", SqlToken.Inner);
 			AddTokenMap("JOIN", SqlToken.Join);
 			AddTokenMap("KEY", SqlToken.Key);
@@ -79,6 +81,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("ORDER", SqlToken.Order);
 			AddTokenMap("OUTER", SqlToken.Outer);
 			AddTokenMap("OVER", SqlToken.Over);
+			AddTokenMap("OUTPUT", SqlToken.Output);
 			AddTokenMap("PARTITION", SqlToken.Partition);
 			AddTokenMap("PRIMARY", SqlToken.Primary);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);

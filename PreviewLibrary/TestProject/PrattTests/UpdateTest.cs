@@ -33,5 +33,23 @@ set id = 1";
 
 			ThenExprShouldBe(@"UPDATE customer WITH(rowlock) SET id = 1");
 		}
+
+		[Fact]
+		public void update_table_output()
+		{
+			var sql = @"update [dbo].[customer] with(rowlock, updlock)
+    set name = @name
+    output deleted.Name
+    where id = @id
+";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE [dbo].[customer] WITH(rowlock, updlock) SET name = @name
+OUTPUT  deleted.Name
+WHERE id = @id");
+		}
+
+
 	}
 }

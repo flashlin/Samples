@@ -21,7 +21,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			var setList = ParseSetItemList(parser);
 
 			SqlCodeExpr fromTable = null;
-			if( parser.Scanner.Match(SqlToken.From) )
+			if (parser.Scanner.Match(SqlToken.From))
 			{
 				fromTable = parser.PrefixParseAny(int.MaxValue, SqlToken.Identifier);
 				parser.TryConsumeAliasName(out var aliasName);
@@ -35,6 +35,23 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			}
 
 			var joinSelectList = parser.GetJoinSelectList();
+
+
+			var outputList = new List<SqlCodeExpr>();
+			if (parser.Scanner.Match(SqlToken.Output))
+			{
+				do
+				{
+					var actionName = parser.Scanner.ConsumeStringAny(SqlToken.Deleted, SqlToken.Inserted);
+					parser.Scanner.Consume(SqlToken.Dot);
+					var columnName = parser.ConsumeObjectId();
+					outputList.Add(new OutputSqlCodeExpr
+					{
+						OutputActionName = actionName,
+						ColumnName = columnName,
+					});
+				} while (parser.Scanner.Match(SqlToken.Comma));
+			}
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))
@@ -50,6 +67,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				SetColumnsList = setList,
 				FromTable = fromTable,
 				JoinSelectList = joinSelectList,
+				OutputList = outputList,
 				WhereExpr = whereExpr
 			};
 		}

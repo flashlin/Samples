@@ -141,6 +141,9 @@
 		Source,
 		Rank,
 		Over,
-		UPDLOCK
+		UPDLOCK,
+		Output,
+		Deleted,
+		Inserted
 	}
 }
