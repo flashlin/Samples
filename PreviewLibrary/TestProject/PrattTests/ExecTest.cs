@@ -21,10 +21,10 @@ namespace TestProject.PrattTests
 		[Fact]
 		public void exec_var_eq()
 		{
-			var sql = @"exec @a=1";
+			var sql = @"exec @a = myfunc a,b";
 			Parse(sql);
 
-			ThenExprShouldBe(@"EXEC @a = 1");
+			ThenExprShouldBe(@"EXEC @a = myfunc a, b");
 		}
 
 		[Fact]
