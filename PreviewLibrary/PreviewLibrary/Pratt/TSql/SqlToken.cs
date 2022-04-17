@@ -144,6 +144,7 @@
 		UPDLOCK,
 		Output,
 		Deleted,
-		Inserted
+		Inserted,
+		Out
 	}
 }

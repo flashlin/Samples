@@ -2,6 +2,7 @@
 using PreviewLibrary.Pratt.Core.Expressions;
 using PreviewLibrary.Pratt.Core.Parselets;
 using PreviewLibrary.Pratt.TSql.Expressions;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace PreviewLibrary.Pratt.TSql.Parselets
@@ -12,10 +13,22 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		{
 			var funcName = parser.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier) as SqlCodeExpr;
 
-			var parameters = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
+			var parameters = new List<SqlCodeExpr>();
+			do
 			{
-				return parser.ParseExp() as SqlCodeExpr;
-			}).ToList();
+				var name = parser.ParseExpIgnoreComment();
+				var isOutput = false;
+				if (parser.Scanner.Match(SqlToken.Out))
+				{
+					isOutput = true;
+				}
+				parameters.Add(new ParameterSqlCodeExpr
+				{
+					Name = name,
+					IsOutput = isOutput
+				});
+			} while (parser.Scanner.Match(SqlToken.Comma));
+
 
 			return new ExecSqlCodeExpr
 			{

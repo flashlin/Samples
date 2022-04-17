@@ -19,6 +19,16 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void exec_func_var_out()
+		{
+			var sql = @"exec myFunc @a out,b";
+			Parse(sql);
+
+			ThenExprShouldBe(@"EXEC myFunc @a OUT, b");
+		}
+
+
+		[Fact]
 		public void exec_func_a_var_eq_b()
 		{
 			var sql = @"exec myFunc a, @b=b";
