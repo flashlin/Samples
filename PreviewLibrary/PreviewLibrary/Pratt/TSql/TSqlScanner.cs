@@ -120,11 +120,15 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("ARITHABORT", SqlToken.ARITHABORT);
 			AddTokenMap("CONNECT", SqlToken.CONNECT);
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
+			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
+			AddTokenMap("HIGH", SqlToken.HIGH);
+			AddTokenMap("LOW", SqlToken.LOW);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
 			AddTokenMap("NOEXEC", SqlToken.NOEXEC);
 			AddTokenMap("NOLOCK", SqlToken.NOLOCK);
 			AddTokenMap("NOCOUNT", SqlToken.NOCOUNT);
+			AddTokenMap("NORMAL", SqlToken.NORMAL);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);

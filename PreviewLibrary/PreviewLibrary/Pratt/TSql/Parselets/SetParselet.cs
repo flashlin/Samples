@@ -11,6 +11,11 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if (parser.Scanner.IsToken(SqlToken.DEADLOCK_PRIORITY))
+			{
+				return Set_DEADLOCK_PRIORITY(parser);
+			}
+
 			if (parser.Scanner.TryConsume(SqlToken.Variable, out var variableSpan))
 			{
 				return SetVariable(variableSpan, parser);
@@ -65,6 +70,17 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				Options = setOptions,
 				Toggle = onOffStr,
+			};
+		}
+
+		private SetDealockPrioritySqlCodeExpr Set_DEADLOCK_PRIORITY(IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.DEADLOCK_PRIORITY);
+			var priority = parser.Scanner.ConsumeStringAny(SqlToken.LOW, SqlToken.HIGH, SqlToken.NORMAL);
+
+			return new SetDealockPrioritySqlCodeExpr
+			{
+				Priority = priority,
 			};
 		}
 

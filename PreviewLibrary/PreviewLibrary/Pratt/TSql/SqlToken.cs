@@ -145,6 +145,10 @@
 		Output,
 		Deleted,
 		Inserted,
-		Out
+		Out,
+		DEADLOCK_PRIORITY,
+		LOW,
+		HIGH,
+		NORMAL
 	}
 }
