@@ -134,6 +134,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 			AddTokenMap("LOW", SqlToken.LOW);
 			AddTokenMap("LEVEL", SqlToken.LEVEL);
+			AddTokenMap("LOCK_TIMEOUT", SqlToken.LOCK_TIMEOUT);
 			AddTokenMap("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
 			AddTokenMap("NOEXEC", SqlToken.NOEXEC);
 			AddTokenMap("NOLOCK", SqlToken.NOLOCK);

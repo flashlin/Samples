@@ -11,6 +11,11 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if(parser.Scanner.TryConsume(SqlToken.LOCK_TIMEOUT, out var lockTimeoutSpan))
+			{
+				return SetLockTimeout(lockTimeoutSpan, parser);
+			}
+
 			if (parser.Scanner.IsToken(SqlToken.DEADLOCK_PRIORITY))
 			{
 				return Set_DEADLOCK_PRIORITY(parser);
@@ -75,6 +80,16 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				Options = setOptions,
 				Toggle = onOffStr,
+			};
+		}
+
+		private SqlCodeExpr SetLockTimeout(TextSpan lockTimeoutSpan, IParser parser)
+		{
+			var timeoutPeriod = parser.ParseExpIgnoreComment();
+			
+			return new SetLockTimeoutSqlCodeExpr
+			{
+				TimeoutPeriod = timeoutPeriod,
 			};
 		}
 

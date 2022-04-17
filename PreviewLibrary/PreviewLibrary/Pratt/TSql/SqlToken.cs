@@ -167,6 +167,7 @@
 		TRAN,
 		Commit,
 		Drop,
-		Pivot
+		Pivot,
+		LOCK_TIMEOUT
 	}
 }
