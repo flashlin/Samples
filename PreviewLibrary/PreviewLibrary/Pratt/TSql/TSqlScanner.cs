@@ -59,6 +59,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("GROUP", SqlToken.Group);
 			AddTokenMap("IF", SqlToken.If);
 			AddTokenMap("IS", SqlToken.Is);
+			AddTokenMap("ISNULL", SqlToken.IsNull);
 			AddTokenMap("IN", SqlToken.In);
 			AddTokenMap("INSERT", SqlToken.Insert);
 			AddTokenMap("INTO", SqlToken.Into);

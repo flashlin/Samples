@@ -30,6 +30,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.HexNumber, new HexNumberParselet());
 			Register(SqlToken.Identifier, new ObjectIdParselet());
 			Register(SqlToken.Insert, new InsertParselet());
+			Register(SqlToken.IsNull, new IsNullParselet());
 			Register(SqlToken.LParen, new GroupParselet());
 			Register(SqlToken.Select, new SelectParselet());
 			Register(SqlToken.SqlIdentifier, new ObjectIdParselet());

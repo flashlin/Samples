@@ -45,5 +45,17 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe(@"CONVERT( VARCHAR(100), GETDATE(), 120 )");
 		}
+
+		[Fact]
+		public void isnull()
+		{
+			var sql = @"isnull(@id, '')";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"ISNULL(@id, '')");
+		}
+
+
 	}
 }

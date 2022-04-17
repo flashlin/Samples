@@ -161,6 +161,7 @@
 		SNAPSHOT,
 		SERIALIZABLE,
 		Distinct,
-		TempTable
+		TempTable,
+		IsNull
 	}
 }
