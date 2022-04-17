@@ -37,6 +37,11 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			do
 			{
 				var name = parser.ParseExpIgnoreComment();
+				if (name == null)
+				{
+					break;
+				}
+
 				var isOutput = false;
 				if (parser.Scanner.Match(SqlToken.Out))
 				{

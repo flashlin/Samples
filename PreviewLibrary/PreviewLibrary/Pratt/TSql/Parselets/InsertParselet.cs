@@ -19,6 +19,16 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var tableName = parser.ConsumeObjectIdOrVariable();
 
+			if(parser.Scanner.TryConsumeAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
+			{
+				var execExpr =	parser.PrefixParse(execSpan) as SqlCodeExpr;
+				return new InsertIntoFromSqlCodeExpr
+				{
+					Table = tableName,
+					SelectFromExpr = execExpr,
+				};
+			}
+
 			var columns = GetColumnsList(parser);
 
 			var outputList = parser.GetOutputListExpr();

@@ -119,5 +119,18 @@ INTO trackCustomer (id, name)
 SELECT id, name
 FROM other_customer");
 		}
+
+		[Fact]
+		public void insert_into_exec()
+		{
+			var sql = @"insert into @customer
+exec sp_read_customer
+";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO @customer
+EXEC sp_read_customer");
+		}
 	}
 }
