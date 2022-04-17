@@ -23,5 +23,49 @@ namespace PreviewLibrary.Pratt.TSql
 			scanner.IgnoreComments();
 			return scanner.Consume<SqlToken>(tokenType);
 		}
+
+		public static bool TryConsumeList(this IScanner scanner, out List<TextSpan> spanList, params SqlToken[] tokenTypeList)
+		{
+			scanner.IgnoreComments();
+			var startIndex = scanner.GetOffset();
+			spanList = new List<TextSpan>();
+			for (var i = 0; i < tokenTypeList.Length; i++)
+			{
+				var tokenType = tokenTypeList[i];
+				if (!scanner.TryConsume<SqlToken>(tokenType, out var span))
+				{
+					spanList = new List<TextSpan>();
+					scanner.SetOffset(startIndex);
+					return false;
+				}
+				spanList.Add(span);
+			}
+			return true;
+		}
+
+		public static bool TryConsumeListAny(this IScanner scanner, out List<TextSpan> spanList, params SqlToken[][] tokenTypeListList)
+		{
+			for (var i = 0; i < tokenTypeListList.Length; i++)
+			{
+				var tokenTypeList = tokenTypeListList[i];
+				if (TryConsumeList(scanner, out spanList, tokenTypeList))
+				{
+					return true;
+				}
+			}
+			spanList = new List<TextSpan>();
+			return false;
+		}
+
+		public static List<TextSpan> ConsumeList(this IScanner scanner, params SqlToken[] tokenTypeList)
+		{
+			scanner.IgnoreComments();
+			var textSpanList = new List<TextSpan>();
+			foreach (var tokenType in tokenTypeList)
+			{
+				textSpanList.Add(scanner.Consume<SqlToken>(tokenType));
+			}
+			return textSpanList;
+		}
 	}
 }

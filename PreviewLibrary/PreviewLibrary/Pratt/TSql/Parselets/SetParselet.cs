@@ -16,6 +16,11 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				return Set_DEADLOCK_PRIORITY(parser);
 			}
 
+			if( parser.Scanner.IsToken(SqlToken.TRANSACTION))
+			{
+				return SetTransaction(parser);
+			}
+
 			if (parser.Scanner.TryConsume(SqlToken.Variable, out var variableSpan))
 			{
 				return SetVariable(variableSpan, parser);
@@ -70,6 +75,33 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			{
 				Options = setOptions,
 				Toggle = onOffStr,
+			};
+		}
+
+		private SetTransactionIsolationLevelSqlCodeExpr SetTransaction(IParser parser)
+		{
+			parser.Scanner.ConsumeList(SqlToken.TRANSACTION, SqlToken.ISOLATION, SqlToken.LEVEL);
+
+			var spanList = new List<TextSpan>();
+			var optionList = new[]
+			{
+				new []{  SqlToken.READ, SqlToken.UNCOMMITTED },
+				new []{  SqlToken.READ, SqlToken.COMMITTED },
+				new []{ SqlToken.REPEATABLE, SqlToken.READ },
+				new []{ SqlToken.SNAPSHOT },
+				new []{  SqlToken.SERIALIZABLE}
+			};
+
+			if( !parser.Scanner.TryConsumeListAny(out spanList, optionList) )
+			{
+				ThrowHelper.ThrowParseException(parser, "TRANSACTION option");
+			}
+
+			var optionStr = string.Join(" ", spanList.Select(s => s.ToString()));
+
+			return new SetTransactionIsolationLevelSqlCodeExpr
+			{
+				Option = optionStr,
 			};
 		}
 
