@@ -43,6 +43,7 @@ namespace PreviewLibrary.Pratt.TSql
 			Register(SqlToken.Number, new NumberParselet());
 			Register(SqlToken.NString, new NStringParselet());
 			Register(SqlToken.Not, new NotParselet());
+			Register(SqlToken.Null, new NullParselet());
 			Register(SqlToken.Merge, new MergeParselet());
 			Register(SqlToken.Max, new FuncParselet(1));
 			Register(SqlToken.MultiComment, new CommentParselet());

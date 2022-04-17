@@ -70,6 +70,7 @@ namespace PreviewLibrary.Pratt.TSql
 			AddTokenMap("LEFT", SqlToken.Left);
 			AddTokenMap("NVARCHAR", SqlToken.NVarchar);
 			AddTokenMap("NOT", SqlToken.Not);
+			AddTokenMap("NULL", SqlToken.Null);
 			AddTokenMap("NUMERIC", SqlToken.Numeric);
 			AddTokenMap("MAX", SqlToken.Max);
 			AddTokenMap("MERGE", SqlToken.Merge);

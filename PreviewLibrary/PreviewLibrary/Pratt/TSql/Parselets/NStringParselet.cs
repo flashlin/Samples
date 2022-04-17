@@ -17,6 +17,14 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 		}
 	}
 
+	public class NullParselet : IPrefixParselet
+	{
+		public IExpression Parse(TextSpan token, IParser parser)
+		{
+			return new NullSqlCodeExpr();
+		}
+	}
+
 
 	public class TargetParselet : IPrefixParselet
 	{

@@ -149,6 +149,7 @@
 		DEADLOCK_PRIORITY,
 		LOW,
 		HIGH,
-		NORMAL
+		NORMAL,
+		Null
 	}
 }
