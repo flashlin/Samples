@@ -123,7 +123,8 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var meetColumnAliasNameList = new []
 			{
-				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString
+				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
+				SqlToken.Date
 			};
 
 			TextSpan aliasNameToken;

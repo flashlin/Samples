@@ -521,6 +521,13 @@ namespace PreviewLibrary.Pratt.TSql
 		public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr)
 		{
 			var comments = parser.IgnoreComments();
+
+			var meetColumnNameList = new []
+			{
+				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
+				SqlToken.Date
+			};
+
 			var identTokens = new List<string>();
 			do
 			{
@@ -530,7 +537,7 @@ namespace PreviewLibrary.Pratt.TSql
 					var currTokenStr = parser.Scanner.PeekString();
 					throw new ParseException($"Expect RemoteServer.Database.dbo.name, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
 				}
-				if (!parser.Scanner.TryConsumeAny(out var identifier, SqlToken.Identifier, SqlToken.SqlIdentifier))
+				if (!parser.Scanner.TryConsumeAny(out var identifier, meetColumnNameList))
 				{
 					break;
 				}
