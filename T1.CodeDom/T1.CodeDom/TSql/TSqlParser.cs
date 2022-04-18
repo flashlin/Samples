@@ -49,6 +49,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.Source, new SourceParselet());
 			Register(SqlToken.Target, new TargetParselet());
 			Register(SqlToken.TempTable, new TempTableParselet());
+			Register(SqlToken.Truncate, new TruncateTableParselet());
 			Register(SqlToken.Number, new NumberParselet());
 			Register(SqlToken.NString, new NStringParselet());
 			Register(SqlToken.Not, new NotParselet());

@@ -102,6 +102,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("SCHEME", SqlToken.Scheme);
 			AddTokenMap("SELECT", SqlToken.Select);
 			AddTokenMap("SMALLDATETIME", SqlToken.SmallDateTime);
+			AddTokenMap("TRUNCATE", SqlToken.Truncate);
 			AddTokenMap("TO", SqlToken.To);
 			AddTokenMap("TARGET", SqlToken.Target);
 			AddTokenMap("TOP", SqlToken.Top);

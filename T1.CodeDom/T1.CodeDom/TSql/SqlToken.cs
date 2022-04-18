@@ -169,6 +169,7 @@
 		Drop,
 		Pivot,
 		LOCK_TIMEOUT,
-		Caret
+		Caret,
+		Truncate
 	}
 }
