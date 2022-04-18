@@ -61,6 +61,16 @@
 						foregroundColor = ConsoleColor.Green;
 					}
 					break;
+				case nameof(Profit):
+					if (Profit < 0)
+					{
+						foregroundColor = ConsoleColor.Green;
+					}
+					if (Profit > 0)
+					{
+						foregroundColor = ConsoleColor.Red;
+					}
+					break;
 			}
 
 			return new ConsoleText
