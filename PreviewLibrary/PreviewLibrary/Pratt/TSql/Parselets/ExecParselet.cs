@@ -43,7 +43,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				}
 
 				var isOutput = false;
-				if (parser.Scanner.Match(SqlToken.Out))
+				if (parser.Scanner.MatchAny(SqlToken.Out, SqlToken.Output))
 				{
 					isOutput = true;
 				}
