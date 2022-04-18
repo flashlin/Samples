@@ -7,6 +7,7 @@ namespace T1.CodeDom.TSql.Parselets
 {
 	public class RankSqlCodeExpr : SqlCodeExpr 
 	{
+		public List<SqlCodeExpr> PartitionColumnList { get; set; }
 		public List<SqlCodeExpr> OrderByClause { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -15,6 +16,13 @@ namespace T1.CodeDom.TSql.Parselets
 			stream.WriteLine();
 			stream.Indent++;
 
+			if(PartitionColumnList != null && PartitionColumnList.Count>0)
+			{
+				stream.Write("PARTITION BY ");
+				PartitionColumnList.WriteToStreamWithComma(stream);
+			}
+
+			stream.WriteLine();
 			stream.Write("ORDER BY ");
 			OrderByClause.WriteToStreamWithComma(stream);
 

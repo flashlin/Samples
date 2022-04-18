@@ -17,9 +17,19 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.LParen);
 			//PARTITION BY i.LocationID
 
+			var partitionColumnList = new List<SqlCodeExpr>();
+			if (parser.Scanner.Match(SqlToken.Partition))
+			{
+				parser.Scanner.Consume(SqlToken.By);
+				do
+				{
+					var name = parser.ConsumeObjectId();
+					partitionColumnList.Add(name);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+			}
+
 			parser.Scanner.Consume(SqlToken.Order);
 			parser.Scanner.Consume(SqlToken.By);
-
 			var sortExprList = new List<SqlCodeExpr>();
 			do
 			{
@@ -37,6 +47,7 @@ namespace T1.CodeDom.TSql.Parselets
 
 			return new RankSqlCodeExpr
 			{
+				PartitionColumnList = partitionColumnList,
 				OrderByClause = sortExprList
 			};
 		}
