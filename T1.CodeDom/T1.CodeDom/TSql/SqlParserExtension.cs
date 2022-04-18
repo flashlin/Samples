@@ -69,6 +69,7 @@ namespace T1.CodeDom.TSql
 				}
 				bodyList.Add(body as SqlCodeExpr);
 			} while (!parser.Scanner.TryConsume(SqlToken.End, out _));
+			parser.Scanner.Match(SqlToken.Semicolon);
 			return bodyList;
 		}
 
