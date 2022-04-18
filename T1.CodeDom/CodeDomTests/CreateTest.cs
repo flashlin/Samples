@@ -67,5 +67,14 @@ birth DATETIME
 )");
 		}
 
+		[Fact]
+		public void create_clustered_index()
+		{
+			var sql = @"create clustered index ix_id on #customer (id)";
+			Parse(sql);
+
+			ThenExprShouldBe(@"");
+		}
+
 	}
 }

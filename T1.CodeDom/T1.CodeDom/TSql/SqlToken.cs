@@ -172,6 +172,8 @@
 		Caret,
 		Truncate,
 		Print,
-		XACT_ABORT
+		XACT_ABORT,
+		Clustered,
+		Index
 	}
 }

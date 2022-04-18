@@ -32,6 +32,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("CROSS", SqlToken.Cross);
 			AddTokenMap("CREATE", SqlToken.Create);
 			AddTokenMap("CONVERT", SqlToken.Convert);
+			AddTokenMap("CLUSTERED", SqlToken.Clustered);
 			AddTokenMap("DROP", SqlToken.Drop);
 			AddTokenMap("DESC", SqlToken.Desc);
 			AddTokenMap("DISTINCT", SqlToken.Distinct);
@@ -62,11 +63,12 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("IS", SqlToken.Is);
 			AddTokenMap("ISNULL", SqlToken.IsNull);
 			AddTokenMap("IN", SqlToken.In);
+			AddTokenMap("INT", SqlToken.Int);
 			AddTokenMap("INSERT", SqlToken.Insert);
 			AddTokenMap("INTO", SqlToken.Into);
-			AddTokenMap("INT", SqlToken.Int);
-			AddTokenMap("INSERTED", SqlToken.Inserted);
+			AddTokenMap("INDEX", SqlToken.Index);
 			AddTokenMap("INNER", SqlToken.Inner);
+			AddTokenMap("INSERTED", SqlToken.Inserted);
 			AddTokenMap("JOIN", SqlToken.Join);
 			AddTokenMap("KEY", SqlToken.Key);
 			AddTokenMap("LIKE", SqlToken.Like);
