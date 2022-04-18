@@ -51,6 +51,8 @@
 			var backgroundColor = Console.BackgroundColor;
 			switch (name)
 			{
+				case nameof(StockId):
+				case nameof(StockName):
 				case nameof(CurrentPrice):
 					if (AvgStockPrice < CurrentPrice)
 					{
