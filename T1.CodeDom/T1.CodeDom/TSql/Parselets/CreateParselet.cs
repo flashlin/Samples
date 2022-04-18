@@ -11,6 +11,11 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if(parser.Scanner.TryConsume(SqlToken.Clustered, out var clusteredSpan))
+			{
+				return CreateClusteredIndex(clusteredSpan, parser);
+			}
+
 			if (parser.Scanner.TryConsume(SqlToken.Table, out var tableSpan))
 			{
 				return CreateTable(tableSpan, parser);
@@ -33,6 +38,35 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var helpMessage = parser.Scanner.GetHelpMessage();
 			throw new ParseException($"Parse CREATE Error, {helpMessage}");
+		}
+
+		private SqlCodeExpr CreateClusteredIndex(TextSpan clusteredSpan, IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.Index);
+			var indexName = parser.ConsumeObjectId();
+			parser.Scanner.Consume(SqlToken.On);
+			
+			if( !parser.TryConsumeObjectId(out var tableName) )
+			{
+				tableName = parser.Consume(SqlToken.TempTable);
+			}
+			
+			
+			var onColumnsList = new List<SqlCodeExpr>();
+			parser.Scanner.Consume(SqlToken.LParen);
+			do
+			{
+				var columnName = parser.ConsumeObjectId();
+				onColumnsList.Add(columnName);
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			parser.Scanner.Consume(SqlToken.RParen);
+
+			return new CreateClusteredIndexSqlCodeExpr
+			{
+				IndexName = indexName,
+				TableName = tableName,
+				OnColumns = onColumnsList
+			};
 		}
 
 		private SqlCodeExpr CreateTable(TextSpan tableSpan, IParser parser)

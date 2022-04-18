@@ -571,6 +571,11 @@ namespace T1.CodeDom.TSql
 			return parser.TryConsumeAny(out expr, (span) => parser.PrefixParse(span, ctxPrecedence) as SqlCodeExpr, tokenTypeList);
 		}
 
+		public static bool TryConsumeAny(this IParser parser, out SqlCodeExpr expr, params SqlToken[] tokenTypeList)
+		{
+			return parser.TryConsumeAny(out expr, (span) => parser.PrefixParse(span, int.MaxValue) as SqlCodeExpr, tokenTypeList);
+		}
+
 		public static bool TryConsume(this IParser parser, SqlToken tokenType, int ctxPrecedence, out SqlCodeExpr expr)
 		{
 			return parser.TryConsumeAny(ctxPrecedence, out expr, tokenType);
@@ -579,6 +584,15 @@ namespace T1.CodeDom.TSql
 		public static bool TryConsume(this IParser parser, SqlToken tokenType, out SqlCodeExpr expr)
 		{
 			return parser.TryConsumeAny(0, out expr, tokenType);
+		}
+
+		public static SqlCodeExpr Consume(this IParser parser, SqlToken tokenType)
+		{
+			if(!parser.TryConsumeAny(0, out var expr, tokenType))
+			{
+				ThrowHelper.ThrowParseException(parser, $"Expect '{tokenType}'.");
+			}
+			return expr;
 		}
 
 		public static bool TryConsumeVariable(this IScanner scanner, out VariableSqlCodeExpr sqlExpr)
