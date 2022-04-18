@@ -17,7 +17,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 				intoStr = parser.Scanner.GetSpanString(intoToken);
 			}
 
-			var tableName = parser.ConsumeObjectIdOrVariable();
+			var tableName = parser.ConsumeTableName();
 
 			if(parser.Scanner.TryConsumeAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
 			{

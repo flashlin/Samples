@@ -159,6 +159,22 @@ namespace PreviewLibrary.Pratt.TSql
 			return Consume(parser, TryConsumeObjectId);
 		}
 
+		public static SqlCodeExpr ConsumeTableName(this IParser parser,int ctxPrecedence=0)
+		{
+			var prefixNames = new[]
+			{
+				SqlToken.Identifier,
+				SqlToken.SqlIdentifier,
+				SqlToken.Variable,
+				SqlToken.TempTable
+			};
+			if (!TryConsumeAny(parser, ctxPrecedence, out var expr, prefixNames))
+			{
+				ThrowHelper.ThrowParseException(parser, "Expected table name");
+			}
+			return expr;
+		}
+
 		public static SqlCodeExpr ConsumeObjectIdOrVariable(this IParser parser, int ctxPrecedence = 0)
 		{
 			if (parser.TryConsumeObjectId(out var objectIdExpr))
@@ -538,14 +554,19 @@ namespace PreviewLibrary.Pratt.TSql
 			return TryConsumeAny(parser, out expr, toExpr, tokenType);
 		}
 
-		public static bool TryConsumeAny(this IParser parser, out SqlCodeExpr expr, params SqlToken[] tokenTypeList)
+		public static bool TryConsumeAny(this IParser parser, int ctxPrecedence, out SqlCodeExpr expr, params SqlToken[] tokenTypeList)
 		{
-			return TryConsumeAny(parser, out expr, (span) => parser.PrefixParse(span) as SqlCodeExpr, tokenTypeList);
+			return TryConsumeAny(parser, out expr, (span) => parser.PrefixParse(span, ctxPrecedence) as SqlCodeExpr, tokenTypeList);
+		}
+
+		public static bool TryConsume(this IParser parser, SqlToken tokenType, int ctxPrecedence, out SqlCodeExpr expr)
+		{
+			return TryConsumeAny(parser, ctxPrecedence, out expr, tokenType);
 		}
 
 		public static bool TryConsume(this IParser parser, SqlToken tokenType, out SqlCodeExpr expr)
 		{
-			return TryConsumeAny(parser, out expr, tokenType);
+			return TryConsumeAny(parser, 0, out expr, tokenType);
 		}
 
 		public static bool TryConsumeVariable(this IScanner scanner, out VariableSqlCodeExpr sqlExpr)
