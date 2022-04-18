@@ -43,6 +43,26 @@ WHERE id = @id");
 		}
 
 		[Fact]
+		public void delete_output_from()
+		{
+			var sql = @"delete from customer
+	output deleted.id, deleted.name, 'System Message'
+	into TrackCustomer([Id],[Name],[Desc])
+	from otherTable ds
+		inner join @tIds bs on ds.Id = bs.Id
+	WHERE ds.name = @name";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"DELETE FROM customer
+OUTPUT deleted.id, deleted.name, 'System Message'
+INTO TrackCustomer ([Id], [Name], [Desc])
+FROM otherTable AS ds
+INNER JOIN @tIds bs ds.Id = bs.Id
+WHERE ds.name = @name");
+		}
+
+		[Fact]
 		public void delete_top()
 		{
 			var sql = @"delete top (@batch) from customer";

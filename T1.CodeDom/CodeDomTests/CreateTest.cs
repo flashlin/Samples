@@ -73,7 +73,7 @@ birth DATETIME
 			var sql = @"create clustered index ix_id on #customer (id)";
 			Parse(sql);
 
-			ThenExprShouldBe(@"");
+			ThenExprShouldBe(@"CREATE CLUSTERED INDEX ix_id ON #customer(id)");
 		}
 
 	}
