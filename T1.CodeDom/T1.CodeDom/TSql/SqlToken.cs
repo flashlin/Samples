@@ -170,6 +170,7 @@
 		Pivot,
 		LOCK_TIMEOUT,
 		Caret,
-		Truncate
+		Truncate,
+		Print
 	}
 }

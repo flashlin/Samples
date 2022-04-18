@@ -92,6 +92,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("PIVOT", SqlToken.Pivot);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);
 			AddTokenMap("PROC", SqlToken.Procedure);
+			AddTokenMap("PRINT", SqlToken.Print);
 			AddTokenMap("RANK", SqlToken.Rank);
 			AddTokenMap("RETURNS", SqlToken.Returns);
 			AddTokenMap("RIGHT", SqlToken.Right);
