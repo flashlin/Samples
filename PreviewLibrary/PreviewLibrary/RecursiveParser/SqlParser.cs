@@ -1220,7 +1220,7 @@ namespace PreviewLibrary.RecursiveParser
 
 		protected SqlExpr ParseDataType()
 		{
-			if (TryGet(ParseTableType, out var tableTypeExpr))
+			if (TryGet(ParseTableDataType, out var tableTypeExpr))
 			{
 				return tableTypeExpr;
 			}
@@ -1247,7 +1247,7 @@ namespace PreviewLibrary.RecursiveParser
 			};
 		}
 
-		protected TableTypeExpr ParseTableType()
+		protected TableTypeExpr ParseTableDataType()
 		{
 			if (!TryKeyword("TABLE", out var dataType))
 			{

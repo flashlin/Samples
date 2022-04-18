@@ -3,7 +3,7 @@ using T1.Standard.IO;
 
 namespace PreviewLibrary.Pratt.TSql.Expressions
 {
-	public class DataTableTypeSqlCodeExpr : SqlCodeExpr
+	public class TableDataTypeSqlCodeExpr : SqlCodeExpr
 	{
 		public List<SqlCodeExpr> Columns { get; set; }
 

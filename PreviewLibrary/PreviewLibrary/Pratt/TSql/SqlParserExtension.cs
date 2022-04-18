@@ -98,7 +98,7 @@ namespace PreviewLibrary.Pratt.TSql
 		{
 			if (parser.Scanner.Match(SqlToken.Table))
 			{
-				return ConsumeDataTableType(parser);
+				return ConsumeTableDataType(parser);
 			}
 
 			SqlCodeExpr dataType;
@@ -643,7 +643,7 @@ namespace PreviewLibrary.Pratt.TSql
 			return expr;
 		}
 
-		private static SqlCodeExpr ConsumeDataTableType(IParser parser)
+		public static TableDataTypeSqlCodeExpr ConsumeTableDataType(this IParser parser)
 		{
 			parser.Scanner.Consume(SqlToken.LParen);
 
@@ -659,7 +659,7 @@ namespace PreviewLibrary.Pratt.TSql
 				});
 			} while (parser.Scanner.Match(SqlToken.Comma));
 			parser.Scanner.Consume(SqlToken.RParen);
-			return new DataTableTypeSqlCodeExpr
+			return new TableDataTypeSqlCodeExpr
 			{
 				Columns = columnDataTypeList
 			};

@@ -52,5 +52,20 @@ END");
 		}
 
 
+		[Fact]
+		public void create_table()
+		{
+			var sql = @"create table #cust (  
+        ID int,
+		birth datetime
+    )";
+			Parse(sql);
+
+			ThenExprShouldBe(@"CREATE TABLE #cust(
+ID INT,
+birth DATETIME
+)");
+		}
+
 	}
 }

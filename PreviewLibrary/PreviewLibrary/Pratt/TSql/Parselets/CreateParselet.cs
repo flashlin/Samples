@@ -12,6 +12,11 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if (parser.Scanner.TryConsume(SqlToken.Table, out var tableSpan))
+			{
+				return CreateTable(tableSpan, parser);
+			}
+
 			if (parser.Scanner.Match(SqlToken.Procedure))
 			{
 				return CreateProcedure(token, parser);
@@ -29,6 +34,19 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 
 			var helpMessage = parser.Scanner.GetHelpMessage();
 			throw new ParseException($"Parse CREATE Error, {helpMessage}");
+		}
+
+		private SqlCodeExpr CreateTable(TextSpan tableSpan, IParser parser)
+		{
+			var tableName = parser.ConsumeAny(SqlToken.TempTable, SqlToken.Variable, SqlToken.Identifier) as SqlCodeExpr;
+
+			var tableType = parser.ConsumeTableDataType();
+
+			return new CreateTableSqlCodeExpr
+			{
+				Name = tableName,
+				ColumnsList = tableType.Columns
+			};
 		}
 
 		private IExpression CreatePartitionFunction(TextSpan token, IParser parser)
@@ -94,7 +112,7 @@ namespace PreviewLibrary.Pratt.TSql.Parselets
 			do
 			{
 				groupNameList.Add(parser.ConsumePrimary());
-			}while(parser.Scanner.Match(SqlToken.Comma));
+			} while (parser.Scanner.Match(SqlToken.Comma));
 			parser.Scanner.Consume(SqlToken.RParen);
 
 			return new CreatePartitionSchemeSqlCodeExpr
