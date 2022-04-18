@@ -171,6 +171,7 @@
 		LOCK_TIMEOUT,
 		Caret,
 		Truncate,
-		Print
+		Print,
+		XACT_ABORT
 	}
 }

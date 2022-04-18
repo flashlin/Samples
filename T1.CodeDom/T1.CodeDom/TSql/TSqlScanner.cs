@@ -153,6 +153,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("TRAN", SqlToken.TRAN);
 			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);
 			AddTokenMap("UNCOMMITTED", SqlToken.UNCOMMITTED);
+			AddTokenMap("XACT_ABORT", SqlToken.XACT_ABORT);
 
 			AddSymbolMap("(", SqlToken.LParen);
 			AddSymbolMap(")", SqlToken.RParen);

@@ -54,6 +54,7 @@ namespace T1.CodeDom.TSql.Parselets
 				SqlToken.NUMERIC_ROUNDABORT,
 				SqlToken.NOEXEC,
 				SqlToken.NOCOUNT,
+				SqlToken.XACT_ABORT
 			};
 
 			var setOptions = new List<string>();
