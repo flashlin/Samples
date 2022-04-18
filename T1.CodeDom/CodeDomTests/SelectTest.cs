@@ -18,6 +18,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_string_as_aliasName()
+		{
+			var sql = "select 'abc' as name";
+			Parse(sql);
+			ThenExprShouldBe("SELECT 'abc' AS name");
+		}
+
+		[Fact]
 		public void select_number_comment_number_from_table()
 		{
 			var sql = @"select 1, --test
