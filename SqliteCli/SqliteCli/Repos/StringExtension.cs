@@ -60,6 +60,14 @@ namespace SqliteCli.Repos
 		public static string GetDisplayValue(this object obj)
 		{
 			var sb = new StringBuilder();
+			obj.GetDisplayValue((name, value) =>{
+				sb.Append(value);
+			});
+			return sb.ToString();
+		}
+
+		public static void GetDisplayValue(this object obj, Action<string, string> propValueString)
+		{
 			var clazz = ReflectionClass.Reflection(obj.GetType());
 			var first = true;
 			foreach (var prop in clazz.Properties.Values)
@@ -71,10 +79,11 @@ namespace SqliteCli.Repos
 					var value = (decimal)prop.Getter(obj);
 					if (!first)
 					{
-						sb.Append(" ");
+						propValueString(string.Empty, " ");
 					}
 
-					sb.Append(value.ToNumberString(decimalAttr.MaxLength));
+					var numberString = value.ToNumberString(decimalAttr.MaxLength);
+					propValueString(prop.Name, numberString);
 					first = false;
 					continue;
 				}
@@ -84,15 +93,16 @@ namespace SqliteCli.Repos
 				{
 					if (!first)
 					{
-						sb.Append(" ");
+						propValueString(string.Empty, " ");
 					}
 					var value = prop.Getter(obj);
-					sb.Append(displayAttr.ToDisplayString(value));
+					
+					var str = displayAttr.ToDisplayString(value);
+					propValueString(prop.Name, str);
 					first = false;
 					continue;
 				}
 			}
-			return sb.ToString();
 		}
 
 		public static int GetLength(this string text)
