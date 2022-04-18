@@ -40,40 +40,6 @@ namespace T1.SqlDomParser
 			  .IgnoreThen(SqlStringContentChar.Many())
 			  .Then(s => Character.EqualTo('\'').Value(new string(s)));
 
-		public static TextParser<SqlToken> LessOrEqual = Span.EqualTo("<=").Value(SqlToken.LessThanOrEqual);
-		public static TextParser<SqlToken> GreaterThanOrEqual = Span.EqualTo(">=").Value(SqlToken.GreaterThanOrEqual);
-		public static TextParser<SqlToken> NotEqual = Span.EqualTo("<>").Value(SqlToken.NotEqual);
-		public static TextParser<SqlToken> GreaterThan = Span.EqualTo(">").Value(SqlToken.GreaterThan);
-		public static TextParser<SqlToken> LessThan = Span.EqualTo("<").Value(SqlToken.LessThan);
-		public static TextParser<SqlToken> Equal = Span.EqualTo("=").Value(SqlToken.Equal);
-
-		public static TextParser<SqlToken> CompareOps =
-			OneOf(
-				LessOrEqual,
-				GreaterThanOrEqual,
-				NotEqual,
-				GreaterThan,
-				LessThan,
-				Equal
-			);
-
-		public static TextParser<SqlToken> Plus = Word(SqlToken.Plus, "+");
-		public static TextParser<SqlToken> Minus = Word(SqlToken.Minus, "-");
-		public static TextParser<SqlToken> Star = Word(SqlToken.Star, "*");
-		public static TextParser<SqlToken> Divide = Word(SqlToken.Divide, "/");
-		public static TextParser<SqlToken> LParen = Word(SqlToken.LParen, "(");
-		public static TextParser<SqlToken> RParen = Word(SqlToken.RParen, ")");
-
-		public static TextParser<SqlToken> BinaryOps =
-			OneOf(
-				Plus,
-				Minus,
-				Star,
-				Divide,
-				LParen,
-				RParen
-			);
-
 
 		public static Tokenizer<SqlToken> Tokenizer = new TokenizerBuilder<SqlToken>()
 			.Ignore(Span.WhiteSpace)
@@ -110,9 +76,32 @@ namespace T1.SqlDomParser
 					s.Span.Length > 0 ? s.Span.UntilEnd(n.Span) : n.Span
 			  );
 
+		public static TokenListParser<SqlToken, ObjectIdLiteral> ColumnName3 =
+			from s3 in Token.EqualTo(SqlToken.Identifier)
+			from dot2 in Token.EqualTo(SqlToken.Dot)
+			from s2 in Token.EqualTo(SqlToken.Identifier)
+			from dot1 in Token.EqualTo(SqlToken.Dot)
+			from s1 in Token.EqualTo(SqlToken.Identifier)
+			select new ObjectIdLiteral(s3.ToStringValue(), s2.ToStringValue(), s1.ToStringValue());
+
+		public static TokenListParser<SqlToken, ObjectIdLiteral> ColumnName2 =
+			from s2 in Token.EqualTo(SqlToken.Identifier)
+			from dot1 in Token.EqualTo(SqlToken.Dot)
+			from s1 in Token.EqualTo(SqlToken.Identifier)
+			select new ObjectIdLiteral(string.Empty, s2.ToStringValue(), s1.ToStringValue());
+
+		public static TokenListParser<SqlToken, ObjectIdLiteral> ColumnName1 =
+			from s1 in Token.EqualTo(SqlToken.Identifier)
+			select new ObjectIdLiteral(string.Empty, string.Empty, s1.ToStringValue());
+
+		public static TokenListParser<SqlToken, ObjectIdLiteral> ColumnName =
+			ColumnName1;
+			//OneOf(ColumnName3, ColumnName2, ColumnName1);
+
 		public static TokenListParser<SqlToken, SqlExpr> ExprNotBinary =
 			from head in OneOf(
-				 Parse.Ref(() => Number).Cast<SqlToken, NumberLiteral, SqlExpr>()
+				 Parse.Ref(() => Number).Cast<SqlToken, NumberLiteral, SqlExpr>(),
+				 Parse.Ref(() => ColumnName).Cast<SqlToken, ObjectIdLiteral, SqlExpr>()
 			)
 			select head;
 
@@ -138,7 +127,6 @@ namespace T1.SqlDomParser
 				.Or(ExprNotBinary)
 			select head;
 
-
 		public SqlExpr ParseSql(string expression)
 		{
 			//var expression = "1 * (2 + 3)";
@@ -150,6 +138,11 @@ namespace T1.SqlDomParser
 				new TokenList<SqlToken>(tokenList.Where(x => x.Kind != SqlToken.Comment).ToArray())
 				);
 			return expressionTree;
+		}
+
+		private static TextParser<SqlToken> Symbol(string text, SqlToken sqlToken)
+		{
+			return Span.EqualTo(text).Value(sqlToken);
 		}
 
 		private static BinaryExpr CreateBinaryExpression(SqlExpr head, (Operators.Binary op, SqlExpr expr)[] tail)
@@ -225,11 +218,14 @@ namespace T1.SqlDomParser
 
 		private static readonly IReadOnlyDictionary<SqlToken, Operators.Binary> BinaryOperatorMap = new Dictionary<SqlToken, Operators.Binary>()
 		{
+			[SqlToken.Or] = Operators.Binary.Or,
+			[SqlToken.And] = Operators.Binary.And,
 			[SqlToken.Plus] = Operators.Binary.Add,
 			[SqlToken.Minus] = Operators.Binary.Sub,
 			[SqlToken.Star] = Operators.Binary.Mul,
-			[SqlToken.Or] = Operators.Binary.Or,
-			[SqlToken.And] = Operators.Binary.And,
+			[SqlToken.Divide] = Operators.Binary.Div,
+			[SqlToken.GreaterThanOrEqual] = Operators.Binary.GreaterThan,
+			[SqlToken.GreaterThan] = Operators.Binary.GreaterThan,
 		};
 	}
 }

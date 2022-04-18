@@ -11,7 +11,8 @@ namespace T1.SqlDomParser
 			Mul,
 			Div,
 			And,
-			Or
+			Or,
+			GreaterThan
 		}
 
 		public static ImmutableArray<ImmutableHashSet<Binary>> BinaryPrecedence { get; set; } = new[]

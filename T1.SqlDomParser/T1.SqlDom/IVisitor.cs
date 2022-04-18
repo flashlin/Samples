@@ -4,5 +4,6 @@
 	{
 		void Visit(BinaryExpr unaryExpr);
 		void Visit(NumberLiteral numberLiteral);
+		void Visit(ObjectIdLiteral objectIdLiteral);
 	}
 }

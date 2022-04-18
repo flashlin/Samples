@@ -35,6 +35,13 @@ namespace SqlDomTests
 			var expr = _sqlParser.ParseSql(sql);
 			expr.ShouldBe("1 + 2 * 3");
 		}
-	}
 
+		[Fact]
+		public void two_number()
+		{
+			var sql = "12";
+			var expr = _sqlParser.ParseSql(sql);
+			expr.ShouldBe("12");
+		}
+	}
 }

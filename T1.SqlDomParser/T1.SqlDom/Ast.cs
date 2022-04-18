@@ -66,4 +66,24 @@ namespace T1.SqlDomParser
 			return sb.ToString();
 		}
 	}
+
+	public record ObjectIdLiteral(string DatabaseName, string SchemaName, string ObjectName, TextSpan? Span = null) : SqlExpr
+	{
+		public void Accept(IVisitor visitor) => visitor.Visit(this);
+
+		public string ToSqlCode()
+		{
+			var sb = new StringBuilder();
+			if(!string.IsNullOrEmpty(DatabaseName))
+			{
+				sb.Append($"{DatabaseName}.");
+			}
+			if(!string.IsNullOrEmpty(SchemaName))
+			{
+				sb.Append($"{SchemaName}.");
+			}
+			sb.Append($"{ObjectName}");
+			return sb.ToString();
+		}
+	}
 }

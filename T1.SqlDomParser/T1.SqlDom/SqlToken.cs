@@ -22,5 +22,14 @@
 		GreaterThanOrEqual,
 		HexNumber,
 		NotEqual,
+		In,
+		Is,
+		Like,
+		Not,
+		True,
+		False,
+		Null,
+		Dot,
+		Unknown,
 	}
 }

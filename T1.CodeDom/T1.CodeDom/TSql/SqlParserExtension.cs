@@ -1,0 +1,782 @@
+﻿using PreviewLibrary.Pratt.TSql;
+using PreviewLibrary.Pratt.TSql.Expressions;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using T1.CodeDom.Core;
+using T1.CodeDom.TSql;
+using T1.CodeDom.TSql.Expressions;
+using T1.CodeDom.TSql.Parselets;
+using T1.Standard.IO;
+
+namespace T1.CodeDom.TSql
+{
+	public static class SqlParserExtension
+	{
+		public delegate bool TryConsumeDelegate(IParser scanner, out SqlCodeExpr expr);
+
+		public static List<ArgumentSqlCodeExpr> ConsumeArgumentList(this IParser parser)
+		{
+			var arguments = parser.ConsumeByDelimiter(SqlToken.Comma, () =>
+			{
+				var comments = parser.IgnoreComments();
+
+				if (!parser.TryConsume(SqlToken.Variable, out var varName))
+				{
+					return null;
+				}
+
+				parser.Scanner.Match(SqlToken.As);
+
+				var dataType = parser.ConsumeDataType();
+
+				SqlCodeExpr defaultValueExpr = null;
+				if (parser.Scanner.Match(SqlToken.Equal))
+				{
+					defaultValueExpr = parser.ParseExp() as SqlCodeExpr;
+				}
+
+				var isOutput = false;
+				if (parser.Scanner.Match(SqlToken.Output))
+				{
+					isOutput = true;
+				}
+
+				return new ArgumentSqlCodeExpr
+				{
+					Comments = comments,
+					Name = varName as SqlCodeExpr,
+					DataType = dataType,
+					IsOutput = isOutput,
+					DefaultValueExpr = defaultValueExpr
+				};
+			});
+
+			return arguments.ToList();
+		}
+
+		public static List<SqlCodeExpr> ConsumeBeginBody(this IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.Begin);
+			var bodyList = new List<SqlCodeExpr>();
+			do
+			{
+				var body = parser.ParseExpIgnoreComment();
+				if (body == null)
+				{
+					break;
+				}
+				bodyList.Add(body as SqlCodeExpr);
+			} while (!parser.Scanner.TryConsume(SqlToken.End, out _));
+			return bodyList;
+		}
+
+		public static List<SqlCodeExpr> ConsumeBeginBodyOrSingle(this IParser parser)
+		{
+			if (parser.Scanner.IsToken(SqlToken.Begin))
+			{
+				return parser.ConsumeBeginBody();
+			}
+			var bodyList = new List<SqlCodeExpr>();
+			var body = parser.ParseExpIgnoreComment();
+			if (body == null)
+			{
+				return bodyList;
+			}
+			bodyList.Add(body as SqlCodeExpr);
+			return bodyList;
+		}
+
+		public static IEnumerable<TExpression> ConsumeByDelimiter<TExpression>(this IParser parser,
+			SqlToken delimiter,
+			Func<TExpression> predicateExpr)
+			where TExpression : SqlCodeExpr
+		{
+			parser.Scanner.IgnoreComments();
+			return parser.ConsumeByDelimiter<SqlToken, TExpression>(delimiter, predicateExpr);
+		}
+
+		public static SqlCodeExpr ConsumeDataType(this IParser parser)
+		{
+			if (parser.Scanner.Match(SqlToken.Table))
+			{
+				return parser.ConsumeTableDataType();
+			}
+
+			SqlCodeExpr dataType;
+			if (parser.TryPrefixParseAny(int.MaxValue, out var userIdentifierDataType, SqlToken.Identifier, SqlToken.SqlIdentifier))
+			{
+				dataType = userIdentifierDataType;
+			}
+			else
+			{
+				dataType = ParseDataType(parser);
+			}
+
+			var isReadonly = false;
+			if (parser.Scanner.Match(SqlToken.ReadOnly))
+			{
+				isReadonly = true;
+			}
+
+			var isPrimaryKey = ParseIsPrimaryKey(parser);
+
+			var isAllowNull = parser.Scanner.Match(SqlToken.Null);
+
+			if (!parser.Scanner.Match(SqlToken.LParen))
+			{
+				return new DataTypeSqlCodeExpr
+				{
+					DataType = dataType,
+					IsReadOnly = isReadonly,
+					IsPrimaryKey = isPrimaryKey,
+					IsAllowNull = isAllowNull
+				};
+			}
+
+			var size = ParseSize(parser);
+
+			int? scale = null;
+			if (parser.Scanner.Match(SqlToken.Comma))
+			{
+				var scaleToken = parser.Scanner.Consume(SqlToken.Number);
+				scale = int.Parse(parser.Scanner.GetSpanString(scaleToken));
+			}
+			parser.Scanner.Consume(SqlToken.RParen);
+
+			isPrimaryKey = ParseIsPrimaryKey(parser);
+
+			return new DataTypeSqlCodeExpr
+			{
+				DataType = dataType,
+				IsPrimaryKey = isPrimaryKey,
+				IsAllowNull = isAllowNull,
+				Size = size,
+				Scale = scale
+			};
+		}
+
+		public static SqlCodeExpr ConsumeObjectId(this IParser parser)
+		{
+			return parser.Consume(TryConsumeObjectId);
+		}
+
+		public static SqlCodeExpr ConsumeTableName(this IParser parser, int ctxPrecedence = 0)
+		{
+			var prefixNames = new[]
+			{
+				SqlToken.Identifier,
+				SqlToken.SqlIdentifier,
+				SqlToken.Variable,
+				SqlToken.TempTable
+			};
+			if (!parser.TryConsumeAny(ctxPrecedence, out var expr, prefixNames))
+			{
+				ThrowHelper.ThrowParseException(parser, "Expected table name");
+			}
+			return expr;
+		}
+
+		public static SqlCodeExpr ConsumeObjectIdOrVariable(this IParser parser, int ctxPrecedence = 0)
+		{
+			if (parser.TryConsumeObjectId(out var objectIdExpr))
+			{
+				return objectIdExpr;
+			}
+			return parser.PrefixParse(SqlToken.Variable, ctxPrecedence) as SqlCodeExpr;
+		}
+
+		public static SqlCodeExpr ConsumePrimary(this IParser parser)
+		{
+			if (parser.Scanner.TryConsumeAny(out var identifier, SqlToken.SqlIdentifier))
+			{
+				return parser.PrefixParse(identifier) as SqlCodeExpr;
+			}
+			parser.Scanner.Consume(SqlToken.Primary);
+			return new ObjectIdSqlCodeExpr
+			{
+				ObjectName = "PRIMARY"
+			};
+		}
+		public static ExprListSqlCodeExpr ConsumeValueList(this IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.LParen);
+			var valueList = new List<SqlCodeExpr>();
+			do
+			{
+				var valueExpr = parser.ParseExpIgnoreComment();
+				valueList.Add(valueExpr);
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			parser.Scanner.Consume(SqlToken.RParen);
+			return new ExprListSqlCodeExpr
+			{
+				Items = valueList
+			};
+		}
+
+		public static List<SqlCodeExpr> GetColumnsListExpr(this IParser parser)
+		{
+			var columnsList = new List<SqlCodeExpr>();
+			if (parser.Scanner.Match(SqlToken.LParen))
+			{
+				do
+				{
+					var column = parser.ParseExpIgnoreComment();
+					columnsList.Add(column);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+			return columnsList;
+		}
+
+		public static List<SqlCodeExpr> GetJoinSelectList(this IParser parser)
+		{
+			var joinSelectList = new List<SqlCodeExpr>();
+			do
+			{
+				if (parser.Scanner.IsToken(SqlToken.Join))
+				{
+					joinSelectList.Add(ParseJoinSelect(TextSpan.Empty, parser));
+					continue;
+				}
+
+				if (!parser.Scanner.TryConsumeAny(out var joinTypeSpan, SqlToken.Inner, SqlToken.Left, SqlToken.Right, SqlToken.Full, SqlToken.Cross))
+				{
+					break;
+				}
+				var joinSelect = ParseJoinSelect(joinTypeSpan, parser);
+				joinSelectList.Add(joinSelect);
+			} while (true);
+			return joinSelectList;
+		}
+
+		public static SqlCodeExpr GetOutputIntoExpr(this IParser parser)
+		{
+			if (!parser.Scanner.Match(SqlToken.Into))
+			{
+				return null;
+			}
+			var intoTable = parser.ConsumeObjectIdOrVariable();
+
+			var columnsList = new List<SqlCodeExpr>();
+			if (parser.Scanner.Match(SqlToken.LParen))
+			{
+				do
+				{
+					var columnName = parser.ConsumeAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
+					columnsList.Add(columnName);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+
+			return new OutputIntoSqlCodeExpr
+			{
+				IntoTable = intoTable,
+				ColumnsList = columnsList
+			};
+		}
+
+		public static List<SqlCodeExpr> GetOutputListExpr(this IParser parser)
+		{
+			var outputList = new List<SqlCodeExpr>();
+			if (parser.Scanner.Match(SqlToken.Output))
+			{
+				do
+				{
+
+					//var actionName = parser.Scanner.ConsumeStringAny(SqlToken.Deleted, SqlToken.Inserted);
+					if (parser.Scanner.TryConsumeStringAny(out var actionName, SqlToken.Deleted, SqlToken.Inserted))
+					{
+						parser.Scanner.Consume(SqlToken.Dot);
+					}
+					//var columnName = parser.ConsumeObjectId();
+					var columnName = parser.ParseExpIgnoreComment();
+
+					outputList.Add(new OutputSqlCodeExpr
+					{
+						OutputActionName = actionName,
+						ColumnName = columnName,
+					});
+				} while (parser.Scanner.Match(SqlToken.Comma));
+			}
+
+			return outputList;
+		}
+
+		public static Func<SqlCodeExpr> GetParseExpIgnoreCommentFunc(this IParser parser, int ctxPrecedence = 0)
+		{
+			var comments = new List<CommentSqlCodeExpr>();
+			return () =>
+			{
+				SqlCodeExpr expr = null;
+				while (true)
+				{
+					expr = parser.GetParseExp(ctxPrecedence) as SqlCodeExpr;
+					if (expr == null)
+					{
+						return null;
+					}
+					if (expr is CommentSqlCodeExpr commentExpr)
+					{
+						comments.Add(commentExpr);
+						continue;
+					}
+					expr.Comments = comments;
+					break;
+				}
+				return expr;
+			};
+		}
+
+		public static List<TextSpan> IgnoreComments(this IScanner scanner)
+		{
+			var commentTypes = new[]
+			{
+				SqlToken.SingleComment.ToString(),
+				SqlToken.MultiComment.ToString(),
+			};
+			var comments = new List<TextSpan>();
+			do
+			{
+				var span = scanner.Peek();
+				if (commentTypes.Contains(span.Type))
+				{
+					scanner.Consume();
+					comments.Add(span);
+					continue;
+				}
+				break;
+			} while (true);
+			return comments;
+		}
+
+		public static List<CommentSqlCodeExpr> IgnoreComments(this IParser parser)
+		{
+			var commentsSpanList = parser.Scanner.IgnoreComments();
+			return commentsSpanList.Select(x => new CommentSqlCodeExpr
+			{
+				Content = parser.Scanner.GetSpanString(x),
+			}).ToList();
+		}
+
+		public static bool Match(this IParser parser, SqlToken tokenType)
+		{
+			return parser.Scanner.Match(tokenType);
+		}
+
+		public static SqlCodeExpr ParseExpIgnoreComment(this IParser parser, int ctxPrecedence = 0)
+		{
+			return parser.GetParseExpIgnoreCommentFunc(ctxPrecedence)();
+		}
+
+		public static List<SqlCodeExpr> ParseFromSourceList(this IParser parser)
+		{
+			var fromSourceList = new List<SqlCodeExpr>();
+			do
+			{
+				FromSourceSqlCodeExpr item = ParseFromSource(parser);
+				fromSourceList.Add(item);
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			return fromSourceList;
+		}
+
+		public static int? ParseTopCount(this IParser parser)
+		{
+			int? topCount = null;
+			if (!parser.Scanner.Match(SqlToken.Top))
+			{
+				return null;
+			}
+
+			var isParen = false;
+			if (parser.Match(SqlToken.LParen))
+			{
+				isParen = true;
+			}
+
+			var number = parser.Scanner.ConsumeString(SqlToken.Number);
+			topCount = int.Parse(number);
+
+			if (isParen)
+			{
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+
+			return topCount;
+		}
+
+		public static SqlCodeExpr ParseTopCountExpr(this IParser parser)
+		{
+			if (!parser.Scanner.Match(SqlToken.Top))
+			{
+				return null;
+			}
+
+			var isParen = false;
+			if (parser.Match(SqlToken.LParen))
+			{
+				isParen = true;
+			}
+
+			var topNumberExpr = parser.ParseExpIgnoreComment();
+
+			if (isParen)
+			{
+				topNumberExpr = new GroupSqlCodeExpr
+				{
+					InnerExpr = topNumberExpr,
+				};
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+
+			return new TopSqlCodeExpr
+			{
+				NumberExpr = topNumberExpr
+			};
+		}
+
+		public static List<string> ParseWithOptions(this IParser parser)
+		{
+			var userWithOptions = new List<string>();
+			if (parser.Scanner.Match(SqlToken.With))
+			{
+				parser.Scanner.Consume(SqlToken.LParen);
+				var withOptions = new[]
+				{
+					SqlToken.NOLOCK,
+					SqlToken.ROWLOCK,
+					SqlToken.UPDLOCK
+				};
+				userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
+					.ToList();
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
+			return userWithOptions;
+		}
+
+		public static SqlCodeExpr PrefixParseAny(this IParser parser, int ctxPrecedence, params SqlToken[] prefixTokenTypeList)
+		{
+			if (!parser.TryPrefixParseAny(ctxPrecedence, out SqlCodeExpr expr, prefixTokenTypeList))
+			{
+				ThrowHelper.ThrowParseException(parser, "");
+			}
+			return expr;
+		}
+
+		public static bool TryConsumeAliasName(this IParser parser, out SqlCodeExpr aliasNameExpr)
+		{
+			if (parser.TryConsumeObjectId(out aliasNameExpr))
+			{
+				return true;
+			}
+
+			var startIndex = parser.Scanner.GetOffset();
+			if (parser.Scanner.Match(SqlToken.As))
+			{
+				var success = parser.TryConsumeObjectId(out aliasNameExpr);
+				if (!success)
+				{
+					parser.Scanner.SetOffset(startIndex);
+				}
+				return success;
+			}
+
+			aliasNameExpr = null;
+			return false;
+		}
+
+		public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr)
+		{
+			var comments = parser.IgnoreComments();
+
+			var meetColumnNameList = new[]
+			{
+				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
+				SqlToken.Asterisk, 
+				SqlToken.Date, 
+				SqlToken.Rank
+			};
+
+			var identTokens = new List<string>();
+			do
+			{
+				if(identTokens.Count==1 && parser.Scanner.IsToken(SqlToken.Dot))
+				{
+					identTokens.Add("dbo");
+					continue;
+				}
+				if (identTokens.Count >= 4)
+				{
+					var prevTokens = string.Join(".", identTokens);
+					var currTokenStr = parser.Scanner.PeekString();
+					throw new ParseException($"Expect RemoteServer.Database.dbo.name, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
+				}
+				if (!parser.Scanner.TryConsumeAny(out var identifier, meetColumnNameList))
+				{
+					break;
+				}
+				identTokens.Add(parser.Scanner.GetSpanString(identifier));
+			} while (parser.Scanner.Match(SqlToken.Dot));
+
+			if (identTokens.Count == 0)
+			{
+				expr = null;
+				return false;
+			}
+
+			var fixCount = 4 - identTokens.Count;
+			for (var i = 0; i < fixCount; i++)
+			{
+				identTokens.Insert(0, string.Empty);
+			}
+
+			var identExpr = new ObjectIdSqlCodeExpr
+			{
+				Comments = comments,
+				RemoteServer = identTokens[0],
+				DatabaseName = identTokens[1],
+				SchemaName = identTokens[2],
+				ObjectName = identTokens[3],
+			};
+
+			expr = identExpr;
+			return true;
+		}
+
+		public static bool TryConsumeAny(this IParser parser, out SqlCodeExpr expr, Func<TextSpan, SqlCodeExpr> toExpr, params SqlToken[] tokenTypeList)
+		{
+			for (var i = 0; i < tokenTypeList.Length; i++)
+			{
+				var tokenType = tokenTypeList[i];
+				if (parser.Scanner.TryConsume(tokenType, out var token))
+				{
+					expr = toExpr(token);
+					return true;
+				}
+			}
+			expr = null;
+			return false;
+		}
+
+		public static bool TryConsume(this IParser parser, out SqlCodeExpr expr, Func<TextSpan, SqlCodeExpr> toExpr, SqlToken tokenType)
+		{
+			return parser.TryConsumeAny(out expr, toExpr, tokenType);
+		}
+
+		public static bool TryConsumeAny(this IParser parser, int ctxPrecedence, out SqlCodeExpr expr, params SqlToken[] tokenTypeList)
+		{
+			return parser.TryConsumeAny(out expr, (span) => parser.PrefixParse(span, ctxPrecedence) as SqlCodeExpr, tokenTypeList);
+		}
+
+		public static bool TryConsume(this IParser parser, SqlToken tokenType, int ctxPrecedence, out SqlCodeExpr expr)
+		{
+			return parser.TryConsumeAny(ctxPrecedence, out expr, tokenType);
+		}
+
+		public static bool TryConsume(this IParser parser, SqlToken tokenType, out SqlCodeExpr expr)
+		{
+			return parser.TryConsumeAny(0, out expr, tokenType);
+		}
+
+		public static bool TryConsumeVariable(this IScanner scanner, out VariableSqlCodeExpr sqlExpr)
+		{
+			if (!scanner.TryConsume(SqlToken.Variable, out var returnVariableSpan))
+			{
+				sqlExpr = null;
+				return false;
+			}
+
+			sqlExpr = new VariableSqlCodeExpr
+			{
+				Name = scanner.GetSpanString(returnVariableSpan)
+			};
+			return true;
+		}
+
+		public static bool TryPrefixParseAny(this IParser parser, int ctxPrecedence, out SqlCodeExpr expr, params SqlToken[] prefixTokenTypeList)
+		{
+			var prefixTokenTypeStrList = prefixTokenTypeList.Select(x => x.ToString()).ToArray();
+			var startIndex = parser.Scanner.GetOffset();
+			var prefixToken = parser.Scanner.Consume();
+			if (!prefixTokenTypeStrList.Contains(prefixToken.Type))
+			{
+				parser.Scanner.SetOffset(startIndex);
+				expr = null;
+				return false;
+			}
+			expr = parser.PrefixParse(prefixToken, ctxPrecedence) as SqlCodeExpr;
+			return true;
+		}
+
+		public static void WriteToStream(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream,
+			Action<IndentStream> writeDelimiter = null)
+		{
+			if (writeDelimiter == null)
+			{
+				writeDelimiter = (stream1) => stream1.WriteLine();
+			}
+
+			foreach (var expr in exprList.Select((val, idx) => new { val, idx }))
+			{
+				if (expr.idx != 0)
+				{
+					writeDelimiter(stream);
+				}
+				expr.val.WriteToStream(stream);
+			}
+		}
+
+		public static void WriteToStreamWithComma(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream)
+		{
+			foreach (var expr in exprList.Select((val, idx) => new { val, idx }))
+			{
+				if (expr.idx != 0)
+				{
+					stream.Write(", ");
+				}
+				expr.val.WriteToStream(stream);
+			}
+		}
+
+		public static void WriteToStreamWithComma(this IEnumerable<string> strList, IndentStream stream)
+		{
+			foreach (var str in strList.Select((val, idx) => new { val, idx }))
+			{
+				if (str.idx != 0)
+				{
+					stream.Write(", ");
+				}
+				stream.Write(str.val);
+			}
+		}
+
+		public static void WriteToStreamWithCommaLine(this IEnumerable<SqlCodeExpr> exprList, IndentStream stream)
+		{
+			foreach (var expr in exprList.Select((val, idx) => new { val, idx }))
+			{
+				if (expr.idx != 0)
+				{
+					stream.WriteLine(",");
+				}
+				expr.val.WriteToStream(stream);
+			}
+		}
+
+		private static SqlCodeExpr Consume(this IParser parser, TryConsumeDelegate predicate)
+		{
+			if (!predicate(parser, out var expr))
+			{
+				var currentToken = parser.Scanner.Peek();
+				var helpMessage = parser.Scanner.GetHelpMessage(currentToken);
+				throw new ParseException(helpMessage);
+			}
+			return expr;
+		}
+
+		public static TableDataTypeSqlCodeExpr ConsumeTableDataType(this IParser parser)
+		{
+			parser.Scanner.Consume(SqlToken.LParen);
+
+			var columnDataTypeList = new List<SqlCodeExpr>();
+			do
+			{
+				var name = parser.Scanner.ConsumeStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
+				var dataType = parser.ConsumeDataType();
+				columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
+				{
+					Name = name,
+					DataType = dataType
+				});
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			parser.Scanner.Consume(SqlToken.RParen);
+			return new TableDataTypeSqlCodeExpr
+			{
+				Columns = columnDataTypeList
+			};
+		}
+
+		private static ObjectIdSqlCodeExpr ParseDataType(IParser parser)
+		{
+			var dataTypes = new[]
+			{
+				SqlToken.Bit,
+				SqlToken.Bigint,
+				SqlToken.Char,
+				SqlToken.Date,
+				SqlToken.DateTime,
+				SqlToken.DateTime2,
+				SqlToken.Decimal,
+				SqlToken.Float,
+				SqlToken.Int,
+				SqlToken.Numeric,
+				SqlToken.NVarchar,
+				SqlToken.SmallDateTime,
+				SqlToken.TinyInt,
+				SqlToken.Varchar,
+			};
+			var allTypes = dataTypes.Concat(new[] { SqlToken.Identifier }).ToArray();
+			var dataTypeToken = parser.Scanner.ConsumeAny(allTypes);
+			var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
+			if (dataTypes.Select(x => x.ToString()).Contains(dataTypeToken.Type))
+			{
+				dataTypeStr = dataTypeStr.ToUpper();
+			}
+			return new ObjectIdSqlCodeExpr
+			{
+				ObjectName = dataTypeStr,
+			};
+		}
+
+		private static FromSourceSqlCodeExpr ParseFromSource(IParser parser)
+		{
+			var sourceExpr = parser.ParseExpIgnoreComment();
+			parser.TryConsumeAliasName(out var aliasNameExpr);
+			var userWithOptions = parser.ParseWithOptions();
+
+			var joinList = parser.GetJoinSelectList();
+
+			return new FromSourceSqlCodeExpr
+			{
+				Left = sourceExpr,
+				AliasName = aliasNameExpr,
+				Options = userWithOptions,
+				JoinList = joinList
+			};
+		}
+
+		private static bool ParseIsPrimaryKey(IParser parser)
+		{
+			var isPrimaryKey = false;
+			if (parser.Scanner.IsTokenList(SqlToken.Primary, SqlToken.Key))
+			{
+				parser.Scanner.Consume(SqlToken.Primary);
+				parser.Scanner.Consume(SqlToken.Key);
+				isPrimaryKey = true;
+			}
+			return isPrimaryKey;
+		}
+
+		private static SqlCodeExpr ParseJoinSelect(TextSpan joinTypeSpan, IParser parser)
+		{
+			var parselet = new JoinParselet();
+			return parselet.Parse(joinTypeSpan, parser) as SqlCodeExpr;
+		}
+
+		private static int? ParseSize(IParser parser)
+		{
+			int? size = null;
+			if (parser.Scanner.Match(SqlToken.Max))
+			{
+				size = int.MaxValue;
+			}
+			else
+			{
+				var sizeToken = parser.Scanner.Consume(SqlToken.Number);
+				var sizeStr = parser.Scanner.GetSpanString(sizeToken);
+				size = int.Parse(sizeStr);
+			}
+			return size;
+		}
+	}
+}
