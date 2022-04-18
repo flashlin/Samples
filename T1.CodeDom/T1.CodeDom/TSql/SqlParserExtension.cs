@@ -496,7 +496,8 @@ namespace T1.CodeDom.TSql
 				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
 				SqlToken.Asterisk, 
 				SqlToken.Date, 
-				SqlToken.Rank
+				SqlToken.Rank,
+				SqlToken.Error
 			};
 
 			var identTokens = new List<string>();

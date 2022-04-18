@@ -143,23 +143,29 @@ namespace T1.CodeDom.TSql.Parselets
 				SqlToken.Date
 			};
 
-			TextSpan aliasNameToken;
-			if (parser.Scanner.TryConsumeAny(out _, SqlToken.As))
-			{
-				aliasNameToken = parser.Scanner.ConsumeAny(meetColumnAliasNameList);
-				return new ColumnSqlCodeExpr
-				{
-					Name = name,
-					AliasName = parser.Scanner.GetSpanString(aliasNameToken),
-				};
-			}
+			parser.Scanner.Match(SqlToken.As);	
 
-			parser.Scanner.TryConsumeAny(out aliasNameToken, meetColumnAliasNameList);
+			////TextSpan aliasNameToken;
+			//if (parser.Scanner.TryConsumeAny(out _, SqlToken.As))
+			//{
+			//	//aliasNameToken = parser.Scanner.ConsumeAny(meetColumnAliasNameList);
+			//	//parser.Scanner.GetSpanString(aliasNameToken)
+			//	return new ColumnSqlCodeExpr
+			//	{
+			//		Name = name,
+			//		AliasName = aliasName,
+			//	};
+			//}
+
+			//parser.Scanner.TryConsumeAny(out aliasNameToken, meetColumnAliasNameList);
+
+			//var aliasName = parser.ConsumeObjectId();
+			parser.TryConsumeObjectId(out var aliasName);
 
 			return new ColumnSqlCodeExpr
 			{
 				Name = name,
-				AliasName = parser.Scanner.GetSpanString(aliasNameToken),
+				AliasName = aliasName//parser.Scanner.GetSpanString(aliasNameToken),
 			};
 		}
 

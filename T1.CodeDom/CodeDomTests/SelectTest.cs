@@ -20,9 +20,9 @@ namespace TestProject.PrattTests
 		[Fact]
 		public void select_string_as_aliasName()
 		{
-			var sql = "select 'abc' as name";
+			var sql = "select 'abc' as error";
 			Parse(sql);
-			ThenExprShouldBe("SELECT 'abc' AS name");
+			ThenExprShouldBe("SELECT 'abc' AS error");
 		}
 
 		[Fact]
