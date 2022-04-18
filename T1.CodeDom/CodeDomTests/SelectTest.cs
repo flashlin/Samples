@@ -193,5 +193,25 @@ JOIN customer c WITH(NOLOCK) p.id = c.id
 ORDER BY c.name ASC, c.id ASC");
 		}
 		
+
+	[Fact]
+		public void select_from_comment_select()
+		{
+			var sql = @"SELECT p.*
+        FROM (
+--test
+                SELECT *
+                FROM otherTable
+                WHERE id = @id
+        ) AS p
+        ";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT p.*
+FROM ( SELECT *
+FROM otherTable
+WHERE id = @id ) AS p");
+		}
 	}
 }
