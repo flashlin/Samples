@@ -46,7 +46,7 @@ namespace SqliteCli.Repos
 						delimiter.Append(" ");
 					}
 					var value = prop.Getter(obj);
-					
+
 					sb.Append(displayAttr.ToDisplayString(prop.Name));
 
 					delimiter.Append(new String('-', displayAttr.MaxLength));
@@ -60,10 +60,44 @@ namespace SqliteCli.Repos
 		public static string GetDisplayValue(this object obj)
 		{
 			var sb = new StringBuilder();
-			obj.GetDisplayValue((name, value) =>{
+			obj.GetDisplayValue((name, value) =>
+			{
 				sb.Append(value);
 			});
 			return sb.ToString();
+		}
+
+		public static void DisplayConsoleValue(this object obj)
+		{
+			var foregroundColor = Console.ForegroundColor;
+			var backgroundColor = Console.BackgroundColor;
+			obj.DisplayValue(text =>
+			{
+				Console.ForegroundColor = text.ForegroundColor;
+				Console.BackgroundColor = text.BackgroundColor;
+				Console.Write(text.Text);
+				Console.ForegroundColor = foregroundColor;
+				Console.BackgroundColor = backgroundColor;
+			});
+			Console.WriteLine();
+		}
+
+		public static void DisplayValue(this object obj, Action<ConsoleText> display)
+		{
+			obj.GetDisplayValue((name, value) =>
+			{
+				var consoleTextProvider = obj as IConsoleTextProvider;
+				if (consoleTextProvider == null)
+				{
+					display(new ConsoleText
+					{
+						Text = value,
+					});
+					return;
+				}
+				var text = consoleTextProvider.GetConsoleText(name, value);
+				display(text);
+			});
 		}
 
 		public static void GetDisplayValue(this object obj, Action<string, string> propValueString)
@@ -96,7 +130,7 @@ namespace SqliteCli.Repos
 						propValueString(string.Empty, " ");
 					}
 					var value = prop.Getter(obj);
-					
+
 					var str = displayAttr.ToDisplayString(value);
 					propValueString(prop.Name, str);
 					first = false;
@@ -140,5 +174,18 @@ namespace SqliteCli.Repos
 					return $"{spaces}{text}";
 			}
 		}
+	}
+
+
+	public class ConsoleText
+	{
+		public string Text { get; set; }
+		public ConsoleColor ForegroundColor { get; set; } = ConsoleColor.White;
+		public ConsoleColor BackgroundColor { get; set; } = ConsoleColor.Black;
+	}
+
+	public interface IConsoleTextProvider
+	{
+		ConsoleText GetConsoleText(string name, string value);
 	}
 }

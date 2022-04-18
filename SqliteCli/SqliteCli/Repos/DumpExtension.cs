@@ -10,6 +10,7 @@ namespace SqliteCli.Repos
 	{
 		public static void Dump(this List<TransHistory> result)
 		{
+
 			if (result.Count > 0)
 			{
 				var title = result.First().GetDisplayTitle();
@@ -17,7 +18,8 @@ namespace SqliteCli.Repos
 			}
 			foreach (var item in result)
 			{
-				Console.WriteLine(item.GetDisplayValue());
+				//Console.WriteLine(item.GetDisplayValue());
+				item.DisplayConsoleValue();
 			}
 			if (result.Count > 0)
 			{
@@ -55,7 +57,8 @@ namespace SqliteCli.Repos
 			}
 			foreach (var item in result)
 			{
-				Console.WriteLine(item.GetDisplayValue());
+				//Console.WriteLine(item.GetDisplayValue());
+				item.DisplayConsoleValue();
 			}
 		}
 	}

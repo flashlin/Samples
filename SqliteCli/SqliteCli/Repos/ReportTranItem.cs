@@ -1,6 +1,6 @@
 ﻿namespace SqliteCli.Repos
 {
-	public class ReportTranItem
+	public class ReportTranItem : IConsoleTextProvider
 	{
 		[DisplayString("", 7)]
 		public string TranType { get; set; }
@@ -38,11 +38,37 @@
 
 		[DecimalString(6)]
 		public decimal CurrentPrice { get; set; }
-		
+
 		[AmountString(12)]
 		public decimal CurrTotalPrice { get; set; }
 
 		[AmountString(11)]
 		public decimal Profit { get; set; }
+
+		public ConsoleText GetConsoleText(string name, string value)
+		{
+			var foregroundColor = Console.ForegroundColor;
+			var backgroundColor = Console.BackgroundColor;
+			switch (name)
+			{
+				case nameof(CurrentPrice):
+					if (AvgStockPrice < CurrentPrice)
+					{
+						foregroundColor = ConsoleColor.Red;
+					}
+					if (AvgStockPrice > CurrentPrice)
+					{
+						foregroundColor = ConsoleColor.Green;
+					}
+					break;
+			}
+
+			return new ConsoleText
+			{
+				ForegroundColor = foregroundColor,
+				BackgroundColor = backgroundColor,
+				Text = value
+			};
+		}
 	}
 }
