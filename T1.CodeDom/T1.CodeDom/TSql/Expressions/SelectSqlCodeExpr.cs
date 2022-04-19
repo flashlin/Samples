@@ -15,6 +15,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public List<SqlCodeExpr> UnionSelectList { get; set; }
 		public List<SqlCodeExpr> GroupByList { get; set; }
 		public List<OrderItemSqlCodeExpr> OrderByList { get; set; }
+		public OptionSqlCodeExpr OptionExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -85,6 +86,12 @@ namespace T1.CodeDom.TSql.Expressions
 				stream.WriteLine();
 				stream.Write("ORDER BY ");
 				OrderByList.WriteToStreamWithComma(stream);
+			}
+
+			if( OptionExpr != null)
+			{
+				stream.WriteLine();
+				OptionExpr.WriteToStream(stream);
 			}
 
 			if (UnionSelectList != null && UnionSelectList.Count > 0)

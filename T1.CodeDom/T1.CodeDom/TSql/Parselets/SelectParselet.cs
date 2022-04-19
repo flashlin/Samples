@@ -40,6 +40,8 @@ namespace T1.CodeDom.TSql.Parselets
 			var groupBy = ParseGroupBy(parser);
 			var orderBy = ParseOrderBy(parser);
 
+			var optionExpr = parser.ParseOptionExpr();
+
 			var unionSelectList = ParseUnionSelectList(parser);
 
 			return new SelectSqlCodeExpr
@@ -52,6 +54,7 @@ namespace T1.CodeDom.TSql.Parselets
 				WhereExpr = whereExpr,
 				GroupByList = groupBy,
 				OrderByList = orderBy,
+				OptionExpr = optionExpr,
 				UnionSelectList = unionSelectList
 			};
 		}
