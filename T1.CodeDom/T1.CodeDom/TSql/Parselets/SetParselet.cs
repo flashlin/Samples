@@ -139,12 +139,13 @@ namespace T1.CodeDom.TSql.Parselets
 				Name = parser.Scanner.GetSpanString(variableSpan),
 			};
 
-			parser.Scanner.Consume(SqlToken.Equal);
+			var oper = parser.Scanner.ConsumeStringAny(SqlToken.Equal, SqlToken.PlusEqual);
 
 			var valueExpr = parser.ParseExp() as SqlCodeExpr;
 			return new SetVariableSqlCodeExpr
 			{
 				Name = variableExpr,
+				Oper = oper,
 				Value = valueExpr
 			};
 		}

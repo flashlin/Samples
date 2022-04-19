@@ -175,6 +175,7 @@
 		XACT_ABORT,
 		Clustered,
 		Index,
-		ROW_NUMBER
+		ROW_NUMBER,
+		PlusEqual
 	}
 }

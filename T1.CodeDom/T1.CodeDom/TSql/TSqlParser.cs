@@ -92,6 +92,7 @@ namespace T1.CodeDom.TSql
 			InfixLeft(SqlToken.Slash, Precedence.PRODUCT);
 			InfixLeft(SqlToken.VerticalBar, Precedence.BINARY);
 			InfixLeft(SqlToken.Caret, Precedence.EXPONENT);
+			InfixLeft(SqlToken.PlusEqual, Precedence.PREFIX);
 		}
 
 		public SqlCodeExpr ParseExpression()

@@ -165,6 +165,7 @@ namespace T1.CodeDom.TSql
 			AddSymbolMap(".", SqlToken.Dot);
 			AddSymbolMap("=", SqlToken.Equal);
 			AddSymbolMap("+", SqlToken.Plus);
+			AddSymbolMap("+=", SqlToken.PlusEqual);
 			AddSymbolMap("-", SqlToken.Minus);
 			AddSymbolMap("*", SqlToken.Asterisk);
 			AddSymbolMap("/", SqlToken.Slash);
