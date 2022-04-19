@@ -224,7 +224,7 @@ WHERE id = @id ) AS p");
 
 
 	[Fact]
-		public void select_()
+		public void select_from_where_comment_comment()
 		{
 			var sql = @"select id
 	from customer
