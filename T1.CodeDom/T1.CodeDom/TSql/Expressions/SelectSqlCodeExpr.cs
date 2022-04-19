@@ -8,7 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class SelectSqlCodeExpr : SqlCodeExpr
 	{
-		public int? TopCount { get; set; }
+		public TopSqlCodeExpr TopCount { get; set; }
 		public List<SqlCodeExpr> Columns { get; set; }
 		public SqlCodeExpr IntoTable { get; set; }
 		public List<SqlCodeExpr> FromSourceList { get; set; }
@@ -20,13 +20,15 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write("SELECT ");
+			stream.Write("SELECT");
 
 			if (TopCount != null)
 			{
-				stream.Write($"TOP {TopCount} ");
+				stream.Write(" ");
+				TopCount.WriteToStream(stream);
 			}
 
+			stream.Write(" ");
 			foreach (var column in Columns.Select((value, idx) => new { value, idx }))
 			{
 				if (column.idx != 0)

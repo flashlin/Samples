@@ -8,7 +8,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 {
 	public class UpdateSqlCodeExpr : SqlCodeExpr
 	{
-		public int? TopCount { get; set; }
+		public TopSqlCodeExpr TopCount { get; set; }
 		public SqlCodeExpr Table { get; set; }
 		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
@@ -24,7 +24,8 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 
 			if (TopCount != null)
 			{
-				stream.Write($" TOP {TopCount}");
+				stream.Write(" ");
+				TopCount.WriteToStream(stream);
 			}
 
 			if (Table != null)

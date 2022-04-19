@@ -10,7 +10,7 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			var topCount = parser.ParseTopCount();
+			var topCount = parser.ParseTopCountExpr();
 
 			var columns = new List<SqlCodeExpr>();
 			do
