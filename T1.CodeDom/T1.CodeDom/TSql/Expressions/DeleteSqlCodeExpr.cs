@@ -14,6 +14,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public List<SqlCodeExpr> FromSourceList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 		public SqlCodeExpr OutputInto { get; set; }
+		public OptionSqlCodeExpr OptionExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -60,6 +61,12 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 				stream.WriteLine();
 				stream.Write("WHERE ");
 				WhereExpr.WriteToStream(stream);
+			}
+
+			if (OptionExpr != null)
+			{
+				stream.WriteLine();
+				OptionExpr.WriteToStream(stream);
 			}
 		}
 	}

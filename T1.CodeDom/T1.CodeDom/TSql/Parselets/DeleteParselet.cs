@@ -33,6 +33,8 @@ namespace T1.CodeDom.TSql.Parselets
 				whereExpr = parser.ParseExp() as SqlCodeExpr;
 			}
 
+			var optionExpr = parser.ParseOptionExpr();
+
 			return new DeleteSqlCodeExpr
 			{
 				TopExpr = topCount,
@@ -41,7 +43,8 @@ namespace T1.CodeDom.TSql.Parselets
 				OutputList = outputList,
 				OutputInto = outputInto,
 				FromSourceList = fromSourceList,
-				WhereExpr = whereExpr
+				WhereExpr = whereExpr,
+				OptionExpr = optionExpr
 			};
 		}
 	}

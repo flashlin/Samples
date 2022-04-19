@@ -176,6 +176,8 @@
 		Clustered,
 		Index,
 		ROW_NUMBER,
-		PlusEqual
+		PlusEqual,
+		MAXDOP,
+		Option
 	}
 }

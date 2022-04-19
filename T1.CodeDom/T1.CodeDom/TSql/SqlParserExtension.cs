@@ -412,6 +412,30 @@ namespace T1.CodeDom.TSql
 			};
 		}
 
+		public static OptionSqlCodeExpr ParseOptionExpr(this IParser parser)
+		{
+			if (!parser.Scanner.Match(SqlToken.Option))
+			{
+				return null;
+			}
+
+			parser.Scanner.Consume(SqlToken.LParen);
+			
+			parser.Scanner.Consume(SqlToken.MAXDOP);
+			var numberOfCpu = int.Parse(parser.Scanner.ConsumeString(SqlToken.Number));
+			parser.Scanner.Consume(SqlToken.RParen);
+
+			var maxdop = new MaxdopSqlCodeExpr
+			{
+				NumberOfCpu = numberOfCpu,
+			};
+
+			return new OptionSqlCodeExpr
+			{
+				Maxdop = maxdop
+			};
+		}
+
 		public static List<string> ParseWithOptions(this IParser parser)
 		{
 			var userWithOptions = new List<string>();

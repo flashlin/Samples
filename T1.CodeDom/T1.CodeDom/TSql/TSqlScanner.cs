@@ -89,6 +89,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("OUTER", SqlToken.Outer);
 			AddTokenMap("OVER", SqlToken.Over);
 			AddTokenMap("OUTPUT", SqlToken.Output);
+			AddTokenMap("OPTION", SqlToken.Option);
 			AddTokenMap("PARTITION", SqlToken.Partition);
 			AddTokenMap("PRIMARY", SqlToken.Primary);
 			AddTokenMap("PIVOT", SqlToken.Pivot);
@@ -145,6 +146,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("NOLOCK", SqlToken.NOLOCK);
 			AddTokenMap("NOCOUNT", SqlToken.NOCOUNT);
 			AddTokenMap("NORMAL", SqlToken.NORMAL);
+			AddTokenMap("MAXDOP", SqlToken.MAXDOP);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("READ", SqlToken.READ);
