@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using PreviewLibrary.Pratt.TSql.Expressions;
+using System.Collections.Generic;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql.Expressions;
 using T1.CodeDom.TSql.Parselets;
@@ -116,6 +117,32 @@ namespace T1.CodeDom.TSql
 		public void InfixLeft(SqlToken tokenType, Precedence precedence)
 		{
 			Register(tokenType.ToString(), new BinaryOperatorParselet(precedence, false));
+		}
+
+		protected override (TextSpan infixToken, int consumeIndex) PeekToken()
+		{
+			var index = _scanner.GetOffset();
+			var lastConsumeIndex = index;
+			TextSpan lastInfixToken = TextSpan.Empty;
+			do
+			{
+				_scanner.SetOffset(index);
+				var (infixToken, consumeIndex) = base.PeekToken();
+				if (infixToken.IsEmpty)
+				{
+					break;
+				}
+				if (infixToken.Type == SqlToken.MultiComment.ToString() || infixToken.Type == SqlToken.SingleComment.ToString())
+				{
+					index = consumeIndex;
+					continue;
+				}
+				lastInfixToken = infixToken;
+				lastConsumeIndex = consumeIndex;
+				break;
+			} while (true);
+
+			return (lastInfixToken, lastConsumeIndex);
 		}
 
 		protected override IPrefixParselet CodeSpecPrefix(TextSpan token)

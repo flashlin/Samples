@@ -497,7 +497,7 @@ namespace T1.CodeDom.TSql
 				SqlToken.Asterisk, 
 				SqlToken.Date, 
 				SqlToken.Rank,
-				SqlToken.Error
+				SqlToken.Error,
 			};
 
 			var identTokens = new List<string>();

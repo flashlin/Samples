@@ -28,7 +28,7 @@ namespace T1.CodeDom.Core
 			return PrefixParse(prefixToken, ctxPrecedence);
 		}
 
-		public IExpression ParseExp(int ctxPrecedence)
+		public virtual IExpression ParseExp(int ctxPrecedence)
 		{
 			var expr = GetParseExp(ctxPrecedence);
 			if (expr == null)
@@ -36,12 +36,6 @@ namespace T1.CodeDom.Core
 				throw new ParseException($"Expect token but found NONE.");
 			}
 			return expr;
-			//var prefixToken = _scanner.Consume();
-			//if (prefixToken.IsEmpty)
-			//{
-			//	throw new ParseException($"Expect token but found NONE.");
-			//}
-			//return PrefixParse(prefixToken, ctxPrecedence);
 		}
 
 		public IExpression PrefixParse(TextSpan prefixToken, int ctxPrecedence)
@@ -50,7 +44,8 @@ namespace T1.CodeDom.Core
 			var left = prefixParselet.Parse(prefixToken, this);
 			while (true)
 			{
-				var infixToken = _scanner.Peek();
+				//var infixToken = _scanner.Peek();
+				var (infixToken, consumeIndex) = PeekToken();
 				if (infixToken.IsEmpty)
 				{
 					break;
@@ -66,10 +61,25 @@ namespace T1.CodeDom.Core
 				{
 					break;
 				}
-				_scanner.Consume();
+				//_scanner.Consume();
+				ConsumeToken(consumeIndex);
 				left = infixParselet.Parse(left, infixToken, this);
 			}
 			return left;
+		}
+
+		private void ConsumeToken(int consumeIndex)
+		{
+			_scanner.SetOffset(consumeIndex);
+		}
+
+		protected virtual (TextSpan infixToken, int consumeIndex) PeekToken()
+		{
+			var startIndex = _scanner.GetOffset();
+			var infixToken = _scanner.Consume();
+			var consumeIndex = _scanner.GetOffset();
+			_scanner.SetOffset(startIndex);
+			return (infixToken, consumeIndex);
 		}
 
 		public IEnumerable<IExpression> ParseProgram()

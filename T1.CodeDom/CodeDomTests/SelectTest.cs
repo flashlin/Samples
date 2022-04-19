@@ -221,5 +221,26 @@ FROM ( SELECT *
 FROM otherTable
 WHERE id = @id ) AS p");
 		}
+
+
+	[Fact]
+		public void select_()
+		{
+			var sql = @"select id
+	from customer
+	where c.id = 1 -- comment1
+		and c.status & 2 <> 3 -- comment2
+		and c.name is NULL
+		";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT id
+FROM customer
+WHERE c.id = 1 AND c.status & 2 <> 3 AND c.name IS NULL");
+		}
+
+
+		
 	}
 }
