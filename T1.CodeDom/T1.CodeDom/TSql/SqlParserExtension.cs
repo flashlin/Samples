@@ -236,9 +236,9 @@ namespace T1.CodeDom.TSql
 			var joinSelectList = new List<SqlCodeExpr>();
 			do
 			{
-				if (parser.Scanner.IsToken(SqlToken.Join))
+				if (parser.TryConsumeToken(SqlToken.Join, out var joinSpan))
 				{
-					joinSelectList.Add(ParseJoinSelect(TextSpan.Empty, parser));
+					joinSelectList.Add(ParseJoinSelect(joinSpan, parser));
 					continue;
 				}
 
@@ -420,7 +420,7 @@ namespace T1.CodeDom.TSql
 			}
 
 			parser.Scanner.Consume(SqlToken.LParen);
-			
+
 			parser.Scanner.Consume(SqlToken.MAXDOP);
 			var numberOfCpu = int.Parse(parser.Scanner.ConsumeString(SqlToken.Number));
 			parser.Scanner.Consume(SqlToken.RParen);
@@ -808,6 +808,97 @@ namespace T1.CodeDom.TSql
 				size = int.Parse(sizeStr);
 			}
 			return size;
+		}
+
+		public static bool IsToken(this IParser parser, SqlToken tokenType)
+		{
+			var token = parser.PeekToken();
+			return token.Type == tokenType.ToString();
+		}
+
+		public static bool TryConsumeToken(this IParser parser, SqlToken tokenType, out TextSpan token)
+		{
+			token = parser.PeekToken();
+			if (token.Type != tokenType.ToString())
+			{
+				token = TextSpan.Empty;
+				return false;
+			}
+			return true;
+		}
+
+		public static TextSpan PeekToken(this IParser parser)
+		{
+			var commentTokenTypes = new[]
+			{
+				SqlToken.MultiComment,
+				SqlToken.SingleComment
+			};
+			var commentList = parser.Scanner.IgnoreComments();
+			var token = parser.Scanner.Peek();
+			if (token.IsEmpty)
+			{
+				if (commentList.Count > 0)
+				{
+					var allComment = commentList.First().Concat(commentList.Last());
+					return allComment;
+				}
+				return TextSpan.Empty;
+			}
+			token.Comments = commentList;
+			return token;
+		}
+
+		public static TextSpan ConsumeToken(this IParser parser)
+		{
+			var token = PeekToken(parser);
+			if (token.IsEmpty)
+			{
+				ThrowHelper.ThrowParseException(parser, "Unexpected None.");
+			}
+			if (token.IsComment())
+			{
+				ThrowHelper.ThrowParseException(parser, $"Except non-comment token, bot got {token.Type}.");
+			}
+			parser.Scanner.SetOffset(token.Offset + token.Length);
+			return token;
+		}
+
+		public static bool IsComment(this TextSpan span)
+		{
+			var commentTokenTypes = new[]
+			{
+				SqlToken.MultiComment.ToString(),
+				SqlToken.SingleComment.ToString()
+			};
+			return commentTokenTypes.Contains(span.Type);
+		}
+
+		public static TextSpan ConsumeToken(this IParser parser, SqlToken tokenType)
+		{
+			var commentTokenTypes = new[]
+			{
+				SqlToken.MultiComment,
+				SqlToken.SingleComment
+			};
+			var commentList = parser.Scanner.IgnoreComments();
+			var token = parser.Scanner.Peek();
+			if (commentTokenTypes.Contains(tokenType) && token.IsEmpty)
+			{
+				if (commentList.Count > 0)
+				{
+					var allComment = commentList.First().Concat(commentList.Last());
+					return allComment;
+				}
+				ThrowHelper.ThrowParseException(parser, "Except Comment, but got None.");
+			}
+			if (token.Type != tokenType.ToString())
+			{
+				ThrowHelper.ThrowParseException(parser, $"Expect {tokenType}, but got {token.Type}");
+			}
+			parser.Scanner.Consume();
+			token.Comments = commentList;
+			return token;
 		}
 	}
 }

@@ -92,6 +92,27 @@ FROM customer AS c WITH( nolock )
 JOIN otherTable o1");
 		}
 
+		[Fact]
+		public void from_select_from_comment_inner_join()
+		{
+			var sql = @"select id
+	from (
+	 	select b.name
+	 	from customer b with (nolock, index(pk_id)) -- test
+		inner join otherTable e with (nolock) on b.id=e.id
+	 	where birth < @birth
+	 	group by b.id
+	) a ";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT id
+FROM ( SELECT b.name
+FROM customer AS b WITH( nolock, INDEX(pk_id) )
+INNER JOIN otherTable e WITH(nolock) b.id = e.id
+WHERE birth < @birth
+GROUP BY b.id ) AS a");
+		}
 
 	}
 }
