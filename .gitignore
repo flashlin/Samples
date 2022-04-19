@@ -6,3 +6,4 @@ node_modules/
 *.user
 *.lock
 dist/
+.idea/
