@@ -1,6 +1,4 @@
-﻿using PreviewLibrary.Pratt.TSql;
-using PreviewLibrary.Pratt.TSql.Expressions;
-using T1.CodeDom.Core;
+﻿using T1.CodeDom.Core;
 using T1.CodeDom.TSql.Expressions;
 
 namespace T1.CodeDom.TSql.Parselets

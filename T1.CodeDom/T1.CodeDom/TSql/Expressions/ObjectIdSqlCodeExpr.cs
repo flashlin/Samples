@@ -1,7 +1,6 @@
-﻿using T1.CodeDom.TSql.Expressions;
-using T1.Standard.IO;
+﻿using T1.Standard.IO;
 
-namespace PreviewLibrary.Pratt.TSql.Expressions
+namespace T1.CodeDom.TSql.Expressions
 {
 	public class ObjectIdSqlCodeExpr : SqlCodeExpr
 	{

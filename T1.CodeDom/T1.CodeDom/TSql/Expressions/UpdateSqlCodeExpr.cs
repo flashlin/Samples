@@ -1,10 +1,7 @@
-﻿
-using System.Collections.Generic;
-using T1.CodeDom.TSql;
-using T1.CodeDom.TSql.Expressions;
+﻿using System.Collections.Generic;
 using T1.Standard.IO;
 
-namespace PreviewLibrary.Pratt.TSql.Expressions
+namespace T1.CodeDom.TSql.Expressions
 {
 	public class UpdateSqlCodeExpr : SqlCodeExpr
 	{

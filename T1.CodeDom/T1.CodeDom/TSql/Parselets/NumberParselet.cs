@@ -1,5 +1,5 @@
-﻿using PreviewLibrary.Pratt.TSql.Expressions;
-using T1.CodeDom.Core;
+﻿using T1.CodeDom.Core;
+using T1.CodeDom.TSql.Expressions;
 using T1.Standard.Net.SoapProtocols.WsdlXmlDeclrs;
 
 namespace T1.CodeDom.TSql.Parselets
