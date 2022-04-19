@@ -28,13 +28,12 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			parser.Scanner.ConsumeList(SqlToken.LParen, SqlToken.RParen);
 			
-			parser.Scanner.Consume(SqlToken.Over);
-			parser.Scanner.Consume(SqlToken.LParen);
-
-			//var overType = parser.Scanner.ConsumeStringAny(SqlToken.Order, SqlToken.Partition);
-			//parser.Scanner.Consume(SqlToken.By);
+			var overExpr = parser.ParseOver();
 			
-			
+			return new RowNumberSqlCodeExpr
+			{
+				Over = overExpr
+			};
 		}
 	}
 }

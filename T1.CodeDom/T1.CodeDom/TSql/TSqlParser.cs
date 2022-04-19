@@ -37,6 +37,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.Print, new PrintParselet());
 			Register(SqlToken.QuoteString, new QuoteStringParselet());
 			Register(SqlToken.Rank, new RankParselet());
+			Register(SqlToken.ROW_NUMBER, new RowNumberParselet());
 			Register(SqlToken.Right, new LeftOrRightFunctionParselet());
 			Register(SqlToken.ROLLBACK, new RollbackParselet());
 			Register(SqlToken.Select, new SelectParselet());

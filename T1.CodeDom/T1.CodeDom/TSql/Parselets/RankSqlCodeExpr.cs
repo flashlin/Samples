@@ -9,25 +9,30 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public List<SqlCodeExpr> PartitionColumnList { get; set; }
 		public List<SqlCodeExpr> OrderByClause { get; set; }
+		public OverSqlCodeExpr Over { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write("RANK() OVER(");
-			stream.WriteLine();
-			stream.Indent++;
+			stream.Write("RANK() ");
+			Over.WriteToStream(stream);
 
-			if(PartitionColumnList != null && PartitionColumnList.Count>0)
-			{
-				stream.Write("PARTITION BY ");
-				PartitionColumnList.WriteToStreamWithComma(stream);
-			}
+			//stream.Write("(");
+			//stream.WriteLine();
+			//stream.Indent++;
 
-			stream.WriteLine();
-			stream.Write("ORDER BY ");
-			OrderByClause.WriteToStreamWithComma(stream);
 
-			stream.Indent--;
-			stream.Write(")");
+			//if(PartitionColumnList != null && PartitionColumnList.Count>0)
+			//{
+			//	stream.Write("PARTITION BY ");
+			//	PartitionColumnList.WriteToStreamWithComma(stream);
+			//}
+
+			//stream.WriteLine();
+			//stream.Write("ORDER BY ");
+			//OrderByClause.WriteToStreamWithComma(stream);
+
+			//stream.Indent--;
+			//stream.Write(")");
 		}
 	}
 }
