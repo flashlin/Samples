@@ -13,9 +13,8 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.RParen);
 			parser.Scanner.Consume(SqlToken.Over);
 
-
+			//
 			parser.Scanner.Consume(SqlToken.LParen);
-			//PARTITION BY i.LocationID
 
 			var partitionColumnList = new List<SqlCodeExpr>();
 			if (parser.Scanner.Match(SqlToken.Partition))

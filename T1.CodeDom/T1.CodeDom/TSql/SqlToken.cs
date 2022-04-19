@@ -174,6 +174,7 @@
 		Print,
 		XACT_ABORT,
 		Clustered,
-		Index
+		Index,
+		ROW_NUMBER
 	}
 }

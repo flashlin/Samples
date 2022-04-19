@@ -11,6 +11,7 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 		public SqlCodeExpr Table { get; set; }
 		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> OutputList { get; set; }
+		public List<SqlCodeExpr> FromSourceList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 		public SqlCodeExpr OutputInto { get; set; }
 
@@ -45,6 +46,13 @@ namespace PreviewLibrary.Pratt.TSql.Expressions
 			{
 				stream.WriteLine();
 				OutputInto.WriteToStream(stream);
+			}
+
+			if (FromSourceList != null && FromSourceList.Count > 0)
+			{
+				stream.WriteLine();
+				stream.Write("FROM ");
+				FromSourceList.WriteToStreamWithComma(stream);
 			}
 
 			if (WhereExpr != null)

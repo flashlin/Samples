@@ -1,4 +1,5 @@
 ﻿using PreviewLibrary.Pratt.TSql.Expressions;
+using System.Collections.Generic;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql;
 using T1.CodeDom.TSql.Expressions;
@@ -20,6 +21,12 @@ namespace T1.CodeDom.TSql.Parselets
 			var outputList = parser.GetOutputListExpr();
 			var outputInto = parser.GetOutputIntoExpr();
 
+			var fromSourceList = new List<SqlCodeExpr>();
+			if(parser.Scanner.Match(SqlToken.From))
+			{
+				fromSourceList = parser.ParseFromSourceList();
+			}
+
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))
 			{
@@ -33,6 +40,7 @@ namespace T1.CodeDom.TSql.Parselets
 				WithOptions = withOptions,
 				OutputList = outputList,
 				OutputInto = outputInto,
+				FromSourceList = fromSourceList,
 				WhereExpr = whereExpr
 			};
 		}
