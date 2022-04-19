@@ -23,6 +23,7 @@ namespace T1.CodeDom.TSql.Expressions
 			{
 				stream.Write($"{OuterType.ToUpper()} ");
 			}
+			
 			stream.Write("JOIN ");
 
 			SecondTable.WriteToStream(stream);

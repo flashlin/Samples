@@ -233,9 +233,9 @@ namespace T1.CodeDom.TSql
 			var joinSelectList = new List<SqlCodeExpr>();
 			do
 			{
-				if (parser.TryConsumeToken(SqlToken.Join, out var joinSpan))
+				if (parser.MatchToken(SqlToken.Join))
 				{
-					joinSelectList.Add(ParseJoinSelect(joinSpan, parser));
+					joinSelectList.Add(ParseJoinSelect(TextSpan.Empty, parser));
 					continue;
 				}
 
@@ -822,6 +822,12 @@ namespace T1.CodeDom.TSql
 				return false;
 			}
 			return true;
+		}
+
+
+		public static bool MatchToken(this IParser parser, SqlToken tokenType)
+		{
+			return TryConsumeToken(parser, tokenType, out _);
 		}
 
 		public static TextSpan PeekToken(this IParser parser)
