@@ -241,6 +241,17 @@ WHERE c.id = 1 AND c.status & 2 <> 3 AND c.name IS NULL");
 		}
 
 
+	[Fact]
+		public void select_top_into_tmpTable_from_table()
+		{
+			var sql = @"SELECT TOP 1 * INTO #tmpCustomer from customer";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT TOP 1 *
+INTO #tmpCustomer
+FROM customer");
+		}
 		
 	}
 }

@@ -21,7 +21,7 @@ namespace T1.CodeDom.TSql.Parselets
 			SqlCodeExpr intoTable = null;
 			if(parser.Scanner.Match(SqlToken.Into))
 			{
-				intoTable = parser.ConsumeAny(SqlToken.TempTable) as SqlCodeExpr;
+				intoTable = parser.ConsumeTableName();
 			}
 
 			var fromSourceList = GetFrom_SourceList(parser);
@@ -145,21 +145,6 @@ namespace T1.CodeDom.TSql.Parselets
 
 			parser.Scanner.Match(SqlToken.As);	
 
-			////TextSpan aliasNameToken;
-			//if (parser.Scanner.TryConsumeAny(out _, SqlToken.As))
-			//{
-			//	//aliasNameToken = parser.Scanner.ConsumeAny(meetColumnAliasNameList);
-			//	//parser.Scanner.GetSpanString(aliasNameToken)
-			//	return new ColumnSqlCodeExpr
-			//	{
-			//		Name = name,
-			//		AliasName = aliasName,
-			//	};
-			//}
-
-			//parser.Scanner.TryConsumeAny(out aliasNameToken, meetColumnAliasNameList);
-
-			//var aliasName = parser.ConsumeObjectId();
 			parser.TryConsumeObjectId(out var aliasName);
 
 			return new ColumnSqlCodeExpr

@@ -395,7 +395,7 @@ namespace T1.CodeDom.TSql
 				isParen = true;
 			}
 
-			var topNumberExpr = parser.ParseExpIgnoreComment();
+			var topNumberExpr = parser.ParseExpIgnoreComment(int.MaxValue);
 
 			if (isParen)
 			{
