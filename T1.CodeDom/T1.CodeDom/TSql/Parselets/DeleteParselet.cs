@@ -14,7 +14,7 @@ namespace T1.CodeDom.TSql.Parselets
 
 			parser.Scanner.Match(SqlToken.From);
 
-			var table = parser.ConsumeObjectId();
+			var table = parser.ConsumeTableName();
 
 			var withOptions = parser.ParseWithOptions();
 
