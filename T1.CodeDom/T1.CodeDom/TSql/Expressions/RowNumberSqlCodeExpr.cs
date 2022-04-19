@@ -1,8 +1,7 @@
-﻿using T1.CodeDom.Core;
-using T1.CodeDom.TSql.Expressions;
+﻿using T1.CodeDom.TSql.Parselets;
 using T1.Standard.IO;
 
-namespace T1.CodeDom.TSql.Parselets
+namespace T1.CodeDom.TSql.Expressions
 {
 	public class RowNumberSqlCodeExpr :  SqlCodeExpr
 	{
