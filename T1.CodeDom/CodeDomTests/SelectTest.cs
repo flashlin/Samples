@@ -241,7 +241,7 @@ WHERE c.id = 1 AND c.status & 2 <> 3 AND c.name IS NULL");
 		}
 
 
-	[Fact]
+		[Fact]
 		public void select_top_into_tmpTable_from_table()
 		{
 			var sql = @"SELECT TOP 1 * INTO #tmpCustomer from customer";
@@ -252,6 +252,16 @@ WHERE c.id = 1 AND c.status & 2 <> 3 AND c.name IS NULL");
 INTO #tmpCustomer
 FROM customer");
 		}
-		
+
+		[Fact]
+		public void select_with_index()
+		{
+			var sql = @"SELECT 1 from customer with(nolock, index(aaa))";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT 1
+FROM customer WITH( nolock, INDEX(aaa) )");
+		}
 	}
 }

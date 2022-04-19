@@ -424,8 +424,24 @@ namespace T1.CodeDom.TSql
 					SqlToken.ROWLOCK,
 					SqlToken.UPDLOCK
 				};
-				userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
-					.ToList();
+
+				do
+				{
+					if (parser.Scanner.Match(SqlToken.Index))
+					{
+						parser.Scanner.Consume(SqlToken.LParen);
+						var indexName = parser.ConsumeObjectId();
+						parser.Scanner.Consume(SqlToken.RParen);
+						userWithOptions.Add($"INDEX({indexName})");
+						continue;
+					}
+
+					var option = parser.Scanner.ConsumeStringAny(withOptions);
+					userWithOptions.Add(option);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+
+				//userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
+				//	.ToList();
 				parser.Scanner.Consume(SqlToken.RParen);
 			}
 			return userWithOptions;
@@ -469,8 +485,8 @@ namespace T1.CodeDom.TSql
 			var meetColumnNameList = new[]
 			{
 				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
-				SqlToken.Asterisk, 
-				SqlToken.Date, 
+				SqlToken.Asterisk,
+				SqlToken.Date,
 				SqlToken.Rank,
 				SqlToken.Error,
 			};
@@ -478,7 +494,7 @@ namespace T1.CodeDom.TSql
 			var identTokens = new List<string>();
 			do
 			{
-				if(identTokens.Count==1 && parser.Scanner.IsToken(SqlToken.Dot))
+				if (identTokens.Count == 1 && parser.Scanner.IsToken(SqlToken.Dot))
 				{
 					identTokens.Add("dbo");
 					continue;
@@ -563,7 +579,7 @@ namespace T1.CodeDom.TSql
 
 		public static SqlCodeExpr Consume(this IParser parser, SqlToken tokenType)
 		{
-			if(!parser.TryConsumeAny(0, out var expr, tokenType))
+			if (!parser.TryConsumeAny(0, out var expr, tokenType))
 			{
 				ThrowHelper.ThrowParseException(parser, $"Expect '{tokenType}'.");
 			}
