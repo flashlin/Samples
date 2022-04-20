@@ -179,6 +179,8 @@
 		PlusEqual,
 		MAXDOP,
 		Option,
-		Cursor
+		Cursor,
+		Open,
+		Fetch
 	}
 }

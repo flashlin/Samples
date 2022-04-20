@@ -34,6 +34,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.LParen, new GroupParselet());
 			Register(SqlToken.Left, new LeftOrRightFunctionParselet());
 			Register(SqlToken.Object, new ObjectParselet());
+			Register(SqlToken.Open, new OpenParselet());
 			Register(SqlToken.Pivot, new PivotParselet());
 			Register(SqlToken.Print, new PrintParselet());
 			Register(SqlToken.QuoteString, new QuoteStringParselet());

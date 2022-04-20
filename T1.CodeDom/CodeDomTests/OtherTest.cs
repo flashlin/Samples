@@ -84,5 +84,15 @@ namespace TestProject.PrattTests
 			ThenExprShouldBe(@"CURSOR FOR SELECT Id, name
 FROM customer WITH( nolock )");
 		}
+
+		[Fact]
+		public void open()
+		{
+			var sql = @"open @mydata";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"OPEN @mydata");
+		}
 	}
 }

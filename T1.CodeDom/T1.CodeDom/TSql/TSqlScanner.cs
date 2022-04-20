@@ -56,6 +56,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("FROM", SqlToken.From);
 			AddTokenMap("FLOAT", SqlToken.Float);
 			AddTokenMap("FULL", SqlToken.Full);
+			AddTokenMap("FETCH", SqlToken.Fetch);
 			AddTokenMap("FUNCTION", SqlToken.Function);
 			AddTokenMap("GRANT", SqlToken.Grant);
 			AddTokenMap("GO", SqlToken.Go);
@@ -86,6 +87,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("OFF", SqlToken.Off);
 			AddTokenMap("OUT", SqlToken.Out);
 			AddTokenMap("OR", SqlToken.Or);
+			AddTokenMap("OPEN", SqlToken.Open);
 			AddTokenMap("ORDER", SqlToken.Order);
 			AddTokenMap("OUTER", SqlToken.Outer);
 			AddTokenMap("OVER", SqlToken.Over);
