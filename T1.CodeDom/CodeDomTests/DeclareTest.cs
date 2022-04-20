@@ -35,5 +35,17 @@ name varchar(50)
 			ThenExprShouldBe(@"DECLARE @amount DECIMAL(10,3) = 1
 DECLARE @id INT");
 		}
+
+		[Fact]
+		public void declare_cursor()
+		{
+			var sql = @"declare @p cursor";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"DECLARE @p CURSOR");
+		}
+
+
 	}
 }

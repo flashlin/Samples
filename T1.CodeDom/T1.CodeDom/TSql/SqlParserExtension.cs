@@ -758,6 +758,7 @@ namespace T1.CodeDom.TSql
 				SqlToken.SmallDateTime,
 				SqlToken.TinyInt,
 				SqlToken.Varchar,
+				SqlToken.Cursor
 			};
 			var allTypes = dataTypes.Concat(new[] { SqlToken.Identifier }).ToArray();
 			var dataTypeToken = parser.Scanner.ConsumeAny(allTypes);
