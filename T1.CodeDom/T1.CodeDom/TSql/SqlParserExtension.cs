@@ -233,13 +233,13 @@ namespace T1.CodeDom.TSql
 			var joinSelectList = new List<SqlCodeExpr>();
 			do
 			{
-				if (parser.MatchToken(SqlToken.Join))
+				if (parser.IsToken(SqlToken.Join))
 				{
 					joinSelectList.Add(ParseJoinSelect(TextSpan.Empty, parser));
 					continue;
 				}
 
-				if (!parser.Scanner.TryConsumeAny(out var joinTypeSpan, SqlToken.Inner, SqlToken.Left, SqlToken.Right, SqlToken.Full, SqlToken.Cross))
+				if (!parser.TryConsumeTokenAny(out var joinTypeSpan, SqlToken.Inner, SqlToken.Left, SqlToken.Right, SqlToken.Full, SqlToken.Cross))
 				{
 					break;
 				}
@@ -560,11 +560,13 @@ namespace T1.CodeDom.TSql
 
 		public static bool TryConsumeAny(this IParser parser, out SqlCodeExpr expr, Func<TextSpan, SqlCodeExpr> toExpr, params SqlToken[] tokenTypeList)
 		{
+			var comments = parser.Scanner.IgnoreComments();
 			for (var i = 0; i < tokenTypeList.Length; i++)
 			{
 				var tokenType = tokenTypeList[i];
 				if (parser.Scanner.TryConsume(tokenType, out var token))
 				{
+					token.Comments = comments;
 					expr = toExpr(token);
 					return true;
 				}
@@ -813,32 +815,39 @@ namespace T1.CodeDom.TSql
 			return token.Type == tokenType.ToString();
 		}
 
-		public static bool TryConsumeToken(this IParser parser, SqlToken tokenType, out TextSpan token)
+		
+		public static bool TryConsumeToken(this IParser parser, out TextSpan token, SqlToken tokenType)
 		{
-			token = parser.PeekToken();
-			if (token.Type != tokenType.ToString())
+			var span = parser.PeekToken();
+			if( span.Type != tokenType.ToString())
 			{
 				token = TextSpan.Empty;
 				return false;
 			}
+			parser.ConsumeToken();
+			token = span;
 			return true;
 		}
 
+		public static bool TryConsumeTokenAny(this IParser parser, out TextSpan token, params SqlToken[] tokenTypeList)
+		{
+			TextSpan tmpToken = TextSpan.Empty;
+			var isSuccess = tokenTypeList.Any(tokenType => parser.TryConsumeToken(out tmpToken, tokenType));
+			token = tmpToken;
+			return isSuccess;
+		}
 
 		public static bool MatchToken(this IParser parser, SqlToken tokenType)
 		{
-			return TryConsumeToken(parser, tokenType, out _);
+			return TryConsumeToken(parser, out _, tokenType);
 		}
 
 		public static TextSpan PeekToken(this IParser parser)
 		{
-			var commentTokenTypes = new[]
-			{
-				SqlToken.MultiComment,
-				SqlToken.SingleComment
-			};
+			var startIndex = parser.Scanner.GetOffset();
 			var commentList = parser.Scanner.IgnoreComments();
 			var token = parser.Scanner.Peek();
+			parser.Scanner.SetOffset(startIndex);
 			if (token.IsEmpty)
 			{
 				if (commentList.Count > 0)
@@ -863,7 +872,7 @@ namespace T1.CodeDom.TSql
 			{
 				ThrowHelper.ThrowParseException(parser, $"Except non-comment token, bot got {token.Type}.");
 			}
-			parser.Scanner.SetOffset(token.Offset + token.Length);
+			parser.Scanner.SetOffset(token.Offset + token.Length -1);
 			return token;
 		}
 

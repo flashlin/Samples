@@ -263,5 +263,17 @@ FROM customer");
 			ThenExprShouldBe(@"SELECT 1
 FROM customer WITH( nolock, INDEX(aaa) )");
 		}
+
+		[Fact]
+		public void select_sum_as_out()
+		{
+			var sql = @"SELECT sum(id) as out, name from customer";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT sum( id ) AS out, name FROM customer");
+		}
+
+
 	}
 }

@@ -6,23 +6,23 @@ namespace T1.CodeDom.TSql.Parselets
 {
 	public class JoinParselet : IPrefixParselet
 	{
-		public IExpression Parse(TextSpan token, IParser parser)
+		public IExpression Parse(TextSpan joinTypetoken, IParser parser)
 		{
 			var outerType = string.Empty;
-			var joinTypeStr = parser.Scanner.GetSpanString(token);
+			var joinTypeStr = parser.Scanner.GetSpanString(joinTypetoken);
 			switch (joinTypeStr.ToUpper())
 			{
 				case "LEFT":
 				case "RIGHT":
 				case "FULL":
-					if (parser.Scanner.Match(SqlToken.Outer))
+					if (parser.Match(SqlToken.Outer))
 					{
 						outerType = "OUTER";
 					}
 					break;
 			}
 
-			parser.Scanner.Consume(SqlToken.Join);
+			parser.ConsumeToken(SqlToken.Join);
 
 			//var secondTable = parser.ConsumeAny(SqlToken.Variable, SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
 			var secondTable = parser.ParseExpIgnoreComment();

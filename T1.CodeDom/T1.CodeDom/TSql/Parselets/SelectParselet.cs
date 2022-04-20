@@ -18,7 +18,7 @@ namespace T1.CodeDom.TSql.Parselets
 			} while (parser.Match(SqlToken.Comma));
 
 			SqlCodeExpr intoTable = null;
-			if(parser.Scanner.Match(SqlToken.Into))
+			if (parser.Scanner.Match(SqlToken.Into))
 			{
 				intoTable = parser.ConsumeTableName();
 			}
@@ -71,7 +71,7 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.By);
 			do
 			{
-				if(!parser.TryConsumeObjectId(out var name))
+				if (!parser.TryConsumeObjectId(out var name))
 				{
 					name = parser.ParseExpIgnoreComment();
 				}
@@ -139,20 +139,37 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			var name = parser.ParseExpIgnoreComment();
 
-			var meetColumnAliasNameList = new []
+			var meetColumnAliasNameList = new[]
 			{
 				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
 				SqlToken.Date
 			};
 
-			parser.Scanner.Match(SqlToken.As);	
+			var hasAs = parser.Scanner.Match(SqlToken.As);
 
-			parser.TryConsumeObjectId(out var aliasName);
+			SqlCodeExpr aliasName = null;
+			if (hasAs)
+			{
+				var aliasNameToken = parser.ConsumeToken();
+				aliasName = new ObjectIdSqlCodeExpr
+				{
+					ObjectName = parser.Scanner.GetSpanString(aliasNameToken)
+				};
+			}
+			else
+			{
+				parser.TryConsumeObjectId(out aliasName);
+			}
+
+			//if (hasAs && !hasAlias)
+			//{
+			//	ThrowHelper.ThrowParseException(parser, $"Expect Alias Name.");
+			//}
 
 			return new ColumnSqlCodeExpr
 			{
 				Name = name,
-				AliasName = aliasName//parser.Scanner.GetSpanString(aliasNameToken),
+				AliasName = aliasName
 			};
 		}
 
