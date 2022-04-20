@@ -74,6 +74,33 @@ namespace T1.CodeDom.TSql.Parselets
 			};
 		}
 
+		private MergeUpdateSqlCodeExpr ParseMergeUpdate(IParser parser)
+		{
+			if (!parser.Scanner.Match(SqlToken.Update))
+			{
+				return null;
+			}
+			parser.ConsumeToken(SqlToken.Set);
+
+			var updateSetList = new List<AssignSqlCodeExpr>();
+			do
+			{
+				var leftExpr = parser.ConsumeObjectId(true);
+				parser.ConsumeToken(SqlToken.Equal);
+				var rightExpr = parser.ConsumeObjectId(true);
+				updateSetList.Add(new AssignSqlCodeExpr
+				{
+					Left = leftExpr,
+					Right = rightExpr
+				});
+			} while (parser.Scanner.Match(SqlToken.Comma));
+
+			return new MergeUpdateSqlCodeExpr
+			{
+				SetList = updateSetList
+			};
+		}
+
 		private MergeInsertSqlCodeExpr GetMergeInsert(IParser parser)
 		{
 			if (!parser.Scanner.Match(SqlToken.Insert))
@@ -126,7 +153,11 @@ namespace T1.CodeDom.TSql.Parselets
 
 			parser.Scanner.Consume(SqlToken.Then);
 
-			var mergeMatched = parser.ParseExpIgnoreComment();
+			SqlCodeExpr mergeMatched = ParseMergeUpdate(parser);
+			if (mergeMatched == null)
+			{
+				mergeMatched = parser.ParseExpIgnoreComment();
+			}
 
 			return new WhenMatchedSqlCodeExpr
 			{

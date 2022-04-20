@@ -88,6 +88,13 @@ namespace T1.CodeDom.Core
 			_index = offset;
 		}
 
+		public bool IsSymbol(int n=0)
+		{
+			var span = Peek(n);
+			var spanStr = GetSpanString(span);
+			return _symbolToTokenTypeMap.ContainsKey(spanStr);
+		}
+
 		protected void AddSymbolMap<TTokenType>(string symbol, TTokenType tokenType)
 			where TTokenType : struct
 		{

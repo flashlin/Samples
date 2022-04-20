@@ -155,9 +155,13 @@ namespace T1.CodeDom.TSql
 			};
 		}
 
-		public static SqlCodeExpr ConsumeObjectId(this IParser parser)
+		public static SqlCodeExpr ConsumeObjectId(this IParser parser, bool nonSensitive = false)
 		{
-			return parser.Consume(TryConsumeObjectId);
+			if (!TryConsumeObjectId(parser, out var objectId, nonSensitive))
+			{
+				ThrowHelper.ThrowParseException(parser, "Expect ObjectId");
+			}
+			return objectId;
 		}
 
 		public static SqlCodeExpr ConsumeTableName(this IParser parser, int ctxPrecedence = 0)
@@ -499,7 +503,7 @@ namespace T1.CodeDom.TSql
 			return false;
 		}
 
-		public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr)
+		public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr, bool nonSensitive = false)
 		{
 			var comments = parser.IgnoreComments();
 
@@ -526,7 +530,17 @@ namespace T1.CodeDom.TSql
 					var currTokenStr = parser.Scanner.PeekString();
 					throw new ParseException($"Expect RemoteServer.Database.dbo.name, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
 				}
-				if (!parser.Scanner.TryConsumeAny(out var identifier, meetColumnNameList))
+
+				var identifier = TextSpan.Empty;
+				if (nonSensitive)
+				{
+					if (parser.Scanner.IsSymbol())
+					{
+						break;
+					}
+					identifier = parser.Scanner.Consume();
+				}
+				else if (!parser.Scanner.TryConsumeAny(out identifier, meetColumnNameList))
 				{
 					break;
 				}
@@ -697,9 +711,7 @@ namespace T1.CodeDom.TSql
 		{
 			if (!predicate(parser, out var expr))
 			{
-				var currentToken = parser.Scanner.Peek();
-				var helpMessage = parser.Scanner.GetHelpMessage(currentToken);
-				throw new ParseException(helpMessage);
+				ThrowHelper.ThrowParseException(parser, string.Empty);
 			}
 			return expr;
 		}
@@ -815,11 +827,11 @@ namespace T1.CodeDom.TSql
 			return token.Type == tokenType.ToString();
 		}
 
-		
+
 		public static bool TryConsumeToken(this IParser parser, out TextSpan token, SqlToken tokenType)
 		{
 			var span = parser.PeekToken();
-			if( span.Type != tokenType.ToString())
+			if (span.Type != tokenType.ToString())
 			{
 				token = TextSpan.Empty;
 				return false;
@@ -872,7 +884,7 @@ namespace T1.CodeDom.TSql
 			{
 				ThrowHelper.ThrowParseException(parser, $"Except non-comment token, bot got {token.Type}.");
 			}
-			parser.Scanner.SetOffset(token.Offset + token.Length -1);
+			parser.Scanner.SetOffset(token.Offset + token.Length - 1);
 			return token;
 		}
 
