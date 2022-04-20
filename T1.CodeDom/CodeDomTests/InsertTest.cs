@@ -134,5 +134,21 @@ exec sp_read_customer
 			ThenExprShouldBe(@"INSERT INTO @customer
 EXEC sp_read_customer");
 		}
+
+		[Fact]
+		public void insert_into_lparen()
+		{
+			var sql = @"insert into @customer(id)
+( select 1 from customer )
+";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO @customer(id)
+( SELECT 1
+FROM customer )");
+		}
+
+
 	}
 }

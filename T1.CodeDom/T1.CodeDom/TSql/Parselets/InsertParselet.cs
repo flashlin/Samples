@@ -18,9 +18,9 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var tableName = parser.ConsumeTableName();
 
-			if(parser.Scanner.TryConsumeAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
+			if (parser.Scanner.TryConsumeAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
 			{
-				var execExpr =	parser.PrefixParse(execSpan) as SqlCodeExpr;
+				var execExpr = parser.PrefixParse(execSpan) as SqlCodeExpr;
 				return new InsertIntoFromSqlCodeExpr
 				{
 					Table = tableName,
@@ -33,9 +33,20 @@ namespace T1.CodeDom.TSql.Parselets
 			var outputList = parser.GetOutputListExpr();
 			var outputInto = parser.GetOutputIntoExpr();
 
+
+			var hasGroup = parser.MatchToken(SqlToken.LParen);
 			if (parser.Scanner.TryConsume(SqlToken.Select, out var selectToken))
 			{
 				var selectExpr = new SelectParselet().Parse(selectToken, parser) as SqlCodeExpr;
+				if (hasGroup)
+				{
+					parser.MatchToken(SqlToken.RParen);
+					selectExpr = new GroupSqlCodeExpr
+					{
+						InnerExpr = selectExpr
+					};
+				}
+
 				return new InsertIntoFromSqlCodeExpr
 				{
 					Table = tableName,
