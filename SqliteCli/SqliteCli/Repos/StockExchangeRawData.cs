@@ -48,6 +48,7 @@ namespace SqliteCli.Repos
 						if (propInfo.PropertyType.IsValueType)
 						{
 							valueStr = valueStr.Replace(",", "");
+							valueStr = valueStr.Replace("X", "");
 						}
 						value = valueStr.ChangeType(propInfo.PropertyType);
 
