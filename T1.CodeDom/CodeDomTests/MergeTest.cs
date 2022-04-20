@@ -19,8 +19,8 @@ namespace TestProject.PrattTests
 
 			Parse(sql);
 
-			ThenExprShouldBe(@"MERGE INTO customer AS Source
-USING @other ON TARGET.Id = SOURCE.Id
+			ThenExprShouldBe(@"MERGE INTO customer AS target
+USING @other AS source ON TARGET.Id = SOURCE.Id
 WHEN NOT MATCHED
 THEN
 INSERT (id, name) VALUES(SOURCE.Id, SOURCE.Name)");
@@ -41,12 +41,12 @@ INSERT (id, name) VALUES(SOURCE.Id, SOURCE.Name)");
 
 			Parse(sql);
 
-			ThenExprShouldBe(@"MERGE customer AS Source
-USING #tmoCustomer ON ( TARGET.id = SOURCE.id )
+			ThenExprShouldBe(@"MERGE customer AS target
+USING #tmoCustomer AS source ON ( TARGET.id = SOURCE.id )
 WHEN MATCHED AND TARGET.tstamp < SOURCE.tstamp AND TARGET.status IN ('waiting')
 THEN
-UPDATE SET Target.[birth] = Source.[birth]	,
-Target.[addr] = Source.[addr]
+UPDATE SET Target.[birth] = SOURCE.[birth]	,
+Target.[addr] = SOURCE.[addr]
 WHEN NOT MATCHED BY TARGET
 THEN
 INSERT ([id], [name]) VALUES(SOURCE.id, SOURCE.name)");

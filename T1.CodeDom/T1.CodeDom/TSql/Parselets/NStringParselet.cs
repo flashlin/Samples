@@ -30,7 +30,7 @@ namespace T1.CodeDom.TSql.Parselets
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
 			parser.Scanner.Consume(SqlToken.Dot);
-			var identifier = parser.PrefixParse(SqlToken.Identifier) as SqlCodeExpr;
+			var identifier = parser.PrefixParseAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
 			return new TargetSqlCodeExpr
 			{
 				Column = identifier
@@ -44,7 +44,7 @@ namespace T1.CodeDom.TSql.Parselets
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
 			parser.Scanner.Consume(SqlToken.Dot);
-			var identifier = parser.PrefixParse(SqlToken.Identifier) as SqlCodeExpr;
+			var identifier = parser.PrefixParseAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
 			return new SourceSqlCodeExpr
 			{
 				Column = identifier

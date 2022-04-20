@@ -510,6 +510,8 @@ namespace T1.CodeDom.TSql
 			var meetColumnNameList = new[]
 			{
 				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
+				SqlToken.Source,
+				SqlToken.Target,
 				SqlToken.Asterisk,
 				SqlToken.Date,
 				SqlToken.Rank,

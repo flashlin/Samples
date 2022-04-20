@@ -87,7 +87,7 @@ namespace T1.CodeDom.TSql.Parselets
 			{
 				var leftExpr = parser.ConsumeObjectId(true);
 				parser.ConsumeToken(SqlToken.Equal);
-				var rightExpr = parser.ConsumeObjectId(true);
+				var rightExpr = parser.ParseExpIgnoreComment();
 				updateSetList.Add(new AssignSqlCodeExpr
 				{
 					Left = leftExpr,
