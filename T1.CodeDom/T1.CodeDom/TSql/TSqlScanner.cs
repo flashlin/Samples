@@ -29,6 +29,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("CHAR", SqlToken.Char);
 			AddTokenMap("CAST", SqlToken.Cast);
 			AddTokenMap("CASE", SqlToken.Case);
+			AddTokenMap("CURSOR", SqlToken.Cursor);
 			AddTokenMap("CROSS", SqlToken.Cross);
 			AddTokenMap("CREATE", SqlToken.Create);
 			AddTokenMap("CONVERT", SqlToken.Convert);

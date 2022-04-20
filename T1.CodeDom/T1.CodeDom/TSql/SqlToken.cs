@@ -178,6 +178,7 @@
 		ROW_NUMBER,
 		PlusEqual,
 		MAXDOP,
-		Option
+		Option,
+		Cursor
 	}
 }

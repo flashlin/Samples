@@ -16,6 +16,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.Convert, new ConvertParselet());
 			Register(SqlToken.Create, new CreateParselet());
 			Register(SqlToken.Commit, new CommitParselet());
+			Register(SqlToken.Cursor, new CursorParselet());
 			Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
 			Register(SqlToken.Drop, new DropParselet());
 			Register(SqlToken.Delete, new DeleteParselet());
