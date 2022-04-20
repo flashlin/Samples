@@ -10,7 +10,7 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			parser.ConsumeToken(SqlToken.Next);
 			parser.ConsumeToken(SqlToken.From);
-			
+
 			var cursorName = parser.ConsumeTableName();
 
 			parser.ConsumeToken(SqlToken.Into);
