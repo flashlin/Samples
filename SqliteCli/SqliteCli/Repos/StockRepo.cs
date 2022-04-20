@@ -188,7 +188,7 @@ group by st.Id, t.TranType
 					}
 				);
 
-			return q2.ToList();
+			return q2.OrderBy(x => x.TranTime).ToList();
 		}
 
 		public IEnumerable<TransHistory> ListTrans1(ListTransReq req)

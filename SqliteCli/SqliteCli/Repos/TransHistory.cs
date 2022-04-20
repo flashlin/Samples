@@ -12,7 +12,7 @@ namespace SqliteCli.Repos
 		[DisplayString("yyyy/MM/dd", 10)]
 		public DateTime TranTime { get; set; }
 
-		[DisplayString("", 7)]
+		[DisplayString("", 8)]
 		public string TranType { get; set; }
 
 		[DisplayString("", 9)]
