@@ -94,5 +94,19 @@ FROM customer WITH( nolock )");
 
 			ThenExprShouldBe(@"OPEN @mydata");
 		}
+
+		[Fact]
+		public void fetch()
+		{
+			var sql = @"fetch next from @getData 
+into @id, @name";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"FETCH NEXT FROM @getData
+INTO @id, @name");
+		}
+
+
 	}
 }

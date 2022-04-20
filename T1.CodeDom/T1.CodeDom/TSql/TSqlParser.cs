@@ -25,6 +25,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.Exists, new ExistsParselet());
 			Register(SqlToken.Exec, new ExecParselet());
 			Register(SqlToken.Execute, new ExecParselet());
+			Register(SqlToken.Fetch, new FetchParselet());
 			Register(SqlToken.Go, new GoParselet());
 			Register(SqlToken.Grant, new GrantParselet());
 			Register(SqlToken.HexNumber, new HexNumberParselet());

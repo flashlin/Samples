@@ -181,6 +181,7 @@
 		Option,
 		Cursor,
 		Open,
-		Fetch
+		Fetch,
+		Next
 	}
 }
