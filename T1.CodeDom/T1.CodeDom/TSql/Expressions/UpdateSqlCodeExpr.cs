@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using T1.CodeDom.TSql.Parselets;
 using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Expressions
@@ -9,10 +10,9 @@ namespace T1.CodeDom.TSql.Expressions
 		public SqlCodeExpr Table { get; set; }
 		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
-		//public SqlCodeExpr FromTable { get; set; }
-		//public List<SqlCodeExpr> JoinSelectList { get; set; }
 		public List<SqlCodeExpr> FromTableList { get; set; }
 		public List<SqlCodeExpr> OutputList { get; set; }
+		public IntoSqlCodeExpr IntoExpr { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -48,24 +48,17 @@ namespace T1.CodeDom.TSql.Expressions
 				FromTableList.WriteToStreamWithComma(stream);
 			}
 
-			//if( FromTable != null)
-			//{
-			//	stream.WriteLine();
-			//	stream.Write("FROM ");
-			//	FromTable.WriteToStream(stream);
-			//}
-
-			//if( JoinSelectList != null && JoinSelectList.Count > 0)
-			//{
-			//	stream.WriteLine();
-			//	JoinSelectList.WriteToStream(stream);
-			//}
-
 			if (OutputList != null && OutputList.Count > 0)
 			{
 				stream.WriteLine();
 				stream.Write("OUTPUT ");
 				OutputList.WriteToStreamWithComma(stream);
+			}
+
+			if (IntoExpr != null)
+			{
+				stream.WriteLine();
+				IntoExpr.WriteToStream(stream);
 			}
 
 			if (WhereExpr != null)

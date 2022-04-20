@@ -28,6 +28,8 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var outputList = parser.GetOutputListExpr();
 
+			var intoExpr = ParseIntoExpr(parser);
+
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))
 			{
@@ -40,11 +42,33 @@ namespace T1.CodeDom.TSql.Parselets
 				Table = table,
 				WithOptions = withOptions,
 				SetColumnsList = setList,
-				//FromTable = fromTable,
-				//JoinSelectList = joinSelectList,
 				FromTableList = fromTableList,
 				OutputList = outputList,
+				IntoExpr = intoExpr,
 				WhereExpr = whereExpr
+			};
+		}
+
+		private IntoSqlCodeExpr ParseIntoExpr(IParser parser)
+		{
+			if (!parser.Scanner.Match(SqlToken.Into))
+			{
+				return null;
+			}
+			var intoTable = parser.ConsumeTableName();
+
+			var columnList = new List<SqlCodeExpr>();
+			parser.ConsumeToken(SqlToken.LParen);
+			do{
+				var column = parser.ConsumeObjectId();
+				columnList.Add(column);
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			parser.ConsumeToken(SqlToken.RParen);
+
+			return new IntoSqlCodeExpr
+			{
+				IntoTable = intoTable,
+				ColumnList = columnList
 			};
 		}
 

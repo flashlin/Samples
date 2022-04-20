@@ -93,5 +93,20 @@ FROM customer AS c");
 		}
 
 
+		[Fact]
+		public void update_output_deleted()
+		{
+			var sql = @"update customer
+		set usergroup = null
+		output deleted.Id, deleted.username into @tmpCustomer (Id, username)
+		where id = 1";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE customer SET usergroup = NULL
+OUTPUT deleted.Id, deleted.username
+INTO @tmpCustomer(Id, username)
+WHERE id = 1");
+		}
 	}
 }
