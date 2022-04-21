@@ -132,6 +132,7 @@ namespace T1.CodeDom.TSql
 			
 			AddTokenMap("ABS", SqlToken.ABS);
 			AddTokenMap("COUNT", SqlToken.COUNT);
+			AddTokenMap("COALESCE", SqlToken.COALESCE);
 			AddTokenMap("DATEADD", SqlToken.DATEADD);
 			AddTokenMap("DATEPART", SqlToken.DATEPART);
 			AddTokenMap("DATEDIFF", SqlToken.DATEDIFF);
