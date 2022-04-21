@@ -133,6 +133,8 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ABS", SqlToken.ABS);
 			AddTokenMap("COUNT", SqlToken.COUNT);
 			AddTokenMap("DATEADD", SqlToken.DATEADD);
+			AddTokenMap("DATEPART", SqlToken.DATEPART);
+			AddTokenMap("DATEDIFF", SqlToken.DATEDIFF);
 			AddTokenMap("FLOOR", SqlToken.FLOOR);
 			AddTokenMap("GETDATE", SqlToken.GETDATE);
 			AddTokenMap("ROUND", SqlToken.ROUND);

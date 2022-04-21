@@ -71,6 +71,8 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.ABS, new CallFuncParselet(1, 1));
 			Register(SqlToken.COUNT, new CallFuncParselet(1, 1));
 			Register(SqlToken.DATEADD, new CallFuncParselet(3, 3));
+			Register(SqlToken.DATEPART, new CallFuncParselet(2, 2));
+			Register(SqlToken.DATEDIFF, new CallFuncParselet(3, 3));
 			Register(SqlToken.FLOOR, new CallFuncParselet(1, 1));
 			Register(SqlToken.GETDATE, new CallFuncParselet());
 			Register(SqlToken.ROUND, new CallFuncParselet(2, 3));

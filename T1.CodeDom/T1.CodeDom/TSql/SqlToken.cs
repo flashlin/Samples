@@ -190,6 +190,8 @@
 		DATEADD,
 		FLOOR,
 		COUNT,
-		ROUND
+		ROUND,
+		DATEPART,
+		DATEDIFF
 	}
 }
