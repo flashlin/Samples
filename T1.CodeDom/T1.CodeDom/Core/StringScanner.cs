@@ -139,7 +139,7 @@ namespace T1.CodeDom.Core
 
 			var content = _textSpan.ToString();
 			var previewContent = content.Substring(0, currentSpan.Offset);
-			var lines = previewContent.Split("\r\n");
+			var lines = previewContent.Split("\n").Select(x => x.Replace("\r","")).ToArray();
 			var line = lines[lines.Length - 1];
 			var prevLines = lines.SkipLast(1).TakeLast(3).ToArray();
 
@@ -147,7 +147,7 @@ namespace T1.CodeDom.Core
 			maxLen = Math.Min(maxLen, 50);
 
 			var backContent = content.Substring(currentSpan.Offset + currentSpan.Length, maxLen);
-			var backLine = backContent.Split("\r\n").First();
+			var backLine = backContent.Split("\n").Select(x => x.Replace("\r", "")).First();
 
 			return new LineChInfo
 			{

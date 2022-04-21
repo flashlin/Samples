@@ -35,6 +35,7 @@ namespace T1.CodeDom.TSql.Parselets
 			if (parser.Scanner.Match(SqlToken.On))
 			{
 				joinOnExpr = parser.ParseExpIgnoreComment();
+				joinOnExpr = parser.ParseLRParenExpr(joinOnExpr);
 			}
 
 			return new JoinTableSqlCodeExpr
