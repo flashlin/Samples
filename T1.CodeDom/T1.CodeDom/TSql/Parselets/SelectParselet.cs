@@ -141,12 +141,6 @@ namespace T1.CodeDom.TSql.Parselets
 			var name = parser.ParseExpIgnoreComment();
 			name = parser.ParseLRParenExpr(name);
 
-			var meetColumnAliasNameList = new[]
-			{
-				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
-				SqlToken.Date
-			};
-
 			var hasAs = parser.Scanner.Match(SqlToken.As);
 
 			SqlCodeExpr aliasName = null;
@@ -162,11 +156,6 @@ namespace T1.CodeDom.TSql.Parselets
 			{
 				parser.TryConsumeObjectId(out aliasName);
 			}
-
-			//if (hasAs && !hasAlias)
-			//{
-			//	ThrowHelper.ThrowParseException(parser, $"Expect Alias Name.");
-			//}
 
 			return new ColumnSqlCodeExpr
 			{

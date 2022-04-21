@@ -52,6 +52,16 @@ namespace TestProject.PrattTests
 			ThenExprShouldBe("SELECT name, [dbo].[isMy]( 123 )");
 		}
 
+		[Fact]
+		public void select_group_customFunc()
+		{
+			var sql = "select name, ([dbo].[isMy](123)) as a";
+			Parse(sql);
+			ThenExprShouldBe("SELECT name, ( [dbo].[isMy]( 123 ) ) AS a");
+		}
+
+
+
 
 		[Fact]
 		public void select_where_eq_and_between()

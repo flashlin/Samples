@@ -9,6 +9,12 @@ namespace T1.CodeDom.TSql.Parselets
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
 			var expr = parser.ParseExpIgnoreComment();
+
+			if( parser.IsToken(SqlToken.LParen))
+			{
+				expr = parser.ParseLRParenExpr(expr);
+			}
+
 			parser.Scanner.Consume(SqlToken.RParen);
 			return new GroupSqlCodeExpr
 			{
