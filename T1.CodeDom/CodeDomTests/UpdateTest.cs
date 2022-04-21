@@ -108,5 +108,24 @@ OUTPUT deleted.Id, deleted.username
 INTO @tmpCustomer(Id, username)
 WHERE id = 1");
 		}
+
+		[Fact]
+		public void update_into_date()
+		{
+			var sql = @"Update c
+	set c.id = 4
+	output inserted.id, inserted.birth, GETDATE()
+	into customerLog(id,birth,date)
+	from customer c, otherTable t
+	where c.id = t.id";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE c SET c.id = 4
+OUTPUT inserted.id, inserted.birth, GETDATE()
+INTO customerLog(id, birth, date)
+FROM customer AS c, otherTable AS t
+WHERE c.id = t.id");
+		}
 	}
 }

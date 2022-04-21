@@ -35,6 +35,7 @@ namespace T1.CodeDom.TSql.Parselets
 			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
 			{
 				whereExpr = parser.ParseExpIgnoreComment();
+				whereExpr = parser.ParseLRParenExpr(whereExpr);
 			}
 
 			var groupBy = ParseGroupBy(parser);

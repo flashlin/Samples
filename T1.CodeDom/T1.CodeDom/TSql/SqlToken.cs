@@ -182,6 +182,9 @@
 		Cursor,
 		Open,
 		Fetch,
-		Next
+		Next,
+		Getdate,
+		ABS,
+		SUM
 	}
 }

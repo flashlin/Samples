@@ -20,15 +20,15 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var setList = ParseSetItemList(parser);
 
+			var outputList = parser.GetOutputListExpr();
+
+			var intoExpr = ParseIntoExpr(parser);
+
 			var fromTableList = new List<SqlCodeExpr>();
 			if (parser.Scanner.Match(SqlToken.From))
 			{
 				fromTableList = parser.ParseFromSourceList();
 			}
-
-			var outputList = parser.GetOutputListExpr();
-
-			var intoExpr = ParseIntoExpr(parser);
 
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))
@@ -55,12 +55,12 @@ namespace T1.CodeDom.TSql.Parselets
 			{
 				return null;
 			}
-			var intoTable = parser.ConsumeTableName();
+			var intoTable = parser.ConsumeTableName(int.MaxValue);
 
 			var columnList = new List<SqlCodeExpr>();
 			parser.ConsumeToken(SqlToken.LParen);
 			do{
-				var column = parser.ConsumeObjectId();
+				var column = parser.ConsumeObjectId(true);
 				columnList.Add(column);
 			} while (parser.Scanner.Match(SqlToken.Comma));
 			parser.ConsumeToken(SqlToken.RParen);

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql;
 using T1.CodeDom.TSql.Expressions;
@@ -12,10 +13,10 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.Scanner.SetOffset(token.Offset - 1);
 			var identExpr = parser.ConsumeObjectId();
 
-			if (parser.Scanner.TryConsume(SqlToken.LParen, out _))
-			{
-				return Call(identExpr, parser);
-			}
+			//if (parser.Scanner.TryConsume(SqlToken.LParen, out _))
+			//{
+			//	return Call(identExpr, parser);
+			//}
 
 			return identExpr;
 		}

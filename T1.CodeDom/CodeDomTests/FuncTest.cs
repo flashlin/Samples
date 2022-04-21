@@ -56,6 +56,14 @@ namespace TestProject.PrattTests
 			ThenExprShouldBe(@"ISNULL(@id, '')");
 		}
 
+		[Fact]
+		public void getdate()
+		{
+			var sql = @"getdate()";
 
+			Parse(sql);
+
+			ThenExprShouldBe(@"GETDATE()");
+		}
 	}
 }

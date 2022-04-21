@@ -129,6 +129,10 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("WHILE", SqlToken.While);
 			AddTokenMap(":SETVAR", SqlToken.ScriptSetVar);
 			AddTokenMap(":ON", SqlToken.ScriptOn);
+			
+			AddTokenMap("ABS", SqlToken.ABS);
+			AddTokenMap("GETDATE", SqlToken.Getdate);
+			AddTokenMap("SUM", SqlToken.SUM);
 
 			AddTokenMap("ANSI_NULLS", SqlToken.ANSI_NULLS);
 			AddTokenMap("ANSI_PADDING", SqlToken.ANSI_PADDING);

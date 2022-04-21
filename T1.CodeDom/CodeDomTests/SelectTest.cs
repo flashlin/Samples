@@ -271,7 +271,7 @@ FROM customer WITH( nolock, INDEX(aaa) )");
 			
 			Parse(sql);
 
-			ThenExprShouldBe(@"SELECT sum( id ) AS out, name FROM customer");
+			ThenExprShouldBe(@"SELECT SUM( id ) AS out, name FROM customer");
 		}
 
 

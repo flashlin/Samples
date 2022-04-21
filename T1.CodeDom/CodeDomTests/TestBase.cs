@@ -9,6 +9,7 @@ using System.IO;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql;
 using T1.CodeDom.TSql.Expressions;
+using Xunit;
 
 namespace TestProject.PrattTests
 {
@@ -80,7 +81,8 @@ namespace TestProject.PrattTests
 		protected void ThenExprShouldBe(string expectCode)
 		{
 			var exprCode = _expr.ToString();
-			exprCode.MergeToCode().Should().Be(expectCode.MergeToCode());
+			//exprCode.MergeToCode().Should().Be(expectCode.MergeToCode());
+			Assert.Equal(expectCode.MergeToCode(), exprCode.MergeToCode());
 		}
 
 		protected IEnumerable<string> ReadSqlFiles(string folder)

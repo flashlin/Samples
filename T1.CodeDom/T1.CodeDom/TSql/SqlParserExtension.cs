@@ -927,5 +927,56 @@ namespace T1.CodeDom.TSql
 			token.Comments = commentList;
 			return token;
 		}
+
+
+		public static SqlCodeExpr ParseLRParenExpr(this IParser parser, SqlCodeExpr leftExpr, bool reqColumns = false)
+		{
+			var parameters = ParseLRParen(parser, reqColumns);
+			if (parameters == null)
+			{
+				return leftExpr;
+			}
+
+			var callExpr = new FuncSqlCodeExpr
+			{
+				Name = leftExpr,
+				Parameters = parameters
+			};
+
+			return parser.PrefixParse(callExpr) as SqlCodeExpr;
+		}
+
+		private static List<SqlCodeExpr> ParseLRParen(IParser parser, bool reqColumns = false)
+		{
+			var parameterList = new List<SqlCodeExpr>();
+			if (!parser.Scanner.Match(SqlToken.LParen))
+			{
+				return null;
+			}
+
+			var startIndex = parser.Scanner.GetOffset();
+			do
+			{
+				if (parser.IsToken(SqlToken.RParen))
+				{
+					break;
+				}
+				var parameter = parser.ParseExpIgnoreComment();
+				parameterList.Add(parameter);
+			} while (parser.MatchToken(SqlToken.Comma));
+			parser.ConsumeToken(SqlToken.RParen);
+
+			if (reqColumns)
+			{
+				var isAllObjectId = parameterList.All(x => x is ObjectIdSqlCodeExpr);
+				if (!isAllObjectId)
+				{
+					parser.Scanner.SetOffset(startIndex);
+					return new List<SqlCodeExpr>();
+				}
+			}
+
+			return parameterList;
+		}
 	}
 }

@@ -42,6 +42,35 @@ namespace T1.CodeDom.Core
 		{
 			var prefixParselet = CodeSpecPrefix(prefixToken);
 			var left = prefixParselet.Parse(prefixToken, this);
+			return PrefixParse(left, ctxPrecedence);
+			//while (true)
+			//{
+			//	//var infixToken = _scanner.Peek();
+			//	var (infixToken, consumeIndex) = PeekToken();
+			//	if (infixToken.IsEmpty)
+			//	{
+			//		break;
+			//	}
+
+			//	var infixParselet = CodeSpecInfix(infixToken);
+			//	if (infixParselet == null)
+			//	{
+			//		break;
+			//	}
+
+			//	if (infixParselet.GetPrecedence() <= ctxPrecedence)
+			//	{
+			//		break;
+			//	}
+			//	//_scanner.Consume();
+			//	ConsumeToken(consumeIndex);
+			//	left = infixParselet.Parse(left, infixToken, this);
+			//}
+			//return left;
+		}
+
+		public IExpression PrefixParse(IExpression left, int ctxPrecedence)
+		{
 			while (true)
 			{
 				//var infixToken = _scanner.Peek();

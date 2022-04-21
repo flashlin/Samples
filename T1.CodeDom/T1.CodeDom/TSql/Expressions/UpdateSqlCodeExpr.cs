@@ -10,9 +10,9 @@ namespace T1.CodeDom.TSql.Expressions
 		public SqlCodeExpr Table { get; set; }
 		public List<string> WithOptions { get; set; }
 		public List<SqlCodeExpr> SetColumnsList { get; set; }
-		public List<SqlCodeExpr> FromTableList { get; set; }
 		public List<SqlCodeExpr> OutputList { get; set; }
 		public IntoSqlCodeExpr IntoExpr { get; set; }
+		public List<SqlCodeExpr> FromTableList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -41,13 +41,6 @@ namespace T1.CodeDom.TSql.Expressions
 			stream.Write(" SET ");
 			SetColumnsList.WriteToStreamWithComma(stream);
 
-			if (FromTableList != null && FromTableList.Count > 0)
-			{
-				stream.WriteLine();
-				stream.Write("FROM ");
-				FromTableList.WriteToStreamWithComma(stream);
-			}
-
 			if (OutputList != null && OutputList.Count > 0)
 			{
 				stream.WriteLine();
@@ -59,6 +52,13 @@ namespace T1.CodeDom.TSql.Expressions
 			{
 				stream.WriteLine();
 				IntoExpr.WriteToStream(stream);
+			}
+
+			if (FromTableList != null && FromTableList.Count > 0)
+			{
+				stream.WriteLine();
+				stream.Write("FROM ");
+				FromTableList.WriteToStreamWithComma(stream);
 			}
 
 			if (WhereExpr != null)

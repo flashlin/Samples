@@ -9,5 +9,6 @@ namespace T1.CodeDom.Core
 		IExpression ParseExp(int ctxPrecedence = 0);
 		IExpression GetParseExp(int ctxPrecedence = 0);
 		IExpression PrefixParse(TextSpan prefixToken, int ctxPrecedence = 0);
+		IExpression PrefixParse(IExpression left, int ctxPrecedence = 0);
 	}
 }
