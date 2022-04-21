@@ -189,6 +189,7 @@
 		SUSER_SNAME,
 		DATEADD,
 		FLOOR,
-		COUNT
+		COUNT,
+		ROUND
 	}
 }

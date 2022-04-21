@@ -73,6 +73,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.DATEADD, new CallFuncParselet(3, 3));
 			Register(SqlToken.FLOOR, new CallFuncParselet(1, 1));
 			Register(SqlToken.GETDATE, new CallFuncParselet());
+			Register(SqlToken.ROUND, new CallFuncParselet(2, 3));
 			Register(SqlToken.SUM, new CallFuncParselet(1, 1));
 			Register(SqlToken.SUSER_SNAME, new CallFuncParselet(1, 1));
 
