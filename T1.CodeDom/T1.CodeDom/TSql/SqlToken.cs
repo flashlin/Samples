@@ -116,7 +116,7 @@
 		Char,
 		Primary,
 		Key,
-		Max,
+		MAX,
 		Tilde,
 		Partition,
 		Range,
@@ -196,6 +196,7 @@
 		COALESCE,
 		SUBSTRING,
 		LEN,
-		CHARINDEX
+		CHARINDEX,
+		MIN
 	}
 }

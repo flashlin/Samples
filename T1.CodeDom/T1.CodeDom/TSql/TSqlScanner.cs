@@ -80,7 +80,6 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("NOT", SqlToken.Not);
 			AddTokenMap("NULL", SqlToken.Null);
 			AddTokenMap("NUMERIC", SqlToken.Numeric);
-			AddTokenMap("MAX", SqlToken.Max);
 			AddTokenMap("MERGE", SqlToken.Merge);
 			AddTokenMap("MATCHED", SqlToken.Matched);
 			AddTokenMap("ON", SqlToken.On);
@@ -140,6 +139,8 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("FLOOR", SqlToken.FLOOR);
 			AddTokenMap("GETDATE", SqlToken.GETDATE);
 			AddTokenMap("LEN", SqlToken.LEN);
+			AddTokenMap("MIN", SqlToken.MIN);
+			AddTokenMap("MAX", SqlToken.MAX);
 			AddTokenMap("ROUND", SqlToken.ROUND);
 			AddTokenMap("SUM", SqlToken.SUM);
 			AddTokenMap("SUSER_SNAME", SqlToken.SUSER_SNAME);

@@ -141,6 +141,8 @@ namespace T1.CodeDom.TSql.Parselets
 			var oper = parser.Scanner.ConsumeStringAny(SqlToken.Equal, SqlToken.PlusEqual);
 
 			var valueExpr = parser.ParseExp() as SqlCodeExpr;
+			valueExpr = parser.ParseLRParenExpr(valueExpr);
+
 			return new SetVariableSqlCodeExpr
 			{
 				Name = variableExpr,

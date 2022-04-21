@@ -61,7 +61,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.Not, new NotParselet());
 			Register(SqlToken.Null, new NullParselet());
 			Register(SqlToken.Merge, new MergeParselet());
-			Register(SqlToken.Max, new FuncParselet(1));
+			//Register(SqlToken.MAX, new FuncParselet(1));
 			Register(SqlToken.MultiComment, new CommentParselet());
 			Register(SqlToken.Update, new UpdateParselet());
 			Register(SqlToken.Variable, new VariableParselet());
@@ -78,6 +78,8 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.FLOOR, new CallFuncParselet(1, 1));
 			Register(SqlToken.GETDATE, new CallFuncParselet());
 			Register(SqlToken.LEN, new CallFuncParselet(1, 1));
+			Register(SqlToken.MIN, new CallFuncParselet(1, 1));
+			Register(SqlToken.MAX, new CallFuncParselet(1));
 			Register(SqlToken.ROUND, new CallFuncParselet(2, 3));
 			Register(SqlToken.SUM, new CallFuncParselet(1, 1));
 			Register(SqlToken.SUSER_SNAME, new CallFuncParselet(1, 1));

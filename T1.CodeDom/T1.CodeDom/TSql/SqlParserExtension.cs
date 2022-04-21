@@ -813,7 +813,7 @@ namespace T1.CodeDom.TSql
 		private static int? ParseSize(IParser parser)
 		{
 			int? size = null;
-			if (parser.Scanner.Match(SqlToken.Max))
+			if (parser.Scanner.Match(SqlToken.MAX))
 			{
 				size = int.MaxValue;
 			}

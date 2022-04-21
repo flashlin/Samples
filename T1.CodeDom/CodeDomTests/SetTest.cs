@@ -40,5 +40,14 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SET @id = 1");
 		}
+
+		[Fact]
+		public void set_var_eq_customFunc()
+		{
+			var sql = "set @isFlag = [dbo].[fn_my]()";
+			Parse(sql);
+			ThenExprShouldBe("SET @isFlag = [dbo].[fn_my]()");
+		}
+
 	}
 }
