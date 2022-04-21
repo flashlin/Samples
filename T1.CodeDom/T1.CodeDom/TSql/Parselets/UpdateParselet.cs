@@ -80,6 +80,8 @@ namespace T1.CodeDom.TSql.Parselets
 				var column = parser.ConsumeObjectIdOrVariable(int.MaxValue);
 				parser.Scanner.Consume(SqlToken.Equal);
 				var valueExpr = parser.ParseExpIgnoreComment();
+				valueExpr = parser.ParseLRParenExpr(valueExpr);
+				
 				setList.Add(new AssignSqlCodeExpr
 				{
 					Left = column,

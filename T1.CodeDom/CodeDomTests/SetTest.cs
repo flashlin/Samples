@@ -50,6 +50,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void set_name_eq_customFunc()
+		{
+			var sql = "set name = [dbo].[fn_my](a,b)";
+			Parse(sql);
+			ThenExprShouldBe("SET name = [dbo].[fn_my]( a, b )");
+		}
+
+		[Fact]
 		public void dateadd()
 		{
 			var sql = "dateadd(day, datediff(day,1,GETDATE()), 0)";

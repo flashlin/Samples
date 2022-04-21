@@ -46,6 +46,8 @@ namespace T1.CodeDom.TSql.Parselets
 				var whenConditionExpr = parser.ParseExpIgnoreComment();
 				parser.Scanner.Consume(SqlToken.Then);
 				var thenExpr = parser.ParseExpIgnoreComment();
+				thenExpr = parser.ParseLRParenExpr(thenExpr);
+
 				whenList.Add(new WhenSqlCodeExpr
 				{
 					ConditionExpr = whenConditionExpr,

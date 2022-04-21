@@ -25,7 +25,7 @@ namespace T1.CodeDom.TSql.Parselets
 				return SetTransaction(parser);
 			}
 
-			if (parser.Scanner.TryConsume(SqlToken.Variable, out var variableSpan))
+			if (parser.Scanner.TryConsumeAny(out var variableSpan, SqlToken.Variable, SqlToken.Identifier, SqlToken.SqlIdentifier))
 			{
 				return SetVariable(variableSpan, parser);
 			}
