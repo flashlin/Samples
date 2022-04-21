@@ -49,5 +49,12 @@ namespace TestProject.PrattTests
 			ThenExprShouldBe("SET @isFlag = [dbo].[fn_my]()");
 		}
 
+		[Fact]
+		public void dateadd()
+		{
+			var sql = "dateadd(day, datediff(day,1,GETDATE()), 0)";
+			Parse(sql);
+			ThenExprShouldBe("DATEADD( day, DATEDIFF( day, 1, GETDATE() ), 0 )");
+		}
 	}
 }

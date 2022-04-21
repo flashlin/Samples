@@ -198,6 +198,8 @@
 		LEN,
 		CHARINDEX,
 		MIN,
-		REPLACE
+		REPLACE,
+		MONTH,
+		DAY
 	}
 }

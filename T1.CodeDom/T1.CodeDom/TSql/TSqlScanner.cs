@@ -136,11 +136,13 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("DATEADD", SqlToken.DATEADD);
 			AddTokenMap("DATEPART", SqlToken.DATEPART);
 			AddTokenMap("DATEDIFF", SqlToken.DATEDIFF);
+			AddTokenMap("DAY", SqlToken.DAY);
 			AddTokenMap("FLOOR", SqlToken.FLOOR);
 			AddTokenMap("GETDATE", SqlToken.GETDATE);
 			AddTokenMap("LEN", SqlToken.LEN);
 			AddTokenMap("MIN", SqlToken.MIN);
 			AddTokenMap("MAX", SqlToken.MAX);
+			AddTokenMap("MONTH", SqlToken.MONTH);
 			AddTokenMap("ROUND", SqlToken.ROUND);
 			AddTokenMap("REPLACE", SqlToken.REPLACE);
 			AddTokenMap("SUM", SqlToken.SUM);
