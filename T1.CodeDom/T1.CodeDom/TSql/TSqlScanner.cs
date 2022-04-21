@@ -142,6 +142,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("MIN", SqlToken.MIN);
 			AddTokenMap("MAX", SqlToken.MAX);
 			AddTokenMap("ROUND", SqlToken.ROUND);
+			AddTokenMap("REPLACE", SqlToken.REPLACE);
 			AddTokenMap("SUM", SqlToken.SUM);
 			AddTokenMap("SUSER_SNAME", SqlToken.SUSER_SNAME);
 			AddTokenMap("SUBSTRING", SqlToken.SUBSTRING);

@@ -81,6 +81,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.MIN, new CallFuncParselet(1, 1));
 			Register(SqlToken.MAX, new CallFuncParselet(1));
 			Register(SqlToken.ROUND, new CallFuncParselet(2, 3));
+			Register(SqlToken.REPLACE, new CallFuncParselet(3, 3));
 			Register(SqlToken.SUM, new CallFuncParselet(1, 1));
 			Register(SqlToken.SUSER_SNAME, new CallFuncParselet(1, 1));
 			Register(SqlToken.SUBSTRING, new CallFuncParselet(3, 3));

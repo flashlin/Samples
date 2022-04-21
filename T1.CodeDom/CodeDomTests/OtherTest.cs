@@ -69,7 +69,7 @@ namespace TestProject.PrattTests
 
 			Parse(sql);
 
-			ThenExprShouldBe("PIVOT(max( id ) FOR idType IN ([4], [3], [2])) AS piv");
+			ThenExprShouldBe("PIVOT(MAX( id ) FOR idType IN ([4], [3], [2])) AS piv");
 		}
 
 

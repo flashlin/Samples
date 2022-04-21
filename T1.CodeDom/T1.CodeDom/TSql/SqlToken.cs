@@ -197,6 +197,7 @@
 		SUBSTRING,
 		LEN,
 		CHARINDEX,
-		MIN
+		MIN,
+		REPLACE
 	}
 }
