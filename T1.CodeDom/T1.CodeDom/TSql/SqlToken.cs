@@ -203,6 +203,7 @@
 		DAY,
 		YEAR,
 		EXP,
-		LOG
+		LOG,
+		RAISERROR
 	}
 }

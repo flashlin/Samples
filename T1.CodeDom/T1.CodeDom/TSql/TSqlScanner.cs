@@ -146,6 +146,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("MAX", SqlToken.MAX);
 			AddTokenMap("MONTH", SqlToken.MONTH);
 			AddTokenMap("ROUND", SqlToken.ROUND);
+			AddTokenMap("RAISERROR", SqlToken.RAISERROR);
 			AddTokenMap("REPLACE", SqlToken.REPLACE);
 			AddTokenMap("SUM", SqlToken.SUM);
 			AddTokenMap("SUSER_SNAME", SqlToken.SUSER_SNAME);
