@@ -138,6 +138,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("DATEDIFF", SqlToken.DATEDIFF);
 			AddTokenMap("FLOOR", SqlToken.FLOOR);
 			AddTokenMap("GETDATE", SqlToken.GETDATE);
+			AddTokenMap("LEN", SqlToken.LEN);
 			AddTokenMap("ROUND", SqlToken.ROUND);
 			AddTokenMap("SUM", SqlToken.SUM);
 			AddTokenMap("SUSER_SNAME", SqlToken.SUSER_SNAME);
