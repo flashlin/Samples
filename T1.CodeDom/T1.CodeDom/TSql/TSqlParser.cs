@@ -69,6 +69,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.While, new WhileParselet());
 
 			Register(SqlToken.ABS, new CallFuncParselet(1, 1));
+			Register(SqlToken.CHARINDEX, new CallFuncParselet(2, 3));
 			Register(SqlToken.COUNT, new CallFuncParselet(1, 1));
 			Register(SqlToken.COALESCE, new CallFuncParselet(1));
 			Register(SqlToken.DATEADD, new CallFuncParselet(3, 3));

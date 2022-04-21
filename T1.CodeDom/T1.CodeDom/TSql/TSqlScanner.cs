@@ -131,6 +131,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap(":ON", SqlToken.ScriptOn);
 			
 			AddTokenMap("ABS", SqlToken.ABS);
+			AddTokenMap("CHARINDEX", SqlToken.CHARINDEX);
 			AddTokenMap("COUNT", SqlToken.COUNT);
 			AddTokenMap("COALESCE", SqlToken.COALESCE);
 			AddTokenMap("DATEADD", SqlToken.DATEADD);
