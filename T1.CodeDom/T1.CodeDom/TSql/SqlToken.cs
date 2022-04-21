@@ -204,6 +204,7 @@
 		YEAR,
 		EXP,
 		LOG,
-		RAISERROR
+		RAISERROR,
+		MinusEqual
 	}
 }

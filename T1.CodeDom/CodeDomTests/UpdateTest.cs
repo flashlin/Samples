@@ -127,5 +127,16 @@ INTO customerLog(id, birth, date)
 FROM customer AS c, otherTable AS t
 WHERE c.id = t.id");
 		}
+
+		[Fact]
+		public void update_set_name_minus_eq()
+		{
+			var sql = @"update customer
+	set id -= @id";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE customer SET id -= @id");
+		}
 	}
 }

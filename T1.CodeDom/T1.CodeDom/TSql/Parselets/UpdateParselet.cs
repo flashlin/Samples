@@ -78,13 +78,16 @@ namespace T1.CodeDom.TSql.Parselets
 			do
 			{
 				var column = parser.ConsumeObjectIdOrVariable(int.MaxValue);
-				parser.Scanner.Consume(SqlToken.Equal);
+				
+				var oper = parser.Scanner.ConsumeStringAny(SqlToken.Equal, SqlToken.MinusEqual, SqlToken.PlusEqual);
+
 				var valueExpr = parser.ParseExpIgnoreComment();
 				valueExpr = parser.ParseLRParenExpr(valueExpr);
 				
 				setList.Add(new AssignSqlCodeExpr
 				{
 					Left = column,
+					Oper = oper,
 					Right = valueExpr
 				});
 			} while (parser.Scanner.Match(SqlToken.Comma));
