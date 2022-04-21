@@ -137,9 +137,11 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("DATEPART", SqlToken.DATEPART);
 			AddTokenMap("DATEDIFF", SqlToken.DATEDIFF);
 			AddTokenMap("DAY", SqlToken.DAY);
+			AddTokenMap("EXP", SqlToken.EXP);
 			AddTokenMap("FLOOR", SqlToken.FLOOR);
 			AddTokenMap("GETDATE", SqlToken.GETDATE);
 			AddTokenMap("LEN", SqlToken.LEN);
+			AddTokenMap("LOG", SqlToken.LOG);
 			AddTokenMap("MIN", SqlToken.MIN);
 			AddTokenMap("MAX", SqlToken.MAX);
 			AddTokenMap("MONTH", SqlToken.MONTH);
@@ -148,6 +150,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("SUM", SqlToken.SUM);
 			AddTokenMap("SUSER_SNAME", SqlToken.SUSER_SNAME);
 			AddTokenMap("SUBSTRING", SqlToken.SUBSTRING);
+			AddTokenMap("YEAR", SqlToken.YEAR);
 
 			AddTokenMap("ANSI_NULLS", SqlToken.ANSI_NULLS);
 			AddTokenMap("ANSI_PADDING", SqlToken.ANSI_PADDING);

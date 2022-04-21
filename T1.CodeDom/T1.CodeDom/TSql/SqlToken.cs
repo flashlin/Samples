@@ -200,6 +200,9 @@
 		MIN,
 		REPLACE,
 		MONTH,
-		DAY
+		DAY,
+		YEAR,
+		EXP,
+		LOG
 	}
 }

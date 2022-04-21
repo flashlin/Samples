@@ -76,9 +76,11 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.DATEPART, new CallFuncParselet(2, 2));
 			Register(SqlToken.DATEDIFF, new DateDiffFuncParselet());
 			Register(SqlToken.DAY, new CallFuncParselet(1, 1));
+			Register(SqlToken.EXP, new CallFuncParselet(1, 1));
 			Register(SqlToken.FLOOR, new CallFuncParselet(1, 1));
 			Register(SqlToken.GETDATE, new CallFuncParselet());
 			Register(SqlToken.LEN, new CallFuncParselet(1, 1));
+			Register(SqlToken.LOG, new CallFuncParselet(1, 1));
 			Register(SqlToken.MIN, new CallFuncParselet(1, 1));
 			Register(SqlToken.MAX, new CallFuncParselet(1));
 			Register(SqlToken.MONTH, new CallFuncParselet(1));
@@ -87,6 +89,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.SUM, new CallFuncParselet(1, 1));
 			Register(SqlToken.SUSER_SNAME, new CallFuncParselet(1, 1));
 			Register(SqlToken.SUBSTRING, new CallFuncParselet(3, 3));
+			Register(SqlToken.YEAR, new CallFuncParselet(1, 1));
 
 			Register(SqlToken.Between, new BetweenParselet());
 			Register(SqlToken.Not, new NotInfixParselet());
