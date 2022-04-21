@@ -40,5 +40,20 @@ WHEN @id IN (7, 8) THEN 9
 ELSE -1
 END");
 		}
+
+		[Fact]
+		public void case_when_customFunc()
+		{
+			var sql = @"case when a > 1  and 
+					[dbo].[fn_my] (1, 2) >= 2 
+					then 2
+					else 3 
+				end";
+			Parse(sql);
+
+			ThenExprShouldBe(@"CASE WHEN a > 1 AND [dbo].[fn_my]( 1, 2 ) >= 2 THEN 2 ELSE 3 END");
+		}
+
+
 	}
 }

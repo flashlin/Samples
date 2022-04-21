@@ -43,7 +43,10 @@ namespace T1.CodeDom.TSql.Parselets
 				{
 					break;
 				}
+				
 				var whenConditionExpr = parser.ParseExpIgnoreComment();
+				whenConditionExpr = parser.ParseLRParenExpr(whenConditionExpr);
+
 				parser.Scanner.Consume(SqlToken.Then);
 				var thenExpr = parser.ParseExpIgnoreComment();
 				thenExpr = parser.ParseLRParenExpr(thenExpr);
