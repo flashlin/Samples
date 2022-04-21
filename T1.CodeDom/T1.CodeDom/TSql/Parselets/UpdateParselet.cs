@@ -55,15 +55,19 @@ namespace T1.CodeDom.TSql.Parselets
 			{
 				return null;
 			}
+			
 			var intoTable = parser.ConsumeTableName(int.MaxValue);
 
 			var columnList = new List<SqlCodeExpr>();
-			parser.ConsumeToken(SqlToken.LParen);
-			do{
-				var column = parser.ConsumeObjectId(true);
-				columnList.Add(column);
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			parser.ConsumeToken(SqlToken.RParen);
+			if (parser.MatchToken(SqlToken.LParen))
+			{
+				do
+				{
+					var column = parser.ConsumeObjectId(true);
+					columnList.Add(column);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+				parser.ConsumeToken(SqlToken.RParen);
+			}
 
 			return new IntoSqlCodeExpr
 			{
@@ -78,12 +82,12 @@ namespace T1.CodeDom.TSql.Parselets
 			do
 			{
 				var column = parser.ConsumeObjectIdOrVariable(int.MaxValue);
-				
+
 				var oper = parser.Scanner.ConsumeStringAny(SqlToken.Equal, SqlToken.MinusEqual, SqlToken.PlusEqual);
 
 				var valueExpr = parser.ParseExpIgnoreComment();
 				valueExpr = parser.ParseLRParenExpr(valueExpr);
-				
+
 				setList.Add(new AssignSqlCodeExpr
 				{
 					Left = column,

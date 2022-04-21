@@ -13,9 +13,13 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			stream.Write("INTO ");
 			IntoTable.WriteToStream(stream);
-			stream.Write("(");
-			ColumnList.WriteToStreamWithComma(stream);
-			stream.Write(")");
+
+			if (ColumnList != null && ColumnList.Count > 0)
+			{
+				stream.Write("(");
+				ColumnList.WriteToStreamWithComma(stream);
+				stream.Write(")");
+			}
 		}
 	}
 }

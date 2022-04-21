@@ -32,6 +32,7 @@ namespace T1.CodeDom.TSql.Parselets
 					variableDataType = new AssignSqlCodeExpr
 					{
 						Left = variableDataType,
+						Oper = "=",
 						Right = valueExpr
 					};
 				}

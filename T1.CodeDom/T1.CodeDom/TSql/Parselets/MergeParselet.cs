@@ -91,6 +91,7 @@ namespace T1.CodeDom.TSql.Parselets
 				updateSetList.Add(new AssignSqlCodeExpr
 				{
 					Left = leftExpr,
+					Oper = "=",
 					Right = rightExpr
 				});
 			} while (parser.Scanner.Match(SqlToken.Comma));

@@ -138,5 +138,24 @@ WHERE c.id = t.id");
 
 			ThenExprShouldBe(@"UPDATE customer SET id -= @id");
 		}
+
+		[Fact]
+		public void update_set_output_where()
+		{
+			var sql = @"update customer
+		set 
+			name = @name
+		output
+			1, deleted.Id into @customerTable
+		where id = 1";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE customer
+SET name = @name
+OUTPUT 1, deleted.Id 
+INTO @customerTable
+WHERE id = 1");
+		}
 	}
 }
