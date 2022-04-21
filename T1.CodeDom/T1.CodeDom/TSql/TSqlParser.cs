@@ -71,6 +71,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.ABS, new CallFuncParselet(1, 1));
 			Register(SqlToken.Getdate, new CallFuncParselet());
 			Register(SqlToken.SUM, new CallFuncParselet(1, 1));
+			Register(SqlToken.SUSER_SNAME, new CallFuncParselet(1, 1));
 
 			Register(SqlToken.Between, new BetweenParselet());
 			Register(SqlToken.Not, new NotInfixParselet());

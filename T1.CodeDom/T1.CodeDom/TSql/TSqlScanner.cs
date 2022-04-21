@@ -133,6 +133,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ABS", SqlToken.ABS);
 			AddTokenMap("GETDATE", SqlToken.Getdate);
 			AddTokenMap("SUM", SqlToken.SUM);
+			AddTokenMap("SUSER_SNAME", SqlToken.SUSER_SNAME);
 
 			AddTokenMap("ANSI_NULLS", SqlToken.ANSI_NULLS);
 			AddTokenMap("ANSI_PADDING", SqlToken.ANSI_PADDING);

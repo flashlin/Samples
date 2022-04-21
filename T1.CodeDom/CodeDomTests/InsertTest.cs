@@ -150,6 +150,15 @@ EXEC sp_read_customer");
 FROM customer )");
 		}
 
+		[Fact]
+		public void insert_into_select_from_customFunc()
+		{
+			var sql = @"insert into @customer
+		select val from myfunc(@id, N'a')";
+			
+			Parse(sql);
 
+			ThenExprShouldBe(@"INSERT INTO @customer SELECT val FROM myfunc( @id, N'a' )");
+		}
 	}
 }

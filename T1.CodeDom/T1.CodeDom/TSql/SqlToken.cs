@@ -185,6 +185,7 @@
 		Next,
 		Getdate,
 		ABS,
-		SUM
+		SUM,
+		SUSER_SNAME
 	}
 }

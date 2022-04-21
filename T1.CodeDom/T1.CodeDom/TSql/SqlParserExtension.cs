@@ -776,6 +776,8 @@ namespace T1.CodeDom.TSql
 		private static FromSourceSqlCodeExpr ParseFromSource(IParser parser)
 		{
 			var sourceExpr = parser.ParseExpIgnoreComment();
+			sourceExpr = parser.ParseLRParenExpr(sourceExpr);
+
 			parser.TryConsumeAliasName(out var aliasNameExpr);
 			var userWithOptions = parser.ParseWithOptions();
 
