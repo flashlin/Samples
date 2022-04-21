@@ -188,6 +188,7 @@
 		SUM,
 		SUSER_SNAME,
 		DATEADD,
-		FLOOR
+		FLOOR,
+		COUNT
 	}
 }
