@@ -139,6 +139,7 @@ namespace T1.CodeDom.TSql.Parselets
 		protected SqlCodeExpr ParseColumnAs(IParser parser)
 		{
 			var name = parser.ParseExpIgnoreComment();
+			name = parser.ParseLRParenExpr(name);
 
 			var meetColumnAliasNameList = new[]
 			{

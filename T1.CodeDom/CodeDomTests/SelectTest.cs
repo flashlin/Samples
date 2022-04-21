@@ -45,6 +45,15 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_customFunc()
+		{
+			var sql = "select name, [dbo].[isMy](123)";
+			Parse(sql);
+			ThenExprShouldBe("SELECT name, [dbo].[isMy]( 123 )");
+		}
+
+
+		[Fact]
 		public void select_where_eq_and_between()
 		{
 			var sql = @"select id from customer where 
