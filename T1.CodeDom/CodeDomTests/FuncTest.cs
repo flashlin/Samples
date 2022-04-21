@@ -65,5 +65,15 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe(@"GETDATE()");
 		}
+
+		[Fact]
+		public void floor()
+		{
+			var sql = @"floor(1)";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"FLOOR( 1 )");
+		}
 	}
 }

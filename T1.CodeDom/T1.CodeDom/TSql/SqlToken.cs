@@ -183,9 +183,11 @@
 		Open,
 		Fetch,
 		Next,
-		Getdate,
+		GETDATE,
 		ABS,
 		SUM,
-		SUSER_SNAME
+		SUSER_SNAME,
+		DATEADD,
+		FLOOR
 	}
 }

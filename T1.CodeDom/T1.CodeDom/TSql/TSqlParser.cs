@@ -69,7 +69,9 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.While, new WhileParselet());
 
 			Register(SqlToken.ABS, new CallFuncParselet(1, 1));
-			Register(SqlToken.Getdate, new CallFuncParselet());
+			Register(SqlToken.DATEADD, new CallFuncParselet(3, 3));
+			Register(SqlToken.FLOOR, new CallFuncParselet(1, 1));
+			Register(SqlToken.GETDATE, new CallFuncParselet());
 			Register(SqlToken.SUM, new CallFuncParselet(1, 1));
 			Register(SqlToken.SUSER_SNAME, new CallFuncParselet(1, 1));
 
