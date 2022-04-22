@@ -157,5 +157,26 @@ OUTPUT 1, deleted.Id
 INTO @customerTable
 WHERE id = 1");
 		}
+
+	[Fact]
+		public void update_set_output_aliasName()
+		{
+			var sql = @"update customer
+		set 
+			name = @name
+		output
+			1, deleted.Id sid into @customerTable
+		where id = 1";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE customer
+SET name = @name
+OUTPUT 1, deleted.Id AS sid
+INTO @customerTable
+WHERE id = 1");
+		}
+
+		
 	}
 }

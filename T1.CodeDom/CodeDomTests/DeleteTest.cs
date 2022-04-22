@@ -71,5 +71,6 @@ WHERE ds.name = @name");
 
 			ThenExprShouldBe(@"DELETE TOP ( @batch ) FROM customer");
 		}
+		
 	}
 }

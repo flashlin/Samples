@@ -297,19 +297,19 @@ namespace T1.CodeDom.TSql
 			{
 				do
 				{
-
-					//var actionName = parser.Scanner.ConsumeStringAny(SqlToken.Deleted, SqlToken.Inserted);
 					if (parser.Scanner.TryConsumeStringAny(out var actionName, SqlToken.Deleted, SqlToken.Inserted))
 					{
 						parser.Scanner.Consume(SqlToken.Dot);
 					}
-					//var columnName = parser.ConsumeObjectId();
 					var columnName = parser.ParseExpIgnoreComment();
+					
+					parser.TryConsumeAliasName(out var aliasName);
 
 					outputList.Add(new OutputSqlCodeExpr
 					{
 						OutputActionName = actionName,
 						ColumnName = columnName,
+						AliasName = aliasName
 					});
 				} while (parser.Scanner.Match(SqlToken.Comma));
 			}
