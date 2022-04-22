@@ -10,6 +10,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public List<string> WithOptions { get; set; }
 		public SqlCodeExpr TargetTableAliasName { get; set; }
 		public SqlCodeExpr TableSource { get; set; }
+		public List<SqlCodeExpr> SourceColumnList { get; set; }
 		public SqlCodeExpr TableSourceAliasName { get; set; }
 		public SqlCodeExpr OnMergeSearchCondition { get; set; }
 		public WhenMatchedSqlCodeExpr WhenMatched { get; set; }
@@ -48,6 +49,13 @@ namespace T1.CodeDom.TSql.Expressions
 			{
 				stream.Write(" AS ");
 				TableSourceAliasName.WriteToStream(stream);
+			}
+
+			if (SourceColumnList != null && SourceColumnList.Count > 0)
+			{
+				stream.Write("(");
+				SourceColumnList.WriteToStreamWithComma(stream);
+				stream.Write(")");
 			}
 
 			stream.Write(" ON ");

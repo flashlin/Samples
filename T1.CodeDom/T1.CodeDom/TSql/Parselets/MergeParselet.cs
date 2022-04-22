@@ -30,7 +30,9 @@ namespace T1.CodeDom.TSql.Parselets
 
 			parser.Scanner.Consume(SqlToken.Using);
 
-			var tableSource = parser.ConsumeTableName();
+			//var tableSource = parser.ConsumeTableName();
+			var tableSource = parser.ParseExpIgnoreComment();
+
 			if (!parser.TryConsumeAliasName(out var tableSourceAliasName) && parser.Scanner.IsTokenList(SqlToken.As, SqlToken.Source))
 			{
 				parser.Scanner.Consume(SqlToken.As);
@@ -39,6 +41,13 @@ namespace T1.CodeDom.TSql.Parselets
 				{
 					ObjectName = "Source"
 				};
+			}
+
+			var sourceColumnList = new List<SqlCodeExpr>();
+			if (parser.MatchToken(SqlToken.LParen))
+			{
+				sourceColumnList = parser.ParseColumnList();
+				parser.ConsumeToken(SqlToken.RParen);
 			}
 
 			parser.Scanner.Consume(SqlToken.On);
@@ -67,6 +76,7 @@ namespace T1.CodeDom.TSql.Parselets
 				TargetTableAliasName = targetTableAliasName,
 				WithOptions = withOptions,
 				TableSource = tableSource,
+				SourceColumnList = sourceColumnList,
 				TableSourceAliasName = tableSourceAliasName,
 				OnMergeSearchCondition = mergeSearchCondition,
 				WhenMatched = whenMatched,
@@ -110,13 +120,15 @@ namespace T1.CodeDom.TSql.Parselets
 			}
 
 			var insertColumnList = new List<SqlCodeExpr>();
-			parser.Scanner.Consume(SqlToken.LParen);
-			do
+			if (parser.MatchToken(SqlToken.LParen))
 			{
-				var column = parser.ParseExpIgnoreComment();
-				insertColumnList.Add(column);
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			parser.Scanner.Consume(SqlToken.RParen);
+				do
+				{
+					var column = parser.ParseExpIgnoreComment();
+					insertColumnList.Add(column);
+				} while (parser.Scanner.Match(SqlToken.Comma));
+				parser.Scanner.Consume(SqlToken.RParen);
+			}
 
 			parser.Scanner.Consume(SqlToken.Values);
 

@@ -11,9 +11,13 @@ namespace T1.CodeDom.TSql.Expressions
 		public override void WriteToStream(IndentStream stream)
 		{
 			stream.Write("INSERT ");
-			stream.Write("(");
-			ColumnList.WriteToStreamWithComma(stream);	
-			stream.Write(") ");
+
+			if (ColumnList != null && ColumnList.Count > 0)
+			{
+				stream.Write("(");
+				ColumnList.WriteToStreamWithComma(stream);
+				stream.Write(") ");
+			}
 
 			stream.Write("VALUES(");
 			SourceColumnList.WriteToStreamWithComma(stream);
