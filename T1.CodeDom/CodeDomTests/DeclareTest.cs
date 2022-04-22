@@ -59,5 +59,15 @@ id int primary key nonclustered
 id INT PRIMARY KEY NONCLUSTERED
 )");
 		}
+
+
+		[Fact]
+		public void declare_table_default()
+		{
+			var sql = @"declare @tbl table(id int, sid int default 1)";
+			Parse(sql);
+			
+			ThenExprShouldBe(@"DECLARE @tbl TABLE ( id INT, sid INT DEFAULT 1 )");
+		}
 	}
 }

@@ -753,10 +753,18 @@ namespace T1.CodeDom.TSql
 				var name = parser.ConsumeTokenStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
 
 				var dataType = parser.ConsumeDataType();
+
+				SqlCodeExpr defaultValue = null;
+				if (parser.MatchToken(SqlToken.Default))
+				{
+					defaultValue = parser.ParseExpIgnoreComment();
+				}
+				
 				columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
 				{
 					Name = name,
-					DataType = dataType
+					DataType = dataType,
+					DefaultValue = defaultValue
 				});
 			} while (parser.MatchToken(SqlToken.Comma));
 			parser.Scanner.Consume(SqlToken.RParen);

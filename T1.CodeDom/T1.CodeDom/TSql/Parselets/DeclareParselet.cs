@@ -36,6 +36,7 @@ namespace T1.CodeDom.TSql.Parselets
 						Right = valueExpr
 					};
 				}
+				
 				variableList.Add(variableDataType);
 			} while (parser.Scanner.Match(SqlToken.Comma));
 
