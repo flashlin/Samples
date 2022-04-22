@@ -93,5 +93,19 @@ name VARCHAR(10)
 
 			ThenExprShouldBe(@"CREATE CLUSTERED INDEX ix_id ON #customer(id)");
 		}
+
+		[Fact]
+		public void create_tmpTable_not_null()
+		{
+			var sql = @"create table #tmpCustomer
+     (       
+			id int NOT NULL
+)";
+			Parse(sql);
+
+			ThenExprShouldBe(@"CREATE TABLE #tmpCustomer(
+id INT NOT NULL
+)");
+		}
 	}
 }

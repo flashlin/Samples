@@ -132,7 +132,15 @@ namespace T1.CodeDom.TSql
 			var isPrimaryKey = ParseIsPrimaryKey(parser);
 			var isNonclustered = parser.MatchToken(SqlToken.NONCLUSTERED);
 
-			var isAllowNull = parser.Scanner.Match(SqlToken.Null);
+			bool? isAllowNull = null;
+			if (parser.MatchTokenList(SqlToken.Not, SqlToken.Null))
+			{
+				isAllowNull = false;
+			}
+			else if (parser.Scanner.Match(SqlToken.Null))
+			{
+				isAllowNull = true;
+			}
 
 			if (!parser.Scanner.Match(SqlToken.LParen))
 			{
@@ -882,6 +890,17 @@ namespace T1.CodeDom.TSql
 		public static bool MatchToken(this IParser parser, SqlToken tokenType)
 		{
 			return TryConsumeToken(parser, out _, tokenType);
+		}
+
+		public static bool MatchTokenList(this IParser parser, params SqlToken[] tokenTypeList)
+		{
+			var startIndex = parser.Scanner.GetOffset();
+			var isAll = tokenTypeList.All(x => parser.MatchToken(x));
+			if (!isAll)
+			{
+				parser.Scanner.SetOffset(startIndex);
+			}
+			return isAll;
 		}
 
 		public static TextSpan PeekToken(this IParser parser)
