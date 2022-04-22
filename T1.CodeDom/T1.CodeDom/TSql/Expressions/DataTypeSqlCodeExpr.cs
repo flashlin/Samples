@@ -9,6 +9,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public int? Size { get; internal set; }
 		public int? Scale { get; internal set; }
 		public bool IsPrimaryKey { get; set; }
+		public bool IsNonclustered { get; set; }
 		public bool IsAllowNull { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -42,6 +43,10 @@ namespace T1.CodeDom.TSql.Expressions
 			if (IsPrimaryKey)
 			{
 				stream.Write(" PRIMARY KEY");
+				if(IsNonclustered)
+				{
+					stream.Write(" NONCLUSTERED");
+				}
 			}
 
 			if(IsAllowNull)

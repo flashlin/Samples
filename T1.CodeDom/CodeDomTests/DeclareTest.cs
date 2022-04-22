@@ -47,5 +47,17 @@ DECLARE @id INT");
 		}
 
 
+		[Fact]
+		public void declare_table_nonclustered()
+		{
+			var sql = @"declare @customer table(
+id int primary key nonclustered
+)";
+			Parse(sql);
+
+			ThenExprShouldBe(@"DECLARE @customer TABLE ( 
+id INT PRIMARY KEY NONCLUSTERED
+)");
+		}
 	}
 }

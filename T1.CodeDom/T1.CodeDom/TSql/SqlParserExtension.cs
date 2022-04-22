@@ -130,6 +130,7 @@ namespace T1.CodeDom.TSql
 			}
 
 			var isPrimaryKey = ParseIsPrimaryKey(parser);
+			var isNonclustered = parser.MatchToken(SqlToken.NONCLUSTERED);
 
 			var isAllowNull = parser.Scanner.Match(SqlToken.Null);
 
@@ -140,6 +141,7 @@ namespace T1.CodeDom.TSql
 					DataType = dataType,
 					IsReadOnly = isReadonly,
 					IsPrimaryKey = isPrimaryKey,
+					IsNonclustered = isNonclustered,
 					IsAllowNull = isAllowNull
 				};
 			}

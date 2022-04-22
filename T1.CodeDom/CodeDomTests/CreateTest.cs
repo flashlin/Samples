@@ -85,8 +85,6 @@ name VARCHAR(10)
 )");
 		}
 
-
-
 		[Fact]
 		public void create_clustered_index()
 		{
@@ -95,6 +93,5 @@ name VARCHAR(10)
 
 			ThenExprShouldBe(@"CREATE CLUSTERED INDEX ix_id ON #customer(id)");
 		}
-
 	}
 }

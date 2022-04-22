@@ -207,6 +207,7 @@
 		RAISERROR,
 		MinusEqual,
 		LOWER,
-		NULLIF
+		NULLIF,
+		NONCLUSTERED
 	}
 }
