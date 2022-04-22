@@ -13,7 +13,8 @@ namespace T1.CodeDom.TSql.Parselets
 
 			if (!parser.Scanner.IsToken(SqlToken.When))
 			{
-				inputExpr = parser.ParseExpIgnoreComment() as SqlCodeExpr;
+				inputExpr = parser.ParseExpIgnoreComment();
+				inputExpr = parser.ParseLRParenExpr(inputExpr);
 			}
 
 			var whenList = ParseWhenList(parser);
