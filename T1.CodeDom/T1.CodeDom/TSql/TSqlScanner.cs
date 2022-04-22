@@ -174,6 +174,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("NOLOCK", SqlToken.NOLOCK);
 			AddTokenMap("NOCOUNT", SqlToken.NOCOUNT);
 			AddTokenMap("NORMAL", SqlToken.NORMAL);
+			AddTokenMap("NULLIF", SqlToken.NULLIF);
 			AddTokenMap("MAXDOP", SqlToken.MAXDOP);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);

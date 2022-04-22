@@ -206,6 +206,7 @@
 		LOG,
 		RAISERROR,
 		MinusEqual,
-		LOWER
+		LOWER,
+		NULLIF
 	}
 }
