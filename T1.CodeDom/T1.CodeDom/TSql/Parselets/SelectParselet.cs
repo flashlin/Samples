@@ -11,11 +11,7 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			var topCount = parser.ParseTopCountExpr();
 
-			var columns = new List<SqlCodeExpr>();
-			do
-			{
-				columns.Add(ParseColumnAs(parser));
-			} while (parser.Match(SqlToken.Comma));
+			var columns = parser.ParseColumnList();
 
 			SqlCodeExpr intoTable = null;
 			if (parser.Scanner.Match(SqlToken.Into))
@@ -134,34 +130,6 @@ namespace T1.CodeDom.TSql.Parselets
 				return new List<SqlCodeExpr>();
 			}
 			return parser.ParseFromSourceList();
-		}
-
-		protected SqlCodeExpr ParseColumnAs(IParser parser)
-		{
-			var name = parser.ParseExpIgnoreComment();
-			name = parser.ParseLRParenExpr(name);
-
-			var hasAs = parser.Scanner.Match(SqlToken.As);
-
-			SqlCodeExpr aliasName = null;
-			if (hasAs)
-			{
-				var aliasNameToken = parser.ConsumeToken();
-				aliasName = new ObjectIdSqlCodeExpr
-				{
-					ObjectName = parser.Scanner.GetSpanString(aliasNameToken)
-				};
-			}
-			else
-			{
-				parser.TryConsumeObjectId(out aliasName);
-			}
-
-			return new ColumnSqlCodeExpr
-			{
-				Name = name,
-				AliasName = aliasName
-			};
 		}
 
 		protected SqlCodeExpr ParseUnionSelect(TextSpan unionToken, IParser parser)

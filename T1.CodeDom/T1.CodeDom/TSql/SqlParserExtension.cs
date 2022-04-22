@@ -1024,5 +1024,43 @@ namespace T1.CodeDom.TSql
 
 			return parameterList;
 		}
+
+		public static List<SqlCodeExpr> ParseColumnList(this IParser parser)
+		{
+			var columns = new List<SqlCodeExpr>();
+			do
+			{
+				columns.Add(ParseColumnAs(parser));
+			} while (parser.Match(SqlToken.Comma));
+			return columns;
+		}
+
+		private static SqlCodeExpr ParseColumnAs(IParser parser)
+		{
+			var name = parser.ParseExpIgnoreComment();
+			name = parser.ParseLRParenExpr(name);
+
+			var hasAs = parser.Scanner.Match(SqlToken.As);
+
+			SqlCodeExpr aliasName = null;
+			if (hasAs)
+			{
+				var aliasNameToken = parser.ConsumeToken();
+				aliasName = new ObjectIdSqlCodeExpr
+				{
+					ObjectName = parser.Scanner.GetSpanString(aliasNameToken)
+				};
+			}
+			else
+			{
+				parser.TryConsumeObjectId(out aliasName);
+			}
+
+			return new ColumnSqlCodeExpr
+			{
+				Name = name,
+				AliasName = aliasName
+			};
+		}
 	}
 }

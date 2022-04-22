@@ -151,6 +151,25 @@ FROM customer )");
 		}
 
 		[Fact]
+		public void insert_into_comment()
+		{
+			var sql = @"insert into #customer(
+id, --- test
+name
+)
+( select 1, name from customer )
+";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO #customer(id, name)
+( SELECT 1, name
+FROM customer )");
+		}
+
+
+
+		[Fact]
 		public void insert_into_select_from_customFunc()
 		{
 			var sql = @"insert into @customer
