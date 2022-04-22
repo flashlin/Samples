@@ -302,7 +302,7 @@ namespace T1.CodeDom.TSql
 						parser.Scanner.Consume(SqlToken.Dot);
 					}
 					var columnName = parser.ParseExpIgnoreComment();
-					
+
 					parser.TryConsumeAliasName(out var aliasName);
 
 					outputList.Add(new OutputSqlCodeExpr
@@ -736,14 +736,16 @@ namespace T1.CodeDom.TSql
 			var columnDataTypeList = new List<SqlCodeExpr>();
 			do
 			{
-				var name = parser.Scanner.ConsumeStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
+				//var name = parser.Scanner.ConsumeStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
+				var name = parser.ConsumeTokenStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
+
 				var dataType = parser.ConsumeDataType();
 				columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
 				{
 					Name = name,
 					DataType = dataType
 				});
-			} while (parser.Scanner.Match(SqlToken.Comma));
+			} while (parser.MatchToken(SqlToken.Comma));
 			parser.Scanner.Consume(SqlToken.RParen);
 			return new TableDataTypeSqlCodeExpr
 			{
@@ -863,6 +865,15 @@ namespace T1.CodeDom.TSql
 			var isSuccess = tokenTypeList.Any(tokenType => parser.TryConsumeToken(out tmpToken, tokenType));
 			token = tmpToken;
 			return isSuccess;
+		}
+
+		public static string ConsumeTokenStringAny(this IParser parser, params SqlToken[] tokenTypeList)
+		{
+			if (!parser.TryConsumeTokenAny(out var tokenSpan, tokenTypeList))
+			{
+				ThrowHelper.ThrowParseException(parser, $"Expect TokenType {string.Join(",", tokenTypeList.Select(x => x.ToString()))}");
+			}
+			return parser.Scanner.GetSpanString(tokenSpan);
 		}
 
 		public static bool MatchToken(this IParser parser, SqlToken tokenType)

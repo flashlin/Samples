@@ -70,6 +70,24 @@ birth DATETIME
 		}
 
 		[Fact]
+		public void create_table_comment()
+		{
+			var sql = @"create table #customer (       
+id int,
+   -- test --    
+name varchar(10)
+  )";
+			Parse(sql);
+
+			ThenExprShouldBe(@"CREATE TABLE #customer(
+id INT,
+name VARCHAR(10)
+)");
+		}
+
+
+
+		[Fact]
 		public void create_clustered_index()
 		{
 			var sql = @"create clustered index ix_id on #customer (id)";
