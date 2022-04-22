@@ -178,6 +178,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("NULLIF", SqlToken.NULLIF);
 			AddTokenMap("NONCLUSTERED", SqlToken.NONCLUSTERED);
 			AddTokenMap("MAXDOP", SqlToken.MAXDOP);
+			AddTokenMap("OBJECT_NAME", SqlToken.OBJECT_NAME);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("READ", SqlToken.READ);
