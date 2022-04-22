@@ -54,6 +54,15 @@ END");
 			ThenExprShouldBe(@"CASE WHEN a > 1 AND [dbo].[fn_my]( 1, 2 ) >= 2 THEN 2 ELSE 3 END");
 		}
 
+		[Fact]
+		public void case_when_then_else_fn()
+		{
+			var sql = @"case when id=1 then '' else master.sys.fn_xxx(id) end ";
+			Parse(sql);
 
+			ThenExprShouldBe(@"CASE WHEN id = 1 THEN '' ELSE master.sys.fn_xxx( id ) END");
+		}
+
+		
 	}
 }

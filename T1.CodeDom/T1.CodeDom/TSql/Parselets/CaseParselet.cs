@@ -22,7 +22,8 @@ namespace T1.CodeDom.TSql.Parselets
 			SqlCodeExpr elseExpr = null;
 			if (parser.Scanner.Match(SqlToken.Else))
 			{
-				elseExpr = parser.ParseExp() as SqlCodeExpr;
+				elseExpr = parser.ParseExpIgnoreComment();
+				elseExpr = parser.ParseLRParenExpr(elseExpr);
 			}
 
 			parser.Scanner.Consume(SqlToken.End);
