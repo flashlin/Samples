@@ -293,6 +293,16 @@ FROM customer WITH( nolock, INDEX(aaa) )");
 			ThenExprShouldBe(@"SELECT SUM( id ) AS out, name FROM customer");
 		}
 
+		[Fact]
+		public void select_name_as_count()
+		{
+			var sql = @"select 'main' as name, COUNT(1) Count";
+			
+			Parse(sql);
 
+			ThenExprShouldBe(@"SELECT 'main' AS name, COUNT( 1 ) AS Count");
+		}
+
+		
 	}
 }

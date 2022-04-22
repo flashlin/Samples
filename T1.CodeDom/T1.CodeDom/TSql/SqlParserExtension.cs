@@ -539,6 +539,7 @@ namespace T1.CodeDom.TSql
 				SqlToken.Date,
 				SqlToken.Rank,
 				SqlToken.Error,
+				SqlToken.COUNT
 			};
 
 			var identTokens = new List<string>();
