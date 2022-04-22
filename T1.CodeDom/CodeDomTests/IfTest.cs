@@ -59,16 +59,12 @@ END");
 			Parse(sql);
 
 			ThenExprShouldBe(@"IF @id IN (1, 2)
-BEGIN
 SET @r = 0
-END
 ELSE IF @id = 2
-BEGIN
 SET @r = 1
-END
-ELSE BEGIN
+ELSE
 SET @r = 3
-END");
+");
 		}
 
 		[Fact]
@@ -88,5 +84,20 @@ END");
 		}
 
 
+		[Fact]
+		public void if_else_begin_tran()
+		{
+			var sql = @"if @id = 1
+begin
+	select 1
+end else begin tran
+";
+			Parse(sql);
+
+			ThenExprShouldBe(@"IF @id = 1
+BEGIN 
+	SELECT 1
+END ELSE BEGIN TRANSACTION");
+		}
 	}
 }

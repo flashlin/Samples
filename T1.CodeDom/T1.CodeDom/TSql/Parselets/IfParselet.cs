@@ -12,20 +12,23 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			var conditionExpr = parser.ParseExp();
 
-			var bodyList = ParseBeginBodyOrBody(parser);
+			//var bodyList = ParseBeginBodyOrBody(parser);
+			var body = parser.ParseExpIgnoreComment();
 
 			var elseIfList = ParseElseIfList(parser);
 
-			var elseExpr = new List<SqlCodeExpr>();
+			//var elseExpr = new List<SqlCodeExpr>();
+			SqlCodeExpr elseExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Else, out var elseSpan))
 			{
-				elseExpr = ParseBeginBodyOrBody(parser);
+				//elseExpr = ParseBeginBodyOrBody(parser);
+				elseExpr = parser.ParseExpIgnoreComment();
 			}
 
 			return new IfSqlCodeExpr
 			{
 				Condition = conditionExpr as SqlCodeExpr,
-				Body = bodyList,
+				Body = body,
 				ElseIfList = elseIfList,
 				ElseExpr = elseExpr
 			};
@@ -45,34 +48,50 @@ namespace T1.CodeDom.TSql.Parselets
 			return elseIfExprList;
 		}
 
-		private static List<SqlCodeExpr> ParseBeginBodyOrBody(IParser parser)
-		{
-			var bodyList = new List<SqlCodeExpr>();
-			if (parser.Scanner.IsToken(SqlToken.Begin))
-			{
-				bodyList = parser.ConsumeBeginBody();
-			}
-			else
-			{
-				var body = parser.ParseExpIgnoreComment();
-				bodyList.Add(body);
-			}
-			return bodyList;
-		}
+		//private static List<SqlCodeExpr> ParseBeginBodyOrBody(IParser parser)
+		//{
+		//	var bodyList = new List<SqlCodeExpr>();
+		//	if (parser.Scanner.IsToken(SqlToken.Begin))
+		//	{
+		//		bodyList = parser.ConsumeBeginBody();
+		//	}
+		//	else
+		//	{
+		//		var body = parser.ParseExpIgnoreComment();
+		//		bodyList.Add(body);
+		//	}
+		//	return bodyList;
+		//}
 
 		private SqlCodeExpr ParseElseIf(IParser parser)
 		{
 			parser.Scanner.Consume(SqlToken.Else);
-			parser.Scanner.Consume(SqlToken.If);
 
+			if(parser.TryConsumeToken(out var beginSpan, SqlToken.Begin))
+			{
+				var elseExpr = ParseBegin(beginSpan, parser);
+				return new ElseIfSqlCodeExpr
+				{
+					//Body = new List<SqlCodeExpr>() { elseExpr }
+					Body = elseExpr
+				};
+			}
+
+			parser.Scanner.Consume(SqlToken.If);
 			var conditionExpr = parser.ParseExpIgnoreComment();
-			var body = ParseBeginBodyOrBody(parser);
+			//var body = ParseBeginBodyOrBody(parser);
+			var body = parser.ParseExpIgnoreComment();
 
 			return new ElseIfSqlCodeExpr
 			{
 				ConditionExpr = conditionExpr,
 				Body = body,
 			};
+		}
+
+		private SqlCodeExpr ParseBegin(TextSpan beginSpan, IParser parser)
+		{			
+			return parser.PrefixParse(beginSpan) as SqlCodeExpr;
 		}
 	}
 }
