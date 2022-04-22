@@ -208,6 +208,7 @@
 		MinusEqual,
 		LOWER,
 		NULLIF,
-		NONCLUSTERED
+		NONCLUSTERED,
+		HOLDLOCK
 	}
 }

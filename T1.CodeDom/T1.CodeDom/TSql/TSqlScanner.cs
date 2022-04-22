@@ -163,6 +163,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
 			AddTokenMap("HIGH", SqlToken.HIGH);
+			AddTokenMap("HOLDLOCK", SqlToken.HOLDLOCK);
 			AddTokenMap("ISOLATION", SqlToken.ISOLATION);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 			AddTokenMap("LOW", SqlToken.LOW);
