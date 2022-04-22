@@ -179,5 +179,17 @@ FROM customer )");
 
 			ThenExprShouldBe(@"INSERT INTO @customer SELECT val FROM myfunc( @id, N'a' )");
 		}
+
+		[Fact]
+		public void insert_into_select_rank()
+		{
+			var sql = @"insert into @customer(id, name) select rank, name from otherTable;";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO @customer(id, name) SELECT rank, name FROM otherTable");
+		}
+
+
 	}
 }

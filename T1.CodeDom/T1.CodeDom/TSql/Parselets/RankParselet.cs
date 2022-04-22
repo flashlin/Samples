@@ -10,6 +10,14 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if (!parser.IsToken(SqlToken.LParen))
+			{
+				return new ObjectIdSqlCodeExpr
+				{
+					ObjectName = parser.Scanner.GetSpanString(token)
+				};
+			}
+
 			parser.Scanner.Consume(SqlToken.LParen);
 			parser.Scanner.Consume(SqlToken.RParen);
 
@@ -78,7 +86,7 @@ namespace T1.CodeDom.TSql.Parselets
 		public override void WriteToStream(IndentStream stream)
 		{
 			stream.Write("OVER(");
-			if (PartitionBy!=null)
+			if (PartitionBy != null)
 			{
 				stream.Write(" ");
 				PartitionBy.WriteToStream(stream);

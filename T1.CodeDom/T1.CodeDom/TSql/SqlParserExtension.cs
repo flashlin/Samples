@@ -539,7 +539,7 @@ namespace T1.CodeDom.TSql
 				SqlToken.Date,
 				SqlToken.Rank,
 				SqlToken.Error,
-				SqlToken.COUNT
+				SqlToken.COUNT,
 			};
 
 			var identTokens = new List<string>();
@@ -560,6 +560,7 @@ namespace T1.CodeDom.TSql
 				var identifier = TextSpan.Empty;
 				if (nonSensitive)
 				{
+					//if (parser.Scanner.IsSymbol() && !parser.IsToken(SqlToken.Asterisk))
 					if (parser.Scanner.IsSymbol())
 					{
 						break;
@@ -759,7 +760,7 @@ namespace T1.CodeDom.TSql
 				{
 					defaultValue = parser.ParseExpIgnoreComment();
 				}
-				
+
 				columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
 				{
 					Name = name,
@@ -1048,6 +1049,8 @@ namespace T1.CodeDom.TSql
 		private static SqlCodeExpr ParseColumnAs(IParser parser)
 		{
 			var name = parser.ParseExpIgnoreComment();
+			//var name = parser.ConsumeObjectId(true);
+
 			name = parser.ParseLRParenExpr(name);
 
 			var hasAs = parser.Scanner.Match(SqlToken.As);
