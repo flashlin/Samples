@@ -521,6 +521,7 @@ namespace T1.CodeDom.TSql
 			var meetColumnNameList = new[]
 			{
 				SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
+				SqlToken.TempTable,
 				SqlToken.Source,
 				SqlToken.Target,
 				SqlToken.Asterisk,

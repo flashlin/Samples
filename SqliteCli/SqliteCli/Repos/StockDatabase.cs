@@ -14,6 +14,7 @@ namespace SqliteCli.Repos
 
 		public DbSet<StockEntity> StocksMap { get; set; }
 		public DbSet<TransEntity> Trans { get; set; }
+		public DbSet<StockHistoryEntity> StocksHistory { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{

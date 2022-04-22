@@ -33,7 +33,7 @@ namespace T1.CodeDom.TSql.Parselets
 			SqlCodeExpr whereExpr = null;
 			if (parser.Scanner.Match(SqlToken.Where))
 			{
-				whereExpr = parser.ParseExp() as SqlCodeExpr;
+				whereExpr = parser.ParseExpIgnoreComment();
 			}
 
 			return new UpdateSqlCodeExpr

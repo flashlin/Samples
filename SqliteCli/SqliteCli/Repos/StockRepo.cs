@@ -97,8 +97,6 @@ namespace SqliteCli.Repos
 
 		public List<ReportTranItem> ReportTrans(ReportTransReq req)
 		{
-			using var db = GetDatabase();
-
 			var sql = @"
 select 
     st.Id StockId,
@@ -120,26 +118,28 @@ group by st.Id, t.TranType
 			req.StartDate = DateTime.MinValue;
 			req.EndDate = DateTime.Now;
 
-			var connection = db.Database.GetDbConnection();
+			//using var db = GetDatabase();
+			//var connection = db.Database.GetDbConnection();
+			//var q1 = connection.Query(sql, new
+			//{
+			//	startTime = req.StartDate,
+			//	endTime = req.EndDate,
+			//});
 
-			var q1 = connection.Query(sql, new
-			{
-				startTime = req.StartDate,
-				endTime = req.EndDate,
-			});
+			//var dapperList = q1.ToList();
 
-			var dapperList = q1.ToList();
-
-			var dictList = dapperList.Select(x => (IDictionary<string, object>)x)
-				.ToList();
+			//var dictList = dapperList.Select(x => (IDictionary<string, object>)x)
+			//	.ToList();
 
 
-			var list = new List<ReportTranItem>();
-			foreach (var dict in dictList)
-			{
-				var item = dict.ConvertToObject<ReportTranItem>();
-				list.Add(item);
-			}
+			//var list = new List<ReportTranItem>();
+			//foreach (var dict in dictList)
+			//{
+			//	var item = dict.ConvertToObject<ReportTranItem>();
+			//	list.Add(item);
+			//}
+
+			var list = QueryRaw<ReportTranItem>(sql, req).ToList();
 
 			return list;
 		}
@@ -255,5 +255,27 @@ group by st.Id, t.TranType
 			});
 			db.SaveChanges();
 		}
+
+		public void UpsertStockHistory(StockHistoryEntity stockHistoryEntity)
+		{
+			//throw new NotImplementedException();
+		}
+
+		protected IEnumerable<T> QueryRaw<T>(string sql, object queryParameter)
+			where T : class, new()
+		{
+			using var db = GetDatabase();
+			var connection = db.Database.GetDbConnection();
+			var q1 = connection.Query(sql, queryParameter);
+
+			var dapperList = q1.ToList();
+			var dictList = dapperList.Select(x => (IDictionary<string, object>)x);
+			foreach (var dict in dictList)
+			{
+				var item = dict.ConvertToObject<T>();
+				yield return item;
+			}
+		}
+
 	}
 }

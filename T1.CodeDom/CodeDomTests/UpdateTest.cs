@@ -192,6 +192,19 @@ SET name = @name
 WHERE id = 1");
 		}
 
-		
+	[Fact]
+		public void update_tmpTable_where()
+		{
+			var sql = @"update #customer
+		set 
+			name = @name
+		where #customer.id = 1";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"UPDATE #customer
+SET name = @name
+WHERE #customer.id = 1");
+		}
 	}
 }

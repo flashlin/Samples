@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,6 +21,7 @@ namespace SqliteCli.Entities
 		public decimal HandlingFee { get; set; }
 	}
 
+	[Keyless]
 	[Table("StockHistory")]
 	public class StockHistoryEntity
 	{

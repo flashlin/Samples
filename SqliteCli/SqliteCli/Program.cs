@@ -99,6 +99,19 @@ async Task ProcessReportAsync(string cmdArgs)
 			stock.Profit = stock.Balance + stock.CurrTotalPrice;
 		}
 
+		db.UpsertStockHistory(new StockHistoryEntity
+		{
+			TranDate = data.Date,
+			StockId = stock.StockId,
+			TradeVolume = data.TradeVolume,
+			DollorVolume = data.DollorVolume,
+			TransactionCount = data.Transaction,
+			OpeningPrice = data.OpeningPrice,
+			ClosingPrice = data.ClosingPrice,
+			HighestPrice = data.HighestPrice,
+			LowestPrice = data.LowestPrice,
+		});
+
 		//var totalDays = (int)Math.Round((DateTime.Now - stock.MinTranTime).TotalDays, 0, MidpointRounding.AwayFromZero);
 		//stock.InterestRate = stock.Profit / stock.AvgStockPrice * 100 / totalDays;
 	}
