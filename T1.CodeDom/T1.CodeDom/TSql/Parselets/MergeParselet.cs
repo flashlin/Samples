@@ -30,7 +30,6 @@ namespace T1.CodeDom.TSql.Parselets
 
 			parser.Scanner.Consume(SqlToken.Using);
 
-			//var tableSource = parser.ConsumeTableName();
 			var tableSource = parser.ParseExpIgnoreComment();
 
 			if (!parser.TryConsumeAliasName(out var tableSourceAliasName) && parser.Scanner.IsTokenList(SqlToken.As, SqlToken.Source))
