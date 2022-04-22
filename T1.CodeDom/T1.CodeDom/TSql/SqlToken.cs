@@ -205,6 +205,7 @@
 		EXP,
 		LOG,
 		RAISERROR,
-		MinusEqual
+		MinusEqual,
+		LOWER
 	}
 }

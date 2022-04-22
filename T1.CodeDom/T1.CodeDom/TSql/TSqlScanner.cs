@@ -166,6 +166,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ISOLATION", SqlToken.ISOLATION);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 			AddTokenMap("LOW", SqlToken.LOW);
+			AddTokenMap("LOWER", SqlToken.LOWER);
 			AddTokenMap("LEVEL", SqlToken.LEVEL);
 			AddTokenMap("LOCK_TIMEOUT", SqlToken.LOCK_TIMEOUT);
 			AddTokenMap("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);

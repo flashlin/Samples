@@ -81,6 +81,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.GETDATE, new CallFuncParselet());
 			Register(SqlToken.LEN, new CallFuncParselet(1, 1));
 			Register(SqlToken.LOG, new CallFuncParselet(1, 1));
+			Register(SqlToken.LOWER, new CallFuncParselet(1, 1));
 			Register(SqlToken.MIN, new CallFuncParselet(1, 1));
 			Register(SqlToken.MAX, new CallFuncParselet(1));
 			Register(SqlToken.MONTH, new CallFuncParselet(1));
