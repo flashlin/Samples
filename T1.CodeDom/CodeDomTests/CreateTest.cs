@@ -24,6 +24,7 @@ end";
 			ThenExprShouldBe(@"CREATE PROCEDURE myProc
 @id INT, 
 @name VARCHAR(50)
+AS
 BEGIN
 	SET NOEXEC ON
 	; 
@@ -45,6 +46,7 @@ end";
 			ThenExprShouldBe(@"CREATE PROCEDURE myProc
 @id INT, 
 @name VARCHAR(50) = 'a'
+AS
 BEGIN
 	SET NOEXEC ON
 	; 

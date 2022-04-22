@@ -13,15 +13,13 @@ namespace T1.CodeDom.TSql.Expressions
 		{
 			stream.Write("CREATE PROCEDURE ");
 			Name.WriteToStream(stream);
+			
 			stream.WriteLine();
 			Arguments.WriteToStreamWithComma(stream);
+
 			stream.WriteLine();
-			stream.WriteLine("BEGIN");
-			stream.Indent++;
+			stream.WriteLine("AS");
 			Body.WriteToStream(stream);
-			stream.Indent--;
-			stream.WriteLine();
-			stream.Write("END");
 		}
 	}
 }

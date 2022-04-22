@@ -72,18 +72,29 @@ namespace T1.CodeDom.TSql
 
 		public static List<SqlCodeExpr> ConsumeBeginBodyOrSingle(this IParser parser)
 		{
-			if (parser.Scanner.IsToken(SqlToken.Begin))
-			{
-				return parser.ConsumeBeginBody();
-			}
 			var bodyList = new List<SqlCodeExpr>();
-			var body = parser.ParseExpIgnoreComment();
-			if (body == null)
+			do
 			{
-				return bodyList;
-			}
-			bodyList.Add(body as SqlCodeExpr);
+				var body = parser.ParseExpIgnoreComment();
+				if (body == null)
+				{
+					break;
+				}
+				bodyList.Add(body);
+			} while (true);
 			return bodyList;
+			//if (parser.Scanner.IsToken(SqlToken.Begin))
+			//{
+			//	return parser.ConsumeBeginBody();
+			//}
+			//var bodyList = new List<SqlCodeExpr>();
+			//var body = parser.ParseExpIgnoreComment();
+			//if (body == null)
+			//{
+			//	return bodyList;
+			//}
+			//bodyList.Add(body as SqlCodeExpr);
+			//return bodyList;
 		}
 
 		public static IEnumerable<TExpression> ConsumeByDelimiter<TExpression>(this IParser parser,
