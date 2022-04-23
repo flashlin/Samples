@@ -1,6 +1,7 @@
 ﻿using T1.CodeDom.Core;
 using T1.CodeDom.TSql;
 using T1.CodeDom.TSql.Expressions;
+using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
@@ -25,6 +26,23 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			parser.Scanner.ConsumeAny(SqlToken.TRANSACTION, SqlToken.TRAN);
 			return new BeginTransactionSqlCodeExpr();
+		}
+	}
+
+	public class BreakParselet : IPrefixParselet
+	{
+		public IExpression Parse(TextSpan token, IParser parser)
+		{
+			parser.ConsumeToken(SqlToken.Semicolon);
+			return new BreakSqlCodeExpr();
+		}
+	}
+
+	public class BreakSqlCodeExpr : SqlCodeExpr
+	{
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write("BREAK;");	
 		}
 	}
 }

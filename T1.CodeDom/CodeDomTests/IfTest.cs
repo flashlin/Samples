@@ -99,5 +99,17 @@ BEGIN
 	SELECT 1
 END ELSE BEGIN TRANSACTION");
 		}
+
+		[Fact]
+		public void if_break()
+		{
+			var sql = @"if @id = 1 break;
+";
+			Parse(sql);
+
+			ThenExprShouldBe(@"IF @id = 1 BREAK;");
+		}
+
+
 	}
 }

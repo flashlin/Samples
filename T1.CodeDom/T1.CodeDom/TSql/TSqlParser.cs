@@ -11,6 +11,7 @@ namespace T1.CodeDom.TSql
 		{
 			Register(SqlToken.Asterisk, new AsteriskParselet());
 			Register(SqlToken.Begin, new BeginParselet());
+			Register(SqlToken.Break, new BreakParselet());
 			Register(SqlToken.Cast, new CastParselet());
 			Register(SqlToken.Case, new CaseParselet());
 			Register(SqlToken.Convert, new ConvertParselet());
