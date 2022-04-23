@@ -318,5 +318,20 @@ HAVING id > 1");
 
 		}
 		
+
+		[Fact]
+		public void select_order_by()
+		{
+			var sql = @"select * from @customer c
+	order by c.Status & 1, name";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT * FROM @customer AS c ORDER BY c.Status & 1 ASC, name ASC");
+
+		}
+		
+
+
 	}
 }

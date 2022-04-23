@@ -89,10 +89,14 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.By);
 			do
 			{
+				/*
 				if (!parser.TryConsumeObjectId(out var name))
 				{
 					name = parser.ParseExpIgnoreComment();
 				}
+				*/
+				
+				var name = parser.ParseExpIgnoreComment();
 
 				var ascOrDesc = "ASC";
 				parser.Scanner.TryConsumeAny(out var ascOrDescSpan, SqlToken.Asc, SqlToken.Desc);
