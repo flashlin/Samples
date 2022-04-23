@@ -7,7 +7,7 @@ public class DateRange
 
     public IEnumerable<DateTime> GetRangeByMonth()
     {
-        var currDate = StartDate.Date;
+        var currDate = DateTime.Parse(StartDate.ToString("yyyy/MM/01")).Date;
         while(currDate <= EndDate)
         {
             yield return currDate;

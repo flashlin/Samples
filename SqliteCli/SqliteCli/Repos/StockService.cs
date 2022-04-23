@@ -1,4 +1,5 @@
 using SqliteCli.Entities;
+using SqliteCli.Helpers;
 using T1.Standard.Common;
 
 namespace SqliteCli.Repos;
@@ -19,7 +20,7 @@ public class StockReportHistory
         public decimal YValue {get; set;}
     }
     
-    public List<Item> Items { get; set; }
+    public Dictionary<DateTime, Item> Items { get; set; }
 }
 
 public class StockService : IStockService
@@ -38,7 +39,19 @@ public class StockService : IStockService
         var stockHistory = _stockRepo.GetStockHistory(ValueHelper.Assign(req, new GetStockHistoryReq()));
         var tranHistory = _stockRepo.GetStockTranHistory(req);
 
+        var dateRange = new DateRange()
+        {
+            StartDate = req.StartTime,
+            EndDate = req.EndTime
+        };
         var history = new StockReportHistory();
+        foreach (var date in dateRange.GetRangeByMonth())
+        {
+            history.Items[date] = new StockReportHistory.Item()
+            {
+                XValue = date.Month
+            };
+        }
     }
         
     public async Task<List<ReportTranItem>> ReportTransAsync()
