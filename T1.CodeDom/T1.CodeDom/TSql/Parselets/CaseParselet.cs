@@ -11,7 +11,7 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			SqlCodeExpr inputExpr = null;
 
-			if (!parser.Scanner.IsToken(SqlToken.When))
+			if (!parser.IsToken(SqlToken.When))
 			{
 				inputExpr = parser.ParseExpIgnoreComment();
 				inputExpr = parser.ParseLRParenExpr(inputExpr);
