@@ -1,6 +1,26 @@
 using SqliteCli.Entities;
+using T1.Standard.Common;
 
 namespace SqliteCli.Repos;
+
+public class StockReportHistoryReq
+{
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string StockId { get; set; }
+}
+
+public class StockReportHistory
+{
+    public class Item
+    {
+        public decimal Value { get; set; }
+        public decimal XValue {get; set;}
+        public decimal YValue {get; set;}
+    }
+    
+    public List<Item> Items { get; set; }
+}
 
 public class StockService : IStockService
 {
@@ -11,6 +31,12 @@ public class StockService : IStockService
     {
         _stockRepo = stockRepo;
         _stockExchangeApi = stockExchangeApi;
+    }
+
+    public void StockReportHistory(StockReportHistoryReq req)
+    {
+        var stockHistory = _stockRepo.GetStockHistory(ValueHelper.Assign(req, new GetStockHistoryReq()));
+        var tranHistory = _stockRepo.GetStockTranHistory(req);
     }
         
     public async Task<List<ReportTranItem>> ReportTransAsync()

@@ -118,30 +118,24 @@ group by st.Id, t.TranType
 			req.StartDate = DateTime.MinValue;
 			req.EndDate = DateTime.Now;
 
-			//using var db = GetDatabase();
-			//var connection = db.Database.GetDbConnection();
-			//var q1 = connection.Query(sql, new
-			//{
-			//	startTime = req.StartDate,
-			//	endTime = req.EndDate,
-			//});
-
-			//var dapperList = q1.ToList();
-
-			//var dictList = dapperList.Select(x => (IDictionary<string, object>)x)
-			//	.ToList();
-
-
-			//var list = new List<ReportTranItem>();
-			//foreach (var dict in dictList)
-			//{
-			//	var item = dict.ConvertToObject<ReportTranItem>();
-			//	list.Add(item);
-			//}
-
 			var list = QueryRaw<ReportTranItem>(sql, req).ToList();
-
 			return list;
+		}
+
+		public List<StockHistoryEntity> GetStockHistory(GetStockHistoryReq req)
+		{
+			using var db = GetDatabase();
+			var data = db.StocksHistory.Where(x => x.TranDate >= req.StartTime && x.TranDate <= req.EndTime && x.StockId == req.StockId);
+			return data.ToList();
+		}
+
+		public List<TransEntity> GetStockTranHistory(StockReportHistoryReq req)
+		{
+			using var db = GetDatabase();
+			var data = db.Trans.Where(x => x.TranTime >= req.StartTime && x.TranTime <= req.EndTime 
+			                                                && x.StockId == req.StockId
+			                                                && x.TranType == "Buy");
+			return data.ToList();
 		}
 
 		public List<TransHistory> ListTrans(ListTransReq req)
@@ -297,5 +291,12 @@ where not exists(
 			connection.Execute(sql, queryParameter);
 		}
 
+	}
+
+	public class GetStockHistoryReq
+	{
+		public DateTime StartTime { get; set; }
+		public DateTime EndTime { get; set; }
+		public string StockId { get; set; }
 	}
 }

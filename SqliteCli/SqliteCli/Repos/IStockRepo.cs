@@ -8,5 +8,7 @@ namespace SqliteCli.Repos
 		List<ReportTranItem> ReportTrans(ReportTransReq req);
 		void Deposit(DepositReq depositReq);
 		void UpsertStockHistory(StockHistoryEntity stockHistoryEntity);
+		List<StockHistoryEntity> GetStockHistory(GetStockHistoryReq req);
+		List<TransEntity> GetStockTranHistory(StockReportHistoryReq req);
 	}
 }
