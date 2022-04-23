@@ -19,6 +19,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ASC", SqlToken.Asc);
 			AddTokenMap("AND", SqlToken.And);
 			AddTokenMap("ALL", SqlToken.All);
+			AddTokenMap("AUTO", SqlToken.AUTO);
 			AddTokenMap("BREAK", SqlToken.Break);
 			AddTokenMap("BEGIN", SqlToken.Begin);
 			AddTokenMap("BIT", SqlToken.Bit);
@@ -41,6 +42,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("DECLARE", SqlToken.Declare);
 			AddTokenMap("DELETE", SqlToken.Delete);
 			AddTokenMap("DEFAULT", SqlToken.Default);
+			AddTokenMap("EXPLICIT", SqlToken.EXPLICIT);
 			AddTokenMap("DATE", SqlToken.Date);
 			AddTokenMap("DATETIME", SqlToken.DateTime);
 			AddTokenMap("DATETIME2", SqlToken.DateTime2);
@@ -100,9 +102,11 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("PIVOT", SqlToken.Pivot);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);
 			AddTokenMap("PROC", SqlToken.Procedure);
+			AddTokenMap("PATH", SqlToken.PATH);
 			AddTokenMap("ROW_NUMBER", SqlToken.ROW_NUMBER);
 			AddTokenMap("PRINT", SqlToken.Print);
 			AddTokenMap("RANK", SqlToken.Rank);
+			AddTokenMap("RAW", SqlToken.RAW);
 			AddTokenMap("RETURNS", SqlToken.Returns);
 			AddTokenMap("RIGHT", SqlToken.Right);
 			AddTokenMap("RANGE", SqlToken.Range);
@@ -129,6 +133,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("WITH", SqlToken.With);
 			AddTokenMap("WHEN", SqlToken.When);
 			AddTokenMap("WHILE", SqlToken.While);
+			AddTokenMap("XML", SqlToken.XML);
 			AddTokenMap(":SETVAR", SqlToken.ScriptSetVar);
 			AddTokenMap(":ON", SqlToken.ScriptOn);
 			

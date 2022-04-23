@@ -1007,6 +1007,18 @@ namespace T1.CodeDom.TSql
 			return commentTokenTypes.Contains(span.Type);
 		}
 
+		public static TextSpan ConsumeTokenAny(this IParser parser, params SqlToken[] tokenTypeList)
+		{
+			var token = TextSpan.Empty;
+			var isAny = tokenTypeList.Any(x => parser.TryConsumeToken(out token, x));
+			if (!isAny)
+			{
+				var s = string.Join(",", tokenTypeList.Select(x => x.ToString()));
+				ThrowHelper.ThrowParseException(parser, $"Expect one of {s}");
+			}
+			return token;
+		}
+
 		public static TextSpan ConsumeToken(this IParser parser, SqlToken tokenType)
 		{
 			var commentTokenTypes = new[]

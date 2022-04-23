@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using T1.CodeDom.Core;
 
@@ -79,6 +80,14 @@ namespace T1.CodeDom.TSql
 				textSpanList.Add(scanner.Consume<SqlToken>(tokenType));
 			}
 			return textSpanList;
+		}
+	}
+
+	public static class SqlTextSpanExtension
+	{
+		public static SqlToken GetTokenType(this TextSpan span)
+		{
+			return (SqlToken)Enum.Parse(typeof(SqlToken), span.Type);
 		}
 	}
 }

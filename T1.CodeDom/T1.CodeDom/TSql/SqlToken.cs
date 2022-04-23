@@ -215,6 +215,11 @@
 		NEWID,
 		Percent,
 		Having,
-		UnPivot
+		UnPivot,
+		XML,
+		AUTO,
+		EXPLICIT,
+		PATH,
+		RAW
 	}
 }
