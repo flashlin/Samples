@@ -21,11 +21,6 @@ namespace T1.CodeDom.TSql.Parselets
 			}
 
 			var fromSourceList = GetFrom_SourceList(parser);
-			SqlCodeExpr forXmlExpr = null;
-			if (parser.TryConsumeToken(out var forSpan, SqlToken.For))
-			{
-				forXmlExpr = parser.PrefixParse(forSpan) as SqlCodeExpr;
-			}
 
 			SqlCodeExpr pivotExpr = null;
 			if (parser.Scanner.TryConsumeAny(out var pivotSpan, SqlToken.Pivot, SqlToken.UnPivot))
@@ -43,6 +38,12 @@ namespace T1.CodeDom.TSql.Parselets
 			var groupBy = ParseGroupBy(parser);
 			var having = ParseHaving(parser);
 			var orderBy = ParseOrderBy(parser);
+			
+			SqlCodeExpr forXmlExpr = null;
+			if (parser.TryConsumeToken(out var forSpan, SqlToken.For))
+			{
+				forXmlExpr = parser.PrefixParse(forSpan) as SqlCodeExpr;
+			}
 
 			var optionExpr = parser.ParseOptionExpr();
 
@@ -54,12 +55,12 @@ namespace T1.CodeDom.TSql.Parselets
 				Columns = columns,
 				IntoTable = intoTable,
 				FromSourceList = fromSourceList,
-				ForXmlExpr = forXmlExpr,
 				PivotExpr = pivotExpr,
 				WhereExpr = whereExpr,
 				GroupByList = groupBy,
 				Having = having,
 				OrderByList = orderBy,
+				ForXmlExpr = forXmlExpr,
 				OptionExpr = optionExpr,
 				UnionSelectList = unionSelectList
 			};

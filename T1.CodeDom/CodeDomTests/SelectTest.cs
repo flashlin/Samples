@@ -349,7 +349,18 @@ for xml path('')              ";
 
             Parse(sql);
 
-            ThenExprShouldBe(@"SELECT name FROM customer FOR XML PATH( '' )");
+            ThenExprShouldBe(@"SELECT name FROM customer FOR XML PATH ( '' )");
+        }
+
+        [Fact]
+        public void select_for_xml_auto()
+        {
+            var sql = @"select name from customer
+       for xml auto, ROOT('customer')";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT name FROM customer FOR XML AUTO, ROOT ( 'customer' )");
         }
     }
 }

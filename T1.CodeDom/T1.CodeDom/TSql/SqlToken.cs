@@ -220,6 +220,7 @@
 		AUTO,
 		EXPLICIT,
 		PATH,
-		RAW
+		RAW,
+		ROOT
 	}
 }

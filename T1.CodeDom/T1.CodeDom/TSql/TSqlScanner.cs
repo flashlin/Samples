@@ -107,6 +107,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("PRINT", SqlToken.Print);
 			AddTokenMap("RANK", SqlToken.Rank);
 			AddTokenMap("RAW", SqlToken.RAW);
+			AddTokenMap("ROOT", SqlToken.ROOT);
 			AddTokenMap("RETURNS", SqlToken.Returns);
 			AddTokenMap("RIGHT", SqlToken.Right);
 			AddTokenMap("RANGE", SqlToken.Range);
