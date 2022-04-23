@@ -214,6 +214,7 @@
 		DENSE_RANK,
 		NEWID,
 		Percent,
-		Having
+		Having,
+		UnPivot
 	}
 }

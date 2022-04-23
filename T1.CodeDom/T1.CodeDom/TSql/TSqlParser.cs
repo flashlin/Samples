@@ -64,6 +64,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.Merge, new MergeParselet());
 			Register(SqlToken.MultiComment, new CommentParselet());
 			Register(SqlToken.Update, new UpdateParselet());
+			Register(SqlToken.UnPivot, new PivotParselet());
 			Register(SqlToken.Variable, new VariableParselet());
 			Register(SqlToken.Values, new ValuesParselet());
 			Register(SqlToken.With, new WithParselet());

@@ -23,7 +23,7 @@ namespace T1.CodeDom.TSql.Parselets
 			var fromSourceList = GetFrom_SourceList(parser);
 
 			SqlCodeExpr pivotExpr = null;
-			if (parser.Scanner.TryConsume(SqlToken.Pivot, out var pivotSpan))
+			if (parser.Scanner.TryConsumeAny(out var pivotSpan, SqlToken.Pivot, SqlToken.UnPivot))
 			{
 				pivotExpr = parser.PrefixParse(pivotSpan) as SqlCodeExpr;
 			}

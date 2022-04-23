@@ -5,6 +5,7 @@ namespace T1.CodeDom.TSql.Expressions
 {
 	public class PivotSqlCodeExpr :  SqlCodeExpr
 	{
+		public string Token { get; set; }
 		public SqlCodeExpr Aggregated { get; set; }
 		public SqlCodeExpr Column { get; set; }
 		public List<SqlCodeExpr> PivotedColumns { get; set; }
@@ -12,7 +13,7 @@ namespace T1.CodeDom.TSql.Expressions
 
 		public override void WriteToStream(IndentStream stream)
 		{
-			stream.Write("PIVOT");
+			stream.Write($"{Token.ToUpper()}");
 			stream.Write("(");
 			Aggregated.WriteToStream(stream);
 			stream.Write(" FOR ");

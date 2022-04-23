@@ -119,6 +119,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("TABLE", SqlToken.Table);
 			AddTokenMap("THEN", SqlToken.Then);
 			AddTokenMap("TINYINT", SqlToken.TinyInt);
+			AddTokenMap("UNPIVOT", SqlToken.UnPivot);
 			AddTokenMap("UPDATE", SqlToken.Update);
 			AddTokenMap("USING", SqlToken.Using);
 			AddTokenMap("UNION", SqlToken.Union);

@@ -9,6 +9,8 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			var pivotStr = parser.Scanner.GetSpanString(token);
+			
 			parser.Scanner.Consume(SqlToken.LParen);
 
 			var aggregated = parser.ParseExpIgnoreComment();
@@ -34,6 +36,7 @@ namespace T1.CodeDom.TSql.Parselets
 
 			return new PivotSqlCodeExpr
 			{
+				Token = pivotStr.ToUpper(),
 				Aggregated = aggregated,
 				Column = column,
 				PivotedColumns = pivotedColumnsList,
