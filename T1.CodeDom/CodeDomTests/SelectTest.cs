@@ -35,7 +35,6 @@ namespace TestProject.PrattTests
 			ThenExprShouldBe(@"SELECT 1, 2 FROM customer");
 		}
 
-
 		[Fact]
 		public void select_name()
 		{
@@ -45,12 +44,29 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void select_date()
+		{
+			var sql = "select date from customer";
+			Parse(sql);
+			ThenExprShouldBe("SELECT date FROM customer");
+		}
+
+		[Fact]
 		public void select_customFunc()
+		{
+			var sql = "select [dbo].[isMy](123)";
+			Parse(sql);
+			ThenExprShouldBe("SELECT [dbo].[isMy]( 123 )");
+		}
+
+		[Fact]
+		public void select_field_customFunc()
 		{
 			var sql = "select name, [dbo].[isMy](123)";
 			Parse(sql);
 			ThenExprShouldBe("SELECT name, [dbo].[isMy]( 123 )");
 		}
+
 
 		[Fact]
 		public void select_group_customFunc()
@@ -59,9 +75,6 @@ namespace TestProject.PrattTests
 			Parse(sql);
 			ThenExprShouldBe("SELECT name, ( [dbo].[isMy]( 123 ) ) AS a");
 		}
-
-
-
 
 		[Fact]
 		public void select_where_eq_and_between()

@@ -18,5 +18,6 @@ namespace T1.CodeDom.Core
 		void SetOffset(int offset);
 		TextSpan ScanNext();
 		bool IsSymbol(int n = 0);
+		bool IsSymbol(TextSpan span);
 	}
 }

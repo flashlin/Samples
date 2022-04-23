@@ -335,7 +335,18 @@ namespace T1.CodeDom.TSql
 				SqlCodeExpr expr = null;
 				while (true)
 				{
-					expr = parser.GetParseExp(ctxPrecedence) as SqlCodeExpr;
+					var headToken = parser.PeekToken();
+					if (!headToken.IsEmpty && !parser.TryGetPrefixParselet(out _, headToken) && !parser.Scanner.IsSymbol(headToken))
+					{
+						var identifierToken = parser.ConsumeToken();
+						identifierToken.Type = SqlToken.Identifier.ToString();
+						expr = parser.PrefixParse(identifierToken) as SqlCodeExpr;
+					}
+					else
+					{
+						expr = parser.GetParseExp(ctxPrecedence) as SqlCodeExpr;
+					}
+
 					if (expr == null)
 					{
 						return null;
@@ -525,6 +536,21 @@ namespace T1.CodeDom.TSql
 			return false;
 		}
 
+		public static bool IsIdentifierToken(this IParser parser)
+		{
+			var startIndex = parser.Scanner.GetOffset();
+			parser.TryConsumeToken(out var token0);
+			parser.TryConsumeToken(out var token1);
+			parser.Scanner.SetOffset(startIndex);
+
+			if (token1.Type == SqlToken.LParen.ToString())
+			{
+				return false;
+			}
+
+			return !parser.Scanner.IsSymbol(token0) || token0.Type == SqlToken.Asterisk.ToString();
+		}
+
 		public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr, bool nonSensitive = false)
 		{
 			var comments = parser.IgnoreComments();
@@ -541,6 +567,12 @@ namespace T1.CodeDom.TSql
 				SqlToken.Error,
 				SqlToken.COUNT,
 			};
+
+			//if (!parser.IsIdentifierToken())
+			//{
+			//	expr = null;
+			//	return false;
+			//}
 
 			var identTokens = new List<string>();
 			do
@@ -925,12 +957,29 @@ namespace T1.CodeDom.TSql
 				if (commentList.Count > 0)
 				{
 					var allComment = commentList.First().Concat(commentList.Last());
+					allComment.Type = SqlToken.MultiComment.ToString();
 					return allComment;
 				}
 				return TextSpan.Empty;
 			}
 			token.Comments = commentList;
 			return token;
+		}
+
+
+		public static bool TryConsumeToken(this IParser parser, out TextSpan token)
+		{
+			token = PeekToken(parser);
+			if (token.IsEmpty)
+			{
+				return false;
+			}
+			if (token.IsComment())
+			{
+				return false;
+			}
+			parser.Scanner.SetOffset(token.Offset + token.Length - 1);
+			return true;
 		}
 
 		public static TextSpan ConsumeToken(this IParser parser)

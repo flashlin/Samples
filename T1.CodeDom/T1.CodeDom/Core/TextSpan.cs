@@ -7,6 +7,7 @@ namespace T1.CodeDom.Core
 	{
 		public static TextSpan Empty = new TextSpan
 		{
+			Type = String.Empty,
 			Offset = -1,
 			Length = 0,
 		};

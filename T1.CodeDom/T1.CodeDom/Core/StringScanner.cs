@@ -91,6 +91,11 @@ namespace T1.CodeDom.Core
 		public bool IsSymbol(int n=0)
 		{
 			var span = Peek(n);
+			return IsSymbol(span);
+		}
+		
+		public bool IsSymbol(TextSpan span)
+		{
 			var spanStr = GetSpanString(span);
 			return _symbolToTokenTypeMap.ContainsKey(spanStr);
 		}

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace T1.CodeDom.Core
 {
@@ -118,6 +119,11 @@ namespace T1.CodeDom.Core
 				yield return ParseExp(0);
 			}
 		}
+
+		public bool TryGetPrefixParselet(out IPrefixParselet parselet, TextSpan token)
+		{
+			return _prefixParselets.TryGetValue(token.Type, out parselet);
+		}		
 
 		protected virtual IInfixParselet CodeSpecInfix(TextSpan token)
 		{

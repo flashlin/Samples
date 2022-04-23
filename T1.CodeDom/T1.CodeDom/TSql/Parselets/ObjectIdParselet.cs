@@ -10,13 +10,15 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			var startIndex = parser.Scanner.GetOffset();
 			parser.Scanner.SetOffset(token.Offset - 1);
-			var identExpr = parser.ConsumeObjectId();
+			//var identExpr = parser.ConsumeObjectId();
 
-			//if (parser.Scanner.TryConsume(SqlToken.LParen, out _))
-			//{
-			//	return Call(identExpr, parser);
-			//}
+			if (!parser.TryConsumeObjectId(out var identExpr))
+			{
+				parser.Scanner.SetOffset(startIndex);
+				return new CallFuncParselet().Parse(token, parser);
+			}
 
 			return identExpr;
 		}
