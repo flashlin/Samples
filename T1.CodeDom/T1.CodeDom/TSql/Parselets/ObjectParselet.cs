@@ -28,7 +28,7 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			parser.Scanner.ConsumeList(SqlToken.LParen, SqlToken.RParen);
 			
-			var overExpr = parser.ParseOver();
+			var overExpr = parser.Consume(SqlToken.Over) as OverSqlCodeExpr;
 			
 			return new RowNumberSqlCodeExpr
 			{

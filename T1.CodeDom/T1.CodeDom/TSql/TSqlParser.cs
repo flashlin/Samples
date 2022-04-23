@@ -37,6 +37,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.Left, new LeftOrRightFunctionParselet());
 			Register(SqlToken.Object, new ObjectParselet());
 			Register(SqlToken.Open, new OpenParselet());
+			Register(SqlToken.Over, new OverParselet());
 			Register(SqlToken.Pivot, new PivotParselet());
 			Register(SqlToken.Print, new PrintParselet());
 			Register(SqlToken.QuoteString, new QuoteStringParselet());
@@ -72,6 +73,7 @@ namespace T1.CodeDom.TSql
 			Register(SqlToken.CHARINDEX, new CallFuncParselet(2, 3));
 			Register(SqlToken.COUNT, new CallFuncParselet(1, 1));
 			Register(SqlToken.COALESCE, new CallFuncParselet(1));
+			Register(SqlToken.DENSE_RANK, new DenseRankParselet());
 			Register(SqlToken.DATEADD, new DateAddFuncParselet());
 			Register(SqlToken.DATEPART, new DatePartFuncParselet());
 			Register(SqlToken.DATEDIFF, new DateDiffFuncParselet());

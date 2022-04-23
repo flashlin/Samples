@@ -35,6 +35,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("CONVERT", SqlToken.Convert);
 			AddTokenMap("CLUSTERED", SqlToken.Clustered);
 			AddTokenMap("DROP", SqlToken.Drop);
+			AddTokenMap("DENSE_RANK", SqlToken.DENSE_RANK);
 			AddTokenMap("DESC", SqlToken.Desc);
 			AddTokenMap("DISTINCT", SqlToken.Distinct);
 			AddTokenMap("DECLARE", SqlToken.Declare);
