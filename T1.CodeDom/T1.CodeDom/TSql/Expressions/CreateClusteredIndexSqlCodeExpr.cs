@@ -20,4 +20,22 @@ namespace T1.CodeDom.TSql.Expressions
 			stream.Write(")");
 		}
 	}
+	
+	public class CreateIndexSqlCodeExpr : SqlCodeExpr
+	{
+		public SqlCodeExpr IndexName { get; set; }
+		public SqlCodeExpr TableName { get; set; }
+		public List<SqlCodeExpr> OnColumns { get; set; }
+
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write("CREATE INDEX ");
+			IndexName.WriteToStream(stream);
+			stream.Write(" ON ");
+			TableName.WriteToStream(stream);
+			stream.Write("(");
+			OnColumns.WriteToStreamWithComma(stream);
+			stream.Write(")");
+		}
+	}
 }

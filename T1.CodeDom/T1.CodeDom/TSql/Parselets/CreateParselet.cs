@@ -14,6 +14,11 @@ namespace T1.CodeDom.TSql.Parselets
 			{
 				return CreateClusteredIndex(clusteredSpan, parser);
 			}
+			
+			if(parser.Scanner.TryConsume(SqlToken.Index, out var indexSpan))
+			{
+				return CreateIndex(indexSpan, parser);
+			}
 
 			if (parser.Scanner.TryConsume(SqlToken.Table, out var tableSpan))
 			{
@@ -50,7 +55,6 @@ namespace T1.CodeDom.TSql.Parselets
 				tableName = parser.Consume(SqlToken.TempTable);
 			}
 			
-			
 			var onColumnsList = new List<SqlCodeExpr>();
 			parser.Scanner.Consume(SqlToken.LParen);
 			do
@@ -61,6 +65,33 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.RParen);
 
 			return new CreateClusteredIndexSqlCodeExpr
+			{
+				IndexName = indexName,
+				TableName = tableName,
+				OnColumns = onColumnsList
+			};
+		}
+		
+		private SqlCodeExpr CreateIndex(TextSpan indexSpan, IParser parser)
+		{
+			var indexName = parser.ConsumeObjectId();
+			parser.Scanner.Consume(SqlToken.On);
+			
+			if( !parser.TryConsumeObjectId(out var tableName) )
+			{
+				tableName = parser.Consume(SqlToken.TempTable);
+			}
+			
+			var onColumnsList = new List<SqlCodeExpr>();
+			parser.Scanner.Consume(SqlToken.LParen);
+			do
+			{
+				var columnName = parser.ConsumeObjectId();
+				onColumnsList.Add(columnName);
+			} while (parser.Scanner.Match(SqlToken.Comma));
+			parser.Scanner.Consume(SqlToken.RParen);
+
+			return new CreateIndexSqlCodeExpr
 			{
 				IndexName = indexName,
 				TableName = tableName,
