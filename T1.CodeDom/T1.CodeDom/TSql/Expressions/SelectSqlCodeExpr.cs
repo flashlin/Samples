@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using T1.CodeDom.TSql.Parselets;
 using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Expressions
@@ -14,6 +15,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public SqlCodeExpr WhereExpr { get; set; }
 		public List<SqlCodeExpr> UnionSelectList { get; set; }
 		public List<SqlCodeExpr> GroupByList { get; set; }
+		public HavingSqlCodeExpr Having { get; set; }
 		public List<OrderItemSqlCodeExpr> OrderByList { get; set; }
 		public OptionSqlCodeExpr OptionExpr { get; set; }
 
@@ -79,6 +81,12 @@ namespace T1.CodeDom.TSql.Expressions
 				stream.WriteLine();
 				stream.Write("GROUP BY ");
 				GroupByList.WriteToStreamWithComma(stream);
+			}
+
+			if (Having != null)
+			{
+				stream.WriteLine();
+				Having.WriteToStream(stream);
 			}
 
 			if (OrderByList.Count > 0)

@@ -213,6 +213,7 @@
 		OBJECT_NAME,
 		DENSE_RANK,
 		NEWID,
-		Percent
+		Percent,
+		Having
 	}
 }

@@ -303,6 +303,20 @@ FROM customer WITH( nolock, INDEX(aaa) )");
 			ThenExprShouldBe(@"SELECT 'main' AS name, COUNT( 1 ) AS Count");
 		}
 
+	
+		[Fact]
+		public void select_having()
+		{
+			var sql = @"select 1 from customer where id=1 group by id having id > 1";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"SELECT 1 FROM customer
+WHERE id = 1
+GROUP BY id
+HAVING id > 1");
+
+		}
 		
 	}
 }

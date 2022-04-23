@@ -2,6 +2,7 @@
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql;
 using T1.CodeDom.TSql.Expressions;
+using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
@@ -35,6 +36,7 @@ namespace T1.CodeDom.TSql.Parselets
 			}
 
 			var groupBy = ParseGroupBy(parser);
+			var having = ParseHaving(parser);
 			var orderBy = ParseOrderBy(parser);
 
 			var optionExpr = parser.ParseOptionExpr();
@@ -50,9 +52,28 @@ namespace T1.CodeDom.TSql.Parselets
 				PivotExpr = pivotExpr,
 				WhereExpr = whereExpr,
 				GroupByList = groupBy,
+				Having = having,
 				OrderByList = orderBy,
 				OptionExpr = optionExpr,
 				UnionSelectList = unionSelectList
+			};
+		}
+
+		private HavingSqlCodeExpr ParseHaving(IParser parser)
+		{
+			if (!parser.MatchToken(SqlToken.Having))
+			{
+				return null;
+			}
+			var itemList = new List<SqlCodeExpr>();
+			do
+			{
+				var item = parser.ParseExpIgnoreComment();
+				itemList.Add(item);
+			} while (parser.MatchToken(SqlToken.Comma));
+			return new HavingSqlCodeExpr
+			{
+				ItemList = itemList
 			};
 		}
 
@@ -145,6 +166,16 @@ namespace T1.CodeDom.TSql.Parselets
 				UnionMethod = unionMethod,
 				RightExpr = rightExpr,
 			};
+		}
+	}
+
+	public class HavingSqlCodeExpr : SqlCodeExpr
+	{
+		public List<SqlCodeExpr> ItemList { get; set; }
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write("HAVING ");
+			ItemList.WriteToStreamWithComma(stream);	
 		}
 	}
 }

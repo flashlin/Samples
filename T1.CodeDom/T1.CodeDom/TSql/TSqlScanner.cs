@@ -62,6 +62,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("GRANT", SqlToken.Grant);
 			AddTokenMap("GO", SqlToken.Go);
 			AddTokenMap("GROUP", SqlToken.Group);
+			AddTokenMap("HAVING", SqlToken.Having);
 			AddTokenMap("IF", SqlToken.If);
 			AddTokenMap("IS", SqlToken.Is);
 			AddTokenMap("ISNULL", SqlToken.IsNull);
