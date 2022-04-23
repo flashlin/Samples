@@ -191,5 +191,15 @@ FROM customer )");
 		}
 
 
+		[Fact]
+		public void insert_into()
+		{
+			var sql = @"INSERT INTO #customer (id, name)
+    			EXEC [my_func] @date";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO #customer(id, name) EXEC [my_func] @date");
+		}
 	}
 }

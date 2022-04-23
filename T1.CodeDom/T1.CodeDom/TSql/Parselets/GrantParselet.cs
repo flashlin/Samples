@@ -32,8 +32,8 @@ namespace T1.CodeDom.TSql.Parselets
 			SqlCodeExpr onObjectId = null;
 			if (parser.Scanner.Match(SqlToken.On))
 			{
-				//onObjectId = parser.Scanner.ConsumeObjectId();
-				onObjectId = parser.ConsumeAny(SqlToken.Object, SqlToken.SqlIdentifier, SqlToken.Identifier) as SqlCodeExpr;
+				//onObjectId = parser.ConsumeAny(SqlToken.Object, SqlToken.SqlIdentifier, SqlToken.Identifier) as SqlCodeExpr;
+				onObjectId = parser.ParseExpIgnoreComment();
 			}
 
 			parser.Scanner.Consume(SqlToken.To);

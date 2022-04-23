@@ -6,8 +6,16 @@ using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
+	public class SelectInsertContext
+	{
+		public TopSqlCodeExpr TopCount { get; set; }
+		public List<SqlCodeExpr> Columns { get; set; }
+		public SqlCodeExpr IntoTable { get; set; }
+	}
+	
 	public class SelectParselet : IPrefixParselet
 	{
+		
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
 			var topCount = parser.ParseTopCountExpr();
@@ -19,6 +27,19 @@ namespace T1.CodeDom.TSql.Parselets
 			{
 				intoTable = parser.ConsumeTableName();
 			}
+
+			/*
+			if (parser.TryConsumeTokenAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
+			{
+				var context = new SelectInsertContext
+				{
+					TopCount = topCount,
+					Columns = columns,
+					IntoTable = intoTable
+				};
+				return ParseInsertExec(context, parser);
+			}
+			*/
 
 			var fromSourceList = GetFrom_SourceList(parser);
 
@@ -63,6 +84,18 @@ namespace T1.CodeDom.TSql.Parselets
 				ForXmlExpr = forXmlExpr,
 				OptionExpr = optionExpr,
 				UnionSelectList = unionSelectList
+			};
+		}
+
+		private IExpression ParseInsertExec(SelectInsertContext context, IParser parser)
+		{
+			var execExpr = parser.ParseExpIgnoreComment();
+			return new InsertFromExecSqlCodeExpr
+			{
+				TopCount = context.TopCount,
+				Columns = context.Columns,
+				IntoTable = context.IntoTable,
+				ExecExpr = execExpr,
 			};
 		}
 
@@ -178,6 +211,37 @@ namespace T1.CodeDom.TSql.Parselets
 				RightExpr = rightExpr,
 			};
 		}
+	}
+
+	public class InsertFromExecSqlCodeExpr : SqlCodeExpr
+	{
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write("INSERT");
+
+			if (TopCount != null)
+			{
+				stream.Write(" ");
+				TopCount.WriteToStream(stream);
+			}
+
+			stream.Write(" ");
+			IntoTable.WriteToStream(stream);
+
+			if (Columns != null && Columns.Count > 0)
+			{
+				stream.Write(" ");
+				Columns.WriteToStream(stream);
+			}
+
+			stream.Write(" EXEC ");
+			ExecExpr.WriteToStream(stream);
+		}
+
+		public TopSqlCodeExpr TopCount { get; set; }
+		public SqlCodeExpr IntoTable { get; set; }
+		public List<SqlCodeExpr> Columns { get; set; }
+		public SqlCodeExpr ExecExpr { get; set; }
 	}
 
 	public class HavingSqlCodeExpr : SqlCodeExpr

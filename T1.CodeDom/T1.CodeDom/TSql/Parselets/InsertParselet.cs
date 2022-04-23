@@ -17,6 +17,8 @@ namespace T1.CodeDom.TSql.Parselets
             }
 
             var tableName = parser.ConsumeTableName();
+            
+            var columnList = GetColumnsList(parser);
 
             if (parser.Scanner.TryConsumeAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
             {
@@ -24,12 +26,10 @@ namespace T1.CodeDom.TSql.Parselets
                 return new InsertIntoFromSqlCodeExpr
                 {
                     Table = tableName,
+                    ColumnsList = columnList,
                     SelectFromExpr = execExpr,
                 };
             }
-
-            var columnList = GetColumnsList(parser);
-            //var columnList = parser.ParseColumnList();
 
             var outputList = parser.GetOutputListExpr();
             var outputInto = parser.GetOutputIntoExpr();
