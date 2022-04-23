@@ -37,6 +37,8 @@ public class StockService : IStockService
     {
         var stockHistory = _stockRepo.GetStockHistory(ValueHelper.Assign(req, new GetStockHistoryReq()));
         var tranHistory = _stockRepo.GetStockTranHistory(req);
+
+        var history = new StockReportHistory();
     }
         
     public async Task<List<ReportTranItem>> ReportTransAsync()
