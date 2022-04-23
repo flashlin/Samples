@@ -258,7 +258,20 @@ group by st.Id, t.TranType
 
 		public void UpsertStockHistory(StockHistoryEntity stockHistoryEntity)
 		{
-			//throw new NotImplementedException();
+			if (stockHistoryEntity.OpeningPrice == 0 && stockHistoryEntity.ClosingPrice == 0)
+			{
+				return;
+			}
+			
+			var sql = @"insert into stockHistory(TranDate, StockId, TradeVolume, DollorVolume, OpeningPrice, ClosingPrice, HighestPrice, LowestPrice, TransactionCount)
+select @TranDate, @StockId, @TradeVolume, @DollorVolume, @OpeningPrice, @ClosingPrice, @HighestPrice, @LowestPrice, @TransactionCount
+where not exists( 
+    select 1 from stockHistory 
+    where tranDate=@TranDate and stockId=@StockId
+    LIMIT 1
+)";
+
+			ExecuteRaw(sql, stockHistoryEntity);
 		}
 
 		protected IEnumerable<T> QueryRaw<T>(string sql, object queryParameter)
@@ -275,6 +288,13 @@ group by st.Id, t.TranType
 				var item = dict.ConvertToObject<T>();
 				yield return item;
 			}
+		}
+
+		protected void ExecuteRaw(string sql, object queryParameter)
+		{
+			using var db = GetDatabase();
+			var connection = db.Database.GetDbConnection();
+			connection.Execute(sql, queryParameter);
 		}
 
 	}
