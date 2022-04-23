@@ -217,6 +217,7 @@ namespace T1.CodeDom.TSql
 			AddSymbolMap("|", SqlToken.VerticalBar);
 			AddSymbolMap("~", SqlToken.Tilde);
 			AddSymbolMap("^", SqlToken.Caret);
+			AddSymbolMap("%", SqlToken.Percent);
 		}
 
 		protected override string GetTokenType(string token, string defaultTokenType)

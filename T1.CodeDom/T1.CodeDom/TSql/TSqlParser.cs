@@ -121,6 +121,7 @@ namespace T1.CodeDom.TSql
 			InfixLeft(SqlToken.Plus, Precedence.SUM);
 			InfixLeft(SqlToken.Minus, Precedence.SUM);
 			InfixLeft(SqlToken.Asterisk, Precedence.PRODUCT);
+			InfixLeft(SqlToken.Percent, Precedence.PRODUCT);
 			InfixLeft(SqlToken.Ampersand, Precedence.PRODUCT);
 			InfixLeft(SqlToken.Slash, Precedence.PRODUCT);
 			InfixLeft(SqlToken.VerticalBar, Precedence.BINARY);

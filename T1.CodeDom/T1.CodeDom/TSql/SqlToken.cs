@@ -212,6 +212,7 @@
 		HOLDLOCK,
 		OBJECT_NAME,
 		DENSE_RANK,
-		NEWID
+		NEWID,
+		Percent
 	}
 }
