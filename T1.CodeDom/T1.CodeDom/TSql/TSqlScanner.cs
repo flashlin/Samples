@@ -143,6 +143,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("GETDATE", SqlToken.GETDATE);
 			AddTokenMap("LEN", SqlToken.LEN);
 			AddTokenMap("LOG", SqlToken.LOG);
+			AddTokenMap("NEWID", SqlToken.NEWID);
 			AddTokenMap("MIN", SqlToken.MIN);
 			AddTokenMap("MAX", SqlToken.MAX);
 			AddTokenMap("MONTH", SqlToken.MONTH);
