@@ -106,9 +106,8 @@ group by st.Id, t.TranType
 
         public StockHistoryEntity? GetStockHistoryData(DateTime date, string stockId)
         {
-            //using var db = GetDatabase();
-            var db = _db;
-            return db.StocksHistory
+            date = date.Date;
+            return _db.StocksHistory
                 .FirstOrDefault(x => x.TranDate == date.Date && x.StockId == stockId);
         }
 
