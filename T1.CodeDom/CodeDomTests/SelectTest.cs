@@ -372,5 +372,19 @@ for xml path('')              ";
 
             ThenExprShouldBe(@"SELECT name ;");
         }
+
+        [Fact]
+        public void select_where_between_fn()
+        {
+            var sql = @"select id from customer 
+			where birth between @startDate and dateadd(hh,24,@startDate) and    
+			id >= 100";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT id FROM customer
+WHERE birth BETWEEN @startDate AND DATEADD( hh, 24, @startDate )
+AND id >= 100");
+        }
     }
 }

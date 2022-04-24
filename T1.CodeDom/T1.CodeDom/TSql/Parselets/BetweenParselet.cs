@@ -15,7 +15,9 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			var startExpr = ParseConstant(parser);
 			parser.Scanner.Consume(SqlToken.And);
-			var endExpr = ParseConstant(parser);
+			//var endExpr = ParseConstant(parser);
+			var endExpr = parser.ParseExpIgnoreComment();
+			endExpr = parser.ParseLRParenExpr(endExpr);
 
 			return new BetweenSqlCodeExpr
 			{
