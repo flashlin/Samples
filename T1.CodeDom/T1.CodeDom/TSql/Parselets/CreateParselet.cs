@@ -3,6 +3,7 @@ using System.Linq;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql;
 using T1.CodeDom.TSql.Expressions;
+using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
@@ -219,6 +220,18 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			var nameExpr = parser.ConsumeObjectId();
 			var arguments = parser.ConsumeArgumentList();
+
+			SqlCodeExpr withExecuteAsExpr = null;
+			if (parser.MatchTokenList(SqlToken.With, SqlToken.Execute, SqlToken.As))
+			{
+				var userExpr =
+					parser.ConsumeTokenStringAny(SqlToken.CALLER, SqlToken.SELF, SqlToken.OWNER, SqlToken.QuoteString);
+				withExecuteAsExpr = new WithExecuteAsSqlCodeExpr
+				{
+					UserExpr = userExpr
+				};
+			}
+			
 			parser.Scanner.Consume(SqlToken.As);
 			var bodyList = parser.ConsumeBeginBodyOrSingle();
 
@@ -226,8 +239,19 @@ namespace T1.CodeDom.TSql.Parselets
 			{
 				Name = nameExpr,
 				Arguments = arguments,
+				WithExecuteAs = withExecuteAsExpr,
 				Body = bodyList
 			};
 		}
+	}
+
+	public class WithExecuteAsSqlCodeExpr : SqlCodeExpr
+	{
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write($"WITH EXECUTE AS {UserExpr}");
+		}
+
+		public string UserExpr { get; set; }
 	}
 }

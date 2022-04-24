@@ -167,6 +167,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ANSI_PADDING", SqlToken.ANSI_PADDING);
 			AddTokenMap("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
 			AddTokenMap("ARITHABORT", SqlToken.ARITHABORT);
+			AddTokenMap("CALLER", SqlToken.CALLER);
 			AddTokenMap("COMMITTED", SqlToken.COMMITTED);
 			AddTokenMap("CONNECT", SqlToken.CONNECT);
 			AddTokenMap("COMMIT", SqlToken.Commit);
@@ -190,12 +191,14 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("NONCLUSTERED", SqlToken.NONCLUSTERED);
 			AddTokenMap("MAXDOP", SqlToken.MAXDOP);
 			AddTokenMap("OBJECT_NAME", SqlToken.OBJECT_NAME);
+			AddTokenMap("OWNER", SqlToken.OWNER);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("READ", SqlToken.READ);
 			AddTokenMap("REPEATABLE", SqlToken.REPEATABLE);
 			AddTokenMap("ROLLBACK", SqlToken.ROLLBACK);
 			AddTokenMap("SNAPSHOT", SqlToken.SNAPSHOT);
+			AddTokenMap("SELF", SqlToken.SELF);
 			AddTokenMap("SERIALIZABLE", SqlToken.SERIALIZABLE);
 			AddTokenMap("TRANSACTION", SqlToken.TRANSACTION);
 			AddTokenMap("TRAN", SqlToken.TRAN);

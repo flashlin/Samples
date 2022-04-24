@@ -222,6 +222,9 @@
 		PATH,
 		RAW,
 		ROOT,
-		FORCESEEK
+		FORCESEEK,
+		CALLER,
+		SELF,
+		OWNER
 	}
 }
