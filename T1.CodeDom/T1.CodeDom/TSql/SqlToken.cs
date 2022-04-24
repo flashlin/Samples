@@ -221,6 +221,7 @@
 		EXPLICIT,
 		PATH,
 		RAW,
-		ROOT
+		ROOT,
+		FORCESEEK
 	}
 }

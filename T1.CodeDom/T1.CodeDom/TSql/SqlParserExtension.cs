@@ -480,7 +480,8 @@ namespace T1.CodeDom.TSql
 					SqlToken.NOLOCK,
 					SqlToken.ROWLOCK,
 					SqlToken.UPDLOCK,
-					SqlToken.HOLDLOCK
+					SqlToken.HOLDLOCK,
+					SqlToken.FORCESEEK
 				};
 
 				do
