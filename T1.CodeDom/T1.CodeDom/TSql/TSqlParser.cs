@@ -22,6 +22,7 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
             Register(SqlToken.Drop, new DropParselet());
             Register(SqlToken.Delete, new DeleteParselet());
+            Register(SqlToken.Deleted, new DeletedParselet());
             Register(SqlToken.Declare, new DeclareParselet());
             Register(SqlToken.Distinct, new DistinctParselet());
             Register(SqlToken.Exists, new ExistsParselet());
