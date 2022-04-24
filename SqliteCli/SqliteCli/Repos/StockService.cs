@@ -60,24 +60,38 @@ public class StockService : IStockService
         Console.WriteLine("done");
     }
 
-    public void StockReportHistory(StockReportHistoryReq req)
+    public void ShowStockHistory(StockReportHistoryReq req)
     {
         var stockHistory = _stockRepo.GetStockHistory(ValueHelper.Assign(req, new GetStockHistoryReq()));
-        var tranHistory = _stockRepo.GetStockTranHistory(req);
+        //var tranHistory = _stockRepo.GetStockTranHistory(req);
 
         var dateRange = new DateRange()
         {
             StartDate = req.StartTime,
             EndDate = req.EndTime
         };
-        var history = new StockReportHistory();
         foreach (var date in dateRange.GetRangeByMonth())
         {
-            history.Items[date] = new StockReportHistory.Item()
-            {
-                Month = date.Month
-            };
+            var item = stockHistory
+                .Where(x => x.TranDate == date)
+                .DefaultIfEmpty(new StockHistoryEntity
+                {
+                    TranDate = date,
+                }).FirstOrDefault();
+
+            var valueStr = GetValueStr(item.ClosingPrice);
+            Console.Write($"{date.ToString("yy-MM")}-");
+            Console.BackgroundColor = ConsoleColor.Gray;
+            Console.Write($"{valueStr}");
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine($" {item.ClosingPrice.ToNumberString(6)}");
         }
+    }
+
+    private string GetValueStr(decimal value)
+    {
+        var spacesCount = (int)Math.Round(value / 20, MidpointRounding.AwayFromZero);
+        return new string(' ', spacesCount);
     }
 
     public async Task<List<ReportTranItem>> ReportTransAsync()

@@ -90,9 +90,26 @@ do
 			await AppendStockHistoryAsync(stockId);
 			break;
 		}
+		case "show":
+		{
+			var stockId = ss[1];
+			ShowStockHistoryAsync(stockId);
+			break;
+		}
 	}
 
 } while (true);
+
+void ShowStockHistoryAsync(string stockId)
+{
+	var stockService = serviceProvider.GetService<IStockService>();
+	 stockService.ShowStockHistory(new StockReportHistoryReq()
+	{
+		StartTime = DateTime.Parse("2021-01-01"),
+		EndTime = DateTime.Now,
+		StockId = stockId
+	});
+}
 
 async Task AppendStockHistoryAsync(string stockId)
 {
