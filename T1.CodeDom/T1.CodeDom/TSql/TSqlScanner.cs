@@ -439,7 +439,7 @@ namespace T1.CodeDom.TSql
 		{
 			var content = ReadUntil(head, ch =>
 			{
-				return ch != '\r';
+				return ch != '\r' && ch != '\n';
 			});
 
 			content.Type = SqlToken.SingleComment.ToString();

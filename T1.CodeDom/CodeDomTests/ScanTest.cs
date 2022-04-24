@@ -170,6 +170,15 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void crlf()
+		{
+			var sql = "1\r\n 2\n 3--a\n4";
+			ScanAll(sql);
+			ThenTokenListShouldBe("1", "2", "3", "--a", "4");
+		}
+
+
+		[Fact]
 		public void temp()
 		{
 			var sql = "#tmp";

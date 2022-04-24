@@ -74,7 +74,8 @@ namespace TestProject.PrattTests
 			foreach (var expectToken in expectTokenList.Select((val, idx) => new { val, idx }))
 			{
 				var tokenStr = _scanner.GetSpanString(_tokenList[expectToken.idx]);
-				tokenStr.Should().Be(expectToken.val);
+				//tokenStr.Should().Be(expectToken.val);
+				Assert.Equal(expectToken.val, tokenStr);
 			}
 		}
 
