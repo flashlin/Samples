@@ -20,7 +20,10 @@ public class DateRange
         var currDate = StartDate;
         while(currDate <= EndDate)
         {
-            yield return currDate;
+            if (currDate.DayOfWeek != DayOfWeek.Saturday && currDate.DayOfWeek != DayOfWeek.Sunday)
+            {
+                yield return currDate;
+            }
             currDate = currDate.AddDays(1);
         }
     }

@@ -99,7 +99,7 @@ async Task AppendStockHistoryAsync(string stockId)
 	var stockService = serviceProvider.GetService<IStockService>();
 	await stockService.AppendStockHistoryAsync(new DateRange()
 	{
-		StartDate = DateTime.Parse("2022/03/01"),
+		StartDate = DateTime.Parse("2021/01/01"),
 		EndDate = DateTime.Today
 	}, stockId);
 }

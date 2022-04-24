@@ -193,7 +193,7 @@ group by st.Id, t.TranType
 select @TranDate, @StockId, @TradeVolume, @DollorVolume, @OpeningPrice, @ClosingPrice, @HighestPrice, @LowestPrice, @TransactionCount
 where not exists( 
     select 1 from stockHistory 
-    where tranDate=@TranDate and stockId=@StockId
+    where DATE(tranDate)=DATE(@TranDate) and stockId=@StockId
     LIMIT 1
 )";
 
@@ -202,6 +202,7 @@ where not exists(
                 x.TranDate == stockHistoryEntity.TranDate && x.StockId == stockHistoryEntity.StockId);
             if (!exists)
             {
+                Console.WriteLine($"add {stockHistoryEntity.TranDate} {stockHistoryEntity.StockId}");
                 _db.StocksHistory.Add(stockHistoryEntity);
                 _db.SaveChanges();
             }
