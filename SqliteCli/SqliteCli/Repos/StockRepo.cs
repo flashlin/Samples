@@ -8,9 +8,9 @@ namespace SqliteCli.Repos
 {
     public class StockRepo : IStockRepo
     {
-        private readonly StockDatabase _db;
+        private readonly StockDbContext _db;
 
-        public StockRepo(StockDatabase db)
+        public StockRepo(StockDbContext db)
         {
             _db = db;
         }

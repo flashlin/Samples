@@ -12,7 +12,7 @@ var services = new ServiceCollection();
 services.AddHttpClient();
 services.AddHttpClient<IWebApiClient, WebApiClient>();
 services.AddTransient<IStockExchangeApi, TwseStockExchangeApi>();
-services.AddDbContext<StockDatabase>();
+services.AddDbContext<StockDbContext>();
 services.AddTransient<IStockRepo, StockRepo>();
 services.AddTransient<IStockService, StockService>();
 
