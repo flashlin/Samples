@@ -28,19 +28,6 @@ namespace T1.CodeDom.TSql.Parselets
 				intoTable = parser.ConsumeTableName();
 			}
 
-			/*
-			if (parser.TryConsumeTokenAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
-			{
-				var context = new SelectInsertContext
-				{
-					TopCount = topCount,
-					Columns = columns,
-					IntoTable = intoTable
-				};
-				return ParseInsertExec(context, parser);
-			}
-			*/
-
 			var fromSourceList = GetFrom_SourceList(parser);
 
 			SqlCodeExpr pivotExpr = null;
@@ -70,6 +57,8 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var unionSelectList = ParseUnionSelectList(parser);
 
+			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
+
 			return new SelectSqlCodeExpr
 			{
 				TopCount = topCount,
@@ -83,7 +72,8 @@ namespace T1.CodeDom.TSql.Parselets
 				OrderByList = orderBy,
 				ForXmlExpr = forXmlExpr,
 				OptionExpr = optionExpr,
-				UnionSelectList = unionSelectList
+				UnionSelectList = unionSelectList,
+				IsSemicolon = isSemicolon,
 			};
 		}
 

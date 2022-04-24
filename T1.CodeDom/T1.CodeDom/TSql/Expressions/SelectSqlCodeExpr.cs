@@ -19,6 +19,7 @@ namespace T1.CodeDom.TSql.Expressions
         public HavingSqlCodeExpr Having { get; set; }
         public List<OrderItemSqlCodeExpr> OrderByList { get; set; }
         public OptionSqlCodeExpr OptionExpr { get; set; }
+        public bool IsSemicolon { get; set; }
 
         public override void WriteToStream(IndentStream stream)
         {
@@ -116,6 +117,11 @@ namespace T1.CodeDom.TSql.Expressions
             {
                 stream.WriteLine();
                 UnionSelectList.WriteToStream(stream);
+            }
+
+            if (IsSemicolon)
+            {
+                stream.Write(" ;");
             }
         }
     }

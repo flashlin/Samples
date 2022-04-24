@@ -187,7 +187,7 @@ FROM customer )");
 			
 			Parse(sql);
 
-			ThenExprShouldBe(@"INSERT INTO @customer(id, name) SELECT rank, name FROM otherTable");
+			ThenExprShouldBe(@"INSERT INTO @customer(id, name) SELECT rank, name FROM otherTable ;");
 		}
 
 

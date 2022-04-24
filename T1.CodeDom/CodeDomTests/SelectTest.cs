@@ -229,7 +229,7 @@ FROM ( SELECT *
 FROM otherTable
 WHERE id = @id ) AS p
 JOIN customer c WITH(NOLOCK) p.id = c.id
-ORDER BY c.name ASC, c.id ASC");
+ORDER BY c.name ASC, c.id ASC ;");
         }
 
 
@@ -361,6 +361,16 @@ for xml path('')              ";
             Parse(sql);
 
             ThenExprShouldBe(@"SELECT name FROM customer FOR XML AUTO, ROOT ( 'customer' )");
+        }
+
+        [Fact]
+        public void select_semecolon()
+        {
+            var sql = @"select name ;";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT name ;");
         }
     }
 }
