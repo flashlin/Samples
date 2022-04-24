@@ -1,5 +1,27 @@
 namespace SqliteCli.Helpers;
 
+public static class DateTimeExtension
+{
+    public static DateRange GetDateRange(this DateTime date)
+    {
+        return new DateRange
+        {
+            StartDate = date.StartOfMonth(),
+            EndDate = date.EndOfMonth()
+        };
+    }
+
+    public static DateTime StartOfMonth(this DateTime date)
+    {
+        return new DateTime(date.Year, date.Month, 1, 0, 0, 0);
+    }
+
+    public static DateTime EndOfMonth(this DateTime date)
+    {
+        return date.StartOfMonth().AddMonths(1).AddSeconds(-1);
+    }
+}
+
 public class DateRange
 {
     public DateTime StartDate { get; set; }
@@ -8,7 +30,7 @@ public class DateRange
     public IEnumerable<DateTime> GetRangeByMonth()
     {
         var currDate = DateTime.Parse(StartDate.ToString("yyyy/MM/01")).Date;
-        while(currDate <= EndDate)
+        while (currDate <= EndDate)
         {
             yield return currDate;
             currDate = currDate.AddMonths(1);
@@ -18,12 +40,13 @@ public class DateRange
     public IEnumerable<DateTime> GetRangeByDay()
     {
         var currDate = StartDate;
-        while(currDate <= EndDate)
+        while (currDate <= EndDate)
         {
             if (currDate.DayOfWeek != DayOfWeek.Saturday && currDate.DayOfWeek != DayOfWeek.Sunday)
             {
                 yield return currDate;
             }
+
             currDate = currDate.AddDays(1);
         }
     }
