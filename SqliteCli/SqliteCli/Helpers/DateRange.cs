@@ -14,4 +14,14 @@ public class DateRange
             currDate = currDate.AddMonths(1);
         }
     }
+
+    public IEnumerable<DateTime> GetRangeByDay()
+    {
+        var currDate = StartDate;
+        while(currDate <= EndDate)
+        {
+            yield return currDate;
+            currDate = currDate.AddDays(1);
+        }
+    }
 }

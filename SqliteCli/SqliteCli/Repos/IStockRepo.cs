@@ -10,5 +10,7 @@ namespace SqliteCli.Repos
 		void UpsertStockHistory(StockHistoryEntity stockHistoryEntity);
 		List<StockHistoryEntity> GetStockHistory(GetStockHistoryReq req);
 		List<TransEntity> GetStockTranHistory(StockReportHistoryReq req);
+		StockHistoryEntity? GetStockHistoryData(DateTime date, string stockId);
+		List<TransHistory> ListTrans(ListTransReq req);
 	}
 }

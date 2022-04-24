@@ -9,10 +9,17 @@ namespace SqliteCli.Repos
 {
 	public class StockRepo : IStockRepo
 	{
+		private readonly StockDatabase _db;
+
+		public StockRepo(StockDatabase db)
+		{
+			_db = db;
+		}
+		
 		public IEnumerable<TransHistory> QueryTrans(string cmd)
 		{
-			using var stockDb = GetDatabase();
-			//stockDb.Trans.FromSqlRaw(cmd);
+			//using var stockDb = GetDatabase();
+			var stockDb = _db;
 			using var connection = stockDb.Database.GetDbConnection();
 			return connection.Query<TransHistory>(cmd);
 		}
@@ -25,7 +32,10 @@ namespace SqliteCli.Repos
 			}
 			data.TranType = "Buy";
 
+			/*
 			using var db = GetDatabase();
+			*/
+			var db = _db;
 
 			var stock = db.StocksMap.Where(x => x.Id == data.StockId).FirstOrDefault();
 			if (stock == null)
@@ -48,7 +58,8 @@ namespace SqliteCli.Repos
 
 		public List<TransHistory> ListTrans3(ListTransReq req)
 		{
-			using var db = GetDatabase();
+			//using var db = GetDatabase();
+			var db = _db;
 
 			var queryFilter = new List<QueryableFilter>();
 			if (req.StartTime != null)
@@ -124,23 +135,34 @@ group by st.Id, t.TranType
 
 		public List<StockHistoryEntity> GetStockHistory(GetStockHistoryReq req)
 		{
-			using var db = GetDatabase();
+			//using var db = GetDatabase();
+			var db = _db;
 			var data = db.StocksHistory.Where(x => x.TranDate >= req.StartTime && x.TranDate <= req.EndTime && x.StockId == req.StockId);
 			return data.ToList();
 		}
 
 		public List<TransEntity> GetStockTranHistory(StockReportHistoryReq req)
 		{
-			using var db = GetDatabase();
+			//using var db = GetDatabase();
+			var db = _db;
 			var data = db.Trans.Where(x => x.TranTime >= req.StartTime && x.TranTime <= req.EndTime 
 			                                                && x.StockId == req.StockId
 			                                                && x.TranType == "Buy");
 			return data.ToList();
 		}
 
+		public StockHistoryEntity? GetStockHistoryData(DateTime date, string stockId)
+		{
+			//using var db = GetDatabase();
+			var db = _db;
+			return db.StocksHistory
+				.FirstOrDefault(x => x.TranDate == date.Date && x.StockId == stockId);
+		}
+
 		public List<TransHistory> ListTrans(ListTransReq req)
 		{
-			using var db = GetDatabase();
+			//using var db = GetDatabase();
+			var db = _db;
 
 			var q1 = db.Trans.AsQueryable();
 
@@ -185,61 +207,17 @@ group by st.Id, t.TranType
 			return q2.OrderBy(x => x.TranTime).ToList();
 		}
 
-		public IEnumerable<TransHistory> ListTrans1(ListTransReq req)
-		{
-			using var db = GetDatabase();
-
-			var queryFilter = new List<QueryableFilter>();
-			if (req.StartTime != null)
-			{
-				queryFilter.Add(
-					new QueryableFilter
-					{
-						Name = nameof(TransEntity.TranTime),
-						Value = req.StartTime,
-						Compare = QueryableFilterCompareEnum.GreaterThanOrEqual
-					}
-				);
-			}
-
-			if (req.EndTime != null)
-			{
-				queryFilter.Add(
-					new QueryableFilter
-					{
-						Name = nameof(TransEntity.TranTime),
-						Value = req.EndTime,
-						Compare = QueryableFilterCompareEnum.LessThanOrEqual
-					}
-				);
-			}
-
-			var query = new DynamicFilters<TransEntity>(db)
-				.Filter(queryFilter)
-				.Join(db.StocksMap, tran => tran.StockId, stock => stock.Id,
-				(tran, stock) => new TransHistory
-				{
-					TranTime = tran.TranTime,
-					TranType = tran.TranType,
-					StockId = tran.StockId,
-					StockName = stock.StockName,
-					StockPrice = tran.StockPrice,
-					NumberOfShare = tran.NumberOfShare,
-					HandlingFee = tran.HandlingFee,
-					Balance = tran.Balance,
-				});
-
-			return query;
-		}
-
+		/*
 		protected StockDatabase GetDatabase()
 		{
 			return new StockDatabase("d:/VDisk/SNL/flash_stock.db");
 		}
+		*/
 
 		public void Deposit(DepositReq depositReq)
 		{
-			using var db = GetDatabase();
+			//using var db = GetDatabase();
+			var db = _db;
 			db.Trans.Add(new TransEntity
 			{
 				TranTime = depositReq.TranTime,
@@ -271,7 +249,8 @@ where not exists(
 		protected IEnumerable<T> QueryRaw<T>(string sql, object queryParameter)
 			where T : class, new()
 		{
-			using var db = GetDatabase();
+			//using var db = GetDatabase();
+			var db = _db;
 			var connection = db.Database.GetDbConnection();
 			var q1 = connection.Query(sql, queryParameter);
 
@@ -286,7 +265,8 @@ where not exists(
 
 		protected void ExecuteRaw(string sql, object queryParameter)
 		{
-			using var db = GetDatabase();
+			//using var db = GetDatabase();
+			var db = _db;
 			var connection = db.Database.GetDbConnection();
 			connection.Execute(sql, queryParameter);
 		}

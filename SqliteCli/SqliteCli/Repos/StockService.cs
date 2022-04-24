@@ -16,10 +16,10 @@ public class StockReportHistory
     public class Item
     {
         public decimal Value { get; set; }
-        public decimal XValue {get; set;}
-        public decimal YValue {get; set;}
+        public int Month { get; set; }
+        public decimal YValue { get; set; }
     }
-    
+
     public Dictionary<DateTime, Item> Items { get; set; }
 }
 
@@ -32,6 +32,32 @@ public class StockService : IStockService
     {
         _stockRepo = stockRepo;
         _stockExchangeApi = stockExchangeApi;
+    }
+
+    public async Task AppendStockHistoryAsync(DateRange dateRange, string stockId)
+    {
+        foreach (var date in dateRange.GetRangeByDay())
+        {
+            var stockData = _stockRepo.GetStockHistoryData(date, stockId);
+            if (stockData == null)
+            {
+                Console.WriteLine($"query {date.ToString("yyyy/MM/dd")} {stockId}");
+                var resp = await _stockExchangeApi.GetStockTranListAsync(new GetStockReq()
+                {
+                    Date = date,
+                    StockId = stockId
+                });
+                var stockNetworkData = resp.ToArray();
+                foreach (var stockDateData in stockNetworkData)
+                {
+                    var data = ValueHelper.Assign(stockDateData, new StockHistoryEntity());
+                    data.TranDate = stockDateData.Date;
+                    data.TransactionCount = stockDateData.Transaction;
+                    _stockRepo.UpsertStockHistory(data);
+                }
+            }
+        }
+        Console.WriteLine("done");
     }
 
     public void StockReportHistory(StockReportHistoryReq req)
@@ -49,11 +75,11 @@ public class StockService : IStockService
         {
             history.Items[date] = new StockReportHistory.Item()
             {
-                XValue = date.Month
+                Month = date.Month
             };
         }
     }
-        
+
     public async Task<List<ReportTranItem>> ReportTransAsync()
     {
         var rc = _stockRepo.ReportTrans(new ReportTransReq());

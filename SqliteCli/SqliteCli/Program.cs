@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SqliteCli.Entities;
 using SqliteCli.Repos;
 using System.Text.RegularExpressions;
+using SqliteCli.Helpers;
 using T1.Standard.Collections.Generics;
 using T1.Standard.Extensions;
 using T1.Standard.Web;
@@ -11,6 +12,7 @@ var services = new ServiceCollection();
 services.AddHttpClient();
 services.AddHttpClient<IWebApiClient, WebApiClient>();
 services.AddTransient<IStockExchangeApi, TwseStockExchangeApi>();
+services.AddDbContext<StockDatabase>();
 services.AddTransient<IStockRepo, StockRepo>();
 services.AddTransient<IStockService, StockService>();
 
@@ -40,6 +42,7 @@ do
 			Console.WriteLine("l 2022/04/04-2022-04-05      :list trans history from 2022/04/04~2022/04/05");
 			Console.WriteLine("b 2022/04/04,0056,12.34,1000 :add 2022/04/04 buy stockId:0056 stockPrice:12.34 numberOfShare:1000");
 			Console.WriteLine("d 2022/04/04,1000            :deposit 2022/04/04 amount:1000");
+			Console.WriteLine("append <stockId>             :append stock history data");
 			continue;
 		case "l":
 			{
@@ -81,11 +84,26 @@ do
 				ProcessDeposit(cmdArgs);
 				break;
 			}
+		case "append":
+		{
+			var stockId = ss[1];
+			await AppendStockHistoryAsync(stockId);
+			break;
+		}
 	}
 
 } while (true);
 
-
+async Task AppendStockHistoryAsync(string stockId)
+{
+	var stockService = serviceProvider.GetService<IStockService>();
+	await stockService.AppendStockHistoryAsync(new DateRange()
+	{
+		StartDate = DateTime.Parse("2022/01/01"),
+		EndDate = DateTime.Today
+	}, stockId);
+}
+	
 
 async Task ProcessReportAsync(string cmdArgs)
 {
@@ -187,7 +205,7 @@ void ProcessTransList(string dateRange)
 		ParseStartDate(dateRange, req);
 	}
 
-	var db = new StockRepo();
+	var db = serviceProvider.GetService<IStockRepo>();
 	var rc = db.ListTrans(req);
 	rc.Dump();
 }

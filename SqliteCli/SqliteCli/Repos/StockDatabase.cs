@@ -5,12 +5,14 @@ namespace SqliteCli.Repos
 {
 	public class StockDatabase : DbContext
 	{
-		private readonly string _sqliteFile;
+		private readonly string _sqliteFile = "d:/VDisk/SNL/flash_stock.db";
 
+		/*
 		public StockDatabase(string sqliteFile)
 		{
 			_sqliteFile = sqliteFile;
 		}
+		*/
 
 		public DbSet<StockEntity> StocksMap { get; set; }
 		public DbSet<TransEntity> Trans { get; set; }
