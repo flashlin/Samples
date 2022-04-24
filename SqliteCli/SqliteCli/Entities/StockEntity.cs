@@ -21,12 +21,13 @@ namespace SqliteCli.Entities
 		public decimal HandlingFee { get; set; }
 	}
 
-	[Keyless]
+	//[Keyless]
 	[Table("StockHistory")]
 	public class StockHistoryEntity
 	{
+		[Key]
 		public DateTime TranDate { get; set; }
-
+		[Key]
 		public string StockId { get; set; }
 		public long TradeVolume { get; set; }
 		public decimal DollorVolume { get; set; }

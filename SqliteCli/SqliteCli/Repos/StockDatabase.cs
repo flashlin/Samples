@@ -22,6 +22,14 @@ namespace SqliteCli.Repos
 		{
 			optionsBuilder.UseSqlite($"DataSource={_sqliteFile};");
 		}
+
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<StockHistoryEntity>(entity =>
+			{
+				entity.HasKey(e => new { e.TranDate, e.StockId  });
+			});
+		}
 	}
 
 }

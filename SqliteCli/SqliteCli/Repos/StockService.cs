@@ -53,7 +53,7 @@ public class StockService : IStockService
                     var data = ValueHelper.Assign(stockDateData, new StockHistoryEntity());
                     data.TranDate = stockDateData.Date;
                     data.TransactionCount = stockDateData.Transaction;
-                    _stockRepo.UpsertStockHistory(data);
+                    _stockRepo.AppendStockHistory(data);
                 }
             }
         }
@@ -94,7 +94,7 @@ public class StockService : IStockService
                 stock.Profit = stock.Balance + stock.CurrTotalPrice;
             }
 
-            _stockRepo.UpsertStockHistory(new StockHistoryEntity
+            _stockRepo.AppendStockHistory(new StockHistoryEntity
             {
                 TranDate = data.Date,
                 StockId = stock.StockId,

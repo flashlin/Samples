@@ -7,7 +7,7 @@ namespace SqliteCli.Repos
 		void BuyStock(TransEntity data);
 		List<ReportTranItem> ReportTrans(ReportTransReq req);
 		void Deposit(DepositReq depositReq);
-		void UpsertStockHistory(StockHistoryEntity stockHistoryEntity);
+		void AppendStockHistory(StockHistoryEntity stockHistoryEntity);
 		List<StockHistoryEntity> GetStockHistory(GetStockHistoryReq req);
 		List<TransEntity> GetStockTranHistory(StockReportHistoryReq req);
 		StockHistoryEntity? GetStockHistoryData(DateTime date, string stockId);
