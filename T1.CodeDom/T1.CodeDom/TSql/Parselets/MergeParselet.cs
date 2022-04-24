@@ -53,17 +53,19 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var mergeSearchCondition = parser.ParseExpIgnoreComment();
 
-			var whenMatched = GetWhenMatched(parser);
-
-			var whenNotMatchedList = new List<SqlCodeExpr>();
+			var whenList = new List<SqlCodeExpr>();
 			do
 			{
-				var whenNotMatched = GetWhenNotMatched(parser);
-				if (whenNotMatched == null)
+				SqlCodeExpr whenItem = GetWhenNotMatched(parser);
+				if (whenItem == null)
 				{
-					break;
+					whenItem = GetWhenMatched(parser);
+					if (whenItem == null)
+					{
+						break;
+					}
 				}
-				whenNotMatchedList.Add(whenNotMatched);
+				whenList.Add(whenItem);
 			} while (true);
 
 			parser.Scanner.Consume(SqlToken.Semicolon);
@@ -78,8 +80,7 @@ namespace T1.CodeDom.TSql.Parselets
 				SourceColumnList = sourceColumnList,
 				TableSourceAliasName = tableSourceAliasName,
 				OnMergeSearchCondition = mergeSearchCondition,
-				WhenMatched = whenMatched,
-				WhenNotMatchedList = whenNotMatchedList
+				WhenList = whenList
 			};
 		}
 

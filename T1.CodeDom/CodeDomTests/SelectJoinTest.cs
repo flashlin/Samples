@@ -30,7 +30,7 @@ where c.id = 1";
 			Parse(sql);
 			ThenExprShouldBe(@"SELECT 1
 FROM customer AS c
-LEFT JOIN secondTable	, 
+LEFT JOIN secondTable, 
 otherTable
 WHERE c.id = 1");
 		}

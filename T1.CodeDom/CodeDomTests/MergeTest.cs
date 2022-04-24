@@ -45,7 +45,7 @@ INSERT (id, name) VALUES(SOURCE.Id, SOURCE.Name)");
 USING #tmoCustomer AS source ON ( TARGET.id = SOURCE.id )
 WHEN MATCHED AND TARGET.tstamp < SOURCE.tstamp AND TARGET.status IN ('waiting')
 THEN
-UPDATE SET Target.[birth] = SOURCE.[birth]	,
+UPDATE SET Target.[birth] = SOURCE.[birth],
 Target.[addr] = SOURCE.[addr]
 WHEN NOT MATCHED BY TARGET
 THEN
@@ -90,7 +90,13 @@ using @customer as src
 
             Parse(sql);
 
-            ThenExprShouldBe(@"MERGE customer ");
+            ThenExprShouldBe(@"MERGE customer AS tar
+USING @customer AS src
+ON tar.id = src.id
+WHEN NOT MATCHED THEN
+	INSERT (id, name) VALUES(src.id, src.name)
+WHEN MATCHED THEN
+	UPDATE SET name = name + 'a', price = tar.price + src.price");
         }
     }
 }

@@ -13,8 +13,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public List<SqlCodeExpr> SourceColumnList { get; set; }
 		public SqlCodeExpr TableSourceAliasName { get; set; }
 		public SqlCodeExpr OnMergeSearchCondition { get; set; }
-		public WhenMatchedSqlCodeExpr WhenMatched { get; set; }
-		public List<SqlCodeExpr> WhenNotMatchedList { get; set; }
+		public List<SqlCodeExpr> WhenList { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -61,16 +60,10 @@ namespace T1.CodeDom.TSql.Expressions
 			stream.Write(" ON ");
 			OnMergeSearchCondition.WriteToStream(stream);
 
-			if (WhenMatched != null)
+			if (WhenList != null && WhenList.Count > 0)
 			{
 				stream.WriteLine();
-				WhenMatched.WriteToStream(stream);
-			}
-
-			if (WhenNotMatchedList != null && WhenNotMatchedList.Count > 0)
-			{
-				stream.WriteLine();
-				WhenNotMatchedList.WriteToStream(stream);
+				WhenList.WriteToStream(stream);
 			}
 		}
 	}
