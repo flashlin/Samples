@@ -14,7 +14,7 @@ namespace TestProject.PrattTests
 		{
 			var sql = "insert customer (id,name) values(1,'a')";
 			Parse(sql);
-			ThenExprShouldBe(@"INSERT customer(id, name) VALUES
+			ThenExprShouldBe(@"INSERT customer( id, name ) VALUES
 (1, 'a')");
 		}
 
@@ -23,7 +23,7 @@ namespace TestProject.PrattTests
 		{
 			var sql = "insert into customer (id,name) values(1,'a')";
 			Parse(sql);
-			ThenExprShouldBe(@"INSERT INTO customer(id, name) VALUES
+			ThenExprShouldBe(@"INSERT INTO customer( id, name ) VALUES
 (1, 'a')");
 		}
 
@@ -32,7 +32,7 @@ namespace TestProject.PrattTests
 		{
 			var sql = "insert customer ([id], [name]) VALUES (-1, 'a')";
 			Parse(sql);
-			ThenExprShouldBe(@"INSERT customer([id], [name]) VALUES
+			ThenExprShouldBe(@"INSERT customer( [id], [name] ) VALUES
 (-1, 'a')");
 		}
 
@@ -41,7 +41,7 @@ namespace TestProject.PrattTests
 		{
 			var sql = @"insert [dbo].[Countries] ([CountryID], [CountryName]) values (N';''', N';'' ', N'""; '':', NULL, -1)";
 			Parse(sql);
-			ThenExprShouldBe(@"INSERT [dbo].[Countries]([CountryID], [CountryName]) VALUES
+			ThenExprShouldBe(@"INSERT [dbo].[Countries]( [CountryID], [CountryName] ) VALUES
 (N';''', N';'' ', N'""; '':', NULL, -1)");
 		}
 
@@ -101,7 +101,7 @@ select id,name from other_customer";
 			
 			Parse(sql);
 
-			ThenExprShouldBe(@"INSERT INTO customer([id], [name])
+			ThenExprShouldBe(@"INSERT INTO customer( [id], [name] )
 SELECT id, name
 FROM other_customer");
 		}
@@ -116,7 +116,7 @@ select id,name from other_customer";
 			
 			Parse(sql);
 
-			ThenExprShouldBe(@"INSERT INTO customer([id], [name])
+			ThenExprShouldBe(@"INSERT INTO customer( [id], [name] )
 OUTPUT 'customer', inserted.id, GETDATE()
 INTO trackCustomer (id, name)
 SELECT id, name

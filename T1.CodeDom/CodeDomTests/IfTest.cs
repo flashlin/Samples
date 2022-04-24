@@ -111,5 +111,15 @@ END ELSE BEGIN TRANSACTION");
 		}
 
 
+		[Fact]
+		public void if_func()
+		{
+			var sql = @"if @id <= [dbo].[fn_my]() break;
+";
+			Parse(sql);
+
+			ThenExprShouldBe(@"IF @id <= [dbo].[fn_my]() BREAK;");
+		}
+
 	}
 }

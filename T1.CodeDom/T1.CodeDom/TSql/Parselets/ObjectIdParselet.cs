@@ -17,7 +17,30 @@ namespace T1.CodeDom.TSql.Parselets
 			if (!parser.TryConsumeObjectId(out var identExpr))
 			{
 				parser.Scanner.SetOffset(startIndex);
-				return new CallFuncParselet().Parse(token, parser);
+				ThrowHelper.ThrowParseException(parser, "Expected object id");
+				//parser.Scanner.SetOffset(startIndex);
+				//return new CallFuncParselet().Parse(token, parser);
+			}
+
+			if( parser.MatchToken(SqlToken.LParen))
+			{
+				var parameterList = new List<SqlCodeExpr>();
+				do
+				{
+					if (parser.IsToken(SqlToken.RParen))
+					{
+						break;
+					}
+					var p = parser.ParseExpIgnoreComment();
+					parameterList.Add(p);
+				} while (parser.MatchToken(SqlToken.Comma));
+				parser.ConsumeToken(SqlToken.RParen);
+
+				identExpr = new FuncSqlCodeExpr
+				{
+					Name = identExpr,
+					Parameters = parameterList
+				};
 			}
 
 			return identExpr;

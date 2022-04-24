@@ -123,7 +123,7 @@ WHERE id = 1");
 
 			ThenExprShouldBe(@"UPDATE c SET c.id = 4
 OUTPUT inserted.id, inserted.birth, GETDATE()
-INTO customerLog(id, birth, date)
+INTO customerLog( id, birth, date )
 FROM customer AS c, otherTable AS t
 WHERE c.id = t.id");
 		}
