@@ -11,5 +11,10 @@ namespace T1.CodeDom.Core
 		IExpression PrefixParse(TextSpan prefixToken, int ctxPrecedence = 0);
 		IExpression PrefixParse(IExpression left, int ctxPrecedence = 0);
 		bool TryGetPrefixParselet(out IPrefixParselet parselet, TextSpan token);
+
+		void StashInfixParselet<TTokenType>(TTokenType tokenType)
+			where TTokenType : struct;
+
+		void UnStashInfixParselet();
 	}
 }

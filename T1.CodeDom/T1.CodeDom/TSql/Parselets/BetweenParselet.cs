@@ -13,9 +13,16 @@ namespace T1.CodeDom.TSql.Parselets
 
 		public IExpression Parse(IExpression left, TextSpan token, IParser parser)
 		{
-			var startExpr = ParseConstant(parser);
+			//var startExpr = ParseConstant(parser);
+			
+			parser.StashInfixParselet(SqlToken.And);
+			var startExpr = parser.ParseExpIgnoreComment();
+			parser.UnStashInfixParselet();
+			
+			startExpr = parser.ParseLRParenExpr(startExpr);
+			
 			parser.Scanner.Consume(SqlToken.And);
-			//var endExpr = ParseConstant(parser);
+
 			var endExpr = parser.ParseExpIgnoreComment();
 			endExpr = parser.ParseLRParenExpr(endExpr);
 

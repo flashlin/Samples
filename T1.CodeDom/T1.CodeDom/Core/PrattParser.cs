@@ -8,6 +8,7 @@ namespace T1.CodeDom.Core
 		protected readonly IScanner _scanner;
 		private Dictionary<string, IPrefixParselet> _prefixParselets = new Dictionary<string, IPrefixParselet>();
 		private Dictionary<string, IInfixParselet> _infixParselets = new Dictionary<string, IInfixParselet>();
+		private List<InfixParseletInfo> _stashInfixParselets = new List<InfixParseletInfo>();	
 
 		public PrattParser(IScanner scanner)
 		{
@@ -148,5 +149,33 @@ namespace T1.CodeDom.Core
 		{
 			_infixParselets.Add(tokenType, parselet);
 		}
+
+		public void StashInfixParselet<TTokenType>(TTokenType tokenType)
+			where TTokenType : struct
+		{
+			var tokenTypeString = tokenType.ToString();
+			var parselet = _infixParselets[tokenTypeString];
+			_stashInfixParselets.Add(new InfixParseletInfo()
+			{
+				TokenType = tokenTypeString,
+				Parselet = parselet
+			});
+			_infixParselets.Remove(tokenTypeString);
+		}
+
+		public void UnStashInfixParselet()
+		{
+			foreach (var info in _stashInfixParselets)
+			{
+				_infixParselets.Add(info.TokenType, info.Parselet);
+			}
+			_stashInfixParselets.Clear();
+		}
+	}
+
+	public class InfixParseletInfo
+	{
+		public string TokenType { get; set; }		
+		public IInfixParselet Parselet { get; set; }
 	}
 }
