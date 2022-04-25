@@ -23,7 +23,7 @@ namespace TestProject.PrattTests
 USING @other AS source ON TARGET.Id = SOURCE.Id
 WHEN NOT MATCHED
 THEN
-INSERT (id, name) VALUES(SOURCE.Id, SOURCE.Name)");
+INSERT (id, name) VALUES(SOURCE.Id, SOURCE.Name) ;");
         }
 
         [Fact]
@@ -49,7 +49,7 @@ UPDATE SET Target.[birth] = SOURCE.[birth],
 Target.[addr] = SOURCE.[addr]
 WHEN NOT MATCHED BY TARGET
 THEN
-INSERT ([id], [name]) VALUES(SOURCE.id, SOURCE.name)");
+INSERT ([id], [name]) VALUES(SOURCE.id, SOURCE.name) ;");
         }
 
         [Fact]
@@ -71,7 +71,7 @@ USING ( VALUES (@id, @name) ) AS S(id, name) ON T.Id = S.id
 WHEN MATCHED THEN 
 	UPDATE SET T.name = S.name
 WHEN NOT MATCHED THEN
-	INSERT VALUES(S.id, S.name)");
+	INSERT VALUES(S.id, S.name) ;");
         }
 
         [Fact]
@@ -96,7 +96,28 @@ ON tar.id = src.id
 WHEN NOT MATCHED THEN
 	INSERT (id, name) VALUES(src.id, src.name)
 WHEN MATCHED THEN
-	UPDATE SET name = name + 'a', price = tar.price + src.price");
+	UPDATE SET name = name + 'a', price = tar.price + src.price ;");
+        }
+
+
+        [Fact]
+        public void merge_into()
+        {
+            var sql = @"merge into customer
+    using (select @Id as Id) as s on t.ID = s.Id
+    when matched
+    then update set t.name = 'aaa'
+    when not matched
+    then insert values (@Id, @name)
+    output 0 as ErrCode, @name as UserName;";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"MERGE INTO customer
+USING ( SELECT @Id AS Id ) AS s ON t.ID = s.Id
+WHEN MATCHED THEN UPDATE SET t.name = 'aaa'
+WHEN NOT MATCHED THEN INSERT VALUES(@Id, @name)
+OUTPUT 0 AS ErrCode, @name AS UserName ;");
         }
     }
 }

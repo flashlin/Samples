@@ -14,6 +14,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public SqlCodeExpr TableSourceAliasName { get; set; }
 		public SqlCodeExpr OnMergeSearchCondition { get; set; }
 		public List<SqlCodeExpr> WhenList { get; set; }
+		public List<SqlCodeExpr> OutputList { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -65,6 +66,15 @@ namespace T1.CodeDom.TSql.Expressions
 				stream.WriteLine();
 				WhenList.WriteToStream(stream);
 			}
+
+			if (OutputList != null && OutputList.Count > 0)
+			{
+				stream.WriteLine();
+				stream.Write("OUTPUT ");
+				OutputList.WriteToStreamWithComma(stream);
+			}
+
+			stream.Write(" ;");
 		}
 	}
 }

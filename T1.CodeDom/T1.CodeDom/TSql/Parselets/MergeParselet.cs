@@ -67,6 +67,8 @@ namespace T1.CodeDom.TSql.Parselets
 				}
 				whenList.Add(whenItem);
 			} while (true);
+			
+			var outputList = parser.GetOutputListExpr();
 
 			parser.Scanner.Consume(SqlToken.Semicolon);
 
@@ -80,7 +82,8 @@ namespace T1.CodeDom.TSql.Parselets
 				SourceColumnList = sourceColumnList,
 				TableSourceAliasName = tableSourceAliasName,
 				OnMergeSearchCondition = mergeSearchCondition,
-				WhenList = whenList
+				WhenList = whenList,
+				OutputList = outputList,
 			};
 		}
 
