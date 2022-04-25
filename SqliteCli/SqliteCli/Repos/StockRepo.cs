@@ -159,6 +159,11 @@ group by st.Id, t.TranType
             return q2.OrderBy(x => x.TranTime).ToList();
         }
 
+        public decimal GetBalance()
+        {
+            return _db.Trans.Sum(x => x.Balance);
+        }
+
         /*
         protected StockDatabase GetDatabase()
         {

@@ -12,5 +12,6 @@ namespace SqliteCli.Repos
 		List<TransEntity> GetStockTranHistory(StockReportHistoryReq req);
 		StockHistoryEntity? GetStockHistoryData(DateTime date, string stockId);
 		List<TransHistory> ListTrans(ListTransReq req);
+		decimal GetBalance();
 	}
 }

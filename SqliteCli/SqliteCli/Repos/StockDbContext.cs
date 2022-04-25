@@ -22,6 +22,9 @@ namespace SqliteCli.Repos
 			{
 				entity.HasKey(e => new { e.TranDate, e.StockId  });
 			});
+			modelBuilder.Entity<TransEntity>()
+				.Property(e => e.Balance)
+				.HasConversion<double>();
 		}
 	}
 

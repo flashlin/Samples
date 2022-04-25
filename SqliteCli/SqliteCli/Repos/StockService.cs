@@ -57,6 +57,7 @@ public class StockService : IStockService
                 }
             }
         }
+
         Console.WriteLine("done");
     }
 
@@ -90,8 +91,18 @@ public class StockService : IStockService
 
     private string GetValueStr(decimal value)
     {
-        var spacesCount = (int)Math.Round(value / 20, MidpointRounding.AwayFromZero);
+        var spacesCount = (int) Math.Round(value / 20, MidpointRounding.AwayFromZero);
         return new string(' ', spacesCount);
+    }
+
+    public void ShowBalance()
+    {
+        var balanceInfo = new ReportTranItem
+        {
+            StockName = "AccountBalance",
+            Balance = _stockRepo.GetBalance()
+        };
+        balanceInfo.DisplayConsoleValue();
     }
 
     public async Task<List<ReportTranItem>> ReportTransAsync()

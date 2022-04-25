@@ -127,6 +127,7 @@ async Task ProcessReportAsync(string cmdArgs)
 	var stockService = serviceProvider.GetService<IStockService>();
 	var rc = await stockService.ReportTransAsync();
 	rc.Dump();
+	stockService.ShowBalance();
 }
 
 void ProcessDeposit(string dataText)
