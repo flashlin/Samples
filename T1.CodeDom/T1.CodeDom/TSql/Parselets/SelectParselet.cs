@@ -6,219 +6,225 @@ using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
-	public class SelectInsertContext
-	{
-		public TopSqlCodeExpr TopCount { get; set; }
-		public List<SqlCodeExpr> Columns { get; set; }
-		public SqlCodeExpr IntoTable { get; set; }
-	}
-	
-	public class SelectParselet : IPrefixParselet
-	{
-		
-		public IExpression Parse(TextSpan token, IParser parser)
-		{
-			var topCount = parser.ParseTopCountExpr();
+    public class SelectInsertContext
+    {
+        public TopSqlCodeExpr TopCount { get; set; }
+        public List<SqlCodeExpr> Columns { get; set; }
+        public SqlCodeExpr IntoTable { get; set; }
+    }
 
-			var columns = parser.ParseColumnList();
+    public class SelectParselet : IPrefixParselet
+    {
+        public IExpression Parse(TextSpan token, IParser parser)
+        {
+            var topCount = parser.ParseTopCountExpr();
 
-			SqlCodeExpr intoTable = null;
-			if (parser.Scanner.Match(SqlToken.Into))
-			{
-				intoTable = parser.ConsumeTableName();
-			}
+            var columns = parser.ParseColumnList();
 
-			var fromSourceList = GetFrom_SourceList(parser);
+            SqlCodeExpr intoTable = null;
+            if (parser.Scanner.Match(SqlToken.Into))
+            {
+                intoTable = parser.ConsumeTableName();
+            }
 
-			SqlCodeExpr pivotExpr = null;
-			if (parser.Scanner.TryConsumeAny(out var pivotSpan, SqlToken.Pivot, SqlToken.UnPivot))
-			{
-				pivotExpr = parser.PrefixParse(pivotSpan) as SqlCodeExpr;
-			}
+            var fromSourceList = GetFrom_SourceList(parser);
 
-			SqlCodeExpr whereExpr = null;
-			if (parser.Scanner.TryConsume(SqlToken.Where, out _))
-			{
-				whereExpr = parser.ParseExpIgnoreComment();
-				whereExpr = parser.ParseLRParenExpr(whereExpr);
-			}
+            SqlCodeExpr pivotExpr = null;
+            if (parser.Scanner.TryConsumeAny(out var pivotSpan, SqlToken.Pivot, SqlToken.UnPivot))
+            {
+                pivotExpr = parser.PrefixParse(pivotSpan) as SqlCodeExpr;
+            }
 
-			var groupBy = ParseGroupBy(parser);
-			var having = ParseHaving(parser);
-			var orderBy = ParseOrderBy(parser);
-			
-			SqlCodeExpr forXmlExpr = null;
-			if (parser.TryConsumeToken(out var forSpan, SqlToken.For))
-			{
-				forXmlExpr = parser.PrefixParse(forSpan) as SqlCodeExpr;
-			}
+            SqlCodeExpr whereExpr = null;
+            if (parser.Scanner.TryConsume(SqlToken.Where, out _))
+            {
+                whereExpr = parser.ParseExpIgnoreComment();
+                whereExpr = parser.ParseLRParenExpr(whereExpr);
+            }
 
-			var optionExpr = parser.ParseOptionExpr();
+            var groupBy = ParseGroupBy(parser);
+            var having = ParseHaving(parser);
+            var orderBy = ParseOrderBy(parser);
 
-			var unionSelectList = ParseUnionSelectList(parser);
+            SqlCodeExpr forXmlExpr = null;
+            if (parser.TryConsumeToken(out var forSpan, SqlToken.For))
+            {
+                forXmlExpr = parser.PrefixParse(forSpan) as SqlCodeExpr;
+            }
 
-			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
+            var optionExpr = parser.ParseOptionExpr();
 
-			return new SelectSqlCodeExpr
-			{
-				TopCount = topCount,
-				Columns = columns,
-				IntoTable = intoTable,
-				FromSourceList = fromSourceList,
-				PivotExpr = pivotExpr,
-				WhereExpr = whereExpr,
-				GroupByList = groupBy,
-				Having = having,
-				OrderByList = orderBy,
-				ForXmlExpr = forXmlExpr,
-				OptionExpr = optionExpr,
-				UnionSelectList = unionSelectList,
-				IsSemicolon = isSemicolon,
-			};
-		}
+            var unionSelectList = ParseUnionSelectList(parser);
 
-		private IExpression ParseInsertExec(SelectInsertContext context, IParser parser)
-		{
-			var execExpr = parser.ParseExpIgnoreComment();
-			return new InsertFromExecSqlCodeExpr
-			{
-				TopCount = context.TopCount,
-				Columns = context.Columns,
-				IntoTable = context.IntoTable,
-				ExecExpr = execExpr,
-			};
-		}
+            var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
 
-		private HavingSqlCodeExpr ParseHaving(IParser parser)
-		{
-			if (!parser.MatchToken(SqlToken.Having))
-			{
-				return null;
-			}
-			var itemList = new List<SqlCodeExpr>();
-			do
-			{
-				var item = parser.ParseExpIgnoreComment();
-				itemList.Add(item);
-			} while (parser.MatchToken(SqlToken.Comma));
-			return new HavingSqlCodeExpr
-			{
-				ItemList = itemList
-			};
-		}
+            return new SelectSqlCodeExpr
+            {
+                TopCount = topCount,
+                Columns = columns,
+                IntoTable = intoTable,
+                FromSourceList = fromSourceList,
+                PivotExpr = pivotExpr,
+                WhereExpr = whereExpr,
+                GroupByList = groupBy,
+                Having = having,
+                OrderByList = orderBy,
+                ForXmlExpr = forXmlExpr,
+                OptionExpr = optionExpr,
+                UnionSelectList = unionSelectList,
+                IsSemicolon = isSemicolon,
+            };
+        }
 
-		private List<OrderItemSqlCodeExpr> ParseOrderBy(IParser parser)
-		{
-			var orderByList = new List<OrderItemSqlCodeExpr>();
+        private IExpression ParseInsertExec(SelectInsertContext context, IParser parser)
+        {
+            var execExpr = parser.ParseExpIgnoreComment();
+            return new InsertFromExecSqlCodeExpr
+            {
+                TopCount = context.TopCount,
+                Columns = context.Columns,
+                IntoTable = context.IntoTable,
+                ExecExpr = execExpr,
+            };
+        }
 
-			if (!parser.Scanner.TryConsume(SqlToken.Order, out _))
-			{
-				return orderByList;
-			}
+        private HavingSqlCodeExpr ParseHaving(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.Having))
+            {
+                return null;
+            }
 
-			parser.Scanner.Consume(SqlToken.By);
-			orderByList = parser.ParseOrderItemList();
+            var itemList = new List<SqlCodeExpr>();
+            do
+            {
+                var item = parser.ParseExpIgnoreComment();
+                itemList.Add(item);
+            } while (parser.MatchToken(SqlToken.Comma));
 
-			return orderByList;
-		}
+            return new HavingSqlCodeExpr
+            {
+                ItemList = itemList
+            };
+        }
 
-		private List<SqlCodeExpr> ParseGroupBy(IParser parser)
-		{
-			var groupByList = new List<SqlCodeExpr>();
+        private List<OrderItemSqlCodeExpr> ParseOrderBy(IParser parser)
+        {
+            var orderByList = new List<OrderItemSqlCodeExpr>();
 
-			if (!parser.Scanner.TryConsume(SqlToken.Group, out _))
-			{
-				return groupByList;
-			}
+            if (!parser.Scanner.TryConsume(SqlToken.Order, out _))
+            {
+                return orderByList;
+            }
 
-			parser.Scanner.Consume(SqlToken.By);
-			do
-			{
-				var name = parser.ParseExpIgnoreComment();
-				groupByList.Add(name);
-			} while (parser.Scanner.Match(SqlToken.Comma));
+            parser.Scanner.Consume(SqlToken.By);
+            orderByList = parser.ParseOrderItemList();
 
-			return groupByList;
-		}
+            return orderByList;
+        }
 
-		private List<SqlCodeExpr> ParseUnionSelectList(IParser parser)
-		{
-			var unionSelectList = new List<SqlCodeExpr>();
-			do
-			{
-				if (!parser.Scanner.TryConsume(SqlToken.Union, out var unionSpan))
-				{
-					break;
-				}
-				var unionSelect = ParseUnionSelect(unionSpan, parser);
-				unionSelectList.Add(unionSelect);
-			} while (true);
-			return unionSelectList;
-		}
+        private List<SqlCodeExpr> ParseGroupBy(IParser parser)
+        {
+            var groupByList = new List<SqlCodeExpr>();
 
-		private static List<SqlCodeExpr> GetFrom_SourceList(IParser parser)
-		{
-			if (!parser.Scanner.TryConsume(SqlToken.From, out _))
-			{
-				return new List<SqlCodeExpr>();
-			}
-			return parser.ParseFromSourceList();
-		}
+            if (!parser.Scanner.TryConsume(SqlToken.Group, out _))
+            {
+                return groupByList;
+            }
 
-		protected SqlCodeExpr ParseUnionSelect(TextSpan unionToken, IParser parser)
-		{
-			var unionMethod = string.Empty;
-			if (parser.Scanner.Match(SqlToken.All))
-			{
-				unionMethod = "ALL";
-			}
-			var rightExpr = parser.ParseExpIgnoreComment();
-			return new UnionSelectSqlCodeExpr
-			{
-				UnionMethod = unionMethod,
-				RightExpr = rightExpr,
-			};
-		}
-	}
+            parser.Scanner.Consume(SqlToken.By);
+            do
+            {
+                var name = parser.ParseExpIgnoreComment();
+                groupByList.Add(name);
+            } while (parser.Scanner.Match(SqlToken.Comma));
 
-	public class InsertFromExecSqlCodeExpr : SqlCodeExpr
-	{
-		public override void WriteToStream(IndentStream stream)
-		{
-			stream.Write("INSERT");
+            return groupByList;
+        }
 
-			if (TopCount != null)
-			{
-				stream.Write(" ");
-				TopCount.WriteToStream(stream);
-			}
+        private List<SqlCodeExpr> ParseUnionSelectList(IParser parser)
+        {
+            var unionSelectList = new List<SqlCodeExpr>();
+            do
+            {
+                if (!parser.Scanner.TryConsume(SqlToken.Union, out var unionSpan))
+                {
+                    break;
+                }
 
-			stream.Write(" ");
-			IntoTable.WriteToStream(stream);
+                var unionSelect = ParseUnionSelect(unionSpan, parser);
+                unionSelectList.Add(unionSelect);
+            } while (true);
 
-			if (Columns != null && Columns.Count > 0)
-			{
-				stream.Write(" ");
-				Columns.WriteToStream(stream);
-			}
+            return unionSelectList;
+        }
 
-			stream.Write(" EXEC ");
-			ExecExpr.WriteToStream(stream);
-		}
+        private static List<SqlCodeExpr> GetFrom_SourceList(IParser parser)
+        {
+            if (!parser.Scanner.TryConsume(SqlToken.From, out _))
+            {
+                return new List<SqlCodeExpr>();
+            }
 
-		public TopSqlCodeExpr TopCount { get; set; }
-		public SqlCodeExpr IntoTable { get; set; }
-		public List<SqlCodeExpr> Columns { get; set; }
-		public SqlCodeExpr ExecExpr { get; set; }
-	}
+            return parser.ParseFromSourceList();
+        }
 
-	public class HavingSqlCodeExpr : SqlCodeExpr
-	{
-		public List<SqlCodeExpr> ItemList { get; set; }
-		public override void WriteToStream(IndentStream stream)
-		{
-			stream.Write("HAVING ");
-			ItemList.WriteToStreamWithComma(stream);	
-		}
-	}
+        protected SqlCodeExpr ParseUnionSelect(TextSpan unionToken, IParser parser)
+        {
+            var unionMethod = string.Empty;
+            if (parser.Scanner.Match(SqlToken.All))
+            {
+                unionMethod = "ALL";
+            }
+
+            var rightExpr = parser.ParseExpIgnoreComment();
+            return new UnionSelectSqlCodeExpr
+            {
+                UnionMethod = unionMethod,
+                RightExpr = rightExpr,
+            };
+        }
+    }
+
+    public class InsertFromExecSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("INSERT");
+
+            if (TopCount != null)
+            {
+                stream.Write(" ");
+                TopCount.WriteToStream(stream);
+            }
+
+            stream.Write(" ");
+            IntoTable.WriteToStream(stream);
+
+            if (Columns != null && Columns.Count > 0)
+            {
+                stream.Write(" ");
+                Columns.WriteToStream(stream);
+            }
+
+            stream.Write(" EXEC ");
+            ExecExpr.WriteToStream(stream);
+        }
+
+        public TopSqlCodeExpr TopCount { get; set; }
+        public SqlCodeExpr IntoTable { get; set; }
+        public List<SqlCodeExpr> Columns { get; set; }
+        public SqlCodeExpr ExecExpr { get; set; }
+    }
+
+    public class HavingSqlCodeExpr : SqlCodeExpr
+    {
+        public List<SqlCodeExpr> ItemList { get; set; }
+
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("HAVING ");
+            ItemList.WriteToStreamWithComma(stream);
+        }
+    }
 }

@@ -223,7 +223,7 @@ namespace T1.CodeDom.TSql
             }
 
             var name = parser.ConsumeObjectId();
-            return new ConstraintSqlCodeExpr
+            return new MarkConstraintSqlCodeExpr
             {
                 Name = name,
             };
@@ -305,7 +305,7 @@ namespace T1.CodeDom.TSql
                 return parser.PrefixParse(identifier) as SqlCodeExpr;
             }
 
-            parser.Scanner.Consume(SqlToken.Primary);
+            parser.Scanner.Consume(SqlToken.PRIMARY);
             return new ObjectIdSqlCodeExpr
             {
                 ObjectName = "PRIMARY"
@@ -993,10 +993,10 @@ namespace T1.CodeDom.TSql
         private static bool ParseIsPrimaryKey(IParser parser)
         {
             var isPrimaryKey = false;
-            if (parser.Scanner.IsTokenList(SqlToken.Primary, SqlToken.Key))
+            if (parser.Scanner.IsTokenList(SqlToken.PRIMARY, SqlToken.KEY))
             {
-                parser.Scanner.Consume(SqlToken.Primary);
-                parser.Scanner.Consume(SqlToken.Key);
+                parser.Scanner.Consume(SqlToken.PRIMARY);
+                parser.Scanner.Consume(SqlToken.KEY);
                 isPrimaryKey = true;
             }
 
@@ -1161,6 +1161,45 @@ namespace T1.CodeDom.TSql
             }
 
             return token;
+        }
+
+        public static bool TryConsumeTokenList(this IParser parser, out List<TextSpan> spanList, params SqlToken[] tokenTypeList)
+        {
+            var startIndex = parser.Scanner.GetOffset();
+            var list = new List<TextSpan>();
+            var isAll = tokenTypeList.All(x =>
+            {
+                var isSuccess = parser.TryConsumeToken(out var span, x);
+                if (isSuccess)
+                {
+                    list.Add(span);
+                }
+                return isSuccess;
+            });
+            if (!isAll)
+            {
+                list = new List<TextSpan>();
+                parser.Scanner.SetOffset(startIndex);
+            }
+            spanList = list;
+            return isAll;
+        }
+
+        public static List<TextSpan> ConsumeTokenListAny(this IParser parser, params SqlToken[][] tokenTypeListArray)
+        {
+            var spanList = new List<TextSpan>();
+            var isAny = tokenTypeListArray.Any(tokenTypeList => parser.TryConsumeTokenList(out spanList, tokenTypeList));
+            if (!isAny)
+            {
+                ThrowHelper.ThrowParseException(parser, "");
+            }
+            return spanList;
+        }
+
+        public static string ConsumeTokenStringListAny(this IParser parser, params SqlToken[][] tokenTypeListArray)
+        {
+            var spanList = parser.ConsumeTokenListAny(tokenTypeListArray);
+            return string.Join(" ", spanList.Select(x => parser.Scanner.GetSpanString(x)));
         }
 
         public static TextSpan ConsumeToken(this IParser parser, SqlToken tokenType)
@@ -1349,7 +1388,7 @@ namespace T1.CodeDom.TSql
         public SqlCodeExpr ValueExpr { get; set; }
     }
 
-    public class ConstraintSqlCodeExpr : SqlCodeExpr
+    public class MarkConstraintSqlCodeExpr : SqlCodeExpr
     {
         public override void WriteToStream(IndentStream stream)
         {

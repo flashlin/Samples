@@ -21,7 +21,7 @@ namespace T1.CodeDom.TSql.Parselets
 				return CreateSynonym(synonymSpan, parser);
 			}
 			
-			if(parser.Scanner.TryConsume(SqlToken.Clustered, out var clusteredSpan))
+			if(parser.Scanner.TryConsume(SqlToken.CLUSTERED, out var clusteredSpan))
 			{
 				return CreateClusteredIndex(clusteredSpan, parser);
 			}

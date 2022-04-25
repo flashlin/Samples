@@ -126,7 +126,7 @@ INTO @id, @name");
 
             Parse(sql);
 
-            ThenExprShouldBe(@"");
+            ThenExprShouldBe(@"CONSTRAINT [PK_my] PRIMARY KEY CLUSTERED([id] ASC, [name] ASC)");
         }
     }
 }

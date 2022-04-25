@@ -34,7 +34,6 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("CROSS", SqlToken.Cross);
 			AddTokenMap("CREATE", SqlToken.Create);
 			AddTokenMap("CONVERT", SqlToken.Convert);
-			AddTokenMap("CLUSTERED", SqlToken.Clustered);
 			AddTokenMap("DROP", SqlToken.Drop);
 			AddTokenMap("DENSE_RANK", SqlToken.DENSE_RANK);
 			AddTokenMap("DESC", SqlToken.Desc);
@@ -76,7 +75,6 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("INNER", SqlToken.Inner);
 			AddTokenMap("INSERTED", SqlToken.Inserted);
 			AddTokenMap("JOIN", SqlToken.Join);
-			AddTokenMap("KEY", SqlToken.Key);
 			AddTokenMap("LIKE", SqlToken.Like);
 			AddTokenMap("LEFT", SqlToken.Left);
 			AddTokenMap("NVARCHAR", SqlToken.NVarchar);
@@ -98,7 +96,6 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("OUTPUT", SqlToken.Output);
 			AddTokenMap("OPTION", SqlToken.Option);
 			AddTokenMap("PARTITION", SqlToken.Partition);
-			AddTokenMap("PRIMARY", SqlToken.Primary);
 			AddTokenMap("PIVOT", SqlToken.Pivot);
 			AddTokenMap("PROCEDURE", SqlToken.Procedure);
 			AddTokenMap("PROC", SqlToken.Procedure);
@@ -141,6 +138,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ABS", SqlToken.ABS);
 			AddTokenMap("CHARINDEX", SqlToken.CHARINDEX);
 			AddTokenMap("COUNT", SqlToken.COUNT);
+			AddTokenMap("CLUSTERED", SqlToken.CLUSTERED);
 			AddTokenMap("COALESCE", SqlToken.COALESCE);
 			AddTokenMap("DATEADD", SqlToken.DATEADD);
 			AddTokenMap("DATEPART", SqlToken.DATEPART);
@@ -180,6 +178,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ISOLATION", SqlToken.ISOLATION);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 			AddTokenMap("IDENTITY", SqlToken.IDENTITY);
+			AddTokenMap("KEY", SqlToken.KEY);
 			AddTokenMap("LOW", SqlToken.LOW);
 			AddTokenMap("LOWER", SqlToken.LOWER);
 			AddTokenMap("LEVEL", SqlToken.LEVEL);
@@ -194,6 +193,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("MAXDOP", SqlToken.MAXDOP);
 			AddTokenMap("OBJECT_NAME", SqlToken.OBJECT_NAME);
 			AddTokenMap("OWNER", SqlToken.OWNER);
+			AddTokenMap("PRIMARY", SqlToken.PRIMARY);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("READ", SqlToken.READ);
@@ -206,6 +206,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("TRANSACTION", SqlToken.TRANSACTION);
 			AddTokenMap("TRAN", SqlToken.TRAN);
 			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);
+			AddTokenMap("UNIQUE", SqlToken.UNIQUE);
 			AddTokenMap("UNCOMMITTED", SqlToken.UNCOMMITTED);
 			AddTokenMap("XACT_ABORT", SqlToken.XACT_ABORT);
 

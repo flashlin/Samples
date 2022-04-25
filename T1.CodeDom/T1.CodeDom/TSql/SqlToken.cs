@@ -114,8 +114,8 @@
 		Continue,
 		Convert,
 		Char,
-		Primary,
-		Key,
+		PRIMARY,
+		KEY,
 		MAX,
 		Tilde,
 		Partition,
@@ -173,7 +173,7 @@
 		Truncate,
 		Print,
 		XACT_ABORT,
-		Clustered,
+		CLUSTERED,
 		Index,
 		ROW_NUMBER,
 		PlusEqual,
@@ -228,6 +228,7 @@
 		OWNER,
 		SYNONYM,
 		IDENTITY,
-		CONSTRAINT
+		CONSTRAINT,
+		UNIQUE
 	}
 }
