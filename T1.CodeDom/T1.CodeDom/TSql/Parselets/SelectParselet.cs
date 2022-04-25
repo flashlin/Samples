@@ -117,15 +117,10 @@ namespace T1.CodeDom.TSql.Parselets
 			}
 
 			parser.Scanner.Consume(SqlToken.By);
+			orderByList = parser.ParseOrderItemList();
+			/*
 			do
 			{
-				/*
-				if (!parser.TryConsumeObjectId(out var name))
-				{
-					name = parser.ParseExpIgnoreComment();
-				}
-				*/
-				
 				var name = parser.ParseExpIgnoreComment();
 
 				var ascOrDesc = "ASC";
@@ -140,6 +135,7 @@ namespace T1.CodeDom.TSql.Parselets
 					AscOrDesc = ascOrDesc,
 				});
 			} while (parser.Scanner.Match(SqlToken.Comma));
+			*/
 
 			return orderByList;
 		}

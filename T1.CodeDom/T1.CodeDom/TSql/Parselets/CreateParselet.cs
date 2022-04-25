@@ -11,6 +11,11 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if (parser.TryConsumeToken(out var nonclusteredSpan, SqlToken.NONCLUSTERED))
+			{
+				return CreateNonclusteredIndex(nonclusteredSpan, parser);
+			}
+			
 			if (parser.TryConsumeToken(out var synonymSpan, SqlToken.SYNONYM))
 			{
 				return CreateSynonym(synonymSpan, parser);
@@ -48,6 +53,25 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var helpMessage = parser.Scanner.GetHelpMessage();
 			throw new ParseException($"Parse CREATE Error, {helpMessage}");
+		}
+
+		private SqlCodeExpr CreateNonclusteredIndex(TextSpan nonclusteredSpan, IParser parser)
+		{
+			parser.ConsumeToken(SqlToken.Index);
+			var indexName = parser.ConsumeObjectId();
+			parser.ConsumeToken(SqlToken.On);
+			var tableName = parser.ConsumeObjectId();
+			parser.ConsumeToken(SqlToken.LParen);
+			var columnList = parser.ParseOrderItemList();
+			parser.ConsumeToken(SqlToken.RParen);
+			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
+			return new CreateNonclusteredIndexSqlCodeExpr
+			{
+				IndexName = indexName,
+				TableName = tableName,
+				ColumnList = columnList,
+				IsSemicolon = isSemicolon,
+			};
 		}
 
 		private SqlCodeExpr CreateSynonym(TextSpan synonymSpan, IParser parser)
@@ -261,6 +285,25 @@ namespace T1.CodeDom.TSql.Parselets
 				Body = bodyList
 			};
 		}
+	}
+
+	public class CreateNonclusteredIndexSqlCodeExpr : SqlCodeExpr
+	{
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write("CREATE NONCLUSTERED INDEX ");
+			IndexName.WriteToStream(stream);
+			stream.Write(" ON ");
+			TableName.WriteToStream(stream);
+			stream.Write("(");
+			ColumnList.WriteToStreamWithComma(stream);
+			stream.Write(")");
+		}
+
+		public SqlCodeExpr IndexName { get; set; }
+		public SqlCodeExpr TableName { get; set; }
+		public List<OrderItemSqlCodeExpr> ColumnList { get; set; }
+		public bool IsSemicolon { get; set; }
 	}
 
 	public class CreateSynonymSqlCodeExpr : SqlCodeExpr

@@ -1286,6 +1286,29 @@ namespace T1.CodeDom.TSql
                 AliasName = aliasName
             };
         }
+
+        public static List<OrderItemSqlCodeExpr> ParseOrderItemList(this IParser parser)
+        {
+            var orderItemList = new List<OrderItemSqlCodeExpr>();
+            do
+            {
+                var name = parser.ParseExpIgnoreComment();
+
+                var ascOrDesc = "ASC";
+                parser.Scanner.TryConsumeAny(out var ascOrDescSpan, SqlToken.Asc, SqlToken.Desc);
+                if (!ascOrDescSpan.IsEmpty)
+                {
+                    ascOrDesc = parser.Scanner.GetSpanString(ascOrDescSpan);
+                }
+                orderItemList.Add(new OrderItemSqlCodeExpr
+                {
+                    Name = name,
+                    AscOrDesc = ascOrDesc,
+                });
+            } while (parser.Scanner.Match(SqlToken.Comma));
+
+            return orderItemList;
+        }
     }
 
     public class DataTypeSizeSqlCodeExpr : SqlCodeExpr
