@@ -5,12 +5,13 @@ namespace T1.CodeDom.TSql.Expressions
 	public class DataTypeSqlCodeExpr : SqlCodeExpr
 	{
 		public SqlCodeExpr DataType { get; set; }
+		public SqlCodeExpr SizeExpr { get; set; }
 		public bool IsIdentity { get; set; }
 		public bool IsReadOnly { get; set; }
-		public int? Size { get; internal set; }
-		public int? Scale { get; internal set; }
+		public SqlCodeExpr ConstraintExpr { get; set; }
 		public bool IsPrimaryKey { get; set; }
 		public bool IsNonclustered { get; set; }
+		public SqlCodeExpr DefaultValueExpr { get; set; }
 		public bool? IsAllowNull { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -27,23 +28,15 @@ namespace T1.CodeDom.TSql.Expressions
 				stream.Write(" READONLY");
 			}
 
-			if (Size != null)
+			if (SizeExpr != null)
 			{
-				stream.Write($"(");
-				if (Size == int.MaxValue)
-				{
-					stream.Write($"MAX");
-				}
-				else
-				{
-					stream.Write($"{Size}");
-				}
+				SizeExpr.WriteToStream(stream);
+			}
 
-				if (Scale != null)
-				{
-					stream.Write($",{Scale}");
-				}
-				stream.Write(")");
+			if (ConstraintExpr != null)
+			{
+				stream.Write(" ");
+				ConstraintExpr.WriteToStream(stream);
 			}
 
 			if (IsPrimaryKey)
@@ -53,6 +46,12 @@ namespace T1.CodeDom.TSql.Expressions
 				{
 					stream.Write(" NONCLUSTERED");
 				}
+			}
+
+			if (DefaultValueExpr != null)
+			{
+				stream.Write(" ");
+				DefaultValueExpr.WriteToStream(stream);
 			}
 
 			if (IsAllowNull != null)

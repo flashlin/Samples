@@ -168,6 +168,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
 			AddTokenMap("ARITHABORT", SqlToken.ARITHABORT);
 			AddTokenMap("CALLER", SqlToken.CALLER);
+			AddTokenMap("CONSTRAINT", SqlToken.CONSTRAINT);
 			AddTokenMap("COMMITTED", SqlToken.COMMITTED);
 			AddTokenMap("CONNECT", SqlToken.CONNECT);
 			AddTokenMap("COMMIT", SqlToken.Commit);

@@ -130,27 +130,42 @@ namespace T1.CodeDom.TSql
 
             var isIdentity = parser.MatchToken(SqlToken.IDENTITY);
 
-            var isReadonly = parser.Scanner.Match(SqlToken.ReadOnly);
+            var sizeExpr = ParseDataTypeSize(parser);
+
+            var constraintExpr = ParseConstraint(parser);
+
+            var isReadOnly = parser.Scanner.Match(SqlToken.ReadOnly);
 
             var isPrimaryKey = ParseIsPrimaryKey(parser);
+
             var isNonclustered = parser.MatchToken(SqlToken.NONCLUSTERED);
+
+            var defaultValueExpr = ParseDefault(parser);
 
             var isAllowNull = ParseIsAllowNull(parser);
 
-            if (!parser.Scanner.Match(SqlToken.LParen))
+            return new DataTypeSqlCodeExpr
             {
-                return new DataTypeSqlCodeExpr
-                {
-                    DataType = dataType,
-                    IsIdentity = isIdentity,
-                    IsReadOnly = isReadonly,
-                    IsPrimaryKey = isPrimaryKey,
-                    IsNonclustered = isNonclustered,
-                    IsAllowNull = isAllowNull
-                };
+                DataType = dataType,
+                IsIdentity = isIdentity,
+                IsReadOnly = isReadOnly,
+                SizeExpr = sizeExpr,
+                IsPrimaryKey = isPrimaryKey,
+                IsNonclustered = isNonclustered,
+                ConstraintExpr = constraintExpr,
+                DefaultValueExpr = defaultValueExpr,
+                IsAllowNull = isAllowNull,
+            };
+        }
+
+        private static DataTypeSizeSqlCodeExpr ParseDataTypeSize(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.LParen))
+            {
+                return null;
             }
 
-            var size = ParseSize(parser);
+            var size = int.Parse(parser.ConsumeTokenStringAny(SqlToken.Number));
 
             int? scale = null;
             if (parser.Scanner.Match(SqlToken.Comma))
@@ -158,19 +173,51 @@ namespace T1.CodeDom.TSql
                 var scaleToken = parser.Scanner.Consume(SqlToken.Number);
                 scale = int.Parse(parser.Scanner.GetSpanString(scaleToken));
             }
+
             parser.Scanner.Consume(SqlToken.RParen);
-            
-            isAllowNull = ParseIsAllowNull(parser);
 
-            isPrimaryKey = ParseIsPrimaryKey(parser);
-
-            return new DataTypeSqlCodeExpr
+            return new DataTypeSizeSqlCodeExpr
             {
-                DataType = dataType,
-                IsPrimaryKey = isPrimaryKey,
-                IsAllowNull = isAllowNull,
                 Size = size,
-                Scale = scale
+                Scale = scale,
+            };
+        }
+
+        private static SqlCodeExpr ParseDefault(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.Default))
+            {
+                return null;
+            }
+
+            SqlCodeExpr valueExpr = null;
+            if (parser.MatchToken(SqlToken.LParen))
+            {
+                valueExpr = parser.ParseExpIgnoreComment();
+                parser.ConsumeToken(SqlToken.RParen);
+            }
+            else
+            {
+                valueExpr = parser.Consume(SqlToken.Number);
+            }
+
+            return new DefaultSqlCodeExpr
+            {
+                ValueExpr = valueExpr,
+            };
+        }
+
+        private static SqlCodeExpr ParseConstraint(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.CONSTRAINT))
+            {
+                return null;
+            }
+
+            var name = parser.ConsumeObjectId();
+            return new ConstraintSqlCodeExpr
+            {
+                Name = name,
             };
         }
 
@@ -1231,5 +1278,54 @@ namespace T1.CodeDom.TSql
                 AliasName = aliasName
             };
         }
+    }
+
+    public class DataTypeSizeSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("(");
+            if (Size == int.MaxValue)
+            {
+                stream.Write($"MAX");
+            }
+            else
+            {
+                stream.Write($"{Size}");
+            }
+
+
+            if (Scale != null)
+            {
+                stream.Write($",{Scale}");
+            }
+
+            stream.Write(")");
+        }
+
+        public int Size { get; set; }
+        public int? Scale { get; set; }
+    }
+
+    public class DefaultSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("DEFAULT ");
+            ValueExpr.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr ValueExpr { get; set; }
+    }
+
+    public class ConstraintSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CONSTRAINT ");
+            Name.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr Name { get; set; }
     }
 }

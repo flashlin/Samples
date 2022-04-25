@@ -150,7 +150,11 @@ END");
             
             Parse(sql);
 
-            ThenExprShouldBe(@"");
+            ThenExprShouldBe(@"CREATE TABLE [dbo].[myCustomer](
+[ID] INT IDENTITY(1,1) NOT NULL,    
+[Name] VARCHAR(50) NOT NULL,    
+[Birth] SMALLDATETIME CONSTRAINT [DF_Birth] DEFAULT GETDATE() NOT NULL    
+)");
         }
         
         
