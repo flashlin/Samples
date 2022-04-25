@@ -199,6 +199,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ROLLBACK", SqlToken.ROLLBACK);
 			AddTokenMap("SNAPSHOT", SqlToken.SNAPSHOT);
 			AddTokenMap("SELF", SqlToken.SELF);
+			AddTokenMap("SYNONYM", SqlToken.SYNONYM);
 			AddTokenMap("SERIALIZABLE", SqlToken.SERIALIZABLE);
 			AddTokenMap("TRANSACTION", SqlToken.TRANSACTION);
 			AddTokenMap("TRAN", SqlToken.TRAN);

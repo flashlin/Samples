@@ -126,5 +126,16 @@ BEGIN
     SET NOCOUNT ON ;
 END");
         }
+        
+        
+        [Fact]
+        public void create_synonym()
+        {
+            var sql = @"CREATE SYNONYM [dbo].[mySynonym] FOR [RemoteServer].[MyDb].[dbo].[MyTable]";
+            
+            Parse(sql);
+
+            ThenExprShouldBe(@"CREATE SYNONYM [dbo].[mySynonym] FOR [RemoteServer].[MyDb].[dbo].[MyTable]");
+        }
     }
 }

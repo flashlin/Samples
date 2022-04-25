@@ -225,6 +225,7 @@
 		FORCESEEK,
 		CALLER,
 		SELF,
-		OWNER
+		OWNER,
+		SYNONYM
 	}
 }

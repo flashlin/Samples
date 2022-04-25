@@ -11,6 +11,11 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
+			if (parser.TryConsumeToken(out var synonymSpan, SqlToken.SYNONYM))
+			{
+				return CreateSynonym(synonymSpan, parser);
+			}
+			
 			if(parser.Scanner.TryConsume(SqlToken.Clustered, out var clusteredSpan))
 			{
 				return CreateClusteredIndex(clusteredSpan, parser);
@@ -43,6 +48,18 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var helpMessage = parser.Scanner.GetHelpMessage();
 			throw new ParseException($"Parse CREATE Error, {helpMessage}");
+		}
+
+		private SqlCodeExpr CreateSynonym(TextSpan synonymSpan, IParser parser)
+		{
+			var synonymName = parser.ConsumeObjectId();
+			parser.ConsumeToken(SqlToken.For);
+			var objectId = parser.ConsumeObjectId();
+			return new CreateSynonymSqlCodeExpr
+			{
+				Name = synonymName,
+				ObjectId = objectId
+			};
 		}
 
 		private SqlCodeExpr CreateClusteredIndex(TextSpan clusteredSpan, IParser parser)
@@ -243,6 +260,20 @@ namespace T1.CodeDom.TSql.Parselets
 				Body = bodyList
 			};
 		}
+	}
+
+	public class CreateSynonymSqlCodeExpr : SqlCodeExpr
+	{
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write("CREATE SYNONYM ");
+			Name.WriteToStream(stream);
+			stream.Write(" FOR ");
+			ObjectId.WriteToStream(stream);
+		}
+
+		public SqlCodeExpr Name { get; set; }
+		public SqlCodeExpr ObjectId { get; set; }
 	}
 
 	public class WithExecuteAsSqlCodeExpr : SqlCodeExpr
