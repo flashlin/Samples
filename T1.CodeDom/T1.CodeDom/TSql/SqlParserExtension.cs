@@ -165,7 +165,15 @@ namespace T1.CodeDom.TSql
                 return null;
             }
 
-            var size = int.Parse(parser.ConsumeTokenStringAny(SqlToken.Number));
+            var size = 0;
+            if (parser.MatchToken(SqlToken.MAX))
+            {
+                size = int.MaxValue;
+            }
+            else
+            {
+                size = int.Parse(parser.ConsumeTokenStringAny(SqlToken.Number));
+            }
 
             int? scale = null;
             if (parser.Scanner.Match(SqlToken.Comma))
