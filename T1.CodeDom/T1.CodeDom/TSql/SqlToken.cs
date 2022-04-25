@@ -226,6 +226,7 @@
 		CALLER,
 		SELF,
 		OWNER,
-		SYNONYM
+		SYNONYM,
+		IDENTITY
 	}
 }

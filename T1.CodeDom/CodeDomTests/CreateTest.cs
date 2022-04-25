@@ -137,5 +137,22 @@ END");
 
             ThenExprShouldBe(@"CREATE SYNONYM [dbo].[mySynonym] FOR [RemoteServer].[MyDb].[dbo].[MyTable]");
         }
+        
+        
+        [Fact]
+        public void create_table_objectId()
+        {
+            var sql = @"CREATE TABLE [dbo].[myCustomer] (
+    [ID]     INT           IDENTITY (1, 1) NOT NULL,
+    [Name]   VARCHAR (50)  NOT NULL,
+    [Birth] SMALLDATETIME CONSTRAINT [DF_Birth] DEFAULT (getdate()) NOT NULL
+)";
+            
+            Parse(sql);
+
+            ThenExprShouldBe(@"");
+        }
+        
+        
     }
 }

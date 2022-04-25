@@ -5,6 +5,7 @@ namespace T1.CodeDom.TSql.Expressions
 	public class DataTypeSqlCodeExpr : SqlCodeExpr
 	{
 		public SqlCodeExpr DataType { get; set; }
+		public bool IsIdentity { get; set; }
 		public bool IsReadOnly { get; set; }
 		public int? Size { get; internal set; }
 		public int? Scale { get; internal set; }
@@ -15,6 +16,11 @@ namespace T1.CodeDom.TSql.Expressions
 		public override void WriteToStream(IndentStream stream)
 		{
 			DataType.WriteToStream(stream);
+
+			if (IsIdentity)
+			{
+				stream.Write(" IDENTITY");
+			}
 
 			if (IsReadOnly)
 			{

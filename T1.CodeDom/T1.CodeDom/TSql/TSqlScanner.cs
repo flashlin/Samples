@@ -178,6 +178,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("HOLDLOCK", SqlToken.HOLDLOCK);
 			AddTokenMap("ISOLATION", SqlToken.ISOLATION);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
+			AddTokenMap("IDENTITY", SqlToken.IDENTITY);
 			AddTokenMap("LOW", SqlToken.LOW);
 			AddTokenMap("LOWER", SqlToken.LOWER);
 			AddTokenMap("LEVEL", SqlToken.LEVEL);

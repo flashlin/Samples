@@ -119,7 +119,8 @@ namespace T1.CodeDom.TSql.Parselets
 
 		private SqlCodeExpr CreateTable(TextSpan tableSpan, IParser parser)
 		{
-			var tableName = parser.ConsumeAny(SqlToken.TempTable, SqlToken.Variable, SqlToken.Identifier) as SqlCodeExpr;
+			//var tableName = parser.ConsumeAny(SqlToken.TempTable, SqlToken.Variable, SqlToken.Identifier) as SqlCodeExpr;
+			var tableName = parser.ConsumeTableName();
 
 			var tableType = parser.ConsumeTableDataType();
 
