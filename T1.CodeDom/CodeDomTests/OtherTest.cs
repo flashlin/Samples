@@ -117,5 +117,16 @@ INTO @id, @name");
 
             ThenExprShouldBe(@"1 BETWEEN a - 1 AND b - 2");
         }
+        
+        
+        [Fact]
+        public void constraint()
+        {
+            var sql = @"CONSTRAINT [PK_my] PRIMARY KEY CLUSTERED ([id] ASC, [name] ASC)";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"");
+        }
     }
 }

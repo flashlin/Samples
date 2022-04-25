@@ -118,24 +118,6 @@ namespace T1.CodeDom.TSql.Parselets
 
 			parser.Scanner.Consume(SqlToken.By);
 			orderByList = parser.ParseOrderItemList();
-			/*
-			do
-			{
-				var name = parser.ParseExpIgnoreComment();
-
-				var ascOrDesc = "ASC";
-				parser.Scanner.TryConsumeAny(out var ascOrDescSpan, SqlToken.Asc, SqlToken.Desc);
-				if (!ascOrDescSpan.IsEmpty)
-				{
-					ascOrDesc = parser.Scanner.GetSpanString(ascOrDescSpan);
-				}
-				orderByList.Add(new OrderItemSqlCodeExpr
-				{
-					Name = name,
-					AscOrDesc = ascOrDesc,
-				});
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			*/
 
 			return orderByList;
 		}
