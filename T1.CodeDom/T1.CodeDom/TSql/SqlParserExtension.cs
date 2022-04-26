@@ -134,17 +134,28 @@ namespace T1.CodeDom.TSql
 
             var notForReplication = ParseNotForReplication(parser);
 
-            SqlCodeExpr constraintExpr = null;
-
             var isReadOnly = parser.Scanner.Match(SqlToken.ReadOnly);
 
-            var isPrimaryKey = ParseIsPrimaryKey(parser);
-
-            var isNonclustered = parser.MatchToken(SqlToken.NONCLUSTERED);
-
+            bool? isNonclustered = null;
+            SqlCodeExpr constraintExpr = null;
+            bool? isPrimaryKey = null;
             bool? isAllowNull = null;
             SqlCodeExpr defaultValueExpr = null;
             ParseAll(
+                () =>
+                {
+                    var isMatch = parser.TryConsumeToken(out _, SqlToken.NONCLUSTERED);
+                    if (isMatch)
+                    {
+                        isNonclustered = true;
+                    }
+                    return isMatch;
+                },
+                () =>
+                {
+                    isPrimaryKey = ParseIsPrimaryKey(parser);
+                    return isPrimaryKey != null;
+                },
                 () =>
                 {
                     constraintExpr = ParseConstraint(parser);
@@ -199,6 +210,7 @@ namespace T1.CodeDom.TSql
                     {
                         currentParseFuncList.Remove(x);
                     }
+
                     return isProcess;
                 });
             } while (isAny);
@@ -317,21 +329,6 @@ namespace T1.CodeDom.TSql
             }
 
             return objectId;
-
-
-            var prefixNames = new[]
-            {
-                SqlToken.Identifier,
-                SqlToken.SqlIdentifier,
-                SqlToken.Variable,
-                SqlToken.TempTable
-            };
-            if (!parser.TryConsumeAny(ctxPrecedence, out var expr, prefixNames))
-            {
-                ThrowHelper.ThrowParseException(parser, "Expected table name");
-            }
-
-            return expr;
         }
 
         public static SqlCodeExpr ConsumeObjectIdOrVariable(this IParser parser, int ctxPrecedence = 0)
@@ -962,7 +959,7 @@ namespace T1.CodeDom.TSql
                     columnDataTypeList.Add(parser.PrefixParse(constraintSpan) as SqlCodeExpr);
                     continue;
                 }
-                
+
                 var name = parser.ConsumeTokenStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
                 var dataType = parser.ConsumeDataType();
 
@@ -1033,17 +1030,16 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        private static bool ParseIsPrimaryKey(IParser parser)
+        private static bool? ParseIsPrimaryKey(IParser parser)
         {
-            var isPrimaryKey = false;
-            if (parser.Scanner.IsTokenList(SqlToken.PRIMARY, SqlToken.KEY))
+            if (!parser.Scanner.IsTokenList(SqlToken.PRIMARY, SqlToken.KEY))
             {
-                parser.Scanner.Consume(SqlToken.PRIMARY);
-                parser.Scanner.Consume(SqlToken.KEY);
-                isPrimaryKey = true;
+                return null;
             }
 
-            return isPrimaryKey;
+            parser.Scanner.Consume(SqlToken.PRIMARY);
+            parser.Scanner.Consume(SqlToken.KEY);
+            return true;
         }
 
         private static SqlCodeExpr ParseJoinSelect(TextSpan joinTypeSpan, IParser parser)
@@ -1407,7 +1403,7 @@ namespace T1.CodeDom.TSql
 
             var optionList = new List<SqlCodeExpr>();
             parser.ConsumeToken(SqlToken.LParen);
-            
+
             parser.ConsumeToken(SqlToken.FILLFACTOR);
             parser.ConsumeToken(SqlToken.Equal);
             var fillfactorValue = parser.Consume(SqlToken.Number);
@@ -1415,7 +1411,7 @@ namespace T1.CodeDom.TSql
             {
                 Value = fillfactorValue
             });
-            
+
             parser.ConsumeToken(SqlToken.RParen);
 
             return new ConstraintWithSqlCodeExpr

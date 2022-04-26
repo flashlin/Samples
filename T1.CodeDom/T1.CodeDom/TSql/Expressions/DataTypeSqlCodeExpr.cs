@@ -2,76 +2,77 @@
 
 namespace T1.CodeDom.TSql.Expressions
 {
-	public class DataTypeSqlCodeExpr : SqlCodeExpr
-	{
-		public SqlCodeExpr DataType { get; set; }
-		public SqlCodeExpr SizeExpr { get; set; }
-		public bool IsIdentity { get; set; }
-		public bool IsReadOnly { get; set; }
-		public SqlCodeExpr ConstraintExpr { get; set; }
-		public bool IsPrimaryKey { get; set; }
-		public bool IsNonclustered { get; set; }
-		public SqlCodeExpr DefaultValueExpr { get; set; }
-		public bool? IsAllowNull { get; set; }
-		public SqlCodeExpr NotForReplicationExpr { get; set; }
+    public class DataTypeSqlCodeExpr : SqlCodeExpr
+    {
+        public SqlCodeExpr DataType { get; set; }
+        public SqlCodeExpr SizeExpr { get; set; }
+        public bool IsIdentity { get; set; }
+        public bool IsReadOnly { get; set; }
+        public SqlCodeExpr ConstraintExpr { get; set; }
+        public bool? IsPrimaryKey { get; set; }
+        public bool? IsNonclustered { get; set; }
+        public SqlCodeExpr DefaultValueExpr { get; set; }
+        public bool? IsAllowNull { get; set; }
+        public SqlCodeExpr NotForReplicationExpr { get; set; }
 
-		public override void WriteToStream(IndentStream stream)
-		{
-			DataType.WriteToStream(stream);
+        public override void WriteToStream(IndentStream stream)
+        {
+            DataType.WriteToStream(stream);
 
-			if (IsIdentity)
-			{
-				stream.Write(" IDENTITY");
-			}
+            if (IsIdentity)
+            {
+                stream.Write(" IDENTITY");
+            }
 
-			if (NotForReplicationExpr != null)
-			{
-				stream.Write(" ");
-				NotForReplicationExpr.WriteToStream(stream);
-			}
+            if (NotForReplicationExpr != null)
+            {
+                stream.Write(" ");
+                NotForReplicationExpr.WriteToStream(stream);
+            }
 
-			if (IsReadOnly)
-			{
-				stream.Write(" READONLY");
-			}
+            if (IsReadOnly)
+            {
+                stream.Write(" READONLY");
+            }
 
-			if (SizeExpr != null)
-			{
-				SizeExpr.WriteToStream(stream);
-			}
+            if (SizeExpr != null)
+            {
+                SizeExpr.WriteToStream(stream);
+            }
 
-			if (ConstraintExpr != null)
-			{
-				stream.Write(" ");
-				ConstraintExpr.WriteToStream(stream);
-			}
+            if (ConstraintExpr != null)
+            {
+                stream.Write(" ");
+                ConstraintExpr.WriteToStream(stream);
+            }
 
-			if (IsPrimaryKey)
-			{
-				stream.Write(" PRIMARY KEY");
-				if (IsNonclustered)
-				{
-					stream.Write(" NONCLUSTERED");
-				}
-			}
+            if (IsPrimaryKey != null)
+            {
+                stream.Write(" PRIMARY KEY");
+            }
 
-			if (DefaultValueExpr != null)
-			{
-				stream.Write(" ");
-				DefaultValueExpr.WriteToStream(stream);
-			}
+            if (IsNonclustered != null)
+            {
+                stream.Write(" NONCLUSTERED");
+            }
 
-			if (IsAllowNull != null)
-			{
-				if (IsAllowNull.Value)
-				{
-					stream.Write(" NULL");
-				}
-				else
-				{
-					stream.Write(" NOT NULL");
-				}
-			}
-		}
-	}
+            if (DefaultValueExpr != null)
+            {
+                stream.Write(" ");
+                DefaultValueExpr.WriteToStream(stream);
+            }
+
+            if (IsAllowNull != null)
+            {
+                if (IsAllowNull.Value)
+                {
+                    stream.Write(" NULL");
+                }
+                else
+                {
+                    stream.Write(" NOT NULL");
+                }
+            }
+        }
+    }
 }
