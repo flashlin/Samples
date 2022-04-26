@@ -1428,15 +1428,38 @@ namespace T1.CodeDom.TSql
 
             var optionList = new List<SqlCodeExpr>();
             parser.ConsumeToken(SqlToken.LParen);
-
-            var fillfactorSqlCodeExpr = ParseFillfactor(parser);
-            optionList.Add(fillfactorSqlCodeExpr);
+            do
+            {
+                var item = parser.ParseAny(ParseFillfactor, ParseToggle);
+                optionList.Add(item);
+            } while (parser.MatchToken(SqlToken.Comma));
 
             parser.ConsumeToken(SqlToken.RParen);
 
             return new ConstraintWithSqlCodeExpr
             {
                 OptionList = optionList
+            };
+        }
+
+        private static ToggleSqlCodeExpr ParseToggle(IParser parser)
+        {
+            if (!parser.TryConsumeTokenAny(out var span,
+                    SqlToken.PAD_INDEX, SqlToken.STATISTICS_NORECOMPUTE, SqlToken.IGNORE_DUP_KEY,
+                    SqlToken.ALLOW_PAGE_LOCKS, SqlToken.ALLOW_ROW_LOCKS))
+            {
+                return null;
+            }
+
+            var name = parser.Scanner.GetSpanString(span);
+            parser.ConsumeToken(SqlToken.Equal);
+            var toggleSpan = parser.ConsumeTokenAny(SqlToken.On, SqlToken.Off);
+            var toggle = parser.Scanner.GetSpanString(toggleSpan);
+
+            return new ToggleSqlCodeExpr
+            {
+                Name = name.ToUpper(),
+                Toggle = toggle
             };
         }
 
@@ -1476,6 +1499,17 @@ namespace T1.CodeDom.TSql
                 ColumnList = columnList,
             };
         }
+    }
+
+    public class ToggleSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write($"{Name} = {Toggle.ToUpper()}");
+        }
+
+        public string Name { get; set; }
+        public string Toggle { get; set; }
     }
 
     public class NotNullSqlCodeExpr : SqlCodeExpr

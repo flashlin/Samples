@@ -165,6 +165,8 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ANSI_PADDING", SqlToken.ANSI_PADDING);
 			AddTokenMap("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
 			AddTokenMap("ARITHABORT", SqlToken.ARITHABORT);
+			AddTokenMap("ALLOW_ROW_LOCKS", SqlToken.ALLOW_ROW_LOCKS);
+			AddTokenMap("ALLOW_PAGE_LOCKS", SqlToken.ALLOW_PAGE_LOCKS);
 			AddTokenMap("CALLER", SqlToken.CALLER);
 			AddTokenMap("CONSTRAINT", SqlToken.CONSTRAINT);
 			AddTokenMap("COMMITTED", SqlToken.COMMITTED);
@@ -179,6 +181,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ISOLATION", SqlToken.ISOLATION);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 			AddTokenMap("IDENTITY", SqlToken.IDENTITY);
+			AddTokenMap("IGNORE_DUP_KEY", SqlToken.IGNORE_DUP_KEY);
 			AddTokenMap("KEY", SqlToken.KEY);
 			AddTokenMap("LOW", SqlToken.LOW);
 			AddTokenMap("LOWER", SqlToken.LOWER);
@@ -195,12 +198,14 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("OBJECT_NAME", SqlToken.OBJECT_NAME);
 			AddTokenMap("OWNER", SqlToken.OWNER);
 			AddTokenMap("PRIMARY", SqlToken.PRIMARY);
+			AddTokenMap("PAD_INDEX", SqlToken.PAD_INDEX);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("REPLICATION", SqlToken.REPLICATION);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("READ", SqlToken.READ);
 			AddTokenMap("REPEATABLE", SqlToken.REPEATABLE);
 			AddTokenMap("ROLLBACK", SqlToken.ROLLBACK);
+			AddTokenMap("STATISTICS_NORECOMPUTE", SqlToken.STATISTICS_NORECOMPUTE);
 			AddTokenMap("SNAPSHOT", SqlToken.SNAPSHOT);
 			AddTokenMap("SELF", SqlToken.SELF);
 			AddTokenMap("SYNONYM", SqlToken.SYNONYM);
