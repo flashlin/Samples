@@ -45,9 +45,17 @@ public class LocalDbContext : DbContext
             .ToArray();
 
         var maxLength = GetMaxLength(q1);
+        var first = true;
         foreach (var dict in q1)
         {
-            var line = string.Join(" ", 
+            if (first)
+            {
+                var titleLine = string.Join(" ",
+                    dict.Keys.Select(x => x.ToBig5FixLenString(maxLength[x])));
+                Console.WriteLine(titleLine);
+                first = false;
+            }
+            var line = string.Join(" ",
                 dict.Select(x => $"{x.Value}".ToBig5FixLenString(maxLength[x.Key])));
             Console.WriteLine(line);
         }
