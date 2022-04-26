@@ -11,7 +11,7 @@ namespace T1.CodeDom.TSql.Parselets
         {
             var constraintName = parser.ConsumeObjectId();
 
-            var keyType = parser.ParseAny(SqlParserExtension.ParseIsPrimaryKey, ParseUnique);
+            var keyType = parser.ParseAny(SqlParserExtension.ParsePrimaryKey, ParseUnique);
 
             var clusterExpr = ParseClustered(parser);
             var withExpr = parser.ParseConstraintWithOptions();

@@ -137,7 +137,7 @@ namespace T1.CodeDom.TSql
             var extraList = ParseAll(parser,
                 ParseNotForReplication,
                 ParseNonClustered,
-                ParseIsPrimaryKey,
+                ParsePrimaryKey,
                 ParseConstraint,
                 ParseIsAllowNull,
                 ParseDefault);
@@ -1024,7 +1024,7 @@ namespace T1.CodeDom.TSql
             return new NonClusteredSqlCodeExpr();
         }
 
-        public static PrimaryKeySqlCodeExpr ParseIsPrimaryKey(IParser parser)
+        public static PrimaryKeySqlCodeExpr ParsePrimaryKey(IParser parser)
         {
             if (!parser.Scanner.IsTokenList(SqlToken.PRIMARY, SqlToken.KEY))
             {
