@@ -11,6 +11,37 @@ public class CreateTableTest : TestBase
     }
 
     [Fact]
+    public void create_table()
+    {
+        var sql = @"create table #cust (  
+        ID int,
+		birth datetime
+    )";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE #cust(
+ID INT,
+birth DATETIME
+)");
+    }
+
+    [Fact]
+    public void create_table_comment()
+    {
+        var sql = @"create table #customer (       
+id int,
+   -- test --    
+name varchar(10)
+  )";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE #customer(
+id INT,
+name VARCHAR(10)
+)");
+    }
+
+    [Fact]
     public void create_table_not_for_replication()
     {
         var sql = @"CREATE TABLE [dbo].[customer] (
@@ -23,8 +54,8 @@ public class CreateTableTest : TestBase
     [id] INT NOT FOR REPLICATION NOT NULL
 ) ;");
     }
-    
-    
+
+
     [Fact]
     public void create_table_primary_key_clustered()
     {
@@ -40,8 +71,8 @@ public class CreateTableTest : TestBase
     PRIMARY KEY CLUSTERED([id] ASC)
 ) ;");
     }
-    
-    
+
+
     [Fact]
     public void create_table_without_comma_clustered()
     {
@@ -57,8 +88,8 @@ public class CreateTableTest : TestBase
     PRIMARY KEY CLUSTERED([id] ASC)
 ) ;");
     }
-    
-    
+
+
     [Fact]
     public void create_table_with_toggle()
     {
@@ -78,8 +109,8 @@ ON [PRIMARY]
     ON [PRIMARY]
 ) ;");
     }
-    
-    
+
+
     [Fact]
     public void create_table_on_primary()
     {
@@ -92,6 +123,4 @@ ON [PRIMARY]
     [id] INT NOT NULL )
     ON [PRIMARY] ;");
     }
-    
-    
 }
