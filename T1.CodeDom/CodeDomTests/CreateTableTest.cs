@@ -79,4 +79,19 @@ ON [PRIMARY]
 ) ;");
     }
     
+    
+    [Fact]
+    public void create_table_on_primary()
+    {
+        var sql = @"create table [dbo].[customer] (
+    [id]      INT            NOT NULL
+) ON [PRIMARY] ;";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
+    [id] INT NOT NULL )
+    ON [PRIMARY] ;");
+    }
+    
+    
 }

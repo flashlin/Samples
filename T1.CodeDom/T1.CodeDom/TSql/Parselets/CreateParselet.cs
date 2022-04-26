@@ -155,12 +155,15 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var tableType = parser.ConsumeTableDataType();
 			tableType.Name = tableName;
+			
+			var onPrimary = parser.ParseOnPrimary();
 
 			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
 
 			return new CreateTableSqlCodeExpr
 			{
 				TableExpr = tableType,
+				OnPrimary = onPrimary,
 				IsSemicolon = isSemicolon
 			};
 		}

@@ -153,7 +153,7 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        private static OnSqlCodeExpr ParseOnPrimary(IParser parser)
+        public static OnSqlCodeExpr ParseOnPrimary(this IParser parser)
         {
             if (!parser.MatchToken(SqlToken.On))
             {
