@@ -21,6 +21,13 @@ public class ConsoleApp
             var tableName = args[2];
             Console.WriteLine($"{csvFile} {tableName}");
             _db.ImportCsvFile(csvFile, tableName);
+            return;
+        }
+
+        if (commandName == "query")
+        {
+            var sql = args[1];
+            _db.QuerySqlCode(sql);
         }
     }
 }

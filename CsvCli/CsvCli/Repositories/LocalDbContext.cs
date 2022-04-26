@@ -1,6 +1,7 @@
 using System.Data;
 using System.Globalization;
 using System.Text;
+using CsvCli.Helpers;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Dapper;
@@ -36,26 +37,57 @@ public class LocalDbContext : DbContext
         BulkExecute(dictObjList, insertSqlCode);
     }
 
-    public void ExecuteSqlCode(string sqlCode)
+    public void QuerySqlCode(string sqlCode)
     {
         var connection = Database.GetDbConnection();
         var q1 = connection.Query(sqlCode)
-            .Select(x => (IDictionary<string, object>)x)
+            .Select(x => (IDictionary<string, object>) x)
             .ToArray();
-        
+
         var maxLength = GetMaxLength(q1);
+        foreach (var dict in q1)
+        {
+            var line = string.Join(" ", 
+                dict.Select(x => $"{x.Value}".ToBig5FixLenString(maxLength[x.Key])));
+            Console.WriteLine(line);
+        }
     }
 
-    private static int GetMaxLength(IEnumerable<IDictionary<string, object>> q1)
+    public string GetStringFixed(string text, int maxLen)
     {
-        var maxLength = 0;
-        foreach (IDictionary<string, object> row in q1)
+        var len = maxLen - text.Length;
+        if (len > 0)
         {
-            var length = row.Values.Max(x => $"{x}".Length);
-            maxLength = Math.Max(length, maxLength);
+            var spaces = new string(' ', len);
+            return text + spaces;
         }
 
-        return maxLength;
+        return text;
+    }
+
+    private static Dictionary<string, int> GetMaxLength(IEnumerable<IDictionary<string, object>> q1)
+    {
+        var maxLenDict = new Dictionary<string, int>();
+        var first = true;
+        foreach (IDictionary<string, object> row in q1)
+        {
+            if (first)
+            {
+                foreach (var key in row.Keys)
+                {
+                    maxLenDict[key] = $"{row[key]}".Length;
+                }
+
+                first = false;
+            }
+
+            foreach (var key in row.Keys)
+            {
+                maxLenDict[key] = Math.Max(maxLenDict[key], $"{row[key]}".Length);
+            }
+        }
+
+        return maxLenDict;
     }
 
     public static DataTable AdjustDataTable(DataTable dataTable)
@@ -73,7 +105,7 @@ public class LocalDbContext : DbContext
             foreach (var newColumn in newColumnList)
             {
                 var value = $"{row[newColumn.ColumnName]}";
-                if( newColumn.DataType == typeof(DateTime))
+                if (newColumn.DataType == typeof(DateTime))
                 {
                     newRow[newColumn] = value.ChangeType(newColumn.DataType);
                     continue;
@@ -91,6 +123,7 @@ public class LocalDbContext : DbContext
                     newRow[newColumn] = value.ChangeType(newColumn.DataType);
                     continue;
                 }
+
                 newRow[newColumn] = value;
             }
 
@@ -112,13 +145,13 @@ public class LocalDbContext : DbContext
                 continue;
             }
 
-            if ( value.Contains(',') && decimal.TryParse(value.Replace(",", ""), out _))
+            if (value.Contains(',') && decimal.TryParse(value.Replace(",", ""), out _))
             {
                 yield return new DataColumn(column.ColumnName, typeof(decimal));
                 continue;
             }
-            
-            if ( long.TryParse(value, out _))
+
+            if (long.TryParse(value, out _))
             {
                 yield return new DataColumn(column.ColumnName, typeof(long));
                 continue;
@@ -152,6 +185,7 @@ public class LocalDbContext : DbContext
         {
             connection.Execute(insertSqlCode, dictObj);
         }
+
         transaction.Commit();
     }
 
@@ -257,7 +291,7 @@ public class LocalDbContext : DbContext
         {
             return "INT";
         }
-        
+
         if (columnDataType == typeof(long))
         {
             return "LONG";
