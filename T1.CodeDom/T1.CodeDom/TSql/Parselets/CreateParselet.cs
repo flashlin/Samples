@@ -101,13 +101,17 @@ namespace T1.CodeDom.TSql.Parselets
 				tableName = parser.Consume(SqlToken.TempTable);
 			}
 			
-			var onColumnsList = new List<SqlCodeExpr>();
+			// var onColumnsList = new List<SqlCodeExpr>();
+			// parser.Scanner.Consume(SqlToken.LParen);
+			// do
+			// {
+			// 	var columnName = parser.ConsumeObjectId();
+			// 	onColumnsList.Add(columnName);
+			// } while (parser.Scanner.Match(SqlToken.Comma));
+			// parser.Scanner.Consume(SqlToken.RParen);
+			
 			parser.Scanner.Consume(SqlToken.LParen);
-			do
-			{
-				var columnName = parser.ConsumeObjectId();
-				onColumnsList.Add(columnName);
-			} while (parser.Scanner.Match(SqlToken.Comma));
+			var onColumnsList = parser.ParseOrderItemList();
 			parser.Scanner.Consume(SqlToken.RParen);
 
 			return new CreateClusteredIndexSqlCodeExpr

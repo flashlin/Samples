@@ -7,7 +7,7 @@ namespace T1.CodeDom.TSql.Expressions
 	{
 		public SqlCodeExpr IndexName { get; set; }
 		public SqlCodeExpr TableName { get; set; }
-		public List<SqlCodeExpr> OnColumns { get; set; }
+		public List<OrderItemSqlCodeExpr> OnColumns { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{

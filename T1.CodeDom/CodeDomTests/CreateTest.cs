@@ -91,7 +91,7 @@ name VARCHAR(10)
             var sql = @"create clustered index ix_id on #customer (id)";
             Parse(sql);
 
-            ThenExprShouldBe(@"CREATE CLUSTERED INDEX ix_id ON #customer(id)");
+            ThenExprShouldBe(@"CREATE CLUSTERED INDEX ix_id ON #customer(id ASC)");
         }
 
         [Fact]
