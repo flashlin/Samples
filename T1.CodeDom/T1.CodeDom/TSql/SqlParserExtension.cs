@@ -944,14 +944,8 @@ namespace T1.CodeDom.TSql
                     continue;
                 }
 
-                var name = parser.ConsumeTokenStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
-                var dataType = parser.ConsumeDataType();
-
-                columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
-                {
-                    Name = name,
-                    DataType = dataType,
-                });
+                var columnDefineSqlCodeExpr = ParseColumnDefine(parser);
+                columnDataTypeList.Add(columnDefineSqlCodeExpr);
             } while (parser.MatchToken(SqlToken.Comma));
 
             parser.Scanner.Consume(SqlToken.RParen);
@@ -959,6 +953,24 @@ namespace T1.CodeDom.TSql
             {
                 Columns = columnDataTypeList
             };
+        }
+
+        private static ColumnDefineSqlCodeExpr ParseColumnDefine(IParser parser)
+        {
+            if (!parser.TryConsumeTokenAny(out var nameSpan, SqlToken.Identifier, SqlToken.SqlIdentifier,
+                    SqlToken.Rank))
+            {
+                return null;
+            }
+            
+            var name = parser.Scanner.GetSpanString(nameSpan);
+            var dataType = parser.ConsumeDataType();
+            var columnDefineSqlCodeExpr = new ColumnDefineSqlCodeExpr
+            {
+                Name = name,
+                DataType = dataType,
+            };
+            return columnDefineSqlCodeExpr;
         }
 
         private static ObjectIdSqlCodeExpr ParseDataType(IParser parser)
