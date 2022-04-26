@@ -132,45 +132,15 @@ namespace T1.CodeDom.TSql
 
             var sizeExpr = ParseDataTypeSize(parser);
 
-            var notForReplication = ParseNotForReplication(parser);
-
             var isReadOnly = parser.Scanner.Match(SqlToken.ReadOnly);
 
-            bool? isNonclustered = null;
-            SqlCodeExpr constraintExpr = null;
-            bool? isPrimaryKey = null;
-            bool? isAllowNull = null;
-            SqlCodeExpr defaultValueExpr = null;
-            ParseAll(
-                () =>
-                {
-                    var isMatch = parser.TryConsumeToken(out _, SqlToken.NONCLUSTERED);
-                    if (isMatch)
-                    {
-                        isNonclustered = true;
-                    }
-                    return isMatch;
-                },
-                () =>
-                {
-                    isPrimaryKey = ParseIsPrimaryKey(parser);
-                    return isPrimaryKey != null;
-                },
-                () =>
-                {
-                    constraintExpr = ParseConstraint(parser);
-                    return constraintExpr != null;
-                },
-                () =>
-                {
-                    isAllowNull = ParseIsAllowNull(parser);
-                    return isAllowNull != null;
-                },
-                () =>
-                {
-                    defaultValueExpr = ParseDefault(parser);
-                    return defaultValueExpr != null;
-                });
+            var extraList = ParseAll(parser,
+                ParseNotForReplication,
+                ParseNonClustered,
+                ParseIsPrimaryKey,
+                ParseConstraint,
+                ParseIsAllowNull,
+                ParseDefault);
 
             return new DataTypeSqlCodeExpr
             {
@@ -178,16 +148,11 @@ namespace T1.CodeDom.TSql
                 IsIdentity = isIdentity,
                 IsReadOnly = isReadOnly,
                 SizeExpr = sizeExpr,
-                IsPrimaryKey = isPrimaryKey,
-                IsNonclustered = isNonclustered,
-                NotForReplicationExpr = notForReplication,
-                ConstraintExpr = constraintExpr,
-                DefaultValueExpr = defaultValueExpr,
-                IsAllowNull = isAllowNull,
+                ExtraList = extraList,
             };
         }
 
-        private static SqlCodeExpr ParseNotForReplication(IParser parser)
+        private static NotForReplicationSqlCodeExpr ParseNotForReplication(IParser parser)
         {
             if (!parser.MatchTokenList(SqlToken.Not, SqlToken.For, SqlToken.REPLICATION))
             {
@@ -197,23 +162,27 @@ namespace T1.CodeDom.TSql
             return new NotForReplicationSqlCodeExpr();
         }
 
-        private static void ParseAll(params Func<bool>[] parseFuncList)
+        private static List<SqlCodeExpr> ParseAll(IParser parser, params Func<IParser, SqlCodeExpr>[] parseFuncList)
         {
             var isAny = true;
-            var currentParseFuncList = new List<Func<bool>>(parseFuncList);
+            var exprList = new List<SqlCodeExpr>();
+            var currentParseFuncList = new List<Func<IParser, SqlCodeExpr>>(parseFuncList);
             do
             {
                 isAny = currentParseFuncList.Any(x =>
                 {
-                    var isProcess = x();
-                    if (isProcess)
+                    var expr = x(parser);
+                    var isMatch = expr != null;
+                    if (isMatch)
                     {
+                        exprList.Add(expr);
                         currentParseFuncList.Remove(x);
                     }
-
-                    return isProcess;
+                    return isMatch;
                 });
             } while (isAny);
+
+            return exprList;
         }
 
         private static DataTypeSizeSqlCodeExpr ParseDataTypeSize(IParser parser)
@@ -273,7 +242,7 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        private static SqlCodeExpr ParseConstraint(IParser parser)
+        private static MarkConstraintSqlCodeExpr ParseConstraint(IParser parser)
         {
             if (!parser.MatchToken(SqlToken.CONSTRAINT))
             {
@@ -287,19 +256,19 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        private static bool? ParseIsAllowNull(IParser parser)
+        private static SqlCodeExpr ParseIsAllowNull(IParser parser)
         {
-            bool? isAllowNull = null;
             if (parser.MatchTokenList(SqlToken.Not, SqlToken.Null))
             {
-                isAllowNull = false;
-            }
-            else if (parser.Scanner.Match(SqlToken.Null))
-            {
-                isAllowNull = true;
+                return new NotNullSqlCodeExpr();
             }
 
-            return isAllowNull;
+            if (parser.Scanner.Match(SqlToken.Null))
+            {
+                return new NullSqlCodeExpr();
+            }
+
+            return null;
         }
 
         public static SqlCodeExpr ConsumeObjectId(this IParser parser, bool nonSensitive = false)
@@ -1030,7 +999,17 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        private static bool? ParseIsPrimaryKey(IParser parser)
+        private static NonClusteredSqlCodeExpr ParseNonClustered(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.NONCLUSTERED))
+            {
+                return null;
+            }
+
+            return new NonClusteredSqlCodeExpr();
+        }
+
+        private static PrimaryKeySqlCodeExpr ParseIsPrimaryKey(IParser parser)
         {
             if (!parser.Scanner.IsTokenList(SqlToken.PRIMARY, SqlToken.KEY))
             {
@@ -1039,7 +1018,7 @@ namespace T1.CodeDom.TSql
 
             parser.Scanner.Consume(SqlToken.PRIMARY);
             parser.Scanner.Consume(SqlToken.KEY);
-            return true;
+            return new PrimaryKeySqlCodeExpr();
         }
 
         private static SqlCodeExpr ParseJoinSelect(TextSpan joinTypeSpan, IParser parser)
@@ -1418,6 +1397,30 @@ namespace T1.CodeDom.TSql
             {
                 OptionList = optionList
             };
+        }
+    }
+
+    public class NotNullSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("NOT NULL");
+        }
+    }
+
+    public class NonClusteredSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("NONCLUSTERED");
+        }
+    }
+
+    public class PrimaryKeySqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("PRIMARY KEY");
         }
     }
 

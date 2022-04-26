@@ -1,4 +1,5 @@
-﻿using T1.Standard.IO;
+﻿using System.Collections.Generic;
+using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Expressions
 {
@@ -8,12 +9,7 @@ namespace T1.CodeDom.TSql.Expressions
         public SqlCodeExpr SizeExpr { get; set; }
         public bool IsIdentity { get; set; }
         public bool IsReadOnly { get; set; }
-        public SqlCodeExpr ConstraintExpr { get; set; }
-        public bool? IsPrimaryKey { get; set; }
-        public bool? IsNonclustered { get; set; }
-        public SqlCodeExpr DefaultValueExpr { get; set; }
-        public bool? IsAllowNull { get; set; }
-        public SqlCodeExpr NotForReplicationExpr { get; set; }
+        public List<SqlCodeExpr> ExtraList { get; set; }
 
         public override void WriteToStream(IndentStream stream)
         {
@@ -22,12 +18,6 @@ namespace T1.CodeDom.TSql.Expressions
             if (IsIdentity)
             {
                 stream.Write(" IDENTITY");
-            }
-
-            if (NotForReplicationExpr != null)
-            {
-                stream.Write(" ");
-                NotForReplicationExpr.WriteToStream(stream);
             }
 
             if (IsReadOnly)
@@ -40,38 +30,10 @@ namespace T1.CodeDom.TSql.Expressions
                 SizeExpr.WriteToStream(stream);
             }
 
-            if (ConstraintExpr != null)
+            if (ExtraList != null && ExtraList.Count > 0)
             {
                 stream.Write(" ");
-                ConstraintExpr.WriteToStream(stream);
-            }
-
-            if (IsPrimaryKey != null)
-            {
-                stream.Write(" PRIMARY KEY");
-            }
-
-            if (IsNonclustered != null)
-            {
-                stream.Write(" NONCLUSTERED");
-            }
-
-            if (DefaultValueExpr != null)
-            {
-                stream.Write(" ");
-                DefaultValueExpr.WriteToStream(stream);
-            }
-
-            if (IsAllowNull != null)
-            {
-                if (IsAllowNull.Value)
-                {
-                    stream.Write(" NULL");
-                }
-                else
-                {
-                    stream.Write(" NOT NULL");
-                }
+                ExtraList.WriteToStream(stream);
             }
         }
     }
