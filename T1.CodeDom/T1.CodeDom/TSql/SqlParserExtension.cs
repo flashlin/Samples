@@ -140,9 +140,21 @@ namespace T1.CodeDom.TSql
 
             var isNonclustered = parser.MatchToken(SqlToken.NONCLUSTERED);
 
-            var defaultValueExpr = ParseDefault(parser);
+            bool? isAllowNull = null;
+            SqlCodeExpr defaultValueExpr = null;
+            // var isAllowNull = ParseIsAllowNull(parser);
+            // var defaultValueExpr = ParseDefault(parser);
 
-            var isAllowNull = ParseIsAllowNull(parser);
+            ParseAll(() =>
+                {
+                    isAllowNull = ParseIsAllowNull(parser);
+                    return isAllowNull != null;
+                },
+                () =>
+                {
+                    defaultValueExpr = ParseDefault(parser);
+                    return defaultValueExpr != null;
+                });
 
             return new DataTypeSqlCodeExpr
             {
@@ -156,6 +168,24 @@ namespace T1.CodeDom.TSql
                 DefaultValueExpr = defaultValueExpr,
                 IsAllowNull = isAllowNull,
             };
+        }
+
+        private static void ParseAll(params Func<bool>[] parseFuncList)
+        {
+            var isAny = true;
+            var currentParseFuncList = new List<Func<bool>>(parseFuncList);
+            do
+            {
+                isAny = currentParseFuncList.Any(x =>
+                {
+                    var isProcess = x();
+                    if (isProcess)
+                    {
+                        currentParseFuncList.Remove(x);
+                    }
+                    return isProcess;
+                });
+            } while (isAny);
         }
 
         private static DataTypeSizeSqlCodeExpr ParseDataTypeSize(IParser parser)
@@ -911,22 +941,21 @@ namespace T1.CodeDom.TSql
             var columnDataTypeList = new List<SqlCodeExpr>();
             do
             {
-                //var name = parser.Scanner.ConsumeStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
                 var name = parser.ConsumeTokenStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
 
                 var dataType = parser.ConsumeDataType();
 
-                SqlCodeExpr defaultValue = null;
-                if (parser.MatchToken(SqlToken.Default))
-                {
-                    defaultValue = parser.ParseExpIgnoreComment();
-                }
+                // SqlCodeExpr defaultValue = null;
+                // if (parser.MatchToken(SqlToken.Default))
+                // {
+                //     defaultValue = parser.ParseExpIgnoreComment();
+                // }
 
                 columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
                 {
                     Name = name,
                     DataType = dataType,
-                    DefaultValue = defaultValue
+                    // DefaultValue = defaultValue
                 });
             } while (parser.MatchToken(SqlToken.Comma));
 
@@ -1163,7 +1192,8 @@ namespace T1.CodeDom.TSql
             return token;
         }
 
-        public static bool TryConsumeTokenList(this IParser parser, out List<TextSpan> spanList, params SqlToken[] tokenTypeList)
+        public static bool TryConsumeTokenList(this IParser parser, out List<TextSpan> spanList,
+            params SqlToken[] tokenTypeList)
         {
             var startIndex = parser.Scanner.GetOffset();
             var list = new List<TextSpan>();
@@ -1174,6 +1204,7 @@ namespace T1.CodeDom.TSql
                 {
                     list.Add(span);
                 }
+
                 return isSuccess;
             });
             if (!isAll)
@@ -1181,6 +1212,7 @@ namespace T1.CodeDom.TSql
                 list = new List<TextSpan>();
                 parser.Scanner.SetOffset(startIndex);
             }
+
             spanList = list;
             return isAll;
         }
@@ -1188,11 +1220,13 @@ namespace T1.CodeDom.TSql
         public static List<TextSpan> ConsumeTokenListAny(this IParser parser, params SqlToken[][] tokenTypeListArray)
         {
             var spanList = new List<TextSpan>();
-            var isAny = tokenTypeListArray.Any(tokenTypeList => parser.TryConsumeTokenList(out spanList, tokenTypeList));
+            var isAny = tokenTypeListArray.Any(tokenTypeList =>
+                parser.TryConsumeTokenList(out spanList, tokenTypeList));
             if (!isAny)
             {
                 ThrowHelper.ThrowParseException(parser, "");
             }
+
             return spanList;
         }
 
@@ -1339,6 +1373,7 @@ namespace T1.CodeDom.TSql
                 {
                     ascOrDesc = parser.Scanner.GetSpanString(ascOrDescSpan);
                 }
+
                 orderItemList.Add(new OrderItemSqlCodeExpr
                 {
                     Name = name,

@@ -4,9 +4,9 @@ namespace CsvCli.Services;
 
 public class ConsoleApp
 {
-    private LocalDbContext _db;
+    private CsvDbContext _db;
 
-    public ConsoleApp(LocalDbContext db)
+    public ConsoleApp(CsvDbContext db)
     {
         _db = db;
     }

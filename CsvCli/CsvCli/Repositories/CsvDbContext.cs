@@ -12,7 +12,7 @@ using T1.Standard.Extensions;
 
 namespace CsvCli.Repositories;
 
-public class LocalDbContext : DbContext
+public class CsvDbContext : DbContext
 {
     private readonly string _sqliteFile = "local.db";
 

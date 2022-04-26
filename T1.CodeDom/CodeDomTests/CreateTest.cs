@@ -158,5 +158,17 @@ END");
         }
         
         
+        [Fact]
+        public void create_table_constraint_primary_key()
+        {
+            var sql = @"CREATE TABLE [dbo].[customer] (
+    [id]   INT       NOT NULL,
+    CONSTRAINT [PK_Id] PRIMARY KEY CLUSTERED ([Id] ASC)
+)";
+            
+            Parse(sql);
+
+            ThenExprShouldBe(@"");
+        }
     }
 }
