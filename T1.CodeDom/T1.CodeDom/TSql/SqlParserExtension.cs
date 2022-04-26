@@ -1429,13 +1429,8 @@ namespace T1.CodeDom.TSql
             var optionList = new List<SqlCodeExpr>();
             parser.ConsumeToken(SqlToken.LParen);
 
-            parser.ConsumeToken(SqlToken.FILLFACTOR);
-            parser.ConsumeToken(SqlToken.Equal);
-            var fillfactorValue = parser.Consume(SqlToken.Number);
-            optionList.Add(new FillfactorSqlCodeExpr
-            {
-                Value = fillfactorValue
-            });
+            var fillfactorSqlCodeExpr = ParseFillfactor(parser);
+            optionList.Add(fillfactorSqlCodeExpr);
 
             parser.ConsumeToken(SqlToken.RParen);
 
@@ -1443,6 +1438,21 @@ namespace T1.CodeDom.TSql
             {
                 OptionList = optionList
             };
+        }
+
+        private static FillfactorSqlCodeExpr ParseFillfactor(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.FILLFACTOR))
+            {
+                return null;
+            }
+            parser.ConsumeToken(SqlToken.Equal);
+            var fillfactorValue = parser.Consume(SqlToken.Number);
+            var fillfactorSqlCodeExpr = new FillfactorSqlCodeExpr
+            {
+                Value = fillfactorValue
+            };
+            return fillfactorSqlCodeExpr;
         }
 
         public static ClusteredSqlCodeExpr ParseClustered(this IParser parser)
