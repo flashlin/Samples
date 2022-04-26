@@ -39,14 +39,17 @@ public class LocalDbContext : DbContext
         }
 
         var dictObjList = dataTable.ToDictionary();
-
         var insertSqlCode = GenerateInsertSqlCode(dataTable);
+        BulkExecute(dictObjList, insertSqlCode);
+    }
+
+    private void BulkExecute(IEnumerable<Dictionary<string, object>> dictObjList, string insertSqlCode)
+    {
         using var connection = Database.GetDbConnection();
         connection.Open();
         using var transaction = connection.BeginTransaction();
         foreach (var dictObj in dictObjList)
         {
-            //var dyObj = dictObj.ConvertToObject<dynamic>();
             connection.Execute(insertSqlCode, dictObj);
         }
         transaction.Commit();
