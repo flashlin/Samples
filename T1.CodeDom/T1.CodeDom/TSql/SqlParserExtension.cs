@@ -945,12 +945,6 @@ namespace T1.CodeDom.TSql
 
                 var dataType = parser.ConsumeDataType();
 
-                // SqlCodeExpr defaultValue = null;
-                // if (parser.MatchToken(SqlToken.Default))
-                // {
-                //     defaultValue = parser.ParseExpIgnoreComment();
-                // }
-
                 columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
                 {
                     Name = name,
