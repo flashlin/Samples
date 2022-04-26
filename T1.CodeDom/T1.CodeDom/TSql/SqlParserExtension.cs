@@ -934,18 +934,11 @@ namespace T1.CodeDom.TSql
         public static TableDataTypeSqlCodeExpr ConsumeTableDataType(this IParser parser)
         {
             parser.Scanner.Consume(SqlToken.LParen);
-
             var columnDataTypeList = new List<SqlCodeExpr>();
             do
             {
-                if (parser.TryConsumeToken(out var constraintSpan, SqlToken.CONSTRAINT))
-                {
-                    columnDataTypeList.Add(parser.PrefixParse(constraintSpan) as SqlCodeExpr);
-                    continue;
-                }
-
-                var columnDefineSqlCodeExpr = ParseColumnDefine(parser);
-                columnDataTypeList.Add(columnDefineSqlCodeExpr);
+                var expr = parser.ParseAny(ParseConstraintExpr, ParseColumnDefine);
+                columnDataTypeList.Add(expr);
             } while (parser.MatchToken(SqlToken.Comma));
 
             parser.Scanner.Consume(SqlToken.RParen);
@@ -953,6 +946,15 @@ namespace T1.CodeDom.TSql
             {
                 Columns = columnDataTypeList
             };
+        }
+
+        private static SqlCodeExpr ParseConstraintExpr(IParser parser)
+        {
+            if (!parser.TryConsumeToken(out var constraintSpan, SqlToken.CONSTRAINT))
+            {
+                return null;
+            }
+            return parser.PrefixParse(constraintSpan) as SqlCodeExpr;
         }
 
         private static ColumnDefineSqlCodeExpr ParseColumnDefine(IParser parser)
