@@ -22,6 +22,20 @@ public class LocalDbContext : DbContext
 
     public void ImportCsvFile(string csvFile, string tableName)
     {
+        var dataTable = ReadCsvFileToDataTable(csvFile, tableName);
+
+        if (!IsTableExists(tableName))
+        {
+            CreateTable(dataTable, tableName);
+        }
+
+        var dictObjList = dataTable.ToDictionary();
+        var insertSqlCode = GenerateInsertSqlCode(dataTable);
+        BulkExecute(dictObjList, insertSqlCode);
+    }
+
+    private static DataTable ReadCsvFileToDataTable(string csvFile, string tableName)
+    {
         var readConfiguration = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true
@@ -32,15 +46,7 @@ public class LocalDbContext : DbContext
         var dataTable = new DataTable();
         dataTable.Load(dr);
         dataTable.TableName = tableName;
-
-        if (!IsTableExists(tableName))
-        {
-            CreateTable(dataTable, tableName);
-        }
-
-        var dictObjList = dataTable.ToDictionary();
-        var insertSqlCode = GenerateInsertSqlCode(dataTable);
-        BulkExecute(dictObjList, insertSqlCode);
+        return dataTable;
     }
 
     private void BulkExecute(IEnumerable<Dictionary<string, object>> dictObjList, string insertSqlCode)
