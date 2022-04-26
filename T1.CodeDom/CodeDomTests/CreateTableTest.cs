@@ -23,4 +23,23 @@ public class CreateTableTest : TestBase
     [id] INT NOT FOR REPLICATION NOT NULL
 ) ;");
     }
+    
+    
+    [Fact]
+    public void create_table_primary_key_clustered()
+    {
+        var sql = @"create table [dbo].[customer] (
+    [id]      INT            NOT NULL,
+    PRIMARY KEY CLUSTERED ([id] ASC)
+);";
+
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
+    [id] INT NOT NULL,
+    PRIMARY KEY CLUSTERED ([id] ASC)
+) ;");
+    }
+    
+    
 }
