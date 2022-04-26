@@ -139,7 +139,9 @@ namespace T1.CodeDom.TSql
                 ParsePrimaryKey,
                 ParseConstraint,
                 ParseIsAllowNull,
-                ParseDefault);
+                ParseDefault,
+                ParseConstraintWithOptions,
+                ParseOnPrimary);
 
             return new DataTypeSqlCodeExpr
             {
@@ -148,6 +150,20 @@ namespace T1.CodeDom.TSql
                 IsReadOnly = isReadOnly,
                 SizeExpr = sizeExpr,
                 ExtraList = extraList,
+            };
+        }
+
+        private static OnSqlCodeExpr ParseOnPrimary(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.On))
+            {
+                return null;
+            }
+
+            var name = parser.ConsumeObjectId();
+            return new OnSqlCodeExpr
+            {
+                Name = name
             };
         }
 
@@ -1499,6 +1515,17 @@ namespace T1.CodeDom.TSql
                 ColumnList = columnList,
             };
         }
+    }
+
+    public class OnSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("ON ");
+            Name.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr Name { get; set; }
     }
 
     public class ToggleSqlCodeExpr : SqlCodeExpr
