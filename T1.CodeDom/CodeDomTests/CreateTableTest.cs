@@ -42,4 +42,21 @@ public class CreateTableTest : TestBase
     }
     
     
+    [Fact]
+    public void create_table_without_comma_clustered()
+    {
+        var sql = @"create table [dbo].[customer] (
+    [id]      INT            NOT NULL
+    PRIMARY KEY CLUSTERED ([id] ASC)
+);";
+
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
+    [id] INT NOT NULL,
+    PRIMARY KEY CLUSTERED([id] ASC)
+) ;");
+    }
+    
+    
 }
