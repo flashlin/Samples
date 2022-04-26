@@ -134,7 +134,7 @@ namespace T1.CodeDom.TSql
 
             var notForReplication = ParseNotForReplication(parser);
 
-            var constraintExpr = ParseConstraint(parser);
+            SqlCodeExpr constraintExpr = null;
 
             var isReadOnly = parser.Scanner.Match(SqlToken.ReadOnly);
 
@@ -144,7 +144,13 @@ namespace T1.CodeDom.TSql
 
             bool? isAllowNull = null;
             SqlCodeExpr defaultValueExpr = null;
-            ParseAll(() =>
+            ParseAll(
+                () =>
+                {
+                    constraintExpr = ParseConstraint(parser);
+                    return constraintExpr != null;
+                },
+                () =>
                 {
                     isAllowNull = ParseIsAllowNull(parser);
                     return isAllowNull != null;
