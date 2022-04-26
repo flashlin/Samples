@@ -5,6 +5,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using T1.Standard.Data;
 using T1.Standard.Extensions;
 
 namespace CsvCli.Repositories;
@@ -28,13 +29,40 @@ public class LocalDbContext : DbContext
         using var reader = new StreamReader(csvFile, Encoding.UTF8);
         using var csv = new CsvReader(reader, readConfiguration);
         using var dr = new CsvDataReader(csv);
-        var dt = new DataTable();
-        dt.Load(dr);
+        var dataTable = new DataTable();
+        dataTable.Load(dr);
+        dataTable.TableName = tableName;
 
         if (!IsTableExists(tableName))
         {
-            CreateTable(dt, tableName);
+            CreateTable(dataTable, tableName);
         }
+
+        var dictObjList = dataTable.ToDictionary();
+
+        var insertSqlCode = GenerateInsertSqlCode(dataTable);
+        using var connection = Database.GetDbConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+        foreach (var dictObj in dictObjList)
+        {
+            //var dyObj = dictObj.ConvertToObject<dynamic>();
+            connection.Execute(insertSqlCode, dictObj);
+        }
+        transaction.Commit();
+    }
+
+    private string GenerateInsertSqlCode(DataTable dataTable)
+    {
+        var code = new StringBuilder();
+        code.Append($"INSERT INTO {dataTable.TableName}");
+        code.Append("(");
+        code.Append(string.Join(", ", GetDataColumnsType(dataTable).Select(x => x.Name)));
+        code.AppendLine(")");
+        code.Append("VALUES (");
+        code.Append(string.Join(", ", GetDataColumnsType(dataTable).Select(x => $"@{x.Name}")));
+        code.Append(")");
+        return code.ToString();
     }
 
     private void CreateTable(DataTable dt, string tableName)
@@ -46,7 +74,8 @@ public class LocalDbContext : DbContext
     public bool IsTableExists(string tableName)
     {
         var sql = @"SELECT 1 FROM sqlite_master WHERE type='table' AND name=@tableName";
-        return QueryRaw<long>(sql, new { tableName }).First() == 1 ? true : false;
+        var result = QueryRaw<long>(sql, new {tableName}).FirstOrDefault();
+        return result != 0;
     }
 
     /*protected T QueryScalar<T>(string sql, object queryParameter)
@@ -62,8 +91,8 @@ public class LocalDbContext : DbContext
         }
     }*/
 
-    protected IEnumerable<T> QueryRaw<T>(string sql, object? queryParameter=null)
-        where T: new()
+    protected IEnumerable<T> QueryRaw<T>(string sql, object? queryParameter = null)
+        where T : new()
     {
         var connection = Database.GetDbConnection();
         var q1 = connection.Query(sql, queryParameter);
@@ -74,40 +103,39 @@ public class LocalDbContext : DbContext
         {
             return dictList.Select(x => (T) x.First().Value);
         }
+
         return dictList.Select(x => x.ConvertToObject<T>());
+    }
+
+    private IEnumerable<DataColumnType> GetDataColumnsType(DataTable dataTable)
+    {
+        for (var i = 0; i < dataTable.Columns.Count; i++)
+        {
+            var column = dataTable.Columns[i];
+            var name = column.ColumnName;
+            var dataType = GetDataType(column.DataType);
+            yield return new DataColumnType
+            {
+                Name = name,
+                DataType = dataType
+            };
+        }
     }
 
     private string GenerateCreateTableSqlCode(string tableName, DataTable dataTable)
     {
         var code = new StringBuilder();
         code.AppendLine($"CREATE TABLE {tableName} (");
-        for (var i = 0; i < dataTable.Columns.Count; i++)
-        {
-            if (i != 0)
-            {
-                code.AppendLine(",");
-            }
-
-            var column = dataTable.Columns[i];
-            code.Append(GetColumnDefine(column));
-        }
-
+        var columnDefines = string.Join(",\r\n", GetDataColumnsType(dataTable).Select(x => $"{x.Name} {x.DataType}"));
+        code.AppendLine(columnDefines);
         code.AppendLine(")");
         return code.ToString();
     }
-
 
     protected void ExecuteRaw(string sql, object? queryParameter)
     {
         var connection = Database.GetDbConnection();
         connection.Execute(sql, queryParameter);
-    }
-
-    private string GetColumnDefine(DataColumn column)
-    {
-        var name = column.ColumnName;
-        var dataType = GetDataType(column.DataType);
-        return $"{name} {dataType}";
     }
 
     private string GetDataType(Type columnDataType)
@@ -132,7 +160,8 @@ public class LocalDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite($"DataSource={_sqliteFile};");
+        optionsBuilder.UseSqlite($"DataSource={_sqliteFile};")
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -147,4 +176,10 @@ public class LocalDbContext : DbContext
             .HasConversion<double>();
     */
     }
+}
+
+public class DataColumnType
+{
+    public string Name { get; set; }
+    public string DataType { get; set; }
 }
