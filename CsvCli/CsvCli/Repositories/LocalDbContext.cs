@@ -5,6 +5,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using T1.Standard.Common;
 using T1.Standard.Data;
 using T1.Standard.Extensions;
 
@@ -23,6 +24,7 @@ public class LocalDbContext : DbContext
     public void ImportCsvFile(string csvFile, string tableName)
     {
         var dataTable = ReadCsvFileToDataTable(csvFile, tableName);
+        dataTable = AdjustDataTable(dataTable);
 
         if (!IsTableExists(tableName))
         {
@@ -32,6 +34,76 @@ public class LocalDbContext : DbContext
         var dictObjList = dataTable.ToDictionary();
         var insertSqlCode = GenerateInsertSqlCode(dataTable);
         BulkExecute(dictObjList, insertSqlCode);
+    }
+
+    public static DataTable AdjustDataTable(DataTable dataTable)
+    {
+        var newColumnList = GetDataColumnsAdjusted(dataTable).ToArray();
+        var newDataTable = new DataTable(dataTable.TableName);
+        foreach (var column in newColumnList)
+        {
+            newDataTable.Columns.Add(column);
+        }
+
+        foreach (DataRow row in dataTable.Rows)
+        {
+            var newRow = newDataTable.NewRow();
+            foreach (var newColumn in newColumnList)
+            {
+                var value = $"{row[newColumn.ColumnName]}";
+                if( newColumn.DataType == typeof(DateTime))
+                {
+                    newRow[newColumn] = value.ChangeType(newColumn.DataType);
+                    continue;
+                }
+
+                if (newColumn.DataType == typeof(decimal))
+                {
+                    value = value.Replace(",", "");
+                    newRow[newColumn] = value.ChangeType(newColumn.DataType);
+                    continue;
+                }
+
+                if (newColumn.DataType != typeof(string))
+                {
+                    newRow[newColumn] = value.ChangeType(newColumn.DataType);
+                    continue;
+                }
+                newRow[newColumn] = value;
+            }
+
+            newDataTable.Rows.Add(newRow);
+        }
+
+        return newDataTable;
+    }
+
+    public static IEnumerable<DataColumn> GetDataColumnsAdjusted(DataTable dataTable)
+    {
+        var row = dataTable.Rows[0];
+        foreach (DataColumn column in dataTable.Columns)
+        {
+            var value = $"{row[column]}";
+            if (DateTime.TryParse(value, out _))
+            {
+                yield return new DataColumn(column.ColumnName, typeof(DateTime));
+                continue;
+            }
+
+            if ( value.Contains(',') && decimal.TryParse(value.Replace(",", ""), out _))
+            {
+                yield return new DataColumn(column.ColumnName, typeof(decimal));
+                continue;
+            }
+            
+            if ( long.TryParse(value, out _))
+            {
+                yield return new DataColumn(column.ColumnName, typeof(long));
+                continue;
+            }
+
+            yield return new DataColumn(column.ColumnName, typeof(string));
+        }
     }
 
     private static DataTable ReadCsvFileToDataTable(string csvFile, string tableName)
@@ -162,6 +234,11 @@ public class LocalDbContext : DbContext
         if (columnDataType == typeof(int))
         {
             return "INT";
+        }
+        
+        if (columnDataType == typeof(long))
+        {
+            return "LONG";
         }
 
         return "DECIMAL(10,2)";
