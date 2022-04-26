@@ -18,7 +18,7 @@ namespace T1.CodeDom.TSql.Parselets
             var columnList = parser.ParseOrderItemList();
             parser.ConsumeToken(SqlToken.RParen);
 
-            var withExpr = ParseWith(parser);
+            var withExpr = parser.ParseConstraintWithOptions();
 
             return new ConstraintSqlCodeExpr
             {
@@ -27,32 +27,6 @@ namespace T1.CodeDom.TSql.Parselets
                 ClusterType = clusterType,
                 ColumnList = columnList,
                 WithExpr = withExpr
-            };
-        }
-
-        private SqlCodeExpr ParseWith(IParser parser)
-        {
-            if (!parser.MatchToken(SqlToken.With))
-            {
-                return null;
-            }
-
-            var optionList = new List<SqlCodeExpr>();
-            parser.ConsumeToken(SqlToken.LParen);
-            
-            parser.ConsumeToken(SqlToken.FILLFACTOR);
-            parser.ConsumeToken(SqlToken.Equal);
-            var fillfactorValue = parser.Consume(SqlToken.Number);
-            optionList.Add(new FillfactorSqlCodeExpr
-            {
-                Value = fillfactorValue
-            });
-            
-            parser.ConsumeToken(SqlToken.RParen);
-
-            return new ConstraintWithSqlCodeExpr
-            {
-                OptionList = optionList
             };
         }
     }

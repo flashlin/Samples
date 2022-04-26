@@ -1382,6 +1382,32 @@ namespace T1.CodeDom.TSql
 
             return orderItemList;
         }
+
+        public static SqlCodeExpr ParseConstraintWithOptions(this IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.With))
+            {
+                return null;
+            }
+
+            var optionList = new List<SqlCodeExpr>();
+            parser.ConsumeToken(SqlToken.LParen);
+            
+            parser.ConsumeToken(SqlToken.FILLFACTOR);
+            parser.ConsumeToken(SqlToken.Equal);
+            var fillfactorValue = parser.Consume(SqlToken.Number);
+            optionList.Add(new FillfactorSqlCodeExpr
+            {
+                Value = fillfactorValue
+            });
+            
+            parser.ConsumeToken(SqlToken.RParen);
+
+            return new ConstraintWithSqlCodeExpr
+            {
+                OptionList = optionList
+            };
+        }
     }
 
     public class DataTypeSizeSqlCodeExpr : SqlCodeExpr

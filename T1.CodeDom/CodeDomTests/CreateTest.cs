@@ -192,5 +192,17 @@ END");
         }
         
         
+        
+        [Fact]
+        public void create_nonclustered_index_fillfactor()
+        {
+            var sql = @"CREATE NONCLUSTERED INDEX [ix_customer]
+    ON [dbo].[customer]([id] ASC) WITH (FILLFACTOR = 90);";
+            
+            Parse(sql);
+
+            ThenExprShouldBe(@"CREATE NONCLUSTERED INDEX [ix_customer]
+ON [dbo].[customer]([id] ASC) WITH(FILLFACTOR = 90) ;");
+        }
     }
 }
