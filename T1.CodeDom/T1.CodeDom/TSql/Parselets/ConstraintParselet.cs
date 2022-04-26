@@ -1,4 +1,7 @@
+using System.Collections.Generic;
 using T1.CodeDom.Core;
+using T1.CodeDom.TSql.Expressions;
+using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
@@ -15,13 +18,65 @@ namespace T1.CodeDom.TSql.Parselets
             var columnList = parser.ParseOrderItemList();
             parser.ConsumeToken(SqlToken.RParen);
 
+            var withExpr = ParseWith(parser);
+
             return new ConstraintSqlCodeExpr
             {
                 ConstraintName = constraintName,
                 KeyType = keyType,
                 ClusterType = clusterType,
-                ColumnList = columnList
+                ColumnList = columnList,
+                WithExpr = withExpr
             };
         }
+
+        private SqlCodeExpr ParseWith(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.With))
+            {
+                return null;
+            }
+
+            var optionList = new List<SqlCodeExpr>();
+            parser.ConsumeToken(SqlToken.LParen);
+            
+            parser.ConsumeToken(SqlToken.FILLFACTOR);
+            parser.ConsumeToken(SqlToken.Equal);
+            var fillfactorValue = parser.Consume(SqlToken.Number);
+            optionList.Add(new FillfactorSqlCodeExpr
+            {
+                Value = fillfactorValue
+            });
+            
+            parser.ConsumeToken(SqlToken.RParen);
+
+            return new ConstraintWithSqlCodeExpr
+            {
+                OptionList = optionList
+            };
+        }
+    }
+
+    internal class ConstraintWithSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("WITH(");
+            OptionList.WriteToStreamWithComma(stream);
+            stream.Write(")");
+        }
+
+        public List<SqlCodeExpr> OptionList { get; set; }
+    }
+
+    public class FillfactorSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("FILLFACTOR = ");
+            Value.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr Value { get; set; }
     }
 }

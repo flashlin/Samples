@@ -173,5 +173,24 @@ END");
     CONSTRAINT [PK_Id] PRIMARY KEY CLUSTERED([Id] ASC)
 )");
         }
+        
+        
+        [Fact]
+        public void create_table_with_fillfactor()
+        {
+            var sql = @"CREATE TABLE [dbo].[customer] (
+    [id]   INT       NOT NULL,
+    CONSTRAINT [PK_Id] PRIMARY KEY CLUSTERED ([Id] ASC) with (fillfactor = 90)
+)";
+            
+            Parse(sql);
+
+            ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
+    [id] INT NOT NULL,
+    CONSTRAINT [PK_Id] PRIMARY KEY CLUSTERED([Id] ASC) WITH(FILLFACTOR = 90)
+)");
+        }
+        
+        
     }
 }

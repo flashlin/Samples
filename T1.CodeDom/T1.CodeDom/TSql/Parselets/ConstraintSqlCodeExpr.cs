@@ -15,11 +15,18 @@ namespace T1.CodeDom.TSql.Parselets
             stream.Write("(");
             ColumnList.WriteToStreamWithComma(stream);
             stream.Write(")");
+
+            if (WithExpr != null)
+            {
+                stream.Write(" ");
+                WithExpr.WriteToStream(stream);
+            }
         }
 
         public SqlCodeExpr ConstraintName { get; set; }
         public string KeyType { get; set; }
         public string ClusterType { get; set; }
         public List<OrderItemSqlCodeExpr> ColumnList { get; set; }
+        public SqlCodeExpr WithExpr { get; set; }
     }
 }
