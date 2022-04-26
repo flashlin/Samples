@@ -9,7 +9,9 @@ namespace T1.CodeDom.TSql.Parselets
         {
             stream.Write("CONSTRAINT ");
             ConstraintName.WriteToStream(stream);
-            stream.Write($" {KeyType}");
+            
+            stream.Write($" ");
+            KeyType.WriteToStream(stream);
 
             if (ClusterExpr != null)
             {
@@ -25,7 +27,7 @@ namespace T1.CodeDom.TSql.Parselets
         }
 
         public SqlCodeExpr ConstraintName { get; set; }
-        public string KeyType { get; set; }
+        public SqlCodeExpr KeyType { get; set; }
         public SqlCodeExpr WithExpr { get; set; }
         public ClusteredSqlCodeExpr ClusterExpr { get; set; }
     }

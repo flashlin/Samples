@@ -10,8 +10,8 @@ namespace T1.CodeDom.TSql.Parselets
         public IExpression Parse(TextSpan token, IParser parser)
         {
             var constraintName = parser.ConsumeObjectId();
-            var keyType = parser.ConsumeTokenStringListAny(new[] {SqlToken.PRIMARY, SqlToken.KEY},
-                new[] {SqlToken.UNIQUE});
+
+            var keyType = parser.ParseAny(SqlParserExtension.ParseIsPrimaryKey, ParseUnique);
 
             var clusterExpr = ParseClustered(parser);
             var withExpr = parser.ParseConstraintWithOptions();
@@ -23,6 +23,16 @@ namespace T1.CodeDom.TSql.Parselets
                 ClusterExpr = clusterExpr,
                 WithExpr = withExpr
             };
+        }
+
+        private static UniqueKeySqlCodeExpr ParseUnique(IParser parser)
+        {
+            if (!parser.MatchTokenList(SqlToken.UNIQUE))
+            {
+                return null;
+            }
+
+            return new UniqueKeySqlCodeExpr();
         }
 
         private static ClusteredSqlCodeExpr ParseClustered(IParser parser)
@@ -40,6 +50,14 @@ namespace T1.CodeDom.TSql.Parselets
                 ClusterType = clusterType,
                 ColumnList = columnList,
             };
+        }
+    }
+
+    public class UniqueKeySqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("UNIQUE");
         }
     }
 

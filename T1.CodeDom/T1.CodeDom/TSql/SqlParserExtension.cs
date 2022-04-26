@@ -161,6 +161,21 @@ namespace T1.CodeDom.TSql
 
             return new NotForReplicationSqlCodeExpr();
         }
+        
+        public static SqlCodeExpr ParseAny(this IParser parser, params Func<IParser, SqlCodeExpr>[] parseFuncList)
+        {
+            for (var i = 0; i < parseFuncList.Length; i++)
+            {
+                var parseFunc = parseFuncList[i];
+                var expr = parseFunc(parser);
+                if (expr != null)
+                {
+                    return expr;
+                }
+            }
+            var helpMessage = parser.Scanner.GetHelpMessage();
+            throw new ParseException(helpMessage);
+        }
 
         private static List<SqlCodeExpr> ParseAll(IParser parser, params Func<IParser, SqlCodeExpr>[] parseFuncList)
         {
@@ -1009,7 +1024,7 @@ namespace T1.CodeDom.TSql
             return new NonClusteredSqlCodeExpr();
         }
 
-        private static PrimaryKeySqlCodeExpr ParseIsPrimaryKey(IParser parser)
+        public static PrimaryKeySqlCodeExpr ParseIsPrimaryKey(IParser parser)
         {
             if (!parser.Scanner.IsTokenList(SqlToken.PRIMARY, SqlToken.KEY))
             {
