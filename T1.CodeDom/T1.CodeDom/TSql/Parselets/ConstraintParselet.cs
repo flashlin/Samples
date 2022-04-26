@@ -13,7 +13,7 @@ namespace T1.CodeDom.TSql.Parselets
 
             var keyType = parser.ParseAny(SqlParserExtension.ParsePrimaryKey, ParseUnique);
 
-            var clusterExpr = ParseClustered(parser);
+            var clusterExpr = parser.ParseClustered();
             var withExpr = parser.ParseConstraintWithOptions();
 
             return new ConstraintSqlCodeExpr
@@ -33,23 +33,6 @@ namespace T1.CodeDom.TSql.Parselets
             }
 
             return new UniqueKeySqlCodeExpr();
-        }
-
-        private static ClusteredSqlCodeExpr ParseClustered(IParser parser)
-        {
-            if (!parser.TryConsumeTokenAny(out var headSpan, SqlToken.CLUSTERED, SqlToken.NONCLUSTERED))
-            {
-                return null;
-            }
-            var clusterType = parser.Scanner.GetSpanString(headSpan);
-            parser.ConsumeToken(SqlToken.LParen);
-            var columnList = parser.ParseOrderItemList();
-            parser.ConsumeToken(SqlToken.RParen);
-            return new ClusteredSqlCodeExpr
-            {
-                ClusterType = clusterType,
-                ColumnList = columnList,
-            };
         }
     }
 

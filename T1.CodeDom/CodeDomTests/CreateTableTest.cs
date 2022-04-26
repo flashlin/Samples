@@ -37,7 +37,7 @@ public class CreateTableTest : TestBase
 
         ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
     [id] INT NOT NULL,
-    PRIMARY KEY CLUSTERED ([id] ASC)
+    PRIMARY KEY CLUSTERED([id] ASC)
 ) ;");
     }
     
