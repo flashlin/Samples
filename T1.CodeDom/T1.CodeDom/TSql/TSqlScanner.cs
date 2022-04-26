@@ -196,6 +196,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("OWNER", SqlToken.OWNER);
 			AddTokenMap("PRIMARY", SqlToken.PRIMARY);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
+			AddTokenMap("REPLICATION", SqlToken.REPLICATION);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("READ", SqlToken.READ);
 			AddTokenMap("REPEATABLE", SqlToken.REPEATABLE);

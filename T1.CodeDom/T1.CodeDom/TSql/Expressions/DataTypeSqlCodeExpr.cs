@@ -13,6 +13,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public bool IsNonclustered { get; set; }
 		public SqlCodeExpr DefaultValueExpr { get; set; }
 		public bool? IsAllowNull { get; set; }
+		public SqlCodeExpr NotForReplicationExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -21,6 +22,12 @@ namespace T1.CodeDom.TSql.Expressions
 			if (IsIdentity)
 			{
 				stream.Write(" IDENTITY");
+			}
+
+			if (NotForReplicationExpr != null)
+			{
+				stream.Write(" ");
+				NotForReplicationExpr.WriteToStream(stream);
 			}
 
 			if (IsReadOnly)

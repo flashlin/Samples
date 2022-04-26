@@ -132,6 +132,8 @@ namespace T1.CodeDom.TSql
 
             var sizeExpr = ParseDataTypeSize(parser);
 
+            var notForReplication = ParseNotForReplication(parser);
+
             var constraintExpr = ParseConstraint(parser);
 
             var isReadOnly = parser.Scanner.Match(SqlToken.ReadOnly);
@@ -142,9 +144,6 @@ namespace T1.CodeDom.TSql
 
             bool? isAllowNull = null;
             SqlCodeExpr defaultValueExpr = null;
-            // var isAllowNull = ParseIsAllowNull(parser);
-            // var defaultValueExpr = ParseDefault(parser);
-
             ParseAll(() =>
                 {
                     isAllowNull = ParseIsAllowNull(parser);
@@ -164,10 +163,21 @@ namespace T1.CodeDom.TSql
                 SizeExpr = sizeExpr,
                 IsPrimaryKey = isPrimaryKey,
                 IsNonclustered = isNonclustered,
+                NotForReplicationExpr = notForReplication,
                 ConstraintExpr = constraintExpr,
                 DefaultValueExpr = defaultValueExpr,
                 IsAllowNull = isAllowNull,
             };
+        }
+
+        private static SqlCodeExpr ParseNotForReplication(IParser parser)
+        {
+            if (!parser.MatchTokenList(SqlToken.Not, SqlToken.For, SqlToken.REPLICATION))
+            {
+                return null;
+            }
+
+            return new NotForReplicationSqlCodeExpr();
         }
 
         private static void ParseAll(params Func<bool>[] parseFuncList)
@@ -947,7 +957,6 @@ namespace T1.CodeDom.TSql
                     continue;
                 }
                 
-                
                 var name = parser.ConsumeTokenStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
                 var dataType = parser.ConsumeDataType();
 
@@ -1407,6 +1416,14 @@ namespace T1.CodeDom.TSql
             {
                 OptionList = optionList
             };
+        }
+    }
+
+    public class NotForReplicationSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("NOT FOR REPLICATION");
         }
     }
 

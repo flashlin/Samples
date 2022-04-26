@@ -204,5 +204,21 @@ END");
             ThenExprShouldBe(@"CREATE NONCLUSTERED INDEX [ix_customer]
 ON [dbo].[customer]([id] ASC) WITH(FILLFACTOR = 90) ;");
         }
+        
+        
+        [Fact]
+        public void create_table_not_for_replication()
+        {
+            var sql = @"CREATE TABLE [dbo].[customer] (
+    [id] int NOT FOR REPLICATION NOT NULL
+);";
+            
+            Parse(sql);
+
+            ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
+    [id] INT NOT FOR REPLICATION NOT NULL
+) ;");
+        }
+        
     }
 }
