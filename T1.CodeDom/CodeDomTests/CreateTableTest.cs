@@ -59,4 +59,23 @@ public class CreateTableTest : TestBase
     }
     
     
+    [Fact]
+    public void create_table_with_toggle()
+    {
+        var sql = @"create table [dbo].[customer] (
+    [id]      INT            NOT NULL
+PRIMARY KEY CLUSTERED ( [Id] ASC )
+WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) 
+ON [PRIMARY]
+)
+);";
+
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
+    [id] INT NOT NULL
+    PRIMARY KEY CLUSTERED([id] ASC)
+) ;");
+    }
+    
 }
