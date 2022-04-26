@@ -14,6 +14,8 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.4" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.4" />
       <PackageReference Include="SQLite" Version="3.13.0" />
+      <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.0.7" />
+      <PackageReference Include="T1.Standard" Version="1.0.61" />
     </ItemGroup>
 
 </Project>
