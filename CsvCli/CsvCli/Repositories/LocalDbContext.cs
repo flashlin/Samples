@@ -36,6 +36,28 @@ public class LocalDbContext : DbContext
         BulkExecute(dictObjList, insertSqlCode);
     }
 
+    public void ExecuteSqlCode(string sqlCode)
+    {
+        var connection = Database.GetDbConnection();
+        var q1 = connection.Query(sqlCode)
+            .Select(x => (IDictionary<string, object>)x)
+            .ToArray();
+        
+        var maxLength = GetMaxLength(q1);
+    }
+
+    private static int GetMaxLength(IEnumerable<IDictionary<string, object>> q1)
+    {
+        var maxLength = 0;
+        foreach (IDictionary<string, object> row in q1)
+        {
+            var length = row.Values.Max(x => $"{x}".Length);
+            maxLength = Math.Max(length, maxLength);
+        }
+
+        return maxLength;
+    }
+
     public static DataTable AdjustDataTable(DataTable dataTable)
     {
         var newColumnList = GetDataColumnsAdjusted(dataTable).ToArray();
