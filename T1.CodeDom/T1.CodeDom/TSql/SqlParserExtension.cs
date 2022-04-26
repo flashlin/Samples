@@ -941,8 +941,14 @@ namespace T1.CodeDom.TSql
             var columnDataTypeList = new List<SqlCodeExpr>();
             do
             {
+                if (parser.TryConsumeToken(out var constraintSpan, SqlToken.CONSTRAINT))
+                {
+                    columnDataTypeList.Add(parser.PrefixParse(constraintSpan) as SqlCodeExpr);
+                    continue;
+                }
+                
+                
                 var name = parser.ConsumeTokenStringAny(SqlToken.Identifier, SqlToken.SqlIdentifier, SqlToken.Rank);
-
                 var dataType = parser.ConsumeDataType();
 
                 columnDataTypeList.Add(new ColumnDefineSqlCodeExpr
