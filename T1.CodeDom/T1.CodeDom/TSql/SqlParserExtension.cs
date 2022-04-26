@@ -949,7 +949,6 @@ namespace T1.CodeDom.TSql
                 {
                     Name = name,
                     DataType = dataType,
-                    // DefaultValue = defaultValue
                 });
             } while (parser.MatchToken(SqlToken.Comma));
 
