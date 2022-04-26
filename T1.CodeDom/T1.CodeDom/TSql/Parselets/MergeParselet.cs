@@ -49,7 +49,7 @@ namespace T1.CodeDom.TSql.Parselets
 				parser.ConsumeToken(SqlToken.RParen);
 			}
 
-			parser.Scanner.Consume(SqlToken.On);
+			parser.Scanner.Consume(SqlToken.ON);
 
 			var mergeSearchCondition = parser.ParseExpIgnoreComment();
 

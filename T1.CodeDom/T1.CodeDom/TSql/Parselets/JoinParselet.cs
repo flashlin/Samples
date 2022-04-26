@@ -32,7 +32,7 @@ namespace T1.CodeDom.TSql.Parselets
 			var userWithOptions = parser.ParseWithOptions();
 
 			SqlCodeExpr joinOnExpr = null;
-			if (parser.Scanner.Match(SqlToken.On))
+			if (parser.Scanner.Match(SqlToken.ON))
 			{
 				joinOnExpr = parser.ParseExpIgnoreComment();
 				joinOnExpr = parser.ParseLRParenExpr(joinOnExpr);

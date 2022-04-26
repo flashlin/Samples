@@ -155,7 +155,7 @@ namespace T1.CodeDom.TSql
 
         public static OnSqlCodeExpr ParseOnPrimary(this IParser parser)
         {
-            if (!parser.MatchToken(SqlToken.On))
+            if (!parser.MatchToken(SqlToken.ON))
             {
                 return null;
             }
@@ -1462,14 +1462,15 @@ namespace T1.CodeDom.TSql
         {
             if (!parser.TryConsumeTokenAny(out var span,
                     SqlToken.PAD_INDEX, SqlToken.STATISTICS_NORECOMPUTE, SqlToken.IGNORE_DUP_KEY,
-                    SqlToken.ALLOW_PAGE_LOCKS, SqlToken.ALLOW_ROW_LOCKS))
+                    SqlToken.ALLOW_PAGE_LOCKS, SqlToken.ALLOW_ROW_LOCKS,
+                    SqlToken.ONLINE))
             {
                 return null;
             }
 
             var name = parser.Scanner.GetSpanString(span);
             parser.ConsumeToken(SqlToken.Equal);
-            var toggleSpan = parser.ConsumeTokenAny(SqlToken.On, SqlToken.Off);
+            var toggleSpan = parser.ConsumeTokenAny(SqlToken.ON, SqlToken.OFF);
             var toggle = parser.Scanner.GetSpanString(toggleSpan);
 
             return new ToggleSqlCodeExpr

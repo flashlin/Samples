@@ -84,9 +84,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("NUMERIC", SqlToken.Numeric);
 			AddTokenMap("MERGE", SqlToken.Merge);
 			AddTokenMap("MATCHED", SqlToken.Matched);
-			AddTokenMap("ON", SqlToken.On);
 			AddTokenMap("OBJECT", SqlToken.Object);
-			AddTokenMap("OFF", SqlToken.Off);
 			AddTokenMap("OUT", SqlToken.Out);
 			AddTokenMap("OR", SqlToken.Or);
 			AddTokenMap("OPEN", SqlToken.Open);
@@ -197,6 +195,9 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("MAXDOP", SqlToken.MAXDOP);
 			AddTokenMap("OBJECT_NAME", SqlToken.OBJECT_NAME);
 			AddTokenMap("OWNER", SqlToken.OWNER);
+			AddTokenMap("OFF", SqlToken.OFF);
+			AddTokenMap("ON", SqlToken.ON);
+			AddTokenMap("ONLINE", SqlToken.ONLINE);
 			AddTokenMap("PRIMARY", SqlToken.PRIMARY);
 			AddTokenMap("PAD_INDEX", SqlToken.PAD_INDEX);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);

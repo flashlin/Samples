@@ -59,7 +59,7 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			parser.ConsumeToken(SqlToken.Index);
 			var indexName = parser.ConsumeObjectId();
-			parser.ConsumeToken(SqlToken.On);
+			parser.ConsumeToken(SqlToken.ON);
 			var tableName = parser.ConsumeObjectId();
 			parser.ConsumeToken(SqlToken.LParen);
 			var columnList = parser.ParseOrderItemList();
@@ -94,7 +94,7 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			parser.Scanner.Consume(SqlToken.Index);
 			var indexName = parser.ConsumeObjectId();
-			parser.Scanner.Consume(SqlToken.On);
+			parser.Scanner.Consume(SqlToken.ON);
 			
 			if( !parser.TryConsumeObjectId(out var tableName) )
 			{
@@ -125,7 +125,7 @@ namespace T1.CodeDom.TSql.Parselets
 		private SqlCodeExpr CreateIndex(TextSpan indexSpan, IParser parser)
 		{
 			var indexName = parser.ConsumeObjectId();
-			parser.Scanner.Consume(SqlToken.On);
+			parser.Scanner.Consume(SqlToken.ON);
 			
 			if( !parser.TryConsumeObjectId(out var tableName) )
 			{

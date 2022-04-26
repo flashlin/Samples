@@ -33,7 +33,7 @@ namespace T1.CodeDom.TSql.Parselets
 			if (parser.Scanner.Match(SqlToken.IDENTITY_INSERT))
 			{
 				var objectId = parser.PrefixParseAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
-				var toggle = parser.Scanner.ConsumeAny(SqlToken.On, SqlToken.Off);
+				var toggle = parser.Scanner.ConsumeAny(SqlToken.ON, SqlToken.OFF);
 				var toggleStr = parser.Scanner.GetSpanString(toggle);
 				return new SetIdentityInsertSqlCodeExpr
 				{
@@ -73,7 +73,7 @@ namespace T1.CodeDom.TSql.Parselets
 				ThrowHelper.ThrowParseException(parser, $"Expect one of {expect}.");
 			}
 
-			var onOffToken = parser.Scanner.ConsumeAny(SqlToken.On, SqlToken.Off);
+			var onOffToken = parser.Scanner.ConsumeAny(SqlToken.ON, SqlToken.OFF);
 			var onOffStr = parser.Scanner.GetSpanString(onOffToken);
 
 			return new SetSqlCodeExpr
