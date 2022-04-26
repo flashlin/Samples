@@ -49,9 +49,12 @@ namespace T1.CodeDom.TSql.Parselets
         public override void WriteToStream(IndentStream stream)
         {
             stream.Write($"{ClusterType.ToUpper()}");
-            stream.Write("(");
-            ColumnList.WriteToStreamWithComma(stream);
-            stream.Write(")");
+            if (ColumnList != null && ColumnList.Count > 0)
+            {
+                stream.Write("(");
+                ColumnList.WriteToStreamWithComma(stream);
+                stream.Write(")");
+            }
         }
 
         public string ClusterType { get; set; }

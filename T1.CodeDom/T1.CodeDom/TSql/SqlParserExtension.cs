@@ -135,7 +135,7 @@ namespace T1.CodeDom.TSql
             var isReadOnly = parser.Scanner.Match(SqlToken.ReadOnly);
 
             var extraList = parser.ParseAll(ParseNotForReplication,
-                ParseNonClustered,
+                SqlParserExtension.ParseClustered,
                 ParsePrimaryKey,
                 ParseConstraint,
                 ParseIsAllowNull,
@@ -934,17 +934,10 @@ namespace T1.CodeDom.TSql
         {
             parser.Scanner.Consume(SqlToken.LParen);
             var columnDataTypeList = new List<SqlCodeExpr>();
-            var extraList = new List<SqlCodeExpr>();
             do
             {
-                var extraExpr = ParseExtraInfo(parser);
-                if (extraExpr.Count > 0)
-                {
-                    extraList = extraExpr;
-                    break;
-                }
-                
-                var expr = parser.ParseAny(ParseConstraintExpr, 
+                var expr = parser.ParseAny(ParseConstraintExpr,
+                    ParseExtra,
                     ParseColumnDefine);
                 columnDataTypeList.Add(expr);
             } while (parser.MatchToken(SqlToken.Comma));
@@ -952,15 +945,24 @@ namespace T1.CodeDom.TSql
             parser.Scanner.Consume(SqlToken.RParen);
             return new TableDataTypeSqlCodeExpr
             {
-                Columns = columnDataTypeList,
-                ExtraList = extraList
+                Columns = columnDataTypeList
             };
         }
 
-        private static List<SqlCodeExpr> ParseExtraInfo(IParser parser)
+        private static SqlCodeExpr ParseExtra(IParser parser)
         {
-            return parser.ParseAll(SqlParserExtension.ParsePrimaryKey,
-                SqlParserExtension.ParseClustered);
+            var list = parser.ParseAll(
+                SqlParserExtension.ParseClustered,
+                ParsePrimaryKey);
+            if (list.Count == 0)
+            {
+                return null;
+            }
+            return new ExprListSqlCodeExpr
+            {
+                IsComma = false,
+                Items = list,
+            };
         }
 
         private static SqlCodeExpr ParseConstraintExpr(IParser parser)
@@ -1450,9 +1452,14 @@ namespace T1.CodeDom.TSql
                 return null;
             }
             var clusterType = parser.Scanner.GetSpanString(headSpan);
-            parser.ConsumeToken(SqlToken.LParen);
-            var columnList = parser.ParseOrderItemList();
-            parser.ConsumeToken(SqlToken.RParen);
+            var columnList = new List<OrderItemSqlCodeExpr>();
+            
+            if (parser.MatchToken(SqlToken.LParen))
+            {
+                columnList = parser.ParseOrderItemList();
+                parser.ConsumeToken(SqlToken.RParen);
+            }
+
             return new ClusteredSqlCodeExpr
             {
                 ClusterType = clusterType,
