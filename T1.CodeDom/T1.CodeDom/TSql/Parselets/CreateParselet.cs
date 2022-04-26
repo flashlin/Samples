@@ -66,6 +66,7 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.ConsumeToken(SqlToken.RParen);
 
 			var withExpr = parser.ParseConstraintWithOptions();
+			var onPrimary = parser.ParseOnPrimary();
 			
 			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
 			return new CreateNonclusteredIndexSqlCodeExpr
@@ -73,8 +74,9 @@ namespace T1.CodeDom.TSql.Parselets
 				IndexName = indexName,
 				TableName = tableName,
 				ColumnList = columnList,
+				WithExpr = withExpr,
+				OnPrimary = onPrimary,
 				IsSemicolon = isSemicolon,
-				WithExpr = withExpr
 			};
 		}
 
@@ -318,6 +320,12 @@ namespace T1.CodeDom.TSql.Parselets
 				WithExpr.WriteToStream(stream);
 			}
 
+			if (OnPrimary != null)
+			{
+				stream.Write(" ");
+				OnPrimary.WriteToStream(stream);
+			}
+
 			if (IsSemicolon)
 			{
 				stream.Write(" ;");
@@ -329,6 +337,7 @@ namespace T1.CodeDom.TSql.Parselets
 		public List<OrderItemSqlCodeExpr> ColumnList { get; set; }
 		public bool IsSemicolon { get; set; }
 		public SqlCodeExpr WithExpr { get; set; }
+		public OnSqlCodeExpr OnPrimary { get; set; }
 	}
 
 	public class CreateSynonymSqlCodeExpr : SqlCodeExpr

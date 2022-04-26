@@ -172,5 +172,20 @@ END");
             ThenExprShouldBe(@"CREATE NONCLUSTERED INDEX [ix_customer]
 ON [dbo].[customer]([id] ASC) WITH(FILLFACTOR = 90) ;");
         }
+        
+        
+        [Fact]
+        public void create_nonclustered_index_on_primary()
+        {
+            var sql = @"CREATE NONCLUSTERED INDEX [ix_customer]
+    ON [dbo].[customer]([id] ASC) WITH (FILLFACTOR = 90) on [PRIMARY];";
+            
+            Parse(sql);
+
+            ThenExprShouldBe(@"CREATE NONCLUSTERED INDEX [ix_customer]
+ON [dbo].[customer]([id] ASC) WITH(FILLFACTOR = 90) ON [PRIMARY] ;");
+        }
+        
+        
     }
 }
