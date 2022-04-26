@@ -83,7 +83,7 @@ public class LocalDbContext : DbContext
             {
                 foreach (var key in row.Keys)
                 {
-                    maxLenDict[key] = $"{row[key]}".Length;
+                    maxLenDict[key] = key.Length;
                 }
 
                 first = false;
