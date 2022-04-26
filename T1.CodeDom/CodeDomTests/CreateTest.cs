@@ -172,6 +172,5 @@ END");
             ThenExprShouldBe(@"CREATE NONCLUSTERED INDEX [ix_customer]
 ON [dbo].[customer]([id] ASC) WITH(FILLFACTOR = 90) ;");
         }
-        
     }
 }

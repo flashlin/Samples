@@ -123,4 +123,29 @@ ON [PRIMARY]
     [id] INT NOT NULL )
     ON [PRIMARY] ;");
     }
+    
+    
+    [Fact]
+    public void create_table_comma_with()
+    {
+        var sql = @"CREATE TABLE [dbo].[customer] (
+	[Id] INT IDENTITY(1, 1) NOT NULL,
+	[sid] INT NULL,
+	PRIMARY KEY CLUSTERED ([Id] ASC) WITH (
+		PAD_INDEX = OFF
+		) ON [PRIMARY]
+	) ON [PRIMARY]";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
+    [Id] INT IDENTITY(1,1) NOT NULL,
+    [sid] INT NULL,
+    PRIMARY KEY CLUSTERED([Id] ASC)
+    WITH(PAD_INDEX = OFF)
+    ON [PRIMARY]
+    )
+    ON [PRIMARY]");
+    }
+    
+    
 }

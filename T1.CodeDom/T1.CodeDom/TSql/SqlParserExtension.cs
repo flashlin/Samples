@@ -969,7 +969,9 @@ namespace T1.CodeDom.TSql
         {
             var list = parser.ParseAll(
                 SqlParserExtension.ParseClustered,
-                ParsePrimaryKey);
+                ParsePrimaryKey,
+                ParseConstraintWithOptions,
+                ParseOnPrimary);
             if (list.Count == 0)
             {
                 return null;
