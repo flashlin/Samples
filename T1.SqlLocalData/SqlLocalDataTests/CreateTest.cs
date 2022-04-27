@@ -1,3 +1,4 @@
+using SqlLocalDataTests.Repositories;
 using System;
 using System.IO;
 using T1.SqlLocalData;
@@ -5,38 +6,52 @@ using Xunit;
 
 namespace SqlLocalDataTests
 {
-    public class CreateTest : IDisposable
-    {
-        private string _instanceName = "localtest";
-        private string _databaseFile = @"D:\Demo\test.mdf";
-        private SqlLocalDb _localDb = new SqlLocalDb();
+	public class CreateTest : IDisposable
+	{
+		private string _databaseFile = @"D:\Demo\test.mdf";
+		private string _instanceName = "localtest";
+		private SqlLocalDb _localDb = new SqlLocalDb();
 
-        public CreateTest()
-        {
-            CreateInstance();
-        }
+		public CreateTest()
+		{
+			CreateInstance();
+			CreateDatabase();
+		}
 
-        private void CreateInstance()
-        {
-            if (!_localDb.IsInstanceExists(_instanceName))
-            {
-                return;
-            }
+		[Fact]
+		public void database_exists()
+		{
+			var dbExists = _localDb.IsDatabaseExists(_instanceName, "test");
+			Assert.True(dbExists);
+		}
 
-            _localDb.CreateInstance(_instanceName);
-            File.Delete(_databaseFile);
-        }
+		[Fact]
+		public void create_table()
+		{
+			var mydb = new MyDbContext();
+			mydb.EnsureTableCreated(typeof(CustomerEntity));
+		}
 
-        public void Dispose()
-        {
-            //_localDb.DeleteInstance();
-        }
+		public void Dispose()
+		{
+			//_localDb.DeleteInstance();
+		}
 
-        [Fact]
-        public void create_database()
-        {
-            _localDb.CreateDatabase(_instanceName, _databaseFile);
-            Assert.True(File.Exists(_databaseFile));
-        }
-    }
+		private void CreateDatabase()
+		{
+			_localDb.DeleteDatabaseFile(_databaseFile);
+			_localDb.CreateDatabase(_instanceName, _databaseFile);
+		}
+
+		private void CreateInstance()
+		{
+			if (_localDb.IsInstanceExists(_instanceName))
+			{
+				_localDb.StopInstance(_instanceName);
+				_localDb.DeleteInstance(_instanceName);
+			}
+			_localDb.CreateInstance(_instanceName);
+			_localDb.StartInstance(_instanceName);
+		}
+	}
 }
