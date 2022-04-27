@@ -55,7 +55,7 @@ public class Startup
                     continue;
                 case "l":
                 {
-                    ProcessTransList(ss);
+                    ShowTransList(ss);
                     break;
                 }
                 case "b":
@@ -216,10 +216,5 @@ public class Startup
             NumberOfShare = numberOfShare
         };
         db.BuyStock(tranData);
-    }
-
-    void ProcessTransList(string[] args)
-    {
-        ShowTransList(args);
     }
 }
