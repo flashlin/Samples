@@ -71,13 +71,7 @@ public class Startup
                 }
                 case "r":
                 {
-                    var cmdArgs = string.Empty;
-                    if (ss.Length > 1)
-                    {
-                        cmdArgs = ss[1];
-                    }
-
-                    await ProcessReportAsync(cmdArgs);
+                    await ProcessReportAsync();
                     break;
                 }
                 case "d":
@@ -128,7 +122,7 @@ public class Startup
     }
 
 
-    async Task ProcessReportAsync(string cmdArgs)
+    async Task ProcessReportAsync()
     {
         var rc = await _stockService.ReportTransAsync();
         rc.Dump();
