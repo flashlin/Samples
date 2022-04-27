@@ -140,15 +140,7 @@ public class StockService : IStockService
         return rc;
     }
 
-    public void ShowTransList(string[] args)
-    {
-        var opts = Parser.Default.ParseArguments<ShowTransListCommandLineOptions>(args)
-            .MapResult((opts) => { return opts; },
-                errs => { return null; });
-        ShowTransList(opts);
-    }
-
-    private void ShowTransList(ShowTransListCommandLineOptions options)
+    public void ShowTransList(ShowTransListCommandLineOptions options)
     {
         var rc = _stockRepo.GetTransList(new ListTransReq
         {

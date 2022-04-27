@@ -15,6 +15,7 @@ services.AddTransient<IStockExchangeApi, TwseStockExchangeApi>();
 services.AddDbContext<StockDbContext>();
 services.AddTransient<IStockRepo, StockRepo>();
 services.AddTransient<IStockService, StockService>();
+services.AddSingleton<ConsoleApp>();
 
 var serviceProvider = services.BuildServiceProvider();
 
@@ -216,7 +217,7 @@ void ProcessBuyStock(string dataText)
 
 void ProcessTransList2(string[] args)
 {
-	var s = serviceProvider.GetService<IStockService>();
+	var s = serviceProvider.GetService<ConsoleApp>();
 	s.ShowTransList(args);
 }
 
