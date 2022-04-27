@@ -1,7 +1,8 @@
-﻿using Xunit.Abstractions;
+﻿using TestProject.PrattTests;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace TestProject.PrattTests
+namespace CodeDomTests
 {
 	public class GrantTest : TestBase
 	{
@@ -17,6 +18,17 @@ namespace TestProject.PrattTests
 			Parse(sql);
 
 			ThenExprShouldBe(@"GRANT EXECUTE ON OBJECT::[dbo].[myFunc] TO [RoleName] AS [dbo]");
+		}
+		
+		[Fact]
+		public void grant_alter()
+		{
+			var sql = @"GRANT ALTER
+    ON OBJECT::[dbo].[Customer] TO [RoleName]
+    AS [dbo];";
+			Parse(sql);
+
+			ThenExprShouldBe(@"GRANT ALTER ON OBJECT::[dbo].[Customer] TO [RoleName] AS [dbo] ;");
 		}
 	}
 }

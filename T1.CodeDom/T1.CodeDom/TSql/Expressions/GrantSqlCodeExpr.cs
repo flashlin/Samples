@@ -10,6 +10,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public SqlCodeExpr OnObjectId { get; set; }
 		public List<SqlCodeExpr> TargetList { get; set; }
 		public SqlCodeExpr AsDbo { get; set; }
+		public bool IsSemicolon { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -30,6 +31,11 @@ namespace T1.CodeDom.TSql.Expressions
 			{
 				stream.Write(" AS ");
 				AsDbo.WriteToStream(stream);
+			}
+
+			if (IsSemicolon)
+			{
+				stream.Write(" ;");
 			}
 		}
 	}

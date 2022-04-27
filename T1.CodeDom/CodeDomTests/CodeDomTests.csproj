@@ -25,8 +25,4 @@
     <ProjectReference Include="..\T1.CodeDom\T1.CodeDom.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="GrantTest.cs" />
-  </ItemGroup>
-
 </Project>

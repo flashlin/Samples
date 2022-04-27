@@ -76,6 +76,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("INSERTED", SqlToken.Inserted);
 			AddTokenMap("JOIN", SqlToken.Join);
 			AddTokenMap("LIKE", SqlToken.Like);
+			AddTokenMap("ALTER", SqlToken.Alter);
 			AddTokenMap("LEFT", SqlToken.Left);
 			AddTokenMap("NVARCHAR", SqlToken.NVarchar);
 			AddTokenMap("NEXT", SqlToken.Next);

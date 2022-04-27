@@ -17,7 +17,8 @@ namespace T1.CodeDom.TSql.Parselets
 				SqlToken.Select,
 				SqlToken.Update,
 				SqlToken.Execute,
-				SqlToken.Exec
+				SqlToken.Exec,
+				SqlToken.Alter
 			};
 
 			var permissionList = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, permissionPrincipal)
@@ -50,12 +51,15 @@ namespace T1.CodeDom.TSql.Parselets
 				asDbo = parser.ConsumeObjectId();
 			}
 
+			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
+
 			return new GrantSqlCodeExpr
 			{
 				PermissionList = permissionList,
 				OnObjectId = onObjectId,
 				TargetList = targetList,
-				AsDbo = asDbo
+				AsDbo = asDbo,
+				IsSemicolon = isSemicolon
 			};
 		}
 	}
