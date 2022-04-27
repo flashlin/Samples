@@ -31,7 +31,7 @@ namespace T1.CodeDom.TSql.Parselets
 				return CreateIndex(indexSpan, parser);
 			}
 
-			if (parser.Scanner.TryConsume(SqlToken.Table, out var tableSpan))
+			if (parser.Scanner.TryConsume(SqlToken.TABLE, out var tableSpan))
 			{
 				return CreateTable(tableSpan, parser);
 			}
@@ -83,7 +83,7 @@ namespace T1.CodeDom.TSql.Parselets
 		private SqlCodeExpr CreateSynonym(TextSpan synonymSpan, IParser parser)
 		{
 			var synonymName = parser.ConsumeObjectId();
-			parser.ConsumeToken(SqlToken.For);
+			parser.ConsumeToken(SqlToken.FOR);
 			var objectId = parser.ConsumeObjectId();
 			return new CreateSynonymSqlCodeExpr
 			{
@@ -188,7 +188,7 @@ namespace T1.CodeDom.TSql.Parselets
 				rangeType = parser.Scanner.GetSpanString(rangeTypeSpan);
 			}
 
-			parser.Scanner.Consume(SqlToken.For);
+			parser.Scanner.Consume(SqlToken.FOR);
 			parser.Scanner.Consume(SqlToken.Values);
 
 			var boundaryValueList = new List<SqlCodeExpr>();

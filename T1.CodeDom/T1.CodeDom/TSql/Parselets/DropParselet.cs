@@ -8,7 +8,7 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			if(parser.Scanner.IsToken(SqlToken.Table))
+			if(parser.Scanner.IsToken(SqlToken.TABLE))
 			{
 				return DropTable(parser);
 			}
@@ -19,7 +19,7 @@ namespace T1.CodeDom.TSql.Parselets
 
 		private DropSqlCodeExpr DropTable(IParser parser)
 		{
-			parser.Scanner.ConsumeString(SqlToken.Table);
+			parser.Scanner.ConsumeString(SqlToken.TABLE);
 			parser.TryConsume(SqlToken.TempTable, out var tmpTable);
 			
 			return new DropSqlCodeExpr

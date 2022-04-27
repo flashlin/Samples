@@ -112,7 +112,7 @@ namespace T1.CodeDom.TSql
 
         public static SqlCodeExpr ConsumeDataType(this IParser parser)
         {
-            if (parser.Scanner.Match(SqlToken.Table))
+            if (parser.Scanner.Match(SqlToken.TABLE))
             {
                 return parser.ConsumeTableDataType();
             }
@@ -169,7 +169,7 @@ namespace T1.CodeDom.TSql
 
         private static NotForReplicationSqlCodeExpr ParseNotForReplication(IParser parser)
         {
-            if (!parser.MatchTokenList(SqlToken.Not, SqlToken.For, SqlToken.REPLICATION))
+            if (!parser.MatchTokenList(SqlToken.Not, SqlToken.FOR, SqlToken.REPLICATION))
             {
                 return null;
             }
@@ -248,7 +248,7 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        private static SqlCodeExpr ParseDefault(IParser parser)
+        public static SqlCodeExpr ParseDefault(this IParser parser)
         {
             if (!parser.MatchToken(SqlToken.Default))
             {
@@ -272,7 +272,7 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        private static MarkConstraintSqlCodeExpr ParseConstraint(IParser parser)
+        public static MarkConstraintSqlCodeExpr ParseConstraint(this IParser parser)
         {
             if (!parser.MatchToken(SqlToken.CONSTRAINT))
             {

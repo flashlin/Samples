@@ -54,7 +54,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("EXECUTE", SqlToken.Execute);
 			AddTokenMap("EXEC", SqlToken.Exec);
 			AddTokenMap("ELSE", SqlToken.Else);
-			AddTokenMap("FOR", SqlToken.For);
+			AddTokenMap("FOR", SqlToken.FOR);
 			AddTokenMap("FROM", SqlToken.From);
 			AddTokenMap("FLOAT", SqlToken.Float);
 			AddTokenMap("FULL", SqlToken.Full);
@@ -117,7 +117,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("TO", SqlToken.To);
 			AddTokenMap("TARGET", SqlToken.Target);
 			AddTokenMap("TOP", SqlToken.Top);
-			AddTokenMap("TABLE", SqlToken.Table);
+			AddTokenMap("TABLE", SqlToken.TABLE);
 			AddTokenMap("THEN", SqlToken.Then);
 			AddTokenMap("TINYINT", SqlToken.TinyInt);
 			AddTokenMap("UNPIVOT", SqlToken.UnPivot);

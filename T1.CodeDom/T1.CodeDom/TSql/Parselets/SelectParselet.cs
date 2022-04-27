@@ -47,7 +47,7 @@ namespace T1.CodeDom.TSql.Parselets
             var orderBy = ParseOrderBy(parser);
 
             SqlCodeExpr forXmlExpr = null;
-            if (parser.TryConsumeToken(out var forSpan, SqlToken.For))
+            if (parser.TryConsumeToken(out var forSpan, SqlToken.FOR))
             {
                 forXmlExpr = parser.PrefixParse(forSpan) as SqlCodeExpr;
             }

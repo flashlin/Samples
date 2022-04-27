@@ -14,7 +14,7 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.Scanner.Consume(SqlToken.LParen);
 
 			var aggregated = parser.ParseExpIgnoreComment();
-			parser.Scanner.Consume(SqlToken.For);
+			parser.Scanner.Consume(SqlToken.FOR);
 			
 			var column = parser.ConsumeObjectId();
 			

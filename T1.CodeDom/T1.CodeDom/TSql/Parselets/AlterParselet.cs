@@ -1,5 +1,6 @@
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql.Expressions;
+using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
@@ -12,7 +13,37 @@ namespace T1.CodeDom.TSql.Parselets
                 return AlterDatabase(databaseSpan, parser);
             }
 
-            throw new ParseException();
+            if (parser.TryConsumeToken(out var tableSpan, SqlToken.TABLE))
+            {
+                return AlterTable(tableSpan, parser);
+            }
+
+            var helpMessage = parser.Scanner.GetHelpMessage();
+            throw new ParseException(helpMessage);
+        }
+
+        private IExpression AlterTable(TextSpan tableSpan, IParser parser)
+        {
+            var tableName = parser.ConsumeObjectId();
+            parser.ConsumeToken(SqlToken.ADD);
+
+            var constraintExpr = parser.ParseConstraint();
+            
+            var defaultValueExpr = parser.ParseDefault();
+            SqlCodeExpr forExpr = null;
+            if (defaultValueExpr != null)
+            {
+                parser.ConsumeToken(SqlToken.FOR);
+                forExpr = parser.ConsumeObjectId();
+            }
+
+            return new AlterTableSqlCodeExpr
+            {
+                TableName = tableName,
+                ConstraintExpr = constraintExpr,
+                DefaultExpr = defaultValueExpr,
+                ForExpr = forExpr
+            };
         }
 
         private IExpression AlterDatabase(TextSpan databaseSpan, IParser parser)
@@ -43,5 +74,25 @@ namespace T1.CodeDom.TSql.Parselets
                 IsSemicolon = isSemicolon,
             };
         }
+    }
+
+    public class AlterTableSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("ALTER TABLE ");
+            TableName.WriteToStream(stream);
+            stream.Write(" ADD ");
+            ConstraintExpr.WriteToStream(stream);
+            stream.Write(" ");
+            DefaultExpr.WriteToStream(stream);
+            stream.Write(" FOR ");
+            ForExpr.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr TableName { get; set; }
+        public MarkConstraintSqlCodeExpr ConstraintExpr { get; set; }
+        public SqlCodeExpr DefaultExpr { get; set; }
+        public SqlCodeExpr ForExpr { get; set; }
     }
 }

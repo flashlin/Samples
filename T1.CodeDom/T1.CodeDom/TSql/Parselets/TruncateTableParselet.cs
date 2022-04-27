@@ -7,7 +7,7 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			parser.Scanner.Consume(SqlToken.Table);
+			parser.Scanner.Consume(SqlToken.TABLE);
 			var tableName = parser.ConsumeObjectId();
 			return new TruncateTableSqlCodeExpr()
 			{

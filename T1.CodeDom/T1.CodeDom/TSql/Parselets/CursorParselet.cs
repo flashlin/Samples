@@ -6,7 +6,7 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			parser.Scanner.Consume(SqlToken.For);
+			parser.Scanner.Consume(SqlToken.FOR);
 
 			var selectExpr = parser.ParseExpIgnoreComment();
 
