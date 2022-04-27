@@ -7,68 +7,6 @@ using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
-	public class AlterParselet : IPrefixParselet
-	{
-		public IExpression Parse(TextSpan token, IParser parser)
-		{
-			if (parser.TryConsumeToken(out var databaseSpan, SqlToken.DATABASE))
-			{
-				return AlterDatabase(databaseSpan, parser);
-			}
-
-			throw new ParseException();
-		}
-
-		private IExpression AlterDatabase(TextSpan databaseSpan, IParser parser)
-		{
-			SqlCodeExpr databaseName  = null;
-			if (parser.MatchToken(SqlToken.CURRENT))
-			{
-				databaseName = new ObjectIdSqlCodeExpr
-				{
-					ObjectName = "CURRENT"
-				};
-			}
-			else
-			{
-				databaseName = parser.ConsumeObjectId();
-			}
-
-			parser.ConsumeToken(SqlToken.ADD);
-			parser.ConsumeToken(SqlToken.FILEGROUP);
-
-			var filegroupName = parser.ConsumeObjectId();
-			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
-			
-			return new AlterDatabaseSqlCodeExpr
-			{
-				DatabaseName = databaseName,
-				FileGroupName = filegroupName,
-				IsSemicolon = isSemicolon,
-			};
-		}
-	}
-
-	public class AlterDatabaseSqlCodeExpr : SqlCodeExpr
-	{
-		public override void WriteToStream(IndentStream stream)
-		{
-			stream.Write("ALTER DATABASE ");
-			DatabaseName.WriteToStream(stream);
-			stream.Write(" ");
-			stream.Write("ADD FILEGROUP ");
-			FileGroupName.WriteToStream(stream);
-			if (IsSemicolon)
-			{
-				stream.Write(" ;");
-			}
-		}
-
-		public SqlCodeExpr DatabaseName { get; set; }
-		public SqlCodeExpr FileGroupName { get; set; }
-		public bool IsSemicolon { get; set; }
-	}
-
 	public class CreateParselet : IPrefixParselet
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
