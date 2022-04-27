@@ -1,3 +1,4 @@
+using CommandLine;
 using SqliteCli.Entities;
 using SqliteCli.Helpers;
 using T1.Standard.Common;
@@ -138,4 +139,38 @@ public class StockService : IStockService
 
         return rc;
     }
+
+    public void ShowTransList(string[] args)
+    {
+        var opts = Parser.Default.ParseArguments<ShowTransListCommandLineOptions>(args)
+            .MapResult((opts) => { return opts; },
+                errs => { return null; });
+        ShowTransList(opts);
+    }
+
+    private void ShowTransList(ShowTransListCommandLineOptions options)
+    {
+        var rc = _stockRepo.GetTransList(new ListTransReq
+        {
+            StartTime = options?.StartTime,
+            EndTime = options?.EndTime,
+            StockId = options?.StockId,
+        });
+        rc.Dump();
+    }
+}
+
+public class ShowTransListCommandLineOptions
+{
+    [Value(index:0, HelpText = "actio name")]
+    public string Name { get; set; }
+    
+    [Value(index:1, Required = false, HelpText = "Start tran Date.")]
+    public DateTime? StartTime { get; set; }
+
+    [Value(index:2, Required = false, HelpText = "Start tran Date.")]
+    public DateTime? EndTime { get; set; }
+
+    [Option(shortName: 's', Required = false, HelpText = "StockId.")]
+    public string? StockId { get; set; }
 }

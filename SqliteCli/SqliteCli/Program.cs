@@ -45,13 +45,14 @@ do
 			Console.WriteLine("append <stockId>             :append stock history data");
 			continue;
 		case "l":
-			{
-				var cmdArgs = string.Empty;
-				if (ss.Length > 1)
-				{
-					cmdArgs = ss[1];
-				}
-				ProcessTransList(cmdArgs);
+		{
+			ProcessTransList2(ss);
+				// var cmdArgs = string.Empty;
+				// if (ss.Length > 1)
+				// {
+				// 	cmdArgs = ss[1];
+				// }
+				// ProcessTransList(cmdArgs);
 				break;
 			}
 		case "b":
@@ -213,6 +214,11 @@ void ProcessBuyStock(string dataText)
 	db.BuyStock(tranData);
 }
 
+void ProcessTransList2(string[] args)
+{
+	var s = serviceProvider.GetService<IStockService>();
+	s.ShowTransList(args);
+}
 
 void ProcessTransList(string dateRange)
 {

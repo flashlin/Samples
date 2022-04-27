@@ -8,4 +8,5 @@ public interface IStockService
     Task AppendStockHistoryAsync(DateRange dateRange, string stockId);
     void ShowStockHistory(StockReportHistoryReq req);
     void ShowBalance();
+    void ShowTransList(string[] commandLine);
 }
