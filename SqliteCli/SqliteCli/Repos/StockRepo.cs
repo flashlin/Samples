@@ -125,6 +125,11 @@ group by st.Id, t.TranType
                 q1 = q1.Where(x => x.TranTime <= req.EndTime);
             }
 
+            if (req.StockId != null)
+            {
+                q1 = q1.Where(x => x.StockId == req.StockId);
+            }
+
             var trans = q1.ToList();
 
             var q2 = trans.GroupJoin(_db.StocksMap, tran => tran.StockId, stock => stock.Id,
