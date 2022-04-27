@@ -8,6 +8,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public SqlCodeExpr IndexName { get; set; }
 		public SqlCodeExpr TableName { get; set; }
 		public List<OrderItemSqlCodeExpr> OnColumns { get; set; }
+		public SqlCodeExpr WithExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -18,6 +19,12 @@ namespace T1.CodeDom.TSql.Expressions
 			stream.Write("(");
 			OnColumns.WriteToStreamWithComma(stream);
 			stream.Write(")");
+
+			if (WithExpr != null)
+			{
+				stream.Write(" ");
+				WithExpr.WriteToStream(stream);
+			}
 		}
 	}
 	
