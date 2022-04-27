@@ -19,7 +19,6 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ASC", SqlToken.Asc);
 			AddTokenMap("AND", SqlToken.And);
 			AddTokenMap("ALL", SqlToken.All);
-			AddTokenMap("AUTO", SqlToken.AUTO);
 			AddTokenMap("BREAK", SqlToken.Break);
 			AddTokenMap("BEGIN", SqlToken.Begin);
 			AddTokenMap("BIT", SqlToken.Bit);
@@ -161,6 +160,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("YEAR", SqlToken.YEAR);
 
 			AddTokenMap("ADD", SqlToken.ADD);
+			AddTokenMap("AUTO", SqlToken.AUTO);
 			AddTokenMap("ANSI_NULLS", SqlToken.ANSI_NULLS);
 			AddTokenMap("ANSI_PADDING", SqlToken.ANSI_PADDING);
 			AddTokenMap("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
@@ -186,6 +186,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("IDENTITY", SqlToken.IDENTITY);
 			AddTokenMap("IGNORE_DUP_KEY", SqlToken.IGNORE_DUP_KEY);
 			AddTokenMap("KEY", SqlToken.KEY);
+			AddTokenMap("LOCK_ESCALATION", SqlToken.LOCK_ESCALATION);
 			AddTokenMap("LOW", SqlToken.LOW);
 			AddTokenMap("LOWER", SqlToken.LOWER);
 			AddTokenMap("LEVEL", SqlToken.LEVEL);

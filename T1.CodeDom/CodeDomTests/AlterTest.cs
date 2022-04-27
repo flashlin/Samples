@@ -17,4 +17,15 @@ public class AlterTest : TestBase
         Parse(sql);
         ThenExprShouldBe(@"ALTER TABLE [dbo].[customer] ADD CONSTRAINT [DF_id] DEFAULT ( 0 ) FOR [id]");
     }
+    
+    
+    [Fact]
+    public void alter_table_set()
+    {
+        var sql = "ALTER TABLE [customer] SET (LOCK_ESCALATION = AUTO);";
+        Parse(sql);
+        ThenExprShouldBe(@"ALTER TABLE [customer] SET (LOCK_ESCALATION = AUTO)");
+    }
+    
+    
 }

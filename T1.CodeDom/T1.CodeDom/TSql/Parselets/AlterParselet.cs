@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql.Expressions;
 using T1.Standard.IO;
@@ -25,24 +26,45 @@ namespace T1.CodeDom.TSql.Parselets
         private IExpression AlterTable(TextSpan tableSpan, IParser parser)
         {
             var tableName = parser.ConsumeObjectId();
+            
             parser.ConsumeToken(SqlToken.ADD);
 
-            var constraintExpr = parser.ParseConstraint();
+
+            var optionList = parser.ParseAll(
+                SqlParserExtension.ParseConstraint,
+                SqlParserExtension.ParseDefault,
+                ParseFor
+                );
             
-            var defaultValueExpr = parser.ParseDefault();
-            SqlCodeExpr forExpr = null;
-            if (defaultValueExpr != null)
-            {
-                parser.ConsumeToken(SqlToken.FOR);
-                forExpr = parser.ConsumeObjectId();
-            }
+            // var constraintExpr = parser.ParseConstraint();
+            // var defaultValueExpr = parser.ParseDefault();
+            // SqlCodeExpr forExpr = null;
+            // if (defaultValueExpr != null)
+            // {
+            //     parser.ConsumeToken(SqlToken.FOR);
+            //     forExpr = parser.ConsumeObjectId();
+            // }
 
             return new AlterTableSqlCodeExpr
             {
                 TableName = tableName,
-                ConstraintExpr = constraintExpr,
-                DefaultExpr = defaultValueExpr,
-                ForExpr = forExpr
+                // ConstraintExpr = constraintExpr,
+                // DefaultExpr = defaultValueExpr,
+                // ForExpr = forExpr,
+                OptionList = optionList
+            };
+        }
+
+        private SqlCodeExpr ParseFor(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.FOR))
+            {
+                return null;
+            }
+            var objectId = parser.ConsumeObjectId();
+            return new ForSqlCodeExpr
+            {
+                ObjectId = objectId
             };
         }
 
@@ -76,6 +98,17 @@ namespace T1.CodeDom.TSql.Parselets
         }
     }
 
+    public class ForSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("FOR ");
+            ObjectId.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr ObjectId { get; set; }
+    }
+
     public class AlterTableSqlCodeExpr : SqlCodeExpr
     {
         public override void WriteToStream(IndentStream stream)
@@ -83,16 +116,18 @@ namespace T1.CodeDom.TSql.Parselets
             stream.Write("ALTER TABLE ");
             TableName.WriteToStream(stream);
             stream.Write(" ADD ");
-            ConstraintExpr.WriteToStream(stream);
-            stream.Write(" ");
-            DefaultExpr.WriteToStream(stream);
-            stream.Write(" FOR ");
-            ForExpr.WriteToStream(stream);
+            // ConstraintExpr.WriteToStream(stream);
+            // stream.Write(" ");
+            // DefaultExpr.WriteToStream(stream);
+            // stream.Write(" FOR ");
+            // ForExpr.WriteToStream(stream);
+            OptionList.WriteToStream(stream);
         }
 
         public SqlCodeExpr TableName { get; set; }
         public MarkConstraintSqlCodeExpr ConstraintExpr { get; set; }
         public SqlCodeExpr DefaultExpr { get; set; }
         public SqlCodeExpr ForExpr { get; set; }
+        public List<SqlCodeExpr> OptionList { get; set; }
     }
 }
