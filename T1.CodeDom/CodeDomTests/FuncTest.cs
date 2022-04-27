@@ -33,7 +33,7 @@ namespace TestProject.PrattTests
 			var sql = @"cast(100.00 as Decimal(19, 2))";
 			Parse(sql);
 
-			ThenExprShouldBe(@"CAST( 100.00 AS DECIMAL(19,2) )");
+			ThenExprShouldBe(@"CAST( 100.00 AS DECIMAL (19,2) )");
 		}
 
 		[Fact]
@@ -43,7 +43,7 @@ namespace TestProject.PrattTests
 
 			Parse(sql);
 
-			ThenExprShouldBe(@"CONVERT( VARCHAR(100), GETDATE(), 120 )");
+			ThenExprShouldBe(@"CONVERT( VARCHAR (100), GETDATE(), 120 )");
 		}
 
 		[Fact]

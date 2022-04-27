@@ -37,7 +37,7 @@ name varchar(10)
 
         ThenExprShouldBe(@"CREATE TABLE #customer(
 id INT,
-name VARCHAR(10)
+name VARCHAR (10)
 )");
     }
 
@@ -138,7 +138,7 @@ ON [PRIMARY]
         Parse(sql);
 
         ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
-    [Id] INT IDENTITY(1,1) NOT NULL,
+    [Id] INT IDENTITY (1,1) NOT NULL,
     [sid] INT NULL,
     PRIMARY KEY CLUSTERED([Id] ASC)
     WITH(PAD_INDEX = OFF)

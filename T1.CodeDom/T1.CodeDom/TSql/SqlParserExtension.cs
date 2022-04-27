@@ -128,13 +128,16 @@ namespace T1.CodeDom.TSql
                 dataType = ParseDataType(parser);
             }
 
-            var isIdentity = parser.MatchToken(SqlToken.IDENTITY);
+            // var isIdentity = parser.MatchToken(SqlToken.IDENTITY);
+            // var sizeExpr = ParseDataTypeSize(parser);
 
-            var sizeExpr = ParseDataTypeSize(parser);
+            //var isReadOnly = parser.Scanner.Match(SqlToken.ReadOnly);
 
-            var isReadOnly = parser.Scanner.Match(SqlToken.ReadOnly);
-
-            var extraList = parser.ParseAll(ParseNotForReplication,
+            var extraList = parser.ParseAll(
+                ParseIdentity,
+                ParseReadOnly,
+                ParseDataTypeSize,
+                ParseNotForReplication,
                 SqlParserExtension.ParseClustered,
                 ParsePrimaryKey,
                 ParseConstraint,
@@ -146,11 +149,34 @@ namespace T1.CodeDom.TSql
             return new DataTypeSqlCodeExpr
             {
                 DataType = dataType,
-                IsIdentity = isIdentity,
-                IsReadOnly = isReadOnly,
-                SizeExpr = sizeExpr,
+                //IsIdentity = isIdentity,
+                //IsReadOnly = isReadOnly,
+                //SizeExpr = sizeExpr,
                 ExtraList = extraList,
             };
+        }
+
+        private static SqlCodeExpr Parse(IParser parser, SqlToken tokenType)
+        {
+            if (!parser.MatchToken(tokenType))
+            {
+                return null;
+            }
+
+            return new TokenSqlCodeExpr
+            {
+                Value = tokenType,
+            };
+        }
+        
+        private static SqlCodeExpr ParseReadOnly(IParser parser)
+        {
+            return Parse(parser, SqlToken.ReadOnly);
+        }
+
+        private static SqlCodeExpr ParseIdentity(IParser parser)
+        {
+            return Parse(parser, SqlToken.IDENTITY);
         }
 
         public static OnSqlCodeExpr ParseOnPrimary(this IParser parser)
@@ -1519,6 +1545,17 @@ namespace T1.CodeDom.TSql
             };
         }
     }
+
+    public class TokenSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write($"{Value.ToString().ToUpper()}");
+        }
+
+        public SqlToken Value { get; set; }
+    }
+
 
     public class OnSqlCodeExpr : SqlCodeExpr
     {

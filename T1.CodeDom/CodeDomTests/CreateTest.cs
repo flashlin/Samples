@@ -23,7 +23,7 @@ end";
 
             ThenExprShouldBe(@"CREATE PROCEDURE myProc
 @id INT, 
-@name VARCHAR(50)
+@name VARCHAR (50)
 AS
 BEGIN
 	SET NOEXEC ON
@@ -45,7 +45,7 @@ end";
 
             ThenExprShouldBe(@"CREATE PROCEDURE myProc
 @id INT, 
-@name VARCHAR(50) = 'a'
+@name VARCHAR (50) = 'a'
 AS
 BEGIN
 	SET NOEXEC ON
@@ -119,8 +119,8 @@ END");
             Parse(sql);
 
             ThenExprShouldBe(@"CREATE TABLE [dbo].[myCustomer](
-[ID] INT IDENTITY(1,1) NOT NULL,    
-[Name] VARCHAR(50) NOT NULL,    
+[ID] INT IDENTITY (1,1) NOT NULL,    
+[Name] VARCHAR (50) NOT NULL,    
 [Birth] SMALLDATETIME CONSTRAINT [DF_Birth] DEFAULT GETDATE() NOT NULL    
 )");
         }

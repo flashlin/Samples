@@ -21,7 +21,7 @@ name varchar(50)
 			ThenExprShouldBe(@"DECLARE @tb TABLE
 (
 	id INT,
-	name VARCHAR(50)
+	name VARCHAR (50)
 )");
 		}
 
@@ -32,7 +32,7 @@ name varchar(50)
 
 			Parse(sql);
 
-			ThenExprShouldBe(@"DECLARE @amount DECIMAL(10,3) = 1
+			ThenExprShouldBe(@"DECLARE @amount DECIMAL (10,3) = 1
 DECLARE @id INT");
 		}
 
