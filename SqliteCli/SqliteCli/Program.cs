@@ -47,13 +47,7 @@ do
 			continue;
 		case "l":
 		{
-			ProcessTransList2(ss);
-				// var cmdArgs = string.Empty;
-				// if (ss.Length > 1)
-				// {
-				// 	cmdArgs = ss[1];
-				// }
-				// ProcessTransList(cmdArgs);
+			ProcessTransList(ss);
 				break;
 			}
 		case "b":
@@ -215,62 +209,8 @@ void ProcessBuyStock(string dataText)
 	db.BuyStock(tranData);
 }
 
-void ProcessTransList2(string[] args)
+void ProcessTransList(string[] args)
 {
 	var s = serviceProvider.GetService<ConsoleApp>();
 	s.ShowTransList(args);
-}
-
-void ProcessTransList(string dateRange)
-{
-	var req = new ListTransReq();
-
-	if (!ParseDateRange(dateRange, req))
-	{
-		ParseStartDate(dateRange, req);
-	}
-
-	var db = serviceProvider.GetService<IStockRepo>();
-	var rc = db.GetTransList(req);
-	rc.Dump();
-}
-
-bool ParseDateRange(string args, ListTransReq req)
-{
-	var startTime = RegexPattern.Group("startTime", @"\d{4}/\d{2}/\d{2}");
-	var endTime = RegexPattern.Group("endTime", @"\d{4}/\d{2}/\d{2}");
-	var dateRange = @$"{startTime}\-{endTime}";
-	var rg = new Regex(dateRange);
-
-	var m = rg.Match(args);
-	if (m.Success)
-	{
-		req.StartTime = DateTime.Parse(m.Groups["startTime"].Value);
-		req.EndTime = DateTime.Parse(m.Groups["endTime"].Value);
-		return true;
-	}
-
-	return false;
-}
-
-bool ParseStartDate(string args, ListTransReq req)
-{
-	var startTime = RegexPattern.Group("startTime", @"\d{4}/\d{2}/\d{2}");
-	var startDateRg = new Regex(@$"{startTime}\-");
-	var m = startDateRg.Match(args);
-	if (m.Success)
-	{
-		req.StartTime = DateTime.Parse(m.Groups["startTime"].Value);
-		return true;
-	}
-
-
-	var startDateRg2 = new Regex(@$"{startTime}");
-	var m2 = startDateRg2.Match(args);
-	if (m2.Success)
-	{
-		req.StartTime = DateTime.Parse(m2.Groups["startTime"].Value);
-		return true;
-	}
-	return false;
 }
