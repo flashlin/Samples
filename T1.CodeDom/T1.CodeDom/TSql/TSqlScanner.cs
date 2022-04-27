@@ -160,6 +160,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("SUBSTRING", SqlToken.SUBSTRING);
 			AddTokenMap("YEAR", SqlToken.YEAR);
 
+			AddTokenMap("ADD", SqlToken.ADD);
 			AddTokenMap("ANSI_NULLS", SqlToken.ANSI_NULLS);
 			AddTokenMap("ANSI_PADDING", SqlToken.ANSI_PADDING);
 			AddTokenMap("ANSI_WARNINGS", SqlToken.ANSI_WARNINGS);
@@ -171,8 +172,11 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("COMMITTED", SqlToken.COMMITTED);
 			AddTokenMap("CONNECT", SqlToken.CONNECT);
 			AddTokenMap("COMMIT", SqlToken.Commit);
+			AddTokenMap("CURRENT", SqlToken.CURRENT);
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
+			AddTokenMap("DATABASE", SqlToken.DATABASE);
+			AddTokenMap("FILEGROUP", SqlToken.FILEGROUP);
 			AddTokenMap("FORCESEEK", SqlToken.FORCESEEK);
 			AddTokenMap("FILLFACTOR", SqlToken.FILLFACTOR);
 			AddTokenMap("HIGH", SqlToken.HIGH);

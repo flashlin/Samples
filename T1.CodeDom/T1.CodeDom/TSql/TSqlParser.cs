@@ -9,6 +9,7 @@ namespace T1.CodeDom.TSql
     {
         public TSqlParser(IScanner scanner) : base(scanner)
         {
+            Register(SqlToken.Alter, new AlterParselet());
             Register(SqlToken.Asterisk, new AsteriskParselet());
             Register(SqlToken.Begin, new BeginParselet());
             Register(SqlToken.Break, new BreakParselet());

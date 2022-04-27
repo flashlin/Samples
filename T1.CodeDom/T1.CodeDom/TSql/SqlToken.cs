@@ -238,6 +238,10 @@
 		ALLOW_ROW_LOCKS,
 		ALLOW_PAGE_LOCKS,
 		ONLINE,
-		Alter
+		Alter,
+		DATABASE,
+		CURRENT,
+		ADD,
+		FILEGROUP
 	}
 }

@@ -128,5 +128,18 @@ INTO @id, @name");
 
             ThenExprShouldBe(@"CONSTRAINT [PK_my] PRIMARY KEY CLUSTERED([id] ASC, [name] ASC)");
         }
+        
+        
+        [Fact]
+        public void alter_database()
+        {
+            var sql = @"alter database [$(DatabaseName)] ADD FILEGROUP [file123];";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"ALTER DATABASE [$(DatabaseName)] ADD FILEGROUP [file123] ;");
+        }
+        
+        
     }
 }
