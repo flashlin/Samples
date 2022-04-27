@@ -29,7 +29,7 @@ namespace SqlLocalDataTests
 		public void create_table()
 		{
 			var mydb = new MyDbContext();
-			mydb.EnsureTableCreated(typeof(CustomerEntity));
+			mydb.CreateTable(typeof(CustomerEntity));
 		}
 
 		public void Dispose()
