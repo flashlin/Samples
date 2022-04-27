@@ -5,12 +5,12 @@ using SqliteCli.Helpers;
 using SqliteCli.Repos;
 using T1.Standard.Extensions;
 
-public class ConsoleApp
+public class Startup
 {
     private IStockService _stockService;
     private IStockRepo _stockRepo;
 
-    public ConsoleApp(IStockService stockService, IStockRepo stockRepo)
+    public Startup(IStockService stockService, IStockRepo stockRepo)
     {
         _stockRepo = stockRepo;
         _stockService = stockService;

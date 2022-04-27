@@ -15,9 +15,9 @@ services.AddTransient<IStockExchangeApi, TwseStockExchangeApi>();
 services.AddDbContext<StockDbContext>();
 services.AddTransient<IStockRepo, StockRepo>();
 services.AddTransient<IStockService, StockService>();
-services.AddSingleton<ConsoleApp>();
+services.AddSingleton<Startup>();
 
 var serviceProvider = services.BuildServiceProvider();
 
-var app = serviceProvider.GetService<ConsoleApp>();
+var app = serviceProvider.GetService<Startup>();
 await app!.Run();
