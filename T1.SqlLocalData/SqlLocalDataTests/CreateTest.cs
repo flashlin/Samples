@@ -5,27 +5,38 @@ using Xunit;
 
 namespace SqlLocalDataTests
 {
-	public class CreateTest : IDisposable
-	{
-		public CreateTest()
-		{
-			
-		}
+    public class CreateTest : IDisposable
+    {
+        private string _instanceName = "localtest";
+        private string _databaseFile = @"D:\Demo\test.mdf";
+        private SqlLocalDb _localDb = new SqlLocalDb();
 
-		public void Dispose()
-		{
-		}
+        public CreateTest()
+        {
+            CreateInstance();
+        }
 
-		[Fact]
-		public void create_database()
-		{
-			var instanceName = "localtest";
-			var databaseFile = @"D:\Demo\test.mdf";
-			var localDb = new SqlLocalDb();
-			localDb.CreateInstance(instanceName);
-			localDb.CreateDatabase(instanceName, databaseFile);
-			Assert.True(File.Exists(databaseFile));
-			//File.Delete(databaseFile);
-		}
-	}
+        private void CreateInstance()
+        {
+            if (!_localDb.IsInstanceExists(_instanceName))
+            {
+                return;
+            }
+
+            _localDb.CreateInstance(_instanceName);
+            File.Delete(_databaseFile);
+        }
+
+        public void Dispose()
+        {
+            //_localDb.DeleteInstance();
+        }
+
+        [Fact]
+        public void create_database()
+        {
+            _localDb.CreateDatabase(_instanceName, _databaseFile);
+            Assert.True(File.Exists(_databaseFile));
+        }
+    }
 }
