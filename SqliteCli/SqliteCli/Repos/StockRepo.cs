@@ -111,12 +111,9 @@ group by st.Id, t.TranType
                 .FirstOrDefault(x => x.TranDate == date.Date && x.StockId == stockId);
         }
 
-        public List<TransHistory> ListTrans(ListTransReq req)
+        public List<TransHistory> GetTransList(ListTransReq req)
         {
-            //using var db = GetDatabase();
-            var db = _db;
-
-            var q1 = db.Trans.AsQueryable();
+            var q1 = _db.Trans.AsQueryable();
 
             if (req.StartTime != null)
             {
@@ -130,7 +127,7 @@ group by st.Id, t.TranType
 
             var trans = q1.ToList();
 
-            var q2 = trans.GroupJoin(db.StocksMap, tran => tran.StockId, stock => stock.Id,
+            var q2 = trans.GroupJoin(_db.StocksMap, tran => tran.StockId, stock => stock.Id,
                     (tran, stock) => new
                     {
                         tran,

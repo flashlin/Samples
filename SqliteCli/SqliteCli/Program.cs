@@ -224,7 +224,7 @@ void ProcessTransList(string dateRange)
 	}
 
 	var db = serviceProvider.GetService<IStockRepo>();
-	var rc = db.ListTrans(req);
+	var rc = db.GetTransList(req);
 	rc.Dump();
 }
 
