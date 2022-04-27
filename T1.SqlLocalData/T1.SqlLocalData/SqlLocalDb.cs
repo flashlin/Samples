@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace T1.SqlLocalData
 {
@@ -105,59 +102,6 @@ namespace T1.SqlLocalData
                     myConn.Close();
                 }
             }
-        }
-    }
-
-    public class ProcessHelper
-    {
-        public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(30);
-
-        public string Execute(string processFilename, string arguments)
-        {
-            var startInfo = new ProcessStartInfo(processFilename)
-            {
-                WindowStyle = ProcessWindowStyle.Hidden,
-                Arguments = arguments,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-            };
-
-            var outputStringBuilder = new StringBuilder();
-
-            var process = new Process();
-            process.StartInfo = startInfo;
-            process.EnableRaisingEvents = false;
-            process.OutputDataReceived += (sender, eventArgs) => outputStringBuilder.AppendLine(eventArgs.Data);
-            process.ErrorDataReceived += (sender, eventArgs) => outputStringBuilder.AppendLine(eventArgs.Data);
-
-            try
-            {
-                process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-                //process.StandardOutput.ReadToEnd();
-                var processExited = process.WaitForExit((int) Timeout.TotalMilliseconds);
-                if (processExited == false)
-                {
-                    process.Kill();
-                    throw new Exception("ERROR: Process took too long to finish");
-                }
-
-                if (process.ExitCode != 0)
-                {
-                    var output = outputStringBuilder.ToString();
-                    throw new Exception("Process exited code: " + process.ExitCode + Environment.NewLine +
-                                        "Output from process: " + outputStringBuilder.ToString());
-                }
-            }
-            finally
-            {
-                process.Close();
-            }
-
-            return outputStringBuilder.ToString();
         }
     }
 }
