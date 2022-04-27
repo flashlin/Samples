@@ -13,7 +13,7 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			if (parser.TryConsumeToken(out var nonclusteredSpan, SqlToken.NONCLUSTERED))
 			{
-				return CreateNonclusteredIndex(nonclusteredSpan, parser);
+				return CreateNonClusteredIndex(nonclusteredSpan, parser);
 			}
 			
 			if (parser.TryConsumeToken(out var synonymSpan, SqlToken.SYNONYM))
@@ -55,7 +55,7 @@ namespace T1.CodeDom.TSql.Parselets
 			throw new ParseException($"Parse CREATE Error, {helpMessage}");
 		}
 
-		private SqlCodeExpr CreateNonclusteredIndex(TextSpan nonclusteredSpan, IParser parser)
+		private SqlCodeExpr CreateNonClusteredIndex(TextSpan nonClusteredSpan, IParser parser)
 		{
 			parser.ConsumeToken(SqlToken.Index);
 			var indexName = parser.ConsumeObjectId();
@@ -64,6 +64,14 @@ namespace T1.CodeDom.TSql.Parselets
 			parser.ConsumeToken(SqlToken.LParen);
 			var columnList = parser.ParseOrderItemList();
 			parser.ConsumeToken(SqlToken.RParen);
+
+			SqlCodeExpr whereExpr = null;
+			if (parser.MatchToken(SqlToken.Where))
+			{
+				parser.ConsumeToken(SqlToken.LParen);
+				whereExpr = parser.ParseExpIgnoreComment();
+				parser.ConsumeToken(SqlToken.RParen);
+			}
 
 			var withExpr = parser.ParseConstraintWithOptions();
 			var onPrimary = parser.ParseOnPrimary();
@@ -74,6 +82,7 @@ namespace T1.CodeDom.TSql.Parselets
 				IndexName = indexName,
 				TableName = tableName,
 				ColumnList = columnList,
+				WhereExpr = whereExpr,
 				WithExpr = withExpr,
 				OnPrimary = onPrimary,
 				IsSemicolon = isSemicolon,
@@ -308,6 +317,13 @@ namespace T1.CodeDom.TSql.Parselets
 			ColumnList.WriteToStreamWithComma(stream);
 			stream.Write(")");
 
+			if (WhereExpr != null)
+			{
+				stream.Write(" WHERE (");
+				WhereExpr.WriteToStream(stream);
+				stream.Write(")");
+			}
+
 			if (WithExpr != null)
 			{
 				stream.Write(" ");
@@ -330,6 +346,7 @@ namespace T1.CodeDom.TSql.Parselets
 		public SqlCodeExpr TableName { get; set; }
 		public List<OrderItemSqlCodeExpr> ColumnList { get; set; }
 		public bool IsSemicolon { get; set; }
+		public SqlCodeExpr WhereExpr { get; set; }
 		public SqlCodeExpr WithExpr { get; set; }
 		public OnSqlCodeExpr OnPrimary { get; set; }
 	}
