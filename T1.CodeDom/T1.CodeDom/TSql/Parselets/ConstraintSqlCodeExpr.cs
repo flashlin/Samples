@@ -24,11 +24,18 @@ namespace T1.CodeDom.TSql.Parselets
                 stream.Write(" ");
                 WithExpr.WriteToStream(stream);
             }
+
+            if (OnPrimary != null)
+            {
+                stream.Write(" ");
+                OnPrimary.WriteToStream(stream);
+            }
         }
 
         public SqlCodeExpr ConstraintName { get; set; }
         public SqlCodeExpr KeyType { get; set; }
         public SqlCodeExpr WithExpr { get; set; }
         public ClusteredSqlCodeExpr ClusterExpr { get; set; }
+        public OnSqlCodeExpr OnPrimary { get; set; }
     }
 }

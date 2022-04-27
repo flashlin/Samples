@@ -15,13 +15,15 @@ namespace T1.CodeDom.TSql.Parselets
 
             var clusterExpr = parser.ParseClustered();
             var withExpr = parser.ParseConstraintWithOptions();
+            var onPrimary = parser.ParseOnPrimary();
 
             return new ConstraintSqlCodeExpr
             {
                 ConstraintName = constraintName,
                 KeyType = keyType,
                 ClusterExpr = clusterExpr,
-                WithExpr = withExpr
+                WithExpr = withExpr,
+                OnPrimary = onPrimary,
             };
         }
 
