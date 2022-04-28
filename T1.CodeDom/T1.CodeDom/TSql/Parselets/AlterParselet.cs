@@ -125,9 +125,9 @@ namespace T1.CodeDom.TSql.Parselets
         }
 
         public SqlCodeExpr TableName { get; set; }
-        public MarkConstraintSqlCodeExpr ConstraintExpr { get; set; }
-        public SqlCodeExpr DefaultExpr { get; set; }
-        public SqlCodeExpr ForExpr { get; set; }
+        // public MarkConstraintSqlCodeExpr ConstraintExpr { get; set; }
+        // public SqlCodeExpr DefaultExpr { get; set; }
+        // public SqlCodeExpr ForExpr { get; set; }
         public List<SqlCodeExpr> OptionList { get; set; }
     }
 }
