@@ -11,6 +11,13 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
+            if (parser.TryConsumeTokenList(out var spanList, SqlToken.UNIQUE, SqlToken.NONCLUSTERED))
+            {
+                var createNonClusteredIndexExpr = CreateNonClusteredIndex(spanList[1], parser);
+                createNonClusteredIndexExpr.IsUnique = true;
+                return createNonClusteredIndexExpr;
+            }
+            
             if (parser.TryConsumeToken(out var nonclusteredSpan, SqlToken.NONCLUSTERED))
             {
                 return CreateNonClusteredIndex(nonclusteredSpan, parser);
@@ -55,7 +62,7 @@ namespace T1.CodeDom.TSql.Parselets
             throw new ParseException($"Parse CREATE Error, {helpMessage}");
         }
 
-        private SqlCodeExpr CreateNonClusteredIndex(TextSpan nonClusteredSpan, IParser parser)
+        private CreateNonclusteredIndexSqlCodeExpr CreateNonClusteredIndex(TextSpan nonClusteredSpan, IParser parser)
         {
             parser.ConsumeToken(SqlToken.Index);
             var indexName = parser.ConsumeObjectId();
@@ -358,7 +365,14 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public override void WriteToStream(IndentStream stream)
         {
-            stream.Write("CREATE NONCLUSTERED INDEX ");
+            stream.Write("CREATE");
+
+            if (IsUnique)
+            {
+                stream.Write(" UNIQUE");
+            }
+            
+            stream.Write(" NONCLUSTERED INDEX ");
             IndexName.WriteToStream(stream);
             stream.Write(" ON ");
             TableName.WriteToStream(stream);
@@ -398,6 +412,7 @@ namespace T1.CodeDom.TSql.Parselets
         public SqlCodeExpr WhereExpr { get; set; }
         public SqlCodeExpr WithExpr { get; set; }
         public OnSqlCodeExpr OnPrimary { get; set; }
+        public bool IsUnique { get; set; }
     }
 
     public class CreateSynonymSqlCodeExpr : SqlCodeExpr

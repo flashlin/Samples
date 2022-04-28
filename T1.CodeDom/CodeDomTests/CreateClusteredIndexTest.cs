@@ -35,4 +35,17 @@ WHERE ([id] IS NOT NULL) WITH(FILLFACTOR = 85) ;");
 ON [dbo].[customer]([id] ASC, [name] ASC)
 ON [product]([ProductType])");
     }
+    
+    
+    [Fact]
+    public void unique_nonclustered()
+    {
+        var sql = @"CREATE UNIQUE NONCLUSTERED INDEX [IX_customer]
+                        ON [dbo].[customer]([id] DESC) WITH (FILLFACTOR = 100);";
+        Parse(sql);
+        ThenExprShouldBe(@"CREATE UNIQUE NONCLUSTERED INDEX [IX_customer]
+ON [dbo].[customer]([id] DESC) WITH(FILLFACTOR = 100) ;");
+    }
+    
+    
 }
