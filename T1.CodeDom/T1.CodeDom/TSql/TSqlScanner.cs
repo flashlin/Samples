@@ -220,6 +220,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("SERIALIZABLE", SqlToken.SERIALIZABLE);
 			AddTokenMap("TRANSACTION", SqlToken.TRANSACTION);
 			AddTokenMap("TRAN", SqlToken.TRAN);
+			AddTokenMap("TYPE", SqlToken.TYPE);
 			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);
 			AddTokenMap("UNIQUE", SqlToken.UNIQUE);
 			AddTokenMap("UNCOMMITTED", SqlToken.UNCOMMITTED);

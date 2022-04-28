@@ -11,6 +11,11 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
+            if (parser.TryConsumeToken(out var typeSpan, SqlToken.TYPE))
+            {
+                return ParseCreateType(typeSpan, parser);
+            }
+            
             if (parser.TryConsumeTokenList(out var spanList, SqlToken.UNIQUE, SqlToken.NONCLUSTERED))
             {
                 var createNonClusteredIndexExpr = CreateNonClusteredIndex(spanList[1], parser);
@@ -40,7 +45,7 @@ namespace T1.CodeDom.TSql.Parselets
 
             if (parser.Scanner.TryConsume(SqlToken.TABLE, out var tableSpan))
             {
-                return CreateTable(tableSpan, parser);
+                return parser.CreateTable(tableSpan);
             }
 
             if (parser.Scanner.Match(SqlToken.Procedure))
@@ -60,6 +65,21 @@ namespace T1.CodeDom.TSql.Parselets
 
             var helpMessage = parser.Scanner.GetHelpMessage();
             throw new ParseException($"Parse CREATE Error, {helpMessage}");
+        }
+
+        private IExpression ParseCreateType(TextSpan typeSpan, IParser parser)
+        {
+            var typeName = parser.ConsumeObjectId();
+            parser.ConsumeToken(SqlToken.As);
+            
+            var tableSpan = parser.ConsumeToken(SqlToken.TABLE);
+            var typeExpr = parser.ConsumeTableDataType();
+
+            return new CreateTypeSqlCodeExpr
+            {
+                Name = typeName,
+                TypeExpr = typeExpr,
+            };
         }
 
         private CreateNonclusteredIndexSqlCodeExpr CreateNonClusteredIndex(TextSpan nonClusteredSpan, IParser parser)
@@ -191,25 +211,6 @@ namespace T1.CodeDom.TSql.Parselets
                 IndexName = indexName,
                 TableName = tableName,
                 OnColumns = onColumnsList
-            };
-        }
-
-        private SqlCodeExpr CreateTable(TextSpan tableSpan, IParser parser)
-        {
-            var tableName = parser.ConsumeTableName();
-
-            var tableType = parser.ConsumeTableDataType();
-            tableType.Name = tableName;
-
-            var onPrimary = parser.ParseOnPrimary();
-
-            var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
-
-            return new CreateTableSqlCodeExpr
-            {
-                TableExpr = tableType,
-                OnPrimary = onPrimary,
-                IsSemicolon = isSemicolon
             };
         }
 
@@ -345,6 +346,20 @@ namespace T1.CodeDom.TSql.Parselets
                 Body = bodyList
             };
         }
+    }
+
+    public class CreateTypeSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CREATE TYPE ");
+            Name.WriteToStream(stream);
+            stream.Write(" AS ");
+            TypeExpr.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr Name { get; set; }
+        public TableDataTypeSqlCodeExpr TypeExpr { get; set; }
     }
 
     public class PartitionSchemeNameSqlCodeExpr : SqlCodeExpr

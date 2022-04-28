@@ -188,5 +188,18 @@ ON [dbo].[customer]([id] ASC) WITH(FILLFACTOR = 90) ON [PRIMARY] ;");
         
        
         
+        [Fact]
+        public void create_type_as_table()
+        {
+            var sql = @"CREATE TYPE [dbo].[myTable] AS TABLE (
+                            [Id] bigInt NULL
+                        );";
+            
+            Parse(sql);
+
+            ThenExprShouldBe(@"CREATE TYPE [dbo].[myTable] AS TABLE (
+[Id] BIGINT NULL )");
+        }
+        
     }
 }

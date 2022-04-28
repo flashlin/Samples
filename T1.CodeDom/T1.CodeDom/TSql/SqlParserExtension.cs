@@ -1565,6 +1565,25 @@ namespace T1.CodeDom.TSql
                 ColumnList = columnList,
             };
         }
+
+        public static CreateTableSqlCodeExpr CreateTable(this IParser parser, TextSpan tableSpan)
+        {
+            var tableName = parser.ConsumeTableName();
+
+            var tableType = parser.ConsumeTableDataType();
+            tableType.Name = tableName;
+
+            var onPrimary = parser.ParseOnPrimary();
+
+            var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
+
+            return new CreateTableSqlCodeExpr
+            {
+                TableExpr = tableType,
+                OnPrimary = onPrimary,
+                IsSemicolon = isSemicolon
+            };
+        }
     }
 
     public class TokenSqlCodeExpr : SqlCodeExpr
