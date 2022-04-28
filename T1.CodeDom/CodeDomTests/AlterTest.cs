@@ -27,5 +27,4 @@ public class AlterTest : TestBase
         ThenExprShouldBe(@"ALTER TABLE [customer] SET (LOCK_ESCALATION = AUTO)");
     }
     
-    
 }

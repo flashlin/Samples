@@ -9,6 +9,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public SqlCodeExpr TableName { get; set; }
 		public List<OrderItemSqlCodeExpr> OnColumns { get; set; }
 		public SqlCodeExpr WithExpr { get; set; }
+		public SqlCodeExpr OnPartitionSchemeNameExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -24,6 +25,12 @@ namespace T1.CodeDom.TSql.Expressions
 			{
 				stream.Write(" ");
 				WithExpr.WriteToStream(stream);
+			}
+
+			if (OnPartitionSchemeNameExpr != null)
+			{
+				stream.WriteLine();
+				OnPartitionSchemeNameExpr.WriteToStream(stream);
 			}
 		}
 	}

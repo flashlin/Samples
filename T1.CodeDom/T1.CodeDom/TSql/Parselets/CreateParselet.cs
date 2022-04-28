@@ -7,371 +7,420 @@ using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
-	public class CreateParselet : IPrefixParselet
-	{
-		public IExpression Parse(TextSpan token, IParser parser)
-		{
-			if (parser.TryConsumeToken(out var nonclusteredSpan, SqlToken.NONCLUSTERED))
-			{
-				return CreateNonClusteredIndex(nonclusteredSpan, parser);
-			}
-			
-			if (parser.TryConsumeToken(out var synonymSpan, SqlToken.SYNONYM))
-			{
-				return CreateSynonym(synonymSpan, parser);
-			}
-			
-			if(parser.Scanner.TryConsume(SqlToken.CLUSTERED, out var clusteredSpan))
-			{
-				return CreateClusteredIndex(clusteredSpan, parser);
-			}
-			
-			if(parser.Scanner.TryConsume(SqlToken.Index, out var indexSpan))
-			{
-				return CreateIndex(indexSpan, parser);
-			}
+    public class CreateParselet : IPrefixParselet
+    {
+        public IExpression Parse(TextSpan token, IParser parser)
+        {
+            if (parser.TryConsumeToken(out var nonclusteredSpan, SqlToken.NONCLUSTERED))
+            {
+                return CreateNonClusteredIndex(nonclusteredSpan, parser);
+            }
 
-			if (parser.Scanner.TryConsume(SqlToken.TABLE, out var tableSpan))
-			{
-				return CreateTable(tableSpan, parser);
-			}
+            if (parser.TryConsumeToken(out var synonymSpan, SqlToken.SYNONYM))
+            {
+                return CreateSynonym(synonymSpan, parser);
+            }
 
-			if (parser.Scanner.Match(SqlToken.Procedure))
-			{
-				return CreateProcedure(token, parser);
-			}
+            if (parser.Scanner.TryConsume(SqlToken.CLUSTERED, out var clusteredSpan))
+            {
+                return CreateClusteredIndex(clusteredSpan, parser);
+            }
 
-			if (parser.Scanner.Match(SqlToken.Function))
-			{
-				return CreateFunction(token, parser);
-			}
+            if (parser.Scanner.TryConsume(SqlToken.Index, out var indexSpan))
+            {
+                return CreateIndex(indexSpan, parser);
+            }
 
-			if (parser.Scanner.Match(SqlToken.Partition))
-			{
-				return CreatePartitionFunction(token, parser);
-			}
+            if (parser.Scanner.TryConsume(SqlToken.TABLE, out var tableSpan))
+            {
+                return CreateTable(tableSpan, parser);
+            }
 
-			var helpMessage = parser.Scanner.GetHelpMessage();
-			throw new ParseException($"Parse CREATE Error, {helpMessage}");
-		}
+            if (parser.Scanner.Match(SqlToken.Procedure))
+            {
+                return CreateProcedure(token, parser);
+            }
 
-		private SqlCodeExpr CreateNonClusteredIndex(TextSpan nonClusteredSpan, IParser parser)
-		{
-			parser.ConsumeToken(SqlToken.Index);
-			var indexName = parser.ConsumeObjectId();
-			parser.ConsumeToken(SqlToken.ON);
-			var tableName = parser.ConsumeObjectId();
-			parser.ConsumeToken(SqlToken.LParen);
-			var columnList = parser.ParseOrderItemList();
-			parser.ConsumeToken(SqlToken.RParen);
+            if (parser.Scanner.Match(SqlToken.Function))
+            {
+                return CreateFunction(token, parser);
+            }
 
-			SqlCodeExpr whereExpr = null;
-			if (parser.MatchToken(SqlToken.Where))
-			{
-				parser.ConsumeToken(SqlToken.LParen);
-				whereExpr = parser.ParseExpIgnoreComment();
-				parser.ConsumeToken(SqlToken.RParen);
-			}
+            if (parser.Scanner.Match(SqlToken.Partition))
+            {
+                return CreatePartitionFunction(token, parser);
+            }
 
-			var withExpr = parser.ParseConstraintWithOptions();
-			var onPrimary = parser.ParseOnPrimary();
-			
-			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
-			return new CreateNonclusteredIndexSqlCodeExpr
-			{
-				IndexName = indexName,
-				TableName = tableName,
-				ColumnList = columnList,
-				WhereExpr = whereExpr,
-				WithExpr = withExpr,
-				OnPrimary = onPrimary,
-				IsSemicolon = isSemicolon,
-			};
-		}
+            var helpMessage = parser.Scanner.GetHelpMessage();
+            throw new ParseException($"Parse CREATE Error, {helpMessage}");
+        }
 
-		private SqlCodeExpr CreateSynonym(TextSpan synonymSpan, IParser parser)
-		{
-			var synonymName = parser.ConsumeObjectId();
-			parser.ConsumeToken(SqlToken.FOR);
-			var objectId = parser.ConsumeObjectId();
-			return new CreateSynonymSqlCodeExpr
-			{
-				Name = synonymName,
-				ObjectId = objectId
-			};
-		}
+        private SqlCodeExpr CreateNonClusteredIndex(TextSpan nonClusteredSpan, IParser parser)
+        {
+            parser.ConsumeToken(SqlToken.Index);
+            var indexName = parser.ConsumeObjectId();
+            parser.ConsumeToken(SqlToken.ON);
+            var tableName = parser.ConsumeObjectId();
+            parser.ConsumeToken(SqlToken.LParen);
+            var columnList = parser.ParseOrderItemList();
+            parser.ConsumeToken(SqlToken.RParen);
 
-		private SqlCodeExpr CreateClusteredIndex(TextSpan clusteredSpan, IParser parser)
-		{
-			parser.Scanner.Consume(SqlToken.Index);
-			var indexName = parser.ConsumeObjectId();
-			parser.Scanner.Consume(SqlToken.ON);
-			
-			if( !parser.TryConsumeObjectId(out var tableName) )
-			{
-				tableName = parser.Consume(SqlToken.TempTable);
-			}
-			
-			parser.Scanner.Consume(SqlToken.LParen);
-			var onColumnsList = parser.ParseOrderItemList();
-			parser.Scanner.Consume(SqlToken.RParen);
-			
-			var withExpr = parser.ParseConstraintWithOptions();
+            SqlCodeExpr whereExpr = null;
+            if (parser.MatchToken(SqlToken.Where))
+            {
+                parser.ConsumeToken(SqlToken.LParen);
+                whereExpr = parser.ParseExpIgnoreComment();
+                parser.ConsumeToken(SqlToken.RParen);
+            }
 
-			return new CreateClusteredIndexSqlCodeExpr
-			{
-				IndexName = indexName,
-				TableName = tableName,
-				OnColumns = onColumnsList,
-				WithExpr = withExpr
-			};
-		}
-		
-		private SqlCodeExpr CreateIndex(TextSpan indexSpan, IParser parser)
-		{
-			var indexName = parser.ConsumeObjectId();
-			parser.Scanner.Consume(SqlToken.ON);
-			
-			if( !parser.TryConsumeObjectId(out var tableName) )
-			{
-				tableName = parser.Consume(SqlToken.TempTable);
-			}
-			
-			var onColumnsList = new List<SqlCodeExpr>();
-			parser.Scanner.Consume(SqlToken.LParen);
-			do
-			{
-				var columnName = parser.ConsumeObjectId();
-				onColumnsList.Add(columnName);
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			parser.Scanner.Consume(SqlToken.RParen);
+            var withExpr = parser.ParseConstraintWithOptions();
+            var onPrimary = parser.ParseOnPrimary();
 
-			return new CreateIndexSqlCodeExpr
-			{
-				IndexName = indexName,
-				TableName = tableName,
-				OnColumns = onColumnsList
-			};
-		}
+            var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
+            return new CreateNonclusteredIndexSqlCodeExpr
+            {
+                IndexName = indexName,
+                TableName = tableName,
+                ColumnList = columnList,
+                WhereExpr = whereExpr,
+                WithExpr = withExpr,
+                OnPrimary = onPrimary,
+                IsSemicolon = isSemicolon,
+            };
+        }
 
-		private SqlCodeExpr CreateTable(TextSpan tableSpan, IParser parser)
-		{
-			var tableName = parser.ConsumeTableName();
+        private SqlCodeExpr CreateSynonym(TextSpan synonymSpan, IParser parser)
+        {
+            var synonymName = parser.ConsumeObjectId();
+            parser.ConsumeToken(SqlToken.FOR);
+            var objectId = parser.ConsumeObjectId();
+            return new CreateSynonymSqlCodeExpr
+            {
+                Name = synonymName,
+                ObjectId = objectId
+            };
+        }
 
-			var tableType = parser.ConsumeTableDataType();
-			tableType.Name = tableName;
-			
-			var onPrimary = parser.ParseOnPrimary();
+        private SqlCodeExpr CreateClusteredIndex(TextSpan clusteredSpan, IParser parser)
+        {
+            parser.Scanner.Consume(SqlToken.Index);
+            var indexName = parser.ConsumeObjectId();
 
-			var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
+            parser.Scanner.Consume(SqlToken.ON);
+            if (!parser.TryConsumeObjectId(out var tableName))
+            {
+                tableName = parser.Consume(SqlToken.TempTable);
+            }
 
-			return new CreateTableSqlCodeExpr
-			{
-				TableExpr = tableType,
-				OnPrimary = onPrimary,
-				IsSemicolon = isSemicolon
-			};
-		}
+            parser.Scanner.Consume(SqlToken.LParen);
+            var onColumnsList = parser.ParseOrderItemList();
+            parser.Scanner.Consume(SqlToken.RParen);
 
-		private IExpression CreatePartitionFunction(TextSpan token, IParser parser)
-		{
-			if (parser.Scanner.IsToken(SqlToken.Scheme))
-			{
-				return CreatePartitionScheme(token, parser);
-			}
+            var withExpr = parser.ParseConstraintWithOptions();
 
-			parser.Scanner.Consume(SqlToken.Function);
+            var onPartitionSchemeNameExpr = ParseOnPartitionSchemeName(parser);
 
-			var name = parser.ConsumeObjectId();
+            return new CreateClusteredIndexSqlCodeExpr
+            {
+                IndexName = indexName,
+                TableName = tableName,
+                OnColumns = onColumnsList,
+                WithExpr = withExpr,
+                OnPartitionSchemeNameExpr = onPartitionSchemeNameExpr
+            };
+        }
 
-			parser.Scanner.Consume(SqlToken.LParen);
-			var dataType = parser.ConsumeDataType();
-			parser.Scanner.Consume(SqlToken.RParen);
+        private SqlCodeExpr ParseOnPartitionSchemeName(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.ON))
+            {
+                return null;
+            }
 
-			parser.Scanner.Consume(SqlToken.As);
-			parser.Scanner.Consume(SqlToken.Range);
+            var filegroupName = parser.ConsumeObjectId();
 
-			var rangeType = string.Empty;
-			if (parser.Scanner.TryConsumeAny(out var rangeTypeSpan, SqlToken.Left, SqlToken.Right))
-			{
-				rangeType = parser.Scanner.GetSpanString(rangeTypeSpan);
-			}
+            if (parser.MatchToken(SqlToken.LParen))
+            {
+                var column = parser.ConsumeObjectId();
+                parser.ConsumeToken(SqlToken.RParen);
+                return new OnSqlCodeExpr
+                {
+                    Name = new PartitionSchemeNameSqlCodeExpr
+                    {
+                        Name = filegroupName,
+                        Column = column
+                    }
+                };
+            }
 
-			parser.Scanner.Consume(SqlToken.FOR);
-			parser.Scanner.Consume(SqlToken.Values);
+            return new OnSqlCodeExpr
+            {
+                Name = filegroupName
+            };
+        }
 
-			var boundaryValueList = new List<SqlCodeExpr>();
-			parser.Scanner.Consume(SqlToken.LParen);
-			do
-			{
-				var boundaryValue = parser.ParseExpIgnoreComment();
-				boundaryValueList.Add(boundaryValue);
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			parser.Scanner.Consume(SqlToken.RParen);
+        private SqlCodeExpr CreateIndex(TextSpan indexSpan, IParser parser)
+        {
+            var indexName = parser.ConsumeObjectId();
+            parser.Scanner.Consume(SqlToken.ON);
 
-			return new CreatePartitionFunctionSqlCodeExpr
-			{
-				Name = name,
-				DataType = dataType,
-				RangeType = rangeType,
-				BoundaryValueList = boundaryValueList,
-			};
-		}
+            if (!parser.TryConsumeObjectId(out var tableName))
+            {
+                tableName = parser.Consume(SqlToken.TempTable);
+            }
 
-		private IExpression CreatePartitionScheme(TextSpan token, IParser parser)
-		{
-			parser.Scanner.Consume(SqlToken.Scheme);
-			var schemeName = parser.ConsumeObjectId();
+            var onColumnsList = new List<SqlCodeExpr>();
+            parser.Scanner.Consume(SqlToken.LParen);
+            do
+            {
+                var columnName = parser.ConsumeObjectId();
+                onColumnsList.Add(columnName);
+            } while (parser.Scanner.Match(SqlToken.Comma));
 
-			parser.Scanner.Consume(SqlToken.As);
-			parser.Scanner.Consume(SqlToken.Partition);
+            parser.Scanner.Consume(SqlToken.RParen);
 
-			var funcName = parser.ConsumeObjectId();
+            return new CreateIndexSqlCodeExpr
+            {
+                IndexName = indexName,
+                TableName = tableName,
+                OnColumns = onColumnsList
+            };
+        }
 
-			parser.Scanner.TryConsumeString(SqlToken.All, out var allToken);
-			parser.Scanner.Consume(SqlToken.To);
+        private SqlCodeExpr CreateTable(TextSpan tableSpan, IParser parser)
+        {
+            var tableName = parser.ConsumeTableName();
 
-			var groupNameList = new List<SqlCodeExpr>();
-			parser.Scanner.Consume(SqlToken.LParen);
-			do
-			{
-				groupNameList.Add(parser.ConsumePrimary());
-			} while (parser.Scanner.Match(SqlToken.Comma));
-			parser.Scanner.Consume(SqlToken.RParen);
+            var tableType = parser.ConsumeTableDataType();
+            tableType.Name = tableName;
 
-			return new CreatePartitionSchemeSqlCodeExpr
-			{
-				SchemeName = schemeName,
-				FuncName = funcName,
-				AllToken = allToken,
-				GroupNameList = groupNameList
-			};
-		}
+            var onPrimary = parser.ParseOnPrimary();
 
-		private IExpression CreateFunction(TextSpan token, IParser parser)
-		{
-			var nameExpr = parser.ConsumeObjectId();
-			parser.Scanner.Consume(SqlToken.LParen);
-			var arguments = parser.ConsumeArgumentList();
-			parser.Scanner.Consume(SqlToken.RParen);
+            var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
 
-			parser.Scanner.Consume(SqlToken.Returns);
+            return new CreateTableSqlCodeExpr
+            {
+                TableExpr = tableType,
+                OnPrimary = onPrimary,
+                IsSemicolon = isSemicolon
+            };
+        }
 
-			parser.Scanner.TryConsumeVariable(out var returnVariableExpr);
+        private IExpression CreatePartitionFunction(TextSpan token, IParser parser)
+        {
+            if (parser.Scanner.IsToken(SqlToken.Scheme))
+            {
+                return CreatePartitionScheme(token, parser);
+            }
+
+            parser.Scanner.Consume(SqlToken.Function);
+
+            var name = parser.ConsumeObjectId();
+
+            parser.Scanner.Consume(SqlToken.LParen);
+            var dataType = parser.ConsumeDataType();
+            parser.Scanner.Consume(SqlToken.RParen);
+
+            parser.Scanner.Consume(SqlToken.As);
+            parser.Scanner.Consume(SqlToken.Range);
+
+            var rangeType = string.Empty;
+            if (parser.Scanner.TryConsumeAny(out var rangeTypeSpan, SqlToken.Left, SqlToken.Right))
+            {
+                rangeType = parser.Scanner.GetSpanString(rangeTypeSpan);
+            }
+
+            parser.Scanner.Consume(SqlToken.FOR);
+            parser.Scanner.Consume(SqlToken.Values);
+
+            var boundaryValueList = new List<SqlCodeExpr>();
+            parser.Scanner.Consume(SqlToken.LParen);
+            do
+            {
+                var boundaryValue = parser.ParseExpIgnoreComment();
+                boundaryValueList.Add(boundaryValue);
+            } while (parser.Scanner.Match(SqlToken.Comma));
+
+            parser.Scanner.Consume(SqlToken.RParen);
+
+            return new CreatePartitionFunctionSqlCodeExpr
+            {
+                Name = name,
+                DataType = dataType,
+                RangeType = rangeType,
+                BoundaryValueList = boundaryValueList,
+            };
+        }
+
+        private IExpression CreatePartitionScheme(TextSpan token, IParser parser)
+        {
+            parser.Scanner.Consume(SqlToken.Scheme);
+            var schemeName = parser.ConsumeObjectId();
+
+            parser.Scanner.Consume(SqlToken.As);
+            parser.Scanner.Consume(SqlToken.Partition);
+
+            var funcName = parser.ConsumeObjectId();
+
+            parser.Scanner.TryConsumeString(SqlToken.All, out var allToken);
+            parser.Scanner.Consume(SqlToken.To);
+
+            var groupNameList = new List<SqlCodeExpr>();
+            parser.Scanner.Consume(SqlToken.LParen);
+            do
+            {
+                groupNameList.Add(parser.ConsumePrimary());
+            } while (parser.Scanner.Match(SqlToken.Comma));
+
+            parser.Scanner.Consume(SqlToken.RParen);
+
+            return new CreatePartitionSchemeSqlCodeExpr
+            {
+                SchemeName = schemeName,
+                FuncName = funcName,
+                AllToken = allToken,
+                GroupNameList = groupNameList
+            };
+        }
+
+        private IExpression CreateFunction(TextSpan token, IParser parser)
+        {
+            var nameExpr = parser.ConsumeObjectId();
+            parser.Scanner.Consume(SqlToken.LParen);
+            var arguments = parser.ConsumeArgumentList();
+            parser.Scanner.Consume(SqlToken.RParen);
+
+            parser.Scanner.Consume(SqlToken.Returns);
+
+            parser.Scanner.TryConsumeVariable(out var returnVariableExpr);
 
 
-			var returnTypeExpr = parser.ConsumeDataType();
+            var returnTypeExpr = parser.ConsumeDataType();
 
-			parser.Scanner.Consume(SqlToken.As);
+            parser.Scanner.Consume(SqlToken.As);
 
-			var body = parser.ConsumeBeginBody();
+            var body = parser.ConsumeBeginBody();
 
-			return new CreateFunctionSqlCodeExpr
-			{
-				Name = nameExpr,
-				Arguments = arguments,
-				ReturnVariable = returnVariableExpr,
-				ReturnType = returnTypeExpr,
-				Body = body
-			};
-		}
+            return new CreateFunctionSqlCodeExpr
+            {
+                Name = nameExpr,
+                Arguments = arguments,
+                ReturnVariable = returnVariableExpr,
+                ReturnType = returnTypeExpr,
+                Body = body
+            };
+        }
 
-		private IExpression CreateProcedure(TextSpan token, IParser parser)
-		{
-			var nameExpr = parser.ConsumeObjectId();
-			var arguments = parser.ConsumeArgumentList();
+        private IExpression CreateProcedure(TextSpan token, IParser parser)
+        {
+            var nameExpr = parser.ConsumeObjectId();
+            var arguments = parser.ConsumeArgumentList();
 
-			SqlCodeExpr withExecuteAsExpr = null;
-			if (parser.MatchTokenList(SqlToken.With, SqlToken.Execute, SqlToken.As))
-			{
-				var userExpr =
-					parser.ConsumeTokenStringAny(SqlToken.CALLER, SqlToken.SELF, SqlToken.OWNER, SqlToken.QuoteString);
-				withExecuteAsExpr = new WithExecuteAsSqlCodeExpr
-				{
-					UserExpr = userExpr
-				};
-			}
-			
-			parser.Scanner.Consume(SqlToken.As);
-			var bodyList = parser.ConsumeBeginBodyOrSingle();
+            SqlCodeExpr withExecuteAsExpr = null;
+            if (parser.MatchTokenList(SqlToken.With, SqlToken.Execute, SqlToken.As))
+            {
+                var userExpr =
+                    parser.ConsumeTokenStringAny(SqlToken.CALLER, SqlToken.SELF, SqlToken.OWNER, SqlToken.QuoteString);
+                withExecuteAsExpr = new WithExecuteAsSqlCodeExpr
+                {
+                    UserExpr = userExpr
+                };
+            }
 
-			return new CreateProcedureSqlCodeExpr
-			{
-				Name = nameExpr,
-				Arguments = arguments,
-				WithExecuteAs = withExecuteAsExpr,
-				Body = bodyList
-			};
-		}
-	}
+            parser.Scanner.Consume(SqlToken.As);
+            var bodyList = parser.ConsumeBeginBodyOrSingle();
 
-	public class CreateNonclusteredIndexSqlCodeExpr : SqlCodeExpr
-	{
-		public override void WriteToStream(IndentStream stream)
-		{
-			stream.Write("CREATE NONCLUSTERED INDEX ");
-			IndexName.WriteToStream(stream);
-			stream.Write(" ON ");
-			TableName.WriteToStream(stream);
-			stream.Write("(");
-			ColumnList.WriteToStreamWithComma(stream);
-			stream.Write(")");
+            return new CreateProcedureSqlCodeExpr
+            {
+                Name = nameExpr,
+                Arguments = arguments,
+                WithExecuteAs = withExecuteAsExpr,
+                Body = bodyList
+            };
+        }
+    }
 
-			if (WhereExpr != null)
-			{
-				stream.Write(" WHERE (");
-				WhereExpr.WriteToStream(stream);
-				stream.Write(")");
-			}
+    public class PartitionSchemeNameSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            Name.WriteToStream(stream);
+            stream.Write("(");
+            Column.WriteToStream(stream);
+            stream.Write(")");
+        }
 
-			if (WithExpr != null)
-			{
-				stream.Write(" ");
-				WithExpr.WriteToStream(stream);
-			}
+        public SqlCodeExpr Name { get; set; }
+        public SqlCodeExpr Column { get; set; }
+    }
 
-			if (OnPrimary != null)
-			{
-				stream.Write(" ");
-				OnPrimary.WriteToStream(stream);
-			}
+    public class CreateNonclusteredIndexSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CREATE NONCLUSTERED INDEX ");
+            IndexName.WriteToStream(stream);
+            stream.Write(" ON ");
+            TableName.WriteToStream(stream);
+            stream.Write("(");
+            ColumnList.WriteToStreamWithComma(stream);
+            stream.Write(")");
 
-			if (IsSemicolon)
-			{
-				stream.Write(" ;");
-			}
-		}
+            if (WhereExpr != null)
+            {
+                stream.Write(" WHERE (");
+                WhereExpr.WriteToStream(stream);
+                stream.Write(")");
+            }
 
-		public SqlCodeExpr IndexName { get; set; }
-		public SqlCodeExpr TableName { get; set; }
-		public List<OrderItemSqlCodeExpr> ColumnList { get; set; }
-		public bool IsSemicolon { get; set; }
-		public SqlCodeExpr WhereExpr { get; set; }
-		public SqlCodeExpr WithExpr { get; set; }
-		public OnSqlCodeExpr OnPrimary { get; set; }
-	}
+            if (WithExpr != null)
+            {
+                stream.Write(" ");
+                WithExpr.WriteToStream(stream);
+            }
 
-	public class CreateSynonymSqlCodeExpr : SqlCodeExpr
-	{
-		public override void WriteToStream(IndentStream stream)
-		{
-			stream.Write("CREATE SYNONYM ");
-			Name.WriteToStream(stream);
-			stream.Write(" FOR ");
-			ObjectId.WriteToStream(stream);
-		}
+            if (OnPrimary != null)
+            {
+                stream.Write(" ");
+                OnPrimary.WriteToStream(stream);
+            }
 
-		public SqlCodeExpr Name { get; set; }
-		public SqlCodeExpr ObjectId { get; set; }
-	}
+            if (IsSemicolon)
+            {
+                stream.Write(" ;");
+            }
+        }
 
-	public class WithExecuteAsSqlCodeExpr : SqlCodeExpr
-	{
-		public override void WriteToStream(IndentStream stream)
-		{
-			stream.Write($"WITH EXECUTE AS {UserExpr}");
-		}
+        public SqlCodeExpr IndexName { get; set; }
+        public SqlCodeExpr TableName { get; set; }
+        public List<OrderItemSqlCodeExpr> ColumnList { get; set; }
+        public bool IsSemicolon { get; set; }
+        public SqlCodeExpr WhereExpr { get; set; }
+        public SqlCodeExpr WithExpr { get; set; }
+        public OnSqlCodeExpr OnPrimary { get; set; }
+    }
 
-		public string UserExpr { get; set; }
-	}
+    public class CreateSynonymSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CREATE SYNONYM ");
+            Name.WriteToStream(stream);
+            stream.Write(" FOR ");
+            ObjectId.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr Name { get; set; }
+        public SqlCodeExpr ObjectId { get; set; }
+    }
+
+    public class WithExecuteAsSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write($"WITH EXECUTE AS {UserExpr}");
+        }
+
+        public string UserExpr { get; set; }
+    }
 }
