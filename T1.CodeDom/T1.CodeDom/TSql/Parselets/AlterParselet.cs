@@ -32,6 +32,8 @@ namespace T1.CodeDom.TSql.Parselets
 
             var optionList = parser.ParseAll(
                 ParseLRParenOptionList,
+                SqlParserExtension.ParseClustered,
+                SqlParserExtension.ParsePrimaryKey,
                 SqlParserExtension.ParseConstraint,
                 SqlParserExtension.ParseDefault,
                 ParseFor

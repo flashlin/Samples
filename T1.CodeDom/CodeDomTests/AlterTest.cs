@@ -27,4 +27,13 @@ public class AlterTest : TestBase
         ThenExprShouldBe(@"ALTER TABLE [customer] SET (LOCK_ESCALATION = AUTO)");
     }
     
+    [Fact]
+    public void alter_table_primary_key()
+    {
+        var sql = @"ALTER TABLE [customer] 
+	ADD CONSTRAINT [PK_customer] PRIMARY KEY CLUSTERED ([Id] )";
+        Parse(sql);
+        ThenExprShouldBe(@"ALTER TABLE [customer] ADD CONSTRAINT [PK_customer] PRIMARY KEY CLUSTERED([Id] ASC)");
+    }
+    
 }
