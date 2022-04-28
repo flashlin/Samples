@@ -164,6 +164,21 @@ ON [PRIMARY]
     [sid] INT NULL,
 CONSTRAINT PK_customer PRIMARY KEY ([Id])
 )");
+        
+    }
+    
+    
+    [Fact]
+    public void create_table_default_getdate()
+    {
+        var sql = @"CREATE TABLE [dbo].[customer] (
+	[Id] INT,
+	[birth] datetime DEFAULT GETDATE()
+	)";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE [dbo].[customer]( [Id] INT, [birth] DATETIME DEFAULT GETDATE() )");
+        
     }
     
     

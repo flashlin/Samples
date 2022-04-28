@@ -289,7 +289,8 @@ namespace T1.CodeDom.TSql
             }
             else
             {
-                valueExpr = parser.Consume(SqlToken.Number);
+                valueExpr = parser.ParseExpIgnoreComment(int.MaxValue);
+                //valueExpr = parser.Consume(SqlToken.Number);
             }
 
             return new DefaultSqlCodeExpr
