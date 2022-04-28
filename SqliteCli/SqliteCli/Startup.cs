@@ -5,6 +5,8 @@ using SqliteCli.Helpers;
 using SqliteCli.Repos;
 using T1.Standard.Extensions;
 
+namespace SqliteCli;
+
 public class Startup
 {
     private IStockService _stockService;

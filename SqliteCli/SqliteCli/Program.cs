@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SqliteCli.Entities;
 using SqliteCli.Repos;
 using System.Text.RegularExpressions;
+using SqliteCli;
 using SqliteCli.Helpers;
 using T1.Standard.Collections.Generics;
 using T1.Standard.Extensions;
