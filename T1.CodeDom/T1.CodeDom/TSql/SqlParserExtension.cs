@@ -1271,6 +1271,12 @@ namespace T1.CodeDom.TSql
             return token;
         }
 
+        public static SqlToken ConsumeTokenTypeAny(this IParser parser, params SqlToken[] tokenTypeList)
+        {
+            var span = ConsumeTokenAny(parser, tokenTypeList);
+            return Enum.Parse<SqlToken>(span.Type);
+        }
+
         public static bool TryConsumeTokenList(this IParser parser, out List<TextSpan> spanList,
             params SqlToken[] tokenTypeList)
         {

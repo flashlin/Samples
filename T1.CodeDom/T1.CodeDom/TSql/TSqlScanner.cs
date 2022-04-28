@@ -176,6 +176,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
 			AddTokenMap("DATABASE", SqlToken.DATABASE);
+			AddTokenMap("DISABLE", SqlToken.DISABLE);
 			AddTokenMap("FILEGROUP", SqlToken.FILEGROUP);
 			AddTokenMap("FORCESEEK", SqlToken.FORCESEEK);
 			AddTokenMap("FILLFACTOR", SqlToken.FILLFACTOR);

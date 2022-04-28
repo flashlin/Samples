@@ -27,10 +27,11 @@ namespace T1.CodeDom.TSql.Parselets
         {
             var tableName = parser.ConsumeObjectId();
             
-            parser.ConsumeToken(SqlToken.ADD);
-
+            var alterActionSpan = parser.ConsumeTokenAny(SqlToken.ADD, SqlToken.Set);
+            var alterAction = parser.Scanner.GetSpanString(alterActionSpan);
 
             var optionList = parser.ParseAll(
+                ParseLRParenOptionList,
                 SqlParserExtension.ParseConstraint,
                 SqlParserExtension.ParseDefault,
                 ParseFor
@@ -48,6 +49,7 @@ namespace T1.CodeDom.TSql.Parselets
             return new AlterTableSqlCodeExpr
             {
                 TableName = tableName,
+                AlterAction = alterAction,
                 // ConstraintExpr = constraintExpr,
                 // DefaultExpr = defaultValueExpr,
                 // ForExpr = forExpr,
@@ -55,6 +57,49 @@ namespace T1.CodeDom.TSql.Parselets
             };
         }
 
+        private SqlCodeExpr ParseLRParenOptionList(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.LParen))
+            {
+                return null;
+            }
+
+            var optionList = new List<SqlCodeExpr>();
+            do
+            {
+                var option = ParseLockEscalationEq(parser);
+                optionList.Add(option);
+            } while (parser.MatchToken(SqlToken.Comma));
+            parser.ConsumeToken(SqlToken.RParen);
+
+            return new LRParenOptionListSqlCodeExpr
+            {
+                OptionList = optionList
+            };
+        }
+
+        private SqlCodeExpr ParseLockEscalationEq(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.LOCK_ESCALATION))
+            {
+                return null;
+            }
+
+            parser.ConsumeToken(SqlToken.Equal);
+            var optionValue = parser.ConsumeTokenTypeAny(SqlToken.AUTO, SqlToken.TABLE, SqlToken.DISABLE);
+            return new SetOptionSqlCodeExpr
+            {
+                OptionName = new TokenSqlCodeExpr
+                {
+                    Value = SqlToken.LOCK_ESCALATION
+                },
+                OptionValue = new TokenSqlCodeExpr
+                {
+                    Value = optionValue
+                },
+            };
+        }
+        
         private SqlCodeExpr ParseFor(IParser parser)
         {
             if (!parser.MatchToken(SqlToken.FOR))
@@ -98,6 +143,31 @@ namespace T1.CodeDom.TSql.Parselets
         }
     }
 
+    public class LRParenOptionListSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("(");
+            OptionList.WriteToStreamWithComma(stream);
+            stream.Write(")");
+        }
+
+        public List<SqlCodeExpr> OptionList { get; set; }
+    }
+
+    public class SetOptionSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            OptionName.WriteToStream(stream);
+            stream.Write(" = ");
+            OptionValue.WriteToStream(stream);
+        }
+
+        public TokenSqlCodeExpr OptionName { get; set; }
+        public TokenSqlCodeExpr OptionValue { get; set; }
+    }
+
     public class ForSqlCodeExpr : SqlCodeExpr
     {
         public override void WriteToStream(IndentStream stream)
@@ -115,7 +185,8 @@ namespace T1.CodeDom.TSql.Parselets
         {
             stream.Write("ALTER TABLE ");
             TableName.WriteToStream(stream);
-            stream.Write(" ADD ");
+            
+            stream.Write($" {AlterAction.ToUpper()} ");
             // ConstraintExpr.WriteToStream(stream);
             // stream.Write(" ");
             // DefaultExpr.WriteToStream(stream);
@@ -129,5 +200,6 @@ namespace T1.CodeDom.TSql.Parselets
         // public SqlCodeExpr DefaultExpr { get; set; }
         // public SqlCodeExpr ForExpr { get; set; }
         public List<SqlCodeExpr> OptionList { get; set; }
+        public string AlterAction { get; set; }
     }
 }
