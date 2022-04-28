@@ -1105,10 +1105,24 @@ namespace T1.CodeDom.TSql
             {
                 return null;
             }
-
             parser.Scanner.Consume(SqlToken.PRIMARY);
             parser.Scanner.Consume(SqlToken.KEY);
-            return new PrimaryKeySqlCodeExpr();
+
+            var columnList = new List<SqlCodeExpr>();
+            if (parser.MatchToken(SqlToken.LParen))
+            {
+                do
+                {
+                    var column = parser.ConsumeObjectId();
+                    columnList.Add(column);
+                } while (parser.MatchToken(SqlToken.Comma));
+                parser.ConsumeToken(SqlToken.RParen);
+            }
+            
+            return new PrimaryKeySqlCodeExpr()
+            {
+                ColumnList = columnList
+            };
         }
 
         private static SqlCodeExpr ParseJoinSelect(TextSpan joinTypeSpan, IParser parser)
@@ -1606,7 +1620,15 @@ namespace T1.CodeDom.TSql
         public override void WriteToStream(IndentStream stream)
         {
             stream.Write("PRIMARY KEY");
+            if (ColumnList != null && ColumnList.Count > 0)
+            {
+                stream.Write(" (");
+                ColumnList.WriteToStreamWithComma(stream);
+                stream.Write(")");
+            }
         }
+
+        public List<SqlCodeExpr> ColumnList { get; set; }
     }
 
     public class NotForReplicationSqlCodeExpr : SqlCodeExpr

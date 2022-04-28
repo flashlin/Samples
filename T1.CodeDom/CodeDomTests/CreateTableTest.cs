@@ -148,4 +148,24 @@ ON [PRIMARY]
     }
     
     
+    
+    [Fact]
+    public void create_table_primary_key_columns()
+    {
+        var sql = @"CREATE TABLE [dbo].[customer] (
+	[Id] INT IDENTITY(1, 1) NOT NULL,
+	[sid] INT NULL,
+	CONSTRAINT PK_customer PRIMARY KEY ([Id])
+	)";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TABLE [dbo].[customer](
+    [Id] INT IDENTITY (1,1) NOT NULL,
+    [sid] INT NULL,
+CONSTRAINT PK_customer PRIMARY KEY ([Id])
+)");
+    }
+    
+    
+    
 }
