@@ -731,6 +731,20 @@ namespace T1.CodeDom.TSql
             return !parser.Scanner.IsSymbol(token0) || token0.Type == SqlToken.Asterisk.ToString();
         }
 
+        public static TypeObjectIdSqlCodeExpr ParseTypeObjectId(this IParser parser)
+        {
+            if (!parser.MatchTokenList(SqlToken.TYPE, SqlToken.ColonColon))
+            {
+                return null;
+            }
+
+            var name = parser.ConsumeObjectId();
+            return new TypeObjectIdSqlCodeExpr
+            {
+                ObjectId = name,
+            };
+        }
+
         public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr, bool nonSensitive = false)
         {
             var comments = parser.IgnoreComments();
@@ -746,14 +760,16 @@ namespace T1.CodeDom.TSql
                 SqlToken.Rank,
                 SqlToken.Error,
                 SqlToken.COUNT,
+                SqlToken.TYPE
             };
 
-            //if (!parser.IsIdentifierToken())
-            //{
-            //	expr = null;
-            //	return false;
-            //}
-
+            var typeObjectId = parser.ParseTypeObjectId();
+            if (typeObjectId != null)
+            {
+                expr = typeObjectId;
+                return true;
+            }
+            
             var identTokens = new List<string>();
             do
             {
@@ -1584,6 +1600,16 @@ namespace T1.CodeDom.TSql
                 IsSemicolon = isSemicolon
             };
         }
+    }
+
+    public class TypeObjectIdSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            ObjectId.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr ObjectId { get; set; }
     }
 
     public class TokenSqlCodeExpr : SqlCodeExpr

@@ -372,6 +372,17 @@ for xml path('')              ";
 
             ThenExprShouldBe(@"SELECT name ;");
         }
+        
+        [Fact]
+        public void select_string_type()
+        {
+            var sql = @"select 'aaa' type";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT 'aaa' AS type");
+        }
+        
 
         [Fact]
         public void select_where_between_fn()
