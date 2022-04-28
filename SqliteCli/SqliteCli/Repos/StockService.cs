@@ -91,7 +91,13 @@ public class StockService : IStockService
             var closingSumPrice = stockHistory
                 .Where(x => x.TranDate.Year == month.Year && x.TranDate.Month == month.Month)
                 .Sum(x => x.ClosingPrice);
-            var closingPrice = closingSumPrice / closingDays;
+            
+            
+            var closingPrice = 0m;
+            if (closingDays != 0)
+            {
+                closingPrice = closingSumPrice / closingDays;
+            }
 
             var valueStr = GetValueStr(closingPrice);
             Console.Write($"{month.ToString("yy-MM")}-");

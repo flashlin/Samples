@@ -32,7 +32,7 @@ namespace SqliteCli.Repos
 					}
 					else
 					{
-						object sumValue = prop.Getter(summary);
+						var sumValue = prop.Getter(summary);
 						if (prop.PropertyType == typeof(decimal))
 						{
 							sumValue = (decimal)sumValue + (decimal)propValue;
@@ -40,6 +40,10 @@ namespace SqliteCli.Repos
 						else if (prop.PropertyType == typeof(int))
 						{
 							sumValue = (int)sumValue + (int)propValue;
+						}
+						else if (prop.PropertyType == typeof(long))
+						{
+							sumValue = (long)sumValue + (long)propValue;
 						}
 						prop.Setter(summary, sumValue);
 					}
