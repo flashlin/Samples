@@ -1,3 +1,4 @@
+using T1.CodeDom.Core;
 using TestProject.PrattTests;
 using Xunit;
 using Xunit.Abstractions;
@@ -179,6 +180,19 @@ CONSTRAINT PK_customer PRIMARY KEY ([Id])
 
         ThenExprShouldBe(@"CREATE TABLE [dbo].[customer]( [Id] INT, [birth] DATETIME DEFAULT GETDATE() )");
         
+    }
+    
+    
+    [Fact]
+    public void create_table_constraint_constraint()
+    {
+        var sql = @"CREATE TABLE [dbo].[customer] (
+	[Id] INT,
+    IsUpdated bit NOT NULL CONSTRAINT [DF_IsUpdated] DEFAULT ((0))
+    CONSTRAINT [pk_customer] PRIMARY KEY CLUSTERED ([id] ASC)
+	)";
+        
+        Assert.Throws<ScanException>(() => Parse(sql));
     }
     
     
