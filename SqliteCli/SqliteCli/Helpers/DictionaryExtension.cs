@@ -25,6 +25,10 @@ namespace SqliteCli.Repos
 					if (first)
 					{
 						prop.Setter(summary, propValue);
+						if (prop.PropertyType == typeof(DateTime))
+						{
+							prop.Setter(summary, DateTime.Now);
+						}
 					}
 					else
 					{

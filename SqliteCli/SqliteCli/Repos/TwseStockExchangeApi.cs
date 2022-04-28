@@ -16,8 +16,8 @@ namespace SqliteCli.Repos
 
         public async Task<IEnumerable<StockExchangeData>> GetStockTranListAsync(GetStockReq req)
         {
-            var date = req.Date.ToString("yyyyMMdd");
-            string url = $"{_baseUrl}/exchangeReport/STOCK_DAY?response=json&date={date}&stockNo={req.StockId}";
+            var date = req.StartDate.ToString("yyyyMMdd");
+            var url = $"{_baseUrl}/exchangeReport/STOCK_DAY?response=json&date={date}&stockNo={req.StockId}";
             var jsonData = await _webApi.GetAsync(
                 url,
                 new Dictionary<string, string>());
@@ -47,7 +47,7 @@ namespace SqliteCli.Repos
         public async Task<StockExchangeData> GetLastDataAsync(string stockId)
         {
             var list = await GetStockTranListAsync(new GetStockReq
-                {Date = DateTime.Now.AddDays(-1), StockId = stockId});
+                {StartDate = DateTime.Now.AddDays(-1), StockId = stockId});
             var data = list.OrderByDescending(x => x.Date).FirstOrDefault();
             if (data == null)
             {

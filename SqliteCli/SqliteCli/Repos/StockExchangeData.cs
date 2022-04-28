@@ -2,17 +2,23 @@
 {
 	public class StockExchangeData
 	{
-		[DisplayString("", 10)]
+		[DisplayString("yyyy-MM-dd", 10)]
 		public DateTime Date { get; set; }
 		
 		[DisplayString("", 7)]
 		public string StockId { get; set; }
 		
+		/// <summary>
+		/// 成交股數
+		/// </summary>
 		[DisplayString("", 7)]
 		public long TradeVolume { get; set; }
 
+		/// <summary>
+		/// 成交金額
+		/// </summary>
 		[DisplayString("", 7)]
-		public decimal DollorVolume { get; set; }
+		public long DollorVolume { get; set; }
 		
 		[DisplayString("", 7)]
 		public decimal OpeningPrice { get; set; }
@@ -29,7 +35,10 @@
 		[DisplayString("", 7)]
 		public decimal Change { get; set; }
 
+		/// <summary>
+		/// 成交筆數
+		/// </summary>
 		[DisplayString("", 7)]
-		public long Transaction { get; set; }
+		public long  Transaction { get; set; }
 	}
 }

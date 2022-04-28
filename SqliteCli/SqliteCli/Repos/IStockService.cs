@@ -6,7 +6,8 @@ public interface IStockService
 {
     Task<List<ReportTranItem>> ReportTransAsync();
     Task AppendStockHistoryAsync(DateRange dateRange, string stockId);
-    void ShowStockHistory(StockReportHistoryReq req);
+    Task ShowStockHistoryAsync(StockReportHistoryReq req);
     void ShowBalance();
     void ShowTransList(ShowTransListCommandLineOptions options);
+    Task Test();
 }

@@ -96,7 +96,12 @@ public class Startup
                 case "show":
                 {
                     var stockId = ss[1];
-                    ShowStockHistoryAsync(stockId);
+                    await ShowStockHistoryAsync(stockId);
+                    break;
+                }
+                case "t":
+                {
+                    await _stockService.Test();
                     break;
                 }
             }
@@ -104,11 +109,11 @@ public class Startup
     }
 
 
-    void ShowStockHistoryAsync(string stockId)
+    async Task ShowStockHistoryAsync(string stockId)
     {
-        _stockService.ShowStockHistory(new StockReportHistoryReq()
+        await _stockService.ShowStockHistoryAsync(new StockReportHistoryReq()
         {
-            StartTime = DateTime.Parse("2021-01-01"),
+            StartTime = DateTime.Now.AddMonths(-12),
             EndTime = DateTime.Now,
             StockId = stockId
         });

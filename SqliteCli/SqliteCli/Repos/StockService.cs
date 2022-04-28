@@ -45,7 +45,7 @@ public class StockService : IStockService
                 Console.WriteLine($"query {date.ToString("yyyy/MM/dd")} {stockId}");
                 var resp = await _stockExchangeApi.GetStockTranListAsync(new GetStockReq()
                 {
-                    Date = date,
+                    StartDate = date,
                     StockId = stockId
                 });
                 var stockNetworkData = resp.ToArray();
@@ -62,31 +62,43 @@ public class StockService : IStockService
         Console.WriteLine("done");
     }
 
-    public void ShowStockHistory(StockReportHistoryReq req)
+    public async Task ShowStockHistoryAsync(StockReportHistoryReq req)
     {
-        var stockHistory = _stockRepo.GetStockHistory(ValueHelper.Assign(req, new GetStockHistoryReq()));
-        //var tranHistory = _stockRepo.GetStockTranHistory(req);
+        var tranHistory = _stockRepo.GetStockTranHistory(req);
 
-        var dateRange = new DateRange()
+        var reqDateRange = new DateRange()
         {
             StartDate = req.StartTime,
             EndDate = req.EndTime
         };
-        foreach (var date in dateRange.GetRangeByMonth())
-        {
-            var item = stockHistory
-                .Where(x => x.TranDate == date)
-                .DefaultIfEmpty(new StockHistoryEntity
-                {
-                    TranDate = date,
-                }).FirstOrDefault();
+        await AppendStockHistoryAsync(reqDateRange, req.StockId);
 
-            var valueStr = GetValueStr(item.ClosingPrice);
-            Console.Write($"{date.ToString("yy-MM")}-");
+        var stockHistoryReq = ValueHelper.Assign(req, new GetStockHistoryReq());
+        stockHistoryReq.StartTime = tranHistory.Select(x=>x.TranTime)
+            .DefaultIfEmpty(req.StartTime).FirstOrDefault();
+        var stockHistory = _stockRepo.GetStockHistory(stockHistoryReq);
+
+        foreach (var month in reqDateRange.GetRangeByMonth())
+        {
+            // var item = stockHistory
+            //     .Where(x => x.TranDate.Year == date.Year && x.TranDate.Month == date.Month)
+            //     .DefaultIfEmpty(new StockHistoryEntity
+            //     {
+            //         TranDate = date,
+            //     }).Sum(x => x.Balance);
+            var closingDays = stockHistory
+                .Count(x => x.TranDate.Year == month.Year && x.TranDate.Month == month.Month);
+            var closingSumPrice = stockHistory
+                .Where(x => x.TranDate.Year == month.Year && x.TranDate.Month == month.Month)
+                .Sum(x => x.ClosingPrice);
+            var closingPrice = closingSumPrice / closingDays;
+
+            var valueStr = GetValueStr(closingPrice);
+            Console.Write($"{month.ToString("yy-MM")}-");
             Console.BackgroundColor = ConsoleColor.Gray;
             Console.Write($"{valueStr}");
             Console.BackgroundColor = ConsoleColor.Black;
-            Console.WriteLine($" {item.ClosingPrice.ToNumberString(6)}");
+            Console.WriteLine($" {closingPrice.ToNumberString(6)}");
         }
     }
 
@@ -149,6 +161,18 @@ public class StockService : IStockService
             StockId = options?.StockId,
         });
         rc.Dump();
+    }
+
+    public async Task Test()
+    {
+        var resp = await _stockExchangeApi.GetStockTranListAsync(new GetStockReq()
+        {
+            StockId = "0052",
+            StartDate = DateTime.Now.AddDays(-30),
+            EndDate = DateTime.Now,
+        });
+        var list = resp.ToList();
+        list.Dump();
     }
 }
 

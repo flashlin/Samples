@@ -13,7 +13,8 @@ namespace SqliteCli.Repos
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseSqlite($"DataSource={_sqliteFile};");
+			optionsBuilder.UseSqlite($"DataSource={_sqliteFile};")
+				.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
