@@ -597,11 +597,7 @@ namespace T1.CodeDom.TSql
                 return null;
             }
 
-            var isParen = false;
-            if (parser.Match(SqlToken.LParen))
-            {
-                isParen = true;
-            }
+            var isParen = parser.MatchToken(SqlToken.LParen);
 
             var topNumberExpr = parser.ParseExpIgnoreComment(int.MaxValue);
 
@@ -614,9 +610,12 @@ namespace T1.CodeDom.TSql
                 parser.Scanner.Consume(SqlToken.RParen);
             }
 
+            var isPercent = parser.MatchToken(SqlToken.PERCENT);
+
             return new TopSqlCodeExpr
             {
-                NumberExpr = topNumberExpr
+                NumberExpr = topNumberExpr,
+                IsPercent = isPercent
             };
         }
 

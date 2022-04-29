@@ -16,6 +16,15 @@ namespace TestProject.PrattTests
             Parse(sql);
             ThenExprShouldBe("SELECT 1");
         }
+        
+        [Fact]
+        public void select_top_10_percent()
+        {
+            var sql = "select top 10 percent name from customer";
+            Parse(sql);
+            ThenExprShouldBe("SELECT TOP 10 PERCENT name FROM customer");
+        }
+        
 
         [Fact]
         public void select_string_as_aliasName()

@@ -246,6 +246,7 @@
 		LOCK_ESCALATION,
 		DISABLE,
 		TYPE,
-		VIEW
+		VIEW,
+		PERCENT
 	}
 }

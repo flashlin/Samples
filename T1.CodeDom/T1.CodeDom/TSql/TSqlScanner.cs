@@ -207,6 +207,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ONLINE", SqlToken.ONLINE);
 			AddTokenMap("PRIMARY", SqlToken.PRIMARY);
 			AddTokenMap("PAD_INDEX", SqlToken.PAD_INDEX);
+			AddTokenMap("PERCENT", SqlToken.PERCENT);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("REPLICATION", SqlToken.REPLICATION);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
