@@ -1,4 +1,5 @@
 using System.Text.Json;
+using T1.Standard.Extensions;
 using T1.Standard.Web;
 
 namespace SqliteCli.Repos;
@@ -15,7 +16,7 @@ public class FinMindApi : IStockExchangeApi
         //_token = File.ReadAllText(@"D:/VDisk/SNL/finmind.key");
     }
 
-    public async Task<IEnumerable<StockExchangeData>> GetStockHistoryListAsync(GetStockReq req)
+    public async IAsyncEnumerable<StockExchangeData> GetStockHistoryListAsync(GetStockReq req)
     {
         var url =
             $"{_baseUrl}/api/v4/data?dataset=TaiwanStockPrice&data_id={req.StockId}&start_date={req.StartDate.ToDateString()}&end_date={req.EndDate.ToDateString()}&token={_token}";
@@ -25,7 +26,7 @@ public class FinMindApi : IStockExchangeApi
 
         if (jsonData == null)
         {
-            return Enumerable.Empty<StockExchangeData>();
+            yield break;
         }
 
         var options = new JsonSerializerOptions
@@ -34,10 +35,9 @@ public class FinMindApi : IStockExchangeApi
             AllowTrailingCommas = true,
         };
         var rawData = JsonSerializer.Deserialize<FinMindResp>(jsonData, options);
-        var list = new List<StockExchangeData>();
         foreach (var data in rawData.data)
         {
-            list.Add(new StockExchangeData
+            yield return new StockExchangeData
             {
                 Date = data.date,
                 StockId = data.stock_id,
@@ -49,10 +49,8 @@ public class FinMindApi : IStockExchangeApi
                 DollorVolume = data.Trading_money, 
                 Transaction = data.Trading_turnover,
                 TradeVolume = data.Trading_Volume
-            });
+            };
         }
-
-        return list;
     }
 
     public async Task<StockExchangeData> GetLastDataAsync(string stockId)
@@ -62,7 +60,8 @@ public class FinMindApi : IStockExchangeApi
                 StartDate = DateTime.Now, 
                 EndDate = DateTime.Now, 
                 StockId = stockId
-            });
+            }).ToListAsync();
+        
         var data = list.OrderByDescending(x => x.Date).FirstOrDefault();
         if (data == null)
         {

@@ -2,6 +2,7 @@ using CommandLine;
 using SqliteCli.Entities;
 using SqliteCli.Helpers;
 using T1.Standard.Common;
+using T1.Standard.Extensions;
 
 namespace SqliteCli.Repos;
 
@@ -157,7 +158,7 @@ public class StockService : IStockService
 			StartDate = startDate,
 			EndDate = endDate,
 			StockId = stockId,
-		});
+		}).ToListAsync();
 		foreach (var data in dataList)
 		{
 			_stockRepo.AppendStockHistory(new StockHistoryEntity
@@ -216,7 +217,7 @@ public class StockService : IStockService
 			StockId = "0052",
 			StartDate = DateTime.Now.AddDays(-30),
 			EndDate = DateTime.Now,
-		});
+		}).ToListAsync();
 		var list = resp.ToList();
 		list.Dump();
 	}
