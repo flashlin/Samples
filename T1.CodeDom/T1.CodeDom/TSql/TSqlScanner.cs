@@ -224,6 +224,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);
 			AddTokenMap("UNIQUE", SqlToken.UNIQUE);
 			AddTokenMap("UNCOMMITTED", SqlToken.UNCOMMITTED);
+			AddTokenMap("VIEW", SqlToken.VIEW);
 			AddTokenMap("XACT_ABORT", SqlToken.XACT_ABORT);
 
 			AddSymbolMap("(", SqlToken.LParen);

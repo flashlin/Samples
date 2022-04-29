@@ -11,6 +11,11 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
+            if (parser.TryConsumeToken(out var viewSpan, SqlToken.VIEW))
+            {
+                return ParseCreateView(viewSpan, parser);
+            }
+            
             if (parser.TryConsumeToken(out var typeSpan, SqlToken.TYPE))
             {
                 return ParseCreateType(typeSpan, parser);
@@ -65,6 +70,19 @@ namespace T1.CodeDom.TSql.Parselets
 
             var helpMessage = parser.Scanner.GetHelpMessage();
             throw new ParseException($"Parse CREATE Error, {helpMessage}");
+        }
+
+        private IExpression ParseCreateView(TextSpan viewSpan, IParser parser)
+        {
+            var viewName = parser.ConsumeObjectId();
+            parser.ConsumeToken(SqlToken.As);
+            var selectSpan = parser.ConsumeToken(SqlToken.Select);
+            var expr = parser.PrefixParse(selectSpan) as SqlCodeExpr;
+            return new CreateViewSqlCodeExpr
+            {
+                Name = viewName,
+                Expr = expr
+            };
         }
 
         private IExpression ParseCreateType(TextSpan typeSpan, IParser parser)
@@ -346,6 +364,21 @@ namespace T1.CodeDom.TSql.Parselets
                 Body = bodyList
             };
         }
+    }
+
+    public class CreateViewSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CREATE VIEW ");
+            Name.WriteToStream(stream);
+            stream.WriteLine();
+            stream.WriteLine("AS ");
+            Expr.WriteToStream(stream); 
+        }
+
+        public SqlCodeExpr Name { get; set; }
+        public SqlCodeExpr Expr { get; set; }
     }
 
     public class CreateTypeSqlCodeExpr : SqlCodeExpr
