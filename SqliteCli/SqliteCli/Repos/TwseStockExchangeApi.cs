@@ -15,7 +15,7 @@ namespace SqliteCli.Repos
             this._webApi = webApi;
         }
 
-        public async Task<IEnumerable<StockExchangeData>> GetStockTranListAsync(GetStockReq req)
+        public async Task<IEnumerable<StockExchangeData>> GetStockHistoryListAsync(GetStockReq req)
         {
             var dateRange = new DateRange()
             {
@@ -67,7 +67,7 @@ namespace SqliteCli.Repos
 
         public async Task<StockExchangeData> GetLastDataAsync(string stockId)
         {
-            var list = await GetStockTranListAsync(new GetStockReq
+            var list = await GetStockHistoryListAsync(new GetStockReq
                 {StartDate = DateTime.Now.AddDays(-1), StockId = stockId});
             var data = list.OrderByDescending(x => x.Date).FirstOrDefault();
             if (data == null)

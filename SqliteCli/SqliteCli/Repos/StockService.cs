@@ -152,7 +152,7 @@ public class StockService : IStockService
 	public async Task AppendStockHistoryRangeFromApi(DateTime startDate, DateTime endDate, string stockId)
 	{
 		Console.WriteLine($"Query {startDate.ToDateString()}~{endDate.ToDateString()} {stockId} from networking...");
-		var dataList = await _stockExchangeApi.GetStockTranListAsync(new GetStockReq
+		var dataList = await _stockExchangeApi.GetStockHistoryListAsync(new GetStockReq
 		{
 			StartDate = startDate,
 			EndDate = endDate,
@@ -211,7 +211,7 @@ public class StockService : IStockService
 
 	public async Task Test()
 	{
-		var resp = await _stockExchangeApi.GetStockTranListAsync(new GetStockReq()
+		var resp = await _stockExchangeApi.GetStockHistoryListAsync(new GetStockReq()
 		{
 			StockId = "0052",
 			StartDate = DateTime.Now.AddDays(-30),

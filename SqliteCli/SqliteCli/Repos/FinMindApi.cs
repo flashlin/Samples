@@ -15,7 +15,7 @@ public class FinMindApi : IStockExchangeApi
         //_token = File.ReadAllText(@"D:/VDisk/SNL/finmind.key");
     }
 
-    public async Task<IEnumerable<StockExchangeData>> GetStockTranListAsync(GetStockReq req)
+    public async Task<IEnumerable<StockExchangeData>> GetStockHistoryListAsync(GetStockReq req)
     {
         var url =
             $"{_baseUrl}/api/v4/data?dataset=TaiwanStockPrice&data_id={req.StockId}&start_date={req.StartDate.ToDateString()}&end_date={req.EndDate.ToDateString()}&token={_token}";
@@ -57,7 +57,7 @@ public class FinMindApi : IStockExchangeApi
 
     public async Task<StockExchangeData> GetLastDataAsync(string stockId)
     {
-        var list = await GetStockTranListAsync(new GetStockReq
+        var list = await GetStockHistoryListAsync(new GetStockReq
             {
                 StartDate = DateTime.Now, 
                 EndDate = DateTime.Now, 
