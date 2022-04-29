@@ -66,13 +66,13 @@ select
     st.Id StockId,
     t.TranType,
     st.StockName,
-	 MIN(t.tranTime) minTranTime,
-	 MAX(t.tranTime) maxTranTime,
+	MIN(t.tranTime) minTranTime,
+	MAX(t.tranTime) maxTranTime,
     MIN(t.StockPrice) minStockPrice,
     AVG(t.StockPrice) avgStockPrice,
     MAX(t.StockPrice) maxStockPrice,
     SUM(t.NumberOfShare) NumberOfShare,
-	 SUM(t.HandlingFee) HandlingFee,
+	SUM(t.HandlingFee) HandlingFee,
     SUM(t.Balance) Balance
 from stockMap st 
 left join trans t on st.Id = t.StockId
@@ -107,6 +107,14 @@ group by st.Id, t.TranType
             date = date.Date.ToDate();
             return _db.StocksHistory
                 .FirstOrDefault(x => x.TranDate == date && x.StockId == stockId);
+        }
+        
+        public StockHistoryEntity? GetLastStockHistoryData(string stockId)
+        {
+            return _db.StocksHistory
+                .Where(x => x.StockId == stockId && x.OpeningPrice != 0)
+                .OrderByDescending(x => x.TranDate)
+                .FirstOrDefault();
         }
 
         public List<TransHistory> GetTransList(ListTransReq req)

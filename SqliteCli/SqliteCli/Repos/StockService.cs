@@ -97,7 +97,8 @@ public class StockService : IStockService
 		foreach (var stock in rc.Where(x => x.TranType == "Buy"))
 		{
 			await EnsuredStockHistory(stock.MinTranTime, DateTime.Now, stock.StockId);
-			var data = _stockRepo.GetStockHistoryData(DateTime.Now.AddDays(-1), stock.StockId);
+			
+			var data = _stockRepo.GetLastStockHistoryData(stock.StockId);
 			stock.CurrentPrice = data.ClosingPrice;
 			stock.CurrTotalPrice = data.ClosingPrice * stock.NumberOfShare;
 			if (stock.CurrentPrice != 0)
