@@ -41,7 +41,6 @@ public class StockService : IStockService
 	{
 		var tranHistory = _stockRepo.GetStockTranHistory(req);
 
-		var reqDateRange = req.DateRange;
 		await EnsuredStockHistory(req.DateRange, req.StockId);
 
 		var stockHistoryReq = new GetStockHistoryReq()
@@ -53,7 +52,7 @@ public class StockService : IStockService
 		};
 		var stockHistory = _stockRepo.GetStockHistory(stockHistoryReq);
 
-		foreach (var month in reqDateRange.GetRangeByMonth())
+		foreach (var month in req.DateRange.GetRangeByMonth())
 		{
 			var closingDays = stockHistory
 				 .Count(x => x.TranDate.EqualYearMonth(month));
