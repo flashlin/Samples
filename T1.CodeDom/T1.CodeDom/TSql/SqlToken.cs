@@ -249,6 +249,7 @@
 		VIEW,
 		PERCENT,
 		BatchRefFile,
-		ROLE
+		ROLE,
+		Rebuild
 	}
 }

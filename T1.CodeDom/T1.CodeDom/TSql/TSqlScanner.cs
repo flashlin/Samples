@@ -99,6 +99,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("PROC", SqlToken.Procedure);
 			AddTokenMap("PATH", SqlToken.PATH);
 			AddTokenMap("ROW_NUMBER", SqlToken.ROW_NUMBER);
+			AddTokenMap("REBUILD", SqlToken.Rebuild);
 			AddTokenMap("PRINT", SqlToken.Print);
 			AddTokenMap("RANK", SqlToken.Rank);
 			AddTokenMap("RAW", SqlToken.RAW);

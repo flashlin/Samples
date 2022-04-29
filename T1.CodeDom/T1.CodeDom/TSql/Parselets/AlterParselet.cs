@@ -10,6 +10,11 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
+            if (parser.TryConsumeToken(out var indexSpan, SqlToken.Index))
+            {
+                return AlterIndex(indexSpan, parser);
+            }
+            
             if (parser.TryConsumeToken(out var databaseSpan, SqlToken.DATABASE))
             {
                 return AlterDatabase(databaseSpan, parser);
@@ -22,6 +27,20 @@ namespace T1.CodeDom.TSql.Parselets
 
             var helpMessage = parser.Scanner.GetHelpMessage();
             throw new ParseException(helpMessage);
+        }
+
+        private AlterIndexSqlCodeExpr AlterIndex(TextSpan indexSpan, IParser parser)
+        {
+            parser.ConsumeToken(SqlToken.All);
+            parser.ConsumeToken(SqlToken.ON);
+            var tableName = parser.ConsumeObjectId();
+            parser.ConsumeToken(SqlToken.Rebuild);
+            var withExpr = parser.ParseConstraintWithOptions();
+            return new AlterIndexSqlCodeExpr
+            {
+                TableName = tableName,
+                WithExpr = withExpr
+            };
         }
 
         private IExpression AlterTable(TextSpan tableSpan, IParser parser)
@@ -188,6 +207,20 @@ namespace T1.CodeDom.TSql.Parselets
                 IsSemicolon = isSemicolon,
             };
         }
+    }
+
+    public class AlterIndexSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("ALTER INDEX ALL ON ");
+            TableName.WriteToStream(stream);
+            stream.Write(" REBUILD ");
+            WithExpr.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr TableName { get; set; }
+        public SqlCodeExpr WithExpr { get; set; }
     }
 
     public class ColumnDataTypeSqlCodeExpr : SqlCodeExpr
