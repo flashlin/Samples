@@ -248,6 +248,7 @@
 		TYPE,
 		VIEW,
 		PERCENT,
-		BatchRefFile
+		BatchRefFile,
+		ROLE
 	}
 }
