@@ -44,9 +44,13 @@ public class StockService : IStockService
 		var reqDateRange = req.DateRange;
 		await EnsuredStockHistory(req.DateRange, req.StockId);
 
-		var stockHistoryReq = ValueHelper.Assign(req, new GetStockHistoryReq());
-		stockHistoryReq.StartTime = tranHistory.Select(x => x.TranTime)
-			 .DefaultIfEmpty(req.StartTime).FirstOrDefault();
+		var stockHistoryReq = new GetStockHistoryReq()
+		{
+			StartTime = tranHistory.Select(x => x.TranTime)
+				.DefaultIfEmpty(req.StartTime).FirstOrDefault(),
+			EndTime = req.EndTime,
+			StockId = req.StockId
+		};
 		var stockHistory = _stockRepo.GetStockHistory(stockHistoryReq);
 
 		foreach (var month in reqDateRange.GetRangeByMonth())
