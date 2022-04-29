@@ -97,8 +97,11 @@ group by st.Id, t.TranType
 
         public List<TransEntity> GetStockTranHistory(ShowStockHistoryReq req)
         {
-            var data = _db.Trans.Where(x => x.TranTime >= req.StartTime && x.TranTime <= req.EndTime
-                                                                        && x.StockId == req.StockId);
+            var startTime = req.DateRange.StartDate;
+            var endTime = req.DateRange.EndDate;
+            var data = _db.Trans.Where(x => 
+                x.TranTime >= startTime && x.TranTime <= endTime && 
+                x.StockId == req.StockId);
             return data.ToList();
         }
 

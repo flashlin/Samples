@@ -29,10 +29,7 @@ public class StockServiceAppendStockHistoryTest
         var appendStockHistoryResult = WhenReceived<StockHistoryEntity>(_stockRepo, 
             x => x.AppendStockHistory(null!));
 
-        await _service.AppendStockHistoryRangeFromApi(
-            DateTime.Parse("2022-04-03"),
-            DateTime.Parse("2022-04-05"),
-            new DateRange
+        await _service.AppendStockHistoryRangeFromApi(new DateRange
             {
                 StartDate = DateTime.Parse("2022-04-03"),
                 EndDate = DateTime.Parse("2022-04-05"),
@@ -52,10 +49,7 @@ public class StockServiceAppendStockHistoryTest
         var appendStockHistoryResult = WhenReceived<StockHistoryEntity>(_stockRepo, 
             x => x.AppendStockHistory(null!));
 
-        await _service.AppendStockHistoryRangeFromApi(
-            DateTime.Now,
-            DateTime.Now,
-            new DateRange
+        await _service.AppendStockHistoryRangeFromApi(new DateRange
             {
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now

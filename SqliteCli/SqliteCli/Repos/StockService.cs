@@ -11,6 +11,7 @@ public class ShowStockHistoryReq
 	public DateTime StartTime { get; set; }
 	public DateTime EndTime { get; set; }
 	public string StockId { get; set; }
+	public DateRange DateRange { get; set; }
 }
 
 public class StockReportHistory
@@ -40,18 +41,8 @@ public class StockService : IStockService
 	{
 		var tranHistory = _stockRepo.GetStockTranHistory(req);
 
-		var reqDateRange = new DateRange()
-		{
-			StartDate = req.StartTime,
-			EndDate = req.EndTime
-		};
-		DateTime startDate = req.StartTime;
-		DateTime endDate = req.EndTime;
-		await EnsuredStockHistory(new DateRange()
-		{
-			StartDate = startDate,
-			EndDate = endDate,
-		}, req.StockId, startDate, endDate);
+		var reqDateRange = req.DateRange;
+		await EnsuredStockHistory(req.DateRange, req.StockId);
 
 		var stockHistoryReq = ValueHelper.Assign(req, new GetStockHistoryReq());
 		stockHistoryReq.StartTime = tranHistory.Select(x => x.TranTime)
@@ -103,13 +94,11 @@ public class StockService : IStockService
 		var rc = _stockRepo.ReportTrans(new ReportTransReq());
 		foreach (var stock in rc.Where(x => x.TranType == "Buy"))
 		{
-			DateTime startDate = stock.MinTranTime;
-			DateTime endDate = DateTime.Now;
 			await EnsuredStockHistory(new DateRange()
 			{
-				StartDate = startDate,
-				EndDate = endDate,
-			}, stock.StockId, startDate, endDate);
+				StartDate = stock.MinTranTime,
+				EndDate = DateTime.Now,
+			}, stock.StockId);
 			
 			var data = _stockRepo.GetLastStockHistoryData(stock.StockId);
 			stock.CurrentPrice = data.ClosingPrice;
@@ -125,7 +114,7 @@ public class StockService : IStockService
 		return rc;
 	}
 
-	private async Task EnsuredStockHistory(DateRange dateRange, string stockId, DateTime startDate, DateTime endDate)
+	private async Task EnsuredStockHistory(DateRange dateRange, string stockId)
 	{
 		var first = true;
 		foreach (var date in dateRange.GetRangeByDay())
@@ -136,7 +125,7 @@ public class StockService : IStockService
 				if (first)
 				{
 					Console.WriteLine($"Beacuse {date} {stockId}");
-					await AppendStockHistoryRangeFromApi(startDate, endDate, dateRange, stockId);
+					await AppendStockHistoryRangeFromApi(dateRange, stockId);
 				}
 				else
 				{
@@ -149,7 +138,7 @@ public class StockService : IStockService
 				{
 					_stockRepo.AppendStockHistory(new StockHistoryEntity()
 					{
-						TranDate = startDate.ToDate(),
+						TranDate = date.ToDate(),
 						StockId = stockId
 					});
 				}
@@ -157,13 +146,12 @@ public class StockService : IStockService
 		}
 	}
 
-	public async Task AppendStockHistoryRangeFromApi(DateTime startDate, DateTime endDate,
-		DateRange range, string stockId)
+	public async Task AppendStockHistoryRangeFromApi(DateRange dateRange, string stockId)
 	{
-		Console.WriteLine($"Query {range} {stockId} from networking...");
+		Console.WriteLine($"Query {dateRange} {stockId} from networking...");
 		var dataList = await _stockExchangeApi.GetStockHistoryListAsync(new GetStockReq
 		{
-			DateRange = range,
+			DateRange = dateRange,
 			StockId = stockId,
 		}).ToListAsync();
 		foreach (var data in dataList)
@@ -182,11 +170,6 @@ public class StockService : IStockService
 			});
 		}
 
-		var dateRange = new DateRange()
-		{
-			StartDate = startDate,
-			EndDate = endDate,
-		};
 		foreach (var date in dateRange.GetRangeByDay())
 		{
 			if (!IsCanAppend(date))
