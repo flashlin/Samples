@@ -1212,11 +1212,6 @@ namespace T1.CodeDom.TSql
         public static bool MatchTokenAny(this IParser parser, params SqlToken[] tokenTypeList)
         {
             var isAny = tokenTypeList.Any(x => parser.MatchToken(x));
-            if (!isAny)
-            {
-                var expectedTokenList = string.Join(",", tokenTypeList.Select(x => $"{x}"));
-                ThrowHelper.ThrowParseException(parser, $"Except one of {expectedTokenList}");
-            }
             return isAny;
         }
 
