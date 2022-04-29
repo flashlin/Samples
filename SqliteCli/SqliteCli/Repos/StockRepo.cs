@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SqliteCli.Entities;
 using System.Data;
 using System.Reflection;
+using SqliteCli.Helpers;
 
 namespace SqliteCli.Repos
 {
@@ -186,6 +187,14 @@ group by st.Id, t.TranType
 
         public void AppendStockHistory(StockHistoryEntity stockHistoryEntity)
         {
+            if (stockHistoryEntity.OpeningPrice == 0 
+                && stockHistoryEntity.ClosingPrice == 0 
+                && stockHistoryEntity.TranDate.IsWorkDay() 
+                && stockHistoryEntity.TranDate.ToDate() == DateTime.Now.ToDate())
+            {
+                return;
+            }
+            
             var sql =
                 @"insert into stockHistory(TranDate, StockId, TradeVolume, DollorVolume, OpeningPrice, ClosingPrice, HighestPrice, LowestPrice, TransactionCount)
 select @TranDate, @StockId, @TradeVolume, @DollorVolume, @OpeningPrice, @ClosingPrice, @HighestPrice, @LowestPrice, @TransactionCount
@@ -197,7 +206,7 @@ where not exists(
 
             //ExecuteRaw(sql, stockHistoryEntity);
             var exists = _db.StocksHistory.Any(x =>
-                x.TranDate == stockHistoryEntity.TranDate && x.StockId == stockHistoryEntity.StockId);
+                x.TranDate == stockHistoryEntity.TranDate.ToDate() && x.StockId == stockHistoryEntity.StockId);
             if (!exists)
             {
                 _db.StocksHistory.Add(stockHistoryEntity);

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SqliteCli.Repos;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -23,7 +24,7 @@ namespace SqliteCli.Entities
 
 	//[Keyless]
 	[Table("StockHistory")]
-	public class StockHistoryEntity
+	public class StockHistoryEntity : IEquatable<StockHistoryEntity>
 	{
 		[Key]
 		public DateTime TranDate { get; set; }
@@ -37,5 +38,31 @@ namespace SqliteCli.Entities
 		public decimal HighestPrice { get; set; }
 		public decimal LowestPrice { get; set; }
 		public long TransactionCount { get; set; }
+
+		public int CompareTo(object? obj)
+		{
+			if (obj is StockHistoryEntity other)
+			{
+				if( TranDate.ToDate()== other.TranDate.ToDate()	&& StockId==other.StockId)
+				{
+					return 0;
+				}
+				if (TranDate.ToDate() > other.TranDate.ToDate())
+				{
+					return 1;
+				}
+				if (TranDate.ToDate() < other.TranDate.ToDate())
+				{
+					return -1;
+				}
+				return StockId.CompareTo(other.StockId);
+			}
+			return 0;
+		}
+
+		public bool Equals(StockHistoryEntity? other)
+		{
+			return CompareTo(other) == 1;
+		}
 	}
 }
