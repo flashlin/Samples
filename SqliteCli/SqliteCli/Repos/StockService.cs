@@ -74,7 +74,7 @@ public class StockService : IStockService
 
 	private string GetValueStr(decimal value)
 	{
-		var spacesCount = (int)Math.Round(value / 20, MidpointRounding.AwayFromZero);
+		var spacesCount = (int)Math.Round(value / 10, MidpointRounding.AwayFromZero);
 		return new string(' ', spacesCount);
 	}
 
