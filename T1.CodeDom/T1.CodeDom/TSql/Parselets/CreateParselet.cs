@@ -76,8 +76,7 @@ namespace T1.CodeDom.TSql.Parselets
         {
             var viewName = parser.ConsumeObjectId();
             parser.ConsumeToken(SqlToken.As);
-            var selectSpan = parser.ConsumeToken(SqlToken.Select);
-            var expr = parser.PrefixParse(selectSpan) as SqlCodeExpr;
+            var expr = parser.ParseExpIgnoreComment();
             return new CreateViewSqlCodeExpr
             {
                 Name = viewName,
