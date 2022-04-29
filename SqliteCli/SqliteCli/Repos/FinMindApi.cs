@@ -7,19 +7,26 @@ public class FinMindApi : IStockExchangeApi
 {
     static string _baseUrl = "https://api.finmindtrade.com";
     private readonly IWebApiClient _webApi;
+    private string _token = string.Empty;
 
     public FinMindApi(IWebApiClient webApi)
     {
         _webApi = webApi;
+        //_token = File.ReadAllText(@"D:/VDisk/SNL/finmind.key");
     }
 
     public async Task<IEnumerable<StockExchangeData>> GetStockTranListAsync(GetStockReq req)
     {
         var url =
-            $"{_baseUrl}/api/v4/data?dataset=TaiwanStockPrice&data_id={req.StockId}&start_date={req.StartDate.ToDateString()}&end_date={req.EndDate.ToDateString()}";
+            $"{_baseUrl}/api/v4/data?dataset=TaiwanStockPrice&data_id={req.StockId}&start_date={req.StartDate.ToDateString()}&end_date={req.EndDate.ToDateString()}&token={_token}";
         var jsonData = await _webApi.GetAsync(
             url,
             new Dictionary<string, string>());
+
+        if (jsonData == null)
+        {
+            return Enumerable.Empty<StockExchangeData>();
+        }
 
         var options = new JsonSerializerOptions
         {

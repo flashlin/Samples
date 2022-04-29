@@ -103,9 +103,9 @@ group by st.Id, t.TranType
 
         public StockHistoryEntity? GetStockHistoryData(DateTime date, string stockId)
         {
-            date = date.Date;
+            date = date.Date.ToDate();
             return _db.StocksHistory
-                .FirstOrDefault(x => x.TranDate == date.Date && x.StockId == stockId);
+                .FirstOrDefault(x => x.TranDate == date && x.StockId == stockId);
         }
 
         public List<TransHistory> GetTransList(ListTransReq req)
@@ -186,11 +186,6 @@ group by st.Id, t.TranType
 
         public void AppendStockHistory(StockHistoryEntity stockHistoryEntity)
         {
-            if (stockHistoryEntity.OpeningPrice == 0 && stockHistoryEntity.ClosingPrice == 0)
-            {
-                return;
-            }
-
             var sql =
                 @"insert into stockHistory(TranDate, StockId, TradeVolume, DollorVolume, OpeningPrice, ClosingPrice, HighestPrice, LowestPrice, TransactionCount)
 select @TranDate, @StockId, @TradeVolume, @DollorVolume, @OpeningPrice, @ClosingPrice, @HighestPrice, @LowestPrice, @TransactionCount
@@ -205,7 +200,6 @@ where not exists(
                 x.TranDate == stockHistoryEntity.TranDate && x.StockId == stockHistoryEntity.StockId);
             if (!exists)
             {
-                Console.WriteLine($"add {stockHistoryEntity.TranDate} {stockHistoryEntity.StockId}");
                 _db.StocksHistory.Add(stockHistoryEntity);
                 _db.SaveChanges();
             }

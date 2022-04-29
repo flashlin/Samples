@@ -29,10 +29,10 @@ namespace SqliteCli.Entities
 		public DateTime TranDate { get; set; }
 		[Key]
 		public string StockId { get; set; }
+
 		public long TradeVolume { get; set; }
 		public decimal DollorVolume { get; set; }
 		public decimal OpeningPrice { get; set; }
-
 		public decimal ClosingPrice { get; set; }
 		public decimal HighestPrice { get; set; }
 		public decimal LowestPrice { get; set; }

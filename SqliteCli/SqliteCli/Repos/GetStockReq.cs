@@ -13,5 +13,9 @@
 		{
 			return time.ToString("yyyy-MM-dd");
 		}
+		public static DateTime ToDate(this DateTime time)
+		{
+			return DateTime.Parse(time.ToDateString());
+		}
 	}
 }

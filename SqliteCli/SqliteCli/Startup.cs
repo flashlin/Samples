@@ -87,12 +87,6 @@ public class Startup
                     ProcessDeposit(cmdArgs);
                     break;
                 }
-                case "append":
-                {
-                    var stockId = ss[1];
-                    await AppendStockHistoryAsync(stockId);
-                    break;
-                }
                 case "show":
                 {
                     var stockId = ss[1];
@@ -118,16 +112,6 @@ public class Startup
             StockId = stockId
         });
     }
-
-    async Task AppendStockHistoryAsync(string stockId)
-    {
-        await _stockService.AppendStockHistoryAsync(new DateRange()
-        {
-            StartDate = DateTime.Parse("2021/01/01"),
-            EndDate = DateTime.Today
-        }, stockId);
-    }
-
 
     async Task ProcessReportAsync()
     {
