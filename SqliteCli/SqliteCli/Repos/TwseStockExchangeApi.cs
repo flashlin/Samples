@@ -1,7 +1,6 @@
 ﻿using System.Data;
 using System.Text.Json;
 using SqliteCli.Helpers;
-using T1.Standard.Extensions;
 using T1.Standard.Web;
 
 namespace SqliteCli.Repos
@@ -18,13 +17,7 @@ namespace SqliteCli.Repos
 
         public async IAsyncEnumerable<StockExchangeData> GetStockHistoryListAsync(GetStockReq req)
         {
-            var dateRange = new DateRange()
-            {
-                StartDate = req.StartDate,
-                EndDate = req.EndDate,
-            };
-
-            foreach (var month in dateRange.GetRangeByMonth())
+            foreach (var month in req.DateRange.GetRangeByMonth())
             {
                 var monthStr = month.ToString("yyyyMMdd");
                 var result = await GetStockTranListAsync(req, monthStr);
@@ -62,27 +55,6 @@ namespace SqliteCli.Repos
                 //Console.WriteLine($"{jsonData}");
                 return Enumerable.Empty<StockExchangeData>();
             }
-        }
-
-        public async Task<StockExchangeData> GetLastDataAsync(string stockId)
-        {
-            var list = await GetStockHistoryListAsync(new GetStockReq
-                {
-                    StartDate = DateTime.Now.AddDays(-1),
-                    StockId = stockId
-                }
-            ).ToListAsync();
-            var data = list.OrderByDescending(x => x.Date).FirstOrDefault();
-            if (data == null)
-            {
-                return new StockExchangeData()
-                {
-                    Date = DateTime.Now,
-                    StockId = stockId,
-                };
-            }
-
-            return data;
         }
     }
 }

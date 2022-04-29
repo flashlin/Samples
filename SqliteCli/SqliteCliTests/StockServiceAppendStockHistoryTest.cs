@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using NSubstitute;
 using SqliteCli.Entities;
+using SqliteCli.Helpers;
 using SqliteCli.Repos;
 using Xunit;
 
@@ -31,7 +32,11 @@ public class StockServiceAppendStockHistoryTest
         await _service.AppendStockHistoryRangeFromApi(
             DateTime.Parse("2022-04-03"),
             DateTime.Parse("2022-04-05"),
-            _anyStockId);
+            new DateRange
+            {
+                StartDate = DateTime.Parse("2022-04-03"),
+                EndDate = DateTime.Parse("2022-04-05"),
+            }, _anyStockId);
 
 
         appendStockHistoryResult.Should().BeEquivalentTo(new[]
@@ -50,7 +55,11 @@ public class StockServiceAppendStockHistoryTest
         await _service.AppendStockHistoryRangeFromApi(
             DateTime.Now,
             DateTime.Now,
-            _anyStockId);
+            new DateRange
+            {
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now
+            }, _anyStockId);
 
         appendStockHistoryResult.Should().BeEmpty();
     }

@@ -78,4 +78,9 @@ public class DateRange
             currDate = currDate.AddDays(1);
         }
     }
+
+    public override string ToString()
+    {
+        return $"{StartDate.ToDateString()}~{EndDate.ToDateString()}";
+    }
 }

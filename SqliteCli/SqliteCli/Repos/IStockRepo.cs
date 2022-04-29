@@ -9,7 +9,7 @@ namespace SqliteCli.Repos
 		void Deposit(DepositReq depositReq);
 		void AppendStockHistory(StockHistoryEntity stockHistoryEntity);
 		List<StockHistoryEntity> GetStockHistory(GetStockHistoryReq req);
-		List<TransEntity> GetStockTranHistory(StockReportHistoryReq req);
+		List<TransEntity> GetStockTranHistory(ShowStockHistoryReq req);
 		StockHistoryEntity? GetStockHistoryData(DateTime date, string stockId);
 		List<TransHistory> GetTransList(ListTransReq req);
 		decimal GetBalance();

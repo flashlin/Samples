@@ -107,7 +107,7 @@ public class Startup
 
 	async Task ShowStockHistoryAsync(string stockId)
 	{
-		await _stockService.ShowStockHistoryAsync(new StockReportHistoryReq()
+		await _stockService.ShowStockHistoryAsync(new ShowStockHistoryReq()
 		{
 			StartTime = DateTime.Now.AddMonths(-12),
 			EndTime = DateTime.Now,

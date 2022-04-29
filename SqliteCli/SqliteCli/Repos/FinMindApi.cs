@@ -1,5 +1,4 @@
 using System.Text.Json;
-using T1.Standard.Extensions;
 using T1.Standard.Web;
 
 namespace SqliteCli.Repos;
@@ -18,8 +17,11 @@ public class FinMindApi : IStockExchangeApi
 
     public async IAsyncEnumerable<StockExchangeData> GetStockHistoryListAsync(GetStockReq req)
     {
+        var startDateStr = req.DateRange.StartDate.ToDateString();
+        var endDateStr = req.DateRange.EndDate.ToDateString();
+        
         var url =
-            $"{_baseUrl}/api/v4/data?dataset=TaiwanStockPrice&data_id={req.StockId}&start_date={req.StartDate.ToDateString()}&end_date={req.EndDate.ToDateString()}&token={_token}";
+            $"{_baseUrl}/api/v4/data?dataset=TaiwanStockPrice&data_id={req.StockId}&start_date={startDateStr}&end_date={endDateStr}&token={_token}";
         var jsonData = await _webApi.GetAsync(
             url,
             new Dictionary<string, string>());
@@ -51,26 +53,5 @@ public class FinMindApi : IStockExchangeApi
                 TradeVolume = data.Trading_Volume
             };
         }
-    }
-
-    public async Task<StockExchangeData> GetLastDataAsync(string stockId)
-    {
-        var list = await GetStockHistoryListAsync(new GetStockReq
-            {
-                StartDate = DateTime.Now, 
-                EndDate = DateTime.Now, 
-                StockId = stockId
-            }).ToListAsync();
-        
-        var data = list.OrderByDescending(x => x.Date).FirstOrDefault();
-        if (data == null)
-        {
-            return new StockExchangeData()
-            {
-                Date = DateTime.Now,
-                StockId = stockId,
-            };
-        }
-        return data;
     }
 }
