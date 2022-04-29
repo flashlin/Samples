@@ -45,4 +45,12 @@ ADD Addr char(10),Tel int";
         ThenExprShouldBe(@"ALTER TABLE [customer] ADD CONSTRAINT [PK_customer] PRIMARY KEY CLUSTERED([Id] ASC)");
     }
     
+    
+    [Fact]
+    public void alter_index()
+    {
+        var sql = @"ALTER index all ON customer REBUILD WITH (FILLFACTOR = 90, online=on);";
+        Parse(sql);
+        ThenExprShouldBe(@"");
+    }
 }
