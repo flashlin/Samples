@@ -250,6 +250,7 @@
 		PERCENT,
 		BatchRefFile,
 		ROLE,
-		Rebuild
+		Rebuild,
+		REORGANIZE
 	}
 }

@@ -29,11 +29,20 @@ namespace T1.CodeDom.TSql.Parselets
             throw new ParseException(helpMessage);
         }
 
-        private AlterIndexSqlCodeExpr AlterIndex(TextSpan indexSpan, IParser parser)
+        private SqlCodeExpr AlterIndex(TextSpan indexSpan, IParser parser)
         {
             parser.ConsumeToken(SqlToken.All);
             parser.ConsumeToken(SqlToken.ON);
             var tableName = parser.ConsumeObjectId();
+
+            if (parser.MatchToken(SqlToken.REORGANIZE))
+            {
+                return new AlterIndexReogranizeSqlCodeExpr
+                {
+                    TableName = tableName
+                };
+            }
+            
             parser.ConsumeToken(SqlToken.Rebuild);
             var withExpr = parser.ParseConstraintWithOptions();
             return new AlterIndexSqlCodeExpr
@@ -207,6 +216,18 @@ namespace T1.CodeDom.TSql.Parselets
                 IsSemicolon = isSemicolon,
             };
         }
+    }
+
+    public class AlterIndexReogranizeSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("ALTER INDEX ALL ON ");
+            TableName.WriteToStream(stream);
+            stream.Write(" REORGANIZE");
+        }
+
+        public SqlCodeExpr TableName { get; set; }
     }
 
     public class AlterIndexSqlCodeExpr : SqlCodeExpr

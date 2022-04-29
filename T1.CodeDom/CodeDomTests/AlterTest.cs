@@ -53,4 +53,13 @@ ADD Addr char(10),Tel int";
         Parse(sql);
         ThenExprShouldBe(@"ALTER INDEX ALL ON customer REBUILD WITH(FILLFACTOR = 90, ONLINE = ON)");
     }
+    
+    [Fact]
+    public void alter_index_reorganize()
+    {
+        var sql = @"ALTER INDEX all ON customer  reorganize ";
+        Parse(sql);
+        ThenExprShouldBe(@"ALTER INDEX ALL ON customer REORGANIZE");
+    }
+    
 }

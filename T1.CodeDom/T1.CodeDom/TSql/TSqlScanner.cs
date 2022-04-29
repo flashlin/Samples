@@ -213,6 +213,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ROLE", SqlToken.ROLE);
 			AddTokenMap("REPLICATION", SqlToken.REPLICATION);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
+			AddTokenMap("REORGANIZE", SqlToken.REORGANIZE);
 			AddTokenMap("READ", SqlToken.READ);
 			AddTokenMap("REPEATABLE", SqlToken.REPEATABLE);
 			AddTokenMap("ROLLBACK", SqlToken.ROLLBACK);
