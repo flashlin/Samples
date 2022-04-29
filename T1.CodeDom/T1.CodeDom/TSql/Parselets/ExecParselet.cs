@@ -32,27 +32,28 @@ namespace T1.CodeDom.TSql.Parselets
 				funcName = parser.ConsumeAny(SqlToken.SqlIdentifier, SqlToken.Identifier) as SqlCodeExpr;
 			}
 
+			var isEnd = parser.IsToken(SqlToken.End);
+			
+
 			var parameters = new List<SqlCodeExpr>();
-			do
+			if (!isEnd)
 			{
-				var name = parser.ParseExpIgnoreComment();
-				if (name == null)
+				do
 				{
-					break;
-				}
+					var name = parser.ParseExpIgnoreComment();
+					if (name == null)
+					{
+						break;
+					}
 
-				var isOutput = false;
-				if (parser.Scanner.MatchAny(SqlToken.Out, SqlToken.Output))
-				{
-					isOutput = true;
-				}
-				parameters.Add(new ParameterSqlCodeExpr
-				{
-					Name = name,
-					IsOutput = isOutput
-				});
-			} while (parser.Scanner.Match(SqlToken.Comma));
-
+					var isOutput = parser.MatchTokenAny(SqlToken.Out, SqlToken.Output);
+					parameters.Add(new ParameterSqlCodeExpr
+					{
+						Name = name,
+						IsOutput = isOutput
+					});
+				} while (parser.Scanner.Match(SqlToken.Comma));
+			}
 
 			return new ExecSqlCodeExpr
 			{
