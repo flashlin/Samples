@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using SqliteCli.Entities;
 using SqliteCli.Repos;
 using System.Text.RegularExpressions;
@@ -19,22 +18,31 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.File("d:/demo/logs/myapp.txt", rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
-//var services = new ServiceCollection();
+try
+{
+    var host = Host.CreateDefaultBuilder(args)
+        .ConfigureServices(services =>
+        {
+            services.AddHttpClient();
+            services.AddHttpClient<IWebApiClient, WebApiClient>();
+            //services.AddTransient<IStockExchangeApi, TwseStockExchangeApi>();
+            services.AddTransient<IStockExchangeApi, FinMindApi>();
+            services.AddDbContext<StockDbContext>();
+            services.AddTransient<IStockRepo, StockRepo>();
+            services.AddTransient<IStockService, StockService>();
+            services.AddSingleton<Startup>();
+        })
+        .UseSerilog()
+        .Build();
 
-var host = Host.CreateDefaultBuilder(args)
-   .ConfigureServices(services => { 
-		services.AddHttpClient();
-		services.AddHttpClient<IWebApiClient, WebApiClient>();
-		//services.AddTransient<IStockExchangeApi, TwseStockExchangeApi>();
-		services.AddTransient<IStockExchangeApi, FinMindApi>();
-		services.AddDbContext<StockDbContext>();
-		services.AddTransient<IStockRepo, StockRepo>();
-		services.AddTransient<IStockService, StockService>();
-		services.AddSingleton<Startup>();
-   })
-   .UseSerilog()
-   .Build();
-
-//var serviceProvider = services.BuildServiceProvider();
-var app = host.Services.GetService<Startup>();
-await app!.Run();
+    var app = host.Services.GetService<Startup>();
+    await app!.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application Fail");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
