@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql.Expressions;
 using T1.Standard.IO;
@@ -26,7 +27,7 @@ namespace T1.CodeDom.TSql.Parselets
         private IExpression AlterTable(TextSpan tableSpan, IParser parser)
         {
             var tableName = parser.ConsumeObjectId();
-            
+
             var alterActionSpan = parser.ConsumeTokenAny(SqlToken.ADD, SqlToken.Set);
             var alterAction = parser.Scanner.GetSpanString(alterActionSpan);
 
@@ -36,9 +37,10 @@ namespace T1.CodeDom.TSql.Parselets
                 SqlParserExtension.ParsePrimaryKey,
                 SqlParserExtension.ParseConstraint,
                 SqlParserExtension.ParseDefault,
-                ParseFor
-                );
-            
+                ParseFor,
+                ParseColumnDataTypeList
+            );
+
             // var constraintExpr = parser.ParseConstraint();
             // var defaultValueExpr = parser.ParseDefault();
             // SqlCodeExpr forExpr = null;
@@ -59,6 +61,47 @@ namespace T1.CodeDom.TSql.Parselets
             };
         }
 
+        private ExprListSqlCodeExpr ParseColumnDataTypeList(IParser parser)
+        {
+            var startIndex = parser.Scanner.GetOffset();
+            if (!parser.TryConsumeObjectId(out _))
+            {
+                return null;
+            }
+
+            var dataType = parser.ConsumeTokenString().ToUpper();
+            if (!IsDataTypeToken(dataType))
+            {
+                parser.Scanner.SetOffset(startIndex);
+                return null;
+            }
+
+            parser.Scanner.SetOffset(startIndex);
+            var columnList = new List<SqlCodeExpr>();
+            do
+            {
+                var field = parser.ConsumeObjectId();
+                var dataTypeExpr = parser.ConsumeDataType();
+                columnList.Add(
+                    new ColumnDataTypeSqlCodeExpr
+                    {
+                        Name = field,
+                        DataType = dataTypeExpr
+                    });
+            } while (parser.MatchToken(SqlToken.Comma));
+
+            return new ExprListSqlCodeExpr
+            {
+                Items = columnList
+            };
+        }
+
+        private static bool IsDataTypeToken(string dataType)
+        {
+            return TSqlParser.DataTypes.Select(x => x.ToString().ToUpper())
+                .Contains(dataType);
+        }
+
         private SqlCodeExpr ParseLRParenOptionList(IParser parser)
         {
             if (!parser.MatchToken(SqlToken.LParen))
@@ -72,6 +115,7 @@ namespace T1.CodeDom.TSql.Parselets
                 var option = ParseLockEscalationEq(parser);
                 optionList.Add(option);
             } while (parser.MatchToken(SqlToken.Comma));
+
             parser.ConsumeToken(SqlToken.RParen);
 
             return new LRParenOptionListSqlCodeExpr
@@ -101,13 +145,14 @@ namespace T1.CodeDom.TSql.Parselets
                 },
             };
         }
-        
+
         private SqlCodeExpr ParseFor(IParser parser)
         {
             if (!parser.MatchToken(SqlToken.FOR))
             {
                 return null;
             }
+
             var objectId = parser.ConsumeObjectId();
             return new ForSqlCodeExpr
             {
@@ -117,7 +162,7 @@ namespace T1.CodeDom.TSql.Parselets
 
         private IExpression AlterDatabase(TextSpan databaseSpan, IParser parser)
         {
-            SqlCodeExpr databaseName  = null;
+            SqlCodeExpr databaseName = null;
             if (parser.MatchToken(SqlToken.CURRENT))
             {
                 databaseName = new ObjectIdSqlCodeExpr
@@ -135,7 +180,7 @@ namespace T1.CodeDom.TSql.Parselets
 
             var filegroupName = parser.ConsumeObjectId();
             var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
-			
+
             return new AlterDatabaseSqlCodeExpr
             {
                 DatabaseName = databaseName,
@@ -143,6 +188,19 @@ namespace T1.CodeDom.TSql.Parselets
                 IsSemicolon = isSemicolon,
             };
         }
+    }
+
+    public class ColumnDataTypeSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            Name.WriteToStream(stream);
+            stream.Write(" ");
+            DataType.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr Name { get; set; }
+        public SqlCodeExpr DataType { get; set; }
     }
 
     public class LRParenOptionListSqlCodeExpr : SqlCodeExpr
@@ -187,7 +245,7 @@ namespace T1.CodeDom.TSql.Parselets
         {
             stream.Write("ALTER TABLE ");
             TableName.WriteToStream(stream);
-            
+
             stream.Write($" {AlterAction.ToUpper()} ");
             // ConstraintExpr.WriteToStream(stream);
             // stream.Write(" ");
@@ -198,6 +256,7 @@ namespace T1.CodeDom.TSql.Parselets
         }
 
         public SqlCodeExpr TableName { get; set; }
+
         // public MarkConstraintSqlCodeExpr ConstraintExpr { get; set; }
         // public SqlCodeExpr DefaultExpr { get; set; }
         // public SqlCodeExpr ForExpr { get; set; }

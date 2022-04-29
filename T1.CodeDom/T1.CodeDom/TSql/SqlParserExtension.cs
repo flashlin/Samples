@@ -1054,28 +1054,10 @@ namespace T1.CodeDom.TSql
 
         private static ObjectIdSqlCodeExpr ParseDataType(IParser parser)
         {
-            var dataTypes = new[]
-            {
-                SqlToken.Bit,
-                SqlToken.Bigint,
-                SqlToken.Char,
-                SqlToken.Date,
-                SqlToken.DateTime,
-                SqlToken.DateTime2,
-                SqlToken.Decimal,
-                SqlToken.Float,
-                SqlToken.Int,
-                SqlToken.Numeric,
-                SqlToken.NVarchar,
-                SqlToken.SmallDateTime,
-                SqlToken.TinyInt,
-                SqlToken.Varchar,
-                SqlToken.Cursor,
-            };
-            var allTypes = dataTypes.Concat(new[] {SqlToken.Identifier}).ToArray();
+            var allTypes = TSqlParser.DataTypes.Concat(new[] {SqlToken.Identifier}).ToArray();
             var dataTypeToken = parser.Scanner.ConsumeAny(allTypes);
             var dataTypeStr = parser.Scanner.GetSpanString(dataTypeToken);
-            if (dataTypes.Select(x => x.ToString()).Contains(dataTypeToken.Type))
+            if (TSqlParser.DataTypes.Select(x => x.ToString()).Contains(dataTypeToken.Type))
             {
                 dataTypeStr = dataTypeStr.ToUpper();
             }
@@ -1282,6 +1264,12 @@ namespace T1.CodeDom.TSql
 
             parser.Scanner.SetOffset(token.Offset + token.Length - 1);
             return token;
+        }
+
+        public static string ConsumeTokenString(this IParser parser)
+        {
+            var span = parser.ConsumeToken();
+            return parser.Scanner.GetSpanString(span);
         }
 
         public static bool IsComment(this TextSpan span)

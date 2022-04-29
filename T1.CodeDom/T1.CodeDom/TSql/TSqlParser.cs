@@ -137,6 +137,25 @@ namespace T1.CodeDom.TSql
             InfixLeft(SqlToken.MinusEqual, Precedence.PREFIX);
         }
 
+        public static SqlToken[] DataTypes = new[]
+        {
+            SqlToken.Bit,
+            SqlToken.Bigint,
+            SqlToken.Char,
+            SqlToken.Date,
+            SqlToken.DateTime,
+            SqlToken.DateTime2,
+            SqlToken.Decimal,
+            SqlToken.Float,
+            SqlToken.Int,
+            SqlToken.Numeric,
+            SqlToken.NVarchar,
+            SqlToken.SmallDateTime,
+            SqlToken.TinyInt,
+            SqlToken.Varchar,
+            SqlToken.Cursor,
+        };
+
         public SqlCodeExpr ParseExpression()
         {
             return (SqlCodeExpr) ParseExp(0);

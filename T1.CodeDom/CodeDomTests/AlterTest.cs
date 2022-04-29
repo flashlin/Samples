@@ -18,6 +18,15 @@ public class AlterTest : TestBase
         ThenExprShouldBe(@"ALTER TABLE [dbo].[customer] ADD CONSTRAINT [DF_id] DEFAULT ( 0 ) FOR [id]");
     }
     
+    [Fact]
+    public void alter_table_add_columns()
+    {
+        var sql = @"ALTER TABLE [dbo].[customer] 
+ADD Addr char(10),Tel int";
+        Parse(sql);
+        ThenExprShouldBe(@"ALTER TABLE [dbo].[customer] ADD Addr CHAR (10), Tel INT");
+    }
+    
     
     [Fact]
     public void alter_table_set()
