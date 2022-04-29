@@ -141,5 +141,15 @@ INTO @id, @name");
         }
         
         
+        
+        [Fact]
+        public void batch_reference_file()
+        {
+            var sql = @":r file";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@":r file");
+        }
     }
 }

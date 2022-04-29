@@ -265,6 +265,14 @@ namespace T1.CodeDom.TSql
 
 			var head = GetSpanString(headSpan)[0];
 
+			if (head == ':' && TryNextChar('r', out var refSpan))
+			{
+				tokenSpan = headSpan.Concat(refSpan);
+				tokenSpan = ReadBatchReferenceFile(tokenSpan);
+				tokenSpan.Type = SqlToken.BatchRefFile.ToString();
+				return true;
+			}
+
 			if (head == 'N' && TryNextChar('\'', out var head2))
 			{
 				headSpan = headSpan.Concat(head2);
@@ -388,6 +396,19 @@ namespace T1.CodeDom.TSql
 			}
 
 			return false;
+		}
+
+		private TextSpan ReadBatchReferenceFile(TextSpan head)
+		{
+			var content = ReadUntil(head, ch =>
+			{
+				return ch != '\n';
+			});
+			if (!Peek().IsEmpty)
+			{
+				ConsumeCharacters("\n");
+			}
+			return content;
 		}
 
 		private TextSpan ReadMagnetCompareSymbol(TextSpan head)

@@ -247,6 +247,7 @@
 		DISABLE,
 		TYPE,
 		VIEW,
-		PERCENT
+		PERCENT,
+		BatchRefFile
 	}
 }
