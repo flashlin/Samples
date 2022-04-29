@@ -18,5 +18,10 @@ namespace SqliteCli.Repos
 		{
 			return DateTime.Parse(time.ToDateString());
 		}
+
+		public static bool EqualYearMonth(this DateTime date, DateTime otherDate)
+		{
+			return date.Year == otherDate.Year && date.Month == otherDate.Month;
+		}
 	}
 }

@@ -56,9 +56,9 @@ public class StockService : IStockService
 		foreach (var month in reqDateRange.GetRangeByMonth())
 		{
 			var closingDays = stockHistory
-				 .Count(x => x.TranDate.Year == month.Year && x.TranDate.Month == month.Month);
+				 .Count(x => x.TranDate.EqualYearMonth(month));
 			var closingSumPrice = stockHistory
-				 .Where(x => x.TranDate.Year == month.Year && x.TranDate.Month == month.Month)
+				 .Where(x => x.TranDate.EqualYearMonth(month))
 				 .Sum(x => x.ClosingPrice);
 
 
