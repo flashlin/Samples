@@ -114,8 +114,6 @@ public class Startup
                 StartDate = DateTime.Now.AddMonths(-12),
                 EndDate = DateTime.Now,
             },
-            StartTime = DateTime.Now.AddMonths(-12),
-            EndTime = DateTime.Now,
             StockId = stockId
         });
     }

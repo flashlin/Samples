@@ -8,8 +8,6 @@ namespace SqliteCli.Repos;
 
 public class ShowStockHistoryReq
 {
-	public DateTime StartTime { get; set; }
-	public DateTime EndTime { get; set; }
 	public string StockId { get; set; }
 	public DateRange DateRange { get; set; }
 }
@@ -45,13 +43,12 @@ public class StockService : IStockService
 
 		var stockHistoryReq = new GetStockHistoryReq()
 		{
-			StartTime = tranHistory.Select(x => x.TranTime)
-				.DefaultIfEmpty(req.StartTime).FirstOrDefault(),
-			EndTime = req.EndTime,
+			StartTime = req.DateRange.StartDate.StartOfMonth(),
+			EndTime = req.DateRange.EndDate,
 			StockId = req.StockId
 		};
+		
 		var stockHistory = _stockRepo.GetStockHistory(stockHistoryReq);
-
 		foreach (var month in req.DateRange.GetRangeByMonth())
 		{
 			var closingDays = stockHistory
@@ -59,7 +56,6 @@ public class StockService : IStockService
 			var closingSumPrice = stockHistory
 				 .Where(x => x.TranDate.EqualYearMonth(month))
 				 .Sum(x => x.ClosingPrice);
-
 
 			var closingPrice = 0m;
 			if (closingDays != 0)

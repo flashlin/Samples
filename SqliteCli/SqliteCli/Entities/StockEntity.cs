@@ -64,5 +64,10 @@ namespace SqliteCli.Entities
 		{
 			return CompareTo(other) == 1;
 		}
+
+		public override string ToString()
+		{
+			return $"{TranDate.ToDateString()} {StockId} {ClosingPrice.ToNumberString(6)}";
+		}
 	}
 }
