@@ -214,6 +214,11 @@ namespace T1.CodeDom.TSql
 
         protected override IPrefixParselet CodeSpecPrefix(TextSpan token)
         {
+            if (!IsPrefixExists(token))
+            {
+                return new ObjectIdParselet();
+            }
+            
             try
             {
                 return base.CodeSpecPrefix(token);

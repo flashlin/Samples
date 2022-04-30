@@ -113,6 +113,11 @@ namespace T1.CodeDom.Core
 		{
 			return _prefixParselets[token.Type];
 		}
+		
+		protected bool IsPrefixExists(TextSpan token)
+		{
+			return _prefixParselets.ContainsKey(token.Type);
+		}
 
 		protected void Register(string tokenType, IPrefixParselet parselet)
 		{
