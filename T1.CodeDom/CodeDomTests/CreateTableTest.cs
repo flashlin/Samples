@@ -189,7 +189,13 @@ CONSTRAINT PK_customer PRIMARY KEY ([Id])
     CONSTRAINT [pk_customer] PRIMARY KEY CLUSTERED ([id] ASC)
 	)";
 
-        Assert.Throws<ScanException>(() => Parse(sql));
+        Parse(sql);
+        
+        ThenExprShouldBe(@"CREATE TABLE [dbo].[customer]( 
+    [Id] INT, 
+    IsUpdated BIT NOT NULL CONSTRAINT [DF_IsUpdated] DEFAULT ( 0 ),
+    CONSTRAINT [pk_customer] PRIMARY KEY CLUSTERED([id] ASC)
+    )");
     }
 
 
