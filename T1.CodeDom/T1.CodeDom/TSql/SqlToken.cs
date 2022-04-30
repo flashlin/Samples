@@ -255,6 +255,7 @@
 		Dbcc,
 		NO_INFOMSGS,
 		Updateusage,
-		COUNT_ROWS
+		COUNT_ROWS,
+		SORT_IN_TEMPDB
 	}
 }

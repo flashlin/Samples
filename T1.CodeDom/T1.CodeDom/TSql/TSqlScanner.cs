@@ -225,6 +225,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("SNAPSHOT", SqlToken.SNAPSHOT);
 			AddTokenMap("SELF", SqlToken.SELF);
 			AddTokenMap("SYNONYM", SqlToken.SYNONYM);
+			AddTokenMap("SORT_IN_TEMPDB", SqlToken.SORT_IN_TEMPDB);
 			AddTokenMap("SERIALIZABLE", SqlToken.SERIALIZABLE);
 			AddTokenMap("TRANSACTION", SqlToken.TRANSACTION);
 			AddTokenMap("TRAN", SqlToken.TRAN);
