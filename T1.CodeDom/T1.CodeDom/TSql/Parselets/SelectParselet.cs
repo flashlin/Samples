@@ -12,7 +12,7 @@ namespace T1.CodeDom.TSql.Parselets
         public List<SqlCodeExpr> Columns { get; set; }
         public SqlCodeExpr IntoTable { get; set; }
     }
-
+    
     public class SelectParselet : IPrefixParselet
     {
         public IExpression Parse(TextSpan token, IParser parser)

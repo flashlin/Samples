@@ -163,6 +163,7 @@ namespace T1.CodeDom.TSql
 			AddFuncNameMap("YEAR", SqlToken.YEAR);
 
 			AddTokenMap("ADD", SqlToken.ADD);
+			AddTokenMap("APPLY", SqlToken.APPLY);
 			AddTokenMap("AUTO", SqlToken.AUTO);
 			AddTokenMap("ANSI_NULLS", SqlToken.ANSI_NULLS);
 			AddTokenMap("ANSI_PADDING", SqlToken.ANSI_PADDING);

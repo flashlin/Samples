@@ -427,6 +427,13 @@ namespace T1.CodeDom.TSql
             var joinSelectList = new List<SqlCodeExpr>();
             do
             {
+                var crossApplyExpr = parser.ParseCrossApply();
+                if (crossApplyExpr != null)
+                {
+                    joinSelectList.Add(crossApplyExpr);
+                    continue;
+                }
+                
                 if (parser.IsToken(SqlToken.Join))
                 {
                     joinSelectList.Add(ParseJoinSelect(TextSpan.Empty, parser));
@@ -1577,6 +1584,34 @@ namespace T1.CodeDom.TSql
             return parameterList;
         }
 
+        public static CrossApplySqlCodeExpr ParseCrossApply(this IParser parser)
+        {
+            if (!parser.MatchTokenList(SqlToken.Cross, SqlToken.APPLY))
+            {
+                return null;
+            }
+
+            parser.ConsumeToken(SqlToken.LParen);
+            var expr = parser.ParseExpIgnoreComment();
+            parser.ConsumeToken(SqlToken.RParen);
+            parser.ConsumeToken(SqlToken.As);
+            var aliasName = parser.ConsumeObjectId();
+           
+            var columnList = new List<SqlCodeExpr>();
+            if (parser.MatchToken(SqlToken.LParen))
+            {
+                columnList = parser.ParseColumnList();
+                parser.ConsumeToken(SqlToken.RParen);
+            }
+
+            return new CrossApplySqlCodeExpr
+            {
+                SubExpr = expr,
+                AliasName = aliasName,
+                ColumnList = columnList
+            };
+        }
+        
         public static List<SqlCodeExpr> ParseColumnList(this IParser parser)
         {
             var columns = new List<SqlCodeExpr>();
@@ -1749,6 +1784,26 @@ namespace T1.CodeDom.TSql
                 IsSemicolon = isSemicolon
             };
         }
+    }
+
+    public class CrossApplySqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CROSS APPLY");
+            stream.Write("(");
+            SubExpr.WriteToStream(stream);
+            stream.Write(")");
+            stream.Write(" AS ");
+            AliasName.WriteToStream(stream);
+            stream.Write("(");
+            ColumnList.WriteToStreamWithComma(stream);
+            stream.Write(")");
+        }
+
+        public SqlCodeExpr SubExpr { get; set; }
+        public SqlCodeExpr AliasName { get; set; }
+        public List<SqlCodeExpr> ColumnList { get; set; }
     }
 
     public class TypeObjectIdSqlCodeExpr : SqlCodeExpr
