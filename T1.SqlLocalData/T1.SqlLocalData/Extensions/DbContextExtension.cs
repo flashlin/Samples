@@ -1,14 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using T1.Standard.DynamicCode;
 
-namespace SqlLocalDataTests.Repositories;
+namespace T1.SqlLocalData.Extensions;
 
 public static class DbContextExtension
 {
@@ -56,7 +56,7 @@ public static class DbContextExtension
 			var keyAttribute = prop.Value.Info.GetCustomAttribute<KeyAttribute>();
 			var isKey = keyAttribute != null;
 
-			string dataType = GetDataType(propType);
+			var dataType = GetDataType(propType);
 
 			yield return new ColumnInfo
 			{
@@ -99,6 +99,7 @@ public static class DbContextExtension
 		{
 			{ typeof(string), "VARCHAR(50)" },
 			{ typeof(int), "INT" },
+			{ typeof(long), "BIGINT" },
 			{ typeof(DateTime), "DATETIME" },
 			{ typeof(decimal), "DECIMAL(10,2)" },
 			{ typeof(bool), "BIT" }

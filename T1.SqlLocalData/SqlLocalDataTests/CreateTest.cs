@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using T1.SqlLocalData;
+using T1.SqlLocalData.Extensions;
 using Xunit;
 
 namespace SqlLocalDataTests

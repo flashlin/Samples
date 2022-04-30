@@ -1,6 +1,6 @@
-﻿namespace SqlLocalDataTests.Repositories
+﻿namespace T1.SqlLocalData.Extensions
 {
-	internal class ColumnInfo
+	public class ColumnInfo
 	{
 		public string Name { get; set; }
 		public string DataType { get; set; }
