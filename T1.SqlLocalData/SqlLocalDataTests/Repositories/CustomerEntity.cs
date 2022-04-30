@@ -11,5 +11,4 @@ public class CustomerEntity
 	public int Id { get; set; }
 	[StringLength(50)]
 	public string Name { get; set; }
-	public DateTime Birth { get; set; }
 }

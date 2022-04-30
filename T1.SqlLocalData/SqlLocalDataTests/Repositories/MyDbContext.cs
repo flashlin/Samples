@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace SqlLocalDataTests.Repositories;
 
@@ -11,6 +12,7 @@ public class MyDbContext : DbContext
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
-		optionsBuilder.UseSqlServer(_connectionString);
+		optionsBuilder.UseSqlServer(_connectionString)
+			.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 	}
 }

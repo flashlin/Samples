@@ -1,6 +1,8 @@
 using SqlLocalDataTests.Repositories;
 using System;
 using System.IO;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using T1.SqlLocalData;
 using Xunit;
 
@@ -10,7 +12,7 @@ namespace SqlLocalDataTests
 	{
 		private string _databaseFile = @"D:\Demo\test.mdf";
 		private string _instanceName = "localtest";
-		private SqlLocalDb _localDb = new SqlLocalDb();
+		private readonly SqlLocalDb _localDb = new SqlLocalDb();
 
 		public CreateTest()
 		{
@@ -28,10 +30,23 @@ namespace SqlLocalDataTests
 		[Fact]
 		public void create_table()
 		{
-			var mydb = new MyDbContext();
-			mydb.CreateTable(typeof(CustomerEntity));
+			var myDb = new MyDbContext();
+			myDb.CreateTable(typeof(CustomerEntity));
 		}
+		
+		[Fact]
+		public void execute_raw_sql()
+		{
+			var myDb = new MyDbContext();
+			myDb.Database.ExecuteSqlRaw(@"CREATE TABLE customer (id INT PRIMARY KEY, name VARCHAR(50))");
+			myDb.Database.ExecuteSqlRaw(@"INSERT customer(id,name) VALUES (1,'Flash'),(3,'Jack'),(4,'Mary')");
 
+			var customer = myDb.Customers
+				.First(x => x.Id == 3);
+
+			Assert.Equal("Jack",customer.Name);
+		}
+		
 		public void Dispose()
 		{
 			//_localDb.DeleteInstance();
