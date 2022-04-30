@@ -1068,10 +1068,14 @@ namespace T1.CodeDom.TSql
 
         public static TableDataTypeSqlCodeExpr ConsumeTableDataTypeList(this IParser parser)
         {
-            parser.Scanner.Consume(SqlToken.LParen);
             var columnDataTypeList = new List<SqlCodeExpr>();
+            parser.Scanner.Consume(SqlToken.LParen);
             do
             {
+                if (parser.IsToken(SqlToken.RParen))
+                {
+                    break;
+                }
                 var expr = parser.ParseAny(ParseConstraintExpr,
                     ParseExtra,
                     ParseColumnDefine);
