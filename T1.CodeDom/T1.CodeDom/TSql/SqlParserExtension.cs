@@ -1623,7 +1623,8 @@ namespace T1.CodeDom.TSql
         {
             if (!parser.TryConsumeTokenAny(out var span,
                     SqlToken.PAD_INDEX, SqlToken.STATISTICS_NORECOMPUTE, SqlToken.IGNORE_DUP_KEY,
-                    SqlToken.ALLOW_PAGE_LOCKS, SqlToken.ALLOW_ROW_LOCKS, SqlToken.SORT_IN_TEMPDB,
+                    SqlToken.ALLOW_PAGE_LOCKS, SqlToken.ALLOW_ROW_LOCKS, SqlToken.SORT_IN_TEMPDB, 
+                    SqlToken.DROP_EXISTING,
                     SqlToken.ONLINE))
             {
                 return null;

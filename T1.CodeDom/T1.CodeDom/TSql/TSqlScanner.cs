@@ -181,6 +181,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
 			AddTokenMap("DATABASE", SqlToken.DATABASE);
 			AddTokenMap("DISABLE", SqlToken.DISABLE);
+			AddTokenMap("DROP_EXISTING", SqlToken.DROP_EXISTING);
 			AddTokenMap("FILEGROUP", SqlToken.FILEGROUP);
 			AddTokenMap("FORCESEEK", SqlToken.FORCESEEK);
 			AddTokenMap("FILLFACTOR", SqlToken.FILLFACTOR);

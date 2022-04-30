@@ -256,6 +256,7 @@
 		NO_INFOMSGS,
 		Updateusage,
 		COUNT_ROWS,
-		SORT_IN_TEMPDB
+		SORT_IN_TEMPDB,
+		DROP_EXISTING
 	}
 }
