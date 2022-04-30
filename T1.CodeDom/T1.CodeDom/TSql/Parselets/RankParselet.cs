@@ -59,43 +59,50 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			parser.Scanner.Consume(SqlToken.LParen);
 
-			var partitionColumnList = new List<SqlCodeExpr>();
+			PartitionBySqlCodeExpr partitionBy = null;
 			if (parser.Scanner.Match(SqlToken.Partition))
 			{
+				var partitionColumnList = new List<SqlCodeExpr>();
 				parser.Scanner.Consume(SqlToken.By);
 				do
 				{
 					partitionColumnList.Add(parser.ConsumeObjectId());
 				} while (parser.Scanner.Match(SqlToken.Comma));
-			}
 
-			parser.Scanner.Consume(SqlToken.Order);
-			parser.Scanner.Consume(SqlToken.By);
-			var orderColumnList = new List<SortSqlCodeExpr>();
-			do
-			{
-				var name = parser.ConsumeObjectId();
-				parser.Scanner.TryConsumeAny(out var sortTokenSpan, SqlToken.Asc, SqlToken.Desc);
-				var sortToken = parser.Scanner.GetSpanString(sortTokenSpan);
-				orderColumnList.Add(new SortSqlCodeExpr
-				{
-					Name = name,
-					SortToken = sortToken
-				});
-			} while (parser.Scanner.Match(SqlToken.Comma));
-
-			parser.Scanner.Consume(SqlToken.RParen);
-
-			return new OverSqlCodeExpr
-			{
-				PartitionBy = new PartitionBySqlCodeExpr
+				partitionBy = new PartitionBySqlCodeExpr()
 				{
 					ColumnList = partitionColumnList
-				},
-				OrderBy = new OrderBySqlCodeExpr
+				};
+			}
+
+			OrderBySqlCodeExpr orderBy = null;
+			if (parser.MatchTokenList(SqlToken.Order, SqlToken.By))
+			{
+				var orderColumnList = new List<SortSqlCodeExpr>();
+				do
+				{
+					var name = parser.ConsumeObjectId();
+					parser.Scanner.TryConsumeAny(out var sortTokenSpan, SqlToken.Asc, SqlToken.Desc);
+					var sortToken = parser.Scanner.GetSpanString(sortTokenSpan);
+					orderColumnList.Add(new SortSqlCodeExpr
+					{
+						Name = name,
+						SortToken = sortToken
+					});
+				} while (parser.Scanner.Match(SqlToken.Comma));
+				orderBy = new OrderBySqlCodeExpr
 				{
 					ColumnList = orderColumnList
-				}
+				};
+			}
+			
+
+			parser.Scanner.Consume(SqlToken.RParen);
+			
+			return new OverSqlCodeExpr
+			{
+				PartitionBy = partitionBy,
+				OrderBy = orderBy 
 			};
 		}
 	}
