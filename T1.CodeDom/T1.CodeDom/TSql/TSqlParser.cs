@@ -79,6 +79,7 @@ namespace T1.CodeDom.TSql
 
             Register(SqlToken.ABS, new CallFuncParselet(1, 1));
             Register(SqlToken.CHARINDEX, new CallFuncParselet(2, 3));
+            Register(SqlToken.CHAR, new CallFuncParselet(1, 1));
             Register(SqlToken.COUNT, new CallFuncParselet(1, 1));
             Register(SqlToken.COALESCE, new CallFuncParselet(1));
             Register(SqlToken.DENSE_RANK, new DenseRankParselet());
@@ -142,7 +143,7 @@ namespace T1.CodeDom.TSql
         {
             SqlToken.Bit,
             SqlToken.Bigint,
-            SqlToken.Char,
+            SqlToken.CHAR,
             SqlToken.Date,
             SqlToken.DateTime,
             SqlToken.DateTime2,

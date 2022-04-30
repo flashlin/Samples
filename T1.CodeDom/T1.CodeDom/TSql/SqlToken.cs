@@ -113,7 +113,7 @@
 		While,
 		Continue,
 		Convert,
-		Char,
+		CHAR,
 		PRIMARY,
 		KEY,
 		MAX,

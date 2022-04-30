@@ -75,5 +75,18 @@ namespace TestProject.PrattTests
 
 			ThenExprShouldBe(@"FLOOR( 1 )");
 		}
+		
+		
+		[Fact]
+		public void char_fn()
+		{
+			var sql = @"char(@code)";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"CHAR( @code )");
+		}
+		
+		
 	}
 }

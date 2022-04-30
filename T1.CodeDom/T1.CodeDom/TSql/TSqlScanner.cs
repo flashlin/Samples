@@ -26,7 +26,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("BETWEEN", SqlToken.Between);
 			AddTokenMap("BIGINT", SqlToken.Bigint);
 			AddTokenMap("CONTINUE", SqlToken.Continue);
-			AddTokenMap("CHAR", SqlToken.Char);
+			AddTokenMap("CHAR", SqlToken.CHAR);
 			AddTokenMap("CAST", SqlToken.Cast);
 			AddTokenMap("CASE", SqlToken.Case);
 			AddTokenMap("CURSOR", SqlToken.Cursor);
