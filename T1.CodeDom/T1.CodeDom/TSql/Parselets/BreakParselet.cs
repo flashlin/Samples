@@ -15,6 +15,22 @@ namespace T1.CodeDom.TSql.Parselets
         }
     }
 
+    public class DefaultConstantParselet : IPrefixParselet
+    {
+        public IExpression Parse(TextSpan token, IParser parser)
+        {
+            return new DefaultConstantSqlCodeExpr();
+        }
+    }
+
+    public class DefaultConstantSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("DEFAULT");
+        }
+    }
+
     public class DbccParselet : IPrefixParselet
     {
         public IExpression Parse(TextSpan token, IParser parser)

@@ -214,6 +214,16 @@ FROM customer )");
 			ThenExprShouldBe(@"INSERT INTO #customer WITH(UPDLOCK) EXEC [my_func] @date");
 		}
 		
+		[Fact]
+		public void insert_into_default()
+		{
+			var sql = @"INSERT INTO #customer values(1, default)";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO #customer VALUES (1, DEFAULT)");
+		}
+		
 		
 	}
 }
