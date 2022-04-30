@@ -18,9 +18,9 @@ namespace T1.CodeDom.TSql.Parselets
 
             var tableName = parser.ConsumeTableName();
             
-            var columnList = GetColumnsList(parser);
-
             var withExpr = parser.ParsePrefix(SqlToken.With);
+            
+            var columnList = GetColumnsList(parser);
 
             if (parser.Scanner.TryConsumeAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
             {

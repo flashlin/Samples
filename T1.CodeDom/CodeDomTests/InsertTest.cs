@@ -206,12 +206,12 @@ FROM customer )");
 		[Fact]
 		public void insert_into_with_updlock()
 		{
-			var sql = @"INSERT INTO #customer (id, name) with(updlock)
+			var sql = @"INSERT INTO #customer with(updlock)
     			EXEC [my_func] @date";
 			
 			Parse(sql);
 
-			ThenExprShouldBe(@"INSERT INTO #customer(id, name) WITH(UPDLOCK) EXEC [my_func] @date");
+			ThenExprShouldBe(@"INSERT INTO #customer WITH(UPDLOCK) EXEC [my_func] @date");
 		}
 		
 		
