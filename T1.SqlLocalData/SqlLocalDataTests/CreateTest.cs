@@ -47,6 +47,24 @@ namespace SqlLocalDataTests
 			Assert.Equal("Jack",customer.Name);
 		}
 		
+		
+		[Fact]
+		public void execute_store_procedure()
+		{
+			var myDb = new MyDbContext();
+			myDb.Database.ExecuteSqlRaw(@"CREATE TABLE customer (id INT PRIMARY KEY, name VARCHAR(50))");
+			myDb.Database.ExecuteSqlRaw(@"INSERT customer(id,name) VALUES (1,'Flash'),(3,'Jack'),(4,'Mary')");
+			myDb.Database.ExecuteSqlRaw(@"CREATE PROC MyGetCustomer @id INT AS BEGIN SET NOCOUNT ON; select name from customer WHERE id=@id END");
+
+			var customer = myDb.QueryRawSql<CustomerEntity>("EXEC MyGetCustomer @id", new
+			{
+				id = 3
+			}).First();
+
+			Assert.Equal("Jack",customer.Name);
+		}
+		
+		
 		public void Dispose()
 		{
 			//_localDb.DeleteInstance();
