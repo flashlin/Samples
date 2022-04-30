@@ -70,6 +70,16 @@ namespace TestProject.PrattTests
             Parse(sql);
             ThenExprShouldBe("SELECT date FROM customer");
         }
+        
+        
+        [Fact]
+        public void select_over()
+        {
+            var sql = "select date over(), ROW_NUMBER() over(order by name desc) from customer";
+            Parse(sql);
+            ThenExprShouldBe("SELECT date OVER( ), ROW_NUMBER() OVER( ORDER BY name desc ) FROM customer");
+        }
+        
 
         [Fact]
         public void select_customFunc()

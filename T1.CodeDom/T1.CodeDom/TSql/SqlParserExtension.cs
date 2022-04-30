@@ -1523,9 +1523,13 @@ namespace T1.CodeDom.TSql
         private static SqlCodeExpr ParseColumnAs(IParser parser)
         {
             var name = parser.ParseExpIgnoreComment();
-            //var name = parser.ConsumeObjectId(true);
-
             name = parser.ParseLRParenExpr(name);
+
+            SqlCodeExpr overExpr = null;
+            if (parser.TryConsumeToken(out var overSpan,SqlToken.Over))
+            {
+                overExpr = parser.PrefixParse(overSpan) as SqlCodeExpr;
+            }
 
             var hasAs = parser.Scanner.Match(SqlToken.As);
 
@@ -1546,6 +1550,7 @@ namespace T1.CodeDom.TSql
             return new ColumnSqlCodeExpr
             {
                 Name = name,
+                OverExpr = overExpr,
                 AliasName = aliasName
             };
         }
