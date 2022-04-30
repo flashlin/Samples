@@ -29,7 +29,7 @@ namespace T1.CodeDom.TSql.Parselets
 
 			parser.TryConsumeAliasName(out var aliasNameExpr);
 
-			var userWithOptions = parser.ParseWithOptions();
+			var userWithOptions = parser.ParseWithOption();
 
 			SqlCodeExpr joinOnExpr = null;
 			if (parser.Scanner.Match(SqlToken.ON))

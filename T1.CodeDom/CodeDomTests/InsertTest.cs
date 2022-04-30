@@ -201,5 +201,19 @@ FROM customer )");
 
 			ThenExprShouldBe(@"INSERT INTO #customer(id, name) EXEC [my_func] @date");
 		}
+		
+		
+		[Fact]
+		public void insert_into_with_updlock()
+		{
+			var sql = @"INSERT INTO #customer (id, name) with(updlock)
+    			EXEC [my_func] @date";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO #customer(id, name) WITH(UPDLOCK) EXEC [my_func] @date");
+		}
+		
+		
 	}
 }

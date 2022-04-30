@@ -14,7 +14,7 @@ namespace T1.CodeDom.TSql.Parselets
 			//parser.TryConsumeObjectId(out var table);
 			var table = parser.ConsumeTableName();
 
-			var withOptions = parser.ParseWithOptions();
+			var withOptions = parser.ParseWithOption();
 
 			parser.Scanner.Consume(SqlToken.Set);
 

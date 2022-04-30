@@ -9,6 +9,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public string IntoStr { get; set; }
 		public SqlCodeExpr TableName { get; set; }
 		public List<string> Columns { get; set; }
+		public SqlCodeExpr WithExpr { get; set; }
 		public List<ExprListSqlCodeExpr> ValuesList { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -25,6 +26,12 @@ namespace T1.CodeDom.TSql.Expressions
 				stream.Write("(");
 				Columns.WriteToStreamWithComma(stream);
 				stream.Write(")");
+			}
+
+			if (WithExpr != null)
+			{
+				stream.Write(" ");
+				WithExpr.WriteToStream(stream);
 			}
 
 			stream.Write(" VALUES");

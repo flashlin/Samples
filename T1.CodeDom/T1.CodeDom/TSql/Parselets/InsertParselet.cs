@@ -20,6 +20,8 @@ namespace T1.CodeDom.TSql.Parselets
             
             var columnList = GetColumnsList(parser);
 
+            var withExpr = parser.ParsePrefix(SqlToken.With);
+
             if (parser.Scanner.TryConsumeAny(out var execSpan, SqlToken.Exec, SqlToken.Execute))
             {
                 var execExpr = parser.PrefixParse(execSpan) as SqlCodeExpr;
@@ -27,6 +29,7 @@ namespace T1.CodeDom.TSql.Parselets
                 {
                     Table = tableName,
                     ColumnsList = columnList,
+                    WithExpr = withExpr,
                     SelectFromExpr = execExpr,
                 };
             }
@@ -83,6 +86,7 @@ namespace T1.CodeDom.TSql.Parselets
                 IntoStr = intoStr,
                 TableName = tableName,
                 Columns = columnList,
+                WithExpr = withExpr,
                 ValuesList = valuesList
             };
         }

@@ -16,7 +16,7 @@ namespace T1.CodeDom.TSql.Parselets
 			}
 
 			var targetTable = parser.ConsumeObjectId();
-			var withOptions = parser.ParseWithOptions();
+			var withOptions = parser.ParseWithOption();
 
 			if (!parser.TryConsumeAliasName(out var targetTableAliasName) && parser.Scanner.IsTokenList(SqlToken.As, SqlToken.Target))
 			{

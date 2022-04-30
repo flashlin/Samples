@@ -7,6 +7,7 @@ namespace T1.CodeDom.TSql.Expressions
 	{
 		public SqlCodeExpr Table { get; set; }
 		public List<string> ColumnsList { get; set; }
+		public SqlCodeExpr WithExpr { get; set; }
 		public List<SqlCodeExpr> OutputList { get; set; }
 		public SqlCodeExpr OutputIntoExpr { get; set; }
 		public SqlCodeExpr SelectFromExpr { get; set; }
@@ -21,6 +22,12 @@ namespace T1.CodeDom.TSql.Expressions
 				stream.Write("(");
 				ColumnsList.WriteToStreamWithComma(stream);
 				stream.Write(")");
+			}
+
+			if (WithExpr != null)
+			{
+				stream.Write(" ");
+				WithExpr.WriteToStream(stream);
 			}
 
 			if(OutputList != null && OutputList.Count > 0)

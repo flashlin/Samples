@@ -15,7 +15,7 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var table = parser.ConsumeTableName();
 
-			var withOptions = parser.ParseWithOptions();
+			var withOptions = parser.ParseWithOption();
 
 			var outputList = parser.GetOutputListExpr();
 			var outputInto = parser.GetOutputIntoExpr();

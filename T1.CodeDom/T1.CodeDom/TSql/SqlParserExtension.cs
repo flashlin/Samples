@@ -643,40 +643,57 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        public static List<string> ParseWithOptions(this IParser parser)
+        public static SqlCodeExpr ParsePrefix(this IParser parser, SqlToken tokenType)
+        {
+            if (!parser.TryConsumeToken(out var tokenSpan, tokenType))
+            {
+                return null;
+            }
+            return parser.PrefixParse(tokenSpan) as SqlCodeExpr;
+        }
+
+        public static List<string> ParseWithOption(this IParser parser)
         {
             var userWithOptions = new List<string>();
             if (parser.Scanner.Match(SqlToken.With))
             {
-                parser.Scanner.Consume(SqlToken.LParen);
-                var withOptions = new[]
-                {
-                    SqlToken.NOLOCK,
-                    SqlToken.ROWLOCK,
-                    SqlToken.UPDLOCK,
-                    SqlToken.HOLDLOCK,
-                    SqlToken.FORCESEEK
-                };
-
-                do
-                {
-                    if (parser.Scanner.Match(SqlToken.Index))
-                    {
-                        parser.Scanner.Consume(SqlToken.LParen);
-                        var indexName = parser.ConsumeObjectId();
-                        parser.Scanner.Consume(SqlToken.RParen);
-                        userWithOptions.Add($"INDEX({indexName})");
-                        continue;
-                    }
-
-                    var option = parser.Scanner.ConsumeStringAny(withOptions);
-                    userWithOptions.Add(option);
-                } while (parser.Scanner.Match(SqlToken.Comma));
-
-                //userWithOptions = parser.Scanner.ConsumeToStringListByDelimiter(SqlToken.Comma, withOptions)
-                //	.ToList();
-                parser.Scanner.Consume(SqlToken.RParen);
+                userWithOptions = parser.ParseWithOptionItemList();
             }
+            return userWithOptions;
+        }
+
+        public static List<string> ParseWithOptionItemList(this IParser parser)
+        {
+            var userWithOptions = new List<string>();
+            if (!parser.MatchToken(SqlToken.LParen))
+            {
+                return userWithOptions;
+            }
+            
+            var withOptions = new[]
+            {
+                SqlToken.NOLOCK,
+                SqlToken.ROWLOCK,
+                SqlToken.UPDLOCK,
+                SqlToken.HOLDLOCK,
+                SqlToken.FORCESEEK
+            };
+            
+            do
+            {
+                if (parser.Scanner.Match(SqlToken.Index))
+                {
+                    parser.Scanner.Consume(SqlToken.LParen);
+                    var indexName = parser.ConsumeObjectId();
+                    parser.Scanner.Consume(SqlToken.RParen);
+                    userWithOptions.Add($"INDEX({indexName})");
+                    continue;
+                }
+
+                var option = parser.Scanner.ConsumeStringAny(withOptions);
+                userWithOptions.Add(option);
+            } while (parser.Scanner.Match(SqlToken.Comma));
+            parser.Scanner.Consume(SqlToken.RParen);
 
             return userWithOptions;
         }
@@ -1141,7 +1158,7 @@ namespace T1.CodeDom.TSql
             sourceExpr = parser.ParseLRParenExpr(sourceExpr);
 
             parser.TryConsumeAliasName(out var aliasNameExpr);
-            var userWithOptions = parser.ParseWithOptions();
+            var userWithOptions = parser.ParseWithOption();
 
             var joinList = parser.GetJoinSelectList();
 

@@ -30,7 +30,7 @@ namespace T1.CodeDom.TSql.Expressions
 		}
 	}
 
-	public class WithSqlCodeExpr : SqlCodeExpr
+	public class WithTableSqlCodeExpr : SqlCodeExpr
 	{
 		public List<WithItemSqlCodeExpr> Items { get; set; }
 
