@@ -33,6 +33,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("CROSS", SqlToken.Cross);
 			AddTokenMap("CREATE", SqlToken.Create);
 			AddTokenMap("CONVERT", SqlToken.Convert);
+			AddTokenMap("DBCC", SqlToken.Dbcc);
 			AddTokenMap("DROP", SqlToken.Drop);
 			AddTokenMap("DENSE_RANK", SqlToken.DENSE_RANK);
 			AddTokenMap("DESC", SqlToken.Desc);
@@ -121,6 +122,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("THEN", SqlToken.Then);
 			AddTokenMap("TINYINT", SqlToken.TinyInt);
 			AddTokenMap("UNPIVOT", SqlToken.UnPivot);
+			AddTokenMap("UPDATEUSAGE", SqlToken.Updateusage);
 			AddTokenMap("UPDATE", SqlToken.Update);
 			AddTokenMap("USING", SqlToken.Using);
 			AddTokenMap("UNION", SqlToken.Union);
@@ -173,6 +175,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("COMMITTED", SqlToken.COMMITTED);
 			AddTokenMap("CONNECT", SqlToken.CONNECT);
 			AddTokenMap("COMMIT", SqlToken.Commit);
+			AddTokenMap("COUNT_ROWS", SqlToken.COUNT_ROWS);
 			AddTokenMap("CURRENT", SqlToken.CURRENT);
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
@@ -194,6 +197,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("LEVEL", SqlToken.LEVEL);
 			AddTokenMap("LOCK_TIMEOUT", SqlToken.LOCK_TIMEOUT);
 			AddTokenMap("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
+			AddTokenMap("NO_INFOMSGS", SqlToken.NO_INFOMSGS);
 			AddTokenMap("NOEXEC", SqlToken.NOEXEC);
 			AddTokenMap("NOLOCK", SqlToken.NOLOCK);
 			AddTokenMap("NOCOUNT", SqlToken.NOCOUNT);

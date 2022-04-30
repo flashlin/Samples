@@ -164,5 +164,16 @@ INTO @id, @name");
         }
         
         
+        [Fact]
+        public void dbcc_updateusage()
+        {
+            var sql = @"dbcc updateusage(0,@objname) with no_infomsgs";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"DBCC UPDATEUSAGE(0, @objname) WITH(NO_INFOMSGS)");
+        }
+        
+        
     }
 }

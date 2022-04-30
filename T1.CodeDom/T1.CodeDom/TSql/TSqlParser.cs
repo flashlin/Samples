@@ -22,6 +22,7 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.CONSTRAINT, new ConstraintParselet());
             Register(SqlToken.Cursor, new CursorParselet());
             Register(SqlToken.Continue, new ContinueParselet());
+            Register(SqlToken.Dbcc, new DbccParselet());
             Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
             Register(SqlToken.Drop, new DropParselet());
             Register(SqlToken.Delete, new DeleteParselet());

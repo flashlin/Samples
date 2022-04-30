@@ -251,6 +251,10 @@
 		BatchRefFile,
 		ROLE,
 		Rebuild,
-		REORGANIZE
+		REORGANIZE,
+		Dbcc,
+		NO_INFOMSGS,
+		Updateusage,
+		COUNT_ROWS
 	}
 }
