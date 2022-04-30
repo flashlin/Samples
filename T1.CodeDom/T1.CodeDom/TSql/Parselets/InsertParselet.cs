@@ -90,22 +90,15 @@ namespace T1.CodeDom.TSql.Parselets
         private static List<string> GetColumnsList(IParser parser)
         {
             var columns = new List<string>();
-
             if (parser.Scanner.Match(SqlToken.LParen))
             {
-                /*
-                columns = parser.Scanner
-                    .ConsumeToStringListByDelimiter(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier)
-                    .ToList();
-                    */
-
                 do
                 {
-                    var columnStr =
-                        parser.ConsumeTokenStringAny(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier);
+                    //var columnStr = parser.ConsumeTokenStringAny(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier);
+                    var columnSpan = parser.ConsumeIdentifierToken();
+                    var columnStr = parser.Scanner.GetSpanString(columnSpan);
                     columns.Add(columnStr);
                 } while (parser.MatchToken(SqlToken.Comma));
-
 
                 parser.Scanner.Consume(SqlToken.RParen);
             }

@@ -769,6 +769,16 @@ namespace T1.CodeDom.TSql
                 ParseFuncNameIdentifierToken);
         }
 
+        public static TextSpan ConsumeIdentifierToken(this IParser parser)
+        {
+            if (!parser.TryConsumeIdentifierToken(out var identifier))
+            {
+                ThrowHelper.ThrowParseException(parser, "Expect Identifier");
+            }
+
+            return identifier;
+        }
+
         public static TextSpan ParseColumnNameToken(IParser parser)
         {
             var meetColumnNameList = new[]
@@ -778,10 +788,11 @@ namespace T1.CodeDom.TSql
                 SqlToken.Source,
                 SqlToken.Target,
                 SqlToken.Asterisk,
+                //
                 SqlToken.Error,
                 SqlToken.TYPE,
-                //
-                SqlToken.Date
+                SqlToken.Date,
+                SqlToken.Rank
             };
             var span = parser.PeekToken();
             if (span.IsEmpty)
@@ -798,20 +809,6 @@ namespace T1.CodeDom.TSql
         public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr, bool nonSensitive = false)
         {
             var comments = parser.IgnoreComments();
-
-            var meetColumnNameList = new[]
-            {
-                SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
-                SqlToken.TempTable,
-                SqlToken.Source,
-                SqlToken.Target,
-                SqlToken.Asterisk,
-                SqlToken.Date,
-                SqlToken.Rank,
-                SqlToken.Error,
-                SqlToken.COUNT,
-                SqlToken.TYPE
-            };
 
             var typeObjectId = parser.ParseTypeObjectId();
             if (typeObjectId != null)
@@ -848,10 +845,6 @@ namespace T1.CodeDom.TSql
 
                     identifier = parser.Scanner.Consume();
                 }
-                // else if (!parser.Scanner.TryConsumeAny(out identifier, meetColumnNameList))
-                // {
-                //     break;
-                // }
                 else if (!parser.TryConsumeIdentifierToken(out identifier))
                 {
                     break;
