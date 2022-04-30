@@ -157,6 +157,7 @@ namespace T1.CodeDom.TSql
             SqlToken.TinyInt,
             SqlToken.Varchar,
             SqlToken.Cursor,
+            SqlToken.XML
         };
 
         public SqlCodeExpr ParseExpression()

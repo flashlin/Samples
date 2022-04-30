@@ -1,4 +1,5 @@
-﻿using Xunit.Abstractions;
+﻿using T1.CodeDom.Core;
+using Xunit.Abstractions;
 using Xunit;
 
 namespace TestProject.PrattTests
@@ -17,6 +18,13 @@ namespace TestProject.PrattTests
             ThenExprShouldBe("SELECT 1");
         }
         
+        
+        [Fact]
+        public void select_nolock()
+        {
+            var sql = "select 1 from customer (nolock)";
+            Assert.Throws<ParseException>(() => Parse(sql));
+        }
         
         [Fact]
         public void select_min()
