@@ -90,7 +90,7 @@ namespace T1.CodeDom.TSql.Parselets
             parser.ConsumeToken(SqlToken.As);
             
             var tableSpan = parser.ConsumeToken(SqlToken.TABLE);
-            var typeExpr = parser.ConsumeTableDataType();
+            var typeExpr = parser.ConsumeTableDataTypeList();
 
             return new CreateTypeSqlCodeExpr
             {

@@ -114,7 +114,7 @@ namespace T1.CodeDom.TSql
         {
             if (parser.Scanner.Match(SqlToken.TABLE))
             {
-                return parser.ConsumeTableDataType();
+                return parser.ConsumeTableDataTypeList();
             }
 
             SqlCodeExpr dataType;
@@ -762,6 +762,13 @@ namespace T1.CodeDom.TSql
             return span;
         }
 
+        public static bool TryConsumeIdentifierToken(this IParser parser, out TextSpan identifier)
+        {
+            return parser.TryConsumeTokenAny(out identifier,
+                ParseColumnNameToken,
+                ParseFuncNameIdentifierToken);
+        }
+
         public static TextSpan ParseColumnNameToken(IParser parser)
         {
             var meetColumnNameList = new[]
@@ -845,9 +852,7 @@ namespace T1.CodeDom.TSql
                 // {
                 //     break;
                 // }
-                else if (!parser.TryConsumeTokenAny(out identifier,
-                             ParseColumnNameToken,
-                             ParseFuncNameIdentifierToken))
+                else if (!parser.TryConsumeIdentifierToken(out identifier))
                 {
                     break;
                 }
@@ -1051,7 +1056,7 @@ namespace T1.CodeDom.TSql
             return expr;
         }
 
-        public static TableDataTypeSqlCodeExpr ConsumeTableDataType(this IParser parser)
+        public static TableDataTypeSqlCodeExpr ConsumeTableDataTypeList(this IParser parser)
         {
             parser.Scanner.Consume(SqlToken.LParen);
             var columnDataTypeList = new List<SqlCodeExpr>();
@@ -1099,13 +1104,19 @@ namespace T1.CodeDom.TSql
 
         private static ColumnDefineSqlCodeExpr ParseColumnDefine(IParser parser)
         {
-            if (!parser.TryConsumeTokenAny(out var nameSpan, SqlToken.Identifier, SqlToken.SqlIdentifier,
-                    SqlToken.Rank))
+            if (!parser.TryConsumeIdentifierToken(out var nameSpan))
             {
                 return null;
             }
             
+            // if (!parser.TryConsumeTokenAny(out var nameSpan, SqlToken.Identifier, SqlToken.SqlIdentifier,
+            //         SqlToken.Rank))
+            // {
+            //     return null;
+            // }
+            
             var name = parser.Scanner.GetSpanString(nameSpan);
+            
             var dataType = parser.ConsumeDataType();
             var columnDefineSqlCodeExpr = new ColumnDefineSqlCodeExpr
             {
@@ -1656,7 +1667,7 @@ namespace T1.CodeDom.TSql
         {
             var tableName = parser.ConsumeTableName();
 
-            var tableType = parser.ConsumeTableDataType();
+            var tableType = parser.ConsumeTableDataTypeList();
             tableType.Name = tableName;
 
             var onPrimary = parser.ParseOnPrimary();

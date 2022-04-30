@@ -124,8 +124,8 @@ ON [PRIMARY]
     [id] INT NOT NULL )
     ON [PRIMARY] ;");
     }
-    
-    
+
+
     [Fact]
     public void create_table_comma_with()
     {
@@ -147,9 +147,8 @@ ON [PRIMARY]
     )
     ON [PRIMARY]");
     }
-    
-    
-    
+
+
     [Fact]
     public void create_table_primary_key_columns()
     {
@@ -165,10 +164,9 @@ ON [PRIMARY]
     [sid] INT NULL,
 CONSTRAINT PK_customer PRIMARY KEY ([Id])
 )");
-        
     }
-    
-    
+
+
     [Fact]
     public void create_table_default_getdate()
     {
@@ -179,10 +177,9 @@ CONSTRAINT PK_customer PRIMARY KEY ([Id])
         Parse(sql);
 
         ThenExprShouldBe(@"CREATE TABLE [dbo].[customer]( [Id] INT, [birth] DATETIME DEFAULT GETDATE() )");
-        
     }
-    
-    
+
+
     [Fact]
     public void create_table_constraint_constraint()
     {
@@ -191,10 +188,16 @@ CONSTRAINT PK_customer PRIMARY KEY ([Id])
     IsUpdated bit NOT NULL CONSTRAINT [DF_IsUpdated] DEFAULT ((0))
     CONSTRAINT [pk_customer] PRIMARY KEY CLUSTERED ([id] ASC)
 	)";
-        
+
         Assert.Throws<ScanException>(() => Parse(sql));
     }
-    
-    
-    
+
+
+    [Fact]
+    public void create_temp_table()
+    {
+        var sql = @"CREATE TABLE #tmpCustomer (id int, DATE DATETIME)";
+        Parse(sql);
+        ThenExprShouldBe(@"CREATE TABLE #tmpCustomer( id INT, DATE DATETIME )");
+    }
 }
