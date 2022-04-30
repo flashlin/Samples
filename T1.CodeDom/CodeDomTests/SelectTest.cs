@@ -17,6 +17,17 @@ namespace TestProject.PrattTests
             ThenExprShouldBe("SELECT 1");
         }
         
+        
+        [Fact]
+        public void select_min()
+        {
+            var sql = "select min,name from customer";
+            Parse(sql);
+            ThenExprShouldBe("SELECT min, name FROM customer");
+        }
+        
+        
+        
         [Fact]
         public void select_top_10_percent()
         {

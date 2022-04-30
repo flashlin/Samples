@@ -89,5 +89,14 @@ namespace T1.CodeDom.TSql
 		{
 			return (SqlToken)Enum.Parse(typeof(SqlToken), span.Type);
 		}
+		
+		public static bool IsTokenType(this TextSpan span, SqlToken tokenType)
+		{
+			if (span.IsEmpty)
+			{
+				return false;
+			}
+			return span.GetTokenType() == tokenType;
+		}
 	}
 }

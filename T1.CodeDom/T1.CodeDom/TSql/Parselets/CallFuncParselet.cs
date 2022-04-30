@@ -27,6 +27,12 @@ namespace T1.CodeDom.TSql.Parselets
 				ObjectName = funcName
 			};
 
+			if (!parser.IsToken(SqlToken.LParen))
+			{
+				token.Type = SqlToken.Identifier.ToString();
+				return parser.PrefixParse(token);
+			}
+
 			var parameterList = new List<SqlCodeExpr>();
 			parser.Scanner.Consume(SqlToken.LParen);
 			do

@@ -13,6 +13,8 @@ namespace T1.CodeDom.Core
 		protected Dictionary<string, string> _symbolToTokenTypeMap = new Dictionary<string, string>();
 		private ReadOnlyMemory<char> _textSpan;
 		private Dictionary<string, string> _tokenToTokenTypeMap = new Dictionary<string, string>();
+		private HashSet<string> _funcNames = new HashSet<string>();
+		
 		public StringScanner(string text)
 		{
 			_textSpan = text.AsMemory();
@@ -23,6 +25,13 @@ namespace T1.CodeDom.Core
 			where TTokenType : struct
 		{
 			_tokenToTokenTypeMap.Add(token, tokenType.ToString());
+		}
+		
+		protected void AddFuncNameMap<TTokenType>(string token, TTokenType tokenType)
+			where TTokenType : struct
+		{
+			AddTokenMap(token, tokenType);
+			_funcNames.Add(token);
 		}
 
 		public TextSpan Consume(string expect = null)
@@ -98,6 +107,11 @@ namespace T1.CodeDom.Core
 		{
 			var spanStr = GetSpanString(span);
 			return _symbolToTokenTypeMap.ContainsKey(spanStr);
+		}
+		
+		public bool IsFuncName(string spanStr)
+		{
+			return _funcNames.Contains(spanStr);
 		}
 
 		protected void AddSymbolMap<TTokenType>(string symbol, TTokenType tokenType)

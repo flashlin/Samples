@@ -19,5 +19,6 @@ namespace T1.CodeDom.Core
 		TextSpan ScanNext();
 		bool IsSymbol(int n = 0);
 		bool IsSymbol(TextSpan span);
+		bool IsFuncName(string spanStr);
 	}
 }

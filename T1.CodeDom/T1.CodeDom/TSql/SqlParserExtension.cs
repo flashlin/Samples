@@ -744,6 +744,50 @@ namespace T1.CodeDom.TSql
             };
         }
 
+        public static TextSpan ParseFuncNameIdentifierToken(this IParser parser)
+        {
+            var funcNameSpan = parser.PeekToken();
+            var funcName = parser.Scanner.GetSpanString(funcNameSpan).ToUpper();
+            if (!parser.Scanner.IsFuncName(funcName))
+            {
+                return TextSpan.Empty;
+            }
+            var symbolSpan = parser.PeekToken(1);
+			if (symbolSpan.IsTokenType(SqlToken.LParen))
+            {
+                return TextSpan.Empty;
+            }
+            var span = parser.ConsumeToken();
+			span.Type = SqlToken.Identifier.ToString();
+            return span;
+        }
+
+        public static TextSpan ParseColumnNameToken(IParser parser)
+        {
+            var meetColumnNameList = new[]
+            {
+                SqlToken.SqlIdentifier, SqlToken.Identifier, SqlToken.QuoteString,
+                SqlToken.TempTable,
+                SqlToken.Source,
+                SqlToken.Target,
+                SqlToken.Asterisk,
+                SqlToken.Error,
+                SqlToken.TYPE,
+                //
+                SqlToken.Date
+            };
+            var span = parser.PeekToken();
+            if (span.IsEmpty)
+            {
+                return TextSpan.Empty;
+            }
+            if (!meetColumnNameList.Contains(span.GetTokenType()))
+            {
+                return TextSpan.Empty;
+            }
+            return parser.ConsumeToken();
+        }
+
         public static bool TryConsumeObjectId(this IParser parser, out SqlCodeExpr expr, bool nonSensitive = false)
         {
             var comments = parser.IgnoreComments();
@@ -797,7 +841,13 @@ namespace T1.CodeDom.TSql
 
                     identifier = parser.Scanner.Consume();
                 }
-                else if (!parser.Scanner.TryConsumeAny(out identifier, meetColumnNameList))
+                // else if (!parser.Scanner.TryConsumeAny(out identifier, meetColumnNameList))
+                // {
+                //     break;
+                // }
+                else if (!parser.TryConsumeTokenAny(out identifier,
+                             ParseColumnNameToken,
+                             ParseFuncNameIdentifierToken))
                 {
                     break;
                 }
@@ -828,6 +878,19 @@ namespace T1.CodeDom.TSql
 
             expr = identExpr;
             return true;
+        }
+        
+        public static bool TryConsumeTokenAny(this IParser parser, out TextSpan span, 
+            params Func<IParser, TextSpan>[] parseTokenFuncList)
+        {
+            var  tmpSpan = TextSpan.Empty;
+            var isAny = parseTokenFuncList.Any(x =>
+            {
+                tmpSpan = x(parser);
+                return !tmpSpan.IsEmpty;
+            });
+            span = tmpSpan;
+            return isAny;
         }
 
         public static bool TryConsumeAny(this IParser parser, out SqlCodeExpr expr, Func<TextSpan, SqlCodeExpr> toExpr,
@@ -1231,6 +1294,20 @@ namespace T1.CodeDom.TSql
             return token;
         }
 
+        public static TextSpan PeekToken(this IParser parser, int n)
+        {
+           var startIndex = parser.Scanner.GetOffset();
+           var token = TextSpan.Empty;
+           for (var i= 0; i <= n; i++)
+           {
+               if (!parser.TryConsumeToken(out token))
+               {
+                   break;
+               }
+           }
+           parser.Scanner.SetOffset(startIndex);
+           return token;
+        }
 
         public static bool TryConsumeToken(this IParser parser, out TextSpan token)
         {
