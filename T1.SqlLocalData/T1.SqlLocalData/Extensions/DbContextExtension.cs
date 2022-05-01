@@ -20,7 +20,7 @@ public static class DbContextExtension
 
 	private static string GenerateCreateTableSqlCode(Type entityType)
 	{
-		var columnList = GetCreateTableColumns(entityType);
+		var columnList = GetTableColumnsInfo(entityType);
 		var sb = new StringBuilder();
 		sb.AppendLine($"CREATE TABLE {GetTableName(entityType)}");
 		sb.AppendLine("(");
@@ -45,7 +45,7 @@ public static class DbContextExtension
 		return tableAttribute.Name;
 	}
 
-	private static IEnumerable<ColumnInfo> GetCreateTableColumns(Type entityType)
+	private static IEnumerable<ColumnInfo> GetTableColumnsInfo(Type entityType)
 	{
 		var entityClass = ReflectionClass.Reflection(entityType);
 		foreach (var prop in entityClass.Properties)
