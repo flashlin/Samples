@@ -11,16 +11,15 @@ namespace SqlLocalDataTests
 {
 	public class FastCreateTest : IDisposable
 	{
-		private string _databaseFile = @"D:\Demo\fasttest.mdf";
-		private string _databaseName = "fasttest";
 		private string _instanceName = "local_fast";
-		private MyDbContext _myDb;
+		private string _databaseName = "fasttest";
+		private string _databaseFile = @"D:\Demo\fasttest.mdf";
 		private readonly SqlLocalDb _localDb = new SqlLocalDb();
+		private MyDbContext _myDb;
 
 		public FastCreateTest()
 		{
-			_localDb.EnsureInstanceCreated(_instanceName);
-			CreateDatabase();
+			InitializeSqlLocalDbInstance();
 			_myDb = new MyDbContext(_instanceName, _databaseName);
 		}
 
@@ -76,8 +75,9 @@ namespace SqlLocalDataTests
 			//_localDb.DeleteInstance();
 		}
 
-		private void CreateDatabase()
+		private void InitializeSqlLocalDbInstance()
 		{
+			_localDb.EnsureInstanceCreated(_instanceName);
 			_localDb.ForceDropDatabase(_instanceName, _databaseName);
 			_localDb.DeleteDatabaseFile(_databaseFile);
 			_localDb.CreateDatabase(_instanceName, _databaseFile);
