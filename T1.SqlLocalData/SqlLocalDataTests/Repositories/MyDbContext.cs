@@ -7,12 +7,11 @@ namespace SqlLocalDataTests.Repositories;
 
 public class MyDbContext : DbContext
 {
-	//string _connectionString = "AttachDBFilename={databaseName}.mdf";
-	string _connectionString = "Server=(localdb)\\localtest;Integrated security=SSPI;database=test;";
+	readonly string _connectionString = "Server=(localdb)\\localtest;Integrated security=SSPI;database=test;";
 
 	public DbSet<CustomerEntity> Customers { get; set; }
 
-	public IEnumerable<T> QueryRawSql<T>(string sql, object parameter = null)
+	public IEnumerable<T> QuerySqlRaw<T>(string sql, object parameter = null)
 	{
 		using var conn = Database.GetDbConnection();
 		return conn.Query<T>(sql, parameter);

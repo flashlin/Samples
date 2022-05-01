@@ -63,7 +63,7 @@ namespace SqlLocalDataTests
 					WHERE id=@id 
 				END");
 
-			var customer = myDb.QueryRawSql<CustomerEntity>("EXEC MyGetCustomer @id", new
+			var customer = myDb.QuerySqlRaw<CustomerEntity>("EXEC MyGetCustomer @id", new
 			{
 				id = 3
 			}).First();
