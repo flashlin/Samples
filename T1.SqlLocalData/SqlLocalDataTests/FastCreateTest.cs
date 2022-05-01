@@ -9,7 +9,7 @@ using Xunit;
 
 namespace SqlLocalDataTests
 {
-	public class FastCreateTest : IDisposable
+	public class FastCreateTest
 	{
 		private string _instanceName = "local_fast";
 		private string _databaseName = "fasttest";
@@ -69,12 +69,6 @@ namespace SqlLocalDataTests
 			Assert.Equal("Jack",customer.Name);
 		}
 		
-		
-		public void Dispose()
-		{
-			//_localDb.DeleteInstance();
-		}
-
 		private void InitializeSqlLocalDbInstance()
 		{
 			_localDb.EnsureInstanceCreated(_instanceName);
