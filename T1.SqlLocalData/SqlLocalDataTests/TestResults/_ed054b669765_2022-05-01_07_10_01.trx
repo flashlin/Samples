@@ -1,0 +1,348 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="a4b9c229-a158-4a2c-b614-7a6d4e41a8e0" name="@ed054b669765 2022-05-01 07:10:01" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2022-05-01T07:10:01.3582074+00:00" queuing="2022-05-01T07:10:01.3582074+00:00" start="2022-05-01T07:10:00.0140744+00:00" finish="2022-05-01T07:10:01.3635052+00:00" />
+  <TestSettings name="default" id="b1d415cf-d198-4bc1-9136-771a88da7d72">
+    <Deployment runDeploymentRoot="_ed054b669765_2022-05-01_07_10_01" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="abd7d980-1d14-49cc-b7f2-793c381723e5" testId="6ca2b253-3bc0-49a2-0edd-0773739b08d4" testName="SqlLocalDataTests.CreateTest.database_exists" computerName="ed054b669765" duration="00:00:00.0010000" startTime="2022-05-01T07:10:01.2833037+00:00" endTime="2022-05-01T07:10:01.2833037+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="abd7d980-1d14-49cc-b7f2-793c381723e5">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory</Message>
+          <StackTrace>   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments) in /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs:line 33
+   at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 85
+   at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext() in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 95
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 122
+   at SqlLocalDataTests.CreateTest.CreateInstance() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 101
+   at SqlLocalDataTests.CreateTest..ctor() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 20
+   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="97fdfab1-7722-47ec-ab10-532586f7e342" testId="ba18da23-2af1-6cbe-e2e9-e21654bd6d35" testName="SqlLocalDataTests.CreateTest.execute_raw_sql_from_file" computerName="ed054b669765" duration="00:00:00.0010000" startTime="2022-05-01T07:10:01.2818985+00:00" endTime="2022-05-01T07:10:01.2818985+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="97fdfab1-7722-47ec-ab10-532586f7e342">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory</Message>
+          <StackTrace>   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments) in /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs:line 33
+   at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 85
+   at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext() in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 95
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 122
+   at SqlLocalDataTests.CreateTest.CreateInstance() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 101
+   at SqlLocalDataTests.CreateTest..ctor() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 20
+   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="8d8553f0-e75a-4486-8684-163bbb685a1e" testId="08421ada-b90e-b084-333c-821785aa3c19" testName="SqlLocalDataTests.CreateTest.execute_store_procedure" computerName="ed054b669765" duration="00:00:00.0010000" startTime="2022-05-01T07:10:01.2830806+00:00" endTime="2022-05-01T07:10:01.2830806+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8d8553f0-e75a-4486-8684-163bbb685a1e">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory</Message>
+          <StackTrace>   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments) in /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs:line 33
+   at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 85
+   at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext() in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 95
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 122
+   at SqlLocalDataTests.CreateTest.CreateInstance() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 101
+   at SqlLocalDataTests.CreateTest..ctor() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 20
+   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d9de8039-dea3-4020-844b-fb0e9b344603" testId="b3371dc3-18f8-8510-8676-34f37e7b3c22" testName="SqlLocalDataTests.FastCreateTest.execute_store_procedure" computerName="ed054b669765" duration="00:00:00.0010000" startTime="2022-05-01T07:10:01.2828738+00:00" endTime="2022-05-01T07:10:01.2828738+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d9de8039-dea3-4020-844b-fb0e9b344603">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory</Message>
+          <StackTrace>   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments) in /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs:line 33
+   at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 85
+   at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext() in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 95
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 122
+   at T1.SqlLocalData.SqlLocalDb.EnsureInstanceCreated(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 148
+   at SqlLocalDataTests.FastCreateTest.InitializeSqlLocalDbInstance() in /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs:line 74
+   at SqlLocalDataTests.FastCreateTest..ctor() in /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs:line 22
+   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="0ebc17ad-f3ab-41dd-a915-63fcdd5a3615" testId="fa4531bc-1afa-7688-8e76-64c004a177f4" testName="SqlLocalDataTests.CreateTest.execute_raw_sql" computerName="ed054b669765" duration="00:00:00.0010000" startTime="2022-05-01T07:10:01.2787002+00:00" endTime="2022-05-01T07:10:01.2787112+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0ebc17ad-f3ab-41dd-a915-63fcdd5a3615">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory</Message>
+          <StackTrace>   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments) in /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs:line 33
+   at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 85
+   at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext() in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 95
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 122
+   at SqlLocalDataTests.CreateTest.CreateInstance() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 101
+   at SqlLocalDataTests.CreateTest..ctor() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 20
+   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="668b8408-b0b1-43fd-878f-860446ceb243" testId="1c124193-22f4-325f-434d-3580f2d2849e" testName="SqlLocalDataTests.CreateTest.create_table" computerName="ed054b669765" duration="00:00:00.0010000" startTime="2022-05-01T07:10:01.2823611+00:00" endTime="2022-05-01T07:10:01.2823612+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="668b8408-b0b1-43fd-878f-860446ceb243">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory</Message>
+          <StackTrace>   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments) in /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs:line 33
+   at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 85
+   at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext() in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 95
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 122
+   at SqlLocalDataTests.CreateTest.CreateInstance() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 101
+   at SqlLocalDataTests.CreateTest..ctor() in /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs:line 20
+   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="2a38dbb1-ee94-4068-b48b-1113434ed4a7" testId="105e5502-47be-b06e-df1e-965369cfe4b4" testName="SqlLocalDataTests.FastCreateTest.execute_raw_sql_from_file" computerName="ed054b669765" duration="00:00:00.0010000" startTime="2022-05-01T07:10:01.2811288+00:00" endTime="2022-05-01T07:10:01.2811288+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2a38dbb1-ee94-4068-b48b-1113434ed4a7">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory</Message>
+          <StackTrace>   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments) in /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs:line 33
+   at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 85
+   at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext() in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 95
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 122
+   at T1.SqlLocalData.SqlLocalDb.EnsureInstanceCreated(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 148
+   at SqlLocalDataTests.FastCreateTest.InitializeSqlLocalDbInstance() in /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs:line 74
+   at SqlLocalDataTests.FastCreateTest..ctor() in /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs:line 22
+   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3d764d3a-780e-41ae-bf2a-d9cd05cf9924" testId="75682385-a087-96ee-fa56-e686030901b9" testName="SqlLocalDataTests.FastCreateTest.execute_raw_sql" computerName="ed054b669765" duration="00:00:00.0010000" startTime="2022-05-01T07:10:01.2821566+00:00" endTime="2022-05-01T07:10:01.2821566+00:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Failed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3d764d3a-780e-41ae-bf2a-d9cd05cf9924">
+      <Output>
+        <ErrorInfo>
+          <Message>System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory</Message>
+          <StackTrace>   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+   at System.Diagnostics.Process.Start()
+   at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments) in /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs:line 33
+   at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 85
+   at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext() in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 95
+   at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+   at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 122
+   at T1.SqlLocalData.SqlLocalDb.EnsureInstanceCreated(String instanceName) in /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs:line 148
+   at SqlLocalDataTests.FastCreateTest.InitializeSqlLocalDbInstance() in /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs:line 74
+   at SqlLocalDataTests.FastCreateTest..ctor() in /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs:line 22
+   at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)</StackTrace>
+        </ErrorInfo>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="SqlLocalDataTests.CreateTest.database_exists" storage="/sqllocaldatatests/sqllocaldatatests/bin/debug/net6.0/sqllocaldatatests.dll" id="6ca2b253-3bc0-49a2-0edd-0773739b08d4">
+      <Execution id="abd7d980-1d14-49cc-b7f2-793c381723e5" />
+      <TestMethod codeBase="/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0/SqlLocalDataTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SqlLocalDataTests.CreateTest" name="database_exists" />
+    </UnitTest>
+    <UnitTest name="SqlLocalDataTests.CreateTest.execute_store_procedure" storage="/sqllocaldatatests/sqllocaldatatests/bin/debug/net6.0/sqllocaldatatests.dll" id="08421ada-b90e-b084-333c-821785aa3c19">
+      <Execution id="8d8553f0-e75a-4486-8684-163bbb685a1e" />
+      <TestMethod codeBase="/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0/SqlLocalDataTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SqlLocalDataTests.CreateTest" name="execute_store_procedure" />
+    </UnitTest>
+    <UnitTest name="SqlLocalDataTests.FastCreateTest.execute_raw_sql_from_file" storage="/sqllocaldatatests/sqllocaldatatests/bin/debug/net6.0/sqllocaldatatests.dll" id="105e5502-47be-b06e-df1e-965369cfe4b4">
+      <Execution id="2a38dbb1-ee94-4068-b48b-1113434ed4a7" />
+      <TestMethod codeBase="/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0/SqlLocalDataTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SqlLocalDataTests.FastCreateTest" name="execute_raw_sql_from_file" />
+    </UnitTest>
+    <UnitTest name="SqlLocalDataTests.FastCreateTest.execute_store_procedure" storage="/sqllocaldatatests/sqllocaldatatests/bin/debug/net6.0/sqllocaldatatests.dll" id="b3371dc3-18f8-8510-8676-34f37e7b3c22">
+      <Execution id="d9de8039-dea3-4020-844b-fb0e9b344603" />
+      <TestMethod codeBase="/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0/SqlLocalDataTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SqlLocalDataTests.FastCreateTest" name="execute_store_procedure" />
+    </UnitTest>
+    <UnitTest name="SqlLocalDataTests.CreateTest.execute_raw_sql_from_file" storage="/sqllocaldatatests/sqllocaldatatests/bin/debug/net6.0/sqllocaldatatests.dll" id="ba18da23-2af1-6cbe-e2e9-e21654bd6d35">
+      <Execution id="97fdfab1-7722-47ec-ab10-532586f7e342" />
+      <TestMethod codeBase="/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0/SqlLocalDataTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SqlLocalDataTests.CreateTest" name="execute_raw_sql_from_file" />
+    </UnitTest>
+    <UnitTest name="SqlLocalDataTests.FastCreateTest.execute_raw_sql" storage="/sqllocaldatatests/sqllocaldatatests/bin/debug/net6.0/sqllocaldatatests.dll" id="75682385-a087-96ee-fa56-e686030901b9">
+      <Execution id="3d764d3a-780e-41ae-bf2a-d9cd05cf9924" />
+      <TestMethod codeBase="/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0/SqlLocalDataTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SqlLocalDataTests.FastCreateTest" name="execute_raw_sql" />
+    </UnitTest>
+    <UnitTest name="SqlLocalDataTests.CreateTest.execute_raw_sql" storage="/sqllocaldatatests/sqllocaldatatests/bin/debug/net6.0/sqllocaldatatests.dll" id="fa4531bc-1afa-7688-8e76-64c004a177f4">
+      <Execution id="0ebc17ad-f3ab-41dd-a915-63fcdd5a3615" />
+      <TestMethod codeBase="/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0/SqlLocalDataTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SqlLocalDataTests.CreateTest" name="execute_raw_sql" />
+    </UnitTest>
+    <UnitTest name="SqlLocalDataTests.CreateTest.create_table" storage="/sqllocaldatatests/sqllocaldatatests/bin/debug/net6.0/sqllocaldatatests.dll" id="1c124193-22f4-325f-434d-3580f2d2849e">
+      <Execution id="668b8408-b0b1-43fd-878f-860446ceb243" />
+      <TestMethod codeBase="/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0/SqlLocalDataTests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="SqlLocalDataTests.CreateTest" name="create_table" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="6ca2b253-3bc0-49a2-0edd-0773739b08d4" executionId="abd7d980-1d14-49cc-b7f2-793c381723e5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ba18da23-2af1-6cbe-e2e9-e21654bd6d35" executionId="97fdfab1-7722-47ec-ab10-532586f7e342" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="08421ada-b90e-b084-333c-821785aa3c19" executionId="8d8553f0-e75a-4486-8684-163bbb685a1e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b3371dc3-18f8-8510-8676-34f37e7b3c22" executionId="d9de8039-dea3-4020-844b-fb0e9b344603" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="fa4531bc-1afa-7688-8e76-64c004a177f4" executionId="0ebc17ad-f3ab-41dd-a915-63fcdd5a3615" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1c124193-22f4-325f-434d-3580f2d2849e" executionId="668b8408-b0b1-43fd-878f-860446ceb243" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="105e5502-47be-b06e-df1e-965369cfe4b4" executionId="2a38dbb1-ee94-4068-b48b-1113434ed4a7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="75682385-a087-96ee-fa56-e686030901b9" executionId="3d764d3a-780e-41ae-bf2a-d9cd05cf9924" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Failed">
+    <Counters total="8" executed="8" passed="0" failed="8" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.4.3+1b45f5407b (64-bit .NET 6.0.4)
+[xUnit.net 00:00:00.71]   Discovering: SqlLocalDataTests
+[xUnit.net 00:00:00.73]   Discovered:  SqlLocalDataTests
+[xUnit.net 00:00:00.73]   Starting:    SqlLocalDataTests
+[xUnit.net 00:00:00.78]       System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory
+[xUnit.net 00:00:00.78]       Stack Trace:
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.Start()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs(33,0): at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(85,0): at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(95,0): at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext()
+[xUnit.net 00:00:00.78]            at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(122,0): at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(101,0): at SqlLocalDataTests.CreateTest.CreateInstance()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(20,0): at SqlLocalDataTests.CreateTest..ctor()
+[xUnit.net 00:00:00.78]            at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
+[xUnit.net 00:00:00.78]       System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory
+[xUnit.net 00:00:00.78]       Stack Trace:
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.Start()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs(33,0): at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(85,0): at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(95,0): at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext()
+[xUnit.net 00:00:00.78]            at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(122,0): at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(148,0): at T1.SqlLocalData.SqlLocalDb.EnsureInstanceCreated(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs(74,0): at SqlLocalDataTests.FastCreateTest.InitializeSqlLocalDbInstance()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs(22,0): at SqlLocalDataTests.FastCreateTest..ctor()
+[xUnit.net 00:00:00.78]            at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
+[xUnit.net 00:00:00.78]       System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory
+[xUnit.net 00:00:00.78]       Stack Trace:
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.Start()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs(33,0): at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(85,0): at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(95,0): at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext()
+[xUnit.net 00:00:00.78]            at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(122,0): at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(101,0): at SqlLocalDataTests.CreateTest.CreateInstance()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(20,0): at SqlLocalDataTests.CreateTest..ctor()
+[xUnit.net 00:00:00.78]            at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
+[xUnit.net 00:00:00.78]       System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory
+[xUnit.net 00:00:00.78]       Stack Trace:
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.Start()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs(33,0): at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(85,0): at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(95,0): at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext()
+[xUnit.net 00:00:00.78]            at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(122,0): at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(148,0): at T1.SqlLocalData.SqlLocalDb.EnsureInstanceCreated(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs(74,0): at SqlLocalDataTests.FastCreateTest.InitializeSqlLocalDbInstance()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs(22,0): at SqlLocalDataTests.FastCreateTest..ctor()
+[xUnit.net 00:00:00.78]            at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
+[xUnit.net 00:00:00.78]       System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory
+[xUnit.net 00:00:00.78]       Stack Trace:
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.Start()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs(33,0): at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(85,0): at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(95,0): at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext()
+[xUnit.net 00:00:00.78]            at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(122,0): at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(101,0): at SqlLocalDataTests.CreateTest.CreateInstance()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(20,0): at SqlLocalDataTests.CreateTest..ctor()
+[xUnit.net 00:00:00.78]            at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
+[xUnit.net 00:00:00.78]       System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory
+[xUnit.net 00:00:00.78]       Stack Trace:
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+[xUnit.net 00:00:00.78]            at System.Diagnostics.Process.Start()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs(33,0): at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(85,0): at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(95,0): at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext()
+[xUnit.net 00:00:00.78]            at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(122,0): at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(148,0): at T1.SqlLocalData.SqlLocalDb.EnsureInstanceCreated(String instanceName)
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs(74,0): at SqlLocalDataTests.FastCreateTest.InitializeSqlLocalDbInstance()
+[xUnit.net 00:00:00.78]         /SqlLocalDataTests/SqlLocalDataTests/FastCreateTest.cs(22,0): at SqlLocalDataTests.FastCreateTest..ctor()
+[xUnit.net 00:00:00.78]            at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
+[xUnit.net 00:00:00.78]       System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory
+[xUnit.net 00:00:00.79]       Stack Trace:
+[xUnit.net 00:00:00.79]            at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+[xUnit.net 00:00:00.79]            at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+[xUnit.net 00:00:00.79]            at System.Diagnostics.Process.Start()
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs(33,0): at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments)
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(85,0): at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments)
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(95,0): at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext()
+[xUnit.net 00:00:00.79]            at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(122,0): at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName)
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(101,0): at SqlLocalDataTests.CreateTest.CreateInstance()
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(20,0): at SqlLocalDataTests.CreateTest..ctor()
+[xUnit.net 00:00:00.79]            at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
+[xUnit.net 00:00:00.79]       System.ComponentModel.Win32Exception : An error occurred trying to start process 'C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe' with working directory '/SqlLocalDataTests/SqlLocalDataTests/bin/Debug/net6.0'. No such file or directory
+[xUnit.net 00:00:00.79]       Stack Trace:
+[xUnit.net 00:00:00.79]            at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo startInfo, String resolvedFilename, String[] argv, String[] envp, String cwd, Boolean setCredentials, UInt32 userId, UInt32 groupId, UInt32[] groups, Int32&amp; stdinFd, Int32&amp; stdoutFd, Int32&amp; stderrFd, Boolean usesTerminal, Boolean throwOnNoExec)
+[xUnit.net 00:00:00.79]            at System.Diagnostics.Process.StartCore(ProcessStartInfo startInfo)
+[xUnit.net 00:00:00.79]            at System.Diagnostics.Process.Start()
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/T1.SqlLocalData/ProcessHelper.cs(33,0): at T1.SqlLocalData.ProcessHelper.Execute(String processFilename, String arguments)
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(85,0): at T1.SqlLocalData.SqlLocalDb.ExecuteSqlLocalDbExe(String arguments)
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(95,0): at T1.SqlLocalData.SqlLocalDb.GetInstanceNames()+MoveNext()
+[xUnit.net 00:00:00.79]            at System.Linq.Enumerable.Any[TSource](IEnumerable`1 source, Func`2 predicate)
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/T1.SqlLocalData/SqlLocalDb.cs(122,0): at T1.SqlLocalData.SqlLocalDb.IsInstanceExists(String instanceName)
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(101,0): at SqlLocalDataTests.CreateTest.CreateInstance()
+[xUnit.net 00:00:00.79]         /SqlLocalDataTests/SqlLocalDataTests/CreateTest.cs(20,0): at SqlLocalDataTests.CreateTest..ctor()
+[xUnit.net 00:00:00.79]            at System.RuntimeType.CreateInstanceDefaultCtor(Boolean publicOnly, Boolean wrapExceptions)
+[xUnit.net 00:00:00.79]   Finished:    SqlLocalDataTests
+</StdOut>
+    </Output>
+    <RunInfos>
+      <RunInfo computerName="ed054b669765" outcome="Error" timestamp="2022-05-01T07:10:01.2758709+00:00">
+        <Text>[xUnit.net 00:00:00.78]     SqlLocalDataTests.CreateTest.execute_raw_sql [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="ed054b669765" outcome="Error" timestamp="2022-05-01T07:10:01.2810117+00:00">
+        <Text>[xUnit.net 00:00:00.78]     SqlLocalDataTests.FastCreateTest.execute_raw_sql_from_file [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="ed054b669765" outcome="Error" timestamp="2022-05-01T07:10:01.2817867+00:00">
+        <Text>[xUnit.net 00:00:00.78]     SqlLocalDataTests.CreateTest.execute_raw_sql_from_file [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="ed054b669765" outcome="Error" timestamp="2022-05-01T07:10:01.2823465+00:00">
+        <Text>[xUnit.net 00:00:00.78]     SqlLocalDataTests.FastCreateTest.execute_raw_sql [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="ed054b669765" outcome="Error" timestamp="2022-05-01T07:10:01.2829916+00:00">
+        <Text>[xUnit.net 00:00:00.78]     SqlLocalDataTests.CreateTest.create_table [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="ed054b669765" outcome="Error" timestamp="2022-05-01T07:10:01.2835855+00:00">
+        <Text>[xUnit.net 00:00:00.78]     SqlLocalDataTests.FastCreateTest.execute_store_procedure [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="ed054b669765" outcome="Error" timestamp="2022-05-01T07:10:01.2841409+00:00">
+        <Text>[xUnit.net 00:00:00.78]     SqlLocalDataTests.CreateTest.execute_store_procedure [FAIL]</Text>
+      </RunInfo>
+      <RunInfo computerName="ed054b669765" outcome="Error" timestamp="2022-05-01T07:10:01.2848534+00:00">
+        <Text>[xUnit.net 00:00:00.79]     SqlLocalDataTests.CreateTest.database_exists [FAIL]</Text>
+      </RunInfo>
+    </RunInfos>
+  </ResultSummary>
+</TestRun>

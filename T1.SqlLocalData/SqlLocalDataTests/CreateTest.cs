@@ -11,9 +11,9 @@ namespace SqlLocalDataTests
 {
 	public class CreateTest : IDisposable
 	{
-		private string _databaseFile = @"D:\Demo\test.mdf";
+		private string _databaseName = "test";
 		private string _instanceName = "localtest";
-		private readonly SqlLocalDb _localDb = new SqlLocalDb();
+		private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
 
 		public CreateTest()
 		{
@@ -92,8 +92,8 @@ namespace SqlLocalDataTests
 
 		private void CreateDatabase()
 		{
-			_localDb.DeleteDatabaseFile(_databaseFile);
-			_localDb.CreateDatabase(_instanceName, _databaseFile);
+			_localDb.DeleteDatabaseFile(_databaseName);
+			_localDb.CreateDatabase(_instanceName, _databaseName);
 		}
 
 		private void CreateInstance()

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SqlLocalDataTests": {
+      "commandName": "Project"
+    },
+    "Docker": {
+      "commandName": "Docker"
+    }
+  }
+}
