@@ -31,6 +31,12 @@ namespace T1.SqlLocalData
 			ExecuteNonQueryRawSql(instanceName, sql);
 		}
 
+		public void ForceDropDatabase(string instanceName, string databaseName)
+		{
+			KillAllConnections(instanceName, databaseName);
+			DropDatabase(instanceName, databaseName);
+		}
+
 		public void KillAllConnections(string instanceName, string databaseName)
 		{
 			var sql = $@"DECLARE @DatabaseName nvarchar(50)=N'{databaseName}'

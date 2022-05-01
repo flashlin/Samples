@@ -78,8 +78,7 @@ namespace SqlLocalDataTests
 
 		private void CreateDatabase()
 		{
-			_localDb.KillAllConnections(_instanceName, _databaseName);
-			_localDb.DropDatabase(_instanceName, _databaseName);
+			_localDb.ForceDropDatabase(_instanceName, _databaseName);
 			_localDb.DeleteDatabaseFile(_databaseFile);
 			_localDb.CreateDatabase(_instanceName, _databaseFile);
 		}
