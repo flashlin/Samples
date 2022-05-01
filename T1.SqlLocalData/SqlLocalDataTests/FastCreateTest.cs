@@ -19,7 +19,7 @@ namespace SqlLocalDataTests
 
 		public FastCreateTest()
 		{
-			CreateInstance();
+			_localDb.EnsureInstanceCreated(_instanceName);
 			CreateDatabase();
 			_myDb = new MyDbContext(_instanceName, _databaseName);
 		}
@@ -81,16 +81,6 @@ namespace SqlLocalDataTests
 			_localDb.ForceDropDatabase(_instanceName, _databaseName);
 			_localDb.DeleteDatabaseFile(_databaseFile);
 			_localDb.CreateDatabase(_instanceName, _databaseFile);
-		}
-
-		private void CreateInstance()
-		{
-			if (_localDb.IsInstanceExists(_instanceName))
-			{
-				return;
-			}
-			_localDb.CreateInstance(_instanceName);
-			_localDb.StartInstance(_instanceName);
 		}
 	}
 }

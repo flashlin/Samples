@@ -142,5 +142,15 @@ select 0";
 		{
 			return $"Server=(localdb)\\{instanceName};Integrated security=SSPI;database=master";
 		}
+
+		public void EnsureInstanceCreated(string instanceName)
+		{
+			if (IsInstanceExists(instanceName))
+			{
+				return;
+			}
+			CreateInstance(instanceName);
+			StartInstance(instanceName);
+		}
 	}
 }
