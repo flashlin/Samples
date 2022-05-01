@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -15,6 +16,17 @@ public class MyDbContext : DbContext
 	{
 		using var conn = Database.GetDbConnection();
 		return conn.Query<T>(sql, parameter);
+	}
+
+	public void ExecuteSqlRaw(string sql, object parameter = null)
+	{
+		Database.ExecuteSqlRaw(sql, parameter);
+	}
+
+	public void ExecuteSqlRawFromFile(string filePath)
+	{
+		var sql = File.ReadAllText(filePath);
+		Database.ExecuteSqlRaw(sql);
 	}
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

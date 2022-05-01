@@ -48,6 +48,19 @@ namespace SqlLocalDataTests
 			Assert.Equal("Jack",customer.Name);
 		}
 		
+		[Fact]
+		public void execute_raw_sql_from_file()
+		{
+			var myDb = new MyDbContext();
+			myDb.ExecuteSqlRawFromFile("./Contents/CreateTable.sql");
+			myDb.ExecuteSqlRawFromFile("./Contents/MyGetCustomer.sql");
+
+			var customer = myDb.Customers
+				.First(x => x.Id == 3);
+
+			Assert.Equal("Jack",customer.Name);
+		}
+
 		
 		[Fact]
 		public void execute_store_procedure()

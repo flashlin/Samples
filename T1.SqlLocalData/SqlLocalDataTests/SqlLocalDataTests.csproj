@@ -28,4 +28,13 @@
     <ProjectReference Include="..\T1.SqlLocalData\T1.SqlLocalData.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Contents\MyGetCustomer.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Contents\CreateTable.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
