@@ -14,7 +14,6 @@ public static class DbContextExtension
 {
 	public static void CreateTable(this DbContext context, Type entityType)
 	{
-		//var sql = $"IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = '{tableName}')";
 		var createTableSqlCode = GenerateCreateTableSqlCode(entityType);
 		context.Database.ExecuteSqlRaw(createTableSqlCode);
 	}
