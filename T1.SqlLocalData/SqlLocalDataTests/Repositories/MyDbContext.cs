@@ -14,9 +14,9 @@ public class MyDbContext : DbContext
 	{		
 	}
 
-	public MyDbContext(string instanceName, string databaseName)
+	public MyDbContext(string connectionString)
 	{
-		_connectionString = $"Server=(localdb)\\{instanceName};Integrated security=SSPI;database={databaseName};";
+		_connectionString = connectionString;
 	}
 
 	public DbSet<CustomerEntity> Customers { get; set; }

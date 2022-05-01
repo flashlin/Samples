@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  db:
+    image: "mcr.microsoft.com/mssql/server:2019-latest"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=1Secure*Password1
+
+  dockersqlserver:
+    image: sql-localdb-test
+    build:
+      context: .
+      dockerfile: SqlLocalDataTests/Dockerfile
+    depends_on:
+      - db
