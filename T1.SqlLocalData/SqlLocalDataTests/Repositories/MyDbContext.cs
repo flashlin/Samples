@@ -8,7 +8,16 @@ namespace SqlLocalDataTests.Repositories;
 
 public class MyDbContext : DbContext
 {
-	readonly string _connectionString = "Server=(localdb)\\localtest;Integrated security=SSPI;database=test;";
+	string _connectionString = "Server=(localdb)\\localtest;Integrated security=SSPI;database=test;";
+
+	public MyDbContext()
+	{		
+	}
+
+	public MyDbContext(string instanceName, string databaseName)
+	{
+		_connectionString = $"Server=(localdb)\\{instanceName};Integrated security=SSPI;database={databaseName};";
+	}
 
 	public DbSet<CustomerEntity> Customers { get; set; }
 

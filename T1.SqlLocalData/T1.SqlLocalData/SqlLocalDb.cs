@@ -25,6 +25,24 @@ namespace T1.SqlLocalData
 			ExecuteNonQueryRawSql(instanceName, sql);
 		}
 
+		public void DropDatabase(string instanceName, string databaseName)
+		{
+			var sql = $"DROP DATABASE IF EXISTS {databaseName}";
+			ExecuteNonQueryRawSql(instanceName, sql);
+		}
+
+		public void KillAllConnections(string instanceName, string databaseName)
+		{
+			var sql = $@"DECLARE @DatabaseName nvarchar(50)=N'{databaseName}'
+DECLARE @SQL varchar(max)
+SELECT @SQL = COALESCE(@SQL,'') + 'Kill ' + Convert(varchar, SPId) + ';'
+FROM MASTER..SysProcesses
+WHERE DBId = DB_ID(@DatabaseName) AND SPId <> @@SPId
+EXEC(@SQL)";
+
+			ExecuteNonQueryRawSql(instanceName, sql);
+		}
+
 		public void CreateInstance(string instanceName)
 		{
 			ExecuteSqlLocalDbExe(@$"CREATE ""{instanceName}"" 15.0 -s");
