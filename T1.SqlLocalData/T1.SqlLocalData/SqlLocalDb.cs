@@ -1,43 +1,20 @@
 ﻿using Dapper;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace T1.SqlLocalData
 {
     public class SqlLocalDb
     {
-        private string _dataFolder;
-        const string _sqllocaldbexe = @"C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe";
-        private const string _sqllocaldbbin = @"/opt/mssql-tools/bin";
+        private readonly string _dataFolder;
+        readonly string _sqllocaldbexe = @"C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe";
 
         public SqlLocalDb(string dataFolder)
         {
             _dataFolder = dataFolder;
-        }
-
-        public OSPlatform GetOSPlatform()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return OSPlatform.Linux;
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return OSPlatform.OSX;
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return OSPlatform.Windows;
-            }
-
-            throw new Exception("Cannot determine operating system!");
         }
 
         public void CreateDatabase(string instanceName, string databaseName)
@@ -109,12 +86,7 @@ EXEC(@SQL)";
         public string ExecuteSqlLocalDbExe(string arguments)
         {
             var p = new ProcessHelper();
-            var exe = _sqllocaldbexe;
-            if (GetOSPlatform() == OSPlatform.Linux)
-            {
-                exe = _sqllocaldbbin;
-            }
-            return p.Execute(exe, arguments);
+            return p.Execute(_sqllocaldbexe, arguments);
         }
 
         public void ForceStopInstance(string instanceName)
