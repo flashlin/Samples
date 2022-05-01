@@ -5,21 +5,20 @@ public class SqlLocalDbTest : IDisposable
 {
     private string _instanceName = "local_db_instance";
     private string _databaseName = "Northwind";
-    private string _databaseFile = @"D:\Demo\Northwind.mdf";
-    private readonly SqlLocalDb _localDb = new SqlLocalDb();
+    private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
 
     public SqlLocalDbTest()
     {
         _localDb.EnsureInstanceCreated(_instanceName);
         _localDb.ForceDropDatabase(_instanceName, _databaseName);
-        _localDb.DeleteDatabaseFile(_databaseFile);
-        _localDb.CreateDatabase(_instanceName, _databaseFile);
+        _localDb.DeleteDatabaseFile(_databaseName);
+        _localDb.CreateDatabase(_instanceName, _databaseName);
     }
 }
 ```
 * EnsureInstanceCreated 建立為 local_db_instance 實例
 * ForceDropDatabase 強制刪除現有的資料庫
-* DeleteDatabaseFile 刪除 mdf 檔案
+* DeleteDatabaseFile 刪除 mdf ldf 檔案
 * CreateDatabase 建立資料庫
 
 將產品專案中的 connectionString 重指向 local_db_instance
@@ -36,7 +35,6 @@ public class MyDbContext : DbContext
 	}
 }
 ```
-
 
 如此一來就能夠在測試專案中, 直接執行資料庫整合測試
 ```
