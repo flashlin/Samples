@@ -17,10 +17,10 @@ public class SqlLocalDbTest : IDisposable
     }
 }
 ```
-EnsureInstanceCreated 方法建立為 local_db_instance 實例
-ForceDropDatabase 強制刪除現有的資料庫
-DeleteDatabaseFile 刪除 mdf 檔案
-CreateDatabase 建立資料庫
+* EnsureInstanceCreated 建立為 local_db_instance 實例
+* ForceDropDatabase 強制刪除現有的資料庫
+* DeleteDatabaseFile 刪除 mdf 檔案
+* CreateDatabase 建立資料庫
 
 將產品專案中的 connectionString 重指向 local_db_instance
 ```
