@@ -25,23 +25,6 @@ public class InitializeFixture : IDisposable
 		InitializeSqlLocalDbInstance();
 	}
 
-	public string ConnectionString
-	{
-		get
-		{
-			var linuxConnectionString =
-				 $"Server=localhost;Database={_databaseName};User=sa;Password=1Secure*Password1;";
-			if (GetOSPlatform() == OSPlatform.Linux)
-			{
-				return linuxConnectionString;
-			}
-
-			var windowsSqlLocalDbConnectionString =
-				 $"Server=(localdb)\\{_instanceName};Integrated security=SSPI;database={_databaseName};";
-			return windowsSqlLocalDbConnectionString;
-		}
-	}
-
 	public ISqlLocalDb LocalDb { get; }
 
 	public void CreateSp()

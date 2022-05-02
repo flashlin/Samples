@@ -5,12 +5,12 @@ VisualStudioVersion = 17.1.32414.318
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "T1.SqlLocalData", "T1.SqlLocalData\T1.SqlLocalData.csproj", "{31B5BBE1-EAAB-4DB2-87BB-7654861EEDE7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SqlLocalDataTests", "SqlLocalDataTests\SqlLocalDataTests.csproj", "{12E56A12-4C5F-4900-9529-FEBC83795DC8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{07B61794-3C16-42B3-9B50-43C6DF2745E5}"
 	ProjectSection(SolutionItems) = preProject
 		RunTest.ps1 = RunTest.ps1
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlLocalDbTests", "SqlLocalDbTests\SqlLocalDbTests.csproj", "{B4D27589-E846-499D-8A36-C2072F58CBEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -22,10 +22,10 @@ Global
 		{31B5BBE1-EAAB-4DB2-87BB-7654861EEDE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31B5BBE1-EAAB-4DB2-87BB-7654861EEDE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31B5BBE1-EAAB-4DB2-87BB-7654861EEDE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12E56A12-4C5F-4900-9529-FEBC83795DC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12E56A12-4C5F-4900-9529-FEBC83795DC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12E56A12-4C5F-4900-9529-FEBC83795DC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12E56A12-4C5F-4900-9529-FEBC83795DC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4D27589-E846-499D-8A36-C2072F58CBEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4D27589-E846-499D-8A36-C2072F58CBEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4D27589-E846-499D-8A36-C2072F58CBEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4D27589-E846-499D-8A36-C2072F58CBEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

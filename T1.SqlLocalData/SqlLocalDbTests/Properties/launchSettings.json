@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "SqlLocalDataTests": {
+    "SqlLocalDbTests": {
       "commandName": "Project"
     },
     "Docker": {
