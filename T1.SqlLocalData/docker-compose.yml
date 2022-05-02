@@ -11,6 +11,6 @@ services:
     image: sql-localdb-test
     build:
       context: .
-      dockerfile: SqlLocalDataTests/Dockerfile-Test
+      dockerfile: SqlLocalDbTests/Dockerfile-Test
     depends_on:
       - db
