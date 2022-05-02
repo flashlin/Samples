@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace T1.SqlLocalData
 {
-	public class SqlLocalDb
+	public class SqlLocalDb : ISqlLocalDb
 	{
 		private readonly string _dataFolder;
 		readonly string _sqllocaldbexe = @"C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe";
@@ -71,8 +71,8 @@ namespace T1.SqlLocalData
 
 		public void ExecuteNonQueryRawSql(string instanceName, string sql, object parameter = null)
 		{
-			//$"Server=localhost;Integrated security=SSPI;database=master;AttachDBFilename=|DataDirectory|\\{databaseName}.mdf");
-			using var myConn = new SqlConnection(GetConnectionString(instanceName));
+			var connectionString = GetConnectionString(instanceName);
+			using var myConn = new SqlConnection(connectionString);
 			myConn.ExecuteScalar(sql, parameter);
 		}
 
@@ -91,6 +91,12 @@ namespace T1.SqlLocalData
 		public void ForceStopInstance(string instanceName)
 		{
 			ExecuteSqlLocalDbExe(@$"stop ""{instanceName}"" -i -k");
+		}
+
+		public string GetDatabaseConnectionString(string instanceName, string databaseName)
+		{
+			var mdfFile = Path.Combine(_dataFolder, $"{databaseName}.mdf");
+			return $"Server=(localdb)\\{instanceName};Integrated security=SSPI;AttachDbFileName={mdfFile};";
 		}
 
 		public IEnumerable<string> GetInstanceNames()
@@ -116,7 +122,7 @@ select 1
 ELSE 
 select 0";
 
-			return QueryRawSql<bool>(instanceName, sql, new
+			return QuerySqlRaw<bool>(instanceName, sql, new
 			{
 				dbname = databaseName
 			}).First();
@@ -139,12 +145,13 @@ EXEC(@SQL)";
 
 			ExecuteNonQueryRawSql(instanceName, sql);
 		}
-		public IEnumerable<T> QueryRawSql<T>(string instanceName, string sql, object parameter = null)
+
+		public IEnumerable<T> QuerySqlRaw<T>(string instanceName, string sql, object parameter = null)
 		{
-			using var myConn = new SqlConnection(GetConnectionString(instanceName));
+			var connectionString = GetConnectionString(instanceName);
+			using var myConn = new SqlConnection(connectionString);
 			return myConn.Query<T>(sql, parameter);
 		}
-
 		public void StartInstance(string instanceName)
 		{
 			ExecuteSqlLocalDbExe(@$"start ""{instanceName}""");

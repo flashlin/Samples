@@ -1,39 +1,100 @@
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using SqlLocalDataTests.Repositories;
+using T1.SqlLocalData;
 
 namespace SqlLocalDataTests;
 
 public class InitializeFixture : IDisposable
 {
-    public MyDbContext MyDb { get; }
+	private string _databaseName = "Northwind";
+	private string _instanceName = "localtest";
 
-    public InitializeFixture()
-    {
-        MyDb = new MyDbContext("Server=db;User Id=sa;Password=1Secure*Password1;");
-        CreateTable1();
-    }
+	public InitializeFixture()
+	{
+		if (GetOSPlatform() == OSPlatform.Linux)
+		{
+			LocalDb = new LinuxLocalDb();
+		}
+		else
+		{
+			LocalDb = new SqlLocalDb(@"D:\Demo");
+		}
 
-    public void Dispose()
-    {
-    }
-		
-    private void CreateTable1()
-    {
-        MyDb.Database.ExecuteSqlRaw(@"CREATE TABLE customer (id INT PRIMARY KEY, name VARCHAR(50))");
-        MyDb.Database.ExecuteSqlRaw(@"INSERT customer(id,name) VALUES (1,'Flash'),(3,'Jack'),(4,'Mary')");
-        MyDb.Database.ExecuteSqlRaw(@"CREATE PROC MyGetCustomer 
-				@id INT AS 
-				BEGIN 
-					SET NOCOUNT ON; 
-					select name from customer 
-					WHERE id=@id 
-				END");
-    }
-		
-    private void CreateTable2()
-    {
-        MyDb.ExecuteSqlRawFromFile("./Contents/CreateTable.sql");
-        MyDb.ExecuteSqlRawFromFile("./Contents/MyGetCustomer.sql");
-    }
+		InitializeSqlLocalDbInstance();
+	}
+
+	public string ConnectionString
+	{
+		get
+		{
+			var linuxConnectionString =
+				 $"Server=localhost;Database={_databaseName};User=sa;Password=1Secure*Password1;";
+			if (GetOSPlatform() == OSPlatform.Linux)
+			{
+				return linuxConnectionString;
+			}
+
+			var windowsSqlLocalDbConnectionString =
+				 $"Server=(localdb)\\{_instanceName};Integrated security=SSPI;database={_databaseName};";
+			return windowsSqlLocalDbConnectionString;
+		}
+	}
+
+	public ISqlLocalDb LocalDb { get; }
+
+	public void CreateSp()
+	{
+		var myDb = GetMyDb();
+		myDb.Database.ExecuteSqlRaw(@"CREATE PROC MyGetCustomer 
+	 @id INT AS 
+	 BEGIN 
+	 	SET NOCOUNT ON; 
+	 	select name from customer 
+	 	WHERE id=@id 
+	 END");
+	}
+
+	public void CreateTable()
+	{
+		var myDb = GetMyDb();
+		myDb.Database.ExecuteSqlRaw(@"CREATE TABLE customer (id INT PRIMARY KEY, name VARCHAR(50))");
+		myDb.Database.ExecuteSqlRaw(@"INSERT customer(id,name) VALUES (1,'Flash'),(3,'Jack'),(4,'Mary')");
+	}
+
+	public void Dispose()
+	{
+	}
+	public MyDbContext GetMyDb()
+	{
+		return new MyDbContext(LocalDb.GetDatabaseConnectionString(_instanceName, _databaseName));
+	}
+	private OSPlatform GetOSPlatform()
+	{
+		if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+		{
+			return OSPlatform.Linux;
+		}
+
+		if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+		{
+			return OSPlatform.OSX;
+		}
+
+		if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+		{
+			return OSPlatform.Windows;
+		}
+
+		throw new Exception("Cannot determine operating system!");
+	}
+
+	private void InitializeSqlLocalDbInstance()
+	{
+		LocalDb.EnsureInstanceCreated(_instanceName);
+		LocalDb.ForceDropDatabase(_instanceName, _databaseName);
+		LocalDb.DeleteDatabaseFile(_databaseName);
+		LocalDb.CreateDatabase(_instanceName, _databaseName);
+	}
 }
