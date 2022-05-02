@@ -1,0 +1,17 @@
+# https://docs.docker.com/engine/reference/builder/#dockerignore-file
+
+# exclude README
+README.md
+
+# exclude docker related files
+.dockerignore
+Dockerfile
+
+# exclude git related files
+.gitignore
+.git
+.gitlab-ci.yml
+node_modules
+
+# exclude kubernetes files
+kubernetes-manifest

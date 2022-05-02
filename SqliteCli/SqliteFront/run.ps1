@@ -1,0 +1,1 @@
+docker run -it -p 3000:80 --name sqlite-front-test sqlite-front:0001-production 
