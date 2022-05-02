@@ -10,100 +10,104 @@ using Xunit;
 
 namespace SqlLocalDataTests
 {
-    public class FastCreateTest
-    {
-        private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
-        private string _databaseName = "fasttest";
-        private string _instanceName = "local_fast";
-        private MyDbContext _myDb;
+	public class FastCreateTest
+	{
+		private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
+		private string _databaseName = "fasttest";
+		private string _instanceName = "local_fast";
+		private MyDbContext _myDb;
 
-        public FastCreateTest()
-        {
-            InitializeSqlLocalDbInstance();
+		public FastCreateTest()
+		{
+			InitializeSqlLocalDbInstance();
 
-            var windowsSqlLocalDbConnectionString =
-                $"Server=(localdb)\\{_instanceName};Integrated security=SSPI;database={_databaseName};";
-            var linuxConnectionString = "Server=db;Database=Northwind;User=sa;Password=1Secure*Password1;";
+			var windowsSqlLocalDbConnectionString =
+				 $"Server=(localdb)\\{_instanceName};Integrated security=SSPI;database={_databaseName};";
+			var linuxConnectionString = "Server=db;Database=Northwind;User=sa;Password=1Secure*Password1;";
 
-            var connectionString = GetOSPlatform() == OSPlatform.Linux
-                ? linuxConnectionString
-                : windowsSqlLocalDbConnectionString;
+			var connectionString = GetOSPlatform() == OSPlatform.Linux
+				 ? linuxConnectionString
+				 : windowsSqlLocalDbConnectionString;
 
-            _myDb = new MyDbContext(connectionString);
-        }
+			_myDb = new MyDbContext(connectionString);
+		}
 
-        private OSPlatform GetOSPlatform()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return OSPlatform.Linux;
-            }
+		[Fact]
+		public void execute_raw_sql()
+		{
+			_myDb.Database.ExecuteSqlRaw(@"CREATE TABLE customer (id INT PRIMARY KEY, name VARCHAR(50))");
+			_myDb.Database.ExecuteSqlRaw(@"INSERT customer(id,name) VALUES (1,'Flash'),(3,'Jack'),(4,'Mary')");
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return OSPlatform.OSX;
-            }
+			var customer = _myDb.Customers
+				 .First(x => x.Id == 3);
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return OSPlatform.Windows;
-            }
+			Assert.Equal("Jack", customer.Name);
+		}
 
-            throw new Exception("Cannot determine operating system!");
-        }
+		[Fact]
+		public void execute_raw_sql_from_file()
+		{
+			_myDb.ExecuteSqlRawFromFile("./Contents/CreateTable.sql");
+			_myDb.ExecuteSqlRawFromFile("./Contents/MyGetCustomer.sql");
 
-        [Fact]
-        public void execute_raw_sql()
-        {
-            _myDb.Database.ExecuteSqlRaw(@"CREATE TABLE customer (id INT PRIMARY KEY, name VARCHAR(50))");
-            _myDb.Database.ExecuteSqlRaw(@"INSERT customer(id,name) VALUES (1,'Flash'),(3,'Jack'),(4,'Mary')");
+			var customer = _myDb.Customers
+				 .First(x => x.Id == 3);
 
-            var customer = _myDb.Customers
-                .First(x => x.Id == 3);
+			Assert.Equal("Jack", customer.Name);
+		}
 
-            Assert.Equal("Jack", customer.Name);
-        }
+		[Fact]
+		public void execute_store_procedure()
+		{
+			_myDb.Database.ExecuteSqlRaw(@"CREATE TABLE customer (id INT PRIMARY KEY, name VARCHAR(50))");
+			_myDb.Database.ExecuteSqlRaw(@"INSERT customer(id,name) VALUES (1,'Flash'),(3,'Jack'),(4,'Mary')");
+			_myDb.Database.ExecuteSqlRaw(@"CREATE PROC MyGetCustomer 
+	 @id INT AS 
+	 BEGIN 
+	 	SET NOCOUNT ON; 
+	 	select name from customer 
+	 	WHERE id=@id 
+	 END");
 
-        [Fact]
-        public void execute_raw_sql_from_file()
-        {
-            _myDb.ExecuteSqlRawFromFile("./Contents/CreateTable.sql");
-            _myDb.ExecuteSqlRawFromFile("./Contents/MyGetCustomer.sql");
+			var customer = _myDb.QuerySqlRaw<CustomerEntity>("EXEC MyGetCustomer @id", new
+			{
+				id = 3
+			}).First();
 
-            var customer = _myDb.Customers
-                .First(x => x.Id == 3);
+			Assert.Equal("Jack", customer.Name);
+		}
 
-            Assert.Equal("Jack", customer.Name);
-        }
+		private OSPlatform GetOSPlatform()
+		{
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+			{
+				return OSPlatform.Linux;
+			}
 
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+			{
+				return OSPlatform.OSX;
+			}
 
-        [Fact]
-        public void execute_store_procedure()
-        {
-            _myDb.Database.ExecuteSqlRaw(@"CREATE TABLE customer (id INT PRIMARY KEY, name VARCHAR(50))");
-            _myDb.Database.ExecuteSqlRaw(@"INSERT customer(id,name) VALUES (1,'Flash'),(3,'Jack'),(4,'Mary')");
-            _myDb.Database.ExecuteSqlRaw(@"CREATE PROC MyGetCustomer 
-				@id INT AS 
-				BEGIN 
-					SET NOCOUNT ON; 
-					select name from customer 
-					WHERE id=@id 
-				END");
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			{
+				return OSPlatform.Windows;
+			}
 
-            var customer = _myDb.QuerySqlRaw<CustomerEntity>("EXEC MyGetCustomer @id", new
-            {
-                id = 3
-            }).First();
+			throw new Exception("Cannot determine operating system!");
+		}
 
-            Assert.Equal("Jack", customer.Name);
-        }
+		private void InitializeSqlLocalDbInstance()
+		{
+			if(GetOSPlatform() != OSPlatform.Windows)
+			{
+				return;
+			}
 
-        private void InitializeSqlLocalDbInstance()
-        {
-            _localDb.EnsureInstanceCreated(_instanceName);
-            _localDb.ForceDropDatabase(_instanceName, _databaseName);
-            _localDb.DeleteDatabaseFile(_databaseName);
-            _localDb.CreateDatabase(_instanceName, _databaseName);
-        }
-    }
+			_localDb.EnsureInstanceCreated(_instanceName);
+			_localDb.ForceDropDatabase(_instanceName, _databaseName);
+			_localDb.DeleteDatabaseFile(_databaseName);
+			_localDb.CreateDatabase(_instanceName, _databaseName);
+		}
+	}
 }

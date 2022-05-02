@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/runtime:6.0 AS base
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS base
 WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
@@ -17,4 +17,4 @@ RUN dotnet publish "SqlLocalDataTests.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SqlLocalDataTests.dll"]
+ENTRYPOINT ["dotnet", "test", "SqlLocalDataTests.dll"]

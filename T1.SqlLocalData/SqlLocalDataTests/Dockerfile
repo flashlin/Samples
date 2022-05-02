@@ -17,4 +17,5 @@ RUN dotnet publish "SqlLocalDataTests.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SqlLocalDataTests.dll"]
+#ENTRYPOINT ["dotnet", "SqlLocalDataTests.dll"]
+ENTRYPOINT ["dotnet", "test", "SqlLocalDataTests.dll"]
