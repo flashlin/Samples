@@ -2,9 +2,8 @@
 using System.IO;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace SqlLocalDataTests.Repositories;
+namespace SqlLocalDbTests.Repositories;
 
 public class MyDbContext : DbContext
 {

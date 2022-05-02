@@ -1,12 +1,8 @@
-using NUnit.Framework;
-using SqlLocalDataTests.Repositories;
-using System;
-using System.IO;
 using System.Linq;
-using T1.SqlLocalData;
-using T1.SqlLocalData.Extensions;
+using NUnit.Framework;
+using SqlLocalDbTests.Repositories;
 
-namespace SqlLocalDataTests
+namespace SqlLocalDbTests
 {
 	public class CreateTest
 	{

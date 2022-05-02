@@ -1,10 +1,10 @@
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
-using SqlLocalDataTests.Repositories;
+using SqlLocalDbTests.Repositories;
 using T1.SqlLocalData;
 
-namespace SqlLocalDataTests;
+namespace SqlLocalDbTests;
 
 public class InitializeFixture : IDisposable
 {

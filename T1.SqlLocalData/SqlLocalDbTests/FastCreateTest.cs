@@ -1,13 +1,9 @@
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
-using SqlLocalDataTests.Repositories;
-using T1.SqlLocalData;
-using T1.SqlLocalData.Extensions;
+using SqlLocalDbTests.Repositories;
 
-namespace SqlLocalDataTests
+namespace SqlLocalDbTests
 {
 	public class FastCreateTest
 	{
