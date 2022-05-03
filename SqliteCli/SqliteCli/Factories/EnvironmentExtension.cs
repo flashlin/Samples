@@ -1,6 +1,4 @@
-using SqliteCli.Factories;
-
-namespace SqliteCli;
+namespace SqliteCli.Factories;
 
 public static class EnvironmentExtension
 {
