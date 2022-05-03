@@ -10,6 +10,7 @@ using T1.Standard.Extensions;
 using T1.Standard.Web;
 using Serilog.Events;
 using Microsoft.Extensions.Hosting;
+using SqliteCli.Factories;
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
@@ -20,9 +21,10 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    var host = Host.CreateDefaultBuilder(args)
+    var host = new HostFactory().Create(args)
         .ConfigureServices(services =>
         {
+            services.AddControllers();
             services.AddHttpClient();
             services.AddHttpClient<IWebApiClient, WebApiClient>();
             //services.AddTransient<IStockExchangeApi, TwseStockExchangeApi>();
@@ -36,7 +38,7 @@ try
         .Build();
 
     var app = host.Services.GetService<Startup>();
-    await app!.Run();
+    await app!.Run(host);
 }
 catch (Exception ex)
 {

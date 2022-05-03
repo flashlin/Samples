@@ -1,7 +1,10 @@
 using System.Text.RegularExpressions;
 using CommandLine;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SqliteCli.Entities;
+using SqliteCli.Factories;
 using SqliteCli.Helpers;
 using SqliteCli.Repos;
 using T1.Standard.Extensions;
@@ -28,8 +31,14 @@ public class Startup
         _stockService.ShowTransList(opts);
     }
 
-    public async Task Run()
+    public async Task Run(IHost host)
     {
+        if (host is WebApplication webApp)
+        {
+            Console.WriteLine("Web Startup");
+            webApp.StartAsync(typeof(Program).Assembly);
+        }
+        
         do
         {
             Console.WriteLine();

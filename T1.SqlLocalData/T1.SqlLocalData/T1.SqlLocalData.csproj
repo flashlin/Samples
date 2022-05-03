@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>latest</LangVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>mr.brain</Authors>
+    <Description>windows sqllocaldb tool</Description>
   </PropertyGroup>
 
   <ItemGroup>
