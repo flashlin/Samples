@@ -188,15 +188,10 @@ public class StockService : IStockService
 		return date.IsWorkDay() && DateTime.Now.ToDate() != date.ToDate();
 	}
 
-	public void ShowTransList(ShowTransListCommandLineOptions options)
+	public List<TransHistory> ShowTransList(ListTransReq listTransReq)
 	{
-		var rc = _stockRepo.GetTransList(new ListTransReq
-		{
-			StartTime = options?.StartTime,
-			EndTime = options?.EndTime,
-			StockId = options?.StockId,
-		});
-		rc.Dump();
+		var rc = _stockRepo.GetTransList(listTransReq);
+		return rc;
 	}
 
 	public async Task Test()

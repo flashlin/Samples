@@ -7,6 +7,6 @@ public interface IStockService
     Task<List<ReportTranItem>> ReportTransAsync();
     Task ShowStockHistoryAsync(ShowStockHistoryReq req);
     void ShowBalance();
-    void ShowTransList(ShowTransListCommandLineOptions options);
+    List<TransHistory> ShowTransList(ListTransReq listTransReq);
     Task Test();
 }
