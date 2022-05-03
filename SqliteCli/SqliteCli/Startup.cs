@@ -28,7 +28,7 @@ public class Startup
         var opts = Parser.Default.ParseArguments<ShowTransListCommandLineOptions>(args)
             .MapResult((opts) => { return opts; },
                 errs => { return null; });
-        var rc = _stockService.ShowTransList(new ListTransReq
+        var rc = _stockService.GetTransList(new ListTransReq
         {
             StartTime = opts?.StartTime,
             EndTime = opts?.EndTime,

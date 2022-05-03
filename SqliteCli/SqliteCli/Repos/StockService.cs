@@ -188,7 +188,7 @@ public class StockService : IStockService
 		return date.IsWorkDay() && DateTime.Now.ToDate() != date.ToDate();
 	}
 
-	public List<TransHistory> ShowTransList(ListTransReq listTransReq)
+	public List<TransHistory> GetTransList(ListTransReq listTransReq)
 	{
 		var rc = _stockRepo.GetTransList(listTransReq);
 		return rc;
