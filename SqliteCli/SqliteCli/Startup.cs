@@ -13,6 +13,7 @@ namespace SqliteCli;
 
 public class Startup
 {
+    public static string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
     private IStockService _stockService;
     private IStockRepo _stockRepo;
 
@@ -41,6 +42,7 @@ public class Startup
     {
         if (host is WebApplication webApp)
         {
+            webApp.UseCors(MyAllowSpecificOrigins);
             webApp.StartAsync(typeof(Program).Assembly, new RuntimeEnvironment());
         }
         

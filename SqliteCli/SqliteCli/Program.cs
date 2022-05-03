@@ -34,6 +34,17 @@ try
             services.AddTransient<IStockRepo, StockRepo>();
             services.AddTransient<IStockService, StockService>();
             services.AddSingleton<Startup>();
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: Startup.MyAllowSpecificOrigins,
+                    policy  =>
+                    {
+                        policy.WithOrigins("http://sqlite.localdev.net:3001")
+                            .AllowAnyHeader()
+                            .WithMethods();
+                    });
+            });
         })
         .UseSerilog()
         .Build();

@@ -24,7 +24,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
     },
     server: {
       host: 'sqlite.localdev.net',
-      port: 3000,
+      port: 3001,
     },
   };
 };

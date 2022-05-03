@@ -5,51 +5,32 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import "./main.scss";
 
+import { StockApi } from "@/models/stockApi";
+
 export default defineComponent({
   setup(props, { expose }) {
     let state = reactive({
       result: "",
       columns: [
-        { field: "code", header: "Code" },
-        { field: "name", header: "Name" },
-        { field: "category", header: "Category" },
-        { field: "quantity", header: "Quantity" },
+        { field: "id", header: "id" },
+        { field: "tranTime", header: "tranTime" },
+        { field: "tranType", header: "tranType" },
+        { field: "stockId", header: "stockId" },
+        { field: "stockName", header: "stockName" },
+        { field: "stockPrice", header: "stockPrice" },
+        { field: "numberOfShare", header: "numberOfShare" },
+        { field: "handlingFee", header: "handlingFee" },
+        { field: "balance", header: "balance" },
       ],
-      products: [
-        {
-          code: "PRD001",
-          name: "Product 1",
-          category: "Category 1",
-          quantity: 10,
-        },
-        {
-          code: "PRD002",
-          name: "Product 2",
-          category: "Category 2",
-          quantity: 20,
-        },
-        {
-          code: "PRD003",
-          name: "Product 3",
-          category: "Category 3",
-          quantity: 30,
-        },
-      ],
+      products: [],
     });
 
-    const clickFetchSend = () => {
-      state.products.push({
-        code: "PRD004",
-        name: "Product 4",
-        category: "Category 4",
-        quantity: 40,
-      });
-
-      // let userData = {
-      //   id: 123,
-      //   name: "flash",
-      // };
-      // fetch("http://example.com/movies.json", {
+    const clickFetchSend = async () => {
+      let userData = {
+        id: 123,
+        name: "flash",
+      };
+      // fetch("http://127.0.0.1:3000/Stock/GetTransList", {
       //   method: "POST",
       //   headers: {
       //     "Accept": "application/json",
@@ -59,8 +40,12 @@ export default defineComponent({
       //   body: JSON.stringify(userData),
       // }).then(function (response) {
       //   console.log("fetch resp", response);
-      //   state.result = response as any;
+      //   state.products = response as any;
       // });
+
+      var api = new StockApi();
+      var resp = await api.getApi();
+      state.products = resp;
     };
 
     return () => (
