@@ -35,7 +35,6 @@ public class Startup
     {
         if (host is WebApplication webApp)
         {
-            Console.WriteLine("Web Startup");
             webApp.StartAsync(typeof(Program).Assembly);
         }
         

@@ -21,7 +21,8 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    var host = new HostFactory().Create(args)
+    var hostBuilder = new HostFactory().Create(args);
+    var host = hostBuilder
         .ConfigureServices(services =>
         {
             services.AddControllers();
@@ -36,9 +37,9 @@ try
         })
         .UseSerilog()
         .Build();
-
-    var app = host.Services.GetService<Startup>();
-    await app!.Run(host);
+    
+    var startup = host.Services.GetService<Startup>();
+    await startup!.Run(host);
 }
 catch (Exception ex)
 {
