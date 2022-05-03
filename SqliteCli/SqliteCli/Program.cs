@@ -33,11 +33,11 @@ try
             services.AddDbContext<StockDbContext>();
             services.AddTransient<IStockRepo, StockRepo>();
             services.AddTransient<IStockService, StockService>();
-            services.AddSingleton<Startup>();
+            services.AddSingleton<Main>();
 
             services.AddCors(options =>
             {
-                options.AddPolicy(name: Startup.MyAllowSpecificOrigins,
+                options.AddPolicy(name: Main.MyAllowSpecificOrigins,
                     policy  =>
                     {
                         policy.WithOrigins("http://sqlite.localdev.net:3001")
@@ -49,8 +49,8 @@ try
         .UseSerilog()
         .Build();
     
-    var startup = host.Services.GetService<Startup>();
-    await startup!.Run(host);
+    var main = host.Services.GetService<Main>();
+    await main!.Run(host);
 }
 catch (Exception ex)
 {

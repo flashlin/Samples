@@ -11,13 +11,13 @@ using T1.Standard.Extensions;
 
 namespace SqliteCli;
 
-public class Startup
+public class Main
 {
     public static string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
     private IStockService _stockService;
     private IStockRepo _stockRepo;
 
-    public Startup(IStockService stockService, IStockRepo stockRepo, ILogger<Startup> logger)
+    public Main(IStockService stockService, IStockRepo stockRepo, ILogger<Main> logger)
     {
         logger.LogInformation("Startup");
         _stockRepo = stockRepo;
