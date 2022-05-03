@@ -1,4 +1,4 @@
-import { defineComponent, Fragment, reactive } from "vue";
+import { defineComponent, Fragment, onMounted, reactive } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
@@ -26,27 +26,16 @@ export default defineComponent({
     });
 
     const clickFetchSend = async () => {
-      let userData = {
-        id: 123,
-        name: "flash",
-      };
-      // fetch("http://127.0.0.1:3000/Stock/GetTransList", {
-      //   method: "POST",
-      //   headers: {
-      //     "Accept": "application/json",
-      //     "Content-Type": "application/json",
-      //     //"Authorization": `Bearer ${token}`,
-      //   },
-      //   body: JSON.stringify(userData),
-      // }).then(function (response) {
-      //   console.log("fetch resp", response);
-      //   state.products = response as any;
-      // });
-
       var api = new StockApi();
-      var resp = await api.getApi();
+      var resp = await api.getTransListAsync();
       state.products = resp;
     };
+
+    onMounted(async () => {
+      var api = new StockApi();
+      var resp = await api.getTransListAsync();
+      state.products = resp;
+    });
 
     return () => (
       <div>
