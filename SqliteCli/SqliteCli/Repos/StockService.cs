@@ -88,7 +88,7 @@ public class StockService : IStockService
 		balanceInfo.DisplayConsoleValue();
 	}
 
-	public async Task<List<ReportTranItem>> ReportTransAsync()
+	public async Task<List<ReportTranItem>> GetTransReportListAsync()
 	{
 		var rc = _stockRepo.ReportTrans(new ReportTransReq());
 		foreach (var stock in rc.Where(x => x.TranType == "Buy"))

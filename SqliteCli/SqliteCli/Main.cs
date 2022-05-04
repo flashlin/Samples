@@ -136,7 +136,7 @@ public class Main
 
     async Task ProcessReportAsync()
     {
-        var rc = await _stockService.ReportTransAsync();
+        var rc = await _stockService.GetTransReportListAsync();
         rc.Dump();
         _stockService.ShowBalance();
     }
