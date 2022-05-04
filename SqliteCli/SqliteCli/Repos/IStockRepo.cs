@@ -5,7 +5,7 @@ namespace SqliteCli.Repos
 	public interface IStockRepo
 	{
 		void BuyStock(TransEntity data);
-		List<ReportTranItem> ReportTrans(ReportTransReq req);
+		List<ReportTranItem> GetTransGroupByStockId(ReportTransReq req);
 		void Deposit(DepositReq depositReq);
 		void AppendStockHistory(StockHistoryEntity stockHistoryEntity);
 		List<StockHistoryEntity> GetStockHistory(GetStockHistoryReq req);

@@ -90,7 +90,7 @@ public class StockService : IStockService
 
 	public async Task<List<ReportTranItem>> GetTransReportListAsync()
 	{
-		var rc = _stockRepo.ReportTrans(new ReportTransReq());
+		var rc = _stockRepo.GetTransGroupByStockId(new ReportTransReq());
 		foreach (var stock in rc.Where(x => x.TranType == "Buy"))
 		{
 			await EnsuredStockHistory(new DateRange()

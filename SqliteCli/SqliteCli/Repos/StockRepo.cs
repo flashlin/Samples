@@ -59,7 +59,7 @@ namespace SqliteCli.Repos
             db.SaveChanges();
         }
 
-        public List<ReportTranItem> ReportTrans(ReportTransReq req)
+        public List<ReportTranItem> GetTransGroupByStockId(ReportTransReq req)
         {
             var sql = @"
 select 
