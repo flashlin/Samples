@@ -6,6 +6,50 @@ using T1.CodeDom.TSql.Expressions;
 
 namespace T1.CodeDom.TSql.Parselets
 {
+	public class DisableParselet : IPrefixParselet
+	{
+		public IExpression Parse(TextSpan token, IParser parser)
+		{
+			parser.ConsumeToken(SqlToken.TRIGGER);
+
+			SqlCodeExpr triggerName;
+			if(parser.TryConsumeToken(out var allSpan, SqlToken.ALL))
+			{
+				triggerName = new AllSqlCodeExpr();
+			} 
+			else
+			{
+				triggerName = parser.ConsumeObjectId();
+			}
+			parser.ConsumeToken(SqlToken.ON);
+
+			SqlCodeExpr objectExpr;
+			if( parser.MatchTokenList(SqlToken.ALL, SqlToken.SERVER) )
+			{
+				objectExpr = new ObjectIdSqlCodeExpr
+				{
+					ObjectName = "ALL SERVER"
+				};
+			} else if( parser.MatchToken(SqlToken.DATABASE) )
+			{
+				objectExpr = new ObjectIdSqlCodeExpr
+				{
+					ObjectName = "DATABASE"
+				};
+			}
+			else
+			{
+				objectExpr = parser.ConsumeObjectId();
+			}
+
+			return new DisableTriggerSqlCodeExpr
+			{
+				TriggerName = triggerName,
+				ObjectExpr = objectExpr,
+			};
+		}
+	}
+
 	public class SetParselet : IPrefixParselet
 	{
 		public IExpression Parse(TextSpan token, IParser parser)

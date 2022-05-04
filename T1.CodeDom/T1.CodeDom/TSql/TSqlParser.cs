@@ -23,6 +23,7 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.Cursor, new CursorParselet());
             Register(SqlToken.Continue, new ContinueParselet());
             Register(SqlToken.Default, new DefaultConstantParselet());
+            Register(SqlToken.DISABLE, new DisableParselet());
             Register(SqlToken.Dbcc, new DbccParselet());
             Register(SqlToken.DoubleQuoteString, new DoubleQuoteStringParselet());
             Register(SqlToken.Drop, new DropParselet());

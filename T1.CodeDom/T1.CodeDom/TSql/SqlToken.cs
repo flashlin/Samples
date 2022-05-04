@@ -93,7 +93,7 @@
 		TABLE,
 		NotEqual,
 		Union,
-		All,
+		ALL,
 		Ampersand,
 		SmallerThan,
 		BiggerThan,
@@ -259,6 +259,8 @@
 		SORT_IN_TEMPDB,
 		DROP_EXISTING,
 		APPLY,
-		NODES
+		NODES,
+		TRIGGER,
+		SERVER
 	}
 }

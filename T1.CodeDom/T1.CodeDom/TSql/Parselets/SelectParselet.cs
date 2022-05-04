@@ -172,7 +172,7 @@ namespace T1.CodeDom.TSql.Parselets
         protected SqlCodeExpr ParseUnionSelect(TextSpan unionToken, IParser parser)
         {
             var unionMethod = string.Empty;
-            if (parser.Scanner.Match(SqlToken.All))
+            if (parser.Scanner.Match(SqlToken.ALL))
             {
                 unionMethod = "ALL";
             }

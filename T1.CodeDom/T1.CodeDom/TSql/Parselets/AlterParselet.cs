@@ -31,7 +31,7 @@ namespace T1.CodeDom.TSql.Parselets
 
         private SqlCodeExpr AlterIndex(TextSpan indexSpan, IParser parser)
         {
-            parser.ConsumeToken(SqlToken.All);
+            parser.ConsumeToken(SqlToken.ALL);
             parser.ConsumeToken(SqlToken.ON);
             var tableName = parser.ConsumeObjectId();
 

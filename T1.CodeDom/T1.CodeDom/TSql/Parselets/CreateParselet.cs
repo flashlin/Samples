@@ -287,7 +287,7 @@ namespace T1.CodeDom.TSql.Parselets
 
             var funcName = parser.ConsumeObjectId();
 
-            parser.Scanner.TryConsumeString(SqlToken.All, out var allToken);
+            parser.Scanner.TryConsumeString(SqlToken.ALL, out var allToken);
             parser.Scanner.Consume(SqlToken.To);
 
             var groupNameList = new List<SqlCodeExpr>();

@@ -18,7 +18,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("AS", SqlToken.As);
 			AddTokenMap("ASC", SqlToken.Asc);
 			AddTokenMap("AND", SqlToken.And);
-			AddTokenMap("ALL", SqlToken.All);
+			AddTokenMap("ALL", SqlToken.ALL);
 			AddTokenMap("BREAK", SqlToken.Break);
 			AddTokenMap("BEGIN", SqlToken.Begin);
 			AddTokenMap("BIT", SqlToken.Bit);
@@ -228,9 +228,11 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("SNAPSHOT", SqlToken.SNAPSHOT);
 			AddTokenMap("SELF", SqlToken.SELF);
 			AddTokenMap("SYNONYM", SqlToken.SYNONYM);
+			AddTokenMap("SERVER", SqlToken.SERVER);
 			AddTokenMap("SORT_IN_TEMPDB", SqlToken.SORT_IN_TEMPDB);
 			AddTokenMap("SERIALIZABLE", SqlToken.SERIALIZABLE);
 			AddTokenMap("TRANSACTION", SqlToken.TRANSACTION);
+			AddTokenMap("TRIGGER", SqlToken.TRIGGER);
 			AddTokenMap("TRAN", SqlToken.TRAN);
 			AddTokenMap("TYPE", SqlToken.TYPE);
 			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);
