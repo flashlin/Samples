@@ -8,243 +8,259 @@ namespace SqliteCli.Repos;
 
 public class ShowStockHistoryReq
 {
-	public string StockId { get; set; }
-	public DateRange DateRange { get; set; }
+    public string StockId { get; set; }
+    public DateRange DateRange { get; set; }
 }
 
 public class StockReportHistory
 {
-	public class Item
-	{
-		public decimal Value { get; set; }
-		public int Month { get; set; }
-		public decimal YValue { get; set; }
-	}
+    public class Item
+    {
+        public decimal Value { get; set; }
+        public int Month { get; set; }
+        public decimal YValue { get; set; }
+    }
 
-	public Dictionary<DateTime, Item> Items { get; set; }
+    public Dictionary<DateTime, Item> Items { get; set; }
 }
 
 public class StockService : IStockService
 {
-	private readonly IStockRepo _stockRepo;
-	private readonly IStockExchangeApi _stockExchangeApi;
+    private readonly IStockRepo _stockRepo;
+    private readonly IStockExchangeApi _stockExchangeApi;
 
-	public StockService(IStockRepo stockRepo, IStockExchangeApi stockExchangeApi)
-	{
-		_stockRepo = stockRepo;
-		_stockExchangeApi = stockExchangeApi;
-	}
+    public StockService(IStockRepo stockRepo, IStockExchangeApi stockExchangeApi)
+    {
+        _stockRepo = stockRepo;
+        _stockExchangeApi = stockExchangeApi;
+    }
 
-	public async Task ShowStockHistoryAsync(ShowStockHistoryReq req)
-	{
-		var tranHistory = _stockRepo.GetStockTranHistory(req);
+    public async Task ShowStockHistoryAsync(ShowStockHistoryReq req)
+    {
+        var tranHistory = _stockRepo.GetStockTranHistory(req);
 
-		await EnsuredStockHistory(req.DateRange, req.StockId);
+        await EnsuredStockHistory(req.DateRange, req.StockId);
 
-		var stockHistoryReq = new GetStockHistoryReq()
-		{
-			StartTime = req.DateRange.StartDate.StartOfMonth(),
-			EndTime = req.DateRange.EndDate,
-			StockId = req.StockId
-		};
-		
-		var stockHistory = _stockRepo.GetStockHistory(stockHistoryReq);
-		foreach (var month in req.DateRange.GetRangeByMonth())
-		{
-			var closingDays = stockHistory
-				 .Count(x => x.TranDate.EqualYearMonth(month));
-			var closingSumPrice = stockHistory
-				 .Where(x => x.TranDate.EqualYearMonth(month))
-				 .Sum(x => x.ClosingPrice);
+        var stockHistoryReq = new GetStockHistoryReq()
+        {
+            StartTime = req.DateRange.StartDate.StartOfMonth(),
+            EndTime = req.DateRange.EndDate,
+            StockId = req.StockId
+        };
 
-			var closingPrice = 0m;
-			if (closingDays != 0)
-			{
-				closingPrice = closingSumPrice / closingDays;
-			}
+        var stockHistory = _stockRepo.GetStockHistory(stockHistoryReq);
+        foreach (var month in req.DateRange.GetRangeByMonth())
+        {
+            var closingDays = stockHistory
+                .Count(x => x.TranDate.EqualYearMonth(month));
+            var closingSumPrice = stockHistory
+                .Where(x => x.TranDate.EqualYearMonth(month))
+                .Sum(x => x.ClosingPrice);
 
-			var valueStr = GetValueStr(closingPrice);
-			Console.Write($"{month.ToString("yy-MM")}-");
-			Console.BackgroundColor = ConsoleColor.Gray;
-			Console.Write($"{valueStr}");
-			Console.BackgroundColor = ConsoleColor.Black;
-			Console.WriteLine($" {closingPrice.ToNumberString(6)}");
-		}
-	}
+            var closingPrice = 0m;
+            if (closingDays != 0)
+            {
+                closingPrice = closingSumPrice / closingDays;
+            }
 
-	private string GetValueStr(decimal value)
-	{
-		var spacesCount = (int)Math.Round(value / 10, MidpointRounding.AwayFromZero);
-		return new string(' ', spacesCount);
-	}
+            var valueStr = GetValueStr(closingPrice);
+            Console.Write($"{month.ToString("yy-MM")}-");
+            Console.BackgroundColor = ConsoleColor.Gray;
+            Console.Write($"{valueStr}");
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.WriteLine($" {closingPrice.ToNumberString(6)}");
+        }
+    }
 
-	public void ShowBalance()
-	{
-		var balanceInfo = new ReportTranItem
-		{
-			StockName = "AccountBalance",
-			Balance = _stockRepo.GetBalance()
-		};
-		balanceInfo.DisplayConsoleValue();
-	}
+    private string GetValueStr(decimal value)
+    {
+        var spacesCount = (int) Math.Round(value / 10, MidpointRounding.AwayFromZero);
+        return new string(' ', spacesCount);
+    }
 
-	public async Task<List<ReportTranItem>> GetTransReportListAsync()
-	{
-		var rc = _stockRepo.GetTransGroupByStock(new ReportTransReq());
-		foreach (var stock in rc.Where(x => x.TranType == "Buy"))
-		{
-			await EnsuredStockHistory(new DateRange()
-			{
-				StartDate = stock.MinTranTime,
-				EndDate = DateTime.Now,
-			}, stock.StockId);
-			
-			var data = _stockRepo.GetLastStockHistoryData(stock.StockId);
-			stock.CurrentPrice = data.ClosingPrice;
-			stock.CurrTotalPrice = data.ClosingPrice * stock.NumberOfShare;
-			if (stock.CurrentPrice != 0)
-			{
-				stock.Profit = stock.Balance + stock.CurrTotalPrice;
-			}
-		}
+    public void ShowBalance()
+    {
+        var balanceInfo = new ReportTranItem
+        {
+            StockName = "AccountBalance",
+            Balance = _stockRepo.GetBalance()
+        };
+        balanceInfo.DisplayConsoleValue();
+    }
 
-		return rc;
-	}
-	
-	
+    public async Task<List<ReportTranItem>> GetAllStockTransReportAsync()
+    {
+        var rc = _stockRepo.GetTransGroupByStock(new ReportTransReq());
+        foreach (var stock in rc.Where(x => x.TranType == "Buy"))
+        {
+            await EnsuredStockHistory(new DateRange()
+            {
+                StartDate = stock.MinTranTime,
+                EndDate = DateTime.Now,
+            }, stock.StockId);
 
-	public async Task<List<ReportTranItem>> GetTransReportAsync()
-	{
-		var rc = _stockRepo.GetTransGroupByStock(new ReportTransReq());
-		foreach (var stock in rc.Where(x => x.TranType == "Buy"))
-		{
-			await EnsuredStockHistory(new DateRange()
-			{
-				StartDate = stock.MinTranTime,
-				EndDate = DateTime.Now,
-			}, stock.StockId);
-			
-			var data = _stockRepo.GetLastStockHistoryData(stock.StockId);
-			stock.CurrentPrice = data.ClosingPrice;
-			stock.CurrTotalPrice = data.ClosingPrice * stock.NumberOfShare;
-			if (stock.CurrentPrice != 0)
-			{
-				stock.Profit = stock.Balance + stock.CurrTotalPrice;
-			}
-		}
+            var data = _stockRepo.GetLastStockHistoryData(stock.StockId);
+            stock.CurrentPrice = data.ClosingPrice;
+            stock.CurrTotalPrice = data.ClosingPrice * stock.NumberOfShare;
+            if (stock.CurrentPrice != 0)
+            {
+                stock.Profit = stock.Balance + stock.CurrTotalPrice;
+            }
+        }
 
-		return rc;
-	}
-	
-	
+        return rc;
+    }
 
-	private async Task EnsuredStockHistory(DateRange dateRange, string stockId)
-	{
-		var first = true;
-		foreach (var date in dateRange.GetRangeByDay())
-		{
-			var stockHistory = _stockRepo.GetStockHistoryData(date, stockId);
-			if (stockHistory == null && date.IsNowClosingTime())
-			{
-				if (first)
-				{
-					Console.WriteLine($"Beacuse {date} {stockId}");
-					await AppendStockHistoryRangeFromApi(dateRange, stockId);
-				}
-				else
-				{
-					Console.WriteLine($"ERROR {date.ToDateString()} {stockId}");
-					throw new Exception();
-				}
-				first = false;
-				stockHistory = _stockRepo.GetStockHistoryData(date, stockId);
-				if (stockHistory == null)
-				{
-					_stockRepo.AppendStockHistory(new StockHistoryEntity()
-					{
-						TranDate = date.ToDate(),
-						StockId = stockId
-					});
-				}
-			}
-		}
-	}
+    public async Task<List<ReportTranItem>> GetStockReportAsync(ReportTransReq req)
+    {
+        var stock = _stockRepo
+            .GetTransGroupByStock(req)
+            .FirstOrDefault(x => x.TranType == "Buy");
+        
+        if (stock == null)
+        {
+            return new List<ReportTranItem>();
+        }
+        
+        await EnsuredStockHistory(new DateRange()
+        {
+            StartDate = stock.MinTranTime,
+            EndDate = DateTime.Now,
+        }, stock.StockId);
 
-	public async Task AppendStockHistoryRangeFromApi(DateRange dateRange, string stockId)
-	{
-		Console.WriteLine($"Query {dateRange} {stockId} from networking...");
-		var dataList = await _stockExchangeApi.GetStockHistoryListAsync(new GetStockReq
-		{
-			DateRange = dateRange,
-			StockId = stockId,
-		}).ToListAsync();
-		foreach (var data in dataList)
-		{
-			_stockRepo.AppendStockHistory(new StockHistoryEntity
-			{
-				TranDate = data.Date.ToDate(),
-				StockId = stockId,
-				TradeVolume = data.TradeVolume,
-				DollorVolume = data.DollorVolume,
-				TransactionCount = data.Transaction,
-				OpeningPrice = data.OpeningPrice,
-				ClosingPrice = data.ClosingPrice,
-				HighestPrice = data.HighestPrice,
-				LowestPrice = data.LowestPrice,
-			});
-		}
+        var report = new List<ReportTranItem>();
+        foreach (var day in new DateRange(stock.MinTranTime, DateTime.Now).GetRangeByDay())
+        {
+            var data = _stockRepo.GetStockHistoryData(day, stock.StockId)!;
+            if (data.ClosingPrice == 0)
+            {
+                continue;
+            }
+            var stockDay = ValueHelper.Assign(stock, new ReportTranItem());
+            stockDay.MinTranTime = day;
+            stockDay.CurrentPrice = data.ClosingPrice;
+            stockDay.CurrTotalPrice = data.ClosingPrice * stock.NumberOfShare;
+            if (stockDay.CurrentPrice != 0)
+            {
+                stockDay.Profit = stock.Balance + stockDay.CurrTotalPrice;
+            }
+            report.Add(stockDay);
+        }
+        
+        return report;
+    }
 
-		foreach (var date in dateRange.GetRangeByDay())
-		{
-			if (!IsCanAppend(date))
-			{
-				continue;
-			}
-			_stockRepo.AppendStockHistory(new StockHistoryEntity
-			{
-				TranDate = date.ToDate(),
-				StockId = stockId,
-			});
-		}
-	}
 
-	private static bool IsCanAppend(DateTime date)
-	{
-		return date.IsWorkDay() && DateTime.Now.ToDate() != date.ToDate();
-	}
+    private async Task EnsuredStockHistory(DateRange dateRange, string stockId)
+    {
+        var first = true;
+        foreach (var date in dateRange.GetRangeByDay())
+        {
+            var stockHistory = _stockRepo.GetStockHistoryData(date, stockId);
+            if (stockHistory == null && date.IsNowClosingTime())
+            {
+                if (first)
+                {
+                    Console.WriteLine($"Beacuse {date} {stockId}");
+                    await AppendStockHistoryRangeFromApi(dateRange, stockId);
+                }
+                else
+                {
+                    Console.WriteLine($"ERROR {date.ToDateString()} {stockId}");
+                    throw new Exception();
+                }
 
-	public List<TransHistory> GetTransList(ListTransReq listTransReq)
-	{
-		var rc = _stockRepo.GetTransList(listTransReq);
-		return rc;
-	}
+                first = false;
+                stockHistory = _stockRepo.GetStockHistoryData(date, stockId);
+                if (stockHistory == null)
+                {
+                    _stockRepo.AppendStockHistory(new StockHistoryEntity()
+                    {
+                        TranDate = date.ToDate(),
+                        StockId = stockId
+                    });
+                }
+            }
+        }
+    }
 
-	public async Task Test()
-	{
-		var resp = await _stockExchangeApi.GetStockHistoryListAsync(new GetStockReq()
-		{
-			DateRange = new DateRange() {
-				StartDate = DateTime.Now.AddDays(-30),
-				EndDate = DateTime.Now,
-			},
-			StockId = "0052",
-		}).ToListAsync();
-		var list = resp.ToList();
-		list.Dump();
-	}
+    public async Task AppendStockHistoryRangeFromApi(DateRange dateRange, string stockId)
+    {
+        Console.WriteLine($"Query {dateRange} {stockId} from networking...");
+        var dataList = await _stockExchangeApi.GetStockHistoryListAsync(new GetStockReq
+        {
+            DateRange = dateRange,
+            StockId = stockId,
+        }).ToListAsync();
+        foreach (var data in dataList)
+        {
+            _stockRepo.AppendStockHistory(new StockHistoryEntity
+            {
+                TranDate = data.Date.ToDate(),
+                StockId = stockId,
+                TradeVolume = data.TradeVolume,
+                DollorVolume = data.DollorVolume,
+                TransactionCount = data.Transaction,
+                OpeningPrice = data.OpeningPrice,
+                ClosingPrice = data.ClosingPrice,
+                HighestPrice = data.HighestPrice,
+                LowestPrice = data.LowestPrice,
+            });
+        }
+
+        foreach (var date in dateRange.GetRangeByDay())
+        {
+            if (!IsCanAppend(date))
+            {
+                continue;
+            }
+
+            _stockRepo.AppendStockHistory(new StockHistoryEntity
+            {
+                TranDate = date.ToDate(),
+                StockId = stockId,
+            });
+        }
+    }
+
+    private static bool IsCanAppend(DateTime date)
+    {
+        return date.IsWorkDay() && DateTime.Now.ToDate() != date.ToDate();
+    }
+
+    public List<TransHistory> GetTransList(ListTransReq listTransReq)
+    {
+        var rc = _stockRepo.GetTransList(listTransReq);
+        return rc;
+    }
+
+    public async Task Test()
+    {
+        var resp = await _stockExchangeApi.GetStockHistoryListAsync(new GetStockReq()
+        {
+            DateRange = new DateRange()
+            {
+                StartDate = DateTime.Now.AddDays(-30),
+                EndDate = DateTime.Now,
+            },
+            StockId = "0052",
+        }).ToListAsync();
+        var list = resp.ToList();
+        list.Dump();
+    }
 }
 
 public class ShowTransListCommandLineOptions
 {
-	[Value(index: 0, HelpText = "actio name")]
-	public string Name { get; set; }
+    [Value(index: 0, HelpText = "actio name")]
+    public string Name { get; set; }
 
-	[Value(index: 1, Required = false, HelpText = "Start tran Date.")]
-	public DateTime? StartTime { get; set; }
+    [Value(index: 1, Required = false, HelpText = "Start tran Date.")]
+    public DateTime? StartTime { get; set; }
 
-	[Value(index: 2, Required = false, HelpText = "Start tran Date.")]
-	public DateTime? EndTime { get; set; }
+    [Value(index: 2, Required = false, HelpText = "Start tran Date.")]
+    public DateTime? EndTime { get; set; }
 
-	[Option(shortName: 's', Required = false, HelpText = "StockId.")]
-	public string? StockId { get; set; }
+    [Option(shortName: 's', Required = false, HelpText = "StockId.")]
+    public string? StockId { get; set; }
 }

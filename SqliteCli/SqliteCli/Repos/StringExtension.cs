@@ -2,6 +2,7 @@
 using T1.Standard.Extensions;
 using T1.Standard.DynamicCode;
 using System.Reflection;
+using CommandLine;
 
 namespace SqliteCli.Repos
 {
@@ -173,6 +174,14 @@ namespace SqliteCli.Repos
 				default:
 					return $"{spaces}{text}";
 			}
+		}
+
+		public static T? ParseArgs<T>(this string[] args)
+		{
+			var opts = Parser.Default.ParseArguments<T>(args)
+				.MapResult((opts) => opts,
+					errs => default(T));
+			return opts;
 		}
 	}
 

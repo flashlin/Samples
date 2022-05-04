@@ -8,6 +8,7 @@ using SqliteCli.Factories;
 using SqliteCli.Helpers;
 using SqliteCli.Repos;
 using T1.Standard.Extensions;
+using StringExtension = SqliteCli.Repos.StringExtension;
 
 namespace SqliteCli;
 
@@ -26,9 +27,7 @@ public class Main
 
     public void ShowTransList(string[] args)
     {
-        var opts = Parser.Default.ParseArguments<ShowTransListCommandLineOptions>(args)
-            .MapResult((opts) => { return opts; },
-                errs => { return null; });
+        var opts = args.ParseArgs<ShowTransListCommandLineOptions>();
         var rc = _stockService.GetTransList(new ListTransReq
         {
             StartTime = opts?.StartTime,
@@ -91,7 +90,15 @@ public class Main
                 }
                 case "r":
                 {
-                    await ProcessReportAsync();
+                    var opt = ss.ParseArgs<ReportStockCommand>()!;
+                    if (opt.StockId == null)
+                    {
+                        await ProcessReportAsync();
+                    }
+                    else
+                    {
+                        await ProcessStockReportAsync(opt);
+                    }
                     break;
                 }
                 case "d":
@@ -136,8 +143,18 @@ public class Main
 
     async Task ProcessReportAsync()
     {
-        var rc = await _stockService.GetTransReportListAsync();
+        var rc = await _stockService.GetAllStockTransReportAsync();
         rc.Dump();
+        _stockService.ShowBalance();
+    }
+    
+    async Task ProcessStockReportAsync(ReportStockCommand command)
+    {
+        var rc = await _stockService.GetStockReportAsync(new ReportTransReq
+        {
+            StockId = command.StockId
+        });
+        rc.DumpList();
         _stockService.ShowBalance();
     }
 
@@ -223,4 +240,13 @@ public class Main
         };
         db.BuyStock(tranData);
     }
+}
+
+public class ReportStockCommand
+{
+    [Value(index: 0, HelpText = "actio name")]
+    public string ActionName { get; set; }
+
+    [Value(index: 1, Required = false, HelpText = "StockId")]
+    public string? StockId { get; set; }
 }
