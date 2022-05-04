@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using CommandLine;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -240,13 +239,4 @@ public class Main
         };
         db.BuyStock(tranData);
     }
-}
-
-public class ReportStockCommand
-{
-    [Value(index: 0, HelpText = "actio name")]
-    public string ActionName { get; set; }
-
-    [Value(index: 1, Required = false, HelpText = "StockId")]
-    public string? StockId { get; set; }
 }
