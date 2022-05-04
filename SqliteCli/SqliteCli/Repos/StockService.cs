@@ -106,8 +106,6 @@ public class StockService : IStockService
 			{
 				stock.Profit = stock.Balance + stock.CurrTotalPrice;
 			}
-			//var totalDays = (int)Math.Round((DateTime.Now - stock.MinTranTime).TotalDays, 0, MidpointRounding.AwayFromZero);
-			//stock.InterestRate = stock.Profit / stock.AvgStockPrice * 100 / totalDays;
 		}
 
 		return rc;
