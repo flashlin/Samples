@@ -59,7 +59,7 @@ namespace SqliteCli.Repos
             db.SaveChanges();
         }
 
-        public List<ReportTranItem> GetTransGroupByStockId(ReportTransReq req)
+        public List<ReportTranItem> GetTransGroupByStock(ReportTransReq req)
         {
             var sql = @"
 select 
@@ -76,6 +76,7 @@ select
     SUM(t.Balance) Balance
 from stockMap st 
 left join trans t on st.Id = t.StockId
+where @StockId is null or t.StockId = @StockId 
 group by st.Id, t.TranType
 ";
 
@@ -228,9 +229,7 @@ where not exists(
         protected IEnumerable<T> QueryRaw<T>(string sql, object queryParameter)
             where T : class, new()
         {
-            //using var db = GetDatabase();
-            var db = _db;
-            var connection = db.Database.GetDbConnection();
+            var connection = _db.Database.GetDbConnection();
             var q1 = connection.Query(sql, queryParameter);
 
             var dapperList = q1.ToList();

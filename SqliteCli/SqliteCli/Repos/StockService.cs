@@ -90,7 +90,7 @@ public class StockService : IStockService
 
 	public async Task<List<ReportTranItem>> GetTransReportListAsync()
 	{
-		var rc = _stockRepo.GetTransGroupByStockId(new ReportTransReq());
+		var rc = _stockRepo.GetTransGroupByStock(new ReportTransReq());
 		foreach (var stock in rc.Where(x => x.TranType == "Buy"))
 		{
 			await EnsuredStockHistory(new DateRange()
@@ -110,6 +110,33 @@ public class StockService : IStockService
 
 		return rc;
 	}
+	
+	
+
+	public async Task<List<ReportTranItem>> GetTransReportAsync()
+	{
+		var rc = _stockRepo.GetTransGroupByStock(new ReportTransReq());
+		foreach (var stock in rc.Where(x => x.TranType == "Buy"))
+		{
+			await EnsuredStockHistory(new DateRange()
+			{
+				StartDate = stock.MinTranTime,
+				EndDate = DateTime.Now,
+			}, stock.StockId);
+			
+			var data = _stockRepo.GetLastStockHistoryData(stock.StockId);
+			stock.CurrentPrice = data.ClosingPrice;
+			stock.CurrTotalPrice = data.ClosingPrice * stock.NumberOfShare;
+			if (stock.CurrentPrice != 0)
+			{
+				stock.Profit = stock.Balance + stock.CurrTotalPrice;
+			}
+		}
+
+		return rc;
+	}
+	
+	
 
 	private async Task EnsuredStockHistory(DateRange dateRange, string stockId)
 	{
