@@ -185,5 +185,14 @@ namespace TestProject.PrattTests
 			ScanAll(sql);
 			ThenTokenListShouldBe("#tmp");
 		}
+		
+		
+		[Fact]
+		public void variable_xml()
+		{
+			var sql = "@xml";
+			ScanAll(sql);
+			ThenTokenListShouldBe("@xml");
+		}
 	}
 }

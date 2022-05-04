@@ -40,7 +40,5 @@ AS (
 	FROM customer
 )");
 		}
-
-
 	}
 }

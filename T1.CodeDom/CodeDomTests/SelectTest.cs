@@ -18,7 +18,6 @@ namespace TestProject.PrattTests
             ThenExprShouldBe("SELECT 1");
         }
         
-        
         [Fact]
         public void select_nolock()
         {
@@ -33,8 +32,6 @@ namespace TestProject.PrattTests
             Parse(sql);
             ThenExprShouldBe("SELECT min, name FROM customer");
         }
-        
-        
         
         [Fact]
         public void select_top_10_percent()
@@ -435,5 +432,18 @@ for xml path('')              ";
 WHERE birth BETWEEN @startDate AND DATEADD( hh, 24, @startDate )
 AND id >= 100");
         }
+        
+        
+        [Fact]
+        public void select_xml()
+        {
+            var sql = @"select id from @xml.nodes('/Array/Customer') AS XMLNode(Node)";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT id FROM @xml.NODES( '/Array/Customer' ) AS XMLNode(Node)");
+        }
+        
+        
     }
 }

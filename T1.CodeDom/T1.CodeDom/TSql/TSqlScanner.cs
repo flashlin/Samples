@@ -151,6 +151,7 @@ namespace T1.CodeDom.TSql
 			AddFuncNameMap("LEN", SqlToken.LEN);
 			AddFuncNameMap("LOG", SqlToken.LOG);
 			AddFuncNameMap("NEWID", SqlToken.NEWID);
+			AddFuncNameMap("NODES", SqlToken.NODES);
 			AddFuncNameMap("MIN", SqlToken.MIN);
 			AddFuncNameMap("MAX", SqlToken.MAX);
 			AddFuncNameMap("MONTH", SqlToken.MONTH);
