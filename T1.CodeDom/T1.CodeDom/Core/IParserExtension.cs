@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using T1.CodeDom.TSql;
 
 namespace T1.CodeDom.Core
 {
@@ -9,8 +10,10 @@ namespace T1.CodeDom.Core
 		public static bool TryConsumeAny<TTokenType>(this IParser parser, out IExpression expr, params TTokenType[] tokenTypes)
 			where TTokenType : struct
 		{
+			var comments = parser.Scanner.IgnoreComments();
 			if (parser.Scanner.TryConsumeAny(out var token, tokenTypes))
 			{
+				token.Comments = comments;
 				expr = parser.PrefixParse(token, 0);
 				return true;
 			}

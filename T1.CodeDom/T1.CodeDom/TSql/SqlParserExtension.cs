@@ -479,15 +479,14 @@ namespace T1.CodeDom.TSql
             var intoTable = parser.ConsumeObjectIdOrVariable();
 
             var columnsList = new List<SqlCodeExpr>();
-            if (parser.Scanner.Match(SqlToken.LParen))
+            if (parser.MatchToken(SqlToken.LParen))
             {
                 do
                 {
                     var columnName = parser.ConsumeAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
                     columnsList.Add(columnName);
-                } while (parser.Scanner.Match(SqlToken.Comma));
-
-                parser.Scanner.Consume(SqlToken.RParen);
+                } while (parser.MatchToken(SqlToken.Comma));
+                parser.ConsumeToken(SqlToken.RParen);
             }
 
             return new OutputIntoSqlCodeExpr
