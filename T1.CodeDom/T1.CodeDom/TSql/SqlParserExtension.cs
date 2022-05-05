@@ -682,6 +682,16 @@ namespace T1.CodeDom.TSql
 
             return parser.PrefixParse(tokenSpan) as SqlCodeExpr;
         }
+        
+        public static SqlCodeExpr ParseInfix(this IParser parser, SqlCodeExpr leftExpr, TextSpan tokenSpan)
+        {
+            if (!parser.TryGetInfixParselet(out var infixParselet, tokenSpan))
+            {
+                ThrowHelper.ThrowParseException(parser, "Not found");
+            }
+            
+            return infixParselet.Parse(leftExpr, tokenSpan, parser) as SqlCodeExpr;
+        }
 
         public static List<string> ParseWithOption(this IParser parser)
         {

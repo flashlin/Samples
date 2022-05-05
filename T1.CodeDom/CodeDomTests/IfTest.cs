@@ -121,5 +121,14 @@ END ELSE BEGIN TRANSACTION");
 			ThenExprShouldBe(@"IF @id <= [dbo].[fn_my]() BREAK;");
 		}
 
+		[Fact]
+		public void if_not_between()
+		{
+			var sql = @"if @id not between 1 and 2 break;";
+			Parse(sql);
+
+			ThenExprShouldBe(@"IF @id NOT BETWEEN 1 AND 2 BREAK;");
+		}
+
 	}
 }

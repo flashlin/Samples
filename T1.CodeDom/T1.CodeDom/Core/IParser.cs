@@ -16,5 +16,6 @@ namespace T1.CodeDom.Core
 			where TTokenType : struct;
 
 		void UnStashInfixParselet();
+		bool TryGetInfixParselet(out IInfixParselet parselet, TextSpan token);
 	}
 }

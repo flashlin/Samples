@@ -99,6 +99,11 @@ namespace T1.CodeDom.Core
 		{
 			return _prefixParselets.TryGetValue(token.Type, out parselet);
 		}		
+		
+		public bool TryGetInfixParselet(out IInfixParselet parselet, TextSpan token)
+		{
+			return _infixParselets.TryGetValue(token.Type, out parselet);
+		}		
 
 		protected virtual IInfixParselet CodeSpecInfix(TextSpan token)
 		{

@@ -12,16 +12,13 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			var conditionExpr = parser.ParseExp();
 
-			//var bodyList = ParseBeginBodyOrBody(parser);
 			var body = parser.ParseExpIgnoreComment();
 
 			var elseIfList = ParseElseIfList(parser);
 
-			//var elseExpr = new List<SqlCodeExpr>();
 			SqlCodeExpr elseExpr = null;
 			if (parser.Scanner.TryConsume(SqlToken.Else, out var elseSpan))
 			{
-				//elseExpr = ParseBeginBodyOrBody(parser);
 				elseExpr = parser.ParseExpIgnoreComment();
 			}
 
