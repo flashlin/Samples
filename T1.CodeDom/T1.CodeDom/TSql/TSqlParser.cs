@@ -31,6 +31,7 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.Deleted, new DeletedParselet());
             Register(SqlToken.Declare, new DeclareParselet());
             Register(SqlToken.Distinct, new DistinctParselet());
+            Register(SqlToken.ENABLE, new EnableParselet());
             Register(SqlToken.Exists, new ExistsParselet());
             Register(SqlToken.Exec, new ExecParselet());
             Register(SqlToken.Execute, new ExecParselet());

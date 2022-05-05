@@ -261,6 +261,7 @@
 		APPLY,
 		NODES,
 		TRIGGER,
-		SERVER
+		SERVER,
+		ENABLE
 	}
 }

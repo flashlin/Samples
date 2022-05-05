@@ -1828,6 +1828,49 @@ namespace T1.CodeDom.TSql
                 Body = bodyList
             };
         }
+
+        public static SqlCodeExpr ConsumeTrigger(IParser parser)
+        {
+            parser.ConsumeToken(SqlToken.TRIGGER);
+
+            SqlCodeExpr triggerName;
+            if (parser.TryConsumeToken(out var allSpan, SqlToken.ALL))
+            {
+                triggerName = new AllSqlCodeExpr();
+            }
+            else
+            {
+                triggerName = parser.ConsumeObjectId();
+            }
+
+            parser.ConsumeToken(SqlToken.ON);
+
+            SqlCodeExpr objectExpr;
+            if (parser.MatchTokenList(SqlToken.ALL, SqlToken.SERVER))
+            {
+                objectExpr = new ObjectIdSqlCodeExpr
+                {
+                    ObjectName = "ALL SERVER"
+                };
+            }
+            else if (parser.MatchToken(SqlToken.DATABASE))
+            {
+                objectExpr = new ObjectIdSqlCodeExpr
+                {
+                    ObjectName = "DATABASE"
+                };
+            }
+            else
+            {
+                objectExpr = parser.ConsumeObjectId();
+            }
+
+            return new TriggerSqlCodeExpr
+            {
+                TriggerName = triggerName,
+                ObjectExpr = objectExpr,
+            };
+        }
     }
 
     public class ValueForSqlCodeExpr : SqlCodeExpr

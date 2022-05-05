@@ -175,5 +175,27 @@ INTO @id, @name");
         }
         
         
+        [Fact]
+        public void enable_trigger()
+        {
+            var sql = @"ENABLE TRIGGER [tr_customer] ON DATABASE";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"ENABLE TRIGGER [tr_customer] ON DATABASE");
+        }
+        
+        
+        [Fact]
+        public void disable_trigger()
+        {
+            var sql = @"disable TRIGGER [tr_customer] ON DATABASE";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"DISABLE TRIGGER [tr_customer] ON DATABASE");
+        }
+        
+        
     }
 }
