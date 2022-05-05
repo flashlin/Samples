@@ -10,6 +10,14 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
+		public void update_online_table()
+		{
+			var sql = "update online set id = 1";
+			Parse(sql);
+			ThenExprShouldBe("UPDATE online SET id = 1");
+		}
+
+		[Fact]
 		public void update_set_field_eq_case()
 		{
 			var sql = @"update customer

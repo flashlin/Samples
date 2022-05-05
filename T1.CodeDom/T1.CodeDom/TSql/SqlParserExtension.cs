@@ -374,9 +374,29 @@ namespace T1.CodeDom.TSql
                 };
             }
 
+            // var funcNameSpan = parser.ParseFuncNameIdentifierToken();
+            // if (!funcNameSpan.IsEmpty)
+            // {
+            //     var funcName = parser.Scanner.GetSpanString(funcNameSpan);
+            //     return new ObjectIdSqlCodeExpr
+            //     {
+            //         ObjectName = funcName
+            //     };
+            // }
+
             if (!parser.TryConsumeObjectId(out var objectId))
             {
-                ThrowHelper.ThrowParseException(parser, "Expect TableName");
+                var token = parser.PeekToken();
+                if (parser.Scanner.IsSymbol(token))
+                {
+                    ThrowHelper.ThrowParseException(parser, "Expect TableName");
+                }
+
+                parser.ConsumeToken();
+                return new ObjectIdSqlCodeExpr
+                {
+                    ObjectName = parser.Scanner.GetSpanString(token)
+                };
             }
 
             return objectId;
