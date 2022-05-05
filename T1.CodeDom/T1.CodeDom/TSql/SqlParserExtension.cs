@@ -289,7 +289,23 @@ namespace T1.CodeDom.TSql
             }
 
             SqlCodeExpr valueExpr = null;
-            if (parser.MatchToken(SqlToken.LParen))
+
+            if (parser.TryConsumeTokenList(out var dateSpan, 
+                SqlToken.Number, SqlToken.Minus, SqlToken.Number, SqlToken.Minus, SqlToken.Number))
+            {
+                var date = string.Join("", dateSpan.Select(x => parser.Scanner.GetSpanString(x)));
+                parser.ConsumeToken(SqlToken.FOR);
+                var forColumn = parser.ConsumeObjectId();
+                valueExpr = new ValueForSqlCodeExpr
+                {
+                    Value = new QuoteStringSqlCodeExpr
+                    {
+                        Value = date
+                    },
+                    Column = forColumn
+                };
+            } 
+            else if (parser.MatchToken(SqlToken.LParen))
             {
                 valueExpr = parser.ParseExpIgnoreComment();
                 parser.ConsumeToken(SqlToken.RParen);
@@ -1349,12 +1365,12 @@ namespace T1.CodeDom.TSql
 
             return isAll;
         }
-
+        
         public static TextSpan PeekToken(this IParser parser)
         {
             var startIndex = parser.Scanner.GetOffset();
             var commentList = parser.Scanner.IgnoreComments();
-            var token = parser.Scanner.Peek();
+            var token = parser.Scanner.Consume();
             parser.Scanner.SetOffset(startIndex);
             if (token.IsEmpty)
             {
@@ -1784,6 +1800,19 @@ namespace T1.CodeDom.TSql
                 IsSemicolon = isSemicolon
             };
         }
+    }
+
+    public class ValueForSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            Value.WriteToStream(stream);
+            stream.Write(" FOR ");
+            Column.WriteToStream(stream);
+        }
+
+        public QuoteStringSqlCodeExpr Value { get; set; }
+        public SqlCodeExpr Column { get; set; }
     }
 
     public class CrossApplySqlCodeExpr : SqlCodeExpr
