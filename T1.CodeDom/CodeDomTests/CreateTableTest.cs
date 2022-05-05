@@ -215,4 +215,12 @@ CONSTRAINT PK_customer PRIMARY KEY ([Id])
         ThenExprShouldBe(@"CREATE TABLE customer( id INT, CONSTRAINT [ct_customer] UNIQUE([id] ASC) )");
     }
     
+    [Fact]
+    public void create_table_default_date()
+    {
+        var sql = @"CREATE TABLE customer ( birth datetime default 2022-01-01 )";
+        Parse(sql);
+        ThenExprShouldBe(@"CREATE TABLE customer( birth DATETIME DEFAULT 2022-01-01 )");
+    }
+    
 }

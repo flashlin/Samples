@@ -292,22 +292,22 @@ namespace T1.CodeDom.TSql
 
             SqlCodeExpr valueExpr = null;
 
-            if (parser.TryConsumeTokenList(out var dateSpan,
-                    SqlToken.Number, SqlToken.Minus, SqlToken.Number, SqlToken.Minus, SqlToken.Number))
-            {
-                var date = string.Join("", dateSpan.Select(x => parser.Scanner.GetSpanString(x)));
-                parser.ConsumeToken(SqlToken.FOR);
-                var forColumn = parser.ConsumeObjectId();
-                valueExpr = new ValueForSqlCodeExpr
-                {
-                    Value = new QuoteStringSqlCodeExpr
-                    {
-                        Value = date
-                    },
-                    Column = forColumn
-                };
-            }
-            else if (parser.MatchToken(SqlToken.LParen))
+            // if (parser.TryConsumeTokenList(out var dateSpan,
+            //         SqlToken.Number, SqlToken.Minus, SqlToken.Number, SqlToken.Minus, SqlToken.Number))
+            // {
+            //     var date = string.Join("", dateSpan.Select(x => parser.Scanner.GetSpanString(x)));
+            //     parser.ConsumeToken(SqlToken.FOR);
+            //     var forColumn = parser.ConsumeObjectId();
+            //     valueExpr = new ValueForSqlCodeExpr
+            //     {
+            //         Value = new QuoteStringSqlCodeExpr
+            //         {
+            //             Value = date
+            //         },
+            //         Column = forColumn
+            //     };
+            // }
+            if (parser.MatchToken(SqlToken.LParen))
             {
                 valueExpr = parser.ParseExpIgnoreComment();
                 parser.ConsumeToken(SqlToken.RParen);
@@ -315,7 +315,6 @@ namespace T1.CodeDom.TSql
             else
             {
                 valueExpr = parser.ParseExpIgnoreComment(int.MaxValue);
-                //valueExpr = parser.Consume(SqlToken.Number);
             }
 
             return new DefaultSqlCodeExpr
