@@ -19,6 +19,8 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var outputList = parser.ParseOutputListExpr();
 			var intoTableExpr = parser.ParseInto_TableExpr();
+			
+			var outputList1 = parser.ParseOutputListExpr();
 
 			var fromSourceList = new List<SqlCodeExpr>();
 			if(parser.Scanner.Match(SqlToken.From))
@@ -41,6 +43,7 @@ namespace T1.CodeDom.TSql.Parselets
 				WithOptions = withOptions,
 				OutputList = outputList,
 				IntoTableExpr = intoTableExpr,
+				OutputList1 = outputList1,
 				FromSourceList = fromSourceList,
 				WhereExpr = whereExpr,
 				OptionExpr = optionExpr

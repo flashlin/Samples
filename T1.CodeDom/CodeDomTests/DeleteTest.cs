@@ -88,7 +88,7 @@ where t.id = 1
 
 			ThenExprShouldBe(@"DELETE FROM c OUTPUT deleted.id
 INTO otherCustomer (id) OUTPUT deleted.id
-FROM @tmp t, customer c
+FROM @tmp AS t, customer AS c
 WHERE t.id = 1");
 		}
 		

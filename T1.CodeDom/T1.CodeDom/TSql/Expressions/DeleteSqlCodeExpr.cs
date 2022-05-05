@@ -13,6 +13,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public SqlCodeExpr WhereExpr { get; set; }
 		public SqlCodeExpr IntoTableExpr { get; set; }
 		public OptionSqlCodeExpr OptionExpr { get; set; }
+		public List<SqlCodeExpr> OutputList1 { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -45,6 +46,13 @@ namespace T1.CodeDom.TSql.Expressions
 			{
 				stream.WriteLine();
 				IntoTableExpr.WriteToStream(stream);
+			}
+
+			if (OutputList1 != null && OutputList1.Count > 0)
+			{
+				stream.WriteLine();
+				stream.Write("OUTPUT ");
+				OutputList.WriteToStreamWithComma(stream);
 			}
 
 			if (FromSourceList != null && FromSourceList.Count > 0)
