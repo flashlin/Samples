@@ -1150,21 +1150,6 @@ namespace T1.CodeDom.TSql
 
         public static TableDataTypeSqlCodeExpr ConsumeTableDataTypeList(this IParser parser)
         {
-            //var columnDataTypeList = new List<SqlCodeExpr>();
-            //  parser.Scanner.Consume(SqlToken.LParen);
-            //  do
-            //  {
-            //      if (parser.IsToken(SqlToken.RParen))
-            //      {
-            //          break;
-            //      }
-            //      var expr = parser.ConsumeAny(ParseConstraintExpr,
-            //          ParseExtra,
-            //          ParseColumnDefine);
-            //      columnDataTypeList.Add(expr);
-            //  } while (parser.MatchToken(SqlToken.Comma));
-            // parser.Scanner.Consume(SqlToken.RParen);
-
             var columnDataTypeList = parser.ParseParenWithComma(() => parser.ParseAny(ParseConstraintExpr,
                 ParseExtra,
                 ParseColumnDefine), true).ToList();
