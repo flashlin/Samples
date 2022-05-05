@@ -197,8 +197,8 @@ namespace T1.CodeDom.TSql
 
             return new NotForReplicationSqlCodeExpr();
         }
-        
-        
+
+
         public static SqlCodeExpr ParseAny(this IParser parser, params Func<IParser, SqlCodeExpr>[] parseFuncList)
         {
             for (var i = 0; i < parseFuncList.Length; i++)
@@ -210,6 +210,7 @@ namespace T1.CodeDom.TSql
                     return expr;
                 }
             }
+
             return null;
         }
 
@@ -221,6 +222,7 @@ namespace T1.CodeDom.TSql
                 var helpMessage = parser.Scanner.GetHelpMessage();
                 throw new ParseException(helpMessage);
             }
+
             return expr;
         }
 
@@ -290,8 +292,8 @@ namespace T1.CodeDom.TSql
 
             SqlCodeExpr valueExpr = null;
 
-            if (parser.TryConsumeTokenList(out var dateSpan, 
-                SqlToken.Number, SqlToken.Minus, SqlToken.Number, SqlToken.Minus, SqlToken.Number))
+            if (parser.TryConsumeTokenList(out var dateSpan,
+                    SqlToken.Number, SqlToken.Minus, SqlToken.Number, SqlToken.Minus, SqlToken.Number))
             {
                 var date = string.Join("", dateSpan.Select(x => parser.Scanner.GetSpanString(x)));
                 parser.ConsumeToken(SqlToken.FOR);
@@ -304,7 +306,7 @@ namespace T1.CodeDom.TSql
                     },
                     Column = forColumn
                 };
-            } 
+            }
             else if (parser.MatchToken(SqlToken.LParen))
             {
                 valueExpr = parser.ParseExpIgnoreComment();
@@ -449,7 +451,7 @@ namespace T1.CodeDom.TSql
                     joinSelectList.Add(crossApplyExpr);
                     continue;
                 }
-                
+
                 if (parser.IsToken(SqlToken.Join))
                 {
                     joinSelectList.Add(ParseJoinSelect(TextSpan.Empty, parser));
@@ -486,6 +488,7 @@ namespace T1.CodeDom.TSql
                     var columnName = parser.ConsumeAny(SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
                     columnsList.Add(columnName);
                 } while (parser.MatchToken(SqlToken.Comma));
+
                 parser.ConsumeToken(SqlToken.RParen);
             }
 
@@ -626,17 +629,19 @@ namespace T1.CodeDom.TSql
                 return null;
             }
 
-            var isParen = parser.MatchToken(SqlToken.LParen);
-
-            var topNumberExpr = parser.ParseExpIgnoreComment(int.MaxValue);
-
-            if (isParen)
+            SqlCodeExpr topNumberExpr;
+            if (parser.MatchToken(SqlToken.LParen))
             {
+                topNumberExpr = parser.ParseExpIgnoreComment();
                 topNumberExpr = new GroupSqlCodeExpr
                 {
                     InnerExpr = topNumberExpr,
                 };
-                parser.Scanner.Consume(SqlToken.RParen);
+                parser.ConsumeToken(SqlToken.RParen);
+            }
+            else
+            {
+                topNumberExpr = parser.ParseExpIgnoreComment(int.MaxValue);
             }
 
             var isPercent = parser.MatchToken(SqlToken.PERCENT);
@@ -681,14 +686,14 @@ namespace T1.CodeDom.TSql
 
             return parser.PrefixParse(tokenSpan) as SqlCodeExpr;
         }
-        
+
         public static SqlCodeExpr ParseInfix(this IParser parser, SqlCodeExpr leftExpr, TextSpan tokenSpan)
         {
             if (!parser.TryGetInfixParselet(out var infixParselet, tokenSpan))
             {
                 ThrowHelper.ThrowParseException(parser, "Not found");
             }
-            
+
             return infixParselet.Parse(leftExpr, tokenSpan, parser) as SqlCodeExpr;
         }
 
@@ -1112,7 +1117,8 @@ namespace T1.CodeDom.TSql
             return expr;
         }
 
-        public static IEnumerable<T> ParseParenWithComma<T>(this IParser parser, Func<T> parseItem, bool canIgnoreCommaAtLast=false)
+        public static IEnumerable<T> ParseParenWithComma<T>(this IParser parser, Func<T> parseItem,
+            bool canIgnoreCommaAtLast = false)
         {
             if (!parser.MatchToken(SqlToken.LParen))
             {
@@ -1144,7 +1150,7 @@ namespace T1.CodeDom.TSql
 
         public static TableDataTypeSqlCodeExpr ConsumeTableDataTypeList(this IParser parser)
         {
-             //var columnDataTypeList = new List<SqlCodeExpr>();
+            //var columnDataTypeList = new List<SqlCodeExpr>();
             //  parser.Scanner.Consume(SqlToken.LParen);
             //  do
             //  {
@@ -1374,7 +1380,7 @@ namespace T1.CodeDom.TSql
 
             return isAll;
         }
-        
+
         public static TextSpan PeekToken(this IParser parser)
         {
             var startIndex = parser.Scanner.GetOffset();
@@ -1621,7 +1627,7 @@ namespace T1.CodeDom.TSql
             parser.ConsumeToken(SqlToken.RParen);
             parser.ConsumeToken(SqlToken.As);
             var aliasName = parser.ConsumeObjectId();
-           
+
             var columnList = new List<SqlCodeExpr>();
             if (parser.MatchToken(SqlToken.LParen))
             {
@@ -1636,7 +1642,7 @@ namespace T1.CodeDom.TSql
                 ColumnList = columnList
             };
         }
-        
+
         public static List<SqlCodeExpr> ParseColumnList(this IParser parser)
         {
             var columns = new List<SqlCodeExpr>();

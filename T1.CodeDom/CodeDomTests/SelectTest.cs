@@ -166,6 +166,15 @@ GROUP BY id");
             Parse(sql);
             ThenExprShouldBe("SELECT TOP 1 name");
         }
+        
+        [Fact]
+        public void select_top_arith()
+        {
+            var sql = "select top (@a-@b) name";
+            Parse(sql);
+            ThenExprShouldBe("SELECT TOP ( @a - @b ) name");
+        }
+        
 
         [Fact]
         public void select_name_number()
