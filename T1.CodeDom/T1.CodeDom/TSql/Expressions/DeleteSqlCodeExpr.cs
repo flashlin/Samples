@@ -11,7 +11,7 @@ namespace T1.CodeDom.TSql.Expressions
 		public List<SqlCodeExpr> OutputList { get; set; }
 		public List<SqlCodeExpr> FromSourceList { get; set; }
 		public SqlCodeExpr WhereExpr { get; set; }
-		public SqlCodeExpr OutputInto { get; set; }
+		public SqlCodeExpr IntoTableExpr { get; set; }
 		public OptionSqlCodeExpr OptionExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
@@ -41,10 +41,10 @@ namespace T1.CodeDom.TSql.Expressions
 				OutputList.WriteToStreamWithComma(stream);
 			}
 
-			if (OutputInto != null)
+			if (IntoTableExpr != null)
 			{
 				stream.WriteLine();
-				OutputInto.WriteToStream(stream);
+				IntoTableExpr.WriteToStream(stream);
 			}
 
 			if (FromSourceList != null && FromSourceList.Count > 0)

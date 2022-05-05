@@ -469,7 +469,7 @@ namespace T1.CodeDom.TSql
             return joinSelectList;
         }
 
-        public static SqlCodeExpr GetOutputIntoExpr(this IParser parser)
+        public static SqlCodeExpr ParseInto_TableExpr(this IParser parser)
         {
             if (!parser.Scanner.Match(SqlToken.Into))
             {

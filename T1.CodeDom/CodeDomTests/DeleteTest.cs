@@ -10,7 +10,7 @@ namespace TestProject.PrattTests
 		}
 
 		[Fact]
-		public void delete()
+		public void delete_table()
 		{
 			var sql = @"delete customer WHERE id=@id";
 			Parse(sql);
@@ -71,6 +71,27 @@ WHERE ds.name = @name");
 
 			ThenExprShouldBe(@"DELETE TOP ( @batch ) FROM customer");
 		}
+		
+		
+		[Fact]
+		public void delete_output_into_output()
+		{
+			var sql = @"delete from c
+output deleted.id
+into otherCustomer(id)
+output deleted.id
+from @tmp t, customer c
+where t.id = 1
+";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"DELETE FROM c OUTPUT deleted.id
+INTO otherCustomer (id) OUTPUT deleted.id
+FROM @tmp t, customer c
+WHERE t.id = 1");
+		}
+		
 		
 	}
 }

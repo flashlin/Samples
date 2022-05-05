@@ -35,7 +35,7 @@ namespace T1.CodeDom.TSql.Parselets
             }
 
             var outputList = parser.GetOutputListExpr();
-            var outputInto = parser.GetOutputIntoExpr();
+            var outputInto = parser.ParseInto_TableExpr();
 
 
             var hasGroup = parser.MatchToken(SqlToken.LParen);
