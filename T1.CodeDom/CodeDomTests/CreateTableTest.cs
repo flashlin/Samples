@@ -212,7 +212,7 @@ CONSTRAINT PK_customer PRIMARY KEY ([Id])
     {
         var sql = @"CREATE TABLE customer ( id int, CONSTRAINT [ct_customer] UNIQUE ([id]) )";
         Parse(sql);
-        ThenExprShouldBe(@"CREATE TABLE customer( id INT, CONSTRAINT [ct_customer] UNIQUE([id]) )");
+        ThenExprShouldBe(@"CREATE TABLE customer( id INT, CONSTRAINT [ct_customer] UNIQUE([id] ASC) )");
     }
     
 }

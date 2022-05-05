@@ -33,17 +33,18 @@ namespace T1.CodeDom.TSql.Parselets
             {
                 return null;
             }
-            
-            var uniqueColumnList = new List<SqlCodeExpr>();
-            parser.ConsumeToken(SqlToken.LParen);
-            do
+
+            var isNonClustered = parser.MatchToken(SqlToken.NONCLUSTERED);
+            var uniqueColumnList = new List<OrderItemSqlCodeExpr>();
+            if (parser.MatchToken(SqlToken.LParen))
             {
-                uniqueColumnList.Add(parser.ConsumeObjectId());
-            } while (parser.MatchToken(SqlToken.Comma));
-            parser.ConsumeToken(SqlToken.RParen);
+                uniqueColumnList = parser.ParseOrderItemList();
+                parser.ConsumeToken(SqlToken.RParen);
+            }
 
             return new UniqueKeySqlCodeExpr
             {
+                IsNonClustered = isNonClustered,
                 ColumnList = uniqueColumnList
             };
         }
@@ -54,15 +55,22 @@ namespace T1.CodeDom.TSql.Parselets
         public override void WriteToStream(IndentStream stream)
         {
             stream.Write("UNIQUE");
+
+            if (IsNonClustered)
+            {
+                stream.Write(" NONCLUSTERED");
+            }
+            
             if (ColumnList != null && ColumnList.Count > 0)
             {
                 stream.Write("(");
-                ColumnList.WriteToStreamWithComma(stream);
+                ColumnList.WriteToStream(stream);
                 stream.Write(")");
             }
         }
 
-        public List<SqlCodeExpr> ColumnList { get; set; }
+        public List<OrderItemSqlCodeExpr> ColumnList { get; set; }
+        public bool IsNonClustered { get; set; }
     }
 
     public class ClusteredSqlCodeExpr : SqlCodeExpr
