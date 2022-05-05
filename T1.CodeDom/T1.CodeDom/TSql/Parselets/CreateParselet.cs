@@ -68,8 +68,30 @@ namespace T1.CodeDom.TSql.Parselets
                 return CreatePartitionFunction(token, parser);
             }
 
+            if (parser.IsToken(SqlToken.TRIGGER))
+            {
+                return ConsumeTriggerCreate(parser);
+            }
+
             var helpMessage = parser.Scanner.GetHelpMessage();
             throw new ParseException($"Parse CREATE Error, {helpMessage}");
+        }
+
+        private SqlCodeExpr ConsumeTriggerCreate(IParser parser)
+        {
+            var triggerExpr = parser.ConsumeTrigger();
+
+            parser.Scanner.Consume(SqlToken.FOR);
+            var forTableExpr = parser.ConsumeObjectId();
+            
+            parser.ConsumeToken(SqlToken.As);
+            var body = parser.ConsumeBeginBodyOrSingle();
+            return new CreateTriggerSqlCodeExpr
+            {
+                TriggerExpr = triggerExpr,
+                ForTableExpr = forTableExpr,
+                Body = body
+            };
         }
 
         private IExpression ParseCreateView(TextSpan viewSpan, IParser parser)
@@ -335,6 +357,26 @@ namespace T1.CodeDom.TSql.Parselets
                 Body = body
             };
         }
+    }
+
+    public class CreateTriggerSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CREATE ");
+            TriggerExpr.WriteToStream(stream);
+
+            stream.Write(" FOR ");
+            ForTableExpr.WriteToStream(stream);
+
+            stream.WriteLine();
+            stream.WriteLine("AS ");
+            Body.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr TriggerExpr { get; set; }
+        public List<SqlCodeExpr> Body { get; set; }
+        public SqlCodeExpr ForTableExpr { get; set; }
     }
 
     public class CreateViewSqlCodeExpr : SqlCodeExpr

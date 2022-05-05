@@ -1829,7 +1829,7 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        public static SqlCodeExpr ConsumeTrigger(IParser parser)
+        public static SqlCodeExpr ConsumeTrigger(this IParser parser)
         {
             parser.ConsumeToken(SqlToken.TRIGGER);
 

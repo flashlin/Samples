@@ -200,6 +200,5 @@ ON [dbo].[customer]([id] ASC) WITH(FILLFACTOR = 90) ON [PRIMARY] ;");
             ThenExprShouldBe(@"CREATE TYPE [dbo].[myTable] AS TABLE (
 [Id] BIGINT NULL )");
         }
-        
     }
 }

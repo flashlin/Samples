@@ -10,7 +10,7 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			var triggerExpr = SqlParserExtension.ConsumeTrigger(parser);
+			var triggerExpr = parser.ConsumeTrigger();
 			return new DisableSqlCodeExpr
 			{
 				Expr = triggerExpr,
@@ -22,7 +22,7 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public IExpression Parse(TextSpan token, IParser parser)
 		{
-			var triggerExpr = SqlParserExtension.ConsumeTrigger(parser);
+			var triggerExpr = parser.ConsumeTrigger();
 			return new EnableSqlCodeExpr
 			{
 				Expr = triggerExpr,
