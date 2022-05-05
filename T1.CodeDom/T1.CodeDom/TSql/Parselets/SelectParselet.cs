@@ -6,13 +6,6 @@ using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
-    public class SelectInsertContext
-    {
-        public TopSqlCodeExpr TopCount { get; set; }
-        public List<SqlCodeExpr> Columns { get; set; }
-        public SqlCodeExpr IntoTable { get; set; }
-    }
-    
     public class SelectParselet : IPrefixParselet
     {
         public IExpression Parse(TextSpan token, IParser parser)
