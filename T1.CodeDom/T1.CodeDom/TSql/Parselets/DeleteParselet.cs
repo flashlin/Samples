@@ -17,7 +17,7 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var withOptions = parser.ParseWithOption();
 
-			var outputList = parser.GetOutputListExpr();
+			var outputList = parser.ParseOutputListExpr();
 			var intoTableExpr = parser.ParseInto_TableExpr();
 
 			var fromSourceList = new List<SqlCodeExpr>();

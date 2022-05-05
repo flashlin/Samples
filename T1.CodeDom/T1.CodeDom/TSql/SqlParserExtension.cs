@@ -497,7 +497,7 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        public static List<SqlCodeExpr> GetOutputListExpr(this IParser parser)
+        public static List<SqlCodeExpr> ParseOutputListExpr(this IParser parser)
         {
             var outputList = new List<SqlCodeExpr>();
             if (parser.Scanner.Match(SqlToken.Output))

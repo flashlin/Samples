@@ -20,7 +20,7 @@ namespace T1.CodeDom.TSql.Parselets
 
 			var setList = ParseSetItemList(parser);
 
-			var outputList = parser.GetOutputListExpr();
+			var outputList = parser.ParseOutputListExpr();
 
 			var intoExpr = ParseIntoExpr(parser);
 

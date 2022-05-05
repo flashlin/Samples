@@ -34,7 +34,7 @@ namespace T1.CodeDom.TSql.Parselets
                 };
             }
 
-            var outputList = parser.GetOutputListExpr();
+            var outputList = parser.ParseOutputListExpr();
             var outputInto = parser.ParseInto_TableExpr();
 
 

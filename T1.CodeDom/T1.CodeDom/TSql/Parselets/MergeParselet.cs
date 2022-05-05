@@ -68,7 +68,7 @@ namespace T1.CodeDom.TSql.Parselets
 				whenList.Add(whenItem);
 			} while (true);
 			
-			var outputList = parser.GetOutputListExpr();
+			var outputList = parser.ParseOutputListExpr();
 
 			parser.Scanner.Consume(SqlToken.Semicolon);
 
