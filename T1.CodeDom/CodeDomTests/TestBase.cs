@@ -16,11 +16,11 @@ namespace TestProject.PrattTests
 	public abstract class TestBase
 	{
 		protected readonly ITestOutputHelper _outputHelper;
-		protected TSqlParser _parser;
-		private List<IExpression> _exprList;
-		protected SqlCodeExpr _expr;
-		private TSqlScanner _scanner;
-		private List<TextSpan> _tokenList;
+		private TSqlParser? _parser;
+		private List<IExpression> _exprList = new List<IExpression>();
+		private SqlCodeExpr? _expr;
+		private TSqlScanner? _scanner;
+		private List<TextSpan> _tokenList = new List<TextSpan>();
 		private TextSpan _token;
 
 		public TestBase(ITestOutputHelper outputHelper)
@@ -65,7 +65,7 @@ namespace TestProject.PrattTests
 
 		protected void ThenTokenShouldBe(string expectToken)
 		{
-			var tokenStr = _scanner.GetSpanString(_token);
+			var tokenStr = _scanner!.GetSpanString(_token);
 			tokenStr.Should().Be(expectToken);
 		}
 
@@ -73,7 +73,7 @@ namespace TestProject.PrattTests
 		{
 			foreach (var expectToken in expectTokenList.Select((val, idx) => new { val, idx }))
 			{
-				var tokenStr = _scanner.GetSpanString(_tokenList[expectToken.idx]);
+				var tokenStr = _scanner!.GetSpanString(_tokenList[expectToken.idx]);
 				//tokenStr.Should().Be(expectToken.val);
 				Assert.Equal(expectToken.val, tokenStr);
 			}
@@ -81,8 +81,7 @@ namespace TestProject.PrattTests
 
 		protected void ThenExprShouldBe(string expectCode)
 		{
-			var exprCode = _expr.ToString();
-			//exprCode.MergeToCode().Should().Be(expectCode.MergeToCode());
+			var exprCode = _expr!.ToString();
 			Assert.Equal(expectCode.MergeToCode(), exprCode.MergeToCode());
 		}
 

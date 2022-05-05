@@ -48,6 +48,18 @@ namespace T1.CodeDom.TSql.Parselets
                 return CreateIndex(indexSpan, parser);
             }
 
+            if (parser.TryConsumeTokenList(out var uniqueSpan, SqlToken.UNIQUE, SqlToken.Index))
+            {
+                var createIndexExpr = CreateIndex(uniqueSpan[1], parser);
+                return new CreateUniqueIndexSqlCodeExpr
+                {
+                    IndexName = createIndexExpr.IndexName,
+                    TableName = createIndexExpr.TableName,
+                    OnColumns = createIndexExpr.OnColumns,
+                    Comments = createIndexExpr.Comments
+                };
+            }
+
             if (parser.Scanner.TryConsume(SqlToken.TABLE, out var tableSpan))
             {
                 return parser.CreateTable(tableSpan);
@@ -225,7 +237,7 @@ namespace T1.CodeDom.TSql.Parselets
             };
         }
 
-        private SqlCodeExpr CreateIndex(TextSpan indexSpan, IParser parser)
+        private CreateIndexSqlCodeExpr CreateIndex(TextSpan indexSpan, IParser parser)
         {
             var indexName = parser.ConsumeObjectId();
             parser.Scanner.Consume(SqlToken.ON);
@@ -357,6 +369,24 @@ namespace T1.CodeDom.TSql.Parselets
                 Body = body
             };
         }
+    }
+
+    public class CreateUniqueIndexSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CREATE UNIQUE INDEX ");
+            IndexName.WriteToStream(stream);
+			stream.Write(" ON ");
+			TableName.WriteToStream(stream);
+			stream.Write("(");
+			OnColumns.WriteToStreamWithComma(stream);
+			stream.Write(")");
+        }
+        
+        public SqlCodeExpr IndexName { get; set; }
+		public SqlCodeExpr TableName { get; set; }
+		public List<SqlCodeExpr> OnColumns { get; set; }
     }
 
     public class CreateTriggerSqlCodeExpr : SqlCodeExpr
