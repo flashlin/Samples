@@ -62,4 +62,21 @@ ADD Addr char(10),Tel int";
         ThenExprShouldBe(@"ALTER INDEX ALL ON customer REORGANIZE");
     }
     
+    
+    [Fact]
+    public void alter_store_procedure()
+    {
+        var sql = @"ALTER procedure [dbo].[my_proc]
+	@id int
+as
+begin
+	set nocount on;
+end";
+        
+        Parse(sql);
+        ThenExprShouldBe(@"ALTER PROCEDURE [dbo].[my_proc] @id INT AS
+BEGIN
+    SET NOCOUNT ON ;
+END");
+    }
 }

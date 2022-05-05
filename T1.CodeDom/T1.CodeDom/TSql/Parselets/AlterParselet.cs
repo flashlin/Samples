@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql.Expressions;
+using T1.Standard.Common;
 using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
@@ -24,9 +25,27 @@ namespace T1.CodeDom.TSql.Parselets
             {
                 return AlterTable(tableSpan, parser);
             }
+            
+            if (parser.TryConsumeToken(out var storeProcedureSpan, SqlToken.Procedure))
+            {
+                return AlterStoreProcedure(storeProcedureSpan, parser);
+            }
 
             var helpMessage = parser.Scanner.GetHelpMessage();
             throw new ParseException(helpMessage);
+        }
+
+        private SqlCodeExpr AlterStoreProcedure(TextSpan storeProcedureSpan, IParser parser)
+        {
+            var createExpr = (CreateProcedureSqlCodeExpr)parser.ConsumeCreateProcedure(storeProcedureSpan);
+            return new AlterProcedureSqlCodeExpr
+            {
+                Name = createExpr.Name,
+                Arguments = createExpr.Arguments,
+                Body = createExpr.Body,
+                Comments = createExpr.Comments,
+                WithExecuteAs = createExpr.WithExecuteAs
+            };
         }
 
         private SqlCodeExpr AlterIndex(TextSpan indexSpan, IParser parser)

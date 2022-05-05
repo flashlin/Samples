@@ -1800,6 +1800,34 @@ namespace T1.CodeDom.TSql
                 IsSemicolon = isSemicolon
             };
         }
+
+        public static SqlCodeExpr ConsumeCreateProcedure(this IParser parser, TextSpan storeProcedureSpan)
+        {
+            var nameExpr = parser.ConsumeObjectId();
+            var arguments = parser.ConsumeArgumentList();
+
+            SqlCodeExpr withExecuteAsExpr = null;
+            if (parser.MatchTokenList(SqlToken.With, SqlToken.Execute, SqlToken.As))
+            {
+                var userExpr =
+                    parser.ConsumeTokenStringAny(SqlToken.CALLER, SqlToken.SELF, SqlToken.OWNER, SqlToken.QuoteString);
+                withExecuteAsExpr = new WithExecuteAsSqlCodeExpr
+                {
+                    UserExpr = userExpr
+                };
+            }
+
+            parser.Scanner.Consume(SqlToken.As);
+            var bodyList = parser.ConsumeBeginBodyOrSingle();
+
+            return new CreateProcedureSqlCodeExpr
+            {
+                Name = nameExpr,
+                Arguments = arguments,
+                WithExecuteAs = withExecuteAsExpr,
+                Body = bodyList
+            };
+        }
     }
 
     public class ValueForSqlCodeExpr : SqlCodeExpr

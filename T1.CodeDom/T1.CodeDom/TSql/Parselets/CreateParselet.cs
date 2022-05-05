@@ -55,7 +55,7 @@ namespace T1.CodeDom.TSql.Parselets
 
             if (parser.Scanner.Match(SqlToken.Procedure))
             {
-                return CreateProcedure(token, parser);
+                return parser.ConsumeCreateProcedure(token);
             }
 
             if (parser.Scanner.Match(SqlToken.Function))
@@ -333,34 +333,6 @@ namespace T1.CodeDom.TSql.Parselets
                 ReturnVariable = returnVariableExpr,
                 ReturnType = returnTypeExpr,
                 Body = body
-            };
-        }
-
-        private IExpression CreateProcedure(TextSpan token, IParser parser)
-        {
-            var nameExpr = parser.ConsumeObjectId();
-            var arguments = parser.ConsumeArgumentList();
-
-            SqlCodeExpr withExecuteAsExpr = null;
-            if (parser.MatchTokenList(SqlToken.With, SqlToken.Execute, SqlToken.As))
-            {
-                var userExpr =
-                    parser.ConsumeTokenStringAny(SqlToken.CALLER, SqlToken.SELF, SqlToken.OWNER, SqlToken.QuoteString);
-                withExecuteAsExpr = new WithExecuteAsSqlCodeExpr
-                {
-                    UserExpr = userExpr
-                };
-            }
-
-            parser.Scanner.Consume(SqlToken.As);
-            var bodyList = parser.ConsumeBeginBodyOrSingle();
-
-            return new CreateProcedureSqlCodeExpr
-            {
-                Name = nameExpr,
-                Arguments = arguments,
-                WithExecuteAs = withExecuteAsExpr,
-                Body = bodyList
             };
         }
     }
