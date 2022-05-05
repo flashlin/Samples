@@ -33,8 +33,19 @@ namespace T1.CodeDom.TSql.Parselets
             {
                 return null;
             }
+            
+            var uniqueColumnList = new List<SqlCodeExpr>();
+            parser.ConsumeToken(SqlToken.LParen);
+            do
+            {
+                uniqueColumnList.Add(parser.ConsumeObjectId());
+            } while (parser.MatchToken(SqlToken.Comma));
+            parser.ConsumeToken(SqlToken.RParen);
 
-            return new UniqueKeySqlCodeExpr();
+            return new UniqueKeySqlCodeExpr
+            {
+                ColumnList = uniqueColumnList
+            };
         }
     }
 
@@ -43,7 +54,15 @@ namespace T1.CodeDom.TSql.Parselets
         public override void WriteToStream(IndentStream stream)
         {
             stream.Write("UNIQUE");
+            if (ColumnList != null && ColumnList.Count > 0)
+            {
+                stream.Write("(");
+                ColumnList.WriteToStreamWithComma(stream);
+                stream.Write(")");
+            }
         }
+
+        public List<SqlCodeExpr> ColumnList { get; set; }
     }
 
     public class ClusteredSqlCodeExpr : SqlCodeExpr

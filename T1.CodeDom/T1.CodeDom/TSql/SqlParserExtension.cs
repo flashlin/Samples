@@ -332,6 +332,7 @@ namespace T1.CodeDom.TSql
             }
 
             var name = parser.ConsumeObjectId();
+
             return new MarkConstraintSqlCodeExpr
             {
                 Name = name,
@@ -1150,7 +1151,8 @@ namespace T1.CodeDom.TSql
 
         public static TableDataTypeSqlCodeExpr ConsumeTableDataTypeList(this IParser parser)
         {
-            var columnDataTypeList = parser.ParseParenWithComma(() => parser.ParseAny(ParseConstraintExpr,
+            var columnDataTypeList = parser.ParseParenWithComma(() => parser.ParseAny(
+                ParseConstraintExpr,
                 ParseExtra,
                 ParseColumnDefine), true).ToList();
 

@@ -206,4 +206,13 @@ CONSTRAINT PK_customer PRIMARY KEY ([Id])
         Parse(sql);
         ThenExprShouldBe(@"CREATE TABLE #tmpCustomer( id INT, DATE DATETIME )");
     }
+    
+    [Fact]
+    public void create_table_unique()
+    {
+        var sql = @"CREATE TABLE customer ( id int, CONSTRAINT [ct_customer] UNIQUE ([id]) )";
+        Parse(sql);
+        ThenExprShouldBe(@"CREATE TABLE customer( id INT, CONSTRAINT [ct_customer] UNIQUE([id]) )");
+    }
+    
 }
