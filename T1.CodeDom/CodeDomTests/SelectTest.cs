@@ -454,5 +454,16 @@ AND id >= 100");
         }
         
         
+        [Fact]
+        public void select_online()
+        {
+            var sql = @"select @id=id from Online with (nolock) where id=1";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT @id = id FROM Online WITH( nolock ) WHERE id = 1");
+        }
+        
+        
     }
 }

@@ -374,16 +374,6 @@ namespace T1.CodeDom.TSql
                 };
             }
 
-            // var funcNameSpan = parser.ParseFuncNameIdentifierToken();
-            // if (!funcNameSpan.IsEmpty)
-            // {
-            //     var funcName = parser.Scanner.GetSpanString(funcNameSpan);
-            //     return new ObjectIdSqlCodeExpr
-            //     {
-            //         ObjectName = funcName
-            //     };
-            // }
-
             if (!parser.TryConsumeObjectId(out var objectId))
             {
                 var token = parser.PeekToken();
@@ -1246,8 +1236,30 @@ namespace T1.CodeDom.TSql
 
         private static FromSourceSqlCodeExpr ParseFromSource(IParser parser)
         {
-            var sourceExpr = parser.ParseExpIgnoreComment();
-            sourceExpr = parser.ParseLRParenExpr(sourceExpr);
+            // var sourceExpr = parser.ParseExpIgnoreComment();
+            // sourceExpr = parser.ParseLRParenExpr(sourceExpr);
+
+            var sourceExpr = ParseTableSource(parser);
+            if (sourceExpr == null)
+            {
+                ThrowHelper.ThrowParseException(parser, "TableName");
+            }
+
+            // SqlCodeExpr sourceExpr;
+            // if (parser.MatchToken(SqlToken.LParen))
+            // {
+            //     sourceExpr = parser.ParseExpIgnoreComment();
+            //     parser.ConsumeToken(SqlToken.RParen);
+            //     sourceExpr = new GroupSqlCodeExpr
+            //     {
+            //         InnerExpr = sourceExpr
+            //     };
+            // }
+            // else
+            // {
+            //     sourceExpr = parser.ConsumeTableName();
+            //     sourceExpr = parser.ParseLRParenExpr(sourceExpr);
+            // }
 
             parser.TryConsumeAliasName(out var aliasNameExpr);
             var userWithOptions = parser.ParseWithOption();
@@ -1262,6 +1274,139 @@ namespace T1.CodeDom.TSql
                 JoinList = joinList
             };
         }
+
+        private static ExprListSqlCodeExpr ParseParametersList(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.LParen))
+            {
+                return null;
+            }
+
+            var parametersList = new List<SqlCodeExpr>();
+            do
+            {
+                parametersList.Add(parser.ParseExpIgnoreComment());
+            } while (parser.MatchToken(SqlToken.Comma));
+
+            parser.ConsumeToken(SqlToken.RParen);
+            return new ExprListSqlCodeExpr
+            {
+                Items = parametersList
+            };
+        }
+
+        private static SqlCodeExpr ParseTableSource(IParser parser)
+        {
+            ObjectIdSqlCodeExpr ParseFuncNameIdentifier(IParser parser)
+            {
+                var funcNameSpan = parser.ParseFuncNameIdentifierToken();
+                if (funcNameSpan.IsEmpty)
+                {
+                    return null;
+                }
+
+                var funcName = parser.Scanner.GetSpanString(funcNameSpan);
+                return new ObjectIdSqlCodeExpr
+                {
+                    ObjectName = funcName
+                };
+            }
+
+            FuncSqlCodeExpr ParseIdentifierFunc(IParser parser)
+            {
+                var startIndex = parser.Scanner.GetOffset();
+                if (!parser.TryConsumeObjectId(out var objectId))
+                {
+                    return null;
+                }
+
+                if (!parser.IsToken(SqlToken.LParen))
+                {
+                    parser.Scanner.SetOffset(startIndex);
+                    return null;
+                }
+
+                var parametersList = ParseParametersList(parser);
+
+                return new FuncSqlCodeExpr
+                {
+                    Name = objectId,
+                    Parameters = parametersList.Items
+                };
+            }
+
+            SqlCodeExpr ParseVariable(IParser parser)
+            {
+                if (!parser.TryConsumeToken(out var variableSpan, SqlToken.Variable))
+                {
+                    return null;
+                }
+
+                return parser.PrefixParse(variableSpan, int.MaxValue) as SqlCodeExpr;
+            }
+
+            ObjectIdSqlCodeExpr ParseTempTable(IParser parser)
+            {
+                if (!parser.TryConsumeToken(out var tempTableSpan, SqlToken.TempTable))
+                {
+                    return null;
+                }
+
+                return new ObjectIdSqlCodeExpr
+                {
+                    ObjectName = parser.Scanner.GetSpanString(tempTableSpan)
+                };
+            }
+
+            SqlCodeExpr ParseIdentifier(IParser parser)
+            {
+                if (!parser.TryConsumeObjectId(out var identifier))
+                {
+                    return null;
+                }
+
+                return parser.ParseLRParenExpr(identifier);
+            }
+
+            SqlCodeExpr ParseNonIdentifier(IParser parser)
+            {
+                var span = parser.PeekToken();
+                if (parser.Scanner.IsSymbol(span))
+                {
+                    return null;
+                }
+
+                parser.ConsumeToken();
+                return new ObjectIdSqlCodeExpr
+                {
+                    ObjectName = parser.Scanner.GetSpanString(span)
+                };
+            }
+
+            SqlCodeExpr ParseRent(IParser parser)
+            {
+                if (!parser.MatchToken(SqlToken.LParen))
+                {
+                    return null;
+                }
+
+                var innerExpr = parser.ParseExpIgnoreComment();
+                parser.ConsumeToken(SqlToken.RParen);
+                return new GroupSqlCodeExpr
+                {
+                    InnerExpr = innerExpr
+                };
+            }
+
+            return parser.ParseAny(ParseFuncNameIdentifier,
+                ParseIdentifierFunc,
+                ParseVariable,
+                ParseTempTable,
+                ParseIdentifier,
+                ParseNonIdentifier,
+                ParseRent);
+        }
+
 
         private static NonClusteredSqlCodeExpr ParseNonClustered(IParser parser)
         {
