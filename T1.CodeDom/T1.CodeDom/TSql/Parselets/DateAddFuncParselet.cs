@@ -75,7 +75,12 @@ namespace T1.CodeDom.TSql.Parselets
 
 		public static bool IsDatepartToken(string datepart)
 		{
-			return datepartList.Select(x => x.ToUpper()).Contains(datepart.ToUpper());
+			if (datepartList.Select(x => x.ToUpper()).Contains(datepart.ToUpper()))
+			{
+				return true;
+			}
+
+			return (datepartList.Select(x => $"[{x.ToUpper()}]").Contains(datepart.ToUpper()));
 		}
 	}
 }

@@ -24,6 +24,16 @@ name varchar(50)
 	name VARCHAR (50)
 )");
 		}
+		
+		
+		[Fact]
+		public void declare_date()
+		{
+			var sql = @"DECLARE @today DATETIME = DATEADD([DD], DATEDIFF([DD], 0, GETDATE()), 0)";
+			Parse(sql);
+
+			ThenExprShouldBe(@"DECLARE @today DATETIME = DATEADD( [DD], DATEDIFF( [DD], 0, GETDATE() ), 0 )");
+		}
 
 		[Fact]
 		public void declare_var_eq_1()
