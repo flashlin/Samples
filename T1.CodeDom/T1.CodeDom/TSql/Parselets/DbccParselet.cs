@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using T1.CodeDom.Core;
 using T1.CodeDom.TSql.Expressions;
+using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
@@ -9,7 +10,16 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
-            parser.ConsumeToken(SqlToken.UpdateUsage);
+            return parser.ConsumeAny(ParseDbccUpdateUsage,
+                ParseDbccCheckIdent);
+        }
+
+        private DbccUpdateusageSqlCodeExpr ParseDbccUpdateUsage(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.UpdateUsage))
+            {
+                return null;
+            }
             parser.ConsumeToken(SqlToken.LParen);
             var objectIdList = new List<SqlCodeExpr>();
             do
@@ -34,6 +44,48 @@ namespace T1.CodeDom.TSql.Parselets
             };
         }
 
+        private DbccSqlCodeExpr ParseDbccCheckIdent(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.CHECKIDENT))
+            {
+                return null;
+            }
+
+            parser.ConsumeToken(SqlToken.LParen);
+
+            var tableName = parser.ConsumeObjectId();
+            var optionParametersList = ParseSeqOptionWithComma(
+                parser,
+                parser1 => parser1.ConsumeToTokenValueAny(SqlToken.NORESEED, SqlToken.RESEED),
+                parser1 => parser1.ParseExpIgnoreComment()
+            );
+            parser.ConsumeToken(SqlToken.RParen);
+
+            var parametersList = new List<SqlCodeExpr>();
+            parametersList.Add(tableName);
+            parametersList.AddRange(optionParametersList);
+
+            return new DbccSqlCodeExpr
+            {
+                Name = "CHECKIDENT",
+                ParametersList = parametersList
+            };
+        }
+
+        public static List<SqlCodeExpr> ParseSeqOptionWithComma(IParser parser,
+            params Func<IParser, SqlCodeExpr>[] parseList)
+        {
+            var list = new List<SqlCodeExpr>();
+            var index = 0;
+            while (parser.MatchToken(SqlToken.Comma))
+            {
+                var expr = parseList[index](parser);
+                list.Add(expr);
+                index++;
+            }
+
+            return list;
+        }
 
         private Func<IParser, SqlCodeExpr> ParseSqlTokenFn(SqlToken sqlToken)
         {
@@ -50,5 +102,19 @@ namespace T1.CodeDom.TSql.Parselets
                 };
             };
         }
+    }
+
+    public class DbccSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write($"DBCC {Name}");
+            stream.Write("(");
+            ParametersList.WriteToStreamWithComma(stream);
+            stream.Write(")");
+        }
+
+        public string Name { get; set; }
+        public List<SqlCodeExpr> ParametersList { get; set; }
     }
 }

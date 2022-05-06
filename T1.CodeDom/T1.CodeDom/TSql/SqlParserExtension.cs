@@ -1623,6 +1623,15 @@ namespace T1.CodeDom.TSql
             return Enum.Parse<SqlToken>(span.Type);
         }
 
+        public static TokenSqlCodeExpr ConsumeToTokenValueAny(this IParser parser, params SqlToken[] tokenTypeList)
+        {
+            var tokenType = parser.ConsumeTokenTypeAny(tokenTypeList);
+            return new TokenSqlCodeExpr
+            {
+                Value = tokenType
+            };
+        }
+
         public static bool TryConsumeTokenList(this IParser parser, out List<TextSpan> spanList,
             params SqlToken[] tokenTypeList)
         {

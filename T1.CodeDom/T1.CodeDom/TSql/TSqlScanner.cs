@@ -177,6 +177,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("COMMITTED", SqlToken.COMMITTED);
 			AddTokenMap("CONNECT", SqlToken.CONNECT);
 			AddTokenMap("COMMIT", SqlToken.Commit);
+			AddTokenMap("CHECKIDENT", SqlToken.CHECKIDENT);
 			AddTokenMap("COUNT_ROWS", SqlToken.COUNT_ROWS);
 			AddTokenMap("CURRENT", SqlToken.CURRENT);
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
@@ -203,6 +204,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
 			AddTokenMap("NO_INFOMSGS", SqlToken.NO_INFOMSGS);
 			AddTokenMap("NOEXEC", SqlToken.NOEXEC);
+			AddTokenMap("NORESEED", SqlToken.NORESEED);
 			AddTokenMap("NOLOCK", SqlToken.NOLOCK);
 			AddTokenMap("NOCOUNT", SqlToken.NOCOUNT);
 			AddTokenMap("NORMAL", SqlToken.NORMAL);
@@ -219,6 +221,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("PERCENT", SqlToken.PERCENT);
 			AddTokenMap("QUOTED_IDENTIFIER", SqlToken.QUOTED_IDENTIFIER);
 			AddTokenMap("ROLE", SqlToken.ROLE);
+			AddTokenMap("RESEED", SqlToken.RESEED);
 			AddTokenMap("REPLICATION", SqlToken.REPLICATION);
 			AddTokenMap("ROWLOCK", SqlToken.ROWLOCK);
 			AddTokenMap("REORGANIZE", SqlToken.REORGANIZE);
