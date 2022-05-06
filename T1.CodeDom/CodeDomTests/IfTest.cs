@@ -129,6 +129,16 @@ END ELSE BEGIN TRANSACTION");
 
 			ThenExprShouldBe(@"IF @id NOT BETWEEN 1 AND 2 BREAK;");
 		}
+		
+		[Fact]
+		public void if_batch_variable()
+		{
+			var sql = @"if $(id)=1 break;";
+			Parse(sql);
+
+			ThenExprShouldBe(@"IF $(id) = 1 BREAK;");
+		}
+		
 
 	}
 }

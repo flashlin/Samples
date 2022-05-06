@@ -14,4 +14,15 @@ namespace T1.CodeDom.TSql.Parselets
 			};
 		}
 	}
+	public class BatchVariableParselet : IPrefixParselet
+	{
+		public IExpression Parse(TextSpan token, IParser parser)
+		{
+			var name = parser.Scanner.GetSpanString(token);
+			return new BatchVariableSqlCodeExpr
+			{
+				Name = name,
+			};
+		}
+	}
 }

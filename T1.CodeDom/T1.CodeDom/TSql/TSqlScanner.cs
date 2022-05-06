@@ -405,6 +405,12 @@ namespace T1.CodeDom.TSql
 				tokenSpan.Type = SqlToken.TempTable.ToString();
 				return true;
 			}
+			
+			if (head == '$' && TryRead(ReadBatchVariable, headSpan, out var nameSpan)) 
+			{
+				tokenSpan = nameSpan;
+				return true;
+			}
 
 			if (_magnetHeadChars.Contains(head) && TryRead(ReadMagnetCompareSymbol, headSpan, out var magnetSymbol))
 			{
@@ -413,6 +419,32 @@ namespace T1.CodeDom.TSql
 			}
 
 			return false;
+		}
+
+
+		protected TextSpan ReadBatchVariable(TextSpan head)
+		{
+			if (!TryNextChar('(', out var lrent))
+			{
+				return TextSpan.Empty;
+			}
+
+			head = head.Concat(lrent);
+			
+			var identifier = ReadIdentifier(head);
+			if (identifier.Length == 2)
+			{
+				return TextSpan.Empty;
+			}
+			
+			if (!TryNextChar(')', out var rrent))
+			{
+				return TextSpan.Empty;
+			}
+
+			var token = identifier.Concat(rrent);
+			token.Type = SqlToken.BatchVariable.ToString();
+			return token;
 		}
 
 		private TextSpan ReadBatchReferenceFile(TextSpan head)

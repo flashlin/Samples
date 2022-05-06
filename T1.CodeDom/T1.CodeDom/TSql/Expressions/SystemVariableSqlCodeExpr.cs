@@ -11,4 +11,13 @@ namespace T1.CodeDom.TSql.Expressions
 			stream.Write(Name);
 		}
 	}
+	public class BatchVariableSqlCodeExpr : SqlCodeExpr
+	{
+		public string Name { get; set; }
+
+		public override void WriteToStream(IndentStream stream)
+		{
+			stream.Write(Name);
+		}
+	}
 }

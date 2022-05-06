@@ -428,7 +428,12 @@ namespace T1.CodeDom.Core
 		protected bool TryRead(Func<TextSpan, TextSpan> readSpan,
 			TextSpan head, out TextSpan token)
 		{
+			var startIndex = GetOffset();
 			token = readSpan(head);
+			if (token.IsEmpty)
+			{
+				SetOffset(startIndex);
+			}
 			return !token.IsEmpty;
 		}
 

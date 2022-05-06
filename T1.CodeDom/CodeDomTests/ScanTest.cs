@@ -194,5 +194,16 @@ namespace TestProject.PrattTests
 			ScanAll(sql);
 			ThenTokenListShouldBe("@xml");
 		}
+		
+		
+		[Fact]
+		public void batch_variable()
+		{
+			var sql = "$(abc)";
+			ScanAll(sql);
+			ThenTokenListShouldBe("$(abc)");
+		}
+		
+		
 	}
 }

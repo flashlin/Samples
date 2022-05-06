@@ -265,6 +265,7 @@
 		ENABLE,
 		CHECKIDENT,
 		NORESEED,
-		RESEED
+		RESEED,
+		BatchVariable
 	}
 }
