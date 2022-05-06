@@ -222,19 +222,60 @@ namespace T1.CodeDom.TSql.Parselets
                 databaseName = parser.ConsumeObjectId();
             }
 
-            parser.ConsumeToken(SqlToken.ADD);
-            parser.ConsumeToken(SqlToken.FILEGROUP);
+            var actionExpr = parser.ConsumeAny(
+                ParseSetOnOff,
+                ParseAddFileGroup);
 
-            var filegroupName = parser.ConsumeObjectId();
             var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
 
             return new AlterDatabaseSqlCodeExpr
             {
                 DatabaseName = databaseName,
-                FileGroupName = filegroupName,
+                ActionExpr = actionExpr,
                 IsSemicolon = isSemicolon,
             };
         }
+
+        private static SqlCodeExpr ParseAddFileGroup(IParser parser)
+        {
+            if (!parser.MatchTokenList(SqlToken.ADD, SqlToken.FILEGROUP))
+            {
+                return null;
+            }
+            var fileGroupName = parser.ConsumeObjectId();
+            return new AddFileGroupSqlCodeExpr
+            {
+                FileGroupName = fileGroupName
+            };
+        }
+
+        private static SetSqlCodeExpr ParseSetOnOff(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.Set))
+            {
+                return null;
+            }
+
+            var optionName = parser.ConsumeTokenString();
+            var toggle = parser.ConsumeTokenStringAny(SqlToken.ON, SqlToken.OFF);
+
+            return new SetSqlCodeExpr
+            {
+                Options = new[] {optionName}.ToList(),
+                Toggle = toggle
+            };
+        }
+    }
+
+    public class AddFileGroupSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("ADD FILEGROUP ");
+            FileGroupName.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr FileGroupName { get; set; }
     }
 
     public class AlterIndexReogranizeSqlCodeExpr : SqlCodeExpr
