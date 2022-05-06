@@ -9,7 +9,7 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
-            parser.ConsumeToken(SqlToken.Updateusage);
+            parser.ConsumeToken(SqlToken.UpdateUsage);
             parser.ConsumeToken(SqlToken.LParen);
             var objectIdList = new List<SqlCodeExpr>();
             do
