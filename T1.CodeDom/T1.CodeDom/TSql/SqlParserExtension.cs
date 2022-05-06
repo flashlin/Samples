@@ -1245,22 +1245,6 @@ namespace T1.CodeDom.TSql
                 ThrowHelper.ThrowParseException(parser, "TableName");
             }
 
-            // SqlCodeExpr sourceExpr;
-            // if (parser.MatchToken(SqlToken.LParen))
-            // {
-            //     sourceExpr = parser.ParseExpIgnoreComment();
-            //     parser.ConsumeToken(SqlToken.RParen);
-            //     sourceExpr = new GroupSqlCodeExpr
-            //     {
-            //         InnerExpr = sourceExpr
-            //     };
-            // }
-            // else
-            // {
-            //     sourceExpr = parser.ConsumeTableName();
-            //     sourceExpr = parser.ParseLRParenExpr(sourceExpr);
-            // }
-
             parser.TryConsumeAliasName(out var aliasNameExpr);
             var userWithOptions = parser.ParseWithOption();
 
