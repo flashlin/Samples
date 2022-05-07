@@ -17,6 +17,15 @@ namespace CodeDomTests
 			Parse(sql);
 			ThenExprShouldBe("UPDATE online SET id = 1");
 		}
+		
+		[Fact]
+		public void update_set_password()
+		{
+			var sql = "update customer set password = '123'";
+			Parse(sql);
+			ThenExprShouldBe("UPDATE customer SET password = '123'");
+		}
+		
 
 		[Fact]
 		public void update_set_field_eq_case()

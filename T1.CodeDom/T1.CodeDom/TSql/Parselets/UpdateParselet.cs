@@ -81,7 +81,12 @@ namespace T1.CodeDom.TSql.Parselets
 			var setList = new List<SqlCodeExpr>();
 			do
 			{
-				var column = parser.ConsumeObjectIdOrVariable(int.MaxValue);
+				//var column = parser.ConsumeObjectIdOrVariable(int.MaxValue);
+				var column = parser.ParseMeetObjectId();
+				if (column == null)
+				{
+					ThrowHelper.ThrowParseException(parser, "Expect column");
+				}
 
 				var oper = parser.Scanner.ConsumeStringAny(SqlToken.Equal, SqlToken.MinusEqual, SqlToken.PlusEqual);
 
