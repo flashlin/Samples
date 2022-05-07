@@ -266,6 +266,20 @@
 		CHECKIDENT,
 		NORESEED,
 		RESEED,
-		BatchVariable
+		BatchVariable,
+		LOCAL,
+		GLOBAL,
+		FORWARD_ONLY,
+		SCROLL,
+		STATIC,
+		KEYSET,
+		DYNAMIC,
+		FAST_FORWARD,
+		READ_ONLY,
+		SCROLL_LOCKS,
+		OPTIMISTIC,
+		TYPE_WARNING,
+		Close,
+		Deallocate
 	}
 }

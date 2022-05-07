@@ -16,6 +16,7 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.BatchRefFile, new BatchRefFileParselet());
             Register(SqlToken.BatchVariable, new BatchVariableParselet());
             Register(SqlToken.Cast, new CastParselet());
+            Register(SqlToken.Close, new CloseParselet());
             Register(SqlToken.Case, new CaseParselet());
             Register(SqlToken.Convert, new ConvertParselet());
             Register(SqlToken.Create, new CreateParselet());
@@ -23,6 +24,7 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.CONSTRAINT, new ConstraintParselet());
             Register(SqlToken.Cursor, new CursorParselet());
             Register(SqlToken.Continue, new ContinueParselet());
+            Register(SqlToken.Deallocate, new DeallocateParselet());
             Register(SqlToken.Default, new DefaultConstantParselet());
             Register(SqlToken.DISABLE, new DisableParselet());
             Register(SqlToken.Dbcc, new DbccParselet());

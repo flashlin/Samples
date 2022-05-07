@@ -56,6 +56,19 @@ DECLARE @id INT");
 
 			ThenExprShouldBe(@"DECLARE @p CURSOR");
 		}
+		
+		
+		[Fact]
+		public void declare_cursor_for()
+		{
+			var sql = @"declare @p cursor local for select 1 from customer";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"DECLARE @p CURSOR LOCAL FOR SELECT 1 FROM customer");
+		}
+		
+		
 
 
 		[Fact]
@@ -80,5 +93,6 @@ id INT PRIMARY KEY NONCLUSTERED
 			
 			ThenExprShouldBe(@"DECLARE @tbl TABLE ( id INT, sid INT DEFAULT 1 )");
 		}
+		
 	}
 }
