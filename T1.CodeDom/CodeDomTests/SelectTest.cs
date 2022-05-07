@@ -1,8 +1,8 @@
-﻿using T1.CodeDom.Core;
-using Xunit.Abstractions;
+﻿using TestProject.PrattTests;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace TestProject.PrattTests
+namespace CodeDomTests
 {
     public class SelectTest : TestBase
     {
