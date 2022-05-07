@@ -199,6 +199,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("GLOBAL", SqlToken.GLOBAL);
 			AddTokenMap("HIGH", SqlToken.HIGH);
 			AddTokenMap("HOLDLOCK", SqlToken.HOLDLOCK);
+			AddTokenMap("INPUTBUFFER", SqlToken.INPUTBUFFER);
 			AddTokenMap("ISOLATION", SqlToken.ISOLATION);
 			AddTokenMap("IDENTITY_INSERT", SqlToken.IDENTITY_INSERT);
 			AddTokenMap("IDENTITY", SqlToken.IDENTITY);

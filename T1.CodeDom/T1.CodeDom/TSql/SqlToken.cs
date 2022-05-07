@@ -284,5 +284,6 @@
 		NOCHECK,
 		CHECK,
 		AFTER,
+		INPUTBUFFER
 	}
 }

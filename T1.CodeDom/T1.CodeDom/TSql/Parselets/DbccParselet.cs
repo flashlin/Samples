@@ -11,7 +11,37 @@ namespace T1.CodeDom.TSql.Parselets
         public IExpression Parse(TextSpan token, IParser parser)
         {
             return parser.ConsumeAny(ParseDbccUpdateUsage,
-                ParseDbccCheckIdent);
+                ParseDbccCheckIdent,
+                ParseDbccInputbuffer);
+        }
+
+
+        private DbccSqlCodeExpr ParseDbccInputbuffer(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.INPUTBUFFER))
+            {
+                return null;
+            }
+
+            var parametersList = new List<SqlCodeExpr>();
+            parser.ConsumeToken(SqlToken.LParen);
+            var sessionId = parser.ParseExpIgnoreComment();
+            parser.ConsumeToken(SqlToken.RParen);
+            parametersList.Add(sessionId);
+            
+            var withList = new List<SqlCodeExpr>();
+            if (parser.MatchToken(SqlToken.With))
+            {
+                withList = parser.ParseAll(ParseSqlTokenFn(SqlToken.NO_INFOMSGS),
+                    ParseSqlTokenFn(SqlToken.COUNT_ROWS));
+            }
+
+            return new DbccSqlCodeExpr
+            {
+                Name = "INPUTBUFFER",
+                ParametersList = parametersList,
+                WithList = withList
+            };
         }
 
         private DbccUpdateusageSqlCodeExpr ParseDbccUpdateUsage(IParser parser)
@@ -112,9 +142,16 @@ namespace T1.CodeDom.TSql.Parselets
             stream.Write("(");
             ParametersList.WriteToStreamWithComma(stream);
             stream.Write(")");
+
+            if (WithList != null && WithList.Count > 0)
+            {
+                stream.Write(" WITH ");
+                WithList.WriteToStream(stream);
+            }
         }
 
         public string Name { get; set; }
         public List<SqlCodeExpr> ParametersList { get; set; }
+        public List<SqlCodeExpr> WithList { get; set; }
     }
 }
