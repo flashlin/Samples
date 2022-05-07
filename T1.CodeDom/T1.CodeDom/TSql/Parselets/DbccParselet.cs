@@ -23,11 +23,7 @@ namespace T1.CodeDom.TSql.Parselets
                 return null;
             }
 
-            var parametersList = new List<SqlCodeExpr>();
-            parser.ConsumeToken(SqlToken.LParen);
-            var sessionId = parser.ParseExpIgnoreComment();
-            parser.ConsumeToken(SqlToken.RParen);
-            parametersList.Add(sessionId);
+            var parametersList = parser.ParseParameterList("INPUTBUFFER", 1, 1);
             
             var withList = new List<SqlCodeExpr>();
             if (parser.MatchToken(SqlToken.With))
