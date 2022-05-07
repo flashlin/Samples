@@ -20,6 +20,14 @@ namespace TestProject.PrattTests
         
         
         [Fact]
+        public void select_type()
+        {
+            var sql = "select type";
+            Parse(sql);
+            ThenExprShouldBe("SELECT type");
+        }
+        
+        [Fact]
         public void select_matic_number()
         {
             var sql = "select 1/2, 2";

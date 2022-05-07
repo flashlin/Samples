@@ -66,6 +66,7 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.ScriptSetVar, new ScriptSetvarParselet());
             Register(SqlToken.ScriptOn, new ScriptOnParselet());
             Register(SqlToken.Source, new SourceParselet());
+            Register(SqlToken.TYPE, new TypeParselet());
             Register(SqlToken.Target, new TargetParselet());
             Register(SqlToken.TempTable, new TempTableParselet());
             Register(SqlToken.Truncate, new TruncateTableParselet());

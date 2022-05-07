@@ -21,6 +21,17 @@ namespace CodeDomTests
 		}
 		
 		[Fact]
+		public void grant_execute_on_type()
+		{
+			var sql = @"grant execute on type::[dbo].[myType] TO [RoleName] as [dbo]";
+
+			Parse(sql);
+
+			ThenExprShouldBe(@"GRANT EXECUTE ON TYPE::[dbo].[myType] TO [RoleName] AS [dbo]");
+		}
+		
+		
+		[Fact]
 		public void grant_alter()
 		{
 			var sql = @"GRANT ALTER
