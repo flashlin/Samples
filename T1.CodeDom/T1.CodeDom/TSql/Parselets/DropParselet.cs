@@ -19,6 +19,11 @@ namespace T1.CodeDom.TSql.Parselets
                 return DropRole(roleSpan, parser);
             }
 
+            if (parser.TryConsumeToken(out var triggerSpan, SqlToken.TRIGGER))
+            {
+                return DropTrigger(triggerSpan, parser);
+            }
+
             if (parser.Scanner.IsToken(SqlToken.TABLE))
             {
                 return DropTable(parser);
@@ -26,6 +31,16 @@ namespace T1.CodeDom.TSql.Parselets
 
             var helpMessage = parser.Scanner.GetHelpMessage();
             throw new ParseException(helpMessage);
+        }
+
+        private SqlCodeExpr DropTrigger(TextSpan triggerSpan, IParser parser)
+        {
+            var name = parser.ConsumeObjectId();
+            return new DropSqlCodeExpr
+            {
+                TargetId = "TRIGGER",
+                ObjectId = name
+            };
         }
 
         private SqlCodeExpr DropIndex(TextSpan indexSpan, IParser parser)

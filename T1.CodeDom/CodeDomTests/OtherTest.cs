@@ -152,18 +152,6 @@ INTO @id, @name");
             ThenExprShouldBe(@":r file");
         }
         
-        
-        [Fact]
-        public void drop_role()
-        {
-            var sql = @"drop role roleName";
-
-            Parse(sql);
-
-            ThenExprShouldBe(@"DROP ROLE roleName");
-        }
-        
-        
         [Fact]
         public void dbcc_updateusage()
         {
