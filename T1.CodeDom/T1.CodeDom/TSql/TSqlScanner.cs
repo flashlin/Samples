@@ -248,6 +248,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("SCROLL", SqlToken.SCROLL);
 			AddTokenMap("SCROLL_LOCKS", SqlToken.SCROLL_LOCKS);
 			AddTokenMap("SELF", SqlToken.SELF);
+			AddTokenMap("SQLPERF", SqlToken.SQLPERF);
 			AddTokenMap("STATIC", SqlToken.STATIC);
 			AddTokenMap("SYNONYM", SqlToken.SYNONYM);
 			AddTokenMap("SERVER", SqlToken.SERVER);

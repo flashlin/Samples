@@ -13,7 +13,24 @@ namespace T1.CodeDom.TSql.Parselets
             return parser.ConsumeAny(ParseDbccUpdateUsage,
                 ParseDbccCheckIdent,
                 ParseDbccInputbuffer,
-                ParseDbccLoginfo);
+                ParseDbccLoginfo,
+                (p) => ParseDbcc(p, SqlToken.SQLPERF, 1, 1));
+        }
+
+        private DbccSqlCodeExpr ParseDbcc(IParser parser, SqlToken tokenType, int min, int max)
+        {
+            if (!parser.MatchToken(tokenType))
+            {
+                return null;
+            }
+            
+            var parametersList = parser.ParseParameterList($"DBCC {tokenType.ToString().ToUpper()}", min, max);
+
+            return new DbccSqlCodeExpr
+            {
+                Name = tokenType.ToString().ToUpper(),
+                ParametersList = parametersList
+            };
         }
 
         private DbccSqlCodeExpr ParseDbccLoginfo(IParser parser)

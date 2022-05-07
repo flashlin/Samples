@@ -42,4 +42,15 @@ public class DbccTest : TestBase
     }
     
     
+    [Fact]
+    public void dbcc_sqlperf()
+    {
+        var sql = @"dbcc sqlperf(dbname)";
+
+        Parse(sql);
+
+        ThenExprShouldBe(@"DBCC SQLPERF(dbname)");
+    }
+    
+    
 }
