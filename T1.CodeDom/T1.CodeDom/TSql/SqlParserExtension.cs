@@ -434,10 +434,27 @@ namespace T1.CodeDom.TSql
 				objectExpr = parser.ConsumeObjectId();
 			}
 
+			var afterExpr = ParseAfter(parser);
+
 			return new TriggerSqlCodeExpr
 			{
 				TriggerName = triggerName,
 				ObjectExpr = objectExpr,
+				AfterExpr = afterExpr
+			};
+		}
+
+		private static SqlCodeExpr ParseAfter(IParser parser)
+		{
+			if (!parser.MatchToken(SqlToken.AFTER))
+			{
+				return null;
+			}
+
+			var actionName = parser.ConsumeToken().GetTokenType();
+			return new AfterActionSqlCodeExpr
+			{
+				ActionName = actionName
 			};
 		}
 
@@ -2033,6 +2050,17 @@ namespace T1.CodeDom.TSql
                 Toggle = toggle
             };
         }
+    }
+
+    public class AfterActionSqlCodeExpr : SqlCodeExpr
+    {
+	    public override void WriteToStream(IndentStream stream)
+	    {
+		    stream.Write("AFTER ");
+		    stream.Write($"{ActionName.ToString().ToUpper()}");
+	    }
+
+	    public SqlToken ActionName { get; set; }
     }
 
     public class CrossApplySqlCodeExpr : SqlCodeExpr

@@ -22,4 +22,26 @@ as
 AS
     SET NOEXEC ON");
     }
+    
+    
+    [Fact]
+    public void create_trigger_after_insert()
+    {
+        var sql = @"CREATE TRIGGER [customer_INSERT] ON [customer]
+AFTER INSERT
+AS
+BEGIN
+	set noexec on
+END";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TRIGGER [customer_INSERT] ON [customer]
+AFTER INSERT
+AS
+BEGIN
+   SET NOEXEC ON
+END");
+    }
+    
+    
 }

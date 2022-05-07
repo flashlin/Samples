@@ -282,6 +282,7 @@
 		Close,
 		Deallocate,
 		NOCHECK,
-		CHECK
+		CHECK,
+		AFTER
 	}
 }

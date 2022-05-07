@@ -92,10 +92,13 @@ namespace T1.CodeDom.TSql.Parselets
         private SqlCodeExpr ConsumeTriggerCreate(IParser parser)
         {
             var triggerExpr = parser.ConsumeTrigger();
-
-            parser.Scanner.Consume(SqlToken.FOR);
-            var forTableExpr = parser.ConsumeObjectId();
             
+            SqlCodeExpr forTableExpr = null;
+            if (parser.MatchToken(SqlToken.FOR))
+            {
+                forTableExpr = parser.ConsumeObjectId();
+            }
+
             parser.ConsumeToken(SqlToken.As);
             var body = parser.ConsumeBeginBodyOrSingle();
             return new CreateTriggerSqlCodeExpr
@@ -396,8 +399,11 @@ namespace T1.CodeDom.TSql.Parselets
             stream.Write("CREATE ");
             TriggerExpr.WriteToStream(stream);
 
-            stream.Write(" FOR ");
-            ForTableExpr.WriteToStream(stream);
+            if (ForTableExpr != null)
+            {
+                stream.Write(" FOR ");
+                ForTableExpr.WriteToStream(stream);
+            }
 
             stream.WriteLine();
             stream.WriteLine("AS ");

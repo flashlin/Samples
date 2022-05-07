@@ -29,6 +29,7 @@ namespace T1.CodeDom.TSql.Parselets
 	{
 		public SqlCodeExpr TriggerName { get; set; }
 		public SqlCodeExpr ObjectExpr { get; set; }
+		public SqlCodeExpr AfterExpr { get; set; }
 
 		public override void WriteToStream(IndentStream stream)
 		{
@@ -36,6 +37,11 @@ namespace T1.CodeDom.TSql.Parselets
 			TriggerName.WriteToStream(stream);
 			stream.Write(" ON ");
 			ObjectExpr.WriteToStream(stream);
+			if (AfterExpr != null)
+			{
+				stream.Write(" ");
+				AfterExpr.WriteToStream(stream);
+			}
 		}
 	}
 }
