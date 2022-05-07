@@ -46,15 +46,8 @@ namespace T1.CodeDom.TSql.Parselets
             {
                 return null;
             }
-            parser.ConsumeToken(SqlToken.LParen);
-            var objectIdList = new List<SqlCodeExpr>();
-            do
-            {
-                var objectId = parser.ParseExpIgnoreComment();
-                objectIdList.Add(objectId);
-            } while (parser.MatchToken(SqlToken.Comma));
-
-            parser.ConsumeToken(SqlToken.RParen);
+            
+            var objectIdList = parser.ParseParameterList("UPDATEUSAGE", 1, int.MaxValue);
 
             var withList = new List<SqlCodeExpr>();
             if (parser.MatchToken(SqlToken.With))
