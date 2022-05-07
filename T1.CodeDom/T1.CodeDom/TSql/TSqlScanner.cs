@@ -175,6 +175,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ARITHABORT", SqlToken.ARITHABORT);
 			AddTokenMap("ALLOW_ROW_LOCKS", SqlToken.ALLOW_ROW_LOCKS);
 			AddTokenMap("ALLOW_PAGE_LOCKS", SqlToken.ALLOW_PAGE_LOCKS);
+			AddTokenMap("AUTHORIZATION", SqlToken.AUTHORIZATION);
 			AddTokenMap("CHECK", SqlToken.CHECK);
 			AddTokenMap("CALLER", SqlToken.CALLER);
 			AddTokenMap("CONSTRAINT", SqlToken.CONSTRAINT);

@@ -11,6 +11,11 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
+            if (parser.IsToken(SqlToken.ROLE))
+            {
+                return ParseCreateRole(parser);
+            }
+            
             if (parser.IsToken(SqlToken.LOGIN))
             {
                 return ParseCreateLogin(parser);
@@ -93,6 +98,24 @@ namespace T1.CodeDom.TSql.Parselets
             var helpMessage = parser.Scanner.GetHelpMessage();
             throw new ParseException($"Parse CREATE Error, {helpMessage}");
         }
+
+        private CreateRoleSqlCodeExpr ParseCreateRole(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.ROLE))
+            {
+                return null;
+            }
+            var roleName = parser.ConsumeObjectId();
+            parser.ConsumeToken(SqlToken.AUTHORIZATION);
+            var schemeName = parser.ConsumeObjectId();
+
+            return new CreateRoleSqlCodeExpr
+            {
+                RoleName = roleName,
+                SchemaName = schemeName
+            };
+        }
+            
 
         private CreateLoginSqlCodeExpr ParseCreateLogin(IParser parser)
         {
@@ -399,6 +422,20 @@ namespace T1.CodeDom.TSql.Parselets
                 Body = body
             };
         }
+    }
+
+    public class CreateRoleSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CREATE ROLE ");
+            RoleName.WriteToStream(stream);
+            stream.Write(" AUTHORIZATION ");
+            SchemaName.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr RoleName { get; set; }
+        public SqlCodeExpr SchemaName { get; set; }
     }
 
     public class CreateLoginSqlCodeExpr : SqlCodeExpr
