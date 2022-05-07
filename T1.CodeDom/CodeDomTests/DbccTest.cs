@@ -30,4 +30,16 @@ public class DbccTest : TestBase
         ThenExprShouldBe(@"DBCC INPUTBUFFER(55) WITH NO_INFOMSGS");
     }
     
+    
+    [Fact]
+    public void dbcc_loginfo()
+    {
+        var sql = @"dbcc loginfo(dbname)";
+
+        Parse(sql);
+
+        ThenExprShouldBe(@"DBCC LOGINFO(dbname)");
+    }
+    
+    
 }

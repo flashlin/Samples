@@ -12,9 +12,25 @@ namespace T1.CodeDom.TSql.Parselets
         {
             return parser.ConsumeAny(ParseDbccUpdateUsage,
                 ParseDbccCheckIdent,
-                ParseDbccInputbuffer);
+                ParseDbccInputbuffer,
+                ParseDbccLoginfo);
         }
 
+        private DbccSqlCodeExpr ParseDbccLoginfo(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.LOGINFO))
+            {
+                return null;
+            }
+
+            var parametersList = parser.ParseParameterList("DBCC LOGINFO", 1, 1);
+
+            return new DbccSqlCodeExpr
+            {
+                Name = "LOGINFO",
+                ParametersList = parametersList
+            };
+        }
 
         private DbccSqlCodeExpr ParseDbccInputbuffer(IParser parser)
         {

@@ -211,6 +211,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("LOCAL", SqlToken.LOCAL);
 			AddTokenMap("LOWER", SqlToken.LOWER);
 			AddTokenMap("LEVEL", SqlToken.LEVEL);
+			AddTokenMap("LOGINFO", SqlToken.LOGINFO);
 			AddTokenMap("LOCK_TIMEOUT", SqlToken.LOCK_TIMEOUT);
 			AddTokenMap("NOCHECK", SqlToken.NOCHECK);
 			AddTokenMap("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
