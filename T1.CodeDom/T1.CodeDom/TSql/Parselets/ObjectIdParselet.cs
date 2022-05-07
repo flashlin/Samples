@@ -12,15 +12,19 @@ namespace T1.CodeDom.TSql.Parselets
 		{
 			var startIndex = parser.Scanner.GetOffset();
 			parser.Scanner.SetOffset(token.Offset - 1);
-			//var identExpr = parser.ConsumeObjectId();
 
-			if (!parser.TryConsumeObjectId(out var identExpr))
+			SqlCodeExpr identExpr = parser.ParseMeetObjectId();
+			if (identExpr == null)
 			{
 				parser.Scanner.SetOffset(startIndex);
 				ThrowHelper.ThrowParseException(parser, "Expected object id");
-				//parser.Scanner.SetOffset(startIndex);
-				//return new CallFuncParselet().Parse(token, parser);
 			}
+
+			// if (!parser.TryConsumeObjectId(out var identExpr))
+			// {
+			// 	parser.Scanner.SetOffset(startIndex);
+			// 	ThrowHelper.ThrowParseException(parser, "Expected object id");
+			// }
 
 			if( parser.MatchToken(SqlToken.LParen))
 			{

@@ -18,11 +18,23 @@ namespace TestProject.PrattTests
             ThenExprShouldBe("SELECT 1");
         }
         
+        
+        [Fact]
+        public void select_matic_number()
+        {
+            var sql = "select 1/2, 2";
+            Parse(sql);
+            ThenExprShouldBe("SELECT 1 / 2, 2");
+        }
+        
         [Fact]
         public void select_nolock()
         {
             var sql = "select 1 from customer (nolock)";
-            Assert.Throws<ParseException>(() => Parse(sql));
+            
+            Parse(sql);
+            
+            ThenExprShouldBe("SELECT 1 FROM customer( nolock )");
         }
         
         [Fact]
@@ -75,7 +87,6 @@ namespace TestProject.PrattTests
             Parse(sql);
             ThenExprShouldBe("SELECT date FROM customer");
         }
-        
         
         [Fact]
         public void select_over()
@@ -465,5 +476,31 @@ AND id >= 100");
         }
         
         
+        [Fact]
+        public void select_var_eq_inserted()
+        {
+            var sql = @"select @id=inserted.id from inserted";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT @id = inserted.id FROM inserted");
+        }
+        
+        
+        [Fact]
+        public void select_()
+        {
+            var sql = @"select 
+       case when id=1
+			then id+2
+		else id+3 end nid, 
+		isnull(name, '123') name from customer";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT CASE WHEN id = 1 THEN id + 2 ELSE id + 3 END AS nid,
+ISNULL( name, '123' ) AS name
+FROM customer");
+        }
     }
 }

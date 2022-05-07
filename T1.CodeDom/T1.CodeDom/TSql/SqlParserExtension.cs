@@ -211,6 +211,52 @@ namespace T1.CodeDom.TSql
 			return identifier;
 		}
 
+		public static ObjectIdSqlCodeExpr ParseMeetObjectId(this IParser parser)
+		{
+			var startIndex = parser.Scanner.GetOffset();
+
+			var comments = parser.IgnoreComments();
+			var tokens = new List<string>();
+			do
+			{
+				var span = parser.ConsumeToken();
+				if (parser.Scanner.IsSymbol(span) && span.GetTokenType() != SqlToken.Asterisk)
+				{
+					break;
+				}
+				
+				tokens.Add(parser.Scanner.GetSpanString(span));
+				if (tokens.Count > 4)
+				{
+					var prevTokens = string.Join(".", tokens);
+					var currTokenStr = parser.Scanner.PeekString();
+					throw new ParseException(
+						 $"Expect RemoteServer.Database.dbo.name, but got too many Identifier at '{prevTokens}.{currTokenStr}'.");
+				}
+			} while (parser.Scanner.Match(SqlToken.Dot));
+
+			if (tokens.Count == 0)
+			{
+				parser.Scanner.SetOffset(startIndex);
+				return null;
+			}
+
+			var fixCount = 4 - tokens.Count;
+			for (var i = 0; i < fixCount; i++)
+			{
+				tokens.Insert(0, string.Empty);
+			}
+
+			return new ObjectIdSqlCodeExpr
+			{
+				Comments = comments,
+				RemoteServer = tokens[0],
+				DatabaseName = tokens[1],
+				SchemaName = tokens[2],
+				ObjectName = tokens[3],
+			};
+		}
+
 		public static SqlCodeExpr ConsumeObjectId(this IParser parser, bool nonSensitive = false)
 		{
 			if (!TryConsumeObjectId(parser, out var objectId, nonSensitive))
@@ -905,6 +951,25 @@ namespace T1.CodeDom.TSql
 			} while (parser.Scanner.Match(SqlToken.Comma));
 
 			return fromSourceList;
+		}
+		
+		public static TextSpan ParseFuncNameToken(this IParser parser)
+		{
+			var funcNameSpan = parser.PeekToken();
+			var funcName = parser.Scanner.GetSpanString(funcNameSpan).ToUpper();
+			if (!parser.Scanner.IsFuncName(funcName))
+			{
+				return TextSpan.Empty;
+			}
+
+			var symbolSpan = parser.PeekToken(1);
+			if (!symbolSpan.IsTokenType(SqlToken.LParen))
+			{
+				return TextSpan.Empty;
+			}
+
+			parser.ConsumeToken();
+			return funcNameSpan;
 		}
 
 		public static TextSpan ParseFuncNameIdentifierToken(this IParser parser)
@@ -1623,10 +1688,71 @@ namespace T1.CodeDom.TSql
             };
         }
 
+		public static SqlCodeExpr ParseMeetColumnName(this IParser parser)
+		{
+			var head = parser.PeekToken();
+			if (parser.TryGetPrefixParselet(out var prefix, head))
+			{
+				parser.ConsumeToken();
+				return prefix.Parse(head, parser) as SqlCodeExpr;
+			}
+			
+			var funcNameSpan = parser.ParseFuncNameToken();
+			if (!funcNameSpan.IsEmpty && parser.IsToken(SqlToken.LParen))
+			{
+				return parser.PrefixParse(funcNameSpan) as SqlCodeExpr;
+			}
+
+			if (parser.TryConsumeToken(out var varNameSpan, SqlToken.Variable))
+			{
+				return parser.PrefixParse(varNameSpan, int.MaxValue) as SqlCodeExpr;
+			}
+
+			if (parser.TryConsumeToken(out var asteriskSpan, SqlToken.Asterisk))
+			{
+				return parser.PrefixParse(asteriskSpan, int.MaxValue) as SqlCodeExpr;
+			}
+			
+			SqlCodeExpr  expr = parser.ParseMeetObjectId();
+			if (expr != null)
+			{
+				return parser.ParseLRParenExpr(expr);
+			}
+			
+			return parser.ParseExpIgnoreComment(int.MaxValue);
+		}
+
+		public static AssignSqlCodeExpr ParseAssign(this IParser parser, SqlCodeExpr leftExpr)
+		{
+			if (!parser.MatchToken(SqlToken.Equal))
+			{
+				return null;
+			}
+
+			var	expr = parser.ParseExpIgnoreComment();
+
+			return new AssignSqlCodeExpr
+			{
+				Left = leftExpr,
+				Right = expr
+			};
+		}
+
 		private static SqlCodeExpr ParseColumnAs(IParser parser)
 		{
 			var name = parser.ParseExpIgnoreComment();
 			name = parser.ParseLRParenExpr(name);
+
+			// SqlCodeExpr name = parser.ParseMeetColumnName();
+			// name = parser.ParseLRParenExpr(name);
+			
+			var assignExpr = parser.ParseAssign(name);
+			if (assignExpr != null)
+			{
+				name = assignExpr;
+			}
+			
+			
 
 			SqlCodeExpr overExpr = null;
 			if (parser.TryConsumeToken(out var overSpan, SqlToken.Over))

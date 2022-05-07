@@ -1,4 +1,8 @@
-﻿using Xunit.Abstractions;
+﻿using ExpectedObjects;
+using FluentAssertions;
+using T1.CodeDom.TSql;
+using T1.CodeDom.TSql.Expressions;
+using Xunit.Abstractions;
 using Xunit;
 
 namespace TestProject.PrattTests
@@ -184,6 +188,22 @@ INTO @id, @name");
             ThenExprShouldBe(@"DISABLE TRIGGER [tr_customer] ON DATABASE");
         }
         
-        
+        [Fact]
+        public void inserted_id()
+        {
+            var sql = @"inserted.id";
+
+			var scanner = new TSqlScanner(sql);
+			var parser = new TSqlParser(scanner);
+            var expr = parser.ParseMeetObjectId();
+
+            new ObjectIdSqlCodeExpr()
+            {
+                RemoteServer = string.Empty,
+                DatabaseName = string.Empty,
+                SchemaName = "inserted",
+                ObjectName = "id"
+            }.ToExpectedObject().ShouldEqual(expr);
+        }
     }
 }

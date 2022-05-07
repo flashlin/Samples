@@ -53,7 +53,7 @@ namespace TestProject.PrattTests
 
 			Parse(sql);
 
-			ThenExprShouldBe(@"ISNULL(@id, '')");
+			ThenExprShouldBe(@"ISNULL( @id, '' )");
 		}
 
 		[Fact]

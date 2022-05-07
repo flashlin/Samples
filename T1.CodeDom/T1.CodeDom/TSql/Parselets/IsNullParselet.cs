@@ -6,23 +6,6 @@ using T1.Standard.IO;
 
 namespace T1.CodeDom.TSql.Parselets
 {
-    public class IsNullParselet : IPrefixParselet
-    {
-        public IExpression Parse(TextSpan token, IParser parser)
-        {
-            parser.Scanner.Consume(SqlToken.LParen);
-            var checkExpression = parser.ParseExpIgnoreComment();
-            parser.Scanner.Consume(SqlToken.Comma);
-            var replacementValue = parser.ParseExpIgnoreComment();
-            parser.Scanner.Consume(SqlToken.RParen);
-            return new IsNullSqlCodeExpr
-            {
-                CheckExpr = checkExpression,
-                ReplacementValue = replacementValue
-            };
-        }
-    }
-
     public class ForXmlParselet : IPrefixParselet
     {
         public IExpression Parse(TextSpan token, IParser parser)

@@ -45,7 +45,6 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.HexNumber, new HexNumberParselet());
             Register(SqlToken.Identifier, new ObjectIdParselet());
             Register(SqlToken.Insert, new InsertParselet());
-            Register(SqlToken.IsNull, new IsNullParselet());
             Register(SqlToken.LParen, new GroupParselet());
             Register(SqlToken.Left, new LeftOrRightFunctionParselet());
             Register(SqlToken.Object, new ObjectParselet());
@@ -96,6 +95,7 @@ namespace T1.CodeDom.TSql
             Register(SqlToken.EXP, new CallFuncParselet(1, 1));
             Register(SqlToken.FLOOR, new CallFuncParselet(1, 1));
             Register(SqlToken.GETDATE, new CallFuncParselet());
+            Register(SqlToken.ISNULL, new CallFuncParselet(2, 2));
             Register(SqlToken.LEN, new CallFuncParselet(1, 1));
             Register(SqlToken.LOG, new CallFuncParselet(1, 1));
             Register(SqlToken.LOWER, new CallFuncParselet(1, 1));

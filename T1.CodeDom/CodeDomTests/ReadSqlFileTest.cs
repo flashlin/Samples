@@ -17,7 +17,6 @@ namespace TestProject.PrattTests
 			ReadSqlFile(0, sqlFile);
 		}
 
-
 		[Fact]
 		public void read_all_sql_files()
 		{

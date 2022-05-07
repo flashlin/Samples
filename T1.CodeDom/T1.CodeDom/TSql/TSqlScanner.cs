@@ -68,7 +68,6 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("HAVING", SqlToken.Having);
 			AddTokenMap("IF", SqlToken.If);
 			AddTokenMap("IS", SqlToken.Is);
-			AddTokenMap("ISNULL", SqlToken.IsNull);
 			AddTokenMap("IN", SqlToken.In);
 			AddTokenMap("INT", SqlToken.Int);
 			AddTokenMap("INSERT", SqlToken.Insert);
@@ -150,6 +149,7 @@ namespace T1.CodeDom.TSql
 			AddFuncNameMap("EXP", SqlToken.EXP);
 			AddFuncNameMap("FLOOR", SqlToken.FLOOR);
 			AddFuncNameMap("GETDATE", SqlToken.GETDATE);
+			AddFuncNameMap("ISNULL", SqlToken.ISNULL);
 			AddFuncNameMap("LEN", SqlToken.LEN);
 			AddFuncNameMap("LOG", SqlToken.LOG);
 			AddFuncNameMap("NEWID", SqlToken.NEWID);

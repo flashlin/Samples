@@ -162,7 +162,7 @@
 		SERIALIZABLE,
 		Distinct,
 		TempTable,
-		IsNull,
+		ISNULL,
 		ROLLBACK,
 		TRAN,
 		Commit,
@@ -283,6 +283,6 @@
 		Deallocate,
 		NOCHECK,
 		CHECK,
-		AFTER
+		AFTER,
 	}
 }
