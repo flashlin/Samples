@@ -27,7 +27,7 @@ public class DbccTest : TestBase
 
         Parse(sql);
 
-        ThenExprShouldBe(@"DBCC UPDATEUSAGE(0, @objname) WITH(NO_INFOMSGS)");
+        ThenExprShouldBe(@"DBCC INPUTBUFFER(0, @objname) WITH(NO_INFOMSGS)");
     }
     
 }

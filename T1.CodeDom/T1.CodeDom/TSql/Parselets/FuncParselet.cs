@@ -19,7 +19,6 @@ namespace T1.CodeDom.TSql.Parselets
 			var funcName = parser.Scanner.GetSpanString(token);
 
 			parser.Scanner.Consume(SqlToken.LParen);
-
 			var arguments = new List<SqlCodeExpr>();
 			do
 			{
@@ -30,13 +29,13 @@ namespace T1.CodeDom.TSql.Parselets
 				var innerExpr = parser.ParseExpIgnoreComment();
 				arguments.Add(innerExpr);
 			} while (parser.Scanner.Match(SqlToken.Comma));
-
+			parser.Scanner.ConsumeAny(SqlToken.RParen);
+			
 			var funcNameExpr = new ObjectIdSqlCodeExpr
 			{
 				ObjectName = funcName
 			};
-
-			parser.Scanner.ConsumeAny(SqlToken.RParen);
+			
 			return new FuncSqlCodeExpr
 			{
 				Name = funcNameExpr,

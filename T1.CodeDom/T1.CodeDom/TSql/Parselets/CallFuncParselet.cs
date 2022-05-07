@@ -33,27 +33,7 @@ namespace T1.CodeDom.TSql.Parselets
 				return parser.PrefixParse(token);
 			}
 
-			var parameterList = new List<SqlCodeExpr>();
-			parser.Scanner.Consume(SqlToken.LParen);
-			do
-			{
-				if (parser.IsToken(SqlToken.RParen))
-				{
-					break;
-				}
-				if (parameterList.Count >= _maxParameterCount)
-				{
-					ThrowHelper.ThrowParseException(parser, $"Too many parameters for function '{funcName}', max is {_maxParameterCount}.");
-				}
-				var parameter = parser.ParseExpIgnoreComment();
-				parameterList.Add(parameter);
-			} while (parser.MatchToken(SqlToken.Comma));
-			parser.ConsumeToken(SqlToken.RParen);
-
-			if (parameterList.Count < this._minParameterCount)
-			{
-				ThrowHelper.ThrowParseException(parser, $"Function '{funcName}' requires at least {_minParameterCount} parameters.");
-			}
+			var parameterList = parser.ParseParameterList($"Function '{funcName}'", _minParameterCount, _maxParameterCount);
 
 			return new FuncSqlCodeExpr
 			{

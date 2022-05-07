@@ -2176,6 +2176,39 @@ namespace T1.CodeDom.TSql
                 Toggle = toggle
             };
         }
+
+        public static List<SqlCodeExpr> ParseParameterList(this IParser parser, string funcName, int minParameterCount,
+	        int maxParameterCount)
+        {
+	        var parameterList = new List<SqlCodeExpr>();
+	        parser.ConsumeToken(SqlToken.LParen);
+	        do
+	        {
+		        if (parser.IsToken(SqlToken.RParen))
+		        {
+			        break;
+		        }
+
+		        if (parameterList.Count >= maxParameterCount)
+		        {
+			        ThrowHelper.ThrowParseException(parser,
+				        $"Too many parameters for {funcName}, max is {maxParameterCount}.");
+		        }
+
+		        var parameter = parser.ParseExpIgnoreComment();
+		        parameterList.Add(parameter);
+	        } while (parser.MatchToken(SqlToken.Comma));
+
+	        parser.ConsumeToken(SqlToken.RParen);
+
+	        if (parameterList.Count < minParameterCount)
+	        {
+		        ThrowHelper.ThrowParseException(parser,
+			        $"{funcName} requires at least {minParameterCount} parameters.");
+	        }
+
+	        return parameterList;
+        }
     }
 
     public class AfterActionSqlCodeExpr : SqlCodeExpr
