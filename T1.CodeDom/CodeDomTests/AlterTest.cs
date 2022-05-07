@@ -60,7 +60,15 @@ ADD Addr char(10),Tel int";
     {
         var sql = @"ALTER index all ON customer REBUILD WITH (FILLFACTOR = 90, online=on);";
         Parse(sql);
-        ThenExprShouldBe(@"ALTER INDEX ALL ON customer REBUILD WITH(FILLFACTOR = 90, ONLINE = ON)");
+        ThenExprShouldBe(@"ALTER INDEX all ON customer REBUILD WITH(FILLFACTOR = 90, ONLINE = ON)");
+    }
+    
+    [Fact]
+    public void alter_index_name()
+    {
+        var sql = @"ALTER index ix_customer ON customer REBUILD";
+        Parse(sql);
+        ThenExprShouldBe(@"ALTER INDEX ix_customer ON customer REBUILD");
     }
     
     [Fact]

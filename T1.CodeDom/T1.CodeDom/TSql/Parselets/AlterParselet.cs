@@ -50,7 +50,7 @@ namespace T1.CodeDom.TSql.Parselets
 
         private SqlCodeExpr AlterIndex(TextSpan indexSpan, IParser parser)
         {
-            parser.ConsumeToken(SqlToken.ALL);
+            var indexName = parser.ParseExpIgnoreComment(int.MaxValue);
             parser.ConsumeToken(SqlToken.ON);
             var tableName = parser.ConsumeObjectId();
 
@@ -66,6 +66,7 @@ namespace T1.CodeDom.TSql.Parselets
             var withExpr = parser.ParseConstraintWithOptions();
             return new AlterIndexSqlCodeExpr
             {
+                IndexName = indexName,
                 TableName = tableName,
                 WithExpr = withExpr
             };
@@ -294,12 +295,20 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public override void WriteToStream(IndentStream stream)
         {
-            stream.Write("ALTER INDEX ALL ON ");
+            stream.Write("ALTER INDEX ");
+            IndexName.WriteToStream(stream);
+            stream.Write(" ON ");
             TableName.WriteToStream(stream);
-            stream.Write(" REBUILD ");
-            WithExpr.WriteToStream(stream);
+            stream.Write(" REBUILD");
+
+            if (WithExpr != null)
+            {
+                stream.Write(" ");
+                WithExpr.WriteToStream(stream);
+            }
         }
 
+        public SqlCodeExpr IndexName { get; set; }
         public SqlCodeExpr TableName { get; set; }
         public SqlCodeExpr WithExpr { get; set; }
     }
