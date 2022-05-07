@@ -6,7 +6,7 @@ namespace T1.CodeDom.TSql.Expressions
 	public class InsertIntoFromSqlCodeExpr : SqlCodeExpr
 	{
 		public SqlCodeExpr Table { get; set; }
-		public List<string> ColumnsList { get; set; }
+		public List<SqlCodeExpr> ColumnsList { get; set; }
 		public SqlCodeExpr WithExpr { get; set; }
 		public List<SqlCodeExpr> OutputList { get; set; }
 		public SqlCodeExpr OutputIntoExpr { get; set; }

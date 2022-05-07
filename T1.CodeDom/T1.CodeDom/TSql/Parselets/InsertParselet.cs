@@ -91,17 +91,18 @@ namespace T1.CodeDom.TSql.Parselets
             };
         }
 
-        private static List<string> GetColumnsList(IParser parser)
+        private static List<SqlCodeExpr> GetColumnsList(IParser parser)
         {
-            var columns = new List<string>();
+            var columns = new List<SqlCodeExpr>();
             if (parser.Scanner.Match(SqlToken.LParen))
             {
                 do
                 {
                     //var columnStr = parser.ConsumeTokenStringAny(SqlToken.Comma, SqlToken.Identifier, SqlToken.SqlIdentifier);
-                    var columnSpan = parser.ConsumeIdentifierToken();
-                    var columnStr = parser.Scanner.GetSpanString(columnSpan);
-                    columns.Add(columnStr);
+                    //var columnSpan = parser.ConsumeIdentifierToken();
+                    //var columnStr = parser.Scanner.GetSpanString(columnSpan);
+                    var column = parser.ParseMeetColumnName();
+                    columns.Add(column);
                 } while (parser.MatchToken(SqlToken.Comma));
 
                 parser.Scanner.Consume(SqlToken.RParen);

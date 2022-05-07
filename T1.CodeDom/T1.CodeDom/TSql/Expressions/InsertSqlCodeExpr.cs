@@ -8,7 +8,7 @@ namespace T1.CodeDom.TSql.Expressions
 	{
 		public string IntoStr { get; set; }
 		public SqlCodeExpr TableName { get; set; }
-		public List<string> Columns { get; set; }
+		public List<SqlCodeExpr> Columns { get; set; }
 		public SqlCodeExpr WithExpr { get; set; }
 		public List<ExprListSqlCodeExpr> ValuesList { get; set; }
 

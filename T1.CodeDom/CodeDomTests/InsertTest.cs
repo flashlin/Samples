@@ -226,5 +226,16 @@ FROM customer )");
 		}
 		
 		
+		[Fact]
+		public void insert_into_password()
+		{
+			var sql = @"INSERT INTO #customer(password) values(1)";
+			
+			Parse(sql);
+
+			ThenExprShouldBe(@"INSERT INTO #customer(password) VALUES (1)");
+		}
+		
+		
 	}
 }
