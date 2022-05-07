@@ -18,6 +18,15 @@ public class AlterTest : TestBase
         ThenExprShouldBe(@"ALTER TABLE [dbo].[customer] ADD CONSTRAINT [DF_id] DEFAULT ( 0 ) FOR [id]");
     }
     
+    
+    [Fact]
+    public void alter_table_nocheck()
+    {
+        var sql = "ALTER TABLE [dbo].[customer] nocheck constraint all";
+        Parse(sql);
+        ThenExprShouldBe(@"ALTER TABLE [dbo].[customer] NOCHECK CONSTRAINT ALL");
+    }
+    
     [Fact]
     public void alter_table_add_columns()
     {

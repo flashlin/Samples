@@ -280,6 +280,8 @@
 		OPTIMISTIC,
 		TYPE_WARNING,
 		Close,
-		Deallocate
+		Deallocate,
+		NOCHECK,
+		CHECK
 	}
 }

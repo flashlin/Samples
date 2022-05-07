@@ -174,6 +174,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ARITHABORT", SqlToken.ARITHABORT);
 			AddTokenMap("ALLOW_ROW_LOCKS", SqlToken.ALLOW_ROW_LOCKS);
 			AddTokenMap("ALLOW_PAGE_LOCKS", SqlToken.ALLOW_PAGE_LOCKS);
+			AddTokenMap("CHECK", SqlToken.CHECK);
 			AddTokenMap("CALLER", SqlToken.CALLER);
 			AddTokenMap("CONSTRAINT", SqlToken.CONSTRAINT);
 			AddTokenMap("COMMITTED", SqlToken.COMMITTED);
@@ -209,6 +210,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("LOWER", SqlToken.LOWER);
 			AddTokenMap("LEVEL", SqlToken.LEVEL);
 			AddTokenMap("LOCK_TIMEOUT", SqlToken.LOCK_TIMEOUT);
+			AddTokenMap("NOCHECK", SqlToken.NOCHECK);
 			AddTokenMap("NUMERIC_ROUNDABORT", SqlToken.NUMERIC_ROUNDABORT);
 			AddTokenMap("NO_INFOMSGS", SqlToken.NO_INFOMSGS);
 			AddTokenMap("NOEXEC", SqlToken.NOEXEC);

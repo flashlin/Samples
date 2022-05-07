@@ -75,7 +75,7 @@ namespace T1.CodeDom.TSql.Parselets
         {
             var tableName = parser.ConsumeObjectId();
 
-            var alterActionSpan = parser.ConsumeTokenAny(SqlToken.ADD, SqlToken.Set, SqlToken.Drop);
+            var alterActionSpan = parser.ConsumeTokenAny(SqlToken.ADD, SqlToken.Set, SqlToken.Drop, SqlToken.NOCHECK, SqlToken.CHECK);
             var alterAction = parser.Scanner.GetSpanString(alterActionSpan);
 
             var optionList = parser.ParseAll(

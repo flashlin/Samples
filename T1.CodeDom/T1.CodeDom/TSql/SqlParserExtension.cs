@@ -759,6 +759,7 @@ namespace T1.CodeDom.TSql
 			return parser.ConsumeToken();
 		}
 
+
 		public static MarkConstraintSqlCodeExpr ParseConstraint(this IParser parser)
 		{
 			if (!parser.MatchToken(SqlToken.CONSTRAINT))
@@ -766,7 +767,15 @@ namespace T1.CodeDom.TSql
 				return null;
 			}
 
-			var name = parser.ConsumeObjectId();
+			SqlCodeExpr name;
+			if (parser.MatchToken(SqlToken.ALL))
+			{
+				name = new AllSqlCodeExpr();
+			}
+			else
+			{
+				name = parser.ConsumeObjectId();
+			}
 
 			return new MarkConstraintSqlCodeExpr
 			{
@@ -2026,7 +2035,7 @@ namespace T1.CodeDom.TSql
         }
     }
 
-	public class CrossApplySqlCodeExpr : SqlCodeExpr
+    public class CrossApplySqlCodeExpr : SqlCodeExpr
 	{
 		public SqlCodeExpr AliasName { get; set; }
 
