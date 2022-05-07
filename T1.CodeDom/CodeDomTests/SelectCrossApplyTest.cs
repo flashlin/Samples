@@ -18,6 +18,6 @@ cross apply (select name from otherTable) as t (name)";
         Parse(sql);
 			
         ThenExprShouldBe(@"SELECT 1, t.name FROM customer
-CROSS APPLY(SELECT name FROM otherTable) AS t(name)");
+CROSS APPLY ( SELECT name FROM otherTable ) AS t(name)");
     }
 }

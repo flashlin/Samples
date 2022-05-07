@@ -875,10 +875,13 @@ namespace T1.CodeDom.TSql
 				return null;
 			}
 
-			parser.ConsumeToken(SqlToken.LParen);
-			var expr = parser.ParseExpIgnoreComment();
-			parser.ConsumeToken(SqlToken.RParen);
-			parser.ConsumeToken(SqlToken.As);
+			// parser.ConsumeToken(SqlToken.LParen);
+			// var expr = parser.ParseExpIgnoreComment();
+			// parser.ConsumeToken(SqlToken.RParen);
+
+			var expr = parser.ParseTableSource();
+			
+			parser.MatchToken(SqlToken.As);
 			var aliasName = parser.ConsumeObjectId();
 
 			var columnList = new List<SqlCodeExpr>();
@@ -1901,7 +1904,7 @@ namespace T1.CodeDom.TSql
 			// var sourceExpr = parser.ParseExpIgnoreComment();
 			// sourceExpr = parser.ParseLRParenExpr(sourceExpr);
 
-			var sourceExpr = ParseTableSource(parser);
+			var sourceExpr = parser.ParseTableSource();
 			if (sourceExpr == null)
 			{
 				ThrowHelper.ThrowParseException(parser, "TableName");
@@ -2043,7 +2046,7 @@ namespace T1.CodeDom.TSql
 			return size;
 		}
 
-		private static SqlCodeExpr ParseTableSource(IParser parser)
+		public static SqlCodeExpr ParseTableSource(this IParser parser)
 		{
             ObjectIdSqlCodeExpr ParseFuncNameIdentifier(IParser parser1)
             {
@@ -2233,14 +2236,22 @@ namespace T1.CodeDom.TSql
 		public override void WriteToStream(IndentStream stream)
 		{
 			stream.Write("CROSS APPLY");
-			stream.Write("(");
+
+			stream.Write(" ");
 			SubExpr.WriteToStream(stream);
-			stream.Write(")");
-			stream.Write(" AS ");
-			AliasName.WriteToStream(stream);
-			stream.Write("(");
-			ColumnList.WriteToStreamWithComma(stream);
-			stream.Write(")");
+
+			if (AliasName != null)
+			{
+				stream.Write(" AS ");
+				AliasName.WriteToStream(stream);
+			}
+
+			if (ColumnList != null && ColumnList.Count > 0)
+			{
+				stream.Write("(");
+				ColumnList.WriteToStreamWithComma(stream);
+				stream.Write(")");
+			}
 		}
 	}
 

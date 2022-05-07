@@ -496,7 +496,7 @@ AND id >= 100");
         
         
         [Fact]
-        public void select_()
+        public void select_case_isnull()
         {
             var sql = @"select 
        case when id=1
@@ -510,5 +510,21 @@ AND id >= 100");
 ISNULL( name, '123' ) AS name
 FROM customer");
         }
+        
+        
+        [Fact]
+        public void select_sys_dm_exec_requests()
+        {
+            var sql = @"select der.command
+from sys.dm_exec_requests der
+    cross apply sys.dm_exec_sql_text(der.sql_handle) dest";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT der.command FROM sys.dm_exec_requests AS der
+CROSS APPLY sys.dm_exec_sql_text( der.sql_handle ) AS dest");
+        }
+        
+        
     }
 }
