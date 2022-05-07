@@ -16,6 +16,6 @@ public class CreateUserTest : TestBase
         var sql = @"create user [UserName] FOR LOGIN [LoginName] WITH DEFAULT_SCHEMA=[dbo]";
         Parse(sql);
 
-        ThenExprShouldBe(@"CREATE USER [UserName] FOR LOGIN [LoginName] WITH DEFAULT_SCHEMA=[dbo]");
+        ThenExprShouldBe(@"CREATE USER [UserName] FOR LOGIN [LoginName] WITH DEFAULT_SCHEMA = [dbo]");
     }
 }

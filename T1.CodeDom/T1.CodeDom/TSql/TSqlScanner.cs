@@ -188,6 +188,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
 			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
 			AddTokenMap("DATABASE", SqlToken.DATABASE);
+			AddTokenMap("DEFAULT_SCHEMA", SqlToken.DEFAULT_SCHEMA);
 			AddTokenMap("DISABLE", SqlToken.DISABLE);
 			AddTokenMap("DYNAMIC", SqlToken.DYNAMIC);
 			AddTokenMap("DROP_EXISTING", SqlToken.DROP_EXISTING);
@@ -263,6 +264,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("TRAN", SqlToken.TRAN);
 			AddTokenMap("TYPE", SqlToken.TYPE);
 			AddTokenMap("TYPE_WARNING", SqlToken.TYPE_WARNING);
+			AddTokenMap("USER", SqlToken.USER);
 			AddTokenMap("UPDLOCK", SqlToken.UPDLOCK);
 			AddTokenMap("UNIQUE", SqlToken.UNIQUE);
 			AddTokenMap("UNCOMMITTED", SqlToken.UNCOMMITTED);
