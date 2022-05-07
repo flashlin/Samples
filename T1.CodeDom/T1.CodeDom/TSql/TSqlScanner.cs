@@ -252,6 +252,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("STATIC", SqlToken.STATIC);
 			AddTokenMap("SYNONYM", SqlToken.SYNONYM);
 			AddTokenMap("SERVER", SqlToken.SERVER);
+			AddTokenMap("SHRINKFILE", SqlToken.SHRINKFILE);
 			AddTokenMap("SORT_IN_TEMPDB", SqlToken.SORT_IN_TEMPDB);
 			AddTokenMap("SERIALIZABLE", SqlToken.SERIALIZABLE);
 			AddTokenMap("TRANSACTION", SqlToken.TRANSACTION);

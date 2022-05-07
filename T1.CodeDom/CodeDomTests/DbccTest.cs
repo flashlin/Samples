@@ -53,4 +53,15 @@ public class DbccTest : TestBase
     }
     
     
+    [Fact]
+    public void dbcc_shrinkfile()
+    {
+        var sql = @"dbcc shrinkfile(dbname)";
+
+        Parse(sql);
+
+        ThenExprShouldBe(@"DBCC SHRINKFILE(dbname)");
+    }
+    
+    
 }

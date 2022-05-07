@@ -14,7 +14,8 @@ namespace T1.CodeDom.TSql.Parselets
                 ParseDbccCheckIdent,
                 ParseDbccInputbuffer,
                 ParseDbccLoginfo,
-                (p) => ParseDbcc(p, SqlToken.SQLPERF, 1, 1));
+                p=> ParseDbcc(p, SqlToken.SQLPERF, 1, 1),
+                p => ParseDbcc(p, SqlToken.SHRINKFILE, 1, 4));
         }
 
         private DbccSqlCodeExpr ParseDbcc(IParser parser, SqlToken tokenType, int min, int max)
