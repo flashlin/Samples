@@ -11,23 +11,28 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
+            if (parser.IsToken(SqlToken.LOGIN))
+            {
+                return ParseCreateLogin(parser);
+            }
+            
             if (parser.TryConsumeToken(out var viewSpan, SqlToken.VIEW))
             {
                 return ParseCreateView(viewSpan, parser);
             }
-            
+
             if (parser.TryConsumeToken(out var typeSpan, SqlToken.TYPE))
             {
                 return ParseCreateType(typeSpan, parser);
             }
-            
+
             if (parser.TryConsumeTokenList(out var spanList, SqlToken.UNIQUE, SqlToken.NONCLUSTERED))
             {
                 var createNonClusteredIndexExpr = CreateNonClusteredIndex(spanList[1], parser);
                 createNonClusteredIndexExpr.IsUnique = true;
                 return createNonClusteredIndexExpr;
             }
-            
+
             if (parser.TryConsumeToken(out var nonclusteredSpan, SqlToken.NONCLUSTERED))
             {
                 return CreateNonClusteredIndex(nonclusteredSpan, parser);
@@ -89,10 +94,32 @@ namespace T1.CodeDom.TSql.Parselets
             throw new ParseException($"Parse CREATE Error, {helpMessage}");
         }
 
+        private CreateLoginSqlCodeExpr ParseCreateLogin(IParser parser)
+        {
+            if (!parser.MatchToken(SqlToken.LOGIN))
+            {
+                return null;
+            }
+
+            var loginName = parser.ConsumeObjectId();
+
+            parser.ConsumeToken(SqlToken.With);
+            parser.ConsumeToken(SqlToken.PASSWORD);
+            parser.ConsumeToken(SqlToken.Equal);
+
+            var password = parser.Consume(SqlToken.QuoteString);
+
+            return new CreateLoginSqlCodeExpr
+            {
+                LoginName = loginName,
+                Password = password
+            };
+        }
+
         private SqlCodeExpr ConsumeTriggerCreate(IParser parser)
         {
             var triggerExpr = parser.ConsumeTrigger();
-            
+
             SqlCodeExpr forTableExpr = null;
             if (parser.MatchToken(SqlToken.FOR))
             {
@@ -125,7 +152,7 @@ namespace T1.CodeDom.TSql.Parselets
         {
             var typeName = parser.ConsumeObjectId();
             parser.ConsumeToken(SqlToken.As);
-            
+
             var tableSpan = parser.ConsumeToken(SqlToken.TABLE);
             var typeExpr = parser.ConsumeTableDataTypeList();
 
@@ -374,22 +401,36 @@ namespace T1.CodeDom.TSql.Parselets
         }
     }
 
+    public class CreateLoginSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("CREATE LOGIN ");
+            LoginName.WriteToStream(stream);
+            stream.Write(" WITH PASSWORD = ");
+            Password.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr LoginName { get; set; }
+        public SqlCodeExpr Password { get; set; }
+    }
+
     public class CreateUniqueIndexSqlCodeExpr : SqlCodeExpr
     {
         public override void WriteToStream(IndentStream stream)
         {
             stream.Write("CREATE UNIQUE INDEX ");
             IndexName.WriteToStream(stream);
-			stream.Write(" ON ");
-			TableName.WriteToStream(stream);
-			stream.Write("(");
-			OnColumns.WriteToStreamWithComma(stream);
-			stream.Write(")");
+            stream.Write(" ON ");
+            TableName.WriteToStream(stream);
+            stream.Write("(");
+            OnColumns.WriteToStreamWithComma(stream);
+            stream.Write(")");
         }
-        
+
         public SqlCodeExpr IndexName { get; set; }
-		public SqlCodeExpr TableName { get; set; }
-		public List<SqlCodeExpr> OnColumns { get; set; }
+        public SqlCodeExpr TableName { get; set; }
+        public List<SqlCodeExpr> OnColumns { get; set; }
     }
 
     public class CreateTriggerSqlCodeExpr : SqlCodeExpr
@@ -423,7 +464,7 @@ namespace T1.CodeDom.TSql.Parselets
             Name.WriteToStream(stream);
             stream.WriteLine();
             stream.WriteLine("AS ");
-            Expr.WriteToStream(stream); 
+            Expr.WriteToStream(stream);
         }
 
         public SqlCodeExpr Name { get; set; }
@@ -468,7 +509,7 @@ namespace T1.CodeDom.TSql.Parselets
             {
                 stream.Write(" UNIQUE");
             }
-            
+
             stream.Write(" NONCLUSTERED INDEX ");
             IndexName.WriteToStream(stream);
             stream.Write(" ON ");

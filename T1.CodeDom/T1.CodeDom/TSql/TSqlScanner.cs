@@ -209,6 +209,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("LOCK_ESCALATION", SqlToken.LOCK_ESCALATION);
 			AddTokenMap("LOW", SqlToken.LOW);
 			AddTokenMap("LOCAL", SqlToken.LOCAL);
+			AddTokenMap("LOGIN", SqlToken.LOGIN);
 			AddTokenMap("LOWER", SqlToken.LOWER);
 			AddTokenMap("LEVEL", SqlToken.LEVEL);
 			AddTokenMap("LOGINFO", SqlToken.LOGINFO);
@@ -230,6 +231,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("ON", SqlToken.ON);
 			AddTokenMap("ONLINE", SqlToken.ONLINE);
 			AddTokenMap("OPTIMISTIC", SqlToken.OPTIMISTIC);
+			AddTokenMap("PASSWORD", SqlToken.PASSWORD);
 			AddTokenMap("PRIMARY", SqlToken.PRIMARY);
 			AddTokenMap("PAD_INDEX", SqlToken.PAD_INDEX);
 			AddTokenMap("PERCENT", SqlToken.PERCENT);
