@@ -1,11 +1,11 @@
 ﻿using ExpectedObjects;
-using FluentAssertions;
 using T1.CodeDom.TSql;
 using T1.CodeDom.TSql.Expressions;
-using Xunit.Abstractions;
+using TestProject.PrattTests;
 using Xunit;
+using Xunit.Abstractions;
 
-namespace TestProject.PrattTests
+namespace CodeDomTests
 {
     public class OtherTest : TestBase
     {
