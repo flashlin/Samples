@@ -269,6 +269,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("UNIQUE", SqlToken.UNIQUE);
 			AddTokenMap("UNCOMMITTED", SqlToken.UNCOMMITTED);
 			AddTokenMap("VIEW", SqlToken.VIEW);
+			AddTokenMap("WITHOUT", SqlToken.WITHOUT);
 			AddTokenMap("XACT_ABORT", SqlToken.XACT_ABORT);
 
 			AddSymbolMap("(", SqlToken.LParen);

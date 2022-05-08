@@ -112,9 +112,21 @@ namespace T1.CodeDom.TSql.Parselets
             }
             //CREATE USER [L_Earth] FOR LOGIN [L_Earth] WITH DEFAULT_SCHEMA=[dbo]
             var userName = parser.ConsumeObjectId();
-            parser.ConsumeToken(SqlToken.FOR);
-            parser.ConsumeToken(SqlToken.LOGIN);
-            var loginName = parser.ConsumeObjectId();
+
+            SqlCodeExpr loginExpr = null;
+            if (parser.MatchTokenList(SqlToken.FOR, SqlToken.LOGIN))
+            {
+                loginExpr = new ForLoginSqlCodeExpr
+                {
+                    LoginName = parser.ConsumeObjectId()
+                };
+            }
+
+            if (parser.MatchTokenList(SqlToken.WITHOUT, SqlToken.LOGIN))
+            {
+                loginExpr = new WithoutLoginSqlCodeExpr();
+            }
+            
             parser.ConsumeToken(SqlToken.With);
             parser.ConsumeToken(SqlToken.DEFAULT_SCHEMA);
             parser.ConsumeToken(SqlToken.Equal);
@@ -122,7 +134,7 @@ namespace T1.CodeDom.TSql.Parselets
             return new CreateUserSqlCodeExpr
             {
                 UserName = userName,
-                LoginName = loginName,
+                LoginName = loginExpr,
                 SchemaName = schemaName
             };
         }
@@ -452,14 +464,32 @@ namespace T1.CodeDom.TSql.Parselets
         }
     }
 
+    public class WithoutLoginSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("WITHOUT LOGIN");
+        }
+    }
+
+    public class ForLoginSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("FOR LOGIN ");
+            LoginName.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr LoginName { get; set; }
+    }
+
     public class CreateUserSqlCodeExpr : SqlCodeExpr
     {
         public override void WriteToStream(IndentStream stream)
         {
             stream.Write("CREATE USER ");
             UserName.WriteToStream(stream);
-            //CREATE USER [L_Earth] FOR LOGIN [L_Earth] WITH DEFAULT_SCHEMA=[dbo]
-            stream.Write(" FOR LOGIN ");
+            stream.Write(" ");
             LoginName.WriteToStream(stream);
             stream.Write(" WITH DEFAULT_SCHEMA = ");
             SchemaName.WriteToStream(stream);

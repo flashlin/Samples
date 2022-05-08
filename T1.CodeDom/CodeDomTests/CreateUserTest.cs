@@ -18,4 +18,16 @@ public class CreateUserTest : TestBase
 
         ThenExprShouldBe(@"CREATE USER [UserName] FOR LOGIN [LoginName] WITH DEFAULT_SCHEMA = [dbo]");
     }
+    
+    
+    [Fact]
+    public void create_user_without()
+    {
+        var sql = @"create user [UserName] WITHOUT LOGIN WITH DEFAULT_SCHEMA=[dbo]";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE USER [UserName] WITHOUT LOGIN WITH DEFAULT_SCHEMA = [dbo]");
+    }
+    
+    
 }
