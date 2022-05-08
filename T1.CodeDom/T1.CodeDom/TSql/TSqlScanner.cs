@@ -133,6 +133,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("WITH", SqlToken.With);
 			AddTokenMap("WHEN", SqlToken.When);
 			AddTokenMap("WHILE", SqlToken.While);
+			AddTokenMap("WAITFOR", SqlToken.WaitFor);
 			AddTokenMap("XML", SqlToken.XML);
 			AddTokenMap(":SETVAR", SqlToken.ScriptSetVar);
 			AddTokenMap(":ON", SqlToken.ScriptOn);
@@ -186,6 +187,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("COUNT_ROWS", SqlToken.COUNT_ROWS);
 			AddTokenMap("CURRENT", SqlToken.CURRENT);
 			AddTokenMap("CONCAT_NULL_YIELDS_NULL", SqlToken.CONCAT_NULL_YIELDS_NULL);
+			AddTokenMap("DELAY", SqlToken.DELAY);
 			AddTokenMap("DEADLOCK_PRIORITY", SqlToken.DEADLOCK_PRIORITY);
 			AddTokenMap("DATABASE", SqlToken.DATABASE);
 			AddTokenMap("DEFAULT_SCHEMA", SqlToken.DEFAULT_SCHEMA);

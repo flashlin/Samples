@@ -178,6 +178,17 @@ INTO @id, @name");
         }
         
         [Fact]
+        public void waitfor_delay()
+        {
+            var sql = @"waitfor delay '00:00:02'";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"WAITFOR DELAY '00:00:02'");
+        }
+        
+        
+        [Fact]
         public void inserted_id()
         {
             var sql = @"inserted.id";

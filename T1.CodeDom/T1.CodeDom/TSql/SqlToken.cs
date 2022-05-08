@@ -294,6 +294,8 @@
 		USER,
 		DEFAULT_SCHEMA,
 		WITHOUT,
-		NOWAIT
+		NOWAIT,
+		WaitFor,
+		DELAY
 	}
 }
