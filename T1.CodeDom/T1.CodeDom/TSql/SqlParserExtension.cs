@@ -801,7 +801,7 @@ namespace T1.CodeDom.TSql
             var columns = new List<SqlCodeExpr>();
             do
             {
-                columns.Add(ParseColumnAs(parser));
+                columns.Add(ConsumeColumnAs(parser));
             } while (parser.Match(SqlToken.Comma));
 
             return columns;
@@ -1748,7 +1748,7 @@ namespace T1.CodeDom.TSql
             };
         }
 
-        private static SqlCodeExpr ParseColumnAs(IParser parser)
+        private static SqlCodeExpr ConsumeColumnAs(IParser parser)
         {
             var name = parser.ParseExpIgnoreComment();
             name = parser.ParseLRParenExpr(name);
@@ -1761,7 +1761,6 @@ namespace T1.CodeDom.TSql
             {
                 name = assignExpr;
             }
-
 
             SqlCodeExpr overExpr = null;
             if (parser.TryConsumeToken(out var overSpan, SqlToken.Over))
