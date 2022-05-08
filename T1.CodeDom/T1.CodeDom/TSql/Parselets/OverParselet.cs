@@ -32,7 +32,9 @@ namespace T1.CodeDom.TSql.Parselets
                 var orderColumnList = new List<SortSqlCodeExpr>();
                 do
                 {
-                    var name = parser.ConsumeObjectId();
+                    //var name = parser.ConsumeObjectId();
+                    var name = parser.ParseExpIgnoreComment();
+                    
                     parser.Scanner.TryConsumeAny(out var sortTokenSpan, SqlToken.Asc, SqlToken.Desc);
                     var sortToken = parser.Scanner.GetSpanString(sortTokenSpan);
                     orderColumnList.Add(new SortSqlCodeExpr

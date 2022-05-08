@@ -54,7 +54,7 @@ as (
 
 			ThenExprShouldBe(@"WITH tmp
 AS (
-	SELECT ROW_NUMBER() OVER(ORDER BY SUM(Price) DESC) AS ROWID, id FROM customer
+	SELECT ROW_NUMBER() OVER( ORDER BY SUM( Price ) DESC ) AS ROWID, id FROM customer
 )");
 		}
 		

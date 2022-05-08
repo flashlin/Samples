@@ -12,7 +12,7 @@ namespace T1.CodeDom.TSql.Expressions
 			Name.WriteToStream(stream);
 			if (!string.IsNullOrEmpty(SortToken))
 			{
-				stream.Write($" {SortToken}");
+				stream.Write($" {SortToken.ToUpper()}");
 			}
 		}
 	}

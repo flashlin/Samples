@@ -23,6 +23,6 @@ public class OverTest : TestBase
     {
         var sql = "over(order by name asc)";
         Parse(sql);
-        ThenExprShouldBe(@"OVER( ORDER BY name asc )");
+        ThenExprShouldBe(@"OVER( ORDER BY name ASC )");
     }
 }

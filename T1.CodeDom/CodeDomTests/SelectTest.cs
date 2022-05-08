@@ -101,7 +101,7 @@ namespace CodeDomTests
         {
             var sql = "select date over(), ROW_NUMBER() over(order by name desc) from customer";
             Parse(sql);
-            ThenExprShouldBe("SELECT date OVER( ), ROW_NUMBER() OVER( ORDER BY name desc ) FROM customer");
+            ThenExprShouldBe("SELECT date OVER( ), ROW_NUMBER() OVER( ORDER BY name DESC ) FROM customer");
         }
         
 
@@ -542,7 +542,7 @@ CROSS APPLY sys.dm_exec_sql_text( der.sql_handle ) AS dest");
 
             Parse(sql);
 
-            ThenExprShouldBe(@"SELECT ROW_NUMBER() OVER(ORDER BY SUM(BetCount) desc) AS ROWID, id FROM customer");
+            ThenExprShouldBe(@"SELECT ROW_NUMBER() OVER( ORDER BY SUM( BetCount ) DESC ) AS ROWID, id FROM customer");
         }
         
         
