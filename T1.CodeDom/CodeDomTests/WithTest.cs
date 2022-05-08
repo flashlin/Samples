@@ -41,5 +41,23 @@ AS (
 	FROM customer
 )");
 		}
+		
+		
+		[Fact]
+		public void with_over_order_by_sum()
+		{
+			var sql = @"with tmp
+as (
+	select ROW_NUMBER() OVER(ORDER BY Sum(Price) desc) AS ROWID, id from customer
+)";
+			Parse(sql);
+
+			ThenExprShouldBe(@"WITH tmp
+AS (
+	SELECT ROW_NUMBER() OVER(ORDER BY SUM(Price) DESC) AS ROWID, id FROM customer
+)");
+		}
+		
+		
 	}
 }

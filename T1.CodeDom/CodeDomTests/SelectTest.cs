@@ -535,5 +535,16 @@ CROSS APPLY sys.dm_exec_sql_text( der.sql_handle ) AS dest");
         }
         
         
+        [Fact]
+        public void select_over_order_by_sum()
+        {
+            var sql = @"SELECT  ROW_NUMBER() OVER(ORDER BY Sum(BetCount) desc) AS ROWID, id from customer";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT ROW_NUMBER() OVER(ORDER BY SUM(BetCount) desc) AS ROWID, id FROM customer");
+        }
+        
+        
     }
 }
