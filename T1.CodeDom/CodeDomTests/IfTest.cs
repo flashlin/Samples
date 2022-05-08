@@ -108,7 +108,7 @@ END ELSE BEGIN TRANSACTION");
 ";
 			Parse(sql);
 
-			ThenExprShouldBe(@"IF @id = 1 BREAK;");
+			ThenExprShouldBe(@"IF @id = 1 BREAK ;");
 		}
 
 
@@ -119,7 +119,7 @@ END ELSE BEGIN TRANSACTION");
 ";
 			Parse(sql);
 
-			ThenExprShouldBe(@"IF @id <= [dbo].[fn_my]() BREAK;");
+			ThenExprShouldBe(@"IF @id <= [dbo].[fn_my]() BREAK ;");
 		}
 
 		[Fact]
@@ -128,7 +128,7 @@ END ELSE BEGIN TRANSACTION");
 			var sql = @"if @id not between 1 and 2 break;";
 			Parse(sql);
 
-			ThenExprShouldBe(@"IF @id NOT BETWEEN 1 AND 2 BREAK;");
+			ThenExprShouldBe(@"IF @id NOT BETWEEN 1 AND 2 BREAK ;");
 		}
 		
 		[Fact]
@@ -137,7 +137,7 @@ END ELSE BEGIN TRANSACTION");
 			var sql = @"if $(id)=1 break;";
 			Parse(sql);
 
-			ThenExprShouldBe(@"IF $(id) = 1 BREAK;");
+			ThenExprShouldBe(@"IF $(id) = 1 BREAK ;");
 		}
 		
 

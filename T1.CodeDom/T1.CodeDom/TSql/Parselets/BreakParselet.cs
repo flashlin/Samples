@@ -9,8 +9,11 @@ namespace T1.CodeDom.TSql.Parselets
     {
         public IExpression Parse(TextSpan token, IParser parser)
         {
-            parser.ConsumeToken(SqlToken.Semicolon);
-            return new BreakSqlCodeExpr();
+            var isSemicolon = parser.MatchToken(SqlToken.Semicolon);
+            return new BreakSqlCodeExpr()
+            {
+                IsSemicolon = isSemicolon
+            };
         }
     }
 
