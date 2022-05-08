@@ -23,16 +23,9 @@ namespace T1.CodeDom.TSql.Expressions
 
 			if (Options.Count > 0)
 			{
-				stream.Write(" WITH( ");
-				foreach (var option in Options.Select((val, idx) => new { val, idx }))
-				{
-					if (option.idx != 0)
-					{
-						stream.Write(", ");
-					}
-					stream.Write($"{option.val}");
-				}
-				stream.Write(" )");
+				stream.Write(" WITH(");
+				Options.ToUpper().WriteToStreamWithComma(stream);
+				stream.Write(")");
 			}
 
 			if( JoinList != null && JoinList.Count > 0)

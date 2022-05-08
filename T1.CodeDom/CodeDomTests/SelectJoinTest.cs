@@ -45,21 +45,21 @@ left join secondTable tb2 with(nolock)";
 
 			ThenExprShouldBe(@"SELECT 1
 FROM customer
-LEFT JOIN secondTable tb2 WITH(nolock)");
+LEFT JOIN secondTable tb2 WITH(NOLOCK)");
 		}
 
 		[Fact]
 		public void left_join_where()
 		{
 			var sql = @"select 1 from customer
-left join secondTable tb2 with(nolock)
+left join secondTable tb2 with(NOLOCK)
 where id = 1";
 
 			Parse(sql);
 
 			ThenExprShouldBe(@"SELECT 1
 FROM customer
-LEFT JOIN secondTable tb2 WITH(nolock)
+LEFT JOIN secondTable tb2 WITH(NOLOCK)
 WHERE id = 1");
 		}
 
@@ -88,7 +88,7 @@ WHERE id = 1");
 			Parse(sql);
 
 			ThenExprShouldBe(@"SELECT 1
-FROM customer AS c WITH( nolock )
+FROM customer AS c WITH(NOLOCK)
 JOIN otherTable o1");
 		}
 
@@ -108,8 +108,8 @@ JOIN otherTable o1");
 
 			ThenExprShouldBe(@"SELECT id
 FROM ( SELECT b.name
-FROM customer AS b WITH( nolock, INDEX(pk_id) )
-INNER JOIN otherTable e WITH(nolock) b.id = e.id
+FROM customer AS b WITH(NOLOCK, INDEX(PK_ID))
+INNER JOIN otherTable e WITH(NOLOCK) b.id = e.id
 WHERE birth < @birth
 GROUP BY b.id ) AS a");
 		}

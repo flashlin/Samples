@@ -22,7 +22,7 @@ ORDER BY name
 
         ThenExprShouldBe(@"CREATE VIEW [dbo].[vcustomer]
 AS
-SELECT id, name FROM customer WITH( NOLOCK ) ORDER BY name ASC
+SELECT id, name FROM customer WITH(NOLOCK) ORDER BY name ASC
 ");
     }
 }

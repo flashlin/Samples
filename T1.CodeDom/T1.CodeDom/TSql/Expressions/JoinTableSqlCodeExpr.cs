@@ -36,7 +36,7 @@ namespace T1.CodeDom.TSql.Expressions
 			if (WithOptions != null && WithOptions.Count > 0)
 			{
 				stream.Write(" WITH(");
-				WithOptions.WriteToStreamWithComma(stream);
+				WithOptions.ToUpper().WriteToStreamWithComma(stream);
 				stream.Write(")");
 			}
 

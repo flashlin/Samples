@@ -86,7 +86,7 @@ namespace CodeDomTests
             Parse(sql);
 
             ThenExprShouldBe(@"CURSOR FOR SELECT Id, name
-FROM customer WITH( nolock )");
+FROM customer WITH(NOLOCK)");
         }
 
         [Fact]

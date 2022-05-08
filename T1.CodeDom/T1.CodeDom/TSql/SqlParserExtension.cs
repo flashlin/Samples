@@ -1293,7 +1293,8 @@ namespace T1.CodeDom.TSql
                 SqlToken.ROWLOCK,
                 SqlToken.UPDLOCK,
                 SqlToken.HOLDLOCK,
-                SqlToken.FORCESEEK
+                SqlToken.FORCESEEK,
+                SqlToken.NOWAIT
             };
 
             do
@@ -1649,6 +1650,11 @@ namespace T1.CodeDom.TSql
                     stream.Write($"{expr.val}");
                 }
             }
+        }
+        
+        public static IEnumerable<string> ToUpper<T>(this IEnumerable<T> exprList)
+        {
+            return exprList.Select(x => $"{x}".ToUpper());
         }
 
         public static void WriteToStreamWithComma<T>(this IEnumerable<T> exprList, IndentStream stream)

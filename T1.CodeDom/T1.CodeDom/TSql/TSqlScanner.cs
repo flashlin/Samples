@@ -225,6 +225,7 @@ namespace T1.CodeDom.TSql
 			AddTokenMap("NOCOUNT", SqlToken.NOCOUNT);
 			AddTokenMap("NORMAL", SqlToken.NORMAL);
 			AddTokenMap("NULLIF", SqlToken.NULLIF);
+			AddTokenMap("NOWAIT", SqlToken.NOWAIT);
 			AddTokenMap("NONCLUSTERED", SqlToken.NONCLUSTERED);
 			AddTokenMap("MAXDOP", SqlToken.MAXDOP);
 			AddTokenMap("OBJECT_NAME", SqlToken.OBJECT_NAME);

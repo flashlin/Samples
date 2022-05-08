@@ -153,7 +153,7 @@ where id in (@id1, @id2)";
             Parse(sql);
 
             ThenExprShouldBe(@"SELECT @id = @id + 1
-FROM customer WITH( nolock )
+FROM customer WITH(NOLOCK)
 WHERE id IN (@id1, @id2)");
         }
 
@@ -210,6 +210,15 @@ GROUP BY id");
             Parse(sql);
             ThenExprShouldBe("SELECT customerName AS name");
         }
+        
+        [Fact]
+        public void select_with_nowait()
+        {
+            var sql = "select 1 from customer with(nowait)";
+            Parse(sql);
+            ThenExprShouldBe("SELECT 1 FROM customer WITH(NOWAIT)");
+        }
+        
 
         [Fact]
         public void select_name_as_name()
@@ -355,7 +364,7 @@ FROM customer");
             Parse(sql);
 
             ThenExprShouldBe(@"SELECT 1
-FROM customer WITH( nolock, INDEX(aaa) )");
+FROM customer WITH(NOLOCK, INDEX(AAA))");
         }
 
         [Fact]
@@ -480,7 +489,7 @@ AND id >= 100");
 
             Parse(sql);
 
-            ThenExprShouldBe(@"SELECT @id = id FROM Online WITH( nolock ) WHERE id = 1");
+            ThenExprShouldBe(@"SELECT @id = id FROM Online WITH(NOLOCK) WHERE id = 1");
         }
         
         
