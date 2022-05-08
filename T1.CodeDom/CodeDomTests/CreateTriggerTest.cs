@@ -44,4 +44,26 @@ END");
     }
     
     
+    [Fact]
+    public void create_trigger_with_execute_as_and_after_many()
+    {
+        var sql = @"CREATE TRIGGER [customer_INSERT] ON [customer]
+WITH EXECUTE AS OWNER
+AFTER INSERT, update
+AS
+BEGIN
+	set noexec on
+END";
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE TRIGGER [customer_INSERT] ON [customer]
+WITH EXECUTE AS OWNER
+AFTER INSERT, UPDATE
+AS
+BEGIN
+   SET NOEXEC ON
+END");
+    }
+    
+    
 }
