@@ -110,7 +110,7 @@ namespace T1.CodeDom.TSql.Parselets
             {
                 return null;
             }
-            //CREATE USER [L_Earth] FOR LOGIN [L_Earth] WITH DEFAULT_SCHEMA=[dbo]
+            
             var userName = parser.ConsumeObjectId();
 
             SqlCodeExpr loginExpr = null;
@@ -126,16 +126,22 @@ namespace T1.CodeDom.TSql.Parselets
             {
                 loginExpr = new WithoutLoginSqlCodeExpr();
             }
-            
-            parser.ConsumeToken(SqlToken.With);
-            parser.ConsumeToken(SqlToken.DEFAULT_SCHEMA);
-            parser.ConsumeToken(SqlToken.Equal);
-            var schemaName = parser.ConsumeObjectId();
+
+            SqlCodeExpr withExpr = null;
+            if (parser.MatchTokenList(SqlToken.With, SqlToken.DEFAULT_SCHEMA, SqlToken.Equal))
+            {
+                var schemaName = parser.ConsumeObjectId();
+                withExpr = new WithDefaultSchemaSqlCodeExpr
+                {
+                    SchemaName = schemaName
+                };
+            }
+
             return new CreateUserSqlCodeExpr
             {
                 UserName = userName,
                 LoginName = loginExpr,
-                SchemaName = schemaName
+                WithExpr = withExpr 
             };
         }
 
@@ -464,6 +470,17 @@ namespace T1.CodeDom.TSql.Parselets
         }
     }
 
+    public class WithDefaultSchemaSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("WITH DEFAULT_SCHEMA = ");
+            SchemaName.WriteToStream(stream);
+        }
+
+        public SqlCodeExpr SchemaName { get; set; }
+    }
+
     public class WithoutLoginSqlCodeExpr : SqlCodeExpr
     {
         public override void WriteToStream(IndentStream stream)
@@ -491,12 +508,15 @@ namespace T1.CodeDom.TSql.Parselets
             UserName.WriteToStream(stream);
             stream.Write(" ");
             LoginName.WriteToStream(stream);
-            stream.Write(" WITH DEFAULT_SCHEMA = ");
-            SchemaName.WriteToStream(stream);
+            if (WithExpr != null)
+            {
+                stream.Write(" ");
+                WithExpr.WriteToStream(stream);
+            }
         }
 
         public SqlCodeExpr UserName { get; set; }
         public SqlCodeExpr LoginName { get; set; }
-        public SqlCodeExpr SchemaName { get; set; }
+        public SqlCodeExpr WithExpr { get; set; }
     }
 }

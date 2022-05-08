@@ -30,4 +30,15 @@ public class CreateUserTest : TestBase
     }
     
     
+    [Fact]
+    public void create_user_without_end()
+    {
+        var sql = @"create user [UserName] WITHOUT LOGIN";
+        
+        Parse(sql);
+
+        ThenExprShouldBe(@"CREATE USER [UserName] WITHOUT LOGIN");
+    }
+    
+    
 }
