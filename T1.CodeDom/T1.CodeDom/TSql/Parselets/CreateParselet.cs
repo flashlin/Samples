@@ -97,7 +97,7 @@ namespace T1.CodeDom.TSql.Parselets
 
             if (parser.IsToken(SqlToken.TRIGGER))
             {
-                return ConsumeTriggerCreate(parser);
+                return ConsumeCreateTrigger(parser);
             }
 
             var helpMessage = parser.Scanner.GetHelpMessage();
@@ -185,7 +185,7 @@ namespace T1.CodeDom.TSql.Parselets
             };
         }
 
-        private SqlCodeExpr ConsumeTriggerCreate(IParser parser)
+        private SqlCodeExpr ConsumeCreateTrigger(IParser parser)
         {
             var triggerExpr = parser.ConsumeTrigger();
 
