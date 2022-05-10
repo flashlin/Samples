@@ -153,13 +153,10 @@ namespace T1.CodeDom.TSql.Parselets
 
 		private WhenMatchedSqlCodeExpr GetWhenMatched(IParser parser)
 		{
-			if (!parser.Scanner.IsTokenList(SqlToken.When, SqlToken.Matched))
+			if (!parser.MatchTokenList(SqlToken.When, SqlToken.Matched))
 			{
 				return null;
 			}
-
-			parser.Scanner.Consume(SqlToken.When);
-			parser.Scanner.Consume(SqlToken.Matched);
 
 			SqlCodeExpr clauseSearchCondition = null;
 			if (parser.Scanner.Match(SqlToken.And))
