@@ -76,7 +76,16 @@ namespace T1.CodeDom.TSql.Parselets
         {
             var tableName = parser.ConsumeObjectId();
 
-            var alterAction = parser.ConsumeTokenStringAny(SqlToken.ADD, SqlToken.Set, SqlToken.Drop, SqlToken.NOCHECK, SqlToken.CHECK);
+            //var alterAction = parser.ConsumeTokenStringAny(SqlToken.ADD, SqlToken.Set, SqlToken.Drop, SqlToken.NOCHECK, SqlToken.CHECK);
+
+            var alterActions = parser.ConsumeTokenListAny(new[] {SqlToken.ADD},
+                new[] {SqlToken.Set},
+                new[] {SqlToken.Drop},
+                new[] {SqlToken.NOCHECK},
+                new []{SqlToken.CHECK },
+                new []{SqlToken.With, SqlToken.NOCHECK});
+
+            var alterAction = string.Join(" ", alterActions.Select(x=> parser.Scanner.GetSpanString(x)));
 
             var optionList = parser.ParseAll(
                 ParseLRParenOptionList,
