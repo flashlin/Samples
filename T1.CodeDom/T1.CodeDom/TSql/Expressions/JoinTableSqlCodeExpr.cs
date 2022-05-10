@@ -42,7 +42,7 @@ namespace T1.CodeDom.TSql.Expressions
 
 			if (JoinOnExpr != null)
 			{
-				stream.Write(" ");
+				stream.Write(" ON ");
 				JoinOnExpr.WriteToStream(stream);
 			}
 		}

@@ -297,10 +297,8 @@ FROM customer");
             Parse(sql);
 
             ThenExprShouldBe(@"SELECT c.id, p.*
-FROM ( SELECT *
-FROM otherTable
-WHERE id = @id ) AS p
-JOIN customer c WITH(NOLOCK) p.id = c.id
+FROM ( SELECT * FROM otherTable WHERE id = @id ) AS p
+JOIN customer c WITH(NOLOCK) ON p.id = c.id
 ORDER BY c.name ASC, c.id ASC ;");
         }
 
@@ -543,6 +541,28 @@ CROSS APPLY sys.dm_exec_sql_text( der.sql_handle ) AS dest");
             Parse(sql);
 
             ThenExprShouldBe(@"SELECT ROW_NUMBER() OVER( ORDER BY SUM( BetCount ) DESC ) AS ROWID, id FROM customer");
+        }
+        
+        
+        [Fact]
+        public void select_from_rent_inner_join()
+        {
+            var sql = @"SELECT id, (select name FROM [otherCustomer] WHERE [Id] = @id) AS [playerName]
+		FROM 
+		(
+			[customer] WITH(NOLOCK) 
+			INNER JOIN ( SELECT gid FROM sample ) AS [g] 
+			ON [g].[gid] = 123
+		) ORDER BY id";
+
+            Parse(sql);
+
+            ThenExprShouldBe(@"SELECT id, ( SELECT name FROM [otherCustomer] WHERE [Id] = @id ) AS [playerName]
+FROM (
+    [customer] WITH(NOLOCK) 
+    INNER JOIN ( SELECT gid FROM sample ) [g] ON [g].[gid] = 123 
+)
+ORDER BY id ASC");
         }
         
         

@@ -59,7 +59,7 @@ WHERE id = @id");
 OUTPUT deleted.id, deleted.name, 'System Message'
 INTO TrackCustomer ([Id], [Name], [Desc])
 FROM otherTable AS ds
-INNER JOIN @tIds bs ds.Id = bs.Id
+INNER JOIN @tIds bs ON ds.Id = bs.Id
 WHERE ds.name = @name");
 		}
 

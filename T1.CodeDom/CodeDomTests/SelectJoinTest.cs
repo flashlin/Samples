@@ -107,9 +107,8 @@ JOIN otherTable o1");
 			Parse(sql);
 
 			ThenExprShouldBe(@"SELECT id
-FROM ( SELECT b.name
-FROM customer AS b WITH(NOLOCK, INDEX(PK_ID))
-INNER JOIN otherTable e WITH(NOLOCK) b.id = e.id
+FROM ( SELECT b.name FROM customer AS b WITH(NOLOCK, INDEX(PK_ID))
+INNER JOIN otherTable e WITH(NOLOCK) ON b.id = e.id
 WHERE birth < @birth
 GROUP BY b.id ) AS a");
 		}

@@ -26,6 +26,20 @@ namespace T1.CodeDom.TSql.Parselets
 
 			//var secondTable = parser.ConsumeAny(SqlToken.Variable, SqlToken.Identifier, SqlToken.SqlIdentifier) as SqlCodeExpr;
 			var secondTable = parser.ParseExpIgnoreComment();
+			// SqlCodeExpr secondTable;
+			// if (parser.MatchToken(SqlToken.LParen))
+			// {
+			// 	secondTable = parser.ParseExpIgnoreComment();
+			// 	parser.ConsumeToken(SqlToken.RParen);
+			// 	secondTable = new GroupSqlCodeExpr
+			// 	{
+			// 		InnerExpr = secondTable,
+			// 	};
+			// }
+			// else
+			// {
+			// 	secondTable = parser.ParseExpIgnoreComment();
+			// }
 
 			parser.TryConsumeAliasName(out var aliasNameExpr);
 

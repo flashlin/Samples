@@ -963,8 +963,7 @@ namespace T1.CodeDom.TSql
             var fromSourceList = new List<SqlCodeExpr>();
             do
             {
-                FromSourceSqlCodeExpr item = ParseFromSource(parser);
-                fromSourceList.Add(item);
+                fromSourceList.Add(ParseFromSource(parser));
             } while (parser.Scanner.Match(SqlToken.Comma));
 
             return fromSourceList;
@@ -1651,7 +1650,7 @@ namespace T1.CodeDom.TSql
                 }
             }
         }
-        
+
         public static IEnumerable<string> ToUpper<T>(this IEnumerable<T> exprList)
         {
             return exprList.Select(x => $"{x}".ToUpper());
@@ -1904,10 +1903,27 @@ namespace T1.CodeDom.TSql
             return fillfactorSqlCodeExpr;
         }
 
-        private static FromSourceSqlCodeExpr ParseFromSource(IParser parser)
+        private static SqlCodeExpr ParseFromSource(IParser parser)
         {
-            // var sourceExpr = parser.ParseExpIgnoreComment();
-            // sourceExpr = parser.ParseLRParenExpr(sourceExpr);
+            // var isLParen = parser.MatchToken(SqlToken.LParen);
+            // SqlCodeExpr sourceExpr;
+            // if (isLParen)
+            // {
+            //     sourceExpr = parser.ParseExpIgnoreComment();
+            //     parser.ConsumeToken(SqlToken.RParen);
+            //     sourceExpr = new GroupSqlCodeExpr
+            //     {
+            //         InnerExpr = sourceExpr
+            //     };
+            // }
+            // else
+            // {
+            //     sourceExpr = parser.ParseTableSource();
+            //     if (sourceExpr == null)
+            //     {
+            //         ThrowHelper.ThrowParseException(parser, "TableName");
+            //     }
+            // }
 
             var sourceExpr = parser.ParseTableSource();
             if (sourceExpr == null)
@@ -1915,11 +1931,14 @@ namespace T1.CodeDom.TSql
                 ThrowHelper.ThrowParseException(parser, "TableName");
             }
 
+            return parser.ConsumeAfterTableSource(sourceExpr);
+        }
+
+        private static SqlCodeExpr ConsumeAfterTableSource(this IParser parser, SqlCodeExpr sourceExpr)
+        {
             parser.TryConsumeAliasName(out var aliasNameExpr);
             var userWithOptions = parser.ParseWithOption();
-
             var joinList = parser.GetJoinSelectList();
-
             return new FromSourceSqlCodeExpr
             {
                 Left = sourceExpr,
@@ -2154,6 +2173,31 @@ namespace T1.CodeDom.TSql
                     InnerExpr = innerExpr
                 };
             }
+            
+            SqlCodeExpr ParseRentTableWithOption(IParser parser1)
+            {
+                var startIndex = parser.Scanner.GetOffset();
+                if (!parser1.MatchToken(SqlToken.LParen))
+                {
+                    return null;
+                }
+                if (!parser1.TryConsumeObjectId(out var tableName))
+                {
+                    parser1.Scanner.SetOffset(startIndex);
+                    return null;
+                }
+                if (!parser1.IsToken(SqlToken.With))
+                {
+                    parser1.Scanner.SetOffset(startIndex);
+                    return null;
+                }
+                var expr = parser1.ConsumeAfterTableSource(tableName);
+                parser1.ConsumeToken(SqlToken.RParen);
+                return new GroupSqlCodeExpr
+                {
+                    InnerExpr = expr
+                };
+            }
 
             return parser.ParseAny(ParseFuncNameIdentifier,
                 ParseIdentifierFunc,
@@ -2161,6 +2205,7 @@ namespace T1.CodeDom.TSql
                 ParseTempTable,
                 ParseIdentifier,
                 ParseNonIdentifier,
+                ParseRentTableWithOption,
                 ParseRent);
         }
 
@@ -2221,13 +2266,29 @@ namespace T1.CodeDom.TSql
         }
     }
 
+    public class AliasSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            LeftExpr.WriteToStream(stream);
+            if (AliasName != null)
+            {
+                stream.Write(" AS ");
+                AliasName.WriteToStream(stream);
+            }
+        }
+
+        public GroupSqlCodeExpr LeftExpr { get; set; }
+        public SqlCodeExpr AliasName { get; set; }
+    }
+
     public class AfterActionSqlCodeExpr : SqlCodeExpr
     {
         public override void WriteToStream(IndentStream stream)
         {
             stream.Write("AFTER ");
-            
-            ActionList.Select(x=> $"{x}".ToUpper()).WriteToStreamWithComma(stream);
+
+            ActionList.Select(x => $"{x}".ToUpper()).WriteToStreamWithComma(stream);
         }
 
         public List<SqlToken> ActionList { get; set; }
