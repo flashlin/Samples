@@ -99,12 +99,14 @@ namespace T1.CodeDom.TSql.Parselets
 			do
 			{
 				var leftExpr = parser.ConsumeObjectId(true);
-				parser.ConsumeToken(SqlToken.Equal);
+
+				var oper = parser.ConsumeTokenString();
+				
 				var rightExpr = parser.ParseExpIgnoreComment();
 				updateSetList.Add(new AssignSqlCodeExpr
 				{
 					Left = leftExpr,
-					Oper = "=",
+					Oper = oper,
 					Right = rightExpr
 				});
 			} while (parser.Scanner.Match(SqlToken.Comma));

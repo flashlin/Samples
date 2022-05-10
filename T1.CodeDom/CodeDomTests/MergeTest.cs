@@ -113,7 +113,10 @@ WHEN MATCHED THEN
 
             Parse(sql);
 
-            ThenExprShouldBe(@"MERGE INTO customer");
+            ThenExprShouldBe(@"MERGE customer AS t 
+USING ( SELECT id = @id ) AS s ON t.id = s.id 
+WHEN MATCHED THEN UPDATE SET t.[price] += @price, t.[ModifiedOn] = GETDATE() 
+WHEN NOT MATCHED THEN INSERT ([id], [name]) VALUES(@Id, @name) ;");
         }
     }
 }

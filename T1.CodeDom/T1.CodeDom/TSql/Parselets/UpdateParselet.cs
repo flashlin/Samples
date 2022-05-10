@@ -88,7 +88,7 @@ namespace T1.CodeDom.TSql.Parselets
 					ThrowHelper.ThrowParseException(parser, "Expect column");
 				}
 
-				var oper = parser.Scanner.ConsumeStringAny(SqlToken.Equal, SqlToken.MinusEqual, SqlToken.PlusEqual);
+				var oper = parser.ConsumeTokenString();
 
 				var valueExpr = parser.ParseExpIgnoreComment();
 				valueExpr = parser.ParseLRParenExpr(valueExpr);
