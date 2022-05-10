@@ -104,21 +104,16 @@ WHEN MATCHED THEN
         [Fact]
         public void merge_into()
         {
-            var sql = @"merge into customer
-    using (select @Id as Id) as s on t.ID = s.Id
-    when matched
-    then update set t.name = 'aaa'
-    when not matched
-    then insert values (@Id, @name)
-    output 0 as ErrCode, @name as UserName;";
+            var sql = @"MERGE customer AS t
+	USING (SELECT id = @id) AS s on t.id = s.id
+	WHEN MATCHED THEN
+	UPDATE SET t.[price] += @price,	t.[ModifiedOn] = GETDATE()		 
+	WHEN NOT MATCHED THEN
+	INSERT ([id], [name]) VALUES(@Id, @name);";
 
             Parse(sql);
 
-            ThenExprShouldBe(@"MERGE INTO customer
-USING ( SELECT @Id AS Id ) AS s ON t.ID = s.Id
-WHEN MATCHED THEN UPDATE SET t.name = 'aaa'
-WHEN NOT MATCHED THEN INSERT VALUES(@Id, @name)
-OUTPUT 0 AS ErrCode, @name AS UserName ;");
+            ThenExprShouldBe(@"MERGE INTO customer");
         }
     }
 }
