@@ -76,8 +76,7 @@ namespace T1.CodeDom.TSql.Parselets
         {
             var tableName = parser.ConsumeObjectId();
 
-            var alterActionSpan = parser.ConsumeTokenAny(SqlToken.ADD, SqlToken.Set, SqlToken.Drop, SqlToken.NOCHECK, SqlToken.CHECK);
-            var alterAction = parser.Scanner.GetSpanString(alterActionSpan);
+            var alterAction = parser.ConsumeTokenStringAny(SqlToken.ADD, SqlToken.Set, SqlToken.Drop, SqlToken.NOCHECK, SqlToken.CHECK);
 
             var optionList = parser.ParseAll(
                 ParseLRParenOptionList,
@@ -89,22 +88,10 @@ namespace T1.CodeDom.TSql.Parselets
                 ParseColumnDataTypeList
             );
 
-            // var constraintExpr = parser.ParseConstraint();
-            // var defaultValueExpr = parser.ParseDefault();
-            // SqlCodeExpr forExpr = null;
-            // if (defaultValueExpr != null)
-            // {
-            //     parser.ConsumeToken(SqlToken.FOR);
-            //     forExpr = parser.ConsumeObjectId();
-            // }
-
             return new AlterTableSqlCodeExpr
             {
                 TableName = tableName,
                 AlterAction = alterAction,
-                // ConstraintExpr = constraintExpr,
-                // DefaultExpr = defaultValueExpr,
-                // ForExpr = forExpr,
                 OptionList = optionList
             };
         }
