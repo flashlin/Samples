@@ -1842,14 +1842,17 @@ namespace T1.CodeDom.TSql
                 return null;
             }
 
-            var size = 0;
+            SqlCodeExpr size;
             if (parser.MatchToken(SqlToken.MAX))
             {
-                size = int.MaxValue;
+                size = new MaxSqlCodeExpr();
             }
             else
             {
-                size = int.Parse(parser.ConsumeTokenStringAny(SqlToken.Number));
+                size = new NumberSqlCodeExpr
+                {
+                    Value = parser.ConsumeTokenStringAny(SqlToken.Number)
+                };
             }
 
             int? scale = null;
@@ -2266,6 +2269,14 @@ namespace T1.CodeDom.TSql
         }
     }
 
+    public class MaxSqlCodeExpr : SqlCodeExpr
+    {
+        public override void WriteToStream(IndentStream stream)
+        {
+            stream.Write("MAX");
+        }
+    }
+
     public class AliasSqlCodeExpr : SqlCodeExpr
     {
         public override void WriteToStream(IndentStream stream)
@@ -2328,20 +2339,12 @@ namespace T1.CodeDom.TSql
     {
         public int? Scale { get; set; }
 
-        public int Size { get; set; }
+        public SqlCodeExpr Size { get; set; }
 
         public override void WriteToStream(IndentStream stream)
         {
             stream.Write("(");
-            if (Size == int.MaxValue)
-            {
-                stream.Write($"MAX");
-            }
-            else
-            {
-                stream.Write($"{Size}");
-            }
-
+            Size.WriteToStream(stream);
 
             if (Scale != null)
             {
