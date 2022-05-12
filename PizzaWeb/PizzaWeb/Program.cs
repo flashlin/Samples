@@ -1,7 +1,11 @@
+using PizzaWeb.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.Configure<PizzaDbConfig>(builder.Configuration.GetSection("DbConfig"));
+builder.Services.AddDbContext<PizzaDbContext>();
 
 var app = builder.Build();
 

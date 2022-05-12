@@ -7,14 +7,17 @@ namespace PizzaWeb.Controllers
 	public class HomeController : Controller
 	{
 		private readonly ILogger<HomeController> _logger;
+		private readonly PizzaDbContext _dbContext;
 
-		public HomeController(ILogger<HomeController> logger)
+		public HomeController(ILogger<HomeController> logger, PizzaDbContext dbContext)
 		{
 			_logger = logger;
+			this._dbContext = dbContext;
 		}
 
 		public IActionResult Index()
 		{
+			var items = _dbContext.StoreShelves.ToList();
 			return View();
 		}
 
