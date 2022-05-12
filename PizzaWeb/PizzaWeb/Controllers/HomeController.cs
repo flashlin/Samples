@@ -4,6 +4,11 @@ using System.Diagnostics;
 
 namespace PizzaWeb.Controllers
 {
+	public class IndexViewModel
+	{
+		public List<StoreShelvesEntity> StoreShelves { get; set; }
+	}
+
 	public class HomeController : Controller
 	{
 		private readonly ILogger<HomeController> _logger;
@@ -17,8 +22,10 @@ namespace PizzaWeb.Controllers
 
 		public IActionResult Index()
 		{
-			var items = _dbContext.StoreShelves.ToList();
-			return View();
+			return View(new IndexViewModel
+			{
+				StoreShelves = _dbContext.StoreShelves.ToList()
+			});
 		}
 
 		public IActionResult Privacy()
@@ -32,4 +39,5 @@ namespace PizzaWeb.Controllers
 			return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 		}
 	}
+	
 }
