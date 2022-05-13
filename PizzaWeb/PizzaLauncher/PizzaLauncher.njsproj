@@ -33,12 +33,13 @@
   <ItemGroup>
     <Content Include="public\favicon.ico" />
     <Content Include="public\index.html" />
+    <Content Include="spa\luncher.html" />
     <Content Include="tsconfig.json" />
     <Content Include="package.json" />
     <Content Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="dist\" />
+    <Folder Include="spa\" />
     <Folder Include="public\" />
     <Folder Include="src\" />
   </ItemGroup>
