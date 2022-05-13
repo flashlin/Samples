@@ -25,7 +25,7 @@
          "scripthost"
       ],
       "types": [
-         "node"
+         "node", "vite/client"
       ]
    },
   "include": [
@@ -34,7 +34,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-  ],
+, "env.d.ts"  ],
   "exclude": [
     "node_modules"
   ]
