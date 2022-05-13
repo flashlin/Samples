@@ -1,35 +1,47 @@
 {
-  "name": "pizza-launcher",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build"
-  },
-  "description": "PizzaLauncher",
-  "author": {
-    "name": ""
-  },
-  "dependencies": {
-    "vue": "2.6.12",
-    "vue-class-component": "7.2.6",
-    "vue-property-decorator": "9.1.2"
-  },
-  "devDependencies": {
-    "@vue/cli-plugin-babel": "4.5.13",
-    "@vue/cli-plugin-typescript": "4.5.13",
-    "@vue/cli-service": "4.5.13",
-    "typescript": "4.1.5",
-    "vue-template-compiler": "2.6.12"
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ]
+	"name": "pizza-launcher",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "vite",
+		"serve": "vite preview",
+		"build": "vite build --emptyOutDir",
+		"build1": "vue-tsc --noEmit && vite build"
+	},
+	"description": "PizzaLauncher",
+	"author": {
+		"name": ""
+	},
+	"dependencies": {
+		"vue": "^3.0.5"
+	},
+	"devDependencies": {
+		"@types/node": "^17.0.33",
+		"@types/webpack-env": "^1.16.4",
+		"@typescript-eslint/eslint-plugin": "^4.24.0",
+		"@typescript-eslint/parser": "^4.24.0",
+		"@vitejs/plugin-vue": "^1.2.2",
+		"@vitejs/plugin-vue-jsx": "^1.1.4",
+		"@vue/compiler-sfc": "^3.0.5",
+		"eslint": "^7.27.0",
+		"eslint-config-standard": "^16.0.2",
+		"eslint-plugin-import": "^2.23.3",
+		"eslint-plugin-node": "^11.1.0",
+		"eslint-plugin-promise": "^4.3.1",
+		"eslint-plugin-vue": "^7.9.0",
+		"typescript": "^4.2.4",
+		"vite": "^2.3.3",
+		"vite-tsconfig-paths": "^3.4.1",
+		"vue-tsc": "^0.34.13"
+	},
+	"postcss": {
+		"plugins": {
+			"autoprefixer": {}
+		}
+	},
+	"browserslist": [
+		"> 1%",
+		"last 2 versions",
+		"not ie <= 8"
+	]
 }
