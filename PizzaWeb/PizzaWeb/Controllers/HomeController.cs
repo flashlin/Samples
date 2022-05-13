@@ -28,6 +28,11 @@ namespace PizzaWeb.Controllers
 			});
 		}
 
+		public IActionResult Launch()
+		{
+			return View();
+		}
+
 		public IActionResult Privacy()
 		{
 			return View();
