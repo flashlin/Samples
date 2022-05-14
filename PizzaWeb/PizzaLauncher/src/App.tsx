@@ -15,7 +15,7 @@ export interface StoreShelves {
 	imageName: string;
 }
 
-async function getStoreShelves() {
+async function getStoreShelves(): Promise<StoreShelves[]> {
 	let resp = await fetch(`/api/StoreShelves/GetAll`);
 	return resp.json();
 }
@@ -24,11 +24,8 @@ export default defineComponent({
 	props: {},
 	setup(props) {
 		const state = reactive({
-			imageId: 1,
 			items: [] as StoreShelves[]
 		});
-
-		getStoreShelves();
 
 		onMounted(async () => {
 			state.items = await getStoreShelves();
@@ -48,12 +45,6 @@ export default defineComponent({
 				formData.append("isFirst", isFirst.toString());
 
 				await fetch(`/api/StoreShelves/SaveBlob`, {
-					//  headers: {
-					//    "Content-Type": "multipart/form-data",
-					//    //    //"Content-Type": "application/json",
-					//    //    //Accept: "application/json",
-					//    //    //"Authorization": `Bearer ${token}`,
-					//  },
 					method: "POST",
 					body: formData,
 				});
