@@ -49,6 +49,12 @@ export default ({ mode }) => {
           ws: true,
           //rewrite: (pathStr) => pathStr.replace("/api", ""),
         },
+        "/images": {
+          target: "http://localhost:5129/",
+          changeOrigin: true,
+          ws: true,
+          //rewrite: (pathStr) => pathStr.replace("/api", ""),
+        },
       },
     },
   });
