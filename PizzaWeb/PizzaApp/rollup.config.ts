@@ -6,7 +6,7 @@ import { terser } from 'rollup-plugin-terser'
 export default {
   input: "src/pages/luncher.ts",
   output: {
-    dir: "dist",
+    dir: "../PizzaWeb/wwwroot/dist/pages",
     format: "esm",  //iife, cjs, esm
     globals: {
       'jquery': '$'
@@ -17,7 +17,7 @@ export default {
     json(),
     nodeResolve(),
     // 如果要在瀏覽器使用需要加入設定如下
-    nodeResolve({ browser: true, preferBuiltins: true }),
-    terser()
+    //nodeResolve({ browser: true, preferBuiltins: true }),
+    //terser()
   ],
 };
