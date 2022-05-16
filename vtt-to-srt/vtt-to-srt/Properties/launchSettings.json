@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "vtt-to-srt": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\Demo\\Recording\\git.vtt"
+    }
+  }
+}
