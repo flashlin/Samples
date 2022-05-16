@@ -9,6 +9,8 @@ Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "PizzaLauncher", "PizzaLaunc
 EndProject
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "PizzaApp", "PizzaApp\PizzaApp.njsproj", "{F2486E51-3BAC-4866-A092-F7F54402953D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{1AEACE94-2D9B-4C1F-A043-3A85D68DB984}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{F2486E51-3BAC-4866-A092-F7F54402953D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2486E51-3BAC-4866-A092-F7F54402953D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2486E51-3BAC-4866-A092-F7F54402953D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AEACE94-2D9B-4C1F-A043-3A85D68DB984}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AEACE94-2D9B-4C1F-A043-3A85D68DB984}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AEACE94-2D9B-4C1F-A043-3A85D68DB984}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AEACE94-2D9B-4C1F-A043-3A85D68DB984}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
