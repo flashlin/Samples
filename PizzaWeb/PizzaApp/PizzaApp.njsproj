@@ -10,7 +10,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>0107c39b-3ef3-4716-a233-a876e77a119b</ProjectGuid>
+    <ProjectGuid>{f2486e51-3bac-4866-a092-f7f54402953d}</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>
     </StartupFile>
@@ -43,10 +43,7 @@
     <TypeScriptCompile Include="src\models\helper.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
-    <TypeScriptCompile Include="src\pages\luncher.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="web-dev-config.ts">
+    <TypeScriptCompile Include="src\pages\index.ts">
       <SubType>Code</SubType>
     </TypeScriptCompile>
   </ItemGroup>

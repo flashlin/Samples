@@ -1,0 +1,155 @@
+<html>
+
+<body>
+   <script>
+      function execute(code) {
+         let fn = Function;
+         return new fn(code)();
+         // let script = document.createElement('script');
+         // script.type = "text/javascript";
+         // script.text = str;
+         // document.getElementsByTagName('head')[0].appendChild(script);
+         // document.head.removeChild(document.head.lastChild);
+      }
+
+      function setSpanText(dom, newValue) {
+         dom.innerText = newValue;
+         console.log("set span text", newValue);
+      }
+
+      function setInputText(dom, newValue) {
+         dom.value = newValue;
+         console.log("set text text", newValue);
+      }
+
+      let setDomDict = {
+         "span": setSpanText,
+         "text": setInputText
+      };
+
+      function getTagName(dom) {
+         let tagName = dom.tagName.toLowerCase();
+         if (tagName == "input") {
+            tagName = dom.type.toLowerCase();
+         }
+         return tagName;
+      }
+
+      function getSetTextFn(dom) {
+         let tagName = getTagName(dom);
+         if (!Object.hasOwn(setDomDict, tagName)) {
+            return () => { };
+         }
+         return setDomDict[tagName];
+      }
+
+      function getVModelAttr(dom) {
+         let vmodel = dom.getAttribute('v-model');
+         if (vmodel == null) {
+            return null;
+         }
+         let vmodelArr = vmodel.split('.');
+         let dataName = vmodelArr[0];
+         let dataPropertyName = vmodelArr[1];
+         return [dataName, dataPropertyName];
+      }
+
+      function bindModelToDom(data, dataPropertyName, dom, attrName, domList) {
+         let bindingDict = data['__bindingDict'];
+         if (!bindingDict) {
+            bindingDict = data['__bindingDict'] = {};
+         }
+         if (Object.hasOwn(bindingDict, dataPropertyName)) {
+            return;
+         }
+         bindingDict[dataPropertyName] = true;
+
+         let innerDataKey = `_${dataPropertyName}`;
+         data[innerDataKey] = data[dataPropertyName];
+         Object.defineProperty(data, dataPropertyName, {
+            get: function () {
+               let value = this[innerDataKey];
+               console.log("get", innerDataKey, value);
+               return value;
+            },
+            set: function (newValue) {
+               console.log('set', innerDataKey, newValue);
+               this[innerDataKey] = newValue;
+               //dom[attrName] = newValue;
+               syncModelToDomList(dom, attrName, newValue, domList);
+            },
+            configurable: true,
+         });
+         return data;
+      }
+
+      function syncModelToDomList(data, dataPropertyName, newValue, domList) {
+         if (domList == null) {
+            return;
+         }
+         for (let i = 0; i < domList.length; i++) {
+            let dom = domList[i];
+            let vmodel = getVModelAttr(dom);
+            if (vmodel == null) {
+               continue;
+            }
+
+            let vmodelData = execute(`return ${vmodel[0]}`);
+            if (vmodel[0] == dataPropertyName) {
+               let setTextFn = getSetTextFn(dom);
+               setTextFn(dom, newValue);
+            }
+
+            let setTextFn = getSetTextFn(dom);
+            setTextFn(dom, newValue);
+         }
+      }
+
+      function bindDomToModel(dom, eventName, attrName, data, dataPropertyName) {
+         dom.addEventListener(eventName, (event) => {
+            data[dataPropertyName] = event.target[attrName];
+         });
+      }
+
+      function twoWayBindingInputText(dom, data, dataPropertyName, domList) {
+         bindModelToDom(data, dataPropertyName, dom, 'value', domList);
+         bindDomToModel(dom, 'keyup', 'value', data, dataPropertyName);
+         dom.value = data[dataPropertyName];
+         //console.log("bind", dom.value);
+      }
+
+      function oneWayBindingSpanText(dom, data, dataPropertyName) {
+         dom.innerText = data[dataPropertyName];
+         bindModelToDom(data, dataPropertyName, dom, 'innerText');
+      }
+   </script>
+
+
+   <input id="id" type="text" v-model="data.id" onchange="print(this)" />
+   <span id="spanId" v-model="data.id"></span>
+   <button onclick="add()">inc</button>
+
+   <script>
+      let data = {
+         id: 0,
+         name: 'flash',
+      };
+
+      function add() {
+         data.id = Number(data.id) + 1;
+      }
+
+      let domList = document.querySelectorAll('body > *');
+      let nameDom = document.getElementById('id');
+      let spanDom = document.getElementById('spanId');
+
+      console.log("domList", domList.length);
+
+      twoWayBindingInputText(nameDom, data, 'id', domList);
+      oneWayBindingSpanText(spanDom, data, 'id');
+
+   </script>
+
+</body>
+
+</html>

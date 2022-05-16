@@ -1,0 +1,29 @@
+<html>
+
+<body>
+   <script>
+      const dinner = {
+         meal: 'tacos'
+      }
+
+      const handler = {
+         get(target, property, receiver) {
+            //track(target, property)
+            return Reflect.get(...arguments)
+         },
+         set(target, property, value, receiver) {
+            //trigger(target, property)
+            console.log("set", target, property, value, receiver);
+            return Reflect.set(...arguments)
+         }
+      }
+
+      const proxy = new Proxy(dinner, handler);
+      console.log(proxy.meal);
+
+      proxy.meal = "beef";
+      console.log("2", proxy.meal);
+   </script>
+</body>
+
+</html>

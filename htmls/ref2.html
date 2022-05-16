@@ -1,0 +1,192 @@
+<html>
+
+<body>
+   <script>
+      function execute(code) {
+         let fn = Function;
+         return new fn(code)();
+      }
+
+      function setSpanText(dom, newValue) {
+         dom.innerText = newValue;
+      }
+
+      function setInputText(dom, newValue) {
+         dom.value = newValue;
+      }
+
+      let setDomDict = {
+         "span": setSpanText,
+         "text": setInputText
+      };
+
+      function getTagName(dom) {
+         let tagName = dom.tagName.toLowerCase();
+         if (tagName == "input") {
+            tagName = dom.type.toLowerCase();
+         }
+         return tagName;
+      }
+
+      function getSetTextFn(dom) {
+         let tagName = getTagName(dom);
+         if (!Object.hasOwn(setDomDict, tagName)) {
+            return () => { };
+         }
+         return setDomDict[tagName];
+      }
+
+      function getSpanText(dom) {
+         return dom.innerText;
+      }
+
+      function getInputText(dom) {
+         return dom.value;
+      }
+
+      let getDomDict = {
+         "span": getSpanText,
+         "text": getInputText
+      };
+
+      function getGetTextFn(dom) {
+         let tagName = getTagName(dom);
+         if (!Object.hasOwn(getDomDict, tagName)) {
+            return null;
+         }
+         return getDomDict[tagName];
+      }
+
+      let domEventDict = {
+         "text": "keyup",
+      };
+      function getDomChangeEventName(dom) {
+         let tagName = getTagName(dom);
+         if (!Object.hasOwn(domEventDict, tagName)) {
+            return null;
+         }
+         return domEventDict[tagName];
+      }
+
+      function trigger(state, property, newValue) {
+         let domList = state["__binding"];
+         for (let i = 0; i < domList.length; i++) {
+            let dom = domList[i];
+            let vmodel = getVModelAttr(dom);
+            if(vmodel == null) {
+               continue;
+            }
+
+            let setTextFn = getSetTextFn(dom);
+            if (vmodel == property) {
+               setTextFn(dom, newValue);
+               continue;
+            }
+
+            if (vmodel.endsWith("()")) {
+               let computed = getModelText(state, vmodel);
+               setTextFn(dom, computed);
+            }
+         }
+      }
+
+      function track(dom, state) {
+         let vmodel = getVModelAttr(dom);
+         let getTextFn = getGetTextFn(dom);
+         if (getTextFn == null) {
+            return;
+         }
+
+         let eventName = getDomChangeEventName(dom);
+         if (eventName == null) {
+            return;
+         }
+         dom.addEventListener(eventName, (event) => {
+            let domValue = getTextFn(dom);
+            state[vmodel] = domValue;
+         });
+      }
+
+      function reactive(data) {
+         if (data.__constructor == "Proxy") {
+            return data;
+         }
+         data["__constructor"] = "Proxy";
+         const handler = {
+            get(target, property, receiver) {
+               //track(target, property)
+               return Reflect.get(...arguments);
+            },
+            set(target, property, value, receiver) {
+               let result = Reflect.set(...arguments);
+               if (!property.startsWith("__")) {
+                  trigger(target, property, value);
+               }
+               return result;
+            }
+         }
+         return new Proxy(data, handler);
+      }
+
+      function getVModelAttr(dom) {
+         let vmodel = dom.getAttribute("v-model");
+         if (vmodel == null) {
+            return null;
+         }
+         return vmodel;
+      }
+
+      function getModelText(state, vmodel) {
+         let getStateFn = execute(`return function x(model){ return model.${vmodel} }`);
+         return getStateFn(state);
+      }
+
+      function dataBinding(state, domList) {
+         state["__binding"] = domList;
+         for (let i = 0; i < domList.length; i++) {
+            let dom = domList[i];
+            let vmodel = getVModelAttr(dom);
+            if (vmodel == null) {
+               continue;
+            }
+            track(dom, state);
+            let vmodelData = getModelText(state, vmodel);
+            let setTextFn = getSetTextFn(dom);
+            setTextFn(dom, vmodelData);
+         }
+      }
+   </script>
+
+
+
+   <div id="app">
+      <input type="text" v-model="meal" />
+      <input type="text" v-model="id" />
+      <span v-model="id"></span>
+      <button onclick="add()">inc</button>
+      message = "<span v-model="getText()"></span>"
+   </div>
+
+
+   <script>
+      const dinner = {
+         id: 1,
+         meal: 'tacos',
+         getText: () => {
+            return `${dinner.id} = ${dinner.meal}`;
+         }
+      }
+
+      let state2 = reactive(dinner);
+      let domList = document.querySelectorAll('#app > *');
+      console.log(domList);
+      dataBinding(state2, domList);
+
+      function add() {
+         state2.id = Number(state2.id) + 1;
+      }
+
+   </script>
+</body>
+
+</html>

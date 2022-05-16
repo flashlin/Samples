@@ -7,10 +7,6 @@
 		"name": ""
 	},
 	"scripts": {
-		"tsc:watch": "tsc --watch",
-		"start:single": "concurrently --kill-others --names tsc,web-dev-server \"npm run tsc:watch\" \"web-dev-server --app-index index.html --node-resolve --open --watch\"",
-		"start": "concurrently --kill-others --names tsc,web-dev-server \"npm run tsc:watch\" \"web-dev-server --config web-dev-server.config.js\"",
-		"build1": "rimraf dist && tsc && rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript",
 		"build": "rimraf dist && rollup -c rollup.config.ts --configPlugin @rollup/plugin-typescript"
 	},
 	"devDependencies": {
