@@ -49,7 +49,7 @@ namespace PizzaWeb.Models.Libs
 			var tableName = tableAttr?.Name ?? typeof(T).Name;
 
 			var sb = new StringBuilder();
-			sb.Append("UPDATE " + tableName);
+			sb.Append("UPDATE " + tableName + " as x");
 			sb.AppendLine();
 			foreach (var item in _setFields.Select((field, idx) => new { idx, field }))
 			{
