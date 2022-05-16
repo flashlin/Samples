@@ -28,7 +28,7 @@
          return tagName;
       }
 
-      function getSetTextFn(dom) {
+      function getSetDomTextFn(dom) {
          let tagName = getTagName(dom);
          if (!Object.hasOwn(setDomDict, tagName)) {
             return () => { };
@@ -77,7 +77,7 @@
                continue;
             }
 
-            let setTextFn = getSetTextFn(dom);
+            let setTextFn = getSetDomTextFn(dom);
             if (vmodel == property) {
                setTextFn(dom, newValue);
                continue;
@@ -151,7 +151,7 @@
             }
             track(dom, state);
             let vmodelData = getModelText(state, vmodel);
-            let setTextFn = getSetTextFn(dom);
+            let setTextFn = getSetDomTextFn(dom);
             setTextFn(dom, vmodelData);
          }
       }
