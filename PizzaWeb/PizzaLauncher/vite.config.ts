@@ -11,12 +11,6 @@ export default ({ mode }) => {
   require("dotenv").config({ path: `./.env.${mode}` });
   // now you can access config with process.env.{configName}
 
-  (import.meta.env as any) = { MODE: mode};
-  Object.entries(process.env).forEach(([key, value]) => {
-    if (key.startsWith("VITE_")) {
-      import.meta.env[key] = value;
-    }
-  });
 
   return defineConfig({
     plugins: [vue(), vueJsx({})],
@@ -29,7 +23,7 @@ export default ({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
-    base: import.meta.env.MODE == "development" ? "" : "dist",
+    base: mode == "development" ? "" : "dist",
     build: {
       outDir: path.resolve(__dirname, "../PizzaWeb/wwwroot/dist"),
       assetsDir: "assets",
