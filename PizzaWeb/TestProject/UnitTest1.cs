@@ -1,3 +1,4 @@
+using NUnit.Framework;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -22,9 +23,10 @@ namespace TestProject
 }";
 
 			var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonStr);
-			var item = dict["spa/luncher.html"];
-			var file = item.GetProperty("file").GetString();
-			//Assert.Equals("assets/luncher.ddee1e2b.js", file);
+			var item = dict[$"spa/luncher.html"];
+			var jsFile = item.GetProperty("file").GetString();
+			
+			Assert.That(jsFile, Is.EqualTo("assets/luncher.ddee1e2b.js"));
 		}
 	}
 

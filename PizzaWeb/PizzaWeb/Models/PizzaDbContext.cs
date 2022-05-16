@@ -13,6 +13,10 @@ namespace PizzaWeb.Models
 			_dbConfig = dbConfig.Value;
 		}
 
+		public PizzaDbContext(DbContextOptions options) : base(options)
+		{
+		}
+
 		public DbSet<StoreShelvesEntity> StoreShelves { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
