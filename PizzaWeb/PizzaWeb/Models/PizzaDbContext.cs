@@ -8,11 +8,15 @@ namespace PizzaWeb.Models
 	{
 		private PizzaDbConfig _dbConfig;
 
+		[ActivatorUtilitiesConstructor]
 		public PizzaDbContext(IOptions<PizzaDbConfig> dbConfig)
 		{
 			_dbConfig = dbConfig.Value;
 		}
 
+		//public PizzaDbContext(IDbContextOptionsFactory optionsFactory) : base(optionsFactory.Create())
+		//{
+		//}
 		public PizzaDbContext(DbContextOptions options) : base(options)
 		{
 		}
