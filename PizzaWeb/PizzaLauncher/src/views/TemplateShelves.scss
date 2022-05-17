@@ -1,0 +1,22 @@
+#editor {
+	resize: vertical;
+	overflow: auto;
+	line-height: 1.5;
+	background-color: #fafafa;
+  background-image: none;
+	border: 0;
+  border-bottom: 1px solid #3b8dbd;
+	min-height: 150px;
+	box-shadow: none;
+	padding: 8px 16px;
+	margin: 0 auto;
+	font-size: 14px;
+	transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+}
+
+#editor:focus {
+	background-color: #f0f0f0;
+	border-color: #38af5b;
+	box-shadow: none;
+	outline: 0 none;
+}
