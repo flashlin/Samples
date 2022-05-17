@@ -23,7 +23,7 @@ export default ({ mode }) => {
 				"@": path.resolve(__dirname, "./src"),
 			},
 		},
-		base: mode == "development" ? "" : "dist",
+		base: mode == "development" ? "/" : "/dist/",
 		build: {
 			manifest: true,
 			outDir: path.resolve(__dirname, "../PizzaWeb/wwwroot/dist"),
