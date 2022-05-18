@@ -5,7 +5,7 @@ import {
   reactive,
   ref,
 } from "vue";
-import "./Editor2.scss";
+import "./Editor.scss";
 
 export interface IEditorExpose {
   getContent(): string;

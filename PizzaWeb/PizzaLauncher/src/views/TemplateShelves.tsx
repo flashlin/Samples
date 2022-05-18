@@ -1,4 +1,12 @@
-import { defineComponent, Fragment, onMounted, reactive, Ref, ref } from "vue";
+import {
+  computed,
+  defineComponent,
+  Fragment,
+  onMounted,
+  reactive,
+  Ref,
+  ref,
+} from "vue";
 import { BannerApi, IBannerTemplateEntity } from "@/models/Api";
 import PreviewFrame from "@/components/PreviewFrame";
 import Editor, { IEditorProxy } from "@/components/Editor";
@@ -12,10 +20,13 @@ export default defineComponent({
         { field: "templateContent", header: "content" },
       ],
       templateList: [] as IBannerTemplateEntity[],
-      templateShortContent: [] as string[],
       currentEditId: "",
       previewContent: "abc",
     });
+
+    const isEditing = () => {
+      return state.currentEditId != "";
+    };
 
     const editorRefs = ref([] as IEditorProxy[]);
     const editor = ref<IEditorProxy>();
@@ -35,16 +46,30 @@ export default defineComponent({
       return content.substring(0, maxLength) + "...";
     };
 
+    const onClickReload = async () => {
+      let api = new BannerApi();
+      let resp = await api.getAllTemplatesAsync();
+      state.templateList = resp;
+    };
+
     const onClickEdit = (id: string) => {
+      //let item = state.templateList.find((x) => x.id == id)!;
+      state.currentEditId = id;
+    };
+
+    const onClickUpdateContent = async (id: string) => {
       let item = state.templateList.find((x) => x.id == id)!;
       let idx = state.templateList.indexOf(item);
+      let newContent = editorRefs.value[idx].getContent();
+      item.templateContent = newContent;
+      //let resp = await BannerApi.updateBannerTemplate(item);
+      state.currentEditId = "";
+    };
 
-      let c = editorRefs.value[idx].getContent();
-      console.log("c", c);
-      //state.itemRefs[idx].value.getContent();
-      //state.previewContent = item.templateContent;
-      //state.editContent = item.templateContent;
-      state.currentEditId = id;
+    const onClickCancelContent = (id: string) => {
+      let item = state.templateList.find((x) => x.id == id)!;
+      let idx = state.templateList.indexOf(item);
+      state.currentEditId = "";
     };
 
     const onClickSave = () => {
@@ -54,21 +79,13 @@ export default defineComponent({
 
     onMounted(async () => {
       let api = new BannerApi();
-      state.templateList = await api.getAllTemplatesAsync();
-      // state.templateList = templateList.map(x => {
-      //   let newObj = new BannerTemplateData(x);
-      //   newObj.templateShortContent = subContent(x.templateContent);
-      //   return newObj;
-      // });
-      for(var item of state.templateList) {
-        state.templateShortContent.push(subContent(item.templateContent));
-      }
+      let resp = await api.getAllTemplatesAsync();
+      state.templateList = resp;
     });
 
     return () => (
       <div>
-        <button onClick={onClickSave}>Update</button>
-        <i class="bi bi-clipboard"></i>
+        <button onClick={onClickReload}>Reload</button>
 
         <table class="table table-striped table-bordered" style="width:100%">
           <thead>
@@ -85,16 +102,26 @@ export default defineComponent({
                 <tr>
                   <td></td>
                   <td>{item.id}</td>
-                  <td>{subContent(item.templateContent)}</td>
-                  <td>
+                  <td v-show={!isEditing()}>
+                    {subContent(item.templateContent)}
+                  </td>
+                  <td v-show={!isEditing()}>
                     <button onClick={() => onClickEdit(item.id)}>Edit</button>
                     <button>Update</button>
                   </td>
-                </tr>
-                <tr v-show={state.currentEditId == item.id}>
-                  <td colspan='3'>
-                    <Editor content={item.templateContent} ref={setItemRef} />
-                  </td>
+                  <Fragment>
+                    <td v-show={state.currentEditId == item.id}>
+                      <Editor content={item.templateContent} ref={setItemRef} />
+                    </td>
+                    <td v-show={state.currentEditId == item.id}>
+                      <button onClick={() => onClickUpdateContent(item.id)}>
+                        Update
+                      </button>
+                      <button onClick={() => onClickCancelContent(item.id)}>
+                        Cancel
+                      </button>
+                    </td>
+                  </Fragment>
                 </tr>
               </Fragment>
             ))}
