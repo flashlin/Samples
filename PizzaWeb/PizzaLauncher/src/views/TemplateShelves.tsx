@@ -1,6 +1,7 @@
 import { defineComponent, onMounted, reactive, ref } from "vue";
-import { BannerApi, IBannerTemplateEntity } from "@/models/api";
-import Editor, { IEditorProxy } from "@/components/editor";
+import { BannerApi, IBannerTemplateEntity } from "@/models/Api";
+import Editor, { IEditorProxy } from "@/components/Editor";
+import PreviewFrame from "@/components/PreviewFrame";
 
 export default defineComponent({
   props: {},
@@ -12,6 +13,7 @@ export default defineComponent({
       ],
       templateList: [] as IBannerTemplateEntity[],
       content: "123",
+      previewContent: "abc"
     });
 
     const editor = ref<IEditorProxy>();
@@ -65,6 +67,7 @@ export default defineComponent({
         </table>
 
         <Editor content={state.content} ref={editor} />
+        <PreviewFrame content={state.previewContent} />
 
       </div>
     );
