@@ -1,6 +1,11 @@
-import { ComponentPublicInstance, defineComponent, onMounted, reactive, ref } from "vue";
-import { QuillEditor } from "@vueup/vue-quill";
-import '@vueup/vue-quill/dist/vue-quill.snow.css';
+import {
+  ComponentPublicInstance,
+  defineComponent,
+  onMounted,
+  reactive,
+  ref,
+} from "vue";
+import "./Editor2.scss";
 
 export interface IEditorExpose {
   getContent(): string;
@@ -9,25 +14,45 @@ export interface IEditorExpose {
 export interface IEditorProxy extends ComponentPublicInstance, IEditorExpose {}
 
 export default defineComponent({
-  components: {
-    QuillEditor,
-  },
   props: {
     content: { type: String, required: true },
   },
   setup(props, { expose, slots }) {
     const state = reactive({
       content: props.content,
+      isVisuell: false,
     });
+
+    if (!state.content) {
+      state.content = "";
+    }
 
     const getContent = () => {
       return state.content;
     };
+
     expose({
       getContent,
     } as IEditorExpose);
 
-    return () => <QuillEditor theme="snow" style="height: 320pt;" v-model:content={state.content} contentType="html" />;
+    return () => (
+      <div>
+        <div class="btn-group">
+          <a href="#" class="btn btn-primary active" aria-current="page">
+            Active link
+          </a>
+          <a href="#" class="btn btn-primary">
+            Link
+          </a>
+          <a href="#" class="btn btn-primary">
+            Link
+          </a>
+        </div>
+        <div class="content-area">
+          <div class="visuell-view" contenteditable v-show={state.isVisuell}></div>
+          <textarea class="html-view" v-show={!state.isVisuell} v-model={state.content}></textarea>
+        </div>
+      </div>
+    );
   },
 });
-

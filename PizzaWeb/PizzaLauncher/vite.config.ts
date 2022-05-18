@@ -3,7 +3,10 @@ import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import path from "path";
 import glob from "glob";
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+
+const pathSrc = path.resolve(__dirname, "src");
+
 //import { loadEnv } from "vite";
 //loadEnv(mode, process.cwd()).VITE_APP_OUT_DIR
 
@@ -13,11 +16,7 @@ export default ({ mode }) => {
   // now you can access config with process.env.{configName}
 
   return defineConfig({
-    plugins: [
-      vue(),
-      vueJsx({}),
-		nodeResolve(),
-    ],
+    plugins: [vue(), vueJsx({}), nodeResolve()],
     esbuild: {
       jsxFactory: "h",
       jsxFragment: "Fragment",
@@ -26,6 +25,12 @@ export default ({ mode }) => {
       alias: {
         "@": path.resolve(__dirname, "./src"),
       },
+    },
+    css: {
+      //讓所有頁面中都可以使用 scss 變數
+      // preprocessorOptions: {
+      //   scss: { additionalData: `@import "${pathSrc}/scss/variables";` },
+      // },
     },
     base: mode == "development" ? "/" : "/dist/",
     build: {
@@ -52,7 +57,11 @@ export default ({ mode }) => {
           target: "http://localhost:5129/",
           changeOrigin: true,
           ws: true,
-          //rewrite: (pathStr) => pathStr.replace("/api", ""),
+        },
+        "/js": {
+          target: "http://localhost:5129/",
+          changeOrigin: true,
+          ws: true,
         },
       },
     },

@@ -58,7 +58,7 @@ export default defineComponent({
 		};
 
 		return () => (
-			<div class="container">
+			<div>
 				<span>Hello world!</span>
 
 				<div class="row">
