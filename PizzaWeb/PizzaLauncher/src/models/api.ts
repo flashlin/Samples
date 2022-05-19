@@ -10,7 +10,11 @@ export class BannerApi
       return this.postAsync("banner/getAllTemplates", {}); 
    }
 
-   async postAsync(url: string, data: any){
+   updateTemplateAsync(req: IBannerTemplateEntity): Promise<void> {
+      return this.postAsync("banner/updateTemplate", req);
+   }
+
+   private async postAsync(url: string, data: any){
       let resp = await fetch(`/api/${url}`,
       {
          method: "POST",

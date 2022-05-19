@@ -30,6 +30,8 @@ export default defineComponent({
       previewContent: "abc",
     });
 
+    const api = new BannerApi();
+
     const isEditing = () => {
       return state.currentEditId != "";
     };
@@ -48,7 +50,6 @@ export default defineComponent({
     };
 
     onMounted(async () => {
-      let api = new BannerApi();
       let resp = await api.getAllTemplatesAsync();
       state.templateList = resp;
     });
@@ -72,8 +73,11 @@ export default defineComponent({
       let idx = state.templateList.indexOf(item);
       //let newContent = editorRefs.value[idx].getContent();
       let newContent = editor.value!.getContent();
+
+      let newItem = Object.assign({} as IBannerTemplateEntity, item);
+      await api.updateTemplateAsync(newItem);
+      
       item.templateContent = newContent;
-      //let resp = await BannerApi.updateBannerTemplate(item);
       state.currentEditId = "";
     };
 
