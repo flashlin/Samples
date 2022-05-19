@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SqliteCli.Entities;
@@ -16,11 +17,15 @@ public class Main
     public static string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
     private IStockService _stockService;
     private IStockRepo _stockRepo;
+    private readonly IServiceProvider _serviceProvider;
 
-    public Main(IStockService stockService, IStockRepo stockRepo, ILogger<Main> logger)
+    public Main(IStockService stockService, IStockRepo stockRepo, 
+        IServiceProvider serviceProvider,
+        ILogger<Main> logger)
     {
         logger.LogInformation("Startup");
         _stockRepo = stockRepo;
+        _serviceProvider = serviceProvider;
         _stockService = stockService;
     }
 
@@ -33,7 +38,7 @@ public class Main
             EndTime = opts?.EndTime,
             StockId = opts?.StockId,
         });
-		rc.Dump();
+        rc.Dump();
     }
 
     public async Task Run(IHost host)
@@ -43,7 +48,7 @@ public class Main
             webApp.UseCors(MyAllowSpecificOrigins);
             webApp.StartAsync(typeof(Program).Assembly, new RuntimeEnvironment());
         }
-        
+
         do
         {
             Console.WriteLine();
@@ -56,6 +61,19 @@ public class Main
             }
 
             var ss = commandLine.Split(' ');
+            var commands = new CommandBase[]
+            {
+                _serviceProvider.GetService<BuyStockTranCommand>()!,
+                _serviceProvider.GetService<TodayBuyStockTranCommand>()!
+            };
+            var cmd = commands.FirstOrDefault(x => x.IsMyCommand(ss));
+            if (cmd != null)
+            {
+                cmd.Run(ss);
+                continue;
+            }
+
+
             var command = ss[0];
             switch (command)
             {
@@ -98,6 +116,7 @@ public class Main
                     {
                         await ProcessStockReportAsync(opt);
                     }
+
                     break;
                 }
                 case "d":
@@ -146,7 +165,7 @@ public class Main
         rc.Dump();
         _stockService.ShowBalance();
     }
-    
+
     async Task ProcessStockReportAsync(ReportStockCommand command)
     {
         var rc = await _stockService.GetStockReportAsync(new ReportTransReq

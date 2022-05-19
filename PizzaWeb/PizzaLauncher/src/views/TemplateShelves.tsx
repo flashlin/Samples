@@ -13,6 +13,12 @@ import Editor, { IEditorProxy } from "@/components/Editor";
 
 export default defineComponent({
   props: {},
+  template: `
+    <h1>Vue 3 TypeScript Template</h1>
+    <div class="app">
+      <HelloWorld />
+    </div>
+  `,
   setup(props) {
     const state = reactive({
       columns: [

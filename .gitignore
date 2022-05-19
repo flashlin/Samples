@@ -8,3 +8,5 @@ node_modules/
 dist/
 .idea/
 *.trx
+*.log
+package-lock.json

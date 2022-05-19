@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PizzaWeb.Models;
+using PizzaWeb.Models.Banner;
 
 namespace PizzaWeb.Controllers
 {
@@ -7,9 +8,16 @@ namespace PizzaWeb.Controllers
 	[ApiController]
 	public class BannerController : ControllerBase
 	{
+		private PizzaDbContext _dbContext;
 
 		public BannerController(PizzaDbContext dbContext)
 		{
+			_dbContext = dbContext;
+		}
+
+		public List<BannerTemplateEntity> GetAllTemplates()
+		{
+			return _dbContext.BannerTemplates.ToList();
 		}
 
 		public string GetBanner(GetBannerReq req)

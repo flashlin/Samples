@@ -1,10 +1,11 @@
 using NUnit.Framework;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using PizzaWeb.Models.Banner;
 
 namespace TestProject
 {
-	public class Tests
+	public class JsonTest
 	{
 		[SetUp]
 		public void Setup()
@@ -12,7 +13,7 @@ namespace TestProject
 		}
 
 		[Test]
-		public void Test1()
+		public void ToDictionaryTest()
 		{
 			var jsonStr = @"{
   ""spa/luncher.html"": {
@@ -28,6 +29,35 @@ namespace TestProject
 			
 			Assert.That(jsFile, Is.EqualTo("assets/luncher.ddee1e2b.js"));
 		}
+		
+		[Test]
+		public void ToDictionaryCTest()
+		{
+			var jsonStr = @"
+[
+	{
+		'name': 'Title',
+		'tempVarType': 0
+	},
+	{
+		'name': 'Price',
+		'tempVarType': 1
+	},
+]";
+			var variablesJson = jsonStr.Replace("'", "\"");
+
+			var jsonOptions = new JsonSerializerOptions
+			{
+				AllowTrailingCommas = true,
+				PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+			};
+			var varitablesList = JsonSerializer.Deserialize<List<TemplateVariable>>(variablesJson, jsonOptions);
+
+			var item0 = varitablesList[0];
+			
+			Assert.That(item0.Name, Is.EqualTo("Title"));
+		}
+		
 	}
 
    public static class JsonDictStringObjExtensions

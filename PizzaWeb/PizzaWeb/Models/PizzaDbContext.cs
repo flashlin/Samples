@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using PizzaWeb.Models.Banner;
 
 namespace PizzaWeb.Models
 {
@@ -14,14 +15,12 @@ namespace PizzaWeb.Models
 			_dbConfig = dbConfig.Value;
 		}
 
-		//public PizzaDbContext(IDbContextOptionsFactory optionsFactory) : base(optionsFactory.Create())
-		//{
-		//}
 		public PizzaDbContext(DbContextOptions options) : base(options)
 		{
 		}
 
 		public DbSet<StoreShelvesEntity> StoreShelves { get; set; }
+		public DbSet<BannerTemplateEntity> BannerTemplates { get; set; }
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
