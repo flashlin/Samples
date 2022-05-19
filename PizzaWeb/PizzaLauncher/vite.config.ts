@@ -5,6 +5,11 @@ import path from "path";
 import glob from "glob";
 import { nodeResolve } from "@rollup/plugin-node-resolve";
 
+//按需要導入
+// import AutoImport from "unplugin-auto-import/vite";
+// import Components from "unplugin-vue-components/vite";
+// import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+
 const pathSrc = path.resolve(__dirname, "src");
 
 //import { loadEnv } from "vite";
@@ -16,7 +21,17 @@ export default ({ mode }) => {
   // now you can access config with process.env.{configName}
 
   return defineConfig({
-    plugins: [vue(), vueJsx({}), nodeResolve()],
+    plugins: [
+      vue(),
+      vueJsx({}),
+      nodeResolve(),
+      // AutoImport({
+      //   resolvers: [ElementPlusResolver()],
+      // }),
+      // Components({
+      //   resolvers: [ElementPlusResolver()],
+      // }),
+    ],
     esbuild: {
       jsxFactory: "h",
       jsxFragment: "Fragment",

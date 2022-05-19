@@ -11,15 +11,15 @@ import { BannerApi, IBannerTemplateEntity } from "@/models/Api";
 import PreviewFrame from "@/components/PreviewFrame";
 import Editor, { IEditorProxy } from "@/components/Editor";
 
+import "./TemplateShelves.scss";
+//import { ElButton } from "element-plus";
+import DataTable from "primevue/datatable";
+import Button from "primevue/button";
+import Column from "primevue/column";
+
 export default defineComponent({
   props: {},
-  template: `
-    <h1>Vue 3 TypeScript Template</h1>
-    <div class="app">
-      <HelloWorld />
-    </div>
-  `,
-  setup(props) {
+  setup(props, { slots }) {
     const state = reactive({
       columns: [
         { field: "id", header: "id" },
@@ -89,6 +89,12 @@ export default defineComponent({
       state.templateList = resp;
     });
 
+    const onClickEditItem = (id: string) => {
+      console.log("id", id);
+    };
+
+    const row: any = {};
+
     return () => (
       <div>
         <button onClick={onClickReload}>Reload</button>
@@ -146,6 +152,25 @@ export default defineComponent({
           content={state.previewContent}
           style={`with:100px; height:100px;`}
         />
+
+        <DataTable value={state.templateList} responsiveLayout="scroll">
+          <slot name="header">
+            <div class="table-header">
+              Products
+              <Button icon="pi pi-refresh" />
+            </div>
+          </slot>
+          <Column field="id" header="id"></Column>
+          <Column header="operators">
+            {{
+              body: (slotProps: any) => [
+                <Button onClick={() => onClickEditItem(slotProps.data.id)}>
+                  Edit
+                </Button>,
+              ],
+            }}
+          </Column>
+        </DataTable>
       </div>
     );
   },

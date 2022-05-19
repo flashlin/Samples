@@ -25,7 +25,7 @@
          "scripthost"
       ],
       "types": [
-         "node", "vite/client"
+         "node", "vite/client", //"element-plus/global"
       ]
    },
   "include": [
