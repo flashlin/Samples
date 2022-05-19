@@ -75,6 +75,7 @@ export default defineComponent({
       let newContent = editor.value!.getContent();
 
       let newItem = Object.assign({} as IBannerTemplateEntity, item);
+      newItem.templateContent = newContent;
       await api.updateTemplateAsync(newItem);
       
       item.templateContent = newContent;
