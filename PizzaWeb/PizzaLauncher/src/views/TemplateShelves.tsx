@@ -38,6 +38,7 @@ export default defineComponent({
     const editor = ref<IEditorProxy>();
 
     const setItemRef = (el: any) => {
+      console.log("set");
       editorRefs.value.push(el);
     };
 
@@ -63,21 +64,6 @@ export default defineComponent({
       state.currentEditId = id;
     };
 
-    const onClickUpdateContent = async (id: string) => {
-      let item = state.templateList.find((x) => x.id == id)!;
-      let idx = state.templateList.indexOf(item);
-      let newContent = editorRefs.value[idx].getContent();
-      item.templateContent = newContent;
-      //let resp = await BannerApi.updateBannerTemplate(item);
-      state.currentEditId = "";
-    };
-
-    const onClickCancelContent = (id: string) => {
-      let item = state.templateList.find((x) => x.id == id)!;
-      let idx = state.templateList.indexOf(item);
-      state.currentEditId = "";
-    };
-
     const onClickSave = () => {
       let newContent = editor.value!.getContent();
       console.log("content", newContent);
@@ -97,63 +83,25 @@ export default defineComponent({
       state.currentEditId = id;
     };
 
-    const row = () => {
-      console.log("row", this);
-      return false;
+    const onClickUpdateContent = async (id: string) => {
+      let item = state.templateList.find((x) => x.id == id)!;
+      let idx = state.templateList.indexOf(item);
+      //let newContent = editorRefs.value[idx].getContent();
+      let newContent = editor.value!.getContent();
+      item.templateContent = newContent;
+      //let resp = await BannerApi.updateBannerTemplate(item);
+      state.currentEditId = "";
+    };
+
+    const onClickCancelContent = (id: string) => {
+      let item = state.templateList.find((x) => x.id == id)!;
+      let idx = state.templateList.indexOf(item);
+      state.currentEditId = "";
     };
 
     return () => (
       <div>
         <button onClick={onClickReload}>Reload</button>
-
-        <table class="table table-striped table-bordered" style="width:100%">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>id</th>
-              <th>content</th>
-              <th>action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {state.templateList.map((item, idx) => (
-              <Fragment>
-                <tr>
-                  <td></td>
-                  <td>{item.id}</td>
-                  <td v-show={!isEditing()}>
-                    {subContent(item.templateContent)}
-                  </td>
-                  <td v-show={!isEditing()}>
-                    <button onClick={() => onClickEdit(item.id)}>Edit</button>
-                    <button>Update</button>
-                  </td>
-                  <Fragment>
-                    <td v-show={state.currentEditId == item.id}>
-                      <Editor content={item.templateContent} ref={setItemRef} />
-                    </td>
-                    <td v-show={state.currentEditId == item.id}>
-                      <button onClick={() => onClickUpdateContent(item.id)}>
-                        Update
-                      </button>
-                      <button onClick={() => onClickCancelContent(item.id)}>
-                        Cancel
-                      </button>
-                    </td>
-                  </Fragment>
-                </tr>
-              </Fragment>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <th></th>
-              <th>id</th>
-              <th>content</th>
-              <th>action</th>
-            </tr>
-          </tfoot>
-        </table>
 
         <PreviewFrame
           content={state.previewContent}
@@ -168,41 +116,55 @@ export default defineComponent({
             </div>
           </slot>
           <Column field="id" header="id"></Column>
-          <Column field="templateContent" header="template">
-            {{
-              body: (slotProps: any) =>
-                isEditingItem(slotProps.data.id)
-                  ? []
-                  : [subContent(slotProps.data.templateContent)],
-            }}
-          </Column>
-          {isEditing() ? (
-            <Column field="templateContent" header="template">
-              {{
-                body: (slotProps: ColumnRowSlots) =>
-                  !isEditingItem(slotProps.data.id)
-                    ? []
-                    : [
-                        <Editor
-                          content={slotProps.data.templateContent}
-                          ref={setItemRef}
-                        />,
-                      ],
-              }}
-            </Column>
-          ) : (
-            []
-          )}
 
-          <Column header="operators">
-            {{
-              body: (slotProps: ColumnRowSlots) => [
-                <Button onClick={() => onClickEditItem(slotProps.data.id)}>
-                  Edit
-                </Button>,
-              ],
-            }}
-          </Column>
+          {!isEditing()
+            ? [
+                <Column field="templateContent" header="template">
+                  {{
+                    body: (slotProps: any) => [
+                      subContent(slotProps.data.templateContent),
+                    ],
+                  }}
+                </Column>,
+                <Column header="operators">
+                  {{
+                    body: (slotProps: ColumnRowSlots) => [
+                      <Button
+                        onClick={() => onClickEditItem(slotProps.data.id)}
+                      >
+                        Edit
+                      </Button>,
+                    ],
+                  }}
+                </Column>,
+              ]
+            : [
+                <Column field="templateContent" header="template">
+                  {{
+                    body: (slotProps: ColumnRowSlots) =>
+                      !isEditingItem(slotProps.data.id)
+                        ? []
+                        : [
+                            <Editor
+                              content={slotProps.data.templateContent}
+                              ref={editor}
+                            />,
+                          ],
+                  }}
+                </Column>,
+                <Column header="operators">
+                  {{
+                    body: (slotProps: ColumnRowSlots) => [
+                      <Button onClick={() => onClickUpdateContent(slotProps.data.id)}>
+                        Update
+                      </Button>,
+                      <Button onClick={() => onClickCancelContent(slotProps.data.id)}>
+                        Cancel
+                      </Button>,
+                    ],
+                  }}
+                </Column>,
+              ]}
         </DataTable>
       </div>
     );
