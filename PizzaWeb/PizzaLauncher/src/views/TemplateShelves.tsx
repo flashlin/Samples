@@ -34,13 +34,7 @@ export default defineComponent({
       return state.currentEditId != "";
     };
 
-    const editorRefs = ref([] as IEditorProxy[]);
     const editor = ref<IEditorProxy>();
-
-    const setItemRef = (el: any) => {
-      console.log("set");
-      editorRefs.value.push(el);
-    };
 
     const subContent = (content: string): string => {
       if (content == null) {
@@ -53,22 +47,6 @@ export default defineComponent({
       return content.substring(0, maxLength) + "...";
     };
 
-    const onClickReload = async () => {
-      let api = new BannerApi();
-      let resp = await api.getAllTemplatesAsync();
-      state.templateList = resp;
-    };
-
-    const onClickEdit = (id: string) => {
-      //let item = state.templateList.find((x) => x.id == id)!;
-      state.currentEditId = id;
-    };
-
-    const onClickSave = () => {
-      let newContent = editor.value!.getContent();
-      console.log("content", newContent);
-    };
-
     onMounted(async () => {
       let api = new BannerApi();
       let resp = await api.getAllTemplatesAsync();
@@ -77,6 +55,12 @@ export default defineComponent({
 
     const isEditingItem = (id: string) => {
       return state.currentEditId == id;
+    };
+
+    const onClickReload = async () => {
+      let api = new BannerApi();
+      let resp = await api.getAllTemplatesAsync();
+      state.templateList = resp;
     };
 
     const onClickEditItem = (id: string) => {
@@ -111,7 +95,7 @@ export default defineComponent({
         <DataTable value={state.templateList} responsiveLayout="scroll">
           <slot name="header">
             <div class="table-header">
-              Products
+              Templates
               <Button icon="pi pi-refresh" />
             </div>
           </slot>
