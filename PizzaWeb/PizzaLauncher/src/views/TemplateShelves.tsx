@@ -12,10 +12,10 @@ import PreviewFrame from "@/components/PreviewFrame";
 import Editor, { IEditorProxy } from "@/components/Editor";
 
 import "./TemplateShelves.scss";
-//import { ElButton } from "element-plus";
 import DataTable from "primevue/datatable";
 import Button from "primevue/button";
-import Column from "primevue/column";
+import Column, { ColumnSlots } from "primevue/column";
+import { ColumnRowSlots } from "@/typings/primevue-typings";
 
 export default defineComponent({
   props: {},
@@ -89,11 +89,18 @@ export default defineComponent({
       state.templateList = resp;
     });
 
-    const onClickEditItem = (id: string) => {
-      console.log("id", id);
+    const isEditingItem = (id: string) => {
+      return state.currentEditId == id;
     };
 
-    const row: any = {};
+    const onClickEditItem = (id: string) => {
+      state.currentEditId = id;
+    };
+
+    const row = () => {
+      console.log("row", this);
+      return false;
+    };
 
     return () => (
       <div>
@@ -161,9 +168,35 @@ export default defineComponent({
             </div>
           </slot>
           <Column field="id" header="id"></Column>
+          <Column field="templateContent" header="template">
+            {{
+              body: (slotProps: any) =>
+                isEditingItem(slotProps.data.id)
+                  ? []
+                  : [subContent(slotProps.data.templateContent)],
+            }}
+          </Column>
+          {isEditing() ? (
+            <Column field="templateContent" header="template">
+              {{
+                body: (slotProps: ColumnRowSlots) =>
+                  !isEditingItem(slotProps.data.id)
+                    ? []
+                    : [
+                        <Editor
+                          content={slotProps.data.templateContent}
+                          ref={setItemRef}
+                        />,
+                      ],
+              }}
+            </Column>
+          ) : (
+            []
+          )}
+
           <Column header="operators">
             {{
-              body: (slotProps: any) => [
+              body: (slotProps: ColumnRowSlots) => [
                 <Button onClick={() => onClickEditItem(slotProps.data.id)}>
                   Edit
                 </Button>,
