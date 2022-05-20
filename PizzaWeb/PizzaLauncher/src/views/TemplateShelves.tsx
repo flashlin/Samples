@@ -88,6 +88,8 @@ export default defineComponent({
       state.currentEditId = "";
     };
 
+    const slotProps: any = {};
+
     return () => (
       <div>
         <button onClick={onClickReload}>Reload</button>
@@ -104,7 +106,11 @@ export default defineComponent({
               <Button icon="pi pi-refresh" />
             </div>
           </slot>
-          <Column field="id" header="id"></Column>
+          <Column field="id" header="id">
+            <slot name="body" content={slotProps}>
+              <span>{slotProps.data.id}</span>
+            </slot>
+          </Column>
 
           {!isEditing()
             ? [
