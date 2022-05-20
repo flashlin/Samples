@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PizzaWeb.Models;
 using PizzaWeb.Models.Banner;
+using T1.AspNetCore;
 
 namespace PizzaWeb.Controllers
 {
@@ -9,9 +10,11 @@ namespace PizzaWeb.Controllers
 	public class BannerController : ControllerBase
 	{
 		private PizzaDbContext _dbContext;
+		private IViewToStringRendererService _viewToStringRenderer;
 
-		public BannerController(PizzaDbContext dbContext)
+		public BannerController(PizzaDbContext dbContext, IViewToStringRendererService viewToStringRenderer)
 		{
+			_viewToStringRenderer = viewToStringRenderer;
 			_dbContext = dbContext;
 		}
 
@@ -20,7 +23,14 @@ namespace PizzaWeb.Controllers
 			return _dbContext.BannerTemplates.ToList();
 		}
 
-		public string GetBanner(GetBannerReq req)
+		[HttpPost]
+		public void UpdateTemplate(BannerTemplateEntity req)
+		{
+			_dbContext.BannerTemplates.Update(req);
+			_dbContext.SaveChanges();
+		}
+
+		public async Task<string> GetBanner(GetBannerReq req)
 		{
 			var allBannerData = new[] {
 				new BannerData()
@@ -50,6 +60,7 @@ namespace PizzaWeb.Controllers
 
 
 			var html = Render(bannerData);
+			var text = await _viewToStringRenderer.RenderViewToStringAsync<object>("/Files/Hello.cshtml", bannerData);
 			return String.Empty;
 		}
 
@@ -61,19 +72,19 @@ namespace PizzaWeb.Controllers
 
 	public class BannerData
 	{
-		public string LangCode { get; set; }
-		public string BannerName { get; set; }
+		public string LangCode { get; set; } = "";
+		public string BannerName { get; set; } = "";
 	}
 
 	public class BannerLogical
 	{
-		public string BannerName { get; set; }
-		public string Code { get; set; }
+		public string BannerName { get; set; } = "";
+		public string Code { get; set; } = "";
 	}
 
 	public class GetBannerReq
 	{
-		public string BannerName { get; set; }
-		public string LangCode { get; set; }
+		public string BannerName { get; set; } = "";
+		public string LangCode { get; set; } = "";
 	}
 }

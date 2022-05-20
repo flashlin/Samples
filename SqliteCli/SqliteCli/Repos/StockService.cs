@@ -107,6 +107,19 @@ public class StockService : IStockService
                 stock.Profit = stock.Balance + stock.CurrTotalPrice;
             }
         }
+        
+        foreach (var stock in rc.Where(x => x.TranType == "Dividend").ToArray())
+        {
+            var buyStock = rc.First(x => x.StockId == stock.StockId && x.TranType == "Buy");
+            stock.Profit = stock.Balance + buyStock.Profit;
+            var idx = rc.IndexOf(stock);
+            rc.Insert(idx+1, new ReportTranItem
+            {
+                StockId = buyStock.StockId,
+                StockName = "",
+                Profit = -stock.Profit + stock.Balance,
+            });
+        }
 
         return rc;
     }

@@ -51,8 +51,9 @@ namespace PizzaWeb.Controllers
 	public class BlobDto
 	{
 		public int ImageId { get; set; }
+		
 		[FromForm(Name = "image")]
-		public List<IFormFile> Images { get; set; }
+		public List<IFormFile> Images { get; set; } = new List<IFormFile>();
 		public bool IsFirst { get; set; }
 	}
 }

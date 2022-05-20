@@ -29,7 +29,7 @@ public class BannerTemplateEntity
 
 public class TemplateVariable
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public TempVariableType TempVarType { get; set; }
 }
 

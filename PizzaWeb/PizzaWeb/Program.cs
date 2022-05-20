@@ -1,4 +1,5 @@
 using PizzaWeb.Models;
+using T1.AspNetCore.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,19 @@ builder.Services.Configure<PizzaDbConfig>(builder.Configuration.GetSection("DbCo
 builder.Services.AddTransient<IDbContextOptionsFactory, SqlServerDbContextOptionsFactory>();
 //builder.Services.AddDbContext<PizzaDbContext>();
 builder.Services.AddTransient(sp => ActivatorUtilities.CreateInstance<PizzaDbContext>(sp));
+builder.Services.AddViewToStringRendererService();
+
+var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy(name: MyAllowSpecificOrigins,
+		policy  =>
+		{
+			policy.WithOrigins("http://localhost:3000")
+				.AllowAnyHeader()
+				.AllowAnyMethod();
+		});
+});
 
 var app = builder.Build();
 
@@ -19,6 +33,7 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthorization();
 

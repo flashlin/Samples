@@ -129,7 +129,7 @@ namespace PizzaWeb.Models.Libs
 			// This gets and prints the value of that closure.
 			if (node.Member is FieldInfo fieldInfo && node.Expression is ConstantExpression constExpr)
 			{
-				WriteConstantValue(fieldInfo.GetValue(constExpr.Value));
+				WriteConstantValue(fieldInfo.GetValue(constExpr.Value)!);
 			}
 			else
 			{

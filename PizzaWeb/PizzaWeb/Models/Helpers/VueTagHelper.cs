@@ -4,32 +4,32 @@ using System.Text.Json;
 
 namespace PizzaWeb.Models.Helpers
 {
-	[HtmlTargetElement("vue")]
-	public class VueTagHelper : TagHelper
-	{
-		private readonly IWebHostEnvironment hostEnv;
+    [HtmlTargetElement("vue")]
+    public class VueTagHelper : TagHelper
+    {
+        private readonly IWebHostEnvironment hostEnv;
 
-		public VueTagHelper(IWebHostEnvironment hostEnv)
-		{
-			this.hostEnv = hostEnv;
-		}
-		
-      public string Name { get; set; }
-		
-      public override void Process(TagHelperContext context, TagHelperOutput output)
-      {
-         output.TagName = "div";
-         output.TagMode = TagMode.StartTagAndEndTag;
+        public VueTagHelper(IWebHostEnvironment hostEnv)
+        {
+            this.hostEnv = hostEnv;
+        }
 
-			var manifest = File.ReadAllText($"{hostEnv.WebRootPath}/dist/manifest.json");
-			var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(manifest);
-			var item = dict[$"spa/{Name}.html"];
-			var jsFile = item.GetProperty("file").GetString();
+        public string Name { get; set; }
 
-			var sb = new StringBuilder();
-         sb.AppendFormat($"<script src='/dist/{jsFile}'></script>", this.Name);
+        public override void Process(TagHelperContext context, TagHelperOutput output)
+        {
+            output.TagName = "div";
+            output.TagMode = TagMode.StartTagAndEndTag;
 
-         output.PreContent.SetHtmlContent(sb.ToString());
-      }
-   }
+            var manifest = File.ReadAllText($"{hostEnv.WebRootPath}/dist/manifest.json");
+            var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(manifest)!;
+            var item = dict[$"spa/{Name}.html"];
+            var jsFile = item.GetProperty("file").GetString();
+
+            var sb = new StringBuilder();
+            sb.AppendFormat($"<script src='/dist/{jsFile}'></script>", this.Name);
+
+            output.PreContent.SetHtmlContent(sb.ToString());
+        }
+    }
 }

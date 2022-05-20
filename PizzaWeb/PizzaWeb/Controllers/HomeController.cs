@@ -6,7 +6,7 @@ namespace PizzaWeb.Controllers
 {
 	public class IndexViewModel
 	{
-		public List<StoreShelvesEntity> StoreShelves { get; set; }
+		public List<StoreShelvesEntity> StoreShelves { get; set; } = new List<StoreShelvesEntity>();
 	}
 
 	public class HomeController : Controller
