@@ -26,6 +26,8 @@ export default defineComponent({
         { field: "templateContent", header: "content" },
       ],
       templateList: [] as IBannerTemplateEntity[],
+      bannerIdCheckedList: [] as boolean[],
+      bannerIdSelected: "",
       currentEditId: "",
       previewContent: "abc",
     });
@@ -52,6 +54,9 @@ export default defineComponent({
     onMounted(async () => {
       let resp = await api.getAllTemplatesAsync();
       state.templateList = resp;
+      state.bannerIdCheckedList = new Array(state.templateList.length).fill(
+        false
+      );
     });
 
     const isEditingItem = (id: string) => {
@@ -77,7 +82,7 @@ export default defineComponent({
       let newItem = Object.assign({} as IBannerTemplateEntity, item);
       newItem.templateContent = newContent;
       await api.updateTemplateAsync(newItem);
-      
+
       item.templateContent = newContent;
       state.currentEditId = "";
     };
@@ -88,15 +93,31 @@ export default defineComponent({
       state.currentEditId = "";
     };
 
-    const slotProps: any = {};
+    const onClickSelectBannerId = (idx: number, id: string) => {
+      for (let i = 0; i < state.bannerIdCheckedList.length; i++) {
+        if (i != idx) {
+          state.bannerIdCheckedList[i] = false;
+        }
+      }
+      if (state.bannerIdCheckedList[idx]) {
+        state.bannerIdSelected = id;
+      } else {
+        state.bannerIdSelected = "";
+      }
+    };
+
+    const onClickPreview = () => {
+      console.log("selected", state.bannerIdSelected);
+    };
 
     return () => (
       <div>
         <button onClick={onClickReload}>Reload</button>
 
+        <button onClick={onClickPreview}>Preview</button>
         <PreviewFrame
           content={state.previewContent}
-          style={`with:100px; height:100px;`}
+          style={`with:200px; height:100px;`}
         />
 
         <DataTable value={state.templateList} responsiveLayout="scroll">
@@ -106,12 +127,28 @@ export default defineComponent({
               <Button icon="pi pi-refresh" />
             </div>
           </slot>
-          <Column field="id" header="id">
-            <slot name="body" content={slotProps}>
-              <span>{slotProps.data.id}</span>
-            </slot>
+          <Column header="selected">
+            {{
+              body: (slotProps: ColumnRowSlots) => [
+                <div>
+                  <input
+                    type="checkbox"
+                    v-model={state.bannerIdCheckedList[slotProps.index]}
+                    onChange={() =>
+                      onClickSelectBannerId(slotProps.index, slotProps.data.id)
+                    }
+                  />
+                </div>,
+              ],
+            }}
           </Column>
-
+          <Column field="id" header="id">
+            {{
+              body: (slotProps: ColumnRowSlots) => [
+                <span>{slotProps.data.id}</span>,
+              ],
+            }}
+          </Column>
           {!isEditing()
             ? [
                 <Column field="templateContent" header="template">
@@ -150,10 +187,14 @@ export default defineComponent({
                 <Column header="operators">
                   {{
                     body: (slotProps: ColumnRowSlots) => [
-                      <Button onClick={() => onClickUpdateContent(slotProps.data.id)}>
+                      <Button
+                        onClick={() => onClickUpdateContent(slotProps.data.id)}
+                      >
                         Update
                       </Button>,
-                      <Button onClick={() => onClickCancelContent(slotProps.data.id)}>
+                      <Button
+                        onClick={() => onClickCancelContent(slotProps.data.id)}
+                      >
                         Cancel
                       </Button>,
                     ],

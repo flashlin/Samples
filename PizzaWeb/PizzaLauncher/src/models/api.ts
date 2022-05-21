@@ -4,6 +4,11 @@ export interface IBannerTemplateEntity {
    variablesData: string;
 }
 
+export class GetBannerReq {
+   bannerName: string = "";
+   langCode: string = "";
+}
+
 export class BannerApi 
 {
    getAllTemplatesAsync(): Promise<IBannerTemplateEntity[]> {
@@ -12,6 +17,10 @@ export class BannerApi
 
    updateTemplateAsync(req: IBannerTemplateEntity): Promise<Response> {
       return this.postAsync("banner/updateTemplate", req);
+   }
+
+   getBannerAsync(req: GetBannerReq): Promise<string> {
+      return this.postQueryAsync("banner/getBanner", req);
    }
 
    private async postAsync(url: string, data: any){
