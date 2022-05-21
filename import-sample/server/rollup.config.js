@@ -25,7 +25,8 @@ export default [
       },
       {
         name: 'my-lib',
-        file: 'dist/my-lib.umd.js',
+        //file: 'dist/my-lib.umd.js',
+        file: `${name}.umd.js`,
         format: 'umd',
         sourcemap: true,
       },

@@ -2,9 +2,9 @@
   "name": "server",
   "version": "1.0.0",
   "license": "MIT",
-  "main": "dist/my-lib.js",
-  "module": "dist/my-lib.mjs",
-  "typings": "dist/my-lib.d.ts",
+  "main": "dist/mylib.js",
+  "module": "dist/mylib.mjs",
+  "typings": "dist/mylib.d.ts",
   "scripts": {
     "build": "rollup -c",
     "dev": "es-dev-server --app-index index.html --node-resolve --watch --open",

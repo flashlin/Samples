@@ -14,10 +14,15 @@
         <li>es-dev-server</li>
     </ul>
     <script>
-         import('http://192.168.2.2:3001/dist/my-lib.mjs')
+        var exports = {};
+        var mylib = exports;
+    </script>
+    <script type="text/javascript" src="http://192.168.2.2:3001/dist/mylib.cjs"></script>
+    <script>
+         import('http://192.168.2.2:3001/dist/mylib.mjs')
          .then((module) => {
             var rc = module.sayHello();
-            console.log("page", rc);
+            console.log("page call", rc);
          });
     </script>
     <script type="module" src="./dist/main.js"></script>

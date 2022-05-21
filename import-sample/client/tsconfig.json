@@ -8,7 +8,9 @@
      "strict": true,
      "esModuleInterop": false,                 
      "outDir": "./dist",
-   }
-   ,
-   "include": ["./src/**/*.ts"]
+   },
+   "include": ["./src/**/*.ts"],
+   "extenal": [
+     "mylib"
+   ]
  }
