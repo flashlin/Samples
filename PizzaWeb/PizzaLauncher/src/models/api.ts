@@ -4,18 +4,35 @@ export interface IBannerTemplateEntity {
    variablesData: string;
 }
 
+export interface ITemplateVariable 
+{
+   name: string;
+   variableType: string;
+}
+
+export interface IBannerTemplateData {
+   id: string;
+   templateName: string;
+   templateContent: string;
+   variables: ITemplateVariable[];
+}
+
 export class GetBannerReq {
-   bannerName: string = "";
+   constructor(data?: Partial<GetBannerReq>)
+   {
+      Object.assign(this, data);
+   }
+   bannerId: string = "";
    langCode: string = "";
 }
 
 export class BannerApi 
 {
-   getAllTemplatesAsync(): Promise<IBannerTemplateEntity[]> {
+   getAllTemplatesAsync(): Promise<IBannerTemplateData[]> {
       return this.postQueryAsync("banner/getAllTemplates", {}); 
    }
 
-   updateTemplateAsync(req: IBannerTemplateEntity): Promise<Response> {
+   updateTemplateAsync(req: IBannerTemplateData): Promise<Response> {
       return this.postAsync("banner/updateTemplate", req);
    }
 

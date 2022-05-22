@@ -12,10 +12,35 @@ namespace PizzaWeb.Models
 			_dbConfig = dbConfig.Value;
 		}
 
+		public void SetDbConnectionString(string connectionString)
+		{
+			_dbConfig = new PizzaDbConfig
+			{
+				ConnectionString = connectionString
+			};
+		}
+
 		public DbContextOptions Create()
 		{
 			return new DbContextOptionsBuilder<PizzaDbContext>()
 				.UseSqlServer(_dbConfig.ConnectionString)
+				.Options;
+		}
+	}
+
+	public class UseSqlServerByConnectionString : IDbContextOptionsFactory
+	{
+		private string _connectionString;
+
+		public UseSqlServerByConnectionString(string connectionString)
+		{
+			_connectionString = connectionString;
+		}
+
+		public DbContextOptions Create()
+		{
+			return new DbContextOptionsBuilder<PizzaDbContext>()
+				.UseSqlServer(_connectionString)
 				.Options;
 		}
 	}

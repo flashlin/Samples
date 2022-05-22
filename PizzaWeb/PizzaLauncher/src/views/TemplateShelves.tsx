@@ -7,7 +7,7 @@ import {
   Ref,
   ref,
 } from "vue";
-import { BannerApi, IBannerTemplateEntity } from "@/models/Api";
+import { BannerApi, GetBannerReq, IBannerTemplateData, IBannerTemplateEntity } from "@/models/Api";
 import PreviewFrame from "@/components/PreviewFrame";
 import Editor, { IEditorProxy } from "@/components/Editor";
 
@@ -25,7 +25,7 @@ export default defineComponent({
         { field: "id", header: "id" },
         { field: "templateContent", header: "content" },
       ],
-      templateList: [] as IBannerTemplateEntity[],
+      templateList: [] as IBannerTemplateData[],
       bannerIdCheckedList: [] as boolean[],
       bannerIdSelected: "",
       currentEditId: "",
@@ -81,6 +81,7 @@ export default defineComponent({
 
       let newItem = Object.assign({} as IBannerTemplateEntity, item);
       newItem.templateContent = newContent;
+
       await api.updateTemplateAsync(newItem);
 
       item.templateContent = newContent;
@@ -106,8 +107,15 @@ export default defineComponent({
       }
     };
 
-    const onClickPreview = () => {
+    const onClickPreview = async () => {
       console.log("selected", state.bannerIdSelected);
+      let content = await api.getBannerAsync(
+        new GetBannerReq({
+          bannerId: state.bannerIdSelected,
+        })
+      );
+      console.log("preview", content);
+      state.previewContent = content;
     };
 
     return () => (
@@ -117,7 +125,7 @@ export default defineComponent({
         <button onClick={onClickPreview}>Preview</button>
         <PreviewFrame
           content={state.previewContent}
-          style={`with:200px; height:100px;`}
+          style={`with:600px; height:300px;`}
         />
 
         <DataTable value={state.templateList} responsiveLayout="scroll">
@@ -142,7 +150,7 @@ export default defineComponent({
               ],
             }}
           </Column>
-          <Column field="id" header="id">
+          <Column field="templateName" header="template name">
             {{
               body: (slotProps: ColumnRowSlots) => [
                 <span>{slotProps.data.id}</span>,
@@ -201,6 +209,17 @@ export default defineComponent({
                   }}
                 </Column>,
               ]}
+            {/* {{
+              expansion: (slotProps: ColumnRowSlots) => [
+                <div class="orders-subtable">
+                    <h5>Variables for {slotProps.data.templateName}</h5>
+                    <DataTable value={slotProps.data.variables} responsiveLayout="scroll">
+                        <Column field="name" header="variable name" sortable></Column>
+                        <Column field="variableType" header="type"></Column>
+                    </DataTable>
+              </div>
+              ]
+            }} */}
         </DataTable>
       </div>
     );

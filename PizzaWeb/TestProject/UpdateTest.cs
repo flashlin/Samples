@@ -18,11 +18,7 @@ namespace TestProject
 		[Test]
 		public void UpdateStoreShelvesById()
 		{
-			var options = new DbContextOptionsBuilder<PizzaDbContext>()
-				.UseInMemoryDatabase(databaseName: "InMemoryDatabase")
-				.Options;
-
-			var db = new PizzaDbContext(options);
+			var db = new PizzaDbContext(new InMemoryOptionsFactory());
 
 			db.StoreShelves
 				.Set(x => x.Title, "123")
@@ -33,4 +29,13 @@ namespace TestProject
 		}
 	}
 
+	public class InMemoryOptionsFactory : IDbContextOptionsFactory
+	{
+		public DbContextOptions Create()
+		{
+			return new DbContextOptionsBuilder<PizzaDbContext>()
+				.UseInMemoryDatabase(databaseName: "InMemoryDatabase")
+				.Options;
+		}
+	}
 }

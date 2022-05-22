@@ -7,24 +7,24 @@ namespace PizzaWeb.Models
 
 	public class PizzaDbContext : DbContext
 	{
-		private PizzaDbConfig _dbConfig;
+		//private PizzaDbConfig _dbConfig;
 
-		[ActivatorUtilitiesConstructor]
-		public PizzaDbContext(IOptions<PizzaDbConfig> dbConfig)
-		{
-			_dbConfig = dbConfig.Value;
-		}
+		//[ActivatorUtilitiesConstructor]
+		//public PizzaDbContext(IOptions<PizzaDbConfig> dbConfig)
+		//{
+		//	_dbConfig = dbConfig.Value;
+		//}
 
-		public PizzaDbContext(DbContextOptions options) : base(options)
+		public PizzaDbContext(IDbContextOptionsFactory optionsFactory) : base(optionsFactory.Create())
 		{
 		}
 
 		public DbSet<StoreShelvesEntity> StoreShelves { get; set; }
 		public DbSet<BannerTemplateEntity> BannerTemplates { get; set; }
 
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-		{
-			optionsBuilder.UseSqlServer(_dbConfig.ConnectionString);
-		}
+		//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		//{
+		//	optionsBuilder.UseSqlServer(_dbConfig.ConnectionString);
+		//}
 	}
 }

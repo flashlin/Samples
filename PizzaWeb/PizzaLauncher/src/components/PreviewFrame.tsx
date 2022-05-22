@@ -41,6 +41,7 @@ export default defineComponent({
       <iframe
         name="preview"
         src=""
+        width="100%"
         height="320"
         style={`border: 2px solid #ccc;`}
         srcdoc={props.content}

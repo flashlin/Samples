@@ -2,6 +2,7 @@
 using PizzaWeb.Models;
 using PizzaWeb.Models.Banner;
 using T1.AspNetCore;
+using T1.Standard.Common;
 
 namespace PizzaWeb.Controllers
 {
@@ -18,15 +19,31 @@ namespace PizzaWeb.Controllers
 			_dbContext = dbContext;
 		}
 
-		public List<BannerTemplateEntity> GetAllTemplates()
+		public List<BannerTemplate> GetAllTemplates()
 		{
-			return _dbContext.BannerTemplates.ToList();
+			var bannerTemplates = _dbContext.BannerTemplates
+				.ToList();
+			return bannerTemplates.Select(x => ToBannerTemplateData(x)).ToList();
+		}
+
+		private BannerTemplate ToBannerTemplateData(BannerTemplateEntity entity)
+		{
+			var row = ValueHelper.CopyData(entity, new BannerTemplate());
+			if (entity.VariablesData != null)
+			{
+				row.Variables = row.GetVariables(entity.VariablesData);
+			}
+			return row;
 		}
 
 		[HttpPost]
-		public void UpdateTemplate(BannerTemplateEntity req)
+		public void UpdateTemplate(BannerTemplate req)
 		{
-			_dbContext.BannerTemplates.Update(req);
+			var bannerTemplate = _dbContext.BannerTemplates.Find(req.Id)!;
+			bannerTemplate.LastModifiedTime = DateTime.Now;
+			bannerTemplate.TemplateContent = req.TemplateContent;
+			bannerTemplate.VariablesData = req.GetVariablesData();
+			_dbContext.BannerTemplates.Update(bannerTemplate);
 			_dbContext.SaveChanges();
 		}
 
@@ -50,7 +67,7 @@ namespace PizzaWeb.Controllers
 				},
 			};
 
-			var bannerData = allBannerData.Where(x => x.BannerName == req.BannerName)
+			var bannerData = allBannerData.Where(x => x.BannerName == req.BannerId)
 				.ToList();
 
 			var bannerLogical = new BannerLogical[]
@@ -58,15 +75,9 @@ namespace PizzaWeb.Controllers
 
 			};
 
-
-			var html = Render(bannerData);
-			var text = await _viewToStringRenderer.RenderViewToStringAsync<object>("/Files/Hello.cshtml", bannerData);
-			return String.Empty;
-		}
-
-		private string Render(List<BannerData> bannerData)
-		{
-			return string.Empty;
+			var content = await _viewToStringRenderer.RenderViewToStringAsync<object>(@$"/banner-template:/{req.BannerId}.banner-template",
+				bannerData);
+			return content;
 		}
 	}
 
@@ -84,7 +95,7 @@ namespace PizzaWeb.Controllers
 
 	public class GetBannerReq
 	{
-		public string BannerName { get; set; } = "";
+		public string BannerId { get; set; } = "";
 		public string LangCode { get; set; } = "";
 	}
 }
