@@ -19,9 +19,9 @@ public class BannerTemplate
 	public int Id { get; set; }
 	public string TemplateName { get; set; } = "";
 	public string TemplateContent { get; set; } = "";
-	public Dictionary<string, TemplateVariable> Variables { get; set; } = new Dictionary<string, TemplateVariable>();
+	public List<TemplateVariable> Variables { get; set; } = new List<TemplateVariable>();
 
-	public Dictionary<string, TemplateVariable> GetVariables(string variablesData)
+	public List<TemplateVariable> GetVariables(string variablesData)
 	{
 		var jsonOptions = new JsonSerializerOptions
 		{
@@ -31,9 +31,9 @@ public class BannerTemplate
 		var variablesList = JsonSerializer.Deserialize<List<TemplateVariable>>(variablesData, jsonOptions);
 		if (variablesList == null)
 		{
-			return new Dictionary<string, TemplateVariable>();
+			return new List<TemplateVariable>();
 		}
-		return variablesList.ToDictionary(x => x.Name);
+		return variablesList;
 	}
 
 	public string GetVariablesData()
@@ -43,7 +43,7 @@ public class BannerTemplate
 			AllowTrailingCommas = true,
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 		};
-		return JsonSerializer.Serialize(Variables.Values, jsonOptions);
+		return JsonSerializer.Serialize(Variables, jsonOptions);
 	}
 }
 

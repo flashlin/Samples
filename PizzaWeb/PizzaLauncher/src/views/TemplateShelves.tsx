@@ -143,7 +143,7 @@ export default defineComponent({
                     type="checkbox"
                     v-model={state.bannerIdCheckedList[slotProps.index]}
                     onChange={() =>
-                      onClickSelectBannerId(slotProps.index, slotProps.data.id)
+                      onClickSelectBannerId(slotProps.index, slotProps.data.templateName)
                     }
                   />
                 </div>,
@@ -153,7 +153,7 @@ export default defineComponent({
           <Column field="templateName" header="template name">
             {{
               body: (slotProps: ColumnRowSlots) => [
-                <span>{slotProps.data.id}</span>,
+                <span>{slotProps.data.templateName}</span>,
               ],
             }}
           </Column>
@@ -217,7 +217,7 @@ export default defineComponent({
                         <Column field="name" header="variable name" sortable></Column>
                         <Column field="variableType" header="type"></Column>
                     </DataTable>
-              </div>
+                </div>
               ]
             }} */}
         </DataTable>
