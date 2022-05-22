@@ -6,31 +6,122 @@ import {
   reactive,
   Ref,
   ref,
+  h,
 } from "vue";
-import { BannerApi, GetBannerReq, IBannerTemplateData, IBannerTemplateEntity } from "@/models/Api";
+import {
+  BannerApi,
+  GetBannerReq,
+  IBannerTemplateData,
+  IBannerTemplateEntity,
+  ITemplateVariable,
+} from "@/models/Api";
 import PreviewFrame from "@/components/PreviewFrame";
 import Editor, { IEditorProxy } from "@/components/Editor";
 
 import "./TemplateShelves.scss";
-import DataTable from "primevue/datatable";
-import Button from "primevue/button";
-import Column, { ColumnSlots } from "primevue/column";
-import { ColumnRowSlots } from "@/typings/primevue-typings";
+// import DataTable from "primevue/datatable";
+// import Button from "primevue/button";
+// import Column, { ColumnSlots } from "primevue/column";
+// import { ColumnRowSlots } from "@/typings/primevue-typings";
+
+import { NButton, useMessage, DataTableColumns, NDataTable } from "naive-ui";
+import ShowOrEdit from "@/components/ShowOrEdit";
+import ShowOrTextArea from "@/components/ShowOrTextArea";
 
 export default defineComponent({
   props: {},
   setup(props, { slots }) {
+    const createBannerTemplateDataTableColumns =
+      (): DataTableColumns<IBannerTemplateData> => {
+        return [
+          { type: "selection", options: ["all", "none"] },
+          { title: "Name", key: "templateName", width: 100 },
+          {
+            type: "expand",
+            renderExpand: (rowData: IBannerTemplateData) => {
+              state.expansionColumns = createTemplateVariableDataTableColumns();
+              return [
+                <span>Template Variables</span>,
+                <NDataTable
+                  rowKey={(rowData) => rowData.name}
+                  data={rowData.variables}
+                  v-model:columns={state.expansionColumns}
+                ></NDataTable>,
+              ];
+            },
+            width: 32,
+          },
+          {
+            title: "Content",
+            key: "templateContent",
+            render(row, index) {
+              return h(ShowOrTextArea, {
+                value: row.templateContent,
+                onUpdateValue(v: string) {
+                  state.templateList[index].templateContent = v;
+                },
+              });
+            },
+          },
+          {
+            title: "Action",
+            key: "actions",
+            render(row: any) {
+              return h(
+                NButton,
+                {
+                  strong: true,
+                  tertiary: true,
+                  size: "small",
+                  onClick: () => updateBannerTemplate(row),
+                },
+                { default: () => "Update" }
+              );
+            },
+          },
+        ];
+      };
+
+    const createTemplateVariableDataTableColumns =
+      (): DataTableColumns<ITemplateVariable> => {
+        return [
+          { type: "selection", options: ["all", "none"] },
+          { title: "Name", key: "name", width: 100 },
+          { title: "Type", key: "variableType" },
+          {
+            title: "Action",
+            key: "actions",
+            render(row: any) {
+              return h(
+                NButton,
+                {
+                  strong: true,
+                  tertiary: true,
+                  size: "small",
+                  onClick: () => updateBannerTemplate(row),
+                },
+                { default: () => "Edit" }
+              );
+            },
+          },
+        ];
+      };
+
     const state = reactive({
-      columns: [
-        { field: "id", header: "id" },
-        { field: "templateContent", header: "content" },
-      ],
+      columns: createBannerTemplateDataTableColumns(),
+      expansionColumns: [] as DataTableColumns<ITemplateVariable>,
+      isEdit: false,
       templateList: [] as IBannerTemplateData[],
-      bannerIdCheckedList: [] as boolean[],
+      bannerTemplateCheckedList: [] as boolean[],
+      expandedRows: [],
       bannerIdSelected: "",
       currentEditId: "",
       previewContent: "abc",
     });
+
+    const updateBannerTemplate = async (row: IBannerTemplateData) => {
+      await api.updateTemplateAsync(row);
+    };
 
     const api = new BannerApi();
 
@@ -54,9 +145,9 @@ export default defineComponent({
     onMounted(async () => {
       let resp = await api.getAllTemplatesAsync();
       state.templateList = resp;
-      state.bannerIdCheckedList = new Array(state.templateList.length).fill(
-        false
-      );
+      state.bannerTemplateCheckedList = new Array(
+        state.templateList.length
+      ).fill(false);
     });
 
     const isEditingItem = (id: string) => {
@@ -95,12 +186,12 @@ export default defineComponent({
     };
 
     const onClickSelectBannerId = (idx: number, id: string) => {
-      for (let i = 0; i < state.bannerIdCheckedList.length; i++) {
+      for (let i = 0; i < state.bannerTemplateCheckedList.length; i++) {
         if (i != idx) {
-          state.bannerIdCheckedList[i] = false;
+          state.bannerTemplateCheckedList[i] = false;
         }
       }
-      if (state.bannerIdCheckedList[idx]) {
+      if (state.bannerTemplateCheckedList[idx]) {
         state.bannerIdSelected = id;
       } else {
         state.bannerIdSelected = "";
@@ -118,6 +209,14 @@ export default defineComponent({
       state.previewContent = content;
     };
 
+    /*
+
+                            <Editor
+                              content={slotProps.data.templateContent}
+                              ref={editor}
+                            />,
+    */
+
     return () => (
       <div>
         <button onClick={onClickReload}>Reload</button>
@@ -128,99 +227,12 @@ export default defineComponent({
           style={`with:600px; height:300px;`}
         />
 
-        <DataTable value={state.templateList} responsiveLayout="scroll">
-          <slot name="header">
-            <div class="table-header">
-              Templates
-              <Button icon="pi pi-refresh" />
-            </div>
-          </slot>
-          <Column header="selected">
-            {{
-              body: (slotProps: ColumnRowSlots) => [
-                <div>
-                  <input
-                    type="checkbox"
-                    v-model={state.bannerIdCheckedList[slotProps.index]}
-                    onChange={() =>
-                      onClickSelectBannerId(slotProps.index, slotProps.data.templateName)
-                    }
-                  />
-                </div>,
-              ],
-            }}
-          </Column>
-          <Column field="templateName" header="template name">
-            {{
-              body: (slotProps: ColumnRowSlots) => [
-                <span>{slotProps.data.templateName}</span>,
-              ],
-            }}
-          </Column>
-          {!isEditing()
-            ? [
-                <Column field="templateContent" header="template">
-                  {{
-                    body: (slotProps: any) => [
-                      subContent(slotProps.data.templateContent),
-                    ],
-                  }}
-                </Column>,
-                <Column header="operators">
-                  {{
-                    body: (slotProps: ColumnRowSlots) => [
-                      <Button
-                        onClick={() => onClickEditItem(slotProps.data.id)}
-                      >
-                        Edit
-                      </Button>,
-                    ],
-                  }}
-                </Column>,
-              ]
-            : [
-                <Column field="templateContent" header="template">
-                  {{
-                    body: (slotProps: ColumnRowSlots) =>
-                      !isEditingItem(slotProps.data.id)
-                        ? []
-                        : [
-                            <Editor
-                              content={slotProps.data.templateContent}
-                              ref={editor}
-                            />,
-                          ],
-                  }}
-                </Column>,
-                <Column header="operators">
-                  {{
-                    body: (slotProps: ColumnRowSlots) => [
-                      <Button
-                        onClick={() => onClickUpdateContent(slotProps.data.id)}
-                      >
-                        Update
-                      </Button>,
-                      <Button
-                        onClick={() => onClickCancelContent(slotProps.data.id)}
-                      >
-                        Cancel
-                      </Button>,
-                    ],
-                  }}
-                </Column>,
-              ]}
-            {/* {{
-              expansion: (slotProps: ColumnRowSlots) => [
-                <div class="orders-subtable">
-                    <h5>Variables for {slotProps.data.templateName}</h5>
-                    <DataTable value={slotProps.data.variables} responsiveLayout="scroll">
-                        <Column field="name" header="variable name" sortable></Column>
-                        <Column field="variableType" header="type"></Column>
-                    </DataTable>
-                </div>
-              ]
-            }} */}
-        </DataTable>
+        <NDataTable
+          data={state.templateList}
+          v-model:columns={state.columns}
+          rowKey={(rowData) => rowData.id}
+          v-model:checked-row-keys={state.bannerTemplateCheckedList}
+        ></NDataTable>
       </div>
     );
   },

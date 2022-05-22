@@ -9,7 +9,7 @@ import "./Main.scss";
 // import 'bootstrap-icons/font/bootstrap-icons.css';
 
 //import { elComponents, elPlugins } from "@/plugins/elementui";
-import PrimeVue from 'primevue/config';
+//import PrimeVue from 'primevue/config';
 
 function program() {
   const app = createApp(layout);
@@ -19,7 +19,7 @@ function program() {
   // elPlugins.forEach(plugin => {
   //   app.use(plugin);
   // });
-  app.use(PrimeVue);
+  //app.use(PrimeVue);
   app.use(createPinia());
   app.use(route);
   app.mount('#app');
