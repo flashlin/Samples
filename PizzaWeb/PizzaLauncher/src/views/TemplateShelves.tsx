@@ -30,9 +30,11 @@ import {
   NLayout,
   NLayoutSider,
   NLayoutContent,
+  NSelect,
 } from "naive-ui";
 import ShowOrEdit from "@/components/ShowOrEdit";
 import ShowOrTextArea from "@/components/ShowOrTextArea";
+import EditableSelect, { EditableSelectOption } from "@/components/EditableSelect";
 
 export default defineComponent({
   props: {},
@@ -60,7 +62,7 @@ export default defineComponent({
                       Template Variables
                     </NLayoutSider>
                     <NLayoutContent content-style="padding: 24px; padding-left: 90%">
-                      <NButton strong={true} tertiary={true} size="small">
+                      <NButton strong={true} tertiary={true} size="small" onClick={() => handleAddTemplateVariable(rowData)}>
                         Add
                       </NButton>
                     </NLayoutContent>
@@ -68,7 +70,7 @@ export default defineComponent({
                   <NDataTable
                     rowKey={(rowData) => rowData.name}
                     data={rowData.variables}
-                    v-model:columns={state.expansionColumns}
+                    columns={state.expansionColumns}
                   ></NDataTable>
                 </div>
               );
@@ -111,7 +113,16 @@ export default defineComponent({
         return [
           { type: "selection", options: ["all", "none"] },
           { title: "Name", key: "name", width: 100 },
-          { title: "Type", key: "variableType" },
+          {
+            title: "Type",
+            key: "variableType",
+            render(row: ITemplateVariable) {
+              return <div>
+                <NSelect value={row.variableType} v-model:options={state.templateVariableOptions} 
+                  onChange={() => handleSelectVariableType(row)} filterable />
+              </div>;
+            },
+          },
           {
             title: "Action",
             key: "actions",
@@ -137,12 +148,26 @@ export default defineComponent({
       isEdit: false,
       templateList: [] as IBannerTemplateData[],
       bannerTemplateCheckedList: [] as boolean[],
+      templateVariableOptions: [
+        new EditableSelectOption({ label: "String", key: "String" }),
+      ],
       activeKey: "",
       expandedRows: [],
       bannerIdSelected: "",
       currentEditId: "",
       previewContent: "abc",
     });
+
+    const handleAddTemplateVariable = (row: IBannerTemplateData) => {
+      row.variables.push({
+        name: "",
+        variableType: "String",
+      });
+    };
+
+    const handleSelectVariableType = (row: ITemplateVariable) => {
+
+    };
 
     const updateBannerTemplate = async (row: IBannerTemplateData) => {
       await api.updateTemplateAsync(row);
