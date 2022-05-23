@@ -19,10 +19,6 @@ import PreviewFrame from "@/components/PreviewFrame";
 import Editor, { IEditorProxy } from "@/components/Editor";
 
 import "./TemplateShelves.scss";
-// import DataTable from "primevue/datatable";
-// import Button from "primevue/button";
-// import Column, { ColumnSlots } from "primevue/column";
-// import { ColumnRowSlots } from "@/typings/primevue-typings";
 
 import {
   NButton,
