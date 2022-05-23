@@ -24,13 +24,30 @@ import "./TemplateShelves.scss";
 // import Column, { ColumnSlots } from "primevue/column";
 // import { ColumnRowSlots } from "@/typings/primevue-typings";
 
-import { NButton, useMessage, DataTableColumns, NDataTable } from "naive-ui";
+import {
+  NButton,
+  useMessage,
+  DataTableColumns,
+  NDataTable,
+  NMenu,
+  MenuOption,
+  NLayout,
+  NLayoutSider,
+  NLayoutContent,
+} from "naive-ui";
 import ShowOrEdit from "@/components/ShowOrEdit";
 import ShowOrTextArea from "@/components/ShowOrTextArea";
 
 export default defineComponent({
   props: {},
   setup(props, { slots }) {
+    const templateVariableMenuOptions: MenuOption[] = [
+      {
+        label: () => <div>Hear the Wind Sing</div>,
+        key: "hear-the-wind-sing",
+      },
+    ];
+
     const createBannerTemplateDataTableColumns =
       (): DataTableColumns<IBannerTemplateData> => {
         return [
@@ -40,14 +57,25 @@ export default defineComponent({
             type: "expand",
             renderExpand: (rowData: IBannerTemplateData) => {
               state.expansionColumns = createTemplateVariableDataTableColumns();
-              return [
-                <span>Template Variables</span>,
-                <NDataTable
-                  rowKey={(rowData) => rowData.name}
-                  data={rowData.variables}
-                  v-model:columns={state.expansionColumns}
-                ></NDataTable>,
-              ];
+              return (
+                <div>
+                  <NLayout has-sider>
+                    <NLayoutSider content-style="padding: 24px;">
+                      Template Variables
+                    </NLayoutSider>
+                    <NLayoutContent content-style="padding: 24px; padding-left: 90%">
+                      <NButton strong={true} tertiary={true} size="small">
+                        Add
+                      </NButton>
+                    </NLayoutContent>
+                  </NLayout>
+                  <NDataTable
+                    rowKey={(rowData) => rowData.name}
+                    data={rowData.variables}
+                    v-model:columns={state.expansionColumns}
+                  ></NDataTable>
+                </div>
+              );
             },
             width: 32,
           },
@@ -75,7 +103,7 @@ export default defineComponent({
                   size: "small",
                   onClick: () => updateBannerTemplate(row),
                 },
-                { default: () => "Update" }
+                { default: () => "Apply" }
               );
             },
           },
@@ -91,16 +119,16 @@ export default defineComponent({
           {
             title: "Action",
             key: "actions",
-            render(row: any) {
+            render(row: ITemplateVariable) {
               return h(
                 NButton,
                 {
                   strong: true,
                   tertiary: true,
                   size: "small",
-                  onClick: () => updateBannerTemplate(row),
+                  onClick: () => applyTemplateVariable(row),
                 },
-                { default: () => "Edit" }
+                { default: () => "Apply" }
               );
             },
           },
@@ -113,6 +141,7 @@ export default defineComponent({
       isEdit: false,
       templateList: [] as IBannerTemplateData[],
       bannerTemplateCheckedList: [] as boolean[],
+      activeKey: "",
       expandedRows: [],
       bannerIdSelected: "",
       currentEditId: "",
@@ -122,6 +151,8 @@ export default defineComponent({
     const updateBannerTemplate = async (row: IBannerTemplateData) => {
       await api.updateTemplateAsync(row);
     };
+
+    const applyTemplateVariable = (row: ITemplateVariable) => {};
 
     const api = new BannerApi();
 
