@@ -22,7 +22,7 @@ export class GetBannerReq {
    {
       Object.assign(this, data);
    }
-   bannerId: string = "";
+   bannerName: string = "";
    langCode: string = "";
 }
 

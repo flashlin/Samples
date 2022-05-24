@@ -39,6 +39,7 @@ import ShowOrTextArea from "@/components/ShowOrTextArea";
 import EditableSelect, {
   EditableSelectOption,
 } from "@/components/EditableSelect";
+import { CreateRowKey, RowKey } from "naive-ui/es/data-table/src/interface";
 
 export default defineComponent({
   props: {},
@@ -175,28 +176,17 @@ export default defineComponent({
       expansionColumns: [] as DataTableColumns<ITemplateVariable>,
       isEdit: false,
       templateList: [] as IBannerTemplateData[],
-      bannerTemplateCheckedList: [] as boolean[],
+      bannerTemplateCheckedList: [] as RowKey[],
       templateVariableOptions: [
         { label: "String", value: "String", disabled: false },
         { label: "Url(production)", value: "Url(production)", disabled: false },
         { label: "Image(200,100)", value: "Image(200,100)" },
       ],
       editingRow: null as unknown as IBannerTemplateData,
-      activeKey: "",
       expandedRows: [],
       bannerIdSelected: "",
-      currentEditId: "",
-      previewContent: "abc",
+      previewContent: "",
     });
-
-    const test = (v: any, row: any) => 
-    {
-      console.log("test", v, row);
-    };
-
-    const handleVariableNameOnChanged = (newValue: string, row: ITemplateVariable) => {
-      row.name = newValue;
-    };
 
     const handleAddTemplateVariable = (row: IBannerTemplateData) => {
       state.editingRow = row;
@@ -251,10 +241,19 @@ export default defineComponent({
     };
 
     const onClickPreview = async () => {
-      console.log("selected", state.bannerIdSelected);
+      let bannerTemplateName = state.bannerTemplateCheckedList.find(x => (typeof x) == 'string') as string;
+      console.log("0", typeof state.bannerTemplateCheckedList[0]);
+      console.log("1", typeof state.bannerTemplateCheckedList[1]);
+      if( bannerTemplateName == null ) {
+        message.info("Please select a template");
+        return;
+      }
+
+      message.info(`preview bannerTemplateId`);
+
       let content = await api.getBannerAsync(
         new GetBannerReq({
-          bannerId: state.bannerIdSelected,
+          bannerName: bannerTemplateName,
         })
       );
       console.log("preview", content);
@@ -282,8 +281,8 @@ export default defineComponent({
         <NDataTable
           data={state.templateList}
           v-model:columns={state.columns}
-          rowKey={(rowData) => rowData.id}
-          v-model:checked-row-keys={state.bannerTemplateCheckedList}
+          rowKey={(row) => row.templateName}
+          v-model:checkedRowKeys={state.bannerTemplateCheckedList}
         ></NDataTable>
       </div>
     );
