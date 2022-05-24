@@ -134,7 +134,7 @@ export default defineComponent({
             render(row: ITemplateVariable) {
               return (
                 <div>
-                  <NInput type="text" value={row.name} />
+                  <NInput type="text" v-model={row.name} />
                 </div>
               );
             },
