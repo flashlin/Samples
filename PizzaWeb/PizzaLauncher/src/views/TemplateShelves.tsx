@@ -53,13 +53,6 @@ export default defineComponent({
             title: "Name",
             key: "templateName",
             width: 200,
-            render: (row) => {
-              return (
-                <div>
-                  <ShowOrEdit value={row.templateName} />
-                </div>
-              );
-            },
           },
           {
             type: "expand",
@@ -134,7 +127,7 @@ export default defineComponent({
             render(row: ITemplateVariable) {
               return (
                 <div>
-                  <NInput type="text" v-model={row.name} />
+                  <ShowOrEdit value={row.name} onUpdateValue={(val) => row.name = val} />
                 </div>
               );
             },
@@ -195,6 +188,15 @@ export default defineComponent({
       currentEditId: "",
       previewContent: "abc",
     });
+
+    const test = (v: any, row: any) => 
+    {
+      console.log("test", v, row);
+    };
+
+    const handleVariableNameOnChanged = (newValue: string, row: ITemplateVariable) => {
+      row.name = newValue;
+    };
 
     const handleAddTemplateVariable = (row: IBannerTemplateData) => {
       state.editingRow = row;
