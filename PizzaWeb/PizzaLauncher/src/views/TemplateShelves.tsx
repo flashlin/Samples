@@ -31,21 +31,17 @@ import {
   NLayoutSider,
   NLayoutContent,
   NSelect,
+  NInput,
 } from "naive-ui";
 import ShowOrEdit from "@/components/ShowOrEdit";
 import ShowOrTextArea from "@/components/ShowOrTextArea";
-import EditableSelect, { EditableSelectOption } from "@/components/EditableSelect";
+import EditableSelect, {
+  EditableSelectOption,
+} from "@/components/EditableSelect";
 
 export default defineComponent({
   props: {},
   setup(props, { slots }) {
-    const templateVariableMenuOptions: MenuOption[] = [
-      {
-        label: () => <div>Hear the Wind Sing</div>,
-        key: "hear-the-wind-sing",
-      },
-    ];
-
     const createBannerTemplateDataTableColumns =
       (): DataTableColumns<IBannerTemplateData> => {
         return [
@@ -62,7 +58,12 @@ export default defineComponent({
                       Template Variables
                     </NLayoutSider>
                     <NLayoutContent content-style="padding: 24px; padding-left: 90%">
-                      <NButton strong={true} tertiary={true} size="small" onClick={() => handleAddTemplateVariable(rowData)}>
+                      <NButton
+                        strong={true}
+                        tertiary={true}
+                        size="small"
+                        onClick={() => handleAddTemplateVariable(rowData)}
+                      >
                         Add
                       </NButton>
                     </NLayoutContent>
@@ -112,30 +113,49 @@ export default defineComponent({
       (): DataTableColumns<ITemplateVariable> => {
         return [
           { type: "selection", options: ["all", "none"] },
-          { title: "Name", key: "name", width: 100 },
+          {
+            title: "Name",
+            key: "name",
+            width: 200,
+            render(row: ITemplateVariable) {
+              return (
+                <div>
+                  <NInput type="text" maxlength={10} v-model:value={row.name} />
+                </div>
+              );
+            },
+          },
           {
             title: "Type",
             key: "variableType",
             render(row: ITemplateVariable) {
-              return <div>
-                <NSelect value={row.variableType} v-model:options={state.templateVariableOptions} 
-                  onChange={() => handleSelectVariableType(row)} filterable />
-              </div>;
+              return (
+                <div>
+                  <NSelect
+                    value={row.variableType}
+                    v-model:options={state.templateVariableOptions}
+                    onUpdate:value={() => handleSelectVariableType(row)}
+                    filterable
+                  />
+                </div>
+              );
             },
           },
           {
             title: "Action",
             key: "actions",
             render(row: ITemplateVariable) {
-              return h(
-                NButton,
-                {
-                  strong: true,
-                  tertiary: true,
-                  size: "small",
-                  onClick: () => applyTemplateVariable(row),
-                },
-                { default: () => "Apply" }
+              return (
+                <div>
+                  <NButton
+                    strong={true}
+                    tertiary={true}
+                    size="small"
+                    onClick={() => handleDeleteTemplateVariable(row)}
+                  >
+                    Delete
+                  </NButton>
+                </div>
               );
             },
           },
@@ -150,7 +170,10 @@ export default defineComponent({
       bannerTemplateCheckedList: [] as boolean[],
       templateVariableOptions: [
         new EditableSelectOption({ label: "String", key: "String" }),
+        new EditableSelectOption({ label: "Url", key: "Url(production)" }),
+        new EditableSelectOption({ label: "Image", key: "Image(200,100)" }),
       ],
+      editingRow: null as unknown as IBannerTemplateData,
       activeKey: "",
       expandedRows: [],
       bannerIdSelected: "",
@@ -159,6 +182,7 @@ export default defineComponent({
     });
 
     const handleAddTemplateVariable = (row: IBannerTemplateData) => {
+      state.editingRow = row;
       row.variables.push({
         name: "",
         variableType: "String",
@@ -166,14 +190,17 @@ export default defineComponent({
     };
 
     const handleSelectVariableType = (row: ITemplateVariable) => {
-
+      console.log("select", row);
     };
 
     const updateBannerTemplate = async (row: IBannerTemplateData) => {
       await api.updateTemplateAsync(row);
     };
 
-    const applyTemplateVariable = (row: ITemplateVariable) => {};
+    const handleDeleteTemplateVariable = (row: ITemplateVariable) => {
+      const index = state.editingRow.variables.indexOf(row);
+      state.editingRow.variables.splice(index, 1);
+    };
 
     const api = new BannerApi();
 
