@@ -32,6 +32,7 @@ import {
   NLayoutContent,
   NSelect,
   NInput,
+  SelectOption,
 } from "naive-ui";
 import ShowOrEdit from "@/components/ShowOrEdit";
 import ShowOrTextArea from "@/components/ShowOrTextArea";
@@ -42,11 +43,24 @@ import EditableSelect, {
 export default defineComponent({
   props: {},
   setup(props, { slots }) {
+    const message = useMessage();
+
     const createBannerTemplateDataTableColumns =
       (): DataTableColumns<IBannerTemplateData> => {
         return [
           { type: "selection", options: ["all", "none"] },
-          { title: "Name", key: "templateName", width: 100 },
+          {
+            title: "Name",
+            key: "templateName",
+            width: 200,
+            render: (row) => {
+              return (
+                <div>
+                  <ShowOrEdit value={row.templateName} />
+                </div>
+              );
+            },
+          },
           {
             type: "expand",
             renderExpand: (rowData: IBannerTemplateData) => {
@@ -120,7 +134,7 @@ export default defineComponent({
             render(row: ITemplateVariable) {
               return (
                 <div>
-                  <NInput type="text" maxlength={10} v-model:value={row.name} />
+                  <NInput type="text" value={row.name} />
                 </div>
               );
             },
@@ -133,9 +147,10 @@ export default defineComponent({
                 <div>
                   <NSelect
                     value={row.variableType}
-                    v-model:options={state.templateVariableOptions}
-                    onUpdate:value={() => handleSelectVariableType(row)}
+                    options={state.templateVariableOptions}
+                    onUpdate:value={(value, option) => handleSelectVariableType(row, value, option)}
                     filterable
+                    tag
                   />
                 </div>
               );
@@ -169,9 +184,9 @@ export default defineComponent({
       templateList: [] as IBannerTemplateData[],
       bannerTemplateCheckedList: [] as boolean[],
       templateVariableOptions: [
-        new EditableSelectOption({ label: "String", key: "String" }),
-        new EditableSelectOption({ label: "Url", key: "Url(production)" }),
-        new EditableSelectOption({ label: "Image", key: "Image(200,100)" }),
+        { label: "String", value: "String", disabled: false },
+        { label: "Url(production)", value: "Url(production)", disabled: false },
+        { label: "Image(200,100)", value: "Image(200,100)" },
       ],
       editingRow: null as unknown as IBannerTemplateData,
       activeKey: "",
@@ -189,8 +204,9 @@ export default defineComponent({
       });
     };
 
-    const handleSelectVariableType = (row: ITemplateVariable) => {
-      console.log("select", row);
+    const handleSelectVariableType = (row: ITemplateVariable, value: string, option: SelectOption) => {
+      row.variableType = value;
+      message.info('select: ' + JSON.stringify(row));
     };
 
     const updateBannerTemplate = async (row: IBannerTemplateData) => {
