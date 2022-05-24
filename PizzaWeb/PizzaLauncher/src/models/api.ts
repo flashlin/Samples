@@ -7,7 +7,7 @@ export interface IBannerTemplateEntity {
 export interface ITemplateVariable 
 {
    name: string;
-   variableType: string;
+   fulltype: string;
 }
 
 export interface IBannerTemplateData {

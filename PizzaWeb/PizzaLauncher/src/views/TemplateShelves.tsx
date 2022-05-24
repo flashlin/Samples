@@ -114,7 +114,7 @@ export default defineComponent({
                   strong: true,
                   tertiary: true,
                   size: "small",
-                  onClick: () => updateBannerTemplate(row),
+                  onClick: () => handleApplyBannerTemplate(row),
                 },
                 { default: () => "Apply" }
               );
@@ -146,7 +146,7 @@ export default defineComponent({
               return (
                 <div>
                   <NSelect
-                    value={row.variableType}
+                    value={row.fulltype}
                     options={state.templateVariableOptions}
                     onUpdate:value={(value, option) => handleSelectVariableType(row, value, option)}
                     filterable
@@ -200,17 +200,18 @@ export default defineComponent({
       state.editingRow = row;
       row.variables.push({
         name: "",
-        variableType: "String",
+        fulltype: "String",
       });
     };
 
     const handleSelectVariableType = (row: ITemplateVariable, value: string, option: SelectOption) => {
-      row.variableType = value;
+      row.fulltype = value;
       message.info('select: ' + JSON.stringify(row));
     };
 
-    const updateBannerTemplate = async (row: IBannerTemplateData) => {
+    const handleApplyBannerTemplate = async (row: IBannerTemplateData) => {
       await api.updateTemplateAsync(row);
+      message.info(`Update ${row.templateName} template success`);
     };
 
     const handleDeleteTemplateVariable = (row: ITemplateVariable) => {
@@ -219,10 +220,6 @@ export default defineComponent({
     };
 
     const api = new BannerApi();
-
-    const isEditing = () => {
-      return state.currentEditId != "";
-    };
 
     const editor = ref<IEditorProxy>();
 
@@ -245,52 +242,10 @@ export default defineComponent({
       ).fill(false);
     });
 
-    const isEditingItem = (id: string) => {
-      return state.currentEditId == id;
-    };
-
     const onClickReload = async () => {
       let api = new BannerApi();
       let resp = await api.getAllTemplatesAsync();
       state.templateList = resp;
-    };
-
-    const onClickEditItem = (id: string) => {
-      state.currentEditId = id;
-    };
-
-    const onClickUpdateContent = async (id: string) => {
-      let item = state.templateList.find((x) => x.id == id)!;
-      let idx = state.templateList.indexOf(item);
-      //let newContent = editorRefs.value[idx].getContent();
-      let newContent = editor.value!.getContent();
-
-      let newItem = Object.assign({} as IBannerTemplateEntity, item);
-      newItem.templateContent = newContent;
-
-      await api.updateTemplateAsync(newItem);
-
-      item.templateContent = newContent;
-      state.currentEditId = "";
-    };
-
-    const onClickCancelContent = (id: string) => {
-      let item = state.templateList.find((x) => x.id == id)!;
-      let idx = state.templateList.indexOf(item);
-      state.currentEditId = "";
-    };
-
-    const onClickSelectBannerId = (idx: number, id: string) => {
-      for (let i = 0; i < state.bannerTemplateCheckedList.length; i++) {
-        if (i != idx) {
-          state.bannerTemplateCheckedList[i] = false;
-        }
-      }
-      if (state.bannerTemplateCheckedList[idx]) {
-        state.bannerIdSelected = id;
-      } else {
-        state.bannerIdSelected = "";
-      }
     };
 
     const onClickPreview = async () => {
