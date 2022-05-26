@@ -242,8 +242,6 @@ export default defineComponent({
 
     const onClickPreview = async () => {
       let bannerTemplateName = state.bannerTemplateCheckedList.find(x => (typeof x) == 'string') as string;
-      console.log("0", typeof state.bannerTemplateCheckedList[0]);
-      console.log("1", typeof state.bannerTemplateCheckedList[1]);
       if( bannerTemplateName == null ) {
         message.info("Please select a template");
         return;
@@ -251,12 +249,16 @@ export default defineComponent({
 
       message.info(`preview bannerTemplateId`);
 
+      let apiUrl = "http://localhost:5129";
+      let data = JSON.stringify(new GetBannerReq({
+        bannerName: bannerTemplateName,
+      }));
+
       let content = await api.getBannerAsync(
         new GetBannerReq({
           bannerName: bannerTemplateName,
         })
       );
-      console.log("preview", content);
       state.previewContent = content;
     };
 
@@ -284,6 +286,7 @@ export default defineComponent({
           rowKey={(row) => row.templateName}
           v-model:checkedRowKeys={state.bannerTemplateCheckedList}
         ></NDataTable>
+
       </div>
     );
   },

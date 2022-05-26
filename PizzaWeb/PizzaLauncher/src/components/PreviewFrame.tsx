@@ -8,6 +8,7 @@ import {
 
 export interface IPreviewFrameExpose {
   getContent(): string;
+  reload(): void;
 }
 
 export interface IPreviewFrameProxy
@@ -16,31 +17,37 @@ export interface IPreviewFrameProxy
 
 export default defineComponent({
   props: {
+    src: { type: String, required: false },
     content: { type: String, required: true },
   },
   setup(props, { expose, slots }) {
     const state = reactive({
+      src: props.src == null ? "" : props.src,
       content: props.content,
     });
 
     const iframe = ref<HTMLIFrameElement>();
 
-    const test = () => {
-      console.log("test prop", props.content);
-      console.log("test state", state.content);
-    };
-
     const getContent = () => {
       return state.content;
     };
+
+    const reload = () => {
+      if (iframe.value == null) {
+        return;
+      }
+      iframe.value.contentWindow?.location.reload();
+    };
+
     expose({
       getContent,
+      reload,
     } as IPreviewFrameExpose);
 
     return () => (
       <iframe
         name="preview"
-        src=""
+        src={props.src}
         width="100%"
         height="320"
         style={`border: 2px solid #ccc;`}
