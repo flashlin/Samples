@@ -1,4 +1,4 @@
-namespace PizzaWeb.Controllers;
+namespace PizzaWeb.Models;
 
 public class BannerData
 {
