@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PizzaWeb.Models;
 using PizzaWeb.Models.Banner;
 using T1.AspNetCore;
@@ -22,6 +23,7 @@ namespace PizzaWeb.Controllers
 		public List<BannerTemplate> GetAllTemplates()
 		{
 			var bannerTemplates = _dbContext.BannerTemplates
+				.AsNoTracking()
 				.ToList();
 			return bannerTemplates.Select(x => ToBannerTemplateData(x)).ToList();
 		}
@@ -67,7 +69,7 @@ namespace PizzaWeb.Controllers
 				},
 			};
 
-			var bannerData = allBannerData.Where(x => x.BannerName == req.BannerId)
+			var bannerData = allBannerData.Where(x => x.BannerName == req.BannerName)
 				.ToList();
 
 			var bannerLogical = new BannerLogical[]
@@ -75,7 +77,7 @@ namespace PizzaWeb.Controllers
 
 			};
 
-			var content = await _viewToStringRenderer.RenderViewToStringAsync<object>(@$"/banner-template:/{req.BannerId}.banner-template",
+			var content = await _viewToStringRenderer.RenderViewToStringAsync<object>(@$"/banner-template:/{req.BannerName}.banner-template",
 				bannerData);
 			return content;
 		}
@@ -95,7 +97,7 @@ namespace PizzaWeb.Controllers
 
 	public class GetBannerReq
 	{
-		public string BannerId { get; set; } = "";
+		public string BannerName { get; set; } = "";
 		public string LangCode { get; set; } = "";
 	}
 }

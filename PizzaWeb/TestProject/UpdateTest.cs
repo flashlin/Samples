@@ -18,7 +18,7 @@ namespace TestProject
 		[Test]
 		public void UpdateStoreShelvesById()
 		{
-			var db = new PizzaDbContext(new InMemoryOptionsFactory());
+			var db = new PizzaDbContext(new InMemoryOptionsFactory().Create());
 
 			db.StoreShelves
 				.Set(x => x.Title, "123")

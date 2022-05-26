@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using T1.AspNetCore.FileProviders.Virtual;
@@ -16,7 +17,7 @@ namespace PizzaWeb.Models.Banner
 		public DynamicBannerTemplateFileProvider(string connectionString)
 		{
 			var optionsFactory = new UseSqlServerByConnectionString(connectionString);
-			_db = new PizzaDbContext(optionsFactory);
+			_db = new PizzaDbContext(optionsFactory.Create());
 		}
 
 		public IFileInfo GetFileInfo(string subPath)
@@ -30,7 +31,7 @@ namespace PizzaWeb.Models.Banner
 			return _files.GetOrAdd(subPath, x =>
 			{
 				var templateId = match.Groups["id"].Value;
-				var template = _db.BannerTemplates.FirstOrDefault(x => x.TemplateName == templateId);
+				var template = _db.BannerTemplates.AsNoTracking().FirstOrDefault(x => x.TemplateName == templateId);
 				if (template == null)
 				{
 					return new NotFoundFileInfo(subPath);
@@ -55,6 +56,7 @@ namespace PizzaWeb.Models.Banner
 			var templateId = match.Groups["id"].Value;
 
 			var lastModifiedTime = _db.BannerTemplates
+				.AsNoTracking()
 				.Where(x => x.TemplateName == templateId)
 				.Select(x => x.LastModifiedTime)
 				.FirstOrDefault();
@@ -64,7 +66,12 @@ namespace PizzaWeb.Models.Banner
 				return false;
 			}
 
-			return new DateTimeOffset(lastModifiedTime) > fileInfo.LastModified;
+			var expired = new DateTimeOffset(lastModifiedTime) > fileInfo.LastModified;
+			if(expired)
+			{
+				_files.TryRemove(subPath, out _);
+			}
+			return expired;
 		}
 
 		public bool? Match(string subPath)

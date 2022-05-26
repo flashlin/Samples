@@ -50,7 +50,7 @@ public class BannerTemplate
 public class TemplateVariable
 {
 	public string Name { get; set; } = "";
-	public TemplateVariableType VarType { get; set; }
+	public string Fulltype { get; set; } = "";
 }
 
 public enum TemplateVariableType

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PizzaWeb.Models;
 using System.Diagnostics;
 
@@ -24,7 +25,8 @@ namespace PizzaWeb.Controllers
 		{
 			return View(new IndexViewModel
 			{
-				StoreShelves = _dbContext.StoreShelves.ToList()
+				StoreShelves = _dbContext.StoreShelves
+					.AsNoTracking().ToList()
 			});
 		}
 

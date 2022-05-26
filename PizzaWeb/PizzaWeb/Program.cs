@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PizzaWeb.Models;
 using PizzaWeb.Models.Banner;
 using T1.AspNetCore.Extensions;
@@ -19,7 +20,13 @@ builder.Services.AddControllersWithViews()
 
 builder.Services.Configure<PizzaDbConfig>(builder.Configuration.GetSection("DbConfig"));
 builder.Services.AddTransient<IDbContextOptionsFactory, SqlServerDbContextOptionsFactory>();
-builder.Services.AddDbContext<PizzaDbContext>();
+//builder.Services.AddDbContext<PizzaDbContext>();
+//builder.Services.AddDbContextFactory<PizzaDbContext>();
+builder.Services.AddDbContextPool<PizzaDbContext>(o => 
+	o.UseSqlServer(builder.Configuration
+		.GetSection("DbConfig")
+		.GetValue<string>("ConnectionString")));
+//builder.Services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
 //builder.Services.AddTransient(sp => ActivatorUtilities.CreateInstance<PizzaDbContext>(sp));
 builder.Services.AddViewToStringRendererService();
 
