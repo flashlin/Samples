@@ -27,7 +27,7 @@ public class TodayBuyStockTranCommand : CommandBase
         return true;
     }
 
-    public override void Run(string[] args)
+    public override Task Run(string[] args)
     {
         var p = args.ParseArgs<TodayBuyStockTranCommandLine>();
         var tranData = new TransEntity
@@ -38,5 +38,6 @@ public class TodayBuyStockTranCommand : CommandBase
             NumberOfShare = p.NumberOfShare
         };
         _stockRepo.BuyStock(tranData);
+        return Task.CompletedTask;
     }
 }

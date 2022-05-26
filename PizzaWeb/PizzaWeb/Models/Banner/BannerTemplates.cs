@@ -14,6 +14,27 @@ public class BannerTemplateEntity
 	public DateTime LastModifiedTime { get; set; }
 }
 
+[Table("BannerVariables")]
+public class BannerVariableEntity
+{
+	public int Id { get; set; }
+	public int TemplateId { get; set; }
+	public string VariableName { get; set; }
+	public int ResxId { get; set; }
+}
+
+
+[Table("BannerResx")]
+public class BannerResxEntity
+{
+	public int Id { get; set; }
+	public string Lang { get; set; }
+	public string Name { get; set; }
+	public string Content { get; set; }
+	public DateTime LastModifiedTime { get; set; }
+}
+
+
 public class BannerTemplate
 {
 	public int Id { get; set; }

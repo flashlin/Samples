@@ -10,4 +10,5 @@ public interface IStockService
     List<TransHistory> GetTransList(ListTransReq listTransReq);
     Task Test();
     Task<List<ReportTranItem>> GetStockReportAsync(ReportTransReq req);
+    Task<List<ReportProfitItem>> GetAllStockProfitReportAsync();
 }

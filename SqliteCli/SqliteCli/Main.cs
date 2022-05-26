@@ -64,12 +64,13 @@ public class Main
             var commands = new CommandBase[]
             {
                 _serviceProvider.GetService<BuyStockTranCommand>()!,
-                _serviceProvider.GetService<TodayBuyStockTranCommand>()!
+                _serviceProvider.GetService<TodayBuyStockTranCommand>()!,
+                _serviceProvider.GetService<QueryStockProfitCommand>()!,
             };
             var cmd = commands.FirstOrDefault(x => x.IsMyCommand(ss));
             if (cmd != null)
             {
-                cmd.Run(ss);
+                await cmd.Run(ss);
                 continue;
             }
 

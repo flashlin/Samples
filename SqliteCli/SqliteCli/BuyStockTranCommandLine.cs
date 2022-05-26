@@ -19,3 +19,9 @@ public class BuyStockTranCommandLine
     [Value(index: 4, Required = true, HelpText = "Stock Number Of Share")]
     public int NumberOfShare { get; set; }
 }
+
+public class QueryStockProfitCommandLine
+{
+    [Value(index: 0, HelpText = "action name")]
+    public string ActionName { get; set; } = "";
+}

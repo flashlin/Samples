@@ -28,11 +28,14 @@ public class StockService : IStockService
 {
     private readonly IStockRepo _stockRepo;
     private readonly IStockExchangeApi _stockExchangeApi;
+    private readonly StockDbContext _db;
 
-    public StockService(IStockRepo stockRepo, IStockExchangeApi stockExchangeApi)
+    public StockService(IStockRepo stockRepo, IStockExchangeApi stockExchangeApi,
+        StockDbContext db)
     {
         _stockRepo = stockRepo;
         _stockExchangeApi = stockExchangeApi;
+        _db = db;
     }
 
     public async Task ShowStockHistoryAsync(ShowStockHistoryReq req)
@@ -122,6 +125,56 @@ public class StockService : IStockService
         }
 
         return rc;
+    }
+    
+    public async Task<List<ReportProfitItem>> GetAllStockProfitReportAsync()
+    {
+        var result = new List<ReportProfitItem>();
+        
+        var rc = _stockRepo.GetTransGroupByStock(new ReportTransReq());
+        foreach (var stock in rc.Where(x => x.TranType == "Buy"))
+        {
+            await EnsuredStockHistory(new DateRange()
+            {
+                StartDate = stock.MinTranTime,
+                EndDate = DateTime.Now,
+            }, stock.StockId);
+
+            var dateRange = new DateRange(DateTime.Now.AddDays(-5), DateTime.Now);
+            foreach (var date in dateRange.GetRangeByDay())
+            {
+                var reportProfitItem = QueryProfit(stock, date);
+                result.Add(reportProfitItem);
+            }
+        }
+        
+        return result;
+    }
+
+    private ReportProfitItem QueryProfit(ReportTranItem stock, DateTime queryDate)
+    {
+        var data = _db.StocksHistory
+            .Where(x => x.StockId == stock.StockId && x.TranDate == queryDate.ToDate())
+            .Select(x => new {x.StockId, x.ClosingPrice})
+            .First();
+
+        var currentPrice = data.ClosingPrice;
+        var currentTotal = data.ClosingPrice * stock.NumberOfShare;
+        var profit = 0m;
+        if (currentTotal != 0)
+        {
+            profit = stock.Balance + currentTotal;
+        }
+
+        var reportProfitItem = new ReportProfitItem()
+        {
+            StockId = stock.StockId,
+            StockName = stock.StockName,
+            Date = queryDate, 
+            StockPrice = currentPrice,
+            Profit = profit
+        };
+        return reportProfitItem;
     }
 
     public async Task<List<ReportTranItem>> GetStockReportAsync(ReportTransReq req)

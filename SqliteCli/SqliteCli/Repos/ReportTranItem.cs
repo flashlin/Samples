@@ -1,5 +1,23 @@
 ﻿namespace SqliteCli.Repos
 {
+
+	public class ReportProfitItem
+	{
+		[DisplayString("", 9)] public string StockId { set; get; }
+
+		[DisplayString("", 26)] public string StockName { set; get; }
+
+		[DisplayString("yyyy/MM/dd", 10)] public DateTime Date { get; set; }
+		
+		[AmountString(6)]
+		public decimal StockPrice { get; set; }
+		
+		[AmountString(11)]
+		public decimal Profit { get; set; }
+		
+	}
+
+
 	public class ReportTranItem : IConsoleTextProvider
 	{
 		[DisplayString("", 7)]

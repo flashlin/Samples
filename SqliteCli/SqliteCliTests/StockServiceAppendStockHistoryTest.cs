@@ -19,7 +19,7 @@ public class StockServiceAppendStockHistoryTest
     public StockServiceAppendStockHistoryTest()
     {
         _stockRepo = Substitute.For<IStockRepo>();
-        _service = new StockService(_stockRepo, Substitute.For<IStockExchangeApi>());
+        _service = new StockService(_stockRepo, Substitute.For<IStockExchangeApi>(), null);
         _anyStockId = "anyStockId";
     }
 
