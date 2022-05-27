@@ -1,13 +1,17 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PizzaWeb.Models.Banner;
 
-[Table("BannerResx")]
+[Table("Resx")]
 public class BannerResxEntity
 {
-    public int Id { get; set; }
-    public string Lang { get; set; }
-    public string Name { get; set; }
-    public string Content { get; set; }
-    public DateTime LastModifiedTime { get; set; }
+	[Key]
+	[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+	public int Id { get; set; } = 0;
+
+    public string IsoLangCode { get; set; } = "en-US";
+    public string VarType { get; set; } = "String";
+    public string Name { get; set; } = "";
+    public string Content { get; set; } = "";
 }

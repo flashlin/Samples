@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PizzaWeb.Models;
 using PizzaWeb.Models.Banner;
+using PizzaWeb.Models.Helpers;
 using T1.AspNetCore.Extensions;
 using T1.AspNetCore.FileProviders.Virtual;
 
@@ -17,7 +18,7 @@ builder.Services.AddControllersWithViews()
 			options.FileProviders.Add(new DynamicVirtualFileProvider(dynamicFileProvider));
 		});
 
-
+builder.Services.AddTransient<IJsonConverter, JsonConverter>();
 builder.Services.Configure<PizzaDbConfig>(builder.Configuration.GetSection("DbConfig"));
 builder.Services.AddTransient<IDbContextOptionsFactory, SqlServerDbContextOptionsFactory>();
 //builder.Services.AddDbContext<PizzaDbContext>();
@@ -44,6 +45,7 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+ServiceLocator.SetLocatorProvider(app.Services);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

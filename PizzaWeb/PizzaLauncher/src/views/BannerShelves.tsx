@@ -55,6 +55,7 @@ export default defineComponent({
         { label: "Url(production)", value: "Url(production)", disabled: false },
         { label: "Image(200,100)", value: "Image(200,100)" },
       ],
+      templateVariables: [] as ITemplateVariable[],
       editingRow: null as unknown as IBannerTemplateData,
       expandedRows: [],
       bannerIdSelected: "",

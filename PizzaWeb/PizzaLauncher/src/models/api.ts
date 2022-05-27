@@ -26,6 +26,19 @@ export class GetBannerReq {
    langCode: string = "";
 }
 
+export interface IGetBannerVariablesReq {
+   templateId: number;
+}
+
+export interface IBannerVariableData {
+   templateId: number;
+   variableName: string;
+   lang: string;
+   resxId: number;
+   resxName: string;
+   resxContent: string;
+}
+
 export class BannerApi 
 {
    getAllTemplatesAsync(): Promise<IBannerTemplateData[]> {
@@ -38,6 +51,10 @@ export class BannerApi
 
    getBannerAsync(req: GetBannerReq): Promise<string> {
       return this.postQueryAsync("banner/getBanner", req);
+   }
+
+   getBannerVariables(req: IGetBannerVariablesReq): Promise<IBannerVariableData[]> {
+      return this.postQueryAsync<IBannerVariableData[]>("banner/getBannerVariables", req);
    }
 
    private async postAsync(url: string, data: any){
@@ -55,8 +72,8 @@ export class BannerApi
       return resp;
    }
 
-   private async postQueryAsync(url: string, data: any){
+   private async postQueryAsync<T>(url: string, data: any){
       let resp = await this.postAsync(url, data);
-      return resp.json();
+      return resp.json() as unknown as T;
    }
 }
