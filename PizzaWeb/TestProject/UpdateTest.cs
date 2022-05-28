@@ -20,6 +20,8 @@ namespace TestProject
 		{
 			var db = CreatePizzaDbInMemory();
 
+			var store = db.Banners.ToList();
+
 			db.StoreShelves
 				.Set(x => x.Title, "123")
 				.Where(x => x.Id == 1)
@@ -34,7 +36,7 @@ namespace TestProject
 			return db;
 		}
 	}
-	
+
 
 
 	public class InMemoryOptionsFactory : IDbContextOptionsFactory
