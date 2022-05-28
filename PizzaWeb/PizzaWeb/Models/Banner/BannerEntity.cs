@@ -24,7 +24,7 @@ public class Banner
     public int Id { get; set; }
     public string Name { get; set; } = "";
     public int OrderId { get; set; } = 1;
-    public Dictionary<string, BannerVariable> Variables { get; set; } = new Dictionary<string, BannerVariable>();
+    public List<BannerVariable> Variables { get; set; } = new List<BannerVariable>();
     public string TemplateName { get; set; } = "";
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 

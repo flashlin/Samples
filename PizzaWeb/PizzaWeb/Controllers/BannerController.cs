@@ -48,7 +48,7 @@ namespace PizzaWeb.Controllers
                     Name = banner.Name,
                     TemplateName = banner.TemplateName,
                     OrderId = banner.OrderId,
-                    Variables = q4.ToDictionary(x => x.VarName)
+                    Variables = q4.ToList()
                 };
             }
         }
@@ -128,7 +128,7 @@ namespace PizzaWeb.Controllers
                     TemplateName = tb1.TemplateName,
                     Name = tb1.Name,
                     OrderId = tb1.OrderId,
-                    TemplateVariables = BannerTemplate.From(tb2).Variables,
+                    TemplateVariables = BannerTemplate.ParseVariablesData(tb2.VariablesData),
                     BannerVariables = Banner.ParseVariableOptions(tb1.VariableOptions),
                 };
 
@@ -201,16 +201,6 @@ namespace PizzaWeb.Controllers
     {
         public string LangCode { get; set; }
         public string BannerName { get; set; }
-    }
-
-    public class BannerVariableData
-    {
-        public int TemplateId { get; set; }
-        public string VariableName { get; set; }
-        public string Lang { get; set; }
-        public int ResxId { get; set; }
-        public string ResxName { get; set; }
-        public string ResxContent { get; set; }
     }
 
     public class GetBannersReq

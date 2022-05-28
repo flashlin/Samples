@@ -18,7 +18,7 @@ namespace TestProject
 		[Test]
 		public void UpdateStoreShelvesById()
 		{
-			var db = new PizzaDbContext(new InMemoryOptionsFactory().Create());
+			var db = CreatePizzaDbInMemory();
 
 			db.StoreShelves
 				.Set(x => x.Title, "123")
@@ -27,7 +27,15 @@ namespace TestProject
 
 			//Assert.That(jsFile, Is.EqualTo("assets/luncher.ddee1e2b.js"));
 		}
+
+		private static PizzaDbContext CreatePizzaDbInMemory()
+		{
+			var db = new PizzaDbContext(new InMemoryOptionsFactory().Create());
+			return db;
+		}
 	}
+	
+
 
 	public class InMemoryOptionsFactory : IDbContextOptionsFactory
 	{

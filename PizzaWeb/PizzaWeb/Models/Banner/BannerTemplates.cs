@@ -15,13 +15,20 @@ public class BannerTemplate
     public static BannerTemplate From(BannerTemplateEntity entity)
     {
         var row = ValueHelper.CopyData(entity, new BannerTemplate());
-        if (entity.VariablesData != null)
-        {
-            var sp = ServiceLocator.Current;
-            var jsonConvert = sp.GetService<IJsonConverter>();
-            row.Variables = jsonConvert.Deserialize<List<TemplateVariable>>(entity.VariablesData) ??
-                            new List<TemplateVariable>();
-        }
+        ParseVariablesData(entity.VariablesData);
         return row;
+    }
+
+    public static List<TemplateVariable> ParseVariablesData(string? templateVariablesData)
+    {
+        if (string.IsNullOrEmpty(templateVariablesData))
+        {
+            return new List<TemplateVariable>();
+        }
+
+        var sp = ServiceLocator.Current;
+        var jsonConvert = sp.GetService<IJsonConverter>();
+        return jsonConvert.Deserialize<List<TemplateVariable>>(templateVariablesData) ??
+               new List<TemplateVariable>();
     }
 }

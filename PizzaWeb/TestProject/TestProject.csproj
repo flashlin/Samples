@@ -21,4 +21,9 @@
     <ProjectReference Include="..\PizzaWeb\PizzaWeb.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Database\PizzaDb.sql" />
+    <EmbeddedResource Include="Database\PizzaDb.sql" />
+  </ItemGroup>
+
 </Project>
