@@ -15,11 +15,11 @@ public class BannerTemplate
     public static BannerTemplate From(BannerTemplateEntity entity)
     {
         var row = ValueHelper.CopyData(entity, new BannerTemplate());
-        ParseVariablesData(entity.VariablesData);
+        ParseVariablesJson(entity.VariablesJson);
         return row;
     }
 
-    public static List<TemplateVariable> ParseVariablesData(string? templateVariablesData)
+    public static List<TemplateVariable> ParseVariablesJson(string? templateVariablesData)
     {
         if (string.IsNullOrEmpty(templateVariablesData))
         {
@@ -28,7 +28,12 @@ public class BannerTemplate
 
         var sp = ServiceLocator.Current;
         var jsonConvert = sp.GetService<IJsonConverter>();
-        return jsonConvert.Deserialize<List<TemplateVariable>>(templateVariablesData) ??
-               new List<TemplateVariable>();
+        var dict = jsonConvert.Deserialize<Dictionary<string, string>>(templateVariablesData);
+
+        return dict.Select(x => new TemplateVariable
+        {
+            Name = x.Key,
+            VarType = x.Value
+        }).ToList();
     }
 }

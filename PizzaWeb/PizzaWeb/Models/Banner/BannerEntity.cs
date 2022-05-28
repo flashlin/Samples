@@ -28,27 +28,21 @@ public class Banner
     public string TemplateName { get; set; } = "";
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 
-    public static List<TemplateVariableValue> ParseVariableOptions(string variableOptions)
+    public static List<TemplateVariableValue> ParseVariableOptionsJson(string variableOptions)
     {
-        var data = new Dictionary<string, string>();
+        var dict = new Dictionary<string, string>();
         if (!string.IsNullOrEmpty(variableOptions))
         {
             var sp = ServiceLocator.Current;
             var jsonConvert = sp.GetService<IJsonConverter>();
-            data = jsonConvert.Deserialize<Dictionary<string, string>>(variableOptions) ?? 
+            dict = jsonConvert.Deserialize<Dictionary<string, string>>(variableOptions) ??
                    new Dictionary<string, string>();
         }
-
-        var list = new List<TemplateVariableValue>();
-        foreach (var item in data)
+        return dict.Select(x => new TemplateVariableValue
         {
-            list.Add(new TemplateVariableValue
-            {
-                VarName = item.Key,
-                ResxName = item.Value
-            });
-        }
-        return list;
+            VarName = x.Key,
+            ResxName = x.Value
+        }).ToList();
     }
 }
 

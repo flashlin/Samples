@@ -1,5 +1,7 @@
 ﻿
-首先建立 xUnit 測試專案, 使用 SqlLocalDb 物件建立實例
+First, Create xUnit Test Project, 
+and new SqlLocalDb to create instance
+
 ```
 public class SqlLocalDbTest : IDisposable
 {
@@ -16,12 +18,14 @@ public class SqlLocalDbTest : IDisposable
     }
 }
 ```
-* EnsureInstanceCreated 建立為 local_db_instance 實例
-* ForceDropDatabase 強制刪除現有的資料庫
-* DeleteDatabaseFile 刪除 mdf ldf 檔案
-* CreateDatabase 建立資料庫
 
-將產品專案中的 connectionString 重指向 local_db_instance
+* EnsureInstanceCreated: Ensure local_db_instance instance created
+* ForceDropDatabase:  Force delete exists database
+* DeleteDatabaseFile: Delete mdf ldf files
+* CreateDatabase: Create database
+
+
+Setting connectionString to local_db_instance
 ```
 public class MyDbContext : DbContext
 {
@@ -36,7 +40,7 @@ public class MyDbContext : DbContext
 }
 ```
 
-如此一來就能夠在測試專案中, 直接執行資料庫整合測試
+Finish, you can use local_db_instance to test your code in Integrated Database Test Project.
 ```
 [Fact]
 public void execute_store_procedure()

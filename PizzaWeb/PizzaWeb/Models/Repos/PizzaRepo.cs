@@ -28,7 +28,7 @@ public class PizzaRepo
             from tb2 in g1.DefaultIfEmpty(new BannerTemplateEntity()
             {
                 TemplateName = tb1.TemplateName,
-                VariablesData = "{}"
+                VariablesJson = "{}"
             })
             select new TemplateBannerData
             {
@@ -36,8 +36,8 @@ public class PizzaRepo
                 TemplateName = tb1.TemplateName,
                 Name = tb1.Name,
                 OrderId = tb1.OrderId,
-                TemplateVariables = BannerTemplate.ParseVariablesData(tb2.VariablesData),
-                BannerVariables = Banner.Banner.ParseVariableOptions(tb1.VariableOptions),
+                TemplateVariables = BannerTemplate.ParseVariablesJson(tb2.VariablesJson),
+                BannerVariables = Banner.Banner.ParseVariableOptionsJson(tb1.VariableOptions),
             };
     }
 
@@ -106,7 +106,7 @@ public class PizzaRepo
 
     private IEnumerable<Banner.Banner> QueryAllBanners()
     {
-        var banners = this.QueryBannersData();
+        var banners = this.QueryBannersData().ToList();
         foreach (var banner in banners)
         {
             var templateVariablesSettings = this.QueryTemplateVariablesSettings(banner);

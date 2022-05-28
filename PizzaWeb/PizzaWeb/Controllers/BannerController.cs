@@ -46,7 +46,7 @@ namespace PizzaWeb.Controllers
             var bannerTemplate = _dbContext.BannerTemplates.Find(req.Id)!;
             bannerTemplate.LastModifiedTime = DateTime.Now;
             bannerTemplate.TemplateContent = req.TemplateContent;
-            bannerTemplate.VariablesData = _jsonConverter.Serialize(req.Variables);
+            bannerTemplate.VariablesJson = _jsonConverter.Serialize(req.Variables);
             _dbContext.BannerTemplates.Update(bannerTemplate);
             _dbContext.SaveChanges();
         }

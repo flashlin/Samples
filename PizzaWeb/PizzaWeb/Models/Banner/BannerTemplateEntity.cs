@@ -9,7 +9,7 @@ public class BannerTemplateEntity
     public string TemplateName { get; set; }
     public string TemplateContent { get; set; }
 
-    public string? VariablesData { get; set;}
+    public string? VariablesJson { get; set;}
 
     public DateTime LastModifiedTime { get; set; }
 }
