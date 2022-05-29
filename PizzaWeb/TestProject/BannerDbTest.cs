@@ -60,20 +60,6 @@ namespace TestProject
             expected.ToExpectedObject().ShouldEqual(bannerTemplate.VariablesJson);
         }
 
-        private void WhenAddTemplate()
-        {
-            _bannerController.AddBannerTemplate(new AddBannerTemplateReq()
-            {
-                TemplateName = "Banner1",
-                TemplateContent = "Hello Banner",
-                Variables = new Dictionary<string, TemplateVariable>()
-                {
-                    {"image", new TemplateVariable {Name = "image", VarType = "Image(100,200)"}},
-                    {"title", new TemplateVariable {Name = "title", VarType = "String"}},
-                }
-            });
-        }
-
 
         [Test]
         public void AddBanner()
@@ -87,6 +73,20 @@ namespace TestProject
             var expected =
                 "{\"image\":{\"varName\":\"image\",\"resxName\":\"Salted Chicken Pizza\"},\"title\":{\"varName\":\"title\",\"resxName\":\"Mother\\u0027s Chicken\"}}";
             expected.ToExpectedObject().ShouldEqual(banner.VariableOptionsJson);
+        }
+
+        private void WhenAddTemplate()
+        {
+            _bannerController.AddBannerTemplate(new AddBannerTemplateReq()
+            {
+                TemplateName = "Banner1",
+                TemplateContent = "Hello Banner",
+                Variables = new Dictionary<string, TemplateVariable>()
+                {
+                    {"image", new TemplateVariable {Name = "image", VarType = "Image(100,200)"}},
+                    {"title", new TemplateVariable {Name = "title", VarType = "String"}},
+                }
+            });
         }
 
         private void WhenAddBanner()
