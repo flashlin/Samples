@@ -14,7 +14,7 @@ using T1.Standard.IO;
 
 namespace TestProject
 {
-    public class SqlLocalDbTest
+    public class BannerDbTest
     {
         private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
         private BannerController _bannerController;
@@ -40,7 +40,7 @@ namespace TestProject
                 ConnectionString = "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=Northwind;"
             }));
             _db = new PizzaDbContext(factory.Create());
-            var sql = EmbeddedResource.GetEmbeddedResourceString(typeof(SqlLocalDbTest).Assembly, "PizzaDb.sql");
+            var sql = EmbeddedResource.GetEmbeddedResourceString(typeof(BannerDbTest).Assembly, "PizzaDb.sql");
             _db.Database.ExecuteSqlRaw(sql);
         }
 
