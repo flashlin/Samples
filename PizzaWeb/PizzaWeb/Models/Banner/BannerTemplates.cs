@@ -35,6 +35,18 @@ public static class ParseJsonExtension
 
         return dict.Values.ToList();
     }
+    
+    public static List<TemplateVariableValue> ToVariableOptionsList(this string variableOptions)
+    {
+        var dict = new Dictionary<string, TemplateVariableValue>();
+        if (!string.IsNullOrEmpty(variableOptions))
+        {
+            var sp = ServiceLocator.Current;
+            var jsonConvert = sp.GetService<IJsonConverter>();
+            dict = jsonConvert.Deserialize<Dictionary<string, TemplateVariableValue>>(variableOptions);
+        }
+        return dict.Values.ToList();
+    }
 
     public static string ToJson(this Dictionary<string,TemplateVariable>? obj)
     {

@@ -42,12 +42,9 @@ namespace PizzaWeb.Controllers
             return _pizzaRepo.GetAllBannerTemplates();
         }
 
-        public IEnumerable<Banner> GetBanners(GetBannersReq req)
+        public List<BannerSetting> GetBanners(GetBannersReq req)
         {
-            foreach (var banner1 in _pizzaRepo.GetAllBanners())
-            {
-                yield return banner1;
-            }
+            return _pizzaRepo.GetAllBanners(req);
         }
 
         [HttpPost]

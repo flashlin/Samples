@@ -37,7 +37,7 @@ public class PizzaRepo
                 Name = tb1.Name,
                 OrderId = tb1.OrderId,
                 TemplateVariables = tb2.VariablesJson.ToTemplateVariablesList(),
-                BannerVariables = Banner.Banner.ParseVariableOptionsJson(tb1.VariableOptionsJson),
+                BannerVariables = tb1.VariableOptionsJson.ToVariableOptionsList(),
             };
     }
 
@@ -99,12 +99,14 @@ public class PizzaRepo
             };
     }
 
-    public List<Banner.Banner> GetAllBanners()
+    public List<BannerSetting> GetAllBanners(GetBannersReq req)
     {
-        return QueryAllBanners().ToList();
+        return QueryAllBanners()
+            .Where(x => x.TemplateName == req.TemplateName)
+            .ToList();
     }
 
-    private IEnumerable<Banner.Banner> QueryAllBanners()
+    private IEnumerable<BannerSetting> QueryAllBanners()
     {
         var banners = this.QueryBannersData().ToList();
         foreach (var banner in banners)
@@ -112,7 +114,7 @@ public class PizzaRepo
             var templateVariablesSettings = this.QueryTemplateVariablesSettings(banner);
             var variableSettings = this.QueryAllVariableSettings(templateVariablesSettings);
             var variables = this.QueryBannerVariables(variableSettings);
-            yield return new Banner.Banner
+            yield return new Banner.BannerSetting
             {
                 Id = banner.Id,
                 Name = banner.Name,

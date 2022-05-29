@@ -19,7 +19,7 @@ public class BannerEntity
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 }
 
-public class Banner
+public class BannerSetting
 {
     public int Id { get; set; }
     public string Name { get; set; } = "";
@@ -27,18 +27,6 @@ public class Banner
     public List<BannerVariable> Variables { get; set; } = new List<BannerVariable>();
     public string TemplateName { get; set; } = "";
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
-
-    public static List<TemplateVariableValue> ParseVariableOptionsJson(string variableOptions)
-    {
-        var dict = new Dictionary<string, TemplateVariableValue>();
-        if (!string.IsNullOrEmpty(variableOptions))
-        {
-            var sp = ServiceLocator.Current;
-            var jsonConvert = sp.GetService<IJsonConverter>();
-            dict = jsonConvert.Deserialize<Dictionary<string, TemplateVariableValue>>(variableOptions);
-        }
-        return dict.Values.ToList();
-    }
 }
 
 public class BannerVariable

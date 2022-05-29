@@ -67,7 +67,7 @@ namespace TestProject
             GivenServiceLocator();
             GivenBannerController();
 
-            WhenAddBanner();
+            WhenAddBanner("Mother's Day");
 
             var banner = _db.Banners.AsNoTracking().First();
             var expected =
@@ -79,7 +79,7 @@ namespace TestProject
         {
             _bannerController.AddBannerTemplate(new AddBannerTemplateReq()
             {
-                TemplateName = "Banner1",
+                TemplateName = "Template1",
                 TemplateContent = "Hello Banner",
                 Variables = new Dictionary<string, TemplateVariable>()
                 {
@@ -89,17 +89,17 @@ namespace TestProject
             });
         }
 
-        private void WhenAddBanner()
+        private void WhenAddBanner(string bannerName)
         {
             _bannerController.AddBanner(new AddBannerReq()
             {
                 TemplateName = "Banner1",
-                BannerName = "Mother's Day",
+                BannerName = bannerName,
                 OrderId = 1,
                 VariablesOptions = new Dictionary<string, TemplateVariableValue>()
                 {
                     {"image", new TemplateVariableValue {VarName = "image", ResxName = "Salted Chicken Pizza"}},
-                    {"title", new TemplateVariableValue {VarName = "title", ResxName = "Mother's Chicken"}},
+                    {"title", new TemplateVariableValue {VarName = "title", ResxName = $"{bannerName} Chicken"}},
                 }
             });
         }
@@ -119,6 +119,30 @@ namespace TestProject
                 {
                     Name = "image",
                     VarType = "Image(100,200)"
+                });
+        }
+        
+        
+        [Test]
+        public void GetBanner()
+        {
+            GivenServiceLocator();
+            GivenBannerController();
+
+            WhenAddTemplate();
+            WhenAddBanner("Mother Day");
+            WhenAddBanner("Father Day");
+            
+            var banners = _bannerController.GetBanners(new GetBannersReq()
+            {
+                TemplateName = "Template1"
+            });
+
+            banners[0].Variables[0].ToExpectedObject()
+                .ShouldEqual(new BannerVariable
+                {
+                    VarName = "image",
+                    ResxName = ""
                 });
         }
 
