@@ -30,19 +30,14 @@ public class Banner
 
     public static List<TemplateVariableValue> ParseVariableOptionsJson(string variableOptions)
     {
-        var dict = new Dictionary<string, string>();
+        var dict = new Dictionary<string, TemplateVariableValue>();
         if (!string.IsNullOrEmpty(variableOptions))
         {
             var sp = ServiceLocator.Current;
             var jsonConvert = sp.GetService<IJsonConverter>();
-            dict = jsonConvert.Deserialize<Dictionary<string, string>>(variableOptions) ??
-                   new Dictionary<string, string>();
+            dict = jsonConvert.Deserialize<Dictionary<string, TemplateVariableValue>>(variableOptions);
         }
-        return dict.Select(x => new TemplateVariableValue
-        {
-            VarName = x.Key,
-            ResxName = x.Value
-        }).ToList();
+        return dict.Values.ToList();
     }
 }
 

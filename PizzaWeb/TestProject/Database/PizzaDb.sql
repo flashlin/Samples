@@ -3,9 +3,9 @@ CREATE TABLE [dbo].[BannerTemplates]
     [Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
     [TemplateName] [varchar](50) NOT NULL,
     [TemplateContent] [nvarchar](4000) NULL,
-    [VariablesData] [nvarchar](4000) NULL,
+    [VariablesJson] [nvarchar](4000) NULL,
     [LastModifiedTime] [datetime] NOT NULL
-    --CONSTRAINT [UK_BannerTemplates] UNIQUE ([TemplateName] ASC)
+    CONSTRAINT [UK_BannerTemplates] UNIQUE ([TemplateName] ASC)
 )
 
 

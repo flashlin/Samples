@@ -38,7 +38,6 @@ namespace TestProject
 	}
 
 
-
 	public class InMemoryOptionsFactory : IDbContextOptionsFactory
 	{
 		public DbContextOptions Create()

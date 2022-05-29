@@ -12,14 +12,6 @@ namespace PizzaWeb.Models
 			_dbConfig = dbConfig.Value;
 		}
 
-		public void SetDbConnectionString(string connectionString)
-		{
-			_dbConfig = new PizzaDbConfig
-			{
-				ConnectionString = connectionString
-			};
-		}
-
 		public DbContextOptions Create()
 		{
 			return new DbContextOptionsBuilder<PizzaDbContext>()
