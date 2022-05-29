@@ -45,7 +45,7 @@ namespace TestProject
         }
 
         [Test]
-        public void CreateBannerTemplate()
+        public void AddBannerTemplate()
         {
             GivenServiceLocator();
             GivenBannerController();
