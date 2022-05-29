@@ -23,21 +23,24 @@ namespace TestProject
 			_localDb.DeleteDatabaseFile(_databaseName);
 			_localDb.CreateDatabase(_instanceName, _databaseName);
 
+			RebuildDatabaseSchema();
+		}
+
+		private void RebuildDatabaseSchema()
+		{
 			var factory = new SqlServerDbContextOptionsFactory(Options.Create(new PizzaDbConfig
 			{
-				ConnectionString  = "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=Northwind;"
+				ConnectionString = "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=Northwind;"
 			}));
 			_db = new PizzaDbContext(factory.Create());
+			var sql = EmbeddedResource.GetEmbeddedResourceString(typeof(SqlLocalDbTest).Assembly, "PizzaDb.sql");
+			_db.Database.ExecuteSqlRaw(sql);
 		}
 
 		[Test]
 		public void UpdateStoreShelvesById()
 		{
-			var sql = EmbeddedResource.GetEmbeddedResourceString(typeof(SqlLocalDbTest).Assembly, "PizzaDb.sql");
-			_db.Database.ExecuteSqlRaw(sql);
-
 			var items = _db.BannerTemplates.ToList();
-
 			Assert.That(items.Count, Is.EqualTo(0));
 		}
 	}
