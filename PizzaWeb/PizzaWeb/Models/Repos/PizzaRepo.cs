@@ -36,7 +36,7 @@ public class PizzaRepo
                 TemplateName = tb1.TemplateName,
                 Name = tb1.Name,
                 OrderId = tb1.OrderId,
-                TemplateVariables = BannerTemplate.ParseVariablesJson(tb2.VariablesJson),
+                TemplateVariables = tb2.VariablesJson.ToTemplateVariablesList(),
                 BannerVariables = Banner.Banner.ParseVariableOptionsJson(tb1.VariableOptions),
             };
     }
@@ -122,4 +122,23 @@ public class PizzaRepo
             };
         }
     }
+
+    public void AddBannerTemplate(AddBannerTemplateReq req)
+    {
+        _dbContext.BannerTemplates.Add(new BannerTemplateEntity()
+        {
+            TemplateName = req.TemplateName,
+            TemplateContent = req.TemplateContent,
+            VariablesJson = req.Variables.ToJson(),
+            LastModifiedTime = DateTime.UtcNow
+        });
+        _dbContext.SaveChanges();
+    }
+}
+
+public class AddBannerTemplateReq
+{
+    public string TemplateName { get; set; }
+    public string TemplateContent { get; set; }
+    public Dictionary<string, TemplateVariable> Variables { get; set; }
 }

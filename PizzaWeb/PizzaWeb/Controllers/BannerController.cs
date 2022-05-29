@@ -27,6 +27,11 @@ namespace PizzaWeb.Controllers
             _pizzaRepo = new PizzaRepo(dbContext);
         }
 
+        public void AddBannerTemplate(AddBannerTemplateReq req)
+        {
+            _pizzaRepo.AddBannerTemplate(req);
+        }
+
         public List<BannerTemplate> GetAllTemplates()
         {
             return _pizzaRepo.GetAllBannerTemplates();

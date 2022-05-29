@@ -1,8 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using ExpectedObjects;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NUnit.Framework;
+using PizzaWeb.Controllers;
 using PizzaWeb.Models;
+using PizzaWeb.Models.Banner;
+using PizzaWeb.Models.Helpers;
 using PizzaWeb.Models.Libs;
+using PizzaWeb.Models.Repos;
 using T1.SqlLocalData;
 using T1.Standard.IO;
 
@@ -10,10 +16,11 @@ namespace TestProject
 {
 	public class SqlLocalDbTest
 	{
-		private string _instanceName = "local_db_instance";
+		private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
+		private BannerController _bannerController;
 		private string _databaseName = "Northwind";
 		private PizzaDbContext _db;
-		private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
+		private string _instanceName = "local_db_instance";
 
 		[SetUp]
 		public void Setup()
@@ -38,10 +45,41 @@ namespace TestProject
 		}
 
 		[Test]
-		public void UpdateStoreShelvesById()
+		public void CreateBannerTemplate()
 		{
-			var items = _db.BannerTemplates.ToList();
-			Assert.That(items.Count, Is.EqualTo(0));
+			GivenServiceLocator();
+			GivenBannerController();
+			
+			_bannerController.AddBannerTemplate(new AddBannerTemplateReq()
+			{
+				TemplateName = "Banner1",
+				TemplateContent = "Hello Banner",
+				Variables = new Dictionary<string, TemplateVariable>()
+				{
+					{ "image", new TemplateVariable{ Name = "image", VarType = "Image(100,200)" } },
+					{ "title", new TemplateVariable{ Name = "title", VarType = "String" } },
+				}
+			});
+
+			var bannerTemplate = _db.BannerTemplates.AsNoTracking().First();
+			Assert.That(bannerTemplate.TemplateContent, Is.EqualTo("Hello Banner"));
+
+			var expected = "{\"image\":{\"name\":\"image\",\"varType\":\"Image(100,200)\"},\"title\":{\"name\":\"title\",\"varType\":\"String\"}}";
+			expected.ToExpectedObject().ShouldEqual(bannerTemplate.VariablesJson);
+		}
+		
+
+		private void GivenBannerController()
+		{
+			_bannerController = new BannerController(_db, new JsonConverter(), null);
+		}
+
+		private static void GivenServiceLocator()
+		{
+			var services = new ServiceCollection();
+			services.AddTransient<IJsonConverter, JsonConverter>();
+			var sp = services.BuildServiceProvider();
+			ServiceLocator.SetLocatorProvider(sp);
 		}
 	}
 }
