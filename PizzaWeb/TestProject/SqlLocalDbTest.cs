@@ -68,6 +68,31 @@ namespace TestProject
 			expected.ToExpectedObject().ShouldEqual(bannerTemplate.VariablesJson);
 		}
 		
+		
+		[Test]
+		public void AddBanner()
+		{
+			GivenServiceLocator();
+			GivenBannerController();
+			
+			_bannerController.AddBanner(new AddBannerReq()
+			{
+				TemplateName = "Banner1",
+				BannerName = "Mother's Day",
+				OrderId = 1,
+				VariablesOptions = new Dictionary<string, TemplateVariableValue>()
+				{
+					{ "image", new TemplateVariableValue{ VarName = "image", ResxName = "Salted Chicken Pizza" } },
+					{ "title", new TemplateVariableValue{ VarName = "title", ResxName = "Mother's Chicken" } },
+				}
+			});
+
+			var banner = _db.Banners.AsNoTracking().First();
+			var expected = "{\"image\":{\"varName\":\"image\",\"resxName\":\"Salted Chicken Pizza\"},\"title\":{\"varName\":\"title\",\"resxName\":\"Mother\\u0027s Chicken\"}}";
+			expected.ToExpectedObject().ShouldEqual(banner.VariableOptionsJson);
+		}
+		
+		
 
 		private void GivenBannerController()
 		{

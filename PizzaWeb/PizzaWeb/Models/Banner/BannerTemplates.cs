@@ -46,4 +46,11 @@ public static class ParseJsonExtension
         var jsonConvert = sp.GetService<IJsonConverter>();
         return jsonConvert.Serialize(obj);
     }
+
+    public static string ToJson(this Dictionary<string, TemplateVariableValue> dict)
+    {
+        var sp = ServiceLocator.Current;
+        var jsonConvert = sp.GetService<IJsonConverter>();
+        return jsonConvert.Serialize(dict);
+    }
 }

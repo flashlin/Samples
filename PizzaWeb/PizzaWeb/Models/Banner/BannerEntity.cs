@@ -14,7 +14,7 @@ public class BannerEntity
 
     public string Name { get; set; } = "";
     public int OrderId { get; set; } = 1;
-    public string VariableOptions { get; set; } = "{}"; // { name: resxName } 
+    public string VariableOptionsJson { get; set; } = "{}"; // { name: resxName } 
     public string TemplateName { get; set; } = "";
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 }

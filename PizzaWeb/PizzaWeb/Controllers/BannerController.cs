@@ -32,6 +32,11 @@ namespace PizzaWeb.Controllers
             _pizzaRepo.AddBannerTemplate(req);
         }
 
+        public void AddBanner(AddBannerReq req)
+        {
+           _pizzaRepo.AddBanner(req); 
+        }
+
         public List<BannerTemplate> GetAllTemplates()
         {
             return _pizzaRepo.GetAllBannerTemplates();
@@ -89,6 +94,14 @@ namespace PizzaWeb.Controllers
                 bannerData);
             return content;
         }
+    }
+
+    public class AddBannerReq
+    {
+        public string BannerName { get; set; }
+        public string TemplateName { get; set; }
+        public int OrderId { get; set; }
+        public Dictionary<string, TemplateVariableValue> VariablesOptions { get; set; }
     }
 
     public class VariableResxSetting
