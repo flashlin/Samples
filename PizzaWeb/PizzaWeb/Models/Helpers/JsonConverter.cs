@@ -12,7 +12,7 @@ public class JsonConverter : IJsonConverter
             AllowTrailingCommas = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
-        return JsonSerializer.Deserialize<T>(variablesData, jsonOptions);
+        return JsonSerializer.Deserialize<T>(variablesData, jsonOptions)!;
     }
 
     public string Serialize<T>(T data)

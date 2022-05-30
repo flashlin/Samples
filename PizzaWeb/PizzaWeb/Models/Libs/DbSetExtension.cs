@@ -70,15 +70,12 @@ namespace PizzaWeb.Models.Libs
 
 	public class WhereExpressionVisitor<T> : ExpressionVisitor
 	{
-		private TextWriter? _writer;
+		private readonly TextWriter _writer;
 
 		public WhereExpressionVisitor(TextWriter? writer)
 		{
+			writer ??= new StringWriter();
 			_writer = writer;
-			if (_writer == null)
-			{
-				_writer = new StringWriter();
-			}
 		}
 
 		protected override Expression VisitParameter(ParameterExpression node)
