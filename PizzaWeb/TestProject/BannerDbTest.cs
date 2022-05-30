@@ -216,7 +216,6 @@ namespace TestProject
                 Content = "Squid Pizza",
             });
             _db.SaveChanges();
-            _db.SaveChanges();
         }
 
         private void GivenBannerController()
