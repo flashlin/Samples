@@ -13,18 +13,18 @@ public class BannerEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    public string Name { get; set; } = "";
-    public int OrderId { get; set; } = 1;
+    public string Name { get; set; } = String.Empty;
+    public int OrderId { get; set; }
     public string VariableOptionsJson { get; set; } = "{}"; // { name: resxName } 
-    public string TemplateName { get; set; } = "";
+    public string TemplateName { get; set; } = String.Empty;
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 }
 
 public class BannerSetting
 {
-    public int Id { get; set; }
-    public string Name { get; set; } = "";
-    public int OrderId { get; set; } = 1;
+	public int Id { get; set; }
+    public string Name { get; set; } = String.Empty;
+    public int OrderId { get; set; }
     public List<BannerVariable> Variables { get; set; } = new List<BannerVariable>();
     public string TemplateName { get; set; } = "";
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
@@ -32,8 +32,8 @@ public class BannerSetting
 
 public class BannerVariable
 {
-    public string VarName { get; set; }
-    public string ResxName { get; set; }
+    public string VarName { get; set; } = string.Empty;
+    public string ResxName { get; set; } = string.Empty;
     public List<VariableResx> ResxList { get; set; } = new List<VariableResx>();
 	public override string ToString()
 	{
@@ -49,8 +49,8 @@ public class BannerVariable
 
 public class VariableResx
 {
-    public string IsoLangCode { get; set; }
-    public string Content { get; set; }
+    public string IsoLangCode { get; set; } = "en-US";
+    public string Content { get; set; } = string.Empty;
 	public override string ToString()
 	{
 		return $"{IsoLangCode}:'{Content}'";
@@ -59,6 +59,6 @@ public class VariableResx
 
 public class TemplateVariableValue
 {
-    public string VarName { get; set; }
-    public string ResxName { get; set; }
+    public string VarName { get; set; } = string.Empty;
+    public string ResxName { get; set; } = string.Empty;
 }
