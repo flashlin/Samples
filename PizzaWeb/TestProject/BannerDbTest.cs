@@ -64,7 +64,6 @@ namespace TestProject
 		[Test]
 		public void AddBanner()
 		{
-			GivenServiceLocator();
 			GivenBannerController();
 
 			WhenAddBanner("Template1", "Mother's Day", "SaltedChicken");
@@ -217,7 +216,8 @@ namespace TestProject
 
 		private void GivenBannerController()
 		{
-			_bannerController = new BannerController(new JsonConverter(), null);
+			var repo = new PizzaRepo(_db, ServiceLocator.Current.GetService<IJsonConverter>());
+			_bannerController = new BannerController(repo, null);
 		}
 
 		private static void GivenServiceLocator()

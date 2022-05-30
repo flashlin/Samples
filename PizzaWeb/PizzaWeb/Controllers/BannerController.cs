@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore.Internal;
 using PizzaWeb.Models;
 using PizzaWeb.Models.Banner;
-using PizzaWeb.Models.Helpers;
 using PizzaWeb.Models.Repos;
 using T1.AspNetCore;
 using T1.Standard.Common;
@@ -13,15 +12,12 @@ namespace PizzaWeb.Controllers
     [ApiController]
     public class BannerController : ControllerBase
     {
-        private PizzaDbContext _dbContext;
         private IViewToStringRendererService _viewToStringRenderer;
-        private IJsonConverter _jsonConverter;
         private readonly IPizzaRepo _pizzaRepo;
 
-        public BannerController(IPizzaRepo pizzaRepo, IJsonConverter jsonConverter,
+        public BannerController(IPizzaRepo pizzaRepo,
             IViewToStringRendererService viewToStringRenderer)
         {
-            _jsonConverter = jsonConverter;
             _viewToStringRenderer = viewToStringRenderer;
             _pizzaRepo = pizzaRepo;
         }
