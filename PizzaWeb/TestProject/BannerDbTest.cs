@@ -71,7 +71,7 @@ namespace TestProject
 
 			var banner = _db.Banners.AsNoTracking().First();
 			var expected =
-				 "{\"image\":{\"varName\":\"image\",\"resxName\":\"SaltedChickenPizzaImage\"},\"title\":{\"varName\":\"title\",\"resxName\":\"Mother\\u0027s DayTitle\"}}";
+				 "{\"image\":{\"varName\":\"image\",\"resxName\":\"SaltedChickenPizzaImage\"},\"title\":{\"varName\":\"title\",\"resxName\":\"SaltedChickenPizzaTitle\"}}";
 			expected.ToExpectedObject().ShouldEqual(banner.VariableOptionsJson);
 		}
 
@@ -99,7 +99,7 @@ namespace TestProject
 				VariablesOptions = new Dictionary<string, TemplateVariableValue>()
 					 {
 						  {"image", new TemplateVariableValue {VarName = "image", ResxName = "SaltedChickenPizzaImage"}},
-						  {"title", new TemplateVariableValue {VarName = "title", ResxName = $"{bannerName}Title"}},
+						  {"title", new TemplateVariableValue {VarName = "title", ResxName = "SaltedChickenPizzaTitle"}},
 					 }
 			});
 		}
@@ -154,7 +154,7 @@ namespace TestProject
 			new BannerVariable
 			{
 				VarName = "title",
-				ResxName = "Mother DayTitle",
+				ResxName = "SaltedChickenPizzaTitle",
 				ResxList = new List<VariableResx>(new[] {
 					new VariableResx { IsoLangCode="en-US", Content="Salted Chicken Pizza" },
 				})
