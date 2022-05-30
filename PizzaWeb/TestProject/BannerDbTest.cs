@@ -126,7 +126,7 @@ namespace TestProject
 
 
         [Test]
-        public void GetBanner()
+        public void GetBannerSettings()
         {
             GivenServiceLocator();
             GivenBannerController();
@@ -136,7 +136,7 @@ namespace TestProject
             WhenAddBanner("Template1", "Father Day", "Squid");
             WhenAddResx();
 
-            var banners = _bannerController.GetBanners(new GetBannersReq()
+            var banners = _bannerController.GetBannerSettings(new GetBannerSettingsReq()
             {
                 TemplateName = "Template1"
             });

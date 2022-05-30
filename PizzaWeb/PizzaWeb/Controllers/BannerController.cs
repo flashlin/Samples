@@ -37,7 +37,7 @@ namespace PizzaWeb.Controllers
             return _pizzaRepo.GetAllBannerTemplates();
         }
 
-        public List<BannerSetting> GetBanners(GetBannersReq req)
+        public List<BannerSetting> GetBannerSettings(GetBannerSettingsReq req)
         {
             return _pizzaRepo.GetAllBanners(req);
         }
@@ -118,7 +118,7 @@ namespace PizzaWeb.Controllers
         public string BannerName { get; set; } = string.Empty;
     }
 
-    public class GetBannersReq
+    public class GetBannerSettingsReq
     {
         public string TemplateName { get; set; } = String.Empty;
     }

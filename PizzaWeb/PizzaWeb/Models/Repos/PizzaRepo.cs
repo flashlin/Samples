@@ -8,7 +8,7 @@ namespace PizzaWeb.Models.Repos;
 public interface IPizzaRepo
 {
     List<BannerTemplate> GetAllBannerTemplates();
-    List<BannerSetting> GetAllBanners(GetBannersReq req);
+    List<BannerSetting> GetAllBanners(GetBannerSettingsReq req);
     void AddBannerTemplate(AddBannerTemplateReq req);
     void AddBanner(AddBannerReq req);
     void UpdateBannerTemplate(BannerTemplate req);
@@ -109,7 +109,7 @@ public class PizzaRepo : IPizzaRepo
             };
     }
 
-    public List<BannerSetting> GetAllBanners(GetBannersReq req)
+    public List<BannerSetting> GetAllBanners(GetBannerSettingsReq req)
     {
         return QueryAllBanners()
             .Where(x => x.TemplateName == req.TemplateName)
