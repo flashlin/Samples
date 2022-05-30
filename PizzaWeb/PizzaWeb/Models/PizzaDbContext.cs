@@ -11,9 +11,9 @@ namespace PizzaWeb.Models
 		{
 		}
 
-		public DbSet<StoreShelvesEntity> StoreShelves { get; set; }
-		public DbSet<BannerTemplateEntity> BannerTemplates { get; set; }
-		public DbSet<BannerEntity> Banners { get; set; }
-		public DbSet<BannerResxEntity> BannerResx { get; set; }
+		public DbSet<StoreShelvesEntity> StoreShelves => Set<StoreShelvesEntity>();
+		public DbSet<BannerTemplateEntity> BannerTemplates => Set<BannerTemplateEntity>();
+		public DbSet<BannerEntity> Banners => Set<BannerEntity>();
+		public DbSet<BannerResxEntity> BannerResx => Set<BannerResxEntity>();
 	}
 }
