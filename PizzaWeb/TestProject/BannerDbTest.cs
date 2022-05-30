@@ -132,7 +132,7 @@ namespace TestProject
 
 			WhenAddTemplate();
 			WhenAddBanner("Template1", "Mother Day", "SaltedChicken");
-			WhenAddBanner("Template1", "Father Day", "Squie");
+			WhenAddBanner("Template1", "Father Day", "Squid");
 			WhenAddResx();
 
 			var banners = _bannerController.GetBanners(new GetBannersReq()
@@ -165,9 +165,9 @@ namespace TestProject
 			new BannerVariable
 			{
 				VarName = "image",
-				ResxName = "SquiePizzaImage",
+				ResxName = "SquidPizzaImage",
 				ResxList = new List<VariableResx>(new[] {
-					 new VariableResx { IsoLangCode="en-US", Content="English Squie Pizza Url" },
+					 new VariableResx { IsoLangCode="en-US", Content="English Squid Pizza Url" },
 				})
 			}.ToExpectedObject()
 			.ShouldEqual(banners[1].Variables[0]);
@@ -199,14 +199,14 @@ namespace TestProject
 
 			_db.BannerResx.Add(new BannerResxEntity()
 			{
-				Name = "SquiePizzaImage",
+				Name = "SquidPizzaImage",
 				VarType = "Image(100,200)",
 				IsoLangCode = "en-US",
-				Content = "English Squie Pizza Url",
+				Content = "English Squid Pizza Url",
 			});
 			_db.BannerResx.Add(new BannerResxEntity()
 			{
-				Name = "SquiePizzaTitle",
+				Name = "SquidPizzaTitle",
 				VarType = "String",
 				IsoLangCode = "en-US",
 				Content = "Squid Pizza",
