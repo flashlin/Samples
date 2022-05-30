@@ -67,7 +67,7 @@ namespace TestProject
 			GivenServiceLocator();
 			GivenBannerController();
 
-			WhenAddBanner("Template1", "Mother's Day");
+			WhenAddBanner("Template1", "Mother's Day", "SaltedChicken");
 
 			var banner = _db.Banners.AsNoTracking().First();
 			var expected =
@@ -89,7 +89,7 @@ namespace TestProject
 			});
 		}
 
-		private void WhenAddBanner(string templateName, string bannerName)
+		private void WhenAddBanner(string templateName, string bannerName, string taste)
 		{
 			_bannerController.AddBanner(new AddBannerReq()
 			{
@@ -98,8 +98,8 @@ namespace TestProject
 				OrderId = 1,
 				VariablesOptions = new Dictionary<string, TemplateVariableValue>()
 					 {
-						  {"image", new TemplateVariableValue {VarName = "image", ResxName = "SaltedChickenPizzaImage"}},
-						  {"title", new TemplateVariableValue {VarName = "title", ResxName = "SaltedChickenPizzaTitle"}},
+						  {"image", new TemplateVariableValue {VarName = "image", ResxName = $"{taste}PizzaImage"}},
+						  {"title", new TemplateVariableValue {VarName = "title", ResxName = $"{taste}PizzaTitle"}},
 					 }
 			});
 		}
@@ -131,8 +131,8 @@ namespace TestProject
 			GivenBannerController();
 
 			WhenAddTemplate();
-			WhenAddBanner("Template1", "Mother Day");
-			WhenAddBanner("Template1", "Father Day");
+			WhenAddBanner("Template1", "Mother Day", "SaltedChicken");
+			WhenAddBanner("Template1", "Father Day", "Squie");
 			WhenAddResx();
 
 			var banners = _bannerController.GetBanners(new GetBannersReq()
@@ -161,6 +161,16 @@ namespace TestProject
 			}
 			.ToExpectedObject()
 			.ShouldEqual(banners[0].Variables[1]);
+
+			new BannerVariable
+			{
+				VarName = "image",
+				ResxName = "SquiePizzaImage",
+				ResxList = new List<VariableResx>(new[] {
+					 new VariableResx { IsoLangCode="en-US", Content="English Squie Pizza Url" },
+				})
+			}.ToExpectedObject()
+			.ShouldEqual(banners[1].Variables[0]);
 		}
 
 		private void WhenAddResx()
@@ -186,6 +196,22 @@ namespace TestProject
 				IsoLangCode = "en-US",
 				Content = "Salted Chicken Pizza",
 			});
+
+			_db.BannerResx.Add(new BannerResxEntity()
+			{
+				Name = "SquiePizzaImage",
+				VarType = "Image(100,200)",
+				IsoLangCode = "en-US",
+				Content = "English Squie Pizza Url",
+			});
+			_db.BannerResx.Add(new BannerResxEntity()
+			{
+				Name = "SquiePizzaTitle",
+				VarType = "String",
+				IsoLangCode = "en-US",
+				Content = "Squid Pizza",
+			});
+			_db.SaveChanges();
 			_db.SaveChanges();
 		}
 
