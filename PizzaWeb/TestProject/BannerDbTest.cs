@@ -19,7 +19,7 @@ namespace TestProject
 	public class BannerDbTest
 	{
 		private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
-		private BannerController _bannerController;
+		private BannerController _bannerController = default!;
 		private string _databaseName = "Northwind";
 		private PizzaDbContext _db;
 		private string _instanceName = "local_db_instance";
