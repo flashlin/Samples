@@ -4,7 +4,15 @@ using PizzaWeb.Models.Banner;
 
 namespace PizzaWeb.Models.Repos;
 
-public class PizzaRepo
+public interface IPizzaRepo
+{
+    List<BannerTemplate> GetAllBannerTemplates();
+    List<BannerSetting> GetAllBanners(GetBannersReq req);
+    void AddBannerTemplate(AddBannerTemplateReq req);
+    void AddBanner(AddBannerReq req);
+}
+
+public class PizzaRepo : IPizzaRepo
 {
     private readonly PizzaDbContext _dbContext;
 
