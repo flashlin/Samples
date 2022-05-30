@@ -13,7 +13,7 @@ namespace PizzaWeb.Controllers
     [ApiController]
     public class BannerController : ControllerBase
     {
-        public PizzaDbContext _dbContext;
+        private PizzaDbContext _dbContext;
         private IViewToStringRendererService _viewToStringRenderer;
         private IJsonConverter _jsonConverter;
         private readonly PizzaRepo _pizzaRepo;
@@ -103,18 +103,18 @@ namespace PizzaWeb.Controllers
 
     public class VariableResxSetting
     {
-        public string VarName { get; set; }
-        public string VarType { get; set; }
-        public string ResxName { get; set; }
-        public string Content { get; set; }
-        public string IsoLangCode { get; set; }
+        public string VarName { get; set; } = string.Empty;
+        public string VarType { get; set; } = "String";
+        public string ResxName { get; set; } = string.Empty;
+        public string Content { get; set; } = string.Empty;
+        public string IsoLangCode { get; set; } = "en-US";
     }
 
     public class TemplateVariableSetting
     {
-        public string VarName { get; set; }
-        public string VarType { get; set; }
-        public string ResxName { get; set; }
+        public string VarName { get; set; } = string.Empty;
+        public string VarType { get; set; } = "String";
+        public string ResxName { get; set; } = string.Empty;
 
         public override string ToString()
         {
@@ -124,12 +124,12 @@ namespace PizzaWeb.Controllers
 
     public class BannerData
     {
-        public string LangCode { get; set; }
-        public string BannerName { get; set; }
+        public string LangCode { get; set; } = "en-US";
+        public string BannerName { get; set; } = string.Empty;
     }
 
     public class GetBannersReq
     {
-        public string TemplateName { get; set; }
+        public string TemplateName { get; set; } = String.Empty;
     }
 }
