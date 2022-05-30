@@ -139,8 +139,7 @@ namespace PizzaWeb.Models.Libs
 
 		protected override Expression VisitConstant(ConstantExpression node)
 		{
-			WriteConstantValue(node.Value);
-
+			WriteConstantValue(node.Value!);
 			return node;
 		}
 

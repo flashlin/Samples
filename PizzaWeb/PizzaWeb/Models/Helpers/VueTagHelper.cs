@@ -7,11 +7,11 @@ namespace PizzaWeb.Models.Helpers
     [HtmlTargetElement("vue")]
     public class VueTagHelper : TagHelper
     {
-        private readonly IWebHostEnvironment hostEnv;
+        private readonly IWebHostEnvironment _hostEnv;
 
         public VueTagHelper(IWebHostEnvironment hostEnv)
         {
-            this.hostEnv = hostEnv;
+            this._hostEnv = hostEnv;
         }
 
         public string Name { get; set; }
@@ -21,7 +21,7 @@ namespace PizzaWeb.Models.Helpers
             output.TagName = "div";
             output.TagMode = TagMode.StartTagAndEndTag;
 
-            var manifest = File.ReadAllText($"{hostEnv.WebRootPath}/dist/manifest.json");
+            var manifest = File.ReadAllText($"{_hostEnv.WebRootPath}/dist/manifest.json");
             var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(manifest)!;
             var item = dict[$"spa/{Name}.html"];
             var jsFile = item.GetProperty("file").GetString();

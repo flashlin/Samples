@@ -151,7 +151,7 @@ public class PizzaRepo
 
 public class AddBannerTemplateReq
 {
-    public string TemplateName { get; set; }
-    public string TemplateContent { get; set; }
-    public Dictionary<string, TemplateVariable> Variables { get; set; }
+    public string TemplateName { get; set; } = string.Empty;
+    public string TemplateContent { get; set; } = string.Empty;
+    public Dictionary<string, TemplateVariable> Variables { get; set; } = new Dictionary<string, TemplateVariable>();
 }

@@ -95,10 +95,10 @@ namespace PizzaWeb.Controllers
 
     public class AddBannerReq
     {
-        public string BannerName { get; set; }
-        public string TemplateName { get; set; }
+        public string BannerName { get; set; } = string.Empty;
+        public string TemplateName { get; set; } = string.Empty;
         public int OrderId { get; set; }
-        public Dictionary<string, TemplateVariableValue> VariablesOptions { get; set; }
+        public Dictionary<string, TemplateVariableValue> VariablesOptions { get; set; } = new Dictionary<string, TemplateVariableValue>();
     }
 
     public class VariableResxSetting
