@@ -23,28 +23,26 @@ public class PizzaRepo
 
     private IQueryable<TemplateBannerData> QueryBannersData()
     {
-        return from tb1 in _dbContext.Banners
-            join tb2 in _dbContext.BannerTemplates on tb1.TemplateName equals tb2.TemplateName into g1
-            from tb2 in g1.DefaultIfEmpty(new BannerTemplateEntity()
-            {
-                TemplateName = tb1.TemplateName,
-                VariablesJson = "{}"
-            })
+        return from tb1 in _dbContext.Banners.AsNoTracking()
+            let tb2 = _dbContext.BannerTemplates
+                .AsNoTracking()
+                .FirstOrDefault(x => x.TemplateName == tb1.TemplateName)
             select new TemplateBannerData
             {
                 Id = tb1.Id,
                 TemplateName = tb1.TemplateName,
                 Name = tb1.Name,
                 OrderId = tb1.OrderId,
-                TemplateVariables = tb2.VariablesJson.ToTemplateVariablesList(),
-                BannerVariables = tb1.VariableOptionsJson.ToVariableOptionsList(),
+                TemplateVariablesJson = tb2.VariablesJson ?? "{}",
+                BannerVariablesJson = tb1.VariableOptionsJson ?? "{}",
             };
     }
 
     private IEnumerable<TemplateVariableSetting> QueryTemplateVariablesSettings(TemplateBannerData banner)
     {
-        return from tb1 in banner.BannerVariables
-            join tb2 in banner.TemplateVariables on tb1.VarName equals tb2.Name
+        return from tb1 in banner.BannerVariablesJson.ToVariableOptionsList()
+            join tb2 in banner.TemplateVariablesJson.ToTemplateVariablesList() 
+                on tb1.VarName equals tb2.Name
                 into g1
             from tb2 in g1.DefaultIfEmpty(new TemplateVariable()
             {

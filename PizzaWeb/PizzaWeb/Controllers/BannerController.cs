@@ -115,6 +115,11 @@ namespace PizzaWeb.Controllers
         public string VarName { get; set; }
         public string VarType { get; set; }
         public string ResxName { get; set; }
+
+        public override string ToString()
+        {
+            return $"{VarName} {VarType}='{ResxName}'";
+        }
     }
 
     public class BannerData

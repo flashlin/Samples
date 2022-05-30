@@ -8,6 +8,6 @@ public class TemplateBannerData
     public string TemplateName { get; set; }
     public string Name { get; set; }
     public int OrderId { get; set; }
-    public List<TemplateVariable> TemplateVariables { get; set; }
-    public List<TemplateVariableValue> BannerVariables { get; set; }
+    public string TemplateVariablesJson { get; set; }
+    public string BannerVariablesJson { get; set; }
 }

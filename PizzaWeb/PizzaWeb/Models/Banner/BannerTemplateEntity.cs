@@ -6,10 +6,10 @@ namespace PizzaWeb.Models.Banner;
 public class BannerTemplateEntity
 {
     public int Id { get; set; }
-    public string TemplateName { get; set; }
-    public string TemplateContent { get; set; }
+    public string TemplateName { get; set; } = string.Empty;
+    public string TemplateContent { get; set; } = string.Empty;
 
-    public string? VariablesJson { get; set;}
+    public string VariablesJson { get; set; } = "{}";
 
     public DateTime LastModifiedTime { get; set; }
 }
