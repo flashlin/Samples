@@ -33,20 +33,20 @@ public interface IServiceLocator
 
 public class ServiceLocator : IServiceLocator
 {
-    private IServiceProvider _currentServiceProvider;
-    private static IServiceProvider _serviceProvider;
+    private IServiceProvider? _currentServiceProvider;
+    private static IServiceProvider? _serviceProvider;
     
-    public ServiceLocator(IServiceProvider currentServiceProvider)
+    public ServiceLocator(IServiceProvider? currentServiceProvider)
     {
         _currentServiceProvider = currentServiceProvider;
     }
 
     public T GetService<T>()
     {
-        return _serviceProvider.GetService<T>()!;
+        return _serviceProvider!.GetService<T>()!;
     }
     
-    public static void SetLocatorProvider(IServiceProvider serviceProvider)
+    public static void SetLocatorProvider(IServiceProvider? serviceProvider)
     {
         _serviceProvider = serviceProvider;
     }

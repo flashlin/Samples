@@ -9,7 +9,7 @@ namespace PizzaWeb.Models.Libs
 {
 	public static class DbSetExtension
 	{
-		public static UpdateOrm<T> Set<T, TValue>(this DbSet<T> dbSet, Expression<Func<T, TValue>> memberLamda, TValue value)
+		public static UpdateOrm<T> Set<T, TValue>(this DbSet<T> dbSet, Expression<Func<T, TValue>> memberLamda, TValue? value)
 			where T : class
 		{
 			return new UpdateOrm<T>(dbSet).Set(memberLamda, value);
@@ -20,7 +20,7 @@ namespace PizzaWeb.Models.Libs
 		where T : class
 	{
 		private DbSet<T> _dbSet;
-		private Dictionary<string, object> _setFields = new Dictionary<string, object>();
+		private readonly Dictionary<string, object?> _setFields = new Dictionary<string, object?>();
 		private string _where;
 
 		public UpdateOrm(DbSet<T> dbSet)
@@ -28,9 +28,9 @@ namespace PizzaWeb.Models.Libs
 			this._dbSet = dbSet;
 		}
 
-		public UpdateOrm<T> Set<TValue>(Expression<Func<T, TValue>> memberLamda, TValue value)
+		public UpdateOrm<T> Set<TValue>(Expression<Func<T, TValue>> memberLambda, TValue? value)
 		{
-			var simpleProperty = memberLamda.GetSimplePropertyAccess()
+			var simpleProperty = memberLambda.GetSimplePropertyAccess()
 				.First();
 			var name = simpleProperty.Name;
 			_setFields[name] = value;
@@ -70,9 +70,9 @@ namespace PizzaWeb.Models.Libs
 
 	public class WhereExpressionVisitor<T> : ExpressionVisitor
 	{
-		private TextWriter _writer;
+		private TextWriter? _writer;
 
-		public WhereExpressionVisitor(TextWriter writer)
+		public WhereExpressionVisitor(TextWriter? writer)
 		{
 			_writer = writer;
 			if (_writer == null)
