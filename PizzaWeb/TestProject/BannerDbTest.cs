@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using NUnit.Framework;
 using PizzaWeb.Controllers;
 using PizzaWeb.Models;
@@ -9,6 +10,7 @@ using PizzaWeb.Models.Banner;
 using PizzaWeb.Models.Helpers;
 using PizzaWeb.Models.Libs;
 using PizzaWeb.Models.Repos;
+using T1.AspNetCore;
 using T1.SqlLocalData;
 using T1.Standard.IO;
 
@@ -218,7 +220,8 @@ namespace TestProject
 		private void GivenBannerController()
 		{
 			var repo = new PizzaRepo(_db, new JsonConverter());
-			_bannerController = new BannerController(repo, null);
+			var viewToStringRenderer = Substitute.For<IViewToStringRendererService>();
+			_bannerController = new BannerController(repo, viewToStringRenderer);
 		}
 
 		private static void GivenServiceLocator()
