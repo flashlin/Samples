@@ -6,14 +6,14 @@ using T1.Standard.Common;
 
 namespace PizzaWeb.Models.Banner;
 
-[Table("Banners")]
+[Table("Banner")]
 public class BannerEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    public string Name { get; set; } = String.Empty;
+    public string BannerName { get; set; } = String.Empty;
     public int OrderId { get; set; }
     public string VariableOptionsJson { get; set; } = "{}"; // { name: resxName } 
     public string TemplateName { get; set; } = String.Empty;
@@ -26,7 +26,7 @@ public class BannerSetting
     public string Name { get; set; } = String.Empty;
     public int OrderId { get; set; }
     public List<BannerVariable> Variables { get; set; } = new List<BannerVariable>();
-    public string TemplateName { get; set; } = "";
+    public string TemplateName { get; set; } = String.Empty;
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 }
 

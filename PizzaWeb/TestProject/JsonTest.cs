@@ -55,7 +55,7 @@ namespace TestProject
 
 			var item0 = varitablesList[0];
 			
-			Assert.That(item0.Name, Is.EqualTo("Title"));
+			Assert.That(item0.VarName, Is.EqualTo("Title"));
 		}
 		
 	}

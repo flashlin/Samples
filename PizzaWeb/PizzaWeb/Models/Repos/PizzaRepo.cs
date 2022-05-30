@@ -8,11 +8,14 @@ namespace PizzaWeb.Models.Repos;
 public interface IPizzaRepo
 {
     List<BannerTemplate> GetAllBannerTemplates();
-    List<BannerSetting> GetAllBanners(GetBannerSettingsReq req);
+    List<BannerSetting> GetBannersSetting(GetBannersSettingReq req);
     void AddBannerTemplate(AddBannerTemplateReq req);
     void AddBanner(AddBannerReq req);
     void UpdateBannerTemplate(BannerTemplate req);
-    List<BannerData> GetBannersData(GetBannersDataReq req);
+    IQueryable<TemplateBannerJsonSetting> QueryBannerJsonSettingData();
+    IEnumerable<BannerSetting> QueryBannerSettings(List<TemplateBannerJsonSetting> banners);
+    List<BannerTemplateEntity> GetTemplateContents(string[] templateNames);
+    void ApplyBanner(string bannerName);
 }
 
 public class PizzaRepo : IPizzaRepo
@@ -34,37 +37,37 @@ public class PizzaRepo : IPizzaRepo
         return bannerTemplates.Select(x => BannerTemplate.From(x)).ToList();
     }
 
-    private IQueryable<TemplateBannerData> QueryBannersData()
+    public IQueryable<TemplateBannerJsonSetting> QueryBannerJsonSettingData()
     {
         return from tb1 in _dbContext.Banners.AsNoTracking()
             let tb2 = _dbContext.BannerTemplates
                 .AsNoTracking()
                 .FirstOrDefault(x => x.TemplateName == tb1.TemplateName)
-            select new TemplateBannerData
+            select new TemplateBannerJsonSetting
             {
                 Id = tb1.Id,
                 TemplateName = tb1.TemplateName,
-                Name = tb1.Name,
+                BannerName = tb1.BannerName,
                 OrderId = tb1.OrderId,
                 TemplateVariablesJson = tb2.VariablesJson ?? "{}",
                 BannerVariablesJson = tb1.VariableOptionsJson ?? "{}",
             };
     }
 
-    private IEnumerable<TemplateVariableSetting> QueryTemplateVariablesSettings(TemplateBannerData banner)
+    private IEnumerable<TemplateVariableSetting> QueryTemplateVariablesSettings(TemplateBannerJsonSetting bannerJson)
     {
-        return from tb1 in banner.BannerVariablesJson.ToVariableOptionsList()
-            join tb2 in banner.TemplateVariablesJson.ToTemplateVariablesList() 
-                on tb1.VarName equals tb2.Name
+        return from tb1 in bannerJson.BannerVariablesJson.ToVariableOptionsList()
+            join tb2 in bannerJson.TemplateVariablesJson.ToTemplateVariablesList()
+                on tb1.VarName equals tb2.VarName
                 into g1
             from tb2 in g1.DefaultIfEmpty(new TemplateVariable()
             {
-                Name = tb1.VarName,
+                VarName = tb1.VarName,
                 VarType = string.Empty
             })
             select new TemplateVariableSetting
             {
-                VarName = tb2.Name,
+                VarName = tb2.VarName,
                 VarType = tb2.VarType,
                 ResxName = tb1.ResxName
             };
@@ -75,11 +78,11 @@ public class PizzaRepo : IPizzaRepo
     {
         return from tb1 in templateVariableSettings
             join tb2 in _dbContext.BannerResx
-                on new {Name = tb1.ResxName, tb1.VarType} equals new {tb2.Name, tb2.VarType}
+                on new {Name = tb1.ResxName, tb1.VarType} equals new {Name = tb2.ResxName, tb2.VarType}
                 into g1
             from tb2 in g1.DefaultIfEmpty(new BannerResxEntity()
             {
-                Name = tb1.ResxName,
+                ResxName = tb1.ResxName,
                 VarType = tb1.VarType,
                 Content = ""
             })
@@ -110,7 +113,7 @@ public class PizzaRepo : IPizzaRepo
             };
     }
 
-    public List<BannerSetting> GetAllBanners(GetBannerSettingsReq req)
+    public List<BannerSetting> GetBannersSetting(GetBannersSettingReq req)
     {
         return QueryAllBanners()
             .Where(x => x.TemplateName == req.TemplateName)
@@ -119,7 +122,12 @@ public class PizzaRepo : IPizzaRepo
 
     private IEnumerable<BannerSetting> QueryAllBanners()
     {
-        var banners = this.QueryBannersData().ToList();
+        var banners = this.QueryBannerJsonSettingData().ToList();
+        foreach (var bannerSetting in QueryBannerSettings(banners)) yield return bannerSetting;
+    }
+
+    public IEnumerable<BannerSetting> QueryBannerSettings(List<TemplateBannerJsonSetting> banners)
+    {
         foreach (var banner in banners)
         {
             var templateVariablesSettings = this.QueryTemplateVariablesSettings(banner);
@@ -128,12 +136,26 @@ public class PizzaRepo : IPizzaRepo
             yield return new BannerSetting
             {
                 Id = banner.Id,
-                Name = banner.Name,
+                Name = banner.BannerName,
                 TemplateName = banner.TemplateName,
                 OrderId = banner.OrderId,
                 Variables = variables.ToList()
             };
         }
+    }
+
+    public List<BannerTemplateEntity> GetTemplateContents(string[] templateNames)
+    {
+        return _dbContext.BannerTemplates
+            .Where(x => templateNames.Contains(x.TemplateName))
+            .Select(x => new BannerTemplateEntity
+            {
+                Id = x.Id,
+                TemplateName = x.TemplateName,
+                TemplateContent = x.TemplateContent,
+                VariablesJson = x.VariablesJson
+            })
+            .ToList();
     }
 
     public void AddBannerTemplate(AddBannerTemplateReq req)
@@ -152,7 +174,7 @@ public class PizzaRepo : IPizzaRepo
     {
         _dbContext.Banners.Add(new BannerEntity()
         {
-            Name = req.BannerName,
+            BannerName = req.BannerName,
             TemplateName = req.TemplateName,
             OrderId = req.OrderId,
             VariableOptionsJson = req.VariablesOptions.ToJson(),
@@ -171,9 +193,76 @@ public class PizzaRepo : IPizzaRepo
         _dbContext.SaveChanges();
     }
 
-    public List<BannerData> GetBannersData(GetBannersDataReq req)
+    public void ApplyBanner(string bannerName)
     {
-        throw new NotImplementedException();
+        _dbContext.Database.ExecuteSqlRaw("delete BannerShelf");
+        _dbContext.Database.ExecuteSqlRaw("delete VariableShelf");
+        
+        var settings = (from tb1 in _dbContext.Banners.AsNoTracking()
+            join tb2 in _dbContext.BannerTemplates.AsNoTracking() on tb1.TemplateName equals tb2.TemplateName
+            where tb1.BannerName == bannerName
+            select new 
+            {
+                TemplateName = tb2.TemplateName,
+                TemplateContent = tb2.TemplateContent,
+                TemplateVariables = tb2.VariablesJson.ToTemplateVariablesList(),
+                BannerName = tb1.BannerName,
+                OrderId = tb1.OrderId,
+                BannerVariableOptions = tb1.VariableOptionsJson.ToVariableOptionsList(),
+                Uid = Guid.NewGuid(),
+            }).ToList();
+
+        var resxNames = (from tb1 in settings
+            from tb2 in tb1.BannerVariableOptions
+            group tb2 by tb2.ResxName into g1
+            select g1.Key).ToList();
+        
+        var resx = (from tb1 in _dbContext.BannerResx.AsNoTracking()
+            where resxNames.Contains(tb1.ResxName)
+            select new BannerResxEntity
+            {
+                ResxName = tb1.ResxName,
+                IsoLangCode = tb1.IsoLangCode,
+                Content = tb1.Content,
+            }).ToList();
+
+        var bannerShelf = new List<BannerShelfEntity>();
+        var varShelf = new List<VariableShelfEntity>();
+
+        foreach (var setting in settings)
+        {
+            bannerShelf.Add(new BannerShelfEntity
+            {
+                Uid = setting.Uid,
+                BannerName = setting.BannerName,
+                TemplateName = setting.TemplateName,
+                TemplateContent = setting.TemplateContent,
+                OrderId = setting.OrderId,
+            });
+
+            var varSettings = from tb1 in setting.TemplateVariables
+                join tb2 in setting.BannerVariableOptions on tb1.VarName equals tb2.VarName
+                let tb3 = (from tb3 in resx
+                    where tb3.ResxName == tb2.ResxName && tb3.VarType == tb1.VarType
+                    select tb3).ToArray()
+                from tb4 in tb3
+                select new VariableShelfEntity()
+                {
+                    Uid = setting.Uid,
+                    VarName = tb1.VarName,
+                    ResxName = tb2.ResxName,
+                    IsoLangCode = tb4.IsoLangCode,
+                    Content = tb4.Content
+                };
+            
+            varShelf.AddRange(varSettings.ToArray());
+        }
+        
+        _dbContext.VariableShelf.AddRange(varShelf);
+        _dbContext.SaveChanges();
+            
+        _dbContext.BannerShelf.AddRange(bannerShelf);
+        _dbContext.SaveChanges();
     }
 }
 

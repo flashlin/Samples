@@ -57,7 +57,7 @@ namespace TestProject
             Assert.That(bannerTemplate.TemplateContent, Is.EqualTo("Hello Banner"));
 
             var expected =
-                "{\"image\":{\"name\":\"image\",\"varType\":\"Image(100,200)\"},\"title\":{\"name\":\"title\",\"varType\":\"String\"}}";
+                "{\"image\":{\"varName\":\"image\",\"varType\":\"Image(100,200)\"},\"title\":{\"varName\":\"title\",\"varType\":\"String\"}}";
             expected.ToExpectedObject().ShouldEqual(bannerTemplate.VariablesJson);
         }
 
@@ -74,20 +74,6 @@ namespace TestProject
             var expected =
                 "{\"image\":{\"varName\":\"image\",\"resxName\":\"SaltedChickenPizzaImage\"},\"title\":{\"varName\":\"title\",\"resxName\":\"SaltedChickenPizzaTitle\"}}";
             expected.ToExpectedObject().ShouldEqual(banner.VariableOptionsJson);
-        }
-
-        private void WhenAddTemplate()
-        {
-            _bannerController.AddBannerTemplate(new AddBannerTemplateReq()
-            {
-                TemplateName = "Template1",
-                TemplateContent = "Hello Banner",
-                Variables = new Dictionary<string, TemplateVariable>()
-                {
-                    {"image", new TemplateVariable {Name = "image", VarType = "Image(100,200)"}},
-                    {"title", new TemplateVariable {Name = "title", VarType = "String"}},
-                }
-            });
         }
 
         private void WhenAddBanner(string templateName, string bannerName, string taste)
@@ -117,7 +103,7 @@ namespace TestProject
 
             new TemplateVariable
                 {
-                    Name = "image",
+                    VarName = "image",
                     VarType = "Image(100,200)"
                 }
                 .ToExpectedObject()
@@ -136,7 +122,7 @@ namespace TestProject
             WhenAddBanner("Template1", "Father Day", "Squid");
             WhenAddResx();
 
-            var banners = _bannerController.GetBannerSettings(new GetBannerSettingsReq()
+            var banners = _bannerController.GetBannerSettings(new GetBannersSettingReq()
             {
                 TemplateName = "Template1"
             });
@@ -176,8 +162,25 @@ namespace TestProject
                 }.ToExpectedObject()
                 .ShouldEqual(banners[1].Variables[0]);
         }
-        
+
         [Test]
+        public void ApplyBanners()
+        {
+            GivenServiceLocator();
+            GivenBannerController();
+
+            WhenAddTemplate();
+            WhenAddBanner("Template1", "Mother Day", "SaltedChicken");
+            WhenAddBanner("Template1", "Father Day", "Squid");
+            WhenAddResx();
+            
+            _bannerController.ApplyBanner(new ApplyBannerReq()
+            {
+                BannerName = "Mother Day",
+            });
+        }
+
+        //[Test]
         public void GetBannersData()
         {
             GivenServiceLocator();
@@ -188,11 +191,11 @@ namespace TestProject
             WhenAddBanner("Template1", "Father Day", "Squid");
             WhenAddResx();
 
-            var banners = _bannerController.GetBannersData(new GetBannersDataReq()
-            {
-                BannerName = "Mother Day",
-                IsoLangCode = "en-US",
-            });
+            // var banners = _bannerController.GetBannersData(new GetBannersDataReq()
+            // {
+            //     BannerName = "Mother Day",
+            //     IsoLangCode = "en-US",
+            // });
 
             // new BannerVariable
             //     {
@@ -229,27 +232,41 @@ namespace TestProject
             //     }.ToExpectedObject()
             //     .ShouldEqual(banners[1].Variables[0]);
         }
-        
+
+
+        private void WhenAddTemplate()
+        {
+            _bannerController.AddBannerTemplate(new AddBannerTemplateReq()
+            {
+                TemplateName = "Template1",
+                TemplateContent = "Hello Banner",
+                Variables = new Dictionary<string, TemplateVariable>()
+                {
+                    {"image", new TemplateVariable {VarName = "image", VarType = "Image(100,200)"}},
+                    {"title", new TemplateVariable {VarName = "title", VarType = "String"}},
+                }
+            });
+        }
 
         private void WhenAddResx()
         {
             _db.BannerResx.Add(new BannerResxEntity()
             {
-                Name = "SaltedChickenPizzaImage",
+                ResxName = "SaltedChickenPizzaImage",
                 VarType = "Image(100,200)",
                 IsoLangCode = "en-US",
                 Content = "English Salted Chicken Pizza Url",
             });
             _db.BannerResx.Add(new BannerResxEntity()
             {
-                Name = "SaltedChickenPizzaImage",
+                ResxName = "SaltedChickenPizzaImage",
                 VarType = "Image(100,200)",
                 IsoLangCode = "zh-TW",
                 Content = "鹹酥雞披薩圖片連結",
             });
             _db.BannerResx.Add(new BannerResxEntity()
             {
-                Name = "SaltedChickenPizzaTitle",
+                ResxName = "SaltedChickenPizzaTitle",
                 VarType = "String",
                 IsoLangCode = "en-US",
                 Content = "Salted Chicken Pizza",
@@ -257,26 +274,19 @@ namespace TestProject
 
             _db.BannerResx.Add(new BannerResxEntity()
             {
-                Name = "SquidPizzaImage",
+                ResxName = "SquidPizzaImage",
                 VarType = "Image(100,200)",
                 IsoLangCode = "en-US",
                 Content = "English Squid Pizza Url",
             });
             _db.BannerResx.Add(new BannerResxEntity()
             {
-                Name = "SquidPizzaTitle",
+                ResxName = "SquidPizzaTitle",
                 VarType = "String",
                 IsoLangCode = "en-US",
                 Content = "Squid Pizza",
             });
             _db.SaveChanges();
-        }
-
-        private void GivenBannerController()
-        {
-            var repo = new PizzaRepo(_db, new JsonConverter());
-            var viewToStringRenderer = Substitute.For<IViewToStringRendererService>();
-            _bannerController = new BannerController(repo, viewToStringRenderer);
         }
 
         private static void GivenServiceLocator()
@@ -285,6 +295,13 @@ namespace TestProject
             services.AddTransient<IJsonConverter, JsonConverter>();
             var sp = services.BuildServiceProvider();
             ServiceLocator.SetLocatorProvider(sp);
+        }
+
+        private void GivenBannerController()
+        {
+            var repo = new PizzaRepo(_db, new JsonConverter());
+            var viewToStringRenderer = Substitute.For<IViewToStringRendererService>();
+            _bannerController = new BannerController(repo, viewToStringRenderer);
         }
     }
 }

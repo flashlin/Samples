@@ -37,9 +37,9 @@ namespace PizzaWeb.Controllers
             return _pizzaRepo.GetAllBannerTemplates();
         }
 
-        public List<BannerSetting> GetBannerSettings(GetBannerSettingsReq req)
+        public List<BannerSetting> GetBannerSettings(GetBannersSettingReq req)
         {
-            return _pizzaRepo.GetAllBanners(req);
+            return _pizzaRepo.GetBannersSetting(req);
         }
 
         [HttpPost]
@@ -82,10 +82,15 @@ namespace PizzaWeb.Controllers
             return content;
         }
 
-        public List<BannerData> GetBannersData(GetBannersDataReq req)
+        public void ApplyBanner(ApplyBannerReq req)
         {
-            return _pizzaRepo.GetBannersData(req);
+           _pizzaRepo.ApplyBanner(req.BannerName);
         }
+    }
+
+    public class ApplyBannerReq
+    {
+        public string BannerName { get; set; } = default!;
     }
 
     public class GetBannersDataReq
@@ -129,7 +134,7 @@ namespace PizzaWeb.Controllers
         public string BannerName { get; set; } = string.Empty;
     }
 
-    public class GetBannerSettingsReq
+    public class GetBannersSettingReq
     {
         public string TemplateName { get; set; } = String.Empty;
     }
