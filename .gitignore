@@ -10,3 +10,4 @@ dist/
 *.trx
 *.log
 package-lock.json
+*.DotSettings

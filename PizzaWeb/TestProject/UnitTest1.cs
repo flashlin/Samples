@@ -23,7 +23,7 @@ namespace TestProject
   }
 }";
 
-			var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonStr);
+			var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(jsonStr)!;
 			var item = dict[$"spa/luncher.html"];
 			var jsFile = item.GetProperty("file").GetString();
 			
@@ -51,7 +51,7 @@ namespace TestProject
 				AllowTrailingCommas = true,
 				PropertyNamingPolicy = JsonNamingPolicy.CamelCase
 			};
-			var varitablesList = JsonSerializer.Deserialize<List<TemplateVariable>>(variablesJson, jsonOptions);
+			var varitablesList = JsonSerializer.Deserialize<List<TemplateVariable>>(variablesJson, jsonOptions)!;
 
 			var item0 = varitablesList[0];
 			
