@@ -81,6 +81,17 @@ namespace PizzaWeb.Controllers
                 bannerData);
             return content;
         }
+
+        public List<BannerData> GetBannersData(GetBannersDataReq req)
+        {
+            return _pizzaRepo.GetBannersData(req);
+        }
+    }
+
+    public class GetBannersDataReq
+    {
+        public string BannerName { get; set; } = default!;
+        public string IsoLangCode { get; set; } = "en-US";
     }
 
     public class AddBannerReq

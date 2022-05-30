@@ -12,6 +12,7 @@ public interface IPizzaRepo
     void AddBannerTemplate(AddBannerTemplateReq req);
     void AddBanner(AddBannerReq req);
     void UpdateBannerTemplate(BannerTemplate req);
+    List<BannerData> GetBannersData(GetBannersDataReq req);
 }
 
 public class PizzaRepo : IPizzaRepo
@@ -168,6 +169,11 @@ public class PizzaRepo : IPizzaRepo
         bannerTemplate.VariablesJson = _jsonConverter.Serialize(req.Variables);
         _dbContext.BannerTemplates.Update(bannerTemplate);
         _dbContext.SaveChanges();
+    }
+
+    public List<BannerData> GetBannersData(GetBannersDataReq req)
+    {
+        throw new NotImplementedException();
     }
 }
 

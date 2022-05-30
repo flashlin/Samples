@@ -176,6 +176,60 @@ namespace TestProject
                 }.ToExpectedObject()
                 .ShouldEqual(banners[1].Variables[0]);
         }
+        
+        [Test]
+        public void GetBannersData()
+        {
+            GivenServiceLocator();
+            GivenBannerController();
+
+            WhenAddTemplate();
+            WhenAddBanner("Template1", "Mother Day", "SaltedChicken");
+            WhenAddBanner("Template1", "Father Day", "Squid");
+            WhenAddResx();
+
+            var banners = _bannerController.GetBannersData(new GetBannersDataReq()
+            {
+                BannerName = "Mother Day",
+                IsoLangCode = "en-US",
+            });
+
+            // new BannerVariable
+            //     {
+            //         VarName = "image",
+            //         ResxName = "SaltedChickenPizzaImage",
+            //         ResxList = new List<VariableResx>(new[]
+            //         {
+            //             new VariableResx {IsoLangCode = "en-US", Content = "English Salted Chicken Pizza Url"},
+            //             new VariableResx {IsoLangCode = "zh-TW", Content = "鹹酥雞披薩圖片連結"},
+            //         })
+            //     }.ToExpectedObject()
+            //     .ShouldEqual(banners[0].Variables[0]);
+            //
+            // new BannerVariable
+            //     {
+            //         VarName = "title",
+            //         ResxName = "SaltedChickenPizzaTitle",
+            //         ResxList = new List<VariableResx>(new[]
+            //         {
+            //             new VariableResx {IsoLangCode = "en-US", Content = "Salted Chicken Pizza"},
+            //         })
+            //     }
+            //     .ToExpectedObject()
+            //     .ShouldEqual(banners[0].Variables[1]);
+            //
+            // new BannerVariable
+            //     {
+            //         VarName = "image",
+            //         ResxName = "SquidPizzaImage",
+            //         ResxList = new List<VariableResx>(new[]
+            //         {
+            //             new VariableResx {IsoLangCode = "en-US", Content = "English Squid Pizza Url"},
+            //         })
+            //     }.ToExpectedObject()
+            //     .ShouldEqual(banners[1].Variables[0]);
+        }
+        
 
         private void WhenAddResx()
         {
