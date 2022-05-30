@@ -114,12 +114,13 @@ namespace TestProject
 			WhenAddTemplate();
 			var templates = _bannerController.GetAllTemplates();
 
-			templates[0].Variables[0].ToExpectedObject()
-				 .ShouldEqual(new TemplateVariable
-				 {
-					 Name = "image",
-					 VarType = "Image(100,200)"
-				 });
+			new TemplateVariable
+			{
+				Name = "image",
+				VarType = "Image(100,200)"
+			}
+			.ToExpectedObject()
+			.ShouldEqual(templates[0].Variables[0]);
 		}
 
 
@@ -139,16 +140,27 @@ namespace TestProject
 				TemplateName = "Template1"
 			});
 
-			banners[0].Variables[0].ToExpectedObject()
-				 .ShouldEqual(new BannerVariable
-				 {
-					 VarName = "image",
-					 ResxName = "SaltedChickenPizzaImage",
-					 ResxList = new List<VariableResx>(new[] {
-						 new VariableResx { IsoLangCode="en-US", Content="English Salted Chicken Pizza Url" },
-						 new VariableResx { IsoLangCode="zh-TW", Content="鹹酥雞披薩圖片連結" },
-					 })
-				 });
+			new BannerVariable
+			{
+				VarName = "image",
+				ResxName = "SaltedChickenPizzaImage",
+				ResxList = new List<VariableResx>(new[] {
+					 new VariableResx { IsoLangCode="en-US", Content="English Salted Chicken Pizza Url" },
+					 new VariableResx { IsoLangCode="zh-TW", Content="鹹酥雞披薩圖片連結" },
+				})
+			}.ToExpectedObject()
+			.ShouldEqual(banners[0].Variables[0]);
+
+			new BannerVariable
+			{
+				VarName = "title",
+				ResxName = "Mother DayTitle",
+				ResxList = new List<VariableResx>(new[] {
+					new VariableResx { IsoLangCode="en-US", Content="Salted Chicken Pizza" },
+				})
+			}
+			.ToExpectedObject()
+			.ShouldEqual(banners[0].Variables[1]);
 		}
 
 		private void WhenAddResx()
