@@ -217,7 +217,7 @@ namespace TestProject
 
 		private void GivenBannerController()
 		{
-			_bannerController = new BannerController(_db, new JsonConverter(), null);
+			_bannerController = new BannerController(new JsonConverter(), null);
 		}
 
 		private static void GivenServiceLocator()

@@ -16,15 +16,14 @@ namespace PizzaWeb.Controllers
         private PizzaDbContext _dbContext;
         private IViewToStringRendererService _viewToStringRenderer;
         private IJsonConverter _jsonConverter;
-        private readonly PizzaRepo _pizzaRepo;
+        private readonly IPizzaRepo _pizzaRepo;
 
-        public BannerController(PizzaDbContext dbContext,
-            IJsonConverter jsonConverter,
+        public BannerController(IPizzaRepo pizzaRepo, IJsonConverter jsonConverter,
             IViewToStringRendererService viewToStringRenderer)
         {
             _jsonConverter = jsonConverter;
             _viewToStringRenderer = viewToStringRenderer;
-            _pizzaRepo = new PizzaRepo(dbContext);
+            _pizzaRepo = pizzaRepo;
         }
 
         public void AddBannerTemplate(AddBannerTemplateReq req)
@@ -50,12 +49,7 @@ namespace PizzaWeb.Controllers
         [HttpPost]
         public void UpdateTemplate(BannerTemplate req)
         {
-            var bannerTemplate = _dbContext.BannerTemplates.Find(req.Id)!;
-            bannerTemplate.LastModifiedTime = DateTime.Now;
-            bannerTemplate.TemplateContent = req.TemplateContent;
-            bannerTemplate.VariablesJson = _jsonConverter.Serialize(req.Variables);
-            _dbContext.BannerTemplates.Update(bannerTemplate);
-            _dbContext.SaveChanges();
+            _pizzaRepo.UpdateBannerTemplate(req);
         }
 
         public async Task<string> GetBanner(GetBannerReq req)

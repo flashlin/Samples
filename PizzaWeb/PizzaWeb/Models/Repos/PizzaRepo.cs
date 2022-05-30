@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PizzaWeb.Controllers;
 using PizzaWeb.Models.Banner;
+using PizzaWeb.Models.Helpers;
 
 namespace PizzaWeb.Models.Repos;
 
@@ -10,14 +11,17 @@ public interface IPizzaRepo
     List<BannerSetting> GetAllBanners(GetBannersReq req);
     void AddBannerTemplate(AddBannerTemplateReq req);
     void AddBanner(AddBannerReq req);
+    void UpdateBannerTemplate(BannerTemplate req);
 }
 
 public class PizzaRepo : IPizzaRepo
 {
     private readonly PizzaDbContext _dbContext;
+    private IJsonConverter _jsonConverter;
 
-    public PizzaRepo(PizzaDbContext dbContext)
+    public PizzaRepo(PizzaDbContext dbContext, IJsonConverter jsonConverter)
     {
+        _jsonConverter = jsonConverter;
         _dbContext = dbContext;
     }
 
@@ -120,7 +124,7 @@ public class PizzaRepo : IPizzaRepo
             var templateVariablesSettings = this.QueryTemplateVariablesSettings(banner);
             var variableSettings = this.QueryAllVariableSettings(templateVariablesSettings);
             var variables = this.QueryBannerVariables(variableSettings);
-            yield return new Banner.BannerSetting
+            yield return new BannerSetting
             {
                 Id = banner.Id,
                 Name = banner.Name,
@@ -153,6 +157,16 @@ public class PizzaRepo : IPizzaRepo
             VariableOptionsJson = req.VariablesOptions.ToJson(),
             LastModifiedTime = DateTime.UtcNow
         });
+        _dbContext.SaveChanges();
+    }
+
+    public void UpdateBannerTemplate(BannerTemplate req)
+    {
+        var bannerTemplate = _dbContext.BannerTemplates.Find(req.Id)!;
+        bannerTemplate.LastModifiedTime = DateTime.Now;
+        bannerTemplate.TemplateContent = req.TemplateContent;
+        bannerTemplate.VariablesJson = _jsonConverter.Serialize(req.Variables);
+        _dbContext.BannerTemplates.Update(bannerTemplate);
         _dbContext.SaveChanges();
     }
 }
