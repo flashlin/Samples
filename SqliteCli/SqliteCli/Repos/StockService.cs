@@ -177,6 +177,11 @@ public class StockService : IStockService
         return reportProfitItem;
     }
 
+    public async Task<List<TransHistory>> GetOneStockTransAsync(string stockId)
+    {
+        return _stockRepo.GetOneStockTransList(stockId);
+    }
+
     public async Task<List<ReportTranItem>> GetStockReportAsync(ReportTransReq req)
     {
         var stock = _stockRepo

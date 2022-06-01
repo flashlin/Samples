@@ -6,7 +6,7 @@ CREATE TABLE [dbo].[BannerTemplate]
     [VariablesJson] [nvarchar](4000) NULL,
     [LastModifiedTime] [datetime] NOT NULL
     CONSTRAINT [UK_BannerTemplates] UNIQUE ([TemplateName] ASC)
-)
+    )
 
 CREATE TABLE [dbo].[Banner]
 (
@@ -16,7 +16,7 @@ CREATE TABLE [dbo].[Banner]
     [BannerName] [varchar](50) NOT NULL,
     [VariableOptionsJson] [varchar](4000) NOT NULL,
     [LastModifiedTime] [datetime] NOT NULL DEFAULT (getdate()),
-)
+    )
 
 CREATE TABLE [dbo].[Resx]
 (
@@ -26,7 +26,7 @@ CREATE TABLE [dbo].[Resx]
     [ResxName] [varchar](100) NOT NULL,
     [Content] [nvarchar](4000) NOT NULL,
     CONSTRAINT [UK_Resx] UNIQUE ([ISOLangCode] ASC, [ResxName] ASC, [VarType] ASC)
-)
+    )
 
 CREATE TABLE [dbo].[BannerShelf]
 (
@@ -35,17 +35,30 @@ CREATE TABLE [dbo].[BannerShelf]
     [TemplateName] [varchar](50) NOT NULL,
     [TemplateContent] [nvarchar](4000) NOT NULL,
     [OrderId] [int] NOT NULL
-)
+    )
 
 CREATE TABLE [dbo].[VariableShelf]
 (
-   [Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
-   [Uid] [Uniqueidentifier] NOT NULL,
-   [VarName] [varchar](50) NOT NULL,
-   [ResxName] [varchar](100) NOT NULL,
-   [ISOLangCode] [varchar](30) NOT NULL,
-   [Content] [nvarchar](4000) NOT NULL
-)
+    [Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    [Uid] [Uniqueidentifier] NOT NULL,
+    [VarName] [varchar](50) NOT NULL,
+    [ResxName] [varchar](100) NOT NULL,
+    [ISOLangCode] [varchar](30) NOT NULL,
+    [Content] [nvarchar](4000) NOT NULL
+    )
 
 CREATE INDEX IX_VariableShelf
-ON [VariableShelf](Uid,ISOLangCode,VarName,ResxName)
+    ON [VariableShelf](Uid,ISOLangCode,VarName,ResxName)
+
+CREATE TYPE TVP_ResxNameVarType AS TABLE  (
+    ResxName [varchar(100)],
+    VarType [varchar(40)]
+    )
+
+CREATE PROC SP_GetResxNames
+    @resxNames TVP_ResxNameVarType
+AS BEGIN
+SELECT r.ResxName, r.VarType, r.IsoLangCode, r.Content
+FROM Resx as r
+         JOIN @resxNames as t on r.ResxName = t.ResxName and r.VarType = t.VarType
+END

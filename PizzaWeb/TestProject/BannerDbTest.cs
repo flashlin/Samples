@@ -1,4 +1,6 @@
 ﻿using ExpectedObjects;
+using FluentAssertions;
+using FluentAssertions.Equivalency;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -38,10 +40,20 @@ namespace TestProject
         {
             var factory = new SqlServerDbContextOptionsFactory(Options.Create(new PizzaDbConfig
             {
-                ConnectionString = "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=Northwind;"
+                //ConnectionString = "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=Northwind;"
+                ConnectionString = "Server=localhost\\SQLEXPRESS;Integrated security=SSPI;database=PizzaDb;"
             }));
             _db = new PizzaDbContext(factory.Create());
             var sql = typeof(BannerDbTest).Assembly.GetEmbeddedResourceString("PizzaDb.sql");
+            //_db.Database.ExecuteSqlRaw(sql);
+
+            sql = @"
+delete [dbo].[BannerTemplate]
+delete [dbo].[Banner]
+delete [dbo].[Resx]
+delete [dbo].[BannerShelf]
+delete [dbo].[VariableShelf]
+";
             _db.Database.ExecuteSqlRaw(sql);
         }
 
@@ -173,14 +185,55 @@ namespace TestProject
             WhenAddBanner("Template1", "Mother Day", "SaltedChicken");
             WhenAddBanner("Template1", "Father Day", "Squid");
             WhenAddResx();
-            
+
             _bannerController.ApplyBanner(new ApplyBannerReq()
             {
                 BannerName = "Mother Day",
             });
+
+            var bannerShelf = 
+                (from tb1 in _db.BannerShelf.AsNoTracking() select tb1)
+                .ToList();
+
+            var variableShelf = 
+                (from tb1 in _db.VariableShelf.AsNoTracking() select tb1)
+                .ToList();
+
+            new[]
+                {
+                    new VariableShelfEntity()
+                    {
+                        VarName = "image",
+                        Content = "English Salted Chicken Pizza Url",
+                        ResxName = "SaltedChickenPizzaImage",
+                        IsoLangCode = "en-US",
+                    },
+                    new VariableShelfEntity()
+                    {
+                        VarName = "image",
+                        Content = "鹹酥雞披薩圖片連結",
+                        ResxName = "SaltedChickenPizzaImage",
+                        IsoLangCode = "zh-TW",
+                    },
+                    new VariableShelfEntity()
+                    {
+                        VarName = "title",
+                        Content = "Salted Chicken Pizza",
+                        ResxName = "SaltedChickenPizzaTitle",
+                        IsoLangCode = "en-US",
+                    }
+                }.Should()
+                .BeEquivalentTo(variableShelf, ExcludeProperties);
+        }
+        
+        private EquivalencyAssertionOptions<VariableShelfEntity> ExcludeProperties(EquivalencyAssertionOptions<VariableShelfEntity> options)
+        {
+            options.Excluding(t => t.Id);
+            options.Excluding(t => t.Uid);
+            return options;
         }
 
-        //[Test]
+        [Test]
         public void GetBannersData()
         {
             GivenServiceLocator();
@@ -191,46 +244,39 @@ namespace TestProject
             WhenAddBanner("Template1", "Father Day", "Squid");
             WhenAddResx();
 
-            // var banners = _bannerController.GetBannersData(new GetBannersDataReq()
-            // {
-            //     BannerName = "Mother Day",
-            //     IsoLangCode = "en-US",
-            // });
+            _bannerController.ApplyBanner(new ApplyBannerReq()
+            {
+                BannerName = "Mother Day",
+            });
 
-            // new BannerVariable
-            //     {
-            //         VarName = "image",
-            //         ResxName = "SaltedChickenPizzaImage",
-            //         ResxList = new List<VariableResx>(new[]
-            //         {
-            //             new VariableResx {IsoLangCode = "en-US", Content = "English Salted Chicken Pizza Url"},
-            //             new VariableResx {IsoLangCode = "zh-TW", Content = "鹹酥雞披薩圖片連結"},
-            //         })
-            //     }.ToExpectedObject()
-            //     .ShouldEqual(banners[0].Variables[0]);
-            //
-            // new BannerVariable
-            //     {
-            //         VarName = "title",
-            //         ResxName = "SaltedChickenPizzaTitle",
-            //         ResxList = new List<VariableResx>(new[]
-            //         {
-            //             new VariableResx {IsoLangCode = "en-US", Content = "Salted Chicken Pizza"},
-            //         })
-            //     }
-            //     .ToExpectedObject()
-            //     .ShouldEqual(banners[0].Variables[1]);
-            //
-            // new BannerVariable
-            //     {
-            //         VarName = "image",
-            //         ResxName = "SquidPizzaImage",
-            //         ResxList = new List<VariableResx>(new[]
-            //         {
-            //             new VariableResx {IsoLangCode = "en-US", Content = "English Squid Pizza Url"},
-            //         })
-            //     }.ToExpectedObject()
-            //     .ShouldEqual(banners[1].Variables[0]);
+            var banners = _bannerController.GetBannersData(new GetBannersDataReq()
+            {
+                BannerName = "Mother Day",
+                IsoLangCode = "en-US",
+            });
+
+            new[]
+                {
+                    new BannerData
+                    {
+                        BannerName = "Mother Day",
+                        TemplateName = "",
+                        TemplateContent = "",
+                        VarName = "image",
+                        ResxName = "SaltedChickenPizzaImage",
+                        IsoLangCode = "en-US",
+                    },
+                    new BannerData
+                    {
+                        BannerName = "Mother Day",
+                        TemplateName = "",
+                        TemplateContent = "",
+                        VarName = "image",
+                        ResxName = "SaltedChickenPizzaImage",
+                        IsoLangCode = "en-US",
+                    },
+                }.ToExpectedObject()
+                .ShouldMatch(banners);
         }
 
 

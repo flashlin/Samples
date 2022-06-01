@@ -54,17 +54,17 @@ namespace PizzaWeb.Controllers
             {
                 new BannerData()
                 {
-                    LangCode = "TW",
+                    IsoLangCode = "TW",
                     BannerName = "A1",
                 },
                 new BannerData()
                 {
-                    LangCode = "CN",
+                    IsoLangCode = "CN",
                     BannerName = "A1",
                 },
                 new BannerData()
                 {
-                    LangCode = "EN",
+                    IsoLangCode = "EN",
                     BannerName = "A2",
                 },
             };
@@ -85,6 +85,11 @@ namespace PizzaWeb.Controllers
         public void ApplyBanner(ApplyBannerReq req)
         {
            _pizzaRepo.ApplyBanner(req.BannerName);
+        }
+
+        public List<BannerData> GetBannersData(GetBannersDataReq req)
+        {
+            return _pizzaRepo.GetBannersData(req);
         }
     }
 
@@ -130,8 +135,14 @@ namespace PizzaWeb.Controllers
 
     public class BannerData
     {
-        public string LangCode { get; set; } = "en-US";
+        public string IsoLangCode { get; set; } = "en-US";
         public string BannerName { get; set; } = string.Empty;
+        public string ResxName { get; set; } = string.Empty;
+        public string ResxContent { get; set; } = string.Empty;
+        public string TemplateContent { get; set; } = string.Empty;
+        public string TemplateName { get; set; } = string.Empty;
+        public int OrderId { get; set; }
+        public string VarName { get; set; } = string.Empty;
     }
 
     public class GetBannersSettingReq

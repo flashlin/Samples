@@ -11,4 +11,5 @@ public interface IStockService
     Task Test();
     Task<List<ReportTranItem>> GetStockReportAsync(ReportTransReq req);
     Task<List<ReportProfitItem>> GetAllStockProfitReportAsync();
+    Task<List<TransHistory>> GetOneStockTransAsync(string stockId);
 }

@@ -36,6 +36,7 @@ try
 			 services.AddTransient<BuyStockTranCommand>();
 			 services.AddTransient<TodayBuyStockTranCommand>();
 			 services.AddTransient<QueryStockProfitCommand>();
+			 services.AddTransient<ListOneStockCommand>();
 			 services.AddSingleton<Main>();
 
 			 services.AddCors(options =>

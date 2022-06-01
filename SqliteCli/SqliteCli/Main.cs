@@ -66,6 +66,7 @@ public class Main
                 _serviceProvider.GetService<BuyStockTranCommand>()!,
                 _serviceProvider.GetService<TodayBuyStockTranCommand>()!,
                 _serviceProvider.GetService<QueryStockProfitCommand>()!,
+                _serviceProvider.GetService<ListOneStockCommand>()!,
             };
             var cmd = commands.FirstOrDefault(x => x.IsMyCommand(ss));
             if (cmd != null)
@@ -108,7 +109,7 @@ public class Main
                 }
                 case "r":
                 {
-                    var opt = ss.ParseArgs<ReportStockCommand>()!;
+                    var opt = ss.ParseArgs<ReportStockCommandLine>()!;
                     if (opt.StockId == null)
                     {
                         await ProcessReportAsync();
@@ -117,7 +118,7 @@ public class Main
                     {
                         await ProcessStockReportAsync(opt);
                     }
-
+                
                     break;
                 }
                 case "d":
@@ -167,11 +168,11 @@ public class Main
         _stockService.ShowBalance();
     }
 
-    async Task ProcessStockReportAsync(ReportStockCommand command)
+    async Task ProcessStockReportAsync(ReportStockCommandLine commandLine)
     {
         var rc = await _stockService.GetStockReportAsync(new ReportTransReq
         {
-            StockId = command.StockId
+            StockId = commandLine.StockId
         });
         rc.DumpList();
         _stockService.ShowBalance();

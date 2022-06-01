@@ -121,6 +121,26 @@ group by st.Id, t.TranType
                 .FirstOrDefault();
         }
 
+        public List<TransHistory> GetOneStockTransList(string stockId)
+        {
+            var stock = _db.StocksMap
+                .First(x => x.Id == stockId);
+            
+            return _db.Trans.Where(x => x.StockId == stockId)
+                .Select(x => new TransHistory()
+                {
+                    StockId = stockId,
+                    StockName = stock.StockName,
+                    TranTime = x.TranTime,
+                    Balance = x.Balance,
+                    TranType = x.TranType,
+                    StockPrice = x.StockPrice,
+                    NumberOfShare = x.NumberOfShare,
+                    HandlingFee = x.HandlingFee
+                })
+                .ToList();
+        }
+
         public List<TransHistory> GetTransList(ListTransReq req)
         {
             var q1 = _db.Trans.AsQueryable();
