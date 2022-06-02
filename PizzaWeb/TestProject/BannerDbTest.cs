@@ -233,6 +233,12 @@ namespace TestProject
                 .BeEquivalentTo(variableShelf, ExcludeProperties);
         }
         
+        private EquivalencyAssertionOptions<BannerTemplateData> ExcludeProperties(EquivalencyAssertionOptions<BannerTemplateData> options)
+        {
+            options.Excluding(t => t.Uid);
+            return options;
+        }
+        
         private EquivalencyAssertionOptions<VariableShelfEntity> ExcludeProperties(EquivalencyAssertionOptions<VariableShelfEntity> options)
         {
             options.Excluding(t => t.Id);
@@ -267,26 +273,27 @@ namespace TestProject
                     new
                     {
                         BannerName = "Mother Day",
-                        TemplateName = "",
-                        TemplateContent = "",
+                        TemplateName = "Template1",
+                        TemplateContent = "Hello Banner",
                         Variables = new []
                         {
                             new
                             {
                                 VarName = "image",
                                 ResxName = "SaltedChickenPizzaImage",
-                                Content = "",
+                                Content = "English Salted Chicken Pizza Url",
                             },
                             new
                             {
                                 VarName = "title",
                                 ResxName = "SaltedChickenPizzaTitle",
-                                Content = "",
+                                Content = "Salted Chicken Pizza",
                             }
                         }
                     },
-                }.ToExpectedObject()
-                .ShouldMatch(banners);
+                }
+                .Should()
+                .BeEquivalentTo(banners, ExcludeProperties);
         }
 
 
