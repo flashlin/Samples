@@ -42,15 +42,15 @@ public class PizzaRepo : IPizzaRepo
                 TemplateName = tb1.TemplateName,
                 BannerName = tb1.BannerName,
                 OrderId = tb1.OrderId,
-                TemplateVariablesJson = tb2.Variables,
-                BannerVariablesJson = tb1.VariableOptions,
+                TemplateVariables = tb2.Variables,
+                BannerVariables = tb1.VariableOptions,
             };
     }
 
     private IEnumerable<TemplateVariableSetting> QueryTemplateVariablesSettings(TemplateBannerJsonSetting bannerJson)
     {
-        return from tb1 in bannerJson.BannerVariablesJson
-            join tb2 in bannerJson.TemplateVariablesJson
+        return from tb1 in bannerJson.BannerVariables
+            join tb2 in bannerJson.TemplateVariables
                 on tb1.VarName equals tb2.VarName
                 into g1
             from tb2 in g1.DefaultIfEmpty(new TemplateVariable()
@@ -121,12 +121,9 @@ public class PizzaRepo : IPizzaRepo
 
     public IEnumerable<BannerSetting> QueryBannerSettings(List<TemplateBannerJsonSetting> banners)
     {
-        foreach (var banner in banners)
-        {
-            var templateVariablesSettings = this.QueryTemplateVariablesSettings(banner);
-            var variableSettings = this.QueryAllVariableSettings(templateVariablesSettings);
-            var variables = this.QueryBannerVariables(variableSettings);
-            yield return new BannerSetting
+        return from banner in banners
+            let variables = QueryTemplateVariableOptions(banner)
+            select new BannerSetting
             {
                 Id = banner.Id,
                 Name = banner.BannerName,
@@ -134,7 +131,14 @@ public class PizzaRepo : IPizzaRepo
                 OrderId = banner.OrderId,
                 Variables = variables.ToList()
             };
-        }
+    }
+
+    private IEnumerable<BannerVariable> QueryTemplateVariableOptions(TemplateBannerJsonSetting banner)
+    {
+        var templateVariablesSettings = this.QueryTemplateVariablesSettings(banner);
+        var variableSettings = this.QueryAllVariableSettings(templateVariablesSettings);
+        var variables = this.QueryBannerVariables(variableSettings);
+        return variables;
     }
 
     public List<BannerTemplateEntity> GetTemplateContents(string[] templateNames)

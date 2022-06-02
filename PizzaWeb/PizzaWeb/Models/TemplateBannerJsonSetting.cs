@@ -8,6 +8,6 @@ public class TemplateBannerJsonSetting
     public string TemplateName { get; set; } = String.Empty;
     public string BannerName { get; set; } = String.Empty;
     public int OrderId { get; set; }
-    public List<TemplateVariable> TemplateVariablesJson { get; set; } = new List<TemplateVariable>();
-    public List<VariableOption> BannerVariablesJson { get; set; } = new List<VariableOption>();
+    public List<TemplateVariable> TemplateVariables { get; set; } = new List<TemplateVariable>();
+    public List<VariableOption> BannerVariables { get; set; } = new List<VariableOption>();
 }
