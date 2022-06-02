@@ -90,7 +90,7 @@ namespace TestProject
                 },
             };
             
-            expected.Should().BeEquivalentTo(bannerTemplate.VariablesJson);
+            expected.Should().BeEquivalentTo(bannerTemplate.Variables);
         }
 
 

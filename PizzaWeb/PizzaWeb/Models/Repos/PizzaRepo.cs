@@ -42,7 +42,7 @@ public class PizzaRepo : IPizzaRepo
                 TemplateName = tb1.TemplateName,
                 BannerName = tb1.BannerName,
                 OrderId = tb1.OrderId,
-                TemplateVariablesJson = tb2.VariablesJson,
+                TemplateVariablesJson = tb2.Variables,
                 BannerVariablesJson = tb1.VariableOptionsJson ?? "{}",
             };
     }
@@ -146,7 +146,7 @@ public class PizzaRepo : IPizzaRepo
                 Id = x.Id,
                 TemplateName = x.TemplateName,
                 TemplateContent = x.TemplateContent,
-                VariablesJson = x.VariablesJson
+                Variables = x.Variables
             })
             .ToList();
     }
@@ -157,7 +157,7 @@ public class PizzaRepo : IPizzaRepo
         {
             TemplateName = req.TemplateName,
             TemplateContent = req.TemplateContent,
-            VariablesJson = req.Variables.Values.ToList(),
+            Variables = req.Variables.Values.ToList(),
             LastModifiedTime = DateTime.UtcNow
         });
         _dbContext.SaveChanges();
@@ -181,7 +181,7 @@ public class PizzaRepo : IPizzaRepo
         var bannerTemplate = _dbContext.BannerTemplates.Find(req.Id)!;
         bannerTemplate.LastModifiedTime = DateTime.Now;
         bannerTemplate.TemplateContent = req.TemplateContent;
-        bannerTemplate.VariablesJson = req.Variables;
+        bannerTemplate.Variables = req.Variables;
         _dbContext.BannerTemplates.Update(bannerTemplate);
         _dbContext.SaveChanges();
     }
@@ -199,7 +199,7 @@ public class PizzaRepo : IPizzaRepo
             {
                 TemplateName = tb2.TemplateName,
                 TemplateContent = tb2.TemplateContent,
-                TemplateVariables = tb2.VariablesJson,
+                TemplateVariables = tb2.Variables,
                 BannerName = tb1.BannerName,
                 OrderId = tb1.OrderId,
                 BannerVariableOptions = tb1.VariableOptionsJson.ToVariableOptionsList(),

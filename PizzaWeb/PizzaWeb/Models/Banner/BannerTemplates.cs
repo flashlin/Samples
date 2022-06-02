@@ -16,7 +16,7 @@ public class BannerTemplate
     {
         var row = ValueHelper.CopyData(entity, new BannerTemplate());
         //row.Variables = entity.VariablesJson.ToTemplateVariablesList();
-        row.Variables = entity.VariablesJson;
+        row.Variables = entity.Variables;
         return row;
     }
 }

@@ -27,7 +27,7 @@ namespace PizzaWeb.Models
         {
             modelBuilder.Entity<BannerTemplateEntity>(builder =>
             {
-                builder.Property(x => x.VariablesJson)
+                builder.Property(x => x.Variables)
                     .HasConversion<TemplateVariableConverter, TemplateVariableComparer>();
             });
         }
