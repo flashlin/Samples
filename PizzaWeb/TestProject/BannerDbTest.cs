@@ -89,7 +89,7 @@ namespace TestProject
                     VarType = "String"
                 },
             };
-            
+
             expected.Should().BeEquivalentTo(bannerTemplate.Variables);
         }
 
@@ -106,21 +106,6 @@ namespace TestProject
             var expected =
                 "{\"image\":{\"varName\":\"image\",\"resxName\":\"SaltedChickenPizzaImage\"},\"title\":{\"varName\":\"title\",\"resxName\":\"SaltedChickenPizzaTitle\"}}";
             expected.ToExpectedObject().ShouldEqual(banner.VariableOptionsJson);
-        }
-
-        private void WhenAddBanner(string templateName, string bannerName, string taste)
-        {
-            _bannerController.AddBanner(new AddBannerReq()
-            {
-                TemplateName = templateName,
-                BannerName = bannerName,
-                OrderId = 1,
-                VariablesOptions = new Dictionary<string, TemplateVariableValue>()
-                {
-                    {"image", new TemplateVariableValue {VarName = "image", ResxName = $"{taste}PizzaImage"}},
-                    {"title", new TemplateVariableValue {VarName = "title", ResxName = $"{taste}PizzaTitle"}},
-                }
-            });
         }
 
 
@@ -141,7 +126,6 @@ namespace TestProject
                 .ToExpectedObject()
                 .ShouldEqual(templates[0].Variables[0]);
         }
-
 
         [Test]
         public void GetBannerSettings()
@@ -211,11 +195,11 @@ namespace TestProject
                 BannerName = "Mother Day",
             });
 
-            var bannerShelf = 
+            var bannerShelf =
                 (from tb1 in _db.BannerShelf.AsNoTracking() select tb1)
                 .ToList();
 
-            var variableShelf = 
+            var variableShelf =
                 (from tb1 in _db.VariableShelf.AsNoTracking() select tb1)
                 .ToList();
 
@@ -244,19 +228,6 @@ namespace TestProject
                     }
                 }.Should()
                 .BeEquivalentTo(variableShelf, ExcludeProperties);
-        }
-        
-        private EquivalencyAssertionOptions<BannerTemplateData> ExcludeProperties(EquivalencyAssertionOptions<BannerTemplateData> options)
-        {
-            options.Excluding(t => t.Uid);
-            return options;
-        }
-        
-        private EquivalencyAssertionOptions<VariableShelfEntity> ExcludeProperties(EquivalencyAssertionOptions<VariableShelfEntity> options)
-        {
-            options.Excluding(t => t.Id);
-            options.Excluding(t => t.Uid);
-            return options;
         }
 
         [Test]
@@ -288,7 +259,7 @@ namespace TestProject
                         BannerName = "Mother Day",
                         TemplateName = "Template1",
                         TemplateContent = "Hello Banner",
-                        Variables = new []
+                        Variables = new[]
                         {
                             new
                             {
@@ -307,6 +278,36 @@ namespace TestProject
                 }
                 .Should()
                 .BeEquivalentTo(banners, ExcludeProperties);
+        }
+
+        private void WhenAddBanner(string templateName, string bannerName, string taste)
+        {
+            _bannerController.AddBanner(new AddBannerReq()
+            {
+                TemplateName = templateName,
+                BannerName = bannerName,
+                OrderId = 1,
+                VariablesOptions = new Dictionary<string, TemplateVariableValue>()
+                {
+                    {"image", new TemplateVariableValue {VarName = "image", ResxName = $"{taste}PizzaImage"}},
+                    {"title", new TemplateVariableValue {VarName = "title", ResxName = $"{taste}PizzaTitle"}},
+                }
+            });
+        }
+
+        private EquivalencyAssertionOptions<BannerTemplateData> ExcludeProperties(
+            EquivalencyAssertionOptions<BannerTemplateData> options)
+        {
+            options.Excluding(t => t.Uid);
+            return options;
+        }
+
+        private EquivalencyAssertionOptions<VariableShelfEntity> ExcludeProperties(
+            EquivalencyAssertionOptions<VariableShelfEntity> options)
+        {
+            options.Excluding(t => t.Id);
+            options.Excluding(t => t.Uid);
+            return options;
         }
 
 
