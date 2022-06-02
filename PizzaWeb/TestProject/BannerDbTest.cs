@@ -11,6 +11,7 @@ using PizzaWeb.Models;
 using PizzaWeb.Models.Banner;
 using PizzaWeb.Models.Helpers;
 using PizzaWeb.Models.Repos;
+using ServiceStack;
 using T1.AspNetCore;
 using T1.SqlLocalData;
 using T1.Standard.IO;
@@ -75,9 +76,21 @@ namespace TestProject
             var bannerTemplate = _db.BannerTemplates.AsNoTracking().First();
             Assert.That(bannerTemplate.TemplateContent, Is.EqualTo("Hello Banner"));
 
-            var expected =
-                "{\"image\":{\"varName\":\"image\",\"varType\":\"Image(100,200)\"},\"title\":{\"varName\":\"title\",\"varType\":\"String\"}}";
-            expected.ToExpectedObject().ShouldEqual(bannerTemplate.VariablesJson);
+            var expected = new[]
+            {
+                new TemplateVariable()
+                {
+                    VarName = "image",
+                    VarType = "Image(100,200)"
+                },
+                new TemplateVariable()
+                {
+                    VarName = "title",
+                    VarType = "String"
+                },
+            };
+            
+            expected.Should().BeEquivalentTo(bannerTemplate.VariablesJson);
         }
 
 

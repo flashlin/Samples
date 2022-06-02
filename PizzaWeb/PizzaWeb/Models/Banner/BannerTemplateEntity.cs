@@ -11,6 +11,7 @@ public class BannerTemplateEntity
     public int Id { get; set; }
     public string TemplateName { get; set; } = string.Empty;
     public string TemplateContent { get; set; } = string.Empty;
-    public string VariablesJson { get; set; } = "{}";
+    //public string VariablesJson { get; set; } = "{}";
+    public List<TemplateVariable> VariablesJson { get; set; } = new List<TemplateVariable>();
     public DateTime LastModifiedTime { get; set; }
 }

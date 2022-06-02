@@ -15,7 +15,8 @@ public class BannerTemplate
     public static BannerTemplate From(BannerTemplateEntity entity)
     {
         var row = ValueHelper.CopyData(entity, new BannerTemplate());
-        row.Variables = entity.VariablesJson.ToTemplateVariablesList();
+        //row.Variables = entity.VariablesJson.ToTemplateVariablesList();
+        row.Variables = entity.VariablesJson;
         return row;
     }
 }

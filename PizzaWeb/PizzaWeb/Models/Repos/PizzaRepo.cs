@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PizzaWeb.Controllers;
 using PizzaWeb.Models.Banner;
 using PizzaWeb.Models.Helpers;
+using T1.Standard.Common;
 using T1.Standard.Data;
 using T1.Standard.Linq;
 using BannerVariable = PizzaWeb.Models.Banner.BannerVariable;
@@ -41,7 +42,7 @@ public class PizzaRepo : IPizzaRepo
                 TemplateName = tb1.TemplateName,
                 BannerName = tb1.BannerName,
                 OrderId = tb1.OrderId,
-                TemplateVariablesJson = tb2.VariablesJson ?? "{}",
+                TemplateVariablesJson = tb2.VariablesJson,
                 BannerVariablesJson = tb1.VariableOptionsJson ?? "{}",
             };
     }
@@ -49,7 +50,7 @@ public class PizzaRepo : IPizzaRepo
     private IEnumerable<TemplateVariableSetting> QueryTemplateVariablesSettings(TemplateBannerJsonSetting bannerJson)
     {
         return from tb1 in bannerJson.BannerVariablesJson.ToVariableOptionsList()
-            join tb2 in bannerJson.TemplateVariablesJson.ToTemplateVariablesList()
+            join tb2 in bannerJson.TemplateVariablesJson
                 on tb1.VarName equals tb2.VarName
                 into g1
             from tb2 in g1.DefaultIfEmpty(new TemplateVariable()
@@ -156,7 +157,7 @@ public class PizzaRepo : IPizzaRepo
         {
             TemplateName = req.TemplateName,
             TemplateContent = req.TemplateContent,
-            VariablesJson = req.Variables.ToJson(),
+            VariablesJson = req.Variables.Values.ToList(),
             LastModifiedTime = DateTime.UtcNow
         });
         _dbContext.SaveChanges();
@@ -180,7 +181,7 @@ public class PizzaRepo : IPizzaRepo
         var bannerTemplate = _dbContext.BannerTemplates.Find(req.Id)!;
         bannerTemplate.LastModifiedTime = DateTime.Now;
         bannerTemplate.TemplateContent = req.TemplateContent;
-        bannerTemplate.VariablesJson = _jsonConverter.Serialize(req.Variables);
+        bannerTemplate.VariablesJson = req.Variables;
         _dbContext.BannerTemplates.Update(bannerTemplate);
         _dbContext.SaveChanges();
     }
@@ -198,7 +199,7 @@ public class PizzaRepo : IPizzaRepo
             {
                 TemplateName = tb2.TemplateName,
                 TemplateContent = tb2.TemplateContent,
-                TemplateVariables = tb2.VariablesJson.ToTemplateVariablesList(),
+                TemplateVariables = tb2.VariablesJson,
                 BannerName = tb1.BannerName,
                 OrderId = tb1.OrderId,
                 BannerVariableOptions = tb1.VariableOptionsJson.ToVariableOptionsList(),
