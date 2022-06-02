@@ -6,6 +6,7 @@ using PizzaWeb.Models.Banner;
 using PizzaWeb.Models.Helpers;
 using T1.Standard.Data;
 using T1.Standard.Linq;
+using BannerVariable = PizzaWeb.Models.Banner.BannerVariable;
 
 namespace PizzaWeb.Models.Repos;
 
@@ -265,7 +266,7 @@ public class PizzaRepo : IPizzaRepo
 
             var varSettings = (
                 from tb1 in bannerResx
-                join tb2 in bannerVars on new { tb1.ResxName, tb1.VarType } equals new { tb2.ResxName, tb2.VarType }
+                join tb2 in bannerVars on new {tb1.ResxName, tb1.VarType} equals new {tb2.ResxName, tb2.VarType}
                 select new VariableShelfEntity()
                 {
                     Uid = setting.Uid,
@@ -280,18 +281,20 @@ public class PizzaRepo : IPizzaRepo
 
         _dbContext.VariableShelf.AddRange(varShelf);
         _dbContext.SaveChanges();
-        
+
         _dbContext.BannerShelf.AddRange(bannerShelf);
         _dbContext.SaveChanges();
     }
 
-    public List<BannerData> GetBannersData(GetBannersDataReq req)
+    public List<BannerTemplateData> GetBannersData(GetBannersDataReq req)
     {
-        var banners = from tb1 in _dbContext.BannerShelf
-            join tb2 in _dbContext.VariableShelf on tb1.Uid equals tb2.Uid
-            where tb1.BannerName == req.BannerName
-            select new BannerData
+        var banners = (
+            from tb1 in _dbContext.BannerShelf.AsNoTracking()
+            join tb2 in _dbContext.VariableShelf.AsNoTracking() on tb1.Uid equals tb2.Uid
+            where tb1.BannerName == req.BannerName && tb2.IsoLangCode == req.IsoLangCode
+            select new
             {
+                Uid = tb1.Uid,
                 BannerName = req.BannerName,
                 TemplateName = tb1.TemplateName,
                 TemplateContent = tb1.TemplateContent,
@@ -300,8 +303,30 @@ public class PizzaRepo : IPizzaRepo
                 VarName = tb2.VarName,
                 ResxName = tb2.ResxName,
                 ResxContent = tb2.Content,
+            }).ToArray();
+
+        var bannersData = from tb1 in banners
+            group tb1 by tb1.Uid
+            into g1
+            let tb2 = g1.First()
+            select new BannerTemplateData
+            {
+                Uid = tb2.Uid,
+                BannerName = tb2.BannerName,
+                TemplateName = tb2.TemplateName,
+                TemplateContent = tb2.TemplateContent,
+                Variables = g1
+                    .OrderBy(x => x.OrderId)
+                    .Select(x => new BannerData()
+                    {
+                        VarName = x.VarName,
+                        ResxName = x.ResxName,
+                        Content = x.ResxContent
+                    })
+                    .ToList()
             };
-        return banners.ToList();
+
+        return bannersData.ToList();
     }
 }
 

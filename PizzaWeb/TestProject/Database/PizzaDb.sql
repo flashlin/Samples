@@ -51,14 +51,6 @@ CREATE INDEX IX_VariableShelf
     ON [VariableShelf](Uid,ISOLangCode,VarName,ResxName)
 
 CREATE TYPE TVP_ResxNameVarType AS TABLE  (
-    ResxName [varchar(100)],
-    VarType [varchar(40)]
+    ResxName varchar(100),
+    VarType varchar(40)
     )
-
-CREATE PROC SP_GetResxNames
-    @resxNames TVP_ResxNameVarType
-AS BEGIN
-SELECT r.ResxName, r.VarType, r.IsoLangCode, r.Content
-FROM Resx as r
-         JOIN @resxNames as t on r.ResxName = t.ResxName and r.VarType = t.VarType
-END

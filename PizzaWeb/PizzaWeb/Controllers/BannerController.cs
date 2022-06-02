@@ -48,36 +48,21 @@ namespace PizzaWeb.Controllers
             _pizzaRepo.UpdateBannerTemplate(req);
         }
 
-        public async Task<string> GetBanner(GetBannerReq req)
+        public async Task<string> GetBanner(GetBannersDataReq req)
         {
-            var allBannerData = new[]
-            {
-                new BannerData()
-                {
-                    IsoLangCode = "TW",
-                    BannerName = "A1",
-                },
-                new BannerData()
-                {
-                    IsoLangCode = "CN",
-                    BannerName = "A1",
-                },
-                new BannerData()
-                {
-                    IsoLangCode = "EN",
-                    BannerName = "A2",
-                },
-            };
+            var bannerData = _pizzaRepo.GetBannersData(req).FirstOrDefault();
 
-            var bannerData = allBannerData.Where(x => x.BannerName == req.BannerName)
-                .ToList();
+            if (bannerData == null)
+            {
+                return String.Empty;
+            }
 
             var bannerLogical = new BannerLogical[]
             {
             };
 
             var content = await _viewToStringRenderer.RenderViewToStringAsync<object>(
-                @$"/banner-template:/{req.BannerName}.banner-template",
+                @$"/banner-template:/{bannerData.Uid}.banner-template",
                 bannerData);
             return content;
         }
@@ -87,7 +72,7 @@ namespace PizzaWeb.Controllers
            _pizzaRepo.ApplyBanner(req.BannerName);
         }
 
-        public List<BannerData> GetBannersData(GetBannersDataReq req)
+        public List<BannerTemplateData> GetBannersData(GetBannersDataReq req)
         {
             return _pizzaRepo.GetBannersData(req);
         }
@@ -133,17 +118,22 @@ namespace PizzaWeb.Controllers
         }
     }
 
-    public class BannerData
+    public class BannerTemplateData
     {
-        public string IsoLangCode { get; set; } = "en-US";
+        public Guid Uid { get; set; }
         public string BannerName { get; set; } = string.Empty;
-        public string ResxName { get; set; } = string.Empty;
-        public string ResxContent { get; set; } = string.Empty;
         public string TemplateContent { get; set; } = string.Empty;
         public string TemplateName { get; set; } = string.Empty;
-        public int OrderId { get; set; }
-        public string VarName { get; set; } = string.Empty;
+        public List<BannerData> Variables { get; set; } = new List<BannerData>();
     }
+
+    public class BannerData
+    {
+        public string VarName { get; set; } = string.Empty;
+        public string ResxName { get; set; } = String.Empty;
+        public string Content { get; set; } = String.Empty;
+    }
+
 
     public class GetBannersSettingReq
     {

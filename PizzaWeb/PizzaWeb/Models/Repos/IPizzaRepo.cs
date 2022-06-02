@@ -14,5 +14,5 @@ public interface IPizzaRepo
     IEnumerable<BannerSetting> QueryBannerSettings(List<TemplateBannerJsonSetting> banners);
     List<BannerTemplateEntity> GetTemplateContents(string[] templateNames);
     void ApplyBanner(string bannerName);
-    List<BannerData> GetBannersData(GetBannersDataReq req);
+    List<BannerTemplateData> GetBannersData(GetBannersDataReq req);
 }

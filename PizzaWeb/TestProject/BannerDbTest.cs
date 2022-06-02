@@ -14,6 +14,7 @@ using PizzaWeb.Models.Repos;
 using T1.AspNetCore;
 using T1.SqlLocalData;
 using T1.Standard.IO;
+using BannerVariable = PizzaWeb.Models.Banner.BannerVariable;
 
 namespace TestProject
 {
@@ -40,20 +41,26 @@ namespace TestProject
         {
             var factory = new SqlServerDbContextOptionsFactory(Options.Create(new PizzaDbConfig
             {
-                //ConnectionString = "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=Northwind;"
-                ConnectionString = "Server=localhost\\SQLEXPRESS;Integrated security=SSPI;database=PizzaDb;"
+                ConnectionString = "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=Northwind;"
+                //ConnectionString = "Server=localhost\\SQLEXPRESS;Integrated security=SSPI;database=PizzaDb;"
             }));
             _db = new PizzaDbContext(factory.Create());
-            var sql = typeof(BannerDbTest).Assembly.GetEmbeddedResourceString("PizzaDb.sql");
-            //_db.Database.ExecuteSqlRaw(sql);
+            ExecuteEmbeddedSql("PizzaDb.sql");
+            ExecuteEmbeddedSql("SP_GetResxNames.sql");
 
-            sql = @"
-delete [dbo].[BannerTemplate]
-delete [dbo].[Banner]
-delete [dbo].[Resx]
-delete [dbo].[BannerShelf]
-delete [dbo].[VariableShelf]
-";
+            //             sql = @"
+// delete [dbo].[BannerTemplate]
+// delete [dbo].[Banner]
+// delete [dbo].[Resx]
+// delete [dbo].[BannerShelf]
+// delete [dbo].[VariableShelf]
+// ";
+//             _db.Database.ExecuteSqlRaw(sql);
+        }
+
+        private void ExecuteEmbeddedSql(string resourceSqlName)
+        {
+            var sql = typeof(BannerDbTest).Assembly.GetEmbeddedResourceString(resourceSqlName);
             _db.Database.ExecuteSqlRaw(sql);
         }
 
@@ -257,23 +264,26 @@ delete [dbo].[VariableShelf]
 
             new[]
                 {
-                    new BannerData
+                    new
                     {
                         BannerName = "Mother Day",
                         TemplateName = "",
                         TemplateContent = "",
-                        VarName = "image",
-                        ResxName = "SaltedChickenPizzaImage",
-                        IsoLangCode = "en-US",
-                    },
-                    new BannerData
-                    {
-                        BannerName = "Mother Day",
-                        TemplateName = "",
-                        TemplateContent = "",
-                        VarName = "image",
-                        ResxName = "SaltedChickenPizzaImage",
-                        IsoLangCode = "en-US",
+                        Variables = new []
+                        {
+                            new
+                            {
+                                VarName = "image",
+                                ResxName = "SaltedChickenPizzaImage",
+                                Content = "",
+                            },
+                            new
+                            {
+                                VarName = "title",
+                                ResxName = "SaltedChickenPizzaTitle",
+                                Content = "",
+                            }
+                        }
                     },
                 }.ToExpectedObject()
                 .ShouldMatch(banners);
