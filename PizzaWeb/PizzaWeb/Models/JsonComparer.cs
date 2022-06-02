@@ -5,29 +5,29 @@ using PizzaWeb.Models.Helpers;
 
 namespace PizzaWeb.Models;
 
-public class TemplateVariableComparer : ValueComparer<List<TemplateVariable>>
+public class JsonComparer<T> : ValueComparer<T>
 {
-    public TemplateVariableComparer()
+    public JsonComparer()
         : base(EqualsFn(), HashCodeFn(), SnapshotFn())
     {
     }
 
-    private static Expression<Func<List<TemplateVariable>?, List<TemplateVariable>?, bool>> EqualsFn()
+    private static Expression<Func<T?, T?, bool>> EqualsFn()
     {
-        var fn = (List<TemplateVariable>? left, List<TemplateVariable>? right) =>
+        var fn = (T? left, T? right) =>
         {
             var sp = ServiceLocator.Current;
             var jsonConvert = sp.GetService<IJsonConverter>();
-            var leftJson = jsonConvert.Serialize(left);
-            var rightJson = jsonConvert.Serialize(right);
+            var leftJson = (left != null) ? jsonConvert.Serialize(left) : String.Empty;
+            var rightJson = (right != null) ? jsonConvert.Serialize(right) : String.Empty;
             return leftJson == rightJson;
         };
         return (left, right) => fn(left, right);
     }
 
-    private static Expression<Func<List<TemplateVariable>, int>> HashCodeFn()
+    private static Expression<Func<T, int>> HashCodeFn()
     {
-        var fn = (List<TemplateVariable>? model) =>
+        var fn = (T? model) =>
         {
             var sp = ServiceLocator.Current;
             var jsonConvert = sp.GetService<IJsonConverter>();
@@ -36,13 +36,13 @@ public class TemplateVariableComparer : ValueComparer<List<TemplateVariable>>
         return (model) => fn(model);
     }
 
-    private static Expression<Func<List<TemplateVariable>, List<TemplateVariable>>> SnapshotFn()
+    private static Expression<Func<T, T>> SnapshotFn()
     {
-        var fn = (List<TemplateVariable> model) =>
+        var fn = (T model) =>
         {
             var sp = ServiceLocator.Current;
             var jsonConvert = sp.GetService<IJsonConverter>();
-            return jsonConvert.Deserialize<List<TemplateVariable>>(jsonConvert.Serialize(model));
+            return jsonConvert.Deserialize<T>(jsonConvert.Serialize(model));
         };
         return (model) => fn(model);
     }

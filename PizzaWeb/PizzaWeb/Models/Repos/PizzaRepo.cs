@@ -27,7 +27,7 @@ public class PizzaRepo : IPizzaRepo
         var bannerTemplates = _dbContext.BannerTemplates
             .AsNoTracking()
             .ToList();
-        return bannerTemplates.Select(x => BannerTemplate.From(x)).ToList();
+        return bannerTemplates.Select(BannerTemplate.From).ToList();
     }
 
     public IQueryable<TemplateBannerJsonSetting> QueryBannerJsonSettingData()
@@ -43,13 +43,13 @@ public class PizzaRepo : IPizzaRepo
                 BannerName = tb1.BannerName,
                 OrderId = tb1.OrderId,
                 TemplateVariablesJson = tb2.Variables,
-                BannerVariablesJson = tb1.VariableOptionsJson ?? "{}",
+                BannerVariablesJson = tb1.VariableOptions,
             };
     }
 
     private IEnumerable<TemplateVariableSetting> QueryTemplateVariablesSettings(TemplateBannerJsonSetting bannerJson)
     {
-        return from tb1 in bannerJson.BannerVariablesJson.ToVariableOptionsList()
+        return from tb1 in bannerJson.BannerVariablesJson
             join tb2 in bannerJson.TemplateVariablesJson
                 on tb1.VarName equals tb2.VarName
                 into g1
@@ -170,7 +170,7 @@ public class PizzaRepo : IPizzaRepo
             BannerName = req.BannerName,
             TemplateName = req.TemplateName,
             OrderId = req.OrderId,
-            VariableOptionsJson = req.VariablesOptions.ToJson(),
+            VariableOptions = req.VariablesOptions.Values.ToList(),
             LastModifiedTime = DateTime.UtcNow
         });
         _dbContext.SaveChanges();
@@ -202,7 +202,7 @@ public class PizzaRepo : IPizzaRepo
                 TemplateVariables = tb2.Variables,
                 BannerName = tb1.BannerName,
                 OrderId = tb1.OrderId,
-                BannerVariableOptions = tb1.VariableOptionsJson.ToVariableOptionsList(),
+                BannerVariableOptions = tb1.VariableOptions,
                 Uid = Guid.NewGuid(),
             }).ToArray();
 

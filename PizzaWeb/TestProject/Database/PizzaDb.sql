@@ -14,7 +14,7 @@ CREATE TABLE [dbo].[Banner]
     [TemplateName] [varchar](50) NOT NULL,
     [OrderId] [int] NOT NULL DEFAULT(1),
     [BannerName] [varchar](50) NOT NULL,
-    [VariableOptionsJson] [varchar](4000) NOT NULL,
+    [VariableOptions] [varchar](4000) NOT NULL,
     [LastModifiedTime] [datetime] NOT NULL DEFAULT (getdate()),
     )
 

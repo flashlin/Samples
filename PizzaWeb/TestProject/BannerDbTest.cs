@@ -103,11 +103,22 @@ namespace TestProject
             WhenAddBanner("Template1", "Mother's Day", "SaltedChicken");
 
             var banner = _db.Banners.AsNoTracking().First();
-            var expected =
-                "{\"image\":{\"varName\":\"image\",\"resxName\":\"SaltedChickenPizzaImage\"},\"title\":{\"varName\":\"title\",\"resxName\":\"SaltedChickenPizzaTitle\"}}";
-            expected.ToExpectedObject().ShouldEqual(banner.VariableOptionsJson);
-        }
 
+            var expected = new[]
+            {
+                new VariableOption
+                {
+                    VarName = "image",
+                    ResxName = "SaltedChickenPizzaImage"
+                },
+                new VariableOption
+                {
+                    VarName = "title",
+                    ResxName = "SaltedChickenPizzaTitle"
+                },
+            };
+            expected.Should().BeEquivalentTo(banner.VariableOptions);
+        }
 
         [Test]
         public void GetBannerTemplate()
@@ -287,10 +298,10 @@ namespace TestProject
                 TemplateName = templateName,
                 BannerName = bannerName,
                 OrderId = 1,
-                VariablesOptions = new Dictionary<string, TemplateVariableValue>()
+                VariablesOptions = new Dictionary<string, VariableOption>()
                 {
-                    {"image", new TemplateVariableValue {VarName = "image", ResxName = $"{taste}PizzaImage"}},
-                    {"title", new TemplateVariableValue {VarName = "title", ResxName = $"{taste}PizzaTitle"}},
+                    {"image", new VariableOption {VarName = "image", ResxName = $"{taste}PizzaImage"}},
+                    {"title", new VariableOption {VarName = "title", ResxName = $"{taste}PizzaTitle"}},
                 }
             });
         }

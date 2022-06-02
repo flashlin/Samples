@@ -15,7 +15,7 @@ public class BannerEntity
 
     public string BannerName { get; set; } = String.Empty;
     public int OrderId { get; set; }
-    public string VariableOptionsJson { get; set; } = "{}"; // { name: resxName } 
+    public List<VariableOption> VariableOptions { get; set; } = new List<VariableOption>();
     public string TemplateName { get; set; } = String.Empty;
     public DateTime LastModifiedTime { get; set; } = DateTime.UtcNow;
 }
@@ -57,7 +57,7 @@ public class VariableResx
 	}
 }
 
-public class TemplateVariableValue
+public class VariableOption
 {
     public string VarName { get; set; } = string.Empty;
     public string ResxName { get; set; } = string.Empty;

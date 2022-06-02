@@ -94,7 +94,7 @@ namespace PizzaWeb.Controllers
         public string BannerName { get; set; } = string.Empty;
         public string TemplateName { get; set; } = string.Empty;
         public int OrderId { get; set; }
-        public Dictionary<string, TemplateVariableValue> VariablesOptions { get; set; } = new Dictionary<string, TemplateVariableValue>();
+        public Dictionary<string, VariableOption> VariablesOptions { get; set; } = new Dictionary<string, VariableOption>();
     }
 
     public class VariableResxSetting
