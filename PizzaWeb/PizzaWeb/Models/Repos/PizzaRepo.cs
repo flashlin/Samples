@@ -30,7 +30,7 @@ public class PizzaRepo : IPizzaRepo
         return bannerTemplates.Select(BannerTemplate.From).ToList();
     }
 
-    public IQueryable<TemplateBannerSetting> QueryBannerJsonSettingData()
+    public IQueryable<TemplateBannerSetting> QueryBannerSettingData()
     {
         return from tb1 in _dbContext.Banners.AsNoTracking()
             let tb2 = _dbContext.BannerTemplates
@@ -115,12 +115,7 @@ public class PizzaRepo : IPizzaRepo
 
     private IEnumerable<BannerSetting> QueryAllBanners()
     {
-        var banners = this.QueryBannerJsonSettingData().ToList();
-        foreach (var bannerSetting in QueryBannerSettings(banners)) yield return bannerSetting;
-    }
-
-    public IEnumerable<BannerSetting> QueryBannerSettings(List<TemplateBannerSetting> banners)
-    {
+        var banners = this.QueryBannerSettingData().ToList();
         return from banner in banners
             let variables = QueryTemplateVariableOptions(banner)
             select new BannerSetting
