@@ -97,11 +97,14 @@ function handleDeleteTemplate(slotProps: ColumnRowSlots) {
   console.log('de');
   confirmPopup({
     message: `Are you sure you want to delete this '${slotProps.data.templateName}' template?`,
-    resolve: () => {
-      console.log("delete");
+    resolve: async () => {
+      let templateName = slotProps.data.templateName;
+      await api.deleteTemplateAsync(templateName);
+      toastInfo(`Delete ${templateName} Template Success`);
     },
     reject: () => {
-      console.log("delete reject");
+      let templateName = slotProps.data.templateName;
+      toastInfo(`Cancel Delete ${templateName} Template`);
     },
   });
 }

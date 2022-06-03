@@ -13,4 +13,5 @@ public interface IPizzaRepo
     List<BannerTemplateEntity> GetTemplateContents(string[] templateNames);
     void ApplyBanner(string bannerName);
     List<BannerTemplateData> GetBannersData(GetBannersDataReq req);
+    void DeleteBannerTemplate(string templateName);
 }

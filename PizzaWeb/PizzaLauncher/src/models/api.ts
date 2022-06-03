@@ -74,6 +74,10 @@ export class BannerApi {
     return this.postAsync("banner/addTemplate", templateData);
   }
 
+  deleteTemplateAsync(templateName: string) {
+     return this.postAsync("banner/deleteTemplate", templateName);
+  }
+
   updateTemplateAsync(req: ITemplateData) {
     return this.postAsync("banner/updateTemplate", req);
   }

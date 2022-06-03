@@ -27,6 +27,11 @@ namespace PizzaWeb.Controllers
             _pizzaRepo.AddBannerTemplate(req);
         }
 
+        public void DeleteTemplate([FromBody] string templateName)
+        {
+            _pizzaRepo.DeleteBannerTemplate(templateName);
+        }
+
         public void AddBanner(AddBannerReq req)
         {
            _pizzaRepo.AddBanner(req); 
