@@ -24,10 +24,9 @@ public class PizzaRepo : IPizzaRepo
 
     public List<BannerTemplate> GetAllBannerTemplates()
     {
-        var bannerTemplates = _dbContext.BannerTemplates
-            .AsNoTracking()
-            .ToList();
-        return bannerTemplates.Select(BannerTemplate.From).ToList();
+        var q1 = from tb1 in _dbContext.BannerTemplates.AsNoTracking()
+            select BannerTemplate.From(tb1);
+        return q1.ToList();
     }
 
     public List<BannerTemplateEntity> GetTemplateContents(string[] templateNames)
