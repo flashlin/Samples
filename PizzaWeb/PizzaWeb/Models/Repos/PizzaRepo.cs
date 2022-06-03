@@ -22,11 +22,14 @@ public class PizzaRepo : IPizzaRepo
         _dbContext = dbContext;
     }
 
-    public List<BannerTemplate> GetAllBannerTemplates()
+    public List<BannerTemplate> GetBannerTemplates(GetBannerTemplatesReq req)
     {
         var q1 = from tb1 in _dbContext.BannerTemplates.AsNoTracking()
+            orderby tb1.Id
             select BannerTemplate.From(tb1);
-        return q1.ToList();
+        return q1.Skip(req.Index * req.PageSize)
+            .Take(req.PageSize)
+            .ToList();
     }
 
     public List<BannerTemplateEntity> GetTemplateContents(string[] templateNames)
@@ -327,6 +330,12 @@ public class PizzaRepo : IPizzaRepo
 
         return bannersData.ToList();
     }
+}
+
+public class GetBannerTemplatesReq
+{
+    public int Index { get; set; }
+    public int PageSize { get; set; }
 }
 
 public class AddBannerTemplateReq

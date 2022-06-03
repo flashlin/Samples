@@ -127,7 +127,10 @@ namespace TestProject
             GivenBannerController();
 
             WhenAddTemplate();
-            var templates = _bannerController.GetAllTemplates();
+            var templates = _bannerController.GetAllTemplates(new GetBannerTemplatesReq()
+            {
+                PageSize = 10,
+            });
 
             new TemplateVariable
                 {

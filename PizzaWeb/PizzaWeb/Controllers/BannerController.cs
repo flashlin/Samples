@@ -32,9 +32,9 @@ namespace PizzaWeb.Controllers
            _pizzaRepo.AddBanner(req); 
         }
 
-        public List<BannerTemplate> GetAllTemplates()
+        public List<BannerTemplate> GetAllTemplates(GetBannerTemplatesReq req)
         {
-            return _pizzaRepo.GetAllBannerTemplates();
+            return _pizzaRepo.GetBannerTemplates(req);
         }
 
         public List<BannerSetting> GetBannerSettings(GetBannersSettingReq req)

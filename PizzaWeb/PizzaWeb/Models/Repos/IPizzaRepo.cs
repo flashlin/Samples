@@ -5,7 +5,7 @@ namespace PizzaWeb.Models.Repos;
 
 public interface IPizzaRepo
 {
-    List<BannerTemplate> GetAllBannerTemplates();
+    List<BannerTemplate> GetBannerTemplates(GetBannerTemplatesReq req);
     List<BannerSetting> GetBannersSetting(GetBannersSettingReq req);
     void AddBannerTemplate(AddBannerTemplateReq req);
     void AddBanner(AddBannerReq req);
