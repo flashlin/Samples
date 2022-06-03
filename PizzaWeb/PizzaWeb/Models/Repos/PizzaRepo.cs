@@ -30,6 +30,20 @@ public class PizzaRepo : IPizzaRepo
         return bannerTemplates.Select(BannerTemplate.From).ToList();
     }
 
+    public List<BannerTemplateEntity> GetTemplateContents(string[] templateNames)
+    {
+        return _dbContext.BannerTemplates
+            .Where(x => templateNames.Contains(x.TemplateName))
+            .Select(x => new BannerTemplateEntity
+            {
+                Id = x.Id,
+                TemplateName = x.TemplateName,
+                TemplateContent = x.TemplateContent,
+                Variables = x.Variables
+            })
+            .ToList();
+    }
+
     public IQueryable<TemplateBannerSetting> QueryBannerSettingData()
     {
         return from tb1 in _dbContext.Banners.AsNoTracking()
@@ -134,20 +148,6 @@ public class PizzaRepo : IPizzaRepo
         var variableSettings = this.QueryAllVariableSettings(templateVariablesSettings);
         var variables = this.QueryBannerVariables(variableSettings);
         return variables;
-    }
-
-    public List<BannerTemplateEntity> GetTemplateContents(string[] templateNames)
-    {
-        return _dbContext.BannerTemplates
-            .Where(x => templateNames.Contains(x.TemplateName))
-            .Select(x => new BannerTemplateEntity
-            {
-                Id = x.Id,
-                TemplateName = x.TemplateName,
-                TemplateContent = x.TemplateContent,
-                Variables = x.Variables
-            })
-            .ToList();
     }
 
     public void AddBannerTemplate(AddBannerTemplateReq req)
