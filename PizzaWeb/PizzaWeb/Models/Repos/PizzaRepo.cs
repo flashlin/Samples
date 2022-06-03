@@ -30,13 +30,13 @@ public class PizzaRepo : IPizzaRepo
         return bannerTemplates.Select(BannerTemplate.From).ToList();
     }
 
-    public IQueryable<TemplateBannerJsonSetting> QueryBannerJsonSettingData()
+    public IQueryable<TemplateBannerSetting> QueryBannerJsonSettingData()
     {
         return from tb1 in _dbContext.Banners.AsNoTracking()
             let tb2 = _dbContext.BannerTemplates
                 .AsNoTracking()
                 .FirstOrDefault(x => x.TemplateName == tb1.TemplateName)
-            select new TemplateBannerJsonSetting
+            select new TemplateBannerSetting
             {
                 Id = tb1.Id,
                 TemplateName = tb1.TemplateName,
@@ -47,10 +47,10 @@ public class PizzaRepo : IPizzaRepo
             };
     }
 
-    private IEnumerable<TemplateVariableSetting> QueryTemplateVariablesSettings(TemplateBannerJsonSetting bannerJson)
+    private IEnumerable<TemplateVariableSetting> QueryTemplateVariablesSettings(TemplateBannerSetting banner)
     {
-        return from tb1 in bannerJson.BannerVariables
-            join tb2 in bannerJson.TemplateVariables
+        return from tb1 in banner.BannerVariables
+            join tb2 in banner.TemplateVariables
                 on tb1.VarName equals tb2.VarName
                 into g1
             from tb2 in g1.DefaultIfEmpty(new TemplateVariable()
@@ -119,7 +119,7 @@ public class PizzaRepo : IPizzaRepo
         foreach (var bannerSetting in QueryBannerSettings(banners)) yield return bannerSetting;
     }
 
-    public IEnumerable<BannerSetting> QueryBannerSettings(List<TemplateBannerJsonSetting> banners)
+    public IEnumerable<BannerSetting> QueryBannerSettings(List<TemplateBannerSetting> banners)
     {
         return from banner in banners
             let variables = QueryTemplateVariableOptions(banner)
@@ -133,7 +133,7 @@ public class PizzaRepo : IPizzaRepo
             };
     }
 
-    private IEnumerable<BannerVariable> QueryTemplateVariableOptions(TemplateBannerJsonSetting banner)
+    private IEnumerable<BannerVariable> QueryTemplateVariableOptions(TemplateBannerSetting banner)
     {
         var templateVariablesSettings = this.QueryTemplateVariablesSettings(banner);
         var variableSettings = this.QueryAllVariableSettings(templateVariablesSettings);

@@ -2,7 +2,7 @@ using PizzaWeb.Models.Banner;
 
 namespace PizzaWeb.Models;
 
-public class TemplateBannerJsonSetting
+public class TemplateBannerSetting
 {
     public int Id { get; set; }
     public string TemplateName { get; set; } = String.Empty;
