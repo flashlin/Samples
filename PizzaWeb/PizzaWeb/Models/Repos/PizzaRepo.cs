@@ -152,7 +152,7 @@ public class PizzaRepo : IPizzaRepo
         return variables;
     }
 
-    public void AddBannerTemplate(AddBannerTemplateReq req)
+    public void AddTemplate(AddTemplateReq req)
     {
         _dbContext.BannerTemplates.Add(new BannerTemplateEntity()
         {
@@ -338,7 +338,7 @@ public class GetBannerTemplatesReq
     public int PageSize { get; set; }
 }
 
-public class AddBannerTemplateReq
+public class AddTemplateReq
 {
     public string TemplateName { get; set; } = string.Empty;
     public string TemplateContent { get; set; } = string.Empty;

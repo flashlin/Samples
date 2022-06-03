@@ -22,7 +22,7 @@ namespace PizzaWeb.Controllers
             _pizzaRepo = pizzaRepo;
         }
 
-        public void AddBannerTemplate(AddBannerTemplateReq req)
+        public void AddBannerTemplate(AddTemplateReq req)
         {
             _pizzaRepo.AddBannerTemplate(req);
         }
