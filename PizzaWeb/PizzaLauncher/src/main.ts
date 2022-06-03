@@ -10,6 +10,7 @@ import "./Main.scss";
 
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
+import ConfirmationService from 'primevue/confirmationservice';
 import { useFocus } from './directives/focus';
 
 function program() {
@@ -17,12 +18,11 @@ function program() {
   useFocus(app);
   app.use(PrimeVue);
   app.use(ToastService);
+  app.use(ConfirmationService);
   app.use(createPinia());
   app.use(route);
   app.mount('#app');
-  console.log("started");
 }
 
-console.log("booting");
 program();
 

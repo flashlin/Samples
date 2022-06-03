@@ -32,7 +32,7 @@
         <template #body="slotProps">
           <Button icon="pi pi-save" @click="handleApplyAddTemplate(slotProps)"/>
           &nbsp;
-          <Button icon="pi pi-trash" />
+          <Button icon="pi pi-trash" @click="handleDeleteTemplate(slotProps)" />
         </template>
       </Column>
       <template #footer> In {{ state.indexPage }} Index. </template>
@@ -58,7 +58,8 @@ import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
 import Button from "primevue/button";
 import DataTable from "primevue/datatable";
 import Column, { ColumnSlots } from "primevue/column";
-import { toastInfo } from "@/models/AppToast";
+import { confirmPopup, toastInfo } from "@/models/AppToast";
+import { ColumnRowSlots } from "@/typings/primevue-typings";
 
 const state = reactive({
   isEdit: false,
@@ -90,6 +91,19 @@ async function handleApplyAddTemplate(slotProps: Parameters<ColumnSlots["body"]>
   const template = state.templateList[slotProps.index];
   await api.addTemplateAsync(template);
   toastInfo(`Template '${template.templateName}' added`);
+}
+
+function handleDeleteTemplate(slotProps: ColumnRowSlots) {
+  console.log('de');
+  confirmPopup({
+    message: `Are you sure you want to delete this '${slotProps.data.templateName}' template?`,
+    resolve: () => {
+      console.log("delete");
+    },
+    reject: () => {
+      console.log("delete reject");
+    },
+  });
 }
 
 // const handleAddTemplateVariable = (row: IBannerTemplateData) => {
