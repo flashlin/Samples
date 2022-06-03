@@ -152,7 +152,7 @@ public class PizzaRepo : IPizzaRepo
         return variables;
     }
 
-    public void AddTemplate(AddTemplateReq req)
+    public void AddBannerTemplate(AddTemplateReq req)
     {
         _dbContext.BannerTemplates.Add(new BannerTemplateEntity()
         {

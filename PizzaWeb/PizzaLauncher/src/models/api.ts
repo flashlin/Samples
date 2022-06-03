@@ -1,86 +1,123 @@
+import Axios, { AxiosError, AxiosResponse } from "axios";
+import { toastError } from "./AppToast";
+
 export interface IBannerTemplateEntity {
-   templateName: string;
-   templateContent: string;
-   variables: ITemplateVariable[];
+  templateName: string;
+  templateContent: string;
+  variables: ITemplateVariable[];
 }
 
-export interface ITemplateVariable 
-{
-   varName: string;
-   varType: string;
+export interface ITemplateVariable {
+  varName: string;
+  varType: string;
 }
 
 export interface ITemplateData {
-   id: number;
-   templateName: string;
-   templateContent: string;
-   variables: ITemplateVariable[];
+  id: number;
+  templateName: string;
+  templateContent: string;
+  variables: ITemplateVariable[];
+}
+
+export interface ITemplateVariableDict {
+  [varName: string]: ITemplateVariable;
+}
+
+export interface IAddTemplateData {
+  id: number;
+  templateName: string;
+  templateContent: string;
+  variables: ITemplateVariableDict;
 }
 
 export class GetBannerReq {
-   constructor(data?: Partial<GetBannerReq>)
-   {
-      Object.assign(this, data);
-   }
-   bannerName: string = "";
-   langCode: string = "";
+  constructor(data?: Partial<GetBannerReq>) {
+    Object.assign(this, data);
+  }
+  bannerName: string = "";
+  langCode: string = "";
 }
 
 export interface IGetBannerVariablesReq {
-   templateId: number;
+  templateId: number;
 }
 
 export interface IBannerVariableData {
-   templateId: number;
-   variableName: string;
-   lang: string;
-   resxId: number;
-   resxName: string;
-   resxContent: string;
+  templateId: number;
+  variableName: string;
+  lang: string;
+  resxId: number;
+  resxName: string;
+  resxContent: string;
 }
 
-export class BannerApi 
-{
-   getAllTemplatesAsync(indexPage: number): Promise<ITemplateData[]> {
-      return this.postQueryAsync("banner/getAllTemplates", {
-         indexPage: indexPage,
-         pageSize: 10,
-      }); 
-   }
+export class BannerApi {
+  // let apiUrl = "http://localhost:5129";
+  _axios = Axios.create({
+    baseURL: "",
+    timeout: 1000 * 10,
+  });
 
-   addTemplateAsync(req: ITemplateData): Promise<Response> {
-      return this.postAsync("banner/addTemplate", req);
-   }
+  getAllTemplatesAsync(indexPage: number): Promise<ITemplateData[]> {
+    return this.postQueryAsync("banner/getAllTemplates", {
+      indexPage: indexPage,
+      pageSize: 10,
+    });
+  }
 
-   updateTemplateAsync(req: ITemplateData): Promise<Response> {
-      return this.postAsync("banner/updateTemplate", req);
-   }
+  addTemplateAsync(req: ITemplateData) {
+    let variablesDict = Object.assign(
+      {},
+      ...req.variables.map((x) => ({ [x.varName]: x }))
+    );
+    let templateData = Object.assign({}, req, { variables: variablesDict });
+    return this.postAsync("banner/addTemplate", templateData);
+  }
 
-   getBannerAsync(req: GetBannerReq): Promise<string> {
-      return this.postQueryAsync("banner/getBanner", req);
-   }
+  updateTemplateAsync(req: ITemplateData) {
+    return this.postAsync("banner/updateTemplate", req);
+  }
 
-   getBannerVariables(req: IGetBannerVariablesReq): Promise<IBannerVariableData[]> {
-      return this.postQueryAsync<IBannerVariableData[]>("banner/getBannerVariables", req);
-   }
+  getBannerAsync(req: GetBannerReq): Promise<string> {
+    return this.postQueryAsync("banner/getBanner", req);
+  }
 
-   private async postAsync(url: string, data: any){
-      let apiUrl = "http://localhost:5129";
-      apiUrl = "";
-      let resp = await fetch(`${apiUrl}/api/${url}`,
-      {
-         headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-         },
-         method: "POST",
-         body: JSON.stringify(data),
+  getBannerVariables(
+    req: IGetBannerVariablesReq
+  ): Promise<IBannerVariableData[]> {
+    return this.postQueryAsync<IBannerVariableData[]>(
+      "banner/getBannerVariables",
+      req
+    );
+  }
+
+  private async postAsync(url: string, data: any): Promise<AxiosResponse> {
+    let apiUrl = "http://localhost:5129";
+    apiUrl = "";
+
+    try {
+      const jsonData = JSON.stringify(data);
+      let resp = await this._axios.post(`/api/${url}`, jsonData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      return resp;
-   }
+      return resp.data;
+    } catch (err) {
+      let errorMessage = this.getErrorMessage(err);
+      toastError(errorMessage);
+      throw err;
+    }
+  }
 
-   private async postQueryAsync<T>(url: string, data: any){
-      let resp = await this.postAsync(url, data);
-      return resp.json() as unknown as T;
-   }
+  getErrorMessage(error: unknown) {
+    if (error instanceof Error) return error.message;
+    if (error instanceof AxiosError) return error.message;
+    return String(error);
+  }
+
+  private async postQueryAsync<T>(url: string, data: any) {
+    let resp = await this.postAsync(url, data);
+    return resp as unknown as T;
+  }
 }

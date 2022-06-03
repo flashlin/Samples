@@ -1,6 +1,5 @@
 <template>
   <div>
-    <Toast />
     <!-- <PreviewFrame
       v-on:content="state.previewContent"
       style="{`with:600px; height:300px;`}
@@ -30,8 +29,8 @@
         </template>
       </Column>
       <Column header="Actions">
-        <template #body>
-          <Button icon="pi pi-save" />
+        <template #body="slotProps">
+          <Button icon="pi pi-save" @click="handleApplyAddTemplate(slotProps)"/>
           &nbsp;
           <Button icon="pi pi-trash" />
         </template>
@@ -51,8 +50,6 @@ import {
   ITemplateVariable,
 } from "@/models/Api";
 //import PreviewFrame from "@/components/PreviewFrame";
-//import Editor, { IEditorProxy } from "@/components/Editor";
-
 
 import "primevue/resources/primevue.min.css";
 import "primeicons/primeicons.css";
@@ -60,10 +57,8 @@ import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
 
 import Button from "primevue/button";
 import DataTable from "primevue/datatable";
-import Column from "primevue/column";
-import { useToast } from "primevue/usetoast";
-
-const data = ref([]);
+import Column, { ColumnSlots } from "primevue/column";
+import { toastInfo } from "@/models/AppToast";
 
 const state = reactive({
   isEdit: false,
@@ -80,15 +75,7 @@ const state = reactive({
   previewContent: "",
 });
 
-const toast = useToast();
-function toastInfo(message: string) {
-  toast.add({
-    severity: "info",
-    summary: "Info Message",
-    detail: message,
-    life: 3000,
-  });
-}
+const api = new BannerApi();
 
 function handleAddTemplate() {
   state.templateList.push({
@@ -97,7 +84,12 @@ function handleAddTemplate() {
     templateContent: "<div></div>",
     variables: [],
   });
-  toastInfo("Add empty template");
+}
+
+async function handleApplyAddTemplate(slotProps: Parameters<ColumnSlots["body"]>[0]) {
+  const template = state.templateList[slotProps.index];
+  await api.addTemplateAsync(template);
+  toastInfo(`Template '${template.templateName}' added`);
 }
 
 // const handleAddTemplateVariable = (row: IBannerTemplateData) => {
@@ -127,7 +119,7 @@ function handleAddTemplate() {
 //   state.editingRow.variables.splice(index, 1);
 // };
 
-const api = new BannerApi();
+
 
 // const editor = ref<IEditorProxy>();
 
@@ -144,7 +136,7 @@ const subContent = (content: string): string => {
 
 onMounted(async () => {
   let resp = await api.getAllTemplatesAsync(state.indexPage);
-  //state.templateList = resp;
+  state.templateList = resp;
 });
 
 // const onClickPreview = async () => {
