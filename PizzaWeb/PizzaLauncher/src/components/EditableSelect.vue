@@ -1,4 +1,12 @@
-import { NButton, NDropdown, NInput, NSelect } from "naive-ui";
+<template>
+  <div class="autocomplete">
+    <input @focus="showDropdownList(true)" 
+      @blur="showDropdownList(false)" 
+      value={state.inputValue} />
+  </div>
+</template>
+
+<script setup lang="ts">
 import {
   ComponentPublicInstance,
   defineComponent,
@@ -9,7 +17,7 @@ import {
 } from "vue";
 import "./Editor.scss";
 
-export class EditableSelectOption {
+class EditableSelectOption {
   constructor(data?: Partial<EditableSelectOption>) {
     Object.assign(this, data);
   }
@@ -18,23 +26,23 @@ export class EditableSelectOption {
   disabled: boolean = false;
 }
 
-export interface IEditableSelectExpose {
+interface IEditableSelectExpose {
   getContent(): string;
 }
 
-export interface IEditableSelectProxy
-  extends ComponentPublicInstance,
-    IEditableSelectExpose {}
+// export interface IEditableSelectProxy
+//   extends ComponentPublicInstance,
+//     IEditableSelectExpose {}
 
-export default defineComponent({
-  props: {
+
+const props = defineProps({
     value: { type: String, required: true },
     options: {
       type: Object as PropType<EditableSelectOption[]>,
       required: true,
     },
-  },
-  setup(props, { expose, slots }) {
+});
+
     const state = reactive({
       value: props.value,
       options: props.options,
@@ -56,20 +64,8 @@ export default defineComponent({
       return state.value;
     };
 
-    expose({
+    defineExpose({
       getContent,
     } as IEditableSelectExpose);
 
-    return () => (
-      <div class="autocomplete">
-        <NInput
-          onFocus={() => showDropdownList(true)}
-          onBlur={() => showDropdownList(false)}
-          value={state.inputValue}
-        />
-        <NSelect v-model:options={state.options} onChange={handleSelect} filterable>
-        </NSelect>
-      </div>
-    );
-  },
-});
+</script>

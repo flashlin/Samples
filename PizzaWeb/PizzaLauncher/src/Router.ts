@@ -1,12 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
-import TemplateShelves from "./views/TemplateShelves";
+import TemplateEditor from "./views/TemplateEditor.vue";
 
 const basePath = "/dist/";
 const router = createRouter({
     history: createWebHistory(basePath),
     routes: [
-        {path: "/", component: TemplateShelves },
-        {path: "/temp", component: TemplateShelves },
+        {path: "/", component: TemplateEditor },
     ]
 });
 

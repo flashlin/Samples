@@ -1,6 +1,6 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
-import layout from "./Layout";
+import layout from "./Layout.vue";
 import route from "./Router";
 import "./Main.scss";
 
@@ -8,22 +8,21 @@ import "./Main.scss";
 // import "bootstrap";
 // import 'bootstrap-icons/font/bootstrap-icons.css';
 
-//import { elComponents, elPlugins } from "@/plugins/elementui";
-//import PrimeVue from 'primevue/config';
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+import { useFocus } from './directives/focus';
 
 function program() {
   const app = createApp(layout);
-  // elComponents.forEach(component => {
-  //   app.component(component.name, component);
-  // });
-  // elPlugins.forEach(plugin => {
-  //   app.use(plugin);
-  // });
-  //app.use(PrimeVue);
+  useFocus(app);
+  app.use(PrimeVue);
+  app.use(ToastService);
   app.use(createPinia());
   app.use(route);
   app.mount('#app');
+  console.log("started");
 }
 
+console.log("booting");
 program();
 

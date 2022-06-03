@@ -11,7 +11,7 @@ import {
 import {
   BannerApi,
   GetBannerReq,
-  IBannerTemplateData,
+  ITemplateData,
   IBannerTemplateEntity,
   ITemplateVariable,
 } from "@/models/Api";
@@ -45,10 +45,10 @@ export default defineComponent({
   props: {},
   setup(props, { slots }) {
     const state = reactive({
-      columns: null as null | DataTableColumns<IBannerTemplateData>,
+      columns: null as null | DataTableColumns<ITemplateData>,
       expansionColumns: [] as DataTableColumns<ITemplateVariable>,
       isEdit: false,
-      templateList: [] as IBannerTemplateData[],
+      templateList: [] as ITemplateData[],
       bannerTemplateCheckedList: [] as RowKey[],
       templateVariableOptions: [
         { label: "String", value: "String", disabled: false },
@@ -56,7 +56,7 @@ export default defineComponent({
         { label: "Image(200,100)", value: "Image(200,100)" },
       ],
       templateVariables: [] as ITemplateVariable[],
-      editingRow: null as unknown as IBannerTemplateData,
+      editingRow: null as unknown as ITemplateData,
       expandedRows: [],
       bannerIdSelected: "",
       previewContent: "",
@@ -101,7 +101,7 @@ export default defineComponent({
     ];
 
 
-    const handleApplyBannerTemplate = async (row: IBannerTemplateData) => {
+    const handleApplyBannerTemplate = async (row: ITemplateData) => {
       await api.updateTemplateAsync(row);
       message.info(`Update ${row.templateName} template success`);
     };

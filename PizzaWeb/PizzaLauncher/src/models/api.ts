@@ -1,17 +1,17 @@
 export interface IBannerTemplateEntity {
-   id: string;
+   templateName: string;
    templateContent: string;
-   variablesData: string;
+   variables: ITemplateVariable[];
 }
 
 export interface ITemplateVariable 
 {
-   name: string;
-   fulltype: string;
+   varName: string;
+   varType: string;
 }
 
-export interface IBannerTemplateData {
-   id: string;
+export interface ITemplateData {
+   id: number;
    templateName: string;
    templateContent: string;
    variables: ITemplateVariable[];
@@ -41,11 +41,18 @@ export interface IBannerVariableData {
 
 export class BannerApi 
 {
-   getAllTemplatesAsync(): Promise<IBannerTemplateData[]> {
-      return this.postQueryAsync("banner/getAllTemplates", {}); 
+   getAllTemplatesAsync(indexPage: number): Promise<ITemplateData[]> {
+      return this.postQueryAsync("banner/getAllTemplates", {
+         indexPage: indexPage,
+         pageSize: 10,
+      }); 
    }
 
-   updateTemplateAsync(req: IBannerTemplateData): Promise<Response> {
+   addTemplateAsync(req: ITemplateData): Promise<Response> {
+      return this.postAsync("banner/addTemplate", req);
+   }
+
+   updateTemplateAsync(req: ITemplateData): Promise<Response> {
       return this.postAsync("banner/updateTemplate", req);
    }
 

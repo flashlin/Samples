@@ -1,3 +1,11 @@
+CREATE TABLE [dbo].[StoreShelves]
+(
+    Id [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
+    Title nvarchar(50) NOT NULL,
+    Content nvarchar(1000) NOT NULL,
+    ImageName varchar(100) NOT NULL
+)
+
 CREATE TABLE [dbo].[BannerTemplate]
 (
     [Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,

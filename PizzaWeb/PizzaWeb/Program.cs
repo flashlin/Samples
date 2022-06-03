@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PizzaWeb.Models;
 using PizzaWeb.Models.Banner;
 using PizzaWeb.Models.Helpers;
+using PizzaWeb.Models.Repos;
 using T1.AspNetCore.Extensions;
 using T1.AspNetCore.FileProviders.Virtual;
 
@@ -21,6 +22,7 @@ builder.Services.AddControllersWithViews()
 builder.Services.AddTransient<IJsonConverter, JsonConverter>();
 builder.Services.Configure<PizzaDbConfig>(builder.Configuration.GetSection("DbConfig"));
 builder.Services.AddTransient<IDbContextOptionsFactory, SqlServerDbContextOptionsFactory>();
+builder.Services.AddTransient<IPizzaRepo, PizzaRepo>();
 //builder.Services.AddDbContext<PizzaDbContext>();
 //builder.Services.AddDbContextFactory<PizzaDbContext>();
 builder.Services.AddDbContextPool<PizzaDbContext>(o => 

@@ -24,7 +24,7 @@ export default ({ mode }) => {
     plugins: [
       vue(),
       vueJsx({}),
-      nodeResolve(),
+      //nodeResolve(),
       // AutoImport({
       //   resolvers: [ElementPlusResolver()],
       // }),

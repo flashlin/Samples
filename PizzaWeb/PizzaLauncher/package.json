@@ -17,7 +17,9 @@
 		"bootstrap": "5.0.2",
 		"bootstrap-icons": "^1.8.2",
 		"pinia": "^2.0.0-rc.10",
-		"vue": "^3.0.5",
+		"primeicons": "^5.0.0",
+		"primevue": "^3.12.6",
+		"vue": "^3.2.36",
 		"vue-router": "^4.0.13"
 	},
 	"devDependencies": {
@@ -37,7 +39,6 @@
 		"eslint-plugin-node": "^11.1.0",
 		"eslint-plugin-promise": "^4.3.1",
 		"eslint-plugin-vue": "^7.9.0",
-		"naive-ui": "^2.29.0",
 		"node-sass": "^7.0.1",
 		"rollup": "^2.74.0",
 		"sass": "^1.51.0",
