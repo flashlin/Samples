@@ -1,4 +1,4 @@
-confirmPopupAsync<template>
+<template>
   <div>
     <!-- <PreviewFrame
       v-on:content="state.previewContent"
@@ -38,7 +38,10 @@ confirmPopupAsync<template>
         </Column>
         <Column field="templateContent" header="Content">
           <template #body="slotProps">
-            {{ slotProps.data.templateContent }}
+            {{ subContent(slotProps.data.templateContent) }}
+          </template>
+          <template #editor="slotProps">
+            <Editor v-model="slotProps.data.templateContent" editorStyle="height: 320px"/>
           </template>
         </Column>
         <Column header="Actions">
@@ -131,6 +134,8 @@ import InputText from "primevue/inputtext";
 import AutoComplete, { AutoCompleteCompleteEvent } from "primevue/autocomplete";
 import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
+//import Editor from 'primevue/editor';
+import Editor from "@/components/Editor.vue";
 
 interface IOption 
 {
@@ -234,15 +239,6 @@ function handleAddTemplateVariable(vars: ITemplateVariable[]) {
     varType: "String",
   });
 }
-
-// const handleSelectVariableType = (
-//   row: ITemplateVariable,
-//   value: string,
-//   option: SelectOption
-// ) => {
-//   row.fulltype = value;
-//   message.info("select: " + JSON.stringify(row));
-// };
 
 function handleDeleteVariable(data: any, slotProps: ColumnRowSlots) {
   data.splice(slotProps.index, 1);
