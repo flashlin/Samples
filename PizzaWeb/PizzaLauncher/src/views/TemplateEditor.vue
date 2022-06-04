@@ -5,63 +5,68 @@
       style="{`with:600px; height:300px;`}
     /> -->
 
-    <DataTable
-      :value="state.templateList"
-      dataKey="templateName"
-      v-model:expandedRows="state.expandedRows"
-      @rowExpand="onRowExpand"
-      @rowCollapse="onRowCollapse"
-      :lazy="true"
-      :rowHover="true"
-      responsiveLayout="scroll"
-    >
-      <template #header>
-        <div class="flex justify-content-center align-items-center">
-          <h5 class="m-0">Templates</h5>
-          <span>
-            <Button icon="pi pi-plus" @click="handleAddTemplate" />
+    <BlockUI :blocked="state.isBlocked">
+      <DataTable
+        :value="state.templateList"
+        dataKey="templateName"
+        v-model:expandedRows="state.expandedRows"
+        @rowExpand="onRowExpand"
+        @rowCollapse="onRowCollapse"
+        :lazy="true"
+        :rowHover="true"
+        responsiveLayout="scroll"
+      >
+        <template #header>
+          <div class="flex justify-content-center align-items-center">
+            <h5 class="m-0">Templates</h5>
+            <span>
+              <Button icon="pi pi-plus" @click="handleAddTemplate" />
+              &nbsp;
+              <Button icon="pi pi-refresh" />
+            </span>
+          </div>
+        </template>
+        <Column :expander="true" headerStyle="width: 1rem" />
+        <Column header="Selected"></Column>
+        <Column field="templateName" header="Name"></Column>
+        <Column field="templateContent" header="Content">
+          <template #body="slotProps">
+            {{ slotProps.data.templateContent }}
+          </template>
+        </Column>
+        <Column header="Actions">
+          <template #body="slotProps">
+            <Button
+              icon="pi pi-save"
+              @click="handleApplyAddTemplate(slotProps)"
+            />
             &nbsp;
-            <Button icon="pi pi-refresh" />
-          </span>
-        </div>
-      </template>
-      <Column :expander="true" headerStyle="width: 1rem" />
-      <Column header="Selected"></Column>
-      <Column field="templateName" header="Name"></Column>
-      <Column field="templateContent" header="Content">
-        <template #body="slotProps">
-          {{ slotProps.data.templateContent }}
+            <Button
+              icon="pi pi-trash"
+              @click="handleDeleteTemplate(slotProps)"
+            />
+          </template>
+        </Column>
+        <template #footer> In {{ state.indexPage }} Index. </template>
+        <template #expansion="slotProps">
+          <div class="orders-subtable">
+            <h5>Orders for {{ slotProps.data.templateName }}</h5>
+            <DataTable
+              :value="slotProps.data.variables"
+              responsiveLayout="scroll"
+            >
+              <Column field="varName" header="name" sortable></Column>
+              <Column field="varType" header="type"></Column>
+              <Column headerStyle="width:4rem">
+                <template #body>
+                  <Button icon="pi pi-search" />
+                </template>
+              </Column>
+            </DataTable>
+          </div>
         </template>
-      </Column>
-      <Column header="Actions">
-        <template #body="slotProps">
-          <Button
-            icon="pi pi-save"
-            @click="handleApplyAddTemplate(slotProps)"
-          />
-          &nbsp;
-          <Button icon="pi pi-trash" @click="handleDeleteTemplate(slotProps)" />
-        </template>
-      </Column>
-      <template #footer> In {{ state.indexPage }} Index. </template>
-      <template #expansion="slotProps">
-        <div class="orders-subtable">
-          <h5>Orders for {{ slotProps.data.templateName }}</h5>
-          <DataTable
-            :value="slotProps.data.variables"
-            responsiveLayout="scroll"
-          >
-            <Column field="varName" header="name" sortable></Column>
-            <Column field="varType" header="type"></Column>
-            <Column headerStyle="width:4rem">
-              <template #body>
-                <Button icon="pi pi-search" />
-              </template>
-            </Column>
-          </DataTable>
-        </div>
-      </template>
-    </DataTable>
+      </DataTable>
+    </BlockUI>
   </div>
 </template>
 
@@ -75,7 +80,7 @@ import {
   ITemplateVariable,
 } from "@/models/Api";
 //import PreviewFrame from "@/components/PreviewFrame";
-
+import BlockUI from "primevue/blockui";
 import Button from "primevue/button";
 import DataTable, {
   DataTableRowCollapseEvent,
@@ -88,6 +93,7 @@ import { ColumnRowSlots } from "@/typings/primevue-typings";
 const state = reactive({
   isEdit: false,
   indexPage: 0,
+  isBlocked: false,
   templateList: [] as ITemplateData[],
   templateVariableOptions: [
     { label: "String", value: "String", disabled: false },
@@ -192,8 +198,10 @@ const subContent = (content: string): string => {
 };
 
 onMounted(async () => {
+  state.isBlocked = true;
   let resp = await api.getAllTemplatesAsync(state.indexPage);
   state.templateList = resp;
+  state.isBlocked = false;
 });
 
 // const onClickPreview = async () => {
