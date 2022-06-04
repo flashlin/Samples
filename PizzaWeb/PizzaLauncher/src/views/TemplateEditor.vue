@@ -72,9 +72,7 @@ confirmPopupAsync<template>
                   <span>
                     <Button
                       icon="pi pi-plus"
-                      @click="
-                        handleAddTemplateVariable(slotProps.data.variables)
-                      "
+                      @click="handleAddTemplateVariable(slotProps.data.variables)"
                     />
                     &nbsp;
                     <Button icon="pi pi-refresh" />
@@ -86,7 +84,15 @@ confirmPopupAsync<template>
                   <InputText v-model="slotProps.data.varName" autofocus />
                 </template>
               </Column>
-              <Column field="varType" header="type"></Column>
+              <Column field="varType" header="type">
+                <template #editor="slotProps">
+                  <AutoComplete v-model="slotProps.data.varType" 
+                    :suggestions="state.filteredVarTypes"
+                    @complete="handleSearchVarType($event)"
+                    field="label"
+                    :dropdown="true" />
+                </template>
+              </Column>
               <Column headerStyle="width:4rem">
                 <template #body="slotProps">
                   <Button
@@ -122,8 +128,15 @@ import DataTable, {
 } from "primevue/datatable";
 import Column, { ColumnSlots } from "primevue/column";
 import InputText from "primevue/inputtext";
+import AutoComplete, { AutoCompleteCompleteEvent } from "primevue/autocomplete";
 import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
+
+interface IOption 
+{
+  label: string;
+  value: string;
+}
 
 const state = reactive({
   isEdit: false,
@@ -131,12 +144,12 @@ const state = reactive({
   isBlocked: false,
   templateList: [] as ITemplateData[],
   templateVariableOptions: [
-    { label: "String", value: "String", disabled: false },
-    { label: "Url(production)", value: "Url(production)", disabled: false },
+    { label: "String", value: "String" },
+    { label: "Url(production)", value: "Url(production)" },
     { label: "Image(200,100)", value: "Image(200,100)" },
-  ],
-  editingRow: null as unknown as ITemplateData,
+  ] as IOption[],
   expandedRows: [] as ITemplateVariable[],
+  filteredVarTypes: [] as IOption[],
   bannerIdSelected: "",
   previewContent: "",
 });
@@ -146,6 +159,19 @@ const api = new BannerApi();
 function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
   let { data, newValue, field } = event;
   data[field] = newValue;
+}
+
+function handleSearchVarType(event: AutoCompleteCompleteEvent){
+  setTimeout(() => {
+    if (!event.query.trim().length) {
+      state.filteredVarTypes = [...state.templateVariableOptions];
+    }
+    else {
+      state.filteredVarTypes = state.templateVariableOptions.filter((item) => {
+        return item.label.toLowerCase().startsWith(event.query.toLowerCase());
+      });
+    }
+  }, 250);
 }
 
 function handleAddTemplate() {
