@@ -343,17 +343,3 @@ public class PizzaRepo : IPizzaRepo
 		conn.Execute(sql, param);
 	}
 }
-
-public class GetBannerTemplatesReq
-{
-	public int Index { get; set; }
-	public int PageSize { get; set; }
-}
-
-public class UpdateTemplateData
-{
-	public int Id { get; set; }
-	public string TemplateName { get; set; } = string.Empty;
-	public string TemplateContent { get; set; } = string.Empty;
-	public Dictionary<string, TemplateVariable> Variables { get; set; } = new Dictionary<string, TemplateVariable>();
-}
