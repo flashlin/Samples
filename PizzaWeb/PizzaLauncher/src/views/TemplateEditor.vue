@@ -25,7 +25,7 @@ confirmPopupAsync<template>
             <span>
               <Button icon="pi pi-plus" @click="handleAddTemplate" />
               &nbsp;
-              <Button icon="pi pi-refresh" />
+              <Button icon="pi pi-refresh" @click="reloadAsync"/>
             </span>
           </div>
         </template>
@@ -94,10 +94,10 @@ confirmPopupAsync<template>
                 </template>
               </Column>
               <Column headerStyle="width:4rem">
-                <template #body="slotProps">
+                <template #body="varSlotProps">
                   <Button
                     icon="pi pi-trash"
-                    @click="handleDeleteVariable(slotProps)"
+                    @click="handleDeleteVariable(slotProps.data.variables, varSlotProps)"
                   />
                 </template>
               </Column>
@@ -156,6 +156,13 @@ const state = reactive({
 
 const api = new BannerApi();
 
+const reloadAsync = async () => {
+  state.isBlocked = true;
+  let resp = await api.getAllTemplatesAsync(state.indexPage);
+  state.templateList = resp;
+  state.isBlocked = false;
+}
+
 function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
   let { data, newValue, field } = event;
   data[field] = newValue;
@@ -192,6 +199,7 @@ async function handleApplyAddTemplate(slotProps: ColumnRowSlots) {
     await api.updateTemplateAsync(template);
     toastInfo(`Template '${template.templateName}' updated`);
   }
+  reloadAsync();
 }
 
 async function handleDeleteTemplate(slotProps: ColumnRowSlots) {
@@ -236,9 +244,8 @@ function handleAddTemplateVariable(vars: ITemplateVariable[]) {
 //   message.info("select: " + JSON.stringify(row));
 // };
 
-function handleDeleteVariable(slotProps: ColumnRowSlots) {
-  console.log("dele", slotProps.data, state.expandedRows);
-  slotProps.data.splice(slotProps.index, 1);
+function handleDeleteVariable(data: any, slotProps: ColumnRowSlots) {
+  data.splice(slotProps.index, 1);
 }
 
 // const editor = ref<IEditorProxy>();
@@ -254,11 +261,8 @@ const subContent = (content: string): string => {
   return content.substring(0, maxLength) + "...";
 };
 
-onMounted(async () => {
-  state.isBlocked = true;
-  let resp = await api.getAllTemplatesAsync(state.indexPage);
-  state.templateList = resp;
-  state.isBlocked = false;
+onMounted(() => {
+  reloadAsync();
 });
 
 // const onClickPreview = async () => {
