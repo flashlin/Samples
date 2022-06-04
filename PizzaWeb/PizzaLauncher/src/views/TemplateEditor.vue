@@ -157,9 +157,7 @@ function handleAddTemplate() {
   });
 }
 
-async function handleApplyAddTemplate(
-  slotProps: Parameters<ColumnSlots["body"]>[0]
-) {
+async function handleApplyAddTemplate(slotProps: ColumnRowSlots) {
   const template = state.templateList[slotProps.index];
   if (template.id === 0) {
     await api.addTemplateAsync(template);
