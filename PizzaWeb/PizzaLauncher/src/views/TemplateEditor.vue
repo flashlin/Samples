@@ -9,6 +9,9 @@ confirmPopupAsync<template>
       <DataTable
         :value="state.templateList"
         dataKey="templateName"
+        editMode="cell"
+        class="editable-cells-table"
+        @cell-edit-complete="handleCellEditComplete"
         v-model:expandedRows="state.expandedRows"
         @rowExpand="onRowExpand"
         @rowCollapse="onRowCollapse"
@@ -28,7 +31,11 @@ confirmPopupAsync<template>
         </template>
         <Column :expander="true" headerStyle="width: 1rem" />
         <Column header="Selected"></Column>
-        <Column field="templateName" header="Name"></Column>
+        <Column field="templateName" header="Name">
+          <template #editor="slotProps">
+            <InputText v-model="slotProps.data.templateName" autofocus />
+          </template>
+        </Column>
         <Column field="templateContent" header="Content">
           <template #body="slotProps">
             {{ slotProps.data.templateContent }}
@@ -55,11 +62,29 @@ confirmPopupAsync<template>
               :value="slotProps.data.variables"
               responsiveLayout="scroll"
             >
+              <template #header>
+                <div class="flex justify-content-center align-items-center">
+                  <h5 class="m-0">Variables</h5>
+                  <span>
+                    <Button
+                      icon="pi pi-plus"
+                      @click="
+                        handleAddTemplateVariable(slotProps.data.variables)
+                      "
+                    />
+                    &nbsp;
+                    <Button icon="pi pi-refresh" />
+                  </span>
+                </div>
+              </template>
               <Column field="varName" header="name" sortable></Column>
               <Column field="varType" header="type"></Column>
               <Column headerStyle="width:4rem">
-                <template #body>
-                  <Button icon="pi pi-search" />
+                <template #body="slotProps">
+                  <Button
+                    icon="pi pi-trash"
+                    @click="handleDeleteVariable(slotProps)"
+                  />
                 </template>
               </Column>
             </DataTable>
@@ -83,9 +108,12 @@ import {
 import BlockUI from "primevue/blockui";
 import Button from "primevue/button";
 import DataTable, {
+DataTableCellEditCompleteEvent,
   DataTableRowCollapseEvent,
-  DataTableRowExpandEvent } from "primevue/datatable";
+  DataTableRowExpandEvent,
+} from "primevue/datatable";
 import Column, { ColumnSlots } from "primevue/column";
+import InputText from "primevue/inputtext";
 import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
 
@@ -100,17 +128,22 @@ const state = reactive({
     { label: "Image(200,100)", value: "Image(200,100)" },
   ],
   editingRow: null as unknown as ITemplateData,
-  expandedRows: [],
+  expandedRows: [] as ITemplateVariable[],
   bannerIdSelected: "",
   previewContent: "",
 });
 
 const api = new BannerApi();
 
+function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
+  let { data, newValue, field } = event;
+  data[field] = newValue;
+}
+
 function handleAddTemplate() {
   state.templateList.push({
     id: 0,
-    templateName: "templateName",
+    templateName: "unknown",
     templateContent: "<div></div>",
     variables: [],
   });
@@ -130,35 +163,37 @@ async function handleApplyAddTemplate(
 }
 
 async function handleDeleteTemplate(slotProps: ColumnRowSlots) {
-  let resp = await confirmPopupAsync(`Are you sure you want to delete this '${slotProps.data.templateName}' template?`);
-  if( resp ) {
-      let templateName = slotProps.data.templateName;
-      await api.deleteTemplateAsync(templateName);
-      let resp = await api.getAllTemplatesAsync(state.indexPage);
-      state.templateList = resp;
-      toastInfo(`Delete ${templateName} Template Success`);
-      return;
+  let resp = await confirmPopupAsync(
+    `Are you sure you want to delete this '${slotProps.data.templateName}' template?`
+  );
+  if (resp) {
+    let templateName = slotProps.data.templateName;
+    await api.deleteTemplateAsync(templateName);
+    let resp = await api.getAllTemplatesAsync(state.indexPage);
+    state.templateList = resp;
+    toastInfo(`Delete ${templateName} Template Success`);
+    return;
   }
   let templateName = slotProps.data.templateName;
   toastInfo(`Cancel Delete ${templateName} Template`);
 }
 
 function onRowExpand(event: DataTableRowExpandEvent) {
-  console.log("expand", event.data);
-  //state.expandedRows = event.data.variables;
+  let data = event.data as any as ITemplateData;
+  //state.expandedRows = data.variables;
+  console.log("rowExpand", data);
 }
 
 function onRowCollapse(event: DataTableRowCollapseEvent) {
-  state.expandedRows = [];
+  //state.expandedRows = [];
 }
 
-// const handleAddTemplateVariable = (row: IBannerTemplateData) => {
-//   state.editingRow = row;
-//   row.variables.push({
-//     name: "",
-//     fulltype: "String",
-//   });
-// };
+function handleAddTemplateVariable(vars: ITemplateVariable[]) {
+  vars.push({
+    varName: "unknown",
+    varType: "String",
+  });
+}
 
 // const handleSelectVariableType = (
 //   row: ITemplateVariable,
@@ -169,15 +204,10 @@ function onRowCollapse(event: DataTableRowCollapseEvent) {
 //   message.info("select: " + JSON.stringify(row));
 // };
 
-// const handleApplyBannerTemplate = async (row: IBannerTemplateData) => {
-//   await api.updateTemplateAsync(row);
-//   message.info(`Update ${row.templateName} template success`);
-// };
-
-// const handleDeleteTemplateVariable = (row: ITemplateVariable) => {
-//   const index = state.editingRow.variables.indexOf(row);
-//   state.editingRow.variables.splice(index, 1);
-// };
+function handleDeleteVariable(slotProps: ColumnRowSlots) {
+  console.log("dele", slotProps.data, state.expandedRows);
+  slotProps.data.splice(slotProps.index, 1);
+}
 
 // const editor = ref<IEditorProxy>();
 
