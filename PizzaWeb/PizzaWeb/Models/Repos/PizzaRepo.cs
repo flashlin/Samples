@@ -152,24 +152,24 @@ public class PizzaRepo : IPizzaRepo
 		return variables;
 	}
 
-	public void AddBannerTemplate(UpdateTemplateData data)
+	public void AddBannerTemplate(TemplateData data)
 	{
 		_dbContext.BannerTemplates.Add(new BannerTemplateEntity()
 		{
 			TemplateName = data.TemplateName,
 			TemplateContent = data.TemplateContent,
-			Variables = data.Variables.Values.ToList(),
+			Variables = data.Variables,
 			LastModifiedTime = DateTime.UtcNow
 		});
 		_dbContext.SaveChanges();
 	}
 
-	public void UpdateBannerTemplate(UpdateTemplateData data)
+	public void UpdateBannerTemplate(TemplateData data)
 	{
 		var bannerTemplate = _dbContext.BannerTemplates.Find(data.Id)!;
 		bannerTemplate.LastModifiedTime = DateTime.Now;
 		bannerTemplate.TemplateContent = data.TemplateContent;
-		bannerTemplate.Variables = data.Variables.Values.ToList();
+		bannerTemplate.Variables = data.Variables;
 		_dbContext.BannerTemplates.Update(bannerTemplate);
 		_dbContext.SaveChanges();
 	}

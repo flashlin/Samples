@@ -327,14 +327,14 @@ namespace TestProject
 
         private void WhenAddTemplate()
         {
-            _bannerController.AddTemplate(new UpdateTemplateData()
+            _bannerController.AddTemplate(new TemplateData()
             {
                 TemplateName = "Template1",
                 TemplateContent = "Hello Banner",
-                Variables = new Dictionary<string, TemplateVariable>()
+                Variables = new List<TemplateVariable>()
                 {
-                    {"image", new TemplateVariable {VarName = "image", VarType = "Image(100,200)"}},
-                    {"title", new TemplateVariable {VarName = "title", VarType = "String"}},
+                    new TemplateVariable {VarName = "image", VarType = "Image(100,200)"},
+                    new TemplateVariable {VarName = "title", VarType = "String"},
                 }
             });
         }

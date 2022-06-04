@@ -22,13 +22,13 @@ namespace PizzaWeb.Controllers
             _pizzaRepo = pizzaRepo;
         }
 
-        public void AddTemplate(UpdateTemplateData data)
+        public void AddTemplate(TemplateData data)
         {
             _pizzaRepo.AddBannerTemplate(data);
         }
 
         [HttpPost]
-        public void UpdateTemplate(UpdateTemplateData data)
+        public void UpdateTemplate(TemplateData data)
         {
             _pizzaRepo.UpdateBannerTemplate(data);
         }
