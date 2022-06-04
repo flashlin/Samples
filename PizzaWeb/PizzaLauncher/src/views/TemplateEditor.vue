@@ -60,6 +60,10 @@ confirmPopupAsync<template>
             <h5>Orders for {{ slotProps.data.templateName }}</h5>
             <DataTable
               :value="slotProps.data.variables"
+              dataKey="varName"
+              editMode="cell"
+              @cell-edit-complete="handleCellEditComplete"
+              class="editable-cells-table"
               responsiveLayout="scroll"
             >
               <template #header>
@@ -77,7 +81,11 @@ confirmPopupAsync<template>
                   </span>
                 </div>
               </template>
-              <Column field="varName" header="name" sortable></Column>
+              <Column field="varName" header="name" sortable>
+                <template #editor="slotProps">
+                  <InputText v-model="slotProps.data.varName" autofocus />
+                </template>
+              </Column>
               <Column field="varType" header="type"></Column>
               <Column headerStyle="width:4rem">
                 <template #body="slotProps">
@@ -108,7 +116,7 @@ import {
 import BlockUI from "primevue/blockui";
 import Button from "primevue/button";
 import DataTable, {
-DataTableCellEditCompleteEvent,
+  DataTableCellEditCompleteEvent,
   DataTableRowCollapseEvent,
   DataTableRowExpandEvent,
 } from "primevue/datatable";
