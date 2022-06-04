@@ -1,4 +1,4 @@
-<template>
+confirmPopupAsync<template>
   <div>
     <!-- <PreviewFrame
       v-on:content="state.previewContent"
@@ -84,10 +84,9 @@ import BlockUI from "primevue/blockui";
 import Button from "primevue/button";
 import DataTable, {
   DataTableRowCollapseEvent,
-  DataTableRowExpandEvent,
-} from "primevue/datatable";
+  DataTableRowExpandEvent } from "primevue/datatable";
 import Column, { ColumnSlots } from "primevue/column";
-import { confirmPopup, toastInfo } from "@/models/AppToast";
+import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
 
 const state = reactive({
@@ -130,22 +129,18 @@ async function handleApplyAddTemplate(
   }
 }
 
-function handleDeleteTemplate(slotProps: ColumnRowSlots) {
-  console.log("de");
-  confirmPopup({
-    message: `Are you sure you want to delete this '${slotProps.data.templateName}' template?`,
-    resolve: async () => {
+async function handleDeleteTemplate(slotProps: ColumnRowSlots) {
+  let resp = await confirmPopupAsync(`Are you sure you want to delete this '${slotProps.data.templateName}' template?`);
+  if( resp ) {
       let templateName = slotProps.data.templateName;
       await api.deleteTemplateAsync(templateName);
       let resp = await api.getAllTemplatesAsync(state.indexPage);
       state.templateList = resp;
       toastInfo(`Delete ${templateName} Template Success`);
-    },
-    reject: () => {
-      let templateName = slotProps.data.templateName;
-      toastInfo(`Cancel Delete ${templateName} Template`);
-    },
-  });
+      return;
+  }
+  let templateName = slotProps.data.templateName;
+  toastInfo(`Cancel Delete ${templateName} Template`);
 }
 
 function onRowExpand(event: DataTableRowExpandEvent) {

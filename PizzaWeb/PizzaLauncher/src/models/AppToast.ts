@@ -24,6 +24,17 @@ export interface IConfirm {
   resolve: () => void;
   reject: () => void;
 }
-export function confirmPopup(req: IConfirm) {
-  emitter.emit("confirm", req);
+
+export function confirmPopupAsync(message: string) {
+  return new Promise<boolean>((resolve, reject) => {
+    emitter.emit("confirm", {
+      message: message,
+      resolve: async () => {
+        resolve(true);
+      },
+      reject: () => {
+        reject(false);
+      },
+    });
+  });
 }
