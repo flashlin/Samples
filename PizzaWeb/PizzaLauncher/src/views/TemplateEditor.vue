@@ -7,6 +7,10 @@
 
     <DataTable
       :value="state.templateList"
+      dataKey="templateName"
+      v-model:expandedRows="state.expandedRows"
+      @rowExpand="onRowExpand"
+      @rowCollapse="onRowCollapse"
       :lazy="true"
       :rowHover="true"
       responsiveLayout="scroll"
@@ -22,6 +26,7 @@
         </div>
       </template>
       <Column header="Selected"></Column>
+      <Column :expander="true" headerStyle="width: 3rem" />
       <Column field="templateName" header="Name"></Column>
       <Column field="templateContent" header="Content">
         <template #body="slotProps">
@@ -30,12 +35,32 @@
       </Column>
       <Column header="Actions">
         <template #body="slotProps">
-          <Button icon="pi pi-save" @click="handleApplyAddTemplate(slotProps)"/>
+          <Button
+            icon="pi pi-save"
+            @click="handleApplyAddTemplate(slotProps)"
+          />
           &nbsp;
           <Button icon="pi pi-trash" @click="handleDeleteTemplate(slotProps)" />
         </template>
       </Column>
       <template #footer> In {{ state.indexPage }} Index. </template>
+      <template #expansion="slotProps">
+        <div class="orders-subtable">
+          <h5>Orders for {{ slotProps.data.templateName }}</h5>
+          <DataTable
+            :value="slotProps.data.variables"
+            responsiveLayout="scroll"
+          >
+            <Column field="varName" header="name" sortable></Column>
+            <Column field="varType" header="type"></Column>
+            <Column headerStyle="width:4rem">
+              <template #body>
+                <Button icon="pi pi-search" />
+              </template>
+            </Column>
+          </DataTable>
+        </div>
+      </template>
     </DataTable>
   </div>
 </template>
@@ -56,7 +81,10 @@ import "primeicons/primeicons.css";
 import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
 
 import Button from "primevue/button";
-import DataTable from "primevue/datatable";
+import DataTable, {
+  DataTableRowCollapseEvent,
+  DataTableRowExpandEvent,
+} from "primevue/datatable";
 import Column, { ColumnSlots } from "primevue/column";
 import { confirmPopup, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
@@ -87,19 +115,28 @@ function handleAddTemplate() {
   });
 }
 
-async function handleApplyAddTemplate(slotProps: Parameters<ColumnSlots["body"]>[0]) {
+async function handleApplyAddTemplate(
+  slotProps: Parameters<ColumnSlots["body"]>[0]
+) {
   const template = state.templateList[slotProps.index];
-  await api.addTemplateAsync(template);
-  toastInfo(`Template '${template.templateName}' added`);
+  if (template.id === 0) {
+    await api.addTemplateAsync(template);
+    toastInfo(`Template '${template.templateName}' added`);
+  } else {
+    await api.updateTemplateAsync(template);
+    toastInfo(`Template '${template.templateName}' updated`);
+  }
 }
 
 function handleDeleteTemplate(slotProps: ColumnRowSlots) {
-  console.log('de');
+  console.log("de");
   confirmPopup({
     message: `Are you sure you want to delete this '${slotProps.data.templateName}' template?`,
     resolve: async () => {
       let templateName = slotProps.data.templateName;
       await api.deleteTemplateAsync(templateName);
+      let resp = await api.getAllTemplatesAsync(state.indexPage);
+      state.templateList = resp;
       toastInfo(`Delete ${templateName} Template Success`);
     },
     reject: () => {
@@ -107,6 +144,15 @@ function handleDeleteTemplate(slotProps: ColumnRowSlots) {
       toastInfo(`Cancel Delete ${templateName} Template`);
     },
   });
+}
+
+function onRowExpand(event: DataTableRowExpandEvent) {
+  console.log("expand", event.data);
+  //state.expandedRows = event.data.variables;
+}
+
+function onRowCollapse(event: DataTableRowCollapseEvent) {
+  state.expandedRows = [];
 }
 
 // const handleAddTemplateVariable = (row: IBannerTemplateData) => {
@@ -135,8 +181,6 @@ function handleDeleteTemplate(slotProps: ColumnRowSlots) {
 //   const index = state.editingRow.variables.indexOf(row);
 //   state.editingRow.variables.splice(index, 1);
 // };
-
-
 
 // const editor = ref<IEditorProxy>();
 

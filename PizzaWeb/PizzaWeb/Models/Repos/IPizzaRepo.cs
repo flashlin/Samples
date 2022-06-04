@@ -7,9 +7,9 @@ public interface IPizzaRepo
 {
     List<BannerTemplate> GetBannerTemplates(GetBannerTemplatesReq req);
     List<BannerSetting> GetBannersSetting(GetBannersSettingReq req);
-    void AddBannerTemplate(AddTemplateReq req);
+    void AddBannerTemplate(UpdateTemplateData data);
     void AddBanner(AddBannerReq req);
-    void UpdateBannerTemplate(BannerTemplate req);
+    void UpdateBannerTemplate(UpdateTemplateData data);
     List<BannerTemplateEntity> GetTemplateContents(string[] templateNames);
     void ApplyBanner(string bannerName);
     List<BannerTemplateData> GetBannersData(GetBannersDataReq req);

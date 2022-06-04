@@ -152,15 +152,25 @@ public class PizzaRepo : IPizzaRepo
 		return variables;
 	}
 
-	public void AddBannerTemplate(AddTemplateReq req)
+	public void AddBannerTemplate(UpdateTemplateData data)
 	{
 		_dbContext.BannerTemplates.Add(new BannerTemplateEntity()
 		{
-			TemplateName = req.TemplateName,
-			TemplateContent = req.TemplateContent,
-			Variables = req.Variables.Values.ToList(),
+			TemplateName = data.TemplateName,
+			TemplateContent = data.TemplateContent,
+			Variables = data.Variables.Values.ToList(),
 			LastModifiedTime = DateTime.UtcNow
 		});
+		_dbContext.SaveChanges();
+	}
+
+	public void UpdateBannerTemplate(UpdateTemplateData data)
+	{
+		var bannerTemplate = _dbContext.BannerTemplates.Find(data.Id)!;
+		bannerTemplate.LastModifiedTime = DateTime.Now;
+		bannerTemplate.TemplateContent = data.TemplateContent;
+		bannerTemplate.Variables = data.Variables.Values.ToList();
+		_dbContext.BannerTemplates.Update(bannerTemplate);
 		_dbContext.SaveChanges();
 	}
 
@@ -174,16 +184,6 @@ public class PizzaRepo : IPizzaRepo
 			VariableOptions = req.VariablesOptions.Values.ToList(),
 			LastModifiedTime = DateTime.UtcNow
 		});
-		_dbContext.SaveChanges();
-	}
-
-	public void UpdateBannerTemplate(BannerTemplate req)
-	{
-		var bannerTemplate = _dbContext.BannerTemplates.Find(req.Id)!;
-		bannerTemplate.LastModifiedTime = DateTime.Now;
-		bannerTemplate.TemplateContent = req.TemplateContent;
-		bannerTemplate.Variables = req.Variables;
-		_dbContext.BannerTemplates.Update(bannerTemplate);
 		_dbContext.SaveChanges();
 	}
 
@@ -350,8 +350,9 @@ public class GetBannerTemplatesReq
 	public int PageSize { get; set; }
 }
 
-public class AddTemplateReq
+public class UpdateTemplateData
 {
+	public int Id { get; set; }
 	public string TemplateName { get; set; } = string.Empty;
 	public string TemplateContent { get; set; } = string.Empty;
 	public Dictionary<string, TemplateVariable> Variables { get; set; } = new Dictionary<string, TemplateVariable>();

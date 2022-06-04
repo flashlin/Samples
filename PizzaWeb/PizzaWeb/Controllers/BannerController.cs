@@ -22,9 +22,15 @@ namespace PizzaWeb.Controllers
             _pizzaRepo = pizzaRepo;
         }
 
-        public void AddTemplate(AddTemplateReq req)
+        public void AddTemplate(UpdateTemplateData data)
         {
-            _pizzaRepo.AddBannerTemplate(req);
+            _pizzaRepo.AddBannerTemplate(data);
+        }
+
+        [HttpPost]
+        public void UpdateTemplate(UpdateTemplateData data)
+        {
+            _pizzaRepo.UpdateBannerTemplate(data);
         }
 
         public void DeleteTemplate([FromBody] string templateName)
@@ -45,12 +51,6 @@ namespace PizzaWeb.Controllers
         public List<BannerSetting> GetBannerSettings(GetBannersSettingReq req)
         {
             return _pizzaRepo.GetBannersSetting(req);
-        }
-
-        [HttpPost]
-        public void UpdateTemplate(BannerTemplate req)
-        {
-            _pizzaRepo.UpdateBannerTemplate(req);
         }
 
         public async Task<string> GetBanner(GetBannersDataReq req)

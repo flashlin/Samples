@@ -327,7 +327,7 @@ namespace TestProject
 
         private void WhenAddTemplate()
         {
-            _bannerController.AddTemplate(new AddTemplateReq()
+            _bannerController.AddTemplate(new UpdateTemplateData()
             {
                 TemplateName = "Template1",
                 TemplateContent = "Hello Banner",
