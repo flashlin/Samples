@@ -66,12 +66,7 @@ export class BannerApi {
   }
 
   addTemplateAsync(req: ITemplateData) {
-    let variablesDict = Object.assign(
-      {},
-      ...req.variables.map((x) => ({ [x.varName]: x }))
-    );
-    let templateData = Object.assign({}, req, { variables: variablesDict });
-    return this.postAsync("banner/addTemplate", templateData);
+    return this.postAsync("banner/addTemplate", req);
   }
 
   deleteTemplateAsync(templateName: string) {

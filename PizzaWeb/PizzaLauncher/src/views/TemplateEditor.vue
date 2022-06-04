@@ -25,8 +25,8 @@
           </span>
         </div>
       </template>
+      <Column :expander="true" headerStyle="width: 1rem" />
       <Column header="Selected"></Column>
-      <Column :expander="true" headerStyle="width: 3rem" />
       <Column field="templateName" header="Name"></Column>
       <Column field="templateContent" header="Content">
         <template #body="slotProps">
@@ -75,10 +75,6 @@ import {
   ITemplateVariable,
 } from "@/models/Api";
 //import PreviewFrame from "@/components/PreviewFrame";
-
-import "primevue/resources/primevue.min.css";
-import "primeicons/primeicons.css";
-import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
 
 import Button from "primevue/button";
 import DataTable, {

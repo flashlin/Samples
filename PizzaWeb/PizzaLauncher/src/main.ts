@@ -2,11 +2,16 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import layout from "./Layout.vue";
 import route from "./Router";
-import "./Main.scss";
+//import "./Main.scss";
 
 // import "bootstrap/dist/css/bootstrap.min.css";
 // import "bootstrap";
 // import 'bootstrap-icons/font/bootstrap-icons.css';
+
+//import "primevue/resources/themes/bootstrap4-dark-blue/theme.css";
+import 'primevue/resources/themes/bootstrap4-light-blue/theme.css'
+import "primevue/resources/primevue.min.css";
+import "primeicons/primeicons.css";
 
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
