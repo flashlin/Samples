@@ -195,6 +195,62 @@ namespace TestProject
                 }.ToExpectedObject()
                 .ShouldEqual(banners[1].Variables[0]);
         }
+        
+        
+        [Test]
+        public void GetBannerSettingsWithoutVariableOptions()
+        {
+            GivenServiceLocator();
+            GivenBannerController();
+
+            WhenAddTemplate();
+            WhenAddBannerWithoutVariableOptions("Template1", "Mother Day");
+            WhenAddBannerWithoutVariableOptions("Template1", "Father Day");
+            WhenAddResx();
+
+            var banners = _bannerController.GetBannerSettings(new GetBannersSettingReq()
+            {
+                TemplateName = "Template1"
+            });
+
+            new BannerVariable
+                {
+                    VarName = "image",
+                    VarType = "Image(100,200)",
+                    ResxName = "",
+                    ResxList = new List<VariableResx>()
+                }.ToExpectedObject()
+                .ShouldEqual(banners[0].Variables[0]);
+
+            new BannerVariable
+                {
+                    VarName = "title",
+                    VarType = "String",
+                    ResxName = "",
+                    ResxList = new List<VariableResx>()
+                }
+                .ToExpectedObject()
+                .ShouldEqual(banners[0].Variables[1]);
+
+            new BannerVariable
+                {
+                    VarName = "image",
+                    VarType = "Image(100,200)",
+                    ResxName = "",
+                    ResxList = new List<VariableResx>()
+                }.ToExpectedObject()
+                .ShouldEqual(banners[1].Variables[0]);
+            
+            new BannerVariable
+                {
+                    VarName = "title",
+                    VarType = "String",
+                    ResxName = "",
+                    ResxList = new List<VariableResx>()
+                }
+                .ToExpectedObject()
+                .ShouldEqual(banners[1].Variables[1]);
+        }
 
         [Test]
         public void ApplyBanners()
@@ -311,6 +367,18 @@ namespace TestProject
                 }
             });
         }
+        
+
+        private void WhenAddBannerWithoutVariableOptions(string templateName, string bannerName)
+        {
+            _bannerController.AddBanner(new AddBannerReq()
+            {
+                TemplateName = templateName,
+                BannerName = bannerName,
+                OrderId = 1,
+            });
+        }
+        
 
         private EquivalencyAssertionOptions<BannerTemplateData> ExcludeProperties(
             EquivalencyAssertionOptions<BannerTemplateData> options)

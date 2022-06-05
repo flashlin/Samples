@@ -204,5 +204,4 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "./VariableOptionEditor.scss";
 </style>

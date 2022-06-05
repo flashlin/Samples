@@ -59,6 +59,7 @@ export interface IVariableResx {
 
 export interface IBannerVariable {
   varName: string;
+  varType: string;
   resxName: string;
   resxList: IVariableResx[];
 }

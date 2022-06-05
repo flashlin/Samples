@@ -57,51 +57,8 @@
         <template #footer> In {{ state.indexPage }} Index. </template>
         <template #expansion="slotProps">
           <div class="orders-subtable">
-            <h5>Orders for {{ slotProps.data.templateName }}</h5>
-            <DataTable
-              :value="slotProps.data.variables"
-              dataKey="varName"
-              editMode="cell"
-              @cell-edit-complete="handleCellEditComplete"
-              class="editable-cells-table"
-              responsiveLayout="scroll"
-            >
-              <template #header>
-                <div class="flex justify-content-center align-items-center">
-                  <h5 class="m-0">Variables</h5>
-                  <span>
-                    <Button
-                      icon="pi pi-plus"
-                      @click="handleAddTemplateVariable(slotProps.data.variables)"
-                    />
-                    &nbsp;
-                    <Button icon="pi pi-refresh" />
-                  </span>
-                </div>
-              </template>
-              <Column field="varName" header="name" sortable>
-                <template #editor="slotProps">
-                  <InputText v-model="slotProps.data.varName" autofocus />
-                </template>
-              </Column>
-              <Column field="varType" header="type">
-                <template #editor="slotProps">
-                  <AutoComplete v-model="slotProps.data.varType" 
-                    :suggestions="state.filteredVarTypes"
-                    @complete="handleSearchVarType($event)"
-                    field="label"
-                    :dropdown="true" />
-                </template>
-              </Column>
-              <Column headerStyle="width:4rem">
-                <template #body="varSlotProps">
-                  <Button
-                    icon="pi pi-trash"
-                    @click="handleDeleteVariable(slotProps.data.variables, varSlotProps)"
-                  />
-                </template>
-              </Column>
-            </DataTable>
+            <h5>Variables for {{ slotProps.data.bannerName }}</h5>
+            <VariableOptionEditor v-model="slotProps.data.variables" />
           </div>
         </template>
       </DataTable>
@@ -131,6 +88,7 @@ import DataTable, {
 import Column, { ColumnSlots } from "primevue/column";
 import InputText from "primevue/inputtext";
 import AutoComplete, { AutoCompleteCompleteEvent } from "primevue/autocomplete";
+import VariableOptionEditor from "@/components/VariableOptionEditor.vue";
 import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
 //import Editor from 'primevue/editor';
