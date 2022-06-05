@@ -301,10 +301,10 @@ namespace TestProject
                 TemplateName = templateName,
                 BannerName = bannerName,
                 OrderId = 1,
-                VariablesOptions = new Dictionary<string, VariableOption>()
+                VariablesOptions = new List<VariableOption>()
                 {
-                    {"image", new VariableOption {VarName = "image", ResxName = $"{taste}PizzaImage"}},
-                    {"title", new VariableOption {VarName = "title", ResxName = $"{taste}PizzaTitle"}},
+                    new VariableOption {VarName = "image", ResxName = $"{taste}PizzaImage"},
+                    new VariableOption {VarName = "title", ResxName = $"{taste}PizzaTitle"},
                 }
             });
         }
