@@ -30,6 +30,7 @@ import { useConfirm } from "primevue/useconfirm";
 import Menubar from 'primevue/menubar';
 import { MenuItem } from "primevue/menuitem";
 import router from "./Router";
+import InputText from "primevue/inputtext";
 
 const state = reactive({
   items: [

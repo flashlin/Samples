@@ -96,6 +96,11 @@ namespace PizzaWeb.Controllers
         {
             return _pizzaRepo.GetBannersData(req);
         }
+
+        public List<BannerResxEntity> GetResxByVarType([FromBody] string varType)
+        {
+            return _pizzaRepo.GetResxByVarType(varType);
+        }
     }
 
     public class UpdateBannerSettingReq

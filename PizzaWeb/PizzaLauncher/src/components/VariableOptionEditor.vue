@@ -29,11 +29,17 @@
         <Column field="varType" header="Variable Type"></Column>
         <Column field="resxName" header="Resx Key Name">
           <template #editor="slotProps">
-            <InputText v-model="slotProps.data.resxName" autofocus />
+            <ComboSelect v-model="slotProps.data.resxName" 
+              :options="getResxByVarTypeAsync(slotProps.data.varType)" />
           </template>
         </Column>
         <Column header="Actions">
           <template #body="slotProps">
+            <Button
+              icon="pi pi-plus-circle"
+              @click="handleAddResx(slotProps)"
+            />
+            &nbsp;
             <Button
               icon="pi pi-save"
               @click="handleApplyVariableSetting(slotProps)"
@@ -79,12 +85,6 @@ import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
 import Editor from "@/components/Editor.vue";
 
-interface IOption 
-{
-  label: string;
-  value: string;
-}
-
 interface IBannerVariableSetting {
   varName: string;
   varType: string;
@@ -102,9 +102,8 @@ const props = defineProps({
 const state = reactive({
   isEdit: false,
   isBlocked: false,
-  variablesOptions: [] as IBannerVariableSetting[],
-  expandedRows: [] as ITemplateVariable[],
-  filteredVarTypes: [] as IOption[],
+  variablesOptions: props.modelValue as IBannerVariableSetting[],
+  expandedRows: [] as IVariableResx[],
   bannerIdSelected: "",
   previewContent: "",
 });
@@ -116,9 +115,17 @@ const reloadAsync = async () => {
   state.isBlocked = false;
 }
 
+async function getResxByVarTypeAsync(varType: string) {
+  return await api.getResxByVarTypeAsync(varType);
+}
+
 function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
   let { data, newValue, field } = event;
   data[field] = newValue;
+}
+
+function handleAddResx(resxName: string) {
+  
 }
 
 function handleSearchVarType(event: AutoCompleteCompleteEvent){

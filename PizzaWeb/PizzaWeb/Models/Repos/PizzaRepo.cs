@@ -169,6 +169,13 @@ public class PizzaRepo : IPizzaRepo
         ).ToArray();
     }
 
+    public List<BannerResxEntity> GetResxByVarType(string varType)
+    {
+        return _dbContext.BannerResx.AsNoTracking()
+            .Where(x => x.VarType == varType)
+            .ToList();
+    }
+
     private IEnumerable<BannerSetting> QueryAllBannersSettings()
     {
         var banners = this.QueryBannerSettingData().ToList();

@@ -1,6 +1,15 @@
 import Axios, { AxiosError, AxiosResponse } from "axios";
 import { toastError } from "./AppToast";
 
+export const AllIsoLangCodes = [
+  "en-US",
+  "zh-TW",
+  "zh-CN",
+  "ru-RU",
+  "vi-VN",
+  "es-AR"
+];
+
 export interface IBannerTemplateEntity {
   templateName: string;
   templateContent: string;
@@ -81,6 +90,14 @@ export interface IAddBanner {
   variables: IVariableOption[];
 }
 
+export interface IBannerResxEntity {
+  id: number;
+  isoLangCode: string;
+  varType: string;
+  resxName: string;
+  content: string;
+}
+
 export class BannerApi {
   // let apiUrl = "http://localhost:5129";
   _axios = Axios.create({
@@ -136,6 +153,12 @@ export class BannerApi {
     return this.postQueryAsync<IBannerVariableData[]>(
       "banner/getBannerVariables",
       req
+    );
+  }
+
+  getResxByVarTypeAsync(varType: string) {
+    return this.postQueryAsync<IBannerResxEntity[]>("banner/getResxByVarType", 
+      varType
     );
   }
 

@@ -93,23 +93,14 @@ import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
 //import Editor from 'primevue/editor';
 import Editor from "@/components/Editor.vue";
-
-interface IOption 
-{
-  label: string;
-  value: string;
-}
+import { DefaultTemplateVariableOptions, IOption } from "@/typings/ui-typeings";
 
 const state = reactive({
   isEdit: false,
   indexPage: 0,
   isBlocked: false,
   bannerList: [] as IBannerSetting[],
-  templateVariableOptions: [
-    { label: "String", value: "String" },
-    { label: "Url(production)", value: "Url(production)" },
-    { label: "Image(200,100)", value: "Image(200,100)" },
-  ] as IOption[],
+  templateVariableOptions: DefaultTemplateVariableOptions,
   expandedRows: [] as ITemplateVariable[],
   filteredVarTypes: [] as IOption[],
   bannerIdSelected: "",

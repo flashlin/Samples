@@ -6,26 +6,16 @@
     /> -->
 
     <BlockUI :blocked="state.isBlocked">
-      <DataTable
-        :value="state.templateList"
-        dataKey="templateName"
-        editMode="cell"
-        class="editable-cells-table"
-        @cell-edit-complete="handleCellEditComplete"
-        v-model:expandedRows="state.expandedRows"
-        @rowExpand="onRowExpand"
-        @rowCollapse="onRowCollapse"
-        :lazy="true"
-        :rowHover="true"
-        responsiveLayout="scroll"
-      >
+      <DataTable :value="state.templateList" dataKey="templateName" editMode="cell" class="editable-cells-table"
+        @cell-edit-complete="handleCellEditComplete" v-model:expandedRows="state.expandedRows" @rowExpand="onRowExpand"
+        @rowCollapse="onRowCollapse" :lazy="true" :rowHover="true" responsiveLayout="scroll">
         <template #header>
           <div class="flex justify-content-center align-items-center">
             <h5 class="m-0">Templates</h5>
             <span>
               <Button icon="pi pi-plus" @click="handleAddTemplate" />
               &nbsp;
-              <Button icon="pi pi-refresh" @click="reloadAsync"/>
+              <Button icon="pi pi-refresh" @click="reloadAsync" />
             </span>
           </div>
         </template>
@@ -41,42 +31,27 @@
             {{ subContent(slotProps.data.templateContent) }}
           </template>
           <template #editor="slotProps">
-            <Editor v-model="slotProps.data.templateContent" editorStyle="height: 320px"/>
+            <Editor v-model="slotProps.data.templateContent" editorStyle="height: 320px" />
           </template>
         </Column>
         <Column header="Actions">
           <template #body="slotProps">
-            <Button
-              icon="pi pi-save"
-              @click="handleApplyAddTemplate(slotProps)"
-            />
+            <Button icon="pi pi-save" @click="handleApplyAddTemplate(slotProps)" />
             &nbsp;
-            <Button
-              icon="pi pi-trash"
-              @click="handleDeleteTemplate(slotProps)"
-            />
+            <Button icon="pi pi-trash" @click="handleDeleteTemplate(slotProps)" />
           </template>
         </Column>
         <template #footer> In {{ state.indexPage }} Index. </template>
         <template #expansion="slotProps">
           <div class="orders-subtable">
             <h5>Orders for {{ slotProps.data.templateName }}</h5>
-            <DataTable
-              :value="slotProps.data.variables"
-              dataKey="varName"
-              editMode="cell"
-              @cell-edit-complete="handleCellEditComplete"
-              class="editable-cells-table"
-              responsiveLayout="scroll"
-            >
+            <DataTable :value="slotProps.data.variables" dataKey="varName" editMode="cell"
+              @cell-edit-complete="handleCellEditComplete" class="editable-cells-table" responsiveLayout="scroll">
               <template #header>
                 <div class="flex justify-content-center align-items-center">
                   <h5 class="m-0">Variables</h5>
                   <span>
-                    <Button
-                      icon="pi pi-plus"
-                      @click="handleAddTemplateVariable(slotProps.data.variables)"
-                    />
+                    <Button icon="pi pi-plus" @click="handleAddTemplateVariable(slotProps.data.variables)" />
                     &nbsp;
                     <Button icon="pi pi-refresh" />
                   </span>
@@ -89,19 +64,14 @@
               </Column>
               <Column field="varType" header="type">
                 <template #editor="slotProps">
-                  <AutoComplete v-model="slotProps.data.varType" 
-                    :suggestions="state.filteredVarTypes"
-                    @complete="handleSearchVarType($event)"
-                    field="label"
-                    :dropdown="true" />
+                  <VarTypeComboSelect v-model="slotProps.data.varType" />
+                  <!-- <AutoComplete v-model="slotProps.data.varType" :suggestions="state.filteredVarTypes"
+                    @complete="handleSearchVarType($event)" field="label" :dropdown="true" /> -->
                 </template>
               </Column>
               <Column headerStyle="width:4rem">
                 <template #body="varSlotProps">
-                  <Button
-                    icon="pi pi-trash"
-                    @click="handleDeleteVariable(slotProps.data.variables, varSlotProps)"
-                  />
+                  <Button icon="pi pi-trash" @click="handleDeleteVariable(slotProps.data.variables, varSlotProps)" />
                 </template>
               </Column>
             </DataTable>
@@ -136,23 +106,15 @@ import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
 //import Editor from 'primevue/editor';
 import Editor from "@/components/Editor.vue";
-
-interface IOption 
-{
-  label: string;
-  value: string;
-}
+import { DefaultTemplateVariableOptions, IOption } from "@/typings/ui-typeings";
+import VarTypeComboSelect from "@/components/VarTypeComboSelect.vue";
 
 const state = reactive({
   isEdit: false,
   indexPage: 0,
   isBlocked: false,
   templateList: [] as ITemplateData[],
-  templateVariableOptions: [
-    { label: "String", value: "String" },
-    { label: "Url(production)", value: "Url(production)" },
-    { label: "Image(200,100)", value: "Image(200,100)" },
-  ] as IOption[],
+  templateVariableOptions: DefaultTemplateVariableOptions,
   expandedRows: [] as ITemplateVariable[],
   filteredVarTypes: [] as IOption[],
   bannerIdSelected: "",
@@ -173,7 +135,7 @@ function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
   data[field] = newValue;
 }
 
-function handleSearchVarType(event: AutoCompleteCompleteEvent){
+function handleSearchVarType(event: AutoCompleteCompleteEvent) {
   setTimeout(() => {
     if (!event.query.trim().length) {
       state.filteredVarTypes = [...state.templateVariableOptions];
