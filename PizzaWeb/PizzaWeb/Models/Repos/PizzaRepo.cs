@@ -125,14 +125,14 @@ public class PizzaRepo : IPizzaRepo
 
 	public List<BannerSetting> GetBannersSetting(GetBannersSettingReq req)
 	{
-		return QueryAllBanners()
+		return QueryAllBannersSettings()
 			 .Where(x => x.TemplateName == req.TemplateName)
 			 .ToList();
 	}
 
 	public List<BannerSetting> GetBannersSettingPage(GetBannersSettingPageReq req)
 	{
-		return QueryAllBanners()
+		return QueryAllBannersSettings()
 			.Skip(req.IndexPage * req.PageSize)
 			.Take(req.PageSize)
 			.ToList();
@@ -167,11 +167,9 @@ public class PizzaRepo : IPizzaRepo
 			join tb2 in userResx on new {tb1.ResxName, tb1.VarType} equals new {tb2.ResxName, tb2.VarType}
 			select tb1
 		).ToArray();
-		
-		
 	}
 
-	private IEnumerable<BannerSetting> QueryAllBanners()
+	private IEnumerable<BannerSetting> QueryAllBannersSettings()
 	{
 		var banners = this.QueryBannerSettingData().ToList();
 		return from banner in banners
