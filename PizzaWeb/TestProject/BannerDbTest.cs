@@ -160,6 +160,7 @@ namespace TestProject
             new BannerVariable
                 {
                     VarName = "image",
+                    VarType = "Image(100,200)",
                     ResxName = "SaltedChickenPizzaImage",
                     ResxList = new List<VariableResx>(new[]
                     {
@@ -172,6 +173,7 @@ namespace TestProject
             new BannerVariable
                 {
                     VarName = "title",
+                    VarType = "String",
                     ResxName = "SaltedChickenPizzaTitle",
                     ResxList = new List<VariableResx>(new[]
                     {
@@ -184,6 +186,7 @@ namespace TestProject
             new BannerVariable
                 {
                     VarName = "image",
+                    VarType = "Image(100,200)",
                     ResxName = "SquidPizzaImage",
                     ResxList = new List<VariableResx>(new[]
                     {

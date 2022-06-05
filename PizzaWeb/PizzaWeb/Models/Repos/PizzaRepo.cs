@@ -108,11 +108,12 @@ public class PizzaRepo : IPizzaRepo
 	private IEnumerable<BannerVariable> QueryBannerVariables(IEnumerable<VariableResxSetting> variablesSettings)
 	{
 		return from tb1 in variablesSettings
-				 group tb1 by new { tb1.VarName, tb1.ResxName }
+				 group tb1 by new { tb1.VarName, tb1.VarType, tb1.ResxName }
 			 into g1
 				 select new BannerVariable
 				 {
 					 VarName = g1.Key.VarName,
+					 VarType = g1.Key.VarType,
 					 ResxName = g1.Key.ResxName,
 					 ResxList = g1.Select(x => new VariableResx
 					 {

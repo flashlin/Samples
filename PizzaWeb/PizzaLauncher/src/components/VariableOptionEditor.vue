@@ -7,103 +7,44 @@
 
     <BlockUI :blocked="state.isBlocked">
       <DataTable
-        :value="state.bannerList"
-        dataKey="templateName"
+        :value="state.variablesOptions"
         editMode="cell"
         class="editable-cells-table"
         @cell-edit-complete="handleCellEditComplete"
         v-model:expandedRows="state.expandedRows"
-        @rowExpand="onRowExpand"
-        @rowCollapse="onRowCollapse"
         :lazy="true"
         :rowHover="true"
         responsiveLayout="scroll"
       >
         <template #header>
           <div class="flex justify-content-center align-items-center">
-            <h5 class="m-0">All Banners</h5>
+            <h5 class="m-0">All Variable Options</h5>
             <span>
-              <Button icon="pi pi-plus" @click="handleAddBanner" />
-              &nbsp;
               <Button icon="pi pi-refresh" @click="reloadAsync"/>
             </span>
           </div>
         </template>
         <Column :expander="true" headerStyle="width: 1rem" />
-        <Column header="Selected"></Column>
-        <Column field="templateName" header="TemplateName">
+        <Column field="varName" header="Variable Name"></Column>
+        <Column field="varType" header="Variable Type"></Column>
+        <Column field="resxName" header="Resx Key Name">
           <template #editor="slotProps">
-            <InputText v-model="slotProps.data.templateName" autofocus />
-          </template>
-        </Column>
-        <Column field="bannerName" header="BannerName">
-          <template #editor="slotProps">
-            <InputText v-model="slotProps.data.bannerName" autofocus />
+            <InputText v-model="slotProps.data.resxName" autofocus />
           </template>
         </Column>
         <Column header="Actions">
           <template #body="slotProps">
             <Button
               icon="pi pi-save"
-              @click="handleApplyAddBanner(slotProps)"
+              @click="handleApplyVariableSetting(slotProps)"
             />
             &nbsp;
             <Button
               icon="pi pi-trash"
-              @click="handleDeleteTemplate(slotProps)"
+              @click="handleRestoreVariableSetting(slotProps)"
             />
           </template>
         </Column>
-        <template #footer> In {{ state.indexPage }} Index. </template>
-        <template #expansion="slotProps">
-          <div class="orders-subtable">
-            <h5>Orders for {{ slotProps.data.templateName }}</h5>
-            <DataTable
-              :value="slotProps.data.variables"
-              dataKey="varName"
-              editMode="cell"
-              @cell-edit-complete="handleCellEditComplete"
-              class="editable-cells-table"
-              responsiveLayout="scroll"
-            >
-              <template #header>
-                <div class="flex justify-content-center align-items-center">
-                  <h5 class="m-0">Variables</h5>
-                  <span>
-                    <Button
-                      icon="pi pi-plus"
-                      @click="handleAddTemplateVariable(slotProps.data.variables)"
-                    />
-                    &nbsp;
-                    <Button icon="pi pi-refresh" />
-                  </span>
-                </div>
-              </template>
-              <Column field="varName" header="name" sortable>
-                <template #editor="slotProps">
-                  <InputText v-model="slotProps.data.varName" autofocus />
-                </template>
-              </Column>
-              <Column field="varType" header="type">
-                <template #editor="slotProps">
-                  <AutoComplete v-model="slotProps.data.varType" 
-                    :suggestions="state.filteredVarTypes"
-                    @complete="handleSearchVarType($event)"
-                    field="label"
-                    :dropdown="true" />
-                </template>
-              </Column>
-              <Column headerStyle="width:4rem">
-                <template #body="varSlotProps">
-                  <Button
-                    icon="pi pi-trash"
-                    @click="handleDeleteVariable(slotProps.data.variables, varSlotProps)"
-                  />
-                </template>
-              </Column>
-            </DataTable>
-          </div>
-        </template>
       </DataTable>
     </BlockUI>
   </div>
@@ -119,6 +60,9 @@ import {
   ITemplateVariable,
 IBannerSetting,
 IAddBanner,
+IVariableOption,
+IBannerVariable,
+IVariableResx,
 } from "@/models/Api";
 //import PreviewFrame from "@/components/PreviewFrame";
 import BlockUI from "primevue/blockui";
@@ -133,7 +77,6 @@ import InputText from "primevue/inputtext";
 import AutoComplete, { AutoCompleteCompleteEvent } from "primevue/autocomplete";
 import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
-//import Editor from 'primevue/editor';
 import Editor from "@/components/Editor.vue";
 
 interface IOption 
@@ -142,16 +85,24 @@ interface IOption
   value: string;
 }
 
+interface IBannerVariableSetting {
+  varName: string;
+  varType: string;
+  resxName: string;
+  resxList: IVariableResx[];
+}
+
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default: () => ([] as IBannerVariable[]),
+  },
+});
+
 const state = reactive({
   isEdit: false,
-  indexPage: 0,
   isBlocked: false,
-  bannerList: [] as IBannerSetting[],
-  templateVariableOptions: [
-    { label: "String", value: "String" },
-    { label: "Url(production)", value: "Url(production)" },
-    { label: "Image(200,100)", value: "Image(200,100)" },
-  ] as IOption[],
+  variablesOptions: [] as IBannerVariableSetting[],
   expandedRows: [] as ITemplateVariable[],
   filteredVarTypes: [] as IOption[],
   bannerIdSelected: "",
@@ -162,8 +113,6 @@ const api = new BannerApi();
 
 const reloadAsync = async () => {
   state.isBlocked = true;
-  let resp = await api.getBannerSettingsAsync(state.indexPage);
-  state.bannerList = resp;
   state.isBlocked = false;
 }
 
@@ -173,54 +122,44 @@ function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
 }
 
 function handleSearchVarType(event: AutoCompleteCompleteEvent){
-  setTimeout(() => {
-    if (!event.query.trim().length) {
-      state.filteredVarTypes = [...state.templateVariableOptions];
-    }
-    else {
-      state.filteredVarTypes = state.templateVariableOptions.filter((item) => {
-        return item.label.toLowerCase().startsWith(event.query.toLowerCase());
-      });
-    }
-  }, 250);
+  // setTimeout(() => {
+  //   if (!event.query.trim().length) {
+  //     state.filteredVarTypes = [...state.templateVariableOptions];
+  //   }
+  //   else {
+  //     state.filteredVarTypes = state.templateVariableOptions.filter((item) => {
+  //       return item.label.toLowerCase().startsWith(event.query.toLowerCase());
+  //     });
+  //   }
+  // }, 250);
 }
 
-function handleAddBanner() {
-  state.bannerList.push({
-    id: 0,
-    templateName: "unknown",
-    bannerName: "bannerName",
-    orderId: 0,
-    variables: [],
-    lastModifiedTime: new Date(),
-  });
+
+async function handleApplyVariableSetting(slotProps: ColumnRowSlots) {
+  // const banner = state.bannerList[slotProps.index];
+  // if (banner.id === 0) {
+  //   await api.addBannerAsync(banner);
+  //   toastInfo(`Banner '${banner.bannerName}' added`);
+  // } else {
+  //   await api.updateBannerAsync(banner);
+  //   toastInfo(`Banner '${banner.templateName}' updated`);
+  // }
+  // reloadAsync();
 }
 
-async function handleApplyAddBanner(slotProps: ColumnRowSlots) {
-  const banner = state.bannerList[slotProps.index];
-  if (banner.id === 0) {
-    await api.addBannerAsync(banner);
-    toastInfo(`Banner '${banner.bannerName}' added`);
-  } else {
-    await api.updateBannerAsync(banner);
-    toastInfo(`Banner '${banner.templateName}' updated`);
-  }
-  reloadAsync();
-}
-
-async function handleDeleteTemplate(slotProps: ColumnRowSlots) {
-  let resp = await confirmPopupAsync(
-    `Are you sure you want to delete this '${slotProps.data.templateName}' template?`
-  );
-  if (resp) {
-    let templateName = slotProps.data.templateName;
-    await api.deleteTemplateAsync(templateName);
-    toastInfo(`Delete ${templateName} Template Success`);
-    await reloadAsync();
-    return;
-  }
-  let templateName = slotProps.data.templateName;
-  toastInfo(`Cancel Delete ${templateName} Template`);
+async function handleRestoreVariableSetting(slotProps: ColumnRowSlots) {
+  // let resp = await confirmPopupAsync(
+  //   `Are you sure you want to delete this '${slotProps.data.templateName}' template?`
+  // );
+  // if (resp) {
+  //   let templateName = slotProps.data.templateName;
+  //   await api.deleteTemplateAsync(templateName);
+  //   toastInfo(`Delete ${templateName} Template Success`);
+  //   await reloadAsync();
+  //   return;
+  // }
+  // let templateName = slotProps.data.templateName;
+  // toastInfo(`Cancel Delete ${templateName} Template`);
 }
 
 function onRowExpand(event: DataTableRowExpandEvent) {
@@ -232,30 +171,6 @@ function onRowExpand(event: DataTableRowExpandEvent) {
 function onRowCollapse(event: DataTableRowCollapseEvent) {
   //state.expandedRows = [];
 }
-
-function handleAddTemplateVariable(vars: ITemplateVariable[]) {
-  vars.push({
-    varName: "unknown",
-    varType: "String",
-  });
-}
-
-function handleDeleteVariable(data: any, slotProps: ColumnRowSlots) {
-  data.splice(slotProps.index, 1);
-}
-
-// const editor = ref<IEditorProxy>();
-
-const subContent = (content: string): string => {
-  if (content == null) {
-    return "";
-  }
-  const maxLength = 100;
-  if (content.length <= maxLength) {
-    return content;
-  }
-  return content.substring(0, maxLength) + "...";
-};
 
 onMounted(() => {
   reloadAsync();
@@ -289,5 +204,5 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "./TemplateEditor.scss";
+@import "./VariableOptionEditor.scss";
 </style>

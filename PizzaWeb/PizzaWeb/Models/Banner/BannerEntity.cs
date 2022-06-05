@@ -22,7 +22,7 @@ public class BannerEntity
 
 public class BannerSetting
 {
-	public int Id { get; set; }
+    public int Id { get; set; }
     public string TemplateName { get; set; } = String.Empty;
     public string BannerName { get; set; } = String.Empty;
     public int OrderId { get; set; }
@@ -33,28 +33,31 @@ public class BannerSetting
 public class BannerVariable
 {
     public string VarName { get; set; } = string.Empty;
+    public string VarType { get; set; } = String.Empty;
     public string ResxName { get; set; } = string.Empty;
     public List<VariableResx> ResxList { get; set; } = new List<VariableResx>();
-	public override string ToString()
-	{
-		var sb = new StringBuilder();
-      sb.Append(VarName);
-		sb.Append("=");
-      sb.Append(ResxName);
-		sb.Append(" ");
-		sb.Append(string.Join(",", ResxList.Select(x => x.ToString())));
-		return sb.ToString();
-	}
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append(VarName);
+        sb.Append("=");
+        sb.Append(ResxName);
+        sb.Append(" ");
+        sb.Append(string.Join(",", ResxList.Select(x => x.ToString())));
+        return sb.ToString();
+    }
 }
 
 public class VariableResx
 {
     public string IsoLangCode { get; set; } = "en-US";
     public string Content { get; set; } = string.Empty;
-	public override string ToString()
-	{
-		return $"{IsoLangCode}:'{Content}'";
-	}
+
+    public override string ToString()
+    {
+        return $"{IsoLangCode}:'{Content}'";
+    }
 }
 
 public class VariableOption
