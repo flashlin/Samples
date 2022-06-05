@@ -181,7 +181,7 @@ public class PizzaRepo : IPizzaRepo
 			BannerName = req.BannerName,
 			TemplateName = req.TemplateName,
 			OrderId = req.OrderId,
-			VariableOptions = req.VariablesOptions.Values.ToList(),
+			VariableOptions = req.VariablesOptions,
 			LastModifiedTime = DateTime.UtcNow
 		});
 		_dbContext.SaveChanges();
