@@ -129,6 +129,14 @@ public class PizzaRepo : IPizzaRepo
 			 .ToList();
 	}
 
+	public List<BannerSetting> GetBannersSettingPage(GetBannersSettingPageReq req)
+	{
+		return QueryAllBanners()
+			.Skip(req.IndexPage * req.PageSize)
+			.Take(req.PageSize)
+			.ToList();
+	}
+
 	private IEnumerable<BannerSetting> QueryAllBanners()
 	{
 		var banners = this.QueryBannerSettingData().ToList();
@@ -335,6 +343,14 @@ public class PizzaRepo : IPizzaRepo
 	{
 		var sql = "DELETE FROM BannerTemplate where TemplateName = @templateName";
 		Execute(sql, new { templateName });
+	}
+
+	public List<string> GetTemplateNames()
+	{
+		return _dbContext.BannerTemplates.AsNoTracking()
+			.GroupBy(x => x.TemplateName)
+			.Select(x => x.Key)
+			.ToList();
 	}
 
 	protected void Execute(string sql, object? param = null)

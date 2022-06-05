@@ -38,14 +38,24 @@ namespace PizzaWeb.Controllers
             _pizzaRepo.DeleteBannerTemplate(templateName);
         }
 
+        public List<BannerTemplate> GetAllTemplates(GetBannerTemplatesReq req)
+        {
+            return _pizzaRepo.GetBannerTemplates(req);
+        }
+
         public void AddBanner(AddBannerReq req)
         {
            _pizzaRepo.AddBanner(req); 
         }
 
-        public List<BannerTemplate> GetAllTemplates(GetBannerTemplatesReq req)
+        public List<string> GetTemplateNames()
         {
-            return _pizzaRepo.GetBannerTemplates(req);
+            return _pizzaRepo.GetTemplateNames();
+        }
+        
+        public List<BannerSetting> GetBannerSettingsPage(GetBannersSettingPageReq req)
+        {
+            return _pizzaRepo.GetBannersSettingPage(req);
         }
 
         public List<BannerSetting> GetBannerSettings(GetBannersSettingReq req)
@@ -81,6 +91,12 @@ namespace PizzaWeb.Controllers
         {
             return _pizzaRepo.GetBannersData(req);
         }
+    }
+
+    public class GetBannersSettingPageReq
+    {
+        public int IndexPage { get; set; }
+        public int PageSize { get; set; }
     }
 
     public class ApplyBannerReq

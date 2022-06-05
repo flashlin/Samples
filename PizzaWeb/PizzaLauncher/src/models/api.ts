@@ -51,6 +51,27 @@ export interface IBannerVariableData {
   resxContent: string;
 }
 
+
+export interface IVariableResx {
+  isoLangCode: string;
+  content: string;
+}
+
+export interface IBannerVariable {
+  varName: string;
+  resxName: string;
+  resxList: IVariableResx[];
+}
+
+export interface IBannerSetting {
+  id: number;
+  name: string;
+  orderId: number;
+  variables: IBannerVariable[];
+  templateName: string;
+  lastModifiedTime: string;
+}
+
 export class BannerApi {
   // let apiUrl = "http://localhost:5129";
   _axios = Axios.create({
@@ -69,12 +90,23 @@ export class BannerApi {
     return this.postAsync("banner/addTemplate", req);
   }
 
+  getBannerSettingsAsync(indexPage: number): Promise<IBannerSetting[]> {
+    return this.postQueryAsync("banner/getBannerSettings", {
+      indexPage: indexPage,
+      pageSize: 10,
+    });
+  }
+
   deleteTemplateAsync(templateName: string) {
      return this.postAsync("banner/deleteTemplate", templateName);
   }
 
   updateTemplateAsync(req: ITemplateData) {
     return this.postAsync("banner/updateTemplate", req);
+  }
+
+  getTemplateNamesAsync() {
+    return this.postQueryAsync<string[]>("banner/getTemplateNames", {});
   }
 
   getBannerAsync(req: GetBannerReq): Promise<string> {
