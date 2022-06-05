@@ -64,11 +64,6 @@ export interface IBannerVariable {
 }
 
 export interface IBannerSetting extends IAddBanner {
-  // id: number;
-  // name: string;
-  // orderId: number;
-  // variables: IBannerVariable[];
-  // templateName: string;
   lastModifiedTime: Date;
 }
 
@@ -116,14 +111,18 @@ export class BannerApi {
   }
 
   getBannerSettingsAsync(indexPage: number): Promise<IBannerSetting[]> {
-    return this.postQueryAsync("banner/getBannerSettings", {
+    return this.postQueryAsync("banner/getBannerSettingsPage", {
       indexPage: indexPage,
       pageSize: 10,
     });
   }
 
-  addBanner(data: IAddBanner) {
+  addBannerAsync(data: IAddBanner) {
     return this.postAsync("banner/addBanner", data);
+  }
+
+  updateBannerAsync(data: IAddBanner) {
+    return this.postAsync("banner/updateBannerSetting", data);
   }
 
   getBannerAsync(req: GetBannerReq): Promise<string> {

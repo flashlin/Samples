@@ -45,17 +45,22 @@ namespace PizzaWeb.Controllers
 
         public void AddBanner(AddBannerReq req)
         {
-           _pizzaRepo.AddBanner(req); 
+            _pizzaRepo.AddBanner(req);
         }
 
         public List<string> GetTemplateNames()
         {
             return _pizzaRepo.GetTemplateNames();
         }
-        
+
         public List<BannerSetting> GetBannerSettingsPage(GetBannersSettingPageReq req)
         {
             return _pizzaRepo.GetBannersSettingPage(req);
+        }
+
+        public void UpdateBannerSetting(UpdateBannerSettingReq req)
+        {
+            _pizzaRepo.UpdateBannerSetting(req);
         }
 
         public List<BannerSetting> GetBannerSettings(GetBannersSettingReq req)
@@ -84,13 +89,22 @@ namespace PizzaWeb.Controllers
 
         public void ApplyBanner(ApplyBannerReq req)
         {
-           _pizzaRepo.ApplyBanner(req.BannerName);
+            _pizzaRepo.ApplyBanner(req.BannerName);
         }
 
         public List<BannerTemplateData> GetBannersData(GetBannersDataReq req)
         {
             return _pizzaRepo.GetBannersData(req);
         }
+    }
+
+    public class UpdateBannerSettingReq
+    {
+        public int Id { get; set; }
+        public string TemplateName { get; set; } = String.Empty;
+        public string BannerName { get; set; } = String.Empty;
+        public int OrderId { get; set; }
+        public List<BannerVariable> Variables { get; set; } = new List<BannerVariable>();
     }
 
     public class GetBannersSettingPageReq

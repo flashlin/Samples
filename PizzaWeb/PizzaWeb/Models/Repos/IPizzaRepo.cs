@@ -16,4 +16,5 @@ public interface IPizzaRepo
     void DeleteBannerTemplate(string templateName);
     List<string> GetTemplateNames();
     List<BannerSetting> GetBannersSettingPage(GetBannersSettingPageReq req);
+    void UpdateBannerSetting(UpdateBannerSettingReq req);
 }

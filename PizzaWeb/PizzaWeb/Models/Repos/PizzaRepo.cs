@@ -137,6 +137,39 @@ public class PizzaRepo : IPizzaRepo
 			.ToList();
 	}
 
+	public void UpdateBannerSetting(UpdateBannerSettingReq req)
+	{
+		var bannerEntity = _dbContext.Banners
+			.First(x => x.Id == req.Id);
+		bannerEntity.TemplateName = req.TemplateName;
+		bannerEntity.BannerName = req.BannerName;
+		bannerEntity.OrderId = req.OrderId;
+		bannerEntity.VariableOptions = req.Variables.Select(x => new VariableOption()
+		{
+			VarName = x.VarName,
+			ResxName = x.ResxName
+		}).ToList();
+
+		var userResx = 
+			(from tb1 in req.Variables
+			from tb2 in tb1.ResxList
+			select new
+			{
+				ResxName = tb1.ResxName,
+				VarType = tb1.VarName,
+				IsoLangCode = tb2.IsoLangCode,
+				Content = tb2.Content
+			}).ToArray();
+
+		var updateResx = (
+			from tb1 in _dbContext.BannerResx
+			join tb2 in userResx on new {tb1.ResxName, tb1.VarType} equals new {tb2.ResxName, tb2.VarType}
+			select tb1
+		).ToArray();
+		
+		
+	}
+
 	private IEnumerable<BannerSetting> QueryAllBanners()
 	{
 		var banners = this.QueryBannerSettingData().ToList();
