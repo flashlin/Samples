@@ -1,8 +1,10 @@
 ﻿
-First, Create xUnit Test Project, 
+First, Create xUnit or other test project, 
 and new SqlLocalDb to create instance
 
 ```
+using T1.SqlLocalData;
+
 public class SqlLocalDbTest : IDisposable
 {
     private string _instanceName = "local_db_instance";
@@ -24,6 +26,19 @@ public class SqlLocalDbTest : IDisposable
 * DeleteDatabaseFile: Delete mdf ldf files
 * CreateDatabase: Create database
 
+<br/>
+<br/>
+
+The SqlLocalDb.exe default installed location is
+"C:\Program Files\Microsoft SQL Server\150\Tools\Binn".
+If you installed it in other location, 
+then you can change default location by SetInstalledLocation method.
+```
+_localDb.SetInstalledLocation("D:\\OtherLocation\\Binn");
+```
+
+
+<br/>
 
 Setting connectionString to local_db_instance
 ```
@@ -40,7 +55,9 @@ public class MyDbContext : DbContext
 }
 ```
 
+<br/>
 Finish, you can use local_db_instance to test your code in Integrated Database Test Project.
+
 ```
 [Fact]
 public void execute_store_procedure()
@@ -64,3 +81,5 @@ public void execute_store_procedure()
     Assert.Equal("Jack",customer.Name);
 }
 ```
+
+

@@ -10,11 +10,17 @@ namespace T1.SqlLocalData
 	public class SqlLocalDb : ISqlLocalDb
 	{
 		private readonly string _dataFolder;
-		readonly string _sqllocaldbexe = @"C:\Program Files\Microsoft SQL Server\150\Tools\Binn\SqlLocalDB.exe";
+		string _installedLocation = @"C:\Program Files\Microsoft SQL Server\150\Tools\Binn";
+		readonly string _sqllocaldbexe = @"SqlLocalDB.exe";
 
 		public SqlLocalDb(string dataFolder)
 		{
 			_dataFolder = dataFolder;
+		}
+
+		public void SetInstalledLocation(string path)
+		{
+			_installedLocation = path;
 		}
 
 		public void CreateDatabase(string instanceName, string databaseName)
@@ -79,7 +85,8 @@ namespace T1.SqlLocalData
 		public string ExecuteSqlLocalDbExe(string arguments)
 		{
 			var p = new ProcessHelper();
-			return p.Execute(_sqllocaldbexe, arguments);
+			var processFilename = $"{_installedLocation}\\{_sqllocaldbexe}";
+			return p.Execute(processFilename, arguments);
 		}
 
 		public void ForceDropDatabase(string instanceName, string databaseName)

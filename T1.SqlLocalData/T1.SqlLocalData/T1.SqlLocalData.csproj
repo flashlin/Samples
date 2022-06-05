@@ -6,10 +6,13 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>mr.brain</Authors>
     <Description>windows sqllocaldb tool</Description>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
     <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     <PackageLicenseFile>license</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageVersion>1.0.1</PackageVersion>
+    <PackageTags>t1</PackageTags>
+    <PackageReleaseNotes>add installedLocation</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
