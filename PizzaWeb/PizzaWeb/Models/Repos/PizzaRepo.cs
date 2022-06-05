@@ -145,7 +145,7 @@ public class PizzaRepo : IPizzaRepo
 				 select new BannerSetting
 				 {
 					 Id = banner.Id,
-					 Name = banner.BannerName,
+					 BannerName = banner.BannerName,
 					 TemplateName = banner.TemplateName,
 					 OrderId = banner.OrderId,
 					 Variables = variables.ToList()

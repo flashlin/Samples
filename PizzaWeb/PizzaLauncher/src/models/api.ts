@@ -63,13 +63,26 @@ export interface IBannerVariable {
   resxList: IVariableResx[];
 }
 
-export interface IBannerSetting {
+export interface IBannerSetting extends IAddBanner {
+  // id: number;
+  // name: string;
+  // orderId: number;
+  // variables: IBannerVariable[];
+  // templateName: string;
+  lastModifiedTime: Date;
+}
+
+export interface IVariableOption {
+  varName: string;
+  resxName: string;
+}
+
+export interface IAddBanner {
   id: number;
-  name: string;
-  orderId: number;
-  variables: IBannerVariable[];
   templateName: string;
-  lastModifiedTime: string;
+  bannerName: string;
+  orderId: number;
+  variables: IVariableOption[];
 }
 
 export class BannerApi {
@@ -90,13 +103,6 @@ export class BannerApi {
     return this.postAsync("banner/addTemplate", req);
   }
 
-  getBannerSettingsAsync(indexPage: number): Promise<IBannerSetting[]> {
-    return this.postQueryAsync("banner/getBannerSettings", {
-      indexPage: indexPage,
-      pageSize: 10,
-    });
-  }
-
   deleteTemplateAsync(templateName: string) {
      return this.postAsync("banner/deleteTemplate", templateName);
   }
@@ -107,6 +113,17 @@ export class BannerApi {
 
   getTemplateNamesAsync() {
     return this.postQueryAsync<string[]>("banner/getTemplateNames", {});
+  }
+
+  getBannerSettingsAsync(indexPage: number): Promise<IBannerSetting[]> {
+    return this.postQueryAsync("banner/getBannerSettings", {
+      indexPage: indexPage,
+      pageSize: 10,
+    });
+  }
+
+  addBanner(data: IAddBanner) {
+    return this.postAsync("banner/addBanner", data);
   }
 
   getBannerAsync(req: GetBannerReq): Promise<string> {

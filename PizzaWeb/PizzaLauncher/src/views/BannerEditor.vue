@@ -5,11 +5,9 @@
       style="{`with:600px; height:300px;`}
     /> -->
 
-    Banners
-
     <BlockUI :blocked="state.isBlocked">
       <DataTable
-        :value="state.templateList"
+        :value="state.bannerList"
         dataKey="templateName"
         editMode="cell"
         class="editable-cells-table"
@@ -23,9 +21,9 @@
       >
         <template #header>
           <div class="flex justify-content-center align-items-center">
-            <h5 class="m-0">Templates</h5>
+            <h5 class="m-0">All Banners</h5>
             <span>
-              <Button icon="pi pi-plus" @click="handleAddTemplate" />
+              <Button icon="pi pi-plus" @click="handleAddBanner" />
               &nbsp;
               <Button icon="pi pi-refresh" @click="reloadAsync"/>
             </span>
@@ -33,24 +31,21 @@
         </template>
         <Column :expander="true" headerStyle="width: 1rem" />
         <Column header="Selected"></Column>
-        <Column field="templateName" header="Name">
+        <Column field="templateName" header="TemplateName">
           <template #editor="slotProps">
             <InputText v-model="slotProps.data.templateName" autofocus />
           </template>
         </Column>
-        <Column field="templateContent" header="Content">
-          <template #body="slotProps">
-            {{ subContent(slotProps.data.templateContent) }}
-          </template>
+        <Column field="bannerName" header="BannerName">
           <template #editor="slotProps">
-            <Editor v-model="slotProps.data.templateContent" editorStyle="height: 320px"/>
+            <InputText v-model="slotProps.data.bannerName" autofocus />
           </template>
         </Column>
         <Column header="Actions">
           <template #body="slotProps">
             <Button
               icon="pi pi-save"
-              @click="handleApplyAddTemplate(slotProps)"
+              @click="handleApplyAddBanner(slotProps)"
             />
             &nbsp;
             <Button
@@ -123,6 +118,7 @@ import {
   IBannerTemplateEntity,
   ITemplateVariable,
 IBannerSetting,
+IAddBanner,
 } from "@/models/Api";
 //import PreviewFrame from "@/components/PreviewFrame";
 import BlockUI from "primevue/blockui";
@@ -189,27 +185,27 @@ function handleSearchVarType(event: AutoCompleteCompleteEvent){
   }, 250);
 }
 
-function handleAddTemplate() {
+function handleAddBanner() {
   state.bannerList.push({
     id: 0,
     templateName: "unknown",
-    name: "bannerName",
+    bannerName: "bannerName",
     orderId: 0,
     variables: [],
-    lastModifiedTime: "",
+    lastModifiedTime: new Date(),
   });
 }
 
-async function handleApplyAddTemplate(slotProps: ColumnRowSlots) {
-  // const template = state.templateList[slotProps.index];
-  // if (template.id === 0) {
-  //   await api.addTemplateAsync(template);
+async function handleApplyAddBanner(slotProps: ColumnRowSlots) {
+  const banner = state.bannerList[slotProps.index];
+  if (banner.id === 0) {
+    await api.addBanner(banner);
   //   toastInfo(`Template '${template.templateName}' added`);
-  // } else {
+  } else {
   //   await api.updateTemplateAsync(template);
   //   toastInfo(`Template '${template.templateName}' updated`);
-  // }
-  // reloadAsync();
+  }
+  reloadAsync();
 }
 
 async function handleDeleteTemplate(slotProps: ColumnRowSlots) {
