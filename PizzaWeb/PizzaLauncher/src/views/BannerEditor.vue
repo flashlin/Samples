@@ -5,6 +5,8 @@
       style="{`with:600px; height:300px;`}
     /> -->
 
+    Banners
+
     <BlockUI :blocked="state.isBlocked">
       <DataTable
         :value="state.templateList"
@@ -120,6 +122,7 @@ import {
   ITemplateData,
   IBannerTemplateEntity,
   ITemplateVariable,
+IBannerSetting,
 } from "@/models/Api";
 //import PreviewFrame from "@/components/PreviewFrame";
 import BlockUI from "primevue/blockui";
@@ -147,7 +150,7 @@ const state = reactive({
   isEdit: false,
   indexPage: 0,
   isBlocked: false,
-  templateList: [] as ITemplateData[],
+  bannerList: [] as IBannerSetting[],
   templateVariableOptions: [
     { label: "String", value: "String" },
     { label: "Url(production)", value: "Url(production)" },
@@ -163,8 +166,8 @@ const api = new BannerApi();
 
 const reloadAsync = async () => {
   state.isBlocked = true;
-  let resp = await api.getAllTemplatesAsync(state.indexPage);
-  state.templateList = resp;
+  let resp = await api.getBannerSettingsAsync(state.indexPage);
+  state.bannerList = resp;
   state.isBlocked = false;
 }
 
@@ -187,24 +190,26 @@ function handleSearchVarType(event: AutoCompleteCompleteEvent){
 }
 
 function handleAddTemplate() {
-  state.templateList.push({
+  state.bannerList.push({
     id: 0,
     templateName: "unknown",
-    templateContent: "<div></div>",
+    name: "bannerName",
+    orderId: 0,
     variables: [],
+    lastModifiedTime: "",
   });
 }
 
 async function handleApplyAddTemplate(slotProps: ColumnRowSlots) {
-  const template = state.templateList[slotProps.index];
-  if (template.id === 0) {
-    await api.addTemplateAsync(template);
-    toastInfo(`Template '${template.templateName}' added`);
-  } else {
-    await api.updateTemplateAsync(template);
-    toastInfo(`Template '${template.templateName}' updated`);
-  }
-  reloadAsync();
+  // const template = state.templateList[slotProps.index];
+  // if (template.id === 0) {
+  //   await api.addTemplateAsync(template);
+  //   toastInfo(`Template '${template.templateName}' added`);
+  // } else {
+  //   await api.updateTemplateAsync(template);
+  //   toastInfo(`Template '${template.templateName}' updated`);
+  // }
+  // reloadAsync();
 }
 
 async function handleDeleteTemplate(slotProps: ColumnRowSlots) {
@@ -214,9 +219,8 @@ async function handleDeleteTemplate(slotProps: ColumnRowSlots) {
   if (resp) {
     let templateName = slotProps.data.templateName;
     await api.deleteTemplateAsync(templateName);
-    let resp = await api.getAllTemplatesAsync(state.indexPage);
-    state.templateList = resp;
     toastInfo(`Delete ${templateName} Template Success`);
+    await reloadAsync();
     return;
   }
   let templateName = slotProps.data.templateName;

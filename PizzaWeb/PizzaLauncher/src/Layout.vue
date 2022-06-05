@@ -2,7 +2,19 @@
   <div>
     <Toast />
     <ConfirmDialog></ConfirmDialog>
-    Vue3 Sample
+    <Menubar :model="state.items">
+      <template #start>
+        <img alt="logo" src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png" height="40"
+          class="mr-2">
+      </template>
+      <template #item="{ item }">
+        &nbsp;
+        <span @click="handleClickMenuItem(item)">{{ item.label }}</span>
+      </template>
+      <template #end>
+        <InputText placeholder="Search" type="text" />
+      </template>
+    </Menubar>
     <router-view></router-view>
   </div>
 </template>
@@ -15,6 +27,29 @@ import { emitter, IConfirm } from "@/models/AppToast";
 import ConfirmPopup from "primevue/confirmpopup";
 import ConfirmDialog from 'primevue/confirmdialog';
 import { useConfirm } from "primevue/useconfirm";
+import Menubar from 'primevue/menubar';
+import { MenuItem } from "primevue/menuitem";
+import router from "./Router";
+
+const state = reactive({
+  items: [
+    {
+      label: 'Template',
+      key: '/',
+      icon: 'pi pi-fw pi-file',
+    },
+    {
+      label: 'Banner',
+      key: '/banners',
+      icon: 'pi pi-fw pi-file',
+    }
+  ],
+});
+
+function handleClickMenuItem(item: MenuItem)
+{
+  router.push(item.key!);
+}
 
 onMounted(() => {
   const toast = useToast();

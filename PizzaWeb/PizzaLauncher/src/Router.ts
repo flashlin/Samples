@@ -1,11 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
 import TemplateEditor from "./views/TemplateEditor.vue";
+import BannerEditor from "./views/BannerEditor.vue";
 
 const basePath = "/dist/";
 const router = createRouter({
     history: createWebHistory(basePath),
     routes: [
         {path: "/", component: TemplateEditor },
+        {path: "/banners", component: BannerEditor },
     ]
 });
 
