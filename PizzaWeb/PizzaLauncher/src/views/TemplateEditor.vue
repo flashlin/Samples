@@ -1,9 +1,9 @@
 <template>
   <div>
-    <!-- <PreviewFrame
-      v-on:content="state.previewContent"
-      style="{`with:600px; height:300px;`}
-    /> -->
+    <PreviewFrame
+      v-model:content="state.previewContent"
+      :style="{with:'600px', height:'300px'}"
+    />
 
     <BlockUI :blocked="state.isBlocked">
       <DataTable :value="state.templateList" dataKey="templateName" editMode="cell" class="editable-cells-table"
@@ -41,6 +41,8 @@
             <Button icon="pi pi-save" @click="handleApplyAddTemplate(slotProps)" />
             &nbsp;
             <Button icon="pi pi-trash" @click="handleDeleteTemplate(slotProps)" />
+            &nbsp;
+            <Button icon="pi pi-id-card" @click="handlePreviewTemplate(slotProps)" />
           </template>
         </Column>
         <template #footer> In {{ state.indexPage }} Index. </template>
@@ -93,7 +95,7 @@ import {
   IBannerTemplateEntity,
   ITemplateVariable,
 } from "@/models/Api";
-//import PreviewFrame from "@/components/PreviewFrame";
+import PreviewFrame from "@/components/PreviewFrame.vue";
 import BlockUI from "primevue/blockui";
 import Button from "primevue/button";
 import DataTable, {
@@ -169,6 +171,12 @@ async function handleApplyAddTemplate(slotProps: ColumnRowSlots) {
     toastInfo(`Template '${template.templateName}' updated`);
   }
   reloadAsync();
+}
+
+function handlePreviewTemplate(slotProps: ColumnRowSlots)
+{
+  const template = state.templateList[slotProps.index];
+  state.previewContent = template.templateContent;
 }
 
 async function handleDeleteTemplate(slotProps: ColumnRowSlots) {
