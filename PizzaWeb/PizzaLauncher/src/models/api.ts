@@ -1,4 +1,5 @@
 import Axios, { AxiosError, AxiosResponse } from "axios";
+import { toHandlers } from "vue";
 import { toastError } from "./AppToast";
 
 export const AllIsoLangCodes = [
@@ -98,6 +99,25 @@ export interface IBannerResxEntity {
   content: string;
 }
 
+export interface IGetResxDataReq {
+  resxName: string;
+  varType: string;
+}
+
+export interface IUpsertResxReq {
+  resxName: string;
+  varType: string;
+  contentList: IVariableResx[];
+}
+
+export interface IUpdateBannerVariableOption
+{
+    bannerName: string;
+    varName: string;
+    varType: string;
+    resxName: string;
+}
+
 export class BannerApi {
   // let apiUrl = "http://localhost:5129";
   _axios = Axios.create({
@@ -156,10 +176,22 @@ export class BannerApi {
     );
   }
 
-  getResxByVarTypeAsync(varType: string) {
-    return this.postQueryAsync<IBannerResxEntity[]>("banner/getResxByVarType", 
+  getResxNamesAsync(varType: string) {
+    return this.postQueryAsync<IBannerResxEntity[]>("banner/getResxNames", 
       varType
     );
+  }
+
+  getResxDataAsync(req: IGetResxDataReq): Promise<IBannerResxEntity[]> {
+    return this.postQueryAsync<IBannerResxEntity[]>("banner/getResxData", req);
+  }
+
+  upsertResxAsync(req: IUpsertResxReq) {
+    return this.postAsync("banner/upsertResx", req);
+  }
+
+  updateBannerVariableOptionAsync(data: IUpdateBannerVariableOption) {
+    return this.postAsync("banner/updateBannerVariableOption", data);
   }
 
   private async postAsync(url: string, data: any): Promise<AxiosResponse> {

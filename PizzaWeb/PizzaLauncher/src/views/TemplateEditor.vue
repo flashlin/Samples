@@ -7,7 +7,9 @@
 
     <BlockUI :blocked="state.isBlocked">
       <DataTable :value="state.templateList" dataKey="templateName" editMode="cell" class="editable-cells-table"
-        @cell-edit-complete="handleCellEditComplete" v-model:expandedRows="state.expandedRows" @rowExpand="onRowExpand"
+        @cell-edit-complete="handleCellEditComplete" 
+        v-model:expandedRows="state.expandedRows" 
+        @rowExpand="onRowExpand"
         @rowCollapse="onRowCollapse" :lazy="true" :rowHover="true" responsiveLayout="scroll">
         <template #header>
           <div class="flex justify-content-center align-items-center">

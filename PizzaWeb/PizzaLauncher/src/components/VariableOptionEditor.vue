@@ -7,7 +7,7 @@
 
     <BlockUI :blocked="state.isBlocked">
       <DataTable
-        :value="state.variablesOptions"
+        :value="state.modelValue"
         editMode="cell"
         class="editable-cells-table"
         @cell-edit-complete="handleCellEditComplete"
@@ -18,7 +18,6 @@
       >
         <template #header>
           <div class="flex justify-content-center align-items-center">
-            <h5 class="m-0">All Variable Options</h5>
             <span>
               <Button icon="pi pi-refresh" @click="reloadAsync"/>
             </span>
@@ -30,34 +29,37 @@
         <Column field="resxName" header="Resx Key Name">
           <template #editor="slotProps">
             <ComboSelect v-model="slotProps.data.resxName" 
-              :options="getResxByVarTypeAsync(slotProps.data.varType)" />
+              :options="() => getResxNamesAsync(slotProps.data.varType)" />
           </template>
         </Column>
         <Column header="Actions">
           <template #body="slotProps">
             <Button
               icon="pi pi-plus-circle"
-              @click="handleAddResx(slotProps)"
+              @click="handleAddResx()"
             />
             &nbsp;
             <Button
               icon="pi pi-save"
               @click="handleApplyVariableSetting(slotProps)"
             />
-            &nbsp;
-            <Button
-              icon="pi pi-trash"
-              @click="handleRestoreVariableSetting(slotProps)"
-            />
           </template>
         </Column>
+        <template #expansion="slotProps">
+          <div class="orders-subtable">
+            <ResxTable 
+              :resxName="slotProps.data.resxName"
+              :varType="slotProps.data.varType"
+              v-model="slotProps.data.resxList" />
+          </div>
+        </template>
       </DataTable>
     </BlockUI>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { onMounted, PropType, reactive, ref } from "vue";
 import {
   BannerApi,
   GetBannerReq,
@@ -69,6 +71,7 @@ IAddBanner,
 IVariableOption,
 IBannerVariable,
 IVariableResx,
+IGetResxDataReq,
 } from "@/models/Api";
 //import PreviewFrame from "@/components/PreviewFrame";
 import BlockUI from "primevue/blockui";
@@ -84,6 +87,9 @@ import AutoComplete, { AutoCompleteCompleteEvent } from "primevue/autocomplete";
 import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
 import Editor from "@/components/Editor.vue";
+import ResxTable from "@/components/ResxTable.vue";
+import { IOption } from "@/typings/ui-typeings";
+import ComboSelect from "@/components/ComboSelect.vue";
 
 interface IBannerVariableSetting {
   varName: string;
@@ -94,15 +100,20 @@ interface IBannerVariableSetting {
 
 const props = defineProps({
   modelValue: {
-    type: Object,
+    type: Object as PropType<IBannerVariableSetting[]>,
     default: () => ([] as IBannerVariable[]),
   },
+  bannerName: {
+    type: String as PropType<string>,
+    required: true,
+    default: "",
+  }
 });
 
 const state = reactive({
   isEdit: false,
   isBlocked: false,
-  variablesOptions: props.modelValue as IBannerVariableSetting[],
+  modelValue: props.modelValue,
   expandedRows: [] as IVariableResx[],
   bannerIdSelected: "",
   previewContent: "",
@@ -115,8 +126,12 @@ const reloadAsync = async () => {
   state.isBlocked = false;
 }
 
-async function getResxByVarTypeAsync(varType: string) {
-  return await api.getResxByVarTypeAsync(varType);
+async function getResxNamesAsync(varType: string) {
+  let resx = await api.getResxNamesAsync(varType);
+  return resx.map(x => ({
+     label: x.resxName,
+     value: x.resxName,
+  } as IOption));
 }
 
 function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
@@ -124,7 +139,7 @@ function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
   data[field] = newValue;
 }
 
-function handleAddResx(resxName: string) {
+function handleAddResx() {
   
 }
 
@@ -141,16 +156,15 @@ function handleSearchVarType(event: AutoCompleteCompleteEvent){
   // }, 250);
 }
 
-
 async function handleApplyVariableSetting(slotProps: ColumnRowSlots) {
-  // const banner = state.bannerList[slotProps.index];
-  // if (banner.id === 0) {
-  //   await api.addBannerAsync(banner);
-  //   toastInfo(`Banner '${banner.bannerName}' added`);
-  // } else {
-  //   await api.updateBannerAsync(banner);
-  //   toastInfo(`Banner '${banner.templateName}' updated`);
-  // }
+  const variableSetting = state.modelValue[slotProps.index];
+  await api.updateBannerVariableOptionAsync({
+    bannerName: props.bannerName,
+    varName: variableSetting.varName,
+    varType: variableSetting.varType,
+    resxName: variableSetting.resxName,
+  });
+  toastInfo(`Banner '${props.bannerName}' ${variableSetting.varName} updated`);
   // reloadAsync();
 }
 

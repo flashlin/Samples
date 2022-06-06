@@ -17,5 +17,8 @@ public interface IPizzaRepo
     List<string> GetTemplateNames();
     List<BannerSetting> GetBannersSettingPage(GetBannersSettingPageReq req);
     void UpdateBannerSetting(UpdateBannerSettingReq req);
-    List<BannerResxEntity> GetResxByVarType(string varType);
+    List<BannerResxEntity> GetResxNames(string varType);
+    List<BannerResxEntity> GetResxData(GetResxDataReq req);
+    void UpsertResx(UpsertResxReq req);
+    void UpdateBannerVariableOption(UpdateBannerVariableOptionReq req);
 }

@@ -58,7 +58,8 @@
         <template #expansion="slotProps">
           <div class="orders-subtable">
             <h5>Variables for {{ slotProps.data.bannerName }}</h5>
-            <VariableOptionEditor v-model="slotProps.data.variables" />
+            <VariableOptionEditor v-model="slotProps.data.variables" 
+              :bannerName="slotProps.data.bannerName" />
           </div>
         </template>
       </DataTable>

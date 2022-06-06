@@ -62,3 +62,10 @@ CREATE TYPE TVP_ResxNameVarType AS TABLE  (
     ResxName varchar(100),
     VarType varchar(40)
     )
+
+CREATE TYPE TVP_Resx AS TABLE  (
+    ResxName varchar(100),
+    VarType varchar(40),
+    ISOLangCode varchar(30),
+    Content nvarchar(400)
+)

@@ -48,6 +48,11 @@ namespace PizzaWeb.Controllers
             _pizzaRepo.AddBanner(req);
         }
 
+        public void UpdateBannerVariableOption(UpdateBannerVariableOptionReq req)
+        {
+            _pizzaRepo.UpdateBannerVariableOption(req);
+        }
+
         public List<string> GetTemplateNames()
         {
             return _pizzaRepo.GetTemplateNames();
@@ -97,10 +102,46 @@ namespace PizzaWeb.Controllers
             return _pizzaRepo.GetBannersData(req);
         }
 
-        public List<BannerResxEntity> GetResxByVarType([FromBody] string varType)
+        public List<BannerResxEntity> GetResxNames([FromBody] string varType)
         {
-            return _pizzaRepo.GetResxByVarType(varType);
+            return _pizzaRepo.GetResxNames(varType);
         }
+
+        public List<BannerResxEntity> GetResxData(GetResxDataReq req)
+        {
+            return _pizzaRepo.GetResxData(req);
+        }
+
+        public void UpsertResx(UpsertResxReq req)
+        {
+            _pizzaRepo.UpsertResx(req);
+        }
+    }
+
+    public class UpdateBannerVariableOptionReq
+    {
+        public string BannerName { get; set; } = String.Empty;
+        public string VarName { get; set; } = String.Empty;
+        public string ResxName { get; set; } = String.Empty;
+    }
+
+    public class ResxContent
+    {
+        public string IsoLangCode { get; set; } = "en-US";
+        public string Content { get; set; } = String.Empty;
+    }
+
+    public class UpsertResxReq
+    {
+        public string ResxName { get; set; } = String.Empty;
+        public string VarType { get; set; } = "String";
+        public List<ResxContent> ContentList { get; set; } = new List<ResxContent>();
+    }
+
+    public class GetResxDataReq
+    {
+        public string ResxName { get; set; } = String.Empty;
+        public string VarType { get; set; } = "String";
     }
 
     public class UpdateBannerSettingReq

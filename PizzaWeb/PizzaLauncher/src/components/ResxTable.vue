@@ -1,22 +1,22 @@
 <template>
   <div>
     <BlockUI :blocked="state.isBlocked">
-      <DataTable :value="state.resx.resxList" editMode="cell" class="editable-cells-table"
+      <DataTable :value="state.modelValue" editMode="cell" key="isoLangCode" class="editable-cells-table"
         @cell-edit-complete="handleCellEditComplete" :lazy="true" :rowHover="true" responsiveLayout="scroll">
         <template #header>
           <div class="flex justify-content-center align-items-center">
-            <h5 class="m-0">All Resx Options</h5>
+            <h5 class="m-0">All Contents for ResxName:'{{ props.resxName }}' VarType:'{{ props.varType }}'</h5>
             <span>
               <Button icon="pi pi-refresh" @click="reloadAsync" />
-              <Button icon="pi pi-save" @click="handleAddResx" />
+              <Button icon="pi pi-plus" @click="handleAddResx" />
+              <Button icon="pi pi-save" @click="handleSaveResxAsync" />
             </span>
           </div>
         </template>
-        <Column :expander="true" headerStyle="width: 1rem" />
         <Column field="isoLangCode" header="IsoLangCode">
           <template #editor="slotProps">
             <ComboSelect v-model="slotProps.data.isoLangCode"
-              :options="getIsoLangCode" />
+              :options="() => getAvailableIsoLangCodesOptionsAsync(slotProps.data)" />
           </template>
         </Column>
         <Column field="content" header="Content">
@@ -26,8 +26,6 @@
         </Column>
         <Column header="Actions">
           <template #body="slotProps">
-            <Button icon="pi pi-save" @click="handleSaveResx(slotProps)" />
-            &nbsp;
             <Button icon="pi pi-trash" @click="handleDeleteResx(slotProps)" />
           </template>
         </Column>
@@ -48,7 +46,7 @@ import {
   IVariableOption,
   IBannerVariable,
   IVariableResx,
-AllIsoLangCodes,
+  AllIsoLangCodes,
 } from "@/models/Api";
 import BlockUI from "primevue/blockui";
 import Button from "primevue/button";
@@ -62,10 +60,23 @@ import InputText from "primevue/inputtext";
 import AutoComplete, { AutoCompleteCompleteEvent } from "primevue/autocomplete";
 import { confirmPopupAsync, toastInfo } from "@/models/AppToast";
 import { ColumnRowSlots } from "@/typings/primevue-typings";
+import ComboSelect from "@/components/ComboSelect.vue";
+import { IOption } from "@/typings/ui-typeings";
+import { BannerApi } from "@/models/Api";
+
+const api = new BannerApi();
 
 const props = defineProps({
+  resxName: {
+    type: String,
+    required: true,
+  },
+  varType: {
+    type: String,
+    required: true,
+  },
   modelValue: {
-    type: Object as PropType<IBannerVariable>,
+    type: Object as PropType<IVariableResx[]>,
     default: () => ([]),
   },
 });
@@ -73,7 +84,7 @@ const props = defineProps({
 const state = reactive({
   isEdit: false,
   isBlocked: false,
-  resx: props.modelValue,
+  modelValue: props.modelValue,
 });
 
 const reloadAsync = async () => {
@@ -86,8 +97,13 @@ function handleCellEditComplete(event: DataTableCellEditCompleteEvent) {
   data[field] = newValue;
 }
 
-function handleSaveResx(slotProps: ColumnRowSlots) {
-  let { data } = slotProps;
+async function handleSaveResxAsync() {
+  await api.upsertResxAsync({
+    resxName: props.resxName,
+    varType: props.varType,
+    contentList: state.modelValue,
+  });
+  toastInfo(`${props.resxName} '${props.varType}' Saved`);
 }
 
 function handleDeleteResx(slotProps: ColumnRowSlots) {
@@ -106,15 +122,35 @@ function onRowCollapse(event: DataTableRowCollapseEvent) {
 }
 
 function handleAddResx() {
-  let isoLangCodes = getIsoLangCode();
+  let isoLangCodes = getAvailableIsoLangCodes();
+  if (isoLangCodes.length == 0) {
+    return;
+  }
+  state.modelValue.push({
+    isoLangCode: isoLangCodes[0],
+    content: "",
+  });
 }
 
-function getIsoLangCode() {
-  let currentAllIsoLangCodes = state.resx.resxList.map(item =>{
+function getAvailableIsoLangCodesOptionsAsync(resx?: IVariableResx): Promise<IOption[]> {
+  return new Promise((resolve)=>{
+    let isoLangCodes = getAvailableIsoLangCodes(resx);
+    resolve(isoLangCodes.map(x=>({
+      label: x,
+      value: x
+    } as IOption)));
+  });
+}
+
+function getAvailableIsoLangCodes(resx?: IVariableResx) {
+  let currentAllIsoLangCodes = state.modelValue.map(item => {
     return item.isoLangCode;
   });
-  return AllIsoLangCodes.filter(item => {
-    return !currentAllIsoLangCodes.includes(item);
+  return AllIsoLangCodes.filter(isoLangCode => {
+    if (resx != null && resx.isoLangCode == isoLangCode) {
+      return true;
+    }
+    return !currentAllIsoLangCodes.includes(isoLangCode);
   });
 }
 
