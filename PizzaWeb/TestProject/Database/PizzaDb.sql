@@ -14,7 +14,32 @@ CREATE TABLE [dbo].[BannerTemplate]
     [Variables] [nvarchar](4000) NULL,
     [LastModifiedTime] [datetime] NOT NULL
     CONSTRAINT [UK_BannerTemplates] UNIQUE ([TemplateName] ASC)
-    )
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 CREATE TABLE [dbo].[Banner]
 (
