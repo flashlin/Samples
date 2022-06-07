@@ -48,6 +48,7 @@ namespace TestProject
             _db = new PizzaDbContext(factory.Create());
             ExecuteEmbeddedSql("PizzaDb.sql");
             ExecuteEmbeddedSql("SP_GetResxNames.sql");
+            ExecuteEmbeddedSql("SP_UpsertResx.sql");
 
             //             sql = @"
 // delete [dbo].[BannerTemplate]
