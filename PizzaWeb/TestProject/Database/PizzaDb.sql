@@ -16,31 +16,6 @@ CREATE TABLE [dbo].[BannerTemplate]
     CONSTRAINT [UK_BannerTemplates] UNIQUE ([TemplateName] ASC)
 )
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 CREATE TABLE [dbo].[Banner]
 (
     [Id] [int] IDENTITY(1,1) PRIMARY KEY NOT NULL,
@@ -49,7 +24,7 @@ CREATE TABLE [dbo].[Banner]
     [BannerName] [varchar](50) NOT NULL,
     [VariableOptions] [varchar](4000) NOT NULL,
     [LastModifiedTime] [datetime] NOT NULL DEFAULT (getdate()),
-    )
+)
 
 CREATE TABLE [dbo].[Resx]
 (
@@ -59,7 +34,10 @@ CREATE TABLE [dbo].[Resx]
     [ResxName] [varchar](100) NOT NULL,
     [Content] [nvarchar](4000) NOT NULL,
     CONSTRAINT [UK_Resx] UNIQUE ([ISOLangCode] ASC, [ResxName] ASC, [VarType] ASC)
-    )
+)
+
+
+
 
 CREATE TABLE [dbo].[BannerShelf]
 (
@@ -68,7 +46,7 @@ CREATE TABLE [dbo].[BannerShelf]
     [TemplateName] [varchar](50) NOT NULL,
     [TemplateContent] [nvarchar](4000) NOT NULL,
     [OrderId] [int] NOT NULL
-    )
+)
 
 CREATE TABLE [dbo].[VariableShelf]
 (
@@ -78,11 +56,23 @@ CREATE TABLE [dbo].[VariableShelf]
     [ResxName] [varchar](100) NOT NULL,
     [ISOLangCode] [varchar](30) NOT NULL,
     [Content] [nvarchar](4000) NOT NULL
-    )
+)
 
 CREATE INDEX IX_VariableShelf
-    ON [VariableShelf](Uid,ISOLangCode,VarName,ResxName)
+   ON [VariableShelf](Uid,ISOLangCode,VarName,ResxName)
 
+
+
+
+	
+	
+	
+
+
+
+
+
+	
 CREATE TYPE TVP_ResxNameVarType AS TABLE  (
     ResxName varchar(100),
     VarType varchar(40)

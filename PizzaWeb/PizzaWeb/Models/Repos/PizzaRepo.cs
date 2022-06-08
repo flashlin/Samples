@@ -308,22 +308,13 @@ public class PizzaRepo : IPizzaRepo
 									  from tb2 in tb1.BannerVariableOptions
 									  select tb2).ToArray();
 
-		var resxNames = (
+		var resxNamesDict = (
 			 from tb1 in templateVariables
 			 join tb2 in variableOptions on tb1.VarName equals tb2.VarName
-			 select new
-			 {
-				 VarName = tb1.VarName,
-				 ResxName = tb2.ResxName,
-				 VarType = tb1.VarType,
-			 }).ToArray();
-
-		var resxNamesDict = (
-			 from tb1 in resxNames
 			 select new Dictionary<string, object>
 			 {
-					 {"ResxName", tb1.ResxName},
-					 {"VarType", tb1.VarType},
+				 {"ResxName", tb2.ResxName},
+				 {"VarType", tb1.VarType},
 			 }).ToArray();
 
 		var resxNamesTable = resxNamesDict.ToDataTable();

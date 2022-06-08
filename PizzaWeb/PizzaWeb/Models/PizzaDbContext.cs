@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -27,10 +28,17 @@ namespace PizzaWeb.Models
 		public DbSet<BannerShelfEntity> BannerShelf => Set<BannerShelfEntity>();
 		public DbSet<VariableShelfEntity> VariableShelf => Set<VariableShelfEntity>();
 
+
+		public IEnumerable<T> Query<T>(string sql, object? data = null)
+		{
+			var conn = Database.GetDbConnection();
+			return conn.Query<T>(sql, data);
+		}
+
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			var templateVariablesConverter = new ValueConverter<List<TemplateVariable>, String>(
-				  model =>_json.Serialize(model.ToDictionary(x => x.VarName)),
+				  model => _json.Serialize(model.ToDictionary(x => x.VarName)),
 				  value => _json.Deserialize<Dictionary<string, TemplateVariable>>(value).Values.ToList());
 
 			var templateVariablesComparer = new ValueComparer<List<TemplateVariable>>(
