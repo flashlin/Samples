@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome WebSite1</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<span id="msg">Loading</span>
+
+<script>
+(async function(){
+    let resp = await fetch('/api/WeatherForecast');
+    let json = await resp.json();
+    let text = JSON.stringify(json);
+    document.getElementById('msg').innerText = text;
+}());
+</script>

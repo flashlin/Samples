@@ -9,7 +9,6 @@ using T1.AspNetCore.FileProviders.Virtual;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllersWithViews()
 		.AddRazorRuntimeCompilation(options =>
 		{
@@ -18,6 +17,18 @@ builder.Services.AddControllersWithViews()
 			var dynamicFileProvider = new DynamicBannerTemplateFileProvider(connectionString);
 			options.FileProviders.Add(new DynamicVirtualFileProvider(dynamicFileProvider));
 		});
+builder.Services.AddViewToStringRendererService();
+
+
+
+
+
+
+
+
+
+
+
 
 builder.Services.AddTransient<IJsonConverter, JsonConverter>();
 builder.Services.Configure<PizzaDbConfig>(builder.Configuration.GetSection("DbConfig"));
@@ -31,7 +42,6 @@ builder.Services.AddDbContextPool<PizzaDbContext>(o =>
 		.GetValue<string>("ConnectionString")));
 //builder.Services.AddSingleton<IRepositoryFactory, RepositoryFactory>();
 //builder.Services.AddTransient(sp => ActivatorUtilities.CreateInstance<PizzaDbContext>(sp));
-builder.Services.AddViewToStringRendererService();
 
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";

@@ -91,16 +91,7 @@ namespace PizzaWeb.Models.Banner
 				RegexPattern.Group("id", "[^/]+") +
 				".banner-template$";
 			var rg = new Regex(pattern);
-			var match = rg.Match(subPath);
-			return match;
-		}
-
-		private string GetFileName(string relativeUrl)
-		{
-			var baseUri = new Uri("http://www.mrbrain.com/");
-			var myUri = new Uri(baseUri, relativeUrl);
-			var fileName = Path.GetFileName(myUri.LocalPath);
-			return fileName;
+			return rg.Match(subPath);
 		}
 
 		public void SignalChangeToken(string subPath)
@@ -121,6 +112,26 @@ namespace PizzaWeb.Models.Banner
 
 			template.LastModifiedTime = DateTime.Now;
 			_db.SaveChanges();
+		}
+
+
+
+
+
+
+
+		
+
+
+
+
+		
+		private string GetFileName(string relativeUrl)
+		{
+			var baseUri = new Uri("http://www.mrbrain.com/");
+			var myUri = new Uri(baseUri, relativeUrl);
+			var fileName = Path.GetFileName(myUri.LocalPath);
+			return fileName;
 		}
 	}
 }

@@ -22,6 +22,26 @@ namespace PizzaWeb.Controllers
             _pizzaRepo = pizzaRepo;
         }
 
+        public async Task<string> GetBanner(GetBannersDataReq req)
+        {
+            var bannerData = _pizzaRepo.GetBannersData(req)
+               .FirstOrDefault();
+
+            if (bannerData == null)
+            {
+                return String.Empty;
+            }
+
+            return await _viewToStringRenderer.RenderViewToStringAsync<object>(
+                @$"/banner-template:/{bannerData.Uid}.banner-template",
+                bannerData);
+        }
+
+
+
+
+		
+
         public void AddTemplate(TemplateData data)
         {
             _pizzaRepo.AddBannerTemplate(data);
@@ -71,25 +91,6 @@ namespace PizzaWeb.Controllers
         public List<BannerSetting> GetBannerSettings(GetBannersSettingReq req)
         {
             return _pizzaRepo.GetBannersSetting(req);
-        }
-
-        public async Task<string> GetBanner(GetBannersDataReq req)
-        {
-            var bannerData = _pizzaRepo.GetBannersData(req).FirstOrDefault();
-
-            if (bannerData == null)
-            {
-                return String.Empty;
-            }
-
-            var bannerLogical = new BannerLogical[]
-            {
-            };
-
-            var content = await _viewToStringRenderer.RenderViewToStringAsync<object>(
-                @$"/banner-template:/{bannerData.Uid}.banner-template",
-                bannerData);
-            return content;
         }
 
         public void ApplyBanner(ApplyBannerReq req)
