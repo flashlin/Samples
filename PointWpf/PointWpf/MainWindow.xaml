@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PointWpf"
         mc:Ignorable="d"
-        Title="MainWindow" 
+        Title="DrawPen" 
 		  Height="80" Width="100"
 		  WindowStyle="ToolWindow"
 		  Topmost="True"

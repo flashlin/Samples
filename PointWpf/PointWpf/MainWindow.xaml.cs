@@ -30,13 +30,8 @@ namespace PointWpf
 			InitializeComponent();
 		}
 
-		private void handleKeyDown(object sender, KeyEventArgs e)
+		private void handleClickStart(object sender, RoutedEventArgs e)
 		{
-			if (e.Key != Key.F9)
-			{
-				return;
-			}
-
 			ToggleDrawWindow();
 		}
 
@@ -55,11 +50,6 @@ namespace PointWpf
 			_drawWindow?.Close();
 		}
 
-		private void handleClickStart(object sender, RoutedEventArgs e)
-		{
-			ToggleDrawWindow();
-		}
-
 		private void ToggleDrawWindow()
 		{
 			if (_start)
@@ -70,6 +60,16 @@ namespace PointWpf
 			{
 				OpenDrawWindow();
 			}
+		}
+		
+		private void handleKeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key != Key.F9)
+			{
+				return;
+			}
+
+			ToggleDrawWindow();
 		}
 
 		private void handleClosing(object sender, System.ComponentModel.CancelEventArgs e)
