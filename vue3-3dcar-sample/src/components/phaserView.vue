@@ -4,41 +4,41 @@
 </template>
 
 <script setup lang="ts">
-import Phaser, { Scene } from 'phaser';
+import Phaser from 'phaser';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 const gameRef = ref<HTMLElement>();
 
 interface PhaserViewProps {
-	//modelValue: string;
-   sceneList: Phaser.Scene[];
+  //modelValue: string;
+  sceneList: Phaser.Scene[]
 }
-const props = defineProps<PhaserViewProps>()
+const props = defineProps<PhaserViewProps>();
 
 const config = {
-   type: Phaser.AUTO,
-   parent: gameRef.value,
-   width: 800,
-   height: 600,
-   scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH
-   },
-   scene: props.sceneList,
+  type: Phaser.AUTO,
+  parent: gameRef.value,
+  width: 800,
+  height: 600,
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  scene: props.sceneList,
 } as Phaser.Types.Core.GameConfig;
 
 class Game extends Phaser.Game {
-  constructor () {
-    super(config)
+  constructor() {
+    super(config);
   }
 }
 
 let game: Game;
-onMounted(() =>{
-   game = new Game();
-})
+onMounted(() => {
+  game = new Game();
+});
 
-onUnmounted(()=>{
-   game.destroy(true);
-})
+onUnmounted(() => {
+  game.destroy(true);
+});
 </script>
