@@ -1,4 +1,5 @@
 import { ConfigEnv, UserConfigExport } from "vite";
+import checker from 'vite-plugin-checker';
 import vue from "@vitejs/plugin-vue";
 import legacy from "@vitejs/plugin-legacy";
 import viteCompression from "vite-plugin-compression";
@@ -6,7 +7,8 @@ import { fileURLToPath, URL } from "url";
 
 export default ({ mode }: ConfigEnv): UserConfigExport => {
   const isProd = mode === "production";
-  const plugins = [vue(), legacy()];
+  const plugins = [checker({ vueTsc: true }), vue(), legacy()];
+  //const plugins = [vue(), legacy()];
   if (isProd) {
     plugins.push(viteCompression());
   }
