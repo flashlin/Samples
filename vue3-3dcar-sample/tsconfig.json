@@ -16,7 +16,8 @@
       "jsxFactory": "h",
       "jsxFragmentFactory": "Fragment",
       "typeRoots": [
-         "./node_modules/phaser/types"
+         "node_modules/@types",
+			"node_module/phaser/types"
       ],
       "types": [
          "node",
