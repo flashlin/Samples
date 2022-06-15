@@ -95,13 +95,7 @@ export default class MainScene extends Scene {
   preload() {
     this.load.image("logo", "assets/game/phaser-logo.png");
 
-    this.load.scenePlugin({
-      key: 'Camera3DPlugin',
-      url: 'plugins/camera3d.min.js',
-      sceneKey: 'cameras3d'
-    });
-
-    this.load.image('particle', 'assets/game/blog.png');
+    this.load.atlas('atlas', 'assets/game/car.png', 'assets/game/car.json');
   }
 
   camera: any;
@@ -109,59 +103,10 @@ export default class MainScene extends Scene {
   create() {
     //this.add.image(400, 300, 'logo');
     const graphics = this.add.graphics();
-    const roadWidth = 200;
-    const roadHeight = 50;
-    const roadX = 100;
-    const roadY = 100;
-    const p1 = { x:roadX, y:roadY, z:0 };
-    const p2 =  { x:roadX + roadWidth, y:roadY, z:0 };
-    const p3 = { x:roadX + roadWidth, y:roadY + roadHeight, z:20 };
-    const p4 = { x:roadX, y: roadY + roadHeight, z: 20};
-    renderPolygon(graphics, [p1,p2,p3,p4], "0x397d46");
 
-    const screen = {
-      width: 1024,
-      height: 800
-    };
-
-    const camera: ICamera = {
-      x: 400, //screen.width / 2,
-      y: 600, //screen.height / 2,
-      z: -400,
-    };
-    const d1 = project3D(camera, p1, screen);
-    const d2 = project3D(camera, p2, screen);
-    const d3 = project3D(camera, p3, screen);
-    const d4 = project3D(camera, p4, screen);
-
-    console.table(d1)
-
-    renderPolygon(graphics, [d1, d2, d3, d4], "0x390046");
-
-
-    const rectList = function* () {
-      yield { x: 100, y: 120, z: 0 }
-      yield { x: 100, y: 120, z: 100 }
-      yield { x: 100, y: 120, z: 200 }
-      yield { x: 100, y: 120, z: 300 }
-    }
-
-    for (var item of rectList()) {
-      const r = add3DRect(camera, item, roadWidth, roadHeight, screen);
-      renderPolygon(graphics, r, "0x595959");
-    }
-
-
-    const rectList2 = function* () {
-      yield { x: -200, y: 120, z: 0 }
-      yield { x: -200, y: 120, z: 100 }
-      yield { x: -200, y: 120, z: 200 }
-      yield { x: -200, y: 120, z: 300 }
-    }
-    for (var item of rectList2()) {
-      const r = add3DRect(camera, item, roadWidth, roadHeight, screen);
-      renderPolygon(graphics, r, "0x095909");
-    }
+    const car1 = this.add.sprite(200, 200, 'atlas', 0);
+    car1.setFlip(true, false);
+    car1.setScale(0.3);
   }
 
   update() {
