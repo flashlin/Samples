@@ -1,6 +1,6 @@
 <template>
-   <div ref="game">
-   </div>
+  <div ref="game">
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -23,6 +23,12 @@ const config = {
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 300 },
+    },
   },
   scene: props.sceneList,
 } as Phaser.Types.Core.GameConfig;

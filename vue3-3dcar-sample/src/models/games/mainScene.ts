@@ -15,6 +15,7 @@ interface ICamera {
   x: number;
   y: number;
   z: number;
+  depth: number;
 }
 
 interface IScreen {
@@ -26,40 +27,44 @@ function project3D(
   camera: ICamera,
   worldPoint: IVector3D,
   screen: IScreen
-) : IVector2D {
+): IVector2D {
   const transX = worldPoint.x - camera.x;
   const transY = worldPoint.y - camera.y;
-  const transZ = worldPoint.z - camera.z;
+  //const transZ = worldPoint.z - camera.z;
 
-  const scale = camera.z / transZ;
-  const projectedX = scale * transX;
-  const projectedY = scale * transY;
-  //const projectedZ = scale * transZ;
+  const scale = camera.depth / (worldPoint.z - camera.z);
+  const projectedX = ((1 + scale * transX) * screen.width) / 2;
+  const projectedY = ((1 - scale * transY) * screen.height) / 2;
 
   return {
     x: projectedX,
     y: projectedY,
-  }
+  };
 }
 
 function project3DRect(camera: ICamera, rect: IVector3D[], screen: IScreen) {
-  return rect.map(x => project3D(camera, x, screen));
+  return rect.map((x) => project3D(camera, x, screen));
 }
 
 function addRect(point: IVector3D, width: number, height: number) {
-  const p1 = { x: point.x, y: point.y, z:point.z };
-  const p2 = { x: point.x + width, y: point.y, z:point.z };
-  const p3 = { x: point.x + width, y: point.y, z:point.z + height };
-  const p4 = { x: point.x, y: point.y, z:point.z + height };
+  const p1 = { x: point.x, y: point.y, z: point.z };
+  const p2 = { x: point.x + width, y: point.y, z: point.z };
+  const p3 = { x: point.x + width, y: point.y, z: point.z + height };
+  const p4 = { x: point.x, y: point.y, z: point.z + height };
   return [p1, p2, p3, p4];
 }
 
-function add3DRect(camera: ICamera, point: IVector3D, width: number, height: number, screen: IScreen) {
+function add3DRect(
+  camera: ICamera,
+  point: IVector3D,
+  width: number,
+  height: number,
+  screen: IScreen
+) {
   const r1 = addRect(point, width, height);
   const projectedr1 = project3DRect(camera, r1, screen);
   return projectedr1;
 }
-
 
 function renderPolygon(graphics, rect: IVector2D[], color) {
   let polygon = new Phaser.Geom.Polygon(rect);
@@ -67,8 +72,24 @@ function renderPolygon(graphics, rect: IVector2D[], color) {
   graphics.fillPoints(polygon.points, true);
 }
 
-function renderPolygon1(graphics, p1: IVector2D, p2: IVector2D, p3: IVector2D, p4: IVector2D, color) {
-  let polygon = new Phaser.Geom.Polygon([p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y]);
+function renderPolygon1(
+  graphics,
+  p1: IVector2D,
+  p2: IVector2D,
+  p3: IVector2D,
+  p4: IVector2D,
+  color
+) {
+  let polygon = new Phaser.Geom.Polygon([
+    p1.x,
+    p1.y,
+    p2.x,
+    p2.y,
+    p3.x,
+    p3.y,
+    p4.x,
+    p4.y,
+  ]);
   graphics.fillStyle(color, 1);
   graphics.fillPoints(polygon.points, true);
 
@@ -82,9 +103,39 @@ function renderPolygon1(graphics, p1: IVector2D, p2: IVector2D, p3: IVector2D, p
   // this.scene.graphics.strokePath();
 }
 
+export interface IImageConstructor {
+  scene: Phaser.Scene;
+  x: number;
+  y: number;
+  texture: string | Phaser.Textures.Texture;
+  frame?: string | number;
+}
+
+class Rocket extends Phaser.GameObjects.Image {
+  body: Phaser.Physics.Arcade.Body;
+
+  constructor(aParams: IImageConstructor) {
+    super(aParams.scene, aParams.x, aParams.y, aParams.texture, aParams.frame);
+    this.initPhysics();
+    this.scene.add.existing(this);
+  }
+
+  private initPhysics() {
+    this.scene.physics.world.enable(this);
+    this.body.setVelocity(0, 300); 
+    //this.body.setBounce(1, 1);
+    this.body.setBounce(0, 0.5); //彈回去的比例
+    this.body.setCollideWorldBounds(true);
+  }
+}
 
 export default class MainScene extends Scene {
-  transform: Phaser.Math.Matrix4;
+  platforms : Phaser.Physics.Arcade.StaticGroup;
+  upArrow: Phaser.Input.Keyboard.Key;
+  downArrow: Phaser.Input.Keyboard.Key;
+  leftArrow: Phaser.Input.Keyboard.Key;
+  rightArrow: Phaser.Input.Keyboard.Key;
+  car: Rocket;//'Phaser.GameObjects.Sprite;
 
   constructor() {
     super({
@@ -94,22 +145,50 @@ export default class MainScene extends Scene {
 
   preload() {
     this.load.image("logo", "assets/game/phaser-logo.png");
-
-    this.load.atlas('atlas', 'assets/game/car.png', 'assets/game/car.json');
+    this.load.atlas("atlas", "assets/game/car.png", "assets/game/car.json");
   }
-
-  camera: any;
 
   create() {
     //this.add.image(400, 300, 'logo');
     const graphics = this.add.graphics();
 
-    const car1 = this.add.sprite(200, 200, 'atlas', 0);
-    car1.setFlip(true, false);
-    car1.setScale(0.3);
+    //const car = (this.car = this.add.sprite(200, 200, "atlas", 0));
+    const car = this.car = new Rocket({scene:this, x: 200, y: 200, texture: "atlas", frame: 0});
+    car.setFlip(true, false);
+    car.setScale(0.3);
+    //car.setGravityY(200);
+    //this.physics.world.enable(car, 0);
+
+    this.leftArrow = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.LEFT
+    );
+    this.rightArrow = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.RIGHT
+    );
+    this.upArrow = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.UP
+    );
+    this.downArrow = this.input.keyboard.addKey(
+      Phaser.Input.Keyboard.KeyCodes.DOWN
+    );
+    // leftArrow.on("up", () => {
+    //   car1.x += 2;
+    // });
   }
 
   update() {
-    //this.camera.transformChildren(this.transform);
+    if (this.leftArrow.isDown) {
+      this.car.body.x -= 2;
+    }
+    if (this.rightArrow.isDown) {
+      //this.physics.moveToObject(this.car, {x: this.car.x+2, y: this.car.y}, 1);
+      this.car.body.x += 2;
+    }
+    if (this.upArrow.isDown) {
+      this.car.body.y -= 2;
+    }
+    if (this.downArrow.isDown) {
+      this.car.body.y += 2;
+    }
   }
 }
