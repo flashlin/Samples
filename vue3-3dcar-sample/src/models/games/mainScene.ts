@@ -129,6 +129,13 @@ class Rocket extends Phaser.GameObjects.Image {
   }
 }
 
+class Flame extends Phaser.GameObjects.Image {
+  constructor(aParams: IImageConstructor) {
+    super(aParams.scene, aParams.x, aParams.y, aParams.texture, aParams.frame);
+    this.scene.add.existing(this);
+  }
+}
+
 export default class MainScene extends Scene {
   platforms : Phaser.Physics.Arcade.StaticGroup;
   upArrow: Phaser.Input.Keyboard.Key;
@@ -136,6 +143,7 @@ export default class MainScene extends Scene {
   leftArrow: Phaser.Input.Keyboard.Key;
   rightArrow: Phaser.Input.Keyboard.Key;
   car: Rocket;//'Phaser.GameObjects.Sprite;
+  flame: Flame;
 
   constructor() {
     super({
@@ -146,18 +154,27 @@ export default class MainScene extends Scene {
   preload() {
     this.load.image("logo", "assets/game/phaser-logo.png");
     this.load.atlas("atlas", "assets/game/car.png", "assets/game/car.json");
+    this.load.image("rocket1", "assets/game/rocket1.png");
+    this.load.image("flame", "assets/game/flame.png");
   }
 
   create() {
     //this.add.image(400, 300, 'logo');
     const graphics = this.add.graphics();
 
+    const flame = this.flame = new Flame({scene:this, x: 200, y: 220, texture: "flame" });
+    flame.setScale(0.15);
+    flame.rotation = -0.78;
+
     //const car = (this.car = this.add.sprite(200, 200, "atlas", 0));
-    const car = this.car = new Rocket({scene:this, x: 200, y: 200, texture: "atlas", frame: 0});
-    car.setFlip(true, false);
-    car.setScale(0.3);
+    const car = this.car = new Rocket({scene:this, x: 200, y: 200, texture: "rocket1" });
+    //car.setFlip(true, false);
+    car.setScale(0.15);
+    car.rotation = -0.8;
     //car.setGravityY(200);
     //this.physics.world.enable(car, 0);
+
+
 
     this.leftArrow = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.LEFT
@@ -177,6 +194,8 @@ export default class MainScene extends Scene {
   }
 
   update() {
+
+    this.flame.visible = false;
     if (this.leftArrow.isDown) {
       this.car.body.x -= 2;
     }
@@ -186,9 +205,11 @@ export default class MainScene extends Scene {
     }
     if (this.upArrow.isDown) {
       this.car.body.y -= 2;
+      this.flame.visible = true;
     }
     if (this.downArrow.isDown) {
       this.car.body.y += 2;
     }
+    this.flame.y = this.car.y + 43;
   }
 }
