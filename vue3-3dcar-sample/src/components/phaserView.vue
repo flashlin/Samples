@@ -20,6 +20,10 @@ const config = {
   parent: gameRef.value,
   width: 800,
   height: 600,
+  fps: {
+    target: 30,
+    //forceSetTimeOut: true,
+  },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
