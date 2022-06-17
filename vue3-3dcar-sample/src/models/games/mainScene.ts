@@ -68,7 +68,11 @@ function add3DRect(
   return projectedr1;
 }
 
-function renderPolygon(graphics: Phaser.GameObjects.Graphics, rect: IVector2D[], color: number) {
+function renderPolygon(
+  graphics: Phaser.GameObjects.Graphics,
+  rect: IVector2D[],
+  color: number
+) {
   let polygon = new Phaser.Geom.Polygon(rect);
   graphics.fillStyle(color, 1);
   graphics.fillPoints(polygon.points, true);
@@ -127,6 +131,7 @@ export default class MainScene extends Scene {
     this.load.image("flame", "assets/game/flame.png");
     this.load.image("fireball", "assets/game/fireball.png");
     this.load.image("ground", "assets/game/ground1.png");
+    this.load.image("tree", "assets/game/tree.png");
   }
 
   create() {
@@ -135,39 +140,49 @@ export default class MainScene extends Scene {
     const ground = this.physics.add.staticGroup({
       key: "ground",
       repeat: 200,
-      setXY: { x: 0, y: screen.height-500, stepX: 270 }
+      setXY: { x: 0, y: screen.height - 500, stepX: 270 },
     });
     ground.children.iterate((child) => {
       const item = child as Phaser.Physics.Arcade.Image;
       item.setScale(0.05);
     });
     ground.refresh();
+    
 
     //this.add.image(400, 300, 'logo');
-    const text = this.add.text(10, 10, "fuel", {fontSize: "16px"});
+    const text = this.add.text(10, 10, "fuel", { fontSize: "16px" });
 
-    const flame = this.flame = new Flame({
+    const flame = (this.flame = new Flame({
       scene: this,
       x: 200,
       y: 220,
       texture: "flame",
-    });
+    }));
     flame.setScale(0.15);
     flame.rotation = -0.78;
 
-    const rocket = this.rocket = new Rocket({
+    const rocket = (this.rocket = new Rocket({
       scene: this,
       x: 200,
       y: 200,
       texture: "rocket1",
-    });
+    }));
     //car.setFlip(true, false);
     rocket.setScale(0.15);
     rocket.rotation = -0.8;
 
+    const treeList = this.physics.add.staticGroup();
+    let x = 0;
+    for(let i=0; i<100; i++) {
+      let tree = this.physics.add.staticImage(x, screen.height-550, "tree");
+      tree.setScale(0.5);
+      x += Phaser.Math.FloatBetween(50, 500);
+    }
+    treeList.refresh();
+
     this.cameras.main.setBounds(0, 0, 270 * 200, screen.height);
-    //this.cameras.main.startFollow(rocket, true, 0.5, 0.5 ); 
-    this.cameras.main.startFollow(rocket); 
+    //this.cameras.main.startFollow(rocket, true, 0.5, 0.5 );
+    this.cameras.main.startFollow(rocket);
 
     this.physics.add.collider(this.rocket, ground);
 
