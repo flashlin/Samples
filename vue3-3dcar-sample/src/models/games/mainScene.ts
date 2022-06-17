@@ -117,6 +117,7 @@ export default class MainScene extends Scene {
   rocket!: Rocket;
   flame!: Flame;
   startTime!: number;
+  fireballs!: Phaser.Physics.Arcade.Group;
 
   constructor() {
     super({
@@ -147,7 +148,6 @@ export default class MainScene extends Scene {
       item.setScale(0.05);
     });
     ground.refresh();
-    
 
     //this.add.image(400, 300, 'logo');
     const text = this.add.text(10, 10, "fuel", { fontSize: "16px" });
@@ -173,35 +173,21 @@ export default class MainScene extends Scene {
 
     const treeList = this.physics.add.staticGroup();
     let x = 0;
-    for(let i=0; i<100; i++) {
-      let tree = this.physics.add.staticImage(x, screen.height-550, "tree");
+    for (let i = 0; i < 100; i++) {
+      let tree = this.physics.add.staticImage(x, screen.height - 550, "tree");
       tree.setScale(0.5);
       x += Phaser.Math.FloatBetween(50, 500);
     }
     treeList.refresh();
 
-    this.cameras.main.setBounds(0, 0, 270 * 200, screen.height);
+    this.cameras.main.setBounds(0, 0, 270 * 200, screen.height - 500);
     //this.cameras.main.startFollow(rocket, true, 0.5, 0.5 );
     this.cameras.main.startFollow(rocket);
 
     this.physics.add.collider(this.rocket, ground);
 
-    const fireballs = this.physics.add.group({
-      key: "fireball",
-      repeat: 5,
-      setXY: { x: 400, y: 0, stepX: 100 },
-    });
-    fireballs.children.iterate((child) => {
-      //const item = child as Phaser.GameObjects.Image;
-      const item = child as Phaser.Physics.Arcade.Image;
-      item.setScale(0.1);
-      item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
-      item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
-      //(item as any).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-      //item.setBounce(0.5, 0.5);
-    });
-
-    this.physics.add.overlap(this.rocket, fireballs, this.collectFireball);
+    this.fireballs = this.createFireballList();
+    this.physics.add.overlap(this.rocket, this.fireballs, this.collectFireball);
 
     this.leftArrow = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.LEFT
@@ -219,6 +205,22 @@ export default class MainScene extends Scene {
     //   this.car.updateFlamePower(true);
     //   this.flame.visible = true;
     // });
+  }
+
+  createFireballList() {
+    const fireballs = this.physics.add.group({
+      key: "fireball",
+      repeat: 5,
+      setXY: { x: 400, y: 0, stepX: 100 },
+    });
+    fireballs.children.iterate((child) => {
+      const item = child as Phaser.Physics.Arcade.Image;
+      item.setScale(0.1);
+      item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
+      item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
+      //item.setBounce(0.5, 0.5);
+    });
+    return fireballs;
   }
 
   collectFireball(rocket: any, fireball: any) {
