@@ -141,7 +141,7 @@ export default class MainScene extends Scene {
       const item = child as Phaser.Physics.Arcade.Image;
       item.setScale(0.05);
     });
-    ground.scaleXY(0.05);
+    ground.refresh();
 
     //this.add.image(400, 300, 'logo');
     const text = this.add.text(10, 10, "fuel", {fontSize: "16px"});
@@ -155,7 +155,6 @@ export default class MainScene extends Scene {
     flame.setScale(0.15);
     flame.rotation = -0.78;
 
-    //const car = (this.car = this.add.sprite(200, 200, "atlas", 0));
     const rocket = this.rocket = new Rocket({
       scene: this,
       x: 200,
