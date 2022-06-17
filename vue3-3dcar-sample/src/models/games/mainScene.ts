@@ -111,13 +111,15 @@ export interface IImageConstructor {
   frame?: string | number;
 }
 
-class Rocket extends Phaser.GameObjects.Image {
-  body: Phaser.Physics.Arcade.Body;
+//GameObjectWithBody
+class Rocket extends Phaser.Physics.Arcade.Sprite { //Phaser.GameObjects.Image {
+  //body: Phaser.Physics.Arcade.Body;
   flamePower: number = 0;
   maxFlamePower: number = 10;
   currentVelocity: number = 0;
   addVelocity: number = 0;
   startTime: number = this.getTime();
+  fuel: number = 100;
 
   constructor(aParams: IImageConstructor) {
     super(aParams.scene, aParams.x, aParams.y, aParams.texture, aParams.frame);
@@ -176,13 +178,20 @@ class Rocket extends Phaser.GameObjects.Image {
     }
   }
 
+  // private initPhysics() {
+  //   this.scene.physics.world.enable(this);
+  //   //this.body.maxVelocity.set(300);
+  //   this.body.setVelocity(0, 300);
+  //   //this.body.setBounce(1, 1);
+  //   this.body.setBounce(0, 0.5); //彈回去的比例
+  //   this.body.setCollideWorldBounds(true);
+  // }
+
   private initPhysics() {
     this.scene.physics.world.enable(this);
-    //this.body.maxVelocity.set(300);
-    this.body.setVelocity(0, 300);
-    //this.body.setBounce(1, 1);
-    this.body.setBounce(0, 0.5); //彈回去的比例
-    this.body.setCollideWorldBounds(true);
+    this.setVelocity(0, 300);
+    this.setBounce(0, 0.5); //彈回去的比例
+    this.setCollideWorldBounds(true);
   }
 }
 
@@ -199,7 +208,7 @@ export default class MainScene extends Scene {
   downArrow: Phaser.Input.Keyboard.Key;
   leftArrow: Phaser.Input.Keyboard.Key;
   rightArrow: Phaser.Input.Keyboard.Key;
-  car: Rocket; //'Phaser.GameObjects.Sprite;
+  rocket: Rocket; //'Phaser.GameObjects.Sprite;
   flame: Flame;
   startTime: number;
 
@@ -214,6 +223,7 @@ export default class MainScene extends Scene {
     this.load.atlas("atlas", "assets/game/car.png", "assets/game/car.json");
     this.load.image("rocket1", "assets/game/rocket1.png");
     this.load.image("flame", "assets/game/flame.png");
+    this.load.image("fireball", "assets/game/fireball.png");
   }
 
   create() {
@@ -221,27 +231,44 @@ export default class MainScene extends Scene {
     //this.add.image(400, 300, 'logo');
     const graphics = this.add.graphics();
 
-    const flame = (this.flame = new Flame({
+    const text = this.add.text(10, 10, "fuel", {fontSize: "16px"});
+
+    const flame = this.flame = new Flame({
       scene: this,
       x: 200,
       y: 220,
       texture: "flame",
-    }));
+    });
     flame.setScale(0.15);
     flame.rotation = -0.78;
 
     //const car = (this.car = this.add.sprite(200, 200, "atlas", 0));
-    const car = (this.car = new Rocket({
+    const rocket = this.rocket = new Rocket({
       scene: this,
       x: 200,
       y: 200,
       texture: "rocket1",
-    }));
+    });
     //car.setFlip(true, false);
-    car.setScale(0.15);
-    car.rotation = -0.8;
-    //car.setGravityY(200);
-    //this.physics.world.enable(car, 0);
+    rocket.setScale(0.15);
+    rocket.rotation = -0.8;
+
+    const fireballs = this.physics.add.group({
+      key: "fireball",
+      repeat: 5,
+      setXY: { x: 400, y: 0, stepX: 100 },
+    });
+    fireballs.children.iterate((child) => {
+      //const item = child as Phaser.GameObjects.Image;
+      const item = child as Phaser.Physics.Arcade.Image;
+      item.setScale(0.1);
+      item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
+      item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
+      //(item as any).setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+      //item.setBounce(0.5, 0.5);
+    });
+
+    this.physics.add.overlap(this.rocket, fireballs, this.collectFireball);
 
     this.leftArrow = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.LEFT
@@ -261,37 +288,43 @@ export default class MainScene extends Scene {
     // });
   }
 
+  //collectFireball(rocket: Rocket, fireball: Phaser.Physics.Arcade.Image) {
+  collectFireball(rocket, fireball) {
+    fireball.disableBody(true, true);
+    //rocket.flamePower += 10;
+  }
+
   update() {
     //this.car.body.angularVelocity = 0;
     this.flame.visible = false;
     if (this.leftArrow.isDown) {
-      this.car.x -= 2;
+      this.rocket.x -= 2;
     }
     if (this.rightArrow.isDown) {
       //this.physics.moveToObject(this.car, {x: this.car.x+2, y: this.car.y}, 1);
-      this.car.x += 2;
+      this.rocket.x += 2;
     }
 
     if (this.upArrow.isDown) {
-      this.car.onFlamePower();
+      this.rocket.onFlamePower();
       this.flame.visible = true;
     } else {
-      this.car.offFlamePower();
+      this.rocket.offFlamePower();
     }
 
     if (this.downArrow.isDown) {
       //this.car.body.y += 2;
     }
 
-    if (this.car.flamePower > 0) {
+    if (this.rocket.flamePower > 0) {
       //this.car.body.velocity.y -= this.car.flamePower;
       this.flame.visible = true;
     }
 
-    this.car.updateVelocity();
-    this.car.body.velocity.y = this.car.currentVelocity;
-    this.flame.x = this.car.x;
-    this.flame.y = this.car.y + (43 / 10) * this.car.flamePower;
+    this.rocket.updateVelocity();
+    this.rocket.body.velocity.y = this.rocket.currentVelocity;
+    this.flame.x = this.rocket.x;
+    this.flame.y = this.rocket.y + (43 / 10) * this.rocket.flamePower;
   }
 
   getTime() {
