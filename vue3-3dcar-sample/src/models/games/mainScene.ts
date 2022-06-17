@@ -134,8 +134,8 @@ export default class MainScene extends Scene {
 
     const ground = this.physics.add.staticGroup({
       key: "ground",
-      repeat: 10,
-      setXY: { x: 0, y: screen.height-500, stepX: 100 }
+      repeat: 200,
+      setXY: { x: 0, y: screen.height-500, stepX: 270 }
     });
     ground.children.iterate((child) => {
       const item = child as Phaser.Physics.Arcade.Image;
@@ -165,7 +165,7 @@ export default class MainScene extends Scene {
     rocket.setScale(0.15);
     rocket.rotation = -0.8;
 
-    this.cameras.main.setBounds(0, 0, screen.width, screen.height);
+    this.cameras.main.setBounds(0, 0, 270 * 200, screen.height);
     //this.cameras.main.startFollow(rocket, true, 0.5, 0.5 ); 
     this.cameras.main.startFollow(rocket); 
 

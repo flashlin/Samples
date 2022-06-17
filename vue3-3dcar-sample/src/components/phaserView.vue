@@ -8,7 +8,6 @@ import Phaser from 'phaser';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 const gameView = ref<HTMLElement>();
-
 interface PhaserViewProps {
   //modelValue: string;
   sceneList: Phaser.Scene[]

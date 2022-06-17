@@ -71,6 +71,6 @@ export class Rocket extends Phaser.Physics.Arcade.Sprite {
     this.scene.physics.world.enable(this);
     this.setVelocity(0, 300);
     this.setBounce(0, 0.5); //彈回去的比例
-    this.setCollideWorldBounds(true);
+    //this.setCollideWorldBounds(true);
   }
 }
