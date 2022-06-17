@@ -39,7 +39,7 @@
    },
    "include": [
       "src/**/*.d.ts",
-      "src/main.ts",
+      "src/**/*.ts",
       "tests/**/*.ts",
       "env.d.ts"
    ],

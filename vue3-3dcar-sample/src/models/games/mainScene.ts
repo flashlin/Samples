@@ -1,4 +1,6 @@
 import { Scene } from "phaser";
+import { Flame } from "./Flame";
+import { Rocket } from "./Rocket";
 
 interface IVector3D {
   x: number;
@@ -66,19 +68,19 @@ function add3DRect(
   return projectedr1;
 }
 
-function renderPolygon(graphics, rect: IVector2D[], color) {
+function renderPolygon(graphics: Phaser.GameObjects.Graphics, rect: IVector2D[], color: number) {
   let polygon = new Phaser.Geom.Polygon(rect);
   graphics.fillStyle(color, 1);
   graphics.fillPoints(polygon.points, true);
 }
 
 function renderPolygon1(
-  graphics,
+  graphics: Phaser.GameObjects.Graphics,
   p1: IVector2D,
   p2: IVector2D,
   p3: IVector2D,
   p4: IVector2D,
-  color
+  color: number
 ) {
   let polygon = new Phaser.Geom.Polygon([
     p1.x,
@@ -103,114 +105,14 @@ function renderPolygon1(
   // this.scene.graphics.strokePath();
 }
 
-export interface IImageConstructor {
-  scene: Phaser.Scene;
-  x: number;
-  y: number;
-  texture: string | Phaser.Textures.Texture;
-  frame?: string | number;
-}
-
-//GameObjectWithBody
-class Rocket extends Phaser.Physics.Arcade.Sprite { //Phaser.GameObjects.Image {
-  //body: Phaser.Physics.Arcade.Body;
-  flamePower: number = 0;
-  maxFlamePower: number = 10;
-  currentVelocity: number = 0;
-  addVelocity: number = 0;
-  startTime: number = this.getTime();
-  fuel: number = 100;
-
-  constructor(aParams: IImageConstructor) {
-    super(aParams.scene, aParams.x, aParams.y, aParams.texture, aParams.frame);
-    this.initPhysics();
-    this.scene.add.existing(this);
-  }
-
-  onFlamePower() {
-    if (this.flamePower < this.maxFlamePower && this.getDeltaTime()) {
-      this.flamePower += 2;
-      return;
-    }
-  }
-
-  offFlamePower() {
-    if (this.flamePower > 0 && this.getDeltaTime()) {
-      console.log("---");
-      this.flamePower -= 2;
-    }
-  }
-
-  getDeltaTime() {
-    const delta = this.getTime() - this.startTime;
-    if (delta > 100) {
-      this.startTime = this.getTime();
-      return true;
-    }
-    return false;
-  }
-
-  getTime() {
-    let d = new Date();
-    return d.getTime();
-  }
-
-  updateVelocity() {
-    if (this.flamePower == 0) {
-      this.currentVelocity += 10;
-    }
-
-    if (this.flamePower > 0) {
-      this.currentVelocity -= this.flamePower;
-    }
-
-    if (this.currentVelocity > 500) {
-      this.currentVelocity = 500;
-    }
-    if (this.currentVelocity < -200) {
-      this.currentVelocity = -200;
-    }
-    console.log(
-      `y=${this.body.y} v=${this.currentVelocity}, f=${this.flamePower}`
-    );
-    if (this.flamePower == 0 && this.body.y >= 522) {
-      this.currentVelocity = 0;
-    }
-  }
-
-  // private initPhysics() {
-  //   this.scene.physics.world.enable(this);
-  //   //this.body.maxVelocity.set(300);
-  //   this.body.setVelocity(0, 300);
-  //   //this.body.setBounce(1, 1);
-  //   this.body.setBounce(0, 0.5); //彈回去的比例
-  //   this.body.setCollideWorldBounds(true);
-  // }
-
-  private initPhysics() {
-    this.scene.physics.world.enable(this);
-    this.setVelocity(0, 300);
-    this.setBounce(0, 0.5); //彈回去的比例
-    this.setCollideWorldBounds(true);
-  }
-}
-
-class Flame extends Phaser.GameObjects.Image {
-  constructor(aParams: IImageConstructor) {
-    super(aParams.scene, aParams.x, aParams.y, aParams.texture, aParams.frame);
-    this.scene.add.existing(this);
-  }
-}
-
 export default class MainScene extends Scene {
-  platforms: Phaser.Physics.Arcade.StaticGroup;
-  upArrow: Phaser.Input.Keyboard.Key;
-  downArrow: Phaser.Input.Keyboard.Key;
-  leftArrow: Phaser.Input.Keyboard.Key;
-  rightArrow: Phaser.Input.Keyboard.Key;
-  rocket: Rocket; //'Phaser.GameObjects.Sprite;
-  flame: Flame;
-  startTime: number;
+  upArrow!: Phaser.Input.Keyboard.Key;
+  downArrow!: Phaser.Input.Keyboard.Key;
+  leftArrow!: Phaser.Input.Keyboard.Key;
+  rightArrow!: Phaser.Input.Keyboard.Key;
+  rocket!: Rocket;
+  flame!: Flame;
+  startTime!: number;
 
   constructor() {
     super({
@@ -224,13 +126,24 @@ export default class MainScene extends Scene {
     this.load.image("rocket1", "assets/game/rocket1.png");
     this.load.image("flame", "assets/game/flame.png");
     this.load.image("fireball", "assets/game/fireball.png");
+    this.load.image("ground", "assets/game/ground1.png");
   }
 
   create() {
     this.startTime = this.getTime();
-    //this.add.image(400, 300, 'logo');
-    const graphics = this.add.graphics();
 
+    const ground = this.physics.add.staticGroup({
+      key: "ground",
+      repeat: 10,
+      setXY: { x: 0, y: screen.height-500, stepX: 100 }
+    });
+    ground.children.iterate((child) => {
+      const item = child as Phaser.Physics.Arcade.Image;
+      item.setScale(0.05);
+    });
+    ground.scaleXY(0.05);
+
+    //this.add.image(400, 300, 'logo');
     const text = this.add.text(10, 10, "fuel", {fontSize: "16px"});
 
     const flame = this.flame = new Flame({
@@ -252,6 +165,8 @@ export default class MainScene extends Scene {
     //car.setFlip(true, false);
     rocket.setScale(0.15);
     rocket.rotation = -0.8;
+
+    this.physics.add.collider(this.rocket, ground);
 
     const fireballs = this.physics.add.group({
       key: "fireball",
@@ -288,8 +203,7 @@ export default class MainScene extends Scene {
     // });
   }
 
-  //collectFireball(rocket: Rocket, fireball: Phaser.Physics.Arcade.Image) {
-  collectFireball(rocket, fireball) {
+  collectFireball(rocket: any, fireball: any) {
     fireball.disableBody(true, true);
     //rocket.flamePower += 10;
   }
