@@ -165,6 +165,10 @@ export default class MainScene extends Scene {
     rocket.setScale(0.15);
     rocket.rotation = -0.8;
 
+    this.cameras.main.setBounds(0, 0, screen.width, screen.height);
+    //this.cameras.main.startFollow(rocket, true, 0.5, 0.5 ); 
+    this.cameras.main.startFollow(rocket); 
+
     this.physics.add.collider(this.rocket, ground);
 
     const fireballs = this.physics.add.group({

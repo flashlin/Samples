@@ -1,5 +1,5 @@
 <template>
-  <div ref="game">
+  <div ref="gameView">
   </div>
 </template>
 
@@ -7,7 +7,7 @@
 import Phaser from 'phaser';
 import { onMounted, onUnmounted, ref } from 'vue';
 
-const gameRef = ref<HTMLElement>();
+const gameView = ref<HTMLElement>();
 
 interface PhaserViewProps {
   //modelValue: string;
@@ -17,7 +17,7 @@ const props = defineProps<PhaserViewProps>();
 
 const config = {
   type: Phaser.AUTO,
-  parent: gameRef.value,
+  //parent: gameView.value,
   width: 800,
   height: 600,
   fps: {
@@ -38,14 +38,15 @@ const config = {
 } as Phaser.Types.Core.GameConfig;
 
 class Game extends Phaser.Game {
-  constructor() {
+  constructor(config: Phaser.Types.Core.GameConfig) {
     super(config);
   }
 }
 
 let game: Game;
 onMounted(() => {
-  game = new Game();
+  config.parent = gameView.value;
+  game = new Game(config);
 });
 
 onUnmounted(() => {
