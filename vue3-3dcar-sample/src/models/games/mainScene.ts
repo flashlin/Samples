@@ -118,6 +118,8 @@ export default class MainScene extends Scene {
   flame!: Flame;
   startTime!: number;
   fireballs!: Phaser.Physics.Arcade.Group;
+  scoreText!: Phaser.GameObjects.Text;
+  ground!: Phaser.Physics.Arcade.StaticGroup;
 
   constructor() {
     super({
@@ -139,11 +141,11 @@ export default class MainScene extends Scene {
     const self = this;
     this.startTime = this.getTime();
 
-    const ground = this.physics.add.staticGroup({
+    const ground = (this.ground = this.physics.add.staticGroup({
       key: "ground",
       repeat: 200,
       setXY: { x: 0, y: screen.height - 500, stepX: 270 },
-    });
+    }));
     ground.children.iterate((child) => {
       const item = child as Phaser.Physics.Arcade.Image;
       item.setScale(0.05);
@@ -151,7 +153,10 @@ export default class MainScene extends Scene {
     ground.refresh();
 
     //this.add.image(400, 300, 'logo');
-    const text = this.add.text(10, 10, "fuel", { fontSize: "16px" });
+    const scoretext = (this.scoreText = this.add.text(10, 10, "fuel", {
+      fontSize: "16px",
+    }));
+    scoretext.setScrollFactor(0, 0);
 
     const flame = (this.flame = new Flame({
       scene: this,
@@ -181,20 +186,28 @@ export default class MainScene extends Scene {
     }
     treeList.refresh();
 
-    //this.cameras.main.setBounds(0, 0, 270 * 200, screen.height);
+    this.cameras.main.setBounds(0, 0, 270 * 200, screen.height);
     //this.cameras.main.startFollow(rocket, true, 0.5, 0.5 );
-    //this.cameras.main.startFollow(rocket);
+    this.cameras.main.startFollow(rocket);
+    //this.cameras.main.setLerp(0,0);
 
     this.physics.add.collider(this.rocket, ground);
 
     setInterval(() => {
-      self.createFireballList();
-      self.physics.add.overlap(
-        self.rocket,
-        self.fireballs,
-        self.collectFireball
-      );
+      self.initFireballs();
     }, 1000 * 3);
+
+    self.createFireballList();
+    this.physics.add.overlap(
+      this.ground,
+      this.fireballs,
+      this.onFireballsHitGround
+    );
+    this.physics.add.overlap(
+      this.rocket,
+      this.fireballs,
+      this.onRocketHitFireball
+    );
 
     this.leftArrow = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.LEFT
@@ -215,37 +228,12 @@ export default class MainScene extends Scene {
   }
 
   createFireballList() {
-    let fireballs = this.fireballs;
-
-    if (fireballs == null) {
-      fireballs = this.physics.add.group({
-        key: "fireball",
-        repeat: 5,
-        setXY: { x: 400, y: 0, stepX: 100 },
-      });
-    }
-
-    const len = fireballs.countActive();
-    if( len < 5 )
-    {
-      fireballs.createMultiple({ key: "fireball", repeat: 5 - len });
-    }
-
-    let x = 400;
-    fireballs.children.iterate((child) => {
-      const item = child as Phaser.Physics.Arcade.Image;
-      if( item == null ) {
-        alert("??")
-      }
-      item.x = x;
-      item.y = 0;
-      item.setScale(0.1);
-      item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
-      item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
-      //item.setBounce(0.5, 0.5);
-      x += 100;
+    const fireballs = this.fireballs = this.physics.add.group({
+      key: "fireball",
+      repeat: 5,
+      setXY: { x: 400, y: 0, stepX: 100 },
     });
-
+    this.initFireballs();
     // if (fireballs == null) {
     //   this.fireballs = fireballs = this.physics.add.group();
     // }
@@ -261,13 +249,41 @@ export default class MainScene extends Scene {
     //   x += 100;
     // });
 
-    this.fireballs = fireballs;
     return fireballs;
   }
 
-  collectFireball(rocket: any, fireball: any) {
+  initFireballs() {
+    const fireballs = this.fireballs;
+    const len = fireballs.countActive();
+    if (len < 5) {
+      fireballs.createMultiple({ key: "fireball", repeat: 5 - len });
+    }
+
+    let x = 400;
+    fireballs.children.iterate((child) => {
+      const item = child as Phaser.Physics.Arcade.Image;
+      if (item == null) {
+        alert("??");
+      }
+      item.x = x;
+      item.y = 0;
+      item.setScale(0.1);
+      item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
+      item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
+      item.setCollideWorldBounds(true);
+      //item.setBounce(0.5, 0.5);
+      x += 100;
+    });
+  }
+
+  onRocketHitFireball(rocket: any, fireball: any) {
     fireball.disableBody(true, true);
     //rocket.flamePower += 10;
+    fireball.destroy();
+  }
+
+  onFireballsHitGround(ground: any, fireball: any) {
+    fireball.disableBody(true, true);
     fireball.destroy();
   }
 
