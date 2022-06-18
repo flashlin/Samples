@@ -136,6 +136,7 @@ export default class MainScene extends Scene {
   }
 
   create() {
+    const self = this;
     this.startTime = this.getTime();
 
     const ground = this.physics.add.staticGroup({
@@ -180,14 +181,20 @@ export default class MainScene extends Scene {
     }
     treeList.refresh();
 
-    this.cameras.main.setBounds(0, 0, 270 * 200, screen.height - 500);
+    //this.cameras.main.setBounds(0, 0, 270 * 200, screen.height);
     //this.cameras.main.startFollow(rocket, true, 0.5, 0.5 );
-    this.cameras.main.startFollow(rocket);
+    //this.cameras.main.startFollow(rocket);
 
     this.physics.add.collider(this.rocket, ground);
 
-    this.fireballs = this.createFireballList();
-    this.physics.add.overlap(this.rocket, this.fireballs, this.collectFireball);
+    setInterval(() => {
+      self.createFireballList();
+      self.physics.add.overlap(
+        self.rocket,
+        self.fireballs,
+        self.collectFireball
+      );
+    }, 1000 * 3);
 
     this.leftArrow = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.LEFT
@@ -208,24 +215,60 @@ export default class MainScene extends Scene {
   }
 
   createFireballList() {
-    const fireballs = this.physics.add.group({
-      key: "fireball",
-      repeat: 5,
-      setXY: { x: 400, y: 0, stepX: 100 },
-    });
+    let fireballs = this.fireballs;
+
+    if (fireballs == null) {
+      fireballs = this.physics.add.group({
+        key: "fireball",
+        repeat: 5,
+        setXY: { x: 400, y: 0, stepX: 100 },
+      });
+    }
+
+    const len = fireballs.countActive();
+    if( len < 5 )
+    {
+      fireballs.createMultiple({ key: "fireball", repeat: 5 - len });
+    }
+
+    let x = 400;
     fireballs.children.iterate((child) => {
       const item = child as Phaser.Physics.Arcade.Image;
+      if( item == null ) {
+        alert("??")
+      }
+      item.x = x;
+      item.y = 0;
       item.setScale(0.1);
       item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
       item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
       //item.setBounce(0.5, 0.5);
+      x += 100;
     });
+
+    // if (fireballs == null) {
+    //   this.fireballs = fireballs = this.physics.add.group();
+    // }
+    // fireballs.createMultiple({ key: "fireball", repeat: 5 });
+    // let x = 400;
+    // fireballs.children.iterate((child) => {
+    //   const item = child as Phaser.Physics.Arcade.Image;
+    //   item.x = x;
+    //   item.y = 0;
+    //   item.setScale(0.1);
+    //   item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
+    //   item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
+    //   x += 100;
+    // });
+
+    this.fireballs = fireballs;
     return fireballs;
   }
 
   collectFireball(rocket: any, fireball: any) {
     fireball.disableBody(true, true);
     //rocket.flamePower += 10;
+    fireball.destroy();
   }
 
   update() {
