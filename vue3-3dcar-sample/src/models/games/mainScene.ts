@@ -228,51 +228,33 @@ export default class MainScene extends Scene {
   }
 
   createFireballList() {
-    const fireballs = this.fireballs = this.physics.add.group({
+    const fireballs = (this.fireballs = this.physics.add.group({
       key: "fireball",
-      repeat: 5,
+      repeat: 0,
       setXY: { x: 400, y: 0, stepX: 100 },
-    });
+    }));
     this.initFireballs();
-    // if (fireballs == null) {
-    //   this.fireballs = fireballs = this.physics.add.group();
-    // }
-    // fireballs.createMultiple({ key: "fireball", repeat: 5 });
-    // let x = 400;
-    // fireballs.children.iterate((child) => {
-    //   const item = child as Phaser.Physics.Arcade.Image;
-    //   item.x = x;
-    //   item.y = 0;
-    //   item.setScale(0.1);
-    //   item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
-    //   item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
-    //   x += 100;
-    // });
-
     return fireballs;
   }
 
   initFireballs() {
     const fireballs = this.fireballs;
-    const len = fireballs.countActive();
-    if (len < 5) {
-      fireballs.createMultiple({ key: "fireball", repeat: 5 - len });
+    const len = fireballs.children.size;
+    const max = 100;
+    if (len < max) {
+      fireballs.createMultiple({ key: "fireball", repeat: max - 1 - len });
     }
-
     let x = 400;
     fireballs.children.iterate((child) => {
       const item = child as Phaser.Physics.Arcade.Image;
-      if (item == null) {
-        alert("??");
-      }
       item.x = x;
-      item.y = 0;
+      item.y = -30;
       item.setScale(0.1);
-      item.body.velocity.x = -Phaser.Math.FloatBetween(10, 300);
-      item.body.velocity.y = Phaser.Math.FloatBetween(10, 100);
-      item.setCollideWorldBounds(true);
+      item.body.velocity.x = -Phaser.Math.FloatBetween(20, 400);
+      item.body.velocity.y = Phaser.Math.FloatBetween(10, 200);
+      //item.setCollideWorldBounds(true);
       //item.setBounce(0.5, 0.5);
-      x += 100;
+      x += 400;
     });
   }
 
