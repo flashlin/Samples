@@ -1,0 +1,10 @@
+# pip install -r requirements.txt 
+pysimplegui
+pywin32
+#https://github.com/mhammond/pywin32/releases
+#install pywin32-304.win-amd64-py3.9.exe
+numpy
+Pillow
+opencv-python
+DateTime
+pynput
