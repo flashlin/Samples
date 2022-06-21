@@ -14,7 +14,7 @@ public class ReportStockCommandLine
 }
 
 
-public class OneStockCommandLine
+public class OneStockCommandArgs
 {
     [Value(index: 0, HelpText = "action name")]
     public string ActionName { get; set; } = "l";
@@ -53,13 +53,13 @@ public class ListOneStockCommand : CommandBase
 
     public override async Task Run(string[] args)
     {
-        var commandLine = args.ParseArgs<OneStockCommandLine>()!;
+        var commandLine = args.ParseArgs<OneStockCommandArgs>()!;
         var rc = await _stockService.GetOneStockTransAsync(commandLine.StockId);
         rc.DumpList();
     }
 }
 
-public class AddDiscountTranCommand
+public class AddDiscountTranCommandArgs
 {
     [Value(index: 0, HelpText = "action name")]
     public string ActionName { get; set; } = "";
