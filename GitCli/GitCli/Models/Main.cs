@@ -183,14 +183,6 @@ namespace GitCli.Models
         {
             _workspaceViewMenus.First(x => x == obj.Value)
                 .Execute();
-
-            // if (obj.Value == _gitChanges)
-            // {
-            // 	if (Confirm("Changes", "123"))
-            // 	{
-            // 		_gitChanges.Execute();
-            // 	}
-            // }
         }
 
         public bool Confirm(string title, string message)
