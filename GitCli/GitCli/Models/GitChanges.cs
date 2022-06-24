@@ -19,7 +19,9 @@ public class GitChanges : IMenuItem
     {
         if (_applicationWindow.Confirm("Changes", "123"))
         {
-            Title = $"Changes(30)";
+            var repoInfo = _applicationWindow.GetRepoInfo();
+            var fileStatus = repoInfo.QueryStatus().ToList();
+            Title = $"Changes({fileStatus.Count})";
             _listView.SetNeedsDisplay();
         }
     }

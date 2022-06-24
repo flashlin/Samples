@@ -10,7 +10,7 @@ namespace GitCli.Models
 {
     public class Main
     {
-        private IApplicationWindow _applicationWindow;
+        private readonly IApplicationWindow _applicationWindow;
 
         public Main(IApplicationWindow applicationWindow)
         {

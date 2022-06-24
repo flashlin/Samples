@@ -8,6 +8,13 @@ public class ApplicationWindow : IApplicationWindow
     private List<IMenuItem> _workspaceViewMenus;
     private GitAllCommits _gitAllCommits;
     private GitRepoInfo _gitRepoInfo;
+    private IGitRepoAgent _gitRepoAgent;
+
+    public ApplicationWindow(IGitRepoAgent gitRepoAgent)
+    {
+        _gitRepoAgent = gitRepoAgent;
+        _gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Samples");
+    }
 
     public void Run()
     {
@@ -136,10 +143,7 @@ public class ApplicationWindow : IApplicationWindow
         return n == 0;
     }
 
-    GitRepoAgent _gitRepoAgent;
-
     void HandleOpenRepository()
     {
-        _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Samples");
     }
 }
