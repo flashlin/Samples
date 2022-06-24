@@ -115,16 +115,33 @@ public class ApplicationWindow : IApplicationWindow
 			Width = Dim.Fill(),
 			Height = Dim.Fill()
 		};
-		_unStagedWindow.Add(unStagedTreeView);
+
+		var scrollView = new ScrollView()
+		{
+			KeepContentAlwaysInViewport = true,
+			ShowVerticalScrollIndicator = true,
+			ShowHorizontalScrollIndicator = true,
+			ContentSize = new Size(200, 150),
+			X = 0,
+			Y = 0,
+			Width = Dim.Fill(),
+			Height = Dim.Fill()
+		};
+		scrollView.Add(unStagedTreeView);
+		_unStagedWindow.Add(scrollView);
+		//_unStagedWindow.Add(unStagedTreeView);
 
 		_gitRepoInfo.PropertyChanged += (sender, args) =>
 		{
 			if (args.PropertyName == nameof(_gitRepoInfo.Status))
 			{
+				unStagedTreeView.ClearObjects();
 				unStagedTreeView.AddObjects(_gitRepoInfo.Status.Value.Select(x => new TreeItem()
 				{
 					Text = x.FilePath
 				}));
+				//unStagedTreeView.SetNeedsDisplay();
+				//scrollView.SetNeedsDisplay();
 			}
 		};
 	}
