@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Terminal.Gui;
 using NStack;
 using GitCli.Models;
-
+using LibGit2Sharp;
 
 namespace GitCli.Models
 {
@@ -17,21 +17,51 @@ namespace GitCli.Models
 			Application.Init();
 			var top = Application.Top;
 
-			var win = new Window("MyApp")
+			var workspace = new Window("Workspace")
 			{
 				X = 0,
-				Y = 1, // Leave one row for the toplevel menu
-						 // By using Dim.Fill(), it will automatically resize without manual intervention
+				Y = 1,
+				Width = Dim.Percent(30),
+				Height = Dim.Percent(30)
+			};
+			top.Add(workspace);
+			AddWorkSpaceMenu(workspace);
+
+
+			workspace.GetCurrentHeight(out var workspaceHeight);
+			var repositoryWin = new Window("Repository")
+			{
+				X = 0,
+				Y = workspaceHeight + 1,
 				Width = Dim.Fill(),
 				Height = Dim.Fill()
 			};
-			top.Add(win);
+			top.Add(repositoryWin);
 
+			workspace.GetCurrentWidth(out var workspaceWidth);
+			var unstagedWin = new Window("unstaged")
+			{
+				X = workspace.X + workspaceWidth + 1,
+				Y = 1,
+				Width = Dim.Fill(),
+				Height = Dim.Fill()
+			};
+			top.Add(unstagedWin);
 
+			AddMenuBar(top);
+
+			Application.Run();
+			Application.Shutdown();
+
+			return Task.CompletedTask;
+		}
+
+		private void AddMenuBar(Toplevel top)
+		{
 			var menu = new MenuBar(new MenuBarItem[] {
 				new MenuBarItem ("_File", new MenuItem [] {
 					new MenuItem ("Clone...", "Clone Repository", null),
-					new MenuItem ("_Open Repository...", "Open Repository",null),
+					new MenuItem ("_Open Repository...", "Open Repository", OpenRepository),
 					new MenuItem ("_Exit", "", () => { if (Quit ()) top.Running = false; })
 				}),
 				new MenuBarItem ("_View", new MenuItem [] {
@@ -48,11 +78,39 @@ namespace GitCli.Models
 				}),
 			});
 			top.Add(menu);
+		}
 
-			Application.Run();
-			Application.Shutdown();
+		private void AddWorkSpaceMenu(Window workspace)
+		{
+			var menus = new List<string>()
+			{
+				"Changes",
+				"All Commits"
+			};
+			var workspaceView = new ListView(menus)
+			{
+				X = 0,
+				Y = 0,
+				Width = Dim.Fill(),
+				Height = Dim.Fill(),
+			};
+			workspace.Add(workspaceView);
 
-			return Task.CompletedTask;
+			workspaceView.OpenSelectedItem += WorkspaceView_OpenSelectedItem; 
+		}
+
+		private void WorkspaceView_OpenSelectedItem(ListViewItemEventArgs obj)
+		{
+			if( obj.Item == 0 )
+			{
+				Confirm("Changes", "123");
+			}
+		}
+
+		bool Confirm(string title, string message)
+		{
+			var n = MessageBox.Query(50, 7, title, message, "Yes", "No");
+			return n == 0;
 		}
 
 		static bool Quit()
@@ -61,11 +119,16 @@ namespace GitCli.Models
 			return n == 0;
 		}
 
-		static void OpenRepository()
+		void OpenRepository()
 		{
+			using (var repo = new Repository("D:/VDisk/Github/Samples"))
+			{
+				//var master = repo.Branches["master"];
+				var status = repo.RetrieveStatus();
+				//status.IsDirty;
 
+				//status.Modified
+			}
 		}
-
-
 	}
 }
