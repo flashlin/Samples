@@ -1,5 +1,4 @@
-﻿using LibGit2Sharp;
-using Terminal.Gui;
+﻿using Terminal.Gui;
 
 namespace GitCli.Models;
 
@@ -8,6 +7,7 @@ public class ApplicationWindow : IApplicationWindow
     private GitChanges _gitChanges;
     private List<IMenuItem> _workspaceViewMenus;
     private GitAllCommits _gitAllCommits;
+    private GitRepoInfo _gitRepoInfo;
 
     public void Run()
     {
@@ -65,7 +65,7 @@ public class ApplicationWindow : IApplicationWindow
             new MenuBarItem("_File", new MenuItem[]
             {
                 new MenuItem("Clone...", "Clone Repository", null),
-                new MenuItem("_Open Repository...", "Open Repository", OpenRepository),
+                new MenuItem("_Open Repository...", "Open Repository", HandleOpenRepository),
                 new MenuItem("_Exit", "", () =>
                 {
                     if (Quit()) top.Running = false;
@@ -118,6 +118,11 @@ public class ApplicationWindow : IApplicationWindow
             .Execute();
     }
 
+    public GitRepoInfo GetRepoInfo()
+    {
+        return _gitRepoInfo;
+    }
+
     public bool Confirm(string title, string message)
     {
         var n = MessageBox.Query(50, 7, title, message, "Yes", "No");
@@ -131,15 +136,10 @@ public class ApplicationWindow : IApplicationWindow
         return n == 0;
     }
 
-    void OpenRepository()
-    {
-        using (var repo = new Repository("D:/VDisk/Github/Samples"))
-        {
-            //var master = repo.Branches["master"];
-            var status = repo.RetrieveStatus();
-            //status.IsDirty;
+    GitRepoAgent _gitRepoAgent;
 
-            //status.Modified
-        }
+    void HandleOpenRepository()
+    {
+        _gitRepoAgent.OpenRepoFolder();
     }
 }

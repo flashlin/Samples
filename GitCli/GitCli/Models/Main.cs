@@ -16,9 +16,4 @@ namespace GitCli.Models
             return Task.CompletedTask;
         }
     }
-
-    public interface IApplicationWindow
-    {
-        bool Confirm(string title, string message);
-    }
 }
