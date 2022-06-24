@@ -10,9 +10,16 @@ namespace GitCli.Models
 {
     public class Main
     {
+        private IApplicationWindow _applicationWindow;
+
+        public Main(IApplicationWindow applicationWindow)
+        {
+            _applicationWindow = applicationWindow;
+        }
+        
         public Task Run()
         {
-            new ApplicationWindow().Run();
+            _applicationWindow.Run();
             return Task.CompletedTask;
         }
     }
