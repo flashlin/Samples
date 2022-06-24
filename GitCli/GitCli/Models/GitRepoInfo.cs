@@ -1,10 +1,18 @@
-﻿using LibGit2Sharp;
+﻿using System.ComponentModel;
+using LibGit2Sharp;
 
 namespace GitCli.Models;
 
-public class GitRepoInfo
+public class GitRepoInfo : IObjectNotifyPropertyChanged
 {
+	public GitRepoInfo()
+	{
+      Status = new NotifyProperty<IEnumerable<FileStatusInfo>>(this, nameof(Status), Enumerable.Empty<FileStatusInfo>());
+	}
+
     public string FolderPath { get; init; }
+    
+    public NotifyProperty<IEnumerable<FileStatusInfo>> Status { get; init; }
 
     public IEnumerable<FileStatusInfo> QueryStatus()
     {
@@ -23,5 +31,11 @@ public class GitRepoInfo
                 };
             }
         }
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    public void RaisePropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
