@@ -17,13 +17,18 @@ public class GitChanges : IMenuItem
 
     public void Execute()
     {
-        if (_applicationWindow.Confirm("Changes", "123"))
-        {
-            var repoInfo = _applicationWindow.GetRepoInfo();
-            var fileStatus = repoInfo.QueryStatus().ToList();
-            Title = $"Changes({fileStatus.Count})";
-            _listView.SetNeedsDisplay();
-        }
+        // if (_applicationWindow.Confirm("Changes", "123"))
+        // {
+        //     var repoInfo = _applicationWindow.GetRepoInfo();
+        //     var fileStatus = repoInfo.QueryStatus().ToList();
+        //     Title = $"Changes({fileStatus.Count})";
+        //     _listView.SetNeedsDisplay();
+        // }
+        
+        var repoInfo = _applicationWindow.GetRepoInfo();
+        var fileStatus = repoInfo.QueryStatus().ToList();
+        repoInfo.Status.SetValue(fileStatus);
+        Title = $"Changes({fileStatus.Count})";
     }
 
     public override string ToString()
