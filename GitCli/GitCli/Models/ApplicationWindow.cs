@@ -88,34 +88,6 @@ public class ApplicationWindow : IApplicationWindow
         top.Add(menu);
     }
 
-    public class GitChanges : IMenuItem
-    {
-        private View _listView;
-        private IApplicationWindow _applicationWindow;
-
-        public GitChanges(IApplicationWindow applicationWindow, View listView)
-        {
-            _applicationWindow = applicationWindow;
-            _listView = listView;
-        }
-
-        public string Title { get; set; } = "Changes";
-
-        public void Execute()
-        {
-            if (_applicationWindow.Confirm("Changes", "123"))
-            {
-                Title = $"Changes(30)";
-                _listView.SetNeedsDisplay();
-            }
-        }
-
-        public override string ToString()
-        {
-            return Title;
-        }
-    }
-
     public class GitAllCommits : IMenuItem
     {
         public string Title { get; set; } = "All Commits";
