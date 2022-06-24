@@ -88,17 +88,7 @@ public class ApplicationWindow : IApplicationWindow
         top.Add(menu);
     }
 
-    public interface ITerminalGui
-    {
-    }
-
-    public interface IMenuItem
-    {
-        string Title { get; set; }
-        void Execute();
-    }
-
-    public class GitChanges : IMenuItem, ITerminalGui
+    public class GitChanges : IMenuItem
     {
         private View _listView;
         private IApplicationWindow _applicationWindow;
