@@ -7,6 +7,7 @@ public class ApplicationWindow : IApplicationWindow
 {
     private GitChanges _gitChanges;
     private List<IMenuItem> _workspaceViewMenus;
+    private GitAllCommits _gitAllCommits;
 
     public void Run()
     {
@@ -99,10 +100,11 @@ public class ApplicationWindow : IApplicationWindow
         };
 
         _gitChanges = new GitChanges(this, workspaceView);
+        _gitAllCommits = new GitAllCommits();
         _workspaceViewMenus = new List<IMenuItem>()
         {
             _gitChanges,
-            new GitAllCommits()
+            _gitAllCommits
         };
         workspaceView.SetSource(_workspaceViewMenus);
         workspace.Add(workspaceView);
