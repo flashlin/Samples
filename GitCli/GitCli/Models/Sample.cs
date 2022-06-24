@@ -38,11 +38,28 @@ namespace GitCli.Models
 
 
 
+		
+		public void Dotnet6_ChunkArray()
+		{
+			var names = new[] {
+				"Flash", "Jack", "Jason", "April", "Frank", "Mary", "Mar", "Stephen", "Curry"
+			};
+			var chunk = names.Chunk(3);
+		}
 
 
 
+		public void Dotnet6_Array()
+		{
+			var name1 = new[] { "Flash" };
+			var name2 = new[] { "Jack" };
+			var name3 = new[] { "Mary" };
 
+			var names = name1.Concat(name2).Concat(name3);
 
+			var count = names.Count();
+			var newNames = names.OrderBy(x => x);
+		}
 
 
 
