@@ -88,21 +88,6 @@ public class ApplicationWindow : IApplicationWindow
         top.Add(menu);
     }
 
-    public class GitAllCommits : IMenuItem
-    {
-        public string Title { get; set; } = "All Commits";
-
-        public void Execute()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string ToString()
-        {
-            return Title;
-        }
-    }
-
     private void AddWorkSpaceMenu(Window workspace)
     {
         var workspaceView = new ListView
