@@ -14,6 +14,9 @@ namespace GitCli.Models
 	{
 		public Task Run()
 		{
+			new Example().Sample();
+
+
 			Application.Init();
 			var top = Application.Top;
 
