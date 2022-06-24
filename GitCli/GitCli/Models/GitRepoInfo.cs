@@ -5,6 +5,7 @@ namespace GitCli.Models;
 public class GitRepoInfo
 {
     public string FolderPath { get; init; }
+
     public IEnumerable<FileStatusInfo> QueryStatus()
     {
         using (var repo = new Repository(FolderPath))
