@@ -69,53 +69,56 @@ public class ApplicationWindow : IApplicationWindow
         Application.Init();
         var top = Application.Top;
 
-        var workspace = AddWorkspaceWindow(top);
-        workspace.GetCurrentHeight(out var workspaceHeight);
-        workspace.GetCurrentWidth(out var workspaceWidth);
+        var workspaceWindow = AddWorkspaceWindow(top);
+        workspaceWindow.GetCurrentHeight(out var workspaceHeight);
+        workspaceWindow.GetCurrentWidth(out var workspaceWidth);
 
-        var repositoryWin = new Window("Repository")
+        var repositoryWindow = new Window("Repository")
         {
             X = 0,
             Y = workspaceHeight + 1,
             Width = Dim.Fill(),
             Height = Dim.Fill()
         };
-        top.Add(repositoryWin);
+        top.Add(repositoryWindow);
 
-        var unstagedWin = new Window("unstaged")
+        AddUnStagedWindow(workspaceWindow, workspaceWidth, top);
+
+        AddMenuBar(top);
+        Application.Run();
+        Application.Shutdown();
+    }
+
+    private void AddUnStagedWindow(Window workspace, int workspaceWidth, Toplevel top)
+    {
+        var unStagedWin = new Window("unstaged")
         {
             X = workspace.X + workspaceWidth + 1,
             Y = 1,
             Width = Dim.Fill(),
             Height = Dim.Fill()
         };
-        top.Add(unstagedWin);
+        top.Add(unStagedWin);
 
-        var treeView = new TreeView()
+        var unStagedTreeView = new TreeView()
         {
             X = 0,
             Y = 0,
             Width = Dim.Fill(),
             Height = Dim.Fill()
         };
-
-        unstagedWin.Add(treeView);
-
-        AddMenuBar(top);
+        unStagedWin.Add(unStagedTreeView);
 
         _gitRepoInfo.PropertyChanged += (sender, args) =>
         {
             if (args.PropertyName == nameof(_gitRepoInfo.Status))
             {
-                treeView.AddObjects(_gitRepoInfo.Status.Value.Select(x => new TreeItem()
+                unStagedTreeView.AddObjects(_gitRepoInfo.Status.Value.Select(x => new TreeItem()
                 {
                     Text = x.FilePath
-                }));        
+                }));
             }
         };
-
-        Application.Run();
-        Application.Shutdown();
     }
 
     private Window AddWorkspaceWindow(Toplevel top)
