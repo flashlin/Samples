@@ -140,6 +140,6 @@ public class ApplicationWindow : IApplicationWindow
 
     void HandleOpenRepository()
     {
-        _gitRepoAgent.OpenRepoFolder();
+        _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Samples");
     }
 }

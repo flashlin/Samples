@@ -9,7 +9,8 @@ var host = hostBuilder
 	.ConfigureServices(services =>
 	{
 		 services.AddDbContext<GitCliDbContext>();
-		 //services.AddTransient<IStockRepo, StockRepo>();
+		 services.AddTransient<IGitRepoAgent, GitRepoAgent>();
+		 services.AddSingleton<IApplicationWindow, ApplicationWindow>();
 		 services.AddSingleton<Main>();
 	})
 	.Build();

@@ -2,7 +2,7 @@
 
 namespace GitCli.Models;
 
-public class GitRepoAgent
+public class GitRepoAgent : IGitRepoAgent
 {
     public IEnumerable<FileStatusInfo> QueryFileStatus(RepositoryStatus status)
     {
@@ -16,9 +16,8 @@ public class GitRepoAgent
         }
     }
 
-    public GitRepoInfo OpenRepoFolder()
+    public GitRepoInfo OpenRepoFolder(string folderPath)
     {
-        var folderPath = "D:/VDisk/Github/Samples";
         using (var repo = new Repository(folderPath))
         {
             //var master = repo.Branches["master"];
