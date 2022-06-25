@@ -48,4 +48,20 @@
 		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0" />
+	  <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
+	  <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Views\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Components\TreeItem.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	</ItemGroup>
+
 </Project>
