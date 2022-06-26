@@ -3,9 +3,7 @@
 	xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
    xmlns:helpers="clr-namespace:GitMaui.Helpers"
-	xmlns:comp="clr-namespace:GitMaui.Components"
-	x:DataType="{x:Type comp:TreeNode}"
-   x:Class="GitMaui.Components.TreeItem">
+   x:Class="GitMaui.Components.DefaultTreeViewNodeView">
 	<HorizontalStackLayout>
 		<Image 
 			HeightRequest="16"
@@ -21,6 +19,6 @@
 				</FontImageSource>
 			</Image.Source>
 		</Image>
-		<Label></Label>
+		<Label Text="{Binding Title}"></Label>
 	</HorizontalStackLayout>
 </ContentView>

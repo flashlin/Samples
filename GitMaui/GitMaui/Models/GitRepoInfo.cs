@@ -43,7 +43,7 @@ namespace GitMaui.Models
 	}
 
 	[INotifyPropertyChanged]
-	public partial class GitFileInfo : ITreeNode
+	public partial class GitFileInfo : IHasChildrenTreeViewNode
 	{
 		public GitFileInfo()
 		{
@@ -68,6 +68,12 @@ namespace GitMaui.Models
 		}
 
 		[ObservableProperty]
+		IList<IHasChildrenTreeViewNode> _children = new List<IHasChildrenTreeViewNode>();
+
+		[ObservableProperty]
+		bool _isLeaf = false;
+
+		[ObservableProperty]
 		GitFileStatus _status;
 
 		[ObservableProperty]
@@ -75,6 +81,9 @@ namespace GitMaui.Models
 
 		[ObservableProperty]
 		ObservableCollection<TreeNode> _child = new();
+
+		[ObservableProperty]
+		bool _isExtended = false;
 	}
 
 	public enum GitFileStatus
