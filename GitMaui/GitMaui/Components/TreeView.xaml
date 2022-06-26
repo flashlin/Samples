@@ -4,11 +4,12 @@
 	xmlns:comps="clr-namespace:GitMaui.Components"
 	xmlns:models="clr-namespace:GitMaui.Models"
    x:Class="GitMaui.Components.TreeView">
-	<CollectionView ItemsSource="{Binding GitRepoInfo.Changes}">
+	<!--<CollectionView x:Name="root" ItemsSource="{Binding GitRepoInfo.Changes}">-->
+	<CollectionView x:Name="root">
 		<CollectionView.ItemTemplate>
-			<DataTemplate x:DataType="models:GitFileInfo">
+			<DataTemplate x:DataType="comps:IHasChildrenTreeViewNode">
 				<HorizontalStackLayout>
-					<Label Text="{Binding FilePath}"/>
+					<Label Text="{Binding Title}"/>
 					<comps:TreeViewItemView></comps:TreeViewItemView>
 				</HorizontalStackLayout>
 			</DataTemplate>

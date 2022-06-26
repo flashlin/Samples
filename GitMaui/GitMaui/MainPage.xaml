@@ -20,6 +20,6 @@
 				</DataTemplate>
 			</CollectionView.ItemTemplate>
 		</CollectionView>-->
-		<comps:TreeView></comps:TreeView>
+		<comps:TreeView ItemsSource="{Binding GitRepoInfo.Changes}"></comps:TreeView>
 	</StackLayout>
 </ContentPage>
