@@ -59,7 +59,19 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Components\TreeItem.xaml">
+	  <Compile Update="Components\DefaultTreeViewNodeView.xaml.cs">
+	    <DependentUpon>DefaultTreeViewNodeView.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Components\DefaultTreeViewNodeView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Components\TreeView.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Components\TreeViewItemView.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

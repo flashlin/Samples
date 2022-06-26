@@ -10,8 +10,19 @@ namespace GitMaui.Components
 {
 	public interface ITreeNode
 	{
-		public string Title { get; set; }
-		public ObservableCollection<TreeNode> Child { get; set; }
+		string Title { get; set; }
+		bool IsExtended { get; set; }
+	}
+
+	public interface IHasChildrenTreeViewNode : ITreeNode
+	{
+		IList<IHasChildrenTreeViewNode> Children { get; }
+		bool IsLeaf { get; set; }
+	}
+
+	public interface ILazyLoadTreeViewNode : IHasChildrenTreeViewNode
+	{
+		Func<ITreeNode, IEnumerable<IHasChildrenTreeViewNode>> GetChildren { get; }
 	}
 
 	[INotifyPropertyChanged]
@@ -22,6 +33,12 @@ namespace GitMaui.Components
 
 		[ObservableProperty]
 		ObservableCollection<TreeNode> _child = new();
+
+		[ObservableProperty]
+		bool _isExtended;
+
+		[ObservableProperty]
+		bool _isLeaf;
 	}
 
 	[INotifyPropertyChanged]

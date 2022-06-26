@@ -1,8 +1,8 @@
 namespace GitMaui.Components;
 
-public partial class TreeItem : ContentView
+public partial class TreeView : ContentView
 {
-	public TreeItem()
+	public TreeView()
 	{
 		InitializeComponent();
 	}

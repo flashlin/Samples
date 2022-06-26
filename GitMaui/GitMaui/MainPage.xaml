@@ -9,24 +9,17 @@
 	xmlns:helpers="clr-namespace:GitMaui.Helpers"
 	x:DataType="vm:MainViewModel"
    x:Class="GitMaui.MainPage">
-			 
-    <ScrollView>
-		<CollectionView>
-			<!--<CollectionView.ItemsSource>
-				<x:Array Type="{x:Type models:GitFileInfo}">
-					<models:GitFileInfo FilePath="ac1"/>
-					<models:GitFileInfo FilePath="ac2"/>
-					<models:GitFileInfo FilePath="ac3"/>
-				</x:Array>
-			</CollectionView.ItemsSource>-->
+	<StackLayout>
+		<Label Text="{Binding GitRepoInfo.Changes}" />
+		<!--<CollectionView ItemsSource="{Binding GitRepoInfo.Changes}">
 			<CollectionView.ItemTemplate>
 				<DataTemplate x:DataType="models:GitFileInfo">
 					<HorizontalStackLayout>
-						<comps:TreeView></comps:TreeView>
-					</HorizontalStackLayout>	
+						<Label Text="{Binding FilePath}"/>
+					</HorizontalStackLayout>
 				</DataTemplate>
 			</CollectionView.ItemTemplate>
-		</CollectionView>
-    </ScrollView>
- 
+		</CollectionView>-->
+		<comps:TreeView></comps:TreeView>
+	</StackLayout>
 </ContentPage>
