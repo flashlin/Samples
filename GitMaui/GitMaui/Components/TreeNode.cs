@@ -12,6 +12,7 @@ namespace GitMaui.Components
 	{
 		string Title { get; set; }
 		bool IsExtended { get; set; }
+		object Tag { get; set; }
 	}
 
 	public interface IHasChildrenTreeViewNode : ITreeNode
@@ -39,6 +40,8 @@ namespace GitMaui.Components
 
 		[ObservableProperty]
 		bool _isLeaf;
+
+		public object Tag { get; set; }
 	}
 
 	[INotifyPropertyChanged]

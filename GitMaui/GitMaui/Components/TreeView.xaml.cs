@@ -60,7 +60,7 @@ public partial class TreeView : ContentView
 			default:
 				break;
 		}
-		Render();
+		//Render();
 	}
 
 	void Render()

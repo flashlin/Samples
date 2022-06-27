@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31611.283
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GitMaui", "GitMaui\GitMaui.csproj", "{75896053-5A31-4810-BF35-C7A79FD8E9B2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitMauiTests", "GitMauiTests\GitMauiTests.csproj", "{5219BE5F-04FE-4704-91E4-398CDA2C397E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{75896053-5A31-4810-BF35-C7A79FD8E9B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75896053-5A31-4810-BF35-C7A79FD8E9B2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{75896053-5A31-4810-BF35-C7A79FD8E9B2}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{5219BE5F-04FE-4704-91E4-398CDA2C397E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5219BE5F-04FE-4704-91E4-398CDA2C397E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5219BE5F-04FE-4704-91E4-398CDA2C397E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5219BE5F-04FE-4704-91E4-398CDA2C397E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

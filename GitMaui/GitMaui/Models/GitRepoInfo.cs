@@ -40,10 +40,20 @@ namespace GitMaui.Models
 				}
 			}
 		}
+
+		public void ConvertToTreeNode(IEnumerable<GitFileInfo> fileList)
+		{
+		}
+
+
+		public void ConvertToTreeNode(List<TreeNode> nodeList, GitFileInfo file)
+		{
+			var ss = file.FilePath.Split(Path.PathSeparator);
+
+		}
 	}
 
-	[INotifyPropertyChanged]
-	public partial class GitFileInfo : IHasChildrenTreeViewNode
+	public class GitFileInfo
 	{
 		public GitFileInfo()
 		{
@@ -61,29 +71,15 @@ namespace GitMaui.Models
 			{
 				if (_filePath != value)
 				{
-					SetProperty(ref _filePath, value);
+					_filePath = value;
 					Title = value;
 				}
 			}
 		}
 
-		[ObservableProperty]
-		IList<IHasChildrenTreeViewNode> _children = new List<IHasChildrenTreeViewNode>();
+		public GitFileStatus Status { get; set; }
 
-		[ObservableProperty]
-		bool _isLeaf = false;
-
-		[ObservableProperty]
-		GitFileStatus _status;
-
-		[ObservableProperty]
-		string _title;
-
-		[ObservableProperty]
-		ObservableCollection<TreeNode> _child = new();
-
-		[ObservableProperty]
-		bool _isExtended = false;
+		public string Title { get; private set; }
 	}
 
 	public enum GitFileStatus
