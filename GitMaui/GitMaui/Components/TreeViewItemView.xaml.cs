@@ -10,7 +10,23 @@ public partial class TreeViewItemView : ContentView
 		SetIconImage();
 	}
 
-	//Glyph="{x:Static helpers:IconFont.SquarePlus}"
+	//public static readonly BindableProperty SourceProperty =
+	//	BindableProperty.Create(nameof(Source),
+	//		typeof(IHasChildrenTreeViewNode),
+	//		typeof(TreeViewItemView),
+	//		propertyChanged: (b, o, v) => (b as TreeViewItemView).OnSourceSet());
+
+	//public IHasChildrenTreeViewNode Source
+	//{
+	//	get => (IHasChildrenTreeViewNode)GetValue(SourceProperty);
+	//	set => SetValue(SourceProperty, value);
+	//}
+
+	//protected virtual void OnSourceSet()
+	//{
+	//	//root.ItemsSource = ItemsSource;
+	//}
+
 	public void SetIconImage()
 	{
 		//icon.Source = new FontImageSource
