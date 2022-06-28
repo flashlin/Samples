@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T1.Standard.Collections;
 
 namespace GitMaui.Models
 {
@@ -22,6 +23,9 @@ namespace GitMaui.Models
 
 		[ObservableProperty]
 		ObservableCollection<GitFileInfo> _changes = new();
+
+		[ObservableProperty]
+		ObservableCollectionFast<TreeNode> _changesTree = new();
 
 		public IEnumerable<GitFileInfo> QueryStatus()
 		{
@@ -41,8 +45,42 @@ namespace GitMaui.Models
 			}
 		}
 
-		public void ConvertToTreeNode(IEnumerable<GitFileInfo> fileList)
+		public List<TreeNode> ConvertToTreeNode(IEnumerable<GitFileInfo> fileList)
 		{
+			var treeBuilder = new TreeBuilder();
+			var treeList = treeBuilder.ReduceTree(fileList,
+				x => x.FilePath,
+				x => treeBuilder.GetParentPath(x),
+				x => treeBuilder.QueryParentPaths(x.FilePath)).ToList();
+
+			return ConvertTree(treeList).ToList();
+		}
+
+		private IEnumerable<TreeNode> ConvertTree(IEnumerable<TreeBuilder.TreeItem<GitFileInfo, string>> treeList)
+		{
+			foreach(var treeItem in treeList)
+			{
+				yield return ToTreeNode(treeItem);
+			}
+		}
+
+		private TreeNode ToTreeNode(TreeBuilder.TreeItem<GitFileInfo, string> node)
+		{
+			if( node.Item == null)
+			{
+				return new TreeNode
+				{
+					Title = node.Id,
+					Child = new ObservableCollection<TreeNode>(node.Children.Select(x => ToTreeNode(x)))
+				};
+			}
+
+			return new TreeNode
+			{
+				Title = node.Id,
+				Tag = node.Item,
+				IsLeaf = true,
+			};
 		}
 
 

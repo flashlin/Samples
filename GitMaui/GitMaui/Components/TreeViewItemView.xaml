@@ -3,22 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
 				 xmlns:helpers="clr-namespace:GitMaui.Helpers"
              x:Class="GitMaui.Components.TreeViewItemView">
-	<HorizontalStackLayout>
-		<Image
+	<StackLayout>
+		<HorizontalStackLayout>
+			<Image
 			HeightRequest="16"
 			WidthRequest="16"
 			HorizontalOptions="CenterAndExpand"
 			VerticalOptions="CenterAndExpand">
-			<Image.Source>
-				<FontImageSource 
+				<Image.Source>
+					<FontImageSource 
 					x:Name="font"
 					Size="16"
 					Glyph="{x:Static helpers:IconFont.SquarePlus}" 
 					FontFamily="FontAwesome"
 					Color="Black">
-				</FontImageSource>
-			</Image.Source>
-		</Image>
-		<Label Text="{Binding Title}"></Label>
-	</HorizontalStackLayout>
+					</FontImageSource>
+				</Image.Source>
+			</Image>
+			<Label Text="{Binding Title}"></Label>
+		</HorizontalStackLayout>
+		<StackLayout x:Name="extended" Spacing="0" Margin="10,0,0,0"></StackLayout>
+	</StackLayout>
 </ContentView>

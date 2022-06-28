@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T1.Standard.Extensions;
 
 namespace GitMaui.Components
 {
@@ -17,7 +18,7 @@ namespace GitMaui.Components
 
 	public interface IHasChildrenTreeViewNode : ITreeNode
 	{
-		IList<IHasChildrenTreeViewNode> Children { get; }
+		ObservableCollection<IHasChildrenTreeViewNode> Children { get; }
 		bool IsLeaf { get; set; }
 	}
 
@@ -27,13 +28,21 @@ namespace GitMaui.Components
 	}
 
 	[INotifyPropertyChanged]
-	public partial class TreeNode : ITreeNode
+	public partial class TreeNode : IHasChildrenTreeViewNode
 	{
 		[ObservableProperty]
 		string _title;
 
 		[ObservableProperty]
 		ObservableCollection<TreeNode> _child = new();
+
+		public ObservableCollection<IHasChildrenTreeViewNode> Children
+		{
+			get
+			{
+				return new ObservableCollection<IHasChildrenTreeViewNode>(_child);
+			}
+		}
 
 		[ObservableProperty]
 		bool _isExtended;
@@ -42,6 +51,11 @@ namespace GitMaui.Components
 		bool _isLeaf;
 
 		public object Tag { get; set; }
+
+		public override string ToString()
+		{
+			return $"{Title}-{Tag}";
+		}
 	}
 
 	[INotifyPropertyChanged]

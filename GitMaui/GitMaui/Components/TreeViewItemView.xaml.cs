@@ -8,6 +8,35 @@ public partial class TreeViewItemView : ContentView
 	{
 		InitializeComponent();
 		SetIconImage();
+
+		BindingContextChanged += TreeViewItemView_BindingContextChanged;
+	}
+
+	private void TreeViewItemView_BindingContextChanged(object sender, EventArgs e)
+	{
+		var model = BindingContext as IHasChildrenTreeViewNode;
+		extended.IsVisible = model.IsExtended;
+
+		if (model.IsExtended)
+		{
+			//extendButton.RotateTo(0);
+			if (model is ILazyLoadTreeViewNode lazyNode && lazyNode.GetChildren != null && !lazyNode.Children.Any())
+			{
+				foreach (var child in lazyNode.GetChildren(lazyNode))
+				{
+					lazyNode.Children.Add(child);
+					//extended.Add(new TreeViewNodeView(child, itemTemplate));
+					var subTreeItem = new TreeViewItemView();
+					extended.Add(subTreeItem);
+				}
+
+				if (!lazyNode.Children.Any())
+				{
+					extended.Opacity = 0;
+					lazyNode.IsLeaf = true;
+				}
+			}
+		}
 	}
 
 	//public static readonly BindableProperty SourceProperty =
