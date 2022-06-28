@@ -9,7 +9,6 @@
 		<CollectionView.ItemTemplate>
 			<DataTemplate x:DataType="comps:IHasChildrenTreeViewNode">
 				<HorizontalStackLayout>
-					<Label Text="{Binding Title}"/>
 					<comps:TreeViewItemView></comps:TreeViewItemView>
 				</HorizontalStackLayout>
 			</DataTemplate>

@@ -52,6 +52,8 @@
 	  <PackageReference Include="CommunityToolkit.Maui.Markup" Version="1.0.0" />
 	  <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
 	  <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
+	  <PackageReference Include="Microsoft.Toolkit.Mvvm" Version="7.1.2" />
+	  <PackageReference Include="T1.Standard" Version="1.0.65" />
 	</ItemGroup>
 
 	<ItemGroup>
