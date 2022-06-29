@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitCli", "GitCli\GitCli.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T1.Standard", "..\..\..\MyGitHub\T1.Standard\T1.Standard\T1.Standard.csproj", "{A1AF6668-C6EC-4616-8BE8-EEECB46CBF8E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GitCliTest", "GitCliTest\GitCliTest.csproj", "{2A9CB7BB-5639-4EAD-AAAD-0E0969900966}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A1AF6668-C6EC-4616-8BE8-EEECB46CBF8E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1AF6668-C6EC-4616-8BE8-EEECB46CBF8E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1AF6668-C6EC-4616-8BE8-EEECB46CBF8E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A9CB7BB-5639-4EAD-AAAD-0E0969900966}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A9CB7BB-5639-4EAD-AAAD-0E0969900966}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A9CB7BB-5639-4EAD-AAAD-0E0969900966}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A9CB7BB-5639-4EAD-AAAD-0E0969900966}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
