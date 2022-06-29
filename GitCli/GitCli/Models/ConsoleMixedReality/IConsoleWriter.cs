@@ -1,4 +1,4 @@
-﻿namespace GitCli.Models;
+﻿namespace GitCli.Models.ConsoleMixedReality;
 
 public interface IConsoleWriter
 {
@@ -8,4 +8,5 @@ public interface IConsoleWriter
     void WriteLine(string text);
     void ResetWriteColor();
     void ResetColor();
+    ConsoleSize GetSize();
 }

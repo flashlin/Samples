@@ -1,4 +1,5 @@
-﻿using LanguageExt.Common;
+﻿using GitCli.Models.ConsoleMixedReality;
+using LanguageExt.Common;
 
 namespace GitCli.Models;
 
