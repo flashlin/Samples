@@ -10,10 +10,13 @@ var host = hostBuilder
 	{
 		 services.AddDbContext<GitCliDbContext>();
 		 services.AddTransient<IGitRepoAgent, GitRepoAgent>();
-		 services.AddSingleton<IApplicationWindow, ApplicationWindow>();
-		 services.AddSingleton<Main>();
+		 //services.AddTransient<IConsoleWriter, ConsoleWriter>();
+		 //services.AddSingleton<ITerminalGui, TerminalGui>();
+		 services.AddTransient<GitStatusCommand>();
+		 services.AddSingleton<IConsoleWindow, ConsoleWindow>();
+		 services.AddSingleton<IApplicationWindow>(sp => sp.GetRequiredService<IConsoleWindow>());
 	})
 	.Build();
 
-var main = host.Services.GetService<Main>();
-await main!.Run();
+var main = host.Services.GetService<IApplicationWindow>();
+await main!.Run(args);

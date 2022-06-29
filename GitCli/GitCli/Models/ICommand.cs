@@ -3,5 +3,5 @@
 public interface ICommand
 {
     bool IsMyCommand(string[] args);
-    Task Run(string[] args);
+    Task Run();
 }
