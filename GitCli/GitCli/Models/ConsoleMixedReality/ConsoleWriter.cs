@@ -1,4 +1,4 @@
-﻿namespace GitCli.Models;
+﻿namespace GitCli.Models.ConsoleMixedReality;
 
 public class ConsoleWriter : IConsoleWriter
 {
@@ -13,6 +13,15 @@ public class ConsoleWriter : IConsoleWriter
         _backgroundColor = _originBackgroundColor;
         _originForegroundColor = Console.ForegroundColor;
         _foregroundColor = _originForegroundColor;
+    }
+
+    public ConsoleSize GetSize()
+    {
+        return new ConsoleSize()
+        {
+            Width = Console.WindowWidth,
+            Height = Console.WindowHeight,
+        };
     }
 
     public void SetForegroundColor(ConsoleColor color)
