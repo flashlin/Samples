@@ -5,11 +5,11 @@ namespace GitCli.Models;
 public class GitChanges : IMenuItem
 {
     private View _listView;
-    private IApplicationWindow _applicationWindow;
+    private ITerminalGui _terminalGui;
 
-    public GitChanges(IApplicationWindow applicationWindow, View listView)
+    public GitChanges(ITerminalGui terminalGui, View listView)
     {
-        _applicationWindow = applicationWindow;
+        _terminalGui = terminalGui;
         _listView = listView;
     }
 
@@ -25,7 +25,7 @@ public class GitChanges : IMenuItem
         //     _listView.SetNeedsDisplay();
         // }
         
-        var repoInfo = _applicationWindow.GetRepoInfo();
+        var repoInfo = _terminalGui.GetRepoInfo();
         var fileStatus = repoInfo.QueryStatus().ToList();
         repoInfo.Status.SetValue(fileStatus);
         Title = $"Changes({fileStatus.Count})";

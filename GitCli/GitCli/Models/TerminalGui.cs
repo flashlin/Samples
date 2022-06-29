@@ -47,7 +47,7 @@ public class NotifyProperty<T>
 	}
 }
 
-public class ApplicationWindow : IApplicationWindow
+public class TerminalGui : ITerminalGui
 {
 	private GitChanges _gitChanges;
 	private List<IMenuItem> _workspaceViewMenus;
@@ -57,13 +57,13 @@ public class ApplicationWindow : IApplicationWindow
 	private Window _unStagedWindow;
 	private Window _workspaceWindow;
 
-	public ApplicationWindow(IGitRepoAgent gitRepoAgent)
+	public TerminalGui(IGitRepoAgent gitRepoAgent)
 	{
 		_gitRepoAgent = gitRepoAgent;
 		_gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Samples");
 	}
 
-	public void Run()
+	public Task Run(string[] args)
 	{
 		//new Example().Sample();
 
@@ -95,6 +95,8 @@ public class ApplicationWindow : IApplicationWindow
 		//top.Redraw(new Rect(0,0, Application.Top.Bounds.Width, Application.Top.Bounds.Height));
 		Application.Run();
 		Application.Shutdown();
+
+		return Task.CompletedTask;
 	}
 
 	private void AddUnStagedWindow(Toplevel top)

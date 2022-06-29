@@ -1,25 +1,25 @@
-﻿namespace GitCli.Models;
+﻿using LanguageExt.Common;
+
+namespace GitCli.Models;
 
 public class GitStatusCommand : ICommand
 {
-    public bool IsMyCommand(string[] args)
-    {
-        if (args.Length != 5)
-        {
-            return false;
-        }
+	private GitStatusCommandArgs _args;
+	private IConsoleWriter _console = new ConsoleWriter();
+	
+	public bool IsMyCommand(string[] args)
+	{
+		var p = args.ParseArgs<GitStatusCommandArgs>();
+		return p.Match(v =>
+		{
+			_args = v;
+			return true;
+		}, _ => false);
+	}
 
-        if (args[0] != "b")
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    public Task Run(string[] args)
-    {
-        var p = args.ParseArgs<GitStatusCommandArgs>()!;
-        return Task.CompletedTask;
-    }
+	public Task Run()
+	{
+		_console.WriteLine($"Action='{_args.ActionName}'");
+		return Task.CompletedTask;
+	}
 }

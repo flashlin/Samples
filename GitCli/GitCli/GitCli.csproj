@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Dapper" Version="2.0.123" />
+    <PackageReference Include="LanguageExt.Core" Version="4.2.9" />
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.6" />
@@ -18,6 +19,10 @@
     <PackageReference Include="SQLite" Version="3.13.0" />
     <PackageReference Include="T1.Standard" Version="1.0.63" />
     <PackageReference Include="Terminal.Gui" Version="1.6.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\MyGitHub\T1.Standard\T1.Standard\T1.Standard.csproj" />
   </ItemGroup>
 
 </Project>
