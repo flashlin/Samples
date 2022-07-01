@@ -40,4 +40,10 @@ public struct Rect
         Width = size.Width, 
         Height = size.Height
     };
+
+    public bool Contain(Position pos)
+    {
+        return (pos.X >= Left && pos.X <= Right &&
+                pos.Y >= Top && pos.Y <= Bottom);
+    }
 }

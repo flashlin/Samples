@@ -14,7 +14,9 @@ public class EmptyElement : IConsoleElement
         get { return () => Rect.OfSize(_console.GetSize()); }
     }
 
-    public Character this[Position pos] => Character.Empty;
+	public Position CursorPosition => new Position(0, 0);
+
+	public Character this[Position pos] => Character.Empty;
 
     public bool OnInput(InputEvent inputEvent)
     {

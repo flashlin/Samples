@@ -104,8 +104,13 @@ public class ConsoleWriter : IConsoleWriter
         Console.CursorVisible = true;
     }
 
-    public void ReadKey()
+    public void StartReadKey()
     {
         KeyEvents.StartReadKey();
+    }
+
+    public void SetCursorPosition(Position position)
+    {
+        Console.SetCursorPosition(position.X, position.Y);
     }
 }
