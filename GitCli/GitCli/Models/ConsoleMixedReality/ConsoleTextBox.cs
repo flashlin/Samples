@@ -2,8 +2,6 @@
 
 public class ConsoleTextBox : IConsoleElement
 {
-	private int _caretStart;
-	private int _caretEnd;
 	private int _editIndex;
 
 	public ConsoleTextBox(Rect rect)
@@ -79,9 +77,6 @@ public class ConsoleTextBox : IConsoleElement
 			case ConsoleKey.End:
 				_editIndex = Value.Length;
 				break;
-			//  break;
-			// case ConsoleKey key when char.IsControl(inputEvent.Key.KeyChar) && inputEvent.Key.Key != ConsoleKey.Enter:
-			//     return;
 			default:
 				var character = inputEvent.Key == ConsoleKey.Enter
 					 ? '\n'
@@ -98,22 +93,6 @@ public class ConsoleTextBox : IConsoleElement
 		return true;
 	}
 
-	private void MoveCursorRight(Rect rect, string? value)
-	{
-		var valueLength = 0;
-		if (value != null)
-		{
-			valueLength = value.Length;
-		}
-		_caretEnd = Math.Min(_caretEnd + 1, valueLength);
-
-		if (_caretEnd >= rect.Width)
-		{
-			_caretStart = Math.Max(_caretStart + 1, _caretEnd - rect.Width - 1);
-		}
-		_editIndex = Math.Max(Value.Length, _editIndex + 1);
-	}
-
 	private (int startIndex, int len) ComputeShowContent(Rect rect)
 	{
 		var startIndex = _editIndex - rect.Width;
@@ -123,25 +102,5 @@ public class ConsoleTextBox : IConsoleElement
 		}
 		var len = Math.Min(Value.Length, rect.Width);
 		return (startIndex, len);
-	}
-}
-
-public static class StringExtension
-{
-	public static string SubStr(this string str, int offset)
-	{
-		if (string.IsNullOrEmpty(str))
-		{
-			return string.Empty;
-		}
-		if (offset < 0)
-		{
-			return string.Empty;
-		}
-		if (offset >= str.Length)
-		{
-			return string.Empty;
-		}
-		return str.Substring(offset);
 	}
 }
