@@ -17,6 +17,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.6" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="SQLite" Version="3.13.0" />
+    <PackageReference Include="System.Reactive" Version="5.0.0" />
+    <PackageReference Include="System.Reactive.Linq" Version="5.0.0" />
     <PackageReference Include="T1.Standard" Version="1.0.63" />
     <PackageReference Include="Terminal.Gui" Version="1.6.4" />
   </ItemGroup>

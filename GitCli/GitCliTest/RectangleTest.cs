@@ -5,353 +5,224 @@ namespace GitCliTest;
 
 public class RectangleTest
 {
-	private ConsoleRectangle _aRect = new ConsoleRectangle
-	{
-		LeftTop = new ConsoleLocation
-		{
-			X = 0,
-			Y = 0,
-		},
-		RightBottom = new ConsoleLocation
-		{
-			X = 10,
-			Y = 10
-		},
-	};
+    private Rect _aRect = new Rect
+    {
+        Left = 0,
+        Top = 0,
+        Width = 10,
+        Height = 10
+    };
 
-	[SetUp]
-	public void Setup()
-	{
-	}
+    [SetUp]
+    public void Setup()
+    {
+    }
 
-	[Test]
-	public void Top()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = -2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 4,
-				Y = 4
-			}
-		});
+    [Test]
+    public void Top()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = 2,
+            Top = -2,
+            Width = 4,
+            Height = 4
+        });
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 0,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 4,
-				Y = 4
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void RightTop()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = -2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 14,
-				Y = 4
-			}
-		});
+        new Rect
+        {
+            Left = 2,
+            Top = 0,
+            Width = 4,
+            Height = 2
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 0,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 10,
-				Y = 4
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void Right()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 15,
-				Y = 5
-			}
-		});
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 10,
-				Y = 5
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void RightBottom()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 15,
-				Y = 15
-			}
-		});
+    [Test]
+    public void RightTop()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = 2,
+            Top = -2,
+            Width = 10,
+            Height = 5
+        });
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 10,
-				Y = 10
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void Bottom()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 15
-			}
-		});
+        new Rect
+        {
+            Left = 2,
+            Top = 0,
+            Width = 8,
+            Height = 3
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 10
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void LeftBottom()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = -2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 15
-			}
-		});
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 0,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 10
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void Left()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = -2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 8
-			}
-		});
+    [Test]
+    public void Right()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = 2,
+            Top = 2,
+            Width = 15,
+            Height = 5
+        });
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 0,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 8
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void LeftTop()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = -2,
-				Y = -2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 8
-			}
-		});
+        new Rect
+        {
+            Left = 2,
+            Top = 2,
+            Width = 8,
+            Height = 5
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 0,
-				Y = 0,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 8
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void In()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 5
-			}
-		});
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 2,
-				Y = 2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 5,
-				Y = 5
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
-	[Test]
-	public void Out()
-	{
-		var rect = _aRect.Intersect(new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = -2,
-				Y = -2,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 15,
-				Y = 15
-			}
-		});
+    [Test]
+    public void RightBottom()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = 2,
+            Top = 2,
+            Width = 15,
+            Height = 15
+        });
 
-		new ConsoleRectangle
-		{
-			LeftTop = new ConsoleLocation
-			{
-				X = 0,
-				Y = 0,
-			},
-			RightBottom = new ConsoleLocation
-			{
-				X = 10,
-				Y = 10
-			}
-		}.ToExpectedObject().ShouldEqual(rect);
-	}
-	
-	
+        new Rect
+        {
+            Left = 2,
+            Top = 2,
+            Width = 8,
+            Height = 8
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
+
+
+    [Test]
+    public void Bottom()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = 2,
+            Top = 2,
+            Width = 5,
+            Height = 15
+        });
+
+        new Rect
+        {
+            Left = 2,
+            Top = 2,
+            Width = 5,
+            Height = 8
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
+
+
+    [Test]
+    public void LeftBottom()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = -2,
+            Top = 2,
+            Width = 5,
+            Height = 15
+        });
+
+        new Rect
+        {
+            Left = 0,
+            Top = 2,
+            Width = 3,
+            Height = 8
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
+
+
+    [Test]
+    public void Left()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = -2,
+            Top = 2,
+            Width = 5,
+            Height = 8
+        });
+
+        new Rect
+        {
+            Left = 0,
+            Top = 2,
+            Width = 3,
+            Height = 8
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
+
+
+    [Test]
+    public void LeftTop()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = -2,
+            Top = -2,
+            Width = 5,
+            Height = 8
+        });
+
+        new Rect
+        {
+            Left = 0,
+            Top = 0,
+            Width = 3,
+            Height = 6
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
+
+
+    [Test]
+    public void In()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = 2,
+            Top = 2,
+            Width = 5,
+            Height = 5
+        });
+
+        new Rect
+        {
+            Left = 2,
+            Top = 2,
+            Width = 5,
+            Height = 5
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
+
+    [Test]
+    public void Out()
+    {
+        var rect = _aRect.Intersect(new Rect
+        {
+            Left = -2,
+            Top = -2,
+            Width = 15,
+            Height = 15
+        });
+
+        new Rect
+        {
+            Left = 0,
+            Top = 0,
+            Width = 10,
+            Height = 10
+        }.ToExpectedObject().ShouldEqual(rect);
+    }
 }

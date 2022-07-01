@@ -9,13 +9,6 @@ namespace GitCli.Models
 {
 	public class Example
 	{
-
-
-
-
-
-
-
 		public class Person
 		{
 			public string? Name { get; set; }
