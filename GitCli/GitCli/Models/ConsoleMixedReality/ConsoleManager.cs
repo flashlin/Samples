@@ -74,13 +74,13 @@ public class ConsoleManager
 
 	public void Start()
 	{
-		_console.SetCursorPosition(Content.CursorPosition);
 		AdjustBufferSize();
 		_console.KeyEvents.Subscribe(ReadInput);
 		_console.StartReadKey();
 		while (true)
 		{
 			AdjustBufferSize();
+			_console.SetCursorPosition(Content.CursorPosition);
 			Thread.Sleep(10);
 		}
 	}
@@ -88,7 +88,7 @@ public class ConsoleManager
 	private void ReadInput(InputEvent @event)
 	{
 		var handled = Content.OnInput(@event);
-		if( handled)
+		if (handled)
 		{
 			Redraw();
 		}
