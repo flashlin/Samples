@@ -70,9 +70,15 @@ public class ConsoleTextBox : IConsoleElement
 				_editIndex = Math.Max(0, _editIndex - 1);
 				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
 				break;
-			// case ConsoleKey.Delete when CaretStart != CaretEnd:
-			// case ConsoleKey.Backspace when CaretStart != CaretEnd:
-			//  newText = $"{Value.Substring(_editIndex, CaretEnd)}";
+			case ConsoleKey.Delete:
+				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
+				break;
+			case ConsoleKey.Home:
+				_editIndex = 0;
+				break;
+			case ConsoleKey.End:
+				_editIndex = Value.Length;
+				break;
 			//  break;
 			// case ConsoleKey key when char.IsControl(inputEvent.Key.KeyChar) && inputEvent.Key.Key != ConsoleKey.Enter:
 			//     return;
