@@ -14,6 +14,7 @@ public class ConsoleTextBox : IConsoleElement
 	public int MaxLength { get; set; } = int.MaxValue;
 	public Rect EditRect { get; set; }
 	public Func<Rect> GetViewRect { get; set; }
+	public Color Background { get; set; } = ConsoleColor.Blue;
 	public Position CursorPosition
 	{
 		get
@@ -46,9 +47,9 @@ public class ConsoleTextBox : IConsoleElement
 			var x = pos.X - rect.Left;
 			if (x >= content.Length)
 			{
-				return Character.Empty;
+				return new Character(' ', Background, Background);
 			}
-			return new Character(content[x]);
+			return new Character(content[x], null, Background);
 		}
 	}
 

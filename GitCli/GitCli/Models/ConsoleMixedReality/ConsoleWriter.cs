@@ -60,10 +60,15 @@ public class ConsoleWriter : IConsoleWriter
 		var foreground = character.Foreground;
 		var background = character.Background;
 		if (content == '\n') content = ' ';
+		if (character == Character.Empty)
+		{
+			background = Color.Black;
+			Console.Write($"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m ");
+			return;
+		}
 		Console.SetCursorPosition(position.X, position.Y);
 		Console.Write($"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m{content}");
 	}
-
 
 	public void ResetWriteColor()
 	{
