@@ -8,5 +8,13 @@ public interface IConsoleWriter
     void WriteLine(string text);
     void ResetWriteColor();
     void ResetColor();
-    ConsoleSize GetSize();
+    Size GetSize();
+    void Clear();
+    void HideCursor();
+    void ShowCursor();
+    void Initialize();
+    void Write(Position position, Character character);
+    ConsoleInputObserver KeyEvents { get; }
+    void ReadKey();
 }
+
