@@ -1,4 +1,5 @@
 ﻿using GitCli.Models;
+using GitCli.Models.ConsoleMixedReality;
 using GitCli.Models.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +11,10 @@ var host = hostBuilder
 	{
 		 services.AddDbContext<GitCliDbContext>();
 		 services.AddTransient<IGitRepoAgent, GitRepoAgent>();
+		 services.AddTransient<IConsoleWriter, ConsoleWriter>();
+		 services.AddSingleton<ConsoleManager>();
+		 
+		 
 		 //services.AddTransient<IConsoleWriter, ConsoleWriter>();
 		 //services.AddSingleton<ITerminalGui, TerminalGui>();
 		 services.AddTransient<GitStatusCommand>();

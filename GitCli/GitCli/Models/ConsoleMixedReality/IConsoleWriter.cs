@@ -15,6 +15,7 @@ public interface IConsoleWriter
     void Initialize();
     void Write(Position position, Character character);
     ConsoleInputObserver KeyEvents { get; }
-    void ReadKey();
+    void StartReadKey();
+    void SetCursorPosition(Position position);
 }
 
