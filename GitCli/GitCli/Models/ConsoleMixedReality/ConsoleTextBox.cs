@@ -50,10 +50,10 @@ public class ConsoleTextBox : IConsoleElement
 			var x = pos.X - rect.Left;
 
 
-			var selectedSpan = GetSelectedValue().Intersect(contentSpan);
+			var selectedSpan = GetSelectedSpan().Intersect(contentSpan);
 			if (!selectedSpan.IsEmpty)
 			{
-				var selectedValue = Value.Substring(selectedSpan.Index, selectedSpan.Length);
+				var selectedValue = GetSelectedValue(selectedSpan);
 				if (selectedSpan.Contain(x))
 				{
 					return new Character(selectedValue[x - selectedSpan.Index], null, Color.DarkGray);
@@ -67,6 +67,11 @@ public class ConsoleTextBox : IConsoleElement
 
 			return new Character(content[x], null, Background);
 		}
+	}
+
+	private string GetSelectedValue(StrSpan selectedSpan)
+	{
+		return Value.Substring(selectedSpan.Index, selectedSpan.Length);
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -141,7 +146,7 @@ public class ConsoleTextBox : IConsoleElement
 	}
 
 
-	private StrSpan GetSelectedValue()
+	private StrSpan GetSelectedSpan()
 	{
 		if (!IsSelectedMode)
 		{
