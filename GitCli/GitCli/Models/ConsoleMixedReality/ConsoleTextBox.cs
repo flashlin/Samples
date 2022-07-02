@@ -44,8 +44,8 @@ public class ConsoleTextBox : IConsoleElement
 				return Character.Empty;
 			}
 
-			var contentSpan = ComputeShowContent(rect);
-			var content = Value.Substring(contentSpan.Index, contentSpan.Length);
+			var contentSpan = GetShowContentSpan(rect);
+			var showContent = GetShowContent(contentSpan);
 
 			var x = pos.X - rect.Left;
 
@@ -60,13 +60,18 @@ public class ConsoleTextBox : IConsoleElement
 				}
 			}
 
-			if (x >= content.Length)
+			if (x >= showContent.Length)
 			{
 				return new Character(' ', null, Background);
 			}
 
-			return new Character(content[x], null, Background);
+			return new Character(showContent[x], null, Background);
 		}
+	}
+
+	private string GetShowContent(StrSpan contentSpan)
+	{
+		return Value.Substring(contentSpan.Index, contentSpan.Length);
 	}
 
 	private string GetSelectedValue(StrSpan selectedSpan)
@@ -129,7 +134,7 @@ public class ConsoleTextBox : IConsoleElement
 		return true;
 	}
 
-	private StrSpan ComputeShowContent(Rect rect)
+	private StrSpan GetShowContentSpan(Rect rect)
 	{
 		var startIndex = _editIndex - rect.Width;
 		if (_editIndex < rect.Width)
