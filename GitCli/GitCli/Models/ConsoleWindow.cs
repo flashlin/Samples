@@ -18,18 +18,30 @@ public class ConsoleWindow : IConsoleWindow
 
     public Task Run(string[] args)
     {
-        var textBox = new ConsoleTextBox(new Rect
+        var layout = new VerticalStack        
         {
-            Left = 10,
-            Top = 10,
-            Width = 10,
-            Height = 1
-        });
-        textBox.MaxLength = 5;
+            Children =
+            {
+                new ConsoleTextBox(new Rect
+                {
+                    Left = 10,
+                    Top = 10,
+                    Width = 10,
+                    Height = 1,
+                }).Setup(x => { x.MaxLength = 5; }),
+                new ConsoleTextBox(new Rect
+                {
+                    Left = 10,
+                    Top = 11,
+                    Width = 10,
+                    Height = 1
+                })
+            }
+        };
 
-        _consoleManager.Content = textBox;
+        _consoleManager.Content = layout;
         _consoleManager.Start();
-        
+
         return Task.CompletedTask;
         //
         // do

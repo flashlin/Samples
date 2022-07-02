@@ -24,4 +24,12 @@ public struct Size
     public static bool operator !=(Size a, Size b) => !(a == b);
     public static bool operator <=(Size a, Size b) => a.Width <= b.Width && a.Height <= b.Height;
     public static bool operator >=(Size a, Size b) => a.Width >= b.Width && a.Height >= b.Height;
+
+    public override int GetHashCode()
+    {
+        return HashCodeCalculator.GetHashCode(
+            (typeof(int), Width),
+            (typeof(int), Height)
+        );
+    }
 }

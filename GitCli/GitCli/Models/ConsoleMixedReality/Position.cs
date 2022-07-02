@@ -2,22 +2,27 @@
 
 public struct Position
 {
-    public Position(int x, int y)
-    {
-        X = x;
-        Y = y;
-    }
+	public Position(int x, int y)
+	{
+		X = x;
+		Y = y;
+	}
 
-    public int X { get; init; }
-    public int Y { get; init; }
+	public static Position Empty = new Position(-1, -1)
+	{
+		IsEmpty = true,
+	};
 
-   public Position Next => new Position(X + 1, Y);
+	public bool IsEmpty { get; private set; } = false;
+	public int X { get; init; }
+	public int Y { get; init; }
 
+	public Position Next => new Position(X + 1, Y);
 
 	public static bool operator ==(in Position lhs, in Position rhs) => lhs.X == rhs.X && lhs.Y == rhs.Y;
 	public static bool operator !=(in Position lhs, in Position rhs) => !(lhs == rhs);
 
-	public override bool Equals(object obj) => obj is Position position && this == position;
+	public override bool Equals(object? obj) => obj is Position position && this == position;
 
 	public override int GetHashCode()
 	{
@@ -25,5 +30,10 @@ public struct Position
 		hashCode = hashCode * -1521134295 + X.GetHashCode();
 		hashCode = hashCode * -1521134295 + Y.GetHashCode();
 		return hashCode;
+	}
+
+	public override string ToString()
+	{
+		return $"{X},{Y}";
 	}
 }
