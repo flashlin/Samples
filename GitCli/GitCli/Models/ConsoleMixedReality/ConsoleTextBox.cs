@@ -30,7 +30,7 @@ public class ConsoleTextBox : IConsoleElement
 	public int EditIndex => _editIndex;
 	public Rect EditRect { get; set; }
 	public Func<Rect> GetViewRect { get; set; }
-	public bool IsSelectedMode { get; set; }
+	public bool IsSelectedMode { get; private set; }
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Value { get; set; } = String.Empty;
 
