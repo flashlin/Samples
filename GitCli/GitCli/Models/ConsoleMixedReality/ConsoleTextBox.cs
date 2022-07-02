@@ -48,8 +48,6 @@ public class ConsoleTextBox : IConsoleElement
 			var showContent = GetShowContent(contentSpan);
 
 			var x = pos.X - rect.Left;
-
-
 			var selectedSpan = GetSelectedSpan().Intersect(contentSpan);
 			if (!selectedSpan.IsEmpty)
 			{
@@ -64,7 +62,6 @@ public class ConsoleTextBox : IConsoleElement
 			{
 				return new Character(' ', null, Background);
 			}
-
 			return new Character(showContent[x], null, Background);
 		}
 	}
