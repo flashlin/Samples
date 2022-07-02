@@ -30,14 +30,14 @@ public class ConsoleInputObserver : IObservable<InputEvent>
 	{
 		while (!_cancellationTokenSource.IsCancellationRequested)
 		{
-			if (Console.KeyAvailable)
-			{
-				var key = Console.ReadKey(true);
-				RaiseKey(key);
-			}
-			//var key = Console.ReadKey();
-			//RaiseKey(key);
-			Thread.Sleep(10);
+			// if (Console.KeyAvailable)
+			// {
+			// 	var key = Console.ReadKey(true);
+			// 	RaiseKey(key);
+			// }
+			//Thread.Sleep(10);
+			var key = Console.ReadKey(true);
+			RaiseKey(key);
 		}
 	}
 

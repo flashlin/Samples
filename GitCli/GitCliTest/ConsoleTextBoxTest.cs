@@ -48,4 +48,16 @@ public class ConsoleTextBoxTest
         Assert.That(_textbox.EditIndex, Is.EqualTo(5));
         Assert.That(_textbox.Value, Is.EqualTo("ab123c"));
     }
+    
+    [Test]
+    public void Input11Chars()
+    {
+        _textbox.Keyin("12345678901");
+        Assert.That(_textbox.EditIndex, Is.EqualTo(11));
+        Assert.That(_textbox.Value, Is.EqualTo("12345678901"));
+
+        Assert.That(_textbox[new Position {X = 10, Y = 11}],
+            Is.EqualTo(Character.Empty));
+    }
+    
 }
