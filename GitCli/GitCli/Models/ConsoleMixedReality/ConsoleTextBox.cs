@@ -13,6 +13,7 @@ public class ConsoleTextBox : IConsoleElement
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 	public IConsoleWriter Console { get; set; }
+
 	public Position CursorPosition
 	{
 		get
@@ -32,6 +33,7 @@ public class ConsoleTextBox : IConsoleElement
 	public bool IsSelectedMode { get; set; }
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Value { get; set; } = String.Empty;
+
 	public Character this[Position pos]
 	{
 		get
@@ -60,6 +62,7 @@ public class ConsoleTextBox : IConsoleElement
 			{
 				return new Character(' ', null, Background);
 			}
+
 			return new Character(showContent[x], null, Background);
 		}
 	}
@@ -74,33 +77,42 @@ public class ConsoleTextBox : IConsoleElement
 			IsSelectedMode = true;
 		}
 
-		if (IsSelectedMode && !inputEvent.HasShift)
-		{
-			IsSelectedMode = false;
-		}
+		//if (IsSelectedMode && !inputEvent.HasShift)
+		//{
+		//    IsSelectedMode = false;
+		//}
 
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.LeftArrow:
 				_editIndex = Math.Max(0, _editIndex - 1);
+				IsSelectedMode = (inputEvent.HasShift);
 				break;
 
 			case ConsoleKey.RightArrow:
 				_editIndex = Math.Min(Value.Length, _editIndex + 1);
+				IsSelectedMode = (inputEvent.HasShift);
 				break;
 
 			case ConsoleKey.Backspace:
 				_editIndex = Math.Max(0, _editIndex - 1);
 				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
+				IsSelectedMode = false;
 				break;
 
 			case ConsoleKey.Delete:
 				if (IsSelectedMode)
 				{
+					var showContentSpan = GetShowContentSpanByView();
 					var selectedSpan = GetSelectedSpan();
-					//TODO: newText = selectedSpan.Intersect()
+					var remainingSpans = selectedSpan.NonIntersect(showContentSpan).ToArray();
+					newText = string.Join("", remainingSpans.Select(x => Value.Substring(x.Index, x.Length)));
 				}
-				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
+				else
+				{
+					newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
+				}
+				IsSelectedMode = false;
 				break;
 
 			case ConsoleKey.Home:
@@ -117,6 +129,7 @@ public class ConsoleTextBox : IConsoleElement
 					 : inputEvent.KeyChar;
 				newText = $"{Value.Substring(0, _editIndex)}{character}{Value.SubStr(_editIndex)}";
 				_editIndex = Math.Min(newText.Length, _editIndex + 1);
+				IsSelectedMode = false;
 				break;
 		}
 
@@ -134,6 +147,7 @@ public class ConsoleTextBox : IConsoleElement
 		{
 			return StrSpan.Empty;
 		}
+
 		var startIndex = Math.Min(_editIndex, _startSelectIndex);
 		var endIndex = Math.Max(_editIndex, _startSelectIndex);
 		return new StrSpan
@@ -151,6 +165,12 @@ public class ConsoleTextBox : IConsoleElement
 	private string GetShowContent(StrSpan contentSpan)
 	{
 		return Value.Substring(contentSpan.Index, contentSpan.Length);
+	}
+
+	private StrSpan GetShowContentSpanByView()
+	{
+		var rect = EditRect.Intersect(GetViewRect());
+		return GetShowContentSpan(rect);
 	}
 
 	private StrSpan GetShowContentSpan(Rect rect)

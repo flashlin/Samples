@@ -62,7 +62,7 @@ public class StrSpanTest
             new StrSpan
             {
                 Index = 10,
-                Length = 4
+                Length = 5
             },
         }.ToExpectedObject().ShouldEqual(actualResult);
     }
@@ -95,7 +95,7 @@ public class StrSpanTest
             new StrSpan
             {
                 Index = 10,
-                Length = 4
+                Length = 5
             },
         }.ToExpectedObject().ShouldEqual(actualResult);
     }

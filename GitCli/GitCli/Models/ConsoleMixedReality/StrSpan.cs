@@ -77,7 +77,7 @@ public struct StrSpan
 		var rightSpan = new StrSpan
 		{
 			Index = right,
-			Length = rightRight- right,
+			Length = rightRight- right + 1,
 		};
 		return rightSpan;
 	}
