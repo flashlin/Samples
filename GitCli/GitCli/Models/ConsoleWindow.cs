@@ -18,13 +18,14 @@ public class ConsoleWindow : IConsoleWindow
 
     public Task Run(string[] args)
     {
-        var textBox = new ConsoleTextBox(new Rect()
+        var textBox = new ConsoleTextBox(new Rect
         {
             Left = 10,
             Top = 10,
             Width = 10,
             Height = 1
         });
+        textBox.MaxLength = 5;
 
         _consoleManager.Content = textBox;
         _consoleManager.Start();
