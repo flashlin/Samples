@@ -21,6 +21,8 @@ public class ConsoleWriter : IConsoleWriter
 		_foregroundColor = _originForegroundColor;
 	}
 
+	public bool IsInsertMode { get; set; } = true;
+
 	public ConsoleInputObserver KeyEvents { get; } = new ConsoleInputObserver();
 
 	public Size GetSize()

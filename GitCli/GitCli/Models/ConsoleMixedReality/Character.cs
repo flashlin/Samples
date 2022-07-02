@@ -33,6 +33,8 @@ public struct Color
 
 	public static Color White => new Color(255, 255, 255);
 	public static Color Black => new Color(0, 0, 0);
+	public static Color DarkGray => ConsoleColor.DarkGray;
+	public static Color Gray => ConsoleColor.Gray;
 
 	public static bool operator ==(in Color lhs, in Color rhs)
 	{
