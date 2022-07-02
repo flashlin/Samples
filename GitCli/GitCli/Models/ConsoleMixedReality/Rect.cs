@@ -25,6 +25,11 @@ public struct Rect
 
 	public bool IsEmpty => Width == 0 && Height == 0;
 
+	public override string ToString()
+	{
+		return $"{Left},{Top},{Width},{Height}";
+	}
+
 	public Rect Intersect(Rect b)
 	{
 		if (this.IsEmpty || b.IsEmpty) return Empty;

@@ -54,7 +54,7 @@ public struct Color
 		 (byte)Math.Min(byte.MaxValue, lhs.Green + rhs.Green),
 		 (byte)Math.Min(byte.MaxValue, lhs.Blue + rhs.Blue));
 
-	public override bool Equals(object obj)
+	public override bool Equals(object? obj)
 	{
 		return obj is Color color && this == color;
 	}
@@ -90,6 +90,17 @@ public static class HashCodeCalculator
 		}
 		return hashCode;
 	}
+	
+	public static int GetHashCode(params (Type type, object value)[] objList)
+	{
+		return GetHashCode(objList.AsEnumerable());
+		// var hashCode = -1058441243;
+		// foreach (var obj in objList)
+		// {
+		// 	hashCode = hashCode * -1521134295 + GetHashCodeOf(obj.type, obj.value);
+		// }
+		// return hashCode;
+	}
 }
 
 public readonly struct Character
@@ -124,7 +135,7 @@ public readonly struct Character
 
 	public static bool operator !=(Character a, Character b) => !(a == b);
 
-	public override bool Equals(object obj)
+	public override bool Equals(object? obj)
 	{
 		return obj is Character character && this == character;
 	}

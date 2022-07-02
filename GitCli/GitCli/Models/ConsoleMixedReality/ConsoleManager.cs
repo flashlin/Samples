@@ -82,7 +82,11 @@ public class ConsoleManager
 		while (true)
 		{
 			AdjustBufferSize();
-			_console.SetCursorPosition(Content.CursorPosition);
+			var cursorPos = Content.CursorPosition;
+			if (!cursorPos.IsEmpty)
+			{
+				_console.SetCursorPosition(cursorPos);
+			}
 			Thread.Sleep(50);
 		}
 	}
