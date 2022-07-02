@@ -15,6 +15,7 @@ public class ConsoleTextBox : IConsoleElement
 	public Rect EditRect { get; set; }
 	public Func<Rect> GetViewRect { get; set; }
 	public Color Background { get; set; } = ConsoleColor.Blue;
+
 	public Position CursorPosition
 	{
 		get
@@ -23,13 +24,12 @@ public class ConsoleTextBox : IConsoleElement
 			{
 				return new Position(EditRect.Left + _editIndex, EditRect.Top);
 			}
+
 			return new Position(EditRect.Left + EditRect.Width, EditRect.Top);
 		}
 	}
-	public int EditIndex
-	{
-		get { return _editIndex; }
-	}
+
+	public int EditIndex => _editIndex;
 
 	public Character this[Position pos]
 	{
@@ -47,8 +47,9 @@ public class ConsoleTextBox : IConsoleElement
 			var x = pos.X - rect.Left;
 			if (x >= content.Length)
 			{
-				return new Character(' ', Background, Background);
+				return new Character(' ', null, Background);
 			}
+
 			return new Character(content[x], null, Background);
 		}
 	}
@@ -101,7 +102,14 @@ public class ConsoleTextBox : IConsoleElement
 		{
 			startIndex = 0;
 		}
+
 		var len = Math.Min(Value.Length, rect.Width);
 		return (startIndex, len);
 	}
+}
+
+public struct InputResponse
+{
+	public bool IsKeyHandled { get; init; }
+	public bool IsUpdated { get; init; }
 }

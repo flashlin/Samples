@@ -28,7 +28,9 @@ public class ConsoleManager
 
 	private void Redraw()
 	{
-		Update(Content.GetViewRect());
+		var contentRect = Content.GetViewRect();
+		//contentRect = contentRect.ExtendBy(contentRect.BottomRightCorner.Next);
+		Update(contentRect);
 	}
 
 	private void Update(Rect rect)
@@ -44,7 +46,7 @@ public class ConsoleManager
 
 				var character = Content[position];
 
-				if (!_buffer.Update(position, character)) continue;
+				//if (!_buffer.Update(position, character)) continue;
 				_console.Write(position, character);
 			}
 		}
@@ -87,8 +89,8 @@ public class ConsoleManager
 
 	private void ReadInput(InputEvent @event)
 	{
-		var handled = Content.OnInput(@event);
-		if (handled)
+		var isHandled = Content.OnInput(@event);
+		if (isHandled)
 		{
 			Redraw();
 		}
