@@ -3,6 +3,7 @@
 public class ConsoleTextBox : IConsoleElement
 {
 	private int _editIndex;
+	private int _startSelectIndex;
 
 	public ConsoleTextBox(Rect rect)
 	{
@@ -10,11 +11,13 @@ public class ConsoleTextBox : IConsoleElement
 		EditRect = rect;
 	}
 
+	public IConsoleWriter Console { get; set; }
+	public bool IsSelectedMode { get; set; }
 	public string Value { get; set; } = String.Empty;
 	public int MaxLength { get; set; } = int.MaxValue;
 	public Rect EditRect { get; set; }
 	public Func<Rect> GetViewRect { get; set; }
-	public Color Background { get; set; } = ConsoleColor.Blue;
+	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 
 	public Position CursorPosition
 	{
@@ -41,10 +44,22 @@ public class ConsoleTextBox : IConsoleElement
 				return Character.Empty;
 			}
 
-			var (startIndex, len) = ComputeShowContent(rect);
-			var content = Value.Substring(startIndex, len);
+			var contentSpan = ComputeShowContent(rect);
+			var content = Value.Substring(contentSpan.Index, contentSpan.Length);
 
 			var x = pos.X - rect.Left;
+
+
+			var selectedSpan = GetSelectedValue().Intersect(contentSpan);
+			if (!selectedSpan.IsEmpty)
+			{
+				var selectedValue = Value.Substring(selectedSpan.Index, selectedSpan.Length);
+				if (selectedSpan.Contain(x))
+				{
+					return new Character(selectedValue[x - selectedSpan.Index], null, Color.DarkGray);
+				}
+			}
+
 			if (x >= content.Length)
 			{
 				return new Character(' ', null, Background);
@@ -58,6 +73,19 @@ public class ConsoleTextBox : IConsoleElement
 	{
 		var rect = EditRect.Intersect(GetViewRect());
 		var newText = (string?)null;
+
+		if (!IsSelectedMode && inputEvent.HasShift)
+		{
+			_startSelectIndex = _editIndex;
+			IsSelectedMode = true;
+		}
+
+		if (IsSelectedMode && !inputEvent.HasShift)
+		{
+			IsSelectedMode = false;
+		}
+
+
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.LeftArrow:
@@ -92,10 +120,11 @@ public class ConsoleTextBox : IConsoleElement
 		{
 			Value = newText;
 		}
+
 		return true;
 	}
 
-	private (int startIndex, int len) ComputeShowContent(Rect rect)
+	private StrSpan ComputeShowContent(Rect rect)
 	{
 		var startIndex = _editIndex - rect.Width;
 		if (_editIndex < rect.Width)
@@ -104,12 +133,62 @@ public class ConsoleTextBox : IConsoleElement
 		}
 
 		var len = Math.Min(Value.Length, rect.Width);
-		return (startIndex, len);
+		return new StrSpan
+		{
+			Index = startIndex,
+			Length = len
+		};
+	}
+
+
+	private StrSpan GetSelectedValue()
+	{
+		if (!IsSelectedMode)
+		{
+			return StrSpan.Empty;
+		}
+		var startIndex = Math.Min(_editIndex, _startSelectIndex);
+		var endIndex = Math.Max(_editIndex, _startSelectIndex);
+		return new StrSpan
+		{
+			Index = startIndex,
+			Length = endIndex - startIndex,
+		};
 	}
 }
 
-public struct InputResponse
+public struct StrSpan
 {
-	public bool IsKeyHandled { get; init; }
-	public bool IsUpdated { get; init; }
+	public static StrSpan Empty = new StrSpan
+	{
+		Index = 0,
+		Length = 0
+	};
+
+	public int Index { get; init; }
+	public int Length { get; init; }
+
+	public int Right => Index + Length - 1;
+
+	public bool IsEmpty => (Index == 0 && Length == 0);
+
+	public StrSpan Intersect(StrSpan b)
+	{
+		if (this.IsEmpty || b.IsEmpty) return Empty;
+		return new StrSpan
+		{
+			Index = Math.Max(this.Index, b.Index),
+			Length = Math.Min(this.Right, b.Right) - Math.Max(this.Index, b.Index) + 1,
+		};
+	}
+
+	public bool Contain(int pos)
+	{
+		return (pos >= Index && pos < Index + Length);
+	}
+
+	public override string ToString()
+	{
+		return $"{nameof(StrSpan)}{{{Index},{Length}}}";
+	}
 }
