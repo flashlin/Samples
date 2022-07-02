@@ -95,6 +95,11 @@ public class ConsoleTextBox : IConsoleElement
 				break;
 
 			case ConsoleKey.Delete:
+				if (IsSelectedMode)
+				{
+					var selectedSpan = GetSelectedSpan();
+					//TODO: newText = selectedSpan.Intersect()
+				}
 				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
 				break;
 
