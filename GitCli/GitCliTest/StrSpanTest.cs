@@ -123,4 +123,24 @@ public class StrSpanTest
     }
     
     
+    [Test]
+    public void NoIntersect()
+    {
+        var aSpan = new StrSpan
+        {
+            Index = 0,
+            Length = 10
+        };
+
+        var bSpan = new StrSpan
+        {
+            Index = 10,
+            Length = 10
+        };
+
+        var actualResult = aSpan.NonIntersect(bSpan)
+            .ToArray();
+
+        Assert.That(actualResult, Is.Empty);
+    }
 }
