@@ -66,7 +66,6 @@ public class ConsoleTextBox : IConsoleElement
 
 	public bool OnInput(InputEvent inputEvent)
 	{
-		var rect = EditRect.Intersect(GetViewRect());
 		var newText = (string?)null;
 
 		if (!IsSelectedMode && inputEvent.HasShift)
