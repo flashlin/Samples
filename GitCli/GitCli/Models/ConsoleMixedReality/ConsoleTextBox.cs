@@ -119,6 +119,10 @@ public class ConsoleTextBox : IConsoleElement
 				break;
 
 			default:
+				if (Value.Length + 1 > MaxLength)
+				{
+					break;
+				}
 				var character = inputEvent.Key == ConsoleKey.Enter
 					 ? '\n'
 					 : inputEvent.KeyChar;
