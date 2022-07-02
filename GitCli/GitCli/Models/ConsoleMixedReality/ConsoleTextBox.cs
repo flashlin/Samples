@@ -77,11 +77,6 @@ public class ConsoleTextBox : IConsoleElement
 			IsSelectedMode = true;
 		}
 
-		//if (IsSelectedMode && !inputEvent.HasShift)
-		//{
-		//    IsSelectedMode = false;
-		//}
-
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.LeftArrow:
