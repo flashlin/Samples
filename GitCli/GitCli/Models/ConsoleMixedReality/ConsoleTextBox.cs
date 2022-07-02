@@ -11,14 +11,8 @@ public class ConsoleTextBox : IConsoleElement
 		EditRect = rect;
 	}
 
-	public IConsoleWriter Console { get; set; }
-	public bool IsSelectedMode { get; set; }
-	public string Value { get; set; } = String.Empty;
-	public int MaxLength { get; set; } = int.MaxValue;
-	public Rect EditRect { get; set; }
-	public Func<Rect> GetViewRect { get; set; }
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
-
+	public IConsoleWriter Console { get; set; }
 	public Position CursorPosition
 	{
 		get
@@ -33,7 +27,11 @@ public class ConsoleTextBox : IConsoleElement
 	}
 
 	public int EditIndex => _editIndex;
-
+	public Rect EditRect { get; set; }
+	public Func<Rect> GetViewRect { get; set; }
+	public bool IsSelectedMode { get; set; }
+	public int MaxLength { get; set; } = int.MaxValue;
+	public string Value { get; set; } = String.Empty;
 	public Character this[Position pos]
 	{
 		get
@@ -66,16 +64,6 @@ public class ConsoleTextBox : IConsoleElement
 		}
 	}
 
-	private string GetShowContent(StrSpan contentSpan)
-	{
-		return Value.Substring(contentSpan.Index, contentSpan.Length);
-	}
-
-	private string GetSelectedValue(StrSpan selectedSpan)
-	{
-		return Value.Substring(selectedSpan.Index, selectedSpan.Length);
-	}
-
 	public bool OnInput(InputEvent inputEvent)
 	{
 		var rect = EditRect.Intersect(GetViewRect());
@@ -92,28 +80,33 @@ public class ConsoleTextBox : IConsoleElement
 			IsSelectedMode = false;
 		}
 
-
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.LeftArrow:
 				_editIndex = Math.Max(0, _editIndex - 1);
 				break;
+
 			case ConsoleKey.RightArrow:
 				_editIndex = Math.Min(Value.Length, _editIndex + 1);
 				break;
+
 			case ConsoleKey.Backspace:
 				_editIndex = Math.Max(0, _editIndex - 1);
 				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
 				break;
+
 			case ConsoleKey.Delete:
 				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
 				break;
+
 			case ConsoleKey.Home:
 				_editIndex = 0;
 				break;
+
 			case ConsoleKey.End:
 				_editIndex = Value.Length;
 				break;
+
 			default:
 				var character = inputEvent.Key == ConsoleKey.Enter
 					 ? '\n'
@@ -131,6 +124,31 @@ public class ConsoleTextBox : IConsoleElement
 		return true;
 	}
 
+	private StrSpan GetSelectedSpan()
+	{
+		if (!IsSelectedMode)
+		{
+			return StrSpan.Empty;
+		}
+		var startIndex = Math.Min(_editIndex, _startSelectIndex);
+		var endIndex = Math.Max(_editIndex, _startSelectIndex);
+		return new StrSpan
+		{
+			Index = startIndex,
+			Length = endIndex - startIndex,
+		};
+	}
+
+	private string GetSelectedValue(StrSpan selectedSpan)
+	{
+		return Value.Substring(selectedSpan.Index, selectedSpan.Length);
+	}
+
+	private string GetShowContent(StrSpan contentSpan)
+	{
+		return Value.Substring(contentSpan.Index, contentSpan.Length);
+	}
+
 	private StrSpan GetShowContentSpan(Rect rect)
 	{
 		var startIndex = _editIndex - rect.Width;
@@ -146,22 +164,6 @@ public class ConsoleTextBox : IConsoleElement
 			Length = len
 		};
 	}
-
-
-	private StrSpan GetSelectedSpan()
-	{
-		if (!IsSelectedMode)
-		{
-			return StrSpan.Empty;
-		}
-		var startIndex = Math.Min(_editIndex, _startSelectIndex);
-		var endIndex = Math.Max(_editIndex, _startSelectIndex);
-		return new StrSpan
-		{
-			Index = startIndex,
-			Length = endIndex - startIndex,
-		};
-	}
 }
 
 public struct StrSpan
@@ -173,11 +175,14 @@ public struct StrSpan
 	};
 
 	public int Index { get; init; }
+	public bool IsEmpty => (Index == 0 && Length == 0);
 	public int Length { get; init; }
 
 	public int Right => Index + Length - 1;
-
-	public bool IsEmpty => (Index == 0 && Length == 0);
+	public bool Contain(int pos)
+	{
+		return (pos >= Index && pos < Index + Length);
+	}
 
 	public StrSpan Intersect(StrSpan b)
 	{
@@ -188,12 +193,6 @@ public struct StrSpan
 			Length = Math.Min(this.Right, b.Right) - Math.Max(this.Index, b.Index) + 1,
 		};
 	}
-
-	public bool Contain(int pos)
-	{
-		return (pos >= Index && pos < Index + Length);
-	}
-
 	public override string ToString()
 	{
 		return $"{nameof(StrSpan)}{{{Index},{Length}}}";
