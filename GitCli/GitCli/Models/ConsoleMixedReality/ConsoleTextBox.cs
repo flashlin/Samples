@@ -86,12 +86,16 @@ public class TextBox : IConsoleElement
 		{
 			case ConsoleKey.LeftArrow:
 				_editIndex = Math.Max(0, _editIndex - 1);
-				_isSelectedMode = (inputEvent.HasShift);
+				_isSelectedMode = inputEvent.HasShift;
 				break;
 
 			case ConsoleKey.RightArrow:
+				_isSelectedMode = inputEvent.HasShift;
+				if (_editIndex + 1 > Value.Length)
+				{
+					break;
+				}
 				_editIndex = Math.Min(Value.Length, _editIndex + 1);
-				_isSelectedMode = (inputEvent.HasShift);
 				break;
 
 			case ConsoleKey.Backspace:
