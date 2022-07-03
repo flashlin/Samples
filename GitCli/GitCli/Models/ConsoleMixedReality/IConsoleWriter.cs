@@ -16,7 +16,7 @@ public interface IConsoleWriter
     void Write(Position position, Character character);
     ConsoleInputObserver KeyEvents { get; }
     bool IsInsertMode { get; set; }
-    void StartReadKey();
     void SetCursorPosition(Position position);
+    InputEvent ReadKey();
 }
 

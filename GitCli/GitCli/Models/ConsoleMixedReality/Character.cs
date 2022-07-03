@@ -90,7 +90,7 @@ public static class HashCodeCalculator
 		}
 		return hashCode;
 	}
-	
+
 	public static int GetHashCode(params (Type type, object value)[] objList)
 	{
 		return GetHashCode(objList.AsEnumerable());
@@ -105,7 +105,7 @@ public static class HashCodeCalculator
 
 public readonly struct Character
 {
-	public Character(char content, Color? foreground = null, Color? background = null)
+	public Character(char? content, Color? foreground = null, Color? background = null)
 	{
 		Content = content;
 		Foreground = foreground ?? Color.White;
@@ -119,12 +119,19 @@ public readonly struct Character
 		Background = background;
 	}
 
-	public char Content { get; init; } = ' ';
+	public char? Content { get; init; }
 	public Color Foreground { get; init; }
 	public Color Background { get; init; }
 
+	public static Character Empty => new Character();
 
-	public static Character Empty => new Character('\0');
+	public bool IsEmpty
+	{
+		get
+		{
+			return Content == null;
+		}
+	}
 
 	public static bool operator ==(Character a, Character b)
 	{
@@ -143,9 +150,18 @@ public readonly struct Character
 	public override int GetHashCode()
 	{
 		var hashCode = -1661473088;
-		hashCode = hashCode * -1521134295 + EqualityComparer<char>.Default.GetHashCode(Content);
+		hashCode = hashCode * -1521134295 + ((Content == null) ? 0 : EqualityComparer<char?>.Default.GetHashCode(Content));
 		hashCode = hashCode * -1521134295 + EqualityComparer<Color>.Default.GetHashCode(Foreground);
 		hashCode = hashCode * -1521134295 + EqualityComparer<Color>.Default.GetHashCode(Background);
 		return hashCode;
+	}
+
+	public override string ToString()
+	{
+		if (Content == null)
+		{
+			return string.Empty;
+		}
+		return $"{Content}";
 	}
 }

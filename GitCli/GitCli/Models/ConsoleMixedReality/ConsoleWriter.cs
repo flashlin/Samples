@@ -62,14 +62,17 @@ public class ConsoleWriter : IConsoleWriter
 		var foreground = character.Foreground;
 		var background = character.Background;
 		if (content == '\n') content = ' ';
-		if (character == Character.Empty)
+		if (character.IsEmpty)
 		{
 			background = Color.Black;
-			Console.Write($"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m ");
+			Console.Write(
+				 $"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m ");
 			return;
 		}
+
 		Console.SetCursorPosition(position.X, position.Y);
-		Console.Write($"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m{content}");
+		Console.Write(
+			 $"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m{content}");
 	}
 
 	public void ResetWriteColor()
@@ -111,13 +114,30 @@ public class ConsoleWriter : IConsoleWriter
 		Console.CursorVisible = true;
 	}
 
-	public void StartReadKey()
+	// public void StartReadKey()
+	// {
+	//     KeyEvents.StartReadKey();
+	// }
+
+	public InputEvent ReadKey()
 	{
-		KeyEvents.StartReadKey();
+		var key = Console.ReadKey(true);
+		return InputEvent.From(key);
 	}
 
 	public void SetCursorPosition(Position position)
 	{
-		Console.SetCursorPosition(position.X, position.Y);
+		if (position.IsEmpty)
+		{
+			return;
+		}
+		//Console.SetCursorPosition(position.X, position.Y);
+		SetVirtualCursorPosition(position.X, position.Y);
+	}
+	
+	public void SetVirtualCursorPosition(int col, int row)
+	{
+		Console.Out.Write($"\x1b[{row + 1};{col + 1}H");
+		Console.Out.Flush();
 	}
 }
