@@ -1,6 +1,6 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public class ConsoleTextBox : ConsoleControl
+public class ConsoleTextBox : IConsoleElement
 {
 	private int _editIndex;
 	private int _startSelectIndex;
@@ -12,37 +12,27 @@ public class ConsoleTextBox : ConsoleControl
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 
-	public override Position CursorPosition
+	public Position CursorPosition
 	{
 		get
 		{
-			if (_editIndex < EditRect.Width)
+			if (_editIndex < ViewRect.Width)
 			{
-				return new Position(EditRect.Left + _editIndex, EditRect.Top);
+				return new Position(ViewRect.Left + _editIndex, ViewRect.Top);
 			}
 
-			return new Position(EditRect.Left + EditRect.Width, EditRect.Top);
+			return new Position(ViewRect.Left + ViewRect.Width, ViewRect.Top);
 		}
 	}
 
 	public int EditIndex => _editIndex;
-	public Rect EditRect { get; set; }
-
-	public override Rect ViewRect
-	{
-		get => base.ViewRect;
-		set
-		{
-			base.ViewRect = value;
-			EditRect = value;
-		}
-	}
+	public Rect ViewRect { get; set; }
 
 	public bool IsSelectedMode { get; private set; }
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Value { get; set; } = String.Empty;
 
-	public override Character this[Position pos]
+	public Character this[Position pos]
 	{
 		get
 		{
@@ -76,7 +66,7 @@ public class ConsoleTextBox : ConsoleControl
 		}
 	}
 
-	public override bool OnInput(InputEvent inputEvent)
+	public bool OnInput(InputEvent inputEvent)
 	{
 		var newText = (string?)null;
 
@@ -111,6 +101,7 @@ public class ConsoleTextBox : ConsoleControl
 					var selectedSpan = GetSelectedSpan();
 					var remainingSpans = selectedSpan.NonIntersect(showContentSpan).ToArray();
 					newText = string.Join("", remainingSpans.Select(x => Value.Substring(x.Index, x.Length)));
+					_editIndex = remainingSpans[0].Index + 1;
 				}
 				else
 				{
@@ -149,6 +140,10 @@ public class ConsoleTextBox : ConsoleControl
 		return true;
 	}
 
+	public void OnCreated()
+	{
+	}
+
 	private StrSpan GetSelectedSpan()
 	{
 		if (!IsSelectedMode)
@@ -177,7 +172,7 @@ public class ConsoleTextBox : ConsoleControl
 
 	private StrSpan GetShowContentSpanByView()
 	{
-		var rect = EditRect.Intersect(ViewRect);
+		var rect = ViewRect.Intersect(ViewRect);
 		return GetShowContentSpan(rect);
 	}
 

@@ -1,10 +1,20 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public class VerticalStack : ConsoleControl
+public class VerticalStack : IConsoleElement
 {
 	private IConsoleElement? _focus;
+	private readonly IConsoleWriter _console;
 
-	public override Position CursorPosition
+	public VerticalStack(IConsoleWriter console)
+	{
+		_console = console;
+	}
+	
+	public Rect ViewRect { get; set; } = Rect.Empty;
+	
+	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
+
+	public virtual Position CursorPosition
 	{
 		get
 		{
@@ -19,7 +29,7 @@ public class VerticalStack : ConsoleControl
 		}
 	}
 
-	public override Character this[Position pos]
+	public Character this[Position pos]
 	{
 		get
 		{
@@ -41,9 +51,9 @@ public class VerticalStack : ConsoleControl
 		}
 	}
 
-	public override void OnCreated()
+	public void OnCreated()
 	{
-		var viewRect = ViewRect.Init(() => Rect.OfSize(VConsole!.GetSize()));
+		var viewRect = ViewRect.Init(() => Rect.OfSize(_console.GetSize()));
 		var top = 0;
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{
@@ -62,7 +72,7 @@ public class VerticalStack : ConsoleControl
 		}
 	}
 
-	public override bool OnInput(InputEvent inputEvent)
+	public bool OnInput(InputEvent inputEvent)
 	{
 		var child = Children
 			 .FirstOrDefault(x => x.OnInput(inputEvent));
