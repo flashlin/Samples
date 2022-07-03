@@ -18,6 +18,17 @@ public class ConsoleWindow : IConsoleWindow
 
 	public Task Run(string[] args)
 	{
+		var idTextBox = new TextBox(new Rect
+		{
+			Left = 10,
+			Top = 2,
+			Width = 10,
+			Height = 1,
+		}).Setup(x => {
+			x.MaxLength = 5;
+			x.TypeCharacter = '*';
+		});
+		
 		var stackLayout = new VerticalStack(_console)
 		{
 			ViewRect = new Rect
@@ -29,16 +40,7 @@ public class ConsoleWindow : IConsoleWindow
 			},
 			Children =
 				{
-					 new TextBox(new Rect
-					 {
-						  Left = 10,
-						  Top = 2,
-						  Width = 10,
-						  Height = 1,
-					 }).Setup(x => {
-						 x.MaxLength = 5;
-						 x.TypeCharacter = '*';
-						}),
+					 idTextBox,
 					 new TextBox(new Rect
 					 {
 						  Left = 10,
@@ -51,6 +53,8 @@ public class ConsoleWindow : IConsoleWindow
 
 		_consoleManager.Content = stackLayout;
 		_consoleManager.Start();
+
+		Console.WriteLine($"id='{idTextBox.Value}'");
 
 		return Task.CompletedTask;
 		//

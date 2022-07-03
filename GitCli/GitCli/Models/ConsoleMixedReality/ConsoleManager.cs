@@ -6,7 +6,8 @@ public class ConsoleManager
 	private static readonly ConsoleBuffer _buffer = new ConsoleBuffer();
 	private static FreezeLock _freezeLock = new FreezeLock();
 	private readonly IConsoleWriter _console;
-
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
 	public ConsoleManager(IConsoleWriter console)
 	{
 		_console = console;
@@ -116,7 +117,7 @@ public class ConsoleManager
 
 		Content.OnCreated();
 		AdjustBufferSize();
-		while (true)
+		while (!_cancellationTokenSource.IsCancellationRequested)
 		{
 			_console.SetCursorPosition(Content.CursorPosition);
 			ProcessInputEvent(_console.ReadKey());
@@ -125,6 +126,12 @@ public class ConsoleManager
 
 	private void ProcessInputEvent(InputEvent @event)
 	{
+		if (@event.HasControl && @event.Key == ConsoleKey.X)
+		{
+			_cancellationTokenSource.Cancel();
+			return;
+		}
+		
 		var isHandled = Content.OnInput(@event);
 		if (isHandled)
 		{
