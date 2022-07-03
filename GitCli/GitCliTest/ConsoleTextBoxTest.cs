@@ -4,12 +4,12 @@ namespace GitCliTest;
 
 public class ConsoleTextBoxTest
 {
-    private ConsoleTextBox _textbox;
+    private TextBox _textbox;
 
     [SetUp]
     public void Setup()
     {
-        _textbox = new ConsoleTextBox(new Rect
+        _textbox = new TextBox(new Rect
         {
             Left = 10,
             Top = 10,

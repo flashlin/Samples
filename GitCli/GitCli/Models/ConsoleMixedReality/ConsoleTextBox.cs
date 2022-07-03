@@ -1,12 +1,12 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public class ConsoleTextBox : IConsoleElement
+public class TextBox : IConsoleElement
 {
 	private int _editIndex;
 	private int _startSelectIndex;
 	private bool _isSelectedMode;
 
-	public ConsoleTextBox(Rect rect)
+	public TextBox(Rect rect)
 	{
 		ViewRect = rect;
 	}
