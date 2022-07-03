@@ -35,7 +35,10 @@ public class ConsoleWindow : IConsoleWindow
 						  Top = 2,
 						  Width = 10,
 						  Height = 1,
-					 }).Setup(x => { x.MaxLength = 5; }),
+					 }).Setup(x => {
+						 x.MaxLength = 5;
+						 x.TypeCharacter = '*';
+						}),
 					 new ConsoleTextBox(new Rect
 					 {
 						  Left = 10,
