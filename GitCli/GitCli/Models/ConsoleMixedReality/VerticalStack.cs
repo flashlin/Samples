@@ -93,7 +93,7 @@ public class VerticalStack : IConsoleElement
 			return false;
 		}
 		
-		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow)
+		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
 		{
 			_focus = GetFocusedControl();
 			if (_focus != null)
@@ -105,7 +105,7 @@ public class VerticalStack : IConsoleElement
 			}
 			return false;
 		}
-
+		
 		if (_focus == null)
 		{
 			return false;
