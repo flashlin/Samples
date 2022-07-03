@@ -46,33 +46,27 @@ public class ConsoleWriter : IConsoleWriter
 		Console.BackgroundColor = color;
 	}
 
-	public void Write(string text)
-	{
-		Console.Write(text);
-	}
-
-	public void WriteLine(string text)
-	{
-		Console.WriteLine(text);
-	}
-
 	public void Write(Position position, Character character)
 	{
+		if (character.IsEmpty)
+		{
+			WriteCharacter(' ', Color.White, Color.Black);
+			return;
+		}
+		
 		var content = character.Content;
 		var foreground = character.Foreground;
 		var background = character.Background;
 		if (content == '\n') content = ' ';
-		if (character.IsEmpty)
-		{
-			background = Color.Black;
-			Console.Write(
-				 $"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m ");
-			return;
-		}
 
 		Console.SetCursorPosition(position.X, position.Y);
+		WriteCharacter(content, foreground, background);
+	}
+
+	private static void WriteCharacter(char? character,Color foreground, Color background)
+	{
 		Console.Write(
-			 $"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m{content}");
+			$"\x1b[38;2;{foreground.Red};{foreground.Green};{foreground.Blue}m\x1b[48;2;{background.Red};{background.Green};{background.Blue}m{character}");
 	}
 
 	public void ResetWriteColor()
@@ -114,11 +108,6 @@ public class ConsoleWriter : IConsoleWriter
 		Console.CursorVisible = true;
 	}
 
-	// public void StartReadKey()
-	// {
-	//     KeyEvents.StartReadKey();
-	// }
-
 	public InputEvent ReadKey()
 	{
 		var key = Console.ReadKey(true);
@@ -134,8 +123,8 @@ public class ConsoleWriter : IConsoleWriter
 		//Console.SetCursorPosition(position.X, position.Y);
 		SetVirtualCursorPosition(position.X, position.Y);
 	}
-	
-	public void SetVirtualCursorPosition(int col, int row)
+
+	private void SetVirtualCursorPosition(int col, int row)
 	{
 		Console.Out.Write($"\x1b[{row + 1};{col + 1}H");
 		Console.Out.Flush();

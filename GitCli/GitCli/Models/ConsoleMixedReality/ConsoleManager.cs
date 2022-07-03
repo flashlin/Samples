@@ -34,6 +34,7 @@ public class ConsoleManager
 		//contentRect = contentRect.ExtendBy(contentRect.BottomRightCorner.Next);
 		Update(contentRect);
 		Update(new Rect { Left = 0, Top = 0, Width = 20, Height = 1 });
+		_console.SetCursorPosition(Content.CursorPosition);
 	}
 
 	private void Update(Rect rect)
@@ -47,23 +48,26 @@ public class ConsoleManager
 			{
 				var position = new Position(x, y);
 				var character = Content[position];
-				_drawBuffer.Update(position, character);
+				//_drawBuffer.Update(position, character);
 				//if (!_buffer.Update(position, character)) continue;
-				//_console.Write(position, character);
-			}
-		}
-
-
-		for (int y = rect.Top; y <= rect.Bottom; y++)
-		{
-			for (int x = rect.Left; x <= rect.Right; x++)
-			{
-				var position = new Position(x, y);
-				var character = _drawBuffer[position];
-				if (!_buffer.Update(position, character)) continue;
+				_console.Write(position, character);
+				
+				character = _drawBuffer[position];
 				_console.Write(position, character);
 			}
 		}
+
+
+		//for (int y = rect.Top; y <= rect.Bottom; y++)
+		//{
+		//	for (int x = rect.Left; x <= rect.Right; x++)
+		//	{
+		//		var position = new Position(x, y);
+		//		var character = _drawBuffer[position];
+		//		if (!_buffer.Update(position, character)) continue;
+		//		_console.Write(position, character);
+		//	}
+		//}
 	}
 
 	public void Resize(Size size)
@@ -95,7 +99,6 @@ public class ConsoleManager
 		foreach (var ch in text)
 		{
 			var character = new Character(ch);
-			//_console.Write(startPos, character);
 			_drawBuffer.Update(startPos, character);
 			startPos = startPos.Next;
 		}
@@ -103,6 +106,7 @@ public class ConsoleManager
 
 	public void Start()
 	{
+		_console.Clear();
 		AdjustBufferSize();
 		var task = Task.Run(() =>
 		{
@@ -110,7 +114,6 @@ public class ConsoleManager
 			{
 				Write(new Position { X = 0, Y = 0 }, $"{DateTime.Now}");
 				Redraw();
-				_console.SetCursorPosition(Content.CursorPosition);
 				Thread.Sleep(500);
 			}
 		});

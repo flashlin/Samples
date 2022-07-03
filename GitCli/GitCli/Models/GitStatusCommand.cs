@@ -20,7 +20,6 @@ public class GitStatusCommand : ICommand
 
 	public Task Run()
 	{
-		_console.WriteLine($"Action='{_args.ActionName}'");
 		return Task.CompletedTask;
 	}
 }
