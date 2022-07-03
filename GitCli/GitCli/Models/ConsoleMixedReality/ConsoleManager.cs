@@ -10,7 +10,7 @@ public class ConsoleManager
 	public ConsoleManager(IConsoleWriter console)
 	{
 		_console = console;
-		Content = new EmptyElement(console);
+		Content = new EmptyElement();
 	}
 
 	public IConsoleElement Content { get; set; }
@@ -30,11 +30,9 @@ public class ConsoleManager
 
 	private void Redraw()
 	{
-		var contentRect = Content.GetViewRect();
+		var contentRect = Content.ViewRect;
 		//contentRect = contentRect.ExtendBy(contentRect.BottomRightCorner.Next);
 		Update(contentRect);
-		Update(new Rect { Left = 0, Top = 0, Width = 20, Height = 1 });
-		_console.SetCursorPosition(Content.CursorPosition);
 	}
 
 	private void Update(Rect rect)
@@ -49,11 +47,11 @@ public class ConsoleManager
 				var position = new Position(x, y);
 				var character = Content[position];
 				//_drawBuffer.Update(position, character);
-				//if (!_buffer.Update(position, character)) continue;
+				if (!_buffer.Update(position, character)) continue;
 				_console.Write(position, character);
 				
-				character = _drawBuffer[position];
-				_console.Write(position, character);
+				//character = _drawBuffer[position];
+				//_console.Write(position, character);
 			}
 		}
 
@@ -106,18 +104,20 @@ public class ConsoleManager
 
 	public void Start()
 	{
-		_console.Clear();
+		//var task = Task.Run(() =>
+		//{
+		//	while (true)
+		//	{
+		//		Write(new Position { X = 0, Y = 0 }, $"{DateTime.Now}");
+		//		Redraw();
+		//		Thread.Sleep(500);
+		//	}
+		//});
+
+		Content.SetConsoleInstance(_console);
+		Content.OnCreated();
+
 		AdjustBufferSize();
-		var task = Task.Run(() =>
-		{
-			while (true)
-			{
-				Write(new Position { X = 0, Y = 0 }, $"{DateTime.Now}");
-				Redraw();
-				Thread.Sleep(500);
-			}
-		});
-		//_console.KeyEvents.Subscribe(ReadInput);
 		while (true)
 		{
 			_console.SetCursorPosition(Content.CursorPosition);

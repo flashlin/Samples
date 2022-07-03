@@ -37,7 +37,7 @@ public class ConsoleBuffer
 			return false;
 		}
 		ref var cell = ref _buffer[position.X, position.Y];
-		var characterChanged = cell.Content != newCell.Content;
+		var characterChanged = cell != newCell;
 		cell = newCell;
 		return characterChanged;
 	}

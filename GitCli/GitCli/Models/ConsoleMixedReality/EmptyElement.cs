@@ -1,25 +1,9 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public class EmptyElement : IConsoleElement
+public class EmptyElement : ConsoleControl
 {
-    private readonly IConsoleWriter _console;
+    public Rect ViewRect { get; set; } = Rect.Empty;
 
-    public EmptyElement(IConsoleWriter console)
-    {
-        _console = console;
-    }
-
-    public Func<Rect> GetViewRect
-    {
-        get { return () => Rect.OfSize(_console.GetSize()); }
-    }
-
-	public Position CursorPosition => new Position(0, 0);
-
-	public Character this[Position pos] => Character.Empty;
-
-    public bool OnInput(InputEvent inputEvent)
-    {
-        return false;
-    }
+    public override Position CursorPosition => new Position(0, 0);
+    
 }

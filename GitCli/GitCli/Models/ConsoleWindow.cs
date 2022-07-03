@@ -5,63 +5,70 @@ namespace GitCli.Models;
 
 public class ConsoleWindow : IConsoleWindow
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly ConsoleWriter _console;
-    private ConsoleManager _consoleManager;
+	private readonly IServiceProvider _serviceProvider;
+	private readonly ConsoleWriter _console;
+	private ConsoleManager _consoleManager;
 
-    public ConsoleWindow(IServiceProvider serviceProvider, ConsoleManager consoleManager)
-    {
-        _consoleManager = consoleManager;
-        _serviceProvider = serviceProvider;
-        _console = new ConsoleWriter();
-    }
+	public ConsoleWindow(IServiceProvider serviceProvider, ConsoleManager consoleManager)
+	{
+		_consoleManager = consoleManager;
+		_serviceProvider = serviceProvider;
+		_console = new ConsoleWriter();
+	}
 
-    public Task Run(string[] args)
-    {
-        var layout = new VerticalStack        
-        {
-            Children =
-            {
-                new ConsoleTextBox(new Rect
-                {
-                    Left = 10,
-                    Top = 10,
-                    Width = 10,
-                    Height = 1,
-                }).Setup(x => { x.MaxLength = 5; }),
-                new ConsoleTextBox(new Rect
-                {
-                    Left = 10,
-                    Top = 11,
-                    Width = 10,
-                    Height = 1
-                })
-            }
-        };
+	public Task Run(string[] args)
+	{
+		var stackLayout = new VerticalStack
+		{
+			ViewRect = new Rect
+			{
+				Left = 0,
+				Top = 1,
+				Width = 40,
+				Height = 20,
+			},
+			Children =
+				{
+					 new ConsoleTextBox(new Rect
+					 {
+						  Left = 10,
+						  Top = 2,
+						  Width = 10,
+						  Height = 1,
+					 }).Setup(x => { x.MaxLength = 5; }),
+					 new ConsoleTextBox(new Rect
+					 {
+						  Left = 10,
+						  Top = 3,
+						  Width = 10,
+						  Height = 1
+					 })
+				}
+		};
 
-        _consoleManager.Content = layout;
-        _consoleManager.Start();
+		_consoleManager.Content = stackLayout;
+		_consoleManager.Start();
 
-        return Task.CompletedTask;
-        //
-        // do
-        // {
-        //     var lineCommand = Console.ReadLine();
-        //     var lineArgs = lineCommand.ParseCommandArgsLine().ToArray();
-        //
-        //     var commands = new ICommand[]
-        //     {
-        //         _serviceProvider.GetService<GitStatusCommand>()!,
-        //     };
-        //     var cmd = commands.FirstOrDefault(x => x.IsMyCommand(lineArgs));
-        //     if (cmd == null)
-        //     {
-        //         _console.SetForegroundColor(ConsoleColor.Red);
-        //         _console.WriteLine($"Unknown command: {lineCommand}");
-        //         _console.ResetColor();
-        //         continue;
-        //     }
-        //     await cmd.Run();
-        // } while (true);
-    }
+		return Task.CompletedTask;
+		//
+		// do
+		// {
+		//     var lineCommand = Console.ReadLine();
+		//     var lineArgs = lineCommand.ParseCommandArgsLine().ToArray();
+		//
+		//     var commands = new ICommand[]
+		//     {
+		//         _serviceProvider.GetService<GitStatusCommand>()!,
+		//     };
+		//     var cmd = commands.FirstOrDefault(x => x.IsMyCommand(lineArgs));
+		//     if (cmd == null)
+		//     {
+		//         _console.SetForegroundColor(ConsoleColor.Red);
+		//         _console.WriteLine($"Unknown command: {lineCommand}");
+		//         _console.ResetColor();
+		//         continue;
+		//     }
+		//     await cmd.Run();
+		// } while (true);
+	}
 }
