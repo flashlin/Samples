@@ -2,6 +2,7 @@
 
 public class ConsoleManager
 {
+	private static readonly ConsoleBuffer _drawBuffer = new ConsoleBuffer();
 	private static readonly ConsoleBuffer _buffer = new ConsoleBuffer();
 	private static FreezeLock _freezeLock = new FreezeLock();
 	private readonly IConsoleWriter _console;
@@ -20,6 +21,7 @@ public class ConsoleManager
 	private void Initialize()
 	{
 		_console.Initialize();
+		_drawBuffer.Clear();
 		_buffer.Clear();
 		_freezeLock.Freeze();
 		_freezeLock.Unfreeze();
@@ -31,6 +33,7 @@ public class ConsoleManager
 		var contentRect = Content.GetViewRect();
 		//contentRect = contentRect.ExtendBy(contentRect.BottomRightCorner.Next);
 		Update(contentRect);
+		Update(new Rect { Left = 0, Top = 0, Width = 20, Height = 1 });
 	}
 
 	private void Update(Rect rect)
@@ -43,10 +46,21 @@ public class ConsoleManager
 			for (int x = rect.Left; x <= rect.Right; x++)
 			{
 				var position = new Position(x, y);
-
 				var character = Content[position];
-
+				_drawBuffer.Update(position, character);
 				//if (!_buffer.Update(position, character)) continue;
+				//_console.Write(position, character);
+			}
+		}
+
+
+		for (int y = rect.Top; y <= rect.Bottom; y++)
+		{
+			for (int x = rect.Left; x <= rect.Right; x++)
+			{
+				var position = new Position(x, y);
+				var character = _drawBuffer[position];
+				if (!_buffer.Update(position, character)) continue;
 				_console.Write(position, character);
 			}
 		}
@@ -55,6 +69,7 @@ public class ConsoleManager
 	public void Resize(Size size)
 	{
 		_buffer.Initialize(size);
+		_drawBuffer.Initialize(size);
 		Initialize();
 	}
 
@@ -74,24 +89,40 @@ public class ConsoleManager
 		}
 	}
 
-	public void Start()
+	public void Write(Position pos, string text)
 	{
-		AdjustBufferSize();
-		_console.KeyEvents.Subscribe(ReadInput);
-		_console.StartReadKey();
-		while (true)
+		var startPos = pos;
+		foreach (var ch in text)
 		{
-			AdjustBufferSize();
-			var cursorPos = Content.CursorPosition;
-			if (!cursorPos.IsEmpty)
-			{
-				_console.SetCursorPosition(cursorPos);
-			}
-			Thread.Sleep(50);
+			var character = new Character(ch);
+			//_console.Write(startPos, character);
+			_drawBuffer.Update(startPos, character);
+			startPos = startPos.Next;
 		}
 	}
 
-	private void ReadInput(InputEvent @event)
+	public void Start()
+	{
+		AdjustBufferSize();
+		var task = Task.Run(() =>
+		{
+			while (true)
+			{
+				Write(new Position { X = 0, Y = 0 }, $"{DateTime.Now}");
+				Redraw();
+				_console.SetCursorPosition(Content.CursorPosition);
+				Thread.Sleep(500);
+			}
+		});
+		//_console.KeyEvents.Subscribe(ReadInput);
+		while (true)
+		{
+			_console.SetCursorPosition(Content.CursorPosition);
+			ProcessInputEvent(_console.ReadKey());
+		}
+	}
+
+	private void ProcessInputEvent(InputEvent @event)
 	{
 		var isHandled = Content.OnInput(@event);
 		if (isHandled)
