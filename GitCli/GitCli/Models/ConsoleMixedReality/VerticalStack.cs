@@ -14,7 +14,7 @@ public class VerticalStack : IConsoleElement
 	
 	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
 
-	public virtual Position CursorPosition
+	public Position CursorPosition
 	{
 		get
 		{
