@@ -120,13 +120,14 @@ public class ConsoleWriter : IConsoleWriter
 		{
 			return;
 		}
-		//Console.SetCursorPosition(position.X, position.Y);
+		Console.SetCursorPosition(position.X, position.Y);
 		SetVirtualCursorPosition(position.X, position.Y);
 	}
 
 	private void SetVirtualCursorPosition(int col, int row)
 	{
-		Console.Out.Write($"\x1b[{row + 1};{col + 1}H");
-		Console.Out.Flush();
+		Console.Write($"\x1b[{row + 1};{col + 1}H");
+		//Console.Out.Write($"\x1b[{row + 1};{col + 1}H");
+		//Console.Out.Flush();
 	}
 }

@@ -1,20 +1,18 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public class ConsoleTextBox : IConsoleElement
+public class ConsoleTextBox : ConsoleControl
 {
 	private int _editIndex;
 	private int _startSelectIndex;
 
 	public ConsoleTextBox(Rect rect)
 	{
-		GetViewRect = () => rect;
-		EditRect = rect;
+		ViewRect = rect;
 	}
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
-	public IConsoleWriter Console { get; set; }
 
-	public Position CursorPosition
+	public override Position CursorPosition
 	{
 		get
 		{
@@ -29,16 +27,27 @@ public class ConsoleTextBox : IConsoleElement
 
 	public int EditIndex => _editIndex;
 	public Rect EditRect { get; set; }
-	public Func<Rect> GetViewRect { get; set; }
+
+	public override Rect ViewRect
+	{
+		get => base.ViewRect;
+		set
+		{
+			base.ViewRect = value;
+			EditRect = value;
+		}
+	}
+
 	public bool IsSelectedMode { get; private set; }
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Value { get; set; } = String.Empty;
 
-	public Character this[Position pos]
+	public override Character this[Position pos]
 	{
 		get
 		{
-			var rect = EditRect.Intersect(GetViewRect());
+			//var rect = EditRect.Intersect(ViewRect);
+			var rect = ViewRect;
 			if (!rect.Contain(pos))
 			{
 				return Character.Empty;
@@ -67,7 +76,7 @@ public class ConsoleTextBox : IConsoleElement
 		}
 	}
 
-	public bool OnInput(InputEvent inputEvent)
+	public override bool OnInput(InputEvent inputEvent)
 	{
 		var newText = (string?)null;
 
@@ -168,7 +177,7 @@ public class ConsoleTextBox : IConsoleElement
 
 	private StrSpan GetShowContentSpanByView()
 	{
-		var rect = EditRect.Intersect(GetViewRect());
+		var rect = EditRect.Intersect(ViewRect);
 		return GetShowContentSpan(rect);
 	}
 
