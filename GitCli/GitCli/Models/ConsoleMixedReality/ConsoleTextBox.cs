@@ -97,6 +97,10 @@ public class TextBox : IConsoleElement
 				}
 				_editIndex = Math.Min(Value.Length, _editIndex + 1);
 				break;
+			
+			case ConsoleKey.UpArrow:
+			case ConsoleKey.DownArrow:
+				break;
 
 			case ConsoleKey.Backspace:
 				_editIndex = Math.Max(0, _editIndex - 1);
@@ -127,7 +131,10 @@ public class TextBox : IConsoleElement
 			case ConsoleKey.End:
 				_editIndex = Value.Length;
 				break;
-
+			
+			case ConsoleKey.Enter:
+				break;
+			
 			default:
 				if (Value.Length + 1 > MaxLength)
 				{
