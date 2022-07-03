@@ -26,6 +26,8 @@ public class ConsoleTextBox : IConsoleElement
 		}
 	}
 
+	public char TypeCharacter { get; set; } = '\0';
+
 	public int EditIndex => _editIndex;
 	public Rect ViewRect { get; set; }
 	public int MaxLength { get; set; } = int.MaxValue;
@@ -59,6 +61,11 @@ public class ConsoleTextBox : IConsoleElement
 			if (x >= showContent.Length)
 			{
 				return new Character(' ', null, Background);
+			}
+
+			if(TypeCharacter != '\0')
+			{
+				return new Character(TypeCharacter, null, Background);
 			}
 
 			return new Character(showContent[x], null, Background);
