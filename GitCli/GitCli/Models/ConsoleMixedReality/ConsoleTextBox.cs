@@ -4,6 +4,7 @@ public class ConsoleTextBox : IConsoleElement
 {
 	private int _editIndex;
 	private int _startSelectIndex;
+	private bool _isSelectedMode;
 
 	public ConsoleTextBox(Rect rect)
 	{
@@ -27,8 +28,6 @@ public class ConsoleTextBox : IConsoleElement
 
 	public int EditIndex => _editIndex;
 	public Rect ViewRect { get; set; }
-
-	public bool IsSelectedMode { get; private set; }
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Value { get; set; } = String.Empty;
 
@@ -70,32 +69,32 @@ public class ConsoleTextBox : IConsoleElement
 	{
 		var newText = (string?)null;
 
-		if (!IsSelectedMode && inputEvent.HasShift)
+		if (!_isSelectedMode && inputEvent.HasShift)
 		{
 			_startSelectIndex = _editIndex;
-			IsSelectedMode = true;
+			_isSelectedMode = true;
 		}
 
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.LeftArrow:
 				_editIndex = Math.Max(0, _editIndex - 1);
-				IsSelectedMode = (inputEvent.HasShift);
+				_isSelectedMode = (inputEvent.HasShift);
 				break;
 
 			case ConsoleKey.RightArrow:
 				_editIndex = Math.Min(Value.Length, _editIndex + 1);
-				IsSelectedMode = (inputEvent.HasShift);
+				_isSelectedMode = (inputEvent.HasShift);
 				break;
 
 			case ConsoleKey.Backspace:
 				_editIndex = Math.Max(0, _editIndex - 1);
 				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
-				IsSelectedMode = false;
+				_isSelectedMode = false;
 				break;
 
 			case ConsoleKey.Delete:
-				if (IsSelectedMode)
+				if (_isSelectedMode)
 				{
 					var showContentSpan = GetShowContentSpanByView();
 					var selectedSpan = GetSelectedSpan();
@@ -107,7 +106,7 @@ public class ConsoleTextBox : IConsoleElement
 				{
 					newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
 				}
-				IsSelectedMode = false;
+				_isSelectedMode = false;
 				break;
 
 			case ConsoleKey.Home:
@@ -128,7 +127,7 @@ public class ConsoleTextBox : IConsoleElement
 					 : inputEvent.KeyChar;
 				newText = $"{Value.Substring(0, _editIndex)}{character}{Value.SubStr(_editIndex)}";
 				_editIndex = Math.Min(newText.Length, _editIndex + 1);
-				IsSelectedMode = false;
+				_isSelectedMode = false;
 				break;
 		}
 
@@ -146,7 +145,7 @@ public class ConsoleTextBox : IConsoleElement
 
 	private StrSpan GetSelectedSpan()
 	{
-		if (!IsSelectedMode)
+		if (!_isSelectedMode)
 		{
 			return StrSpan.Empty;
 		}
