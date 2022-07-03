@@ -12,7 +12,7 @@ public static class ConsoleTextBoxExtension
             .ToDictionary(x => x.KeyChar, x => x);
     }
 
-    public static void Keyin(this ConsoleTextBox textBox, string text)
+    public static void Keyin(this TextBox textBox, string text)
     {
         foreach (var ch in text)
         {

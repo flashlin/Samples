@@ -29,7 +29,7 @@ public class ConsoleWindow : IConsoleWindow
 			},
 			Children =
 				{
-					 new ConsoleTextBox(new Rect
+					 new TextBox(new Rect
 					 {
 						  Left = 10,
 						  Top = 2,
@@ -39,7 +39,7 @@ public class ConsoleWindow : IConsoleWindow
 						 x.MaxLength = 5;
 						 x.TypeCharacter = '*';
 						}),
-					 new ConsoleTextBox(new Rect
+					 new TextBox(new Rect
 					 {
 						  Left = 10,
 						  Top = 3,
