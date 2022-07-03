@@ -18,7 +18,7 @@ public class ConsoleWindow : IConsoleWindow
 
 	public Task Run(string[] args)
 	{
-		var stackLayout = new VerticalStack
+		var stackLayout = new VerticalStack(_console)
 		{
 			ViewRect = new Rect
 			{

@@ -114,9 +114,7 @@ public class ConsoleManager
 		//	}
 		//});
 
-		Content.SetConsoleInstance(_console);
 		Content.OnCreated();
-
 		AdjustBufferSize();
 		while (true)
 		{
