@@ -10,6 +10,8 @@ public class TextBox : IConsoleElement
 	{
 		ViewRect = rect;
 	}
+	
+	public IConsoleElement? Parent { get; set; }
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 

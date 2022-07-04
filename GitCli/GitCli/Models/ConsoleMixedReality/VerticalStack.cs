@@ -2,110 +2,116 @@
 
 public class VerticalStack : IConsoleElement
 {
-	private IConsoleElement? _focus;
+    private IConsoleElement? _focus;
 
-	public Rect ViewRect { get; set; } = Rect.Empty;
-	
-	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
+    public Rect ViewRect { get; set; } = Rect.Empty;
 
-	public Position CursorPosition
-	{
-		get
-		{
-			GetFocusedControl();
+    public IConsoleElement? Parent { get; set; }
 
-			if (_focus != null)
-			{
-				return _focus.CursorPosition;
-			}
+    public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
 
-			return ViewRect.BottomRightCorner;
-		}
-	}
+    public Position CursorPosition
+    {
+        get
+        {
+            GetFocusedControl();
 
-	private IConsoleElement? GetFocusedControl()
-	{
-		_focus ??= Children.FirstOrDefault();
-		return _focus;
-	}
+            if (_focus != null)
+            {
+                return _focus.CursorPosition;
+            }
 
-	public Character this[Position pos]
-	{
-		get
-		{
-			if (!ViewRect.Contain(pos))
-			{
-				return Character.Empty;
-			}
+            return ViewRect.BottomRightCorner;
+        }
+    }
 
-			var character = new Character(' ', null, ConsoleColor.DarkGray);
-			foreach (var child in Children)
-			{
-				var ch = child[pos];
-				if (!ch.IsEmpty)
-				{
-					character = ch;
-				}
-			}
-			return character;
-		}
-	}
+    private IConsoleElement? GetFocusedControl()
+    {
+        _focus ??= Children.FirstOrDefault();
+        return _focus;
+    }
 
-	public void OnCreated(IConsoleWriter console)
-	{
-		var viewRect = ViewRect.Init(() => Rect.OfSize(console.GetSize()));
-		var top = 0;
-		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
-		{
-			if (idx == 0)
-			{
-				top = viewRect.Top + child.ViewRect.Top;
-			}
-			child.ViewRect = new Rect
-			{
-				Left = viewRect.Left + child.ViewRect.Left,
-				Top = top,
-				Width = child.ViewRect.Width,
-				Height = child.ViewRect.Height,
-			};
-			top += child.ViewRect.Height;
-		}
-	}
+    public Character this[Position pos]
+    {
+        get
+        {
+            if (!ViewRect.Contain(pos))
+            {
+                return Character.Empty;
+            }
 
-	public bool OnInput(InputEvent inputEvent)
-	{
-		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
-		{
-			_focus = GetFocusedControl();
-			if (_focus != null)
-			{
-				var idx = Children.FindIndex(x => x == _focus);
-				idx = Math.Min(idx-1, 0);
-				_focus = Children[idx];
-				return true;
-			}
-			return false;
-		}
-		
-		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
-		{
-			_focus = GetFocusedControl();
-			if (_focus != null)
-			{
-				var idx = Children.FindIndex(x => x == _focus);
-				idx = Math.Min(idx+1, Children.Count-1);
-				_focus = Children[idx];
-				return true;
-			}
-			return false;
-		}
-		
-		if (_focus == null)
-		{
-			return false;
-		}
+            var character = new Character(' ', null, ConsoleColor.DarkGray);
+            foreach (var child in Children)
+            {
+                var ch = child[pos];
+                if (!ch.IsEmpty)
+                {
+                    character = ch;
+                }
+            }
 
-		var handle = _focus.OnInput(inputEvent);
-		return handle;
-	}
+            return character;
+        }
+    }
+
+    public void OnCreated(IConsoleWriter console)
+    {
+        var viewRect = ViewRect.Init(() => Rect.OfSize(console.GetSize()));
+        var top = 0;
+        foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
+        {
+            if (idx == 0)
+            {
+                top = viewRect.Top + child.ViewRect.Top;
+            }
+
+            child.ViewRect = new Rect
+            {
+                Left = viewRect.Left + child.ViewRect.Left,
+                Top = top,
+                Width = child.ViewRect.Width,
+                Height = child.ViewRect.Height,
+            };
+            top += child.ViewRect.Height;
+        }
+    }
+
+    public bool OnInput(InputEvent inputEvent)
+    {
+        if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
+        {
+            _focus = GetFocusedControl();
+            if (_focus != null)
+            {
+                var idx = Children.FindIndex(x => x == _focus);
+                idx = Math.Min(idx - 1, 0);
+                _focus = Children[idx];
+                return true;
+            }
+
+            return false;
+        }
+
+        if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
+        {
+            _focus = GetFocusedControl();
+            if (_focus != null)
+            {
+                var idx = Children.FindIndex(x => x == _focus);
+                idx = Math.Min(idx + 1, Children.Count - 1);
+                _focus = Children[idx];
+                return true;
+            }
+
+            return false;
+        }
+
+        if (_focus == null)
+        {
+            return false;
+        }
+
+        var handle = _focus.OnInput(inputEvent);
+        return handle;
+    }
 }
