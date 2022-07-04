@@ -39,7 +39,6 @@ public class TextBox : IConsoleElement
 	{
 		get
 		{
-			//var rect = EditRect.Intersect(ViewRect);
 			var rect = ViewRect;
 			if (!rect.Contain(pos))
 			{
