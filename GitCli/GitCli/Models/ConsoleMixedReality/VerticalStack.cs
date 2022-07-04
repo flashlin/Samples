@@ -65,6 +65,7 @@ public class VerticalStack : IConsoleElement
                 top = viewRect.Top + child.ViewRect.Top;
             }
 
+            child.Parent = this;
             child.ViewRect = new Rect
             {
                 Left = viewRect.Left + child.ViewRect.Left,
