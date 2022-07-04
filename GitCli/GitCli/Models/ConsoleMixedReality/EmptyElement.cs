@@ -8,7 +8,7 @@ public class EmptyElement : IConsoleElement
         return false;
     }
 
-    public void OnCreated()
+    public void OnCreated(IConsoleWriter console)
     {
     }
 

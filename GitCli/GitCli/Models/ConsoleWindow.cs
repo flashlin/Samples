@@ -29,7 +29,7 @@ public class ConsoleWindow : IConsoleWindow
 			x.TypeCharacter = '*';
 		});
 		
-		var stackLayout = new VerticalStack(_console)
+		var stackLayout = new VerticalStack()
 		{
 			ViewRect = new Rect
 			{

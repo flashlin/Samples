@@ -8,5 +8,5 @@ public interface IConsoleElement
     Position CursorPosition { get; }
     Rect ViewRect { get; set; }
     bool OnInput(InputEvent inputEvent);
-    void OnCreated();
+    void OnCreated(IConsoleWriter console);
 }

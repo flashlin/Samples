@@ -115,7 +115,7 @@ public class ConsoleManager
 		//	}
 		//});
 
-		Content.OnCreated();
+		Content.OnCreated(_console);
 		AdjustBufferSize();
 		while (!_cancellationTokenSource.IsCancellationRequested)
 		{
