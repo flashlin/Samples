@@ -3,13 +3,7 @@
 public class VerticalStack : IConsoleElement
 {
 	private IConsoleElement? _focus;
-	private readonly IConsoleWriter _console;
 
-	public VerticalStack(IConsoleWriter console)
-	{
-		_console = console;
-	}
-	
 	public Rect ViewRect { get; set; } = Rect.Empty;
 	
 	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
@@ -57,9 +51,9 @@ public class VerticalStack : IConsoleElement
 		}
 	}
 
-	public void OnCreated()
+	public void OnCreated(IConsoleWriter console)
 	{
-		var viewRect = ViewRect.Init(() => Rect.OfSize(_console.GetSize()));
+		var viewRect = ViewRect.Init(() => Rect.OfSize(console.GetSize()));
 		var top = 0;
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{

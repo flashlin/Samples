@@ -157,7 +157,7 @@ public class TextBox : IConsoleElement
 		return true;
 	}
 
-	public void OnCreated()
+	public void OnCreated(IConsoleWriter console)
 	{
 	}
 
