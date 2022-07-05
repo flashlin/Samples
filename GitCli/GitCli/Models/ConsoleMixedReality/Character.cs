@@ -73,6 +73,10 @@ public static class HashCodeCalculator
 {
 	public static int GetHashCodeOf(Type objType, object obj)
 	{
+		if (objType == typeof(int))
+		{
+			return ((int)obj).GetHashCode();
+		}
 		var fieldInfo = typeof(EqualityComparer<>)
 			 .MakeGenericType(objType)
 			 .GetField("Default");

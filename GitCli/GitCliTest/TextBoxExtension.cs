@@ -12,13 +12,22 @@ public static class ConsoleTextBoxExtension
             .ToDictionary(x => x.KeyChar, x => x);
     }
 
-    public static void Keyin(this TextBox textBox, string text)
+    public static void Keyin(this IConsoleElement element, string text)
     {
         foreach (var ch in text)
         {
             var keyEvent = _keyDict[ch];
-            textBox.OnInput(keyEvent);
+            element.OnInput(keyEvent);
         }
+    }
+
+    public static void ShiftKey(this IConsoleElement element, ConsoleKey key, bool hasShift = true)
+    {
+        element.OnInput(new InputEvent
+        {
+            Key = key,
+            HasShift = hasShift
+        });
     }
 
     private static IEnumerable<InputEvent> QueryKeys()
