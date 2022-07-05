@@ -113,7 +113,11 @@ public class TextArea : IConsoleElement
 			case ConsoleKey.Delete:
 				if (_isSelectedMode)
 				{
-					var showContentSpan = GetShowContentSpanByView();
+					var showContentSpan = new StrSpan
+					{
+						Index = 0,
+						Length = Value.Length
+					};
 					var selectedSpan = GetSelectedSpan();
 					var remainingSpans = selectedSpan.NonIntersect(showContentSpan).ToArray();
 					newText = string.Join("", remainingSpans.Select(x => Value.Substring(x.Index, x.Length)));
@@ -219,8 +223,7 @@ public class TextArea : IConsoleElement
 
 	private StrSpan GetShowContentSpanByView()
 	{
-		var rect = ViewRect.Intersect(ViewRect);
-		return GetShowContentSpan(rect);
+		return GetShowContentSpan(ViewRect);
 	}
 
 	private StrSpan GetShowContentSpan(Rect rect)
