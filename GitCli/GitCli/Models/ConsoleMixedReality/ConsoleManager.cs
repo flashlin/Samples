@@ -2,7 +2,6 @@
 
 public class ConsoleManager
 {
-	private static readonly ConsoleBuffer _drawBuffer = new ConsoleBuffer();
 	private static readonly ConsoleBuffer _buffer = new ConsoleBuffer();
 	private static FreezeLock _freezeLock = new FreezeLock();
 	private readonly IConsoleWriter _console;
@@ -22,7 +21,6 @@ public class ConsoleManager
 	private void Initialize()
 	{
 		_console.Initialize();
-		_drawBuffer.Clear();
 		_buffer.Clear();
 		_freezeLock.Freeze();
 		_freezeLock.Unfreeze();
@@ -72,7 +70,6 @@ public class ConsoleManager
 	public void Resize(Size size)
 	{
 		_buffer.Initialize(size);
-		_drawBuffer.Initialize(size);
 		Initialize();
 	}
 
@@ -89,17 +86,6 @@ public class ConsoleManager
 		if (WindowSize != BufferSize)
 		{
 			Resize(BufferSize);
-		}
-	}
-
-	public void Write(Position pos, string text)
-	{
-		var startPos = pos;
-		foreach (var ch in text)
-		{
-			var character = new Character(ch);
-			_drawBuffer.Update(startPos, character);
-			startPos = startPos.Next;
 		}
 	}
 
@@ -129,6 +115,7 @@ public class ConsoleManager
 		if (@event.HasControl && @event.Key == ConsoleKey.X)
 		{
 			_cancellationTokenSource.Cancel();
+			_console.ResetColor();
 			return;
 		}
 		

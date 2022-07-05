@@ -90,6 +90,8 @@ public class ConsoleWriter : IConsoleWriter
 
 	public void Clear()
 	{
+		Console.ForegroundColor = ConsoleColor.White;
+		Console.BackgroundColor = ConsoleColor.Black;
 		Console.Clear();
 	}
 
