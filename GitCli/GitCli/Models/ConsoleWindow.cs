@@ -28,6 +28,14 @@ public class ConsoleWindow : IConsoleWindow
 			x.MaxLength = 5;
 			x.TypeCharacter = '*';
 		});
+
+		var box = new TextArea(new Rect
+		{
+			Left = 10,
+			Top = 4,
+			Width = 5,
+			Height = 2,
+		});
 		
 		var stackLayout = new VerticalStack()
 		{
@@ -47,7 +55,8 @@ public class ConsoleWindow : IConsoleWindow
 						  Top = 3,
 						  Width = 10,
 						  Height = 1
-					 })
+					 }),
+					 box
 				}
 		};
 
