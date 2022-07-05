@@ -101,7 +101,18 @@ public class TextArea : IConsoleElement
 				break;
 
 			case ConsoleKey.UpArrow:
+				_isSelectedMode = inputEvent.HasShift;
+				if ((_editIndex - ViewRect.Width) >= 0)
+				{
+					_editIndex -= ViewRect.Width;
+				}
+				break;
 			case ConsoleKey.DownArrow:
+				_isSelectedMode = inputEvent.HasShift;
+				if ((_editIndex + ViewRect.Width) < Value.Length)
+				{
+					_editIndex += ViewRect.Width;
+				}
 				break;
 
 			case ConsoleKey.Backspace:
