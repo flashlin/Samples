@@ -28,5 +28,11 @@ public class TextAreaTest
         textArea.ShiftKey(ConsoleKey.Delete, false);
 
         Assert.That(textArea.Value, Is.EqualTo("125"));
+
+        Assert.That(textArea.CursorPosition, Is.EqualTo(new Position
+        {
+            X = 2,
+            Y = 0,
+        }));
     }
 }
