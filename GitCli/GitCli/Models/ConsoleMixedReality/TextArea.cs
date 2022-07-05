@@ -121,7 +121,7 @@ public class TextArea : IConsoleElement
 					var selectedSpan = GetSelectedSpan();
 					var remainingSpans = selectedSpan.NonIntersect(showContentSpan).ToArray();
 					newText = string.Join("", remainingSpans.Select(x => Value.Substring(x.Index, x.Length)));
-					_editIndex = remainingSpans[0].Index + 1;
+					_editIndex = selectedSpan.Index;
 				}
 				else
 				{
