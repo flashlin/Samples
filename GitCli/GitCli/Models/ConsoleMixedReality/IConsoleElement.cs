@@ -18,6 +18,7 @@ public interface IConsoleEditableElement : IConsoleElement
 {
     int EditIndex { get; set; }
     string Value { get; }
+    void ForceSetEditIndex(int index);
 }
 
 public interface IRaisePropertyChanged : INotifyPropertyChanged

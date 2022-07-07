@@ -12,6 +12,11 @@ public class EmptyElement : IConsoleEditableElement
 
 	public IConsoleElement? Parent { get; set; }
 	public string Value { get; } = String.Empty;
+	public void ForceSetEditIndex(int index)
+	{
+		_editIndex = index;
+	}
+
 	public Rect ViewRect { get; set; } = Rect.Empty;
 	public Character this[Position pos] => Character.Empty;
 
