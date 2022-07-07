@@ -1,8 +1,8 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public struct StrSpan
+public struct Span
 {
-    public static StrSpan Empty = new StrSpan
+    public static Span Empty = new Span
     {
         Index = 0,
         Length = 0
@@ -19,22 +19,22 @@ public struct StrSpan
         return (pos >= Index && pos < Index + Length);
     }
 
-    public bool Contain(StrSpan span)
+    public bool Contain(Span span)
     {
         return (span.Index >= Index && span.Right <= Right);
     }
 
-    public StrSpan Intersect(StrSpan b)
+    public Span Intersect(Span b)
     {
         if (this.IsEmpty || b.IsEmpty) return Empty;
-        return new StrSpan
+        return new Span
         {
             Index = Math.Max(this.Index, b.Index),
             Length = Math.Min(this.Right, b.Right) - Math.Max(this.Index, b.Index) + 1,
         };
     }
 
-    public IEnumerable<StrSpan> NonIntersect(StrSpan b)
+    public IEnumerable<Span> NonIntersect(Span b)
     {
         var intersectSpan = Intersect(b);
         if (intersectSpan.IsEmpty)
@@ -72,11 +72,11 @@ public struct StrSpan
         }
     }
 
-    private StrSpan GetRightSpan(StrSpan b)
+    private Span GetRightSpan(Span b)
     {
         var right = Math.Max(this.Right + 1, b.Index);
         var rightRight = Math.Max(this.Right, b.Right);
-        var rightSpan = new StrSpan
+        var rightSpan = new Span
         {
             Index = right,
             Length = rightRight - right + 1,
@@ -84,11 +84,11 @@ public struct StrSpan
         return rightSpan;
     }
 
-    private StrSpan GetLeftSpan(StrSpan b)
+    private Span GetLeftSpan(Span b)
     {
         var left = Math.Min(this.Index, b.Index);
         var leftRight = Math.Max(this.Index, b.Index);
-        var leftSpan = new StrSpan
+        var leftSpan = new Span
         {
             Index = left,
             Length = leftRight - left
@@ -98,11 +98,11 @@ public struct StrSpan
 
     public override string ToString()
     {
-        return $"{nameof(StrSpan)}{{{Index},{Length}}}";
+        return $"{nameof(Span)}{{{Index},{Length}}}";
     }
 
-    public static bool operator ==(StrSpan lhs, StrSpan rhs) => lhs.Index == rhs.Index && lhs.Length == rhs.Length;
-    public static bool operator !=(StrSpan lhs, StrSpan rhs) => !(lhs == rhs);
+    public static bool operator ==(Span lhs, Span rhs) => lhs.Index == rhs.Index && lhs.Length == rhs.Length;
+    public static bool operator !=(Span lhs, Span rhs) => !(lhs == rhs);
 
     public override bool Equals(object? obj)
     {
@@ -111,7 +111,7 @@ public struct StrSpan
             return false;
         }
 
-        if (obj is StrSpan b)
+        if (obj is Span b)
         {
             return this == b;
         }
@@ -124,5 +124,14 @@ public struct StrSpan
         return HashCodeCalculator.GetHashCode(
             (typeof(int), Index),
             (typeof(int), Length));
+    }
+
+    public Span Move(int add)
+    {
+        return new Span()
+        {
+            Index = Index + add,
+            Length = Length,
+        };
     }
 }
