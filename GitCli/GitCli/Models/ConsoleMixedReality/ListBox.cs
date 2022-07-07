@@ -153,6 +153,7 @@ public class ListBox : IConsoleElement
         {
             _showListItemSpan = _showListItemSpan.Move(1);
         }
+
         var isEditEnd = (prevEditIndex == focusedItem.Value.Length);
         return (prevEditIndex, isEditEnd);
     }
@@ -168,6 +169,14 @@ public class ListBox : IConsoleElement
         {
             focusedItem.EditIndex = info.prevEditIndex;
         }
+
+        foreach (var child in Children)
+        {
+            if (child != focusedItem)
+            {
+                child.ForceSetEditIndex(focusedItem.EditIndex);
+            }
+        }
     }
 
     private (int prevEditIndex, bool isEditEnd) BeforeMoveUp()
@@ -178,6 +187,7 @@ public class ListBox : IConsoleElement
         {
             _showListItemSpan = _showListItemSpan.Move(-1);
         }
+
         var isEditEnd = (prevEditIndex == focusedItem.Value.Length);
         return (prevEditIndex, isEditEnd);
     }

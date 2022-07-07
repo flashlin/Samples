@@ -43,6 +43,11 @@ public class TextBox : IConsoleEditableElement
 		}
 	}
 
+	public void ForceSetEditIndex(int index)
+	{
+		_editIndex = index;
+	}
+
 	public Rect ViewRect { get; set; }
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Value { get; set; } = String.Empty;
@@ -204,7 +209,8 @@ public class TextBox : IConsoleEditableElement
 
 	private string GetShowContent(Span contentSpan)
 	{
-		return Value.Substring(contentSpan.Index, contentSpan.Length);
+		//return Value.Substring(contentSpan.Index, contentSpan.Length);
+		return Value.SubStr(contentSpan.Index, contentSpan.Length);
 	}
 
 	private Span GetShowContentSpanByView()

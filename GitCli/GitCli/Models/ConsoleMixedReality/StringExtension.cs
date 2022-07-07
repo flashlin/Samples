@@ -2,7 +2,7 @@
 
 public static class StringExtension
 {
-	public static string SubStr(this string str, int offset)
+	public static string SubStr(this string str, int offset, int? length = null)
 	{
 		if (string.IsNullOrEmpty(str))
 		{
@@ -16,7 +16,19 @@ public static class StringExtension
 		{
 			return string.Empty;
 		}
-		return str.Substring(offset);
+
+		if (length == null)
+		{
+			return str.Substring(offset);
+		}
+
+		var maxLen = str.Length - offset;
+		var len = Math.Min(maxLen, length.Value);
+		if( len == 0)
+		{
+			return string.Empty;
+		}
+		return str.Substring(offset, len);
 	}
 
 
