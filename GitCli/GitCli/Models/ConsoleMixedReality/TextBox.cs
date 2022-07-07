@@ -2,230 +2,230 @@
 
 public class TextBox : IConsoleEditableElement
 {
-    private int _editIndex;
-    private int _startSelectIndex;
-    private bool _isSelectedMode;
+	private int _editIndex;
+	private int _startSelectIndex;
+	private bool _isSelectedMode;
 
-    public TextBox(Rect rect)
-    {
-        ViewRect = rect;
-    }
+	public TextBox(Rect rect)
+	{
+		ViewRect = rect;
+	}
 
-    public IConsoleElement? Parent { get; set; }
+	public IConsoleElement? Parent { get; set; }
+	public bool Enabled { get; set; }
 
-    public Color Background { get; set; } = ConsoleColor.DarkBlue;
+	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 
-    public Position CursorPosition
-    {
-        get
-        {
-            if (_editIndex < ViewRect.Width)
-            {
-                return new Position(ViewRect.Left + _editIndex, ViewRect.Top);
-            }
+	public Position CursorPosition
+	{
+		get
+		{
+			if (_editIndex < ViewRect.Width)
+			{
+				return new Position(ViewRect.Left + _editIndex, ViewRect.Top);
+			}
+			return new Position(ViewRect.Left + ViewRect.Width, ViewRect.Top);
+		}
+	}
 
-            return new Position(ViewRect.Left + ViewRect.Width, ViewRect.Top);
-        }
-    }
+	public char TypeCharacter { get; set; } = '\0';
 
-    public char TypeCharacter { get; set; } = '\0';
+	public int EditIndex
+	{
+		get => _editIndex;
+		set
+		{
+			if (value >= Value.Length)
+			{
+				_editIndex = Value.Length - 1;
+			}
+			_editIndex = value;
+		}
+	}
 
-    public int EditIndex
-    {
-        get => _editIndex;
-        set
-        {
-            if (value >= Value.Length)
-            {
-                _editIndex = Value.Length - 1;
-            }
-            _editIndex = value;
-        }
-    }
+	public Rect ViewRect { get; set; }
+	public int MaxLength { get; set; } = int.MaxValue;
+	public string Value { get; set; } = String.Empty;
 
-    public Rect ViewRect { get; set; }
-    public int MaxLength { get; set; } = int.MaxValue;
-    public string Value { get; set; } = String.Empty;
+	public Character this[Position pos]
+	{
+		get
+		{
+			var rect = ViewRect;
+			if (!rect.Contain(pos))
+			{
+				return Character.Empty;
+			}
 
-    public Character this[Position pos]
-    {
-        get
-        {
-            var rect = ViewRect;
-            if (!rect.Contain(pos))
-            {
-                return Character.Empty;
-            }
+			var contentSpan = GetShowContentSpan(rect);
+			var showContent = GetShowContent(contentSpan);
 
-            var contentSpan = GetShowContentSpan(rect);
-            var showContent = GetShowContent(contentSpan);
+			var x = pos.X - rect.Left;
+			var selectedSpan = GetSelectedSpan().Intersect(contentSpan);
+			if (!selectedSpan.IsEmpty)
+			{
+				var selectedValue = GetSelectedValue(selectedSpan);
+				if (selectedSpan.Contain(x))
+				{
+					return new Character(selectedValue[x - selectedSpan.Index], null, Color.DarkGray);
+				}
+			}
 
-            var x = pos.X - rect.Left;
-            var selectedSpan = GetSelectedSpan().Intersect(contentSpan);
-            if (!selectedSpan.IsEmpty)
-            {
-                var selectedValue = GetSelectedValue(selectedSpan);
-                if (selectedSpan.Contain(x))
-                {
-                    return new Character(selectedValue[x - selectedSpan.Index], null, Color.DarkGray);
-                }
-            }
+			if (x >= showContent.Length)
+			{
+				return new Character(' ', null, Background);
+			}
 
-            if (x >= showContent.Length)
-            {
-                return new Character(' ', null, Background);
-            }
+			if (TypeCharacter != '\0')
+			{
+				return new Character(TypeCharacter, null, Background);
+			}
 
-            if (TypeCharacter != '\0')
-            {
-                return new Character(TypeCharacter, null, Background);
-            }
+			return new Character(showContent[x], null, Background);
+		}
+	}
 
-            return new Character(showContent[x], null, Background);
-        }
-    }
+	public bool OnInput(InputEvent inputEvent)
+	{
+		var newText = (string?)null;
 
-    public bool OnInput(InputEvent inputEvent)
-    {
-        var newText = (string?) null;
+		if (!_isSelectedMode && inputEvent.HasShift)
+		{
+			_startSelectIndex = _editIndex;
+			_isSelectedMode = true;
+		}
 
-        if (!_isSelectedMode && inputEvent.HasShift)
-        {
-            _startSelectIndex = _editIndex;
-            _isSelectedMode = true;
-        }
+		switch (inputEvent.Key)
+		{
+			case ConsoleKey.LeftArrow:
+				_editIndex = Math.Max(0, _editIndex - 1);
+				_isSelectedMode = inputEvent.HasShift;
+				break;
 
-        switch (inputEvent.Key)
-        {
-            case ConsoleKey.LeftArrow:
-                _editIndex = Math.Max(0, _editIndex - 1);
-                _isSelectedMode = inputEvent.HasShift;
-                break;
+			case ConsoleKey.RightArrow:
+				_isSelectedMode = inputEvent.HasShift;
+				if (_editIndex + 1 > Value.Length)
+				{
+					break;
+				}
 
-            case ConsoleKey.RightArrow:
-                _isSelectedMode = inputEvent.HasShift;
-                if (_editIndex + 1 > Value.Length)
-                {
-                    break;
-                }
+				_editIndex = Math.Min(Value.Length, _editIndex + 1);
+				break;
 
-                _editIndex = Math.Min(Value.Length, _editIndex + 1);
-                break;
+			case ConsoleKey.UpArrow:
+			case ConsoleKey.DownArrow:
+				break;
 
-            case ConsoleKey.UpArrow:
-            case ConsoleKey.DownArrow:
-                break;
+			case ConsoleKey.Backspace:
+				_editIndex = Math.Max(0, _editIndex - 1);
+				newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
+				_isSelectedMode = false;
+				break;
 
-            case ConsoleKey.Backspace:
-                _editIndex = Math.Max(0, _editIndex - 1);
-                newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
-                _isSelectedMode = false;
-                break;
+			case ConsoleKey.Delete:
+				if (_isSelectedMode)
+				{
+					var showContentSpan = GetShowContentSpanByView();
+					var selectedSpan = GetSelectedSpan();
+					var remainingSpans = selectedSpan.NonIntersect(showContentSpan).ToArray();
+					newText = string.Join("", remainingSpans.Select(x => Value.Substring(x.Index, x.Length)));
+					_editIndex = remainingSpans[0].Index + 1;
+				}
+				else
+				{
+					newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
+				}
 
-            case ConsoleKey.Delete:
-                if (_isSelectedMode)
-                {
-                    var showContentSpan = GetShowContentSpanByView();
-                    var selectedSpan = GetSelectedSpan();
-                    var remainingSpans = selectedSpan.NonIntersect(showContentSpan).ToArray();
-                    newText = string.Join("", remainingSpans.Select(x => Value.Substring(x.Index, x.Length)));
-                    _editIndex = remainingSpans[0].Index + 1;
-                }
-                else
-                {
-                    newText = $"{Value.Substring(0, _editIndex)}{Value.SubStr(_editIndex + 1)}";
-                }
+				_isSelectedMode = false;
+				break;
 
-                _isSelectedMode = false;
-                break;
+			case ConsoleKey.Home:
+				_editIndex = 0;
+				break;
 
-            case ConsoleKey.Home:
-                _editIndex = 0;
-                break;
+			case ConsoleKey.End:
+				_editIndex = Value.Length;
+				break;
 
-            case ConsoleKey.End:
-                _editIndex = Value.Length;
-                break;
+			case ConsoleKey.Enter:
+				break;
 
-            case ConsoleKey.Enter:
-                break;
+			default:
+				if (Value.Length + 1 > MaxLength)
+				{
+					break;
+				}
 
-            default:
-                if (Value.Length + 1 > MaxLength)
-                {
-                    break;
-                }
+				var character = inputEvent.Key == ConsoleKey.Enter
+					 ? '\n'
+					 : inputEvent.KeyChar;
+				newText = $"{Value.Substring(0, _editIndex)}{character}{Value.SubStr(_editIndex)}";
+				_editIndex = Math.Min(newText.Length, _editIndex + 1);
+				_isSelectedMode = false;
+				break;
+		}
 
-                var character = inputEvent.Key == ConsoleKey.Enter
-                    ? '\n'
-                    : inputEvent.KeyChar;
-                newText = $"{Value.Substring(0, _editIndex)}{character}{Value.SubStr(_editIndex)}";
-                _editIndex = Math.Min(newText.Length, _editIndex + 1);
-                _isSelectedMode = false;
-                break;
-        }
+		if (newText != null)
+		{
+			Value = newText;
+		}
 
-        if (newText != null)
-        {
-            Value = newText;
-        }
+		return true;
+	}
 
-        return true;
-    }
+	public void OnCreated(IConsoleWriter console)
+	{
+	}
 
-    public void OnCreated(IConsoleWriter console)
-    {
-    }
+	public void OnBubbleEvent(InputEvent inputEvent)
+	{
+	}
 
-    public void OnBubbleEvent(InputEvent inputEvent)
-    {
-    }
+	private Span GetSelectedSpan()
+	{
+		if (!_isSelectedMode)
+		{
+			return Span.Empty;
+		}
 
-    private Span GetSelectedSpan()
-    {
-        if (!_isSelectedMode)
-        {
-            return Span.Empty;
-        }
+		var startIndex = Math.Min(_editIndex, _startSelectIndex);
+		var endIndex = Math.Max(_editIndex, _startSelectIndex);
+		return new Span
+		{
+			Index = startIndex,
+			Length = endIndex - startIndex,
+		};
+	}
 
-        var startIndex = Math.Min(_editIndex, _startSelectIndex);
-        var endIndex = Math.Max(_editIndex, _startSelectIndex);
-        return new Span
-        {
-            Index = startIndex,
-            Length = endIndex - startIndex,
-        };
-    }
+	private string GetSelectedValue(Span selectedSpan)
+	{
+		return Value.Substring(selectedSpan.Index, selectedSpan.Length);
+	}
 
-    private string GetSelectedValue(Span selectedSpan)
-    {
-        return Value.Substring(selectedSpan.Index, selectedSpan.Length);
-    }
+	private string GetShowContent(Span contentSpan)
+	{
+		return Value.Substring(contentSpan.Index, contentSpan.Length);
+	}
 
-    private string GetShowContent(Span contentSpan)
-    {
-        return Value.Substring(contentSpan.Index, contentSpan.Length);
-    }
+	private Span GetShowContentSpanByView()
+	{
+		var rect = ViewRect.Intersect(ViewRect);
+		return GetShowContentSpan(rect);
+	}
 
-    private Span GetShowContentSpanByView()
-    {
-        var rect = ViewRect.Intersect(ViewRect);
-        return GetShowContentSpan(rect);
-    }
+	private Span GetShowContentSpan(Rect rect)
+	{
+		var startIndex = _editIndex - rect.Width;
+		if (_editIndex < rect.Width)
+		{
+			startIndex = 0;
+		}
 
-    private Span GetShowContentSpan(Rect rect)
-    {
-        var startIndex = _editIndex - rect.Width;
-        if (_editIndex < rect.Width)
-        {
-            startIndex = 0;
-        }
-
-        var len = Math.Min(Value.Length, rect.Width);
-        return new Span
-        {
-            Index = startIndex,
-            Length = len
-        };
-    }
+		var len = Math.Min(Value.Length, rect.Width);
+		return new Span
+		{
+			Index = startIndex,
+			Length = len
+		};
+	}
 }
