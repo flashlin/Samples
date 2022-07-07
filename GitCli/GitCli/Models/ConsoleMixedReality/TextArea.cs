@@ -124,7 +124,7 @@ public class TextArea : IConsoleElement
 			case ConsoleKey.Delete:
 				if (_isSelectedMode)
 				{
-					var showContentSpan = new StrSpan
+					var showContentSpan = new Span
 					{
 						Index = 0,
 						Length = Value.Length
@@ -184,23 +184,23 @@ public class TextArea : IConsoleElement
 	{
 	}
 
-	private StrSpan GetSelectedSpan()
+	private Span GetSelectedSpan()
 	{
 		if (!_isSelectedMode)
 		{
-			return StrSpan.Empty;
+			return Span.Empty;
 		}
 
 		var startIndex = Math.Min(_editIndex, _startSelectIndex);
 		var endIndex = Math.Max(_editIndex, _startSelectIndex);
-		return new StrSpan
+		return new Span
 		{
 			Index = startIndex,
 			Length = endIndex - startIndex,
 		};
 	}
 
-	private IEnumerable<StrSpan> GetSelectedSpans(List<StrSpan> contentSpans)
+	private IEnumerable<Span> GetSelectedSpans(List<Span> contentSpans)
 	{
 		if (!_isSelectedMode)
 		{
@@ -213,7 +213,7 @@ public class TextArea : IConsoleElement
 			var span = contentSpan.Intersect(selectedSpan);
 			if (span.IsEmpty)
 			{
-				yield return new StrSpan
+				yield return new Span
 				{
 					Index = contentSpan.Index,
 					Length = -contentSpan.Length,
@@ -226,22 +226,22 @@ public class TextArea : IConsoleElement
 		}
 	}
 
-	private string GetSelectedValue(StrSpan selectedSpan)
+	private string GetSelectedValue(Span selectedSpan)
 	{
 		return Value.Substring(selectedSpan.Index, selectedSpan.Length);
 	}
 
-	private string GetShowContent(StrSpan contentSpan)
+	private string GetShowContent(Span contentSpan)
 	{
 		return Value.Substring(contentSpan.Index, contentSpan.Length);
 	}
 
-	private StrSpan GetShowContentSpanByView()
+	private Span GetShowContentSpanByView()
 	{
 		return GetShowContentSpan(ViewRect);
 	}
 
-	private StrSpan GetShowContentSpan(Rect rect)
+	private Span GetShowContentSpan(Rect rect)
 	{
 		var startIndex = _editIndex - rect.Width;
 		if (_editIndex < rect.Width)
@@ -250,7 +250,7 @@ public class TextArea : IConsoleElement
 		}
 
 		var len = Math.Min(Value.Length, rect.Width);
-		return new StrSpan
+		return new Span
 		{
 			Index = startIndex,
 			Length = len
@@ -258,7 +258,7 @@ public class TextArea : IConsoleElement
 	}
 
 
-	private List<StrSpan> GetShowContentSpanList(Rect rect)
+	private List<Span> GetShowContentSpanList(Rect rect)
 	{
 		var editHeight = _editIndex / rect.Width;
 		var startHeight = Math.Max(editHeight - rect.Height + 1, 0);
@@ -269,13 +269,13 @@ public class TextArea : IConsoleElement
 		return list;
 	}
 
-	private IEnumerable<StrSpan> GetContentSpans(Rect rect)
+	private IEnumerable<Span> GetContentSpans(Rect rect)
 	{
 		var editIndex = 0;
 		var valueLength = Value.Length + 1;
 		while (valueLength > 0)
 		{
-			yield return new StrSpan
+			yield return new Span
 			{
 				Index = editIndex,
 				Length = Math.Min(valueLength, rect.Width)

@@ -14,13 +14,13 @@ public class StrSpanTest
     [Test]
     public void BSpanInLeft()
     {
-        var aSpan = new StrSpan
+        var aSpan = new Span
         {
             Index = 0,
             Length = 10
         };
 
-        var bSpan = new StrSpan
+        var bSpan = new Span
         {
             Index = -5,
             Length = 10
@@ -31,7 +31,7 @@ public class StrSpanTest
 
         new[]
         {
-            new StrSpan
+            new Span
             {
                 Index = -5,
                 Length = 5
@@ -42,13 +42,13 @@ public class StrSpanTest
     [Test]
     public void BSpanInRight()
     {
-        var aSpan = new StrSpan
+        var aSpan = new Span
         {
             Index = 0,
             Length = 10
         };
 
-        var bSpan = new StrSpan
+        var bSpan = new Span
         {
             Index = 5,
             Length = 10
@@ -59,7 +59,7 @@ public class StrSpanTest
 
         new[]
         {
-            new StrSpan
+            new Span
             {
                 Index = 10,
                 Length = 5
@@ -70,13 +70,13 @@ public class StrSpanTest
     [Test]
     public void BSpanInLarge()
     {
-        var aSpan = new StrSpan
+        var aSpan = new Span
         {
             Index = 0,
             Length = 10
         };
 
-        var bSpan = new StrSpan
+        var bSpan = new Span
         {
             Index = -5,
             Length = 20
@@ -87,12 +87,12 @@ public class StrSpanTest
 
         new[]
         {
-            new StrSpan
+            new Span
             {
                 Index = -5,
                 Length = 5
             },
-            new StrSpan
+            new Span
             {
                 Index = 10,
                 Length = 5
@@ -104,13 +104,13 @@ public class StrSpanTest
     [Test]
     public void BSpanSame()
     {
-        var aSpan = new StrSpan
+        var aSpan = new Span
         {
             Index = 0,
             Length = 10
         };
 
-        var bSpan = new StrSpan
+        var bSpan = new Span
         {
             Index = 0,
             Length = 10
@@ -126,13 +126,13 @@ public class StrSpanTest
     [Test]
     public void NoIntersect()
     {
-        var aSpan = new StrSpan
+        var aSpan = new Span
         {
             Index = 0,
             Length = 10
         };
 
-        var bSpan = new StrSpan
+        var bSpan = new Span
         {
             Index = 10,
             Length = 10

@@ -8,6 +8,8 @@ public class ListBox : IConsoleElement
 	private bool _isSelectedMode;
 	private int _maxLength;
 
+	private Span _showListItemSpan = Span.Empty;
+
 	public ListBox(Rect rect)
 	{
 		ViewRect = rect;
@@ -43,24 +45,22 @@ public class ListBox : IConsoleElement
 				return Character.Empty;
 			}
 
-			if (Children.Count <= 0)
+			if (_showListItemSpan.IsEmpty)
 			{
 				return new Character(' ', null, BackgroundColor);
 			}
-
-			var x = pos.X - ViewRect.Left;
-			var y = _index + pos.Y - ViewRect.Top;
-			if (_index < ViewRect.Height)
+			var y = pos.Y - ViewRect.Top;
+			var index = _showListItemSpan.Index + y;
+			//recalute item view
+			var item = Children[index];
+			item.ViewRect = new Rect
 			{
-				y = pos.Y - ViewRect.Top;
-			}
-
-			if (y < Children.Count)
-			{
-				return Children[y][pos];
-			}
-
-			return new Character(' ', null, BackgroundColor);
+				Left = ViewRect.Left, 
+				Top = ViewRect.Top + y, 
+				Width = ViewRect.Width,
+				Height = ViewRect.Height
+			};
+			return item[pos];
 		}
 	}
 
@@ -89,6 +89,10 @@ public class ListBox : IConsoleElement
 					break;
 				}
 				prevEditIndex = GetFocusedListItem().EditIndex;
+				if (_index == _showListItemSpan.Index && _showListItemSpan.Index > 0)
+				{
+					_showListItemSpan = _showListItemSpan.Move(-1);
+				}
 				_index = Math.Max(_index - 1, 0);
 				GetFocusedListItem().EditIndex = prevEditIndex;
 				break;
@@ -98,6 +102,10 @@ public class ListBox : IConsoleElement
 					break;
 				}
 				prevEditIndex = GetFocusedListItem().EditIndex;
+				if (_index == _showListItemSpan.Right && _showListItemSpan.Right + 1 < Children.Count)
+				{
+					_showListItemSpan = _showListItemSpan.Move(1);
+				}
 				_index = Math.Min(_index + 1, Children.Count - 1);
 				GetFocusedListItem().EditIndex = prevEditIndex;
 				break;
@@ -135,6 +143,12 @@ public class ListBox : IConsoleElement
 			_maxLength = Math.Max(_maxLength, child.Value.Length);
 			y += 1;
 		}
+
+		_showListItemSpan = new Span()
+		{
+			Index = 0,
+			Length = ViewRect.Height
+		};
 	}
 
 	public void OnBubbleEvent(InputEvent inputEvent)

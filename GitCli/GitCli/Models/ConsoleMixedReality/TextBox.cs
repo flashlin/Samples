@@ -181,39 +181,39 @@ public class TextBox : IConsoleEditableElement
     {
     }
 
-    private StrSpan GetSelectedSpan()
+    private Span GetSelectedSpan()
     {
         if (!_isSelectedMode)
         {
-            return StrSpan.Empty;
+            return Span.Empty;
         }
 
         var startIndex = Math.Min(_editIndex, _startSelectIndex);
         var endIndex = Math.Max(_editIndex, _startSelectIndex);
-        return new StrSpan
+        return new Span
         {
             Index = startIndex,
             Length = endIndex - startIndex,
         };
     }
 
-    private string GetSelectedValue(StrSpan selectedSpan)
+    private string GetSelectedValue(Span selectedSpan)
     {
         return Value.Substring(selectedSpan.Index, selectedSpan.Length);
     }
 
-    private string GetShowContent(StrSpan contentSpan)
+    private string GetShowContent(Span contentSpan)
     {
         return Value.Substring(contentSpan.Index, contentSpan.Length);
     }
 
-    private StrSpan GetShowContentSpanByView()
+    private Span GetShowContentSpanByView()
     {
         var rect = ViewRect.Intersect(ViewRect);
         return GetShowContentSpan(rect);
     }
 
-    private StrSpan GetShowContentSpan(Rect rect)
+    private Span GetShowContentSpan(Rect rect)
     {
         var startIndex = _editIndex - rect.Width;
         if (_editIndex < rect.Width)
@@ -222,7 +222,7 @@ public class TextBox : IConsoleEditableElement
         }
 
         var len = Math.Min(Value.Length, rect.Width);
-        return new StrSpan
+        return new Span
         {
             Index = startIndex,
             Length = len
