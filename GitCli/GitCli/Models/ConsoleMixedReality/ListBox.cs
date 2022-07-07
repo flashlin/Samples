@@ -93,17 +93,13 @@ public class ListBox : IConsoleElement
         switch (inputEvent.Key)
         {
             case ConsoleKey.LeftArrow:
-                //_editIndex = Math.Max(0, _editIndex - 1);
                 GetFocusedListItem().OnInput(inputEvent);
+                RearrangeChildrenIndex();
                 return true;
 
             case ConsoleKey.RightArrow:
-                //if (_editIndex + 1 > _maxLength)
-                //{
-                //	break;
-                //}
-                //_editIndex = Math.Min(_maxLength, _editIndex + 1);
                 GetFocusedListItem().OnInput(inputEvent);
+                RearrangeChildrenIndex();
                 return true;
 
             case ConsoleKey.UpArrow:
@@ -167,6 +163,12 @@ public class ListBox : IConsoleElement
             focusedItem.EditIndex = info.prevEditIndex;
         }
 
+        RearrangeChildrenIndex();
+    }
+
+    private void RearrangeChildrenIndex()
+    {
+        var focusedItem = GetFocusedListItem();
         foreach (var child in Children)
         {
             if (child != focusedItem)
