@@ -83,6 +83,18 @@ public class ConsoleWindow : IConsoleWindow
                 {
                     Value = "Flash123"
                 },
+                new TextBox(Rect.Empty)
+                {
+                    Value = "Jack"
+                },
+                new TextBox(Rect.Empty)
+                {
+                    Value = "Jack Mary Flash"
+                },
+                new TextBox(Rect.Empty)
+                {
+                    Value = "End"
+                },
             }
         };
 
