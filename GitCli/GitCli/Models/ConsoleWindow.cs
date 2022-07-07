@@ -73,27 +73,27 @@ public class ConsoleWindow : IConsoleWindow
             {
                 new TextBox(Rect.Empty)
                 {
-                    Value = "1234567890"
+                    Value = "1.1234567890"
                 },
                 new TextBox(Rect.Empty)
                 {
-                    Value = "abcdef"
+                    Value = "2.abcdef"
                 },
                 new TextBox(Rect.Empty)
                 {
-                    Value = "Flash123"
+                    Value = "3.Flash123"
                 },
                 new TextBox(Rect.Empty)
                 {
-                    Value = "Jack"
+                    Value = "4.Jack"
                 },
                 new TextBox(Rect.Empty)
                 {
-                    Value = "Jack Mary Flash"
+                    Value = "5.Jack, Mary, Flash"
                 },
                 new TextBox(Rect.Empty)
                 {
-                    Value = "End"
+                    Value = "6.End"
                 },
             }
         };
