@@ -1,10 +1,15 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public class VerticalStack : IConsoleElement
+public class Frame : IConsoleElement
 {
+    public Frame(Rect viewRect)
+    {
+        ViewRect = viewRect;
+    }
+
     private IConsoleElement? _focus;
 
-    public Rect ViewRect { get; set; } = Rect.Empty;
+    public Rect ViewRect { get; set; }
 
     public IConsoleElement? Parent { get; set; }
 
@@ -57,24 +62,33 @@ public class VerticalStack : IConsoleElement
     public void OnCreated(IConsoleWriter console)
     {
         var viewRect = ViewRect.Init(() => Rect.OfSize(console.GetSize()));
-        var top = 0;
         foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
         {
             if (idx == 0)
             {
-                top = viewRect.Top + child.ViewRect.Top;
+                _focus = child;
             }
 
             child.Parent = this;
             child.ViewRect = new Rect
             {
                 Left = viewRect.Left + child.ViewRect.Left,
-                Top = top,
+                Top = viewRect.Top + child.ViewRect.Top,
                 Width = child.ViewRect.Width,
                 Height = child.ViewRect.Height,
             };
-            top += child.ViewRect.Height;
+            child.OnCreated(console);
         }
+    }
+
+    public bool OnInput(InputEvent inputEvent)
+    {
+        if (_focus == null)
+        {
+            return false;
+        }
+
+        return _focus.OnInput(inputEvent);
     }
 
     public void OnBubbleEvent(InputEvent inputEvent)
@@ -107,16 +121,5 @@ public class VerticalStack : IConsoleElement
         }
 
         Parent?.OnBubbleEvent(inputEvent);
-    }
-
-    public bool OnInput(InputEvent inputEvent)
-    {
-        if (_focus == null)
-        {
-            return false;
-        }
-
-        var handle = _focus.OnInput(inputEvent);
-        return handle;
     }
 }

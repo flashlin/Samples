@@ -180,6 +180,10 @@ public class TextArea : IConsoleElement
 	{
 	}
 
+	public void OnBubbleEvent(InputEvent inputEvent)
+	{
+	}
+
 	private StrSpan GetSelectedSpan()
 	{
 		if (!_isSelectedMode)

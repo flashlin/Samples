@@ -10,4 +10,10 @@ public interface IConsoleElement
     IConsoleElement? Parent { get; set; }
     bool OnInput(InputEvent inputEvent);
     void OnCreated(IConsoleWriter console);
+    void OnBubbleEvent(InputEvent inputEvent);
+}
+
+public interface IConsoleEditableElement : IConsoleElement
+{
+    int EditIndex { get; set; }
 }
