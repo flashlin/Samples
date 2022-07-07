@@ -90,9 +90,6 @@ public class ListBox : IConsoleElement
 
     public bool OnInput(InputEvent inputEvent)
     {
-        var focusedItem = (IConsoleEditableElement?) null;
-        var prevEditIndex = 0;
-        var isEditEnd = false;
         switch (inputEvent.Key)
         {
             case ConsoleKey.LeftArrow:

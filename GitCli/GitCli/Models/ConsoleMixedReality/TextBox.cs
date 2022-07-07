@@ -209,7 +209,6 @@ public class TextBox : IConsoleEditableElement
 
 	private string GetShowContent(Span contentSpan)
 	{
-		//return Value.Substring(contentSpan.Index, contentSpan.Length);
 		return Value.SubStr(contentSpan.Index, contentSpan.Length);
 	}
 
