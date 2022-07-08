@@ -92,7 +92,7 @@ public class DropdownListBox : IConsoleElement
         _listBox.Parent = this;
     }
 
-    public void OnBubbleEvent(InputEvent inputEvent)
+    public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
     {
     }
 }

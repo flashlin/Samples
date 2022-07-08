@@ -21,9 +21,9 @@ public class EmptyElement : IConsoleEditableElement
 	public Rect ViewRect { get; set; } = Rect.Empty;
 	public Character this[Position pos] => Character.Empty;
 
-	public void OnBubbleEvent(InputEvent inputEvent)
+	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
-		Parent?.OnBubbleEvent(inputEvent);
+		Parent?.OnBubbleEvent(element, inputEvent);
 	}
 
 	public void OnCreate(IConsoleManager manager)

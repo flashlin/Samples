@@ -92,7 +92,7 @@ public class Frame : IConsoleElement
         return _focus.OnInput(inputEvent);
     }
 
-    public void OnBubbleEvent(InputEvent inputEvent)
+    public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
     {
         if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
         {
@@ -105,7 +105,7 @@ public class Frame : IConsoleElement
                 return;
             }
 
-            Parent?.OnBubbleEvent(inputEvent);
+            Parent?.OnBubbleEvent(this, inputEvent);
             return;
         }
 
@@ -121,6 +121,6 @@ public class Frame : IConsoleElement
             }
         }
 
-        Parent?.OnBubbleEvent(inputEvent);
+        Parent?.OnBubbleEvent(element, inputEvent);
     }
 }
