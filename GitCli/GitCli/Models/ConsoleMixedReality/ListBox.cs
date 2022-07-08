@@ -113,11 +113,11 @@ public class ListBox : IConsoleElement
 				return true;
 
 			case ConsoleKey.UpArrow:
-				JumpToUp();
+				JumpUpToItem();
 				break;
 
 			case ConsoleKey.DownArrow:
-				JumpToDown();
+				JumpDownToItem();
 				break;
 
 			// case ConsoleKey.Home:
@@ -135,7 +135,7 @@ public class ListBox : IConsoleElement
 		return true;
 	}
 
-	private void JumpToDown()
+	private void JumpDownToItem()
 	{
 		if (_index == -1)
 		{
@@ -147,7 +147,7 @@ public class ListBox : IConsoleElement
 		AfterMove(downInfo);
 	}
 
-	private void JumpToUp()
+	private void JumpUpToItem()
 	{
 		if (_index == -1)
 		{
