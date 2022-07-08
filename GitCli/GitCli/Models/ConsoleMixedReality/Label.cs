@@ -46,7 +46,7 @@ public class Label : IConsoleElement
     {
     }
 
-    public void OnBubbleEvent(InputEvent inputEvent)
+    public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
     {
     }
 }

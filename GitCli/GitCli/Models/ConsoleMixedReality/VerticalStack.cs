@@ -2,122 +2,148 @@
 
 public class VerticalStack : IConsoleElement
 {
-    private IConsoleElement? _focus;
+	private int _focusIndex = -1;
 
-    public Rect ViewRect { get; set; } = Rect.Empty;
+	public Rect ViewRect { get; set; } = Rect.Empty;
 
-    public IConsoleElement? Parent { get; set; }
-    public bool IsTab { get; set; }
+	public IConsoleElement? Parent { get; set; }
+	public bool IsTab { get; set; }
 
-    public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
+	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
 
-    public Position CursorPosition
-    {
-        get
-        {
-            GetFocusedControl();
+	public Position CursorPosition
+	{
+		get
+		{
+			GetFocusedControl();
 
-            if (_focus != null)
-            {
-                return _focus.CursorPosition;
-            }
+			var focus = GetFocusedControl();
+			if (focus != null)
+			{
+				return focus.CursorPosition;
+			}
 
-            return ViewRect.BottomRightCorner;
-        }
-    }
+			return ViewRect.BottomRightCorner;
+		}
+	}
 
-    private IConsoleElement? GetFocusedControl()
-    {
-        _focus ??= Children.FirstOrDefault();
-        return _focus;
-    }
+	private IConsoleElement? GetFocusedControl()
+	{
+		if (_focusIndex == -1)
+		{
+			return null;
+		}
+		return Children[_focusIndex];
+	}
 
-    public Character this[Position pos]
-    {
-        get
-        {
-            if (!ViewRect.Contain(pos))
-            {
-                return Character.Empty;
-            }
+	public Character this[Position pos]
+	{
+		get
+		{
+			if (!ViewRect.Contain(pos))
+			{
+				return Character.Empty;
+			}
 
-            var character = new Character(' ', null, ConsoleColor.DarkGray);
-            foreach (var child in Children)
-            {
-                var ch = child[pos];
-                if (!ch.IsEmpty)
-                {
-                    character = ch;
-                }
-            }
+			var character = new Character(' ', null, ConsoleColor.DarkGray);
+			foreach (var child in Children)
+			{
+				var ch = child[pos];
+				if (!ch.IsEmpty)
+				{
+					character = ch;
+				}
+			}
 
-            return character;
-        }
-    }
+			return character;
+		}
+	}
 
-    public void OnCreate(IConsoleManager manager)
-    {
-        var viewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
-        var top = 0;
-        foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
-        {
-            if (idx == 0)
-            {
-                top = viewRect.Top + child.ViewRect.Top;
-            }
-            child.Parent = this;
-            child.ViewRect = new Rect
-            {
-                Left = viewRect.Left + child.ViewRect.Left,
-                Top = top,
-                Width = child.ViewRect.Width,
-                Height = child.ViewRect.Height,
-            };
-            child.OnCreate(manager);
-            top += child.ViewRect.Height;
-        }
-    }
+	public void OnCreate(IConsoleManager manager)
+	{
+		var viewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
+		var top = 0;
+		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
+		{
+			if (idx == 0)
+			{
+				_focusIndex = 0;
+				top = viewRect.Top + child.ViewRect.Top;
+			}
+			child.Parent = this;
+			child.ViewRect = new Rect
+			{
+				Left = viewRect.Left + child.ViewRect.Left,
+				Top = top,
+				Width = child.ViewRect.Width,
+				Height = child.ViewRect.Height,
+			};
+			child.OnCreate(manager);
+			top += child.ViewRect.Height;
+		}
+	}
 
-    public void OnBubbleEvent(InputEvent inputEvent)
-    {
-        if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
-        {
-            _focus = GetFocusedControl();
-            if (_focus != null)
-            {
-                var idx = Children.FindIndex(x => x == _focus);
-                idx = Math.Min(idx - 1, 0);
-                _focus = Children[idx];
-                return;
-            }
+	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	{
+		if (inputEvent.Key == ConsoleKey.Tab)
+		{
+			DownJumpToChild();
+			return;
+		}
 
-            Parent?.OnBubbleEvent(inputEvent);
-            return;
-        }
+		var focus = GetFocusedControl();
+		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
+		{
+			if (_focusIndex != -1)
+			{
+				_focusIndex = Math.Min(_focusIndex - 1, 0);
+				return;
+			}
+			//if (focus != null)
+			//{
+			//    var idx = Children.FindIndex(x => x == focus);
+			//    idx = Math.Min(idx - 1, 0);
+			//    _focusIndex = idx;
+			//    return;
+			//}
 
-        if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
-        {
-            _focus = GetFocusedControl();
-            if (_focus != null)
-            {
-                var idx = Children.FindIndex(x => x == _focus);
-                idx = Math.Min(idx + 1, Children.Count - 1);
-                _focus = Children[idx];
-                return;
-            }
-        }
+			Parent?.OnBubbleEvent(this, inputEvent);
+			return;
+		}
 
-        Parent?.OnBubbleEvent(inputEvent);
-    }
+		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
+		{
+			if (_focusIndex != -1)
+			{
+				DownJumpToChild();
+				return;
+			}
+			//if (focus != null)
+			//{
+			//	var idx = Children.FindIndex(x => x == focus);
+			//	idx = Math.Min(idx + 1, Children.Count - 1);
+			//	_focusIndex = idx;
+			//	return;
+			//}
+		}
 
-    public bool OnInput(InputEvent inputEvent)
-    {
-        if (_focus == null)
-        {
-            return false;
-        }
+		Parent?.OnBubbleEvent(this, inputEvent);
+	}
 
-        var handle = _focus.OnInput(inputEvent);
-        return handle;
-    }
+	private void DownJumpToChild()
+	{
+		_focusIndex = Math.Min(_focusIndex + 1, Children.Count - 1);
+	}
+
+	public bool OnInput(InputEvent inputEvent)
+	{
+		var focus = GetFocusedControl();
+		if (focus == null)
+		{
+			return false;
+		}
+
+		var handle = focus.OnInput(inputEvent);
+		return handle;
+	}
 }

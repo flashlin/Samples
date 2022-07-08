@@ -12,7 +12,7 @@ public interface IConsoleElement
     bool IsTab { get; set; }
     bool OnInput(InputEvent inputEvent);
     void OnCreate(IConsoleManager manager);
-    void OnBubbleEvent(InputEvent inputEvent);
+    void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
 }
 
 public interface IConsoleEditableElement : IConsoleElement

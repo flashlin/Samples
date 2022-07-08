@@ -104,6 +104,10 @@ public class TextBox : IConsoleEditableElement
 
 		switch (inputEvent.Key)
 		{
+			case ConsoleKey.Tab:
+				Parent?.OnBubbleEvent(this, inputEvent);
+				return true;
+			
 			case ConsoleKey.LeftArrow:
 				_editIndex = Math.Max(0, _editIndex - 1);
 				_isSelectedMode = inputEvent.HasShift;
@@ -184,7 +188,7 @@ public class TextBox : IConsoleEditableElement
 	{
 	}
 
-	public void OnBubbleEvent(InputEvent inputEvent)
+	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 	}
 
