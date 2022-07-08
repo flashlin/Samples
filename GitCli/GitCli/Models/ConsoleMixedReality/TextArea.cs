@@ -12,6 +12,7 @@ public class TextArea : IConsoleElement
 	}
 
 	public IConsoleElement? Parent { get; set; }
+	public bool IsTab { get; set; } = true;
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 

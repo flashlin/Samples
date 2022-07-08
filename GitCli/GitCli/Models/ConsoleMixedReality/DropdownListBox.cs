@@ -31,6 +31,7 @@ public class DropdownListBox : IConsoleElement
     }
 
     public IConsoleElement? Parent { get; set; }
+    public bool IsTab { get; set; } = true;
 
     public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 
@@ -62,6 +63,11 @@ public class DropdownListBox : IConsoleElement
             if (y == 0)
             {
                 return _textBox[pos];
+            }
+
+            if (!_isSelectedMode)
+            {
+                return Character.Empty;
             }
 
             return _listBox[pos];

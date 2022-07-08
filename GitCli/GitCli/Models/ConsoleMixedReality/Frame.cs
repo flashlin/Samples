@@ -12,6 +12,7 @@ public class Frame : IConsoleElement
     public Rect ViewRect { get; set; }
 
     public IConsoleElement? Parent { get; set; }
+    public bool IsTab { get; set; } = false;
 
     public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
 

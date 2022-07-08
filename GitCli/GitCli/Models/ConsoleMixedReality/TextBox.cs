@@ -12,6 +12,7 @@ public class TextBox : IConsoleEditableElement
 	}
 
 	public IConsoleElement? Parent { get; set; }
+	public bool IsTab { get; set; } = true;
 	public bool Enabled { get; set; }
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
@@ -51,6 +52,7 @@ public class TextBox : IConsoleEditableElement
 	public Rect ViewRect { get; set; }
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Value { get; set; } = String.Empty;
+	public object UserObject { get; set; }
 
 	public Character this[Position pos]
 	{
