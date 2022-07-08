@@ -1,6 +1,14 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public class ConsoleManager
+public interface IConsoleManager
+{
+	Color HighlightBackgroundColor { get; set; }
+	Color InputBackgroundColor { get; set; }
+	Color ViewBackgroundColor { get; set; }
+	IConsoleWriter Console { get; }
+}
+
+public class ConsoleManager : IConsoleManager
 {
 	private static readonly ConsoleBuffer _buffer = new ConsoleBuffer();
 	private static FreezeLock _freezeLock = new FreezeLock();
@@ -13,7 +21,13 @@ public class ConsoleManager
 		Content = new EmptyElement();
 	}
 
+	public Color HighlightBackgroundColor { get; set; } = ConsoleColor.DarkGray;
+	public Color InputBackgroundColor { get; set; } = ConsoleColor.DarkBlue;
+	public Color ViewBackgroundColor { get; set; } = ConsoleColor.Gray;
+
 	public IConsoleElement Content { get; set; }
+
+	public IConsoleWriter Console => _console;
 
 	public Size WindowSize => _console.GetSize();
 	public Size BufferSize => _buffer.Size;
@@ -101,7 +115,7 @@ public class ConsoleManager
 		//	}
 		//});
 
-		Content.OnCreated(_console);
+		Content.OnCreate(this);
 		AdjustBufferSize();
 		while (!_cancellationTokenSource.IsCancellationRequested)
 		{

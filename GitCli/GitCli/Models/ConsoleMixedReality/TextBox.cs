@@ -178,7 +178,7 @@ public class TextBox : IConsoleEditableElement
 		return true;
 	}
 
-	public void OnCreated(IConsoleWriter console)
+	public void OnCreate(IConsoleManager manager)
 	{
 	}
 

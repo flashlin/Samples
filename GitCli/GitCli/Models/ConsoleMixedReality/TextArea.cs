@@ -176,7 +176,7 @@ public class TextArea : IConsoleElement
 		return true;
 	}
 
-	public void OnCreated(IConsoleWriter console)
+	public void OnCreate(IConsoleManager manager)
 	{
 	}
 

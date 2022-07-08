@@ -25,7 +25,7 @@ public class EmptyElement : IConsoleEditableElement
 		Parent?.OnBubbleEvent(inputEvent);
 	}
 
-	public void OnCreated(IConsoleWriter console)
+	public void OnCreate(IConsoleManager manager)
 	{
 	}
 

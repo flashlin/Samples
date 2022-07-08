@@ -13,7 +13,6 @@ public class ListBox : IConsoleElement
     private int _maxLength;
 
     private Span _showListItemSpan = Span.Empty;
-    private IConsoleWriter _console;
 
     public ListBox(Rect rect)
     {
@@ -191,9 +190,8 @@ public class ListBox : IConsoleElement
         return (prevEditIndex, isEditEnd);
     }
 
-    public void OnCreated(IConsoleWriter console)
+    public void OnCreate(IConsoleManager manager)
     {
-        _console = console;
         var y = ViewRect.Top;
         foreach (var child in Children)
         {
@@ -206,7 +204,7 @@ public class ListBox : IConsoleElement
                 Width = ViewRect.Width,
                 Height = 1,
             };
-            child.OnCreated(console);
+            child.OnCreate(manager);
             _maxLength = Math.Max(_maxLength, child.Value.Length);
             y += 1;
         }
