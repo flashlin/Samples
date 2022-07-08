@@ -85,27 +85,25 @@ public class VerticalStack : IConsoleElement
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
+		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
+		{
+			JumpUpToChild();
+			return;
+		}
+		
 		if (inputEvent.Key == ConsoleKey.Tab)
 		{
-			DownJumpToChild();
+			JumpDownToChild();
 			return;
 		}
 
-		var focus = GetFocusedControl();
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
 			if (_focusIndex != -1)
 			{
-				_focusIndex = Math.Min(_focusIndex - 1, 0);
+				JumpUpToChild();
 				return;
 			}
-			//if (focus != null)
-			//{
-			//    var idx = Children.FindIndex(x => x == focus);
-			//    idx = Math.Min(idx - 1, 0);
-			//    _focusIndex = idx;
-			//    return;
-			//}
 
 			Parent?.OnBubbleEvent(this, inputEvent);
 			return;
@@ -115,22 +113,20 @@ public class VerticalStack : IConsoleElement
 		{
 			if (_focusIndex != -1)
 			{
-				DownJumpToChild();
+				JumpDownToChild();
 				return;
 			}
-			//if (focus != null)
-			//{
-			//	var idx = Children.FindIndex(x => x == focus);
-			//	idx = Math.Min(idx + 1, Children.Count - 1);
-			//	_focusIndex = idx;
-			//	return;
-			//}
 		}
 
 		Parent?.OnBubbleEvent(this, inputEvent);
 	}
 
-	private void DownJumpToChild()
+	private void JumpUpToChild()
+	{
+		_focusIndex = Math.Min(_focusIndex - 1, 0);
+	}
+
+	private void JumpDownToChild()
 	{
 		_focusIndex = Math.Min(_focusIndex + 1, Children.Count - 1);
 	}
