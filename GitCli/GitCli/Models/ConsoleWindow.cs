@@ -98,6 +98,13 @@ public class ConsoleWindow : IConsoleWindow
             }
         };
 
+        var dropdown1 = new DropdownListBox(new Rect()
+        {
+            Left = 20,
+            Top = 1,
+            Width = 10,
+            Height = 10
+        });
 
         var frame = new Frame(new Rect()
         {
@@ -109,7 +116,8 @@ public class ConsoleWindow : IConsoleWindow
         {
             Children =
             {
-                listBox
+                listBox,
+                dropdown1
             }
         };
 
