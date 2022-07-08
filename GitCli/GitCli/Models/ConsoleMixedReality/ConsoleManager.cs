@@ -6,6 +6,7 @@ public interface IConsoleManager
 	Color InputBackgroundColor { get; set; }
 	Color ViewBackgroundColor { get; set; }
 	IConsoleWriter Console { get; }
+	ConsoleInputObserver InputObserver { get; }
 }
 
 public class ConsoleManager : IConsoleManager
@@ -14,6 +15,7 @@ public class ConsoleManager : IConsoleManager
 	private static FreezeLock _freezeLock = new FreezeLock();
 	private readonly IConsoleWriter _console;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly ConsoleInputObserver _inputObserver = new ConsoleInputObserver();
     
 	public ConsoleManager(IConsoleWriter console)
 	{
@@ -24,6 +26,8 @@ public class ConsoleManager : IConsoleManager
 	public Color HighlightBackgroundColor { get; set; } = ConsoleColor.DarkGray;
 	public Color InputBackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public Color ViewBackgroundColor { get; set; } = ConsoleColor.Gray;
+
+	public ConsoleInputObserver InputObserver => _inputObserver;
 
 	public IConsoleElement Content { get; set; }
 
