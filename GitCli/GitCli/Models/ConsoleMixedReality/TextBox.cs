@@ -54,6 +54,8 @@ public class TextBox : IConsoleEditableElement
 	public string Value { get; set; } = String.Empty;
 	public object UserObject { get; set; }
 
+	public event EventHandler<ConsoleElementEvent> OnHandle;
+
 	public Character this[Position pos]
 	{
 		get
@@ -159,6 +161,12 @@ public class TextBox : IConsoleEditableElement
 				break;
 
 			case ConsoleKey.Enter:
+				//Parent?.OnBubbleEvent(this, inputEvent);
+				OnHandle?.Invoke(this, new ConsoleElementEvent()
+				{
+					Element = this,
+					InputEvent = inputEvent,
+				});
 				break;
 
 			default:

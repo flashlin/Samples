@@ -1,14 +1,22 @@
 ﻿using System.Reactive.Disposables;
+using T1.Standard.Net.SoapProtocols.WsdlXmlDeclrs;
 
 namespace GitCli.Models.ConsoleMixedReality;
 
-public class ConsoleInputObserver : IObservable<InputEvent>
+
+public class ConsoleElementEvent
 {
-    private IObserver<InputEvent>? _observer;
+    public InputEvent InputEvent { get; init; }
+    public IConsoleElement Element { get; init; }
+}
+
+public class ConsoleInputObserver : IObservable<ConsoleElementEvent>
+{
+    private IObserver<ConsoleElementEvent>? _observer;
     private Task? _task;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    public IDisposable Subscribe(IObserver<InputEvent> observer)
+    public IDisposable Subscribe(IObserver<ConsoleElementEvent> observer)
     {
         _observer = observer;
         return Disposable.Empty;
@@ -16,48 +24,12 @@ public class ConsoleInputObserver : IObservable<InputEvent>
 
     public CancellationTokenSource Cancellation => _cancellationTokenSource;
 
-    public void StartReadKey()
+    private void RaiseKey(IConsoleElement element, InputEvent inputEvent)
     {
-        if (_task != null)
+        _observer?.OnNext(new ConsoleElementEvent
         {
-            throw new InvalidProgramException();
-        }
-
-        _task = new Task(ReadKeyWithoutWait);
-        _task.Start();
-    }
-
-    public void ReadKey()
-    {
-        var key = Console.ReadKey(true);
-        RaiseKey(key);
-    }
-
-    private void ReadKeyWithoutWait()
-    {
-        while (!_cancellationTokenSource.IsCancellationRequested)
-        {
-            // if (Console.KeyAvailable)
-            // {
-            // 	var key = Console.ReadKey(true);
-            // 	RaiseKey(key);
-            // }
-            //Thread.Sleep(10);
-            var key = Console.ReadKey(true);
-            RaiseKey(key);
-        }
-    }
-
-    private void RaiseKey(ConsoleKeyInfo key)
-    {
-        var inputEvent = new InputEvent
-        {
-            HasControl = key.Modifiers.HasFlag(ConsoleModifiers.Control),
-            HasAlt = key.Modifiers.HasFlag(ConsoleModifiers.Alt),
-            HasShift = key.Modifiers.HasFlag(ConsoleModifiers.Shift),
-            Key = key.Key,
-            KeyChar = key.KeyChar,
-        };
-        _observer?.OnNext(inputEvent);
+            InputEvent = inputEvent,
+            Element = element,
+        });
     }
 }

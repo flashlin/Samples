@@ -96,6 +96,8 @@ public class VerticalStack : IConsoleElement
 			JumpDownToChild();
 			return;
 		}
+		
+		
 
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{

@@ -8,12 +8,11 @@ public class ListBox : IConsoleElement
 {
 	private int _editIndex;
 	private int _index = -1;
-	private int _startSelectIndex;
 	private bool _isSelectedMode;
-	private int _maxLength;
-
-	private Span _showListItemSpan = Span.Empty;
 	private IConsoleManager _manager;
+	private int _maxLength;
+	private Span _showListItemSpan = Span.Empty;
+	private int _startSelectIndex;
 
 	public ListBox(Rect rect)
 	{
@@ -21,28 +20,9 @@ public class ListBox : IConsoleElement
 		Children.CollectionChanged += ChildrenOnCollectionChanged;
 	}
 
-	private void ChildrenOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-	{
-		if (e.Action == NotifyCollectionChangedAction.Add)
-		{
-			AddChild(e.NewItems!);
-		}
-	}
-
-	private void AddChild(IList newItems)
-	{
-		foreach (IConsoleElement item in newItems)
-		{
-			item.Parent = this;
-		}
-	}
-
-	public IConsoleElement? Parent { get; set; }
-	public bool IsTab { get; set; } = true;
+	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 
 	public ObservableCollection<TextBox> Children { get; } = new();
-
-	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 
 	public Position CursorPosition
 	{
@@ -57,8 +37,13 @@ public class ListBox : IConsoleElement
 		}
 	}
 
-	public Rect ViewRect { get; set; }
+	public bool IsTab { get; set; } = true;
+
 	public int MaxLength { get; set; } = int.MaxValue;
+
+	public IConsoleElement? Parent { get; set; }
+
+	public Rect ViewRect { get; set; }
 
 	public Character this[Position pos]
 	{
@@ -92,6 +77,54 @@ public class ListBox : IConsoleElement
 			};
 			return item[pos];
 		}
+	}
+
+	public TextBox AddItem(ListItem item)
+	{
+		var textBox = new TextBox(Rect.Empty)
+		{
+			Value = item.Title,
+			UserObject = item.Value
+		};
+		Children.Add(textBox);
+		return textBox;
+	}
+
+	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	{
+		switch (inputEvent.Key)
+		{
+			case ConsoleKey.Tab:
+			case ConsoleKey.Enter:
+				Parent?.OnBubbleEvent(element, inputEvent);
+				break;
+		}
+	}
+
+	public void OnCreate(IConsoleManager manager)
+	{
+		_manager = manager;
+		var y = ViewRect.Top;
+		foreach (var child in Children)
+		{
+			_index = 0;
+			child.ViewRect = new Rect()
+			{
+				Left = ViewRect.Left,
+				Top = y,
+				Width = ViewRect.Width,
+				Height = 1,
+			};
+			child.OnCreate(manager);
+			_maxLength = Math.Max(_maxLength, child.Value.Length);
+			y += 1;
+		}
+		_showListItemSpan = new Span()
+		{
+			Index = 0,
+			Length = ViewRect.Height
+		};
+		RearrangeChildrenIndex();
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -129,10 +162,77 @@ public class ListBox : IConsoleElement
 			//     break;
 
 			case ConsoleKey.Enter:
+				GetFocusedListItem().OnInput(inputEvent);
 				break;
 		}
 
 		return true;
+	}
+
+	private void AddChild(IList newItems)
+	{
+		foreach (IConsoleElement item in newItems)
+		{
+			item.Parent = this;
+		}
+	}
+
+	private void AfterMove((int prevEditIndex, bool isEditEnd) info)
+	{
+		var focusedItem = GetFocusedListItem();
+		if (info.isEditEnd)
+		{
+			focusedItem.EditIndex = focusedItem.Value.Length;
+		}
+		else
+		{
+			focusedItem.EditIndex = info.prevEditIndex;
+		}
+
+		RearrangeChildrenIndex();
+	}
+
+	private (int prevEditIndex, bool isEditEnd) BeforeMoveDown()
+	{
+		var focusedItem = GetFocusedListItem();
+		var prevEditIndex = focusedItem.EditIndex;
+		if (_index == _showListItemSpan.Right && _showListItemSpan.Right + 1 < Children.Count)
+		{
+			_showListItemSpan = _showListItemSpan.Move(1);
+		}
+
+		var isEditEnd = (prevEditIndex == focusedItem.Value.Length);
+		return (prevEditIndex, isEditEnd);
+	}
+
+	private (int prevEditIndex, bool isEditEnd) BeforeMoveUp()
+	{
+		var focusedItem = GetFocusedListItem();
+		var prevEditIndex = focusedItem.EditIndex;
+		if (_index == _showListItemSpan.Index && _showListItemSpan.Index > 0)
+		{
+			_showListItemSpan = _showListItemSpan.Move(-1);
+		}
+
+		var isEditEnd = (prevEditIndex == focusedItem.Value.Length);
+		return (prevEditIndex, isEditEnd);
+	}
+
+	private void ChildrenOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	{
+		if (e.Action == NotifyCollectionChangedAction.Add)
+		{
+			AddChild(e.NewItems!);
+		}
+	}
+	private IConsoleEditableElement GetFocusedListItem()
+	{
+		if (_index == -1)
+		{
+			return new EmptyElement();
+		}
+
+		return Children[_index];
 	}
 
 	private void JumpDownToItem()
@@ -158,35 +258,6 @@ public class ListBox : IConsoleElement
 		_index = Math.Max(_index - 1, 0);
 		AfterMove(beforeInfo);
 	}
-
-	private (int prevEditIndex, bool isEditEnd) BeforeMoveDown()
-	{
-		var focusedItem = GetFocusedListItem();
-		var prevEditIndex = focusedItem.EditIndex;
-		if (_index == _showListItemSpan.Right && _showListItemSpan.Right + 1 < Children.Count)
-		{
-			_showListItemSpan = _showListItemSpan.Move(1);
-		}
-
-		var isEditEnd = (prevEditIndex == focusedItem.Value.Length);
-		return (prevEditIndex, isEditEnd);
-	}
-
-	private void AfterMove((int prevEditIndex, bool isEditEnd) info)
-	{
-		var focusedItem = GetFocusedListItem();
-		if (info.isEditEnd)
-		{
-			focusedItem.EditIndex = focusedItem.Value.Length;
-		}
-		else
-		{
-			focusedItem.EditIndex = info.prevEditIndex;
-		}
-
-		RearrangeChildrenIndex();
-	}
-
 	private void RearrangeChildrenIndex()
 	{
 		var focusedItem = GetFocusedListItem();
@@ -202,73 +273,5 @@ public class ListBox : IConsoleElement
 				child.Background = _manager.HighlightBackgroundColor;
 			}
 		}
-	}
-
-	private (int prevEditIndex, bool isEditEnd) BeforeMoveUp()
-	{
-		var focusedItem = GetFocusedListItem();
-		var prevEditIndex = focusedItem.EditIndex;
-		if (_index == _showListItemSpan.Index && _showListItemSpan.Index > 0)
-		{
-			_showListItemSpan = _showListItemSpan.Move(-1);
-		}
-
-		var isEditEnd = (prevEditIndex == focusedItem.Value.Length);
-		return (prevEditIndex, isEditEnd);
-	}
-
-	public void OnCreate(IConsoleManager manager)
-	{
-		_manager = manager;
-		var y = ViewRect.Top;
-		foreach (var child in Children)
-		{
-			_index = 0;
-			child.ViewRect = new Rect()
-			{
-				Left = ViewRect.Left,
-				Top = y,
-				Width = ViewRect.Width,
-				Height = 1,
-			};
-			child.OnCreate(manager);
-			_maxLength = Math.Max(_maxLength, child.Value.Length);
-			y += 1;
-		}
-		_showListItemSpan = new Span()
-		{
-			Index = 0,
-			Length = ViewRect.Height
-		};
-		RearrangeChildrenIndex();
-	}
-
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
-	{
-		switch (inputEvent.Key)
-		{
-			case ConsoleKey.Tab:
-				Parent?.OnBubbleEvent(element, inputEvent);
-				break;
-		}
-	}
-
-	private IConsoleEditableElement GetFocusedListItem()
-	{
-		if (_index == -1)
-		{
-			return new EmptyElement();
-		}
-
-		return Children[_index];
-	}
-
-	public void AddItem(ListItem item)
-	{
-		Children.Add(new TextBox(Rect.Empty)
-		{
-			Value = item.Title,
-			UserObject = item.Value
-		});
 	}
 }
