@@ -13,6 +13,7 @@ public class ListBox : IConsoleElement
     private int _maxLength;
 
     private Span _showListItemSpan = Span.Empty;
+    private IConsoleManager _manager;
 
     public ListBox(Rect rect)
     {
@@ -173,6 +174,11 @@ public class ListBox : IConsoleElement
             if (child != focusedItem)
             {
                 child.ForceSetEditIndex(focusedItem.EditIndex);
+                child.Background = _manager.InputBackgroundColor;
+            }
+            else
+            {
+                child.Background = _manager.HighlightBackgroundColor;
             }
         }
     }
@@ -192,11 +198,11 @@ public class ListBox : IConsoleElement
 
     public void OnCreate(IConsoleManager manager)
     {
+        _manager = manager;
         var y = ViewRect.Top;
         foreach (var child in Children)
         {
             _index = 0;
-            child.Parent = this;
             child.ViewRect = new Rect()
             {
                 Left = ViewRect.Left,
@@ -208,12 +214,12 @@ public class ListBox : IConsoleElement
             _maxLength = Math.Max(_maxLength, child.Value.Length);
             y += 1;
         }
-
         _showListItemSpan = new Span()
         {
             Index = 0,
             Length = ViewRect.Height
         };
+        RearrangeChildrenIndex();
     }
 
     public void OnBubbleEvent(InputEvent inputEvent)
