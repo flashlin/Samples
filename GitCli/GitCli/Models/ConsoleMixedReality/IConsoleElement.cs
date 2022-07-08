@@ -10,7 +10,7 @@ public interface IConsoleElement
     Rect ViewRect { get; set; }
     IConsoleElement? Parent { get; set; }
     bool OnInput(InputEvent inputEvent);
-    void OnCreated(IConsoleWriter console);
+    void OnCreate(IConsoleManager manager);
     void OnBubbleEvent(InputEvent inputEvent);
 }
 

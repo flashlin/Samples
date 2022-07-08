@@ -54,9 +54,9 @@ public class VerticalStack : IConsoleElement
         }
     }
 
-    public void OnCreated(IConsoleWriter console)
+    public void OnCreate(IConsoleManager manager)
     {
-        var viewRect = ViewRect.Init(() => Rect.OfSize(console.GetSize()));
+        var viewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
         var top = 0;
         foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
         {
