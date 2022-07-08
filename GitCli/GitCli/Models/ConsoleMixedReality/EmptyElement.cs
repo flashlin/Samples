@@ -11,6 +11,7 @@ public class EmptyElement : IConsoleEditableElement
 	}
 
 	public IConsoleElement? Parent { get; set; }
+	public bool IsTab { get; set; } = false;
 	public string Value { get; } = String.Empty;
 	public void ForceSetEditIndex(int index)
 	{

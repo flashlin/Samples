@@ -10,7 +10,7 @@ public class GitRepoInfo : IObjectNotifyPropertyChanged
       Status = new NotifyProperty<IEnumerable<FileStatusInfo>>(this, nameof(Status), Enumerable.Empty<FileStatusInfo>());
 	}
 
-    public string FolderPath { get; init; }
+    public string FolderPath { get; init; } = String.Empty;
     
     public NotifyProperty<IEnumerable<FileStatusInfo>> Status { get; init; }
 
@@ -38,4 +38,39 @@ public class GitRepoInfo : IObjectNotifyPropertyChanged
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
+    public IEnumerable<GitBranchInfo> QueryBranches()
+    {
+        var branches = Repository.ListRemoteReferences(FolderPath);
+        var refHeads = "refs/heads/";
+        foreach(var branch in branches)
+        {
+            if (branch.TargetIdentifier.StartsWith(refHeads) || 
+                branch.CanonicalName.StartsWith(refHeads))
+            {
+                yield return new GitBranchInfo
+                {
+                    Name = branch.CanonicalName.Replace(refHeads, String.Empty),
+                    IsLocalBranch = true,
+                    TargetIdentifier = branch.TargetIdentifier
+                };
+            }
+            else
+            {
+                yield return new GitBranchInfo
+                {
+                    Name = branch.CanonicalName.Replace("refs/remotes/", String.Empty),
+                    IsLocalBranch = false,
+                    TargetIdentifier = branch.TargetIdentifier
+                };
+            }
+        }
+    }
+}
+
+public class GitBranchInfo
+{
+    public string Name { get; set; }
+    public bool IsLocalBranch { get; set; }
+    public string TargetIdentifier { get; set; }
 }

@@ -9,6 +9,7 @@ public interface IConsoleElement
     Position CursorPosition { get; }
     Rect ViewRect { get; set; }
     IConsoleElement? Parent { get; set; }
+    bool IsTab { get; set; }
     bool OnInput(InputEvent inputEvent);
     void OnCreate(IConsoleManager manager);
     void OnBubbleEvent(InputEvent inputEvent);

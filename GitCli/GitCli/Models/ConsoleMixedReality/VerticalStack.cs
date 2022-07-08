@@ -7,6 +7,7 @@ public class VerticalStack : IConsoleElement
     public Rect ViewRect { get; set; } = Rect.Empty;
 
     public IConsoleElement? Parent { get; set; }
+    public bool IsTab { get; set; }
 
     public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
 
@@ -64,7 +65,6 @@ public class VerticalStack : IConsoleElement
             {
                 top = viewRect.Top + child.ViewRect.Top;
             }
-
             child.Parent = this;
             child.ViewRect = new Rect
             {
@@ -73,6 +73,7 @@ public class VerticalStack : IConsoleElement
                 Width = child.ViewRect.Width,
                 Height = child.ViewRect.Height,
             };
+            child.OnCreate(manager);
             top += child.ViewRect.Height;
         }
     }

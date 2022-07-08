@@ -38,6 +38,7 @@ public class ListBox : IConsoleElement
     }
 
     public IConsoleElement? Parent { get; set; }
+    public bool IsTab { get; set; } = true;
 
     public ObservableCollection<TextBox> Children { get; } = new();
 
@@ -75,6 +76,12 @@ public class ListBox : IConsoleElement
 
             var y = pos.Y - ViewRect.Top;
             var index = _showListItemSpan.Index + y;
+
+            if( index >= Children.Count)
+            {
+                return new Character(' ', null, BackgroundColor);
+            }
+
             //recalute item view
             var item = Children[index];
             item.ViewRect = new Rect
@@ -234,5 +241,14 @@ public class ListBox : IConsoleElement
         }
 
         return Children[_index];
+    }
+
+    public void AddItem(ListItem item)
+    {
+        Children.Add(new TextBox(Rect.Empty)
+        {
+            Value = item.Title,
+            UserObject = item.Value
+        });
     }
 }

@@ -8,9 +8,12 @@ public class ConsoleWindow : IConsoleWindow
     private readonly IServiceProvider _serviceProvider;
     private readonly ConsoleWriter _console;
     private ConsoleManager _consoleManager;
+    private IGitRepoAgent _gitRepoAgent;
 
-    public ConsoleWindow(IServiceProvider serviceProvider, ConsoleManager consoleManager)
+    public ConsoleWindow(IServiceProvider serviceProvider, ConsoleManager consoleManager,
+        IGitRepoAgent gitRepoAgent)
     {
+        _gitRepoAgent = gitRepoAgent;
         _consoleManager = consoleManager;
         _serviceProvider = serviceProvider;
         _console = new ConsoleWriter();
@@ -18,26 +21,8 @@ public class ConsoleWindow : IConsoleWindow
 
     public Task Run(string[] args)
     {
-        var idTextBox = new TextBox(new Rect
-        {
-            Left = 10,
-            Top = 2,
-            Width = 10,
-            Height = 1,
-        }).Setup(x =>
-        {
-            x.MaxLength = 5;
-            x.TypeCharacter = '*';
-        });
-
-        var box = new TextArea(new Rect
-        {
-            Left = 10,
-            Top = 4,
-            Width = 5,
-            Height = 2,
-        });
-
+        var gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Codewars");
+        
         var stackLayout = new VerticalStack()
         {
             ViewRect = new Rect
@@ -49,15 +34,42 @@ public class ConsoleWindow : IConsoleWindow
             },
             Children =
             {
-                idTextBox,
-                new TextBox(new Rect
+                new ListBox(new Rect
+				    {
+                    Left = 0,
+                    Top = 0,
+                    Width = 20,
+                    Height = 2,
+				    }).Setup(x =>
                 {
-                    Left = 10,
-                    Top = 3,
-                    Width = 10,
-                    Height = 1
+                    x.AddItem(new ListItem()
+                    {
+                        Title = "Local Changes",
+                    });
+                    x.AddItem(new ListItem()
+                    {
+                        Title = "All Commits",
+                    });
                 }),
-                box
+                new ListBox(new Rect
+                {
+                    Left = 0,
+                    Top = 3,
+                    Width = 20,
+                    Height = 10,
+                }).Setup(branchList =>
+                {
+                    var branches = gitRepoInfo.QueryBranches()
+                        .OrderByDescending(x => x.IsLocalBranch);
+                    foreach (var branch in branches)
+                    {
+                        branchList.AddItem(new ListItem
+                        {
+                            Title = branch.Name,
+                            Value = branch
+                        });
+                    }
+                })
             }
         };
 
@@ -121,10 +133,8 @@ public class ConsoleWindow : IConsoleWindow
             }
         };
 
-        _consoleManager.Content = frame;
+        _consoleManager.Content = stackLayout;
         _consoleManager.Start();
-
-        Console.WriteLine($"id='{idTextBox.Value}'");
 
         return Task.CompletedTask;
         //
@@ -148,4 +158,10 @@ public class ConsoleWindow : IConsoleWindow
         //     await cmd.Run();
         // } while (true);
     }
+}
+
+public class ListItem
+{
+    public string Title { get; set; }
+    public object Value { get; set; }
 }
