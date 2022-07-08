@@ -42,10 +42,19 @@ public class ConsoleWindow : IConsoleWindow
                     Height = 2,
 				    }).Setup(x =>
                 {
-                    x.AddItem(new ListItem()
+                    var localChanges = x.AddItem(new ListItem()
                     {
                         Title = "Local Changes",
                     });
+                        
+                    localChanges.OnHandle += (sender, evt) =>
+                    {
+                        var fileStatus = gitRepoInfo.QueryStatus()
+                            .ToArray();
+                        
+                        Console.WriteLine("");
+                    };
+                    
                     x.AddItem(new ListItem()
                     {
                         Title = "All Commits",
@@ -72,6 +81,10 @@ public class ConsoleWindow : IConsoleWindow
                 })
             }
         };
+        
+        
+        
+        
 
         var listBox = new ListBox(new Rect()
         {
