@@ -1,24 +1,60 @@
-﻿namespace GitCli.Models.ConsoleMixedReality;
+﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+
+namespace GitCli.Models.ConsoleMixedReality;
+
+
+public class StackChildren : ObservableCollection<IConsoleElement>
+{
+	private int _focusIndex = -1;
+
+	public StackChildren(IConsoleElement parent)
+	{
+	}
+
+	public IConsoleElement GetFocusedControl()
+	{
+		if (_focusIndex == -1)
+		{
+			return new EmptyElement();
+		}
+		return this[_focusIndex];
+	}
+
+	public void JumpDownFocus()
+	{
+		_focusIndex = Math.Min(_focusIndex + 1, Count - 1);
+	}
+
+	public void JumpUpFocus()
+	{
+		_focusIndex = Math.Min(_focusIndex - 1, 0);
+	}
+
+	protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+	{
+		if (e.Action == NotifyCollectionChangedAction.Add)
+		{
+			_focusIndex = Math.Max(_focusIndex, 0);
+		}
+		base.OnCollectionChanged(e);
+	}
+}
+
 
 public class HorizontalStack : IConsoleElement
 {
 	private int _focusIndex = -1;
 
-	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
-	public Position CursorPosition
+	public HorizontalStack(Rect rect)
 	{
-		get
-		{
-			GetFocusedControl();
-			var focus = GetFocusedControl();
-			if (focus != null)
-			{
-				return focus.CursorPosition;
-			}
-
-			return ViewRect.BottomRightCorner;
-		}
+		ViewRect = rect;
+		Children = new StackChildren(this);
 	}
+
+	public StackChildren Children { get; private set; }
+
+	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
 	public bool IsTab { get; set; }
 	public IConsoleElement? Parent { get; set; }
@@ -31,18 +67,7 @@ public class HorizontalStack : IConsoleElement
 			{
 				return Character.Empty;
 			}
-
-			var character = new Character(' ', null, ConsoleColor.DarkGray);
-			foreach (var child in Children)
-			{
-				var ch = child[pos];
-				if (!ch.IsEmpty)
-				{
-					character = ch;
-				}
-			}
-
-			return character;
+			return Children.GetFocusedControl()[pos];
 		}
 	}
 
@@ -50,23 +75,21 @@ public class HorizontalStack : IConsoleElement
 	{
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
 		{
-			JumpUpToChild();
+			Children.JumpUpFocus();
 			return;
 		}
 
 		if (inputEvent.Key == ConsoleKey.Tab)
 		{
-			JumpDownToChild();
+			Children.JumpDownFocus();
 			return;
 		}
-
-
 
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
 			if (_focusIndex != -1)
 			{
-				JumpUpToChild();
+				Children.JumpUpFocus();
 				return;
 			}
 
@@ -78,7 +101,7 @@ public class HorizontalStack : IConsoleElement
 		{
 			if (_focusIndex != -1)
 			{
-				JumpDownToChild();
+				Children.JumpDownFocus();
 				return;
 			}
 		}
@@ -88,8 +111,8 @@ public class HorizontalStack : IConsoleElement
 
 	public void OnCreate(IConsoleManager manager)
 	{
-		var viewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
-		var left = 0;
+		var viewRect = ViewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
+		var left = ViewRect.Left;
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{
 			if (idx == 0)
@@ -101,7 +124,7 @@ public class HorizontalStack : IConsoleElement
 			child.ViewRect = new Rect
 			{
 				Left = left,
-				Top = viewRect.Left + child.ViewRect.Left,
+				Top = viewRect.Top + child.ViewRect.Top,
 				Width = child.ViewRect.Width,
 				Height = child.ViewRect.Height,
 			};
@@ -112,32 +135,6 @@ public class HorizontalStack : IConsoleElement
 
 	public bool OnInput(InputEvent inputEvent)
 	{
-		var focus = GetFocusedControl();
-		if (focus == null)
-		{
-			return false;
-		}
-
-		var handle = focus.OnInput(inputEvent);
-		return handle;
-	}
-
-	private IConsoleElement? GetFocusedControl()
-	{
-		if (_focusIndex == -1)
-		{
-			return null;
-		}
-		return Children[_focusIndex];
-	}
-
-	private void JumpDownToChild()
-	{
-		_focusIndex = Math.Min(_focusIndex + 1, Children.Count - 1);
-	}
-
-	private void JumpUpToChild()
-	{
-		_focusIndex = Math.Min(_focusIndex - 1, 0);
+		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
 }

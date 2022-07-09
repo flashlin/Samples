@@ -4,6 +4,11 @@ public class VerticalStack : IConsoleElement
 {
 	private int _focusIndex = -1;
 
+	public VerticalStack(Rect rect)
+	{
+		ViewRect = rect;
+	}
+
 	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
 	public Position CursorPosition
 	{
@@ -24,6 +29,7 @@ public class VerticalStack : IConsoleElement
 	public bool IsTab { get; set; }
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; } = Rect.Empty;
+	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public Character this[Position pos]
 	{
 		get
@@ -33,7 +39,7 @@ public class VerticalStack : IConsoleElement
 				return Character.Empty;
 			}
 
-			var character = new Character(' ', null, ConsoleColor.DarkGray);
+			var character = new Character(' ', null, BackgroundColor);
 			foreach (var child in Children)
 			{
 				var ch = child[pos];
@@ -89,8 +95,8 @@ public class VerticalStack : IConsoleElement
 
 	public void OnCreate(IConsoleManager manager)
 	{
-		var viewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
-		var top = 0;
+		var viewRect = ViewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
+		var top = viewRect.Top;
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{
 			if (idx == 0)
