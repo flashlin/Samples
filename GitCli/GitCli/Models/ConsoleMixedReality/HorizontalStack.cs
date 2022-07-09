@@ -1,6 +1,6 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public class VerticalStack : IConsoleElement
+public class HorizontalStack : IConsoleElement
 {
 	private int _focusIndex = -1;
 
@@ -10,7 +10,6 @@ public class VerticalStack : IConsoleElement
 		get
 		{
 			GetFocusedControl();
-
 			var focus = GetFocusedControl();
 			if (focus != null)
 			{
@@ -90,24 +89,24 @@ public class VerticalStack : IConsoleElement
 	public void OnCreate(IConsoleManager manager)
 	{
 		var viewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
-		var top = 0;
+		var left = 0;
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{
 			if (idx == 0)
 			{
 				_focusIndex = 0;
-				top = viewRect.Top + child.ViewRect.Top;
+				left = viewRect.Left + child.ViewRect.Left;
 			}
 			child.Parent = this;
 			child.ViewRect = new Rect
 			{
-				Left = viewRect.Left + child.ViewRect.Left,
-				Top = top,
+				Left = left,
+				Top = viewRect.Left + child.ViewRect.Left,
 				Width = child.ViewRect.Width,
 				Height = child.ViewRect.Height,
 			};
 			child.OnCreate(manager);
-			top += child.ViewRect.Height;
+			left += child.ViewRect.Width;
 		}
 	}
 
@@ -131,6 +130,7 @@ public class VerticalStack : IConsoleElement
 		}
 		return Children[_focusIndex];
 	}
+
 	private void JumpDownToChild()
 	{
 		_focusIndex = Math.Min(_focusIndex + 1, Children.Count - 1);
