@@ -3,6 +3,13 @@ using T1.Standard.Extensions;
 
 namespace GitCli.Models;
 
+
+public class Bind<T>
+{
+	public T Value { get; set; }
+}
+
+
 public class ConsoleWindow : IConsoleWindow
 {
 	private readonly IServiceProvider _serviceProvider;
@@ -23,17 +30,16 @@ public class ConsoleWindow : IConsoleWindow
 	{
 		var gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Codewars");
 
-		ListBox allCommitList;
+		var allCommitList = new Bind<ListBox>();
 
-		var stackLayout = new VerticalStack()
+		var branchStackLayout = new VerticalStack(new Rect
 		{
-			ViewRect = new Rect
-			{
-				Left = 0,
-				Top = 1,
-				Width = 40,
-				Height = 20,
-			},
+			Left = 0,
+			Top = 0,
+			Width = 20,
+			Height = 20,
+		})
+		{
 			Children =
 				{
 					 new ListBox(new Rect
@@ -65,6 +71,14 @@ public class ConsoleWindow : IConsoleWindow
 						  allCommits.OnHandle += (sender, evt) =>
 						  {
 							  var commits = gitRepoInfo.QueryCommits();
+							  foreach (var commit in commits)
+							  {
+								  allCommitList.Value.AddItem(new ListItem()
+								  {
+									  Title = commit.Message,
+									  Value = commit
+								  });
+							  }
 						  };
 
 					 }),
@@ -91,70 +105,47 @@ public class ConsoleWindow : IConsoleWindow
 		};
 
 
-
-
-
-		var listBox = new ListBox(new Rect()
+		var verticalStack2 = new VerticalStack(new Rect
 		{
 			Left = 0,
 			Top = 0,
-			Width = 10,
-			Height = 5,
+			Width = 20,
+			Height = 40
 		})
 		{
+			BackgroundColor = Color.Gray,
 			Children =
+			{
+				new ListBox(new Rect
 				{
-					 new TextBox(Rect.Empty)
-					 {
-						  Value = "1.1234567890"
-					 },
-					 new TextBox(Rect.Empty)
-					 {
-						  Value = "2.abcdef"
-					 },
-					 new TextBox(Rect.Empty)
-					 {
-						  Value = "3.Flash123"
-					 },
-					 new TextBox(Rect.Empty)
-					 {
-						  Value = "4.Jack"
-					 },
-					 new TextBox(Rect.Empty)
-					 {
-						  Value = "5.Jack, Mary, Flash"
-					 },
-					 new TextBox(Rect.Empty)
-					 {
-						  Value = "6.End"
-					 },
-				}
+					Left = 0,
+					Top = 0,
+					Width = 20,
+					Height = 40
+				}).Setup(x =>
+				{
+					allCommitList.Value = x;
+				})
+			}
 		};
 
-		var dropdown1 = new DropdownListBox(new Rect()
+
+		var mainStack = new HorizontalStack(new Rect
 		{
-			Left = 20,
+			Left = 0,
 			Top = 1,
-			Width = 10,
-			Height = 10
-		});
-
-		var frame = new Frame(new Rect()
-		{
-			Left = 0,
-			Top = 0,
-			Width = 50,
-			Height = 20
+			Width = _console.GetSize().Width,
+			Height = _console.GetSize().Height - 1
 		})
 		{
 			Children =
-				{
-					 listBox,
-					 dropdown1
-				}
+			{
+				branchStackLayout,
+				verticalStack2
+			}
 		};
 
-		_consoleManager.Content = stackLayout;
+		_consoleManager.Content = mainStack;
 		_consoleManager.Start();
 
 		return Task.CompletedTask;
