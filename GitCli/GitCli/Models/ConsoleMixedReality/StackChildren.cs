@@ -38,4 +38,18 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 		}
 		base.OnCollectionChanged(e);
 	}
+
+	public Character GetContent(Position pos)
+	{
+		foreach (var child in this)
+		{
+			var ch = child[pos];
+			if (ch != Character.Empty)
+			{
+				return ch;
+			}
+		}
+
+		return this.GetFocusedControl()[pos];
+	}
 }
