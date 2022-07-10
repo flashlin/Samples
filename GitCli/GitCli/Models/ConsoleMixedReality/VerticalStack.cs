@@ -57,13 +57,21 @@ public class VerticalStack : IConsoleElement
 	{
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
 		{
-			JumpUpToChild();
+			if (!JumpUpToChild())
+			{
+				Parent?.OnBubbleEvent(this, inputEvent);
+				return;
+			}
 			return;
 		}
 
 		if (inputEvent.Key == ConsoleKey.Tab)
 		{
-			JumpDownToChild();
+			if (!JumpDownToChild())
+			{
+				Parent?.OnBubbleEvent(this, inputEvent);
+				return;
+			}
 			return;
 		}
 
@@ -125,8 +133,7 @@ public class VerticalStack : IConsoleElement
 			return false;
 		}
 
-		var handle = focus.OnInput(inputEvent);
-		return handle;
+		return focus.OnInput(inputEvent);
 	}
 
 	public Rect GetChildrenRect()
@@ -147,13 +154,24 @@ public class VerticalStack : IConsoleElement
 		}
 		return Children[_focusIndex];
 	}
-	private void JumpDownToChild()
+
+	private bool JumpDownToChild()
 	{
+		if (_focusIndex + 1 >= Children.Count)
+		{
+			return false;
+		}
 		_focusIndex = Math.Min(_focusIndex + 1, Children.Count - 1);
+		return true;
 	}
 
-	private void JumpUpToChild()
+	private bool JumpUpToChild()
 	{
+		if (_focusIndex - 1 < 0)
+		{
+			return false;
+		}
 		_focusIndex = Math.Min(_focusIndex - 1, 0);
+		return true;
 	}
 }
