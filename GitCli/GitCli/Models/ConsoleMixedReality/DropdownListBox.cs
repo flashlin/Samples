@@ -70,7 +70,7 @@ public class DropdownListBox : IConsoleElement
 		return _textBox.OnInput(inputEvent);
 	}
 
-	public void OnCreate(Rect rect, IConsoleWriter consoleWriter)
+	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		_textBox.Parent = this;
 		_listBox.Parent = this;

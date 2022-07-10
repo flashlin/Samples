@@ -32,7 +32,7 @@ public class EmptyElement : IConsoleEditableElement
 		return Rect.Empty;
 	}
 
-	public void OnCreate(Rect rect, IConsoleWriter consoleWriter)
+	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 	}
 

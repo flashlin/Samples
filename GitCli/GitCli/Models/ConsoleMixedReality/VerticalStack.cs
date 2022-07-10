@@ -90,7 +90,7 @@ public class VerticalStack : IConsoleElement
 		Parent?.OnBubbleEvent(this, inputEvent);
 	}
 
-	public void OnCreate(Rect rect, IConsoleWriter console)
+	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		var viewRect = ViewRect = ViewRect.Init(() => rect);
 		var top = viewRect.Top;
@@ -109,7 +109,7 @@ public class VerticalStack : IConsoleElement
 				Width = child.ViewRect.Width,
 				Height = child.ViewRect.Height,
 			};
-			child.OnCreate(rect, console);
+			child.OnCreate(rect, consoleManager);
 			top += child.ViewRect.Height;
 		}
 	}
