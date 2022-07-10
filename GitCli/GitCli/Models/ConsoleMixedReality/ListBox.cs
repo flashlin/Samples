@@ -6,7 +6,6 @@ namespace GitCli.Models.ConsoleMixedReality;
 
 public class ListBox : IConsoleElement
 {
-	private IConsoleWriter _console;
 	private IConsoleManager _consoleManager;
 	private int _index = -1;
 	private IConsoleManager _manager;
