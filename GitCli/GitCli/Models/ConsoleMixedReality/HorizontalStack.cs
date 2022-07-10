@@ -81,24 +81,30 @@ public class HorizontalStack : IConsoleElement
 
 		if (!FixedLayout && noInitViewRect)
 		{
-			var prevRect = Rect.Empty;
-			Children.ForEachIndex((child, idx) =>
-			{
-				if (idx == 0)
-				{
-					prevRect = child.ViewRect = child.GetChildrenRect();
-					return;
-				}
-				var childRect = child.GetChildrenRect();
-				child.ViewRect = new Rect
-				{
-					Left = prevRect.Right + 1,
-					Top = childRect.Top,
-					Width = childRect.Width,
-					Height = childRect.Height
-				};
-			});
+			RearrangeChildrenByChildWidth();
 		}
+	}
+
+	private void RearrangeChildrenByChildWidth()
+	{
+		var prevRect = Rect.Empty;
+		Children.ForEachIndex((child, idx) =>
+		{
+			if (idx == 0)
+			{
+				prevRect = child.ViewRect = child.GetChildrenRect();
+				return;
+			}
+
+			var childRect = child.GetChildrenRect();
+			child.ViewRect = new Rect
+			{
+				Left = prevRect.Right + 1,
+				Top = childRect.Top,
+				Width = childRect.Width,
+				Height = childRect.Height
+			};
+		});
 	}
 
 	private void RearrangeChildren(Rect viewRect, bool noInitViewRect)
