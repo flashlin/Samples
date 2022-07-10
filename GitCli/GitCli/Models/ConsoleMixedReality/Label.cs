@@ -42,7 +42,7 @@ public class Label : IConsoleElement
         return false;
     }
 
-    public void OnCreate(Rect ofSize)
+    public void OnCreate(Rect ofSize, IConsoleWriter consoleWriter)
     {
     }
 

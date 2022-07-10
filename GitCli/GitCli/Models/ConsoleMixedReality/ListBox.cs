@@ -108,7 +108,7 @@ public class ListBox : IConsoleElement
 		return ViewRect;
 	}
 
-	public void OnCreate(Rect rect)
+	public void OnCreate(Rect rect, IConsoleWriter console)
 	{
 		var y = ViewRect.Top;
 		foreach (var child in Children)
@@ -121,7 +121,7 @@ public class ListBox : IConsoleElement
 				Width = ViewRect.Width,
 				Height = 1,
 			};
-			child.OnCreate(rect);
+			child.OnCreate(rect, console);
 			_maxLength = Math.Max(_maxLength, child.Value.Length);
 			y += 1;
 		}

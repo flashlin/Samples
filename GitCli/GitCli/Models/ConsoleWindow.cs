@@ -6,9 +6,8 @@ namespace GitCli.Models;
 
 public class Bind<T>
 {
-	public T Value { get; set; }
+	public T? Value { get; set; }
 }
-
 
 public class ConsoleWindow : IConsoleWindow
 {
