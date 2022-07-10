@@ -6,9 +6,11 @@ public class VerticalStack : IConsoleElement
 
 	public VerticalStack()
 	{
+		Children = new StackChildren();
 	}
 
-	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
+	public StackChildren Children { get; private set; }
+
 	public Position CursorPosition
 	{
 		get
@@ -104,13 +106,14 @@ public class VerticalStack : IConsoleElement
 		ViewRect = DesignRect.ToViewRect(rect);
 
 		var top = ViewRect.Top;
-		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
+		Children.ForEachIndex((child, idx) =>
 		{
 			if (idx == 0)
 			{
 				_focusIndex = 0;
 				top = ViewRect.Top + child.ViewRect.Top;
 			}
+
 			child.Parent = this;
 
 			var childRect = new Rect
@@ -122,7 +125,7 @@ public class VerticalStack : IConsoleElement
 			};
 			child.OnCreate(childRect, consoleManager);
 			top += child.ViewRect.Height;
-		}
+		});
 	}
 
 	public bool OnInput(InputEvent inputEvent)
