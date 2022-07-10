@@ -192,7 +192,7 @@ public class TextBox : IConsoleEditableElement
 		return true;
 	}
 
-	public void OnCreate(Rect ofSize)
+	public void OnCreate(Rect ofSize, IConsoleWriter consoleWriter)
 	{
 	}
 
