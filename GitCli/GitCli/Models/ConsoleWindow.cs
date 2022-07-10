@@ -99,6 +99,7 @@ public class ConsoleWindow : IConsoleWindow
 									  Value = commit
 								  });
 							  }
+							  allCommitList.Value!.Refresh();
 						  };
 
 					 }),

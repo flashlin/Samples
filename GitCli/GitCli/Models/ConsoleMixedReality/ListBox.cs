@@ -77,6 +77,7 @@ public class ListBox : IConsoleElement
 
 	public TextBox AddItem(ListItem item)
 	{
+		_index = Math.Max(_index, 0);
 		var textBox = new TextBox(Rect.Empty)
 		{
 			Value = item.Title,
@@ -197,7 +198,6 @@ public class ListBox : IConsoleElement
 		{
 			focusedItem.EditIndex = info.prevEditIndex;
 		}
-
 		RearrangeChildrenIndex();
 	}
 
@@ -283,5 +283,10 @@ public class ListBox : IConsoleElement
 				child.Background = _consoleManager.HighlightBackgroundColor;
 			}
 		}
+	}
+
+	public void Refresh()
+	{
+		RearrangeChildrenIndex();
 	}
 }
