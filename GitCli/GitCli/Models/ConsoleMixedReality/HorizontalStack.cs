@@ -15,6 +15,8 @@ public class HorizontalStack : IConsoleElement
 
 	public StackChildren Children { get; private set; }
 
+	public bool FixedLayout { get; set; } = false;
+
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
 	public bool IsTab { get; set; }
@@ -73,26 +75,38 @@ public class HorizontalStack : IConsoleElement
 
 	public void OnCreate(Rect rect)
 	{
+		var noInitViewRect = ViewRect.IsEmpty;
 		var viewRect = ViewRect = ViewRect.Init(() => rect);
-		var left = ViewRect.Left;
-		var everyWidth = rect.Width / Children.Count;
-		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
+
+
+		var left = viewRect.Left;
+		var everyWidth = viewRect.Width / Children.Count;
+		Children.ForEachIndex((child, idx) =>
 		{
 			if (idx == 0)
 			{
 				_focusIndex = 0;
 				left = viewRect.Left + child.ViewRect.Left;
 			}
+
 			child.Parent = this;
 			child.ViewRect = new Rect
 			{
 				Left = left,
 				Top = viewRect.Top + child.ViewRect.Top,
 				Width = Math.Max(child.ViewRect.Width, everyWidth),
-				Height = Math.Max(child.ViewRect.Height, rect.Height),
+				Height = Math.Max(child.ViewRect.Height, viewRect.Height),
 			};
-			child.OnCreate(rect);
+			child.OnCreate(viewRect);
 			left += child.ViewRect.Width;
+		});
+
+		if (!FixedLayout && noInitViewRect)
+		{
+			Children.ForEachIndex((child, idx) =>
+			{
+
+			});
 		}
 	}
 

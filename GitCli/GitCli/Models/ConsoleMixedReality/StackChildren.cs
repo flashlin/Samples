@@ -52,4 +52,12 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 
 		return this.GetFocusedControl()[pos];
 	}
+
+	public void ForEachIndex(Action<IConsoleElement, int> eachAction)
+	{
+		foreach (var child in this.Select((val, idx) => (val, idx)))
+		{
+			eachAction(child.val, child.idx);
+		}
+	}
 }

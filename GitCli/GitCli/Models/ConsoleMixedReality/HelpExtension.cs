@@ -1,6 +1,8 @@
-﻿namespace GitCli.Models.ConsoleMixedReality;
+﻿using System.Collections;
 
-public static class StringExtension
+namespace GitCli.Models.ConsoleMixedReality;
+
+public static class HelpExtension
 {
 	public static string SubStr(this string str, int offset, int? length = null)
 	{
@@ -52,5 +54,10 @@ public static class StringExtension
 			return " ";
 		}
 		return str.Substring(offset, len);
+	}
+
+	public static IEnumerable<(T val, int idx)> WithIndex<T>(this IEnumerable<T> enumerable)
+	{
+		return enumerable.Select((val, idx) => (val, idx));
 	}
 }
