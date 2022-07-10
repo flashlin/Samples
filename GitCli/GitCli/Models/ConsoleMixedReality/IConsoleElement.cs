@@ -13,6 +13,7 @@ public interface IConsoleElement
     bool OnInput(InputEvent inputEvent);
     void OnCreate(Rect ofSize);
     void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
+    Rect GetSurroundChildrenRect();
 }
 
 public interface IConsoleEditableElement : IConsoleElement

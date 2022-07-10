@@ -19,11 +19,17 @@ public class EmptyElement : IConsoleEditableElement
 	}
 
 	public Rect ViewRect { get; set; } = Rect.Empty;
+
 	public Character this[Position pos] => Character.Empty;
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		Parent?.OnBubbleEvent(element, inputEvent);
+	}
+
+	public Rect GetSurroundChildrenRect()
+	{
+		return Rect.Empty;
 	}
 
 	public void OnCreate(Rect rect)

@@ -34,6 +34,11 @@ public class ConsoleWindow : IConsoleWindow
 
 		var branchStackLayout = new VerticalStack()
 		{
+			ViewRect = new Rect()
+			{
+				Width = 20,
+				Height = 20,
+			},
 			BackgroundColor = ConsoleColor.DarkMagenta,
 			Children =
 				{

@@ -77,8 +77,32 @@ public class HorizontalStack : IConsoleElement
 	{
 		var noInitViewRect = ViewRect.IsEmpty;
 		var viewRect = ViewRect = ViewRect.Init(() => rect);
+		RearrangeChildren(viewRect, noInitViewRect);
 
+		if (!FixedLayout && noInitViewRect)
+		{
+			var prevRect = Rect.Empty;
+			Children.ForEachIndex((child, idx) =>
+			{
+				if (idx == 0)
+				{
+					prevRect = child.ViewRect = child.GetSurroundChildrenRect();
+					return;
+				}
+				var childRect = child.GetSurroundChildrenRect();
+				child.ViewRect = new Rect
+				{
+					Left = prevRect.Right + 1,
+					Top = childRect.Top,
+					Width = childRect.Width,
+					Height = childRect.Height
+				};
+			});
+		}
+	}
 
+	private void RearrangeChildren(Rect viewRect, bool noInitViewRect)
+	{
 		var left = viewRect.Left;
 		var everyWidth = viewRect.Width / Children.Count;
 		Children.ForEachIndex((child, idx) =>
@@ -94,20 +118,17 @@ public class HorizontalStack : IConsoleElement
 			{
 				Left = left,
 				Top = viewRect.Top + child.ViewRect.Top,
-				Width = Math.Max(child.ViewRect.Width, everyWidth),
+				Width = noInitViewRect ? Math.Max(child.ViewRect.Width, everyWidth) : child.ViewRect.Width,
 				Height = Math.Max(child.ViewRect.Height, viewRect.Height),
 			};
 			child.OnCreate(viewRect);
 			left += child.ViewRect.Width;
 		});
+	}
 
-		if (!FixedLayout && noInitViewRect)
-		{
-			Children.ForEachIndex((child, idx) =>
-			{
-
-			});
-		}
+	public Rect GetSurroundChildrenRect()
+	{
+		return Children.GetRect();
 	}
 
 	public bool OnInput(InputEvent inputEvent)
