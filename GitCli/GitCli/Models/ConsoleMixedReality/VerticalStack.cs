@@ -2,8 +2,6 @@
 
 public class VerticalStack : IConsoleElement
 {
-	private int _focusIndex = -1;
-
 	public VerticalStack()
 	{
 		Children = new StackChildren();
@@ -15,15 +13,13 @@ public class VerticalStack : IConsoleElement
 	{
 		get
 		{
-			GetFocusedControl();
-
-			var focus = GetFocusedControl();
-			if (focus != null)
-			{
-				return focus.CursorPosition;
-			}
-
-			return ViewRect.BottomRightCorner;
+			return Children.GetFocusedControl().CursorPosition;
+			//var focus = GetFocusedControl();
+			//if (focus != null)
+			//{
+			//	return focus.CursorPosition;
+			//}
+			//return ViewRect.BottomRightCorner;
 		}
 	}
 
@@ -59,7 +55,7 @@ public class VerticalStack : IConsoleElement
 	{
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
 		{
-			if (!JumpUpToChild())
+			if (!Children.JumpUpFocus())
 			{
 				Parent?.OnBubbleEvent(this, inputEvent);
 				return;
@@ -69,7 +65,7 @@ public class VerticalStack : IConsoleElement
 
 		if (inputEvent.Key == ConsoleKey.Tab)
 		{
-			if (!JumpDownToChild())
+			if (!Children.JumpDownFocus())
 			{
 				Parent?.OnBubbleEvent(this, inputEvent);
 				return;
@@ -79,23 +75,22 @@ public class VerticalStack : IConsoleElement
 
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
-			if (_focusIndex != -1)
+			if (!Children.JumpUpFocus())
 			{
-				JumpUpToChild();
+				Parent?.OnBubbleEvent(this, inputEvent);
 				return;
 			}
-
-			Parent?.OnBubbleEvent(this, inputEvent);
 			return;
 		}
 
 		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
 		{
-			if (_focusIndex != -1)
+			if (!Children.JumpDownFocus())
 			{
-				JumpDownToChild();
+				Parent?.OnBubbleEvent(this, inputEvent);
 				return;
 			}
+			return;
 		}
 
 		Parent?.OnBubbleEvent(this, inputEvent);
@@ -110,7 +105,7 @@ public class VerticalStack : IConsoleElement
 		{
 			if (idx == 0)
 			{
-				_focusIndex = 0;
+				//_focusIndex = 0;
 				top = ViewRect.Top + child.ViewRect.Top;
 			}
 
@@ -130,13 +125,7 @@ public class VerticalStack : IConsoleElement
 
 	public bool OnInput(InputEvent inputEvent)
 	{
-		var focus = GetFocusedControl();
-		if (focus == null)
-		{
-			return false;
-		}
-
-		return focus.OnInput(inputEvent);
+		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
 
 	public Rect GetChildrenRect()
@@ -147,34 +136,5 @@ public class VerticalStack : IConsoleElement
 			initRect = initRect.Surround(child.ViewRect);
 		}
 		return initRect;
-	}
-
-	private IConsoleElement? GetFocusedControl()
-	{
-		if (_focusIndex == -1)
-		{
-			return null;
-		}
-		return Children[_focusIndex];
-	}
-
-	private bool JumpDownToChild()
-	{
-		if (_focusIndex + 1 >= Children.Count)
-		{
-			return false;
-		}
-		_focusIndex = Math.Min(_focusIndex + 1, Children.Count - 1);
-		return true;
-	}
-
-	private bool JumpUpToChild()
-	{
-		if (_focusIndex - 1 < 0)
-		{
-			return false;
-		}
-		_focusIndex = Math.Min(_focusIndex - 1, 0);
-		return true;
 	}
 }
