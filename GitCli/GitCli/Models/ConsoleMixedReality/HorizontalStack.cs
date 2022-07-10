@@ -86,10 +86,10 @@ public class HorizontalStack : IConsoleElement
 			{
 				if (idx == 0)
 				{
-					prevRect = child.ViewRect = child.GetSurroundChildrenRect();
+					prevRect = child.ViewRect = child.GetChildrenRect();
 					return;
 				}
-				var childRect = child.GetSurroundChildrenRect();
+				var childRect = child.GetChildrenRect();
 				child.ViewRect = new Rect
 				{
 					Left = prevRect.Right + 1,
@@ -126,7 +126,7 @@ public class HorizontalStack : IConsoleElement
 		});
 	}
 
-	public Rect GetSurroundChildrenRect()
+	public Rect GetChildrenRect()
 	{
 		return Children.GetRect();
 	}

@@ -77,7 +77,7 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 		var initRect = Rect.Empty;
 		foreach (var child in this)
 		{
-			var childRect = child.GetSurroundChildrenRect();
+			var childRect = child.GetChildrenRect();
 			initRect = initRect.Surround(childRect);
 		}
 		return initRect;

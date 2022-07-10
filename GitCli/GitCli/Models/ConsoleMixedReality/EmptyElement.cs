@@ -27,7 +27,7 @@ public class EmptyElement : IConsoleEditableElement
 		Parent?.OnBubbleEvent(element, inputEvent);
 	}
 
-	public Rect GetSurroundChildrenRect()
+	public Rect GetChildrenRect()
 	{
 		return Rect.Empty;
 	}

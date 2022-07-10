@@ -126,7 +126,7 @@ public class VerticalStack : IConsoleElement
 		return handle;
 	}
 
-	public Rect GetSurroundChildrenRect()
+	public Rect GetChildrenRect()
 	{
 		var initRect = Rect.Empty;
 		foreach (var child in Children)

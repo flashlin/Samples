@@ -50,7 +50,7 @@ public class Label : IConsoleElement
     {
     }
 
-    public Rect GetSurroundChildrenRect()
+    public Rect GetChildrenRect()
     {
 	    return ViewRect;
     }

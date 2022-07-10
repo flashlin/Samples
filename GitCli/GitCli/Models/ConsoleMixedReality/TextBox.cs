@@ -200,7 +200,7 @@ public class TextBox : IConsoleEditableElement
 	{
 	}
 
-	public Rect GetSurroundChildrenRect()
+	public Rect GetChildrenRect()
 	{
 		return ViewRect;
 	}
