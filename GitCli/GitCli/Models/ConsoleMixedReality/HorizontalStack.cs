@@ -7,7 +7,7 @@ namespace GitCli.Models.ConsoleMixedReality;
 public class HorizontalStack : IConsoleElement
 {
 	private int _focusIndex = -1;
-	private IConsoleWriter _console;
+	private IConsoleManager _consoleManager;
 
 	public HorizontalStack()
 	{
@@ -74,9 +74,9 @@ public class HorizontalStack : IConsoleElement
 		Parent?.OnBubbleEvent(this, inputEvent);
 	}
 
-	public void OnCreate(Rect rect, IConsoleWriter console)
+	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		_console = console;
+		_consoleManager = consoleManager;
 		var noInitViewRect = ViewRect.IsEmpty;
 		var viewRect = ViewRect = ViewRect.Init(() => rect);
 		RearrangeChildren(viewRect, noInitViewRect);
@@ -129,7 +129,7 @@ public class HorizontalStack : IConsoleElement
 				Width = noInitViewRect ? Math.Max(child.ViewRect.Width, everyWidth) : child.ViewRect.Width,
 				Height = Math.Max(child.ViewRect.Height, viewRect.Height),
 			};
-			child.OnCreate(viewRect, _console);
+			child.OnCreate(viewRect, _consoleManager);
 			left += child.ViewRect.Width;
 		});
 	}

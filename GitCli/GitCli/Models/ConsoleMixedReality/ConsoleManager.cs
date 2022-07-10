@@ -119,7 +119,7 @@ public class ConsoleManager : IConsoleManager
 		//	}
 		//});
 
-		Content.OnCreate(Rect.OfSize(Console.GetSize()), _console);
+		Content.OnCreate(Rect.OfSize(Console.GetSize()), (IConsoleManager)this);
 		AdjustBufferSize();
 		while (!_cancellationTokenSource.IsCancellationRequested)
 		{

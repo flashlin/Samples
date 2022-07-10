@@ -8,6 +8,7 @@ public class Frame : IConsoleElement
     }
 
     private IConsoleElement? _focus;
+    private IConsoleManager _consoleManager;
 
     public Rect ViewRect { get; set; }
 
@@ -60,9 +61,10 @@ public class Frame : IConsoleElement
         }
     }
 
-    public void OnCreate(Rect rect, IConsoleWriter console)
+    public void OnCreate(Rect rect, IConsoleManager consoleManager)
     {
-        var viewRect = ViewRect.Init(() => rect);
+	    _consoleManager = consoleManager;
+	    var viewRect = ViewRect.Init(() => rect);
         foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
         {
             if (idx == 0)
@@ -78,7 +80,7 @@ public class Frame : IConsoleElement
                 Width = child.ViewRect.Width,
                 Height = child.ViewRect.Height,
             };
-            child.OnCreate(rect, console);
+            child.OnCreate(rect, consoleManager);
         }
     }
 
