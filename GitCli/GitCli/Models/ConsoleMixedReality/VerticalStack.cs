@@ -9,19 +9,7 @@ public class VerticalStack : IConsoleElement
 
 	public StackChildren Children { get; private set; }
 
-	public Position CursorPosition
-	{
-		get
-		{
-			return Children.GetFocusedControl().CursorPosition;
-			//var focus = GetFocusedControl();
-			//if (focus != null)
-			//{
-			//	return focus.CursorPosition;
-			//}
-			//return ViewRect.BottomRightCorner;
-		}
-	}
+	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
 	public bool IsTab { get; set; }
 	public IConsoleElement? Parent { get; set; }
