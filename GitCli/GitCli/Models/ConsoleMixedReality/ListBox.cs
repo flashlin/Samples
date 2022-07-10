@@ -158,11 +158,11 @@ public class ListBox : IConsoleElement
 				RearrangeChildrenIndex();
 				return true;
 
-			case ConsoleKey.UpArrow:
+			case ConsoleKey.UpArrow when !inputEvent.HasControl:
 				JumpUpToItem();
 				break;
 
-			case ConsoleKey.DownArrow:
+			case ConsoleKey.DownArrow when !inputEvent.HasControl:
 				JumpDownToItem();
 				break;
 
