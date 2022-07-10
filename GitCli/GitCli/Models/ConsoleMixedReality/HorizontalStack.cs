@@ -29,16 +29,7 @@ public class HorizontalStack : IConsoleElement
 				return Character.Empty;
 			}
 
-			foreach (var child in Children)
-			{
-				var ch = child[pos];
-				if (ch != Character.Empty)
-				{
-					return ch;
-				}
-			}
-
-			return Children.GetFocusedControl()[pos];
+			return Children.GetContent(pos);
 		}
 	}
 
