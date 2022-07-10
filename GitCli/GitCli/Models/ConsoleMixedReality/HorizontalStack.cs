@@ -6,9 +6,8 @@ namespace GitCli.Models.ConsoleMixedReality;
 
 public class HorizontalStack : IConsoleElement
 {
-	private int _focusIndex = -1;
 	private IConsoleManager _consoleManager;
-
+	private int _focusIndex = -1;
 	public HorizontalStack()
 	{
 		Children = new StackChildren(this);
@@ -16,10 +15,9 @@ public class HorizontalStack : IConsoleElement
 
 	public StackChildren Children { get; private set; }
 
-	public bool FixedLayout { get; set; } = false;
-
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
-
+	public Rect DesignRect { get; set; } = Rect.Empty;
+	public bool FixedLayout { get; set; } = false;
 	public bool IsTab { get; set; }
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; } = Rect.Empty;
@@ -34,6 +32,11 @@ public class HorizontalStack : IConsoleElement
 
 			return Children.GetContent(pos);
 		}
+	}
+
+	public Rect GetChildrenRect()
+	{
+		return Children.GetRect();
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
@@ -77,36 +80,20 @@ public class HorizontalStack : IConsoleElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		_consoleManager = consoleManager;
-		var noInitViewRect = ViewRect.IsEmpty;
-		var viewRect = ViewRect = ViewRect.Init(() => rect);
-		RearrangeChildren(viewRect, noInitViewRect);
+		ViewRect = DesignRect.ToViewRect(rect);
 
-		if (!FixedLayout && noInitViewRect)
+		var noInitDesignRect = DesignRect.IsEmpty;
+		RearrangeChildren(ViewRect, noInitDesignRect);
+
+		if (!FixedLayout && noInitDesignRect)
 		{
 			RearrangeChildrenByChildWidth();
 		}
 	}
 
-	private void RearrangeChildrenByChildWidth()
+	public bool OnInput(InputEvent inputEvent)
 	{
-		var prevRect = Rect.Empty;
-		Children.ForEachIndex((child, idx) =>
-		{
-			if (idx == 0)
-			{
-				prevRect = child.ViewRect = child.GetChildrenRect();
-				return;
-			}
-
-			var childRect = child.GetChildrenRect();
-			child.ViewRect = new Rect
-			{
-				Left = prevRect.Right + 1,
-				Top = childRect.Top,
-				Width = childRect.Width,
-				Height = childRect.Height
-			};
-		});
+		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
 
 	private void RearrangeChildren(Rect viewRect, bool noInitViewRect)
@@ -134,13 +121,30 @@ public class HorizontalStack : IConsoleElement
 		});
 	}
 
-	public Rect GetChildrenRect()
+	private void RearrangeChildrenByChildWidth()
 	{
-		return Children.GetRect();
-	}
+		var prevRect = Rect.Empty;
+		Children.ForEachIndex((child, idx) =>
+		{
+			if (idx == 0)
+			{
+				prevRect = child.ViewRect = child.GetChildrenRect();
+				return;
+			}
 
-	public bool OnInput(InputEvent inputEvent)
-	{
-		return Children.GetFocusedControl().OnInput(inputEvent);
+			var childRect = child.GetChildrenRect();
+
+			//child.ViewRect = childRect = new Rect
+			child.ViewRect = Rect.Empty;
+			childRect = new Rect
+			{
+				Left = prevRect.Right + 1,
+				Top = childRect.Top,
+				Width = childRect.Width,
+				Height = childRect.Height
+			};
+
+			child.OnCreate(childRect, _consoleManager);
+		});
 	}
 }

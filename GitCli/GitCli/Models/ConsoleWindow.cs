@@ -54,7 +54,7 @@ public class ConsoleWindow : IConsoleWindow
 
 		var branchStackLayout = new VerticalStack()
 		{
-			ViewRect = new Rect()
+			DesignRect = new Rect()
 			{
 				Width = 20,
 				Height = 20,

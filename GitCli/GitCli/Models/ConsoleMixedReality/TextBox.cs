@@ -8,11 +8,12 @@ public class TextBox : IConsoleEditableElement
 
 	public TextBox(Rect rect)
 	{
-		ViewRect = rect;
+		DesignRect = rect;
 	}
 
 	public IConsoleElement? Parent { get; set; }
 	public bool IsTab { get; set; } = true;
+	public Rect DesignRect { get; set; } = Rect.Empty;
 	public bool Enabled { get; set; }
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
@@ -192,8 +193,15 @@ public class TextBox : IConsoleEditableElement
 		return true;
 	}
 
-	public void OnCreate(Rect ofSize, IConsoleManager consoleManager)
+	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
+		ViewRect = new Rect
+		{
+			Left = rect.Left + DesignRect.Left,
+			Top = rect.Top + DesignRect.Top,
+			Width = DesignRect.Width,
+			Height = DesignRect.Height,
+		};
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)

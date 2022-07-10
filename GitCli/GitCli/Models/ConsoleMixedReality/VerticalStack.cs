@@ -27,6 +27,7 @@ public class VerticalStack : IConsoleElement
 
 	public bool IsTab { get; set; }
 	public IConsoleElement? Parent { get; set; }
+	public Rect DesignRect { get; set; } = Rect.Empty;
 	public Rect ViewRect { get; set; } = Rect.Empty;
 	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public Character this[Position pos]
@@ -92,24 +93,26 @@ public class VerticalStack : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		var viewRect = ViewRect = ViewRect.Init(() => rect);
-		var top = viewRect.Top;
+		ViewRect = DesignRect.ToViewRect(rect);
+
+		var top = ViewRect.Top;
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{
 			if (idx == 0)
 			{
 				_focusIndex = 0;
-				top = viewRect.Top + child.ViewRect.Top;
+				top = ViewRect.Top + child.ViewRect.Top;
 			}
 			child.Parent = this;
-			child.ViewRect = new Rect
+
+			var childRect = new Rect
 			{
-				Left = viewRect.Left + child.ViewRect.Left,
+				Left = ViewRect.Left + child.ViewRect.Left,
 				Top = top,
 				Width = child.ViewRect.Width,
 				Height = child.ViewRect.Height,
 			};
-			child.OnCreate(rect, consoleManager);
+			child.OnCreate(childRect, consoleManager);
 			top += child.ViewRect.Height;
 		}
 	}
