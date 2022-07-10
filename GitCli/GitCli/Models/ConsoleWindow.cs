@@ -159,26 +159,6 @@ public class ConsoleWindow : IConsoleWindow
 		_consoleManager.Start();
 
 		return Task.CompletedTask;
-		//
-		// do
-		// {
-		//     var lineCommand = Console.ReadLine();
-		//     var lineArgs = lineCommand.ParseCommandArgsLine().ToArray();
-		//
-		//     var commands = new ICommand[]
-		//     {
-		//         _serviceProvider.GetService<GitStatusCommand>()!,
-		//     };
-		//     var cmd = commands.FirstOrDefault(x => x.IsMyCommand(lineArgs));
-		//     if (cmd == null)
-		//     {
-		//         _console.SetForegroundColor(ConsoleColor.Red);
-		//         _console.WriteLine($"Unknown command: {lineCommand}");
-		//         _console.ResetColor();
-		//         continue;
-		//     }
-		//     await cmd.Run();
-		// } while (true);
 	}
 }
 
