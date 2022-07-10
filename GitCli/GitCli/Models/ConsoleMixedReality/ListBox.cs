@@ -22,6 +22,8 @@ public class ListBox : IConsoleElement
 		Children.CollectionChanged += ChildrenOnCollectionChanged;
 	}
 
+	public string Name { get; set; }
+
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 
 	public ObservableCollection<TextBox> Children { get; } = new();

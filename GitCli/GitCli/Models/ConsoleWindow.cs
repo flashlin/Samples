@@ -6,7 +6,28 @@ namespace GitCli.Models;
 
 public class Bind<T>
 {
-	public T? Value { get; set; }
+	public T? Value { get; private set; }
+
+	public List<Action<T>> SetupList = new List<Action<T>>();
+
+	public void Setup(Action<T> fn)
+	{
+		if (Value == null)
+		{
+			SetupList.Add(fn);
+			return;
+		}
+		fn(Value);
+	}
+
+	public void SetValue(T value)
+	{
+		Value = value;
+		foreach (var setup in SetupList)
+		{
+			setup(value);
+		}
+	}
 }
 
 public class ConsoleWindow : IConsoleWindow
@@ -72,7 +93,7 @@ public class ConsoleWindow : IConsoleWindow
 							  var commits = gitRepoInfo.QueryCommits();
 							  foreach (var commit in commits)
 							  {
-								  allCommitList.Value.AddItem(new ListItem()
+								  allCommitList.Value!.AddItem(new ListItem()
 								  {
 									  Title = commit.Message,
 									  Value = commit
@@ -117,7 +138,8 @@ public class ConsoleWindow : IConsoleWindow
 					Height = 40
 				}).Setup(x =>
 				{
-					allCommitList.Value = x;
+					x.Name = "allCommitList";
+					allCommitList.SetValue(x);
 				})
 			}
 		};
