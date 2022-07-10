@@ -289,3 +289,4 @@ public class ListBox : IConsoleElement
 		RearrangeChildrenIndex();
 	}
 }
+

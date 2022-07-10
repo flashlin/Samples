@@ -86,7 +86,7 @@ public class VerticalStack : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		ViewRect = DesignRect.ToViewRect(rect);
+		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
 
 		var top = ViewRect.Top;
 		Children.ForEachIndex((child, idx) =>

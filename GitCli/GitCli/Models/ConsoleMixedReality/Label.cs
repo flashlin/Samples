@@ -45,7 +45,7 @@ public class Label : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		ViewRect = DesignRect.ToViewRect(rect);
+		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
 	}
 
 	public bool OnInput(InputEvent inputEvent)

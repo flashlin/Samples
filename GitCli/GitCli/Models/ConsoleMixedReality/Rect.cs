@@ -111,14 +111,21 @@ public struct Rect
 				  pos.Y >= Top && pos.Y <= Bottom);
 	}
 
-	public Rect ToViewRect(Rect parentRect)
+	public Rect ToViewRect(Rect parentRect, IConsoleManager consoleManager)
 	{
-		return new Rect
+		var rect = new Rect
 		{
 			Left = parentRect.Left + Left,
 			Top = parentRect.Top + Top,
 			Width = parentRect.IsEmpty ? Width : parentRect.Width,
 			Height = parentRect.IsEmpty ? Height : parentRect.Height
 		};
+
+		if (rect.IsEmpty)
+		{
+			rect = Rect.OfSize(consoleManager.Console.GetSize());
+		}
+
+		return rect;
 	}
 }

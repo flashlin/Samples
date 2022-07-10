@@ -67,16 +67,16 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 		}
 	}
 
-	public Rect GetRect(StackChildren stackChildren)
-	{
-		var initRect = Rect.Empty;
-		foreach (var child in stackChildren)
-		{
-			initRect = initRect.Surround(child.ViewRect);
-		}
+	//public Rect GetRect(StackChildren stackChildren)
+	//{
+	//	var initRect = Rect.Empty;
+	//	foreach (var child in stackChildren)
+	//	{
+	//		initRect = initRect.Surround(child.ViewRect);
+	//	}
 
-		return initRect;
-	}
+	//	return initRect;
+	//}
 
 	public Rect GetRect()
 	{
