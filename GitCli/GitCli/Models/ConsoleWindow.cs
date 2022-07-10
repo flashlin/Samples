@@ -155,7 +155,24 @@ public class ConsoleWindow : IConsoleWindow
 			}
 		};
 
+		var c1 = new StackChildren();
+		for (var i = 0; i < 5; i++)
+		{
+			c1.Add(new TextBox(Rect.Empty)
+			{
+				Value = $"A{i}"
+			});
+		}
+		var t1 = new TableRow(new Rect
+		{
+			Left = 0,
+			Top = 0,
+			Width = 30,
+			Height = 1
+		}, c1);
+
 		_consoleManager.Content = mainStack;
+		//_consoleManager.Content = t1;
 		_consoleManager.Start();
 
 		return Task.CompletedTask;
@@ -164,6 +181,6 @@ public class ConsoleWindow : IConsoleWindow
 
 public class ListItem
 {
-	public string Title { get; set; }
-	public object Value { get; set; }
+	public string? Title { get; set; }
+	public object? Value { get; set; }
 }

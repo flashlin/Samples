@@ -12,7 +12,7 @@ public interface IConsoleElement
     bool IsTab { get; set; }
     Rect DesignRect { get; set; }
     bool OnInput(InputEvent inputEvent);
-    void OnCreate(Rect ofSize, IConsoleManager consoleManager);
+    void OnCreate(Rect parentRect, IConsoleManager consoleManager);
     void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
     Rect GetChildrenRect();
 }
