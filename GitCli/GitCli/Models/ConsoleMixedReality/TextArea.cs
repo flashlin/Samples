@@ -185,7 +185,7 @@ public class TextArea : IConsoleElement
 	{
 	}
 
-	public Rect GetSurroundChildrenRect()
+	public Rect GetChildrenRect()
 	{
 		return ViewRect;
 	}
