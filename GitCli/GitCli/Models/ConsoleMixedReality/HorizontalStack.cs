@@ -11,7 +11,7 @@ public class HorizontalStack : IConsoleElement
 
 	public HorizontalStack()
 	{
-		Children = new StackChildren(this);
+		Children = new StackChildren();
 	}
 
 	public StackChildren Children { get; private set; }
