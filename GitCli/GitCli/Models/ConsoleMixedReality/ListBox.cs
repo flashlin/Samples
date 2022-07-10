@@ -8,13 +8,10 @@ public class ListBox : IConsoleElement
 {
 	private IConsoleWriter _console;
 	private IConsoleManager _consoleManager;
-	private int _editIndex;
 	private int _index = -1;
-	private bool _isSelectedMode;
 	private IConsoleManager _manager;
 	private int _maxLength;
 	private Span _showListItemSpan = Span.Empty;
-	private int _startSelectIndex;
 
 	public ListBox(Rect rect)
 	{
