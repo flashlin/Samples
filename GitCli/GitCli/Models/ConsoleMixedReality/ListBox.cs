@@ -8,7 +8,6 @@ public class ListBox : IConsoleElement
 {
 	private IConsoleManager _consoleManager;
 	private int _index = -1;
-	private IConsoleManager _manager;
 	private int _maxLength;
 	private Span _showListItemSpan = Span.Empty;
 
