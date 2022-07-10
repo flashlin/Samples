@@ -93,4 +93,9 @@ public class DropdownListBox : IConsoleElement
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 	}
+
+	public Rect GetSurroundChildrenRect()
+	{
+		return ViewRect;
+	}
 }

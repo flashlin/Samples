@@ -185,6 +185,11 @@ public class TextArea : IConsoleElement
 	{
 	}
 
+	public Rect GetSurroundChildrenRect()
+	{
+		return ViewRect;
+	}
+
 	private Span GetSelectedSpan()
 	{
 		if (!_isSelectedMode)

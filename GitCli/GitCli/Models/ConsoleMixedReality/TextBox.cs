@@ -200,6 +200,11 @@ public class TextBox : IConsoleEditableElement
 	{
 	}
 
+	public Rect GetSurroundChildrenRect()
+	{
+		return ViewRect;
+	}
+
 	private Span GetSelectedSpan()
 	{
 		if (!_isSelectedMode)

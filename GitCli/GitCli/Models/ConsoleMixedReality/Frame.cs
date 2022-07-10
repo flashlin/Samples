@@ -123,4 +123,14 @@ public class Frame : IConsoleElement
 
         Parent?.OnBubbleEvent(element, inputEvent);
     }
+
+    public Rect GetSurroundChildrenRect()
+    {
+	    var initRect = Rect.Empty;
+	    foreach (var child in this.Children)
+	    {
+		    initRect = initRect.Surround(child.ViewRect);
+	    }
+	    return initRect;
+   }
 }

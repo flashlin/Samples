@@ -126,6 +126,16 @@ public class VerticalStack : IConsoleElement
 		return handle;
 	}
 
+	public Rect GetSurroundChildrenRect()
+	{
+		var initRect = Rect.Empty;
+		foreach (var child in Children)
+		{
+			initRect = initRect.Surround(child.ViewRect);
+		}
+		return initRect;
+	}
+
 	private IConsoleElement? GetFocusedControl()
 	{
 		if (_focusIndex == -1)

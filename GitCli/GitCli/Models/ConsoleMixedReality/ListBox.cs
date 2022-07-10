@@ -103,6 +103,11 @@ public class ListBox : IConsoleElement
 		}
 	}
 
+	public Rect GetSurroundChildrenRect()
+	{
+		return ViewRect;
+	}
+
 	public void OnCreate(Rect rect)
 	{
 		var y = ViewRect.Top;
