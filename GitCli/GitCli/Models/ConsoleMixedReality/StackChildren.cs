@@ -7,10 +7,6 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 {
 	private int _focusIndex = -1;
 
-	public StackChildren(IConsoleElement parent)
-	{
-	}
-
 	public IConsoleElement GetFocusedControl()
 	{
 		if (_focusIndex == -1)
