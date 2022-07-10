@@ -20,14 +20,24 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 		return this[_focusIndex];
 	}
 
-	public void JumpDownFocus()
+	public bool JumpDownFocus()
 	{
+		if (_focusIndex + 1 >= Count)
+		{
+			return false;
+		}
 		_focusIndex = Math.Min(_focusIndex + 1, Count - 1);
+		return true;
 	}
 
-	public void JumpUpFocus()
+	public bool JumpUpFocus()
 	{
+		if (_focusIndex - 1 < 0)
+		{
+			return false;
+		}
 		_focusIndex = Math.Min(_focusIndex - 1, 0);
+		return true;
 	}
 
 	protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)

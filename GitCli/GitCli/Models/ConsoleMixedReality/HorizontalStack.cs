@@ -8,6 +8,7 @@ public class HorizontalStack : IConsoleElement
 {
 	private IConsoleManager _consoleManager;
 	private int _focusIndex = -1;
+
 	public HorizontalStack()
 	{
 		Children = new StackChildren(this);
