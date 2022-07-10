@@ -135,7 +135,7 @@ public class ConsoleWindow : IConsoleWindow
 				{
 					Left = 0,
 					Top = 0,
-					Width = 20,
+					Width = 30,
 					Height = 40
 				}).Setup(x =>
 				{
