@@ -3,19 +3,14 @@
 public class TextArea : IConsoleElement
 {
 	private int _editIndex;
-	private int _startSelectIndex;
 	private bool _isSelectedMode;
-
+	private int _startSelectIndex;
 	public TextArea(Rect rect)
 	{
-		ViewRect = rect;
+		DesignRect = rect;
 	}
 
-	public IConsoleElement? Parent { get; set; }
-	public bool IsTab { get; set; } = true;
-
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
-
 	public Position CursorPosition
 	{
 		get
@@ -27,13 +22,14 @@ public class TextArea : IConsoleElement
 		}
 	}
 
-	public char TypeCharacter { get; set; } = '\0';
-
+	public Rect DesignRect { get; set; }
 	public int EditIndex => _editIndex;
-	public Rect ViewRect { get; set; }
+	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;
+	public IConsoleElement? Parent { get; set; }
+	public char TypeCharacter { get; set; } = '\0';
 	public string Value { get; set; } = String.Empty;
-
+	public Rect ViewRect { get; set; }
 	public Character this[Position pos]
 	{
 		get
@@ -72,6 +68,19 @@ public class TextArea : IConsoleElement
 
 			return new Character(' ', null, Background);
 		}
+	}
+
+	public Rect GetChildrenRect()
+	{
+		return ViewRect;
+	}
+
+	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	{
+	}
+
+	public void OnCreate(Rect ofSize, IConsoleManager consoleManager)
+	{
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -176,18 +185,20 @@ public class TextArea : IConsoleElement
 
 		return true;
 	}
-
-	public void OnCreate(Rect ofSize, IConsoleManager consoleManager)
+	private IEnumerable<Span> GetContentSpans(Rect rect)
 	{
-	}
-
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
-	{
-	}
-
-	public Rect GetChildrenRect()
-	{
-		return ViewRect;
+		var editIndex = 0;
+		var valueLength = Value.Length + 1;
+		while (valueLength > 0)
+		{
+			yield return new Span
+			{
+				Index = editIndex,
+				Length = Math.Min(valueLength, rect.Width)
+			};
+			valueLength -= rect.Width;
+			editIndex += rect.Width;
+		}
 	}
 
 	private Span GetSelectedSpan()
@@ -242,11 +253,6 @@ public class TextArea : IConsoleElement
 		return Value.Substring(contentSpan.Index, contentSpan.Length);
 	}
 
-	private Span GetShowContentSpanByView()
-	{
-		return GetShowContentSpan(ViewRect);
-	}
-
 	private Span GetShowContentSpan(Rect rect)
 	{
 		var startIndex = _editIndex - rect.Width;
@@ -263,7 +269,10 @@ public class TextArea : IConsoleElement
 		};
 	}
 
-
+	private Span GetShowContentSpanByView()
+	{
+		return GetShowContentSpan(ViewRect);
+	}
 	private List<Span> GetShowContentSpanList(Rect rect)
 	{
 		var editHeight = _editIndex / rect.Width;
@@ -273,21 +282,5 @@ public class TextArea : IConsoleElement
 			 .Take(rect.Height)
 			 .ToList();
 		return list;
-	}
-
-	private IEnumerable<Span> GetContentSpans(Rect rect)
-	{
-		var editIndex = 0;
-		var valueLength = Value.Length + 1;
-		while (valueLength > 0)
-		{
-			yield return new Span
-			{
-				Index = editIndex,
-				Length = Math.Min(valueLength, rect.Width)
-			};
-			valueLength -= rect.Width;
-			editIndex += rect.Width;
-		}
 	}
 }

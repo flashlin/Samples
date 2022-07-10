@@ -4,23 +4,19 @@ namespace GitCli.Models.ConsoleMixedReality;
 
 public class DropdownListBox : IConsoleElement
 {
-	private bool _isSelectedMode = false;
-	private readonly TextBox _textBox;
 	private readonly ListBox _listBox;
+	private readonly TextBox _textBox;
+	private bool _isSelectedMode = false;
 	private bool _isSelectMode = false;
 
 	public DropdownListBox(Rect rect)
 	{
-		ViewRect = rect;
+		DesignRect = rect;
 		_textBox = new TextBox(Rect.Empty);
 		_listBox = new ListBox(Rect.Empty);
 	}
 
-	public IConsoleElement? Parent { get; set; }
-	public bool IsTab { get; set; } = true;
-
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
-
 	public Position CursorPosition
 	{
 		get
@@ -34,6 +30,9 @@ public class DropdownListBox : IConsoleElement
 		}
 	}
 
+	public Rect DesignRect { get; set; } = Rect.Empty;
+	public bool IsTab { get; set; } = true;
+	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; }
 
 	public Character this[Position pos]
@@ -60,14 +59,13 @@ public class DropdownListBox : IConsoleElement
 		}
 	}
 
-	public bool OnInput(InputEvent inputEvent)
+	public Rect GetChildrenRect()
 	{
-		if (_isSelectedMode)
-		{
-			return _listBox.OnInput(inputEvent);
-		}
+		return ViewRect;
+	}
 
-		return _textBox.OnInput(inputEvent);
+	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	{
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
@@ -90,12 +88,13 @@ public class DropdownListBox : IConsoleElement
 		};
 	}
 
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnInput(InputEvent inputEvent)
 	{
-	}
+		if (_isSelectedMode)
+		{
+			return _listBox.OnInput(inputEvent);
+		}
 
-	public Rect GetChildrenRect()
-	{
-		return ViewRect;
+		return _textBox.OnInput(inputEvent);
 	}
 }

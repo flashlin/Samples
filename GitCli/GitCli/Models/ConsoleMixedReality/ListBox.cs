@@ -6,6 +6,8 @@ namespace GitCli.Models.ConsoleMixedReality;
 
 public class ListBox : IConsoleElement
 {
+	private IConsoleWriter _console;
+	private IConsoleManager _consoleManager;
 	private int _editIndex;
 	private int _index = -1;
 	private bool _isSelectedMode;
@@ -13,21 +15,15 @@ public class ListBox : IConsoleElement
 	private int _maxLength;
 	private Span _showListItemSpan = Span.Empty;
 	private int _startSelectIndex;
-	private IConsoleWriter _console;
-	private IConsoleManager _consoleManager;
 
 	public ListBox(Rect rect)
 	{
-		ViewRect = rect;
+		DesignRect = rect;
 		Children.CollectionChanged += ChildrenOnCollectionChanged;
 	}
 
-	public string Name { get; set; }
-
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
-
 	public ObservableCollection<TextBox> Children { get; } = new();
-
 	public Position CursorPosition
 	{
 		get
@@ -41,10 +37,10 @@ public class ListBox : IConsoleElement
 		}
 	}
 
+	public Rect DesignRect { get; set; } = Rect.Empty;
 	public bool IsTab { get; set; } = true;
-
 	public int MaxLength { get; set; } = int.MaxValue;
-
+	public string Name { get; set; }
 	public IConsoleElement? Parent { get; set; }
 
 	public Rect ViewRect { get; set; }
@@ -94,6 +90,11 @@ public class ListBox : IConsoleElement
 		return textBox;
 	}
 
+	public Rect GetChildrenRect()
+	{
+		return ViewRect;
+	}
+
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		switch (inputEvent.Key)
@@ -104,27 +105,30 @@ public class ListBox : IConsoleElement
 				break;
 		}
 	}
-
-	public Rect GetChildrenRect()
-	{
-		return ViewRect;
-	}
-
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
+		ViewRect = new Rect()
+		{
+			Left = rect.Left + DesignRect.Left,
+			Top = rect.Top + DesignRect.Top,
+			Width = rect.IsEmpty ? DesignRect.Width : rect.Width,
+			Height = rect.IsEmpty ? DesignRect.Height : rect.Height,
+		};
+
 		_consoleManager = consoleManager;
+
 		var y = ViewRect.Top;
 		foreach (var child in Children)
 		{
 			_index = 0;
-			child.ViewRect = new Rect()
+			var childRect = new Rect()
 			{
 				Left = ViewRect.Left,
 				Top = y,
 				Width = ViewRect.Width,
 				Height = 1,
 			};
-			child.OnCreate(rect, _consoleManager);
+			child.OnCreate(childRect, _consoleManager);
 			_maxLength = Math.Max(_maxLength, child.Value.Length);
 			y += 1;
 		}
