@@ -4,51 +4,12 @@ using System.Collections.Specialized;
 namespace GitCli.Models.ConsoleMixedReality;
 
 
-public class StackChildren : ObservableCollection<IConsoleElement>
-{
-	private int _focusIndex = -1;
-
-	public StackChildren(IConsoleElement parent)
-	{
-	}
-
-	public IConsoleElement GetFocusedControl()
-	{
-		if (_focusIndex == -1)
-		{
-			return new EmptyElement();
-		}
-		return this[_focusIndex];
-	}
-
-	public void JumpDownFocus()
-	{
-		_focusIndex = Math.Min(_focusIndex + 1, Count - 1);
-	}
-
-	public void JumpUpFocus()
-	{
-		_focusIndex = Math.Min(_focusIndex - 1, 0);
-	}
-
-	protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
-	{
-		if (e.Action == NotifyCollectionChangedAction.Add)
-		{
-			_focusIndex = Math.Max(_focusIndex, 0);
-		}
-		base.OnCollectionChanged(e);
-	}
-}
-
-
 public class HorizontalStack : IConsoleElement
 {
 	private int _focusIndex = -1;
 
-	public HorizontalStack(Rect rect)
+	public HorizontalStack()
 	{
-		ViewRect = rect;
 		Children = new StackChildren(this);
 	}
 
@@ -67,6 +28,16 @@ public class HorizontalStack : IConsoleElement
 			{
 				return Character.Empty;
 			}
+
+			foreach (var child in Children)
+			{
+				var ch = child[pos];
+				if (ch != Character.Empty)
+				{
+					return ch;
+				}
+			}
+
 			return Children.GetFocusedControl()[pos];
 		}
 	}
@@ -109,10 +80,11 @@ public class HorizontalStack : IConsoleElement
 		Parent?.OnBubbleEvent(this, inputEvent);
 	}
 
-	public void OnCreate(IConsoleManager manager)
+	public void OnCreate(Rect rect)
 	{
-		var viewRect = ViewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
+		var viewRect = ViewRect = ViewRect.Init(() => rect);
 		var left = ViewRect.Left;
+		var everyWidth = rect.Width / Children.Count;
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{
 			if (idx == 0)
@@ -125,10 +97,10 @@ public class HorizontalStack : IConsoleElement
 			{
 				Left = left,
 				Top = viewRect.Top + child.ViewRect.Top,
-				Width = child.ViewRect.Width,
-				Height = child.ViewRect.Height,
+				Width = Math.Max(child.ViewRect.Width, everyWidth),
+				Height = Math.Max(child.ViewRect.Height, rect.Height),
 			};
-			child.OnCreate(manager);
+			child.OnCreate(rect);
 			left += child.ViewRect.Width;
 		}
 	}
