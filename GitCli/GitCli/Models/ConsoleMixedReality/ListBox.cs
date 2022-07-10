@@ -20,6 +20,8 @@ public class ListBox : IConsoleElement
 		Children.CollectionChanged += ChildrenOnCollectionChanged;
 	}
 
+	public Color InputBackgroundColor { get; set; }
+	public Color HighlightBackgroundColor { get; set; }
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 
 	public ObservableCollection<TextBox> Children { get; } = new();
@@ -101,9 +103,8 @@ public class ListBox : IConsoleElement
 		}
 	}
 
-	public void OnCreate(IConsoleManager manager)
+	public void OnCreate(Rect rect)
 	{
-		_manager = manager;
 		var y = ViewRect.Top;
 		foreach (var child in Children)
 		{
@@ -115,7 +116,7 @@ public class ListBox : IConsoleElement
 				Width = ViewRect.Width,
 				Height = 1,
 			};
-			child.OnCreate(manager);
+			child.OnCreate(rect);
 			_maxLength = Math.Max(_maxLength, child.Value.Length);
 			y += 1;
 		}
@@ -258,6 +259,7 @@ public class ListBox : IConsoleElement
 		_index = Math.Max(_index - 1, 0);
 		AfterMove(beforeInfo);
 	}
+
 	private void RearrangeChildrenIndex()
 	{
 		var focusedItem = GetFocusedListItem();
@@ -266,11 +268,11 @@ public class ListBox : IConsoleElement
 			if (child != focusedItem)
 			{
 				child.ForceSetEditIndex(focusedItem.EditIndex);
-				child.Background = _manager.InputBackgroundColor;
+				child.Background = InputBackgroundColor;
 			}
 			else
 			{
-				child.Background = _manager.HighlightBackgroundColor;
+				child.Background = HighlightBackgroundColor;
 			}
 		}
 	}

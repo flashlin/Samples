@@ -4,9 +4,8 @@ public class VerticalStack : IConsoleElement
 {
 	private int _focusIndex = -1;
 
-	public VerticalStack(Rect rect)
+	public VerticalStack()
 	{
-		ViewRect = rect;
 	}
 
 	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
@@ -67,8 +66,6 @@ public class VerticalStack : IConsoleElement
 			return;
 		}
 
-
-
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
 			if (_focusIndex != -1)
@@ -93,9 +90,9 @@ public class VerticalStack : IConsoleElement
 		Parent?.OnBubbleEvent(this, inputEvent);
 	}
 
-	public void OnCreate(IConsoleManager manager)
+	public void OnCreate(Rect rect)
 	{
-		var viewRect = ViewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
+		var viewRect = ViewRect = ViewRect.Init(() => rect);
 		var top = viewRect.Top;
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{
@@ -112,7 +109,7 @@ public class VerticalStack : IConsoleElement
 				Width = child.ViewRect.Width,
 				Height = child.ViewRect.Height,
 			};
-			child.OnCreate(manager);
+			child.OnCreate(rect);
 			top += child.ViewRect.Height;
 		}
 	}

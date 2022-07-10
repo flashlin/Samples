@@ -60,9 +60,9 @@ public class Frame : IConsoleElement
         }
     }
 
-    public void OnCreate(IConsoleManager manager)
+    public void OnCreate(Rect rect)
     {
-        var viewRect = ViewRect.Init(() => Rect.OfSize(manager.Console.GetSize()));
+        var viewRect = ViewRect.Init(() => rect);
         foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
         {
             if (idx == 0)
@@ -78,7 +78,7 @@ public class Frame : IConsoleElement
                 Width = child.ViewRect.Width,
                 Height = child.ViewRect.Height,
             };
-            child.OnCreate(manager);
+            child.OnCreate(rect);
         }
     }
 

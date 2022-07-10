@@ -32,14 +32,9 @@ public class ConsoleWindow : IConsoleWindow
 
 		var allCommitList = new Bind<ListBox>();
 
-		var branchStackLayout = new VerticalStack(new Rect
+		var branchStackLayout = new VerticalStack()
 		{
-			Left = 0,
-			Top = 0,
-			Width = 20,
-			Height = 20,
-		})
-		{
+			BackgroundColor = ConsoleColor.DarkMagenta,
 			Children =
 				{
 					 new ListBox(new Rect
@@ -105,15 +100,9 @@ public class ConsoleWindow : IConsoleWindow
 		};
 
 
-		var verticalStack2 = new VerticalStack(new Rect
+		var verticalStack2 = new VerticalStack()
 		{
-			Left = 0,
-			Top = 0,
-			Width = 20,
-			Height = 40
-		})
-		{
-			BackgroundColor = Color.Gray,
+			BackgroundColor = ConsoleColor.DarkGreen,
 			Children =
 			{
 				new ListBox(new Rect
@@ -130,13 +119,7 @@ public class ConsoleWindow : IConsoleWindow
 		};
 
 
-		var mainStack = new HorizontalStack(new Rect
-		{
-			Left = 0,
-			Top = 1,
-			Width = _console.GetSize().Width,
-			Height = _console.GetSize().Height - 1
-		})
+		var mainStack = new HorizontalStack()
 		{
 			Children =
 			{
