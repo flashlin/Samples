@@ -279,7 +279,7 @@ public class ListBox : IConsoleElement
 			}
 			else
 			{
-				child.Background = _consoleManager.HighlightBackgroundColor;
+				child.Background = _consoleManager.HighlightBackgroundColor1;
 			}
 		}
 	}
