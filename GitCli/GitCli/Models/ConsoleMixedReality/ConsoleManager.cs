@@ -2,7 +2,7 @@
 
 public interface IConsoleManager
 {
-	Color HighlightBackgroundColor { get; set; }
+	Color HighlightBackgroundColor1 { get; set; }
 	Color InputBackgroundColor { get; set; }
 	Color ViewBackgroundColor { get; set; }
 	IConsoleWriter Console { get; }
@@ -23,9 +23,10 @@ public class ConsoleManager : IConsoleManager
 		Content = new EmptyElement();
 	}
 
-	public Color HighlightBackgroundColor { get; set; } = ConsoleColor.DarkGray;
+	public Color HighlightBackgroundColor1 { get; set; } = ConsoleColor.DarkGray;
+	public Color HighlightBackgroundColor2 { get; set; } = ConsoleColor.Gray;
 	public Color InputBackgroundColor { get; set; } = ConsoleColor.DarkBlue;
-	public Color ViewBackgroundColor { get; set; } = ConsoleColor.Gray;
+	public Color ViewBackgroundColor { get; set; } = ConsoleColor.DarkYellow;
 
 	public ConsoleInputObserver InputObserver => _inputObserver;
 
@@ -71,18 +72,6 @@ public class ConsoleManager : IConsoleManager
 				//_console.Write(position, character);
 			}
 		}
-
-
-		//for (int y = rect.Top; y <= rect.Bottom; y++)
-		//{
-		//	for (int x = rect.Left; x <= rect.Right; x++)
-		//	{
-		//		var position = new Position(x, y);
-		//		var character = _drawBuffer[position];
-		//		if (!_buffer.Update(position, character)) continue;
-		//		_console.Write(position, character);
-		//	}
-		//}
 	}
 
 	public void Resize(Size size)
