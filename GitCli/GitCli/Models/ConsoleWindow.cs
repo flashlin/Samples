@@ -181,6 +181,6 @@ public class ConsoleWindow : IConsoleWindow
 
 public class ListItem
 {
-	public string? Title { get; set; }
+	public string Title { get; set; } = string.Empty;
 	public object? Value { get; set; }
 }

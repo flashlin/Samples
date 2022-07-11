@@ -134,6 +134,8 @@ public class ListBox : IConsoleElement
 			Length = ViewRect.Height
 		};
 		RearrangeChildrenIndex();
+
+		_consoleManager.FocusedElement ??= this;
 	}
 
 	public bool OnInput(InputEvent inputEvent)

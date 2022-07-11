@@ -7,6 +7,7 @@ public interface IConsoleManager
 	Color ViewBackgroundColor { get; set; }
 	IConsoleWriter Console { get; }
 	ConsoleInputObserver InputObserver { get; }
+	IConsoleElement? FocusedElement { get; set; }
 }
 
 public class ConsoleManager : IConsoleManager
@@ -31,6 +32,7 @@ public class ConsoleManager : IConsoleManager
 	public ConsoleInputObserver InputObserver => _inputObserver;
 
 	public IConsoleElement Content { get; set; }
+	public IConsoleElement? FocusedElement { get; set; }
 
 	public IConsoleWriter Console => _console;
 
