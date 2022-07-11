@@ -5,6 +5,7 @@ public class TextBox : IConsoleEditableElement
 	private int _editIndex;
 	private int _startSelectIndex;
 	private bool _isSelectedMode;
+	private IConsoleManager _consoleManager;
 
 	public TextBox(Rect rect)
 	{
@@ -13,7 +14,7 @@ public class TextBox : IConsoleEditableElement
 
 	public IConsoleElement? Parent { get; set; }
 	public bool IsTab { get; set; } = true;
-	public Rect DesignRect { get; set; } = Rect.Empty;
+	public Rect DesignRect { get; set; }
 	public bool Enabled { get; set; }
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
@@ -53,9 +54,10 @@ public class TextBox : IConsoleEditableElement
 	public Rect ViewRect { get; set; }
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Value { get; set; } = String.Empty;
-	public object UserObject { get; set; }
+	public object? UserObject { get; set; }
 
 	public event EventHandler<ConsoleElementEvent> OnHandle;
+	public Color? HighlightBackgroundColor1 { get; set; }
 
 	public Character this[Position pos]
 	{
@@ -77,7 +79,7 @@ public class TextBox : IConsoleEditableElement
 				var selectedValue = GetSelectedValue(selectedSpan);
 				if (selectedSpan.Contain(x))
 				{
-					return new Character(selectedValue[x - selectedSpan.Index], null, Color.DarkGray);
+					return new Character(selectedValue[x - selectedSpan.Index], null, HighlightBackgroundColor1);
 				}
 			}
 
@@ -195,6 +197,7 @@ public class TextBox : IConsoleEditableElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
+		_consoleManager = consoleManager;
 		ViewRect = new Rect
 		{
 			Left = rect.Left + DesignRect.Left,
@@ -202,6 +205,9 @@ public class TextBox : IConsoleEditableElement
 			Width = DesignRect.Width,
 			Height = DesignRect.Height,
 		};
+
+		consoleManager.FocusedElement ??= this;
+		HighlightBackgroundColor1 ??= consoleManager.HighlightBackgroundColor1;
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
