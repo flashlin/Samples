@@ -2,23 +2,18 @@
 
 public class TextBox : IConsoleEditableElement
 {
-	private int _editIndex;
-	private int _startSelectIndex;
-	private bool _isSelectedMode;
 	private IConsoleManager _consoleManager;
-
+	private int _editIndex;
+	private bool _isSelectedMode;
+	private int _startSelectIndex;
 	public TextBox(Rect rect)
 	{
 		DesignRect = rect;
 	}
 
-	public IConsoleElement? Parent { get; set; }
-	public bool IsTab { get; set; } = true;
-	public Rect DesignRect { get; set; }
-	public bool Enabled { get; set; }
+	public event EventHandler<ConsoleElementEvent> OnHandle;
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
-
 	public Position CursorPosition
 	{
 		get
@@ -31,8 +26,7 @@ public class TextBox : IConsoleEditableElement
 		}
 	}
 
-	public char TypeCharacter { get; set; } = '\0';
-
+	public Rect DesignRect { get; set; }
 	public int EditIndex
 	{
 		get => _editIndex;
@@ -46,18 +40,17 @@ public class TextBox : IConsoleEditableElement
 		}
 	}
 
-	public void ForceSetEditIndex(int index)
-	{
-		_editIndex = index;
-	}
-
-	public Rect ViewRect { get; set; }
+	public bool Enabled { get; set; }
+	public Color? HighlightBackgroundColor { get; set; }
+	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;
-	public string Value { get; set; } = String.Empty;
+	public IConsoleElement? Parent { get; set; }
+	public char TypeCharacter { get; set; } = '\0';
 	public object? UserObject { get; set; }
 
-	public event EventHandler<ConsoleElementEvent> OnHandle;
-	public Color? HighlightBackgroundColor1 { get; set; }
+	public string Value { get; set; } = String.Empty;
+
+	public Rect ViewRect { get; set; }
 
 	public Character this[Position pos]
 	{
@@ -79,7 +72,7 @@ public class TextBox : IConsoleEditableElement
 				var selectedValue = GetSelectedValue(selectedSpan);
 				if (selectedSpan.Contain(x))
 				{
-					return new Character(selectedValue[x - selectedSpan.Index], null, HighlightBackgroundColor1);
+					return new Character(selectedValue[x - selectedSpan.Index], null, HighlightBackgroundColor);
 				}
 			}
 
@@ -95,6 +88,34 @@ public class TextBox : IConsoleEditableElement
 
 			return new Character(showContent[x], null, Background);
 		}
+	}
+
+	public void ForceSetEditIndex(int index)
+	{
+		_editIndex = index;
+	}
+	public Rect GetChildrenRect()
+	{
+		return ViewRect;
+	}
+
+	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	{
+	}
+
+	public void OnCreate(Rect rect, IConsoleManager consoleManager)
+	{
+		_consoleManager = consoleManager;
+		ViewRect = new Rect
+		{
+			Left = rect.Left + DesignRect.Left,
+			Top = rect.Top + DesignRect.Top,
+			Width = DesignRect.Width,
+			Height = DesignRect.Height,
+		};
+
+		consoleManager.FocusedElement ??= this;
+		HighlightBackgroundColor ??= consoleManager.HighlightBackgroundColor1;
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -194,31 +215,6 @@ public class TextBox : IConsoleEditableElement
 
 		return true;
 	}
-
-	public void OnCreate(Rect rect, IConsoleManager consoleManager)
-	{
-		_consoleManager = consoleManager;
-		ViewRect = new Rect
-		{
-			Left = rect.Left + DesignRect.Left,
-			Top = rect.Top + DesignRect.Top,
-			Width = DesignRect.Width,
-			Height = DesignRect.Height,
-		};
-
-		consoleManager.FocusedElement ??= this;
-		HighlightBackgroundColor1 ??= consoleManager.HighlightBackgroundColor1;
-	}
-
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
-	{
-	}
-
-	public Rect GetChildrenRect()
-	{
-		return ViewRect;
-	}
-
 	private Span GetSelectedSpan()
 	{
 		if (!_isSelectedMode)
@@ -245,12 +241,6 @@ public class TextBox : IConsoleEditableElement
 		return Value.SubStr(contentSpan.Index, contentSpan.Length);
 	}
 
-	private Span GetShowContentSpanByView()
-	{
-		var rect = ViewRect.Intersect(ViewRect);
-		return GetShowContentSpan(rect);
-	}
-
 	private Span GetShowContentSpan(Rect rect)
 	{
 		var startIndex = _editIndex - rect.Width;
@@ -265,5 +255,11 @@ public class TextBox : IConsoleEditableElement
 			Index = startIndex,
 			Length = len
 		};
+	}
+
+	private Span GetShowContentSpanByView()
+	{
+		var rect = ViewRect.Intersect(ViewRect);
+		return GetShowContentSpan(rect);
 	}
 }

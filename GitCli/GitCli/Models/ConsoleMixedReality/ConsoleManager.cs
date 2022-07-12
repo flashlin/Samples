@@ -1,22 +1,12 @@
 ﻿namespace GitCli.Models.ConsoleMixedReality;
 
-public interface IConsoleManager
-{
-	Color HighlightBackgroundColor1 { get; set; }
-	Color InputBackgroundColor { get; set; }
-	Color ViewBackgroundColor { get; set; }
-	IConsoleWriter Console { get; }
-	ConsoleInputObserver InputObserver { get; }
-	IConsoleElement? FocusedElement { get; set; }
-}
-
 public class ConsoleManager : IConsoleManager
 {
 	private static readonly ConsoleBuffer _buffer = new ConsoleBuffer();
 	private static FreezeLock _freezeLock = new FreezeLock();
+	private readonly CancellationTokenSource _cancellationTokenSource = new();
 	private readonly IConsoleWriter _console;
-    private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly ConsoleInputObserver _inputObserver = new ConsoleInputObserver();
+	private readonly ConsoleInputObserver _inputObserver = new ConsoleInputObserver();
     
 	public ConsoleManager(IConsoleWriter console)
 	{
@@ -24,20 +14,59 @@ public class ConsoleManager : IConsoleManager
 		Content = new EmptyElement();
 	}
 
-	public Color HighlightBackgroundColor1 { get; set; } = ConsoleColor.DarkGray;
-	public Color HighlightBackgroundColor2 { get; set; } = ConsoleColor.Gray;
-	public Color InputBackgroundColor { get; set; } = ConsoleColor.DarkBlue;
-	public Color ViewBackgroundColor { get; set; } = ConsoleColor.DarkYellow;
-
-	public ConsoleInputObserver InputObserver => _inputObserver;
-
+	public Size BufferSize => _buffer.Size;
+	public IConsoleWriter Console => _console;
 	public IConsoleElement Content { get; set; }
 	public IConsoleElement? FocusedElement { get; set; }
-
-	public IConsoleWriter Console => _console;
-
+	public Color HighlightBackgroundColor1 { get; set; } = ConsoleColor.Gray;
+	public Color HighlightBackgroundColor2 { get; set; } = ConsoleColor.DarkGray;
+	public Color InputBackgroundColor { get; set; } = ConsoleColor.DarkBlue;
+	public ConsoleInputObserver InputObserver => _inputObserver;
+	public Color ViewBackgroundColor { get; set; } = ConsoleColor.DarkYellow;
 	public Size WindowSize => _console.GetSize();
-	public Size BufferSize => _buffer.Size;
+	public void AdjustBufferSize()
+	{
+		if (WindowSize != BufferSize)
+		{
+			Resize(WindowSize);
+		}
+	}
+
+	public void AdjustWindowSize()
+	{
+		if (WindowSize != BufferSize)
+		{
+			Resize(BufferSize);
+		}
+	}
+
+	public void Resize(Size size)
+	{
+		_buffer.Initialize(size);
+		Initialize();
+	}
+
+	public void Start()
+	{
+		//var task = Task.Run(() =>
+		//{
+		//	while (true)
+		//	{
+		//		Write(new Position { X = 0, Y = 0 }, $"{DateTime.Now}");
+		//		Redraw();
+		//		Thread.Sleep(500);
+		//	}
+		//});
+
+		//Content.OnCreate(Rect.OfSize(Console.GetSize()), (IConsoleManager)this);
+		Content.OnCreate(Rect.Empty, (IConsoleManager)this);
+		AdjustBufferSize();
+		while (!_cancellationTokenSource.IsCancellationRequested)
+		{
+			_console.SetCursorPosition(Content.CursorPosition);
+			ProcessInputEvent(_console.ReadKey());
+		}
+	}
 
 	private void Initialize()
 	{
@@ -46,6 +75,22 @@ public class ConsoleManager : IConsoleManager
 		_freezeLock.Freeze();
 		_freezeLock.Unfreeze();
 		Redraw();
+	}
+
+	private void ProcessInputEvent(InputEvent @event)
+	{
+		if (@event.HasControl && @event.Key == ConsoleKey.X)
+		{
+			_cancellationTokenSource.Cancel();
+			_console.ResetColor();
+			return;
+		}
+
+		var isHandled = Content.OnInput(@event);
+		if (isHandled)
+		{
+			Redraw();
+		}
 	}
 
 	private void Redraw()
@@ -73,66 +118,6 @@ public class ConsoleManager : IConsoleManager
 				//character = _drawBuffer[position];
 				//_console.Write(position, character);
 			}
-		}
-	}
-
-	public void Resize(Size size)
-	{
-		_buffer.Initialize(size);
-		Initialize();
-	}
-
-	public void AdjustBufferSize()
-	{
-		if (WindowSize != BufferSize)
-		{
-			Resize(WindowSize);
-		}
-	}
-
-	public void AdjustWindowSize()
-	{
-		if (WindowSize != BufferSize)
-		{
-			Resize(BufferSize);
-		}
-	}
-
-	public void Start()
-	{
-		//var task = Task.Run(() =>
-		//{
-		//	while (true)
-		//	{
-		//		Write(new Position { X = 0, Y = 0 }, $"{DateTime.Now}");
-		//		Redraw();
-		//		Thread.Sleep(500);
-		//	}
-		//});
-
-		//Content.OnCreate(Rect.OfSize(Console.GetSize()), (IConsoleManager)this);
-		Content.OnCreate(Rect.Empty, (IConsoleManager)this);
-		AdjustBufferSize();
-		while (!_cancellationTokenSource.IsCancellationRequested)
-		{
-			_console.SetCursorPosition(Content.CursorPosition);
-			ProcessInputEvent(_console.ReadKey());
-		}
-	}
-
-	private void ProcessInputEvent(InputEvent @event)
-	{
-		if (@event.HasControl && @event.Key == ConsoleKey.X)
-		{
-			_cancellationTokenSource.Cancel();
-			_console.ResetColor();
-			return;
-		}
-		
-		var isHandled = Content.OnInput(@event);
-		if (isHandled)
-		{
-			Redraw();
 		}
 	}
 }
