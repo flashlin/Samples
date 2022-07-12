@@ -33,6 +33,8 @@ public class ListBox : IConsoleElement
 	}
 
 	public Rect DesignRect { get; set; }
+	public Color? HighlightBackgroundColor1 { get; set; }
+	public Color? InputBackgroundColor { get; set; }
 	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Name { get; set; }
@@ -112,6 +114,9 @@ public class ListBox : IConsoleElement
 		};
 
 		_consoleManager = consoleManager;
+		_consoleManager.FocusedElement ??= this;
+		InputBackgroundColor ??= _consoleManager.InputBackgroundColor;
+		HighlightBackgroundColor1 ??= _consoleManager.HighlightBackgroundColor1;
 
 		var y = ViewRect.Top;
 		foreach (var child in Children)
@@ -134,10 +139,7 @@ public class ListBox : IConsoleElement
 			Length = ViewRect.Height
 		};
 		RearrangeChildrenIndex();
-
-		_consoleManager.FocusedElement ??= this;
 	}
-
 	public bool OnInput(InputEvent inputEvent)
 	{
 		switch (inputEvent.Key)
@@ -178,6 +180,11 @@ public class ListBox : IConsoleElement
 		}
 
 		return true;
+	}
+
+	public void Refresh()
+	{
+		RearrangeChildrenIndex();
 	}
 
 	private void AddChild(IList newItems)
@@ -277,18 +284,13 @@ public class ListBox : IConsoleElement
 			if (child != focusedItem)
 			{
 				child.ForceSetEditIndex(focusedItem.EditIndex);
-				child.Background = _consoleManager.InputBackgroundColor;
+				child.Background = InputBackgroundColor!.Value;
 			}
 			else
 			{
-				child.Background = _consoleManager.HighlightBackgroundColor1;
+				child.Background = HighlightBackgroundColor1!.Value;
 			}
 		}
-	}
-
-	public void Refresh()
-	{
-		RearrangeChildrenIndex();
 	}
 }
 
