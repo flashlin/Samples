@@ -33,7 +33,6 @@ public class ListBox : IConsoleElement
 	}
 
 	public Rect DesignRect { get; set; }
-	public Color? HighlightBackgroundColor1 { get; set; }
 	public Color? InputBackgroundColor { get; set; }
 	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;
@@ -72,8 +71,18 @@ public class ListBox : IConsoleElement
 				Width = ViewRect.Width,
 				Height = ViewRect.Height
 			};
+
+			item.HighlightBackgroundColor = GetHighlightBackgroundColor();
+			
 			return item[pos];
 		}
+	}
+
+	private Color GetHighlightBackgroundColor()
+	{
+		return _consoleManager.FocusedElement == this ? 
+			_consoleManager.HighlightBackgroundColor1 : 
+			_consoleManager.HighlightBackgroundColor2;
 	}
 
 	public TextBox AddItem(ListItem item)
@@ -116,7 +125,6 @@ public class ListBox : IConsoleElement
 		_consoleManager = consoleManager;
 		_consoleManager.FocusedElement ??= this;
 		InputBackgroundColor ??= _consoleManager.InputBackgroundColor;
-		HighlightBackgroundColor1 ??= _consoleManager.HighlightBackgroundColor1;
 
 		var y = ViewRect.Top;
 		foreach (var child in Children)
@@ -288,7 +296,7 @@ public class ListBox : IConsoleElement
 			}
 			else
 			{
-				child.Background = HighlightBackgroundColor1!.Value;
+				child.Background = GetHighlightBackgroundColor();
 			}
 		}
 	}
