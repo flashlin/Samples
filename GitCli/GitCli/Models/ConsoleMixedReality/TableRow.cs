@@ -73,4 +73,8 @@ public class TableRow : IConsoleElement
 	{
 		return Children.GetRect();
 	}
+
+	public void Refresh()
+	{
+	}
 }

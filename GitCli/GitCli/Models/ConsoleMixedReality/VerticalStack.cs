@@ -2,6 +2,8 @@
 
 public class VerticalStack : IConsoleElement
 {
+	private IConsoleManager _consoleManager;
+
 	public VerticalStack()
 	{
 		Children = new StackChildren();
@@ -32,6 +34,7 @@ public class VerticalStack : IConsoleElement
 				if (!ch.IsEmpty)
 				{
 					character = ch;
+					return ch;
 				}
 			}
 
@@ -48,6 +51,9 @@ public class VerticalStack : IConsoleElement
 				Parent?.OnBubbleEvent(this, inputEvent);
 				return;
 			}
+
+			_consoleManager.FocusedElement = Children.GetFocusedControl();
+			_consoleManager.FocusedElement!.Refresh();
 			return;
 		}
 
@@ -58,6 +64,9 @@ public class VerticalStack : IConsoleElement
 				Parent?.OnBubbleEvent(this, inputEvent);
 				return;
 			}
+
+			_consoleManager.FocusedElement = Children.GetFocusedControl();
+			_consoleManager.FocusedElement!.Refresh();
 			return;
 		}
 
@@ -68,6 +77,8 @@ public class VerticalStack : IConsoleElement
 				Parent?.OnBubbleEvent(this, inputEvent);
 				return;
 			}
+
+			_consoleManager.FocusedElement = Children.GetFocusedControl();
 			return;
 		}
 
@@ -78,6 +89,8 @@ public class VerticalStack : IConsoleElement
 				Parent?.OnBubbleEvent(this, inputEvent);
 				return;
 			}
+
+			_consoleManager.FocusedElement = Children.GetFocusedControl();
 			return;
 		}
 
@@ -86,6 +99,7 @@ public class VerticalStack : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
+		_consoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
 
 		var top = ViewRect.Top;
@@ -124,5 +138,10 @@ public class VerticalStack : IConsoleElement
 			initRect = initRect.Surround(child.ViewRect);
 		}
 		return initRect;
+	}
+
+	public void Refresh()
+	{
+		
 	}
 }

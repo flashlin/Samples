@@ -39,6 +39,10 @@ public class Label : IConsoleElement
 		return ViewRect;
 	}
 
+	public void Refresh()
+	{
+	}
+
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 	}

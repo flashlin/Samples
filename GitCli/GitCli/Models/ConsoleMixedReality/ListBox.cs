@@ -107,11 +107,11 @@ public class ListBox : IConsoleElement
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.Tab:
-			case ConsoleKey.Enter:
 				Parent?.OnBubbleEvent(element, inputEvent);
 				break;
 		}
 	}
+	
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		ViewRect = new Rect()
@@ -148,12 +148,14 @@ public class ListBox : IConsoleElement
 		};
 		RearrangeChildrenIndex();
 	}
+
 	public bool OnInput(InputEvent inputEvent)
 	{
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.Tab:
 				GetFocusedListItem().OnInput(inputEvent);
+				RearrangeChildrenIndex();
 				return true;
 
 			case ConsoleKey.LeftArrow:
