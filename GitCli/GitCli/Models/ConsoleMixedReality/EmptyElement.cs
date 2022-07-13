@@ -28,6 +28,10 @@ public class EmptyElement : IConsoleEditableElement
 		return Rect.Empty;
 	}
 
+	public void Refresh()
+	{
+	}
+
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		Parent?.OnBubbleEvent(element, inputEvent);

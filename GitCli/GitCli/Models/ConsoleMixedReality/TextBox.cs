@@ -94,9 +94,13 @@ public class TextBox : IConsoleEditableElement
 	{
 		_editIndex = index;
 	}
+
 	public Rect GetChildrenRect()
 	{
 		return ViewRect;
+	}
+
+	public void Refresh() {
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)

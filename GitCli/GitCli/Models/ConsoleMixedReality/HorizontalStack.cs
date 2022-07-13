@@ -40,6 +40,11 @@ public class HorizontalStack : IConsoleElement
 		return Children.GetRect();
 	}
 
+	public void Refresh()
+	{
+		RearrangeChildren(ViewRect, DesignRect.IsEmpty);
+	}
+
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
@@ -83,10 +88,10 @@ public class HorizontalStack : IConsoleElement
 		_consoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
 
-		var noInitDesignRect = DesignRect.IsEmpty;
-		RearrangeChildren(ViewRect, noInitDesignRect);
+		var userInitDesignRect = DesignRect.IsEmpty;
+		RearrangeChildren(ViewRect, userInitDesignRect);
 
-		if (!FixedLayout && noInitDesignRect)
+		if (!FixedLayout && userInitDesignRect)
 		{
 			RearrangeChildrenByChildWidth();
 		}
@@ -97,7 +102,7 @@ public class HorizontalStack : IConsoleElement
 		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
 
-	private void RearrangeChildren(Rect viewRect, bool noInitViewRect)
+	private void RearrangeChildren(Rect viewRect, bool userInitViewRect)
 	{
 		var left = viewRect.Left;
 		var everyWidth = viewRect.Width / Children.Count;
@@ -114,7 +119,7 @@ public class HorizontalStack : IConsoleElement
 			{
 				Left = left,
 				Top = viewRect.Top + child.ViewRect.Top,
-				Width = noInitViewRect ? Math.Max(child.ViewRect.Width, everyWidth) : child.ViewRect.Width,
+				Width = userInitViewRect ? Math.Max(child.ViewRect.Width, everyWidth) : child.ViewRect.Width,
 				Height = Math.Max(child.ViewRect.Height, viewRect.Height),
 			};
 			child.OnCreate(viewRect, _consoleManager);

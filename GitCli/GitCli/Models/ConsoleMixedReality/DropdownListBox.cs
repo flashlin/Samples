@@ -64,6 +64,11 @@ public class DropdownListBox : IConsoleElement
 		return ViewRect;
 	}
 
+	public void Refresh()
+	{
+
+	}
+
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 	}

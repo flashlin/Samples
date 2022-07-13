@@ -128,6 +128,10 @@ public class Frame : IConsoleElement
 		return _focus.OnInput(inputEvent);
 	}
 
+	public void Refresh()
+	{
+	}
+
 	private IConsoleElement? GetFocusedControl()
 	{
         _focus ??= Children.FirstOrDefault();
