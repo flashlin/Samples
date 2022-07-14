@@ -100,27 +100,23 @@ public class VerticalStack : IConsoleElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		_consoleManager = consoleManager;
-		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
-
+		ViewRect = DesignRect.ToViewRect(rect, _consoleManager);
 		var top = ViewRect.Top;
 		Children.ForEachIndex((child, idx) =>
 		{
 			if (idx == 0)
 			{
-				//_focusIndex = 0;
-				top = ViewRect.Top + child.ViewRect.Top;
+				top = ViewRect.Top + child.DesignRect.Top;
 			}
-
 			child.Parent = this;
-
 			var childRect = new Rect
 			{
-				Left = ViewRect.Left + child.ViewRect.Left,
+				Left = ViewRect.Left + child.DesignRect.Left,
 				Top = top,
-				Width = child.ViewRect.Width,
-				Height = child.ViewRect.Height,
+				Width = child.DesignRect.Width,
+				Height = child.DesignRect.Height,
 			};
-			child.OnCreate(childRect, consoleManager);
+			child.OnCreate(childRect, _consoleManager);
 			top += child.ViewRect.Height;
 		});
 	}
@@ -142,6 +138,24 @@ public class VerticalStack : IConsoleElement
 
 	public void Refresh()
 	{
-		
+		//var prevRect = Rect.Empty;
+		//Children.ForEachIndex((child, idx) =>
+		//{
+		//	if (idx == 0)
+		//	{
+		//		prevRect = child.ViewRect = child.GetChildrenRect();
+		//		return;
+		//	}
+
+		//	var childRect = child.GetChildrenRect();
+		//	childRect = new Rect
+		//	{
+		//		Left = childRect.Left,
+		//		Top = prevRect.Bottom + 1,
+		//		Width = childRect.Width,
+		//		Height = childRect.Height
+		//	};
+		//	child.OnCreate(childRect, _consoleManager);
+		//});
 	}
 }

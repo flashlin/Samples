@@ -7,6 +7,7 @@ public class ConsoleManager : IConsoleManager
 	private readonly CancellationTokenSource _cancellationTokenSource = new();
 	private readonly IConsoleWriter _console;
 	private readonly ConsoleInputObserver _inputObserver = new ConsoleInputObserver();
+	private IConsoleElement? _focusedElement;
     
 	public ConsoleManager(IConsoleWriter console)
 	{
@@ -17,7 +18,17 @@ public class ConsoleManager : IConsoleManager
 	public Size BufferSize => _buffer.Size;
 	public IConsoleWriter Console => _console;
 	public IConsoleElement Content { get; set; }
-	public IConsoleElement? FocusedElement { get; set; }
+
+	public IConsoleElement? FocusedElement
+	{
+		get => _focusedElement;
+		set
+		{
+			_focusedElement = value;
+			_focusedElement?.Refresh();
+		}
+	}
+
 	public Color HighlightBackgroundColor1 { get; set; } = ConsoleColor.Gray;
 	public Color HighlightBackgroundColor2 { get; set; } = ConsoleColor.DarkGray;
 	public Color InputBackgroundColor { get; set; } = ConsoleColor.DarkBlue;

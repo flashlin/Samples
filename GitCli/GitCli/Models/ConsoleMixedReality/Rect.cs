@@ -115,8 +115,8 @@ public struct Rect
 	{
 		var rect = new Rect
 		{
-			Left = parentRect.Left + Left,
-			Top = parentRect.Top + Top,
+			Left = parentRect.Left,
+			Top = parentRect.Top,
 			Width = parentRect.IsEmpty ? Width : parentRect.Width,
 			Height = parentRect.IsEmpty ? Height : parentRect.Height
 		};
