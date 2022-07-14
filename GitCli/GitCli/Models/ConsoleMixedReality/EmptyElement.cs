@@ -36,12 +36,19 @@ public class EmptyElement : IConsoleEditableElement
 	{
 		Parent?.OnBubbleEvent(element, inputEvent);
 	}
+
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 	}
 
 	public bool OnInput(InputEvent inputEvent)
 	{
+		switch (inputEvent.Key)
+		{
+			case ConsoleKey.Tab:
+				OnBubbleEvent(this, inputEvent);
+				return false;
+		}
 		return false;
 	}
 }

@@ -123,8 +123,8 @@ public class ListBox : IConsoleElement
 		};
 
 		_consoleManager = consoleManager;
-		_consoleManager.FocusedElement ??= this;
 		InputBackgroundColor ??= _consoleManager.InputBackgroundColor;
+		_consoleManager.FocusedElement ??= this;
 
 		var y = ViewRect.Top;
 		foreach (var child in Children)
@@ -252,11 +252,15 @@ public class ListBox : IConsoleElement
 			AddChild(e.NewItems!);
 		}
 	}
+	
 	private IConsoleEditableElement GetFocusedListItem()
 	{
 		if (_index == -1)
 		{
-			return new EmptyElement();
+			return new EmptyElement()
+			{
+				Parent = this,
+			};
 		}
 
 		return Children[_index];

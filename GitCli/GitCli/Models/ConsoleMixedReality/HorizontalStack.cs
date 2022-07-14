@@ -50,12 +50,14 @@ public class HorizontalStack : IConsoleElement
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
 		{
 			Children.JumpUpFocus();
+			_consoleManager.FocusedElement = Children.GetFocusedControl();
 			return;
 		}
 
 		if (inputEvent.Key == ConsoleKey.Tab)
 		{
 			Children.JumpDownFocus();
+			_consoleManager.FocusedElement = Children.GetFocusedControl();
 			return;
 		}
 
@@ -64,6 +66,7 @@ public class HorizontalStack : IConsoleElement
 			if (_focusIndex != -1)
 			{
 				Children.JumpUpFocus();
+				_consoleManager.FocusedElement = Children.GetFocusedControl();
 				return;
 			}
 
@@ -76,6 +79,7 @@ public class HorizontalStack : IConsoleElement
 			if (_focusIndex != -1)
 			{
 				Children.JumpDownFocus();
+				_consoleManager.FocusedElement = Children.GetFocusedControl();
 				return;
 			}
 		}
