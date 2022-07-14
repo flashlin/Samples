@@ -9,15 +9,15 @@ public class VerticalStack : IConsoleElement
 		Children = new StackChildren();
 	}
 
+	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public StackChildren Children { get; private set; }
 
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
+	public Rect DesignRect { get; set; } = Rect.Empty;
 	public bool IsTab { get; set; }
 	public IConsoleElement? Parent { get; set; }
-	public Rect DesignRect { get; set; } = Rect.Empty;
 	public Rect ViewRect { get; set; } = Rect.Empty;
-	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public Character this[Position pos]
 	{
 		get
@@ -40,6 +40,16 @@ public class VerticalStack : IConsoleElement
 
 			return character;
 		}
+	}
+
+	public Rect GetChildrenRect()
+	{
+		var initRect = Rect.Empty;
+		foreach (var child in Children)
+		{
+			initRect = initRect.Surround(child.ViewRect);
+		}
+		return initRect;
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
@@ -101,6 +111,20 @@ public class VerticalStack : IConsoleElement
 	{
 		_consoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, _consoleManager);
+		RearrangeChildren();
+	}
+
+	public bool OnInput(InputEvent inputEvent)
+	{
+		return Children.GetFocusedControl().OnInput(inputEvent);
+	}
+
+	public void Refresh()
+	{
+	}
+
+	private void RearrangeChildren()
+	{
 		var top = ViewRect.Top;
 		Children.ForEachIndex((child, idx) =>
 		{
@@ -108,6 +132,7 @@ public class VerticalStack : IConsoleElement
 			{
 				top = ViewRect.Top + child.DesignRect.Top;
 			}
+
 			child.Parent = this;
 			var childRect = new Rect
 			{
@@ -119,43 +144,5 @@ public class VerticalStack : IConsoleElement
 			child.OnCreate(childRect, _consoleManager);
 			top += child.ViewRect.Height;
 		});
-	}
-
-	public bool OnInput(InputEvent inputEvent)
-	{
-		return Children.GetFocusedControl().OnInput(inputEvent);
-	}
-
-	public Rect GetChildrenRect()
-	{
-		var initRect = Rect.Empty;
-		foreach (var child in Children)
-		{
-			initRect = initRect.Surround(child.ViewRect);
-		}
-		return initRect;
-	}
-
-	public void Refresh()
-	{
-		//var prevRect = Rect.Empty;
-		//Children.ForEachIndex((child, idx) =>
-		//{
-		//	if (idx == 0)
-		//	{
-		//		prevRect = child.ViewRect = child.GetChildrenRect();
-		//		return;
-		//	}
-
-		//	var childRect = child.GetChildrenRect();
-		//	childRect = new Rect
-		//	{
-		//		Left = childRect.Left,
-		//		Top = prevRect.Bottom + 1,
-		//		Width = childRect.Width,
-		//		Height = childRect.Height
-		//	};
-		//	child.OnCreate(childRect, _consoleManager);
-		//});
 	}
 }
