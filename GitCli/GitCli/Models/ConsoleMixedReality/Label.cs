@@ -10,6 +10,7 @@ public class Label : IConsoleElement
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 	public Position CursorPosition => Position.Empty;
 	public Rect DesignRect { get; set; }
+	public string Name { get; set; } = string.Empty;
 	public bool Enabled { get; set; }
 	public bool IsTab { get; set; }
 	public IConsoleElement? Parent { get; set; }

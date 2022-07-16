@@ -32,6 +32,7 @@ public class TableRow : IConsoleElement
 	public IConsoleElement? Parent { get; set; }
 	public bool IsTab { get; set; }
 	public Rect DesignRect { get; set; }
+	public string Name { get; set; } = string.Empty;
 	public StackChildren Children { get; private set; }
 
 	public bool OnInput(InputEvent inputEvent)
