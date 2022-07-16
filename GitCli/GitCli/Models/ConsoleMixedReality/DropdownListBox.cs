@@ -30,7 +30,8 @@ public class DropdownListBox : IConsoleElement
 		}
 	}
 
-	public Rect DesignRect { get; set; } = Rect.Empty;
+	public Rect DesignRect { get; set; }
+	public string Name { get; set; } = string.Empty;
 	public bool IsTab { get; set; } = true;
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; }

@@ -18,6 +18,7 @@ public class HorizontalStack : IConsoleElement
 
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 	public Rect DesignRect { get; set; } = Rect.Empty;
+	public string Name { get; set; } = String.Empty;
 	public bool FixedLayout { get; set; } = false;
 	public bool IsTab { get; set; }
 	public IConsoleElement? Parent { get; set; }

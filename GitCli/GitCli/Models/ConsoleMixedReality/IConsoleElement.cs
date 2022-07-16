@@ -11,6 +11,7 @@ public interface IConsoleElement
     IConsoleElement? Parent { get; set; }
     bool IsTab { get; set; }
     Rect DesignRect { get; set; }
+    string Name { get; set; }
     bool OnInput(InputEvent inputEvent);
     void OnCreate(Rect parentRect, IConsoleManager consoleManager);
     void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);

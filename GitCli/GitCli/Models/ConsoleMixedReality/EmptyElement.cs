@@ -5,6 +5,7 @@ public class EmptyElement : IConsoleEditableElement
 	private int _editIndex = 0;
 	public Position CursorPosition => Position.Empty;
 	public Rect DesignRect { get; set; } = Rect.Empty;
+	public string Name { get; set; } = string.Empty;
 
 	public int EditIndex
 	{

@@ -23,6 +23,7 @@ public class TextArea : IConsoleElement
 	}
 
 	public Rect DesignRect { get; set; }
+	public string Name { get; set; }
 	public int EditIndex => _editIndex;
 	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;

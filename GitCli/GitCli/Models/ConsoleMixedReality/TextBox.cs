@@ -27,6 +27,8 @@ public class TextBox : IConsoleEditableElement
 	}
 
 	public Rect DesignRect { get; set; }
+	public string Name { get; set; } = string.Empty;
+
 	public int EditIndex
 	{
 		get => _editIndex;

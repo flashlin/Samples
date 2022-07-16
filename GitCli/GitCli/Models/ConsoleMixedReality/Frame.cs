@@ -27,6 +27,7 @@ public class Frame : IConsoleElement
 	}
 
 	public Rect DesignRect { get; set; } = Rect.Empty;
+	public string Name { get; set; } = string.Empty; 
 	public bool IsTab { get; set; } = false;
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; }

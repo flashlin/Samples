@@ -9,6 +9,7 @@ public class VerticalStack : IConsoleElement
 		Children = new StackChildren();
 	}
 
+	public string Name { get; set; }
 	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public StackChildren Children { get; private set; }
 
@@ -121,6 +122,7 @@ public class VerticalStack : IConsoleElement
 
 	public void Refresh()
 	{
+		RearrangeChildren();
 	}
 
 	private void RearrangeChildren()
