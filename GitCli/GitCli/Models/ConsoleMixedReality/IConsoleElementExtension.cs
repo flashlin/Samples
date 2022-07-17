@@ -21,6 +21,7 @@ public static class ConsoleElementExtension
 	public static void HandleOnCreate(this IConsoleElement element, Rect rect, IConsoleManager consoleManager)
 	{
 		element.ConsoleManager = consoleManager;
+		element.Children.ConsoleManager = consoleManager;
 		element.ViewRect = element.DesignRect.ToViewRect(rect, consoleManager);
 		consoleManager.FirstSetFocusElement(element);
 	}
