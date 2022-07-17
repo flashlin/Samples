@@ -7,6 +7,8 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 {
 	private int _focusIndex = -1;
 
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+
 	public IConsoleElement GetFocusedControl()
 	{
 		if (_focusIndex == -1)
@@ -32,7 +34,7 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 		{
 			return false;
 		}
-		_focusIndex = Math.Min(_focusIndex - 1, 0);
+		_focusIndex = Math.Max(_focusIndex - 1, 0);
 		return true;
 	}
 

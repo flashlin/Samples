@@ -61,7 +61,7 @@ public class VerticalStack : IConsoleElement
 			}
 
 			ConsoleManager.FocusedElement = Children.GetFocusedControl();
-			ConsoleManager.FocusedElement!.Refresh();
+			Refresh();
 			return;
 		}
 
@@ -74,7 +74,7 @@ public class VerticalStack : IConsoleElement
 			}
 
 			ConsoleManager.FocusedElement = Children.GetFocusedControl();
-			ConsoleManager.FocusedElement!.Refresh();
+			Refresh();
 			return;
 		}
 
@@ -125,6 +125,7 @@ public class VerticalStack : IConsoleElement
 	{
 		RearrangeChildren();
 	}
+
 	private void RearrangeChildren()
 	{
 		var top = ViewRect.Top;
