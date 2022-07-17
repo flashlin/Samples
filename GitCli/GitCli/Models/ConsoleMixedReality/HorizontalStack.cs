@@ -86,9 +86,7 @@ public class HorizontalStack : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		ConsoleManager = consoleManager;
-		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
-		ConsoleManager.FirstSetFocusElement(this);
+		this.HandleOnCreate(rect, consoleManager);
 
 		var userInitDesignRect = DesignRect.IsEmpty;
 		RearrangeChildren(ViewRect, userInitDesignRect);

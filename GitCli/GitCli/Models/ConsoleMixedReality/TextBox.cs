@@ -109,9 +109,7 @@ public class TextBox : IConsoleEditableElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		ConsoleManager = consoleManager;
-		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
-		consoleManager.FirstSetFocusElement(this);
+		this.HandleOnCreate(rect, consoleManager);
 
 		HighlightBackgroundColor ??= consoleManager.HighlightBackgroundColor1;
 	}

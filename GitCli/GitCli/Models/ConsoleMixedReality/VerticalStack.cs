@@ -107,9 +107,7 @@ public class VerticalStack : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		ConsoleManager = consoleManager;
-		ViewRect = DesignRect.ToViewRect(rect, ConsoleManager);
-		consoleManager.FirstSetFocusElement(this);
+		this.HandleOnCreate(rect, consoleManager);
 		RearrangeChildren();
 	}
 
