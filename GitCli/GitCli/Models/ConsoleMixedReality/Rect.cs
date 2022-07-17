@@ -126,6 +126,7 @@ public struct Rect
 			rect = Rect.OfSize(consoleManager.Console.GetSize());
 		}
 
+		rect = rect.ExtendBy(TopLeftCorner);
 		return rect;
 	}
 }
