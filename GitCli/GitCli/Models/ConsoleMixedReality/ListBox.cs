@@ -93,11 +93,7 @@ public class ListBox : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		ConsoleManager = consoleManager;
-		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
-		consoleManager.FirstSetFocusElement(this);
-		//TODO:
-		//this.HandleOnCreate(this);
+		this.HandleOnCreate(rect, consoleManager);
 
 		OnUpdate();
 		_showListItemSpan = new Span()
