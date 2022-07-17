@@ -11,7 +11,7 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 	{
 		if (_focusIndex == -1)
 		{
-			return new EmptyElement();
+			return EmptyElement.Default;
 		}
 		return this[_focusIndex];
 	}

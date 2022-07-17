@@ -17,6 +17,8 @@ public class DropdownListBox : IConsoleElement
 	}
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
+	public StackChildren Children { get; } = new();
+
 	public Position CursorPosition
 	{
 		get
@@ -31,8 +33,8 @@ public class DropdownListBox : IConsoleElement
 	}
 
 	public Rect DesignRect { get; set; }
-	public string Name { get; set; } = string.Empty;
 	public bool IsTab { get; set; } = true;
+	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; }
 
@@ -63,11 +65,6 @@ public class DropdownListBox : IConsoleElement
 	public Rect GetChildrenRect()
 	{
 		return ViewRect;
-	}
-
-	public void Refresh()
-	{
-
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
@@ -102,5 +99,14 @@ public class DropdownListBox : IConsoleElement
 		}
 
 		return _textBox.OnInput(inputEvent);
+	}
+
+	public void OnUpdate()
+	{
+	}
+
+	public void Refresh()
+	{
+
 	}
 }

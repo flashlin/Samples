@@ -13,7 +13,9 @@ public class TextBox : IConsoleEditableElement
 
 	public event EventHandler<ConsoleElementEvent> OnHandle;
 
-	public Color Background { get; set; } = ConsoleColor.DarkBlue;
+	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
+	public StackChildren Children { get; } = new();
+
 	public Position CursorPosition
 	{
 		get
@@ -27,8 +29,6 @@ public class TextBox : IConsoleEditableElement
 	}
 
 	public Rect DesignRect { get; set; }
-	public string Name { get; set; } = string.Empty;
-
 	public int EditIndex
 	{
 		get => _editIndex;
@@ -46,6 +46,7 @@ public class TextBox : IConsoleEditableElement
 	public Color? HighlightBackgroundColor { get; set; }
 	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;
+	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public char TypeCharacter { get; set; } = '\0';
 	public object? UserObject { get; set; }
@@ -80,15 +81,15 @@ public class TextBox : IConsoleEditableElement
 
 			if (x >= showContent.Length)
 			{
-				return new Character(' ', null, Background);
+				return new Character(' ', null, BackgroundColor);
 			}
 
 			if (TypeCharacter != '\0')
 			{
-				return new Character(TypeCharacter, null, Background);
+				return new Character(TypeCharacter, null, BackgroundColor);
 			}
 
-			return new Character(showContent[x], null, Background);
+			return new Character(showContent[x], null, BackgroundColor);
 		}
 	}
 
@@ -102,9 +103,6 @@ public class TextBox : IConsoleEditableElement
 		return ViewRect;
 	}
 
-	public void Refresh() {
-	}
-
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 	}
@@ -113,9 +111,13 @@ public class TextBox : IConsoleEditableElement
 	{
 		_consoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
+		consoleManager.FirstSetFocusElement(this);
 
-		consoleManager.FocusedElement ??= this;
 		HighlightBackgroundColor ??= consoleManager.HighlightBackgroundColor1;
+	}
+
+	public void OnUpdate()
+	{
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -133,7 +135,7 @@ public class TextBox : IConsoleEditableElement
 			case ConsoleKey.Tab:
 				Parent?.OnBubbleEvent(this, inputEvent);
 				return true;
-			
+
 			case ConsoleKey.LeftArrow:
 				_editIndex = Math.Max(0, _editIndex - 1);
 				_isSelectedMode = inputEvent.HasShift;
@@ -214,6 +216,10 @@ public class TextBox : IConsoleEditableElement
 		}
 
 		return true;
+	}
+
+	public void Refresh()
+	{
 	}
 	private Span GetSelectedSpan()
 	{

@@ -10,25 +10,13 @@ public class Frame : IConsoleElement
 	{
         ViewRect = viewRect;
     }
-	public List<IConsoleElement> Children { get; set; } = new List<IConsoleElement>();
-	public Position CursorPosition
-	{
-		get
-		{
-			GetFocusedControl();
-
-			if (_focus != null)
-			{
-				return _focus.CursorPosition;
-			}
-
-			return ViewRect.BottomRightCorner;
-		}
-	}
+	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
+	public StackChildren Children { get; set; } = new();
+	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
 	public Rect DesignRect { get; set; } = Rect.Empty;
-	public string Name { get; set; } = string.Empty; 
 	public bool IsTab { get; set; } = false;
+	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; }
 	public Character this[Position pos]
@@ -66,31 +54,18 @@ public class Frame : IConsoleElement
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
+		var focus = Children.GetFocusedControl();
+		
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
-			_focus = GetFocusedControl();
-			if (_focus != null)
-			{
-				var idx = Children.FindIndex(x => x == _focus);
-				idx = Math.Min(idx - 1, 0);
-				_focus = Children[idx];
-				return;
-			}
-
-			Parent?.OnBubbleEvent(this, inputEvent);
+			Children.JumpUpFocus();
 			return;
 		}
 
 		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
 		{
-			_focus = GetFocusedControl();
-			if (_focus != null)
-			{
-				var idx = Children.FindIndex(x => x == _focus);
-				idx = Math.Min(idx + 1, Children.Count - 1);
-				_focus = Children[idx];
-				return;
-			}
+			Children.JumpDownFocus();
+			return;
 		}
 
 		Parent?.OnBubbleEvent(element, inputEvent);
@@ -129,13 +104,11 @@ public class Frame : IConsoleElement
 		return _focus.OnInput(inputEvent);
 	}
 
-	public void Refresh()
+	public void OnUpdate()
 	{
 	}
 
-	private IConsoleElement? GetFocusedControl()
+	public void Refresh()
 	{
-        _focus ??= Children.FirstOrDefault();
-        return _focus;
-    }
+	}
 }

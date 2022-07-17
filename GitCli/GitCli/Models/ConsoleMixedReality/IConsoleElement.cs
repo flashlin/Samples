@@ -12,11 +12,14 @@ public interface IConsoleElement
     bool IsTab { get; set; }
     Rect DesignRect { get; set; }
     string Name { get; set; }
+    Color BackgroundColor { get; set; }
+    StackChildren Children { get; }
     bool OnInput(InputEvent inputEvent);
     void OnCreate(Rect parentRect, IConsoleManager consoleManager);
     void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
     Rect GetChildrenRect();
     void Refresh();
+    void OnUpdate();
 }
 
 public interface IConsoleEditableElement : IConsoleElement

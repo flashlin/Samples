@@ -11,6 +11,10 @@ public class TextArea : IConsoleElement
 	}
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
+	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
+
+	public StackChildren Children { get; } = new();
+
 	public Position CursorPosition
 	{
 		get
@@ -23,10 +27,10 @@ public class TextArea : IConsoleElement
 	}
 
 	public Rect DesignRect { get; set; }
-	public string Name { get; set; }
 	public int EditIndex => _editIndex;
 	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;
+	public string Name { get; set; }
 	public IConsoleElement? Parent { get; set; }
 	public char TypeCharacter { get; set; } = '\0';
 	public string Value { get; set; } = String.Empty;
@@ -74,10 +78,6 @@ public class TextArea : IConsoleElement
 	public Rect GetChildrenRect()
 	{
 		return ViewRect;
-	}
-
-	public void Refresh()
-	{
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
@@ -190,6 +190,15 @@ public class TextArea : IConsoleElement
 
 		return true;
 	}
+
+	public void OnUpdate()
+	{
+	}
+
+	public void Refresh()
+	{
+	}
+
 	private IEnumerable<Span> GetContentSpans(Rect rect)
 	{
 		var editIndex = 0;
