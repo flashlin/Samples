@@ -3,7 +3,7 @@
 public interface IConsoleManager
 {
 	IConsoleWriter Console { get; }
-	IConsoleElement? FocusedElement { get; set; }
+	IConsoleElement FocusedElement { get; set; }
 	Color HighlightBackgroundColor1 { get; set; }
 	Color HighlightBackgroundColor2 { get; set; }
 	Color InputBackgroundColor { get; set; }

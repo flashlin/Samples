@@ -7,7 +7,7 @@ public class ConsoleManager : IConsoleManager
 	private readonly CancellationTokenSource _cancellationTokenSource = new();
 	private readonly IConsoleWriter _console;
 	private readonly ConsoleInputObserver _inputObserver = new ConsoleInputObserver();
-	private IConsoleElement? _focusedElement;
+	private IConsoleElement _focusedElement;
     
 	public ConsoleManager(IConsoleWriter console)
 	{
@@ -19,13 +19,13 @@ public class ConsoleManager : IConsoleManager
 	public IConsoleWriter Console => _console;
 	public IConsoleElement Content { get; set; }
 
-	public IConsoleElement? FocusedElement
+	public IConsoleElement FocusedElement
 	{
 		get => _focusedElement;
 		set
 		{
 			_focusedElement = value;
-			_focusedElement?.Refresh();
+			_focusedElement.Refresh();
 		}
 	}
 

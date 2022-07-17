@@ -1,4 +1,6 @@
-﻿namespace GitCli.Models.ConsoleMixedReality;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
+namespace GitCli.Models.ConsoleMixedReality;
 
 public class Label : IConsoleElement
 {
@@ -51,6 +53,7 @@ public class Label : IConsoleElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
+		ViewRect = ViewRect.ExtendBy(DesignRect.TopLeftCorner);
 	}
 
 	public bool OnInput(InputEvent inputEvent)
