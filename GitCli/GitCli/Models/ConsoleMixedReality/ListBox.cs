@@ -4,9 +4,9 @@ using System.Collections.Specialized;
 
 namespace GitCli.Models.ConsoleMixedReality;
 
+[MapClone]
 public class ListBox : IConsoleElement
 {
-	private IConsoleManager _consoleManager;
 	private int _index = -1;
 	private Span _showListItemSpan = Span.Empty;
 
@@ -16,6 +16,7 @@ public class ListBox : IConsoleElement
 		Children.CollectionChanged += ChildrenOnCollectionChanged;
 	}
 
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 	public StackChildren Children { get; } = new();
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
@@ -92,9 +93,11 @@ public class ListBox : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		_consoleManager = consoleManager;
+		ConsoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
 		consoleManager.FirstSetFocusElement(this);
+		//TODO:
+		//this.HandleOnCreate(this);
 
 		OnUpdate();
 		_showListItemSpan = new Span()
@@ -127,12 +130,13 @@ public class ListBox : IConsoleElement
 
 			case ConsoleKey.UpArrow when !inputEvent.HasControl:
 				Children.JumpUpFocus();
+				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				OnUpdate();
 				break;
 
 			case ConsoleKey.DownArrow when !inputEvent.HasControl:
 				Children.JumpDownFocus();
-				_consoleManager.FocusedElement = Children.GetFocusedControl();
+				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				OnUpdate();
 				break;
 
@@ -185,9 +189,9 @@ public class ListBox : IConsoleElement
 
 	private Color GetHighlightBackgroundColor(IConsoleElement child)
 	{
-		return _consoleManager.FocusedElement == child ? 
-			_consoleManager.HighlightBackgroundColor1 : 
-			_consoleManager.HighlightBackgroundColor2;
+		return ConsoleManager.FocusedElement == child ?
+			ConsoleManager.HighlightBackgroundColor1 :
+			ConsoleManager.HighlightBackgroundColor2;
 	}
 }
 

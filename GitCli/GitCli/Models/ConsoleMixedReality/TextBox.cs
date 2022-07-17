@@ -2,7 +2,6 @@
 
 public class TextBox : IConsoleEditableElement
 {
-	private IConsoleManager _consoleManager;
 	private int _editIndex;
 	private bool _isSelectedMode;
 	private int _startSelectIndex;
@@ -15,6 +14,7 @@ public class TextBox : IConsoleEditableElement
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; } = new();
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 
 	public Position CursorPosition
 	{
@@ -109,7 +109,7 @@ public class TextBox : IConsoleEditableElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		_consoleManager = consoleManager;
+		ConsoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
 		consoleManager.FirstSetFocusElement(this);
 

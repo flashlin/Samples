@@ -17,4 +17,11 @@ public static class ConsoleElementExtension
 		}
 		return element;
 	}
+
+	public static void HandleOnCreate(this IConsoleElement element, Rect rect)
+	{
+		//element._consoleManager = consoleManager;
+		//ViewRect = element.DesignRect.ToViewRect(rect, consoleManager);
+		//consoleManager.FirstSetFocusElement(this);
+	}
 }

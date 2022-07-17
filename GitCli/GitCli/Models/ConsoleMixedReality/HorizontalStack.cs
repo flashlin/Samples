@@ -6,7 +6,6 @@ namespace GitCli.Models.ConsoleMixedReality;
 
 public class HorizontalStack : IConsoleElement
 {
-	private IConsoleManager _consoleManager;
 	private int _focusIndex = -1;
 
 	public HorizontalStack()
@@ -16,6 +15,7 @@ public class HorizontalStack : IConsoleElement
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; private set; }
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 	public Rect DesignRect { get; set; } = Rect.Empty;
@@ -47,14 +47,14 @@ public class HorizontalStack : IConsoleElement
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
 		{
 			Children.JumpUpFocus();
-			_consoleManager.FocusedElement = Children.GetFocusedControl();
+			ConsoleManager.FocusedElement = Children.GetFocusedControl();
 			return;
 		}
 
 		if (inputEvent.Key == ConsoleKey.Tab)
 		{
 			Children.JumpDownFocus();
-			_consoleManager.FocusedElement = Children.GetFocusedControl();
+			ConsoleManager.FocusedElement = Children.GetFocusedControl();
 			return;
 		}
 
@@ -63,7 +63,7 @@ public class HorizontalStack : IConsoleElement
 			if (_focusIndex != -1)
 			{
 				Children.JumpUpFocus();
-				_consoleManager.FocusedElement = Children.GetFocusedControl();
+				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				return;
 			}
 
@@ -76,7 +76,7 @@ public class HorizontalStack : IConsoleElement
 			if (_focusIndex != -1)
 			{
 				Children.JumpDownFocus();
-				_consoleManager.FocusedElement = Children.GetFocusedControl();
+				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				return;
 			}
 		}
@@ -86,9 +86,9 @@ public class HorizontalStack : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		_consoleManager = consoleManager;
+		ConsoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
-		_consoleManager.FirstSetFocusElement(this);
+		ConsoleManager.FirstSetFocusElement(this);
 
 		var userInitDesignRect = DesignRect.IsEmpty;
 		RearrangeChildren(ViewRect, userInitDesignRect);
@@ -132,7 +132,7 @@ public class HorizontalStack : IConsoleElement
 				Width = userInitViewRect ? Math.Max(child.ViewRect.Width, everyWidth) : child.ViewRect.Width,
 				Height = Math.Max(child.ViewRect.Height, viewRect.Height),
 			};
-			child.OnCreate(viewRect, _consoleManager);
+			child.OnCreate(viewRect, ConsoleManager);
 			left += child.ViewRect.Width;
 		});
 	}
@@ -160,7 +160,7 @@ public class HorizontalStack : IConsoleElement
 				Height = childRect.Height
 			};
 
-			child.OnCreate(childRect, _consoleManager);
+			child.OnCreate(childRect, ConsoleManager);
 		});
 	}
 }

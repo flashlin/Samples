@@ -2,8 +2,9 @@
 
 public class EmptyConsoleManager : IConsoleManager
 {
+	public static EmptyConsoleManager Default = new();
     
-	public EmptyConsoleManager()
+	private EmptyConsoleManager()
 	{
 	}
 

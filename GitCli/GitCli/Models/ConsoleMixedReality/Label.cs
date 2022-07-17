@@ -12,6 +12,7 @@ public class Label : IConsoleElement
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; } = new();
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Position CursorPosition => Position.Empty;
 	public Rect DesignRect { get; set; }
 	public bool Enabled { get; set; }

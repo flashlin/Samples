@@ -18,6 +18,7 @@ public class DropdownListBox : IConsoleElement
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 	public StackChildren Children { get; } = new();
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 
 	public Position CursorPosition
 	{
