@@ -13,6 +13,7 @@ public class TableRow : IConsoleElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 
 	public StackChildren Children { get; private set; }
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 

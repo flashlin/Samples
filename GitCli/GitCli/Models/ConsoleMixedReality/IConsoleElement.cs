@@ -14,6 +14,7 @@ public interface IConsoleElement
     string Name { get; set; }
     Color BackgroundColor { get; set; }
     StackChildren Children { get; }
+    IConsoleManager ConsoleManager { get; set; }
     bool OnInput(InputEvent inputEvent);
     void OnCreate(Rect parentRect, IConsoleManager consoleManager);
     void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);

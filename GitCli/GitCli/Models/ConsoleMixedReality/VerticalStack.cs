@@ -2,8 +2,6 @@
 
 public class VerticalStack : IConsoleElement
 {
-	private IConsoleManager _consoleManager;
-
 	public VerticalStack()
 	{
 		Children = new StackChildren();
@@ -11,6 +9,7 @@ public class VerticalStack : IConsoleElement
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public StackChildren Children { get; private set; }
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 	public Rect DesignRect { get; set; } = Rect.Empty;
 	public bool IsTab { get; set; }
@@ -61,8 +60,8 @@ public class VerticalStack : IConsoleElement
 				return;
 			}
 
-			_consoleManager.FocusedElement = Children.GetFocusedControl();
-			_consoleManager.FocusedElement!.Refresh();
+			ConsoleManager.FocusedElement = Children.GetFocusedControl();
+			ConsoleManager.FocusedElement!.Refresh();
 			return;
 		}
 
@@ -74,8 +73,8 @@ public class VerticalStack : IConsoleElement
 				return;
 			}
 
-			_consoleManager.FocusedElement = Children.GetFocusedControl();
-			_consoleManager.FocusedElement!.Refresh();
+			ConsoleManager.FocusedElement = Children.GetFocusedControl();
+			ConsoleManager.FocusedElement!.Refresh();
 			return;
 		}
 
@@ -87,7 +86,7 @@ public class VerticalStack : IConsoleElement
 				return;
 			}
 
-			_consoleManager.FocusedElement = Children.GetFocusedControl();
+			ConsoleManager.FocusedElement = Children.GetFocusedControl();
 			return;
 		}
 
@@ -99,7 +98,7 @@ public class VerticalStack : IConsoleElement
 				return;
 			}
 
-			_consoleManager.FocusedElement = Children.GetFocusedControl();
+			ConsoleManager.FocusedElement = Children.GetFocusedControl();
 			return;
 		}
 
@@ -108,8 +107,8 @@ public class VerticalStack : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		_consoleManager = consoleManager;
-		ViewRect = DesignRect.ToViewRect(rect, _consoleManager);
+		ConsoleManager = consoleManager;
+		ViewRect = DesignRect.ToViewRect(rect, ConsoleManager);
 		consoleManager.FirstSetFocusElement(this);
 		RearrangeChildren();
 	}
@@ -146,7 +145,7 @@ public class VerticalStack : IConsoleElement
 				Width = child.DesignRect.Width,
 				Height = child.DesignRect.Height,
 			};
-			child.OnCreate(childRect, _consoleManager);
+			child.OnCreate(childRect, ConsoleManager);
 			top += child.ViewRect.Height;
 		});
 	}
