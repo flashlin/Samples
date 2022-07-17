@@ -10,6 +10,22 @@ public class TableRow : IConsoleElement
 		Children = children;
 	}
 
+	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
+
+	public StackChildren Children { get; private set; }
+
+	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
+
+	public Rect DesignRect { get; set; }
+
+	public bool IsTab { get; set; }
+
+	public string Name { get; set; } = string.Empty;
+
+	public IConsoleElement? Parent { get; set; }
+
+	public Rect ViewRect { get; set; }
+
 	public Character this[Position pos]
 	{
 		get
@@ -25,19 +41,13 @@ public class TableRow : IConsoleElement
 			return Character.Empty;
 		}
 	}
-
-	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
-
-	public Rect ViewRect { get; set; }
-	public IConsoleElement? Parent { get; set; }
-	public bool IsTab { get; set; }
-	public Rect DesignRect { get; set; }
-	public string Name { get; set; } = string.Empty;
-	public StackChildren Children { get; private set; }
-
-	public bool OnInput(InputEvent inputEvent)
+	public Rect GetChildrenRect()
 	{
-		return Children.GetFocusedControl().OnInput(inputEvent);
+		return Children.GetRect();
+	}
+
+	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	{
 	}
 
 	public void OnCreate(Rect parentRect, IConsoleManager consoleManager)
@@ -66,13 +76,12 @@ public class TableRow : IConsoleElement
 		}
 	}
 
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnInput(InputEvent inputEvent)
 	{
+		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
-
-	public Rect GetChildrenRect()
+	public void OnUpdate()
 	{
-		return Children.GetRect();
 	}
 
 	public void Refresh()

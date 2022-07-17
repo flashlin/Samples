@@ -14,13 +14,14 @@ public class HorizontalStack : IConsoleElement
 		Children = new StackChildren();
 	}
 
+	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; private set; }
 
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 	public Rect DesignRect { get; set; } = Rect.Empty;
-	public string Name { get; set; } = String.Empty;
 	public bool FixedLayout { get; set; } = false;
 	public bool IsTab { get; set; }
+	public string Name { get; set; } = String.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; } = Rect.Empty;
 	public Character this[Position pos]
@@ -39,11 +40,6 @@ public class HorizontalStack : IConsoleElement
 	public Rect GetChildrenRect()
 	{
 		return Children.GetRect();
-	}
-
-	public void Refresh()
-	{
-		RearrangeChildren(ViewRect, DesignRect.IsEmpty);
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
@@ -92,6 +88,7 @@ public class HorizontalStack : IConsoleElement
 	{
 		_consoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
+		_consoleManager.FirstSetFocusElement(this);
 
 		var userInitDesignRect = DesignRect.IsEmpty;
 		RearrangeChildren(ViewRect, userInitDesignRect);
@@ -107,6 +104,14 @@ public class HorizontalStack : IConsoleElement
 		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
 
+	public void OnUpdate()
+	{
+	}
+
+	public void Refresh()
+	{
+		RearrangeChildren(ViewRect, DesignRect.IsEmpty);
+	}
 	private void RearrangeChildren(Rect viewRect, bool userInitViewRect)
 	{
 		var left = viewRect.Left;

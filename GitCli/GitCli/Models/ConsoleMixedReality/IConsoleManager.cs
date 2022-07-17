@@ -9,4 +9,5 @@ public interface IConsoleManager
 	Color InputBackgroundColor { get; set; }
 	ConsoleInputObserver InputObserver { get; }
 	Color ViewBackgroundColor { get; set; }
+	bool FirstSetFocusElement(IConsoleElement element);
 }

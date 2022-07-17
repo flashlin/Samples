@@ -2,11 +2,18 @@
 
 public class EmptyElement : IConsoleEditableElement
 {
+	public static EmptyElement Default = new();
+
 	private int _editIndex = 0;
+
+	private EmptyElement()
+	{
+	}
+
+	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
+	public StackChildren Children { get; } = new();
 	public Position CursorPosition => Position.Empty;
 	public Rect DesignRect { get; set; } = Rect.Empty;
-	public string Name { get; set; } = string.Empty;
-
 	public int EditIndex
 	{
 		get => _editIndex;
@@ -14,6 +21,7 @@ public class EmptyElement : IConsoleEditableElement
 	}
 
 	public bool IsTab { get; set; } = false;
+	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public string Value { get; } = String.Empty;
 	public Rect ViewRect { get; set; } = Rect.Empty;
@@ -27,10 +35,6 @@ public class EmptyElement : IConsoleEditableElement
 	public Rect GetChildrenRect()
 	{
 		return Rect.Empty;
-	}
-
-	public void Refresh()
-	{
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
@@ -51,5 +55,13 @@ public class EmptyElement : IConsoleEditableElement
 				return false;
 		}
 		return false;
+	}
+
+	public void OnUpdate()
+	{
+	}
+
+	public void Refresh()
+	{
 	}
 }

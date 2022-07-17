@@ -9,14 +9,12 @@ public class VerticalStack : IConsoleElement
 		Children = new StackChildren();
 	}
 
-	public string Name { get; set; }
 	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public StackChildren Children { get; private set; }
-
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
-
 	public Rect DesignRect { get; set; } = Rect.Empty;
 	public bool IsTab { get; set; }
+	public string Name { get; set; }
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; } = Rect.Empty;
 	public Character this[Position pos]
@@ -112,6 +110,7 @@ public class VerticalStack : IConsoleElement
 	{
 		_consoleManager = consoleManager;
 		ViewRect = DesignRect.ToViewRect(rect, _consoleManager);
+		consoleManager.FirstSetFocusElement(this);
 		RearrangeChildren();
 	}
 
@@ -120,11 +119,15 @@ public class VerticalStack : IConsoleElement
 		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
 
+	public void OnUpdate()
+	{
+
+	}
+
 	public void Refresh()
 	{
 		RearrangeChildren();
 	}
-
 	private void RearrangeChildren()
 	{
 		var top = ViewRect.Top;

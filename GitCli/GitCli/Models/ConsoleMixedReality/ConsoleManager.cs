@@ -7,12 +7,12 @@ public class ConsoleManager : IConsoleManager
 	private readonly CancellationTokenSource _cancellationTokenSource = new();
 	private readonly IConsoleWriter _console;
 	private readonly ConsoleInputObserver _inputObserver = new ConsoleInputObserver();
-	private IConsoleElement _focusedElement;
-    
+	private IConsoleElement _focusedElement = EmptyElement.Default;
+
 	public ConsoleManager(IConsoleWriter console)
 	{
 		_console = console;
-		Content = new EmptyElement();
+		Content = EmptyElement.Default;
 	}
 
 	public Size BufferSize => _buffer.Size;
@@ -24,9 +24,25 @@ public class ConsoleManager : IConsoleManager
 		get => _focusedElement;
 		set
 		{
-			_focusedElement = value;
-			_focusedElement.Refresh();
+			SetFocusElement(value);
 		}
+	}
+
+	public bool FirstSetFocusElement(IConsoleElement element)
+	{
+		if (_focusedElement != EmptyElement.Default)
+		{
+			return false;
+		}
+		return SetFocusElement(element);
+	}
+
+	private bool SetFocusElement(IConsoleElement element)
+	{
+		var lastFocused = element.GetLeafChild();
+		var hasChanged = _focusedElement != lastFocused;
+		_focusedElement = lastFocused;
+		return hasChanged;
 	}
 
 	public Color HighlightBackgroundColor1 { get; set; } = ConsoleColor.Gray;
@@ -125,10 +141,11 @@ public class ConsoleManager : IConsoleManager
 				//_drawBuffer.Update(position, character);
 				if (!_buffer.Update(position, character)) continue;
 				_console.Write(position, character);
-				
+
 				//character = _drawBuffer[position];
 				//_console.Write(position, character);
 			}
 		}
 	}
 }
+
