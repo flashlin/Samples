@@ -128,8 +128,9 @@ public class ConsoleWriter : IConsoleWriter
 
 	private void SetVirtualCursorPosition(int col, int row)
 	{
-		Console.Write($"\x1b[{row + 1};{col + 1}H");
-		//Console.Out.Write($"\x1b[{row + 1};{col + 1}H");
-		//Console.Out.Flush();
+		//Console.Write($"\x1b[{row + 1};{col + 1}H");
+		HideCursor();
+		Console.CursorSize = 50;
+		Console.SetCursorPosition(col, row);
 	}
 }

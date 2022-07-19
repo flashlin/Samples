@@ -52,14 +52,6 @@ public class ListBox : IConsoleElement
 			}
 
 			var item = Children[index];
-			//item.ViewRect = new Rect
-			//{
-			//	Left = ViewRect.Left,
-			//	Top = ViewRect.Top + y,
-			//	Width = ViewRect.Width,
-			//	Height = ViewRect.Height
-			//};
-			//item.BackgroundColor = GetHighlightBackgroundColor(item);
 			return item[pos];
 		}
 	}
