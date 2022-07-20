@@ -157,6 +157,7 @@ public class ListBox : IConsoleElement
 
 	public void Refresh()
 	{
+		OnUpdate();
 	}
 
 	private void AddChild(IList newItems)

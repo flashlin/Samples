@@ -3,46 +3,17 @@ using T1.Standard.Extensions;
 
 namespace GitCli.Models;
 
-
-public class Bind<T>
-{
-	public T? Value { get; private set; }
-
-	public List<Action<T>> SetupList = new List<Action<T>>();
-
-	public void Setup(Action<T> fn)
-	{
-		if (Value == null)
-		{
-			SetupList.Add(fn);
-			return;
-		}
-		fn(Value);
-	}
-
-	public void SetValue(T value)
-	{
-		Value = value;
-		foreach (var setup in SetupList)
-		{
-			setup(value);
-		}
-	}
-}
-
 public class ConsoleWindow : IConsoleWindow
 {
-	private readonly IServiceProvider _serviceProvider;
 	private readonly ConsoleWriter _console;
-	private ConsoleManager _consoleManager;
-	private IGitRepoAgent _gitRepoAgent;
+	private readonly ConsoleManager _consoleManager;
+	private readonly IGitRepoAgent _gitRepoAgent;
 
-	public ConsoleWindow(IServiceProvider serviceProvider, ConsoleManager consoleManager,
+	public ConsoleWindow(ConsoleManager consoleManager,
 		 IGitRepoAgent gitRepoAgent)
 	{
 		_gitRepoAgent = gitRepoAgent;
 		_consoleManager = consoleManager;
-		_serviceProvider = serviceProvider;
 		_console = new ConsoleWriter();
 	}
 

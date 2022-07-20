@@ -6,8 +6,6 @@ namespace GitCli.Models.ConsoleMixedReality;
 
 public class HorizontalStack : IConsoleElement
 {
-	private int _focusIndex = -1;
-
 	public HorizontalStack()
 	{
 		Children = new StackChildren();
@@ -60,25 +58,17 @@ public class HorizontalStack : IConsoleElement
 
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
-			if (_focusIndex != -1)
-			{
-				Children.JumpUpFocus();
-				ConsoleManager.FocusedElement = Children.GetFocusedControl();
-				return;
-			}
-
-			Parent?.OnBubbleEvent(this, inputEvent);
+			Children.JumpUpFocus();
+			ConsoleManager.FocusedElement = Children.GetFocusedControl();
+			//Parent?.OnBubbleEvent(this, inputEvent);
 			return;
 		}
 
 		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
 		{
-			if (_focusIndex != -1)
-			{
-				Children.JumpDownFocus();
-				ConsoleManager.FocusedElement = Children.GetFocusedControl();
-				return;
-			}
+			Children.JumpDownFocus();
+			ConsoleManager.FocusedElement = Children.GetFocusedControl();
+			return;
 		}
 
 		Parent?.OnBubbleEvent(this, inputEvent);
@@ -110,6 +100,7 @@ public class HorizontalStack : IConsoleElement
 	{
 		RearrangeChildren(ViewRect, DesignRect.IsEmpty);
 	}
+
 	private void RearrangeChildren(Rect viewRect, bool userInitViewRect)
 	{
 		var left = viewRect.Left;
@@ -118,19 +109,17 @@ public class HorizontalStack : IConsoleElement
 		{
 			if (idx == 0)
 			{
-				_focusIndex = 0;
 				left = viewRect.Left + child.ViewRect.Left;
 			}
-
 			child.Parent = this;
-			child.ViewRect = new Rect
+			var childViewRect = new Rect
 			{
 				Left = left,
-				Top = viewRect.Top + child.ViewRect.Top,
-				Width = userInitViewRect ? Math.Max(child.ViewRect.Width, everyWidth) : child.ViewRect.Width,
-				Height = Math.Max(child.ViewRect.Height, viewRect.Height),
+				Top = viewRect.Top,
+				Width = userInitViewRect ? Math.Max(child.DesignRect.Width, everyWidth) : child.ViewRect.Width,
+				Height = Math.Max(child.DesignRect.Height, viewRect.Height),
 			};
-			child.OnCreate(viewRect, ConsoleManager);
+			child.OnCreate(childViewRect, ConsoleManager);
 			left += child.ViewRect.Width;
 		});
 	}
