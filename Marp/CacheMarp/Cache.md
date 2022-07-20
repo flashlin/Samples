@@ -113,5 +113,75 @@ public class CacheInterceptorAttribute : AbstractInterceptorAttribute
 ---
 
 
+```C#
+public IActionResult Index()
+{
+	var featureEnabled1 = _globalSettingService.GetStringValue("FeatureEnabled") == "true";
+	var featureEnabled2 = _globalSettingService.GetBoolValue("FeatureEnabled");
+   ...
+	return View;
+}
+```
+
+---
+
+Create strongly typed config object
+```C#
+public class MyGlobalSettings
+{
+   public string[] Countries { get; set; } = Array.Empty<string>();
+   public bool FeatureEnabled { get; set; } = false;
+   public List<int> CustomerIds { get; set; } = new();
+   public List<BlockedDomain> BlockedDomains { get; set; } = new();
+}
+```
+
+---
+
+Use Factory Pattern Create our GlobalSetting Config Value
+```C#
+public HomeController(IGlobalSettingFactory<MyGlobalSettings> globalSettingFactory)
+{
+	_myGlobalSettings = globalSettingFactory.Create();
+}
+
+public IActionResult Index()
+{
+	//var featureEnabled1 = _globalSettingService.GetStringValue("FeatureEnabled") == "true";
+	//var featureEnabled2 = _globalSettingService.GetBoolValue("FeatureEnabled");
+	var featureEnabled3 = _myGlobalSettings.FeatureEnabled;
+   ...
+}
+```
+
+---
+
+```C#
+public T Create()
+{
+   var json = new StringBuilder();
+   json.AppendLine("{");
+   var allSettings = _globalSettingRepo.GetGlobalSettings().ToArray();
+   foreach (var setting in allSettings)
+   {
+      json.Append($"\"{setting.Id}\" : ");
+   	json.Append(IsSurroundWithJson(setting) ? $"{setting.Value}" : $"\"{setting.Value}\"");
+   	if (setting != allSettings.Last())
+   	{
+   	   json.Append(",");
+   	}
+   }
+   json.AppendLine("}");
+   return Deserialize(json);
+}
+```
 
 
+---
+
+Register
+```C#
+
+Services.AddTransient<IGlobalSettingFactory<MyGlobalSettings>, GlobalSettingFactory<MyGlobalSettings>>();
+
+```
