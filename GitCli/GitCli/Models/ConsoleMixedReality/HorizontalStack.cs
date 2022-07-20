@@ -77,14 +77,8 @@ public class HorizontalStack : IConsoleElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		this.HandleOnCreate(rect, consoleManager);
-
 		var userInitDesignRect = DesignRect.IsEmpty;
-		RearrangeChildren(ViewRect, userInitDesignRect);
-
-		if (!FixedLayout && userInitDesignRect)
-		{
-			RearrangeChildrenByChildWidth();
-		}
+		RearrangeChildren();
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -98,56 +92,29 @@ public class HorizontalStack : IConsoleElement
 
 	public void Refresh()
 	{
-		RearrangeChildren(ViewRect, DesignRect.IsEmpty);
+		RearrangeChildren();
 	}
 
-	private void RearrangeChildren(Rect viewRect, bool userInitViewRect)
+	private void RearrangeChildren()
 	{
-		var left = viewRect.Left;
-		var everyWidth = viewRect.Width / Children.Count;
+		var left = ViewRect.Left;
+		var everyWidth = ViewRect.Width / Children.Count;
 		Children.ForEachIndex((child, idx) =>
 		{
 			if (idx == 0)
 			{
-				left = viewRect.Left + child.ViewRect.Left;
+				left = ViewRect.Left + child.ViewRect.Left;
 			}
 			child.Parent = this;
 			var childViewRect = new Rect
 			{
 				Left = left,
-				Top = viewRect.Top,
-				Width = userInitViewRect ? Math.Max(child.DesignRect.Width, everyWidth) : child.ViewRect.Width,
-				Height = Math.Max(child.DesignRect.Height, viewRect.Height),
+				Top = ViewRect.Top,
+				Width = DesignRect.IsEmpty ? everyWidth : child.DesignRect.Width,
+				Height = Math.Max(child.DesignRect.Height, ViewRect.Height),
 			};
 			child.OnCreate(childViewRect, ConsoleManager);
 			left += child.ViewRect.Width;
-		});
-	}
-
-	private void RearrangeChildrenByChildWidth()
-	{
-		var prevRect = Rect.Empty;
-		Children.ForEachIndex((child, idx) =>
-		{
-			if (idx == 0)
-			{
-				prevRect = child.ViewRect = child.GetChildrenRect();
-				return;
-			}
-
-			var childRect = child.GetChildrenRect();
-
-			//child.ViewRect = childRect = new Rect
-			child.ViewRect = Rect.Empty;
-			childRect = new Rect
-			{
-				Left = prevRect.Right + 1,
-				Top = childRect.Top,
-				Width = childRect.Width,
-				Height = childRect.Height
-			};
-
-			child.OnCreate(childRect, ConsoleManager);
 		});
 	}
 }

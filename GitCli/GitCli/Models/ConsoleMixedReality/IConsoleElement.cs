@@ -18,7 +18,6 @@ public interface IConsoleElement
     bool OnInput(InputEvent inputEvent);
     void OnCreate(Rect parentRect, IConsoleManager consoleManager);
     void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
-    Rect GetChildrenRect();
     void Refresh();
     void OnUpdate();
 }

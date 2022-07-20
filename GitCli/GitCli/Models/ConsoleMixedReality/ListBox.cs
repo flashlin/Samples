@@ -61,16 +61,12 @@ public class ListBox : IConsoleElement
 		_index = Math.Max(_index, 0);
 		var textBox = new TextBox(Rect.Empty)
 		{
+			Parent = this,
 			Value = item.Title,
 			UserObject = item.Value
 		};
 		Children.Add(textBox);
 		return textBox;
-	}
-
-	public Rect GetChildrenRect()
-	{
-		return ViewRect;
 	}
 
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
