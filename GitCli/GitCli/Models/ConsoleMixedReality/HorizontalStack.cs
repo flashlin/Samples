@@ -99,6 +99,7 @@ public class HorizontalStack : IConsoleElement
 	{
 		var left = ViewRect.Left;
 		var everyWidth = ViewRect.Width / Children.Count;
+		everyWidth = DesignRect.IsEmpty ? everyWidth : DesignRect.Width;
 		Children.ForEachIndex((child, idx) =>
 		{
 			if (idx == 0)
@@ -110,7 +111,7 @@ public class HorizontalStack : IConsoleElement
 			{
 				Left = left,
 				Top = ViewRect.Top,
-				Width = DesignRect.IsEmpty ? everyWidth : child.DesignRect.Width,
+				Width = Math.Max(everyWidth, DesignRect.Width),
 				Height = Math.Max(child.DesignRect.Height, ViewRect.Height),
 			};
 			child.OnCreate(childViewRect, ConsoleManager);
