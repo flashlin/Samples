@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="AspectCore.Core" Version="2.2.0" />
     <PackageReference Include="AspectCore.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="LanguageExt.Core" Version="4.2.9" />
     <PackageReference Include="T1.Standard" Version="1.0.65" />
   </ItemGroup>
 
