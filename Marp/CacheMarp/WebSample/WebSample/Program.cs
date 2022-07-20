@@ -7,7 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddTransient<IUserService, UserService>();
-
+builder.Services.AddTransient<IGlobalSettingRepo, GlobalSettingRepo>();
+builder.Services.AddTransient<IGlobalSettingService, GlobalSettingService>();
+builder.Services.AddTransient<IGlobalSettingFactory<MyGlobalSettings>, GlobalSettingFactory<MyGlobalSettings>>();
 
 //builder.Services.ConfigureDynamicProxy(config =>
 //{
