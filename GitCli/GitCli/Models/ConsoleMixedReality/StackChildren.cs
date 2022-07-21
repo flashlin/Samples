@@ -6,6 +6,12 @@ namespace GitCli.Models.ConsoleMixedReality;
 public class StackChildren : ObservableCollection<IConsoleElement>
 {
 	private int _focusIndex = -1;
+	private IConsoleElement _parent;
+
+	public StackChildren(IConsoleElement parent)
+	{
+		_parent = parent;
+	}
 
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public int FocusIndex => _focusIndex;

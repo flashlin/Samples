@@ -12,12 +12,13 @@ public class DropdownListBox : IConsoleElement
 	public DropdownListBox(Rect rect)
 	{
 		DesignRect = rect;
+		Children = new StackChildren(this);
 		_textBox = new TextBox(Rect.Empty);
 		_listBox = new ListBox(Rect.Empty);
 	}
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
-	public StackChildren Children { get; } = new();
+	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 
 	public Position CursorPosition
