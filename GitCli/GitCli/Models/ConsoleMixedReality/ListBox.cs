@@ -21,7 +21,9 @@ public class ListBox : IConsoleElement
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 	public StackChildren Children { get; }
-	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
+	public Position CursorPosition => Children.FocusedControlOrMe(
+		x => x.CursorPosition,
+		() => ViewRect.TopLeftCorner);
 
 	public Rect DesignRect { get; set; }
 	public bool IsTab { get; set; } = true;

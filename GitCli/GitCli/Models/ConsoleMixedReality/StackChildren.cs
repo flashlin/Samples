@@ -6,7 +6,7 @@ namespace GitCli.Models.ConsoleMixedReality;
 public class StackChildren : ObservableCollection<IConsoleElement>
 {
 	private int _focusIndex = -1;
-	private IConsoleElement _parent;
+	private readonly IConsoleElement _parent;
 
 	public StackChildren(IConsoleElement parent)
 	{
@@ -23,6 +23,15 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 			return EmptyElement.Default;
 		}
 		return this[_focusIndex];
+	}
+
+	public T GetFocusedControlOrMe<T>(Func<IConsoleElement, T> action, Func<T> parentAction)
+	{
+		if (_focusIndex == -1)
+		{
+			return parentAction();
+		}
+		return action(this[_focusIndex]);
 	}
 
 	public bool JumpDownFocus()

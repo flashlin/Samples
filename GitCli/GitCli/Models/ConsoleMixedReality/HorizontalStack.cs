@@ -35,11 +35,6 @@ public class HorizontalStack : IConsoleElement
 		}
 	}
 
-	public Rect GetChildrenRect()
-	{
-		return Children.GetRect();
-	}
-
 	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
