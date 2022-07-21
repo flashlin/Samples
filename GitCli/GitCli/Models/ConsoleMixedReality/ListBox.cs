@@ -1,13 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace GitCli.Models.ConsoleMixedReality;
 
 [MapClone]
 public class ListBox : IConsoleElement
 {
-	private Span _showListItemSpan = Span.Empty;
+	private Span _showListSpan = Span.Empty;
 
 	public ListBox(Rect rect)
 	{
@@ -37,13 +38,13 @@ public class ListBox : IConsoleElement
 				return Character.Empty;
 			}
 
-			if (_showListItemSpan.IsEmpty)
+			if (_showListSpan.IsEmpty)
 			{
 				return new Character(' ', null, BackgroundColor);
 			}
 
 			var y = pos.Y - ViewRect.Top;
-			var index = _showListItemSpan.Index + y;
+			var index = _showListSpan.Index + y;
 
 			if (index >= Children.Count)
 			{
@@ -84,9 +85,8 @@ public class ListBox : IConsoleElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		this.HandleOnCreate(rect, consoleManager);
-
 		OnUpdate();
-		_showListItemSpan = new Span()
+		_showListSpan = new Span()
 		{
 			Index = 0,
 			Length = ViewRect.Height
@@ -109,19 +109,30 @@ public class ListBox : IConsoleElement
 				OnUpdate();
 				return true;
 
+			case ConsoleKey.Home:
+			case ConsoleKey.End:
 			case ConsoleKey.RightArrow:
 				focusedControl.OnInput(inputEvent);
 				OnUpdate();
 				return true;
 
 			case ConsoleKey.UpArrow when !inputEvent.HasControl:
-				Children.JumpUpFocus();
+				if (Children.JumpUpFocus() && 0 == CursorPosition.Y - ViewRect.Top)
+				{
+					if (_showListSpan.Index > 0)
+					{
+						_showListSpan = _showListSpan.Move(-1);
+					}
+				}
 				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				OnUpdate();
 				break;
 
 			case ConsoleKey.DownArrow when !inputEvent.HasControl:
-				Children.JumpDownFocus();
+				if (Children.JumpDownFocus() && ViewRect.Height == CursorPosition.Y - ViewRect.Top)
+				{
+					_showListSpan = _showListSpan.Move(1);
+				}
 				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				OnUpdate();
 				break;
@@ -137,8 +148,12 @@ public class ListBox : IConsoleElement
 	public void OnUpdate()
 	{
 		var y = ViewRect.Top;
-		foreach (var child in Children)
+		Children.ForEachIndex((child, idx) =>
 		{
+			if (idx < _showListSpan.Index)
+			{
+				return;
+			}
 			child.ViewRect = new Rect()
 			{
 				Left = ViewRect.Left,
@@ -149,7 +164,7 @@ public class ListBox : IConsoleElement
 			child.BackgroundColor = GetHighlightBackgroundColor(child);
 			child.OnUpdate();
 			y += 1;
-		}
+		});
 	}
 
 	public void Refresh()
