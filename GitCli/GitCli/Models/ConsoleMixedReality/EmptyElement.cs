@@ -14,6 +14,7 @@ public class EmptyElement : IConsoleEditableElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public Color? HighlightBackgroundColor { get; set; }
 	public Position CursorPosition => Position.Empty;
 	public Rect DesignRect { get; set; } = Rect.Empty;
 	public int EditIndex

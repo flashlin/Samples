@@ -14,6 +14,7 @@ public class TableRow : IConsoleElement
 
 	public StackChildren Children { get; private set; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public Color? HighlightBackgroundColor { get; set; }
 
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
