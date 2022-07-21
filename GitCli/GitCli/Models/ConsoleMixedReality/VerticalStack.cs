@@ -108,7 +108,10 @@ public class VerticalStack : IConsoleElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		this.HandleOnCreate(rect, consoleManager);
-		RearrangeChildren();
+		UpdateChildren((viewRect, child) =>
+		{
+			child.OnCreate(viewRect, ConsoleManager);
+		});
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -118,15 +121,19 @@ public class VerticalStack : IConsoleElement
 
 	public void OnUpdate()
 	{
-		
+
 	}
 
 	public void Refresh()
 	{
-		RearrangeChildren();
+		UpdateChildren((viewRect, child) =>
+		{
+			child.ViewRect = viewRect;
+			child.OnUpdate();
+		});
 	}
 
-	private void RearrangeChildren()
+	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)
 	{
 		var top = ViewRect.Top;
 		Children.ForEachIndex((child, idx) =>
@@ -135,7 +142,6 @@ public class VerticalStack : IConsoleElement
 			{
 				top = ViewRect.Top + child.DesignRect.Top;
 			}
-
 			child.Parent = this;
 			var childRect = new Rect
 			{
@@ -144,7 +150,7 @@ public class VerticalStack : IConsoleElement
 				Width = child.DesignRect.Width,
 				Height = child.DesignRect.Height,
 			};
-			child.OnCreate(childRect, ConsoleManager);
+			updateChild(childRect, child);
 			top += child.ViewRect.Height;
 		});
 	}
