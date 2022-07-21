@@ -89,10 +89,6 @@ public class HorizontalStack : IConsoleElement
 		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
 
-	public void OnUpdate()
-	{
-	}
-
 	public void Refresh()
 	{
 		UpdateChildren((viewRect, child) =>

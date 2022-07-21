@@ -194,10 +194,6 @@ public class TextArea : IConsoleElement
 		return true;
 	}
 
-	public void OnUpdate()
-	{
-	}
-
 	public void Refresh()
 	{
 	}

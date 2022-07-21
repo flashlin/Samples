@@ -107,10 +107,6 @@ public class Frame : IConsoleElement
 		return _focus.OnInput(inputEvent);
 	}
 
-	public void OnUpdate()
-	{
-	}
-
 	public void Refresh()
 	{
 	}

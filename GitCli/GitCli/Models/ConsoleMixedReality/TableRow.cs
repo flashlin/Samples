@@ -81,9 +81,6 @@ public class TableRow : IConsoleElement
 	{
 		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
-	public void OnUpdate()
-	{
-	}
 
 	public void Refresh()
 	{

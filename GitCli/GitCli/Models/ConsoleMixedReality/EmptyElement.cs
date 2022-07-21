@@ -59,10 +59,6 @@ public class EmptyElement : IConsoleEditableElement
 		return false;
 	}
 
-	public void OnUpdate()
-	{
-	}
-
 	public void Refresh()
 	{
 	}

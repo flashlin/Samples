@@ -103,10 +103,6 @@ public class DropdownListBox : IConsoleElement
 		return _textBox.OnInput(inputEvent);
 	}
 
-	public void OnUpdate()
-	{
-	}
-
 	public void Refresh()
 	{
 

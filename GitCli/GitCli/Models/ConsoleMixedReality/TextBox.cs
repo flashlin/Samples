@@ -115,10 +115,6 @@ public class TextBox : IConsoleEditableElement
 		HighlightBackgroundColor ??= consoleManager.HighlightBackgroundColor1;
 	}
 
-	public void OnUpdate()
-	{
-	}
-
 	public bool OnInput(InputEvent inputEvent)
 	{
 		var newText = (string?)null;
