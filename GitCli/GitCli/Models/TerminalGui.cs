@@ -4,11 +4,11 @@ namespace GitCli.Models;
 
 public class TerminalGui : ITerminalGui
 {
-	private GitChanges _gitChanges;
+	private GitChanges? _gitChanges;
 	private List<IMenuItem> _workspaceViewMenus;
-	private GitAllCommits _gitAllCommits;
+	private GitAllCommits? _gitAllCommits;
 	private readonly GitRepoInfo _gitRepoInfo;
-	private readonly IGitRepoAgent _gitRepoAgent;
+	private readonly IGitRepoAgent? _gitRepoAgent;
 	private Window _unStagedWindow;
 	private Window _workspaceWindow;
 

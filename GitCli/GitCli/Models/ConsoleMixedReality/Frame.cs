@@ -2,7 +2,7 @@
 
 public class Frame : IConsoleElement
 {
-	private IConsoleManager _consoleManager;
+	private IConsoleManager _consoleManager = EmptyConsoleManager.Default;
 
 	private IConsoleElement? _focus;
 
@@ -75,7 +75,7 @@ public class Frame : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		_consoleManager = consoleManager;
+		this.HandleOnCreate(rect, consoleManager);
 		var viewRect = ViewRect.Init(() => rect);
 		foreach (var (child, idx) in Children.Select((val, idx) => (val, idx)))
 		{
