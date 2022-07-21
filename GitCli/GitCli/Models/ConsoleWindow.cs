@@ -27,6 +27,7 @@ public class ConsoleWindow : IConsoleWindow
 
 		var branchStackLayout = new VerticalStack()
 		{
+			Name = "LeftVertical1",
 			DesignRect = new Rect()
 			{
 				Width = 20,
@@ -43,6 +44,7 @@ public class ConsoleWindow : IConsoleWindow
 						  Height = 2,
 					 }).Setup(x =>
 					 {
+						  x.Name = "LocalChanges";
 						  var localChanges = x.AddItem(new ListItem()
 						  {
 								Title = "Local Changes",
@@ -82,13 +84,14 @@ public class ConsoleWindow : IConsoleWindow
 						  Top = 3,
 						  Width = 20,
 						  Height = 10,
-					 }).Setup(branchList =>
+					 }).Setup(x =>
 					 {
+						  x.Name = "branchList";
 						  var branches = gitRepoInfo.QueryBranches()
 								.OrderByDescending(x => x.IsLocalBranch);
 						  foreach (var branch in branches)
 						  {
-								branchList.AddItem(new ListItem
+								x.AddItem(new ListItem
 								{
 									 Title = branch.Name,
 									 Value = branch
@@ -100,6 +103,7 @@ public class ConsoleWindow : IConsoleWindow
 
 		var verticalStack2 = new VerticalStack()
 		{
+			Name = "vertical2",
 			BackgroundColor = ConsoleColor.DarkGreen,
 			Children =
 			{
