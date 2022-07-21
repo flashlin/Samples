@@ -104,8 +104,9 @@ public class TextBox : IConsoleEditableElement
 		return ViewRect;
 	}
 
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
+		return false;
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)

@@ -51,44 +51,41 @@ public class VerticalStack : IConsoleElement
 		return initRect;
 	}
 
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
 		{
 			if (!Children.JumpUpFocus())
 			{
-				Parent?.OnBubbleEvent(this, inputEvent);
-				return;
+				return Parent?.OnBubbleEvent(this, inputEvent) ?? false;
 			}
 
 			ConsoleManager.FocusedElement = Children.GetFocusedControl();
 			Refresh();
-			return;
+			return true;
 		}
 
 		if (inputEvent.Key == ConsoleKey.Tab)
 		{
 			if (!Children.JumpDownFocus())
 			{
-				Parent?.OnBubbleEvent(this, inputEvent);
-				return;
+				return Parent?.OnBubbleEvent(this, inputEvent) ?? false;
 			}
 
 			ConsoleManager.FocusedElement = Children.GetFocusedControl();
 			Refresh();
-			return;
+			return true;
 		}
 
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
 			if (!Children.JumpUpFocus())
 			{
-				Parent?.OnBubbleEvent(this, inputEvent);
-				return;
+				return Parent?.OnBubbleEvent(this, inputEvent) ?? false;
 			}
 
 			ConsoleManager.FocusedElement = Children.GetFocusedControl();
-			return;
+			return true;
 		}
 
 		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
@@ -96,14 +93,14 @@ public class VerticalStack : IConsoleElement
 			if (!Children.JumpDownFocus())
 			{
 				Parent?.OnBubbleEvent(this, inputEvent);
-				return;
+				return false;
 			}
 
 			ConsoleManager.FocusedElement = Children.GetFocusedControl();
-			return;
+			return true;
 		}
 
-		Parent?.OnBubbleEvent(this, inputEvent);
+		return Parent?.OnBubbleEvent(this, inputEvent) ?? false;
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)

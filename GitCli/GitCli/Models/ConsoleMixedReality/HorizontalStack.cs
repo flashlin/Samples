@@ -36,40 +36,53 @@ public class HorizontalStack : IConsoleElement
 		}
 	}
 
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
 		{
-			Children.JumpUpFocus();
-			ConsoleManager.FocusedElement = Children.GetFocusedControl();
-			Refresh();
-			return;
+			if (Children.JumpUpFocus())
+			{
+				ConsoleManager.FocusedElement = Children.GetFocusedControl();
+				Refresh();
+				return true;
+			}
+			return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 		}
 
 		if (inputEvent.Key == ConsoleKey.Tab)
 		{
-			Children.JumpDownFocus();
-			ConsoleManager.FocusedElement = Children.GetFocusedControl();
-			Refresh();
-			return;
+			if (Children.JumpDownFocus())
+			{
+				ConsoleManager.FocusedElement = Children.GetFocusedControl();
+				Refresh();
+				return true;
+			}
+			return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 		}
 
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
-			Children.JumpUpFocus();
-			ConsoleManager.FocusedElement = Children.GetFocusedControl();
-			//Parent?.OnBubbleEvent(this, inputEvent);
-			return;
+			if (Children.JumpUpFocus())
+			{
+				ConsoleManager.FocusedElement = Children.GetFocusedControl();
+				Refresh();
+				return true;
+			}
+			return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 		}
 
 		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
 		{
-			Children.JumpDownFocus();
-			ConsoleManager.FocusedElement = Children.GetFocusedControl();
-			return;
+			if (Children.JumpDownFocus())
+			{
+				ConsoleManager.FocusedElement = Children.GetFocusedControl();
+				Refresh();
+				return true;
+			}
+			return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 		}
 
-		Parent?.OnBubbleEvent(this, inputEvent);
+		return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)

@@ -56,23 +56,29 @@ public class Frame : IConsoleElement
 		return initRect;
 	}
 
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		var focus = Children.GetFocusedControl();
 		
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
 		{
-			Children.JumpUpFocus();
-			return;
+			if (Children.JumpUpFocus())
+			{
+				Refresh();
+				return true;
+			}
 		}
 
 		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
 		{
-			Children.JumpDownFocus();
-			return;
+			if (Children.JumpDownFocus())
+			{
+				Refresh();
+				return true;
+			}
 		}
 
-		Parent?.OnBubbleEvent(element, inputEvent);
+		return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)

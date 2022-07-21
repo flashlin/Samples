@@ -40,9 +40,9 @@ public class EmptyElement : IConsoleEditableElement
 		return Rect.Empty;
 	}
 
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
-		Parent?.OnBubbleEvent(element, inputEvent);
+		return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)

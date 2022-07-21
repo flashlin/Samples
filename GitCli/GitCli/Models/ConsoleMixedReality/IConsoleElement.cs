@@ -15,10 +15,9 @@ public interface IConsoleElement
     Color BackgroundColor { get; set; }
     StackChildren Children { get; }
     IConsoleManager ConsoleManager { get; set; }
-    Color? HighlightBackgroundColor { get; set; }
     bool OnInput(InputEvent inputEvent);
     void OnCreate(Rect parentRect, IConsoleManager consoleManager);
-    void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
+    bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
     void Refresh();
 }
 
