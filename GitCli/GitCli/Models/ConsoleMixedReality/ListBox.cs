@@ -99,14 +99,19 @@ public class ListBox : IConsoleElement
 
 	public bool OnInput(InputEvent inputEvent)
 	{
-		var focusedControl = Children.GetFocusedControl();
-		//TODO:
-		//if (focusedControl == EmptyElement.Default)
-		//{
-		//	this.Parent?.OnBubbleEvent(this, inputEvent);
-		//	return false;
-		//}
+		return Children.FocusedControlOrMe(
+			focusedControl => OnFocusedControlInputEvent(inputEvent, focusedControl),
+			() => OnMeInputEvent(inputEvent));
+	}
 
+	private bool OnMeInputEvent(InputEvent inputEvent)
+	{
+		OnBubbleEvent(this, inputEvent);
+		return false;
+	}
+
+	private bool OnFocusedControlInputEvent(InputEvent inputEvent, IConsoleElement focusedControl)
+	{
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.Tab:
@@ -131,6 +136,7 @@ public class ListBox : IConsoleElement
 				{
 					_showListSpan = _showListSpan.Move(-1);
 				}
+
 				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				Refresh();
 				break;
@@ -140,6 +146,7 @@ public class ListBox : IConsoleElement
 				{
 					_showListSpan = _showListSpan.Move(1);
 				}
+
 				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				Refresh();
 				break;
