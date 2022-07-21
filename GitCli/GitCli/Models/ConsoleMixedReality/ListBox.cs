@@ -77,14 +77,14 @@ public class ListBox : IConsoleElement
 		return textBox;
 	}
 
-	public void OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.Tab:
-				Parent?.OnBubbleEvent(element, inputEvent);
-				break;
+				return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 		}
+		return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
