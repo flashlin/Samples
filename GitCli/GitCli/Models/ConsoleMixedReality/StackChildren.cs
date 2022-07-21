@@ -8,6 +8,7 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 	private int _focusIndex = -1;
 
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public int FocusIndex => _focusIndex;
 
 	public IConsoleElement GetFocusedControl()
 	{
