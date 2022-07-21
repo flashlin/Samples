@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using LanguageExt;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace GitCli.Models.ConsoleMixedReality;
@@ -86,7 +87,7 @@ public class ListBox : IConsoleElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		this.HandleOnCreate(rect, consoleManager);
-		OnUpdate();
+		Refresh();
 		_showListSpan = new Span()
 		{
 			Index = 0,
@@ -108,19 +109,19 @@ public class ListBox : IConsoleElement
 		{
 			case ConsoleKey.Tab:
 				focusedControl.OnInput(inputEvent);
-				OnUpdate();
+				Refresh();
 				return true;
 
 			case ConsoleKey.LeftArrow:
 				focusedControl.OnInput(inputEvent);
-				OnUpdate();
+				Refresh();
 				return true;
 
 			case ConsoleKey.Home:
 			case ConsoleKey.End:
 			case ConsoleKey.RightArrow:
 				focusedControl.OnInput(inputEvent);
-				OnUpdate();
+				Refresh();
 				return true;
 
 			case ConsoleKey.UpArrow when !inputEvent.HasControl:
@@ -129,7 +130,7 @@ public class ListBox : IConsoleElement
 					_showListSpan = _showListSpan.Move(-1);
 				}
 				ConsoleManager.FocusedElement = Children.GetFocusedControl();
-				OnUpdate();
+				Refresh();
 				break;
 
 			case ConsoleKey.DownArrow when !inputEvent.HasControl:
@@ -138,7 +139,7 @@ public class ListBox : IConsoleElement
 					_showListSpan = _showListSpan.Move(1);
 				}
 				ConsoleManager.FocusedElement = Children.GetFocusedControl();
-				OnUpdate();
+				Refresh();
 				break;
 
 			case ConsoleKey.Enter:
@@ -149,7 +150,7 @@ public class ListBox : IConsoleElement
 		return true;
 	}
 
-	public void OnUpdate()
+	public void Refresh()
 	{
 		var y = ViewRect.Top;
 		Children.ForEachIndex((child, idx) =>
@@ -158,6 +159,7 @@ public class ListBox : IConsoleElement
 			{
 				return;
 			}
+			child.Parent = this;
 			child.ViewRect = new Rect()
 			{
 				Left = ViewRect.Left,
@@ -166,14 +168,9 @@ public class ListBox : IConsoleElement
 				Height = 1,
 			};
 			child.BackgroundColor = GetHighlightBackgroundColor(child);
-			child.OnUpdate();
+			child.Refresh();
 			y += 1;
 		});
-	}
-
-	public void Refresh()
-	{
-		OnUpdate();
 	}
 
 	private void AddChild(IList newItems)

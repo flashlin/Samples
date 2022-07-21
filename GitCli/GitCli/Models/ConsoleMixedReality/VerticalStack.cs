@@ -119,17 +119,12 @@ public class VerticalStack : IConsoleElement
 		return Children.GetFocusedControl().OnInput(inputEvent);
 	}
 
-	public void OnUpdate()
-	{
-
-	}
-
 	public void Refresh()
 	{
 		UpdateChildren((viewRect, child) =>
 		{
 			child.ViewRect = viewRect;
-			child.OnUpdate();
+			child.Refresh();
 		});
 	}
 

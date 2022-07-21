@@ -61,10 +61,6 @@ public class Label : IConsoleElement
 		return false;
 	}
 
-	public void OnUpdate()
-	{
-	}
-
 	public void Refresh()
 	{
 	}
