@@ -119,10 +119,7 @@ public class ListBox : IConsoleElement
 			case ConsoleKey.UpArrow when !inputEvent.HasControl:
 				if (Children.JumpUpFocus() && 0 == CursorPosition.Y - ViewRect.Top)
 				{
-					if (_showListSpan.Index > 0)
-					{
-						_showListSpan = _showListSpan.Move(-1);
-					}
+					_showListSpan = _showListSpan.Move(-1);
 				}
 				ConsoleManager.FocusedElement = Children.GetFocusedControl();
 				OnUpdate();
