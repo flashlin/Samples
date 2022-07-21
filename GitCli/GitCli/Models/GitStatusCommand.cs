@@ -5,7 +5,7 @@ namespace GitCli.Models;
 
 public class GitStatusCommand : ICommand
 {
-	private GitStatusCommandArgs _args;
+	private GitStatusCommandArgs _args = new();
 	private IConsoleWriter _console = new ConsoleWriter();
 	
 	public bool IsMyCommand(string[] args)

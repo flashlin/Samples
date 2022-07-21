@@ -13,7 +13,7 @@ public class VerticalStack : IConsoleElement
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 	public Rect DesignRect { get; set; } = Rect.Empty;
 	public bool IsTab { get; set; }
-	public string Name { get; set; }
+	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; } = Rect.Empty;
 	public Character this[Position pos]

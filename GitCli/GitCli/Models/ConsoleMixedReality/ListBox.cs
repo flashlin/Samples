@@ -23,7 +23,7 @@ public class ListBox : IConsoleElement
 	public Rect DesignRect { get; set; }
 	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;
-	public string Name { get; set; }
+	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 
 	public Rect ViewRect { get; set; }

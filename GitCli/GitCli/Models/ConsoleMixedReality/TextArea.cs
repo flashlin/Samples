@@ -5,6 +5,7 @@ public class TextArea : IConsoleElement
 	private int _editIndex;
 	private bool _isSelectedMode;
 	private int _startSelectIndex;
+
 	public TextArea(Rect rect)
 	{
 		DesignRect = rect;
@@ -31,7 +32,7 @@ public class TextArea : IConsoleElement
 	public int EditIndex => _editIndex;
 	public bool IsTab { get; set; } = true;
 	public int MaxLength { get; set; } = int.MaxValue;
-	public string Name { get; set; }
+	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public char TypeCharacter { get; set; } = '\0';
 	public string Value { get; set; } = String.Empty;

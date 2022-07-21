@@ -10,7 +10,7 @@ public class TextBox : IConsoleEditableElement
 		DesignRect = rect;
 	}
 
-	public event EventHandler<ConsoleElementEvent> OnHandle;
+	public event EventHandler<ConsoleElementEvent>? OnHandle;
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; } = new();
