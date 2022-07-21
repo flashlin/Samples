@@ -7,7 +7,6 @@ namespace GitCli.Models.ConsoleMixedReality;
 [MapClone]
 public class ListBox : IConsoleElement
 {
-	private int _index = -1;
 	private Span _showListItemSpan = Span.Empty;
 
 	public ListBox(Rect rect)
@@ -58,7 +57,6 @@ public class ListBox : IConsoleElement
 
 	public TextBox AddItem(ListItem item)
 	{
-		_index = Math.Max(_index, 0);
 		var textBox = new TextBox(Rect.Empty)
 		{
 			Parent = this,
@@ -66,6 +64,10 @@ public class ListBox : IConsoleElement
 			UserObject = item.Value
 		};
 		Children.Add(textBox);
+		if (ConsoleManager.FocusedElement == this)
+		{
+			ConsoleManager.FocusedElement = textBox;
+		}
 		return textBox;
 	}
 
@@ -137,7 +139,6 @@ public class ListBox : IConsoleElement
 		var y = ViewRect.Top;
 		foreach (var child in Children)
 		{
-			_index = 0;
 			child.ViewRect = new Rect()
 			{
 				Left = ViewRect.Left,
@@ -174,9 +175,12 @@ public class ListBox : IConsoleElement
 
 	private Color GetHighlightBackgroundColor(IConsoleElement child)
 	{
-		return ConsoleManager.FocusedElement == child ?
-			ConsoleManager.HighlightBackgroundColor1 :
-			ConsoleManager.HighlightBackgroundColor2;
+		if (ConsoleManager.FocusedElement == child)
+		{
+			return ConsoleManager.HighlightBackgroundColor1;
+		}
+
+		return Children.GetFocusedControl() == child ? ConsoleManager.HighlightBackgroundColor2 : BackgroundColor;
 	}
 }
 

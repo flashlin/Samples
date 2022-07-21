@@ -53,6 +53,7 @@ public class HorizontalStack : IConsoleElement
 		{
 			Children.JumpDownFocus();
 			ConsoleManager.FocusedElement = Children.GetFocusedControl();
+			Refresh();
 			return;
 		}
 
@@ -104,14 +105,14 @@ public class HorizontalStack : IConsoleElement
 		{
 			if (idx == 0)
 			{
-				left = ViewRect.Left + child.ViewRect.Left;
+				left = ViewRect.Left + child.DesignRect.Left;
 			}
 			child.Parent = this;
 			var childViewRect = new Rect
 			{
 				Left = left,
 				Top = ViewRect.Top,
-				Width = Math.Max(everyWidth, DesignRect.Width),
+				Width = everyWidth,
 				Height = Math.Max(child.DesignRect.Height, ViewRect.Height),
 			};
 			child.OnCreate(childViewRect, ConsoleManager);
