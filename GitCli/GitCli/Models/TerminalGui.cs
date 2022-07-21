@@ -1,59 +1,14 @@
-﻿using System.ComponentModel;
-using Terminal.Gui;
+﻿using Terminal.Gui;
 
 namespace GitCli.Models;
-
-public interface IObjectNotifyPropertyChanged : INotifyPropertyChanged
-{
-	void RaisePropertyChanged(string propertyName);
-}
-
-public class BaseNotifyObject : IObjectNotifyPropertyChanged
-{
-	public event PropertyChangedEventHandler? PropertyChanged;
-
-	protected virtual void OnPropertyChanged(PropertyChangedEventArgs args)
-	{
-		PropertyChanged?.Invoke(this, args);
-	}
-
-	public void RaisePropertyChanged(string propertyName)
-	{
-		OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
-	}
-}
-
-public class NotifyProperty<T>
-{
-	private IObjectNotifyPropertyChanged _owner;
-
-	public NotifyProperty(IObjectNotifyPropertyChanged owner, string name, T initialValue)
-	{
-		_owner = owner;
-		Name = name;
-		Value = initialValue;
-	}
-
-	public string Name { get; }
-	public T Value { get; private set; }
-
-	public void SetValue(T newValue)
-	{
-		if (!newValue.Equals(Value))
-		{
-			Value = newValue;
-			_owner.RaisePropertyChanged(this.Name);
-		}
-	}
-}
 
 public class TerminalGui : ITerminalGui
 {
 	private GitChanges _gitChanges;
 	private List<IMenuItem> _workspaceViewMenus;
 	private GitAllCommits _gitAllCommits;
-	private GitRepoInfo _gitRepoInfo;
-	private IGitRepoAgent _gitRepoAgent;
+	private readonly GitRepoInfo _gitRepoInfo;
+	private readonly IGitRepoAgent _gitRepoAgent;
 	private Window _unStagedWindow;
 	private Window _workspaceWindow;
 
@@ -91,7 +46,7 @@ public class TerminalGui : ITerminalGui
 		top.Add(compareWindow);
 
 		AddMenuBar(top);
-		
+
 		//top.Redraw(new Rect(0,0, Application.Top.Bounds.Width, Application.Top.Bounds.Height));
 		Application.Run();
 		Application.Shutdown();

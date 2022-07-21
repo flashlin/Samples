@@ -9,7 +9,8 @@ public class Frame : IConsoleElement
 	public Frame(Rect viewRect)
 	{
         ViewRect = viewRect;
-    }
+   }
+
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; set; } = new();
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;

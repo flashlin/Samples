@@ -37,6 +37,6 @@ namespace GitCli.Models.Repositories
 	public class GitRepositoryEntity
 	{
 		[Key]
-		public string Path { get; set; }
+		public string Path { get; set; } = string.Empty;
 	}
 }

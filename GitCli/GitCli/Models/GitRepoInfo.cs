@@ -89,21 +89,22 @@ public class GitRepoInfo : IObjectNotifyPropertyChanged
 
 public class Author
 {
-	public string Name { get; set; }
-	public string Email { get; set; }
+	public static Author Empty = new();
+	public string Name { get; set; } = string.Empty;
+	public string Email { get; set; } = string.Empty;
 	public DateTime WhenOn { get; set; }
 }
 
 public class GitCommitInfo
 {
-	public string Message { get; set; }
-	public string HashCode { get; set; }
-	public Author Committer { get; set; }
+	public string Message { get; set; } = string.Empty;
+	public string HashCode { get; set; } = string.Empty;
+	public Author Committer { get; set; } = Author.Empty;
 }
 
 public class GitBranchInfo
 {
-	public string Name { get; set; }
+	public string Name { get; set; } = string.Empty;
 	public bool IsLocalBranch { get; set; }
-	public string TargetIdentifier { get; set; }
+	public string TargetIdentifier { get; set; } = string.Empty;
 }
