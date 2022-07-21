@@ -25,7 +25,7 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 		return this[_focusIndex];
 	}
 
-	public T GetFocusedControlOrMe<T>(Func<IConsoleElement, T> action, Func<T> parentAction)
+	public T FocusedControlOrMe<T>(Func<IConsoleElement, T> action, Func<T> parentAction)
 	{
 		if (_focusIndex == -1)
 		{
