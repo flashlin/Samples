@@ -111,7 +111,6 @@ public class TextBox : IConsoleEditableElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		this.HandleOnCreate(rect, consoleManager);
-
 		HighlightBackgroundColor ??= consoleManager.HighlightBackgroundColor1;
 	}
 
@@ -216,6 +215,7 @@ public class TextBox : IConsoleEditableElement
 	public void Refresh()
 	{
 	}
+
 	private Span GetSelectedSpan()
 	{
 		if (!_isSelectedMode)

@@ -19,6 +19,7 @@ public class ListBox : IConsoleElement
 	}
 
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public Color? HighlightBackgroundColor { get; set; }
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 	public StackChildren Children { get; }
 	public Position CursorPosition => Children.FocusedControlOrMe(
@@ -107,7 +108,7 @@ public class ListBox : IConsoleElement
 	private bool OnMeInputEvent(InputEvent inputEvent)
 	{
 		OnBubbleEvent(this, inputEvent);
-		return false;
+		return true;
 	}
 
 	private bool OnFocusedControlInputEvent(InputEvent inputEvent, IConsoleElement focusedControl)

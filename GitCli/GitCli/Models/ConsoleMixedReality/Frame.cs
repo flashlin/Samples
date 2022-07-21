@@ -15,6 +15,7 @@ public class Frame : IConsoleElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; set; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public Color? HighlightBackgroundColor { get; set; }
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
 	public Rect DesignRect { get; set; } = Rect.Empty;
