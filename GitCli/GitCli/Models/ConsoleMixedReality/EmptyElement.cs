@@ -8,10 +8,11 @@ public class EmptyElement : IConsoleEditableElement
 
 	private EmptyElement()
 	{
+		Children = new StackChildren(this);
 	}
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
-	public StackChildren Children { get; } = new();
+	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Position CursorPosition => Position.Empty;
 	public Rect DesignRect { get; set; } = Rect.Empty;

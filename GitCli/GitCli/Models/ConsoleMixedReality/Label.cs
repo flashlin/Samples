@@ -6,12 +6,13 @@ public class Label : IConsoleElement
 {
 	public Label(Rect rect)
 	{
+		Children = new StackChildren(this);
 		DesignRect = rect;
 	}
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
-	public StackChildren Children { get; } = new();
+	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Position CursorPosition => Position.Empty;
 	public Rect DesignRect { get; set; }

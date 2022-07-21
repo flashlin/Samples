@@ -8,11 +8,11 @@ public class HorizontalStack : IConsoleElement
 {
 	public HorizontalStack()
 	{
-		Children = new StackChildren();
+		Children = new StackChildren(this);
 	}
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
-	public StackChildren Children { get; private set; }
+	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
@@ -78,8 +78,10 @@ public class HorizontalStack : IConsoleElement
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		this.HandleOnCreate(rect, consoleManager);
-		var userInitDesignRect = DesignRect.IsEmpty;
-		RearrangeChildren();
+		UpdateChildren((viewRect, child) =>
+		{
+			child.OnCreate(viewRect, ConsoleManager);
+		});
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -93,10 +95,14 @@ public class HorizontalStack : IConsoleElement
 
 	public void Refresh()
 	{
-		RearrangeChildren();
+		UpdateChildren((viewRect, child) =>
+		{
+			child.ViewRect = viewRect;
+			child.Refresh();
+		});
 	}
 
-	private void RearrangeChildren()
+	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)
 	{
 		var left = ViewRect.Left;
 		var everyWidth = ViewRect.Width / Children.Count;
@@ -115,7 +121,7 @@ public class HorizontalStack : IConsoleElement
 				Width = everyWidth,
 				Height = Math.Max(child.DesignRect.Height, ViewRect.Height),
 			};
-			child.OnCreate(childViewRect, ConsoleManager);
+			updateChild(childViewRect, child);
 			left += child.ViewRect.Width;
 		});
 	}

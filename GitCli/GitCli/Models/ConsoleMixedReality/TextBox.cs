@@ -7,13 +7,14 @@ public class TextBox : IConsoleEditableElement
 	private int _startSelectIndex;
 	public TextBox(Rect rect)
 	{
+		Children = new StackChildren(this);
 		DesignRect = rect;
 	}
 
 	public event EventHandler<ConsoleElementEvent>? OnHandle;
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
-	public StackChildren Children { get; } = new();
+	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 
 	public Position CursorPosition

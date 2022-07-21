@@ -13,12 +13,13 @@ public class ListBox : IConsoleElement
 	public ListBox(Rect rect)
 	{
 		DesignRect = rect;
+		Children = new StackChildren(this);
 		Children.CollectionChanged += ChildrenOnCollectionChanged;
 	}
 
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
-	public StackChildren Children { get; } = new();
+	public StackChildren Children { get; }
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
 	public Rect DesignRect { get; set; }
@@ -96,6 +97,12 @@ public class ListBox : IConsoleElement
 	public bool OnInput(InputEvent inputEvent)
 	{
 		var focusedControl = Children.GetFocusedControl();
+		//TODO:
+		//if (focusedControl == EmptyElement.Default)
+		//{
+		//	this.Parent?.OnBubbleEvent(this, inputEvent);
+		//	return false;
+		//}
 
 		switch (inputEvent.Key)
 		{
