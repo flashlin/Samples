@@ -25,4 +25,9 @@ public static class ConsoleElementExtension
 		element.ViewRect = element.DesignRect.ToViewRect(rect, consoleManager);
 		consoleManager.FirstSetFocusElement(element);
 	}
+
+	public static bool RaiseOnBubbleEvent(this IConsoleElement? parent, IConsoleElement element, InputEvent inputEvent)
+	{
+		return parent?.OnBubbleEvent(element, inputEvent) ?? false;
+	}
 }
