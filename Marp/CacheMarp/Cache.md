@@ -3,8 +3,8 @@ marp: true
 theme: gaia
 paginate: true
 ---
-
-以下程式碼混雜, 掩蓋商業邏輯核心, 不易閱讀
+觀察到: 每個專案都會有快取的需求
+掩蓋商業邏輯核心, 不易閱讀及理解
 ```C#
 public class UserService
 {
@@ -26,7 +26,7 @@ public class UserService
 
 ---
 
-單一功能原則
+單一功能原則, 越少的程式碼, 讓開發人員相對的越好閱讀和理解
 ```C#
 public class UserService : IUserService
 {
@@ -62,8 +62,11 @@ public class CachedUserService : IUserService
 
 ---
 
-以上是裝飾者模式(Decorator Pattern) 很棒, 但可以更好
-針對重複發生的需求
+以上是裝飾者模式(Decorator Pattern) 很棒, 但可以更好.
+
+這些在程式碼中會重複出現, 
+它們很重要但是不屬於我們核心業務的操作
+可以將這些重複的事情整合起來在一個地方執行
 ```C#
 public interface IUserService
 {
@@ -106,13 +109,13 @@ public class CacheInterceptorAttribute : AbstractInterceptorAttribute
 
 
 * 單一功能原則
-* 針對重複發生的功能邏輯, 用不同的面向去思考
+* 針對重複發生的功能邏輯, 用不同的面向切入
 * 可避免後人重複犯以前同樣的錯誤 (例如 lock, 避免同一時間大量 user 存取同一個 resource)
 
 
 ---
 
-
+觀察到: 每一個專案都會有讀取 GlobalSetting 的需求
 ```C#
 public IActionResult Index()
 {
