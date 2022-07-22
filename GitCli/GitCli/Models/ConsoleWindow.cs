@@ -22,12 +22,55 @@ public class ConsoleWindow : IConsoleWindow
 		var gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Codewars");
 		var consoleSize = _console.GetSize();
 
+		var changedFilesList = new ListBox(new Rect()
+		{
+			Left = 0,
+			Top = 0,
+			Width = 30,
+			Height = 10,
+		});
+
+		changedFilesList.AddItem(new ListItem()
+		{
+			Title = "file1"
+		});
+
+		var compareList = new ListBox(new Rect()
+		{
+			Left = 0,
+			Top = 0,
+			Width = 30,
+			Height = 10,
+		});
+
+		compareList.AddItem(new ListItem()
+		{
+			Title = "compare1"
+		});
+
+		var changedFilesLayout = new HorizontalStack()
+		{
+			Name = "changedFilesLayout",
+			DesignRect = new Rect()
+			{
+				Left = 0,
+				Top = 0,
+				Width = 60,
+				Height = 10
+			},
+			Children =
+			{
+				changedFilesList,
+				compareList,
+			}
+		};
+
 		var allCommitList = new ListBox(new Rect
 		{
 			Left = 0,
 			Top = 0,
 			Width = 30,
-			Height = consoleSize.Height,
+			Height = 20,
 		}).Setup(x =>
 		{
 			x.Name = "allCommitList";
@@ -116,7 +159,8 @@ public class ConsoleWindow : IConsoleWindow
 			BackgroundColor = ConsoleColor.DarkGreen,
 			Children =
 			{
-				allCommitList
+				allCommitList,
+				changedFilesLayout
 			}
 		};
 
