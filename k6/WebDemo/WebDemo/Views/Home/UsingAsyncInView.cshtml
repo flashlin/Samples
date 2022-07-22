@@ -1,0 +1,23 @@
+﻿@using WebDemo.Services
+@inject IWeatherService WeatherService
+@{
+    ViewData["Title"] = "UsingAsyncInView";
+    var city = await WeatherService.GetInfoAsync("Taipei");
+}
+
+
+<h1>UsingAsyncInView</h1>
+
+
+<table>
+    <tr>
+        <td>CITY</td>
+        <td>@city.Name</td>
+    </tr>
+    <tr>
+        <td>Temperature</td>
+        <td>@city.Temperature</td>
+    </tr>
+</table>
+
+

@@ -82,6 +82,7 @@ public class GitRepoInfo : IObjectNotifyPropertyChanged
 					WhenOn = repoCommit.Committer.When.DateTime
 				},
 				HashCode = repoCommit.Sha,
+				Tree = repoCommit.Tree,
 			};
 		}
 	}
@@ -100,6 +101,7 @@ public class GitCommitInfo
 	public string Message { get; set; } = string.Empty;
 	public string HashCode { get; set; } = string.Empty;
 	public Author Committer { get; set; } = Author.Empty;
+	public Tree Tree { get; set; }
 }
 
 public class GitBranchInfo
