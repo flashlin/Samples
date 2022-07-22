@@ -20,10 +20,18 @@ public class ConsoleWindow : IConsoleWindow
 	public Task Run(string[] args)
 	{
 		var gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Codewars");
-
-		var allCommitList = new Bind<ListBox>();
-
 		var consoleSize = _console.GetSize();
+
+		var allCommitList = new ListBox(new Rect
+		{
+			Left = 0,
+			Top = 0,
+			Width = 30,
+			Height = consoleSize.Height,
+		}).Setup(x =>
+		{
+			x.Name = "allCommitList";
+		});
 
 		var branchStackLayout = new VerticalStack()
 		{
@@ -68,13 +76,13 @@ public class ConsoleWindow : IConsoleWindow
 							  var commits = gitRepoInfo.QueryCommits();
 							  foreach (var commit in commits)
 							  {
-								  allCommitList.Value!.AddItem(new ListItem()
+								  allCommitList.AddItem(new ListItem()
 								  {
 									  Title = commit.Message,
 									  Value = commit
 								  });
 							  }
-							  allCommitList.Value!.Refresh();
+							  allCommitList.Refresh();
 						  };
 
 					 }),
@@ -107,17 +115,7 @@ public class ConsoleWindow : IConsoleWindow
 			BackgroundColor = ConsoleColor.DarkGreen,
 			Children =
 			{
-				new ListBox(new Rect
-				{
-					Left = 0,
-					Top = 0,
-					Width = 30,
-					Height = consoleSize.Height,
-				}).Setup(x =>
-				{
-					x.Name = "allCommitList";
-					allCommitList.SetValue(x);
-				})
+				allCommitList
 			}
 		};
 
