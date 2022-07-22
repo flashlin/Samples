@@ -33,6 +33,48 @@ public class ConsoleWindow : IConsoleWindow
 			x.Name = "allCommitList";
 		});
 
+		var changesList = new ListBox(new Rect
+		{
+			Left = 0,
+			Top = 0,
+			Width = 20,
+			Height = 2,
+		}).Setup(x =>
+		{
+			x.Name = "LocalChanges";
+			var localChanges = x.AddItem(new ListItem()
+			{
+				Title = "Local Changes",
+			});
+
+			localChanges.OnHandle += (sender, evt) =>
+			{
+				var fileStatus = gitRepoInfo.QueryStatus()
+					.ToArray();
+
+				Console.WriteLine("");
+			};
+
+			var allCommits = x.AddItem(new ListItem()
+			{
+				Title = "All Commits",
+			});
+
+			allCommits.OnHandle += (sender, evt) =>
+			{
+				var commits = gitRepoInfo.QueryCommits();
+				foreach (var commit in commits)
+				{
+					allCommitList.AddItem(new ListItem()
+					{
+						Title = commit.Message,
+						Value = commit
+					});
+				}
+				allCommitList.Refresh();
+			};
+		});
+
 		var branchStackLayout = new VerticalStack()
 		{
 			Name = "LeftVertical1",
@@ -44,48 +86,7 @@ public class ConsoleWindow : IConsoleWindow
 			BackgroundColor = ConsoleColor.DarkMagenta,
 			Children =
 				{
-					 new ListBox(new Rect
-					 {
-						  Left = 0,
-						  Top = 0,
-						  Width = 20,
-						  Height = 2,
-					 }).Setup(x =>
-					 {
-						  x.Name = "LocalChanges";
-						  var localChanges = x.AddItem(new ListItem()
-						  {
-								Title = "Local Changes",
-						  });
-
-						  localChanges.OnHandle += (sender, evt) =>
-						  {
-								var fileStatus = gitRepoInfo.QueryStatus()
-									 .ToArray();
-
-								Console.WriteLine("");
-						  };
-
-						  var allCommits = x.AddItem(new ListItem()
-						  {
-								Title = "All Commits",
-						  });
-
-						  allCommits.OnHandle += (sender, evt) =>
-						  {
-							  var commits = gitRepoInfo.QueryCommits();
-							  foreach (var commit in commits)
-							  {
-								  allCommitList.AddItem(new ListItem()
-								  {
-									  Title = commit.Message,
-									  Value = commit
-								  });
-							  }
-							  allCommitList.Refresh();
-						  };
-
-					 }),
+					 changesList,
 					 new ListBox(new Rect
 					 {
 						  Left = 0,
