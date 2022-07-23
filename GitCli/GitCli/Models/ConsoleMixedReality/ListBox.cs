@@ -70,10 +70,7 @@ public class ListBox : IConsoleElement
 			UserObject = item.Value
 		};
 		Children.Add(textBox);
-		if (ConsoleManager.FocusedElement == this)
-		{
-			ConsoleManager.FocusedElement = textBox;
-		}
+		ConsoleManager.SetFocusElementOrChild(this, textBox);
 		return textBox;
 	}
 

@@ -10,4 +10,5 @@ public interface IConsoleManager
 	ConsoleInputObserver InputObserver { get; }
 	Color ViewBackgroundColor { get; set; }
 	bool FirstSetFocusElement(IConsoleElement element);
+	void SetFocusElementOrChild(IConsoleElement element, IConsoleElement child);
 }
