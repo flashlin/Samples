@@ -15,8 +15,13 @@ public class EmptyConsoleManager : IConsoleManager
 	public Color InputBackgroundColor { get; set; }
 	public ConsoleInputObserver InputObserver { get; } = new();
 	public Color ViewBackgroundColor { get; set; }
+
 	public bool FirstSetFocusElement(IConsoleElement element)
 	{
 		return false;
+	}
+
+	public void SetFocusElementOrChild(IConsoleElement element, IConsoleElement child)
+	{
 	}
 }

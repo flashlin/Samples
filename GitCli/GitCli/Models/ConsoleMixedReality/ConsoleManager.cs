@@ -2,7 +2,7 @@
 
 public class ConsoleManager : IConsoleManager
 {
-	private static readonly ConsoleBuffer _buffer = new ConsoleBuffer();
+	private static readonly ConsoleBuffer Buffer = new ConsoleBuffer();
 	private static FreezeLock _freezeLock = new FreezeLock();
 	private readonly CancellationTokenSource _cancellationTokenSource = new();
 	private readonly IConsoleWriter _console;
@@ -15,17 +15,14 @@ public class ConsoleManager : IConsoleManager
 		Content = EmptyElement.Default;
 	}
 
-	public Size BufferSize => _buffer.Size;
+	public Size BufferSize => Buffer.Size;
 	public IConsoleWriter Console => _console;
 	public IConsoleElement Content { get; set; }
 
 	public IConsoleElement FocusedElement
 	{
 		get => _focusedElement;
-		set
-		{
-			SetFocusElement(value);
-		}
+		set => SetFocusElement(value);
 	}
 
 	public bool FirstSetFocusElement(IConsoleElement element)
@@ -69,7 +66,7 @@ public class ConsoleManager : IConsoleManager
 
 	public void Resize(Size size)
 	{
-		_buffer.Initialize(size);
+		Buffer.Initialize(size);
 		Initialize();
 	}
 
@@ -98,7 +95,7 @@ public class ConsoleManager : IConsoleManager
 	private void Initialize()
 	{
 		_console.Initialize();
-		_buffer.Clear();
+		Buffer.Clear();
 		_freezeLock.Freeze();
 		_freezeLock.Unfreeze();
 		Redraw();
@@ -139,12 +136,20 @@ public class ConsoleManager : IConsoleManager
 				var position = new Position(x, y);
 				var character = Content[position];
 				//_drawBuffer.Update(position, character);
-				if (!_buffer.Update(position, character)) continue;
+				if (!Buffer.Update(position, character)) continue;
 				_console.Write(position, character);
 
 				//character = _drawBuffer[position];
 				//_console.Write(position, character);
 			}
+		}
+	}
+
+	public void SetFocusElementOrChild(IConsoleElement element, IConsoleElement child)
+	{
+		if (FocusedElement == element)
+		{
+			FocusedElement = child;
 		}
 	}
 }
