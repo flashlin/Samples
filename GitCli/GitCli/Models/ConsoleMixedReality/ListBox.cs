@@ -34,6 +34,12 @@ public class ListBox : IConsoleElement
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; }
 
+	public object? DataContext
+	{
+		get => _dataContext;
+		set => SetDataContext(value);
+	}
+
 	public Character this[Position pos]
 	{
 		get
@@ -61,14 +67,17 @@ public class ListBox : IConsoleElement
 		}
 	}
 
-	public void SetDataContext(object dataModel)
+	public void SetDataContext(object? dataModel)
 	{
 		if (_dataContext != null)
 		{
 			_dataContext.OnNotify -= OnDataContext;
 		}
-		_dataContext = (NotifyCollection<ListItem>)dataModel;
-		_dataContext.OnNotify += OnDataContext;
+		_dataContext = (NotifyCollection<ListItem>?)dataModel;
+		if (_dataContext != null)
+		{
+			_dataContext.OnNotify += OnDataContext;
+		}
 	}
 
 	private void OnDataContext(object? sender, NotifyEventArgs<ListItem> eventArgs)

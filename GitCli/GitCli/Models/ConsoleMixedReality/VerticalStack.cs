@@ -10,6 +10,7 @@ public class VerticalStack : IConsoleElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public StackChildren Children { get; private set; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public object? DataContext { get; set; }
 	public Color? HighlightBackgroundColor { get; set; }
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 	public Rect DesignRect { get; set; } = Rect.Empty;
@@ -124,10 +125,6 @@ public class VerticalStack : IConsoleElement
 			child.ViewRect = viewRect;
 			child.Refresh();
 		});
-	}
-
-	public void SetDataContext(object dataModel)
-	{
 	}
 
 	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)

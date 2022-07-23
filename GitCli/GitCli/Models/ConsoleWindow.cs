@@ -71,10 +71,10 @@ public class ConsoleWindow : IConsoleWindow
 		{
 			Width = 30,
 			Height = 20,
-		}).Setup(x =>
+		})
 		{
-			x.Name = "allCommitList";
-		});
+			Name = "allCommitList",
+		};
 		allCommitList.SetDataContext(model.AllCommitList);
 
 		var localChanges = new TextBox()
