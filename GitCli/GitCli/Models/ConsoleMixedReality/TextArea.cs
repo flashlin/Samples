@@ -85,7 +85,7 @@ public class TextArea : IConsoleElement
 		return ViewRect;
 	}
 
-	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		return false;
 	}
@@ -199,6 +199,11 @@ public class TextArea : IConsoleElement
 
 	public void Refresh()
 	{
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 
 	public void SetDataContext(object dataModel)

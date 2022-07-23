@@ -33,6 +33,7 @@ public class ListBox : IConsoleElement
 	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public Rect ViewRect { get; set; }
+	public event EventHandler<ConsoleElementEvent>? OnHandleEnter;
 
 	public object? DataContext
 	{
@@ -77,6 +78,7 @@ public class ListBox : IConsoleElement
 		if (_dataContext != null)
 		{
 			_dataContext.OnNotify += OnDataContext;
+			OnDataContext(dataModel, new NotifyEventArgs<ListItem>());
 		}
 	}
 
@@ -120,9 +122,15 @@ public class ListBox : IConsoleElement
 		Children.AddElement(element);
 	}
 
-	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
 	{
-		return Parent.RaiseOnBubbleEvent(element, inputEvent);
+		this.OnHandleEnter?.Invoke(this, evt);
+		return true;
+	}
+
+	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
+	{
+		return Parent.RaiseOnBubbleKeyEvent(element, inputEvent);
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
@@ -145,7 +153,7 @@ public class ListBox : IConsoleElement
 
 	private bool OnMeInputEvent(InputEvent inputEvent)
 	{
-		OnBubbleEvent(this, inputEvent);
+		OnBubbleKeyEvent(this, inputEvent);
 		return true;
 	}
 

@@ -28,9 +28,14 @@ public static class ConsoleElementExtension
 		consoleManager.FirstSetFocusElement(element);
 	}
 
-	public static bool RaiseOnBubbleEvent(this IConsoleElement? parent, IConsoleElement element, InputEvent inputEvent)
+	public static bool RaiseOnBubbleKeyEvent(this IConsoleElement? parent, IConsoleElement element, InputEvent inputEvent)
 	{
-		return parent?.OnBubbleEvent(element, inputEvent) ?? false;
+		return parent?.OnBubbleKeyEvent(element, inputEvent) ?? false;
+	}
+
+	public static bool RaiseOnBubbleEvent(this IConsoleElement? parent, IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return parent?.RaiseOnBubbleEvent(element, evt) ?? false;
 	}
 
 	public static int GetDesignRectValue(this IConsoleElement element, Func<Rect, int> getRectValue)

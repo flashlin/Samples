@@ -37,7 +37,7 @@ public class HorizontalStack : IConsoleElement
 		}
 	}
 
-	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		if (inputEvent.Key == ConsoleKey.Tab && inputEvent.HasShift)
 		{
@@ -47,7 +47,7 @@ public class HorizontalStack : IConsoleElement
 				Refresh();
 				return true;
 			}
-			return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
+			return Parent?.OnBubbleKeyEvent(element, inputEvent) ?? false;
 		}
 
 		if (inputEvent.Key == ConsoleKey.Tab)
@@ -58,7 +58,7 @@ public class HorizontalStack : IConsoleElement
 				Refresh();
 				return true;
 			}
-			return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
+			return Parent?.OnBubbleKeyEvent(element, inputEvent) ?? false;
 		}
 
 		if (inputEvent.HasControl && inputEvent.Key == ConsoleKey.UpArrow)
@@ -69,7 +69,7 @@ public class HorizontalStack : IConsoleElement
 				Refresh();
 				return true;
 			}
-			return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
+			return Parent?.OnBubbleKeyEvent(element, inputEvent) ?? false;
 		}
 
 		if ((inputEvent.HasControl && inputEvent.Key == ConsoleKey.DownArrow) || inputEvent.Key == ConsoleKey.Enter)
@@ -80,10 +80,10 @@ public class HorizontalStack : IConsoleElement
 				Refresh();
 				return true;
 			}
-			return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
+			return Parent?.OnBubbleKeyEvent(element, inputEvent) ?? false;
 		}
 
-		return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
+		return Parent?.OnBubbleKeyEvent(element, inputEvent) ?? false;
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
@@ -107,6 +107,11 @@ public class HorizontalStack : IConsoleElement
 			child.ViewRect = viewRect;
 			child.Refresh();
 		});
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 
 	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)

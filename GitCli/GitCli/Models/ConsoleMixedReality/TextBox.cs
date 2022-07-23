@@ -108,7 +108,7 @@ public class TextBox : IConsoleEditableElement
 		return ViewRect;
 	}
 
-	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		return false;
 	}
@@ -132,7 +132,7 @@ public class TextBox : IConsoleEditableElement
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.Tab:
-				Parent?.OnBubbleEvent(this, inputEvent);
+				Parent?.OnBubbleKeyEvent(this, inputEvent);
 				return true;
 
 			case ConsoleKey.LeftArrow:
@@ -186,12 +186,13 @@ public class TextBox : IConsoleEditableElement
 				break;
 
 			case ConsoleKey.Enter:
-				//Parent?.OnBubbleEvent(this, inputEvent);
-				OnHandleEnter?.Invoke(this, new ConsoleElementEvent()
+				var consoleElementEvent = new ConsoleElementEvent()
 				{
 					Element = this,
 					InputEvent = inputEvent,
-				});
+				};
+				OnHandleEnter?.Invoke(this, consoleElementEvent);
+				Parent?.OnBubbleEvent(this, consoleElementEvent);
 				break;
 
 			default:
@@ -219,6 +220,11 @@ public class TextBox : IConsoleEditableElement
 
 	public void Refresh()
 	{
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 
 	private Span GetSelectedSpan()
