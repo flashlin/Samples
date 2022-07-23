@@ -85,14 +85,9 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 		}
 	}
 
-	public Rect GetRect()
+	public void AddElement(IConsoleElement element)
 	{
-		var initRect = Rect.Empty;
-		foreach (var child in this)
-		{
-			var childRect = child.ViewRect;
-			initRect = initRect.Surround(childRect);
-		}
-		return initRect;
+		this.Add(element);
+		ConsoleManager.SetFocusElementOrChild(_parent, element);
 	}
 }
