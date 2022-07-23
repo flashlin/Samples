@@ -95,14 +95,8 @@ public class ConsoleWindow : IConsoleWindow
 					Title = commit.Message,
 					Value = commit
 				});
-				//allCommitList.AddItem(new ListItem()
-				//{
-				//	Title = commit.Message,
-				//	Value = commit
-				//});
 			}
 			model.AllCommitList.Notify();
-			//allCommitList.Refresh();
 		};
 
 		model.AllCommitList.OnNotify += (sender, eventArgs) =>
