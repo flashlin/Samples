@@ -57,7 +57,7 @@ public class Frame : IConsoleElement
 		return initRect;
 	}
 
-	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		var focus = Children.GetFocusedControl();
 		
@@ -79,7 +79,7 @@ public class Frame : IConsoleElement
 			}
 		}
 
-		return Parent?.OnBubbleEvent(element, inputEvent) ?? false;
+		return Parent?.OnBubbleKeyEvent(element, inputEvent) ?? false;
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
@@ -117,5 +117,10 @@ public class Frame : IConsoleElement
 
 	public void Refresh()
 	{
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 }

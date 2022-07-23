@@ -41,9 +41,9 @@ public class EmptyElement : IConsoleEditableElement
 		return Rect.Empty;
 	}
 
-	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
-		return Parent.RaiseOnBubbleEvent(element, inputEvent);
+		return Parent.RaiseOnBubbleKeyEvent(element, inputEvent);
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
@@ -55,7 +55,7 @@ public class EmptyElement : IConsoleEditableElement
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.Tab:
-				OnBubbleEvent(this, inputEvent);
+				OnBubbleKeyEvent(this, inputEvent);
 				return false;
 		}
 		return false;
@@ -63,5 +63,10 @@ public class EmptyElement : IConsoleEditableElement
 
 	public void Refresh()
 	{
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 }

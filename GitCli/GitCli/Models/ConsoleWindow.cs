@@ -6,6 +6,7 @@ namespace GitCli.Models;
 
 public class MainModel
 {
+	public NotifyCollection<ListItem> ChangesList { get; set; } = new();
 	public NotifyCollection<ListItem> AllCommitList { get; set; } = new();
 }
 
@@ -29,6 +30,15 @@ public class ConsoleWindow : IConsoleWindow
 		var gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Codewars");
 		var consoleSize = _console.GetSize();
 		var model = new MainModel();
+
+		model.ChangesList.Adding(new ListItem()
+		{
+			Title = "Local Changes",
+		});
+		model.ChangesList.Adding(new ListItem()
+		{
+			Title = "All Commits",
+		});
 
 		var changedFilesList = new ListBox(new Rect()
 		{
@@ -81,24 +91,24 @@ public class ConsoleWindow : IConsoleWindow
 		{
 			Value = "Local Changes",
 		};
-
 		var allCommits = new TextBox()
 		{
 			Value = "All Commits",
 		};
-		allCommits.OnHandleEnter += (sender, evt) =>
-		{
-			var commits = gitRepoInfo.QueryCommits();
-			foreach (var commit in commits)
-			{
-				model.AllCommitList.Adding(new ListItem()
-				{
-					Title = commit.Message,
-					Value = commit
-				});
-			}
-			model.AllCommitList.Notify();
-		};
+
+		//allCommits.OnHandleEnter += (sender, evt) =>
+		//{
+		//	var commits = gitRepoInfo.QueryCommits();
+		//	foreach (var commit in commits)
+		//	{
+		//		model.AllCommitList.Adding(new ListItem()
+		//		{
+		//			Title = commit.Message,
+		//			Value = commit
+		//		});
+		//	}
+		//	model.AllCommitList.Notify();
+		//};
 
 		var changesList = new ListBox(new Rect
 		{
@@ -113,12 +123,29 @@ public class ConsoleWindow : IConsoleWindow
 			{
 				var fileStatus = gitRepoInfo.QueryStatus()
 					.ToArray();
-
-				Console.WriteLine("");
 			};
-
 			x.AddElement(allCommits);
 		});
+
+
+		changesList.OnHandleEnter += (sender, evt) =>
+		{
+			var textBox = (TextBox)evt.Element;
+			if (textBox.Value == "All Commits")
+			{
+				var commits = gitRepoInfo.QueryCommits();
+				foreach (var commit in commits)
+				{
+					model.AllCommitList.Adding(new ListItem()
+					{
+						Title = commit.Message,
+						Value = commit
+					});
+				}
+				model.AllCommitList.Notify();
+			}
+		};
+
 
 		var layout1 = new VerticalStack()
 		{

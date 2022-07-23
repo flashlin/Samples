@@ -17,6 +17,7 @@ public interface IConsoleElement
     object? DataContext { get; set; }
     bool OnInput(InputEvent inputEvent);
     void OnCreate(Rect parentRect, IConsoleManager consoleManager);
-    bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
+    bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent);
     void Refresh();
+    bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt);
 }

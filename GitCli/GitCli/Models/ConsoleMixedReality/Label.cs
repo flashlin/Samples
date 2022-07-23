@@ -45,7 +45,7 @@ public class Label : IConsoleElement
 		}
 	}
 
-	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
+	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		return false;
 	}
@@ -63,5 +63,10 @@ public class Label : IConsoleElement
 
 	public void Refresh()
 	{
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 }
