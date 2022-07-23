@@ -63,7 +63,7 @@ public class ListBox : IConsoleElement
 
 	public TextBox AddItem(ListItem item)
 	{
-		var textBox = new TextBox(Rect.Empty)
+		var textBox = new TextBox
 		{
 			Parent = this,
 			DesignRect = new Rect()

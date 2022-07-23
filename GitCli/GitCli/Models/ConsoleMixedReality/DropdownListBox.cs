@@ -13,7 +13,7 @@ public class DropdownListBox : IConsoleElement
 	{
 		DesignRect = rect;
 		Children = new StackChildren(this);
-		_textBox = new TextBox(Rect.Empty);
+		_textBox = new TextBox();
 		_listBox = new ListBox(Rect.Empty);
 	}
 
