@@ -24,8 +24,6 @@ public class ConsoleWindow : IConsoleWindow
 
 		var changedFilesList = new ListBox(new Rect()
 		{
-			Left = 0,
-			Top = 0,
 			Width = 30,
 			Height = 10,
 		});
@@ -37,8 +35,6 @@ public class ConsoleWindow : IConsoleWindow
 
 		var compareList = new ListBox(new Rect()
 		{
-			Left = 0,
-			Top = 0,
 			Width = 30,
 			Height = 10,
 		});
@@ -53,8 +49,6 @@ public class ConsoleWindow : IConsoleWindow
 			Name = "changedFilesLayout",
 			DesignRect = new Rect()
 			{
-				Left = 0,
-				Top = 0,
 				Width = 60,
 				Height = 10
 			},
@@ -67,8 +61,6 @@ public class ConsoleWindow : IConsoleWindow
 
 		var allCommitList = new ListBox(new Rect
 		{
-			Left = 0,
-			Top = 0,
 			Width = 30,
 			Height = 20,
 		}).Setup(x =>
@@ -78,8 +70,6 @@ public class ConsoleWindow : IConsoleWindow
 
 		var changesList = new ListBox(new Rect
 		{
-			Left = 0,
-			Top = 0,
 			Width = 20,
 			Height = 2,
 		}).Setup(x =>
