@@ -63,4 +63,8 @@ public class EmptyElement : IConsoleEditableElement
 	public void Refresh()
 	{
 	}
+
+	public void SetDataContext(object dataModel)
+	{
+	}
 }

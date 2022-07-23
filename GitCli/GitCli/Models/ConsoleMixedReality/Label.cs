@@ -63,4 +63,8 @@ public class Label : IConsoleElement
 	public void Refresh()
 	{
 	}
+
+	public void SetDataContext(object dataModel)
+	{
+	}
 }

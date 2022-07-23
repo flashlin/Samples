@@ -117,4 +117,8 @@ public class Frame : IConsoleElement
 	public void Refresh()
 	{
 	}
+
+	public void SetDataContext(object dataModel)
+	{
+	}
 }

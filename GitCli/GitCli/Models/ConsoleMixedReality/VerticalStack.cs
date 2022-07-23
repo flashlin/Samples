@@ -126,6 +126,10 @@ public class VerticalStack : IConsoleElement
 		});
 	}
 
+	public void SetDataContext(object dataModel)
+	{
+	}
+
 	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)
 	{
 		var top = ViewRect.Top;

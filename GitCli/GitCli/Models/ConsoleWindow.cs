@@ -75,6 +75,7 @@ public class ConsoleWindow : IConsoleWindow
 		{
 			x.Name = "allCommitList";
 		});
+		allCommitList.SetDataContext(model.AllCommitList);
 
 		var localChanges = new TextBox()
 		{
@@ -97,17 +98,6 @@ public class ConsoleWindow : IConsoleWindow
 				});
 			}
 			model.AllCommitList.Notify();
-		};
-
-		model.AllCommitList.OnNotify += (sender, eventArgs) =>
-		{
-			var items = model.AllCommitList.ToList();
-			allCommitList.Children.Clear();
-			foreach (var item in items)
-			{
-				allCommitList.AddItem(item);
-			}
-			allCommitList.Refresh();
 		};
 
 		var changesList = new ListBox(new Rect

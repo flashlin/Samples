@@ -19,6 +19,7 @@ public interface IConsoleElement
     void OnCreate(Rect parentRect, IConsoleManager consoleManager);
     bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent);
     void Refresh();
+    void SetDataContext(object dataModel);
 }
 
 public interface IConsoleEditableElement : IConsoleElement

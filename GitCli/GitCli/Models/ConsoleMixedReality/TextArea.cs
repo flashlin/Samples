@@ -200,6 +200,10 @@ public class TextArea : IConsoleElement
 	{
 	}
 
+	public void SetDataContext(object dataModel)
+	{
+	}
+
 	private IEnumerable<Span> GetContentSpans(Rect rect)
 	{
 		var editIndex = 0;

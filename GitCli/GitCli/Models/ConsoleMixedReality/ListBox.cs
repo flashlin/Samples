@@ -10,6 +10,7 @@ namespace GitCli.Models.ConsoleMixedReality;
 public class ListBox : IConsoleElement
 {
 	private Span _showListSpan = Span.Empty;
+	private NotifyCollection<ListItem>? _dataContext;
 
 	public ListBox(Rect rect)
 	{
@@ -31,7 +32,6 @@ public class ListBox : IConsoleElement
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
-
 	public Rect ViewRect { get; set; }
 
 	public Character this[Position pos]
@@ -59,6 +59,28 @@ public class ListBox : IConsoleElement
 			var item = Children[index];
 			return item[pos];
 		}
+	}
+
+	public void SetDataContext(object dataModel)
+	{
+		if (_dataContext != null)
+		{
+			_dataContext.OnNotify -= OnDataContext;
+		}
+		_dataContext = (NotifyCollection<ListItem>)dataModel;
+		_dataContext.OnNotify += OnDataContext;
+	}
+
+	private void OnDataContext(object? sender, NotifyEventArgs<ListItem> eventArgs)
+	{
+		var dataModel = (NotifyCollection<ListItem>)sender!;
+		var items = dataModel.ToList();
+		Children.Clear();
+		foreach (var item in items)
+		{
+			AddItem(item);
+		}
+		Refresh();
 	}
 
 	public TextBox AddItem(ListItem item)
