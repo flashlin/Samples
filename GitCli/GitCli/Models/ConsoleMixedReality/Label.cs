@@ -44,11 +44,6 @@ public class Label : IConsoleElement
 		}
 	}
 
-	public Rect GetChildrenRect()
-	{
-		return ViewRect;
-	}
-
 	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		return false;
