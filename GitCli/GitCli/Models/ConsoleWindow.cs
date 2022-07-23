@@ -86,7 +86,7 @@ public class ConsoleWindow : IConsoleWindow
 			x.Name = "LocalChanges";
 			x.AddElement(localChanges);
 
-			localChanges.OnHandle += (sender, evt) =>
+			localChanges.OnHandleEnter += (sender, evt) =>
 			{
 				var fileStatus = gitRepoInfo.QueryStatus()
 					.ToArray();
@@ -94,7 +94,7 @@ public class ConsoleWindow : IConsoleWindow
 				Console.WriteLine("");
 			};
 
-			allCommits.OnHandle += (sender, evt) =>
+			allCommits.OnHandleEnter += (sender, evt) =>
 			{
 				var commits = gitRepoInfo.QueryCommits();
 				foreach (var commit in commits)
