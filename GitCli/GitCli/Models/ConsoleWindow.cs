@@ -72,9 +72,23 @@ public class ConsoleWindow : IConsoleWindow
 		{
 			Value = "Local Changes",
 		};
+
 		var allCommits = new TextBox()
 		{
 			Value = "All Commits",
+		};
+		allCommits.OnHandleEnter += (sender, evt) =>
+		{
+			var commits = gitRepoInfo.QueryCommits();
+			foreach (var commit in commits)
+			{
+				allCommitList.AddItem(new ListItem()
+				{
+					Title = commit.Message,
+					Value = commit
+				});
+			}
+			allCommitList.Refresh();
 		};
 
 		var changesList = new ListBox(new Rect
@@ -94,19 +108,7 @@ public class ConsoleWindow : IConsoleWindow
 				Console.WriteLine("");
 			};
 
-			allCommits.OnHandleEnter += (sender, evt) =>
-			{
-				var commits = gitRepoInfo.QueryCommits();
-				foreach (var commit in commits)
-				{
-					allCommitList.AddItem(new ListItem()
-					{
-						Title = commit.Message,
-						Value = commit
-					});
-				}
-				allCommitList.Refresh();
-			};
+			x.AddElement(allCommits);
 		});
 
 		var layout1 = new VerticalStack()
