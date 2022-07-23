@@ -43,10 +43,6 @@ public class TableRow : IConsoleElement
 			return Character.Empty;
 		}
 	}
-	public Rect GetChildrenRect()
-	{
-		return Children.GetRect();
-	}
 
 	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{

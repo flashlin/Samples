@@ -69,8 +69,7 @@ public class ListBox : IConsoleElement
 			Value = item.Title,
 			UserObject = item.Value
 		};
-		Children.Add(textBox);
-		ConsoleManager.SetFocusElementOrChild(this, textBox);
+		Children.AddElement(textBox);
 		return textBox;
 	}
 
