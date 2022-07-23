@@ -10,7 +10,7 @@ public class TextBox : IConsoleEditableElement
 		Children = new StackChildren(this);
 	}
 
-	public event EventHandler<ConsoleElementEvent>? OnHandle;
+	public event EventHandler<ConsoleElementEvent>? OnHandleEnter;
 
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; }
@@ -187,7 +187,7 @@ public class TextBox : IConsoleEditableElement
 
 			case ConsoleKey.Enter:
 				//Parent?.OnBubbleEvent(this, inputEvent);
-				OnHandle?.Invoke(this, new ConsoleElementEvent()
+				OnHandleEnter?.Invoke(this, new ConsoleElementEvent()
 				{
 					Element = this,
 					InputEvent = inputEvent,
