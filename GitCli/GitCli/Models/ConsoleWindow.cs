@@ -118,7 +118,7 @@ public class ConsoleWindow : IConsoleWindow
 			};
 		});
 
-		var branchStackLayout = new VerticalStack()
+		var layout1 = new VerticalStack()
 		{
 			Name = "LeftVertical1",
 			DesignRect = new Rect()
@@ -153,7 +153,7 @@ public class ConsoleWindow : IConsoleWindow
 				}
 		};
 
-		var verticalStack2 = new VerticalStack()
+		var layout2 = new VerticalStack()
 		{
 			Name = "vertical2",
 			BackgroundColor = ConsoleColor.DarkGreen,
@@ -168,8 +168,8 @@ public class ConsoleWindow : IConsoleWindow
 		{
 			Children =
 			{
-				branchStackLayout,
-				verticalStack2
+				layout1,
+				layout2
 			}
 		};
 

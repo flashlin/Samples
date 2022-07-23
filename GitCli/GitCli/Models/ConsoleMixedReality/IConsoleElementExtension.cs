@@ -31,14 +31,19 @@ public static class ConsoleElementExtension
 		return parent?.OnBubbleEvent(element, inputEvent) ?? false;
 	}
 
-	public static int GetDesignRectOrViewValue(this IConsoleElement element, Func<Rect, int> getRectValue)
+	public static int GetDesignRectValue(this IConsoleElement element, Func<Rect, int> getRectValue)
 	{
 		var childDesignValue = 0;
 		if (element.Children.Count > 0)
 		{
-			childDesignValue = element.Children.Max(x => x.GetDesignRectOrViewValue(getRectValue));
+			childDesignValue = element.Children.Max(x => x.GetDesignRectValue(getRectValue));
 		}
-		var designValue = Math.Max(getRectValue(element.DesignRect), childDesignValue);
+		return Math.Max(getRectValue(element.DesignRect), childDesignValue);
+	}
+
+	public static int GetDesignRectOrViewValue(this IConsoleElement element, Func<Rect, int> getRectValue)
+	{
+		var designValue = GetDesignRectValue(element, getRectValue);
 		var lastDesignValue = (designValue == 0 ? getRectValue(element.ViewRect) : designValue);
 		if (element.ViewRect.Width == 0)
 		{

@@ -129,6 +129,7 @@ public class VerticalStack : IConsoleElement
 	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)
 	{
 		var top = ViewRect.Top;
+		var everyWidth = this.GetDesignRectOrViewValue(x => x.Width);
 		Children.ForEachIndex((child, idx) =>
 		{
 			if (idx == 0)
@@ -140,7 +141,7 @@ public class VerticalStack : IConsoleElement
 			{
 				Left = ViewRect.Left + child.DesignRect.Left,
 				Top = top,
-				Width = child.DesignRect.Width,
+				Width = everyWidth, //child.DesignRect.Width,
 				Height = child.DesignRect.Height,
 			};
 			updateChild(childRect, child);

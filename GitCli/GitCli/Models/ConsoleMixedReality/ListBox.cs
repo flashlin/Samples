@@ -66,8 +66,13 @@ public class ListBox : IConsoleElement
 		var textBox = new TextBox(Rect.Empty)
 		{
 			Parent = this,
+			DesignRect = new Rect()
+			{
+				Width = DesignRect.Width,
+				Height = 1,
+			},
 			Value = item.Title,
-			UserObject = item.Value
+			UserObject = item.Value,
 		};
 		Children.AddElement(textBox);
 		return textBox;
