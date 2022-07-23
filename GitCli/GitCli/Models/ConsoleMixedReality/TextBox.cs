@@ -5,10 +5,9 @@ public class TextBox : IConsoleEditableElement
 	private int _editIndex;
 	private bool _isSelectedMode;
 	private int _startSelectIndex;
-	public TextBox(Rect rect)
+	public TextBox()
 	{
 		Children = new StackChildren(this);
-		DesignRect = rect;
 	}
 
 	public event EventHandler<ConsoleElementEvent>? OnHandle;
@@ -29,7 +28,12 @@ public class TextBox : IConsoleEditableElement
 		}
 	}
 
-	public Rect DesignRect { get; set; }
+	public Rect DesignRect { get; set; } = new Rect()
+	{
+		Width = 10,
+		Height = 1,
+	};
+
 	public int EditIndex
 	{
 		get => _editIndex;
