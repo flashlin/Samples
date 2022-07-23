@@ -1,7 +1,14 @@
-﻿using GitCli.Models.ConsoleMixedReality;
+﻿using System.Collections.ObjectModel;
+using GitCli.Models.ConsoleMixedReality;
 using T1.Standard.Extensions;
 
 namespace GitCli.Models;
+
+public class MainModel
+{
+	public NotifyCollection<ListItem> AllCommitList { get; set; } = new();
+}
+
 
 public class ConsoleWindow : IConsoleWindow
 {
