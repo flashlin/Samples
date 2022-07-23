@@ -33,7 +33,11 @@ public static class ConsoleElementExtension
 
 	public static int GetDesignRectWidthOrViewWidth(this IConsoleElement element)
 	{
-		var childDesignWidth = element.Children.Max(x => x.DesignRect.Width);
+		var childDesignWidth = 0;
+		if (element.Children.Count > 0)
+		{
+			childDesignWidth = element.Children.Max(x => x.GetDesignRectWidthOrViewWidth());
+		}
 		var designWidth = Math.Max(element.DesignRect.Width, childDesignWidth);
 		var lastDesignWidth = (designWidth == 0 ? element.ViewRect.Width : designWidth);
 		if (element.ViewRect.Width == 0)
