@@ -72,6 +72,10 @@ public class ConsoleWindow : IConsoleWindow
 		{
 			Value = "Local Changes",
 		};
+		var allCommits = new TextBox()
+		{
+			Value = "All Commits",
+		};
 
 		var changesList = new ListBox(new Rect
 		{
@@ -80,11 +84,6 @@ public class ConsoleWindow : IConsoleWindow
 		}).Setup(x =>
 		{
 			x.Name = "LocalChanges";
-			//var localChanges = x.AddItem(new ListItem()
-			//{
-			//	Title = "Local Changes",
-			//});
-
 			x.AddElement(localChanges);
 
 			localChanges.OnHandle += (sender, evt) =>
@@ -94,11 +93,6 @@ public class ConsoleWindow : IConsoleWindow
 
 				Console.WriteLine("");
 			};
-
-			var allCommits = x.AddItem(new ListItem()
-			{
-				Title = "All Commits",
-			});
 
 			allCommits.OnHandle += (sender, evt) =>
 			{
