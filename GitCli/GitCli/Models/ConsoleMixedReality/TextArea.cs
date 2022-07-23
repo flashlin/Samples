@@ -17,6 +17,7 @@ public class TextArea : IConsoleElement
 
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public object? DataContext { get; set; }
 	public Color? HighlightBackgroundColor { get; set; }
 
 	public Position CursorPosition

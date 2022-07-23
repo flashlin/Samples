@@ -15,6 +15,7 @@ public class Frame : IConsoleElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; set; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public object? DataContext { get; set; }
 	public Color? HighlightBackgroundColor { get; set; }
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
 
@@ -115,10 +116,6 @@ public class Frame : IConsoleElement
 	}
 
 	public void Refresh()
-	{
-	}
-
-	public void SetDataContext(object dataModel)
 	{
 	}
 }

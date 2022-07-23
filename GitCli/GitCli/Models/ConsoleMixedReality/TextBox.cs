@@ -14,6 +14,7 @@ public class TextBox : IConsoleEditableElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public object? DataContext { get; set; }
 
 	public Position CursorPosition
 	{
@@ -217,10 +218,6 @@ public class TextBox : IConsoleEditableElement
 	}
 
 	public void Refresh()
-	{
-	}
-
-	public void SetDataContext(object dataModel)
 	{
 	}
 

@@ -14,6 +14,7 @@ public class HorizontalStack : IConsoleElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
+	public object? DataContext { get; set; }
 	public Color? HighlightBackgroundColor { get; set; }
 
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
@@ -106,10 +107,6 @@ public class HorizontalStack : IConsoleElement
 			child.ViewRect = viewRect;
 			child.Refresh();
 		});
-	}
-
-	public void SetDataContext(object dataModel)
-	{
 	}
 
 	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)
