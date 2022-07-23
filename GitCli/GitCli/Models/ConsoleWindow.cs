@@ -28,6 +28,7 @@ public class ConsoleWindow : IConsoleWindow
 	{
 		var gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Codewars");
 		var consoleSize = _console.GetSize();
+		var model = new MainModel();
 
 		var changedFilesList = new ListBox(new Rect()
 		{
@@ -89,11 +90,28 @@ public class ConsoleWindow : IConsoleWindow
 			var commits = gitRepoInfo.QueryCommits();
 			foreach (var commit in commits)
 			{
-				allCommitList.AddItem(new ListItem()
+				model.AllCommitList.Adding(new ListItem()
 				{
 					Title = commit.Message,
 					Value = commit
 				});
+				//allCommitList.AddItem(new ListItem()
+				//{
+				//	Title = commit.Message,
+				//	Value = commit
+				//});
+			}
+			model.AllCommitList.Notify();
+			//allCommitList.Refresh();
+		};
+
+		model.AllCommitList.OnNotify += (sender, eventArgs) =>
+		{
+			var items = model.AllCommitList.ToList();
+			allCommitList.Children.Clear();
+			foreach (var item in items)
+			{
+				allCommitList.AddItem(item);
 			}
 			allCommitList.Refresh();
 		};

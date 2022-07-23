@@ -23,6 +23,14 @@ public class NotifyCollection<T>
 
 	public event EventHandler<NotifyEventArgs<T>>? OnNotify;
 
+	public List<T> ToList()
+	{
+		lock (_locker)
+		{
+			return _items.ToList();
+		}
+	}
+
 	public void Updating(T item)
 	{
 		_updatingItems.Add(item);
@@ -48,7 +56,7 @@ public class NotifyCollection<T>
 			addList = _addingItems;
 			removeList = _removingItems;
 			updateList = _updatingItems;
-			CloneDataList();
+			_items = CloneDataList();
 			_addingItems = new ConcurrentOnlyAddList<T>();
 			_removingItems = new ConcurrentOnlyAddList<T>();
 			_updatingItems = new ConcurrentOnlyAddList<T>();
