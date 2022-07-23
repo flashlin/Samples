@@ -111,7 +111,7 @@ public class HorizontalStack : IConsoleElement
 	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)
 	{
 		var left = ViewRect.Left;
-		var everyWidth = (DesignRect.IsEmpty ? ViewRect.Width : DesignRect.Width) / Children.Count;
+		var everyWidth = this.GetDesignRectWidthOrViewWidth() / Children.Count;
 		Children.ForEachIndex((child, idx) =>
 		{
 			if (idx == 0)

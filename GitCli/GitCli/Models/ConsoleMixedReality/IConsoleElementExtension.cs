@@ -30,4 +30,16 @@ public static class ConsoleElementExtension
 	{
 		return parent?.OnBubbleEvent(element, inputEvent) ?? false;
 	}
+
+	public static int GetDesignRectWidthOrViewWidth(this IConsoleElement element)
+	{
+		var childDesignWidth = element.Children.Max(x => x.DesignRect.Width);
+		var designWidth = Math.Max(element.DesignRect.Width, childDesignWidth);
+		var lastDesignWidth = (designWidth == 0 ? element.ViewRect.Width : designWidth);
+		if (element.ViewRect.Width == 0)
+		{
+			return lastDesignWidth;
+		}
+		return Math.Min(lastDesignWidth, element.ViewRect.Width);
+	}
 }

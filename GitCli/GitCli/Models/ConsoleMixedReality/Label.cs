@@ -4,10 +4,9 @@ namespace GitCli.Models.ConsoleMixedReality;
 
 public class Label : IConsoleElement
 {
-	public Label(Rect rect)
+	public Label()
 	{
 		Children = new StackChildren(this);
-		DesignRect = rect;
 	}
 
 	public Color Background { get; set; } = ConsoleColor.DarkBlue;
@@ -16,7 +15,10 @@ public class Label : IConsoleElement
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Color? HighlightBackgroundColor { get; set; }
 	public Position CursorPosition => Position.Empty;
-	public Rect DesignRect { get; set; }
+	public Rect DesignRect { get; set; } = new()
+	{
+		Height = 1,
+	};
 	public bool Enabled { get; set; }
 	public bool IsTab { get; set; }
 	public string Name { get; set; } = string.Empty;
