@@ -78,6 +78,17 @@ public class ListBox : IConsoleElement
 		return textBox;
 	}
 
+	public void AddElement(IConsoleElement element)
+	{
+		element.Parent = this;
+		element.DesignRect = new Rect()
+		{
+			Width = DesignRect.Width,
+			Height = Math.Max(1, element.DesignRect.Height),
+		};
+		Children.AddElement(element);
+	}
+
 	public bool OnBubbleEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		return Parent.RaiseOnBubbleEvent(element, inputEvent);
