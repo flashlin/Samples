@@ -1,8 +1,14 @@
-﻿using T1.Standard.Collections.Generics;
+﻿using GitCli.Models.ConsoleMixedReality;
+using T1.Standard.Collections.Generics;
 
 namespace GitCli.Models;
 
-public class NotifyCollection<T>
+public interface INotifyCollection<T>
+{
+	event EventHandler<NotifyEventArgs<T>> OnNotify;
+}
+
+public class NotifyCollection<T> : INotifyCollection<T>
 {
 	private readonly object _locker = new object();
 	private ConcurrentOnlyAddList<T> _items = new();
@@ -21,7 +27,7 @@ public class NotifyCollection<T>
 		}
 	}
 
-	public event EventHandler<NotifyEventArgs<T>>? OnNotify;
+	public event EventHandler<NotifyEventArgs<T>> OnNotify = null!;
 
 	public List<T> ToList()
 	{

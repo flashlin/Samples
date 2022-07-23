@@ -1,4 +1,5 @@
-﻿using T1.Standard.Collections.Generics;
+﻿using GitCli.Models.ConsoleMixedReality;
+using T1.Standard.Collections.Generics;
 
 namespace GitCli.Models;
 

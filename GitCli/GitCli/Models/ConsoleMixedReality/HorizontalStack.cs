@@ -108,6 +108,10 @@ public class HorizontalStack : IConsoleElement
 		});
 	}
 
+	public void SetDataContext(object dataModel)
+	{
+	}
+
 	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)
 	{
 		var left = ViewRect.Left;

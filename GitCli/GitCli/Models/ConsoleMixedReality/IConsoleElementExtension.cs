@@ -1,4 +1,6 @@
-﻿namespace GitCli.Models.ConsoleMixedReality;
+﻿using T1.Standard.Collections.Generics;
+
+namespace GitCli.Models.ConsoleMixedReality;
 
 public static class ConsoleElementExtension
 {

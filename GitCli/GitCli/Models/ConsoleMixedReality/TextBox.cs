@@ -11,7 +11,6 @@ public class TextBox : IConsoleEditableElement
 	}
 
 	public event EventHandler<ConsoleElementEvent>? OnHandleEnter;
-
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
@@ -218,6 +217,10 @@ public class TextBox : IConsoleEditableElement
 	}
 
 	public void Refresh()
+	{
+	}
+
+	public void SetDataContext(object dataModel)
 	{
 	}
 

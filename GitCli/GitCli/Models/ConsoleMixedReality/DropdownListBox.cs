@@ -109,4 +109,8 @@ public class DropdownListBox : IConsoleElement
 	{
 
 	}
+
+	public void SetDataContext(object dataModel)
+	{
+	}
 }
