@@ -16,6 +16,7 @@ public class MainModel
 	public NotifyCollection<ListItem> BranchList { get; set; } = new();
 	public NotifyCollection<ListItem> AllCommitList { get; set; } = new();
 	public NotifyCollection<ListItem> CompareList { get; set; } = new();
+	public NotifyCollection<ListItem> ChangedFilesList { get; set; } = new();
 	public IModelCommand LocalChangesCommand { get; set; }
 
 	private void OnHandleAllChanges()
@@ -96,21 +97,16 @@ public class ConsoleWindow : IConsoleWindow
 		});
 		model.CompareList.Notify();
 
-		GetBranchList(gitRepoInfo, model);
-
-		//
-
-		var changedFilesList = new ListBox(new Rect()
-		{
-			Width = 30,
-			Height = 10,
-		});
-
-		changedFilesList.AddItem(new ListItem()
+		model.ChangedFilesList.Adding(new ListItem()
 		{
 			Title = "file1"
 		});
+		model.ChangedFilesList.Notify();
 
+
+		GetBranchList(gitRepoInfo, model);
+
+		//
 		var layout1 = new VerticalStack()
 		{
 			Name = "LeftVertical1",
@@ -171,7 +167,14 @@ public class ConsoleWindow : IConsoleWindow
 					},
 					Children =
 					{
-						changedFilesList,
+						new ListBox(new Rect()
+						{
+							Width = 30,
+							Height = 10,
+						})
+						{
+							DataContext = model.ChangesList,
+						},
 						new ListBox(new Rect()
 						{
 							Width = 30,
