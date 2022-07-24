@@ -9,9 +9,8 @@ public class DropdownListBox : IConsoleElement
 	private bool _isSelectedMode = false;
 	private bool _isSelectMode = false;
 
-	public DropdownListBox(Rect rect)
+	public DropdownListBox()
 	{
-		DesignRect = rect;
 		Children = new StackChildren(this);
 		_textBox = new TextBox();
 		_listBox = new ListBox(Rect.Empty);
@@ -34,13 +33,17 @@ public class DropdownListBox : IConsoleElement
 	}
 
 	public object? DataContext { get; set; }
-	public Rect DesignRect { get; set; }
-	public Color? HighlightBackgroundColor { get; set; }
+	public Rect DesignRect { get; set; } = new Rect()
+	{
+		Width = 10,
+		Height = 1,
+	};
+
 	public bool IsTab { get; set; } = true;
 	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
 	public object? UserObject { get; set; }
-	public string Value { get; set; }
+	public string Value { get; set; } = string.Empty;
 	public Rect ViewRect { get; set; }
 
 	public Character this[Position pos]
@@ -67,11 +70,6 @@ public class DropdownListBox : IConsoleElement
 		}
 	}
 
-	public Rect GetChildrenRect()
-	{
-		return ViewRect;
-	}
-
 	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
 	{
 		return Parent.RaiseOnBubbleEvent(this, evt);
@@ -84,6 +82,7 @@ public class DropdownListBox : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
+		this.HandleOnCreate(rect, consoleManager);
 		_textBox.Parent = this;
 		_listBox.Parent = this;
 		_textBox.ViewRect = new Rect
