@@ -115,21 +115,6 @@ public class ConsoleWindow : IConsoleWindow
 			Title = "compare1"
 		});
 
-		var changedFilesLayout = new HorizontalStack()
-		{
-			Name = "changedFilesLayout",
-			DesignRect = new Rect()
-			{
-				Width = 60,
-				Height = 10
-			},
-			Children =
-			{
-				changedFilesList,
-				compareList,
-			}
-		};
-
 		var layout1 = new VerticalStack()
 		{
 			Name = "LeftVertical1",
@@ -180,7 +165,20 @@ public class ConsoleWindow : IConsoleWindow
 					Name = "allCommitList",
 					DataContext = model.AllCommitList,
 				},
-				changedFilesLayout
+				new HorizontalStack()
+				{
+					Name = "changedFilesLayout",
+					DesignRect = new Rect()
+					{
+						Width = 60,
+						Height = 10
+					},
+					Children =
+					{
+						changedFilesList,
+						compareList,
+					}
+				}
 			}
 		};
 
