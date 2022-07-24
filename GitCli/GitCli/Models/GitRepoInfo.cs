@@ -16,20 +16,18 @@ public class GitRepoInfo : IObjectNotifyPropertyChanged
 
 	public IEnumerable<FileStatusInfo> QueryStatus()
 	{
-		using (var repo = new Repository(FolderPath))
+		using var repo = new Repository(FolderPath);
+		//var master = repo.Branches["master"];
+		var status = repo.RetrieveStatus();
+		//status.IsDirty;
+		//status.Modified
+		foreach (var modified in status.Modified)
 		{
-			//var master = repo.Branches["master"];
-			var status = repo.RetrieveStatus();
-			//status.IsDirty;
-			//status.Modified
-			foreach (var modified in status.Modified)
+			yield return new FileStatusInfo
 			{
-				yield return new FileStatusInfo
-				{
-					FilePath = modified.FilePath,
-					Status = GitFileStatus.Modified
-				};
-			}
+				FilePath = modified.FilePath,
+				Status = GitFileStatus.Modified
+			};
 		}
 	}
 
