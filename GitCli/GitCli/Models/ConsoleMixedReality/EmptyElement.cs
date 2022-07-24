@@ -14,9 +14,8 @@ public class EmptyElement : IConsoleEditableElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
-	public object? DataContext { get; set; }
-	public Color? HighlightBackgroundColor { get; set; }
 	public Position CursorPosition => Position.Empty;
+	public object? DataContext { get; set; }
 	public Rect DesignRect { get; set; } = Rect.Empty;
 	public int EditIndex
 	{
@@ -24,9 +23,11 @@ public class EmptyElement : IConsoleEditableElement
 		set => _editIndex = 0;
 	}
 
+	public Color? HighlightBackgroundColor { get; set; }
 	public bool IsTab { get; set; } = false;
 	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
+	public object? UserObject { get; set; }
 	public string Value { get; } = String.Empty;
 	public Rect ViewRect { get; set; } = Rect.Empty;
 
@@ -39,6 +40,11 @@ public class EmptyElement : IConsoleEditableElement
 	public Rect GetChildrenRect()
 	{
 		return Rect.Empty;
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 
 	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
@@ -63,10 +69,5 @@ public class EmptyElement : IConsoleEditableElement
 
 	public void Refresh()
 	{
-	}
-
-	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
-	{
-		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 }

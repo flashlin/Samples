@@ -14,19 +14,18 @@ public class TableRow : IConsoleElement
 
 	public StackChildren Children { get; private set; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
-	public object? DataContext { get; set; }
-	public Color? HighlightBackgroundColor { get; set; }
-
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
-
+	public object? DataContext { get; set; }
 	public Rect DesignRect { get; set; }
-
+	public Color? HighlightBackgroundColor { get; set; }
 	public bool IsTab { get; set; }
 
 	public string Name { get; set; } = string.Empty;
 
 	public IConsoleElement? Parent { get; set; }
 
+	public object? UserObject { get; set; }
+	public string Value { get; set; }
 	public Rect ViewRect { get; set; }
 
 	public Character this[Position pos]
@@ -43,6 +42,11 @@ public class TableRow : IConsoleElement
 			}
 			return Character.Empty;
 		}
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 
 	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
@@ -75,9 +79,6 @@ public class TableRow : IConsoleElement
 			left += columnWidth;
 		}
 	}
-
-	public string Value { get; set; }
-
 	public bool OnInput(InputEvent inputEvent)
 	{
 		return Children.GetFocusedControl().OnInput(inputEvent);
@@ -85,10 +86,5 @@ public class TableRow : IConsoleElement
 
 	public void Refresh()
 	{
-	}
-
-	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
-	{
-		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 }

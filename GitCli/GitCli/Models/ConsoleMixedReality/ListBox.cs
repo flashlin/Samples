@@ -9,9 +9,8 @@ namespace GitCli.Models.ConsoleMixedReality;
 [MapClone]
 public class ListBox : IConsoleElement
 {
-	private Span _showListSpan = Span.Empty;
 	private NotifyCollection<ListItem>? _dataContext;
-
+	private Span _showListSpan = Span.Empty;
 	public ListBox(Rect rect)
 	{
 		DesignRect = rect;
@@ -19,29 +18,31 @@ public class ListBox : IConsoleElement
 		Children.CollectionChanged += ChildrenOnCollectionChanged;
 	}
 
-	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
-	public Color? HighlightBackgroundColor { get; set; }
+	public event EventHandler<ConsoleElementEvent>? OnHandleEnter;
+
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 	public StackChildren Children { get; }
+	public IModelCommand? Command { get; set; }
+	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
 	public Position CursorPosition => Children.FocusedControlOrMe(
 		x => x.CursorPosition,
 		() => ViewRect.TopLeftCorner);
-
-	public Rect DesignRect { get; set; }
-	public bool IsTab { get; set; } = true;
-	public int MaxLength { get; set; } = int.MaxValue;
-	public string Name { get; set; } = string.Empty;
-	public IConsoleElement? Parent { get; set; }
-	public Rect ViewRect { get; set; }
-	public event EventHandler<ConsoleElementEvent>? OnHandleEnter;
 
 	public object? DataContext
 	{
 		get => _dataContext;
 		set => SetDataContext(value);
 	}
-	public IModelCommand? Command { get; set; }
 
+	public Rect DesignRect { get; set; }
+	public Color? HighlightBackgroundColor { get; set; }
+	public bool IsTab { get; set; } = true;
+	public int MaxLength { get; set; } = int.MaxValue;
+	public string Name { get; set; } = string.Empty;
+	public IConsoleElement? Parent { get; set; }
+	public string Value { get; set; }
+	public object? UserObject { get; set; }
+	public Rect ViewRect { get; set; }
 	public Character this[Position pos]
 	{
 		get
@@ -69,30 +70,15 @@ public class ListBox : IConsoleElement
 		}
 	}
 
-	public void SetDataContext(object? dataModel)
+	public void AddElement(IConsoleElement element)
 	{
-		if (_dataContext != null)
+		element.Parent = this;
+		element.DesignRect = new Rect()
 		{
-			_dataContext.OnNotify -= OnDataContext;
-		}
-		_dataContext = (NotifyCollection<ListItem>?)dataModel;
-		if (_dataContext != null)
-		{
-			_dataContext.OnNotify += OnDataContext;
-			OnDataContext(dataModel, new NotifyEventArgs<ListItem>());
-		}
-	}
-
-	private void OnDataContext(object? sender, NotifyEventArgs<ListItem> eventArgs)
-	{
-		var dataModel = (NotifyCollection<ListItem>)sender!;
-		var items = dataModel.ToList();
-		Children.Clear();
-		foreach (var item in items)
-		{
-			AddItem(item);
-		}
-		Refresh();
+			Width = DesignRect.Width,
+			Height = Math.Max(1, element.DesignRect.Height),
+		};
+		Children.AddElement(element);
 	}
 
 	public TextBox AddItem(ListItem item)
@@ -110,17 +96,6 @@ public class ListBox : IConsoleElement
 		};
 		Children.AddElement(textBox);
 		return textBox;
-	}
-
-	public void AddElement(IConsoleElement element)
-	{
-		element.Parent = this;
-		element.DesignRect = new Rect()
-		{
-			Width = DesignRect.Width,
-			Height = Math.Max(1, element.DesignRect.Height),
-		};
-		Children.AddElement(element);
 	}
 
 	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
@@ -146,8 +121,6 @@ public class ListBox : IConsoleElement
 		};
 	}
 
-	public string Value { get; set; }
-
 	public bool OnInput(InputEvent inputEvent)
 	{
 		return Children.FocusedControlOrMe(
@@ -155,12 +128,80 @@ public class ListBox : IConsoleElement
 			() => OnMeInputEvent(inputEvent));
 	}
 
-	private bool OnMeInputEvent(InputEvent inputEvent)
+	public void Refresh()
 	{
-		OnBubbleKeyEvent(this, inputEvent);
-		return true;
+		var y = ViewRect.Top;
+		Children.ForEachIndex((child, idx) =>
+		{
+			if (idx < _showListSpan.Index)
+			{
+				return;
+			}
+			child.Parent = this;
+			child.ViewRect = new Rect()
+			{
+				Left = ViewRect.Left,
+				Top = y,
+				Width = ViewRect.Width,
+				Height = 1,
+			};
+			child.BackgroundColor = GetHighlightBackgroundColor(child);
+			child.Refresh();
+			y += 1;
+		});
 	}
 
+	public void SetDataContext(object? dataModel)
+	{
+		if (_dataContext != null)
+		{
+			_dataContext.OnNotify -= OnDataContext;
+		}
+		_dataContext = (NotifyCollection<ListItem>?)dataModel;
+		if (_dataContext != null)
+		{
+			_dataContext.OnNotify += OnDataContext;
+			OnDataContext(dataModel, new NotifyEventArgs<ListItem>());
+		}
+	}
+
+	private void AddChild(IList newItems)
+	{
+		foreach (IConsoleElement item in newItems)
+		{
+			item.Parent = this;
+		}
+	}
+
+	private void ChildrenOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+	{
+		if (e.Action == NotifyCollectionChangedAction.Add)
+		{
+			AddChild(e.NewItems!);
+		}
+	}
+
+	private Color GetHighlightBackgroundColor(IConsoleElement child)
+	{
+		if (ConsoleManager.FocusedElement == child)
+		{
+			return ConsoleManager.HighlightBackgroundColor1;
+		}
+
+		return Children.GetFocusedControl() == child ? ConsoleManager.HighlightBackgroundColor2 : BackgroundColor;
+	}
+
+	private void OnDataContext(object? sender, NotifyEventArgs<ListItem> eventArgs)
+	{
+		var dataModel = (NotifyCollection<ListItem>)sender!;
+		var items = dataModel.ToList();
+		Children.Clear();
+		foreach (var item in items)
+		{
+			AddItem(item);
+		}
+		Refresh();
+	}
 	private bool OnFocusedControlInputEvent(InputEvent inputEvent, IConsoleElement focusedControl)
 	{
 		switch (inputEvent.Key)
@@ -210,53 +251,10 @@ public class ListBox : IConsoleElement
 		return true;
 	}
 
-	public void Refresh()
+	private bool OnMeInputEvent(InputEvent inputEvent)
 	{
-		var y = ViewRect.Top;
-		Children.ForEachIndex((child, idx) =>
-		{
-			if (idx < _showListSpan.Index)
-			{
-				return;
-			}
-			child.Parent = this;
-			child.ViewRect = new Rect()
-			{
-				Left = ViewRect.Left,
-				Top = y,
-				Width = ViewRect.Width,
-				Height = 1,
-			};
-			child.BackgroundColor = GetHighlightBackgroundColor(child);
-			child.Refresh();
-			y += 1;
-		});
-	}
-
-	private void AddChild(IList newItems)
-	{
-		foreach (IConsoleElement item in newItems)
-		{
-			item.Parent = this;
-		}
-	}
-
-	private void ChildrenOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-	{
-		if (e.Action == NotifyCollectionChangedAction.Add)
-		{
-			AddChild(e.NewItems!);
-		}
-	}
-
-	private Color GetHighlightBackgroundColor(IConsoleElement child)
-	{
-		if (ConsoleManager.FocusedElement == child)
-		{
-			return ConsoleManager.HighlightBackgroundColor1;
-		}
-
-		return Children.GetFocusedControl() == child ? ConsoleManager.HighlightBackgroundColor2 : BackgroundColor;
+		OnBubbleKeyEvent(this, inputEvent);
+		return true;
 	}
 }
 

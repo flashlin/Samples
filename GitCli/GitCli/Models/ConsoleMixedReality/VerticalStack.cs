@@ -10,13 +10,15 @@ public class VerticalStack : IConsoleElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.Cyan;
 	public StackChildren Children { get; private set; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
-	public object? DataContext { get; set; }
-	public Color? HighlightBackgroundColor { get; set; }
 	public Position CursorPosition => Children.GetFocusedControl().CursorPosition;
+	public object? DataContext { get; set; }
 	public Rect DesignRect { get; set; } = Rect.Empty;
+	public Color? HighlightBackgroundColor { get; set; }
 	public bool IsTab { get; set; } = true;
 	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
+	public string Value { get; set; }
+	public object? UserObject { get; set; }
 	public Rect ViewRect { get; set; } = Rect.Empty;
 	public Character this[Position pos]
 	{
@@ -50,6 +52,11 @@ public class VerticalStack : IConsoleElement
 			initRect = initRect.Surround(child.ViewRect);
 		}
 		return initRect;
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 
 	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
@@ -112,9 +119,6 @@ public class VerticalStack : IConsoleElement
 			child.OnCreate(viewRect, ConsoleManager);
 		});
 	}
-
-	public string Value { get; set; }
-
 	public bool OnInput(InputEvent inputEvent)
 	{
 		return Children.GetFocusedControl().OnInput(inputEvent);
@@ -128,12 +132,6 @@ public class VerticalStack : IConsoleElement
 			child.Refresh();
 		});
 	}
-
-	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
-	{
-		return Parent.RaiseOnBubbleEvent(this, evt);
-	}
-
 	private void UpdateChildren(Action<Rect, IConsoleElement> updateChild)
 	{
 		var top = ViewRect.Top;

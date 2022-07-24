@@ -13,17 +13,19 @@ public class Label : IConsoleElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
-	public object? DataContext { get; set; }
-	public Color? HighlightBackgroundColor { get; set; }
 	public Position CursorPosition => Position.Empty;
+	public object? DataContext { get; set; }
 	public Rect DesignRect { get; set; } = new()
 	{
 		Height = 1,
 	};
+
 	public bool Enabled { get; set; }
+	public Color? HighlightBackgroundColor { get; set; }
 	public bool IsTab { get; set; }
 	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
+	public object? UserObject { get; set; }
 	public string Value { get; set; } = String.Empty;
 	public Rect ViewRect { get; set; }
 	public Character this[Position pos]
@@ -45,6 +47,11 @@ public class Label : IConsoleElement
 		}
 	}
 
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
+	}
+
 	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		return false;
@@ -63,10 +70,5 @@ public class Label : IConsoleElement
 
 	public void Refresh()
 	{
-	}
-
-	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
-	{
-		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 }
