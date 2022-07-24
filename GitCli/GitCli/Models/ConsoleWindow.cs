@@ -15,6 +15,7 @@ public class MainModel
 	public NotifyCollection<ListItem> ChangesList { get; set; } = new();
 	public NotifyCollection<ListItem> BranchList { get; set; } = new();
 	public NotifyCollection<ListItem> AllCommitList { get; set; } = new();
+	public NotifyCollection<ListItem> CompareList { get; set; } = new();
 	public IModelCommand LocalChangesCommand { get; set; }
 
 	private void OnHandleAllChanges()
@@ -89,6 +90,12 @@ public class ConsoleWindow : IConsoleWindow
 		});
 		model.ChangesList.Notify();
 
+		model.CompareList.Adding(new ListItem()
+		{
+			Title = "compare1"
+		});
+		model.CompareList.Notify();
+
 		GetBranchList(gitRepoInfo, model);
 
 		//
@@ -102,17 +109,6 @@ public class ConsoleWindow : IConsoleWindow
 		changedFilesList.AddItem(new ListItem()
 		{
 			Title = "file1"
-		});
-
-		var compareList = new ListBox(new Rect()
-		{
-			Width = 30,
-			Height = 10,
-		});
-
-		compareList.AddItem(new ListItem()
-		{
-			Title = "compare1"
 		});
 
 		var layout1 = new VerticalStack()
@@ -176,7 +172,14 @@ public class ConsoleWindow : IConsoleWindow
 					Children =
 					{
 						changedFilesList,
-						compareList,
+						new ListBox(new Rect()
+						{
+							Width = 30,
+							Height = 10,
+						})
+						{
+							DataContext = model.CompareList,
+						},
 					}
 				}
 			}
