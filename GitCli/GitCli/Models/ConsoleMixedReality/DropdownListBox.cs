@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 
 namespace GitCli.Models.ConsoleMixedReality;
 
@@ -46,6 +47,7 @@ public class DropdownListBox : IConsoleElement
 	public string Value { get; set; } = string.Empty;
 	public Rect ViewRect { get; set; }
 
+
 	public Character this[Position pos]
 	{
 		get
@@ -78,6 +80,11 @@ public class DropdownListBox : IConsoleElement
 	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		return false;
+	}
+
+	public TextBox AddItem(ListItem item)
+	{
+		return _listBox.AddItem(item);
 	}
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
