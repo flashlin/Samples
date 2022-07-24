@@ -101,7 +101,7 @@ public class ListBox : IConsoleElement
 	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
 	{
 		//this.OnHandleEnter?.Invoke(this, evt);
-		Command?.Execute(evt);
+		Command.Raise(evt);
 		return true;
 	}
 

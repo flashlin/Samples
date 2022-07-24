@@ -6,7 +6,8 @@ public class MainModel
 {
 	public MainModel()
 	{
-		LocalChangesCommand = new EntryCommand(("All Commits", OnHandleAllChanges));
+		LocalChangesCommand = new EntryCommand("All Commits", OnHandleAllChanges);
+		ACommitCommand = new ExecuteCommand(OnHandleACommit);
 	}
 
 	public GitRepoInfo RepoInfo { get; set; }
@@ -15,7 +16,8 @@ public class MainModel
 	public NotifyCollection<ListItem> AllCommitList { get; set; } = new();
 	public NotifyCollection<ListItem> CompareList { get; set; } = new();
 	public NotifyCollection<ListItem> ChangedFilesList { get; set; } = new();
-	public IModelCommand LocalChangesCommand { get; set; }
+	public IModelCommand LocalChangesCommand { get; }
+	public IModelCommand ACommitCommand { get; }
 
 	private void OnHandleAllChanges()
 	{
@@ -31,17 +33,13 @@ public class MainModel
 		AllCommitList.Notify();
 	}
 
-	private void OnHandleACommit(IConsoleElement target)
+	private void OnHandleACommit(ConsoleElementEvent evt)
 	{
-		var commits = RepoInfo.QueryCommits();
-		foreach (var commit in commits)
+		var commit = (GitCommitInfo)evt.Element.UserObject;
+		var count = 0;
+		foreach (var entry in commit.Tree)
 		{
-			AllCommitList.Adding(new ListItem()
-			{
-				Title = commit.Message,
-				Value = commit
-			});
+			count++;
 		}
-		AllCommitList.Notify();
 	}
 }
