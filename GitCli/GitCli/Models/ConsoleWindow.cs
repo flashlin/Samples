@@ -6,10 +6,58 @@ namespace GitCli.Models;
 
 public class MainModel
 {
+	public MainModel()
+	{
+		LocalChangesCommand = new EntryCommand(("All Commits", OnHandleAllChanges));
+	}
+
+	public GitRepoInfo RepoInfo { get; set; }
 	public NotifyCollection<ListItem> ChangesList { get; set; } = new();
+	public NotifyCollection<ListItem> BranchList { get; set; } = new();
 	public NotifyCollection<ListItem> AllCommitList { get; set; } = new();
+	public IModelCommand LocalChangesCommand { get; set; }
+
+	private void OnHandleAllChanges()
+	{
+		var commits = RepoInfo.QueryCommits();
+		foreach (var commit in commits)
+		{
+			AllCommitList.Adding(new ListItem()
+			{
+				Title = commit.Message,
+				Value = commit
+			});
+		}
+		AllCommitList.Notify();
+	}
 }
 
+
+public class EntryCommand : IModelCommand
+{
+	private readonly (string, Action) _listener;
+	public EntryCommand((string value, Action handler) listener)
+	{
+		_listener = listener;
+	}
+	public bool CanExecute(ConsoleElementEvent evt)
+	{
+		return true;
+	}
+	public void Execute(ConsoleElementEvent evt)
+	{
+		var consoleElement = evt.Element;
+		if (consoleElement.Value == _listener.Item1)
+		{
+			_listener.Item2();
+		}
+	}
+}
+
+public interface IModelCommand
+{
+	void Execute(ConsoleElementEvent evt);
+}
 
 public class ConsoleWindow : IConsoleWindow
 {
@@ -30,7 +78,7 @@ public class ConsoleWindow : IConsoleWindow
 		var gitRepoInfo = _gitRepoAgent.OpenRepoFolder("D:/VDisk/Github/Codewars");
 		var consoleSize = _console.GetSize();
 		var model = new MainModel();
-
+		model.RepoInfo = gitRepoInfo;
 		model.ChangesList.Adding(new ListItem()
 		{
 			Title = "Local Changes",
@@ -39,6 +87,9 @@ public class ConsoleWindow : IConsoleWindow
 		{
 			Title = "All Commits",
 		});
+		model.ChangesList.Notify();
+
+		GetBranchList(gitRepoInfo, model);
 
 		var changedFilesList = new ListBox(new Rect()
 		{
@@ -87,48 +138,22 @@ public class ConsoleWindow : IConsoleWindow
 		};
 		allCommitList.SetDataContext(model.AllCommitList);
 
-		var localChanges = new TextBox()
-		{
-			Value = "Local Changes",
-		};
-		var allCommits = new TextBox()
-		{
-			Value = "All Commits",
-		};
 
-		//allCommits.OnHandleEnter += (sender, evt) =>
+		//localChanges.OnHandleEnter += (sender, evt) =>
 		//{
-		//	var commits = gitRepoInfo.QueryCommits();
-		//	foreach (var commit in commits)
-		//	{
-		//		model.AllCommitList.Adding(new ListItem()
-		//		{
-		//			Title = commit.Message,
-		//			Value = commit
-		//		});
-		//	}
-		//	model.AllCommitList.Notify();
+		//	var fileStatus = gitRepoInfo.QueryStatus()
+		//		.ToArray();
 		//};
 
-		var changesList = new ListBox(new Rect
+		new ListBox(new Rect
 		{
 			Width = 20,
 			Height = 2,
-		}).Setup(x =>
+		})
 		{
-			x.Name = "LocalChanges";
-			x.AddElement(localChanges);
-
-			localChanges.OnHandleEnter += (sender, evt) =>
-			{
-				var fileStatus = gitRepoInfo.QueryStatus()
-					.ToArray();
-			};
-			x.AddElement(allCommits);
-		});
-
-
-		changesList.OnHandleEnter += (sender, evt) =>
+			Name = "LocalChanges",
+			DataContext = model.ChangesList
+		}.OnHandleEnter += (sender, evt) =>
 		{
 			var textBox = (TextBox)evt.Element;
 			if (textBox.Value == "All Commits")
@@ -158,27 +183,27 @@ public class ConsoleWindow : IConsoleWindow
 			BackgroundColor = ConsoleColor.DarkMagenta,
 			Children =
 				{
-					 changesList,
+					 new ListBox(new Rect
+					 {
+						 Width = 20,
+						 Height = 2,
+					 })
+					 {
+						 Name = "LocalChanges",
+						 DataContext = model.ChangesList,
+						 Command = model.LocalChangesCommand
+					 },
 					 new ListBox(new Rect
 					 {
 						  Left = 0,
 						  Top = 3,
 						  Width = 20,
 						  Height = 10,
-					 }).Setup(x =>
-					 {
-						  x.Name = "branchList";
-						  var branches = gitRepoInfo.QueryBranches()
-								.OrderByDescending(x => x.IsLocalBranch);
-						  foreach (var branch in branches)
-						  {
-								x.AddItem(new ListItem
-								{
-									 Title = branch.Name,
-									 Value = branch
-								});
-						  }
 					 })
+					 {
+						  Name = "branchList",
+						  DataContext = model.BranchList
+					 },
 				}
 		};
 
@@ -206,6 +231,22 @@ public class ConsoleWindow : IConsoleWindow
 		_consoleManager.Start();
 
 		return Task.CompletedTask;
+	}
+
+	private static void GetBranchList(GitRepoInfo gitRepoInfo, MainModel model)
+	{
+		var branches = gitRepoInfo.QueryBranches()
+			.OrderByDescending(x => x.IsLocalBranch);
+		foreach (var branch in branches)
+		{
+			model.BranchList.Adding(new ListItem
+			{
+				Title = branch.Name,
+				Value = branch
+			});
+		}
+
+		model.BranchList.Notify();
 	}
 }
 
