@@ -40,6 +40,7 @@ public class ListBox : IConsoleElement
 		get => _dataContext;
 		set => SetDataContext(value);
 	}
+	public IModelCommand? Command { get; set; }
 
 	public Character this[Position pos]
 	{
@@ -124,7 +125,8 @@ public class ListBox : IConsoleElement
 
 	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
 	{
-		this.OnHandleEnter?.Invoke(this, evt);
+		//this.OnHandleEnter?.Invoke(this, evt);
+		Command?.Execute(evt);
 		return true;
 	}
 
@@ -143,6 +145,8 @@ public class ListBox : IConsoleElement
 			Length = ViewRect.Height
 		};
 	}
+
+	public string Value { get; set; }
 
 	public bool OnInput(InputEvent inputEvent)
 	{

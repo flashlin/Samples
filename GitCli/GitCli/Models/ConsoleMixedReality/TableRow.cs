@@ -76,6 +76,8 @@ public class TableRow : IConsoleElement
 		}
 	}
 
+	public string Value { get; set; }
+
 	public bool OnInput(InputEvent inputEvent)
 	{
 		return Children.GetFocusedControl().OnInput(inputEvent);

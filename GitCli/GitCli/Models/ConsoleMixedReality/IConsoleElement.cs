@@ -15,6 +15,7 @@ public interface IConsoleElement
     StackChildren Children { get; }
     IConsoleManager ConsoleManager { get; set; }
     object? DataContext { get; set; }
+    string Value { get; }
     bool OnInput(InputEvent inputEvent);
     void OnCreate(Rect parentRect, IConsoleManager consoleManager);
     bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent);

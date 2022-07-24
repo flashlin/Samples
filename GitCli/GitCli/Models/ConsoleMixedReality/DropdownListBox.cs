@@ -96,6 +96,8 @@ public class DropdownListBox : IConsoleElement
 		};
 	}
 
+	public string Value { get; set; }
+
 	public bool OnInput(InputEvent inputEvent)
 	{
 		if (_isSelectedMode)
