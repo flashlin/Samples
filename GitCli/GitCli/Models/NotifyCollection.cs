@@ -37,6 +37,15 @@ public class NotifyCollection<T> : INotifyCollection<T>
 		}
 	}
 
+	public void Init(params T[] items)
+	{
+		foreach (var item in items)
+		{
+			Adding(item);
+		}
+		Notify();
+	}
+
 	public void Updating(T item)
 	{
 		_updatingItems.Add(item);

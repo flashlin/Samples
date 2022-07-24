@@ -4,63 +4,6 @@ using T1.Standard.Extensions;
 
 namespace GitCli.Models;
 
-public class MainModel
-{
-	public MainModel()
-	{
-		LocalChangesCommand = new EntryCommand(("All Commits", OnHandleAllChanges));
-	}
-
-	public GitRepoInfo RepoInfo { get; set; }
-	public NotifyCollection<ListItem> ChangesList { get; set; } = new();
-	public NotifyCollection<ListItem> BranchList { get; set; } = new();
-	public NotifyCollection<ListItem> AllCommitList { get; set; } = new();
-	public NotifyCollection<ListItem> CompareList { get; set; } = new();
-	public NotifyCollection<ListItem> ChangedFilesList { get; set; } = new();
-	public IModelCommand LocalChangesCommand { get; set; }
-
-	private void OnHandleAllChanges()
-	{
-		var commits = RepoInfo.QueryCommits();
-		foreach (var commit in commits)
-		{
-			AllCommitList.Adding(new ListItem()
-			{
-				Title = commit.Message,
-				Value = commit
-			});
-		}
-		AllCommitList.Notify();
-	}
-}
-
-
-public class EntryCommand : IModelCommand
-{
-	private readonly (string, Action) _listener;
-	public EntryCommand((string value, Action handler) listener)
-	{
-		_listener = listener;
-	}
-	public bool CanExecute(ConsoleElementEvent evt)
-	{
-		return true;
-	}
-	public void Execute(ConsoleElementEvent evt)
-	{
-		var consoleElement = evt.Element;
-		if (consoleElement.Value == _listener.Item1)
-		{
-			_listener.Item2();
-		}
-	}
-}
-
-public interface IModelCommand
-{
-	void Execute(ConsoleElementEvent evt);
-}
-
 public class ConsoleWindow : IConsoleWindow
 {
 	private readonly ConsoleWriter _console;
@@ -81,27 +24,24 @@ public class ConsoleWindow : IConsoleWindow
 		var consoleSize = _console.GetSize();
 		var model = new MainModel();
 		model.RepoInfo = gitRepoInfo;
-		model.ChangesList.Adding(new ListItem()
+		model.ChangesList.Init(new ListItem()
 		{
 			Title = "Local Changes",
-		});
-		model.ChangesList.Adding(new ListItem()
+		},
+		new ListItem()
 		{
 			Title = "All Commits",
 		});
-		model.ChangesList.Notify();
 
-		model.CompareList.Adding(new ListItem()
+		model.CompareList.Init(new ListItem()
 		{
 			Title = "compare1"
 		});
-		model.CompareList.Notify();
 
-		model.ChangedFilesList.Adding(new ListItem()
+		model.ChangedFilesList.Init(new ListItem()
 		{
 			Title = "file1"
 		});
-		model.ChangedFilesList.Notify();
 
 
 		GetBranchList(gitRepoInfo, model);
