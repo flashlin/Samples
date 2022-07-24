@@ -47,15 +47,12 @@ public class ConsoleWindow : IConsoleWindow
 		GetBranchList(gitRepoInfo, model);
 
 		//
-		var layout1 = CreateLayout1(consoleSize, model);
-		var layout2 = CreateLayout2(model);
-
 		var mainStack = new HorizontalStack()
 		{
 			Children =
 			{
-				layout1,
-				layout2
+				CreateLayout1(consoleSize, model),
+				CreateLayout2(model),
 			}
 		};
 
