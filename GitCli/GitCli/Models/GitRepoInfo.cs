@@ -72,6 +72,16 @@ public class GitRepoInfo : IObjectNotifyPropertyChanged
 		using var repo = new Repository(FolderPath);
 		foreach (var repoCommit in repo.Commits)
 		{
+			var files = new List<GitFileInfo>();
+			foreach (var entry in repoCommit.Tree)
+			{
+				files.Add(new GitFileInfo()
+				{
+					Path = entry.Path,
+					Name = entry.Name,
+					Mode = entry.Mode,
+				});
+			}
 			yield return new GitCommitInfo
 			{
 				Message = repoCommit.Message,
@@ -82,10 +92,17 @@ public class GitRepoInfo : IObjectNotifyPropertyChanged
 					WhenOn = repoCommit.Committer.When.DateTime
 				},
 				HashCode = repoCommit.Sha,
-				Tree = repoCommit.Tree,
+				Tree = files,
 			};
 		}
 	}
+}
+
+public class GitFileInfo
+{
+	public string Path { get; set; }
+	public string Name { get; set; }
+	public Mode Mode { get; set; }
 }
 
 public class Author
@@ -101,7 +118,7 @@ public class GitCommitInfo
 	public string Message { get; set; } = string.Empty;
 	public string HashCode { get; set; } = string.Empty;
 	public Author Committer { get; set; } = Author.Empty;
-	public Tree Tree { get; set; }
+	public List<GitFileInfo> Tree { get; set; } = new();
 }
 
 public class GitBranchInfo
