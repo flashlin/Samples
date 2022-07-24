@@ -47,42 +47,27 @@ public class ConsoleWindow : IConsoleWindow
 		GetBranchList(gitRepoInfo, model);
 
 		//
-		var layout1 = new VerticalStack()
+		var layout1 = CreateLayout1(consoleSize, model);
+		var layout2 = CreateLayout2(model);
+
+		var mainStack = new HorizontalStack()
 		{
-			Name = "LeftVertical1",
-			DesignRect = new Rect()
-			{
-				Width = 20,
-				Height = consoleSize.Height,
-			},
-			BackgroundColor = ConsoleColor.DarkMagenta,
 			Children =
-				{
-					 new ListBox(new Rect
-					 {
-						 Width = 20,
-						 Height = 2,
-					 })
-					 {
-						 Name = "LocalChanges",
-						 DataContext = model.ChangesList,
-						 Command = model.LocalChangesCommand
-					 },
-					 new ListBox(new Rect
-					 {
-						  Left = 0,
-						  Top = 3,
-						  Width = 20,
-						  Height = 10,
-					 })
-					 {
-						  Name = "branchList",
-						  DataContext = model.BranchList
-					 },
-				}
+			{
+				layout1,
+				layout2
+			}
 		};
 
-		var layout2 = new VerticalStack()
+		_consoleManager.Content = mainStack;
+		_consoleManager.Start();
+
+		return Task.CompletedTask;
+	}
+
+	private static VerticalStack CreateLayout2(MainModel model)
+	{
+		return new VerticalStack()
 		{
 			Name = "vertical2",
 			BackgroundColor = ConsoleColor.DarkGreen,
@@ -127,20 +112,44 @@ public class ConsoleWindow : IConsoleWindow
 				}
 			}
 		};
+	}
 
-		var mainStack = new HorizontalStack()
+	private static VerticalStack CreateLayout1(Size consoleSize, MainModel model)
+	{
+		return new VerticalStack()
 		{
+			Name = "LeftVertical1",
+			DesignRect = new Rect()
+			{
+				Width = 20,
+				Height = consoleSize.Height,
+			},
+			BackgroundColor = ConsoleColor.DarkMagenta,
 			Children =
 			{
-				layout1,
-				layout2
+				new ListBox(new Rect
+				{
+					Width = 20,
+					Height = 2,
+				})
+				{
+					Name = "LocalChanges",
+					DataContext = model.ChangesList,
+					Command = model.LocalChangesCommand
+				},
+				new ListBox(new Rect
+				{
+					Left = 0,
+					Top = 3,
+					Width = 20,
+					Height = 10,
+				})
+				{
+					Name = "branchList",
+					DataContext = model.BranchList
+				},
 			}
 		};
-
-		_consoleManager.Content = mainStack;
-		_consoleManager.Start();
-
-		return Task.CompletedTask;
 	}
 
 	private static void GetBranchList(GitRepoInfo gitRepoInfo, MainModel model)
