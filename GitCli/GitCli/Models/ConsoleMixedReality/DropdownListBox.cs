@@ -20,9 +20,6 @@ public class DropdownListBox : IConsoleElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
-	public object? DataContext { get; set; }
-	public Color? HighlightBackgroundColor { get; set; }
-
 	public Position CursorPosition
 	{
 		get
@@ -36,10 +33,14 @@ public class DropdownListBox : IConsoleElement
 		}
 	}
 
+	public object? DataContext { get; set; }
 	public Rect DesignRect { get; set; }
+	public Color? HighlightBackgroundColor { get; set; }
 	public bool IsTab { get; set; } = true;
 	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
+	public object? UserObject { get; set; }
+	public string Value { get; set; }
 	public Rect ViewRect { get; set; }
 
 	public Character this[Position pos]
@@ -71,6 +72,11 @@ public class DropdownListBox : IConsoleElement
 		return ViewRect;
 	}
 
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
+	}
+
 	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
 	{
 		return false;
@@ -95,9 +101,6 @@ public class DropdownListBox : IConsoleElement
 			Height = rect.Height - 1,
 		};
 	}
-
-	public string Value { get; set; }
-
 	public bool OnInput(InputEvent inputEvent)
 	{
 		if (_isSelectedMode)
@@ -111,10 +114,5 @@ public class DropdownListBox : IConsoleElement
 	public void Refresh()
 	{
 
-	}
-
-	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
-	{
-		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 }

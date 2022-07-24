@@ -14,8 +14,6 @@ public class TextBox : IConsoleEditableElement
 	public Color BackgroundColor { get; set; } = ConsoleColor.DarkBlue;
 	public StackChildren Children { get; }
 	public IConsoleManager ConsoleManager { get; set; } = EmptyConsoleManager.Default;
-	public object? DataContext { get; set; }
-
 	public Position CursorPosition
 	{
 		get
@@ -28,6 +26,7 @@ public class TextBox : IConsoleEditableElement
 		}
 	}
 
+	public object? DataContext { get; set; }
 	public Rect DesignRect { get; set; } = new Rect()
 	{
 		Width = 10,
@@ -106,6 +105,11 @@ public class TextBox : IConsoleEditableElement
 	public Rect GetChildrenRect()
 	{
 		return ViewRect;
+	}
+
+	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
+	{
+		return Parent.RaiseOnBubbleEvent(this, evt);
 	}
 
 	public bool OnBubbleKeyEvent(IConsoleElement element, InputEvent inputEvent)
@@ -221,12 +225,6 @@ public class TextBox : IConsoleEditableElement
 	public void Refresh()
 	{
 	}
-
-	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
-	{
-		return Parent.RaiseOnBubbleEvent(this, evt);
-	}
-
 	private Span GetSelectedSpan()
 	{
 		if (!_isSelectedMode)

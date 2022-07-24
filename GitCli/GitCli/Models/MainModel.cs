@@ -1,4 +1,6 @@
-﻿namespace GitCli.Models;
+﻿using GitCli.Models.ConsoleMixedReality;
+
+namespace GitCli.Models;
 
 public class MainModel
 {
@@ -16,6 +18,20 @@ public class MainModel
 	public IModelCommand LocalChangesCommand { get; set; }
 
 	private void OnHandleAllChanges()
+	{
+		var commits = RepoInfo.QueryCommits();
+		foreach (var commit in commits)
+		{
+			AllCommitList.Adding(new ListItem()
+			{
+				Title = commit.Message,
+				Value = commit
+			});
+		}
+		AllCommitList.Notify();
+	}
+
+	private void OnHandleACommit(IConsoleElement target)
 	{
 		var commits = RepoInfo.QueryCommits();
 		foreach (var commit in commits)
