@@ -18,8 +18,6 @@ public class ListBox : IConsoleElement
 		Children.CollectionChanged += ChildrenOnCollectionChanged;
 	}
 
-	public event EventHandler<ConsoleElementEvent>? OnHandleEnter;
-
 	public Color BackgroundColor { get; set; } = ConsoleColor.Blue;
 	public StackChildren Children { get; }
 	public IModelCommand? Command { get; set; }
@@ -43,6 +41,7 @@ public class ListBox : IConsoleElement
 	public string Value { get; set; }
 	public object? UserObject { get; set; }
 	public Rect ViewRect { get; set; }
+
 	public Character this[Position pos]
 	{
 		get
