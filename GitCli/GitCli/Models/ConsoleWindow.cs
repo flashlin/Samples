@@ -78,6 +78,7 @@ public class ConsoleWindow : IConsoleWindow
 				{
 					Name = "allCommitList",
 					DataContext = model.AllCommitList,
+					Command = model.ACommitCommand,
 				},
 				new HorizontalStack()
 				{

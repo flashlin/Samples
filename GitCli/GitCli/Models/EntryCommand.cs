@@ -4,10 +4,31 @@ namespace GitCli.Models;
 
 public class EntryCommand : IModelCommand
 {
-	private readonly (string, Action) _listener;
-	public EntryCommand((string value, Action handler) listener)
+	private readonly string _value;
+	private readonly Action _handler;
+
+	public EntryCommand(string value, Action handler)
 	{
-		_listener = listener;
+		_handler = handler;
+		_value = value;
+	}
+	public bool CanExecute(ConsoleElementEvent evt)
+	{
+		return evt.Element.Value == _value;
+	}
+	public void Execute(ConsoleElementEvent evt)
+	{
+		_handler();
+	}
+}
+
+public class ExecuteCommand : IModelCommand
+{
+	private readonly Action<ConsoleElementEvent> _handler;
+
+	public ExecuteCommand(Action<ConsoleElementEvent> handler)
+	{
+		_handler = handler;
 	}
 	public bool CanExecute(ConsoleElementEvent evt)
 	{
@@ -15,10 +36,21 @@ public class EntryCommand : IModelCommand
 	}
 	public void Execute(ConsoleElementEvent evt)
 	{
-		var consoleElement = evt.Element;
-		if (consoleElement.Value == _listener.Item1)
+		_handler(evt);
+	}
+}
+
+public static class ModelCommandExtension
+{
+	public static void Raise(this IModelCommand? command, ConsoleElementEvent evt)
+	{
+		if (command == null)
 		{
-			_listener.Item2();
+			return;
+		}
+		if (command.CanExecute(evt))
+		{
+			command.Execute(evt);
 		}
 	}
 }
