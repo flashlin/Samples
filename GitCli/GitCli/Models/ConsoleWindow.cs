@@ -138,40 +138,6 @@ public class ConsoleWindow : IConsoleWindow
 		};
 		allCommitList.SetDataContext(model.AllCommitList);
 
-
-		//localChanges.OnHandleEnter += (sender, evt) =>
-		//{
-		//	var fileStatus = gitRepoInfo.QueryStatus()
-		//		.ToArray();
-		//};
-
-		new ListBox(new Rect
-		{
-			Width = 20,
-			Height = 2,
-		})
-		{
-			Name = "LocalChanges",
-			DataContext = model.ChangesList
-		}.OnHandleEnter += (sender, evt) =>
-		{
-			var textBox = (TextBox)evt.Element;
-			if (textBox.Value == "All Commits")
-			{
-				var commits = gitRepoInfo.QueryCommits();
-				foreach (var commit in commits)
-				{
-					model.AllCommitList.Adding(new ListItem()
-					{
-						Title = commit.Message,
-						Value = commit
-					});
-				}
-				model.AllCommitList.Notify();
-			}
-		};
-
-
 		var layout1 = new VerticalStack()
 		{
 			Name = "LeftVertical1",
