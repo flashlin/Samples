@@ -91,6 +91,8 @@ public class ConsoleWindow : IConsoleWindow
 
 		GetBranchList(gitRepoInfo, model);
 
+		//
+
 		var changedFilesList = new ListBox(new Rect()
 		{
 			Width = 30,
@@ -127,16 +129,6 @@ public class ConsoleWindow : IConsoleWindow
 				compareList,
 			}
 		};
-
-		var allCommitList = new ListBox(new Rect
-		{
-			Width = 30,
-			Height = 20,
-		})
-		{
-			Name = "allCommitList",
-		};
-		allCommitList.SetDataContext(model.AllCommitList);
 
 		var layout1 = new VerticalStack()
 		{
@@ -179,7 +171,15 @@ public class ConsoleWindow : IConsoleWindow
 			BackgroundColor = ConsoleColor.DarkGreen,
 			Children =
 			{
-				allCommitList,
+				new ListBox(new Rect
+				{
+					Width = 30,
+					Height = 20,
+				})
+				{
+					Name = "allCommitList",
+					DataContext = model.AllCommitList,
+				},
 				changedFilesLayout
 			}
 		};
