@@ -7,6 +7,7 @@ public class DropdownListBox : IConsoleElement
 {
 	private readonly ListBox _listBox;
 	private readonly TextBox _textBox;
+	private NotifyCollection<ListItem>? _dataContext;
 	private bool _isSelectedMode = false;
 	private bool _isSelectMode = false;
 
@@ -33,7 +34,12 @@ public class DropdownListBox : IConsoleElement
 		}
 	}
 
-	public object? DataContext { get; set; }
+	public object? DataContext
+	{
+		get => _dataContext;
+		set => SetDataContext(value);
+	}
+
 	public Rect DesignRect { get; set; } = new Rect()
 	{
 		Width = 10,
@@ -52,10 +58,10 @@ public class DropdownListBox : IConsoleElement
 	{
 		get
 		{
-			if (!ViewRect.Contain(pos))
-			{
-				return Character.Empty;
-			}
+			//if (!ViewRect.Contain(pos))
+			//{
+			//	return Character.Empty;
+			//}
 
 			var y = pos.Y - ViewRect.Top;
 			if (y == 0)
@@ -63,13 +69,18 @@ public class DropdownListBox : IConsoleElement
 				return _textBox[pos];
 			}
 
-			if (!_isSelectedMode)
+			if (ConsoleManager.FocusedElement != this)
 			{
 				return Character.Empty;
 			}
 
 			return _listBox[pos];
 		}
+	}
+
+	public TextBox AddItem(ListItem item)
+	{
+		return _listBox.AddItem(item);
 	}
 
 	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
@@ -82,31 +93,30 @@ public class DropdownListBox : IConsoleElement
 		return false;
 	}
 
-	public TextBox AddItem(ListItem item)
-	{
-		return _listBox.AddItem(item);
-	}
-
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
 		this.HandleOnCreate(rect, consoleManager);
 		_textBox.Parent = this;
-		_listBox.Parent = this;
-		_textBox.ViewRect = new Rect
+		var textBoxRect = new Rect
 		{
 			Left = rect.Left,
 			Top = rect.Top,
 			Width = rect.Width,
 			Height = 1,
 		};
-		_listBox.ViewRect = new Rect
+		_textBox.OnCreate(textBoxRect, consoleManager);
+
+		var childRect = new Rect
 		{
 			Left = rect.Left,
 			Top = rect.Top + 1,
 			Width = rect.Width,
 			Height = rect.Height - 1,
 		};
+		_listBox.Parent = this;
+		_listBox.OnCreate(childRect, consoleManager);
 	}
+
 	public bool OnInput(InputEvent inputEvent)
 	{
 		if (_isSelectedMode)
@@ -119,6 +129,44 @@ public class DropdownListBox : IConsoleElement
 
 	public void Refresh()
 	{
+		if (ConsoleManager.FocusedElement == this)
+		{
+			_textBox.ViewRect = new Rect()
+			{
+				Left = ViewRect.Left,
+				Top = ViewRect.Top,
+				Width = ViewRect.Width,
+				Height = 1,
+			};
+			_listBox.ViewRect = new Rect()
+			{
+				Left = ViewRect.Left,
+				Top = ViewRect.Top + 1,
+				Width = ViewRect.Width,
+				Height = 10,
+			};
+			_listBox.Refresh();
+		}
+	}
 
+	public void SetDataContext(object? dataModel)
+	{
+		if (_dataContext != null)
+		{
+			_dataContext.OnNotify -= OnDataContext;
+		}
+		_dataContext = (NotifyCollection<ListItem>?)dataModel;
+		if (_dataContext != null)
+		{
+			_dataContext.OnNotify += OnDataContext;
+			OnDataContext(dataModel, new NotifyEventArgs<ListItem>());
+		}
+	}
+
+	private void OnDataContext(object? sender, NotifyEventArgs<ListItem> eventArgs)
+	{
+		var dataModel = (NotifyCollection<ListItem>)sender!;
+		_listBox.DataContext = dataModel;
+		Refresh();
 	}
 }
