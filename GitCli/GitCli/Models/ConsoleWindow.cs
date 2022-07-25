@@ -53,6 +53,10 @@ public class ConsoleWindow : IConsoleWindow
 			{
 				CreateLayout1(consoleSize, model),
 				CreateLayout2(model),
+				new DropdownListBox()
+				{
+					DataContext = model.AllCommitList
+				},
 			}
 		};
 
