@@ -118,7 +118,9 @@ public class DropdownListBox : IConsoleElement
 		{
 			case ConsoleKey.UpArrow:
 			case ConsoleKey.DownArrow:
-				return _listBox.OnInput(inputEvent);
+				var flag = _listBox.OnInput(inputEvent);
+				ConsoleManager.FocusedElement = this;
+				return flag;
 		}
 		return _textBox.OnInput(inputEvent);
 	}
@@ -141,7 +143,6 @@ public class DropdownListBox : IConsoleElement
 				Width = ViewRect.Width,
 				Height = 10,
 			};
-			_listBox.Refresh();
 			return;
 		}
 		_listBox.ViewRect = new Rect()
