@@ -24,23 +24,29 @@ public class ConsoleWindow : IConsoleWindow
 		var consoleSize = _console.GetSize();
 		var model = new MainModel();
 		model.RepoInfo = gitRepoInfo;
-		model.ChangesList.Init(new ListItem()
-		{
-			Title = "Local Changes",
-		},
-		new ListItem()
-		{
-			Title = "All Commits",
+		model.ChangesList.Init(new[]{
+			new ListItem()
+			{
+				Title = "Local Changes",
+			},
+			new ListItem()
+			{
+				Title = "All Commits",
+			},
 		});
 
-		model.CompareList.Init(new ListItem()
-		{
-			Title = "compare1"
+		model.CompareList.Init(new []{
+			new ListItem()
+			{
+				Title = "compare1"
+			},
 		});
 
-		model.ChangedFilesList.Init(new ListItem()
-		{
-			Title = "file1"
+		model.ChangedFilesList.Init(new []{
+			new ListItem()
+			{
+				Title = "file1"
+			},
 		});
 
 
