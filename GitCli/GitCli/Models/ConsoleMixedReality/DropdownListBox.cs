@@ -8,7 +8,8 @@ public class DropdownListBox : IConsoleElement
 	private readonly ListBox _listBox;
 	private readonly TextBox _textBox;
 	private NotifyCollection<ListItem>? _dataContext;
-	private bool _isSelectedMode = false;
+	private NotifyCollection<ListItem> _list = new();
+
 	private bool _isSelectMode = false;
 
 	public DropdownListBox()
@@ -170,8 +171,14 @@ public class DropdownListBox : IConsoleElement
 
 	private void OnDataContext(object? sender, NotifyEventArgs<ListItem> eventArgs)
 	{
+		//var dataModel = (NotifyCollection<ListItem>)sender!;
+		//_listBox.DataContext = dataModel;
+		//Refresh();
+		
 		var dataModel = (NotifyCollection<ListItem>)sender!;
-		_listBox.DataContext = dataModel;
+		_list.Init(dataModel.ToList());
+		_dataContext = dataModel;
+		_listBox.DataContext = _list;
 		Refresh();
 	}
 }

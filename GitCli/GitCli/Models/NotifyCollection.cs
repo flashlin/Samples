@@ -37,7 +37,7 @@ public class NotifyCollection<T> : INotifyCollection<T>
 		}
 	}
 
-	public void Init(params T[] items)
+	public void Init(IEnumerable<T> items)
 	{
 		foreach (var item in items)
 		{
