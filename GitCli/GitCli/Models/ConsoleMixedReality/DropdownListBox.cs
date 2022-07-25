@@ -58,11 +58,6 @@ public class DropdownListBox : IConsoleElement
 	{
 		get
 		{
-			//if (!ViewRect.Contain(pos))
-			//{
-			//	return Character.Empty;
-			//}
-
 			var y = pos.Y - ViewRect.Top;
 			if (y == 0)
 			{
@@ -119,11 +114,12 @@ public class DropdownListBox : IConsoleElement
 
 	public bool OnInput(InputEvent inputEvent)
 	{
-		if (_isSelectedMode)
+		switch (inputEvent.Key)
 		{
-			return _listBox.OnInput(inputEvent);
+			case ConsoleKey.UpArrow:
+			case ConsoleKey.DownArrow:
+				return _listBox.OnInput(inputEvent);
 		}
-
 		return _textBox.OnInput(inputEvent);
 	}
 
@@ -146,7 +142,15 @@ public class DropdownListBox : IConsoleElement
 				Height = 10,
 			};
 			_listBox.Refresh();
+			return;
 		}
+		_listBox.ViewRect = new Rect()
+		{
+			Left = ViewRect.Left,
+			Top = ViewRect.Top + 1,
+			Width = ViewRect.Width,
+			Height = 0,
+		};
 	}
 
 	public void SetDataContext(object? dataModel)
