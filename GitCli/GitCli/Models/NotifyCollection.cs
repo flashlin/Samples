@@ -11,10 +11,10 @@ public interface INotifyCollection<T>
 public class NotifyCollection<T> : INotifyCollection<T>
 {
 	private readonly object _locker = new object();
-	private ConcurrentOnlyAddList<T> _items = new();
-	private ConcurrentOnlyAddList<T> _addingItems = new();
-	private ConcurrentOnlyAddList<T> _removingItems = new();
-	private ConcurrentOnlyAddList<T> _updatingItems = new();
+	private List<T> _items = new();
+	private List<T> _addingItems = new();
+	private List<T> _removingItems = new();
+	private List<T> _updatingItems = new();
 
 	public T this[int index]
 	{
@@ -26,6 +26,8 @@ public class NotifyCollection<T> : INotifyCollection<T>
 			}
 		}
 	}
+
+	public int Count => _items.Count;
 
 	public event EventHandler<NotifyEventArgs<T>> OnNotify = null!;
 
@@ -39,11 +41,26 @@ public class NotifyCollection<T> : INotifyCollection<T>
 
 	public void Init(IEnumerable<T> items)
 	{
+		lock (_locker)
+		{
+			_items.Clear();
+		}
 		foreach (var item in items)
 		{
 			Adding(item);
 		}
 		Notify();
+	}
+
+	public void Clear()
+	{
+		var oldItems = _items.ToList();
+		OnNotify?.Invoke(this, new NotifyEventArgs<T>
+		{
+			Items = oldItems,
+			Status = ChangeStatus.Removed,
+			LastItems = _items.ToList(),
+		});
 	}
 
 	public void Updating(T item)
@@ -63,26 +80,29 @@ public class NotifyCollection<T> : INotifyCollection<T>
 
 	public void Notify()
 	{
-		ConcurrentOnlyAddList<T> addList;
-		ConcurrentOnlyAddList<T> removeList;
-		ConcurrentOnlyAddList<T> updateList;
+		List<T> addList;
+		List<T> removeList;
+		List<T> updateList;
 		lock (_locker)
 		{
 			addList = _addingItems;
 			removeList = _removingItems;
 			updateList = _updatingItems;
 			_items = CloneDataList();
-			_addingItems = new ConcurrentOnlyAddList<T>();
-			_removingItems = new ConcurrentOnlyAddList<T>();
-			_updatingItems = new ConcurrentOnlyAddList<T>();
+			_addingItems = new List<T>();
+			_removingItems = new List<T>();
+			_updatingItems = new List<T>();
 		}
+
+		var lastItems = _items.ToList();
 
 		if (removeList.Count > 0)
 		{
 			OnNotify?.Invoke(this, new NotifyEventArgs<T>
 			{
 				Items = removeList,
-				Status = ChangeStatus.Removed
+				Status = ChangeStatus.Removed,
+				LastItems = lastItems,
 			});
 		}
 
@@ -91,7 +111,8 @@ public class NotifyCollection<T> : INotifyCollection<T>
 			OnNotify?.Invoke(this, new NotifyEventArgs<T>
 			{
 				Items = addList,
-				Status = ChangeStatus.Added
+				Status = ChangeStatus.Added,
+				LastItems = lastItems,
 			});
 		}
 
@@ -100,14 +121,15 @@ public class NotifyCollection<T> : INotifyCollection<T>
 			OnNotify?.Invoke(this, new NotifyEventArgs<T>
 			{
 				Items = updateList,
-				Status = ChangeStatus.Updated
+				Status = ChangeStatus.Updated,
+				LastItems = lastItems,
 			});
 		}
 	}
 
-	private ConcurrentOnlyAddList<T> CloneDataList()
+	private List<T> CloneDataList()
 	{
-		var newDataList = new ConcurrentOnlyAddList<T>();
+		var newDataList = new List<T>();
 		foreach (var item in _items)
 		{
 			if (!_removingItems.Contains(item))
