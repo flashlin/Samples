@@ -41,10 +41,10 @@ public class NotifyCollection<T> : INotifyCollection<T>
 
 	public void Init(IEnumerable<T> items)
 	{
-		lock (_locker)
-		{
-			_items.Clear();
-		}
+		//lock (_locker)
+		//{
+		//	_items.Clear();
+		//}
 		foreach (var item in items)
 		{
 			Adding(item);
@@ -55,6 +55,7 @@ public class NotifyCollection<T> : INotifyCollection<T>
 	public void Clear()
 	{
 		var oldItems = _items.ToList();
+		_items.Clear();
 		OnNotify?.Invoke(this, new NotifyEventArgs<T>
 		{
 			Items = oldItems,

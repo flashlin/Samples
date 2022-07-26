@@ -107,9 +107,10 @@ public class DropdownListBox : IConsoleElement
 			Left = rect.Left,
 			Top = rect.Top + 1,
 			Width = rect.Width,
-			Height = rect.Height - 1,
+			Height = 0,
 		};
 		_listBox.Parent = this;
+		_listBox.Name = "aa";
 		_listBox.OnCreate(childRect, consoleManager);
 	}
 
@@ -122,6 +123,7 @@ public class DropdownListBox : IConsoleElement
 			case ConsoleKey.DownArrow:
 				flag = _listBox.OnInput(inputEvent);
 				ConsoleManager.FocusedElement = this;
+				Refresh();
 				return flag;
 		}
 		flag = _textBox.OnInput(inputEvent);
@@ -149,7 +151,7 @@ public class DropdownListBox : IConsoleElement
 				_list.Init(filter);
 			}
 
-			var height = Math.Min(10, _list.Count);
+			var height = Math.Min(10, Math.Min(ViewRect.Height - 1, _list.Count));
 			_listBox.ViewRect = new Rect()
 			{
 				Left = ViewRect.Left,
@@ -157,6 +159,7 @@ public class DropdownListBox : IConsoleElement
 				Width = ViewRect.Width,
 				Height = height,
 			};
+			_listBox.Refresh();
 			return;
 		}
 		_listBox.ViewRect = new Rect()
