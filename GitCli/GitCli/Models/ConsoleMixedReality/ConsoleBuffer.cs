@@ -32,11 +32,11 @@ public class ConsoleBuffer
 
 	public bool Update(Position position, Character newCell)
 	{
+		if (newCell.IsEmpty)
+		{
+			return false;
+		}
 		ref var cell = ref _buffer[position.X, position.Y];
-		//if (newCell.IsEmpty && cell.IsEmpty)
-		//{
-		//	return false;
-		//}
 		var characterChanged = cell != newCell;
 		cell = newCell;
 		return characterChanged;

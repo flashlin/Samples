@@ -129,6 +129,13 @@ public class ListBox : IConsoleElement
 
 	public void Refresh()
 	{
+		var height = ViewRect.Height < 0 ? 0 : ViewRect.Height;
+		_showListSpan = new Span()
+		{
+			Index = Math.Min(height, _showListSpan.Index),
+			Length = ViewRect.Height
+		};
+
 		var y = ViewRect.Top;
 		Children.ForEachIndex((child, idx) =>
 		{
@@ -206,6 +213,7 @@ public class ListBox : IConsoleElement
 		}
 		Refresh();
 	}
+
 	private bool OnFocusedControlInputEvent(InputEvent inputEvent, IConsoleElement focusedControl)
 	{
 		switch (inputEvent.Key)
