@@ -72,17 +72,6 @@ public class ConsoleManager : IConsoleManager
 
 	public void Start()
 	{
-		//var task = Task.Run(() =>
-		//{
-		//	while (true)
-		//	{
-		//		Write(new Position { X = 0, Y = 0 }, $"{DateTime.Now}");
-		//		Redraw();
-		//		Thread.Sleep(500);
-		//	}
-		//});
-
-		//Content.OnCreate(Rect.OfSize(Console.GetSize()), (IConsoleManager)this);
 		Content.OnCreate(Rect.Empty, (IConsoleManager)this);
 		AdjustBufferSize();
 		while (!_cancellationTokenSource.IsCancellationRequested)

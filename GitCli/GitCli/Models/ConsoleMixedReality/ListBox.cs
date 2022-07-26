@@ -150,17 +150,23 @@ public class ListBox : IConsoleElement
 		});
 	}
 
-	public void SetDataContext(object? dataModel)
+	public void SetDataContext(object? data)
 	{
 		if (_dataContext != null)
 		{
 			_dataContext.OnNotify -= OnDataContext;
 		}
-		_dataContext = (NotifyCollection<ListItem>?)dataModel;
-		if (_dataContext != null)
+		var dataModel = _dataContext = (NotifyCollection<ListItem>?)data;
+		if (dataModel != null)
 		{
-			_dataContext.OnNotify += OnDataContext;
-			OnDataContext(dataModel, new NotifyEventArgs<ListItem>());
+			dataModel.OnNotify += OnDataContext;
+			var lastItems = dataModel.ToList();
+			OnDataContext(data, new NotifyEventArgs<ListItem>()
+			{
+				Items = lastItems,
+				Status = ChangeStatus.Added,
+				LastItems = lastItems,
+			});
 		}
 	}
 
@@ -192,9 +198,8 @@ public class ListBox : IConsoleElement
 
 	private void OnDataContext(object? sender, NotifyEventArgs<ListItem> eventArgs)
 	{
-		var dataModel = (NotifyCollection<ListItem>)sender!;
-		var items = dataModel.ToList();
 		Children.Clear();
+		var items = eventArgs.LastItems.ToList();
 		foreach (var item in items)
 		{
 			AddItem(item);

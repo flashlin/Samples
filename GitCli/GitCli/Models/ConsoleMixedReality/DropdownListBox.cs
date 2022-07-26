@@ -115,15 +115,18 @@ public class DropdownListBox : IConsoleElement
 
 	public bool OnInput(InputEvent inputEvent)
 	{
+		var flag = false;
 		switch (inputEvent.Key)
 		{
 			case ConsoleKey.UpArrow:
 			case ConsoleKey.DownArrow:
-				var flag = _listBox.OnInput(inputEvent);
+				flag = _listBox.OnInput(inputEvent);
 				ConsoleManager.FocusedElement = this;
 				return flag;
 		}
-		return _textBox.OnInput(inputEvent);
+		flag = _textBox.OnInput(inputEvent);
+		Refresh();
+		return flag;
 	}
 
 	public void Refresh()
@@ -137,12 +140,22 @@ public class DropdownListBox : IConsoleElement
 				Width = ViewRect.Width,
 				Height = 1,
 			};
+			var text = _textBox.Value;
+			var dataContext = (NotifyCollection<ListItem>?)_dataContext;
+			if (dataContext != null)
+			{
+				var filter = dataContext.ToList().Where(x => x.Title.Contains(text)).ToArray();
+				_list.Clear();
+				_list.Init(filter);
+			}
+
+			var height = Math.Min(10, _list.Count);
 			_listBox.ViewRect = new Rect()
 			{
 				Left = ViewRect.Left,
 				Top = ViewRect.Top + 1,
 				Width = ViewRect.Width,
-				Height = 10,
+				Height = height,
 			};
 			return;
 		}
@@ -155,30 +168,28 @@ public class DropdownListBox : IConsoleElement
 		};
 	}
 
-	public void SetDataContext(object? dataModel)
+	public void SetDataContext(object? data)
 	{
 		if (_dataContext != null)
 		{
-			_dataContext.OnNotify -= OnDataContext;
+			_dataContext.OnNotify -= OnDataUpdate;
 		}
-		_dataContext = (NotifyCollection<ListItem>?)dataModel;
+		var dataModel= _dataContext = (NotifyCollection<ListItem>?)data;
 		if (_dataContext != null)
 		{
-			_dataContext.OnNotify += OnDataContext;
-			OnDataContext(dataModel, new NotifyEventArgs<ListItem>());
+			_dataContext.OnNotify += OnDataUpdate;
+			OnDataUpdate(data, new NotifyEventArgs<ListItem>());
+		}
+		if (dataModel != null)
+		{
+			_list.Init(dataModel.ToList());
+			_listBox.DataContext = _list;
 		}
 	}
 
-	private void OnDataContext(object? sender, NotifyEventArgs<ListItem> eventArgs)
+	private void OnDataUpdate(object? sender, NotifyEventArgs<ListItem> eventArgs)
 	{
-		//var dataModel = (NotifyCollection<ListItem>)sender!;
-		//_listBox.DataContext = dataModel;
-		//Refresh();
-		
 		var dataModel = (NotifyCollection<ListItem>)sender!;
-		_list.Init(dataModel.ToList());
-		_dataContext = dataModel;
-		_listBox.DataContext = _list;
 		Refresh();
 	}
 }
