@@ -22,6 +22,10 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 		{
 			return EmptyElement.Default;
 		}
+		if (_focusIndex > Count)
+		{
+			_focusIndex = Count - 1;
+		}
 		return this[_focusIndex];
 	}
 
