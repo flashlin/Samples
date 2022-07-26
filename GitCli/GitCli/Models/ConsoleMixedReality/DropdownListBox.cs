@@ -70,6 +70,10 @@ public class DropdownListBox : IConsoleElement
 				return Character.Empty;
 			}
 
+			if (!_listBox.ViewRect.Contain(pos))
+			{
+				return new Character(' ', BackgroundColor);
+			}
 			return _listBox[pos];
 		}
 	}
