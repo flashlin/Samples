@@ -1,13 +1,22 @@
 ﻿using ScreenRecorderLib;
 
+public class ScreenOption
+{
+	public static RecordingSourceBase MainMonitor = new DisplayRecordingSource(DisplayRecordingSource.MainMonitor);
+	public static RecordingSourceBase Monitor2 = new DisplayRecordingSource(@"\\.\DISPLAY2");
+}
+
 public class ScreenRecorder
 {
 	Recorder _rec;
 
+	public string VideoPath { get; set; } = "d:/demo";
+
+	public RecordingSourceBase RecordingSource { get; set; } = ScreenOption.MainMonitor;
+
 	public void Start()
 	{
-		//string videoPath = Path.Combine(Path.GetTempPath(), "test.mp4");
-		var videoPath = "d:/demo/test.mp4";
+		var videoFile = VideoPath + "/" + GetTempFile();
 
 		var options = new RecorderOptions
 		{
@@ -16,7 +25,8 @@ public class ScreenRecorder
 				RecordingSources = new List<RecordingSourceBase>()
 				{
 					//new DisplayRecordingSource(@"\\.\DISPLAY2")
-					new DisplayRecordingSource(DisplayRecordingSource.MainMonitor)
+					//new DisplayRecordingSource(DisplayRecordingSource.MainMonitor)
+					RecordingSource
 				}
 			},
 			OutputOptions = new OutputOptions
@@ -55,7 +65,7 @@ public class ScreenRecorder
 		_rec.OnRecordingComplete += OnRecordingComplete;
 		_rec.OnRecordingFailed += OnRecordingFailed;
 		_rec.OnStatusChanged += OnStatusChanged;
-		_rec.Record(videoPath);
+		_rec.Record(videoFile);
 	}
 
 	public void Stop()
@@ -63,6 +73,10 @@ public class ScreenRecorder
 		_rec.Stop();
 	}
 
+	private string GetTempFile()
+	{
+		return $"{DateTime.Now.ToString("yyyyMMdd_HHmmss")}.mp4";
+	}
 	private void OnRecordingComplete(object? sender, RecordingCompleteEventArgs e)
 	{
 		var path = e.FilePath;
