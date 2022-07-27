@@ -112,6 +112,18 @@ public class CacheInterceptorAttribute : AbstractInterceptorAttribute
 * 針對重複發生的功能邏輯, 用不同的面向切入
 * 可避免後人重複犯以前同樣的錯誤 (例如 lock, 避免同一時間大量 user 存取同一個 resource)
 
+---
+練習 Cache 
+* Pavo Project
+PavoInfoRepoDecorator
+GeoIpClient
+AkisCacheDecorator
+* Siren Project
+GamesVoucherApiCached
+CachedPmsApiProxy
+FreeSpinServiceCached
+
+
 
 ---
 
