@@ -3,14 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using GitCli.Models;
 
-namespace T1.ConsoleUiMixedReality;
+namespace T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
-public interface INotifyCollection<T>
-{
-	event EventHandler<NotifyEventArgs<T>> OnNotify;
-}
-
-public class NotifyCollection<T> : INotifyCollection<T>
+public class NotifyObject<T> : INotifyObject<T>
 {
 	private readonly object _locker = new object();
 	private List<T> _items = new();

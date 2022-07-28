@@ -1,4 +1,5 @@
 ﻿using T1.ConsoleUiMixedReality;
+using T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
 namespace GitCli.Models;
 
@@ -11,11 +12,11 @@ public class MainModel
 	}
 
 	public GitRepoInfo RepoInfo { get; set; }
-	public NotifyCollection<ListItem> ChangesList { get; set; } = new();
-	public NotifyCollection<ListItem> BranchList { get; set; } = new();
-	public NotifyCollection<ListItem> AllCommitList { get; set; } = new();
-	public NotifyCollection<ListItem> CompareList { get; set; } = new();
-	public NotifyCollection<ListItem> ChangedFilesList { get; set; } = new();
+	public NotifyObject<ListItem> ChangesList { get; set; } = new();
+	public NotifyObject<ListItem> BranchList { get; set; } = new();
+	public NotifyObject<ListItem> AllCommitList { get; set; } = new();
+	public NotifyObject<ListItem> CompareList { get; set; } = new();
+	public NotifyObject<ListItem> ChangedFilesList { get; set; } = new();
 	public IModelCommand LocalChangesCommand { get; }
 	public IModelCommand ACommitCommand { get; }
 
