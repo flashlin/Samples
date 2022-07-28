@@ -11,9 +11,9 @@ public struct Span
 		Length = 0
 	};
 
-	public int Index { get; init; }
+	public int Index { get; set; }
 	public bool IsEmpty => (Length <= 0);
-	public int Length { get; init; }
+	public int Length { get; set; }
 
 	public int Right => Index + Length - 1;
 

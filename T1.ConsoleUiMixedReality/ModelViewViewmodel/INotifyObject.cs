@@ -1,5 +1,4 @@
 ﻿using System;
-using GitCli.Models;
 
 namespace T1.ConsoleUiMixedReality.ModelViewViewmodel;
 

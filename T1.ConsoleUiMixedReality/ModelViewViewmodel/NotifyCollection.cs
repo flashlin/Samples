@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GitCli.Models;
 
 namespace T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
@@ -26,7 +25,7 @@ public class NotifyCollection<T> : INotifyObject<T>
 
 	public int Count => _items.Count;
 
-	public event EventHandler<NotifyEventArgs<T>> OnNotify = null!;
+	public event EventHandler<NotifyEventArgs<T>>? OnNotify;
 
 	public List<T> ToList()
 	{

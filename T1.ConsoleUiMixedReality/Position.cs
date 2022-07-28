@@ -14,8 +14,8 @@ public struct Position
 	};
 
 	public bool IsEmpty { get; private set; } = false;
-	public int X { get; init; }
-	public int Y { get; init; }
+	public int X { get; set; } = 0;
+	public int Y { get; set; } = 0;
 
 	public Position Next => new Position(X + 1, Y);
 

@@ -2,8 +2,8 @@
 
 public struct Size
 {
-    public int Width { get; init; }
-    public int Height { get; init; }
+    public int Width { get; set; }
+    public int Height { get; set; }
 
     public override bool Equals(object? obj)
     {

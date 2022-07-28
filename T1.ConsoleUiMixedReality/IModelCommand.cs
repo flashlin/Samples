@@ -1,6 +1,4 @@
-﻿using T1.ConsoleUiMixedReality;
-
-namespace GitCli.Models;
+﻿namespace T1.ConsoleUiMixedReality;
 
 public interface IModelCommand
 {

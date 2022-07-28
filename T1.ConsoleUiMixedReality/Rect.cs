@@ -12,14 +12,14 @@ public struct Rect
 		Height = 0
 	};
 
-	public int Left { get; init; }
-	public int Top { get; init; }
+	public int Left { get; set; }
+	public int Top { get; set; }
 	public int Right => Left + Width - 1;
 
 	public int Bottom => Top + Height - 1;
 
-	public int Width { get; init; }
-	public int Height { get; init; }
+	public int Width { get; set; }
+	public int Height { get; set; }
 
 	public Position TopLeftCorner => new Position(Left, Top);
 
