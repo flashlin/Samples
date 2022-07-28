@@ -3,12 +3,13 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.Linq;
 using GitCli.Models;
+using T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
 namespace T1.ConsoleUiMixedReality;
 
 public class ListBox : IConsoleElement
 {
-	private NotifyCollection<ListItem>? _dataContext;
+	private NotifyObject<ListItem>? _dataContext;
 	private Span _showListSpan = Span.Empty;
 	public ListBox(Rect rect)
 	{
@@ -163,7 +164,7 @@ public class ListBox : IConsoleElement
 		{
 			_dataContext.OnNotify -= OnDataContext;
 		}
-		var dataModel = _dataContext = (NotifyCollection<ListItem>?)data;
+		var dataModel = _dataContext = (NotifyObject<ListItem>?)data;
 		if (dataModel != null)
 		{
 			dataModel.OnNotify += OnDataContext;
