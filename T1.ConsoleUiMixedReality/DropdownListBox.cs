@@ -15,8 +15,8 @@ public class DropdownListBox : IConsoleElement
 {
 	private readonly ListBox _listBox;
 	private readonly TextBox _textBox;
-	private NotifyObject<ListItem>? _dataContext;
-	private NotifyObject<ListItem> _list = new();
+	private NotifyCollection<ListItem>? _dataContext;
+	private NotifyCollection<ListItem> _list = new();
 
 	private bool _isSelectMode = false;
 
@@ -163,7 +163,7 @@ public class DropdownListBox : IConsoleElement
 				Height = 1,
 			};
 			var text = _textBox.Value;
-			var dataContext = (NotifyObject<ListItem>?)_dataContext;
+			var dataContext = (NotifyCollection<ListItem>?)_dataContext;
 			if (dataContext != null)
 			{
 				var filter = dataContext.ToList().Where(x => x.Title.Contains(text)).ToArray();
@@ -197,7 +197,7 @@ public class DropdownListBox : IConsoleElement
 		{
 			_dataContext.OnNotify -= OnDataUpdate;
 		}
-		var dataModel= _dataContext = (NotifyObject<ListItem>?)data;
+		var dataModel= _dataContext = (NotifyCollection<ListItem>?)data;
 		if (_dataContext != null)
 		{
 			_dataContext.OnNotify += OnDataUpdate;
@@ -212,7 +212,7 @@ public class DropdownListBox : IConsoleElement
 
 	private void OnDataUpdate(object? sender, NotifyEventArgs<ListItem> eventArgs)
 	{
-		var dataModel = (NotifyObject<ListItem>)sender!;
+		var dataModel = (NotifyCollection<ListItem>)sender!;
 		Refresh();
 	}
 }

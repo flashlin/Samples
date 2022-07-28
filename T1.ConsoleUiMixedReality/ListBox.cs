@@ -9,7 +9,7 @@ namespace T1.ConsoleUiMixedReality;
 
 public class ListBox : IConsoleElement
 {
-	private NotifyObject<ListItem>? _dataContext;
+	private NotifyCollection<ListItem>? _dataContext;
 	private Span _showListSpan = Span.Empty;
 	public ListBox(Rect rect)
 	{
@@ -164,7 +164,7 @@ public class ListBox : IConsoleElement
 		{
 			_dataContext.OnNotify -= OnDataContext;
 		}
-		var dataModel = _dataContext = (NotifyObject<ListItem>?)data;
+		var dataModel = _dataContext = (NotifyCollection<ListItem>?)data;
 		if (dataModel != null)
 		{
 			dataModel.OnNotify += OnDataContext;

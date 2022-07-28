@@ -1,15 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using GitCli.Models;
 
-namespace T1.ConsoleUiMixedReality;
+namespace T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
-public class ComponentProperty<TValue, TOwner>
+public class NotifyProperty<TValue, TOwner> : INotifyObject<TValue>
 	where TOwner : IRaisePropertyChanged
 {
 	private TValue? _value;
 	private readonly TOwner _owner;
 	private readonly string _propertyName;
 
-	public ComponentProperty(TOwner owner, string propertyName)
+	public NotifyProperty(TOwner owner, string propertyName)
 	{
 		_propertyName = propertyName;
 		_owner = owner;
@@ -25,7 +27,10 @@ public class ComponentProperty<TValue, TOwner>
 				return;
 			}
 			_value = value;
+			OnNotify.RaiseUpdateValue(value);
 			_owner.RaisePropertyChanged(_propertyName, value);
 		}
 	}
+
+	public event EventHandler<NotifyEventArgs<TValue>> OnNotify;
 }
