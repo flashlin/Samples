@@ -134,8 +134,11 @@ public class DropdownListBox : IConsoleElement
 				_textBox.Value = _listBox.Value;
 				Refresh();
 				return true;
+			case ConsoleKey.Tab:
+				return Parent.RaiseOnBubbleKeyEvent(this, inputEvent);
 		}
 		flag = _textBox.OnInput(inputEvent);
+		Value = _textBox.Value;
 		Refresh();
 		return flag;
 	}
