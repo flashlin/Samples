@@ -22,15 +22,15 @@ public class NotifyProperty<TValue, TOwner> : INotifyObject<TValue>
 		get => _value;
 		set
 		{
-			if (EqualityComparer<TValue>.Default.Equals(_value, value))
+			if (_value.IsEquals(value))
 			{
 				return;
 			}
 			_value = value;
-			OnNotify.RaiseUpdateValue(value);
+			OnNotify!.RaiseUpdateValue(value);
 			_owner.RaisePropertyChanged(_propertyName, value);
 		}
 	}
 
-	public event EventHandler<NotifyEventArgs<TValue>> OnNotify;
+	public event EventHandler<NotifyEventArgs<TValue>>? OnNotify;
 }
