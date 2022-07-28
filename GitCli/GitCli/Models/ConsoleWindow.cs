@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using GitCli.Models.ConsoleMixedReality;
-using T1.Standard.Extensions;
+﻿using T1.ConsoleUiMixedReality;
 
 namespace GitCli.Models;
 
@@ -177,8 +175,3 @@ public class ConsoleWindow : IConsoleWindow
 	}
 }
 
-public class ListItem
-{
-	public string Title { get; set; } = string.Empty;
-	public object? Value { get; set; }
-}

@@ -1,8 +1,7 @@
 ﻿using GitCli.Models;
-using GitCli.Models.ConsoleMixedReality;
 using GitCli.Models.Repositories;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using T1.ConsoleUiMixedReality;
 
 var hostBuilder = new HostFactory().Create(args);
 
