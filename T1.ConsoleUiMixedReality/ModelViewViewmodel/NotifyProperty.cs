@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using GitCli.Models;
 
 namespace T1.ConsoleUiMixedReality.ModelViewViewmodel;
 

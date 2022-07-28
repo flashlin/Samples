@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using GitCli.Models;
 using T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
 namespace T1.ConsoleUiMixedReality;

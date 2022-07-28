@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.Linq;
-using GitCli.Models;
 using T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
 namespace T1.ConsoleUiMixedReality;

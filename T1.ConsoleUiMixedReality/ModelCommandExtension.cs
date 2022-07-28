@@ -1,6 +1,4 @@
-﻿using GitCli.Models;
-
-namespace T1.ConsoleUiMixedReality;
+﻿namespace T1.ConsoleUiMixedReality;
 
 public static class ModelCommandExtension
 {

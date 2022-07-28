@@ -1,4 +1,4 @@
-﻿namespace System.Runtime.CompilerServices
+﻿namespace T1.ConsoleUiMixedReality
 {
 	internal static class IsExternalInit { }
 }
