@@ -5,7 +5,7 @@ using GitCli.Models;
 
 namespace T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
-public class NotifyObject<T> : INotifyObject<T>
+public class NotifyCollection<T> : INotifyObject<T>
 {
 	private readonly object _locker = new object();
 	private List<T> _items = new();
