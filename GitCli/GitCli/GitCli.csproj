@@ -26,9 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\MyGitHub\T1.SourceGeneratorKit\T1.SourceGeneratorKit\T1.SourceGeneratorKit.csproj"
-                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\..\MyGitHub\T1.SourceGeneratorKit\T1.SourceGeneratorKit\T1.SourceGeneratorKit.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\..\..\..\MyGitHub\T1.Standard\T1.Standard\T1.Standard.csproj" />
+    <ProjectReference Include="..\..\T1.ConsoleUiMixedReality\T1.ConsoleUiMixedReality.csproj" />
   </ItemGroup>
 
 </Project>

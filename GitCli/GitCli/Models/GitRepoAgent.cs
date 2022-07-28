@@ -1,6 +1,4 @@
-﻿using LibGit2Sharp;
-
-namespace GitCli.Models;
+﻿namespace GitCli.Models;
 
 public class GitRepoAgent : IGitRepoAgent
 {
