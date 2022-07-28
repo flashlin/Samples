@@ -1,5 +1,5 @@
 using ExpectedObjects;
-using GitCli.Models.ConsoleMixedReality;
+using T1.ConsoleUiMixedReality;
 
 namespace GitCliTest;
 

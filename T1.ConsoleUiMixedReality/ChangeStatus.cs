@@ -1,6 +1,6 @@
-﻿using T1.ConsoleUiMixedReality;
+﻿using GitCli.Models;
 
-namespace GitCli.Models;
+namespace T1.ConsoleUiMixedReality;
 
 public enum ChangeStatus
 {
@@ -11,7 +11,7 @@ public enum ChangeStatus
 
 public static class ModelCommandExtension
 {
-	public static void Raise(this IModelCommand? command, ConsoleElementEvent evt)
+	public static void Raise(this IModelCommand command, ConsoleElementEvent evt)
 	{
 		if (command == null)
 		{

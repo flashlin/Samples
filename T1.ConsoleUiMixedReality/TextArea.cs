@@ -60,7 +60,7 @@ public class TextArea : IConsoleElement
 			var offsetX = pos.X - rect.Left;
 			var index = (pos.Y - rect.Top) * rect.Width + offsetX;
 			index += contentSpans.FirstOrDefault().Index;
-			foreach (var (selectedSpan, contentSpan) in selectedSpans.Zip(contentSpans, (x,y) => (x, y)))
+			foreach (var (selectedSpan, contentSpan) in selectedSpans.Zip(contentSpans, (x, y) => (x, y)))
 			{
 				if (selectedSpan.Contain(index))
 				{
