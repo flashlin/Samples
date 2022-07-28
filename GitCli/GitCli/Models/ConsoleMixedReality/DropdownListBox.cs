@@ -129,6 +129,11 @@ public class DropdownListBox : IConsoleElement
 				ConsoleManager.FocusedElement = this;
 				Refresh();
 				return flag;
+			case ConsoleKey.Enter:
+				_listBox.OnInput(inputEvent);
+				_textBox.Value = _listBox.Value;
+				Refresh();
+				return true;
 		}
 		flag = _textBox.OnInput(inputEvent);
 		Refresh();

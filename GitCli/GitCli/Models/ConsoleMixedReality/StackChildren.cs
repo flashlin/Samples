@@ -31,7 +31,7 @@ public class StackChildren : ObservableCollection<IConsoleElement>
 
 	public T FocusedControlOrMe<T>(Func<IConsoleElement, T> action, Func<T> parentAction)
 	{
-		if (_focusIndex == -1)
+		if (_focusIndex == -1 || Count == 0)
 		{
 			return parentAction();
 		}
