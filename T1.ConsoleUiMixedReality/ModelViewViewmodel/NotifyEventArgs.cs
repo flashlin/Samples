@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace T1.ConsoleUiMixedReality;
+namespace T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
 public class NotifyEventArgs<T>
 {
