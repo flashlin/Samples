@@ -38,8 +38,8 @@ public class ListBox : IConsoleElement
 	public int MaxLength { get; set; } = int.MaxValue;
 	public string Name { get; set; } = string.Empty;
 	public IConsoleElement? Parent { get; set; }
-	public string Value { get; set; }
 	public object? UserObject { get; set; }
+	public string Value { get; set; }
 	public Rect ViewRect { get; set; }
 
 	public Character this[Position pos]
@@ -100,6 +100,7 @@ public class ListBox : IConsoleElement
 	public bool OnBubbleEvent(IConsoleElement element, ConsoleElementEvent evt)
 	{
 		//this.OnHandleEnter?.Invoke(this, evt);
+		Value = Children.GetFocusedControl().Value;
 		Command.Raise(evt);
 		return true;
 	}
