@@ -5,7 +5,7 @@ namespace T1.ConsoleUiMixedReality.ModelViewViewmodel;
 
 public static class NotifyExtension
 {
-	public static void RaiseUpdateValue<TValue>(this EventHandler<NotifyEventArgs<TValue>> handler, TValue value)
+	public static void RaiseUpdateValue<TValue>(this EventHandler<NotifyEventArgs<TValue>>? handler, TValue value)
 	{
 		if (handler == null)
 		{
