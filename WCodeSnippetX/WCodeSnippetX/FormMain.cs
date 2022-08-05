@@ -1,13 +1,15 @@
 using System.Data;
 using WCodeSnippetX.Models;
+using WCodeSnippetX.ViewComponents;
 
 namespace WCodeSnippetX
 {
 	public partial class FormMain : Form
 	{
 		readonly DataTable _table = new DataTable();
-		BindingSource _bindingSource = new BindingSource();
+		readonly BindingSource _bindingSource = new BindingSource();
 		readonly DataGridView _dataGridView = new DataGridView();
+		private int _selectedRow = 0;
 
 		public FormMain()
 		{
@@ -37,24 +39,67 @@ namespace WCodeSnippetX
 				ReadOnly = true,
 				Width = 3 * 12,
 			});
-			_dataGridView.Columns.Add(new DataGridViewTextBoxColumn()
+			_dataGridView.Columns.Add(new DataGridViewRichTextBoxColumn()
 			{
 				Name = "Code Content",
 				DataPropertyName = "content",
 				ReadOnly = true,
+				Width = 30 * 12,
 			});
 
-			_dataGridView.RowTemplate.Height = 12 * 5;
+			_dataGridView.ReadOnly = true;
 			_dataGridView.AutoGenerateColumns = false;
 			_dataGridView.DataSource = _bindingSource;
-			_dataGridView.Height = ClientSize.Height - buttonSearch.Height - 6;
+			ResizeDataGridView();
 			this.Controls.Add(_dataGridView);
+		}
+
+		private void ResizeDataGridView()
+		{
+			//foreach (var vBar in _dataGridView.Controls.OfType<HScrollBar>())
+			//{
+			//	vBar.Enabled = false;
+			//}
+			_dataGridView.ScrollBars = ScrollBars.Vertical;
+			_dataGridView.RowTemplate.Height = 12 * 10;
+			_dataGridView.Width = ClientSize.Width - 3;
+			_dataGridView.Height = ClientSize.Height - buttonSearch.Height - 6;
+		}
+
+		private void SetDataGridViewSelected(int idx)
+		{
+			_dataGridView.CurrentCell = _dataGridView.Rows[idx].Cells[0];
 		}
 
 		private void FormMain_ResizeEnd(object sender, EventArgs e)
 		{
-			_dataGridView.Height = ClientSize.Height - buttonSearch.Height - 6;
-			buttonSearch.Left = textBoxSearch.Right + 3;
+			ResizeDataGridView();
+		}
+
+		private void textBoxSearch_KeyDown(object sender, KeyEventArgs e)
+		{
+			HandleKeyDown(e);
+		}
+
+		private void HandleKeyDown(KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Down)
+			{
+				if (_selectedRow + 1 < _dataGridView.RowCount)
+				{
+					_selectedRow++;
+				}
+
+				SetDataGridViewSelected(_selectedRow);
+				return;
+			}
+
+			if (e.KeyCode == Keys.Up)
+			{
+				_selectedRow = Math.Max(0, _selectedRow - 1);
+				SetDataGridViewSelected(_selectedRow);
+				return;
+			}
 		}
 	}
 }
