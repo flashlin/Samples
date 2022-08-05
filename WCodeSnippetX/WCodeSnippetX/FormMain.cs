@@ -7,6 +7,7 @@ namespace WCodeSnippetX
 	public partial class FormMain : Form
 	{
 		readonly List<CodeSnippet> _table = new();
+		List<CodeSnippet> _result = Enumerable.Empty<CodeSnippet>().ToList();
 		readonly BindingSource _bindingSource = new();
 		readonly DataGridView _dataGridView = new();
 		private int _selectedRow = 0;
@@ -52,8 +53,11 @@ namespace WCodeSnippetX
 
 			textBoxSearch.TextChanged += (sender, args) =>
 			{
-				_bindingSource.DataSource = textBoxSearch.Text == string.Empty ?
-					_table : _table.Where(x => x.Content.Contains(textBoxSearch.Text));
+				_result = textBoxSearch.Text == string.Empty ?
+					_table : 
+					_table.Where(x => x.Content.Contains(textBoxSearch.Text))
+						.ToList();
+				_bindingSource.DataSource = _result;
 			};
 		}
 
@@ -107,6 +111,8 @@ namespace WCodeSnippetX
 
 			if (e.KeyCode == Keys.Enter && _dataGridView.SelectedRows.Count > 0)
 			{
+				var item = _result[_selectedRow].Content;
+				MessageBox.Show(item);
 				return;
 			}
 		}
