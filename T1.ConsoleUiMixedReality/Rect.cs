@@ -25,7 +25,7 @@ public struct Rect
 
 	public Position BottomRightCorner => new Position(Right, Bottom);
 
-	public bool IsEmpty => Width == 0 && Height == 0;
+	public bool IsEmpty => Width == 0 || Height == 0;
 
 	public Rect Move(int x, int y)
 	{
