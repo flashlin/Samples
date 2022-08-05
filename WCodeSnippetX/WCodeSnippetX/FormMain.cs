@@ -27,7 +27,7 @@ namespace WCodeSnippetX
 
 			_bindingSource.Add(new CodeSnippet { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
 			_bindingSource.Add(new CodeSnippet { Id = 2, Content = "Sample htextbox for bold substring in C#" });
-			_bindingSource.Add(new CodeSnippet { Id = 3, Content = "public class bold substring in C#" });
+			_bindingSource.Add(new CodeSnippet { Id = 3, Content = "public class { \r\n public string Name; }" });
 			//_bindingSource.DataSource = _table;
 
 			_dataGridView.Columns.Add(new DataGridViewTextBoxColumn()
@@ -35,6 +35,7 @@ namespace WCodeSnippetX
 				Name = "index",
 				DataPropertyName = "Id",
 				ReadOnly = true,
+				Width = 3 * 12,
 			});
 			_dataGridView.Columns.Add(new DataGridViewTextBoxColumn()
 			{
@@ -43,9 +44,17 @@ namespace WCodeSnippetX
 				ReadOnly = true,
 			});
 
+			_dataGridView.RowTemplate.Height = 12 * 5;
 			_dataGridView.AutoGenerateColumns = false;
 			_dataGridView.DataSource = _bindingSource;
+			_dataGridView.Height = ClientSize.Height - buttonSearch.Height - 6;
 			this.Controls.Add(_dataGridView);
+		}
+
+		private void FormMain_ResizeEnd(object sender, EventArgs e)
+		{
+			_dataGridView.Height = ClientSize.Height - buttonSearch.Height - 6;
+			buttonSearch.Left = textBoxSearch.Right + 3;
 		}
 	}
 }
