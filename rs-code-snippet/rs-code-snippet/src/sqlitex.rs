@@ -7,17 +7,22 @@ pub mod Sqlitex {
    //#[derive(Debug)]
    pub struct SqliteDb {
      name: String,
+     _conn: sqlite::Connection,
    }
    
-   conn: sqlite::Connection;
-
    impl SqliteDb {
+
+      pub fn new(name: &String) -> SqliteDb {
+         let obj = SqliteDb {
+            name: name.to_string(),
+            _conn: sqlite::Connection::open(name).unwrap(),
+         };
+         obj.init();
+         return obj;
+      }
       
       pub fn init(& self) {
-         self._conn = sqlite::open(":memory:").unwrap();
-         let conn = self._conn;
-         //self.drive();
-         conn.execute("
+         self._conn.execute("
            CREATE TABLE users (name TEXT, age INTEGER);
            INSERT INTO users VALUES ('Alice', 42);
            INSERT INTO users VALUES ('Bob', 69);
