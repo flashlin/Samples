@@ -33,14 +33,14 @@ public class ConsoleWindow : IConsoleWindow
 			},
 		});
 
-		model.CompareList.Init(new []{
+		model.CompareList.Init(new[]{
 			new ListItem()
 			{
 				Title = "compare1"
 			},
 		});
 
-		model.ChangedFilesList.Init(new []{
+		model.ChangedFilesList.Init(new[]{
 			new ListItem()
 			{
 				Title = "file1"
@@ -78,15 +78,22 @@ public class ConsoleWindow : IConsoleWindow
 			BackgroundColor = ConsoleColor.DarkGreen,
 			Children =
 			{
-				new ListBox(new Rect
+				new HorizontalStack()
 				{
-					Width = 30,
-					Height = 20,
-				})
-				{
-					Name = "allCommitList",
-					DataContext = model.AllCommitList,
-					Command = model.ACommitCommand,
+					Name = "Test",
+					Children =
+					{
+						new ListBox(new Rect
+						{
+							Width = 30,
+							Height = 20,
+						})
+						{
+							Name = "allCommitList",
+							DataContext = model.AllCommitList,
+							Command = model.ACommitCommand,
+						},
+					}
 				},
 				new HorizontalStack()
 				{

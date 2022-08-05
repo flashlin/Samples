@@ -59,8 +59,8 @@ public class Label : IConsoleElement
 
 	public void OnCreate(Rect rect, IConsoleManager consoleManager)
 	{
-		ViewRect = DesignRect.ToViewRect(rect, consoleManager);
-		ViewRect = ViewRect.ExtendBy(DesignRect.TopLeftCorner);
+		this.HandleOnCreate(rect, consoleManager);
+		Refresh();
 	}
 
 	public bool OnInput(InputEvent inputEvent)
@@ -70,5 +70,16 @@ public class Label : IConsoleElement
 
 	public void Refresh()
 	{
+		if (DesignRect.IsEmpty)
+		{
+			var width = Value.Length;
+			ViewRect = new Rect()
+			{
+				Left = ViewRect.Left,
+				Top = ViewRect.Top,
+				Width = width,
+				Height = ViewRect.Height,
+			};
+		}
 	}
 }
