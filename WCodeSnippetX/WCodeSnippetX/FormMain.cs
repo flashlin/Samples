@@ -23,12 +23,13 @@ namespace WCodeSnippetX
 			_table.Add(new CodeSnippet { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
 			_table.Add(new CodeSnippet { Id = 2, Content = "Sample htextbox for bold substring in C#" });
 			_table.Add(new CodeSnippet { Id = 3, Content = "public class { \r\n public string Name; }" });
+			_result = _table;
 
 
 			//_bindingSource.Add(new CodeSnippet { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
 			//_bindingSource.Add(new CodeSnippet { Id = 2, Content = "Sample htextbox for bold substring in C#" });
 			//_bindingSource.Add(new CodeSnippet { Id = 3, Content = "public class { \r\n public string Name; }" });
-			_bindingSource.DataSource = _table;
+			_bindingSource.DataSource = _result;
 
 			_dataGridView.Columns.Add(new DataGridViewTextBoxColumn()
 			{
@@ -48,6 +49,7 @@ namespace WCodeSnippetX
 			_dataGridView.ReadOnly = true;
 			_dataGridView.AutoGenerateColumns = false;
 			_dataGridView.DataSource = _bindingSource;
+			_dataGridView.KeyDown += OnDataGridViewKeyDown;
 			ResizeDataGridView();
 			this.Controls.Add(_dataGridView);
 
@@ -59,6 +61,16 @@ namespace WCodeSnippetX
 						.ToList();
 				_bindingSource.DataSource = _result;
 			};
+		}
+
+		private void OnDataGridViewKeyDown(object? sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Enter && _dataGridView.SelectedRows.Count > 0)
+			{
+				var item = _result[_selectedRow].Content;
+				MessageBox.Show(item);
+				return;
+			}
 		}
 
 		private void ResizeDataGridView()
