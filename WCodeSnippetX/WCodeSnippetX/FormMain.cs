@@ -4,16 +4,19 @@ namespace WCodeSnippetX
 {
 	public partial class FormMain : Form
 	{
-		DataTable _table = new DataTable();
+		readonly DataTable _table = new DataTable();
+		BindingSource _bindingSource = new BindingSource();
+		readonly DataGridView _dataGridView = new DataGridView();
 
 		public FormMain()
 		{
 			InitializeComponent();
+			Init();
 		}
 
 		void Init()
 		{
-			_table.Columns.Add("idx");
+			_table.Columns.Add(new DataColumn("idx", typeof(int)));
 			_table.Columns.Add("content");
 
 			DataRow row = _table.NewRow();
@@ -22,13 +25,30 @@ namespace WCodeSnippetX
 			_table.Rows.Add(row);
 			_table.AcceptChanges();
 
-			//this.dataGridView1.AutoGenerateColumns = false;
-			//this.dataGridView1.DataSource = _table;
-		}
+			_bindingSource.DataSource = _table;
 
-		private void dataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
-		{
+			_dataGridView.Columns.Add(new DataGridViewComboBoxColumn()
+			{
+				Name = "index",
+				DataPropertyName = "idx",
+				DefaultCellStyle = new DataGridViewCellStyle()
+				{
+					NullValue = 0,
+				}
+			});
+			_dataGridView.Columns.Add(new DataGridViewComboBoxColumn()
+			{
+				Name = "content",
+				DataPropertyName = "content",
+				DefaultCellStyle = new DataGridViewCellStyle()
+				{
+					NullValue = string.Empty,
+				}
+			});
 
+			_dataGridView.AutoGenerateColumns = false;
+			_dataGridView.DataSource = _bindingSource;
+			this.Controls.Add(_dataGridView);
 		}
 	}
 }

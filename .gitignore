@@ -3,6 +3,8 @@ bin/
 obj/
 packages/
 node_modules/
+debug/
+target/
 *.user
 *.lock
 dist/
