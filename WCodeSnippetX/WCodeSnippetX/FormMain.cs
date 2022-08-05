@@ -63,10 +63,19 @@ namespace WCodeSnippetX
 		{
 			if (e.KeyCode == Keys.Enter && _dataGridView.SelectedRows.Count > 0)
 			{
-				var item = _result[_selectedRow].Content;
-				MessageBox.Show(item);
+				CopySelectedItem();
 				return;
 			}
+
+			if (e.KeyCode == Keys.Escape)
+			{
+				return;
+			}
+		}
+
+		private void CopySelectedItem()
+		{
+			Clipboard.SetText(_result[_selectedRow].Content);
 		}
 
 		private void ResizeDataGridView()
@@ -119,10 +128,14 @@ namespace WCodeSnippetX
 
 			if (e.KeyCode == Keys.Enter && _dataGridView.SelectedRows.Count > 0)
 			{
-				var item = _result[_selectedRow].Content;
-				MessageBox.Show(item);
+				CopySelectedItem();
 				return;
 			}
+		}
+
+		private void FormMain_Activated(object sender, EventArgs e)
+		{
+			textBoxSearch.Focus();
 		}
 	}
 }

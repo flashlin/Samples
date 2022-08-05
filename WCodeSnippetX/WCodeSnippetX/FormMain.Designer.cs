@@ -63,6 +63,7 @@
 			this.Margin = new System.Windows.Forms.Padding(4);
 			this.Name = "FormMain";
 			this.Text = "Code Snippet";
+			this.Activated += new System.EventHandler(this.FormMain_Activated);
 			this.ResizeEnd += new System.EventHandler(this.FormMain_ResizeEnd);
 			this.ResumeLayout(false);
 			this.PerformLayout();
