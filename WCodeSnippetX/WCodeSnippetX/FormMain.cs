@@ -6,9 +6,9 @@ namespace WCodeSnippetX
 {
 	public partial class FormMain : Form
 	{
-		readonly DataTable _table = new DataTable();
-		readonly BindingSource _bindingSource = new BindingSource();
-		readonly DataGridView _dataGridView = new DataGridView();
+		readonly List<CodeSnippet> _table = new();
+		readonly BindingSource _bindingSource = new();
+		readonly DataGridView _dataGridView = new();
 		private int _selectedRow = 0;
 
 		public FormMain()
@@ -19,18 +19,15 @@ namespace WCodeSnippetX
 
 		void Init()
 		{
-			_table.Columns.Add(new DataColumn("idx", typeof(int)));
-			_table.Columns.Add(new DataColumn("context", typeof(string)));
+			_table.Add(new CodeSnippet { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
+			_table.Add(new CodeSnippet { Id = 2, Content = "Sample htextbox for bold substring in C#" });
+			_table.Add(new CodeSnippet { Id = 3, Content = "public class { \r\n public string Name; }" });
 
-			DataRow row = _table.NewRow();
-			row[0] = "1";
-			_table.Rows.Add(row);
-			_table.AcceptChanges();
 
-			_bindingSource.Add(new CodeSnippet { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
-			_bindingSource.Add(new CodeSnippet { Id = 2, Content = "Sample htextbox for bold substring in C#" });
-			_bindingSource.Add(new CodeSnippet { Id = 3, Content = "public class { \r\n public string Name; }" });
-			//_bindingSource.DataSource = _table;
+			//_bindingSource.Add(new CodeSnippet { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
+			//_bindingSource.Add(new CodeSnippet { Id = 2, Content = "Sample htextbox for bold substring in C#" });
+			//_bindingSource.Add(new CodeSnippet { Id = 3, Content = "public class { \r\n public string Name; }" });
+			_bindingSource.DataSource = _table;
 
 			_dataGridView.Columns.Add(new DataGridViewTextBoxColumn()
 			{
@@ -52,6 +49,12 @@ namespace WCodeSnippetX
 			_dataGridView.DataSource = _bindingSource;
 			ResizeDataGridView();
 			this.Controls.Add(_dataGridView);
+
+			textBoxSearch.TextChanged += (sender, args) =>
+			{
+				_bindingSource.DataSource = textBoxSearch.Text == string.Empty ?
+					_table : _table.Where(x => x.Content.Contains(textBoxSearch.Text));
+			};
 		}
 
 		private void ResizeDataGridView()
@@ -60,6 +63,7 @@ namespace WCodeSnippetX
 			//{
 			//	vBar.Enabled = false;
 			//}
+			_dataGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 			_dataGridView.ScrollBars = ScrollBars.Vertical;
 			_dataGridView.RowTemplate.Height = 12 * 10;
 			_dataGridView.Width = ClientSize.Width - 3;
@@ -98,6 +102,11 @@ namespace WCodeSnippetX
 			{
 				_selectedRow = Math.Max(0, _selectedRow - 1);
 				SetDataGridViewSelected(_selectedRow);
+				return;
+			}
+
+			if (e.KeyCode == Keys.Enter && _dataGridView.SelectedRows.Count > 0)
+			{
 				return;
 			}
 		}
