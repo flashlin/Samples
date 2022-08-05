@@ -40,6 +40,7 @@
 			this.textBoxSearch.Name = "textBoxSearch";
 			this.textBoxSearch.Size = new System.Drawing.Size(307, 29);
 			this.textBoxSearch.TabIndex = 0;
+			this.textBoxSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxSearch_KeyDown);
 			// 
 			// buttonSearch
 			// 
