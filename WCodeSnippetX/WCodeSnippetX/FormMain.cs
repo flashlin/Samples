@@ -1,4 +1,5 @@
 using System.Data;
+using WCodeSnippetX.Models;
 
 namespace WCodeSnippetX
 {
@@ -17,33 +18,29 @@ namespace WCodeSnippetX
 		void Init()
 		{
 			_table.Columns.Add(new DataColumn("idx", typeof(int)));
-			_table.Columns.Add("content");
+			_table.Columns.Add(new DataColumn("context", typeof(string)));
 
 			DataRow row = _table.NewRow();
 			row[0] = "1";
-			row[1] = "Datagridview and richtextbox for bold substring in C#";
 			_table.Rows.Add(row);
 			_table.AcceptChanges();
 
-			_bindingSource.DataSource = _table;
+			_bindingSource.Add(new CodeSnippet { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
+			_bindingSource.Add(new CodeSnippet { Id = 2, Content = "Sample htextbox for bold substring in C#" });
+			_bindingSource.Add(new CodeSnippet { Id = 3, Content = "public class bold substring in C#" });
+			//_bindingSource.DataSource = _table;
 
-			_dataGridView.Columns.Add(new DataGridViewComboBoxColumn()
+			_dataGridView.Columns.Add(new DataGridViewTextBoxColumn()
 			{
 				Name = "index",
-				DataPropertyName = "idx",
-				DefaultCellStyle = new DataGridViewCellStyle()
-				{
-					NullValue = 0,
-				}
+				DataPropertyName = "Id",
+				ReadOnly = true,
 			});
-			_dataGridView.Columns.Add(new DataGridViewComboBoxColumn()
+			_dataGridView.Columns.Add(new DataGridViewTextBoxColumn()
 			{
-				Name = "content",
+				Name = "Code Content",
 				DataPropertyName = "content",
-				DefaultCellStyle = new DataGridViewCellStyle()
-				{
-					NullValue = string.Empty,
-				}
+				ReadOnly = true,
 			});
 
 			_dataGridView.AutoGenerateColumns = false;
