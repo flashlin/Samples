@@ -19,7 +19,16 @@ namespace WCodeSnippetX
 			InitializeComponent();
 			_globalKeyboardHook.KeyboardPressed += OnKeyPressed;
 			this.Closing += OnClosing;
+			this.KeyDown += OnKeyDown;
 			Init();
+		}
+
+		private void OnKeyDown(object? sender, KeyEventArgs e)
+		{
+			if (e.KeyCode == Keys.Escape)
+			{
+				e.Handled = true;
+			}
 		}
 
 		private void OnClosing(object? sender, CancelEventArgs e)
@@ -111,13 +120,22 @@ namespace WCodeSnippetX
 
 			if (e.KeyCode == Keys.Escape)
 			{
+				HideMe();
 				return;
 			}
+		}
+
+		private void HideMe()
+		{
+			textBoxSearch.Text = "";
+			this.WindowState = FormWindowState.Minimized;
 		}
 
 		private void CopySelectedItem()
 		{
 			Clipboard.SetText(_result[_selectedRow].Content);
+			textBoxSearch.Text = "";
+			HideMe();
 		}
 
 		private void ResizeDataGridView()
@@ -171,6 +189,12 @@ namespace WCodeSnippetX
 			if (e.KeyCode == Keys.Enter && _dataGridView.SelectedRows.Count > 0)
 			{
 				CopySelectedItem();
+				return;
+			}
+
+			if (e.KeyCode == Keys.Escape)
+			{
+				HideMe();
 				return;
 			}
 		}
