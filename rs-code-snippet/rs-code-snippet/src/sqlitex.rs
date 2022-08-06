@@ -1,7 +1,7 @@
 //use sqlite::Error as SqError;
 
-pub mod Sqlitex {
-   
+pub mod sqlitex {
+ 
 
    //#[derive(Default)]
    //#[derive(Debug)]
@@ -12,7 +12,7 @@ pub mod Sqlitex {
    
    impl SqliteDb {
 
-      pub fn new(name: &String) -> SqliteDb {
+      pub fn new(name: &str) -> SqliteDb {
          let obj = SqliteDb {
             name: name.to_string(),
             _conn: sqlite::Connection::open(name).unwrap(),
