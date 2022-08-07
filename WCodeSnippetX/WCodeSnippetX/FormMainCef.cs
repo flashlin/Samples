@@ -21,7 +21,8 @@ namespace WCodeSnippetX
 
 		private void Initialize()
 		{
-			var fileName = Path.Combine(Directory.GetCurrentDirectory(), "Views/index.html");
+			//var fileName = Path.Combine(Directory.GetCurrentDirectory(), "Views/index.html");
+			var fileName = "localfolder://cefsharp/";
 			var browser = new ChromiumWebBrowser(fileName)
 			{
 				Dock = DockStyle.Fill

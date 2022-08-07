@@ -7,7 +7,7 @@ import { fileURLToPath, URL } from 'url';
 export default defineConfig({
   plugins: [vue()],
   build: {
-    outDir: "../webrtc-server/wwwroot/dist",
+    outDir: "../WCodeSnippetX/bin/Debug/net6.0-windows/views",
     emptyOutDir: true,
     manifest: true,
   },

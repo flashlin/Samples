@@ -11,18 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Views\index.html" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Views\index.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="Models\Repos\" />
     <Folder Include="ViewModels\" />
+    <Folder Include="Views\" />
   </ItemGroup>
 
   <ItemGroup>

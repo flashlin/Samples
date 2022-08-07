@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using CefSharp;
+using CefSharp.SchemeHandler;
 using CefSharp.WinForms;
 using Microsoft.Extensions.DependencyInjection;
 using WCodeSnippetX.Models;
@@ -17,10 +18,6 @@ namespace WCodeSnippetX
 		[STAThread]
 		static void Main()
 		{
-			//Application.SetHighDpiMode(HighDpiMode.SystemAware);
-			//Application.EnableVisualStyles();
-			//Application.SetCompatibleTextRenderingDefault(false);
-
 			var services = new ServiceCollection();
 			ConfigureServices(services);
 			ApplicationConfiguration.Initialize();
@@ -58,6 +55,18 @@ namespace WCodeSnippetX
 		private static void InitializeCefSharp()
 		{
 			var settings = new CefSettings();
+			var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+
+			settings.RegisterScheme(new CefCustomScheme
+			{
+				SchemeName = "localfolder",
+				DomainName = "cefsharp",
+				SchemeHandlerFactory = new FolderSchemeHandlerFactory(
+					rootFolder: $"{baseDir}/views",
+					hostName: "cefsharp",
+					defaultPage: "index.html"
+				)
+			});
 
 			// Set BrowserSubProcessPath based on app bitness at runtime
 			// .NET Core 註解這一行
@@ -65,7 +74,6 @@ namespace WCodeSnippetX
 			//	Environment.Is64BitProcess ? "x64" : "x86",
 			//	"CefSharp.BrowserSubprocess.exe");
 
-			// Make sure you set performDependencyCheck false
 			Cef.Initialize(settings, false, browserProcessHandler: null);
 		}
 
