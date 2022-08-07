@@ -70,12 +70,12 @@ namespace WCodeSnippetX
 		}
 
 		// Will attempt to load missing assembly from either x86 or x64 subdir
-		private static Assembly Resolver(object sender, ResolveEventArgs args)
+		private static Assembly? Resolver(object sender, ResolveEventArgs args)
 		{
 			if (args.Name.StartsWith("CefSharp"))
 			{
 				var assemblyName = args.Name.Split(new[] { ',' }, 2)[0] + ".dll";
-				var archSpecificPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase,
+				var archSpecificPath = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase!,
 					Environment.Is64BitProcess ? "x64" : "x86",
 					assemblyName);
 
