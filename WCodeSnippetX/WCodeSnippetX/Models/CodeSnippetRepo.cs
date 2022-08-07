@@ -69,6 +69,12 @@ public class CodeSnippetRepo : ICodeSnippetRepo
 		_dbContext.SaveChanges();
 	}
 
+	public void DeleteCode(CodeSnippetEntity codeSnippet)
+	{
+		_dbContext.CodeSnippets.Remove(codeSnippet);
+		_dbContext.SaveChanges();
+	}
+
 	private bool IsMatch(CodeSnippetEntity codeSnippet, List<string> patterns)
 	{
 		foreach (var pattern in patterns)
