@@ -36,7 +36,14 @@ namespace WCodeSnippetX.ViewComponents
 			_codeSnippet.Content = textBoxContent.Text;
 			_codeSnippet.Description = textBoxDescription.Text;
 
-			_repo.UpdateCode(_codeSnippet);
+			if (_codeSnippet.Id != 0)
+			{
+				_repo.UpdateCode(_codeSnippet);
+			}
+			else
+			{
+				_repo.AddCode(_codeSnippet);
+			}
 		}
 
 		private void buttonSave_Click(object sender, EventArgs e)
