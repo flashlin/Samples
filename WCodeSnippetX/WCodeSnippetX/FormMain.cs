@@ -3,6 +3,7 @@ using System.Data;
 using WCodeSnippetX.Models;
 using WCodeSnippetX.ViewComponents;
 
+//https://docs.microsoft.com/zh-tw/windows/win32/inputdev/virtual-key-codes
 namespace WCodeSnippetX
 {
 	public partial class FormMain : Form
