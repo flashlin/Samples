@@ -63,6 +63,12 @@ public class CodeSnippetRepo : ICodeSnippetRepo
 		_dbContext.SaveChanges();
 	}
 
+	public void AddCode(CodeSnippetEntity codeSnippet)
+	{
+		_dbContext.CodeSnippets.Add(codeSnippet);
+		_dbContext.SaveChanges();
+	}
+
 	private bool IsMatch(CodeSnippetEntity codeSnippet, List<string> patterns)
 	{
 		foreach (var pattern in patterns)

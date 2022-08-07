@@ -46,7 +46,7 @@ namespace WCodeSnippetX
 		private void OnKeyPressed(object? sender, GlobalKeyboardHookEventArgs e)
 		{
 			if (e.KeyboardState != GlobalKeyboardHook.KeyboardState.KeyDown &&
-			    e.KeyboardState != GlobalKeyboardHook.KeyboardState.SysKeyDown)
+				 e.KeyboardState != GlobalKeyboardHook.KeyboardState.SysKeyDown)
 			{
 				_leftAlt = false;
 				return;
@@ -95,43 +95,69 @@ namespace WCodeSnippetX
 				Width = 30 * 12,
 			});
 
-			_dataGridView.CellMouseClick += DataGridViewOnCellMouseClick;
 			_dataGridView.ReadOnly = true;
 			_dataGridView.AutoGenerateColumns = false;
 			_dataGridView.DataSource = _bindingSource;
 			_dataGridView.KeyDown += OnDataGridViewKeyDown;
+			SetupDataGridViewMenu();
 			ResizeDataGridView();
 			this.Controls.Add(_dataGridView);
 
 			textBoxSearch.TextChanged += (sender, args) =>
 			{
-				_result = _repo.QueryCode(textBoxSearch.Text).ToList();
-				_bindingSource.DataSource = _result;
+				RefreshSearchCode();
 			};
 		}
 
-		private void DataGridViewOnCellMouseClick(object? sender, DataGridViewCellMouseEventArgs e)
+		private void DataGridViewOnMouseClick(object? sender, MouseEventArgs e)
 		{
 			if (e.Button != MouseButtons.Right)
 			{
 				return;
 			}
-			var m = new ContextMenuStrip();
-			var toolStripMenuEdit = new ToolStripMenuItem("Edit");
-			toolStripMenuEdit.Click += (o, args) =>
-			{
-				_formEditCode.SetValue(_result[_selectedRow]);
-				_formEditCode.ShowDialog();
-			};
-			m.Items.Add(toolStripMenuEdit);
-			m.Items.Add(new ToolStripMenuItem("Add"));
+
+			//var p = _dataGridView.PointToClient(new Point(e.X, e.Y));
 			var currentMouseOverRow = _dataGridView.HitTest(e.X, e.Y).RowIndex;
 			if (currentMouseOverRow >= 0)
 			{
 				_selectedRow = currentMouseOverRow;
 				SetDataGridViewSelected(_selectedRow);
-				m.Show(_dataGridView, new Point(e.X, e.Y));
+				//m.Show(_dataGridView, new Point(e.X, e.Y));
 			}
+		}
+
+		private void RefreshSearchCode()
+		{
+			_result = _repo.QueryCode(textBoxSearch.Text).ToList();
+			_bindingSource.DataSource = _result;
+		}
+
+		private ContextMenuStrip SetupDataGridViewMenu()
+		{
+			var m = new ContextMenuStrip();
+			var toolStripMenuEdit = new ToolStripMenuItem("Edit");
+			toolStripMenuEdit.Click += (o, args) =>
+			{
+				if (_dataGridView.SelectedRows.Count == 0)
+				{
+					return;
+				}
+				_selectedRow = _dataGridView.SelectedRows[0].Index;
+				_formEditCode.SetValue(_result[_selectedRow]);
+				_formEditCode.ShowDialog();
+			};
+			m.Items.Add(toolStripMenuEdit);
+
+			var toolStripMenuAdd = new ToolStripMenuItem("Add");
+			toolStripMenuAdd.Click += (o, args) =>
+			{
+				_formEditCode.SetValue(new CodeSnippetEntity());
+				_formEditCode.ShowDialog();
+				RefreshSearchCode();
+			};
+			m.Items.Add(toolStripMenuAdd);
+			_dataGridView.ContextMenuStrip = m;
+			return m;
 		}
 
 		private void OnDataGridViewKeyDown(object? sender, KeyEventArgs e)
