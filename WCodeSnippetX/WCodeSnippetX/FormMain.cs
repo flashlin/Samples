@@ -8,15 +8,15 @@ namespace WCodeSnippetX
 {
 	public partial class FormMain : Form
 	{
-		readonly List<CodeSnippetEntity> _table = new();
 		List<CodeSnippetEntity> _result = Enumerable.Empty<CodeSnippetEntity>().ToList();
 		readonly BindingSource _bindingSource = new();
 		readonly DataGridView _dataGridView = new();
 		private int _selectedRow = 0;
 		private readonly GlobalKeyboardHook _globalKeyboardHook = new();
 
-		public FormMain()
+		public FormMain(ICodeSnippetRepo repo)
 		{
+			_repo = repo;
 			InitializeComponent();
 			_globalKeyboardHook.KeyboardPressed += OnKeyPressed;
 			this.Closing += OnClosing;
@@ -38,6 +38,7 @@ namespace WCodeSnippetX
 		}
 
 		bool _leftAlt = false;
+		private ICodeSnippetRepo _repo;
 
 		private void OnKeyPressed(object? sender, GlobalKeyboardHookEventArgs e)
 		{
@@ -72,10 +73,7 @@ namespace WCodeSnippetX
 
 		void Init()
 		{
-			_table.Add(new CodeSnippetEntity { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
-			_table.Add(new CodeSnippetEntity { Id = 2, Content = "Sample htextbox for bold substring in C#" });
-			_table.Add(new CodeSnippetEntity { Id = 3, Content = "public class { \r\n public string Name; }" });
-			_result = _table;
+			_result = _repo.QueryCode(textBoxSearch.Text).ToList();
 
 			_bindingSource.DataSource = _result;
 
@@ -103,10 +101,7 @@ namespace WCodeSnippetX
 
 			textBoxSearch.TextChanged += (sender, args) =>
 			{
-				_result = textBoxSearch.Text == string.Empty ?
-					_table : 
-					_table.Where(x => x.Content.Contains(textBoxSearch.Text))
-						.ToList();
+				_result = _repo.QueryCode(textBoxSearch.Text).ToList();
 				_bindingSource.DataSource = _result;
 			};
 		}

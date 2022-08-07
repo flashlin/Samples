@@ -19,4 +19,8 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\MyGitHub\T1.Standard\T1.Standard\T1.Standard.csproj" />
+  </ItemGroup>
+
 </Project>

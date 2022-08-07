@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using WCodeSnippetX.Models;
 using WCodeSnippetX.Models.Repos;
 
 namespace WCodeSnippetX
@@ -31,6 +32,7 @@ namespace WCodeSnippetX
 		{
 			services.AddScoped<FormMain>();
 			services.AddDbContext<CodeSnippetDbContext>();
+			services.AddTransient<ICodeSnippetRepo, CodeSnippetRepo>();
 		}
 
 		static void ConfigureApp(IServiceProvider serviceProvider)
