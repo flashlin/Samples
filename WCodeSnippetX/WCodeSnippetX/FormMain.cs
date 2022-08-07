@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Data;
 using WCodeSnippetX.Models;
 using WCodeSnippetX.ViewComponents;
+using System.Windows.Forms;
 
 //https://docs.microsoft.com/zh-tw/windows/win32/inputdev/virtual-key-codes
 namespace WCodeSnippetX
@@ -14,8 +15,9 @@ namespace WCodeSnippetX
 		private int _selectedRow = 0;
 		private readonly GlobalKeyboardHook _globalKeyboardHook = new();
 
-		public FormMain(ICodeSnippetRepo repo)
+		public FormMain(ICodeSnippetRepo repo, FormEditCode formEditCode)
 		{
+			_formEditCode = formEditCode;
 			_repo = repo;
 			InitializeComponent();
 			_globalKeyboardHook.KeyboardPressed += OnKeyPressed;
@@ -39,6 +41,7 @@ namespace WCodeSnippetX
 
 		bool _leftAlt = false;
 		private ICodeSnippetRepo _repo;
+		private FormEditCode _formEditCode;
 
 		private void OnKeyPressed(object? sender, GlobalKeyboardHookEventArgs e)
 		{
@@ -92,6 +95,7 @@ namespace WCodeSnippetX
 				Width = 30 * 12,
 			});
 
+			_dataGridView.CellMouseClick += DataGridViewOnCellMouseClick;
 			_dataGridView.ReadOnly = true;
 			_dataGridView.AutoGenerateColumns = false;
 			_dataGridView.DataSource = _bindingSource;
@@ -104,6 +108,30 @@ namespace WCodeSnippetX
 				_result = _repo.QueryCode(textBoxSearch.Text).ToList();
 				_bindingSource.DataSource = _result;
 			};
+		}
+
+		private void DataGridViewOnCellMouseClick(object? sender, DataGridViewCellMouseEventArgs e)
+		{
+			if (e.Button != MouseButtons.Right)
+			{
+				return;
+			}
+			var m = new ContextMenuStrip();
+			var toolStripMenuEdit = new ToolStripMenuItem("Edit");
+			toolStripMenuEdit.Click += (o, args) =>
+			{
+				_formEditCode.SetValue(_result[_selectedRow]);
+				_formEditCode.ShowDialog();
+			};
+			m.Items.Add(toolStripMenuEdit);
+			m.Items.Add(new ToolStripMenuItem("Add"));
+			var currentMouseOverRow = _dataGridView.HitTest(e.X, e.Y).RowIndex;
+			if (currentMouseOverRow >= 0)
+			{
+				_selectedRow = currentMouseOverRow;
+				SetDataGridViewSelected(_selectedRow);
+				m.Show(_dataGridView, new Point(e.X, e.Y));
+			}
 		}
 
 		private void OnDataGridViewKeyDown(object? sender, KeyEventArgs e)

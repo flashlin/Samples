@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using WCodeSnippetX.Models;
 using WCodeSnippetX.Models.Repos;
+using WCodeSnippetX.ViewComponents;
 
 namespace WCodeSnippetX
 {
@@ -31,6 +32,7 @@ namespace WCodeSnippetX
 		static void ConfigureServices(ServiceCollection services)
 		{
 			services.AddScoped<FormMain>();
+			services.AddScoped<FormEditCode>();
 			services.AddDbContext<CodeSnippetDbContext>();
 			services.AddTransient<ICodeSnippetRepo, CodeSnippetRepo>();
 		}
