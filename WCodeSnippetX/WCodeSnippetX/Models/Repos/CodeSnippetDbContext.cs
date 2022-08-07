@@ -1,0 +1,29 @@
+using Microsoft.EntityFrameworkCore;
+
+namespace WCodeSnippetX.Models.Repos;
+
+public class CodeSnippetDbContext : DbContext
+{
+	private readonly string _dbFilename = "codeSnippet.db";
+
+	public DbSet<CodeSnippetEntity> CodeSnippets { get; set; }
+
+	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+	{
+		var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+		var dbFile = Path.Combine(baseDir, _dbFilename);
+		optionsBuilder.UseSqlite($"DataSource={dbFile};")
+			.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+	}
+
+	protected override void OnModelCreating(ModelBuilder modelBuilder)
+	{
+		modelBuilder.Entity<CodeSnippetEntity>(entity =>
+		{
+			entity.HasKey(e => new { e.Id });
+		});
+		//modelBuilder.Entity<TransEntity>()
+		//	.Property(e => e.Balance)
+		//	.HasConversion<double>();
+	}
+}

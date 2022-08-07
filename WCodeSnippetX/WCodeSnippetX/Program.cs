@@ -1,3 +1,6 @@
+using Microsoft.Extensions.DependencyInjection;
+using WCodeSnippetX.Models.Repos;
+
 namespace WCodeSnippetX
 {
 	internal static class Program
@@ -8,10 +11,25 @@ namespace WCodeSnippetX
 		[STAThread]
 		static void Main()
 		{
-			// To customize application configuration such as set high DPI settings or default font,
-			// see https://aka.ms/applicationconfiguration.
+			//Application.SetHighDpiMode(HighDpiMode.SystemAware);
+			//Application.EnableVisualStyles();
+			//Application.SetCompatibleTextRenderingDefault(false);
+
+			var services = new ServiceCollection();
+			ConfigureServices(services);
 			ApplicationConfiguration.Initialize();
-			Application.Run(new FormMain());
+			using var serviceProvider = services.BuildServiceProvider();
+			var form = serviceProvider.GetRequiredService<FormMain>();
+			Application.Run(form);
+
+			//ApplicationConfiguration.Initialize();
+			//Application.Run(new FormMain());
+		}
+
+		static void ConfigureServices(ServiceCollection services)
+		{
+			services.AddScoped<FormMain>();
+			services.AddDbContext<CodeSnippetDbContext>();
 		}
 	}
 }

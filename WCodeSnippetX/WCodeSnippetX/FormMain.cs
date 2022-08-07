@@ -8,8 +8,8 @@ namespace WCodeSnippetX
 {
 	public partial class FormMain : Form
 	{
-		readonly List<CodeSnippet> _table = new();
-		List<CodeSnippet> _result = Enumerable.Empty<CodeSnippet>().ToList();
+		readonly List<CodeSnippetEntity> _table = new();
+		List<CodeSnippetEntity> _result = Enumerable.Empty<CodeSnippetEntity>().ToList();
 		readonly BindingSource _bindingSource = new();
 		readonly DataGridView _dataGridView = new();
 		private int _selectedRow = 0;
@@ -72,9 +72,9 @@ namespace WCodeSnippetX
 
 		void Init()
 		{
-			_table.Add(new CodeSnippet { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
-			_table.Add(new CodeSnippet { Id = 2, Content = "Sample htextbox for bold substring in C#" });
-			_table.Add(new CodeSnippet { Id = 3, Content = "public class { \r\n public string Name; }" });
+			_table.Add(new CodeSnippetEntity { Id = 1, Content = "Datagridview and richtextbox for bold substring in C#" });
+			_table.Add(new CodeSnippetEntity { Id = 2, Content = "Sample htextbox for bold substring in C#" });
+			_table.Add(new CodeSnippetEntity { Id = 3, Content = "public class { \r\n public string Name; }" });
 			_result = _table;
 
 			_bindingSource.DataSource = _result;
