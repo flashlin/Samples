@@ -9,7 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Models\Repos\" />
     <Folder Include="ViewModels\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.7" />
   </ItemGroup>
 
 </Project>
