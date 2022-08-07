@@ -51,5 +51,20 @@ namespace WCodeSnippetX.ViewComponents
 			SaveValue();
 			Hide();
 		}
+
+		private void buttonDelete_Click(object sender, EventArgs e)
+		{
+			var dialogResult = MessageBox.Show("Delete sure", "Delete", MessageBoxButtons.YesNo);
+			if (dialogResult != DialogResult.Yes)
+			{
+				return;
+			}
+			if (_codeSnippet.Id == 0)
+			{
+				return;
+			}
+			_repo.DeleteCode(_codeSnippet);
+			Hide();
+		}
 	}
 }
