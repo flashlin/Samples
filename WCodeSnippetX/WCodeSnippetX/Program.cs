@@ -29,8 +29,8 @@ namespace WCodeSnippetX
 
 			using var serviceProvider = services.BuildServiceProvider();
 			ConfigureApp(serviceProvider);
-			//Application.Run(serviceProvider.GetRequiredService<FormMain>());
-			Application.Run(serviceProvider.GetRequiredService<FormMainCef>());
+			Application.Run(serviceProvider.GetRequiredService<FormMain>());
+			//Application.Run(serviceProvider.GetRequiredService<FormMainCef>());
 
 			//ApplicationConfiguration.Initialize();
 			//Application.Run(new FormMain());
