@@ -6,7 +6,18 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Views\index.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Views\index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Models\Repos\" />
@@ -14,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CefSharp.WinForms.NETCore" Version="103.0.120" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="6.0.7" />

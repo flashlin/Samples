@@ -1,3 +1,5 @@
+using CefSharp;
+using CefSharp.WinForms;
 using Microsoft.Extensions.DependencyInjection;
 using WCodeSnippetX.Models;
 using WCodeSnippetX.Models.Repos;
@@ -20,18 +22,25 @@ namespace WCodeSnippetX
 			var services = new ServiceCollection();
 			ConfigureServices(services);
 			ApplicationConfiguration.Initialize();
+
+			var settings = new CefSettings();
+			Cef.Initialize(settings, false, browserProcessHandler: null);
+
 			using var serviceProvider = services.BuildServiceProvider();
 			ConfigureApp(serviceProvider);
-			var form = serviceProvider.GetRequiredService<FormMain>();
-			Application.Run(form);
+			//Application.Run(serviceProvider.GetRequiredService<FormMain>());
+			Application.Run(serviceProvider.GetRequiredService<FormMainCef>());
 
 			//ApplicationConfiguration.Initialize();
 			//Application.Run(new FormMain());
+
+			Cef.Shutdown();
 		}
 
 		static void ConfigureServices(ServiceCollection services)
 		{
 			services.AddScoped<FormMain>();
+			services.AddScoped<FormMainCef>();
 			services.AddScoped<FormEditCode>();
 			services.AddDbContext<CodeSnippetDbContext>();
 			services.AddTransient<ICodeSnippetRepo, CodeSnippetRepo>();
