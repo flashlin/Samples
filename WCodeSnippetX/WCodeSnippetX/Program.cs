@@ -19,6 +19,7 @@ namespace WCodeSnippetX
 			ConfigureServices(services);
 			ApplicationConfiguration.Initialize();
 			using var serviceProvider = services.BuildServiceProvider();
+			ConfigureApp(serviceProvider);
 			var form = serviceProvider.GetRequiredService<FormMain>();
 			Application.Run(form);
 
@@ -30,6 +31,13 @@ namespace WCodeSnippetX
 		{
 			services.AddScoped<FormMain>();
 			services.AddDbContext<CodeSnippetDbContext>();
+		}
+
+		static void ConfigureApp(IServiceProvider serviceProvider)
+		{
+			using var serviceScope = serviceProvider.GetService<IServiceScopeFactory>()!.CreateScope();
+			var context = serviceScope.ServiceProvider.GetRequiredService<CodeSnippetDbContext>();
+			context.Database.EnsureCreated();
 		}
 	}
 }

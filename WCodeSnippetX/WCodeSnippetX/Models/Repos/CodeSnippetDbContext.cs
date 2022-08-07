@@ -4,14 +4,14 @@ namespace WCodeSnippetX.Models.Repos;
 
 public class CodeSnippetDbContext : DbContext
 {
-	private readonly string _dbFilename = "codeSnippet.db";
+	public static readonly string DbFilename = "codeSnippet.db";
 
 	public DbSet<CodeSnippetEntity> CodeSnippets { get; set; }
 
 	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 	{
 		var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-		var dbFile = Path.Combine(baseDir, _dbFilename);
+		var dbFile = Path.Combine(baseDir, DbFilename);
 		optionsBuilder.UseSqlite($"DataSource={dbFile};")
 			.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 	}
