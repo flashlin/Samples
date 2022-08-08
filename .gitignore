@@ -13,3 +13,4 @@ dist/
 *.log
 package-lock.json
 *.DotSettings
+GPUCache/
