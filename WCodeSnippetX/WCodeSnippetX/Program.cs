@@ -40,6 +40,7 @@ namespace WCodeSnippetX
 			Host.CreateDefaultBuilder()
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
+					webBuilder.UseUrls("http://*:8880");
 					webBuilder.UseStartup<Startup>();
 				});
 

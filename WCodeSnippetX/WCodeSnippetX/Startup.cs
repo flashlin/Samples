@@ -20,7 +20,8 @@ namespace WCodeSnippetX
 
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllers();
+			services.AddControllersWithViews();
+			//services.AddControllers();
 			services.AddScoped<FormMain>();
 			services.AddScoped<FormMainCef>();
 			services.AddScoped<FormEditCode>();
@@ -31,6 +32,7 @@ namespace WCodeSnippetX
 		public void Configure(IApplicationBuilder app)
 		{
 			app.UseRouting();
+
 
 			app.UseEndpoints(endpoints =>
 			{
