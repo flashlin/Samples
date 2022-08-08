@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using WCodeSnippetX.Models;
+using WCodeSnippetX.Models.Repos;
+using WCodeSnippetX.ViewComponents;
+
+namespace WCodeSnippetX
+{
+	public class Startup
+	{
+		public Startup(IConfiguration configuration)
+		{
+			Configuration = configuration;
+		}
+
+		public IConfiguration Configuration { get; }
+
+		public void ConfigureServices(IServiceCollection services)
+		{
+			services.AddControllers();
+			services.AddScoped<FormMain>();
+			services.AddScoped<FormMainCef>();
+			services.AddScoped<FormEditCode>();
+			services.AddDbContext<CodeSnippetDbContext>();
+			services.AddTransient<ICodeSnippetRepo, CodeSnippetRepo>();
+		}
+
+		public void Configure(IApplicationBuilder app)
+		{
+			app.UseRouting();
+
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllers();
+			});
+		}
+	}
+}

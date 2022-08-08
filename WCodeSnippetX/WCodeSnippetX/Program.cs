@@ -18,16 +18,17 @@ namespace WCodeSnippetX
 		[STAThread]
 		static void Main()
 		{
-			var services = new ServiceCollection();
-			ConfigureServices(services);
-			ApplicationConfiguration.Initialize();
+			var host = CreateHostBuilder()
+				.Build();
 
+			ApplicationConfiguration.Initialize();
 			InitializeCefSharp();
 
-			using var serviceProvider = services.BuildServiceProvider();
+			var serviceProvider = host.Services;
 			ConfigureApp(serviceProvider);
-			Application.Run(serviceProvider.GetRequiredService<FormMain>());
-			//Application.Run(serviceProvider.GetRequiredService<FormMainCef>());
+			host.RunAsync();
+			//Application.Run(serviceProvider.GetRequiredService<FormMain>());
+			Application.Run(serviceProvider.GetRequiredService<FormMainCef>());
 
 			//ApplicationConfiguration.Initialize();
 			//Application.Run(new FormMain());
@@ -35,14 +36,12 @@ namespace WCodeSnippetX
 			Cef.Shutdown();
 		}
 
-		static void ConfigureServices(ServiceCollection services)
-		{
-			services.AddScoped<FormMain>();
-			services.AddScoped<FormMainCef>();
-			services.AddScoped<FormEditCode>();
-			services.AddDbContext<CodeSnippetDbContext>();
-			services.AddTransient<ICodeSnippetRepo, CodeSnippetRepo>();
-		}
+		public static IHostBuilder CreateHostBuilder() =>
+			Host.CreateDefaultBuilder()
+				.ConfigureWebHostDefaults(webBuilder =>
+				{
+					webBuilder.UseStartup<Startup>();
+				});
 
 		static void ConfigureApp(IServiceProvider serviceProvider)
 		{
