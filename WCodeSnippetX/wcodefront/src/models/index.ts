@@ -8,9 +8,13 @@ export class CodeSnippet {
    description: string = '';
 }
 
-export class CodeSnippetService {
-   query(text: string): CodeSnippet[] {
-      return [
+export interface ICodeSnippetService {
+   queryAsync(text: string): Promise<CodeSnippet[]>;
+}
+
+export class CodeSnippetService implements ICodeSnippetService {
+   queryAsync(text: string): Promise<CodeSnippet[]> {
+      return Promise.resolve([
          new CodeSnippet({
             id: 1,
             programLanguage: 'cs',
@@ -29,6 +33,10 @@ export class CodeSnippetService {
             content: 'public class cccc { }',
             description: 'This is a sample123 class'
          }),
-      ];
+      ]);
    }
+}
+
+export function useCodeSnippetService() {
+   return new CodeSnippetService();
 }

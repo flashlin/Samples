@@ -3,6 +3,8 @@ using System.Runtime.CompilerServices;
 using CefSharp;
 using CefSharp.SchemeHandler;
 using CefSharp.WinForms;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.DependencyInjection;
 using WCodeSnippetX.Models;
 using WCodeSnippetX.Models.Repos;
@@ -27,8 +29,17 @@ namespace WCodeSnippetX
 			var serviceProvider = host.Services;
 			ConfigureApp(serviceProvider);
 			host.RunAsync();
+
+			//var server = host.Services.GetService<IServer>()!;
+			//var addressFeature = server.Features.Get<IServerAddressesFeature>();
+			//var address = addressFeature.Addresses.First();
+			//var idx = address.LastIndexOf(":");
+			//var port = address.Substring(idx+1);
+
+
 			//Application.Run(serviceProvider.GetRequiredService<FormMain>());
 			Application.Run(serviceProvider.GetRequiredService<FormMainCef>());
+			host.RunAsync();
 
 			//ApplicationConfiguration.Initialize();
 			//Application.Run(new FormMain());

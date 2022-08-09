@@ -7,14 +7,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CefSharp.Internals;
 using CefSharp.WinForms;
+using WCodeSnippetX.Models;
 
 namespace WCodeSnippetX
 {
 	public partial class FormMainCef : Form
 	{
-		public FormMainCef()
+		private IBoundObject _boundObject;
+
+		public FormMainCef(IBoundObject boundObject)
 		{
+			_boundObject = boundObject;
 			InitializeComponent();
 			Initialize();
 		}
@@ -27,6 +32,16 @@ namespace WCodeSnippetX
 			{
 				Dock = DockStyle.Fill
 			};
+			browser.JavascriptObjectRepository.Settings.LegacyBindingEnabled = true;
+			browser.JavascriptObjectRepository.Register("__backend", _boundObject);
+			//browser.JavascriptObjectRepository.ResolveObject += (s, e) =>
+			//{
+			//	if (e.ObjectName == JavascriptObjectRepository.LegacyObjects)
+			//	{
+			//		e.ObjectRepository.Register("__backend", obj);
+			//	}
+			//};
+
 			this.Controls.Add(browser);
 		}
 	}
