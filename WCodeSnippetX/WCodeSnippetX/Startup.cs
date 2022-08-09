@@ -23,10 +23,11 @@ namespace WCodeSnippetX
 			services.AddControllersWithViews();
 			//services.AddControllers();
 			services.AddScoped<FormMain>();
-			services.AddScoped<FormMainCef>();
+			services.AddSingleton<FormMainCef>();
 			services.AddScoped<FormEditCode>();
 			services.AddDbContext<CodeSnippetDbContext>();
 			services.AddTransient<ICodeSnippetRepo, CodeSnippetRepo>();
+			services.AddSingleton<IBoundObject, BoundObject>();
 		}
 
 		public void Configure(IApplicationBuilder app)
