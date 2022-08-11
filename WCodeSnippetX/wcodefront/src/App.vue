@@ -1,21 +1,35 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import { reactive } from 'vue';
+import { reactive, ref } from 'vue';
 import { CodeSnippet, useCodeSnippetService } from './models';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import ColumnGroup from 'primevue/columngroup'; 
-import Row from 'primevue/row';
+//import ColumnGroup from 'primevue/columngroup'; 
+//import Row from 'primevue/row';
 
-await CefSharp.BindObjectAsync("__backend");
-let port = await window.__backend.getPort();
-alert("port" + port);
+//let port = await window.__backend.getPort();
 
 
 let codeSnippetList = reactive<CodeSnippet[]>([]);
-let app = useCodeSnippetService();
-codeSnippetList = await app.queryAsync('');
+//let app = useCodeSnippetService();
+//codeSnippetList = await app.queryAsync('');
+
+async function loadData() {
+  await CefSharp.BindObjectAsync("__backend");
+  let resp = await window.__backend.queryCode('');
+  let list: CodeSnippet[] = JSON.parse(resp);
+  for(let item of list) {
+    codeSnippetList.push(item);
+    codeSnippetList.push({
+      content: "test",
+      programLanguage: "vue",
+      description: "test",
+      id: 123
+    });
+    //alert(JSON.stringify(item));
+  }
+}
+
+loadData();
 
 </script>
 

@@ -65,7 +65,10 @@ namespace WCodeSnippetX
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void InitializeCefSharp()
 		{
-			var settings = new CefSettings();
+			var settings = new CefSettings()
+			{
+				RemoteDebuggingPort = 8888
+			};
 			var baseDir = AppDomain.CurrentDomain.BaseDirectory;
 
 			settings.RegisterScheme(new CefCustomScheme

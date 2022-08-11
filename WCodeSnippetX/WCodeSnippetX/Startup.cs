@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using T1.Standard.Serialization;
 using WCodeSnippetX.Models;
 using WCodeSnippetX.Models.Repos;
 using WCodeSnippetX.ViewComponents;
@@ -27,7 +28,9 @@ namespace WCodeSnippetX
 			services.AddScoped<FormEditCode>();
 			services.AddDbContext<CodeSnippetDbContext>();
 			services.AddTransient<ICodeSnippetRepo, CodeSnippetRepo>();
-			services.AddSingleton<IBoundObject, BoundObject>();
+			services.AddTransient<ICodeSnippetService, CodeSnippetService>();
+			services.AddTransient<IBoundObject, BoundObject>();
+			services.AddTransient<IJsonSerializer, MyJsonSerializer>();
 		}
 
 		public void Configure(IApplicationBuilder app)
