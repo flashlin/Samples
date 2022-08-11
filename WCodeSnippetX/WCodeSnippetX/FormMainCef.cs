@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CefSharp;
 using CefSharp.Internals;
 using CefSharp.WinForms;
 using WCodeSnippetX.Models;
@@ -20,6 +21,7 @@ namespace WCodeSnippetX
 		public FormMainCef(IBoundObject boundObject)
 		{
 			_boundObject = boundObject;
+			this.Text = "Code Snippet";
 			InitializeComponent();
 			Initialize();
 		}
@@ -43,6 +45,16 @@ namespace WCodeSnippetX
 			//};
 
 			this.Controls.Add(browser);
+			browser.IsBrowserInitializedChanged += BrowserOnIsBrowserInitializedChanged;
+		}
+
+		private void BrowserOnIsBrowserInitializedChanged(object? sender, EventArgs e)
+		{
+			var browser = (ChromiumWebBrowser)sender!;
+			if (browser.IsBrowserInitialized)
+			{
+				browser.ShowDevTools();
+			}
 		}
 	}
 }

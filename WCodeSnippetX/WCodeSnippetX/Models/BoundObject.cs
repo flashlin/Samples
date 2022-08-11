@@ -1,14 +1,22 @@
-﻿using Microsoft.AspNetCore.Hosting.Server;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
+using T1.Standard.Serialization;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace WCodeSnippetX.Models;
 
 public class BoundObject : IBoundObject
 {
-	int _port;
+	readonly int _port;
+	private readonly IServiceProvider _serviceProvider;
+	private IJsonSerializer _jsonSerializer;
 
-	public BoundObject(IServer server)
+	public BoundObject(IServer server, IServiceProvider serviceProvider,
+		IJsonSerializer jsonSerializer)
 	{
+		_serviceProvider = serviceProvider.CreateScope().ServiceProvider;
+		_jsonSerializer = jsonSerializer;
 		var addressFeature = server.Features.Get<IServerAddressesFeature>()!;
 		var address = addressFeature.Addresses.First();
 		var idx = address.LastIndexOf(":");
@@ -18,5 +26,49 @@ public class BoundObject : IBoundObject
 	public int GetPort()
 	{
 		return _port;
+	}
+
+	public string QueryCode(string text)
+	{
+		var repo = _serviceProvider.GetService<ICodeSnippetRepo>()!;
+		return _jsonSerializer.Serialize(repo.QueryCode(text).ToList());
+	}
+}
+
+public class MyJsonSerializer : IJsonSerializer
+{
+	private readonly JsonSerializerOptions _options;
+
+	public MyJsonSerializer()
+	{
+		_options = new JsonSerializerOptions()
+		{
+			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+		};
+	}
+
+	public T Deserialize<T>(string json)
+	{
+		return JsonSerializer.Deserialize<T>(json, _options)!;
+	}
+
+	public object DeserializeObject(Type type, string json)
+	{
+		throw new NotImplementedException();
+	}
+
+	public object DeserializeTypedObject(string json)
+	{
+		throw new NotImplementedException();
+	}
+
+	public string Serialize<T>(T obj)
+	{
+		return JsonSerializer.Serialize(obj, _options);
+	}
+
+	public string SerializeWithType(object obj)
+	{
+		throw new NotImplementedException();
 	}
 }
