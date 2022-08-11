@@ -11,16 +11,23 @@ public class BoundObject : IBoundObject
 	readonly int _port;
 	private readonly IServiceProvider _serviceProvider;
 	private IJsonSerializer _jsonSerializer;
+	private readonly ICodeSnippetRepo _repo;
 
-	public BoundObject(IServer server, IServiceProvider serviceProvider,
-		IJsonSerializer jsonSerializer)
+	//public BoundObject(IServer server, IServiceProvider serviceProvider,
+	//	IJsonSerializer jsonSerializer)
+	//{
+	//	_serviceProvider = serviceProvider.CreateScope().ServiceProvider;
+	//	_jsonSerializer = jsonSerializer;
+	//	var addressFeature = server.Features.Get<IServerAddressesFeature>()!;
+	//	var address = addressFeature.Addresses.First();
+	//	var idx = address.LastIndexOf(":");
+	//	_port = int.Parse(address.Substring(idx+1));
+	//}
+
+	public BoundObject(ICodeSnippetRepo repo, IJsonSerializer jsonSerializer)
 	{
-		_serviceProvider = serviceProvider.CreateScope().ServiceProvider;
+		_repo = repo;
 		_jsonSerializer = jsonSerializer;
-		var addressFeature = server.Features.Get<IServerAddressesFeature>()!;
-		var address = addressFeature.Addresses.First();
-		var idx = address.LastIndexOf(":");
-		_port = int.Parse(address.Substring(idx+1));
 	}
 
 	public int GetPort()
@@ -30,8 +37,7 @@ public class BoundObject : IBoundObject
 
 	public string QueryCode(string text)
 	{
-		var repo = _serviceProvider.GetService<ICodeSnippetRepo>()!;
-		return _jsonSerializer.Serialize(repo.QueryCode(text).ToList());
+		return _jsonSerializer.Serialize(_repo.QueryCode(text).ToList());
 	}
 }
 
