@@ -20,15 +20,25 @@ namespace WCodeSnippetX
 		[STAThread]
 		static void Main()
 		{
-			var host = CreateHostBuilder()
-				.Build();
+			//create dotnet self-host
+			//var host = CreateHostBuilder()
+			//	.Build();
+			//var serviceProvider = host.Services;
 
+			var configurationBuilder = new ConfigurationBuilder();
+			configurationBuilder.SetBasePath(Directory.GetCurrentDirectory());
+			var configuration = configurationBuilder.Build();
+			var startup = new Startup(configuration);
+			var services = new ServiceCollection();
+			startup.ConfigureServices(services);
+
+
+			//host.RunAsync();
 			ApplicationConfiguration.Initialize();
 			InitializeCefSharp();
 
-			var serviceProvider = host.Services;
+			using var serviceProvider = services.BuildServiceProvider();
 			ConfigureApp(serviceProvider);
-			host.RunAsync();
 
 			//var server = host.Services.GetService<IServer>()!;
 			//var addressFeature = server.Features.Get<IServerAddressesFeature>();
@@ -39,7 +49,6 @@ namespace WCodeSnippetX
 
 			//Application.Run(serviceProvider.GetRequiredService<FormMain>());
 			Application.Run(serviceProvider.GetRequiredService<FormMainCef>());
-			host.RunAsync();
 
 			//ApplicationConfiguration.Initialize();
 			//Application.Run(new FormMain());

@@ -11,6 +11,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="GPUCache\**" />
+    <Content Remove="GPUCache\**" />
+    <EmbeddedResource Remove="GPUCache\**" />
+    <None Remove="GPUCache\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Models\Repos\" />
     <Folder Include="ViewModels\" />
   </ItemGroup>
