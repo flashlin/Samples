@@ -1,4 +1,7 @@
 export class CodeSnippet {
+   static Empty = new CodeSnippet({
+      id: 0,   
+   });
    constructor(data?: Partial<CodeSnippet>) {
       Object.assign(this, data);
    }
