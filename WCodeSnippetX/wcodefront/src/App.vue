@@ -36,7 +36,7 @@ function rowClass(item: CodeSnippet) {
 }
 
 function selectDown(event: KeyboardEvent) {
-  if( event.key == 'ArrowDown' ) {
+  if( event.key == 'ArrowDown' && data.selectedIndex < codeSnippetList.length - 1) {
     data.selectedRow = codeSnippetList[data.selectedIndex + 1];
     data.selectedIndex++;
     return;
@@ -45,6 +45,7 @@ function selectDown(event: KeyboardEvent) {
   if( event.key == 'ArrowUp' && data.selectedIndex > 0) {
     data.selectedRow = codeSnippetList[data.selectedIndex - 1];
     data.selectedIndex--;
+    return;
   }
 }
 
