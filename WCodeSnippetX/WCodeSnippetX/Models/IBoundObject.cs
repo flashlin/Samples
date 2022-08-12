@@ -2,5 +2,5 @@
 
 public interface IBoundObject
 {
-	int GetPort();
+	string QueryCode(string text);
 }

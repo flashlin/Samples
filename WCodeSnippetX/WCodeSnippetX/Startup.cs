@@ -36,12 +36,17 @@ namespace WCodeSnippetX
 		public void Configure(IApplicationBuilder app)
 		{
 			app.UseRouting();
-
-
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
 			});
+		}
+
+		public void ConfigureApp(IServiceProvider serviceProvider)
+		{
+			using var serviceScope = serviceProvider.GetService<IServiceScopeFactory>()!.CreateScope();
+			var context = serviceScope.ServiceProvider.GetRequiredService<CodeSnippetDbContext>();
+			context.Database.EnsureCreated();
 		}
 	}
 }

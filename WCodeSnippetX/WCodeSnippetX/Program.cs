@@ -32,20 +32,18 @@ namespace WCodeSnippetX
 			var services = new ServiceCollection();
 			startup.ConfigureServices(services);
 
-
 			//host.RunAsync();
 			ApplicationConfiguration.Initialize();
 			InitializeCefSharp();
 
 			using var serviceProvider = services.BuildServiceProvider();
-			ConfigureApp(serviceProvider);
+			startup.ConfigureApp(serviceProvider);
 
 			//var server = host.Services.GetService<IServer>()!;
 			//var addressFeature = server.Features.Get<IServerAddressesFeature>();
 			//var address = addressFeature.Addresses.First();
 			//var idx = address.LastIndexOf(":");
 			//var port = address.Substring(idx+1);
-
 
 			//Application.Run(serviceProvider.GetRequiredService<FormMain>());
 			Application.Run(serviceProvider.GetRequiredService<FormMainCef>());
@@ -63,13 +61,6 @@ namespace WCodeSnippetX
 					webBuilder.UseUrls("http://*:8880");
 					webBuilder.UseStartup<Startup>();
 				});
-
-		static void ConfigureApp(IServiceProvider serviceProvider)
-		{
-			using var serviceScope = serviceProvider.GetService<IServiceScopeFactory>()!.CreateScope();
-			var context = serviceScope.ServiceProvider.GetRequiredService<CodeSnippetDbContext>();
-			context.Database.EnsureCreated();
-		}
 
 		[MethodImpl(MethodImplOptions.NoInlining)]
 		private static void InitializeCefSharp()

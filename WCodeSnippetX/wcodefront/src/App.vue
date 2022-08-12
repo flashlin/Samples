@@ -8,24 +8,13 @@ import Column from 'primevue/column';
 
 //let port = await window.__backend.getPort();
 
-
 let codeSnippetList = reactive<CodeSnippet[]>([]);
-//let app = useCodeSnippetService();
-//codeSnippetList = await app.queryAsync('');
 
 async function loadData() {
-  await CefSharp.BindObjectAsync("__backend");
-  let resp = await window.__backend.queryCode('');
-  let list: CodeSnippet[] = JSON.parse(resp);
-  for(let item of list) {
+  let app = useCodeSnippetService();
+  let data: CodeSnippet[] = await app.queryAsync('');
+  for(let item of data) {
     codeSnippetList.push(item);
-    codeSnippetList.push({
-      content: "test",
-      programLanguage: "vue",
-      description: "test",
-      id: 123
-    });
-    //alert(JSON.stringify(item));
   }
 }
 
@@ -34,7 +23,9 @@ loadData();
 </script>
 
 <template>
-  <DataTable :value="codeSnippetList" responsiveLayout="scroll">
+  <DataTable :value="codeSnippetList" 
+    hoverable="true"
+    responsiveLayout="scroll">
     <Column field="id" header="id"></Column>
     <Column field="content" header="Content"></Column>
     <Column field="description" header="Description"></Column>
@@ -50,4 +41,10 @@ loadData();
   color: #2c3e50;
   margin-top: 60px;
 }
+
+
+.ui-datatable tr.ui-datatable-even:hover, .ui-datatable tr.ui-datatable-odd:hover {
+    background: #78BCFF;
+}
+
 </style>
