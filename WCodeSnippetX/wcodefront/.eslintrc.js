@@ -1,5 +1,3 @@
-/** @format */
-
 module.exports = {
   parser: 'vue-eslint-parser',
   parserOptions: {
@@ -17,7 +15,6 @@ module.exports = {
     node: true,
   },
   rules: {
-    //'@typescript-eslint/rule-name': 'error',
     '@typescript-eslint/no-unused-vars': ['error'],
   },
 };
