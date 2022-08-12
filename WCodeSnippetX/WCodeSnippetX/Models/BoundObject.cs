@@ -8,10 +8,10 @@ namespace WCodeSnippetX.Models;
 
 public class BoundObject : IBoundObject
 {
-	readonly int _port;
-	private readonly IServiceProvider _serviceProvider;
-	private IJsonSerializer _jsonSerializer;
+	//private readonly IServiceProvider _serviceProvider;
+	private readonly IJsonSerializer _jsonSerializer;
 	private readonly ICodeSnippetRepo _repo;
+	//readonly int _port;
 
 	//public BoundObject(IServer server, IServiceProvider serviceProvider,
 	//	IJsonSerializer jsonSerializer)
@@ -30,10 +30,10 @@ public class BoundObject : IBoundObject
 		_jsonSerializer = jsonSerializer;
 	}
 
-	public int GetPort()
-	{
-		return _port;
-	}
+	//public int GetPort()
+	//{
+	//	return _port;
+	//}
 
 	public string QueryCode(string text)
 	{

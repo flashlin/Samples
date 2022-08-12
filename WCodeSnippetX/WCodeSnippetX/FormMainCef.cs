@@ -21,7 +21,6 @@ namespace WCodeSnippetX
 		public FormMainCef(IBoundObject boundObject)
 		{
 			_boundObject = boundObject;
-			this.Text = "Code Snippet";
 			InitializeComponent();
 			Initialize();
 		}
@@ -45,14 +44,17 @@ namespace WCodeSnippetX
 			//};
 
 			this.Controls.Add(browser);
-			browser.IsBrowserInitializedChanged += BrowserOnIsBrowserInitializedChanged;
+			//browser.IsBrowserInitializedChanged += BrowserOnIsBrowserInitializedChanged;
 		}
+
+		bool _isOpened = false;
 
 		private void BrowserOnIsBrowserInitializedChanged(object? sender, EventArgs e)
 		{
 			var browser = (ChromiumWebBrowser)sender!;
-			if (browser.IsBrowserInitialized)
+			if (browser.IsBrowserInitialized && !_isOpened)
 			{
+				_isOpened = true;
 				browser.ShowDevTools();
 			}
 		}
