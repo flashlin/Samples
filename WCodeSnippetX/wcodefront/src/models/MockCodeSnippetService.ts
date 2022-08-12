@@ -1,10 +1,16 @@
 /** @format */
 
-import {ICodeSnippetService, CodeSnippet} from './types';
+import { ICodeSnippetService, CodeSnippet} from './types';
 
 export class MockCodeSnippetService implements ICodeSnippetService {
+  setClipboardAsync(text: string): Promise<void> {
+    return new Promise(resolve => {
+      navigator.clipboard.writeText(text);
+      resolve();
+    });
+  }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  queryAsync(text: string): Promise<CodeSnippet[]> {
+  queryCodeAsync(text: string): Promise<CodeSnippet[]> {
     return Promise.resolve([
       new CodeSnippet({
         id: 1,

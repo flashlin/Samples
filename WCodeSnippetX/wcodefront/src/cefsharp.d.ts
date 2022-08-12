@@ -1,9 +1,10 @@
-declare interface ICodeSnippetService {
-  queryCode(text: string): Promise<string>;
+declare interface IBoundObject {
+  queryCodeAsync(text: string): Promise<string>;
+  setClipboardAsync(text: string): Promise<void>;
 }
 
 declare interface Window {
-  __backend: ICodeSnippetService;
+  __backend: IBoundObject;
 }
 
 declare let CefSharp: any;
