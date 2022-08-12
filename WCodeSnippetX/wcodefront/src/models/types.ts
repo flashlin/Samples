@@ -14,3 +14,11 @@ export class CodeSnippet {
 export interface ICodeSnippetService {
    queryAsync(text: string): Promise<CodeSnippet[]>;
 }
+
+export interface IAppState {
+   selectedIndex: number;
+   selectedItem: CodeSnippet;
+   searchText: string;
+   codeSnippetList: CodeSnippet[];
+   filterCodes: CodeSnippet[];
+}
