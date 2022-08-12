@@ -14,9 +14,10 @@ const data = reactive<IAppState>({
   filterCodes: [],
 });
 
+const codeSnippetService = useCodeSnippetService();
+
 async function loadData() {
-  let app = useCodeSnippetService();
-  let list: CodeSnippet[] = await app.queryAsync(data.searchText);
+  let list: CodeSnippet[] = await codeSnippetService.queryCodeAsync(data.searchText);
   for (let item of list) {
     data.codeSnippetList.push(item);
   }
@@ -52,6 +53,7 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 
   if(event.key == 'Enter') {
+    codeSnippetService.setClipboardAsync(data.selectedItem.content);
     return;
   }
 }
