@@ -1,9 +1,9 @@
 declare interface ICodeSnippetService {
-   queryCode(text: string): Promise<string>;
+  queryCode(text: string): Promise<string>;
 }
 
 declare interface Window {
-   __backend: ICodeSnippetService;
+  __backend: ICodeSnippetService;
 }
 
-declare var CefSharp: any;
+declare let CefSharp: any;

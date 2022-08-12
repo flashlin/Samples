@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
-import { CodeSnippet, useCodeSnippetService } from './models';
+import {reactive} from 'vue';
+import {CodeSnippet, useCodeSnippetService} from './models';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
-import { it } from 'node:test';
-//import ColumnGroup from 'primevue/columngroup'; 
+//import ColumnGroup from 'primevue/columngroup';
 //import Row from 'primevue/row';
 
 const data = reactive({
@@ -27,7 +26,7 @@ async function loadData() {
 }
 
 function rowClass(item: CodeSnippet) {
-  let css = "";
+  let css = '';
   if (item.id == data.selectedRow.id) {
     css = 'row-selected';
   }
@@ -36,33 +35,30 @@ function rowClass(item: CodeSnippet) {
 }
 
 function selectDown(event: KeyboardEvent) {
-  if( event.key == 'ArrowDown' && data.selectedIndex < codeSnippetList.length - 1) {
+  if (event.key == 'ArrowDown' && data.selectedIndex < codeSnippetList.length - 1) {
     data.selectedRow = codeSnippetList[data.selectedIndex + 1];
     data.selectedIndex++;
     return;
   }
-  
-  if( event.key == 'ArrowUp' && data.selectedIndex > 0) {
+
+  if (event.key == 'ArrowUp' && data.selectedIndex > 0) {
     data.selectedRow = codeSnippetList[data.selectedIndex - 1];
     data.selectedIndex--;
     return;
   }
 }
 
-document.addEventListener("keydown", selectDown)
+document.addEventListener('keydown', selectDown);
 
 loadData();
-
 </script>
 
 <template>
-  <div v-on:keydown.down="selectRow()">
-    <DataTable :value="codeSnippetList" :rowClass="rowClass" responsiveLayout="scroll">
-      <Column field="id" header="id"></Column>
-      <Column field="content" header="Content"></Column>
-      <Column field="description" header="Description"></Column>
-    </DataTable>
-  </div>
+  <DataTable :value="codeSnippetList" :row-class="rowClass" responsive-layout="scroll">
+    <Column field="id" header="id"></Column>
+    <Column field="content" header="Content"></Column>
+    <Column field="description" header="Description"></Column>
+  </DataTable>
 </template>
 
 <style scoped lang="scss">
