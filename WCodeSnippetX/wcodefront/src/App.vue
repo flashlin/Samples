@@ -5,6 +5,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 //import ColumnGroup from 'primevue/columngroup';
 //import Row from 'primevue/row';
+import InputText from 'primevue/inputtext';
 
 const data = reactive<IAppState>({
   selectedIndex: -1,
@@ -16,8 +17,9 @@ const data = reactive<IAppState>({
 
 const codeSnippetService = useCodeSnippetService();
 
-async function loadData() {
+async function queryData() {
   let list: CodeSnippet[] = await codeSnippetService.queryCodeAsync(data.searchText);
+  data.codeSnippetList = [];
   for (let item of list) {
     data.codeSnippetList.push(item);
   }
@@ -33,6 +35,10 @@ function rowClass(item: CodeSnippet) {
     css = 'row-selected';
   }
   return css;
+}
+
+function onSearchChanged() {
+  queryData();
 }
 
 function handleKeyDown(event: KeyboardEvent) {
@@ -60,7 +66,7 @@ function handleKeyDown(event: KeyboardEvent) {
 
 document.addEventListener('keydown', handleKeyDown);
 
-loadData();
+queryData();
 </script>
 
 <template>
@@ -69,6 +75,14 @@ loadData();
     <Column field="content" header="Content"></Column>
     <Column field="description" header="Description"></Column>
   </DataTable>
+  <span class="p-input-icon-left" style="width: 100%;">
+    <i class="pi pi-search" />
+    <InputText type="text" 
+      v-model="data.searchText" 
+      style="width: 100%;"
+      @input="onSearchChanged()"
+      placeholder="Search" />
+  </span>
 </template>
 
 <style scoped lang="scss">

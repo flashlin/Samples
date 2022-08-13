@@ -1,15 +1,13 @@
-﻿using System.Text.Json;
-using Microsoft.AspNetCore.Hosting.Server;
+﻿using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using T1.Standard.Serialization;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace WCodeSnippetX.Models;
 
 public class BoundObject : IBoundObject
 {
-	//private readonly IServiceProvider _serviceProvider;
 	private readonly IJsonSerializer _jsonSerializer;
+
 	private readonly ICodeSnippetRepo _repo;
 	//readonly int _port;
 
@@ -35,46 +33,20 @@ public class BoundObject : IBoundObject
 	//	return _port;
 	//}
 
-	public string QueryCodeAsync(string text)
+	public string QueryCode(string text)
 	{
 		return _jsonSerializer.Serialize(_repo.QueryCode(text).ToList());
 	}
-}
 
-public class MyJsonSerializer : IJsonSerializer
-{
-	private readonly JsonSerializerOptions _options;
+	public FormMainCef Form { get; set; } = null!;
 
-	public MyJsonSerializer()
+	public void Minimize()
 	{
-		_options = new JsonSerializerOptions()
-		{
-			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-		};
+		Form.Minimize();
 	}
 
-	public T Deserialize<T>(string json)
+	public void BringMeToFront()
 	{
-		return JsonSerializer.Deserialize<T>(json, _options)!;
-	}
-
-	public object DeserializeObject(Type type, string json)
-	{
-		throw new NotImplementedException();
-	}
-
-	public object DeserializeTypedObject(string json)
-	{
-		throw new NotImplementedException();
-	}
-
-	public string Serialize<T>(T obj)
-	{
-		return JsonSerializer.Serialize(obj, _options);
-	}
-
-	public string SerializeWithType(object obj)
-	{
-		throw new NotImplementedException();
+		Form.BringMeToFront();
 	}
 }

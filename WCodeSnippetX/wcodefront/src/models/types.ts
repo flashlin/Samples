@@ -14,6 +14,8 @@ export class CodeSnippet {
 export interface ICodeSnippetService {
    queryCodeAsync(text: string): Promise<CodeSnippet[]>;
    setClipboardAsync(text: string): Promise<void>;
+   minimizeAsync(): Promise<void>;
+   bringMeToFrontAsync(): Promise<void>;
 }
 
 export interface IAppState {

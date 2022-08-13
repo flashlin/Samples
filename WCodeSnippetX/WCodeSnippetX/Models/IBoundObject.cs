@@ -2,5 +2,8 @@
 
 public interface IBoundObject
 {
-	string QueryCodeAsync(string text);
+	string QueryCode(string text);
+	FormMainCef Form { get; set; }
+	void Minimize();
+	void BringMeToFront();
 }
