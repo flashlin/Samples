@@ -16,11 +16,12 @@ namespace WCodeSnippetX
 {
 	public partial class FormMainCef : Form
 	{
-		private IBoundObject _boundObject;
+		private readonly IBoundObject _boundObject;
 
 		public FormMainCef(IBoundObject boundObject)
 		{
 			_boundObject = boundObject;
+			_boundObject.Form = this;
 			InitializeComponent();
 			Initialize();
 			this.Activated += FormMainCef_Activated;
@@ -66,6 +67,18 @@ namespace WCodeSnippetX
 				_isOpened = true;
 				browser.ShowDevTools();
 			}
+		}
+
+		public void Minimize()
+		{
+			this.WindowState = FormWindowState.Minimized;
+		}
+
+		public void BringMeToFront()
+		{
+			this.WindowState = FormWindowState.Minimized;
+			this.Show();
+			this.WindowState = FormWindowState.Normal;
 		}
 	}
 }

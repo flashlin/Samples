@@ -3,6 +3,12 @@
 import { ICodeSnippetService, CodeSnippet} from './types';
 
 export class MockCodeSnippetService implements ICodeSnippetService {
+  minimizeAsync(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
+  bringMeToFrontAsync(): Promise<void> {
+    throw new Error('Method not implemented.');
+  }
   setClipboardAsync(text: string): Promise<void> {
     return new Promise(resolve => {
       navigator.clipboard.writeText(text);
@@ -11,7 +17,7 @@ export class MockCodeSnippetService implements ICodeSnippetService {
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   queryCodeAsync(text: string): Promise<CodeSnippet[]> {
-    return Promise.resolve([
+    const allItems = [
       new CodeSnippet({
         id: 1,
         programLanguage: 'cs',
@@ -30,6 +36,8 @@ export class MockCodeSnippetService implements ICodeSnippetService {
         content: 'public class cccc { }',
         description: 'This is a sample123 class',
       }),
-    ]);
+    ];
+    const data = allItems.filter(item => item.content.includes(text));
+    return Promise.resolve(data);
   }
 }
