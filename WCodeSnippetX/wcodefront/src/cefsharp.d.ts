@@ -1,6 +1,6 @@
 declare interface IBoundObject {
   queryCode(text: string): Promise<string>;
-  //setClipboard(text: string): Promise<void>;
+  setClipboard(text: string): Promise<void>;
   minimize(): Promise<void>;
   bringMeToFront(): Promise<void>;
 }

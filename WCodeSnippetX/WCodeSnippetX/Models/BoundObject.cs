@@ -49,4 +49,13 @@ public class BoundObject : IBoundObject
 	{
 		Form.BringMeToFront();
 	}
+
+	public void SetClipboard(string text)
+	{
+		var t = new Thread(() => {
+			Clipboard.SetText(text);
+		});
+		t.SetApartmentState(ApartmentState.STA);
+		t.Start();
+	}
 }

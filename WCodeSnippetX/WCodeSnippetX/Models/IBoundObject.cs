@@ -6,4 +6,5 @@ public interface IBoundObject
 	FormMainCef Form { get; set; }
 	void Minimize();
 	void BringMeToFront();
+	void SetClipboard(string text);
 }
