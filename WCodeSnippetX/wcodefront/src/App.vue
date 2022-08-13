@@ -7,6 +7,9 @@ import Column from 'primevue/column';
 //import Row from 'primevue/row';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import DynamicDialog from 'primevue/dynamicdialog';
+import { useDialog } from 'primevue/usedialog';
+import AddCodeSnippet from './views/AddCodeSnippet.vue';
 
 const data = reactive<IAppState>({
   selectedIndex: -1,
@@ -46,8 +49,9 @@ function onSearchEnter() {
   codeSnippetService.setClipboardAsync(data.selectedItem.content);
 }
 
+const dialog = useDialog();
 function onClickAdd() {
-  console.log('onClickAdd');
+  dialog.open(AddCodeSnippet, {});
 }
 
 function handleKeyDown(event: KeyboardEvent) {
@@ -79,9 +83,10 @@ queryData();
 </script>
 
 <template>
+  <DynamicDialog />
   <Button label="Add" 
     class="p-button p-component p-button-icon-only p-button-rounded"
-    @click="onClickAdd()">
+    @click="onClickAdd">
     <span class="pi pi-plus p-button-icon"></span>
   </Button> 
   <DataTable :value="data.codeSnippetList" :row-class="rowClass" responsive-layout="scroll">
