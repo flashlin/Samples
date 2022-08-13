@@ -8,7 +8,9 @@ import 'primevue/resources/themes/bootstrap4-dark-blue/theme.css';
 import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 
-//createApp(App).mount('#app')
+import DialogService from 'primevue/dialogservice';
+
 const app = createApp(App);
 app.use(PrimeVue);
+app.use(DialogService);
 app.mount('#app');
