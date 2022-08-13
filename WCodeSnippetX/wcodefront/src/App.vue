@@ -6,6 +6,7 @@ import Column from 'primevue/column';
 //import ColumnGroup from 'primevue/columngroup';
 //import Row from 'primevue/row';
 import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
 
 const data = reactive<IAppState>({
   selectedIndex: -1,
@@ -41,6 +42,14 @@ function onSearchChanged() {
   queryData();
 }
 
+function onSearchEnter() {
+  codeSnippetService.setClipboardAsync(data.selectedItem.content);
+}
+
+function onClickAdd() {
+  console.log('onClickAdd');
+}
+
 function handleKeyDown(event: KeyboardEvent) {
   if (event.key == 'ArrowDown' && data.selectedIndex < data.codeSnippetList.length - 1) {
     data.selectedItem = data.codeSnippetList[data.selectedIndex + 1];
@@ -70,6 +79,11 @@ queryData();
 </script>
 
 <template>
+  <Button label="Add" 
+    class="p-button p-component p-button-icon-only p-button-rounded"
+    @click="onClickAdd()">
+    <span class="pi pi-plus p-button-icon"></span>
+  </Button> 
   <DataTable :value="data.codeSnippetList" :row-class="rowClass" responsive-layout="scroll">
     <Column field="id" header="id"></Column>
     <Column field="content" header="Content"></Column>
@@ -81,6 +95,7 @@ queryData();
       v-model="data.searchText" 
       style="width: 100%;"
       @input="onSearchChanged()"
+      @keydown.enter="onSearchEnter()"
       placeholder="Search" />
   </span>
 </template>
