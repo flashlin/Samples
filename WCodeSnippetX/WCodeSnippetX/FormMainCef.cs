@@ -23,6 +23,15 @@ namespace WCodeSnippetX
 			_boundObject = boundObject;
 			InitializeComponent();
 			Initialize();
+			this.Activated += FormMainCef_Activated;
+		}
+
+		private void FormMainCef_Activated(object? sender, EventArgs e)
+		{
+			this.Width = (int)(SystemInformation.VirtualScreen.Width * 0.3);
+			this.Height = (int)(SystemInformation.VirtualScreen.Height * 0.6);
+			this.Left =  SystemInformation.VirtualScreen.Width - this.Width - 30;
+			this.Top = SystemInformation.VirtualScreen.Height - this.Height - 60;
 		}
 
 		private void Initialize()

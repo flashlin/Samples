@@ -2,5 +2,5 @@
 
 public interface IBoundObject
 {
-	string QueryCode(string text);
+	string QueryCodeAsync(string text);
 }

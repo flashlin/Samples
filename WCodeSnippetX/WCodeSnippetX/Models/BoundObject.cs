@@ -35,7 +35,7 @@ public class BoundObject : IBoundObject
 	//	return _port;
 	//}
 
-	public string QueryCode(string text)
+	public string QueryCodeAsync(string text)
 	{
 		return _jsonSerializer.Serialize(_repo.QueryCode(text).ToList());
 	}
