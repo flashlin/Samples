@@ -5,10 +5,7 @@ type BackendFn = (obj: IBoundObject) => Promise<string>;
 
 export class CodeSnippetService implements ICodeSnippetService {
   async setClipboardAsync(text: string): Promise<void> {
-    return new Promise(resolve => {
-      navigator.clipboard.writeText(text);
-      resolve();
-    });
+    return this.Invoke(backend => backend.setClipboard(text));
   }
 
   async queryCodeAsync(text: string): Promise<CodeSnippet[]> {
