@@ -36,7 +36,7 @@ namespace WCodeSnippetX
 			ApplicationConfiguration.Initialize();
 			InitializeCefSharp();
 
-			using var serviceProvider = services.BuildServiceProvider();
+			using var serviceProvider = Build(services);
 			startup.ConfigureApp(serviceProvider);
 
 			//var server = host.Services.GetService<IServer>()!;
@@ -52,6 +52,11 @@ namespace WCodeSnippetX
 			//Application.Run(new FormMain());
 
 			Cef.Shutdown();
+		}
+
+		private static ServiceProvider Build(ServiceCollection services)
+		{
+			return services.BuildServiceProvider();
 		}
 
 		public static IHostBuilder CreateHostBuilder() =>

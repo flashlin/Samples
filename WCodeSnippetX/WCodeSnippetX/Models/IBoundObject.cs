@@ -8,4 +8,5 @@ public interface IBoundObject
 	void BringMeToFront();
 	void SetClipboard(string text);
 	void UpsertCode(string codeSnippetJson);
+	void DeleteCode(int id);
 }
