@@ -33,21 +33,32 @@ public class BoundObject : IBoundObject
 	//	return _port;
 	//}
 
-	public string QueryCode(string text)
-	{
-		return _jsonSerializer.Serialize(_repo.QueryCode(text).ToList());
-	}
-
 	public FormMainCef Form { get; set; } = null!;
+
+	public void BringMeToFront()
+	{
+		Form.BringMeToFront();
+	}
 
 	public void Minimize()
 	{
 		Form.Minimize();
 	}
 
-	public void BringMeToFront()
+	public string QueryCode(string text)
 	{
-		Form.BringMeToFront();
+		return _jsonSerializer.Serialize(_repo.QueryCode(text).ToList());
+	}
+
+	public void UpsertCode(string codeSnippetJson)
+	{
+		var codeSnippet = _jsonSerializer.Deserialize<CodeSnippetEntity>(codeSnippetJson);
+		if (codeSnippet.Id == 0)
+		{
+			_repo.AddCode(codeSnippet);
+			return;
+		}
+		_repo.UpdateCode(codeSnippet);
 	}
 
 	public void SetClipboard(string text)
