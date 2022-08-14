@@ -7,4 +7,5 @@ public interface IBoundObject
 	void Minimize();
 	void BringMeToFront();
 	void SetClipboard(string text);
+	void UpsertCode(string codeSnippetJson);
 }
