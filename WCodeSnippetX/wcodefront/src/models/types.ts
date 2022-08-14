@@ -11,6 +11,7 @@ export class CodeSnippet {
    description: string = '';
 }
 
+
 export interface ICodeSnippetService {
    queryCodeAsync(text: string): Promise<CodeSnippet[]>;
    setClipboardAsync(text: string): Promise<void>;
@@ -24,4 +25,5 @@ export interface IAppState {
    searchText: string;
    codeSnippetList: CodeSnippet[];
    filterCodes: CodeSnippet[];
+   isEditingData: boolean;
 }
