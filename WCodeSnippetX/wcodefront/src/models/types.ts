@@ -19,6 +19,7 @@ export interface ICodeSnippetService {
   minimizeAsync(): Promise<void>;
   bringMeToFrontAsync(): Promise<void>;
   upsertCodeAsync(code: CodeSnippet): Promise<void>;
+  deleteCodeAsync(id: number): Promise<void>;
 }
 
 export interface IAppState {

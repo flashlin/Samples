@@ -6,4 +6,5 @@ public interface ICodeSnippetRepo
 	void UpdateCode(CodeSnippetEntity codeSnippet);
 	void AddCode(CodeSnippetEntity codeSnippet);
 	void DeleteCode(CodeSnippetEntity codeSnippet);
+	void DeleteCodeById(int id);
 }
