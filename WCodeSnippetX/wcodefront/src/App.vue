@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { CodeSnippet, useCodeSnippetService, type IAppState } from './models';
-import DataTable from 'primevue/datatable';
+import DataTable, { DataTableRowSelectEvent } from 'primevue/datatable';
 import Column from 'primevue/column';
 //import ColumnGroup from 'primevue/columngroup';
 //import Row from 'primevue/row';
@@ -18,7 +18,6 @@ const data = reactive<IAppState>({
   selectedItem: CodeSnippet.Empty,
   searchText: '',
   codeSnippetList: [],
-  filterCodes: [],
   isEditingData: false,
 });
 
@@ -112,6 +111,10 @@ function onClickAdd() {
   });
 }
 
+function onRowSelect(event: DataTableRowSelectEvent) {
+  data.selectedIndex = event.index;
+  data.selectedItem = data.codeSnippetList[event.index];
+}
 
 function handleKeyDown(event: KeyboardEvent) {
   if (event.key == 'ArrowDown' && data.selectedIndex < data.codeSnippetList.length - 1) {
@@ -151,7 +154,10 @@ queryData();
     icon="pi pi-plus" iconPos="left" 
     class="p-button p-button-info" 
     @click="onClickAdd" />
-  <DataTable :value="data.codeSnippetList" :row-class="rowClass" responsive-layout="scroll">
+  <DataTable :value="data.codeSnippetList" :row-class="rowClass" 
+    selectionMode="single"
+    @rowSelect="onRowSelect"
+    responsive-layout="scroll">
     <Column field="id" header="id"></Column>
     <Column field="content" header="Content"></Column>
     <Column field="description" header="Description"></Column>
