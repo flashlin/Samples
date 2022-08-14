@@ -4,6 +4,10 @@ type BackendAn = (obj: IBoundObject) => Promise<void>;
 type BackendFn = (obj: IBoundObject) => Promise<string>;
 
 export class CodeSnippetService implements ICodeSnippetService {
+  deleteCodeAsync(id: number): Promise<void> {
+    return this.Invoke(backend => backend.deleteCode(id));
+  }
+
   upsertCodeAsync(code: CodeSnippet): Promise<void> {
     const json = JSON.stringify(code);
     return this.Invoke(backend => backend.upsertCode(json));

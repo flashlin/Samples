@@ -7,8 +7,10 @@ import Column from 'primevue/column';
 //import Row from 'primevue/row';
 import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
+import ConfirmDialog from 'primevue/confirmdialog';
 import DynamicDialog from 'primevue/dynamicdialog';
 import { useDialog } from 'primevue/usedialog';
+import { useConfirm } from "primevue/useconfirm";
 import Toast from 'primevue/toast';
 import { useToast } from "primevue/usetoast";
 import AddCodeSnippet from './views/AddCodeSnippet.vue';
@@ -23,6 +25,7 @@ const data = reactive<IAppState>({
 
 const codeSnippetService = useCodeSnippetService();
 const dialog = useDialog();
+const confirm = useConfirm();
 const toast = useToast();
 
 async function queryData() {
@@ -111,6 +114,26 @@ function onClickAdd() {
   });
 }
 
+function onClickDelete() {
+  if( data.selectedIndex == -1) {
+    return;
+  }
+  confirm.require({
+    message: 'Are you sure you want to delete?',
+    header: 'Confirmation',
+    icon: 'pi pi-exclamation-triangle',
+    accept: async () => {
+      await codeSnippetService.deleteCodeAsync(data.selectedItem.id);
+      info('Delete Success');
+      data.selectedIndex = -1;
+      queryData();
+    },
+    reject: () => {
+      info('Delete canceled');
+    }
+  });
+}
+
 function onRowSelect(event: DataTableRowSelectEvent) {
   data.selectedIndex = event.index;
   data.selectedItem = data.codeSnippetList[event.index];
@@ -147,8 +170,10 @@ queryData();
 <template>
   <Toast />
   <DynamicDialog />
+  <ConfirmDialog />
   <Button label="Update" class="p-button p-button-info" icon="pi pi-pencil" iconPos="left" @click="onClickEdit" />
   <Button label="Add" icon="pi pi-plus" iconPos="left" class="p-button p-button-info" @click="onClickAdd" />
+  <Button label="Delete" icon="pi pi-times" iconPos="left" class="p-button p-button-danger" @click="onClickDelete" />
   <DataTable :value="data.codeSnippetList" :row-class="rowClass" selectionMode="single" @rowSelect="onRowSelect"
     responsive-layout="scroll">
     <Column field="id" header="id"></Column>
@@ -176,7 +201,7 @@ queryData();
   background-color: rgb(156, 146, 1) !important;
 }
 
- :deep(tr:not(.p-highlight):hover) {
+:deep(tr:not(.p-highlight):hover) {
   color: rgb(247, 230, 0) !important;
   background-color: rgb(87, 56, 56) !important;
 }

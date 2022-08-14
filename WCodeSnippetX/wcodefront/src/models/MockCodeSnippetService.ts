@@ -3,6 +3,7 @@
 import {ICodeSnippetService, CodeSnippet} from './types';
 
 export class MockCodeSnippetService implements ICodeSnippetService {
+  _id = 3;
   _allItems = [
     new CodeSnippet({
       id: 1,
@@ -25,13 +26,19 @@ export class MockCodeSnippetService implements ICodeSnippetService {
   ];
 
   upsertCodeAsync(code: CodeSnippet): Promise<void> {
-    if( code.id === 0 ){
-      code.id = this._allItems.length + 1;
+    if (code.id === 0) {
+      code.id = ++this._id;
       this._allItems.push(code);
     } else {
       const index = this._allItems.findIndex(item => item.id === code.id);
       this._allItems[index] = code;
     }
+    return Promise.resolve();
+  }
+
+  deleteCodeAsync(id: number): Promise<void> {
+    const index = this._allItems.findIndex(item => item.id === id);
+    this._allItems.splice(index, 1);
     return Promise.resolve();
   }
 
@@ -49,6 +56,7 @@ export class MockCodeSnippetService implements ICodeSnippetService {
       resolve();
     });
   }
+
   queryCodeAsync(text: string): Promise<CodeSnippet[]> {
     const data = this._allItems.filter(item => item.content.includes(text));
     return Promise.resolve(data);

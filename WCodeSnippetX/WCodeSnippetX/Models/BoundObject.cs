@@ -61,6 +61,11 @@ public class BoundObject : IBoundObject
 		_repo.UpdateCode(codeSnippet);
 	}
 
+	public void DeleteCode(int id)
+	{
+		_repo.DeleteCodeById(id);
+	}
+
 	public void SetClipboard(string text)
 	{
 		var t = new Thread(() => {

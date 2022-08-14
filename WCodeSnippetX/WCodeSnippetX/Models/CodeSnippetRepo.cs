@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
 using T1.Standard.Extensions;
 using WCodeSnippetX.Models.Repos;
 
@@ -72,6 +73,17 @@ public class CodeSnippetRepo : ICodeSnippetRepo
 	public void DeleteCode(CodeSnippetEntity codeSnippet)
 	{
 		_dbContext.CodeSnippets.Remove(codeSnippet);
+		_dbContext.SaveChanges();
+	}
+
+	public void DeleteCodeById(int id)
+	{
+		var item = new CodeSnippetEntity()
+		{
+			Id = id,
+		};
+		var entry = _dbContext.Entry(item);
+		entry.State = EntityState.Deleted;
 		_dbContext.SaveChanges();
 	}
 

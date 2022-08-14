@@ -4,6 +4,7 @@ declare interface IBoundObject {
   minimize(): Promise<void>;
   bringMeToFront(): Promise<void>;
   upsertCode(codeSnippetJson: string): Promise<void>;
+  deleteCode(id: number): Promise<void>;
 }
 
 declare interface Window {
