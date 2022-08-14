@@ -147,16 +147,9 @@ queryData();
 <template>
   <Toast />
   <DynamicDialog />
-  <Button label="Update" class="p-button p-button-info" 
-    icon="pi pi-pencil" iconPos="left" 
-    @click="onClickEdit" />
-  <Button label="Add" 
-    icon="pi pi-plus" iconPos="left" 
-    class="p-button p-button-info" 
-    @click="onClickAdd" />
-  <DataTable :value="data.codeSnippetList" :row-class="rowClass" 
-    selectionMode="single"
-    @rowSelect="onRowSelect"
+  <Button label="Update" class="p-button p-button-info" icon="pi pi-pencil" iconPos="left" @click="onClickEdit" />
+  <Button label="Add" icon="pi pi-plus" iconPos="left" class="p-button p-button-info" @click="onClickAdd" />
+  <DataTable :value="data.codeSnippetList" :row-class="rowClass" selectionMode="single" @rowSelect="onRowSelect"
     responsive-layout="scroll">
     <Column field="id" header="id"></Column>
     <Column field="content" header="Content"></Column>
@@ -179,7 +172,12 @@ queryData();
   margin-top: 60px;
 }
 
-::v-deep(.row-selected) {
+:deep(.row-selected) {
   background-color: rgb(156, 146, 1) !important;
+}
+
+ :deep(tr:not(.p-highlight):hover) {
+  color: rgb(247, 230, 0) !important;
+  background-color: rgb(87, 56, 56) !important;
 }
 </style>
