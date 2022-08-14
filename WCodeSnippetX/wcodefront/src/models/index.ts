@@ -2,9 +2,9 @@ export * from "./types";
 import { MockCodeSnippetService } from "./MockCodeSnippetService";
 import { CodeSnippetService } from "./CodeSnippetService";
 
+const codeSnippetService = process.env.NODE_ENV === 'production' ?
+   new CodeSnippetService() : new MockCodeSnippetService();
+
 export function useCodeSnippetService() {
-   if( process.env.NODE_ENV === 'production' ){
-      return new CodeSnippetService();
-   }
-   return new MockCodeSnippetService();
+   return codeSnippetService;
 }
