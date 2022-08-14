@@ -26,6 +26,5 @@ export interface IAppState {
   selectedItem: CodeSnippet;
   searchText: string;
   codeSnippetList: CodeSnippet[];
-  filterCodes: CodeSnippet[];
   isEditingData: boolean;
 }
