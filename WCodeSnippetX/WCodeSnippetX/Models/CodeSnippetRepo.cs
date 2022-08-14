@@ -78,12 +78,17 @@ public class CodeSnippetRepo : ICodeSnippetRepo
 
 	public void DeleteCodeById(int id)
 	{
-		var item = new CodeSnippetEntity()
-		{
-			Id = id,
-		};
-		var entry = _dbContext.Entry(item);
-		entry.State = EntityState.Deleted;
+		//not work ??
+		//var item = new CodeSnippetEntity()
+		//{
+		//	Id = id,
+		//};
+		//_dbContext.Entry(item).State = EntityState.Deleted;
+		//_dbContext.SaveChanges();
+
+		var item = _dbContext.CodeSnippets.AsTracking()
+			.First(x => x.Id == id);
+		_dbContext.CodeSnippets.Remove(item);
 		_dbContext.SaveChanges();
 	}
 
