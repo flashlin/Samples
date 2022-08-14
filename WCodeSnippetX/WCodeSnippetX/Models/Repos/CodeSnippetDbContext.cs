@@ -14,7 +14,8 @@ public class CodeSnippetDbContext : DbContext
 		var dbFile = Path.Combine(baseDir, DbFilename);
 		optionsBuilder.UseSqlite($"DataSource={dbFile};")
 			.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-		optionsBuilder.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole().AddDebug()));
+		optionsBuilder.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole().AddDebug()))
+			.EnableSensitiveDataLogging();
 		optionsBuilder.LogTo(Console.WriteLine);
 	}
 
