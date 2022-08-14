@@ -153,6 +153,7 @@ function handleKeyDown(event: KeyboardEvent) {
   }
 
   if (event.key == 'Escape') {
+    codeSnippetService.minimizeAsync();
     return;
   }
 
