@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {reactive} from 'vue';
-import {CodeSnippet, useCodeSnippetService, type IAppState} from './models';
+import { reactive } from 'vue';
+import { CodeSnippet, useCodeSnippetService, type IAppState } from './models';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 //import ColumnGroup from 'primevue/columngroup';
@@ -9,6 +9,8 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import DynamicDialog from 'primevue/dynamicdialog';
 import { useDialog } from 'primevue/usedialog';
+import Toast from 'primevue/toast';
+import { useToast } from "primevue/usetoast";
 import AddCodeSnippet from './views/AddCodeSnippet.vue';
 
 const data = reactive<IAppState>({
@@ -17,9 +19,12 @@ const data = reactive<IAppState>({
   searchText: '',
   codeSnippetList: [],
   filterCodes: [],
+  isEditingData: false,
 });
 
 const codeSnippetService = useCodeSnippetService();
+const dialog = useDialog();
+const toast = useToast();
 
 async function queryData() {
   let list: CodeSnippet[] = await codeSnippetService.queryCodeAsync(data.searchText);
@@ -49,9 +54,40 @@ function onSearchEnter() {
   codeSnippetService.setClipboardAsync(data.selectedItem.content);
 }
 
-const dialog = useDialog();
+function info(message: string) {
+  toast.add({
+    severity: 'info',
+    summary: 'Info Message',
+    detail: message,
+    life: 3000
+  });
+}
+
 function onClickAdd() {
-  dialog.open(AddCodeSnippet, {});
+  if (data.isEditingData) {
+    return;
+  }
+  data.isEditingData = true;
+  dialog.open(AddCodeSnippet, {
+    props: {
+      header: 'Add/Edit Code Snippet',
+      modal: true,
+    },
+    data: data.selectedItem,
+    onClose: (options) => {
+      data.isEditingData = false;
+      const editingData = options!.data;
+      if (editingData == undefined) {
+        info('No data to add/edit');
+        return;
+      }
+      if (editingData.id == 0) {
+        info('add success');
+        return;
+      }
+      info('update success');
+    },
+  });
 }
 
 function handleKeyDown(event: KeyboardEvent) {
@@ -67,11 +103,11 @@ function handleKeyDown(event: KeyboardEvent) {
     return;
   }
 
-  if(event.key == 'Escape') {
+  if (event.key == 'Escape') {
     return;
   }
 
-  if(event.key == 'Enter') {
+  if (event.key == 'Enter') {
     codeSnippetService.setClipboardAsync(data.selectedItem.content);
     return;
   }
@@ -83,12 +119,11 @@ queryData();
 </script>
 
 <template>
+  <Toast />
   <DynamicDialog />
-  <Button label="Add" 
-    class="p-button p-component p-button-icon-only p-button-rounded"
-    @click="onClickAdd">
+  <Button label="Add" class="p-button p-component p-button-icon-only p-button-rounded" @click="onClickAdd">
     <span class="pi pi-plus p-button-icon"></span>
-  </Button> 
+  </Button>
   <DataTable :value="data.codeSnippetList" :row-class="rowClass" responsive-layout="scroll">
     <Column field="id" header="id"></Column>
     <Column field="content" header="Content"></Column>
@@ -96,12 +131,8 @@ queryData();
   </DataTable>
   <span class="p-input-icon-left" style="width: 100%;">
     <i class="pi pi-search" />
-    <InputText type="text" 
-      v-model="data.searchText" 
-      style="width: 100%;"
-      @input="onSearchChanged()"
-      @keydown.enter="onSearchEnter()"
-      placeholder="Search" />
+    <InputText type="text" v-model="data.searchText" style="width: 100%;" @input="onSearchChanged()"
+      @keydown.enter="onSearchEnter()" placeholder="Search" />
   </span>
 </template>
 

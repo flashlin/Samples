@@ -1,20 +1,31 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, inject, Ref } from 'vue';
 import { CodeSnippet } from '../models';
 import InputText from 'primevue/inputtext';
+import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import Textarea from 'primevue/textarea';
+import { DynamicDialogInstance } from 'primevue/dynamicdialogoptions';
+
+const dialogRef: Ref<DynamicDialogInstance> = inject("dialogRef")!;
+
+// interface IAddCodeSnippetProps {
+//    data: CodeSnippet;
+// }
+// const props = defineProps<IAddCodeSnippetProps>();
+
+const injectData: CodeSnippet = dialogRef.value.data;
 
 const data = reactive<CodeSnippet>({
-   id: 0,
-   programLanguage: '',
-   content: '',
-   description: '',
+   id: injectData.id,
+   programLanguage: injectData.programLanguage,
+   content: injectData.content,
+   description: injectData.description,
 });
 
 
 function onClickAdd() {
-   console.log('onClickAdd');
+   dialogRef.value.close(data);
 }
 
 </script>
@@ -22,6 +33,13 @@ function onClickAdd() {
 <template>
    <div class="card">
       <div class="p-fluid grid">
+         <div class="field col-12">&nbsp;</div>
+         <div class="field col-12 md:col-4">
+            <span class="p-float-label">
+               <InputNumber v-model="data.id" readonly />
+               <label for="inputtext">id</label>
+            </span>
+         </div>
          <div class="field col-12">&nbsp;</div>
          <div class="field col-12 md:col-4">
             <span class="p-float-label">

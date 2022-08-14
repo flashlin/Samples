@@ -9,8 +9,10 @@ import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 
 import DialogService from 'primevue/dialogservice';
+import ToastService from 'primevue/toastservice';
 
 const app = createApp(App);
 app.use(PrimeVue);
 app.use(DialogService);
+app.use(ToastService);
 app.mount('#app');
