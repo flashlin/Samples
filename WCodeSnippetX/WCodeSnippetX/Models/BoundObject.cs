@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using T1.Standard.Serialization;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WCodeSnippetX.Models;
 
@@ -68,9 +69,20 @@ public class BoundObject : IBoundObject
 
 	public void SetClipboard(string text)
 	{
-		var t = new Thread(() => {
+		var t = new Thread(() =>
+		{
 			Clipboard.SetText(text);
 		});
+		t.SetApartmentState(ApartmentState.STA);
+		t.Start();
+	}
+}
+
+public static class UiThread
+{
+	public static void Execute(Action action)
+	{
+		var t = new Thread(() => action());
 		t.SetApartmentState(ApartmentState.STA);
 		t.Start();
 	}

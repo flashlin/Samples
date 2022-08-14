@@ -31,7 +31,7 @@ namespace WCodeSnippetX
 		{
 			this.Width = (int)(SystemInformation.VirtualScreen.Width * 0.3);
 			this.Height = (int)(SystemInformation.VirtualScreen.Height * 0.6);
-			this.Left =  SystemInformation.VirtualScreen.Width - this.Width - 30;
+			this.Left = SystemInformation.VirtualScreen.Width - this.Width - 30;
 			this.Top = SystemInformation.VirtualScreen.Height - this.Height - 60;
 		}
 
@@ -71,7 +71,10 @@ namespace WCodeSnippetX
 
 		public void Minimize()
 		{
-			this.WindowState = FormWindowState.Minimized;
+			Invoke(() =>
+			{
+				this.WindowState = FormWindowState.Minimized;
+			});
 		}
 
 		public void BringMeToFront()
