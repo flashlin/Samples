@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { reactive, inject, Ref } from 'vue';
-import { CodeSnippet } from '../models';
+import { CodeSnippet, useCodeSnippetService } from '../models';
 import InputText from 'primevue/inputtext';
 import InputNumber from 'primevue/inputnumber';
 import Button from 'primevue/button';
 import Textarea from 'primevue/textarea';
 import { DynamicDialogInstance } from 'primevue/dynamicdialogoptions';
 
+const codeSnippetService = useCodeSnippetService();
 const dialogRef: Ref<DynamicDialogInstance> = inject("dialogRef")!;
 
 // interface IAddCodeSnippetProps {
@@ -25,6 +26,7 @@ const data = reactive<CodeSnippet>({
 
 
 function onClickAdd() {
+   codeSnippetService.upsertCodeAsync(data);   
    dialogRef.value.close(data);
 }
 

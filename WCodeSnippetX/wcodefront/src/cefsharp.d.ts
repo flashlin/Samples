@@ -3,6 +3,7 @@ declare interface IBoundObject {
   setClipboard(text: string): Promise<void>;
   minimize(): Promise<void>;
   bringMeToFront(): Promise<void>;
+  upsertCode(codeSnippetJson: string): Promise<void>;
 }
 
 declare interface Window {

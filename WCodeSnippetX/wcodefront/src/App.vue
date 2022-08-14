@@ -32,7 +32,7 @@ async function queryData() {
   for (let item of list) {
     data.codeSnippetList.push(item);
   }
-  if (list.length > 0) {
+  if (list.length > 0 && (data.selectedIndex >= list.length || data.selectedIndex == -1)) {
     data.selectedIndex = 0;
     data.selectedItem = list[0];
   }
@@ -63,14 +63,14 @@ function info(message: string) {
   });
 }
 
-function onClickAdd() {
+function onClickEdit() {
   if (data.isEditingData) {
     return;
   }
   data.isEditingData = true;
   dialog.open(AddCodeSnippet, {
     props: {
-      header: 'Add/Edit Code Snippet',
+      header: 'Edit Code Snippet',
       modal: true,
     },
     data: data.selectedItem,
@@ -78,17 +78,40 @@ function onClickAdd() {
       data.isEditingData = false;
       const editingData = options!.data;
       if (editingData == undefined) {
-        info('No data to add/edit');
+        info('No data to update');
         return;
       }
-      if (editingData.id == 0) {
-        info('add success');
-        return;
-      }
+      queryData();
       info('update success');
     },
   });
 }
+
+
+function onClickAdd() {
+  if (data.isEditingData) {
+    return;
+  }
+  data.isEditingData = true;
+  dialog.open(AddCodeSnippet, {
+    props: {
+      header: 'Add Code Snippet',
+      modal: true,
+    },
+    data: new CodeSnippet(),
+    onClose: (options) => {
+      data.isEditingData = false;
+      const editingData = options!.data;
+      if (editingData == undefined) {
+        info('No data to add');
+        return;
+      }
+      queryData();
+      info('add success');
+    },
+  });
+}
+
 
 function handleKeyDown(event: KeyboardEvent) {
   if (event.key == 'ArrowDown' && data.selectedIndex < data.codeSnippetList.length - 1) {
@@ -121,9 +144,13 @@ queryData();
 <template>
   <Toast />
   <DynamicDialog />
-  <Button label="Add" class="p-button p-component p-button-icon-only p-button-rounded" @click="onClickAdd">
-    <span class="pi pi-plus p-button-icon"></span>
-  </Button>
+  <Button label="Update" class="p-button p-button-info" 
+    icon="pi pi-pencil" iconPos="left" 
+    @click="onClickEdit" />
+  <Button label="Add" 
+    icon="pi pi-plus" iconPos="left" 
+    class="p-button p-button-info" 
+    @click="onClickAdd" />
   <DataTable :value="data.codeSnippetList" :row-class="rowClass" responsive-layout="scroll">
     <Column field="id" header="id"></Column>
     <Column field="content" header="Content"></Column>

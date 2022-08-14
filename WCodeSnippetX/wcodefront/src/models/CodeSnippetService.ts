@@ -4,6 +4,11 @@ type BackendAn = (obj: IBoundObject) => Promise<void>;
 type BackendFn = (obj: IBoundObject) => Promise<string>;
 
 export class CodeSnippetService implements ICodeSnippetService {
+  upsertCodeAsync(code: CodeSnippet): Promise<void> {
+    const json = JSON.stringify(code);
+    return this.Invoke(backend => backend.upsertCode(json));
+  }
+
   async setClipboardAsync(text: string): Promise<void> {
     return this.Invoke(backend => backend.setClipboard(text));
   }
