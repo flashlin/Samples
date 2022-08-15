@@ -178,6 +178,7 @@ queryData();
   <DataTable :value="data.codeSnippetList" :row-class="rowClass" selectionMode="single" @rowSelect="onRowSelect"
     responsive-layout="scroll">
     <Column field="id" header="id"></Column>
+    <Column field="programLanguage" header="Language"></Column>
     <Column field="content" header="Content"></Column>
     <Column field="description" header="Description"></Column>
   </DataTable>
