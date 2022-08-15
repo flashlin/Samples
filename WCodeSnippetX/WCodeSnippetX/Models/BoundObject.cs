@@ -72,6 +72,7 @@ public class BoundObject : IBoundObject
 		var t = new Thread(() =>
 		{
 			Clipboard.SetText(text);
+			Form.Minimize();
 		});
 		t.SetApartmentState(ApartmentState.STA);
 		t.Start();

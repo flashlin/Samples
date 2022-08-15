@@ -57,10 +57,12 @@ namespace WCodeSnippetX
 
 		private void FormMainCef_Activated(object? sender, EventArgs e)
 		{
-			this.Width = (int)(SystemInformation.VirtualScreen.Width * 0.3);
-			this.Height = (int)(SystemInformation.VirtualScreen.Height * 0.6);
-			this.Left = SystemInformation.VirtualScreen.Width - this.Width - 30;
-			this.Top = SystemInformation.VirtualScreen.Height - this.Height - 60;
+			var screenWidth = SystemInformation.PrimaryMonitorSize.Width;
+			var screenHeight = SystemInformation.PrimaryMonitorSize.Height;
+			this.Width = (int)(screenWidth * 0.3);
+			this.Height = (int)(screenHeight * 0.6);
+			this.Left = screenWidth - this.Width - 30;
+			this.Top = screenHeight - this.Height - 60;
 		}
 
 		private void Initialize()
