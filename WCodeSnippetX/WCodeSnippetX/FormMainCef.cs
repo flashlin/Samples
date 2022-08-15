@@ -16,7 +16,9 @@ namespace WCodeSnippetX
 {
 	public partial class FormMainCef : Form
 	{
+		private readonly GlobalKeyboardHook _globalKeyboardHook = new();
 		private readonly IBoundObject _boundObject;
+		bool _leftAlt = false;
 
 		public FormMainCef(IBoundObject boundObject)
 		{
@@ -25,7 +27,33 @@ namespace WCodeSnippetX
 			InitializeComponent();
 			Initialize();
 			this.Activated += FormMainCef_Activated;
+			_globalKeyboardHook.KeyboardPressed += OnGlobalKeyPressed;
 		}
+
+		private void OnGlobalKeyPressed(object? sender, GlobalKeyboardHookEventArgs e)
+		{
+			if (e.KeyboardState != GlobalKeyboardHook.KeyboardState.KeyDown &&
+			    e.KeyboardState != GlobalKeyboardHook.KeyboardState.SysKeyDown)
+			{
+				_leftAlt = false;
+				return;
+			}
+
+			if (e.KeyboardData.VirtualCode == VirtualCode.VkLeftAlt)
+			{
+				_leftAlt = true;
+				e.Handled = true;
+				return;
+			}
+
+			if (e.KeyboardData.VirtualCode == VirtualCode.Vk0 && _leftAlt)
+			{
+				BringMeToFront();
+				e.Handled = true;
+				return;
+			}
+		}
+
 
 		private void FormMainCef_Activated(object? sender, EventArgs e)
 		{
