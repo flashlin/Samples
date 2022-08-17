@@ -15,3 +15,4 @@ package-lock.json
 *.DotSettings
 GPUCache/
 .parcel-cache/
+data/
