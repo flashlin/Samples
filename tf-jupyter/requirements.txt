@@ -1,0 +1,4 @@
+mss 
+opencv-python
+pynput
+tensorflow
