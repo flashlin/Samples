@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.WebView.Maui;
 using MauiSql.Data;
+using Havit.Blazor.Components.Web;
 
 namespace MauiSql;
 
@@ -16,7 +17,8 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddMauiBlazorWebView();
-		#if DEBUG
+		builder.Services.AddHxServices();
+#if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
 #endif
 		
