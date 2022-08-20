@@ -1,4 +1,5 @@
 mss 
 opencv-python
 pynput
+matplotlib
 tensorflow
