@@ -5,7 +5,7 @@ const maps = [
   [
     "====================",
     "=                  =",
-    "=                  =",
+    "=         p        =",
     "=         d        =",
     "=                  =",
     "=         e        =",
@@ -15,17 +15,17 @@ const maps = [
     "====================",
   ],
   [
-   "====================",
-   "=  e               =",
-   "=                  =",
-   "=                  =",
-   "=                  =",
-   "=                  =",
-   "=                  =",
-   "=                  =",
-   "= d                =",
-   "====================",
- ],
+    "====================",
+    "=  e               =",
+    "=                  =",
+    "=                  =",
+    "=                  =",
+    "=                  =",
+    "=                  =",
+    "=                  =",
+    "= dp               =",
+    "====================",
+  ],
 ];
 
 export function createMap(idx: number = 0) {
@@ -33,9 +33,22 @@ export function createMap(idx: number = 0) {
     width: 20,
     height: 20,
     pos: vec2(0, 0),
-    '=': () => [sprite("rock"), area(), solid(), scale(0.5)],
-    'd': () => [sprite("door"), area(), scale(0.5), "door"],
-    'e': () => [
+    "=": () => [sprite("rock"), area(), solid(), scale(0.5)],
+    d: () => [sprite("door"), area(), scale(0.5), "door"],
+    p: () => [
+      "player",
+      sprite("mario"),
+      area(),
+      solid(),
+      scale(1),
+      //body(),
+      {
+        //origin: 'bot',
+        dir: vec2(1, 0),
+      },
+      //lifespan(1, { fade: 0.5}),
+    ],
+    e: () => [
       sprite("enemies", { anim: "Walking" }),
       area({ width: 16, height: 16 }),
       patrol(),
