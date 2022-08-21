@@ -28,7 +28,7 @@ export class Scene1 extends BaseScene {
   create(k: KaboomCtx) {
     layers(["bg", "obj", "ui"], "obj");
 
-    createMap(this.level);
+    const mapsLength = createMap(this.level);
 
     k.add([
       text("0"),
@@ -47,6 +47,7 @@ export class Scene1 extends BaseScene {
     const player = add([
       sprite("mario"),
       area(),
+      solid(),
       scale(1),
       //body(),
       pos(80, 40),
@@ -59,26 +60,37 @@ export class Scene1 extends BaseScene {
 
     player.onUpdate(() => {
       camPos(vec2(player.pos.x, currCam.y));
-      //player.resolve();
+ 
     });
 
-    keyDown("left", () => {
+    player.onCollide("door", () => {
+      console.log('collide door');
+      this.level++;
+      if (this.level >= mapsLength) {
+        this.level = 0;
+      }
+      //createMap(this.level);
+      go("Scene1", {
+        level: this.level,
+      });
+    });
+
+    onKeyDown("left", () => {
       //player.use(sprite('abc2'));
       player.move(-MOVE_SPEED, 0);
       player.flipX(true);
     });
 
-    keyDown("right", () => {
+    onKeyDown("right", () => {
       player.move(MOVE_SPEED, 0);
       player.flipX(false);
     });
 
-    keyDown("up", () => {
+    onKeyDown("up", () => {
       player.move(0, -MOVE_SPEED);
     });
 
-    keyDown("down", () => {
-      //player.changeSprite("mario_left");
+    onKeyDown("down", () =>{
       player.move(0, MOVE_SPEED);
     });
   }
