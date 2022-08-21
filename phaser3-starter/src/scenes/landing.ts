@@ -10,6 +10,7 @@ export default class LandingScene extends Phaser.Scene {
   }
 
   create() {
+    const self = this;
     const logo = this.add.image(400, 70, 'logo');
 
     this.tweens.add({
@@ -19,6 +20,11 @@ export default class LandingScene extends Phaser.Scene {
       ease: 'Sine.inOut',
       yoyo: true,
       repeat: -1
+    });
+
+
+    this.input.keyboard.on('keydown-ENTER', (event: KeyboardEvent) => {
+      self.scene.start('GameScene');
     });
   }
 }
