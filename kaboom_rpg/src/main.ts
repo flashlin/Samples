@@ -1,4 +1,4 @@
-import { Scene1 } from "./scenes/scene1";
+import { createScene, SceneState } from "./scenes/scene1";
 import kaboom from "kaboom";
 import { MapSize } from "./types";
 
@@ -23,10 +23,9 @@ loadSprite("door", "door.png");
 loadSprite("mario", "mario.png");
 loadAseprite("enemies", "enemies.png", "enemies.json");
 
-let scene1 = new Scene1();
-scene1.load(k);
+createScene(k);
 
-go("Scene1");
+go("Scene1", new SceneState({ level: 0 }));
 
 onClick(() => {
   //addKaboom(mousePos())
