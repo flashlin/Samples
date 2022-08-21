@@ -34,7 +34,7 @@ export function createMap(idx: number = 0) {
     height: 20,
     pos: vec2(0, 0),
     "=": () => [sprite("rock"), area(), solid(), scale(0.5), "wall"],
-    d: () => [sprite("door"), area(), scale(0.5), "door"],
+    d: () => [sprite("door"), area(), solid(), scale(0.5), "door"],
     p: () => [
       "player",
       sprite("mario"),

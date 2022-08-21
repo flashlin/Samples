@@ -1,8 +1,7 @@
-import { KaboomCtx } from "kaboom";
+import { Collision, GameObj, KaboomCtx, Vec2 } from "kaboom";
 import { createMap } from "./map1";
 
 const MOVE_SPEED = 100;
-
 export class SceneState {
   constructor(aParams: Partial<SceneState>)
   {
@@ -35,8 +34,10 @@ export function createScene(k: KaboomCtx) {
       camPos(vec2(player.pos.x, currCam.y));
     });
 
-    player.onCollide("door", (door) => {
-      //console.log('collide door', door.isColliding(player));
+    player.onCollide("door", (door, col: Collision) => {
+      if( !col.isBottom() ){
+        return;
+      }
       state.level++;
       if (state.level >= mapsLength) {
         state.level = 0;
