@@ -33,7 +33,7 @@ export function createMap(idx: number = 0) {
     width: 20,
     height: 20,
     pos: vec2(0, 0),
-    "=": () => [sprite("rock"), area(), solid(), scale(0.5)],
+    "=": () => [sprite("rock"), area(), solid(), scale(0.5), "wall"],
     d: () => [sprite("door"), area(), scale(0.5), "door"],
     p: () => [
       "player",
@@ -50,9 +50,9 @@ export function createMap(idx: number = 0) {
     ],
     e: () => [
       sprite("enemies", { anim: "Walking" }),
-      area({ width: 16, height: 16 }),
-      patrol(),
+      area({ width: 24, height: 24 }),
       solid(),
+      patrol(),
       "badGuy",
     ],
   };
