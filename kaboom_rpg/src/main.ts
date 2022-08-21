@@ -19,6 +19,7 @@ const showMap = () => {
 
 loadRoot("assets/");
 loadSprite("rock", "rock.png");
+loadSprite("door", "door.png");
 loadSprite("mario", "mario.png");
 loadAseprite("enemies", "enemies.png", "enemies.json");
 
