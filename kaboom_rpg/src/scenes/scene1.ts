@@ -44,19 +44,21 @@ export class Scene1 extends BaseScene {
     //const player = level.spawn('p', 1, 10)
     let currCam = camPos();
 
-    const player = add([
-      sprite("mario"),
-      area(),
-      solid(),
-      scale(1),
-      //body(),
-      pos(80, 40),
-      {
-        //origin: 'bot',
-        dir: vec2(1, 0),
-      },
-      //lifespan(1, { fade: 0.5}),
-    ]);
+    // const player = add([
+    //   sprite("mario"),
+    //   area(),
+    //   solid(),
+    //   scale(1),
+    //   //body(),
+    //   pos(80, 40),
+    //   {
+    //     //origin: 'bot',
+    //     dir: vec2(1, 0),
+    //   },
+    //   //lifespan(1, { fade: 0.5}),
+    // ]);
+
+    const player = k.get("player")[0];
 
     player.onUpdate(() => {
       camPos(vec2(player.pos.x, currCam.y));
