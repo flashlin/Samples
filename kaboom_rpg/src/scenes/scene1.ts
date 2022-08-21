@@ -1,34 +1,21 @@
 import { KaboomCtx } from "kaboom";
 import { createMap } from "./map1";
 
-export abstract class BaseScene {
-  constructor() {}
-
-  abstract name: string;
-
-  load(k: KaboomCtx) {
-    k.scene(this.name, () => {
-      this.create(k);
-    });
-  }
-
-  abstract create(k: KaboomCtx);
-}
-
 const MOVE_SPEED = 100;
 
-export class Scene1 extends BaseScene {
-  constructor() {
-    super();
+export class SceneState {
+  constructor(aParams: Partial<SceneState>)
+  {
+    Object.assign(this, aParams); 
   }
+  level: number = 0;
+}
 
-  name = "Scene1";
-  level = 0;
-
-  create(k: KaboomCtx) {
+export function createScene(k: KaboomCtx) {
+  k.scene("Scene1", (state: SceneState) => {
     layers(["bg", "obj", "ui"], "obj");
 
-    const mapsLength = createMap(this.level);
+    const mapsLength = createMap(state.level);
 
     k.add([
       text("0"),
@@ -39,8 +26,6 @@ export class Scene1 extends BaseScene {
       },
     ]);
 
-    //k.add([sprite("mario"), pos(80, 40), scale(2)]);
-
     //const player = level.spawn('p', 1, 10)
     let currCam = camPos();
 
@@ -50,14 +35,13 @@ export class Scene1 extends BaseScene {
       camPos(vec2(player.pos.x, currCam.y));
     });
 
-    player.onCollide("door", () => {
-      this.level++;
-      if (this.level >= mapsLength) {
-        this.level = 0;
+    player.onCollide("door", (door) => {
+      //console.log('collide door', door.isColliding(player));
+      state.level++;
+      if (state.level >= mapsLength) {
+        state.level = 0;
       }
-      go("Scene1", {
-        level: this.level,
-      });
+      go("Scene1", state);
     });
 
     onKeyDown("left", () => {
@@ -78,5 +62,5 @@ export class Scene1 extends BaseScene {
     onKeyDown("down", () =>{
       player.move(0, MOVE_SPEED);
     });
-  }
+  });
 }
