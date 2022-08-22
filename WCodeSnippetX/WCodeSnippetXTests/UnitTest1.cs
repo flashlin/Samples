@@ -24,7 +24,7 @@ public class CodeServiceTest
     [Test]
     public void query_cs()
     {
-        var actual = QueryCode();
+        var actual = QueryCode("cs");
 
         actual.Should()
             .BeEquivalentTo(new[]
@@ -46,9 +46,88 @@ public class CodeServiceTest
             }, opt => opt.WithStrictOrdering());
     }
 
-    private List<CodeSnippetEntity> QueryCode()
+
+    [Test]
+    public void query_class()
     {
-        var actual = _jsonSerializer.Deserialize<List<CodeSnippetEntity>>(_service.Query("cs"));
+        var actual = QueryCode("class");
+
+        actual.Should()
+            .BeEquivalentTo(new[]
+            {
+                new CodeSnippetEntity()
+                {
+                    Id = 1,
+                    ProgramLanguage = "cs",
+                    Content = "public class User { }",
+                    Description = "starter"
+                },
+                new CodeSnippetEntity()
+                {
+                    Id = 3,
+                    ProgramLanguage = "ts",
+                    Content = "class User { }",
+                    Description = "typescript"
+                },
+            }, opt => opt.WithStrictOrdering());
+    }
+
+
+    [Test]
+    public void query_property()
+    {
+        var actual = QueryCode("property");
+
+        actual.Should()
+            .BeEquivalentTo(new[]
+            {
+                new CodeSnippetEntity()
+                {
+                    Id = 2,
+                    ProgramLanguage = "cs",
+                    Content = "public string Name { get; set; }",
+                    Description = "property"
+                },
+            }, opt => opt.WithStrictOrdering());
+    }
+
+
+    [Test]
+    public void query_empty()
+    {
+        var actual = QueryCode("");
+
+        actual.Should()
+            .BeEquivalentTo(new[]
+            {
+                new CodeSnippetEntity()
+                {
+                    Id = 1,
+                    ProgramLanguage = "cs",
+                    Content = "public class User { }",
+                    Description = "starter"
+                },
+                new CodeSnippetEntity()
+                {
+                    Id = 2,
+                    ProgramLanguage = "cs",
+                    Content = "public string Name { get; set; }",
+                    Description = "property"
+                },
+                new CodeSnippetEntity()
+                {
+                    Id = 3,
+                    ProgramLanguage = "ts",
+                    Content = "class User { }",
+                    Description = "typescript"
+                },
+            }, opt => opt.WithStrictOrdering());
+    }
+
+
+    private List<CodeSnippetEntity> QueryCode(string text)
+    {
+        var actual = _jsonSerializer.Deserialize<List<CodeSnippetEntity>>(_service.Query(text));
         return actual;
     }
 
