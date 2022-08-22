@@ -7,120 +7,134 @@ namespace WCodeSnippetX.Models;
 
 public class CodeSnippetRepo : ICodeSnippetRepo
 {
-	private readonly CodeSnippetDbContext _dbContext;
+    private readonly CodeSnippetDbContext _dbContext;
 
-	private static readonly string[] DefaultProgramLanguages = new[]
-	{
-		"cs",
-		"ts",
-		"js",
-		"py",
-		"go",
-		"csharp",
-		"typescript",
-		"javascript",
-		"python",
-		"java",
-		"xml",
-		"json",
-		"c++",
-		"c",
-		"c#",
-		"cpp",
-		"txt",
-		"md",
-		"markdown",
-	};
+    public static readonly string[] DefaultProgramLanguages = new[]
+    {
+        "cs",
+        "ts",
+        "js",
+        "py",
+        "go",
+        "csharp",
+        "typescript",
+        "javascript",
+        "python",
+        "java",
+        "xml",
+        "json",
+        "c++",
+        "c",
+        "c#",
+        "cpp",
+        "txt",
+        "md",
+        "markdown",
+    };
 
-	public CodeSnippetRepo(CodeSnippetDbContext dbContext)
-	{
-		_dbContext = dbContext;
-	}
+    public CodeSnippetRepo(CodeSnippetDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	public IEnumerable<CodeSnippetEntity> QueryCode(string text)
-	{
-		var codeSnippets = _dbContext.CodeSnippets.ToList();
-		if (string.IsNullOrEmpty(text))
-		{
-			foreach (var codeSnippet in codeSnippets)
-			{
-				yield return codeSnippet;
-			}
-		}
+    public IEnumerable<CodeSnippetEntity> QueryCode(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            var codeSnippets = _dbContext.CodeSnippets.ToList();
+            foreach (var codeSnippet in codeSnippets)
+            {
+                yield return codeSnippet;
+            }
+            yield break;
+        }
 
-		var patterns = text.ParseCommandArgsLine().ToList();
-		foreach (var codeSnippet in codeSnippets)
-		{
-			if (IsMatch(codeSnippet, patterns))
-			{
-				yield return codeSnippet;
-			}
-		}
-	}
+        var patterns = text.ParseCommandArgsLine().ToList();
+        var queryLang = patterns
+            .FirstOrDefault(x => DefaultProgramLanguages.Contains(x));
+        if (queryLang == null)
+        {
+            var codeSnippets = _dbContext.CodeSnippets.ToList();
+            foreach (var codeSnippet in codeSnippets)
+            {
+                yield return codeSnippet;
+            }
+            yield break;
+        }
 
-	public void UpdateCode(CodeSnippetEntity codeSnippet)
-	{
-		_dbContext.CodeSnippets.Update(codeSnippet);
-		_dbContext.SaveChanges();
-	}
+        var codeSnippetsByLang = _dbContext.CodeSnippets
+            .Where(x => x.ProgramLanguage == queryLang);
 
-	public void AddCode(CodeSnippetEntity codeSnippet)
-	{
-		_dbContext.CodeSnippets.Add(codeSnippet);
-		_dbContext.SaveChanges();
-	}
+        foreach (var entity in codeSnippetsByLang)
+        {
+            yield return entity;
+        }
+    }
 
-	public void DeleteCode(CodeSnippetEntity codeSnippet)
-	{
-		_dbContext.CodeSnippets.Remove(codeSnippet);
-		_dbContext.SaveChanges();
-	}
+    public void UpdateCode(CodeSnippetEntity codeSnippet)
+    {
+        _dbContext.CodeSnippets.Update(codeSnippet);
+        _dbContext.SaveChanges();
+    }
 
-	public void DeleteCodeById(int id)
-	{
-		//not work ??
-		//var item = new CodeSnippetEntity()
-		//{
-		//	Id = id,
-		//};
-		//_dbContext.Entry(item).State = EntityState.Deleted;
-		//_dbContext.SaveChanges();
+    public void AddCode(CodeSnippetEntity codeSnippet)
+    {
+        _dbContext.CodeSnippets.Add(codeSnippet);
+        _dbContext.SaveChanges();
+    }
 
-		var item = _dbContext.CodeSnippets.AsTracking()
-			.First(x => x.Id == id);
-		_dbContext.CodeSnippets.Remove(item);
-		_dbContext.SaveChanges();
-	}
+    public void DeleteCode(CodeSnippetEntity codeSnippet)
+    {
+        _dbContext.CodeSnippets.Remove(codeSnippet);
+        _dbContext.SaveChanges();
+    }
 
-	private bool IsMatch(CodeSnippetEntity codeSnippet, List<string> patterns)
-	{
-		foreach (var pattern in patterns)
-		{
-			if (DefaultProgramLanguages.Contains(pattern) && !Regex.Match(codeSnippet.ProgramLanguage, pattern).Success)
-			{
-				return false;
-			}
+    public void DeleteCodeById(int id)
+    {
+        //not work ??
+        //var item = new CodeSnippetEntity()
+        //{
+        //	Id = id,
+        //};
+        //_dbContext.Entry(item).State = EntityState.Deleted;
+        //_dbContext.SaveChanges();
 
-			if (Regex.Match(codeSnippet.Content, pattern).Success)
-			{
-				return true;
-			}
+        var item = _dbContext.CodeSnippets.AsTracking()
+            .First(x => x.Id == id);
+        _dbContext.CodeSnippets.Remove(item);
+        _dbContext.SaveChanges();
+    }
 
-			if (Regex.Match(codeSnippet.Description, pattern).Success)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+    private bool IsMatch(CodeSnippetEntity codeSnippet, IEnumerable<string> patterns)
+    {
+        foreach (var pattern in patterns)
+        {
+            if (DefaultProgramLanguages.Contains(pattern) && !Regex.Match(codeSnippet.ProgramLanguage, pattern).Success)
+            {
+                return false;
+            }
 
-	private void Initialize()
-	{
-		var baseDir = AppDomain.CurrentDomain.BaseDirectory;
-		var dbFile = Path.Combine(baseDir, CodeSnippetDbContext.DbFilename);
-		if (File.Exists(dbFile))
-		{
-			return;
-		}
-	}
+            if (Regex.Match(codeSnippet.Content, pattern).Success)
+            {
+                return true;
+            }
+
+            if (Regex.Match(codeSnippet.Description, pattern).Success)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void Initialize()
+    {
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var dbFile = Path.Combine(baseDir, CodeSnippetDbContext.DbFilename);
+        if (File.Exists(dbFile))
+        {
+            return;
+        }
+    }
 }
