@@ -11,5 +11,6 @@ export default class GameScene extends Phaser.Scene {
 
   create() {
     const logo = this.add.image(400, 70, "hero");
+    //this.add.text(10, 10, 'Press any button and see the console', {fontSize: '20px'});
   }
 }
