@@ -15,14 +15,29 @@ public class CodeSnippetService : ICodeSnippetService
         _repo = repo;
     }
 
-    public string Query(string text)
+    public void DeleteCodeById(int id)
+    {
+       _repo.DeleteCodeById(id);
+    }
+
+	 public void UpdateCode(CodeSnippetEntity code)
+    {
+       _repo.UpdateCode(code);
+    }
+
+    public void AddCode(CodeSnippetEntity code)
+    {
+       _repo.AddCode(code);
+    }
+
+    public List<CodeSnippetEntity> Query(string text)
     {
         var codeSnippets = _repo.QueryCode(text)
             .ToList();
 
         if (string.IsNullOrEmpty(text))
         {
-            return _jsonSerializer.Serialize(codeSnippets);
+            return codeSnippets;
         }
 
         var patterns = text.ParseCommandArgsLine().ToList();
@@ -40,7 +55,7 @@ public class CodeSnippetService : ICodeSnippetService
             }
             prevCodeSnippets = filterSnippets;
         }
-        return _jsonSerializer.Serialize(filterSnippets);
+        return filterSnippets;
     }
 
 

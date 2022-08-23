@@ -9,7 +9,7 @@ public class BoundObject : IBoundObject
 {
 	private readonly IJsonSerializer _jsonSerializer;
 
-	private readonly ICodeSnippetRepo _repo;
+	private readonly ICodeSnippetService _service;
 	//readonly int _port;
 
 	//public BoundObject(IServer server, IServiceProvider serviceProvider,
@@ -23,9 +23,9 @@ public class BoundObject : IBoundObject
 	//	_port = int.Parse(address.Substring(idx+1));
 	//}
 
-	public BoundObject(ICodeSnippetRepo repo, IJsonSerializer jsonSerializer)
+	public BoundObject(ICodeSnippetService service, IJsonSerializer jsonSerializer)
 	{
-		_repo = repo;
+		_service = service;
 		_jsonSerializer = jsonSerializer;
 	}
 
@@ -48,7 +48,7 @@ public class BoundObject : IBoundObject
 
 	public string QueryCode(string text)
 	{
-		return _jsonSerializer.Serialize(_repo.QueryCode(text).ToList());
+		return _jsonSerializer.Serialize(_service.Query(text).ToList());
 	}
 
 	public void UpsertCode(string codeSnippetJson)
@@ -56,15 +56,15 @@ public class BoundObject : IBoundObject
 		var codeSnippet = _jsonSerializer.Deserialize<CodeSnippetEntity>(codeSnippetJson);
 		if (codeSnippet.Id == 0)
 		{
-			_repo.AddCode(codeSnippet);
+			_service.AddCode(codeSnippet);
 			return;
 		}
-		_repo.UpdateCode(codeSnippet);
+		_service.UpdateCode(codeSnippet);
 	}
 
 	public void DeleteCode(int id)
 	{
-		_repo.DeleteCodeById(id);
+		_service.DeleteCodeById(id);
 	}
 
 	public void SetClipboard(string text)
