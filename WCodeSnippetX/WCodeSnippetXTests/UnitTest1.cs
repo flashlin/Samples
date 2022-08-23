@@ -124,6 +124,24 @@ public class CodeServiceTest
             }, opt => opt.WithStrictOrdering());
     }
 
+    [Test]
+    public void query_cs_class()
+    {
+        var actual = QueryCode("cs class");
+
+        actual.Should()
+            .BeEquivalentTo(new[]
+            {
+                new CodeSnippetEntity()
+                {
+                    Id = 1,
+                    ProgramLanguage = "cs",
+                    Content = "public class User { }",
+                    Description = "starter"
+                },
+            }, opt => opt.WithStrictOrdering());
+    }
+
 
     private List<CodeSnippetEntity> QueryCode(string text)
     {
