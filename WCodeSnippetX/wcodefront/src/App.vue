@@ -34,6 +34,7 @@ async function queryData() {
   for (let item of list) {
     data.codeSnippetList.push(item);
   }
+  data.selectedIndex = -1;
   if (list.length > 0 && (data.selectedIndex >= list.length || data.selectedIndex == -1)) {
     data.selectedIndex = 0;
     data.selectedItem = list[0];
