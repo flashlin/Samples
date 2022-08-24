@@ -57,4 +57,8 @@
       <Content Include="Pages\Index.razor.css" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\CodeSnippetLib\CodeSnippetLib.csproj" />
+    </ItemGroup>
+
 </Project>
