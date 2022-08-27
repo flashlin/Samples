@@ -1,0 +1,240 @@
+2022-08-27 00:00:05.735 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:00:05.780 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:00:05.782 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:00:05.783 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:00:05.783 +00:00 [INF] Content root path: /app/
+2022-08-27 00:00:06.414 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 109.6380 ms
+2022-08-27 00:00:06.639 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 67.9314 ms
+2022-08-27 00:00:09.131 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 1.1202 ms
+2022-08-27 00:00:10.359 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:00:10.366 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 12.3774 ms
+2022-08-27 00:00:10.931 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:00:10.932 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.8399 ms
+2022-08-27 00:00:11.190 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:00:11.190 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.8354 ms
+2022-08-27 00:01:01.734 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:01:01.774 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:01:01.776 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:01:01.776 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:01:01.777 +00:00 [INF] Content root path: /app/
+2022-08-27 00:01:02.140 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 75.1366 ms
+2022-08-27 00:01:02.401 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 123.1640 ms
+2022-08-27 00:01:04.077 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 1.1740 ms
+2022-08-27 00:04:05.455 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:04:05.494 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:04:05.497 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:04:05.497 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:04:05.498 +00:00 [INF] Content root path: /app/
+2022-08-27 00:04:05.913 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 93.1696 ms
+2022-08-27 00:04:05.958 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 109.9719 ms
+2022-08-27 00:04:06.004 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 0.9688 ms
+2022-08-27 00:05:11.334 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:05:11.368 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:05:11.371 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:05:11.371 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:05:11.372 +00:00 [INF] Content root path: /app/
+2022-08-27 00:05:11.833 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 73.2209 ms
+2022-08-27 00:05:12.020 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 68.7571 ms
+2022-08-27 00:05:13.728 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 1.1606 ms
+2022-08-27 00:05:15.271 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:15.278 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 11.9803 ms
+2022-08-27 00:05:16.222 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:16.222 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.8427 ms
+2022-08-27 00:05:16.696 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:16.696 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.0043 ms
+2022-08-27 00:05:17.004 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:17.005 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.1516 ms
+2022-08-27 00:05:17.237 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:17.237 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6297 ms
+2022-08-27 00:05:17.399 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:17.400 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.1516 ms
+2022-08-27 00:05:17.584 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:17.585 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.8935 ms
+2022-08-27 00:05:17.773 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:17.773 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.8215 ms
+2022-08-27 00:05:17.966 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:17.966 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.4335 ms
+2022-08-27 00:05:18.166 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:18.166 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.8666 ms
+2022-08-27 00:05:18.333 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:05:18.335 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.1448 ms
+2022-08-27 00:11:05.664 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:11:05.704 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:11:05.706 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:11:05.706 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:11:05.707 +00:00 [INF] Content root path: /app/
+2022-08-27 00:11:06.146 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 84.4080 ms
+2022-08-27 00:11:06.350 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 72.7840 ms
+2022-08-27 00:11:08.011 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 1.7672 ms
+2022-08-27 00:11:12.077 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:11:12.084 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 11.6376 ms
+2022-08-27 00:11:12.588 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:11:12.589 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.4517 ms
+2022-08-27 00:11:12.778 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:11:12.778 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6554 ms
+2022-08-27 00:11:12.961 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:11:12.962 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.1398 ms
+2022-08-27 00:11:13.153 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:11:13.154 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.3994 ms
+2022-08-27 00:11:13.341 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:11:13.342 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.2509 ms
+2022-08-27 00:11:13.524 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:11:13.525 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.7960 ms
+2022-08-27 00:11:13.712 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:11:13.713 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.3436 ms
+2022-08-27 00:18:03.324 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:18:03.362 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:18:03.364 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:18:03.365 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:18:03.365 +00:00 [INF] Content root path: /app/
+2022-08-27 00:18:03.654 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 60.7324 ms
+2022-08-27 00:18:03.809 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 81.3990 ms
+2022-08-27 00:18:07.961 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:07.968 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 12.4162 ms
+2022-08-27 00:18:08.601 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:08.602 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.1166 ms
+2022-08-27 00:18:08.811 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:08.812 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.7340 ms
+2022-08-27 00:18:09.025 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:09.026 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.1817 ms
+2022-08-27 00:18:09.226 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:09.227 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6520 ms
+2022-08-27 00:18:09.400 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:09.401 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.4316 ms
+2022-08-27 00:18:09.605 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:09.605 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6332 ms
+2022-08-27 00:18:09.820 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:09.821 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.0724 ms
+2022-08-27 00:18:10.001 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:10.002 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.7161 ms
+2022-08-27 00:18:59.862 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:18:59.862 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.5640 ms
+2022-08-27 00:19:00.241 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:19:00.242 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.4341 ms
+2022-08-27 00:19:00.447 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:19:00.448 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6605 ms
+2022-08-27 00:19:00.654 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:19:00.655 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 21.2856 ms
+2022-08-27 00:20:42.098 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:20:42.133 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:20:42.136 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:20:42.137 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:20:42.137 +00:00 [INF] Content root path: /app/
+2022-08-27 00:20:42.447 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 85.8490 ms
+2022-08-27 00:20:42.657 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 53.0349 ms
+2022-08-27 00:21:04.448 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:21:04.455 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 11.9445 ms
+2022-08-27 00:21:05.168 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:21:05.169 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.8668 ms
+2022-08-27 00:21:05.486 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:21:05.486 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6652 ms
+2022-08-27 00:21:05.716 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:21:05.717 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.9974 ms
+2022-08-27 00:21:05.909 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:21:05.910 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.4340 ms
+2022-08-27 00:21:06.089 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:21:06.090 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.8461 ms
+2022-08-27 00:24:33.052 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:24:33.092 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:24:33.094 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:24:33.095 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:24:33.095 +00:00 [INF] Content root path: /app/
+2022-08-27 00:24:33.388 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 57.2218 ms
+2022-08-27 00:24:33.537 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 73.2464 ms
+2022-08-27 00:24:41.346 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:24:41.354 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 12.8153 ms
+2022-08-27 00:24:41.733 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:24:41.734 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.1026 ms
+2022-08-27 00:24:41.982 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:24:41.983 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.0713 ms
+2022-08-27 00:24:42.185 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:24:42.185 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6198 ms
+2022-08-27 00:24:42.375 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:24:42.376 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.7582 ms
+2022-08-27 00:25:37.808 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:25:37.846 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:25:37.848 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:25:37.849 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:25:37.849 +00:00 [INF] Content root path: /app/
+2022-08-27 00:25:38.111 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 67.8645 ms
+2022-08-27 00:25:38.297 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 53.1065 ms
+2022-08-27 00:26:05.017 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:26:05.023 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 11.7294 ms
+2022-08-27 00:26:05.606 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:26:05.607 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.9826 ms
+2022-08-27 00:26:05.998 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:26:05.999 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6703 ms
+2022-08-27 00:26:06.204 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:26:06.205 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.5301 ms
+2022-08-27 00:26:06.417 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:26:06.418 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.3879 ms
+2022-08-27 00:26:40.163 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:26:40.163 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6486 ms
+2022-08-27 00:26:40.623 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:26:40.623 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 0.6293 ms
+2022-08-27 00:26:40.852 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:26:40.854 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 2.0991 ms
+2022-08-27 00:28:01.336 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 21.1866 ms
+2022-08-27 00:28:01.430 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 1.1992 ms
+2022-08-27 00:41:05.051 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:41:05.091 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:41:05.094 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:41:05.094 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:41:05.095 +00:00 [INF] Content root path: /app/
+2022-08-27 00:41:05.361 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 71.1904 ms
+2022-08-27 00:41:05.536 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 55.5673 ms
+2022-08-27 00:41:16.093 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:41:16.094 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:41:16.095 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:41:16.102 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 13.6240 ms
+2022-08-27 00:41:17.331 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:41:17.331 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:41:17.332 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:41:17.332 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.5456 ms
+2022-08-27 00:41:17.674 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:41:17.674 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:41:17.674 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:41:17.675 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.7427 ms
+2022-08-27 00:54:41.361 +00:00 [INF] Now listening on: https://[::]:443
+2022-08-27 00:54:41.401 +00:00 [INF] Now listening on: http://[::]:80
+2022-08-27 00:54:41.403 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2022-08-27 00:54:41.403 +00:00 [INF] Hosting environment: Development
+2022-08-27 00:54:41.403 +00:00 [INF] Content root path: /app/
+2022-08-27 00:54:41.773 +00:00 [INF] HTTP GET /swagger/index.html responded 200 in 81.2139 ms
+2022-08-27 00:54:41.982 +00:00 [INF] HTTP GET /swagger/v1/swagger.json responded 200 in 84.0846 ms
+2022-08-27 00:54:45.520 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:54:45.520 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:54:45.520 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:54:45.528 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 13.8431 ms
+2022-08-27 00:54:46.147 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:54:46.147 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:54:46.147 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:54:46.148 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.9599 ms
+2022-08-27 00:54:46.557 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:54:46.557 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:54:46.558 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:54:46.558 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.3802 ms
+2022-08-27 00:54:46.839 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:54:46.840 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:54:46.840 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:54:46.841 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 2.0859 ms
+2022-08-27 00:54:47.049 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:54:47.049 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:54:47.050 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:54:47.050 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.9151 ms
+2022-08-27 00:54:47.276 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:54:47.276 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:54:47.277 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:54:47.277 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 2.3787 ms
+2022-08-27 00:55:34.491 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:55:34.491 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:55:34.491 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:55:34.491 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.1823 ms
+2022-08-27 00:55:34.976 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:55:34.977 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:55:34.978 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:55:34.978 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 2.4234 ms
+2022-08-27 00:55:35.199 +00:00 [INF] Hello Log '/app/bin/Debug/net6.0/'
+2022-08-27 00:55:35.200 +00:00 [ERR] Hello sample error 'Get'
+2022-08-27 00:55:35.200 +00:00 [WRN] Hello warning message 'test'
+2022-08-27 00:55:35.200 +00:00 [INF] HTTP GET /WeatherForecast responded 200 in 1.4305 ms
