@@ -16,3 +16,4 @@ package-lock.json
 GPUCache/
 .parcel-cache/
 data/
+logs/
