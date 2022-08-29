@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
+import CodeExitor from "@/components/CodeEditor.vue";
+import { reactive } from 'vue';
+
+const data = reactive({
+  code: 'class User { name = "flash" }'
+})
 </script>
 
 <template>
@@ -11,9 +17,9 @@ import TheWelcome from './components/TheWelcome.vue'
       <HelloWorld msg="You did it!" />
     </div>
   </header>
-
   <main>
     <TheWelcome />
+    <CodeExitor v-model="data.code" />
   </main>
 </template>
 
