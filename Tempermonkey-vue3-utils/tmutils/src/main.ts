@@ -8,7 +8,7 @@ const app = createApp(App);
 app.use(createPinia());
 
 //app.mount("#app");
-const div = document.querySelector(".logo");
+const div = document.querySelector("#app");
 if( div != null) {
    console.log("mount logo");
    app.mount(div);
