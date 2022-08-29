@@ -68,6 +68,8 @@ onMounted(() => {
       tabSize: 2,
       automaticLayout: true,
       scrollBeyondLastLine: false,
+      theme: 'vs-dark', //vs, hc-black, vs-dark
+      //language: 'typescript',
    });
 
    instance.onDidChangeModelContent(() => {
