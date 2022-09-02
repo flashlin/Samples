@@ -33,7 +33,7 @@ class MyDataset(torch.utils.data.Dataset):
             trns.Resize((220, 415)),
             #trns.RandomCrop((224, 224)),
             trns.ColorJitter(brightness=0.1, contrast=0.1, saturation=0, hue=0.1),
-            trns.GaussianBlur(11, sigma=(0.1, 2.0)),
+            #trns.GaussianBlur(11, sigma=(0.1, 2.0)),
             trns.RandomHorizontalFlip(),
             #trns.RandomVerticalFlip(0.5),
             trns.ToTensor(),
@@ -64,14 +64,14 @@ class MyDataset(torch.utils.data.Dataset):
         #   img = self.transform(img)
         X = img
         y = self.labels[index]
-        y = torch.tensor(y, dtype=torch.float32)
+        y = torch.tensor(y, dtype=torch.long)
         return X, y
 
 
 
 def train(dataset, model, device, loss_fn, optimizer):
     size = len(dataset)
-    max_epochs = 10
+    max_epochs = 8
     params = {
         'batch_size': 32,
         'shuffle': True,

@@ -61,14 +61,18 @@ class ResNet18Numbers(nn.Module):
       super().__init__() 
       self.model = models.resnet18(pretrained=True)
       set_pretrained_model(self.model)
-      self.model.fc = nn.Linear(512, 1)
+      self.model.fc = nn.Linear(512, 32)
+      self.softmax = torch.nn.Softmax(dim=1)
+      self.fc2 = torch.nn.Linear(32, n_numbers)
       
    def forward(self, x):
       logits = self.model(x)
+      logits = self.fc2(logits)
+      logits = self.softmax(logits)
       # 因為會出現
       # UserWarning: Using a target size (torch.Size([64])) that is different to the input size (torch.Size([64,1]))
       # 故用下列方法降低維度
-      logits = logits.squeeze(-1) # 降低維度
+      # logits = logits.squeeze(-1) # 降低維度
       return logits
 
 
@@ -102,7 +106,7 @@ def use_resnet18_numbers(n_numbers):
    model = ResNet18Numbers(n_numbers).to(device)
    print(model)
    # 損失函數
-   loss_fn = nn.MSELoss()
+   loss_fn = nn.CrossEntropyLoss()
    # 學習優化器
    optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
    return Model(
