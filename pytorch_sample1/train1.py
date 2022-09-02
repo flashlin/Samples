@@ -7,8 +7,6 @@ from torchvision.io import read_image
 import torchvision.transforms as T
 from PIL import Image
 
-import model
-
 def list_files(dir_path, pattern):
     regex = re.compile(pattern)
     for name in os.listdir(dir_path):
@@ -64,54 +62,31 @@ class MyDataset(torch.utils.data.Dataset):
         #   img = self.transform(img)
         X = img
         y = self.labels[index]
-        y = torch.tensor(y, dtype=torch.float32)
         return X, y
 
 
 
-def train(dataset, model, device, loss_fn, optimizer):
-    size = len(dataset)
-    max_epochs = 10
-    params = {
-        'batch_size': 32,
-        'shuffle': True,
-        'num_workers': 1
-    }
-    train_loader = torch.utils.data.DataLoader(dataset, **params)
+def train(dataloader, model, device, loss_fn, optimizer):
+    # 資料總筆數
+    size = len(dataloader.dataset)
+    # 將模型設定為訓練模式
     model.train()
-    for epoch in range(max_epochs):
-        for X, y in train_loader:
-            X, y = X.to(device), y.to(device)
-            pred = model(X)         # 計算預測值
-            loss = loss_fn(pred, y) # 計算損失值
-            optimizer.zero_grad()   # 重設參數梯度(gradient)
-            loss.backward()         # 反向傳播（backpropagation）
-            optimizer.step()        # 更新參數
-
-            # 輸出訓練過程資訊
-            if epoch % 2 == 0:
-                loss, current = loss.item(), epoch * len(X)
-                print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
-
-
-    # # 將模型設定為訓練模式
-    # model.train()
-    # # 批次讀取資料進行訓練
-    # for batch, (X, y) in enumerate(dataset):
-    #     # 將資料放置於 GPU 或 CPU
-    #     X, y = X.to(device), y.to(device)
+    # 批次讀取資料進行訓練
+    for batch, (X, y) in enumerate(dataloader):
+        # 將資料放置於 GPU 或 CPU
+        X, y = X.to(device), y.to(device)
         
-    #     pred = model(X)         # 計算預測值
-    #     loss = loss_fn(pred, y) # 計算損失值（loss）
+        pred = model(X)         # 計算預測值
+        loss = loss_fn(pred, y) # 計算損失值（loss）
 
-    #     optimizer.zero_grad()   # 重設參數梯度（gradient）
-    #     loss.backward()         # 反向傳播（backpropagation）
-    #     optimizer.step()        # 更新參數
+        optimizer.zero_grad()   # 重設參數梯度（gradient）
+        loss.backward()         # 反向傳播（backpropagation）
+        optimizer.step()        # 更新參數
 
-    #     # 輸出訓練過程資訊
-    #     if batch % 100 == 0:
-    #         loss, current = loss.item(), batch * len(X)
-    #         print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+        # 輸出訓練過程資訊
+        if batch % 100 == 0:
+            loss, current = loss.item(), batch * len(X)
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
 
 
@@ -119,6 +94,18 @@ def train(dataset, model, device, loss_fn, optimizer):
 
 def main():
     torch.manual_seed(0)
+    # CUDA for PyTorch
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda:0" if use_cuda else "cpu")
+    torch.backends.cudnn.benchmark = True
+
+    # Parameters
+    params = {
+        'batch_size': 32,
+        'shuffle': True,
+        'num_workers': 1
+    }
+    max_epochs = 10
 
     dataset = MyDataset('D:/VDisk/Github/Samples/tf-jupyter/data')
     print(f"{len(dataset)=}")
@@ -132,8 +119,26 @@ def main():
     print(f"{len(valid_set)=}")
     print(f"{len(test_set)=}")
 
-    m = model.use_resnet18_numbers(1)
-    train(train_set, m.model, m.device, m.loss_fn, m.optimizer)
+    # Generators
+    training_generator = torch.utils.data.DataLoader(train_set, **params)
+
+    # Loop over epochs
+    # for epoch in range(max_epochs):
+    #     # Training
+    #     for local_batch, local_labels in training_generator:
+    #         # Transfer to GPU
+    #         local_batch, local_labels = local_batch.to(
+    #             device), local_labels.to(device)
+    #         print(f"{local_batch} {local_labels}")
+    #         # Model computations
+
+    #    #  # Validation
+    #    #  with torch.set_grad_enabled(False):
+    #    #      for local_batch, local_labels in validation_generator:
+    #    #          # Transfer to GPU
+    #    #          local_batch, local_labels = local_batch.to(device), local_labels.to(device)
+
+    #    #          # Model computations
 
 
 if __name__ == '__main__':
