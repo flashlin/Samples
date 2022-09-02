@@ -1,5 +1,6 @@
 import torch
 import torchvision.transforms as trns
+import torch.utils.data as data
 import os
 import re
 from torchvision.io import read_image
@@ -27,9 +28,12 @@ class MyDataset(torch.utils.data.Dataset):
     def __init__(self, images_path, transform=None):
         self.images_path = images_path
         self.transform = trns.Compose([
-            trns.Resize((256, 256)),
-            trns.RandomCrop((224, 224)),
+            trns.Resize((220, 415)),
+            #trns.RandomCrop((224, 224)),
+            trns.ColorJitter(brightness=0.1, contrast=0.1, saturation=0, hue=0.1),
+            trns.GaussianBlur(11, sigma=(0.1, 2.0)),
             trns.RandomHorizontalFlip(),
+            #trns.RandomVerticalFlip(0.5),
             trns.ToTensor(),
             trns.Normalize(mean=[0.485, 0.456, 0.406],
                            std=[0.229, 0.224, 0.225]),
@@ -60,7 +64,7 @@ class MyDataset(torch.utils.data.Dataset):
         return X, y
 
 
-def start():
+def main():
     # CUDA for PyTorch
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda:0" if use_cuda else "cpu")
@@ -74,28 +78,39 @@ def start():
     }
     max_epochs = 10
 
+    dataset = MyDataset('D:/VDisk/Github/Samples/tf-jupyter/data')
+    print(f"{len(dataset)=}")
+
+    train_set_size = int(len(dataset) * 0.7)
+    valid_set_size = int(len(dataset) * 0.2)
+    test_set_size = len(dataset) - train_set_size - valid_set_size
+
+    train_set, valid_set, test_set = data.random_split(dataset, [train_set_size, valid_set_size, test_set_size])
+    print(f"{len(train_set)=}")
+    print(f"{len(valid_set)=}")
+    print(f"{len(test_set)=}")
+
     # Generators
-    training_set = MyDataset('D:/VDisk/Github/Samples/tf-jupyter/data')
-    training_generator = torch.utils.data.DataLoader(training_set, **params)
+    training_generator = torch.utils.data.DataLoader(train_set, **params)
 
     # Loop over epochs
-    for epoch in range(max_epochs):
-        # Training
-        for local_batch, local_labels in training_generator:
-            # Transfer to GPU
-            local_batch, local_labels = local_batch.to(
-                device), local_labels.to(device)
-            print(f"{local_batch} {local_labels}")
-            # Model computations
+    # for epoch in range(max_epochs):
+    #     # Training
+    #     for local_batch, local_labels in training_generator:
+    #         # Transfer to GPU
+    #         local_batch, local_labels = local_batch.to(
+    #             device), local_labels.to(device)
+    #         print(f"{local_batch} {local_labels}")
+    #         # Model computations
 
-       #  # Validation
-       #  with torch.set_grad_enabled(False):
-       #      for local_batch, local_labels in validation_generator:
-       #          # Transfer to GPU
-       #          local_batch, local_labels = local_batch.to(device), local_labels.to(device)
+    #    #  # Validation
+    #    #  with torch.set_grad_enabled(False):
+    #    #      for local_batch, local_labels in validation_generator:
+    #    #          # Transfer to GPU
+    #    #          local_batch, local_labels = local_batch.to(device), local_labels.to(device)
 
-       #          # Model computations
+    #    #          # Model computations
 
 
 if __name__ == '__main__':
-    start()
+    main()
