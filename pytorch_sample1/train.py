@@ -77,9 +77,8 @@ class MyDataset(torch.utils.data.Dataset):
 
 
 
-def train(dataset, model, device, loss_fn, optimizer):
+def train(epoch, dataset, model, device, loss_fn, optimizer):
     size = len(dataset)
-    max_epochs = 8
     params = {
         'batch_size': 32,
         'shuffle': True,
@@ -87,44 +86,41 @@ def train(dataset, model, device, loss_fn, optimizer):
     }
     train_loader = torch.utils.data.DataLoader(dataset, **params)
     model.train()
+    train_loss_tmp = 0
+    train_loss_avg = 0
+    #for X, y in train_loader:
+    for batch_idx, (X, y) in enumerate(train_loader):
+        X, y = X.to(device), y.to(device)
+        pred = model(X)         # 計算預測值
+        #print(f"{X.shape=} {y.shape=} {pred.shape=}")
+        loss = loss_fn(pred, y) # 計算損失值
+        optimizer.zero_grad()   # 重設參數梯度(gradient)
+        loss.backward()         # 反向傳播（backpropagation）
+        optimizer.step()        # 更新參數
+
+        # 輸出訓練過程資訊
+        loss, current = loss.item(), epoch * len(X)
+        print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+        train_loss_tmp += loss
+        train_loss_avg = train_loss_tmp / (batch_idx + 1)
+    print(f"{epoch=} loss: {train_loss_avg:>7f}")
+    save_checkpoint(epoch, model, train_loss_avg, optimizer, f"./checkpoints/{epoch+1:05d}_{train_loss_avg:1.5f}_model.pt")
+
+
+def save_checkpoint(epoch, model, loss, optimizer, path="model.pt"):
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': model.state_dict(),
+        'optimizer_state_dict': optimizer.state_dict(),
+        'loss': loss,
+        }, path)
+
+
+def train_loop(dataset, model, device, loss_fn, optimizer):
+    max_epochs = 10
+    model.train()
     for epoch in range(max_epochs):
-        for X, y in train_loader:
-            X, y = X.to(device), y.to(device)
-            pred = model(X)         # 計算預測值
-            #print(f"{X.shape=} {y.shape=} {pred.shape=}")
-            loss = loss_fn(pred, y) # 計算損失值
-            optimizer.zero_grad()   # 重設參數梯度(gradient)
-            loss.backward()         # 反向傳播（backpropagation）
-            optimizer.step()        # 更新參數
-
-            # 輸出訓練過程資訊
-            # if epoch % 2 == 0:
-            loss, current = loss.item(), epoch * len(X)
-            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
-
-
-    # # 將模型設定為訓練模式
-    # model.train()
-    # # 批次讀取資料進行訓練
-    # for batch, (X, y) in enumerate(dataset):
-    #     # 將資料放置於 GPU 或 CPU
-    #     X, y = X.to(device), y.to(device)
-        
-    #     pred = model(X)         # 計算預測值
-    #     loss = loss_fn(pred, y) # 計算損失值（loss）
-
-    #     optimizer.zero_grad()   # 重設參數梯度（gradient）
-    #     loss.backward()         # 反向傳播（backpropagation）
-    #     optimizer.step()        # 更新參數
-
-    #     # 輸出訓練過程資訊
-    #     if batch % 100 == 0:
-    #         loss, current = loss.item(), batch * len(X)
-    #         print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
-
-
-
-
+        train(epoch, dataset, model, device, loss_fn, optimizer)
 
 def main():
     torch.manual_seed(0)
@@ -132,7 +128,7 @@ def main():
     dataset = MyDataset([
         #'D:/VDisk/Github/Samples/tf-jupyter/data',
         'D:/VDisk/Github/Samples/pytorch_sample1/data',
-        'D:/VDisk/Github/Samples/pytorch_sample1/data1',
+        'D:/VDisk/Github/Samples/pytorch_sample1/data/data1',
     ])
     print(f"{len(dataset)=}")
 
@@ -146,7 +142,7 @@ def main():
     print(f"{len(test_set)=}")
 
     m = model.use_resnet18_numbers(1)
-    train(train_set, m.model, m.device, m.loss_fn, m.optimizer)
+    train_loop(train_set, m.model, m.device, m.loss_fn, m.optimizer)
 
 
 if __name__ == '__main__':
