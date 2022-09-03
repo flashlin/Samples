@@ -19,6 +19,17 @@ def list_files(dir_path, pattern):
             yield fullname
 
 
+def list_files_by_paths(pattern, dir_paths):
+    for dir_path in dir_paths:
+        for file in list_files(dir_path, pattern):
+            yield file
+
+def concat_list(*list_files_list):
+    for list in list_files_list:
+        for file in list:
+            yield file
+
+
 def read_textfile(filename):
     with open(filename, "r") as f:
         data = f.read()
@@ -27,8 +38,7 @@ def read_textfile(filename):
 
 
 class MyDataset(torch.utils.data.Dataset):
-    def __init__(self, images_path, transform=None):
-        self.images_path = images_path
+    def __init__(self, images_paths):
         self.transform = trns.Compose([
             trns.Resize((220, 415)),
             #trns.RandomCrop((224, 224)),
@@ -41,13 +51,11 @@ class MyDataset(torch.utils.data.Dataset):
             trns.Normalize(mean=[0.485, 0.456, 0.406],
                            std=[0.229, 0.224, 0.225]),
         ])
-        if transform is not None:
-            self.transform = transform
         self.images = []
-        for image in list_files(images_path, "\.png$"):
+        for image in list_files_by_paths("\.png$", images_paths):
             self.images.append(image)
         self.labels = []
-        for txt in list_files(images_path, "\.txt$"):
+        for txt in list_files_by_paths("\.txt$", images_paths):
             lines = read_textfile(txt)
             self.labels.append(int(lines[0]))
 
@@ -83,6 +91,7 @@ def train(dataset, model, device, loss_fn, optimizer):
         for X, y in train_loader:
             X, y = X.to(device), y.to(device)
             pred = model(X)         # 計算預測值
+            #print(f"{X.shape=} {y.shape=} {pred.shape=}")
             loss = loss_fn(pred, y) # 計算損失值
             optimizer.zero_grad()   # 重設參數梯度(gradient)
             loss.backward()         # 反向傳播（backpropagation）
@@ -120,7 +129,11 @@ def train(dataset, model, device, loss_fn, optimizer):
 def main():
     torch.manual_seed(0)
 
-    dataset = MyDataset('D:/VDisk/Github/Samples/tf-jupyter/data')
+    dataset = MyDataset([
+        #'D:/VDisk/Github/Samples/tf-jupyter/data',
+        'D:/VDisk/Github/Samples/pytorch_sample1/data',
+        'D:/VDisk/Github/Samples/pytorch_sample1/data1',
+    ])
     print(f"{len(dataset)=}")
 
     train_set_size = int(len(dataset) * 0.7)
