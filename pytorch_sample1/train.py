@@ -10,7 +10,8 @@ import sys
 
 import model
 
-def query_files(dir_path, pattern):
+
+def query_files(dir_path: str, pattern: str):
     # print(f"query_files {dir_path=} {pattern=}")
     regex = re.compile(pattern)
     for name in os.listdir(dir_path):
@@ -20,16 +21,12 @@ def query_files(dir_path, pattern):
         if os.path.isfile(fullname):
             yield fullname
 
-def list_files(dir_path, pattern):
-    files = []
-    for file in query_files(dir_path, pattern):
-        files.append(file)
-    return files
 
-def query_files_by_paths(pattern, dir_paths):
+def query_files_by_paths(pattern: str, dir_paths):
     for dir_path in dir_paths:
-        for file in list_files(dir_path, pattern):
+        for file in query_files(dir_path, pattern):
             yield file
+
 
 def list_files_by_paths(pattern: str, dir_paths):
     files = []
@@ -37,9 +34,10 @@ def list_files_by_paths(pattern: str, dir_paths):
         files.append(file)
     return files
 
+
 def concat_list(*list_files_list):
-    for list in list_files_list:
-        for file in list:
+    for file_list in list_files_list:
+        for file in file_list:
             yield file
 
 
@@ -49,17 +47,15 @@ def read_textfile(filename):
         lines = data.split("\n")
         return lines
 
+
 def query_epoch_checkpoints(path: str, epoch: int):
-    epoch = epoch + 1
     loss_pattern = r'\d+.\d+'
     regex = re.compile(loss_pattern)
-    s_epoch = f"{epoch:05d}"
-    epoch_file_pattern = rf"{s_epoch}_({loss_pattern})_model\.pt$"
-    print(f"query_epoch_checkpoints {path=} {epoch_file_pattern=}")
-    for pt_file in list_files(path, epoch_file_pattern):
+    epoch_file_pattern = rf"{epoch+1:05d}_({loss_pattern})_model\.pt$"
+    for pt_file in query_files(path, epoch_file_pattern):
         print(f"query {pt_file=}")
         loss = float(regex.search(pt_file).group(1))
-        yield (pt_file, loss)
+        yield pt_file, loss
 
 
 def list_epoch_checkpoints(path: str, epoch: int):
@@ -68,17 +64,18 @@ def list_epoch_checkpoints(path: str, epoch: int):
         files.append(file)
     return files
 
+
 class MyDataset(torch.utils.data.Dataset):
     def __init__(self, images_paths):
         self.transform = trns.Compose([
             trns.Resize((220, 415)),
-            #trns.RandomCrop((224, 224)),
-            #trns.ColorJitter(brightness=0.1, contrast=0.1, saturation=0, hue=0.1),
-            #trns.GaussianBlur(11, sigma=(0.1, 2.0)),
-            #trns.RandomHorizontalFlip(),
-            #trns.RandomVerticalFlip(0.5),
+            # trns.RandomCrop((224, 224)),
+            # trns.ColorJitter(brightness=0.1, contrast=0.1, saturation=0, hue=0.1),
+            # trns.GaussianBlur(11, sigma=(0.1, 2.0)),
+            # trns.RandomHorizontalFlip(),
+            # trns.RandomVerticalFlip(0.5),
             trns.ToTensor(),
-            #trns.Lambda(lambda x: x.repeat(3, 1, 1)), # 灰階轉為 RGB
+            # trns.Lambda(lambda x: x.repeat(3, 1, 1)), # 灰階轉為 RGB
             trns.Normalize(mean=[0.485, 0.456, 0.406],
                            std=[0.229, 0.224, 0.225]),
         ])
@@ -107,7 +104,6 @@ class MyDataset(torch.utils.data.Dataset):
         return X, y
 
 
-
 def train(epoch, dataset, model, device, loss_fn, optimizer):
     size = len(dataset)
     params = {
@@ -119,15 +115,15 @@ def train(epoch, dataset, model, device, loss_fn, optimizer):
     model.train()
     train_loss_tmp = 0
     train_loss_avg = 0
-    #for X, y in train_loader:
+    # for X, y in train_loader:
     for batch_idx, (X, y) in enumerate(train_loader):
         X, y = X.to(device), y.to(device)
-        pred = model(X)         # 計算預測值
-        #print(f"{X.shape=} {y.shape=} {pred.shape=}")
-        loss = loss_fn(pred, y) # 計算損失值
-        optimizer.zero_grad()   # 重設參數梯度(gradient)
-        loss.backward()         # 反向傳播（backpropagation）
-        optimizer.step()        # 更新參數
+        pred = model(X)  # 計算預測值
+        # print(f"{X.shape=} {y.shape=} {pred.shape=}")
+        loss = loss_fn(pred, y)  # 計算損失值
+        optimizer.zero_grad()  # 重設參數梯度(gradient)
+        loss.backward()  # 反向傳播（backpropagation）
+        optimizer.step()  # 更新參數
 
         # 輸出訓練過程資訊
         loss, current = loss.item(), epoch * len(X)
@@ -135,8 +131,9 @@ def train(epoch, dataset, model, device, loss_fn, optimizer):
         train_loss_tmp += loss
         train_loss_avg = train_loss_tmp / (batch_idx + 1)
     print(f"{epoch=} loss: {train_loss_avg:>7f}")
-    #save_checkpoint(epoch, model, train_loss_avg, optimizer, f"./checkpoints/{epoch+1:05d}_{train_loss_avg:1.5f}_model.pt")
-    save_best_checkpoint(epoch, model, train_loss_avg, optimizer, f"./checkpoints/{epoch+1:05d}_{train_loss_avg:1.5f}_model.pt")
+    # save_checkpoint(epoch, model, train_loss_avg, optimizer, f"./checkpoints/{epoch+1:05d}_{train_loss_avg:1.5f}_model.pt")
+    save_best_checkpoint(epoch, model, train_loss_avg, optimizer,
+                         f"./checkpoints/{epoch + 1:05d}_{train_loss_avg:1.5f}_model.pt")
 
 
 def save_checkpoint(epoch, model, loss, optimizer, path="model.pt"):
@@ -145,7 +142,8 @@ def save_checkpoint(epoch, model, loss, optimizer, path="model.pt"):
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'loss': loss,
-        }, path)
+    }, path)
+
 
 def save_best_checkpoint(epoch: int, model, loss, optimizer, path="model.pt"):
     print(" ============================ ")
@@ -158,8 +156,9 @@ def save_best_checkpoint(epoch: int, model, loss, optimizer, path="model.pt"):
         return
     save_checkpoint(epoch, model, loss, optimizer, path)
 
+
 def get_best_checkpoint_file(path):
-    pt_files = list_files(path, "\\.pt$")
+    pt_files = query_files(path, "\\.pt$")
     regex = re.compile(r'\d+_(\d+\.\d+)_model\.pt$')
     min_loss = sys.maxsize
     file = ""
@@ -173,6 +172,7 @@ def get_best_checkpoint_file(path):
             file = pt_file
     return file
 
+
 def load_checkpoint(model, optimizer, path):
     checkpoint = torch.load(path)
     model.load_state_dict(checkpoint['model_state_dict'])
@@ -185,11 +185,12 @@ def train_loop(dataset, model, device, loss_fn, optimizer):
     for epoch in range(max_epochs):
         train(epoch, dataset, model, device, loss_fn, optimizer)
 
+
 def main():
     torch.manual_seed(0)
 
     dataset = MyDataset([
-        #'D:/VDisk/Github/Samples/tf-jupyter/data',
+        # 'D:/VDisk/Github/Samples/tf-jupyter/data',
         'D:/VDisk/Github/Samples/pytorch_sample1/data',
         'D:/VDisk/Github/Samples/pytorch_sample1/data/data1',
     ])
