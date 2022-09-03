@@ -63,7 +63,8 @@ def query_epoch_checkpoints(path: str, epoch: int):
 class MyDataset(torch.utils.data.Dataset):
     def __init__(self, images_paths):
         self.transform = trns.Compose([
-            trns.Resize((220, 415)),
+            # trns.Resize((220, 415)),
+            trns.Resize((132, 249)),
             # trns.RandomCrop((224, 224)),
             # trns.ColorJitter(brightness=0.1, contrast=0.1, saturation=0, hue=0.1),
             # trns.GaussianBlur(11, sigma=(0.1, 2.0)),
@@ -71,8 +72,7 @@ class MyDataset(torch.utils.data.Dataset):
             # trns.RandomVerticalFlip(0.5),
             trns.ToTensor(),
             # trns.Lambda(lambda x: x.repeat(3, 1, 1)), # 灰階轉為 RGB
-            trns.Normalize(mean=[0.485, 0.456, 0.406],
-                           std=[0.229, 0.224, 0.225]),
+            trns.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
         self.images = []
         for image in list_files_by_paths(r"\.png$", images_paths):
@@ -207,8 +207,9 @@ def main():
     m = model.use_resnet18_numbers(1)
 
     best_pt_file = get_best_checkpoint_file("./checkpoints")
-    info(f"load best {best_pt_file=}")
-    load_checkpoint(m.model, m.optimizer, best_pt_file)
+    if best_pt_file != "":
+        info(f"load best {best_pt_file=}")
+        load_checkpoint(m.model, m.optimizer, best_pt_file)
 
     train_loop(train_set, m.model, m.device, m.loss_fn, m.optimizer)
 
