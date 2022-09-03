@@ -6,10 +6,12 @@ import re
 from torchvision.io import read_image
 import torchvision.transforms as T
 from PIL import Image
+import sys
 
 import model
 
-def list_files(dir_path, pattern):
+def query_files(dir_path, pattern):
+    # print(f"query_files {dir_path=} {pattern=}")
     regex = re.compile(pattern)
     for name in os.listdir(dir_path):
         if regex.search(name) is None:
@@ -18,11 +20,22 @@ def list_files(dir_path, pattern):
         if os.path.isfile(fullname):
             yield fullname
 
+def list_files(dir_path, pattern):
+    files = []
+    for file in query_files(dir_path, pattern):
+        files.append(file)
+    return files
 
-def list_files_by_paths(pattern, dir_paths):
+def query_files_by_paths(pattern, dir_paths):
     for dir_path in dir_paths:
         for file in list_files(dir_path, pattern):
             yield file
+
+def list_files_by_paths(pattern: str, dir_paths):
+    files = []
+    for file in query_files_by_paths(pattern, dir_paths):
+        files.append(file)
+    return files
 
 def concat_list(*list_files_list):
     for list in list_files_list:
@@ -36,6 +49,24 @@ def read_textfile(filename):
         lines = data.split("\n")
         return lines
 
+def query_epoch_checkpoints(path: str, epoch: int):
+    epoch = epoch + 1
+    loss_pattern = r'\d+.\d+'
+    regex = re.compile(loss_pattern)
+    s_epoch = f"{epoch:05d}"
+    epoch_file_pattern = rf"{s_epoch}_({loss_pattern})_model\.pt$"
+    print(f"query_epoch_checkpoints {path=} {epoch_file_pattern=}")
+    for pt_file in list_files(path, epoch_file_pattern):
+        print(f"query {pt_file=}")
+        loss = float(regex.search(pt_file).group(1))
+        yield (pt_file, loss)
+
+
+def list_epoch_checkpoints(path: str, epoch: int):
+    files = []
+    for file in query_epoch_checkpoints(path, epoch):
+        files.append(file)
+    return files
 
 class MyDataset(torch.utils.data.Dataset):
     def __init__(self, images_paths):
@@ -104,7 +135,8 @@ def train(epoch, dataset, model, device, loss_fn, optimizer):
         train_loss_tmp += loss
         train_loss_avg = train_loss_tmp / (batch_idx + 1)
     print(f"{epoch=} loss: {train_loss_avg:>7f}")
-    save_checkpoint(epoch, model, train_loss_avg, optimizer, f"./checkpoints/{epoch+1:05d}_{train_loss_avg:1.5f}_model.pt")
+    #save_checkpoint(epoch, model, train_loss_avg, optimizer, f"./checkpoints/{epoch+1:05d}_{train_loss_avg:1.5f}_model.pt")
+    save_best_checkpoint(epoch, model, train_loss_avg, optimizer, f"./checkpoints/{epoch+1:05d}_{train_loss_avg:1.5f}_model.pt")
 
 
 def save_checkpoint(epoch, model, loss, optimizer, path="model.pt"):
@@ -114,6 +146,37 @@ def save_checkpoint(epoch, model, loss, optimizer, path="model.pt"):
         'optimizer_state_dict': optimizer.state_dict(),
         'loss': loss,
         }, path)
+
+def save_best_checkpoint(epoch: int, model, loss, optimizer, path="model.pt"):
+    print(" ============================ ")
+    pt_files = list_epoch_checkpoints("./data", epoch)
+    for (pt_file, old_loss) in pt_files:
+        print(f"{pt_file=} {old_loss=}")
+        if old_loss > loss:
+            os.remove(pt_file)
+            continue
+        return
+    save_checkpoint(epoch, model, loss, optimizer, path)
+
+def get_best_checkpoint_file(path):
+    pt_files = list_files(path, "\\.pt$")
+    regex = re.compile(r'\d+_(\d+\.\d+)_model\.pt$')
+    min_loss = sys.maxsize
+    file = ""
+    for pt_file in pt_files:
+        match = regex.search(pt_file)
+        if match is None:
+            continue
+        loss = float(match.group(1))
+        if loss < min_loss:
+            min_loss = loss
+            file = pt_file
+    return file
+
+def load_checkpoint(model, optimizer, path):
+    checkpoint = torch.load(path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
 
 
 def train_loop(dataset, model, device, loss_fn, optimizer):
@@ -142,6 +205,10 @@ def main():
     print(f"{len(test_set)=}")
 
     m = model.use_resnet18_numbers(1)
+
+    best_pt_file = get_best_checkpoint_file("./checkpoints")
+    load_checkpoint(m.model, m.optimizer, best_pt_file)
+
     train_loop(train_set, m.model, m.device, m.loss_fn, m.optimizer)
 
 
