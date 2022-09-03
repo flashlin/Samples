@@ -70,6 +70,7 @@ class MyDataset(torch.utils.data.Dataset):
             # trns.GaussianBlur(11, sigma=(0.1, 2.0)),
             # trns.RandomHorizontalFlip(),
             # trns.RandomVerticalFlip(0.5),
+            # trns.Grayscale(),
             trns.ToTensor(),
             # trns.Lambda(lambda x: x.repeat(3, 1, 1)), # 灰階轉為 RGB
             trns.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
