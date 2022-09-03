@@ -80,10 +80,10 @@ class MyDataset(torch.utils.data.Dataset):
                            std=[0.229, 0.224, 0.225]),
         ])
         self.images = []
-        for image in list_files_by_paths("\.png$", images_paths):
+        for image in list_files_by_paths(r"\.png$", images_paths):
             self.images.append(image)
         self.labels = []
-        for txt in list_files_by_paths("\.txt$", images_paths):
+        for txt in list_files_by_paths(r"\.txt$", images_paths):
             lines = read_textfile(txt)
             self.labels.append(int(lines[0]))
 
