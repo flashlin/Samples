@@ -17,3 +17,4 @@ GPUCache/
 .parcel-cache/
 data/
 logs/
+__pycache__/

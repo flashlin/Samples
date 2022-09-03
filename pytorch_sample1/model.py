@@ -61,18 +61,20 @@ class ResNet18Numbers(nn.Module):
       super().__init__() 
       self.model = models.resnet18(pretrained=True)
       set_pretrained_model(self.model)
-      self.model.fc = nn.Linear(512, 32)
+      # self.model.fc = nn.Linear(512, 32)
       # self.softmax = torch.nn.Softmax(dim=1)
-      self.fc2 = torch.nn.Linear(32, n_numbers)
+      self.fc1 = torch.nn.Linear(1000, 576)
+      self.fc2 = torch.nn.Linear(576, n_numbers)
       
    def forward(self, x):
       logits = self.model(x)
+      logits = self.fc1(logits)
       logits = self.fc2(logits)
       # logits = self.softmax(logits)
       # 因為會出現
       # UserWarning: Using a target size (torch.Size([64])) that is different to the input size (torch.Size([64,1]))
       # 故用下列方法降低維度
-      # logits = logits.squeeze(-1) # 降低維度, 相當於 logits = logits[:, -1]
+      logits = logits.squeeze(-1) # 降低維度, 相當於 logits = logits[:, -1]
       return logits
 
 
