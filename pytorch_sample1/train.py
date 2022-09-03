@@ -32,9 +32,9 @@ class MyDataset(torch.utils.data.Dataset):
         self.transform = trns.Compose([
             trns.Resize((220, 415)),
             #trns.RandomCrop((224, 224)),
-            trns.ColorJitter(brightness=0.1, contrast=0.1, saturation=0, hue=0.1),
+            #trns.ColorJitter(brightness=0.1, contrast=0.1, saturation=0, hue=0.1),
             #trns.GaussianBlur(11, sigma=(0.1, 2.0)),
-            trns.RandomHorizontalFlip(),
+            #trns.RandomHorizontalFlip(),
             #trns.RandomVerticalFlip(0.5),
             trns.ToTensor(),
             #trns.Lambda(lambda x: x.repeat(3, 1, 1)), # 灰階轉為 RGB
@@ -64,7 +64,7 @@ class MyDataset(torch.utils.data.Dataset):
         #   img = self.transform(img)
         X = img
         y = self.labels[index]
-        y = torch.tensor(y, dtype=torch.long)
+        y = torch.tensor(y, dtype=torch.float32)
         return X, y
 
 
@@ -89,9 +89,9 @@ def train(dataset, model, device, loss_fn, optimizer):
             optimizer.step()        # 更新參數
 
             # 輸出訓練過程資訊
-            if epoch % 2 == 0:
-                loss, current = loss.item(), epoch * len(X)
-                print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+            # if epoch % 2 == 0:
+            loss, current = loss.item(), epoch * len(X)
+            print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
 
     # # 將模型設定為訓練模式
