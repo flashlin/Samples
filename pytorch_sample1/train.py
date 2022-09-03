@@ -49,20 +49,13 @@ def read_textfile(filename):
 
 
 def query_epoch_checkpoints(path: str, epoch: int):
-    loss_pattern = r'\d+.\d+'
+    loss_pattern = r'(\d+.\d+)'
     regex = re.compile(loss_pattern)
-    epoch_file_pattern = rf"{epoch+1:05d}_({loss_pattern})_model\.pt$"
+    epoch_file_pattern = rf"{epoch+1:05d}_{loss_pattern}_model\.pt$"
+    # print(f"query_epoch_checkpoints {epoch_file_pattern=}")
     for pt_file in query_files(path, epoch_file_pattern):
-        print(f"query {pt_file=}")
         loss = float(regex.search(pt_file).group(1))
         yield pt_file, loss
-
-
-def list_epoch_checkpoints(path: str, epoch: int):
-    files = []
-    for file in query_epoch_checkpoints(path, epoch):
-        files.append(file)
-    return files
 
 
 class MyDataset(torch.utils.data.Dataset):
@@ -145,15 +138,13 @@ def save_checkpoint(epoch, model, loss, optimizer, path="model.pt"):
     }, path)
 
 
-def save_best_checkpoint(epoch: int, model, loss, optimizer, path="model.pt"):
-    print(" ============================ ")
-    pt_files = list_epoch_checkpoints("./data", epoch)
+def save_best_checkpoint(epoch: int, model, loss: float, optimizer, path="model.pt"):
+    pt_files = query_epoch_checkpoints("./checkpoints", epoch)
     for (pt_file, old_loss) in pt_files:
-        print(f"{pt_file=} {old_loss=}")
+        # print(f"delete {pt_file=} {old_loss=}")
         if old_loss > loss:
             os.remove(pt_file)
-            continue
-        return
+    # print(f"save_best_checkpoint {path=}")
     save_checkpoint(epoch, model, loss, optimizer, path)
 
 
