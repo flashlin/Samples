@@ -8,6 +8,8 @@ import torchvision.transforms as T
 from PIL import Image
 import sys
 
+import torch.optim.lr_scheduler
+
 import model
 
 
@@ -104,6 +106,7 @@ def train(epoch, dataset, model, device, loss_fn, optimizer):
         'shuffle': True,
         'num_workers': 1
     }
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
     train_loader = torch.utils.data.DataLoader(dataset, **params)
     model.train()
     train_loss_tmp = 0
@@ -117,10 +120,11 @@ def train(epoch, dataset, model, device, loss_fn, optimizer):
         optimizer.zero_grad()  # 重設參數梯度(gradient)
         loss.backward()  # 反向傳播（backpropagation）
         optimizer.step()  # 更新參數
+        scheduler.step()
 
         # 輸出訓練過程資訊
         loss, current = loss.item(), epoch * len(X)
-        print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
+        # print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
         train_loss_tmp += loss
         train_loss_avg = train_loss_tmp / (batch_idx + 1)
     print(f"{epoch=} loss: {train_loss_avg:>7f}")
@@ -171,14 +175,18 @@ def load_checkpoint(model, optimizer, path):
 
 
 def train_loop(dataset, model, device, loss_fn, optimizer):
-    max_epochs = 10
+    max_epochs = 20
     model.train()
     for epoch in range(max_epochs):
         train(epoch, dataset, model, device, loss_fn, optimizer)
 
+OKGREEN = '\033[92m'
+ENDC = '\033[0m'
+def info(msg):
+    print(OKGREEN + msg + ENDC)
 
 def main():
-    torch.manual_seed(0)
+    # torch.manual_seed(0)
 
     dataset = MyDataset([
         # 'D:/VDisk/Github/Samples/tf-jupyter/data',
@@ -199,6 +207,7 @@ def main():
     m = model.use_resnet18_numbers(1)
 
     best_pt_file = get_best_checkpoint_file("./checkpoints")
+    info(f"load best {best_pt_file=}")
     load_checkpoint(m.model, m.optimizer, best_pt_file)
 
     train_loop(train_set, m.model, m.device, m.loss_fn, m.optimizer)
