@@ -60,6 +60,7 @@ class ResNet18Numbers(nn.Module):
    def __init__(self, n_numbers):
       super().__init__() 
       self.model = models.resnet18(pretrained=True)
+      # self.model = models.resnet34(pretrained=True)
       set_pretrained_model(self.model)
       # self.model.fc = nn.Linear(512, 32)
       # self.softmax = torch.nn.Softmax(dim=1)
