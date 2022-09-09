@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.21.5" />
+    <PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" Version="2.48.0" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.48.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.48.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    <PackageReference Include="System.Linq.Async.Queryable" Version="6.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="Protos\ForwardProto.proto" GrpcServices="Both" />
+  </ItemGroup>
+</Project>

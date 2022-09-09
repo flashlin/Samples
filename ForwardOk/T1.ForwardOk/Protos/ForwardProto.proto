@@ -1,0 +1,41 @@
+﻿syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "GrpcForwarderKit";
+
+service GrpcForwarder {
+	// 一次
+	rpc Connect (ConnectRequest) returns (ConnectReply);
+	rpc Subscribe (SubscribeRequest) returns (stream DataReply);
+	rpc Send(SendRequest) returns (google.protobuf.Empty);
+}
+
+enum ForwardErrorCode {
+  Success = 0;
+  NotExists = 1;
+}
+
+message ConnectRequest {
+	string ServerName = 1;
+	int32 ServerPort = 2;
+}
+
+message ConnectReply {
+	ForwardErrorCode ErrorCode = 1;
+	string ConnectId = 2;
+}
+
+message SubscribeRequest {
+	string ConnectId = 1;
+}
+
+message DataReply {
+	ForwardErrorCode ErrorCode = 1;
+	string ConnectId = 2;
+	bytes Data = 3;
+}
+
+message SendRequest {
+	string ConnectId = 1;
+	bytes Data = 2;
+}
