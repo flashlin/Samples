@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using T1.ForwardOk.Sockets;
 
-namespace T1.ForwardOk;
+namespace T1.ForwardOk.Utils;
 
 public class AsyncSocket : IAsyncSocket
 {
@@ -18,7 +18,7 @@ public class AsyncSocket : IAsyncSocket
         _readBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
     }
 
-    public void BeginReceive(ReceiveAsyncCallback receiveCallback, Action closeCallback)
+    public void BeginReceive(ReceiveAsyncCallback receiveCallback, ClosedAsyncCallback closeCallback)
     {
         var state = new AsyncSocketState
         {
@@ -53,7 +53,7 @@ public class AsyncSocket : IAsyncSocket
         {
             var bytesRead = state.Socket.EndReceive(result);
             if (bytesRead <= 0) return;
-            state.ReceiveAsyncCallback(state.Buffer, bytesRead);
+            state.ReceiveAsyncCallback(state.Buffer, 0, bytesRead);
             state.Socket.BeginReceive(state.Buffer, 0, state.Buffer.Length, 0, OnDataReceive, state);
         }
         catch

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace T1.ForwardOk;
+namespace T1.ForwardOk.Utils;
 
 public static class StringEx
 {

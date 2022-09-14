@@ -1,10 +1,7 @@
-﻿using System.Net.Sockets;
-using Google.Protobuf;
+﻿using System.Net;
+using System.Net.Sockets;
 using Google.Protobuf.WellKnownTypes;
-using Grpc.Net.Client;
-using GrpcForwarderKit;
-using T1.ForwardOk;
-using T1.ForwardOk.Sockets;
+using T1.ForwardOk.Utils;
 
 namespace T1.ForwardOk
 {
@@ -14,11 +11,11 @@ namespace T1.ForwardOk
             new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
         private CancellationTokenSource? _cancellationTokenSource;
-        private IRemoteForwardOk? _remote;
+        private readonly IRemoteForwardConnection _remoteWeb;
 
-        public TcpForwarderSlim(IRemoteForwardOk remote)
+        public TcpForwarderSlim(IRemoteForwardConnection remoteWeb)
         {
-            _remote = remote;
+            _remoteWeb = remoteWeb;
         }
 
         public int BufferSize { get; set; } = 4 * 1024;
@@ -34,77 +31,26 @@ namespace T1.ForwardOk
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     var sourceSocket = await _mainSocket.AcceptAsync().ConfigureAwait(false);
-                    //_destination.Connect();
+                    await _remoteWeb.StartRemoteForwardAsync(new RemoteForwardReq
+                    {
+                        ServerEndpoint = destination,
+                    }).ConfigureAwait(false);
                     var source = new AsyncSocket(sourceSocket, BufferSize);
                     source.BeginReceive(OnSourceReceived, OnSourceClosed);
                 }
             }).ConfigureAwait(false);
         }
 
-        private void OnSourceClosed()
+        private Task OnSourceClosed()
         {
-            _remote?.Close();
+            _remoteWeb?.CloseAsync();
+            return Task.CompletedTask;
         }
 
         private Task OnSourceReceived(byte[] buffer, int offset, int bytes)
         {
-            _remote?.SendAsync(buffer, bytes);
+            _remoteWeb?.SendAsync(buffer, 0, bytes);
+            return Task.CompletedTask;
         }
-    }
-}
-
-
-public class GRpcClientAgent : IRemoteForwardOk
-{
-    private string _connectId = string.Empty;
-    private GrpcForwarder.GrpcForwarderClient _client = null!;
-    private CancellationTokenSource? _cancellationTokenSource;
-
-    public void Connect(ConnectRequest req)
-    {
-        _cancellationTokenSource = new CancellationTokenSource();
-        var channel = GrpcChannel.ForAddress($"http://{req.ServerName}:{req.ServerPort}");
-        _client = new GrpcForwarder.GrpcForwarderClient(channel);
-        var reply = _client.Connect(req);
-        _connectId = reply.ConnectId;
-    }
-
-    public void BeginReceive(ReceiveAsyncCallback receiveAsyncCallback, Action closeCallback)
-    {
-        Task.Run(async () =>
-        {
-            using var call = _client.Subscribe(new SubscribeRequest()
-            {
-                ConnectId = _connectId
-            });
-            while (await call.ResponseStream.MoveNext(_cancellationTokenSource!.Token))
-            {
-                var reply = call.ResponseStream.Current;
-                if (reply != null)
-                {
-                    receiveAsyncCallback(reply.Data.ToByteArray(), reply.Data.Length);
-                }
-            }
-        });
-    }
-
-    public void Close()
-    {
-    }
-
-    public void SendAsync(byte[] buffer, int bytes)
-    {
-        var data = new Span<byte>(buffer);
-        _client.Send(new SendRequest()
-        {
-            ConnectId = _connectId,
-            Data = ByteString.CopyFrom(data)
-        });
-    }
-
-    public void SendMessage(string message)
-    {
-        var bytes = message.FastToBytes();
-        SendAsync(bytes, bytes.Length);
     }
 }
