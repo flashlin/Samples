@@ -8,8 +8,9 @@ services.AddSingleton<TcpForwarderSlim>();
 var serviceProvider = services.BuildServiceProvider();
 Console.WriteLine("Hello, World!");
 
-var tcpForwarderSlim = serviceProvider.GetService<TcpForwarderSlim>();
+var tcpForwarderSlim = serviceProvider.GetService<TcpForwarderSlim>()!;
 
-tcpForwarderSlim.StartAsync("localhost:3000", "127.0.0.1:3001");
+await tcpForwarderSlim.StartAsync("localhost:3000", "127.0.0.1:3001");
+
 Console.WriteLine("END");
 Console.ReadLine();

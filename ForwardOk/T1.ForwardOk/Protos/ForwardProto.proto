@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 option csharp_namespace = "GrpcForwarderKit";
 
 service GrpcForwarder {
-	// 一次
+	rpc Ready(google.protobuf.Empty) returns (google.protobuf.Empty);
 	rpc Connect (ConnectRequest) returns (ConnectReply);
 	rpc Subscribe (SubscribeRequest) returns (stream DataReply);
 	rpc Send(SendRequest) returns (google.protobuf.Empty);
@@ -16,8 +16,7 @@ enum ForwardErrorCode {
 }
 
 message ConnectRequest {
-	string ServerName = 1;
-	int32 ServerPort = 2;
+	string ServerEndpoint = 1;  //127.0.0.1:8000
 }
 
 message ConnectReply {

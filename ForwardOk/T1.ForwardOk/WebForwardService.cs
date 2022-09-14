@@ -3,6 +3,7 @@ using Grpc.Core;
 using GrpcForwarderKit;
 using Microsoft.Extensions.Logging;
 using T1.ForwardOk.Sockets;
+using T1.ForwardOk.Utils;
 
 namespace T1.ForwardOk;
 
@@ -20,7 +21,7 @@ public class WebForwardService : GrpcForwarder.GrpcForwarderBase
 
     public override async Task<ConnectReply> Connect(ConnectRequest request, ServerCallContext context)
     {
-        var remoteAddress = await $"{request.ServerName}:{request.ServerPort}".ParseAddressesAsync()
+        var remoteAddress = await $"{request.ServerEndpoint}".ParseAddressesAsync()
             .FirstAsync().ConfigureAwait(false);
         var webForwardConnection = new WebForwardConnection();
         var destinationConnection = new TcpAsyncClient()

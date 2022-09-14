@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
+namespace T1.ForwardOk.Utils;
+
 public static class DnsEx
 {
     public static ConfiguredTaskAwaitable<IPAddress[]> GetAddressesAsync(this string hostNameOrAddress)
