@@ -19,3 +19,4 @@ data/
 logs/
 __pycache__/
 checkpoints/
+pytorch_bert/huggingface/

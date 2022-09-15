@@ -8,6 +8,8 @@ services.AddSingleton<TcpForwarderSlim>();
 var serviceProvider = services.BuildServiceProvider();
 Console.WriteLine("Hello, World!");
 
+new GrpcClientConnection();
+//var remoteWebForward = serviceProvider.GetService<IRemoteForwardConnection>();
 var tcpForwarderSlim = serviceProvider.GetService<TcpForwarderSlim>()!;
 
 await tcpForwarderSlim.StartAsync("localhost:3000", "127.0.0.1:3001");
