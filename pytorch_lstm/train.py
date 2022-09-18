@@ -248,7 +248,16 @@ def test():
    print(model.loss.quantiles)
    from pytorch_forecasting.metrics import NormalDistributionLoss
    print(NormalDistributionLoss(quantiles=[0.2, 0.8]).quantiles)
-   
+   ######
+   from pytorch_lightning import Trainer
+   model = FullyConnectedForDistributionLossModel.from_dataset(dataset, hidden_size=10, n_hidden_layers=2, log_interval=1)
+   trainer = Trainer(fast_dev_run=True)
+   trainer.fit(model, train_dataloaders=dataloader, val_dataloaders=dataloader)
+
+
+
+
+
 test()
 
 
