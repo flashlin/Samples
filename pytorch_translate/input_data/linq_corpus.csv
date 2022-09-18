@@ -1,0 +1,3 @@
+source_sentence,target_sentence
+from tb1 in customer select tb1,select tb1.* from customer as tb1
+"from tb1 in customer select new { tb1.id, tb1.name }","select tb1.id, tb1.name from customer as tb1"
