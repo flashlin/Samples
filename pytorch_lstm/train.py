@@ -244,7 +244,11 @@ def test():
    print("parameter predition shape: ", model(x)["prediction"].size())
    model.eval()  # set model into eval mode for sampling
    print("sample prediction shape: ", model(x, n_samples=200)["prediction"].size())
-
+   print(model.predict(dataloader, mode="quantiles", mode_kwargs=dict(n_samples=100)).shape)
+   print(model.loss.quantiles)
+   from pytorch_forecasting.metrics import NormalDistributionLoss
+   print(NormalDistributionLoss(quantiles=[0.2, 0.8]).quantiles)
+   
 test()
 
 
