@@ -1,3 +1,8 @@
 source_sentence,target_sentence
-from tb1 in customer select tb1,select tb1.* from customer as tb1
+"from tb1 in customer select tb1",select tb1.* from customer as tb1
 "from tb1 in customer select new { tb1.id, tb1.name }","select tb1.id, tb1.name from customer as tb1"
+"from tb2 in user select tb2",select tb2.* from user as tb2
+"from tb1 in customer from tb2 in user select { tb1, tb2 }","select tb1.*, tb2.* from customer as tb1, user as tb2"
+from tb1 in customer where tb1.name == "flash" select tb1.id,select tb1.id from customer as tb1 where tb1.name = 'flash'
+from tb1 in products where tb1.id=="1" && tb1.name=="banana" select tb1.home,select tb1.home from products as tb1 where tb1.id='1' and tb1.name='banana'
+"from tb1 in Playlists join tb2 in PlaylistTracks on tb1.PlaylistId equals tb2.PlaylistId select new { tb1.Name, tb2.TrackId }","SELECT tb1.Name, tb2.TrackId FROM Playlist as tb1 INNER JOIN PlaylistTrack as tb2 ON tb1.PlaylistId = tb2.PlaylistId"

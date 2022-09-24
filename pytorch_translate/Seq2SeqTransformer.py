@@ -16,14 +16,15 @@ import pickle
 from torch.nn import (TransformerEncoder, TransformerDecoder,
                       TransformerEncoderLayer, TransformerDecoderLayer)
 
-from token import TokenEmbedding, PositionalEncoding
+from train_utils import TokenEmbedding, PositionalEncoding
 
 NHEAD = 8
+
 
 class Seq2SeqTransformer(nn.Module):
     def __init__(self, num_encoder_layers: int, num_decoder_layers: int,
                  emb_size: int, src_vocab_size: int, tgt_vocab_size: int,
-                 dim_feedforward:int = 512, dropout:float = 0.1):
+                 dim_feedforward: int = 512, dropout: float = 0.1):
         super(Seq2SeqTransformer, self).__init__()
         encoder_layer = TransformerEncoderLayer(d_model=emb_size, nhead=NHEAD,
                                                 dim_feedforward=dim_feedforward)
@@ -49,10 +50,9 @@ class Seq2SeqTransformer(nn.Module):
 
     def encode(self, src: Tensor, src_mask: Tensor):
         return self.transformer_encoder(self.positional_encoding(
-                            self.src_tok_emb(src)), src_mask)
+            self.src_tok_emb(src)), src_mask)
 
     def decode(self, tgt: Tensor, memory: Tensor, tgt_mask: Tensor):
         return self.transformer_decoder(self.positional_encoding(
-                          self.tgt_tok_emb(tgt)), memory,
-                          tgt_mask)
-
+            self.tgt_tok_emb(tgt)), memory,
+            tgt_mask)
