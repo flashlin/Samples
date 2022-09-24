@@ -4,7 +4,22 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 from torch.nn.utils.rnn import pad_sequence
 from torchtext.vocab import Vocab
-from train import DEVICE
+
+
+class BACKGROUND_COLORS:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    END = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def info(message: str):
+    print(f"{BACKGROUND_COLORS.GREEN}{message}{BACKGROUND_COLORS.END}")
 
 
 class Vocabulary:
@@ -230,17 +245,9 @@ def get_valid_loader(dataset, train_dataset, batch_size, num_workers=0, shuffle=
     return loader
 
 
-def generate_square_subsequent_mask(sz):
-    mask = (torch.triu(torch.ones((sz, sz), device=DEVICE)) == 1).transpose(0, 1)
-    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-    return mask
-
-
 def build_vocab(filepath: str, tokenizer):
     counter = Counter()
     with io.open(filepath, encoding="utf8") as f:
         for string_ in f:
             counter.update(tokenizer(string_))
     return Vocab(counter, specials=['<unk>', '<pad>', '<bos>', '<eos>'])
-
-
