@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -115,4 +117,51 @@ END
 
 //		return sql;
 //	}
+//}
+
+
+//public class CustomQueryTranslationPreprocessor : QueryTranslationPreprocessor
+//{
+//	public CustomQueryTranslationPreprocessor(
+//		QueryTranslationPreprocessorDependencies dependencies,
+//		QueryCompilationContext queryCompilationContext)
+//		: base(dependencies, queryCompilationContext)
+//	{
+//	}
+
+//	public override Expression Process(Expression query)
+//	{
+//		return base.Process(query);
+//	}
+//}
+
+//public class CustomQueryTranslationPreprocessorFactory : IQueryTranslationPreprocessorFactory
+//{
+//	private readonly QueryTranslationPreprocessorDependencies dependencies;
+
+//	public CustomQueryTranslationPreprocessorFactory(QueryTranslationPreprocessorDependencies dependencies)
+//	{
+//		this.dependencies = dependencies;
+//	}
+
+//	public QueryTranslationPreprocessor Create(QueryCompilationContext queryCompilationContext)
+//	{
+//		return new CustomQueryTranslationPreprocessor(this.dependencies, queryCompilationContext);
+//	}
+//}
+
+//protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+//{
+//	optionsBuilder.UseSqlite(
+//		"Filename=TestDatabase.db",
+//		options =>
+//		{
+//			options.MigrationsAssembly(Assembly.GetExecutingAssembly().FullName);
+//		});
+
+//	optionsBuilder
+//		.ReplaceService<IQueryTranslationPreprocessorFactory, CustomQueryTranslationPreprocessorFactory>()
+//		.ReplaceService<IQuerySqlGeneratorFactory, CustomSqliteQuerySqlGeneratorFactory>();
+
+//	base.OnConfiguring(optionsBuilder);
 //}

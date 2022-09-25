@@ -1,11 +1,14 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using Microsoft.EntityFrameworkCore;
+
 using var context = new DemoDbContext();
 DemoDbContext.Initialize(context);
 
 
 var q1 = from tb1 in context.Customers
 			select tb1;
+var s1 = q1.ToQueryString();
 context.WriteLog(() =>
 {
 	var customer = q1.ToList();
