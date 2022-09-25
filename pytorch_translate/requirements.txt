@@ -8,3 +8,4 @@ spacy
 torchtext
 torch
 pandarallel
+nltk
