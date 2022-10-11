@@ -266,8 +266,7 @@ model_path = "./models/lstm.model"
 if os.path.exists(model_path):
    net.load_state_dict(torch.load(model_path))
    print(f"{net.eval()=}")
-   rc = predict('April')
-   print(f"{rc=}")
+   print(f"\r\n\r\n{predict(net, 'Elon Musk')=}")
 else:
    train_setup(net, lr = 0.0005, n_batches = 100, batch_size = 256)
    torch.save(net.state_dict(), model_path)
