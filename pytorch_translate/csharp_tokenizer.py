@@ -103,7 +103,9 @@ def read_operators(context: TokenContext):
     if token == "":
         return context
     if not (token in operators):
-        raise Exception(f"can't read '{token}'")
+        for ch in token:
+            context.tokens.append(ch)
+        return context
     context.tokens.append(token)
     return context
 
