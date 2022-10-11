@@ -253,19 +253,21 @@ class LSTM_net(nn.Module):
 n_hidden = 128
 net = LSTM_net(n_letters, n_hidden, n_languages)
 
+
+def predict(net, name):
+   output = infer(net, name)
+   val, indices = output.topk(3) #get top 3
+   lgs = [n for n in indices.detach().numpy()]
+   lgs = [convert_to_language(x) for x in lgs[0]]
+   return lgs
+
+
 model_path = "./models/lstm.model"
 if os.path.exists(model_path):
    net.load_state_dict(torch.load(model_path))
    print(f"{net.eval()=}")
-   output = infer(net, 'Stephen')
-   val, indices = output.topk(3) #get top 3
-   print("\r\n\r\n")
-   #print(f"{languages=}")
-   #print(f"{indices.detach().numpy()=}")
-   lgs = [n for n in indices.detach().numpy()]
-   lgs = [convert_to_language(x) for x in lgs[0]]
-   print(f"{val=}")
-   print(f"{lgs=}")
+   rc = predict('April')
+   print(f"{rc=}")
 else:
    train_setup(net, lr = 0.0005, n_batches = 100, batch_size = 256)
    torch.save(net.state_dict(), model_path)
