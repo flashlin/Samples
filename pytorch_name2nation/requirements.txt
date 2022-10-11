@@ -10,3 +10,6 @@ torch
 pandarallel
 nltk
 gensim
+matplotlib
+seaborn
+IPython
