@@ -1,0 +1,8 @@
+**/__pycache__
+**/data
+**/docker-images
+
+.gitignore
+.git
+.vscode
+dockerfile*
