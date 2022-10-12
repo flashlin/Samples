@@ -1,3 +1,4 @@
+#from __future__ import unicode_literals, print_function, division
 from io import open
 import os, string, random, time, math
 import matplotlib.pyplot as plt
@@ -8,14 +9,41 @@ from sklearn.model_selection import train_test_split
 import torch 
 import torch.nn as nn
 import torch.optim as optim
+import glob
+import unicodedata
 
 #clearing output
 from IPython.display import clear_output
+
+# Turn a Unicode string to plain ASCII, thanks to http://stackoverflow.com/a/518232/2809427
+all_letters = string.ascii_letters + " .,;'"
+n_letters = len(all_letters)
+def unicodeToAscii(s):
+    return ''.join(
+        c for c in unicodedata.normalize('NFD', s)
+        if unicodedata.category(c) != 'Mn'
+        and c in all_letters
+    )
+
+def findFiles(path): return glob.glob(path)
+
+def readLines(filename):
+    lines = open(filename, encoding='utf-8').read().strip().split('\n')
+    return [unicodeToAscii(line) for line in lines]
 
 languages = []
 data = []
 X = []
 y = []
+
+for filename in findFiles('data/names/*.txt'):
+    lang = os.path.splitext(os.path.basename(filename))[0]
+    if not lang in languages:
+        languages.append(lang)
+    languages.append(lang)
+    lines = readLines(filename)
+    for line in lines:
+        data.append((line, lang))
 
 with open("name2lang.txt", 'r') as f:
     #read the dataset
@@ -65,7 +93,7 @@ def name_rep(name):
 
 #function to create lang representation
 def nat_rep(lang):
-    return torch.tensor([languages.index(lang)], dtype=torch.long, device=device)
+    return torch.tensor([languages.index(lang)], dtype=torch.long)
 
 print(f'{name_rep("Kumar")=}')
 print(f'{nat_rep("Irish")=}')
@@ -107,7 +135,7 @@ class RNN_net(nn.Module):
         self.softmax = nn.LogSoftmax(dim = 1) #softmax for classification
     
     def forward(self, input_, hidden):
-        combined = torch.cat((input_, hidden), 1) #concatenate tensors on column wise
+        combined = torch.cat((input_, hidden), 1)
         hidden = self.i2h(combined) #generate hidden representation
         output = self.i2o(combined) #generate output representation
         output = self.softmax(output) #get the softmax label
@@ -134,7 +162,6 @@ def infer(net, name):
 
 
 #before training the network, make a inference to test the network
-
 output = infer(net, "Adam")
 index = torch.argmax(output)
 print(output, index)
@@ -293,6 +320,6 @@ class GRU_net(nn.Module):
 
 #hyperparameters
 n_hidden = 128
-net = LSTM_net(n_letters, n_hidden, n_languages)
+# net = LSTM_net(n_letters, n_hidden, n_languages)
 #train_setup(net, lr = 0.0005, n_batches = 100, batch_size = 256)
 
