@@ -1,1 +1,1 @@
-docker build -t fastapi-torch -f py3.9.dockerfile .
+docker build -t fastapi-py39 -f py3.9.dockerfile .

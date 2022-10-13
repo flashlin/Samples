@@ -1,0 +1,4 @@
+FROM fastapi-py39
+
+RUN pip3 install FastAPI
+COPY ./app /app
