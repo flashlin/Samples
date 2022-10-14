@@ -1,5 +1,6 @@
 import sys
 from fastapi import FastAPI
+from name2lang import NameToNationClassify
 
 version = f"{sys.version_info.major}.{sys.version_info.minor}"
 app = FastAPI()
@@ -11,11 +12,15 @@ async def read_root():
       "message": message
    }
 
-@app.get("/items/{item_id}")   
-def read_item(item_id: int, q: str=None):
+@app.get("/api/name2nation/{name}")
+def read_item(name: str):
+   name = name.strip()
+   model = NameToNationClassify("../models")
+   model.load_state()
+   rc = model.predict(name)
    return {
-      "item_id": item_id,
-      "q": q
+      "langs": rc,
    }
+
 
    
