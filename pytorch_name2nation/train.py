@@ -61,23 +61,22 @@ def train_setup(net, lr=0.01, n_batches=100, batch_size=10, momentum=0.9, displa
     opt = optim.SGD(model.parameters(), lr=lr, momentum=momentum)  # define a optimizer
     loss_arr = np.zeros(n_batches + 1)
     # iterate through all the batches
+    total_loss = 0
     for i in range(n_batches):
         loss_arr[i + 1] = (loss_arr[i] * i + net.train(opt, criterion, batch_size, X_train, y_train)) / (i + 1)
 
         if i % display_freq == display_freq - 1:
             #clear_output(wait=True)
-            print("Iteration number ", i + 1, "Top - 1 Accuracy:",
-                  round(net.eval(len(X_test), 1, X_test, y_test), 4),
-                  'Top-2 Accuracy:',
-                  round(net.eval(len(X_test), 2, X_test, y_test), 4), 'Loss:',
-                  round(loss_arr[i], 4)
+            print("Iteration number ", i + 1,
+                  "Top - 1 Accuracy:", round(net.eval(len(X_test), 1, X_test, y_test), 4),
+                  'Top-2 Accuracy:', round(net.eval(len(X_test), 2, X_test, y_test), 4),
+                  'Loss:', round(loss_arr[i], 4)
                   )
-            # plt.figure()
-            # plt.plot(loss_arr[1:i], "-*")
-            # plt.xlabel("Iteration")
-            # plt.ylabel("Loss")
-            # plt.show()
-            #print("\n\n")
+            plt.figure()
+            plt.plot(loss_arr[1:i], "-*")
+            plt.xlabel("Iteration")
+            plt.ylabel("Loss")
+            plt.show()
 
 
 # declare all the parameters
