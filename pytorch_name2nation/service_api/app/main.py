@@ -16,7 +16,7 @@ async def read_root():
 def read_item(name: str):
    name = name.strip()
    model = NameToNationClassify("../models")
-   model.load_state()
+   model.load_state("lstm1.model")
    rc = model.predict(name)
    return {
       "langs": rc,
