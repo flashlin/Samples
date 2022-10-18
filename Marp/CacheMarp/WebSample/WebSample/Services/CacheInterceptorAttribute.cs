@@ -14,16 +14,17 @@ public class CacheInterceptorAttribute : AbstractInterceptorAttribute
 	public override async Task Invoke(AspectContext context, AspectDelegate next)
 	{
 		var cacheKey = CreateCacheKey(context);
-		var cache = context.ServiceProvider.GetService<IMemoryCache>();
+		var cache = context.ServiceProvider.GetRequiredService<IMemoryCache>();
 		await _locker.WaitAsync();
 		try
 		{
-			var result = await cache.GetOrCreateAsync(cacheKey, async (_) =>
+			var cacheEntry = await cache.GetOrCreateAsync(cacheKey, async cacheEntry =>
 			{
 				await next(context);
-				return context.ReturnValue;
+				cacheEntry.Value = context.ReturnValue;
+				return cacheEntry;
 			});
-			context.ReturnValue = result;
+			context.ReturnValue = cacheEntry.Value;
 		}
 		finally
 		{
@@ -34,15 +35,8 @@ public class CacheInterceptorAttribute : AbstractInterceptorAttribute
 	private static string CreateCacheKey(AspectContext context)
 	{
 		var sb = new StringBuilder();
-		foreach (var item in context.ServiceMethod.GetParameters())
-		{
-			sb.Append(item.Name);
-		}
-		foreach (var value in context.Parameters)
-		{
-			sb.Append(value.GetHashCode());
-		}
-		return $"{context.ImplementationMethod.DeclaringType}.{context.ImplementationMethod.Name}." + sb.ToString();
+		sb.Append(string.Join("", context.Parameters.Select(x => x?.ToString())));
+		return $"{context.ImplementationMethod.DeclaringType}.{context.ImplementationMethod.Name}:" + sb.ToString();
 	}
 }
 
