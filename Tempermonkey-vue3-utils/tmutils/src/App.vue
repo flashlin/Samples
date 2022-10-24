@@ -10,17 +10,14 @@ const data = reactive({
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-  <main>
-    <TheWelcome />
-    <CodeExitor v-model="data.code" />
-  </main>
+  <div>
+    <nav>
+      <RouterLink to="/">Home</RouterLink>
+      <RouterLink to="/about">About</RouterLink>
+    </nav>
+    <!-- <CodeExitor v-model="data.code" /> -->
+    <RouterView />
+  </div>
 </template>
 
 <style scoped>
