@@ -1,5 +1,6 @@
 <template>
    <div class="editor" ref="dom"></div>
+   <div ref="statusbar"></div>
 </template>
 
 <script setup lang="ts">
@@ -12,12 +13,14 @@ import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 //import CssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 //import HtmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import TsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import { initVimMode } from 'monaco-vim';
 
 const props = defineProps<{
    modelValue: string,
 }>();
 
 const dom = ref();
+const statusbarRef = ref();
 
 const emit = defineEmits<{
    (e: 'update:modelValue', value: string): void
@@ -76,6 +79,9 @@ onMounted(() => {
       const value = instance.getValue();
       emit('update:modelValue', value);
    });
+
+   const vimMode = initVimMode(instance, statusbarRef.value)
+   //vimMode.dispose();
 });
 </script>
 
