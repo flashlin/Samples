@@ -1,6 +1,12 @@
+
+export type SelectorFn = <T>(item: T) => string;
+
 declare global {
   interface String {
     csvSplit(separator?: string): string[];
+  }
+  interface Array<T> {
+    getCsvHeaders(selector?: SelectorFn): T[];
   }
 }
 
@@ -31,7 +37,21 @@ String.prototype.csvSplit = function (separator: string=',') {
   }
 
   return row;
-};
+}
+
+const defaultGetCsvHeaderSelector = <T>(item: T) => {
+  let obj: any = item;
+  return obj as string;
+}
+
+Array.prototype.getCsvHeaders = function<T>(selector: SelectorFn=defaultGetCsvHeaderSelector) {
+  let columns: any[] = [];
+  let line = this[0];
+  line.csvSplit().forEach((item: T, _: number) => {
+    columns.push(selector(item));
+  });
+  return columns;
+}
 
 function group(context: string) {
   return `(?:${context})`;

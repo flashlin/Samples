@@ -47,11 +47,14 @@ function convertToClassValues() {
   let columns: string[] = [];
   let result = "";
   let lines = data.sourceText.csvSplit('\n');
+
+  columns = lines.getCsvHeaders();
+
   data.targetProperties = [];
   lines.forEach((line, index) => {
     if (index == 0) {
       line.csvSplit().forEach((name, fieldIdx) => {
-        columns.push(name);
+        //columns.push(name);
         data.targetProperties.push(new ClassProperty({
           name: name,
           type: VarType.String

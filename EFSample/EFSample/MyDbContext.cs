@@ -12,6 +12,12 @@ public class MyDbContext : DbContext
     }
     
     public DbSet<Customer> Customers { get; set; } = null!;
+
+    protected override void OnConfiguring(Microsoft.EntityFrameworkCore.DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        base.OnConfiguring(optionsBuilder);
+    }
 }
 
 [Table("Customer")]

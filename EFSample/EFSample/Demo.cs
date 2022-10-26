@@ -1,4 +1,6 @@
-﻿namespace EFSample;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EFSample;
 
 public class Demo
 {
@@ -25,19 +27,29 @@ public class Demo
         var customer2 = new Customer()
         {
             Id = customerId,
-            Name = "jack",
+            Name = "jack1233",
             Price = 3
         };
         db.Entry(customer2).Property(x => x.Name).IsModified = true;
         db.SaveChanges();
     }
+    
+    public class TopUser
+    {
+        public string Name { get; set; } = null!;
+    }
 
     public void TestSqliteMemory()
     {
-        SQLitePCL.Batteries.Init();
         using var db = new MyDbContext(DbContextOptionsBuilder.UseSqliteMemory<MyDbContext>("North"));
-        var ok = db.Database.EnsureCreated();
-        Console.WriteLine($"{ok}");
+        db.Database.EnsureCreated();
+        //var sql = db.Database.GenerateCreateScript();
+        //db.Database.ExecuteSqlRaw(sql);
+
+        // var tables = db.RawSqlQuery($"SELECT name FROM sqlite_schema WHERE type ='table'", dr => new TopUser
+        // {
+        //     Name = (string)dr[0]
+        // });
         
         if (!db.Customers.Any(x => x.Name == "flash"))
         {
@@ -51,17 +63,19 @@ public class Demo
             db.SaveChanges();
         }
 
-        var customerId = db.Customers.Where(x => x.Id == 1)
-            .Select(x => x.Id)
+        //db.ChangeTracker.Clear();
+        var customer2 = db.Customers.AsNoTracking().Where(x => x.Id == 1)
+            .Select(x => new Customer
+            {
+                Id = x.Id,
+            })
             .First();
 
-        var customer2 = new Customer()
-        {
-            Id = customerId,
-            Name = "jack",
-            Price = 3
-        };
+        customer2.Name = "jack";
         db.Entry(customer2).Property(x => x.Name).IsModified = true;
         db.SaveChanges();
+
+        //db.ChangeTracker.Clear();
+        var customer3 = db.Customers.First();
     }
 }
