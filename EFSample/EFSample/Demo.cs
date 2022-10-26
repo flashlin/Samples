@@ -37,6 +37,7 @@ public class Demo
         SQLitePCL.Batteries.Init();
         using var db = new MyDbContext(DbContextOptionsBuilder.UseSqliteMemory<MyDbContext>("North"));
         var ok = db.Database.EnsureCreated();
+        Console.WriteLine($"{ok}");
         
         if (!db.Customers.Any(x => x.Name == "flash"))
         {
