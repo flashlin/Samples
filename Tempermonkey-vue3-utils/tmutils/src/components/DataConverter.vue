@@ -4,6 +4,8 @@ import Button from 'primevue/button';
 import Datatable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
+
 import { reactive, ref } from 'vue';
 import '@/models/csv-parser';
 import { ClassProperty, VarType, type IDataConverterData } from '@/typings/convert-models';
@@ -14,8 +16,9 @@ import { ClassProperty, VarType, type IDataConverterData } from '@/typings/conve
 
 let data = reactive<IDataConverterData>({
   sourceText: "",
+  className: "MyClass",
+  targetProperties: [],
   targetText: "",
-  targetProperties: []
 });
 
 let varTypes = ref([
@@ -49,21 +52,17 @@ function convertToClassValues() {
   let lines = data.sourceText.csvSplit('\n');
 
   columns = lines.getCsvHeaders();
-
   data.targetProperties = [];
-  lines.forEach((line, index) => {
-    if (index == 0) {
-      line.csvSplit().forEach((name, fieldIdx) => {
-        //columns.push(name);
-        data.targetProperties.push(new ClassProperty({
-          name: name,
-          type: VarType.String
-        }));
-      });
-      return;
-    }
+  columns.forEach((name, idx) => {
+    data.targetProperties.push(new ClassProperty({
+      name: name,
+      type: VarType.String
+    }));
+  });
+
+  lines.slice(1).forEach((line, index) => {
     let code = "";
-    code += "new Class { \r\n";
+    code += `new ${data.className} { \r\n`;
     line.csvSplit().forEach((elem, idx) => {
       let name = columns[idx];
       code += `${name} = ${elem}`;
@@ -90,6 +89,9 @@ function convertToClassValues() {
       <Textarea v-model="data.sourceText" rows="10" cols="80"></Textarea>
     </div>
     <div>
+      <InputText type="text" v-model="data.className" />
+    </div>
+    <div>
       <Datatable :value="data.targetProperties" responsive-layout="scroll">
         <template #header>
           <div class="table-header">
@@ -100,12 +102,8 @@ function convertToClassValues() {
         <Column field="name" header="Name"></Column>
         <Column field="type" header="Type">
           <template #body="slotProps">
-            <Dropdown v-model="slotProps.data.type" 
-              :options="varTypes" 
-              optionLabel="text" 
-              optionValue="value"
-              :filter="true"
-              placeholder="Select a VarType" :showClear="false">
+            <Dropdown v-model="slotProps.data.type" :options="varTypes" optionLabel="text" optionValue="value"
+              :filter="true" placeholder="Select a VarType" :showClear="false">
               <!-- <template #value="slotProps">
                 <div v-if="slotProps.value">
                   <div>{{ slotProps.value.text }}</div>
