@@ -8,7 +8,7 @@ import InputText from 'primevue/inputtext';
 
 import { reactive, ref } from 'vue';
 import '@/models/csv-parser';
-import { ClassProperty, VarType, type IDataConverterData } from '@/typings/convert-models';
+import { ClassProperty, CsvStringToInt32, CsvStringToString, VarType, type ICodeConverter, type IDataConverterData } from '@/typings/convert-models';
 
 // defineProps<{
 //   msg: string
@@ -19,12 +19,18 @@ let data = reactive<IDataConverterData>({
   className: "MyClass",
   targetProperties: [],
   targetText: "",
+  lines: []
 });
 
 let varTypes = ref([
   { text: 'String', value: VarType.String },
   { text: 'Int32', value: VarType.Int32 },
 ]);
+
+let codeConverter: Record<VarType, ICodeConverter> = {
+  [VarType.String]: new CsvStringToString(),
+  [VarType.Int32]: new CsvStringToInt32(),
+};
 
 function convertToJson() {
   let columns: string[] = [];
@@ -46,26 +52,14 @@ function convertToJson() {
   data.targetText = JSON.stringify(result);
 }
 
-function convertToClassValues() {
-  let columns: string[] = [];
+function linesToClass(columns: ClassProperty[], lines: string[]) {
   let result = "";
-  let lines = data.sourceText.csvSplit('\n');
-
-  columns = lines.getCsvHeaders();
-  data.targetProperties = [];
-  columns.forEach((name, idx) => {
-    data.targetProperties.push(new ClassProperty({
-      name: name,
-      type: VarType.String
-    }));
-  });
-
-  lines.slice(1).forEach((line, index) => {
+  lines.forEach((line, index) => {
     let code = "";
     code += `new ${data.className} { \r\n`;
     line.csvSplit().forEach((elem, idx) => {
-      let name = columns[idx];
-      code += `${name} = ${elem}`;
+      let column = columns[idx];
+      code += `${column.name} = ${codeConverter[column.type].to(elem)}`;
       if (idx < columns.length - 1) {
         code += ',';
       }
@@ -79,7 +73,28 @@ function convertToClassValues() {
     code += "\r\n"
     result += code;
   });
-  data.targetText = result;
+  return result
+}
+
+function convertToClassValues() {
+  let columns: string[] = [];
+  let lines = data.sourceText.csvSplit('\n');
+
+  columns = lines.getCsvHeaders();
+  data.targetProperties = [];
+  columns.forEach((name, idx) => {
+    data.targetProperties.push(new ClassProperty({
+      name: name,
+    }));
+  });
+
+  data.lines = lines.slice(1);
+  data.targetText = linesToClass(data.targetProperties, data.lines);
+}
+
+function onRefreshToClassValues() {
+  console.log("refres", data.targetProperties);
+  data.targetText = linesToClass(data.targetProperties, data.lines);
 }
 </script>
 
@@ -95,8 +110,7 @@ function convertToClassValues() {
       <Datatable :value="data.targetProperties" responsive-layout="scroll">
         <template #header>
           <div class="table-header">
-            Name
-            <Button icon="pi pi-refresh"></Button>
+            Class Properties <Button icon="pi pi-refresh" :onclick="onRefreshToClassValues"></Button>
           </div>
         </template>
         <Column field="name" header="Name"></Column>

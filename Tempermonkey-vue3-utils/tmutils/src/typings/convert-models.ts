@@ -1,22 +1,37 @@
-export enum VarType 
-{
-   String,
-   Int32
+export enum VarType {
+  String,
+  Int32,
 }
 
-export class ClassProperty 
-{
-   constructor(options?: Partial<ClassProperty>) {
-      Object.assign(this, options);
-   }
+export interface ICodeConverter {
+  to(item: string): string;
+}
 
-   public name: string = "";
-   public type: VarType = VarType.String;
+export class CsvStringToString implements ICodeConverter {
+  to(item: string): string {
+    return `"${item}"`;
+  }
+}
+
+export class CsvStringToInt32 implements ICodeConverter {
+  to(item: string): string {
+    return item;
+  }
+}
+
+export class ClassProperty {
+  constructor(options?: Partial<ClassProperty>) {
+    Object.assign(this, options);
+  }
+
+  name: string = "";
+  type: VarType = VarType.String;
 }
 
 export interface IDataConverterData {
-   sourceText: string;
-   className: string;
-   targetProperties: ClassProperty[];
-   targetText: string;
+  sourceText: string;
+  className: string;
+  targetProperties: ClassProperty[];
+  targetText: string;
+  lines: string[];
 }
