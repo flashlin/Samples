@@ -16,6 +16,7 @@ export class ClassProperty
 
 export interface IDataConverterData {
    sourceText: string;
-   targetText: string;
+   className: string;
    targetProperties: ClassProperty[];
+   targetText: string;
 }
