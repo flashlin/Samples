@@ -86,10 +86,8 @@ function linesToClass(columns: ClassProperty[], lines: string[]) {
   return result
 }
 
-function convertToClassValues() {
+function getColumns(lines: string[]) {
   let columns: string[] = [];
-  let lines = data.sourceText.csvSplit('\n');
-
   columns = lines.getCsvHeaders();
   data.targetProperties = [];
   columns.forEach((name, idx) => {
@@ -97,13 +95,17 @@ function convertToClassValues() {
       name: name,
     }));
   });
+}
+
+function convertToClassValues() {
+  let lines = data.sourceText.csvSplit('\n');
+  getColumns(lines);
 
   data.lines = lines.slice(1);
   data.targetText = linesToClass(data.targetProperties, data.lines);
 }
 
 function onRefreshToClassValues() {
-  console.log("refres", data.targetProperties);
   data.targetText = linesToClass(data.targetProperties, data.lines);
 }
 </script>
