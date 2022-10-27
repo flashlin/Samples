@@ -114,8 +114,8 @@ function onRefreshToClassValues() {
       <Textarea v-model="data.sourceText" rows="10" cols="80"></Textarea>
     </div>
     <div>
-      <InputText type="text" v-model="data.className" />
-      <Checkbox v-model="data.isCamelCase" :binary="true" />
+      Class Name <InputText type="text" v-model="data.className" />
+      <Checkbox v-model="data.isCamelCase" :binary="true" /> CamelCase
     </div>
     <div>
       <Datatable :value="data.targetProperties" responsive-layout="scroll">
