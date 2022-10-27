@@ -34,4 +34,5 @@ export interface IDataConverterData {
   targetProperties: ClassProperty[];
   targetText: string;
   lines: string[];
+  isCamelCase: boolean;
 }

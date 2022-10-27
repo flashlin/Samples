@@ -5,6 +5,7 @@ import Datatable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
+import Checkbox from 'primevue/checkbox';
 
 import { reactive, ref } from 'vue';
 import '@/models/csv-parser';
@@ -19,7 +20,8 @@ let data = reactive<IDataConverterData>({
   className: "MyClass",
   targetProperties: [],
   targetText: "",
-  lines: []
+  lines: [],
+  isCamelCase: true,
 });
 
 let varTypes = ref([
@@ -31,6 +33,13 @@ let codeConverter: Record<VarType, ICodeConverter> = {
   [VarType.String]: new CsvStringToString(),
   [VarType.Int32]: new CsvStringToInt32(),
 };
+
+function camelCase(text: string) {
+  if (!data.isCamelCase) {
+    return text;
+  }
+  return text.substring(0, 1).toUpperCase() + text.substring(1);
+}
 
 function convertToJson() {
   let columns: string[] = [];
@@ -59,7 +68,8 @@ function linesToClass(columns: ClassProperty[], lines: string[]) {
     code += `new ${data.className} { \r\n`;
     line.csvSplit().forEach((elem, idx) => {
       let column = columns[idx];
-      code += `${column.name} = ${codeConverter[column.type].to(elem)}`;
+      let propertyName = camelCase(column.name);
+      code += `\t${propertyName} = ${codeConverter[column.type].to(elem)}`;
       if (idx < columns.length - 1) {
         code += ',';
       }
@@ -105,6 +115,7 @@ function onRefreshToClassValues() {
     </div>
     <div>
       <InputText type="text" v-model="data.className" />
+      <Checkbox v-model="data.isCamelCase" :binary="true" />
     </div>
     <div>
       <Datatable :value="data.targetProperties" responsive-layout="scroll">
