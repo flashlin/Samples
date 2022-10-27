@@ -41,24 +41,26 @@ function camelCase(text: string) {
   return text.substring(0, 1).toUpperCase() + text.substring(1);
 }
 
-function convertToJson() {
-  let columns: string[] = [];
+function linesToJson(columns: ClassProperty[], lines: string[])
+{
   let result: object[] = [];
-  data.sourceText.csvSplit('\n').forEach((line, index) => {
-    if (index == 0) {
-      line.csvSplit().forEach((name, fieldIdx) => {
-        columns.push(name);
-      });
-      return;
-    }
+  lines.forEach((line, index) => {
     let obj: any = {};
     line.csvSplit().forEach((elem, idx) => {
-      let name = columns[idx];
+      let name = columns[idx].name;
       obj[name] = elem;
     });
     result.push(obj);
   });
-  data.targetText = JSON.stringify(result);
+  console.log('aaa', result);
+  return JSON.stringify(result);
+}
+
+function convertToJson() {
+  let lines = data.sourceText.csvSplit('\n');
+  getColumns(lines);
+  data.lines = lines.slice(1);
+  data.targetText = linesToJson(data.targetProperties, data.lines);
 }
 
 function linesToClass(columns: ClassProperty[], lines: string[]) {
@@ -97,7 +99,7 @@ function getColumns(lines: string[]) {
   });
 }
 
-function convertToClassValues() {
+function convertToClass() {
   let lines = data.sourceText.csvSplit('\n');
   getColumns(lines);
 
@@ -105,8 +107,12 @@ function convertToClassValues() {
   data.targetText = linesToClass(data.targetProperties, data.lines);
 }
 
-function onRefreshToClassValues() {
+function onRefreshToClass() {
   data.targetText = linesToClass(data.targetProperties, data.lines);
+}
+
+function onRefreshToJson() {
+  data.targetText = linesToJson(data.targetProperties, data.lines);
 }
 </script>
 
@@ -123,7 +129,9 @@ function onRefreshToClassValues() {
       <Datatable :value="data.targetProperties" responsive-layout="scroll">
         <template #header>
           <div class="table-header">
-            Class Properties <Button icon="pi pi-refresh" :onclick="onRefreshToClassValues"></Button>
+            <Button :onclick="onRefreshToClass">Refresh Class</Button>
+            &nbsp;
+            <Button :onclick="onRefreshToJson">Refresh Json</Button>
           </div>
         </template>
         <Column field="name" header="Name"></Column>
@@ -155,7 +163,9 @@ function onRefreshToClassValues() {
       <Textarea v-model="data.targetText" rows="10" cols="80"></Textarea>
     </div>
     <div class="mb-3">
-      <Button label="ToClass" :onclick="convertToClassValues"></Button>
+      <Button label="ToClass" :onclick="convertToClass"></Button>
+      &nbsp;
+      <Button label="ToJson" :onclick="convertToJson"></Button>
     </div>
   </div>
 </template>
