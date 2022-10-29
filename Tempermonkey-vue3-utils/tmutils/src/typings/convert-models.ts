@@ -41,4 +41,5 @@ export interface IDataConverterData {
   isCamelCase: boolean;
   separator: string;
   templateText: string;
+  isAddBreak: boolean;
 }
