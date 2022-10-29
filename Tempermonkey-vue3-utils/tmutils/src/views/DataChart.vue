@@ -1,11 +1,27 @@
 <script setup lang="ts">
 import LineChart from "@/components/LineChart.vue";
+import type { IChartDataSet } from "@/models/LineChartModel";
 
+const dataset: IChartDataSet = {
+  labels: ["2019", "2020", "2021"],
+  data: [
+    {
+      title: "title1",
+      data: [1, 2, 3],
+      color: "White"
+    },
+    {
+      title: "title2",
+      data: [3, 4, 1],
+      color: "Red"
+    }
+  ]
+}
 </script>
 
 <template>
   <div>
-    <LineChart></LineChart>
+    <LineChart :modelValue="dataset"></LineChart>
   </div>
 </template>
 
