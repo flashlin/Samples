@@ -10,14 +10,11 @@ const router = createRouter({
       component: DataConverterView
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('@/views/DataConverter.vue')
+      path: '/dataChart',
+      name: 'dataChart',
+      component: () => import('@/views/DataChart.vue')
     }
   ]
-})
+});
 
-export default router
+export default router;

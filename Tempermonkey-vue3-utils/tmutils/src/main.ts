@@ -19,8 +19,7 @@ app.use(router);
 //app.mount("#app");
 const div = document.querySelector("#app");
 if( div != null) {
-   console.log("mount logo");
    app.mount(div);
 } else {
-   console.error("mount logo fail");
+   console.error("mount app fail");
 }
