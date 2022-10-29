@@ -1,52 +1,43 @@
 <script setup lang="ts">
-import type { ILineChartData } from '@/models/LineChartModel';
+import type { IChartDataSet } from '@/models/LineChartModel';
 import { Chart, type ChartConfiguration, type ChartData, registerables, LineController, LineElement, PointElement, LinearScale, Title } from 'chart.js'
 import { onMounted, reactive, ref } from 'vue';
 
-// defineProps<{
-//   msg: string
-// }>()
+
+const props = defineProps<{
+  modelValue: IChartDataSet,
+}>();
+
 Chart.register(...registerables);
-Chart.register(LineController, LineElement, PointElement, LinearScale, 
+Chart.register(LineController, LineElement, PointElement, LinearScale,
   Title);
 
 const chartRef = ref<HTMLCanvasElement>();
-
 const colors = ["White", 'Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'];
 
-const data = reactive<ILineChartData>({
-  labels: ["a", "b", "c", "d"],
-  data: [
-    30, 90, 60, 80,
-  ],
-});
 
 onMounted(() => {
-  //ChartDataset
+  const datasets = props.modelValue.data.map((item) => {
+    return {
+      label: item.title,
+      data: item.data,
+      backgroundColor: item.color,
+    };
+  });
+
   createChart({
-    labels: data.labels,
-    datasets: [
-      {
-        label: '# of Votes',
-        data: data.data,
-        backgroundColor: "White",
-      },
-      {
-        label: '# of Votes 2',
-        data: data.data,
-        backgroundColor: "Red"
-      }
-    ],
+    labels: props.modelValue.labels,
+    datasets,
   })
 });
 
 function createChart(chartData: ChartData) {
-    const options: ChartConfiguration = {
-      type: 'bar', //'line', 'doughnut',
-      data: chartData,
-    }
-    return new Chart(chartRef.value!, options);
+  const options: ChartConfiguration = {
+    type: 'bar', //'line', 'doughnut',
+    data: chartData,
   }
+  return new Chart(chartRef.value!, options);
+}
 </script>
 
 <template>
