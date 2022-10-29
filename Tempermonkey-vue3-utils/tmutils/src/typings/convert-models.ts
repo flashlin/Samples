@@ -34,7 +34,9 @@ export interface IDataConverterData {
   sourceLine: string;
   className: string;
   targetProperties: ClassProperty[];
-  targetText: string;
+  targetText1: string;
+  targetText2: string;
+  targetText3: string;
   lines: string[];
   isCamelCase: boolean;
   separator: string;
