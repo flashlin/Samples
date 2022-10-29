@@ -29,7 +29,9 @@ export class ClassProperty {
 }
 
 export interface IDataConverterData {
-  sourceText: string;
+  sourceCsvText: string;
+  sourceObjArrJson: string;
+  sourceLine: string;
   className: string;
   targetProperties: ClassProperty[];
   targetText: string;
