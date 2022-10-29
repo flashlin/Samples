@@ -19,14 +19,16 @@ import { ClassProperty, CsvStringToInt32, CsvStringToString, VarType, type ICode
 // }>()
 
 let data = reactive<IDataConverterData>({
-  sourceText: "",
+  sourceCsvText: `id,name\n1,flash\n2,jack`,
+  sourceObjArrJson: `[{"id":"1","name":"flash"},{"id":"2","name":"jack"}]`,
+  sourceLine: `1,2,3,4`,
   className: "MyClass",
   targetProperties: [],
   targetText: "",
   lines: [],
   isCamelCase: true,
   separator: ',',
-  templateText: "name: $0",
+  templateText: "name: ${this.id}",
 });
 
 let varTypes = ref([
@@ -57,7 +59,7 @@ function lineToLines(line: string) {
 }
 
 function onLineToLines() {
-  lineToLines(data.sourceText);
+  lineToLines(data.sourceLine);
 }
 
 function dataLinesToJson(columns: ClassProperty[], lines: string[]) {
@@ -84,11 +86,11 @@ function objArrayJsonToText(objArrayJsonString: string): string {
 }
 
 function onObjArrayJsonToText() {
-  data.targetText = objArrayJsonToText(data.sourceText);
+  data.targetText = objArrayJsonToText(data.sourceObjArrJson);
 }
 
 function onConvertToJson() {
-  let lines = data.sourceText.csvSplit('\n');
+  let lines = data.sourceCsvText.csvSplit('\n');
   convertToColumns(lines);
   data.lines = lines.slice(1);
   data.targetText = dataLinesToJson(data.targetProperties, data.lines);
@@ -135,7 +137,7 @@ function convertToColumns(lines: string[]) {
 }
 
 function onConvertToClass() {
-  let lines = data.sourceText.csvSplit('\n');
+  let lines = data.sourceCsvText.csvSplit('\n');
   convertToColumns(lines);
 
   data.lines = lines.slice(1);
@@ -153,11 +155,11 @@ function onRefreshToJson() {
 
 <template>
   <div>
-    <div class="mb-3">
-      <Textarea v-model="data.sourceText" rows="10" cols="80"></Textarea>
-    </div>
     <TabView>
       <TabPanel header="Csv To Class">
+        <div class="mb-3">
+          <Textarea v-model="data.sourceCsvText" rows="10" cols="80"></Textarea>
+        </div>
         <div class="mb-3">
           <Button label="ToClass" :onclick="onConvertToClass"></Button>
           &nbsp;
@@ -204,14 +206,26 @@ function onRefreshToJson() {
         </div>
       </TabPanel>
       <TabPanel header="Line To Lines">
-        separator
-        <InputText type="text" v-model="data.separator" />
-        &nbsp;
-        <Button :onclick="onLineToLines">line to lines</Button>
+        <div class="mb-3">
+          <Textarea v-model="data.sourceLine" rows="3" cols="80"></Textarea>
+        </div>
+        <div class="mb-3">
+          separator
+          <InputText type="text" v-model="data.separator" />
+          &nbsp;
+          <Button :onclick="onLineToLines">line to lines</Button>
+        </div>
       </TabPanel>
       <TabPanel header="Obj Array Json To Text">
-        <Button :onclick="onObjArrayJsonToText">Obj Array Json to Text</Button>
-        <Textarea v-model="data.templateText" rows="5" cols="80"></Textarea>
+        <div class="mb-3">
+          <Textarea v-model="data.sourceObjArrJson" rows="10" cols="80"></Textarea>
+        </div>
+        <div class="mb-3">
+          <Button :onclick="onObjArrayJsonToText">Obj Array Json to Text</Button>
+        </div>
+        <div class="mb-3">
+          <Textarea v-model="data.templateText" rows="5" cols="80"></Textarea>
+        </div>
       </TabPanel>
     </TabView>
     <div class="mb-3">
