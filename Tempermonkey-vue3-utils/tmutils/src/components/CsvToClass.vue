@@ -25,6 +25,7 @@ let data = reactive<IDataConverterData>({
   targetText: "",
   lines: [],
   isCamelCase: true,
+  separator: ',',
 });
 
 let varTypes = ref([
@@ -42,6 +43,16 @@ function camelCase(text: string) {
     return text;
   }
   return text.substring(0, 1).toUpperCase() + text.substring(1);
+}
+
+function lineToLines(line: string) {
+  let lines = line.csvSplit(data.separator);
+  lines = lines.filter(x => x.trim() != "" );
+  data.targetText = lines.join('\n');
+}
+
+function onLineToLines() {
+  lineToLines(data.sourceText);
 }
 
 function linesToJson(columns: ClassProperty[], lines: string[]) {
@@ -171,7 +182,10 @@ function onRefreshToJson() {
         </div>
       </TabPanel>
       <TabPanel header="Line To Lines">
-        Content II
+        separator 
+        <InputText type="text" v-model="data.separator" />
+        &nbsp;
+        <Button :onclick="onLineToLines">line to lines</Button>
       </TabPanel>
       <TabPanel header="Header III">
         Content III

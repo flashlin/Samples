@@ -35,4 +35,5 @@ export interface IDataConverterData {
   targetText: string;
   lines: string[];
   isCamelCase: boolean;
+  separator: string;
 }
