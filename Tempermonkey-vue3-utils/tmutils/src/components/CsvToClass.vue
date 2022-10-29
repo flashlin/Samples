@@ -26,6 +26,7 @@ let data = reactive<IDataConverterData>({
   lines: [],
   isCamelCase: true,
   separator: ',',
+  templateText: "name: $0",
 });
 
 let varTypes = ref([
@@ -45,9 +46,13 @@ function camelCase(text: string) {
   return text.substring(0, 1).toUpperCase() + text.substring(1);
 }
 
+function fillTemplate(templateString: string, templateVars: any) {
+  return new Function("return `" + templateString + "`;").call(templateVars);
+}
+
 function lineToLines(line: string) {
   let lines = line.csvSplit(data.separator);
-  lines = lines.filter(x => x.trim() != "" );
+  lines = lines.filter(x => x.trim() != "");
   data.targetText = lines.join('\n');
 }
 
@@ -55,7 +60,7 @@ function onLineToLines() {
   lineToLines(data.sourceText);
 }
 
-function linesToJson(columns: ClassProperty[], lines: string[]) {
+function dataLinesToJson(columns: ClassProperty[], lines: string[]) {
   let result: object[] = [];
   lines.forEach((line, index) => {
     let obj: any = {};
@@ -65,20 +70,33 @@ function linesToJson(columns: ClassProperty[], lines: string[]) {
     });
     result.push(obj);
   });
-  console.log('aaa', result);
   return JSON.stringify(result);
 }
 
-function convertToJson() {
-  let lines = data.sourceText.csvSplit('\n');
-  getColumns(lines);
-  data.lines = lines.slice(1);
-  data.targetText = linesToJson(data.targetProperties, data.lines);
+function objArrayJsonToText(objArrayJsonString: string): string {
+  let objArray: any[] = JSON.parse(objArrayJsonString);
+  let result = "";
+  objArray.forEach((obj) => {
+    let item = fillTemplate(data.templateText, obj);
+    result += item + "\r\n";
+  });
+  return result;
 }
 
-function linesToClass(columns: ClassProperty[], lines: string[]) {
+function onObjArrayJsonToText() {
+  data.targetText = objArrayJsonToText(data.sourceText);
+}
+
+function onConvertToJson() {
+  let lines = data.sourceText.csvSplit('\n');
+  convertToColumns(lines);
+  data.lines = lines.slice(1);
+  data.targetText = dataLinesToJson(data.targetProperties, data.lines);
+}
+
+function dataLinesToClass(columns: ClassProperty[], dataLines: string[]) {
   let result = "";
-  lines.forEach((line, index) => {
+  dataLines.forEach((line, index) => {
     let code = "";
     code += `new ${data.className} { \r\n`;
     line.csvSplit().forEach((elem, idx) => {
@@ -92,40 +110,44 @@ function linesToClass(columns: ClassProperty[], lines: string[]) {
     });
     code += "}";
 
-    if (index < lines.length - 1) {
+    if (index < dataLines.length - 1) {
       code += ",";
     }
     code += "\r\n"
     result += code;
   });
-  return result
+  return result;
 }
 
-function getColumns(lines: string[]) {
-  let columns: string[] = [];
-  columns = lines.getCsvHeaders();
-  data.targetProperties = [];
-  columns.forEach((name, idx) => {
-    data.targetProperties.push(new ClassProperty({
+function getColumns(names: string[]) {
+  let result: ClassProperty[] = [];
+  names.forEach((name, idx) => {
+    result.push(new ClassProperty({
       name: name,
     }));
   });
+  return result;
 }
 
-function convertToClass() {
+function convertToColumns(lines: string[]) {
+  let columnNames: string[] = lines.getCsvHeaders();
+  data.targetProperties = getColumns(columnNames);
+}
+
+function onConvertToClass() {
   let lines = data.sourceText.csvSplit('\n');
-  getColumns(lines);
+  convertToColumns(lines);
 
   data.lines = lines.slice(1);
-  data.targetText = linesToClass(data.targetProperties, data.lines);
+  data.targetText = dataLinesToClass(data.targetProperties, data.lines);
 }
 
 function onRefreshToClass() {
-  data.targetText = linesToClass(data.targetProperties, data.lines);
+  data.targetText = dataLinesToClass(data.targetProperties, data.lines);
 }
 
 function onRefreshToJson() {
-  data.targetText = linesToJson(data.targetProperties, data.lines);
+  data.targetText = dataLinesToJson(data.targetProperties, data.lines);
 }
 </script>
 
@@ -137,9 +159,9 @@ function onRefreshToJson() {
     <TabView>
       <TabPanel header="Csv To Class">
         <div class="mb-3">
-          <Button label="ToClass" :onclick="convertToClass"></Button>
+          <Button label="ToClass" :onclick="onConvertToClass"></Button>
           &nbsp;
-          <Button label="ToJson" :onclick="convertToJson"></Button>
+          <Button label="ToJson" :onclick="onConvertToJson"></Button>
         </div>
         <div>
           Class Name
@@ -182,13 +204,14 @@ function onRefreshToJson() {
         </div>
       </TabPanel>
       <TabPanel header="Line To Lines">
-        separator 
+        separator
         <InputText type="text" v-model="data.separator" />
         &nbsp;
         <Button :onclick="onLineToLines">line to lines</Button>
       </TabPanel>
-      <TabPanel header="Header III">
-        Content III
+      <TabPanel header="Obj Array Json To Text">
+        <Button :onclick="onObjArrayJsonToText">Obj Array Json to Text</Button>
+        <Textarea v-model="data.templateText" rows="5" cols="80"></Textarea>
       </TabPanel>
     </TabView>
     <div class="mb-3">

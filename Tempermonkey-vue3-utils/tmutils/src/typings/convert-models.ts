@@ -36,4 +36,5 @@ export interface IDataConverterData {
   lines: string[];
   isCamelCase: boolean;
   separator: string;
+  templateText: string;
 }
