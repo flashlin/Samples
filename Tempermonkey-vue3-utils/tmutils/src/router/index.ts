@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import CsvToClassView from '@/components/CsvToClass.vue';
+import DataConverterView from '@/components/DataConverter.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -7,7 +7,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: CsvToClassView
+      component: DataConverterView
     },
     {
       path: '/about',
@@ -15,7 +15,7 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('@/components/CsvToClass.vue')
+      component: () => import('@/components/DataConverter.vue')
     }
   ]
 })
