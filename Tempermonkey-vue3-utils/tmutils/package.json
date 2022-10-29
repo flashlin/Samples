@@ -18,10 +18,12 @@
     "pinia": "^2.0.17",
     "primevue": "^3.17.0",
     "vue": "^3.2.37",
-    "vue-router": "^4.1.5"
+    "vue-router": "^4.1.5",
+    "chart.js": "^3.9.1"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
+    "@types/chart.js": "^2.9.37",
     "@types/jsdom": "^20.0.0",
     "@types/node": "^18.8.0",
     "@vitejs/plugin-vue": "^3.0.1",

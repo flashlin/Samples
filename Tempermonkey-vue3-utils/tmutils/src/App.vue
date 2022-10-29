@@ -13,7 +13,7 @@ const data = reactive({
   <div>
     <nav>
       <RouterLink to="/">Home</RouterLink>
-      <RouterLink to="/about">About</RouterLink>
+      <RouterLink to="/dataChart">Data Chart</RouterLink>
     </nav>
     <!-- <CodeExitor v-model="data.code" /> -->
     <RouterView />
