@@ -31,6 +31,7 @@ let data = reactive<IDataConverterData>({
   isCamelCase: true,
   separator: ',',
   templateText: "name: ${this.id}",
+  isAddBreak: true,
 });
 
 let varTypes = ref([
@@ -78,7 +79,10 @@ function objArrayJsonToText(objArrayJsonString: string): string {
   let result = "";
   objArray.forEach((obj) => {
     let item = fillTemplate(data.templateText, obj);
-    result += item + "\r\n";
+    result += item;
+    if (data.isAddBreak) {
+      result += "\n";
+    }
   });
   return result;
 }
@@ -226,6 +230,8 @@ function onRefreshToJson() {
         </div>
         <div class="mb-3">
           <Button :onclick="onConvertObjArrayJsonToText">Obj Array Json to Text</Button>
+          &nbsp;
+          <Checkbox v-model="data.isAddBreak" :binary="true" /> Add Break
         </div>
         <div class="mb-3">
           <Textarea v-model="data.templateText" rows="5" cols="80"></Textarea>
