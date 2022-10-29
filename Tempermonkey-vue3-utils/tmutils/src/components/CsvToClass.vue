@@ -62,11 +62,11 @@ function onLineToLines() {
 
 function dataLinesToJson(columns: ClassProperty[], lines: string[]) {
   let result: object[] = [];
-  lines.forEach((line, index) => {
+  lines.forEach((line) => {
     let obj: any = {};
-    line.csvSplit().forEach((elem, idx) => {
-      let name = columns[idx].name;
-      obj[name] = elem;
+    line.csvSplit().forEach((value, idx) => {
+      let name = camelCase(columns[idx].name);
+      obj[name] = value;
     });
     result.push(obj);
   });
