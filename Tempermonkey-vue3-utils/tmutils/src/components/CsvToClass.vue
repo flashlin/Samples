@@ -121,6 +121,11 @@ function onRefreshToJson() {
     <div class="mb-3">
       <Textarea v-model="data.sourceText" rows="10" cols="80"></Textarea>
     </div>
+    <div class="mb-3">
+      <Button label="ToClass" :onclick="convertToClass"></Button>
+      &nbsp;
+      <Button label="ToJson" :onclick="convertToJson"></Button>
+    </div>
     <div>
       Class Name <InputText type="text" v-model="data.className" />
       <Checkbox v-model="data.isCamelCase" :binary="true" /> CamelCase
@@ -161,11 +166,6 @@ function onRefreshToJson() {
     </div>
     <div class="mb-3">
       <Textarea v-model="data.targetText" rows="10" cols="80"></Textarea>
-    </div>
-    <div class="mb-3">
-      <Button label="ToClass" :onclick="convertToClass"></Button>
-      &nbsp;
-      <Button label="ToJson" :onclick="convertToJson"></Button>
     </div>
   </div>
 </template>
