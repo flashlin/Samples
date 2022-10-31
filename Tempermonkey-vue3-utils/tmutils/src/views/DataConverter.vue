@@ -87,6 +87,21 @@ function objArrayJsonToText(objArrayJsonString: string): string {
   return result;
 }
 
+function onConvertObjArrayJsonToTemplate() {
+  let template = 'new MyClass {\n';
+  let objArray: any[] = JSON.parse(data.sourceObjArrJson);
+  let keys = Object.keys(objArray[0]);
+  keys.forEach((key, idx) => {
+    template += `\t${key} = "\$\{this.${key}\}"`;
+    if (idx < keys.length - 1) {
+      template += ',';
+    }
+    template += '\n';
+  });
+  template += '},';
+  data.templateText = template;
+}
+
 function onConvertObjArrayJsonToText() {
   data.targetText3 = objArrayJsonToText(data.sourceObjArrJson);
 }
@@ -232,6 +247,8 @@ function onRefreshToJson() {
           <Button :onclick="onConvertObjArrayJsonToText">Obj Array Json to Text</Button>
           &nbsp;
           <Checkbox v-model="data.isAddBreak" :binary="true" /> Add Break
+          &nbsp;
+          <Button :onclick="onConvertObjArrayJsonToTemplate">Generate Class Template</Button>
         </div>
         <div class="mb-3">
           <Textarea v-model="data.templateText" rows="5" cols="80"></Textarea>
