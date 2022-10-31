@@ -90,9 +90,16 @@ function objArrayJsonToText(objArrayJsonString: string): string {
 function onConvertObjArrayJsonToTemplate() {
   let template = 'new MyClass {\n';
   let objArray: any[] = JSON.parse(data.sourceObjArrJson);
-  let keys = Object.keys(objArray[0]);
+  let obj = objArray[0];
+  let keys = Object.keys(obj);
   keys.forEach((key, idx) => {
-    template += `\t${key} = "\$\{this.${key}\}"`;
+    let quote = '';
+    let value = parseInt(obj[key], 10);
+    if (isNaN(value))
+    {
+      quote = '"';
+    }
+    template += `\t${key} = ${quote}\$\{this.${key}\}${quote}`;
     if (idx < keys.length - 1) {
       template += ',';
     }
