@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+    "types": ["node"]
+  }
+}
