@@ -6,14 +6,17 @@
   "scripts": {
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "train": "ts-node -r tsconfig-paths/register ./src/train.ts"
+    "train": "ts-node -r tsconfig-paths/register ./src/train.ts",
+    "test": "ts-node -r tsconfig-paths/register ./src/test.ts"
   },
   "dependencies": {
     "@tensorflow/tfjs": "^4.0.0",
     "@tensorflow/tfjs-node-gpu": "^4.0.0",
     "@types/argparse": "^2.0.10",
     "argparse": "^2.0.1",
+    "fs": "^0.0.1-security",
     "nodemon": "^2.0.20",
+    "ts-tokenizr": "^1.1.1",
     "tsconfig-paths": "^4.1.0"
   },
   "devDependencies": {
