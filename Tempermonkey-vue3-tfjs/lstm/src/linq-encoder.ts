@@ -1,0 +1,74 @@
+import { keywords, LinqTokenizr } from "linq-tokenizr";
+import { Token } from "ts-tokenizr";
+
+const linqCharacters = [
+  "",
+  "<begin>",
+  "<end>",
+  "keyword",
+  "operator",
+  "symbol",
+  "identifier",
+  ...keywords,
+  ..."abcdefghijklmnopqrstuvwxyz`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
+];
+
+const indexDict = Object.assign(
+  {},
+  ...linqCharacters.map((x, idx) => ({ [x]: idx }))
+);
+
+const valueDict = Object.assign(
+  {},
+  ...linqCharacters.map((x, idx) => ({ [idx]: x }))
+);
+
+function toIndex(ch: string) {
+  if (!indexDict.hasOwnProperty(ch)) {
+    throw new Error(`'${ch}' not exist in dict`);
+  }
+  return indexDict[ch];
+}
+
+function linqTokenToValues(token: Token): number[] {
+  let typeIndex = toIndex(token.type);
+  if (token.type == "keyword") {
+    return [typeIndex, indexDict[token.text]];
+  }
+  let next = [...token.text].map((x) => toIndex(x));
+  return [typeIndex, ...next, 0];
+}
+
+export function linqTokensToIndexList(tokens: Token[]): number[] {
+  let begin = indexDict["<begin>"];
+  let end = indexDict["<end>"];
+  let body = tokens.map((x) => linqTokenToValues(x)).flatMap((x) => x);
+  return [begin, ...body, end];
+}
+
+export function linqIndexListToStrList(values: number[]): string[] {
+  return values.map((x) => valueDict[x]);
+}
+
+export function linqStrListToString(strList: string[]): string {
+  const process = (acc: string[], arr: string[]): string[] => {
+    if( arr.length == 0) {
+      return [];
+    }
+    let first = arr[0];
+    if( first.startsWith('<') && arr[0].endsWith('>') ) {
+      return process([], arr.slice(1));
+    }
+    if( first == "keyword" ) {
+      return [arr[1], ...process([], arr.slice(2))];
+    }
+    if( ['identifier', 'symbol'].includes(first) ) {
+      return [...process([...acc, arr[1]], arr.slice(2))];
+    }
+    if( first == '') {
+      return [acc.join(''), ...process([], arr.slice(1))];
+    }
+    return process([...acc, first], arr.slice(1));
+  };
+  return process([], strList).join(' ');
+}
