@@ -10,7 +10,7 @@ const linqCharacters = [
   "symbol",
   "identifier",
   ...keywords,
-  ..."abcdefghijklmnopqrstuvwxyz`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
+  ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
 ];
 
 const indexDict = Object.assign(

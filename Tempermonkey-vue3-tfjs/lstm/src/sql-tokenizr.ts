@@ -1,6 +1,6 @@
 import { Tokenizr } from "ts-tokenizr";
 
-const keywords = [
+export const keywords = [
   "ADD",
   "EXTERNAL",
   "PROCEDURE",
@@ -191,7 +191,7 @@ const keywords = [
 keywords.sort().reverse();
 let keywordRegex = keywords.map((x) => `(${x})`).join("|");
 
-export class SqlTokenizr {
+export class TSqlTokenizr {
   private _lexer: Tokenizr = new Tokenizr({
     debug: false,
   });
@@ -202,7 +202,9 @@ export class SqlTokenizr {
 
   tokens(text: string) {
     this._lexer.input(text);
-    return this._lexer.tokens();
+    let tokens = this._lexer.tokens();
+    tokens.pop();
+    return tokens;
   }
 
   private init() {
