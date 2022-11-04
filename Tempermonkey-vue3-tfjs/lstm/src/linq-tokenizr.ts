@@ -1,7 +1,7 @@
 import { keywordsRegExp, symbolsRegExp } from "tokenizr-utils";
 import { Tokenizr } from "ts-tokenizr";
 
-const keywords = [
+export const keywords = [
   "select",
   "from",
   "into",
