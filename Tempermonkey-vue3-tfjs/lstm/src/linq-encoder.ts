@@ -13,41 +13,41 @@ const linqCharacters = [
   ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
 ];
 
-const indexDict = Object.assign(
+const charToIndexDict = Object.assign(
   {},
   ...linqCharacters.map((x, idx) => ({ [x]: idx }))
 );
 
-const valueDict = Object.assign(
+const indexToCharDict = Object.assign(
   {},
   ...linqCharacters.map((x, idx) => ({ [idx]: x }))
 );
 
-function toIndex(ch: string) {
-  if (!indexDict.hasOwnProperty(ch)) {
+function charToIndex(ch: string) {
+  if (!charToIndexDict.hasOwnProperty(ch)) {
     throw new Error(`'${ch}' not exist in dict`);
   }
-  return indexDict[ch];
+  return charToIndexDict[ch];
 }
 
 function linqTokenToValues(token: Token): number[] {
-  let typeIndex = toIndex(token.type);
+  let typeIndex = charToIndex(token.type);
   if (token.type == "keyword") {
-    return [typeIndex, indexDict[token.text]];
+    return [typeIndex, charToIndexDict[token.text]];
   }
-  let next = [...token.text].map((x) => toIndex(x));
+  let next = [...token.text].map((x) => charToIndex(x));
   return [typeIndex, ...next, 0];
 }
 
 export function linqTokensToIndexList(tokens: Token[]): number[] {
-  let begin = indexDict["<begin>"];
-  let end = indexDict["<end>"];
+  let begin = charToIndexDict["<begin>"];
+  let end = charToIndexDict["<end>"];
   let body = tokens.map((x) => linqTokenToValues(x)).flatMap((x) => x);
   return [begin, ...body, end];
 }
 
 export function linqIndexListToStrList(values: number[]): string[] {
-  return values.map((x) => valueDict[x]);
+  return values.map((ch) => indexToCharDict[ch]);
 }
 
 export function linqStrListToString(strList: string[]): string {
