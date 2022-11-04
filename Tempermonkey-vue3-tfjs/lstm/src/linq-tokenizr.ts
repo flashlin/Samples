@@ -25,7 +25,9 @@ export class LinqTokenizr {
 
   tokens(text: string) {
     this._lexer.input(text);
-    return this._lexer.tokens();
+    let tokens = this._lexer.tokens();
+    tokens.pop();
+    return tokens;
   }
 
   private init() {
