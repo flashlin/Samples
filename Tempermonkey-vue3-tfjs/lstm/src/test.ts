@@ -1,16 +1,18 @@
 import fs from "fs";
-import { LinqTokenizr } from "linq-tokenizr";
+import { LinqTokenizr, keywords } from "linq-tokenizr";
 import { Token } from "ts-tokenizr";
 
 let linqLexer = new LinqTokenizr();
 
 const linqCharacters = [
+  "",
   "<begin>",
   "<end>",
   "keyword",
   "operator",
   "symbol",
   "identifier",
+  ...keywords,
   ..."abcdefghijklmnopqrstuvwxyz`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
 ];
 
@@ -32,9 +34,12 @@ function toIndex(ch: string) {
 }
 
 function tokenToValues(token: Token): number[] {
-  let prev = toIndex(token.type);
+  let typeIndex = toIndex(token.type);
+  if (token.type == "keyword") {
+    return [typeIndex, indexDict[token.text]];
+  }
   let next = [...token.text].map((x) => toIndex(x));
-  return [prev, ...next];
+  return [typeIndex, ...next, 0];
 }
 
 function tokensToIndexList(tokens: Token[]): number[] {
@@ -44,8 +49,31 @@ function tokensToIndexList(tokens: Token[]): number[] {
   return [begin, ...body, end];
 }
 
-function indexListToStrList(values: number[]) {
+function indexListToStrList(values: number[]): string[] {
   return values.map((x) => valueDict[x]);
+}
+
+function strListToText(strList: string[]): string {
+  const process = (acc: string[], arr: string[]): string[] => {
+    if( arr.length == 0) {
+      return [];
+    }
+    let first = arr[0];
+    if( first.startsWith('<') && arr[0].endsWith('>') ) {
+      return process([], arr.slice(1));
+    }
+    if( first == "keyword" ) {
+      return [arr[1], ...process([], arr.slice(2))];
+    }
+    if( ['identifier', 'symbol'].includes(first) ) {
+      return [...process([...acc, arr[1]], arr.slice(2))];
+    }
+    if( first == '') {
+      return [acc.join(''), ...process([], arr.slice(1))];
+    }
+    return process([...acc, first], arr.slice(1));
+  };
+  return process([], strList).join(' ');
 }
 
 let text = fs.readFileSync("./data/sample-sql.txt", "utf8");
@@ -55,10 +83,12 @@ text.split("\n").forEach((line, idx) => {
     tokens.pop();
     let values = tokensToIndexList(tokens);
     console.log(values);
-    
-    let t = indexListToStrList(values);
-    console.log(t);
-    
+
+    let strList = indexListToStrList(values);
+    console.log(strList);
+
+    console.log(strListToText(strList));
+
     console.log(" ");
     return;
   }
