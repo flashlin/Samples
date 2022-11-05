@@ -1,4 +1,9 @@
-import { keywords } from "sql-tokenizr";
+import { keywords } from "@/tsql-tokenizr";
+import {
+  ArrayToChar2IndexCaseInsensitiveMap,
+  ArrayToChar2IndexMap,
+  ArrayToIndex2CharMap,
+} from "@/tokenizr-utils";
 import { Token } from "ts-tokenizr";
 
 const tsqlCharacters = [
@@ -9,47 +14,35 @@ const tsqlCharacters = [
   "operator",
   "symbol",
   "identifier",
+  "string",
+  "spaces",
   ...keywords,
   ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
 ];
 
-const charToIndexDict = Object.assign(
-  {},
-  ...tsqlCharacters.map((ch, idx) => ({ [ch]: idx }))
-);
+const charToIndexDict = ArrayToChar2IndexCaseInsensitiveMap(tsqlCharacters);
 
-const indexToCharDict = Object.assign(
-  {},
-  ...tsqlCharacters.map((ch, idx) => ({ [idx]: ch }))
-);
+const indexToCharDict = ArrayToIndex2CharMap(tsqlCharacters);
 
 function charToIndex(ch: string) {
-  if (!charToIndexDict.hasOwnProperty(ch)) {
+  if (!charToIndexDict.has(ch)) {
     throw new Error(`'${ch}' not exist in dict`);
   }
-  return charToIndexDict[ch];
-}
-
-function getDictValueCaseInsensitive(dict, key) {
-  const asLowercase = key.toLowerCase();
-  return dict[Object.keys(dict).find((k) => k.toLowerCase() === asLowercase)];
+  return charToIndexDict.get(ch);
 }
 
 function tsqlTokenToValues(token: Token): number[] {
   const typeIndex = charToIndex(token.type);
   if (token.type == "keyword") {
-    return [
-      typeIndex,
-      getDictValueCaseInsensitive(charToIndexDict, token.text),
-    ];
+    return [typeIndex, charToIndexDict.get(token.text)];
   }
   const next = [...token.text].map((ch) => charToIndex(ch));
   return [typeIndex, ...next, 0];
 }
 
 export function tsqlTokensToIndexList(tokens: Token[]): number[] {
-  const begin = charToIndexDict["<begin>"];
-  const end = charToIndexDict["<end>"];
+  const begin = charToIndexDict.get("<begin>");
+  const end = charToIndexDict.get("<end>");
   const body = tokens.map((x) => tsqlTokenToValues(x)).flatMap((x) => x);
   return [begin, ...body, end];
 }
