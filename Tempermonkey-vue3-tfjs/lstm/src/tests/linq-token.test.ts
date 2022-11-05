@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { linqTokensToIndexList } from "@/linq-encoder";
+import { linqIndexListToString, linqTokensToIndexList } from "@/linq-encoder";
 import { LinqTokenizr } from "@/linq-tokenizr";
 import { describe, expect, test } from "@jest/globals";
 
@@ -48,5 +48,18 @@ describe("linq to token", () => {
       5, 108, 0, 6, 30, 17, 29, 21, 0, 5, 81, 0, 7, 102, 22, 28, 17, 35, 24,
       102, 0, 5, 96, 0, 2,
     ]);
+  });
+
+  test("linq values to string", () => {
+    const tokenizr = new LinqTokenizr();
+    const tokens = tokenizr.tokens(
+      'from tb1 in myUser select new{id=tb1.id,name="flash"}'
+    );
+    const valueList = linqTokensToIndexList(tokens);
+
+    const result = linqIndexListToString(valueList);
+    expect(result).toBe(
+      'from tb1 in myUser select new{id=tb1.id,name="flash"}'
+    );
   });
 });

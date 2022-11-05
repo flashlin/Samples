@@ -1,7 +1,7 @@
 import { keywords } from "@/linq-tokenizr";
 import { Token } from "ts-tokenizr";
 
-const linqCharacters = [
+const linqReverseCharacters = [
   "",
   "<begin>",
   "<end>",
@@ -11,6 +11,10 @@ const linqCharacters = [
   "identifier",
   "string",
   "spaces",
+];
+
+const linqCharacters = [
+  ...linqReverseCharacters,
   ...keywords,
   ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
 ];
@@ -49,29 +53,9 @@ export function linqTokensToIndexList(tokens: Token[]): number[] {
   return [begin, ...body, end];
 }
 
-export function linqIndexListToStrList(values: number[]): string[] {
-  return values.map((ch) => indexToCharDict[ch]);
-}
-
-export function linqStrListToString(strList: string[]): string {
-  const process = (acc: string[], arr: string[]): string[] => {
-    if (arr.length == 0) {
-      return [];
-    }
-    const first = arr[0];
-    if (first.startsWith("<") && arr[0].endsWith(">")) {
-      return process([], arr.slice(1));
-    }
-    if (first == "keyword") {
-      return [arr[1], ...process([], arr.slice(2))];
-    }
-    if (["identifier", "symbol"].includes(first)) {
-      return [...process([...acc, arr[1]], arr.slice(2))];
-    }
-    if (first == "") {
-      return [acc.join(""), ...process([], arr.slice(1))];
-    }
-    return process([...acc, first], arr.slice(1));
-  };
-  return process([], strList).join(" ");
+export function linqIndexListToString(values: number[]): string {
+  const strList = values
+    .map((ch) => indexToCharDict.get(ch))
+    .filter((ch) => !linqReverseCharacters.includes(ch));
+  return strList.join("");
 }
