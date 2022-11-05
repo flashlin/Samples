@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Tokenizr } from "ts-tokenizr";
 
 export const keywords = [
@@ -202,17 +204,24 @@ export class TSqlTokenizr {
 
   tokens(text: string) {
     this._lexer.input(text);
-    const tokens = this._lexer.tokens();
-    tokens.pop();
-    return tokens;
+    try {
+      const tokens = this._lexer.tokens();
+      tokens.pop();
+      return tokens;
+    } catch (e) {
+      console.error(
+        `${e.message} pos=${e.pos} '${text.substring(e.pos, e.pos + 10)}'`
+      );
+      throw e;
+    }
   }
 
   private init() {
     this._lexer.rule(/[ \t\r\n]+/, (ctx, match) => {
-      ctx.ignore();
+      ctx.accept("spaces");
     });
 
-    this._lexer.rule(/\/\/[^\r\n]*\r?\n/, (ctx, match) => {
+    this._lexer.rule(/--[^\r\n]*\r?\n/, (ctx, match) => {
       ctx.ignore();
     });
 
@@ -228,12 +237,20 @@ export class TSqlTokenizr {
       ctx.accept("number");
     });
 
-    this._lexer.rule(/[\.\(\)\[\]\*\+\-]/, (ctx, match) => {
+    this._lexer.rule(/'(\\'|[^'])*'/, (ctx, match) => {
+      ctx.accept("string");
+    });
+
+    this._lexer.rule(/[.,()[\]]/, (ctx, match) => {
       ctx.accept("symbol");
     });
 
-    this._lexer.rule(/(\<\>)|(\!\=)|(\<\=)|(\>\=)|\<|\>/, (ctx, match) => {
-      ctx.accept("symbol");
+    this._lexer.rule(/\*\+-%/, (ctx, match) => {
+      ctx.accept("operator");
+    });
+
+    this._lexer.rule(/(<>)|(!=)|(<=)|(>=)|<|>/, (ctx, match) => {
+      ctx.accept("compare");
     });
   }
 }
