@@ -7,8 +7,17 @@
     "allowJs": true,
     "baseUrl": "src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
-    "types": ["node"]
-  }
+    "types": [
+      "node"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "build/**/*",
+    "coverage/**/*"
+  ]
 }
