@@ -6,7 +6,7 @@ import {
 } from "@/tokenizr-utils";
 import { Token } from "ts-tokenizr";
 
-const tsqlCharacters = [
+const tsqlReverseCharacters = [
   "",
   "<begin>",
   "<end>",
@@ -16,11 +16,15 @@ const tsqlCharacters = [
   "identifier",
   "string",
   "spaces",
+];
+
+const tsqlCharacters = [
+  ...tsqlReverseCharacters,
   ...keywords,
   ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
 ];
 
-const charToIndexDict = ArrayToChar2IndexCaseInsensitiveMap(tsqlCharacters);
+const charToIndexDict = ArrayToChar2IndexMap(tsqlCharacters);
 
 const indexToCharDict = ArrayToIndex2CharMap(tsqlCharacters);
 
@@ -45,4 +49,11 @@ export function tsqlTokensToIndexList(tokens: Token[]): number[] {
   const end = charToIndexDict.get("<end>");
   const body = tokens.map((x) => tsqlTokenToValues(x)).flatMap((x) => x);
   return [begin, ...body, end];
+}
+
+export function tsqlIndexListToString(values: number[]): string {
+  const strList = values
+    .map((ch) => indexToCharDict.get(ch))
+    .filter((ch) => !tsqlReverseCharacters.includes(ch));
+  return strList.join("");
 }
