@@ -1,10 +1,6 @@
 /* eslint-disable no-console */
 import fs from "fs";
-import {
-  linqIndexListToStrList,
-  linqStrListToString,
-  linqTokensToIndexList,
-} from "@/linq-encoder";
+import { linqIndexListToString, linqTokensToIndexList } from "@/linq-encoder";
 import { LinqTokenizr } from "@/linq-tokenizr";
 import { TSqlTokenizr } from "@/sql-tokenizr";
 import { tsqlTokensToIndexList } from "@/tsql-encoder";
@@ -17,12 +13,7 @@ text.split("\n").forEach((line, idx) => {
     const tokens = linqLexer.tokens(line);
     const values = linqTokensToIndexList(tokens);
     console.log(values);
-
-    const strList = linqIndexListToStrList(values);
-    console.log(strList);
-
-    console.log(linqStrListToString(strList));
-
+    console.log(linqIndexListToString(values));
     console.log(" ");
     return;
   }
