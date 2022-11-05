@@ -2,8 +2,8 @@
 import { LinqTokenizr } from "@/linq-tokenizr";
 import { describe, expect, test } from "@jest/globals";
 
-describe("sum module", () => {
-  test("adds 1 + 2 to equal 3", () => {
+describe("linq to token", () => {
+  test("case1", () => {
     const tokenizr = new LinqTokenizr();
     const result = tokenizr
       .tokens('from tb1 in myUser select new{id=tb1.id,name="flash"}')
