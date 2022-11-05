@@ -1,9 +1,5 @@
 import { keywords } from "@/tsql-tokenizr";
-import {
-  ArrayToChar2IndexCaseInsensitiveMap,
-  ArrayToChar2IndexMap,
-  ArrayToIndex2CharMap,
-} from "@/tokenizr-utils";
+import { ArrayToChar2IndexMap, ArrayToIndex2CharMap } from "@/tokenizr-utils";
 import { Token } from "ts-tokenizr";
 
 const tsqlReverseCharacters = [
