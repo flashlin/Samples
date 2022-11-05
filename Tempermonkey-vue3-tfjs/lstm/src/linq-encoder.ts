@@ -25,7 +25,6 @@ linqCharacters.forEach((ch, idx) => {
 });
 
 const indexToCharDict = new Map();
-
 linqCharacters.forEach((ch, idx) => {
   indexToCharDict.set(idx, ch);
 });
