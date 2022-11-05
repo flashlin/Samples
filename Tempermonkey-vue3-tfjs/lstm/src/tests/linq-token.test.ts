@@ -35,7 +35,7 @@ describe("linq to token", () => {
     ]);
   });
 
-  test("linq to tokens", () => {
+  test("linq tokens to values", () => {
     const tokenizr = new LinqTokenizr();
     const tokens = tokenizr.tokens(
       'from tb1 in myUser select new{id=tb1.id,name="flash"}'
