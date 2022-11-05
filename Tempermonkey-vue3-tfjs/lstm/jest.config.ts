@@ -1,7 +1,7 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
+  preset: "ts-jest",
+  testEnvironment: "node",
   coverageDirectory: "coverage",
-  testRegex: "(/tests/.*\\.(test|spec))\\.tsx?$"
+  testRegex: "(/tests/.*\\.(test|spec))\\.tsx?$",
 };
