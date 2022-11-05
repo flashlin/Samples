@@ -7,7 +7,8 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "train": "ts-node -r tsconfig-paths/register ./src/train.ts",
-    "test": "ts-node -r tsconfig-paths/register ./src/test.ts"
+    "token": "ts-node -r tsconfig-paths/register ./src/test.ts",
+    "test": "jest --coverage"
   },
   "dependencies": {
     "@tensorflow/tfjs": "^4.0.0",
@@ -21,16 +22,18 @@
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",
-    "@types/jest": "^29.2.0",
+    "@types/jest": "^29.2.2",
     "@types/jsdom": "^20.0.0",
     "@types/node": "^18.8.0",
     "axios": "^0.27.2",
     "eslint": "^8.21.0",
     "eslint-plugin-vue": "^9.3.0",
+    "jest": "^29.2.2",
     "jsdom": "^20.0.0",
     "live-server": "^1.2.2",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.7.1",
+    "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "typescript": "~4.7.4"
   }
