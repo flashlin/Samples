@@ -1,4 +1,6 @@
+/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+//https://github.com/kevinkhill/ts-tokenizr
 import { keywordsRegExp, symbolsRegExp } from "@/tokenizr-utils";
 import { Tokenizr } from "ts-tokenizr";
 
@@ -25,19 +27,30 @@ export class LinqTokenizr {
   }
 
   tokens(text: string) {
-    this._lexer.input(text);
-    const tokens = this._lexer.tokens();
-    tokens.pop();
-    return tokens;
+    try {
+      this._lexer.input(text);
+      const tokens = this._lexer.tokens();
+      tokens.pop();
+      return tokens;
+    } catch (e) {
+      console.error(
+        `${e.message} pos=${e.pos}, '${text.substring(e.pos, e.pos + 10)}'`
+      );
+      throw e;
+    }
   }
 
   private init() {
     this._lexer.rule(/[ \t\r\n]+/, (ctx, match) => {
-      ctx.ignore();
+      ctx.accept("spaces");
     });
 
     this._lexer.rule(/\/\/[^\r\n]*\r?\n/, (ctx, match) => {
       ctx.ignore();
+    });
+
+    this._lexer.rule(/"((\\")|[^"])*"/, (ctx, match) => {
+      ctx.accept("string");
     });
 
     this._lexer.rule(new RegExp(keywordRegex, "i"), (ctx, match) => {
@@ -53,7 +66,30 @@ export class LinqTokenizr {
     });
 
     this._lexer.rule(
-      symbolsRegExp([".", "(", ")", "[", "]", "<", ">"]),
+      symbolsRegExp([
+        "!",
+        "~",
+        "@",
+        "^",
+        "+",
+        "-",
+        "*",
+        "/",
+        "_",
+        "`",
+        "=",
+        ",",
+        ".",
+        "(",
+        ")",
+        "[",
+        "]",
+        "<",
+        ">",
+        "{",
+        "}",
+        '"',
+      ]),
       (ctx, match) => {
         ctx.accept("symbol");
       }
