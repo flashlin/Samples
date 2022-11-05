@@ -4,4 +4,7 @@ module.exports = {
   testEnvironment: "node",
   coverageDirectory: "coverage",
   testRegex: "(/tests/.*\\.(test|spec))\\.tsx?$",
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
 };
