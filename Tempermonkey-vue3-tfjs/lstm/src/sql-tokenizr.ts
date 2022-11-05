@@ -189,7 +189,7 @@ export const keywords = [
 ];
 
 keywords.sort().reverse();
-let keywordRegex = keywords.map((x) => `(${x})`).join("|");
+const keywordRegex = keywords.map((x) => `(${x})`).join("|");
 
 export class TSqlTokenizr {
   private _lexer: Tokenizr = new Tokenizr({
@@ -202,7 +202,7 @@ export class TSqlTokenizr {
 
   tokens(text: string) {
     this._lexer.input(text);
-    let tokens = this._lexer.tokens();
+    const tokens = this._lexer.tokens();
     tokens.pop();
     return tokens;
   }

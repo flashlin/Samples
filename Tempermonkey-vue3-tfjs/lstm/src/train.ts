@@ -86,7 +86,7 @@ function parseArgs() {
 (async () => {
   const args = parseArgs();
 
-  require('@tensorflow/tfjs-node-gpu');
+  require("@tensorflow/tfjs-node-gpu");
   //require('@tensorflow/tfjs-node');
 
   const lstmLayerSize =
@@ -104,7 +104,7 @@ function parseArgs() {
     args.sampleStep
   );
 
-  let model = createModel(
+  const model = createModel(
     textData.sampleLen(),
     textData.charSetSize(),
     lstmLayerSize
