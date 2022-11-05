@@ -1,4 +1,5 @@
-import { keywordsRegExp, symbolsRegExp } from "tokenizr-utils";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { keywordsRegExp, symbolsRegExp } from "@/tokenizr-utils";
 import { Tokenizr } from "ts-tokenizr";
 
 export const keywords = [
@@ -12,7 +13,7 @@ export const keywords = [
   "in",
 ];
 
-let keywordRegex = keywordsRegExp(keywords);
+const keywordRegex = keywordsRegExp(keywords);
 
 export class LinqTokenizr {
   private _lexer: Tokenizr = new Tokenizr({
@@ -25,7 +26,7 @@ export class LinqTokenizr {
 
   tokens(text: string) {
     this._lexer.input(text);
-    let tokens = this._lexer.tokens();
+    const tokens = this._lexer.tokens();
     tokens.pop();
     return tokens;
   }
@@ -58,7 +59,7 @@ export class LinqTokenizr {
       }
     );
 
-    let operators = [
+    const operators = [
       "==",
       "!=",
       "<",

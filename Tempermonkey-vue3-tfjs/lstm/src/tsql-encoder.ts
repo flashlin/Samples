@@ -31,24 +31,25 @@ function charToIndex(ch: string) {
 }
 
 function getDictValueCaseInsensitive(dict, key) {
-   const asLowercase = key.toLowerCase();
-   return dict[Object.keys(dict)
-     .find(k => k.toLowerCase() === asLowercase)
-   ];
- }
+  const asLowercase = key.toLowerCase();
+  return dict[Object.keys(dict).find((k) => k.toLowerCase() === asLowercase)];
+}
 
 function tsqlTokenToValues(token: Token): number[] {
-  let typeIndex = charToIndex(token.type);
+  const typeIndex = charToIndex(token.type);
   if (token.type == "keyword") {
-    return [typeIndex, getDictValueCaseInsensitive(charToIndexDict,token.text)];
+    return [
+      typeIndex,
+      getDictValueCaseInsensitive(charToIndexDict, token.text),
+    ];
   }
-  let next = [...token.text].map((ch) => charToIndex(ch));
+  const next = [...token.text].map((ch) => charToIndex(ch));
   return [typeIndex, ...next, 0];
 }
 
 export function tsqlTokensToIndexList(tokens: Token[]): number[] {
-  let begin = charToIndexDict["<begin>"];
-  let end = charToIndexDict["<end>"];
-  let body = tokens.map((x) => tsqlTokenToValues(x)).flatMap((x) => x);
+  const begin = charToIndexDict["<begin>"];
+  const end = charToIndexDict["<end>"];
+  const body = tokens.map((x) => tsqlTokenToValues(x)).flatMap((x) => x);
   return [begin, ...body, end];
 }

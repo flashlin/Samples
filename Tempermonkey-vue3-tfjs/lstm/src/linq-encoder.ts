@@ -1,4 +1,4 @@
-import { keywords, LinqTokenizr } from "linq-tokenizr";
+import { keywords } from "@/linq-tokenizr";
 import { Token } from "ts-tokenizr";
 
 const linqCharacters = [
@@ -13,36 +13,37 @@ const linqCharacters = [
   ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
 ];
 
-const charToIndexDict = Object.assign(
-  {},
-  ...linqCharacters.map((x, idx) => ({ [x]: idx }))
-);
+const charToIndexDict = new Map();
+linqCharacters.forEach((ch, idx) => {
+  charToIndexDict.set(ch, idx);
+});
 
-const indexToCharDict = Object.assign(
-  {},
-  ...linqCharacters.map((x, idx) => ({ [idx]: x }))
-);
+const indexToCharDict = new Map();
+
+linqCharacters.forEach((ch, idx) => {
+  indexToCharDict.set(idx, ch);
+});
 
 function charToIndex(ch: string) {
-  if (!charToIndexDict.hasOwnProperty(ch)) {
+  if (!charToIndexDict.has(ch)) {
     throw new Error(`'${ch}' not exist in dict`);
   }
   return charToIndexDict[ch];
 }
 
 function linqTokenToValues(token: Token): number[] {
-  let typeIndex = charToIndex(token.type);
+  const typeIndex = charToIndex(token.type);
   if (token.type == "keyword") {
     return [typeIndex, charToIndexDict[token.text]];
   }
-  let next = [...token.text].map((x) => charToIndex(x));
+  const next = [...token.text].map((x) => charToIndex(x));
   return [typeIndex, ...next, 0];
 }
 
 export function linqTokensToIndexList(tokens: Token[]): number[] {
-  let begin = charToIndexDict["<begin>"];
-  let end = charToIndexDict["<end>"];
-  let body = tokens.map((x) => linqTokenToValues(x)).flatMap((x) => x);
+  const begin = charToIndexDict["<begin>"];
+  const end = charToIndexDict["<end>"];
+  const body = tokens.map((x) => linqTokenToValues(x)).flatMap((x) => x);
   return [begin, ...body, end];
 }
 
@@ -52,23 +53,23 @@ export function linqIndexListToStrList(values: number[]): string[] {
 
 export function linqStrListToString(strList: string[]): string {
   const process = (acc: string[], arr: string[]): string[] => {
-    if( arr.length == 0) {
+    if (arr.length == 0) {
       return [];
     }
-    let first = arr[0];
-    if( first.startsWith('<') && arr[0].endsWith('>') ) {
+    const first = arr[0];
+    if (first.startsWith("<") && arr[0].endsWith(">")) {
       return process([], arr.slice(1));
     }
-    if( first == "keyword" ) {
+    if (first == "keyword") {
       return [arr[1], ...process([], arr.slice(2))];
     }
-    if( ['identifier', 'symbol'].includes(first) ) {
+    if (["identifier", "symbol"].includes(first)) {
       return [...process([...acc, arr[1]], arr.slice(2))];
     }
-    if( first == '') {
-      return [acc.join(''), ...process([], arr.slice(1))];
+    if (first == "") {
+      return [acc.join(""), ...process([], arr.slice(1))];
     }
     return process([...acc, first], arr.slice(1));
   };
-  return process([], strList).join(' ');
+  return process([], strList).join(" ");
 }

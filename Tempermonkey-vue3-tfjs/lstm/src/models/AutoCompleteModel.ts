@@ -6,7 +6,7 @@ export class TextData {
   textLen_: number;
   sampleLen_: number;
   sampleStep_: number;
-  charSetSize_: number = 0;
+  charSetSize_ = 0;
   exampleBeginIndices_: any;
   examplePosition_: any;
   indices_: any;
@@ -211,14 +211,14 @@ export class TextData {
 }
 
 function createDense(alpha_len: number) {
-  let layer = tf.sequential();
+  const layer = tf.sequential();
   layer.add(tf.layers.dense({ units: alpha_len, activation: "softmax" }));
   layer.add(tf.layers.dropout({ rate: 0.2 }));
   return layer;
 }
 
-async function create_model1(max_len: number, alpha_len: number = 26) {
-  let model = tf.sequential();
+async function create_model1(max_len: number, alpha_len = 26) {
+  const model = tf.sequential();
   model.add(
     tf.layers.lstm({
       units: alpha_len * 2,
@@ -263,10 +263,7 @@ export function createModel(
   return model;
 }
 
-export function compileModel(
-  model: tf.Sequential,
-  learningRate: number = 0.002
-) {
+export function compileModel(model: tf.Sequential, learningRate = 0.002) {
   const optimizer = tf.train.rmsprop(learningRate);
   model.compile({ optimizer: optimizer, loss: "categoricalCrossentropy" });
   console.log(`Compiled model with learning rate ${learningRate}`);
@@ -277,9 +274,9 @@ export async function fitModel(
   model: tf.Sequential,
   textData: TextData,
   numEpochs: number,
-  examplesPerEpoch: number = 10000,
-  batchSize: number = 128,
-  validationSplit: number = 0.0625,
+  examplesPerEpoch = 10000,
+  batchSize = 128,
+  validationSplit = 0.0625,
   callbacks?: any
 ) {
   for (let i = 0; i < numEpochs; ++i) {
