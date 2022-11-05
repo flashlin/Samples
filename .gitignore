@@ -15,7 +15,6 @@ package-lock.json
 *.DotSettings
 GPUCache/
 .parcel-cache/
-data/
 logs/
 __pycache__/
 checkpoints/
