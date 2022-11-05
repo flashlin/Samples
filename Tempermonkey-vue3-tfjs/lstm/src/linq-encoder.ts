@@ -9,6 +9,8 @@ const linqCharacters = [
   "operator",
   "symbol",
   "identifier",
+  "string",
+  "spaces",
   ...keywords,
   ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",
 ];
@@ -28,21 +30,21 @@ function charToIndex(ch: string) {
   if (!charToIndexDict.has(ch)) {
     throw new Error(`'${ch}' not exist in dict`);
   }
-  return charToIndexDict[ch];
+  return charToIndexDict.get(ch);
 }
 
 function linqTokenToValues(token: Token): number[] {
   const typeIndex = charToIndex(token.type);
   if (token.type == "keyword") {
-    return [typeIndex, charToIndexDict[token.text]];
+    return [typeIndex, charToIndex(token.text)];
   }
   const next = [...token.text].map((x) => charToIndex(x));
   return [typeIndex, ...next, 0];
 }
 
 export function linqTokensToIndexList(tokens: Token[]): number[] {
-  const begin = charToIndexDict["<begin>"];
-  const end = charToIndexDict["<end>"];
+  const begin = charToIndexDict.get("<begin>");
+  const end = charToIndexDict.get("<end>");
   const body = tokens.map((x) => linqTokenToValues(x)).flatMap((x) => x);
   return [begin, ...body, end];
 }
