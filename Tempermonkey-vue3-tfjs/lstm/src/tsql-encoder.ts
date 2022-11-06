@@ -14,7 +14,7 @@ const tsqlReverseCharacters = [
   "spaces",
 ];
 
-const tsqlCharacters = [
+export const tsqlCharacters = [
   ...tsqlReverseCharacters,
   ...keywords,
   ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",

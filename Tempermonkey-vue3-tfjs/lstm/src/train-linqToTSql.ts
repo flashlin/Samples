@@ -10,7 +10,7 @@ import {
   TextData,
 } from "@/models/AutoCompleteModel";
 import { linqStringToIndexList } from "./linq-encoder";
-import { tsqlToIndexList } from "./tsql-encoder";
+import { tsqlCharacters, tsqlToIndexList } from "./tsql-encoder";
 
 function createModel(
   sampleLen: number,
@@ -133,11 +133,14 @@ function prepareTrainData() {
   });
 }
 
-async function train(args) {
+async function startTrain(args) {
   const lstmLayerSize =
     args.lstmLayerSize.indexOf(",") === -1
       ? Number.parseInt(args.lstmLayerSize)
       : args.lstmLayerSize.split(",").map((x: string) => Number.parseInt(x));
+
+  const model = createModel(100, tsqlCharacters.length, lstmLayerSize);
+  compileModel(model);
 
   const text = `word`;
   const textData = new TextData(
@@ -146,11 +149,6 @@ async function train(args) {
     args.sampleLen,
     args.sampleStep
   );
-
-  const model = createModel(100, textData.charSetSize(), lstmLayerSize);
-
-  compileModel(model);
-
   const [seed, seedIndices] = textData.getRandomSlice();
   console.log(`Seed text:\n"${seed}"\n`);
 
@@ -203,5 +201,8 @@ async function train(args) {
   if (args.data) {
     console.log("process traing raw data");
     prepareTrainData();
+    return;
   }
+
+  startTrain(args);
 })();
