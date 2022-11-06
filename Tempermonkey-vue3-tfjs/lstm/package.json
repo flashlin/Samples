@@ -6,7 +6,8 @@
   "scripts": {
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "train": "ts-node -r tsconfig-paths/register ./src/train.ts",
+    "train": "ts-node -r tsconfig-paths/register ./src/train-linqToTSql.ts",
+    "train2": "ts-node -r tsconfig-paths/register ./src/train.ts",
     "token": "ts-node -r tsconfig-paths/register ./src/test.ts",
     "test": "jest --coverage",
     "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write"
