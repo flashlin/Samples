@@ -1,7 +1,7 @@
 import fs from "fs";
-import * as os from "os";
-import * as path from "path";
-import * as tf from "@tensorflow/tfjs";
+//import os from "os";
+//import path from "path";
+import tf from "@tensorflow/tfjs";
 import { ArgumentParser } from "argparse";
 import {
   compileModel,
@@ -49,6 +49,10 @@ function parseArgs() {
   parser.add_argument("--gpu", {
     action: "store_true",
     help: "Use CUDA GPU for training.",
+  });
+  parser.add_argument("--data", {
+    action: "store_true",
+    help: "process train raw data",
   });
   parser.add_argument("--sampleLen", {
     type: "int",
@@ -191,10 +195,13 @@ async function train(args) {
 (async () => {
   const args = parseArgs();
 
-  require("@tensorflow/tfjs-node-gpu");
+  //require("@tensorflow/tfjs-node-gpu");
   //require('@tensorflow/tfjs-node');
 
-  // let localTextDataPath = args.textDatasetPath;
-  // const text = fs.readFileSync(localTextDataPath, { encoding: "utf-8" });
-  prepareTrainData();
+  console.log(args);
+
+  if (args.data) {
+    console.log("process traing raw data");
+    prepareTrainData();
+  }
 })();
