@@ -13,7 +13,7 @@ const linqReverseCharacters = [
   "spaces",
 ];
 
-const linqCharacters = [
+export const linqCharacters = [
   ...linqReverseCharacters,
   ...keywords,
   ..."abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ ",

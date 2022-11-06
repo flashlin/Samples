@@ -5,6 +5,7 @@
     "target": "ES2015",
     "esModuleInterop": true,
     "allowJs": true,
+    "sourceMap": true,
     "baseUrl": ".",
     "paths": {
       "@/*": [

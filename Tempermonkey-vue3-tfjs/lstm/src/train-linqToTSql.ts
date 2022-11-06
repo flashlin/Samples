@@ -1,15 +1,10 @@
-import fs from "fs";
-//import os from "os";
-//import path from "path";
-import tf from "@tensorflow/tfjs";
+import * as fs from "fs";
+//import * as os from "os";
+import * as path from "path";
+import * as tf from "@tensorflow/tfjs";
 import { ArgumentParser } from "argparse";
-import {
-  compileModel,
-  fitModel,
-  generateText,
-  TextData,
-} from "@/models/AutoCompleteModel";
-import { linqStringToIndexList } from "./linq-encoder";
+import { compileModel } from "@/models/AutoCompleteModel";
+import { linqCharacters, linqStringToIndexList } from "./linq-encoder";
 import { tsqlCharacters, tsqlToIndexList } from "./tsql-encoder";
 
 function createModel(
@@ -35,6 +30,106 @@ function createModel(
   model.add(tf.layers.dense({ units: charSetSize, activation: "softmax" }));
   return model;
 }
+
+function seq2seqModel(
+  numEncoderTokens: number,
+  numDecoderTokens: number,
+  latentDim: number
+) {
+  // Define an input sequence and process it.
+  const encoderInputs = tf.layers.input({
+    shape: [null, numEncoderTokens] as number[],
+    name: "encoderInputs",
+  });
+
+  const encoder = tf.layers.lstm({
+    units: latentDim,
+    returnState: true,
+    name: "encoderLstm",
+  });
+  const [, stateH, stateC] = encoder.apply(
+    encoderInputs
+  ) as tf.SymbolicTensor[];
+  // We discard `encoder_outputs` and only keep the states.
+  const encoderStates = [stateH, stateC];
+
+  // Set up the decoder, using `encoder_states` as initial state.
+  const decoderInputs = tf.layers.input({
+    shape: [null, numDecoderTokens] as number[],
+    name: "decoderInputs",
+  });
+  // We set up our decoder to return full output sequences,
+  // and to return internal states as well. We don't use the
+  // return states in the training model, but we will use them in inference.
+  const decoderLstm = tf.layers.lstm({
+    units: latentDim,
+    returnSequences: true,
+    returnState: true,
+    name: "decoderLstm",
+  });
+
+  const [decoderOutputs] = decoderLstm.apply([
+    decoderInputs,
+    ...encoderStates,
+  ]) as tf.Tensor[];
+
+  const decoderDense = tf.layers.dense({
+    units: numDecoderTokens,
+    activation: "softmax",
+    name: "decoderDense",
+  });
+
+  const decoderDenseOutputs = decoderDense.apply(
+    decoderOutputs
+  ) as tf.SymbolicTensor;
+
+  // Define the model that will turn
+  // `encoder_input_data` & `decoder_input_data` into `decoder_target_data`
+  const model = tf.model({
+    inputs: [encoderInputs, decoderInputs],
+    outputs: decoderDenseOutputs,
+    name: "seq2seqModel",
+  });
+  return {
+    encoderInputs,
+    encoderStates,
+    decoderInputs,
+    decoderLstm,
+    decoderDense,
+    model,
+  };
+}
+
+// function nextDataEpoch(
+//   textLength,
+//   sampleLen,
+//   sampleStep,
+//   charSetSize,
+//   textIndices,
+//   numExamples
+// ) {
+//   const trainingIndices = [];
+
+//   for (let i = 0; i < textLength - sampleLen - 1; i += sampleStep) {
+//     trainingIndices.push(i);
+//   }
+
+//   tf.util.shuffle(trainingIndices);
+
+//   const xsBuffer = new tf.TensorBuffer([numExamples, sampleLen, charSetSize]);
+
+//   const ysBuffer = new tf.TensorBuffer([numExamples, charSetSize]);
+
+//   for (let i = 0; i < numExamples; ++i) {
+//     const beginIndex = trainingIndices[i % trainingIndices.length];
+//     for (let j = 0; j < sampleLen; ++j) {
+//       xsBuffer.set(1, i, j, textIndices[beginIndex + j]);
+//     }
+//     ysBuffer.set(1, i, textIndices[beginIndex + sampleLen]);
+//   }
+
+//   return [xsBuffer.toTensor(), ysBuffer.toTensor()];
+// }
 
 function parseArgs() {
   const parser = new ArgumentParser({
@@ -134,60 +229,161 @@ function prepareTrainData() {
 }
 
 async function startTrain(args) {
+  const inputTexts: number[][] = [];
+  const targetTexts: number[][] = [];
+
+  const dataFile = "./dist/train.txt";
+  const inputLines = fs.readFileSync(dataFile, "utf-8");
+  inputLines.split("\n").forEach((line, idx) => {
+    if (line == "") {
+      return;
+    }
+    if (idx % 2 == 0) {
+      const values = JSON.parse(line);
+      inputTexts.push(values);
+      return;
+    }
+    {
+      const values = JSON.parse(line);
+      targetTexts.push(values);
+    }
+  });
+
+  const numEncoderTokens = linqCharacters.length;
+  const numDecoderTokens = tsqlCharacters.length;
+
+  const maxEncoderSeqLength = inputTexts
+    .map((text) => text.length)
+    .reduceRight((prev, curr) => (curr > prev ? curr : prev), 0);
+  const maxDecoderSeqLength = targetTexts
+    .map((text) => text.length)
+    .reduceRight((prev, curr) => (curr > prev ? curr : prev), 0);
+
+  console.log("Number of samples:", inputTexts.length);
+  console.log("Number of unique input tokens:", numEncoderTokens);
+  console.log("Number of unique output tokens:", numDecoderTokens);
+  console.log("Max sequence length for inputs:", maxEncoderSeqLength);
+  console.log("Max sequence length for outputs:", maxDecoderSeqLength);
+
+  const metadata = {
+    //input_token_index: inputTokenIndex,
+    //target_token_index: targetTokenIndex,
+    max_encoder_seq_length: maxEncoderSeqLength,
+    max_decoder_seq_length: maxDecoderSeqLength,
+  };
+
+  // Save the token indices to file.
+  const artifacts_dir = "./dist";
+  const metadataJsonPath = path.join(artifacts_dir, "metadata.json");
+  fs.writeFileSync(metadataJsonPath, JSON.stringify(metadata));
+  console.log("Saved metadata at: ", metadataJsonPath);
+
+  const encoderInputDataBuf = tf.buffer<tf.Rank.R3>([
+    inputTexts.length,
+    maxEncoderSeqLength,
+    numEncoderTokens,
+  ]);
+  const decoderInputDataBuf = tf.buffer<tf.Rank.R3>([
+    inputTexts.length,
+    maxDecoderSeqLength,
+    numDecoderTokens,
+  ]);
+  const decoderTargetDataBuf = tf.buffer<tf.Rank.R3>([
+    inputTexts.length,
+    maxDecoderSeqLength,
+    numDecoderTokens,
+  ]);
+
+  inputTexts.forEach((inputText, i) => {
+    for (const [t, char] of inputText.entries()) {
+      encoderInputDataBuf.set(1, i, t, char);
+    }
+  });
+
+  targetTexts.forEach((targetText, i) => {
+    for (const [t, char] of targetText.entries()) {
+      decoderInputDataBuf.set(1, i, t, char);
+      if (t > 0) {
+        // decoder_target_data will be ahead by one timestep
+        // and will not include the start character.
+        decoderTargetDataBuf.set(1, i, t - 1, char);
+      }
+    }
+  });
+
+  const encoderInputData = encoderInputDataBuf.toTensor();
+  const decoderInputData = decoderInputDataBuf.toTensor();
+  const decoderTargetData = decoderTargetDataBuf.toTensor();
+
   const lstmLayerSize =
     args.lstmLayerSize.indexOf(",") === -1
       ? Number.parseInt(args.lstmLayerSize)
       : args.lstmLayerSize.split(",").map((x: string) => Number.parseInt(x));
 
-  const model = createModel(100, tsqlCharacters.length, lstmLayerSize);
-  compileModel(model);
-
-  const text = `word`;
-  const textData = new TextData(
-    "text-data",
-    text,
-    args.sampleLen,
-    args.sampleStep
-  );
-  const [seed, seedIndices] = textData.getRandomSlice();
-  console.log(`Seed text:\n"${seed}"\n`);
-
-  const DISPLAY_TEMPERATURES = [0, 0.25, 0.5, 0.75];
-  let epochCount = 0;
-  await fitModel(
+  const latentDim = 256;
+  const {
+    encoderInputs,
+    encoderStates,
+    decoderInputs,
+    decoderLstm,
+    decoderDense,
     model,
-    textData,
-    args.epochs,
-    args.examplesPerEpoch,
-    args.batchSize,
-    args.validationSplit,
-    {
-      onTrainBegin: async () => {
-        epochCount++;
-        console.log(`Epoch ${epochCount} of ${args.epochs}:`);
-      },
-      onTrainEnd: async () => {
-        DISPLAY_TEMPERATURES.forEach(async (temperature) => {
-          const generated = await generateText(
-            model,
-            textData,
-            seedIndices,
-            args.displayLength,
-            temperature
-          );
-          console.log(
-            `Generated text (temperature=${temperature}):\n` +
-              `"${generated}"\n`
-          );
-        });
-      },
-    }
-  );
+  } = seq2seqModel(numEncoderTokens, numDecoderTokens, latentDim);
+
+  model.compile({
+    optimizer: "rmsprop",
+    loss: "categoricalCrossentropy",
+  });
+  model.summary();
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const tfn = require("@tensorflow/tfjs-node-gpu");
+  await model.fit([encoderInputData, decoderInputData], decoderTargetData, {
+    batchSize: 32,
+    epochs: 10,
+    validationSplit: 0.2,
+    callbacks:
+      args.logDir == null
+        ? null
+        : tfn.node.tensorBoard(args.logDir, {
+            updateFreq: args.logUpdateFreq,
+          }),
+  });
 
   console.log("END");
 
-  //await model.save(`file://${args.savePath}`);
-  await model.save(`file://./model`);
+  await model.save(`file://./dist/model`);
+
+  // Define sampling models
+  const encoderModel = tf.model({
+    inputs: encoderInputs,
+    outputs: encoderStates,
+    name: "encoderModel",
+  });
+
+  const decoderStateInputH = tf.layers.input({
+    shape: [latentDim],
+    name: "decoderStateInputHidden",
+  });
+
+  const decoderStateInputC = tf.layers.input({
+    shape: [latentDim],
+    name: "decoderStateInputCell",
+  });
+
+  const decoderStatesInputs = [decoderStateInputH, decoderStateInputC];
+  let [decoderOutputs, stateH, stateC] = decoderLstm.apply([
+    decoderInputs,
+    ...decoderStatesInputs,
+  ]) as tf.SymbolicTensor[];
+
+  const decoderStates = [stateH, stateC];
+  decoderOutputs = decoderDense.apply(decoderOutputs) as tf.SymbolicTensor;
+  const decoderModel = tf.model({
+    inputs: [decoderInputs, ...decoderStatesInputs],
+    outputs: [decoderOutputs, ...decoderStates],
+    name: "decoderModel",
+  });
 }
 
 (async () => {
