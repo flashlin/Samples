@@ -35,6 +35,12 @@ describe("linq to token", () => {
     ]);
   });
 
+  test("linq cr to tokens", () => {
+    const tokenizr = new LinqTokenizr();
+    const result = tokenizr.tokens("\n").map((x) => x.value);
+    expect(result).toStrictEqual([" "]);
+  });
+
   test("linq tokens to values", () => {
     const tokenizr = new LinqTokenizr();
     const tokens = tokenizr.tokens(

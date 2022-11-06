@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Tokenizr } from "ts-tokenizr";
 
@@ -207,7 +206,12 @@ export class TSqlTokenizr {
     try {
       const tokens = this._lexer.tokens();
       tokens.pop();
-      return tokens;
+      return tokens.map((x) => {
+        if (x.text == "\r") {
+          x.value = " ";
+        }
+        return x;
+      });
     } catch (e) {
       console.error(
         `${e.message} pos=${e.pos} '${text.substring(e.pos, e.pos + 10)}'`
@@ -245,7 +249,7 @@ export class TSqlTokenizr {
       ctx.accept("symbol");
     });
 
-    this._lexer.rule(/\*\+-%/, (ctx, match) => {
+    this._lexer.rule(/[*+\-%]/, (ctx, match) => {
       ctx.accept("operator");
     });
 

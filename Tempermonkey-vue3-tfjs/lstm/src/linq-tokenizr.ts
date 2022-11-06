@@ -31,7 +31,14 @@ export class LinqTokenizr {
       this._lexer.input(text);
       const tokens = this._lexer.tokens();
       tokens.pop();
-      return tokens;
+      return tokens.map((x) => {
+        if (x.text == "\n") {
+          x.value = " ";
+        } else if (x.text == "\r") {
+          x.value = " ";
+        }
+        return x;
+      });
     } catch (e) {
       console.error(
         `${e.message} pos=${e.pos}, '${text.substring(e.pos, e.pos + 10)}'`

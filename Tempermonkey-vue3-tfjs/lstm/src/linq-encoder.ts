@@ -1,4 +1,4 @@
-import { keywords } from "@/linq-tokenizr";
+import { keywords, LinqTokenizr } from "@/linq-tokenizr";
 import { Token } from "ts-tokenizr";
 
 const linqReverseCharacters = [
@@ -41,7 +41,7 @@ function linqTokenToValues(token: Token): number[] {
   if (token.type == "keyword") {
     return [typeIndex, charToIndex(token.text)];
   }
-  const next = [...token.text].map((x) => charToIndex(x));
+  const next = [...(token.value as string)].map((x) => charToIndex(x));
   return [typeIndex, ...next, 0];
 }
 
@@ -57,4 +57,10 @@ export function linqIndexListToString(values: number[]): string {
     .map((ch) => indexToCharDict.get(ch))
     .filter((ch) => !linqReverseCharacters.includes(ch));
   return strList.join("");
+}
+
+export function linqStringToIndexList(expression: string): number[] {
+  const tokenizr = new LinqTokenizr();
+  const tokens = tokenizr.tokens(expression);
+  return linqTokensToIndexList(tokens);
 }

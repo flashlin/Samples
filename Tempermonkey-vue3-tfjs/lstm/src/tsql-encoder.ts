@@ -1,4 +1,4 @@
-import { keywords } from "@/tsql-tokenizr";
+import { keywords, TSqlTokenizr } from "@/tsql-tokenizr";
 import { ArrayToChar2IndexMap, ArrayToIndex2CharMap } from "@/tokenizr-utils";
 import { Token } from "ts-tokenizr";
 
@@ -36,7 +36,7 @@ function tsqlTokenToValues(token: Token): number[] {
   if (token.type == "keyword") {
     return [typeIndex, charToIndexDict.get(token.text)];
   }
-  const next = [...token.text].map((ch) => charToIndex(ch));
+  const next = [...(token.value as string)].map((ch) => charToIndex(ch));
   return [typeIndex, ...next, 0];
 }
 
@@ -52,4 +52,10 @@ export function tsqlIndexListToString(values: number[]): string {
     .map((ch) => indexToCharDict.get(ch))
     .filter((ch) => !tsqlReverseCharacters.includes(ch));
   return strList.join("");
+}
+
+export function tsqlToIndexList(sql: string): number[] {
+  const tokenizr = new TSqlTokenizr();
+  const tokens = tokenizr.tokens(sql);
+  return tsqlTokensToIndexList(tokens);
 }

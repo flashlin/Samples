@@ -44,6 +44,20 @@ describe("tsql", () => {
     ]);
   });
 
+  test("tsql * to tokens", () => {
+    const tokenizr = new TSqlTokenizr();
+    const result = tokenizr.tokens("SELECT * FROM myUser").map((x) => x.value);
+    expect(result).toStrictEqual([
+      "SELECT",
+      " ",
+      "*",
+      " ",
+      "FROM",
+      " ",
+      "myUser",
+    ]);
+  });
+
   test("tsql tokens to values", () => {
     const tokenizr = new TSqlTokenizr();
     const tokens = tokenizr.tokens(
