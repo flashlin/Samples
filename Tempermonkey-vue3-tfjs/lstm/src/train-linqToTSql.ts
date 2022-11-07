@@ -315,11 +315,6 @@ async function startTrain(args) {
   const decoderInputData = decoderInputDataBuf.toTensor();
   const decoderTargetData = decoderTargetDataBuf.toTensor();
 
-  const lstmLayerSize =
-    args.lstmLayerSize.indexOf(",") === -1
-      ? Number.parseInt(args.lstmLayerSize)
-      : args.lstmLayerSize.split(",").map((x: string) => Number.parseInt(x));
-
   const latentDim = 256;
   const {
     encoderInputs,
@@ -338,7 +333,16 @@ async function startTrain(args) {
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const tfn = require("@tensorflow/tfjs-node-gpu");
-  await model.fit([encoderInputData, decoderInputData], decoderTargetData, {
+
+  const model1 = await tf.loadLayersModel("file://./dist/model/model.json");
+  model1.compile({
+    optimizer: "rmsprop",
+    loss: "categoricalCrossentropy",
+  });
+
+  const m = model1;
+
+  await m.fit([encoderInputData, decoderInputData], decoderTargetData, {
     batchSize: 32,
     epochs: 10,
     validationSplit: 0.2,
@@ -352,7 +356,7 @@ async function startTrain(args) {
 
   console.log("END");
 
-  await model.save(`file://./dist/model`);
+  await m.save(`file://./dist/model`);
 
   // Define sampling models
   const encoderModel = tf.model({
