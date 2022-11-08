@@ -1,6 +1,6 @@
-from itertools import groupby
+from utils.tokenizr import Token
+from utils.tsql_tokenizr import tsql_tokenize, TSQL_Operators_Lengths
 
-from utils.tokenizr import tsql_tokenize, Token, TSQL_Operators_Lengths
 
 def test_operator_lengths():
     assert TSQL_Operators_Lengths == [2, 1]
