@@ -197,6 +197,25 @@ TSQL_Operators: Final[list[str]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', 
 # TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
 TSQL_Operators_Lengths = group_length(TSQL_Operators)
 
+
+def read_tsql_keyword_fn():
+    return read_keyword_fn(Token.Keyword, TSQL_Keywords_Lengths, TSQL_Keywords, case_insensitive=True)
+
+def read_symbol(stream_iterator: StreamIterator):
+    hint_length = peek_str_by_list_contain(stream_iterator, [1], TSQL_Symbols)
+    buff = read_token_list_by_length(stream_iterator, hint_length)
+    if not hint_length > 0:
+        return EmptyToken
+    return reduce_token_list(Token.Symbol, buff)
+
+
+def read_operator(stream_iterator: StreamIterator):
+    hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Operators_Lengths, TSQL_Operators)
+    buff = read_token_list_by_length(stream_iterator, hint_length)
+    if not hint_length > 0:
+        return EmptyToken
+    return reduce_token_list(Token.Operator, buff)
+
 def tsql_tokenize(stream) -> list[Token]:
     tokens = []
     stream_iterator = StreamIterator(stream)
@@ -217,22 +236,3 @@ def tsql_tokenize(stream) -> list[Token]:
             continue
         raise Exception(f"try to tokenize fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
     return tokens
-
-
-def read_tsql_keyword_fn():
-    return read_keyword_fn(TSQL_Keywords_Lengths, TSQL_Keywords, case_insensitive=True)
-
-def read_symbol(stream_iterator: StreamIterator):
-    hint_length = peek_str_by_list_contain(stream_iterator, [1], TSQL_Symbols)
-    buff = read_token_list_by_length(stream_iterator, hint_length)
-    if not hint_length > 0:
-        return EmptyToken
-    return reduce_token_list(Token.Symbol, buff)
-
-
-def read_operator(stream_iterator: StreamIterator):
-    hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Operators_Lengths, TSQL_Operators)
-    buff = read_token_list_by_length(stream_iterator, hint_length)
-    if not hint_length > 0:
-        return EmptyToken
-    return reduce_token_list(Token.Operator, buff)
