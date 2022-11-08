@@ -2,6 +2,7 @@ from functools import reduce
 from typing import TypeVar, Generic, Final
 from itertools import groupby
 
+
 class Token:
     Undefined = 'undefined'
     String = 'string'
@@ -9,6 +10,7 @@ class Token:
     Identifier = 'identifier'
     Operator = 'operator'
     Symbol = 'symbol'
+    Keyword = 'keyword'
     Empty = '(empty)'
 
     def __init__(self, token_type: str, text: str, offset: int, line: int, col: int):
@@ -32,9 +34,11 @@ class Token:
                and self.line == other.line \
                and self.col == other.col
 
+
 EmptyToken = Token(Token.Empty, None, -1, -1, -1)
 
 T = TypeVar("T")
+
 
 class StreamIterator(Generic[T]):
     def __init__(self, stream: list[T]):
@@ -59,6 +63,10 @@ class StreamIterator(Generic[T]):
             buff.append(node)
             count += 1
         self.prev(count)
+        while count < length:
+            node = Token(Token.Undefined, " ", self.idx + count, self.line, self.col + count)
+            buff.append(node)
+            count += 1
         buff = filter(lambda n: n.text is not None, buff)
         buff = map(lambda n: n.text, buff)
         return "".join(buff)
@@ -93,6 +101,7 @@ class StreamIterator(Generic[T]):
                 self.col = 0
             else:
                 self.col += 1
+
         if self.idx >= self.length:
             return EmptyToken
         if self.idx < self.buffer_len:
@@ -118,9 +127,11 @@ def reduce_token_list(token_type: str, buff: list[Token]):
             return item
         acc.text += item.text
         return acc
+
     token = reduce(reduce_token_list_fn, buff, EmptyToken)
     token.type = token_type
     return token
+
 
 def read_number(stream_iterator: StreamIterator) -> Token:
     buff = []
@@ -134,6 +145,7 @@ def read_number(stream_iterator: StreamIterator) -> Token:
         return EmptyToken
     return reduce_token_list(Token.Number, buff)
 
+
 def read_float_number(stream_iterator: StreamIterator) -> Token:
     integer = read_number(stream_iterator)
     text = stream_iterator.peek_str(1)
@@ -145,6 +157,7 @@ def read_float_number(stream_iterator: StreamIterator) -> Token:
         stream_iterator.prev()
         return EmptyToken
     return reduce_token_list(Token.Number, [integer, dot, scale])
+
 
 def read_identifier(stream_iterator: StreamIterator) -> Token:
     text = stream_iterator.peek_str(1)
@@ -177,41 +190,239 @@ def read_single_quote_string(stream_iterator: StreamIterator):
         buff.append(next_node)
     return reduce_token_list(Token.String, buff)
 
+
 def sort_desc(arr: list[str]) -> list[str]:
     arr.sort(key=lambda x: len(x))
     return arr[::-1]
 
+
 def group_length(arr_sorted: list[str]):
     return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
 
+
 TSQL_Operators: Final[list[str]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', '-', '*', '/', '%'])
-#TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
+# TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
 TSQL_Operators_Lengths = group_length(TSQL_Operators)
-
 TSQL_Symbols: Final[list[str]] = ['.', '(', ')', '@', '#']
+TSQL_Keywords = sort_desc([
+    "ADD",
+    "EXTERNAL",
+    "PROCEDURE",
+    "ALL",
+    "FETCH",
+    "PUBLIC",
+    "ALTER",
+    "FILE",
+    "RAISERROR",
+    "AND",
+    "FILLFACTOR",
+    "READ",
+    "ANY",
+    "FOR",
+    "READTEXT",
+    "AS",
+    "FOREIGN",
+    "RECONFIGURE",
+    "ASC",
+    "FREETEXT",
+    "REFERENCES",
+    "AUTHORIZATION",
+    "FREETEXTTABLE",
+    "REPLICATION",
+    "BACKUP",
+    "FROM",
+    "RESTORE",
+    "BEGIN",
+    "FULL",
+    "RESTRICT",
+    "BETWEEN",
+    "FUNCTION",
+    "RETURN",
+    "BREAK",
+    "GOTO",
+    "REVERT",
+    "BROWSE",
+    "GRANT",
+    "REVOKE",
+    "BULK",
+    "GROUP",
+    "RIGHT",
+    "BY",
+    "HAVING",
+    "ROLLBACK",
+    "CASCADE",
+    "HOLDLOCK",
+    "ROWCOUNT",
+    "CASE",
+    "IDENTITY",
+    "ROWGUIDCOL",
+    "CHECK",
+    "IDENTITY_INSERT",
+    "RULE",
+    "CHECKPOINT",
+    "IDENTITYCOL",
+    "SAVE",
+    "CLOSE",
+    "IF",
+    "SCHEMA",
+    "CLUSTERED",
+    "IN",
+    "SECURITYAUDIT",
+    "COALESCE",
+    "INDEX",
+    "SELECT",
+    "COLLATE",
+    "INNER",
+    "SEMANTICKEYPHRASETABLE",
+    "COLUMN",
+    "INSERT",
+    "SEMANTICSIMILARITYDETAILSTABLE",
+    "COMMIT",
+    "INTERSECT",
+    "SEMANTICSIMILARITYTABLE",
+    "COMPUTE",
+    "INTO",
+    "SESSION_USER",
+    "CONSTRAINT",
+    "IS",
+    "SET",
+    "CONTAINS",
+    "JOIN",
+    "SETUSER",
+    "CONTAINSTABLE",
+    "KEY",
+    "SHUTDOWN",
+    "CONTINUE",
+    "KILL",
+    "SOME",
+    "CONVERT",
+    "LEFT",
+    "STATISTICS",
+    "CREATE",
+    "LIKE",
+    "SYSTEM_USER",
+    "CROSS",
+    "LINENO",
+    "TABLE",
+    "CURRENT",
+    "LOAD",
+    "TABLESAMPLE",
+    "CURRENT_DATE",
+    "MERGE",
+    "TEXTSIZE",
+    "CURRENT_TIME",
+    "NATIONAL",
+    "THEN",
+    "CURRENT_TIMESTAMP",
+    "NOCHECK",
+    "TO",
+    "CURRENT_USER",
+    "NONCLUSTERED",
+    "TOP",
+    "CURSOR",
+    "NOT",
+    "TRAN",
+    "DATABASE",
+    "NULL",
+    "TRANSACTION",
+    "DBCC",
+    "NULLIF",
+    "TRIGGER",
+    "DEALLOCATE",
+    "OF",
+    "TRUNCATE",
+    "DECLARE",
+    "OFF",
+    "TRY_CONVERT",
+    "DEFAULT",
+    "OFFSETS",
+    "TSEQUAL",
+    "DELETE",
+    "ON",
+    "UNION",
+    "DENY",
+    "OPEN",
+    "UNIQUE",
+    "DESC",
+    "OPENDATASOURCE",
+    "UNPIVOT",
+    "DISK",
+    "OPENQUERY",
+    "UPDATE",
+    "DISTINCT",
+    "OPENROWSET",
+    "UPDATETEXT",
+    "DISTRIBUTED",
+    "OPENXML",
+    "USE",
+    "DOUBLE",
+    "OPTION",
+    "USER",
+    "DROP",
+    "OR",
+    "VALUES",
+    "DUMP",
+    "ORDER",
+    "VARYING",
+    "ELSE",
+    "OUTER",
+    "VIEW",
+    "END",
+    "OVER",
+    "WAITFOR",
+    "ERRLVL",
+    "PERCENT",
+    "WHEN",
+    "ESCAPE",
+    "PIVOT",
+    "WHERE",
+    "EXCEPT",
+    "PLAN",
+    "WHILE",
+    "EXEC",
+    "PRECISION",
+    "WITH",
+    "EXECUTE",
+    "PRIMARY",
+    "WITHIN GROUP",
+    "EXISTS",
+    "PRINT",
+    "WRITETEXT",
+    "EXIT",
+    "PROC",
+])
+TSQL_Keywords_Lengths = group_length(TSQL_Keywords)
 
-def index_of(arr: list[str], search: str) -> int:
+
+def index_of(arr: list[str], search: str, case_insensitive: bool=False) -> int:
+    search = search.upper() if case_insensitive else search
     for idx, item in enumerate(arr):
+        item = item.upper() if case_insensitive else item
         if item == search:
             return idx
     return -1
 
-def peek_str_by_list_contain(stream_iterator: StreamIterator, peek_length_list: list[int], str_list: list[str]):
+
+def peek_str_by_list_contain(stream_iterator: StreamIterator, peek_length_list: list[int], str_list: list[str], case_insensitive: bool=False):
     hint_length = 0
+
     def peek_str(length: int) -> str:
         return stream_iterator.peek_str(length)
+
     for peek_length in peek_length_list:
         text = peek_str(peek_length)
-        if index_of(str_list, text) >= 0:
+        if index_of(str_list, text, case_insensitive) >= 0:
             hint_length = peek_length
             break
     return hint_length
+
 
 def read_token_list_by_length(stream_iterator, hint_length):
     buff = []
     for n in range(hint_length):
         buff.append(stream_iterator.next())
     return buff
+
 
 def read_operator(stream_iterator: StreamIterator):
     hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Operators_Lengths, TSQL_Operators)
@@ -220,12 +431,20 @@ def read_operator(stream_iterator: StreamIterator):
         return EmptyToken
     return reduce_token_list(Token.Operator, buff)
 
+
 def read_symbol(stream_iterator: StreamIterator):
     hint_length = peek_str_by_list_contain(stream_iterator, [1], TSQL_Symbols)
     buff = read_token_list_by_length(stream_iterator, hint_length)
     if not hint_length > 0:
         return EmptyToken
     return reduce_token_list(Token.Symbol, buff)
+
+def read_keyword(stream_iterator: StreamIterator):
+    hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Keywords_Lengths, TSQL_Keywords, True)
+    buff = read_token_list_by_length(stream_iterator, hint_length)
+    if not hint_length > 0:
+        return EmptyToken
+    return reduce_token_list(Token.Keyword, buff)
 
 
 def try_read_any(stream_iterator: StreamIterator, fn_list: list):
@@ -235,16 +454,18 @@ def try_read_any(stream_iterator: StreamIterator, fn_list: list):
             return token
     return EmptyToken
 
+
 def tsql_tokenize(stream) -> list[Token]:
     tokens = []
     stream_iterator = StreamIterator(stream)
 
     read_fn_list = [
+        read_keyword,
         read_identifier,
         read_float_number,
         read_single_quote_string,
         read_operator,
-        read_symbol
+        read_symbol,
     ]
 
     while not stream_iterator.is_done():
