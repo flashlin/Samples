@@ -6,8 +6,10 @@ class Token:
     String = 'string'
     Number = 'number'
     Operator = 'operator'
-    EOF = '(end)'
-    def __init__(self, text: str, offset: int, line: int, col: int):
+    Empty = '(empty)'
+
+    def __init__(self, token_type: str, text: str, offset: int, line: int, col: int):
+        self.type = token_type
         self.text = text
         self.line = line
         self.col = col
@@ -21,11 +23,13 @@ class Token:
         return self.text
 
     def __eq__(self, other):
-        return self.text == other.text \
+        return self.type == other.type \
+               and self.text == other.text \
+               and self.offset == other.offset \
                and self.line == other.line \
                and self.col == other.col
 
-EmptyToken = Token(None, -1, -1, -1)
+EmptyToken = Token(Token.Empty, None, -1, -1, -1)
 
 T = TypeVar("T")
 
@@ -81,7 +85,7 @@ class StreamIterator(Generic[T]):
             increase_idx(buffer_node.text)
             return buffer_node
         character = self.stream[self.idx]
-        token = Token(character, self.idx, self.line, self.col)
+        token = Token(Token.Undefined, character, self.idx, self.line, self.col)
         self.buffer.append(token)
         self.buffer_len += 1
         increase_idx(character)
@@ -93,13 +97,15 @@ class StreamIterator(Generic[T]):
         return self.idx >= self.length
 
 
-def reduce_token_list(buff: list[Token]):
+def reduce_token_list(token_type: str, buff: list[Token]):
     def reduce_token_list_fn(acc: Token, item: Token):
         if acc.text is None:
             return item
         acc.text += item.text
         return acc
-    return reduce(reduce_token_list_fn, buff, EmptyToken)
+    token = reduce(reduce_token_list_fn, buff, EmptyToken)
+    token.type = token_type
+    return token
 
 def read_number(node: Token, stream_iterator: StreamIterator):
     buff = [ node ]
@@ -110,7 +116,7 @@ def read_number(node: Token, stream_iterator: StreamIterator):
         else:
             stream_iterator.prev()
             break
-    return reduce_token_list(buff)
+    return reduce_token_list(Token.Number, buff)
 
 def read_single_quote_string(node: Token, stream_iterator: StreamIterator):
     buff = [node]
@@ -125,7 +131,7 @@ def read_single_quote_string(node: Token, stream_iterator: StreamIterator):
                 continue
             break
         buff.append(next_node)
-    return reduce_token_list(buff)
+    return reduce_token_list(Token.String, buff)
 
 
 def tsql_tokenize(stream) -> list[Token]:
