@@ -1,41 +1,21 @@
 from functools import reduce
 from typing import TypeVar, Generic
 
-
 class Token:
-    Name = 'name'
+    Undefined = 'undefined'
     String = 'string'
     Number = 'number'
     Operator = 'operator'
-    Boolean = 'boolean'
-    Undefined = 'undefined'
-    Null = 'null'
-    Regex = 'regex'
     EOF = '(end)'
-
-    LITERALS = [String, Number, Boolean, Regex, Null, Undefined]
-
-    def __init__(self, source: str, token_type: str, line=0, char=0):
-        self.value = source
-        self.type = token_type
-        self.line = line
-        self.char = char
-
-    def __repr__(self):
-        return '<%s: %s (line %d, char %d)>' % (self.type, self.value.replace('\n', '\\n'), self.line, self.char)
-
-    def __str__(self):
-        return self.value
-
-
-class CharNode:
-    def __init__(self, text: str, line: int, col: int):
+    def __init__(self, text: str, offset: int, line: int, col: int):
         self.text = text
         self.line = line
         self.col = col
+        self.offset = offset
 
     def __repr__(self):
-        return '<%s (line %d, col %d)>' % (self.text.replace('\n', '\\n'), self.line, self.col)
+        text = "None" if self.text is None else self.text
+        return '<%s (offset %d, line %d, col %d)>' % (text.replace('\n', '\\n'), self.offset, self.line, self.col)
 
     def __str__(self):
         return self.text
@@ -45,7 +25,7 @@ class CharNode:
                and self.line == other.line \
                and self.col == other.col
 
-EmptyCharNode = CharNode(None, -1, -1)
+EmptyToken = Token(None, -1, -1, -1)
 
 T = TypeVar("T")
 
@@ -53,12 +33,11 @@ class StreamIterator(Generic[T]):
     def __init__(self, stream: list[T]):
         self.stream = stream
         self.length = len(stream)
-
-    buffer = []
-    buffer_len = 0
-    line = 0
-    col = 0
-    idx = 0
+        self.line = 0
+        self.col = 0
+        self.idx = 0
+        self.buffer: list[Token] = []
+        self.buffer_len = 0
 
     def peek(self, n=1):
         node = self.next(n)
@@ -66,43 +45,47 @@ class StreamIterator(Generic[T]):
         return node
 
     def prev(self, n=1):
-        node = EmptyCharNode
+        node = EmptyToken
         count = 0
         while count < n:
-            node = self.prev_node()
+            node = self.prev_token()
             count += 1
         return node
 
-    def prev_node(self):
+    def prev_token(self):
         if self.idx - 1 < 0:
-            return EmptyCharNode
+            return EmptyToken
         self.idx -= 1
         return self.buffer[self.idx]
 
     def next(self, n=1):
-        node = None
+        node = EmptyToken
         count = 0
         while count < n:
-            node = self.next_node()
+            node = self.next_token()
             count += 1
         return node
 
-    def next_node(self):
+    def next_token(self):
+        def increase_idx(ch):
+            self.idx += 1
+            if ch == '\n':
+                self.line += 1
+                self.col = 0
+            else:
+                self.col += 1
         if self.idx >= self.length:
-            return EmptyCharNode
+            return EmptyToken
         if self.idx < self.buffer_len:
-            return self.buffer[self.idx]
+            buffer_node = self.buffer[self.idx]
+            increase_idx(buffer_node.text)
+            return buffer_node
         character = self.stream[self.idx]
-        node = CharNode(character, self.line, self.col)
-        self.buffer.append(node)
+        token = Token(character, self.idx, self.line, self.col)
+        self.buffer.append(token)
         self.buffer_len += 1
-        self.idx += 1
-        if character == '\n':
-            self.line += 1
-            self.col = 0
-        else:
-            self.col += 1
-        return node
+        increase_idx(character)
+        return token
 
     def is_done(self):
         if self.idx == 0 and self.length == 0:
@@ -110,8 +93,16 @@ class StreamIterator(Generic[T]):
         return self.idx >= self.length
 
 
-def read_number(node, stream_iterator):
-    buff = [ node ];
+def reduce_token_list(buff: list[Token]):
+    def reduce_token_list_fn(acc: Token, item: Token):
+        if acc.text is None:
+            return item
+        acc.text += item.text
+        return acc
+    return reduce(reduce_token_list_fn, buff, EmptyToken)
+
+def read_number(node: Token, stream_iterator: StreamIterator):
+    buff = [ node ]
     while not stream_iterator.is_done():
         next_node = stream_iterator.next()
         if next_node.text.isdigit():
@@ -119,21 +110,36 @@ def read_number(node, stream_iterator):
         else:
             stream_iterator.prev()
             break
-    def reduceChartNodeFn(acc: CharNode, item: CharNode):
-        if acc.text is None:
-            return item
-        acc.text += item.text
-        return acc
-    return reduce(reduceChartNodeFn, buff, CharNode(None, -1, -1))
+    return reduce_token_list(buff)
+
+def read_single_quote_string(node: Token, stream_iterator: StreamIterator):
+    buff = [node]
+    while not stream_iterator.is_done():
+        next_node = stream_iterator.next()
+        if next_node.text == "'":
+            buff.append(next_node)
+            node2 = stream_iterator.peek()
+            if node2.text == "'":
+                buff.append(node2)
+                stream_iterator.next()
+                continue
+            break
+        buff.append(next_node)
+    return reduce_token_list(buff)
+
 
 def tsql_tokenize(stream) -> list[Token]:
     tokens = []
     stream_iterator = StreamIterator(stream)
+    c = 0
     while not stream_iterator.is_done():
+        c += 1
         node = stream_iterator.next()
         if node.text.isdigit():
-            token = read_number(node, stream_iterator)
-            tokens.append(token)
+            tokens.append(read_number(node, stream_iterator))
             continue
-        raise Exception(f"Parse token fail, unknown '{node.text}'")
+        if node.text == "'":
+            tokens.append(read_single_quote_string(node, stream_iterator))
+            continue
+        raise Exception(f"Parse token fail, unknown '{node=}' at {stream_iterator.idx=}")
     return tokens
