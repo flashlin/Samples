@@ -21,5 +21,10 @@ def test_operator():
     tokens = tsql_tokenize(stream)
     assert tokens[0] == Token(Token.Operator, stream, 0, 0, 0)
 
+def test_symbol():
+    stream = "."
+    tokens = tsql_tokenize(stream)
+    assert tokens[0] == Token(Token.Symbol, stream, 0, 0, 0)
+
 if __name__ == "__main__":
     test_string()
