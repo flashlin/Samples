@@ -4,3 +4,5 @@ pynput
 matplotlib
 tensorflow
 pytest
+pydot
+graphviz
