@@ -1,5 +1,7 @@
 from functools import reduce
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Final
+import numpy as np
+from itertools import groupby
 
 class Token:
     Undefined = 'undefined'
@@ -16,8 +18,8 @@ class Token:
         self.offset = offset
 
     def __repr__(self):
-        text = "None" if self.text is None else self.text
-        return '<%s (offset %d, line %d, col %d)>' % (text.replace('\n', '\\n'), self.offset, self.line, self.col)
+        text = "(none)" if self.text is None else self.text
+        return '<"%s" (offset %d, line %d, col %d)>' % (text.replace('\n', '\\n'), self.offset, self.line, self.col)
 
     def __str__(self):
         return self.text
@@ -47,6 +49,18 @@ class StreamIterator(Generic[T]):
         node = self.next(n)
         self.prev(n)
         return node
+
+    def peek_str(self, length: int):
+        buff = []
+        count = 0
+        while count < length and not self.is_done():
+            node = self.next()
+            buff.append(node)
+            count += 1
+        self.prev(count)
+        buff = filter(lambda n: n.text is not None, buff)
+        buff = map(lambda n: n.text, buff)
+        return "".join(buff)
 
     def prev(self, n=1):
         node = EmptyToken
@@ -107,19 +121,22 @@ def reduce_token_list(token_type: str, buff: list[Token]):
     token.type = token_type
     return token
 
-def read_number(node: Token, stream_iterator: StreamIterator):
-    buff = [ node ]
+def try_read_number(stream_iterator: StreamIterator):
+    buff = []
     while not stream_iterator.is_done():
-        next_node = stream_iterator.next()
-        if next_node.text.isdigit():
-            buff.append(next_node)
-        else:
-            stream_iterator.prev()
+        token = stream_iterator.peek()
+        if not token.text.isdigit():
             break
-    return reduce_token_list(Token.Number, buff)
+        buff.append(token)
+        stream_iterator.next()
+    success = len(buff) > 0
+    token = EmptyToken if not success else reduce_token_list(Token.Number, buff)
+    return success, token
 
-def read_single_quote_string(node: Token, stream_iterator: StreamIterator):
-    buff = [node]
+def try_read_single_quote_string(stream_iterator: StreamIterator):
+    if stream_iterator.peek_str(1) != "'":
+        return False, EmptyToken
+    buff = [stream_iterator.next()]
     while not stream_iterator.is_done():
         next_node = stream_iterator.next()
         if next_node.text == "'":
@@ -131,21 +148,50 @@ def read_single_quote_string(node: Token, stream_iterator: StreamIterator):
                 continue
             break
         buff.append(next_node)
-    return reduce_token_list(Token.String, buff)
+    return True, reduce_token_list(Token.String, buff)
 
+def sort_desc(arr: list[str]) -> list[str]:
+    arr.sort(key=lambda x: len(x))
+    return arr[::-1]
+
+def group_length(arr_sorted: list[str]):
+    return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
+
+TSQL_Operators: Final[list[int]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', '-', '*', '/', '%'])
+#TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
+TSQL_Operators_Lengths = group_length(TSQL_Operators)
+
+def try_read_operator(stream_iterator: StreamIterator):
+    buff = []
+    hint_length = 0
+    def peek_str(length: int) -> str:
+        return stream_iterator.peek_str(length)
+    for read_len in TSQL_Operators_Lengths:
+        text = peek_str(read_len)
+        if TSQL_Operators.index(text) >= 0:
+            hint_length = read_len
+            break
+    for n in range(hint_length):
+        buff.append(stream_iterator.next())
+    success = hint_length > 0
+    token = EmptyToken if not success else reduce_token_list(Token.Operator, buff)
+    return success, token
 
 def tsql_tokenize(stream) -> list[Token]:
     tokens = []
     stream_iterator = StreamIterator(stream)
-    c = 0
     while not stream_iterator.is_done():
-        c += 1
-        node = stream_iterator.next()
-        if node.text.isdigit():
-            tokens.append(read_number(node, stream_iterator))
+        is_number, number = try_read_number(stream_iterator)
+        if is_number:
+            tokens.append(number)
             continue
-        if node.text == "'":
-            tokens.append(read_single_quote_string(node, stream_iterator))
+        is_string, string = try_read_single_quote_string(stream_iterator)
+        if is_string:
+            tokens.append(string)
             continue
-        raise Exception(f"Parse token fail, unknown '{node=}' at {stream_iterator.idx=}")
+        is_operator, operator = try_read_operator(stream_iterator)
+        if is_operator:
+            tokens.append(operator)
+            continue
+        raise Exception(f"Parse token fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
     return tokens
