@@ -6,6 +6,13 @@ def test_next():
     node = stream_iter.next()
     assert node.text == 'a'
 
+def test_next_2_times():
+    stream = "abc123"
+    stream_iter = StreamIterator(stream)
+    stream_iter.next()
+    node = stream_iter.next()
+    assert node.text == 'b'
+
 def test_next4():
     stream = "abc123"
     stream_iter = StreamIterator(stream)
