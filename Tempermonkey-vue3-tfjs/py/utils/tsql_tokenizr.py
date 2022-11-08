@@ -2,7 +2,7 @@ from typing import Final
 
 from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_number, \
     read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_length, \
-    peek_str_by_list_contain, read_token_list_by_length, reduce_token_list, read_keyword_fn
+    peek_str_by_list_contain, read_token_list_by_length, reduce_token_list, read_keyword_fn, read_spaces
 
 TSQL_Keywords = sort_desc([
     "ADD",
@@ -218,6 +218,7 @@ def tsql_tokenize(stream) -> list[Token]:
         read_single_quote_string,
         read_operator_fn(),
         read_symbol_fn(),
+        read_spaces,
     ]
 
     while not stream_iterator.is_done():
