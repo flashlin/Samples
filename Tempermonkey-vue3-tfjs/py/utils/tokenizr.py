@@ -8,6 +8,7 @@ class Token:
     String = 'string'
     Number = 'number'
     Operator = 'operator'
+    Symbol = 'symbol'
     Empty = '(empty)'
 
     def __init__(self, token_type: str, text: str, offset: int, line: int, col: int):
@@ -157,24 +158,47 @@ def sort_desc(arr: list[str]) -> list[str]:
 def group_length(arr_sorted: list[str]):
     return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
 
-TSQL_Operators: Final[list[int]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', '-', '*', '/', '%'])
+TSQL_Operators: Final[list[str]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', '-', '*', '/', '%'])
 #TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
 TSQL_Operators_Lengths = group_length(TSQL_Operators)
 
-def try_read_operator(stream_iterator: StreamIterator):
-    buff = []
+TSQL_Symbols: Final[list[str]] = ['.', '(', ')', '@', '#']
+
+def index_of(arr: list[str], search: str) -> int:
+    for idx, item in enumerate(arr):
+        if item == search:
+            return idx
+    return -1
+
+def peek_str_by_list_contain(stream_iterator: StreamIterator, peek_length_list: list[int], str_list: list[str]):
     hint_length = 0
     def peek_str(length: int) -> str:
         return stream_iterator.peek_str(length)
-    for read_len in TSQL_Operators_Lengths:
-        text = peek_str(read_len)
-        if TSQL_Operators.index(text) >= 0:
-            hint_length = read_len
+    for peek_length in peek_length_list:
+        text = peek_str(peek_length)
+        if index_of(str_list, text) >= 0:
+            hint_length = peek_length
             break
+    return hint_length
+
+def read_token_list_by_length(stream_iterator, hint_length):
+    buff = []
     for n in range(hint_length):
         buff.append(stream_iterator.next())
+    return buff
+
+def try_read_operator(stream_iterator: StreamIterator):
+    hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Operators_Lengths, TSQL_Operators)
+    buff = read_token_list_by_length(stream_iterator, hint_length)
     success = hint_length > 0
     token = EmptyToken if not success else reduce_token_list(Token.Operator, buff)
+    return success, token
+
+def try_read_symbol(stream_iterator: StreamIterator):
+    hint_length = peek_str_by_list_contain(stream_iterator, [1], TSQL_Symbols)
+    buff = read_token_list_by_length(stream_iterator, hint_length)
+    success = hint_length > 0
+    token = EmptyToken if not success else reduce_token_list(Token.Symbol, buff)
     return success, token
 
 def tsql_tokenize(stream) -> list[Token]:
@@ -193,5 +217,9 @@ def tsql_tokenize(stream) -> list[Token]:
         if is_operator:
             tokens.append(operator)
             continue
-        raise Exception(f"Parse token fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
+        is_symbol, symbol = try_read_symbol(stream_iterator)
+        if is_symbol:
+            tokens.append(symbol)
+            continue
+        raise Exception(f"try to tokenize fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
     return tokens
