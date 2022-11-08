@@ -7,6 +7,7 @@ class Token:
     String = 'string'
     Number = 'number'
     Identifier = 'identifier'
+    Spaces = 'spaces'
     Operator = 'operator'
     Symbol = 'symbol'
     Keyword = 'keyword'
@@ -171,6 +172,20 @@ def read_identifier(stream_iterator: StreamIterator) -> Token:
         buff.append(token)
     return reduce_token_list(Token.Identifier, buff)
 
+def is_spaces(ch: str) -> bool:
+    return index_of([' ', '\\r', '\\n', '\\t' ], ch) != -1
+
+def read_spaces(stream_iterator: StreamIterator) -> Token:
+    buff = []
+    while not stream_iterator.is_done():
+        token = stream_iterator.peek()
+        if not is_spaces(token.text):
+            break
+        stream_iterator.next()
+        buff.append(token)
+    if len(buff) == 0:
+        return EmptyToken
+    return reduce_token_list(Token.Spaces, buff)
 
 def read_single_quote_string(stream_iterator: StreamIterator):
     if stream_iterator.peek_str(1) != "'":
