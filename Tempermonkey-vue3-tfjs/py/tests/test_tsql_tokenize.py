@@ -33,11 +33,16 @@ def test_symbol():
 
 def test_tb1_name():
     tokens = tsql_tokenize("tb1.name")
-    print(f"{tokens=}")
     assert tokens == [
         Token(Token.Identifier, "tb1", 0, 0, 0),
         Token(Token.Symbol, ".", 3, 0, 3),
         Token(Token.Identifier, "name", 4, 0, 4)
+    ]
+
+def test_select_keyword():
+    tokens = tsql_tokenize("select")
+    assert tokens == [
+        Token(Token.Keyword, "select", 0, 0, 0)
     ]
 
 if __name__ == "__main__":
