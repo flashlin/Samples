@@ -201,13 +201,8 @@ TSQL_Operators_Lengths = group_length(TSQL_Operators)
 def read_tsql_keyword_fn():
     return read_keyword_fn(Token.Keyword, TSQL_Keywords_Lengths, TSQL_Keywords, case_insensitive=True)
 
-def read_symbol(stream_iterator: StreamIterator):
-    hint_length = peek_str_by_list_contain(stream_iterator, [1], TSQL_Symbols)
-    buff = read_token_list_by_length(stream_iterator, hint_length)
-    if not hint_length > 0:
-        return EmptyToken
-    return reduce_token_list(Token.Symbol, buff)
-
+def read_symbol_fn():
+    return read_keyword_fn(Token.Symbol, [1], TSQL_Symbols)
 
 def read_operator(stream_iterator: StreamIterator):
     hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Operators_Lengths, TSQL_Operators)
@@ -226,7 +221,7 @@ def tsql_tokenize(stream) -> list[Token]:
         read_float_number,
         read_single_quote_string,
         read_operator,
-        read_symbol,
+        read_symbol_fn(),
     ]
 
     while not stream_iterator.is_done():
