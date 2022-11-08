@@ -31,5 +31,14 @@ def test_symbol():
     tokens = tsql_tokenize(stream)
     assert tokens[0] == Token(Token.Symbol, stream, 0, 0, 0)
 
+def test_tb1_name():
+    tokens = tsql_tokenize("tb1.name")
+    print(f"{tokens=}")
+    assert tokens == [
+        Token(Token.Identifier, "tb1", 0, 0, 0),
+        Token(Token.Symbol, ".", 3, 0, 3),
+        Token(Token.Identifier, "name", 4, 0, 4)
+    ]
+
 if __name__ == "__main__":
     test_string()
