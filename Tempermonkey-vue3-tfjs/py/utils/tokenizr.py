@@ -1,7 +1,6 @@
 from functools import reduce
-from typing import TypeVar, Generic, Final
+from typing import TypeVar, Generic
 from itertools import groupby
-
 
 class Token:
     Undefined = 'undefined'
@@ -200,200 +199,6 @@ def group_length(arr_sorted: list[str]):
     return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
 
 
-TSQL_Operators: Final[list[str]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', '-', '*', '/', '%'])
-# TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
-TSQL_Operators_Lengths = group_length(TSQL_Operators)
-TSQL_Symbols: Final[list[str]] = ['.', '(', ')', '@', '#']
-TSQL_Keywords = sort_desc([
-    "ADD",
-    "EXTERNAL",
-    "PROCEDURE",
-    "ALL",
-    "FETCH",
-    "PUBLIC",
-    "ALTER",
-    "FILE",
-    "RAISERROR",
-    "AND",
-    "FILLFACTOR",
-    "READ",
-    "ANY",
-    "FOR",
-    "READTEXT",
-    "AS",
-    "FOREIGN",
-    "RECONFIGURE",
-    "ASC",
-    "FREETEXT",
-    "REFERENCES",
-    "AUTHORIZATION",
-    "FREETEXTTABLE",
-    "REPLICATION",
-    "BACKUP",
-    "FROM",
-    "RESTORE",
-    "BEGIN",
-    "FULL",
-    "RESTRICT",
-    "BETWEEN",
-    "FUNCTION",
-    "RETURN",
-    "BREAK",
-    "GOTO",
-    "REVERT",
-    "BROWSE",
-    "GRANT",
-    "REVOKE",
-    "BULK",
-    "GROUP",
-    "RIGHT",
-    "BY",
-    "HAVING",
-    "ROLLBACK",
-    "CASCADE",
-    "HOLDLOCK",
-    "ROWCOUNT",
-    "CASE",
-    "IDENTITY",
-    "ROWGUIDCOL",
-    "CHECK",
-    "IDENTITY_INSERT",
-    "RULE",
-    "CHECKPOINT",
-    "IDENTITYCOL",
-    "SAVE",
-    "CLOSE",
-    "IF",
-    "SCHEMA",
-    "CLUSTERED",
-    "IN",
-    "SECURITYAUDIT",
-    "COALESCE",
-    "INDEX",
-    "SELECT",
-    "COLLATE",
-    "INNER",
-    "SEMANTICKEYPHRASETABLE",
-    "COLUMN",
-    "INSERT",
-    "SEMANTICSIMILARITYDETAILSTABLE",
-    "COMMIT",
-    "INTERSECT",
-    "SEMANTICSIMILARITYTABLE",
-    "COMPUTE",
-    "INTO",
-    "SESSION_USER",
-    "CONSTRAINT",
-    "IS",
-    "SET",
-    "CONTAINS",
-    "JOIN",
-    "SETUSER",
-    "CONTAINSTABLE",
-    "KEY",
-    "SHUTDOWN",
-    "CONTINUE",
-    "KILL",
-    "SOME",
-    "CONVERT",
-    "LEFT",
-    "STATISTICS",
-    "CREATE",
-    "LIKE",
-    "SYSTEM_USER",
-    "CROSS",
-    "LINENO",
-    "TABLE",
-    "CURRENT",
-    "LOAD",
-    "TABLESAMPLE",
-    "CURRENT_DATE",
-    "MERGE",
-    "TEXTSIZE",
-    "CURRENT_TIME",
-    "NATIONAL",
-    "THEN",
-    "CURRENT_TIMESTAMP",
-    "NOCHECK",
-    "TO",
-    "CURRENT_USER",
-    "NONCLUSTERED",
-    "TOP",
-    "CURSOR",
-    "NOT",
-    "TRAN",
-    "DATABASE",
-    "NULL",
-    "TRANSACTION",
-    "DBCC",
-    "NULLIF",
-    "TRIGGER",
-    "DEALLOCATE",
-    "OF",
-    "TRUNCATE",
-    "DECLARE",
-    "OFF",
-    "TRY_CONVERT",
-    "DEFAULT",
-    "OFFSETS",
-    "TSEQUAL",
-    "DELETE",
-    "ON",
-    "UNION",
-    "DENY",
-    "OPEN",
-    "UNIQUE",
-    "DESC",
-    "OPENDATASOURCE",
-    "UNPIVOT",
-    "DISK",
-    "OPENQUERY",
-    "UPDATE",
-    "DISTINCT",
-    "OPENROWSET",
-    "UPDATETEXT",
-    "DISTRIBUTED",
-    "OPENXML",
-    "USE",
-    "DOUBLE",
-    "OPTION",
-    "USER",
-    "DROP",
-    "OR",
-    "VALUES",
-    "DUMP",
-    "ORDER",
-    "VARYING",
-    "ELSE",
-    "OUTER",
-    "VIEW",
-    "END",
-    "OVER",
-    "WAITFOR",
-    "ERRLVL",
-    "PERCENT",
-    "WHEN",
-    "ESCAPE",
-    "PIVOT",
-    "WHERE",
-    "EXCEPT",
-    "PLAN",
-    "WHILE",
-    "EXEC",
-    "PRECISION",
-    "WITH",
-    "EXECUTE",
-    "PRIMARY",
-    "WITHIN GROUP",
-    "EXISTS",
-    "PRINT",
-    "WRITETEXT",
-    "EXIT",
-    "PROC",
-])
-TSQL_Keywords_Lengths = group_length(TSQL_Keywords)
-
-
 def index_of(arr: list[str], search: str, case_insensitive: bool=False) -> int:
     search = search.upper() if case_insensitive else search
     for idx, item in enumerate(arr):
@@ -424,28 +229,14 @@ def read_token_list_by_length(stream_iterator, hint_length):
     return buff
 
 
-def read_operator(stream_iterator: StreamIterator):
-    hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Operators_Lengths, TSQL_Operators)
-    buff = read_token_list_by_length(stream_iterator, hint_length)
-    if not hint_length > 0:
-        return EmptyToken
-    return reduce_token_list(Token.Operator, buff)
-
-
-def read_symbol(stream_iterator: StreamIterator):
-    hint_length = peek_str_by_list_contain(stream_iterator, [1], TSQL_Symbols)
-    buff = read_token_list_by_length(stream_iterator, hint_length)
-    if not hint_length > 0:
-        return EmptyToken
-    return reduce_token_list(Token.Symbol, buff)
-
-def read_keyword(stream_iterator: StreamIterator):
-    hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Keywords_Lengths, TSQL_Keywords, True)
-    buff = read_token_list_by_length(stream_iterator, hint_length)
-    if not hint_length > 0:
-        return EmptyToken
-    return reduce_token_list(Token.Keyword, buff)
-
+def read_keyword_fn(length_list, keyword_list, case_insensitive: bool=False):
+    def fn(stream_iterator):
+        hint_length = peek_str_by_list_contain(stream_iterator, length_list, keyword_list, case_insensitive)
+        buff = read_token_list_by_length(stream_iterator, hint_length)
+        if not hint_length > 0:
+            return EmptyToken
+        return reduce_token_list(Token.Keyword, buff)
+    return fn
 
 def try_read_any(stream_iterator: StreamIterator, fn_list: list):
     for fn in fn_list:
@@ -455,23 +246,3 @@ def try_read_any(stream_iterator: StreamIterator, fn_list: list):
     return EmptyToken
 
 
-def tsql_tokenize(stream) -> list[Token]:
-    tokens = []
-    stream_iterator = StreamIterator(stream)
-
-    read_fn_list = [
-        read_keyword,
-        read_identifier,
-        read_float_number,
-        read_single_quote_string,
-        read_operator,
-        read_symbol,
-    ]
-
-    while not stream_iterator.is_done():
-        token = try_read_any(stream_iterator, read_fn_list)
-        if token != EmptyToken:
-            tokens.append(token)
-            continue
-        raise Exception(f"try to tokenize fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
-    return tokens
