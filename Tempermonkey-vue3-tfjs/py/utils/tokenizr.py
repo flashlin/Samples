@@ -229,13 +229,13 @@ def read_token_list_by_length(stream_iterator, hint_length):
     return buff
 
 
-def read_keyword_fn(length_list, keyword_list, case_insensitive: bool=False):
+def read_keyword_fn(token_type: str, length_list, keyword_list, case_insensitive: bool=False):
     def fn(stream_iterator):
         hint_length = peek_str_by_list_contain(stream_iterator, length_list, keyword_list, case_insensitive)
         buff = read_token_list_by_length(stream_iterator, hint_length)
         if not hint_length > 0:
             return EmptyToken
-        return reduce_token_list(Token.Keyword, buff)
+        return reduce_token_list(token_type, buff)
     return fn
 
 def try_read_any(stream_iterator: StreamIterator, fn_list: list):
