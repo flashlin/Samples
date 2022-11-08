@@ -6,6 +6,7 @@ class Token:
     Undefined = 'undefined'
     String = 'string'
     Number = 'number'
+    Identifier = 'identifier'
     Operator = 'operator'
     Symbol = 'symbol'
     Empty = '(empty)'
@@ -19,7 +20,7 @@ class Token:
 
     def __repr__(self):
         text = "(none)" if self.text is None else self.text
-        return '<"%s" (offset %d, line %d, col %d)>' % (text.replace('\n', '\\n'), self.offset, self.line, self.col)
+        return '<"%s" (line %d, col %d)>' % (text.replace('\n', '\\n'), self.line, self.col)
 
     def __str__(self):
         return self.text
@@ -96,7 +97,7 @@ class StreamIterator(Generic[T]):
             return EmptyToken
         if self.idx < self.buffer_len:
             buffer_node = self.buffer[self.idx]
-            increase_idx(buffer_node.text)
+            self.idx += 1
             return buffer_node
         character = self.stream[self.idx]
         token = Token(Token.Undefined, character, self.idx, self.line, self.col)
@@ -113,7 +114,7 @@ class StreamIterator(Generic[T]):
 
 def reduce_token_list(token_type: str, buff: list[Token]):
     def reduce_token_list_fn(acc: Token, item: Token):
-        if acc.text is None:
+        if acc == EmptyToken:
             return item
         acc.text += item.text
         return acc
@@ -121,7 +122,7 @@ def reduce_token_list(token_type: str, buff: list[Token]):
     token.type = token_type
     return token
 
-def read_number(stream_iterator: StreamIterator):
+def read_number(stream_iterator: StreamIterator) -> Token:
     buff = []
     while not stream_iterator.is_done():
         token = stream_iterator.peek()
@@ -133,7 +134,7 @@ def read_number(stream_iterator: StreamIterator):
         return EmptyToken
     return reduce_token_list(Token.Number, buff)
 
-def read_float_number(stream_iterator: StreamIterator):
+def read_float_number(stream_iterator: StreamIterator) -> Token:
     integer = read_number(stream_iterator)
     text = stream_iterator.peek_str(1)
     if text != '.':
@@ -144,6 +145,20 @@ def read_float_number(stream_iterator: StreamIterator):
         stream_iterator.prev()
         return EmptyToken
     return reduce_token_list(Token.Number, [integer, dot, scale])
+
+def read_identifier(stream_iterator: StreamIterator) -> Token:
+    text = stream_iterator.peek_str(1)
+    if not text.isalpha() and text != '_':
+        return EmptyToken
+    buff = [stream_iterator.next()]
+    while not stream_iterator.is_done():
+        token = stream_iterator.peek()
+        if not token.text.isdigit() and not token.text.isalpha() and token.text != '_':
+            break
+        stream_iterator.next()
+        buff.append(token)
+    return reduce_token_list(Token.Identifier, buff)
+
 
 def read_single_quote_string(stream_iterator: StreamIterator):
     if stream_iterator.peek_str(1) != "'":
@@ -212,6 +227,7 @@ def read_symbol(stream_iterator: StreamIterator):
         return EmptyToken
     return reduce_token_list(Token.Symbol, buff)
 
+
 def try_read_any(stream_iterator: StreamIterator, fn_list: list):
     for fn in fn_list:
         token = fn(stream_iterator)
@@ -224,6 +240,7 @@ def tsql_tokenize(stream) -> list[Token]:
     stream_iterator = StreamIterator(stream)
 
     read_fn_list = [
+        read_identifier,
         read_float_number,
         read_single_quote_string,
         read_operator,
@@ -232,7 +249,7 @@ def tsql_tokenize(stream) -> list[Token]:
 
     while not stream_iterator.is_done():
         token = try_read_any(stream_iterator, read_fn_list)
-        if token is not None:
+        if token != EmptyToken:
             tokens.append(token)
             continue
         raise Exception(f"try to tokenize fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
