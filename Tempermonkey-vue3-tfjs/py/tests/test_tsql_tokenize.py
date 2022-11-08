@@ -1,6 +1,6 @@
 from itertools import groupby
 
-from utils.tokenizr import tsql_tokenize, Token, TSQL_Operators_Lengths, TSQL_Operators
+from utils.tokenizr import tsql_tokenize, Token, TSQL_Operators_Lengths
 
 def test_operator_lengths():
     assert TSQL_Operators_Lengths == [2, 1]
@@ -9,6 +9,11 @@ def test_number():
     stream = "123"
     tokens = tsql_tokenize(stream)
     assert tokens[0] == Token(Token.Number, "123", 0, 0, 0)
+
+def test_float():
+    stream = "123.33"
+    tokens = tsql_tokenize(stream)
+    assert tokens[0] == Token(Token.Number, stream, 0, 0, 0)
 
 def test_string():
     stream = "'abc ''123'''"

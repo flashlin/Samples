@@ -133,6 +133,18 @@ def read_number(stream_iterator: StreamIterator):
         return EmptyToken
     return reduce_token_list(Token.Number, buff)
 
+def read_float_number(stream_iterator: StreamIterator):
+    integer = read_number(stream_iterator)
+    text = stream_iterator.peek_str(1)
+    if text != '.':
+        return integer
+    dot = stream_iterator.next()
+    scale = read_number(stream_iterator)
+    if scale == EmptyToken:
+        stream_iterator.prev()
+        return EmptyToken
+    return reduce_token_list(Token.Number, [integer, dot, scale])
+
 def read_single_quote_string(stream_iterator: StreamIterator):
     if stream_iterator.peek_str(1) != "'":
         return EmptyToken
@@ -212,7 +224,7 @@ def tsql_tokenize(stream) -> list[Token]:
     stream_iterator = StreamIterator(stream)
 
     read_fn_list = [
-        read_number,
+        read_float_number,
         read_single_quote_string,
         read_operator,
         read_symbol
