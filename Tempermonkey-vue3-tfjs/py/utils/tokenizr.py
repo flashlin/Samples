@@ -1,6 +1,5 @@
 from functools import reduce
 from typing import TypeVar, Generic, Final
-import numpy as np
 from itertools import groupby
 
 class Token:
@@ -122,7 +121,7 @@ def reduce_token_list(token_type: str, buff: list[Token]):
     token.type = token_type
     return token
 
-def try_read_number(stream_iterator: StreamIterator):
+def read_number(stream_iterator: StreamIterator):
     buff = []
     while not stream_iterator.is_done():
         token = stream_iterator.peek()
@@ -130,13 +129,13 @@ def try_read_number(stream_iterator: StreamIterator):
             break
         buff.append(token)
         stream_iterator.next()
-    success = len(buff) > 0
-    token = EmptyToken if not success else reduce_token_list(Token.Number, buff)
-    return success, token
+    if len(buff) == 0:
+        return EmptyToken
+    return reduce_token_list(Token.Number, buff)
 
-def try_read_single_quote_string(stream_iterator: StreamIterator):
+def read_single_quote_string(stream_iterator: StreamIterator):
     if stream_iterator.peek_str(1) != "'":
-        return False, EmptyToken
+        return EmptyToken
     buff = [stream_iterator.next()]
     while not stream_iterator.is_done():
         next_node = stream_iterator.next()
@@ -149,7 +148,7 @@ def try_read_single_quote_string(stream_iterator: StreamIterator):
                 continue
             break
         buff.append(next_node)
-    return True, reduce_token_list(Token.String, buff)
+    return reduce_token_list(Token.String, buff)
 
 def sort_desc(arr: list[str]) -> list[str]:
     arr.sort(key=lambda x: len(x))
@@ -187,39 +186,42 @@ def read_token_list_by_length(stream_iterator, hint_length):
         buff.append(stream_iterator.next())
     return buff
 
-def try_read_operator(stream_iterator: StreamIterator):
+def read_operator(stream_iterator: StreamIterator):
     hint_length = peek_str_by_list_contain(stream_iterator, TSQL_Operators_Lengths, TSQL_Operators)
     buff = read_token_list_by_length(stream_iterator, hint_length)
-    success = hint_length > 0
-    token = EmptyToken if not success else reduce_token_list(Token.Operator, buff)
-    return success, token
+    if not hint_length > 0:
+        return EmptyToken
+    return reduce_token_list(Token.Operator, buff)
 
-def try_read_symbol(stream_iterator: StreamIterator):
+def read_symbol(stream_iterator: StreamIterator):
     hint_length = peek_str_by_list_contain(stream_iterator, [1], TSQL_Symbols)
     buff = read_token_list_by_length(stream_iterator, hint_length)
-    success = hint_length > 0
-    token = EmptyToken if not success else reduce_token_list(Token.Symbol, buff)
-    return success, token
+    if not hint_length > 0:
+        return EmptyToken
+    return reduce_token_list(Token.Symbol, buff)
+
+def try_read_any(stream_iterator: StreamIterator, fn_list: list):
+    for fn in fn_list:
+        token = fn(stream_iterator)
+        if token != EmptyToken:
+            return token
+    return EmptyToken
 
 def tsql_tokenize(stream) -> list[Token]:
     tokens = []
     stream_iterator = StreamIterator(stream)
+
+    read_fn_list = [
+        read_number,
+        read_single_quote_string,
+        read_operator,
+        read_symbol
+    ]
+
     while not stream_iterator.is_done():
-        is_number, number = try_read_number(stream_iterator)
-        if is_number:
-            tokens.append(number)
-            continue
-        is_string, string = try_read_single_quote_string(stream_iterator)
-        if is_string:
-            tokens.append(string)
-            continue
-        is_operator, operator = try_read_operator(stream_iterator)
-        if is_operator:
-            tokens.append(operator)
-            continue
-        is_symbol, symbol = try_read_symbol(stream_iterator)
-        if is_symbol:
-            tokens.append(symbol)
+        token = try_read_any(stream_iterator, read_fn_list)
+        if token is not None:
+            tokens.append(token)
             continue
         raise Exception(f"try to tokenize fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
     return tokens
