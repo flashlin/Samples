@@ -1,14 +1,19 @@
-from utils.tokenizr import tokens_to_index_list
-from utils.tsql_tokenizr import tsql_tokenize, tsql_token_to_value
+from utils.tokenizr import tokens_to_index_list, index_list_to_string
+from utils.tsql_tokenizr import tsql_tokenize, tsql_char2index_dict, tsql_index2char_dict
 
 
 def test_number():
     tokens = tsql_tokenize("123")
-    values = tokens_to_index_list(tsql_token_to_value, tokens)
-    assert values == [103, 97, 53, 54, 55, 104]
+    values = tokens_to_index_list(tsql_char2index_dict, tokens)
+    assert values == [1, 100, 56, 57, 58, 0, 2]
 
 def test_select_name():
     tokens = tsql_tokenize("select name")
-    print(f"{tsql_token_to_value['spaces']=}")
-    values = tokens_to_index_list(tsql_token_to_value, tokens)
-    assert values == [103, 202, 94, 95, 13, 0, 12, 4, 104]
+    values = tokens_to_index_list(tsql_char2index_dict, tokens)
+    assert values == [1, 99, 202, 102, 97, 98, 16, 3, 15, 7, 0, 2]
+
+def test_tsql_values_to_string():
+    tokens = tsql_tokenize("select name")
+    values = tokens_to_index_list(tsql_char2index_dict, tokens)
+    text = index_list_to_string(tsql_index2char_dict, values)
+    assert text == "SELECT name"

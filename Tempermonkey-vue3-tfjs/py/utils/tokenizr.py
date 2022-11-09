@@ -44,6 +44,59 @@ EmptyToken = Token(Token.Empty, None, -1, -1, -1)
 T = TypeVar("T")
 
 
+class Iterator(Generic[T]):
+    def __init__(self, stream: list[T]):
+        self.stream = stream
+        self.length = len(stream)
+        self.idx = 0
+        self.buffer: list[T] = []
+        self.buffer_len = 0
+
+    def peek(self, n=1):
+        node = self.next(n)
+        self.prev(n)
+        return node
+
+    def prev(self, n=1):
+        node = None
+        count = 0
+        while count < n:
+            node = self.prev_token()
+            count += 1
+        return node
+
+    def prev_token(self):
+        if self.idx - 1 < 0:
+            return None
+        self.idx -= 1
+        return self.buffer[self.idx]
+
+    def next(self, n=1):
+        node = None
+        count = 0
+        while count < n:
+            node = self.next_token()
+            count += 1
+        return node
+
+    def next_token(self):
+        if self.idx >= self.length:
+            return EmptyToken
+        if self.idx < self.buffer_len:
+            buffer_node = self.buffer[self.idx]
+            self.idx += 1
+            return buffer_node
+        character = self.stream[self.idx]
+        self.buffer.append(character)
+        self.buffer_len += 1
+        self.idx += 1
+        return character
+
+    def is_done(self):
+        if self.idx == 0 and self.length == 0:
+            return True
+        return self.idx >= self.length
+
 class StreamIterator(Generic[T]):
     def __init__(self, stream: list[T]):
         self.stream = stream
@@ -271,26 +324,68 @@ def try_read_any(stream_iterator: StreamIterator, fn_list: list):
             return token
     return EmptyToken
 
+def is_string_token_type(token_type: str):
+    return index_of([Token.Identifier, Token.Number, Token.String], token_type) != -1
 
-def token_to_index(str_to_int_dict, token: Token):
-    if index_of([Token.Identifier, Token.Number], token.type) != -1:
-        values = [str_to_int_dict[token.type]]
+def token_to_index(char2index_dict, token: Token):
+    values = [char2index_dict[token.type]]
+    if is_string_token_type(token.type):
         for ch in [ch for ch in token.value]:
-            values.append(str_to_int_dict[ch])
+            values.append(char2index_dict[ch])
+        values.append(char2index_dict[''])
         return values
-    return [ str_to_int_dict[token.value] ]
-
-
-def tokens_to_index_list(str_to_int_dict, token_list: list[Token]):
-    values = [str_to_int_dict['<begin>']]
-    for token in token_list:
-        values += token_to_index(str_to_int_dict, token)
-    values.append(str_to_int_dict['<end>'])
+    values.append(char2index_dict[token.value])
     return values
 
 
-def str_list_to_dict(str_list: list[str]):
+def tokens_to_index_list(char2index_dict, token_list: list[Token]):
+    values = [char2index_dict['<begin>']]
+    for token in token_list:
+        values += token_to_index(char2index_dict, token)
+    values.append(char2index_dict['<end>'])
+    return values
+
+def read_until_zero(index2char_dict, iterator):
+    text = ""
+    while not iterator.is_done():
+        value = iterator.next()
+        if value == 0:
+            break
+        text += index2char_dict[value]
+    return text
+
+def index_list_to_string(index2char_dict, value_list: list[int]):
+    text = ""
+    iterator = Iterator(value_list)
+    while not iterator.is_done():
+        value = iterator.next()
+        token_type = index2char_dict[value]
+        if token_type.startswith('<') and token_type.endswith('>'):
+            continue
+        if is_string_token_type(token_type):
+            text += read_until_zero(index2char_dict, iterator)
+            continue
+        text += index2char_dict[iterator.next()]
+    return text
+
+def convert_str_list_to_char2index_map(str_list: list[str]):
     dictionary = {}
     for idx, key in enumerate(str_list):
         dictionary[key] = idx
     return dictionary
+
+def convert_str_list_to_index2char_map(str_list: list[str]):
+    dictionary = {}
+    for idx, key in enumerate(str_list):
+        dictionary[idx] = key
+    return dictionary
+
+
+letters = [ch for ch in
+           "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ "]
+fixed_marks = [
+    "",
+    "<begin>",
+    "<end>",
+] + letters + ReservedWords
+fixed_length = len(fixed_marks)
