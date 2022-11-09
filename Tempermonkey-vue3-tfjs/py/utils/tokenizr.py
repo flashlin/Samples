@@ -268,7 +268,7 @@ def sort_desc(arr: list[str]) -> list[str]:
     return arr[::-1]
 
 
-def group_length(arr_sorted: list[str]):
+def group_to_lengths(arr_sorted: list[str]):
     return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
 
 

@@ -1,7 +1,7 @@
 from typing import Final
 
 from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_number, \
-    read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_length, \
+    read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_to_lengths, \
     read_keyword_fn, read_spaces, convert_str_list_to_char2index_map, convert_str_list_to_index2char_map, \
     fixed_marks
 
@@ -192,11 +192,11 @@ TSQL_Keywords = sort_desc([
     "EXIT",
     "PROC",
 ])
-TSQL_Keywords_Lengths = group_length(TSQL_Keywords)
+TSQL_Keywords_Lengths = group_to_lengths(TSQL_Keywords)
 TSQL_Symbols: Final[list[str]] = ['.', '(', ')', '@', '#']
 TSQL_Operators: Final[list[str]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', '-', '*', '/', '%'])
 # TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
-TSQL_Operators_Lengths = group_length(TSQL_Operators)
+TSQL_Operators_Lengths = group_to_lengths(TSQL_Operators)
 
 
 def read_tsql_keyword_fn():
