@@ -281,7 +281,7 @@ def token_to_index(str_to_int_dict, token: Token):
     return [ str_to_int_dict[token.value] ]
 
 
-def tokens_to_index(str_to_int_dict, token_list: list[Token]):
+def tokens_to_index_list(str_to_int_dict, token_list: list[Token]):
     values = [str_to_int_dict['<begin>']]
     for token in token_list:
         values += token_to_index(str_to_int_dict, token)
