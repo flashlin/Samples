@@ -278,7 +278,7 @@ def token_to_index(str_to_int_dict, token: Token):
         for ch in [ch for ch in token.value]:
             values.append(str_to_int_dict[ch])
         return values
-    return str_to_int_dict[token.value]
+    return [ str_to_int_dict[token.value] ]
 
 
 def tokens_to_index(str_to_int_dict, token_list: list[Token]):
