@@ -2,7 +2,7 @@ from typing import Final
 
 from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_number, \
     read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_length, \
-    read_keyword_fn, read_spaces
+    read_keyword_fn, read_spaces, ReservedWords, str_list_to_dict
 
 TSQL_Keywords = sort_desc([
     "ADD",
@@ -228,3 +228,13 @@ def tsql_tokenize(stream) -> list[Token]:
             continue
         raise Exception(f"try to tokenize fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
     return tokens
+
+
+letters = [ch for ch in
+           "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ "]
+tsql_marks = letters + ReservedWords + [
+    "",
+    "<begin>",
+    "<end>",
+] + TSQL_Keywords
+tsql_token_to_value = str_list_to_dict(tsql_marks)
