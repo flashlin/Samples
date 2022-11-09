@@ -19,6 +19,7 @@ class Token:
         self.line = line
         self.col = col
         self.offset = offset
+        self.value = ''
 
     def __repr__(self):
         text = "(none)" if self.text is None else self.text
@@ -34,9 +35,12 @@ class Token:
                and self.line == other.line \
                and self.col == other.col
 
-
+ReservedWords = [
+    Token.Identifier, Token.Keyword, Token.Number,
+    Token.String, Token.Spaces,
+    Token.Symbol, Token.Operator,
+]
 EmptyToken = Token(Token.Empty, None, -1, -1, -1)
-
 T = TypeVar("T")
 
 
@@ -130,6 +134,7 @@ def reduce_token_list(token_type: str, buff: list[Token]):
 
     token = reduce(reduce_token_list_fn, buff, EmptyToken)
     token.type = token_type
+    token.value = token.text
     return token
 
 
@@ -229,12 +234,16 @@ def peek_str_by_list_contain(stream_iterator: StreamIterator, peek_length_list: 
     def peek_str(length: int) -> str:
         return stream_iterator.peek_str(length)
 
+    value = None
     for peek_length in peek_length_list:
         text = peek_str(peek_length)
-        if index_of(str_list, text, case_insensitive) >= 0:
+        index = index_of(str_list, text, case_insensitive)
+        if index >= 0:
+            value = str_list[index]
             hint_length = peek_length
             break
-    return hint_length
+
+    return hint_length, value
 
 
 def read_token_list_by_length(stream_iterator, hint_length):
@@ -246,11 +255,13 @@ def read_token_list_by_length(stream_iterator, hint_length):
 
 def read_keyword_fn(token_type: str, length_list, keyword_list, case_insensitive: bool=False):
     def fn(stream_iterator):
-        hint_length = peek_str_by_list_contain(stream_iterator, length_list, keyword_list, case_insensitive)
+        hint_length, keyword_value = peek_str_by_list_contain(stream_iterator, length_list, keyword_list, case_insensitive)
         buff = read_token_list_by_length(stream_iterator, hint_length)
         if not hint_length > 0:
             return EmptyToken
-        return reduce_token_list(token_type, buff)
+        token = reduce_token_list(token_type, buff)
+        token.value = keyword_value
+        return token
     return fn
 
 def try_read_any(stream_iterator: StreamIterator, fn_list: list):
