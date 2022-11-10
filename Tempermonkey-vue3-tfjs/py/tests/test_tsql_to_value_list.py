@@ -1,5 +1,5 @@
 from utils.tokenizr import tokens_to_index_list, index_list_to_string
-from utils.tsql_tokenizr import tsql_tokenize, tsql_char2index_dict, tsql_index2char_dict
+from utils.tsql_tokenizr import tsql_tokenize, tsql_char2index_dict, tsql_index2char_dict, tsql_encode
 
 
 def test_number():
@@ -13,7 +13,6 @@ def test_select_name():
     assert values == [1, 99, 202, 102, 97, 98, 16, 3, 15, 7, 0, 2]
 
 def test_tsql_values_to_string():
-    tokens = tsql_tokenize("select name")
-    values = tokens_to_index_list(tsql_char2index_dict, tokens)
+    values = tsql_encode("select name")
     text = index_list_to_string(tsql_index2char_dict, values)
     assert text == "SELECT name"

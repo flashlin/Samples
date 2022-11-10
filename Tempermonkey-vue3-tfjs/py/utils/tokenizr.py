@@ -43,7 +43,6 @@ ReservedWords = [
 EmptyToken = Token(Token.Empty, None, -1, -1, -1)
 T = TypeVar("T")
 
-
 class Iterator(Generic[T]):
     def __init__(self, stream: list[T]):
         self.stream = stream
@@ -255,6 +254,24 @@ def read_single_quote_string(stream_iterator: StreamIterator):
             buff.append(next_node)
             node2 = stream_iterator.peek()
             if node2.text == "'":
+                buff.append(node2)
+                stream_iterator.next()
+                continue
+            break
+        buff.append(next_node)
+    return reduce_token_list(Token.String, buff)
+
+
+def read_double_quote_string(stream_iterator: StreamIterator):
+    if stream_iterator.peek_str(1) != '"':
+        return EmptyToken
+    buff = [stream_iterator.next()]
+    while not stream_iterator.is_done():
+        next_node = stream_iterator.next()
+        if next_node.text == '\\':
+            buff.append(next_node)
+            node2 = stream_iterator.peek()
+            if node2.text == '"':
                 buff.append(node2)
                 stream_iterator.next()
                 continue

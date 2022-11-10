@@ -1,8 +1,13 @@
 mss 
 opencv-python
 pynput
-matplotlib
 tensorflow
 pytest
 pydot
 graphviz
+
+pandas
+scikit-learn
+scipy
+matplotlib
+category_encoders

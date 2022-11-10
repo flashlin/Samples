@@ -3,7 +3,7 @@ from typing import Final
 from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_number, \
     read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_to_lengths, \
     read_keyword_fn, read_spaces, convert_str_list_to_char2index_map, convert_str_list_to_index2char_map, \
-    fixed_marks
+    fixed_marks, tokens_to_index_list
 
 TSQL_Keywords = sort_desc([
     "ADD",
@@ -234,3 +234,8 @@ def tsql_tokenize(stream) -> list[Token]:
 tsql_marks = fixed_marks + TSQL_Keywords
 tsql_char2index_dict = convert_str_list_to_char2index_map(tsql_marks)
 tsql_index2char_dict = convert_str_list_to_index2char_map(tsql_marks)
+
+def tsql_encode(stream):
+    tokens = tsql_tokenize(stream)
+    values = tokens_to_index_list(tsql_char2index_dict, tokens)
+    return values

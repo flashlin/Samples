@@ -1,1 +1,1 @@
-$env:PYTHONPATH="D:\VDisk\Github\Samples\Tempermonkey-vue3-tfjs\py"
+$env:PYTHONPATH="D:\VDisk\Github\Samples\Tempermonkey-vue3-tfjs\py;D:\VDisk\MyGitHub\pycore"
