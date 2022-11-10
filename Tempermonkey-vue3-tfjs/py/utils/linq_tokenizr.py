@@ -3,7 +3,7 @@ from typing import Final
 from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_number, \
     read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_to_lengths, \
     read_keyword_fn, read_spaces, convert_str_list_to_char2index_map, convert_str_list_to_index2char_map, \
-    fixed_marks, tokens_to_index_list
+    fixed_marks, tokens_to_index_list, read_double_quote_string
 
 LINQ_Keywords = sort_desc([
     "select",
@@ -38,6 +38,7 @@ def linq_tokenize(stream) -> list[Token]:
         read_linq_keyword_fn(),
         read_identifier,
         read_float_number,
+        read_double_quote_string,
         read_single_quote_string,
         read_operator_fn(),
         read_symbol_fn(),
@@ -60,5 +61,6 @@ linq_index2char_dict = convert_str_list_to_index2char_map(linq_marks)
 
 def linq_encode(stream):
     tokens = linq_tokenize(stream)
+    print(f"{tokens=}")
     values = tokens_to_index_list(linq_char2index_dict, tokens)
     return values

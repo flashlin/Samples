@@ -23,7 +23,8 @@ class Token:
 
     def __repr__(self):
         text = "(none)" if self.text is None else self.text
-        return '<"%s" (line %d, col %d)>' % (text.replace('\n', '\\n'), self.line, self.col)
+        text = text.replace('\n', '\\n')
+        return '<"%s" %s(line %d, col %d)>' % (text, self.type, self.line, self.col)
 
     def __str__(self):
         return self.text
@@ -230,7 +231,7 @@ def read_identifier(stream_iterator: StreamIterator) -> Token:
     return reduce_token_list(Token.Identifier, buff)
 
 def is_spaces(ch: str) -> bool:
-    return index_of([' ', '\\r', '\\n', '\\t' ], ch) != -1
+    return index_of([' ', '\r', '\n', '\t' ], ch) != -1
 
 def read_spaces(stream_iterator: StreamIterator) -> Token:
     buff = []
@@ -249,16 +250,18 @@ def read_single_quote_string(stream_iterator: StreamIterator):
         return EmptyToken
     buff = [stream_iterator.next()]
     while not stream_iterator.is_done():
-        next_node = stream_iterator.next()
-        if next_node.text == "'":
-            buff.append(next_node)
-            node2 = stream_iterator.peek()
-            if node2.text == "'":
-                buff.append(node2)
+        token = stream_iterator.peek()
+        if token.text == "'":
+            stream_iterator.next()
+            buff.append(token)
+            token2 = stream_iterator.peek()
+            if token2.text == "'":
+                buff.append(token2)
                 stream_iterator.next()
                 continue
             break
-        buff.append(next_node)
+        stream_iterator.next()
+        buff.append(token)
     return reduce_token_list(Token.String, buff)
 
 
@@ -267,16 +270,12 @@ def read_double_quote_string(stream_iterator: StreamIterator):
         return EmptyToken
     buff = [stream_iterator.next()]
     while not stream_iterator.is_done():
-        next_node = stream_iterator.next()
-        if next_node.text == '\\':
-            buff.append(next_node)
-            node2 = stream_iterator.peek()
-            if node2.text == '"':
-                buff.append(node2)
-                stream_iterator.next()
+        token = stream_iterator.next()
+        buff.append(token)
+        if token.text == '"':
+            if buff[len(buff)-1].text == '\\':
                 continue
             break
-        buff.append(next_node)
     return reduce_token_list(Token.String, buff)
 
 
@@ -399,10 +398,16 @@ def convert_str_list_to_index2char_map(str_list: list[str]):
 
 
 letters = [ch for ch in
-           "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ "]
+           "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ \n\r\t"]
 fixed_marks = [
     "",
     "<begin>",
     "<end>",
 ] + letters + ReservedWords
 fixed_length = len(fixed_marks)
+
+
+if __name__ == "__main__":
+    iterator = StreamIterator("'abc ''123'''")
+    token = read_single_quote_string(iterator)
+    print(f"{token=}")
