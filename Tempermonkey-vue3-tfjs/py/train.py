@@ -8,7 +8,7 @@ from tensorflow.keras.layers import Activation
 from keras_preprocessing.sequence import pad_sequences
 import numpy as np
 
-from utils.linq_translation_data import LinqTranslationData
+from utils.linq_translation_data import LinqTranslationData, write_train_data, write_tokens_data
 
 # preparing hyperparameters
 
@@ -24,4 +24,7 @@ tgt_max_seq_length = 12  # max length of a sentence (including <SOS> and <EOS>)
 latent_dim = 256  # LSTM 的內部狀態為 256維的向量
 
 
-data = LinqTranslationData("./data/linq-sample.txt")
+data_file = "./data/linq-sample.txt"
+# data = LinqTranslationData("./data/linq-sample.txt")
+write_train_data(data_file)
+write_tokens_data(data_file)
