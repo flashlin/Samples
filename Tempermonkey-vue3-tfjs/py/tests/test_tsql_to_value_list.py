@@ -14,7 +14,7 @@ def test_select_name():
 
 def test_tsql_values_to_string():
     values = tsql_encode("select name")
-    text = index_list_to_string(tsql_index2char_dict, values)
+    text = tsql_decode(values)
     assert text == "SELECT name"
 
 def test_tsql_number():

@@ -20,6 +20,12 @@ def test_string():
     tokens = tsql_tokenize(stream)
     assert tokens[0] == Token(Token.String, stream, 0, 0, 0)
 
+def test_string1():
+    stream = "'123','abc'"
+    tokens = tsql_tokenize(stream)
+    assert tokens[0] == Token(Token.String, "'123'", 0, 0, 0)
+    assert tokens[1] == Token(Token.Symbol, ",", 5, 0, 5)
+    assert tokens[2] == Token(Token.String, "'abc'", 6, 0, 6)
 
 def test_operator():
     stream = "<>"

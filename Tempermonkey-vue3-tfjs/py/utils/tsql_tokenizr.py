@@ -3,7 +3,7 @@ from typing import Final
 from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_number, \
     read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_to_lengths, \
     read_keyword_fn, read_spaces, convert_str_list_to_char2index_map, convert_str_list_to_index2char_map, \
-    fixed_marks, tokens_to_index_list, index_list_to_string
+    fixed_marks, tokens_to_index_list, index_list_to_string, reduce_token_list
 
 TSQL_Keywords = sort_desc([
     "ADD",
@@ -193,7 +193,7 @@ TSQL_Keywords = sort_desc([
     "PROC",
 ])
 TSQL_Keywords_Lengths = group_to_lengths(TSQL_Keywords)
-TSQL_Symbols: Final[list[str]] = ['.', '(', ')', '@', '#']
+TSQL_Symbols: Final[list[str]] = [',', '.', '(', ')', '@', '#']
 TSQL_Operators: Final[list[str]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', '-', '*', '/', '%'])
 # TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
 TSQL_Operators_Lengths = group_to_lengths(TSQL_Operators)
@@ -208,6 +208,20 @@ def read_symbol_fn():
 def read_operator_fn():
     return read_keyword_fn(Token.Operator, TSQL_Operators_Lengths, TSQL_Operators)
 
+def read_tsql_identifier(stream_iterator):
+    if stream_iterator.peek_str(1) != "[":
+        return EmptyToken
+    buff = [stream_iterator.next()]
+    while not stream_iterator.is_done():
+        token = stream_iterator.peek()
+        if token.text == "]":
+            stream_iterator.next()
+            buff.append(token)
+            break
+        stream_iterator.next()
+        buff.append(token)
+    return reduce_token_list(Token.Identifier, buff)
+
 def tsql_tokenize(stream) -> list[Token]:
     tokens = []
     stream_iterator = StreamIterator(stream)
@@ -220,6 +234,7 @@ def tsql_tokenize(stream) -> list[Token]:
         read_operator_fn(),
         read_symbol_fn(),
         read_spaces,
+        read_tsql_identifier
     ]
 
     while not stream_iterator.is_done():
