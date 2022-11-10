@@ -10,21 +10,8 @@ import numpy as np
 
 from utils.linq_translation_data import LinqTranslationData, write_train_data, write_tokens_data
 
-# preparing hyperparameters
-
-# source language- English
-src_wordEmbed_dim = 18  # 詞向量維度18
-src_max_seq_length = 100  # 句長最大值為 100
-
-# target language- Spanish
-tgt_wordEmbed_dim = 27  # dim of text vector representation
-tgt_max_seq_length = 12  # max length of a sentence (including <SOS> and <EOS>)
-
-# dim of context vector
-latent_dim = 256  # LSTM 的內部狀態為 256維的向量
-
-
 data_file = "./data/linq-sample.txt"
 # data = LinqTranslationData("./data/linq-sample.txt")
 write_train_data(data_file)
 write_tokens_data(data_file)
+
