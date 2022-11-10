@@ -12,3 +12,5 @@ nvcc --version
 #
 conda install jupyter notebook
 pip install -r requirements.txt
+
+conda install -c conda-forge category_encoders
