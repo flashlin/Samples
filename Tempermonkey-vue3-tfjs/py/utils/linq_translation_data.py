@@ -1,24 +1,78 @@
 from common.csv_utils import CsvWriter
-from common.io import read_text_file
+from common.io import read_text_file, get_file_name, get_dir
 from utils.linq_tokenizr import linq_encode, linq_tokenize
 from utils.tsql_tokenizr import tsql_encode, tsql_tokenize
 import tensorflow as tf
 from functools import partial
 import matplotlib.pyplot as plt
+from keras_preprocessing.sequence import pad_sequences
+import numpy as np
 
 AUTOTUNE = tf.data.AUTOTUNE
 
-def write_train_data(file: str):
+def write_train_csv(file: str):
     lines = read_text_file(file)
     out_file = "./output/linq-translation.csv"
+    src_max_seq_length = 0
+    tgt_max_seq_length = 0
     with CsvWriter(out_file) as csv:
         for idx, line in enumerate(lines):
             if idx % 2 == 0:
                 linq_values = linq_encode(line)
+                src_max_seq_length = max(len(linq_values), src_max_seq_length)
                 csv.write(linq_values)
             else:
                 sql_values = tsql_encode(line)
+                tgt_max_seq_length = max(len(sql_values), tgt_max_seq_length)
                 csv.write(sql_values)
+    return src_max_seq_length, tgt_max_seq_length
+
+
+def get_line_str(arr):
+    return ' '.join(str(number) for number in arr)
+
+def write_train_data(file: str):
+    lines = read_text_file(file)
+    out_file = "./output/linq-translation.txt"
+    src_max_seq_length = 0
+    tgt_max_seq_length = 0
+    with open(out_file, "w", encoding='UTF-8') as f:
+        for idx, line in enumerate(lines):
+            if idx % 2 == 0:
+                linq_values = linq_encode(line)
+                src_max_seq_length = max(len(linq_values), src_max_seq_length)
+                f.write(get_line_str(linq_values) + '\n')
+            else:
+                sql_values = tsql_encode(line)
+                tgt_max_seq_length = max(len(sql_values), tgt_max_seq_length)
+                f.write(get_line_str(sql_values) + '\n')
+    return src_max_seq_length, tgt_max_seq_length
+
+
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
+def pad_train_data(file: str, src_max_seq_length, tgt_max_seq_length):
+    filename = get_file_name(file)
+    train_data_padded = get_dir(file) + "/" + filename + "_padded.txt"
+    train_data_npz = get_dir(file) + "/" + filename + "_padded.npz"
+    linq_data = []
+    tsql_data = []
+    with open(train_data_padded, "w", encoding='UTF-8') as f2:
+        with open(file, "r", encoding='UTF-8') as f:
+            for idx, line in enumerate(f):
+                values = [[int(n) for n in line.split(' ')]]
+                if idx % 2== 0:
+                    sentences_padded = pad_sequences(values, maxlen=src_max_seq_length, padding="post")  # shape: (26388, 38)
+                    sentences_padded = flatten(sentences_padded)
+                    linq_data.append(sentences_padded)
+                else:
+                    sentences_padded = pad_sequences(values, maxlen=tgt_max_seq_length, padding="post")  # shape: (26388, 38)
+                    sentences_padded = flatten(sentences_padded)
+                    tsql_data.append(sentences_padded)
+                f2.write(get_line_str(sentences_padded) + '\n')
+    np.savez_compressed(train_data_npz, x=linq_data, y=tsql_data)
+    return
 
 def write_tokens_data(file: str):
     lines = read_text_file(file)
