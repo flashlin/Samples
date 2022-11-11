@@ -68,7 +68,15 @@ model.summary()
 #plot_model(model, to_file="output/2-layer_seq2seq_attention.png",
 #           dpi=100, show_shapes=True, show_layer_names=True)
 
-train_dataset, valid_dataset, test_dataset = load_tfrecord_files("./output")
+
+# increase 1 dimension
+with np.load('./output/linq-translation_padded.npz') as npz:
+    src_sentences_padded = npz["x"]
+    tgt_sentences_padded = npz["y"]
+src_sentences_padded = src_sentences_padded.reshape(*src_sentences_padded.shape, 1) # shape: (26388, 38, 1)
+tgt_sentences_padded = tgt_sentences_padded.reshape(*tgt_sentences_padded.shape, 1) #
+
+# train_dataset, valid_dataset, test_dataset = load_tfrecord_files("./output")
 
 # 以下函數允許模型在每個 epoch 運行時更改學習率。
 # 當模型沒有改進時，我們可以使用回調來停止訓練。在訓練過程結束時，模型將恢復其最佳迭代的權重
