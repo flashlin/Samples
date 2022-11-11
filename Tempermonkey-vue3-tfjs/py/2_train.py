@@ -36,12 +36,12 @@ dec_outputs_final = dec_dense(dec_outputs_2)
 
 # 算出注意力權重
 attention_scores = dot([dec_outputs_2, enc_outputs_2], axes=[2, 2])
-attenton_weights = Activation("softmax")(attention_scores)
+attention_weights = Activation("softmax")(attention_scores)
 print("attention weights - shape: {}".format(
-    attenton_weights.shape))  # shape: (None, enc_max_seq_length, dec_max_seq_length)
+    attention_weights.shape))  # shape: (None, enc_max_seq_length, dec_max_seq_length)
 
 # 利用加權平均求出context vector
-context_vec = dot([attenton_weights, enc_outputs_2], axes=[2, 1])
+context_vec = dot([attention_weights, enc_outputs_2], axes=[2, 1])
 print("context vector - shape: {}".format(context_vec.shape))  # shape: (None, dec_max_seq_length, latent_dim)
 
 # 將解碼器當下的內部狀態與context vector連接起來，並得到注意力層的輸出
