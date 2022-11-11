@@ -15,4 +15,4 @@ data_file = "./data/linq-sample.txt"
 write_train_data(data_file)
 #write_tokens_data(data_file)
 
-write_train_tfrecord(data_file, "./output/train.tfrecord")
+write_train_tfrecord(data_file, "./output/train.tfrec")

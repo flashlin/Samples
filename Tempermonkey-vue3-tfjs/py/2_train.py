@@ -8,6 +8,8 @@ from tensorflow.keras.layers import Activation
 from keras_preprocessing.sequence import pad_sequences
 import numpy as np
 
+from utils.linq_translation_data import load_tfrecord_files
+
 # preparing hyperparameters
 src_wordEmbed_dim = 18  # 詞向量維度18
 src_max_seq_length = 200  # 句長最大值為 100
@@ -59,10 +61,43 @@ print("dec_outputs_final - shape: {}".format(
     dec_outputs_final.shape))  # shape: (None, dec_max_seq_length, tgt_wordEmbed_dim)
 
 # Integrate seq2seq model with attention mechanism
-seq2seq_2_layers_attention = Model([enc_inputs, dec_inputs], dec_outputs_final, name="seq2seq_2_layers_attention")
-seq2seq_2_layers_attention.summary()
+model = Model([enc_inputs, dec_inputs], dec_outputs_final, name="seq2seq_2_layers_attention")
+model.summary()
 
 # Preview model architecture
-plot_model(seq2seq_2_layers_attention, to_file="output/2-layer_seq2seq_attention.png",
-           dpi=100, show_shapes=True, show_layer_names=True)
+#plot_model(model, to_file="output/2-layer_seq2seq_attention.png",
+#           dpi=100, show_shapes=True, show_layer_names=True)
 
+train_dataset, valid_dataset, test_dataset = load_tfrecord_files("./output")
+
+# 以下函數允許模型在每個 epoch 運行時更改學習率。
+# 當模型沒有改進時，我們可以使用回調來停止訓練。在訓練過程結束時，模型將恢復其最佳迭代的權重
+initial_learning_rate = 0.01
+lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+    initial_learning_rate, decay_steps=20, decay_rate=0.96, staircase=True
+)
+
+checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
+    "./output/linq_model.h5", save_best_only=True
+)
+
+early_stopping_cb = tf.keras.callbacks.EarlyStopping(
+    patience=10, restore_best_weights=True
+)
+
+# ----------------------------
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
+    # loss="binary_crossentropy",
+    loss = tf.keras.losses.CategoricalCrossentropy(),
+    metrics=tf.keras.metrics.AUC(name="auc"),
+)
+
+history = model.fit(
+    train_dataset,
+    epochs=2,
+    validation_data=valid_dataset,
+    callbacks=[checkpoint_cb, early_stopping_cb],
+)
+
+print(f"{history=}")
