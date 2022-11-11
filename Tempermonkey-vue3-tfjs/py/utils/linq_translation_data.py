@@ -113,23 +113,23 @@ def load_dataset(filenames, labeled=True):
     return dataset
 
 
-def get_dataset(filenames, batch_size=64, labeled=True):
+def shuffle_dataset(filenames, batch_size=64, labeled=True):
     dataset = load_dataset(filenames, labeled=labeled)
     dataset = dataset.shuffle(2048)
     dataset = dataset.prefetch(buffer_size=AUTOTUNE)
     dataset = dataset.batch(batch_size)
     return dataset
 
-def demo_get_dataset():
-    filenames = tf.io.gfile.glob("/tfrecords/train*.tfrec")
+def demo_get_dataset(tfrec_path):
+    filenames = tf.io.gfile.glob(tfrec_path + "/tfrecords/train*.tfrec")
     split_ind = int(0.9 * len(filenames))
     training_filenames, valid_filenames = filenames[:split_ind], filenames[split_ind:]
 
-    train_dataset = get_dataset(training_filenames)
-    valid_dataset = get_dataset(valid_filenames)
+    train_dataset = shuffle_dataset(training_filenames)
+    valid_dataset = shuffle_dataset(valid_filenames)
 
-    test_filenames = tf.io.gfile.glob("/tfrecords/test*.tfrec")
-    test_dataset = get_dataset(test_filenames, labeled=False)
+    test_filenames = tf.io.gfile.glob(tfrec_path + "/tfrecords/test*.tfrec")
+    test_dataset = shuffle_dataset(test_filenames, labeled=False)
 
     image_batch, label_batch = next(iter(train_dataset))
     def show_batch(image_batch, label_batch):
@@ -144,6 +144,20 @@ def demo_get_dataset():
             plt.axis("off")
 
     show_batch(image_batch.numpy(), label_batch.numpy())
+
+
+def load_tfrecord_files(tfrec_path):
+    filenames = tf.io.gfile.glob(tfrec_path + "/tfrecords/train*.tfrec")
+    split_ind = int(0.9 * len(filenames))
+    training_filenames, valid_filenames = filenames[:split_ind], filenames[split_ind:]
+
+    train_dataset = shuffle_dataset(training_filenames)
+    valid_dataset = shuffle_dataset(valid_filenames)
+
+    test_filenames = tf.io.gfile.glob(tfrec_path + "/tfrecords/test*.tfrec")
+    test_dataset = shuffle_dataset(test_filenames, labeled=False)
+
+    return train_dataset, valid_dataset, test_dataset
 
 class LinqTranslationData:
     def __init__(self):
