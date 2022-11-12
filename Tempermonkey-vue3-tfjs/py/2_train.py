@@ -1,4 +1,5 @@
 import tensorflow as tf
+from keras.utils import to_categorical
 from tensorflow.keras import Sequential, Input
 from tensorflow.keras.layers import Dense, LSTM, Embedding, concatenate
 from tensorflow.keras.models import Model
@@ -7,8 +8,10 @@ from tensorflow.keras.layers import dot
 from tensorflow.keras.layers import Activation
 from keras_preprocessing.sequence import pad_sequences
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 from utils.linq_translation_data import load_tfrecord_files
+from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 # preparing hyperparameters
 src_wordEmbed_dim = 18  # 詞向量維度18
@@ -70,11 +73,43 @@ model.summary()
 
 
 # increase 1 dimension
-with np.load('./output/linq-translation_padded.npz') as npz:
-    src_sentences_padded = npz["x"]
-    tgt_sentences_padded = npz["y"]
-src_sentences_padded = src_sentences_padded.reshape(*src_sentences_padded.shape, 1) # shape: (26388, 38, 1)
-tgt_sentences_padded = tgt_sentences_padded.reshape(*tgt_sentences_padded.shape, 1) #
+# with np.load('./output/linq-translation_padded.npz') as npz:
+#     src_sentences_padded = npz["x"]
+#     tgt_sentences_padded = npz["y"]
+# src_sentences_padded = src_sentences_padded.reshape(*src_sentences_padded.shape, 1) # shape: (26388, 38, 1)
+# tgt_sentences_padded = tgt_sentences_padded.reshape(*tgt_sentences_padded.shape, 1)
+
+# prepare training and test data
+data = np.load("./output/linq-translation_padded.npz")
+print(data.files)
+
+X = data["x"]
+y = data["y"]
+
+# text_as_int = enc_inputs
+# characters = tf.data.Dataset.from_tensor_slices(text_as_int)
+# print(f"{characters=}")
+
+
+def one_hot_encode_labels(sequences, vocab_size):
+    y_list = []
+    for seq in sequences:
+        # one-hot encode each sentence
+        oh_encoded = to_categorical(seq, num_classes = vocab_size)
+        y_list.append(oh_encoded)
+    y = np.array(y_list, dtype = np.float32)
+    y = y.reshape(sequences.shape[0], sequences.shape[1], vocab_size)
+    return y
+
+tgt_vocab_size = TSQL_VOCAB_SIZE
+dec_outputs = one_hot_encode_labels(y, tgt_vocab_size) # shape: (n_samples, tgt_max_seq_length, tgt_vocab_size)
+
+# test_ratio = .2
+# enc_inputs_train, enc_inputs_test = train_test_split(enc_inputs, test_size = test_ratio, shuffle = False)
+# # dec_inputs_train, dec_inputs_test = train_test_split(dec_inputs, test_size = test_ratio, shuffle = False)
+# y_train, y_test = train_test_split(dec_outputs, test_size = test_ratio, shuffle = False)
+# X_train = [enc_inputs_train, dec_inputs_train]
+# X_test = [enc_inputs_test, dec_inputs_test]
 
 # train_dataset, valid_dataset, test_dataset = load_tfrecord_files("./output")
 
@@ -94,18 +129,18 @@ early_stopping_cb = tf.keras.callbacks.EarlyStopping(
 )
 
 # ----------------------------
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
-    # loss="binary_crossentropy",
-    loss = tf.keras.losses.CategoricalCrossentropy(),
-    metrics=tf.keras.metrics.AUC(name="auc"),
-)
-
-history = model.fit(
-    train_dataset,
-    epochs=2,
-    validation_data=valid_dataset,
-    callbacks=[checkpoint_cb, early_stopping_cb],
-)
-
-print(f"{history=}")
+# model.compile(
+#     optimizer=tf.keras.optimizers.Adam(learning_rate=lr_schedule),
+#     # loss="binary_crossentropy",
+#     loss = tf.keras.losses.CategoricalCrossentropy(),
+#     metrics=tf.keras.metrics.AUC(name="auc"),
+# )
+#
+# history = model.fit(
+#     train_dataset,
+#     epochs=2,
+#     validation_data=valid_dataset,
+#     callbacks=[checkpoint_cb, early_stopping_cb],
+# )
+#
+# print(f"{history=}")

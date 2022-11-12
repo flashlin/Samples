@@ -57,6 +57,7 @@ def linq_tokenize(stream) -> list[Token]:
 LINQ_Marks = fixed_marks + LINQ_Keywords
 LINQ_Char2Index_Dict = convert_str_list_to_char2index_map(LINQ_Marks)
 LINQ_Index2Char_Dict = convert_str_list_to_index2char_map(LINQ_Marks)
+LINQ_VOCAB_SIZE = len(LINQ_Marks)
 
 def linq_encode(stream):
     tokens = linq_tokenize(stream)

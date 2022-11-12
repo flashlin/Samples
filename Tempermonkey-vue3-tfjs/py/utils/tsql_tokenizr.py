@@ -198,7 +198,6 @@ TSQL_Operators: Final[list[str]] = sort_desc(['<>', '>=', '<=', '!=', '=', '+', 
 # TSQL_Operators_Lengths = [(k, list(g)) for k, g in groupby(TSQL_Operators, key=lambda x: len(x))]
 TSQL_Operators_Lengths = group_to_lengths(TSQL_Operators)
 
-
 def read_tsql_keyword_fn():
     return read_keyword_fn(Token.Keyword, TSQL_Keywords_Lengths, TSQL_Keywords, case_insensitive=True)
 
@@ -249,6 +248,7 @@ def tsql_tokenize(stream) -> list[Token]:
 tsql_marks = fixed_marks + TSQL_Keywords
 tsql_char2index_dict = convert_str_list_to_char2index_map(tsql_marks)
 tsql_index2char_dict = convert_str_list_to_index2char_map(tsql_marks)
+TSQL_VOCAB_SIZE = len(tsql_marks)
 
 def tsql_encode(stream):
     tokens = tsql_tokenize(stream)
