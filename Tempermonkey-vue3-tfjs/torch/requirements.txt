@@ -1,0 +1,4 @@
+#torch==1.12.1
+#torchtext==0.13.1
+pydot
+pytorch-lightning
