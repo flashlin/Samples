@@ -12,6 +12,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from common.io import info
 from prepare import create_data_loader
+from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 """
     為了使模型能夠利用序列的順序,
@@ -311,8 +312,7 @@ class TransformerPredictor(pl.LightningModule):
 
         # Perform prediction and calculate loss and accuracy
         preds = self.forward(inp_data, add_positional_encoding=True)
-        #loss = F.cross_entropy(preds.view(-1, preds.size(-1)), labels.view(-1))
-        loss = F.cross_entropy(preds.permute(1,2,0), labels.permute(0, 1))
+        loss = F.cross_entropy(preds.view(-1, preds.size(-1)), labels.view(-1))
 
         acc = (preds.argmax(dim=-1) == labels).float().mean()
 
@@ -326,9 +326,9 @@ class TransformerPredictor(pl.LightningModule):
 class MyPredictor(TransformerPredictor):
     def __init__(self):
         super(MyPredictor, self).__init__(
-            input_dim=255,
+            input_dim=TSQL_VOCAB_SIZE,
             model_dim=3,
-            num_classes=255,
+            num_classes=TSQL_VOCAB_SIZE,
             num_heads=3,
             num_layers=3,
             max_iters=10,
@@ -373,6 +373,8 @@ def start_train(model_type, device=None, **kwargs):
         train_loader = model.train_dataloader()
         val_loader = model.val_dataloader()
         # trainer.fit(model, train_loader, val_loader)
+        for batch, idx in train_loader:
+            info(f" {batch=}")
         trainer.fit(model)
 
     # Test best model on validation and test set

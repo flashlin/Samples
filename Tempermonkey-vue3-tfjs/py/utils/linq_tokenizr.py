@@ -8,14 +8,18 @@ from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_nu
 LINQ_Keywords = sort_desc([
     "select",
     "from",
-    "into",
     "equals",
     "group",
     "by",
+    "into",
+    "orderby",
     "join",
     "in",
     "new",
-    "DefaultIfEmpty"
+    "DefaultIfEmpty",
+    "Distinct",
+    "ToList",
+    "ToArray"
 ])
 LINQ_Keywords_Lengths = group_to_lengths(LINQ_Keywords)
 LINQ_Symbols: Final[list[str]] = ['.', ',', '(', ')', '{', '}']
