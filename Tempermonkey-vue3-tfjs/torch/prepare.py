@@ -6,7 +6,7 @@ import torch
 from common.csv_utils import CsvWriter, CsvReader
 from common.io import info
 import pandas as pd
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 
 from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
 
@@ -128,3 +128,14 @@ if __name__ == '__main__':
     #train_iterator, valid_iterator, test_iterator, source, target = get_datasets(batch_size=256)
     convert_translation_file_to_csv()
 
+
+def create_data_loader(batch_size=32):
+    # dataset = MNIST("", train=True, download=True, transform=transforms.ToTensor())
+    csv_file_path = "./output/linq-sample.csv"
+    dataset = Linq2TSqlDataset(csv_file_path)
+    train_size = int(0.8 * len(dataset))
+    val_size = len(dataset) - train_size
+    train_data, val_data = random_split(dataset, [train_size, val_size])
+    train_loader = DataLoader(train_data, batch_size=batch_size)
+    val_loader = DataLoader(val_data, batch_size=batch_size)
+    return train_loader, val_loader

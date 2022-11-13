@@ -6,3 +6,5 @@ from tb3 in (from tb2 in customer select new{tb2.id,tb2.name,tb2.birth}) select 
 SELECT tb3.id AS id FROM (SELECT tb2.id AS id,tb2.name AS name,tb2.birth as birth FROM customer WITH(NOLOCK))
 from tb1 in Customer join tb2 in Home on tb1.id equals tb2.CustId select new {tb1.id,tb2.addr}
 SELECT tb1.id AS id,tb2.addr AS addr FROM Customer AS tb1 WITH(NOLOCK) JOIN Home AS tb2 ON tb1.id=tb2.CustId
+from c in Categories join p in Products on c.CategoryID equals p.CategoryID into cp from p in cp.DefaultIfEmpty() select new {c.CategoryID,c.CategoryName,p.ProductName}
+SELECT c.CategoryID AS CategoryID,c.CategoryName AS CategoryName,p.ProductName AS ProductName FROM Categories AS c WITH(NOLOCK) LEFT OUTER JOIN Products AS p WITH(NOLOCK) WHERE c.CategoryID=p.CategoryID

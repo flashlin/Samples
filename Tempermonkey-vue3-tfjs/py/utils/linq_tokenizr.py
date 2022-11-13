@@ -14,7 +14,8 @@ LINQ_Keywords = sort_desc([
     "by",
     "join",
     "in",
-    "new"
+    "new",
+    "DefaultIfEmpty"
 ])
 LINQ_Keywords_Lengths = group_to_lengths(LINQ_Keywords)
 LINQ_Symbols: Final[list[str]] = ['.', ',', '(', ')', '{', '}']
