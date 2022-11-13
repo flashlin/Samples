@@ -12,6 +12,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from common.io import info
 from prepare import create_data_loader
+from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 """
@@ -20,12 +21,15 @@ from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
     因此專家提出了 “Positional Encoding” 位置編碼的概念
     使用了不同頻率的正弦和余弦函數來作為位置編碼
 """
+
+
 class PositionalEncoding(nn.Module):
     """
     Args
         d_model: Hidden dimensionality of the input.
         max_len: Maximum length of a sequence to expect.
     """
+
     def __init__(self, d_model, dropout=0.1, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
@@ -34,8 +38,8 @@ class PositionalEncoding(nn.Module):
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)
-        if d_model%2 != 0:
-            pe[:, 1::2] = torch.cos(position * div_term)[:,0:-1]
+        if d_model % 2 != 0:
+            pe[:, 1::2] = torch.cos(position * div_term)[:, 0:-1]
         else:
             pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0).transpose(0, 1)
@@ -45,11 +49,14 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
+
 """
     是一個 lookup table 
     存儲了固定大小的 dictionary 的 word embeddings
     輸入是 indices 來獲取指定 indices 的 word embedding 向量
 """
+
+
 class Embeddings(nn.Module):
     def __init__(self, vocab: int, d_model: int = 512):
         super().__init__()
@@ -61,10 +68,160 @@ class Embeddings(nn.Module):
         return a
 
 
+class Encoder(nn.Module):
+    def __init__(self, input_dim, hidden_dim, embbed_dim, num_layers):
+        super(Encoder, self).__init__()
+
+        # set the encoder input dimesion , embbed dimesion, hidden dimesion, and number of layers
+        self.input_dim = input_dim
+        self.embbed_dim = embbed_dim
+        self.hidden_dim = hidden_dim
+        self.num_layers = num_layers
+
+        # initialize the embedding layer with input and embbed dimention
+        self.embedding = nn.Embedding(input_dim, self.embbed_dim)
+        # intialize the GRU to take the input dimetion of embbed, and output dimention of hidden and
+        # set the number of gru layers
+        self.gru = nn.GRU(self.embbed_dim, self.hidden_dim, num_layers=self.num_layers)
+
+    def forward(self, src):
+        embedded = self.embedding(src).view(1, 1, -1)
+        outputs, hidden = self.gru(embedded)
+        return outputs, hidden
+
+
+class Decoder(nn.Module):
+    def __init__(self, output_dim, hidden_dim, embbed_dim, num_layers):
+        super(Decoder, self).__init__()
+
+        # set the encoder output dimension, embed dimension, hidden dimension, and number of layers
+        self.embbed_dim = embbed_dim
+        self.hidden_dim = hidden_dim
+        self.output_dim = output_dim
+        self.num_layers = num_layers
+
+        # initialize every layer with the appropriate dimension. For the decoder layer, it will consist of an embedding, GRU, a Linear layer and a Log softmax activation function.
+        self.embedding = nn.Embedding(output_dim, self.embbed_dim)
+        self.gru = nn.GRU(self.embbed_dim, self.hidden_dim, num_layers=self.num_layers)
+        self.out = nn.Linear(self.hidden_dim, output_dim)
+        self.softmax = nn.LogSoftmax(dim=1)
+
+    def forward(self, input, hidden):
+        # reshape the input to (1, batch_size)
+        input = input.view(1, -1)
+        embedded = F.relu(self.embedding(input))
+        output, hidden = self.gru(embedded, hidden)
+        prediction = self.softmax(self.out(output[0]))
+
+        return prediction, hidden
+
+
+class Seq2Seq(nn.Module):
+    def __init__(self, encoder, decoder, device, max_length=512, sos_token=1, eos_token=2):
+        super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.device = device
+
+    def forward(self, source, target, teacher_forcing_ratio=0.5):
+        input_length = source.size(0)  # get the input length (number of words in sentence)
+        batch_size = target.shape[1]
+        target_length = target.shape[0]
+        vocab_size = self.decoder.output_dim
+
+        # initialize a variable to hold the predicted outputs
+        outputs = torch.zeros(target_length, batch_size, vocab_size).to(self.device)
+
+        # encode every word in a sentence
+        for i in range(input_length):
+            encoder_output, encoder_hidden = self.encoder(source[i])
+
+        # use the encoder’s hidden layer as the decoder hidden
+        decoder_hidden = encoder_hidden.to(self.device)
+
+        # add a token before the first predicted word
+        decoder_input = torch.tensor([self.sos_token], device=self.device)  # SOS
+
+        # topk is used to get the top K value over a list
+        # predict the output word from the current target word. If we enable the teaching force,  then the #next decoder input is the next word, else, use the decoder output highest value.
+        for t in range(target_length):
+            decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
+            outputs[t] = decoder_output
+            teacher_force = random.random() < teacher_forcing_ratio
+            topv, topi = decoder_output.topk(1)
+            input = (target[t] if teacher_force else topi)
+            if teacher_force == False and input.item() == self.eos_token:
+                break
+        return outputs
+
+
+class LitSeq2Seq(pl.LightningModule):
+    def __init__(self, input_size=80, embed_size=TSQL_VOCAB_SIZE, hidden_size=3, num_layers=3, output_size=512, device=None):
+        super().__init__()
+        if device is None:
+            device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.lr_scheduler = None
+        self.encoder = Encoder(input_size, hidden_size, embed_size, num_layers)
+        self.decoder = Decoder(output_size, hidden_size, embed_size, num_layers)
+        self.model = Seq2Seq(self.encoder, self.decoder, device).to(device)
+        self.optimizer = optim.SGD(self.model.parameters(), lr=0.01)
+        self.criterion = nn.NLLLoss()
+        train_loader, val_loader = create_data_loader()
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+
+    def forward(self, batch):
+        input_tensor, target_tensor = batch
+        output = self.model(input_tensor, target_tensor)
+        return output
+
+    def configure_optimizers(self):
+        optimizer = optim.SGD(self.model.parameters(), lr=0.01)
+        # We don't return the lr scheduler because we need to apply it per iteration, not per epoch
+        self.lr_scheduler = CosineWarmupScheduler(
+            optimizer, warmup=50, max_iters=10
+        )
+        return optimizer
+
+    def optimizer_step(self, *args, **kwargs):
+        super().optimizer_step(*args, **kwargs)
+        self.lr_scheduler.step()  # Step per iteration
+
+    def training_step(self, batch, batch_idx):
+        loss = self._calculate_loss(batch, mode="train")
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        _ = self._calculate_loss(batch, mode="val")
+
+    def test_step(self, batch, batch_idx):
+        _ = self._calculate_loss(batch, mode="test")
+
+    def _calculate_loss(self, batch, mode="train"):
+        x_hat, y = batch
+        x_hat = x_hat.permute(1, 0)
+        y = y.permute(1, 0)
+        num_iter = x_hat.size(1)
+        loss = 0
+        info(f"{x_hat[0]=} {y[0]=}")
+        for ot in range(num_iter):
+            loss += self.criterion(x_hat[ot], y[ot])
+        self.log("%s_loss" % mode, loss)
+        return loss
+    def train_dataloader(self):
+        return self.train_loader
+
+    def val_dataloader(self):
+        return self.val_loader
+
+    def test_dataloader(self):
+        return self.val_loader
+
 class Generator(nn.Module):
     def __init__(self, tgt_vocab_size):
         super().__init__()
         self.proj = nn.Linear(512, tgt_vocab_size)
+
     def forward(self, x):
         return F.log_softmax(self.proj(x), dim=-1)
 
@@ -78,6 +235,7 @@ def scaled_dot_product(q, k, v, mask=None):
     attention = F.softmax(attn_logits, dim=-1)
     values = torch.matmul(attention, v)
     return values, attention
+
 
 class MultiHeadAttention(nn.Module):
     def __init__(self, input_dim, embed_dim, num_heads):
@@ -180,6 +338,7 @@ class EncoderBlock(nn.Module):
 
         return x
 
+
 class TransformerEncoder(nn.Module):
     def __init__(self, num_layers, **block_args):
         super().__init__()
@@ -201,17 +360,17 @@ class TransformerEncoder(nn.Module):
 
 class TransformerPredictor(pl.LightningModule):
     def __init__(
-        self,
-        input_dim,
-        model_dim,
-        num_classes,
-        num_heads,
-        num_layers,
-        max_iters,
-        warmup=50,
-        lr=1e-4,
-        dropout=0.0,
-        input_dropout=0.0,
+            self,
+            input_dim,
+            model_dim,
+            num_classes,
+            num_heads,
+            num_layers,
+            max_iters,
+            warmup=50,
+            lr=1e-4,
+            dropout=0.0,
+            input_dropout=0.0,
     ):
         """
         Args:
@@ -322,7 +481,6 @@ class TransformerPredictor(pl.LightningModule):
         return loss, acc
 
 
-
 class MyPredictor(TransformerPredictor):
     def __init__(self):
         super(MyPredictor, self).__init__(
@@ -348,6 +506,8 @@ class MyPredictor(TransformerPredictor):
 
 
 CHECKPOINT_PATH = "./output"
+
+
 def start_train(model_type, device=None, **kwargs):
     if device is None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -373,8 +533,8 @@ def start_train(model_type, device=None, **kwargs):
         train_loader = model.train_dataloader()
         val_loader = model.val_dataloader()
         # trainer.fit(model, train_loader, val_loader)
-        for batch, idx in train_loader:
-            info(f" {batch=}")
+        # for batch, idx in train_loader:
+        #     info(f" {batch=}")
         trainer.fit(model)
 
     # Test best model on validation and test set
@@ -388,4 +548,5 @@ def start_train(model_type, device=None, **kwargs):
 
 
 if __name__ == '__main__':
-    start_train(MyPredictor, device='cpu')
+    # start_train(MyPredictor, device='cpu')
+    start_train(LitSeq2Seq, device='cpu')

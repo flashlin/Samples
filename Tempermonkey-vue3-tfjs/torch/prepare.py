@@ -23,32 +23,17 @@ def convert_translation_file_to_csv():
         src_max_length = max(len(linq_values), src_max_length)
         tgt_max_length = max(len(tsql_values), tgt_max_length)
     file_iter = Linq2TSqlTranslationFileIterator("../data/linq-sample.txt")
+    max_length = max(src_max_length, tgt_max_length)
+    info(f"translation {max_length=}")
     with open(r"./output/linq-sample.csv", "w", encoding='utf-8') as csv:
         csv.write('linq\ttsql\n')
         for linq_values, tsql_values in file_iter:
-            linq_values_padded = pad_list(linq_values, 0, src_max_length)
+            linq_values_padded = pad_list(linq_values, 0, max_length)
             csv.write(','.join(str(x) for x in linq_values_padded))
             csv.write('\t')
-            tsql_values_padded = pad_list(tsql_values, 0, tgt_max_length)
+            tsql_values_padded = pad_list(tsql_values, 0, max_length)
             csv.write(','.join(str(x) for x in tsql_values_padded))
             csv.write('\n')
-    # nb_samples = 110
-    # a = np.arange(nb_samples)
-    # df = pd.DataFrame(a, columns=['data'])
-    # with CsvWriter(r"./output/linq-sample.csv") as csv:
-    #     csv.write(['linq', 'tsql'])
-    #     for linq_values, tsql_values in file_iter:
-    #         csv.write([linq_values, tsql_values])
-        #df = pd.DataFrame(file_iter)
-        #df.to_csv('data.csv', index=False)
-
-    # with CsvReader("./output/linq-sample.csv") as rsv:
-    #     for item in rsv.get_iterator():
-    #         print(f"{item[0]=}")
-    #         print(f"{item[1]=}")
-
-    # df = pd.read_csv("./output/linq-sample.csv", sep = "\t")
-    # print(f"{df=}")
 
 def dataframe_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
@@ -62,7 +47,7 @@ class Linq2TSqlDataset(Dataset):
         # drop non numeric columns to make tutorial simpler, in real life do categorical encoding
         # self.df = df.drop(columns=['Type', 'Color', 'Spectral_Class'])
         # convert to torch dtypes
-        self.dataset = torch.tensor(self.df_linq_values).long()
+        self.dataset = torch.tensor(self.df_linq_values).float()
         self.labels = torch.tensor(self.df_labels).long()
 
     def __len__(self):
