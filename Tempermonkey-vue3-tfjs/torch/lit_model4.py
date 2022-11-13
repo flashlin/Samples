@@ -88,8 +88,8 @@ class LitMachineTranslation(BaseLightning):
         self.teacher_forcing_ratio = 0.5
         self.loss = 0
 
-    def forward(self, batch):
-        src, trg = batch
+    def forward(self, x):
+        src, trg = x
 
         input_length = src.size(0)
         target_length = trg.size(0)
