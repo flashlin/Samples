@@ -161,6 +161,7 @@ class LitTranslateModel(pl.LightningModule):
         self.decoder = LitDecoder(self.one_step_decoder, device)
         self.model = LitEncodeDecoder(self.encoder, self.decoder)
         self.criterion = nn.CrossEntropyLoss(ignore_index=0)
+        self.log_softmax_fn = torch.nn.LogSoftmax(dim=1)
 
     def forward(self, source, target):
         return self.model(source, target)
@@ -182,14 +183,25 @@ class LitTranslateModel(pl.LightningModule):
         loss = self.criterion(output, trg)
         return loss
 
+    def validation_step(self, batch, batch_idx):  # Optional for PyTorch Lightning
+        self.eval()
+        reactants, products = batch
+        logits = self.forward(reactants, products)  # Sequence, batch, tokens
+        logits = logits.permute(1, 2, 0)  # Now batch, tokens, sequence
+        log_softmax = self.log_softmax_fn(logits)
+        loss = self.criterion(log_softmax, products[1:].permute(1, 0))  # Skipping the start-char in the target
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True)
+        return loss
+
 
 if __name__ == '__main__':
-    model = train(train_iterator, valid_iterator, source, target, epochs=25)
-
-    checkpoint = {
-        'model_state_dict': model.state_dict(),
-        'source': source.vocab,
-        'target': target.vocab
-    }
-
-    torch.save(checkpoint, 'nmt-model-gru-attention-25.pth')
+    # model = train(train_iterator, valid_iterator, source, target, epochs=25)
+    #
+    # checkpoint = {
+    #     'model_state_dict': model.state_dict(),
+    #     'source': source.vocab,
+    #     'target': target.vocab
+    # }
+    #
+    # torch.save(checkpoint, 'nmt-model-gru-attention-25.pth')
+    pass
