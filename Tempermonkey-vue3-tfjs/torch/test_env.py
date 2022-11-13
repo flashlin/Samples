@@ -7,4 +7,4 @@ print(torch.cuda.is_available())
 #True
 
 tensor = tensor.to('cuda')
-print(f"Device tensor is stored on: {tensor._device}")
+print(f"Device tensor is stored on: {tensor.device}")
