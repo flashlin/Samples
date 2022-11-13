@@ -11,66 +11,14 @@ import os
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 from common.io import info
+from lit import PositionalEncoding
 from prepare import create_data_loader
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
-"""
-    為了使模型能夠利用序列的順序,
-    需要插入一些關於 tokens 在序列中相對或絕對位置的信息
-    因此專家提出了 “Positional Encoding” 位置編碼的概念
-    使用了不同頻率的正弦和余弦函數來作為位置編碼
-"""
-
-
-class PositionalEncoding(nn.Module):
-    """
-    Args
-        d_model: Hidden dimensionality of the input.
-        max_len: Maximum length of a sequence to expect.
-    """
-
-    def __init__(self, d_model, dropout=0.1, max_len=5000):
-        super(PositionalEncoding, self).__init__()
-        self.dropout = nn.Dropout(p=dropout)
-
-        pe = torch.zeros(max_len, d_model)
-        position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
-        pe[:, 0::2] = torch.sin(position * div_term)
-        if d_model % 2 != 0:
-            pe[:, 1::2] = torch.cos(position * div_term)[:, 0:-1]
-        else:
-            pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0).transpose(0, 1)
-        self.register_buffer('pe', pe, persistent=False)
-
-    def forward(self, x):
-        x = x + self.pe[:x.size(0), :]
-        return self.dropout(x)
-
-
-"""
-    是一個 lookup table 
-    存儲了固定大小的 dictionary 的 word embeddings
-    輸入是 indices 來獲取指定 indices 的 word embedding 向量
-"""
-
-
-class Embeddings(nn.Module):
-    def __init__(self, vocab: int, d_model: int = 512):
-        super().__init__()
-        self.lut = nn.Embedding(vocab, d_model)
-        self.d_model = d_model
-
-    def forward(self, x):
-        a = self.lut(x) * math.sqrt(self.d_model)
-        return a
-
-
 class Encoder(nn.Module):
     def __init__(self, input_dim, hidden_dim, embbed_dim, num_layers):
-        super(Encoder, self).__init__()
+        super().__init__()
 
         # set the encoder input dimesion , embbed dimesion, hidden dimesion, and number of layers
         self.input_dim = input_dim
@@ -437,7 +385,6 @@ class TransformerPredictor(pl.LightningModule):
     @torch.no_grad()
     def get_attention_maps(self, x, mask=None, add_positional_encoding=True):
         """Function for extracting the attention matrices of the whole Transformer for a single batch.
-
         Input arguments same as the forward pass.
         """
         x = self.input_net(x)
