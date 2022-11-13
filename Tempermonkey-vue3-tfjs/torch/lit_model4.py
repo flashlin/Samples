@@ -128,7 +128,8 @@ class LitMachineTranslation(BaseLightning):
         return decoder_output
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=0.0005)
+        optimizer = optim.SGD(self.parameters(), lr=0.01)
+        # optimizer = optim.Adam(self.parameters(), lr=0.0005)
         # We don't return the lr scheduler because we need to apply it per iteration, not per epoch
         self.lr_scheduler = CosineWarmupScheduler(
             optimizer, warmup=50, max_iters=80
