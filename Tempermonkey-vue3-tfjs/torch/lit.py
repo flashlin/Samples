@@ -76,7 +76,7 @@ def start_train(model_type, device=None, checkpoint_path="./output", **kwargs):
         model = model_type.load_from_checkpoint(pretrained_filename)
     else:
         # model = model_type(max_iters=trainer.max_epochs * len(train_loader), **kwargs)
-        model = model_type(device=device, **kwargs)
+        model = model_type(**kwargs)
         train_loader = model.train_dataloader()
         val_loader = model.val_dataloader()
         # trainer.fit(model, train_loader, val_loader)
@@ -88,10 +88,10 @@ def start_train(model_type, device=None, checkpoint_path="./output", **kwargs):
     test_loader = model.test_dataloader()
     val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
     test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
-    result = {"test_acc": test_result[0]["test_acc"], "val_acc": val_result[0]["test_acc"]}
+    # result = {"test_acc": test_result[0]["test_acc"], "val_acc": val_result[0]["test_acc"]}
 
     model = model.to(device)
-    return model, result
+    return model #, result
 
 
 class CosineWarmupScheduler(optim.lr_scheduler._LRScheduler):
@@ -125,9 +125,8 @@ class BaseLightning(pl.LightningModule):
         self.val_loader = None
         self.test_loader = None
 
-    def forward(self, batch):
-        src, trg = batch
-        output, _ = self.model(src, trg)
+    def forward(self, x):
+        output = self.model(x)
         return output
 
     def configure_optimizers(self):
