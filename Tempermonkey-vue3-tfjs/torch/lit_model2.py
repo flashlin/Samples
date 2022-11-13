@@ -188,14 +188,20 @@ class LitSeq2Seq(pl.LightningModule):
         self.lr_scheduler.step()  # Step per iteration
 
     def training_step(self, batch, batch_idx):
-        loss = self._calculate_loss(batch, mode="train")
+        x, y = batch
+        y_hat = self(x)
+        loss = self._calculate_loss((y_hat, y), mode="train")
         return loss
 
     def validation_step(self, batch, batch_idx):
-        _ = self._calculate_loss(batch, mode="val")
+        x, y = batch
+        y_hat = self(x)
+        _ = self._calculate_loss((y_hat, y), mode="val")
 
     def test_step(self, batch, batch_idx):
-        _ = self._calculate_loss(batch, mode="test")
+        x, y = batch
+        y_hat = self(x)
+        _ = self._calculate_loss((y_hat, y), mode="test")
 
     def _calculate_loss(self, batch, mode="train"):
         x_hat, y = batch
