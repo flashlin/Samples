@@ -5,10 +5,9 @@ from common.io import info
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
+from data import pad_list
 from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
 
-def pad_list(l, item, max_length):
-    return l + [item] * (max_length - len(l))
 
 def convert_translation_file_to_csv():
     file_iter = Linq2TSqlTranslationFileIterator("../data/linq-sample.txt")
