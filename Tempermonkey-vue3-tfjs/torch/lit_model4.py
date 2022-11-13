@@ -94,7 +94,6 @@ class LitMachineTranslation(BaseLightning):
 
         input_length = src.size(0)
         target_length = trg.size(0)
-        info(f" {input_length=} {target_length=}")
         encoder_outputs = torch.zeros(self.max_length, self.encoder.hidden_size, device=self._device)
         encoder_hidden = self.encoder_hidden
 
@@ -111,6 +110,7 @@ class LitMachineTranslation(BaseLightning):
             for di in range(target_length):
                 decoder_output, decoder_hidden, decoder_attention = self.decoder(
                     decoder_input, decoder_hidden, encoder_outputs)
+                info(f" d1 {decoder_output=} {trg[di]=} {di=}")
                 loss += self.criterion(decoder_output, trg[di])
                 decoder_input = trg[di]  # Teacher forcing
         else:
@@ -120,7 +120,7 @@ class LitMachineTranslation(BaseLightning):
                     decoder_input, decoder_hidden, encoder_outputs)
                 topv, topi = decoder_output.topk(1)
                 decoder_input = topi.squeeze().detach()  # detach from history as input
-
+                info(f" d2 {decoder_output=} {trg=}")
                 loss += self.criterion(decoder_output, trg[di])
                 if decoder_input.item() == self.eos_token:
                     break
