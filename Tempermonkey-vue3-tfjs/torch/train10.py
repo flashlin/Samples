@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from pytorch_lightning import Trainer
 from torch import nn
 import torch.nn.functional as F
 
@@ -60,7 +61,7 @@ class Translator(nn.Module):
                                           num_decoder_layers=2, dim_feedforward=512,
                                           batch_first=True)
         self.positional_encoding = PositionalEncoding(d_model=128, dropout=0)
-        self.predictor = nn.Linear(129, tgt_seq_len)
+        self.predictor = nn.Linear(tgt_dim, tgt_seq_len)
 
     def forward(self, src, tgt):
         tgt_mask = nn.Transformer.generate_square_subsequent_mask(tgt.size()[- 1])
@@ -111,18 +112,22 @@ class LitTranslator(BaseLightning):
         return self.loss
 
     def infer(self, src, max_length):
+        src = torch.tensor(src, dtype=torch.long)
         model = self.model.eval()
-        tgt = torch.LongTensor([[0]])
+        tgt = torch.tensor([0], dtype=torch.long)
         for i in range(max_length):
             out = model(src, tgt)
             # 预测结果，因为只需要看最后一个词，所以取`out[:, -1]`
-            predict = model.predictor(out[:, -1])
+            #predict = model.predictor(out[:, -1])
+            predict = model.predictor(out[-1])
+            # predict = model(out[-1], tgt)
             # 找出最大值的index
             y = torch.argmax(predict, dim=1)
             # 和之前的预测结果拼接到一起
-            tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
+            #tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
+            tgt = torch.concat([tgt, y], dim=0)
             # 如果為 <eos> 說明預測結束，跳出循環
-            if y == 2:
+            if y[-1] == 2:
                 break
         print(tgt)
 
@@ -142,9 +147,17 @@ def test():
     s1 = "from tb3 in account select tb3.name"
     v1 = linq_encode(s1)
     model = load_model(LitTranslator)
-    v2 = model.infer(v1, 500)
+    v2 = model.infer(v1, 200)
     print(f" {v2=}")
 
+def test2():
+    s1 = "from tb3 in account select tb3.name"
+    v1 = linq_encode(s1)
+    trainer = Trainer()
+    model = load_model(LitTranslator)
+    predictions = trainer.predict(model, enumerate([v1]))
+    print(f" {predictions=}")
+
 if __name__ == "__main__":
-    main()
-    #test()
+    #main()
+    test()
