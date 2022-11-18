@@ -3,7 +3,7 @@ import torch
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from data import pad_sequence
+from preprocess_data import pad_sequence
 from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
 
 

@@ -200,8 +200,7 @@ class BaseLightning(pl.LightningModule):
         _ = self._calculate_loss(batch, mode="test")
 
     def _calculate_loss(self, batch, mode="train"):
-        y_hat, y = batch
-        loss = self.criterion(y_hat, y)
+        loss = self.criterion(batch)
         self.log("%s_loss" % mode, loss)
         return loss
 
