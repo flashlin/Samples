@@ -149,6 +149,13 @@ class BaseLightning(pl.LightningModule):
         self.val_loader = val_loader
         self.test_loader = val_loader
 
+def load_model(model_type, checkpoint_path="./output", train_task_name="TrainTask"):
+    pretrained_filename = os.path.join(checkpoint_path, f"{train_task_name}.ckpt")
+    if os.path.isfile(pretrained_filename):
+        info("Found pretrained model, loading...")
+        return model_type.load_from_checkpoint(pretrained_filename)
+    return None
+
 def start_train(model_type, device=None,
                 checkpoint_path="./output",
                 train_task_name="TrainTask",
@@ -161,7 +168,7 @@ def start_train(model_type, device=None,
     trainer = pl.Trainer(
         default_root_dir=root_dir,
         #callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
-        callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="train_loss")],
+        callbacks=[ModelCheckpoint(save_weights_only=True, mode="min", monitor="train_loss")],
         gpus=1 if str(device).startswith("cuda") else 0,
         max_epochs=max_epochs,
         gradient_clip_val=5,
