@@ -1,9 +1,9 @@
 import math
 import os
-
 import numpy as np
 import pytorch_lightning as pl
 import torch
+import torch.nn.functional as F
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn as nn, optim as optim
 from sklearn.metrics import accuracy_score
@@ -55,6 +55,76 @@ class Embeddings(nn.Module):
         a = self.lut(x) * math.sqrt(self.d_model)
         return a
 
+def scaled_dot_product(q, k, v, mask=None):
+    """
+    所謂的注意力機制（attention function）概念上就是拿一個查詢（query）去跟一組 key-values 做運算，最後產生一個輸出。
+    只是我們會利用矩陣運算同時讓多個查詢跟一組 key-values 做運算，最大化計算效率。
+    :param q:
+    :param k:
+    :param v:
+    :param mask:
+    :return:
+        values: 代表注意力機制的結果
+        attention: 代表句子 q 裡頭每個子詞對句子 k 裡頭的每個子詞的注意權重
+    """
+    d_k = q.size()[-1]
+    attn_logits = torch.matmul(q, k.transpose(-2, -1))
+    attn_logits = attn_logits / math.sqrt(d_k)
+    if mask is not None:
+        attn_logits = attn_logits.masked_fill(mask == 0, -9e15)
+    attention = F.softmax(attn_logits, dim=-1)
+    values = torch.matmul(attention, v)
+    return values, attention
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, input_dim, embed_dim, num_heads):
+        super().__init__()
+        assert embed_dim % num_heads == 0, "Embedding dimension must be 0 modulo number of heads."
+
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.head_dim = embed_dim // num_heads
+
+        # Stack all weight matrices 1...h together for efficiency
+        # Note that in many implementations you see "bias=False" which is optional
+        self.qkv_proj = nn.Linear(input_dim, 3*embed_dim)
+        self.o_proj = nn.Linear(embed_dim, embed_dim)
+
+        self._reset_parameters()
+
+    def _reset_parameters(self):
+        # Original Transformer initialization, see PyTorch documentation
+        nn.init.xavier_uniform_(self.qkv_proj.weight)
+        self.qkv_proj.bias.data.fill_(0)
+        nn.init.xavier_uniform_(self.o_proj.weight)
+        self.o_proj.bias.data.fill_(0)
+
+    def forward(self, x, mask=None, return_attention=False):
+        """
+        :param x:
+        :param mask:
+        :param return_attention:
+        :return: (batch_size, seq_len_q, d_model)
+        """
+        batch_size, seq_length, _ = x.size()
+        qkv = self.qkv_proj(x)
+
+        # Separate Q, K, V from linear output
+        qkv = qkv.reshape(batch_size, seq_length, self.num_heads, 3*self.head_dim)
+        qkv = qkv.permute(0, 2, 1, 3) # [Batch, Head, SeqLen, Dims]
+        q, k, v = qkv.chunk(3, dim=-1)
+
+        # Determine value outputs
+        values, attention = scaled_dot_product(q, k, v, mask=mask)
+        values = values.permute(0, 2, 1, 3) # [Batch, SeqLen, Head, Dims]
+        values = values.reshape(batch_size, seq_length, self.embed_dim)
+        o = self.o_proj(values)
+
+        if return_attention:
+            return o, attention
+        else:
+            return o
+
 class CosineWarmupScheduler(optim.lr_scheduler._LRScheduler):
     def __init__(self, optimizer, warmup, max_iters):
         self.warmup = warmup
@@ -96,8 +166,8 @@ class BaseLightning(pl.LightningModule):
         self.val_loader = None
         self.test_loader = None
 
-    def forward(self, batch):
-        output = self.model(batch)
+    def forward(self, batch, **kwargs):
+        output = self.model(batch, **kwargs)
         return output
 
     def configure_optimizers(self):
@@ -113,20 +183,21 @@ class BaseLightning(pl.LightningModule):
         self.lr_scheduler.step()  # Step per iteration
 
     def training_step(self, batch, batch_idx):
+        info(f" {batch_idx=}")
         x, y = batch
         y_hat = self(x)
         loss = self._calculate_loss((y_hat, y), mode="train")
         return loss
 
-    def validation_step(self, batch, batch_idx):
-        x, y = batch
-        y_hat = self(x)
-        _ = self._calculate_loss((y_hat, y), mode="val")
+    def validation_step(self, batch, batch_idx, **kwargs):
+        # x, y = batch
+        # y_hat = self(x)
+        _ = self._calculate_loss(batch, mode="val")
 
     def test_step(self, batch, batch_idx):
-        x, y = batch
-        y_hat = self(x)
-        _ = self._calculate_loss((y_hat, y), mode="test")
+        # x, y = batch
+        # y_hat = self(x)
+        _ = self._calculate_loss(batch, mode="test")
 
     def _calculate_loss(self, batch, mode="train"):
         y_hat, y = batch
