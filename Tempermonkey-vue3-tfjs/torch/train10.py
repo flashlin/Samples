@@ -5,9 +5,9 @@ import torch.nn.functional as F
 
 from common.io import info
 from data import pad_sequence
-from lit import BaseLightning, start_train, PositionalEncoding
+from lit import BaseLightning, start_train, PositionalEncoding, load_model
 from prepare7 import Linq2TSqlDataset
-from utils.linq_tokenizr import LINQ_VOCAB_SIZE
+from utils.linq_tokenizr import LINQ_VOCAB_SIZE, linq_encode
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 # .unsqueeze
@@ -110,6 +110,21 @@ class LitTranslator(BaseLightning):
         self.log("%s_loss" % mode, self.loss)
         return self.loss
 
+    def infer(self, src, max_length):
+        model = self.model.eval()
+        tgt = torch.LongTensor([[0]])
+        for i in range(max_length):
+            out = model(src, tgt)
+            # 预测结果，因为只需要看最后一个词，所以取`out[:, -1]`
+            predict = model.predictor(out[:, -1])
+            # 找出最大值的index
+            y = torch.argmax(predict, dim=1)
+            # 和之前的预测结果拼接到一起
+            tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
+            # 如果為 <eos> 說明預測結束，跳出循環
+            if y == 2:
+                break
+        print(tgt)
 
 
 def main():
@@ -123,5 +138,13 @@ def main():
                 tgt_len=100,
                 tgt_vocab_size = TSQL_VOCAB_SIZE)
 
+def test():
+    s1 = "from tb3 in account select tb3.name"
+    v1 = linq_encode(s1)
+    model = load_model(LitTranslator)
+    v2 = model.infer(v1, 500)
+    print(f" {v2=}")
+
 if __name__ == "__main__":
     main()
+    #test()
