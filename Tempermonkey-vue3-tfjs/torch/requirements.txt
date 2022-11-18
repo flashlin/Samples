@@ -2,3 +2,7 @@
 #torchtext==0.13.1
 pydot
 pytorch-lightning
+tensorboard
+#pytorch-transformers
+#transformers
+tensorflow

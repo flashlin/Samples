@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -56,6 +57,13 @@ class LitSeq2Seq(BaseLightning):
 
     def _compute_accuracy(self, y_hat, y):
         return accuracy(y_hat, y)
+
+    def infer(self):
+        # pred = model(seq_in)
+        pred = 1.0
+        # pred = to_prob(F.softmax(pred).data[0].numpy())  # softmax 後轉成機率分佈
+        # char = np.random.choice(chars, p=pred)  # 依機率分佈選字
+        pass
 
 
 def main():

@@ -125,8 +125,8 @@ class BaseLightning(pl.LightningModule):
         self.val_loader = None
         self.test_loader = None
 
-    def forward(self, x):
-        output = self.model(x)
+    def forward(self, batch):
+        output = self.model(batch)
         return output
 
     def configure_optimizers(self):
@@ -171,3 +171,9 @@ class BaseLightning(pl.LightningModule):
 
     def test_dataloader(self):
         return self.test_loader
+
+    def init_dataloader(self, dataset, batch_size):
+        train_loader, val_loader = dataset.create_dataloader(batch_size)
+        self.train_loader = train_loader
+        self.val_loader = val_loader
+        self.test_loader = val_loader

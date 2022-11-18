@@ -5,7 +5,7 @@ from common.io import info
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from data import pad_list
+from data import pad_sequence
 from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
 
 
@@ -22,10 +22,10 @@ def convert_translation_file_to_csv():
     with open(r"./output/linq-sample.csv", "w", encoding='utf-8') as csv:
         csv.write('linq\ttsql\n')
         for linq_values, tsql_values in file_iter:
-            linq_values_padded = pad_list(linq_values, 0, src_max_length)
+            linq_values_padded = pad_sequence(linq_values, 0, src_max_length)
             csv.write(','.join(str(x) for x in linq_values_padded))
             csv.write('\t')
-            tsql_values_padded = pad_list(tsql_values, 0, tgt_max_length)
+            tsql_values_padded = pad_sequence(tsql_values, 0, tgt_max_length)
             csv.write(','.join(str(x) for x in tsql_values_padded))
             csv.write('\n')
 

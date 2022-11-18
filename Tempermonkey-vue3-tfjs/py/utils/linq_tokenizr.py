@@ -3,24 +3,8 @@ from typing import Final
 from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_number, \
     read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_to_lengths, \
     read_keyword_fn, read_spaces, convert_str_list_to_char2index_map, convert_str_list_to_index2char_map, \
-    fixed_marks, tokens_to_index_list, read_double_quote_string, index_list_to_string
+    fixed_marks, tokens_to_index_list, read_double_quote_string, index_list_to_string, LINQ_Keywords, VOCAB_MARKS
 
-LINQ_Keywords = sort_desc([
-    "select",
-    "from",
-    "equals",
-    "group",
-    "by",
-    "into",
-    "orderby",
-    "join",
-    "in",
-    "new",
-    "DefaultIfEmpty",
-    "Distinct",
-    "ToList",
-    "ToArray"
-])
 LINQ_Keywords_Lengths = group_to_lengths(LINQ_Keywords)
 LINQ_Symbols: Final[list[str]] = ['.', ',', '(', ')', '{', '}']
 LINQ_Operators: Final[list[str]] = sort_desc(['>=', '<=', '!=', '=', '+', '-', '*', '/', '%'])
@@ -60,6 +44,7 @@ def linq_tokenize(stream) -> list[Token]:
 
 
 LINQ_Marks = fixed_marks + LINQ_Keywords
+# LINQ_Marks = VOCAB_MARKS
 LINQ_Char2Index_Dict = convert_str_list_to_char2index_map(LINQ_Marks)
 LINQ_Index2Char_Dict = convert_str_list_to_index2char_map(LINQ_Marks)
 LINQ_VOCAB_SIZE = len(LINQ_Marks)
