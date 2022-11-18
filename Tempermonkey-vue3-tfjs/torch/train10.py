@@ -107,6 +107,7 @@ class LitTranslator(BaseLightning):
     #     return out
 
     def _calculate_loss(self, batch, mode="train"):
+        self.log("%s_loss" % mode, self.loss)
         return self.loss
 
 
@@ -116,6 +117,7 @@ def main():
     # start_train(LitSeq2Seq, device='cpu', src_vocab_size=LINQ_VOCAB_SIZE, tgt_vocab_size=TSQL_VOCAB_SIZE)
     info(f" {LINQ_VOCAB_SIZE=} {TSQL_VOCAB_SIZE=}")
     start_train(LitTranslator, device='cpu',
+                max_epochs=100,
                 #src_len=277,
                 #src_vocab_size = LINQ_VOCAB_SIZE,
                 tgt_len=100,

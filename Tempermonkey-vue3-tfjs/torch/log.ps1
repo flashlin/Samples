@@ -1,2 +1,2 @@
 # pip install tensorboard
-tensorboard --logdir=output/ReverseTask
+tensorboard --logdir=output/TrainTask
