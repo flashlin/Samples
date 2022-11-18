@@ -5,7 +5,7 @@ from torch import nn
 import torch.nn.functional as F
 
 from common.io import info
-from data import pad_sequence
+from preprocess_data import pad_sequence
 from lit import BaseLightning, start_train, PositionalEncoding, load_model
 from prepare7 import Linq2TSqlDataset
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE, linq_encode

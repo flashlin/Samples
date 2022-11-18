@@ -1,15 +1,12 @@
-import numpy as np
-import pandas as pd
 import torch
-from pytorch_lightning import Trainer
 from torch import nn, optim
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader, random_split
 from torch.nn.utils.rnn import pad_sequence
 
 from common.io import info
-from lit import BaseLightning, start_train, PositionalEncoding, load_model, CosineWarmupScheduler, MultiHeadAttention
-from utils.linq_tokenizr import LINQ_VOCAB_SIZE, linq_encode
+from preprocess_data import Seq2SeqDataset
+from lit import BaseLightning, start_train, PositionalEncoding, CosineWarmupScheduler, MultiHeadAttention
+from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 
@@ -77,46 +74,6 @@ class TransformerEncoder(nn.Module):
             x = l(x)
         return attention_maps
 
-
-def comma_str_to_array(df):
-    return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
-
-
-def pad_collate(batch):
-    (xx, yy) = zip(*batch)
-    x_lens = [len(x) for x in xx]
-    y_lens = [len(y) for y in yy]
-    xx_pad = pad_sequence(xx, batch_first=True, padding_value=0)
-    yy_pad = pad_sequence(yy, batch_first=True, padding_value=0)
-    return xx_pad, yy_pad, x_lens, y_lens
-
-
-def pad_data_loader(dataset, batch_size=32, **kwargs):
-    return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
-
-
-class Seq2SeqDataset(Dataset):
-    def __init__(self, csv_file_path):
-        self.df = df = pd.read_csv(csv_file_path, sep='\t')
-        self.df_features = comma_str_to_array(df['features'])
-        self.df_labels = comma_str_to_array(df['labels'])
-        self.features = torch.tensor(self.df_features, dtype=torch.long)
-        self.labels = torch.tensor(self.df_labels, dtype=torch.long)
-
-    def __len__(self):
-        return len(self.features)
-
-    # This returns given an index the i-th sample and label
-    def __getitem__(self, idx):
-        return self.features[idx], self.labels[idx]
-
-    def create_dataloader(self, batch_size=32):
-        train_size = int(0.8 * len(self))
-        val_size = len(self) - train_size
-        train_data, val_data = random_split(self, [train_size, val_size])
-        train_loader = pad_data_loader(train_data, batch_size=batch_size)
-        val_loader = pad_data_loader(val_data, batch_size=batch_size)
-        return train_loader, val_loader
 
 class TransformerPredictor(BaseLightning):
     def __init__(self, input_dim, num_classes,

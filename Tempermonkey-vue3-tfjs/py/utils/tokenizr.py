@@ -2,6 +2,10 @@ from functools import reduce
 from typing import TypeVar, Generic
 from itertools import groupby
 
+BOS_TOKEN = '<bos>'
+EOS_TOKEN = '<eos>'
+PAD_TOKEN = '<pad>'
+
 class Token:
     Undefined = 'undefined'
     String = 'string'
@@ -355,10 +359,10 @@ def token_to_index(char2index_dict, token: Token):
 
 
 def tokens_to_index_list(char2index_dict, token_list: list[Token]):
-    values = [char2index_dict['<begin>']]
+    values = [char2index_dict[BOS_TOKEN]]
     for token in token_list:
         values += token_to_index(char2index_dict, token)
-    values.append(char2index_dict['<end>'])
+    values.append(char2index_dict[EOS_TOKEN])
     return values
 
 def read_until_zero(index2char_dict, iterator):
@@ -401,8 +405,9 @@ letters = [ch for ch in
            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ \n\r\t"]
 fixed_marks = [
     "",
-    "<begin>",
-    "<end>",
+    BOS_TOKEN,
+    EOS_TOKEN,
+    PAD_TOKEN
 ] + letters + ReservedWords
 fixed_length = len(fixed_marks)
 
