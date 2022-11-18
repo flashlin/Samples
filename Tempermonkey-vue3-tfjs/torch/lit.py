@@ -54,46 +54,6 @@ class Embeddings(nn.Module):
         a = self.lut(x) * math.sqrt(self.d_model)
         return a
 
-
-def start_train(model_type, device=None, checkpoint_path="./output", **kwargs):
-    if device is None:
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    root_dir = os.path.join(checkpoint_path, "ReverseTask")
-    os.makedirs(root_dir, exist_ok=True)
-    trainer = pl.Trainer(
-        default_root_dir=root_dir,
-        callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
-        gpus=1 if str(device).startswith("cuda") else 0,
-        max_epochs=10,
-        gradient_clip_val=5,
-    )
-    trainer.logger._default_hp_metric = None  # Optional logging argument that we don't need
-
-    # Check whether pretrained model exists. If yes, load it and skip training
-    pretrained_filename = os.path.join(checkpoint_path, "ReverseTask.ckpt")
-    if os.path.isfile(pretrained_filename):
-        print("Found pretrained model, loading...")
-        model = model_type.load_from_checkpoint(pretrained_filename)
-    else:
-        # model = model_type(max_iters=trainer.max_epochs * len(train_loader), **kwargs)
-        model = model_type(**kwargs)
-        train_loader = model.train_dataloader()
-        val_loader = model.val_dataloader()
-        # trainer.fit(model, train_loader, val_loader)
-        # for batch, idx in train_loader:
-        #     info(f" {batch=}")
-        trainer.fit(model)
-
-    # Test best model on validation and test set
-    test_loader = model.test_dataloader()
-    val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
-    test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
-    # result = {"test_acc": test_result[0]["test_acc"], "val_acc": val_result[0]["test_acc"]}
-
-    model = model.to(device)
-    return model #, result
-
-
 class CosineWarmupScheduler(optim.lr_scheduler._LRScheduler):
     def __init__(self, optimizer, warmup, max_iters):
         self.warmup = warmup
@@ -177,3 +137,43 @@ class BaseLightning(pl.LightningModule):
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.test_loader = val_loader
+
+def start_train(model_type, device=None,
+                checkpoint_path="./output",
+                train_task_name="TrainTask",
+                max_epochs=10,
+                **kwargs):
+    if device is None:
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    root_dir = os.path.join(checkpoint_path, train_task_name)
+    os.makedirs(root_dir, exist_ok=True)
+    trainer = pl.Trainer(
+        default_root_dir=root_dir,
+        callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
+        gpus=1 if str(device).startswith("cuda") else 0,
+        max_epochs=max_epochs,
+        gradient_clip_val=5,
+    )
+    trainer.logger._default_hp_metric = None  # Optional logging argument that we don't need
+
+    # Check whether pretrained model exists. If yes, load it and skip training
+    pretrained_filename = os.path.join(checkpoint_path, f"{train_task_name}.ckpt")
+    if os.path.isfile(pretrained_filename):
+        info("Found pretrained model, loading...")
+        model = model_type.load_from_checkpoint(pretrained_filename)
+    else:
+        model = model_type(**kwargs)
+        train_loader = model.train_dataloader()
+        val_loader = model.val_dataloader()
+        # trainer.fit(model, train_loader, val_loader)
+        # for batch, idx in train_loader:
+        #     info(f" {batch=}")
+        trainer.fit(model)
+
+    # Test best model on validation and test set
+    test_loader = model.test_dataloader()
+    val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
+    test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
+    # result = {"test_acc": test_result[0]["test_acc"], "val_acc": val_result[0]["test_acc"]}
+    model = model.to(device)
+    return model #, result
