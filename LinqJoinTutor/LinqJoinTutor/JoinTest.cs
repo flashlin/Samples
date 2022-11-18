@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -23,8 +25,36 @@ namespace LinqJoinTutor
 			var data = q1.ToArray();
 		}
 
+		[Fact]
+		public void JoinOuter1()
+		{
+			using var mydb = new MyDbContext();
+			var q1 = from input in mydb.Customers
+				join db in mydb.Houses on input.Id equals db.CustomerId into ps
+				from dbb in ps.DefaultIfEmpty(new House { Address = "" })
+				select new
+				{
+					inputProductGuid = input.Id,
+					inputProductName = input.Name,
+					dbProductGuid = dbb.Address,
+				};
+			var sql = q1.ToQueryString();
+		}
+		[Fact]
+		public void JoinOuter2()
+		{
+			using var mydb = new MyDbContext();
+			var q1 = from input in mydb.Customers
+						join db in mydb.Houses on input.Id equals db.CustomerId
+						select new
+						{
+							inputProductGuid = input.Id,
+							inputProductName = input.Name,
+							dbProductGuid = db.Address
+						};
+			var sql = q1.ToQueryString();
+		}
 	}
-
 
 	public class JoinTest
 	{
