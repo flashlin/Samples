@@ -11,6 +11,7 @@ public class MyDbContext : DbContext
 	}
 
 	public DbSet<Customer> Customers { get; set; }
+	public DbSet<House> Houses { get; set; }
 
 	public static DbContextOptions<MyDbContext> DbOptions()
 	{
