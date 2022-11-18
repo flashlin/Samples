@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 import torch
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn as nn, optim as optim
-
+from sklearn.metrics import accuracy_score
 from common.io import info
 
 
@@ -70,9 +70,19 @@ class CosineWarmupScheduler(optim.lr_scheduler._LRScheduler):
             lr_factor *= epoch * 1.0 / self.warmup
         return lr_factor
 
+
+def flat_accuracy(preds, labels):
+    # pred_flat = np.argmax(preds, axis=1).flatten()
+    seq_len = preds.size(1)
+    pred_seq = torch.max(preds, 1)[1]
+    pred_flat = pred_seq
+    labels_flat = labels.flatten()
+    return np.sum(pred_flat == labels_flat) / len(labels_flat)
+
 class BaseLightning(pl.LightningModule):
     def __init__(self, device=None):
         super().__init__()
+        self.batch_size = 0
         self._device = device
         if device is None:
             self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -134,6 +144,7 @@ class BaseLightning(pl.LightningModule):
 
     def init_dataloader(self, dataset, batch_size):
         train_loader, val_loader = dataset.create_dataloader(batch_size)
+        self.batch_size = batch_size
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.test_loader = val_loader
@@ -149,7 +160,8 @@ def start_train(model_type, device=None,
     os.makedirs(root_dir, exist_ok=True)
     trainer = pl.Trainer(
         default_root_dir=root_dir,
-        callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
+        #callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
+        callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="train_loss")],
         gpus=1 if str(device).startswith("cuda") else 0,
         max_epochs=max_epochs,
         gradient_clip_val=5,
