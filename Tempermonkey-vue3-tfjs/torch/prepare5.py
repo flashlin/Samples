@@ -3,16 +3,16 @@ import torch
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from data import pad_list
+from data import pad_sequence
 from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
 
 
 def convert_seq_to_target(src_values, tgt_values, max_input_seq_length, eos_value: int=2):
     src_length = len(src_values)
     if src_length < max_input_seq_length:
-        src_values = pad_list(src_values, eos_value, max_input_seq_length)
+        src_values = pad_sequence(src_values, eos_value, max_input_seq_length)
         src_length = max_input_seq_length
-    tgt_values = pad_list(tgt_values, eos_value, max_input_seq_length)
+    tgt_values = pad_sequence(tgt_values, eos_value, max_input_seq_length)
     data_x = []
     data_y = []
     for i in range(0, src_length - max_input_seq_length):

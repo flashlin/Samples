@@ -3,16 +3,16 @@ import torch
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from data import pad_list
+from data import pad_sequence
 from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
 
 
 def convert_seq_to_target(src_values, tgt_values, max_input_seq_length, eos_value: int=2):
     src_length = len(src_values)
     if src_length < max_input_seq_length:
-        src_values = pad_list(src_values, eos_value, max_input_seq_length)
+        src_values = pad_sequence(src_values, eos_value, max_input_seq_length)
         src_length = max_input_seq_length
-    tgt_values = pad_list(tgt_values, eos_value, max_input_seq_length)
+    tgt_values = pad_sequence(tgt_values, eos_value, max_input_seq_length)
     data_x = []
     data_y = []
     for i in range(0, src_length - max_input_seq_length):
@@ -28,15 +28,26 @@ def convert_translation_file_to_csv(txt_file_path: str="../data/linq-sample.txt"
                                     max_input_seq_length: int=100,
                                     eos_value: int=2):
     file_iter = Linq2TSqlTranslationFileIterator(txt_file_path)
+    src_max_length = 0
+    tgt_max_length = 0
+    for linq_values, tsql_values in file_iter:
+        src_max_length = max(len(linq_values), src_max_length)
+        tgt_max_length = max(len(tsql_values), tgt_max_length)
+    max_length = max(src_max_length, tgt_max_length)
+    file_iter = Linq2TSqlTranslationFileIterator(txt_file_path)
     with open(output_file_path, "w", encoding='utf-8') as csv:
-        csv.write('features\tlabel\n')
+        csv.write('features\tlabels\n')
         for src_values, tgt_values in file_iter:
-            ds_features, ds_label = convert_seq_to_target(src_values, tgt_values, max_input_seq_length, eos_value=eos_value)
-            for features, label in zip(ds_features, ds_label):
-                csv.write(','.join(str(x) for x in features))
-                csv.write('\t')
-                csv.write(str(label))
-                csv.write('\n')
+            src_values = pad_sequence(src_values, 0, max_length)
+            csv.write(int_list_to_str(src_values))
+            csv.write('\t')
+            tgt_values = pad_sequence(tgt_values, 0, max_length)
+            csv.write(int_list_to_str(tgt_values))
+            csv.write('\n')
+    print(f" {max_length=}")
+
+def int_list_to_str(alist):
+    return ','.join([str(n) for n in alist])
 
 def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
@@ -45,16 +56,16 @@ class Linq2TSqlDataset(Dataset):
     def __init__(self, csv_file_path):
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
         self.df_features = comma_str_to_array(df['features'])
-        self.df_label = df['label']
+        self.df_labels = comma_str_to_array(df['labels'])
         self.features = torch.tensor(self.df_features).long()
-        self.label = torch.tensor(self.df_label).long()
+        self.labels = torch.tensor(self.df_labels).long()
 
     def __len__(self):
         return len(self.features)
 
     # This returns given an index the i-th sample and label
     def __getitem__(self, idx):
-        return self.features[idx], self.label[idx]
+        return self.features[idx], self.labels[idx]
 
     def create_dataloader(self, batch_size=32):
         train_size = int(0.8 * len(self))
