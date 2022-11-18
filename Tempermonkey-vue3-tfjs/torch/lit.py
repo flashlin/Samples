@@ -8,6 +8,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn as nn, optim as optim
 from sklearn.metrics import accuracy_score
 from common.io import info
+from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 
 class PositionalEncoding(nn.Module):
@@ -153,7 +154,7 @@ def load_model(model_type, checkpoint_path="./output", train_task_name="TrainTas
     pretrained_filename = os.path.join(checkpoint_path, f"{train_task_name}.ckpt")
     if os.path.isfile(pretrained_filename):
         info("Found pretrained model, loading...")
-        return model_type.load_from_checkpoint(pretrained_filename)
+        return model_type.load_from_checkpoint(pretrained_filename, tgt_len=100, tgt_vocab_size=TSQL_VOCAB_SIZE)
     return None
 
 def start_train(model_type, device=None,
