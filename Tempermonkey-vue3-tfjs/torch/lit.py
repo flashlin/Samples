@@ -201,8 +201,8 @@ class BaseLightning(pl.LightningModule):
         self.val_loader = None
         self.test_loader = None
 
-    def forward(self, batch, **kwargs):
-        output = self.model(batch, **kwargs)
+    def forward(self, batch):
+        output = self.model(batch)
         return output
 
     def configure_optimizers(self):
@@ -218,24 +218,17 @@ class BaseLightning(pl.LightningModule):
         self.lr_scheduler.step()  # Step per iteration
 
     def training_step(self, batch, batch_idx):
-        x, y = self._fetch_xy_batch(batch)
-        y_hat = self(x)
-        loss = self._calculate_loss((y_hat, y), mode="train")
+        outputs = self(batch)
+        loss = self._calculate_loss((outputs, batch), mode="train")
         return loss
 
     def validation_step(self, batch, batch_idx, **kwargs):
-        x, y = self._fetch_xy_batch(batch)
-        y_hat = self(x)
-        _ = self._calculate_loss((y_hat, y), mode="val")
+        outputs = self(batch)
+        _ = self._calculate_loss((outputs, batch), mode="val")
 
     def test_step(self, batch, batch_idx):
-        x, y = self._fetch_xy_batch(batch)
-        y_hat = self(x)
-        _ = self._calculate_loss((y_hat, y), mode="test")
-
-    def _fetch_xy_batch(self, batch):
-        x, y = batch
-        return x, y
+        outputs = self(batch)
+        _ = self._calculate_loss((outputs, batch), mode="test")
 
     def _calculate_loss(self, batch, mode="train"):
         loss = self.criterion(batch)

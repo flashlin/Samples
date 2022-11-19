@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader, Dataset, random_split
 
 from common.io import info
 from utils.linq_tokenizr import linq_encode
+from utils.tokenizr import PAD_TOKEN_VALUE
 from utils.tsql_tokenizr import tsql_encode
 
 class TranslationFileIterator:
@@ -39,12 +40,16 @@ def convert_translation_file_to_csv(txt_file_path: str="../data/linq-sample.txt"
 def pad_seq(seq, fill_value, max_length):
     return seq + [fill_value] * (max_length - len(seq))
 
+def pad_array(arr, fill_value, max_length, d_type=np.long):
+    arr_len = len(arr)
+    new_arr = np.pad(arr, (0, max_length - arr_len), 'constant', constant_values=fill_value)
+    return np.array(new_arr, dtype=d_type)
+
 def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
 
 def pad_data_loader(dataset, batch_size=32, **kwargs):
     return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
-
 
 def df_to_values(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.long))
@@ -71,6 +76,55 @@ class Seq2SeqDataset(Dataset):
         train_loader = pad_data_loader(train_data, batch_size=batch_size)
         val_loader = pad_data_loader(val_data, batch_size=batch_size)
         return train_loader, val_loader
+
+
+class TranslationDataset(Dataset):
+    def __init__(self, csv_file_path):
+        self.df = df = pd.read_csv(csv_file_path, sep='\t')
+        self.src = df_to_values(df['src'])
+        self.tgt = df_to_values(df['tgt'])
+
+    def __len__(self):
+        return len(self.src)
+
+    def __getitem__(self, idx):
+        src = self.src[idx]
+        tgt = self.tgt[idx]
+        max_len = max(len(src), len(tgt))
+        enc_input = torch.tensor(pad_array(src[1:-1], PAD_TOKEN_VALUE, max_len), dtype=torch.long)
+        dec_input = torch.tensor(pad_array(tgt[:-1], PAD_TOKEN_VALUE, max_len), dtype=torch.long)
+        dec_output = torch.tensor(pad_array(tgt[1:], PAD_TOKEN_VALUE, max_len), dtype=torch.long)
+        return enc_input, dec_input, dec_output
+
+    def create_dataloader(self, batch_size=32):
+        train_size = int(0.8 * len(self))
+        val_size = len(self) - train_size
+        train_data, val_data = random_split(self, [train_size, val_size])
+        train_loader = TranslationDataset.pad_data_loader(train_data, batch_size=batch_size)
+        # train_loader = DataLoader(train_data, batch_size=batch_size)
+        val_loader = TranslationDataset.pad_data_loader(val_data, batch_size=batch_size)
+        # val_loader = DataLoader(val_data, batch_size=batch_size)
+        return train_loader, val_loader
+
+    @staticmethod
+    def pad_data_loader(dataset, batch_size=32, **kwargs):
+        return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=TranslationDataset.pad_collate, **kwargs)
+
+    @staticmethod
+    def pad_collate(batch):
+        (enc_input, dec_input, dec_output) = zip(*batch)
+        # enc_input_lens = TranslationDataset.get_lens(enc_input)
+        # dec_input_lens = TranslationDataset.get_lens(dec_input)
+        # dec_input_lens = TranslationDataset.get_lens(dec_output)
+        enc_input_pad = torch.nn.utils.rnn.pad_sequence(enc_input, batch_first=True, padding_value=PAD_TOKEN_VALUE)
+        dec_input_pad = torch.nn.utils.rnn.pad_sequence(dec_input, batch_first=True, padding_value=PAD_TOKEN_VALUE)
+        dec_output_pad = torch.nn.utils.rnn.pad_sequence(dec_output, batch_first=True, padding_value=PAD_TOKEN_VALUE)
+        return enc_input_pad, dec_input_pad, dec_output_pad
+
+    @staticmethod
+    def get_lens(batch):
+        lens = [len(row) for row in batch]
+        return lens
 
 
 def pad_collate(batch):
