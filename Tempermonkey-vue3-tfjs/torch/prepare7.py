@@ -3,10 +3,8 @@ import torch
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from common.io import info
 from preprocess_data import pad_sequence
-from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
-
+from utils.linq_translation_data import convert_translation_file_to_csv
 
 def convert_seq_to_target(src_values, tgt_values, max_input_seq_length, eos_value: int=2):
     src_length = len(src_values)
@@ -28,33 +26,6 @@ def validate_size(alist, max_index):
     alist = np.array(alist)
     assert (alist <= max_index).all(), "target: {} invalid ".format(alist)
 
-def convert_translation_file_to_csv(txt_file_path: str="../data/linq-sample.txt",
-                                    output_file_path: str="./output/linq-sample.csv",
-                                    max_input_seq_length: int=100,
-                                    eos_value: int=2):
-    file_iter = Linq2TSqlTranslationFileIterator(txt_file_path)
-    src_max_length = 0
-    tgt_max_length = 0
-    for linq_values, tsql_values in file_iter:
-        src_max_length = max(len(linq_values), src_max_length)
-        tgt_max_length = max(len(tsql_values), tgt_max_length)
-    max_length = max(src_max_length, tgt_max_length)
-    file_iter = Linq2TSqlTranslationFileIterator(txt_file_path)
-    with open(output_file_path, "w", encoding='utf-8') as csv:
-        csv.write('features\tlabels\n')
-        for src_values, tgt_values in file_iter:
-            src_values = pad_sequence(src_values, 0, max_length)
-            validate_size(src_values, 122)
-            # info(f" {src_values=}")
-            csv.write(int_list_to_str(src_values))
-            csv.write('\t')
-            tgt_values = pad_sequence(tgt_values, 0, max_length)
-            csv.write(int_list_to_str(tgt_values))
-            csv.write('\n')
-    print(f" {max_length=}")
-
-def int_list_to_str(alist):
-    return ','.join([str(n) for n in alist])
 
 def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))

@@ -42,20 +42,6 @@ def write_train_data(file: str):
     return src_max_seq_length, tgt_max_seq_length
 
 
-
-class Linq2TSqlTranslationFileIterator:
-    def __init__(self, file_path):
-        self.file_path = file_path
-
-    def __iter__(self):
-        with open(self.file_path, "r", encoding='UTF-8') as f:
-            for idx, line in enumerate(f):
-                if idx % 2 == 0:
-                    linq_values = linq_encode(line)
-                else:
-                    sql_values = tsql_encode(line)
-                    yield linq_values, sql_values
-
 def flatten(l):
     return [item for sublist in l for item in sublist]
 
@@ -74,6 +60,5 @@ def write_tokens_data(file: str):
                 sql_tokens = tsql_tokenize(line)
                 tokens = map_tokens(sql_tokens)
                 csv.write(tokens)
-
 
 

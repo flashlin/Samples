@@ -21,7 +21,7 @@ class PositionalEncoding(nn.Module):
     """
 
     def __init__(self, d_model, dropout=0.1, max_len=5000):
-        super(PositionalEncoding, self).__init__()
+        super().__init__()
         self.dropout = nn.Dropout(p=dropout)
 
         pe = torch.zeros(max_len, d_model)
@@ -37,6 +37,40 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         x = x + self.pe[:x.size(0), :]
+        return self.dropout(x)
+
+
+class PositionalEncoding2(nn.Module):
+    def __init__(self, d_model, dropout=0.1, max_len=5000):
+        super().__init__()
+        self.dropout = nn.Dropout(p=dropout)
+        pe = torch.zeros(max_len, d_model)
+        # 初始化一个tensor [[0, 1, 2, 3, ...]]
+        position = torch.arange(0, max_len).unsqueeze(1)
+        # 这里就是sin和cos括号中的内容，通过e和ln进行了变换
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2) * -(math.log(10000.0) / d_model)
+        )
+        # 计算PE(pos, 2i)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        # 计算PE(pos, 2i+1)
+        # pe[:, 1::2] = torch.cos(position * div_term)
+        if d_model % 2 != 0:
+            pe[:, 1::2] = torch.cos(position * div_term)[:, 0:-1]
+        else:
+            pe[:, 1::2] = torch.cos(position * div_term)
+
+        # 为了方便计算，在最外面在unsqueeze出一个batch
+        pe = pe.unsqueeze(0)
+        # 如果一個參數不參與梯度下降，但又希望保存 model 的时候將其保存下来
+        # 這個時候就可以用 register_buffer
+        self.register_buffer("pe", pe)
+
+    def forward(self, x):
+        """
+        x 為 embedding 後的 inputs，例如(1, 7, 128)，batch size:1, 單字: 7, 單詞維度 128
+        """
+        x = x + self.pe[:, : x.size(1)].requires_grad_(False)
         return self.dropout(x)
 
 
@@ -183,21 +217,24 @@ class BaseLightning(pl.LightningModule):
         self.lr_scheduler.step()  # Step per iteration
 
     def training_step(self, batch, batch_idx):
-        info(f" {batch_idx=}")
-        x, y = batch
+        x, y = self._fetch_xy_batch(batch)
         y_hat = self(x)
         loss = self._calculate_loss((y_hat, y), mode="train")
         return loss
 
     def validation_step(self, batch, batch_idx, **kwargs):
-        # x, y = batch
-        # y_hat = self(x)
-        _ = self._calculate_loss(batch, mode="val")
+        x, y = self._fetch_xy_batch(batch)
+        y_hat = self(x)
+        _ = self._calculate_loss((y_hat, y), mode="val")
 
     def test_step(self, batch, batch_idx):
-        # x, y = batch
-        # y_hat = self(x)
-        _ = self._calculate_loss(batch, mode="test")
+        x, y = self._fetch_xy_batch(batch)
+        y_hat = self(x)
+        _ = self._calculate_loss((y_hat, y), mode="test")
+
+    def _fetch_xy_batch(self, batch):
+        x, y = batch
+        return x, y
 
     def _calculate_loss(self, batch, mode="train"):
         loss = self.criterion(batch)
@@ -250,15 +287,14 @@ def start_train(model_type, device=None,
     pretrained_filename = os.path.join(checkpoint_path, f"{train_task_name}.ckpt")
     if os.path.isfile(pretrained_filename):
         info("Found pretrained model, loading...")
-        model = model_type.load_from_checkpoint(pretrained_filename)
+        model = model_type.load_from_checkpoint(pretrained_filename, **kwargs)
     else:
         model = model_type(**kwargs)
-        train_loader = model.train_dataloader()
-        val_loader = model.val_dataloader()
-        # trainer.fit(model, train_loader, val_loader)
-        # for batch, idx in train_loader:
-        #     info(f" {batch=}")
-        trainer.fit(model)
+        # train_loader = model.train_dataloader()
+
+    val_loader = model.val_dataloader()
+    # trainer.fit(model, train_loader, val_loader)
+    trainer.fit(model)
 
     # Test best model on validation and test set
     test_loader = model.test_dataloader()

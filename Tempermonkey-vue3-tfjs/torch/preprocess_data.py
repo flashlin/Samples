@@ -4,33 +4,65 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset, random_split
 
+from common.io import info
+from utils.linq_tokenizr import linq_encode
+from utils.tsql_tokenizr import tsql_encode
 
-def pad_sequence(l, fill_value, max_length):
-    return l + [fill_value] * (max_length - len(l))
+class TranslationFileIterator:
+    def __init__(self, file_path):
+        self.file_path = file_path
 
+    def __iter__(self):
+        with open(self.file_path, "r", encoding='UTF-8') as f:
+            for idx, line in enumerate(f):
+                if idx % 2 == 0:
+                    linq_values = linq_encode(line)
+                else:
+                    sql_values = tsql_encode(line)
+                    yield linq_values, sql_values
+
+def int_list_to_str(alist):
+    return ','.join([str(n) for n in alist])
+
+def convert_translation_file_to_csv(txt_file_path: str="../data/linq-sample.txt",
+                                    output_file_path: str="./output/linq-sample.csv",
+                                    ):
+    file_iter = TranslationFileIterator(txt_file_path)
+    with open(output_file_path, "w", encoding='utf-8') as csv:
+        csv.write('src\ttgt\n')
+        for src_values, tgt_values in file_iter:
+            csv.write(int_list_to_str(src_values))
+            csv.write('\t')
+            csv.write(int_list_to_str(tgt_values))
+            csv.write('\n')
+
+def pad_seq(seq, fill_value, max_length):
+    return seq + [fill_value] * (max_length - len(seq))
 
 def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
-
 
 def pad_data_loader(dataset, batch_size=32, **kwargs):
     return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
 
 
+def df_to_values(df):
+    return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.long))
+
 class Seq2SeqDataset(Dataset):
     def __init__(self, csv_file_path):
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
-        self.df_features = comma_str_to_array(df['features'])
-        self.df_labels = comma_str_to_array(df['labels'])
-        self.features = torch.tensor(self.df_features, dtype=torch.float32)
-        self.labels = torch.tensor(self.df_labels, dtype=torch.float32)
+        self.features = df_to_values(df['src'])
+        self.labels = df_to_values(df['tgt'])
 
     def __len__(self):
         return len(self.features)
 
     # This returns given an index the i-th sample and label
     def __getitem__(self, idx):
-        return self.features[idx], self.labels[idx]
+        src = torch.tensor(self.features[idx])
+        tgt = torch.tensor(self.labels[idx])
+        return src, tgt
 
     def create_dataloader(self, batch_size=32):
         train_size = int(0.8 * len(self))
