@@ -187,6 +187,7 @@ def flat_accuracy(preds, labels):
 class BaseLightning(pl.LightningModule):
     def __init__(self, device=None):
         super().__init__()
+        self.save_hyperparameters()
         self.batch_size = 0
         self._device = device
         if device is None:
@@ -257,11 +258,12 @@ class BaseLightning(pl.LightningModule):
         self.val_loader = val_loader
         self.test_loader = val_loader
 
-def load_model(model_type, checkpoint_path="./output", train_task_name="TrainTask"):
+def load_model(model_type, checkpoint_path="./output", train_task_name="TrainTask", **kwargs):
     pretrained_filename = os.path.join(checkpoint_path, f"{train_task_name}.ckpt")
     if os.path.isfile(pretrained_filename):
         info("Found pretrained model, loading...")
-        return model_type.load_from_checkpoint(pretrained_filename, tgt_len=100, tgt_vocab_size=TSQL_VOCAB_SIZE)
+        model = model_type(**kwargs)
+        return model.load_from_checkpoint(pretrained_filename)
     return None
 
 def start_train(model_type, device=None,

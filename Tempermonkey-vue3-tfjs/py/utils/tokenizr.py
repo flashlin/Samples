@@ -619,6 +619,8 @@ LINQ_Keywords = sort_desc([
 VOCAB_MARKS = fixed_marks + sort_desc(TSQL_Keywords + LINQ_Keywords)
 VOCAB_SIZE = len(VOCAB_MARKS)
 VOCAB_MARKS_CHAR2INDEX = convert_str_list_to_char2index_map(VOCAB_MARKS)
+BOS_TOKEN_VALUE = VOCAB_MARKS_CHAR2INDEX[BOS_TOKEN]
+EOS_TOKEN_VALUE = VOCAB_MARKS_CHAR2INDEX[EOS_TOKEN]
 PAD_TOKEN_VALUE = VOCAB_MARKS_CHAR2INDEX[PAD_TOKEN]
 
 if __name__ == "__main__":
