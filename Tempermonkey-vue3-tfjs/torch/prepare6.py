@@ -4,7 +4,7 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
 from preprocess_data import pad_sequence
-from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
+from utils.linq_translation_data import TranslationFileIterator
 
 
 def convert_seq_to_target(src_values, tgt_values, max_input_seq_length, eos_value: int=2):
@@ -27,14 +27,14 @@ def convert_translation_file_to_csv(txt_file_path: str="../data/linq-sample.txt"
                                     output_file_path: str="./output/linq-sample.csv",
                                     max_input_seq_length: int=100,
                                     eos_value: int=2):
-    file_iter = Linq2TSqlTranslationFileIterator(txt_file_path)
+    file_iter = TranslationFileIterator(txt_file_path)
     src_max_length = 0
     tgt_max_length = 0
     for linq_values, tsql_values in file_iter:
         src_max_length = max(len(linq_values), src_max_length)
         tgt_max_length = max(len(tsql_values), tgt_max_length)
     max_length = max(src_max_length, tgt_max_length)
-    file_iter = Linq2TSqlTranslationFileIterator(txt_file_path)
+    file_iter = TranslationFileIterator(txt_file_path)
     with open(output_file_path, "w", encoding='utf-8') as csv:
         csv.write('features\tlabels\n')
         for src_values, tgt_values in file_iter:

@@ -6,17 +6,17 @@ import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
 from preprocess_data import pad_sequence
-from utils.linq_translation_data import Linq2TSqlTranslationFileIterator
+from utils.linq_translation_data import TranslationFileIterator
 
 
 def convert_translation_file_to_csv():
-    file_iter = Linq2TSqlTranslationFileIterator("../data/linq-sample.txt")
+    file_iter = TranslationFileIterator("../data/linq-sample.txt")
     src_max_length = 0
     tgt_max_length = 0
     for linq_values, tsql_values in file_iter:
         src_max_length = max(len(linq_values), src_max_length)
         tgt_max_length = max(len(tsql_values), tgt_max_length)
-    file_iter = Linq2TSqlTranslationFileIterator("../data/linq-sample.txt")
+    file_iter = TranslationFileIterator("../data/linq-sample.txt")
     max_length = max(src_max_length, tgt_max_length)
     info(f" translation {src_max_length=} {tgt_max_length=} {max_length=}")
     with open(r"./output/linq-sample.csv", "w", encoding='utf-8') as csv:
