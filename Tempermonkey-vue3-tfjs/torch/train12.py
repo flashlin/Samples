@@ -235,12 +235,14 @@ class Seq2SeqTransformer(nn.Module):
         return logits, enc_self_attns, dec_self_attns, dec_enc_attns
 
     def inference(self, input_text):
-        enc_inputs = torch.tensor(linq_encode(input_text))
+        enc_inputs = torch.tensor([linq_encode(input_text)])
         # greedy_dec_input = self.greedy_decoder(enc_inputs[0].view(1, -1), start_symbol=BOS_TOKEN_VALUE)
         greedy_dec_input = self.greedy_decoder(enc_inputs, start_symbol=BOS_TOKEN_VALUE)
-        predict, _, _, _ = self(enc_inputs[i].view(1, -1), greedy_dec_input)
-        predict = predict.data.max(1, keepdim=True)[1]
-        return predict
+        # predict, _, _, _ = self(enc_inputs[i].view(1, -1), greedy_dec_input)
+        predict, _, _, _ = self(enc_inputs, greedy_dec_input)
+        # predict = predict.data.max(1, keepdim=True)[1]
+        predict = predict.data.max(1, keepdim=False)[1]
+        return predict.tolist()
 
     def greedy_decoder(self, enc_input, start_symbol):
         """
@@ -280,10 +282,14 @@ class LitTranslator(BaseLightning):
 
     def _calculate_loss(self, data, mode="train"):
         (logits, dec_outputs), batch = data
-        info(f" {dec_outputs=}")
         loss = self.criterion(logits, dec_outputs.view(-1))
         self.log("%s_loss" % mode, loss)
         return loss
+
+    def infer(self, text):
+        sql_values = self.model.inference(text)
+        sql = tsql_decode(sql_values)
+        return sql
 
 def prepare_train_data():
     print("convert translation file to csv...")
@@ -292,17 +298,19 @@ def prepare_train_data():
 
 def main():
     start_train(LitTranslator, device='cpu',
-                max_epochs=100,
+                max_epochs=10,
                 src_vocab_size=LINQ_VOCAB_SIZE,
                 tgt_vocab_size=TSQL_VOCAB_SIZE)
 
 def infer():
     model = load_model(LitTranslator, src_vocab_size=LINQ_VOCAB_SIZE, tgt_vocab_size=TSQL_VOCAB_SIZE)
-    sql = model.evaluate('from tb3 in customer select new tb3')
+    text = 'from tb3 in customer select new tb3'
+    sql = model.infer(text)
+    print(text)
     print(sql)
 
 if __name__ == "__main__":
     info(f" {LINQ_VOCAB_SIZE=} {TSQL_VOCAB_SIZE=} {PAD_TOKEN_VALUE=}")
     #prepare_train_data()
-    main()
-    #infer()
+    #main()
+    infer()
