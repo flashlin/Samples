@@ -1,3 +1,4 @@
+import inspect
 import math
 import os
 import numpy as np
@@ -80,6 +81,7 @@ class Embeddings(nn.Module):
 存儲了固定大小的 dictionary 的 word embeddings
 輸入是 indices 來獲取指定 indices 的 word embedding 向量
     """
+
     def __init__(self, vocab: int, d_model: int = 512):
         super().__init__()
         self.lut = nn.Embedding(vocab, d_model)
@@ -88,6 +90,7 @@ class Embeddings(nn.Module):
     def forward(self, x):
         a = self.lut(x) * math.sqrt(self.d_model)
         return a
+
 
 def scaled_dot_product(q, k, v, mask=None):
     """
@@ -110,6 +113,7 @@ def scaled_dot_product(q, k, v, mask=None):
     values = torch.matmul(attention, v)
     return values, attention
 
+
 class MultiHeadAttention(nn.Module):
     def __init__(self, input_dim, embed_dim, num_heads):
         super().__init__()
@@ -121,7 +125,7 @@ class MultiHeadAttention(nn.Module):
 
         # Stack all weight matrices 1...h together for efficiency
         # Note that in many implementations you see "bias=False" which is optional
-        self.qkv_proj = nn.Linear(input_dim, 3*embed_dim)
+        self.qkv_proj = nn.Linear(input_dim, 3 * embed_dim)
         self.o_proj = nn.Linear(embed_dim, embed_dim)
 
         self._reset_parameters()
@@ -144,13 +148,13 @@ class MultiHeadAttention(nn.Module):
         qkv = self.qkv_proj(x)
 
         # Separate Q, K, V from linear output
-        qkv = qkv.reshape(batch_size, seq_length, self.num_heads, 3*self.head_dim)
-        qkv = qkv.permute(0, 2, 1, 3) # [Batch, Head, SeqLen, Dims]
+        qkv = qkv.reshape(batch_size, seq_length, self.num_heads, 3 * self.head_dim)
+        qkv = qkv.permute(0, 2, 1, 3)  # [Batch, Head, SeqLen, Dims]
         q, k, v = qkv.chunk(3, dim=-1)
 
         # Determine value outputs
         values, attention = scaled_dot_product(q, k, v, mask=mask)
-        values = values.permute(0, 2, 1, 3) # [Batch, SeqLen, Head, Dims]
+        values = values.permute(0, 2, 1, 3)  # [Batch, SeqLen, Head, Dims]
         values = values.reshape(batch_size, seq_length, self.embed_dim)
         o = self.o_proj(values)
 
@@ -158,6 +162,7 @@ class MultiHeadAttention(nn.Module):
             return o, attention
         else:
             return o
+
 
 class CosineWarmupScheduler(optim.lr_scheduler._LRScheduler):
     def __init__(self, optimizer, warmup, max_iters):
@@ -183,6 +188,7 @@ def flat_accuracy(preds, labels):
     pred_flat = pred_seq
     labels_flat = labels.flatten()
     return np.sum(pred_flat == labels_flat) / len(labels_flat)
+
 
 class BaseLightning(pl.LightningModule):
     def __init__(self, device=None):
@@ -251,8 +257,10 @@ class BaseLightning(pl.LightningModule):
         self.val_loader = val_loader
         self.test_loader = val_loader
 
-def load_model(model_type, checkpoint_path="./output", train_task_name="TrainTask", **kwargs):
-    pretrained_filename = os.path.join(checkpoint_path, f"{train_task_name}.ckpt")
+
+def load_model(model_type, checkpoint_path="./output", model_name=None, **kwargs):
+    model_name = model_type.__name__ if model_name is None else model_name
+    pretrained_filename = os.path.join(checkpoint_path, f"{model_name}.ckpt")
     if os.path.isfile(pretrained_filename):
         info("Found pretrained model, loading...")
         model = model_type(**kwargs)
@@ -260,20 +268,23 @@ def load_model(model_type, checkpoint_path="./output", train_task_name="TrainTas
         return model.load_from_checkpoint(pretrained_filename).to(device)
     return None
 
-def start_train(model_type, device=None,
+
+def start_train(model_type,
+                model_name=None,
+                device=None,
                 checkpoint_path="./output",
-                train_task_name="TrainTask",
                 max_epochs=10,
                 **kwargs):
+    model_name = model_type.__name__ if model_name is None else model_name
     if device is None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    root_dir = os.path.join(checkpoint_path, train_task_name)
+    root_dir = os.path.join(checkpoint_path, model_name)
     os.makedirs(root_dir, exist_ok=True)
     trainer = pl.Trainer(
         default_root_dir=root_dir,
-        #callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
+        # callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
         callbacks=[ModelCheckpoint(save_weights_only=True, mode="min", monitor="train_loss")],
-        #gpus=1 if str(device).startswith("cuda") else 0,
+        # gpus=1 if str(device).startswith("cuda") else 0,
         accelerator='gpu', devices=1,
         max_epochs=max_epochs,
         gradient_clip_val=5,
@@ -281,7 +292,7 @@ def start_train(model_type, device=None,
     trainer.logger._default_hp_metric = None  # Optional logging argument that we don't need
 
     # Check whether pretrained model exists. If yes, load it and skip training
-    pretrained_filename = os.path.join(checkpoint_path, f"{train_task_name}.ckpt")
+    pretrained_filename = os.path.join(checkpoint_path, f"{model_name}.ckpt")
     if os.path.isfile(pretrained_filename):
         info("Found pretrained model, loading...")
         model = model_type.load_from_checkpoint(pretrained_filename, **kwargs)
@@ -299,4 +310,4 @@ def start_train(model_type, device=None,
     test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
     # result = {"test_acc": test_result[0]["test_acc"], "val_acc": val_result[0]["test_acc"]}
     model = model.to(device)
-    return model #, result
+    return model  # , result
