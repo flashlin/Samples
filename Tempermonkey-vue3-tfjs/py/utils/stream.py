@@ -150,6 +150,92 @@ def read_identifier(stream_iterator: StreamTokenIterator) -> Token:
     return reduce_token_list(Token.Identifier, buff)
 
 
+def read_number(stream_iterator: StreamTokenIterator) -> Token:
+    buff = []
+    while not stream_iterator.is_done():
+        token = stream_iterator.peek()
+        if not token.text.isdigit():
+            break
+        buff.append(token)
+        stream_iterator.next()
+    if len(buff) == 0:
+        return EmptyToken
+    return reduce_token_list(Token.Number, buff)
+
+
+def read_float_number(stream_iterator: StreamTokenIterator) -> Token:
+    integer = read_number(stream_iterator)
+    text = stream_iterator.peek_str(1)
+    if text != '.':
+        return integer
+    dot = stream_iterator.next()
+    scale = read_number(stream_iterator)
+    if scale == EmptyToken:
+        stream_iterator.prev()
+        return EmptyToken
+    return reduce_token_list(Token.Number, [integer, dot, scale])
+
+
+def index_of(arr: list[str], search: str, case_insensitive: bool = False) -> int:
+    search = search.upper() if case_insensitive else search
+    for idx, item in enumerate(arr):
+        item = item.upper() if case_insensitive else item
+        if item == search:
+            return idx
+    return -1
+
+
+def is_spaces(ch: str) -> bool:
+    return index_of([' ', '\r', '\n', '\t'], ch) != -1
+
+
+def read_spaces(stream_iterator: StreamTokenIterator) -> Token:
+    buff = []
+    while not stream_iterator.is_done():
+        token = stream_iterator.peek()
+        if not is_spaces(token.text):
+            break
+        stream_iterator.next()
+        buff.append(token)
+    if len(buff) == 0:
+        return EmptyToken
+    return reduce_token_list(Token.Spaces, buff)
+
+
+def read_single_quote_string(stream_iterator: StreamTokenIterator):
+    if stream_iterator.peek_str(1) != "'":
+        return EmptyToken
+    buff = [stream_iterator.next()]
+    while not stream_iterator.is_done():
+        token = stream_iterator.peek()
+        if token.text == "'":
+            stream_iterator.next()
+            buff.append(token)
+            token2 = stream_iterator.peek()
+            if token2.text == "'":
+                buff.append(token2)
+                stream_iterator.next()
+                continue
+            break
+        stream_iterator.next()
+        buff.append(token)
+    return reduce_token_list(Token.String, buff)
+
+
+def read_double_quote_string(stream_iterator: StreamTokenIterator):
+    if stream_iterator.peek_str(1) != '"':
+        return EmptyToken
+    buff = [stream_iterator.next()]
+    while not stream_iterator.is_done():
+        token = stream_iterator.next()
+        buff.append(token)
+        if token.text == '"':
+            if buff[len(buff) - 1].text == '\\':
+                continue
+            break
+    return reduce_token_list(Token.String, buff)
+
+
 class SeqIterator(Generic[T]):
     def __init__(self, stream: list[T]):
         self.stream = stream
