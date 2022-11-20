@@ -1,6 +1,7 @@
 from itertools import groupby
 
-from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, SeqIterator
+from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, SeqIterator, \
+    read_single_quote_string, index_of
 
 BOS_TOKEN = '<bos>'
 EOS_TOKEN = '<eos>'
@@ -13,81 +14,6 @@ ReservedWords = [
 ]
 
 
-def read_number(stream_iterator: StreamTokenIterator) -> Token:
-    buff = []
-    while not stream_iterator.is_done():
-        token = stream_iterator.peek()
-        if not token.text.isdigit():
-            break
-        buff.append(token)
-        stream_iterator.next()
-    if len(buff) == 0:
-        return EmptyToken
-    return reduce_token_list(Token.Number, buff)
-
-
-def read_float_number(stream_iterator: StreamTokenIterator) -> Token:
-    integer = read_number(stream_iterator)
-    text = stream_iterator.peek_str(1)
-    if text != '.':
-        return integer
-    dot = stream_iterator.next()
-    scale = read_number(stream_iterator)
-    if scale == EmptyToken:
-        stream_iterator.prev()
-        return EmptyToken
-    return reduce_token_list(Token.Number, [integer, dot, scale])
-
-
-def is_spaces(ch: str) -> bool:
-    return index_of([' ', '\r', '\n', '\t' ], ch) != -1
-
-def read_spaces(stream_iterator: StreamTokenIterator) -> Token:
-    buff = []
-    while not stream_iterator.is_done():
-        token = stream_iterator.peek()
-        if not is_spaces(token.text):
-            break
-        stream_iterator.next()
-        buff.append(token)
-    if len(buff) == 0:
-        return EmptyToken
-    return reduce_token_list(Token.Spaces, buff)
-
-def read_single_quote_string(stream_iterator: StreamTokenIterator):
-    if stream_iterator.peek_str(1) != "'":
-        return EmptyToken
-    buff = [stream_iterator.next()]
-    while not stream_iterator.is_done():
-        token = stream_iterator.peek()
-        if token.text == "'":
-            stream_iterator.next()
-            buff.append(token)
-            token2 = stream_iterator.peek()
-            if token2.text == "'":
-                buff.append(token2)
-                stream_iterator.next()
-                continue
-            break
-        stream_iterator.next()
-        buff.append(token)
-    return reduce_token_list(Token.String, buff)
-
-
-def read_double_quote_string(stream_iterator: StreamTokenIterator):
-    if stream_iterator.peek_str(1) != '"':
-        return EmptyToken
-    buff = [stream_iterator.next()]
-    while not stream_iterator.is_done():
-        token = stream_iterator.next()
-        buff.append(token)
-        if token.text == '"':
-            if buff[len(buff)-1].text == '\\':
-                continue
-            break
-    return reduce_token_list(Token.String, buff)
-
-
 def sort_desc(arr: list[str]) -> list[str]:
     arr.sort(key=lambda x: len(x))
     return arr[::-1]
@@ -97,16 +23,10 @@ def group_to_lengths(arr_sorted: list[str]):
     return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
 
 
-def index_of(arr: list[str], search: str, case_insensitive: bool=False) -> int:
-    search = search.upper() if case_insensitive else search
-    for idx, item in enumerate(arr):
-        item = item.upper() if case_insensitive else item
-        if item == search:
-            return idx
-    return -1
-
-
-def peek_str_by_list_contain(stream_iterator: StreamTokenIterator, peek_length_list: list[int], str_list: list[str], case_insensitive: bool=False):
+def peek_str_by_list_contain(stream_iterator: StreamTokenIterator,
+                             peek_length_list: list[int],
+                             str_list: list[str],
+                             case_insensitive: bool = False):
     hint_length = 0
 
     def peek_str(length: int) -> str:
@@ -131,16 +51,19 @@ def read_token_list_by_length(stream_iterator, hint_length):
     return buff
 
 
-def read_keyword_fn(token_type: str, length_list, keyword_list, case_insensitive: bool=False):
+def read_keyword_fn(token_type: str, length_list, keyword_list, case_insensitive: bool = False):
     def fn(stream_iterator):
-        hint_length, keyword_value = peek_str_by_list_contain(stream_iterator, length_list, keyword_list, case_insensitive)
+        hint_length, keyword_value = peek_str_by_list_contain(stream_iterator, length_list, keyword_list,
+                                                              case_insensitive)
         buff = read_token_list_by_length(stream_iterator, hint_length)
         if not hint_length > 0:
             return EmptyToken
         token = reduce_token_list(token_type, buff)
         token.value = keyword_value
         return token
+
     return fn
+
 
 def try_read_any(stream_iterator: StreamTokenIterator, fn_list: list):
     for fn in fn_list:
@@ -149,8 +72,10 @@ def try_read_any(stream_iterator: StreamTokenIterator, fn_list: list):
             return token
     return EmptyToken
 
+
 def is_string_token_type(token_type: str):
     return index_of([Token.Identifier, Token.Number, Token.String], token_type) != -1
+
 
 def token_to_index(char2index_dict, token: Token):
     values = [char2index_dict[token.type]]
@@ -170,6 +95,7 @@ def tokens_to_index_list(char2index_dict, token_list: list[Token]):
     values.append(char2index_dict[EOS_TOKEN])
     return values
 
+
 def read_until_zero(index2char_dict, iterator):
     text = ""
     while not iterator.is_done():
@@ -178,6 +104,7 @@ def read_until_zero(index2char_dict, iterator):
             break
         text += index2char_dict[value]
     return text
+
 
 def index_list_to_string(index2char_dict, value_list: list[int]):
     text = ""
@@ -193,11 +120,13 @@ def index_list_to_string(index2char_dict, value_list: list[int]):
         text += index2char_dict[iterator.next()]
     return text
 
+
 def convert_str_list_to_char2index_map(str_list: list[str]):
     dictionary = {}
     for idx, key in enumerate(str_list):
         dictionary[key] = idx
     return dictionary
+
 
 def convert_str_list_to_index2char_map(str_list: list[str]):
     dictionary = {}
@@ -209,11 +138,11 @@ def convert_str_list_to_index2char_map(str_list: list[str]):
 letters = [ch for ch in
            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`1234567890-=~!@#$%^&*()_+{}|[]\\:\";'<>?,./ \n\r\t"]
 fixed_marks = [
-    "",
-    BOS_TOKEN,
-    EOS_TOKEN,
-    PAD_TOKEN
-] + letters + ReservedWords
+                  "",
+                  BOS_TOKEN,
+                  EOS_TOKEN,
+                  PAD_TOKEN
+              ] + letters + ReservedWords
 fixed_length = len(fixed_marks)
 
 TSQL_Keywords = sort_desc([
@@ -432,5 +361,3 @@ if __name__ == "__main__":
     iterator = StreamTokenIterator("'abc ''123'''")
     token = read_single_quote_string(iterator)
     print(f"{token=}")
-
-
