@@ -1,7 +1,7 @@
 from typing import Final
 
 from utils.tokenizr import try_read_any, sort_desc, group_to_lengths, \
-    read_keyword_fn, convert_str_list_to_char2index_map, convert_str_list_to_index2char_map, \
+    read_keyword_fn, create_char2index_map, convert_str_list_to_index2char_map, \
     fixed_marks, tokens_to_index_list, index_list_to_string, LINQ_Keywords, VOCAB_MARKS
 from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier, read_float_number, read_spaces, \
     read_single_quote_string, read_double_quote_string
@@ -46,7 +46,7 @@ def linq_tokenize(stream) -> list[Token]:
 
 LINQ_Marks = fixed_marks + LINQ_Keywords
 # LINQ_Marks = VOCAB_MARKS
-LINQ_Char2Index_Dict = convert_str_list_to_char2index_map(LINQ_Marks)
+LINQ_Char2Index_Dict = create_char2index_map(LINQ_Marks)
 LINQ_Index2Char_Dict = convert_str_list_to_index2char_map(LINQ_Marks)
 LINQ_VOCAB_SIZE = len(LINQ_Marks)
 
