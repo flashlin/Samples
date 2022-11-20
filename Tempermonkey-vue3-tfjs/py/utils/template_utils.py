@@ -1,7 +1,7 @@
-from utils.stream import StreamIterator, EmptyToken, read_identifier, reduce_token_list, Token
+from utils.stream import StreamIterator, read_identifier, reduce_token_list, Token
 
 
-class Template:
+class TemplateText:
     def __init__(self, text: str):
         self.text = text
         self.dict = {}
@@ -23,12 +23,12 @@ class Template:
     def _parse(self, text):
         read_fn_list = [
             self.read_variable,
-            Template.read_text,
+            TemplateText.read_text,
         ]
         write_fn_list = []
         stream_iterator = StreamIterator(text)
         while not stream_iterator.is_done():
-            write_fn = Template.get_any_parse_fn(stream_iterator, read_fn_list)
+            write_fn = TemplateText.get_write_fn(stream_iterator, read_fn_list)
             if write_fn is None:
                 raise Exception(f"try to parse template context fail at {stream_iterator.idx=} "
                                 f"'{stream_iterator.peek_str(10)}'")
@@ -36,7 +36,7 @@ class Template:
         self.write_fn_list = write_fn_list
 
     @staticmethod
-    def get_any_parse_fn(stream_iterator: StreamIterator, fn_list: list):
+    def get_write_fn(stream_iterator: StreamIterator, fn_list: list):
         for parse_fn in fn_list:
             fn = parse_fn(stream_iterator)
             if fn is not None:
