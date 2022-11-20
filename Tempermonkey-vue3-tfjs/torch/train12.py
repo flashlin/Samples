@@ -37,13 +37,14 @@ def get_attn_subsequence_mask(seq):
     """
     attn_shape = [seq.size(0), seq.size(1), seq.size(1)]
     subsequence_mask = np.triu(np.ones(attn_shape), k=1) # Upper triangular matrix
-    subsequence_mask = torch.from_numpy(subsequence_mask).byte()
+    subsequence_mask = torch.from_numpy(subsequence_mask).to(seq.device).byte()
     return subsequence_mask # [batch_size, tgt_len, tgt_len]
 
 
 class ScaledDotProductAttention(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super().__init__()
+        self.device = device
 
     def forward(self, Q, K, V, attn_mask):
         """
@@ -52,18 +53,17 @@ class ScaledDotProductAttention(nn.Module):
         V: [batch_size, n_heads, len_v(=len_k), d_v]
         attn_mask: [batch_size, n_heads, seq_len, seq_len]
         """
-        scores = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(d_k)  # scores : [batch_size, n_heads, len_q, len_k]
-        scores.masked_fill_(attn_mask, -1e9)  # Fills elements of self tensor with value where mask is True.
+        scores = torch.matmul(Q, K.transpose(-1, -2)).to(self.device) / np.sqrt(d_k)  # scores : [batch_size, n_heads, len_q, len_k]
+        scores.masked_fill_(attn_mask, -1e9) # Fills elements of self tensor with value where mask is True.
 
         attn = nn.Softmax(dim=-1)(scores)
-        context = torch.matmul(attn, V)  # [batch_size, n_heads, len_q, d_v]
+        context = torch.matmul(attn, V).to(self.device)  # [batch_size, n_heads, len_q, d_v]
         return context, attn
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, device):
+    def __init__(self):
         super().__init__()
-        self.device = device
         self.W_Q = nn.Linear(d_model, d_k * n_heads, bias=False)
         self.W_K = nn.Linear(d_model, d_k * n_heads, bias=False)
         self.W_V = nn.Linear(d_model, d_v * n_heads, bias=False)
@@ -76,9 +76,10 @@ class MultiHeadAttention(nn.Module):
         input_V: [batch_size, len_v(=len_k), d_model]
         attn_mask: [batch_size, seq_len, seq_len]
         """
+        device = next(self.parameters()).device
         residual, batch_size = input_Q, input_Q.size(0)
         # (B, S, D) -proj-> (B, S, D_new) -split-> (B, S, H, W) -trans-> (B, H, S, W)
-        Q = self.W_Q(input_Q).view(batch_size, -1, n_heads, d_k)\
+        Q = self.W_Q(input_Q).view(batch_size, -1, n_heads, d_k) \
             .transpose(1, 2)  # Q: [batch_size, n_heads, len_q, d_k]
         K = self.W_K(input_K).view(batch_size, -1, n_heads, d_k)\
             .transpose(1, 2)  # K: [batch_size, n_heads, len_k, d_k]
@@ -89,17 +90,16 @@ class MultiHeadAttention(nn.Module):
             .repeat(1, n_heads, 1, 1)  # attn_mask : [batch_size, n_heads, seq_len, seq_len]
 
         # context: [batch_size, n_heads, len_q, d_v], attn: [batch_size, n_heads, len_q, len_k]
-        context, attn = ScaledDotProductAttention()(Q, K, V, attn_mask)
+        context, attn = ScaledDotProductAttention(device)(Q, K, V, attn_mask)
         context = context.transpose(1, 2).reshape(batch_size, -1,
                                                   n_heads * d_v)  # context: [batch_size, len_q, n_heads * d_v]
         output = self.fc(context)  # [batch_size, len_q, d_model]
-        return nn.LayerNorm(d_model).to(self.device)(output + residual), attn
+        return nn.LayerNorm(d_model).to(device)(output + residual), attn
 
 
 class PoswiseFeedForwardNet(nn.Module):
-    def __init__(self, device):
+    def __init__(self):
         super().__init__()
-        self.device =device
         self.fc = nn.Sequential(
             nn.Linear(d_model, d_ff, bias=False),
             nn.ReLU(),
@@ -110,16 +110,17 @@ class PoswiseFeedForwardNet(nn.Module):
         """
         inputs: [batch_size, seq_len, d_model]
         """
+        device = next(self.parameters()).device
         residual = inputs
         output = self.fc(inputs)
-        return nn.LayerNorm(d_model).to(self.device)(output + residual)  # [batch_size, seq_len, d_model]
+        return nn.LayerNorm(d_model).to(device)(output + residual)  # [batch_size, seq_len, d_model]
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self, device):
+    def __init__(self):
         super().__init__()
-        self.enc_self_attn = MultiHeadAttention(device)
-        self.pos_ffn = PoswiseFeedForwardNet(device)
+        self.enc_self_attn = MultiHeadAttention()
+        self.pos_ffn = PoswiseFeedForwardNet()
 
     def forward(self, enc_inputs, enc_self_attn_mask):
         """
@@ -134,11 +135,11 @@ class EncoderLayer(nn.Module):
 
 
 class DecoderLayer(nn.Module):
-    def __init__(self, device):
+    def __init__(self):
         super().__init__()
-        self.dec_self_attn = MultiHeadAttention(device)
-        self.dec_enc_attn = MultiHeadAttention(device)
-        self.pos_ffn = PoswiseFeedForwardNet(device)
+        self.dec_self_attn = MultiHeadAttention()
+        self.dec_enc_attn = MultiHeadAttention()
+        self.pos_ffn = PoswiseFeedForwardNet()
 
     def forward(self, dec_inputs, enc_outputs, dec_self_attn_mask, dec_enc_attn_mask):
         """
@@ -156,12 +157,12 @@ class DecoderLayer(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, src_vocab_size, device):
+    def __init__(self, src_vocab_size):
         super().__init__()
         self.src_vocab_size = src_vocab_size
         self.src_emb = nn.Embedding(src_vocab_size, d_model, padding_idx=PAD_TOKEN_VALUE)
         self.pos_emb = PositionalEncoding(d_model)
-        self.layers = nn.ModuleList([EncoderLayer(device) for _ in range(n_layers)])
+        self.layers = nn.ModuleList([EncoderLayer() for _ in range(n_layers)])
 
     def forward(self, enc_inputs):
         """
@@ -179,12 +180,11 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, tgt_vocab_size, device):
+    def __init__(self, tgt_vocab_size):
         super().__init__()
-        self.device = device
         self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model, padding_idx=PAD_TOKEN_VALUE)
         self.pos_emb = PositionalEncoding(d_model)
-        self.layers = nn.ModuleList([DecoderLayer(device) for _ in range(n_layers)])
+        self.layers = nn.ModuleList([DecoderLayer() for _ in range(n_layers)])
 
     def forward(self, dec_inputs, enc_inputs, enc_outputs):
         """
@@ -193,11 +193,11 @@ class Decoder(nn.Module):
         enc_outputs: [batsh_size, src_len, d_model]
         """
         dec_outputs = self.tgt_emb(dec_inputs)  # [batch_size, tgt_len, d_model]
-        dec_outputs = self.pos_emb(dec_outputs.transpose(0, 1)).transpose(0, 1).to(self.device)  # [batch_size, tgt_len, d_model]
-        dec_self_attn_pad_mask = get_attn_pad_mask(dec_inputs, dec_inputs).to(self.device)  # [batch_size, tgt_len, tgt_len]
-        dec_self_attn_subsequence_mask = get_attn_subsequence_mask(dec_inputs).to(self.device)  # [batch_size, tgt_len, tgt_len]
+        dec_outputs = self.pos_emb(dec_outputs.transpose(0, 1)).transpose(0, 1)  # [batch_size, tgt_len, d_model]
+        dec_self_attn_pad_mask = get_attn_pad_mask(dec_inputs, dec_inputs)  # [batch_size, tgt_len, tgt_len]
+        dec_self_attn_subsequence_mask = get_attn_subsequence_mask(dec_inputs)  # [batch_size, tgt_len, tgt_len]
         dec_self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequence_mask),
-                                      0).to(self.device)  # [batch_size, tgt_len, tgt_len]
+                                      0)  # [batch_size, tgt_len, tgt_len]
 
         dec_enc_attn_mask = get_attn_pad_mask(dec_inputs, enc_inputs)  # [batc_size, tgt_len, src_len]
 
@@ -212,10 +212,10 @@ class Decoder(nn.Module):
 
 
 class Seq2SeqTransformer(nn.Module):
-    def __init__(self, src_vocab_size, tgt_vocab_size, device):
+    def __init__(self, src_vocab_size, tgt_vocab_size):
         super().__init__()
-        self.encoder = Encoder(src_vocab_size, device)
-        self.decoder = Decoder(tgt_vocab_size, device)
+        self.encoder = Encoder(src_vocab_size)
+        self.decoder = Decoder(tgt_vocab_size)
         self.projection = nn.Linear(d_model, tgt_vocab_size, bias=False)
 
     def forward(self, enc_inputs, dec_inputs):
@@ -238,7 +238,8 @@ class Seq2SeqTransformer(nn.Module):
         return logits, enc_self_attns, dec_self_attns, dec_enc_attns
 
     def inference(self, input_text):
-        enc_inputs = torch.tensor([linq_encode(input_text)])
+        device = next(self.parameters()).device
+        enc_inputs = torch.tensor([linq_encode(input_text)]).to(device)
         # greedy_dec_input = self.greedy_decoder(enc_inputs[0].view(1, -1), start_symbol=BOS_TOKEN_VALUE)
         greedy_dec_input = self.greedy_decoder(enc_inputs, start_symbol=BOS_TOKEN_VALUE)
         # predict, _, _, _ = self(enc_inputs[i].view(1, -1), greedy_dec_input)
@@ -274,7 +275,7 @@ class Seq2SeqTransformer(nn.Module):
 class LitTranslator(BaseLightning):
     def __init__(self, src_vocab_size, tgt_vocab_size):
         super().__init__()
-        self.model = Seq2SeqTransformer(src_vocab_size, tgt_vocab_size, self.device)
+        self.model = Seq2SeqTransformer(src_vocab_size, tgt_vocab_size)
         self.criterion = nn.CrossEntropyLoss() #reduction="none")
         self.init_dataloader(TranslationDataset("./output/linq-sample.csv"), 2)
 
@@ -316,4 +317,4 @@ if __name__ == "__main__":
     info(f" {LINQ_VOCAB_SIZE=} {TSQL_VOCAB_SIZE=} {PAD_TOKEN_VALUE=}")
     #prepare_train_data()
     main()
-    #infer()
+    infer()
