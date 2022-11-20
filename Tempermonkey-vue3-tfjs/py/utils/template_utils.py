@@ -5,16 +5,30 @@ class Template:
     def __init__(self, text: str):
         self.text = text
         self.dict = {}
+        self.write_fn_list = []
+        self._parse(text)
 
-    def _parse(self):
+    def get_keys(self):
+        return list(self.dict.keys())
+
+    def set_value(self, key, value):
+        self.dict[key] = value
+
+    def to_string(self):
+        text = ""
+        for fn in self.write_fn_list:
+            text += str(fn())
+        return text
+
+    def _parse(self, text):
         read_fn_list = [
             self.read_variable,
             Template.read_text,
         ]
         write_fn_list = []
-        stream_iterator = StreamIterator(self.text)
+        stream_iterator = StreamIterator(text)
         while not stream_iterator.is_done():
-            write_fn = Template.try_parse_any(stream_iterator, read_fn_list)
+            write_fn = Template.get_any_parse_fn(stream_iterator, read_fn_list)
             if write_fn is None:
                 raise Exception(f"try to parse template context fail at {stream_iterator.idx=} "
                                 f"'{stream_iterator.peek_str(10)}'")
@@ -22,18 +36,17 @@ class Template:
         self.write_fn_list = write_fn_list
 
     @staticmethod
-    def try_parse_any(stream_iterator: StreamIterator, fn_list: list):
-        for fn in fn_list:
-            token = fn(stream_iterator)
-            if token != EmptyToken:
-                return token
-        return EmptyToken
+    def get_any_parse_fn(stream_iterator: StreamIterator, fn_list: list):
+        for parse_fn in fn_list:
+            fn = parse_fn(stream_iterator)
+            if fn is not None:
+                return fn
+        return None
 
     def read_variable(self, stream_iterator: StreamIterator):
         text = stream_iterator.peek_str(2)
         if text.startswith('@@'):
             text = stream_iterator.next(2)
-            self.dict[text] = ''
 
             def constant():
                 return text
@@ -46,9 +59,10 @@ class Template:
 
         stream_iterator.next()
         token = read_identifier(stream_iterator)
+        self.dict[token.text] = ''
 
         def write_var():
-            return dict[token.text]
+            return self.dict[token.text]
 
         return write_var
 
