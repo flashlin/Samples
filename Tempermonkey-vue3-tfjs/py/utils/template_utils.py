@@ -1,4 +1,4 @@
-from utils.stream import StreamIterator, read_identifier, reduce_token_list, Token
+from utils.stream import StreamTokenIterator, read_identifier, reduce_token_list, Token
 
 
 class TemplateText:
@@ -26,7 +26,7 @@ class TemplateText:
             TemplateText.read_text,
         ]
         write_fn_list = []
-        stream_iterator = StreamIterator(text)
+        stream_iterator = StreamTokenIterator(text)
         while not stream_iterator.is_done():
             write_fn = TemplateText.get_write_fn(stream_iterator, read_fn_list)
             if write_fn is None:
@@ -36,14 +36,14 @@ class TemplateText:
         self.write_fn_list = write_fn_list
 
     @staticmethod
-    def get_write_fn(stream_iterator: StreamIterator, fn_list: list):
+    def get_write_fn(stream_iterator: StreamTokenIterator, fn_list: list):
         for parse_fn in fn_list:
             fn = parse_fn(stream_iterator)
             if fn is not None:
                 return fn
         return None
 
-    def read_variable(self, stream_iterator: StreamIterator):
+    def read_variable(self, stream_iterator: StreamTokenIterator):
         text = stream_iterator.peek_str(2)
         if text.startswith('@@'):
             text = stream_iterator.next(2)
@@ -67,7 +67,7 @@ class TemplateText:
         return write_var
 
     @staticmethod
-    def read_text(stream_iterator: StreamIterator):
+    def read_text(stream_iterator: StreamTokenIterator):
         buff = []
         while not stream_iterator.is_done():
             token = stream_iterator.peek()
