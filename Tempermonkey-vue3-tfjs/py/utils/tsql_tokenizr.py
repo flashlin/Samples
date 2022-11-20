@@ -1,7 +1,7 @@
 from typing import Final
 
 from utils.tokenizr import try_read_any, sort_desc, group_to_lengths, \
-    read_keyword_fn, convert_str_list_to_char2index_map, convert_str_list_to_index2char_map, \
+    read_keyword_fn, create_char2index_map, convert_str_list_to_index2char_map, \
     fixed_marks, tokens_to_index_list, index_list_to_string, TSQL_Keywords, VOCAB_MARKS
 from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, read_identifier, read_float_number, \
     read_spaces, read_single_quote_string
@@ -61,7 +61,7 @@ def tsql_tokenize(stream) -> list[Token]:
 
 tsql_marks = fixed_marks + TSQL_Keywords
 # tsql_marks = VOCAB_MARKS
-tsql_char2index_dict = convert_str_list_to_char2index_map(tsql_marks)
+tsql_char2index_dict = create_char2index_map(tsql_marks)
 tsql_index2char_dict = convert_str_list_to_index2char_map(tsql_marks)
 TSQL_VOCAB_SIZE = len(tsql_marks)
 
