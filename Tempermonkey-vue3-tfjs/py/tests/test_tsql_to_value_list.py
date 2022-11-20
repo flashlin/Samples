@@ -5,12 +5,12 @@ from utils.tsql_tokenizr import tsql_tokenize, tsql_char2index_dict, tsql_index2
 def test_number():
     tokens = tsql_tokenize("123")
     values = tokens_to_index_list(tsql_char2index_dict, tokens)
-    assert values == [1, 103, 56, 57, 58, 0, 2]
+    assert values == [1, 104, 57, 58, 59, 0, 2]
 
 def test_select_name():
     tokens = tsql_tokenize("select name")
     values = tokens_to_index_list(tsql_char2index_dict, tokens)
-    assert values == [1, 102, 205, 105, 97, 101, 16, 3, 15, 7, 0, 2]
+    assert values == [1, 103, 206, 106, 98, 102, 17, 4, 16, 8, 0, 2]
 
 def test_tsql_values_to_string():
     values = tsql_encode("select name")

@@ -1,4 +1,4 @@
-from utils.tokenizr import Token
+from utils.stream import Token
 from utils.tsql_tokenizr import tsql_tokenize, TSQL_Operators_Lengths
 
 

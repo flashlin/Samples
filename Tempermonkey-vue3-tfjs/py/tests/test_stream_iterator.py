@@ -1,4 +1,5 @@
-from utils.tokenizr import StreamIterator
+from utils.stream import StreamIterator
+
 
 def test_next():
     stream = "abc123"

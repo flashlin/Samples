@@ -1,9 +1,10 @@
 from typing import Final
 
-from utils.tokenizr import Token, StreamIterator, read_identifier, read_float_number, \
-    read_single_quote_string, try_read_any, EmptyToken, sort_desc, group_to_lengths, \
+from utils.tokenizr import read_float_number, \
+    read_single_quote_string, try_read_any, sort_desc, group_to_lengths, \
     read_keyword_fn, read_spaces, convert_str_list_to_char2index_map, convert_str_list_to_index2char_map, \
     fixed_marks, tokens_to_index_list, read_double_quote_string, index_list_to_string, LINQ_Keywords, VOCAB_MARKS
+from utils.stream import StreamIterator, Token, EmptyToken, read_identifier
 
 LINQ_Keywords_Lengths = group_to_lengths(LINQ_Keywords)
 LINQ_Symbols: Final[list[str]] = ['.', ',', '(', ')', '{', '}']
