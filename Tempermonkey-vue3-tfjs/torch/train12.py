@@ -264,7 +264,8 @@ class Seq2SeqTransformer(nn.Module):
             dec_outputs, _, _ = self.decoder(dec_input, enc_input, enc_outputs)
             projected = self.projection(dec_outputs)
             prob = projected.squeeze(0).max(dim=-1, keepdim=False)[1]
-            next_word = prob.data[-1]
+            # print(f" {prob.data=}")
+            next_word = prob.data[-1] # 拿最後一個字
             next_symbol = next_word
             if next_symbol == EOS_TOKEN_VALUE:
                 terminal = True
