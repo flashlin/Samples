@@ -1,7 +1,6 @@
-from typing import Generic
 from itertools import groupby
 
-from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, T
+from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, SeqIterator
 
 BOS_TOKEN = '<bos>'
 EOS_TOKEN = '<eos>'
@@ -12,60 +11,6 @@ ReservedWords = [
     Token.String, Token.Spaces,
     Token.Symbol, Token.Operator,
 ]
-
-
-class Iterator(Generic[T]):
-    def __init__(self, stream: list[T]):
-        self.stream = stream
-        self.length = len(stream)
-        self.idx = 0
-        self.buffer: list[T] = []
-        self.buffer_len = 0
-
-    def peek(self, n=1):
-        node = self.next(n)
-        self.prev(n)
-        return node
-
-    def prev(self, n=1):
-        node = None
-        count = 0
-        while count < n:
-            node = self.prev_token()
-            count += 1
-        return node
-
-    def prev_token(self):
-        if self.idx - 1 < 0:
-            return None
-        self.idx -= 1
-        return self.buffer[self.idx]
-
-    def next(self, n=1):
-        node = None
-        count = 0
-        while count < n:
-            node = self.next_token()
-            count += 1
-        return node
-
-    def next_token(self):
-        if self.idx >= self.length:
-            return EmptyToken
-        if self.idx < self.buffer_len:
-            buffer_node = self.buffer[self.idx]
-            self.idx += 1
-            return buffer_node
-        character = self.stream[self.idx]
-        self.buffer.append(character)
-        self.buffer_len += 1
-        self.idx += 1
-        return character
-
-    def is_done(self):
-        if self.idx == 0 and self.length == 0:
-            return True
-        return self.idx >= self.length
 
 
 def read_number(stream_iterator: StreamTokenIterator) -> Token:
@@ -236,7 +181,7 @@ def read_until_zero(index2char_dict, iterator):
 
 def index_list_to_string(index2char_dict, value_list: list[int]):
     text = ""
-    iterator = Iterator(value_list)
+    iterator = SeqIterator(value_list)
     while not iterator.is_done():
         value = iterator.next()
         token_type = index2char_dict[value]
