@@ -1,7 +1,7 @@
 from typing import Generic
 from itertools import groupby
 
-from utils.stream import StreamIterator, Token, EmptyToken, reduce_token_list, T
+from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, T
 
 BOS_TOKEN = '<bos>'
 EOS_TOKEN = '<eos>'
@@ -68,7 +68,7 @@ class Iterator(Generic[T]):
         return self.idx >= self.length
 
 
-def read_number(stream_iterator: StreamIterator) -> Token:
+def read_number(stream_iterator: StreamTokenIterator) -> Token:
     buff = []
     while not stream_iterator.is_done():
         token = stream_iterator.peek()
@@ -81,7 +81,7 @@ def read_number(stream_iterator: StreamIterator) -> Token:
     return reduce_token_list(Token.Number, buff)
 
 
-def read_float_number(stream_iterator: StreamIterator) -> Token:
+def read_float_number(stream_iterator: StreamTokenIterator) -> Token:
     integer = read_number(stream_iterator)
     text = stream_iterator.peek_str(1)
     if text != '.':
@@ -97,7 +97,7 @@ def read_float_number(stream_iterator: StreamIterator) -> Token:
 def is_spaces(ch: str) -> bool:
     return index_of([' ', '\r', '\n', '\t' ], ch) != -1
 
-def read_spaces(stream_iterator: StreamIterator) -> Token:
+def read_spaces(stream_iterator: StreamTokenIterator) -> Token:
     buff = []
     while not stream_iterator.is_done():
         token = stream_iterator.peek()
@@ -109,7 +109,7 @@ def read_spaces(stream_iterator: StreamIterator) -> Token:
         return EmptyToken
     return reduce_token_list(Token.Spaces, buff)
 
-def read_single_quote_string(stream_iterator: StreamIterator):
+def read_single_quote_string(stream_iterator: StreamTokenIterator):
     if stream_iterator.peek_str(1) != "'":
         return EmptyToken
     buff = [stream_iterator.next()]
@@ -129,7 +129,7 @@ def read_single_quote_string(stream_iterator: StreamIterator):
     return reduce_token_list(Token.String, buff)
 
 
-def read_double_quote_string(stream_iterator: StreamIterator):
+def read_double_quote_string(stream_iterator: StreamTokenIterator):
     if stream_iterator.peek_str(1) != '"':
         return EmptyToken
     buff = [stream_iterator.next()]
@@ -161,7 +161,7 @@ def index_of(arr: list[str], search: str, case_insensitive: bool=False) -> int:
     return -1
 
 
-def peek_str_by_list_contain(stream_iterator: StreamIterator, peek_length_list: list[int], str_list: list[str], case_insensitive: bool=False):
+def peek_str_by_list_contain(stream_iterator: StreamTokenIterator, peek_length_list: list[int], str_list: list[str], case_insensitive: bool=False):
     hint_length = 0
 
     def peek_str(length: int) -> str:
@@ -197,7 +197,7 @@ def read_keyword_fn(token_type: str, length_list, keyword_list, case_insensitive
         return token
     return fn
 
-def try_read_any(stream_iterator: StreamIterator, fn_list: list):
+def try_read_any(stream_iterator: StreamTokenIterator, fn_list: list):
     for fn in fn_list:
         token = fn(stream_iterator)
         if token != EmptyToken:
@@ -484,7 +484,7 @@ EOS_TOKEN_VALUE = VOCAB_MARKS_CHAR2INDEX[EOS_TOKEN]
 PAD_TOKEN_VALUE = VOCAB_MARKS_CHAR2INDEX[PAD_TOKEN]
 
 if __name__ == "__main__":
-    iterator = StreamIterator("'abc ''123'''")
+    iterator = StreamTokenIterator("'abc ''123'''")
     token = read_single_quote_string(iterator)
     print(f"{token=}")
 

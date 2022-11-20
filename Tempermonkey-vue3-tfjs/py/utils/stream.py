@@ -42,7 +42,7 @@ EmptyToken = Token(Token.Empty, None, -1, -1, -1)
 T = TypeVar("T")
 
 
-class StreamIterator(Generic[T]):
+class StreamTokenIterator(Generic[T]):
     def __init__(self, stream: list[T]):
         self.stream = stream
         self.length = len(stream)
@@ -136,7 +136,7 @@ def reduce_token_list(token_type: str, buff: list[Token]):
     return token
 
 
-def read_identifier(stream_iterator: StreamIterator) -> Token:
+def read_identifier(stream_iterator: StreamTokenIterator) -> Token:
     text = stream_iterator.peek_str(1)
     if not text.isalpha() and text != '_':
         return EmptyToken
