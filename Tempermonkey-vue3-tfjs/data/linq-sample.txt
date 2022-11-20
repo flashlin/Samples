@@ -18,3 +18,7 @@ from student in students group student by student.LastName into newGroup orderby
 SELECT [t].[Name], [c0].* FROM (SELECT [student].[Name] FROM [Customer] AS [student] WITH(NOLOCK) GROUP BY [student].[Name]) AS [t] LEFT JOIN [Customer] AS [c0] WITH(NOLOCK) ON [t].[Name]=[c0].[Name] ORDER BY [t].[Name]
 from input in mydb.Customers join db in mydb.Houses on input.Id equals db.CustomerId select new {inputProductGuid=input.Id,inputProductName=input.Name,dbProductGuid=db.Address}
 SELECT [input].[Id] AS [inputProductGuid],[input].[Name] AS [inputProductName],[db].[Address] AS [dbProductGuid] FROM [Customer] AS [input] INNER JOIN [House] AS [db] ON [input].[Id]=[db].[CustomerId]
+from tb1 in customer select tb1
+SELECT [tb1].* FROM [dbo].[customer] AS [tb1] WITH(NOLOCK)
+from c in customer select c
+SELECT [c].* FROM [dbo].[customer] AS [c] WITH(NOLOCK)

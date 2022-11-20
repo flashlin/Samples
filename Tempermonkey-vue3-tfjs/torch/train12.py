@@ -260,7 +260,7 @@ class Seq2SeqTransformer(nn.Module):
         terminal = False
         next_symbol = start_symbol
         while not terminal:
-            dec_input = torch.cat([dec_input.detach(), torch.tensor([[next_symbol]], dtype=enc_input.dtype)], -1)
+            dec_input = torch.cat([dec_input.detach(), torch.tensor([[next_symbol]], dtype=enc_input.dtype).to(enc_input.device)], -1)
             dec_outputs, _, _ = self.decoder(dec_input, enc_input, enc_outputs)
             projected = self.projection(dec_outputs)
             prob = projected.squeeze(0).max(dim=-1, keepdim=False)[1]
@@ -302,13 +302,14 @@ def prepare_train_data():
 
 def main():
     start_train(LitTranslator, device='cuda',
-                max_epochs=10,
+                max_epochs=100,
                 src_vocab_size=LINQ_VOCAB_SIZE,
                 tgt_vocab_size=TSQL_VOCAB_SIZE)
 
 def infer():
     model = load_model(LitTranslator, src_vocab_size=LINQ_VOCAB_SIZE, tgt_vocab_size=TSQL_VOCAB_SIZE)
     text = 'from tb3 in customer select new tb3'
+    print("start infer")
     sql = model.infer(text)
     print(text)
     print(sql)
@@ -316,5 +317,5 @@ def infer():
 if __name__ == "__main__":
     info(f" {LINQ_VOCAB_SIZE=} {TSQL_VOCAB_SIZE=} {PAD_TOKEN_VALUE=}")
     #prepare_train_data()
-    main()
+    #main()
     infer()
