@@ -3,10 +3,10 @@ import torch
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader, random_split
 
-from preprocess_data import pad_sequence
-from utils.linq_translation_data import convert_translation_file_to_csv
+from preprocess_data import pad_sequence, convert_translation_file_to_csv
 
-def convert_seq_to_target(src_values, tgt_values, max_input_seq_length, eos_value: int=2):
+
+def convert_seq_to_target(src_values, tgt_values, max_input_seq_length, eos_value: int = 2):
     src_length = len(src_values)
     if src_length < max_input_seq_length:
         src_values = pad_sequence(src_values, eos_value, max_input_seq_length)
@@ -29,6 +29,7 @@ def validate_size(alist, max_index):
 
 def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
+
 
 class Linq2TSqlDataset(Dataset):
     def __init__(self, csv_file_path):
@@ -53,10 +54,10 @@ class Linq2TSqlDataset(Dataset):
         val_loader = DataLoader(val_data, batch_size=batch_size)
         return train_loader, val_loader
 
+
 if __name__ == '__main__':
     convert_translation_file_to_csv()
     # ds = Linq2TSqlDataset('./output/linq-sample.csv')
     # train_loader, val_loader = ds.create_dataloader()
     # for item in val_loader:
     #     print(f"{item=}")
-
