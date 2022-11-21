@@ -1,4 +1,4 @@
-import collections
+from collections.abc import MutableMapping, Mapping
 
 from common.io import info
 from utils.linq_tokenizr import linq_tokenize
@@ -41,7 +41,7 @@ SCAN_TSQL_MARKS = VOCAB_MARKS + sort_desc([
 SCAN_TSQL_CHAR2INDEX_DICT = create_char2index_map(SCAN_TSQL_MARKS)
 
 
-class CaseInsensitiveDict(collections.MutableMapping):
+class CaseInsensitiveDict(MutableMapping):
     """
     For example,
         cid = CaseInsensitiveDict()
@@ -80,7 +80,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
         )
 
     def __eq__(self, other):
-        if isinstance(other, collections.Mapping):
+        if isinstance(other, Mapping):
             other = CaseInsensitiveDict(other)
         else:
             return NotImplemented
@@ -104,9 +104,14 @@ class EmbeddingToken:
         return [index_of(TOKEN_TYPES, self.token_type), self.offset]
 
 
-def find_token(tokens: list[Token], search_token: Token) -> Token:
+def find_token_in_src(tokens: list[Token], search_token: Token) -> Token:
+    search_text = search_token.text
+    if search_token.type == Token.Identifier:
+        search_text = search_token.text[1:-1]
+    if search_token.type == Token.String:
+        search_text = '"' + search_token.text[1:-1] + '"'
     for idx, token in enumerate(tokens):
-        if token.text == search_token.text:
+        if token.text == search_text:
             return idx, token
     return None, None
 
@@ -130,7 +135,7 @@ class Linq2TSqlEmbedding:
         tgt_tokens = tsql_tokenize(text)
         values = []
         for tgt_token in tgt_tokens:
-            (idx, src_token) = find_token(src_tokens, tgt_token)
+            (idx, src_token) = find_token_in_src(src_tokens, tgt_token)
             if src_token is not None and self.is_token_src_type(src_token.type):
                 value = EmbeddingToken(src_token.type, idx)
                 values.append(value)
@@ -170,7 +175,7 @@ class Linq2TSqlEmbedding:
 
 if __name__ == "__main__":
     linq_code = 'from tb1 in customer select tb1'
-    tsql_code = 'SELECT tb1.* FROM customer AS tb1 WITH(NOLOCK)'
+    tsql_code = 'SELECT [tb1].* FROM [customer] AS [tb1] WITH(NOLOCK)'
     emb = Linq2TSqlEmbedding()
     the_src_tokens, the_src_values = emb.encode_source(linq_code)
     print(f"{the_src_values=}")
