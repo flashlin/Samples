@@ -109,7 +109,7 @@ def find_token(tokens: list[Token], search_token: Token) -> Token:
     return None, None
 
 
-class EmbeddingTokenizer:
+class Linq2TSqlEmbedding:
     def __init__(self):
         self.token_src_types = [Token.Identifier]
         self.token_type_dict = create_index2char_map(TOKEN_TYPES)
@@ -169,7 +169,7 @@ class EmbeddingTokenizer:
 if __name__ == "__main__":
     linq_code = 'from tb1 in customer select tb1'
     tsql_code = 'SELECT tb1.* FROM customer AS tb1 WITH(NOLOCK)'
-    emb = EmbeddingTokenizer()
+    emb = Linq2TSqlEmbedding()
     the_src_tokens, the_src_values = emb.encode_source(linq_code)
     print(f"{the_src_values=}")
     the_tgt_tokens, the_tgt_values = emb.encode_target(tsql_code, the_src_tokens)
