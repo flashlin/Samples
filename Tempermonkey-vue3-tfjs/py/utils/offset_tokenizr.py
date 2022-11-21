@@ -167,12 +167,12 @@ class EmbeddingTokenizer:
 
 
 if __name__ == "__main__":
-    s1 = 'from tb1 in customer select tb1'
-    sql = 'SELECT tb1.* FROM customer AS tb1 WITH(NOLOCK)'
+    linq_code = 'from tb1 in customer select tb1'
+    tsql_code = 'SELECT tb1.* FROM customer AS tb1 WITH(NOLOCK)'
     emb = EmbeddingTokenizer()
-    the_src_tokens, the_src_values = emb.encode_source(s1)
+    the_src_tokens, the_src_values = emb.encode_source(linq_code)
     print(f"{the_src_values=}")
-    the_tgt_tokens, the_tgt_values = emb.encode_target(sql, the_src_tokens)
+    the_tgt_tokens, the_tgt_values = emb.encode_target(tsql_code, the_src_tokens)
     info(f"{the_tgt_values=}")
     s2 = emb.decode(the_tgt_values, the_src_tokens)
     print(s2)
