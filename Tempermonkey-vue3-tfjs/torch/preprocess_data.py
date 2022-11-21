@@ -9,6 +9,7 @@ from utils.linq_tokenizr import linq_encode
 from utils.tokenizr import PAD_TOKEN_VALUE
 from utils.tsql_tokenizr import tsql_encode
 
+
 class TranslationFileIterator:
     def __init__(self, file_path):
         self.file_path = file_path
@@ -22,11 +23,13 @@ class TranslationFileIterator:
                     sql_values = tsql_encode(line)
                     yield linq_values, sql_values
 
+
 def int_list_to_str(alist):
     return ','.join([str(n) for n in alist])
 
-def convert_translation_file_to_csv(txt_file_path: str="../data/linq-sample.txt",
-                                    output_file_path: str="./output/linq-sample.csv",
+
+def convert_translation_file_to_csv(txt_file_path: str = "../data/linq-sample.txt",
+                                    output_file_path: str = "./output/linq-sample.csv",
                                     ):
     file_iter = TranslationFileIterator(txt_file_path)
     with open(output_file_path, "w", encoding='utf-8') as csv:
@@ -37,22 +40,28 @@ def convert_translation_file_to_csv(txt_file_path: str="../data/linq-sample.txt"
             csv.write(int_list_to_str(tgt_values))
             csv.write('\n')
 
+
 def pad_seq(seq, fill_value, max_length):
     return seq + [fill_value] * (max_length - len(seq))
+
 
 def pad_array(arr, fill_value, max_length, d_type=np.long):
     arr_len = len(arr)
     new_arr = np.pad(arr, (0, max_length - arr_len), 'constant', constant_values=fill_value)
     return np.array(new_arr, dtype=d_type)
 
+
 def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
+
 
 def pad_data_loader(dataset, batch_size=32, **kwargs):
     return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
 
+
 def df_to_values(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.long))
+
 
 class Seq2SeqDataset(Dataset):
     def __init__(self, csv_file_path):
