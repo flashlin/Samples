@@ -128,7 +128,7 @@ def create_char2index_map(str_list: list[str]):
     return dictionary
 
 
-def convert_str_list_to_index2char_map(str_list: list[str]):
+def create_index2char_map(str_list: list[str]):
     dictionary = {}
     for idx, key in enumerate(str_list):
         dictionary[idx] = key
