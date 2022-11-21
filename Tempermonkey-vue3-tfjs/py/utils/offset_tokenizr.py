@@ -40,6 +40,7 @@ SCAN_TSQL_MARKS = VOCAB_MARKS + sort_desc([
 ])
 SCAN_TSQL_CHAR2INDEX_DICT = create_char2index_map(SCAN_TSQL_MARKS)
 
+
 class CaseInsensitiveDict(collections.MutableMapping):
     """
     For example,
@@ -48,6 +49,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
         cid['aCCEPT'] == 'application/json'  # True
         list(cid) == ['Accept']  # True
     """
+
     def __init__(self, data=None, **kwargs):
         self._store = dict()
         if data is None:
