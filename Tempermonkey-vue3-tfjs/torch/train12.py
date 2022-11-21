@@ -331,6 +331,9 @@ def infer():
 
 if __name__ == "__main__":
     info(f" {LINQ_VOCAB_SIZE=} {TSQL_VOCAB_SIZE=} {PAD_TOKEN_VALUE=}")
-    prepare_train_data()
-    main()
+    #convert_translation_file_to_csv()
+    #info("prepare train data")
+    #prepare_train_data()
+    #info("start train")
+    #main()
     infer()

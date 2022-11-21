@@ -1,2 +1,2 @@
 # pip install tensorboard
-tensorboard --logdir=output/TrainTask
+tensorboard --logdir=output/LitTranslator
