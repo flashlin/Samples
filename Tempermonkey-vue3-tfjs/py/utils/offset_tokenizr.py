@@ -95,7 +95,7 @@ class CaseInsensitiveDict(collections.MutableMapping):
         return '%s(%r)' % (self.__class__.__name__, dict(self.items()))
 
 
-class Value:
+class EmbeddingToken:
     def __init__(self, token_type: str, offset: int):
         self.token_type = token_type
         self.offset = offset
@@ -122,7 +122,7 @@ class Linq2TSqlEmbedding:
         tokens = linq_tokenize(text)
         values = []
         for idx, token in enumerate(tokens):
-            value = Value(token.type, idx).to_values()
+            value = EmbeddingToken(token.type, idx).to_values()
             values.extend(value)
         return tokens, values
 
@@ -132,10 +132,10 @@ class Linq2TSqlEmbedding:
         for tgt_token in tgt_tokens:
             (idx, src_token) = find_token(src_tokens, tgt_token)
             if src_token is not None and self.is_token_src_type(src_token.type):
-                value = Value(src_token.type, idx)
+                value = EmbeddingToken(src_token.type, idx)
                 values.append(value)
                 continue
-            value = Value(Token.CreateTarget, self.tgt_char2index_dict[tgt_token.text])
+            value = EmbeddingToken(Token.CreateTarget, self.tgt_char2index_dict[tgt_token.text])
             values.append(value)
 
         tgt_values = []
