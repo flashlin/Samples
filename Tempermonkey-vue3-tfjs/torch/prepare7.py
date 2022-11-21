@@ -57,7 +57,3 @@ class Linq2TSqlDataset(Dataset):
 
 if __name__ == '__main__':
     convert_translation_file_to_csv()
-    # ds = Linq2TSqlDataset('./output/linq-sample.csv')
-    # train_loader, val_loader = ds.create_dataloader()
-    # for item in val_loader:
-    #     print(f"{item=}")
