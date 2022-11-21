@@ -11,6 +11,8 @@ from prepare7 import Linq2TSqlDataset
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE, linq_encode
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
+# inp: 依照一個句子,
+# out: 預測最後一個字
 # .unsqueeze
 # .squeeze
 # .transpose(1, 2) 交換維度
