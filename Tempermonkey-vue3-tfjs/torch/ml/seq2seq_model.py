@@ -160,10 +160,10 @@ class DecoderLayer(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, src_vocab_size, n_layers=6):
+    def __init__(self, src_vocab_size, padding_idx, n_layers=6):
         super().__init__()
         self.src_vocab_size = src_vocab_size
-        self.src_emb = nn.Embedding(src_vocab_size, d_model, padding_idx=PAD_TOKEN_VALUE)
+        self.src_emb = nn.Embedding(src_vocab_size, d_model, padding_idx=padding_idx)
         self.pos_emb = PositionalEncoding(d_model)
         self.layers = nn.ModuleList([EncoderLayer() for _ in range(n_layers)])
 
@@ -183,9 +183,9 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, tgt_vocab_size, n_layers=6):
+    def __init__(self, tgt_vocab_size, padding_idx, n_layers=6):
         super().__init__()
-        self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model, padding_idx=PAD_TOKEN_VALUE)
+        self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model, padding_idx=padding_idx)
         self.pos_emb = PositionalEncoding(d_model)
         self.layers = nn.ModuleList([DecoderLayer() for _ in range(n_layers)])
 
@@ -215,10 +215,10 @@ class Decoder(nn.Module):
 
 
 class Seq2SeqTransformer(nn.Module):
-    def __init__(self, src_vocab_size, tgt_vocab_size):
+    def __init__(self, src_vocab_size, tgt_vocab_size, padding_idx):
         super().__init__()
-        self.encoder = Encoder(src_vocab_size)
-        self.decoder = Decoder(tgt_vocab_size)
+        self.encoder = Encoder(src_vocab_size, padding_idx=padding_idx)
+        self.decoder = Decoder(tgt_vocab_size, padding_idx=padding_idx)
         self.projection = nn.Linear(d_model, tgt_vocab_size, bias=False)
 
     def forward(self, enc_inputs, dec_inputs):
@@ -240,28 +240,29 @@ class Seq2SeqTransformer(nn.Module):
         logits = dec_logits.view(-1, dec_logits.size(-1))
         return logits, enc_self_attns, dec_self_attns, dec_enc_attns
 
-    def inference(self, input_text):
+    def inference(self, input_text, bos_idx, eos_idx):
         device = next(self.parameters()).device
         enc_inputs = torch.tensor([linq_encode(input_text)]).to(device)
         # greedy_dec_input = self.greedy_decoder(enc_inputs[0].view(1, -1), start_symbol=BOS_TOKEN_VALUE)
-        greedy_dec_input = self.greedy_decoder(enc_inputs, start_symbol=BOS_TOKEN_VALUE)
+        greedy_dec_input = self.greedy_decoder(enc_inputs, bos_idx=bos_idx, eos_idx=eos_idx)
         # predict, _, _, _ = self(enc_inputs[i].view(1, -1), greedy_dec_input)
         predict, _, _, _ = self(enc_inputs, greedy_dec_input)
         # predict = predict.data.max(1, keepdim=True)[1]
         predict = predict.data.max(1, keepdim=False)[1]
         return predict.tolist()
 
-    def greedy_decoder(self, enc_input, start_symbol):
+    def greedy_decoder(self, enc_input, bos_idx, eos_idx):
         """
         :param model: Transformer Model
         :param enc_input: The encoder input
-        :param start_symbol: The start symbol. In this example it is 'S' which corresponds to index 4
+        :param bos_idx: The start symbol value. In this example it is 'S' which corresponds to index 4
+        :param eos_idx: The end symbol value
         :return: The target input
         """
         enc_outputs, enc_self_attns = self.encoder(enc_input)
         dec_input = torch.zeros(1, 0).type_as(enc_input.data)
         terminal = False
-        next_symbol = start_symbol
+        next_symbol = bos_idx
         while not terminal:
             dec_input = torch.cat(
                 [dec_input.detach(), torch.tensor([[next_symbol]], dtype=enc_input.dtype).to(enc_input.device)], -1)
@@ -271,7 +272,7 @@ class Seq2SeqTransformer(nn.Module):
             # print(f" {prob.data=}")
             next_word = prob.data[-1]  # 拿最後一個字
             next_symbol = next_word
-            if next_symbol == EOS_TOKEN_VALUE:
+            if next_symbol == eos_idx:
                 terminal = True
             # print(next_word)
         return dec_input
