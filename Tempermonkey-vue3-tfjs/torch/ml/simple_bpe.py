@@ -53,6 +53,11 @@ def basic_clean(text):
     return text
 
 
+BOS_SYMBOL = '<start_of_text>'
+EOS_SYMBOL = '<end_of_text>'
+PAD_SYMBOL = '<pad>'
+
+
 class SimpleTokenizer(object):
     def __init__(self, tokenize_fn, bpe_path=default_bpe()):
         self.tokenize_fn = tokenize_fn
@@ -65,17 +70,20 @@ class SimpleTokenizer(object):
         vocab = vocab + [v + '</w>' for v in vocab]
         for merge in merges:
             vocab.append(''.join(merge))
-        vocab.extend(['<start_of_text>', '<end_of_text>'])
+        vocab.extend([BOS_SYMBOL, EOS_SYMBOL, PAD_SYMBOL])
 
-        self.vocab_size = 49408
-
+        # self.vocab_size = 49408
         self.encoder = dict(zip(vocab, range(len(vocab))))
+        self.vocab_size = len(self.encoder)
         self.decoder = {v: k for k, v in self.encoder.items()}
         self.bpe_ranks = dict(zip(merges, range(len(merges))))
-        self.cache = {'<start_of_text>': '<start_of_text>', '<end_of_text>': '<end_of_text>'}
-        self.pattern = re.compile(
-            r"""<start_of_text>|<end_of_text>""",
-            re.IGNORECASE)
+        self.cache = {BOS_SYMBOL: BOS_SYMBOL, EOS_SYMBOL: EOS_SYMBOL, PAD_SYMBOL: PAD_SYMBOL}
+        # self.pattern = re.compile(
+        #     r"""<start_of_text>|<end_of_text>""",
+        #     re.IGNORECASE)
+        self.bos_idx = self.encoder[BOS_SYMBOL]
+        self.eos_idx = self.encoder[EOS_SYMBOL]
+        self.pad_idx = self.encoder[PAD_SYMBOL]
 
     def bpe(self, token):
         if token in self.cache:
@@ -154,7 +162,8 @@ class SimpleTokenizer(object):
         return result
 
 
-# if __name__ == '__main__':
-#     tk = SimpleTokenizer()
+if __name__ == '__main__':
+    tk = SimpleTokenizer(None)
+    print(f"{tk.bos_idx=} {tk.vocab_size=}")
 #     tokens = tk.encode('from tb1 in customer select new{ tb1.name, lastName="flash" }')
 #     print(f"{tokens=}")

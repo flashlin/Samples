@@ -3,7 +3,7 @@ import sys
 
 from torch import nn
 
-from lit import BaseLightning, start_train
+from lit import BaseLightning, start_train, load_model
 from ml.seq2seq_model import Seq2SeqTransformer
 from ml.simple_bpe import SimpleTokenizer
 from preprocess_data import TranslationFileTextIterator, int_list_to_str, TranslationDataset
@@ -48,8 +48,8 @@ def write_train_csv_file():
 class BpeTranslator(BaseLightning):
     def __init__(self):
         super().__init__()
-        tk = SimpleTokenizer(None)
-        self.model = Seq2SeqTransformer(tk.vocab_size, tk.vocab_size)
+        self.tk = tk = SimpleTokenizer(None)
+        self.model = Seq2SeqTransformer(tk.vocab_size, tk.vocab_size. tk.pad_idx)
         self.criterion = nn.CrossEntropyLoss()  # reduction="none")
         self.init_dataloader(TranslationDataset("./output/linq-sample2.csv"), 1)
 
@@ -64,6 +64,11 @@ class BpeTranslator(BaseLightning):
         self.log("%s_loss" % mode, loss)
         return loss
 
+    def infer(self, text):
+        sql_values = self.model.inference(text, self.tk.bos_idx, self.tk.eos_idx)
+        sql = self.tk.decode(sql_values)
+        return sql
+
 
 def prepare_data():
     print(f"start preparing data")
@@ -75,11 +80,31 @@ def train():
     start_train(BpeTranslator, device='cuda', max_epochs=100)
 
 
-def test():
+def evalute():
     print(f"test")
+    model = load_model(BpeTranslator)
+
+    def inference(text):
+        print(text)
+        sql = model.infer(text)
+        print(sql)
+
+    inference('from tb3 in customer select new tb3')
+    inference('from c in customer select new { c.id, c.name }')
+
+
+def test():
+    tk = SimpleTokenizer(tsql_tokenize)
+    sql1 = 'SELECT name FROM customer WITH(NOLOCK)'
+    print(f"{sql1=}")
+    tokens = tk.encode(sql1)
+    print(f"{tokens=}")
+    sql2 = tk.decode(tokens)
+    print(f"{sql2=}")
 
 
 if __name__ == '__main__':
+    test()
     args = get_args()
     if args.train:
         train()
@@ -88,5 +113,5 @@ if __name__ == '__main__':
         prepare_data()
         sys.exit(0)
     if args.test:
-        test()
+        evalute()
         sys.exit(0)
