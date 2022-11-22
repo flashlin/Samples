@@ -215,8 +215,10 @@ class Decoder(nn.Module):
 
 
 class Seq2SeqTransformer(nn.Module):
-    def __init__(self, src_vocab_size, tgt_vocab_size, padding_idx):
+    def __init__(self, src_vocab_size, tgt_vocab_size, bos_idx, eos_idx, padding_idx):
         super().__init__()
+        self.bos_idx = bos_idx
+        self.eos_idx = eos_idx
         self.encoder = Encoder(src_vocab_size, padding_idx=padding_idx)
         self.decoder = Decoder(tgt_vocab_size, padding_idx=padding_idx)
         self.projection = nn.Linear(d_model, tgt_vocab_size, bias=False)
@@ -240,18 +242,18 @@ class Seq2SeqTransformer(nn.Module):
         logits = dec_logits.view(-1, dec_logits.size(-1))
         return logits, enc_self_attns, dec_self_attns, dec_enc_attns
 
-    def inference(self, input_text, bos_idx, eos_idx):
+    def inference(self, input_text):
         device = next(self.parameters()).device
         enc_inputs = torch.tensor([linq_encode(input_text)]).to(device)
         # greedy_dec_input = self.greedy_decoder(enc_inputs[0].view(1, -1), start_symbol=BOS_TOKEN_VALUE)
-        greedy_dec_input = self.greedy_decoder(enc_inputs, bos_idx=bos_idx, eos_idx=eos_idx)
+        greedy_dec_input = self.greedy_decoder(enc_inputs, bos_idx=self.bos_idx, eos_idx=self.eos_idx)
         # predict, _, _, _ = self(enc_inputs[i].view(1, -1), greedy_dec_input)
         predict, _, _, _ = self(enc_inputs, greedy_dec_input)
         # predict = predict.data.max(1, keepdim=True)[1]
         predict = predict.data.max(1, keepdim=False)[1]
         return predict.tolist()
 
-    def greedy_decoder(self, enc_input, bos_idx, eos_idx):
+    def greedy_decoder(self, enc_input):
         """
         :param model: Transformer Model
         :param enc_input: The encoder input
@@ -262,7 +264,7 @@ class Seq2SeqTransformer(nn.Module):
         enc_outputs, enc_self_attns = self.encoder(enc_input)
         dec_input = torch.zeros(1, 0).type_as(enc_input.data)
         terminal = False
-        next_symbol = bos_idx
+        next_symbol = self.bos_idx
         while not terminal:
             dec_input = torch.cat(
                 [dec_input.detach(), torch.tensor([[next_symbol]], dtype=enc_input.dtype).to(enc_input.device)], -1)
@@ -272,7 +274,7 @@ class Seq2SeqTransformer(nn.Module):
             # print(f" {prob.data=}")
             next_word = prob.data[-1]  # 拿最後一個字
             next_symbol = next_word
-            if next_symbol == eos_idx:
+            if next_symbol == self.eos_idx:
                 terminal = True
             # print(next_word)
         return dec_input

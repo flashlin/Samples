@@ -83,7 +83,7 @@ class SimpleTokenizer(object):
         #     re.IGNORECASE)
         self.bos_idx = self.encoder[BOS_SYMBOL]
         self.eos_idx = self.encoder[EOS_SYMBOL]
-        self.pad_idx = self.encoder[PAD_SYMBOL]
+        self.padding_idx = self.encoder[PAD_SYMBOL]
 
     def bpe(self, token):
         if token in self.cache:
@@ -142,7 +142,7 @@ class SimpleTokenizer(object):
 
         if remove_start_end:
             tokens = [token for token in tokens if token not in (self.bos_idx, self.eos_idx)]
-        text = ''.join([self.decoder[token] for token in tokens if token not in [self.pad_idx]])
+        text = ''.join([self.decoder[token] for token in tokens if token not in [self.padding_idx]])
         text = bytearray([self.byte_decoder[c] for c in text]).decode('utf-8', errors="replace").replace('</w>', '')
         return text
 

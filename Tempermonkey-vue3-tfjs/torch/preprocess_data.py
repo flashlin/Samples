@@ -103,7 +103,8 @@ class Seq2SeqDataset(Dataset):
 
 
 class TranslationDataset(Dataset):
-    def __init__(self, csv_file_path):
+    def __init__(self, csv_file_path, padding_idx):
+        self.padding_idx = padding_idx
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
         self.src = df_to_values(df['src'])
         self.tgt = df_to_values(df['tgt'])
@@ -115,9 +116,9 @@ class TranslationDataset(Dataset):
         src = self.src[idx]
         tgt = self.tgt[idx]
         max_len = max(len(src), len(tgt))
-        enc_input = torch.tensor(pad_array(src[1:-1], PAD_TOKEN_VALUE, max_len), dtype=torch.long)
-        dec_input = torch.tensor(pad_array(tgt[:-1], PAD_TOKEN_VALUE, max_len), dtype=torch.long)
-        dec_output = torch.tensor(pad_array(tgt[1:], PAD_TOKEN_VALUE, max_len), dtype=torch.long)
+        enc_input = torch.tensor(pad_array(src[1:-1], self.padding_idx, max_len), dtype=torch.long)
+        dec_input = torch.tensor(pad_array(tgt[:-1], self.padding_idx, max_len), dtype=torch.long)
+        dec_output = torch.tensor(pad_array(tgt[1:], self.padding_idx, max_len), dtype=torch.long)
         return enc_input, dec_input, dec_output
 
     def create_dataloader(self, batch_size=32):

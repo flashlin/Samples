@@ -30,8 +30,8 @@ class TranslationFileEncodeIterator:
 
     def __iter__(self):
         for src, tgt in TranslationFileTextIterator(self.file_path):
-            src_tokens = self.linq_tk.encode(src)
-            tgt_tokens = self.tsql_tk.encode(tgt)
+            src_tokens = self.linq_tk.encode(src, add_start_end=True)
+            tgt_tokens = self.tsql_tk.encode(tgt, add_start_end=True)
             yield src_tokens, tgt_tokens
 
 
@@ -49,9 +49,12 @@ class BpeTranslator(BaseLightning):
     def __init__(self):
         super().__init__()
         self.tk = tk = SimpleTokenizer(None)
-        self.model = Seq2SeqTransformer(tk.vocab_size, tk.vocab_size. tk.pad_idx)
+        self.model = Seq2SeqTransformer(tk.vocab_size, tk.vocab_size,
+                                        bos_idx=tk.bos_idx,
+                                        eos_idx=tk.eos_idx,
+                                        padding_idx=tk.padding_idx)
         self.criterion = nn.CrossEntropyLoss()  # reduction="none")
-        self.init_dataloader(TranslationDataset("./output/linq-sample2.csv"), 1)
+        self.init_dataloader(TranslationDataset("./output/linq-sample2.csv", tk.padding_idx), 1)
 
     def forward(self, batch):
         enc_inputs, dec_inputs, dec_outputs = batch
