@@ -10,6 +10,21 @@ from utils.tokenizr import PAD_TOKEN_VALUE
 from utils.tsql_tokenizr import tsql_encode
 
 
+class TranslationFileTextIterator:
+    def __init__(self, file_path):
+        self.file_path = file_path
+
+    def __iter__(self):
+        with open(self.file_path, "r", encoding='UTF-8') as f:
+            for idx, line in enumerate(f):
+                if idx % 2 == 0:
+                    src = line
+                else:
+                    tgt = line
+                    yield src, tgt
+
+
+
 class TranslationFileIterator:
     def __init__(self, file_path):
         self.file_path = file_path
