@@ -68,7 +68,7 @@ class BpeTranslator(BaseLightning):
         return loss
 
     def infer(self, text):
-        sql_values = self.model.inference(text, self.tk.bos_idx, self.tk.eos_idx)
+        sql_values = self.model.inference(text)
         sql = self.tk.decode(sql_values)
         return sql
 

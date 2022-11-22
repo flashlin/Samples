@@ -246,7 +246,7 @@ class Seq2SeqTransformer(nn.Module):
         device = next(self.parameters()).device
         enc_inputs = torch.tensor([linq_encode(input_text)]).to(device)
         # greedy_dec_input = self.greedy_decoder(enc_inputs[0].view(1, -1), start_symbol=BOS_TOKEN_VALUE)
-        greedy_dec_input = self.greedy_decoder(enc_inputs, bos_idx=self.bos_idx, eos_idx=self.eos_idx)
+        greedy_dec_input = self.greedy_decoder(enc_inputs)
         # predict, _, _, _ = self(enc_inputs[i].view(1, -1), greedy_dec_input)
         predict, _, _, _ = self(enc_inputs, greedy_dec_input)
         # predict = predict.data.max(1, keepdim=True)[1]
