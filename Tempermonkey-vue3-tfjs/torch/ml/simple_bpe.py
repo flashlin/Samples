@@ -126,21 +126,23 @@ class SimpleTokenizer(object):
         self.cache[token] = word
         return word
 
-    def encode(self, text):
+    def encode(self, text, add_start_end=False):
         bpe_tokens = []
         tokens = self.tokenize_fn(text)
         for token in tokens:
             token = ''.join(self.byte_encoder[b] for b in token.text.encode('utf-8'))
             bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token).split(' '))
+        if add_start_end:
+            bpe_tokens = [self.bos_idx] + bpe_tokens + [self.eos_idx]
         return bpe_tokens
 
-    def decode(self, tokens, remove_start_end=True, pad_tokens=set()):
+    def decode(self, tokens, remove_start_end=True):
         if torch.is_tensor(tokens):
             tokens = tokens.tolist()
 
         if remove_start_end:
-            tokens = [token for token in tokens if token not in (49406, 40407, 0)]
-        text = ''.join([self.decoder[token] for token in tokens if token not in pad_tokens])
+            tokens = [token for token in tokens if token not in (self.bos_idx, self.eos_idx)]
+        text = ''.join([self.decoder[token] for token in tokens if token not in [self.pad_idx]])
         text = bytearray([self.byte_decoder[c] for c in text]).decode('utf-8', errors="replace").replace('</w>', '')
         return text
 
@@ -164,6 +166,8 @@ class SimpleTokenizer(object):
 
 if __name__ == '__main__':
     tk = SimpleTokenizer(None)
+    if 1 not in [1]:
+        print(f"1 not")
     print(f"{tk.bos_idx=} {tk.vocab_size=}")
 #     tokens = tk.encode('from tb1 in customer select new{ tb1.name, lastName="flash" }')
 #     print(f"{tokens=}")

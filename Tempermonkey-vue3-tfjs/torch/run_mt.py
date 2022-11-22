@@ -97,9 +97,9 @@ def test():
     tk = SimpleTokenizer(tsql_tokenize)
     sql1 = 'SELECT name FROM customer WITH(NOLOCK)'
     print(f"{sql1=}")
-    tokens = tk.encode(sql1)
+    tokens = tk.encode(sql1, True)
     print(f"{tokens=}")
-    sql2 = tk.decode(tokens)
+    sql2 = tk.decode(tokens, False)
     print(f"{sql2=}")
 
 
