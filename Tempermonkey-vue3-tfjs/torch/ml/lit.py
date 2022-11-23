@@ -332,10 +332,10 @@ def query_train_ckpts(ckpt_root_path='./output/BpeTranslator'):
     for ckpt in LightningLogsIterator(ckpt_root_path):
         match = loss.search(ckpt)
         if match:
-            yield match.group(0), ckpt
+            yield match.group(1), ckpt
 
 
-def copy_last_cpk(model_name='BpeTranslator'):
+def copy_last_ckpt(model_name='BpeTranslator'):
     ckpts = [x for x in query_train_ckpts()]
     _, ckpt = min(ckpts, key=lambda tup: tup[0])
     print(f"{ckpt=}")

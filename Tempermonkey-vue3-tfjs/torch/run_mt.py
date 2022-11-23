@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from ml.lit import start_train, load_model, copy_last_cpk
+from ml.lit import start_train, load_model, copy_last_ckpt
 from ml.bpe_seq2seq_net import BpeTranslator, write_train_csv_file
 from ml.simple_bpe import SimpleTokenizer
 from utils.tsql_tokenizr import tsql_tokenize
@@ -65,5 +65,5 @@ if __name__ == '__main__':
         evaluate()
         sys.exit(0)
     if args.copy:
-        copy_last_cpk()
+        copy_last_ckpt()
         sys.exit(0)
