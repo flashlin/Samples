@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import pytorch_lightning as pl
 
-from lit import start_train, CosineWarmupScheduler
+from ml.lit import start_train, CosineWarmupScheduler
 from prepare import create_data_loader
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE

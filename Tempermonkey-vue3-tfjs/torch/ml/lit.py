@@ -1,6 +1,9 @@
 import inspect
 import math
 import os
+import re
+import shutil
+
 import numpy as np
 import pytorch_lightning as pl
 import torch
@@ -8,7 +11,7 @@ import torch.nn.functional as F
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn as nn, optim as optim
 from sklearn.metrics import accuracy_score
-from common.io import info
+from common.io import info, get_directory_list_by_pattern, get_file_list_by_pattern
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 
@@ -312,3 +315,28 @@ def start_train(model_type,
     # result = {"test_acc": test_result[0]["test_acc"], "val_acc": val_result[0]["test_acc"]}
     model = model.to(device)
     return model  # , result
+
+
+class LightningLogsIterator:
+    def __init__(self, lightning_logs_path):
+        self.lightning_logs_path = lightning_logs_path + "/lightning_logs"
+
+    def __iter__(self):
+        for folder in get_directory_list_by_pattern(self.lightning_logs_path, r'version_\d+'):
+            for ckpt in get_file_list_by_pattern(folder + '/checkpoints', r'.+\.ckpt'):
+                yield ckpt
+
+
+def query_train_ckpts(ckpt_root_path='./output/BpeTranslator'):
+    loss = re.compile(r'epoch=\d+\-train_loss=(\d+\.\d+)')
+    for ckpt in LightningLogsIterator(ckpt_root_path):
+        match = loss.search(ckpt)
+        if match:
+            yield match.group(0), ckpt
+
+
+def copy_last_cpk(model_name='BpeTranslator'):
+    ckpts = [x for x in query_train_ckpts()]
+    _, ckpt = min(ckpts, key=lambda tup: tup[0])
+    print(f"{ckpt=}")
+    shutil.copy(ckpt, './output/%s.ckpt' % model_name)

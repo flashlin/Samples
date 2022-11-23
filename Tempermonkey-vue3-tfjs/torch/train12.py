@@ -3,7 +3,7 @@ from torch import nn
 from common.io import info
 from ml.seq2seq_model import Seq2SeqTransformer
 from preprocess_data import convert_translation_file_to_csv, TranslationDataset
-from lit import BaseLightning, start_train, load_model
+from ml.lit import BaseLightning, start_train, load_model
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tokenizr import PAD_TOKEN_VALUE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE, tsql_decode

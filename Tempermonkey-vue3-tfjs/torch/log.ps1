@@ -1,2 +1,2 @@
 # pip install tensorboard
-tensorboard --logdir=output/LitTranslator
+tensorboard --logdir=output/BpeTranslator

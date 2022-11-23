@@ -5,7 +5,7 @@ from torch.nn.utils.rnn import pad_sequence
 
 from common.io import info
 from preprocess_data import Seq2SeqDataset
-from lit import BaseLightning, start_train, PositionalEncoding, CosineWarmupScheduler, MultiHeadAttention
+from ml.lit import BaseLightning, start_train, PositionalEncoding, CosineWarmupScheduler, MultiHeadAttention
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 

@@ -1,21 +1,13 @@
-import math
 from typing import Tuple
 
-import numpy as np
 import torch
 from torch import nn, Tensor
-import torch.nn.functional as F
-from torchmetrics.functional import accuracy
 from common.io import info
-from lit import BaseLightning, start_train, PositionalEncoding
+from ml.lit import BaseLightning, start_train, PositionalEncoding
 from prepare6 import Linq2TSqlDataset
-from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tokenizr import VOCAB_SIZE
-from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
-import pytorch_lightning as pl
-import math, copy, time
-from torch.autograd import Variable
-from math import sqrt
+import math
+
 
 def generate_square_subsequent_mask(sz):
     return torch.triu(torch.ones(sz, sz) * float('-inf'), diagonal=1)

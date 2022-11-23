@@ -1,10 +1,9 @@
-import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
 
 from common.io import info
-from lit import BaseLightning, start_train
+from ml.lit import BaseLightning, start_train
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
