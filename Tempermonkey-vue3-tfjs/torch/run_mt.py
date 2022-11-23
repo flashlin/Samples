@@ -1,6 +1,8 @@
 import argparse
+import shutil
 import sys
 
+import re
 from torch import nn
 
 from common.io import get_directory_list_by_pattern, get_file_list_by_pattern
@@ -108,9 +110,19 @@ class LightningLogsIterator:
                 yield ckpt
 
 
-def copy_last_cpk():
+def query_train_ckpts():
+    loss = re.compile(r'epoch=\d+\-train_loss=(\d+\.\d+)')
     for ckpt in LightningLogsIterator('./output/BpeTranslator'):
-        print(f"{ckpt=}")
+        match = loss.search(ckpt)
+        if match:
+            yield match.group(0), ckpt
+
+
+def copy_last_cpk():
+    ckpts = [x for x in query_train_ckpts()]
+    _, ckpt = min(ckpts, key=lambda tup: tup[0])
+    print(f"{ckpt=}")
+    shutil.copy(ckpt, './output/BpeTranslator.ckpt')
 
 
 def test():
@@ -124,7 +136,7 @@ def test():
 
 
 if __name__ == '__main__':
-    #test()
+    # test()
     args = get_args()
     if args.train:
         train()
@@ -138,4 +150,3 @@ if __name__ == '__main__':
     if args.copy:
         copy_last_cpk()
         sys.exit(0)
-
