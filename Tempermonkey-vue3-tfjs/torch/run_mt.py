@@ -20,6 +20,7 @@ def get_args():
     parser.add_argument("-p", "--prepare", help="optional prepare data", dest="prepare", action='store_true')
     parser.add_argument("-t", "--train", help="optional train data", dest="train", action='store_true')
     parser.add_argument("-e", "--test", help="optional test", dest="test", action='store_true')
+    parser.add_argument("-c", "--copy", help="optional copy ckpt", dest="copy", action='store_true')
     return parser.parse_args()
 
 
@@ -97,23 +98,19 @@ def evaluate():
     inference('from c in customer select new { c.id, c.name }')
 
 
-
-class LightningLogsCIterator:
+class LightningLogsIterator:
     def __init__(self, lightning_logs_path):
-        self.lightning_logs_path = lightning_logs_path
+        self.lightning_logs_path = lightning_logs_path + "/lightning_logs"
 
     def __iter__(self):
         for folder in get_directory_list_by_pattern(self.lightning_logs_path, r'version_\d+'):
-            ckpt_list = [f for f in get_file_list_by_pattern(folder + 'checkpoints', r'.+\.ckpt')]
-
-        for src, tgt in TranslationFileTextIterator(self.file_path):
-            src_tokens = self.linq_tk.encode(src, add_start_end=True)
-            tgt_tokens = self.tsql_tk.encode(tgt, add_start_end=True)
-            yield src_tokens, tgt_tokens
-
-#def copy_last_cpk():
+            for ckpt in get_file_list_by_pattern(folder + '/checkpoints', r'.+\.ckpt'):
+                yield ckpt
 
 
+def copy_last_cpk():
+    for ckpt in LightningLogsIterator('./output/BpeTranslator'):
+        print(f"{ckpt=}")
 
 
 def test():
@@ -127,7 +124,7 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    #test()
     args = get_args()
     if args.train:
         train()
@@ -138,3 +135,7 @@ if __name__ == '__main__':
     if args.test:
         evaluate()
         sys.exit(0)
+    if args.copy:
+        copy_last_cpk()
+        sys.exit(0)
+
