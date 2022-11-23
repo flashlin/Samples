@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import random
-from tqdm import tqdm
 import torch.nn.functional as F
 import pytorch_lightning as pl
 import math
@@ -11,9 +10,8 @@ import os
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 from common.io import info
-from lit import PositionalEncoding
+from ml.lit import PositionalEncoding
 from prepare import create_data_loader
-from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 class Encoder(nn.Module):

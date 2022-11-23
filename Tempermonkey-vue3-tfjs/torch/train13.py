@@ -1,13 +1,11 @@
 import numpy as np
 import torch
-from torch import nn, optim, Tensor
-import torch.nn.functional as F
-from torch.nn.utils.rnn import pad_sequence
+from torch import nn
 
 from common.io import info
-from preprocess_data import Seq2SeqDataset, convert_translation_file_to_csv, TranslationDataset
-from lit import BaseLightning, start_train, PositionalEncoding, load_model
-from utils.linq_tokenizr import LINQ_VOCAB_SIZE, linq_encode, linq_decode, LINQ_Index2Char_Dict
+from preprocess_data import convert_translation_file_to_csv, TranslationDataset
+from ml.lit import BaseLightning, start_train, PositionalEncoding, load_model
+from utils.linq_tokenizr import LINQ_VOCAB_SIZE, linq_encode
 from utils.tokenizr import PAD_TOKEN_VALUE, BOS_TOKEN_VALUE, EOS_TOKEN_VALUE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE, tsql_decode
 

@@ -2,9 +2,8 @@ import numpy as np
 import torch
 from torch import nn
 
-from lit import PositionalEncoding
+from ml.lit import PositionalEncoding
 from utils.linq_tokenizr import linq_encode
-from utils.tokenizr import PAD_TOKEN_VALUE, BOS_TOKEN_VALUE, EOS_TOKEN_VALUE
 
 d_model = 512  # Embedding Size
 

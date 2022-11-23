@@ -1,12 +1,9 @@
-import numpy as np
 import torch
 from pytorch_lightning import Trainer
 from torch import nn
-import torch.nn.functional as F
 
 from common.io import info
-from preprocess_data import pad_sequence
-from lit import BaseLightning, start_train, PositionalEncoding, load_model
+from ml.lit import BaseLightning, start_train, PositionalEncoding, load_model
 from prepare7 import Linq2TSqlDataset
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE, linq_encode
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE

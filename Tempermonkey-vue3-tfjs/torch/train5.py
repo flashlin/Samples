@@ -1,14 +1,12 @@
-import numpy as np
 import torch
 from torch import nn
 import torch.nn.functional as F
 from torchmetrics.functional import accuracy
-from common.io import info
-from lit import BaseLightning, start_train
+from ml.lit import BaseLightning, start_train
 from prepare5 import Linq2TSqlDataset
 from utils.linq_tokenizr import LINQ_VOCAB_SIZE
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
-import pytorch_lightning as pl
+
 
 class Seq2Seq(nn.Module):
     def __init__(self, src_vocab_size, tgt_vocab_size, embedding_dim=512, hidden_dim=3, dropout=0.2):
