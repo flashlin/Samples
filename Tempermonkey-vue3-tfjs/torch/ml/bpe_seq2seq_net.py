@@ -1,21 +1,45 @@
 from torch import nn
-
 from ml.lit import BaseLightning
 from ml.seq2seq_model import Seq2SeqTransformer
 from ml.simple_bpe import SimpleTokenizer
 from preprocess_data import TranslationDataset, TranslationFileTextIterator, int_list_to_str
 from utils.linq_tokenizr import linq_tokenize
 from utils.tsql_tokenizr import tsql_tokenize
+from dataclasses import dataclass
+from typing import Callable
+
+tk = SimpleTokenizer(None)
+
+
+@dataclass
+class BpeTranslateOptions:
+    src_vocab_size: int
+    tgt_vocab_size: int
+    bos_idx: int
+    eos_idx: int
+    padding_idx: int
+    decode_fn: Callable[[list[int]], str]
+
+
+bpe_translate_options = BpeTranslateOptions(
+    src_vocab_size=tk.vocab_size,
+    tgt_vocab_size=tk.vocab_size,
+    bos_idx=tk.bos_idx,
+    eos_idx=tk.eos_idx,
+    padding_idx=tk.padding_idx,
+    decode_fn=tk.decode,
+)
 
 
 class BpeTranslator(BaseLightning):
-    def __init__(self):
+    def __init__(self, options=bpe_translate_options):
         super().__init__()
-        self.tk = tk = SimpleTokenizer(None)
-        self.model = Seq2SeqTransformer(tk.vocab_size, tk.vocab_size,
-                                        bos_idx=tk.bos_idx,
-                                        eos_idx=tk.eos_idx,
-                                        padding_idx=tk.padding_idx)
+        self.options = options
+        self.model = Seq2SeqTransformer(options.src_vocab_size,
+                                        options.tgt_vocab_size,
+                                        bos_idx=options.bos_idx,
+                                        eos_idx=options.eos_idx,
+                                        padding_idx=options.padding_idx)
         self.criterion = nn.CrossEntropyLoss()  # reduction="none")
         self.init_dataloader(TranslationDataset("./output/linq-sample2.csv", tk.padding_idx), 1)
 
@@ -31,9 +55,9 @@ class BpeTranslator(BaseLightning):
         return loss
 
     def infer(self, text):
-        sql_values = self.model.inference(text)
-        sql = self.tk.decode(sql_values)
-        return sql
+        tgt_values = self.model.inference(text)
+        tgt_text = self.options.decode_fn(tgt_values)
+        return tgt_text
 
 
 class TranslationFileEncodeIterator:
