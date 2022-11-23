@@ -40,6 +40,7 @@ def evaluate():
 
     inference('from tb3 in customer select new tb3')
     inference('from c in customer select new { c.id, c.name }')
+    inference('from c in customer join p in products on c.id equals p.id select new { c.id, c.name, p.name }')
 
 
 def test():
