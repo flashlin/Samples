@@ -1,17 +1,19 @@
 from torch import nn
+from torch.utils.data import Dataset
+
 from ml.lit import BaseLightning
 from ml.seq2seq_model import Seq2SeqTransformer
 from ml.simple_bpe import SimpleTokenizer
 from preprocess_data import TranslationDataset, TranslationFileTextIterator, int_list_to_str
 from utils.linq_tokenizr import linq_tokenize
 from utils.tsql_tokenizr import tsql_tokenize
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable
 
 tk = SimpleTokenizer(None)
 
 
-@dataclass
+@dataclass(frozen=True)
 class BpeTranslateOptions:
     src_vocab_size: int
     tgt_vocab_size: int
@@ -19,6 +21,7 @@ class BpeTranslateOptions:
     eos_idx: int
     padding_idx: int
     decode_fn: Callable[[list[int]], str]
+    train_dataset: Dataset
 
 
 bpe_translate_options = BpeTranslateOptions(
@@ -28,6 +31,7 @@ bpe_translate_options = BpeTranslateOptions(
     eos_idx=tk.eos_idx,
     padding_idx=tk.padding_idx,
     decode_fn=tk.decode,
+    train_dataset=TranslationDataset("./output/linq-sample2.csv", tk.padding_idx)
 )
 
 
@@ -41,7 +45,7 @@ class BpeTranslator(BaseLightning):
                                         eos_idx=options.eos_idx,
                                         padding_idx=options.padding_idx)
         self.criterion = nn.CrossEntropyLoss()  # reduction="none")
-        self.init_dataloader(TranslationDataset("./output/linq-sample2.csv", tk.padding_idx), 1)
+        self.init_dataloader(options.train_dataset, 1)
 
     def forward(self, batch):
         enc_inputs, dec_inputs, dec_outputs = batch
