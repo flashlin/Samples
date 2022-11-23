@@ -3,6 +3,7 @@ import sys
 
 from torch import nn
 
+from common.io import get_directory_list_by_pattern, get_file_list_by_pattern
 from lit import BaseLightning, start_train, load_model
 from ml.seq2seq_model import Seq2SeqTransformer
 from ml.simple_bpe import SimpleTokenizer
@@ -83,7 +84,7 @@ def train():
     start_train(BpeTranslator, device='cuda', max_epochs=100)
 
 
-def evalute():
+def evaluate():
     print(f"test")
     model = load_model(BpeTranslator)
 
@@ -94,6 +95,25 @@ def evalute():
 
     inference('from tb3 in customer select new tb3')
     inference('from c in customer select new { c.id, c.name }')
+
+
+
+class LightningLogsCIterator:
+    def __init__(self, lightning_logs_path):
+        self.lightning_logs_path = lightning_logs_path
+
+    def __iter__(self):
+        for folder in get_directory_list_by_pattern(self.lightning_logs_path, r'version_\d+'):
+            ckpt_list = [f for f in get_file_list_by_pattern(folder + 'checkpoints', r'.+\.ckpt')]
+
+        for src, tgt in TranslationFileTextIterator(self.file_path):
+            src_tokens = self.linq_tk.encode(src, add_start_end=True)
+            tgt_tokens = self.tsql_tk.encode(tgt, add_start_end=True)
+            yield src_tokens, tgt_tokens
+
+#def copy_last_cpk():
+
+
 
 
 def test():
@@ -116,5 +136,5 @@ if __name__ == '__main__':
         prepare_data()
         sys.exit(0)
     if args.test:
-        evalute()
+        evaluate()
         sys.exit(0)
