@@ -265,7 +265,7 @@ def load_model(model_type, checkpoint_path="./output", model_name=None, **kwargs
     model_name = model_type.__name__ if model_name is None else model_name
     pretrained_filename = os.path.join(checkpoint_path, f"{model_name}.ckpt")
     if os.path.isfile(pretrained_filename):
-        info("Found pretrained model, loading...")
+        info(f"Found pretrained model, loading {model_name}...")
         model = model_type(**kwargs)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         return model.load_from_checkpoint(pretrained_filename).to(device)
@@ -298,7 +298,7 @@ def start_train(model_type,
     # Check whether pretrained model exists. If yes, load it and skip training
     pretrained_filename = os.path.join(checkpoint_path, f"{model_name}.ckpt")
     if os.path.isfile(pretrained_filename):
-        info("Found pretrained model, loading...")
+        info(f"Found pretrained model, loading {model_name}...")
         model = model_type.load_from_checkpoint(pretrained_filename, **kwargs)
     else:
         model = model_type(**kwargs)
@@ -340,3 +340,4 @@ def copy_last_ckpt(model_name='BpeTranslator'):
     _, ckpt = min(ckpts, key=lambda tup: tup[0])
     print(f"{ckpt=}")
     shutil.copy(ckpt, './output/%s.ckpt' % model_name)
+    print(f"{model_name=}")
