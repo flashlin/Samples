@@ -4,6 +4,7 @@ import sys
 from ml.lit import start_train, load_model, copy_last_ckpt
 from ml.bpe_seq2seq_net import BpeTranslator
 from ml.bpe_tokenizer import SimpleTokenizer
+from ml.token_type_seq2seq_net import TokenTypeTranslator
 from utils.tsql_tokenizr import tsql_tokenize
 
 
@@ -14,18 +15,18 @@ def get_args():
         sys.exit(1)
     parser.add_argument("-p", "--prepare", help="optional prepare data", dest="prepare", action='store_true')
     parser.add_argument("-t", "--train", help="optional train data", dest="train", action='store_true')
-    parser.add_argument("-e", "--test", help="optional test", dest="test", action='store_true')
+    parser.add_argument("-e", "--evaluate", help="optional evaluate", dest="evaluate", action='store_true')
     parser.add_argument("-c", "--copy", help="optional copy ckpt", dest="copy", action='store_true')
     return parser.parse_args()
 
 
 model_type = BpeTranslator
+# model_type = TokenTypeTranslator
 
 
 def prepare_data():
-    print(f"start preparing data")
+    print(f"start preparing data for {model_type.__name__}")
     model_type.prepare_train_data()
-    # MntTranslator.prepare_train_data()
 
 
 def train():
@@ -69,9 +70,9 @@ if __name__ == '__main__':
     if args.prepare:
         prepare_data()
         sys.exit(0)
-    if args.test:
+    if args.evaluate:
         evaluate()
         sys.exit(0)
     if args.copy:
-        copy_last_ckpt()
+        copy_last_ckpt(model_type.__name__)
         sys.exit(0)
