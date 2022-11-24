@@ -131,7 +131,7 @@ translate_options = TranslateOptions(
     unk_idx=tk.unk_idx,
     num_epochs=100,
     decode_fn=tk.decode,
-    train_dataset=TranslationDataset("./output/linq-sample.csv", tk.padding_idx)
+    train_dataset=lambda: TranslationDataset("./output/linq-sample.csv", tk.padding_idx)
 )
 
 
@@ -166,8 +166,7 @@ class MntTranslator(BaseLightning):
                               encoding_size=options.encoding_size,
                               target_bos_index=options.bos_idx)
         self.criterion = sequence_loss
-        self.init_dataloader(options.train_dataset, 1)
-        self.vectorizer = options.train_dataset.get_vectorizer()
+        self.init_dataloader(options.train_dataset(), 1)
         self.sample_probability = None
 
     @staticmethod
@@ -189,12 +188,12 @@ class MntTranslator(BaseLightning):
         return y_pred, tgt
 
     def _calculate_loss(self, data, mode="train"):
-        (logits, tgt), batch = data
+        (logits, tgt), batch_idx = data
         loss = self.criterion(logits, tgt, self.options.mask_index)
         self.log("%s_loss" % mode, loss)
         return loss
 
     def infer(self, text):
-        # tgt_values = self.model.inference(text)
-        # tgt_text = self.options.decode_fn(tgt_values)
-        return text
+        tgt_values = self.model.inference(text)
+        tgt_text = self.options.decode_fn(tgt_values)
+        return tgt_text
