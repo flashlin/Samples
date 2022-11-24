@@ -24,7 +24,6 @@ class TranslationFileTextIterator:
                     yield src, tgt
 
 
-
 class TranslationFileIterator:
     def __init__(self, file_path):
         self.file_path = file_path
@@ -41,6 +40,16 @@ class TranslationFileIterator:
 
 def int_list_to_str(alist):
     return ','.join([str(n) for n in alist])
+
+
+def write_train_csv_file(translation_file_encode_iterator, output_csv_file):
+    with open(output_csv_file, "w", encoding='UTF-8') as csv:
+        csv.write('src\ttgt\n')
+        for src, tgt in translation_file_encode_iterator:
+            csv.write(int_list_to_str(src))
+            csv.write('\t')
+            csv.write(int_list_to_str(tgt))
+            csv.write('\n')
 
 
 def convert_translation_file_to_csv(txt_file_path: str = "../data/linq-sample.txt",
@@ -70,7 +79,13 @@ def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
 
 
-def pad_data_loader(dataset, batch_size=32, **kwargs):
+def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
+    def pad_collate(batch):
+        (enc_input, dec_input, dec_output) = zip(*batch)
+        enc_input_pad = torch.nn.utils.rnn.pad_sequence(enc_input, batch_first=True, padding_value=padding_idx)
+        dec_input_pad = torch.nn.utils.rnn.pad_sequence(dec_input, batch_first=True, padding_value=padding_idx)
+        dec_output_pad = torch.nn.utils.rnn.pad_sequence(dec_output, batch_first=True, padding_value=padding_idx)
+        return enc_input_pad, dec_input_pad, dec_output_pad
     return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
 
 
@@ -97,8 +112,8 @@ class Seq2SeqDataset(Dataset):
         train_size = int(0.8 * len(self))
         val_size = len(self) - train_size
         train_data, val_data = random_split(self, [train_size, val_size])
-        train_loader = pad_data_loader(train_data, batch_size=batch_size)
-        val_loader = pad_data_loader(val_data, batch_size=batch_size)
+        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=PAD_TOKEN_VALUE)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=PAD_TOKEN_VALUE)
         return train_loader, val_loader
 
 
@@ -125,37 +140,19 @@ class TranslationDataset(Dataset):
         train_size = int(0.8 * len(self))
         val_size = len(self) - train_size
         train_data, val_data = random_split(self, [train_size, val_size])
-        train_loader = TranslationDataset.pad_data_loader(train_data, batch_size=batch_size)
-        # train_loader = DataLoader(train_data, batch_size=batch_size)
-        val_loader = TranslationDataset.pad_data_loader(val_data, batch_size=batch_size)
-        # val_loader = DataLoader(val_data, batch_size=batch_size)
+        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=self.padding_idx)
         return train_loader, val_loader
 
-    @staticmethod
-    def pad_data_loader(dataset, batch_size=32, **kwargs):
-        return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=TranslationDataset.pad_collate, **kwargs)
+    # @staticmethod
+    # def get_lens(batch):
+    #     lens = [len(row) for row in batch]
+    #     return lens
 
-    @staticmethod
-    def pad_collate(batch):
-        (enc_input, dec_input, dec_output) = zip(*batch)
-        # enc_input_lens = TranslationDataset.get_lens(enc_input)
-        # dec_input_lens = TranslationDataset.get_lens(dec_input)
-        # dec_input_lens = TranslationDataset.get_lens(dec_output)
-        enc_input_pad = torch.nn.utils.rnn.pad_sequence(enc_input, batch_first=True, padding_value=PAD_TOKEN_VALUE)
-        dec_input_pad = torch.nn.utils.rnn.pad_sequence(dec_input, batch_first=True, padding_value=PAD_TOKEN_VALUE)
-        dec_output_pad = torch.nn.utils.rnn.pad_sequence(dec_output, batch_first=True, padding_value=PAD_TOKEN_VALUE)
-        return enc_input_pad, dec_input_pad, dec_output_pad
-
-    @staticmethod
-    def get_lens(batch):
-        lens = [len(row) for row in batch]
-        return lens
-
-
-def pad_collate(batch):
-    (xx, yy) = zip(*batch)
-    x_lens = [len(x) for x in xx]
-    y_lens = [len(y) for y in yy]
-    xx_pad = torch.nn.utils.rnn.pad_sequence(xx, batch_first=True, padding_value=0)
-    yy_pad = torch.nn.utils.rnn.pad_sequence(yy, batch_first=True, padding_value=0)
-    return xx_pad, yy_pad, x_lens, y_lens
+# def pad_collate(batch):
+#     (xx, yy) = zip(*batch)
+#     x_lens = [len(x) for x in xx]
+#     y_lens = [len(y) for y in yy]
+#     xx_pad = torch.nn.utils.rnn.pad_sequence(xx, batch_first=True, padding_value=0)
+#     yy_pad = torch.nn.utils.rnn.pad_sequence(yy, batch_first=True, padding_value=0)
+#     return xx_pad, yy_pad, x_lens, y_lens

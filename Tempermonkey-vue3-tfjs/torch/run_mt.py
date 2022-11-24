@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from ml.lit import start_train, load_model, copy_last_ckpt
-from ml.bpe_seq2seq_net import BpeTranslator, write_train_csv_file
+from ml.bpe_seq2seq_net import BpeTranslator
 from ml.bpe_tokenizer import SimpleTokenizer
 from utils.tsql_tokenizr import tsql_tokenize
 
@@ -21,17 +21,20 @@ def get_args():
 
 def prepare_data():
     print(f"start preparing data")
-    write_train_csv_file()
+    BpeTranslator.prepare_train_data()
+    # MntTranslator.prepare_train_data()
 
 
 def train():
     print(f"start training")
     start_train(BpeTranslator, device='cuda', max_epochs=100)
+    # start_train(MntTranslator, device='cuda', max_epochs=100)
 
 
 def evaluate():
     print(f"test")
     model = load_model(BpeTranslator)
+    # model = load_model(MntTranslator)
 
     def inference(text):
         print(text)
