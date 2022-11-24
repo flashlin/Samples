@@ -53,7 +53,7 @@ class BpeTranslator(BaseLightning):
         return logits, dec_outputs
 
     def _calculate_loss(self, data, mode="train"):
-        (logits, dec_outputs), batch = data
+        (logits, dec_outputs), batch_idx = data
         loss = self.criterion(logits, dec_outputs.view(-1))
         self.log("%s_loss" % mode, loss)
         return loss
