@@ -21,7 +21,7 @@ def get_args():
 
 
 model_type = BpeTranslator
-# model_type = TokenTypeTranslator
+model_type = TokenTypeTranslator
 
 
 def prepare_data():
