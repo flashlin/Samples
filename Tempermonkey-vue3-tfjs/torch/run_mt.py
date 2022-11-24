@@ -21,6 +21,7 @@ def get_args():
 
 model_type = BpeTranslator
 
+
 def prepare_data():
     print(f"start preparing data")
     model_type.prepare_train_data()
@@ -36,6 +37,7 @@ def train():
 def evaluate():
     print(f"test")
     model = load_model(model_type)
+
     # model = load_model(MntTranslator)
 
     def inference(text):
