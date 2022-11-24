@@ -24,7 +24,7 @@ class NMTModel(nn.Module):
         :return:
         """
 
-        super(NMTModel, self).__init__()
+        super().__init__()
 
         self.encoder = NMTEncoder(num_embeddings=source_vocab_size,
                                   embedding_size=source_embedding_size,
@@ -58,7 +58,7 @@ class NMTEncoder(nn.Module):
         :param embedding_size: int, size of embedding vectors
         :param rnn_hidden_size: int, size of the RNN hidden state vectors
         """
-        super(NMTEncoder, self).__init__()
+        super().__init__()
         self.source_embedding = nn.Embedding(num_embeddings=num_embeddings, embedding_dim=embedding_size, padding_idx=0)
         self.birnn = nn.GRU(embedding_size, rnn_hidden_size, bidirectional=True, batch_first=True)
 
