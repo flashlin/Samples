@@ -19,21 +19,23 @@ def get_args():
     return parser.parse_args()
 
 
+model_type = BpeTranslator
+
 def prepare_data():
     print(f"start preparing data")
-    BpeTranslator.prepare_train_data()
+    model_type.prepare_train_data()
     # MntTranslator.prepare_train_data()
 
 
 def train():
     print(f"start training")
-    start_train(BpeTranslator, device='cuda', max_epochs=100)
+    start_train(model_type, device='cuda', max_epochs=100)
     # start_train(MntTranslator, device='cuda', max_epochs=100)
 
 
 def evaluate():
     print(f"test")
-    model = load_model(BpeTranslator)
+    model = load_model(model_type)
     # model = load_model(MntTranslator)
 
     def inference(text):
