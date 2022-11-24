@@ -13,6 +13,7 @@ def get_args():
     if len(sys.argv) == 1:
         parser.print_help(sys.stderr)
         sys.exit(1)
+    parser.add_argument("-n", "--name", help="model name BpeTranslator TokenTypeTranslator", dest="model_name")
     parser.add_argument("-p", "--prepare", help="optional prepare data", dest="prepare", action='store_true')
     parser.add_argument("-t", "--train", help="optional train data", dest="train", action='store_true')
     parser.add_argument("-e", "--evaluate", help="optional evaluate", dest="evaluate", action='store_true')
@@ -20,26 +21,20 @@ def get_args():
     return parser.parse_args()
 
 
-model_type = BpeTranslator
-model_type = TokenTypeTranslator
-
-
-def prepare_data():
+def prepare_data(model_type):
     print(f"start preparing data for {model_type.__name__}")
     model_type.prepare_train_data()
 
 
-def train():
+def train(model_type):
     print(f"start training")
     start_train(model_type, device='cuda', max_epochs=100)
     # start_train(MntTranslator, device='cuda', max_epochs=100)
 
 
-def evaluate():
+def evaluate(model_type):
     print(f"test")
     model = load_model(model_type)
-
-    # model = load_model(MntTranslator)
 
     def inference(text):
         print(text)
@@ -61,17 +56,22 @@ def test():
     print(f"{sql2=}")
 
 
+def str_to_class(class_name):
+    return getattr(sys.modules[__name__], class_name)
+
+
 if __name__ == '__main__':
     # test()
     args = get_args()
+    model_type = str_to_class(args.model_name)
     if args.train:
-        train()
+        train(model_type)
         sys.exit(0)
     if args.prepare:
-        prepare_data()
+        prepare_data(model_type)
         sys.exit(0)
     if args.evaluate:
-        evaluate()
+        evaluate(model_type)
         sys.exit(0)
     if args.copy:
         copy_last_ckpt(model_type.__name__)
