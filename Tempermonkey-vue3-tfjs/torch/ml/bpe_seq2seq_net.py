@@ -14,7 +14,7 @@ tk = SimpleTokenizer(None)
 
 
 @dataclass(frozen=True)
-class BpeTranslateOptions:
+class TranslateOptions:
     src_vocab_size: int
     tgt_vocab_size: int
     bos_idx: int
@@ -24,7 +24,7 @@ class BpeTranslateOptions:
     train_dataset: Dataset
 
 
-bpe_translate_options = BpeTranslateOptions(
+bpe_translate_options = TranslateOptions(
     src_vocab_size=tk.vocab_size,
     tgt_vocab_size=tk.vocab_size,
     bos_idx=tk.bos_idx,
