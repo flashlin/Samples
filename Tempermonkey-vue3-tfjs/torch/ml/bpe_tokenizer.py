@@ -130,8 +130,8 @@ class SimpleTokenizer(object):
         bpe_tokens = []
         tokens = self.tokenize_fn(text)
         for token in tokens:
-            token = ''.join(self.byte_encoder[b] for b in token.text.encode('utf-8'))
-            bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token).split(' '))
+            token_text = ''.join(self.byte_encoder[b] for b in token.text.encode('utf-8'))
+            bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token_text).split(' '))
         if add_start_end:
             bpe_tokens = [self.bos_idx] + bpe_tokens + [self.eos_idx]
         return bpe_tokens
