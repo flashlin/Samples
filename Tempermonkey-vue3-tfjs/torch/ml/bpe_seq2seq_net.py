@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 
 from ml.lit import BaseLightning
 from ml.seq2seq_model import Seq2SeqTransformer
-from ml.simple_bpe import SimpleTokenizer
+from ml.bpe_tokenizer import SimpleTokenizer
 from preprocess_data import TranslationDataset, TranslationFileTextIterator, int_list_to_str
 from utils.linq_tokenizr import linq_tokenize
 from utils.tsql_tokenizr import tsql_tokenize

@@ -1,4 +1,4 @@
-from ml.simple_bpe import SimpleTokenizer
+from ml.bpe_tokenizer import SimpleTokenizer
 from utils.linq_tokenizr import linq_tokenize
 
 if __name__ == '__main__':

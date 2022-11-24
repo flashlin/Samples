@@ -3,7 +3,7 @@ import sys
 
 from ml.lit import start_train, load_model, copy_last_ckpt
 from ml.bpe_seq2seq_net import BpeTranslator, write_train_csv_file
-from ml.simple_bpe import SimpleTokenizer
+from ml.bpe_tokenizer import SimpleTokenizer
 from utils.tsql_tokenizr import tsql_tokenize
 
 
