@@ -56,6 +56,8 @@ def basic_clean(text):
 BOS_SYMBOL = '<start_of_text>'
 EOS_SYMBOL = '<end_of_text>'
 PAD_SYMBOL = '<pad>'
+MASK_SYMBOL = '<mask>'
+UNK_SYMBOL = '<unk>'
 
 
 class SimpleTokenizer(object):
@@ -70,19 +72,26 @@ class SimpleTokenizer(object):
         vocab = vocab + [v + '</w>' for v in vocab]
         for merge in merges:
             vocab.append(''.join(merge))
-        vocab.extend([BOS_SYMBOL, EOS_SYMBOL, PAD_SYMBOL])
+        vocab.extend([BOS_SYMBOL, EOS_SYMBOL, PAD_SYMBOL, MASK_SYMBOL, UNK_SYMBOL])
 
         # self.vocab_size = 49408
         self.vocab = vocab
         self.vocab_size, self.encoder, self.decoder = self.calculate_encoder_decoder(vocab)
         self.bpe_ranks = dict(zip(merges, range(len(merges))))
-        self.cache = {BOS_SYMBOL: BOS_SYMBOL, EOS_SYMBOL: EOS_SYMBOL, PAD_SYMBOL: PAD_SYMBOL}
+        self.cache = {BOS_SYMBOL: BOS_SYMBOL,
+                      EOS_SYMBOL: EOS_SYMBOL,
+                      PAD_SYMBOL: PAD_SYMBOL,
+                      MASK_SYMBOL: MASK_SYMBOL,
+                      UNK_SYMBOL: UNK_SYMBOL
+                      }
         # self.pattern = re.compile(
         #     r"""<start_of_text>|<end_of_text>""",
         #     re.IGNORECASE)
         self.bos_idx = self.encoder[BOS_SYMBOL]
         self.eos_idx = self.encoder[EOS_SYMBOL]
         self.padding_idx = self.encoder[PAD_SYMBOL]
+        self.mask_idx = self.encoder[MASK_SYMBOL]
+        self.unk_idx = self.encoder[UNK_SYMBOL]
 
     def calculate_encoder_decoder(self, vocab):
         encoder = dict(zip(vocab, range(len(vocab))))
