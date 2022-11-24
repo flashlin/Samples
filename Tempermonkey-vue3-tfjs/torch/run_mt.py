@@ -4,6 +4,7 @@ import sys
 from ml.lit import start_train, load_model, copy_last_ckpt
 from ml.bpe_seq2seq_net import BpeTranslator
 from ml.bpe_tokenizer import SimpleTokenizer
+from ml.mnt_net import MntTranslator
 from ml.token_type_seq2seq_net import TokenTypeTranslator
 from utils.tsql_tokenizr import tsql_tokenize
 

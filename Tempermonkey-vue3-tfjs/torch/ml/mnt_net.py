@@ -1,14 +1,14 @@
 import pandas as pd
 import torch
-from torch.utils.data import Dataset, random_split
+from torch.utils.data import Dataset, random_split, DataLoader
 import torch.nn.functional as F
 from ml.bpe_tokenizer import SimpleTokenizer
 from ml.lit import BaseLightning
-from mnt_model import NMTModel
+from ml.mnt_model import NMTModel
 from dataclasses import dataclass, field
 from typing import Callable
 
-from preprocess_data import TranslationFileTextIterator, write_train_csv_file, TranslationDataset, int_list_to_str, \
+from preprocess_data import TranslationFileTextIterator, TranslationDataset, int_list_to_str, \
     df_to_values, pad_array, pad_data_loader
 from utils.linq_tokenizr import linq_tokenize
 from utils.stream import Token
@@ -16,9 +16,10 @@ from utils.tsql_tokenizr import tsql_tokenize
 
 
 class MntTokenizer(SimpleTokenizer):
-    def __init__(self):
-        super().__init__()
-        token_types = [Token.Identifier, Token.String, Token.Number, Token.Spaces, Token.Symbol, Token.Keyword]
+    def __init__(self, tokenize_fn):
+        super().__init__(tokenize_fn)
+        token_types = [Token.Identifier, Token.String,
+                       Token.Number, Token.Spaces, Token.Symbol, Token.Keyword, Token.Operator]
         self.vocab.extend(token_types)
         self.vocab_size, self.encoder, self.decoder = self.calculate_encoder_decoder(self.vocab)
         for token_type in token_types:
@@ -26,7 +27,7 @@ class MntTokenizer(SimpleTokenizer):
 
     def encode(self, text, add_start_end=False):
         def add_to_bpe_tokens(a_token):
-            bpe_tokens.extend(self.encoder[a_token.type])
+            bpe_tokens.extend([self.encoder[a_token.type]])
             token_text = ''.join(self.byte_encoder[b] for b in a_token.text.encode('utf-8'))
             bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token_text).split(' '))
 
@@ -53,17 +54,27 @@ class TranslationFileEncodeIterator:
 
 
 def write_train_data():
-    with open('./output/lin-sample.csv', "w", encoding='UTF-8') as csv:
+    with open('./output/linq-sample.csv', "w", encoding='UTF-8') as csv:
         csv.write('src\tsrc_len\ttgt\ttgt_len\n')
         for src, src_len, tgt, tgt_len in TranslationFileEncodeIterator('../data/linq-sample.txt'):
             csv.write(int_list_to_str(src))
             csv.write('\t')
-            csv.write(src_len)
+            csv.write(f'{src_len}')
             csv.write('\t')
             csv.write(int_list_to_str(tgt))
             csv.write('\t')
-            csv.write(tgt_len)
+            csv.write(f'{tgt_len}')
             csv.write('\n')
+
+
+def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
+    def pad_collate(batch):
+        (src, src_len, tgt, tgt_len) = zip(*batch)
+        src_pad = torch.nn.utils.rnn.pad_sequence(src, batch_first=True, padding_value=padding_idx)
+        tgt_pad = torch.nn.utils.rnn.pad_sequence(tgt, batch_first=True, padding_value=padding_idx)
+        return src_pad, src_len, tgt_pad, tgt_len
+
+    return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
 
 
 class TranslationDataset(Dataset):
@@ -71,9 +82,9 @@ class TranslationDataset(Dataset):
         self.padding_idx = padding_idx
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
         self.src = df_to_values(df['src'])
-        self.src_len = df_to_values(df['src_len'])
+        self.src_len = df['src_len']
         self.tgt = df_to_values(df['tgt'])
-        self.tgt_len = df_to_values(df['tgt_len'])
+        self.tgt_len = df['tgt_len']
 
     def __len__(self):
         return len(self.src)
@@ -83,9 +94,9 @@ class TranslationDataset(Dataset):
         src_len = self.src_len[idx]
         tgt = self.tgt[idx]
         tgt_len = self.tgt_len[idx]
-        # max_len = max(src_len, tgt_len)
-        # enc_input = torch.tensor(pad_array(src[1:-1], self.padding_idx, max_len), dtype=torch.long)
-        # dec_input = torch.tensor(pad_array(tgt[:-1], self.padding_idx, max_len), dtype=torch.long)
+        max_len = max(src_len, tgt_len)
+        src = torch.tensor(pad_array(src, self.padding_idx, max_len), dtype=torch.long)
+        tgt = torch.tensor(pad_array(tgt, self.padding_idx, max_len), dtype=torch.long)
         # dec_output = torch.tensor(pad_array(tgt[1:], self.padding_idx, max_len), dtype=torch.long)
         return src, src_len, tgt, tgt_len
 
@@ -93,10 +104,9 @@ class TranslationDataset(Dataset):
         train_size = int(0.8 * len(self))
         val_size = len(self) - train_size
         train_data, val_data = random_split(self, [train_size, val_size])
-        train_loader = pad_data_loader(train_data, batch_size=batch_size)
-        val_loader = pad_data_loader(val_data, batch_size=batch_size)
+        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=self.padding_idx)
         return train_loader, val_loader
-
 
 
 @dataclass(frozen=True)
