@@ -1,10 +1,102 @@
-from torch.utils.data import Dataset
+import pandas as pd
+import torch
+from torch.utils.data import Dataset, random_split
 import torch.nn.functional as F
 from ml.bpe_tokenizer import SimpleTokenizer
 from ml.lit import BaseLightning
 from mnt_model import NMTModel
 from dataclasses import dataclass, field
 from typing import Callable
+
+from preprocess_data import TranslationFileTextIterator, write_train_csv_file, TranslationDataset, int_list_to_str, \
+    df_to_values, pad_array, pad_data_loader
+from utils.linq_tokenizr import linq_tokenize
+from utils.stream import Token
+from utils.tsql_tokenizr import tsql_tokenize
+
+
+class MntTokenizer(SimpleTokenizer):
+    def __init__(self):
+        super().__init__()
+        token_types = [Token.Identifier, Token.String, Token.Number, Token.Spaces, Token.Symbol, Token.Keyword]
+        self.vocab.extend(token_types)
+        self.vocab_size, self.encoder, self.decoder = self.calculate_encoder_decoder(self.vocab)
+        for token_type in token_types:
+            self.cache[token_type] = token_type
+
+    def encode(self, text, add_start_end=False):
+        def add_to_bpe_tokens(a_token):
+            bpe_tokens.extend(self.encoder[a_token.type])
+            token_text = ''.join(self.byte_encoder[b] for b in a_token.text.encode('utf-8'))
+            bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token_text).split(' '))
+
+        bpe_tokens = []
+        tokens = self.tokenize_fn(text)
+        for token in tokens:
+            add_to_bpe_tokens(token)
+        if add_start_end:
+            bpe_tokens = [self.bos_idx] + bpe_tokens + [self.eos_idx]
+        return bpe_tokens
+
+
+class TranslationFileEncodeIterator:
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.linq_tk = MntTokenizer(linq_tokenize)
+        self.tsql_tk = MntTokenizer(tsql_tokenize)
+
+    def __iter__(self):
+        for src, tgt in TranslationFileTextIterator(self.file_path):
+            src_tokens = self.linq_tk.encode(src, add_start_end=True)
+            tgt_tokens = self.tsql_tk.encode(tgt, add_start_end=True)
+            yield src_tokens, len(src_tokens), tgt_tokens, len(tgt_tokens)
+
+
+def write_train_data():
+    with open('./output/lin-sample.csv', "w", encoding='UTF-8') as csv:
+        csv.write('src\tsrc_len\ttgt\ttgt_len\n')
+        for src, src_len, tgt, tgt_len in TranslationFileEncodeIterator('../data/linq-sample.txt'):
+            csv.write(int_list_to_str(src))
+            csv.write('\t')
+            csv.write(src_len)
+            csv.write('\t')
+            csv.write(int_list_to_str(tgt))
+            csv.write('\t')
+            csv.write(tgt_len)
+            csv.write('\n')
+
+
+class TranslationDataset(Dataset):
+    def __init__(self, csv_file_path, padding_idx):
+        self.padding_idx = padding_idx
+        self.df = df = pd.read_csv(csv_file_path, sep='\t')
+        self.src = df_to_values(df['src'])
+        self.src_len = df_to_values(df['src_len'])
+        self.tgt = df_to_values(df['tgt'])
+        self.tgt_len = df_to_values(df['tgt_len'])
+
+    def __len__(self):
+        return len(self.src)
+
+    def __getitem__(self, idx):
+        src = self.src[idx]
+        src_len = self.src_len[idx]
+        tgt = self.tgt[idx]
+        tgt_len = self.tgt_len[idx]
+        # max_len = max(src_len, tgt_len)
+        # enc_input = torch.tensor(pad_array(src[1:-1], self.padding_idx, max_len), dtype=torch.long)
+        # dec_input = torch.tensor(pad_array(tgt[:-1], self.padding_idx, max_len), dtype=torch.long)
+        # dec_output = torch.tensor(pad_array(tgt[1:], self.padding_idx, max_len), dtype=torch.long)
+        return src, src_len, tgt, tgt_len
+
+    def create_dataloader(self, batch_size=32):
+        train_size = int(0.8 * len(self))
+        val_size = len(self) - train_size
+        train_data, val_data = random_split(self, [train_size, val_size])
+        train_loader = pad_data_loader(train_data, batch_size=batch_size)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size)
+        return train_loader, val_loader
+
 
 
 @dataclass(frozen=True)
@@ -39,7 +131,7 @@ translate_options = TranslateOptions(
     unk_idx=tk.unk_idx,
     num_epochs=100,
     decode_fn=tk.decode,
-    train_dataset=TranslationDataset("./output/linq-sample2.csv", tk.padding_idx)
+    train_dataset=TranslationDataset("./output/linq-sample.csv", tk.padding_idx)
 )
 
 
@@ -78,6 +170,10 @@ class MntTranslator(BaseLightning):
         self.vectorizer = options.train_dataset.get_vectorizer()
         self.sample_probability = None
 
+    @staticmethod
+    def prepare_train_data():
+        write_train_data()
+
     def training_step(self, batch, batch_idx):
         self.sample_probability = (20 + batch_idx) / self.options.num_epochs
         outputs = self(batch)
@@ -99,6 +195,6 @@ class MntTranslator(BaseLightning):
         return loss
 
     def infer(self, text):
-        #tgt_values = self.model.inference(text)
-        #tgt_text = self.options.decode_fn(tgt_values)
+        # tgt_values = self.model.inference(text)
+        # tgt_text = self.options.decode_fn(tgt_values)
         return text

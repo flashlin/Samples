@@ -73,9 +73,8 @@ class SimpleTokenizer(object):
         vocab.extend([BOS_SYMBOL, EOS_SYMBOL, PAD_SYMBOL])
 
         # self.vocab_size = 49408
-        self.encoder = dict(zip(vocab, range(len(vocab))))
-        self.vocab_size = len(self.encoder)
-        self.decoder = {v: k for k, v in self.encoder.items()}
+        self.vocab = vocab
+        self.vocab_size, self.encoder, self.decoder = self.calculate_encoder_decoder(vocab)
         self.bpe_ranks = dict(zip(merges, range(len(merges))))
         self.cache = {BOS_SYMBOL: BOS_SYMBOL, EOS_SYMBOL: EOS_SYMBOL, PAD_SYMBOL: PAD_SYMBOL}
         # self.pattern = re.compile(
@@ -84,6 +83,12 @@ class SimpleTokenizer(object):
         self.bos_idx = self.encoder[BOS_SYMBOL]
         self.eos_idx = self.encoder[EOS_SYMBOL]
         self.padding_idx = self.encoder[PAD_SYMBOL]
+
+    def calculate_encoder_decoder(self, vocab):
+        encoder = dict(zip(vocab, range(len(vocab))))
+        vocab_size = len(encoder)
+        decoder = {v: k for k, v in encoder.items()}
+        return vocab_size, encoder, decoder
 
     def bpe(self, token):
         if token in self.cache:
