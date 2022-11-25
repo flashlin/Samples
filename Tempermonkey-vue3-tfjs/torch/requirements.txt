@@ -5,4 +5,4 @@ pytorch-lightning
 tensorboard
 #pytorch-transformers
 #transformers
-tensorflow
+mlperf_compliance
