@@ -9,7 +9,8 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from preprocess_data import TranslationFileTextIterator, TranslationDataset, int_list_to_str, \
-    df_to_values, pad_array, pad_data_loader
+    df_to_values, pad_data_loader
+from utils.data_ex import pad_array
 from utils.linq_tokenizr import linq_tokenize
 from utils.stream import Token
 from utils.tsql_tokenizr import tsql_tokenize
