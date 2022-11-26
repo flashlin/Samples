@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
 import torch
-from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from common.io import info
+from utils.data_ex import df_to_values, pad_array
 from utils.linq_tokenizr import linq_encode
 from utils.stream import int_list_to_str
 from utils.tokenizr import PAD_TOKEN_VALUE
@@ -66,12 +65,6 @@ def pad_seq(seq, fill_value, max_length):
     return seq + [fill_value] * (max_length - len(seq))
 
 
-def pad_array(arr, fill_value, max_length, d_type=np.long):
-    arr_len = len(arr)
-    new_arr = np.pad(arr, (0, max_length - arr_len), 'constant', constant_values=fill_value)
-    return np.array(new_arr, dtype=d_type)
-
-
 def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))
 
@@ -86,8 +79,6 @@ def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
     return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
 
 
-def df_to_values(df):
-    return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.long))
 
 
 class Seq2SeqDataset(Dataset):

@@ -4,8 +4,13 @@ import re
 import random
 import string
 
+import pandas as pd
+import torch
+from torch.utils.data import Dataset, random_split, DataLoader
+
 from common.io import info
 from preprocess_data import TranslationFileTextIterator
+from utils.data_ex import df_to_values, pad_array
 from utils.linq_tokenizr import linq_tokenize
 from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str
 from utils.template_utils import TemplateText
@@ -52,16 +57,16 @@ def read_examples(example_file):
             yield tokens
 
 
-def read_examples_to_tokens_tuple(example_file):
+def read_examples_to_tokens3(example_file):
     for idx, tokens in enumerate(read_examples(example_file)):
         if idx % 3 == 0:
             src_tokens = tokens
             continue
         if idx % 3 == 1:
-            decode1_tokens = tokens
+            tgt1_tokens = tokens
             continue
-        decode2_tokens = tokens
-        yield src_tokens, decode1_tokens, decode2_tokens
+        tgt2_tokens = tokens
+        yield src_tokens, tgt1_tokens, tgt2_tokens
 
 
 def split_space(line):
@@ -134,23 +139,62 @@ def decode_tgt_to_text(text):
 
 
 def write_train_files(target_path="./output"):
-    def write_train_data(mode, src, de1_values, de2_values):
-        with open(f"{target_path}\\linq_sql-{mode}.txt", "a+", encoding='UTF-8') as f:
-            f.write(int_list_to_str(src))
-            f.write('\n')
-            f.write(int_list_to_str(de1_values))
-            f.write('\n')
-            f.write(int_list_to_str(de2_values))
+    def write_train_data():
+        f.write(int_list_to_str(src_values))
+        f.write('\t')
+        f.write(int_list_to_str(tgt1_values))
+        f.write('\t')
+        f.write(int_list_to_str(tgt2_values))
 
-    remove_file(f"{target_path}\\src-train.txt")
-    remove_file(f"{target_path}\\src-val.txt")
+    remove_file(f"{target_path}\\linq_sql.csv")
     file = get_data_file_path("linq_classification.txt")
-    for (src, de1, de2) in read_examples_to_tokens_tuple(file):
-        src_values = encode_src(src)
-        de1_values = encode_src(de1)
-        de2_values = encode_tgt(de2)
-        mode = 'train' if random.randint(1, 10) >= 3 else 'val'
-        write_train_data(mode, src_values, de1_values, de2_values)
+    with open(f"{target_path}\\linq_sql.csv", "w", encoding='UTF-8') as f:
+        f.write("src\ttgt1\ttgt2")
+        for (src, tgt1, tgt2) in read_examples_to_tokens3(file):
+            src_values = encode_src(src)
+            tgt1_values = encode_src(tgt1)
+            tgt2_values = encode_tgt(tgt2)
+            write_train_data(src_values, tgt1_values, tgt2_values)
+
+
+def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
+    def pad_collate(batch):
+        (src_input, dec_input, dec_output) = zip(*batch)
+        enc_input_pad = torch.nn.utils.rnn.pad_sequence(src_input, batch_first=True, padding_value=padding_idx)
+        dec_input_pad = torch.nn.utils.rnn.pad_sequence(dec_input, batch_first=True, padding_value=padding_idx)
+        dec_output_pad = torch.nn.utils.rnn.pad_sequence(dec_output, batch_first=True, padding_value=padding_idx)
+        return enc_input_pad, dec_input_pad, dec_output_pad
+
+    return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
+
+
+class TranslationDataset(Dataset):
+    def __init__(self, csv_file_path, padding_idx):
+        self.padding_idx = padding_idx
+        self.df = df = pd.read_csv(csv_file_path, sep='\t')
+        self.src = df_to_values(df['src'])
+        self.tgt1 = df_to_values(df['tgt1'])
+        self.tgt2 = df_to_values(df['tgt2'])
+
+    def __len__(self):
+        return len(self.src)
+
+    def __getitem__(self, idx):
+        src = self.src[idx]
+        tgt = self.tgt[idx]
+        max_len = max(len(src), len(tgt))
+        enc_input = torch.tensor(pad_array(src[1:-1], self.padding_idx, max_len), dtype=torch.long)
+        dec_input = torch.tensor(pad_array(tgt[:-1], self.padding_idx, max_len), dtype=torch.long)
+        dec_output = torch.tensor(pad_array(tgt[1:], self.padding_idx, max_len), dtype=torch.long)
+        return enc_input, dec_input, dec_output
+
+    def create_dataloader(self, batch_size=32):
+        train_size = int(0.8 * len(self))
+        val_size = len(self) - train_size
+        train_data, val_data = random_split(self, [train_size, val_size])
+        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        return train_loader, val_loader
 
 
 """
@@ -161,19 +205,6 @@ def filter_tokens(tokens):
     for token in tokens:
         if replace_many_spaces(token.text) != ' ':
             yield token.text
-
-
-class TranslationTokensIterator:
-    def __init__(self, file_path):
-        self.file_path = file_path
-
-    def __iter__(self):
-        for src, tgt in TranslationFileTextIterator(self.file_path):
-            src_tokens = linq_tokenize(src)
-            tgt_tokens = tsql_tokenize(tgt)
-            src = ' '.join(x for x in filter_tokens(src_tokens))
-            tgt = ' '.join(x for x in filter_tokens(tgt_tokens))
-            yield src, tgt
 
 
 def random_chars(n):
