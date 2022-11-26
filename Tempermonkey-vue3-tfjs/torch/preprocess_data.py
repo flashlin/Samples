@@ -6,6 +6,7 @@ from torch.utils.data import DataLoader, Dataset, random_split
 
 from common.io import info
 from utils.linq_tokenizr import linq_encode
+from utils.stream import int_list_to_str
 from utils.tokenizr import PAD_TOKEN_VALUE
 from utils.tsql_tokenizr import tsql_encode
 
@@ -36,10 +37,6 @@ class TranslationFileIterator:
                 else:
                     sql_values = tsql_encode(line)
                     yield linq_values, sql_values
-
-
-def int_list_to_str(alist):
-    return ','.join([str(n) for n in alist])
 
 
 def write_train_csv_file(translation_file_encode_iterator, output_csv_file):

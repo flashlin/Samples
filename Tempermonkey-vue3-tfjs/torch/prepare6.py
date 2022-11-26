@@ -46,8 +46,6 @@ def convert_translation_file_to_csv(txt_file_path: str="../data/linq-sample.txt"
             csv.write('\n')
     print(f" {max_length=}")
 
-def int_list_to_str(alist):
-    return ','.join([str(n) for n in alist])
 
 def comma_str_to_array(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.float16))

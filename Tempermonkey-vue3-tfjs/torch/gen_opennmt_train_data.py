@@ -1,9 +1,11 @@
 import os
 import random
 import re
-
+import random
+import string
 from preprocess_data import TranslationFileTextIterator
 from utils.linq_tokenizr import linq_tokenize
+from utils.template_utils import TemplateText
 from utils.tsql_tokenizr import tsql_tokenize
 
 
@@ -31,6 +33,43 @@ class TranslationTokensIterator:
             yield src, tgt
 
 
+def random_chars(n):
+    chars = "".join([random.choice(string.ascii_letters + '_') for i in range(n)])
+    return chars
+
+
+def random_digits(n):
+    digits = "".join([random.choice(string.digits) for i in range(n)])
+    return digits
+
+
+def random_any(n):
+    return "".join([random.choice(string.digits + string.ascii_letters + '_') for i in range(n)])
+
+
+def random_identifier():
+    n = random.randint(2, 40)
+    return random_chars(1) + random_any(n - 1)
+
+
+def random_template(template_text):
+    tmp = TemplateText(template_text)
+    keys = tmp.get_keys()
+    for key in keys:
+        if key.startswith('id'):
+            tmp.set_value(key, random_identifier())
+            continue
+        n = random.randint(1, 40)
+        tmp.set_value(key, random_any(n))
+    return tmp.to_string()
+
+
+def random_linq_sql_template(template_src, template_tgt):
+    template_text = template_src + '<br>' + template_tgt
+    ss = random_template(template_text).split('<br>')
+    return ss[0], ss[1]
+
+
 target_path = r'D:\demo\samples\OpenNMT-py\toy-linq_sql'
 
 
@@ -55,5 +94,25 @@ def write_train_files():
         write_train_data(mode, src, tgt)
 
 
+train_templates = [
+    'from @id1 in @id2 select @id1.@id3',
+    'SELECT [@id1].[@id3] AS [@id3] FROM [dbo].[@id2] AS [@id1] WITH(NOLOCK)',
+
+    'from @id1 in @id2 join @id4 in @id5 on @id2.@id6 equals @id1.@id7 select new { @id1.@id3, @id4.@id8 }',
+    'SELECT [@id1].[@id3] AS [@id3], [@id4].[@id8] AS [@id8] FROM [dbo].[@id2] AS [@id1] WITH(NOLOCK) '
+    'JOIN [dbo].[@id5] AS [@id4] WITH(NOLOCK) ON [@id2].[@id6] = [@id1].[@id7]',
+]
+
+
+def random_train_template():
+    for idx, text in enumerate(train_templates):
+        if idx % 2 == 0:
+            src = text
+        else:
+            tgt = text
+            yield src, tgt
+
+
 if __name__ == '__main__':
-    write_train_files()
+    # write_train_files()
+
