@@ -236,6 +236,16 @@ def read_double_quote_string(stream_iterator: StreamTokenIterator):
     return reduce_token_list(Token.String, buff)
 
 
+def read_until(stream_iterator: StreamTokenIterator, last_char):
+    buff = [stream_iterator.next()]
+    while not stream_iterator.is_done():
+        if stream_iterator.peek_str(1) == last_char:
+            break
+        token = stream_iterator.next()
+        buff.append(token)
+    return reduce_token_list(Token.String, buff)
+
+
 class SeqIterator(Generic[T]):
     def __init__(self, stream: list[T]):
         self.stream = stream
@@ -288,3 +298,7 @@ class SeqIterator(Generic[T]):
         if self.idx == 0 and self.length == 0:
             return True
         return self.idx >= self.length
+
+
+def int_list_to_str(alist):
+    return ','.join([str(n) for n in alist])

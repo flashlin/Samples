@@ -1,4 +1,5 @@
 from utils.offset_tokenizr import Linq2TSqlEmbedding
+from utils.stream import int_list_to_str
 
 
 class TranslationFileIterator:
@@ -14,10 +15,6 @@ class TranslationFileIterator:
                 else:
                     sql_tokens, sql_values = self.emb.encode_target(line, linq_tokens)
                     yield linq_values, sql_values
-
-
-def int_list_to_str(alist):
-    return ','.join([str(n) for n in alist])
 
 
 def convert_file_to_csv(
