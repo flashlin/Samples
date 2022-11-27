@@ -10,9 +10,11 @@ from torch.utils.data import Dataset, random_split, DataLoader
 
 from common.io import info, remove_file
 from ml.data_utils import get_data_file_path
-from ml.lit import BaseLightning, start_train, copy_last_ckpt
+from ml.lit import BaseLightning, start_train, copy_last_ckpt, load_model, PositionalEncoding
 from ml.model_utils import reduce_dim, detach_lstm_hidden_state
-from my_model import read_examples_to_tokens3, encode_src, encode_tgt, src_char2index, src_symbols
+from my_model import read_examples_to_tokens3, encode_src_tokens, encode_tgt_tokens, src_char2index, src_symbols, \
+    tgt_char2index, \
+    decode_src_to_text, line_to_tokens
 from utils.data_utils import df_to_values, pad_array, split_line_by_space
 from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str, replace_many_spaces
 from utils.template_utils import TemplateText
@@ -52,7 +54,7 @@ def write_train_files(max_seq_len, target_path="./output"):
     with open(target_csv_file, "w", encoding='UTF-8') as f:
         f.write("src\ttgt1\ttgt2\n")
         for (src, tgt1, tgt2) in read_examples_to_tokens3(example_file):
-            row = encode_src(src), encode_src(tgt1), encode_tgt(tgt2)
+            row = encode_src_tokens(src), encode_src_tokens(tgt1), encode_tgt_tokens(tgt2)
             for new_src, new_tgt1, new_tgt2 in pad_row_iter(row, max_seq_len, src_char2index['<pad>']):
                 assert len(new_src) == len(new_tgt1)
                 assert len(new_src) == len(new_tgt2)
@@ -102,6 +104,16 @@ class TranslationDataset(Dataset):
         return train_loader, val_loader
 
 
+PADDING_IDX = src_char2index['<pad>']
+
+
+def get_key_padding_mask(tokens):
+    key_padding_mask = torch.zeros(tokens.size()).type(torch.bool)
+    # key_padding_mask[tokens == PADDING_IDX] = -torch.inf
+    key_padding_mask = (tokens == PADDING_IDX)
+    return key_padding_mask
+
+
 class TransformerTagger(nn.Module):
     def __init__(self, src_vocab_size, embedding_dim, hidden_feature_dim, classes_num):
         super().__init__()
@@ -109,6 +121,8 @@ class TransformerTagger(nn.Module):
         self.hidden_feature_dim = hidden_feature_dim
 
         self.embedding = nn.Embedding(src_vocab_size, embedding_dim)
+        self.pos_embedding = PositionalEncoding(d_model=embedding_dim, dropout=0.1)
+
         self.transformer = nn.Transformer(d_model=embedding_dim,
                                           num_encoder_layers=7,
                                           num_decoder_layers=7,
@@ -127,9 +141,20 @@ class TransformerTagger(nn.Module):
         # self.loss_fn = nn.NLLLoss()
 
     def forward(self, x, y):
+        device = x.device
+        tgt_mask = nn.Transformer.generate_square_subsequent_mask(y.size()[-1]).to(device)
+        src_key_padding_mask = get_key_padding_mask(x).to(device)
+        tgt_key_padding_mask = get_key_padding_mask(y).to(device)
+
         x = self.embedding(x)
+        x = self.pos_embedding(x)
         y = self.embedding(y)
-        output = self.transformer(x, y)  # [batch_size, tgt_seq_len, embedding_dim]
+        y = self.pos_embedding(y)
+        output = self.transformer(x, y,
+                                  tgt_mask=tgt_mask,
+                                  src_key_padding_mask=src_key_padding_mask,
+                                  tgt_key_padding_mask=tgt_key_padding_mask
+                                  )  # [batch_size, tgt_seq_len, embedding_dim]
         # 在訓練時, 把output 的所有輸出送给Linear
         # 而在推理時, 只需要將最後一個輸出送给Linear 即可, 即 output[:-1]
         # output = reduce_dim(output)
@@ -144,11 +169,35 @@ class TransformerTagger(nn.Module):
         # info(f" loss {x.shape=} {y.shape=}")
         return self.loss_fn(x, y)
 
+    def inference(self, text, max_length):
+        self.eval()
+        device = next(self.parameters()).device
+        text_tokens = line_to_tokens(text)
+        text_values = encode_src_tokens(text_tokens)
+        src = torch.LongTensor([text_values]).to(device)
+        tgt = torch.LongTensor([[tgt_char2index['<bos>']]]).to(device)
+        for i in range(max_length):
+            out = self(src, tgt)
+            info(f" {out.shape=}")
+            last_out = out[:, -1]
+            info(f" {last_out.shape=}")
+            predict = self.linear(last_out)
+            # 找出最大值的index
+            y = torch.argmax(predict, dim=1)
+            # 和之前的预测结果拼接到一起
+            tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
+
+            # 如果为<eos>，说明预测结束，跳出循环
+            if y == tgt_char2index['<eos>']:
+                break
+        # print(tgt)
+        return tgt
+
 
 class MyModel2(BaseLightning):
     def __init__(self):
         super().__init__()
-        batch_size = 8
+        batch_size = 16
         self.model = TransformerTagger(src_vocab_size=len(src_symbols),
                                        embedding_dim=8,
                                        hidden_feature_dim=len(src_symbols),
@@ -167,19 +216,40 @@ class MyModel2(BaseLightning):
         self.log("%s_loss" % mode, loss)
         return loss
 
-    # def infer(self, text):
-    #     sql_values = self.model.inference(text)
-    #     sql = tsql_decode(sql_values)
-    #     return sql
+    def infer(self, text):
+        values = self.model.inference(text, 100)
+        sql = decode_src_to_text(values)
+        return sql
+
+
+def evaluate():
+    print(f"test")
+    model = load_model(MyModel2)
+
+    def inference(text):
+        print(text)
+        sql = model.infer(text)
+        print(sql)
+
+    inference('from tb3 in customer select new tb3')
+    # inference('from c in customer select new { c.id, c.name }')
+    # inference('from c in customer join p in products on c.id equals p.id select new { c.id, c.name, p.name }')
+
+
+def train():
+    MAX_SEQ_LEN = 100
+    print("prepare train data...")
+    write_train_files(max_seq_len=MAX_SEQ_LEN)
+    copy_last_ckpt(model_name=MyModel2.__name__)
+    print("start training...")
+    # start_train(MyModel2, device='cuda', max_epochs=100)
+    start_train(MyModel2, device='cpu', max_epochs=100)
 
 
 if __name__ == '__main__':
     """
     2022-11-27 loss 平均 3.37 降不下來
     """
-    MAX_SEQ_LEN = 100
-    print("prepare train data...")
-    write_train_files(max_seq_len=MAX_SEQ_LEN)
-    copy_last_ckpt(model_name=MyModel2.__name__)
-    print("start training...")
-    start_train(MyModel2, device='cuda', max_epochs=100)
+    print(f" {torch.__version__=}")
+    train()
+    # evaluate()

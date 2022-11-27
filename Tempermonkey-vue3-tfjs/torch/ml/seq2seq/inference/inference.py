@@ -60,7 +60,7 @@ class Translator(object):
             bos = bos.cuda()
 
         with torch.no_grad():
-            context = self.model.encode(src, src_length)
+            context = self.model.encode_tokens(src, src_length)
             context = [context, src_length, None]
 
             if beam_size == 1:

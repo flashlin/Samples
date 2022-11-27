@@ -7,7 +7,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset, random_split, DataLoader
 
-from common.io import info, remove_file
+from common.io import info, remove_file, info_error
 from ml.data_utils import get_data_file_path
 from ml.lit import BaseLightning, start_train, copy_last_ckpt
 from ml.model_utils import reduce_dim, detach_lstm_hidden_state
@@ -76,7 +76,7 @@ tgt_char2index = create_char2index_map(tgt_symbols)
 tgt_index2char = create_index2char_map(tgt_symbols)
 
 
-def encode(tokens, char2index):
+def encode_tokens(tokens, char2index):
     var_re = re.compile(r'(@\w.+)(\d+)')
     buff = [char2index['<bos>']]
     unk_tokens = {}
@@ -93,8 +93,12 @@ def encode(tokens, char2index):
             if token in unk_tokens:
                 unk = unk_tokens[token]
             else:
-                unk = [char2index['<unk>'], char2index[str(unk_num)]]
-                unk_tokens[token] = unk
+                try:
+                    unk = [char2index['<unk>'], char2index[str(unk_num)]]
+                    unk_tokens[token] = unk
+                except Exception as e:
+                    info_error(f' {tokens=} {token=} {e}')
+                    raise
             buff.extend(unk)
             continue
         buff.append(char2index[token])
@@ -109,12 +113,12 @@ def decode_to_text(values, index2char):
     return buff
 
 
-def encode_src(text):
-    return encode(text, src_char2index)
+def encode_src_tokens(text):
+    return encode_tokens(text, src_char2index)
 
 
-def encode_tgt(text):
-    return encode(text, tgt_char2index)
+def encode_tgt_tokens(text):
+    return encode_tokens(text, tgt_char2index)
 
 
 def decode_src_to_text(text):
@@ -157,7 +161,7 @@ def write_train_files(max_seq_len, target_path="./output"):
     with open(f"{target_path}\\linq_sql.csv", "w", encoding='UTF-8') as f:
         f.write("src\ttgt1\ttgt2\n")
         for (src, tgt1, tgt2) in read_examples_to_tokens3(example_file):
-            row = encode_src(src), encode_src(tgt1), encode_tgt(tgt2)
+            row = encode_src_tokens(src), encode_src_tokens(tgt1), encode_tgt_tokens(tgt2)
             for new_src, new_tgt1, new_tgt2 in pad_row_iter(row, max_seq_len, src_char2index['<pad>']):
                 assert len(new_src) == len(new_tgt1)
                 assert len(new_src) == len(new_tgt2)
