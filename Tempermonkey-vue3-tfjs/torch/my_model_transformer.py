@@ -127,12 +127,6 @@ class TransformerTagger(nn.Module):
         # self.loss_fn = nn.NLLLoss()
 
     def forward(self, x, y):
-        """
-        lstm 的輸出會有output 和最後一個CELL 的 hidden state, cell state
-        在pytorch 裏output 的值其實就是每個cell 的hidden state集合起來的陣列
-        :param x:
-        :return:
-        """
         x = self.embedding(x)
         y = self.embedding(y)
         output = self.transformer(x, y)  # [batch_size, tgt_seq_len, embedding_dim]
@@ -154,7 +148,7 @@ class TransformerTagger(nn.Module):
 class MyModel2(BaseLightning):
     def __init__(self):
         super().__init__()
-        batch_size = 1
+        batch_size = 8
         self.model = TransformerTagger(src_vocab_size=len(src_symbols),
                                        embedding_dim=8,
                                        hidden_feature_dim=len(src_symbols),
@@ -180,9 +174,12 @@ class MyModel2(BaseLightning):
 
 
 if __name__ == '__main__':
+    """
+    2022-11-27 loss 平均 3.37 降不下來
+    """
     MAX_SEQ_LEN = 100
     print("prepare train data...")
     write_train_files(max_seq_len=MAX_SEQ_LEN)
     copy_last_ckpt(model_name=MyModel2.__name__)
     print("start training...")
-    start_train(MyModel2, device='cuda', max_epochs=10)
+    start_train(MyModel2, device='cuda', max_epochs=100)
