@@ -8,3 +8,7 @@ def df_to_values(df):
 def pad_array(arr, fill_value, max_length, d_type=np.long):
     new_arr = np.pad(arr, (0, max_length - len(arr)), 'constant', constant_values=fill_value)
     return np.array(new_arr, dtype=d_type)
+
+
+def split_line_by_space(line):
+    return [x.rstrip() for x in line.split(' ')]
