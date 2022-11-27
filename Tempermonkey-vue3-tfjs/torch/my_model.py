@@ -11,6 +11,7 @@ from torch.utils.data import Dataset, random_split, DataLoader
 from common.io import info
 from ml.data_utils import get_data_file_path
 from ml.lit import BaseLightning, start_train, copy_last_ckpt
+from ml.model_utils import reduce_dim, detach_lstm_hidden_state
 from utils.data_utils import df_to_values, pad_array, split_line_by_space
 from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str, replace_many_spaces
 from utils.template_utils import TemplateText
@@ -212,14 +213,6 @@ class TranslationDataset(Dataset):
         return train_loader, val_loader
 
 
-def reduce_dim(torch_value):
-    return torch_value.squeeze()
-
-
-def detach(states):
-    return [state.detach() for state in states]
-
-
 class LSTMTagger(nn.Module):
     def __init__(self, src_vocab_size, embedding_dim, hidden_feature_dim, hidden_layer_num, classes_num, batch_size):
         """
@@ -286,8 +279,8 @@ class LSTMTagger(nn.Module):
         output = self.linear(output)
         # _, predictive_value = torch.max(output, 1)  # 從output中取最大的出來作為預測值
         # predictive_value = F.log_softmax(output, dim=1)  # 從output中取最大的出來作為預測值
-        info(f" {reduce_dim(output)[-1]=}")
-        self.hidden = detach(self.hidden)
+        info(f" { reduce_dim(output)[-1]=}")
+        self.hidden = detach_lstm_hidden_state(self.hidden)
         return output
 
     def calculate_loss(self, x, y):
