@@ -2,10 +2,10 @@ import torch
 from torch import nn
 
 from common.io import info
-from utils.linq_tokenizr import LINQ_Char2Index_Dict, LINQ_Marks
 
-info(f" {len(LINQ_Char2Index_Dict)=}")
-info(f" {len(LINQ_Marks)=}")
+info(f" {torch.cuda.device_count()=}")
+info(f" {torch.cuda.get_device_name(0)=}")
+
 
 # max_size = 297
 # embedding = nn.Embedding(max_size + 1, 3, padding_idx=0)
