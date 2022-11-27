@@ -113,11 +113,12 @@ class TransformerTagger(nn.Module):
                                           num_encoder_layers=7,
                                           num_decoder_layers=7,
                                           dim_feedforward=512,
+                                          nhead=8,
                                           batch_first=True)
 
         # self.linear = nn.Linear(hidden_feature_dim, classes_num)
         self.linear = nn.Sequential(
-            nn.Linear(hidden_feature_dim, classes_num),
+            nn.Linear(embedding_dim, classes_num),
             nn.ReLU(inplace=True),
             nn.Sigmoid()
         )
@@ -144,7 +145,9 @@ class TransformerTagger(nn.Module):
         return output
 
     def calculate_loss(self, x, y):
-        y = reduce_dim(y)
+        x = x.contiguous().view(-1, x.size(-1))
+        y = y.contiguous().view(-1)
+        # info(f" loss {x.shape=} {y.shape=}")
         return self.loss_fn(x, y)
 
 
@@ -153,7 +156,7 @@ class MyModel2(BaseLightning):
         super().__init__()
         batch_size = 1
         self.model = TransformerTagger(src_vocab_size=len(src_symbols),
-                                       embedding_dim=3,
+                                       embedding_dim=8,
                                        hidden_feature_dim=len(src_symbols),
                                        classes_num=len(src_symbols),
                                        )
@@ -161,7 +164,7 @@ class MyModel2(BaseLightning):
 
     def forward(self, batch):
         enc_inputs, dec_inputs, dec_outputs = batch
-        logits = self.model(enc_inputs)
+        logits = self.model(enc_inputs, dec_inputs)
         return logits, dec_inputs
 
     def _calculate_loss(self, data, mode="train"):
