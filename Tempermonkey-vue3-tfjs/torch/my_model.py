@@ -1,5 +1,4 @@
 import os
-import random
 import re
 import random
 import string
@@ -7,27 +6,15 @@ import string
 import pandas as pd
 import torch
 from torch import nn
-import torch.nn.functional as F
-from torch.utils.data import Dataset, random_split, DataLoader, Sampler
+from torch.utils.data import Dataset, random_split, DataLoader
 
 from common.io import info
+from ml.data_utils import get_data_file_path
 from ml.lit import BaseLightning, start_train, copy_last_ckpt
-from preprocess_data import TranslationFileTextIterator
-from utils.data_ex import df_to_values, pad_array
-from utils.linq_tokenizr import linq_tokenize
-from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str
+from utils.data_utils import df_to_values, pad_array, split_line_by_space
+from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str, replace_many_spaces
 from utils.template_utils import TemplateText
 from utils.tokenizr import create_char2index_map, create_index2char_map
-from utils.tsql_tokenizr import tsql_tokenize
-
-
-def replace_many_spaces(text):
-    new_text = re.sub(' +', ' ', text)
-    return new_text
-
-
-def get_data_file_path(file_name):
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), f"ml/data/{file_name}")
 
 
 def line_to_tokens(line):
@@ -72,17 +59,13 @@ def read_examples_to_tokens3(example_file):
         yield src_tokens, tgt1_tokens, tgt2_tokens
 
 
-def split_space(line):
-    return [x.rstrip() for x in line.split(' ')]
-
-
 def get_vocabs():
     vocab_file = get_data_file_path("linq_classification_vocab.txt")
     with open(vocab_file, "r", encoding='UTF-8') as f:
         lines = f.readlines()
-        common_symbols = split_space(lines[0])
-        src_tokens = split_space(lines[1])
-        tgt_tokens = split_space(lines[2])
+        common_symbols = split_line_by_space(lines[0])
+        src_tokens = split_line_by_space(lines[1])
+        tgt_tokens = split_line_by_space(lines[2])
     return common_symbols + src_tokens, common_symbols + tgt_tokens
 
 
@@ -303,7 +286,7 @@ class LSTMTagger(nn.Module):
         output = self.linear(output)
         # _, predictive_value = torch.max(output, 1)  # 從output中取最大的出來作為預測值
         # predictive_value = F.log_softmax(output, dim=1)  # 從output中取最大的出來作為預測值
-        # print(f"{predictive_value.size(1)=} {predictive_value=}")
+        info(f" {reduce_dim(output)[-1]=}")
         self.hidden = detach(self.hidden)
         return output
 
@@ -418,4 +401,4 @@ if __name__ == '__main__':
     write_train_files(max_seq_len=MAX_SEQ_LEN)
     copy_last_ckpt(model_name=MyModel.__name__)
     print("start training...")
-    start_train(MyModel, device='cuda', max_epochs=100)
+    start_train(MyModel, device='cuda', max_epochs=1)
