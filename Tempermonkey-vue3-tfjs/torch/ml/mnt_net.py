@@ -29,7 +29,7 @@ class MntTokenizer(SimpleTokenizer):
     def encode(self, text, add_start_end=False):
         def add_to_bpe_tokens(a_token):
             bpe_tokens.extend([self.encoder[a_token.type]])
-            token_text = ''.join(self.byte_encoder[b] for b in a_token.text.encode('utf-8'))
+            token_text = ''.join(self.byte_encoder[b] for b in a_token.text.encode_tokens('utf-8'))
             bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token_text).split(' '))
 
         bpe_tokens = []
