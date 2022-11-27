@@ -1,3 +1,4 @@
+import re
 from functools import reduce
 from typing import Generic, TypeVar
 
@@ -302,3 +303,8 @@ class SeqIterator(Generic[T]):
 
 def int_list_to_str(alist):
     return ','.join([str(n) for n in alist])
+
+
+def replace_many_spaces(text):
+    new_text = re.sub(' +', ' ', text)
+    return new_text
