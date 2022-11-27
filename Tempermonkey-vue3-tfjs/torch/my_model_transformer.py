@@ -40,7 +40,8 @@ def pad_row_iter(row, max_seq_len, padding_idx):
 
 
 def write_train_files(max_seq_len, target_path="./output"):
-    def write_train_data(a_src, a_tgt1, a_tgt2):
+    def write_train_data(a_row):
+        a_src, a_tgt1, a_tgt2 = a_row
         f.write(int_list_to_str(a_src))
         f.write('\t')
         f.write(int_list_to_str(a_tgt1))
@@ -55,10 +56,12 @@ def write_train_files(max_seq_len, target_path="./output"):
         f.write("src\ttgt1\ttgt2\n")
         for (src, tgt1, tgt2) in read_examples_to_tokens3(example_file):
             row = encode_src_tokens(src), encode_src_tokens(tgt1), encode_tgt_tokens(tgt2)
-            for new_src, new_tgt1, new_tgt2 in pad_row_iter(row, max_seq_len, src_char2index['<pad>']):
-                assert len(new_src) == len(new_tgt1)
-                assert len(new_src) == len(new_tgt2)
-                write_train_data(new_src, new_tgt1, new_tgt2)
+            write_train_data(row)
+            # for row_tuple in pad_row_iter(row, max_seq_len, src_char2index['<pad>']):
+            #     new_src, new_tgt1, new_tgt2 = row_tuple
+            #     assert len(new_src) == len(new_tgt1)
+            #     assert len(new_src) == len(new_tgt2)
+            #     write_train_data(row_tuple)
 
 
 def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
@@ -225,6 +228,7 @@ class MyModel2(BaseLightning):
 def evaluate():
     print(f"test")
     model = load_model(MyModel2)
+    assert model is not None
 
     def inference(text):
         print(text)
