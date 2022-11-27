@@ -414,7 +414,8 @@ def random_train_template():
 
 if __name__ == '__main__':
     MAX_SEQ_LEN = 100
-    # write_train_files(max_seq_len=MAX_SEQ_LEN)
+    print("prepare train data...")
+    write_train_files(max_seq_len=MAX_SEQ_LEN)
     copy_last_ckpt(model_name=MyModel.__name__)
     print("start training...")
     start_train(MyModel, device='cuda', max_epochs=100)
