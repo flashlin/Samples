@@ -6,9 +6,12 @@ import string
 
 import pandas as pd
 import torch
+from torch import nn
+import torch.nn.functional as F
 from torch.utils.data import Dataset, random_split, DataLoader
 
 from common.io import info
+from ml.lit import BaseLightning, start_train
 from preprocess_data import TranslationFileTextIterator
 from utils.data_ex import df_to_values, pad_array
 from utils.linq_tokenizr import linq_tokenize
@@ -92,7 +95,7 @@ tgt_index2char = create_index2char_map(tgt_symbols)
 
 def encode(tokens, char2index):
     var_re = re.compile(r'(@\w.+)(\d+)')
-    buff = []
+    buff = [char2index['<bos>']]
     unk_tokens = {}
     for token in tokens:
         match = var_re.match(token)
@@ -112,6 +115,7 @@ def encode(tokens, char2index):
             buff.extend(unk)
             continue
         buff.append(char2index[token])
+    buff.append(char2index['<eos>'])
     return buff
 
 
@@ -145,16 +149,17 @@ def write_train_files(target_path="./output"):
         f.write(int_list_to_str(tgt1_values))
         f.write('\t')
         f.write(int_list_to_str(tgt2_values))
+        f.write('\n')
 
     remove_file(f"{target_path}\\linq_sql.csv")
     file = get_data_file_path("linq_classification.txt")
     with open(f"{target_path}\\linq_sql.csv", "w", encoding='UTF-8') as f:
-        f.write("src\ttgt1\ttgt2")
+        f.write("src\ttgt1\ttgt2\n")
         for (src, tgt1, tgt2) in read_examples_to_tokens3(file):
             src_values = encode_src(src)
             tgt1_values = encode_src(tgt1)
             tgt2_values = encode_tgt(tgt2)
-            write_train_data(src_values, tgt1_values, tgt2_values)
+            write_train_data()
 
 
 def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
@@ -181,11 +186,20 @@ class TranslationDataset(Dataset):
 
     def __getitem__(self, idx):
         src = self.src[idx]
-        tgt = self.tgt[idx]
-        max_len = max(len(src), len(tgt))
-        enc_input = torch.tensor(pad_array(src[1:-1], self.padding_idx, max_len), dtype=torch.long)
-        dec_input = torch.tensor(pad_array(tgt[:-1], self.padding_idx, max_len), dtype=torch.long)
-        dec_output = torch.tensor(pad_array(tgt[1:], self.padding_idx, max_len), dtype=torch.long)
+        tgt1 = self.tgt1[idx]
+        tgt2 = self.tgt1[idx]
+        # max_len = max(len(src), len(tgt1))
+        # max_len = max(len(tgt2), max_len)
+        max_len = 47
+        # enc_input = torch.tensor(pad_array(src[1:-1], self.padding_idx, max_len), dtype=torch.long)
+        # dec_input = torch.tensor(pad_array(tgt[:-1], self.padding_idx, max_len), dtype=torch.long)
+        # dec_output = torch.tensor(pad_array(tgt[1:], self.padding_idx, max_len), dtype=torch.long)
+        enc_input = torch.tensor(pad_array(src, self.padding_idx, max_len), dtype=torch.float)
+        dec_input = torch.tensor(pad_array(tgt1, self.padding_idx, max_len), dtype=torch.float)
+        dec_output = torch.tensor(pad_array(tgt2, self.padding_idx, max_len), dtype=torch.float)
+        # enc_input = torch.tensor(src, dtype=torch.long)
+        # dec_input = torch.tensor(tgt1, dtype=torch.long)
+        # dec_output = torch.tensor(tgt2, dtype=torch.long)
         return enc_input, dec_input, dec_output
 
     def create_dataloader(self, batch_size=32):
@@ -197,7 +211,96 @@ class TranslationDataset(Dataset):
         return train_loader, val_loader
 
 
+class LSTMTagger(nn.Module):
+    def __init__(self, input_feature_dim, hidden_feature_dim, hidden_layer_num, classes_num, batch_size=1):
+        """
+        :param input_feature_dim: 輸入訊號的維度
+        :param hidden_feature_dim: 設定越多代表能記住的特徵越多
+        :param hidden_layer_num: 記住的有用的 hidden_layer_num
+        :param classes_num:
+        :param batch_size:
+        """
+        super().__init__()
+        self.input_feature_dim = input_feature_dim
+        self.hidden_feature_dim = hidden_feature_dim
+        self.hidden_layer_num = hidden_layer_num
+        self.batch_size = batch_size
+
+        self.lstm = nn.LSTM(input_size=input_feature_dim,
+                            hidden_size=hidden_feature_dim,
+                            num_layers=hidden_layer_num,
+                            batch_first=True)
+        self.hidden = self.init_hidden('cpu')
+        # self.linear = nn.Linear(hidden_feature_dim, classes_num)
+        self.linear = nn.Sequential(
+            nn.Linear(hidden_feature_dim, classes_num),
+            nn.ReLU(inplace=True),
+            nn.Sigmoid()
+        )
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def init_hidden(self, device):
+        """
+        由於LSTM 的輸入必須有前一個LSTM 計算出來的hidden state 和cell state
+        因此在頭一個CELL 的時候，必須自己弄一個隨機生成的初始狀態
+        :return:
+        """
+        # h0 = torch.randn(self.hidden_layer_num, self.batch_size, self.hidden_feature_dim)
+        # c0 = torch.randn(self.hidden_layer_num, self.batch_size, self.hidden_feature_dim)
+        h0 = torch.randn(self.hidden_layer_num, self.hidden_feature_dim).to(device)
+        c0 = torch.randn(self.hidden_layer_num, self.hidden_feature_dim).to(device)
+        # h0 = torch.zeros(self.hidden_layer_num, self.hidden_feature_dim).to(device)
+        # c0 = torch.zeros(self.hidden_layer_num, self.hidden_feature_dim).to(device)
+        return h0, c0
+
+    def forward(self, x):
+        """
+        lstm 的輸出會有output 和最後一個CELL 的 hidden state, cell state
+        在pytorch 裏output 的值其實就是每個cell 的hidden state集合起來的陣列
+        :param x:
+        :return:
+        """
+        self.hidden = self.init_hidden(x.device)
+        output, self.hidden = self.lstm(x, self.hidden)
+        # output = self.linear(output[-1])
+        output = self.linear(output)
+        # _, predictive_value = torch.max(output, 1)  # 從output中取最大的出來作為預測值
+        predictive_value = F.log_softmax(output, dim=1)
+        print(f"{predictive_value=}")
+        return predictive_value
+
+    def calculate_loss(self, x, label):
+        return self.loss_fn(x, label)
+
+
+class MyModel(BaseLightning):
+    def __init__(self):
+        super().__init__()
+        self.model = LSTMTagger(input_feature_dim=len(src_symbols),
+                                hidden_feature_dim=len(src_symbols),
+                                hidden_layer_num=3,
+                                classes_num=len(src_symbols))
+        self.init_dataloader(TranslationDataset("./output/linq_sql.csv", src_char2index['<pad>']), 1)
+
+    def forward(self, batch):
+        enc_inputs, dec_inputs, dec_outputs = batch
+        logits = self.model(enc_inputs)
+        return logits, dec_inputs
+
+    def _calculate_loss(self, data, mode="train"):
+        (logits, dec_inputs), batch = data
+        loss = self.model.calculate_loss(logits, dec_inputs)
+        self.log("%s_loss" % mode, loss)
+        return loss
+
+    # def infer(self, text):
+    #     sql_values = self.model.inference(text)
+    #     sql = tsql_decode(sql_values)
+    #     return sql
+
+
 """
+----------------
 """
 
 
@@ -269,3 +372,5 @@ def random_train_template():
 
 if __name__ == '__main__':
     write_train_files()
+    print("start training...")
+    start_train(MyModel, device='cuda', max_epochs=10)
