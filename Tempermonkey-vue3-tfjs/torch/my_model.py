@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, random_split, DataLoader, Sampler
 
 from common.io import info
-from ml.lit import BaseLightning, start_train
+from ml.lit import BaseLightning, start_train, copy_last_ckpt
 from preprocess_data import TranslationFileTextIterator
 from utils.data_ex import df_to_values, pad_array
 from utils.linq_tokenizr import linq_tokenize
@@ -414,6 +414,7 @@ def random_train_template():
 
 if __name__ == '__main__':
     MAX_SEQ_LEN = 100
-    write_train_files(max_seq_len=MAX_SEQ_LEN)
+    # write_train_files(max_seq_len=MAX_SEQ_LEN)
+    copy_last_ckpt(model_name=MyModel.__name__)
     print("start training...")
-    start_train(MyModel, device='cuda', max_epochs=10)
+    start_train(MyModel, device='cuda', max_epochs=100)
