@@ -6,6 +6,5 @@ def df_to_values(df):
 
 
 def pad_array(arr, fill_value, max_length, d_type=np.long):
-    arr_len = len(arr)
-    new_arr = np.pad(arr, (0, max_length - arr_len), 'constant', constant_values=fill_value)
+    new_arr = np.pad(arr, (0, max_length - len(arr)), 'constant', constant_values=fill_value)
     return np.array(new_arr, dtype=d_type)
