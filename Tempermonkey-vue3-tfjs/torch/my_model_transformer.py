@@ -52,7 +52,7 @@ def write_train_files(max_seq_len, target_path="./output"):
         a_list = list(a_tuple)
         for idx, column in enumerate(a_list):
             f.write(int_list_to_str(column))
-            if idx < len(a_list)-1:
+            if idx < len(a_list) - 1:
                 f.write('\t')
         f.write('\n')
 
@@ -254,11 +254,7 @@ def train():
     start_train(MyModel2, device='cpu', max_epochs=500)
 
 
-if __name__ == '__main__':
-    """
-    2022-11-27 loss 平均 3.37 降不下來
-    """
-    print(f" {torch.__version__=}")
+def test():
     s1 = 'from tb1     in customer where tb1     . price > 1   select tb1     . name'
     tokens = line_to_tokens(s1)
     print(f" {s1=}")
@@ -268,5 +264,13 @@ if __name__ == '__main__':
     s2 = decode_src_to_text(v1)
     print(s2)
     print(f" {s2=}")
-    # train()
+
+
+if __name__ == '__main__':
+    """
+    2022-11-27 loss 平均 3.37 降不下來
+    """
+    print(f" {torch.__version__=}")
+    # test()
+    train()
     # evaluate()
