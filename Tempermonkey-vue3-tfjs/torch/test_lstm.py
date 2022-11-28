@@ -3,6 +3,9 @@ from torch import nn
 
 from common.io import info
 from my_model import line_to_tokens
+from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, read_identifier, EmptyToken, \
+    read_symbol
+from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map
 
 """
 src = 'from tb1     in customer select tb1     . name'
@@ -40,9 +43,48 @@ tgt = '. @fd1 <eos>'
 src = 'from tb1 in customer select tb1.name'
 pre = ''
 tgt = 'from @tb_as1 in @tb1 select @tb_as1 . @fd1'
-#lstm = nn.LSTM()
+# lstm = nn.LSTM()
 
-src_tokens = line_to_tokens(src)
+symbols = '. [ ] { } += + - * / ,'
+symbols = symbols.split(' ')
+
+
+def linq_to_tokens(line):
+    stream_iter = StreamTokenIterator(line)
+    buff = []
+    prev_ch = None
+    while not stream_iter.is_done():
+        ch = stream_iter.peek_str(1)
+        if ch == '"':
+            prev_ch = read_double_quote_string(stream_iter).text
+            buff.append(prev_ch)
+            continue
+        if ch == ' ':
+            if prev_ch == ' ':
+                prev_ch = stream_iter.next().text
+                continue
+            prev_ch = stream_iter.next().text
+            buff.append(prev_ch)
+            continue
+        token = read_symbol(stream_iter, symbols)
+        if token != EmptyToken:
+            prev_ch = token.text
+            buff.append(token.text)
+            continue
+        token = read_identifier(stream_iter)
+        if token != EmptyToken:
+            prev_ch = token.text
+            buff.append(token.text)
+            continue
+
+        text = read_until(stream_iter, ' ').text
+        prev_ch = text
+        buff.append(text)
+    return buff
+
+
+src_tokens = linq_to_tokens(src)
+print(f"{src_tokens=}")
 
 # max_size = 297
 # embedding = nn.Embedding(max_size + 1, 3, padding_idx=0)

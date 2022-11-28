@@ -3,7 +3,8 @@ from collections.abc import MutableMapping, Mapping
 from common.io import info
 from utils.linq_tokenizr import linq_tokenize
 from utils.stream import Token, index_of, SeqIterator
-from utils.tokenizr import sort_desc, LINQ_Keywords, create_char2index_map, create_index2char_map, TSQL_Keywords
+from utils.tokenizr import LINQ_Keywords, TSQL_Keywords
+from utils.data_utils import sort_desc, create_char2index_map, create_index2char_map
 from utils.tsql_tokenizr import tsql_tokenize, TSQL_CHAR2INDEX_DICT, TSQL_INDEX2CHAR_DICT
 
 BOS_TOKEN = '<bos>'

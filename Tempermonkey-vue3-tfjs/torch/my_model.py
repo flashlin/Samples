@@ -11,10 +11,9 @@ from common.io import info, remove_file, info_error
 from ml.data_utils import get_data_file_path
 from ml.lit import BaseLightning, start_train, copy_last_ckpt
 from ml.model_utils import reduce_dim, detach_lstm_hidden_state
-from utils.data_utils import df_to_values, pad_array, split_line_by_space
+from utils.data_utils import df_to_values, pad_array, split_line_by_space, create_char2index_map, create_index2char_map
 from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str, replace_many_spaces
 from utils.template_utils import TemplateText
-from utils.tokenizr import create_char2index_map, create_index2char_map
 
 
 def line_to_tokens(line):
