@@ -14,7 +14,7 @@ from ml.lit import BaseLightning, start_train, copy_last_ckpt, load_model, Posit
 from ml.model_utils import reduce_dim, detach_lstm_hidden_state
 from my_model import read_examples_to_tokens3, encode_src_tokens, encode_tgt_tokens, src_char2index, src_symbols, \
     tgt_char2index, \
-    decode_src_to_text, line_to_tokens
+    decode_src_to_text, line_to_tokens, read_examples
 from utils.data_utils import df_to_values, pad_array, split_line_by_space
 from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str, replace_many_spaces
 from utils.template_utils import TemplateText
@@ -39,23 +39,30 @@ def pad_row_iter(row, max_seq_len, padding_idx):
         yield new_src, new_tgt1, new_tgt2
 
 
+def read_examples_to_tokens(example_file, num_tuple):
+    for idx, tokens in enumerate(read_examples(example_file)):
+        tuple_value = []
+        for n in range(num_tuple):
+            tuple_value.append(tokens)
+        yield tuple(tuple_value)
+
+
 def write_train_files(max_seq_len, target_path="./output"):
-    def write_train_data(a_row):
-        a_src, a_tgt1, a_tgt2 = a_row
-        f.write(int_list_to_str(a_src))
-        f.write('\t')
-        f.write(int_list_to_str(a_tgt1))
-        f.write('\t')
-        f.write(int_list_to_str(a_tgt2))
+    def write_train_data(a_tuple):
+        a_list = list(a_tuple)
+        for idx, column in enumerate(a_list):
+            f.write(int_list_to_str(column))
+            if idx < len(a_list)-1:
+                f.write('\t')
         f.write('\n')
 
     target_csv_file = f"{target_path}\\linq_sql.csv"
     remove_file(target_csv_file)
-    example_file = get_data_file_path("linq_classification.txt")
+    example_file = get_data_file_path("linq_classification1.txt")
     with open(target_csv_file, "w", encoding='UTF-8') as f:
-        f.write("src\ttgt1\ttgt2\n")
-        for (src, tgt1, tgt2) in read_examples_to_tokens3(example_file):
-            row = encode_src_tokens(src), encode_src_tokens(tgt1), encode_tgt_tokens(tgt2)
+        f.write("src\ttgt\n")
+        for (src, tgt) in read_examples_to_tokens(example_file, 2):
+            row = encode_src_tokens(src), encode_src_tokens(tgt)
             write_train_data(row)
             # for row_tuple in pad_row_iter(row, max_seq_len, src_char2index['<pad>']):
             #     new_src, new_tgt1, new_tgt2 = row_tuple
@@ -66,11 +73,11 @@ def write_train_files(max_seq_len, target_path="./output"):
 
 def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
     def pad_collate(batch):
-        (src_input, dec_input, dec_output) = zip(*batch)
-        enc_input_pad = torch.nn.utils.rnn.pad_sequence(src_input, batch_first=True, padding_value=padding_idx)
-        dec_input_pad = torch.nn.utils.rnn.pad_sequence(dec_input, batch_first=True, padding_value=padding_idx)
-        dec_output_pad = torch.nn.utils.rnn.pad_sequence(dec_output, batch_first=True, padding_value=padding_idx)
-        return enc_input_pad, dec_input_pad, dec_output_pad
+        a_tuple = zip(*batch)
+        result = []
+        for column in list(a_tuple):
+            result.append(torch.nn.utils.rnn.pad_sequence(column, batch_first=True, padding_value=padding_idx))
+        return tuple(result)
 
     return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
 
@@ -80,23 +87,20 @@ class TranslationDataset(Dataset):
         self.padding_idx = padding_idx
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
         self.src = df_to_values(df['src'])
-        self.tgt1 = df_to_values(df['tgt1'])
-        self.tgt2 = df_to_values(df['tgt2'])
+        self.tgt = df_to_values(df['tgt'])
 
     def __len__(self):
         return len(self.src)
 
     def __getitem__(self, idx):
         src = self.src[idx]
-        tgt1 = self.tgt1[idx]
-        tgt2 = self.tgt2[idx]
+        tgt = self.tgt[idx]
         # enc_input = torch.tensor(pad_array(src[1:-1], self.padding_idx, max_len), dtype=torch.long)
         # dec_input = torch.tensor(pad_array(tgt[:-1], self.padding_idx, max_len), dtype=torch.long)
         # dec_output = torch.tensor(pad_array(tgt[1:], self.padding_idx, max_len), dtype=torch.long)
-        enc_input = torch.tensor(src, dtype=torch.long)
-        dec_input = torch.tensor(tgt1, dtype=torch.long)
-        dec_output = torch.tensor(tgt2, dtype=torch.long)
-        return enc_input, dec_input, dec_output
+        src = torch.tensor(src, dtype=torch.long)
+        tgt = torch.tensor(tgt, dtype=torch.long)
+        return src, tgt
 
     def create_dataloader(self, batch_size=32):
         train_size = int(0.8 * len(self))
@@ -209,13 +213,13 @@ class MyModel2(BaseLightning):
         self.init_dataloader(TranslationDataset("./output/linq_sql.csv", src_char2index['<pad>']), batch_size)
 
     def forward(self, batch):
-        enc_inputs, dec_inputs, dec_outputs = batch
-        logits = self.model(enc_inputs, dec_inputs)
-        return logits, dec_inputs
+        src, tgt = batch
+        logits = self.model(src, tgt)
+        return logits, tgt
 
     def _calculate_loss(self, data, mode="train"):
-        (logits, dec_inputs), batch = data
-        loss = self.model.calculate_loss(logits, dec_inputs)
+        (logits, tgt), batch = data
+        loss = self.model.calculate_loss(logits, tgt)
         self.log("%s_loss" % mode, loss)
         return loss
 
@@ -247,7 +251,7 @@ def train():
     copy_last_ckpt(model_name=MyModel2.__name__)
     print("start training...")
     # start_train(MyModel2, device='cuda', max_epochs=100)
-    start_train(MyModel2, device='cpu', max_epochs=100)
+    start_train(MyModel2, device='cpu', max_epochs=500)
 
 
 if __name__ == '__main__':
