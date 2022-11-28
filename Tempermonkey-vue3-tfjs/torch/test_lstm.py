@@ -55,8 +55,9 @@ def linq_to_tokens(line):
     prev_ch = None
     while not stream_iter.is_done():
         ch = stream_iter.peek_str(1)
-        if ch == '"':
-            prev_ch = read_double_quote_string(stream_iter).text
+        token = read_double_quote_string(stream_iter)
+        if token != EmptyToken:
+            prev_ch = token.text
             buff.append(prev_ch)
             continue
         if ch == ' ':
@@ -69,17 +70,16 @@ def linq_to_tokens(line):
         token = read_symbol(stream_iter, symbols)
         if token != EmptyToken:
             prev_ch = token.text
-            buff.append(token.text)
+            buff.append(prev_ch)
             continue
         token = read_identifier(stream_iter)
         if token != EmptyToken:
             prev_ch = token.text
-            buff.append(token.text)
+            buff.append(prev_ch)
             continue
 
-        text = read_until(stream_iter, ' ').text
-        prev_ch = text
-        buff.append(text)
+        prev_ch = read_until(stream_iter, ' ').text
+        buff.append(prev_ch)
     return buff
 
 
