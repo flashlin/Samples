@@ -4,7 +4,7 @@ from torch import nn
 from common.io import info
 from my_model import line_to_tokens
 from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, read_identifier, EmptyToken, \
-    read_symbol, read_spaces
+    read_symbol, read_spaces, Token, reduce_token_list
 from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map
 
 """
@@ -42,17 +42,29 @@ tgt = '. @fd1 <eos>'
 
 src = 'from tb1 in customer select tb1.name'
 pre = ''
-tgt = 'from @tb_as1 in @tb1 select @tb_as1 . @fd1'
+tgt = 'from @tb_as1 in @tb1 select @tb_as1.@fd1'
 # lstm = nn.LSTM()
 
 symbols = '. [ ] { } += + - * / ,'
 symbols = symbols.split(' ')
 
 
+def read_variable_token(stream_iter: StreamTokenIterator) -> Token:
+    if stream_iter.peek_str(1) != '@':
+        return EmptyToken
+    at_token = stream_iter.next()
+    token = read_identifier(stream_iter)
+    return reduce_token_list('variable', [at_token, token])
+
+
 def linq_to_tokens(line):
     stream_iter = StreamTokenIterator(line)
     buff = []
     while not stream_iter.is_done():
+        token = read_variable_token(stream_iter)
+        if token != EmptyToken:
+            buff.append(token.text)
+            continue
         token = read_double_quote_string(stream_iter)
         if token != EmptyToken:
             buff.append(token.text)
@@ -77,6 +89,8 @@ def linq_to_tokens(line):
 
 src_tokens = linq_to_tokens(src)
 print(f"{src_tokens=}")
+tgt_tokens = linq_to_tokens(tgt)
+print(f"{tgt_tokens=}")
 
 # max_size = 297
 # embedding = nn.Embedding(max_size + 1, 3, padding_idx=0)

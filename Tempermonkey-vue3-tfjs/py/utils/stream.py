@@ -90,7 +90,7 @@ class StreamTokenIterator(Generic[T]):
         self.idx -= 1
         return self.buffer[self.idx]
 
-    def next(self, n=1):
+    def next(self, n=1) -> Token:
         node = EmptyToken
         count = 0
         while count < n:
