@@ -20,15 +20,22 @@ from utils.tokenizr import create_char2index_map, create_index2char_map
 def line_to_tokens(line):
     stream_iter = StreamTokenIterator(line)
     buff = []
+    prev_ch = None
     while not stream_iter.is_done():
         ch = stream_iter.peek_str(1)
         if ch == '"':
-            buff.append(read_double_quote_string(stream_iter).text)
+            prev_ch = read_double_quote_string(stream_iter).text
+            buff.append(prev_ch)
             continue
         if ch == ' ':
-            buff.append(stream_iter.next().text)
+            if prev_ch == ' ':
+                prev_ch = stream_iter.next().text
+                continue
+            prev_ch = stream_iter.next().text
+            buff.append(prev_ch)
             continue
         text = read_until(stream_iter, ' ').text
+        prev_ch = text
         buff.append(text)
     return buff
 
@@ -65,7 +72,7 @@ def get_vocabs():
     vocab_file = get_data_file_path("linq_classification_vocab.txt")
     with open(vocab_file, "r", encoding='UTF-8') as f:
         lines = f.readlines()
-        common_symbols = split_line_by_space(lines[0])
+        common_symbols = split_line_by_space(lines[0]) + [' ']
         src_tokens = split_line_by_space(lines[1])
         tgt_tokens = split_line_by_space(lines[2])
     return common_symbols + src_tokens, common_symbols + tgt_tokens

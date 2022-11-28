@@ -259,5 +259,14 @@ if __name__ == '__main__':
     2022-11-27 loss 平均 3.37 降不下來
     """
     print(f" {torch.__version__=}")
-    train()
+    s1 = 'from tb1     in customer where tb1     . price > 1   select tb1     . name'
+    tokens = line_to_tokens(s1)
+    print(f" {s1=}")
+    print(f" {tokens=}")
+    v1 = encode_src_tokens(tokens)
+    print(f" {v1=}")
+    s2 = decode_src_to_text(v1)
+    print(s2)
+    print(f" {s2=}")
+    # train()
     # evaluate()
