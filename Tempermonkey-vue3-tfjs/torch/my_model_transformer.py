@@ -250,8 +250,7 @@ def train():
     write_train_files(max_seq_len=MAX_SEQ_LEN)
     copy_last_ckpt(model_name=MyModel2.__name__)
     print("start training...")
-    # start_train(MyModel2, device='cuda', max_epochs=100)
-    start_train(MyModel2, device='cpu', max_epochs=500)
+    start_train(MyModel2, device='cuda', max_epochs=10)
 
 
 def test():
