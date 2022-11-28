@@ -42,6 +42,8 @@ def read_examples(example_file):
 
     with open(example_file, "r", encoding='UTF-8') as f:
         for line in f:
+            if line.strip() == '':
+                continue
             tokens = line_to_tokens(line)
             tokens = [t for t in filter_space_tokens(tokens)]
             yield tokens
