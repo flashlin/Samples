@@ -4,7 +4,7 @@ from torch import nn
 from common.io import info
 from my_model import line_to_tokens
 from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, read_identifier, EmptyToken, \
-    read_symbol
+    read_symbol, read_spaces
 from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map
 
 """
@@ -52,34 +52,26 @@ symbols = symbols.split(' ')
 def linq_to_tokens(line):
     stream_iter = StreamTokenIterator(line)
     buff = []
-    prev_ch = None
     while not stream_iter.is_done():
-        ch = stream_iter.peek_str(1)
         token = read_double_quote_string(stream_iter)
         if token != EmptyToken:
-            prev_ch = token.text
             buff.append(prev_ch)
             continue
-        if ch == ' ':
-            if prev_ch == ' ':
-                prev_ch = stream_iter.next().text
-                continue
-            prev_ch = stream_iter.next().text
-            buff.append(prev_ch)
+        token = read_spaces(stream_iter)
+        if token != EmptyToken:
+            buff.append(' ')
             continue
         token = read_symbol(stream_iter, symbols)
         if token != EmptyToken:
-            prev_ch = token.text
-            buff.append(prev_ch)
+            buff.append(token.text)
             continue
         token = read_identifier(stream_iter)
         if token != EmptyToken:
-            prev_ch = token.text
-            buff.append(prev_ch)
+            buff.append(token.text)
             continue
 
-        prev_ch = read_until(stream_iter, ' ').text
-        buff.append(prev_ch)
+        text = read_until(stream_iter, ' ').text
+        buff.append(text)
     return buff
 
 
