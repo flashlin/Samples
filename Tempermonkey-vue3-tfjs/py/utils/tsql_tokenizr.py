@@ -2,8 +2,8 @@ from typing import Final
 
 from utils.tokenizr import try_read_any, read_keyword_fn, fixed_marks, tokens_to_index_list, index_list_to_string, TSQL_Keywords, VOCAB_MARKS
 from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map, create_index2char_map
-from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, read_identifier, read_float_number, \
-    read_spaces, read_single_quote_string
+from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, read_identifier_token, read_float_number_token, \
+    read_spaces_token, read_single_quote_string_token
 
 TSQL_Keywords_Lengths = group_to_lengths(TSQL_Keywords)
 TSQL_Symbols: Final[list[str]] = [',', '.', '(', ')', '@', '#']
@@ -45,12 +45,12 @@ def tsql_tokenize(stream) -> list[Token]:
 
     read_fn_list = [
         read_tsql_keyword_fn(),
-        read_identifier,
-        read_float_number,
-        read_single_quote_string,
+        read_identifier_token,
+        read_float_number_token,
+        read_single_quote_string_token,
         read_operator_fn(),
         read_symbol_fn(),
-        read_spaces,
+        read_spaces_token,
         read_tsql_identifier
     ]
 

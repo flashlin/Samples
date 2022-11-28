@@ -1,4 +1,4 @@
-from utils.stream import StreamTokenIterator, read_identifier, reduce_token_list, Token
+from utils.stream import StreamTokenIterator, read_identifier_token, reduce_token_list, Token
 
 
 class TemplateText:
@@ -58,7 +58,7 @@ class TemplateText:
             return None
 
         stream_iterator.next()
-        token = read_identifier(stream_iterator)
+        token = read_identifier_token(stream_iterator)
         self.dict[token.text] = ''
 
         def write_var():

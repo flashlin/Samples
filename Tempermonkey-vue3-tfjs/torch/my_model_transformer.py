@@ -16,7 +16,7 @@ from my_model import read_examples_to_tokens3, encode_src_tokens, encode_tgt_tok
     tgt_char2index, \
     decode_src_to_text, line_to_tokens, read_examples
 from utils.data_utils import df_to_values, pad_array, split_line_by_space, create_char2index_map, create_index2char_map
-from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str, replace_many_spaces
+from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, int_list_to_str, replace_many_spaces
 from utils.template_utils import TemplateText
 
 
