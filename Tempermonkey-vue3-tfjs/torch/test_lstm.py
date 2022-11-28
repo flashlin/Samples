@@ -3,8 +3,8 @@ from torch import nn
 
 from common.io import info
 from my_model import line_to_tokens
-from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, read_identifier, EmptyToken, \
-    read_symbol, read_spaces, Token, reduce_token_list
+from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, read_identifier_token, EmptyToken, \
+    read_symbol_token, read_spaces_token, Token, reduce_token_list
 from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map
 
 """
@@ -53,11 +53,11 @@ def read_variable_token(stream_iter: StreamTokenIterator) -> Token:
     if stream_iter.peek_str(1) != '@':
         return EmptyToken
     at_token = stream_iter.next()
-    token = read_identifier(stream_iter)
+    token = read_identifier_token(stream_iter)
     return reduce_token_list('variable', [at_token, token])
 
 
-def linq_to_tokens(line):
+def linq_to_token_text_list(line):
     stream_iter = StreamTokenIterator(line)
     buff = []
     while not stream_iter.is_done():
@@ -65,31 +65,31 @@ def linq_to_tokens(line):
         if token != EmptyToken:
             buff.append(token.text)
             continue
-        token = read_double_quote_string(stream_iter)
+        token = read_double_quote_string_token(stream_iter)
         if token != EmptyToken:
             buff.append(token.text)
             continue
-        token = read_spaces(stream_iter)
+        token = read_spaces_token(stream_iter)
         if token != EmptyToken:
             buff.append(' ')
             continue
-        token = read_symbol(stream_iter, symbols)
+        token = read_symbol_token(stream_iter, symbols)
         if token != EmptyToken:
             buff.append(token.text)
             continue
-        token = read_identifier(stream_iter)
+        token = read_identifier_token(stream_iter)
         if token != EmptyToken:
             buff.append(token.text)
             continue
 
-        text = read_until(stream_iter, ' ').text
+        text = read_token_until(stream_iter, ' ').text
         buff.append(text)
     return buff
 
 
-src_tokens = linq_to_tokens(src)
+src_tokens = linq_to_token_text_list(src)
 print(f"{src_tokens=}")
-tgt_tokens = linq_to_tokens(tgt)
+tgt_tokens = linq_to_token_text_list(tgt)
 print(f"{tgt_tokens=}")
 
 # max_size = 297

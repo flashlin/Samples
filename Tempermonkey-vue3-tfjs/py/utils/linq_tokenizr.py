@@ -2,8 +2,8 @@ from typing import Final
 
 from utils.tokenizr import try_read_any, read_keyword_fn, fixed_marks, tokens_to_index_list, index_list_to_string, LINQ_Keywords, VOCAB_MARKS
 from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map, create_index2char_map
-from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier, read_float_number, read_spaces, \
-    read_single_quote_string, read_double_quote_string
+from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier_token, read_float_number_token, read_spaces_token, \
+    read_single_quote_string_token, read_double_quote_string_token
 
 LINQ_Keywords_Lengths = group_to_lengths(LINQ_Keywords)
 LINQ_Symbols: Final[list[str]] = ['.', ',', '(', ')', '{', '}']
@@ -25,13 +25,13 @@ def linq_tokenize(stream) -> list[Token]:
 
     read_fn_list = [
         read_linq_keyword_fn(),
-        read_identifier,
-        read_float_number,
-        read_double_quote_string,
-        read_single_quote_string,
+        read_identifier_token,
+        read_float_number_token,
+        read_double_quote_string_token,
+        read_single_quote_string_token,
         read_operator_fn(),
         read_symbol_fn(),
-        read_spaces,
+        read_spaces_token,
     ]
 
     while not stream_iterator.is_done():

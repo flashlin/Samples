@@ -139,7 +139,7 @@ def reduce_token_list(token_type: str, buff: list[Token]):
     return token
 
 
-def read_identifier(stream_iterator: StreamTokenIterator) -> Token:
+def read_identifier_token(stream_iterator: StreamTokenIterator) -> Token:
     text = stream_iterator.peek_str(1)
     if not text.isalpha() and text != '_':
         return EmptyToken
@@ -153,7 +153,7 @@ def read_identifier(stream_iterator: StreamTokenIterator) -> Token:
     return reduce_token_list(Token.Identifier, buff)
 
 
-def read_symbol(stream_iterator: StreamTokenIterator, symbols: [str]) -> Token:
+def read_symbol_token(stream_iterator: StreamTokenIterator, symbols: [str]) -> Token:
     symbols_sorted = sort_desc(symbols)
     symbols_dict = create_char2index_map(symbols_sorted)
     symbols_lens = group_to_lengths(symbols_sorted)
@@ -164,7 +164,7 @@ def read_symbol(stream_iterator: StreamTokenIterator, symbols: [str]) -> Token:
     return EmptyToken
 
 
-def read_number(stream_iterator: StreamTokenIterator) -> Token:
+def read_number_token(stream_iterator: StreamTokenIterator) -> Token:
     buff = []
     while not stream_iterator.is_done():
         token = stream_iterator.peek()
@@ -177,13 +177,13 @@ def read_number(stream_iterator: StreamTokenIterator) -> Token:
     return reduce_token_list(Token.Number, buff)
 
 
-def read_float_number(stream_iterator: StreamTokenIterator) -> Token:
-    integer = read_number(stream_iterator)
+def read_float_number_token(stream_iterator: StreamTokenIterator) -> Token:
+    integer = read_number_token(stream_iterator)
     text = stream_iterator.peek_str(1)
     if text != '.':
         return integer
     dot = stream_iterator.next()
-    scale = read_number(stream_iterator)
+    scale = read_number_token(stream_iterator)
     if scale == EmptyToken:
         stream_iterator.prev()
         return EmptyToken
@@ -203,7 +203,7 @@ def is_spaces(ch: str) -> bool:
     return index_of([' ', '\r', '\n', '\t'], ch) != -1
 
 
-def read_spaces(stream_iterator: StreamTokenIterator) -> Token:
+def read_spaces_token(stream_iterator: StreamTokenIterator) -> Token:
     buff = []
     while not stream_iterator.is_done():
         token = stream_iterator.peek()
@@ -216,7 +216,7 @@ def read_spaces(stream_iterator: StreamTokenIterator) -> Token:
     return reduce_token_list(Token.Spaces, buff)
 
 
-def read_single_quote_string(stream_iterator: StreamTokenIterator):
+def read_single_quote_string_token(stream_iterator: StreamTokenIterator):
     if stream_iterator.peek_str(1) != "'":
         return EmptyToken
     buff = [stream_iterator.next()]
@@ -236,7 +236,7 @@ def read_single_quote_string(stream_iterator: StreamTokenIterator):
     return reduce_token_list(Token.String, buff)
 
 
-def read_double_quote_string(stream_iterator: StreamTokenIterator):
+def read_double_quote_string_token(stream_iterator: StreamTokenIterator) -> Token:
     if stream_iterator.peek_str(1) != '"':
         return EmptyToken
     buff = [stream_iterator.next()]
@@ -253,7 +253,7 @@ def read_double_quote_string(stream_iterator: StreamTokenIterator):
 Until_Check_Fn = Callable[[StreamTokenIterator], bool]
 
 
-def read_until_by(stream_iterator: StreamTokenIterator, check_fn: Until_Check_Fn) -> Token:
+def read_token_until_by(stream_iterator: StreamTokenIterator, check_fn: Until_Check_Fn) -> Token:
     buff = [stream_iterator.next()]
     while not stream_iterator.is_done():
         if check_fn(stream_iterator):
@@ -263,8 +263,8 @@ def read_until_by(stream_iterator: StreamTokenIterator, check_fn: Until_Check_Fn
     return reduce_token_list(Token.String, buff)
 
 
-def read_until(stream_iterator: StreamTokenIterator, last_char):
-    return read_until_by(stream_iterator, lambda a_iter: a_iter.peek_str(1) == last_char)
+def read_token_until(stream_iterator: StreamTokenIterator, last_char):
+    return read_token_until_by(stream_iterator, lambda a_iter: a_iter.peek_str(1) == last_char)
 
 
 class SeqIterator(Generic[T]):

@@ -12,7 +12,7 @@ from ml.data_utils import get_data_file_path
 from ml.lit import BaseLightning, start_train, copy_last_ckpt
 from ml.model_utils import reduce_dim, detach_lstm_hidden_state
 from utils.data_utils import df_to_values, pad_array, split_line_by_space, create_char2index_map, create_index2char_map
-from utils.stream import StreamTokenIterator, read_double_quote_string, read_until, int_list_to_str, replace_many_spaces
+from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, int_list_to_str, replace_many_spaces
 from utils.template_utils import TemplateText
 
 
@@ -23,7 +23,7 @@ def line_to_tokens(line):
     while not stream_iter.is_done():
         ch = stream_iter.peek_str(1)
         if ch == '"':
-            prev_ch = read_double_quote_string(stream_iter).text
+            prev_ch = read_double_quote_string_token(stream_iter).text
             buff.append(prev_ch)
             continue
         if ch == ' ':
@@ -33,7 +33,7 @@ def line_to_tokens(line):
             prev_ch = stream_iter.next().text
             buff.append(prev_ch)
             continue
-        text = read_until(stream_iter, ' ').text
+        text = read_token_until(stream_iter, ' ').text
         prev_ch = text
         buff.append(text)
     return buff

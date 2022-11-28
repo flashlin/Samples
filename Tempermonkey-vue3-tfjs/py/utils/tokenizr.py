@@ -1,6 +1,6 @@
 from utils.data_utils import sort_desc, create_char2index_map
 from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, SeqIterator, \
-    read_single_quote_string, index_of
+    read_single_quote_string_token, index_of
 
 BOS_TOKEN = '<bos>'
 EOS_TOKEN = '<eos>'
@@ -335,5 +335,5 @@ PAD_TOKEN_VALUE = VOCAB_MARKS_CHAR2INDEX[PAD_TOKEN]
 
 if __name__ == "__main__":
     iterator = StreamTokenIterator("'abc ''123'''")
-    token = read_single_quote_string(iterator)
+    token = read_single_quote_string_token(iterator)
     print(f"{token=}")
