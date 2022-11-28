@@ -1,5 +1,4 @@
-from itertools import groupby
-
+from utils.data_utils import sort_desc, create_char2index_map
 from utils.stream import StreamTokenIterator, Token, EmptyToken, reduce_token_list, SeqIterator, \
     read_single_quote_string, index_of
 
@@ -12,15 +11,6 @@ ReservedWords = [
     Token.String, Token.Spaces,
     Token.Symbol, Token.Operator,
 ]
-
-
-def sort_desc(arr: list[str]) -> list[str]:
-    arr.sort(key=lambda x: len(x))
-    return arr[::-1]
-
-
-def group_to_lengths(arr_sorted: list[str]):
-    return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
 
 
 def peek_str_by_list_contain(stream_iterator: StreamTokenIterator,
@@ -119,20 +109,6 @@ def index_list_to_string(index2char_dict, value_list: list[int]):
             continue
         text += index2char_dict[iterator.next()]
     return text
-
-
-def create_char2index_map(str_list: list[str]):
-    dictionary = {}
-    for idx, key in enumerate(str_list):
-        dictionary[key] = idx
-    return dictionary
-
-
-def create_index2char_map(str_list: list[str]):
-    dictionary = {}
-    for idx, key in enumerate(str_list):
-        dictionary[idx] = key
-    return dictionary
 
 
 letters = [ch for ch in

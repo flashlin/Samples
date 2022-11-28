@@ -1,3 +1,5 @@
+from itertools import groupby
+
 import numpy as np
 
 
@@ -12,3 +14,26 @@ def pad_array(arr, fill_value, max_length, d_type=np.long):
 
 def split_line_by_space(line):
     return [x.rstrip() for x in line.split(' ')]
+
+
+def sort_desc(arr: list[str]) -> list[str]:
+    arr.sort(key=lambda x: len(x))
+    return arr[::-1]
+
+
+def group_to_lengths(arr_sorted: list[str]):
+    return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
+
+
+def create_char2index_map(str_list: list[str]):
+    dictionary = {}
+    for idx, key in enumerate(str_list):
+        dictionary[key] = idx
+    return dictionary
+
+
+def create_index2char_map(str_list: list[str]):
+    dictionary = {}
+    for idx, key in enumerate(str_list):
+        dictionary[idx] = key
+    return dictionary

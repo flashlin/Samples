@@ -2,6 +2,8 @@ import re
 from functools import reduce
 from typing import Generic, TypeVar, Callable
 
+from utils.data_utils import sort_desc, create_char2index_map, group_to_lengths
+
 
 class Token:
     Undefined = 'undefined'
@@ -149,6 +151,17 @@ def read_identifier(stream_iterator: StreamTokenIterator) -> Token:
         stream_iterator.next()
         buff.append(token)
     return reduce_token_list(Token.Identifier, buff)
+
+
+def read_symbol(stream_iterator: StreamTokenIterator, symbols: [str]) -> Token:
+    symbols_sorted = sort_desc(symbols)
+    symbols_dict = create_char2index_map(symbols_sorted)
+    symbols_lens = group_to_lengths(symbols_sorted)
+    for len in symbols_lens:
+        ch = stream_iterator.peek_str(len)
+        if ch in symbols:
+            return stream_iterator.next(len)
+    return EmptyToken
 
 
 def read_number(stream_iterator: StreamTokenIterator) -> Token:

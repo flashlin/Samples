@@ -7,8 +7,8 @@ from ml.bpe_tokenizer import SimpleTokenizer
 from preprocess_data import TranslationDataset, TranslationFileTextIterator, int_list_to_str
 from utils.linq_tokenizr import linq_tokenize, linq_encode, LINQ_VOCAB_SIZE
 from utils.stream import Token
-from utils.tokenizr import BOS_TOKEN_VALUE, EOS_TOKEN_VALUE, PAD_TOKEN_VALUE, create_char2index_map, sort_desc, \
-    create_index2char_map
+from utils.tokenizr import BOS_TOKEN_VALUE, EOS_TOKEN_VALUE, PAD_TOKEN_VALUE
+from utils.data_utils import sort_desc, create_char2index_map, create_index2char_map
 from utils.tsql_tokenizr import tsql_tokenize, tsql_encode, TSQL_VOCAB_SIZE, tsql_decode
 from dataclasses import dataclass, field
 from typing import Callable
