@@ -1,6 +1,6 @@
 import re
 from functools import reduce
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Callable
 
 
 class Token:
@@ -237,14 +237,21 @@ def read_double_quote_string(stream_iterator: StreamTokenIterator):
     return reduce_token_list(Token.String, buff)
 
 
-def read_until(stream_iterator: StreamTokenIterator, last_char):
+Until_Check_Fn = Callable[[StreamTokenIterator], bool]
+
+
+def read_until_by(stream_iterator: StreamTokenIterator, check_fn: Until_Check_Fn) -> Token:
     buff = [stream_iterator.next()]
     while not stream_iterator.is_done():
-        if stream_iterator.peek_str(1) == last_char:
+        if check_fn(stream_iterator):
             break
         token = stream_iterator.next()
         buff.append(token)
     return reduce_token_list(Token.String, buff)
+
+
+def read_until(stream_iterator: StreamTokenIterator, last_char):
+    return read_until_by(stream_iterator, lambda a_iter: a_iter.peek_str(1) == last_char)
 
 
 class SeqIterator(Generic[T]):
