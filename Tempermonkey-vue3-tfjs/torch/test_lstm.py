@@ -55,7 +55,7 @@ def linq_to_tokens(line):
     while not stream_iter.is_done():
         token = read_double_quote_string(stream_iter)
         if token != EmptyToken:
-            buff.append(prev_ch)
+            buff.append(token.text)
             continue
         token = read_spaces(stream_iter)
         if token != EmptyToken:
