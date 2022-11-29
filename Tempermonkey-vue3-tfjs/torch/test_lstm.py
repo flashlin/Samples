@@ -272,26 +272,43 @@ class Seq2Seq(nn.Module):
         # x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
         # y = y.contiguous().view(-1)
         x_hat = x_hat[:, 1:, :].reshape(-1, self.tgt_vocab_size)
-        info(f" loss {y.shape=}")
         y = y[:, 1:].reshape(-1)
         return self.loss_fn(x_hat, y)
 
 
-class Seq2Seq2(nn.Module):
+
+class Seq2SeqTransformer(nn.Module):
     def __init__(self, vocab_size, padding_idx, word_dim=128):
         super().__init__()
+        self.padding_idx = padding_idx
         self.embedding = nn.Embedding(vocab_size, word_dim)
         self.transformer = nn.Transformer(d_model=word_dim, batch_first=True)
-        self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn = nn.CrossEntropyLoss(ignore_index=padding_idx)
 
     def forward(self, x, y):
+        src_key_padding_mask = self.get_key_padding_mask(x).to(x.device)
+        tgt_key_padding_mask = self.get_key_padding_mask(y).to(x.device)
+        tgt_mask = nn.Transformer.generate_square_subsequent_mask(y.size(-1)).to(x.device)
+        x = self.embedding(x)
         y = self.embedding(y)
-        outputs = self.transformer(self.embedding(x), y)
-        return outputs, y
+        outputs = self.transformer(x, y,
+                                   tgt_mask=tgt_mask,
+                                   src_key_padding_mask=src_key_padding_mask,
+                                   tgt_key_padding_mask=tgt_key_padding_mask
+                                   )
+        return outputs
 
     def calculate_loss(self, x_hat, y):
-        info(f" loss {x_hat.shape=} {y.shape=}")
+        x_hat = x_hat.reshape(-1, x_hat.shape[2])
+        y = reduce_dim(y)
         return self.loss_fn(x_hat, y)
+
+    def get_key_padding_mask(self, tokens):
+        key_padding_mask = tokens == self.padding_idx
+        # # key_padding_mask = self.transformer.generate_square_subsequent_mask(tokens.size())
+        # key_padding_mask = torch.zeros(tokens.size()).type(torch.bool)
+        # key_padding_mask[tokens == self.padding_idx] = True
+        return key_padding_mask
 
 
 inp1 = src_values  # [0:3]
@@ -310,13 +327,13 @@ inp2_values = torch.tensor([inp2], dtype=torch.long)
 #                 tgt_word_dim=TGT_WORD_DIM,
 #                 tgt_padding_idx=TGT_PADDING_IDX,
 #                 )
-model = Seq2Seq2(len(shared_symbols), src_char2index['<pad>'])
+model = Seq2SeqTransformer(len(shared_symbols), src_char2index['<pad>'])
 
-predictive, y = model(inp1_values, inp2_values)
-print(f"{predictive=}")
-
-loss = model.calculate_loss(predictive, y)
-print(f" {loss=}")
+# predictive, y = model(inp1_values, inp2_values)
+# print(f"{predictive=}")
+#
+# loss = model.calculate_loss(predictive, y)
+# print(f" {loss=}")
 
 
 class MemDataset(Dataset):
@@ -326,11 +343,12 @@ class MemDataset(Dataset):
         self.data2 = [tgt_values]
 
     def __len__(self):
-        return len(self.data1)
+        # return len(self.data1)
+        return 100
 
     def __getitem__(self, idx):
-        src = self.data1[idx]
-        tgt = self.data2[idx]
+        src = self.data1[0]
+        tgt = self.data2[0]
         src = torch.tensor(src, dtype=torch.long)
         tgt = torch.tensor(tgt, dtype=torch.long)
         return src, len(src), tgt, len(tgt)
@@ -347,14 +365,14 @@ class MemDataset(Dataset):
 class MyTrans(BaseLightning):
     def __init__(self):
         super().__init__()
-        self.model = Seq2Seq2(len(shared_symbols), src_char2index['<pad>'])
+        self.model = Seq2SeqTransformer(len(shared_symbols), src_char2index['<pad>'])
         batch_size = 1
         self.init_dataloader(MemDataset(src_char2index['<pad>']), batch_size)
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
-        x_hat, y_hat = self.model(src, tgt)
-        return x_hat, y_hat
+        x_hat = self.model(src, tgt)
+        return x_hat, tgt
 
     def _calculate_loss(self, data, mode="train"):
         (x_hat, y_hat), batch = data
@@ -363,4 +381,4 @@ class MyTrans(BaseLightning):
         return loss
 
 
-start_train(MyTrans, device='cuda', max_epochs=10)
+start_train(MyTrans, device='cuda', max_epochs=100)
