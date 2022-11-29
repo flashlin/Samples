@@ -3,9 +3,11 @@ import random
 import torch
 from torch import nn
 import torch.nn.functional as F
+from torch.utils.data import Dataset, random_split
 
 from common.io import info
-from ml.lit import PositionalEncoding
+from ml.lit import PositionalEncoding, BaseLightning, start_train
+from ml.mnt_net import pad_data_loader
 from ml.model_utils import reduce_dim
 from my_model import line_to_tokens, encode_tokens, decode_to_text
 from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, read_identifier_token, \
@@ -292,8 +294,8 @@ class Seq2Seq2(nn.Module):
         return self.loss_fn(x_hat, y)
 
 
-inp1 = src_values #[0:3]
-inp2 = tgt_values #[0:3]
+inp1 = src_values  # [0:3]
+inp2 = tgt_values  # [0:3]
 
 inp1_values = torch.tensor([inp1], dtype=torch.long)
 inp2_values = torch.tensor([inp2], dtype=torch.long)
@@ -310,7 +312,6 @@ inp2_values = torch.tensor([inp2], dtype=torch.long)
 #                 )
 model = Seq2Seq2(len(shared_symbols), src_char2index['<pad>'])
 
-
 predictive, y = model(inp1_values, inp2_values)
 print(f"{predictive=}")
 
@@ -318,3 +319,48 @@ loss = model.calculate_loss(predictive, y)
 print(f" {loss=}")
 
 
+class MemDataset(Dataset):
+    def __init__(self, padding_idx):
+        self.padding_idx = padding_idx
+        self.data1 = [src_values]
+        self.data2 = [tgt_values]
+
+    def __len__(self):
+        return len(self.data1)
+
+    def __getitem__(self, idx):
+        src = self.data1[idx]
+        tgt = self.data2[idx]
+        src = torch.tensor(src, dtype=torch.long)
+        tgt = torch.tensor(tgt, dtype=torch.long)
+        return src, len(src), tgt, len(tgt)
+
+    def create_dataloader(self, batch_size=32):
+        train_size = int(0.8 * len(self))
+        val_size = len(self) - train_size
+        train_data, val_data = random_split(self, [train_size, val_size])
+        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        return train_loader, val_loader
+
+
+class MyTrans(BaseLightning):
+    def __init__(self):
+        super().__init__()
+        self.model = Seq2Seq2(len(shared_symbols), src_char2index['<pad>'])
+        batch_size = 1
+        self.init_dataloader(MemDataset(src_char2index['<pad>']), batch_size)
+
+    def forward(self, batch):
+        src, src_len, tgt, tgt_len = batch
+        x_hat, y_hat = self.model(src, tgt)
+        return x_hat, y_hat
+
+    def _calculate_loss(self, data, mode="train"):
+        (x_hat, y_hat), batch = data
+        loss = self.model.calculate_loss(x_hat, y_hat)
+        self.log("%s_loss" % mode, loss)
+        return loss
+
+
+start_train(MyTrans, device='cuda', max_epochs=10)
