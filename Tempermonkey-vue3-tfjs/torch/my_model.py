@@ -84,6 +84,10 @@ tgt_char2index = create_char2index_map(tgt_symbols)
 tgt_index2char = create_index2char_map(tgt_symbols)
 
 
+def encode_number_token(token, char2index):
+    return [char2index[n] for n in token]
+
+
 def encode_tokens(tokens, char2index):
     var_re = re.compile(r'(@\w.+)(\d+)')
     buff = [char2index['<bos>']]
@@ -102,7 +106,8 @@ def encode_tokens(tokens, char2index):
                 unk = unk_tokens[token]
             else:
                 try:
-                    unk = [char2index['<unk>'], char2index[str(unk_num)]]
+                    unk_num_values = encode_number_token(str(unk_num), char2index)
+                    unk = [char2index['<unk>']] + unk_num_values
                     unk_tokens[token] = unk
                 except Exception as e:
                     info_error(f' {tokens=} {token=} {e}')
