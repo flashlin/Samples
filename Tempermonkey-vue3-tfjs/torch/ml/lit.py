@@ -268,6 +268,7 @@ def load_model(model_type, checkpoint_path="./output", model_name=None, **kwargs
         info(f"Found pretrained model, loading {model_name}...")
         model = model_type(**kwargs)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        info(f"{device=}")
         return model.load_from_checkpoint(pretrained_filename).to(device)
     return None
 
