@@ -157,10 +157,10 @@ def read_symbol_token(stream_iterator: StreamTokenIterator, symbols: [str]) -> T
     symbols_sorted = sort_desc(symbols)
     symbols_dict = create_char2index_map(symbols_sorted)
     symbols_lens = group_to_lengths(symbols_sorted)
-    for len in symbols_lens:
-        ch = stream_iterator.peek_str(len)
-        if ch in symbols:
-            return stream_iterator.next(len)
+    for symbol_len in symbols_lens:
+        ch = stream_iterator.peek_str(symbol_len)
+        if ch in symbols_dict:
+            return stream_iterator.next(symbol_len)
     return EmptyToken
 
 

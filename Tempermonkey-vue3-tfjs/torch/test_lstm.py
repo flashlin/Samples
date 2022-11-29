@@ -1,11 +1,17 @@
+import random
+
 import torch
 from torch import nn
+import torch.nn.functional as F
 
 from common.io import info
-from my_model import line_to_tokens
-from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, read_identifier_token, EmptyToken, \
+from ml.lit import PositionalEncoding
+from ml.model_utils import reduce_dim
+from my_model import line_to_tokens, encode_tokens, decode_to_text
+from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, read_identifier_token, \
+    EmptyToken, \
     read_symbol_token, read_spaces_token, Token, reduce_token_list
-from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map
+from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map, create_index2char_map
 
 """
 src = 'from tb1     in customer select tb1     . name'
@@ -45,8 +51,36 @@ pre = ''
 tgt = 'from @tb_as1 in @tb1 select @tb_as1.@fd1'
 # lstm = nn.LSTM()
 
-symbols = '. [ ] { } += + - * / ,'
+symbols = '. [ ] { } += + - * / , =='
 symbols = symbols.split(' ')
+
+common_symbols = '1 2 3 4 5 6 7 8 9 0 <unk> <bos> <eos> <pad>'.split(' ') + [' ']
+
+src_spec = 'from in select new join on equals contains'.split(' ')
+src_symbols = sort_desc(common_symbols + symbols + src_spec)
+tgt_spec = '@tb_as @tb @fd_as @fd @str @number'.split(' ')
+tgt_symbols = sort_desc(common_symbols + symbols + tgt_spec)
+shared_symbols = sort_desc(common_symbols + symbols + src_spec + tgt_spec)
+
+# src_char2index = create_char2index_map(src_symbols)
+# src_index2char = create_index2char_map(src_symbols)
+# tgt_char2index = create_char2index_map(tgt_symbols)
+
+src_char2index = create_char2index_map(shared_symbols)
+src_index2char = create_index2char_map(shared_symbols)
+tgt_char2index = create_char2index_map(shared_symbols)
+
+
+def encode_src_tokens(tokens):
+    return encode_tokens(tokens, src_char2index)
+
+
+def encode_tgt_tokens(tokens):
+    return encode_tokens(tokens, tgt_char2index)
+
+
+def decode_src_values(values):
+    return decode_to_text(values, src_index2char)
 
 
 def read_variable_token(stream_iter: StreamTokenIterator) -> Token:
@@ -89,33 +123,198 @@ def linq_to_token_text_list(line):
 
 src_tokens = linq_to_token_text_list(src)
 print(f"{src_tokens=}")
+src_values = encode_src_tokens(src_tokens)
+print(f"{src_values=}")
+src_text = decode_src_values(src_values)
+print(f"{src_text=}")
 tgt_tokens = linq_to_token_text_list(tgt)
 print(f"{tgt_tokens=}")
+tgt_values = encode_tgt_tokens(tgt_tokens)
 
-# max_size = 297
-# embedding = nn.Embedding(max_size + 1, 3, padding_idx=0)
-# inputs = torch.tensor([  1, 102, 243, 105,  97, 101,  21,  22,  23,   6,   7,  16,  22,   0,
-#         105,  97, 102, 297, 105,  97, 101,  21,  22,  23,   6,   7,  16,  22,
-#          21,   0, 105,  97, 102, 221, 105,  97, 101,  21,  22,  23,   6,   7,
-#          16,  22,   0, 105,  97, 102, 296, 105,  97, 101,  21,  22,  23,   6,
-#           7,  16,  22,   0, 106,  95, 101,  40,   3,  21,  22,  42,   3,  15,
-#           7,   0, 105,  97, 102, 244, 105,  97, 102, 282, 101,  35,  20,  17,
-#          23,  18,   0, 105,  97, 102, 168, 105,  97, 102, 282, 101,  35,  20,
-#          17,  23,  18,   0, 106,  95, 101,  39,   7,  27,   0, 105,  97, 102,
-#         192, 105,  97, 102, 282, 106,  81, 101,  13,   7,  27,   0, 107,  67,
-#         102, 282, 101,  35,  20,  17,  23,  18,   0, 106,  95, 101,  39,   7,
-#          27,   0, 106,  94, 101,  24,   3,  14,  23,   7,  21,   0, 107,  67,
-#         102, 282, 101,  35,  20,  17,  23,  18,   0, 106,  95, 102, 169, 106,
-#          77, 106,  78, 106,  82, 105,  98,   2,   0,   0,   0,   0,   0,   0,
-#           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-#           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-#           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-#           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-#           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-#           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
-#           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0])
-# info(f" {inputs.shape=}")
-# info(f" {max(inputs)=}")
-# assert (inputs <= max_size).all(), "target: {} invalid".format(inputs)
-# t = embedding(inputs) #.view(1, 1, -1)
-# info(f" {t=}")
+SEQ_LEN = 3
+SRC_VOCAB_SIZE = len(src_symbols)
+SRC_WORD_DIM = 3
+SRC_PADDING_IDX = src_char2index['<pad>']
+TGT_VOCAB_SIZE = len(tgt_symbols)
+TGT_WORD_DIM = 3
+TGT_PADDING_IDX = tgt_char2index['<pad>']
+POS_DIM = 3
+MAX_SENTENCE_LEN = 1000
+HIDDEN_SIZE = 7
+NUM_LAYERS = 3
+
+
+class Encoder(nn.Module):
+    def __init__(self,
+                 pos_dim, max_sentence_len,
+                 src_vocab_size, src_word_dim,
+                 src_padding_idx,
+                 hidden_size=3,
+                 dropout=0.1,
+                 num_layers=7):
+        super().__init__()
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.src_embedding = nn.Embedding(num_embeddings=src_vocab_size,
+                                          embedding_dim=src_word_dim,
+                                          padding_idx=src_padding_idx)
+        self.pos_emb = PositionalEncoding(d_model=pos_dim, max_len=max_sentence_len)
+        self.lstm = nn.LSTM(input_size=src_word_dim,
+                            hidden_size=hidden_size,
+                            num_layers=num_layers,
+                            batch_first=True,
+                            dropout=dropout)
+
+    def forward(self, x):
+        x = self.src_embedding(x)
+        x = self.pos_emb(x)
+        output, hidden = self.lstm(x)  # h_n = (num_layers * num_directions, batch_size, hidden_size)
+        return output, hidden
+
+
+class Decoder(nn.Module):
+    def __init__(self,
+                 seq_len, pos_dim, max_sentence_len,
+                 tgt_vocab_size, tgt_word_dim, tgt_padding_idx,
+                 hidden_size=3, num_layers=7, dropout=0.1):
+        super().__init__()
+        self.seq_len = seq_len
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.tgt_embedding = nn.Embedding(num_embeddings=tgt_vocab_size,
+                                          embedding_dim=tgt_word_dim,
+                                          padding_idx=tgt_padding_idx)
+        self.pos_emb = PositionalEncoding(d_model=pos_dim, max_len=max_sentence_len)
+        self.lstm = nn.LSTM(input_size=tgt_word_dim,
+                            hidden_size=hidden_size,
+                            num_layers=num_layers,
+                            batch_first=True,
+                            dropout=dropout)
+        self.classify = nn.Linear(hidden_size, tgt_vocab_size)
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def forward(self, tgt, hidden):
+        """
+        :param trg: [batch, seq_len] 實際訓練應該為 seq_len = 1
+        :param hidden: [n_layers, batch, hidden_dim]
+        :return:
+        """
+        # tgt = tgt.unsqueeze(1)
+        tgt = self.tgt_embedding(tgt)
+        tgt = self.pos_emb(tgt)
+        print(f" decoder {tgt.shape=} {hidden[0].shape=}")
+        output, hidden = self.lstm(tgt, hidden)
+        predictive = self.classify(output)
+        return predictive, hidden
+
+
+# （L - 長度，N - 批量大小，F - 特徵大小）
+
+class Seq2Seq(nn.Module):
+    def __init__(self,
+                 seq_len, src_pos_dim, max_sentence_len,
+                 src_vocab_size, src_word_dim, src_padding_idx,
+                 tgt_vocab_size, tgt_word_dim, tgt_padding_idx,
+                 hidden_size=3,
+                 num_layers=7,
+                 dropout=0.1):
+        super().__init__()
+        self.seq_len = seq_len
+        self.tgt_vocab_size = tgt_vocab_size
+        self.encoder = Encoder(pos_dim=src_pos_dim,
+                               max_sentence_len=max_sentence_len,
+                               src_vocab_size=src_vocab_size,
+                               src_word_dim=src_word_dim,
+                               src_padding_idx=src_padding_idx,
+                               hidden_size=hidden_size,
+                               num_layers=num_layers,
+                               dropout=dropout)
+        self.decoder = Decoder(seq_len=seq_len,
+                               pos_dim=src_pos_dim,
+                               max_sentence_len=max_sentence_len,
+                               tgt_vocab_size=tgt_vocab_size,
+                               tgt_word_dim=tgt_word_dim,
+                               tgt_padding_idx=tgt_padding_idx,
+                               num_layers=num_layers,
+                               hidden_size=hidden_size,
+                               dropout=dropout)
+        self.out2tag = nn.Linear(hidden_size, tgt_vocab_size)
+        self.loss_fn = nn.CrossEntropyLoss(ignore_index=tgt_padding_idx)
+
+    def forward(self, src, tgt, teach_rate=0.5):
+        batch_size = tgt.size(0)
+        tgt_seq_len = tgt.size(1)
+
+        outputs_save = torch.zeros(batch_size, tgt_seq_len, self.tgt_vocab_size)
+        _, hidden = self.encoder(src)
+        info(f" cnoder {hidden[0].shape=}")
+
+        tgt_i = tgt[:, 0]
+        for i in range(0, tgt_seq_len):
+            print(f" {tgt_i.shape=} {hidden[0].shape=}")
+            output, hidden = self.decoder(tgt_i, hidden)
+            outputs_save[:, i, :] = output
+            top = output.argmax(dim=0).argmax(dim=0)  # 拿到預測結果
+            top = max(top)
+            probability = random.random()
+            if probability > teach_rate:
+                info(f" teach {tgt[:, i].shape=}")
+                tgt_i = tgt[:, i]
+            else:
+                print(f" top {top.shape=} {top=}")
+                tgt_i = top
+            # tgt_i = tgt[:, i] if probability > teach_rate else top
+        return outputs_save
+
+    def calculate_loss(self, x_hat, y):
+        # x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
+        # y = y.contiguous().view(-1)
+        x_hat = x_hat[:, 1:, :].reshape(-1, self.tgt_vocab_size)
+        info(f" loss {y.shape=}")
+        y = y[:, 1:].reshape(-1)
+        return self.loss_fn(x_hat, y)
+
+
+class Seq2Seq2(nn.Module):
+    def __init__(self, vocab_size, padding_idx, word_dim=128):
+        super().__init__()
+        self.embedding = nn.Embedding(vocab_size, word_dim)
+        self.transformer = nn.Transformer(d_model=word_dim, batch_first=True)
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def forward(self, x, y):
+        y = self.embedding(y)
+        outputs = self.transformer(self.embedding(x), y)
+        return outputs, y
+
+    def calculate_loss(self, x_hat, y):
+        info(f" loss {x_hat.shape=} {y.shape=}")
+        return self.loss_fn(x_hat, y)
+
+
+inp1 = src_values #[0:3]
+inp2 = tgt_values #[0:3]
+
+inp1_values = torch.tensor([inp1], dtype=torch.long)
+inp2_values = torch.tensor([inp2], dtype=torch.long)
+
+# model = Seq2Seq(seq_len=SEQ_LEN,
+#                 src_pos_dim=POS_DIM,
+#                 max_sentence_len=MAX_SENTENCE_LEN,
+#                 src_vocab_size=SRC_VOCAB_SIZE,
+#                 src_word_dim=SRC_WORD_DIM,
+#                 src_padding_idx=SRC_PADDING_IDX,
+#                 tgt_vocab_size=TGT_VOCAB_SIZE,
+#                 tgt_word_dim=TGT_WORD_DIM,
+#                 tgt_padding_idx=TGT_PADDING_IDX,
+#                 )
+model = Seq2Seq2(len(shared_symbols), src_char2index['<pad>'])
+
+
+predictive, y = model(inp1_values, inp2_values)
+print(f"{predictive=}")
+
+loss = model.calculate_loss(predictive, y)
+print(f" {loss=}")
+
+
