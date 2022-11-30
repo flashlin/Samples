@@ -226,25 +226,13 @@ translate_examples = [
 ]
 print(f" {translate_examples=}")
 
-t1 = vocab.encode('from tb1     in customer select tb1.name')
-t1 = vocab.decode_values(t1)
-print(f" {t1=}")
-t1 = vocab.encode('from @tb_as1 in @tb1     select @tb_as1.@fd1')
-t1 = vocab.decode_values(t1)
-print(f" {t1=}")
-
-translate_examples = [(vocab.encode(src), vocab.encode(tgt)) for (srg, tgt) in translate_examples]
-print(f" {translate_examples=}")
-
-t1 = [(vocab.decode_values(src), vocab.decode_values(tgt)) for (src, tgt) in translate_examples]
-print(f" {t1=}")
+translate_examples = [(vocab.encode(src), vocab.encode(tgt)) for (src, tgt) in translate_examples]
 
 copy_last_ckpt(LiTranslator)
 
 model = start_train(LiTranslator,
                     {
-                        'vocab_size': vocab.get_size(),
-                        'padding_idx': vocab.get_value('<pad>')
+                        'vocab': vocab,
                     },
                     ListDataset(translate_examples, vocab.get_value('<pad>')),
                     model_name='MyTrans',
