@@ -77,9 +77,10 @@ class ListDataset(Dataset):
 
 
 class LiTranslator(BaseLightning):
-    def __init__(self, vocab_size, padding_idx):
+    def __init__(self, vocab):
         super().__init__()
-        self.model = Seq2SeqTransformer(vocab_size, padding_idx)
+        self.vocab = vocab
+        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'))
         # batch_size = 1
         # self.init_dataloader(ListDataset(padding_idx), batch_size)
 
@@ -98,7 +99,8 @@ class LiTranslator(BaseLightning):
         self.log("%s_loss" % mode, loss)
         return loss
 
-    def infer(self, text, vocab):
+    def infer(self, text):
+        vocab = self.vocab
         src_values = vocab.encode(text)
         self.model.eval()
         device = next(self.parameters()).device

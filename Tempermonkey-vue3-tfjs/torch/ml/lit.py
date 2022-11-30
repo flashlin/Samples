@@ -299,14 +299,12 @@ def start_train(model_type,
     )
     trainer.logger._default_hp_metric = None  # Optional logging argument that we don't need
 
-    # Check whether pretrained model exists. If yes, load it and skip training
     pretrained_filename = os.path.join(checkpoint_path, f"{model_name}.ckpt")
     if os.path.isfile(pretrained_filename):
         info(f"Found pretrained model, loading {model_name}...")
         model = model_type.load_from_checkpoint(pretrained_filename, **kwargs)
     else:
         model = model_type(**model_args)
-        # train_loader = model.train_dataloader()
 
     model.init_dataloader(dataset, batch_size)
 
