@@ -2,18 +2,18 @@ import random
 
 import torch
 from torch import nn
-import torch.nn.functional as F
-from torch.utils.data import Dataset, random_split, DataLoader
+from torch.utils.data import Dataset, random_split
 
 from common.io import info
-from ml.lit import PositionalEncoding, BaseLightning, start_train, load_model, copy_last_ckpt
+from ml.lit import PositionalEncoding, BaseLightning, load_model, copy_last_ckpt
 from ml.mnt_net import pad_data_loader
 from ml.model_utils import reduce_dim
-from my_model import line_to_tokens, encode_tokens, decode_to_text
+from ml.translate_net import Seq2SeqTransformer
+from my_model import encode_tokens, decode_to_text
 from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, read_identifier_token, \
     EmptyToken, \
     read_symbol_token, read_spaces_token, Token, reduce_token_list
-from utils.data_utils import sort_desc, group_to_lengths, create_char2index_map, create_index2char_map
+from utils.data_utils import sort_desc, create_char2index_map, create_index2char_map
 
 """
 src = 'from tb1     in customer select tb1     . name'
@@ -130,6 +130,9 @@ def encode_linq(text):
 
 def decode_linq(values):
     return decode_src_values(values)
+
+
+
 
 
 src_tokens = linq_to_token_text_list(src)
@@ -283,51 +286,6 @@ class Seq2Seq(nn.Module):
         x_hat = x_hat[:, 1:, :].reshape(-1, self.tgt_vocab_size)
         y = y[:, 1:].reshape(-1)
         return self.loss_fn(x_hat, y)
-
-
-class Seq2SeqTransformer(nn.Module):
-    def __init__(self, vocab_size, padding_idx, word_dim=128):
-        super().__init__()
-        self.vocab_size = vocab_size
-        self.padding_idx = padding_idx
-        self.embedding = nn.Embedding(vocab_size, word_dim)
-        self.transformer = nn.Transformer(d_model=word_dim, batch_first=True)
-        self.predictor = nn.Linear(word_dim, vocab_size)
-        self.loss_fn = nn.CrossEntropyLoss(ignore_index=padding_idx)
-
-    def forward(self, x, y):
-        outputs = self.transform(x, y)
-        outputs = self.predictor(outputs)
-        return outputs
-
-    def transform(self, x, y):
-        src_key_padding_mask = self.get_key_padding_mask(x)
-        tgt_key_padding_mask = self.get_key_padding_mask(y)
-        tgt_mask = nn.Transformer.generate_square_subsequent_mask(y.size(-1)).to(x.device)
-        x = self.embedding(x)
-        y = self.embedding(y)
-        outputs = self.transformer(x, y,
-                                   tgt_mask=tgt_mask,
-                                   src_key_padding_mask=src_key_padding_mask,
-                                   tgt_key_padding_mask=tgt_key_padding_mask
-                                   )
-        return outputs
-
-    def calculate_loss(self, x_hat, y):
-        n_tokens = (y != self.padding_idx).sum()
-
-        x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
-        y = y.contiguous().view(-1)
-
-        loss = self.loss_fn(x_hat, y) / n_tokens
-        return loss
-
-    def get_key_padding_mask(self, tokens):
-        key_padding_mask = tokens == self.padding_idx
-        # # key_padding_mask = self.transformer.generate_square_subsequent_mask(tokens.size())
-        # key_padding_mask = torch.zeros(tokens.size()).type(torch.bool)
-        # key_padding_mask[tokens == self.padding_idx] = True
-        return key_padding_mask
 
 
 inp1 = src_values  # [0:3]
