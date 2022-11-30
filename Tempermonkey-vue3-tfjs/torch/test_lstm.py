@@ -127,8 +127,10 @@ def encode_linq(text):
     tokens = linq_to_token_text_list(text)
     return encode_src_tokens(tokens)
 
+
 def decode_linq(values):
     return decode_src_values(values)
+
 
 src_tokens = linq_to_token_text_list(src)
 print(f"{src_tokens=}")
@@ -311,29 +313,6 @@ class Seq2SeqTransformer(nn.Module):
                                    )
         return outputs
 
-    def infer(self, src, char2index, max_length=500):
-        # self.eval()
-        # device = next(self.parameters()).device
-        # src = torch.tensor([src], dtype=torch.long).to(device)
-        # bos = char2index['<bos>']
-        # tgt = torch.tensor([[bos]], dtype=torch.long).to(device)
-
-        out = self(src, tgt)
-        # x_hat = out.reshape(-1, out.shape[2])
-        return out
-        # for i in range(max_length):
-        #     out = self(src, tgt)
-        #     # 預測結果，因為只需要看最後一個詞，所以取`out[:, -1]`
-        #     predict = model.predictor(out[:, - 1])
-        #     # 找出最大值的index
-        #     y = torch.argmax(predict, dim=1)
-        #     # 和之前的預測結果拼接到一起
-        #     tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
-        #
-        #     # 如果為<eos>，說明預測結束，跳出循環
-        #     if y == 1:
-        #         break
-
     def calculate_loss(self, x_hat, y):
         n_tokens = (y != self.padding_idx).sum()
 
@@ -426,18 +405,14 @@ class MyTrans(BaseLightning):
         self.log("%s_loss" % mode, loss)
         return loss
 
-    def infer(self, text, max_length=500):
+    def infer(self, text):
         values = encode_linq(text)
-        print(f" {len(values)=}")
         t = decode_linq(values)
-        print(f" {t=}")
         self.model.eval()
         device = next(self.parameters()).device
         src = torch.tensor([values], dtype=torch.long).to(device)
         bos = src_char2index['<bos>']
         tgt = torch.tensor([[bos]], dtype=torch.long).to(device)
-        print(f" {src.shape=}")
-
         for i in range(len(values)):
             outputs = self.model.transform(src, tgt)
             # 預測結果，因為只需要看最後一個詞，所以取`out[:, -1]`
@@ -457,7 +432,6 @@ class MyTrans(BaseLightning):
 
 
 copy_last_ckpt(MyTrans)
-model = start_train(MyTrans, device='cuda', max_epochs=100)
-# model = load_model(MyTrans)
+# model = start_train(MyTrans, device='cuda', max_epochs=100)
+model = load_model(MyTrans)
 model.infer('from tb2 in p select tb2.name')
-
