@@ -5,7 +5,7 @@ from torch import nn
 from torch.utils.data import Dataset, random_split
 
 from common.io import info
-from ml.lit import PositionalEncoding, BaseLightning, load_model, copy_last_ckpt
+from ml.lit import PositionalEncoding, BaseLightning, load_model, copy_last_ckpt, start_train
 from ml.mnt_net import pad_data_loader
 from ml.model_utils import reduce_dim
 from ml.translate_net import Seq2SeqTransformer
@@ -51,107 +51,88 @@ tgt = '. @fd1 <eos>'
 src = 'from tb1 in customer select tb1.name'
 pre = ''
 tgt = 'from @tb_as1 in @tb1 select @tb_as1.@fd1'
-# lstm = nn.LSTM()
-
-symbols = '. [ ] { } += + - * / , =='
-symbols = symbols.split(' ')
-
-common_symbols = '1 2 3 4 5 6 7 8 9 0 <unk> <bos> <eos> <pad>'.split(' ') + [' ']
-
-src_spec = 'from in select new join on equals contains'.split(' ')
-src_symbols = sort_desc(common_symbols + symbols + src_spec)
-tgt_spec = '@tb_as @tb @fd_as @fd @str @number'.split(' ')
-tgt_symbols = sort_desc(common_symbols + symbols + tgt_spec)
-shared_symbols = sort_desc(common_symbols + symbols + src_spec + tgt_spec)
-
-# src_char2index = create_char2index_map(src_symbols)
-# src_index2char = create_index2char_map(src_symbols)
-# tgt_char2index = create_char2index_map(tgt_symbols)
-
-src_char2index = create_char2index_map(shared_symbols)
-src_index2char = create_index2char_map(shared_symbols)
-tgt_char2index = create_char2index_map(shared_symbols)
 
 
-def encode_src_tokens(tokens):
-    return encode_tokens(tokens, src_char2index)
+class LinqToSqlVocab:
+    def __init__(self):
+        self.symbols = symbols = '. [ ] { } += + - * / , =='.split(' ')
+        common_symbols = '1 2 3 4 5 6 7 8 9 0 <unk> <bos> <eos> <pad>'.split(' ') + [' ']
+        linq_spec = 'from in select new join on equals contains'.split(' ')
+        linq_symbols = sort_desc(common_symbols + symbols + linq_spec)
+        tsql_spec = '@tb_as @tb @fd_as @fd @str @number'.split(' ')
+        tsql_symbols = sort_desc(common_symbols + symbols + tsql_spec)
+        self.shared_symbols = shared_symbols = sort_desc(common_symbols + symbols + linq_symbols + tsql_symbols)
+        self.char2index = create_char2index_map(shared_symbols)
+        self.index2char = create_index2char_map(shared_symbols)
 
+    def get_size(self):
+        return len(self.shared_symbols)
 
-def encode_tgt_tokens(tokens):
-    return encode_tokens(tokens, tgt_char2index)
+    def encode_tokens(self, tokens: [str]) -> [int]:
+        return encode_tokens(tokens, self.char2index)
 
+    def decode_values(self, values: [int]) -> [str]:
+        return decode_to_text(values, self.index2char)
 
-def decode_src_values(values):
-    return decode_to_text(values, src_index2char)
-
-
-def read_variable_token(stream_iter: StreamTokenIterator) -> Token:
-    if stream_iter.peek_str(1) != '@':
-        return EmptyToken
-    at_token = stream_iter.next()
-    token = read_identifier_token(stream_iter)
-    return reduce_token_list('variable', [at_token, token])
-
-
-def linq_to_token_text_list(line):
-    stream_iter = StreamTokenIterator(line)
-    buff = []
-    while not stream_iter.is_done():
-        token = read_variable_token(stream_iter)
-        if token != EmptyToken:
-            buff.append(token.text)
-            continue
-        token = read_double_quote_string_token(stream_iter)
-        if token != EmptyToken:
-            buff.append(token.text)
-            continue
-        token = read_spaces_token(stream_iter)
-        if token != EmptyToken:
-            buff.append(' ')
-            continue
-        token = read_symbol_token(stream_iter, symbols)
-        if token != EmptyToken:
-            buff.append(token.text)
-            continue
+    @staticmethod
+    def read_variable_token(stream_iter: StreamTokenIterator) -> Token:
+        if stream_iter.peek_str(1) != '@':
+            return EmptyToken
+        at_token = stream_iter.next()
         token = read_identifier_token(stream_iter)
-        if token != EmptyToken:
-            buff.append(token.text)
-            continue
+        return reduce_token_list('variable', [at_token, token])
 
-        text = read_token_until(stream_iter, ' ').text
-        buff.append(text)
-    return buff
+    def encode_to_tokens(self, line) -> [str]:
+        stream_iter = StreamTokenIterator(line)
+        buff = []
+        while not stream_iter.is_done():
+            token = LinqToSqlVocab.read_variable_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token.text)
+                continue
+            token = read_double_quote_string_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token.text)
+                continue
+            token = read_spaces_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(' ')
+                continue
+            token = read_symbol_token(stream_iter, self.symbols)
+            if token != EmptyToken:
+                buff.append(token.text)
+                continue
+            token = read_identifier_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token.text)
+                continue
+
+            text = read_token_until(stream_iter, ' ').text
+            buff.append(text)
+        return buff
+
+    def encode(self, text: str) -> [int]:
+        tokens = self.encode_to_tokens(text)
+        return self.encode_tokens(tokens)
+
+    def get_value(self, char: str) -> int:
+        return self.char2index[char]
 
 
-def encode_linq(text):
-    tokens = linq_to_token_text_list(text)
-    return encode_src_tokens(tokens)
-
-
-def decode_linq(values):
-    return decode_src_values(values)
-
-
-
-
-
-src_tokens = linq_to_token_text_list(src)
+vocab = LinqToSqlVocab()
+src_tokens = vocab.encode_to_tokens(src)
 print(f"{src_tokens=}")
-src_values = encode_src_tokens(src_tokens)
+src_values = vocab.encode_tokens(src_tokens)
 print(f"{src_values=}")
-src_text = decode_src_values(src_values)
+src_text = vocab.decode_values(src_values)
 print(f"{src_text=}")
-tgt_tokens = linq_to_token_text_list(tgt)
+tgt_tokens = vocab.encode_to_tokens(tgt)
 print(f"{tgt_tokens=}")
-tgt_values = encode_tgt_tokens(tgt_tokens)
+tgt_values = vocab.encode_tokens(tgt_tokens)
 
 SEQ_LEN = 3
-SRC_VOCAB_SIZE = len(src_symbols)
 SRC_WORD_DIM = 3
-SRC_PADDING_IDX = src_char2index['<pad>']
-TGT_VOCAB_SIZE = len(tgt_symbols)
 TGT_WORD_DIM = 3
-TGT_PADDING_IDX = tgt_char2index['<pad>']
 POS_DIM = 3
 MAX_SENTENCE_LEN = 1000
 HIDDEN_SIZE = 7
@@ -304,8 +285,6 @@ inp2_values = torch.tensor([inp2], dtype=torch.long)
 #                 tgt_word_dim=TGT_WORD_DIM,
 #                 tgt_padding_idx=TGT_PADDING_IDX,
 #                 )
-model = Seq2SeqTransformer(len(shared_symbols), src_char2index['<pad>'])
-
 
 # predictive, y = model(inp1_values, inp2_values)
 # print(f"{predictive=}")
@@ -343,9 +322,9 @@ class MemDataset(Dataset):
 class MyTrans(BaseLightning):
     def __init__(self):
         super().__init__()
-        self.model = Seq2SeqTransformer(len(shared_symbols), src_char2index['<pad>'])
+        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'))
         batch_size = 1
-        self.init_dataloader(MemDataset(src_char2index['<pad>']), batch_size)
+        self.init_dataloader(MemDataset(vocab.get_value('<pad>')), batch_size)
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
@@ -354,7 +333,6 @@ class MyTrans(BaseLightning):
         tgt = tgt[:, :-1]
 
         x_hat = self.model(src, tgt)
-
         return x_hat, tgt_y
 
     def _calculate_loss(self, data, mode="train"):
@@ -363,33 +341,31 @@ class MyTrans(BaseLightning):
         self.log("%s_loss" % mode, loss)
         return loss
 
-    def infer(self, text):
-        values = encode_linq(text)
-        t = decode_linq(values)
+    def infer(self, text, vocab):
+        src_values = vocab.encode(text)
         self.model.eval()
         device = next(self.parameters()).device
-        src = torch.tensor([values], dtype=torch.long).to(device)
-        bos = src_char2index['<bos>']
+        src = torch.tensor([src_values], dtype=torch.long).to(device)
+        bos = vocab.get_value('<bos>')
         tgt = torch.tensor([[bos]], dtype=torch.long).to(device)
-        for i in range(len(values)):
+        for i in range(len(src_values)):
             outputs = self.model.transform(src, tgt)
             # 預測結果，因為只需要看最後一個詞，所以取`out[:, -1]`
             last_word = outputs[:, -1]
-            # print(f" {last_word.shape=} {out.shape=}")
             predict = self.model.predictor(last_word)
-            # 找出最大值的index
+            # 找出最大值的 index
             y = torch.argmax(predict, dim=1)
             # 和之前的預測結果拼接到一起
             tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
-            if y == src_char2index['<eos>']:
+            if y == vocab.get_value('<eos>'):
                 break
 
-        result = decode_linq(reduce_dim(tgt).tolist())
-        print(f" {result=}")
+        result = vocab.decode_values(reduce_dim(tgt).tolist())
         return result
 
 
 copy_last_ckpt(MyTrans)
 # model = start_train(MyTrans, device='cuda', max_epochs=100)
 model = load_model(MyTrans)
-model.infer('from tb2 in p select tb2.name')
+text = model.infer('from tb2 in p select tb2.name', vocab)
+print(f"{text=}")
