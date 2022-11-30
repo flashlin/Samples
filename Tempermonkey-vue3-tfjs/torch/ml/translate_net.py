@@ -53,8 +53,8 @@ class Seq2SeqTransformer(nn.Module):
 
 
 class ListDataset(Dataset):
-    def __init__(self, translation_list, padding_idx=0):
-        self.padding_idx = padding_idx
+    def __init__(self, translation_list, vocab):
+        self.vocab = vocab
         self.data = translation_list
 
     def __len__(self):
@@ -63,16 +63,19 @@ class ListDataset(Dataset):
 
     def __getitem__(self, idx):
         src, tgt = self.data[0]
+        src = self.vocab.encode(src)
+        tgt = self.vocab.encode(tgt)
         src = torch.tensor(src, dtype=torch.long)
         tgt = torch.tensor(tgt, dtype=torch.long)
         return src, len(src), tgt, len(tgt)
 
     def create_dataloader(self, batch_size=32):
+        vocab = self.vocab
         train_size = int(0.8 * len(self))
         val_size = len(self) - train_size
         train_data, val_data = random_split(self, [train_size, val_size])
-        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=self.padding_idx)
-        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=vocab.padding_idx)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=vocab.padding_idx)
         return train_loader, val_loader
 
 

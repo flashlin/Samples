@@ -18,6 +18,7 @@ class LinqToSqlVocab:
         self.shared_symbols = shared_symbols = sort_desc(common_symbols + symbols + linq_symbols + tsql_symbols)
         self.char2index = create_char2index_map(shared_symbols)
         self.index2char = create_index2char_map(shared_symbols)
+        self.padding_idx = self.get_value('<pad>')
 
     def get_size(self):
         return len(self.shared_symbols)
