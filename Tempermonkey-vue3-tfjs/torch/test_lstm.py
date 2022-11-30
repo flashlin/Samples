@@ -3,10 +3,10 @@ import random
 import torch
 from torch import nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, random_split
+from torch.utils.data import Dataset, random_split, DataLoader
 
 from common.io import info
-from ml.lit import PositionalEncoding, BaseLightning, start_train, load_model
+from ml.lit import PositionalEncoding, BaseLightning, start_train, load_model, copy_last_ckpt
 from ml.mnt_net import pad_data_loader
 from ml.model_utils import reduce_dim
 from my_model import line_to_tokens, encode_tokens, decode_to_text
@@ -294,8 +294,13 @@ class Seq2SeqTransformer(nn.Module):
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=padding_idx)
 
     def forward(self, x, y):
-        src_key_padding_mask = self.get_key_padding_mask(x) #.to(x.device)
-        tgt_key_padding_mask = self.get_key_padding_mask(y) #.to(x.device)
+        outputs = self.transform(x, y)
+        outputs = self.predictor(outputs)
+        return outputs
+
+    def transform(self, x, y):
+        src_key_padding_mask = self.get_key_padding_mask(x)
+        tgt_key_padding_mask = self.get_key_padding_mask(y)
         tgt_mask = nn.Transformer.generate_square_subsequent_mask(y.size(-1)).to(x.device)
         x = self.embedding(x)
         y = self.embedding(y)
@@ -304,16 +309,15 @@ class Seq2SeqTransformer(nn.Module):
                                    src_key_padding_mask=src_key_padding_mask,
                                    tgt_key_padding_mask=tgt_key_padding_mask
                                    )
-        outputs = self.predictor(outputs)
         return outputs
 
     def infer(self, src, char2index, max_length=500):
-        self.eval()
-        device = next(self.parameters()).device
-        src = torch.tensor([src], dtype=torch.long).to(device)
-        print(f" infer {src=}")
-        bos = char2index['<bos>']
-        tgt = torch.tensor([[bos]], dtype=torch.long).to(device)
+        # self.eval()
+        # device = next(self.parameters()).device
+        # src = torch.tensor([src], dtype=torch.long).to(device)
+        # bos = char2index['<bos>']
+        # tgt = torch.tensor([[bos]], dtype=torch.long).to(device)
+
         out = self(src, tgt)
         # x_hat = out.reshape(-1, out.shape[2])
         return out
@@ -331,14 +335,12 @@ class Seq2SeqTransformer(nn.Module):
         #         break
 
     def calculate_loss(self, x_hat, y):
-        #x_hat = x_hat.reshape(-1, x_hat.shape[2])
-        #y = reduce_dim(y)
         n_tokens = (y != self.padding_idx).sum()
+
         x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
         y = y.contiguous().view(-1)
-        loss = self.loss_fn(x_hat, y) / n_tokens
 
-        # return self.loss_fn(x_hat, y)
+        loss = self.loss_fn(x_hat, y) / n_tokens
         return loss
 
     def get_key_padding_mask(self, tokens):
@@ -410,8 +412,13 @@ class MyTrans(BaseLightning):
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
+
+        tgt_y = tgt[:, 1:]
+        tgt = tgt[:, :-1]
+
         x_hat = self.model(src, tgt)
-        return x_hat, tgt
+
+        return x_hat, tgt_y
 
     def _calculate_loss(self, data, mode="train"):
         (x_hat, y_hat), batch = data
@@ -419,21 +426,38 @@ class MyTrans(BaseLightning):
         self.log("%s_loss" % mode, loss)
         return loss
 
-    def infer(self, text):
+    def infer(self, text, max_length=500):
         values = encode_linq(text)
-        predict = self.model.infer(values, src_char2index)
-
-        last = predict[:, -1]
-        print(f" {last=}")
-        y = torch.argmax(predict, dim=1)
-        print(f" {y=}")
-
-        t = decode_linq(predict)
+        print(f" {len(values)=}")
+        t = decode_linq(values)
         print(f" {t=}")
-        return t
+        self.model.eval()
+        device = next(self.parameters()).device
+        src = torch.tensor([values], dtype=torch.long).to(device)
+        bos = src_char2index['<bos>']
+        tgt = torch.tensor([[bos]], dtype=torch.long).to(device)
+        print(f" {src.shape=}")
+
+        for i in range(len(values)):
+            outputs = self.model.transform(src, tgt)
+            # 預測結果，因為只需要看最後一個詞，所以取`out[:, -1]`
+            last_word = outputs[:, -1]
+            # print(f" {last_word.shape=} {out.shape=}")
+            predict = self.model.predictor(last_word)
+            # 找出最大值的index
+            y = torch.argmax(predict, dim=1)
+            # 和之前的預測結果拼接到一起
+            tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
+            if y == src_char2index['<eos>']:
+                break
+
+        result = decode_linq(reduce_dim(tgt).tolist())
+        print(f" {result=}")
+        return result
 
 
-start_train(MyTrans, device='cuda', max_epochs=100)
-#model = load_model(MyTrans)
-#model.infer('from tb2 in p select tb2.name')
+copy_last_ckpt(MyTrans)
+model = start_train(MyTrans, device='cuda', max_epochs=100)
+# model = load_model(MyTrans)
+model.infer('from tb2 in p select tb2.name')
 

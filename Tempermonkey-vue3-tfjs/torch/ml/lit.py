@@ -336,11 +336,12 @@ def query_train_ckpts(ckpt_root_path='./output/BpeTranslator'):
             yield match.group(1), ckpt
 
 
-def copy_last_ckpt(model_name='BpeTranslator'):
+#def copy_last_ckpt(model_name='BpeTranslator'):
+def copy_last_ckpt(model_type):
+    model_name = model_type.__name__
     ckpt_list = [x for x in query_train_ckpts(f"./output/{model_name}")]
     if not ckpt_list:
         return
     _, ckpt = min(ckpt_list, key=lambda tup: tup[0])
-    print(f"{ckpt=}")
+    print(f"{model_name} {ckpt=}")
     shutil.copy(ckpt, './output/%s.ckpt' % model_name)
-    print(f"{model_name=}")
