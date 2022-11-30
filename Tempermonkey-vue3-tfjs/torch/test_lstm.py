@@ -235,6 +235,7 @@ model = start_train(LiTranslator,
                         'vocab': vocab,
                     },
                     ListDataset(translate_examples, vocab.get_value('<pad>')),
+                    batch_size=1,
                     device='cuda',
                     max_epochs=10)
 # model = load_model(LiTranslator)
