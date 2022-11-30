@@ -316,8 +316,9 @@ def start_train(model_type,
     test_loader = model.test_dataloader()
     val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
     test_result = trainer.test(model, dataloaders=test_loader, verbose=False)
+    copy_last_ckpt(model_name)
     # result = {"test_acc": test_result[0]["test_acc"], "val_acc": val_result[0]["test_acc"]}
-    model = model.to(device)
+    # model = model.to(device)
     return model  # , result
 
 
