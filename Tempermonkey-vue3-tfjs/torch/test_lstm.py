@@ -226,15 +226,13 @@ translate_examples = [
 ]
 print(f" {translate_examples=}")
 
-translate_examples = [(vocab.encode(src), vocab.encode(tgt)) for (src, tgt) in translate_examples]
-
 copy_last_ckpt(LiTranslator)
 
 model = start_train(LiTranslator,
                     {
                         'vocab': vocab,
                     },
-                    ListDataset(translate_examples, vocab.get_value('<pad>')),
+                    ListDataset(translate_examples, vocab),
                     batch_size=1,
                     device='cuda',
                     max_epochs=10)
