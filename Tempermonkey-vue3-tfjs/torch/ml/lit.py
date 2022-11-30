@@ -274,10 +274,13 @@ def load_model(model_type, checkpoint_path="./output", model_name=None, **kwargs
 
 
 def start_train(model_type,
+                model_args,
+                dataset,
+                batch_size=1,
+                max_epochs=10,
+                checkpoint_path="./output",
                 model_name=None,
                 device=None,
-                checkpoint_path="./output",
-                max_epochs=10,
                 **kwargs):
     model_name = model_type.__name__ if model_name is None else model_name
     if device is None:
@@ -302,14 +305,16 @@ def start_train(model_type,
         info(f"Found pretrained model, loading {model_name}...")
         model = model_type.load_from_checkpoint(pretrained_filename, **kwargs)
     else:
-        model = model_type(**kwargs)
+        model = model_type(**model_args)
         # train_loader = model.train_dataloader()
 
-    val_loader = model.val_dataloader()
+    model.init_dataloader(dataset, batch_size)
+
     # trainer.fit(model, train_loader, val_loader)
     trainer.fit(model)
 
     # Test best model on validation and test set
+    val_loader = model.val_dataloader()
     test_loader = model.test_dataloader()
     val_result = trainer.test(model, dataloaders=val_loader, verbose=False)
     test_result = trainer.test(model, dataloaders=test_loader, verbose=False)

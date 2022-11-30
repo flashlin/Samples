@@ -2,18 +2,11 @@ import random
 
 import torch
 from torch import nn
-from torch.utils.data import Dataset, random_split
 
 from common.io import info
-from ml.lit import PositionalEncoding, BaseLightning, load_model, copy_last_ckpt, start_train
-from ml.mnt_net import pad_data_loader
-from ml.model_utils import reduce_dim
-from ml.translate_net import Seq2SeqTransformer
-from my_model import encode_tokens, decode_to_text
-from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, read_identifier_token, \
-    EmptyToken, \
-    read_symbol_token, read_spaces_token, Token, reduce_token_list
-from utils.data_utils import sort_desc, create_char2index_map, create_index2char_map
+from ml.lit import PositionalEncoding, load_model, copy_last_ckpt, start_train
+from ml.trans_linq2tsql import LinqToSqlVocab
+from ml.translate_net import LiTranslator, ListDataset
 
 """
 src = 'from tb1     in customer select tb1     . name'
@@ -49,75 +42,7 @@ tgt = '. @fd1 <eos>'
 """
 
 src = 'from tb1 in customer select tb1.name'
-pre = ''
 tgt = 'from @tb_as1 in @tb1 select @tb_as1.@fd1'
-
-
-class LinqToSqlVocab:
-    def __init__(self):
-        self.symbols = symbols = '. [ ] { } += + - * / , =='.split(' ')
-        common_symbols = '1 2 3 4 5 6 7 8 9 0 <unk> <bos> <eos> <pad>'.split(' ') + [' ']
-        linq_spec = 'from in select new join on equals contains'.split(' ')
-        linq_symbols = sort_desc(common_symbols + symbols + linq_spec)
-        tsql_spec = '@tb_as @tb @fd_as @fd @str @number'.split(' ')
-        tsql_symbols = sort_desc(common_symbols + symbols + tsql_spec)
-        self.shared_symbols = shared_symbols = sort_desc(common_symbols + symbols + linq_symbols + tsql_symbols)
-        self.char2index = create_char2index_map(shared_symbols)
-        self.index2char = create_index2char_map(shared_symbols)
-
-    def get_size(self):
-        return len(self.shared_symbols)
-
-    def encode_tokens(self, tokens: [str]) -> [int]:
-        return encode_tokens(tokens, self.char2index)
-
-    def decode_values(self, values: [int]) -> [str]:
-        return decode_to_text(values, self.index2char)
-
-    @staticmethod
-    def read_variable_token(stream_iter: StreamTokenIterator) -> Token:
-        if stream_iter.peek_str(1) != '@':
-            return EmptyToken
-        at_token = stream_iter.next()
-        token = read_identifier_token(stream_iter)
-        return reduce_token_list('variable', [at_token, token])
-
-    def encode_to_tokens(self, line) -> [str]:
-        stream_iter = StreamTokenIterator(line)
-        buff = []
-        while not stream_iter.is_done():
-            token = LinqToSqlVocab.read_variable_token(stream_iter)
-            if token != EmptyToken:
-                buff.append(token.text)
-                continue
-            token = read_double_quote_string_token(stream_iter)
-            if token != EmptyToken:
-                buff.append(token.text)
-                continue
-            token = read_spaces_token(stream_iter)
-            if token != EmptyToken:
-                buff.append(' ')
-                continue
-            token = read_symbol_token(stream_iter, self.symbols)
-            if token != EmptyToken:
-                buff.append(token.text)
-                continue
-            token = read_identifier_token(stream_iter)
-            if token != EmptyToken:
-                buff.append(token.text)
-                continue
-
-            text = read_token_until(stream_iter, ' ').text
-            buff.append(text)
-        return buff
-
-    def encode(self, text: str) -> [int]:
-        tokens = self.encode_to_tokens(text)
-        return self.encode_tokens(tokens)
-
-    def get_value(self, char: str) -> int:
-        return self.char2index[char]
-
 
 vocab = LinqToSqlVocab()
 src_tokens = vocab.encode_to_tokens(src)
@@ -293,79 +218,38 @@ inp2_values = torch.tensor([inp2], dtype=torch.long)
 # print(f" {loss=}")
 
 
-class MemDataset(Dataset):
-    def __init__(self, padding_idx):
-        self.padding_idx = padding_idx
-        self.data1 = [src_values]
-        self.data2 = [tgt_values]
+translate_examples = [
+    (
+        'from tb1     in customer select tb1.name',
+        'from @tb_as1 in @tb1     select @tb_as1.@fd1'
+    ),
+]
+print(f" {translate_examples=}")
 
-    def __len__(self):
-        # return len(self.data1)
-        return 100
+t1 = vocab.encode('from tb1     in customer select tb1.name')
+t1 = vocab.decode_values(t1)
+print(f" {t1=}")
+t1 = vocab.encode('from @tb_as1 in @tb1     select @tb_as1.@fd1')
+t1 = vocab.decode_values(t1)
+print(f" {t1=}")
 
-    def __getitem__(self, idx):
-        src = self.data1[0]
-        tgt = self.data2[0]
-        src = torch.tensor(src, dtype=torch.long)
-        tgt = torch.tensor(tgt, dtype=torch.long)
-        return src, len(src), tgt, len(tgt)
+translate_examples = [(vocab.encode(src), vocab.encode(tgt)) for (srg, tgt) in translate_examples]
+print(f" {translate_examples=}")
 
-    def create_dataloader(self, batch_size=32):
-        train_size = int(0.8 * len(self))
-        val_size = len(self) - train_size
-        train_data, val_data = random_split(self, [train_size, val_size])
-        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=self.padding_idx)
-        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=self.padding_idx)
-        return train_loader, val_loader
+t1 = [(vocab.decode_values(src), vocab.decode_values(tgt)) for (src, tgt) in translate_examples]
+print(f" {t1=}")
 
+copy_last_ckpt(LiTranslator)
 
-class MyTrans(BaseLightning):
-    def __init__(self):
-        super().__init__()
-        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'))
-        batch_size = 1
-        self.init_dataloader(MemDataset(vocab.get_value('<pad>')), batch_size)
-
-    def forward(self, batch):
-        src, src_len, tgt, tgt_len = batch
-
-        tgt_y = tgt[:, 1:]
-        tgt = tgt[:, :-1]
-
-        x_hat = self.model(src, tgt)
-        return x_hat, tgt_y
-
-    def _calculate_loss(self, data, mode="train"):
-        (x_hat, y_hat), batch = data
-        loss = self.model.calculate_loss(x_hat, y_hat)
-        self.log("%s_loss" % mode, loss)
-        return loss
-
-    def infer(self, text, vocab):
-        src_values = vocab.encode(text)
-        self.model.eval()
-        device = next(self.parameters()).device
-        src = torch.tensor([src_values], dtype=torch.long).to(device)
-        bos = vocab.get_value('<bos>')
-        tgt = torch.tensor([[bos]], dtype=torch.long).to(device)
-        for i in range(len(src_values)):
-            outputs = self.model.transform(src, tgt)
-            # 預測結果，因為只需要看最後一個詞，所以取`out[:, -1]`
-            last_word = outputs[:, -1]
-            predict = self.model.predictor(last_word)
-            # 找出最大值的 index
-            y = torch.argmax(predict, dim=1)
-            # 和之前的預測結果拼接到一起
-            tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
-            if y == vocab.get_value('<eos>'):
-                break
-
-        result = vocab.decode_values(reduce_dim(tgt).tolist())
-        return result
-
-
-copy_last_ckpt(MyTrans)
-# model = start_train(MyTrans, device='cuda', max_epochs=100)
-model = load_model(MyTrans)
+model = start_train(LiTranslator,
+                    {
+                        'vocab_size': vocab.get_size(),
+                        'padding_idx': vocab.get_value('<pad>')
+                    },
+                    ListDataset(translate_examples, vocab.get_value('<pad>')),
+                    model_name='MyTrans',
+                    device='cuda',
+                    max_epochs=10)
+# model = load_model(LiTranslator)
 text = model.infer('from tb2 in p select tb2.name', vocab)
 print(f"{text=}")

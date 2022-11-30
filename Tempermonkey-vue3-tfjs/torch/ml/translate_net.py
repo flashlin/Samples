@@ -1,4 +1,10 @@
+import torch
 from torch import nn
+from torch.utils.data import Dataset, random_split
+
+from ml.lit import BaseLightning
+from ml.mnt_net import pad_data_loader
+from ml.model_utils import reduce_dim
 
 
 class Seq2SeqTransformer(nn.Module):
@@ -44,3 +50,72 @@ class Seq2SeqTransformer(nn.Module):
         # key_padding_mask = torch.zeros(tokens.size()).type(torch.bool)
         # key_padding_mask[tokens == self.padding_idx] = True
         return key_padding_mask
+
+
+class ListDataset(Dataset):
+    def __init__(self, translation_list, padding_idx=0):
+        self.padding_idx = padding_idx
+        self.data = translation_list
+
+    def __len__(self):
+        # return len(self.data)
+        return 100
+
+    def __getitem__(self, idx):
+        src, tgt = self.data[0]
+        src = torch.tensor(src, dtype=torch.long)
+        tgt = torch.tensor(tgt, dtype=torch.long)
+        return src, len(src), tgt, len(tgt)
+
+    def create_dataloader(self, batch_size=32):
+        train_size = int(0.8 * len(self))
+        val_size = len(self) - train_size
+        train_data, val_data = random_split(self, [train_size, val_size])
+        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=self.padding_idx)
+        return train_loader, val_loader
+
+
+class LiTranslator(BaseLightning):
+    def __init__(self, vocab_size, padding_idx):
+        super().__init__()
+        self.model = Seq2SeqTransformer(vocab_size, padding_idx)
+        # batch_size = 1
+        # self.init_dataloader(ListDataset(padding_idx), batch_size)
+
+    def forward(self, batch):
+        src, src_len, tgt, tgt_len = batch
+
+        tgt_y = tgt[:, 1:]
+        tgt = tgt[:, :-1]
+
+        x_hat = self.model(src, tgt)
+        return x_hat, tgt_y
+
+    def _calculate_loss(self, data, mode="train"):
+        (x_hat, y_hat), batch = data
+        loss = self.model.calculate_loss(x_hat, y_hat)
+        self.log("%s_loss" % mode, loss)
+        return loss
+
+    def infer(self, text, vocab):
+        src_values = vocab.encode(text)
+        self.model.eval()
+        device = next(self.parameters()).device
+        src = torch.tensor([src_values], dtype=torch.long).to(device)
+        bos = vocab.get_value('<bos>')
+        tgt = torch.tensor([[bos]], dtype=torch.long).to(device)
+        for i in range(len(src_values)):
+            outputs = self.model.transform(src, tgt)
+            # 預測結果，因為只需要看最後一個詞，所以取`out[:, -1]`
+            last_word = outputs[:, -1]
+            predict = self.model.predictor(last_word)
+            # 找出最大值的 index
+            y = torch.argmax(predict, dim=1)
+            # 和之前的預測結果拼接到一起
+            tgt = torch.concat([tgt, y.unsqueeze(0)], dim=1)
+            if y == vocab.get_value('<eos>'):
+                break
+
+        result = vocab.decode_values(reduce_dim(tgt).tolist())
+        return result
