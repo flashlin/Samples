@@ -52,7 +52,7 @@ class Seq2SeqTransformer(nn.Module):
         return key_padding_mask
 
 
-class ListDataset(Dataset):
+class TranslateListDataset(Dataset):
     def __init__(self, translation_list, vocab):
         self.vocab = vocab
         self.data = translation_list

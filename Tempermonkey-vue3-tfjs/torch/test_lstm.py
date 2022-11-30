@@ -6,7 +6,7 @@ from torch import nn
 from common.io import info
 from ml.lit import PositionalEncoding, load_model, copy_last_ckpt, start_train
 from ml.trans_linq2tsql import LinqToSqlVocab
-from ml.translate_net import LiTranslator, ListDataset
+from ml.translate_net import LiTranslator, TranslateListDataset
 
 """
 src = 'from tb1     in customer select tb1     . name'
@@ -232,8 +232,8 @@ model = start_train(LiTranslator,
                     {
                         'vocab': vocab,
                     },
-                    ListDataset(translate_examples, vocab),
-                    batch_size=1,
+                    TranslateListDataset(translate_examples, vocab),
+                    batch_size=16,
                     device='cuda',
                     max_epochs=10)
 # model = load_model(LiTranslator)
