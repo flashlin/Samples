@@ -235,9 +235,8 @@ model = start_train(LiTranslator,
                         'vocab': vocab,
                     },
                     ListDataset(translate_examples, vocab.get_value('<pad>')),
-                    model_name='MyTrans',
                     device='cuda',
                     max_epochs=10)
 # model = load_model(LiTranslator)
-text = model.infer('from tb2 in p select tb2.name', vocab)
+text = model.infer('from tb2 in p select tb2.name')
 print(f"{text=}")

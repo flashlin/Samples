@@ -281,7 +281,7 @@ def start_train(model_type,
                 checkpoint_path="./output",
                 model_name=None,
                 device=None,
-                **kwargs):
+                ):
     model_name = model_type.__name__ if model_name is None else model_name
     if device is None:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -302,7 +302,7 @@ def start_train(model_type,
     pretrained_filename = os.path.join(checkpoint_path, f"{model_name}.ckpt")
     if os.path.isfile(pretrained_filename):
         info(f"Found pretrained model, loading {model_name}...")
-        model = model_type.load_from_checkpoint(pretrained_filename, **kwargs)
+        model = model_type.load_from_checkpoint(pretrained_filename, **model_args)
     else:
         model = model_type(**model_args)
 
@@ -341,7 +341,10 @@ def query_train_ckpts(ckpt_root_path='./output/BpeTranslator'):
 
 #def copy_last_ckpt(model_name='BpeTranslator'):
 def copy_last_ckpt(model_type):
-    model_name = model_type.__name__
+    if isinstance(model_type, str):
+        model_name = model_type
+    else:
+        model_name = model_type.__name__
     ckpt_list = [x for x in query_train_ckpts(f"./output/{model_name}")]
     if not ckpt_list:
         return
