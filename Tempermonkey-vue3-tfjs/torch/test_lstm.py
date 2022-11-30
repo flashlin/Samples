@@ -226,8 +226,6 @@ translate_examples = [
 ]
 print(f" {translate_examples=}")
 
-copy_last_ckpt(LiTranslator)
-
 model = start_train(LiTranslator,
                     {
                         'vocab': vocab,
