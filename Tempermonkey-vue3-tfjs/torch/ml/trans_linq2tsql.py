@@ -24,7 +24,7 @@ class LinqToSqlVocab:
 
     def encode_tokens(self, tokens: [str]) -> [int]:
         char2index = self.char2index
-        var_re = re.compile(r'(@\w.+)(\d+)')
+        var_re = re.compile(r'(@\w+)(\d+)')
         buff = [char2index['<bos>']]
         unk_tokens = {}
         for token in tokens:
