@@ -56,7 +56,7 @@ model_args = {
 
 model = start_train(LiTranslator, model_args,
                     translate_ds,
-                    batch_size=2,
+                    batch_size=5,
                     device='cuda',
                     max_epochs=200)
 
