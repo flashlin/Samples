@@ -8,52 +8,6 @@ from ml.lit import PositionalEncoding, load_model, copy_last_ckpt, start_train
 from ml.trans_linq2tsql import LinqToSqlVocab
 from ml.translate_net import LiTranslator, TranslateListDataset
 
-"""
-src = 'from tb1     in customer select tb1     . name'
-tgt = 'from @tb_as1 in @tb1     select @tb_as1 . @fd1'
-
-src = 'from tb1     in'
-pre = '<bos>'
-tgt = 'from @tb_as1 in'
-
-src = 'tb1     in customer'
-pre = 'from'
-tgt = '@tb_as1 in @tb1'
-
-src = 'in customer select'
-pre = 'from in'
-tgt = 'in @tb1     select'
-
-src = 'customer select tb1'
-pre = 'from in customer'
-tgt = '@tb1     select @tb_as1'
-
-src = 'select tb1     .'
-pre = 'in customer select'
-tgt = 'select @tb_as1 .'
-
-src = 'tb1     . name'
-pre = 'customer select tb1'
-tgt = '@tb_as1 . @fd1'
-
-src = '. name <eos>'
-pre = 'select tb1 .'
-tgt = '. @fd1 <eos>'
-"""
-
-src = 'from tb1 in customer select tb1.name'
-tgt = 'from @tb_as1 in @tb1 select @tb_as1.@fd1'
-
-vocab = LinqToSqlVocab()
-src_tokens = vocab.encode_to_tokens(src)
-print(f"{src_tokens=}")
-src_values = vocab.encode_tokens(src_tokens)
-print(f"{src_values=}")
-src_text = vocab.decode_values(src_values)
-print(f"{src_text=}")
-tgt_tokens = vocab.encode_to_tokens(tgt)
-print(f"{tgt_tokens=}")
-tgt_values = vocab.encode_tokens(tgt_tokens)
 
 SEQ_LEN = 3
 SRC_WORD_DIM = 3
@@ -194,46 +148,19 @@ class Seq2Seq(nn.Module):
         return self.loss_fn(x_hat, y)
 
 
-inp1 = src_values  # [0:3]
-inp2 = tgt_values  # [0:3]
+model = Seq2Seq(seq_len=SEQ_LEN,
+                src_pos_dim=POS_DIM,
+                max_sentence_len=MAX_SENTENCE_LEN,
+                src_vocab_size=SRC_VOCAB_SIZE,
+                src_word_dim=SRC_WORD_DIM,
+                src_padding_idx=SRC_PADDING_IDX,
+                tgt_vocab_size=TGT_VOCAB_SIZE,
+                tgt_word_dim=TGT_WORD_DIM,
+                tgt_padding_idx=TGT_PADDING_IDX,
+                )
 
-inp1_values = torch.tensor([inp1], dtype=torch.long)
-inp2_values = torch.tensor([inp2], dtype=torch.long)
+predictive, y = model(inp1_values, inp2_values)
+print(f"{predictive=}")
 
-# model = Seq2Seq(seq_len=SEQ_LEN,
-#                 src_pos_dim=POS_DIM,
-#                 max_sentence_len=MAX_SENTENCE_LEN,
-#                 src_vocab_size=SRC_VOCAB_SIZE,
-#                 src_word_dim=SRC_WORD_DIM,
-#                 src_padding_idx=SRC_PADDING_IDX,
-#                 tgt_vocab_size=TGT_VOCAB_SIZE,
-#                 tgt_word_dim=TGT_WORD_DIM,
-#                 tgt_padding_idx=TGT_PADDING_IDX,
-#                 )
-
-# predictive, y = model(inp1_values, inp2_values)
-# print(f"{predictive=}")
-#
-# loss = model.calculate_loss(predictive, y)
-# print(f" {loss=}")
-
-
-translate_examples = [
-    (
-        'from tb1     in customer select tb1.name',
-        'from @tb_as1 in @tb1     select @tb_as1.@fd1'
-    ),
-]
-print(f" {translate_examples=}")
-
-model = start_train(LiTranslator,
-                    {
-                        'vocab': vocab,
-                    },
-                    TranslateListDataset(translate_examples, vocab),
-                    batch_size=16,
-                    device='cuda',
-                    max_epochs=10)
-# model = load_model(LiTranslator)
-text = model.infer('from tb2 in p select tb2.name')
-print(f"{text=}")
+loss = model.calculate_loss(predictive, y)
+print(f" {loss=}")
