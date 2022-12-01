@@ -66,7 +66,7 @@ for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
     linq_code = model.infer(src)
     tgt_expected = vocab.decode(vocab.encode(tgt)).rstrip()
     src = ' '.join(src.split(' ')).rstrip()
-    print(f'{src=}')
+    print(f'src="{src}"')
     if linq_code != tgt_expected:
         info(f'"{tgt_expected}"')
         info_error(f'"{linq_code}"')
