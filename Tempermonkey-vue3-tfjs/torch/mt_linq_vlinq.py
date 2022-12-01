@@ -6,7 +6,7 @@ from torch import nn
 from common.io import info
 from ml.lit import PositionalEncoding, load_model, copy_last_ckpt, start_train
 from ml.trans_linq2tsql import LinqToSqlVocab
-from ml.translate_net import LiTranslator, TranslateListDataset
+from ml.translate_net import LiTranslator, TranslateListDataset, convert_translate_file_to_csv, TranslateCsvDataset
 
 """
 src = 'from tb1     in customer select tb1     . name'
@@ -49,15 +49,23 @@ translate_examples = [
         'from @tb_as1 in @tb1     select @tb_as1.@fd1'
     ),
 ]
+# translate_ds = TranslateListDataset(translate_examples, vocab)
 
+translate_csv_file_path = './output/linq_vlinq.csv'
+convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
+translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
+
+model_args = {
+    'vocab': vocab
+}
 model = start_train(LiTranslator,
                     {
                         'vocab': vocab,
                     },
-                    TranslateListDataset(translate_examples, vocab),
+                    translate_ds,
                     batch_size=16,
                     device='cuda',
                     max_epochs=10)
-# model = load_model(LiTranslator)
+# model = load_model(LiTranslator, model_args)
 text = model.infer('from tb2 in p select tb2.name')
 print(f"{text=}")

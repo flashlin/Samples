@@ -261,12 +261,12 @@ class BaseLightning(pl.LightningModule):
         self.test_loader = val_loader
 
 
-def load_model(model_type, checkpoint_path="./output", model_name=None, **kwargs):
+def load_model(model_type, model_args, checkpoint_path="./output", model_name=None):
     model_name = model_type.__name__ if model_name is None else model_name
     pretrained_filename = os.path.join(checkpoint_path, f"{model_name}.ckpt")
     if os.path.isfile(pretrained_filename):
         info(f"Found pretrained model, loading {model_name}...")
-        model = model_type(**kwargs)
+        model = model_type(**model_args)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         info(f"{device=}")
         return model.load_from_checkpoint(pretrained_filename).to(device)

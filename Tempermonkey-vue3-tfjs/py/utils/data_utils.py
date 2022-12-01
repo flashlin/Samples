@@ -3,7 +3,7 @@ from itertools import groupby
 import numpy as np
 
 
-def df_to_values(df):
+def df_intstr_to_values(df):
     return df.map(lambda l: np.array([int(n) for n in l.split(',')], dtype=np.long))
 
 
