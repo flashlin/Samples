@@ -1,0 +1,2 @@
+from tb1     in customer select tb1.name
+from @tb_as1 in @tb1     select @tb_as1.@fd1

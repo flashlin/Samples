@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from labs.preprocess_data import TranslationFileTextIterator, TranslationDataset, int_list_to_str, \
-    df_to_values, pad_data_loader
+    df_intstr_to_values, pad_data_loader
 from utils.data_utils import pad_array
 from utils.linq_tokenizr import linq_tokenize
 from utils.stream import Token
@@ -82,9 +82,9 @@ class TranslationDataset(Dataset):
     def __init__(self, csv_file_path, padding_idx):
         self.padding_idx = padding_idx
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
-        self.src = df_to_values(df['src'])
+        self.src = df_intstr_to_values(df['src'])
         self.src_len = df['src_len']
-        self.tgt = df_to_values(df['tgt'])
+        self.tgt = df_intstr_to_values(df['tgt'])
         self.tgt_len = df['tgt_len']
 
     def __len__(self):

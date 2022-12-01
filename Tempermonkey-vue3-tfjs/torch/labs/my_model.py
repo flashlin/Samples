@@ -11,7 +11,7 @@ from common.io import info, remove_file, info_error
 from ml.data_utils import get_data_file_path
 from ml.lit import BaseLightning, start_train, copy_last_ckpt
 from ml.model_utils import reduce_dim, detach_lstm_hidden_state
-from utils.data_utils import df_to_values, pad_array, split_line_by_space, create_char2index_map, create_index2char_map
+from utils.data_utils import df_intstr_to_values, pad_array, split_line_by_space, create_char2index_map, create_index2char_map
 from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, int_list_to_str, replace_many_spaces
 from utils.template_utils import TemplateText
 
@@ -196,9 +196,9 @@ class TranslationDataset(Dataset):
     def __init__(self, csv_file_path, padding_idx):
         self.padding_idx = padding_idx
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
-        self.src = df_to_values(df['src'])
-        self.tgt1 = df_to_values(df['tgt1'])
-        self.tgt2 = df_to_values(df['tgt2'])
+        self.src = df_intstr_to_values(df['src'])
+        self.tgt1 = df_intstr_to_values(df['tgt1'])
+        self.tgt2 = df_intstr_to_values(df['tgt2'])
 
     def __len__(self):
         return len(self.src)

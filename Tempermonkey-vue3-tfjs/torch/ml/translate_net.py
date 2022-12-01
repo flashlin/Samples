@@ -1,10 +1,12 @@
 import torch
 from torch import nn
 from torch.utils.data import Dataset, random_split
+import pandas as pd
 
 from ml.lit import BaseLightning
 from ml.mnt_net import pad_data_loader
 from ml.model_utils import reduce_dim
+from utils.data_utils import df_intstr_to_values
 
 
 class Seq2SeqTransformer(nn.Module):
@@ -58,11 +60,10 @@ class TranslateListDataset(Dataset):
         self.data = translation_list
 
     def __len__(self):
-        # return len(self.data)
-        return 100
+        return len(self.data)
 
     def __getitem__(self, idx):
-        src, tgt = self.data[0]
+        src, tgt = self.data[idx]
         src = self.vocab.encode(src)
         tgt = self.vocab.encode(tgt)
         src = torch.tensor(src, dtype=torch.long)
@@ -77,6 +78,52 @@ class TranslateListDataset(Dataset):
         train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=vocab.padding_idx)
         val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=vocab.padding_idx)
         return train_loader, val_loader
+
+
+class TranslateCsvDataset(Dataset):
+    def __init__(self, translation_csv_file_path, vocab):
+        self.vocab = vocab
+        self.df = df = pd.read_csv(translation_csv_file_path, sep='\t')
+        self.src = df['src']
+        self.tgt = df['tgt']
+
+    def __len__(self):
+        return len(self.src)
+
+    def __getitem__(self, idx):
+        src = self.src[idx]
+        tgt = self.tgt[idx]
+        src = self.vocab.encode(src)
+        tgt = self.vocab.encode(tgt)
+        src = torch.tensor(src, dtype=torch.long)
+        tgt = torch.tensor(tgt, dtype=torch.long)
+        return src, len(src), tgt, len(tgt)
+
+    def create_dataloader(self, batch_size=32):
+        vocab = self.vocab
+        train_size = int(0.8 * len(self))
+        val_size = len(self) - train_size
+        train_data, val_data = random_split(self, [train_size, val_size])
+        train_loader = pad_data_loader(train_data, batch_size=batch_size, padding_idx=vocab.padding_idx)
+        val_loader = pad_data_loader(val_data, batch_size=batch_size, padding_idx=vocab.padding_idx)
+        return train_loader, val_loader
+
+
+def get_translate_file_iter(translate_text_file_path):
+    with open(translate_text_file_path, "r", encoding='UTF-8') as f:
+        for idx, line in enumerate(f):
+            if idx % 2 == 0:
+                src = line.rstrip()
+            else:
+                tgt = line.rstrip()
+                yield src, tgt
+
+
+def convert_translate_file_to_csv(translate_text_file_path, csv_file_path):
+    with open(csv_file_path, "w", encoding='UTF-8') as csv:
+        csv.write(f"src\ttgt\n")
+        for src, tgt in get_translate_file_iter(translate_text_file_path):
+            csv.write(f"{src}\t{tgt}\n")
 
 
 class LiTranslator(BaseLightning):

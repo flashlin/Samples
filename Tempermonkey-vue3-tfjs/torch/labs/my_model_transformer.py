@@ -9,7 +9,7 @@ from ml.lit import BaseLightning, start_train, copy_last_ckpt, load_model, Posit
 from labs.my_model import encode_src_tokens, src_char2index, src_symbols, \
     tgt_char2index, \
     decode_src_to_text, line_to_tokens, read_examples
-from utils.data_utils import df_to_values, pad_array
+from utils.data_utils import df_intstr_to_values, pad_array
 from utils.stream import int_list_to_str
 
 
@@ -78,8 +78,8 @@ class TranslationDataset(Dataset):
     def __init__(self, csv_file_path, padding_idx):
         self.padding_idx = padding_idx
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
-        self.src = df_to_values(df['src'])
-        self.tgt = df_to_values(df['tgt'])
+        self.src = df_intstr_to_values(df['src'])
+        self.tgt = df_intstr_to_values(df['tgt'])
 
     def __len__(self):
         return len(self.src)

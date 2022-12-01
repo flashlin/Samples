@@ -3,7 +3,7 @@ import pandas as pd
 import torch
 from torch.utils.data import DataLoader, Dataset, random_split
 
-from utils.data_utils import df_to_values, pad_array
+from utils.data_utils import df_intstr_to_values, pad_array
 from utils.linq_tokenizr import linq_encode
 from utils.stream import int_list_to_str
 from utils.tokenizr import PAD_TOKEN_VALUE
@@ -84,8 +84,8 @@ def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
 class Seq2SeqDataset(Dataset):
     def __init__(self, csv_file_path):
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
-        self.features = df_to_values(df['src'])
-        self.labels = df_to_values(df['tgt'])
+        self.features = df_intstr_to_values(df['src'])
+        self.labels = df_intstr_to_values(df['tgt'])
 
     def __len__(self):
         return len(self.features)
@@ -109,8 +109,8 @@ class TranslationDataset(Dataset):
     def __init__(self, csv_file_path, padding_idx):
         self.padding_idx = padding_idx
         self.df = df = pd.read_csv(csv_file_path, sep='\t')
-        self.src = df_to_values(df['src'])
-        self.tgt = df_to_values(df['tgt'])
+        self.src = df_intstr_to_values(df['src'])
+        self.tgt = df_intstr_to_values(df['tgt'])
 
     def __len__(self):
         return len(self.src)
