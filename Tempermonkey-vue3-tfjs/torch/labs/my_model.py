@@ -314,7 +314,7 @@ class MyModel(BaseLightning):
                                 hidden_layer_num=3,
                                 classes_num=len(src_symbols),
                                 batch_size=batch_size)
-        self.init_dataloader(TranslationDataset("./output/linq_sql.csv", src_char2index['<pad>']), batch_size)
+        self.init_dataloader(TranslationDataset("../output/linq_sql.csv", src_char2index['<pad>']), batch_size)
 
     def forward(self, batch):
         enc_inputs, dec_inputs, dec_outputs = batch

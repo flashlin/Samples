@@ -142,7 +142,7 @@ class LitSeq2Seq(BaseLightning):
         super().__init__()
         self.n_tokens = vocab_size
         self.model = TranslationModel()
-        ds = Linq2TSqlDataset('./output/linq-sample.csv')
+        ds = Linq2TSqlDataset('../output/linq-sample.csv')
         train_loader, val_loader = ds.create_dataloader()
         self.train_loader = train_loader
         self.val_loader = val_loader

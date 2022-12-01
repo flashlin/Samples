@@ -71,7 +71,7 @@ class LitSeq2Seq(BaseLightning):
         self.n_tokens = vocab_size
         self.model = TransformerModel(self.n_tokens, d_model=200, n_head=2, d_hid=200, n_layers=2, dropout=dropout)
         self.criterion = nn.CrossEntropyLoss()
-        ds = Linq2TSqlDataset('./output/linq-sample.csv')
+        ds = Linq2TSqlDataset('../output/linq-sample.csv')
         train_loader, val_loader = ds.create_dataloader()
         self.train_loader = train_loader
         self.val_loader = val_loader

@@ -1,9 +1,8 @@
 import os
-import random
 import re
 import random
 import string
-from preprocess_data import TranslationFileTextIterator
+from labs.preprocess_data import TranslationFileTextIterator
 from utils.linq_tokenizr import linq_tokenize
 from utils.template_utils import TemplateText
 from utils.tsql_tokenizr import tsql_tokenize
@@ -89,7 +88,7 @@ def write_train_files():
     remove_file(f"{target_path}\\tgt-train.txt")
     remove_file(f"{target_path}\\src-val.txt")
     remove_file(f"{target_path}\\tgt-val.txt")
-    for src, tgt in TranslationTokensIterator('../data/linq-sample.txt'):
+    for src, tgt in TranslationTokensIterator('../../data/linq-sample.txt'):
         mode = 'train' if random.randint(1, 10) >= 3 else 'val'
         write_train_data(mode, src, tgt)
 

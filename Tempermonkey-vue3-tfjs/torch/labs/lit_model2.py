@@ -11,7 +11,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 from common.io import info
 from ml.lit import PositionalEncoding
-from prepare import create_data_loader
+from labs.prepare import create_data_loader
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 class Encoder(nn.Module):
@@ -456,7 +456,7 @@ class MyPredictor(TransformerPredictor):
         return self.val_loader
 
 
-CHECKPOINT_PATH = "./output"
+CHECKPOINT_PATH = "../output"
 
 
 def start_train(model_type, device=None, **kwargs):

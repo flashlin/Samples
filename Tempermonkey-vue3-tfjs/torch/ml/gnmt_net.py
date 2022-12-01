@@ -1,15 +1,14 @@
 import torch.nn as nn
 from torch.utils.data import Dataset
-from torch.nn.functional import log_softmax
 
 from ml.bpe_tokenizer import SimpleTokenizer
 from ml.lit import BaseLightning
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
 from ml.seq2seq.inference.inference import Translator
 from ml.seq2seq.models import GNMT
-from preprocess_data import TranslationDataset
+from labs.preprocess_data import TranslationDataset
 
 tk = SimpleTokenizer(None)
 

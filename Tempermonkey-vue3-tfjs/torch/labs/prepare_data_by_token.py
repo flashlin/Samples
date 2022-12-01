@@ -31,7 +31,7 @@ def convert_file_to_csv(
 
 
 def main():
-    convert_file_to_csv(TranslationFileIterator("../data/linq-sample.txt"))
+    convert_file_to_csv(TranslationFileIterator("../../data/linq-sample.txt"))
 
 
 if __name__ == "__main__":

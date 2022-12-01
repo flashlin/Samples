@@ -19,7 +19,7 @@ def convert_translation_file_to_csv():
     file_iter = TranslationFileIterator("../data/linq-sample.txt")
     max_length = max(src_max_length, tgt_max_length)
     info(f" translation {src_max_length=} {tgt_max_length=} {max_length=}")
-    with open(r"./output/linq-sample.csv", "w", encoding='utf-8') as csv:
+    with open(r"../output/linq-sample.csv", "w", encoding='utf-8') as csv:
         csv.write('linq\ttsql\n')
         for linq_values, tsql_values in file_iter:
             linq_values_padded = pad_sequence(linq_values, 0, src_max_length)
@@ -59,7 +59,7 @@ def create_dataloader(csv_file_path):
 
 def create_data_loader(batch_size=32):
     # dataset = MNIST("", train=True, download=True, transform=transforms.ToTensor())
-    csv_file_path = "./output/linq-sample.csv"
+    csv_file_path = "../output/linq-sample.csv"
     dataset = Linq2TSqlDataset(csv_file_path)
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size

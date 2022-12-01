@@ -1,7 +1,7 @@
 import collections
 import re
 
-from preprocess_data import TranslationFileTextIterator, TranslationFileIterator
+from labs.preprocess_data import TranslationFileTextIterator
 from utils.linq_tokenizr import linq_tokenize
 from utils.tsql_tokenizr import tsql_tokenize
 
@@ -52,7 +52,7 @@ def merge_vocab(pair, v_in):
 
 
 def generate_vocab():
-    word_dict = generate_word_dict('../data/linq-sample.txt')
+    word_dict = generate_word_dict('../../data/linq-sample.txt')
     vocab = {}
     for word in word_dict.keys():
         new_key = ' '.join([x for x in word] + ['</w>'])

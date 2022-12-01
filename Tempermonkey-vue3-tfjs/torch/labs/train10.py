@@ -94,7 +94,7 @@ class LitTranslator(BaseLightning):
         self.loss = None
         self.model = Translator(tgt_vocab_size, tgt_seq_len=tgt_len)
         self.criteria = nn.CrossEntropyLoss()
-        self.init_dataloader(Linq2TSqlDataset('./output/linq-sample.csv'), 2)
+        self.init_dataloader(Linq2TSqlDataset('../output/linq-sample.csv'), 2)
 
     def forward(self, batch):
         src, tgt, tgt_y, n_tokens = generate_tgt(batch, padding_idx=3)
