@@ -46,7 +46,8 @@ class Seq2SeqTransformer(nn.Module):
         x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
         y = y.contiguous().view(-1)
 
-        loss = self.loss_fn(x_hat, y) / n_tokens
+        # loss = self.loss_fn(x_hat, y) / n_tokens
+        loss = self.loss_fn(x_hat, y)
         return loss
 
     def get_key_padding_mask(self, tokens):

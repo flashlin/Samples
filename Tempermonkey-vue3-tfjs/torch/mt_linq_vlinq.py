@@ -1,4 +1,5 @@
 from common.io import info, info_error, get_file_by_lines_iter
+from ml.gnmt.net import LiGmnTranslator
 from ml.lit import load_model, start_train
 from ml.trans_linq2tsql import LinqToSqlVocab
 from ml.translate_net import LiTranslator, convert_translate_file_to_csv, TranslateCsvDataset
@@ -50,17 +51,20 @@ translate_csv_file_path = './output/linq_vlinq.csv'
 convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
 translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 
+model_type = LiTranslator
+model_type = LiGmnTranslator
+
 model_args = {
     'vocab': vocab
 }
 
-model = start_train(LiTranslator, model_args,
+model = start_train(model_type, model_args,
                     translate_ds,
-                    batch_size=5,
+                    batch_size=1,
                     device='cuda',
-                    max_epochs=200)
+                    max_epochs=100)
 
-# model = load_model(LiTranslator, model_args)
+# model = load_model(model_type, model_args)
 
 for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
     linq_code = model.infer(src)
