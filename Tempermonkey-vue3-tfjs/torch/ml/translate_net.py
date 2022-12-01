@@ -3,7 +3,7 @@ from torch import nn
 from torch.utils.data import Dataset, random_split
 import pandas as pd
 
-from ml.lit import BaseLightning
+from ml.lit import BaseLightning, PositionalEncoding
 from ml.mnt_net import pad_data_loader
 from ml.model_utils import reduce_dim
 from utils.data_utils import df_intstr_to_values
@@ -15,6 +15,7 @@ class Seq2SeqTransformer(nn.Module):
         self.vocab_size = vocab_size
         self.padding_idx = padding_idx
         self.embedding = nn.Embedding(vocab_size, word_dim)
+        self.pos_emb = PositionalEncoding(word_dim, dropout=0.1, max_len=500)
         self.transformer = nn.Transformer(d_model=word_dim, batch_first=True)
         self.predictor = nn.Linear(word_dim, vocab_size)
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=padding_idx)
@@ -29,7 +30,9 @@ class Seq2SeqTransformer(nn.Module):
         tgt_key_padding_mask = self.get_key_padding_mask(y)
         tgt_mask = nn.Transformer.generate_square_subsequent_mask(y.size(-1)).to(x.device)
         x = self.embedding(x)
+        x = self.pos_emb(x)
         y = self.embedding(y)
+        y = self.pos_emb(y)
         outputs = self.transformer(x, y,
                                    tgt_mask=tgt_mask,
                                    src_key_padding_mask=src_key_padding_mask,
