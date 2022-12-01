@@ -52,7 +52,7 @@ convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_
 translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 
 model_type = LiTranslator
-model_type = LiGmnTranslator
+# model_type = LiGmnTranslator
 
 model_args = {
     'vocab': vocab

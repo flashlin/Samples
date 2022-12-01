@@ -10,7 +10,7 @@ from utils.data_utils import df_intstr_to_values
 
 
 class Seq2SeqTransformer(nn.Module):
-    def __init__(self, vocab_size, padding_idx, word_dim=256):
+    def __init__(self, vocab_size, padding_idx, word_dim=128):
         super().__init__()
         self.vocab_size = vocab_size
         self.padding_idx = padding_idx
@@ -134,7 +134,7 @@ class LiTranslator(BaseLightning):
     def __init__(self, vocab):
         super().__init__()
         self.vocab = vocab
-        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'))
+        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'), word_dim=64)
         # batch_size = 1
         # self.init_dataloader(ListDataset(padding_idx), batch_size)
 
