@@ -175,7 +175,7 @@ class LitTranslator(TransformerPredictor):
     def __init__(self, src_vocab_size, tgt_vocab_size):
         super().__init__(input_dim=src_vocab_size, num_classes=tgt_vocab_size)
         self.loss = None
-        self.init_dataloader(Seq2SeqDataset('./output/linq-sample.csv'), 2)
+        self.init_dataloader(Seq2SeqDataset('../output/linq-sample.csv'), 2)
 
     # def training_step(self, batch, batch_idx):
     #     x, y = batch

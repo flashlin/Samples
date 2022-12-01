@@ -290,7 +290,7 @@ class LitTranslator(BaseLightning):
         super().__init__()
         self.model = Seq2SeqTransformer(src_vocab_size, tgt_vocab_size, d_dim=512)
         self.criterion = nn.CrossEntropyLoss()  # reduction="none")
-        self.init_dataloader(TranslationDataset("./output/linq-sample.csv"), 2)
+        self.init_dataloader(TranslationDataset("../output/linq-sample.csv"), 2)
 
     def forward(self, batch):
         enc_inputs, dec_inputs, dec_outputs = batch

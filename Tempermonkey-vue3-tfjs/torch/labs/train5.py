@@ -39,7 +39,7 @@ class LitSeq2Seq(BaseLightning):
     def __init__(self, src_vocab_size, tgt_vocab_size, embedding_dim=512, hidden_dim=3, dropout=0.2):
         super().__init__()
         self.model = Seq2Seq(src_vocab_size, tgt_vocab_size, embedding_dim, hidden_dim, dropout)
-        ds = Linq2TSqlDataset('./output/linq-sample.csv')
+        ds = Linq2TSqlDataset('../output/linq-sample.csv')
         train_loader, val_loader = ds.create_dataloader()
         self.train_loader = train_loader
         self.val_loader = val_loader

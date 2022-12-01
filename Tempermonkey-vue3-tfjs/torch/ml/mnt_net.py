@@ -5,10 +5,10 @@ import torch.nn.functional as F
 from ml.bpe_tokenizer import SimpleTokenizer
 from ml.lit import BaseLightning
 from ml.mnt_model import NMTModel
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable
 
-from preprocess_data import TranslationFileTextIterator, TranslationDataset, int_list_to_str, \
+from labs.preprocess_data import TranslationFileTextIterator, TranslationDataset, int_list_to_str, \
     df_to_values, pad_data_loader
 from utils.data_utils import pad_array
 from utils.linq_tokenizr import linq_tokenize

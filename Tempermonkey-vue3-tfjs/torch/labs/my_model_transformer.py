@@ -1,8 +1,3 @@
-import os
-import re
-import random
-import string
-
 import pandas as pd
 import torch
 from torch import nn
@@ -11,13 +6,11 @@ from torch.utils.data import Dataset, random_split, DataLoader
 from common.io import info, remove_file
 from ml.data_utils import get_data_file_path
 from ml.lit import BaseLightning, start_train, copy_last_ckpt, load_model, PositionalEncoding
-from ml.model_utils import reduce_dim, detach_lstm_hidden_state
-from my_model import read_examples_to_tokens3, encode_src_tokens, encode_tgt_tokens, src_char2index, src_symbols, \
+from labs.my_model import encode_src_tokens, src_char2index, src_symbols, \
     tgt_char2index, \
     decode_src_to_text, line_to_tokens, read_examples
-from utils.data_utils import df_to_values, pad_array, split_line_by_space, create_char2index_map, create_index2char_map
-from utils.stream import StreamTokenIterator, read_double_quote_string_token, read_token_until, int_list_to_str, replace_many_spaces
-from utils.template_utils import TemplateText
+from utils.data_utils import df_to_values, pad_array
+from utils.stream import int_list_to_str
 
 
 def pad_row_iter(row, max_seq_len, padding_idx):
@@ -209,7 +202,7 @@ class MyModel2(BaseLightning):
                                        hidden_feature_dim=len(src_symbols),
                                        classes_num=len(src_symbols),
                                        )
-        self.init_dataloader(TranslationDataset("./output/linq_sql.csv", src_char2index['<pad>']), batch_size)
+        self.init_dataloader(TranslationDataset("../output/linq_sql.csv", src_char2index['<pad>']), batch_size)
 
     def forward(self, batch):
         src, tgt = batch
