@@ -58,17 +58,14 @@ translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 model_args = {
     'vocab': vocab
 }
-model = start_train(LiTranslator,
-                    {
-                        'vocab': vocab,
-                    },
-                    translate_ds,
-                    batch_size=1,
-                    device='cuda',
-                    max_epochs=100)
+# model = start_train(LiTranslator, model_args,
+#                     translate_ds,
+#                     batch_size=1,
+#                     device='cuda',
+#                     max_epochs=100)
 
 
-# model = load_model(LiTranslator, model_args)
+model = load_model(LiTranslator, model_args)
 
 def get_file_by_lines_iter(file_path, n_lines):
     with open(file_path, 'r', encoding='UTF-8') as f:
@@ -86,11 +83,11 @@ def get_file_by_lines_iter(file_path, n_lines):
 
 for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
     linq_code = model.infer(src)
-    tgt_expected = vocab.decode(vocab.encode(tgt))
-    print(f"{src=}")
+    tgt_expected = vocab.decode(vocab.encode(tgt)).rstrip()
+    print(f'"{src=}"')
     if linq_code != tgt_expected:
-        info(f"{tgt_expected}")
-        info_error(f"{linq_code}")
+        info(f'"{tgt_expected}"')
+        info_error(f'"{linq_code}"')
     else:
-        print(f"{linq_code}")
+        print(f'"{linq_code}"')
     print("\n")
