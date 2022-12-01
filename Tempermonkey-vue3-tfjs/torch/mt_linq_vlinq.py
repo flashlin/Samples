@@ -54,13 +54,13 @@ model_args = {
     'vocab': vocab
 }
 
-# model = start_train(LiTranslator, model_args,
-#                     translate_ds,
-#                     batch_size=1,
-#                     device='cuda',
-#                     max_epochs=100)
+model = start_train(LiTranslator, model_args,
+                    translate_ds,
+                    batch_size=1,
+                    device='cuda',
+                    max_epochs=200)
 
-model = load_model(LiTranslator, model_args)
+# model = load_model(LiTranslator, model_args)
 
 for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
     linq_code = model.infer(src)
