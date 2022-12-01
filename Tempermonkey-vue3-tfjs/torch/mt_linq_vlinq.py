@@ -58,14 +58,20 @@ translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 model_args = {
     'vocab': vocab
 }
-# model = start_train(LiTranslator,
-#                     {
-#                         'vocab': vocab,
-#                     },
-#                     translate_ds,
-#                     batch_size=16,
-#                     device='cuda',
-#                     max_epochs=10)
-model = load_model(LiTranslator, model_args)
-text = model.infer('from tb2 in p select tb2.name')
-print(f"{text=}")
+model = start_train(LiTranslator,
+                    {
+                        'vocab': vocab,
+                    },
+                    translate_ds,
+                    batch_size=1,
+                    device='cuda',
+                    max_epochs=10)
+
+#model = load_model(LiTranslator, model_args)
+
+with open('./train_data/linq_vlinq_test.txt', 'r', encoding='UTF-8') as f:
+    for text in f:
+        linq_code = model.infer(text)
+        print(f"{text=}")
+        print(f"{linq_code=}")
+
