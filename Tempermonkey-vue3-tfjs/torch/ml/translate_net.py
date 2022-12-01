@@ -10,7 +10,7 @@ from utils.data_utils import df_intstr_to_values
 
 
 class Seq2SeqTransformer(nn.Module):
-    def __init__(self, vocab_size, padding_idx, word_dim=128):
+    def __init__(self, vocab_size, padding_idx, word_dim=256):
         super().__init__()
         self.vocab_size = vocab_size
         self.padding_idx = padding_idx
