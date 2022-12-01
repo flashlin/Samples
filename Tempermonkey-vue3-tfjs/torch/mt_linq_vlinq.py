@@ -58,14 +58,14 @@ translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 model_args = {
     'vocab': vocab
 }
-model = start_train(LiTranslator,
-                    {
-                        'vocab': vocab,
-                    },
-                    translate_ds,
-                    batch_size=16,
-                    device='cuda',
-                    max_epochs=10)
-# model = load_model(LiTranslator, model_args)
+# model = start_train(LiTranslator,
+#                     {
+#                         'vocab': vocab,
+#                     },
+#                     translate_ds,
+#                     batch_size=16,
+#                     device='cuda',
+#                     max_epochs=10)
+model = load_model(LiTranslator, model_args)
 text = model.infer('from tb2 in p select tb2.name')
 print(f"{text=}")

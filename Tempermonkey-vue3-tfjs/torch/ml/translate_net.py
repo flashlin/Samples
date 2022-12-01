@@ -169,5 +169,5 @@ class LiTranslator(BaseLightning):
             if y == vocab.get_value('<eos>'):
                 break
 
-        result = vocab.decode_values(reduce_dim(tgt).tolist())
+        result = vocab.decode(reduce_dim(tgt).tolist())
         return result
