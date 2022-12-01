@@ -24,3 +24,5 @@ from tb1 in customer select amount  = tb1.price + 1   * 2
 from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 + @n1 * @n2
 from tb1 in customer select amount  = tb1.price - 1   / 2
 from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 - @n1 / @n2
+from s       in Scores where s.Degree  >= 60  && s.Degree  < 80  select s.name
+from @tb_as1 in @tb1   where @tb1.@fd1 >= @n1 && @tb1.@fd1 < @n2 select @tb1.@fd2
