@@ -12,7 +12,7 @@ class LinqToSqlVocab:
         common_symbols = '1 2 3 4 5 6 7 8 9 0 <unk> <bos> <eos> <pad>'.split(' ') + [' ']
         linq_spec = 'from in select new join on equals contains'.split(' ')
         linq_symbols = sort_desc(common_symbols + symbols + linq_spec)
-        tsql_spec = '@tb_as @tb @fd_as @fd @str @number'.split(' ')
+        tsql_spec = '@tb_as @tb @fd_as @fd @str @n'.split(' ')
         tsql_symbols = sort_desc(common_symbols + symbols + tsql_spec)
         self.shared_symbols = shared_symbols = sort_desc(common_symbols + symbols + linq_symbols + tsql_symbols)
         self.char2index = create_char2index_map(shared_symbols)

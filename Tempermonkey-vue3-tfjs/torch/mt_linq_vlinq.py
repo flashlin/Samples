@@ -3,7 +3,7 @@ import random
 import torch
 from torch import nn
 
-from common.io import info
+from common.io import info, info_error
 from ml.lit import PositionalEncoding, load_model, copy_last_ckpt, start_train
 from ml.trans_linq2tsql import LinqToSqlVocab
 from ml.translate_net import LiTranslator, TranslateListDataset, convert_translate_file_to_csv, TranslateCsvDataset
@@ -65,13 +65,32 @@ model = start_train(LiTranslator,
                     translate_ds,
                     batch_size=1,
                     device='cuda',
-                    max_epochs=10)
+                    max_epochs=100)
 
-#model = load_model(LiTranslator, model_args)
 
-with open('./train_data/linq_vlinq_test.txt', 'r', encoding='UTF-8') as f:
-    for text in f:
-        linq_code = model.infer(text)
-        print(f"{text=}")
-        print(f"{linq_code=}")
+# model = load_model(LiTranslator, model_args)
 
+def get_file_by_lines_iter(file_path, n_lines):
+    with open(file_path, 'r', encoding='UTF-8') as f:
+        buf = []
+        count = 0
+        for idx, line in enumerate(f):
+            if count < n_lines:
+                count += 1
+                buf.append(line)
+            else:
+                count = 0
+                yield buf
+                buf = []
+
+
+for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
+    linq_code = model.infer(src)
+    tgt_expected = vocab.decode(vocab.encode(tgt))
+    print(f"{src=}")
+    if linq_code != tgt_expected:
+        info(f"{tgt_expected}")
+        info_error(f"{linq_code}")
+    else:
+        print(f"{linq_code}")
+    print("\n")
