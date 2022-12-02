@@ -79,7 +79,36 @@ class LinqToSqlVocab:
         token = read_identifier_token(stream_iter)
         return reduce_token_list('variable', [at_token, token])
 
-    def encode_to_tokens(self, line) -> [str]:
+    def encode_to_tokens(self, line) -> [Token]:
+        stream_iter = StreamTokenIterator(line)
+        buff = []
+        while not stream_iter.is_done():
+            token = LinqToSqlVocab.read_variable_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_double_quote_string_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_spaces_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_symbol_token(stream_iter, self.symbols)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_identifier_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+
+            token = read_token_until(stream_iter, ' ')
+            buff.append(token)
+        return buff
+
+    def encode_to_texts(self, line) -> [str]:
         stream_iter = StreamTokenIterator(line)
         buff = []
         while not stream_iter.is_done():
@@ -109,8 +138,40 @@ class LinqToSqlVocab:
         return buff
 
     def encode(self, text: str) -> [int]:
-        tokens = self.encode_to_tokens(text)
+        tokens = self.encode_to_texts(text)
         return self.encode_tokens(tokens)
+
+    def get_value(self, char: str) -> int:
+        return self.char2index[char]
+
+
+class EnglishVocab:
+    def __init__(self):
+        self.symbols = symbols = '. [ ] { } = _ + - * / , > < ! @ \' " & ( )'.split(' ')
+        common_symbols = '1 2 3 4 5 6 7 8 9 0 <unk> <bos> <eos> <pad>'.split(' ') + [' ']
+        spec = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        self.shared_symbols = shared_symbols = sort_desc(common_symbols + symbols + spec)
+        self.char2index = create_char2index_map(shared_symbols)
+        self.index2char = create_index2char_map(shared_symbols)
+        self.padding_idx = self.get_value('<pad>')
+        self.bos_idx = self.get_value('<bos>')
+        self.eos_idx = self.get_value('<eos>')
+
+    def get_size(self):
+        return len(self.shared_symbols)
+
+    def decode(self, values: [int]) -> str:
+        buf = []
+        for idx in values:
+            buf.append(self.index2char[idx])
+        return ''.join(buf)
+
+    def encode(self, text: str) -> [int]:
+        buf = [self.bos_idx]
+        for ch in text:
+            buf.append(self.char2index[ch])
+        buf.append(self.eos_idx)
+        return buf
 
     def get_value(self, char: str) -> int:
         return self.char2index[char]
