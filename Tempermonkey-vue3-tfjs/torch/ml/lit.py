@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn as nn, optim as optim
 from sklearn.metrics import accuracy_score
-from common.io import info, get_directory_list_by_pattern, get_file_list_by_pattern
+from common.io import info, get_directory_list_by_pattern, get_file_list_by_pattern, info_error
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 
@@ -270,6 +270,7 @@ def load_model(model_type, model_args, checkpoint_path="./output", model_name=No
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         info(f"{device=}")
         return model.load_from_checkpoint(pretrained_filename).to(device)
+    info_error(f"Not found pretrained model, {model_name}...")
     return None
 
 

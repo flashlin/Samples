@@ -1,6 +1,8 @@
 import torch
 from mlperf_compliance import mlperf_log
 
+from common.io import info
+
 
 class SequenceGenerator:
     def __init__(self,
@@ -144,11 +146,11 @@ class SequenceGenerator:
             context[0] = context[0].contiguous().view(seq, batch_size * beam_size, feature)
             # context[0]: (seq, batch * beam,  feature)
 
-        #context[1] (encoder seq length): (batch)
+        # context[1] (encoder seq length): (batch)
         context[1].unsqueeze_(1)
         context[1] = context[1].expand(-1, beam_size)
         context[1] = context[1].contiguous().view(batch_size * beam_size)
-        #context[1]: (batch * beam)
+        # context[1]: (batch * beam)
 
         accu_attn_scores = torch.zeros(batch_size * beam_size, seq)
         if self.cuda:
@@ -207,13 +209,18 @@ class SequenceGenerator:
 
             offset = global_offset[:source_beam.shape[0]]
             source_beam += offset.unsqueeze(1)
-            # print(translation[active[source_beam.view(-1)], :])
-            translation[active, :] = translation[active[source_beam.view(-1)], :]
+
+            # translation[active, :] = translation[active[source_beam.view(-1)], :]
+            source_beam_list = source_beam.view(-1).type(torch.long)
+            translation[active, :] = translation[active[source_beam_list], :]
+
             translation[active, idx] = words.view(-1)
 
-            lengths[active] = lengths[active[source_beam.view(-1)]]
+            # lengths[active] = lengths[active[source_beam.view(-1)]]
+            lengths[active] = lengths[active[source_beam_list]]
 
-            context[2] = context[2].index_select(1, source_beam.view(-1))
+            # context[2] = context[2].index_select(1, source_beam.view(-1))
+            context[2] = context[2].index_select(1, source_beam_list)
 
             if terminating.any():
                 not_terminating = ~terminating
