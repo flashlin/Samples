@@ -35,7 +35,6 @@ class ResidualRecurrentEncoder(nn.Module):
                                          padding_idx=padding_idx)
 
     def forward(self, inputs, lengths):
-        print(f" encoder {inputs.shape=} {lengths=}")
 
         x = self.embedder(inputs)
 
