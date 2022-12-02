@@ -60,7 +60,7 @@ model_args = {
 
 model = start_train(model_type, model_args,
                     translate_ds,
-                    batch_size=2,
+                    batch_size=1,
                     device='cuda',
                     max_epochs=100)
 

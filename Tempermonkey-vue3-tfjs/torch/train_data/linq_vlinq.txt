@@ -28,6 +28,10 @@ from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,   
 from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3, @tb_as1.@fd4, @tb_as1.@fd5, @tb_as1.@fd6, @tb_as1.@fd7, @tb_as1.@fd8 }
 from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6,   tb1.field7,   tb1.field8,   tb1.field9  }
 from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3, @tb_as1.@fd4, @tb_as1.@fd5, @tb_as1.@fd6, @tb_as1.@fd7, @tb_as1.@fd8, @tb_as1.@fd9 }
+from tb1     in customer select new { id      = tb1.id       }
+from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1 }
+from tb1     in customer select new { id      = tb1.id,       tb1.name    }
+from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1, @tb_as1.@fd2 }
 from tb1     in customer select new { id      = tb1.id,       tb1.name,      tb1.birth    }
 from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3 }
 from tb1     in customer select new { tb1.id,       username = tb1.name,      tb1.birth     }
