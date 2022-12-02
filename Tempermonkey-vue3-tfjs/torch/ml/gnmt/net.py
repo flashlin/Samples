@@ -1,6 +1,12 @@
 import torch
+
+from common.io import info
 from ml.gnmt.model import GNMT, LabelSmoothing
 from ml.lit import BaseLightning
+
+
+def tuple_of_tensors_to_tensor(tuple_of_tensors):
+    return torch.stack(list(tuple_of_tensors), dim=0)
 
 
 class LiGmnTranslator(BaseLightning):
@@ -8,11 +14,12 @@ class LiGmnTranslator(BaseLightning):
         super().__init__()
         self.vocab = vocab
         padding_idx = vocab.get_value('<pad>')
-        self.model = GNMT(vocab.get_size(), padding_idx)
+        self.model = GNMT(vocab.get_size(), padding_idx, batch_first=True)
         self.loss_fn = LabelSmoothing(padding_idx, smoothing=True)
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
+        src_len = tuple_of_tensors_to_tensor(src_len)
 
         output = self.model(src, src_len, tgt[:, :-1])
         tgt_labels = tgt[:, 1:]
@@ -26,7 +33,7 @@ class LiGmnTranslator(BaseLightning):
     def _calculate_loss(self, data, mode="train"):
         (x_hat, y_hat, B), batch = data
 
-        loss = self.criterion(x_hat, y_hat)
+        loss = self.loss_fn(x_hat, y_hat)
         self.log("%s_loss" % mode, loss)
         return loss / B
 

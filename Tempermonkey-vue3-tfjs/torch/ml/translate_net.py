@@ -99,9 +99,11 @@ class TranslateCsvDataset(Dataset):
         tgt = self.tgt[idx]
         src = self.vocab.encode(src)
         tgt = self.vocab.encode(tgt)
+        src_len = torch.tensor(len(src), dtype=torch.long)
+        tgt_len = torch.tensor(len(tgt), dtype=torch.long)
         src = torch.tensor(src, dtype=torch.long)
         tgt = torch.tensor(tgt, dtype=torch.long)
-        return src, len(src), tgt, len(tgt)
+        return src, src_len, tgt, tgt_len
 
     def create_dataloader(self, batch_size=32):
         vocab = self.vocab

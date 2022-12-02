@@ -18,6 +18,8 @@ class LinqToSqlVocab:
         self.char2index = create_char2index_map(shared_symbols)
         self.index2char = create_index2char_map(shared_symbols)
         self.padding_idx = self.get_value('<pad>')
+        self.bos_idx = self.get_value('<bos>')
+        self.eos_idx = self.get_value('<eos>')
 
     def get_size(self):
         return len(self.shared_symbols)
