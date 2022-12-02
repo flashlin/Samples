@@ -1,7 +1,7 @@
 from common.io import info, info_error, get_file_by_lines_iter
 from ml.gnmt.net import LiGmnTranslator
 from ml.lit import load_model, start_train
-from ml.trans_linq2tsql import LinqToSqlVocab
+from ml.trans_linq2tsql import LinqToSqlVocab, EnglishVocab
 from ml.translate_net import LiTranslator, convert_translate_file_to_csv, TranslateCsvDataset
 
 """
@@ -37,7 +37,8 @@ pre = 'select tb1 .'
 tgt = '. @fd1 <eos>'
 """
 
-vocab = LinqToSqlVocab()
+# vocab = LinqToSqlVocab()
+vocab = EnglishVocab()
 
 translate_examples = [
     (
@@ -51,8 +52,8 @@ translate_csv_file_path = './output/linq_vlinq.csv'
 convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
 translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 
-# model_type = LiTranslator
-model_type = LiGmnTranslator
+model_type = LiTranslator
+# model_type = LiGmnTranslator
 
 model_args = {
     'vocab': vocab
@@ -64,9 +65,11 @@ model = start_train(model_type, model_args,
                     device='cuda',
                     max_epochs=100)
 
-# model = load_model(model_type, model_args)
+#model = load_model(model_type, model_args)
 
 for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
+    src = src.rstrip()
+    tgt = tgt.rstrip()
     linq_code = model.infer(src)
     tgt_expected = vocab.decode(vocab.encode(tgt)).rstrip()
     src = ' '.join(src.split(' ')).rstrip()

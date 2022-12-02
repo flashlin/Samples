@@ -40,6 +40,14 @@ from tb1     in customer select new { uid     = tb1.id,       username = tb1.nam
 from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1, @fd_as2  = @tb_as1.@fd2, @tb_as1.@fd3 }
 from tb1     in customer select new { uid     = tb1.id,       username = tb1.name,     userBirth = tb1.birth     }
 from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1, @fd_as2  = @tb_as1.@fd2, @fd_as3   = @tb_as1.@fd3 }
+from tb1 in customer select amount  = tb1.price / 1
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 / @n1
+from tb1 in customer select amount  = tb1.price - 1
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 - @n1
+from tb1 in customer select amount  = tb1.price * 1
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 * @n1
+from tb1 in customer select amount  = tb1.price * 1   - 2
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 * @n1 - @n2
 from tb1 in customer select amount  = tb1.price + 1   * 2
 from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 + @n1 * @n2
 from tb1 in customer select amount  = tb1.price - 1   / 2

@@ -3,6 +3,7 @@ from torch import nn
 from torch.utils.data import Dataset, random_split
 import pandas as pd
 
+from common.io import info
 from ml.lit import BaseLightning, PositionalEncoding
 from ml.mnt_net import pad_data_loader
 from ml.model_utils import reduce_dim
@@ -16,7 +17,11 @@ class Seq2SeqTransformer(nn.Module):
         self.padding_idx = padding_idx
         self.embedding = nn.Embedding(vocab_size, word_dim)
         self.pos_emb = PositionalEncoding(word_dim, dropout=0.1, max_len=500)
-        self.transformer = nn.Transformer(d_model=word_dim, batch_first=True)
+        self.transformer = nn.Transformer(d_model=word_dim,
+                                          nhead=32,  # 8
+                                          num_encoder_layers=8,  # 6
+                                          num_decoder_layers=8,
+                                          batch_first=True)
         self.predictor = nn.Linear(word_dim, vocab_size)
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=padding_idx)
 
@@ -46,8 +51,7 @@ class Seq2SeqTransformer(nn.Module):
         x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
         y = y.contiguous().view(-1)
 
-        # loss = self.loss_fn(x_hat, y) / n_tokens
-        loss = self.loss_fn(x_hat, y)
+        loss = self.loss_fn(x_hat, y) / n_tokens
         return loss
 
     def get_key_padding_mask(self, tokens):
@@ -136,9 +140,7 @@ class LiTranslator(BaseLightning):
     def __init__(self, vocab):
         super().__init__()
         self.vocab = vocab
-        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'), word_dim=64)
-        # batch_size = 1
-        # self.init_dataloader(ListDataset(padding_idx), batch_size)
+        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'), word_dim=512)
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
