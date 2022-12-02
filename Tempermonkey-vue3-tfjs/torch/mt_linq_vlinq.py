@@ -37,8 +37,8 @@ pre = 'select tb1 .'
 tgt = '. @fd1 <eos>'
 """
 
-# vocab = LinqToSqlVocab()
-vocab = EnglishVocab()
+vocab = LinqToSqlVocab()
+# vocab = EnglishVocab()
 
 translate_examples = [
     (
@@ -61,9 +61,9 @@ model_args = {
 
 model = start_train(model_type, model_args,
                     translate_ds,
-                    batch_size=1,
+                    batch_size=2,
                     device='cuda',
-                    max_epochs=100)
+                    max_epochs=50)
 
 #model = load_model(model_type, model_args)
 

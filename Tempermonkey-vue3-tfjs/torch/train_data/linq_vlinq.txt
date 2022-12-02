@@ -62,3 +62,9 @@ from tb1     in customer select amount  = tb1.price + 1   + 2   + 3   * 1
 from @tb_as1 in @tb1     select @fd_as1 = @tb1.@fd1 + @n1 + @n2 + @n3 * @n1
 from tb1     in customer select amount  = tb1.price + 1   + 2   + 3   * 1   * 4
 from @tb_as1 in @tb1     select @fd_as1 = @tb1.@fd1 + @n1 + @n2 + @n3 * @n1 * @n4
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb1
+from @tb_as1 in @tb1 from @tb_as2 in @tb2 from @tb_as3 in @tb3 select @tb1
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb2
+from @tb_as1 in @tb1 from @tb_as2 in @tb2 from @tb_as3 in @tb3 select @tb2
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb3
+from @tb_as1 in @tb1 from @tb_as2 in @tb2 from @tb_as3 in @tb3 select @tb3

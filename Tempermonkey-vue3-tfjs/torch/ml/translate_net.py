@@ -18,7 +18,7 @@ class Seq2SeqTransformer(nn.Module):
         self.embedding = nn.Embedding(vocab_size, word_dim)
         self.pos_emb = PositionalEncoding(word_dim, dropout=0.1, max_len=500)
         self.transformer = nn.Transformer(d_model=word_dim,
-                                          nhead=32,  # 8
+                                          nhead=16,  # 8
                                           num_encoder_layers=8,  # 6
                                           num_decoder_layers=8,
                                           batch_first=True)
