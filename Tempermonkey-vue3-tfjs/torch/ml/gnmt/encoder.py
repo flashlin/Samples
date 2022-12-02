@@ -35,10 +35,12 @@ class ResidualRecurrentEncoder(nn.Module):
                                          padding_idx=padding_idx)
 
     def forward(self, inputs, lengths):
+        print(f" encoder {inputs.shape=} {lengths=}")
+
         x = self.embedder(inputs)
 
         # bidirectional layer
-        x = pack_padded_sequence(x, lengths.cpu().numpy(), batch_first=self.batch_first)
+        x = pack_padded_sequence(x, lengths.cpu().numpy(), batch_first=self.batch_first, enforce_sorted=False)
         x, _ = self.rnn_layers[0](x)
         x, _ = pad_packed_sequence(x, batch_first=self.batch_first)
 

@@ -77,6 +77,7 @@ class GNMT(Seq2Seq):
                                                 batch_first, math, embedder)
 
     def forward(self, input_encoder, input_enc_len, input_decoder):
+        print(f" forward  {input_enc_len=}")
         context = self.encode(input_encoder, input_enc_len)
         context = (context, input_enc_len, None)
         output, _, _ = self.decode(input_decoder, context)
