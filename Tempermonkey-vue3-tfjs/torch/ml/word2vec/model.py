@@ -108,31 +108,25 @@ class Word2Vec(BaseLightning):
     def __init__(self, vocab_size):
         super().__init__()
         self.cbow_model = CBOW_Model(vocab_size)
-        self.skip_gram_model = CBOW_Model(vocab_size)
         self.loss_fn = nn.CrossEntropyLoss()
 
     def forward(self, batch):
         inputs, labels = batch
-        outputs1 = self.cbow_model(inputs)
-        outputs2 = self.skip_gram_model(inputs)
-        return outputs1, outputs2, labels
+        outputs = self.cbow_model(inputs)
+        return outputs, labels
 
     def _calculate_loss(self, batch, mode="train"):
-        (outputs1, outputs2, labels), batch_idx = batch
-        loss1 = self.loss_fn(outputs1, labels)
-        loss2 = self.loss_fn(outputs2, labels)
-        loss = loss1 + loss2
+        (outputs, labels), batch_idx = batch
+        loss = self.loss_fn(outputs, labels)
         self.log("%s_loss" % mode, loss)
         return loss
 
     def infer(self, vocab, word):
         self.cbow_model.eval()
-        self.skip_gram_model.eval()
         value = vocab.encode(word, False)
         value = torch.tensor([value], dtype=torch.long)
-        vec1 = self.cbow_model(value)
-        vec2 = self.skip_gram_model(value)
-        return vec1 * vec2
+        vec = self.cbow_model(value)
+        return vec
 
 
 class TranslateFileDataset(Dataset):
