@@ -24,10 +24,12 @@ class LinqToSqlVocab:
     def get_size(self):
         return len(self.shared_symbols)
 
-    def encode_tokens(self, tokens: [str]) -> [int]:
+    def encode_tokens(self, tokens: [str], add_bos_eos=True) -> [int]:
         char2index = self.char2index
         var_re = re.compile(r'(@\w+)(\d+)')
-        buff = [char2index['<bos>']]
+        buff = []
+        if add_bos_eos:
+            buff.append(char2index['<bos>'])
         unk_tokens = {}
         for token in tokens:
             match = var_re.match(token)
@@ -52,7 +54,8 @@ class LinqToSqlVocab:
                 buff.extend(unk)
                 continue
             buff.append(char2index[token])
-        buff.append(char2index['<eos>'])
+        if add_bos_eos:
+            buff.append(char2index['<eos>'])
         return buff
 
     def encode_number_token(self, token):
@@ -137,9 +140,9 @@ class LinqToSqlVocab:
             buff.append(text)
         return buff
 
-    def encode(self, text: str) -> [int]:
+    def encode(self, text: str, add_bos_eos=True) -> [int]:
         tokens = self.encode_to_texts(text)
-        return self.encode_tokens(tokens)
+        return self.encode_tokens(tokens, add_bos_eos)
 
     def get_value(self, char: str) -> int:
         return self.char2index[char]
