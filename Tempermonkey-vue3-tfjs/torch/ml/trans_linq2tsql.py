@@ -8,6 +8,9 @@ from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier
 
 
 def repeat_word(word, n):
+    if word.startswith('<') and word.endswith('>'):
+        word = word[1:-1]
+        return [f'<{word}{idx}>' for idx in range(1, n)]
     return [f'{word}{idx}' for idx in range(1, n)]
 
 
@@ -30,7 +33,10 @@ class LinqToSqlVocab:
             '@fd_as': 300,
             '@fd': 300,
             '@s': 100,
-            '@n': 100
+            '@n': 100,
+            '<s>': 500,
+            '<n>': 500,
+            '<identifier>': 1000
         })
         self.keywords = create_char2index_map(linq_keywords + tsql_keywords)
         self.all_symbols = shared_symbols = sort_desc(spec_marks + symbols +
@@ -83,6 +89,9 @@ class LinqToSqlVocab:
         return [self.char2index[n] for n in token]
 
     def decode_values(self, values: [int]) -> [str]:
+        return [self.index2char[idx] for idx in values]
+
+    def decode_values1(self, values: [int]) -> [str]:
         def is_ignore(text):
             return text.startswith('<') and text.endswith('>')
 
@@ -161,39 +170,43 @@ class LinqToSqlVocab:
         dict[key] = new_index
         return new_index
 
-    def encode_to_words(self, line) -> [str]:
+    def tokens_to_words(self, tokens: [Token]) -> [str]:
         identifiers = {}
         numbers = {}
         strings = {}
         buff = []
-        for token in self.parse_to_tokens(line):
+        for token in tokens:
             if token.text in self.keywords:
-                buff.append(token.text)
+                buff += [token.text]
                 continue
             if token.type == Token.Identifier:
                 idx = self.add_to_dict(identifiers, token.text)
-                buff.append(f'<identifier{idx}>')
+                buff += [f'<identifier{idx}>']
                 continue
             if token.type == 'variable':
-                buff.append(token.text)
+                buff += [token.text]
                 continue
             if token.type == Token.String:
                 idx = self.add_to_dict(strings, token.text)
-                buff.append(f'<s{idx}>')
+                buff += [f'<s{idx}>']
                 continue
             if token.type == Token.Number:
                 idx = self.add_to_dict(numbers, token.text)
-                buff.append(f'<n{idx}>')
+                buff += [f'<n{idx}>']
                 continue
             if token.type == Token.Spaces:
-                buff.append(f' ')
+                buff += [f' ']
                 continue
-            buff.append(token.text)
+            buff += [token.text]
         return buff
 
-    def encode(self, text: str, add_bos_eos=True) -> [int]:
-        tokens = self.encode_to_texts(text)
-        return self.encode_tokens(tokens, add_bos_eos)
+    def encode_words(self, words) -> [int]:
+        return [self.char2index[word] for word in words]
+
+    def encode(self, text: str) -> [int]:
+        tokens = self.parse_to_tokens(text)
+        words = self.tokens_to_words(tokens)
+        return self.encode_words(words)
 
     def get_value(self, char: str) -> int:
         return self.char2index[char]

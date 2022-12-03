@@ -92,9 +92,16 @@ if __name__ == '__main__':
     print(f'{s1=}')
     tokens = vocab.parse_to_tokens(s1)
     print(f'{tokens=}\n')
-    words = vocab.encode_to_words(s1)
+    words = vocab.tokens_to_words(tokens)
     print(f'{words=}\n')
+    values = vocab.encode_words(words)
+    print(f'{values=}\n')
+
+    words = vocab.decode_values(values)
+    print(f'decode to {words=}')
+
+
     s2 = 'from @tb_as1 in @tb1 select @tb_as1.@fd1, @fd_as1 = @n1'
     print(f'{s2=}')
-    s2_words = vocab.encode_to_words(s2)
+    s2_words = vocab.encode(s2)
     print(f'{s2_words=}')
