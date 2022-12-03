@@ -55,7 +55,9 @@ class LinqToSqlVocab:
         return [self.index2char[idx] for idx in values]
 
     def decode(self, values: [int]) -> str:
-        return ''.join(self.decode_values(values))
+        words = self.decode_values(values)
+        words = [word for word in words if not word.startswith('<')]
+        return ''.join(words)
 
     @staticmethod
     def read_variable_token(stream_iter: StreamTokenIterator) -> Token:
