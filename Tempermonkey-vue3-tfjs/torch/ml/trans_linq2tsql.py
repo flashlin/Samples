@@ -7,17 +7,35 @@ from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier
     read_number_token
 
 
+def repeat_word(word, n):
+    return [f'{word}{idx}' for idx in range(1, n)]
+
+
+def dict_to_words_list(dict):
+    buf = []
+    for key, count in dict.items():
+        buf += repeat_word(key, count)
+    return buf
+
+
 class LinqToSqlVocab:
     def __init__(self):
-        self.symbols = symbols = '. ( ) [ ] { } += + - * / , =='.split(' ')
-        common_symbols = '1 2 3 4 5 6 7 8 9 0 <unk> <bos> <eos> <pad>'.split(' ') + [' ']
+        spec_marks = '<unk> <bos> <eos> <pad>'.split(' ')
+        self.symbols = symbols = '. ( ) [ ] { } + - * / % ^ , == += -= /= *= %='.split(' ') + [' ']
         linq_keywords = 'from in select new join on equals contains'.split(' ')
         tsql_keywords = 'SELECT FROM WITH NOLOCK AS JOIN LEFT RIGHT ON GROUP BY TOP DESC'.split(' ')
-        linq_symbols = sort_desc(common_symbols + symbols + linq_keywords)
-        tsql_spec = '@tb_as @tb @fd_as @fd @str @n'.split(' ')
-        tsql_symbols = sort_desc(common_symbols + symbols + tsql_spec)
+        spec_variables = dict_to_words_list({
+            '@tb_as': 20,
+            '@tb': 20,
+            '@fd_as': 300,
+            '@fd': 300,
+            '@s': 100,
+            '@n': 100
+        })
         self.keywords = create_char2index_map(linq_keywords + tsql_keywords)
-        self.shared_symbols = shared_symbols = sort_desc(common_symbols + symbols + linq_symbols + tsql_symbols)
+        self.all_symbols = shared_symbols = sort_desc(spec_marks + symbols +
+                                                      linq_keywords + tsql_keywords +
+                                                      spec_variables)
         self.char2index = create_char2index_map(shared_symbols)
         self.index2char = create_index2char_map(shared_symbols)
         self.padding_idx = self.get_value('<pad>')
@@ -25,7 +43,7 @@ class LinqToSqlVocab:
         self.eos_idx = self.get_value('<eos>')
 
     def get_size(self):
-        return len(self.shared_symbols)
+        return len(self.all_symbols)
 
     def encode_tokens(self, tokens: [str], add_bos_eos=True) -> [int]:
         char2index = self.char2index
@@ -67,6 +85,7 @@ class LinqToSqlVocab:
     def decode_values(self, values: [int]) -> [str]:
         def is_ignore(text):
             return text.startswith('<') and text.endswith('>')
+
         buff = []
         for value in values:
             token_text = self.index2char[value]

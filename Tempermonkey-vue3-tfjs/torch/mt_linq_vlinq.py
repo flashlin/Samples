@@ -87,6 +87,7 @@ def train():
 
 if __name__ == '__main__':
     # train()
+    info(f'{vocab.get_size()=}')
     s1 = 'from tb1 in customer select new { tb1.name, 123 }'
     print(f'{s1=}')
     tokens = vocab.parse_to_tokens(s1)
