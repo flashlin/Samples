@@ -1,4 +1,4 @@
-from ml.lit import start_train
+from ml.lit import start_train, load_model
 from ml.trans_linq2tsql import LinqToSqlVocab
 from ml.word2vec.model import Word2Vec, TranslateFileDataset
 
@@ -12,12 +12,18 @@ if __name__ == '__main__':
 
     train_ds = TranslateFileDataset('./train_data/linq_vlinq.txt', vocab)
 
-    model = start_train(model_type, model_args,
-                        train_ds,
-                        batch_size=10,
-                        device='cuda',
-                        max_epochs=300)
+    # model = start_train(model_type, model_args,
+    #                     train_ds,
+    #                     batch_size=5,
+    #                     device='cuda',
+    #                     max_epochs=100)
 
-    word1 = 'select'
+    model = load_model(model_type, model_args)
+
+    word1 = 'tb1'
     vec1 = model.infer(vocab, word1)
     print(f'vec = {word1=} {vec1=}')
+
+    word2 = '@tb1'
+    vec2 = model.infer(vocab, word2)
+    print(f'vec = {vec1-vec2=}')

@@ -124,7 +124,7 @@ class Word2Vec(BaseLightning):
     def infer(self, vocab, word):
         self.cbow_model.eval()
         value = vocab.encode(word, False)
-        value = torch.tensor([value], dtype=torch.long)
+        value = torch.tensor([value], dtype=torch.long).to(self.device)
         vec = self.cbow_model(value)
         return vec
 
