@@ -38,45 +38,56 @@ tgt = '. @fd1 <eos>'
 """
 
 vocab = LinqToSqlVocab()
-# vocab = EnglishVocab()
 
-translate_examples = [
-    (
-        'from tb1     in customer select tb1.name',
-        'from @tb_as1 in @tb1     select @tb_as1.@fd1'
-    ),
-]
-# translate_ds = TranslateListDataset(translate_examples, vocab)
 
-translate_csv_file_path = './output/linq_vlinq.csv'
-convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
-translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
+def train():
+    # vocab = EnglishVocab()
 
-model_type = LiTranslator
-# model_type = LiGmnTranslator
+    translate_examples = [
+        (
+            'from tb1     in customer select tb1.name',
+            'from @tb_as1 in @tb1     select @tb_as1.@fd1'
+        ),
+    ]
+    # translate_ds = TranslateListDataset(translate_examples, vocab)
 
-model_args = {
-    'vocab': vocab
-}
+    translate_csv_file_path = './output/linq_vlinq.csv'
+    convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
+    translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 
-model = start_train(model_type, model_args,
-                    translate_ds,
-                    batch_size=2,
-                    device='cuda',
-                    max_epochs=50)
+    model_type = LiTranslator
+    # model_type = LiGmnTranslator
 
-#model = load_model(model_type, model_args)
+    model_args = {
+        'vocab': vocab
+    }
 
-for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
-    src = src.rstrip()
-    tgt = tgt.rstrip()
-    linq_code = model.infer(src)
-    tgt_expected = vocab.decode(vocab.encode(tgt)).rstrip()
-    src = ' '.join(src.split(' ')).rstrip()
-    print(f'src="{src}"')
-    if linq_code != tgt_expected:
-        info(f'"{tgt_expected}"')
-        info_error(f'"{linq_code}"')
-    else:
-        print(f'"{linq_code}"')
-    print("\n")
+    model = start_train(model_type, model_args,
+                        translate_ds,
+                        batch_size=2,
+                        device='cuda',
+                        max_epochs=50)
+
+    # model = load_model(model_type, model_args)
+
+    for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
+        src = src.rstrip()
+        tgt = tgt.rstrip()
+        linq_code = model.infer(src)
+        tgt_expected = vocab.decode(vocab.encode(tgt)).rstrip()
+        src = ' '.join(src.split(' ')).rstrip()
+        print(f'src="{src}"')
+        if linq_code != tgt_expected:
+            info(f'"{tgt_expected}"')
+            info_error(f'"{linq_code}"')
+        else:
+            print(f'"{linq_code}"')
+        print("\n")
+
+
+if __name__ == '__main__':
+    # train()
+    tokens = vocab.parse_to_tokens('from tb1 in customer select tb1.name')
+    print(f'{tokens=}')
+    tokens = vocab.parse_to_tokens('from @tb_as1 in @tb1 select @tb_as1.name')
+    print(f'{tokens=}')

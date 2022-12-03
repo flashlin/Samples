@@ -82,10 +82,23 @@ class LinqToSqlVocab:
         token = read_identifier_token(stream_iter)
         return reduce_token_list('variable', [at_token, token])
 
-    def encode_to_tokens(self, line) -> [Token]:
+    @staticmethod
+    def read_spec_identifier_token(stream_iter: StreamTokenIterator) -> Token:
+        if stream_iter.peek_str(1) != '[':
+            return EmptyToken
+        start_token = stream_iter.next()
+        ident = read_token_until(stream_iter, ']')
+        end_token = stream_iter.next()
+        return reduce_token_list(Token.Identifier, [start_token, ident, end_token])
+
+    def parse_to_tokens(self, line) -> [Token]:
         stream_iter = StreamTokenIterator(line)
         buff = []
         while not stream_iter.is_done():
+            token = LinqToSqlVocab.read_spec_identifier_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
             token = LinqToSqlVocab.read_variable_token(stream_iter)
             if token != EmptyToken:
                 buff.append(token)
