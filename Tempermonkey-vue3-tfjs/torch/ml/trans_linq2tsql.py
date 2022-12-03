@@ -3,17 +3,20 @@ import re
 from common.io import info_error
 from utils.data_utils import sort_desc, create_char2index_map, create_index2char_map
 from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier_token, reduce_token_list, \
-    read_double_quote_string_token, read_spaces_token, read_symbol_token, read_token_until
+    read_double_quote_string_token, read_spaces_token, read_symbol_token, read_token_until, read_float_number_token, \
+    read_number_token
 
 
 class LinqToSqlVocab:
     def __init__(self):
-        self.symbols = symbols = '. [ ] { } += + - * / , =='.split(' ')
+        self.symbols = symbols = '. ( ) [ ] { } += + - * / , =='.split(' ')
         common_symbols = '1 2 3 4 5 6 7 8 9 0 <unk> <bos> <eos> <pad>'.split(' ') + [' ']
-        linq_spec = 'from in select new join on equals contains'.split(' ')
-        linq_symbols = sort_desc(common_symbols + symbols + linq_spec)
+        linq_keywords = 'from in select new join on equals contains'.split(' ')
+        tsql_keywords = 'SELECT FROM WITH NOLOCK AS JOIN LEFT RIGHT ON GROUP BY TOP DESC'.split(' ')
+        linq_symbols = sort_desc(common_symbols + symbols + linq_keywords)
         tsql_spec = '@tb_as @tb @fd_as @fd @str @n'.split(' ')
         tsql_symbols = sort_desc(common_symbols + symbols + tsql_spec)
+        self.keywords = create_char2index_map(linq_keywords + tsql_keywords)
         self.shared_symbols = shared_symbols = sort_desc(common_symbols + symbols + linq_symbols + tsql_symbols)
         self.char2index = create_char2index_map(shared_symbols)
         self.index2char = create_index2char_map(shared_symbols)
@@ -119,38 +122,54 @@ class LinqToSqlVocab:
             if token != EmptyToken:
                 buff.append(token)
                 continue
-
+            token = read_float_number_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_number_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
             token = read_token_until(stream_iter, ' ')
             buff.append(token)
         return buff
 
-    def encode_to_texts(self, line) -> [str]:
-        stream_iter = StreamTokenIterator(line)
-        buff = []
-        while not stream_iter.is_done():
-            token = LinqToSqlVocab.read_variable_token(stream_iter)
-            if token != EmptyToken:
-                buff.append(token.text)
-                continue
-            token = read_double_quote_string_token(stream_iter)
-            if token != EmptyToken:
-                buff.append(token.text)
-                continue
-            token = read_spaces_token(stream_iter)
-            if token != EmptyToken:
-                buff.append(' ')
-                continue
-            token = read_symbol_token(stream_iter, self.symbols)
-            if token != EmptyToken:
-                buff.append(token.text)
-                continue
-            token = read_identifier_token(stream_iter)
-            if token != EmptyToken:
-                buff.append(token.text)
-                continue
+    @staticmethod
+    def add_to_dict(dict, key):
+        if key in dict:
+            return dict[key]
+        new_index = len(dict) + 1
+        dict[key] = new_index
+        return new_index
 
-            text = read_token_until(stream_iter, ' ').text
-            buff.append(text)
+    def encode_to_words(self, line) -> [str]:
+        identifiers = {}
+        numbers = {}
+        strings = {}
+        buff = []
+        for token in self.parse_to_tokens(line):
+            if token.text in self.keywords:
+                buff.append(token.text)
+                continue
+            if token.type == Token.Identifier:
+                idx = self.add_to_dict(identifiers, token.text)
+                buff.append(f'<identifier{idx}>')
+                continue
+            if token.type == 'variable':
+                buff.append(token.text)
+                continue
+            if token.type == Token.String:
+                idx = self.add_to_dict(strings, token.text)
+                buff.append(f'<s{idx}>')
+                continue
+            if token.type == Token.Number:
+                idx = self.add_to_dict(numbers, token.text)
+                buff.append(f'<n{idx}>')
+                continue
+            if token.type == Token.Spaces:
+                buff.append(f' ')
+                continue
+            buff.append(token.text)
         return buff
 
     def encode(self, text: str, add_bos_eos=True) -> [int]:

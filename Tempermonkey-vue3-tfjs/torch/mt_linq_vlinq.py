@@ -87,7 +87,13 @@ def train():
 
 if __name__ == '__main__':
     # train()
-    tokens = vocab.parse_to_tokens('from tb1 in customer select tb1.name')
-    print(f'{tokens=}')
-    tokens = vocab.parse_to_tokens('from @tb_as1 in @tb1 select @tb_as1.name')
-    print(f'{tokens=}')
+    s1 = 'from tb1 in customer select new { tb1.name, 123 }'
+    print(f'{s1=}')
+    tokens = vocab.parse_to_tokens(s1)
+    print(f'{tokens=}\n')
+    words = vocab.encode_to_words(s1)
+    print(f'{words=}\n')
+    s2 = 'from @tb_as1 in @tb1 select @tb_as1.@fd1, @fd_as1 = @n1'
+    print(f'{s2=}')
+    s2_words = vocab.encode_to_words(s2)
+    print(f'{s2_words=}')
