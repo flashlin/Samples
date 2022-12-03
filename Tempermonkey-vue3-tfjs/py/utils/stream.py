@@ -160,7 +160,9 @@ def read_symbol_token(stream_iterator: StreamTokenIterator, symbols: [str]) -> T
     for symbol_len in symbols_lens:
         ch = stream_iterator.peek_str(symbol_len)
         if ch in symbols_dict:
-            return stream_iterator.next(symbol_len)
+            token = stream_iterator.next(symbol_len)
+            token.type = Token.Symbol
+            return token
     return EmptyToken
 
 
