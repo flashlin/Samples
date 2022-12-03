@@ -14,9 +14,9 @@ if __name__ == '__main__':
 
     model = start_train(model_type, model_args,
                         train_ds,
-                        batch_size=1,
+                        batch_size=10,
                         device='cuda',
-                        max_epochs=50)
+                        max_epochs=300)
 
     word1 = 'select'
     vec1 = model.infer(vocab, word1)
