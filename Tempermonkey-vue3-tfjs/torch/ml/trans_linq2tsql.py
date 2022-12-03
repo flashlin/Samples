@@ -24,7 +24,7 @@ def dict_to_words_list(dict):
 class LinqToSqlVocab:
     def __init__(self):
         spec_marks = '<unk> <bos> <eos> <pad>'.split(' ')
-        self.symbols = symbols = '. ( ) [ ] { } + - * / % ^ , == += -= /= *= %='.split(' ') + [' ']
+        self.symbols = symbols = '. ( ) [ ] { } + - * / % ^ , = == += -= /= *= %='.split(' ') + [' ']
         linq_keywords = 'from in select new join on equals contains'.split(' ')
         tsql_keywords = 'SELECT FROM WITH NOLOCK AS JOIN LEFT RIGHT ON GROUP BY TOP DESC'.split(' ')
         spec_variables = dict_to_words_list({
@@ -51,56 +51,8 @@ class LinqToSqlVocab:
     def get_size(self):
         return len(self.all_symbols)
 
-    def encode_tokens(self, tokens: [str], add_bos_eos=True) -> [int]:
-        char2index = self.char2index
-        var_re = re.compile(r'(@\w+)(\d+)')
-        buff = []
-        if add_bos_eos:
-            buff.append(char2index['<bos>'])
-        unk_tokens = {}
-        for token in tokens:
-            match = var_re.match(token)
-            if match:
-                name = match.group(1)
-                num = match.group(2)
-                buff.append(char2index[name])
-                buff.append(char2index[num])
-                continue
-            if token not in char2index:
-                unk_number = len(unk_tokens) + 1
-                if token in unk_tokens:
-                    unk = unk_tokens[token]
-                else:
-                    try:
-                        unk_num_values = self.encode_number_token(str(unk_number))
-                        unk = [char2index['<unk>']] + unk_num_values
-                        unk_tokens[token] = unk
-                    except Exception as e:
-                        info_error(f' {tokens=} {token=} {e}')
-                        raise
-                buff.extend(unk)
-                continue
-            buff.append(char2index[token])
-        if add_bos_eos:
-            buff.append(char2index['<eos>'])
-        return buff
-
-    def encode_number_token(self, token):
-        return [self.char2index[n] for n in token]
-
     def decode_values(self, values: [int]) -> [str]:
         return [self.index2char[idx] for idx in values]
-
-    def decode_values1(self, values: [int]) -> [str]:
-        def is_ignore(text):
-            return text.startswith('<') and text.endswith('>')
-
-        buff = []
-        for value in values:
-            token_text = self.index2char[value]
-            if not is_ignore(token_text):
-                buff.append(token_text)
-        return buff
 
     def decode(self, values: [int]) -> str:
         return ''.join(self.decode_values(values))
@@ -158,8 +110,7 @@ class LinqToSqlVocab:
             if token != EmptyToken:
                 buff.append(token)
                 continue
-            token = read_token_until(stream_iter, ' ')
-            buff.append(token)
+            raise Exception(f'parse "{stream_iter.peek_str(10)}" fail')
         return buff
 
     @staticmethod

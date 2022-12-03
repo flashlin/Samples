@@ -90,18 +90,15 @@ if __name__ == '__main__':
     info(f'{vocab.get_size()=}')
     s1 = 'from tb1 in customer select new { tb1.name, 123 }'
     print(f'{s1=}')
-    tokens = vocab.parse_to_tokens(s1)
-    print(f'{tokens=}\n')
-    words = vocab.tokens_to_words(tokens)
-    print(f'{words=}\n')
-    values = vocab.encode_words(words)
-    print(f'{values=}\n')
-
-    words = vocab.decode_values(values)
-    print(f'decode to {words=}')
-
+    s1_values = vocab.encode(s1)
+    print(f'{s1_values=}')
+    s11 = vocab.decode(s1_values)
+    print(f'{s11=}\n')
 
     s2 = 'from @tb_as1 in @tb1 select @tb_as1.@fd1, @fd_as1 = @n1'
     print(f'{s2=}')
-    s2_words = vocab.encode(s2)
-    print(f'{s2_words=}')
+    s2_values = vocab.encode(s2)
+    print(f' {vocab.parse_to_tokens(s2)=}')
+    print(f'{s2_values=}')
+    s22 = vocab.decode(s2_values)
+    print(f'{s22=}')
