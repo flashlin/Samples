@@ -12,18 +12,18 @@ if __name__ == '__main__':
 
     train_ds = TranslateFileDataset('./train_data/linq_vlinq.txt', vocab)
 
-    # model = start_train(model_type, model_args,
-    #                     train_ds,
-    #                     batch_size=5,
-    #                     device='cuda',
-    #                     max_epochs=100)
+    model = start_train(model_type, model_args,
+                        train_ds,
+                        batch_size=16,
+                        device='cuda',
+                        max_epochs=300)
 
-    model = load_model(model_type, model_args)
+    # model = load_model(model_type, model_args)
 
-    word1 = 'tb1'
+    word1 = '@tb_as2'
     vec1 = model.infer(vocab, word1)
     print(f'vec = {word1=} {vec1=}')
 
-    word2 = '@tb1'
+    word2 = '@tb_as1'
     vec2 = model.infer(vocab, word2)
     print(f'vec = {vec1-vec2=}')

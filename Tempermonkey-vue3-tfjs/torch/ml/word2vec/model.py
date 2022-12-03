@@ -13,15 +13,15 @@ EMBED_MAX_NORM = 1
 
 
 class CBOW_Model(nn.Module):
-    def __init__(self, vocab_size: int):
+    def __init__(self, vocab_size: int, embed_dim=EMBED_DIMENSION):
         super().__init__()
         self.embeddings = nn.Embedding(
             num_embeddings=vocab_size,
-            embedding_dim=EMBED_DIMENSION,
+            embedding_dim=embed_dim,
             max_norm=EMBED_MAX_NORM,
         )
         self.linear = nn.Linear(
-            in_features=EMBED_DIMENSION,
+            in_features=embed_dim,
             out_features=vocab_size,
         )
 
@@ -107,7 +107,7 @@ def collate_skipgram(batch, text_pipeline):
 class Word2Vec(BaseLightning):
     def __init__(self, vocab_size):
         super().__init__()
-        self.cbow_model = CBOW_Model(vocab_size)
+        self.cbow_model = CBOW_Model(vocab_size, embed_dim=100)
         self.loss_fn = nn.CrossEntropyLoss()
 
     def forward(self, batch):
