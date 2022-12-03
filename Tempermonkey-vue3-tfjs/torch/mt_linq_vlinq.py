@@ -43,14 +43,6 @@ vocab = LinqToSqlVocab()
 def train():
     # vocab = EnglishVocab()
 
-    translate_examples = [
-        (
-            'from tb1     in customer select tb1.name',
-            'from @tb_as1 in @tb1     select @tb_as1.@fd1'
-        ),
-    ]
-    # translate_ds = TranslateListDataset(translate_examples, vocab)
-
     translate_csv_file_path = './output/linq_vlinq.csv'
     convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
     translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
@@ -85,11 +77,11 @@ def train():
         print("\n")
 
 
-if __name__ == '__main__':
-    # train()
+def test():
     info(f'{vocab.get_size()=}')
-    s1 = 'from tb1 in customer select new { tb1.name, 123 }'
+    s1 = 'from tb1 in customer where 1==2 && 3==4 select new { tb1.name, 123 }'
     print(f'{s1=}')
+    print(f'{vocab.parse_to_tokens(s1)=}')
     s1_values = vocab.encode(s1)
     print(f'{s1_values=}')
     s11 = vocab.decode(s1_values)
@@ -98,7 +90,11 @@ if __name__ == '__main__':
     s2 = 'from @tb_as1 in @tb1 select @tb_as1.@fd1, @fd_as1 = @n1'
     print(f'{s2=}')
     s2_values = vocab.encode(s2)
-    print(f' {vocab.parse_to_tokens(s2)=}')
     print(f'{s2_values=}')
     s22 = vocab.decode(s2_values)
     print(f'{s22=}')
+
+
+if __name__ == '__main__':
+    #train()
+    test()

@@ -24,7 +24,7 @@ def dict_to_words_list(dict):
 class LinqToSqlVocab:
     def __init__(self):
         spec_marks = '<unk> <bos> <eos> <pad>'.split(' ')
-        self.symbols = symbols = '. ( ) [ ] { } + - * / % ^ , = == += -= /= *= %='.split(' ') + [' ']
+        self.symbols = '. ( ) [ ] { } + - * / % ^ , < > = <= >= != <> == && || += -= /= *= %='.split(' ') + [' ']
         linq_keywords = 'from in select new join on equals contains'.split(' ')
         tsql_keywords = 'SELECT FROM WITH NOLOCK AS JOIN LEFT RIGHT ON GROUP BY TOP DESC'.split(' ')
         spec_variables = dict_to_words_list({
@@ -39,7 +39,7 @@ class LinqToSqlVocab:
             '<identifier>': 1000
         })
         self.keywords = create_char2index_map(linq_keywords + tsql_keywords)
-        self.all_symbols = shared_symbols = sort_desc(spec_marks + symbols +
+        self.all_symbols = shared_symbols = sort_desc(spec_marks + self.symbols +
                                                       linq_keywords + tsql_keywords +
                                                       spec_variables)
         self.char2index = create_char2index_map(shared_symbols)

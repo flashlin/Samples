@@ -91,12 +91,15 @@ class StreamTokenIterator(Generic[T]):
         return self.buffer[self.idx]
 
     def next(self, n=1) -> Token:
-        node = EmptyToken
         count = 0
+        buf = []
         while count < n:
             node = self.next_token()
+            buf.append(node)
             count += 1
-        return node
+        if count == 0:
+            return EmptyToken
+        return reduce_token_list(buf[0].type, buf)
 
     def next_token(self):
         def increase_idx(ch):
