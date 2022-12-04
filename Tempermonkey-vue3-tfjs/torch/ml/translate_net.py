@@ -101,14 +101,11 @@ class TranslateCsvDataset(Dataset):
 
     def encode_text(self, text):
         buf = self.vocab.encode(text)
-        # return [self.vocab.bos_idx] + buf + [self.vocab.eos_idx]
-        return buf
+        return [self.vocab.bos_idx] + buf + [self.vocab.eos_idx]
 
     def __getitem__(self, idx):
         src = self.src[idx]
         tgt = self.tgt[idx]
-        # src = [self.vocab.bos_idx] + self.encode_text(src)
-        # tgt = self.encode_text(tgt) + [self.vocab.eos_idx]
         src = self.encode_text(src)
         tgt = self.encode_text(tgt)
         src_len = torch.tensor(len(src), dtype=torch.long)

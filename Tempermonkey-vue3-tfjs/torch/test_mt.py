@@ -8,7 +8,7 @@ from common.io import info, get_file_by_lines_iter, info_error
 from ml.attension_models import Transformer
 from ml.lit import PositionalEncoding, start_train, BaseLightning, load_model
 from ml.trans_linq2tsql import LinqToSqlVocab
-from ml.translate_net import TranslateCsvDataset
+from ml.translate_net import TranslateCsvDataset, convert_translate_file_to_csv
 
 vocab = LinqToSqlVocab()
 
@@ -16,14 +16,14 @@ vocab = LinqToSqlVocab()
 class MySeq(BaseLightning):
     def __init__(self):
         super().__init__()
-        self.model = Transformer(num_layers=2,
-                                 d_model=512,
-                                 num_heads=8,
+        self.model = Transformer(num_layers=3,
+                                 d_model=1024,
+                                 num_heads=16,
                                  dff=2048,
                                  input_vocab_size=vocab.get_size(),
                                  target_vocab_size=vocab.get_size(),
-                                 pe_input=10000,
-                                 pe_target=6000)
+                                 pe_input=500,
+                                 pe_target=500)
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
@@ -49,11 +49,13 @@ model_type = MySeq
 model_args = {
 }
 
+
 translate_csv_file_path = './output/linq_vlinq.csv'
+convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
 translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 model = start_train(model_type, model_args,
                     translate_ds,
-                    batch_size=16,
+                    batch_size=2,
                     device='cuda',
                     max_epochs=100)
 
