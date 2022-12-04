@@ -22,8 +22,8 @@ class MySeq(BaseLightning):
                                  dff=2048,
                                  input_vocab_size=vocab.get_size(),
                                  target_vocab_size=vocab.get_size(),
-                                 pe_input=1000,
-                                 pe_target=1000)
+                                 pe_input=10000,
+                                 pe_target=6000)
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
@@ -53,7 +53,7 @@ translate_csv_file_path = './output/linq_vlinq.csv'
 translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 model = start_train(model_type, model_args,
                     translate_ds,
-                    batch_size=1,
+                    batch_size=16,
                     device='cuda',
                     max_epochs=100)
 
