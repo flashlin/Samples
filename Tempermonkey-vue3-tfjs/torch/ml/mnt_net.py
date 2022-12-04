@@ -68,14 +68,14 @@ def write_train_data():
             csv.write('\n')
 
 
-def pad_data_loader(dataset, batch_size, padding_idx, **kwargs):
+def pad_data_loader(dataset, batch_size, padding_idx):
     def pad_collate(batch):
         (src, src_len, tgt, tgt_len) = zip(*batch)
         src_pad = torch.nn.utils.rnn.pad_sequence(src, batch_first=True, padding_value=padding_idx)
         tgt_pad = torch.nn.utils.rnn.pad_sequence(tgt, batch_first=True, padding_value=padding_idx)
         return src_pad, src_len, tgt_pad, tgt_len
 
-    return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, **kwargs)
+    return DataLoader(dataset=dataset, batch_size=batch_size, collate_fn=pad_collate, pin_memory=True)
 
 
 class TranslationDataset(Dataset):

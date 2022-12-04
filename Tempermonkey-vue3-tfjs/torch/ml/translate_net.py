@@ -16,11 +16,12 @@ class Seq2SeqTransformer(nn.Module):
         self.vocab_size = vocab_size
         self.padding_idx = padding_idx
         self.embedding = nn.Embedding(vocab_size, word_dim)
-        self.pos_emb = PositionalEncoding(word_dim, dropout=0.1, max_len=500)
+        self.pos_emb = PositionalEncoding(word_dim, dropout=0.1)
         self.transformer = nn.Transformer(d_model=word_dim,
                                           nhead=8,  # default:8
                                           num_encoder_layers=6,  # default:6
                                           num_decoder_layers=6,
+                                          dropout=0.1,
                                           batch_first=True)
         self.predictor = nn.Linear(word_dim, vocab_size)
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=padding_idx)
@@ -144,7 +145,7 @@ class LiTranslator(BaseLightning):
     def __init__(self, vocab):
         super().__init__()
         self.vocab = vocab
-        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'), word_dim=512)
+        self.model = Seq2SeqTransformer(vocab.get_size(), vocab.get_value('<pad>'), word_dim=128)
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
