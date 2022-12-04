@@ -2,12 +2,12 @@ import random
 
 import torch
 from torch import nn
-import torch.nn.functional as F
+from torch.autograd import Variable
+
 from common.io import info, get_file_by_lines_iter, info_error
-from ml.lit import PositionalEncoding, load_model, copy_last_ckpt, start_train, BaseLightning
-from ml.model_utils import detach_lstm_hidden_state
+from ml.lit import PositionalEncoding, start_train, BaseLightning
 from ml.trans_linq2tsql import LinqToSqlVocab
-from ml.translate_net import LiTranslator, TranslateListDataset, TranslateCsvDataset
+from ml.translate_net import TranslateCsvDataset
 
 SEQ_LEN = 5
 SRC_WORD_DIM = 3
@@ -39,10 +39,32 @@ class Encoder(nn.Module):
                             batch_first=True,
                             dropout=dropout)
 
-    def forward(self, x):
+    def init_hidden_state(self, batch_size, hidden=None):
+        device = next(self.parameters()).device
+        if hidden is None:
+            h_0 = torch.zeros(self.num_layers, batch_size, self.hidden_size)
+            c_0 = torch.zeros(self.num_layers, batch_size, self.hidden_size)
+            h_0, c_0 = Variable(h_0), Variable(c_0)
+        else:
+            h_0, c_0 = hidden
+        h_0 = h_0.to(device)
+        c_0 = c_0.to(device)
+        return h_0, c_0
+
+    def forward(self, x, hidden=None):
+        """
+        :param x: (batch, seq_len)
+        :param hidden:
+        :return:
+        """
+        batch_size, seq_len = x.size()
+        info(f" {seq_len=} {batch_size=}")
         x = self.src_embedding(x)
-        x = self.pos_emb(x)
-        output, hidden = self.lstm(x)  # h_n = (num_layers * num_directions, batch_size, hidden_size)
+        embeds = self.pos_emb(x)
+
+        hidden = self.init_hidden_state(batch_size, hidden)
+        output, hidden = self.lstm(embeds, hidden)
+        # output.view(seq_len*batch_size, -1)
         return output, hidden
 
 
@@ -67,17 +89,37 @@ class Decoder(nn.Module):
         self.classify = nn.Linear(hidden_size, tgt_vocab_size)
         self.loss_fn = nn.CrossEntropyLoss()
 
-    def forward(self, tgt, hidden):
+    def init_hidden_state(self, batch_size, hidden=None):
+        device = next(self.parameters()).device
+        if hidden is None:
+            h_0 = torch.zeros(self.num_layers, batch_size, self.hidden_size)
+            c_0 = torch.zeros(self.num_layers, batch_size, self.hidden_size)
+            h_0, c_0 = Variable(h_0), Variable(c_0)
+        else:
+            h_0, c_0 = hidden
+        h_0 = h_0.to(device)
+        c_0 = c_0.to(device)
+        return h_0, c_0
+
+    def forward(self, x, hidden):
         """
         :param trg: [batch, seq_len] 實際訓練應該為 seq_len = 1
         :param hidden: [n_layers, batch, hidden_dim]
         :return:
         """
-        tgt = self.tgt_embedding(tgt)
-        tgt = self.pos_emb(tgt)
-        outputs, hidden = self.lstm(tgt, hidden)
-        pred = self.classify(outputs)
-        # detach_lstm_hidden_state(hidden)
+        device = next(self.parameters()).device
+        batch_size, seq_len = x.size()
+
+        # x = x.unsqueeze(0)
+        x = x.to(device)
+        x = self.tgt_embedding(x)
+        embeds = self.pos_emb(x)
+
+        hidden = self.init_hidden_state(batch_size, hidden).to(device)
+
+        output, hidden = self.lstm(embeds, hidden)
+        output = output.view(batch_size * seq_len, -1)
+        pred = self.classify(output)
         return pred, hidden
 
 
@@ -112,38 +154,40 @@ class Seq2Seq(nn.Module):
                                hidden_size=hidden_size,
                                dropout=dropout)
         self.out2tag = nn.Linear(hidden_size, tgt_vocab_size)
-        self.loss_fn = nn.CrossEntropyLoss()  # ignore_index=tgt_padding_idx)
+        self.loss_fn = nn.CrossEntropyLoss(ignore_index=tgt_padding_idx)
         self.device = None
 
     def forward(self, x, y, teacher_forcing_ratio=0.5):
-        batch_size = y.size(0)
-        target_len = y.size(1)
+        batch_size, target_len = y.size()
         device = next(self.parameters()).device
-        self.device = device
 
         # tensor to store decoder outputs of each time step
-        predicts = torch.zeros(y.shape).to(device)
+        # predicts = torch.zeros(y.shape, requires_grad=False).to(device)
+        predicts = torch.zeros(batch_size, target_len, self.tgt_vocab_size)
 
         # last hidden state of the encoder is used as the initial hidden state of the decoder
         _, hidden = self.encoder(x)
 
         # first input to decoder is last coordinates of x
+        # decoder_input = F.one_hot(x[:, -1])
         decoder_input = y[:, -1]
 
         for i in range(target_len):
-            # run decode for one time step
-            outputs, hidden = self.decoder(decoder_input, hidden)
-            # last_output = outputs[:, -1, :]   # 拿最後一個結果
-            prob, pred = torch.max(outputs, dim=2, keepdim=False)
-            # place predictions in a tensor holding predictions for each time step
-            predicts[0, i] = pred
+            info(f"{i=} {predicts.shape=} {decoder_input.shape=} {hidden[0].shape=}")
+            output, hidden = self.decoder(decoder_input, hidden)
+            # info(f" {outputs.requires_grad=}")
 
+            # last_output = outputs[:, -1, :]
+            # prob, pred = torch.max(outputs, dim=2, keepdim=False)  # 找最大結果
+            pred = output
+            pred = pred.type(torch.LongTensor)
+            predicts[:, i] = pred
             # decide if we are going to use teacher forcing or not
             teacher_forcing = random.random() < teacher_forcing_ratio
 
             # output is the same shape as input, [batch_size, feature size]
-            decoder_input = y[:, i] if teacher_forcing else pred
-            # decoder_input = pred
+            # decoder_input = y[:, i] if teacher_forcing else pred
+            decoder_input = pred
 
         return predicts
 
@@ -174,33 +218,36 @@ class Seq2Seq(nn.Module):
     def calculate_loss(self, x_hat, y):
         # x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
         # y = y.contiguous().view(-1)
-        y = y.type(torch.FloatTensor).to(self.device)
-        return self.loss_fn(x_hat, y)
+        device = next(self.parameters()).device
+        x_hat = x_hat.permute(0, 2, 1).to(device)
+        return self.loss_fn(x_hat, y)  # (batch, classes, seq_len) (batch, classes)
 
 
 vocab = LinqToSqlVocab()
 
-model = Seq2Seq(seq_len=SEQ_LEN,
-                src_pos_dim=POS_DIM,
-                max_sentence_len=MAX_SENTENCE_LEN,
-                src_vocab_size=vocab.get_size(),
-                src_word_dim=SRC_WORD_DIM,
-                src_padding_idx=vocab.padding_idx,
-                tgt_vocab_size=vocab.get_size(),
-                tgt_word_dim=TGT_WORD_DIM,
-                tgt_padding_idx=vocab.padding_idx,
-                )
 
-inp1_values = vocab.encode('from tb1 in p select tb1.name')
-inp2_values = vocab.encode('@tb_as1 in @tb1 select @tb1.@fd1')
+def test1():
+    model = Seq2Seq(seq_len=SEQ_LEN,
+                    src_pos_dim=POS_DIM,
+                    max_sentence_len=MAX_SENTENCE_LEN,
+                    src_vocab_size=vocab.get_size(),
+                    src_word_dim=SRC_WORD_DIM,
+                    src_padding_idx=vocab.padding_idx,
+                    tgt_vocab_size=vocab.get_size(),
+                    tgt_word_dim=TGT_WORD_DIM,
+                    tgt_padding_idx=vocab.padding_idx,
+                    )
 
-inp1_values = torch.tensor([inp1_values], dtype=torch.long)
-inp2_values = torch.tensor([inp2_values], dtype=torch.long)
-predictive = model(inp1_values, inp2_values)
-print(f"{predictive=}")
+    inp1_values = vocab.encode('from tb1 in p select tb1.name')
+    inp2_values = vocab.encode('@tb_as1 in @tb1 select @tb1.@fd1')
 
-loss = model.calculate_loss(predictive, inp2_values)
-print(f" {loss=}")
+    inp1_values = torch.tensor([inp1_values], dtype=torch.long)
+    inp2_values = torch.tensor([inp2_values], dtype=torch.long)
+    predictive = model(inp1_values, inp2_values)
+    print(f"{predictive=}")
+
+    loss = model.calculate_loss(predictive, inp2_values)
+    print(f" {loss=}")
 
 
 class MySeq(BaseLightning):
@@ -254,3 +301,5 @@ for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
     else:
         print(f'"{linq_code}"')
     print("\n")
+
+
