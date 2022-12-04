@@ -53,7 +53,7 @@ translate_csv_file_path = './output/linq_vlinq.csv'
 translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 model = start_train(model_type, model_args,
                     translate_ds,
-                    batch_size=5,
+                    batch_size=1,
                     device='cuda',
                     max_epochs=100)
 

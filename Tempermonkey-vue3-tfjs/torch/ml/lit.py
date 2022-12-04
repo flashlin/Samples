@@ -217,7 +217,8 @@ class BaseLightning(pl.LightningModule):
     def configure_optimizers(self):
         # optimizer = optim.Adam(self.model.parameters(), lr=0.0005)
         # optimizer = optim.Adam(self.parameters(), lr=0.0005)
-        optimizer = optim.AdamW(self.parameters())
+        # optimizer = optim.AdamW(self.parameters())
+        optimizer = optim.Adam(self.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9)
         # We don't return the lr scheduler because we need to apply it per iteration, not per epoch
         self.lr_scheduler = CosineWarmupScheduler(
             optimizer, warmup=50, max_iters=80
