@@ -2,12 +2,15 @@ import numpy as np
 import torch
 from torch import nn
 
+from common.io import info
+
 
 # 计算角度：pos * 1/(10000^(2i/d))
 def get_angles(pos, i, d_model):
     # 2*(i//2)保证了2i，这部分计算的是1/10000^(2i/d)
     angle_rates = 1 / np.power(10000, 2 * (i // 2) / np.float32(d_model))  # => [1, 512]
     return pos * angle_rates  # [50,1]*[1,512]=>[50, 512]
+
 
 # np.arange()函数返回一个有终点和起点的固定步长的排列，如[1,2,3,4,5]，起点是1，终点是5，步长为1
 # 注意：起点终点是左开右闭区间，即start=1,end=6，才会产生[1,2,3,4,5]
@@ -292,19 +295,66 @@ class Decoder(torch.nn.Module):
         #  '..block2': [b, num_heads, targ_seq_len, inp_seq_len], ...}
 
 
+def create_padding_mask(seq, padding_idx):
+    """
+    :param seq: [b, seq_len]
+    :param padding_idx: 0 or other
+    :return:
+    """
+    if padding_idx == 0:  # 重要
+        seq = torch.eq(seq, torch.tensor(0)).float()
+    else:
+        seq = torch.eq(seq, torch.tensor(padding_idx)).float()
+    return seq[:, np.newaxis, np.newaxis, :]  # =>[b, 1, 1, seq_len]
+
+
+def create_look_ahead_mask(seq_len):
+    """
+torch.triu(tensor, diagonal=0) 求上三角矩阵，diagonal默认为0表示主对角线的上三角矩阵
+diagonal>0，则主对角上面的第|diagonal|条次对角线的上三角矩阵
+diagonal<0，则主对角下面的第|diagonal|条次对角线的上三角矩阵
+    :param seq_len:
+    :return:
+    """
+    mask = torch.triu(torch.ones((seq_len, seq_len)), diagonal=1)
+    # mask = mask.device() #
+    return mask  # [seq_len, seq_len]
+
+
+# inp [b, inp_seq_len] 序列已经加入pad填充
+# targ [b, targ_seq_len] 序列已经加入pad填充
+def create_mask(inp, targ, padding_idx):
+    # encoder padding mask
+    enc_padding_mask = create_padding_mask(inp, padding_idx)  # =>[b,1,1,inp_seq_len] mask=1的位置为pad
+
+    # decoder's first attention block(self-attention)
+    # 使用的padding create_mask & look-ahead create_mask
+    look_ahead_mask = create_look_ahead_mask(targ.shape[-1])  # =>[targ_seq_len,targ_seq_len] ##################
+    dec_targ_padding_mask = create_padding_mask(targ, padding_idx)  # =>[b,1,1,targ_seq_len]
+    combined_mask = torch.max(look_ahead_mask, dec_targ_padding_mask)  # 结合了2种mask =>[b,1,targ_seq_len,targ_seq_len]
+
+    # decoder's second attention block(encoder-decoder attention) 使用的padding create_mask
+    # 【注意】：这里的mask是用于遮挡encoder output的填充pad，而encoder的输出与其输入shape都是[b,inp_seq_len,d_model]
+    # 所以这里mask的长度是inp_seq_len而不是targ_mask_len
+    dec_padding_mask = create_padding_mask(inp, padding_idx)  # =>[b,1,1,inp_seq_len] mask=1的位置为pad
+
+    return enc_padding_mask, combined_mask, dec_padding_mask
+    # [b,1,1,inp_seq_len], [b,1,targ_seq_len,targ_seq_len], [b,1,1,inp_seq_len]
+
+
 class Transformer(torch.nn.Module):
     def __init__(self,
                  num_layers,  # N个encoder layer
                  d_model,
                  num_heads,
                  dff,  # 点式前馈网络内层fn的维度
-                 input_vocab_size,  # input此表大小（源语言（法语））
-                 target_vocab_size,  # target词表大小（目标语言（英语））
+                 input_vocab_size,  # input 詞表大小
+                 target_vocab_size,  # target 詞表大小
                  pe_input,  # input max_pos_encoding
                  pe_target,  # input max_pos_encoding
                  rate=0.1):
         super(Transformer, self).__init__()
-
+        self.padding_idx = 0
         self.encoder = Encoder(num_layers,
                                d_model,
                                num_heads,
@@ -320,6 +370,7 @@ class Transformer(torch.nn.Module):
                                pe_target,
                                rate)
         self.final_layer = torch.nn.Linear(d_model, target_vocab_size)
+        self.loss_fn = nn.CrossEntropyLoss()
 
     # inp [b, inp_seq_len]
     # targ [b, targ_seq_len]
@@ -339,6 +390,65 @@ class Transformer(torch.nn.Module):
         # [b, targ_seq_len, target_vocab_size]
         # {'..block1': [b, num_heads, targ_seq_len, targ_seq_len],
         #  '..block2': [b, num_heads, targ_seq_len, inp_seq_len], ...}
+
+    def calculate_loss(self, x_hat, y):
+        # x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
+        # y = y.contiguous().view(-1)
+        # device = next(self.parameters()).device
+        # x_hat = x_hat.permute(0, 2, 1).to(device)
+        pad = 0
+        x_hat = x_hat.transpose(-1, -2)
+        loss = self.loss_fn(x_hat, y)
+        # mask = torch.logical_not(y.eq(pad)).type(loss.dtype)
+        # info(f" {mask.shape=}")
+        # loss *= mask
+        # return loss.sum() / mask.sum().item()
+        return loss
+
+    def infer(self, vocab, inp_sentence, max_length=None):
+        device = next(self.parameters()).device
+        inp_sentence_ids = vocab.encode(inp_sentence)
+        encoder_input = torch.tensor(inp_sentence_ids).unsqueeze(dim=0)  # =>[b=1, inp_seq_len]
+
+        decoder_input = [vocab.bos_idx]
+        decoder_input = torch.tensor(decoder_input).unsqueeze(0)  # =>[b=1,seq_len=1]
+
+        max_length = (len(inp_sentence_ids) + 2) if max_length is None else max_length
+        with torch.no_grad():
+            for i in range(max_length):
+                enc_padding_mask, combined_mask, dec_padding_mask = create_mask(encoder_input.cpu(),
+                                                                                decoder_input.cpu(),
+                                                                                padding_idx=self.padding_idx)
+                # [b,1,1,inp_seq_len], [b,1,targ_seq_len,inp_seq_len], [b,1,1,inp_seq_len]
+
+                encoder_input = encoder_input.to(device)
+                decoder_input = decoder_input.to(device)
+                enc_padding_mask = enc_padding_mask.to(device)
+                combined_mask = combined_mask.to(device)
+                dec_padding_mask = dec_padding_mask.to(device)
+
+                # forward
+                predictions, attention_weights = self(encoder_input,
+                                                      decoder_input,
+                                                      enc_padding_mask,
+                                                      combined_mask,
+                                                      dec_padding_mask)
+                # [b=1, targ_seq_len, target_vocab_size]
+                # {'..block1': [b, num_heads, targ_seq_len, targ_seq_len],
+                #  '..block2': [b, num_heads, targ_seq_len, inp_seq_len], ...}
+
+                # 看最後一個詞並計算它的 argmax
+                prediction = predictions[:, -1:, :]  # =>[b=1, 1, target_vocab_size]
+                prediction_id = torch.argmax(prediction, dim=-1)  # => [b=1, 1]
+                # print('prediction_id:', prediction_id, prediction_id.dtype) # torch.int64
+                if prediction_id.squeeze().item() == vocab.eos_idx:
+                    return decoder_input.squeeze(dim=0), attention_weights
+
+                # 連接decoder_input
+                decoder_input = torch.cat([decoder_input, prediction_id],
+                                          dim=-1)  # [b=1,targ_seq_len=1]=>[b=1,targ_seq_len=2]
+
+        return decoder_input.squeeze(dim=0), attention_weights
 
 
 if __name__ == '__main__':
