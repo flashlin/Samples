@@ -323,15 +323,16 @@ diagonal<0，则主对角下面的第|diagonal|条次对角线的上三角矩阵
 
 # inp [b, inp_seq_len] 序列已经加入pad填充
 # targ [b, targ_seq_len] 序列已经加入pad填充
-def create_mask(inp, targ, padding_idx):
+def create_mask(inp, targ, padding_idx, device):
     # encoder padding mask
     enc_padding_mask = create_padding_mask(inp, padding_idx)  # =>[b,1,1,inp_seq_len] mask=1的位置为pad
 
     # decoder's first attention block(self-attention)
     # 使用的padding create_mask & look-ahead create_mask
     look_ahead_mask = create_look_ahead_mask(targ.shape[-1])  # =>[targ_seq_len,targ_seq_len] ##################
+    look_ahead_mask = look_ahead_mask.to(device)
     dec_targ_padding_mask = create_padding_mask(targ, padding_idx)  # =>[b,1,1,targ_seq_len]
-    combined_mask = torch.max(look_ahead_mask, dec_targ_padding_mask)  # 结合了2种mask =>[b,1,targ_seq_len,targ_seq_len]
+    combined_mask = torch.max(look_ahead_mask, dec_targ_padding_mask)  # 結合了2 種mask => [b,1,targ_seq_len,targ_seq_len]
 
     # decoder's second attention block(encoder-decoder attention) 使用的padding create_mask
     # 【注意】：这里的mask是用于遮挡encoder output的填充pad，而encoder的输出与其输入shape都是[b,inp_seq_len,d_model]
@@ -391,6 +392,36 @@ class Transformer(torch.nn.Module):
         # {'..block1': [b, num_heads, targ_seq_len, targ_seq_len],
         #  '..block2': [b, num_heads, targ_seq_len, inp_seq_len], ...}
 
+    def train_step(self, inp, targ):
+        device = next(self.parameters()).device
+        # 目标（target）被分成了 tar_inp 和 tar_real
+        # tar_inp 作为输入传递到解码器。
+        # tar_real 是位移了 1 的同一个输入：在 tar_inp 中的每个位置，tar_real 包含了应该被预测到的下一个标记（token）。
+        inp = inp.to(device)
+        targ = targ.to(device)
+        targ_inp = targ[:, :-1]
+        targ_real = targ[:, 1:]
+
+        enc_padding_mask, combined_mask, dec_padding_mask = create_mask(inp, targ_inp, self.padding_idx, device)
+
+        inp = inp.to(device)
+        targ_inp = targ_inp.to(device)
+        targ_real = targ_real.to(device)
+        enc_padding_mask = enc_padding_mask.to(device)
+        combined_mask = combined_mask.to(device)
+        dec_padding_mask = dec_padding_mask.to(device)
+        # print('device:', inp.device, targ_inp)
+
+        # forward
+        prediction, _ = self(inp, targ_inp, enc_padding_mask, combined_mask, dec_padding_mask)
+        # [b, targ_seq_len, target_vocab_size]
+        # {'..block1': [b, num_heads, targ_seq_len, targ_seq_len],
+        #  '..block2': [b, num_heads, targ_seq_len, inp_seq_len], ...}
+
+        #loss = mask_loss_func(targ_real, prediction)
+        #metric = mask_accuracy_func(targ_real, prediction)
+        return prediction, targ_real
+
     def calculate_loss(self, x_hat, y):
         # x_hat = x_hat.contiguous().view(-1, x_hat.size(-1))
         # y = y.contiguous().view(-1)
@@ -418,7 +449,8 @@ class Transformer(torch.nn.Module):
             for i in range(max_length):
                 enc_padding_mask, combined_mask, dec_padding_mask = create_mask(encoder_input.cpu(),
                                                                                 decoder_input.cpu(),
-                                                                                padding_idx=self.padding_idx)
+                                                                                padding_idx=self.padding_idx,
+                                                                                device=device)
                 # [b,1,1,inp_seq_len], [b,1,targ_seq_len,inp_seq_len], [b,1,1,inp_seq_len]
 
                 encoder_input = encoder_input.to(device)
@@ -442,13 +474,15 @@ class Transformer(torch.nn.Module):
                 prediction_id = torch.argmax(prediction, dim=-1)  # => [b=1, 1]
                 # print('prediction_id:', prediction_id, prediction_id.dtype) # torch.int64
                 if prediction_id.squeeze().item() == vocab.eos_idx:
-                    return decoder_input.squeeze(dim=0), attention_weights
+                    # return decoder_input.squeeze(dim=0), attention_weights
+                    break
 
                 # 連接decoder_input
                 decoder_input = torch.cat([decoder_input, prediction_id],
                                           dim=-1)  # [b=1,targ_seq_len=1]=>[b=1,targ_seq_len=2]
 
-        return decoder_input.squeeze(dim=0), attention_weights
+        # return decoder_input.squeeze(dim=0), attention_weights
+        return decoder_input.squeeze(dim=0)
 
 
 if __name__ == '__main__':
