@@ -27,8 +27,10 @@ class MySeq(BaseLightning):
 
     def forward(self, batch):
         src, src_len, tgt, tgt_len = batch
-        x_hat, _ = self.model(src, tgt, None, None, None)
-        return x_hat, tgt
+
+        # x_hat, _ = self.model(src, tgt, None, None, None)
+        x_hat, tgt_real = self.model.train_step(src, tgt)
+        return x_hat, tgt_real
 
     def _calculate_loss(self, data, mode="train"):
         (x_hat, y), batch = data
@@ -38,7 +40,9 @@ class MySeq(BaseLightning):
 
     def infer(self, text):
         self.model.eval()
-        self.model.infer(vocab, text)
+        values = self.model.infer(vocab, text)
+        values = values.tolist()
+        return vocab.decode(values)
 
 
 model_type = MySeq
@@ -49,7 +53,7 @@ translate_csv_file_path = './output/linq_vlinq.csv'
 translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
 model = start_train(model_type, model_args,
                     translate_ds,
-                    batch_size=1,
+                    batch_size=5,
                     device='cuda',
                     max_epochs=100)
 
