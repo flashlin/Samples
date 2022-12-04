@@ -23,7 +23,7 @@ def dict_to_words_list(dict):
 
 class LinqToSqlVocab:
     def __init__(self):
-        spec_marks = '<unk> <bos> <eos> <pad>'.split(' ')
+        spec_marks = '<pad> <bos> <eos> <unk>'.split(' ')
         self.symbols = '. ( ) [ ] { } + - * / % ^ , < > = <= >= != <> == && || += -= /= *= %='.split(' ') + [' ']
         linq_keywords = 'from in select new join on equals contains'.split(' ')
         tsql_keywords = 'SELECT FROM WITH NOLOCK AS JOIN LEFT RIGHT ON GROUP BY TOP DESC'.split(' ')
@@ -39,9 +39,8 @@ class LinqToSqlVocab:
             '<identifier>': 1000
         })
         self.keywords = create_char2index_map(linq_keywords + tsql_keywords)
-        self.all_symbols = shared_symbols = sort_desc(spec_marks + self.symbols +
-                                                      linq_keywords + tsql_keywords +
-                                                      spec_variables)
+        self.all_symbols = shared_symbols = spec_marks + sort_desc(self.symbols +
+                                                                   linq_keywords + tsql_keywords + spec_variables)
         self.char2index = create_char2index_map(shared_symbols)
         self.index2char = create_index2char_map(shared_symbols)
         self.padding_idx = self.get_value('<pad>')
