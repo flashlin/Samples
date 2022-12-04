@@ -53,14 +53,14 @@ def train():
         'vocab': vocab
     }
 
-    translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
-    model = start_train(model_type, model_args,
-                        translate_ds,
-                        batch_size=16,
-                        device='cuda',
-                        max_epochs=300)
+    # translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
+    # model = start_train(model_type, model_args,
+    #                     translate_ds,
+    #                     batch_size=1,
+    #                     device='cuda',
+    #                     max_epochs=300)
 
-    # model = load_model(model_type, model_args)
+    model = load_model(model_type, model_args)
 
     for src, tgt in get_file_by_lines_iter('./train_data/linq_vlinq_test.txt', 2):
         src = src.rstrip()
