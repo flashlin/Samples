@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch import nn as nn, optim as optim
 from sklearn.metrics import accuracy_score
-from common.io import info, get_directory_list_by_pattern, get_file_list_by_pattern, info_error
+from common.io import info, get_directory_list_by_pattern, get_file_list_by_pattern, info_error, is_file_exists
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
 
 
@@ -291,15 +291,19 @@ def start_train(model_type,
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     root_dir = os.path.join(checkpoint_path, model_name)
     os.makedirs(root_dir, exist_ok=True)
+    last_checkpoint_file_path = f'./output/{model_name}.ckpt'
+    if not is_file_exists(last_checkpoint_file_path):
+        last_checkpoint_file_path = None
     trainer = pl.Trainer(
         default_root_dir=root_dir,
         # callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
         callbacks=[ModelCheckpoint(filename="{epoch}-{train_loss:.5f}",
-                                   save_weights_only=True, mode="min", monitor="train_loss")],
+                                   save_weights_only=False, mode="min", monitor="train_loss")],
         # gpus=1 if str(device).startswith("cuda") else 0,
         accelerator='gpu', devices=1,
         max_epochs=max_epochs,
-        gradient_clip_val=5,
+        gradient_clip_val=10,
+        resume_from_checkpoint=last_checkpoint_file_path
     )
     trainer.logger._default_hp_metric = None  # Optional logging argument that we don't need
 

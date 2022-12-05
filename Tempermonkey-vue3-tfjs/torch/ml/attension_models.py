@@ -332,6 +332,7 @@ def create_mask(inp, targ, padding_idx, device):
     look_ahead_mask = create_look_ahead_mask(targ.shape[-1])  # =>[targ_seq_len,targ_seq_len] ##################
     look_ahead_mask = look_ahead_mask.to(device)
     dec_targ_padding_mask = create_padding_mask(targ, padding_idx)  # =>[b,1,1,targ_seq_len]
+    dec_targ_padding_mask = dec_targ_padding_mask.to(device)
     combined_mask = torch.max(look_ahead_mask, dec_targ_padding_mask)  # 結合了2 種mask => [b,1,targ_seq_len,targ_seq_len]
 
     # decoder's second attention block(encoder-decoder attention) 使用的padding create_mask
@@ -447,8 +448,8 @@ class Transformer(torch.nn.Module):
         max_length = (len(inp_sentence_ids) + 2) if max_length is None else max_length
         with torch.no_grad():
             for i in range(max_length):
-                enc_padding_mask, combined_mask, dec_padding_mask = create_mask(encoder_input.cpu(),
-                                                                                decoder_input.cpu(),
+                enc_padding_mask, combined_mask, dec_padding_mask = create_mask(encoder_input,
+                                                                                decoder_input,
                                                                                 padding_idx=self.padding_idx,
                                                                                 device=device)
                 # [b,1,1,inp_seq_len], [b,1,targ_seq_len,inp_seq_len], [b,1,1,inp_seq_len]
