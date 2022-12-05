@@ -210,6 +210,9 @@ class BaseLightning(pl.LightningModule):
         self.val_loader = None
         self.test_loader = None
 
+    def get_device(self):
+        return next(self.parameters()).device
+
     def forward(self, batch):
         output = self.model(batch)
         return output
@@ -231,18 +234,18 @@ class BaseLightning(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         outputs = self(batch)
-        loss = self._calculate_loss((outputs, batch_idx), mode="train")
+        loss = self._calculate_loss(outputs, batch_idx, mode="train")
         return loss
 
     def validation_step(self, batch, batch_idx, **kwargs):
         outputs = self(batch)
-        _ = self._calculate_loss((outputs, batch_idx), mode="val")
+        _ = self._calculate_loss(outputs, batch_idx, mode="val")
 
     def test_step(self, batch, batch_idx):
         outputs = self(batch)
-        _ = self._calculate_loss((outputs, batch_idx), mode="test")
+        _ = self._calculate_loss(outputs, batch_idx, mode="test")
 
-    def _calculate_loss(self, batch, mode="train"):
+    def _calculate_loss(self, batch, batch_idx, mode="train"):
         loss = self.criterion(batch)
         self.log("%s_loss" % mode, loss)
         return loss
@@ -298,12 +301,12 @@ def start_train(model_type,
         default_root_dir=root_dir,
         # callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
         callbacks=[ModelCheckpoint(filename="{epoch}-{train_loss:.5f}",
-                                   save_weights_only=False, mode="min", monitor="train_loss")],
+                                   save_weights_only=True, mode="min", monitor="train_loss")],
         # gpus=1 if str(device).startswith("cuda") else 0,
         accelerator='gpu', devices=1,
         max_epochs=max_epochs,
         gradient_clip_val=10,
-        resume_from_checkpoint=last_checkpoint_file_path
+        resume_from_checkpoint=None
     )
     trainer.logger._default_hp_metric = None  # Optional logging argument that we don't need
 
