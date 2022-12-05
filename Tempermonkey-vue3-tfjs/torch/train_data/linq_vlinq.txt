@@ -68,3 +68,7 @@ from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb2
 from @tb_as1 in @tb1 from @tb_as2 in @tb2 from @tb_as3 in @tb3 select @tb2
 from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb3
 from @tb_as1 in @tb1 from @tb_as2 in @tb2 from @tb_as3 in @tb3 select @tb3
+tb1.name, tb1.name2, tb1.name3
+@tb1.@fd1, @tb1.@fd2, @tb1.@fd3
+tb1.name, tb2.name2, tb3.name3
+@tb1.@fd1, @tb2.@fd2, @tb3.@fd3
