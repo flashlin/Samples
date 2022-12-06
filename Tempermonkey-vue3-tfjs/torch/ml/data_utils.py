@@ -1,6 +1,16 @@
 import os
 
+import numpy as np
 from torch.utils.data import Dataset, random_split, DataLoader
+
+
+def pad_list(a_list, max_length):
+    a_list_length = len(a_list)
+    if a_list_length > max_length:
+        return a_list[:max_length]
+    result = np.zeros(max_length)
+    result[0: a_list_length] = a_list
+    return list(result)
 
 
 def get_data_file_path(file_name):

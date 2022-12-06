@@ -4,6 +4,7 @@ from torch.utils.data import Dataset, random_split
 import pandas as pd
 
 from common.io import info
+from ml.data_utils import pad_list
 from ml.lit import BaseLightning, PositionalEncoding
 from ml.mnt_net import pad_data_loader
 from ml.model_utils import reduce_dim
@@ -104,12 +105,15 @@ class TranslateCsvDataset(Dataset):
         return [self.vocab.bos_idx] + buf + [self.vocab.eos_idx]
 
     def __getitem__(self, idx):
-        src = self.src[idx]
-        tgt = self.tgt[idx]
-        src = self.encode_text(src)
-        tgt = self.encode_text(tgt)
-        src_len = torch.tensor(len(src), dtype=torch.long)
-        tgt_len = torch.tensor(len(tgt), dtype=torch.long)
+        max_length = 300
+        src = self.encode_text(self.src[idx])
+        tgt = self.encode_text(self.tgt[idx])
+        src_len = len(src)
+        tgt_len = len(tgt)
+        src_len = torch.tensor(src_len, dtype=torch.long)
+        tgt_len = torch.tensor(tgt_len, dtype=torch.long)
+        src = pad_list(src, max_length)
+        tgt = pad_list(tgt, max_length)
         src = torch.tensor(src, dtype=torch.long)
         tgt = torch.tensor(tgt, dtype=torch.long)
         return src, src_len, tgt, tgt_len

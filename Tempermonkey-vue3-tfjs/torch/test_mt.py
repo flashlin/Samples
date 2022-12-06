@@ -6,7 +6,9 @@ from torch.autograd import Variable
 
 from common.io import info, get_file_by_lines_iter, info_error
 from ml.attension_models import Transformer
-from ml.seq_to_classification_net import SeqToOneClassificationLstm, pre
+from ml.seq2seq_net import LiSeq2Seq
+from ml.seq2seq_net2 import Seq2SeqNet
+from ml.seq_to_classification_net import SeqToOneClassificationLstm
 from ml.lit import PositionalEncoding, start_train, BaseLightning, load_model
 from ml.trans_linq2tsql import LinqToSqlVocab
 from ml.translate_net import TranslateCsvDataset, convert_translate_file_to_csv
@@ -57,15 +59,26 @@ def train():
         "padding_idx": vocab.padding_idx,
     }
 
+    # model_type = LiSeq2Seq
+    # model_args = {
+    #     "src_vocab_size": vocab.get_size(),
+    #     "tgt_vocab_size": vocab.get_size(),
+    #     "padding_idx": vocab.padding_idx,
+    # }
+
+    model_type = Seq2SeqNet
+    model_args = {
+        "vocab": vocab,
+    }
 
     translate_csv_file_path = './output/linq_vlinq.csv'
     convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
     translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
-    model = start_train(model_type, model_args,
-                        translate_ds,
-                        batch_size=1,  #32,
-                        device='cuda',
-                        max_epochs=1000)
+    start_train(model_type, model_args,
+                translate_ds,
+                batch_size=1,  # 32,
+                device='cuda',
+                max_epochs=100)
 
     model = load_model(model_type, model_args)
 
@@ -85,4 +98,4 @@ def train():
 
 
 if __name__ == '__main__':
-    pre()
+    train()
