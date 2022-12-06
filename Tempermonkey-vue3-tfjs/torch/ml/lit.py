@@ -234,20 +234,22 @@ class BaseLightning(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         outputs = self(batch)
-        loss = self._calculate_loss(outputs, batch_idx, mode="train")
+        loss = self._calculate_loss(outputs, batch_idx)
+        self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx, **kwargs):
         outputs = self(batch)
-        _ = self._calculate_loss(outputs, batch_idx, mode="val")
+        loss = self._calculate_loss(outputs, batch_idx)
+        self.log("val_loss", loss)
 
     def test_step(self, batch, batch_idx):
         outputs = self(batch)
-        _ = self._calculate_loss(outputs, batch_idx, mode="test")
+        loss = self._calculate_loss(outputs, batch_idx)
+        self.log("test_loss", loss)
 
-    def _calculate_loss(self, batch, batch_idx, mode="train"):
+    def _calculate_loss(self, batch, batch_idx):
         loss = self.criterion(batch)
-        self.log("%s_loss" % mode, loss)
         return loss
 
     def train_dataloader(self):
