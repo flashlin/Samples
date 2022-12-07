@@ -204,7 +204,7 @@ class Decoder(nn.Module):
         embedded = self.embedding(x)
         sequence_length = encoder_output.shape[1]
 
-        assert sequence_length == 1, f"{sequence_length=} is not correct."
+        # assert sequence_length == 1, f"{sequence_length=} is not correct."
         assert hidden.shape == (1, 1, 512), f"{hidden.shape=} is not correct."
         # h_reshaped = hidden.repeat(sequence_length, 1, 1) #.permute(1, 0, 2)
         h_reshaped = hidden.repeat(1, sequence_length, 1)
@@ -216,10 +216,8 @@ class Decoder(nn.Module):
         attention = self.softmax(energy)
         context_vector = torch.einsum("snk,snl->knl", attention, encoder_output)
 
-        # context_vector=([1, 1, 1024])  embedded=([1, 1, 256])
-        # context_vector=([1, 13, 1024]) embedded([1, 1, 256])
         # info(f" {context_vector.shape=} {embedded.shape=}")
-        assert context_vector.shape == (1, 1, 1024), f"{context_vector.shape=} is not correct."
+        # assert context_vector.shape == (1, 1, 1024), f"{context_vector.shape=} is not correct."
         rnn_input = torch.cat((context_vector, embedded), dim=2)
 
         outputs, (hidden_states, cell) = self.rnn(rnn_input, hidden_states)
