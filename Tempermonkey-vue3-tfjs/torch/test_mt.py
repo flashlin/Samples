@@ -78,7 +78,7 @@ def train():
                 translate_ds,
                 batch_size=1,  # 32,
                 device='cuda',
-                max_epochs=100)
+                max_epochs=10)
 
     model = load_model(model_type, model_args)
 
@@ -98,4 +98,5 @@ def train():
 
 
 if __name__ == '__main__':
+    info(f" {vocab.get_size()}")
     train()
