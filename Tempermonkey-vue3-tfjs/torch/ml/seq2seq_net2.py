@@ -60,6 +60,35 @@ class Seq2Seq(nn.Module):
         # outputs = outputs #.clone().detach()
         return outputs
 
+    def infer(self, text_to_indices, max_length):
+        device = next(self.parameters()).device
+        input_length = len(text_to_indices)
+        sentence_tensor = torch.LongTensor(text_to_indices).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+            for t in range(input_length):
+                encoder_output, hidden_states = self.encoder(sentence_tensor[0, t])
+
+        vocab = self.vocab
+        outputs = [vocab.get_value('<bos>')]
+        for _ in range(max_length):
+            previous_word = torch.LongTensor([outputs[-1]]).to(device)
+
+            with torch.no_grad():
+                output, hidden_states = self.decoder(
+                    previous_word, encoder_output, hidden_states
+                )
+                best_guess = output.argmax(1).item()
+
+            outputs.append(best_guess)
+
+            # Model predicts it's the end of the sentence
+            if output.argmax(1).item() == vocab.get_value('<eos>'):
+                break
+
+        translated_sentence = vocab.decode(outputs)
+        return translated_sentence
+
 
 class BiLSTM(nn.Module):
     def __init__(self, n_class, n_hidden):
@@ -175,17 +204,22 @@ class Decoder(nn.Module):
         embedded = self.embedding(x)
         sequence_length = encoder_output.shape[1]
 
-        # info(f" {hidden.shape=} {sequence_length=}")
+        assert sequence_length == 1, f"{sequence_length=} is not correct."
+        assert hidden.shape == (1, 1, 512), f"{hidden.shape=} is not correct."
         # h_reshaped = hidden.repeat(sequence_length, 1, 1) #.permute(1, 0, 2)
-        h_reshaped = hidden.repeat(1, sequence_length, 1) #.permute(1, 0, 2)
+        h_reshaped = hidden.repeat(1, sequence_length, 1)
 
-        # info(f" {h_reshaped.shape=} {encoder_output.shape=}")
+        # info(f" cat {h_reshaped.shape=} {encoder_output.shape=}")
         energy = torch.cat((h_reshaped, encoder_output), dim=2)
         energy = self.relu(self.energy(energy))
 
         attention = self.softmax(energy)
         context_vector = torch.einsum("snk,snl->knl", attention, encoder_output)
 
+        # context_vector=([1, 1, 1024])  embedded=([1, 1, 256])
+        # context_vector=([1, 13, 1024]) embedded([1, 1, 256])
+        # info(f" {context_vector.shape=} {embedded.shape=}")
+        assert context_vector.shape == (1, 1, 1024), f"{context_vector.shape=} is not correct."
         rnn_input = torch.cat((context_vector, embedded), dim=2)
 
         outputs, (hidden_states, cell) = self.rnn(rnn_input, hidden_states)
@@ -200,6 +234,7 @@ class Decoder(nn.Module):
 class Seq2SeqNet(BaseLightning):
     def __init__(self, vocab):
         super().__init__()
+        self.vocab = vocab
         hidden_dim = 512
         embbed_dim = 256
         n_layers = 1
@@ -220,3 +255,7 @@ class Seq2SeqNet(BaseLightning):
         y = y.view(-1)
 
         return self.loss_fn(x_hat, y)
+
+    def infer(self, text):
+        text_to_indices = self.vocab.encode(text)
+        return self.model.infer(text_to_indices, len(text))
