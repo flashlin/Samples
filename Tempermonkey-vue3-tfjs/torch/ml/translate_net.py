@@ -112,8 +112,8 @@ class TranslateCsvDataset(Dataset):
         tgt_len = len(tgt)
         src_len = torch.tensor(src_len, dtype=torch.long)
         tgt_len = torch.tensor(tgt_len, dtype=torch.long)
-        src = pad_list(src, max_length)
-        tgt = pad_list(tgt, max_length)
+        # src = pad_list(src, max_length)
+        # tgt = pad_list(tgt, max_length)
         src = torch.tensor(src, dtype=torch.long)
         tgt = torch.tensor(tgt, dtype=torch.long)
         return src, src_len, tgt, tgt_len

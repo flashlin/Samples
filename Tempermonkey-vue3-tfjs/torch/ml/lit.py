@@ -297,10 +297,12 @@ def start_train(model_type,
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     root_dir = os.path.join(checkpoint_path, model_name)
     os.makedirs(root_dir, exist_ok=True)
-    last_checkpoint_file_path = f'./output/{model_name}.ckpt'
+    # last_checkpoint_file_path = f'./output/{model_name}.ckpt'
+    last_checkpoint_file_path = get_last_train_ckpt_file(f'./output/{model_name}')
     if not is_file_exists(last_checkpoint_file_path):
         last_checkpoint_file_path = None
     last_checkpoint_file_path = None if resume_train is False else last_checkpoint_file_path
+    info(f" {last_checkpoint_file_path=}")
     save_weights_only = True if resume_train is False else False
     trainer = pl.Trainer(
         default_root_dir=root_dir,
