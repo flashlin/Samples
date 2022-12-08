@@ -81,12 +81,12 @@ def train():
     translate_csv_file_path = './output/linq_vlinq.csv'
     convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
     translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
-    # start_train(model_type, model_args,
-    #             translate_ds,
-    #             batch_size=1,  # 32,
-    #             resume_train=True,
-    #             device='cuda',
-    #             max_epochs=50)
+    start_train(model_type, model_args,
+                translate_ds,
+                batch_size=2,  # 32,
+                resume_train=True,
+                device='cuda',
+                max_epochs=100)
 
     model = load_model(model_type, model_args)
 
