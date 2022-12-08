@@ -287,6 +287,7 @@ def start_train(model_type,
                 dataset,
                 batch_size=1,
                 max_epochs=10,
+                resume_train=False,
                 checkpoint_path="./output",
                 model_name=None,
                 device=None,
@@ -299,16 +300,18 @@ def start_train(model_type,
     last_checkpoint_file_path = f'./output/{model_name}.ckpt'
     if not is_file_exists(last_checkpoint_file_path):
         last_checkpoint_file_path = None
+    last_checkpoint_file_path = None if resume_train is False else last_checkpoint_file_path
+    save_weights_only = True if resume_train is False else False
     trainer = pl.Trainer(
         default_root_dir=root_dir,
         # callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
         callbacks=[ModelCheckpoint(filename="{epoch}-{train_loss:.5f}",
-                                   save_weights_only=True, mode="min", monitor="train_loss")],
+                                   save_weights_only=save_weights_only, mode="min", monitor="train_loss")],
         # gpus=1 if str(device).startswith("cuda") else 0,
         accelerator='gpu', devices=1,
         max_epochs=max_epochs,
         gradient_clip_val=10,
-        resume_from_checkpoint=None
+        resume_from_checkpoint=last_checkpoint_file_path
     )
     trainer.logger._default_hp_metric = None  # Optional logging argument that we don't need
 
@@ -354,15 +357,21 @@ def query_train_ckpts(ckpt_root_path='./output/BpeTranslator'):
             yield match.group(1), ckpt
 
 
-#def copy_last_ckpt(model_name='BpeTranslator'):
+def get_last_train_ckpt_file(ckpt_root_path):
+    ckpt_list = [x for x in query_train_ckpts(ckpt_root_path)]
+    if not ckpt_list:
+        return None
+    _, ckpt = min(ckpt_list, key=lambda tup: tup[0])
+    return ckpt
+
+
 def copy_last_ckpt(model_type):
     if isinstance(model_type, str):
         model_name = model_type
     else:
         model_name = model_type.__name__
-    ckpt_list = [x for x in query_train_ckpts(f"./output/{model_name}")]
-    if not ckpt_list:
+    ckpt = get_last_train_ckpt_file(f"./output/{model_name}")
+    if ckpt is None:
         return
-    _, ckpt = min(ckpt_list, key=lambda tup: tup[0])
     print(f"{model_name} {ckpt=}")
     shutil.copy(ckpt, './output/%s.ckpt' % model_name)

@@ -77,8 +77,9 @@ def train():
     start_train(model_type, model_args,
                 translate_ds,
                 batch_size=1,  # 32,
+                resume_train=True,
                 device='cuda',
-                max_epochs=1)
+                max_epochs=200)
 
     model = load_model(model_type, model_args)
 
