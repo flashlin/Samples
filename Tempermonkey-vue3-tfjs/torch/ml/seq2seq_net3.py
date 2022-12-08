@@ -45,8 +45,8 @@ class ScaledDotProductAttention(nn.Module):
         attn_mask: [batch_size, n_heads, seq_len, seq_len]
         """
         d_k = self.d_k
-        scores = torch.matmul(Q, K.transpose(-1, -2)).to(self.device) / np.sqrt(
-            d_k)  # scores : [batch_size, n_heads, len_q, len_k]
+        scores = torch.matmul(Q, K.transpose(-1, -2)).to(self.device) / np.sqrt(d_k)
+        # scores : [batch_size, n_heads, len_q, len_k]
         scores.masked_fill_(attn_mask, -1e9)  # Fills elements of self tensor with value where mask is True.
 
         attn = nn.Softmax(dim=-1)(scores)
@@ -282,11 +282,18 @@ class LitTranslator(BaseLightning):
     def __init__(self, vocab, src_vocab_size, tgt_vocab_size):
         super().__init__()
         self.vocab = vocab
-        self.model = Seq2SeqTransformer(src_vocab_size, tgt_vocab_size)
+        self.model = Seq2SeqTransformer(src_vocab_size, tgt_vocab_size,
+                                        bos_idx=vocab.bos_idx,
+                                        eos_idx=vocab.eos_idx,
+                                        padding_idx=vocab.padding_idx,
+                                        embedding_dim=512)
         self.criterion = nn.CrossEntropyLoss()  # reduction="none")
 
     def forward(self, batch):
-        enc_inputs, dec_inputs, dec_outputs = batch
+        src, src_len, tgt, tgt_len = batch
+        enc_inputs = src
+        dec_inputs = tgt[1:]
+        dec_outputs = tgt[:-1]
         logits, enc_self_attns, dec_self_attns, dec_enc_attns = self.model(enc_inputs, dec_inputs)
         return logits, dec_outputs
 
