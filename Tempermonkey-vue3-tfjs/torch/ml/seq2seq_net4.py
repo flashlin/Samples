@@ -83,7 +83,8 @@ class LitTransformer(BaseLightning):
     def _calculate_loss(self, batch, batch_idx):
         (logits, y) = batch
         logits = logits.view(-1, self.vocab.get_size())
-        y = y.squeeze(1)
+        y = torch.flatten(y)
+        # y = y.squeeze(1)
         loss = self.criterion(logits, y)
         return loss
 
