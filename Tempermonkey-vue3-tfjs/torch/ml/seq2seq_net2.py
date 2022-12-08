@@ -41,7 +41,7 @@ class Seq2Seq(nn.Module):
         decoder_hidden = encoder_hidden
 
         # torch.autograd.set_detect_anomaly(True)
-        for t in range(target_length):
+        for t in range(1, target_length):
             # info(f" {t=} {decoder_input.shape=}")
             decoder_output, decoder_hidden = self.decoder(decoder_input, encoder_output, decoder_hidden)
             # info(f" {t=} {decoder_output.shape=}")
