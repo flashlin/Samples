@@ -2,7 +2,7 @@ from torch import nn
 from torch.utils.data import Dataset
 
 from ml.lit import BaseLightning
-from ml.seq2seq_model import Seq2SeqTransformer
+from ml.seq2seq_net3 import Seq2SeqTransformer
 from labs.preprocess_data import TranslationDataset, TranslationFileTextIterator, int_list_to_str
 from utils.linq_tokenizr import linq_encode, LINQ_VOCAB_SIZE
 from utils.tokenizr import BOS_TOKEN_VALUE, EOS_TOKEN_VALUE, PAD_TOKEN_VALUE

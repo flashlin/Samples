@@ -2,10 +2,9 @@ import numpy as np
 import torch
 from torch import nn
 
-from ml.lit import PositionalEncoding
+from ml.lit import PositionalEncoding, BaseLightning
 from utils.linq_tokenizr import linq_encode
-
-d_model = 512  # Embedding Size
+from utils.tsql_tokenizr import tsql_decode
 
 
 def get_attn_pad_mask(seq_q, seq_k):
@@ -56,15 +55,16 @@ class ScaledDotProductAttention(nn.Module):
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, n_heads=8, d_k=64, d_v=64):
+    def __init__(self, n_heads=8, d_k=64, d_v=64, embedding_dim=512):
         super().__init__()
         self.n_heads = n_heads
+        self.embedding_dim = embedding_dim
         self.d_k = d_k  # dimension of K(=Q)
         self.d_v = d_v  # dimension of V
-        self.W_Q = nn.Linear(d_model, d_k * n_heads, bias=False)
-        self.W_K = nn.Linear(d_model, d_k * n_heads, bias=False)
-        self.W_V = nn.Linear(d_model, d_v * n_heads, bias=False)
-        self.fc = nn.Linear(n_heads * d_v, d_model, bias=False)
+        self.W_Q = nn.Linear(embedding_dim, d_k * n_heads, bias=False)
+        self.W_K = nn.Linear(embedding_dim, d_k * n_heads, bias=False)
+        self.W_V = nn.Linear(embedding_dim, d_v * n_heads, bias=False)
+        self.fc = nn.Linear(n_heads * d_v, embedding_dim, bias=False)
 
     def forward(self, input_Q, input_K, input_V, attn_mask):
         """
@@ -93,19 +93,21 @@ class MultiHeadAttention(nn.Module):
         context = context.transpose(1, 2).reshape(batch_size, -1,
                                                   n_heads * d_v)  # context: [batch_size, len_q, n_heads * d_v]
         output = self.fc(context)  # [batch_size, len_q, d_model]
-        return nn.LayerNorm(d_model).to(device)(output + residual), attn
+        return nn.LayerNorm(self.embedding_dim).to(device)(output + residual), attn
 
 
 class PoswiseFeedForwardNet(nn.Module):
     """
         d_ff: FeedForward dimension
     """
-    def __init__(self, d_ff=2048):
+
+    def __init__(self, d_ff=2048, embedding_dim=512):
         super().__init__()
+        self.embedding_dim = embedding_dim
         self.fc = nn.Sequential(
-            nn.Linear(d_model, d_ff, bias=False),
+            nn.Linear(embedding_dim, d_ff, bias=False),
             nn.ReLU(),
-            nn.Linear(d_ff, d_model, bias=False)
+            nn.Linear(d_ff, embedding_dim, bias=False)
         )
 
     def forward(self, inputs):
@@ -115,7 +117,7 @@ class PoswiseFeedForwardNet(nn.Module):
         device = next(self.parameters()).device
         residual = inputs
         output = self.fc(inputs)
-        return nn.LayerNorm(d_model).to(device)(output + residual)  # [batch_size, seq_len, d_model]
+        return nn.LayerNorm(self.embedding_dim).to(device)(output + residual)  # [batch_size, seq_len, d_model]
 
 
 class EncoderLayer(nn.Module):
@@ -159,11 +161,11 @@ class DecoderLayer(nn.Module):
 
 
 class Encoder(nn.Module):
-    def __init__(self, src_vocab_size, padding_idx, n_layers=6):
+    def __init__(self, src_vocab_size, padding_idx, n_layers=6, embedding_dim=512):
         super().__init__()
         self.src_vocab_size = src_vocab_size
-        self.src_emb = nn.Embedding(src_vocab_size, d_model, padding_idx=padding_idx)
-        self.pos_emb = PositionalEncoding(d_model)
+        self.src_emb = nn.Embedding(src_vocab_size, embedding_dim, padding_idx=padding_idx)
+        self.pos_emb = PositionalEncoding(embedding_dim)
         self.layers = nn.ModuleList([EncoderLayer() for _ in range(n_layers)])
 
     def forward(self, enc_inputs):
@@ -182,10 +184,10 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, tgt_vocab_size, padding_idx, n_layers=6):
+    def __init__(self, tgt_vocab_size, padding_idx, embedding_dim=512, n_layers=6):
         super().__init__()
-        self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model, padding_idx=padding_idx)
-        self.pos_emb = PositionalEncoding(d_model)
+        self.tgt_emb = nn.Embedding(tgt_vocab_size, embedding_dim, padding_idx=padding_idx)
+        self.pos_emb = PositionalEncoding(embedding_dim)
         self.layers = nn.ModuleList([DecoderLayer() for _ in range(n_layers)])
 
     def forward(self, dec_inputs, enc_inputs, enc_outputs):
@@ -214,13 +216,13 @@ class Decoder(nn.Module):
 
 
 class Seq2SeqTransformer(nn.Module):
-    def __init__(self, src_vocab_size, tgt_vocab_size, bos_idx, eos_idx, padding_idx):
+    def __init__(self, src_vocab_size, tgt_vocab_size, bos_idx, eos_idx, padding_idx, embedding_dim=512):
         super().__init__()
         self.bos_idx = bos_idx
         self.eos_idx = eos_idx
-        self.encoder = Encoder(src_vocab_size, padding_idx=padding_idx)
-        self.decoder = Decoder(tgt_vocab_size, padding_idx=padding_idx)
-        self.projection = nn.Linear(d_model, tgt_vocab_size, bias=False)
+        self.encoder = Encoder(src_vocab_size, padding_idx=padding_idx, embedding_dim=embedding_dim)
+        self.decoder = Decoder(tgt_vocab_size, padding_idx=padding_idx, embedding_dim=embedding_dim)
+        self.projection = nn.Linear(embedding_dim, tgt_vocab_size, bias=False)
 
     def forward(self, enc_inputs, dec_inputs):
         """
@@ -241,14 +243,11 @@ class Seq2SeqTransformer(nn.Module):
         logits = dec_logits.view(-1, dec_logits.size(-1))
         return logits, enc_self_attns, dec_self_attns, dec_enc_attns
 
-    def inference(self, input_text):
+    def inference(self, text_values):
         device = next(self.parameters()).device
-        enc_inputs = torch.tensor([linq_encode(input_text)]).to(device)
-        # greedy_dec_input = self.greedy_decoder(enc_inputs[0].view(1, -1), start_symbol=BOS_TOKEN_VALUE)
+        enc_inputs = torch.tensor(text_values).to(device)
         greedy_dec_input = self.greedy_decoder(enc_inputs)
-        # predict, _, _, _ = self(enc_inputs[i].view(1, -1), greedy_dec_input)
         predict, _, _, _ = self(enc_inputs, greedy_dec_input)
-        # predict = predict.data.max(1, keepdim=True)[1]
         predict = predict.data.max(1, keepdim=False)[1]
         return predict.tolist()
 
@@ -277,3 +276,26 @@ class Seq2SeqTransformer(nn.Module):
                 terminal = True
             # print(next_word)
         return dec_input
+
+
+class LitTranslator(BaseLightning):
+    def __init__(self, vocab, src_vocab_size, tgt_vocab_size):
+        super().__init__()
+        self.vocab = vocab
+        self.model = Seq2SeqTransformer(src_vocab_size, tgt_vocab_size)
+        self.criterion = nn.CrossEntropyLoss()  # reduction="none")
+
+    def forward(self, batch):
+        enc_inputs, dec_inputs, dec_outputs = batch
+        logits, enc_self_attns, dec_self_attns, dec_enc_attns = self.model(enc_inputs, dec_inputs)
+        return logits, dec_outputs
+
+    def _calculate_loss(self, data, mode="train"):
+        (logits, dec_outputs), batch = data
+        loss = self.criterion(logits, dec_outputs.view(-1))
+        self.log("%s_loss" % mode, loss)
+        return loss
+
+    def infer(self, text):
+        translated_values = self.model.inference(text)
+        return self.vocab.decode(translated_values)
