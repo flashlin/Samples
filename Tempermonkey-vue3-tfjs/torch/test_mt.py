@@ -7,6 +7,7 @@ from torch.autograd import Variable
 from common.io import info, get_file_by_lines_iter, info_error
 from ml.attension_models import Transformer
 from ml.gnmt.net import LiGmnTranslator
+from ml.mini_gpt_net import LitMiniGpt
 from ml.seq2seq_net import LiSeq2Seq
 from ml.seq2seq_net2 import Seq2SeqNet
 from ml.seq2seq_net3 import LitTranslator
@@ -80,6 +81,11 @@ def train():
     }
 
     model_type = LiGmnTranslator
+    model_args = {
+        'vocab': vocab,
+    }
+
+    model_type = LitMiniGpt
     model_args = {
         'vocab': vocab,
     }
