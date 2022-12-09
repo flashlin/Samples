@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Hangfire.AspNetCore" Version="1.7.32" />
+      <PackageReference Include="Hangfire.Core" Version="1.7.32" />
+    </ItemGroup>
+
+</Project>
