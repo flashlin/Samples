@@ -1,5 +1,8 @@
 using System.Data.SqlClient;
 using Dapper;
+using LanguageExt;
+using LanguageExt.Common;
+using Microsoft.Extensions.FileProviders;
 
 namespace CloneDatabase;
 
@@ -14,15 +17,31 @@ public class SqlDb
 
     public List<DatabaseInfo> QueryDatabases()
     {
-        return Query<DatabaseInfo>("use [master];SELECT name, database_id as Id, create_date as CreateDate FROM sys.databases").ToList();
+        return Query<DatabaseInfo>(
+            "use [master];SELECT name, database_id as Id, create_date as CreateDate FROM sys.databases").ToList();
     }
 
-    public List<TableInfo> QueryTables(string dbName)
+    public List<string> QueryTableNames(string dbName)
     {
-        return Query<TableInfo>(@$"use [{dbName}];
-SELECT info.TABLE_NAME as Name
+        return Query<string>(@$"use [{dbName}];
+            SELECT info.TABLE_NAME as Name
             FROM {dbName}.INFORMATION_SCHEMA.TABLES as info WITH(NOLOCK)
             WHERE TABLE_TYPE = 'BASE TABLE';").ToList();
+    }
+
+    public TableInfo? QueryTable(string dbName, string tableName)
+    {
+        var fields = QueryFields(dbName, tableName);
+        if (!fields.Any())
+        {
+            return null;
+        }
+
+        return new TableInfo
+        {
+            Name = tableName,
+            Fields = fields
+        };
     }
 
     public List<TableFieldInfo> QueryFields(string dbName, string tableName)
@@ -158,21 +177,21 @@ ORDER BY table_view, constraint_type, constraint_name;";
         using var conn = new SqlConnection(_connectionString);
         return conn.Query<T>(sql, dbParameter).ToList();
     }
+
+    public int Execute(string sql, object? param = null)
+    {
+        using var conn = new SqlConnection(_connectionString);
+        return conn.Execute(sql, param);
+    }
 }
 
-public class TableConstraintInfo
+public static class QueryDatabaseMetaExtension
 {
-    public string Name { get; set; }
-    public string TableViewName { get; set; }
-    public string ObjectType { get; set; }
-    public string ConstraintType { get; set; }
-}
-
-public class TableIndexInfo
-{
-    public string Name { get; set; }
-    public string ColumnName { get; set; }
-    public int IndexColumnId { get; set; }
-    public int KeyOrdinal { get; set; }
-    public bool IsIncludedColumn { get; set; }
+    public static void QueryPrimaryKeyConstraint(this IEnumerable<TableConstraintInfo> list)
+    {
+        foreach (var info in list)
+        {   
+            //if( info.ConstraintType == )
+        }
+    }
 }

@@ -13,12 +13,13 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
         .ConfigureServices((context, services) =>
         {
             services.Configure<DbConfig>(context.Configuration);
-            services.AddTransient<CloneDatabaseHelper>();
+            services.AddTransient<DatabaseCloner>();
+            services.AddTransient<ISqlScriptBuilder, MsSqlScriptBuilder>();
         });
 
 
 var host = CreateHostBuilder(args).Build();
 
-var helper = host.Services.GetRequiredService<CloneDatabaseHelper>();
+var helper = host.Services.GetRequiredService<DatabaseCloner>();
 helper.Clone();
 Console.WriteLine("=== END ===");
