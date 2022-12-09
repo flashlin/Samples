@@ -61,11 +61,16 @@ class LitTransformer(BaseLightning):
         super().__init__()
         self.vocab = vocab
         hidden_size = 1024
+        # self.model = TransformerModel(n_token=vocab.get_size(),
+        #                               d_model=1024,
+        #                               n_head=8,
+        #                               d_hid=1024,
+        #                               n_layers=6)
         self.model = TransformerModel(n_token=vocab.get_size(),
-                                      d_model=1024,
+                                      d_model=4096,
                                       n_head=8,
                                       d_hid=1024,
-                                      n_layers=6)
+                                      n_layers=2)
         self.fc = nn.Linear(hidden_size * 2, vocab.get_size())
         self.criterion = nn.CrossEntropyLoss()  # reduction="none")
 
