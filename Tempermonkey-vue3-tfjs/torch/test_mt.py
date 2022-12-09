@@ -6,6 +6,7 @@ from torch.autograd import Variable
 
 from common.io import info, get_file_by_lines_iter, info_error
 from ml.attension_models import Transformer
+from ml.gnmt.net import LiGmnTranslator
 from ml.seq2seq_net import LiSeq2Seq
 from ml.seq2seq_net2 import Seq2SeqNet
 from ml.seq2seq_net3 import LitTranslator
@@ -78,13 +79,18 @@ def train():
         'vocab': vocab,
     }
 
+    model_type = LiGmnTranslator
+    model_args = {
+        'vocab': vocab,
+    }
+
     translate_csv_file_path = './output/linq_vlinq.csv'
     convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
     translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
     start_train(model_type, model_args,
                 translate_ds,
-                batch_size=2,  # 32,
-                resume_train=True,
+                batch_size=16,  # 32,
+                resume_train=False,
                 device='cuda',
                 max_epochs=100)
 

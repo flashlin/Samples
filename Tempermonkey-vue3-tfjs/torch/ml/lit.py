@@ -302,8 +302,8 @@ def start_train(model_type,
     if not is_file_exists(last_checkpoint_file_path):
         last_checkpoint_file_path = None
     last_checkpoint_file_path = None if resume_train is False else last_checkpoint_file_path
-    info(f" {last_checkpoint_file_path=}")
     save_weights_only = True if resume_train is False else False
+    info(f" {save_weights_only=} {last_checkpoint_file_path=}")
     trainer = pl.Trainer(
         default_root_dir=root_dir,
         # callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc")],
