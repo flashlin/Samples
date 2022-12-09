@@ -56,6 +56,7 @@ def generate_square_subsequent_mask(sz: int) -> Tensor:
     return torch.triu(torch.ones(sz, sz) * float('-inf'), diagonal=1)
 
 
+# 很難訓練, loss=240
 class LitTransformer(BaseLightning):
     def __init__(self, vocab):
         super().__init__()

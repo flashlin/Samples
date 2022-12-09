@@ -75,20 +75,23 @@ def train():
         "vocab": vocab,
     }
 
-    model_type = LitTransformer
-    model_args = {
-        'vocab': vocab,
-    }
+    # loss = 0.40 不下降
+    # model_type = LitTransformer
+    # model_args = {
+    #     'vocab': vocab,
+    # }
 
-    model_type = LiGmnTranslator
-    model_args = {
-        'vocab': vocab,
-    }
+    # loss = 240 不下降
+    # model_type = LiGmnTranslator
+    # model_args = {
+    #     'vocab': vocab,
+    # }
 
-    model_type = LitMiniGpt
-    model_args = {
-        'vocab': vocab,
-    }
+    # 不會弄
+    # model_type = LitMiniGpt
+    # model_args = {
+    #     'vocab': vocab,
+    # }
 
     translate_csv_file_path = './output/linq_vlinq.csv'
     convert_translate_file_to_csv('./train_data/linq_vlinq.txt', translate_csv_file_path)
