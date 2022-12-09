@@ -17,11 +17,11 @@ class LiGmnTranslator(BaseLightning):
         padding_idx = vocab.get_value('<pad>')
         self.model = GNMT(vocab.get_size(),
                           padding_idx,
-                          hidden_size=1024,
-                          num_layers=8,
-                          dropout=0.0,
+                          hidden_size=128,
+                          num_layers=2,
+                          dropout=0.3,
                           batch_first=True,
-                          math='fp32',
+                          math='fp16',
                           share_embedding=True)
         self.loss_fn = LabelSmoothing(padding_idx, smoothing=True)
 
