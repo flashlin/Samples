@@ -327,6 +327,7 @@ def start_train(model_type,
     model._device = device
     model.init_dataloader(dataset, batch_size)
 
+    info(f" start {model_name} model")
     # trainer.fit(model, train_loader, val_loader)
     trainer.fit(model)
 
