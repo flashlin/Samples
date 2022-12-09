@@ -230,11 +230,9 @@ class Decoder(nn.Module):
 
 
 class Seq2SeqNet(BaseLightning):
-    def __init__(self, vocab):
+    def __init__(self, vocab, embbed_dim=256, hidden_dim=512):
         super().__init__()
         self.vocab = vocab
-        hidden_dim = 512
-        embbed_dim = 256
         n_layers = 1
         encoder = Encoder(input_dim=vocab.get_size(), hidden_dim=hidden_dim, embbed_dim=embbed_dim, num_layers=n_layers)
         decoder = Decoder(output_dim=vocab.get_size(), hidden_dim=hidden_dim, embbed_dim=embbed_dim,
