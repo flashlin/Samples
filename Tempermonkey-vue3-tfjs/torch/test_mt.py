@@ -12,6 +12,7 @@ from ml.seq2seq_net import LiSeq2Seq
 from ml.seq2seq_net2 import Seq2SeqNet
 from ml.seq2seq_net3 import LitTranslator
 from ml.seq2seq_net4 import LitTransformer
+from ml.seq2seq_net5 import MySeq2SeqNet
 from ml.seq_to_classification_net import SeqToOneClassificationLstm
 from ml.lit import PositionalEncoding, start_train, BaseLightning, load_model
 from ml.trans_linq2tsql import LinqToSqlVocab
@@ -71,6 +72,11 @@ def train():
     # }
 
     model_type = Seq2SeqNet
+    model_args = {
+        "vocab": vocab,
+    }
+
+    model_type = MySeq2SeqNet
     model_args = {
         "vocab": vocab,
     }
