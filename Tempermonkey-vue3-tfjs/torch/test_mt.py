@@ -104,7 +104,7 @@ def train():
     translate_ds = TranslateCsvDataset(translate_csv_file_path, vocab)
     start_train(model_type, model_args,
                 translate_ds,
-                batch_size=2,  # 32,
+                batch_size=1,  # 32,
                 resume_train=False,
                 device='cuda',
                 max_epochs=100)

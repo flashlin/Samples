@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import random
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from common.io import info
 from ml.data_utils import pad_list
@@ -37,6 +38,7 @@ class Seq2Seq(nn.Module):
         # encode every word in a sentence
         for i in range(input_length):
             encoder_output, encoder_hidden = self.encoder(source[:, i])
+
         # add a token before the first predicted word
         # start_input = pad_list([self.vocab.bos_idx], 300)
         # start_input = [self.vocab.bos_idx]
@@ -53,21 +55,11 @@ class Seq2Seq(nn.Module):
             # outputs[:, t, :] = decoder_output[:, t, :] #.clone().detach()  unsqueeze(-1)
             outputs[:, t] = decoder_output
             top = decoder_output.argmax(1)
-
-            # top = self.embedding(top.unsqueeze(0))
-            # prev_cells = torch.cat((src, top))
-            # top = self.prev_fc(prev_cells).argmax(1)[-1]
-            # top = torch.tensor([top]).to(device)
-
             teacher_force = random.random() < teacher_forcing_ratio
             decoder_input = target[:, t] if teacher_force else top
-            # top_value, top_index = decoder_output.max(dim=-1)
-            # info(f" {target[:, t].requires_grad=}")
-            # decoder_input[:, t] = t_tgt if teacher_force else top_index[:, t]
+            if teacher_force is False and top == self.vocab.get_value('<eos>'):
+                break
 
-        # outputs = outputs.argmax(dim=-1, keepdim=False)
-        # info(f" {outputs.shape=} {outputs.requires_grad=}")
-        # outputs = outputs #.clone().detach()
         return outputs
 
     def infer(self, text_to_indices, max_length):
@@ -101,7 +93,7 @@ class Seq2Seq(nn.Module):
 
 
 class BiLSTM(nn.Module):
-    def __init__(self, n_class, n_hidden):
+    def __init__(self, n_hidden, n_class):
         super().__init__()
         self.n_hidden = n_hidden
         self.lstm = nn.LSTM(input_size=n_class, hidden_size=n_hidden, bidirectional=True)
@@ -115,13 +107,93 @@ class BiLSTM(nn.Module):
         batch_size = x.shape[0]
         input = x.transpose(0, 1)  # input : [max_len, batch_size, n_class]
 
-        hidden_state = torch.randn(1 * 2, batch_size, self.n_hidden)  # [num_layers(=1) * num_directions(=2), batch_size, n_hidden]
-        cell_state = torch.randn(1 * 2, batch_size, self.n_hidden)  # [num_layers(=1) * num_directions(=2), batch_size, n_hidden]
+        hidden_state = torch.randn(1 * 2, batch_size,
+                                   self.n_hidden)  # [num_layers(=1) * num_directions(=2), batch_size, n_hidden]
+        cell_state = torch.randn(1 * 2, batch_size,
+                                 self.n_hidden)  # [num_layers(=1) * num_directions(=2), batch_size, n_hidden]
 
         outputs, (_, _) = self.lstm(input, (hidden_state, cell_state))
         outputs = outputs[-1]  # [batch_size, n_hidden * 2]
         model = self.fc(outputs)
         return model
+
+
+def create_src_lengths_mask(batch_size, src_lengths, max_src_len=None):
+    if max_src_len is None:
+        max_src_len = int(src_lengths.max())
+    src_indices = torch.arange(0, max_src_len).unsqueeze(0).type_as(src_lengths)
+    src_indices = src_indices.expand(batch_size, max_src_len)
+    src_lengths = src_lengths.unsqueeze(dim=1).expand(batch_size, max_src_len)
+    return (src_indices < src_lengths).int().detach()
+
+
+def masked_softmax(scores, src_lengths, src_length_masking=True):
+    if src_length_masking:
+        bsz, max_src_len = scores.size()
+        src_mask = create_src_lengths_mask(bsz, src_lengths)
+        scores = scores.masked_fill(src_mask == 0, -np.inf)
+    return F.softmax(scores.float(), dim=-1).type_as(scores)
+
+
+class MLPAttentionNetwork(nn.Module):
+    def __init__(self, hidden_dim, attention_dim, src_length_masking=True):
+        super().__init__()
+        self.hidden_dim = hidden_dim
+        self.attention_dim = attention_dim
+        self.src_length_masking = src_length_masking
+        self.proj_w = nn.Linear(hidden_dim, attention_dim, bias=True)
+        self.proj_v = nn.Linear(attention_dim, 1, bias=False)
+
+    def forward(self, x, x_lengths):
+        """
+        :param x: (seq_len, batch_size, hidden_dim)
+        :param x_lengths: (batch_size)
+        :return: (batch, seq_len), (batch, hidden_dim)
+        """
+        seq_len, batch_size, _ = x.size()
+        flat_inputs = x.reshape(-1, self.hidden_dim)
+        mlp_x = self.proj_w(flat_inputs)
+        att_scores = self.proj_v(mlp_x).view(seq_len, batch_size).t()
+        normalized_masked_att_scores = masked_softmax(att_scores, x_lengths, self.src_length_masking).t()
+        attn_x = (x * normalized_masked_att_scores.unsqueeze(2)).sum(0)
+        return normalized_masked_att_scores.t(), attn_x
+
+
+class BiLstmAttention(nn.Module):
+    def __init__(self, vocab_size, max_seq_len,
+                 embedding_dim, hidden_dim, num_layers,
+                 bidirectional=True,
+                 attention_dim=256, num_classes=None):
+        super().__init__()
+        self.vocab_size = vocab_size
+        self.max_seq_len = max_seq_len
+        self.embedding_dim = embedding_dim
+        self.hidden_dim = hidden_dim
+        self.num_layers = num_layers
+        self.bidirectional = bidirectional
+        self.attention_dim = attention_dim
+        self.num_classes = num_classes
+        self.embedding_layer = nn.Embedding(vocab_size, embedding_dim, padding_idx=0)
+        self.bilstm_layer = nn.LSTM(embedding_dim, hidden_dim, num_layers,
+                                    bidirectional=bidirectional, batch_first=True)
+        self.mlp_attention_layer = MLPAttentionNetwork(2 * hidden_dim, attention_dim)
+        self.fc_layer = nn.Linear(2 * hidden_dim, num_classes)
+        self.softmax_layer = nn.Softmax(dim=1)
+
+    def forward(self, x, x_lengths):
+        """
+        :param x: (seq_len, batch_size)
+        :param x_lengths: (batch_size)
+        :return:
+        """
+        x_input = self.embedding_layer(x)
+        x_packed_input = pack_padded_sequence(input=x_input, lengths=x_lengths, batch_first=True, enforce_sorted=False)
+        packed_out, _ = self.bilstm_layer(x_packed_input)
+        packed_out, _ = pad_packed_sequence(packed_out, batch_first=True, total_length=self.max_seq_len,
+                                            padding_value=0.0)
+        atten_scores, atten_out = self.mlp_attention_layer(packed_out, x_lengths)
+        logits = self.softmax_layer(self.fc_layer(atten_out))
+        return atten_scores, logits
 
 
 class Encoder(nn.Module):
@@ -183,6 +255,7 @@ class Decoder(nn.Module):
         # assert context_vector.shape == (1, 1, 1024), f"{context_vector.shape=} is not correct."
         rnn_input = torch.cat((context_vector, embedded), dim=2)
 
+        # info(f" {rnn_input.shape=} {hidden_states[0].shape=}")
         outputs, (hidden_states, cell) = self.rnn(rnn_input, hidden_states)
         predictions = self.fc(outputs).squeeze(0)
 
@@ -197,7 +270,8 @@ class MySeq2SeqNet(BaseLightning):
         super().__init__()
         self.vocab = vocab
         encoder = Encoder(input_dim=vocab.get_size(), hidden_dim=hidden_dim, embbed_dim=embbed_dim, num_layers=n_layers)
-        decoder = Decoder(output_dim=vocab.get_size(), hidden_dim=hidden_dim, embbed_dim=embbed_dim, num_layers=n_layers)
+        decoder = Decoder(output_dim=vocab.get_size(), hidden_dim=hidden_dim, embbed_dim=embbed_dim,
+                          num_layers=n_layers)
         self.model = Seq2Seq(vocab, encoder=encoder, decoder=decoder, max_length=500)
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=vocab.padding_idx)
 
