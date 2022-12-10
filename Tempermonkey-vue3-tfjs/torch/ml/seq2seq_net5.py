@@ -10,84 +10,61 @@ from ml.data_utils import pad_list
 from ml.lit import BaseLightning
 
 
+def get_num_segments(src):
+    src_length = src.size(1)
+    if src_length - 1 <= 0:
+        return 1
+    return src_length - 1 + 1
+
+
+def pad_list_by_num_segments(src, segment_length, num_segments):
+    src = src.squeeze().tolist()
+    max_len = num_segments * segment_length
+    pad_src = pad_list([], segment_length - 1)
+    pad_src = pad_src + src
+    pad_src = pad_list(pad_src, max_len)
+    return pad_src
+
+
+def get_segment(src, segment_length, n):
+    return src[n: n + segment_length]
+
+
 class Seq2Seq(nn.Module):
     def __init__(self, vocab, encoder, decoder, max_length):
         super().__init__()
-        self.max_length = max_length
-        self.encoder = encoder
-        self.decoder = decoder
         self.vocab = vocab
-        self.prev_fc = nn.Linear(self.encoder.embbed_dim, vocab.get_size())
+        self.segment_length = max_length
+        self.encoder = BiLstmAttention(vocab_size=vocab.get_size(),
+                                       embedding_dim=512, hidden_dim=512,
+                                       num_layers=2, attention_dim=256, max_seq_len=500,
+                                       num_classes=vocab.get_size())
+        self.decoder = decoder
 
-    def embedding(self, x):
-        return self.encoder.embedding(x).view(-1, self.encoder.embbed_dim)
-
-    def forward(self, source, target, teacher_forcing_ratio=0.5):
+    def forward(self, src, tgt, teacher_forcing_ratio=0.5):
         device = next(self.parameters()).device
-        input_length = source.size(1)  # get the input length (number of words in sentence)
-        batch_size = target.shape[0]
-        target_length = target.shape[1]
-        vocab_size = self.decoder.output_dim
 
-        # initialize a variable to hold the predicted outputs
-        outputs = torch.zeros(batch_size, target_length, vocab_size).to(device)
-        # outputs = outputs.permute(1, 0, 2)
-
-        src = self.embedding(source)
-
-        # encode every word in a sentence
-        for i in range(input_length):
-            encoder_output, encoder_hidden = self.encoder(source[:, i])
-
-        # add a token before the first predicted word
-        # start_input = pad_list([self.vocab.bos_idx], 300)
-        # start_input = [self.vocab.bos_idx]
-        # decoder_input = torch.tensor([start_input] * batch_size, dtype=torch.long, device=device)
-        decoder_input = target[:, 0]
-        decoder_hidden = encoder_hidden
-
-        # torch.autograd.set_detect_anomaly(True)
-        for t in range(1, target_length):
-            # info(f" {t=} {decoder_input.shape=} {decoder_input.dtype=} {encoder_output.shape=} {encoder_output.dtype=} {decoder_hidden[0].shape=}")
-            decoder_output, decoder_hidden = self.decoder(decoder_input, encoder_output, decoder_hidden)
-            # info(f" {t=} {decoder_output.shape=}")
-            # decoder_output = decoder_output.view(batch_size, 300, -1)
-            # outputs[:, t, :] = decoder_output[:, t, :] #.clone().detach()  unsqueeze(-1)
-            outputs[:, t] = decoder_output
-            top = decoder_output.argmax(1)
-            teacher_force = random.random() < teacher_forcing_ratio
-            decoder_input = target[:, t] if teacher_force else top
-            if teacher_force is False and top == self.vocab.get_value('<eos>'):
-                break
-
-        return outputs
+        num_segments = get_num_segments(src)
+        src = pad_list_by_num_segments(src, self.segment_length, num_segments)
+        segment_length_tensor = torch.tensor([self.segment_length]).to('cpu')
+        outputs = torch.tensor(np.zeros(shape=(num_segments, self.vocab.get_size()))).to(device)
+        for n in range(num_segments):
+            src_segment = get_segment(src, self.segment_length, n)
+            src_segment = torch.tensor([src_segment], dtype=torch.long).to(device)
+            atten_scores, logits = self.encoder(src_segment, segment_length_tensor)
+            pred = logits[-1]  # .argmax()
+            outputs[n] = pred
+        return outputs, tgt
 
     def infer(self, text_to_indices, max_length):
         device = next(self.parameters()).device
-        input_length = len(text_to_indices)
-        sentence_tensor = torch.LongTensor(text_to_indices).unsqueeze(0).to(device)
+        src = torch.tensor([text_to_indices]).to(device)
 
-        with torch.no_grad():
-            for t in range(input_length):
-                encoder_output, hidden_states = self.encoder(sentence_tensor[0, t])
+        outputs, _ = self(src, None)
+        outputs = outputs.argmax(1)
+        outputs = outputs.tolist()
 
         vocab = self.vocab
-        outputs = [vocab.get_value('<bos>')]
-        for _ in range(max_length):
-            previous_word = torch.LongTensor([outputs[-1]]).to(device)
-
-            with torch.no_grad():
-                output, hidden_states = self.decoder(
-                    previous_word, encoder_output, hidden_states
-                )
-                best_guess = output.argmax(1).item()
-
-            outputs.append(best_guess)
-
-            # Model predicts it's the end of the sentence
-            if output.argmax(1).item() == vocab.get_value('<eos>'):
-                break
-
         translated_sentence = vocab.decode(outputs)
         return translated_sentence
 
@@ -150,6 +127,8 @@ class MLPAttentionNetwork(nn.Module):
         :param x_lengths: (batch_size)
         :return: (batch, seq_len), (batch, hidden_dim)
         """
+        device = next(self.parameters()).device
+        x_lengths = x_lengths.to(device)
         seq_len, batch_size, _ = x.size()
         flat_inputs = x.reshape(-1, self.hidden_dim)
         mlp_x = self.proj_w(flat_inputs)
@@ -271,19 +250,18 @@ class MySeq2SeqNet(BaseLightning):
         decoder = Decoder(output_dim=vocab.get_size(), hidden_dim=hidden_dim, embbed_dim=embbed_dim,
                           num_layers=n_layers)
         self.model = Seq2Seq(vocab, encoder=encoder, decoder=decoder, max_length=500)
+
+        # CrossEntropyLoss((src_len, n_classes), (tgt_len))
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=vocab.padding_idx)
 
     def forward(self, batch):
         src, src_lens, tgt, tgt_lens = batch
-        return self.model(src, tgt), tgt
+        return self.model(src, tgt)
 
     def _calculate_loss(self, batch, batch_idx):
         x_hat, y = batch
-
-        x_hat = x_hat.view(-1, x_hat.shape[-1])
-        y = y.view(-1)
-
-        return self.loss_fn(x_hat, y)
+        y_true = y.squeeze(0)
+        return self.loss_fn(x_hat, y_true)
 
     def infer(self, text):
         text_to_indices = self.vocab.encode(text)
