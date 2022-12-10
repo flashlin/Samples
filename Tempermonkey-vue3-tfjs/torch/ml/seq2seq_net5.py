@@ -160,10 +160,8 @@ class MLPAttentionNetwork(nn.Module):
 
 
 class BiLstmAttention(nn.Module):
-    def __init__(self, vocab_size, max_seq_len,
-                 embedding_dim, hidden_dim, num_layers,
-                 bidirectional=True,
-                 attention_dim=256, num_classes=None):
+    def __init__(self, vocab_size, max_seq_len, embedding_dim, hidden_dim, num_layers, num_classes,
+                 bidirectional=True, attention_dim=256):
         super().__init__()
         self.vocab_size = vocab_size
         self.max_seq_len = max_seq_len
