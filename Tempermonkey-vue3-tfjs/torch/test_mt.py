@@ -12,7 +12,7 @@ from ml.seq2seq_net import LiSeq2Seq
 from ml.seq2seq_net2 import Seq2SeqNet
 from ml.seq2seq_net3 import LitTranslator
 from ml.seq2seq_net4 import LitTransformer
-from ml.seq2seq_net5 import MySeq2SeqNet
+from ml.seq2seq_net5 import MySeq2SeqNet, get_num_segments, pad_list_by_num_segments, get_segment
 from ml.seq_to_classification_net import SeqToOneClassificationLstm
 from ml.lit import PositionalEncoding, start_train, BaseLightning, load_model
 from ml.trans_linq2tsql import LinqToSqlVocab
@@ -107,7 +107,7 @@ def train():
                 batch_size=1,  # 32,
                 resume_train=False,
                 device='cuda',
-                max_epochs=100)
+                max_epochs=10)
 
     model = load_model(model_type, model_args)
 
