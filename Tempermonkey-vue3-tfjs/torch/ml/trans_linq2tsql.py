@@ -1,6 +1,3 @@
-import re
-
-from common.io import info_error
 from utils.data_utils import sort_desc, create_char2index_map, create_index2char_map
 from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier_token, reduce_token_list, \
     read_double_quote_string_token, read_spaces_token, read_symbol_token, read_token_until, read_float_number_token, \

@@ -1,59 +1,150 @@
-import math
 import string
 
 import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import random
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from common.io import info
 from ml.data_utils import pad_list
 from ml.lit import BaseLightning
-from utils.data_utils import create_char2index_map
+from ml.trans_linq2tsql import LinqToSqlVocab
+from utils.data_utils import create_char2index_map, create_index2char_map
+from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier_token, reduce_token_list, \
+    read_token_until, read_double_quote_string_token, read_spaces_token, read_symbol_token, read_float_number_token, \
+    read_number_token
 
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+class ProgramLangVocab:
+    def __init__(self):
+        printable = ['<pad>', '<bos>', '<eos>'] + [char for char in string.printable]
+        spec_symbols = '<= >= != <> == && || += -= /= *= %='.split(' ')
+        printable += spec_symbols
+        self.vocab_size = len(printable)
+        self.spec_symbols = spec_symbols
+        self.printable = printable
+        self.char2index = create_char2index_map(printable)
+        self.index2char = create_index2char_map(printable)
+        self.padding_idx = self.get_value('<pad>')
+        self.bos_idx = self.get_value('<bos>')
+        self.eos_idx = self.get_value('<eos>')
+
+    def get_size(self):
+        return self.vocab_size
+
+    def decode_values(self, values: [int]) -> [str]:
+        return [self.index2char[idx] for idx in values]
+
+    def decode(self, values: [int]) -> str:
+        words = self.decode_values(values)
+        words = [word for word in words if not word.startswith('<')]
+        return ''.join(words)
+
+    @staticmethod
+    def read_variable_token(stream_iter: StreamTokenIterator) -> Token:
+        if stream_iter.peek_str(1) != '@':
+            return EmptyToken
+        at_token = stream_iter.next()
+        token = read_identifier_token(stream_iter)
+        return reduce_token_list('variable', [at_token, token])
+
+    @staticmethod
+    def read_spec_identifier_token(stream_iter: StreamTokenIterator) -> Token:
+        if stream_iter.peek_str(1) != '[':
+            return EmptyToken
+        start_token = stream_iter.next()
+        ident = read_token_until(stream_iter, ']')
+        end_token = stream_iter.next()
+        return reduce_token_list(Token.Identifier, [start_token, ident, end_token])
+
+    def parse_to_tokens(self, line) -> [Token]:
+        stream_iter = StreamTokenIterator(line)
+        buff = []
+        while not stream_iter.is_done():
+            token = LinqToSqlVocab.read_spec_identifier_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = LinqToSqlVocab.read_variable_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_double_quote_string_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_spaces_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_symbol_token(stream_iter, self.spec_symbols)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_identifier_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_float_number_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            token = read_number_token(stream_iter)
+            if token != EmptyToken:
+                buff.append(token)
+                continue
+            raise Exception(f'parse "{stream_iter.peek_str(10)}" fail')
+        return buff
+
+    def tokenize_to_words(self, text: str) -> [str]:
+        tokens = self.parse_to_tokens(text)
+        words = [token.text for token in tokens]
+        return words
+
+    def get_value(self, char: str) -> int:
+        return self.char2index[char]
 
 
 class TextClassifier(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, num_class):
-        super(TextClassifier, self).__init__()
+    def __init__(self, vocab=ProgramLangVocab(), num_class=2, embedding_dim=10000):
+        super().__init__()
+        self.embedding_dim = embedding_dim
         # 建立嵌入層
-        self.embedding = nn.EmbeddingBag(vocab_size, embedding_dim, sparse=True)
-        # 建立全連接層
+        # self.embedding = nn.EmbeddingBag(vocab_size, embedding_dim, sparse=True)
+        self.embedding = TextEmbeddingModel(vocab=vocab, embedding_dim=embedding_dim)
         self.fc = nn.Linear(embedding_dim, num_class)
 
-    def forward(self, text, offsets):
+    def forward(self, text):
         # 通過嵌入層，將文字轉換成特徵
-        embedded = self.embedding(text, offsets)
+        embedded = self.embedding(text)
         # 通過全連接層，將特徵轉換成預測結果
-        return self.fc(embedded)
+        prediction = self.fc(embedded)
+        info(f" {prediction=}")
+        return prediction
 
 
 class TextEmbeddingModel(nn.Module):
-    def __init__(self, hidden_dim=512, embedding_dim=10000):
+    def __init__(self, vocab, hidden_dim=512, embedding_dim=10000):
         super().__init__()
-        self.word_embedding = WordEmbeddingModel(hidden_dim=hidden_dim, embedding_dim=embedding_dim)
+        self.word_embedding = WordEmbeddingModel(vocab=vocab, hidden_dim=hidden_dim, embedding_dim=embedding_dim)
 
     def forward(self, str_list):
+        device = next(self.parameters()).device
         str_tensor = [self.word_embedding(word) for word in str_list]
+        str_tensor = torch.stack(str_tensor, dim=0).to(device)
         return str_tensor
 
 
 class WordEmbeddingModel(nn.Module):
-    def __init__(self, hidden_dim=512, embedding_dim=10000):
+    def __init__(self, vocab, hidden_dim=512, embedding_dim=10000):
         super().__init__()
-        printable = ['<pad>', '<bos>', '<eos>'] + [char for char in string.printable]
-        vocab_size = len(printable)
-        self.char2index = create_char2index_map(printable)
-        self.embedding = MergeModel(1, hidden_dim, 1)
+        self.vocab = vocab
+        self.merge = MergeModel(1, hidden_dim, embedding_dim)
 
     def forward(self, input_word):
-        input_seq = [self.char2index[c] for c in input_word]
+        input_seq = [self.vocab.char2index[c] for c in input_word]
         input_seq = torch.tensor(input_seq, dtype=torch.float).unsqueeze(dim=1)  # [[1],[2],[3]]
         # 將多個單字向量組合起來
-        output = self.embedding(input_seq)
+        output = self.merge(input_seq)
         # output_vector = np.mean(output.detach().numpy(), axis=0)
         # return torch.mean(output, dim=0)
         return output
@@ -76,7 +167,8 @@ class MergeModel(nn.Module):
         :return:
         """
         lstm_out, _ = self.lstm(x)
-        output = self.linear(lstm_out[-1])
+        last = lstm_out[-1]
+        output = self.linear(last)
         return output
 
 
@@ -123,3 +215,5 @@ class LitTransformer2(BaseLightning):
         logits = self.model(src, src)
         logits = logits.squeeze(0).argmax(1).tolist()
         return self.vocab.decode(logits)
+
+
