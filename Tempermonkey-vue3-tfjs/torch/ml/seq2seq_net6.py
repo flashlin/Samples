@@ -271,5 +271,12 @@ class LitTransformer2(BaseLightning):
         return self.loss_fn(x_hat, y_true)
 
     def infer(self, text):
+        device = self.get_device()
         text_to_indices = self.vocab.encode(text)
-        return self.model.infer(text_to_indices, len(text))
+
+        src = torch.tensor([text_to_indices]).type(torch.long).to(device)
+        src = pad_batch_sequence(src, 200).type(torch.long).to(device)
+        self.model.eval()
+        logits = self.model(src, src)
+        logits = logits.squeeze(0).argmax(1).tolist()
+        return self.vocab.decode(logits)
