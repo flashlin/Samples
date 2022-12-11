@@ -6,7 +6,7 @@ from torch.autograd import Variable
 
 from common.io import info, get_file_by_lines_iter, info_error
 from ml.lit import PositionalEncoding, start_train, BaseLightning, load_model
-from ml.text_classifier_net import WordEmbeddingModel, TextEmbeddingModel
+from ml.text_classifier_net import WordEmbeddingModel, TextEmbeddingModel, TextClassifier
 from ml.trans_linq2tsql import LinqToSqlVocab
 from ml.translate_net import TranslateCsvDataset, convert_translate_file_to_csv
 
@@ -48,7 +48,7 @@ def train():
 if __name__ == '__main__':
     info(f" {vocab.get_size()}")
     # train()
-    s1 = ['flash', 'is', 'super']
-    m = TextEmbeddingModel()
+    s1 = 'from tb1 in customer select tb1'
+    m = TextClassifier()
     v1 = m.forward(s1)
     info(f" {v1=}")
