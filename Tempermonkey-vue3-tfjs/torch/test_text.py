@@ -45,15 +45,24 @@ def train():
         print("\n")
 
 
+def test_train1(text, n_class):
+    info(f" {text=}")
+    classifier = TextClassifier()
+    logits = classifier.forward(text)
+    info(f" {logits=}")
+    tgt = torch.tensor(n_class)
+    loss = classifier.calculate_loss((logits, tgt))
+    info(f" {loss=}")
+    prediction = classifier.infer(text)
+    info(f" infer {prediction=}")
+
+
+def test():
+    test_train1('from tb1 in customer select tb1', 1)
+    test_train1('from tb1 in customer join tb2 in home select new { tb1.name, tb2.addr}', 2)
+
+
 if __name__ == '__main__':
     info(f" {vocab.get_size()}")
     # train()
-    s1 = 'from tb1 in customer select tb1'
-    m = TextClassifier()
-    v1 = m.forward(s1)
-    info(f" {v1=}")
-    tgt = torch.tensor(1)
-    loss = m.calculate_loss((v1, tgt))
-    info(f" {loss=}")
-    v2 = m.infer(s1)
-    info(f" infer {v2=}")
+    test()
