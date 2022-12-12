@@ -52,3 +52,8 @@ if __name__ == '__main__':
     m = TextClassifier()
     v1 = m.forward(s1)
     info(f" {v1=}")
+    tgt = torch.tensor(1)
+    loss = m.calculate_loss((v1, tgt))
+    info(f" {loss=}")
+    v2 = m.infer(s1)
+    info(f" infer {v2=}")

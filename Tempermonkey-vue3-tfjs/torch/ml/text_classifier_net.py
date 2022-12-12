@@ -105,25 +105,49 @@ class ProgramLangVocab:
 
 
 class TextClassifier(nn.Module):
-    def __init__(self, vocab=ProgramLangVocab(), num_class=2, embedding_dim=10000):
+    def __init__(self, vocab=ProgramLangVocab(), num_class=2, embedding_dim=1024,
+                 hidden_dim=512, n_layers=2, dropout=0.1):
         super().__init__()
         self.embedding_dim = embedding_dim
         # 建立嵌入層
         # self.embedding = nn.EmbeddingBag(vocab_size, embedding_dim, sparse=True)
         self.embedding = TextEmbeddingModel(vocab=vocab, embedding_dim=embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, num_layers=n_layers,
+                            bidirectional=True,
+                            dropout=dropout,
+                            batch_first=True)
         self.fc = nn.Linear(embedding_dim, num_class)
+        self.loss_fn = nn.CrossEntropyLoss(ignore_index=0)
 
     def forward(self, text):
         # 通過嵌入層，將文字轉換成特徵
         embedded = self.embedding(text)
+
+        output, (hidden, cell) = self.lstm(embedded)
+        # hidden = [batch size, n_layers * num directions, hid dim]
+        # cell = [batch size, n_layers * num directions, hid dim]
+        # 連線最後的正向和反向隱狀態
+        hidden = torch.cat((hidden[-2, :], hidden[-1, :]), dim=0)
+        # hidden = [batch size, hid dim * num directions]
+
         # 通過全連接層，將特徵轉換成預測結果
-        prediction = self.fc(embedded)
-        info(f" {prediction=}")
+        prediction = self.fc(hidden)
+        # info(f" {embedded.shape=} {prediction.shape=}")
         return prediction
+
+    def calculate_loss(self, batch):
+        prediction, y = batch
+        prediction = prediction.unsqueeze(0)
+        y = y.unsqueeze(0)
+        return self.loss_fn(prediction, y)
+
+    def infer(self, text):
+        prediction = self(text)
+        return prediction.argmax(0)
 
 
 class TextEmbeddingModel(nn.Module):
-    def __init__(self, vocab, hidden_dim=512, embedding_dim=10000):
+    def __init__(self, vocab, hidden_dim=512, embedding_dim=10):
         super().__init__()
         self.word_embedding = WordEmbeddingModel(vocab=vocab, hidden_dim=hidden_dim, embedding_dim=embedding_dim)
 
@@ -135,7 +159,7 @@ class TextEmbeddingModel(nn.Module):
 
 
 class WordEmbeddingModel(nn.Module):
-    def __init__(self, vocab, hidden_dim=512, embedding_dim=10000):
+    def __init__(self, vocab, hidden_dim=512, embedding_dim=10):
         super().__init__()
         self.vocab = vocab
         self.merge = MergeModel(1, hidden_dim, embedding_dim)
@@ -145,7 +169,6 @@ class WordEmbeddingModel(nn.Module):
         input_seq = torch.tensor(input_seq, dtype=torch.float).unsqueeze(dim=1)  # [[1],[2],[3]]
         # 將多個單字向量組合起來
         output = self.merge(input_seq)
-        # output_vector = np.mean(output.detach().numpy(), axis=0)
         # return torch.mean(output, dim=0)
         return output
 

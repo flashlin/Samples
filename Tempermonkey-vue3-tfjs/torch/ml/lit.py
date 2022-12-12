@@ -13,7 +13,8 @@ from torch import nn as nn, optim as optim
 from sklearn.metrics import accuracy_score
 from common.io import info, get_directory_list_by_pattern, get_file_list_by_pattern, info_error, is_file_exists
 from utils.tsql_tokenizr import TSQL_VOCAB_SIZE
-
+from tensorboardX import SummaryWriter
+import matplotlib.pyplot as plt
 
 class PositionalEncoding(nn.Module):
     """
@@ -199,6 +200,7 @@ class BaseLightning(pl.LightningModule):
         self.save_hyperparameters()
         self.batch_size = 0
         self._device = device
+        self.grads_writer = SummaryWriter('logs/grads')
         if device is None:
             self._device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.lr_scheduler = None
@@ -241,6 +243,7 @@ class BaseLightning(pl.LightningModule):
     def validation_step(self, batch, batch_idx, **kwargs):
         outputs = self(batch)
         loss = self._calculate_loss(outputs, batch_idx)
+        self.write_grads(batch_idx)
         self.log("val_loss", loss)
 
     def test_step(self, batch, batch_idx):
@@ -251,6 +254,23 @@ class BaseLightning(pl.LightningModule):
     def _calculate_loss(self, batch, batch_idx):
         loss = self.criterion(batch)
         return loss
+
+    def write_grads(self, epoch):
+        grads = []
+        for param in self.model.parameters():
+            grads.append(param.grad)
+        # 將梯度轉換為張量
+        grads_tensor = torch.stack(grads)
+        self.grads_writer.add_embedding(grads_tensor, global_step=epoch)
+
+    def draw_grads(self):
+        # 獲取模型的參數梯度
+        gradients = [param.grad for param in self.model.parameters()]
+        # 使用 Matplotlib 繪製梯度 3D 圖
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        ax.plot(gradients)
+        plt.show()
 
     def train_dataloader(self):
         return self.train_loader
