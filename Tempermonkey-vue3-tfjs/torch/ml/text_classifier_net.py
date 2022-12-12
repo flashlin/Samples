@@ -207,6 +207,32 @@ def pad_batch_sequence(batch_tensor, max_length):
     return new_batch
 
 
+class CBOW(torch.nn.Module):
+    def __init__(self, vocab, embedding_dim):
+        super().__init__()
+        self.vocab = vocab
+        # out: 1 x emdedding_dim
+        self.embeddings = nn.Embedding(vocab.get_size(), embedding_dim)
+        self.linear1 = nn.Linear(embedding_dim, 128)
+        self.activation_function1 = nn.ReLU()
+
+        # out: 1 x vocab_size
+        self.linear2 = nn.Linear(128, vocab.get_size())
+        self.activation_function2 = nn.LogSoftmax(dim=-1)
+
+    def forward(self, inputs):
+        embeds = sum(self.embeddings(inputs)).view(1, -1)
+        out = self.linear1(embeds)
+        out = self.activation_function1(out)
+        out = self.linear2(out)
+        out = self.activation_function2(out)
+        return out
+
+    def get_word_emdedding(self, word):
+        word = torch.tensor([self.vocab.char2int[word]])
+        return self.embeddings(word).view(1, -1)
+
+
 class LitTransformer2(BaseLightning):
     def __init__(self):
         super().__init__()
@@ -238,5 +264,3 @@ class LitTransformer2(BaseLightning):
         logits = self.model(src, src)
         logits = logits.squeeze(0).argmax(1).tolist()
         return self.vocab.decode(logits)
-
-
