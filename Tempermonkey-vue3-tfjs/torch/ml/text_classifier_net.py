@@ -105,7 +105,7 @@ class ProgramLangVocab:
 
 
 class TextClassifier(nn.Module):
-    def __init__(self, vocab=ProgramLangVocab(), num_class=2, embedding_dim=1024,
+    def __init__(self, vocab=ProgramLangVocab(), num_class=3, embedding_dim=1024,
                  hidden_dim=512, n_layers=2, dropout=0.1):
         super().__init__()
         self.embedding_dim = embedding_dim
@@ -136,10 +136,10 @@ class TextClassifier(nn.Module):
         return prediction
 
     def calculate_loss(self, batch):
-        prediction, y = batch
-        prediction = prediction.unsqueeze(0)
+        logits, y = batch
+        logits = logits.unsqueeze(0)
         y = y.unsqueeze(0)
-        return self.loss_fn(prediction, y)
+        return self.loss_fn(logits, y)
 
     def infer(self, text):
         prediction = self(text)
