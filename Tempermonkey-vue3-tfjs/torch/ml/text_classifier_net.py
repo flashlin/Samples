@@ -169,7 +169,6 @@ class WordEmbeddingModel(nn.Module):
         input_seq = torch.tensor(input_seq, dtype=torch.float).unsqueeze(dim=1)  # [[1],[2],[3]]
         # 將多個單字向量組合起來
         output = self.merge(input_seq)
-        # return torch.mean(output, dim=0)
         return output
 
 
@@ -209,9 +208,10 @@ def pad_batch_sequence(batch_tensor, max_length):
 
 
 class LitTransformer2(BaseLightning):
-    def __init__(self, vocab):
+    def __init__(self):
         super().__init__()
-        self.vocab = vocab
+        vocab = ProgramLangVocab()
+        self.model = TextClassifier(vocab=vocab, num_class=vocab.get_size())
         # CrossEntropyLoss((src_len, n_classes), (tgt_len))
         self.loss_fn = nn.CrossEntropyLoss(ignore_index=vocab.padding_idx)
 
