@@ -17,7 +17,8 @@ from utils.stream import StreamTokenIterator, Token, EmptyToken, read_identifier
 class ProgramLangVocab:
     def __init__(self):
         printable = ['<pad>', '<bos>', '<eos>'] + [char for char in string.printable]
-        spec_symbols = '<= >= != <> == && || += -= /= *= %='.split(' ')
+        spec_symbols = '< > <= >= != <> == && || += -= /= *= %= ' \
+                       '( ) { } [ ] . ` @ # $ % ^ & * - + = _ | \\ : " ; \' , . / ?'.split(' ')
         printable += spec_symbols
         self.vocab_size = len(printable)
         self.spec_symbols = spec_symbols

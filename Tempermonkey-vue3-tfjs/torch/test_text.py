@@ -5,6 +5,7 @@ from torch import nn
 from torch.autograd import Variable
 
 from common.io import info, get_file_by_lines_iter, info_error
+from ml.corpus_net import BpeVocab
 from ml.lit import PositionalEncoding, start_train, BaseLightning, load_model
 from ml.text_classifier_net import WordEmbeddingModel, TextEmbeddingModel, TextClassifier
 from ml.trans_linq2tsql import LinqToSqlVocab
@@ -57,6 +58,22 @@ def test_train1(text, n_class):
     info(f" infer {prediction=}")
 
 
+def test_bpe():
+    bpe = BpeVocab()
+
+    with open('train_data/linq.txt', 'r', encoding='utf-8') as f:
+        raw_list_of_text = f.readlines()
+    bpe.create_train_csv_file(raw_list_of_text)
+    bpe.train()
+    bpe.load()
+    # Encode a sentence using BPE
+    encoded_sentence = bpe.encode_tokens(['from', 'flash', 'from_flash'])
+    # Decode the encoded sentence using BPE
+    # decoded_sentence = bpe.decode(encoded_sentence)
+    info(f" {encoded_sentence=}")
+    s1 = bpe.decode_values(encoded_sentence)
+    info(f" {s1=}")
+
 def test():
     test_train1('from tb1 in customer select tb1', 1)
     test_train1('from tb1 in customer join tb2 in home select new { tb1.name, tb2.addr}', 2)
@@ -65,4 +82,5 @@ def test():
 if __name__ == '__main__':
     info(f" {vocab.get_size()}")
     # train()
-    test()
+    # test()
+    test_bpe()
