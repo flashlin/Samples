@@ -14,6 +14,7 @@ services.AddSingleton<MockDbContext>(sp =>
     var fac = sp.GetRequiredService<DbContextFactory>();
     return fac.Create<MockDbContext>();
 });
+services.AddSwaggerGen();
 
 
 var app = builder.Build();
@@ -30,8 +31,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.MapControllerRoute(
     name: "default",
