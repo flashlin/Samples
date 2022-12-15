@@ -1,10 +1,19 @@
 using MockApiWeb.Controllers;
+using MockApiWeb.Models.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddSingleton<DynamicApiTransformer>();
+
+var services = builder.Services;
+services.AddSingleton<DynamicApiTransformer>();
+services.AddSingleton<DbContextFactory>();
+services.AddSingleton<MockDbContext>(sp =>
+{
+    var fac = sp.GetRequiredService<DbContextFactory>();
+    return fac.Create<MockDbContext>();
+});
 
 
 var app = builder.Build();
@@ -28,6 +37,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapDynamicControllerRoute<DynamicApiTransformer>("api/{controller}/{action}");
+app.MapDynamicControllerRoute<DynamicApiTransformer>("mock_{product}/api/{controller}/{action}");
 
 app.Run();
