@@ -8,8 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\Apis" />
-      <Folder Include="Models\Middlewares" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="7.0.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="7.0.1" />
     </ItemGroup>
 
 </Project>

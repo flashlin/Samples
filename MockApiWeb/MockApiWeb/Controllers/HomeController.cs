@@ -1,6 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using MockApiWeb.Models;
 
 namespace MockApiWeb.Controllers;
@@ -31,42 +33,44 @@ public class HomeController : Controller
     }
 }
 
-[Route("api/[controller]/[action]")]
-[ApiController]
-public class MockWebApiController : ControllerBase
+public class MockDbContext : DbContext
 {
-    [HttpPost, HttpGet]
-    public JsonResult ProcessRequest([FromBody] dynamic request)
+    public MockDbContext(DbContextOptions<MockDbContext> options)
+        : base(options)
     {
-        return new JsonResult(new
-        {
-            Id = 123,
-            Name = "Flash"
-        });
     }
+
+    public DbSet<WebApiFuncInfoEntity> WebApiFuncInfos { get; set; } = null!;
 }
 
-public class DynamicApiTransformer : DynamicRouteValueTransformer
+[Table("WebApiFuncInfos")]
+public class WebApiFuncInfoEntity
 {
-    public DynamicApiTransformer()
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+    public string ProductName { get; set; } = string.Empty;
+    public string ActionName { get; set; } = string.Empty;
+    public WebApiAccessMethodType Method { get; set; }
+    public string ResponseContent { get; set; } = string.Empty;
+}
+
+public enum WebApiAccessMethodType
+{
+    Post,
+    Get
+}
+
+public class DbContextFactory
+{
+    public TContext Create<TContext>()
+        where TContext: DbContext
     {
-    }
- 
-    public override async ValueTask<RouteValueDictionary> TransformAsync(HttpContext httpContext, RouteValueDictionary values)
-    {
-        if (!values.ContainsKey("controller") || !values.ContainsKey("action"))
-        {
-            return values;
-        }
- 
-        var controller = (string?)values["controller"];
-        if (controller == null) return values;
-        values["controller"] = "MockWebApi";  //controller;
- 
-        var action = (string?)values["action"];
-        if (action == null) return values;
-        values["action"] = "ProcessRequest";//action;
- 
-        return values;
+        var cn = new SqliteConnection("data source=:memory:");
+        cn.Open();
+        var opt = new DbContextOptionsBuilder<TContext>()
+            .UseSqlite(cn).Options;
+        var db = (TContext)Activator.CreateInstance(typeof(TContext), opt)!;
+        db.Database.EnsureCreated();
+        return db;
     }
 }
