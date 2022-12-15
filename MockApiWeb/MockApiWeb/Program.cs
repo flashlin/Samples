@@ -1,12 +1,18 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MockApiWeb.Controllers;
+using MockApiWeb.Controllers.Apis;
 using MockApiWeb.Models.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
-
 var services = builder.Services;
+services.AddControllersWithViews();
+services.AddTransient<MockWebApiRequestBinder>();
+services.AddControllers(options =>
+{
+    options.ModelBinderProviders.Insert(0, new MockWebApiBinderProvider());
+});
 services.AddSingleton<DynamicApiTransformer>();
 services.AddSingleton<DbContextFactory>();
 services.AddSingleton<MockDbContext>(sp =>

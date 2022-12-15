@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MockApiWeb.Models.Requests;
 
 namespace MockApiWeb.Controllers.Apis;
 
@@ -7,12 +8,15 @@ namespace MockApiWeb.Controllers.Apis;
 public class MockWebApiController : ControllerBase
 {
     [HttpPost, HttpGet]
-    public JsonResult ProcessRequest([FromBody] dynamic? request)
+    public JsonResult ProcessRequest([FromBody] MockWebApiRequest req)
     {
         return new JsonResult(new
         {
             Id = 123,
-            Name = "Flash"
+            Name = "Flash",
+            Product = req.ProductName,
+            RequestBody = req.RequestBody,
+            RequestQueryString = req.RequestQueryString
         });
     }
 }
