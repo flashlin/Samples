@@ -4,15 +4,15 @@ namespace MockApiWeb.Controllers.Apis;
 
 [Route("api/[controller]/[action]")]
 [ApiController]
-public class MockWebApiController : ControllerBase
+public class MgmtApiController : ControllerBase
 {
-    [HttpPost, HttpGet]
-    public JsonResult ProcessRequest([FromBody] dynamic? request)
+    [HttpPost]
+    public JsonResult CreateDefaultResponse(string swaggerUrl)
     {
         return new JsonResult(new
         {
-            Id = 123,
-            Name = "Flash"
+            Id = 133,
+            Name = "Flashcc"
         });
     }
 }
