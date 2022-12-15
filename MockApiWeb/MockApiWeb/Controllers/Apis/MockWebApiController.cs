@@ -8,7 +8,7 @@ namespace MockApiWeb.Controllers.Apis;
 public class MockWebApiController : ControllerBase
 {
     [HttpPost, HttpGet]
-    public JsonResult ProcessRequest([FromBody] MockWebApiRequest req)
+    public JsonResult ProcessRequest(MockWebApiRequest req)
     {
         return new JsonResult(new
         {

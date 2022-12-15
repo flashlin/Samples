@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MockApiWeb.Controllers;
 using MockApiWeb.Controllers.Apis;
 using MockApiWeb.Models.Middlewares;
+using MockApiWeb.Models.Repos;
 
 var builder = WebApplication.CreateBuilder(args);
 
