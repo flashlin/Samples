@@ -12,8 +12,8 @@ namespace MockApiWeb.Controllers.Apis;
 [ApiController]
 public class MockWebApiController : ControllerBase
 {
-    private IMockDbRepo _mockDbRepo;
-    private IMapper _mapper;
+    private readonly IMockDbRepo _mockDbRepo;
+    private readonly IMapper _mapper;
 
     public MockWebApiController(IMockDbRepo mockDbRepo, IMapper mapper)
     {

@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 namespace MockApiWeb.Controllers.Apis;
 
@@ -44,7 +43,7 @@ public class SwaggerJsonDocument
 {
     public string OpenApi { get; set; } = "3.0.1";
     public SwaggerInfo Info { get; set; } = new();
-    public SwaggerPaths Paths { get; set; }
+    public SwaggerPaths Paths { get; set; } = new();
 }
 
 public class SwaggerPaths
@@ -53,10 +52,10 @@ public class SwaggerPaths
 
 public class SwaggerPath
 {
-    public string ApiUrl { get; set; }
-    public string AccessMethod { get; set; }
-    public string[] Tags { get; set; }
-    public List<SwaggerParameter> Parameters { get; set; }
+    public string ApiUrl { get; set; } = string.Empty;
+    public string AccessMethod { get; set; } = string.Empty;
+    public string[] Tags { get; set; } = Array.Empty<string>();
+    public List<SwaggerParameter> Parameters { get; set; } = new();
 }
 
 public class SwaggerParameterConverter : JsonConverter<SwaggerParameter>
@@ -79,7 +78,7 @@ public class SwaggerParameterConverter : JsonConverter<SwaggerParameter>
 
 public class SwaggerParameter
 {
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public string SwaggerDataType { get; set; } = "integer";
     public string Format { get; set; } = "int32";
 }
