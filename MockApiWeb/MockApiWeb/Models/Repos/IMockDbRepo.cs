@@ -4,6 +4,6 @@ namespace MockApiWeb.Models.Repos;
 
 public interface IMockDbRepo
 {
-    WebApiFuncInfoEntity GetWebApiResponseSetting(MockWebApiParameters req);
+    WebApiMockInfoEntity GetWebApiResponseSetting(MockWebApiParameters req);
     void AddMockWebApiSimpleSetting(MockWebApiSimpleSettingParameters req);
 }
