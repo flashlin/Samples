@@ -1,4 +1,4 @@
-using MockApiWeb.Models.DataObjects;
+using MockApiWeb.Models.Parameters;
 
 namespace MockApiWeb.Models.Repos;
 

@@ -1,4 +1,4 @@
-namespace MockApiWeb.Models.DataObjects;
+namespace MockApiWeb.Models.Parameters;
 
 public class MockWebApiSimpleSettingParameters
 {
