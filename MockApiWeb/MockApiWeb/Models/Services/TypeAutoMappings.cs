@@ -9,5 +9,6 @@ public class TypeAutoMappings : Profile
     public TypeAutoMappings()
     {
         CreateMap<MockWebApiRequest, MockWebApiParameters>();
+        CreateMap<MockWebApiSimpleSettingRequest, MockWebApiSimpleSettingParameters>();
     }
 }

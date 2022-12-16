@@ -26,6 +26,7 @@ public class MockWebApiController : ControllerBase
     public ActionResult ProcessRequest(MockWebApiRequest req)
     {
         var responseSettings = _mockDbRepo.GetWebApiResponseSetting(_mapper.Map<MockWebApiParameters>(req));
+        return responseSettings.GetResponseResult();
 
         if (responseSettings.ResponseStatus != 200)
         {
