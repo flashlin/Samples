@@ -20,6 +20,22 @@
             <td><input type="text" v-model="addMockWebApiForm.productName" /></td>
         </tr>
         <tr>
+            <td>ControllerName</td>
+            <td><input type="text" v-model="addMockWebApiForm.controllerName" /></td>
+        </tr>
+        <tr>
+            <td>ActionName</td>
+            <td><input type="text" v-model="addMockWebApiForm.actionName" /></td>
+        </tr>
+        <tr>
+            <td>Response Content</td>
+            <td><input type="text" v-model="addMockWebApiForm.responseContent" /></td>
+        </tr>
+        <tr>
+            <td>Response Status</td>
+            <td><input type="text" v-model="addMockWebApiForm.responseStatus" /></td>
+        </tr>
+        <tr>
             <td>
                 <button type="button" v-on:click="clickAddMockWebApi">Add</button>
                 <button type="button" v-on:click="clickShowAddMockWebApiPanel(false)">Cancel</button>
