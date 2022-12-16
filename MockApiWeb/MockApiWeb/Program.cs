@@ -21,7 +21,8 @@ services.AddSingleton<DbContextFactory>();
 services.AddSingleton(sp =>
 {
     var factory = sp.GetRequiredService<DbContextFactory>();
-    return factory.Create<MockDbContext>();
+    //return factory.Create<MockDbContext>();
+    return factory.CreateFile<MockDbContext>("d:/demo/mockWebApiDb.sqlite");
 });
 services.AddSingleton<IMockDbRepo, MockDbRepo>();
 services.AddCors();
