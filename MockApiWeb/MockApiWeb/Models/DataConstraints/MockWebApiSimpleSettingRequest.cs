@@ -6,5 +6,5 @@ public class MockWebApiSimpleSettingRequest
     public string ControllerName { get; set; } = string.Empty;
     public string ActionName { get; set; } = string.Empty;
     public string ResponseContent { get; set; } = string.Empty;
-    public int StatusCode { get; set; } = 200;
+    public int ResponseStatusCode { get; set; } = 200;
 }
