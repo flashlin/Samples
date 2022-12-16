@@ -17,11 +17,12 @@ services.AddControllers(options =>
 });
 services.AddSingleton<DynamicApiTransformer>();
 services.AddSingleton<DbContextFactory>();
-services.AddSingleton<MockDbContext>(sp =>
+services.AddSingleton(sp =>
 {
-    var fac = sp.GetRequiredService<DbContextFactory>();
-    return fac.Create<MockDbContext>();
+    var factory = sp.GetRequiredService<DbContextFactory>();
+    return factory.Create<MockDbContext>();
 });
+services.AddSingleton<IMockDbRepo, MockDbRepo>();
 services.AddSwaggerGen();
 
 
