@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using MockApiWeb.Models.Dtos;
+using MockApiWeb.Models.DataObjects;
 using MockApiWeb.Models.Repos;
 
 namespace MockApiWeb.Controllers.Apis;

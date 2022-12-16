@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Web;
 
-namespace MockApiWeb.Models.Dtos;
+namespace MockApiWeb.Models.DataObjects;
 
 public class MockWebApiRequest
 {

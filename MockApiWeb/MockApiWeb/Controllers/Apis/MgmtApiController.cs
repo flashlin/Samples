@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using MockApiWeb.Models.DataObjects;
 
 namespace MockApiWeb.Controllers.Apis;
 
@@ -9,7 +10,7 @@ namespace MockApiWeb.Controllers.Apis;
 public class MgmtApiController : ControllerBase
 {
     [HttpPost]
-    public JsonResult CreateDefaultResponse(string swaggerUrl)
+    public JsonResult CreateDefaultResponse(MockWebApiRequest req)
     {
         return new JsonResult(new
         {
