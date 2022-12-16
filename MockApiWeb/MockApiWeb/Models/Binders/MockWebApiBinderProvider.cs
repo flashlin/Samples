@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using MockApiWeb.Models.Binders;
 using MockApiWeb.Models.Requests;
 
 namespace MockApiWeb.Models.Middlewares;

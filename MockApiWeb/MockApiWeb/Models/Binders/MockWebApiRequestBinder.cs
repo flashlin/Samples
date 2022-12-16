@@ -2,17 +2,21 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MockApiWeb.Models.Requests;
 
-namespace MockApiWeb.Models.Middlewares;
+namespace MockApiWeb.Models.Binders;
 
 public class MockWebApiRequestBinder : IModelBinder
 {
+    private const string IdentifierPattern = "[A-Za-z_][A-Za-z_\\d]+";
+    private readonly Regex[] _requestUrlRegexList = new[]
+    {
+        $"^/mock_(?<product>{IdentifierPattern})/api/(?<controller>{IdentifierPattern})/(?<action>{IdentifierPattern})",
+        $"^/mock_(?<product>{IdentifierPattern})/(?<controller>{IdentifierPattern})/(?<action>{IdentifierPattern})",
+    }.Select(x => new Regex(x)).ToArray();
+
     public async Task BindModelAsync(ModelBindingContext bindingContext)
     {
         var reqPath = bindingContext.HttpContext.Request.Path.Value!;
-        var identifierPattern = "[A-Za-z_][A-Za-z_\\d]+";
-        var rg = new Regex(
-            $"^/mock_(?<product>{identifierPattern})/api/(?<controller>{identifierPattern})/(?<action>{identifierPattern})");
-        var match = rg.Match(reqPath);
+        var match = Match(reqPath);
         if (!match.Success)
         {
             return;
@@ -29,14 +33,19 @@ public class MockWebApiRequestBinder : IModelBinder
             RequestBody = requestBody,
             RequestQueryString = bindingContext.ActionContext.HttpContext.Request.QueryString.Value ?? string.Empty
         });
-        //bindingContext.ModelState.SetModelValue("ProductName", ModelBindingResult.Success(reqPath));
-        // var modelName = bindingContext.ModelName;
-        // var valueProviderResult = bindingContext.ValueProvider.GetValue(modelName);
-        // if (valueProviderResult == ValueProviderResult.None)
-        // {
-        //     return Task.CompletedTask;
-        // }
-        // bindingContext.ModelState.SetModelValue(modelName, valueProviderResult);
-        // bindingContext.Result = ModelBindingResult.Success(model);
+    }
+
+    private Match Match(string reqPath)
+    {
+        var len = _requestUrlRegexList.Length;
+        for (var n = 0; n < len - 1; n++)
+        {
+            var match = _requestUrlRegexList[n].Match(reqPath);
+            if (match.Success)
+            {
+                return match;
+            }
+        }
+        return _requestUrlRegexList[len - 1].Match(reqPath);
     }
 }
