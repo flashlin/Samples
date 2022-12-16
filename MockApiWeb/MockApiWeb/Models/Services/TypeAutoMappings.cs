@@ -1,6 +1,6 @@
 using AutoMapper;
 using MockApiWeb.Models.DataConstraints;
-using MockApiWeb.Models.DataObjects;
+using MockApiWeb.Models.Parameters;
 
 namespace MockApiWeb.Models.Services;
 
