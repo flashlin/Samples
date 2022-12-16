@@ -70,6 +70,21 @@
 </div>
 
 <script>
+async function postAsync(actionName, data) {
+    const rawResponse = await fetch(`/api/MgmtApi/${actionName}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+    console.log(rawResponse);
+    return rawResponse;
+}
+</script>
+
+<script>
 const { createApp, reactive, ref } = Vue;
 const app = createApp({
     setup(){
@@ -102,8 +117,9 @@ const app = createApp({
         const clickShowAddMockWebApiPanel = (enabled) => {
             showAddMockWebApiPanel.value = enabled;
         };
-        const clickAddMockWebApi = () => {
-            alert(addMockWebApiForm.productName);
+        const clickAddMockWebApi = async () => {
+            const resp = await postAsync('CreateDefaultResponse', addMockWebApiForm);
+            alert("success");
         };
         
         return { 
