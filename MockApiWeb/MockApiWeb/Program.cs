@@ -23,6 +23,7 @@ services.AddSingleton(sp =>
     return factory.Create<MockDbContext>();
 });
 services.AddSingleton<IMockDbRepo, MockDbRepo>();
+services.AddCors();
 services.AddSwaggerGen();
 
 
@@ -42,6 +43,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthorization();
 
+app.UseCors(options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 app.UseSwagger();
 app.UseSwaggerUI();
 
