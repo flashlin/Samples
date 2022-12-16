@@ -2,7 +2,29 @@
     ViewData["Title"] = "Home Page";
 }
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.30/vue.global.min.js"></script>
+
+
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<div id="app">
+    <p>Type: {{ framework.type }}</p>
+    <p>Framework: {{ framework.name }}</p>
+</div>
+
+<script>
+const { createApp, reactive } = Vue;
+const app = createApp({
+    setup(){
+        const framework = reactive({
+            type: "Frontend",
+            name: "Vue",
+        })
+        return { framework }
+    }
+})
+app.mount("#app");
+</script>
