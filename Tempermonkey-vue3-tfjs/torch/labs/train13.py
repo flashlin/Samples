@@ -27,7 +27,7 @@ def get_attn_pad_mask(seq_q, seq_k):
     batch_size, len_q = seq_q.size()
     batch_size, len_k = seq_k.size()
     # eq(zero) is PAD token
-    pad_attn_mask = seq_k.data.eq(0).unsqueeze(1)  # [batch_size, 1, len_k], False is masked
+    pad_attn_mask = seq_k.words.eq(0).unsqueeze(1)  # [batch_size, 1, len_k], False is masked
     return pad_attn_mask.expand(batch_size, len_q, len_k)  # [batch_size, len_q, len_k]
 
 
@@ -250,7 +250,7 @@ class Seq2SeqTransformer(nn.Module):
         enc_inputs = torch.tensor([linq_encode(input_text)]).to(device)
         greedy_dec_input = self.greedy_decoder(enc_inputs, start_symbol=BOS_TOKEN_VALUE)
         predict, _, _, _ = self(enc_inputs, greedy_dec_input)
-        predict = predict.data.max(1, keepdim=False)[1]
+        predict = predict.words.max(1, keepdim=False)[1]
         return predict.tolist()
 
     def greedy_decoder(self, enc_input, start_symbol):
@@ -262,7 +262,7 @@ class Seq2SeqTransformer(nn.Module):
         """
         enc_input = self.src_emb(enc_input)
         enc_outputs, enc_self_attns = self.transformer.encoder(enc_input)
-        dec_input = torch.zeros(1, 0).type_as(enc_input.data)
+        dec_input = torch.zeros(1, 0).type_as(enc_input.words)
         terminal = False
         next_symbol = start_symbol
         while not terminal:
@@ -272,7 +272,7 @@ class Seq2SeqTransformer(nn.Module):
             projected = self.projection(dec_outputs)
             prob = projected.squeeze(0).max(dim=-1, keepdim=False)[1]
             # print(f" {prob.data=}")
-            next_word = prob.data[-1]  # 拿最後一個字
+            next_word = prob.words[-1]  # 拿最後一個字
             next_symbol = next_word
             if next_symbol == EOS_TOKEN_VALUE:
                 terminal = True

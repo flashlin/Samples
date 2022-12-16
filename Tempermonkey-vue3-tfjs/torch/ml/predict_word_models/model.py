@@ -117,7 +117,7 @@ class CharRNN(nn.Module):
         if h is None:
             out, h = self.forward(inputs)
         else:
-            h = tuple([each.data for each in h])
+            h = tuple([each.words for each in h])
             out, h = self.forward(inputs, h)
 
         p = F.softmax(out, dim=1).data

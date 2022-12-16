@@ -55,7 +55,7 @@ class Translator:
         batch_size = len(input_sentences)
         beam_size = self.beam_size
 
-        src_tok = [torch.tensor(self.tok.encode(line)) for line in input_sentences]
+        src_tok = [torch.tensor(self.tok.encode_to_tokens(line)) for line in input_sentences]
 
         bos = [self.insert_target_start] * (batch_size * beam_size)
         bos = torch.LongTensor(bos)
@@ -76,7 +76,7 @@ class Translator:
             bos = bos.cuda()
 
         with torch.no_grad():
-            context = self.model.encode(src, src_length)
+            context = self.model.encode_to_tokens(src, src_length)
             context = [context, src_length, None]
 
             if beam_size == 1:

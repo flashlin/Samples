@@ -272,7 +272,7 @@ class LitTransformer2(BaseLightning):
 
     def infer(self, text):
         device = self.get_device()
-        text_to_indices = self.vocab.encode(text)
+        text_to_indices = self.vocab.encode_to_tokens(text)
 
         src = torch.tensor([text_to_indices]).type(torch.long).to(device)
         src = pad_batch_sequence(src, 200).type(torch.long).to(device)

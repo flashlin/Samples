@@ -118,7 +118,7 @@ class LitMiniGpt(BaseLightning):
 
     def infer(self, text):
         device = next(self.parameters()).device
-        text_values = self.vocab.encode(text)
+        text_values = self.vocab.encode_to_tokens(text)
         text_values = torch.tensor([text_values]).to(device)
         with torch.no_grad():
             output = self.model(text_values)

@@ -32,7 +32,7 @@ class TransformerModel(nn.Module):
     def init_weights(self) -> None:
         initrange = 0.1
         self.encoder.weight.data.uniform_(-initrange, initrange)
-        self.decoder.bias.data.zero_()
+        self.decoder.bias.words.zero_()
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, src: Tensor, src_mask: Tensor) -> Tensor:
@@ -96,7 +96,7 @@ class LitTransformer(BaseLightning):
 
     def infer(self, text):
         device = next(self.parameters()).device
-        text_values = self.vocab.encode(text)
+        text_values = self.vocab.encode_to_tokens(text)
         seq_length = len(text_values)
         src_mask = generate_square_subsequent_mask(seq_length).to(device)
         text_values = torch.tensor([text_values]).to(device).permute(1, 0)

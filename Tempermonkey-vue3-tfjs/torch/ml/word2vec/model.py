@@ -123,7 +123,7 @@ class Word2Vec(BaseLightning):
 
     def infer(self, vocab, word):
         self.cbow_model.eval()
-        value = vocab.encode(word, False)
+        value = vocab.encode_to_tokens(word, False)
         value = torch.tensor([value], dtype=torch.long).to(self.device)
         vec = self.cbow_model(value)
         return vec
@@ -155,7 +155,7 @@ class TranslateFileDataset(Dataset):
 
     def create_data_loader(self, data_set, batch_size):
         collate_fn = collate_cbow
-        text_pipeline = lambda x: self.vocab.encode(x, False)
+        text_pipeline = lambda x: self.vocab.encode_to_tokens(x, False)
         return DataLoader(dataset=data_set, batch_size=batch_size,
                           collate_fn=partial(collate_fn, text_pipeline=text_pipeline))
 

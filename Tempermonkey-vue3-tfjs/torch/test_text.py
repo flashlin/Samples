@@ -5,7 +5,8 @@ from torch import nn
 from torch.autograd import Variable
 
 from common.io import info, get_file_by_lines_iter, info_error
-from ml.corpus_net import BpeVocab
+from ml.corpus_net import BpeVocab, CharLevelBpeVocab
+from ml.bpe_utils import BPE, generate_bpe_vocabulary_and_merges
 from ml.lit import PositionalEncoding, start_train, BaseLightning, load_model
 from ml.text_classifier_net import WordEmbeddingModel, TextEmbeddingModel, TextClassifier
 from ml.trans_linq2tsql import LinqToSqlVocab
@@ -67,12 +68,13 @@ def test_bpe():
     bpe.train()
     bpe.load()
     # Encode a sentence using BPE
-    encoded_sentence = bpe.encode_tokens(['from', 'flash', 'from_flash'])
+    encoded_sentence = bpe.encode_tokens(['from', 'flash', 'from_flash', 'From'])
     # Decode the encoded sentence using BPE
     # decoded_sentence = bpe.decode(encoded_sentence)
     info(f" {encoded_sentence=}")
     s1 = bpe.decode_values(encoded_sentence)
     info(f" {s1=}")
+
 
 def test():
     test_train1('from tb1 in customer select tb1', 1)
@@ -83,4 +85,39 @@ if __name__ == '__main__':
     info(f" {vocab.get_size()}")
     # train()
     # test()
-    test_bpe()
+    # test_bpe()
+    v = CharLevelBpeVocab(None)
+
+    words = []
+    with open('ml/data/cvc.txt', 'r', encoding='utf-8') as f:
+        lines = f.readlines()
+        for line in lines:
+            for word in line.split(' '):
+                word = word.strip()
+                v.build_word(word)
+                words.append(word)
+
+    #words.append('1234567890')
+    # words.append('abcdefghijklmnopqrstuvwxyz')
+    # words.append('~!@#$%^&*()_+`_+{}|{}|:";\'<>?,./')
+    # v.merge()
+    # info(f" {v.word_freq=}")
+    # info(f" {v.pairs=}")
+    # v1 = v.encode('flash')
+    # info(f" {v1=}")
+    words = ['low', 'lower', 'sh']
+
+    v, m = generate_bpe_vocabulary_and_merges(words, 10)
+    # print(f" {v=}")
+    p = BPE()
+    p.build(words)
+    print(f" {p.tokens_frequencies=}")
+    print(f" {p.vocab_tokenization=}")
+    print(f" {p.token2index=}")
+    def encode(word):
+        encode_values = p.encode(word)
+        info(f" {word=} {encode_values=}")
+        s1 = p.decode(encode_values)
+        info(f" {s1=}")
+    encode('flash')
+    encode('lower')

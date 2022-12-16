@@ -199,7 +199,7 @@ class NMTDecoder(nn.Module):
 
             # step 2: Make a GRU step, getting a new hidden vector
             h_t = self.gru_cell(rnn_input, h_t)
-            self._cached_ht.append(h_t.cpu().data.numpy())
+            self._cached_ht.append(h_t.cpu().words.numpy())
 
             # step 3: use current hidden vector to attend to encoder state
             context_vectors, p_attn, _ = verbose_attention(encoder_state, h_t)

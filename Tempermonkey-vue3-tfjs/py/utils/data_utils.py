@@ -25,15 +25,15 @@ def group_to_lengths(arr_sorted: list[str]):
     return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
 
 
-def create_char2index_map(str_list: list[str]):
+def create_char2index_map(str_list: list[str], start=0):
     dictionary = {}
     for idx, key in enumerate(str_list):
-        dictionary[key] = idx
+        dictionary[key] = idx + start
     return dictionary
 
 
-def create_index2char_map(str_list: list[str]):
+def create_index2char_map(str_list: list[str], start=0):
     dictionary = {}
     for idx, key in enumerate(str_list):
-        dictionary[idx] = key
+        dictionary[idx + start] = key
     return dictionary

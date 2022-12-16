@@ -439,7 +439,7 @@ class Transformer(torch.nn.Module):
 
     def infer(self, vocab, inp_sentence, max_length=None):
         device = next(self.parameters()).device
-        inp_sentence_ids = vocab.encode(inp_sentence)
+        inp_sentence_ids = vocab.encode_to_tokens(inp_sentence)
         encoder_input = torch.tensor(inp_sentence_ids).unsqueeze(dim=0)  # =>[b=1, inp_seq_len]
 
         decoder_input = [vocab.bos_idx]

@@ -74,8 +74,8 @@ class TranslateListDataset(Dataset):
 
     def __getitem__(self, idx):
         src, tgt = self.data[idx]
-        src = self.vocab.encode(src)
-        tgt = self.vocab.encode(tgt)
+        src = self.vocab.encode_to_tokens(src)
+        tgt = self.vocab.encode_to_tokens(tgt)
         src = torch.tensor(src, dtype=torch.long)
         tgt = torch.tensor(tgt, dtype=torch.long)
         return src, len(src), tgt, len(tgt)
@@ -101,7 +101,7 @@ class TranslateCsvDataset(Dataset):
         return len(self.src)
 
     def encode_text(self, text):
-        buf = self.vocab.encode(text)
+        buf = self.vocab.encode_to_tokens(text)
         return [self.vocab.bos_idx] + buf + [self.vocab.eos_idx]
 
     def __getitem__(self, idx):
@@ -168,7 +168,7 @@ class LiTranslator(BaseLightning):
 
     def infer(self, text):
         vocab = self.vocab
-        src_values = vocab.encode(text)
+        src_values = vocab.encode_to_tokens(text)
         self.model.eval()
         device = next(self.parameters()).device
         src = torch.tensor([src_values], dtype=torch.long).to(device)

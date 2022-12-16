@@ -137,9 +137,9 @@ class MultiHeadAttention(nn.Module):
     def _reset_parameters(self):
         # Original Transformer initialization, see PyTorch documentation
         nn.init.xavier_uniform_(self.qkv_proj.weight)
-        self.qkv_proj.bias.data.fill_(0)
+        self.qkv_proj.bias.words.fill_(0)
         nn.init.xavier_uniform_(self.o_proj.weight)
-        self.o_proj.bias.data.fill_(0)
+        self.o_proj.bias.words.fill_(0)
 
     def forward(self, x, mask=None, return_attention=False):
         """
