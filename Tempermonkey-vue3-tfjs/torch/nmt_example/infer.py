@@ -123,13 +123,13 @@ plt.show()
 
 
 def get_source_sentence(vectorizer, batch_dict, index):
-    indices = batch_dict['x_source'][index].cpu().data.numpy()
+    indices = batch_dict['x_source'][index].cpu().words.numpy()
     vocab = vectorizer.source_vocab
     return sentence_from_indices(indices, vocab)
 
 
 def get_true_sentence(vectorizer, batch_dict, index):
-    return sentence_from_indices(batch_dict['y_target'].cpu().data.numpy()[index], vectorizer.target_vocab)
+    return sentence_from_indices(batch_dict['y_target'].cpu().words.numpy()[index], vectorizer.target_vocab)
 
 
 def get_sampled_sentence(vectorizer, batch_dict, index):
@@ -137,7 +137,7 @@ def get_sampled_sentence(vectorizer, batch_dict, index):
                    x_source_lengths=batch_dict['x_source_length'],
                    target_sequence=batch_dict['x_target'],
                    sample_probability=1.0)
-    return sentence_from_indices(torch.max(y_pred, dim=2)[1].cpu().data.numpy()[index], vectorizer.target_vocab)
+    return sentence_from_indices(torch.max(y_pred, dim=2)[1].cpu().words.numpy()[index], vectorizer.target_vocab)
 
 
 def get_all_sentences(vectorizer, batch_dict, index):

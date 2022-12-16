@@ -26,7 +26,7 @@ def padding_batch(sequences, padding_value):
     num = len(sequences)
     max_len = max([s.size(0) for s in sequences])
     out_dims = (num, max_len)
-    out_tensor = sequences[0].data.new(*out_dims).fill_(padding_value)
+    out_tensor = sequences[0].words.new(*out_dims).fill_(padding_value)
     for i, tensor in enumerate(sequences):
         length = tensor.size(0)
         out_tensor[i, :length] = tensor

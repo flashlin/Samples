@@ -12,12 +12,12 @@ class Fp16Optimizer:
         for param, param_w_grad in zip(params, params_with_grad):
             if param.grad is None:
                 param.grad = torch.nn.Parameter(torch.empty_like(param))
-            param.grad.data.copy_(param_w_grad.grad.data)
+            param.grad.data.copy_(param_w_grad.grad.words)
 
     @staticmethod
     def set_weights(params, new_params):
         for param, new_param in zip(params, new_params):
-            param.data.copy_(new_param.data)
+            param.words.copy_(new_param.words)
 
     def __init__(self, fp16_model, grad_clip=float('inf'), loss_scale=8192,
                  dls_downscale=2, dls_upscale=2, dls_upscale_interval=2048):
@@ -50,7 +50,7 @@ class Fp16Optimizer:
         self.set_grads(self.fp32_params, self.fp16_model.parameters())
         if self.loss_scale != 1.0:
             for param in self.fp32_params:
-                param.grad.data /= self.loss_scale
+                param.grad.words /= self.loss_scale
 
         norm = clip_grad_norm_(self.fp32_params, self.grad_clip)
 

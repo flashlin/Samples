@@ -253,5 +253,5 @@ class Seq2SeqNet(BaseLightning):
         return self.loss_fn(x_hat, y)
 
     def infer(self, text):
-        text_to_indices = self.vocab.encode(text)
+        text_to_indices = self.vocab.encode_to_tokens(text)
         return self.model.infer(text_to_indices, len(text))

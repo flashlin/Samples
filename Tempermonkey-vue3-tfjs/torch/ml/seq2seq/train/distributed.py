@@ -86,7 +86,7 @@ class DistributedDataParallel(Module):
         self.record = []
         self.create_hooks()
 
-        flat_dist_call([param.data for param in self.module.parameters()], dist.broadcast, (0,) )
+        flat_dist_call([param.words for param in self.module.parameters()], dist.broadcast, (0,))
 
     def create_hooks(self):
         #all reduce gradient hook
@@ -102,7 +102,7 @@ class DistributedDataParallel(Module):
                 self.record = [int(entry) for entry in t_record]
                 self.needs_refresh = False
 
-            grads = [param.grad.data for param in self.module.parameters() if param.grad is not None]
+            grads = [param.grad.words for param in self.module.parameters() if param.grad is not None]
             flat_dist_call(grads, dist.all_reduce)
 
         def flush_buckets():
@@ -114,7 +114,7 @@ class DistributedDataParallel(Module):
             for i in range(self.ready_end, len(self.param_state)):
                 param = self.param_refs[self.record[i]]
                 if param.grad is not None:
-                    grads.append(param.grad.data)
+                    grads.append(param.grad.words)
             grads = [param.grad.data for param in self.ready_params] + grads
 
             if(len(grads)>0):
@@ -163,7 +163,7 @@ class DistributedDataParallel(Module):
             self.param_state[param_ind] = 1
             return
 
-        grads = [param.grad.data for param in self.ready_params]
+        grads = [param.grad.words for param in self.ready_params]
 
         bucket = []
         bucket_inds = []

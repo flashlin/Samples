@@ -171,7 +171,7 @@ class LiSeq2Seq(BaseLightning):
     def infer(self, vocab, text, max_length=None):
         device = self.get_device()
         max_length = vocab.get_size() if max_length is None else max_length
-        text_to_indices = [vocab.get_value('<bos>')] + vocab.encode(text) + [vocab.get_value('<eos>')]
+        text_to_indices = [vocab.get_value('<bos>')] + vocab.encode_to_tokens(text) + [vocab.get_value('<eos>')]
         sentence_tensor = torch.LongTensor(text_to_indices).unsqueeze(1).to(device)
 
         # 取消梯度修正
