@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Web;
-using MockApiWeb.Models.Requests;
+using MockApiWeb.Models.Dtos;
 
 namespace MockApiWeb.Models.Repos;
 
@@ -13,7 +13,7 @@ public class MockDbRepo : IMockDbRepo
         _mockDbContext = mockDbContext;
     }
 
-    public WebApiFuncInfoEntity GetWebApiResponseSetting(MockWebApiRequest req)
+    public WebApiFuncInfoEntity GetWebApiResponseSetting(MockWebApiParameters req)
     {
         var data = _mockDbContext.WebApiFuncInfos
             .FirstOrDefault(x => x.ProductName == req.ProductName
@@ -25,33 +25,13 @@ public class MockDbRepo : IMockDbRepo
             return data;
         }
 
-
         return new WebApiFuncInfoEntity()
         {
             ProductName = req.ProductName,
             ControllerName = req.ControllerName,
             ActionName = req.ActionName,
-            ResponseContent = GetRequestJsonContent(req),
+            ResponseContent = req.GetRequestJsonContent(),
             ResponseStatus = 200
         };
-    }
-
-    private string GetRequestJsonContent(MockWebApiRequest req)
-    {
-        if (!string.IsNullOrEmpty(req.RequestBody))
-        {
-            return req.RequestBody;
-        }
-
-        if (!string.IsNullOrEmpty(req.RequestQueryString))
-        {
-            var nameValues = HttpUtility.ParseQueryString(req.RequestQueryString);
-            var dictionary = nameValues.AllKeys
-                .Select(key => key!)
-                .ToDictionary(key => key, key => nameValues[key]);
-            return JsonSerializer.Serialize(dictionary);
-        }
-
-        return string.Empty;
     }
 }

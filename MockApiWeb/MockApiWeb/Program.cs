@@ -4,12 +4,14 @@ using MockApiWeb.Controllers.Apis;
 using MockApiWeb.Models.Binders;
 using MockApiWeb.Models.Middlewares;
 using MockApiWeb.Models.Repos;
+using MockApiWeb.Models.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var services = builder.Services;
 services.AddControllersWithViews();
+services.AddAutoMappings();
 services.AddTransient<MockWebApiRequestBinder>();
 services.AddControllers(options =>
 {

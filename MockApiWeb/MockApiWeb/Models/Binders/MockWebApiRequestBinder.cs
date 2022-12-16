@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using MockApiWeb.Models.Requests;
+using MockApiWeb.Models.Dtos;
 
 namespace MockApiWeb.Models.Binders;
 
