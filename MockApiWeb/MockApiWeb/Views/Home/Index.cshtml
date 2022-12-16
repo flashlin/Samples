@@ -63,11 +63,7 @@ const app = createApp({
                 responseStatus: 200
             }
         ]);
-        const framework = reactive({
-            type: "Frontend",
-            name: "Vue",
-        })
-        return { mockWebApiData, framework }
+        return { mockWebApiData };
     }
 });
 app.mount("#app");
