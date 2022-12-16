@@ -1,6 +1,10 @@
+using System.Net;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using MockApiWeb.Models.Dtos;
 using MockApiWeb.Models.Repos;
-using MockApiWeb.Models.Requests;
 
 namespace MockApiWeb.Controllers.Apis;
 
@@ -9,18 +13,24 @@ namespace MockApiWeb.Controllers.Apis;
 public class MockWebApiController : ControllerBase
 {
     private IMockDbRepo _mockDbRepo;
+    private IMapper _mapper;
 
-    public MockWebApiController(IMockDbRepo mockDbRepo)
+    public MockWebApiController(IMockDbRepo mockDbRepo, IMapper mapper)
     {
+        _mapper = mapper;
         _mockDbRepo = mockDbRepo;
     }
     
-    
     [HttpPost, HttpGet]
-    public ContentResult ProcessRequest(MockWebApiRequest req)
+    public ActionResult ProcessRequest(MockWebApiRequest req)
     {
-        var responseSettings = _mockDbRepo.GetWebApiResponseSetting(req);
+        var responseSettings = _mockDbRepo.GetWebApiResponseSetting(_mapper.Map<MockWebApiParameters>(req));
 
+        if (responseSettings.ResponseStatus != 200)
+        {
+            return responseSettings.GetResponseResult();
+        }
+        
         return new ContentResult
         {
             Content = responseSettings.ResponseContent,
