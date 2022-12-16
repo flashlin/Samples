@@ -11,5 +11,5 @@ public class MockDbContext : DbContext
     {
     }
 
-    public DbSet<WebApiFuncInfoEntity> WebApiFuncInfos { get; set; } = null!;
+    public DbSet<WebApiMockInfoEntity> WebApiMockInfos { get; set; } = null!;
 }

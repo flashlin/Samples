@@ -5,8 +5,8 @@ using MockApiWeb.Controllers;
 
 namespace MockApiWeb.Models.Repos;
 
-[Table("WebApiFuncInfos")]
-public class WebApiFuncInfoEntity
+[Table("WebApiMockInfos")]
+public class WebApiMockInfoEntity
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }

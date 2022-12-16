@@ -14,9 +14,9 @@ public class MockDbRepo : IMockDbRepo
         _mockDbContext = mockDbContext;
     }
 
-    public WebApiFuncInfoEntity GetWebApiResponseSetting(MockWebApiParameters req)
+    public WebApiMockInfoEntity GetWebApiResponseSetting(MockWebApiParameters req)
     {
-        var data = _mockDbContext.WebApiFuncInfos.AsNoTracking()
+        var data = _mockDbContext.WebApiMockInfos.AsNoTracking()
             .FirstOrDefault(x => x.ProductName == req.ProductName
                                  && x.ControllerName == req.ControllerName
                                  && x.ActionName == req.ActionName);
@@ -26,7 +26,7 @@ public class MockDbRepo : IMockDbRepo
             return data;
         }
 
-        return new WebApiFuncInfoEntity()
+        return new WebApiMockInfoEntity()
         {
             ProductName = req.ProductName,
             ControllerName = req.ControllerName,
@@ -38,7 +38,7 @@ public class MockDbRepo : IMockDbRepo
 
     public void AddMockWebApiSimpleSetting(MockWebApiSimpleSettingParameters req)
     {
-        _mockDbContext.WebApiFuncInfos.Add(new WebApiFuncInfoEntity
+        _mockDbContext.WebApiMockInfos.Add(new WebApiMockInfoEntity
         {
             ProductName = req.ProductName,
             ControllerName = req.ControllerName,
