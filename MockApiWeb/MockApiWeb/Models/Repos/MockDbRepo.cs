@@ -15,17 +15,25 @@ public class MockDbRepo : IMockDbRepo
 
     public WebApiFuncInfoEntity GetWebApiResponseSetting(MockWebApiRequest req)
     {
-        return _mockDbContext.WebApiFuncInfos
+        var data = _mockDbContext.WebApiFuncInfos
             .FirstOrDefault(x => x.ProductName == req.ProductName
                                  && x.ControllerName == req.ControllerName
-                                 && x.ActionName == req.ActionName, new WebApiFuncInfoEntity()
-            {
-                ProductName = req.ProductName,
-                ControllerName = req.ControllerName,
-                ActionName = req.ActionName,
-                ResponseContent = GetRequestJsonContent(req),
-                ResponseStatus = 200
-            });
+                                 && x.ActionName == req.ActionName);
+
+        if (data != null)
+        {
+            return data;
+        }
+
+
+        return new WebApiFuncInfoEntity()
+        {
+            ProductName = req.ProductName,
+            ControllerName = req.ControllerName,
+            ActionName = req.ActionName,
+            ResponseContent = GetRequestJsonContent(req),
+            ResponseStatus = 200
+        };
     }
 
     private string GetRequestJsonContent(MockWebApiRequest req)

@@ -28,6 +28,8 @@ services.AddSwaggerGen();
 
 
 var app = builder.Build();
+SQLitePCL.raw.SetProvider(new SQLitePCL.SQLite3Provider_e_sqlite3());
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

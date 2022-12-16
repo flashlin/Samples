@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using MockApiWeb.Models.Repos;
 using MockApiWeb.Models.Requests;
 
 namespace MockApiWeb.Controllers.Apis;
@@ -7,22 +8,23 @@ namespace MockApiWeb.Controllers.Apis;
 [ApiController]
 public class MockWebApiController : ControllerBase
 {
-    public MockWebApiController()
+    private IMockDbRepo _mockDbRepo;
+
+    public MockWebApiController(IMockDbRepo mockDbRepo)
     {
-        
+        _mockDbRepo = mockDbRepo;
     }
     
     
     [HttpPost, HttpGet]
-    public JsonResult ProcessRequest(MockWebApiRequest req)
+    public ContentResult ProcessRequest(MockWebApiRequest req)
     {
-        return new JsonResult(new
+        var responseSettings = _mockDbRepo.GetWebApiResponseSetting(req);
+
+        return new ContentResult
         {
-            Id = 123,
-            Name = "Flash",
-            Product = req.ProductName,
-            RequestBody = req.RequestBody,
-            RequestQueryString = req.RequestQueryString
-        });
+            Content = responseSettings.ResponseContent,
+            ContentType = "application/json"
+        };
     }
 }
