@@ -1,7 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using MockApiWeb.Models.DataConstraints;
 using MockApiWeb.Models.DataObjects;
+using MockApiWeb.Models.Repos;
 
 namespace MockApiWeb.Controllers.Apis;
 
@@ -9,14 +12,20 @@ namespace MockApiWeb.Controllers.Apis;
 [ApiController]
 public class MgmtApiController : ControllerBase
 {
-    [HttpPost]
-    public JsonResult CreateDefaultResponse(MockWebApiRequest req)
+    private IMockDbRepo _mockDbRepo;
+    private IMapper _mapper;
+
+    public MgmtApiController(IMockDbRepo mockDbRepo, IMapper mapper)
     {
-        return new JsonResult(new
-        {
-            Id = 133,
-            Name = "Flashcc"
-        });
+        _mapper = mapper;
+        _mockDbRepo = mockDbRepo;
+    }
+    
+    [HttpPost]
+    public ActionResult CreateDefaultResponse(MockWebApiSimpleSettingRequest req)
+    {
+        _mockDbRepo.AddMockWebApiSimpleSetting(_mapper.Map<MockWebApiSimpleSettingParameters>(req));
+        return Ok();
     }
 }
 
