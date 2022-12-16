@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using MockApiWeb.Models.Binders;
 using MockApiWeb.Models.DataConstraints;
 
-namespace MockApiWeb.Models.Middlewares;
+namespace MockApiWeb.Models.Binders;
 
 public class MockWebApiBinderProvider : IModelBinderProvider
 {

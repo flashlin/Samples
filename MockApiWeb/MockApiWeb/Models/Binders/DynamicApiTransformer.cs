@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Routing;
 
-namespace MockApiWeb.Models.Middlewares;
+namespace MockApiWeb.Models.Binders;
 
 public class DynamicApiTransformer : DynamicRouteValueTransformer
 {

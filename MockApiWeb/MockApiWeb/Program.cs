@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MockApiWeb.Controllers;
 using MockApiWeb.Controllers.Apis;
 using MockApiWeb.Models.Binders;
-using MockApiWeb.Models.Middlewares;
 using MockApiWeb.Models.Repos;
 using MockApiWeb.Models.Services;
 
