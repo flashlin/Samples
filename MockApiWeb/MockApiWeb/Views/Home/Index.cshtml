@@ -13,7 +13,19 @@
 </div>
 
 <div id="app">
-    <p>Framework: {{ framework.name }}</p>
+    <button type="button" class="btn btn-primary" v-on:click="clickShowAddMockWebApiPanel(true)">Add MockWebApi</button>
+    <table v-if="showAddMockWebApiPanel">
+        <tr>
+            <td>ProductName</td>
+            <td><input type="text" v-model="addMockWebApiForm.productName" /></td>
+        </tr>
+        <tr>
+            <td>
+                <button type="button" v-on:click="clickAddMockWebApi">Add</button>
+                <button type="button" v-on:click="clickShowAddMockWebApiPanel(false)">Cancel</button>
+            </td>
+        </tr>
+    </table>
     <table class="table">
         <thead>
         <tr>
@@ -42,7 +54,7 @@
 </div>
 
 <script>
-const { createApp, reactive } = Vue;
+const { createApp, reactive, ref } = Vue;
 const app = createApp({
     setup(){
         const mockWebApiData = reactive([
@@ -63,7 +75,28 @@ const app = createApp({
                 responseStatus: 200
             }
         ]);
-        return { mockWebApiData };
+        const showAddMockWebApiPanel = ref(false);
+        const addMockWebApiForm = reactive({
+            productName: "santa",
+            controllerName: "Customer",
+            actionName: "GetCustomer",
+            responseContent: `{"id": 123}`,
+            responseStatus: 200
+        });
+        const clickShowAddMockWebApiPanel = (enabled) => {
+            showAddMockWebApiPanel.value = enabled;
+        };
+        const clickAddMockWebApi = () => {
+            alert(addMockWebApiForm.productName);
+        };
+        
+        return { 
+            mockWebApiData,
+            showAddMockWebApiPanel,
+            addMockWebApiForm,
+            clickShowAddMockWebApiPanel,
+            clickAddMockWebApi
+        };
     }
 });
 app.mount("#app");
