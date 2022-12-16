@@ -12,8 +12,8 @@ namespace MockApiWeb.Controllers.Apis;
 [ApiController]
 public class MgmtApiController : ControllerBase
 {
-    private IMockDbRepo _mockDbRepo;
-    private IMapper _mapper;
+    private readonly IMockDbRepo _mockDbRepo;
+    private readonly IMapper _mapper;
 
     public MgmtApiController(IMockDbRepo mockDbRepo, IMapper mapper)
     {
@@ -31,7 +31,7 @@ public class MgmtApiController : ControllerBase
 
 public class SwaggerJsonFetcher
 {
-    private HttpClient _httpClient;
+    private readonly HttpClient _httpClient;
 
     public SwaggerJsonFetcher(IHttpClientFactory httpClientFactory)
     {
