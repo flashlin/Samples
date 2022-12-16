@@ -18,28 +18,24 @@
         <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col">First</th>
-            <th scope="col">Last</th>
-            <th scope="col">Handle</th>
+            <th scope="col">ProductName</th>
+            <th scope="col">ControllerName</th>
+            <th scope="col">ActionName</th>
+            <th scope="col">RequestContent</th>
+            <th scope="col">ResponseContent</th>
+            <th scope="col">ResponseStatus</th>
         </tr>
         </thead>
+        
         <tbody>
-        <tr>
+        <tr v-for="item in mockWebApiData">
             <th scope="row">1</th>
-            <td>Mark</td>
-            <td>Otto</td>
-            <td>mdo</td>
-        </tr>
-        <tr>
-            <th scope="row">2</th>
-            <td>Jacob</td>
-            <td>Thornton</td>
-            <td>fat</td>
-        </tr>
-        <tr>
-            <th scope="row">3</th>
-            <td colspan="2">Larry the Bird</td>
-            <td>twitter</td>
+            <td>{{ item.productName }}</td>
+            <td>{{ item.controllerName }}</td>
+            <td>{{ item.actionName }}</td>
+            <td>{{ item.requestContent }}</td>
+            <td>{{ item.responseContent }}</td>
+            <td>{{ item.responseStatus }}</td>
         </tr>
         </tbody>
     </table>
@@ -49,11 +45,29 @@
 const { createApp, reactive } = Vue;
 const app = createApp({
     setup(){
+        const mockWebApiData = reactive([
+            {
+                productName: "santa",
+                controllerName: "Customer",
+                actionName: "GetCustomer",
+                requestContent: "",
+                responseContent: `{"id": 123}`,
+                responseStatus: 200
+            },
+            {
+                productName: "santa",
+                controllerName: "Customer",
+                actionName: "AddCustomer",
+                requestContent: "",
+                responseContent: `{"code": 123}`,
+                responseStatus: 200
+            }
+        ]);
         const framework = reactive({
             type: "Frontend",
             name: "Vue",
         })
-        return { framework }
+        return { mockWebApiData, framework }
     }
 });
 app.mount("#app");
