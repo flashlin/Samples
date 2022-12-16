@@ -1,5 +1,5 @@
 using AutoMapper;
-using MockApiWeb.Models.Dtos;
+using MockApiWeb.Models.DataObjects;
 
 namespace MockApiWeb.Models.Services;
 
