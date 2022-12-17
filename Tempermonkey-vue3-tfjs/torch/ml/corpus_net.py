@@ -4,6 +4,7 @@ import re
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from ml.lit import BaseLightning
 from ml.text_classifier_net import ProgramLangVocab
@@ -64,6 +65,87 @@ class SpmVocab:
 
 
 # pip install sentence-transformers
+
+def inputs_to_next_word_labels(inputs):
+    """
+    :param inputs: [1, 2, 3, 4]
+    :return: [2, 3, 4, 0]
+    """
+    if len(inputs) > 1:
+        return inputs[1:] + [0]
+    else:
+        return inputs
+
+
+def inputs_batch_to_labels(inputs_batch):
+    """
+    :param inputs_batch: [[1,2,3],[4,5,6]]
+    :return: [[2,3,0],[5,6,0]]
+    """
+    labels_batch = []
+    for n in range(len(inputs_batch)):
+        labels = inputs_to_next_word_labels(inputs_batch[n])
+        labels_batch.append(labels)
+    return labels_batch
+
+
+class ContextVecModel(nn.Module):
+    def __init__(self, vocab_size, embedding_dim):
+        super().__init__()
+        self.vocab_size = vocab_size
+        self.embedding_dim = embedding_dim
+        self.embeddings = nn.Embedding(vocab_size, embedding_dim)
+        self.linear1 = nn.Linear(2 * embedding_dim, 128)
+        self.linear2 = nn.Linear(128, vocab_size)
+        self.loss_fn = nn.CrossEntropyLoss()
+
+    def forward(self, inputs):
+        # 取出詞彙的向量化表示
+        embeddings = self.embeddings(inputs)
+
+        # 計算詞彙的上下文出現機率
+        out = self.linear1(embeddings)
+        out = F.relu(out)
+        out = self.linear2(out)
+        out = F.log_softmax(out, dim=1)
+        return out
+
+    def get_word_vectors(self):
+        # 取出詞彙向量
+        word_vectors = self.embeddings.weight.data
+        return word_vectors
+
+    def calculate_loss(self, x_hat, y_true):
+        return self.loss_fn(x_hat, y_true)
+
+
+class SequenceEncoderDecoder(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(SequenceEncoderDecoder, self).__init__()
+        self.input_layer = nn.Linear(input_size, hidden_size)
+        self.hidden_layers = nn.ModuleList([nn.Linear(hidden_size, hidden_size) for _ in range(3)])
+        self.output_layer = nn.Linear(hidden_size, output_size)
+        self.decoder_layers = nn.ModuleList([nn.Linear(hidden_size, hidden_size) for _ in range(3)])
+
+    def forward(self, x):
+        """
+        :param x: (seq_len)
+        :return: 
+        """
+        encoded = []
+        for i in range(x.size(0)):
+            x_i = x[i]
+            x_prev = x[i - 1] if i > 0 else torch.zeros_like(x_i)
+            x_next = x[i + 1] if i < x.size(0) - 1 else torch.zeros_like(x_i)
+            x_encoded = self.input_layer(x_i) + self.input_layer(x_prev) + self.input_layer(x_next)
+            for hidden_layer in self.hidden_layers:
+                x_encoded = hidden_layer(x_encoded)
+            encoded.append(x_encoded)
+
+        decoded = encoded[-1]
+        for decoder_layer in self.decoder_layers:
+            decoded = decoder_layer(decoded)
+        return self.output_layer(decoded)
 
 
 class CorpusVocab:

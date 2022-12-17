@@ -98,11 +98,21 @@ class ProgramLangVocab:
 
     def tokenize_to_words(self, text: str) -> [str]:
         tokens = self.parse_to_tokens(text)
-        words = [token.text for token in tokens]
+        words = [token.text if token.type != Token.Spaces else ' ' for token in tokens]
         return words
 
     def get_value(self, char: str) -> int:
         return self.char2index[char]
+
+    def read_text_file_to_words(self, text_file):
+        all_tokens = []
+        with open(text_file, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.strip()
+                tokens = self.tokenize_to_words(line)
+                all_tokens += tokens
+        return all_tokens
 
 
 class TextClassifier(nn.Module):
