@@ -1,8 +1,14 @@
 import collections
+import os
 import re
 from collections import Counter
 
+from common.io import info
 from utils.data_utils import create_char2index_map, create_index2char_map
+
+
+def map_data_path(relative_file):
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), f"data/{relative_file}")
 
 
 def tokenize_word(text, sorted_tokens, unknown_token='</u>'):
@@ -97,56 +103,143 @@ def generate_bpe_vocabulary_and_merges(tokens, num_merges=10):
 
 def get_stats(vocab):
     pairs = collections.defaultdict(int)
-    for word, freq in vocab.items():
-        symbols = word.split()
+    for (symbols, freq) in vocab:
         for i in range(len(symbols) - 1):
             pairs[symbols[i], symbols[i + 1]] += freq
     return pairs
 
 
+def search_and_merge(alist, pair):
+    alist_len = len(alist)
+    str_len = len(pair)
+    result = []
+    pair_symbol = ''.join(pair)
+    n = 0
+    while n < alist_len:
+        part = ''.join(alist[n: n+str_len])
+        if part == pair_symbol:
+            result.append(part)
+            n += str_len
+            continue
+        result.append(alist[n])
+        n += 1
+    return result
+
+
+
 def merge_vocab(pair, vocab):
-    vocab_out = {}
+    vocab_out = StrListDict()
     new_symbol = ''.join(pair)
-    bigram = ' '.join(pair)
-    p = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
-    for word in vocab:
-        new_word = p.sub(new_symbol, word)
+    # bigram = ' '.join(pair)
+    # p = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
+    for word, count in vocab:
+        if new_symbol == 'from':
+            info(f" from {word=} {new_symbol=}")
+        new_word = search_and_merge(word, pair)
         vocab_out[new_word] = vocab[word]
     return vocab_out
 
 
 def get_tokens_from_vocab(vocab):
-    tokens_frequencies = collections.defaultdict(int)
     vocab_tokenization = {}
-    for word, freq in vocab.items():
-        word_tokens = word.split()
-        for token in word_tokens:
-            tokens_frequencies[token] += freq
-        vocab_tokenization[''.join(word_tokens)] = word_tokens
-    return tokens_frequencies, vocab_tokenization
+    for word, freq in vocab:
+        vocab_tokenization[''.join(word)] = word
+    return vocab_tokenization
+
+
+def dump(token_freq):
+    for token, count in token_freq:
+        print(f"{token}: {count}")
+
+
+class StrListDict(collections.UserDict):
+    @staticmethod
+    def get_key(alist):
+        def replace_char(ch):
+            if ch == '</s>':
+                return ' '
+            if ch == '</w>':
+                return ''
+            return ch
+        chars = [replace_char(char) for char in alist]
+        return ''.join(chars)
+
+    def __setitem__(self, alist, value):
+        # 檢查鍵是否為字符串列表
+        if self.is_key(alist):
+            key = ' '.join(alist)
+            if isinstance(value, int):
+                self.data[key] = (alist, value)
+            else:
+                raise ValueError("Value must be an integer")
+        else:
+            raise KeyError("Key must be a list of strings")
+
+    def __getitem__(self, alist):
+        if not self.is_key(alist):
+            raise KeyError(f"'{alist}' Key must be a list of string")
+        key = ' '.join(alist)
+        if key in self.data:
+            return self.data[key][1]
+        else:
+            raise KeyError(f"'{key}' Key not found")
+
+    def __iter__(self):
+        # 將字典鍵值對按鍵的字符串列表長度排序
+        items = sorted(self.data.items(), key=lambda x: -len(self.get_key(x[0])))
+        result = []
+        for (key, a_tuple) in items:
+            result.append(a_tuple)
+        return iter(result)
+
+    def __contains__(self, alist):
+        key = ' '.join(alist)
+        return key in self.data
+
+    def increase_count(self, alist):
+        if alist in self:
+            self[alist] += 1
+        else:
+            self[alist] = 1
+
+    @staticmethod
+    def is_key(alist):
+        return isinstance(alist, list) and all(isinstance(x, str) for x in alist)
 
 
 class BPE:
     def __init__(self):
-        self.tokens_frequencies = {}
+        self.char_frequencies = StrListDict()
         self.vocab_tokenization = []
         self.token2index = {}
         self.index2token = {}
 
-    def build(self, tokens):
-        tokens = [token.replace(' ', '</s>') for token in tokens]
-        vocab = collections.defaultdict(int)
-        for token in tokens:
-            vocab[' '.join(list(token)) + ' </w>'] += 1
-        self.run_merge_vocab(vocab)
-        sorted_tokens_tuple = sorted(self.tokens_frequencies.items(),
-                                     key=lambda item: (measure_token_length(item[0]), item[1]), reverse=True)
-        tokens = [token for (token, freq) in sorted_tokens_tuple] + ['</u>']
-        self.token2index = create_char2index_map(tokens, 1)
-        self.index2token = create_index2char_map(tokens, 1)
+    def dump(self):
+        info(f"char_freq")
+        for char, count in self.char_frequencies:
+            print(f"{char}: {count}")
+        print(f"{self.vocab_tokenization=}")
 
-    def run_merge_vocab(self, vocab):
-        num_merges = 5
+    def add_word_list(self, word_list):
+        for word in word_list:
+            self.add_word(word)
+
+    def build(self):
+        vocab = self.merge_vocab(self.char_frequencies)
+        word = [''.join(char) for (char, freq) in vocab] + ['</u>']
+        self.token2index = create_char2index_map(word, 1)
+        self.index2token = create_index2char_map(word, 1)
+
+    def add_word(self, word):
+        word = [char.replace(' ', '</s>') for char in word] + ['</w>']
+        vocab = self.char_frequencies
+        if word in vocab:
+            vocab[word] += 1
+        else:
+            vocab[word] = 1
+
+    def merge_vocab(self, vocab):
+        num_merges = 100
         for i in range(num_merges):
             pairs = get_stats(vocab)
             if not pairs:
@@ -155,11 +248,13 @@ class BPE:
             if pairs[best] == 1:
                 break
             vocab = merge_vocab(best, vocab)
-            tokens_frequencies, vocab_tokenization = get_tokens_from_vocab(vocab)
-            self.tokens_frequencies = tokens_frequencies
-            self.vocab_tokenization = vocab_tokenization
+        vocab_tokenization = get_tokens_from_vocab(vocab)
+        self.char_frequencies = vocab
+        self.vocab_tokenization = vocab_tokenization
+        return vocab
 
     def encode_to_tokens(self, word):
+        word += '</w>'
         if word in self.vocab_tokenization:
             return self.vocab_tokenization[word]
         return tokenize_word(text=word, sorted_tokens=self.token2index, unknown_token='</u>')
@@ -169,7 +264,47 @@ class BPE:
         return [self.token2index[token] for token in tokens]
 
     def decode(self, values):
+        def remove_w(t):
+            if t.endswith('</w>'):
+                return t[:-4]
+            return t
         tokens = [self.index2token[value] for value in values]
         tokens = [token.replace('</s>', ' ') for token in tokens]
+        tokens = [remove_w(token) for token in tokens]
         return ''.join(tokens)
 
+
+class TextEncoding:
+    def __init__(self, tokenizer):
+        self.tokenizer = tokenizer
+        self.bpe = BPE()
+        # self.read_cvc_file()
+
+    def encode(self, text):
+        values = []
+        words = self.tokenizer.tokenize_to_words(text)
+        for word in words:
+            values += self.bpe.encode(word)
+        return values
+
+    def decode(self, text_values):
+        return self.bpe.decode(text_values)
+
+    def build(self):
+        self.bpe.build()
+        self.bpe.dump()
+
+    def read_text_file(self, text_file):
+        words = self.tokenizer.read_text_file_to_words(text_file)
+        self.bpe.add_word_list(words)
+
+    def read_cvc_file(self):
+        words = []
+        cvc_file = map_data_path('cvc.txt')
+        with open(cvc_file, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            for line in lines:
+                for word in line.split(' '):
+                    word = word.strip()
+                    words.append(word)
+        self.bpe.add_word_list(words)

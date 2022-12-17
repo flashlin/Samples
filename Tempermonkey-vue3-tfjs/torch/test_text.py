@@ -5,10 +5,9 @@ from torch import nn
 from torch.autograd import Variable
 
 from common.io import info, get_file_by_lines_iter, info_error
-from ml.corpus_net import BpeVocab, CharLevelBpeVocab
-from ml.bpe_utils import BPE, generate_bpe_vocabulary_and_merges
-from ml.lit import PositionalEncoding, start_train, BaseLightning, load_model
-from ml.text_classifier_net import WordEmbeddingModel, TextEmbeddingModel, TextClassifier
+from ml.bpe_utils import BPE, generate_bpe_vocabulary_and_merges, TextEncoding
+from ml.lit import load_model
+from ml.text_classifier_net import WordEmbeddingModel, TextEmbeddingModel, TextClassifier, ProgramLangVocab
 from ml.trans_linq2tsql import LinqToSqlVocab
 from ml.translate_net import TranslateCsvDataset, convert_translate_file_to_csv
 
@@ -81,37 +80,11 @@ def test():
     test_train1('from tb1 in customer join tb2 in home select new { tb1.name, tb2.addr}', 2)
 
 
-if __name__ == '__main__':
-    info(f" {vocab.get_size()}")
-    # train()
-    # test()
-    # test_bpe()
-    v = CharLevelBpeVocab(None)
-
-    words = []
-    with open('ml/data/cvc.txt', 'r', encoding='utf-8') as f:
-        lines = f.readlines()
-        for line in lines:
-            for word in line.split(' '):
-                word = word.strip()
-                v.build_word(word)
-                words.append(word)
-
-    #words.append('1234567890')
-    # words.append('abcdefghijklmnopqrstuvwxyz')
-    # words.append('~!@#$%^&*()_+`_+{}|{}|:";\'<>?,./')
-    # v.merge()
-    # info(f" {v.word_freq=}")
-    # info(f" {v.pairs=}")
-    # v1 = v.encode('flash')
-    # info(f" {v1=}")
+def test_bpe():
     words = ['low', 'lower', 'sh']
-
-    v, m = generate_bpe_vocabulary_and_merges(words, 10)
-    # print(f" {v=}")
     p = BPE()
     p.build(words)
-    print(f" {p.tokens_frequencies=}")
+    print(f" {p.char_frequencies=}")
     print(f" {p.vocab_tokenization=}")
     print(f" {p.token2index=}")
     def encode(word):
@@ -121,3 +94,29 @@ if __name__ == '__main__':
         info(f" {s1=}")
     encode('flash')
     encode('lower')
+
+if __name__ == '__main__':
+    info(f" {vocab.get_size()}")
+    # train()
+    # test()
+    # test_bpe()
+    #words.append('1234567890')
+    # words.append('abcdefghijklmnopqrstuvwxyz')
+    # words.append('~!@#$%^&*()_+`_+{}|{}|:";\'<>?,./')
+    # v.merge()
+    # info(f" {v.word_freq=}")
+    # info(f" {v.pairs=}")
+    # v1 = v.encode('flash')
+    # info(f" {v1=}")
+
+    vocab = ProgramLangVocab()
+    model = TextEncoding(vocab)
+    model.read_text_file('train_data/linq.txt')
+    model.build()
+    s1 = "from tb1 in customer"
+    v1 = model.encode(s1)
+    print(f" {s1=}")
+    print(f" {v1=}")
+    s2 = model.decode(v1)
+    print(f" {s2=}")
+
