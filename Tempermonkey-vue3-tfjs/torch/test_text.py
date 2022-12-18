@@ -119,4 +119,8 @@ if __name__ == '__main__':
     print(f" {v1=}")
     s2 = model.decode(v1)
     print(f" {s2=}")
+    s1 = 'flash'
+    v1 = model.encode(s1)
+    s2 = model.decode(v1)
+    print(f" {s1=} {s2=}")
 
