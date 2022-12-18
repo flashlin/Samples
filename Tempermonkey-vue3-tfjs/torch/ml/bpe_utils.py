@@ -292,7 +292,7 @@ class TextEncoding:
 
     def build(self):
         self.bpe.build()
-        self.bpe.dump()
+        # self.bpe.dump()
 
     def read_text_file(self, text_file):
         words = self.tokenizer.read_text_file_to_words(text_file)
