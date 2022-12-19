@@ -28,4 +28,14 @@ public class DbContextFactory
         db.Database.EnsureCreated();
         return db;
     }
+    
+    public DbContextOptions<TContext> CreateFileOption<TContext>(string dbFile)
+        where TContext: DbContext
+    {
+        var cn = new SqliteConnection($"data source={dbFile}");
+        cn.Open();
+        return new DbContextOptionsBuilder<TContext>()
+            .UseSqlite(cn)
+            .Options;
+    }
 }
