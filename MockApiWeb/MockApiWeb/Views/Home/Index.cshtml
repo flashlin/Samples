@@ -84,7 +84,7 @@ async function postAsync(actionName, data) {
 </script>
 
 <script>
-const { createApp, reactive, ref } = Vue;
+const { createApp, reactive, ref, onMounted } = Vue;
 const app = createApp({
     setup(){
          const mockWebApiData = reactive([
@@ -130,6 +130,10 @@ const app = createApp({
             mockWebApiData.length = 0;
             Object.assign(mockWebApiData, data.pageData);
         };
+        
+        onMounted(() => {
+            clickQueryMockWebApiPage();
+        });
         
         return { 
             mockWebApiData,
