@@ -25,4 +25,10 @@ public class MgmtApiController : ControllerBase
         _mockDbRepo.AddMockWebApiSimpleSetting(_mapper.Map<MockWebApiSimpleSettingParameters>(req));
         return Ok();
     }
+
+    [HttpPost]
+    public DefaultResponsePageData QueryDefaultResponsePage(GetWebApiSimpleSettingRequest req)
+    {
+        return _mockDbRepo.QueryDefaultResponsePage(req);
+    }
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using MockApiWeb.Controllers;
 using MockApiWeb.Controllers.Apis;
 using MockApiWeb.Models.Binders;
@@ -21,10 +22,10 @@ services.AddSingleton<DbContextFactory>();
 services.AddSingleton(sp =>
 {
     var factory = sp.GetRequiredService<DbContextFactory>();
-    //return factory.Create<MockDbContext>();
-    return factory.CreateFile<MockDbContext>("d:/demo/mockWebApiDb.sqlite");
+    return factory.CreateFileOption<MockDbContext>("d:/demo/mockWebApiDb.sqlite");
 });
-services.AddSingleton<IMockDbRepo, MockDbRepo>();
+services.AddSingleton<MockDbContext>();
+services.AddTransient<IMockDbRepo, MockDbContext>();
 services.AddCors();
 services.AddSwaggerGen();
 
