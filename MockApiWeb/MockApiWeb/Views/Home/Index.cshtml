@@ -13,27 +13,28 @@
 </div>
 
 <div id="app">
+    <button type="button" v-on:click="clickQueryMockWebApiPage">Query</button>
     <button type="button" class="btn btn-primary" v-on:click="clickShowAddMockWebApiPanel(true)">Add MockWebApi</button>
     <table v-if="showAddMockWebApiPanel">
         <tr>
             <td>ProductName</td>
-            <td><input type="text" v-model="addMockWebApiForm.productName" /></td>
+            <td><input type="text" v-model="addMockWebApiForm.productName"/></td>
         </tr>
         <tr>
             <td>ControllerName</td>
-            <td><input type="text" v-model="addMockWebApiForm.controllerName" /></td>
+            <td><input type="text" v-model="addMockWebApiForm.controllerName"/></td>
         </tr>
         <tr>
             <td>ActionName</td>
-            <td><input type="text" v-model="addMockWebApiForm.actionName" /></td>
+            <td><input type="text" v-model="addMockWebApiForm.actionName"/></td>
         </tr>
         <tr>
             <td>Response Content</td>
-            <td><input type="text" v-model="addMockWebApiForm.responseContent" /></td>
+            <td><input type="text" v-model="addMockWebApiForm.responseContent"/></td>
         </tr>
         <tr>
             <td>Response Status</td>
-            <td><input type="text" v-model="addMockWebApiForm.responseStatus" /></td>
+            <td><input type="text" v-model="addMockWebApiForm.responseStatus"/></td>
         </tr>
         <tr>
             <td>
@@ -54,7 +55,7 @@
             <th scope="col">ResponseStatus</th>
         </tr>
         </thead>
-        
+
         <tbody>
         <tr v-for="item in mockWebApiData">
             <th scope="row">1</th>
@@ -71,7 +72,7 @@
 
 <script>
 async function postAsync(actionName, data) {
-    const rawResponse = await fetch(`/api/MgmtApi/${actionName}`, {
+    return await fetch(`/api/MgmtApi/${actionName}`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -79,8 +80,6 @@ async function postAsync(actionName, data) {
         },
         body: JSON.stringify(data)
     });
-    console.log(rawResponse);
-    return rawResponse;
 }
 </script>
 
@@ -88,7 +87,7 @@ async function postAsync(actionName, data) {
 const { createApp, reactive, ref } = Vue;
 const app = createApp({
     setup(){
-        const mockWebApiData = reactive([
+         const mockWebApiData = reactive([
             {
                 productName: "santa",
                 controllerName: "Customer",
@@ -121,13 +120,24 @@ const app = createApp({
             const resp = await postAsync('CreateDefaultResponse', addMockWebApiForm);
             alert("success");
         };
+        const clickQueryMockWebApiPage = async () => {
+            const resp = await postAsync('QueryDefaultResponsePage', {
+                borderBlockStartWidth: 0,
+                pageSize: 20
+            });
+            const data = await resp.json();
+            console.log('d', data.pageData);
+            mockWebApiData.length = 0;
+            Object.assign(mockWebApiData, data.pageData);
+        };
         
         return { 
             mockWebApiData,
             showAddMockWebApiPanel,
             addMockWebApiForm,
             clickShowAddMockWebApiPanel,
-            clickAddMockWebApi
+            clickAddMockWebApi,
+            clickQueryMockWebApiPage
         };
     }
 });
