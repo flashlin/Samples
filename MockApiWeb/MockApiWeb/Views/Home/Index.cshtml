@@ -14,7 +14,7 @@
 <div id="app">
     <button type="button" class="btn btn-info" v-on:click="clickQueryMockWebApiPage">Query</button>
     <button type="button" class="btn btn-primary" v-on:click="clickShowAddMockWebApiPanel(true)">Add MockWebApi</button>
-    <div v-if="showAddMockWebApiPanel">
+    <div v-if="data.showAddMockWebApiPanel">
         <partial name="AddMockWebApiForm"/>
         <button type="button" v-on:click="clickAddMockWebApi">Add</button>
         <button type="button" v-on:click="clickShowAddMockWebApiPanel(false)">Cancel</button>
@@ -100,10 +100,10 @@ const app = createApp({
                 responseContent: `{"id": 123}`,
                 responseStatus: 200
             },
+            showAddMockWebApiPanel: false,
         }); 
-        const showAddMockWebApiPanel = ref(false);
         const clickShowAddMockWebApiPanel = (enabled) => {
-            showAddMockWebApiPanel.value = enabled;
+            data.showAddMockWebApiPanel = enabled;
         };
         const clickAddMockWebApi = async () => {
             await postAsync('CreateDefaultResponse', data.addMockWebApiForm);
@@ -125,7 +125,6 @@ const app = createApp({
         
         return { 
             data, 
-            showAddMockWebApiPanel,
             clickShowAddMockWebApiPanel,
             clickAddMockWebApi,
             clickQueryMockWebApiPage
