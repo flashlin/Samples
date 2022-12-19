@@ -53,18 +53,19 @@ public class MockDbContext : DbContext, IMockDbRepo
 
     public DefaultResponsePageData QueryDefaultResponsePage(GetWebApiSimpleSettingRequest req)
     {
+        var queryForm = req.QueryForm;
         var predicate = PredicateBuilder.New<WebApiMockInfoEntity>(true);
-        if (!string.IsNullOrEmpty(req.ProductName))
+        if (!string.IsNullOrEmpty(queryForm.ProductName))
         {
-            predicate.And(x => x.ProductName.Contains(req.ProductName));
+            predicate.And(x => x.ProductName.Contains(queryForm.ProductName));
         }
-        if (!string.IsNullOrEmpty(req.ControllerName))
+        if (!string.IsNullOrEmpty(queryForm.ControllerName))
         {
-            predicate.And(x => x.ControllerName.Contains(req.ControllerName));
+            predicate.And(x => x.ControllerName.Contains(queryForm.ControllerName));
         }
-        if (!string.IsNullOrEmpty(req.ActionName))
+        if (!string.IsNullOrEmpty(queryForm.ActionName))
         {
-            predicate.And(x => x.ActionName.Contains(req.ActionName));
+            predicate.And(x => x.ActionName.Contains(queryForm.ActionName));
         }
 
         predicate.And(x => x.Id > req.StartId);
