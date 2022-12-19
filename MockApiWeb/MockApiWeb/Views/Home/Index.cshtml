@@ -26,19 +26,24 @@
             <th scope="col">ProductName</th>
             <th scope="col">ControllerName</th>
             <th scope="col">ActionName</th>
-            <th scope="col">RequestContent</th>
             <th scope="col">ResponseContent</th>
             <th scope="col">ResponseStatus</th>
         </tr>
         </thead>
-
         <tbody>
+        <tr>
+            <td>#</td>
+            <td><input type="text" v-model="data.productName" /></td>
+            <td><input type="text" v-model="data.controllerName" /></td>
+            <td><input type="text" v-model="data.actionName" /></td>
+            <td><input type="text" v-model="data.responseContent" /></td>
+            <td><input type="text" v-model="data.responseStatus" /></td>
+        </tr>
         <tr v-for="item in mockWebApiData">
             <th scope="row">1</th>
             <td>{{ item.productName }}</td>
             <td>{{ item.controllerName }}</td>
             <td>{{ item.actionName }}</td>
-            <td>{{ item.requestContent }}</td>
             <td>{{ item.responseContent }}</td>
             <td>{{ item.responseStatus }}</td>
         </tr>
@@ -64,7 +69,16 @@ const { createApp, reactive, ref, onMounted } = Vue;
 
 const app = createApp({
     setup(){
-         const mockWebApiData = reactive([
+        const data = reactive({
+            queryForm: {
+                productName: "",
+                controllerName: "",
+                actionName: "",
+                responseContent: '',
+                responseStatus: ''
+            },
+        }); 
+        const mockWebApiData = reactive([
             {
                 productName: "santa",
                 controllerName: "Customer",
@@ -82,6 +96,10 @@ const app = createApp({
                 responseStatus: 200
             }
         ]);
+        const showQueryMockWebApiPanel = ref(false);
+        const clickShowQueryMockWebApiPanel = () => {
+            showQueryMockWebApiPanel.value = true;
+        };
         const showAddMockWebApiPanel = ref(false);
         const addMockWebApiForm = reactive({
             productName: "santa",
@@ -113,7 +131,9 @@ const app = createApp({
         });
         
         return { 
+            data, 
             mockWebApiData,
+            showQueryMockWebApiPanel,
             showAddMockWebApiPanel,
             addMockWebApiForm,
             clickShowAddMockWebApiPanel,
