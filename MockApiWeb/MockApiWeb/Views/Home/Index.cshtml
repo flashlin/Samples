@@ -93,22 +93,22 @@ const app = createApp({
                     responseStatus: 200
                 },
             ],
+            addMockWebApiForm: {
+                productName: "santa",
+                controllerName: "Customer",
+                actionName: "GetCustomer",
+                responseContent: `{"id": 123}`,
+                responseStatus: 200
+            },
         }); 
         const showAddMockWebApiPanel = ref(false);
-        const addMockWebApiForm = reactive({
-            productName: "santa",
-            controllerName: "Customer",
-            actionName: "GetCustomer",
-            responseContent: `{"id": 123}`,
-            responseStatus: 200
-        });
         const clickShowAddMockWebApiPanel = (enabled) => {
             showAddMockWebApiPanel.value = enabled;
         };
         const clickAddMockWebApi = async () => {
-            const resp = await postAsync('CreateDefaultResponse', addMockWebApiForm);
+            await postAsync('CreateDefaultResponse', data.addMockWebApiForm);
             alert("success");
-            clickShowAddMockWebApiPanel();
+            clickQueryMockWebApiPage();
         };
         const clickQueryMockWebApiPage = async () => {
             const response = await postAsync('QueryDefaultResponsePage', {
@@ -126,7 +126,6 @@ const app = createApp({
         return { 
             data, 
             showAddMockWebApiPanel,
-            addMockWebApiForm,
             clickShowAddMockWebApiPanel,
             clickAddMockWebApi,
             clickQueryMockWebApiPage
