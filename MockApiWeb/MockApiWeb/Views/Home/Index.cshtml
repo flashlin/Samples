@@ -40,7 +40,7 @@
             <td><input type="text" v-model="data.queryForm.responseStatus" /></td>
         </tr>
         <tr v-for="item in data.pageData">
-            <th scope="row">1</th>
+            <th scope="row">{{ item.id }}</th>
             <td>{{ item.productName }}</td>
             <td>{{ item.controllerName }}</td>
             <td>{{ item.actionName }}</td>
