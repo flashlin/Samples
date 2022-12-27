@@ -20,7 +20,6 @@ namespace T1.SqlDomParser
 
 	public interface SqlExpr : ISqlDom
 	{
-		//ValueType Type { get; }
 		public string ToSqlCode();
 	}
 

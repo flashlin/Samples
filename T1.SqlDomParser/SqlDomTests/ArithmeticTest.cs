@@ -16,32 +16,8 @@ namespace SqlDomTests
 		public void add()
 		{
 			var sql = "1 +2";
-			var expr = _sqlParser.ParseSql(sql);
-			expr.ShouldBe("1 + 2");
-		}
-
-		[Fact]
-		public void mul()
-		{
-			var sql = "1 * 2";
-			var expr = _sqlParser.ParseSql(sql);
-			expr.ShouldBe("1 * 2");
-		}
-
-		[Fact]
-		public void add_mul()
-		{
-			var sql = "1 + 2 * 3";
-			var expr = _sqlParser.ParseSql(sql);
-			expr.ShouldBe("1 + 2 * 3");
-		}
-
-		[Fact]
-		public void two_number()
-		{
-			var sql = "12";
-			var expr = _sqlParser.ParseSql(sql);
-			expr.ShouldBe("12");
+			Parse(sql);
+			ThenResultShouldBe("1 + 2");
 		}
 	}
 }
