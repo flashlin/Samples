@@ -1,17 +1,29 @@
-﻿using T1.SqlDomParser;
+﻿using FluentAssertions;
+using T1.SqlDom.Expressions;
 using Xunit.Abstractions;
 
 namespace SqlDomTests
 {
-	public class SqlTestBase
-	{
-		protected readonly ITestOutputHelper _outputHelper;
-		protected readonly SqlParser _sqlParser;
+    public class SqlTestBase
+    {
+        private readonly ITestOutputHelper _outputHelper;
+        private readonly SqlParser _sqlParser;
+        private SqlExpr _result = null!;
 
-		public SqlTestBase(ITestOutputHelper outputHelper)
-		{
-			this._outputHelper = outputHelper;
-			_sqlParser = new SqlParser();
-		}
-	}
+        protected SqlTestBase(ITestOutputHelper outputHelper)
+        {
+            _outputHelper = outputHelper;
+            _sqlParser = new SqlParser();
+        }
+
+        protected void Parse(string sql)
+        {
+            _result = _sqlParser.Parse(sql);
+        }
+
+        protected void ThenResultShouldBe(string expected)
+        {
+            _result.ToSqlString().Should().Be(expected);
+        }
+    }
 }
