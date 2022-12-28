@@ -21,12 +21,41 @@ public static class ParseHelper
     {
         foreach (var parseFunc in parseFuncList)
         {
-            var rc = parseFunc(inp);
-            if (rc.Success)
+            if (parseFunc.Try(inp, out var rc))
             {
                 return rc;
             }
         }
         return ParseResult.Empty;
+    }
+
+
+    public static ParseResult Match(ParseFunc parseFunc, InputStream inp, Func<ParseResult, ParseResult> mapFunc)
+    {
+        var position = inp.Position;
+        var rc = parseFunc(inp);
+        if (!rc.Success)
+        {
+            inp.Position = position;
+            return rc;
+        }
+        rc = mapFunc(rc);
+        if (!rc.Success)
+        {
+            inp.Position = position;
+        }
+        return rc;
+    }
+
+    public static bool Try(this ParseFunc parseFunc, InputStream inp, out ParseResult result)
+    {
+        var position = inp.Position;
+        result = parseFunc(inp);
+        if (!result.Success)
+        {
+            inp.Position = position;
+            return false;
+        }
+        return true;
     }
 }

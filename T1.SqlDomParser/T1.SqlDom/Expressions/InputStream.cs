@@ -113,7 +113,13 @@ public class InputStream
 
     public string SubStr(int start, int len)
     {
-        return Value.Substring(start, len);
+        var maxLen = Math.Min(Value.Length - start, len);
+        return Value.Substring(start, maxLen);
+    }
+
+    public override string ToString()
+    {
+        return SubStr(Position, 20);
     }
 }
 

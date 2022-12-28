@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using T1.SqlDomParser;
 
 namespace T1.SqlDom.Expressions;
@@ -39,19 +40,71 @@ public class SqlParser
 
     private SqlExpr ParseWhereClause(InputStream inp)
     {
-        return ParseOperatorExpr(inp);
+        return ParseHelper.Parse(ParseOperatorExpr, inp, "Where Expr");
     }
 
-    private ComparsionExpr ParseOperatorExpr(InputStream inp)
+    private ParseResult ParseConcatenate(InputStream inp)
     {
-        var left = ParseHelper.Parse(ParseConstant, inp, "Left Expr");
-        var op = ParseHelper.Parse(ParseOperator, inp, "operator");
-        var right = ParseHelper.Parse(ParseConstant, inp, "Right Expr");
-        return new ComparsionExpr
+        inp.SkipSpaces();
+        
+        var words = new[] { "AND", "OR" };
+        if (!inp.AcceptAnyKeyword(words, out var word))
         {
-            Left = left,
-            Oper = op,
-            Right = right,
+            return ParseResult.Empty;
+        }
+
+        return new ParseResult
+        {
+            Expr = new StringExpr
+            {
+                Value = word
+            },
+            Success = true
+        };
+    }
+
+    private ParseResult ParseOperatorExpr(InputStream inp)
+    {
+        if (!ParseHelper.Try(ParseConstant, inp, out var leftResult))
+        {
+            return ParseResult.Empty;
+        }
+
+        if (!ParseHelper.Try(ParseOperator, inp, out var opResult))
+        {
+            return ParseResult.Empty;
+        }
+
+        if (!ParseHelper.Try(ParseConstant, inp, out var rightResult))
+        {
+            return ParseResult.Empty;
+        }
+
+        var left = new ComparsionExpr
+        {
+            Left = leftResult.Expr,
+            Oper = opResult.Expr,
+            Right = rightResult.Expr
+        };
+
+        if (!ParseHelper.Try(ParseConcatenate, inp, out var concatenateResult))
+        {
+            return new ParseResult
+            {
+                Expr = left,
+                Success = true
+            };
+        }
+
+        return new ParseResult
+        {
+            Expr = new ComparsionExpr
+            {
+                Left = left,
+                Oper = concatenateResult.Expr,
+                Right = ParseHelper.Parse(ParseOperatorExpr, inp, "compare expr")
+            },
+            Success = true
         };
     }
 
@@ -60,7 +113,8 @@ public class SqlParser
         return ParseHelper.Any(new ParseFunc[]
         {
             ParseColumn,
-            ParseNumber
+            ParseNumber,
+            ParseIdentifier
         }, inp);
     }
 
@@ -169,17 +223,27 @@ public class SqlParser
         return columns;
     }
 
+
     private ParseResult ParseColumn(InputStream inp)
     {
         inp.SkipSpaces();
-        var column = new ColumnExpr
+
+        var column = new ColumnExpr();
+        if (!ParseHelper.Try(ParseIdentifier, inp, out var rc))
         {
-            Name = ParseHelper.Parse(ParseIdentifier, inp, "Column"),
-        };
+            return rc;
+        }
+
+        column.Name = rc.Expr;
 
         if (inp.AcceptKeyword("AS"))
         {
-            column.Alias = ParseHelper.Parse(ParseIdentifier, inp, "AliasName");
+            if (!ParseHelper.Try(ParseIdentifier, inp, out rc))
+            {
+                return rc;
+            }
+
+            column.Alias = rc.Expr;
         }
 
         return new ParseResult()
