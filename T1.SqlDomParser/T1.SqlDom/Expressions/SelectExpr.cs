@@ -7,14 +7,19 @@ namespace T1.SqlDom.Expressions
 	{
 		public List<SqlExpr> Columns { get; set; } = new();
 		public List<TableExpr> Tables { get; set; } = new();
-		public SqlExpr WhereClause { get; set; }
+		public SqlExpr WhereClause { get; set; } = Empty;
 		public override string ToSqlString()
 		{
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
 			sb.Append(Columns.ToSqlString(","));
+			sb.Append(" ");
 			sb.Append("FROM ");
 			sb.Append(Tables.ToSqlString(","));
+			if (WhereClause != Empty)
+			{
+				sb.Append(" WHERE " + WhereClause.ToSqlString());
+			}
 			return sb.ToString();
 		}
 	}

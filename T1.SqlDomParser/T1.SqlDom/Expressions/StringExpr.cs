@@ -8,4 +8,9 @@ public class StringExpr : SqlExpr
     {
         return Value;
     }
+
+    public override string ToString()
+    {
+        return ToSqlString();
+    }
 }

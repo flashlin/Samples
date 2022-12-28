@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace T1.SqlDom.Expressions;
 
 public class ComparsionExpr : SqlExpr
@@ -8,6 +10,10 @@ public class ComparsionExpr : SqlExpr
 
     public override string ToSqlString()
     {
-        throw new NotImplementedException();
+        var sb = new StringBuilder();
+        sb.Append(Left.ToSqlString());
+        sb.Append(" " + Oper.ToSqlString() + " ");
+        sb.Append(Right.ToSqlString());
+        return sb.ToString();
     }
 }

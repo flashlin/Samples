@@ -15,7 +15,7 @@ namespace SqlDomTests
 		{
 			var sql = "select name from customer where a > 1 and b >=2 or c = 3";
 			Parse(sql);
-			ThenResultShouldBe(sql);
+			ThenResultShouldBe("SELECT name FROM customer WHERE a > 1 AND b >=2 OR c = 3");
 		}
 	}
 }
