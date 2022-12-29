@@ -37,6 +37,8 @@ export interface IDataConverterData {
   targetText1: string;
   targetText2: string;
   targetText3: string;
+  targetApiUrl: string;
+  targetText4: string;
   lines: string[];
   isCamelCase: boolean;
   separator: string;
