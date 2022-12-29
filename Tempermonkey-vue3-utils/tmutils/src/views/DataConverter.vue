@@ -27,6 +27,8 @@ let data = reactive<IDataConverterData>({
   targetText1: "",
   targetText2: "",
   targetText3: "",
+  targetApiUrl: "http://xxx/api/xxx",
+  targetText4: "",
   lines: [],
   isCamelCase: true,
   separator: ',',
@@ -85,6 +87,37 @@ function objArrayJsonToText(objArrayJsonString: string): string {
     }
   });
   return result;
+}
+
+async function postJsonAsync(url: string, data: any)
+{
+  const rawResponse = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+  console.log(rawResponse);
+  return await rawResponse.json();
+}
+
+function onInvokeApiByObjArrayJson()
+{
+  let objArray: any[] = JSON.parse(data.sourceObjArrJson);
+  let result = "[";
+  let first = true;
+  objArray.forEach(async (obj) => {
+    let content = await postJsonAsync(data.targetApiUrl, obj); 
+    if( !first ) {
+      result += ",\n";
+    }
+    result += content;
+    first = false;
+  });
+  result += "]";
+  data.targetText4 = result;
 }
 
 function onConvertObjArrayJsonToTemplate() {
@@ -262,6 +295,19 @@ function onRefreshToJson() {
         </div>
         <div class="mb-3">
           <Textarea v-model="data.targetText3" rows="10" cols="80"></Textarea>
+        </div>
+      </TabPanel>
+      <TabPanel header="Obj Array Json To invoke API">
+        <div class="mb-3">
+          <Textarea v-model="data.sourceObjArrJson" rows="10" cols="80"></Textarea>
+        </div>
+        <div class="mb-3">
+          <InputText type="text" v-model="data.targetApiUrl"/>
+          <br/>
+          <Button :onclick="onInvokeApiByObjArrayJson">invoke Api foreach Obj Array Json</Button>
+        </div>
+        <div class="mb-3">
+          <Textarea v-model="data.targetText4" rows="10" cols="80"></Textarea>
         </div>
       </TabPanel>
     </TabView>
