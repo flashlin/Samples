@@ -48,7 +48,7 @@ public class SqlParser
         inp.SkipSpaces();
         
         var words = new[] { "AND", "OR" };
-        if (!inp.AcceptAnyKeyword(words, out var word))
+        if (!inp.AcceptAnyKeywordIgnoreCase(words, out var word))
         {
             return ParseResult.Empty;
         }
@@ -110,6 +110,7 @@ public class SqlParser
 
     private ParseResult ParseConstant(InputStream inp)
     {
+        inp.SkipSpaces();
         return ParseHelper.Any(new ParseFunc[]
         {
             ParseColumn,
@@ -151,7 +152,9 @@ public class SqlParser
 
     private ParseResult ParseOperator(InputStream inp)
     {
-        if (!inp.AcceptAnyKeyword(new[] { "==", "<=", ">=", "<", ">", "!=", "+", "-", "*", "/", "%" }, out var op))
+        inp.SkipSpaces();
+        
+        if (!inp.AcceptAnyKeyword(new[] { "<=", ">=", "<", ">", "!=", "=", "+", "-", "*", "/", "%" }, out var op))
         {
             return ParseResult.Empty;
         }
