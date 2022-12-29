@@ -21,6 +21,25 @@ public class InputStream
         }
     }
 
+
+    public bool AcceptAnyKeywordIgnoreCase(string[] list, out string outputString)
+    {
+        foreach (var searchString in list)
+        {
+            var len = searchString.Length;
+            var currentString = SubStr(Position, len);
+            if (string.Equals(currentString, searchString, StringComparison.OrdinalIgnoreCase))
+            {
+                Position += len;
+                outputString = searchString;
+                return true;
+            }
+        }
+
+        outputString = string.Empty;
+        return false;
+    }
+
     public bool AcceptAnyKeyword(string[] list, out string outputString)
     {
         foreach (var searchString in list)
