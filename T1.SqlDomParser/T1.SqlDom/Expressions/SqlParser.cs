@@ -1,5 +1,4 @@
 using System.Text.RegularExpressions;
-using Irony.Parsing;
 using T1.SqlDomParser;
 
 namespace T1.SqlDom.Expressions;
@@ -337,15 +336,5 @@ public class SqlParser
             },
             Success = true,
         };
-    }
-
-    public void Test1()
-    {
-        var grammar = new Grammar(caseSensitive: false);
-        var select_statement = new NonTerminal("select_statement");
-        select_statement.Rule = grammar.ToTerm("SELECT") + grammar.select_list + grammar.table_expression
-                                        + grammar.where_clause.Q()
-                                        + grammar.group_by_clause.Q()
-                                        + grammar.having_clause.Q();
     }
 }
