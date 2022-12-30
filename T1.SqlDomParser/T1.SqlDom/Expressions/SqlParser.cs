@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Irony.Parsing;
 using T1.SqlDomParser;
 
 namespace T1.SqlDom.Expressions;
@@ -40,14 +41,35 @@ public class SqlParser
 
     private SqlExpr ParseWhereClause(InputStream inp)
     {
+        inp.SkipSpaces();
         return ParseHelper.Parse(ParseOperatorExpr, inp, "Where Expr");
+    }
+
+    private static ParseResult ParseArithmetic(InputStream inp)
+    {
+        inp.SkipSpaces();
+        
+        var arithmetics = new[] {"+", "-", "*", "/", "%"};
+        if (!inp.AcceptAnyKeyword(arithmetics, out var arithmetic))
+        {
+            return ParseResult.Empty;
+        }
+
+        return new ParseResult
+        {
+            Expr = new StringExpr
+            {
+                Value = arithmetic,
+            },
+            Success = true,
+        };
     }
 
     private ParseResult ParseConcatenate(InputStream inp)
     {
         inp.SkipSpaces();
         
-        var words = new[] { "AND", "OR" };
+        var words = new[] {"AND", "OR"};
         if (!inp.AcceptAnyKeywordIgnoreCase(words, out var word))
         {
             return ParseResult.Empty;
@@ -65,14 +87,35 @@ public class SqlParser
 
     private ParseResult ParseOperatorExpr(InputStream inp)
     {
+        inp.SkipSpaces();
+        
+        if (inp.Accept('('))
+        {
+            if (!ParseHelper.Try(ParseOperatorExpr, inp, out var operatorResult))
+            {
+                return ParseResult.Empty;
+            }
+
+            inp.Expect(')');
+            return new ParseResult
+            {
+                Expr = new GroupExpr
+                {
+                    Expr = operatorResult.Expr,
+                },
+                Success = true,
+            };
+        }
+
         if (!ParseHelper.Try(ParseConstant, inp, out var leftResult))
         {
             return ParseResult.Empty;
         }
 
-        if (!ParseHelper.Try(ParseOperator, inp, out var opResult))
+        var matchOper = ParseHelper.MatchAny(inp, ParseArithmetic, ParseOperator);
+        if (matchOper.Func == null)
         {
-            return ParseResult.Empty;
+            return ParseResult.Fail("arithmetic or operator");
         }
 
         if (!ParseHelper.Try(ParseConstant, inp, out var rightResult))
@@ -80,12 +123,25 @@ public class SqlParser
             return ParseResult.Empty;
         }
 
-        var left = new ComparsionExpr
+        var left = SqlExpr.Empty;
+        if (matchOper.Func == ParseArithmetic)
         {
-            Left = leftResult.Expr,
-            Oper = opResult.Expr,
-            Right = rightResult.Expr
-        };
+            left = new ArithmeticExpr
+            {
+                Left = leftResult.Expr,
+                Oper = matchOper.Expr,
+                Right = rightResult.Expr
+            };
+        }
+        else if (matchOper.Func == ParseOperator)
+        {
+            left = new ComparsionExpr
+            {
+                Left = leftResult.Expr,
+                Oper = matchOper.Expr,
+                Right = rightResult.Expr
+            };
+        }
 
         if (!ParseHelper.Try(ParseConcatenate, inp, out var concatenateResult))
         {
@@ -110,7 +166,6 @@ public class SqlParser
 
     private ParseResult ParseConstant(InputStream inp)
     {
-        inp.SkipSpaces();
         return ParseHelper.Any(new ParseFunc[]
         {
             ParseColumn,
@@ -122,6 +177,7 @@ public class SqlParser
     private ParseResult ParseNumber(InputStream inp)
     {
         inp.SkipSpaces();
+        
         if (!inp.Accept(c => char.IsNumber(c), out var ch))
         {
             return ParseResult.Empty;
@@ -150,11 +206,10 @@ public class SqlParser
         };
     }
 
-    private ParseResult ParseOperator(InputStream inp)
+    private static ParseResult ParseOperator(InputStream inp)
     {
         inp.SkipSpaces();
-        
-        if (!inp.AcceptAnyKeyword(new[] { "<=", ">=", "<", ">", "!=", "=", "+", "-", "*", "/", "%" }, out var op))
+        if (!inp.AcceptAnyKeyword(new[] {"<=", ">=", "<", ">", "!=", "=", "+", "-", "*", "/", "%"}, out var op))
         {
             return ParseResult.Empty;
         }
@@ -184,6 +239,7 @@ public class SqlParser
 
     private TableExpr ParseTable(InputStream inp)
     {
+        inp.SkipSpaces();
         if (inp.Accept('('))
         {
             var subQuery = ParseExpr(inp);
@@ -230,7 +286,7 @@ public class SqlParser
     private ParseResult ParseColumn(InputStream inp)
     {
         inp.SkipSpaces();
-
+        
         var column = new ColumnExpr();
         if (!ParseHelper.Try(ParseIdentifier, inp, out var rc))
         {
@@ -260,6 +316,7 @@ public class SqlParser
     private ParseResult ParseIdentifier(InputStream inp)
     {
         inp.SkipSpaces();
+        
         var identifier = "";
         if (!inp.Accept(c => char.IsLetter(c) || c == '_', out var ch))
         {
@@ -280,5 +337,15 @@ public class SqlParser
             },
             Success = true,
         };
+    }
+
+    public void Test1()
+    {
+        var grammar = new Grammar(caseSensitive: false);
+        var select_statement = new NonTerminal("select_statement");
+        select_statement.Rule = grammar.ToTerm("SELECT") + grammar.select_list + grammar.table_expression
+                                        + grammar.where_clause.Q()
+                                        + grammar.group_by_clause.Q()
+                                        + grammar.having_clause.Q();
     }
 }

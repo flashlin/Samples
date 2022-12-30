@@ -24,6 +24,7 @@ public class InputStream
 
     public bool AcceptAnyKeywordIgnoreCase(string[] list, out string outputString)
     {
+        SkipSpaces();
         foreach (var searchString in list)
         {
             var len = searchString.Length;
@@ -42,6 +43,7 @@ public class InputStream
 
     public bool AcceptAnyKeyword(string[] list, out string outputString)
     {
+        SkipSpaces();
         foreach (var searchString in list)
         {
             var len = searchString.Length;
