@@ -28,6 +28,39 @@ public static class ParseHelper
         }
         return ParseResult.Empty;
     }
+    
+    
+    public static MatchParseFuncResult MatchAny(InputStream inp, params ParseFunc[] parseFuncList)
+    {
+        foreach (var item in parseFuncList.Select((parseFunc,idx) => (parseFunc, idx)))
+        {
+            if (item.parseFunc.Try(inp, out var rc))
+            {
+                return new MatchParseFuncResult
+                {
+                    Func = item.parseFunc,
+                    Expr = rc.Expr,
+                };
+            }
+        }
+        return new MatchParseFuncResult
+        {
+            Func = null,
+            Expr = SqlExpr.Empty,
+        };
+    }
+    
+    
+    public static bool TryBindAny(ParseFunc[] parseFuncList, InputStream inp, Action<SqlExpr> bind)
+    {
+        var match = MatchAny(inp, parseFuncList);
+        if (match.Func == null)
+        {
+            return false;
+        }
+        bind(match.Expr);
+        return true;
+    }
 
 
     public static ParseResult Match(ParseFunc parseFunc, InputStream inp, Func<ParseResult, ParseResult> mapFunc)
