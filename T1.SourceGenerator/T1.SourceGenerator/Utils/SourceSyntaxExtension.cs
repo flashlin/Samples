@@ -32,23 +32,26 @@ public static class SourceSyntaxExtension
             if (acceptedTrees.Contains(attribute.ApplicationSyntaxReference!.SyntaxTree))
                 ret.Add(attribute);
         }
+
         return ret;
     }
 
-    public static IEnumerable<AttributeData> GetAttributeDataList(this TypeDeclarationSyntax node, Compilation compilation)
+    public static IEnumerable<AttributeData> GetAttributeDataList(this TypeDeclarationSyntax node,
+        Compilation compilation)
     {
         return node.AttributeLists
             .SelectMany(x => x.GetAttributeDataList(compilation));
     }
 
-    public static IEnumerable<PropertySyntaxInfo> GetPropertiesSyntaxList(this SyntaxNode typeSyntaxNode, Compilation compilation)
-	{
-		var model = compilation.GetSemanticModel(typeSyntaxNode.SyntaxTree);
+    public static IEnumerable<PropertySyntaxInfo> GetPropertiesSyntaxList(this SyntaxNode typeSyntaxNode,
+        Compilation compilation)
+    {
+        var model = compilation.GetSemanticModel(typeSyntaxNode.SyntaxTree);
         var symbol = (model.GetDeclaredSymbol(typeSyntaxNode) as INamedTypeSymbol)!;
         foreach (var member in symbol.GetMembers())
         {
             if (member.Kind == SymbolKind.Property)
-				{
+            {
                 var property = (IPropertySymbol)member;
                 yield return new PropertySyntaxInfo
                 {
@@ -70,4 +73,10 @@ public class PropertySyntaxInfo
     public string Name { get; set; } = null!;
     public bool HasGetter { get; set; }
     public bool HasSetter { get; set; }
+}
+
+public class FileContentInfo
+{
+    public string Directory { get; set; }
+    public string Content { get; set; }
 }

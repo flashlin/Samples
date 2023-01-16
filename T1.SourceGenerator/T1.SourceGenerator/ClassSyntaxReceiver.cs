@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using T1.SourceGenerator.AutoMappingSlim;
+using T1.SourceGenerator.AutoMappingGen;
 
 namespace T1.SourceGenerator;
 
