@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace T1.SourceGenerator;
+namespace T1.SourceGenerator.AutoMappingSlim;
 
 public class AutoMappingDeclarationInfo
 {

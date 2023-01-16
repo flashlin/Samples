@@ -1,4 +1,4 @@
-namespace T1.SourceGenerator;
+namespace T1.SourceGenerator.AutoMappingSlim;
 
 public class AutoMappingMetadata
 {

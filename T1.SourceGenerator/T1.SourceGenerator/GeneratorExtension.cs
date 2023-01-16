@@ -102,56 +102,6 @@ public static class GeneratorExtension
 		return GetRoot(node.Parent);
 	}
 
-
-
-	//public static string GetAttributeNamespace(this AttributeSyntax attribute)
-	//{
-	//	var parent = attribute.Parent;
-	//	if (parent is ClassDeclarationSyntax classDecl)
-	//	{
-	//		return classDecl.GetNamespace();
-	//	}
-	//	else if (parent is NamespaceDeclarationSyntax namespaceDecl)
-	//	{
-	//		return namespaceDecl.Name.ToString();
-	//	}
-	//	else
-	//	{
-	//		return string.Empty;
-	//	}
-	//}
-
-	//public static string GetNamespace(this BaseTypeDeclarationSyntax syntax)
-	//{
-	//	var nameSpace = string.Empty;
-	//	var potentialNamespaceParent = syntax.Parent;
-
-	//	while (potentialNamespaceParent != null &&
-	//			 potentialNamespaceParent is not NamespaceDeclarationSyntax
-	//			 && potentialNamespaceParent is not FileScopedNamespaceDeclarationSyntax)
-	//	{
-	//		potentialNamespaceParent = potentialNamespaceParent.Parent;
-	//	}
-
-	//	if (potentialNamespaceParent is BaseNamespaceDeclarationSyntax namespaceParent)
-	//	{
-	//		nameSpace = namespaceParent.Name.ToString();
-
-	//		while (true)
-	//		{
-	//			if (namespaceParent.Parent is not NamespaceDeclarationSyntax parent)
-	//			{
-	//				break;
-	//			}
-
-	//			nameSpace = $"{namespaceParent.Name}.{nameSpace}";
-	//			namespaceParent = parent;
-	//		}
-	//	}
-
-	//	return nameSpace;
-	//}
-
 	private static string GetContentInParentheses(string value)
 	{
 		var match = Regex.Match(value, @"\(([^)]*)\)");
