@@ -72,7 +72,8 @@ public static class TypeDeclarationSyntaxExtension
 						new ArgumentDataSyntaxInfo
 						{
 							TypeFullName = constructorArgument.Type!.Name,
-							ValueTypeFullName = constructorArgument.Value!.ToString(),
+							ValueTypeFullName = (constructorArgument.Value == null) ? string.Empty : constructorArgument.Value.ToString(),
+							Value = constructorArgument.Value,
 						}
 					).ToList()
 				});

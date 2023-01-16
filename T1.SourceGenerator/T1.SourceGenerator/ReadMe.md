@@ -1,19 +1,18 @@
-
-
-```
-<ItemGroup>
-  <ProjectReference Include="..\T1.SourceGenerator\T1.SourceGenerator.csproj"
-                    OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-</ItemGroup>
-```
-
 ```
 dotnet add package Microsoft.CodeAnalysis.CSharp
 dotnet add package Microsoft.CodeAnalysis.Analyzers
 ```
 
+### How do I get started ?
+
+First, install T1.SourceGenerator nuget package.
+Attach AutoMapping Attribute on any class.
 
 ```csharp
+using T1.SourceGenerator.Attributes;
+namespace MyDemoApp;
+
+[AutoMapping(typeof(Employee))]
 public class User
 {
     public string Name { get; set; }
@@ -27,4 +26,10 @@ public class Employee
     public float Level { get; set; }
     public int Vip { get; }
 }
+```
+
+Then in your application code, execute the mappings:
+```csharp
+var source = new User();
+var dto = source.ToEmployee(); 
 ```

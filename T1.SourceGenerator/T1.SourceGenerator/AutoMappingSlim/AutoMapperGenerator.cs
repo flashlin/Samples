@@ -51,6 +51,7 @@ public class AutoMapperGenerator : ISourceGenerator
             {
                 var toClassFullName = autoMappingAttr.ToTypeFullName;
                 var toClassName = GetName(toClassFullName);
+                var toMethodName = autoMappingAttr.ToMethodName ?? $"To{toClassName}";
                 var toProperties = autoMappingAttr.ToTypeSyntax.GetPropertiesSyntaxList(compilation)
                     .Where(x => x.Accessibility == Accessibility.Public && x.HasSetter);
                 var sameProperties = from tb1 in fromProperties
@@ -58,7 +59,7 @@ public class AutoMapperGenerator : ISourceGenerator
                     select tb1.Name;
 
                 sourceBuilder.WriteLine(
-                    $@"public static {toClassFullName} To{toClassName}(this {fromClassFullName} source)");
+                    $@"public static {toClassFullName} {toMethodName}(this {fromClassFullName} source)");
                 sourceBuilder.WriteLine("{");
                 sourceBuilder.Indent++;
                 sourceBuilder.WriteLine($"var target = new {toClassFullName}();");
@@ -112,6 +113,7 @@ public class AutoMapperGenerator : ISourceGenerator
             .Select(x => new AutoMappingDeclarationInfo
             {
                 ToTypeFullName = x.ConstructorArguments[0].ValueTypeFullName,
+                ToMethodName = x.ConstructorArguments[1].Value as string,
                 ToTypeSyntax = compilation.GetAllTypes()
                     .First(t => t.TypeFullName == x.ConstructorArguments[0].ValueTypeFullName).SyntaxNode
             });

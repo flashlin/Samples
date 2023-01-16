@@ -6,4 +6,5 @@ public class AutoMappingDeclarationInfo
 {
     public string ToTypeFullName { get; set; } = null!;
     public TypeDeclarationSyntax ToTypeSyntax { get; set; } = null!;
+    public string? ToMethodName { get; set; }
 }
