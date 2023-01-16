@@ -1,7 +1,7 @@
 using T1.SourceGenerator.Attributes;
 namespace ConsoleDemoApp;
 
-[AutoMapping(typeof(UserDto))]
+[AutoMapping(typeof(UserDto), "ToXXX")]
 public class UserEntity
 {
     public int Id { get; set; }

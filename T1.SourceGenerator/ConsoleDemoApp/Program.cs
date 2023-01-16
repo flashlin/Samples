@@ -9,6 +9,6 @@ a.Name = "Test";
 a.Level = 3;
 var b = new UserDto();
 
-var c = a.ToUserDto();
+var c = a.ToXXX();
 Console.WriteLine(c.Name);
 
