@@ -1,12 +1,11 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using T1.SourceGenerator.Attributes;
 using T1.SourceGenerator.Utils;
 using IndentStringBuilder = T1.SourceGenerator.Utils.IndentStringBuilder;
 
-namespace T1.SourceGenerator;
+namespace T1.SourceGenerator.AutoMappingSlim;
 
 [Generator]
 public class AutoMapperGenerator : ISourceGenerator
@@ -55,7 +54,7 @@ public class AutoMapperGenerator : ISourceGenerator
                 var toProperties = autoMappingAttr.ToTypeSyntax.GetPropertiesSyntaxList(compilation)
                     .Where(x => x.Accessibility == Accessibility.Public && x.HasSetter);
                 var sameProperties = from tb1 in fromProperties
-                    join tb2 in toProperties on tb1.Name equals tb2.Name
+                    join tb2 in toProperties on new { tb1.Name, tb1.TypeFullName } equals new { tb2.Name, tb2.TypeFullName } 
                     select tb1.Name;
 
                 sourceBuilder.WriteLine(

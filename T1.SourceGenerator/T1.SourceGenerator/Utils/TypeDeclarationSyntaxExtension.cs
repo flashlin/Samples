@@ -1,9 +1,8 @@
-﻿using System.Text;
+using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using T1.SourceGenerator.Utils;
 
-namespace T1.SourceGenerator;
+namespace T1.SourceGenerator.Utils;
 
 
 public static class TypeDeclarationSyntaxExtension
