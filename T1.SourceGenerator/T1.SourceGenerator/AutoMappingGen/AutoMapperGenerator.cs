@@ -5,7 +5,7 @@ using T1.SourceGenerator.Attributes;
 using T1.SourceGenerator.Utils;
 using IndentStringBuilder = T1.SourceGenerator.Utils.IndentStringBuilder;
 
-namespace T1.SourceGenerator.AutoMappingSlim;
+namespace T1.SourceGenerator.AutoMappingGen;
 
 [Generator]
 public class AutoMapperGenerator : ISourceGenerator
