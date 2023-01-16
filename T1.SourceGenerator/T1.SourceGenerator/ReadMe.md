@@ -1,8 +1,3 @@
-```
-dotnet add package Microsoft.CodeAnalysis.CSharp
-dotnet add package Microsoft.CodeAnalysis.Analyzers
-```
-
 ### How do I get started ?
 
 First, install T1.SourceGenerator nuget package.
@@ -32,4 +27,21 @@ Then in your application code, execute the mappings:
 ```csharp
 var source = new User();
 var dto = source.ToEmployee(); 
+```
+
+If you hope change `ToEmployee()` method to other extension method, you can do this:
+```csharp
+[AutoMapping(typeof(Employee), "CloneToEmployee")]
+public class User
+{
+    public string Name { get; set; }
+    public int Level { get; set; }
+    public int Vip { get; set; }
+}
+```
+
+Then in your application code, execute the mappings:
+```csharp
+var source = new User();
+var dto = source.CloneToEmployee(); 
 ```
