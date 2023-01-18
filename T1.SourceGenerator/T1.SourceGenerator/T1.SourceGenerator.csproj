@@ -45,6 +45,14 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ApiClientGen" />
+      <EmbeddedResource Include="..\T1.SourceGenerator.Attributes\WebApiClientAttribute.cs">
+        <Link>Templates\WebApiAttribute.cs</Link>
+      </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="..\T1.SourceGenerator.Attributes\WebApiClient.cs">
+        <Link>Templates\WebApiClient.cs</Link>
+      </EmbeddedResource>
     </ItemGroup>
 </Project>

@@ -2,7 +2,7 @@ using System.Text;
 
 namespace T1.SourceGenerator.Utils;
 
-public class IndentStringBuilder
+internal class IndentStringBuilder
 {
     private readonly object _lockBase = new object();
 
