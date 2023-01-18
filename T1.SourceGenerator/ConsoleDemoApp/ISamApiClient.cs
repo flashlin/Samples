@@ -7,7 +7,7 @@ public interface IGlobalSetting
     string GetValue(String key);
 }
 
-[WebApiClient(ClientClassName = "SamApiClient")]
+[WebApiClient(ClientClassName = "SamApiClient", Namespace = "ConsoleDemoApp")]
 //[AutoConstructorInject(typeof(IGlobalSetting), "globalSetting", "globalSetting")]
 public interface ISamApiClient
 {

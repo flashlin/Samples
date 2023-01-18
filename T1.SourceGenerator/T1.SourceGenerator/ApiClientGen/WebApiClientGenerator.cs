@@ -26,11 +26,19 @@ public class WebApiClientGenerator : ISourceGenerator
         var compilation = context.Compilation;
         AllTypes = compilation.GetAllTypes();
 
-        var templateCode = _embedded.LoadTemplate("WebApiClient");
         foreach (var classType in QueryTypeWithWebApiClientAttribute(compilation))
         {
+            var templateCode = _embedded.LoadTemplate("WebApiClient");
             var webApiClientAttrInfo =
                 classType.Attributes.First(x => x.TypeFullName == typeof(WebApiClientAttribute).FullName);
+            var webApiClientNamespaceArg =
+                webApiClientAttrInfo.GetArgumentSyntaxInfo(nameof(WebApiClientAttribute.Namespace));
+            var webApiClientNamespace = webApiClientNamespaceArg == null
+                ? "T1.SourceGenerator"
+                : webApiClientNamespaceArg.Value as string;
+
+            templateCode = templateCode.Replace("T1.SourceGenerator", webApiClientNamespace);
+            
             var webApiClientClassNameArg =
                 webApiClientAttrInfo.GetArgumentSyntaxInfo(nameof(WebApiClientAttribute.ClientClassName));
             var webApiClientClassName = webApiClientClassNameArg == null ? $"{classType.TypeFullName.GetName()}Client" : webApiClientClassNameArg.Value as string;
