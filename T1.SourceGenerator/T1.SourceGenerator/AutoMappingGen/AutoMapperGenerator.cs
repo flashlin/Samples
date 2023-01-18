@@ -42,7 +42,7 @@ public class AutoMapperGenerator : ISourceGenerator
         foreach (var type in compilation.GetAllTypes())
         {
             var fromClassFullName = type.TypeFullName;
-            var fromProperties = type.SyntaxNode.GetPropertiesSyntaxList(compilation)
+            var fromProperties = type.SyntaxNode.QueryPropertiesSyntaxes(compilation)
                 .Where(x => x.Accessibility == Accessibility.Public && x.HasGetter)
                 .ToList();
 
@@ -52,7 +52,7 @@ public class AutoMapperGenerator : ISourceGenerator
                 var toClassFullName = autoMappingAttr.ToTypeFullName;
                 var toClassName = GetName(toClassFullName);
                 var toMethodName = autoMappingAttr.ToMethodName ?? $"To{toClassName}";
-                var toProperties = autoMappingAttr.ToTypeSyntax.GetPropertiesSyntaxList(compilation)
+                var toProperties = autoMappingAttr.ToTypeSyntax.QueryPropertiesSyntaxes(compilation)
                     .Where(x => x.Accessibility == Accessibility.Public && x.HasSetter);
                 var sameProperties = from tb1 in fromProperties
                     join tb2 in toProperties on new { tb1.Name, tb1.TypeFullName } equals new { tb2.Name, tb2.TypeFullName } 
@@ -108,7 +108,7 @@ public class AutoMapperGenerator : ISourceGenerator
     private static IEnumerable<AutoMappingDeclarationInfo> GetAutoMappingAttributes(TypeSyntaxInfo type,
         Compilation compilation)
     {
-        return type.SyntaxNode.GetAttributesSyntaxInfo(compilation)
+        return type.SyntaxNode.AttributeLists.QueryAttributesSyntaxInfo(compilation)
             .Where(x => x.TypeFullName == typeof(AutoMappingAttribute).FullName)
             .Select(x => new AutoMappingDeclarationInfo
             {

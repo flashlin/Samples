@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "T1.SourceGenerator.Attribut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleDemoApp", "ConsoleDemoApp\ConsoleDemoApp.csproj", "{3857BA9C-C4B9-48F8-8A66-57DD4A82EA6D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSourceGenerator", "TestSourceGenerator\TestSourceGenerator.csproj", "{D20066AB-7B02-4375-9B24-74682BF7049A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{3857BA9C-C4B9-48F8-8A66-57DD4A82EA6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3857BA9C-C4B9-48F8-8A66-57DD4A82EA6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3857BA9C-C4B9-48F8-8A66-57DD4A82EA6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D20066AB-7B02-4375-9B24-74682BF7049A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D20066AB-7B02-4375-9B24-74682BF7049A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D20066AB-7B02-4375-9B24-74682BF7049A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D20066AB-7B02-4375-9B24-74682BF7049A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

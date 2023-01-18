@@ -61,21 +61,47 @@ public static class TypeDeclarationSyntaxExtension
 		return model.GetDeclaredSymbol(node);
 	}
 
-	public static IEnumerable<AttributeDataSyntaxInfo> GetAttributesSyntaxInfo(this TypeDeclarationSyntax typeSyntax, Compilation compilation)
+	public static IEnumerable<AttributeSyntaxInfo> QueryAttributesSyntaxInfo(this SyntaxList<AttributeListSyntax> attributeList, Compilation compilation)
 	{
-		return typeSyntax.GetAttributeDataList(compilation)
+		return attributeList.QueryAttributeData(compilation)
 			.Select(attr =>
-				new AttributeDataSyntaxInfo
-				{
-					TypeFullName = attr.AttributeClass!.ToDisplayString(),
-					ConstructorArguments = attr.ConstructorArguments.Select(constructorArgument =>
-						new ArgumentDataSyntaxInfo
-						{
-							TypeFullName = constructorArgument.Type!.Name,
-							ValueTypeFullName = (constructorArgument.Value == null) ? string.Empty : constructorArgument.Value.ToString(),
-							Value = constructorArgument.Value,
-						}
-					).ToList()
-				});
+				attr.ToAttributeSyntaxInfo());
+	}
+
+	public static AttributeSyntaxInfo ToAttributeSyntaxInfo(this AttributeData attr)
+	{
+		return new AttributeSyntaxInfo
+		{
+			TypeFullName = attr.AttributeClass!.ToDisplayString(),
+			ConstructorArguments = attr.QueryArgumentsSyntaxInfo().ToList(),
+		};
+	}
+
+	public static IEnumerable<ArgumentSyntaxInfo> QueryArgumentsSyntaxInfo(this AttributeData attr)
+	{
+		foreach (var constructorArgument in attr.ConstructorArguments)
+		{
+			yield return ToArgumentSyntaxInfo(constructorArgument);
+		}
+
+		foreach (var arg in attr.NamedArguments)
+		{
+			var info = ToArgumentSyntaxInfo(arg.Value);
+			info.Name = arg.Key;
+			yield return info;
+		}
+	}
+
+	private static ArgumentSyntaxInfo ToArgumentSyntaxInfo(TypedConstant constructorArgument)
+	{
+		return new ArgumentSyntaxInfo
+		{
+			Name = string.Empty,
+			TypeFullName = constructorArgument.Type!.Name,
+			ValueTypeFullName = (constructorArgument.Value == null)
+				? string.Empty
+				: constructorArgument.Value.ToString(),
+			Value = constructorArgument.Value,
+		};
 	}
 }

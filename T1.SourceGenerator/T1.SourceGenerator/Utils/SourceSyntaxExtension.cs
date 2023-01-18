@@ -12,13 +12,59 @@ public static class SourceSyntaxExtension
             .SelectMany(x => x.GetRoot().DescendantNodes().OfType<TypeDeclarationSyntax>())
             .Select(x => new TypeSyntaxInfo
             {
+                Attributes = x.AttributeLists.QueryAttributesSyntaxInfo(compilation).ToList(),
                 TypeFullName = x.GetFullName(),
+                Methods = x.QueryMethods(compilation).ToList(),
                 SyntaxNode = x,
             })
             .ToList();
     }
+    
+    public static IEnumerable<MethodSyntaxInfo> QueryMethods(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
+    {
+        var methods = typeDeclaration.Members.OfType<MethodDeclarationSyntax>();
+        foreach (var method in methods)
+        {
+            yield return new MethodSyntaxInfo
+            {
+                Attributes = method.QueryAttributesSyntaxInfo(compilation).ToList(),
+                Name = method.Identifier.ValueText,
+                Parameters = method.QueryMethodParameters(compilation).ToList(),
+            };
+        }
+    }
 
-    public static List<AttributeData> GetAttributeDataList(this AttributeListSyntax attributes, Compilation compilation)
+    public static IEnumerable<AttributeSyntaxInfo> QueryAttributesSyntaxInfo(this MethodDeclarationSyntax methodDeclarationSyntax, Compilation compilation)
+    {
+        return methodDeclarationSyntax.AttributeLists.QueryAttributesSyntaxInfo(compilation);
+    }
+    
+    public static IEnumerable<ParameterSyntaxInfo> QueryMethodParameters(this MethodDeclarationSyntax method,
+        Compilation compilation)
+    {
+        var parameters = method.ParameterList.Parameters;
+        foreach (var parameter in parameters)
+        {
+            var parameterSymbol = compilation.GetSymbol<IParameterSymbol>(parameter);
+            var parameterTypeFullName = parameterSymbol.Type.ToDisplayString();
+            
+            yield return new ParameterSyntaxInfo
+            {
+                TypeFullName = parameterTypeFullName,
+                Name = parameter.Identifier.Text,
+            };
+        }
+    }
+
+    public static T GetSymbol<T>(this Compilation compilation, ParameterSyntax parameter)
+        where T : ISymbol
+    {
+        var model = compilation.GetSemanticModel(parameter.SyntaxTree);
+        var symbol = (T)model.GetDeclaredSymbol(parameter)!;
+        return symbol;
+    }
+
+    public static IEnumerable<AttributeData> QueryAttributeData(this AttributeListSyntax attributes, Compilation compilation)
     {
         var acceptedTrees = new HashSet<SyntaxTree>();
         foreach (var attribute in attributes.Attributes)
@@ -26,24 +72,24 @@ public static class SourceSyntaxExtension
 
         var parentSymbol = attributes.Parent!.GetDeclaredSymbol(compilation)!;
         var parentAttributes = parentSymbol.GetAttributes();
-        var ret = new List<AttributeData>();
+        
         foreach (var attribute in parentAttributes)
         {
             if (acceptedTrees.Contains(attribute.ApplicationSyntaxReference!.SyntaxTree))
-                ret.Add(attribute);
+            {
+                yield return attribute;
+            }
         }
-
-        return ret;
     }
 
-    public static IEnumerable<AttributeData> GetAttributeDataList(this TypeDeclarationSyntax node,
+    public static IEnumerable<AttributeData> QueryAttributeData(this SyntaxList<AttributeListSyntax> attributeListSyntaxes,
         Compilation compilation)
     {
-        return node.AttributeLists
-            .SelectMany(x => x.GetAttributeDataList(compilation));
+        return attributeListSyntaxes
+            .SelectMany(x => x.QueryAttributeData(compilation));
     }
 
-    public static IEnumerable<PropertySyntaxInfo> GetPropertiesSyntaxList(this SyntaxNode typeSyntaxNode,
+    public static IEnumerable<PropertySyntaxInfo> QueryPropertiesSyntaxes(this SyntaxNode typeSyntaxNode,
         Compilation compilation)
     {
         var model = compilation.GetSemanticModel(typeSyntaxNode.SyntaxTree);
@@ -64,6 +110,19 @@ public static class SourceSyntaxExtension
             }
         }
     }
+}
+
+public class ParameterSyntaxInfo
+{
+    public string TypeFullName { get; set; } = null!;
+    public string Name { get; set; } = null!;
+}
+
+public class MethodSyntaxInfo
+{
+    public string Name { get; set; } = null!;
+    public List<ParameterSyntaxInfo> Parameters { get; set; } = new();
+    public List<AttributeSyntaxInfo> Attributes { get; set; } = new();
 }
 
 public class PropertySyntaxInfo
