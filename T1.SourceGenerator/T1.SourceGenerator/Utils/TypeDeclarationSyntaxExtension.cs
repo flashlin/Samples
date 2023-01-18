@@ -10,7 +10,7 @@ public static class TypeDeclarationSyntaxExtension
 	const char NESTED_CLASS_DELIMITER = '+';
 	const char NAMESPACE_CLASS_DELIMITER = '.';
 	const char TYPEPARAMETER_CLASS_DELIMITER = '`';
-	
+
 	public static string GetFullName(this TypeDeclarationSyntax source)
 	{
 		if (source is null)
@@ -46,15 +46,6 @@ public static class TypeDeclarationSyntaxExtension
 		return result.ToString();
 	}
 
-	static void AppendName(StringBuilder builder, TypeDeclarationSyntax type)
-	{
-		builder.Append(type.Identifier.Text);
-		var typeArguments = type.TypeParameterList?.ChildNodes()
-			 .Count(node => node is TypeParameterSyntax) ?? 0;
-		if (typeArguments != 0)
-			builder.Append(TYPEPARAMETER_CLASS_DELIMITER).Append(typeArguments);
-	}
-	
 	public static ISymbol? GetDeclaredSymbol(this SyntaxNode node, Compilation compilation)
 	{
 		var model = compilation.GetSemanticModel(node.SyntaxTree);
@@ -90,6 +81,15 @@ public static class TypeDeclarationSyntaxExtension
 			info.Name = arg.Key;
 			yield return info;
 		}
+	}
+
+	static void AppendName(StringBuilder builder, TypeDeclarationSyntax type)
+	{
+		builder.Append(type.Identifier.Text);
+		var typeArguments = type.TypeParameterList?.ChildNodes()
+			 .Count(node => node is TypeParameterSyntax) ?? 0;
+		if (typeArguments != 0)
+			builder.Append(TYPEPARAMETER_CLASS_DELIMITER).Append(typeArguments);
 	}
 
 	private static ArgumentSyntaxInfo ToArgumentSyntaxInfo(TypedConstant constructorArgument)

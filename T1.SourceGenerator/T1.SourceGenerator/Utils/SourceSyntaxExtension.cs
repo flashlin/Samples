@@ -111,31 +111,3 @@ public static class SourceSyntaxExtension
         }
     }
 }
-
-public class ParameterSyntaxInfo
-{
-    public string TypeFullName { get; set; } = null!;
-    public string Name { get; set; } = null!;
-}
-
-public class MethodSyntaxInfo
-{
-    public string Name { get; set; } = null!;
-    public List<ParameterSyntaxInfo> Parameters { get; set; } = new();
-    public List<AttributeSyntaxInfo> Attributes { get; set; } = new();
-}
-
-public class PropertySyntaxInfo
-{
-    public Accessibility Accessibility { get; set; }
-    public string TypeFullName { get; set; } = null!;
-    public string Name { get; set; } = null!;
-    public bool HasGetter { get; set; }
-    public bool HasSetter { get; set; }
-}
-
-public class FileContentInfo
-{
-    public string Directory { get; set; }
-    public string Content { get; set; }
-}
