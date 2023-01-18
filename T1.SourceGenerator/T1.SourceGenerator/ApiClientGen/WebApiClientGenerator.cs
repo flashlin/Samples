@@ -63,14 +63,22 @@ public class WebApiClientGenerator : ISourceGenerator
                     string.Join(",", method.Parameters.Select(x => $"{x.Name}"));
                 var methodReturnTypeFullName = method.ReturnTypeFullName;
 
-                WritePostMethod(new WebApiMethodContext
+                var webApiMethodContext = new WebApiMethodContext
                 {
                     MethodReturnTypeFullName = methodReturnTypeFullName, 
                     MethodName = methodName, 
                     MethodArguments = methodArguments, 
                     MethodParameters = methodParameters, 
                     ApiPath = apiPath
-                }, apiMethodCode);
+                };
+                if (invokeMethod == InvokeMethod.Post)
+                {
+                    WritePostMethod(webApiMethodContext, apiMethodCode);
+                }
+                else
+                {
+                    WriteGetMethod(webApiMethodContext, apiMethodCode);
+                }
             }
 
             templateCode = templateCode.Replace("WebApiClient", webApiClientClassName);
@@ -111,6 +119,41 @@ public class WebApiClientGenerator : ISourceGenerator
         apiMethodCode.WriteLine("}");
         apiMethodCode.WriteLine("");
     }
+    
+
+    private static void WriteGetMethod(WebApiMethodContext webApiMethodContext, IndentStringBuilder apiMethodCode)
+    {
+        if (webApiMethodContext.MethodReturnTypeFullName != "void")
+        {
+            apiMethodCode.WriteLine($"public Task<{webApiMethodContext.MethodReturnTypeFullName}> {webApiMethodContext.MethodName}({webApiMethodContext.MethodArguments})");
+            apiMethodCode.WriteLine("{");
+            apiMethodCode.Indent++;
+            if (string.IsNullOrEmpty(webApiMethodContext.MethodParameters))
+            {
+                webApiMethodContext.MethodParameters = "null";
+            }
+
+            apiMethodCode.WriteLine(
+                $@"return GetDataAsync<{webApiMethodContext.MethodReturnTypeFullName}>(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters});");
+        }
+        else
+        {
+            apiMethodCode.WriteLine($"public Task {webApiMethodContext.MethodName}({webApiMethodContext.MethodArguments})");
+            apiMethodCode.WriteLine("{");
+            apiMethodCode.Indent++;
+            if (string.IsNullOrEmpty(webApiMethodContext.MethodParameters))
+            {
+                webApiMethodContext.MethodParameters = "null";
+            }
+
+            apiMethodCode.WriteLine($@"return GetVoidAsync(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters});");
+        }
+
+        apiMethodCode.Indent--;
+        apiMethodCode.WriteLine("}");
+        apiMethodCode.WriteLine("");
+    }
+    
 
     private bool IsWebApiClientMethodAttributeAttached(MethodSyntaxInfo method)
     {
