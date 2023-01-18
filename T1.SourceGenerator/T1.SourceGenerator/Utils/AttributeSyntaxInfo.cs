@@ -13,6 +13,7 @@ public class AttributeSyntaxInfo
 
     public override string ToString()
     {
-        return $"{TypeFullName}";
+        var arguments = string.Join(",", ConstructorArguments.Select(x => x.ToString()));
+        return $"{TypeFullName}({arguments})";
     }
 }

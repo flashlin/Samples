@@ -54,9 +54,16 @@ public static class TypeDeclarationSyntaxExtension
 
 	public static IEnumerable<AttributeSyntaxInfo> QueryAttributesSyntaxInfo(this SyntaxList<AttributeListSyntax> attributeList, Compilation compilation)
 	{
-		return attributeList.QueryAttributeData(compilation)
-			.Select(attr =>
-				attr.ToAttributeSyntaxInfo());
+		if( attributeList.Count == 0 )
+		{
+			return Enumerable.Empty<AttributeSyntaxInfo>();
+		}
+		return attributeList[0].QueryAttributeData(compilation)
+			.Select(x => x.ToAttributeSyntaxInfo());
+
+		//return attributeList.QueryAttributeData(compilation)
+		//	.Select(attr =>
+		//		attr.ToAttributeSyntaxInfo());
 	}
 
 	public static AttributeSyntaxInfo ToAttributeSyntaxInfo(this AttributeData attr)

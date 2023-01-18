@@ -55,4 +55,10 @@
         <Link>Templates\WebApiClient.cs</Link>
       </EmbeddedResource>
     </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="..\T1.SourceGenerator.Attributes\WebApiClientConstructorInjectAttribute.cs">
+        <Link>Templates\WebApiClientConstructorInjectAttribute.cs</Link>
+      </EmbeddedResource>
+    </ItemGroup>
 </Project>

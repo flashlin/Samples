@@ -19,6 +19,10 @@ public class WebApiClientGenerator : ISourceGenerator
 
     public void Initialize(GeneratorInitializationContext context)
     {
+        context.RegisterForPostInitialization(i =>
+        {
+            i.AddSource("WebApiClientConstructorInjectAttribute.g.cs", _embedded.LoadTemplateForEmitting("WebApiClientConstructorInjectAttribute"));
+        });
     }
 
     public void Execute(GeneratorExecutionContext context)
@@ -38,6 +42,30 @@ public class WebApiClientGenerator : ISourceGenerator
                 : webApiClientNamespaceArg.Value as string;
 
             templateCode = templateCode.Replace("T1.SourceGenerator", webApiClientNamespace);
+
+            var webApiClientCtorAttrs = classType.Attributes.Where(x =>
+                x.TypeFullName == typeof(WebApiClientConstructorInjectAttribute).FullName)
+                .ToList();
+            var webApiClientCtorInjectArguments = string.Empty;
+            var webApiClientCtorInjectParamters = string.Empty;
+            var webApiClientCtorInjectFields = string.Empty;
+            if (webApiClientCtorAttrs.Any())
+            {
+                var ctorArguments = webApiClientCtorAttrs
+                    .Select(x => GetConstructorInjectParameter(x.ConstructorArguments))
+                    .ToList();
+                webApiClientCtorInjectArguments = "," + string.Join(",", ctorArguments.Select(x => $"{x.TypeFullName} {x.Name}"));
+                webApiClientCtorInjectParamters = string.Join("\t\n", ctorArguments.Select(x => $"_{x.Name} = {x.AssignCode};"));
+                webApiClientCtorInjectFields = string.Join("\t\n", ctorArguments.Select(x => $"{x.TypeFullName} _{x.Name};"));
+            }
+            
+            templateCode = templateCode.Replace("//<generate code: fields/>", webApiClientCtorInjectFields);
+            templateCode = templateCode.Replace("//<generate code: ctor/>", webApiClientCtorInjectArguments);
+
+            var initCtorCode = new IndentStringBuilder();
+            initCtorCode.WriteLine(webApiClientCtorInjectParamters);
+            templateCode = templateCode.Replace("//<generate code: initialize/>", initCtorCode.ToString());
+            
             
             var webApiClientClassNameArg =
                 webApiClientAttrInfo.GetArgumentSyntaxInfo(nameof(WebApiClientAttribute.ClientClassName));
@@ -85,6 +113,24 @@ public class WebApiClientGenerator : ISourceGenerator
             templateCode = templateCode.Replace("//<generate code: properties/>", apiMethodCode.ToString());
             context.AddSource($"{webApiClientClassName}.g.cs", SourceText.From(templateCode, Encoding.UTF8));
         }
+    }
+
+    private ConstructorInjectInfo GetConstructorInjectParameter(List<ArgumentSyntaxInfo> argumentSyntaxesInfo)
+    {
+        var typeFullName = argumentSyntaxesInfo[0].ValueTypeFullName;
+        var name = (argumentSyntaxesInfo[1].Value as string)!;
+        var assignCode = name;
+        var assignCodeArg = argumentSyntaxesInfo.FirstOrDefault(x => x.Name == nameof(WebApiClientConstructorInjectAttribute.AssignCode));
+        if (assignCodeArg != null)
+        {
+            assignCode = (assignCodeArg.Value as string)!;
+        }
+        return new ConstructorInjectInfo
+        {
+            TypeFullName = typeFullName,
+            Name = name,
+            AssignCode = assignCode,
+        };
     }
 
     private static void WritePostMethod(WebApiMethodContext webApiMethodContext, IndentStringBuilder apiMethodCode)
@@ -172,4 +218,11 @@ public class WebApiClientGenerator : ISourceGenerator
             }
         }
     }
+}
+
+public class ConstructorInjectInfo
+{
+    public string TypeFullName { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public string AssignCode { get; set; } = null!;
 }
