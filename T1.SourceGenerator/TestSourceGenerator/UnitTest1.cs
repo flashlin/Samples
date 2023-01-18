@@ -43,7 +43,7 @@ public interface IJackApi{
 
     public List<TypeSyntaxInfo> EmitAndGetAllTypes(CSharpCompilation compilation)
     {
-        var generator = new ApiClientGenerator();
+        var generator = new WebApiClientGenerator();
         var driver = CSharpGeneratorDriver.Create(generator);
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
         return generator.AllTypes;

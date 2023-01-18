@@ -5,6 +5,6 @@ namespace ConsoleDemoApp;
 [WebApiClient("SamApiClient")]
 public interface ISamApiClient
 {
-    [WebApiClientMethod(Method = InvokeMethod.Post, Timeout = "1000")]
+    [WebApiClientMethod("mgmt/test", Method = InvokeMethod.Post, Timeout = "1000")]
     void Test(Request1 req);
 }
