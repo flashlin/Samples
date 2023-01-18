@@ -41,10 +41,12 @@ public class WebApiClientGenerator : ISourceGenerator
                     method.Attributes.First(x => x.TypeFullName == typeof(WebApiClientMethodAttribute).FullName);
                 var apiPath =
                     webApiMethodAttr.ConstructorArguments[0].Value as string;
-                var invokeMethod = (InvokeMethod)webApiMethodAttr
-                    .GetArgumentSyntaxInfo(nameof(WebApiClientMethodAttribute.Method)).Value!;
-                var timeout =
-                    webApiMethodAttr.GetArgumentSyntaxInfo(nameof(WebApiClientMethodAttribute.Timeout)).Value as string;
+
+                var invokeMethodArg = webApiMethodAttr
+                    .GetArgumentSyntaxInfo(nameof(WebApiClientMethodAttribute.Method));
+                var invokeMethod = invokeMethodArg == null ? InvokeMethod.Post : (InvokeMethod)invokeMethodArg.Value!;
+                var timeoutArg = webApiMethodAttr.GetArgumentSyntaxInfo(nameof(WebApiClientMethodAttribute.Timeout));
+                var timeout = timeoutArg == null ? "00:00:30" : timeoutArg.Value as string;
                 var methodArguments =
                     string.Join(",", method.Parameters.Select(x => $"{x.TypeFullName} {x.Name}"));
                 var methodParameters =
@@ -56,13 +58,23 @@ public class WebApiClientGenerator : ISourceGenerator
                     apiMethodCode.WriteLine($"public Task<{methodReturnTypeFullName}> {methodName}({methodArguments})");
                     apiMethodCode.WriteLine("{");
                     apiMethodCode.Indent++;
-                    apiMethodCode.WriteLine($@"return PostDataAsync<{methodReturnTypeFullName}>(""{apiPath}"", {methodParameters});");
+                    if (string.IsNullOrEmpty(methodParameters))
+                    {
+                        methodParameters = "null";
+                    }
+                    apiMethodCode.WriteLine(
+                        $@"return PostDataAsync<{methodReturnTypeFullName}>(""{apiPath}"", {methodParameters});");
                 }
                 else
                 {
                     apiMethodCode.WriteLine($"public Task {methodName}({methodArguments})");
                     apiMethodCode.WriteLine("{");
                     apiMethodCode.Indent++;
+                    if (string.IsNullOrEmpty(methodParameters))
+                    {
+                        methodParameters = "null";
+                    }
+
                     apiMethodCode.WriteLine($@"return PostVoidAsync(""{apiPath}"", {methodParameters});");
                 }
 

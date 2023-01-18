@@ -30,9 +30,17 @@ public static class SourceSyntaxExtension
                 Attributes = method.QueryAttributesSyntaxInfo(compilation).ToList(),
                 Name = method.Identifier.ValueText,
                 Parameters = method.QueryMethodParameters(compilation).ToList(),
-                ReturnTypeFullName = method.ReturnType.ToFullString().Trim(),
+                ReturnTypeFullName = method.ReturnType.GetTypeFullName(compilation)
             };
         }
+    }
+    
+    public static string GetTypeFullName(this TypeSyntax typeSyntax, Compilation compilation)
+    {
+        var semanticModel = compilation.GetSemanticModel(typeSyntax.SyntaxTree);
+        var typeInfo = semanticModel.GetTypeInfo(typeSyntax);
+        var type = (typeInfo.Type as ITypeSymbol)!;
+        return type.ToDisplayString();
     }
 
     public static IEnumerable<AttributeSyntaxInfo> QueryAttributesSyntaxInfo(this MethodDeclarationSyntax methodDeclarationSyntax, Compilation compilation)

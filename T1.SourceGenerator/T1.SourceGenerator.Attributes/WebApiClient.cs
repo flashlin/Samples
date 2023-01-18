@@ -11,7 +11,6 @@ internal partial class WebApiClient
     public WebApiClient(IHttpClientFactory httpClientFactory)
     {
         InitHttp(httpClientFactory);
-        //<generate code: ctor/>
     }
 
     public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(30);
@@ -22,18 +21,23 @@ internal partial class WebApiClient
 
     public async Task<TResp?> PostDataAsync<TResp>(string apiPath, object? data = null)
     {
-        var requestUri = new Uri(BaseUrl + apiPath);
-        var response = await _httpClient.PostAsync(requestUri, ToJsonContent(data));
-        response.EnsureSuccessStatusCode();
+        var response = await InternalPostDataAsync(apiPath, data);
         var result = await response.Content.ReadAsStringAsync();
         return Deserialize<TResp>(result);
     }
 
     public async Task PostVoidAsync(string apiPath, object? data = null)
     {
+        await InternalPostDataAsync(apiPath, data);
+    }
+
+    protected async Task<HttpResponseMessage> InternalPostDataAsync(string apiPath, object? data = null)
+    {
         var requestUri = new Uri(BaseUrl + apiPath);
+        _httpClient.Timeout = Timeout;
         var response = await _httpClient.PostAsync(requestUri, ToJsonContent(data));
         response.EnsureSuccessStatusCode();
+        return response;
     }
 
     protected virtual string SerializeObject(object obj)
