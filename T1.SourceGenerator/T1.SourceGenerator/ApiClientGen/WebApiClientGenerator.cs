@@ -31,7 +31,9 @@ public class WebApiClientGenerator : ISourceGenerator
         {
             var webApiClientAttrInfo =
                 classType.Attributes.First(x => x.TypeFullName == typeof(WebApiClientAttribute).FullName);
-            var webApiClientClassName = webApiClientAttrInfo.ConstructorArguments[0].Value as string;
+            var webApiClientClassNameArg =
+                webApiClientAttrInfo.GetArgumentSyntaxInfo(nameof(WebApiClientAttribute.ClientClassName));
+            var webApiClientClassName = webApiClientClassNameArg == null ? $"{classType.TypeFullName.GetName()}Client" : webApiClientClassNameArg.Value as string;
             var methods = classType.Methods.Where(IsWebApiClientMethodAttributeAttached);
             var apiMethodCode = new IndentStringBuilder();
             foreach (var method in methods)

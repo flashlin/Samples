@@ -3,12 +3,9 @@ namespace T1.SourceGenerator.Attributes;
 [AttributeUsage(AttributeTargets.Interface, Inherited = false, AllowMultiple = false)]
 public class WebApiClientAttribute : Attribute
 {
-    public WebApiClientAttribute(string clientClassName)
-    {
-        ClientClassName = clientClassName;
-    }   
+    public string ClientClassName { get; set; } = string.Empty;
     
-    public string ClientClassName { get; set; }
+    public string BaseUrl { get; set; }
 }
 
 public enum InvokeMethod
