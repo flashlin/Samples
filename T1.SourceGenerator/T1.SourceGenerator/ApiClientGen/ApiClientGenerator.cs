@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -5,14 +6,15 @@ using T1.SourceGenerator.Attributes;
 using T1.SourceGenerator.AutoMappingGen;
 using T1.SourceGenerator.Utils;
 
+[assembly: InternalsVisibleTo("TestSourceGenerator")]
 namespace T1.SourceGenerator.ApiClientGen;
 
 [Generator]
 public class ApiClientGenerator : ISourceGenerator
 {
     private readonly EmbeddedSources _embedded = new EmbeddedSources(typeof(ApiClientGenerator).Assembly);
-    
-    public List<TypeSyntaxInfo> Debug { get; set; }
+
+    internal List<TypeSyntaxInfo> AllTypes { get; set; }
 
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -25,11 +27,9 @@ public class ApiClientGenerator : ISourceGenerator
     public void Execute(GeneratorExecutionContext context)
     {
         var compilation = context.Compilation;
+        AllTypes = compilation.GetAllTypes();
 
         var templateCode = _embedded.LoadTemplate("WebApiClient");
-
-        Debug = QueryTypeWithWebApiClientAttribute(compilation).ToList();
-        
         foreach (var classType in QueryTypeWithWebApiClientAttribute(compilation))
         {
             var webApiClientAttrInfo = classType.Attributes.First(x => x.TypeFullName == typeof(WebApiClientAttribute).FullName);
