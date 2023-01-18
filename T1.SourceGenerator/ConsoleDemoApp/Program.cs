@@ -12,3 +12,5 @@ var b = new UserDto();
 var c = a.ToXXX();
 Console.WriteLine(c.Name);
 
+var client = new SamApiClient(null);
+

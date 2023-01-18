@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace T1.SourceGenerator.Attributes;
+namespace T1.SourceGenerator;
 
 internal partial class WebApiClient
 {
@@ -29,6 +29,28 @@ internal partial class WebApiClient
         return Deserialize<TResp>(result);
     }
 
+    public async Task PostVoidAsync(string apiPath, object? data = null)
+    {
+        var requestUri = new Uri(BaseUrl + apiPath);
+        var response = await _httpClient.PostAsync(requestUri, ToJsonContent(data));
+        response.EnsureSuccessStatusCode();
+    }
+
+    protected virtual string SerializeObject(object obj)
+    {
+        return JsonSerializer.Serialize(obj);
+    }
+
+    protected virtual T? Deserialize<T>(string json)
+    {
+        return JsonSerializer.Deserialize<T>(json);
+    }
+
+    protected virtual void InitHttp(IHttpClientFactory httpClientFactory)
+    {
+        _httpClient = httpClientFactory.CreateClient();
+    }
+    
     private StringContent ToJsonContent(object? data)
     {
         return new StringContent(ToJsonStr(data), Encoding.UTF8, "application/json");
@@ -39,27 +61,5 @@ internal partial class WebApiClient
         var requestJson = "{}";
         if (data != null) requestJson = SerializeObject(data);
         return requestJson;
-    }
-
-    public async Task PostVoidAsync(string apiPath, object? data = null)
-    {
-        var requestUri = new Uri(BaseUrl + apiPath);
-        var response = await _httpClient.PostAsync(requestUri, ToJsonContent(data));
-        response.EnsureSuccessStatusCode();
-    }
-
-    public virtual string SerializeObject(object obj)
-    {
-        return JsonSerializer.Serialize(obj);
-    }
-
-    public virtual T? Deserialize<T>(string json)
-    {
-        return JsonSerializer.Deserialize<T>(json);
-    }
-
-    protected virtual void InitHttp(IHttpClientFactory httpClientFactory)
-    {
-        _httpClient = httpClientFactory.CreateClient();
     }
 }
