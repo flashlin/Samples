@@ -7,9 +7,3 @@ public class UserDto
     public float Price { get; }
     public DateTime Birth { get; set; }
 }
-
-public class Address
-{
-   public string City { get; set; } = null!;
-   public string Region { get; set; } = null!;
-}
