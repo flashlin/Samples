@@ -11,15 +11,3 @@ public class UserEntity
     public float Price { get; set; }
     public DateTime Birth { get; }
 }
-
-public class Request1
-{
-    public string Id { get; set; }
-}
-
-[WebApiClient("SamApiClient")]
-public interface ISamApiClient
-{
-    [WebApiClientMethod(Method = InvokeMethod.Post, Timeout = "1000")]
-    void Test(Request1 req);
-}
