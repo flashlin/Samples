@@ -17,6 +17,7 @@ public class Tests
     public void Test1()
     {
         var compilation = GenerateCode(@"
+namespace ConsoleDemoApp;
 [WebApiClient(""JackProxy"")]
 public interface IJackApi{
     [WebApiClientMethod(Method = InvokeMethod.Post, Timeout = ""1000"")]
@@ -30,8 +31,7 @@ public interface IJackApi{
     public CSharpCompilation GenerateCode(string sourceCode)
     {
         var compilation = CSharpCompilation.Create("MyCompilation")
-            //.WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-            .WithOptions(new CSharpCompilationOptions(OutputKind.ConsoleApplication))
+            .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
             .AddSyntaxTrees(CSharpSyntaxTree.ParseText(sourceCode))
             .AddReferences(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
         return compilation;
@@ -43,6 +43,6 @@ public interface IJackApi{
         var driver = CSharpGeneratorDriver.Create(generator);
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
 
-        var t = generator.Debug.ToList();
+        var t = generator.AllTypes;
     }
 }
