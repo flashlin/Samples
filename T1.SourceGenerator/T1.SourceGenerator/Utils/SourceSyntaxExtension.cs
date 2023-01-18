@@ -14,13 +14,13 @@ public static class SourceSyntaxExtension
             {
                 Attributes = x.AttributeLists.QueryAttributesSyntaxInfo(compilation).ToList(),
                 TypeFullName = x.GetFullName(),
-                Methods = x.QueryMethods(compilation).ToList(),
+                Methods = x.QueryMethodsSyntaxInfo(compilation).ToList(),
                 SyntaxNode = x,
             })
             .ToList();
     }
     
-    public static IEnumerable<MethodSyntaxInfo> QueryMethods(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
+    public static IEnumerable<MethodSyntaxInfo> QueryMethodsSyntaxInfo(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
     {
         var methods = typeDeclaration.Members.OfType<MethodDeclarationSyntax>();
         foreach (var method in methods)
@@ -30,6 +30,7 @@ public static class SourceSyntaxExtension
                 Attributes = method.QueryAttributesSyntaxInfo(compilation).ToList(),
                 Name = method.Identifier.ValueText,
                 Parameters = method.QueryMethodParameters(compilation).ToList(),
+                ReturnTypeFullName = method.ReturnType.ToFullString().Trim(),
             };
         }
     }
