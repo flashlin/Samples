@@ -15,14 +15,10 @@ public class WebApiClientGenerator : ISourceGenerator
 {
     private readonly EmbeddedSources _embedded = new EmbeddedSources(typeof(WebApiClientGenerator).Assembly);
 
-    internal List<TypeSyntaxInfo> AllTypes { get; set; }
+    internal List<TypeSyntaxInfo> AllTypes { get; set; } = new();
 
     public void Initialize(GeneratorInitializationContext context)
     {
-        // context.RegisterForPostInitialization(i =>
-        // {
-        //     i.AddSource("AutoMappingAttribute.g.cs", _embedded.LoadTemplateForEmitting("AutoMappingAttribute"));
-        // });
     }
 
     public void Execute(GeneratorExecutionContext context)
@@ -98,32 +94,4 @@ public class WebApiClientGenerator : ISourceGenerator
             }
         }
     }
-
-
-    private static IEnumerable<WebApiDeclarationInfo> GetWebApiAttributes(TypeSyntaxInfo type,
-        Compilation compilation)
-    {
-        var allTypes = compilation.GetAllTypes();
-        var attributeDataSyntaxInfos = type.SyntaxNode.AttributeLists.QueryAttributesSyntaxInfo(compilation)
-            .Where(x => x.TypeFullName == typeof(WebApiClientAttribute).FullName)
-            .ToList();
-        foreach (var x in attributeDataSyntaxInfos)
-        {
-            var methods = type.Methods;
-            foreach (var method in methods)
-            {
-                yield return new WebApiDeclarationInfo
-                {
-                    HttpClientClassName = x.ConstructorArguments[0].Value as string,
-                    Method = method
-                };
-            }
-        }
-    }
-}
-
-public class WebApiDeclarationInfo
-{
-    public string? HttpClientClassName { get; set; }
-    public MethodSyntaxInfo Method { get; set; } = null!;
 }
