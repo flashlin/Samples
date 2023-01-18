@@ -10,8 +10,12 @@ internal partial class WebApiClient
 
     public WebApiClient(IHttpClientFactory httpClientFactory)
     {
-        InitHttp(httpClientFactory);
+        _httpClient = httpClientFactory.CreateClient();
+        //<generate code: ctor/>
+        Initialize();
     }
+
+    partial void Initialize();
 
     public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(30);
 
@@ -50,11 +54,6 @@ internal partial class WebApiClient
         return JsonSerializer.Deserialize<T>(json);
     }
 
-    protected virtual void InitHttp(IHttpClientFactory httpClientFactory)
-    {
-        _httpClient = httpClientFactory.CreateClient();
-    }
-    
     private StringContent ToJsonContent(object? data)
     {
         return new StringContent(ToJsonStr(data), Encoding.UTF8, "application/json");

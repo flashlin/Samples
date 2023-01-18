@@ -50,7 +50,7 @@ public class AutoMapperGenerator : ISourceGenerator
             foreach (var autoMappingAttr in attrs)
             {
                 var toClassFullName = autoMappingAttr.ToTypeFullName;
-                var toClassName = GetName(toClassFullName);
+                var toClassName = toClassFullName.GetName();
                 var toMethodName = autoMappingAttr.ToMethodName ?? $"To{toClassName}";
                 var toProperties = autoMappingAttr.ToTypeSyntax.QueryPropertiesSyntaxes(compilation)
                     .Where(x => x.Accessibility == Accessibility.Public && x.HasSetter);
@@ -92,17 +92,6 @@ public class AutoMapperGenerator : ISourceGenerator
         //            var toClassModel = context.Compilation.GetSemanticModel(toClassSyntax.SyntaxTree);
         //            var toClassNamedTypeSymbol = ModelExtensions.GetDeclaredSymbol(toClassModel, toClassSyntax);
         //            var toClassFullName = toClassNamedTypeSymbol.OriginalDefinition.ToString();
-    }
-
-    private string GetName(string fullname)
-    {
-        var idx = fullname.LastIndexOf(".", StringComparison.Ordinal);
-        if(idx == -1)
-        {
-            return fullname;
-        }
-
-        return fullname.Substring(idx + 1);
     }
 
     private static IEnumerable<AutoMappingDeclarationInfo> GetAutoMappingAttributes(TypeSyntaxInfo type,

@@ -19,6 +19,17 @@ public static class SourceSyntaxExtension
             })
             .ToList();
     }
+
+
+    public static string GetName(this string fullname)
+    {
+        var idx = fullname.LastIndexOf(".", StringComparison.Ordinal);
+        if(idx == -1)
+        {
+            return fullname;
+        }
+        return fullname.Substring(idx + 1);
+    }
     
     public static IEnumerable<MethodSyntaxInfo> QueryMethodsSyntaxInfo(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
     {
