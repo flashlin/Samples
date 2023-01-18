@@ -4,8 +4,8 @@ namespace T1.SourceGenerator.Attributes;
 public class WebApiClientAttribute : Attribute
 {
     public string ClientClassName { get; set; } = string.Empty;
-    
-    public string BaseUrl { get; set; }
+
+    public string Namespace { get; set; } = "T1.SourceGenerator";
 }
 
 public enum InvokeMethod

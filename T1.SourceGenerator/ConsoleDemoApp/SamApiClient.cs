@@ -1,6 +1,6 @@
 using System.Net.Mail;
 
-namespace T1.SourceGenerator;
+namespace ConsoleDemoApp;
 
 partial class SamApiClient
 {
