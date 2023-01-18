@@ -8,7 +8,7 @@ public interface IGlobalSetting
 }
 
 [WebApiClient(ClientClassName = "SamApiClient", Namespace = "ConsoleDemoApp")]
-//[AutoConstructorInject(typeof(IGlobalSetting), "globalSetting", "globalSetting")]
+[WebApiClientConstructorInject(typeof(IGlobalSetting), "globalSetting")]
 public interface ISamApiClient
 {
     [WebApiClientMethod("mgmt/test", Method = InvokeMethod.Post, Timeout = "1000")]

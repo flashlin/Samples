@@ -8,11 +8,14 @@ namespace T1.SourceGenerator;
 internal partial class WebApiClient
 {
     private HttpClient _httpClient;
+    //<generate code: fields/>
 
-    public WebApiClient(IHttpClientFactory httpClientFactory)
+    public WebApiClient(
+        IHttpClientFactory httpClientFactory//<generate code: ctor/>
+        )
     {
         _httpClient = httpClientFactory.CreateClient();
-        //<generate code: ctor/>
+        //<generate code: initialize/>
         Initialize();
     }
 
