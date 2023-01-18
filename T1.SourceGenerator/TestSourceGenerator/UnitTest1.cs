@@ -1,8 +1,10 @@
+using FluentAssertions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Testing;
 using T1.SourceGenerator.ApiClientGen;
+using T1.SourceGenerator.Utils;
 
 namespace TestSourceGenerator;
 
@@ -14,7 +16,7 @@ public class Tests
     }
 
     [Test]
-    public void Test1()
+    public void test_method()
     {
         var compilation = GenerateCode(@"
 namespace ConsoleDemoApp;
@@ -24,8 +26,10 @@ public interface IJackApi{
     void Test(int a);
 }");
         
-        Emit(compilation);
-        Assert.Pass();
+        var allTypes = EmitAndGetAllTypes(compilation);
+        
+        allTypes[0].Methods[0].Name.Should()
+            .Be("Test");
     }
 
     public CSharpCompilation GenerateCode(string sourceCode)
@@ -37,12 +41,11 @@ public interface IJackApi{
         return compilation;
     }
 
-    public void Emit(CSharpCompilation compilation)
+    public List<TypeSyntaxInfo> EmitAndGetAllTypes(CSharpCompilation compilation)
     {
         var generator = new ApiClientGenerator();
         var driver = CSharpGeneratorDriver.Create(generator);
         driver.RunGeneratorsAndUpdateCompilation(compilation, out var outputCompilation, out var diagnostics);
-
-        var t = generator.AllTypes;
+        return generator.AllTypes;
     }
 }
