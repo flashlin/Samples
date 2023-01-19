@@ -15,5 +15,5 @@ Console.WriteLine(c.Name);
 
 
 
-var client = new SamApiClient(null);
+var client = new SamApiClient(null, null);
 
