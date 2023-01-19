@@ -46,7 +46,7 @@
 
     <ItemGroup>
       <EmbeddedResource Include="..\T1.SourceGenerator.Attributes\WebApiClientAttribute.cs">
-        <Link>Templates\WebApiAttribute.cs</Link>
+        <Link>Templates\WebApiClientAttribute.cs</Link>
       </EmbeddedResource>
     </ItemGroup>
 
