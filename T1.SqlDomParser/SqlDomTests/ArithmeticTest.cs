@@ -15,7 +15,7 @@ namespace SqlDomTests
 		[Fact]
 		public void add()
 		{
-			var sql = "1 +2";
+			var sql = "select 1";
 			Parse(sql);
 			ThenResultShouldBe("1 + 2");
 		}
