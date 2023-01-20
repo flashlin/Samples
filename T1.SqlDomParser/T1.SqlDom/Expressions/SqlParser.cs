@@ -1,4 +1,7 @@
 using System.Text.RegularExpressions;
+using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
+using T1.SqlDom.Tsql;
 using T1.SqlDomParser;
 
 namespace T1.SqlDom.Expressions;
@@ -7,11 +10,19 @@ public class SqlParser
 {
     public SqlExpr Parse(string input)
     {
-        return ParseExpr(new InputStream
+        var stream = new AntlrInputStream(input);
+        var lexer  = new TsqlLexer(stream);  // 這個 HelloLexer 是透過 ANTLR 產生的
+        var tokens = new CommonTokenStream(lexer);
+        var parser = new TsqlParser(tokens)
         {
-            Value = input,
-            Position = 0
-        });
+            BuildParseTree = true
+        };
+        var compileUnit = parser.select_statement()!;
+        
+        var listener = new TsqlParserListener();
+        var walker = new ParseTreeWalker();
+        walker.Walk(listener, compileUnit);
+        throw new InvalidOperationException();
     }
 
     private SqlExpr ParseExpr(InputStream inputStream)
@@ -337,4 +348,10 @@ public class SqlParser
             Success = true,
         };
     }
+}
+
+
+public class TsqlParserListener : TsqlParserBaseListener
+{
+    
 }
