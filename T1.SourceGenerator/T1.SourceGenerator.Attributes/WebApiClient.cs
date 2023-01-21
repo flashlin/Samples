@@ -21,49 +21,62 @@ internal partial class WebApiClient
 
     partial void Initialize();
 
-    public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(30);
-
     //<generate code: properties/>
 
     public string BaseUrl { get; set; } = string.Empty;
 
-    public async Task<TResp?> PostDataAsync<TResp>(string apiPath, object? data = null)
+    public async Task<TResp?> PostDataAsync<TResp>(string apiPath, 
+        object? data = null,
+        TimeSpan? timeout = null)
     {
-        var response = await InternalPostDataAsync(apiPath, data);
+        var response = await InternalPostDataAsync(apiPath, data, timeout);
         var result = await response.Content.ReadAsStringAsync();
         return Deserialize<TResp>(result);
     }
 
-    public async Task PostVoidAsync(string apiPath, object? data = null)
+    public async Task PostVoidAsync(
+        string apiPath, 
+        object? data = null,
+        TimeSpan? timeout = null)
     {
-        await InternalPostDataAsync(apiPath, data);
+        await InternalPostDataAsync(apiPath, data, timeout);
     }
     
-    public async Task<TResp?> GetDataAsync<TResp>(string apiPath, object? data = null)
+    public async Task<TResp?> GetDataAsync<TResp>(string apiPath, 
+        object? data = null,
+        TimeSpan? timeout = null)
     {
-        var response = await InternalGetDataAsync(apiPath, data);
+        var response = await InternalGetDataAsync(apiPath, data, timeout);
         var result = await response.Content.ReadAsStringAsync();
         return Deserialize<TResp>(result);
     }
 
-    public async Task GetVoidAsync(string apiPath, object? data = null)
+    public async Task GetVoidAsync(string apiPath, 
+        object? data = null,
+        TimeSpan? timeout = null)
     {
-        await InternalGetDataAsync(apiPath, data);
+        await InternalGetDataAsync(apiPath, data, timeout);
     }
 
-    protected async Task<HttpResponseMessage> InternalPostDataAsync(string apiPath, object? data = null)
+    protected async Task<HttpResponseMessage> InternalPostDataAsync(string apiPath, 
+        object? data = null, 
+        TimeSpan? timeout = null)
     {
         var requestUri = new Uri(BaseUrl + apiPath);
-        _httpClient.Timeout = Timeout;
+        timeout = timeout ?? TimeSpan.FromSeconds(30);
+        _httpClient.Timeout = timeout.Value;
         var response = await _httpClient.PostAsync(requestUri, ToJsonContent(data));
         response.EnsureSuccessStatusCode();
         return response;
     }
 
-    protected async Task<HttpResponseMessage> InternalGetDataAsync(string apiPath, object? data = null)
+    protected async Task<HttpResponseMessage> InternalGetDataAsync(string apiPath, 
+        object? data = null,
+        TimeSpan? timeout = null)
     {
         var requestUri = new Uri(BaseUrl + apiPath);
-        _httpClient.Timeout = Timeout;
+        timeout = timeout ?? TimeSpan.FromSeconds(30);
+        _httpClient.Timeout = timeout.Value;
         var response = await _httpClient.GetAsync(requestUri + ToQueryString(data), HttpCompletionOption.ResponseHeadersRead);
         response.EnsureSuccessStatusCode();
         return response;
