@@ -55,7 +55,6 @@ var dto = source.CloneToEmployee();
 ###  How to get Auto Mapping WebApiClient class ?
 ```csharp
 [WebApiClient(ClientClassName = "SamApiClient", Namespace = "ConsoleDemoApp")]
-//[AutoConstructorInject(typeof(IGlobalSetting), "globalSetting", "globalSetting")]
 public interface IMyApiClient
 {
    [WebApiClientMethod("mgmt/test1", Method = InvokeMethod.Get, Timeout = "00:00:10")]
@@ -87,3 +86,44 @@ public interface IMyApiClient
     ...
 }
 ```
+
+If you need constructor injection, you can do it like in the following program example.
+```csharp
+[WebApiClient(ClientClassName = "SamApiClient", Namespace = "ConsoleDemoApp")]
+[WebApiClientConstructorInject(MyConfig), "myConfig")]
+public interface IMyApiClient
+{
+   ...
+}
+
+partial class SamApiClient
+{
+    partial void Initialize()
+    {
+        BaseUrl = _myConfig.BaseUrl;
+    }
+}
+```
+
+Even if you need to specify a variable using a special method for constructor injection, you can do it this way.
+```csharp
+[WebApiClient(ClientClassName = "SamApiClient", Namespace = "ConsoleDemoApp")]
+[WebApiClientConstructorInject(typeof(IOption<MyConfig>), "myConfig", AssignCode="myConfig.Value")]
+public interface IMyApiClient
+{
+   ...
+}
+```
+
+It will produce the following code.
+```
+public class SamApiClient
+{
+    public SamApiClient(IHttpClientFactory httpClientFactory,
+        IOption<MyConfig> myConfig)   
+    {
+        _myConfig = myConfig.Value;
+    }
+}
+```
+
