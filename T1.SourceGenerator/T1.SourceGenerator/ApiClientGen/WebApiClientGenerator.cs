@@ -84,7 +84,7 @@ public class WebApiClientGenerator : ISourceGenerator
                     .GetArgumentSyntaxInfo(nameof(WebApiClientMethodAttribute.Method));
                 var invokeMethod = invokeMethodArg == null ? InvokeMethod.Post : (InvokeMethod)invokeMethodArg.Value!;
                 var timeoutArg = webApiMethodAttr.GetArgumentSyntaxInfo(nameof(WebApiClientMethodAttribute.Timeout));
-                var timeout = timeoutArg == null ? "00:00:30" : timeoutArg.Value as string;
+                var timeout = timeoutArg == null ? "00:00:30" : (string)timeoutArg.Value!;
                 var methodArguments =
                     string.Join(",", method.Parameters.Select(x => $"{x.TypeFullName} {x.Name}"));
                 var methodParameters =
@@ -101,11 +101,11 @@ public class WebApiClientGenerator : ISourceGenerator
                 };
                 if (invokeMethod == InvokeMethod.Post)
                 {
-                    WritePostMethod(webApiMethodContext, apiMethodCode);
+                    WritePostMethod(webApiMethodContext, apiMethodCode, timeout);
                 }
                 else
                 {
-                    WriteGetMethod(webApiMethodContext, apiMethodCode);
+                    WriteGetMethod(webApiMethodContext, apiMethodCode, timeout);
                 }
             }
 
@@ -133,7 +133,8 @@ public class WebApiClientGenerator : ISourceGenerator
         };
     }
 
-    private static void WritePostMethod(WebApiMethodContext webApiMethodContext, IndentStringBuilder apiMethodCode)
+    private static void WritePostMethod(WebApiMethodContext webApiMethodContext, IndentStringBuilder apiMethodCode,
+        string timeout)
     {
         if (webApiMethodContext.MethodReturnTypeFullName != "void")
         {
@@ -144,9 +145,8 @@ public class WebApiClientGenerator : ISourceGenerator
             {
                 webApiMethodContext.MethodParameters = "null";
             }
-
             apiMethodCode.WriteLine(
-                $@"return PostDataAsync<{webApiMethodContext.MethodReturnTypeFullName}>(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters});");
+                $@"return PostDataAsync<{webApiMethodContext.MethodReturnTypeFullName}>(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters}, TimeSpan.Parse(""{timeout}""));");
         }
         else
         {
@@ -158,7 +158,7 @@ public class WebApiClientGenerator : ISourceGenerator
                 webApiMethodContext.MethodParameters = "null";
             }
 
-            apiMethodCode.WriteLine($@"return PostVoidAsync(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters});");
+            apiMethodCode.WriteLine($@"return PostVoidAsync(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters}, TimeSpan.Parse(""{timeout}""));");
         }
 
         apiMethodCode.Indent--;
@@ -167,7 +167,8 @@ public class WebApiClientGenerator : ISourceGenerator
     }
     
 
-    private static void WriteGetMethod(WebApiMethodContext webApiMethodContext, IndentStringBuilder apiMethodCode)
+    private static void WriteGetMethod(WebApiMethodContext webApiMethodContext, IndentStringBuilder apiMethodCode,
+        string timeout)
     {
         if (webApiMethodContext.MethodReturnTypeFullName != "void")
         {
@@ -180,7 +181,7 @@ public class WebApiClientGenerator : ISourceGenerator
             }
 
             apiMethodCode.WriteLine(
-                $@"return GetDataAsync<{webApiMethodContext.MethodReturnTypeFullName}>(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters});");
+                $@"return GetDataAsync<{webApiMethodContext.MethodReturnTypeFullName}>(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters}, TimeSpan.Parse(""{timeout}""));");
         }
         else
         {
@@ -192,7 +193,7 @@ public class WebApiClientGenerator : ISourceGenerator
                 webApiMethodContext.MethodParameters = "null";
             }
 
-            apiMethodCode.WriteLine($@"return GetVoidAsync(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters});");
+            apiMethodCode.WriteLine($@"return GetVoidAsync(""{webApiMethodContext.ApiPath}"", {webApiMethodContext.MethodParameters}, TimeSpan.Parse(""{timeout}""));");
         }
 
         apiMethodCode.Indent--;
