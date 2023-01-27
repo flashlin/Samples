@@ -13,11 +13,11 @@ namespace SqlDomTests
 		}
 
 		[Fact]
-		public void add()
+		public void select_integer()
 		{
 			var sql = "select 1";
 			Parse(sql);
-			ThenResultShouldBe("1 + 2");
+			ThenResultShouldBe("SELECT 1");
 		}
 	}
 }

@@ -13,7 +13,9 @@ top_clause: TOP (top_count);
 top_count:
 	count_constant = DECIMAL; //| '(' topcount_expression=expression ')'
 
-column_elem: (full_column_name) as_column_alias?;
+constant: DECIMAL | INT;
+
+column_elem: (full_column_name | constant) as_column_alias?;
 
 full_column_name: (DELETED | INSERTED) '.' column_name = id_
 	| server = id_? '.' schema = id_? '.' tablename = id_? '.' column_name = id_

@@ -62,6 +62,16 @@ public interface ITsqlParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitTop_count([NotNull] TsqlParser.Top_countContext context);
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="TsqlParser.constant"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void EnterConstant([NotNull] TsqlParser.ConstantContext context);
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="TsqlParser.constant"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	void ExitConstant([NotNull] TsqlParser.ConstantContext context);
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="TsqlParser.column_elem"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>

@@ -13,9 +13,11 @@ namespace T1.SqlDom.Expressions
 			var sb = new StringBuilder();
 			sb.Append("SELECT ");
 			sb.Append(Columns.ToSqlString(","));
-			sb.Append(" ");
-			sb.Append("FROM ");
-			sb.Append(Tables.ToSqlString(","));
+			if (Tables.Count > 0)
+			{
+				sb.Append(" FROM ");
+				sb.Append(Tables.ToSqlString(","));
+			}
 			if (WhereClause != Empty)
 			{
 				sb.Append(" WHERE " + WhereClause.ToSqlString());

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -11,347 +12,59 @@ public class SqlParser
     public SqlExpr Parse(string input)
     {
         var stream = new AntlrInputStream(input);
-        var lexer  = new TsqlLexer(stream);  // 這個 HelloLexer 是透過 ANTLR 產生的
+        var lexer = new TsqlLexer(stream); // 這個 HelloLexer 是透過 ANTLR 產生的
         var tokens = new CommonTokenStream(lexer);
         var parser = new TsqlParser(tokens)
         {
             BuildParseTree = true
         };
         var compileUnit = parser.select_statement()!;
-        
-        var listener = new TsqlParserListener();
+
+        var visitor = new TsqlExprVisitor();
+        var expr = visitor.Visit(compileUnit);
+        return expr;
+
+        var listener = new TsqlFormatListener();
         var walker = new ParseTreeWalker();
         walker.Walk(listener, compileUnit);
+        var sql = listener.GetFormattedSql();
         throw new InvalidOperationException();
-    }
-
-    private SqlExpr ParseExpr(InputStream inputStream)
-    {
-        return ParseSelectStatement(inputStream);
-    }
-
-    public SelectExpr ParseSelectStatement(InputStream inp)
-    {
-        var statement = new SelectExpr();
-        inp.ExpectKeyword("SELECT");
-
-        statement.Columns = ParseColumns(inp);
-
-        inp.ExpectKeyword("FROM");
-
-        statement.Tables = ParseTables(inp);
-
-        if (inp.AcceptKeyword("WHERE"))
-        {
-            statement.WhereClause = ParseWhereClause(inp);
-        }
-
-        return statement;
-    }
-
-    private SqlExpr ParseWhereClause(InputStream inp)
-    {
-        inp.SkipSpaces();
-        return ParseHelper.Parse(ParseOperatorExpr, inp, "Where Expr");
-    }
-
-    private static ParseResult ParseArithmetic(InputStream inp)
-    {
-        inp.SkipSpaces();
-        
-        var arithmetics = new[] {"+", "-", "*", "/", "%"};
-        if (!inp.AcceptAnyKeyword(arithmetics, out var arithmetic))
-        {
-            return ParseResult.Empty;
-        }
-
-        return new ParseResult
-        {
-            Expr = new StringExpr
-            {
-                Value = arithmetic,
-            },
-            Success = true,
-        };
-    }
-
-    private ParseResult ParseConcatenate(InputStream inp)
-    {
-        inp.SkipSpaces();
-        
-        var words = new[] {"AND", "OR"};
-        if (!inp.AcceptAnyKeywordIgnoreCase(words, out var word))
-        {
-            return ParseResult.Empty;
-        }
-
-        return new ParseResult
-        {
-            Expr = new StringExpr
-            {
-                Value = word
-            },
-            Success = true
-        };
-    }
-
-    private ParseResult ParseOperatorExpr(InputStream inp)
-    {
-        inp.SkipSpaces();
-        
-        if (inp.Accept('('))
-        {
-            if (!ParseHelper.Try(ParseOperatorExpr, inp, out var operatorResult))
-            {
-                return ParseResult.Empty;
-            }
-
-            inp.Expect(')');
-            return new ParseResult
-            {
-                Expr = new GroupExpr
-                {
-                    Expr = operatorResult.Expr,
-                },
-                Success = true,
-            };
-        }
-
-        if (!ParseHelper.Try(ParseConstant, inp, out var leftResult))
-        {
-            return ParseResult.Empty;
-        }
-
-        var matchOper = ParseHelper.MatchAny(inp, ParseArithmetic, ParseOperator);
-        if (matchOper.Func == null)
-        {
-            return ParseResult.Fail("arithmetic or operator");
-        }
-
-        if (!ParseHelper.Try(ParseConstant, inp, out var rightResult))
-        {
-            return ParseResult.Empty;
-        }
-
-        var left = SqlExpr.Empty;
-        if (matchOper.Func == ParseArithmetic)
-        {
-            left = new ArithmeticExpr
-            {
-                Left = leftResult.Expr,
-                Oper = matchOper.Expr,
-                Right = rightResult.Expr
-            };
-        }
-        else if (matchOper.Func == ParseOperator)
-        {
-            left = new ComparsionExpr
-            {
-                Left = leftResult.Expr,
-                Oper = matchOper.Expr,
-                Right = rightResult.Expr
-            };
-        }
-
-        if (!ParseHelper.Try(ParseConcatenate, inp, out var concatenateResult))
-        {
-            return new ParseResult
-            {
-                Expr = left,
-                Success = true
-            };
-        }
-
-        return new ParseResult
-        {
-            Expr = new ComparsionExpr
-            {
-                Left = left,
-                Oper = concatenateResult.Expr,
-                Right = ParseHelper.Parse(ParseOperatorExpr, inp, "compare expr")
-            },
-            Success = true
-        };
-    }
-
-    private ParseResult ParseConstant(InputStream inp)
-    {
-        return ParseHelper.Any(new ParseFunc[]
-        {
-            ParseColumn,
-            ParseNumber,
-            ParseIdentifier
-        }, inp);
-    }
-
-    private ParseResult ParseNumber(InputStream inp)
-    {
-        inp.SkipSpaces();
-        
-        if (!inp.Accept(c => char.IsNumber(c), out var ch))
-        {
-            return ParseResult.Empty;
-        }
-
-        var number = string.Empty;
-        number += ch;
-        var hasDot = false;
-        while (inp.Accept(c => char.IsNumber(c) || (c == '.' && !hasDot), out ch))
-        {
-            if (ch == '.')
-            {
-                hasDot = true;
-            }
-
-            number += ch;
-        }
-
-        return new ParseResult
-        {
-            Expr = new NumberExpr
-            {
-                Value = number
-            },
-            Success = true,
-        };
-    }
-
-    private static ParseResult ParseOperator(InputStream inp)
-    {
-        inp.SkipSpaces();
-        if (!inp.AcceptAnyKeyword(new[] {"<=", ">=", "<", ">", "!=", "=", "+", "-", "*", "/", "%"}, out var op))
-        {
-            return ParseResult.Empty;
-        }
-
-        return new ParseResult
-        {
-            Expr = new StringExpr
-            {
-                Value = op,
-            },
-            Success = true
-        };
-    }
-
-
-    private List<TableExpr> ParseTables(InputStream inp)
-    {
-        var tables = new List<TableExpr>();
-        tables.Add(ParseTable(inp));
-        while (inp.Accept(','))
-        {
-            tables.Add(ParseTable(inp));
-        }
-
-        return tables;
-    }
-
-    private TableExpr ParseTable(InputStream inp)
-    {
-        inp.SkipSpaces();
-        if (inp.Accept('('))
-        {
-            var subQuery = ParseExpr(inp);
-            inp.Expect(')');
-            var subTable = new TableExpr
-            {
-                Name = subQuery,
-                IsSubQuery = true
-            };
-            if (inp.AcceptKeyword("AS"))
-            {
-                subTable.Alias = ParseHelper.Parse(ParseIdentifier, inp, "AliasName");
-            }
-
-            return subTable;
-        }
-
-        var table = new TableExpr
-        {
-            Name = ParseHelper.Parse(ParseIdentifier, inp, "FieldName"),
-            IsSubQuery = true
-        };
-        if (inp.AcceptKeyword("AS"))
-        {
-            table.Alias = ParseHelper.Parse(ParseIdentifier, inp, "AliasName");
-        }
-
-        return table;
-    }
-
-    private List<SqlExpr> ParseColumns(InputStream inp)
-    {
-        var columns = new List<SqlExpr>();
-        columns.Add(ParseHelper.Parse(ParseColumn, inp, "Column"));
-        while (inp.Accept(','))
-        {
-            columns.Add(ParseHelper.Parse(ParseColumn, inp, "Column"));
-        }
-
-        return columns;
-    }
-
-
-    private ParseResult ParseColumn(InputStream inp)
-    {
-        inp.SkipSpaces();
-        
-        var column = new ColumnExpr();
-        if (!ParseHelper.Try(ParseIdentifier, inp, out var rc))
-        {
-            return rc;
-        }
-
-        column.Name = rc.Expr;
-
-        if (inp.AcceptKeyword("AS"))
-        {
-            if (!ParseHelper.Try(ParseIdentifier, inp, out rc))
-            {
-                return rc;
-            }
-
-            column.Alias = rc.Expr;
-        }
-
-        return new ParseResult()
-        {
-            Expr = column,
-            Success = true,
-        };
-    }
-
-
-    private ParseResult ParseIdentifier(InputStream inp)
-    {
-        inp.SkipSpaces();
-        
-        var identifier = "";
-        if (!inp.Accept(c => char.IsLetter(c) || c == '_', out var ch))
-        {
-            return ParseResult.Empty;
-        }
-
-        identifier += ch;
-        while (inp.Accept(c => char.IsLetter(c) || c == '_', out ch))
-        {
-            identifier += ch;
-        }
-
-        return new ParseResult
-        {
-            Expr = new StringExpr
-            {
-                Value = identifier
-            },
-            Success = true,
-        };
     }
 }
 
-
-public class TsqlParserListener : TsqlParserBaseListener
+public class NumberSqlExpr : SqlExpr
 {
-    
+    public override string ToSqlString()
+    {
+        return Value;
+    }
+
+    public string Value { get; init; } = null!;
+}
+
+public class TsqlFormatListener : TsqlParserBaseListener
+{
+    StringBuilder _formattedSql = new StringBuilder();
+
+    public string GetFormattedSql()
+    {
+        return _formattedSql.ToString();
+    }
+
+    public override void EnterSelect_statement(TsqlParser.Select_statementContext context)
+    {
+        _formattedSql.AppendLine("SELECT ");
+        base.EnterSelect_statement(context);
+    }
+
+    public override void ExitSelect_list(TsqlParser.Select_listContext context)
+    {
+        foreach (var item in context.column_elem())
+        {
+            var text = item.GetText();
+            _formattedSql.AppendLine(text);
+        }
+
+        base.ExitSelect_list(context);
+    }
 }
