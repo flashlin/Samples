@@ -72,6 +72,18 @@ public partial class TsqlParserBaseListener : ITsqlParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitTop_count([NotNull] TsqlParser.Top_countContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="TsqlParser.constant"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterConstant([NotNull] TsqlParser.ConstantContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="TsqlParser.constant"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitConstant([NotNull] TsqlParser.ConstantContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="TsqlParser.column_elem"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>

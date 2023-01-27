@@ -51,6 +51,12 @@ public interface ITsqlParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitTop_count([NotNull] TsqlParser.Top_countContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="TsqlParser.constant"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitConstant([NotNull] TsqlParser.ConstantContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="TsqlParser.column_elem"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
