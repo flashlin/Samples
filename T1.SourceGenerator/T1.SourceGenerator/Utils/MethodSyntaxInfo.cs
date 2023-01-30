@@ -6,4 +6,5 @@ public class MethodSyntaxInfo
     public List<ParameterSyntaxInfo> Parameters { get; set; } = new();
     public List<AttributeSyntaxInfo> Attributes { get; set; } = new();
     public string ReturnTypeFullName { get; set; } = null!;
+    public string BodySourceCode { get; set; } = string.Empty;
 }

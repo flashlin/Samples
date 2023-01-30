@@ -41,6 +41,7 @@ public static class SourceSyntaxExtension
                 Attributes = method.QueryAttributesSyntaxInfo(compilation).ToList(),
                 Name = method.Identifier.ValueText,
                 Parameters = method.QueryMethodParameters(compilation).ToList(),
+                BodySourceCode = (method.Body == null) ? string.Empty : method.Body.ToFullString(),
                 ReturnTypeFullName = method.ReturnType.GetTypeFullName(compilation)
             };
         }
