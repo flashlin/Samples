@@ -13,4 +13,5 @@ export interface ICsvData
 export interface ICsvReportViewModel
 {
     csvTextList: ICsvData[];
+    code: string;
 }
