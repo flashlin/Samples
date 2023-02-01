@@ -16,18 +16,22 @@ import { ClassProperty, CsvStringToInt32, CsvStringToString, VarType, type ICode
 import type { ICsvTextAreaViewModel } from '@/typings/csv-textarea-models';
 
 const props = defineProps<{
-   text: string,
+  name: string,
+  text: string,
 }>();
 
 let data = reactive<ICsvTextAreaViewModel>({
+  name: '',
   csvText: `id,name\n1,flash\n2,jack`,
 });
 
+data.name = props.name;
 data.csvText = props.text;
 </script>
 
 <template>
   <div>
+    <InputText type="text" v-model="data.name" />
     <Textarea v-model="data.csvText" rows="10" cols="80"></Textarea>
   </div>
 </template>
