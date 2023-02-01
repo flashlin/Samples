@@ -4,13 +4,15 @@ export type SelectorFn = <T>(item: T) => string;
 declare global {
   interface String {
     csvSplit(separator?: string): string[];
+    camelCase(): string;
+    toJson(): string;
   }
   interface Array<T> {
     getCsvHeaders(selector?: SelectorFn): T[];
   }
 }
 
-String.prototype.csvSplit = function (separator: string=',') {
+String.prototype.csvSplit = function (separator: string='\n') {
   let reg_exp = new RegExp(
     "(\\" +
       separator +
@@ -37,6 +39,30 @@ String.prototype.csvSplit = function (separator: string=',') {
   }
 
   return row;
+}
+
+String.prototype.camelCase = function() {
+  return this.substring(0, 1).toUpperCase() + this.substring(1);
+}
+
+function dataLinesToJson(columnsName: string[], lines: string[]) {
+  let result: object[] = [];
+  lines.forEach((line) => {
+    let obj: any = {};
+    line.csvSplit().forEach((value, idx) => {
+      let name = columnsName[idx].camelCase();
+      obj[name] = value;
+    });
+    result.push(obj);
+  });
+  return JSON.stringify(result);
+}
+
+String.prototype.toJson = function (separator: string='\n') {
+  let lines = this.csvSplit(separator);
+  let columnNames = lines.getCsvHeaders();
+  let dataLines = lines.slice(1);
+  return dataLinesToJson(columnNames, dataLines);
 }
 
 const defaultGetCsvHeaderSelector = <T>(item: T) => {
