@@ -6,9 +6,9 @@ using Xunit.Abstractions;
 
 namespace SqlDomTests
 {
-	public class ArithmeticTest : SqlTestBase
+	public class SelectTest : SqlTestBase
 	{
-		public ArithmeticTest(ITestOutputHelper outputHelper) : base(outputHelper)
+		public SelectTest(ITestOutputHelper outputHelper) : base(outputHelper)
 		{
 		}
 
@@ -19,5 +19,14 @@ namespace SqlDomTests
 			Parse(sql);
 			ThenResultShouldBe("SELECT 1");
 		}
+
+		[Fact]
+		public void select_field1()
+		{
+			var sql = "select id";
+			Parse(sql);
+			ThenResultShouldBe("SELECT id");
+		}
+
 	}
 }
