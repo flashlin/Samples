@@ -5,15 +5,17 @@ import CodeExitor from "@/components/CodeEditor.vue";
 import { reactive } from 'vue';
 
 const data = reactive({
-  code: 'class User { name = "flash" }'
+  code: 'class User { name = "flash" }',
 })
 </script>
 
 <template>
   <div>
+    
     <nav>
       <RouterLink to="/">Home</RouterLink>
       <RouterLink to="/dataChart">Data Chart</RouterLink>
+      <RouterLink to="/csvReport">Csv Report</RouterLink>
     </nav>
     <!-- <CodeExitor v-model="data.code" /> -->
     <RouterView />
