@@ -39,7 +39,8 @@ let data = reactive<ICsvReportViewModel>({
   json.customer.forEach( item => {
     item.flag = find(item.id);
   });
-  alert(JSON.stringify(json.customer));`,
+  return json.customer;`,
+  result: ``,
 });
 
 function evil(json: any, code: string) {
@@ -52,7 +53,8 @@ const onRun = () => {
     csv.json = csv.text.toJson();
     json[csv.name] = JSON.parse(csv.json);
   });
-  evil(json, data.code);
+  let result = evil(json, data.code);
+  data.result = JSON.stringify(result);
 };
 </script>
 
@@ -64,6 +66,8 @@ const onRun = () => {
       :text="csv.text" />
     <CodeExitor v-model="data.code" />
     <Button label="run" :onclick="onRun"></Button>
+    <br/>
+    <Textarea v-model="data.result" rows="10" cols="80"></Textarea>
   </div>
 </template>
 

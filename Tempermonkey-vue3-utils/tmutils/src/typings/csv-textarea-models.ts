@@ -15,4 +15,5 @@ export interface ICsvReportViewModel
 {
     csvTextList: ICsvData[];
     code: string;
+    result: string;
 }
