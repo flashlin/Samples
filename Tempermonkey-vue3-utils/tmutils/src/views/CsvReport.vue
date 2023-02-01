@@ -21,8 +21,14 @@ import CsvTextArea from '@/components/CsvTextArea.vue';
 
 let data = reactive<ICsvReportViewModel>({
   csvTextList: [
-      'id,name\n1,flash\n2,jack\n3,Mary',
-      `id,addr\n2,Taipei\n3,Kaohsiung`,
+      {
+        name: 'customer',
+        text:'id,name\n1,flash\n2,jack\n3,Mary'
+      },
+      {
+        name: 'home',
+        text: `id,addr\n2,Taipei\n3,Kaohsiung`,
+      },
     ]
 });
 </script>
@@ -30,8 +36,9 @@ let data = reactive<ICsvReportViewModel>({
 <template>
   <div>
     <h1>CSV Report</h1>
-    <CsvTextArea v-for="csvText in data.csvTextList"
-      :text="csvText" />
+    <CsvTextArea v-for="csv in data.csvTextList"
+      :name="csv.name"
+      :text="csv.text" />
   </div>
 </template>
 
