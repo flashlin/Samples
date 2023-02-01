@@ -73,8 +73,13 @@ onMounted(() => {
       monaco.Uri.parse('json://grid/settings.json')
    );
 
+   const tsModel = monaco.editor.createModel(
+      props.modelValue,
+      'typescript',
+   );
+
    instance = monaco.editor.create(dom.value, {
-      model: jsonModel,
+      model: tsModel, //jsonModel,
       tabSize: 2,
       automaticLayout: true,
       scrollBeyondLastLine: false,
