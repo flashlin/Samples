@@ -142,6 +142,52 @@ function onConvertObjArrayJsonToTemplate() {
   data.templateText = template;
 }
 
+function dataToValuesString(objArray: any[]) {
+  let obj = objArray[0];
+  let keys = Object.keys(obj);
+  let template = '';
+  keys.forEach((key, idx) => {
+    let quote = '';
+    let value = parseInt(obj[key], 10);
+    if (isNaN(value))
+    {
+      quote = '"';
+    }
+    template += `\t${quote}\$\{this.${key}\}${quote}`;
+    if (idx < keys.length - 1) {
+      template += ',';
+    }
+  });
+  return template;
+}
+
+
+function dataToKeysString(objArray: any[]) {
+  let obj = objArray[0];
+  let keys = Object.keys(obj);
+  let template = '';
+  keys.forEach((key, idx) => {
+    template += `${key}`;
+    if (idx < keys.length - 1) {
+      template += ',';
+    }
+  });
+  return template;
+}
+
+function onConvertObjArrayJsonToInsertTemplate() {
+  let template = 'INSERT INTO [dbo].[xxx](\n';
+  let objArray: any[] = JSON.parse(data.sourceObjArrJson);
+  let obj = objArray[0];
+  let keys = Object.keys(obj);
+  template += dataToKeysString(objArray);
+  template += ')\n'
+  template += 'VALUES(\n'
+  template += dataToValuesString(objArray);
+  template += ')\n'
+  data.templateText = template;
+}
+
 function onConvertObjArrayJsonToText() {
   data.targetText3 = objArrayJsonToText(data.sourceObjArrJson);
 }
@@ -289,6 +335,8 @@ function onRefreshToJson() {
           <Checkbox v-model="data.isAddBreak" :binary="true" /> Add Break
           &nbsp;
           <Button :onclick="onConvertObjArrayJsonToTemplate">Generate Class Template</Button>
+          &nbsp;
+          <Button :onclick="onConvertObjArrayJsonToInsertTemplate">Generate INSERT Template</Button>
         </div>
         <div class="mb-3">
           <Textarea v-model="data.templateText" rows="5" cols="80"></Textarea>
