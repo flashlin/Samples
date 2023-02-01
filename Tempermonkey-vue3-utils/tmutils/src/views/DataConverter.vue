@@ -51,7 +51,6 @@ function camelCase(text: string) {
     return text;
   }
   return text.camelCase();
-  //return text.substring(0, 1).toUpperCase() + text.substring(1);
 }
 
 function fillTemplate(templateString: string, templateVars: any) {

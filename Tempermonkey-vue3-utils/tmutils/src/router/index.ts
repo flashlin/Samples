@@ -13,6 +13,11 @@ const router = createRouter({
       path: '/dataChart',
       name: 'dataChart',
       component: () => import('@/views/DataChart.vue')
+    },
+    {
+      path: '/csvReport',
+      name: 'csvReport',
+      component: () => import('@/views/CsvReport.vue')
     }
   ]
 });
