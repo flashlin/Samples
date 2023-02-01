@@ -8,6 +8,7 @@ export interface ICsvData
 {
     name: string;
     text: string;
+    json: any;
 }
 
 export interface ICsvReportViewModel

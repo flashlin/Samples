@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-String.prototype.csvSplit = function (separator: string='\n') {
+String.prototype.csvSplit = function (separator: string=',') {
   let reg_exp = new RegExp(
     "(\\" +
       separator +
@@ -50,7 +50,7 @@ function dataLinesToJson(columnsName: string[], lines: string[]) {
   lines.forEach((line) => {
     let obj: any = {};
     line.csvSplit().forEach((value, idx) => {
-      let name = columnsName[idx].camelCase();
+      let name = columnsName[idx];
       obj[name] = value;
     });
     result.push(obj);
