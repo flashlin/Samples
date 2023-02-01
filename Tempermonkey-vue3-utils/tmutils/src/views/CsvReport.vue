@@ -24,23 +24,35 @@ let data = reactive<ICsvReportViewModel>({
   csvTextList: [
       {
         name: 'customer',
-        text:'id,name\n1,flash\n2,jack\n3,Mary'
+        text:'id,name\n1,flash\n2,jack\n3,Mary',
+        json: {},
       },
       {
         name: 'home',
         text: `id,addr\n2,Taipei\n3,Kaohsiung`,
+        json: {},
       },
     ],
-  code: ``,
+  code: `function find(id) {
+    return json.home.find(x => x.id == id) != null;
+  }
+  json.customer.forEach( item => {
+    item.flag = find(item.id);
+  });
+  alert(JSON.stringify(json.customer));`,
 });
 
-function evil(code: string) {
-  let fn = Function;
-  return new fn(code)();
+function evil(json: any, code: string) {
+  return new Function('json', code)(json);
 }
 
 const onRun = () => {
-  evil(data.code);
+  let json: any = {};
+  data.csvTextList.forEach(csv => {
+    csv.json = csv.text.toJson();
+    json[csv.name] = JSON.parse(csv.json);
+  });
+  evil(json, data.code);
 };
 </script>
 
