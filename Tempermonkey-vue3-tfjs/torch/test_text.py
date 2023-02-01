@@ -112,6 +112,10 @@ if __name__ == '__main__':
     vocab = ProgramLangVocab()
     model = TextEncoding(vocab)
     model.read_text_file('train_data/linq.txt')
+    model.bpe.add_word('f')
+    model.bpe.add_word('la')
+    model.bpe.add_word('sh')
+    # model.read_cvc_file()
     model.build()
     s1 = "from tb1 in customer"
     v1 = model.encode(s1)

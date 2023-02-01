@@ -133,8 +133,6 @@ def merge_vocab(pair, vocab):
     # bigram = ' '.join(pair)
     # p = re.compile(r'(?<!\S)' + bigram + r'(?!\S)')
     for word, count in vocab:
-        if new_symbol == 'from':
-            info(f" from {word=} {new_symbol=}")
         new_word = search_and_merge(word, pair)
         vocab_out[new_word] = vocab[word]
     return vocab_out
@@ -245,9 +243,11 @@ class BPE:
             if not pairs:
                 break
             best = max(pairs, key=pairs.get)
-            if pairs[best] == 1:
-                break
+            # if pairs[best] == 1:
+            #     break
+            info(f" {best=}")
             vocab = merge_vocab(best, vocab)
+            dump(vocab)
         vocab_tokenization = get_tokens_from_vocab(vocab)
         self.char_frequencies = vocab
         self.vocab_tokenization = vocab_tokenization
@@ -292,7 +292,7 @@ class TextEncoding:
 
     def build(self):
         self.bpe.build()
-        # self.bpe.dump()
+        #self.bpe.dump()
 
     def read_text_file(self, text_file):
         words = self.tokenizer.read_text_file_to_words(text_file)
