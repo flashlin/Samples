@@ -33,6 +33,15 @@ let data = reactive<ICsvReportViewModel>({
     ],
   code: ``,
 });
+
+function evil(code: string) {
+  let fn = Function;
+  return new fn(code)();
+}
+
+const onRun = () => {
+  evil(data.code);
+};
 </script>
 
 <template>
@@ -42,6 +51,7 @@ let data = reactive<ICsvReportViewModel>({
       :name="csv.name"
       :text="csv.text" />
     <CodeExitor v-model="data.code" />
+    <Button label="run" :onclick="onRun"></Button>
   </div>
 </template>
 
