@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CodeExitor from "@/components/CodeEditor.vue";
 import Textarea from 'primevue/textarea';
 import Button from 'primevue/button';
 import Datatable from 'primevue/datatable';
@@ -29,7 +30,8 @@ let data = reactive<ICsvReportViewModel>({
         name: 'home',
         text: `id,addr\n2,Taipei\n3,Kaohsiung`,
       },
-    ]
+    ],
+  code: ``,
 });
 </script>
 
@@ -39,6 +41,7 @@ let data = reactive<ICsvReportViewModel>({
     <CsvTextArea v-for="csv in data.csvTextList"
       :name="csv.name"
       :text="csv.text" />
+    <CodeExitor v-model="data.code" />
   </div>
 </template>
 
