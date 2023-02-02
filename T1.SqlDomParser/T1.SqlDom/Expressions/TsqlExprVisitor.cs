@@ -42,6 +42,22 @@ public class TsqlExprVisitor : TsqlParserBaseVisitor<SqlExpr>
         };
     }
 
+    public override SqlExpr VisitFull_column_name(TsqlParser.Full_column_nameContext context)
+    {
+        return new TableSqlExpr
+        {
+            Name = Visit(context.children[0]),
+        };
+    }
+
+    public override SqlExpr VisitId_(TsqlParser.Id_Context context)
+    {
+        return new IdSqlExpr
+        {
+            Value = context.GetText()
+        };
+    }
+
     public override SqlExpr VisitAs_column_alias(TsqlParser.As_column_aliasContext context)
     {
         return new AliasSqlExpr
@@ -91,6 +107,16 @@ public class TsqlExprVisitor : TsqlParserBaseVisitor<SqlExpr>
 
         throw new NotSupportedException();
     }
+}
+
+public class TableSqlExpr : SqlExpr
+{
+    public override string ToSqlString()
+    {
+        return Name.ToSqlString();
+    }
+
+    public SqlExpr Name { get; init; } = SqlExpr.Empty;
 }
 
 public class StringSqlExpr : SqlExpr
