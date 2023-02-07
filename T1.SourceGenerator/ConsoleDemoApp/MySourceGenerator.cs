@@ -2,10 +2,11 @@
 
 namespace ConsoleDemoApp;
 
+[RoslynSourceGenerator]
 public class MySourceGenerator : IRoslynSourceGenerator
 {
     public void Execute(IRoslynGeneratorExecutionContext context)
     {
-        context.AddSource("aaa.g.cs", "public enum AAA { BBB, CCC }");
+        context.AddSource("aaa.g.cs", "namespace ConsoleDemoApp; public enum AAA { BBB, CCC }");
     }
 }

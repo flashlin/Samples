@@ -14,3 +14,5 @@ Console.WriteLine(c.Name);
 
 
 var client = new SamApiClient(null, null);
+
+var a = AAA.BBB;

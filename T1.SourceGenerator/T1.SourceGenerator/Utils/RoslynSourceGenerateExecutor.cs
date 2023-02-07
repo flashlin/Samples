@@ -8,6 +8,7 @@ public class RoslynSourceGenerateExecutor
     {
         var source = new IndentStringBuilder();
         source.WriteLine("using System;");
+        source.WriteLine("using T1.SourceGenerator.Attributes;");
         source.WriteLine("namespace T1.SourceGenerator.DynGenerators");
         source.WriteLine("{");
 
@@ -16,11 +17,8 @@ public class RoslynSourceGenerateExecutor
         source.WriteLine("{");
         source.Indent++;
 
-        source.WriteLine("public void Generate(RoslynGeneratorExecutionContext context) {");
-        source.Indent++;
+        source.WriteLine("public void Generate(IRoslynGeneratorExecutionContext context)");
         source.WriteText(generateMethodSource);
-        source.Indent--;
-        source.WriteLine("}");
 
         source.Indent--;
         source.WriteLine("}");
@@ -29,6 +27,7 @@ public class RoslynSourceGenerateExecutor
         source.WriteLine("}");
 
         var roslyn = new RoslynScripting();
+        roslyn.AddAssembly(typeof(IRoslynGeneratorExecutionContext));
         var result = roslyn.Compile(source.ToString());
         result.Match(assembly =>
         {
