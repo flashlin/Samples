@@ -211,7 +211,9 @@ public class WebApiClientGenerator : ISourceGenerator
     {
         foreach (var type in compilation.GetAllTypes())
         {
-            var webApiAttr = type.SyntaxNode.AttributeLists.QueryAttributesSyntaxInfo(compilation)
+            //var webApiAttr = type.SyntaxNode.AttributeLists.QueryAttributesSyntaxInfo(compilation)
+            //    .FirstOrDefault(x => x.TypeFullName == typeof(WebApiClientAttribute).FullName);
+            var webApiAttr = type.Attributes
                 .FirstOrDefault(x => x.TypeFullName == typeof(WebApiClientAttribute).FullName);
             if (webApiAttr != null)
             {

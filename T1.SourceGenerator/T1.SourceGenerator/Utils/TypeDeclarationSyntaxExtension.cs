@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using T1.SourceGenerator.Attributes;
 
 namespace T1.SourceGenerator.Utils;
 

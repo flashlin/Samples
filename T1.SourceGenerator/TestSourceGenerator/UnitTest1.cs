@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Testing;
 using T1.SourceGenerator.ApiClientGen;
+using T1.SourceGenerator.Attributes;
 using T1.SourceGenerator.Utils;
 
 namespace TestSourceGenerator;
