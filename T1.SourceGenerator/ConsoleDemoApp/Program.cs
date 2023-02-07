@@ -13,7 +13,4 @@ var c = a.ToXXX();
 Console.WriteLine(c.Name);
 
 
-
-
 var client = new SamApiClient(null, null);
-

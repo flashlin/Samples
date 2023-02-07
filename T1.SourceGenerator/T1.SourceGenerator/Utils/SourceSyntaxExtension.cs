@@ -1,5 +1,7 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using T1.SourceGenerator.Attributes;
 
 namespace T1.SourceGenerator.Utils;
 
@@ -14,8 +16,9 @@ public static class SourceSyntaxExtension
             {
                 Attributes = x.AttributeLists.QueryAttributesSyntaxInfo(compilation).ToList(),
                 TypeFullName = x.GetFullName(),
+                BaseTypes = x.QueryBaseTypeInfo(compilation).ToList(),
                 Methods = x.QueryMethodsSyntaxInfo(compilation).ToList(),
-                SyntaxNode = x,
+                Properties = x.QueryPropertiesSyntaxInfo(compilation).ToList(),
             })
             .ToList();
     }
@@ -29,6 +32,22 @@ public static class SourceSyntaxExtension
             return fullname;
         }
         return fullname.Substring(idx + 1);
+    }
+
+    public static IEnumerable<string> QueryBaseTypeInfo(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
+    {
+        if (typeDeclaration.BaseList == null)
+        {
+            yield break;
+        }
+
+        foreach (var baseType in typeDeclaration.BaseList.Types)
+        {
+            if (baseType.Type.Kind() == SyntaxKind.IdentifierName)
+            {
+                yield return baseType.Type.GetTypeFullName(compilation);
+            }
+        }
     }
     
     public static IEnumerable<MethodSyntaxInfo> QueryMethodsSyntaxInfo(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
@@ -46,7 +65,7 @@ public static class SourceSyntaxExtension
             };
         }
     }
-    
+
     public static string GetTypeFullName(this TypeSyntax typeSyntax, Compilation compilation)
     {
         var semanticModel = compilation.GetSemanticModel(typeSyntax.SyntaxTree);
@@ -110,7 +129,7 @@ public static class SourceSyntaxExtension
             .SelectMany(x => x.QueryAttributeData(compilation));
     }
 
-    public static IEnumerable<PropertySyntaxInfo> QueryPropertiesSyntaxes(this SyntaxNode typeSyntaxNode,
+    public static IEnumerable<PropertySyntaxInfo> QueryPropertiesSyntaxInfo(this SyntaxNode typeSyntaxNode,
         Compilation compilation)
     {
         var model = compilation.GetSemanticModel(typeSyntaxNode.SyntaxTree);
@@ -122,7 +141,7 @@ public static class SourceSyntaxExtension
                 var property = (IPropertySymbol)member;
                 yield return new PropertySyntaxInfo
                 {
-                    Accessibility = property.DeclaredAccessibility,
+                    Accessibility = ToAccessibility(property.DeclaredAccessibility),
                     TypeFullName = property.Type.ToDisplayString(),
                     Name = property.Name,
                     HasGetter = property.GetMethod != null,
@@ -130,5 +149,25 @@ public static class SourceSyntaxExtension
                 };
             }
         }
+    }
+
+    private static AccessibilityInfo ToAccessibility(Accessibility declaredAccessibility)
+    {
+        if (declaredAccessibility == Accessibility.Private)
+        {
+            return AccessibilityInfo.Private;
+        }
+
+        if (declaredAccessibility == Accessibility.Protected)
+        {
+            return AccessibilityInfo.Protected;
+        }
+
+        if (declaredAccessibility == Accessibility.Internal)
+        {
+            return AccessibilityInfo.Internal;
+        }
+
+        return AccessibilityInfo.Public;
     }
 }
