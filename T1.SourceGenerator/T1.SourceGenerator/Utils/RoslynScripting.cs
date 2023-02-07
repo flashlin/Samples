@@ -125,7 +125,9 @@ public class RoslynScripting
         var rtPath = Path.GetDirectoryName(typeof(object).Assembly.Location) +
                      Path.DirectorySeparatorChar;
 
+
         AddAssemblies(
+				typeof(object).Assembly.Location,
             rtPath + "System.Private.CoreLib.dll",
             rtPath + "System.Runtime.dll",
             rtPath + "System.Console.dll",
