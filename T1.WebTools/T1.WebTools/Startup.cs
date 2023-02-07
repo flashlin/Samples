@@ -38,6 +38,14 @@ namespace T1.WebTools
 			});
 		}
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="app"></param>
+        /// <remarks><![CDATA[
+        /// app.UseWebTools(); //must
+        /// app.UseStaticFiles();
+		/// ]]></remarks>
         public static void UseWebTools(this IApplicationBuilder app)
         {
             var assembly = typeof(ToolsController).Assembly;
