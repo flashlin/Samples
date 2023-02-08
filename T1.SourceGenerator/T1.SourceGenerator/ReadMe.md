@@ -2,7 +2,7 @@
 
 * Simple Auto Mapping Clone Object Function
 * Simple Auto Mapping any interface to WebApi Client Class
-
+* Dynamic execute SourceGenerator in product Project.
 
 ### How do I get started ?
 
@@ -125,5 +125,28 @@ public class SamApiClient
         _myConfig = myConfig.Value;
     }
 }
+```
+
+### run SourceGenerator in product project
+
+Add following code in product project.
+```
+using T1.SourceGenerator.Attributes;
+
+namespace ConsoleDemoApp;
+
+[RoslynSourceGenerator]
+public class MySourceGenerator : IRoslynSourceGenerator
+{
+    public void Execute(IRoslynGeneratorExecutionContext context)
+    {
+        context.AddSource("aaa.g.cs", "namespace ConsoleDemoApp; public enum ProductType { Game, Sport }");
+    }
+}
+```
+
+then you can use it in product project.
+```
+var a = ProductType.Game;
 ```
 
