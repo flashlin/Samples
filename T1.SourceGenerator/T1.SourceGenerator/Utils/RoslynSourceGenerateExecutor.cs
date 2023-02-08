@@ -1,15 +1,28 @@
-﻿using T1.SourceGenerator.Attributes;
+﻿using System.Text.Json;
+using T1.SourceGenerator.Attributes;
 
 namespace T1.SourceGenerator.Utils;
 
 public class RoslynSourceGenerateExecutor
 {
-    public void Execute(string generateMethodSource, RoslynGeneratorExecutionContext context)
+    private static readonly string[] DefaultUsingNamespaceList = new[]
+    {
+        "System",
+        "System.Text",
+        "System.Linq",
+        "System.Linq.Expressions",
+        "T1.SourceGenerator.Attributes",
+    };
+
+    public void Execute(TypeSyntaxInfo sourceGeneratorType, string generateMethodSource,
+        RoslynGeneratorExecutionContext context)
     {
         var source = new IndentStringBuilder();
-        source.WriteLine("using System;");
-        source.WriteLine("using System.Text;");
-        source.WriteLine("using T1.SourceGenerator.Attributes;");
+        foreach (var sNamespace in GetDistinctUsingNamespaceList(sourceGeneratorType))
+        {
+            source.WriteLine($"using {sNamespace};");
+        }
+
         source.WriteLine("namespace T1.SourceGenerator.DynGenerators");
         source.WriteLine("{");
 
@@ -36,6 +49,19 @@ public class RoslynSourceGenerateExecutor
             instance.Generate(context);
             return true;
         }, compilation => false);
+    }
 
+    private static List<string> GetDistinctUsingNamespaceList(TypeSyntaxInfo sourceGeneratorType)
+    {
+        var namespaceDict = new Dictionary<string, string>();
+        foreach (var sNamespace in DefaultUsingNamespaceList)
+        {
+            namespaceDict[sNamespace] = sNamespace;
+        }
+        foreach (var sNamespace in sourceGeneratorType.UsingNamespaces)
+        {
+            namespaceDict[sNamespace] = sNamespace;
+        }
+        return namespaceDict.Keys.ToList();
     }
 }

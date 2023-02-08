@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text.Json;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -28,8 +30,10 @@ public class RoslynScripting
             {
                 compileError.Errors.Add(diagnostic.ToString());
             }
+
             return new Either<Assembly, CompileError>(compileError);
         }
+
         var assembly = Assembly.Load(codeStream.ToArray());
         //dynamic instance = assembly.CreateInstance("__ScriptExecution.__Executor")!;
         return new Either<Assembly, CompileError>(assembly);
@@ -46,7 +50,7 @@ public class RoslynScripting
             .AddSyntaxTrees(tree);
         return compilation;
     }
-        
+
     public bool AddAssembly(Type type)
     {
         try
@@ -61,6 +65,7 @@ public class RoslynScripting
         {
             return false;
         }
+
         return true;
     }
 
@@ -125,18 +130,17 @@ public class RoslynScripting
         var rtPath = Path.GetDirectoryName(typeof(object).Assembly.Location) +
                      Path.DirectorySeparatorChar;
 
+        AddAssembly(typeof(Enumerable));
 
         AddAssemblies(
-				typeof(object).Assembly.Location,
+            typeof(object).Assembly.Location,
             rtPath + "System.Private.CoreLib.dll",
             rtPath + "System.Runtime.dll",
             rtPath + "System.Console.dll",
             rtPath + "netstandard.dll",
-
             rtPath + "System.Text.RegularExpressions.dll", // IMPORTANT!
             rtPath + "System.Linq.dll",
             rtPath + "System.Linq.Expressions.dll", // IMPORTANT!
-
             rtPath + "System.IO.dll",
             rtPath + "System.Net.Primitives.dll",
             rtPath + "System.Net.Http.dll",
