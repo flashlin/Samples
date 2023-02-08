@@ -8,6 +8,7 @@ public class RoslynSourceGenerateExecutor
     {
         var source = new IndentStringBuilder();
         source.WriteLine("using System;");
+        source.WriteLine("using System.Text;");
         source.WriteLine("using T1.SourceGenerator.Attributes;");
         source.WriteLine("namespace T1.SourceGenerator.DynGenerators");
         source.WriteLine("{");

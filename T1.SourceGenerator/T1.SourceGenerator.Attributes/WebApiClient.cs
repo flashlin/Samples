@@ -25,8 +25,8 @@ internal partial class WebApiClient
 
     public string BaseUrl { get; set; } = string.Empty;
 
-    public async Task<TResp?> PostDataAsync<TResp>(string apiPath, 
-        object? data = null,
+    public async Task<TResp> PostDataAsync<TResp>(string apiPath, 
+        object data = null,
         TimeSpan? timeout = null)
     {
         var response = await InternalPostDataAsync(apiPath, data, timeout);
@@ -36,14 +36,14 @@ internal partial class WebApiClient
 
     public async Task PostVoidAsync(
         string apiPath, 
-        object? data = null,
+        object data = null,
         TimeSpan? timeout = null)
     {
         await InternalPostDataAsync(apiPath, data, timeout);
     }
     
-    public async Task<TResp?> GetDataAsync<TResp>(string apiPath, 
-        object? data = null,
+    public async Task<TResp> GetDataAsync<TResp>(string apiPath, 
+        object data = null,
         TimeSpan? timeout = null)
     {
         var response = await InternalGetDataAsync(apiPath, data, timeout);
@@ -52,14 +52,14 @@ internal partial class WebApiClient
     }
 
     public async Task GetVoidAsync(string apiPath, 
-        object? data = null,
+        object data = null,
         TimeSpan? timeout = null)
     {
         await InternalGetDataAsync(apiPath, data, timeout);
     }
 
     protected async Task<HttpResponseMessage> InternalPostDataAsync(string apiPath, 
-        object? data = null, 
+        object data = null, 
         TimeSpan? timeout = null)
     {
         var requestUri = new Uri(BaseUrl + apiPath);
@@ -71,7 +71,7 @@ internal partial class WebApiClient
     }
 
     protected async Task<HttpResponseMessage> InternalGetDataAsync(string apiPath, 
-        object? data = null,
+        object data = null,
         TimeSpan? timeout = null)
     {
         var requestUri = new Uri(BaseUrl + apiPath);
@@ -82,7 +82,7 @@ internal partial class WebApiClient
         return response;
     }
 
-    protected virtual string ToQueryString(object? data)
+    protected virtual string ToQueryString(object data)
     {
         if (data == null)
         {
@@ -99,17 +99,17 @@ internal partial class WebApiClient
         return JsonSerializer.Serialize(obj);
     }
 
-    protected virtual T? Deserialize<T>(string json)
+    protected virtual T Deserialize<T>(string json)
     {
         return JsonSerializer.Deserialize<T>(json);
     }
 
-    private StringContent ToJsonContent(object? data)
+    private StringContent ToJsonContent(object data)
     {
         return new StringContent(ToJsonStr(data), Encoding.UTF8, "application/json");
     }
 
-    private string ToJsonStr(object? data)
+    private string ToJsonStr(object data)
     {
         var requestJson = "{}";
         if (data != null) requestJson = SerializeObject(data);

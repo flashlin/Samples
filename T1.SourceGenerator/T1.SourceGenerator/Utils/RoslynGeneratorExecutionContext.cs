@@ -13,6 +13,7 @@ public class RoslynGeneratorExecutionContext : IRoslynGeneratorExecutionContext
     }
 
     public List<TypeSyntaxInfo> AllTypes { get; set; } = new();
+    public List<EnumSyntaxInfo> AllEnums { get; set; } = new();
 
     public void AddSource(string name, string sourceText)
     {
