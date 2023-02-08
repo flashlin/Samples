@@ -65,6 +65,7 @@ public class PropertySyntaxInfo
 
 public class TypeSyntaxInfo
 {
+    public List<string> UsingNamespaces { get; set; } = new();
     public List<AttributeSyntaxInfo> Attributes { get; set; } = new();
     public string TypeFullName { get; set; } = null!;
     public List<MethodSyntaxInfo> Methods { get; set; } = new();
@@ -75,4 +76,16 @@ public class TypeSyntaxInfo
     {
         return $"{TypeFullName}";
     }
+}
+
+public class EnumMemberSyntaxInfo
+{
+    public string Name { get; set; } = null!;
+    public string Value { get; set; } = string.Empty;
+}
+
+public class EnumSyntaxInfo
+{
+    public string Name { get; set; } = null!;
+    public List<EnumMemberSyntaxInfo> Values { get; set; } = new();
 }

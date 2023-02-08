@@ -25,9 +25,13 @@ public class RoslynSourceGenerator : ISourceGenerator
 	{
 		var compilation = context.Compilation;
 		var sourceGenerateExecutor = new RoslynSourceGenerateExecutor();
-		var generateContext = new RoslynGeneratorExecutionContext(context);
+		var generateContext = new RoslynGeneratorExecutionContext(context)
+        {
+            AllTypes = compilation.GetAllTypes(),
+			AllEnums = compilation.GetAllEnums()
+        };
 
-		var sourceGeneratorTypeList = QueryRoslynSourceGeneratorTypeList(compilation.GetAllTypes())
+        var sourceGeneratorTypeList = QueryRoslynSourceGeneratorTypeList(generateContext.AllTypes)
 			 .ToList();
 		foreach (var sourceGeneratorType in sourceGeneratorTypeList)
 		{
@@ -45,7 +49,7 @@ public class RoslynSourceGenerator : ISourceGenerator
 	{
 		foreach (var typeSyntaxInfo in typeSyntaxList)
 		{
-			if (!typeSyntaxInfo.BaseTypes.Any(x => x == typeof(IRoslynSourceGenerator).FullName))
+			if (typeSyntaxInfo.BaseTypes.All(x => x != typeof(IRoslynSourceGenerator).FullName))
 			{
 				continue;
 			}

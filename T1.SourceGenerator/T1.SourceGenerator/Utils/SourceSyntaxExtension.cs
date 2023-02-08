@@ -14,6 +14,7 @@ public static class SourceSyntaxExtension
             .SelectMany(x => x.GetRoot().DescendantNodes().OfType<TypeDeclarationSyntax>())
             .Select(x => new TypeSyntaxInfo
             {
+                UsingNamespaces = x.QueryUsingNamespaceList().ToList(),
                 Attributes = x.AttributeLists.QueryAttributesSyntaxInfo(compilation).ToList(),
                 TypeFullName = x.GetFullName(),
                 BaseTypes = x.QueryBaseTypeInfo(compilation).ToList(),
@@ -21,6 +22,38 @@ public static class SourceSyntaxExtension
                 Properties = x.QueryPropertiesSyntaxInfo(compilation).ToList(),
             })
             .ToList();
+    }
+
+    public static List<EnumSyntaxInfo> GetAllEnums(this Compilation compilation)
+    {
+        return compilation.SyntaxTrees
+            .SelectMany(syntaxTree => syntaxTree.GetRoot().DescendantNodes().OfType<EnumDeclarationSyntax>())
+            .Select(enumType => new EnumSyntaxInfo
+            {
+                Name = enumType.Identifier.Text,
+                Values = enumType.Members.Select(member => member.GetEnumMemberInfo()).ToList(),
+            })
+            .ToList();
+    }
+
+    private static EnumMemberSyntaxInfo GetEnumMemberInfo(this EnumMemberDeclarationSyntax member)
+    {
+        return new EnumMemberSyntaxInfo
+        {
+            Name = member.Identifier.Text,
+            Value = member.GetEnumValue()
+        };
+    }
+
+    private static string GetEnumValue(this EnumMemberDeclarationSyntax member)
+    {
+        if (member.EqualsValue == null)
+        {
+            return string.Empty;
+        }
+        var valueNode = member.EqualsValue.Value;
+        var value = ((LiteralExpressionSyntax)valueNode).Token.Value!;
+        return $"{value}";
     }
 
 
@@ -49,7 +82,26 @@ public static class SourceSyntaxExtension
             }
         }
     }
-    
+
+    private static IEnumerable<UsingDirectiveSyntax> QueryUsingDirectiveList(this TypeDeclarationSyntax node)
+    {
+        var parentNode = node.Parent;
+        while (!(parentNode is CompilationUnitSyntax))
+        {
+            parentNode = parentNode!.Parent;
+        }
+
+        var compilationUnit = (CompilationUnitSyntax)parentNode;
+        return compilationUnit.Usings;
+    }
+
+    public static IEnumerable<string> QueryUsingNamespaceList(this TypeDeclarationSyntax node)
+    {
+        return node.QueryUsingDirectiveList()
+            .Select(x => x.Name.ToString())
+            .ToList();
+    }
+
     public static IEnumerable<MethodSyntaxInfo> QueryMethodsSyntaxInfo(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
     {
         var methods = typeDeclaration.Members.OfType<MethodDeclarationSyntax>();
