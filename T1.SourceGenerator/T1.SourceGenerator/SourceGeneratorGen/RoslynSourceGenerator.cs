@@ -39,7 +39,7 @@ public class RoslynSourceGenerator : ISourceGenerator
 			if (method != null)
 			{
 				var methodSource = method.BodySourceCode;
-				sourceGenerateExecutor.Execute(methodSource, generateContext);
+				sourceGenerateExecutor.Execute(sourceGeneratorType, methodSource, generateContext);
 			}
 		}
 	}
