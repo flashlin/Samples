@@ -10,11 +10,11 @@
 
 <form asp-controller="Home" asp-action="RunCode">
    <div>
-      <textarea name="code">@Model.Code</textarea>
+      <textarea name="code" rows="10" cols="50">@Model.Code</textarea>
    </div>
    <button>RUN</button>
    <div>
-      <textarea name="result">@Model.Result</textarea>
+      <textarea name="result" rows="10" cols="50">@Model.Result</textarea>
    </div>
 </form>
 

@@ -21,14 +21,22 @@ namespace DemoSite.Controllers
 		}
 
 		public IActionResult Index()
-		{
-			return View(new RunCodeViewModel());
-		}
+        {
+            var viewModel = new RunCodeViewModel
+            {
+                Code = @"var a = new string[] { ""a"", ""b"", ""c"" };
+var b = a.Where(x => x == ""b"").First();
+return b;"
+            };
+
+            return View(viewModel);
+        }
 
 		public IActionResult RunCode(RunCodeViewModel vm)
 		{
 			var code = $@"
 using System;
+using System.Linq;
 namespace MyDynamicNs {{
 public class MyDynamicType {{
 				public string Execute() {{ 
