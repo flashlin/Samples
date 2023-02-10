@@ -24,6 +24,13 @@ namespace SqliteCli.Repos
             return connection.Query<TransHistory>(cmd);
         }
 
+        public void AddTrans(TransEntity data)
+        {
+            var db = _db;
+            db.Trans.Add(data);
+            db.SaveChanges();
+        }
+
         public void BuyStock(TransEntity data)
         {
             if (data.TranTime == DateTime.MinValue)

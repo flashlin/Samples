@@ -1,20 +1,19 @@
 using SqliteCli.Entities;
 using SqliteCli.Repos;
 
-namespace SqliteCli;
+namespace SqliteCli.Commands;
 
-public class TodayBuyStockTranCommand : CommandBase
+public class BuyStockTranCommand : CommandBase
 {
     private IStockRepo _stockRepo;
-
-    public TodayBuyStockTranCommand(IStockRepo stockRepo)
+    public BuyStockTranCommand(IStockRepo stockRepo)
     {
         _stockRepo = stockRepo;
     }
-
+    
     public override bool IsMyCommand(string[] args)
     {
-        if (args.Length != 4)
+        if (args.Length != 5)
         {
             return false;
         }
@@ -29,10 +28,10 @@ public class TodayBuyStockTranCommand : CommandBase
 
     public override Task Run(string[] args)
     {
-        var p = args.ParseArgs<TodayBuyStockTranCommandLine>();
+        var p = args.ParseArgs<BuyStockTranCommandLine>()!;
         var tranData = new TransEntity
         {
-            TranTime = DateTime.Now.Date,
+            TranTime = p.TranDate,
             StockId = p.StockId,
             StockPrice = p.StockPrice,
             NumberOfShare = p.NumberOfShare

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SqliteCli.Commands;
 using SqliteCli.Entities;
 using SqliteCli.Factories;
 using SqliteCli.Helpers;
@@ -63,10 +64,11 @@ public class Main
             var ss = commandLine.Split(' ');
             var commands = new CommandBase[]
             {
-                _serviceProvider.GetService<BuyStockTranCommand>()!,
-                _serviceProvider.GetService<TodayBuyStockTranCommand>()!,
-                _serviceProvider.GetService<QueryStockProfitCommand>()!,
-                _serviceProvider.GetService<ListOneStockCommand>()!,
+                _serviceProvider.GetRequiredService<DividendCommand>(),
+                _serviceProvider.GetRequiredService<BuyStockTranCommand>(),
+                _serviceProvider.GetRequiredService<TodayBuyStockTranCommand>(),
+                _serviceProvider.GetRequiredService<QueryStockProfitCommand>(),
+                _serviceProvider.GetRequiredService<ListOneStockCommand>(),
             };
             var cmd = commands.FirstOrDefault(x => x.IsMyCommand(ss));
             if (cmd != null)
@@ -83,12 +85,14 @@ public class Main
                     Console.WriteLine("END");
                     return;
                 case "?":
-                    Console.WriteLine("l                            :list trans history");
-                    Console.WriteLine("l 2022/04/04                 :list trans history from 2022/04/04");
-                    Console.WriteLine("l 2022/04/04-2022-04-05      :list trans history from 2022/04/04~2022/04/05");
+                    Console.WriteLine("l                             :list trans history");
+                    Console.WriteLine("l  2022/04/04                 :list trans history from 2022/04/04");
+                    Console.WriteLine("l  2022/04/04-2022-04-05      :list trans history from 2022/04/04~2022/04/05");
                     Console.WriteLine(
                         "b 2022/04/04,0056,12.34,1000 :add 2022/04/04 buy stockId:0056 stockPrice:12.34 numberOfShare:1000");
-                    Console.WriteLine("d 2022/04/04,1000            :deposit 2022/04/04 amount:1000");
+                    Console.WriteLine("d  2022/04/04,1000            :deposit 2022/04/04 amount:1000");
+                    Console.WriteLine("di 2022/04/04,0050,4000,1000  :發送股利");
+                    Console.WriteLine("di 2022/04/04,0050,股數 ,股利  :發送股利");
                     Console.WriteLine("append <stockId>             :append stock history data");
                     continue;
                 case "l":

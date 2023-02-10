@@ -1,5 +1,4 @@
 using CommandLine;
-using SqliteCli.Repos;
 using T1.Standard.Extensions;
 
 namespace SqliteCli;
@@ -13,6 +12,24 @@ public class ReportStockCommandLine
     public string? StockId { get; set; }
 }
 
+public class DividendCommandLine
+{
+    [Value(index: 0, HelpText = "action name")]
+    public string ActionName { get; set; } = "di";
+    
+    [Value(index: 1, Required = true, HelpText = "TranDate")]
+    public DateTime TranTime {get; set;}
+
+    [Value(index: 2, Required = true, HelpText = "StockId")]
+    public string StockId { get; set; } = string.Empty;
+    
+    [Value(index: 3, Required = true, HelpText = "股數")]
+    public int NumberOfShare { get; set; }
+    
+    [Value(index: 4, Required = true, HelpText = "股利")]
+    public decimal Dividend { get; set; }
+}
+
 
 public class OneStockCommandArgs
 {
@@ -21,42 +38,6 @@ public class OneStockCommandArgs
 
     [Value(index: 1, Required = true, HelpText = "StockId")]
     public string StockId { get; set; } = String.Empty;
-}
-
-public class ListOneStockCommand : CommandBase
-{
-    private IStockService _stockService;
-
-    public ListOneStockCommand(IStockService stockService)
-    {
-        _stockService = stockService;
-    }
-
-    public override bool IsMyCommand(string[] args)
-    {
-        if (args.Length != 2)
-        {
-            return false;
-        }
-
-        if (args[0] != "l")
-        {
-            return false;
-        }
-
-        if (DateTime.TryParse(args[1], out _))
-        {
-            return false;
-        }
-        return true;
-    }
-
-    public override async Task Run(string[] args)
-    {
-        var commandLine = args.ParseArgs<OneStockCommandArgs>()!;
-        var rc = await _stockService.GetOneStockTransAsync(commandLine.StockId);
-        rc.DumpList();
-    }
 }
 
 public class AddDiscountTranCommandArgs

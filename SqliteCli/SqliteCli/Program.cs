@@ -10,6 +10,7 @@ using T1.Standard.Extensions;
 using T1.Standard.Web;
 using Serilog.Events;
 using Microsoft.Extensions.Hosting;
+using SqliteCli.Commands;
 using SqliteCli.Factories;
 
 Log.Logger = new LoggerConfiguration()
@@ -33,10 +34,12 @@ try
 			 services.AddDbContext<StockDbContext>();
 			 services.AddTransient<IStockRepo, StockRepo>();
 			 services.AddTransient<IStockService, StockService>();
+			 
 			 services.AddTransient<BuyStockTranCommand>();
 			 services.AddTransient<TodayBuyStockTranCommand>();
 			 services.AddTransient<QueryStockProfitCommand>();
 			 services.AddTransient<ListOneStockCommand>();
+			 services.AddTransient<DividendCommand>();
 			 services.AddSingleton<Main>();
 
 			 services.AddCors(options =>
@@ -58,6 +61,7 @@ try
 }
 catch (Exception ex)
 {
+	Console.WriteLine(ex.Message);
 	Log.Fatal(ex, "Application Fail");
 }
 finally

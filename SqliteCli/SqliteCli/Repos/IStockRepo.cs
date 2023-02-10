@@ -15,5 +15,6 @@ namespace SqliteCli.Repos
 		decimal GetBalance();
 		StockHistoryEntity? GetLastStockHistoryData(string stockId);
 		List<TransHistory> GetOneStockTransList(string stockId);
+		void AddTrans(TransEntity data);
 	}
 }
