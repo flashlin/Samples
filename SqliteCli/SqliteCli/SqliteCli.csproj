@@ -34,8 +34,4 @@
     <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="6.13.16" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Commands" />
-  </ItemGroup>
-
 </Project>

@@ -1,6 +1,6 @@
 using SqliteCli.Repos;
 
-namespace SqliteCli;
+namespace SqliteCli.Commands;
 
 public class QueryStockProfitCommand : CommandBase
 {
