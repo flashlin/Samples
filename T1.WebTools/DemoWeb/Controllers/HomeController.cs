@@ -15,7 +15,8 @@ namespace DemoWeb.Controllers
 
 		public IActionResult Index()
 		{
-			return View();
+			var vm = new IndexViewModel();
+			return View(vm);
 		}
 
 		public IActionResult Privacy()
