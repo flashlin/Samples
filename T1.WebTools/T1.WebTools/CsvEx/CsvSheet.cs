@@ -13,10 +13,12 @@ public class CsvSheet
       var option = new CsvConfiguration(CultureInfo.InvariantCulture)
       {
          Delimiter = ",",
+         Mode = CsvMode.RFC4180,
          Encoding = Encoding.UTF8,
          HasHeaderRecord = true,
       };
       using var csvReader = new CsvReader(strReader, option);
+      csvReader.Read();
       csvReader.ReadHeader();
 
       var csvSheet = new CsvSheet

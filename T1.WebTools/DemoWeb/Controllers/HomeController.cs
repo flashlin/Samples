@@ -1,6 +1,7 @@
 ﻿using DemoWeb.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using T1.WebTools.CsvEx;
 
 namespace DemoWeb.Controllers
 {
@@ -16,6 +17,14 @@ namespace DemoWeb.Controllers
 		public IActionResult Index()
 		{
 			var vm = new IndexViewModel();
+
+			var csvData = @"id,name
+1,flash
+2,jack
+3,mary";
+
+			vm.CsvSheet = CsvSheet.ReadFrom(csvData);
+			
 			return View(vm);
 		}
 
