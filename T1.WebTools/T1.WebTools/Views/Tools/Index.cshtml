@@ -1,3 +1,28 @@
 ﻿
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+<
+<link rel="stylesheet" href="https://bootswatch.com/4/darkly/bootstrap.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/clike/clike.min.js"></script>
+
+
+
 Hello Tools V1.7
 <img src="~/component:/Contents/images/S.jpg" />
+
+
+<div id="editor"></div>
+
+<script>
+    var editor = CodeMirror(document.getElementById("editor"), {
+        //value: "<html>\n  <head>\n  </head>\n  <body>\n  </body>\n</html>",
+        value: "using System;\n\nclass Program {\n  static void Main(string[] args) {\n    Console.WriteLine(\"Hello, world!\");\n  }\n}",
+        //mode: "htmlmixed",
+        mode: "text/x-csharp",
+        lineNumbers: true,
+        theme: "dracula"
+    });
+</script>
