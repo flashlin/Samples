@@ -1,28 +1,155 @@
-﻿
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css" />
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
-<
-<link rel="stylesheet" href="https://bootswatch.com/4/darkly/bootstrap.min.css">
+﻿@{
+    Layout = "";
+}
+<html lang="en">
+<head>
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://bootswatch.com/4/darkly/bootstrap.min.css">
+</head>
+<body>
+Small Db Tools V1.0
+<img src="~/component:/Contents/images/S.jpg"/>
 
+<div class="container">
+    <div id="app">
+        CodeEditor
+        <div ref="codeEditorDom"></div>
+        {{ data.isLoading }}
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.10.2/umd/popper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/htmlmixed/htmlmixed.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/clike/clike.min.js"></script>
-
-
-
-Hello Tools V1.7
-<img src="~/component:/Contents/images/S.jpg" />
-
-
-<div id="editor"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.30/vue.global.min.js"></script>
 
 <script>
-    var editor = CodeMirror(document.getElementById("editor"), {
-        //value: "<html>\n  <head>\n  </head>\n  <body>\n  </body>\n</html>",
-        value: "using System;\n\nclass Program {\n  static void Main(string[] args) {\n    Console.WriteLine(\"Hello, world!\");\n  }\n}",
-        //mode: "htmlmixed",
-        mode: "text/x-csharp",
-        lineNumbers: true,
-        theme: "dracula"
-    });
+    // var editor = CodeMirror(document.getElementById("editor"), {
+    //     //value: "<html>\n  <head>\n  </head>\n  <body>\n  </body>\n</html>",
+    //     value: "using System;\n\nclass Program {\n  static void Main(string[] args) {\n    Console.WriteLine(\"Hello, world!\");\n  }\n}",
+    //     //mode: "htmlmixed",
+    //     mode: "text/x-csharp",
+    //     lineNumbers: true,
+    //     theme: "dracula"
+    // });
 </script>
+
+<script>
+const { createApp, reactive, ref, nextTick, onMounted } = Vue;
+
+const app = createApp({
+    setup(){
+        const data = reactive({
+            isLoading: true,
+            queryForm: {
+                productName: "",
+                controllerName: "",
+                actionName: "",
+                responseContent: '',
+                responseStatus: ''
+            },
+            pageData: [
+                {
+                    productName: "project1",
+                    controllerName: "controller1",
+                    actionName: "action1",
+                    responseContent: `{"id": 1}`,
+                    responseStatus: 200
+                },
+                {
+                    productName: "project2",
+                    controllerName: "controller2",
+                    actionName: "action2",
+                    responseContent: `{"id": 2}`,
+                    responseStatus: 200
+                },
+            ],
+            addMockWebApiForm: {
+                productName: "santa",
+                controllerName: "Customer",
+                actionName: "GetCustomer",
+                responseContent: `{"id": 123}`,
+                responseStatus: 200
+            },
+            showAddMockWebApiPanel: false,
+        }); 
+        let codeEditorDom = ref();
+        const ctrl = {};
+        ctrl.clickShowAddMockWebApiPanel = (enabled) => {
+            data.showAddMockWebApiPanel = enabled;
+        };
+        ctrl.clickAddMockWebApi = async () => {
+            await postAsync('CreateDefaultResponse', data.addMockWebApiForm);
+            alert("success");
+            ctrl.clickQueryMockWebApiPage();
+        };
+        ctrl.clickQueryMockWebApiPage = async () => {
+            data.isLoading = true;
+            const response = await postAsync('QueryDefaultResponsePage', {
+                queryForm: data.queryForm,
+                startId: 0,
+                pageSize: 20
+            });
+            const respData = await response.json();
+            data.pageData = respData.pageData;
+            data.isLoading = false;
+        };
+        ctrl.updateResponseContent = async (id) =>{
+            const item = data.pageData.find(x => x.id === id);
+            await postAsync('UpdateMockData', item)
+            alert("success");
+        };
+        ctrl.clickDeleteMockWebApi = async (itemId) => {
+            const req = data.pageData.find(x=>x.id === itemId); 
+            await postAsync('DeleteMockData', req);
+            alert("success");
+            ctrl.clickQueryMockWebApiPage();
+        };
+        
+        ctrl.clickExportData = async () => {
+            const resp = await postAsync('ExportData');
+            const data = await resp.json();
+            const jsonString = JSON.stringify(data);
+            const blob = new Blob([jsonString], {type: "octet/stream"});
+            const link = document.createElement('a', {
+              style: 'display: none',
+            });
+            link.href = URL.createObjectURL(blob);
+            link.download = 'data.json';
+            document.body.appendChild(link);
+            link.click();
+            window.URL.revokeObjectURL(link.url);
+        };
+        
+        onMounted(async () => {
+            console.log("refs", this.$refs);
+            codeEditorDom = this.$refs.codeEditorDom;
+            await nextTick();
+            console.log("ref", codeEditorDom.value);
+            const codeEditor = CodeMirror(codeEditorDom.value, {
+                value: "using System;\n\nclass Program {\n  static void Main(string[] args) {\n    Console.WriteLine(\"Hello, world!\");\n  }\n}",
+                mode: "text/x-csharp",
+                lineNumbers: true,
+                theme: "dracula"
+            });
+        });
+        
+        return { 
+            data, 
+            ctrl, 
+        };
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function(event) {
+    app.mount("#app");
+});
+</script>
+</body>
+</html>
