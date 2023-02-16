@@ -2,11 +2,6 @@ using T1.SqlLocalData;
 
 namespace QueryApp.Models.Services;
 
-public interface ILocalDbService
-{
-    string GetDbConnectionString();
-}
-
 public class LocalDbService : ILocalDbService
 {
     private readonly string _instanceName = "local_report_instance";
