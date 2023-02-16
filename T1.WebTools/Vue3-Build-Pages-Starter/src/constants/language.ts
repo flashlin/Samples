@@ -1,0 +1,16 @@
+export enum LanguageType {
+  EN = 'EN',
+  ID_ID = 'ID_ID',
+  TH_TH = 'TH_TH',
+  ZH_CN = 'ZH_CN',
+  VI_VN = 'VI_VN',
+  MY_MM = 'MY_MM',
+  JA_JP = 'JA_JP',
+  KO_KR = 'KO_KR',
+  RU_RU = 'RU_RU',
+  ES_ES = 'ES_ES',
+  DE_DE = 'DE_DE',
+  HI_IN = 'HI_IN',
+  TA_IN = 'TA_IN',
+  PT_BR = 'PT_BR',
+}

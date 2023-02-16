@@ -1,0 +1,13 @@
+{
+  "Login": "登入",
+  "LoginName": "登入名称",
+  "Password": "密码",
+  "ValidationCode": "验证码",
+  "LoginErrorLoginNameRequired": "请填写您的登入名称。",
+  "LoginErrorPasswordRequired": "请填写您的密码。",
+  "LoginErrorInvalidLoginNameOrPassword": "嘿，输入有效的登录名称和密码以继续。",
+  "LoginErrorEnterValidationCode": "Enter Validation Code",
+  "ContactUs": "联络我们",
+  "ForgotAccount": "忘记帐户？",
+  "Register": "注册"
+}

@@ -1,0 +1,29 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.web.json",
+  "include": [
+    "env.d.ts",
+    "src/**/*",
+    "src/**/*.vue",
+    "test-utils.d.ts"
+  ],
+  "exclude": [
+    "src/**/__tests__/*"
+  ],
+  "compilerOptions": {
+    "importsNotUsedAsValues": "remove",
+    "baseUrl": ".",
+    "resolveJsonModule": true,
+    "target": "ES2020",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "module": "es2020",
+    "moduleResolution": "node"
+  }
+}

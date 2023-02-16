@@ -1,0 +1,15 @@
+/// <reference types="vite/client" />
+interface ImportMetaEnv {
+  VITE_CDN_URL: string
+  VITE_AKIS_API_SUBDOMAIN: string
+  VITE_AUTH_API_SUBDOMAIN: string
+  VITE_PROMOTION_API_SUBDOMAIN: string
+  VITE_SBOBET_MAIN_DOMAIN: string
+  VITE_SBOTOP_MAIN_DOMAIN: string
+  VITE_NEW_LANDING_API_SUBDOMAIN: string
+  VITE_PAGE_ENV: string
+  VITE_ENABLE_WC_PREDICTION_PAGE_LOGIN: string
+  VITE_SPORTS_ASI_SUBDOMAIN: string
+  VITE_CASINO_ASI_SUBDOMAIN: string
+  VITE_GAMES_ASI_SUBDOMAIN: string
+}

@@ -1,0 +1,13 @@
+{
+  "Login": "Log In",
+  "LoginName": "Login Name",
+  "Password": "Password",
+  "ValidationCode": "Validation Code",
+  "LoginErrorLoginNameRequired": "Enter your login name.",
+  "LoginErrorPasswordRequired": "Enter your password.",
+  "LoginErrorInvalidLoginNameOrPassword": "Hey there, enter a valid login name and password to continue.",
+  "LoginErrorEnterValidationCode": "Enter Validation Code",
+  "ContactUs": "Contact Us",
+  "ForgotAccount": "Forgot account?",
+  "Register": "Register"
+}
