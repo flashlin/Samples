@@ -2,11 +2,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace QueryApp.Models.Services;
 
-public interface IReportRepo
-{
-    List<string> GetAllTableNames();
-}
-
 public class ReportDbContext : DbContext, IReportRepo
 {
     private readonly string _connectionString;
