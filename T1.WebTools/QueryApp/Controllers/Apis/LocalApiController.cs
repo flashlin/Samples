@@ -6,10 +6,13 @@ using QueryApp.Models;
 namespace QueryApp.Controllers.Apis;
 
 [ApiController]
+[Route("api/[controller]/[action]")]
 public class LocalApiController : ControllerBase
 {
-    public void Knock(KnockRequest req)
+    [HttpPost]
+    public OkResult Knock(KnockRequest req)
     {
+        return Ok();
     }
 }
 
