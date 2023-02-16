@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,13 +13,17 @@ public class Startup
 {
     public void Run(string[] args)
     {
+        var machineName = Environment.MachineName;
+        var appLocation = Assembly.GetEntryAssembly()!.Location;
         var port = FindAvailablePort();
 
         var hostBuilder = Host.CreateDefaultBuilder(args)
             .ConfigureServices(services =>
             {
-                services.AddSingleton<IClientEnvironment>(sp => new ClientEnvironment 
+                services.AddSingleton<ILocalEnvironment>(sp => new LocalEnvironment
                 {
+                    MachineName = machineName,
+                    AppLocation = appLocation,
                     Port = port,
                 });
             })

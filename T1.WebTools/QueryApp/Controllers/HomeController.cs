@@ -5,15 +5,15 @@ namespace QueryApp.Controllers;
 
 public class HomeController : Controller
 {
-    private IClientEnvironment _clientEnvironment;
+    private readonly ILocalEnvironment _localEnvironment;
 
-    public HomeController(IClientEnvironment clientEnvironment)
+    public HomeController(ILocalEnvironment localEnvironment)
     {
-        _clientEnvironment = clientEnvironment;
+        _localEnvironment = localEnvironment;
     }
     
     public IActionResult Index()
     {
-        return Ok("Hello " + _clientEnvironment.Port);
+        return Ok($"Hello {_localEnvironment.MachineName} {_localEnvironment.AppLocation} {_localEnvironment.Port}");
     }
 }
