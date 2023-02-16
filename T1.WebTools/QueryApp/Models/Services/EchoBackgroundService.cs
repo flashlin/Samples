@@ -15,7 +15,7 @@ public class EchoBackgroundService : IHostedService, IDisposable
 
     private void DoWork(object state)
     {
-        Console.WriteLine("Hello");
+        //Console.WriteLine("Hello");
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
