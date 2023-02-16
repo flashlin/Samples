@@ -11,4 +11,8 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  base: "/my_path/", // 設定打包後的檔案路徑
+  build: {
+    assetsDir: "assets", // 設定放置打包後 js/css 的目錄
+  }, //最後 `my_path/assets/`
 });
