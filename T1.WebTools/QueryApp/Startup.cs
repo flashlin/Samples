@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using QueryApp.Controllers.Apis;
 using QueryApp.Models;
+using QueryApp.Models.Clients;
 using QueryApp.Models.Services;
 
 namespace QueryApp;
@@ -43,6 +45,7 @@ public class Startup
     {
         services.AddControllers();
         services.AddSingleton<ILocalDbService, LocalDbService>();
+        services.AddTransient<IQueryClient, QueryClient>();
         services.AddSwaggerGen();
     }
 
