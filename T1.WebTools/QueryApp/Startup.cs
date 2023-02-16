@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QueryApp.Models;
+using QueryApp.Models.Services;
 
 namespace QueryApp;
 
@@ -26,6 +27,7 @@ public class Startup
                     AppLocation = appLocation,
                     Port = port,
                 });
+                services.AddHostedService<EchoBackgroundService>();
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {
