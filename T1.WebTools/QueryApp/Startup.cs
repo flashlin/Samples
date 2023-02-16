@@ -42,11 +42,15 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddControllers();
+        services.AddSingleton<ILocalDbService, LocalDbService>();
+        services.AddSwaggerGen();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         app.UseRouting();
+        app.UseSwagger();
+        app.UseSwaggerUI();
         app.UseEndpoints(endpoints =>
         {
             endpoints.MapControllerRoute(

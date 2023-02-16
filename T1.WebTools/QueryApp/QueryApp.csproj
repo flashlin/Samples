@@ -17,8 +17,12 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="7.0.3" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
       <PackageReference Include="NPOI" Version="2.6.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+      <PackageReference Include="T1.SqlLocalData" Version="1.0.1" />
     </ItemGroup>
 
 </Project>
