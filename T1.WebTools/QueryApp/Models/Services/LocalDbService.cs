@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using T1.SqlLocalData;
 
 namespace QueryApp.Models.Services;
@@ -10,9 +9,9 @@ public interface ILocalDbService
 
 public class LocalDbService : ILocalDbService
 {
-    private readonly string _databaseName = "ReportDb";
     private readonly string _instanceName = "local_report_instance";
     private readonly SqlLocalDb _localDb;
+    public const string DatabaseName = "ReportDb";
 
     public LocalDbService(ILocalEnvironment localEnvironment)
     {
@@ -22,31 +21,12 @@ public class LocalDbService : ILocalDbService
 
     public string GetDbConnectionString()
     {
-        return _localDb.GetDatabaseConnectionString(_instanceName, _databaseName);
-    }
-
-    public void QueryAllTables()
-    {
+        return _localDb.GetDatabaseConnectionString(_instanceName, DatabaseName);
     }
 
     private void InitializeLocalDb()
     {
         _localDb.EnsureInstanceCreated(_instanceName);
-        _localDb.CreateDatabase(_instanceName, _databaseName);
-    }
-}
-
-public class ReportDbContext : DbContext
-{
-    private readonly string _connectionString;
-
-    public ReportDbContext(ILocalDbService localDbService)
-    {
-        _connectionString = localDbService.GetDbConnectionString();
-    }
-    
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer(_connectionString);
+        _localDb.CreateDatabase(_instanceName, DatabaseName);
     }
 }
