@@ -45,7 +45,7 @@ public class Startup
     {
         services.AddControllers();
         services.AddSingleton<ILocalDbService, LocalDbService>();
-        services.AddTransient<ILocalQueryClient, LocalQueryClient>();
+        services.AddTransient<ILocalQueryHostClient, LocalQueryHostClient>();
         services.AddTransient<IReportRepo, ReportDbContext>();
         services.AddSwaggerGen();
     }

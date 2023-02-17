@@ -6,11 +6,11 @@ namespace QueryApp.Models.Services;
 public class EchoBackgroundService : BackgroundService
 {
     private readonly ILocalEnvironment _localEnvironment;
-    private readonly ILocalQueryClient _localQueryClient;
+    private readonly ILocalQueryHostClient _localQueryHostClient;
 
-    public EchoBackgroundService(ILocalEnvironment localEnvironment, ILocalQueryClient localQueryClient)
+    public EchoBackgroundService(ILocalEnvironment localEnvironment, ILocalQueryHostClient localQueryHostClient)
     {
-        _localQueryClient = localQueryClient;
+        _localQueryHostClient = localQueryHostClient;
         _localEnvironment = localEnvironment;
     }
 
@@ -20,7 +20,7 @@ public class EchoBackgroundService : BackgroundService
         {
             if (!_localEnvironment.IsBinded)
             {
-                var resp = await _localQueryClient.EchoAsync(_localEnvironment);
+                var resp = await _localQueryHostClient.EchoAsync(_localEnvironment);
                 _localEnvironment.IsBinded = resp.IsBinded;
             }
             await Task.Delay(1000, stoppingToken);

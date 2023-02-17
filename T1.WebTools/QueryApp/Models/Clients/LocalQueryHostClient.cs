@@ -3,12 +3,12 @@ using T1.WebTools.LocalQueryEx;
 
 namespace QueryApp.Models.Clients;
 
-public class LocalQueryClient : ILocalQueryClient
+public class LocalQueryHostClient : ILocalQueryHostClient
 {
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl;
 
-    public LocalQueryClient(IHttpClientFactory httpClientFactory)
+    public LocalQueryHostClient(IHttpClientFactory httpClientFactory)
     {
         _httpClient = httpClientFactory.CreateClient();
         _baseUrl = "http://example.com/api/";
