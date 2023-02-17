@@ -11,18 +11,17 @@ namespace QueryApp.Controllers.Apis;
 public class LocalApiController : ControllerBase
 {
     private readonly IReportRepo _reportRepo;
-    private readonly IQueryClient _queryClient;
+    private readonly ILocalQueryClient _localQueryClient;
 
-    public LocalApiController(IReportRepo reportRepo, IQueryClient queryClient)
+    public LocalApiController(IReportRepo reportRepo, ILocalQueryClient localQueryClient)
     {
-        _queryClient = queryClient;
+        _localQueryClient = localQueryClient;
         _reportRepo = reportRepo;
     }
     
     [HttpPost]
     public OkResult Knock(KnockRequest req)
     {
-        _queryClient.KnockAsync(req);
         return Ok();
     }
 

@@ -61,8 +61,3 @@ public class LocalLocalQueryHostService : ILocalQueryHostService
         return new Either<LocalQueryEchoInfo, Exception>(item);
     }
 }
-
-public class EchoResponse
-{
-    public bool IsBinded { get; set; }
-}

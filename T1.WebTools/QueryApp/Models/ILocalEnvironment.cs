@@ -3,6 +3,7 @@
 public interface ILocalEnvironment
 {
     int Port { get; set; }
-    string MachineName { get; set; }
+    string AppUid { get; set; }
     string AppLocation { get; set; }
+    bool IsBinded { get; set; }
 }

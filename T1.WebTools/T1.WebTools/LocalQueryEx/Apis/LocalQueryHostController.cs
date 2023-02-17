@@ -14,10 +14,9 @@ public class LocalQueryHostController : ControllerBase
 	}
 	
 	[HttpPost]
-	public OkResult Echo(EchoRequest req)
+	public EchoResponse Echo(EchoRequest req)
 	{
-		_localQueryHostService.Echo(req);
-		return Ok();
+		return _localQueryHostService.Echo(req);
 	}
 
 	[HttpPost]

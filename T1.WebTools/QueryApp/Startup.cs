@@ -16,8 +16,8 @@ public class Startup
 {
     public void Run(string[] args)
     {
-        var machineName = Environment.MachineName;
-        var appLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location);
+        var appUid = Guid.NewGuid().ToString();
+        var appLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
         var port = FindAvailablePort();
 
         var hostBuilder = Host.CreateDefaultBuilder(args)
@@ -25,7 +25,7 @@ public class Startup
             {
                 services.AddSingleton<ILocalEnvironment>(sp => new LocalEnvironment
                 {
-                    MachineName = machineName,
+                    AppUid = appUid,
                     AppLocation = appLocation,
                     Port = port,
                 });
@@ -45,7 +45,7 @@ public class Startup
     {
         services.AddControllers();
         services.AddSingleton<ILocalDbService, LocalDbService>();
-        services.AddTransient<IQueryClient, QueryClient>();
+        services.AddTransient<ILocalQueryClient, LocalQueryClient>();
         services.AddTransient<IReportRepo, ReportDbContext>();
         services.AddSwaggerGen();
     }
