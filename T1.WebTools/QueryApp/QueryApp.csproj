@@ -23,6 +23,11 @@
       <PackageReference Include="NPOI" Version="2.6.0" />
       <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
       <PackageReference Include="T1.SqlLocalData" Version="1.0.1" />
+      <PackageReference Include="T1.Standard" Version="1.0.67" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\T1.WebTools\T1.WebTools.csproj" />
     </ItemGroup>
 
 </Project>
