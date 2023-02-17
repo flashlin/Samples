@@ -1,7 +1,6 @@
 ﻿using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using QueryApp.Models;
-using QueryApp.Models.Clients;
 using QueryApp.Models.Services;
 
 namespace QueryApp.Controllers.Apis;
@@ -11,18 +10,21 @@ namespace QueryApp.Controllers.Apis;
 public class LocalApiController : ControllerBase
 {
     private readonly IReportRepo _reportRepo;
-    private readonly ILocalQueryClient _localQueryClient;
+    private readonly ILocalEnvironment _localEnvironment;
 
-    public LocalApiController(IReportRepo reportRepo, ILocalQueryClient localQueryClient)
+    public LocalApiController(IReportRepo reportRepo, ILocalEnvironment localEnvironment)
     {
-        _localQueryClient = localQueryClient;
+        _localEnvironment = localEnvironment;
         _reportRepo = reportRepo;
     }
     
     [HttpPost]
-    public OkResult Knock(KnockRequest req)
+    public KnockResponse Knock(KnockRequest req)
     {
-        return Ok();
+        return new KnockResponse
+        {
+            AppUid = _localEnvironment.AppUid,
+        };
     }
 
     [HttpPost]
