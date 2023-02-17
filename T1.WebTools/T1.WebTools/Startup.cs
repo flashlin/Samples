@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 using T1.WebTools.Controllers;
+using T1.WebTools.LocalQueryEx;
 
 namespace T1.WebTools
 {
@@ -30,6 +31,8 @@ namespace T1.WebTools
 			services.AddControllersWithViews()
 				.AddApplicationPart(assembly)
 				.AddRazorRuntimeCompilation();
+
+			services.AddSingleton<ILocalQueryHostService, LocalLocalQueryHostService>();
 
 			services.Configure<MvcRazorRuntimeCompilationOptions>(options =>
 			{

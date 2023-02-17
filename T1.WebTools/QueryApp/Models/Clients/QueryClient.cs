@@ -18,6 +18,11 @@ public class QueryClient : IQueryClient
         await PostJsonVoidAsync("echo", localEnvironment);
     }
 
+    public void KnockAsync(KnockRequest req)
+    {
+        throw new NotImplementedException();
+    }
+
     private async Task<T?> PostJsonAsync<T>(string relativeUrl, object request)
     {
         var response = await PostAsync(relativeUrl, request);

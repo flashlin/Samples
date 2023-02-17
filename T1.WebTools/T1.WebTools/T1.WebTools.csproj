@@ -27,11 +27,13 @@
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.2" />
 	  <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="3.1.6" />
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+	  <PackageReference Include="T1.Standard" Version="1.0.67" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Folder Include="Contents\css\" />
 	  <Folder Include="CsvEx\" />
+	  <Folder Include="Models" />
 	</ItemGroup>
 
 </Project>
