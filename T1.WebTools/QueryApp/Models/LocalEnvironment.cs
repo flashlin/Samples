@@ -2,7 +2,8 @@ namespace QueryApp.Models;
 
 public class LocalEnvironment : ILocalEnvironment
 {
-    public string MachineName { get; set; } = string.Empty;
+    public string AppUid { get; set; } = string.Empty;
     public string AppLocation { get; set; } = string.Empty;
+    public bool IsBinded { get; set; }
     public int Port { get; set; }
 }

@@ -1,33 +1,30 @@
 ﻿using Microsoft.Extensions.Hosting;
+using QueryApp.Models.Clients;
 
 namespace QueryApp.Models.Services;
 
-public class EchoBackgroundService : IHostedService, IDisposable
+public class EchoBackgroundService : BackgroundService
 {
-    private Timer? _timer;
+    private readonly ILocalEnvironment _localEnvironment;
+    private readonly ILocalQueryClient _localQueryClient;
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public EchoBackgroundService(ILocalEnvironment localEnvironment, ILocalQueryClient localQueryClient)
     {
-        Console.WriteLine("Starting background service...");
-        _timer = new Timer(DoWork!, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
-        return Task.CompletedTask;
+        _localQueryClient = localQueryClient;
+        _localEnvironment = localEnvironment;
     }
 
-    private void DoWork(object state)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //Console.WriteLine("Hello");
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        Console.WriteLine("Stopping background service...");
-        _timer?.Change(Timeout.Infinite, 0);
-        return Task.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-        _timer?.Dispose();
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            if (!_localEnvironment.IsBinded)
+            {
+                var resp = await _localQueryClient.EchoAsync(_localEnvironment);
+                _localEnvironment.IsBinded = resp.IsBinded;
+            }
+            await Task.Delay(1000, stoppingToken);
+        }
     }
 }
 
