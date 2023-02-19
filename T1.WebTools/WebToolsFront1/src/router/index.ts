@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { useAppState } from "@/stores/appState";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "@/views/Login.vue";
 
@@ -35,7 +36,8 @@ router.beforeEach((to, from, next) => {
     next();
     return;
   }
-  const isAuthenticated = false;
+  const appState = useAppState();
+  const isAuthenticated = appState.isAuthenticated;
   if (!isAuthenticated) {
     next({
       name: "login",
