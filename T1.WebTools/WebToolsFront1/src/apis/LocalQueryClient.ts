@@ -6,11 +6,23 @@ export interface IKnockResponse {
   appUid: string;
 }
 
-class LocalQueryClient {
-  _httpClient = createHttpClient("http://127.0.0.1/");
+export interface IGetAllTableNamesResponse {
+  tableNames: string[];
+}
 
-  async knockAsync(req: IKnockRequest): Promise<IKnockResponse> {
-    const resp = await this._httpClient.postAsync<IKnockResponse>("knock", req);
-    return resp;
+export class LocalQueryClient {
+  _httpClient = createHttpClient("http://127.0.0.1/api/");
+
+  knockAsync(req: IKnockRequest): Promise<IKnockResponse> {
+    return this._httpClient.postAsync<IKnockResponse>("knock", req);
+  }
+
+  getAllTableNamesAsync(): Promise<IGetAllTableNamesResponse> {
+    return this._httpClient.postAsync<IGetAllTableNamesResponse>(
+      "getAllTableNames"
+    );
   }
 }
+
+const client = new LocalQueryClient();
+export default client;
