@@ -1,74 +1,40 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import SideMenu from '@/components/SideMenu.vue';
+import { RouterLink, RouterView } from 'vue-router';
 
 </script>
 
 <template>
-  <SideMenu />
-  <RouterView />
+  llll
+  <q-layout view="lHh Lpr fFf">
+    <q-header elevated class="bg-primary text-white">
+      <q-toolbar>
+        <q-btn dense flat round icon="menu" aria-label="Menu" />
+        <q-toolbar-title>
+          LocalQuery v1.0
+        </q-toolbar-title>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer side="left">
+      <q-list>
+        <q-item to="/" clickable>
+          <q-item-section>
+            <q-item-label>Home</q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item to="/about" clickable>
+          <q-item-section>
+            <q-item-label>About</q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </q-drawer>
+
+    <q-page-container>
+      <RouterView />
+    </q-page-container>
+  </q-layout>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
+<style lang="sass" scoped>
 </style>
