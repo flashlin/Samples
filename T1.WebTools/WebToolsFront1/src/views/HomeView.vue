@@ -3,7 +3,6 @@ import SideMenu from '@/components/SideMenu.vue'
 </script>
 
 <template>
-  <main>
-    Main
-  </main>
+  <SideMenu v-if="$route.meta.requiresAuth" />
+  Main
 </template>

@@ -32,7 +32,7 @@ const data = reactive({
         <v-divider></v-divider>
 
         <v-list :lines="false" density="compact" nav>
-          <v-list-item v-for="(item, i) in data.items" :key="i" :value="item" active-color="primary">
+          <v-list-item v-for="(item, i) in data.items" :key="i" :value="item.text" active-color="primary">
             <template v-slot:prepend>
               <v-icon :icon="item.icon"></v-icon>
             </template>
