@@ -3,5 +3,5 @@ export interface ITable {
 }
 
 export interface IHomeViewModel {
-  tablesName: string[];
+  tableNames: string[];
 }

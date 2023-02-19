@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { IHomeViewModel } from '@/types/HomeViewModel';
-import { reactive } from 'vue';
+import { onMounted, reactive } from 'vue';
+import localQueryClient from '@/apis/LocalQueryClient';
 
 const data = reactive<IHomeViewModel>({
-  tablesName: [
+  tableNames: [
     "customer",
     "product"
   ]
@@ -12,12 +13,17 @@ const data = reactive<IHomeViewModel>({
 function onSelectTableName(tableName: string): void {
   console.log("", tableName);
 }
+
+onMounted(async () => {
+  const resp = await localQueryClient.getAllTableNamesAsync();
+  data.tableNames = resp.tableNames;
+})
 </script>
 
 <template>
   <h6>Menu</h6>
   <q-list bordered separator>
-    <template v-for="tableName in data.tablesName">
+    <template v-for="tableName in data.tableNames">
       <q-item clickable v-ripple @click="() => onSelectTableName(tableName)">
         <q-item-section>
           {{ tableName }}
