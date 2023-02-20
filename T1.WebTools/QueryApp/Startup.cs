@@ -49,10 +49,18 @@ public class Startup
         services.AddTransient<ILocalQueryHostClient, LocalQueryHostClient>();
         services.AddTransient<IReportRepo, ReportDbContext>();
         services.AddSwaggerGen();
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll",
+                cp => cp.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        app.UseCors("AllowAll");
         app.UseRouting();
         app.UseSwagger();
         app.UseSwaggerUI();
@@ -69,7 +77,7 @@ public class Startup
     {
         TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
-        int port = ((IPEndPoint) listener.LocalEndpoint).Port;
+        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
         listener.Stop();
         return port;
     }
