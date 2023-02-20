@@ -6,4 +6,5 @@ public interface ILocalEnvironment
     string AppUid { get; set; }
     string AppLocation { get; set; }
     bool IsBinded { get; set; }
+    DateTime LastActivityTime { get; set; }
 }

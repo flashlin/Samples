@@ -6,6 +6,6 @@ namespace T1.WebTools.LocalQueryEx;
 public interface ILocalQueryHostService
 {
     EchoResponse Echo(EchoRequest req);
-    Either<LocalQueryEchoInfo, Exception> BindLocalQueryApp(BindLocalQueryAppRequest req);
+    BindLocalQueryAppResponse BindLocalQueryApp(BindLocalQueryAppRequest req);
     List<LocalQueryEchoInfo> GetUnbindLocalQueryApps();
 }
