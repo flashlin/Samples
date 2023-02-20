@@ -10,6 +10,10 @@ export interface IBindLocalQueryAppRequest {
   appUid: string;
 }
 
+export interface IBindLocalQueryAppResponse {
+  errorMessage: string;
+}
+
 export class LocalQueryHostClient {
   _httpClient = createHttpClient(import.meta.env.VITE_LOCAL_QUERY_HOST_URL);
 
@@ -19,8 +23,13 @@ export class LocalQueryHostClient {
     );
   }
 
-  async bindLocalQueryAppAsync(req: IBindLocalQueryAppRequest) {
-    await this._httpClient.postVoidAsync("bindLocalQueryApp", req);
+  async bindLocalQueryAppAsync(
+    req: IBindLocalQueryAppRequest
+  ): Promise<IBindLocalQueryAppResponse> {
+    return await this._httpClient.postAsync<IBindLocalQueryAppResponse>(
+      "bindLocalQueryApp",
+      req
+    );
   }
 }
 

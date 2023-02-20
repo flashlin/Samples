@@ -5,6 +5,7 @@ import { useAppState } from '@/stores/appState';
 import localQueryHostClient from '@/apis/LocalQueryHostClient';
 import localQueryClient from '@/apis/LocalQueryClient';
 import { v4 as uuidv4 } from 'uuid';
+import { BindWorker } from "@/apis/BindWorker";
 
 const data = reactive({
    username: "",
@@ -13,6 +14,7 @@ const data = reactive({
 const appState = useAppState();
 const login = async () => {
    const guidString: string = uuidv4();
+   appState.guid = guidString;
    const unbindLocalQueryAppsInfo = await localQueryHostClient.getUnbindLocalQueryAppsAsync();
    const foundInfo = unbindLocalQueryAppsInfo.find(async info => {
       try {
@@ -21,6 +23,12 @@ const login = async () => {
             appUid: info.appUid,
             port: info.port,
          });
+
+         if (resp.isSuccess) {
+            appState.appUid = info.appUid;
+            appState.appPort = info.port;
+         }
+
          return resp.isSuccess;
       } catch {
          return false;
@@ -31,10 +39,16 @@ const login = async () => {
       return;
    }
 
-   await localQueryHostClient.bindLocalQueryAppAsync({
+   const bindResp = await localQueryHostClient.bindLocalQueryAppAsync({
       uniqueId: guidString,
       appUid: foundInfo.appUid,
    });
+
+   if (bindResp.errorMessage == "") {
+      const bindWorker = new BindWorker();
+      bindWorker.run();
+   }
+
    appState.isAuthenticated = true;
    router.push('/');
 }

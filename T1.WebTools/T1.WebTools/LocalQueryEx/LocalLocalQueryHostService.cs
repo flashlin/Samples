@@ -34,12 +34,13 @@ public class LocalLocalQueryHostService : ILocalQueryHostService
             LastActivityTime = DateTime.Now,
         }, (key, info) =>
         {
+            info.FrontUid = req.IsBinded ? info.FrontUid : string.Empty;
             info.LastActivityTime = DateTime.Now;
             return info;
         });
         return new EchoResponse
         {
-            IsBinded = string.IsNullOrEmpty(item.FrontUid)
+            IsBinded = !string.IsNullOrEmpty(item.FrontUid)
         };
     }
 
