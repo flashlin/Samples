@@ -31,6 +31,7 @@ public class LocalLocalQueryHostService : ILocalQueryHostService
         {
             AppUid = req.AppUid,
             Port = req.Port,
+            LastActivityTime = DateTime.Now,
         }, (key, info) =>
         {
             info.LastActivityTime = DateTime.Now;
@@ -42,22 +43,37 @@ public class LocalLocalQueryHostService : ILocalQueryHostService
         };
     }
 
-    public Either<LocalQueryEchoInfo, Exception> BindLocalQueryApp(BindLocalQueryAppRequest req)
+    public BindLocalQueryAppResponse BindLocalQueryApp(BindLocalQueryAppRequest req)
     {
         if (!_localEchoInfos.TryGetValue(req.AppUid, out var item))
         {
-            return new Either<LocalQueryEchoInfo, Exception>(new KeyNotFoundException($"AppUid: {req.AppUid}"));
+            return new BindLocalQueryAppResponse
+            {
+                ErrorMessage = $"AppUid: {req.AppUid}"
+            };
         }
 
         lock (item)
         {
             if (!string.IsNullOrEmpty(item.FrontUid))
             {
-                return new Either<LocalQueryEchoInfo, Exception>(new SynchronizationLockException($"Front Bind ERROR AppUid: {req.AppUid}"));
+                return new BindLocalQueryAppResponse
+                {
+                    ErrorMessage = $"Front Bind ERROR AppUid: {req.AppUid}"
+                };
             }
+
             item.FrontUid = req.UniqueId;
         }
 
-        return new Either<LocalQueryEchoInfo, Exception>(item);
+        return new BindLocalQueryAppResponse
+        {
+            ErrorMessage = string.Empty
+        };
     }
+}
+
+public class BindLocalQueryAppResponse
+{
+    public string ErrorMessage { get; set; } = string.Empty;
 }

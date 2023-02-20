@@ -28,6 +28,8 @@ public class LocalQueryApiController : ControllerBase
                 IsSuccess = false
             };
         }
+
+        _localEnvironment.LastActivityTime = DateTime.Now;
         return new KnockResponse
         {
             IsSuccess = true
