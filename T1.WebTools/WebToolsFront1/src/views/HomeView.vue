@@ -16,7 +16,7 @@ function onSelectTableName(tableName: string): void {
 }
 
 function search() {
-  
+
 }
 
 onMounted(async () => {
@@ -27,12 +27,11 @@ onMounted(async () => {
 
 <template>
   <h6>Menu</h6>
-  <q-input
-      outlined
-      placeholder="Search"
-      v-model="data.searchText"
-      @input="search"
-    />
+  <q-input outlined placeholder="Search" v-model="data.searchText" @input="search">
+    <template v-slot:prepend>
+      <q-icon name="search" />
+    </template>
+  </q-input>
   <q-list bordered separator>
     <template v-for="tableName in data.tableNames">
       <q-item clickable v-ripple @click="() => onSelectTableName(tableName)">
@@ -41,5 +40,5 @@ onMounted(async () => {
         </q-item-section>
       </q-item>
     </template>
-  </q-list>
+</q-list>
 </template>
