@@ -23,13 +23,11 @@ public class EchoBackgroundService : BackgroundService
                 var resp = await _localQueryHostClient.EchoAsync(_localEnvironment);
                 _localEnvironment.IsBinded = resp.IsBinded;
             }
-            else
+            else if (_localEnvironment.IsBinded && _localEnvironment.LastActivityTime.AddSeconds(10) < DateTime.Now)
             {
-                if (_localEnvironment.LastActivityTime.AddSeconds(10) < DateTime.Now)
-                {
-                    _localEnvironment.IsBinded = false;
-                }
+                _localEnvironment.IsBinded = false;
             }
+
             await Task.Delay(1000, stoppingToken);
         }
     }

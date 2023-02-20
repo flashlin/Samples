@@ -1,5 +1,4 @@
-import createHttpClient from "@/apis/HttpClient";
-import { HttpClient } from './HttpClient';
+import createHttpClient, { HttpClient } from "@/apis/HttpClient";
 
 export interface IKnockRequest {
   uniqueId: string;
@@ -16,10 +15,12 @@ export interface IGetAllTableNamesResponse {
 }
 
 export class LocalQueryClient {
-  _httpClient: HttpClient;
+  _httpClient!: HttpClient;
 
   knockAsync(req: IKnockRequest): Promise<IKnockResponse> {
-    this._httpClient = createHttpClient(`http://127.0.0.1:${req.port}/api/LocalQueryApi/`);
+    this._httpClient = createHttpClient(
+      `http://127.0.0.1:${req.port}/api/LocalQueryApi/`
+    );
     return this._httpClient.postAsync<IKnockResponse>("knock", req);
   }
 

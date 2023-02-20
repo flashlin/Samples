@@ -31,9 +31,9 @@ public class LocalQueryHostController : ControllerBase
 	}
 
 	[HttpPost]
-	public void BindLocalQueryApp(BindLocalQueryAppRequest req)
-	{
-		_localQueryHostService.BindLocalQueryApp(req);
+	public BindLocalQueryAppResponse BindLocalQueryApp(BindLocalQueryAppRequest req)
+	{ 
+        return _localQueryHostService.BindLocalQueryApp(req);
 	}
 }
 

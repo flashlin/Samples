@@ -5,8 +5,9 @@ namespace QueryApp.Models.Clients;
 
 public class LocalQueryHostClient : ILocalQueryHostClient
 {
-    private readonly HttpClient _httpClient;
     private readonly string _baseUrl;
+    private readonly HttpClient _httpClient;
+    private static readonly JsonSerializerOptions JsonOptions = CreateDefaultSerializeOptions();
 
     public LocalQueryHostClient(IHttpClientFactory httpClientFactory)
     {
@@ -20,6 +21,7 @@ public class LocalQueryHostClient : ILocalQueryHostClient
         {
             AppUid = localEnvironment.AppUid,
             Port = localEnvironment.Port,
+            IsBinded = localEnvironment.IsBinded,
         });
         return resp;
     }
@@ -28,18 +30,37 @@ public class LocalQueryHostClient : ILocalQueryHostClient
     {
         var response = await PostAsync(relativeUrl, request);
         var responseJson = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<T>(responseJson)!;
+        return DeserializeObject<T>(responseJson);
+    }
+
+    private static T DeserializeObject<T>(string json)
+    {
+        return JsonSerializer.Deserialize<T>(json, JsonOptions)!;
+    }
+
+    private static JsonSerializerOptions CreateDefaultSerializeOptions()
+    {
+        var option = new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        return option;
     }
 
     private async Task<HttpResponseMessage> PostAsync(string relativeUrl, object request)
     {
-        var json = JsonSerializer.Serialize(request);
+        var json = SerializeObject(request);
         var requestContent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
         var response = await _httpClient.PostAsync($"{_baseUrl}{relativeUrl}", requestContent);
         response.EnsureSuccessStatusCode();
         return response;
     }
 
+    private static string SerializeObject(object instance)
+    {
+        var json = JsonSerializer.Serialize(instance, JsonOptions);
+        return json;
+    }
 
     private async Task PostJsonVoidAsync(string relativeUrl, object request)
     {
