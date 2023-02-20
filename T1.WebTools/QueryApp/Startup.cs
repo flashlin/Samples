@@ -43,6 +43,7 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddHttpClient();
         services.AddControllers();
         services.AddSingleton<ILocalDbService, LocalDbService>();
         services.AddTransient<ILocalQueryHostClient, LocalQueryHostClient>();

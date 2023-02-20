@@ -11,7 +11,7 @@ public class LocalQueryHostClient : ILocalQueryHostClient
     public LocalQueryHostClient(IHttpClientFactory httpClientFactory)
     {
         _httpClient = httpClientFactory.CreateClient();
-        _baseUrl = "http://example.com/api/";
+        _baseUrl = "http://127.0.0.1:5004/api/LocalQueryHost/";
     }
 
     public async Task<EchoResponse> EchoAsync(ILocalEnvironment localEnvironment)

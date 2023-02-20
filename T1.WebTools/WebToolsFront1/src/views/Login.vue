@@ -16,10 +16,12 @@ const login = async () => {
    const unbindLocalQueryAppsInfo = await localQueryHostClient.getUnbindLocalQueryAppsAsync();
    const foundInfo = unbindLocalQueryAppsInfo.find(async info => {
       try {
-         await localQueryClient.knockAsync({
+         var resp = await localQueryClient.knockAsync({
             uniqueId: guidString,
+            appUid: info.appUid,
+            port: info.port,
          });
-         return true;
+         return resp.isSuccess;
       } catch {
          return false;
       }

@@ -2,5 +2,5 @@
 
 public class KnockResponse
 {
-    public string AppUid { get; set; } = string.Empty;
+    public bool IsSuccess { get; set; }
 }
