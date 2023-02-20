@@ -3,5 +3,6 @@ export interface ITable {
 }
 
 export interface IHomeViewModel {
+  searchText: string;
   tableNames: string[];
 }
