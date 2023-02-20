@@ -20,7 +20,7 @@ export class LocalQueryHostClient {
   }
 
   async bindLocalQueryAppAsync(req: IBindLocalQueryAppRequest) {
-    await this._httpClient.postVoidAsync("bindLocalQueryAppAsync", req);
+    await this._httpClient.postVoidAsync("bindLocalQueryApp", req);
   }
 }
 
