@@ -1,6 +1,8 @@
 import createHttpClient from "@/apis/HttpClient";
 
-export interface IKnockRequest {}
+export interface IKnockRequest {
+  uniqueId: string;
+}
 
 export interface IKnockResponse {
   appUid: string;
