@@ -7,5 +7,5 @@ public interface ILocalQueryHostService
 {
     EchoResponse Echo(EchoRequest req);
     Either<LocalQueryEchoInfo, Exception> BindLocalQueryApp(BindLocalQueryAppRequest req);
-    List<LocalQueryEchoInfo> GetAllUnbindLocalQueryApp();
+    List<LocalQueryEchoInfo> GetUnbindLocalQueryApps();
 }

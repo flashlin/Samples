@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import router from '@/router';
-import { useAppState } from '@/stores/appState';
 import { reactive } from 'vue';
+import { useAppState } from '@/stores/appState';
+import localQueryHostClient from '@/apis/LocalQueryHostClient';
+import localQueryClient from '@/apis/LocalQueryClient';
+
 const data = reactive({
    username: "",
    password: "",
 })
 const appState = useAppState();
-const login = () => {
+const login = async () => {
+   const unbindLocalQueryAppsInfo = await localQueryHostClient.getUnbindLocalQueryAppsAsync();
+   unbindLocalQueryAppsInfo.forEach(info => {
+      localQueryClient.knockAsync({
+         uniqueId: "",
+      })
+   });
    appState.isAuthenticated = true;
    router.push('/');
 }

@@ -7,12 +7,12 @@ namespace QueryApp.Controllers.Apis;
 
 [ApiController]
 [Route("api/[controller]/[action]")]
-public class LocalApiController : ControllerBase
+public class LocalQueryApiController : ControllerBase
 {
     private readonly IReportRepo _reportRepo;
     private readonly ILocalEnvironment _localEnvironment;
 
-    public LocalApiController(IReportRepo reportRepo, ILocalEnvironment localEnvironment)
+    public LocalQueryApiController(IReportRepo reportRepo, ILocalEnvironment localEnvironment)
     {
         _localEnvironment = localEnvironment;
         _reportRepo = reportRepo;

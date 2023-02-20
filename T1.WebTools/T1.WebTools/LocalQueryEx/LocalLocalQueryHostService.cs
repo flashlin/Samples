@@ -17,7 +17,7 @@ public class LocalLocalQueryHostService : ILocalQueryHostService
 {
     private readonly ConcurrentDictionary<string, LocalQueryEchoInfo> _localEchoInfos = new();
 
-    public List<LocalQueryEchoInfo> GetAllUnbindLocalQueryApp()
+    public List<LocalQueryEchoInfo> GetUnbindLocalQueryApps()
     {
         return _localEchoInfos
             .Where(x => string.IsNullOrEmpty(x.Value.FrontUid))
