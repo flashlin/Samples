@@ -27,6 +27,8 @@ const login = async () => {
          if (resp.isSuccess) {
             appState.appUid = info.appUid;
             appState.appPort = info.port;
+            const bindWorker = new BindWorker();
+            bindWorker.run();
          }
 
          return resp.isSuccess;
@@ -34,19 +36,10 @@ const login = async () => {
          return false;
       }
    });
+
    if (foundInfo == null) {
       //Login FAIL
       return;
-   }
-
-   const bindResp = await localQueryHostClient.bindLocalQueryAppAsync({
-      uniqueId: guidString,
-      appUid: foundInfo.appUid,
-   });
-
-   if (bindResp.errorMessage == "") {
-      const bindWorker = new BindWorker();
-      bindWorker.run();
    }
 
    appState.isAuthenticated = true;

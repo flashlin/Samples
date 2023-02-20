@@ -23,6 +23,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Models\**" />
+	  <EmbeddedResource Remove="Models\**" />
+	  <None Remove="Models\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <PackageReference Include="CsvHelper" Version="30.0.1" />
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.2" />
 	  <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="3.1.6" />
@@ -33,7 +39,6 @@
 	<ItemGroup>
 	  <Folder Include="Contents\css\" />
 	  <Folder Include="CsvEx\" />
-	  <Folder Include="Models" />
 	</ItemGroup>
 
 </Project>

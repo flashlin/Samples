@@ -22,15 +22,6 @@ export class LocalQueryHostClient {
       "GetUnbindLocalQueryApps"
     );
   }
-
-  async bindLocalQueryAppAsync(
-    req: IBindLocalQueryAppRequest
-  ): Promise<IBindLocalQueryAppResponse> {
-    return await this._httpClient.postAsync<IBindLocalQueryAppResponse>(
-      "bindLocalQueryApp",
-      req
-    );
-  }
 }
 
 const client = new LocalQueryHostClient();

@@ -30,6 +30,7 @@ public class LocalQueryApiController : ControllerBase
         }
 
         _localEnvironment.LastActivityTime = DateTime.Now;
+        _localEnvironment.IsBinded = true;
         return new KnockResponse
         {
             IsSuccess = true
