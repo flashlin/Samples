@@ -26,19 +26,45 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h6>Menu</h6>
-  <q-input outlined placeholder="Search" v-model="data.searchText" @input="search">
-    <template v-slot:prepend>
-      <q-icon name="search" />
-    </template>
-  </q-input>
-  <q-list bordered separator>
-    <template v-for="tableName in data.tableNames">
-      <q-item clickable v-ripple @click="() => onSelectTableName(tableName)">
-        <q-item-section>
-          {{ tableName }}
-        </q-item-section>
-      </q-item>
-    </template>
-</q-list>
+  <q-layout view="hHh lpR fFf">
+
+    <q-drawer side="left" show-if-above overlay bordered>
+      <h6>Menu</h6>
+      <q-input outlined placeholder="Search" v-model="data.searchText" @input="search">
+        <template v-slot:prepend>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+      <q-list bordered separator>
+        <template v-for="tableName in data.tableNames">
+          <q-item clickable v-ripple @click="() => onSelectTableName(tableName)">
+            <q-item-section>
+              {{ tableName }}
+            </q-item-section>
+          </q-item>
+        </template>
+      </q-list>
+    </q-drawer>
+
+    <q-drawer side="right" show-if-above bordered>
+      <!-- drawer content -->
+    </q-drawer>
+
+    <q-page-container>
+
+      main
+    </q-page-container>
+
+    <q-footer elevated class="bg-grey-8 text-white">
+      <q-toolbar>
+        <q-toolbar-title>
+          <q-avatar>
+            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+          </q-avatar>
+          <div>Title</div>
+        </q-toolbar-title>
+      </q-toolbar>
+    </q-footer>
+
+  </q-layout>
 </template>

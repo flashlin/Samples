@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using QueryApp.Models.Clients;
+using T1.WebTools.LocalQueryEx;
 
 namespace QueryApp.Models.Services;
 
@@ -18,6 +19,7 @@ public class EchoBackgroundService : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
+            await Task.Delay(1000, stoppingToken);
             if (!_localEnvironment.IsBinded)
             {
                 try
@@ -26,14 +28,28 @@ public class EchoBackgroundService : BackgroundService
                 }
                 catch
                 {
-                    //None
+                    continue;
                 }
+                continue;
             }
-            else if (_localEnvironment.IsBinded && _localEnvironment.LastActivityTime.AddSeconds(10) < DateTime.Now)
+            
+            if (_localEnvironment.LastActivityTime.AddSeconds(10) < DateTime.Now)
             {
                 _localEnvironment.IsBinded = false;
+                continue;
             }
-            await Task.Delay(1000, stoppingToken);
+
+            try
+            {
+                await _localQueryHostClient.UnEchoAsync(new UnEchoRequest
+                {
+                    AppUid = _localEnvironment.AppUid,
+                });
+            }
+            catch
+            {
+                continue;
+            }
         }
     }
 }

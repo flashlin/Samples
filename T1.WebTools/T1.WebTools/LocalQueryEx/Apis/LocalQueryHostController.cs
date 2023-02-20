@@ -29,10 +29,11 @@ public class LocalQueryHostController : ControllerBase
 	{
 		return _localQueryHostService.Echo(req);
 	}
-}
-
-public class UnbindLocalQueryAppInfo
-{
-	public string AppUid { get; set; } = string.Empty;
-	public int Port { get; set; }
+	
+	[HttpPost]
+	public OkResult UnEcho(UnEchoRequest req)
+	{
+		_localQueryHostService.UnEcho(req);
+		return Ok();
+	}
 }
