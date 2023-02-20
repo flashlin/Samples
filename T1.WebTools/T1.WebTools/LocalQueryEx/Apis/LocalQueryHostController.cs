@@ -12,7 +12,18 @@ public class LocalQueryHostController : ControllerBase
 	{
 		_localQueryHostService = localQueryHostService;
 	}
-	
+
+	public List<UnbindLocalQueryAppInfo> GetUnbindLocalQueryApps()
+	{
+		return _localQueryHostService.GetUnbindLocalQueryApps()
+			.Select(x => new UnbindLocalQueryAppInfo
+			{
+				AppUid = x.AppUid,
+				Port = x.Port,
+			})
+			.ToList();
+	}
+
 	[HttpPost]
 	public EchoResponse Echo(EchoRequest req)
 	{
@@ -24,6 +35,12 @@ public class LocalQueryHostController : ControllerBase
 	{
 		_localQueryHostService.BindLocalQueryApp(req);
 	}
+}
+
+public class UnbindLocalQueryAppInfo
+{
+	public string AppUid { get; set; } = string.Empty;
+	public int Port { get; set; }
 }
 
 public class BindLocalQueryAppRequest
