@@ -35,7 +35,16 @@ public class LocalLocalQueryHostService : ILocalQueryHostService
             info.LastActivityTime = DateTime.Now;
             return info;
         });
-        return new EchoResponse {
-        };
+        return new EchoResponse();
     }
+
+    public void UnEcho(UnEchoRequest req)
+    {
+        _localEchoInfos.Remove(req.AppUid, out _);
+    }
+}
+
+public class UnEchoRequest
+{
+    public string AppUid { get; set; } = string.Empty;
 }

@@ -25,6 +25,11 @@ public class LocalQueryHostClient : ILocalQueryHostClient
         });
         return resp;
     }
+    
+    public async Task UnEchoAsync(UnEchoRequest req)
+    {
+        await PostJsonVoidAsync("unEcho", req);
+    }
 
     private async Task<T> PostJsonAsync<T>(string relativeUrl, object request)
     {
