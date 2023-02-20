@@ -2,5 +2,4 @@
 
 public class EchoResponse
 {
-    public bool IsBinded { get; set; }
 }

@@ -29,22 +29,10 @@ public class LocalQueryHostController : ControllerBase
 	{
 		return _localQueryHostService.Echo(req);
 	}
-
-	[HttpPost]
-	public BindLocalQueryAppResponse BindLocalQueryApp(BindLocalQueryAppRequest req)
-	{ 
-        return _localQueryHostService.BindLocalQueryApp(req);
-	}
 }
 
 public class UnbindLocalQueryAppInfo
 {
 	public string AppUid { get; set; } = string.Empty;
 	public int Port { get; set; }
-}
-
-public class BindLocalQueryAppRequest
-{
-	public string UniqueId { get; set; } = string.Empty;
-	public string AppUid { get; set; } = string.Empty;
 }
