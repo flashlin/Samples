@@ -4,6 +4,7 @@ import { reactive } from 'vue';
 import { useAppState } from '@/stores/appState';
 import localQueryHostClient from '@/apis/LocalQueryHostClient';
 import localQueryClient from '@/apis/LocalQueryClient';
+import { v4 as uuidv4 } from 'uuid';
 
 const data = reactive({
    username: "",
@@ -11,11 +12,26 @@ const data = reactive({
 })
 const appState = useAppState();
 const login = async () => {
+   const guidString: string = uuidv4();
    const unbindLocalQueryAppsInfo = await localQueryHostClient.getUnbindLocalQueryAppsAsync();
-   unbindLocalQueryAppsInfo.forEach(info => {
-      localQueryClient.knockAsync({
-         uniqueId: "",
-      })
+   const foundInfo = unbindLocalQueryAppsInfo.find(async info => {
+      try {
+         await localQueryClient.knockAsync({
+            uniqueId: guidString,
+         });
+         return true;
+      } catch {
+         return false;
+      }
+   });
+   if (foundInfo == null) {
+      //Login FAIL
+      return;
+   }
+
+   await localQueryHostClient.bindLocalQueryAppAsync({
+      uniqueId: guidString,
+      appUid: foundInfo.appUid,
    });
    appState.isAuthenticated = true;
    router.push('/');

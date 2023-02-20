@@ -5,6 +5,11 @@ export interface IUnbindLocalQueryAppInfo {
   port: number;
 }
 
+export interface IBindLocalQueryAppRequest {
+  uniqueId: string;
+  appUid: string;
+}
+
 export class LocalQueryHostClient {
   _httpClient = createHttpClient(import.meta.env.VUE_APP_LOCAL_QUERY_HOST_URL);
 
@@ -12,6 +17,10 @@ export class LocalQueryHostClient {
     return this._httpClient.postAsync<IUnbindLocalQueryAppInfo[]>(
       "GetUnbindLocalQueryApps"
     );
+  }
+
+  async bindLocalQueryAppAsync(req: IBindLocalQueryAppRequest) {
+    await this._httpClient.postVoidAsync("bindLocalQueryAppAsync", req);
   }
 }
 

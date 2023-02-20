@@ -8,10 +8,10 @@ namespace T1.WebTools.LocalQueryEx;
 /// complete operation process steps
 /// * user open front then download LocalQueryApp.exe and run LocalQueryApp.exe
 /// * LocalQueryApp --> Echo every one sec until FrontUid is marked --> LocalQueryHost
-/// * front --> GetAllLocalQueryApp Ports --> LocalQueryHost
-/// * front --> Knock localhost: Ports and get AppUid --> LocalQueryApp
-/// * front --> BindLocalQueryApp --> LocalQueryHost (mark FrontUid)
-/// * front --> Send Api with token --> LocalQueryApp 
+/// * front --> GetUnbindLocalQueryApps --> LocalQueryHost
+/// * front --> Knock                   --> LocalQueryApp
+/// * front --> BindLocalQueryApp       --> LocalQueryHost
+/// * front --> Send Api with token     --> LocalQueryApp 
 /// </summary>
 public class LocalLocalQueryHostService : ILocalQueryHostService
 {

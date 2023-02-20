@@ -14,6 +14,9 @@ export class HttpClient {
     const response = await this._httpClient.post<T>(url, data);
     return response.data;
   }
+  async postVoidAsync(url: string, data?: unknown): Promise<void> {
+    await this._httpClient.post(url, data);
+  }
 }
 
 function createHttpClient(baseUrl: string) {
