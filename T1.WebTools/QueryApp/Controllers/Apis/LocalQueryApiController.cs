@@ -21,9 +21,16 @@ public class LocalQueryApiController : ControllerBase
     [HttpPost]
     public KnockResponse Knock(KnockRequest req)
     {
+        if (_localEnvironment.AppUid != req.AppUid)
+        {
+            return new KnockResponse()
+            {
+                IsSuccess = false
+            };
+        }
         return new KnockResponse
         {
-            AppUid = _localEnvironment.AppUid,
+            IsSuccess = true
         };
     }
 

@@ -11,7 +11,7 @@ export interface IBindLocalQueryAppRequest {
 }
 
 export class LocalQueryHostClient {
-  _httpClient = createHttpClient(import.meta.env.VUE_APP_LOCAL_QUERY_HOST_URL);
+  _httpClient = createHttpClient(import.meta.env.VITE_LOCAL_QUERY_HOST_URL);
 
   getUnbindLocalQueryAppsAsync(): Promise<IUnbindLocalQueryAppInfo[]> {
     return this._httpClient.postAsync<IUnbindLocalQueryAppInfo[]>(
