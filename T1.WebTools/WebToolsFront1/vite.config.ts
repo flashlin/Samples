@@ -21,6 +21,15 @@ export default defineConfig({
   },
   base: "/my_path/", // 設定打包後的檔案路徑
   build: {
-    assetsDir: "assets", // 設定放置打包後 js/css 的目錄
-  }, //最後 `my_path/assets/`
+    assetsDir: "assets", // 設定放置打包後 js/css 的目錄, 最後 `my_path/assets/`
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        }
+      }
+    }
+  }, 
 });
