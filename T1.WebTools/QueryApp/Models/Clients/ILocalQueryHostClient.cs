@@ -5,5 +5,4 @@ namespace QueryApp.Models.Clients;
 public interface ILocalQueryHostClient
 {
     Task<EchoResponse> EchoAsync(ILocalEnvironment localEnvironment);
-    Task UnEchoAsync(UnEchoRequest req);
 }

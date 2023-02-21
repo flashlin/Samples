@@ -35,20 +35,8 @@ public class EchoBackgroundService : BackgroundService
             
             if (_localEnvironment.LastActivityTime.AddSeconds(10) < DateTime.Now)
             {
+                _localEnvironment.UserUid = string.Empty;
                 _localEnvironment.IsBinded = false;
-                continue;
-            }
-
-            try
-            {
-                await _localQueryHostClient.UnEchoAsync(new UnEchoRequest
-                {
-                    AppUid = _localEnvironment.AppUid,
-                });
-            }
-            catch
-            {
-                continue;
             }
         }
     }

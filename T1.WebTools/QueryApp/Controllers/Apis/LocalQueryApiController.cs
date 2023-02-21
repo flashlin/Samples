@@ -29,6 +29,7 @@ public class LocalQueryApiController : ControllerBase
             };
         }
 
+        _localEnvironment.UserUid = req.UniqueId;
         _localEnvironment.LastActivityTime = DateTime.Now;
         _localEnvironment.IsBinded = true;
         return new KnockResponse

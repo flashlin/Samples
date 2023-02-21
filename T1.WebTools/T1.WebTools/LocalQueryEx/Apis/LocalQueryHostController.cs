@@ -29,11 +29,4 @@ public class LocalQueryHostController : ControllerBase
 	{
 		return _localQueryHostService.Echo(req);
 	}
-	
-	[HttpPost]
-	public OkResult UnEcho(UnEchoRequest req)
-	{
-		_localQueryHostService.UnEcho(req);
-		return Ok();
-	}
 }

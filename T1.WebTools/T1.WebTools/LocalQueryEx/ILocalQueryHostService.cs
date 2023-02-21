@@ -6,5 +6,4 @@ public interface ILocalQueryHostService
 {
     EchoResponse Echo(EchoRequest req);
     List<LocalQueryEchoInfo> GetUnbindLocalQueryApps();
-    void UnEcho(UnEchoRequest req);
 }

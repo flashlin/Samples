@@ -21,14 +21,8 @@ public class LocalQueryHostClient : ILocalQueryHostClient
         {
             AppUid = localEnvironment.AppUid,
             Port = localEnvironment.Port,
-            IsBinded = localEnvironment.IsBinded,
         });
         return resp;
-    }
-    
-    public async Task UnEchoAsync(UnEchoRequest req)
-    {
-        await PostJsonVoidAsync("unEcho", req);
     }
 
     private async Task<T> PostJsonAsync<T>(string relativeUrl, object request)
