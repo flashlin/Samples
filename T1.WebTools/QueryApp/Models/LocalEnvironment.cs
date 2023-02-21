@@ -6,5 +6,6 @@ public class LocalEnvironment : ILocalEnvironment
     public string AppLocation { get; set; } = string.Empty;
     public bool IsBinded { get; set; }
     public DateTime LastActivityTime { get; set; }
+    public string UserUid { get; set; } = string.Empty;
     public int Port { get; set; }
 }

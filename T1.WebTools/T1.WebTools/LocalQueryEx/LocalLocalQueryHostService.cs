@@ -19,6 +19,7 @@ public class LocalLocalQueryHostService : ILocalQueryHostService
     public List<LocalQueryEchoInfo> GetUnbindLocalQueryApps()
     {
         return _localEchoInfos
+            .Where(x => DateTime.Now < x.Value.LastActivityTime.AddSeconds(5))
             .Select(x => x.Value)
             .ToList();
     }
@@ -32,19 +33,10 @@ public class LocalLocalQueryHostService : ILocalQueryHostService
             LastActivityTime = DateTime.Now,
         }, (key, info) =>
         {
+            info.Port = req.Port;
             info.LastActivityTime = DateTime.Now;
             return info;
         });
         return new EchoResponse();
     }
-
-    public void UnEcho(UnEchoRequest req)
-    {
-        _localEchoInfos.Remove(req.AppUid, out _);
-    }
-}
-
-public class UnEchoRequest
-{
-    public string AppUid { get; set; } = string.Empty;
 }

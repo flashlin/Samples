@@ -4,5 +4,4 @@ public class EchoRequest
 {
     public string AppUid { get; set; } = string.Empty;
     public int Port { get; set; }
-    public bool IsBinded { get; set; }
 }
