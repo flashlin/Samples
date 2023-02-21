@@ -2,6 +2,7 @@
 import type { IHomeViewModel } from '@/types/HomeViewModel';
 import { onMounted, reactive } from 'vue';
 import localQueryClient from '@/apis/LocalQueryClient';
+import CodeEditor from '@/components/CodeEditor.vue';
 
 const data = reactive<IHomeViewModel>({
   searchText: "",
@@ -73,7 +74,8 @@ onMounted(async () => {
 
     <q-page-container>
       <!-- drawer main content -->
-
+      code editor
+      <code-editor />
     </q-page-container>
 
     <q-footer elevated class="bg-grey-8 text-white">
