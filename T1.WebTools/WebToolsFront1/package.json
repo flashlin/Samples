@@ -19,7 +19,9 @@
     "quasar": "^2.11.6",
     "uuid": "^9.0.0",
     "vue": "^3.2.45",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+    "xterm": "^5.1.0",
+    "xterm-addon-web-links": "^0.8.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.28.1",
