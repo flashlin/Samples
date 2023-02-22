@@ -1,5 +1,5 @@
 import createHttpClient, { HttpClient } from "@/apis/HttpClient";
-import { MockAsyncMethod } from '../commons/MockUtils';
+import { MockAsyncMethod } from "../commons/MockUtils";
 
 export interface IKnockRequest {
   uniqueId: string;
@@ -16,14 +16,14 @@ export interface IGetAllTableNamesResponse {
 }
 
 export interface ILocalQueryClient {
-  knockAsync(req: IKnockRequest): Promise<IKnockResponse>; 
+  knockAsync(req: IKnockRequest): Promise<IKnockResponse>;
   getAllTableNamesAsync(): Promise<IGetAllTableNamesResponse>;
 }
 
 export class LocalQueryClient implements ILocalQueryClient {
   _httpClient!: HttpClient;
 
-  @MockAsyncMethod('{"isSuccess": true}')
+  @MockAsyncMethod({ isSuccess: true })
   knockAsync(req: IKnockRequest): Promise<IKnockResponse> {
     this._httpClient = createHttpClient(
       `http://127.0.0.1:${req.port}/api/LocalQueryApi/`
@@ -31,7 +31,7 @@ export class LocalQueryClient implements ILocalQueryClient {
     return this._httpClient.postAsync<IKnockResponse>("knock", req);
   }
 
-  @MockAsyncMethod('{"tableNames":["Customer", "Product"]}')
+  @MockAsyncMethod({ tableNames: ["Customer", "Product"] })
   getAllTableNamesAsync(): Promise<IGetAllTableNamesResponse> {
     return this._httpClient.postAsync<IGetAllTableNamesResponse>(
       "getAllTableNames"

@@ -1,9 +1,9 @@
-using NPOI.SS.UserModel;
+﻿using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace QueryApp.Models.Services;
+namespace QueryApp.Models.Helpers;
 
-public class ExcelService
+public class ExcelHelper
 {
     public IEnumerable<ExcelSheet> ReadSheets(string xlsxFile)
     {
