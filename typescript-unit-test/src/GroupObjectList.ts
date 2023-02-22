@@ -59,7 +59,7 @@ function CountSameValue(objList: any[], rowIndex: number, column: IColumn, group
     return count;
 }
 
-function ComputeGroupRow(rowIndex: number, objList: any[], groupColumnNames: string[], groups: IGroupCounts[]) {
+function ComputeGroupCountRow(rowIndex: number, objList: any[], groupColumnNames: string[], groups: IGroupCounts[]) {
     const columns = GetColumns(objList[0]);
     columns.forEach(column => {
         EnsureGroupCount(groups, rowIndex, column.index);
@@ -79,14 +79,14 @@ function ComputeGroupRow(rowIndex: number, objList: any[], groupColumnNames: str
     });
 }
 
-function ComputeGroups(objList: any[], groupColumnNames: string[], groups: IGroupCounts[]) {
+function ComputeGroupsCount(objList: any[], groupColumnNames: string[], groups: IGroupCounts[]) {
     objList.forEach((row, rowIndex) => {
-        ComputeGroupRow(rowIndex, objList, groupColumnNames, groups);
+        ComputeGroupCountRow(rowIndex, objList, groupColumnNames, groups);
     });
 }
 
-export function GroupObjectList(objList: any[], groupColumnNames: string[]): IGroupCounts[] {
+export function GroupCountObjectList(objList: any[], groupColumnNames: string[]): IGroupCounts[] {
     let groups: IGroupCounts[] = [];
-    ComputeGroups(objList, groupColumnNames, groups);
+    ComputeGroupsCount(objList, groupColumnNames, groups);
     return groups;
 }

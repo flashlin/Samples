@@ -1,4 +1,4 @@
-import { GroupObjectList, IGroupCounts } from '../GroupObjectList';
+import { GroupCountObjectList, IGroupCounts } from '../GroupObjectList';
 
 describe('group object list', () => {
     it('case1', () => {
@@ -10,7 +10,7 @@ describe('group object list', () => {
             { product: 'Banner', year: 2002, price: 500 },
         ];
 
-      const actual = GroupObjectList(inputData, ['product','year']);
+      const actual = GroupCountObjectList(inputData, ['product','year']);
 
       expect(actual).toStrictEqual([
         [ 3, 2, 1 ],
@@ -33,7 +33,7 @@ describe('group object list', () => {
             { product: 'Apple', year: 2000, price: 500 },
         ];
 
-      const actual = GroupObjectList(inputData, ['product','year']);
+      const actual = GroupCountObjectList(inputData, ['product','year']);
 
       expect(actual).toStrictEqual([
         [ 3, 2, 1 ],
