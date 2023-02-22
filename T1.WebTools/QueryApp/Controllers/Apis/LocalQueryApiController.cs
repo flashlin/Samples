@@ -72,5 +72,12 @@ public class LocalQueryApiController : ControllerBase
             await stream.FlushAsync();
         }
     }
+    
+    [HttpPost]
+    public List<Dictionary<string, string>> QueryRawSql(string sql)
+    {
+        throw new NotImplementedException();
+        //return _reportRepo.QueryRawSql(sql);
+    }
 }
 
