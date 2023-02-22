@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, defineExpose } from 'vue';
 import { Terminal } from 'xterm';
 import 'xterm/css/xterm.css';
 import { WebLinksAddon } from 'xterm-addon-web-links';
+import type { ITerminalUiExpose } from '@/components/TerminalUiModel';
 
 const terminalDom = ref<HTMLElement>();
 const terminal = new Terminal();
@@ -13,12 +14,21 @@ function executeCommand(command: any) {
    terminal.writeln(`> ${command}`);
 }
 
+function writeln(text: string): void {
+   const terminal: any = terminalDom.value!;
+   terminal.writeln(text);
+}
+
+defineExpose<ITerminalUiExpose>({
+   writeln,
+});
+
 onMounted(() => {
    terminal.open(terminalDom.value!);
-   terminal.writeln('Hello from mxterm.js ');
-   setInterval(() => {
-      terminal.writeln("" + new Date());
-   }, 1000);
+   //terminal.writeln('Hello from mxterm.js ');
+   // setInterval(() => {
+   //    terminal.writeln("" + new Date());
+   // }, 1000);
 })
 </script>
 
