@@ -1,3 +1,4 @@
+using Dapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace QueryApp.Models.Services;
@@ -21,7 +22,16 @@ public class ReportDbContext : DbContext, IReportRepo
         return Database.SqlQueryRaw<string>(sql)
             .ToList();
     }
-    
+
+    public List<Dictionary<string, object>> QueryRawSql(string sql)
+    {
+        using var conn = Database.GetDbConnection();
+        return conn.Query(sql)
+            .Cast<IDictionary<string, object>>()
+            .Select(row => row.ToDictionary(item => item.Key, item => item.Value))
+            .ToList();
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer(_connectionString);

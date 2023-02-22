@@ -76,8 +76,10 @@ public class LocalQueryApiController : ControllerBase
     [HttpPost]
     public List<Dictionary<string, string>> QueryRawSql(string sql)
     {
-        throw new NotImplementedException();
-        //return _reportRepo.QueryRawSql(sql);
+        var result = _reportRepo.QueryRawSql(sql);
+        return result
+            .Select(row => row.ToDictionary(item => item.Key, y => $"{y.Value}"))
+            .ToList();
     }
 }
 
