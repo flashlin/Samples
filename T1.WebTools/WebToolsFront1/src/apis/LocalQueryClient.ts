@@ -15,9 +15,19 @@ export interface IGetAllTableNamesResponse {
   tableNames: string[];
 }
 
+export interface IDataRow {
+  [columnName: string]: any;
+}
+
+export interface IQueryRawSqlResponse {
+  data: IDataRow[];
+  errorMessage: string;
+}
+
 export interface ILocalQueryClient {
   knockAsync(req: IKnockRequest): Promise<IKnockResponse>;
   getAllTableNamesAsync(): Promise<IGetAllTableNamesResponse>;
+  queryRawSql(sql: string): Promise<IQueryRawSqlResponse>;
 }
 
 export class LocalQueryClient implements ILocalQueryClient {
@@ -36,6 +46,11 @@ export class LocalQueryClient implements ILocalQueryClient {
     return this._httpClient.postAsync<IGetAllTableNamesResponse>(
       "getAllTableNames"
     );
+  }
+
+  queryRawSql(sql: string): Promise<IQueryRawSqlResponse> {
+    console.log("c", this._httpClient);
+    return this._httpClient.postAsync<IQueryRawSqlResponse>("queryRawSql", sql);
   }
 }
 

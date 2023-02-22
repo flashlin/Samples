@@ -74,12 +74,24 @@ public class LocalQueryApiController : ControllerBase
     }
     
     [HttpPost]
-    public List<Dictionary<string, string>> QueryRawSql(string sql)
+    public QueryRawSqlResponse QueryRawSql(string sql)
     {
-        var result = _reportRepo.QueryRawSql(sql);
-        return result
-            .Select(row => row.ToDictionary(item => item.Key, y => $"{y.Value}"))
-            .ToList();
+        try
+        {
+            var data = _reportRepo.QueryRawSql(sql)
+                .Select(row => row.ToDictionary(item => item.Key, y => $"{y.Value}"))
+                .ToList();
+            return new QueryRawSqlResponse
+            {
+                Data = data
+            };
+        }
+        catch(Exception e)
+        {
+            return new QueryRawSqlResponse
+            {
+                ErrorMessage = e.Message
+            };
+        }
     }
 }
-

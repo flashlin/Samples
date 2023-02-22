@@ -15,7 +15,6 @@ function executeCommand(command: any) {
 }
 
 function writeln(text: string): void {
-   const terminal: any = terminalDom.value!;
    terminal.writeln(text);
 }
 

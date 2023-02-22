@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted, onBeforeUnmount } from 'vue';
+import { ref, reactive, onMounted, onBeforeUnmount, toRefs } from 'vue';
 import * as monaco from 'monaco-editor';
 
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
@@ -13,9 +13,17 @@ self.MonacoEnvironment = {
     },
 };
 
+const props = defineProps<{
+    code: string
+}>();
+
+interface MyComponentEmits {
+    (e: 'update:code', code: string): void
+}
+const emits = defineEmits<MyComponentEmits>();
 
 const data = reactive({
-    code: "",
+    code: props.code,
 });
 
 const editorDom = ref<HTMLElement>();
@@ -25,8 +33,14 @@ onMounted(() => {
     //const jsonModel = monaco.editor.createModel(props.modelValue, 'json');
     editor = monaco.editor.create(editorDom.value!, {
         //model: jsonModel,
-        value: 'CREATE TABLE customer(\n[id] int IDENTITY(1,1),\n[name] nvarchar(50))\n',
+        value: data.code,
         language: 'sql'
+    });
+
+    editor.onDidChangeModelContent(() => {
+        const value = editor.getValue();
+        //emits('update:modelValue', value);
+        emits('update:code', value);
     });
 });
 
