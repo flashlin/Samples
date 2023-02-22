@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { IHomeViewModel } from '@/types/HomeViewModel';
 import { onMounted, reactive, ref } from 'vue';
-import localQueryClient from '@/apis/LocalQueryClient';
 import CodeEditor from '@/components/CodeEditor.vue';
 import TerminalUi from '@/components/TerminalUi.vue';
 import { useAppState } from '@/stores/appState';
@@ -16,7 +15,8 @@ const data = reactive<IHomeViewModel>({
   tableNames: [
     "customer",
     "product"
-  ]
+  ],
+  code: `CREATE TABLE (\n[id] int IDENTITY(1,1),\n[name] nvarchar(50))\n`
 });
 
 const terminalRef = ref<ITerminalUiProxy>();
@@ -48,15 +48,20 @@ interface IHotkey {
   keyCode: number;
 }
 
-function onTriggeredEventHandler(payload: IHotkey) {
-  console.log('trigger', payload);
-  //payload.keyString
-  terminalRef.value?.writeln(payload.keyString);
+async function onTriggeredEventHandler(payload: IHotkey) {
+  const term = terminalRef.value!;
+  if (payload.keyString == 'R') {
+    //term.writeln(payload.keyString);
+    //term.writeln(data.code);
+    const localQueryClient = appState.localQueryClient!;
+    const result = await localQueryClient.queryRawSql(data.code);
+    term.writeln(result.errorMessage);
+    term.writeln(JSON.stringify(result.data));
+  }
 }
 
-
-
 onMounted(async () => {
+  const localQueryClient = appState.localQueryClient!;
   const resp = await localQueryClient.getAllTableNamesAsync();
   data.tableNames = resp.tableNames;
 })
@@ -67,24 +72,24 @@ onMounted(async () => {
   <q-layout view="hHh lpR fFf">
 
     <!-- <q-header elevated class="bg-primary text-white" height-hint="98">
-                                                                  <q-toolbar>
-                                                                    <q-btn dense flat round icon="menu" />
-                                                                    <q-toolbar-title>
-                                                                          <q-avatar>
-                                                                            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-                                                                          </q-avatar>
-                                                                      Title
-                                                                    </q-toolbar-title>
+                                                                                                    <q-toolbar>
+                                                                                                      <q-btn dense flat round icon="menu" />
+                                                                                                      <q-toolbar-title>
+                                                                                                            <q-avatar>
+                                                                                                              <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+                                                                                                            </q-avatar>
+                                                                                                        Title
+                                                                                                      </q-toolbar-title>
 
-                                                              <q-btn dense flat round icon="menu" />
-                                                            </q-toolbar>
+                                                                                                <q-btn dense flat round icon="menu" />
+                                                                                              </q-toolbar>
 
-                                                            <q-tabs align="left">
-                                                              <q-route-tab to="/page1" label="Page One" />
-                                                                <q-route-tab to="/page2" label="Page Two" />
-                                                                    <q-route-tab to="/page3" label="Page Three" />
-                                                                  </q-tabs>
-                                                                      </q-header> -->
+                                                                                              <q-tabs align="left">
+                                                                                                <q-route-tab to="/page1" label="Page One" />
+                                                                                                  <q-route-tab to="/page2" label="Page Two" />
+                                                                                                      <q-route-tab to="/page3" label="Page Three" />
+                                                                                                    </q-tabs>
+                                                                                                        </q-header> -->
 
     <q-drawer show-if-above side="left" bordered>
       <!-- drawer left content -->
@@ -114,19 +119,19 @@ onMounted(async () => {
 
     <q-page-container>
       <!-- drawer main content -->
-      <code-editor />
-      <terminal-ui ref="termDom"></terminal-ui>
+      <code-editor v-model:code="data.code" />
+      <terminal-ui ref="terminalRef"></terminal-ui>
     </q-page-container>
 
     <!-- <q-footer elevated class="bg-grey-8 text-white">
-                                                                    <q-toolbar>
-                                                                      <q-toolbar-title>
-                                                                        <q-avatar>
-                                                                          <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-                                                                        </q-avatar>
-                                                                        <div>footer</div>
-                                                                      </q-toolbar-title>
-                                                                    </q-toolbar>
-                                                                  </q-footer> -->
+                                                                                                      <q-toolbar>
+                                                                                                        <q-toolbar-title>
+                                                                                                          <q-avatar>
+                                                                                                            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+                                                                                                          </q-avatar>
+                                                                                                          <div>footer</div>
+                                                                                                        </q-toolbar-title>
+                                                                                                      </q-toolbar>
+                                                                                                    </q-footer> -->
   </q-layout>
 </template>

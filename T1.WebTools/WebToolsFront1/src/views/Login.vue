@@ -29,6 +29,7 @@ const login = async () => {
             appState.appPort = info.port;
             const bindWorker = new BindWorker();
             bindWorker.run();
+            appState.localQueryClient = localQueryClient;
          }
 
          return resp.isSuccess;
