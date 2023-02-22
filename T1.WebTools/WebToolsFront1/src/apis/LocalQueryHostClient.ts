@@ -1,5 +1,5 @@
 import createHttpClient from "@/apis/HttpClient";
-import { MockAsyncMethod } from '../commons/MockUtils';
+import { MockAsyncMethod } from "../commons/MockUtils";
 
 export interface IUnbindLocalQueryAppInfo {
   appUid: string;
@@ -18,7 +18,7 @@ export interface IBindLocalQueryAppResponse {
 export class LocalQueryHostClient {
   _httpClient = createHttpClient(import.meta.env.VITE_LOCAL_QUERY_HOST_URL);
 
-  @MockAsyncMethod('[{"appUid":"xxx","port":0}]')
+  @MockAsyncMethod([{ appUid: "xxx", port: 0 }])
   getUnbindLocalQueryAppsAsync(): Promise<IUnbindLocalQueryAppInfo[]> {
     return this._httpClient.postAsync<IUnbindLocalQueryAppInfo[]>(
       "GetUnbindLocalQueryApps"

@@ -43,4 +43,34 @@ public class LocalQueryApiController : ControllerBase
     {
         return _reportRepo.GetAllTableNames();
     }
+    
+    [HttpPost]
+    public async Task UploadFiles()
+    {
+        var dataFolder = Path.Combine(_localEnvironment.AppLocation, "Data");
+        if (!Directory.Exists(dataFolder))
+        {
+            Directory.CreateDirectory(dataFolder);
+        }
+        
+        var uploadFiles = this.Request.Form.Files;
+        foreach (var uploadFile in uploadFiles)
+        {
+            if (uploadFile.Length == 0)
+                continue;
+            var fileName = Path.GetFileName(uploadFile.FileName);
+            var fileSize = uploadFile.Length;
+            var fileExt = fileName.Substring(Path.GetFileNameWithoutExtension(fileName).Length);
+
+            var file = Path.Combine(dataFolder, fileName);
+            if (System.IO.File.Exists(file))
+            {
+                System.IO.File.Delete(file);
+            }
+            await using var stream = new FileStream(file, FileMode.Create);
+            await uploadFile.CopyToAsync(stream);
+            await stream.FlushAsync();
+        }
+    }
 }
+

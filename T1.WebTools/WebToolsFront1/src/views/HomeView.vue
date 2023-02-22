@@ -4,6 +4,10 @@ import { onMounted, reactive } from 'vue';
 import localQueryClient from '@/apis/LocalQueryClient';
 import CodeEditor from '@/components/CodeEditor.vue';
 import TerminalUi from '@/components/TerminalUi.vue';
+import { useAppState } from '@/stores/appState';
+import type { QUploaderFactoryFn, QUploaderFactoryObject } from 'quasar';
+
+const appState = useAppState();
 
 const data = reactive<IHomeViewModel>({
   searchText: "",
@@ -21,6 +25,20 @@ function search() {
 
 }
 
+
+function uploadFileFactory(files: readonly File[]): Promise<QUploaderFactoryObject> {
+  return new Promise((resolve, reject) => {
+    const token = "myToken";
+    resolve({
+      url: `http://127.0.0.1:${appState.appPort}/api/LocalQueryApi/uploadFiles`,
+      method: 'POST',
+      headers: [
+        { name: 'Authorization', value: `Bearer ${token}` }
+      ]
+    })
+  })
+}
+
 onMounted(async () => {
   const resp = await localQueryClient.getAllTableNamesAsync();
   data.tableNames = resp.tableNames;
@@ -31,40 +49,44 @@ onMounted(async () => {
   <q-layout view="hHh lpR fFf">
 
     <!-- <q-header elevated class="bg-primary text-white" height-hint="98">
-                    <q-toolbar>
-                      <q-btn dense flat round icon="menu" />
-                      <q-toolbar-title>
-                        <q-avatar>
-                          <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-                        </q-avatar>
-                        Title
-                      </q-toolbar-title>
+                                                      <q-toolbar>
+                                                        <q-btn dense flat round icon="menu" />
+                                                        <q-toolbar-title>
+                                                          <q-avatar>
+                                                            <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+                                                        </q-avatar>
+                                                    Title
+                                                  </q-toolbar-title>
 
-                      <q-btn dense flat round icon="menu" />
-                    </q-toolbar>
+                                            <q-btn dense flat round icon="menu" />
+                                          </q-toolbar>
 
-                    <q-tabs align="left">
-                      <q-route-tab to="/page1" label="Page One" />
-                      <q-route-tab to="/page2" label="Page Two" />
-                      <q-route-tab to="/page3" label="Page Three" />
-                    </q-tabs>
-                  </q-header> -->
+                                          <q-tabs align="left">
+                                            <q-route-tab to="/page1" label="Page One" />
+                                              <q-route-tab to="/page2" label="Page Two" />
+                                                  <q-route-tab to="/page3" label="Page Three" />
+                                                </q-tabs>
+                                                    </q-header> -->
 
     <q-drawer show-if-above side="left" bordered>
-    <!-- drawer left content -->
-    <q-input outlined placeholder="Search" v-model="data.searchText" @input="search">
-      <template v-slot:prepend>
-        <q-icon name="search" />
-      </template>
-    </q-input>
-    <q-list bordered separator>
-      <template v-for="tableName in data.tableNames">
-        <q-item clickable v-ripple @click="() => onSelectTableName(tableName)">
+      <!-- drawer left content -->
+      <q-input outlined placeholder="Search" v-model="data.searchText" @input="search">
+        <template v-slot:prepend>
+          <q-icon name="search" />
+        </template>
+      </q-input>
+      <q-list bordered separator>
+        <template v-for="tableName in data.tableNames">
+          <q-item clickable v-ripple @click="() => onSelectTableName(tableName)">
             <q-item-section>
               {{ tableName }}
             </q-item-section>
           </q-item>
         </template>
+        <div class="q-pa-md">
+          <q-uploader multiple batch label="csv/excel multiple upload" :factory="uploadFileFactory" dark
+            style="max-width: 250px" />
+        </div>
       </q-list>
     </q-drawer>
 
@@ -80,15 +102,15 @@ onMounted(async () => {
     </q-page-container>
 
     <!-- <q-footer elevated class="bg-grey-8 text-white">
-                <q-toolbar>
-                  <q-toolbar-title>
-                    <q-avatar>
-                      <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-                    </q-avatar>
-                    <div>footer</div>
-                  </q-toolbar-title>
-                </q-toolbar>
-              </q-footer> -->
+                                                  <q-toolbar>
+                                                    <q-toolbar-title>
+                                                      <q-avatar>
+                                                        <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+                                                      </q-avatar>
+                                                      <div>footer</div>
+                                                    </q-toolbar-title>
+                                                  </q-toolbar>
+                                                </q-footer> -->
 
   </q-layout>
 </template>

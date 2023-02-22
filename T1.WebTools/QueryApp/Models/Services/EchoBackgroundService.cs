@@ -41,23 +41,3 @@ public class EchoBackgroundService : BackgroundService
         }
     }
 }
-
-public enum ExcelDataType
-{
-    String,
-    Number
-}
-
-public class ExcelColumn
-{
-    public string Name { get; set; } = string.Empty;
-    public ExcelDataType DataType { get; set; }
-    public int CellIndex { get; set; }
-}
-
-public class ExcelSheet
-{
-    public string Name { get; set; } = string.Empty;
-    public List<ExcelColumn> Header { get; set; } = new();
-    public List<Dictionary<string, string>> Rows { get; set; } = new();
-}
