@@ -1,6 +1,11 @@
 import createHttpClient, { HttpClient } from "@/apis/HttpClient";
 import { MockAsyncMethod } from "../commons/MockUtils";
 
+export interface ILocalQueryAppConnectOption {
+  appUid: string;
+  appPort: number;
+}
+
 export interface IKnockRequest {
   uniqueId: string;
   appUid: string;
@@ -19,25 +24,35 @@ export interface IDataRow {
   [columnName: string]: any;
 }
 
+export interface IQueryRawSqlRequest {
+  sql: string;
+}
+
 export interface IQueryRawSqlResponse {
   data: IDataRow[];
   errorMessage: string;
 }
 
 export interface ILocalQueryClient {
+  setConnectOption(option: ILocalQueryAppConnectOption): void;
   knockAsync(req: IKnockRequest): Promise<IKnockResponse>;
   getAllTableNamesAsync(): Promise<IGetAllTableNamesResponse>;
-  queryRawSql(sql: string): Promise<IQueryRawSqlResponse>;
+  queryRawSql(req: IQueryRawSqlRequest): Promise<IQueryRawSqlResponse>;
 }
 
 export class LocalQueryClient implements ILocalQueryClient {
   _httpClient!: HttpClient;
+  _connectOption!: ILocalQueryAppConnectOption;
+
+  setConnectOption(option: ILocalQueryAppConnectOption) {
+    this._connectOption = option;
+    this._httpClient = createHttpClient(
+      `http://127.0.0.1:${option.appPort}/api/LocalQueryApi/`
+    );
+  }
 
   @MockAsyncMethod({ isSuccess: true })
   knockAsync(req: IKnockRequest): Promise<IKnockResponse> {
-    this._httpClient = createHttpClient(
-      `http://127.0.0.1:${req.port}/api/LocalQueryApi/`
-    );
     return this._httpClient.postAsync<IKnockResponse>("knock", req);
   }
 
@@ -48,11 +63,12 @@ export class LocalQueryClient implements ILocalQueryClient {
     );
   }
 
-  queryRawSql(sql: string): Promise<IQueryRawSqlResponse> {
+  queryRawSql(req: IQueryRawSqlRequest): Promise<IQueryRawSqlResponse> {
     console.log("c", this._httpClient);
-    return this._httpClient.postAsync<IQueryRawSqlResponse>("queryRawSql", sql);
+    return this._httpClient.postAsync<IQueryRawSqlResponse>("queryRawSql", req);
   }
 }
 
-const client = new LocalQueryClient();
-export default client;
+export default function useLocalQueryClient(): ILocalQueryClient {
+  return new LocalQueryClient();
+}

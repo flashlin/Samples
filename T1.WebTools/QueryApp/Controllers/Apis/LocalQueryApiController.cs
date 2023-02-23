@@ -74,11 +74,11 @@ public class LocalQueryApiController : ControllerBase
     }
     
     [HttpPost]
-    public QueryRawSqlResponse QueryRawSql(string sql)
+    public QueryRawSqlResponse QueryRawSql(QueryRawSqlRequest req)
     {
         try
         {
-            var data = _reportRepo.QueryRawSql(sql)
+            var data = _reportRepo.QueryRawSql(req.Sql)
                 .Select(row => row.ToDictionary(item => item.Key, y => $"{y.Value}"))
                 .ToList();
             return new QueryRawSqlResponse
@@ -94,4 +94,9 @@ public class LocalQueryApiController : ControllerBase
             };
         }
     }
+}
+
+public class QueryRawSqlRequest
+{
+    public string Sql { get; set; } = string.Empty;
 }
