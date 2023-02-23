@@ -3,7 +3,7 @@ import type { IHomeViewModel } from '@/types/HomeViewModel';
 import { onActivated, onMounted, reactive, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import TerminalUi from '@/components/TerminalUi.vue';
-import { useAppStore } from '@/stores/appState';
+import { useAppStore } from '@/stores/appStore.js';
 import type { QUploaderFactoryFn, QUploaderFactoryObject } from 'quasar';
 import Hotkeys from 'vue-hotkeys-rt';
 import type { ITerminalUiProxy } from '@/components/TerminalUiModel';
