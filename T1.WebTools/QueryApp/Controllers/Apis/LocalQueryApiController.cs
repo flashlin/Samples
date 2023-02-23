@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using QueryApp.Models;
 using QueryApp.Models.Helpers;
 using QueryApp.Models.Services;
+using T1.WebTools.CsvEx;
 
 namespace QueryApp.Controllers.Apis;
 
@@ -93,6 +94,27 @@ public class LocalQueryApiController : ControllerBase
                     _reportRepo.ReCreateTable(tableName, excelSheet.Headers);
                     _reportRepo.ImportData(tableName, excelSheet);
                 }
+                continue;
+            }
+
+            if (fileExt == "csv")
+            {
+                var delimiter = CsvSheet.ParseHeaderDelimiterFromFile(file);
+                var csv = CsvSheet.ReadFrom(file, delimiter);
+                var tableName = Path.GetFileNameWithoutExtension(fileName);
+                var excelSheet = new ExcelSheet
+                {
+                    Headers = csv.Headers.Select((x, index) => new ExcelColumn
+                    {
+                        Name = x.Name,
+                        DataType = ExcelDataType.String,
+                        CellIndex = index
+                    }).ToList(),
+                    Rows = csv.Rows
+                };
+                _reportRepo.ReCreateTable(tableName, excelSheet.Headers);
+                _reportRepo.ImportData(tableName, excelSheet);
+                continue;
             }
         }
     }
