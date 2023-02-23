@@ -7,17 +7,50 @@ namespace T1.WebTools.CsvEx;
 
 public class CsvSheet
 {
-   public static CsvSheet ReadFrom(string csvData)
+   
+   public static string ParseHeaderDelimiter(string line)
+   {
+      if (line.Contains('\t'))
+      {
+         return "\t";
+      }
+      if (line.Contains(','))
+      {
+         return ",";
+      }
+      return " ";
+   }
+
+   public static string ParseHeaderDelimiterFromFile(string csvFile)
+   {
+      using var stream = new FileStream(csvFile, FileMode.Open);
+      using var reader = new StreamReader(stream);
+      var line = reader.ReadLine()!;
+      return ParseHeaderDelimiter(line);
+   }
+
+   public static CsvSheet ReadFromStream(Stream csvStream, string delimiter)
+   {
+      using var textReader = new StreamReader(csvStream);
+      return ReadFromTextReader(textReader, delimiter);
+   }
+
+   public static CsvSheet ReadFromString(string csvData)
    {
       using var strReader = new StringReader(csvData);
+      return ReadFromTextReader(strReader, ",");
+   }
+   
+   public static CsvSheet ReadFromTextReader(TextReader textReader, string delimiter)
+   {
       var option = new CsvConfiguration(CultureInfo.InvariantCulture)
       {
-         Delimiter = ",",
+         Delimiter = delimiter,
          Mode = CsvMode.RFC4180,
          Encoding = Encoding.UTF8,
          HasHeaderRecord = true,
       };
-      using var csvReader = new CsvReader(strReader, option);
+      using var csvReader = new CsvReader(textReader, option);
       csvReader.Read();
       csvReader.ReadHeader();
 
@@ -42,7 +75,6 @@ public class CsvSheet
       }
       
       csvSheet.ParseHeadersType();
-      
       return csvSheet;
    }
 
@@ -62,6 +94,12 @@ public class CsvSheet
          var value = row[header.Name];
          header.ColumnType = decimal.TryParse(value, out _) ? ColumnType.Number : ColumnType.String;
       }
+   }
+
+   public static CsvSheet ReadFrom(string csvFile, string delimiter)
+   {
+      using var stream = new FileStream(csvFile, FileMode.Open);
+      return ReadFromStream(stream, delimiter);
    }
 }
 

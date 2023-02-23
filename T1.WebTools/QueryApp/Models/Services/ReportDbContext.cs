@@ -35,10 +35,16 @@ public class ReportDbContext : DbContext, IReportRepo
             .ToList();
     }
 
+    public int ExecuteRawSql(string sql)
+    {
+        var conn = Database.GetDbConnection();
+        return conn.Execute(sql);
+    }
+
     public int DropTable(string tableName)
     {
         var sql = $"IF (OBJECT_ID('{tableName}')) Is Not NULL DROP TABLE [{tableName}];";
-        return SqlQueryRaw(sql).First();
+        return ExecuteRawSql(sql);
     }
 
     public void ReCreateTable(string tableName, List<ExcelColumn> headers)
@@ -67,7 +73,7 @@ public class ReportDbContext : DbContext, IReportRepo
         }
 
         sql.Append(")");
-        Database.SqlQueryRaw<int>(sql.ToString());
+        ExecuteRawSql(sql.ToString());
     }
 
     public int ImportData(string tableName, ExcelSheet sheet)
@@ -85,7 +91,7 @@ public class ReportDbContext : DbContext, IReportRepo
         sqlInsertColumns.Append(")");
 
         var sql = CreateInsertTableSqlBlock(sqlInsertColumns, sheet.Headers, sheet.Rows);
-        return Database.SqlQueryRaw<int>(sql).First();
+        return ExecuteRawSql(sql);
     }
 
     private static string CreateInsertTableSqlBlock(StringBuilder sqlInsertColumns, List<ExcelColumn> headers, List<Dictionary<string, string>> rows)
@@ -111,6 +117,7 @@ public class ReportDbContext : DbContext, IReportRepo
             {
                 value = "'" + value + "'";
             }
+            sql.Append(value);
 
             if (header != headers.Last())
             {

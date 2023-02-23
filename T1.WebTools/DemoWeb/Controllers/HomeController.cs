@@ -23,7 +23,7 @@ namespace DemoWeb.Controllers
 2,jack
 3,mary";
 
-			vm.CsvSheet = CsvSheet.ReadFrom(csvData);
+			vm.CsvSheet = CsvSheet.ReadFromString(csvData);
 			
 			return View(vm);
 		}
