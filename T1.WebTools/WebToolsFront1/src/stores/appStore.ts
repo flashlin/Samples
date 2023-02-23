@@ -29,7 +29,11 @@ export const appStore = defineStore("appStore", {
       return state.localQueryClient;
     },
   },
-  actions: {},
+  actions: {
+    setLocalQueryClient(client: ILocalQueryClient) {
+      this.$patch({ localQueryClient: client });
+    },
+  },
 });
 
 export const useAppStore = () => appStore();
