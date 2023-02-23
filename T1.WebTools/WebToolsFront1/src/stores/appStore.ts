@@ -1,7 +1,7 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import type { ILocalQueryClient } from "@/apis/LocalQueryClient";
-import { LocalQueryClient } from '../apis/LocalQueryClient';
+import { useLocalQueryClient } from '../apis/LocalQueryClient';
 
 export interface IAppState 
 {
@@ -9,9 +9,7 @@ export interface IAppState
   guid: string;
   appUid: string;
   appPort: number;
-  localQueryClient: ILocalQueryClient | null;
 }
-
 
 export const appStore = defineStore("appStore", {
   state: (): IAppState => ({
@@ -19,7 +17,6 @@ export const appStore = defineStore("appStore", {
     guid: '',
     appUid: '',
     appPort: 0,
-    localQueryClient: null,
   }),
   getters: {
     IsAuthenticated(state) {
@@ -27,11 +24,13 @@ export const appStore = defineStore("appStore", {
     },
   },
   actions: {
-    setLocalQueryClient(client: ILocalQueryClient) {
-      this.$patch({ localQueryClient: client });
-    },
     getLocalQueryClient() {
-      return this.localQueryClient;
+      const client = useLocalQueryClient();
+      client.setConnectOption({
+        appUid: this.appUid,
+        appPort: this.port,
+      });
+      return client;
     },
   },
 });
