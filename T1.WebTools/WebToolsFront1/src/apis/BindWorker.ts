@@ -5,11 +5,7 @@ export class BindWorker {
   run(localQueryClient: ILocalQueryClient) {
     const timerId = setInterval(async () => {
       const appState = useAppState();
-      const bindResp = await localQueryClient.knockAsync({
-        uniqueId: appState.guid,
-        appUid: appState.appUid,
-        port: appState.appPort,
-      });
+      const bindResp = await localQueryClient.knockAsync(appState.guid);
       if (!bindResp.isSuccess) {
         clearInterval(timerId);
       }

@@ -9,7 +9,6 @@ export interface ILocalQueryAppConnectOption {
 export interface IKnockRequest {
   uniqueId: string;
   appUid: string;
-  port: number;
 }
 
 export interface IKnockResponse {
@@ -35,7 +34,7 @@ export interface IQueryRawSqlResponse {
 
 export interface ILocalQueryClient {
   setConnectOption(option: ILocalQueryAppConnectOption): void;
-  knockAsync(req: IKnockRequest): Promise<IKnockResponse>;
+  knockAsync(uniqueId: string): Promise<IKnockResponse>;
   getAllTableNamesAsync(): Promise<IGetAllTableNamesResponse>;
   queryRawSql(req: IQueryRawSqlRequest): Promise<IQueryRawSqlResponse>;
 }
@@ -52,8 +51,12 @@ export class LocalQueryClient implements ILocalQueryClient {
   }
 
   @MockAsyncMethod({ isSuccess: true })
-  knockAsync(req: IKnockRequest): Promise<IKnockResponse> {
-    return this._httpClient.postAsync<IKnockResponse>("knock", req);
+  knockAsync(uniqueId: string): Promise<IKnockResponse> {
+    const knockReq: IKnockRequest = {
+      uniqueId: uniqueId,
+      appUid: this._connectOption.appUid,
+    };
+    return this._httpClient.postAsync<IKnockResponse>("knock", knockReq);
   }
 
   @MockAsyncMethod({ tableNames: ["Customer", "Product"] })
