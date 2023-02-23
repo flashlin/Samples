@@ -48,7 +48,7 @@ interface IHotkey {
 }
 
 async function updateTableNames(){
-  const localQueryClient = appStore.getLocalQueryClient!;
+  const localQueryClient = appStore.getLocalQueryClient()!;
   const resp = await localQueryClient.getAllTableNamesAsync();
   data.tableNames.splice(0, data.tableNames.length, ...resp.tableNames);
 }

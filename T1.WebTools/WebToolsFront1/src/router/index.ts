@@ -37,7 +37,7 @@ router.beforeEach((to, from, next) => {
     return;
   }
   const appStore = useAppStore();
-  const isAuthenticated = appStore.getIsAuthenticated;
+  const isAuthenticated = appStore.IsAuthenticated;
   if (!isAuthenticated) {
     next({
       name: "login",
