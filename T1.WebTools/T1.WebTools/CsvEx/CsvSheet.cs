@@ -24,7 +24,7 @@ public class CsvSheet
    public static string ParseHeaderDelimiterFromFile(string csvFile)
    {
       using var stream = new FileStream(csvFile, FileMode.Open);
-      using var reader = new StreamReader(stream);
+      using var reader = new StreamReader(stream, Encoding.UTF8);
       var line = reader.ReadLine()!;
       return ParseHeaderDelimiter(line);
    }
