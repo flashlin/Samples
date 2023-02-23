@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAppStore } from "@/stores/appState";
+import { useAppStore } from "@/stores/appStore";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "@/views/Login.vue";
 import { storeToRefs } from 'pinia';

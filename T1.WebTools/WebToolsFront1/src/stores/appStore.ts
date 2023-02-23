@@ -13,7 +13,7 @@ export interface IAppState
 }
 
 
-export const useAppStore = defineStore("appStore", {
+export const appStore = defineStore("appStore", {
   state: (): IAppState => ({
     isAuthenticated: false,
     guid: '',
@@ -31,3 +31,5 @@ export const useAppStore = defineStore("appStore", {
   },
   actions: {},
 });
+
+export const useAppStore = () => appStore();

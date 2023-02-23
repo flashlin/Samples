@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import router from '@/router';
 import { nextTick, reactive } from 'vue';
-import { useAppStore } from '@/stores/appState';
+import { useAppStore } from '@/stores/appStore.js';
 import useLocalQueryHostClient from '@/apis/LocalQueryHostClient';
 import useLocalQueryClient from '@/apis/LocalQueryClient';
 import { v4 as uuidv4 } from 'uuid';
