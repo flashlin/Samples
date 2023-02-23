@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import router from '@/router';
-import { reactive } from 'vue';
+import { nextTick, reactive } from 'vue';
 import { useAppState } from '@/stores/appState';
 import useLocalQueryHostClient from '@/apis/LocalQueryHostClient';
 import useLocalQueryClient from '@/apis/LocalQueryClient';
@@ -32,7 +32,6 @@ const login = async () => {
             bindWorker.run(localQueryClient);
             appState.localQueryClient = localQueryClient;
          }
-
          return resp.isSuccess;
       } catch {
          return false;
