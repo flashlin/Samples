@@ -2,8 +2,8 @@
 import router from '@/router';
 import { reactive } from 'vue';
 import { useAppState } from '@/stores/appState';
-import localQueryHostClient from '@/apis/LocalQueryHostClient';
-import localQueryClient from '@/apis/LocalQueryClient';
+import useLocalQueryHostClient from '@/apis/LocalQueryHostClient';
+import useLocalQueryClient from '@/apis/LocalQueryClient';
 import { v4 as uuidv4 } from 'uuid';
 import { BindWorker } from "@/apis/BindWorker";
 
@@ -13,11 +13,17 @@ const data = reactive({
 })
 const appState = useAppState();
 const login = async () => {
+   const localQueryClient = useLocalQueryClient();
+   const localQueryHostClient = useLocalQueryHostClient();
    const guidString: string = uuidv4();
    appState.guid = guidString;
    const unbindLocalQueryAppsInfo = await localQueryHostClient.getUnbindLocalQueryAppsAsync();
    const foundInfo = unbindLocalQueryAppsInfo.find(async info => {
       try {
+         localQueryClient.setConnectOption({
+            appUid: info.appUid,
+            appPort: info.port,
+         });
          var resp = await localQueryClient.knockAsync({
             uniqueId: guidString,
             appUid: info.appUid,
@@ -28,7 +34,7 @@ const login = async () => {
             appState.appUid = info.appUid;
             appState.appPort = info.port;
             const bindWorker = new BindWorker();
-            bindWorker.run();
+            bindWorker.run(localQueryClient);
             appState.localQueryClient = localQueryClient;
          }
 
