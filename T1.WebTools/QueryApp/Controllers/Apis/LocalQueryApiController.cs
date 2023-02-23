@@ -65,6 +65,10 @@ public class LocalQueryApiController : ControllerBase
             
             var fileName = Path.GetFileName(uploadFile.FileName);
             var fileExt = fileName.Substring(Path.GetFileNameWithoutExtension(fileName).Length);
+            if (fileExt.StartsWith("."))
+            {
+                fileExt = fileExt.Substring(1);
+            }
             if (!IsValidFileExt(fileExt))
             {
                 continue;
@@ -78,14 +82,16 @@ public class LocalQueryApiController : ControllerBase
             await using var stream = new FileStream(file, FileMode.Create);
             await uploadFile.CopyToAsync(stream);
             await stream.FlushAsync();
+            stream.Close();
 
             if (fileExt == "xlsx")
             {
                 var excelSheets = new ExcelHelper().ReadSheets(file);
                 foreach (var excelSheet in excelSheets)
                 {
-                    _reportRepo.ReCreateTable(excelSheet.Name, excelSheet.Headers);
-                    _reportRepo.ImportData(excelSheet.Name, excelSheet);
+                    var tableName = $"{Path.GetFileNameWithoutExtension(fileName)}_{excelSheet.Name}";
+                    _reportRepo.ReCreateTable(tableName, excelSheet.Headers);
+                    _reportRepo.ImportData(tableName, excelSheet);
                 }
             }
         }
