@@ -31,7 +31,6 @@ const login = async () => {
             appStore.$patch({ 
                appUid: info.appUid,
                appPort: info.port,
-               localQueryClient: localQueryClient,
             });
             const bindWorker = new BindWorker();
             bindWorker.run(guidString, localQueryClient);

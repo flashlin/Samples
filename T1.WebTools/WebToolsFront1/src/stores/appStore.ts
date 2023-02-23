@@ -1,7 +1,7 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import type { ILocalQueryClient } from "@/apis/LocalQueryClient";
-import { useLocalQueryClient } from '../apis/LocalQueryClient';
+import useLocalQueryClient from '@/apis/LocalQueryClient';
 
 export interface IAppState 
 {
@@ -28,7 +28,7 @@ export const appStore = defineStore("appStore", {
       const client = useLocalQueryClient();
       client.setConnectOption({
         appUid: this.appUid,
-        appPort: this.port,
+        appPort: this.appPort,
       });
       return client;
     },
