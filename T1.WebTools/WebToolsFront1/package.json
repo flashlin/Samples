@@ -19,7 +19,6 @@
     "quasar": "^2.11.6",
     "uuid": "^9.0.0",
     "vue": "^3.2.45",
-    "vue-hotkeys-rt": "^0.2.0",
     "vue-router": "^4.1.6",
     "xterm": "^5.1.0",
     "xterm-addon-web-links": "^0.8.0"
