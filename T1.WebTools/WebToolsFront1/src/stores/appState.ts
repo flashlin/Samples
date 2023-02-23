@@ -1,23 +1,33 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import type { ILocalQueryClient } from "@/apis/LocalQueryClient";
+import { LocalQueryClient } from '../apis/LocalQueryClient';
 
-export const useAppState = defineStore("appState", () => {
-  const isAuthenticated = ref(false);
-  const guid = ref("");
-  const appUid = ref("");
-  const appPort = ref(0);
-  const localQueryClient = ref<ILocalQueryClient>();
-  // const doubleCount = computed(() => isLogined.value * 2);
-  // function increment() {
-  //   isLogined.value++;
-  // }
+export interface IAppState 
+{
+  isAuthenticated: boolean;
+  guid: string;
+  appUid: string;
+  appPort: number;
+  localQueryClient: ILocalQueryClient | null;
+}
 
-  return {
-    isAuthenticated,
-    guid,
-    appUid,
-    appPort,
-    localQueryClient,
-  };
+
+export const useAppStore = defineStore("appStore", {
+  state: (): IAppState => ({
+    isAuthenticated: false,
+    guid: '',
+    appUid: '',
+    appPort: 0,
+    localQueryClient: null,
+  }),
+  getters: {
+    getIsAuthenticated(state) {
+      return state.isAuthenticated;
+    },
+    getLocalQueryClient(state) {
+      return state.localQueryClient;
+    },
+  },
+  actions: {},
 });

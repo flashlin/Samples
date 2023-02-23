@@ -1,22 +1,23 @@
 <script setup lang="ts">
 import router from '@/router';
 import { nextTick, reactive } from 'vue';
-import { useAppState } from '@/stores/appState';
+import { useAppStore } from '@/stores/appState';
 import useLocalQueryHostClient from '@/apis/LocalQueryHostClient';
 import useLocalQueryClient from '@/apis/LocalQueryClient';
 import { v4 as uuidv4 } from 'uuid';
 import { BindWorker } from "@/apis/BindWorker";
+import { storeToRefs } from 'pinia';
 
 const data = reactive({
    username: "",
    password: "",
 })
-const appState = useAppState();
+const appStore = useAppStore();
 const login = async () => {
    const localQueryClient = useLocalQueryClient();
    const localQueryHostClient = useLocalQueryHostClient();
    const guidString: string = uuidv4();
-   appState.guid = guidString;
+   appStore.$patch({ guid: guidString });
    const unbindLocalQueryAppsInfo = await localQueryHostClient.getUnbindLocalQueryAppsAsync();
    const foundInfo = unbindLocalQueryAppsInfo.find(async info => {
       try {
@@ -26,11 +27,13 @@ const login = async () => {
          });
          var resp = await localQueryClient.knockAsync(guidString);
          if (resp.isSuccess) {
-            appState.appUid = info.appUid;
-            appState.appPort = info.port;
+            appStore.$patch({ 
+               appUid: info.appUid,
+               appPort: info.port,
+               localQueryClient: localQueryClient,
+            });
             const bindWorker = new BindWorker();
-            bindWorker.run(localQueryClient);
-            appState.localQueryClient = localQueryClient;
+            bindWorker.run(guidString, localQueryClient);
          }
          return resp.isSuccess;
       } catch {
@@ -43,7 +46,7 @@ const login = async () => {
       return;
    }
 
-   appState.isAuthenticated = true;
+   appStore.$patch({ isAuthenticated: true });
    router.push('/');
 }
 const clear = () => { }
