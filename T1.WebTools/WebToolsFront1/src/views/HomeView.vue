@@ -3,12 +3,14 @@ import type { IHomeViewModel } from '@/types/HomeViewModel';
 import { onActivated, onMounted, reactive, ref } from 'vue';
 import CodeEditor from '@/components/CodeEditor.vue';
 import TerminalUi from '@/components/TerminalUi.vue';
-import { useAppState } from '@/stores/appState';
+import { useAppStore } from '@/stores/appState';
 import type { QUploaderFactoryFn, QUploaderFactoryObject } from 'quasar';
 import Hotkeys from 'vue-hotkeys-rt';
 import type { ITerminalUiProxy } from '@/components/TerminalUiModel';
+import { storeToRefs } from 'pinia';
 
-const appState = useAppState();
+const appStore = useAppStore();
+const appState = storeToRefs(appStore);
 
 const data = reactive<IHomeViewModel>({
   searchText: "",
@@ -45,12 +47,19 @@ interface IHotkey {
   keyCode: number;
 }
 
+async function updateTableNames(){
+  const localQueryClient = appStore.getLocalQueryClient!;
+  const resp = await localQueryClient.getAllTableNamesAsync();
+  data.tableNames.splice(0, data.tableNames.length, ...resp.tableNames);
+}
+
+
 async function onTriggeredEventHandler(payload: IHotkey) {
   const term = terminalRef.value!;
   if (payload.keyString == 'R') {
     //term.writeln(payload.keyString);
     //term.writeln(data.code);
-    const localQueryClient = appState.localQueryClient!;
+    const localQueryClient = appState.localQueryClient.value!;
     const result = await localQueryClient.queryRawSql({
       sql: data.code
     });
@@ -58,12 +67,6 @@ async function onTriggeredEventHandler(payload: IHotkey) {
     term.writeln(JSON.stringify(result.data));
     updateTableNames();
   }
-}
-
-async function updateTableNames(){
-  const localQueryClient = appState.localQueryClient!;
-  const resp = await localQueryClient.getAllTableNamesAsync();
-  data.tableNames.splice(0, data.tableNames.length, ...resp.tableNames);
 }
 
 updateTableNames();

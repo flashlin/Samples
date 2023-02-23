@@ -1,11 +1,10 @@
 import type { ILocalQueryClient } from "@/apis/LocalQueryClient";
-import { useAppState } from "@/stores/appState";
+import { useAppStore } from "@/stores/appState";
 
 export class BindWorker {
-  run(localQueryClient: ILocalQueryClient) {
+  run(guid: string, localQueryClient: ILocalQueryClient) {
     const timerId = setInterval(async () => {
-      const appState = useAppState();
-      const bindResp = await localQueryClient.knockAsync(appState.guid);
+      const bindResp = await localQueryClient.knockAsync(guid);
       if (!bindResp.isSuccess) {
         clearInterval(timerId);
       }

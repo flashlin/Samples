@@ -67,7 +67,6 @@ export class LocalQueryClient implements ILocalQueryClient {
   }
 
   queryRawSql(req: IQueryRawSqlRequest): Promise<IQueryRawSqlResponse> {
-    console.log("c", this._httpClient);
     return this._httpClient.postAsync<IQueryRawSqlResponse>("queryRawSql", req);
   }
 }

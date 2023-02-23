@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { useAppState } from "@/stores/appState";
+import { useAppStore } from "@/stores/appState";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "@/views/Login.vue";
+import { storeToRefs } from 'pinia';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,8 +36,8 @@ router.beforeEach((to, from, next) => {
     next();
     return;
   }
-  const appState = useAppState();
-  const isAuthenticated = appState.isAuthenticated;
+  const appStore = useAppStore();
+  const isAuthenticated = appStore.getIsAuthenticated;
   if (!isAuthenticated) {
     next({
       name: "login",
