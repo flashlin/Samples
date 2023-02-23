@@ -9,6 +9,7 @@ import Hotkeys from 'vue-hotkeys-rt';
 import type { ITerminalUiProxy } from '@/components/TerminalUiModel';
 import { storeToRefs } from 'pinia';
 const appStore = useAppStore();
+const appState = storeToRefs(appStore);
 const localQueryClient = appStore.getLocalQueryClient();
 
 const data = reactive<IHomeViewModel>({
@@ -30,9 +31,10 @@ function search() {
 
 function uploadFileFactory(files: readonly File[]): Promise<QUploaderFactoryObject> {
   return new Promise((resolve, reject) => {
+    console.log('upload appPort', appState.appPort.value);
     const token = "myToken";
     resolve({
-      url: `http://127.0.0.1:${appState.appPort}/api/LocalQueryApi/uploadFiles`,
+      url: `http://127.0.0.1:${appState.appPort.value}/api/LocalQueryApi/uploadFiles`,
       method: 'POST',
       headers: [
         { name: 'Authorization', value: `Bearer ${token}` }

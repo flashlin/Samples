@@ -38,7 +38,7 @@ public class ReportDbContext : DbContext, IReportRepo
     public int DropTable(string tableName)
     {
         var sql = $"IF (OBJECT_ID('{tableName}')) Is Not NULL DROP TABLE [{tableName}];";
-        return Database.SqlQueryRaw<int>(sql).First();
+        return SqlQueryRaw(sql).First();
     }
 
     public void ReCreateTable(string tableName, List<ExcelColumn> headers)
@@ -65,13 +65,61 @@ public class ReportDbContext : DbContext, IReportRepo
                 sql.Append(",");
             }
         }
+
         sql.Append(")");
         Database.SqlQueryRaw<int>(sql.ToString());
     }
 
-    public void ImportData(string tableName, ExcelSheet sheet)
+    public int ImportData(string tableName, ExcelSheet sheet)
     {
-        
+        var sqlInsertColumns = new StringBuilder();
+        sqlInsertColumns.Append($"INSERT [{tableName}](");
+        foreach (var header in sheet.Headers)
+        {
+            sqlInsertColumns.Append($"[{header.Name}]");
+            if (header != sheet.Headers.Last())
+            {
+                sqlInsertColumns.Append(",");
+            }
+        }
+        sqlInsertColumns.Append(")");
+
+        var sql = CreateInsertTableSqlBlock(sqlInsertColumns, sheet.Headers, sheet.Rows);
+        return Database.SqlQueryRaw<int>(sql).First();
+    }
+
+    private static string CreateInsertTableSqlBlock(StringBuilder sqlInsertColumns, List<ExcelColumn> headers, List<Dictionary<string, string>> rows)
+    {
+        var sqlBlock = new StringBuilder();
+        foreach (var row in rows)
+        {
+            var sqlInsert = sqlInsertColumns.ToString() + " " + CreateValuesSql(headers, row) + "\r\n";
+            sqlBlock.Append(sqlInsert);
+        }
+
+        return sqlBlock.ToString();
+    }
+
+    private static string CreateValuesSql(List<ExcelColumn> headers, Dictionary<string, string> row)
+    {
+        var sql = new StringBuilder();
+        sql.Append("VALUES (");
+        foreach (var header in headers)
+        {
+            var value = row[header.Name];
+            if (header.DataType == ExcelDataType.String)
+            {
+                value = "'" + value + "'";
+            }
+
+            if (header != headers.Last())
+            {
+                sql.Append(",");
+            }
+        }
+
+        sql.Append(")");
+        return sql.ToString();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
