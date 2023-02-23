@@ -8,7 +8,7 @@ import type { QUploaderFactoryFn, QUploaderFactoryObject } from 'quasar';
 import Hotkeys from 'vue-hotkeys-rt';
 import type { ITerminalUiProxy } from '@/components/TerminalUiModel';
 import { storeToRefs } from 'pinia';
-
+const appStore = useAppStore();
 const data = reactive<IHomeViewModel>({
   searchText: "",
   tableNames: [],
@@ -45,7 +45,7 @@ interface IHotkey {
 }
 
 async function updateTableNames(){
-  const appStore = useAppStore();
+  // const appStore = useAppStore();
   const localQueryClient = appStore.getLocalQueryClient()!;
   const resp = await localQueryClient.getAllTableNamesAsync();
   data.tableNames.splice(0, data.tableNames.length, ...resp.tableNames);
@@ -53,7 +53,7 @@ async function updateTableNames(){
 
 
 async function onTriggeredEventHandler(payload: IHotkey) {
-  const appStore = useAppStore();
+  // const appStore = useAppStore();
   const appState = storeToRefs(appStore);
   const term = terminalRef.value!;
   if (payload.keyString == 'R') {
