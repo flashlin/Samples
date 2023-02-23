@@ -19,7 +19,8 @@ const login = async () => {
    const guidString: string = uuidv4();
    appStore.$patch({ guid: guidString });
    const unbindLocalQueryAppsInfo = await localQueryHostClient.getUnbindLocalQueryAppsAsync();
-   const foundInfo = unbindLocalQueryAppsInfo.find(async info => {
+   let foundInfo = null;
+   for await (const info of unbindLocalQueryAppsInfo){
       try {
          localQueryClient.setConnectOption({
             appUid: info.appUid,
@@ -35,11 +36,13 @@ const login = async () => {
             const bindWorker = new BindWorker();
             bindWorker.run(guidString, localQueryClient);
          }
-         return resp.isSuccess;
+         if( resp.isSuccess ) {
+            foundInfo = info;
+            break;
+         }
       } catch {
-         return false;
       }
-   });
+   }
 
    if (foundInfo == null) {
       //Login FAIL
