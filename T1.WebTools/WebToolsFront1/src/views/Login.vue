@@ -24,12 +24,7 @@ const login = async () => {
             appUid: info.appUid,
             appPort: info.port,
          });
-         var resp = await localQueryClient.knockAsync({
-            uniqueId: guidString,
-            appUid: info.appUid,
-            port: info.port,
-         });
-
+         var resp = await localQueryClient.knockAsync(guidString);
          if (resp.isSuccess) {
             appState.appUid = info.appUid;
             appState.appPort = info.port;
