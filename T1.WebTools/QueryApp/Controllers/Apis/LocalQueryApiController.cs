@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using QueryApp.Models;
+using QueryApp.Models.Helpers;
 using QueryApp.Models.Services;
 
 namespace QueryApp.Controllers.Apis;
@@ -61,10 +62,14 @@ public class LocalQueryApiController : ControllerBase
         {
             if (uploadFile.Length == 0)
                 continue;
+            
             var fileName = Path.GetFileName(uploadFile.FileName);
-            var fileSize = uploadFile.Length;
             var fileExt = fileName.Substring(Path.GetFileNameWithoutExtension(fileName).Length);
-
+            if (!IsValidFileExt(fileExt))
+            {
+                continue;
+            }
+            var fileSize = uploadFile.Length;
             var file = Path.Combine(dataFolder, fileName);
             if (System.IO.File.Exists(file))
             {
@@ -73,9 +78,25 @@ public class LocalQueryApiController : ControllerBase
             await using var stream = new FileStream(file, FileMode.Create);
             await uploadFile.CopyToAsync(stream);
             await stream.FlushAsync();
+
+            if (fileExt == "xlsx")
+            {
+                var excelSheets = new ExcelHelper().ReadSheets(file);
+                foreach (var excelSheet in excelSheets)
+                {
+                    _reportRepo.ReCreateTable(excelSheet.Name, excelSheet.Headers);
+                    _reportRepo.ImportData(excelSheet.Name, excelSheet);
+                }
+            }
         }
     }
-    
+
+    private static bool IsValidFileExt(string fileExt)
+    {
+        var invalidFileExts = new[] { "csv", "xlsx" };
+        return invalidFileExts.Contains(fileExt);
+    }
+
     [HttpPost]
     public QueryRawSqlResponse QueryRawSql(QueryRawSqlRequest req)
     {

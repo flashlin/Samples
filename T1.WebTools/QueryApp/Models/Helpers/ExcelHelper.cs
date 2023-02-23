@@ -20,7 +20,7 @@ public class ExcelHelper
         var result = new ExcelSheet
         {
             Name = sheet.SheetName,
-            Header = QueryHeader(sheet).ToList()
+            Headers = QueryHeader(sheet).ToList()
         };
         for (var i = sheet.FirstRowNum + 1; i < sheet.LastRowNum; i++)
         {
@@ -33,7 +33,7 @@ public class ExcelHelper
             {
                 continue;
             }
-            FetchRowData(row, result.Header);
+            FetchRowData(row, result.Headers);
         }
         return result;
     }

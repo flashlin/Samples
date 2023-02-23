@@ -1,5 +1,8 @@
+using System.Text;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Primitives;
+using QueryApp.Models.Helpers;
 
 namespace QueryApp.Models.Services;
 
@@ -30,6 +33,45 @@ public class ReportDbContext : DbContext, IReportRepo
             .Cast<IDictionary<string, object>>()
             .Select(row => row.ToDictionary(item => item.Key, item => item.Value))
             .ToList();
+    }
+
+    public int DropTable(string tableName)
+    {
+        var sql = $"IF (OBJECT_ID('{tableName}')) Is Not NULL DROP TABLE [{tableName}];";
+        return Database.SqlQueryRaw<int>(sql).First();
+    }
+
+    public void ReCreateTable(string tableName, List<ExcelColumn> headers)
+    {
+        DropTable(tableName);
+        var sql = new StringBuilder();
+        sql.Append($"CREATE TABLE [{tableName}] (");
+        sql.Append("_PID INT IDENTITY(1,1),");
+        foreach (var header in headers)
+        {
+            sql.Append($"[{header.Name}] ");
+            switch (header.DataType)
+            {
+                case ExcelDataType.Number:
+                    sql.Append("decimal(19,6) NULL");
+                    break;
+                default:
+                    sql.Append("nvarchar(100) NULL");
+                    break;
+            }
+
+            if (header != headers.Last())
+            {
+                sql.Append(",");
+            }
+        }
+        sql.Append(")");
+        Database.SqlQueryRaw<int>(sql.ToString());
+    }
+
+    public void ImportData(string tableName, ExcelSheet sheet)
+    {
+        
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
