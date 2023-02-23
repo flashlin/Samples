@@ -22,16 +22,16 @@ export const appStore = defineStore("appStore", {
     localQueryClient: null,
   }),
   getters: {
-    getIsAuthenticated(state) {
+    IsAuthenticated(state) {
       return state.isAuthenticated;
-    },
-    getLocalQueryClient(state) {
-      return state.localQueryClient;
     },
   },
   actions: {
     setLocalQueryClient(client: ILocalQueryClient) {
       this.$patch({ localQueryClient: client });
+    },
+    getLocalQueryClient() {
+      return this.localQueryClient;
     },
   },
 });
