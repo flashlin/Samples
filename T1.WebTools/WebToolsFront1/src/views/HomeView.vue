@@ -12,10 +12,7 @@ const appState = useAppState();
 
 const data = reactive<IHomeViewModel>({
   searchText: "",
-  tableNames: [
-    "customer",
-    "product"
-  ],
+  tableNames: [],
   code: `CREATE TABLE (\n[id] int IDENTITY(1,1),\n[name] nvarchar(50))\n`
 });
 
@@ -59,18 +56,17 @@ async function onTriggeredEventHandler(payload: IHotkey) {
     });
     term.writeln(result.errorMessage);
     term.writeln(JSON.stringify(result.data));
+    updateTableNames();
   }
 }
 
-onActivated(async () => {
+async function updateTableNames(){
   const localQueryClient = appState.localQueryClient!;
-  // localQueryClient.setConnectOption({
-  //   appUid: appState.appUid,
-  //   appPort: appState.appPort,
-  // });
   const resp = await localQueryClient.getAllTableNamesAsync();
-  data.tableNames = resp.tableNames;
-})
+  data.tableNames.splice(0, data.tableNames.length, ...resp.tableNames);
+}
+
+updateTableNames();
 </script>
 
 <template>

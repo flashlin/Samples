@@ -39,9 +39,12 @@ public class LocalQueryApiController : ControllerBase
     }
 
     [HttpPost]
-    public List<string> GetAllTableNames()
+    public GetAllTableNamesResponse GetAllTableNames()
     {
-        return _reportRepo.GetAllTableNames();
+        return new GetAllTableNamesResponse()
+        {
+            TableNames = _reportRepo.GetAllTableNames()
+        };
     }
     
     [HttpPost]
@@ -94,6 +97,11 @@ public class LocalQueryApiController : ControllerBase
             };
         }
     }
+}
+
+public class GetAllTableNamesResponse
+{
+    public List<string> TableNames { get; set; } = new();
 }
 
 public class QueryRawSqlRequest
