@@ -115,7 +115,7 @@ public class ReportDbContext : DbContext, IReportRepo
             var value = row[header.Name];
             if (header.DataType == ExcelDataType.String)
             {
-                value = "'" + value + "'";
+                value = "N'" + value + "'";
             }
             sql.Append(value);
 

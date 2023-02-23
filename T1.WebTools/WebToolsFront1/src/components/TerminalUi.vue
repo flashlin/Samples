@@ -6,7 +6,11 @@ import { WebLinksAddon } from 'xterm-addon-web-links';
 import type { ITerminalUiExpose } from '@/components/TerminalUiModel';
 
 const terminalDom = ref<HTMLElement>();
-const terminal = new Terminal();
+const terminal = new Terminal({
+   fontFamily: 'Courier New, Courier, monospace, "思源黑體"',
+   cols: 100,
+   screenReaderMode: true,
+});
 terminal.loadAddon(new WebLinksAddon());
 
 function executeCommand(command: any) {
@@ -15,6 +19,8 @@ function executeCommand(command: any) {
 }
 
 function writeln(text: string): void {
+   //const textEncoder = new TextEncoder();
+   //terminal.writeln(textEncoder.encode(text));
    terminal.writeln(text);
 }
 
