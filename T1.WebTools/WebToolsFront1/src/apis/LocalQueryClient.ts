@@ -27,9 +27,32 @@ export interface IQueryRawSqlRequest {
   sql: string;
 }
 
+export enum ColumnType {
+  String,
+  Number
+}
+
+export interface ICsvHeader {
+  columnType: ColumnType;
+  name: string;
+}
+
+export interface ICsvRow {
+  [name: string]: string;
+}
+
+export interface ICsvSheet {
+  headers: ICsvHeader[];
+  rows: ICsvRow[];
+}
+
 export interface IQueryRawSqlResponse {
-  data: IDataRow[];
+  csvSheet: ICsvSheet;
   errorMessage: string;
+}
+
+export interface IImportLocalFileRequest {
+  filePath: string;
 }
 
 export interface ILocalQueryClient {
@@ -37,6 +60,7 @@ export interface ILocalQueryClient {
   knockAsync(uniqueId: string): Promise<IKnockResponse>;
   getAllTableNamesAsync(): Promise<IGetAllTableNamesResponse>;
   queryRawSql(req: IQueryRawSqlRequest): Promise<IQueryRawSqlResponse>;
+  importLocalFile(req: IImportLocalFileRequest): Promise<void>;
 }
 
 export class LocalQueryClient implements ILocalQueryClient {
@@ -64,6 +88,10 @@ export class LocalQueryClient implements ILocalQueryClient {
     return this._httpClient.postAsync<IGetAllTableNamesResponse>(
       "getAllTableNames"
     );
+  }
+
+  importLocalFile(req: IImportLocalFileRequest): Promise<void> {
+    return this._httpClient.postVoidAsync('importLocalFile', req);
   }
 
   queryRawSql(req: IQueryRawSqlRequest): Promise<IQueryRawSqlResponse> {

@@ -1,4 +1,6 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using QueryApp.Models;
 using QueryApp.Models.Helpers;
@@ -65,11 +67,7 @@ public class LocalQueryApiController : ControllerBase
                 continue;
             
             var fileName = Path.GetFileName(uploadFile.FileName);
-            var fileExt = fileName.Substring(Path.GetFileNameWithoutExtension(fileName).Length);
-            if (fileExt.StartsWith("."))
-            {
-                fileExt = fileExt.Substring(1);
-            }
+            var fileExt = GetFileExtName(fileName);
             if (!IsValidFileExt(fileExt))
             {
                 continue;
@@ -80,6 +78,7 @@ public class LocalQueryApiController : ControllerBase
             {
                 System.IO.File.Delete(file);
             }
+            
             await using var stream = new FileStream(file, FileMode.Create);
             await uploadFile.CopyToAsync(stream);
             await stream.FlushAsync();
@@ -99,24 +98,65 @@ public class LocalQueryApiController : ControllerBase
 
             if (fileExt == "csv")
             {
-                var delimiter = CsvSheet.ParseHeaderDelimiterFromFile(file);
-                var csv = CsvSheet.ReadFrom(file, delimiter);
-                var tableName = Path.GetFileNameWithoutExtension(fileName);
-                var excelSheet = new ExcelSheet
-                {
-                    Headers = csv.Headers.Select((x, index) => new ExcelColumn
-                    {
-                        Name = x.Name,
-                        DataType = ExcelDataType.String,
-                        CellIndex = index
-                    }).ToList(),
-                    Rows = csv.Rows
-                };
-                _reportRepo.ReCreateTable(tableName, excelSheet.Headers);
-                _reportRepo.ImportData(tableName, excelSheet);
+                ImportLocalCsvFile(file);       
                 continue;
             }
         }
+    }
+
+    private static string GetFileExtName(string fileName)
+    {
+        var fileExt = fileName.Substring(Path.GetFileNameWithoutExtension(fileName).Length);
+        if (fileExt.StartsWith("."))
+        {
+            fileExt = fileExt.Substring(1);
+        }
+
+        return fileExt;
+    }
+
+    [HttpPost]
+    public OkResult ImportLocalFile(ImportLocalFileRequest req)
+    {
+        var extName = GetFileExtName(Path.GetFileName(req.FilePath));
+        if (extName == "csv")
+        {
+            ImportLocalCsvFile(req.FilePath);
+            return Ok();
+        }
+        ImportLocalJsonFile(req.FilePath);
+        return Ok();
+    }
+
+    public void ImportLocalJsonFile(string jsonFile)
+    {
+        var csvFileName = Path.GetFileName(jsonFile);
+        csvFileName = csvFileName.Substring(0, Path.GetFileNameWithoutExtension(csvFileName).Length) + ".csv";
+        var folder = Path.GetDirectoryName(jsonFile) ?? "";
+        var csvFile = Path.Combine(folder, csvFileName);
+        var json = System.IO.File.ReadAllText(jsonFile);
+        var dictList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json)!;
+        dictList.ToCsvFile(csvFile);
+        ImportLocalCsvFile(csvFile);
+    }
+
+    private void ImportLocalCsvFile(string file)
+    {
+        var delimiter = CsvSheet.ParseHeaderDelimiterFromFile(file);
+        var csv = CsvSheet.ReadFrom(file, delimiter);
+        var tableName = Path.GetFileNameWithoutExtension(file);
+        var excelSheet = new ExcelSheet
+        {
+            Headers = csv.Headers.Select((x, index) => new ExcelColumn
+            {
+                Name = x.Name,
+                DataType = ExcelDataType.String,
+                CellIndex = index
+            }).ToList(),
+            Rows = csv.Rows
+        };
+        _reportRepo.ReCreateTable(tableName, excelSheet.Headers);
+        _reportRepo.ImportData(tableName, excelSheet);
     }
 
     private static bool IsValidFileExt(string fileExt)
@@ -130,12 +170,15 @@ public class LocalQueryApiController : ControllerBase
     {
         try
         {
-            var data = _reportRepo.QueryRawSql(req.Sql)
-                .Select(row => row.ToDictionary(item => item.Key, y => $"{y.Value}"))
+            var dataList = _reportRepo.QueryRawSql(req.Sql)
+                //.Select(row => row.ToDictionary(item => item.Key, y => $"{y.Value}"))
                 .ToList();
+
+            var csvSheet = dataList.ToCsvStream().ToCsvSheet();
+            
             return new QueryRawSqlResponse
             {
-                Data = data
+                CsvSheet = csvSheet,
             };
         }
         catch(Exception e)
@@ -146,6 +189,11 @@ public class LocalQueryApiController : ControllerBase
             };
         }
     }
+}
+
+public class ImportLocalFileRequest
+{
+    public string FilePath { get; set; }
 }
 
 public class GetAllTableNamesResponse

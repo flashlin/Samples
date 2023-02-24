@@ -18,6 +18,10 @@ function executeCommand(command: any) {
    terminal.writeln(`> ${command}`);
 }
 
+function clear(): void {
+   terminal.clear();
+}
+
 function writeln(text: string): void {
    //const textEncoder = new TextEncoder();
    //terminal.writeln(textEncoder.encode(text));
@@ -26,14 +30,15 @@ function writeln(text: string): void {
 
 defineExpose<ITerminalUiExpose>({
    writeln,
+   clear,
 });
 
 onMounted(() => {
    terminal.open(terminalDom.value!);
    //terminal.writeln('Hello from mxterm.js ');
-   setInterval(() => {
-      terminal.writeln("" + new Date());
-   }, 1000);
+   // setInterval(() => {
+   //    terminal.writeln("" + new Date());
+   // }, 1000);
 })
 </script>
 
