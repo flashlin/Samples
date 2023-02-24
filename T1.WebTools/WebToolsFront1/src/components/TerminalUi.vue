@@ -31,15 +31,15 @@ defineExpose<ITerminalUiExpose>({
 onMounted(() => {
    terminal.open(terminalDom.value!);
    //terminal.writeln('Hello from mxterm.js ');
-   // setInterval(() => {
-   //    terminal.writeln("" + new Date());
-   // }, 1000);
+   setInterval(() => {
+      terminal.writeln("" + new Date());
+   }, 1000);
 })
 </script>
 
 <template>
    <div>
-      <div ref="terminalDom" style="height: 50px;"></div>
+      <div ref="terminalDom"></div>
    </div>
 </template>
 
