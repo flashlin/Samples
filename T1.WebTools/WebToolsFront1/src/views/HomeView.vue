@@ -7,6 +7,7 @@ import { useAppStore } from '@/stores/appStore.js';
 import type { QUploaderFactoryFn, QUploaderFactoryObject } from 'quasar';
 import type { ITerminalUiProxy } from '@/components/TerminalUiModel';
 import { storeToRefs } from 'pinia';
+import type { ITableColumn } from '@/types/HomeViewModel';
 
 const appStore = useAppStore();
 const appState = storeToRefs(appStore);
@@ -17,8 +18,15 @@ const data = reactive<IHomeViewModel>({
   searchText: '',
   tableNames: [],
   code: `CREATE TABLE (\n[id] int IDENTITY(1,1),\n[name] nvarchar(50))\n`,
-  tabName: 'a1',
+  tabName: 'Result',
+  tableData: [],
+  tableColumns: []
 });
+
+const tablePagination = {
+  page: 1,    
+  rowsPerPage: 0 
+};
 
 const terminalRef = ref<ITerminalUiProxy>();
 
@@ -45,25 +53,20 @@ function uploadFileFactory(files: readonly File[]): Promise<QUploaderFactoryObje
   })
 }
 
-interface IHotkey {
-  keyString: string;
-  keyCode: number;
-}
-
 function clear() {
-    const term = terminalRef.value!;
-    term.clear();
+  const term = terminalRef.value!;
+  term.clear();
 }
 
 function write(msg: string) {
-    const term = terminalRef.value!;
-    term.write(msg);
+  const term = terminalRef.value!;
+  term.write(msg);
 }
 
 
 function writeln(msg: string) {
-    const term = terminalRef.value!;
-    term.writeln(msg);
+  const term = terminalRef.value!;
+  term.writeln(msg);
 }
 
 
@@ -81,6 +84,10 @@ async function onImportLocalFile() {
   writeln(`import ${data.localFile} success`);
 }
 
+function onSwitchTab(newTabName: string) {
+  data.tabName = newTabName;
+}
+
 onMounted(() => {
   window.addEventListener('keydown', async (event: KeyboardEvent) => {
     if (event.ctrlKey && event.key === 'r') {
@@ -90,10 +97,10 @@ onMounted(() => {
       });
       clear();
       writeln('' + new Date());
-      
+
       const csvSheet = result.csvSheet;
       let count = 0;
-      if( csvSheet.rows != null ) {
+      if (csvSheet.rows != null) {
         count = csvSheet.rows.length;
       }
       writeln(`count: ${count}`);
@@ -101,22 +108,21 @@ onMounted(() => {
 
       //term.writeln(JSON.stringify(result.csvSheet.headers));
       const headers = result.csvSheet.headers;
-      for(let header of headers) {
+      for (let header of headers) {
         let cols = 0;
         write(header.name);
-        if( cols < headers.length-1 ){
+        if (cols < headers.length - 1) {
           write(',');
         }
         cols++;
       }
       writeln('');
 
-      for(let row of result.csvSheet.rows)
-      {
+      for (let row of result.csvSheet.rows) {
         let cols = 0;
-        for(let header of result.csvSheet.headers) {
+        for (let header of result.csvSheet.headers) {
           write(row[header.name]);
-          if( cols < result.csvSheet.headers.length-1 ){
+          if (cols < result.csvSheet.headers.length - 1) {
             write(',');
           }
           cols++;
@@ -124,6 +130,14 @@ onMounted(() => {
         writeln('');
       }
 
+      const columns = result.csvSheet.headers.map(header => <ITableColumn>{
+        label: header.name,
+        field: header.name
+      })
+      data.tableColumns.splice(0, data.tableColumns.length, ...columns);
+      data.tableData.splice(0, data.tableData.length, ...result.csvSheet.rows);
+
+      console.log('tableData', data.tableData);
       updateTableNames();
     }
   });
@@ -136,24 +150,24 @@ updateTableNames();
   <q-layout view="hHh lpR fFf">
 
     <!-- <q-header elevated class="bg-primary text-white" height-hint="98">
-                                                                                                                                                          <q-toolbar>
-                                                                                                                                                            <q-btn dense flat round icon="menu" />
-                                                                                                                                                            <q-toolbar-title>
-                                                                                                                                                                  <q-avatar>
-                                                                                                                                                                    <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-                                                                                                                                                                  </q-avatar>
-                                                                                                                                                              Title
-                                                                                                                                                            </q-toolbar-title>
+                                                                                                                                                            <q-toolbar>
+                                                                                                                                                              <q-btn dense flat round icon="menu" />
+                                                                                                                                                              <q-toolbar-title>
+                                                                                                                                                                    <q-avatar>
+                                                                                                                                                                      <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+                                                                                                                                                                    </q-avatar>
+                                                                                                                                                                Title
+                                                                                                                                                              </q-toolbar-title>
 
-                                                                                                                                                      <q-btn dense flat round icon="menu" />
-                                                                                                                                                    </q-toolbar>
+                                                                                                                                                        <q-btn dense flat round icon="menu" />
+                                                                                                                                                      </q-toolbar>
 
-                                                                                                                                                    <q-tabs align="left">
-                                                                                                                                                      <q-route-tab to="/page1" label="Page One" />
-                                                                                                                                                        <q-route-tab to="/page2" label="Page Two" />
-                                                                                                                                                            <q-route-tab to="/page3" label="Page Three" />
-                                                                                                                                                          </q-tabs>
-                                                                                                                                                              </q-header> -->
+                                                                                                                                                      <q-tabs align="left">
+                                                                                                                                                        <q-route-tab to="/page1" label="Page One" />
+                                                                                                                                                          <q-route-tab to="/page2" label="Page Two" />
+                                                                                                                                                              <q-route-tab to="/page3" label="Page Three" />
+                                                                                                                                                            </q-tabs>
+                                                                                                                                                                </q-header> -->
 
     <q-drawer show-if-above side="left" bordered>
       <!-- drawer left content -->
@@ -184,31 +198,35 @@ updateTableNames();
     <q-page-container>
       <!-- drawer main content -->
       <q-input v-model="data.localFile" label="import local file" />
-      <q-btn color="secondary" label="Import" @click="onImportLocalFile"/>
+      <q-btn color="secondary" label="Import" @click="onImportLocalFile" />
       <code-editor v-model:code="data.code" />
       <q-tabs align="justify" tabIndex="0">
-        <q-tab>Result</q-tab>
-        <q-tab>Grid</q-tab>
+        <q-tab @click='()=>onSwitchTab("Result")'>Result</q-tab>
+        <q-tab @click='()=>onSwitchTab("Table")'>Grid</q-tab>
       </q-tabs>
       <q-tab-panels v-model="data.tabName" style="height: 250px;">
-        <q-tab-panel name="a1">
+        <q-tab-panel name="Result">
           <terminal-ui ref="terminalRef" style="height: 250px;"></terminal-ui>
         </q-tab-panel>
-        <q-tab-panel name="a2">
-          cdcdcdcdcd
+        <q-tab-panel name="Table">
+          <q-table :data="data.tableData" :columns="data.tableColumns" 
+            :rows-per-page-options="[0]"
+            :pagination.sync="tablePagination"
+            row-key="_PID"
+             />
         </q-tab-panel>
       </q-tab-panels>
     </q-page-container>
 
     <!-- <q-footer elevated class="bg-grey-8 text-white">
-                                                                                                                                                            <q-toolbar>
-                                                                                                                                                              <q-toolbar-title>
-                                                                                                                                                                <q-avatar>
-                                                                                                                                                                  <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-                                                                                                                                                                </q-avatar>
-                                                                                                                                                                <div>footer</div>
-                                                                                                                                                              </q-toolbar-title>
-                                                                                                                                                            </q-toolbar>
-                                                                                                                                                          </q-footer> -->
+                                                                                                                                                              <q-toolbar>
+                                                                                                                                                                <q-toolbar-title>
+                                                                                                                                                                  <q-avatar>
+                                                                                                                                                                    <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+                                                                                                                                                                  </q-avatar>
+                                                                                                                                                                  <div>footer</div>
+                                                                                                                                                                </q-toolbar-title>
+                                                                                                                                                              </q-toolbar>
+                                                                                                                                                            </q-footer> -->
   </q-layout>
 </template>
