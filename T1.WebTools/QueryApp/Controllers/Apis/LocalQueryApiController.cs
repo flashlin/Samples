@@ -171,18 +171,21 @@ public class LocalQueryApiController : ControllerBase
         try
         {
             var dataList = _reportRepo.QueryRawSql(req.Sql)
-                //.Select(row => row.ToDictionary(item => item.Key, y => $"{y.Value}"))
                 .ToList();
 
-            var csvSheet = dataList.ToCsvStream().ToCsvSheet();
+            if (dataList.Count == 0)
+            {
+                return new QueryRawSqlResponse()
+                {
+                    ErrorMessage = "No Data Found."
+                };
+            }
 
-            
-            var queryRawSqlResponse = new QueryRawSqlResponse
+            var csvSheet = dataList.ToCsvStream().ToCsvSheet();
+            return new QueryRawSqlResponse
             {
                 CsvSheet = csvSheet,
             };
-            
-            return queryRawSqlResponse;
         }
         catch(Exception e)
         {
