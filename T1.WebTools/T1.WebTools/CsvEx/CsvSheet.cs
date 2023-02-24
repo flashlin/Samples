@@ -102,18 +102,3 @@ public class CsvSheet
       return ReadFromStream(stream, delimiter);
    }
 }
-
-public class CsvDataProcessor
-{
-   public void CsvToJson()
-   {
-      
-   }
-   
-   public void Merge(CsvSheet master, List<CsvSheet> slaves)
-   {
-      foreach (var row in master.Rows)
-      {
-      }
-   }
-}

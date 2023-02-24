@@ -3,6 +3,7 @@ export interface ITable {
 }
 
 export interface IHomeViewModel {
+  localFile: string;
   searchText: string;
   tableNames: string[];
   code: string;

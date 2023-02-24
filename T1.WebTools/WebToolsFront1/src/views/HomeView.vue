@@ -13,7 +13,8 @@ const appState = storeToRefs(appStore);
 const localQueryClient = appStore.getLocalQueryClient();
 
 const data = reactive<IHomeViewModel>({
-  searchText: "",
+  localFile: '',
+  searchText: '',
   tableNames: [],
   code: `CREATE TABLE (\n[id] int IDENTITY(1,1),\n[name] nvarchar(50))\n`,
   tabName: 'a1',
@@ -54,6 +55,12 @@ async function updateTableNames() {
   data.tableNames.splice(0, data.tableNames.length, ...resp.tableNames);
 }
 
+async function onImportLocalFile() {
+  await localQueryClient.importLocalFile({
+    filePath: data.localFile
+  });
+}
+
 onMounted(() => {
   window.addEventListener('keydown', async (event: KeyboardEvent) => {
     const term = terminalRef.value!;
@@ -62,8 +69,15 @@ onMounted(() => {
       const result = await localQueryClient.queryRawSql({
         sql: data.code
       });
+      term.clear();
       term.writeln(result.errorMessage);
-      term.writeln(JSON.stringify(result.data));
+
+      term.writeln(JSON.stringify(result.csvSheet.headers));
+      for(let row in result.csvSheet.rows)
+      {
+        term.writeln(JSON.stringify(row));
+      }
+
       updateTableNames();
     }
   });
@@ -123,6 +137,8 @@ updateTableNames();
 
     <q-page-container>
       <!-- drawer main content -->
+      <q-input v-model="data.localFile" label="import local file" />
+      <q-btn color="secondary" label="Import" @click="onImportLocalFile"/>
       <code-editor v-model:code="data.code" />
       <q-tabs align="justify" tabIndex="0">
         <q-tab>Result</q-tab>

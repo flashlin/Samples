@@ -1,7 +1,9 @@
-﻿namespace QueryApp.Models;
+﻿using T1.WebTools.CsvEx;
+
+namespace QueryApp.Models;
 
 public class QueryRawSqlResponse
 {
-    public List<Dictionary<string, string>> Data { get; set; } = new();
     public string ErrorMessage { get; set; } = string.Empty;
+    public CsvSheet CsvSheet { get; set; } = new();
 }
