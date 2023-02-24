@@ -50,6 +50,23 @@ interface IHotkey {
   keyCode: number;
 }
 
+function clear() {
+    const term = terminalRef.value!;
+    term.clear();
+}
+
+function write(msg: string) {
+    const term = terminalRef.value!;
+    term.write(msg);
+}
+
+
+function writeln(msg: string) {
+    const term = terminalRef.value!;
+    term.writeln(msg);
+}
+
+
 async function updateTableNames() {
   const resp = await localQueryClient.getAllTableNamesAsync();
   data.tableNames.splice(0, data.tableNames.length, ...resp.tableNames);
@@ -59,6 +76,9 @@ async function onImportLocalFile() {
   await localQueryClient.importLocalFile({
     filePath: data.localFile
   });
+  updateTableNames();
+  clear();
+  writeln(`import ${data.localFile} success`);
 }
 
 onMounted(() => {
@@ -70,12 +90,39 @@ onMounted(() => {
         sql: data.code
       });
       term.clear();
+      term.writeln('' + new Date());
+      
+      const csvSheet = result.csvSheet;
+      let count = 0;
+      if( csvSheet.rows != null ) {
+        count = csvSheet.rows.length;
+      }
+      term.writeln(`count: ${count}`);
       term.writeln(result.errorMessage);
 
-      term.writeln(JSON.stringify(result.csvSheet.headers));
-      for(let row in result.csvSheet.rows)
+      //term.writeln(JSON.stringify(result.csvSheet.headers));
+      const headers = result.csvSheet.headers;
+      for(let header of headers) {
+        let cols = 0;
+        term.write(header.name);
+        if( cols < headers.length-1 ){
+          term.write(',');
+        }
+        cols++;
+      }
+      term.writeln('');
+
+      for(let row of result.csvSheet.rows)
       {
-        term.writeln(JSON.stringify(row));
+        let cols = 0;
+        for(let header of result.csvSheet.headers) {
+          term.write(row[header.name]);
+          if( cols < result.csvSheet.headers.length-1 ){
+            term.write(',');
+          }
+          cols++;
+        }
+        term.writeln('');
       }
 
       updateTableNames();

@@ -22,6 +22,10 @@ function clear(): void {
    terminal.clear();
 }
 
+function write(text: string): void {
+   terminal.write(text);
+}
+
 function writeln(text: string): void {
    //const textEncoder = new TextEncoder();
    //terminal.writeln(textEncoder.encode(text));
@@ -29,6 +33,7 @@ function writeln(text: string): void {
 }
 
 defineExpose<ITerminalUiExpose>({
+   write,
    writeln,
    clear,
 });

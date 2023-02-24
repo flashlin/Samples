@@ -175,11 +175,14 @@ public class LocalQueryApiController : ControllerBase
                 .ToList();
 
             var csvSheet = dataList.ToCsvStream().ToCsvSheet();
+
             
-            return new QueryRawSqlResponse
+            var queryRawSqlResponse = new QueryRawSqlResponse
             {
                 CsvSheet = csvSheet,
             };
+            
+            return queryRawSqlResponse;
         }
         catch(Exception e)
         {
