@@ -83,46 +83,45 @@ async function onImportLocalFile() {
 
 onMounted(() => {
   window.addEventListener('keydown', async (event: KeyboardEvent) => {
-    const term = terminalRef.value!;
     if (event.ctrlKey && event.key === 'r') {
       event.preventDefault();
       const result = await localQueryClient.queryRawSql({
         sql: data.code
       });
-      term.clear();
-      term.writeln('' + new Date());
+      clear();
+      writeln('' + new Date());
       
       const csvSheet = result.csvSheet;
       let count = 0;
       if( csvSheet.rows != null ) {
         count = csvSheet.rows.length;
       }
-      term.writeln(`count: ${count}`);
-      term.writeln(result.errorMessage);
+      writeln(`count: ${count}`);
+      writeln(result.errorMessage);
 
       //term.writeln(JSON.stringify(result.csvSheet.headers));
       const headers = result.csvSheet.headers;
       for(let header of headers) {
         let cols = 0;
-        term.write(header.name);
+        write(header.name);
         if( cols < headers.length-1 ){
-          term.write(',');
+          write(',');
         }
         cols++;
       }
-      term.writeln('');
+      writeln('');
 
       for(let row of result.csvSheet.rows)
       {
         let cols = 0;
         for(let header of result.csvSheet.headers) {
-          term.write(row[header.name]);
+          write(row[header.name]);
           if( cols < result.csvSheet.headers.length-1 ){
-            term.write(',');
+            write(',');
           }
           cols++;
         }
-        term.writeln('');
+        writeln('');
       }
 
       updateTableNames();
