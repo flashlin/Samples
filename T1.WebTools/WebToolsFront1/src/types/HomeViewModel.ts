@@ -1,11 +1,10 @@
-import { ITable } from './HomeViewModel';
 export interface ITable {
   name: string;
 }
 
 export interface ITableColumn {
   name: string;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
   label: string;
   field: string | ((row: any) => any);
   sortable?: boolean;
@@ -18,6 +17,6 @@ export interface IHomeViewModel {
   tableNames: string[];
   code: string;
   tabName: string;
-  tableData: any[];
+  tableRows: any[];
   tableColumns: ITableColumn[];
 }
