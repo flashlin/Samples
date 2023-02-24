@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CsvHelper;
 using CsvHelper.Configuration;
 
@@ -79,7 +81,9 @@ public class CsvSheet
    }
 
    public List<CsvHeader> Headers { get; init; } = new();
-   public List<Dictionary<string, string>> Rows = new();
+   
+   //[JsonConverter(typeof(DictionaryStringToStringConverter))]
+   public List<Dictionary<string, string>> Rows { get; set; } = new();
 
    public void ParseHeadersType()
    {
@@ -100,5 +104,128 @@ public class CsvSheet
    {
       using var stream = new FileStream(csvFile, FileMode.Open);
       return ReadFromStream(stream, delimiter);
+   }
+}
+
+public interface IMyJsonSerializer
+{
+   string Serialize<T>(T obj);
+   T? Deserialize<T>(string json);
+}
+
+public class MyJsonSerializer : IMyJsonSerializer
+{
+    private static readonly JsonSerializerOptions JsonOptions = CreateDefaultSerializeOptions();
+   
+   public string Serialize<T>(T obj)
+   {
+      return JsonSerializer.Serialize(obj, JsonOptions);
+   }
+   
+   public T? Deserialize<T>(string json)
+   {
+      return JsonSerializer.Deserialize<T>(json, JsonOptions);
+   }
+   
+    private static JsonSerializerOptions CreateDefaultSerializeOptions()
+    {
+        var option = new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new DictionaryStringToStringConverter() }
+        };
+        return option;
+    }
+}
+
+
+public class DictionaryStringToStringConverter : JsonConverter<Dictionary<string, string>>
+{
+   public override bool CanConvert(Type typeToConvert)
+   {
+      if (typeToConvert == typeof(Dictionary<string, string>))
+      {
+         return true;
+      }
+      return false;
+   }
+
+   public override Dictionary<string, string> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+   {
+      if (reader.TokenType != JsonTokenType.StartObject)
+      {
+         throw new JsonException($"JsonTokenType was of type {reader.TokenType}, only objects are supported");
+      }
+
+      var dictionary = new Dictionary<string, string>();
+      while (reader.Read())
+      {
+         if (reader.TokenType == JsonTokenType.EndObject)
+         {
+            return dictionary;
+         }
+         if (reader.TokenType != JsonTokenType.PropertyName)
+         {
+            throw new JsonException("JsonTokenType was not PropertyName");
+         }
+         var propertyName = reader.GetString();
+         if (string.IsNullOrWhiteSpace(propertyName))
+         {
+            throw new JsonException("Failed to get property name");
+         }
+
+         var value = ExtractValue(ref reader, options);
+         dictionary.Add(propertyName!, $"{value}");
+      }
+
+      return dictionary;
+      
+   }
+
+   public override void Write(Utf8JsonWriter writer, Dictionary<string, string> value, JsonSerializerOptions options)
+   {
+      writer.WriteStartObject();
+      foreach (var item in value)
+      {
+         writer.WriteString(item.Key, item.Value);
+      }
+      writer.WriteEndObject();
+   }
+   
+   private object? ExtractValue(ref Utf8JsonReader reader, JsonSerializerOptions options)
+   {
+      reader.Read();
+      switch (reader.TokenType)
+      {
+         case JsonTokenType.String:
+            if (reader.TryGetDateTime(out var date))
+            {
+               return date;
+            }
+            return reader.GetString();
+         case JsonTokenType.False:
+            return false;
+         case JsonTokenType.True:
+            return true;
+         case JsonTokenType.Null:
+            return null;
+         case JsonTokenType.Number:
+            if (reader.TryGetInt64(out var result))
+            {
+               return result;
+            }
+            return reader.GetDecimal();
+         case JsonTokenType.StartObject:
+            return Read(ref reader, null!, options);
+         case JsonTokenType.StartArray:
+            var list = new List<object?>();
+            while (reader.Read() && reader.TokenType != JsonTokenType.EndArray)
+            {
+               list.Add(ExtractValue(ref reader, options));
+            }
+            return list;
+         default:
+            throw new JsonException($"'{reader.TokenType}' is not supported");
+      }
    }
 }

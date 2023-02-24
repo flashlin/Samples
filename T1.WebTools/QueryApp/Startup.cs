@@ -9,6 +9,7 @@ using QueryApp.Controllers.Apis;
 using QueryApp.Models;
 using QueryApp.Models.Clients;
 using QueryApp.Models.Services;
+using T1.WebTools.CsvEx;
 
 namespace QueryApp;
 
@@ -45,9 +46,14 @@ public class Startup
     {
         services.AddHttpClient();
         services.AddControllers();
+            // .AddJsonOptions(options =>
+            // {
+            //     options.JsonSerializerOptions.Converters.Add(new DictionaryStringToStringConverter());
+            // });
         services.AddSingleton<ILocalDbService, LocalDbService>();
         services.AddTransient<ILocalQueryHostClient, LocalQueryHostClient>();
         services.AddTransient<IReportRepo, ReportDbContext>();
+        services.AddTransient<IMyJsonSerializer, MyJsonSerializer>();
         services.AddSwaggerGen();
         services.AddCors(options =>
         {
