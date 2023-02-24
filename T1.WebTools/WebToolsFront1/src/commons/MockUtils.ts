@@ -1,4 +1,4 @@
-export function MockAsyncMethod(returnValue?: any) {
+export function MockAsyncMethod(returnValue?: any, hardRun?: boolean) {
   return function (
     target: any,
     propertyKey: string,
@@ -9,10 +9,10 @@ export function MockAsyncMethod(returnValue?: any) {
       //console.log(`Calling ${propertyKey} with arguments: ${JSON.stringify(args)}`);
       const mode = import.meta.env.MODE;
       if (
-        mode == "development" &&
-        import.meta.env.VITE_MOCK_ENABLED == "true"
+        (mode == "development" &&
+          import.meta.env.VITE_MOCK_ENABLED == "true") ||
+        hardRun == true
       ) {
-        console.log("mock");
         if (returnValue == null) {
           returnValue = {};
         }

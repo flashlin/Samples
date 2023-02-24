@@ -19,34 +19,9 @@ const data = reactive<IHomeViewModel>({
   tableNames: [],
   code: `CREATE TABLE (\n[id] int IDENTITY(1,1),\n[name] nvarchar(50))\n`,
   tabName: 'Grid',
-  tableColumns: [{
-    name: "a",
-    label: "a1111",
-    field: "a",
-  }],
-  tableData: [{ PID: 1, a: "aaa" }],
+  tableColumns: [],
+  tableRows: [],
 });
-
-const tableColumns = [
-  {
-    name: "a",
-    label: "a1",
-    field: "name",
-  },
-  {
-    name: "b",
-    label: "a2",
-    field: "n",
-  },
-
-]
-const tableData = [
-  {
-    _PID: 1,
-    name: "aaa",
-    n: "bbbbbbbb"
-  }
-];
 
 const tablePagination = {
   page: 0,
@@ -158,11 +133,8 @@ onMounted(() => {
         label: header.name,
         field: header.name
       })
-      data.tableColumns.push(...columns)
-      // data.tableColumns.splice(0, data.tableColumns.length, ...columns);
-      //data.tableData.splice(0, data.tableData.length, ...csvSheet.rows);
-      // data.tableData = csvSheet.rows
-      data.tableData.push(...csvSheet.rows)
+      data.tableColumns.splice(0, data.tableColumns.length, ...columns);
+      data.tableRows.splice(0, data.tableRows.length, ...csvSheet.rows);
       updateTableNames();
     }
   });
@@ -175,24 +147,24 @@ updateTableNames();
   <q-layout view="hHh lpR fFf">
 
     <!-- <q-header elevated class="bg-primary text-white" height-hint="98">
-                                                                                                                                                                <q-toolbar>
-                                                                                                                                                                  <q-btn dense flat round icon="menu" />
-                                                                                                                                                                  <q-toolbar-title>
-                                                                                                                                                                        <q-avatar>
-                                                                                                                                                                          <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-                                                                                                                                                                        </q-avatar>
-                                                                                                                                                                    Title
-                                                                                                                                                                  </q-toolbar-title>
+                                                                                                                                                                                      <q-toolbar>
+                                                                                                                                                                                        <q-btn dense flat round icon="menu" />
+                                                                                                                                                                                        <q-toolbar-title>
+                                                                                                                                                                                              <q-avatar>
+                                                                                                                                                                                                <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+                                                                                                                                                                                              </q-avatar>
+                                                                                                                                                                                          Title
+                                                                                                                                                                                        </q-toolbar-title>
 
-                                                                                                                                                            <q-btn dense flat round icon="menu" />
-                                                                                                                                                          </q-toolbar>
+                                                                                                                                                                                  <q-btn dense flat round icon="menu" />
+                                                                                                                                                                                </q-toolbar>
 
-                                                                                                                                                          <q-tabs align="left">
-                                                                                                                                                            <q-route-tab to="/page1" label="Page One" />
-                                                                                                                                                              <q-route-tab to="/page2" label="Page Two" />
-                                                                                                                                                                  <q-route-tab to="/page3" label="Page Three" />
-                                                                                                                                                                </q-tabs>
-                                                                                                                                                                    </q-header> -->
+                                                                                                                                                                                <q-tabs align="left">
+                                                                                                                                                                                  <q-route-tab to="/page1" label="Page One" />
+                                                                                                                                                                                    <q-route-tab to="/page2" label="Page Two" />
+                                                                                                                                                                                        <q-route-tab to="/page3" label="Page Three" />
+                                                                                                                                                                                      </q-tabs>
+                                                                                                                                                                                          </q-header> -->
 
     <q-drawer show-if-above side="left" bordered>
       <!-- drawer left content -->
@@ -234,36 +206,20 @@ updateTableNames();
           <terminal-ui ref="terminalRef" style="height: 250px;"></terminal-ui>
         </q-tab-panel>
         <q-tab-panel name="Table">
-          <q-table :columns="tableColumns" :data="tableData" row-key="_PID" />
-          <table>
-            <tr v-for="header in data.tableColumns">
-              <th>
-                {{ header.label }}
-              </th>
-            </tr>
-            <template v-for="row in data.tableData">
-              <tr>
-                <template v-for="header in data.tableColumns">
-                  <td>
-                    {{ row[header.name] }}
-                  </td>
-                </template>
-              </tr>
-            </template>
-          </table>
+          <q-table :columns="data.tableColumns" :rows="data.tableRows" row-key="_PID" />
         </q-tab-panel>
       </q-tab-panels>
     </q-page-container>
 
     <!-- <q-footer elevated class="bg-grey-8 text-white">
-                                                                                                                                                                  <q-toolbar>
-                                                                                                                                                                    <q-toolbar-title>
-                                                                                                                                                                      <q-avatar>
-                                                                                                                                                                        <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
-                                                                                                                                                                      </q-avatar>
-                                                                                                                                                                      <div>footer</div>
-                                                                                                                                                                    </q-toolbar-title>
-                                                                                                                                                                  </q-toolbar>
-                                                                                                                                                                </q-footer> -->
+                                                                                                                                                                                        <q-toolbar>
+                                                                                                                                                                                          <q-toolbar-title>
+                                                                                                                                                                                            <q-avatar>
+                                                                                                                                                                                              <img src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg">
+                                                                                                                                                                                            </q-avatar>
+                                                                                                                                                                                            <div>footer</div>
+                                                                                                                                                                                          </q-toolbar-title>
+                                                                                                                                                                                        </q-toolbar>
+                                                                                                                                                                                      </q-footer> -->
   </q-layout>
 </template>

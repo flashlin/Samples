@@ -21,6 +21,8 @@ public class Startup
         var appLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
         var port = FindAvailablePort();
 
+        File.WriteAllText(appLocation + "/app.txt","{"+ $"""appUid:"{appUid}",port:{port}""" + "}");
+
         var hostBuilder = Host.CreateDefaultBuilder(args)
             .ConfigureServices(services =>
             {
