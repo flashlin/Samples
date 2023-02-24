@@ -7,8 +7,9 @@ export interface ITableColumn {
   name: string;
   align?: 'left' | 'center' | 'right';
   label: string;
-  field: string;
+  field: string | ((row: any) => any);
   sortable?: boolean;
+  required?: boolean;
 }
 
 export interface IHomeViewModel {
