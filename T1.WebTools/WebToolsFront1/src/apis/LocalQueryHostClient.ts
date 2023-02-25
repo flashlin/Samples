@@ -23,7 +23,7 @@ export class LocalQueryHostClient implements ILocalQueryHostClient {
   _httpClient = createHttpClient(import.meta.env.VITE_LOCAL_QUERY_HOST_URL);
 
   @MockAsyncMethod(
-    [{ appUid: "8482efb9-3cd3-4a22-84ab-5f9e21066b4b", port: 63569 }],
+    [{ appUid: "08cbf4b7-10b6-4d6f-8ab6-212de3ba01af", port: 56426 }],
     true
   )
   getUnbindLocalQueryAppsAsync(): Promise<IUnbindLocalQueryAppInfo[]> {

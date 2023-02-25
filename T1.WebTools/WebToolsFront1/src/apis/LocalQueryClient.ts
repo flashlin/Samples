@@ -29,7 +29,7 @@ export interface IQueryRawSqlRequest {
 
 export enum ColumnType {
   String,
-  Number
+  Number,
 }
 
 export interface ICsvHeader {
@@ -68,9 +68,10 @@ export class LocalQueryClient implements ILocalQueryClient {
   _connectOption!: ILocalQueryAppConnectOption;
 
   setConnectOption(option: ILocalQueryAppConnectOption) {
+    const appHost = import.meta.env.VITE_LOCAL_QUERY_APP_HOST;
     this._connectOption = option;
     this._httpClient = createHttpClient(
-      `http://127.0.0.1:${option.appPort}/api/LocalQueryApi/`
+      `http://${appHost}:${option.appPort}/api/LocalQueryApi/`
     );
   }
 
@@ -91,7 +92,7 @@ export class LocalQueryClient implements ILocalQueryClient {
   }
 
   importLocalFile(req: IImportLocalFileRequest): Promise<void> {
-    return this._httpClient.postVoidAsync('importLocalFile', req);
+    return this._httpClient.postVoidAsync("importLocalFile", req);
   }
 
   queryRawSql(req: IQueryRawSqlRequest): Promise<IQueryRawSqlResponse> {
