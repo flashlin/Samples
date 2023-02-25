@@ -17,8 +17,12 @@ public class Startup
 {
     public void Run(string[] args)
     {
+        var entryAssembly = Assembly.GetEntryAssembly()!;
         var appUid = Guid.NewGuid().ToString();
-        var appLocation = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
+        var appLocation = Path.GetDirectoryName(entryAssembly.Location)!;
+        var appVersion = entryAssembly
+            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
+            .InformationalVersion;
         var port = FindAvailablePort();
 
         File.WriteAllText(appLocation + "/app.txt","{"+ $"""appUid:"{appUid}",port:{port}""" + "}");
@@ -29,6 +33,7 @@ public class Startup
                 services.AddSingleton<ILocalEnvironment>(sp => new LocalEnvironment
                 {
                     AppUid = appUid,
+                    AppVersion = appVersion,
                     AppLocation = appLocation,
                     Port = port,
                 });

@@ -38,7 +38,8 @@ public class LocalQueryApiController : ControllerBase
         _localEnvironment.IsBinded = true;
         return new KnockResponse
         {
-            IsSuccess = true
+            IsSuccess = true,
+            AppVersion = _localEnvironment.AppVersion
         };
     }
 

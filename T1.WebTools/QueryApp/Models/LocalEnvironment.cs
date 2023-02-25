@@ -8,4 +8,5 @@ public class LocalEnvironment : ILocalEnvironment
     public DateTime LastActivityTime { get; set; }
     public string UserUid { get; set; } = string.Empty;
     public int Port { get; set; }
+    public string AppVersion { get; set; } = string.Empty;
 }
