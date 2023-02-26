@@ -49,8 +49,8 @@ function uploadFileFactory(files: readonly File[]): Promise<QUploaderFactoryObje
       headers: [
         { name: 'Authorization', value: `Bearer ${token}` }
       ]
-    })
-  })
+    });
+  });
 }
 
 function clear() {
