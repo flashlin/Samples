@@ -7,7 +7,7 @@ import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  mode: 'development',
+  mode: "development",
   plugins: [
     vue({ template: { transformAssetUrls } }),
     quasar({
@@ -23,13 +23,21 @@ export default defineConfig({
   build: {
     assetsDir: "assets", // 設定放置打包後 js/css 的目錄, 最後 `my_path/assets/`
     rollupOptions: {
+      external: ["node-sql-parser"],
       output: {
+        globals: {
+          "node-sql-parser": "NodeSqlParser",
+        },
         manualChunks(id) {
-          if (id.includes('node_modules')) {
-            return 'vendor';
+          if (id.includes("node_modules")) {
+            return "vendor";
           }
-        }
-      }
-    }
-  }, 
+        },
+      },
+    },
+  },
+  define: {
+    global: "window",
+    "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
+  },
 });

@@ -1,9 +1,13 @@
 <script setup lang="ts">
+/// <reference types="monaco-editor" />
 import { ref, reactive, onMounted, onBeforeUnmount, toRefs } from 'vue';
 import * as monaco from 'monaco-editor';
 
 import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import JsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
+import type { ICodeEditorExpose } from './CodeEditorExpose';
+
+
 self.MonacoEnvironment = {
     getWorker(workerId: string, label: string) {
         if (label === 'json') {
@@ -12,6 +16,8 @@ self.MonacoEnvironment = {
         return new EditorWorker();
     },
 };
+
+
 
 const props = defineProps<{
     code: string
@@ -28,6 +34,20 @@ const data = reactive({
 
 const editorDom = ref<HTMLElement>();
 let editor: monaco.editor.IStandaloneCodeEditor;
+
+function getSelectionCodeText(): string {
+    const selection = editor.getSelection();
+    if (selection) {
+        const model = editor.getModel()!;
+        const selectedText = model.getValueInRange(selection);
+        return selectedText;
+    }
+    return editor.getValue();
+}
+
+defineExpose<ICodeEditorExpose>({
+    getSelectionCodeText
+});
 
 onMounted(() => {
     //const jsonModel = monaco.editor.createModel(props.modelValue, 'json');
