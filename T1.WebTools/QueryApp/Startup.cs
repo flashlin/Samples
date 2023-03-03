@@ -3,6 +3,9 @@ using System.Net.Sockets;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc.ViewFeatures.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QueryApp.Controllers.Apis;
@@ -25,7 +28,7 @@ public class Startup
             .InformationalVersion;
         var port = FindAvailablePort();
 
-        File.WriteAllText(appLocation + "/app.txt","{"+ $"""appUid:"{appUid}",port:{port}""" + "}");
+        File.WriteAllText(appLocation + "/AppUid.txt", "[{" + $"""appUid:"{appUid}",port:{port}""" + "}]");
 
         var hostBuilder = Host.CreateDefaultBuilder(args)
             .ConfigureServices(services =>
@@ -43,6 +46,8 @@ public class Startup
             {
                 webBuilder.UseUrls($"http://localhost:{port}");
                 webBuilder.UseStartup<Startup>();
+                //webBuilder.UseWebRoot(Path.Combine(appLocation, "wwwroot"));
+                //webBuilder.UseStaticWebAssets();
             });
 
         var host = hostBuilder.Build();
@@ -51,12 +56,15 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddMvcCore()
+            .AddRazorRuntimeCompilation();
         services.AddHttpClient();
-        services.AddControllers();
-            // .AddJsonOptions(options =>
-            // {
-            //     options.JsonSerializerOptions.Converters.Add(new DictionaryStringToStringConverter());
-            // });
+        services.AddControllersWithViews();
+        // .AddJsonOptions(options =>
+        // {
+        //     options.JsonSerializerOptions.Converters.Add(new DictionaryStringToStringConverter());
+        // });
+        //services.AddServerSideBlazor();
         services.AddSingleton<ILocalDbService, LocalDbService>();
         services.AddTransient<ILocalQueryHostClient, LocalQueryHostClient>();
         services.AddTransient<IReportRepo, ReportDbContext>();
@@ -83,6 +91,7 @@ public class Startup
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             endpoints.MapControllers();
+            //endpoints.MapBlazorHub();
         });
     }
 
@@ -90,7 +99,7 @@ public class Startup
     {
         TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
-        int port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        int port = ((IPEndPoint) listener.LocalEndpoint).Port;
         listener.Stop();
         return port;
     }

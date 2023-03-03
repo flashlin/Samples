@@ -200,7 +200,7 @@ public class LocalQueryApiController : ControllerBase
 
 public class ImportLocalFileRequest
 {
-    public string FilePath { get; set; }
+    public string FilePath { get; set; } = string.Empty;
 }
 
 public class GetAllTableNamesResponse
