@@ -28,12 +28,6 @@
       <Content Include="appSettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
-      <Page Include="Razors\Components\Counter.razor">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Page>
-      <Page Include="Razors\_Imports.razor">
-        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Page>
     </ItemGroup>
 
     <ItemGroup>

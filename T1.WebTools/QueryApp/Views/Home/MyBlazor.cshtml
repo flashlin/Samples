@@ -10,7 +10,11 @@
 <body>
    <div id="app">
       <div>
-            @(await Html.RenderComponentAsync<QueryRazor.Counter>(RenderMode.ServerPrerendered, new { Data = " Hello World " }))
+            @(await Html.RenderComponentAsync<QueryRazor.Counter>(RenderMode.ServerPrerendered, 
+                new
+                {
+                    Data = " Hello World "
+                }))
       </div>
    </div>
 </body>
