@@ -14,6 +14,7 @@ public class HomeController : Controller
     
     public IActionResult Index()
     {
-        return Ok($"Hello {_localEnvironment.AppUid} {_localEnvironment.AppLocation} {_localEnvironment.Port}");
+        //return Ok($"Hello {_localEnvironment.AppUid} {_localEnvironment.AppLocation} {_localEnvironment.Port}");
+        return View("Index");
     }
 }
