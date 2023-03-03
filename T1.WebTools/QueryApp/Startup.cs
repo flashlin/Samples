@@ -56,10 +56,13 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddMvcCore()
-            .AddRazorRuntimeCompilation();
+        // services.AddMvcCore()
+        //     .AddRazorRuntimeCompilation();
         services.AddHttpClient();
-        services.AddControllersWithViews();
+        services.AddControllersWithViews()
+            .AddRazorRuntimeCompilation();
+        services.AddServerSideBlazor();
+        services.AddRazorPages();
         // .AddJsonOptions(options =>
         // {
         //     options.JsonSerializerOptions.Converters.Add(new DictionaryStringToStringConverter());
@@ -91,7 +94,8 @@ public class Startup
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             endpoints.MapControllers();
-            //endpoints.MapBlazorHub();
+            endpoints.MapBlazorHub();
+            endpoints.MapRazorPages();
         });
     }
 

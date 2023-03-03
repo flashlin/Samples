@@ -17,4 +17,9 @@ public class HomeController : Controller
         //return Ok($"Hello {_localEnvironment.AppUid} {_localEnvironment.AppLocation} {_localEnvironment.Port}");
         return View("Index");
     }
+
+    public IActionResult MyBlazor()
+    {
+        return View("MyBlazor");
+    }
 }
