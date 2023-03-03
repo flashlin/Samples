@@ -183,6 +183,7 @@ public class LocalQueryApiController : ControllerBase
             }
 
             var csvSheet = dataList.ToCsvStream().ToCsvSheet();
+            csvSheet.SaveToFile(_localEnvironment.AppLocation + "/Data/Result.csv");
             return new QueryRawSqlResponse
             {
                 CsvSheet = csvSheet,

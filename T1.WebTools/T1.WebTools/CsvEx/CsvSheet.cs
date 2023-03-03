@@ -58,6 +58,7 @@ public class CsvSheet
 
       var csvSheet = new CsvSheet
       {
+         Delimiter = delimiter,
          Headers = csvReader.HeaderRecord!.Select(name => new CsvHeader
          {
             Name = name,
@@ -80,9 +81,9 @@ public class CsvSheet
       return csvSheet;
    }
 
+   public string Delimiter { get; set; } = ",";
    public List<CsvHeader> Headers { get; init; } = new();
    
-   //[JsonConverter(typeof(DictionaryStringToStringConverter))]
    public List<Dictionary<string, string>> Rows { get; set; } = new();
 
    public void ParseHeadersType()
@@ -104,6 +105,26 @@ public class CsvSheet
    {
       using var stream = new FileStream(csvFile, FileMode.Open);
       return ReadFromStream(stream, delimiter);
+   }
+
+   public void SaveToFile(string file)
+   {
+      var option = new CsvConfiguration(CultureInfo.InvariantCulture)
+      {
+         Delimiter = Delimiter,
+         Mode = CsvMode.RFC4180,
+         Encoding = Encoding.UTF8,
+         HasHeaderRecord = true,
+      };
+      using var stream = new FileStream(file, FileMode.Create);
+      using var streamWriter = new StreamWriter(stream, Encoding.UTF8);
+      using var csvWriter = new CsvWriter(streamWriter, option);
+      foreach (var header in Headers)
+      {
+         csvWriter.WriteField(header.Name);
+      }
+      csvWriter.NextRecord();
+      csvWriter.WriteRecords(Rows);
    }
 }
 
