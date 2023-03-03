@@ -5,6 +5,13 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>Web UI Tools</Title>
+		<Authors>Mr.Brain</Authors>
+		<Description>Web UI Tools ( QueryLocal )</Description>
+		<Copyright>2023</Copyright>
+		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+		<PackageTags>T1</PackageTags>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -39,6 +46,13 @@
 	<ItemGroup>
 	  <Folder Include="Contents\css\" />
 	  <Folder Include="CsvEx\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="ReadMe.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>
