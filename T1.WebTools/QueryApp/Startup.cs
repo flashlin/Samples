@@ -12,6 +12,8 @@ using QueryApp.Controllers.Apis;
 using QueryApp.Models;
 using QueryApp.Models.Clients;
 using QueryApp.Models.Services;
+using Serilog;
+using Serilog.Extensions.Logging.File;
 using T1.WebTools.CsvEx;
 
 namespace QueryApp;
@@ -31,6 +33,10 @@ public class Startup
         File.WriteAllText(appLocation + "/AppUid.txt", "[{" + $"""appUid:"{appUid}",port:{port}""" + "}]");
 
         var hostBuilder = Host.CreateDefaultBuilder(args)
+            .UseSerilog((hostingContext, loggerConfiguration) => 
+            {
+                loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
+            })
             .ConfigureServices(services =>
             {
                 services.AddSingleton<ILocalEnvironment>(sp => new LocalEnvironment
