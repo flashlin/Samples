@@ -18,8 +18,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Remove="appSettings.json" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
+      </Content>
+      <Content Include="appSettings.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <Page Include="Razors\Components\Counter.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
@@ -50,6 +57,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\QueryRazor\QueryRazor.csproj" />
       <ProjectReference Include="..\T1.WebTools\T1.WebTools.csproj" />
     </ItemGroup>
 
