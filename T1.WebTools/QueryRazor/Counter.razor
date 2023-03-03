@@ -1,0 +1,21 @@
+﻿@page "/counter"
+
+<h1>Counter</h1>
+
+@Data
+
+<p role="status">Current count: @_currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    [Parameter]
+    public string Data { get; set; } = string.Empty;
+
+    private int _currentCount = 0;
+
+    private void IncrementCount()
+    {
+        _currentCount++;
+    }
+}

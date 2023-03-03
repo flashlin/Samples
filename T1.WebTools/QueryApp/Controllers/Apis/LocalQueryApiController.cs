@@ -56,10 +56,7 @@ public class LocalQueryApiController : ControllerBase
     public async Task UploadFiles()
     {
         var dataFolder = Path.Combine(_localEnvironment.AppLocation, "Data");
-        if (!Directory.Exists(dataFolder))
-        {
-            Directory.CreateDirectory(dataFolder);
-        }
+        FileHelper.EnsureDirectory(dataFolder);
         
         var uploadFiles = this.Request.Form.Files;
         foreach (var uploadFile in uploadFiles)

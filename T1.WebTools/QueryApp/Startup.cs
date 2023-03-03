@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using QueryApp.Controllers.Apis;
 using QueryApp.Models;
 using QueryApp.Models.Clients;
@@ -17,6 +19,18 @@ using Serilog.Extensions.Logging.File;
 using T1.WebTools.CsvEx;
 
 namespace QueryApp;
+
+public static class FileHelper
+{
+    public static void EnsureDirectory(string directory)
+    {
+        if (Directory.Exists(directory))
+        {
+            return;
+        }
+        Directory.CreateDirectory(directory);
+    }
+}
 
 public class Startup
 {
@@ -31,9 +45,20 @@ public class Startup
         var port = FindAvailablePort();
 
         File.WriteAllText(appLocation + "/AppUid.txt", "[{" + $"""appUid:"{appUid}",port:{port}""" + "}]");
+        //FileHelper.EnsureDirectory(Path.Combine(appLocation, "Logs"));
 
         var hostBuilder = Host.CreateDefaultBuilder(args)
-            .UseSerilog((hostingContext, loggerConfiguration) => 
+            .ConfigureAppConfiguration((context, config) =>
+            {
+                config.AddJsonFile("appSettings.json", optional: true);
+            })
+            .ConfigureLogging(logging =>
+            {
+                logging.ClearProviders();
+                logging.AddConsole();
+                logging.AddSerilog();
+            })
+            .UseSerilog((hostingContext, loggerConfiguration) =>
             {
                 loggerConfiguration.ReadFrom.Configuration(hostingContext.Configuration);
             })
@@ -53,7 +78,7 @@ public class Startup
                 webBuilder.UseUrls($"http://localhost:{port}");
                 webBuilder.UseStartup<Startup>();
                 //webBuilder.UseWebRoot(Path.Combine(appLocation, "wwwroot"));
-                //webBuilder.UseStaticWebAssets();
+                webBuilder.UseStaticWebAssets();
             });
 
         var host = hostBuilder.Build();
@@ -64,6 +89,7 @@ public class Startup
     {
         // services.AddMvcCore()
         //     .AddRazorRuntimeCompilation();
+        services.AddSignalR();
         services.AddHttpClient();
         services.AddControllersWithViews()
             .AddRazorRuntimeCompilation();
@@ -103,6 +129,7 @@ public class Startup
             endpoints.MapBlazorHub();
             endpoints.MapRazorPages();
         });
+        app.UseStaticFiles();
     }
 
     int FindAvailablePort()
