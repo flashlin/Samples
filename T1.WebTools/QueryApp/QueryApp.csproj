@@ -14,24 +14,26 @@
 
     <ItemGroup>
         <Content Include="Views/**/*.cshtml" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="Razors/**/*.razor" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include="..\.dockerignore">
         <Link>.dockerignore</Link>
       </Content>
-      <Content Include="Razors\Components\Counter.razor">
+      <Page Include="Razors\Components\Counter.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
-      <Content Include="Razors\_Imports.razor">
+      </Page>
+      <Page Include="Razors\_Imports.razor">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-      </Content>
+      </Page>
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="CsvHelper" Version="30.0.1" />
       <PackageReference Include="Dapper" Version="2.0.123" />
-      <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.3" />
+      <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.3" />
+      <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.3" />
       <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="7.0.3" />
       <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
