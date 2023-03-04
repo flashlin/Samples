@@ -1,5 +1,6 @@
 import tensorflow as tf
 
+
 def create_model(total_words, hidden_size, num_steps, optimizer='adam'):
     model = tf.keras.models.Sequential()
 
