@@ -2,11 +2,10 @@ import os.path
 
 import numpy as np
 import tensorflow as tf
+from keras.utils import to_categorical, pad_sequences
+
 from Vocabulary import Vocabulary
-from model import create_model
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.utils import to_categorical
+from model2 import create_model
 from sklearn.model_selection import train_test_split
 
 train_data = [
@@ -33,7 +32,6 @@ vocab.save(vob_file)
 seq2 = vocab.texts_to_sequences(["select password from customer"])
 print(f'{seq2=}')
 
-
 BEST_PREDICT_MODEL = "Models/best_predict_model.hdf5"
 
 
@@ -41,24 +39,13 @@ class PredictNextWord:
     """
         number_of_words: 關注幾個字?
     """
-    def __init__(self, vocab: Vocabulary, num_of_sentence_words=100, hidden_size=512 * 2):
-        self.vocab = vocab
-        self.number_of_words = num_of_sentence_words
-        self.vocab_size = vocab_size = len(vocab)
-        initial_learning_rate = 0.01
-        decay_steps = 1000
-        decay_rate = 0.95
-        learning_rate_fn = tf.keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate,
-            decay_steps=decay_steps,
-            decay_rate=decay_rate)
 
-        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate_fn)
-        self.model = create_model(
-            total_words=vocab_size + 1,
-            hidden_size=hidden_size,
-            num_steps=num_of_sentence_words, optimizer=optimizer)
-        #print(model.summary())
+    def __init__(self, vocab: Vocabulary, model, num_words_of_sentence=100):
+        self.num_words_of_sentence = num_words_of_sentence
+        self.vocab = vocab
+        self.vocab_size = vocab_size = len(vocab)
+        self.model = model
+        print(self.model.summary())
 
         show_epochs = 10
         self.checkpoint = tf.keras.callbacks.ModelCheckpoint(
@@ -82,28 +69,16 @@ class PredictNextWord:
         # 將文本轉換為數字序列
         sequences = self.vocab.texts_to_sequences(texts)
         # 將序列補齊到固定長度
-        padded_sequences = pad_sequences(sequences, maxlen=self.number_of_words, padding='post')
+        padded_sequences = pad_sequences(sequences, maxlen=self.num_words_of_sentence, padding='post')
         return padded_sequences
 
     def one_hot(self, padded_sequences):
         one_hot_targets = to_categorical(padded_sequences, num_classes=self.vocab_size + 1)
         return one_hot_targets
 
-
-    def predict1(self, input_text):
-        input_sequence = self.vocab.texts_to_sequences([input_text])[0]
-        padded_input_sequence = pad_sequences([input_sequence], maxlen=self.number_of_words, padding='post')
-        output_probabilities = self.model.predict(padded_input_sequence)[0][-1]
-        # 將概率值轉換為單詞
-        next_word_id = np.argmax(output_probabilities)
-        if next_word_id == 0:
-            return None
-        next_word = self.vocab.index_word(next_word_id)
-        return next_word
-
     def predict(self, input_text, top=5):
         input_sequence = self.vocab.texts_to_sequences([input_text])[0]
-        padded_input_sequence = pad_sequences([input_sequence], maxlen=self.number_of_words, padding='post')
+        padded_input_sequence = pad_sequences([input_sequence], maxlen=self.num_words_of_sentence, padding='post')
         output_probabilities = self.model.predict(padded_input_sequence)[0][-1]
 
         # 取得 TOP 5 概率值的索引
@@ -124,7 +99,9 @@ class PredictNextWord:
         self.model = tf.keras.models.load_model(model_path)
 
 
-p = PredictNextWord(vocab, num_of_sentence_words=10)
+num_words_of_sentence = 100
+model = create_model(total_words=len(vocab), num_words_of_sentence=num_words_of_sentence)
+p = PredictNextWord(vocab, model, num_words_of_sentence=num_words_of_sentence)
 p.fit(train_data, num_epochs=500, batch_size=10)
 
 top_words = p.predict("select id")
@@ -132,4 +109,3 @@ top_words = p.predict("select id")
 print('Top 5 predicted words:')
 for (word, prob) in top_words.items():
     print(f'{word} {prob}')
-
