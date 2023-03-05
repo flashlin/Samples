@@ -34,5 +34,6 @@ class Vocabulary:
     def try_load(self, vocab_path=VOCAB_PICKLE):
         if not os.path.exists(vocab_path):
             return False
+        print(f'load vocab {vocab_path}')
         self.load(vocab_path)
         return True
