@@ -34,11 +34,13 @@ for seq in sequences:
     for i in range(n, len(seq)):
         n_grams.append(seq[i-n:i+1])
 
-print(f'{sequences=}')
-print(f'{n_grams=}')
+print(f'1 {type(n_grams[0])=}')
+print(f'1 {type(n_grams)=}')
 
+print(f'1 {n_grams=}')
 # 將資料集轉換成 Numpy array
 n_grams = np.array(n_grams)
+print(f'2 {n_grams=}')
 
 # 將輸入和輸出分開
 X = n_grams[:, :-1]
