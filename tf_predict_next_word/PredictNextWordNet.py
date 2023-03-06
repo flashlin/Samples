@@ -1,3 +1,5 @@
+import os.path
+
 import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from Vocabulary import Vocabulary
@@ -10,12 +12,18 @@ class PredictNextWordConfig:
     batch_size = 64
     epochs = 100
     input_length = 10
+    vocab_file = 'models/predict.vocab'
+    model_folder = 'models/predict'
 
 
 class PredictNextWordModel:
     def __init__(self, config: PredictNextWordConfig):
         self.config = config
         self.vocab = Vocabulary(config.num_words)
+        show_epochs = 10
+        self.checkpoint = tf.keras.callbacks.ModelCheckpoint(
+            config.model_folder, monitor='loss', verbose=1,
+            save_best_only=True, mode='min', period=show_epochs)
         self.model = self.create_model()
 
     def create_model(self):
@@ -30,12 +38,22 @@ class PredictNextWordModel:
         return model
 
     def fit(self, corpus, batch_size, epochs):
+        self.vocab.try_load(self.config.vocab_file)
         self.vocab.fit(corpus)
         n_grams = self.vocab.create_n_gram_corpus(corpus)
-        # 將資料集轉換成 Numpy array
+        self.vocab.save(self.config.vocab_file)
         x, y = self.vocab.create_train_data(n_grams)
-        # 訓練模型
-        self.model.fit(x, y, batch_size=batch_size, epochs=epochs)
+        self.try_load_model(self.config.model_folder)
+        self.model.fit(x, y, batch_size=batch_size, epochs=epochs, callbacks=[self.checkpoint])
+
+    def try_load_model(self, model_folder):
+        if not os.path.exists(model_folder):
+            return
+        print(f'load model from "{model_folder}"')
+        self.model = tf.keras.models.load_model(self.config.model_folder)
+
+    def save_model(self, model_file='models/predict.pb'):
+        self.model.save(model_file)
 
     def predict_next_word(self, test_text, top_k=5):
         test_seq = self.vocab.texts_to_sequences([test_text])[0]
