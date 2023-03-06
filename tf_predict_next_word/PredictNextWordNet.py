@@ -46,9 +46,9 @@ class PredictNextWordModel:
         self.vocab.save(self.config.vocab_file)
         x, y = self.vocab.create_train_data(n_grams)
         self.try_load_model(self.config.model_file)
-        # self.model.fit(x, y, batch_size=batch_size, epochs=epochs, callbacks=[self.checkpoint])
-        self.model.fit(x, y, batch_size=batch_size, epochs=epochs)
-        self.save_model(self.config.model_file)
+        self.model.fit(x, y, batch_size=batch_size, epochs=epochs, callbacks=[self.checkpoint])
+        # self.model.fit(x, y, batch_size=batch_size, epochs=epochs)
+        # self.save_model(self.config.model_file)
 
     def try_load_model(self, model_folder):
         if not os.path.exists(model_folder):
