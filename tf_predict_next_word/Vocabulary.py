@@ -51,7 +51,6 @@ class Vocabulary:
         words = [self.symbols[word] if word in self.symbols else word for word in words]
         return ' '.join(words)
 
-
     def create_n_gram_corpus(self, corpus, max_len=10, num_of_adjacent_words: int = 2):
         new_corpus = []
         for text in corpus:
@@ -66,7 +65,7 @@ class Vocabulary:
                 new_text = ' '.join(new_words)
                 new_corpus.append(new_text)
             for i in range(1, len(words) + 1):
-                new_words = words[: i] + ['<FILL>'] + words[i+1:] + words[i:i+1]
+                new_words = words[: i] + ['<FILL>'] + words[i + 1:] + words[i:i + 1]
                 new_words = self.pad_words(new_words, max_len)
                 new_text = ' '.join(new_words)
                 new_corpus.append(new_text)
