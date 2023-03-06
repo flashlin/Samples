@@ -85,6 +85,8 @@ class Vocabulary:
 
     def create_train_data(self, n_grams_corpus):
         sequences = self.tokenizer.texts_to_sequences(n_grams_corpus)
+        # for seq in sequences:
+        #     print(f'{seq}')
         sequences = np.array(sequences)
         # 將輸入和輸出分開
         x = sequences[:, :-1]

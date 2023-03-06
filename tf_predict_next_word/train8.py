@@ -5,7 +5,7 @@ corpus = [
     "select id , name from customer"
 ]
 model = PredictNextWordModel(PredictNextWordConfig())
-model.fit(corpus, batch_size=1, epochs=300)
+model.fit(corpus, batch_size=2, epochs=100)
 
 
 def predict(test_text):

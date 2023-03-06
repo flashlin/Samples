@@ -41,6 +41,8 @@ class PredictNextWordModel:
         self.vocab.try_load(self.config.vocab_file)
         self.vocab.fit(corpus)
         n_grams = self.vocab.create_n_gram_corpus(corpus)
+        # for text in n_grams:
+        #     print(f'n_grams={text}')
         self.vocab.save(self.config.vocab_file)
         x, y = self.vocab.create_train_data(n_grams)
         self.try_load_model(self.config.model_folder)
@@ -56,8 +58,9 @@ class PredictNextWordModel:
         self.model.save(model_file)
 
     def predict_next_word(self, test_text, top_k=5):
+        eos_id = self.vocab.texts_to_sequences(['<EOS>'])
         test_seq = self.vocab.texts_to_sequences([test_text])[0]
-        test_seq = pad_sequences([test_seq], maxlen=self.config.input_length - 1, padding='pre')
+        test_seq = pad_sequences([test_seq], maxlen=self.config.input_length - 1, padding='pre', value=eos_id)
         print(f'{test_seq=}')
         # 使用模型預測下一個單詞的機率分佈
         pred_prob = self.model.predict(test_seq)[0]
