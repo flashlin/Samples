@@ -1,0 +1,19 @@
+FROM python:3.9-alpine
+
+# Installing packages
+RUN apk update
+
+# 安裝 Python 依賴庫
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 複製應用程式代碼到容器內
+COPY bootstrap.sh ./
+COPY . .
+
+# 開放 Web API 的埠口
+EXPOSE 80
+
+# 預設啟動 Web API
+ENTRYPOINT ["/usr/src/app/bootstrap.sh"]
