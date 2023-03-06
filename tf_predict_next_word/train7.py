@@ -6,7 +6,6 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from Vocabulary import Vocabulary
 
 corpus = [
-    "<EOS>",
     "select id from customer",
     "select id , name from customer"
 ]
@@ -16,7 +15,9 @@ vocab.fit(corpus)
 
 # 建立 nGram 資料集
 n_grams = vocab.create_n_gram_corpus(corpus)
-# print(f'{n_grams=}')
+for text in n_grams:
+    print(f'{text}')
+print()
 
 # 將資料集轉換成 Numpy array
 x, y = vocab.create_train_data(n_grams)
@@ -24,14 +25,14 @@ x, y = vocab.create_train_data(n_grams)
 # print(f'{y=}')
 
 # 建立模型
-num_words = len(vocab)
+num_words = 9000
 embedding_size = 100
 lstm_units = 128
 batch_size = 64
 epochs = 100
 input_length = 10
 model = tf.keras.Sequential([
-    tf.keras.layers.Embedding(num_words, embedding_size, input_length=input_length),
+    tf.keras.layers.Embedding(num_words, embedding_size, input_length=input_length-1),
     tf.keras.layers.LSTM(lstm_units),
     tf.keras.layers.Dense(num_words, activation="softmax")
 ])
@@ -55,7 +56,7 @@ def predict_next_word(model, tokenizer, test_text, top_k=5):
     # 預處理輸入句子
     test_seq = tokenizer.texts_to_sequences([test_text])[0]
     # test_seq = pad_sequences([test_seq], maxlen=input_length, padding='pre')
-    test_seq = pad_sequences([test_seq], maxlen=input_length, padding='post')
+    test_seq = pad_sequences([test_seq], maxlen=input_length-1, padding='post')
 
     print(f'{test_seq=}')
 

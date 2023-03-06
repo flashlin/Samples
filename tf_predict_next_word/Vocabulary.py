@@ -8,9 +8,12 @@ VOCAB_PICKLE = 'vocab.pickle'
 
 
 class Vocabulary:
-    def __init__(self):
-        # self.tokenizer = Tokenizer(num_words=num_words, oov_token="<OOV>")
-        self.tokenizer = Tokenizer()
+    def __init__(self, num_words=9000):
+        self.tokenizer = Tokenizer(num_words=num_words, oov_token="<OOV>")
+        self.symbols = {
+            ',': '<COMMA>'
+        }
+        # self.tokenizer = Tokenizer()
 
     def __len__(self):
         return len(self.tokenizer.word_index)
@@ -43,35 +46,41 @@ class Vocabulary:
         self.load(vocab_path)
         return True
 
+    def normal_text(self, text):
+        words = text.split()
+        words = [self.symbols[word] if word in self.symbols else word for word in words]
+        return ' '.join(words)
+
+
     def create_n_gram_corpus(self, corpus, max_len=10, num_of_adjacent_words: int = 2):
         new_corpus = []
         for text in corpus:
+            text = self.normal_text(text)
             sentence = text.split()
             sentence = sentence + ['<EOS>']
             # words = self.pad_words(sentence, n_gram)
             words = sentence
             for i in range(num_of_adjacent_words, len(words) + 1):
                 new_words = words[i - num_of_adjacent_words: i]
-                new_words = new_words + ['<EOS>'] * (max_len - len(words))
+                new_words = self.pad_words(new_words, max_len)
                 new_text = ' '.join(new_words)
                 new_corpus.append(new_text)
             for i in range(1, len(words) + 1):
-                new_words = words[: i] + ['<???>'] + words[i+1:] + words[i:i+1]
-                new_words = new_words + ['<EOS>'] * (max_len - len(words))
+                new_words = words[: i] + ['<FILL>'] + words[i+1:] + words[i:i+1]
+                new_words = self.pad_words(new_words, max_len)
                 new_text = ' '.join(new_words)
                 new_corpus.append(new_text)
         self.tokenizer.fit_on_texts(new_corpus)
         return new_corpus
 
+    # def pad_words(self, words, max_len):
+    #     words = ['<EOS>'] * (max_len - len(words)) + words
+    #     return words
+
     def create_train_data(self, n_grams_corpus):
-        input_length = 10
         sequences = self.tokenizer.texts_to_sequences(n_grams_corpus)
-        print(f'1 {sequences=}')
-        sequences = np.array(sequences).reshape(9, -1)
-        print(f'2 {sequences=}')
+        sequences = np.array(sequences)
         # 將輸入和輸出分開
-        # x = [seq[:-1] for seq in sequences]
-        # y = [seq[-1] for seq in sequences]
         x = sequences[:, :-1]
         y = sequences[:, -1]
         return x, y
@@ -103,5 +112,5 @@ class Vocabulary:
         #     error_message = f"The length of words must be less than or equal to {max_len}. {words=}"
         #     raise ValueError(error_message)
         if len(words) < max_len:
-            words += ['<EOS>'] * (max_len - len(words))
+            words = ['<EOS>'] * (max_len - len(words)) + words
         return words
