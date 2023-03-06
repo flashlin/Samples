@@ -1,5 +1,7 @@
 import os
 import pickle
+
+import numpy as np
 from tensorflow.keras.preprocessing.text import Tokenizer
 
 VOCAB_PICKLE = 'vocab.pickle'
@@ -7,6 +9,7 @@ VOCAB_PICKLE = 'vocab.pickle'
 
 class Vocabulary:
     def __init__(self):
+        # self.tokenizer = Tokenizer(num_words=num_words, oov_token="<OOV>")
         self.tokenizer = Tokenizer()
 
     def __len__(self):
@@ -20,6 +23,8 @@ class Vocabulary:
 
     def index_word(self, idx):
         if idx == 0:
+            return None
+        if idx >= len(self):
             return None
         return self.tokenizer.index_word[idx]
 
@@ -37,3 +42,66 @@ class Vocabulary:
         print(f'load vocab {vocab_path}')
         self.load(vocab_path)
         return True
+
+    def create_n_gram_corpus(self, corpus, max_len=10, num_of_adjacent_words: int = 2):
+        new_corpus = []
+        for text in corpus:
+            sentence = text.split()
+            sentence = sentence + ['<EOS>']
+            # words = self.pad_words(sentence, n_gram)
+            words = sentence
+            for i in range(num_of_adjacent_words, len(words) + 1):
+                new_words = words[i - num_of_adjacent_words: i]
+                new_words = new_words + ['<EOS>'] * (max_len - len(words))
+                new_text = ' '.join(new_words)
+                new_corpus.append(new_text)
+            for i in range(1, len(words) + 1):
+                new_words = words[: i] + ['<???>'] + words[i+1:] + words[i:i+1]
+                new_words = new_words + ['<EOS>'] * (max_len - len(words))
+                new_text = ' '.join(new_words)
+                new_corpus.append(new_text)
+        self.tokenizer.fit_on_texts(new_corpus)
+        return new_corpus
+
+    def create_train_data(self, n_grams_corpus):
+        input_length = 10
+        sequences = self.tokenizer.texts_to_sequences(n_grams_corpus)
+        print(f'1 {sequences=}')
+        sequences = np.array(sequences).reshape(9, -1)
+        print(f'2 {sequences=}')
+        # 將輸入和輸出分開
+        # x = [seq[:-1] for seq in sequences]
+        # y = [seq[-1] for seq in sequences]
+        x = sequences[:, :-1]
+        y = sequences[:, -1]
+        return x, y
+
+    def split_n_grams_to_xy(self, n_grams, n_gram):
+        x_grams = []
+        y_trues = []
+        for words in n_grams:
+            x, y = self.split_words_to_xy(words)
+            x = self.pad_sequences(x, n_gram)
+            x_grams.append(x)
+            y_trues.append(y)
+        return x_grams, y_trues
+
+    @staticmethod
+    def pad_sequences(seq, max_len):
+        if len(seq) < max_len:
+            seq += [0] * (max_len - len(seq))
+        return seq
+
+    def split_words_to_xy(self, words):
+        x = words[:-1]
+        y = words[-1]
+        return x, y
+
+    @staticmethod
+    def pad_words(words, max_len):
+        # if len(words) > max_len:
+        #     error_message = f"The length of words must be less than or equal to {max_len}. {words=}"
+        #     raise ValueError(error_message)
+        if len(words) < max_len:
+            words += ['<EOS>'] * (max_len - len(words))
+        return words

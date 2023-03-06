@@ -38,14 +38,15 @@ def create_model(total_words,
     model.add(tf.keras.layers.Activation('relu'))
 
     # Output Layer
-    model.add(tf.keras.layers.TimeDistributed(
-        tf.keras.layers.Dense(total_words)))
+    model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(total_words)))
     model.add(tf.keras.layers.Activation('softmax'))
 
-    model.compile(loss='categorical_crossentropy', optimizer=optimizer,
-                  metrics=[tf.keras.metrics.categorical_accuracy])
+    # model.compile(loss='categorical_crossentropy', optimizer=optimizer,
+    #               metrics=[tf.keras.metrics.categorical_accuracy])
     # model.compile(loss=tf.keras.losses.CategoricalCrossentropy(), optimizer=optimizer,
     #               metrics=[CategoricalAccuracy()])
     # model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(), optimizer=optimizer,
     #               metrics=[SparseCategoricalAccuracy()])
+    model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(), optimizer=optimizer,
+                  metrics=[SparseCategoricalAccuracy()])
     return model
