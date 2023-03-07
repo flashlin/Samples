@@ -19,7 +19,7 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-  base: "/my_path/", // 設定打包後的檔案路徑
+  base: "/js/LocalQuery/", // 設定打包後的檔案路徑
   build: {
     assetsDir: "assets", // 設定放置打包後 js/css 的目錄, 最後 `my_path/assets/`
     rollupOptions: {
@@ -37,6 +37,7 @@ export default defineConfig({
     },
   },
   define: {
+    __VUE_PROD_DEVTOOLS__: true,
     global: "window",
     "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
   },
