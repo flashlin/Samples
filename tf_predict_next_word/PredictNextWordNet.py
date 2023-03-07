@@ -3,6 +3,51 @@ import os.path
 import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from Vocabulary import Vocabulary
+from tensorflow.keras.layers import Layer
+
+class MemoryAwareSynapses(Layer):
+    def __init__(self, num_synapses, **kwargs):
+        super(MemoryAwareSynapses, self).__init__(**kwargs)
+        self.num_synapses = num_synapses
+
+    def build(self, input_shape):
+        self.kernel = self.add_weight(name='kernel',
+                                      shape=(input_shape[-1], self.num_synapses),
+                                      initializer='glorot_uniform',
+                                      trainable=True)
+
+    def call(self, inputs):
+        # 計算注意力權重
+        attentions = tf.matmul(inputs, self.kernel)
+        attentions = tf.nn.softmax(attentions, axis=1)
+
+        # 加權平均 Embedding 向量
+        outputs = tf.reduce_sum(tf.multiply(inputs, attentions), axis=1)
+
+        return outputs
+
+class MyModel(tf.keras.Model):
+    def __init__(self, config, **kwargs):
+        super(MyModel, self).__init__(**kwargs)
+        self.config = config
+        self.embedding = tf.keras.layers.Embedding(self.config.num_words,
+                                      self.config.embedding_size,
+                                      input_length=self.config.input_length - 1)
+        self.memory_aware = MemoryAwareSynapses(self.config.num_words)
+        self.lstm = tf.keras.layers.LSTM(self.config.lstm_units)
+        self.dense = tf.keras.layers.Dense(self.config.num_words, activation="softmax")
+
+    def call(self, inputs):
+        x = self.embedding(inputs)
+        x = self.memory_aware(x)
+        x = self.lstm(x)
+        x = self.dense(x)
+        return x
+
+# model = MyModel(config)
+# model.compile(loss="sparse_categorical_crossentropy", optimizer="adam")
+
+
 
 
 class PredictNextWordConfig:
