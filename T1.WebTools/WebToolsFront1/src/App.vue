@@ -2,6 +2,16 @@
 import { RouterLink, RouterView } from 'vue-router';
 import { QBtn } from 'quasar';
 
+import { getCurrentInstance } from "@vue/runtime-core";
+// import { onMounted } from 'vue';
+// const {
+//     appContext: {
+//         config: {
+//             globalProperties: { app },
+//         },
+//     },
+// } = getCurrentInstance()!;
+
 </script>
 
 <template>
