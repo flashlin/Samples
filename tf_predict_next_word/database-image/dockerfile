@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/mssql/server:2017-latest
+
+# Set environment variables
+ENV SA_PASSWORD=<YourStrong!Passw0rd>
+ENV ACCEPT_EULA=Y
+
+# Copy initialization SQL script
+RUN mkdir /app 
+COPY init.sql /app
+
+# Set working directory
+WORKDIR /app
+
+# Start SQL Server, run the initialization script, and enable TCP/IP
+CMD /opt/mssql/bin/sqlservr & sleep 30s & /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P ${SA_PASSWORD} -i init.sql & /opt/mssql/bin/mssql-conf set network.tcpipenabled true & /opt/mssql/bin/mssql-conf set network.tcpport 1433 & /opt/mssql/bin/mssql-conf set sqlagent.enabled true & tail -f /dev/null
+
+# Expose SQL Server port
+EXPOSE 1433
