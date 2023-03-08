@@ -15,7 +15,7 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.1" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
-      <PackageReference Include="System.Data.SqlClient" Version="4.8.4" />
+      <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
       <PackageReference Include="T1.Standard" Version="1.0.66" />
     </ItemGroup>
 
