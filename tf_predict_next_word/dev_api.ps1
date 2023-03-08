@@ -1,1 +1,0 @@
-flask --app predict_next_word_api run
