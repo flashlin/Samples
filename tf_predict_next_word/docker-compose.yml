@@ -1,0 +1,24 @@
+services:
+  database:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    environment:
+      - SA_PASSWORD=Pass@word
+      - ACCEPT_EULA=Y
+    volumes:
+      - d:/demo/db:/var/opt/mssql/data
+    networks:
+      - database-net
+
+  predict-next-word-api:
+    image: predict-next-word-api
+    container_name: predict-next-word-api
+    ports:
+      - 8001:5000
+    networks:
+      - database-net
+    depends_on:
+      - database
+
+networks:
+  database-net:
+    name: database-net

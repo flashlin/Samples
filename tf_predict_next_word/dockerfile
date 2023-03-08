@@ -13,8 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY bootstrap.sh ./
 COPY . .
 
-# 開放 Web API 的埠口
 EXPOSE 5000
 
-# 預設啟動 Web API
 ENTRYPOINT ["/app/bootstrap.sh"]
