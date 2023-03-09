@@ -6,9 +6,7 @@ corpus = [
 ]
 
 config = PredictNextWordConfig()
-config.model_file = "test.h5"
 model = PredictNextWordModel(config)
-# model.try_load_model(model.config.model_file)
 model.fit(corpus, batch_size=2, epochs=100)
 
 

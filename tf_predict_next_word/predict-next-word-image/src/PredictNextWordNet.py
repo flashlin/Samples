@@ -12,7 +12,7 @@ class PredictNextWordConfig:
     lstm_units = 128
     batch_size = 64
     epochs = 100
-    input_length = 10
+    input_length = 100
     vocab_file = 'models/predict.vocab'
     model_file = 'models/predict.h5'
 
@@ -41,7 +41,7 @@ class PredictNextWordModel:
 
     def fit(self, corpus, batch_size, epochs):
         self.vocab.fit(corpus)
-        n_grams = self.vocab.create_n_gram_corpus(corpus)
+        n_grams = self.vocab.create_n_gram_corpus(corpus, self.config.input_length)
         # for text in n_grams:
         #     print(f'n_grams={text}')
         self.vocab.save(self.config.vocab_file)
