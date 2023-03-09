@@ -1,4 +1,0 @@
-Flask
-# 用於將復雜數據類型（例如對象）與內置 Python 數據類型相互轉換
-marshmallow
-pyodbc
