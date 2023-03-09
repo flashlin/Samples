@@ -1,8 +1,10 @@
 FROM python:3.9-alpine
 
 # Installing packages
-RUN apk update
+RUN apk update 
 RUN pip install pipenv
+
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev unixodbc-dev g++
 
 # 安裝 Python 依賴庫
 WORKDIR /app
