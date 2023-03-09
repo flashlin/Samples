@@ -1,1 +1,0 @@
-python ./train8.py
