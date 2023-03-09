@@ -1,11 +1,12 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, createWebHashHistory } from "vue-router";
 import { useAppStore } from "@/stores/appStore";
 import HomeView from "../views/HomeView.vue";
 import LoginView from "@/views/Login.vue";
 import { storeToRefs } from 'pinia';
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  //history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHashHistory(),
   routes: [
     {
       path: "/",
