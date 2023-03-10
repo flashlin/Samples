@@ -1,13 +1,21 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using QueryKits.Services;
 using QueryWeb.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+var localEnv = LocalEnvironment.Load();
+builder.WebHost.UseUrls($@"http://127.0.0.1:{localEnv.Port}");
+
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+
+var services = builder.Services;
+services.AddSingleton<ILocalEnvironment>(sp => localEnv);
+services.AddSingleton<ILocalDbService, LocalDbService>();
+services.AddSingleton<IReportRepo, ReportDbContext>();
 
 var app = builder.Build();
 
