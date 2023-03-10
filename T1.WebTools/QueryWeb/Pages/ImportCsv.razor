@@ -1,0 +1,28 @@
+﻿@page "/importCsv"
+@inject IJSRuntime JSRuntime;
+
+Import Csv
+<form>
+    <InputFile OnChange="@HandleFileUpload" />
+</form>
+
+@code {
+    private async Task HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        await ShowMessageAsync(file.Name);
+    }
+    
+    async Task ShowMessageAsync(string message)
+    {
+        var result = await JSRuntime.InvokeAsync<bool>("messageBox.show", message);
+        if (result)
+        {
+            // User clicked OK
+        }
+        else
+        {
+            // User clicked Cancel
+        }
+    }
+}
