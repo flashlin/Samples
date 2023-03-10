@@ -1,6 +1,6 @@
-using QueryApp.Models.Helpers;
+﻿using QueryKits.ExcelUtils;
 
-namespace QueryApp.Models.Services;
+namespace QueryKits.Services;
 
 public interface IReportRepo
 {

@@ -1,4 +1,4 @@
-namespace QueryApp.Models;
+﻿namespace QueryKits.Services;
 
 public class LocalEnvironment : ILocalEnvironment
 {

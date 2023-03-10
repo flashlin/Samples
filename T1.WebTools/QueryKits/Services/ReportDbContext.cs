@@ -1,10 +1,9 @@
-using System.Text;
+﻿using System.Text;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Primitives;
-using QueryApp.Models.Helpers;
+using QueryKits.ExcelUtils;
 
-namespace QueryApp.Models.Services;
+namespace QueryKits.Services;
 
 public class ReportDbContext : DbContext, IReportRepo
 {
@@ -17,13 +16,12 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public List<string> GetAllTableNames()
     {
-        var sql = $"""
+        var sql = $@"
             SELECT TABLE_NAME as TableName 
             FROM INFORMATION_SCHEMA.TABLES
             WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG='{LocalDbService.DatabaseName}'
-            """;
-        return Database.SqlQueryRaw<string>(sql)
-            .ToList();
+            ";
+        return Enumerable.ToList<string>(Database.SqlQueryRaw<string>(sql));
     }
 
     public List<Dictionary<string, object>> QueryRawSql(string sql)
@@ -51,7 +49,8 @@ public class ReportDbContext : DbContext, IReportRepo
     {
         DropTable(tableName);
         var sql = new StringBuilder();
-        sql.Append($"CREATE TABLE [{tableName}] (");
+        sql.Append($"CREATE TABLE");
+        sql.Append($"[{tableName}] (");
         sql.Append("_PID INT IDENTITY(1,1),");
         foreach (var header in headers)
         {

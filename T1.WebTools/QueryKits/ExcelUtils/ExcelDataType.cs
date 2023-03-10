@@ -1,4 +1,4 @@
-﻿namespace QueryApp.Models.Helpers;
+﻿namespace QueryKits.ExcelUtils;
 
 public enum ExcelDataType
 {
