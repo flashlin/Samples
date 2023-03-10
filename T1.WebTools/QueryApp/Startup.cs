@@ -38,11 +38,12 @@ public class Startup
     {
         var entryAssembly = Assembly.GetEntryAssembly()!;
         var appUid = Guid.NewGuid().ToString();
-        var appLocation = Path.GetDirectoryName(entryAssembly.Location)!;
+        var appLocation = AppContext.BaseDirectory;
         var appVersion = entryAssembly
             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
             .InformationalVersion;
         var port = FindAvailablePort();
+        Console.WriteLine($"Starting '{appLocation}'");
 
         File.WriteAllText(appLocation + "/AppUid.txt", "[{" + $"""appUid:"{appUid}",port:{port}""" + "}]");
         //FileHelper.EnsureDirectory(Path.Combine(appLocation, "Logs"));
@@ -55,7 +56,7 @@ public class Startup
             .ConfigureLogging(logging =>
             {
                 logging.ClearProviders();
-                logging.AddConsole();
+                //logging.AddConsole();
                 logging.AddSerilog();
             })
             .UseSerilog((hostingContext, loggerConfiguration) =>

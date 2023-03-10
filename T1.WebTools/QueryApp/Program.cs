@@ -2,4 +2,4 @@
 
 var app = new Startup();
 app.Run(Environment.GetCommandLineArgs());
-Console.WriteLine("Hello, World!");
+Console.WriteLine("End");
