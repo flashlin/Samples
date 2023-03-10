@@ -1,18 +1,54 @@
-FROM mcr.microsoft.com/mssql/server:2017-latest
+FROM mcr.microsoft.com/mssql/server:2019-latest
 
-# Set environment variables
-ENV SA_PASSWORD=<YourStrong!Passw0rd>
-ENV ACCEPT_EULA=Y
+USER root
+# RUN apt-get -y update && \
+#     apt-get install -y curl
 
-# Copy initialization SQL script
-RUN mkdir /app 
-COPY init.sql /app
 
-# Set working directory
-WORKDIR /app
+ENV ACCEPT_EULA=Y \
+    MSSQL_SA_PASSWORD=Passw0rd! \
+    MSSQL_PID=Developer \
+    MSSQL_TCP_PORT=1433 \
+    MSSQL_AGENT_ENABLED=true 
+
+# Create app directory
+RUN mkdir -p /usr/app
+WORKDIR /usr/app    
+
+#RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.2/g' /etc/ssl/openssl.cnf
+#RUN sed -i 's/MinProtocol = TLSv1.2/MinProtocol = TLSv1.1/g' /etc/ssl/openssl.cnf
+
+# # 安裝 unzip 工具
+# RUN apt-get update && apt-get install -y unzip
+
+# # 下載並解壓縮 SQL Server 的 JDBC 驅動程式
+# RUN curl https://download.microsoft.com/download/2/2/C/22C23B18-55FA-4D8A-B12E-17DFFE80A7C4/sqljdbc_9.4.1.0_enu.tar.gz -o sqljdbc.tar.gz \
+#     && tar xvzf sqljdbc.tar.gz \
+#     && mv sqljdbc_9.4/enu/mssql-jdbc-9.4.1.jre11.jar /var/opt/mssql/lib/
+
+# # 設定 SQL Server 的配置檔案，啟用 TCP/IP 通訊協定
+# RUN sed -i 's#127.0.0.1,1433#0.0.0.0,1433#' /var/opt/mssql/data/mssql.conf \
+#     && echo "network.tcpipenabled = 1" >> /var/opt/mssql/data/mssql.conf \
+#     && echo "network.forceencryption = 0" >> /var/opt/mssql/data/mssql.conf
+
+USER root
+
+#WORKDIR /usr/app
+COPY . /usr/app/
+RUN chmod +x /usr/app/init.sh
 
 # Start SQL Server, run the initialization script, and enable TCP/IP
-CMD /opt/mssql/bin/sqlservr & sleep 30s & /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P ${SA_PASSWORD} -i init.sql & /opt/mssql/bin/mssql-conf set network.tcpipenabled true & /opt/mssql/bin/mssql-conf set network.tcpport 1433 & /opt/mssql/bin/mssql-conf set sqlagent.enabled true & tail -f /dev/null
+#RUN /opt/mssql/bin/sqlservr &
+#RUN sleep 20s 
+
+#RUN /opt/mssql/bin/mssql-conf set network.tcpipenabled true 
+#RUN /opt/mssql/bin/mssql-conf set network.tcpport 1433 
+#RUN /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P ${MSSQL_SA_PASSWORD} -i init.sql 
+#RUN /bin/bash -c '/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P ${MSSQL_SA_PASSWORD} < init.sql'
 
 # Expose SQL Server port
 EXPOSE 1433
+
+USER mssql
+RUN /opt/mssql/bin/sqlservr & /usr/app/init.sh  && exec /bin/bash
+# ENTRYPOINT /bin/bash ./entrypoint.sh
