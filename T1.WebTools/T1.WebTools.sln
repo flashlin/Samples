@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DemoWeb", "DemoWeb\DemoWeb.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryApp", "QueryApp\QueryApp.csproj", "{1578759F-47BB-4FF9-8894-BA20FA2FF5AD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryRazor", "QueryRazor\QueryRazor.csproj", "{83726C7F-6384-4CF8-8283-0A1FB1E61045}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueryRazor", "QueryRazor\QueryRazor.csproj", "{83726C7F-6384-4CF8-8283-0A1FB1E61045}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryWeb", "QueryWeb\QueryWeb.csproj", "{6BA325C3-6705-4840-A5BB-2E3AEED6C1B2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{83726C7F-6384-4CF8-8283-0A1FB1E61045}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83726C7F-6384-4CF8-8283-0A1FB1E61045}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83726C7F-6384-4CF8-8283-0A1FB1E61045}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BA325C3-6705-4840-A5BB-2E3AEED6C1B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BA325C3-6705-4840-A5BB-2E3AEED6C1B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BA325C3-6705-4840-A5BB-2E3AEED6C1B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BA325C3-6705-4840-A5BB-2E3AEED6C1B2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
