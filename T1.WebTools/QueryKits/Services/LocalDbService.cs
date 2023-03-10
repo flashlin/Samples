@@ -27,6 +27,10 @@ public class LocalDbService : ILocalDbService
         var dbFile = Path.Combine(_localEnvironment.AppLocation, $"{DatabaseName}.mdf");
         if (!File.Exists(dbFile))
         {
+            if (_localDb.IsDatabaseExists(_instanceName, DatabaseName))
+            {
+                _localDb.DropDatabase(_instanceName, DatabaseName);
+            }
             _localDb.CreateDatabase(_instanceName, DatabaseName);
         }
     }

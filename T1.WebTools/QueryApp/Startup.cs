@@ -37,16 +37,10 @@ public class Startup
 {
     public void Run(string[] args)
     {
-        var entryAssembly = Assembly.GetEntryAssembly()!;
-        var appUid = Guid.NewGuid().ToString();
-        var appLocation = AppContext.BaseDirectory;
-        var appVersion = entryAssembly
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()!
-            .InformationalVersion;
-        var port = FindAvailablePort();
-        Console.WriteLine($"Starting '{appLocation}'");
+        var appEnvironment = LocalEnvironment.Load();
+        Console.WriteLine($"Starting '{appEnvironment.AppLocation}'");
 
-        File.WriteAllText(appLocation + "/AppUid.txt", "[{" + $"""appUid:"{appUid}",port:{port}""" + "}]");
+        File.WriteAllText(appEnvironment.AppLocation + "/AppUid.txt", "[{" + $"""appUid:"{appEnvironment.AppUid}",port:{appEnvironment.Port}""" + "}]");
         //FileHelper.EnsureDirectory(Path.Combine(appLocation, "Logs"));
 
         var hostBuilder = Host.CreateDefaultBuilder(args)
@@ -66,18 +60,12 @@ public class Startup
             })
             .ConfigureServices(services =>
             {
-                services.AddSingleton<ILocalEnvironment>(sp => new LocalEnvironment
-                {
-                    AppUid = appUid,
-                    AppVersion = appVersion,
-                    AppLocation = appLocation,
-                    Port = port,
-                });
+                services.AddSingleton<ILocalEnvironment>(sp => appEnvironment);
                 services.AddHostedService<EchoBackgroundService>();
             })
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseUrls($"http://localhost:{port}");
+                webBuilder.UseUrls($"http://localhost:{appEnvironment.Port}");
                 webBuilder.UseStartup<Startup>();
                 //webBuilder.UseWebRoot(Path.Combine(appLocation, "wwwroot"));
                 webBuilder.UseStaticWebAssets();
@@ -132,14 +120,5 @@ public class Startup
             endpoints.MapRazorPages();
         });
         app.UseStaticFiles();
-    }
-
-    int FindAvailablePort()
-    {
-        TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
-        listener.Start();
-        int port = ((IPEndPoint) listener.LocalEndpoint).Port;
-        listener.Stop();
-        return port;
     }
 }
