@@ -1,6 +1,4 @@
-﻿using QueryApp.Models.Services;
-
-namespace QueryApp.Models.Helpers;
+﻿namespace QueryKits.ExcelUtils;
 
 public class ExcelSheet
 {

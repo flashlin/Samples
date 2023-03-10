@@ -1,4 +1,4 @@
-namespace QueryApp.Models.Services;
+﻿namespace QueryKits.Services;
 
 public interface ILocalDbService
 {

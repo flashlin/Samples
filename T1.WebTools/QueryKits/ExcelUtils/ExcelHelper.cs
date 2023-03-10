@@ -1,7 +1,7 @@
 ﻿using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace QueryApp.Models.Helpers;
+namespace QueryKits.ExcelUtils;
 
 public class ExcelHelper
 {

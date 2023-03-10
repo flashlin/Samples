@@ -14,6 +14,7 @@ using QueryApp.Controllers.Apis;
 using QueryApp.Models;
 using QueryApp.Models.Clients;
 using QueryApp.Models.Services;
+using QueryKits.Services;
 using Serilog;
 using Serilog.Extensions.Logging.File;
 using T1.WebTools.CsvEx;
