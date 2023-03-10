@@ -1,2 +1,2 @@
 Write-host "build the database image"
-docker build -t ai-db .
+docker build --no-cache -t ai-db .
