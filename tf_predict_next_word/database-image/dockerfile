@@ -4,14 +4,12 @@ USER root
 # RUN apt-get -y update && \
 #     apt-get install -y curl
 
-
 ENV ACCEPT_EULA=Y \
     MSSQL_SA_PASSWORD=Passw0rd! \
     MSSQL_PID=Developer \
     MSSQL_TCP_PORT=1433 \
     MSSQL_AGENT_ENABLED=true 
 
-# Create app directory
 RUN mkdir -p /usr/app
 WORKDIR /usr/app    
 
@@ -33,13 +31,9 @@ WORKDIR /usr/app
 
 USER root
 
-#WORKDIR /usr/app
+WORKDIR /usr/app
 COPY . /usr/app/
 RUN chmod +x /usr/app/init.sh
-
-# Start SQL Server, run the initialization script, and enable TCP/IP
-#RUN /opt/mssql/bin/sqlservr &
-#RUN sleep 20s 
 
 #RUN /opt/mssql/bin/mssql-conf set network.tcpipenabled true 
 #RUN /opt/mssql/bin/mssql-conf set network.tcpport 1433 
@@ -51,4 +45,3 @@ EXPOSE 1433
 
 USER mssql
 RUN /opt/mssql/bin/sqlservr & /usr/app/init.sh  && exec /bin/bash
-# ENTRYPOINT /bin/bash ./entrypoint.sh

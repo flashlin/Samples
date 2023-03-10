@@ -1,1 +1,1 @@
-docker run -it --name ai-db -p 4431:1443 ai-db
+docker run -it --name ai-db -p 4331:1433 ai-db
