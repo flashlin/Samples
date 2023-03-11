@@ -1,8 +1,7 @@
 ﻿@page "/MCodeEditor"
 @inject IJSRuntime JSRuntime;
 
-<pre><StandaloneCodeEditor @ref="_editor"
-    ConstructionOptions="@GetOptions" /></pre>
+<StandaloneCodeEditor @ref="_editor" ConstructionOptions="@GetOptions" />
 
 @code {
     StandaloneCodeEditor _editor = null!;
@@ -22,8 +21,8 @@
 
     public StandaloneEditorConstructionOptions GetOptions(StandaloneCodeEditor editor)
     {
-        var lineHeight = 19;
-        var codeLines = 50;
+        var lineHeight = 16;
+        var codeLines = 20;
         var totalHeight = lineHeight * codeLines;
         return new StandaloneEditorConstructionOptions()
         {
@@ -53,7 +52,7 @@
             RenderValidationDecorations = "off",
             OverviewRulerBorder = false,
             OverviewRulerLanes = 0,
-            Theme = "vs-light",
+            Theme = "vs-dark", //"vs-light",
             FixedOverflowWidgets = true,
             LineHeight = lineHeight,
             Dimension = new Dimension { Height = totalHeight },
