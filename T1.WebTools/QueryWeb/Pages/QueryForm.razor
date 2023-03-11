@@ -4,18 +4,54 @@
 
 <h1>Counter</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p role="status">Current count: @_currentCount</p>
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-<ImportCsv />
+<ImportCsv/>
 
-<MCodeEditor />
+<MCodeEditor Language="csharp"/>
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link" @onclick="() => ClickTab(0)">Rrsult</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" @onclick="() => ClickTab(1)">Grid</a>
+    </li>
+</ul>
+<div class="tab-content mt-3">
+    <div class="tab-pane @_isShowTabs[0]">
+        <h3>Result</h3>
+            <MCodeEditor @ref="_resultEditor" Language="text"/>
+    </div>
+    <div class="tab-pane @_isShowTabs[1]">
+        <h3>Grid</h3>
+        <p>Aliquam id nibh consequat, fringilla mauris nec, pellentesque lectus. Sed sed risus sit amet quam eleifend auctor. Vivamus sed est leo. Suspendisse mollis ex in ante aliquet vestibulum. In mattis purus eu enim venenatis pharetra. Etiam ullamcorper neque ac lacus consectetur lacinia. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin eget purus sed dolor tristique pharetra vel id turpis.</p>
+    </div>
+</div>
 
 @code {
-    private int currentCount = 0;
+    private string[] _isShowTabs = new[] { "active", "" };
+    private int _currentCount = 0;
+    MCodeEditor _resultEditor = null!;
 
     private void IncrementCount()
     {
-        currentCount++;
+        _currentCount++;
+        _isShowTabs[0] = "";
+        _isShowTabs[1] = "true";
+    }
+
+    private void ClickTab(int index)
+    {
+        for (var i = 0; i < _isShowTabs.Length; i++)
+        {
+            _isShowTabs[i] = string.Empty;
+            if (i == index)
+            {
+                _isShowTabs[i] = "active";
+            }
+        }
+        _resultEditor.ForceUpdate();
     }
 }

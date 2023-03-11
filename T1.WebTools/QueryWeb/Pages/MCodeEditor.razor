@@ -1,12 +1,86 @@
 ﻿@page "/MCodeEditor"
 @inject IJSRuntime JSRuntime;
 
-<StandaloneCodeEditor @ref="_editor" ConstructionOptions="@GetOptions" />
+<StandaloneCodeEditor @ref="_editor" ConstructionOptions="@GetOptions"/>
 
 @code {
+
+    [Parameter]
+    public string Language { get; set; } = "csharp";
+
     StandaloneCodeEditor _editor = null!;
     string _valueToSet = "";
-    
+    StandaloneEditorConstructionOptions _editorOptions;
+
+    public void ForceUpdate()
+    {
+        _editor.Layout(_editorOptions.Dimension);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var lineHeight = 16;
+            var codeLines = 20;
+            var totalHeight = lineHeight * codeLines;
+            _editorOptions = new StandaloneEditorConstructionOptions()
+            {
+                AutomaticLayout = true,
+                Language = Language,
+                Value = _valueToSet,
+                Scrollbar = new EditorScrollbarOptions()
+                {
+                    UseShadows = false,
+                    Vertical = "Hidden",
+                    AlwaysConsumeMouseWheel = false,
+                    VerticalScrollbarSize = 0,
+                    VerticalSliderSize = 0,
+                    Horizontal = "Auto"
+                },
+                ScrollBeyondLastColumn = 0,
+                ScrollBeyondLastLine = false,
+                GlyphMargin = false,
+                Folding = false,
+                Contextmenu = false,
+                CodeLens = false,
+                Minimap = new EditorMinimapOptions() {Enabled = false},
+                ReadOnly = false,
+                LineNumbers = "on",
+                LineDecorationsWidth = 0,
+                Lightbulb = new EditorLightbulbOptions() {Enabled = false},
+                RenderFinalNewline = false,
+                RenderValidationDecorations = "off",
+                OverviewRulerBorder = false,
+                OverviewRulerLanes = 0,
+                Theme = "vs-dark", //"vs-light",
+                FixedOverflowWidgets = true,
+                LineHeight = lineHeight,
+                Dimension = new Dimension {Height = totalHeight},
+                ColorDecorators = true,
+                OccurrencesHighlight = true,
+            };
+
+
+    //editorElement = await JSRuntime.InvokeAsync<ElementReference>("createEditor", "editor", _editorSettings);
+            await JSRuntime.InvokeVoidAsync("addEventListener", "resize", DotNetObjectReference.Create(this), "HandleWindowResize");
+        }
+    }
+
+    [JSInvokable]
+    public Task HandleWindowResize()
+    {
+    // 取得編輯器的容器元素
+    //var container = await JSRuntime.InvokeAsync<ElementReference>("getEditorContainer", editorElement);
+    // 取得容器元素的寬度和高度
+    //var width = await JSRuntime.InvokeAsync<int>("getElementWidth", container);
+    //var height = await JSRuntime.InvokeAsync<int>("getElementHeight", container);
+    // 設定編輯器的大小
+    //await JSRuntime.InvokeVoidAsync("setEditorDimension", editorElement, width, height);
+        ForceUpdate();
+        return Task.CompletedTask;
+    }
+
     private async Task SetValue()
     {
         Console.WriteLine($"setting value to: {_valueToSet}");
@@ -19,45 +93,10 @@
         Console.WriteLine($"value is: {val}");
     }
 
+
     public StandaloneEditorConstructionOptions GetOptions(StandaloneCodeEditor editor)
     {
-        var lineHeight = 16;
-        var codeLines = 20;
-        var totalHeight = lineHeight * codeLines;
-        return new StandaloneEditorConstructionOptions()
-        {
-            AutomaticLayout = true,
-            Language = "csharp",
-            Value = _valueToSet,
-            Scrollbar = new EditorScrollbarOptions() {
-                UseShadows = false,
-                Vertical = "Hidden",
-                AlwaysConsumeMouseWheel = false,
-                VerticalScrollbarSize = 0,
-                VerticalSliderSize = 0,
-                Horizontal = "Auto"
-            },
-            ScrollBeyondLastColumn = 0,
-            ScrollBeyondLastLine = false,
-            GlyphMargin = false,
-            Folding = false,
-            Contextmenu = false,
-            CodeLens = false,
-            Minimap = new EditorMinimapOptions() { Enabled = false },
-            ReadOnly = false,
-            LineNumbers = "on",
-            LineDecorationsWidth = 0,
-            Lightbulb = new EditorLightbulbOptions() { Enabled = false },
-            RenderFinalNewline = false,
-            RenderValidationDecorations = "off",
-            OverviewRulerBorder = false,
-            OverviewRulerLanes = 0,
-            Theme = "vs-dark", //"vs-light",
-            FixedOverflowWidgets = true,
-            LineHeight = lineHeight,
-            Dimension = new Dimension { Height = totalHeight },
-            ColorDecorators = true,
-            OccurrencesHighlight = true,
-        };
+        return _editorOptions;
     }
+
 }
