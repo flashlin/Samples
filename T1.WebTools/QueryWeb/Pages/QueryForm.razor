@@ -1,4 +1,4 @@
-﻿@page "/counter"
+﻿@page "/queryForm"
 
 <PageTitle>Counter</PageTitle>
 
@@ -8,6 +8,8 @@
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 <ImportCsv />
+
+<MCodeEditor />
 
 @code {
     private int currentCount = 0;

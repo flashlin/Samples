@@ -1,0 +1,64 @@
+﻿@page "/MCodeEditor"
+@inject IJSRuntime JSRuntime;
+
+<pre><StandaloneCodeEditor @ref="_editor"
+    ConstructionOptions="@GetOptions" /></pre>
+
+@code {
+    StandaloneCodeEditor _editor = null!;
+    string _valueToSet = "";
+    
+    private async Task SetValue()
+    {
+        Console.WriteLine($"setting value to: {_valueToSet}");
+        await _editor.SetValue(_valueToSet);
+    }
+
+    private async Task GetValue()
+    {
+        var val = await _editor.GetValue();
+        Console.WriteLine($"value is: {val}");
+    }
+
+    public StandaloneEditorConstructionOptions GetOptions(StandaloneCodeEditor editor)
+    {
+        var lineHeight = 19;
+        var codeLines = 50;
+        var totalHeight = lineHeight * codeLines;
+        return new StandaloneEditorConstructionOptions()
+        {
+            AutomaticLayout = true,
+            Language = "csharp",
+            Value = _valueToSet,
+            Scrollbar = new EditorScrollbarOptions() {
+                UseShadows = false,
+                Vertical = "Hidden",
+                AlwaysConsumeMouseWheel = false,
+                VerticalScrollbarSize = 0,
+                VerticalSliderSize = 0,
+                Horizontal = "Auto"
+            },
+            ScrollBeyondLastColumn = 0,
+            ScrollBeyondLastLine = false,
+            GlyphMargin = false,
+            Folding = false,
+            Contextmenu = false,
+            CodeLens = false,
+            Minimap = new EditorMinimapOptions() { Enabled = false },
+            ReadOnly = false,
+            LineNumbers = "on",
+            LineDecorationsWidth = 0,
+            Lightbulb = new EditorLightbulbOptions() { Enabled = false },
+            RenderFinalNewline = false,
+            RenderValidationDecorations = "off",
+            OverviewRulerBorder = false,
+            OverviewRulerLanes = 0,
+            Theme = "vs-light",
+            FixedOverflowWidgets = true,
+            LineHeight = lineHeight,
+            Dimension = new Dimension { Height = totalHeight },
+            ColorDecorators = true,
+            OccurrencesHighlight = true,
+        };
+    }
+}
