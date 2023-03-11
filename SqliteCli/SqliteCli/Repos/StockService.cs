@@ -102,7 +102,7 @@ public class StockService : IStockService
                 EndDate = DateTime.Now,
             }, stock.StockId);
 
-            var data = _stockRepo.GetLastStockHistoryData(stock.StockId);
+            var data = _stockRepo.GetLastStockHistoryData(stock.StockId)!;
             stock.CurrentPrice = data.ClosingPrice;
             stock.CurrTotalPrice = data.ClosingPrice * stock.NumberOfShare;
             if (stock.CurrentPrice != 0)
@@ -122,6 +122,17 @@ public class StockService : IStockService
                 StockName = "",
                 Profit = -stock.Profit + stock.Balance,
             });
+        }
+        
+        foreach (var stock in rc.Where(x => x.TranType == "Sale"))
+        {
+            await EnsuredStockHistory(new DateRange()
+            {
+                StartDate = stock.MinTranTime,
+                EndDate = DateTime.Now,
+            }, stock.StockId);
+
+            stock.Profit = stock.Balance;
         }
 
         return rc;
@@ -214,6 +225,11 @@ public class StockService : IStockService
             if (stockDay.CurrentPrice != 0)
             {
                 stockDay.Profit = stock.Balance + stockDay.CurrTotalPrice;
+            }
+
+            if (stockDay.TranType == "Sale")
+            {
+                stockDay.Profit = stock.Balance;
             }
             report.Add(stockDay);
         }
