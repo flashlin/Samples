@@ -76,7 +76,7 @@
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, async (args) =>
         {
             Console.WriteLine("Ctrl+J : Initial editor command is triggered.");
-            var s = await GetCursorBeforeTextAsync();
+            var s = await _editor.GetTextOfBeforeCursorAsync();
             Console.WriteLine("==>" + s);
         });
     }
@@ -104,37 +104,6 @@
     {
         var val = await _editor.GetValue();
         return val;
-    }
-
-    private async Task<string> GetCursorBeforeTextAsync()
-    {
-        var allText = await _editor.GetValue();
-        var cursorPosition = await _editor.GetPosition()!;
-        return GetText(allText, cursorPosition);
-    }
-
-    private string GetText(string allText, Position position)
-    {
-        var sr = new StringReader(allText);
-        var lineNumber = 1;
-        var text = new StringBuilder();
-        do
-        {
-            var line = sr.ReadLine();
-            if (line == null)
-            {
-                break;
-            }
-            if (lineNumber == position.LineNumber)
-            {
-                var s = line.Substring(0, position.Column - 1);
-                text.Append(s);
-                break;
-            }
-            text.AppendLine(line);
-            lineNumber++;
-        } while (true);
-        return text.ToString();
     }
 
     public StandaloneEditorConstructionOptions GetOptions(StandaloneCodeEditor editor)
