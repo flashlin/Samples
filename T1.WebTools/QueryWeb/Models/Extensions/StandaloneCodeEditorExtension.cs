@@ -2,7 +2,7 @@
 using BlazorMonaco;
 using BlazorMonaco.Editor;
 
-namespace QueryWeb.Pages;
+namespace QueryWeb.Models.Extensions;
 
 public static class StandaloneCodeEditorExtension
 {
