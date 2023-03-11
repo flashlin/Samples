@@ -28,6 +28,9 @@ public class DividendCommandLine
     
     [Value(index: 4, Required = true, HelpText = "股利")]
     public decimal Dividend { get; set; }
+    
+    [Value(index: 5, Required = true, HelpText = "手續費")]
+    public decimal HandlingFee { get; set; }
 }
 
 
