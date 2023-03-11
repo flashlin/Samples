@@ -1,6 +1,8 @@
 ﻿@page "/MCodeEditor"
 @using System.Text
-@inject IJSRuntime JSRuntime;
+@inject IJSRuntime JsRuntime;
+
+<PageTitle>Query Form</PageTitle>
 
 <StandaloneCodeEditor @ref="_editor"
                       ConstructionOptions="GetOptions"
@@ -65,7 +67,7 @@
             };
 
     //editorElement = await JSRuntime.InvokeAsync<ElementReference>("createEditor", "editor", _editorSettings);
-            await JSRuntime.InvokeVoidAsync("addEventListener", "resize", DotNetObjectReference.Create(this), "HandleWindowResize");
+            await JsRuntime.InvokeVoidAsync("addEventListener", "resize", DotNetObjectReference.Create(this), "HandleWindowResize");
         }
     }
 
@@ -104,14 +106,14 @@
         return val;
     }
 
-    public async Task<string> GetCursorBeforeTextAsync()
+    private async Task<string> GetCursorBeforeTextAsync()
     {
-        var allText = await GetValue();
+        var allText = await _editor.GetValue();
         var cursorPosition = await _editor.GetPosition()!;
         return GetText(allText, cursorPosition);
     }
 
-    public string GetText(string allText, Position position)
+    private string GetText(string allText, Position position)
     {
         var sr = new StringReader(allText);
         var lineNumber = 1;
