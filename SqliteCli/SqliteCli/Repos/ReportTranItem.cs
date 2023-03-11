@@ -20,7 +20,7 @@
 
 	public class ReportTranItem : IConsoleTextProvider
 	{
-		[DisplayString("", 7)]
+		[DisplayString("交易種類", 7)]
 		public string TranType { get; set; }
 
 		[DisplayString("", 9)]
