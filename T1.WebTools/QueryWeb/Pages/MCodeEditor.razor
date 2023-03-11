@@ -1,7 +1,10 @@
 ﻿@page "/MCodeEditor"
+@using System.Text
 @inject IJSRuntime JSRuntime;
 
-<StandaloneCodeEditor @ref="_editor" ConstructionOptions="@GetOptions"/>
+<StandaloneCodeEditor @ref="_editor"
+                      ConstructionOptions="GetOptions"
+                      OnDidInit="EditorOnDidInit"/>
 
 @code {
 
@@ -10,7 +13,7 @@
 
     StandaloneCodeEditor _editor = null!;
     string _valueToSet = "";
-    StandaloneEditorConstructionOptions _editorOptions;
+    StandaloneEditorConstructionOptions _editorOptions = null!;
 
     public void ForceUpdate()
     {
@@ -61,10 +64,19 @@
                 OccurrencesHighlight = true,
             };
 
-
     //editorElement = await JSRuntime.InvokeAsync<ElementReference>("createEditor", "editor", _editorSettings);
             await JSRuntime.InvokeVoidAsync("addEventListener", "resize", DotNetObjectReference.Create(this), "HandleWindowResize");
         }
+    }
+
+    private async Task EditorOnDidInit()
+    {
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, async (args) =>
+        {
+            Console.WriteLine("Ctrl+J : Initial editor command is triggered.");
+            var s = await GetCursorBeforeTextAsync();
+            Console.WriteLine("==>" + s);
+        });
     }
 
     [JSInvokable]
@@ -83,16 +95,45 @@
 
     private async Task SetValue()
     {
-        Console.WriteLine($"setting value to: {_valueToSet}");
         await _editor.SetValue(_valueToSet);
     }
 
-    private async Task GetValue()
+    private async Task<string> GetValue()
     {
         var val = await _editor.GetValue();
-        Console.WriteLine($"value is: {val}");
+        return val;
     }
 
+    public async Task<string> GetCursorBeforeTextAsync()
+    {
+        var allText = await GetValue();
+        var cursorPosition = await _editor.GetPosition()!;
+        return GetText(allText, cursorPosition);
+    }
+
+    public string GetText(string allText, Position position)
+    {
+        var sr = new StringReader(allText);
+        var lineNumber = 1;
+        var text = new StringBuilder();
+        do
+        {
+            var line = sr.ReadLine();
+            if (line == null)
+            {
+                break;
+            }
+            if (lineNumber == position.LineNumber)
+            {
+                var s = line.Substring(0, position.Column - 1);
+                text.Append(s);
+                break;
+            }
+            text.AppendLine(line);
+            lineNumber++;
+        } while (true);
+        return text.ToString();
+    }
 
     public StandaloneEditorConstructionOptions GetOptions(StandaloneCodeEditor editor)
     {
