@@ -1,0 +1,25 @@
+FROM trzeci/emscripten-slim
+
+COPY . /app/
+
+# 設定工作目錄
+WORKDIR /app
+
+# 編譯 C 檔案，產生 wasm 檔案
+#RUN emcc -s WASM=1 -s EXPORTED_FUNCTIONS="['_getDrives', '_freeStringArray']" -s EXTRA_EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap']" -o system-io.wasm system-io.c
+
+# 複製 wasm 檔案至 /app 內
+#COPY system-io.wasm /app/
+
+# 產生 JS 檔案，使用 wasm-bindgen 工具
+#RUN wasm-bindgen system-io.wasm --out-dir .
+
+# 設定工作目錄至 /app/pkg
+#WORKDIR /app/pkg
+
+# 建立 entrypoint.sh 檔案，並設定權限
+RUN echo "#!/bin/bash\ncd /app\nexec /bin/bash" > entrypoint.sh && \
+    chmod +x entrypoint.sh
+
+# 設定 entrypoint 為剛建立的 entrypoint.sh 檔案
+ENTRYPOINT [ "/app/entrypoint.sh" ]

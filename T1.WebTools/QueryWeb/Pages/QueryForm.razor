@@ -1,4 +1,5 @@
 ﻿@page "/queryForm"
+@using QueryRazor
 
 <PageTitle>Counter</PageTitle>
 
@@ -13,7 +14,7 @@
 
 <ul class="nav nav-tabs">
     <li class="nav-item">
-        <a class="nav-link" @onclick="() => ClickTab(0)">Rrsult</a>
+        <a class="nav-link" @onclick="() => ClickTab(0)">Result</a>
     </li>
     <li class="nav-item">
         <a class="nav-link active" @onclick="() => ClickTab(1)">Grid</a>
@@ -22,7 +23,7 @@
 <div class="tab-content mt-3">
     <div class="tab-pane @_isShowTabs[0]">
         <h3>Result</h3>
-            <MCodeEditor @ref="_resultEditor" Language="text"/>
+            <MCodeEditor @ref="_resultEditor" Language="text" />
     </div>
     <div class="tab-pane @_isShowTabs[1]">
         <h3>Grid</h3>
@@ -44,6 +45,11 @@
 
     private void ClickTab(int index)
     {
+        Console.WriteLine("Click Tabs" + index);
+        var drives = GetDrives();
+        var s = string.Join(",", drives);
+        Console.WriteLine("drives=" + s);
+
         for (var i = 0; i < _isShowTabs.Length; i++)
         {
             _isShowTabs[i] = string.Empty;
@@ -53,5 +59,14 @@
             }
         }
         _resultEditor.ForceUpdate();
+    }
+    
+    public string[] GetDrives()
+    {
+        return DriveInfo.GetDrives()
+            .Select(d => d.Name.Substring(0, 1))
+            .GroupBy(x => x)
+            .Select(x => x.Key)
+            .ToArray();
     }
 }

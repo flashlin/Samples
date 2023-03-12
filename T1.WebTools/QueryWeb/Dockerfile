@@ -7,8 +7,14 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["QueryWeb/QueryWeb.csproj", "QueryWeb/"]
+COPY ["QueryKits/QueryKits.csproj", "QueryKits/"]
+COPY ["QueryRazor/QueryRazor.csproj", "QueryRazor/"]
+COPY ["T1.WebTools/T1.WebTools.csproj", "T1.WebTools/"]
+
 RUN dotnet restore "QueryWeb/QueryWeb.csproj"
+
 COPY . .
+
 WORKDIR "/src/QueryWeb"
 RUN dotnet build "QueryWeb.csproj" -c Release -o /app/build
 
