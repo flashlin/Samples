@@ -1,0 +1,1 @@
+docker build -f .\QueryWeb\Dockerfile -t queryweb:dev .

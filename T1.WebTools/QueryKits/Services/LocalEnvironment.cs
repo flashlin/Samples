@@ -44,4 +44,20 @@ public class LocalEnvironment : ILocalEnvironment
         listener.Stop();
         return port;
     }
+
+    public static bool IsPortUsed(int port)
+    {
+        try
+        {
+            var listener = new TcpListener(IPAddress.Loopback, port);
+            listener.Start();
+            listener.Stop();
+        }
+        catch (SocketException)
+        {
+            return true;
+        }
+
+        return false;
+    }
 }

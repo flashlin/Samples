@@ -1,0 +1,1 @@
+docker build -f emscripten-slim-dockerfile -t emscripten-slim .

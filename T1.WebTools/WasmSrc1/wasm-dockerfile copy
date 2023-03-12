@@ -1,0 +1,16 @@
+FROM scratch
+
+# Install required tools and libraries
+RUN apk add --no-cache gcc musl-dev wasm-pack
+
+# Copy source code to the container
+COPY hello.c .
+
+# Compile C code to WebAssembly
+RUN gcc -o hello.wasm -nostartfiles -Wl,--no-entry -Wl,--export-all -Wl,--allow-undefined hello.c
+
+# Run wasm-pack to create a package
+RUN wasm-pack pack --out-dir /app
+
+# Set the default command to run the WebAssembly module
+CMD [ "node", "/app/hello.js" ]

@@ -34,7 +34,7 @@
         </div>
     </nav>
 </div>
-@inject IReportRepo ReportRepo
+@* @inject IReportRepo ReportRepo *@
 
 @code {
     private List<string> AllTableNames = new();
@@ -49,7 +49,7 @@
 
     protected override Task OnInitializedAsync()
     {
-        AllTableNames = ReportRepo.GetAllTableNames();
+        //AllTableNames = ReportRepo.GetAllTableNames();
         return Task.CompletedTask;
     }
 
