@@ -30,7 +30,8 @@
         <p>Aliquam id nibh consequat, fringilla mauris nec, pellentesque lectus. Sed sed risus sit amet quam eleifend auctor. Vivamus sed est leo. Suspendisse mollis ex in ante aliquet vestibulum. In mattis purus eu enim venenatis pharetra. Etiam ullamcorper neque ac lacus consectetur lacinia. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin eget purus sed dolor tristique pharetra vel id turpis.</p>
     </div>
 </div>
-
+@inject IJSRuntime _jsRuntime
+@using QueryWeb.Shared
 @code {
     private string[] _isShowTabs = new[] { "active", "" };
     private int _currentCount = 0;
@@ -69,4 +70,22 @@
             .Select(x => x.Key)
             .ToArray();
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
+                var s1 = string.Join(",", t);
+                Console.WriteLine("js " + s1);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("load wasm fail" + e.Message);
+            }
+        }
+    }
+
 }
