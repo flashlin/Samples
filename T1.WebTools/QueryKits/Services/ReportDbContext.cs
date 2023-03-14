@@ -6,11 +6,6 @@ using QueryKits.ExcelUtils;
 
 namespace QueryKits.Services;
 
-public class DbConfig
-{
-    public string ConnectionString { get; set; } = string.Empty;
-}
-
 public class ReportDbContext : DbContext, IReportRepo
 {
     private readonly string _connectionString;
