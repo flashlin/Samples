@@ -23,15 +23,17 @@
 <div class="tab-content mt-3">
     <div class="tab-pane @_isShowTabs[0]">
         <h3>Result</h3>
-            <MCodeEditor @ref="_resultEditor" Language="text" />
+        <MCodeEditor @ref="_resultEditor" Language="text" />
     </div>
     <div class="tab-pane @_isShowTabs[1]">
         <h3>Grid</h3>
         <p>Aliquam id nibh consequat, fringilla mauris nec, pellentesque lectus. Sed sed risus sit amet quam eleifend auctor. Vivamus sed est leo. Suspendisse mollis ex in ante aliquet vestibulum. In mattis purus eu enim venenatis pharetra. Etiam ullamcorper neque ac lacus consectetur lacinia. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin eget purus sed dolor tristique pharetra vel id turpis.</p>
     </div>
 </div>
+@inject IReportRepo _reportRepo
 @inject IJSRuntime _jsRuntime
 @using QueryWeb.Shared
+@using QueryKits.Services
 @code {
     private string[] _isShowTabs = new[] { "active", "" };
     private int _currentCount = 0;
@@ -46,11 +48,6 @@
 
     private void ClickTab(int index)
     {
-        Console.WriteLine("Click Tabs" + index);
-        var drives = GetDrives();
-        var s = string.Join(",", drives);
-        Console.WriteLine("drives=" + s);
-
         for (var i = 0; i < _isShowTabs.Length; i++)
         {
             _isShowTabs[i] = string.Empty;
@@ -61,15 +58,6 @@
         }
         _resultEditor.ForceUpdate();
     }
-    
-    public string[] GetDrives()
-    {
-        return DriveInfo.GetDrives()
-            .Select(d => d.Name.Substring(0, 1))
-            .GroupBy(x => x)
-            .Select(x => x.Key)
-            .ToArray();
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -77,9 +65,7 @@
         {
             try
             {
-                var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
-                var s1 = string.Join(",", t);
-                Console.WriteLine("js " + s1);
+                //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
             }
             catch (Exception e)
             {

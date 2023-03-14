@@ -21,7 +21,7 @@
                 <span class="oi oi-plus" aria-hidden="true"></span> Query
             </NavLink>
             <div style="display: block">
-                @foreach (var item in AllTableNames)
+                @foreach (var item in _allTableNames)
                 {
                     <NavLink class="dropdown-item">item</NavLink>
                 }
@@ -34,22 +34,22 @@
         </div>
     </nav>
 </div>
-@* @inject IReportRepo ReportRepo *@
+@inject IReportRepo ReportRepo
 
 @code {
-    private List<string> AllTableNames = new();
-    private bool collapseNavMenu = true;
+    private List<string> _allTableNames = new();
+    private bool _collapseNavMenu = true;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
-        collapseNavMenu = !collapseNavMenu;
+        _collapseNavMenu = !_collapseNavMenu;
     }
 
     protected override Task OnInitializedAsync()
     {
-        //AllTableNames = ReportRepo.GetAllTableNames();
+        _allTableNames = ReportRepo.GetAllTableNames();
         return Task.CompletedTask;
     }
 

@@ -1,0 +1,25 @@
+FROM mcr.microsoft.com/mssql/server:2019-latest
+
+USER root
+# RUN apt-get -y update && \
+#     apt-get install -y curl
+
+ENV ACCEPT_EULA=Y \
+    MSSQL_SA_PASSWORD=Passw0rd! \
+    MSSQL_PID=Developer \
+    MSSQL_TCP_PORT=1433 \
+    MSSQL_AGENT_ENABLED=true 
+
+RUN mkdir -p /usr/app
+WORKDIR /usr/app    
+
+
+USER root
+WORKDIR /usr/app
+COPY . /usr/app/
+RUN chmod +x /usr/app/init.sh
+
+
+EXPOSE 1433
+USER mssql
+RUN /opt/mssql/bin/sqlservr & /usr/app/init.sh  && exec /bin/bash

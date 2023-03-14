@@ -26,8 +26,8 @@ var configuration = builder.Configuration;
 var services = builder.Services;
 services.AddSingleton<ILocalEnvironment>(sp => localEnv);
 //services.AddSingleton<ILocalDbService, LocalDbService>();
-//services.AddSingleton<IReportRepo, ReportDbContext>();
 services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
+services.AddSingleton<IReportRepo, ReportDbContext>();
 
 var app = builder.Build();
 
