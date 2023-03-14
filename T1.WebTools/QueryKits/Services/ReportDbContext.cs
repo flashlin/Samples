@@ -1,17 +1,23 @@
 ﻿using System.Text;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using QueryKits.ExcelUtils;
 
 namespace QueryKits.Services;
+
+public class DbConfig
+{
+    public string ConnectionString { get; set; } = string.Empty;
+}
 
 public class ReportDbContext : DbContext, IReportRepo
 {
     private readonly string _connectionString;
 
-    public ReportDbContext(ILocalDbService localDbService)
+    public ReportDbContext(IOptions<DbConfig> dbConfig)
     {
-        _connectionString = localDbService.GetDbConnectionString();
+        _connectionString = dbConfig.Value.ConnectionString;
     }
 
     public List<string> GetAllTableNames()
