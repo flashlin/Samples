@@ -22,7 +22,7 @@
 async function uploadFileAsync(uploadUrl, file) {
     const chunkSize = 1024 * 2;
     const totalChunks = Math.ceil(file.size / chunkSize);
-    for await (let currentChunk = 0; currentChunk < totalChunks; currentChunk++) {
+    for (let currentChunk = 0; currentChunk < totalChunks; currentChunk++) {
         await uploadChunkAsync(file, currentChunk, totalChunks, chunkSize);
     }
 }
@@ -30,7 +30,7 @@ async function uploadFileAsync(uploadUrl, file) {
 async function uploadFileElementAsync(uploadUrl, fileElement) {
     //const uploadUrl = "https://example.com/upload";
     //const fileElement = document.getElementById("fileInput");
-    for await (let i =0; i<fileElement.files.length; i++)
+    for (let i=0; i<fileElement.files.length; i++)
     {
         const file = fileElement.files[i];
         await uploadFileAsync(uploadUrl, file);
