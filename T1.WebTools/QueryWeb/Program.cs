@@ -20,11 +20,14 @@ builder.WebHost.UseUrls(urls.ToArray());
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddOptions();
 
+var configuration = builder.Configuration;
 var services = builder.Services;
 services.AddSingleton<ILocalEnvironment>(sp => localEnv);
 //services.AddSingleton<ILocalDbService, LocalDbService>();
 //services.AddSingleton<IReportRepo, ReportDbContext>();
+services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
 
 var app = builder.Build();
 
