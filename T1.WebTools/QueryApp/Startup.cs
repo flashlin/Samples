@@ -21,18 +21,6 @@ using T1.WebTools.CsvEx;
 
 namespace QueryApp;
 
-public static class FileHelper
-{
-    public static void EnsureDirectory(string directory)
-    {
-        if (Directory.Exists(directory))
-        {
-            return;
-        }
-        Directory.CreateDirectory(directory);
-    }
-}
-
 public class Startup
 {
     public void Run(string[] args)
