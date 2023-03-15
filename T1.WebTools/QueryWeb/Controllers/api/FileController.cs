@@ -2,10 +2,16 @@
 
 namespace QueryWeb.Controllers.api;
 
-//[ApiController]
-//[Route("api/[controller]/[action]")]
+[ApiController]
+[Route("api/[controller]/[action]")]
 public class FileController : ControllerBase
 {
+    [HttpPost]
+    public string SayHello([FromBody] string name)
+    {
+        return $"Hello {name}";
+    }
+    
     [HttpPost]
     public IActionResult Upload([FromForm] UploadFilesRequest req)
     {
