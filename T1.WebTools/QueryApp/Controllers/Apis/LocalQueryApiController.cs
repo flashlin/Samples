@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using QueryApp.Models;
 using QueryApp.Models.Services;
 using QueryKits.ExcelUtils;
+using QueryKits.Extensions;
 using QueryKits.Services;
 using T1.WebTools.CsvEx;
 
@@ -57,7 +58,7 @@ public class LocalQueryApiController : ControllerBase
     public async Task UploadFiles()
     {
         var dataFolder = Path.Combine(_localEnvironment.AppLocation, "Data");
-        FileHelper.EnsureDirectory(dataFolder);
+        DirectoryHelper.EnsureDirectory(dataFolder);
         
         var uploadFiles = this.Request.Form.Files;
         foreach (var uploadFile in uploadFiles)
