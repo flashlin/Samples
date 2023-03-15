@@ -6,16 +6,16 @@ using QueryWeb.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 var localEnv = LocalEnvironment.Load();
-var urls = new List<string>();
-if (!LocalEnvironment.IsPortUsed(80))
-{
-    urls.Add("http://0.0.0.0:80");
-}
-else
-{
-    urls.Add($@"http://127.0.0.1:{localEnv.Port}");
-}
-builder.WebHost.UseUrls(urls.ToArray());
+//var urls = new List<string>();
+//if (!LocalEnvironment.IsPortUsed(80))
+//{
+//    urls.Add("http://0.0.0.0:80");
+//}
+//else
+//{
+//    urls.Add($@"http://127.0.0.1:{localEnv.Port}");
+//}
+//builder.WebHost.UseUrls(urls.ToArray());
 
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();

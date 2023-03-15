@@ -22,8 +22,5 @@ function postFormAsync(url, data) {
     return fetch(url, {
         method: 'POST',
         body: formData,
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
     });
 }
