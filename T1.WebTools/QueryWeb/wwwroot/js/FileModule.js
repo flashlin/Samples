@@ -18,6 +18,8 @@ function uploadChunkAsync(uploadUrl, file, chunkSize, currentChunk, totalChunks)
         const reader = new FileReader();
         reader.onload = async function () {
             let chunk = blobSlice(reader.result, start, end);
+            chunk = new Uint8Array(chunk);
+            chunk = Array.from(chunk);
             try{
                 await postFormAsync(uploadUrl, {
                     fileName: file.name,
@@ -38,14 +40,13 @@ function uploadChunkAsync(uploadUrl, file, chunkSize, currentChunk, totalChunks)
 async function uploadFileAsync(uploadUrl, file) {
     const chunkSize = 1024 * 2;
     const totalChunks = Math.ceil(file.size / chunkSize);
+    console.log('uploadFileAsync', file, totalChunks);
     for (let currentChunk = 0; currentChunk < totalChunks; currentChunk++) {
         await uploadChunkAsync(uploadUrl, file, currentChunk, totalChunks, chunkSize);
     }
 }
 
-async function uploadFileElementAsync(uploadUrl, fileElement) {
-    //const uploadUrl = "https://example.com/upload";
-    //const fileElement = document.getElementById("fileInput");
+async function uploadFileElementAsync(uploadUrl, fileElement){
     for (let i=0; i<fileElement.files.length; i++)
     {
         const file = fileElement.files[i];

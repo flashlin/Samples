@@ -17,6 +17,7 @@ else
 }
 builder.WebHost.UseUrls(urls.ToArray());
 
+builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
@@ -42,6 +43,10 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
+app.UseEndpoints(endpoints=>
+{
+    endpoints.MapControllers();
+});
 app.MapFallbackToPage("/_Host");
 
 app.Run();
