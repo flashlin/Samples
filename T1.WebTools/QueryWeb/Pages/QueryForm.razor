@@ -6,11 +6,27 @@
 <h1>Counter</h1>
 
 <p role="status">Current count: @_currentCount</p>
-
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-<ImportCsv/>
 
-<MCodeEditor Language="csharp"/>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <MCodeEditor Language="csharp"/>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" multiple aria-label="multiple select example">
+                <option selected>Open this select menu</option>
+                <option value="1">Option 1</option>
+                <option value="2">Option 2</option>
+                <option value="3">Option 3</option>
+                <option value="4">Option 4</option>
+                <option value="5">Option 5</option>
+            </select>
+        </div>
+    </div>
+</div>
+
 
 <ul class="nav nav-tabs">
     <li class="nav-item">
@@ -23,7 +39,7 @@
 <div class="tab-content mt-3">
     <div class="tab-pane @_isShowTabs[0]">
         <h3>Result</h3>
-        <MCodeEditor @ref="_resultEditor" Language="text" />
+        <MCodeEditor @ref="_resultEditor" Language="text"/>
     </div>
     <div class="tab-pane @_isShowTabs[1]">
         <h3>Grid</h3>
@@ -36,8 +52,9 @@
 @inject IReportRepo _reportRepo
 @inject IJSRuntime _jsRuntime
 @inject IEventAggregator EventAggregator
+
 @code {
-    private string[] _isShowTabs = new[] { "active", "" };
+    private string[] _isShowTabs = new[] {"active", ""};
     private int _currentCount = 0;
     MCodeEditor _resultEditor = null!;
 
@@ -67,7 +84,7 @@
         {
             try
             {
-                //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
+    //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
             }
             catch (Exception e)
             {

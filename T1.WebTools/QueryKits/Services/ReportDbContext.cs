@@ -2,6 +2,7 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using QueryKits.Entities;
 using QueryKits.ExcelUtils;
 
 namespace QueryKits.Services;
@@ -14,6 +15,8 @@ public class ReportDbContext : DbContext, IReportRepo
     {
         _connectionString = dbConfig.Value.ConnectionString;
     }
+
+    public DbSet<SqlHistoryEntity> SqlHistories { get; set; } = null!;
 
     public List<string> GetAllTableNames()
     {
