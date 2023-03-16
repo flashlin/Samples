@@ -17,12 +17,11 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public List<string> GetAllTableNames()
     {
-        var sql = $@"
-            SELECT TABLE_NAME as TableName 
-            FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG='{LocalDbService.DatabaseName}'
-            ";
-        return Enumerable.ToList<string>(Database.SqlQueryRaw<string>(sql));
+        var sql = new StringBuilder();
+        sql.AppendLine("SELECT TABLE_NAME as TableName");
+        sql.AppendLine("FROM INFORMATION_SCHEMA.TABLES");
+        sql.Append(@"WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG='{LocalDbService.DatabaseName}'");
+        return Database.SqlQueryRaw<string>(sql.ToString()).ToList();
     }
 
     public List<Dictionary<string, object>> QueryRawSql(string sql)
