@@ -1,11 +1,11 @@
-﻿@inherits LayoutComponentBase
+﻿@using QueryKits.Services
+@inherits LayoutComponentBase
 
 <PageTitle>QueryWeb</PageTitle>
 
-
 <div class="page">
     <div class="sidebar">
-        <NavMenu />
+        <NavMenu/>
     </div>
 
     <main>
@@ -17,3 +17,45 @@
         </article>
     </main>
 </div>
+
+<div class="@_appStateClass">
+    <div class="spinner-border" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<style>
+    .BlockUI {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background-color: rgba(0,0,0,0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+</style>
+@inject IAppState AppState
+
+@code{
+
+    string _appStateClass = string.Empty;
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            AppState.Subscribe(args =>
+            {
+                _appStateClass = AppState.IsLoading ? "BlockUI" : string.Empty;
+                StateHasChanged();
+            });
+        }
+        return Task.CompletedTask;
+    }
+
+
+}
