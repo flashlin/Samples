@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Prism.Events;
 using QueryKits.Services;
 using QueryWeb.Data;
 
@@ -25,7 +26,9 @@ builder.Services.AddOptions();
 
 var configuration = builder.Configuration;
 var services = builder.Services;
+services.AddSingleton<IEventAggregator, EventAggregator>();
 services.AddSingleton<ILocalEnvironment>(sp => localEnv);
+services.AddSingleton<IAppState, AppState>();
 //services.AddSingleton<ILocalDbService, LocalDbService>();
 services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
 services.AddSingleton<IReportRepo, ReportDbContext>();
@@ -39,7 +42,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.MapBlazorHub();
