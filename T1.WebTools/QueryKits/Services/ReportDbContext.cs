@@ -104,6 +104,16 @@ public class ReportDbContext : DbContext, IReportRepo
             .ToList();
     }
 
+    public void AddSqlCode(string sqlCode)
+    {
+        SqlHistories.Add(new SqlHistoryEntity
+        {
+            SqlCode = sqlCode,
+            CreatedOn = DateTime.Now
+        });
+        SaveChanges();
+    }
+
     private static string CreateInsertTableSqlBlock(StringBuilder sqlInsertColumns, List<ExcelColumn> headers, List<Dictionary<string, string>> rows)
     {
         var sqlBlock = new StringBuilder();

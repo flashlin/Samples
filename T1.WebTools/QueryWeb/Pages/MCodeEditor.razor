@@ -1,5 +1,6 @@
 ﻿@page "/MCodeEditor"
 @using System.Text
+@using QueryWeb.Models
 @using QueryWeb.Models.Extensions
 @inject IJSRuntime JsRuntime;
 
@@ -13,6 +14,8 @@
 
     [Parameter]
     public string Language { get; set; } = "csharp";
+    
+    public event EventHandler<SqlCodeRunEventArgs> SqlCodeRan = null!;
 
     StandaloneCodeEditor _editor = null!;
     string _valueToSet = "";
@@ -22,6 +25,7 @@
     {
         _editor.Layout(_editorOptions.Dimension);
     }
+    
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -80,6 +84,14 @@
             var s = await _editor.GetTextOfBeforeCursorAsync();
             Console.WriteLine("==>" + s);
         });
+        
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) =>
+        {
+            SqlCodeRan?.Invoke(this, new SqlCodeRunEventArgs
+            {
+                SqlCode = await GetValueAsync()
+            });
+        });
     }
 
     [JSInvokable]
@@ -96,12 +108,12 @@
         return Task.CompletedTask;
     }
 
-    private async Task SetValue()
+    private async Task SetValueAsync()
     {
         await _editor.SetValue(_valueToSet);
     }
 
-    private async Task<string> GetValue()
+    private async Task<string> GetValueAsync()
     {
         var val = await _editor.GetValue();
         return val;

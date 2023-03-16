@@ -9,4 +9,5 @@ public interface IReportRepo
     void ReCreateTable(string tableName, List<ExcelColumn> headers);
     int ImportData(string tableName, ExcelSheet rawDataList);
     List<string> GetTop10SqlCode();
+    void AddSqlCode(string sqlCode);
 }
