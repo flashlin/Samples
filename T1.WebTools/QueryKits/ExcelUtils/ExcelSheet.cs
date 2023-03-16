@@ -12,7 +12,6 @@ public class ExcelSheet
     public List<ExcelColumn> Headers { get; set; } = new();
     public List<Dictionary<string, string>> Rows { get; set; } = new();
 
-
     public string ToCsv()
     {
         var csvConfig = new CsvConfiguration(CultureInfo.CurrentCulture)
@@ -48,6 +47,62 @@ public class ExcelSheet
 
 public static class DictListExtension
 {
+    public static string ToCsv(IEnumerable<Dictionary<string, string>> dictList)
+    {
+        var index = 0;
+        var headers = new List<string>();
+        using var csvWriter = CreateCsvWriter();
+        foreach (var item in dictList)
+        {
+            if (index == 0)
+            {
+                headers = item.Keys.ToList();
+                csvWriter.WriteHeaders(headers);
+            }
+            csvWriter.WriteRow(headers, item);
+        }
+        
+    }
+
+    public static CsvWriter CreateCsvWriter()
+    {
+        var csvConfig = new CsvConfiguration(CultureInfo.CurrentCulture)
+        {
+            HasHeaderRecord = true,
+            Delimiter = ",",
+            Encoding = Encoding.UTF8
+        };
+        var mem = new MemoryStream();
+        var writer = new StreamWriter(mem);
+        var csvWriter = new CsvWriter(writer, csvConfig);
+        return csvWriter;
+    }
+
+    public static void WriteHeaders(this CsvWriter csvWriter, IEnumerable<string> headers)
+    {
+        foreach (var header in headers)
+        {
+            csvWriter.WriteField(header);
+        }
+        csvWriter.NextRecord();
+    }
+
+    public static void WriteRow(this CsvWriter csvWriter, IEnumerable<string> headers, Dictionary<string, string> row)
+    {
+        foreach (var header in headers)
+        {
+            csvWriter.WriteField(row[header]);
+        }
+        csvWriter.NextRecord();
+    }
+
+    public static void ToString(this CsvWriter csvWriter)
+    {
+        csvWriter.Flush();
+        mem.Position = 0;
+        using var sr = new StreamReader(mem);
+        return sr.ReadToEnd();
+    }
     
     public static string ToCsv(this string json)
     {
@@ -87,7 +142,6 @@ public static class DictListExtension
         }
 
         writer.Flush();
-
         mem.Position = 0;
         using var sr = new StreamReader(mem);
         return sr.ReadToEnd();
