@@ -17,11 +17,10 @@
         <div class="col-md-4">
             <select class="form-select" multiple aria-label="multiple select example">
                 <option selected>Open this select menu</option>
-                <option value="1">Option 1</option>
-                <option value="2">Option 2</option>
-                <option value="3">Option 3</option>
-                <option value="4">Option 4</option>
-                <option value="5">Option 5</option>
+                @foreach (var sqlCode in _sqlCodeHistory)
+                {
+                    <option value="@sqlCode">@sqlCode</option>
+                }
             </select>
         </div>
     </div>
@@ -56,6 +55,7 @@
 @code {
     private string[] _isShowTabs = new[] {"active", ""};
     private int _currentCount = 0;
+    private List<string> _sqlCodeHistory = new List<string>();
     MCodeEditor _resultEditor = null!;
 
     private void IncrementCount()
@@ -78,10 +78,11 @@
         _resultEditor.ForceUpdate();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            _sqlCodeHistory = _reportRepo.GetTop10SqlCode();
             try
             {
     //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
@@ -91,6 +92,7 @@
                 Console.WriteLine("load wasm fail" + e.Message);
             }
         }
+        return Task.CompletedTask;
     }
 
 }
