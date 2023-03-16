@@ -96,6 +96,14 @@ public class ReportDbContext : DbContext, IReportRepo
         return ExecuteRawSql(sql);
     }
 
+    public List<string> GetTop10SqlCode()
+    {
+        return SqlHistories.OrderByDescending(x => x.CreatedOn)
+            .Take(20)
+            .Select(x => x.SqlCode)
+            .ToList();
+    }
+
     private static string CreateInsertTableSqlBlock(StringBuilder sqlInsertColumns, List<ExcelColumn> headers, List<Dictionary<string, string>> rows)
     {
         var sqlBlock = new StringBuilder();
