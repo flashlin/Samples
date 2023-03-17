@@ -106,6 +106,10 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public void AddSqlCode(string sqlCode)
     {
+        if (string.IsNullOrEmpty(sqlCode))
+        {
+            return;
+        }
         SqlHistories.Add(new SqlHistoryEntity
         {
             SqlCode = sqlCode,
