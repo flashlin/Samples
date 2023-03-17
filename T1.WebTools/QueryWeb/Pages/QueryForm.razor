@@ -12,10 +12,14 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-8">
-            <MCodeEditor @ref="_codeEditor" SqlCodeRanCallback="@OnSqlCodeRan" Language="csharp"/>
+            <MCodeEditor @ref="_codeEditor"
+                         SqlCodeRanCallback="@OnSqlCodeRan" Language="csharp"
+                         KeyCallback="@OnCodeEditorKey" />
         </div>
         <div class="col-md-4">
-            <select class="form-select" multiple aria-label="multiple select example">
+            <select class="form-select" multiple aria-label="multiple select example" 
+                    @ref="_sqlCodeHistorySelector"
+                    @onchange="HandleSelectionSqlHistoryChange">
                 @foreach (var sqlCode in _sqlCodeHistory)
                 {
                     <option value="@sqlCode">@sqlCode</option>
@@ -52,6 +56,7 @@
 @inject IReportRepo _reportRepo
 @inject IJSRuntime _jsRuntime
 @inject IEventAggregator EventAggregator
+@inject IQueryService QueryService
 
 @code {
     private MCodeEditor _codeEditor = null!;
@@ -59,6 +64,8 @@
     private int _currentCount = 0;
     private List<string> _sqlCodeHistory = new List<string>();
     MCodeEditor _resultEditor = null!;
+    private ElementReference _sqlCodeHistorySelector;
+    private string _sqlCode = string.Empty;
     
     private void IncrementCount()
     {
@@ -98,10 +105,31 @@
         return Task.CompletedTask;
     }
 
-    private void OnSqlCodeRan(SqlCodeRunEventArgs arg)
+    private async Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
     {
         _reportRepo.AddSqlCode(arg.SqlCode);
+        var results = QueryService.QueryRawSql(arg.SqlCode);
         //StateHasChanged();
+        if (results.Count == 0)
+        {
+            await _resultEditor.SetValue($"{DateTime.Now}");
+            return;
+        }
+        await _resultEditor.SetValue(results.First().ToCsvString());
     }
 
+    private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)
+    {
+        var value = (string[]) arg.Value!;
+        _sqlCode = value[0];
+        return Task.CompletedTask;
+    }
+
+    private async Task OnCodeEditorKey(KeyEventArgs arg)
+    {
+        if (arg.KeyCode == KeyCode.KeyI)
+        {
+            await _codeEditor.Insert(_sqlCode);
+        }
+    }
 }

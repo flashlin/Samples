@@ -1,8 +1,9 @@
 ﻿using QueryKits.CsvEx;
+using QueryKits.ExcelUtils;
 
 namespace QueryKits.Services;
 
 public interface IQueryService
 {
-    List<CsvSheet> QueryRawSql(string sql);
+    List<ExcelSheet> QueryRawSql(string sql);
 }
