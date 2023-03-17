@@ -1,5 +1,6 @@
 ﻿@page "/MCodeEditor"
 @using System.Text
+@using QueryKits.Services
 @using QueryWeb.Models
 @using QueryWeb.Models.Extensions
 @inject IJSRuntime JsRuntime;
@@ -8,14 +9,19 @@
 
 <StandaloneCodeEditor @ref="_editor"
                       ConstructionOptions="GetOptions"
-                      OnDidInit="EditorOnDidInit"/>
+                      OnDidInit="EditorOnDidInit"
+                      OnKeyDown="OnKeyDown"/>
+
+@inject IReportRepo _reportRepo
 
 @code {
 
     [Parameter]
     public string Language { get; set; } = "csharp";
-    
-    public event EventHandler<SqlCodeRunEventArgs> SqlCodeRan = null!;
+
+    //public event EventHandler<SqlCodeRunEventArgs> SqlCodeRan = null!;
+    [Parameter]
+    public EventCallback<SqlCodeRunEventArgs> SqlCodeRanCallback { get; set; }
 
     StandaloneCodeEditor _editor = null!;
     string _valueToSet = "";
@@ -25,7 +31,7 @@
     {
         _editor.Layout(_editorOptions.Dimension);
     }
-    
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -75,22 +81,39 @@
             await JsRuntime.InvokeVoidAsync("addEventListener", "resize", DotNetObjectReference.Create(this), "HandleWindowResize");
         }
     }
+    
+    private async Task OnKeyDown(KeyboardEvent e)
+    {
+        if (e.CtrlKey && e.KeyCode == KeyCode.KeyJ)
+        {
+            string text = await _editor.GetValue();
+            Console.WriteLine(text);
+            var s1 = await _editor.GetTextOfBeforeCursorAsync();
+            Console.WriteLine(s1);
+        }
+    }
 
     private async Task EditorOnDidInit()
     {
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, async (args) =>
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) =>
         {
             Console.WriteLine("Ctrl+J : Initial editor command is triggered.");
-            var s = await _editor.GetTextOfBeforeCursorAsync();
-            Console.WriteLine("==>" + s);
+           
         });
-        
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) =>
+
+        // await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) =>
+        // {
+        //     var s = await _editor.GetValue();
+        // });
+    }
+
+    async Task RunCtrlR()
+    {
+        var sqlCode = await GetValueAsync();
+        _reportRepo.AddSqlCode(sqlCode);
+        await SqlCodeRanCallback.InvokeAsync(new SqlCodeRunEventArgs
         {
-            SqlCodeRan?.Invoke(this, new SqlCodeRunEventArgs
-            {
-                SqlCode = await GetValueAsync()
-            });
+            SqlCode = await GetValueAsync()
         });
     }
 
