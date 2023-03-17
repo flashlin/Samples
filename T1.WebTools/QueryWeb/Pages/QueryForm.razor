@@ -12,7 +12,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-8">
-            <MCodeEditor @ref="_codeEditor" Language="csharp"/>
+            <MCodeEditor @ref="_codeEditor" SqlCodeRanCallback="@OnSqlCodeRan" Language="csharp"/>
         </div>
         <div class="col-md-4">
             <select class="form-select" multiple aria-label="multiple select example">
@@ -48,6 +48,7 @@
 @using QueryWeb.Shared
 @using QueryKits.Services
 @using Prism.Events
+@using QueryWeb.Models
 @inject IReportRepo _reportRepo
 @inject IJSRuntime _jsRuntime
 @inject IEventAggregator EventAggregator
@@ -58,7 +59,9 @@
     private int _currentCount = 0;
     private List<string> _sqlCodeHistory = new List<string>();
     MCodeEditor _resultEditor = null!;
-
+    
+    
+    
     private void IncrementCount()
     {
         _currentCount++;
@@ -83,12 +86,8 @@
     {
         if (firstRender)
         {
-            _codeEditor.SqlCodeRan += (sender, args) =>
-            {
-                _reportRepo.AddSqlCode(args.SqlCode);
-            };
             _sqlCodeHistory = _reportRepo.GetTop10SqlCode();
-            StateHasChanged();
+            //StateHasChanged();
             try
             {
     //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
@@ -99,6 +98,12 @@
             }
         }
         return Task.CompletedTask;
+    }
+
+    private void OnSqlCodeRan(SqlCodeRunEventArgs arg)
+    {
+        _reportRepo.AddSqlCode(arg.SqlCode);
+        //StateHasChanged();
     }
 
 }
