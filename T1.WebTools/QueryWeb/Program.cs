@@ -43,6 +43,7 @@ services.AddSingleton<IAppState, AppState>();
 //services.AddSingleton<ILocalDbService, LocalDbService>();
 services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
 services.AddSingleton<IReportRepo, ReportDbContext>();
+services.AddTransient<IQueryService, QueryService>();
 
 var app = builder.Build();
 
