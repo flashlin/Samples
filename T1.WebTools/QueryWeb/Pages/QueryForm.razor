@@ -87,7 +87,7 @@
         if (firstRender)
         {
             _sqlCodeHistory = _reportRepo.GetTop10SqlCode();
-            //StateHasChanged();
+            StateHasChanged();
             try
             {
     //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
