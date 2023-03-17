@@ -10,4 +10,5 @@ public interface IReportRepo
     int ImportData(string tableName, ExcelSheet rawDataList);
     List<string> GetTop10SqlCode();
     void AddSqlCode(string sqlCode);
+    IEnumerable<QueryDataSet> QueryMultipleRawSql(string sql);
 }
