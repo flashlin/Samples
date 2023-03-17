@@ -3,8 +3,19 @@ using Microsoft.AspNetCore.Components.Web;
 using Prism.Events;
 using QueryKits.Services;
 using QueryWeb.Data;
+using Serilog;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+    .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true);
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    //.WriteTo.Console()
+    .CreateLogger();
+builder.Host.UseSerilog();
 
 var localEnv = LocalEnvironment.Load();
 //var urls = new List<string>();
