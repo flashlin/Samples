@@ -81,30 +81,27 @@
             await JsRuntime.InvokeVoidAsync("addEventListener", "resize", DotNetObjectReference.Create(this), "HandleWindowResize");
         }
     }
-    
+
     private async Task OnKeyDown(KeyboardEvent e)
     {
-        if (e.CtrlKey && e.KeyCode == KeyCode.KeyJ)
+        if (e.CtrlKey && e.KeyCode == KeyCode.KeyR)
         {
-            string text = await _editor.GetValue();
-            Console.WriteLine(text);
-            var s1 = await _editor.GetTextOfBeforeCursorAsync();
-            Console.WriteLine(s1);
+            var sqlCode = await _editor.GetValue();
+            await SqlCodeRanCallback.InvokeAsync(new SqlCodeRunEventArgs
+            {
+                SqlCode = sqlCode
+            });
         }
     }
 
     private async Task EditorOnDidInit()
     {
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) =>
-        {
-            Console.WriteLine("Ctrl+J : Initial editor command is triggered.");
-           
-        });
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) => { Console.WriteLine("Ctrl+J : Initial editor command is triggered."); });
 
-        // await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) =>
-        // {
-        //     var s = await _editor.GetValue();
-        // });
+    // await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) =>
+    // {
+    //     var s = await _editor.GetValue();
+    // });
     }
 
     async Task RunCtrlR()
