@@ -3,25 +3,27 @@
 @using QueryKits.Services
 @using QueryWeb.Models
 @using QueryWeb.Models.Extensions
-@inject IJSRuntime JsRuntime;
 
 <PageTitle>Query Form</PageTitle>
 
-<StandaloneCodeEditor @ref="_editor"
-                      ConstructionOptions="GetOptions"
-                      OnDidInit="EditorOnDidInit"
-                      OnKeyDown="OnKeyDown"/>
+<StandaloneCodeEditor 
+    @ref="_editor"
+    ConstructionOptions="GetOptions"
+    OnDidInit="EditorOnDidInit"
+    OnKeyDown="OnKeyDown"/>
 
-@inject IReportRepo _reportRepo
-
+@inject IJSRuntime JsRuntime
+@inject IReportRepo ReportRepo
 @code {
-
     [Parameter]
     public string Language { get; set; } = "csharp";
 
     //public event EventHandler<SqlCodeRunEventArgs> SqlCodeRan = null!;
     [Parameter]
     public EventCallback<SqlCodeRunEventArgs> SqlCodeRanCallback { get; set; }
+    
+    [Parameter]
+    public EventCallback<KeyEventArgs> KeyCallback { get; set; }
 
     StandaloneCodeEditor _editor = null!;
     string _valueToSet = "";
@@ -92,25 +94,28 @@
                 SqlCode = sqlCode
             });
         }
+
+        await KeyCallback.InvokeAsync(new KeyEventArgs
+        {
+            CtrlKey = e.CtrlKey,
+            KeyCode = e.KeyCode
+        });
     }
 
     private async Task EditorOnDidInit()
     {
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) => { Console.WriteLine("Ctrl+J : Initial editor command is triggered."); });
-
-    // await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) =>
-    // {
-    //     var s = await _editor.GetValue();
-    // });
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) => { });
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI, async (args) => { });
     }
 
     async Task RunCtrlR()
     {
-        var sqlCode = await GetValueAsync();
-        _reportRepo.AddSqlCode(sqlCode);
+        var sqlCode = await GetValue();
+        ReportRepo.AddSqlCode(sqlCode);
         await SqlCodeRanCallback.InvokeAsync(new SqlCodeRunEventArgs
         {
-            SqlCode = await GetValueAsync()
+            SqlCode = await GetValue()
         });
     }
 
@@ -128,12 +133,12 @@
         return Task.CompletedTask;
     }
 
-    private async Task SetValueAsync()
+    public async Task SetValue(string text)
     {
-        await _editor.SetValue(_valueToSet);
+        await _editor.SetValue(text);
     }
 
-    private async Task<string> GetValueAsync()
+    private async Task<string> GetValue()
     {
         var val = await _editor.GetValue();
         return val;
@@ -144,4 +149,8 @@
         return _editorOptions;
     }
 
+    public async Task Insert(string text)
+    {
+        await JsRuntime.InvokeVoidAsync("monacoEditorInsertText", _editor.Id, text);
+    }
 }

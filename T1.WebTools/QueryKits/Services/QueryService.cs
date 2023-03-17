@@ -1,4 +1,5 @@
 ﻿using QueryKits.CsvEx;
+using QueryKits.ExcelUtils;
 
 namespace QueryKits.Services;
 
@@ -11,9 +12,9 @@ public class QueryService : IQueryService
         _reportRepo = reportRepo;
     }
 
-    public List<CsvSheet> QueryRawSql(string sql)
+    public List<ExcelSheet> QueryRawSql(string sql)
     {
-        var result = new List<CsvSheet>();
+        var result = new List<ExcelSheet>();
         var dataSets = _reportRepo.QueryMultipleRawSql(sql).ToList();
         foreach (var ds in dataSets)
         {
@@ -22,12 +23,11 @@ public class QueryService : IQueryService
                 continue;
             }
             var headers = ds.Rows[0].Keys
-                .Select(name => new CsvHeader
+                .Select(name => new ExcelColumn
                 {
-                    ColumnType = ColumnType.String,
                     Name = name
                 }).ToList();
-            var sheet = new CsvSheet();
+            var sheet = new ExcelSheet();
             sheet.Headers.AddRange(headers);
             foreach (var row in ds.Rows)
             {
