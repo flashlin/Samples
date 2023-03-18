@@ -56,6 +56,8 @@ def predict_next_sentence():
         next_word = result[0]['word']
         if next_word is None:
             break
+        if next_word == 'eos':
+            break
         print(f'{next_word=}')
         predict_sentence += ' ' + next_word
         input_text += ' ' + next_word
