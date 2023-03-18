@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Prism.Events;
 using QueryKits.Services;
 using QueryWeb.Data;
+using QueryWeb.Models;
 using Serilog;
 
 
@@ -44,6 +45,8 @@ services.AddSingleton<IAppState, AppState>();
 services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
 services.AddSingleton<IReportRepo, ReportDbContext>();
 services.AddTransient<IQueryService, QueryService>();
+services.AddTransient<IJsJsonSerializer, JsJsonSerializer>();
+services.AddTransient<IJsHelper, JsHelper>();
 
 var app = builder.Build();
 

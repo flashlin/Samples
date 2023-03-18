@@ -1,4 +1,5 @@
-﻿using QueryKits.CsvEx;
+﻿using System.Text.Json.Serialization;
+using QueryKits.CsvEx;
 using QueryKits.ExcelUtils;
 
 namespace QueryKits.Services;

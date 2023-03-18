@@ -1,12 +1,13 @@
 ﻿@page "/MCodeEditor"
 @using System.Text
+@using System.Text.Json
 @using QueryKits.Services
 @using QueryWeb.Models
 @using QueryWeb.Models.Extensions
 
 <PageTitle>Query Form</PageTitle>
 
-<StandaloneCodeEditor 
+<StandaloneCodeEditor
     @ref="_editor"
     ConstructionOptions="GetOptions"
     OnDidInit="EditorOnDidInit"
@@ -14,14 +15,16 @@
 
 @inject IJSRuntime JsRuntime
 @inject IReportRepo ReportRepo
+@inject IJsHelper JsHelper
 @code {
+
     [Parameter]
     public string Language { get; set; } = "csharp";
 
     //public event EventHandler<SqlCodeRunEventArgs> SqlCodeRan = null!;
     [Parameter]
     public EventCallback<SqlCodeRunEventArgs> SqlCodeRanCallback { get; set; }
-    
+
     [Parameter]
     public EventCallback<KeyEventArgs> KeyCallback { get; set; }
 
@@ -77,10 +80,22 @@
                 Dimension = new Dimension {Height = totalHeight},
                 ColorDecorators = true,
                 OccurrencesHighlight = true,
+                QuickSuggestions = new QuickSuggestionsOptions
+                {
+                    Other = ".", 
+                    Comments = "null", 
+                    Strings = "null"
+                }
             };
 
     //editorElement = await JSRuntime.InvokeAsync<ElementReference>("createEditor", "editor", _editorSettings);
-            await JsRuntime.InvokeVoidAsync("addEventListener", "resize", DotNetObjectReference.Create(this), "HandleWindowResize");
+            await JsRuntime.InvokeVoidAsync("addEventListener", "resize", 
+                DotNetObjectReference.Create(this), 
+                "HandleWindowResize");
+            await JsHelper.InvokeVoidWithObjectAsync("useMonacoEditor", new
+            {
+                Id = _editor.Id,
+            });
         }
     }
 
@@ -153,4 +168,5 @@
     {
         await JsRuntime.InvokeVoidAsync("monacoEditorInsertText", _editor.Id, text);
     }
+
 }
