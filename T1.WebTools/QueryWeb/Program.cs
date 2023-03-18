@@ -47,6 +47,7 @@ services.AddSingleton<IReportRepo, ReportDbContext>();
 services.AddTransient<IQueryService, QueryService>();
 services.AddTransient<IJsJsonSerializer, JsJsonSerializer>();
 services.AddTransient<IJsHelper, JsHelper>();
+services.AddTransient<ILanguageService, LanguageService>();
 
 var app = builder.Build();
 
