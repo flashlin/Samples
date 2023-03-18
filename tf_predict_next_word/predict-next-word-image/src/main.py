@@ -51,7 +51,7 @@ def predict_next_sentence():
     predict_sentence = ''
     input_text = req['text']
     count = 0
-    while next_word != '<EOF>' and count < 20:
+    while next_word != '<EOS>' and count < 20:
         result = predict_service.predict_next_word(input_text)
         next_word = result[0]['word']
         predict_sentence += ' ' + next_word
