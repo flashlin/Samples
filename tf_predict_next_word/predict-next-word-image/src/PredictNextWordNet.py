@@ -43,7 +43,7 @@ class PredictNextWordModel:
         self.vocab.fit(corpus)
         n_grams = self.vocab.create_n_gram_corpus(corpus, self.config.input_length)
         # for text in n_grams:
-        #     print(f'n_grams={text}')
+        #    print(f'n_grams={text}')
         self.vocab.save(self.config.vocab_file)
         x, y = self.vocab.create_train_data(n_grams)
         self.try_load_model(self.config.model_file)

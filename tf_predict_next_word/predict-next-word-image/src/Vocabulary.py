@@ -59,12 +59,14 @@ class Vocabulary:
             sentence = sentence + ['<EOS>']
             words = sentence
             # 下一個字
-            for i in range(3, len(words)):
+            for i in range(3, len(words) + 1):
                 new_words = words[: i]
                 new_words = self.pad_words(new_words, max_len)
-                if self.is_spec_symbol_word(new_words[-1]):
-                    continue
+                # 如果尾巴是特別符號就結束
+                #if self.is_spec_symbol_word(new_words[-1]):
+                #    continue
                 new_text = ' '.join(new_words)
+                # print(f'{new_text=}')
                 new_corpus.append(new_text)
             # 克漏字
             for i in range(1, len(words)-1):
