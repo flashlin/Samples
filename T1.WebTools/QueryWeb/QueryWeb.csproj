@@ -20,4 +20,8 @@
     <ProjectReference Include="..\T1.WebTools\T1.WebTools.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Helpers" />
+  </ItemGroup>
+
 </Project>
