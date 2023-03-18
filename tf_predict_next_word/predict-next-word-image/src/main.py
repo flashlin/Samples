@@ -54,6 +54,9 @@ def predict_next_sentence():
     while next_word != '<EOS>' and count < 20:
         result = predict_service.predict_next_word(input_text)
         next_word = result[0]['word']
+        if next_word is None:
+            break
+        print(f'{next_word=}')
         predict_sentence += ' ' + next_word
         input_text += ' ' + next_word
         count += 1
