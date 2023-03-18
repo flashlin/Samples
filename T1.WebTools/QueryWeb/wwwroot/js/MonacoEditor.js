@@ -93,8 +93,6 @@ function createMonacoEditor(config)
             const words = last_chars.replace("\t", "").split(" ");
             const active_typing = words[words.length - 1];
             
-            console.log('trigger', active_typing);
-
             const t1 = {
                 label: 'SELECT',
                 kind: monaco.languages.CompletionItemKind.Keyword,
@@ -142,7 +140,6 @@ function createMonacoEditor(config)
     const editor = instance.editor;
     if( instance.language === 'csharp') {
         monaco.editor.setModelLanguage(editor.getModel(), newLanguage);
-        console.log('switch', newLanguage);
     }
     return this;
 }

@@ -172,8 +172,3 @@ public class ReportDbContext : DbContext, IReportRepo
         optionsBuilder.UseSqlServer(_connectionString);
     }
 }
-
-public class QueryDataSet
-{
-    public List<Dictionary<string, object>> Rows { get; set; } = new();
-}
