@@ -50,11 +50,13 @@ def predict_next_sentence():
     next_word = ''
     predict_sentence = ''
     input_text = req['text']
-    while next_word != '<EOF>':
+    count = 0
+    while next_word != '<EOF>' and count < 20:
         result = predict_service.predict_next_word(input_text)
-        next_word = result[0].word
+        next_word = result[0]['word']
         predict_sentence += ' ' + next_word
         input_text += ' ' + next_word
+        count += 1
     return jsonify({
         'predictSentence': predict_sentence
     })
