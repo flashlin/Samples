@@ -1,16 +1,18 @@
-from src.PredictNextWordNet import PredictNextWordConfig, PredictNextWordModel
+from PredictNextWordNet import PredictNextWordConfig, PredictNextWordModel
 
 
 class PredictService:
     def __init__(self, logger):
         self.logger = logger
+        config = PredictNextWordConfig()
+        model = PredictNextWordModel(config)
+        model.try_load_model(config.model_file)
+        self.model = model
 
     def predict_next_word(self, text):
         logger = self.logger
         logger.info('predict_next_word: %s', f'{text=}')
-        config = PredictNextWordConfig()
-        model = PredictNextWordModel(config)
-        model.try_load_model(config.model_file)
+        model = self.model
         top_k_word, top_k_prob = model.predict_next_word(text)
         result = []
         logger.info(f"'{text}' Top 5 predicted next words and probabilities:")
