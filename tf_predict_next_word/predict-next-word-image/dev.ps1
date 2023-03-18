@@ -1,1 +1,2 @@
-flask --app ./src/main run
+#flask --app ./src/main run
+python ./src/main.py
