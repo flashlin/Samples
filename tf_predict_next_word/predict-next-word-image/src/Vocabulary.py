@@ -9,7 +9,8 @@ VOCAB_PICKLE = 'vocab.pickle'
 
 class Vocabulary:
     def __init__(self, num_words=9000):
-        self.tokenizer = Tokenizer(num_words=num_words, oov_token="<OOV>")
+        self.tokenizer = Tokenizer(num_words=num_words, oov_token="<OOV>",
+                                   filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n')
         self.symbols = {
             ',': '<COMMA>'
         }
@@ -47,9 +48,10 @@ class Vocabulary:
         return True
 
     def normal_text(self, text):
-        words = text.split()
-        words = [self.symbols[word] if word in self.symbols else word for word in words]
-        return ' '.join(words)
+        # words = text.split()
+        # words = [self.symbols[word] if word in self.symbols else word for word in words]
+        # return ' '.join(words)
+        return text
 
     def create_n_gram_corpus(self, corpus, max_len=10):
         new_corpus = []
@@ -72,8 +74,8 @@ class Vocabulary:
             for i in range(1, len(words)-1):
                 new_words = words[: i] + ['<FILL>'] + words[i+1:] + words[i:i+1]
                 new_words = self.pad_words(new_words, max_len)
-                if self.is_spec_symbol_word(new_words[-1]):
-                    continue
+                # if self.is_spec_symbol_word(new_words[-1]):
+                #     continue
                 new_text = ' '.join(new_words)
                 new_corpus.append(new_text)
         self.tokenizer.fit_on_texts(new_corpus)
