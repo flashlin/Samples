@@ -1,45 +1,9 @@
-﻿using System.Runtime.Serialization;
-using System.ServiceModel;
 using Grpc.Core;
 using Grpc.Net.Client;
-using ProtoBuf.Grpc;
 using ProtoBuf.Grpc.Client;
-using ProtoBuf.Grpc.Configuration;
 using ProtoBuf.Grpc.Server;
 
 namespace WebAutoGrpcSample.GrpcServices;
-
-//dotnet tool install -g dotnet-grpc
-public interface IMyService
-{
-    public string SayHello(string message);
-}
-
-[ServiceContract]
-[Service("foo")]
-public interface IMyAmazingService {
-    ValueTask<SearchResponse> SearchAsync(SearchRequest request);
-}
-
-[DataContract]
-public class SearchRequest
-{
-    [DataMember(Order = 1)]
-    public string Name { get; set; }
-}
-
-public class SearchResponse
-{
-    [DataMember(Order = 1)]
-    public int Id { get; set; }
-}
-
-public class MyServer : IMyAmazingService {
-    public ValueTask<SearchResponse> SearchAsync(SearchRequest request)
-    {
-        throw new NotImplementedException();
-    }
-}
 
 public class Sample1
 {
