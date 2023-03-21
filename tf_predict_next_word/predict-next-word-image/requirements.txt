@@ -1,4 +1,8 @@
+# conda create -n tf2_p382 python=3.8.2
+# conda install tensorflow-gpu
 Flask
-# 用於將復雜數據類型（例如對象）與內置 Python 數據類型相互轉換
+# convert object to json
 marshmallow
 pyodbc
+# tensorflow-addons
+g2p_en
