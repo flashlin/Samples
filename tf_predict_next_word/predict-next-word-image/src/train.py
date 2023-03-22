@@ -7,7 +7,7 @@ corpus = [
 
 config = PredictNextWordConfig()
 model = PredictNextWordModel(config)
-model.fit(corpus, batch_size=2, epochs=100)
+model.fit(corpus, batch_size=2, epochs=10)
 
 
 def predict(test_text):
