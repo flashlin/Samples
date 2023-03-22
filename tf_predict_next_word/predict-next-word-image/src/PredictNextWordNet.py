@@ -5,6 +5,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import Layer
 from Vocabulary import Vocabulary
 from SimpleTokenizer import SimpleTokenizer
+from MyBertTokenizer import MyBertTokenizer
 
 
 class PredictNextWordConfig:
@@ -21,7 +22,8 @@ class PredictNextWordConfig:
 class PredictNextWordModel:
     def __init__(self, config: PredictNextWordConfig):
         self.config = config
-        self.vocab = Vocabulary(SimpleTokenizer(config.num_words))
+        # self.vocab = Vocabulary(SimpleTokenizer(config.num_words))
+        self.vocab = Vocabulary(MyBertTokenizer())
         self.vocab.try_load(self.config.vocab_file)
         show_epochs = 10
         self.checkpoint = tf.keras.callbacks.ModelCheckpoint(
