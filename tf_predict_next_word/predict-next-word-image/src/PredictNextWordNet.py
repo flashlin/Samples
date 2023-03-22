@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.layers import Layer
 from Vocabulary import Vocabulary
+from SimpleTokenizer import SimpleTokenizer
 
 
 class PredictNextWordConfig:
@@ -11,7 +12,7 @@ class PredictNextWordConfig:
     embedding_size = 100
     lstm_units = 128
     batch_size = 64
-    epochs = 100
+    epochs = 20
     input_length = 100
     vocab_file = 'models/predict.vocab'
     model_file = 'models/predict.h5'
@@ -20,7 +21,7 @@ class PredictNextWordConfig:
 class PredictNextWordModel:
     def __init__(self, config: PredictNextWordConfig):
         self.config = config
-        self.vocab = Vocabulary(config.num_words)
+        self.vocab = Vocabulary(SimpleTokenizer(config.num_words))
         self.vocab.try_load(self.config.vocab_file)
         show_epochs = 10
         self.checkpoint = tf.keras.callbacks.ModelCheckpoint(
@@ -41,7 +42,7 @@ class PredictNextWordModel:
 
     def fit(self, corpus, batch_size, epochs):
         self.vocab.fit(corpus)
-        n_grams = self.vocab.create_n_gram_corpus(corpus, self.config.input_length)
+        n_grams = self.vocab.create_n_gram_corpus(corpus, self.config.input_length - 1)
         # for text in n_grams:
         #    print(f'n_grams={text}')
         self.vocab.save(self.config.vocab_file)
@@ -61,8 +62,10 @@ class PredictNextWordModel:
         self.model.save(model_file)
 
     def predict_next_word(self, test_text, top_k=5):
-        eos_id = self.vocab.texts_to_sequences(['<EOS>'])
+        eos_id = self.vocab.texts_to_sequences(['<EOS>'])[0]
+        print(f'{eos_id=}')
         test_seq = self.vocab.texts_to_sequences([test_text])[0]
+        print(f'{test_seq=}')
         test_seq = pad_sequences([test_seq], maxlen=self.config.input_length - 1, padding='pre', value=eos_id)
         # 使用模型預測下一個單詞的機率分佈
         pred_prob = self.model.predict(test_seq)[0]
