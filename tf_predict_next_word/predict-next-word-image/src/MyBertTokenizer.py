@@ -7,7 +7,9 @@ from transformers import BertTokenizer
 class MyBertTokenizer:
     def __init__(self):
         self.tokenizer = tokenizer = BertTokenizer.from_pretrained('bert-base-cased', never_split=['>='])
-        tokenizer.add_tokens(['"""', '>=', '<=', '!=', '<>', '~=', '+=', '-=', '++', '--'])
+        tokenizer.add_tokens(['"""', '>=', '<=', '!=', '<>', '~=', '+=', '-=', '++', '--', ' ',
+                              '\n', '\r', '\t',
+                              chr(0)])
 
     def __len__(self):
         return len(self.tokenizer.word_index)
@@ -28,7 +30,17 @@ class MyBertTokenizer:
         return sequences[1:-1]
 
     def decode(self, sequence):
-        return ' '.join([self.index_word(idx) for idx in sequence])
+        return self.join_words([self.index_word(idx) for idx in sequence])
+
+    @staticmethod
+    def join_words(words):
+        text = ''
+        for word in words:
+            if word.startswith('##'):
+                text += word[2:]
+            else:
+                text += word
+        return text
 
     def texts_to_sequences(self, texts):
         sequences = []
