@@ -27,6 +27,9 @@ class MyBertTokenizer:
         sequences = self.tokenizer.encode(tokens)
         return sequences[1:-1]
 
+    def decode(self, sequence):
+        return ' '.join([self.index_word(idx) for idx in sequence])
+
     def texts_to_sequences(self, texts):
         sequences = []
         for text in texts:
@@ -36,7 +39,8 @@ class MyBertTokenizer:
 
     def index_word(self, idx):
         text_restored = self.tokenizer.decode([idx])
-        return text_restored[1]
+        return text_restored
+        #return text_restored[1]
 
     def save(self, vocab_path):
         pass

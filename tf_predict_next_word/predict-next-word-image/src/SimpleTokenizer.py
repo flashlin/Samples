@@ -15,9 +15,9 @@ class SimpleTokenizer:
 
     def tokenize(self, text):
         words = text.split()
-        if len(words) == 1 and words[0] == '<EOS>':
-            return words
-        words = words + ['<EOS>']
+        # if len(words) == 1 and words[0] == '<EOS>':
+        #     return words
+        # words = words + ['<EOS>']
         return words
 
     def fit_on_texts(self, texts):
@@ -26,6 +26,9 @@ class SimpleTokenizer:
     def encode(self, text):
         sequence = self.texts_to_sequences([text])
         return np.array(sequence).flatten()
+
+    def decode(self, sequence):
+        return ' '.join([self.index_word(idx) for idx in sequence])
 
     def texts_to_sequences(self, texts):
         return self.tokenizer.texts_to_sequences(texts)
