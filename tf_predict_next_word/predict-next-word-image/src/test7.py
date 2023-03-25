@@ -25,6 +25,7 @@ def fit(training_data):
     optimizer = tf.keras.optimizers.Adam(learning_rate=2e-5, epsilon=1e-08, clipnorm=1.0)
     loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     metric = tf.keras.metrics.SparseCategoricalAccuracy('accuracy')
+    model = TFBertForMaskedLM.from_pretrained("my_model_weights")
     model.compile(optimizer=optimizer, loss=loss, metrics=[metric])
 
     model.fit(input_ids, input_ids, epochs=100, batch_size=1)
@@ -33,8 +34,8 @@ def fit(training_data):
 
 
 training_data = ["select id from customer", "select id,name from prod"]
-# model = fit(training_data)
-model = TFBertForMaskedLM.from_pretrained("my_model_weights")
+model = fit(training_data)
+# model = TFBertForMaskedLM.from_pretrained("my_model_weights")
 
 predict(model, 'select id from ')
 print('worked')
