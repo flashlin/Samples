@@ -45,7 +45,7 @@ class PredictNextWordModel:
 
     def fit(self, corpus, batch_size, epochs):
         self.vocab.fit(corpus)
-        n_grams = self.vocab.create_n_gram_values(corpus, self.config.input_length)
+        n_grams = self.vocab.create_n_gram_by_corpus(corpus, self.config.input_length)
         # for sequence in n_grams:
         #     text = self.vocab.tokenizer.decode(sequence)
         #     print(f'n_grams={text}')

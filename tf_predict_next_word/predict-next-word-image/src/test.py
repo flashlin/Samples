@@ -13,18 +13,16 @@ class TestAdd(unittest.TestCase):
     def test_n_grams(self):
         corpus = [ 'select id from customer' ]
         vocab = Vocabulary(MyBertTokenizer())
-        n_grams = vocab.create_n_gram_values(corpus, 10)
-        for sequence in n_grams:
-            text = vocab.tokenizer.decode(sequence)
-            print(f'n_grams1={text=}')
-            print(f'n_grams2={sequence=}')
-            print()
+        n_grams = vocab.create_n_gram_by_corpus(corpus, 10)
+        # for sequence in n_grams:
+        #     text = vocab.tokenizer.decode(sequence)
+        #     print(f'n_gram {sequence=} {text=}')
 
     def encode_token(self, token):
         expected = token
         tokenizer = MyBertTokenizer()
         sequences = tokenizer.encode([token])
-        print(f'test {token=} {sequences=}')
+        # print(f'test {token=} {sequences=}')
         text_restored = tokenizer.decode(sequences)
         self.assertEqual(text_restored, expected)
 

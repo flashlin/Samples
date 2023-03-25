@@ -1,13 +1,13 @@
 from PredictNextWordNet import PredictNextWordConfig, PredictNextWordModel
 
-corpus = [
+sequences = [
     "select id from customer",
     "select id , name from customer"
 ]
 
 config = PredictNextWordConfig()
 model = PredictNextWordModel(config)
-model.fit(corpus, batch_size=2, epochs=100)
+model.fit(sequences, batch_size=2, epochs=100)
 
 
 def predict(test_text):
