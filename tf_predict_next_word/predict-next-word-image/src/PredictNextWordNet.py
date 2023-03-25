@@ -23,13 +23,14 @@ class PredictNextWordModel:
     def __init__(self, config: PredictNextWordConfig):
         self.config = config
         self.tokenizer = MyBertTokenizer()
+        self.config.num_words = len(self.tokenizer)
         # self.vocab = Vocabulary(SimpleTokenizer(config.num_words))
         self.vocab = Vocabulary(self.tokenizer)
         self.vocab.try_load(self.config.vocab_file)
         show_epochs = 10
         self.checkpoint = tf.keras.callbacks.ModelCheckpoint(
             config.model_file, monitor='loss', verbose=1,
-            save_best_only=True, mode='min', period=show_epochs)
+            save_best_only=True, mode='min', save_freq=show_epochs)
         self.model = self.create_model()
 
     def create_model(self):
