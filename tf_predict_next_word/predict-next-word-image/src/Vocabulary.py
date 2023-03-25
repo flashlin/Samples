@@ -24,13 +24,13 @@ class Vocabulary:
     def decode(self, sequence):
         return self.tokenizer.decode(sequence)
 
-    def create_n_gram_values(self, corpus, max_len=10):
+    def create_n_gram_by_corpus(self, corpus, max_len=10):
         sequences = []
         for text in corpus:
             words = self.tokenizer.tokenize(text)
             values = self.tokenizer.encode(words)
             sequences.append(values)
-        return self.create_n_gram(sequences, max_len)
+        return self.create_n_gram_by_values(sequences, max_len)
         # new_corpus = []
         # for text in corpus:
         #     words = self.tokenizer.tokenize(text)
@@ -50,24 +50,24 @@ class Vocabulary:
         #self.tokenizer.fit_on_texts(new_corpus)
         #return new_corpus
 
-    def create_n_gram(self, corpus, max_len=10):
-        new_corpus = []
+    def create_n_gram_by_values(self, sequences, max_len=10):
+        new_sequences = []
         fill = self.tokenizer.FILL_IDX
         eos = self.tokenizer.EOS_IDX
-        for words in corpus:
+        for sequence in sequences:
             # 下一個字
-            for i in range(3, len(words) + 1):
-                new_words = words[: i]
-                new_words = self.pad_sequences(new_words, max_len, eos)
+            for i in range(3, len(sequence) + 1):
+                new_sequence = sequence[: i]
+                new_sequence = self.pad_sequences(new_sequence, max_len, eos)
                 # print(f'{new_words=} {words=} {len(words)=} {i=}')
-                new_corpus.append(new_words)
+                new_sequences.append(new_sequence)
             # 克漏字
-            for i in range(1, len(words) - 1):
+            for i in range(1, len(sequence) - 1):
                 # new_words = words[: i] + [fill] + words[i+1:] + words[i:i+1]
-                new_words = np.concatenate((words[: i], [fill], words[i+1:]))
-                new_words = self.pad_sequences(new_words, max_len, eos)
-                new_corpus.append(new_words)
-        return new_corpus
+                new_sequence = np.concatenate((sequence[: i], [fill, eos], sequence[i+1:]))
+                new_sequence = self.pad_sequences(new_sequence, max_len, eos)
+                new_sequences.append(new_sequence)
+        return new_sequences
 
     def index_word(self, index):
         return self.tokenizer.index_word(index)
