@@ -22,8 +22,9 @@ class PredictNextWordConfig:
 class PredictNextWordModel:
     def __init__(self, config: PredictNextWordConfig):
         self.config = config
-        self.vocab = Vocabulary(SimpleTokenizer(config.num_words))
-        # self.vocab = Vocabulary(MyBertTokenizer())
+        self.tokenizer = MyBertTokenizer()
+        # self.vocab = Vocabulary(SimpleTokenizer(config.num_words))
+        self.vocab = Vocabulary(self.tokenizer)
         self.vocab.try_load(self.config.vocab_file)
         show_epochs = 10
         self.checkpoint = tf.keras.callbacks.ModelCheckpoint(
@@ -64,9 +65,8 @@ class PredictNextWordModel:
     def save_model(self, model_file='models/predict.pb'):
         self.model.save(model_file)
 
-    def predict_next_word(self, test_text, top_k=5):
-        eos_id = self.vocab.texts_to_sequences(['<EOS>'])[0]
-        print(f'{eos_id=}')
+    def predict_next_value(self, test_text, top_k=5):
+        eos_id = self.tokenizer.EOS_IDX
         test_seq = self.vocab.texts_to_sequences([test_text])[0]
         print(f'{test_seq=}')
         test_seq = pad_sequences([test_seq], maxlen=self.config.input_length - 1, padding='pre', value=eos_id)
@@ -75,6 +75,29 @@ class PredictNextWordModel:
         # 取出最高的 k 個機率值和對應的單詞索引
         top_k_idx_list = pred_prob.argsort()[-top_k:][::-1]
         top_k_prob = pred_prob[top_k_idx_list]
+        return top_k_idx_list, top_k_prob
+
+    def predict_next_word(self, test_text, top_k=5):
+        def predict(new_text, top_k, prev_idx_list):
+            if top_k == self.tokenizer.EOS_IDX:
+                return prev_idx_list
+            new_text += self.tokenizer.decode([top_k])
+            prev_idx_list.append(top_k)
+            next = self.predict_next_value(new_text, 1)
+            return predict(new_text, next[0].top_k, prev_idx_list)
+
+        top_k_idx, top_k_prob = self.predict_next_value(test_text, top_k)
+
+        top_k_text = []
+        for _ in top_k_idx:
+            top_k_text.append(test_text)
+
+        top_k_word = []
+        for new_text, top_k in zip(top_k_text, top_k_idx):
+            top_k_idx_list = predict(new_text, top_k, [top_k])
+            word = self.tokenizer.decode(top_k_idx_list)
+            top_k_word.append(word)
+
         # 將單詞索引轉換為對應的單詞
-        top_k_word = [self.vocab.index_word(idx) for idx in top_k_idx_list]
+        top_k_word = [self.vocab.index_word(idx) for idx in top_k_idx]
         return top_k_word, top_k_prob
