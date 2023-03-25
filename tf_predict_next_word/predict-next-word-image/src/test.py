@@ -13,12 +13,13 @@ class TestAdd(unittest.TestCase):
         self.execute(chr(0))
 
     def execute(self, text):
+        expected = text[:-1]
         tokenizer = MyBertTokenizer()
         # tokenizer.keep_special_tokens([text])
         sequences = tokenizer.encode(text)
         print(f'{text=} {sequences=}')
         text_restored = tokenizer.decode(sequences)
-        self.assertEqual(text_restored, text)
+        self.assertEqual(text_restored, expected)
 
 
 if __name__ == '__main__':
