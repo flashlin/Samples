@@ -54,6 +54,7 @@ class Vocabulary:
         new_sequences = []
         fill = self.tokenizer.FILL_IDX
         eos = self.tokenizer.EOS_IDX
+        cat = self.tokenizer.CAT_IDX
         for sequence in sequences:
             # 下一個字
             for i in range(3, len(sequence) + 1):
@@ -64,7 +65,7 @@ class Vocabulary:
             # 克漏字
             for i in range(1, len(sequence) - 1):
                 # new_words = words[: i] + [fill] + words[i+1:] + words[i:i+1]
-                new_sequence = np.concatenate((sequence[: i], [fill, eos], sequence[i+1:]))
+                new_sequence = np.concatenate((sequence[: i], [fill, cat], sequence[i+1:]))
                 new_sequence = self.pad_sequences(new_sequence, max_len, eos)
                 new_sequences.append(new_sequence)
         return new_sequences

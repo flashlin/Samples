@@ -9,13 +9,15 @@ class MyBertTokenizer:
         self.tokenizer = tokenizer = BertTokenizer.from_pretrained('bert-base-cased', never_split=['>='])
         self.EOS = chr(0)
         self.FILL = chr(1)
+        self.CAT = chr(2)
         tokenizer.add_tokens([
-            self.EOS, self.FILL,
+            self.EOS, self.FILL, self.CAT,
             '"""', '>=', '<=', '!=', '<>', '~=', '+=', '-=', '++', '--', ' ',
             '\n', '\r', '\t'
             ])
         self.EOS_IDX = self.internal_encode(self.EOS)[0]
         self.FILL_IDX = self.internal_encode(self.FILL)[0]
+        self.CAT_IDX = self.internal_encode(self.CAT)[0]
 
     def __len__(self):
         return len(self.tokenizer)
@@ -31,9 +33,10 @@ class MyBertTokenizer:
         sequences = []
         for token in tokens:
             values = self.internal_encode(token)
-            values = np.concatenate((values, [self.EOS_IDX]))
+            values = np.concatenate((values, [self.CAT_IDX]))
             sequences = np.concatenate((sequences, values))
         # print(f'MyBert encode {tokens=} {sequences=}')
+        sequences = np.concatenate((sequences[:-1], [self.EOS_IDX]))
         return sequences
 
     def internal_encode(self, tokens):
@@ -44,6 +47,8 @@ class MyBertTokenizer:
         sequence = self.r_trim(sequence)
         for idx in sequence:
             if idx == self.EOS_IDX:
+                break
+            if idx == self.CAT_IDX:
                 text += ' '
                 continue
             word = self.index_word(idx)

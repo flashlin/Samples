@@ -6,6 +6,7 @@ from tensorflow.keras.layers import Layer
 from Vocabulary import Vocabulary
 from SimpleTokenizer import SimpleTokenizer
 from MyBertTokenizer import MyBertTokenizer
+import random
 
 
 class PredictNextWordConfig:
@@ -69,7 +70,7 @@ class PredictNextWordModel:
     def predict_next_value(self, test_text, top_k=5):
         eos_id = self.tokenizer.EOS_IDX
         test_seq = self.vocab.texts_to_sequences([test_text])[0]
-        print(f'{test_seq=}')
+        # print(f'{test_seq=}')
         test_seq = pad_sequences([test_seq], maxlen=self.config.input_length - 1, padding='pre', value=eos_id)
         # 使用模型預測下一個單詞的機率分佈
         pred_prob = self.model.predict(test_seq)[0]
@@ -79,13 +80,15 @@ class PredictNextWordModel:
         return top_k_idx_list, top_k_prob
 
     def predict_next_word(self, test_text, top_k=5):
-        def predict(new_text, top_k, prev_idx_list):
-            if top_k == self.tokenizer.EOS_IDX:
+        def predict(new_text, next_value, prev_idx_list):
+            # print(f'predict {new_text=}')
+            if next_value == self.tokenizer.EOS_IDX:
                 return prev_idx_list
-            new_text += self.tokenizer.decode([top_k])
-            prev_idx_list.append(top_k)
-            next = self.predict_next_value(new_text, 1)
-            return predict(new_text, next[0].top_k, prev_idx_list)
+            new_text += self.tokenizer.decode([next_value])
+            prev_idx_list.append(next_value)
+            next_top_k, next_top_prob = self.predict_next_value(new_text, top_k)
+            rand_num = random.randint(0, top_k)
+            return predict(new_text, next_top_k[rand_num], prev_idx_list)
 
         top_k_idx, top_k_prob = self.predict_next_value(test_text, top_k)
 
@@ -99,6 +102,8 @@ class PredictNextWordModel:
             word = self.tokenizer.decode(top_k_idx_list)
             top_k_word.append(word)
 
+        print(f'{top_k_word=}')
+
         # 將單詞索引轉換為對應的單詞
-        top_k_word = [self.vocab.index_word(idx) for idx in top_k_idx]
+        # top_k_word = [self.vocab.index_word(idx) for idx in top_k_idx]
         return top_k_word, top_k_prob
