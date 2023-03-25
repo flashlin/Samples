@@ -18,7 +18,7 @@ class MyBertTokenizer:
         self.FILL_IDX = self.internal_encode(self.FILL)[0]
 
     def __len__(self):
-        return len(self.tokenizer.word_index)
+        return len(self.tokenizer)
 
     def tokenize(self, text):
         words = text.split()
