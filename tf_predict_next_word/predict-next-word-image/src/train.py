@@ -7,7 +7,7 @@ sequences = [
 
 config = PredictNextWordConfig()
 model = PredictNextWordModel(config)
-model.fit(sequences, batch_size=2, epochs=100)
+model.fit(sequences, batch_size=2, epochs=10)
 
 
 def predict(test_text):
@@ -16,6 +16,9 @@ def predict(test_text):
     for word, prob in zip(top_k_word, top_k_prob):
         print(f"{word}: {prob:.4f}")
 
+print()
+print()
+print()
 
 predict("select id")
 predict("select id from")
