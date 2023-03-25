@@ -24,17 +24,13 @@ class Vocabulary:
     def decode(self, sequence):
         return self.tokenizer.decode(sequence)
 
-    def create_n_gram_corpus(self, corpus, max_len=10):
+    def create_n_gram_values(self, corpus, max_len=10):
         sequences = []
         for text in corpus:
             words = self.tokenizer.tokenize(text)
-            seq = self.tokenizer.encode(words)
-            sequences.append(seq)
-        self.tokenizer.fit_on_texts(corpus)
-        self.tokenizer.fit_on_texts(['<FILL>'])
-        fill_idx = self.tokenizer.encode('<FILL>')[0]
-        pad_idx = self.tokenizer.encode('<EOS>')[0]
-        return self.create_n_gram(sequences, fill_idx, pad_idx, max_len)
+            values = self.tokenizer.encode(words)
+            sequences.append(values)
+        return self.create_n_gram(sequences, max_len)
         # new_corpus = []
         # for text in corpus:
         #     words = self.tokenizer.tokenize(text)
@@ -54,25 +50,22 @@ class Vocabulary:
         #self.tokenizer.fit_on_texts(new_corpus)
         #return new_corpus
 
-    def create_n_gram(self, corpus, fill, pad, max_len=10):
+    def create_n_gram(self, corpus, max_len=10):
         new_corpus = []
+        fill = self.tokenizer.FILL_IDX
+        eos = self.tokenizer.EOS_IDX
         for words in corpus:
             # 下一個字
             for i in range(3, len(words) + 1):
                 new_words = words[: i]
-                new_words = self.pad_sequences(new_words, max_len, pad)
+                new_words = self.pad_sequences(new_words, max_len, eos)
                 # print(f'{new_words=} {words=} {len(words)=} {i=}')
                 new_corpus.append(new_words)
             # 克漏字
             for i in range(1, len(words) - 1):
-                # print(f'{words=} {i=}')
-                # print(f'{words[:i]=} fill')
-                # print(f'{words[i+1:]=}')
-                # print(f'last {words[i:i+1]=}')
-                # print()
                 # new_words = words[: i] + [fill] + words[i+1:] + words[i:i+1]
                 new_words = np.concatenate((words[: i], [fill], words[i+1:]))
-                new_words = self.pad_sequences(new_words, max_len, pad)
+                new_words = self.pad_sequences(new_words, max_len, eos)
                 new_corpus.append(new_words)
         return new_corpus
 
@@ -117,7 +110,7 @@ class Vocabulary:
 
     @staticmethod
     def pad_sequences(seq, max_len, pad_value=0):
-        assert len(seq) <= max_len
+        assert len(seq) <= max_len, f"len(seq) {len(seq)} <= {max_len}"
         seq = np.pad(seq, (0, max_len - len(seq)), mode='constant', constant_values=pad_value)
         return seq
 

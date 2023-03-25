@@ -30,9 +30,7 @@ class SimpleTokenizer:
         self.tokenizer.fit_on_texts(texts)
 
     def encode(self, text):
-        print(f'encode {text=}')
         sequence = self.texts_to_sequences([text])
-        print(f'encode {sequence=}')
         return np.array(sequence).flatten()
 
     def decode(self, sequence):
