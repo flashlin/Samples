@@ -23,15 +23,23 @@ def fit(train_data):
         model = TFAutoModelForMaskedLM.from_pretrained('microsoft/codebert-base')
     print('start training')
     optimizer = tf.keras.optimizers.Adam(learning_rate=1e-5)
-    for epoch in range(100):
+    best_loss = float('inf')
+    for epoch in range(200):
         with tf.GradientTape() as tape:
             outputs = model(inputs["input_ids"], inputs["attention_mask"])
             loss = tf.reduce_mean(outputs.logits)
         gradients = tape.gradient(loss, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-        if epoch % 10 == 0:
+        if best_loss > loss > 0:
+            best_loss = loss
+            print("Save Loss {}".format(loss))
+            model.save_pretrained(model_path)
+        else:
+            print("FIAL Loss {}".format(loss))
+            return model
+        if epoch % 20 == 0:
             print("Epoch {}, Loss {}".format(epoch, loss))
-    model.save_pretrained(model_path)
+    # model.save_pretrained(model_path)
     return model
 
 
@@ -43,7 +51,8 @@ def predict(model, text="select [MASK]"):
     top_5 = tf.math.top_k(predictions, k=5)
     for i, idx in enumerate(top_5.indices.numpy()):
         predicted_token = tokenizer.convert_ids_to_tokens([idx])[0]
-        print(f"{i + 1}. {predicted_token}")
+        predicted_prob = top_5.values.numpy()[i]
+        print(f"{i + 1}. {predicted_token} {predicted_prob}")
 
 
 model = fit(t)
