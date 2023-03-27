@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Embedding, MultiHeadAttention, Dense
+from tensorflow.keras.layers import Input, Embedding, MultiHeadAttention, Dense, Reshape, Flatten
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint
 
@@ -9,17 +9,31 @@ max_seq_len = 100
 vocab_size = 1000
 
 # Define the input layer
+# inputs = Input(shape=(max_seq_len-1,))
+# embed = Embedding(vocab_size, 128)(inputs)
+# # Reshape the input tensor to 3D shape
+# reshape = Reshape((max_seq_len-1, 128))(embed)
+# # Define the transformer block
+# attn = MultiHeadAttention(8, 16)(reshape, reshape)
+# out = Dense(vocab_size, activation='softmax')(attn)
+# model = Model(inputs=inputs, outputs=out)
+
+# inputs = Input(shape=(None, max_seq_len-1))
+# embed = Embedding(vocab_size, 128)(inputs)
+# reshape = Reshape((-1, max_seq_len-1, 128))(embed)
+# attn = MultiHeadAttention(8, 16)(reshape, reshape)
+# flatten = Flatten()(attn)
+# out = Dense(1, activation='sigmoid')(flatten)
+# model = Model(inputs=inputs, outputs=out)
+# model.compile(loss='binary_crossentropy', optimizer='adam')
+
 inputs = Input(shape=(max_seq_len,))
-
-# Define the embedding layer
 embed = Embedding(vocab_size, 128)(inputs)
-
-# Define the transformer block
-attn = MultiHeadAttention(8, 16)(embed, embed)
+reshape = Reshape((max_seq_len, 128))(embed)
+attn = MultiHeadAttention(8, 16)(reshape, reshape)
 out = Dense(vocab_size, activation='softmax')(attn)
-
-# Create the model
 model = Model(inputs=inputs, outputs=out)
+model.compile(loss='sparse_categorical_crossentropy', optimizer='adam')
 
 # Compile the model
 model.compile(loss='sparse_categorical_crossentropy', optimizer='adam')
@@ -38,7 +52,6 @@ def pad_sequences(seq, max_len, pad_value=0):
 
 
 def create_n_gram_by_values(sequences, fill, eos, max_len=10):
-    print(f'{sequences=}')
     new_sequences = []
     for sequence in sequences:
         sequence = np.concatenate((sequence, [eos]))
@@ -51,7 +64,6 @@ def create_n_gram_by_values(sequences, fill, eos, max_len=10):
         # 克漏字
         for i in range(1, len(sequence) - 2):
             mask = sequence[i:i+1]
-            print(f'{mask=}')
             new_sequence = np.concatenate((sequence[: i], [fill], sequence[i + 1:], mask))
             new_sequence = pad_sequences(new_sequence, max_len, eos)
             new_sequences.append(new_sequence)
@@ -65,16 +77,19 @@ for text in train_data:
 
 x_train = []
 y_train = []
-n_gram = create_n_gram_by_values(train_words, '<mask>', '<eos>', 20)
+n_gram = create_n_gram_by_values(train_words, '<mask>', '<eos>', max_len=max_seq_len)
 for gram in n_gram:
     prev = gram[:-1]
     next = gram[-1]
     x_train.append(prev)
-    y_train.append(next)
+    y_train.append([next])
 
-for x, y in zip(x_train, y_train):
-    print(f'{x=}')
-    print(f'{y=}')
+print(f'{x_train}')
+print(f'{y_train}')
+
+# for x, y in zip(x_train, y_train):
+#     print(f'{x=}')
+#     print(f'{y=}')
 
 checkpoint = ModelCheckpoint('best_model.h5', monitor='loss', save_best_only=True)
 model.fit(x_train, y_train, epochs=100, callbacks=[checkpoint])
