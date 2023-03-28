@@ -8,41 +8,11 @@
 <p role="status">Current count: @_currentCount</p>
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-<div class="my-modal">
-  <div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">title</h5>
-        <button type="button" class="btn-close"></button>
-      </div>
-        <div class="modal-body">
-            123
-            <MergeTableForm></MergeTableForm>
-        </div>
-        <div class="modal-footer">
-            Footer
-            <button type="button" class="btn btn-secondary">關閉</button>
-        </div>
-    </div>
-  </div>
-</div>
-
-<style>
-.my-modal {
-    display: block;
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 0;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    z-index: 100;
-}    
-</style>
-
-
+<Modal IsShow="true">
+    <Body>
+       <MergeTableForm></MergeTableForm>
+    </Body>
+</Modal>
 
 <div class="container-fluid">
     <div class="row">

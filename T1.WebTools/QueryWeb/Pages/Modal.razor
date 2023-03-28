@@ -1,0 +1,52 @@
+﻿<div class="my-modal" style="@_showCss">
+  <div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">@Title</h5>
+        <button type="button" class="btn-close"></button>
+      </div>
+      <div class="modal-body">
+        @Body
+      </div>
+      <div class="modal-footer">
+        @Footer
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.my-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 0;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    z-index: 100;
+}    
+</style>
+
+@code {
+  [Parameter]
+  public string Title { get; set; } = string.Empty;
+
+  [Parameter]
+  public RenderFragment Body { get; set; } = _ => { };
+
+  [Parameter]
+  public RenderFragment Footer { get; set; } = _ => { };
+
+  [Parameter]
+  public bool IsShow { get; set; }
+
+  string _showCss = "display: none;";
+
+  protected override void OnParametersSet()
+  {
+    _showCss = IsShow ? "display: block;" : "display: none;";
+  }
+}
