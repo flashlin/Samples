@@ -2,6 +2,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using ProtoBuf.Grpc.Client;
 using ProtoBuf.Grpc.Server;
+using Shared.Contracts;
 
 namespace WebAutoGrpcSample.GrpcServices;
 
@@ -29,9 +30,9 @@ public class Sample1
         server.Services.AddCodeFirst<IMyAmazingService>(new MyServer());
         server.Start();
 
-        Console.WriteLine("server listening on port " + port);
-        Console.ReadKey();
-
-        await server.ShutdownAsync();
+        // Console.WriteLine("server listening on port " + port);
+        // Console.ReadKey();
+        //
+        // await server.ShutdownAsync();
     }
 }

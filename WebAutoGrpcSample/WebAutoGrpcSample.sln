@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAutoGrpcSample", "WebAutoGrpcSample\WebAutoGrpcSample.csproj", "{523B74A1-2E37-478C-9006-A5202462CD6E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientConsoleApp", "ClientConsoleApp\ClientConsoleApp.csproj", "{3DAED323-0274-48AB-9652-689B0BEB3432}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Contracts", "Shared.Contracts\Shared.Contracts.csproj", "{96CCD2A0-2F30-4060-B235-F0D3C3313161}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{523B74A1-2E37-478C-9006-A5202462CD6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{523B74A1-2E37-478C-9006-A5202462CD6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{523B74A1-2E37-478C-9006-A5202462CD6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DAED323-0274-48AB-9652-689B0BEB3432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DAED323-0274-48AB-9652-689B0BEB3432}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DAED323-0274-48AB-9652-689B0BEB3432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DAED323-0274-48AB-9652-689B0BEB3432}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96CCD2A0-2F30-4060-B235-F0D3C3313161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96CCD2A0-2F30-4060-B235-F0D3C3313161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96CCD2A0-2F30-4060-B235-F0D3C3313161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96CCD2A0-2F30-4060-B235-F0D3C3313161}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
