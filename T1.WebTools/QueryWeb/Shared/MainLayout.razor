@@ -42,7 +42,7 @@
 
 @code{
 
-    string _appStateClass = string.Empty;
+    string _appStateClass = "visually-hidden";
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
@@ -50,7 +50,7 @@
         {
             AppState.Subscribe(args =>
             {
-                _appStateClass = AppState.IsLoading ? "BlockUI" : string.Empty;
+                _appStateClass = AppState.IsLoading ? "BlockUI" : "visually-hidden";
                 StateHasChanged();
             });
         }
