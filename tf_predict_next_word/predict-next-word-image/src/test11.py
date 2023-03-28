@@ -5,6 +5,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 import numpy as np
 
+print(tf.__version__)
 
 class Word2Vec(keras.Model):
     def __init__(self, vocab_size, embedding_dim):
@@ -20,13 +21,16 @@ class Word2Vec(keras.Model):
     def call(self, pair):
         target = pair[:, 0]
         context = pair[:, 1]
+        tf.print(pair)
+        tf.print(target)
+        tf.print(context)
         word_emb = self.target_embedding(target)
         context_emb = self.context_embedding(context)
         dot_product = tf.reduce_sum(tf.multiply(word_emb, context_emb), axis=1)
         return dot_product
 
 
-def generate_training_data(data, window_size, num_ns):
+def generate_training_data(data, window_size):
     data_index = 0
     for target_word in data:
         context_window = np.random.randint(1, window_size + 1)
@@ -35,6 +39,7 @@ def generate_training_data(data, window_size, num_ns):
             if context_word_idx < 0 or context_word_idx >= len(data) or data_index == context_word_idx:
                 continue
             context_word = data[context_word_idx]
+            print(f'{target_word=} {context_word=}')
             yield target_word, context_word
         data_index += 1
 
@@ -69,7 +74,7 @@ model.compile(optimizer='adam', loss=custom_loss)
 
 x_train = []
 y_train = []
-for target_word, context_word in generate_training_data(data, window_size, num_ns):
+for target_word, context_word in generate_training_data(data, window_size):
     x_train.append([encode(target_word, word_index), encode(context_word, word_index)])
     y_train.append(1)
 

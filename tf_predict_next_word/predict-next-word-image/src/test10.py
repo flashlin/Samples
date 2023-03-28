@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Embedding, MultiHeadAttention, Dense, Reshape, Flatten
+from tensorflow.keras.layers import Input, Embedding, MultiHeadAttention, Dense, Reshape, Flatten, GlobalAveragePooling1D
 from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint
 
@@ -18,24 +18,17 @@ vocab_size = 1000
 # out = Dense(vocab_size, activation='softmax')(attn)
 # model = Model(inputs=inputs, outputs=out)
 
-# inputs = Input(shape=(None, max_seq_len-1))
-# embed = Embedding(vocab_size, 128)(inputs)
-# reshape = Reshape((-1, max_seq_len-1, 128))(embed)
-# attn = MultiHeadAttention(8, 16)(reshape, reshape)
-# flatten = Flatten()(attn)
-# out = Dense(1, activation='sigmoid')(flatten)
+inputs = Input(shape=(None, max_seq_len-1))
+embed = Embedding(vocab_size, 128)(inputs)
+reshape = Reshape((-1, max_seq_len-1, 128))(embed)
+attn = MultiHeadAttention(8, 16)(reshape, reshape)
+attn = tf.squeeze(attn, axis=1)
+flatten = GlobalAveragePooling1D()(attn)
+out = Dense(1, activation='softmax')(flatten)
 # model = Model(inputs=inputs, outputs=out)
 # model.compile(loss='binary_crossentropy', optimizer='adam')
 
-inputs = Input(shape=(max_seq_len,))
-embed = Embedding(vocab_size, 128)(inputs)
-reshape = Reshape((max_seq_len, 128))(embed)
-attn = MultiHeadAttention(8, 16)(reshape, reshape)
-out = Dense(vocab_size, activation='softmax')(attn)
 model = Model(inputs=inputs, outputs=out)
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adam')
-
-# Compile the model
 model.compile(loss='sparse_categorical_crossentropy', optimizer='adam')
 
 train_data = [
