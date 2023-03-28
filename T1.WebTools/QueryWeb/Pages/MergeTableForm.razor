@@ -1,0 +1,48 @@
+﻿@page "/mergeTableForm"
+
+<PageTitle>Merge Table</PageTitle>
+
+<table class="table">
+    <tbody>
+      <tr>
+        <td><input type="text" class="form-control" placeholder="textbox"></td>
+        <td></td>
+        <td><input type="text" class="form-control" placeholder="textbox"></td>
+      </tr>
+      <tr>
+        <td><select class="form-select"><option>listbox</option></select></td>
+        <td><button type="button" class="btn btn-primary">button</button></td>
+        <td><select class="form-select"><option>listbox</option></select></td>
+      </tr>
+      <tr>
+        <td colspan="3"><textarea class="form-control">areatext</textarea></td>
+      </tr>
+    </tbody>
+  </table>
+
+
+@using QueryWeb.Shared
+@using QueryKits.Services
+@using Prism.Events
+@inject IReportRepo _reportRepo
+@inject IJSRuntime _jsRuntime
+@inject IEventAggregator EventAggregator
+@inject IQueryService QueryService
+
+@code {
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("load wasm fail" + e.Message);
+            }
+        }
+        return Task.CompletedTask;
+    }
+}

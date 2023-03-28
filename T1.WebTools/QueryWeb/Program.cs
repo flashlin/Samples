@@ -1,6 +1,8 @@
+using AspectCore.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Prism.Events;
+using QueryKits.Extensions;
 using QueryKits.Services;
 using QueryWeb.Data;
 using QueryWeb.Models;
@@ -35,6 +37,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddOptions();
+builder.Host.UseServiceProviderFactory(new DynamicProxyServiceProviderFactory());
 
 var configuration = builder.Configuration;
 var services = builder.Services;
@@ -48,6 +51,7 @@ services.AddTransient<IQueryService, QueryService>();
 services.AddTransient<IJsJsonSerializer, JsJsonSerializer>();
 services.AddTransient<IJsHelper, JsHelper>();
 services.AddTransient<ILanguageService, LanguageService>();
+services.AddQueryKits();
 
 var app = builder.Build();
 

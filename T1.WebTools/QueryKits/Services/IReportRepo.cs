@@ -1,7 +1,10 @@
 ﻿using QueryKits.ExcelUtils;
+using QueryKits.Extensions;
 
 namespace QueryKits.Services;
 
+
+[DefaultReturnTypeInterceptor]
 public interface IReportRepo
 {
     List<string> GetAllTableNames();
