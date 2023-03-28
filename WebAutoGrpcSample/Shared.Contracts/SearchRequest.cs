@@ -1,6 +1,6 @@
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
-namespace WebAutoGrpcSample.GrpcServices;
+namespace Shared.Contracts;
 
 [DataContract]
 public class SearchRequest

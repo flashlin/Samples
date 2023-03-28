@@ -1,0 +1,2 @@
+model_checkpoint_path: "word2vec"
+all_model_checkpoint_paths: "word2vec"

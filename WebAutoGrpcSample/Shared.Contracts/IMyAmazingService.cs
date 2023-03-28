@@ -1,10 +1,9 @@
-using System.ServiceModel;
-using ProtoBuf.Grpc.Configuration;
+﻿using System.ServiceModel;
 
-namespace WebAutoGrpcSample.GrpcServices;
+namespace Shared.Contracts;
 
 [ServiceContract]
-[Service("foo")]
+//[Service("foo")]
 public interface IMyAmazingService {
     ValueTask<SearchResponse> SearchAsync(SearchRequest request);
 }
