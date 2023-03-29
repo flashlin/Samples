@@ -8,7 +8,7 @@
 <p role="status">Current count: @_currentCount</p>
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
-<Modal IsShow="true">
+<Modal IsShow="false">
     <Body>
        <MergeTableForm></MergeTableForm>
     </Body>
@@ -117,10 +117,14 @@
         //StateHasChanged();
         if (results.Count == 0)
         {
-            await _resultEditor.SetValue($"{DateTime.Now}");
+            await _resultEditor.SetValueAsync($"{DateTime.Now}");
             return;
         }
-        await _resultEditor.SetValue(results.First().ToCsvString());
+        foreach (var result in results)
+        {
+           await _codeEditor.AppendAsync(result.ToCsvString()); 
+        }
+        //await _resultEditor.SetValue(results.First().ToCsvString());
     }
 
     private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)
@@ -134,7 +138,7 @@
     {
         if (arg.KeyCode == KeyCode.KeyI)
         {
-            await _codeEditor.Insert(_sqlCode);
+            await _codeEditor.InsertAsync(_sqlCode);
         }
     }
 }
