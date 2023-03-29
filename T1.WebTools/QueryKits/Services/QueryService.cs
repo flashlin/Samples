@@ -16,7 +16,7 @@ public class QueryService : IQueryService
     public List<ExcelSheet> QueryRawSql(string sql)
     {
         var result = new List<ExcelSheet>();
-        var dataSets = _reportRepo.QueryMultipleRawSql(sql).ToList();
+        var dataSets = _reportRepo.QueryMultipleRawSql(sql);
         foreach (var ds in dataSets)
         {
             if (ds.Rows.Count == 0)
@@ -37,5 +37,15 @@ public class QueryService : IQueryService
             result.Add(sheet);
         }
         return result; 
+    }
+
+    public void AddSqlCode(string sqlCode)
+    {
+        _reportRepo.AddSqlCode(sqlCode);
+    }
+
+    public List<string> GetTop10SqlCode()
+    {
+        return _reportRepo.GetTop10SqlCode();
     }
 }

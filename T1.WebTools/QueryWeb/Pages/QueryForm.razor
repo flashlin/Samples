@@ -58,7 +58,6 @@
 @using QueryKits.Services
 @using Prism.Events
 @using QueryWeb.Models
-@inject IReportRepo _reportRepo
 @inject IJSRuntime _jsRuntime
 @inject IEventAggregator EventAggregator
 @inject IQueryService QueryService
@@ -96,7 +95,7 @@
     {
         if (firstRender)
         {
-            _sqlCodeHistory = _reportRepo.GetTop10SqlCode();
+            _sqlCodeHistory = QueryService.GetTop10SqlCode();
             StateHasChanged();
             try
             {
@@ -112,7 +111,6 @@
 
     private async Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
     {
-        _reportRepo.AddSqlCode(arg.SqlCode);
         var results = QueryService.QueryRawSql(arg.SqlCode);
         //StateHasChanged();
         if (results.Count == 0)
@@ -125,6 +123,7 @@
            await _codeEditor.AppendAsync(result.ToCsvString()); 
         }
         //await _resultEditor.SetValue(results.First().ToCsvString());
+        QueryService.AddSqlCode(arg.SqlCode);
     }
 
     private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)

@@ -4,7 +4,7 @@ using QueryKits.Extensions;
 namespace QueryKits.Services;
 
 
-[DefaultReturnInterceptor]
+//[DefaultReturnInterceptor]
 public interface IReportRepo
 {
     List<string> GetAllTableNames();
@@ -13,5 +13,5 @@ public interface IReportRepo
     int ImportData(string tableName, ExcelSheet rawDataList);
     List<string> GetTop10SqlCode();
     void AddSqlCode(string sqlCode);
-    IEnumerable<QueryDataSet> QueryMultipleRawSql(string sql);
+    List<QueryDataSet> QueryMultipleRawSql(string sql);
 }
