@@ -4,7 +4,7 @@ using QueryKits.Extensions;
 namespace QueryKits.Services;
 
 
-[DefaultReturnTypeInterceptor]
+[DefaultReturnInterceptor]
 public interface IReportRepo
 {
     List<string> GetAllTableNames();
