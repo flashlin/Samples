@@ -37,18 +37,20 @@ public class ReportDbContext : DbContext, IReportRepo
             .ToList();
     }
 
-    public IEnumerable<QueryDataSet> QueryMultipleRawSql(string sql)
+    public List<QueryDataSet> QueryMultipleRawSql(string sql)
     {
-        using var conn = Database.GetDbConnection();
+        var conn = Database.GetDbConnection();
         using var multiQuery = conn.QueryMultiple(sql)!;
+        var result = new List<QueryDataSet>();
         while (!multiQuery.IsConsumed)
         {
-            yield return new QueryDataSet
+            result.Add(new QueryDataSet
             {
                 Rows = multiQuery.Read<Dictionary<string, object>>()
                     .ToList()
-            };
+            });
         }
+        return result;
     }
 
     public int ExecuteRawSql(string sql)
