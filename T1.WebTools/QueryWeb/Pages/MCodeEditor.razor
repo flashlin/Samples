@@ -148,7 +148,7 @@
         return Task.CompletedTask;
     }
 
-    public async Task SetValue(string text)
+    public async Task SetValueAsync(string text)
     {
         await _editor.SetValue(text);
     }
@@ -164,9 +164,13 @@
         return _editorOptions;
     }
 
-    public async Task Insert(string text)
+    public async Task InsertAsync(string text)
     {
         await JsRuntime.InvokeVoidAsync("monacoEditorInsertText", _editor.Id, text);
     }
 
+    public async Task AppendAsync(string text)
+    {
+        await JsRuntime.InvokeVoidAsync("monacoEditorAppendLine", _editor.Id, text);   
+    }
 }

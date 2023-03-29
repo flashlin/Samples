@@ -1,16 +1,35 @@
-﻿window.monacoEditorInsertText = function (editorRef, text) {
-    const editors = monaco.editor.getEditors().map(x => ({ 
-        'id': x.getDomNode().parentNode.id, 
+﻿function getEditor(editorRef) {
+    const editors = monaco.editor.getEditors().map(x => ({
+        'id': x.getDomNode().parentNode.id,
         'editor': x,
     }));
-    const editor = editors.filter(x => x.id === editorRef)[0].editor;
-    //const editor = window.monaco.editor.getModels()[0];
+    return editors.filter(x => x.id === editorRef)[0].editor;
+}
+
+window.monacoEditorInsertText = function (editorRef, text) {
+    const editor = getEditor(editorRef);
     const position = editor.getSelection().getPosition();
     //const position = editor.getModel().getPosition();
     editor.executeEdits("insertText", [{
         range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
         text: text
     }]);
+};
+
+
+window.monacoEditorAppendLine = function (editorRef, text) {
+    const editor = getEditor(editorRef);
+    const lineCount = editor.getModel().getLineCount();
+    const lastLineLength = editor.getModel().getLineMaxColumn(lineCount);
+    const range = new monaco.Range(
+        lineCount,
+        lastLineLength,
+        lineCount,
+        lastLineLength
+    );
+    editor.executeEdits('', [
+        { range: range, text: text }
+    ]);
 };
 
 function useMonacoEditor1() {
@@ -141,6 +160,7 @@ function createMonacoEditor(config)
     if( instance.language === 'csharp') {
         monaco.editor.setModelLanguage(editor.getModel(), newLanguage);
     }
+
     return this;
 }
 
