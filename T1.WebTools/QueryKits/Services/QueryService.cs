@@ -13,6 +13,11 @@ public class QueryService : IQueryService
         _reportRepo = reportRepo;
     }
 
+    public List<string> GetAllTableNames()
+    {
+        return _reportRepo.GetAllTableNames();
+    }
+
     public List<ExcelSheet> QueryRawSql(string sql)
     {
         var result = new List<ExcelSheet>();
