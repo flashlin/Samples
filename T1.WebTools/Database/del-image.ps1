@@ -1,3 +1,3 @@
-docker stop ai-db
-docker rm ai-db
-docker rmi ai-db
+docker stop query-db
+docker rm query-db
+docker rmi query-db
