@@ -29,9 +29,9 @@
                 <span class="oi oi-plus" aria-hidden="true"></span> Query
             </NavLink>
             <div style="display: block">
-                @foreach (var item in _allTableNames)
+                @foreach (var tableName in _allTableNames)
                 {
-                    <NavLink class="dropdown-item">item</NavLink>
+                    <NavLink class="dropdown-item">@tableName</NavLink>
                 }
             </div>
         </div>
@@ -49,7 +49,7 @@
 }
 </style>
 
-@inject IReportRepo ReportRepo
+@inject IQueryService QueryService
 @inject IJSRuntime JsRuntime
 @inject IAppState AppState
 @inject IEventAggregator EventAggregator
@@ -76,14 +76,7 @@
 
     protected override Task OnInitializedAsync()
     {
-        try
-        {
-            _allTableNames = ReportRepo.GetAllTableNames();
-        }
-        catch
-        {
-            // ignored
-        }
+        _allTableNames = QueryService.GetAllTableNames();
         return Task.CompletedTask;
     }
 

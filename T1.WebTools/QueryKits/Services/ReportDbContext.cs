@@ -26,7 +26,7 @@ public class ReportDbContext : DbContext, IReportRepo
         var sql = new StringBuilder();
         sql.AppendLine("SELECT TABLE_NAME as TableName");
         sql.AppendLine("FROM INFORMATION_SCHEMA.TABLES");
-        sql.Append(@"WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG='{LocalDbService.DatabaseName}'");
+        sql.Append(@$"WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG='{LocalDbService.DatabaseName}'");
         return Database.SqlQueryRaw<string>(sql.ToString()).ToList();
     }
 
