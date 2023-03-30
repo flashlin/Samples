@@ -47,9 +47,17 @@
         <p>Aliquam id nibh consequat, fringilla mauris nec, pellentesque lectus. Sed sed risus sit amet quam eleifend auctor. Vivamus sed est leo. Suspendisse mollis ex in ante aliquet vestibulum. In mattis purus eu enim venenatis pharetra. Etiam ullamcorper neque ac lacus consectetur lacinia. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin eget purus sed dolor tristique pharetra vel id turpis.</p>
     </div>
 </div>
+
+
+@foreach (var result in _results.Select((value,index) => new {value, index}))
+{
+    <a href="javascript:void(0)" @onclick="() => CopyCsvToClipboard(result.value)">Copy Result@(result.index) CSV</a>
+}
+
 @using QueryWeb.Shared
 @using QueryKits.Services
 @using Prism.Events
+@using QueryKits.ExcelUtils
 @using QueryWeb.Models
 @inject IJSRuntime _jsRuntime
 @inject IEventAggregator EventAggregator
@@ -62,6 +70,7 @@
     MCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
     private string _sqlCode = string.Empty;
+    private List<ExcelSheet> _results = new();
 
     private void ClickTab(int index)
     {
@@ -74,6 +83,11 @@
             }
         }
         _resultEditor.ForceUpdate();
+    }
+
+    private void CopyCsvToClipboard(ExcelSheet sheet)
+    {
+        _jsRuntime.InvokeVoidAsync("copyTextToClipboard", sheet.ToCsvString());
     }
 
     protected override Task OnAfterRenderAsync(bool firstRender)
@@ -105,6 +119,7 @@
             await _resultEditor.AppendAsync("");
         }
         QueryService.AddSqlCode(arg.SqlCode);
+        _results = results;
     }
 
     private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)
