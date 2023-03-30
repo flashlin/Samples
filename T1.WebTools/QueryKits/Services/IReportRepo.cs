@@ -13,5 +13,6 @@ public interface IReportRepo
     int ImportData(string tableName, ExcelSheet rawDataList);
     List<string> GetTop10SqlCode();
     void AddSqlCode(string sqlCode);
+    List<QueryDataSet> QueryDapperMultipleRawSql(string sql);
     List<QueryDataSet> QueryMultipleRawSql(string sql);
 }
