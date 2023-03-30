@@ -1,16 +1,9 @@
 ﻿@page "/queryForm"
-@using QueryRazor
-
-<PageTitle>Counter</PageTitle>
-
-<h1>Counter</h1>
-
-<p role="status">Current count: @_currentCount</p>
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<PageTitle>Query</PageTitle>
 
 <Modal IsShow="false">
     <Body>
-       <MergeTableForm></MergeTableForm>
+    <MergeTableForm></MergeTableForm>
     </Body>
 </Modal>
 
@@ -19,10 +12,10 @@
         <div class="col-md-8">
             <MCodeEditor @ref="_codeEditor"
                          SqlCodeRanCallback="@OnSqlCodeRan" Language="csharp"
-                         KeyCallback="@OnCodeEditorKey" />
+                         KeyCallback="@OnCodeEditorKey"/>
         </div>
         <div class="col-md-4">
-            <select class="form-select" multiple aria-label="multiple select example" 
+            <select class="form-select" multiple aria-label="multiple select example"
                     @ref="_sqlCodeHistorySelector"
                     @onchange="HandleSelectionSqlHistoryChange">
                 @foreach (var sqlCode in _sqlCodeHistory)
@@ -64,19 +57,11 @@
 
 @code {
     private MCodeEditor _codeEditor = null!;
-    private string[] _isShowTabs = new[] {"active", ""};
-    private int _currentCount = 0;
-    private List<string> _sqlCodeHistory = new List<string>();
+    private readonly string[] _isShowTabs = { "active", "" };
+    private List<string> _sqlCodeHistory = new();
     MCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
     private string _sqlCode = string.Empty;
-    
-    private void IncrementCount()
-    {
-        _currentCount++;
-        _isShowTabs[0] = "";
-        _isShowTabs[1] = "true";
-    }
 
     private void ClickTab(int index)
     {
@@ -112,23 +97,19 @@
     private async Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
     {
         var results = QueryService.QueryRawSql(arg.SqlCode);
-        //StateHasChanged();
-        if (results.Count == 0)
-        {
-            await _resultEditor.SetValueAsync($"{DateTime.Now}");
-            return;
-        }
+    //StateHasChanged();
+        await _resultEditor.SetValueAsync($"{DateTime.Now}\r\n");
         foreach (var result in results)
         {
-           await _codeEditor.AppendAsync(result.ToCsvString()); 
+            await _resultEditor.AppendAsync(result.ToCsvString());
+            await _resultEditor.AppendAsync("");
         }
-        //await _resultEditor.SetValue(results.First().ToCsvString());
         QueryService.AddSqlCode(arg.SqlCode);
     }
 
     private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)
     {
-        var value = (string[]) arg.Value!;
+        var value = (string[])arg.Value!;
         _sqlCode = value[0];
         return Task.CompletedTask;
     }
@@ -140,4 +121,5 @@
             await _codeEditor.InsertAsync(_sqlCode);
         }
     }
+
 }
