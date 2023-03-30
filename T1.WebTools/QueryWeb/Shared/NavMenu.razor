@@ -53,6 +53,7 @@
 @inject IJSRuntime JsRuntime
 @inject IAppState AppState
 @inject IEventAggregator EventAggregator
+@inject IQueryEnvironment QueryEnvironment
 @code {
     private List<string> _allTableNames = new();
     private bool _collapseNavMenu = true;
@@ -70,8 +71,18 @@
         AppState.Publish(x => x.IsLoading = true);
         await JsRuntime.InvokeVoidAsync("uploadFileElementAsync", 
             "/api/File/Upload", 
+            DotNetObjectReference.Create(this),
             fileInput);
+
+        _allTableNames = QueryService.GetAllTableNames();
         AppState.Publish(x => x.IsLoading = false);
+    }
+    
+    [JSInvokable]
+    public void ImportCsvFile(string csvFileName)
+    {
+        var fullname = Path.Combine(QueryEnvironment.UploadPath, csvFileName);
+        QueryService.ImportCsvFile(fullname);
     }
 
     protected override Task OnInitializedAsync()

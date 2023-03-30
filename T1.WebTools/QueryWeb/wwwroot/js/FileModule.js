@@ -32,9 +32,10 @@ async function uploadFileAsync(uploadUrl, file) {
 	}
 }
 
-async function uploadFileElementAsync(uploadUrl, fileElement) {
+async function uploadFileElementAsync(uploadUrl, dotnetHelper, fileElement) {
 	for (let i = 0; i < fileElement.files.length; i++) {
 		const file = fileElement.files[i];
 		await uploadFileAsync(uploadUrl, file);
+		dotnetHelper.invokeMethodAsync('ImportCsvFile', file.name);
 	}
 }

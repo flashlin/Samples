@@ -41,6 +41,7 @@ builder.Host.UseServiceProviderFactory(new DynamicProxyServiceProviderFactory())
 
 var configuration = builder.Configuration;
 var services = builder.Services;
+services.AddSingleton<IQueryEnvironment, QueryEnvironment>();
 services.AddSingleton<IEventAggregator, EventAggregator>();
 services.AddSingleton<ILocalEnvironment>(sp => localEnv);
 services.AddSingleton<IAppState, AppState>();

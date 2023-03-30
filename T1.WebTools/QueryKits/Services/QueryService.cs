@@ -1,6 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using QueryKits.CsvEx;
 using QueryKits.ExcelUtils;
+using T1.Standard.Extensions;
 
 namespace QueryKits.Services;
 
@@ -16,6 +17,24 @@ public class QueryService : IQueryService
     public List<string> GetAllTableNames()
     {
         return _reportRepo.GetAllTableNames();
+    }
+
+    public void ImportCsvFile(string csvFile)
+    {
+        var csvSheet = CsvSheet.ReadFrom(csvFile, ",");
+        var excelSheet = new ExcelSheet();
+        foreach (var csvSheetHeader in csvSheet.Headers.Select((value,index)=>new {value, index}))
+        {
+            excelSheet.Headers.Add(new ExcelColumn
+            {
+                Name = csvSheetHeader.value.Name,
+                DataType = ExcelDataType.String,
+                CellIndex = csvSheetHeader.index
+            });
+        }
+        excelSheet.Rows.AddRange(csvSheet.Rows);
+        var tableName = Path.GetFileNameWithoutExtension(csvFile);
+        _reportRepo.ImportData(tableName, excelSheet);
     }
 
     public List<ExcelSheet> QueryRawSql(string sql)
