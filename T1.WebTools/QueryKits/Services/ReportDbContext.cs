@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Data;
+using System.Data.Common;
+using System.Text;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -37,7 +39,7 @@ public class ReportDbContext : DbContext, IReportRepo
             .ToList();
     }
 
-    public List<QueryDataSet> QueryMultipleRawSql(string sql)
+    public List<QueryDataSet> QueryDapperMultipleRawSql(string sql)
     {
         var conn = Database.GetDbConnection();
         using var multiQuery = conn.QueryMultiple(sql)!;
@@ -51,6 +53,48 @@ public class ReportDbContext : DbContext, IReportRepo
             });
         }
         return result;
+    }
+
+    public List<QueryDataSet> QueryMultipleRawSql(string sql)
+    {
+        var conn = Database.GetDbConnection();
+        if (conn.State != ConnectionState.Open)
+        {
+            conn.Open();
+        }
+        using var command = conn.CreateCommand();
+        command.CommandText = sql;
+        command.CommandType = CommandType.Text;
+        using var reader = command.ExecuteReader();
+        var dataSets = new List<QueryDataSet>();
+        do
+        {
+            dataSets.Add(ReadDataSet(reader));
+        } while (reader.NextResult());
+        return dataSets;
+    }
+
+    private static QueryDataSet ReadDataSet(DbDataReader reader)
+    {
+        var dataSet = new QueryDataSet();
+        while (reader.Read())
+        {
+            var row = new Dictionary<string, object>();
+            var unknownCount = 0;
+            for (var i = 0; i < reader.FieldCount; i++)
+            {
+                var columnName = reader.GetName(i);
+                if (string.IsNullOrEmpty(columnName))
+                {
+                    columnName = $"UnknownName{unknownCount}";
+                    unknownCount++;
+                }
+                var columnValue = reader.GetValue(i);
+                row[columnName] = columnValue;
+            }
+            dataSet.Rows.Add(row);
+        }
+        return dataSet;
     }
 
     public int ExecuteRawSql(string sql)
