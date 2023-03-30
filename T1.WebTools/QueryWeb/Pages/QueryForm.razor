@@ -29,29 +29,28 @@
 </div>
 
 
-<ul class="nav nav-tabs">
-    <li class="nav-item">
-        <a class="nav-link" @onclick="() => ClickTab(0)">Result</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link active" @onclick="() => ClickTab(1)">Grid</a>
-    </li>
-</ul>
-<div class="tab-content mt-3">
-    <div class="tab-pane @_isShowTabs[0]">
-        <h3>Result</h3>
-        <MCodeEditor @ref="_resultEditor" Language="text"/>
-    </div>
-    <div class="tab-pane @_isShowTabs[1]">
-        <h3>Grid</h3>
-        <p>Aliquam id nibh consequat, fringilla mauris nec, pellentesque lectus. Sed sed risus sit amet quam eleifend auctor. Vivamus sed est leo. Suspendisse mollis ex in ante aliquet vestibulum. In mattis purus eu enim venenatis pharetra. Etiam ullamcorper neque ac lacus consectetur lacinia. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Proin eget purus sed dolor tristique pharetra vel id turpis.</p>
-    </div>
-</div>
-
-
-@foreach (var result in _results.Select((value,index) => new {value, index}))
+@foreach (var result in _results.Select((value, index) => new { value, index }))
 {
-    <a href="javascript:void(0)" @onclick="() => CopyCsvToClipboard(result.value)">Copy Result@(result.index) CSV</a>
+    <button @onclick="() => CopyCsvToClipboard(result.value)">Copy Result@(result.index) CSV</button>
+    <table>
+        <tr>
+            @foreach (var header in result.value.Headers)
+            {
+                <td>@header.Name</td>
+            }
+        </tr>
+        @foreach (var row in result.value.Rows)
+        {
+            <tr>
+                @foreach (var column in row.Keys)
+                {
+                    <td>
+                        @row[column]
+                    </td>
+                }
+            </tr>
+        }
+    </table>
 }
 
 @using QueryWeb.Shared
@@ -59,6 +58,7 @@
 @using Prism.Events
 @using QueryKits.ExcelUtils
 @using QueryWeb.Models
+@using T1.Standard.Linq
 @inject IJSRuntime _jsRuntime
 @inject IEventAggregator EventAggregator
 @inject IQueryService QueryService
@@ -108,18 +108,12 @@
         return Task.CompletedTask;
     }
 
-    private async Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
+    private Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
     {
-        var results = QueryService.QueryRawSql(arg.SqlCode);
-    //StateHasChanged();
-        await _resultEditor.SetValueAsync($"{DateTime.Now}\r\n");
-        foreach (var result in results)
-        {
-            await _resultEditor.AppendAsync(result.ToCsvString());
-            await _resultEditor.AppendAsync("");
-        }
+        //StateHasChanged();
+        _results = QueryService.QueryRawSql(arg.SqlCode);
         QueryService.AddSqlCode(arg.SqlCode);
-        _results = results;
+        return Task.CompletedTask;
     }
 
     private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)
@@ -138,3 +132,4 @@
     }
 
 }
+
