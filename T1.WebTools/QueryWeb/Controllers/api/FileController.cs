@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using NPOI.OpenXml4Net.OPC.Internal;
 using QueryKits.Extensions;
+using QueryKits.Services;
+using QueryWeb.Models;
 
 namespace QueryWeb.Controllers.api;
 
@@ -9,11 +11,13 @@ namespace QueryWeb.Controllers.api;
 [Route("api/[controller]/[action]")]
 public class FileController : ControllerBase
 {
-    private IWebHostEnvironment _webHostEnv;
+    private readonly IQueryEnvironment _queryEnvironment;
+    private IQueryService _queryService;
 
-    public FileController(IWebHostEnvironment webHostEnv)
+    public FileController(IQueryEnvironment queryEnvironment, IQueryService queryService)
     {
-        _webHostEnv = webHostEnv;
+        _queryEnvironment = queryEnvironment;
+        _queryService = queryService;
     }
 
     [HttpPost]
@@ -26,9 +30,9 @@ public class FileController : ControllerBase
     public IActionResult Upload([FromForm] UploadFilesRequest req)
     {
         var fileName = Path.GetFileName(req.FileName);
-        var uploadPath = Path.Combine(_webHostEnv.WebRootPath, "Upload");
-        DirectoryHelper.EnsureDirectory(uploadPath);
-        using var file = new FileStream(Path.Combine(uploadPath, fileName), FileMode.OpenOrCreate);
+        DirectoryHelper.EnsureDirectory(_queryEnvironment.UploadPath);
+        var fullFilename = Path.Combine(_queryEnvironment.UploadPath, fileName);
+        using var file = new FileStream(fullFilename, FileMode.OpenOrCreate);
         file.Seek(req.CurrentChunk * 2048, SeekOrigin.Begin);
         var buffer = new byte[2048];
         var count = req.Chunk.OpenReadStream().Read(buffer, 0, 2048);
@@ -36,12 +40,4 @@ public class FileController : ControllerBase
         file.Flush();
         return Ok();
     }
-}
-
-public class UploadFilesRequest
-{
-    public string FileName { get; set; } = string.Empty;
-    public IFormFile Chunk { get; set; }
-    public int CurrentChunk { get; set; }
-    public int TotalChunks { get; set; }
 }

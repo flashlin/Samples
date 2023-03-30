@@ -9,4 +9,5 @@ public interface IQueryService
     void AddSqlCode(string sqlCode);
     List<string> GetTop10SqlCode();
     List<string> GetAllTableNames();
+    void ImportCsvFile(string csvFile);
 }

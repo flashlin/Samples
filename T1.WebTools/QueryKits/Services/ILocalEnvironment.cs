@@ -10,3 +10,8 @@ public interface ILocalEnvironment
     string AppLocation { get; set; }
     string AppVersion { get; set; }
 }
+
+public interface IQueryEnvironment
+{
+    string UploadPath { get; set; }
+}
