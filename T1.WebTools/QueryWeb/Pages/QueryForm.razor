@@ -11,7 +11,9 @@
     <div class="row">
         <div class="col-md-8">
             <MCodeEditor @ref="_codeEditor"
-                         SqlCodeRanCallback="@OnSqlCodeRan" Language="csharp"
+                         SqlCodeRanCallback="@OnSqlCodeRan" 
+                         Text="@_codeText"
+                         Language="csharp"
                          KeyCallback="@OnCodeEditorKey"/>
         </div>
         <div class="col-md-4">
@@ -77,7 +79,11 @@
     private List<string> _sqlCodeHistory = new();
     MCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
-    private string _sqlCode = string.Empty;
+    private string _codeText = @"-- CTRL + r: execute 
+-- CTRL + i: insert code block from history
+-- CTRL + <space>: popup intellisence
+";
+    private string _sqlSnippetCode = string.Empty;
     private List<ExcelSheet> _results = new();
 
     private void ClickTab(int index)
@@ -127,7 +133,7 @@
     private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)
     {
         var value = (string[])arg.Value!;
-        _sqlCode = value[0];
+        _sqlSnippetCode = value[0];
         return Task.CompletedTask;
     }
 
@@ -135,7 +141,7 @@
     {
         if (arg.KeyCode == KeyCode.KeyI)
         {
-            await _codeEditor.InsertAsync(_sqlCode);
+            await _codeEditor.InsertAsync(_sqlSnippetCode);
         }
     }
 
