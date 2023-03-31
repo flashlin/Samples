@@ -125,7 +125,7 @@ public class ReportDbContext : DbContext, IReportRepo
                     sql.Append("decimal(19,6) NULL");
                     break;
                 default:
-                    sql.Append("nvarchar(100) NULL");
+                    sql.Append("nvarchar(2000) NULL");
                     break;
             }
 

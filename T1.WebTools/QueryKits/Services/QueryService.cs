@@ -34,6 +34,7 @@ public class QueryService : IQueryService
         }
         excelSheet.Rows.AddRange(csvSheet.Rows);
         var tableName = Path.GetFileNameWithoutExtension(csvFile);
+        _reportRepo.ReCreateTable(tableName, excelSheet.Headers);
         _reportRepo.ImportData(tableName, excelSheet);
     }
 
