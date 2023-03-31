@@ -38,6 +38,17 @@ public class QueryService : IQueryService
         _reportRepo.ImportData(tableName, excelSheet);
     }
 
+    public void ImportExcelFile(string xlsxFile)
+    {
+        var excelSheets = new ExcelHelper().ReadSheets(xlsxFile);
+        foreach (var excelSheet in excelSheets)
+        {
+            var tableName = $"{Path.GetFileNameWithoutExtension(xlsxFile)}_{excelSheet.Name}";
+            _reportRepo.ReCreateTable(tableName, excelSheet.Headers);
+            _reportRepo.ImportData(tableName, excelSheet);
+        }
+    }
+
     public List<ExcelSheet> QueryRawSql(string sql)
     {
         var result = new List<ExcelSheet>();
