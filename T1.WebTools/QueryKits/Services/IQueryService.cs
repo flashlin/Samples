@@ -10,4 +10,5 @@ public interface IQueryService
     List<string> GetTop10SqlCode();
     List<string> GetAllTableNames();
     void ImportCsvFile(string csvFile);
+    void ImportExcelFile(string xlsxFile);
 }
