@@ -32,13 +32,16 @@
 @foreach (var result in _results.Select((value, index) => new { value, index }))
 {
     <button @onclick="() => CopyCsvToClipboard(result.value)">Copy Result@(result.index) CSV</button>
-    <table>
+    <table class="table table-dark table-striped">
+        <thead>
         <tr>
             @foreach (var header in result.value.Headers)
             {
-                <td>@header.Name</td>
+                <th>@header.Name</th>
             }
         </tr>
+        </thead>
+        <tbody>
         @foreach (var row in result.value.Rows)
         {
             <tr>
@@ -50,9 +53,14 @@
                 }
             </tr>
         }
+        </tbody>
     </table>
 }
-
+<style>
+.table-dark tbody tr:nth-of-type(odd) {
+    background-color: #f2f2f2;
+}    
+</style>
 @using QueryWeb.Shared
 @using QueryKits.Services
 @using Prism.Events
@@ -110,7 +118,7 @@
 
     private Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
     {
-        //StateHasChanged();
+    //StateHasChanged();
         _results = QueryService.QueryRawSql(arg.SqlCode);
         QueryService.AddSqlCode(arg.SqlCode);
         return Task.CompletedTask;
@@ -132,4 +140,3 @@
     }
 
 }
-
