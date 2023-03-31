@@ -4,9 +4,6 @@
 @using QueryKits.Services
 @using QueryWeb.Models
 @using QueryWeb.Models.Extensions
-
-<PageTitle>Query Form</PageTitle>
-
 <StandaloneCodeEditor
     @ref="_editor"
     ConstructionOptions="GetOptions"
@@ -28,8 +25,10 @@
     [Parameter]
     public EventCallback<KeyEventArgs> KeyCallback { get; set; }
 
+    [Parameter]
+    public string Text { get; set; } = string.Empty;
+
     StandaloneCodeEditor _editor = null!;
-    string _valueToSet = "";
     StandaloneEditorConstructionOptions _editorOptions = null!;
 
     public void ForceUpdate()
@@ -49,7 +48,7 @@
             {
                 AutomaticLayout = true,
                 Language = Language,
-                Value = _valueToSet,
+                Value = Text,
                 Scrollbar = new EditorScrollbarOptions()
                 {
                     UseShadows = false,
