@@ -31,7 +31,7 @@
 
 @foreach (var result in _results.Select((value, index) => new { value, index }))
 {
-    <button @onclick="() => CopyCsvToClipboard(result.value)">Copy Result@(result.index) CSV</button>
+    <button @onclick="() => CopyCsvToClipboard(result.value)">Copy CSV</button>
     <table class="table table-dark table-striped">
         <thead>
         <tr>
