@@ -1,0 +1,47 @@
+﻿@page "/confirm"
+
+<Modal IsShow="@_isShow">
+    <Body>
+    @_question
+    </Body>
+    <Footer>
+       <button type="button" class="btn btn-secondary" @onclick="() => OnClickYesNoButton(false)">No</button>
+       <button type="button" class="btn btn-primary" @onclick="() => OnClickYesNoButton(true)">Yes</button>
+    </Footer>
+</Modal>
+
+@using QueryWeb.Shared
+@using QueryKits.Services
+@using Prism.Events
+@inject IJSRuntime _jsRuntime
+@inject IEventAggregator EventAggregator
+@inject IQueryService QueryService
+
+@code {
+    private string _question = string.Empty;
+    bool _isShow = false;
+    TaskCompletionSource<bool> _yesNo = new();
+
+    public async Task<bool> Show(string question)
+    {
+        _question = question;
+        _isShow = true;
+        _yesNo = new();
+        var result = await _yesNo.Task;
+        _isShow = false;
+        return result;
+    }
+
+    private void OnClickYesNoButton(bool flag)
+    {
+        _yesNo.SetResult(flag);
+    }
+    
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+        }
+        return Task.CompletedTask;
+    }
+}

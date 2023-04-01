@@ -18,7 +18,9 @@
             </NavLink>
         </div>
         <div class="mb-3">
-            <label class="form-label"><span class="text">選擇檔案 (支援的檔案類型: .csv, .xlsx)</span></label>
+            <label class="form-label">
+                <span class="text">選擇檔案 (支援的檔案類型: .csv, .xlsx)</span>
+            </label>
             <input type="file" @ref="_inputFileRef" class="form-control" accept=".csv,.xlsx">
         </div>
         <div class="mb-3">
@@ -28,12 +30,15 @@
             <NavLink class="nav-link dropdown-toggle" href="/queryForm">
                 <span class="oi oi-plus" aria-hidden="true"></span> Query
             </NavLink>
-            <div style="display: block">
-                @foreach (var tableName in _allTableNames)
-                {
-                    <NavLink class="dropdown-item">@tableName</NavLink>
-                }
-            </div>
+            @foreach (var tableName in _allTableNames)
+            {
+                <div style="display: block">
+                    <span class="text-left text-white">@tableName</span>
+                    <button type="button" class="close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            }
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="fetchdata">
@@ -54,6 +59,7 @@
 @inject IAppState AppState
 @inject IEventAggregator EventAggregator
 @inject IQueryEnvironment QueryEnvironment
+
 @code {
     private List<string> _allTableNames = new();
     private bool _collapseNavMenu = true;
@@ -65,19 +71,24 @@
     {
         _collapseNavMenu = !_collapseNavMenu;
     }
-    
-    public async Task UploadFile(ElementReference fileInput)
+
+    private async Task UploadFile(ElementReference fileInput)
     {
         AppState.Publish(x => x.IsLoading = true);
-        await JsRuntime.InvokeVoidAsync("uploadFileElementAsync", 
-            "/api/File/Upload", 
+        await JsRuntime.InvokeVoidAsync("uploadFileElementAsync",
+            "/api/File/Upload",
             DotNetObjectReference.Create(this),
             fileInput);
 
         _allTableNames = QueryService.GetAllTableNames();
         AppState.Publish(x => x.IsLoading = false);
     }
-    
+
+    private void DeleteTable(string tableName)
+    {
+        QueryService.DeleteTable(tableName);
+    }
+
     [JSInvokable]
     public void ImportCsvFile(string csvFileName)
     {

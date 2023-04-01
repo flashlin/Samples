@@ -15,4 +15,5 @@ public interface IReportRepo
     void AddSqlCode(string sqlCode);
     List<QueryDataSet> QueryDapperMultipleRawSql(string sql);
     List<QueryDataSet> QueryMultipleRawSql(string sql);
+    void DeleteTable(string tableName);
 }

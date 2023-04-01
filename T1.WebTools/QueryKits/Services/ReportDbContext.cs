@@ -57,14 +57,7 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public List<QueryDataSet> QueryMultipleRawSql(string sql)
     {
-        var conn = Database.GetDbConnection();
-        if (conn.State != ConnectionState.Open)
-        {
-            conn.Open();
-        }
-        using var command = conn.CreateCommand();
-        command.CommandText = sql;
-        command.CommandType = CommandType.Text;
+        using var command = CreateCommand(sql);
         using var reader = command.ExecuteReader();
         var dataSets = new List<QueryDataSet>();
         do
@@ -72,6 +65,33 @@ public class ReportDbContext : DbContext, IReportRepo
             dataSets.Add(ReadDataSet(reader));
         } while (reader.NextResult());
         return dataSets;
+    }
+
+    private DbCommand CreateCommand(string sql)
+    {
+        var conn = GetDbConnection();
+        var command = conn.CreateCommand();
+        command.CommandText = sql;
+        command.CommandType = CommandType.Text;
+        return command;
+    }
+
+    public void DeleteTable(string tableName)
+    {
+        var sql = new StringBuilder();
+        sql.Append("DROP TABLE");
+        sql.Append($" [dbo].[{tableName}]");
+        ExecuteRawSql(sql.ToString());
+    }
+
+    private DbConnection GetDbConnection()
+    {
+        var conn = Database.GetDbConnection();
+        if (conn.State != ConnectionState.Open)
+        {
+            conn.Open();
+        }
+        return conn;
     }
 
     private static QueryDataSet ReadDataSet(DbDataReader reader)

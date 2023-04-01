@@ -49,6 +49,11 @@ public class QueryService : IQueryService
         }
     }
 
+    public void DeleteTable(string tableName)
+    {
+        _reportRepo.DeleteTable(tableName);
+    }
+
     public List<ExcelSheet> QueryRawSql(string sql)
     {
         var result = new List<ExcelSheet>();
