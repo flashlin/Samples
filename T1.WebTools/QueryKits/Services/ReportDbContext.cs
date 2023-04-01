@@ -4,11 +4,11 @@ using System.Text;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using QueryKits.Entities;
 using QueryKits.ExcelUtils;
 
 namespace QueryKits.Services;
-
 
 public class ReportDbContext : DbContext, IReportRepo
 {
@@ -39,6 +39,13 @@ public class ReportDbContext : DbContext, IReportRepo
             .ToList();
     }
 
+    public List<T> Query<T>(string sql, object? parameters = null)
+    {
+        using var conn = Database.GetDbConnection();
+        return conn.Query<T>(sql, parameters)
+            .ToList();
+    }
+
     public List<QueryDataSet> QueryDapperMultipleRawSql(string sql)
     {
         var conn = Database.GetDbConnection();
@@ -52,6 +59,7 @@ public class ReportDbContext : DbContext, IReportRepo
                     .ToList()
             });
         }
+
         return result;
     }
 
@@ -64,6 +72,7 @@ public class ReportDbContext : DbContext, IReportRepo
         {
             dataSets.Add(ReadDataSet(reader));
         } while (reader.NextResult());
+
         return dataSets;
     }
 
@@ -91,6 +100,7 @@ public class ReportDbContext : DbContext, IReportRepo
         {
             conn.Open();
         }
+
         return conn;
     }
 
@@ -109,12 +119,29 @@ public class ReportDbContext : DbContext, IReportRepo
                     columnName = $"UnknownName{unknownCount}";
                     unknownCount++;
                 }
+
                 var columnValue = reader.GetValue(i);
                 row[columnName] = columnValue;
             }
+
             dataSet.Rows.Add(row);
         }
+
         return dataSet;
+    }
+
+    public List<TableColumn> GetTableColumns(string tableName)
+    {
+        var sql = new StringBuilder();
+        sql.Append("SELECT COLUMN_NAME as Name,");
+        sql.Append("DATA_TYPE as DataType,");
+        sql.Append("CHARACTER_MAXIMUM_LENGTH as Size,");
+        sql.Append("NUMERIC_PRECISION as Precision,");
+        sql.Append("NUMERIC_SCALE as Scale ");
+        sql.Append("FROM INFORMATION_SCHEMA.COLUMNS ");
+        sql.Append($"WHERE TABLE_NAME = '{tableName}'");
+
+        return Query<TableColumn>(sql.ToString());
     }
 
     public int ExecuteRawSql(string sql)
@@ -171,6 +198,7 @@ public class ReportDbContext : DbContext, IReportRepo
                 sqlInsertColumns.Append(",");
             }
         }
+
         sqlInsertColumns.Append(")");
 
         var sql = CreateInsertTableSqlBlock(sqlInsertColumns, sheet.Headers, sheet.Rows);
@@ -191,6 +219,7 @@ public class ReportDbContext : DbContext, IReportRepo
         {
             return;
         }
+
         SqlHistories.Add(new SqlHistoryEntity
         {
             SqlCode = sqlCode,
@@ -199,7 +228,8 @@ public class ReportDbContext : DbContext, IReportRepo
         SaveChanges();
     }
 
-    private static string CreateInsertTableSqlBlock(StringBuilder sqlInsertColumns, List<ExcelColumn> headers, List<Dictionary<string, string>> rows)
+    private static string CreateInsertTableSqlBlock(StringBuilder sqlInsertColumns, List<ExcelColumn> headers,
+        List<Dictionary<string, string>> rows)
     {
         var sqlBlock = new StringBuilder();
         foreach (var row in rows)
@@ -222,6 +252,7 @@ public class ReportDbContext : DbContext, IReportRepo
             {
                 value = "N'" + value + "'";
             }
+
             sql.Append(value);
 
             if (header != headers.Last())
