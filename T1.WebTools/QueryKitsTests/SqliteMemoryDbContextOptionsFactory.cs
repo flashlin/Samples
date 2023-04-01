@@ -15,3 +15,14 @@ public class SqliteMemoryDbContextOptionsFactory : IDbContextOptionsFactory
             .Options;
     }
 }
+
+public class SqlMemoryDbContextOptionsFactory : IDbContextOptionsFactory
+{
+    public DbContextOptions<T> Create<T>() where T : DbContext
+    {
+        var inMemDbName = "D" + Guid.NewGuid();
+        return new DbContextOptionsBuilder<T>()
+            .UseInMemoryDatabase(inMemDbName)
+            .Options;
+    }
+}
