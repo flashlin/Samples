@@ -19,6 +19,11 @@ public class QueryService : IQueryService
         return _reportRepo.GetAllTableNames();
     }
 
+    public void MergeTable(MergeTableRequest req)
+    {
+        
+    }
+
     public void ImportCsvFile(string csvFile)
     {
         var csvSheet = CsvSheet.ReadFrom(csvFile, ",");
@@ -89,4 +94,16 @@ public class QueryService : IQueryService
     {
         return _reportRepo.GetTop10SqlCode();
     }
+}
+
+public class TableForeignInfo
+{
+    public string Name { get; set; }
+    public List<string> Columns { get; set; } = new();
+}
+
+public class MergeTableRequest
+{
+    public TableForeignInfo Table1 { get; set; }
+    public TableForeignInfo Table2 { get; set; }
 }

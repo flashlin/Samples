@@ -10,13 +10,35 @@ using QueryKits.ExcelUtils;
 
 namespace QueryKits.Services;
 
+public interface IDbContextOptionsFactory
+{
+    DbContextOptions<T> Create<T>()
+        where T : DbContext;
+}
+
+public class DbContextOptionsFactory : IDbContextOptionsFactory
+{
+    private readonly DbConfig _dbConfig;
+
+    public DbContextOptionsFactory(IOptions<DbConfig> dbConfig)
+    {
+        _dbConfig = dbConfig.Value;
+    }
+
+    public DbContextOptions<T> Create<T>()
+        where T : DbContext
+    {
+        return new DbContextOptionsBuilder<T>()
+            .UseSqlServer(_dbConfig.ConnectionString)
+            .Options;
+    }
+}
+
 public class ReportDbContext : DbContext, IReportRepo
 {
-    private readonly string _connectionString;
-
-    public ReportDbContext(IOptions<DbConfig> dbConfig)
+    public ReportDbContext(IDbContextOptionsFactory factory)
+        : base(factory.Create<ReportDbContext>())
     {
-        _connectionString = dbConfig.Value.ConnectionString;
     }
 
     public DbSet<SqlHistoryEntity> SqlHistories { get; set; } = null!;
@@ -263,10 +285,5 @@ public class ReportDbContext : DbContext, IReportRepo
 
         sql.Append(")");
         return sql.ToString();
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer(_connectionString);
     }
 }
