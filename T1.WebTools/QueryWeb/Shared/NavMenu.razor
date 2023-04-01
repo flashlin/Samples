@@ -1,5 +1,6 @@
 ﻿@using QueryKits.Services
 @using Prism.Events
+@using QueryWeb.Pages
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -34,7 +35,7 @@
             {
                 <div style="display: block">
                     <span class="text-left text-white">@tableName</span>
-                    <button type="button" class="close">
+                    <button type="button" class="close" @onclick="() => DeleteTable(tableName)">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
@@ -47,6 +48,9 @@
         </div>
     </nav>
 </div>
+
+<Confirm @ref="_confirmRef"></Confirm>
+
 <style>
 .text{
     color: white;
@@ -64,6 +68,7 @@
     private List<string> _allTableNames = new();
     private bool _collapseNavMenu = true;
     ElementReference _inputFileRef;
+    Confirm _confirmRef = null!;
 
     private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
 
@@ -84,9 +89,14 @@
         AppState.Publish(x => x.IsLoading = false);
     }
 
-    private void DeleteTable(string tableName)
+    private async Task DeleteTable(string tableName)
     {
-        QueryService.DeleteTable(tableName);
+        var answer = await _confirmRef.Show($"Do you want to delete {tableName}?");
+        if (answer)
+        {
+            QueryService.DeleteTable(tableName);
+           _allTableNames = QueryService.GetAllTableNames();
+        }
     }
 
     [JSInvokable]

@@ -26,9 +26,11 @@
     {
         _question = question;
         _isShow = true;
+        StateHasChanged();
         _yesNo = new();
         var result = await _yesNo.Task;
         _isShow = false;
+        StateHasChanged();
         return result;
     }
 
