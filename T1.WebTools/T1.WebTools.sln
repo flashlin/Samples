@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryKits", "QueryKits\Quer
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryWasm", "QueryWasm\QueryWasm.csproj", "{2718D512-D1B5-42AD-ABF9-326B4364CB6E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryKitsTests", "QueryKitsTests\QueryKitsTests.csproj", "{6F46DB04-4A11-4291-BC5B-C5F6DCA0CFE3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{2718D512-D1B5-42AD-ABF9-326B4364CB6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2718D512-D1B5-42AD-ABF9-326B4364CB6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2718D512-D1B5-42AD-ABF9-326B4364CB6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F46DB04-4A11-4291-BC5B-C5F6DCA0CFE3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F46DB04-4A11-4291-BC5B-C5F6DCA0CFE3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F46DB04-4A11-4291-BC5B-C5F6DCA0CFE3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F46DB04-4A11-4291-BC5B-C5F6DCA0CFE3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
