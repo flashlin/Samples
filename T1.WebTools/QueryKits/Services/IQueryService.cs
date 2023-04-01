@@ -11,4 +11,5 @@ public interface IQueryService
     List<string> GetAllTableNames();
     void ImportCsvFile(string csvFile);
     void ImportExcelFile(string xlsxFile);
+    void DeleteTable(string tableName);
 }
