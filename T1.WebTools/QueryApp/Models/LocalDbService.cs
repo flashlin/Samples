@@ -1,6 +1,7 @@
-﻿using T1.SqlLocalData;
+﻿using QueryKits.Services;
+using T1.SqlLocalData;
 
-namespace QueryKits.Services;
+namespace QueryApp.Models;
 
 public class LocalDbService : ILocalDbService
 {

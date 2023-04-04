@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using QueryKits.Services;
+using T1.Standard.Data.SqlBuilders;
 
 namespace QueryKitsTests;
 
@@ -14,15 +15,10 @@ public class SqliteMemoryDbContextOptionsFactory : IDbContextOptionsFactory
             .UseSqlite(cn)
             .Options;
     }
-}
 
-public class SqlMemoryDbContextOptionsFactory : IDbContextOptionsFactory
-{
-    public DbContextOptions<T> Create<T>() where T : DbContext
+    public ISqlBuilder CreateSqlBuilder()
     {
-        var inMemDbName = "D" + Guid.NewGuid();
-        return new DbContextOptionsBuilder<T>()
-            .UseInMemoryDatabase(inMemDbName)
-            .Options;
+        return new MssqlBuilder();
     }
 }
+

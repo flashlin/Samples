@@ -3,53 +3,36 @@ using System.Data.Common;
 using System.Text;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using QueryKits.Entities;
 using QueryKits.ExcelUtils;
+using T1.Standard.Data.SqlBuilders;
 
 namespace QueryKits.Services;
 
-public interface IDbContextOptionsFactory
-{
-    DbContextOptions<T> Create<T>()
-        where T : DbContext;
-}
-
-public class DbContextOptionsFactory : IDbContextOptionsFactory
-{
-    private readonly DbConfig _dbConfig;
-
-    public DbContextOptionsFactory(IOptions<DbConfig> dbConfig)
-    {
-        _dbConfig = dbConfig.Value;
-    }
-
-    public DbContextOptions<T> Create<T>()
-        where T : DbContext
-    {
-        return new DbContextOptionsBuilder<T>()
-            .UseSqlServer(_dbConfig.ConnectionString)
-            .Options;
-    }
-}
-
 public class ReportDbContext : DbContext, IReportRepo
 {
+    private readonly ISqlBuilder _sqlBuilder;
+    private const string DatabaseName = "QueryDb";
+
     public ReportDbContext(IDbContextOptionsFactory factory)
         : base(factory.Create<ReportDbContext>())
     {
+        _sqlBuilder = factory.CreateSqlBuilder();
     }
 
     public DbSet<SqlHistoryEntity> SqlHistories { get; set; } = null!;
 
+    public void CreateTableByEntity(Type entityType)
+    {
+        var sql = _sqlBuilder.CreateTableStatement(entityType);
+        ExecuteRawSql(sql);
+    }
+
     public List<string> GetAllTableNames()
     {
-        var sql = new StringBuilder();
-        sql.AppendLine("SELECT TABLE_NAME as TableName");
-        sql.AppendLine("FROM INFORMATION_SCHEMA.TABLES");
-        sql.Append(@$"WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG='{LocalDbService.DatabaseName}'");
-        return Database.SqlQueryRaw<string>(sql.ToString()).ToList();
+        var sql = _sqlBuilder.GetAllTableNames(DatabaseName);
+        return Database.SqlQueryRaw<string>(sql).ToList();
     }
 
     public List<Dictionary<string, object>> QueryRawSql(string sql)
@@ -152,7 +135,7 @@ public class ReportDbContext : DbContext, IReportRepo
         return dataSet;
     }
 
-    public List<TableColumn> GetTableColumns(string tableName)
+    public List<TableColumnInfo> GetTableColumns(string tableName)
     {
         var sql = new StringBuilder();
         sql.Append("SELECT COLUMN_NAME as Name,");
@@ -163,7 +146,7 @@ public class ReportDbContext : DbContext, IReportRepo
         sql.Append("FROM INFORMATION_SCHEMA.COLUMNS ");
         sql.Append($"WHERE TABLE_NAME = '{tableName}'");
 
-        return Query<TableColumn>(sql.ToString());
+        return Query<TableColumnInfo>(sql.ToString());
     }
 
     public int ExecuteRawSql(string sql)

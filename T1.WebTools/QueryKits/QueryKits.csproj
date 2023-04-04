@@ -14,7 +14,7 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3" />
       <PackageReference Include="NPOI" Version="2.6.0" />
       <PackageReference Include="Prism.Core" Version="8.1.97" />
-      <PackageReference Include="T1.SqlLocalData" Version="1.0.1" />
+      <PackageReference Include="T1.Standard" Version="1.0.68" />
     </ItemGroup>
 
 </Project>

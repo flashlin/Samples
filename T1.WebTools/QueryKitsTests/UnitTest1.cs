@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using FluentAssertions;
 using QueryKits.Services;
-using T1.SqlLocalData.Extensions;
 
 namespace QueryKitsTests;
 
@@ -14,15 +13,15 @@ public class Tests
     [SetUp]
     public void Setup()
     {
-        _dbContext = new ReportDbContext(new SqlMemoryDbContextOptionsFactory());
+        _dbContext = new ReportDbContext(new SqliteMemoryDbContextOptionsFactory());
         _sut = new QueryService(_dbContext);
     }
 
     [Test]
     public void CreateTable()
     {
-        _dbContext.CreateTable(typeof(CustomerEntity));
-        _dbContext.CreateTable(typeof(ExtraCustomerEntity));
+        _dbContext.CreateTableByEntity(typeof(CustomerEntity));
+        _dbContext.CreateTableByEntity(typeof(ExtraCustomerEntity));
         
         var tables = _dbContext.GetAllTableNames();
         tables.Count().Should().Be(2);
@@ -46,5 +45,6 @@ public class ExtraCustomerEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; } 
     public int CustomerId { get; set; }
+    [Column("Addr", TypeName = "NVARCHAR(50)")]
     public string Address { get; set; }
 }
