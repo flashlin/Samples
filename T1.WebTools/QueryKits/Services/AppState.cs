@@ -1,5 +1,4 @@
 ﻿using Prism.Events;
-using T1.Standard.Extensions;
 
 namespace QueryKits.Services;
 

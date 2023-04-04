@@ -16,4 +16,5 @@ public interface IReportRepo
     List<QueryDataSet> QueryDapperMultipleRawSql(string sql);
     List<QueryDataSet> QueryMultipleRawSql(string sql);
     void DeleteTable(string tableName);
+    void CreateTableByEntity(Type entityType);
 }
