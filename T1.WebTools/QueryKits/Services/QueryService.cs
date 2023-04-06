@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text;
+using System.Text.Json.Serialization;
 using QueryKits.CsvEx;
 using QueryKits.ExcelUtils;
 
@@ -20,7 +21,10 @@ public class QueryService : IQueryService
 
     public void MergeTable(MergeTableRequest req)
     {
-        
+        var sql = new StringBuilder();
+
+        var datetime = "CONVERT(varchar, datetime_column, 126)";
+        var concat = "CONCAT(varchar, datetime_column, 126)";
     }
 
     public void ImportCsvFile(string csvFile)
@@ -95,14 +99,20 @@ public class QueryService : IQueryService
     }
 }
 
-public class TableForeignInfo
-{
-    public string Name { get; set; }
-    public List<string> Columns { get; set; } = new();
-}
-
 public class MergeTableRequest
 {
-    public TableForeignInfo Table1 { get; set; }
-    public TableForeignInfo Table2 { get; set; }
+    public TableInfo LeftTable { get; set; }
+    public TableInfo RightTable { get; set; }
+    public string TargetTableName { get; set; }
+    public MergeType MergeType { get; set; }
+}
+
+public enum MergeType
+{
+    InnerJoin,
+    LeftJoin,
+    RightJoin,
+    LeftExcludeJoin,
+    RightExcludeJoin,
+    FullOuterJoin,
 }

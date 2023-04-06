@@ -12,26 +12,27 @@ namespace QueryKits.Services;
 
 public class ReportDbContext : DbContext, IReportRepo
 {
-    private readonly ISqlBuilder _sqlBuilder;
     private const string DatabaseName = "QueryDb";
 
     public ReportDbContext(IDbContextOptionsFactory factory)
         : base(factory.Create<ReportDbContext>())
     {
-        _sqlBuilder = factory.CreateSqlBuilder();
+        SqlBuilder = factory.CreateSqlBuilder();
     }
+    
+    public ISqlBuilder SqlBuilder { get; }
 
     public DbSet<SqlHistoryEntity> SqlHistories { get; set; } = null!;
 
     public void CreateTableByEntity(Type entityType)
     {
-        var sql = _sqlBuilder.CreateTableStatement(entityType);
+        var sql = SqlBuilder.CreateTableStatement(entityType);
         ExecuteRawSql(sql);
     }
 
     public List<string> GetAllTableNames()
     {
-        var sql = _sqlBuilder.GetAllTableNames(DatabaseName);
+        var sql = SqlBuilder.GetAllTableNames(DatabaseName);
         return Database.SqlQueryRaw<string>(sql).ToList();
     }
 
@@ -149,10 +150,10 @@ public class ReportDbContext : DbContext, IReportRepo
         return Query<TableColumnInfo>(sql.ToString());
     }
 
-    public int ExecuteRawSql(string sql)
+    public int ExecuteRawSql(string sql, object? parameters=null)
     {
         var conn = Database.GetDbConnection();
-        return conn.Execute(sql);
+        return conn.Execute(sql, parameters);
     }
 
     public int DropTable(string tableName)
