@@ -96,23 +96,3 @@ public class QueryService : IQueryService
         return _reportRepo.GetTop10SqlCode();
     }
 }
-
-public class MergeTableRequest
-{
-    public TableInfo LeftTable { get; set; }
-    public List<TableColumnInfo> LeftJoinKeys { get; set; } = new();
-    public TableInfo RightTable { get; set; }
-    public List<TableColumnInfo> RightJoinKeys { get; set; } = new();
-    public string TargetTableName { get; set; }
-    public MergeType MergeType { get; set; }
-}
-
-public enum MergeType
-{
-    InnerJoin,
-    LeftJoin,
-    RightJoin,
-    LeftExcludeJoin,
-    RightExcludeJoin,
-    FullOuterJoin,
-}

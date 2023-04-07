@@ -40,7 +40,6 @@
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.2" />
 	  <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="3.1.6" />
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-	  <PackageReference Include="T1.Standard" Version="1.0.73" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -53,6 +52,10 @@
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\..\MyGitHub\T1.Standard\T1.Standard\T1.Standard.csproj" />
 	</ItemGroup>
 
 </Project>
