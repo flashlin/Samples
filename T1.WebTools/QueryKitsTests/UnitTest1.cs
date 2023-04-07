@@ -16,7 +16,7 @@ public class Tests
     [SetUp]
     public void Setup()
     {
-        //_dbContext = new ReportDbContext(new SqliteMemoryDbContextOptionsFactory());
+        //_dbContext = new ReportDbContext(new SqlMemoryDbContextOptionsFactory());
         var dbConfig = Options.Create(new DbConfig
         {
             ConnectionString =
@@ -74,7 +74,6 @@ public class Tests
 
         var leftTable = _dbContext.SqlBuilder.GetTableInfo(typeof(CustomerEntity));
         var rightTable = _dbContext.SqlBuilder.GetTableInfo(typeof(ExtraCustomerEntity));
-
         _sut.MergeTable(new MergeTableRequest
         {
             LeftTable = leftTable,
@@ -91,14 +90,15 @@ public class Tests
             MergeType = MergeType.InnerJoin
         });
 
-        var actual = _dbContext.Query<MergeEntity>("SELECT * FROM M1");
+        var actual = _dbContext.Query<MergeEntity>("SELECT * FROM M1")
+            .ToList();
     }
 
     private void AddEntity(object data)
     {
         var entityType = data.GetType();
         var sql = CreateInsertTableStatement(entityType);
-        _dbContext.ExecuteRawSql(sql, data);
+        _dbContext.Execute(sql, data);
     }
 
     private string CreateInsertTableStatement(Type entityType)
