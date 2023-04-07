@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using QueryKits.CsvEx;
 using QueryKits.ExcelUtils;
+using T1.Standard.Data.SqlBuilders;
 
 namespace QueryKits.Services;
 
@@ -21,10 +22,7 @@ public class QueryService : IQueryService
 
     public void MergeTable(MergeTableRequest req)
     {
-        var sql = new StringBuilder();
-
-        var datetime = "CONVERT(varchar, datetime_column, 126)";
-        var concat = "CONCAT(varchar, datetime_column, 126)";
+        _reportRepo.MergeTable(req);
     }
 
     public void ImportCsvFile(string csvFile)
@@ -102,7 +100,9 @@ public class QueryService : IQueryService
 public class MergeTableRequest
 {
     public TableInfo LeftTable { get; set; }
+    public List<TableColumnInfo> LeftJoinKeys { get; set; } = new();
     public TableInfo RightTable { get; set; }
+    public List<TableColumnInfo> RightJoinKeys { get; set; } = new();
     public string TargetTableName { get; set; }
     public MergeType MergeType { get; set; }
 }

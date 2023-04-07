@@ -17,4 +17,5 @@ public interface IReportRepo
     List<QueryDataSet> QueryMultipleRawSql(string sql);
     void DeleteTable(string tableName);
     void CreateTableByEntity(Type entityType);
+    void MergeTable(MergeTableRequest req);
 }
