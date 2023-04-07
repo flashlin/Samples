@@ -24,4 +24,10 @@
       <ProjectReference Include="..\QueryKits\QueryKits.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="T1.Standard">
+        <HintPath>..\..\..\..\MyGitHub\T1.Standard\T1.Standard\bin\Debug\netstandard2.0\T1.Standard.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>

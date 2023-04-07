@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Primitives;
 using QueryKits.Entities;
 using QueryKits.ExcelUtils;
+using T1.Standard.Collections.Generics;
 using T1.Standard.Data.SqlBuilders;
 
 namespace QueryKits.Services;
@@ -28,6 +29,94 @@ public class ReportDbContext : DbContext, IReportRepo
     {
         var sql = SqlBuilder.CreateTableStatement(entityType);
         ExecuteRawSql(sql);
+    }
+
+    public void MergeTable(MergeTableRequest req)
+    {
+        var leftColumns = string.Join(",", req.LeftTable.Columns.Select(x => $"tb1.[{x.Name}]"));
+        var rightColumns = string.Join(",", req.RightTable.Columns.Select(x => $"tb2.[{x.Name}]"));
+        var leftJoinKeys = JoinKeys(req.LeftJoinKeys, name => $"tb1.{name}");
+        var rightJoinKeys = JoinKeys(req.RightJoinKeys, name => $"tb2.{name}");
+
+        var columnNames = GetAllColumnNames(req);
+        var leftAliasNames = GetAliasNames(columnNames, req.LeftTable);
+        var rightAlias = GetAliasNames(columnNames, req.RightTable);
+        
+        var sql = new StringBuilder();
+        sql.Append("SELECT ");
+        sql.Append(leftColumns + ",");
+        sql.AppendLine(rightColumns);
+        sql.AppendLine($"INTO {req.TargetTableName}");
+        sql.AppendLine($"FROM {req.LeftTable.Name} as tb1");
+        sql.Append($"JOIN {req.RightTable.Name} as tb2 ON {leftJoinKeys} = {rightJoinKeys}");
+        
+        
+
+        ExecuteRawSql(sql.ToString());
+    }
+
+    private static List<string> GetAliasNames(Dictionary<string, int> columnNames, TableInfo table)
+    {
+        var aliasNames = new List<string>();
+        foreach (var column in table.Columns)
+        {
+            columnNames.TryGetValue(column.Name, out var times);
+            if (times > 1)
+            {
+                aliasNames.Add($"[{table.Name}_{column.Name}]");
+            }
+            else
+            {
+                aliasNames.Add($"[{column.Name}]");
+            }
+        }
+        return aliasNames;
+    }
+
+    private static Dictionary<string, int> GetAllColumnNames(MergeTableRequest req)
+    {
+        var columnNames = new Dictionary<string, int>();
+        foreach (var column in req.LeftTable.Columns)
+        {
+            if (columnNames.TryAdd(column.Name, 1))
+            {
+                columnNames[column.Name]++;
+            }
+        }
+
+        foreach (var column in req.RightTable.Columns)
+        {
+            if (columnNames.TryAdd(column.Name, 1))
+            {
+                columnNames[column.Name]++;
+            }
+        }
+
+        return columnNames;
+    }
+
+    private string JoinKeys(List<TableColumnInfo> joinKeys, Func<string, string> mapField)
+    {
+        if (joinKeys.Count == 1)
+        {
+            return JoinKeyName(joinKeys[0], mapField);
+        }
+        return "CONCAT(" +
+               string.Join(",", joinKeys.Select(x => JoinKeyName(x, mapField))) + 
+               ")";
+    }
+
+    private string JoinKeyName(TableColumnInfo column, Func<string, string> mapField)
+    {
+        string Field()
+        {
+            return mapField($"[{column.Name}]");
+        }
+        if (column.DataType.TypeName == "DATETIME")
+        {
+            return $"CONVERT(varchar, {Field()}, 126)";
+        }
+        return Field();
     }
 
     public List<string> GetAllTableNames()
