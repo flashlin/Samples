@@ -28,38 +28,14 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public void CreateTableByEntity(Type entityType)
     {
-        var sql = SqlBuilder.CreateTableStatement(entityType);
+        var sql = SqlBuilder.CreateTableStatement(SqlBuilder.GetTableInfo(entityType));
         Execute(sql);
     }
 
     public void MergeTable(MergeTableRequest req)
     {
-        var leftJoinKeys = JoinKeys(req.LeftJoinKeys, name => $"tb1.{name}");
-        var rightJoinKeys = JoinKeys(req.RightJoinKeys, name => $"tb2.{name}");
-
-        var columnNames = GetAllColumnNames(req);
-        var leftAlias = GetAliasNames(columnNames, req.LeftTable);
-        var rightAlias = GetAliasNames(columnNames, req.RightTable);
-
-        var leftColumns = req.LeftTable.Columns.Select(x => $"tb1.[{x.Name}]").ToList();
-        var leftColumnsAlias = leftColumns.Zip(leftAlias).Select(x => $"{x.First} as {x.Second}")
-            .ToList();
-        var leftColumnsStr = string.Join(",", leftColumnsAlias);
-        
-        var rightColumns = req.RightTable.Columns.Select(x => $"tb2.[{x.Name}]").ToList();
-        var rightColumnsAlias = rightColumns.Zip(rightAlias).Select(x=> $"{x.First} as {x.Second}")
-            .ToList();
-        var rightColumnsStr = string.Join(",", rightColumnsAlias);
-
-        var sql = new StringBuilder();
-        sql.Append("SELECT ");
-        sql.Append(leftColumnsStr + ",");
-        sql.AppendLine(rightColumnsStr);
-        sql.AppendLine($"INTO {req.TargetTableName}");
-        sql.AppendLine($"FROM {req.LeftTable.Name} as tb1");
-        sql.Append($"JOIN {req.RightTable.Name} as tb2 ON {leftJoinKeys} = {rightJoinKeys}");
-
-        Execute(sql.ToString());
+        var sql = SqlBuilder.CreateMergeTableStatement(req);
+        Execute(sql);
     }
 
     public List<string> GetAllTableNames()
@@ -190,74 +166,6 @@ public class ReportDbContext : DbContext, IReportRepo
     private SqlConnection GetSqlConnection()
     {
         return new SqlConnection(Database.GetDbConnection().ConnectionString);
-    }
-
-    private static List<string> GetAliasNames(Dictionary<string, int> columnNames, TableInfo table)
-    {
-        var aliasNames = new List<string>();
-        foreach (var column in table.Columns)
-        {
-            columnNames.TryGetValue(column.Name, out var times);
-            if (times > 1)
-            {
-                aliasNames.Add($"[{table.Name}_{column.Name}]");
-            }
-            else
-            {
-                aliasNames.Add($"[{column.Name}]");
-            }
-        }
-
-        return aliasNames;
-    }
-
-    private static Dictionary<string, int> GetAllColumnNames(MergeTableRequest req)
-    {
-        var columnNames = new Dictionary<string, int>();
-        foreach (var column in req.LeftTable.Columns)
-        {
-            if (!columnNames.TryAdd(column.Name, 1))
-            {
-                columnNames[column.Name]++;
-            }
-        }
-
-        foreach (var column in req.RightTable.Columns)
-        {
-            if (!columnNames.TryAdd(column.Name, 1))
-            {
-                columnNames[column.Name]++;
-            }
-        }
-
-        return columnNames;
-    }
-
-    private string JoinKeys(List<TableColumnInfo> joinKeys, Func<string, string> mapField)
-    {
-        if (joinKeys.Count == 1)
-        {
-            return JoinKeyName(joinKeys[0], mapField);
-        }
-
-        return "CONCAT(" +
-               string.Join(",", joinKeys.Select(x => JoinKeyName(x, mapField))) +
-               ")";
-    }
-
-    private string JoinKeyName(TableColumnInfo column, Func<string, string> mapField)
-    {
-        string Field()
-        {
-            return mapField($"[{column.Name}]");
-        }
-
-        if (column.DataType.TypeName == "DATETIME")
-        {
-            return $"CONVERT(varchar, {Field()}, 126)";
-        }
-
-        return Field();
     }
 
     private DbCommand CreateCommand(string sql)

@@ -14,13 +14,16 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3" />
       <PackageReference Include="NPOI" Version="2.6.0" />
       <PackageReference Include="Prism.Core" Version="8.1.97" />
-      <PackageReference Include="T1.Standard" Version="1.0.73" />
     </ItemGroup>
 
     <ItemGroup>
       <Reference Include="T1.Standard">
         <HintPath>..\..\..\..\MyGitHub\T1.Standard\T1.Standard\bin\Debug\netstandard2.0\T1.Standard.dll</HintPath>
       </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\..\MyGitHub\T1.Standard\T1.Standard\T1.Standard.csproj" />
     </ItemGroup>
 
 </Project>
