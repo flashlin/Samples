@@ -50,39 +50,10 @@ public class Tests
 
 
     [Test]
-    public void MergeTable()
+    public void MergeTableInto()
     {
-        var allTableNames = _dbContext.GetAllTableNames().Select(x => x.ToLower()).ToList();
-        if (!allTableNames.Contains("customer"))
-        {
-            _dbContext.CreateTableByEntity(typeof(CustomerEntity));
-        }
-
-        if (!allTableNames.Contains("extraCustomer".ToLower()))
-        {
-            _dbContext.CreateTableByEntity(typeof(ExtraCustomerEntity));
-        }
-
-        AddEntity(new CustomerEntity
-        {
-            Name = "flash",
-            Birth = new DateTime(2019, 01, 01)
-        });
-        AddEntity(new CustomerEntity
-        {
-            Name = "mary",
-            Birth = new DateTime(2019, 01, 02)
-        });
-        AddEntity(new ExtraCustomerEntity
-        {
-            CustomerId = 1,
-            Address = "Taipei"
-        });
-        AddEntity(new ExtraCustomerEntity
-        {
-            CustomerId = 2,
-            Address = "Taichung"
-        });
+        GiveTables();
+        GiveData();
 
         var leftTable = _dbContext.SqlBuilder.GetTableInfo(typeof(CustomerEntity));
         var rightTable = _dbContext.SqlBuilder.GetTableInfo(typeof(ExtraCustomerEntity));
@@ -102,17 +73,47 @@ public class Tests
             MergeType = MergeType.InnerJoin
         });
 
-        var actual = _dbContext.QueryRawSql("SELECT * FROM M1")
-            .Select(row => new MergeEntity
+        var actual = ThenGetResult();
+
+        actual.Should().BeEquivalentTo(new List<MergeEntity>()
+        {
+            new()
             {
-                LeftId = (int)row["Customer_Id"],
-                Name = (string)row["Name"],
-                Birth = (DateTime)row["Birth"],
-                RightId = (int)row["ExtraCustomer_Id"],
-                CustomerId = (int)row["CustomerId"],
-                Addr = (string)row["Addr"]
-            })
-            .ToList();
+                LeftId = 1,
+                Name = "flash",
+                Birth = new DateTime(2019, 1, 1),
+                RightId = 1,
+                CustomerId = 1,
+                Addr = "Taipei"
+            },
+        });
+    }
+    
+    [Test]
+    public void MergeTableLeftInto()
+    {
+        GiveTables();
+        GiveData();
+
+        var leftTable = _dbContext.SqlBuilder.GetTableInfo(typeof(CustomerEntity));
+        var rightTable = _dbContext.SqlBuilder.GetTableInfo(typeof(ExtraCustomerEntity));
+        _sut.MergeTable(new MergeTableRequest
+        {
+            LeftTable = leftTable,
+            RightTable = rightTable,
+            LeftJoinKeys = new List<TableColumnInfo>
+            {
+                leftTable.Columns.First(x => x.Name == "Id")
+            },
+            RightJoinKeys = new List<TableColumnInfo>
+            {
+                rightTable.Columns.First(x => x.Name == "CustomerId")
+            },
+            TargetTableName = "M1",
+            MergeType = MergeType.LeftJoin
+        });
+
+        var actual = ThenGetResult();
 
         actual.Should().BeEquivalentTo(new List<MergeEntity>()
         {
@@ -130,11 +131,120 @@ public class Tests
                 LeftId = 2,
                 Name = "mary",
                 Birth = new DateTime(2019, 1, 2),
-                RightId = 2,
-                CustomerId = 2,
-                Addr = "Taichung"
+                RightId = 0,
+                CustomerId = 0,
+                Addr = null
             },
         });
+    }
+    
+    [Test]
+    public void MergeTableLeftExcludeInto()
+    {
+        GiveTables();
+        GiveData();
+
+        var leftTable = _dbContext.SqlBuilder.GetTableInfo(typeof(CustomerEntity));
+        var rightTable = _dbContext.SqlBuilder.GetTableInfo(typeof(ExtraCustomerEntity));
+        _sut.MergeTable(new MergeTableRequest
+        {
+            LeftTable = leftTable,
+            RightTable = rightTable,
+            LeftJoinKeys = new List<TableColumnInfo>
+            {
+                leftTable.Columns.First(x => x.Name == "Id")
+            },
+            RightJoinKeys = new List<TableColumnInfo>
+            {
+                rightTable.Columns.First(x => x.Name == "CustomerId")
+            },
+            TargetTableName = "M1",
+            MergeType = MergeType.LeftExcludeCrossJoin
+        });
+
+        var actual = ThenGetResult();
+
+        actual.Should().BeEquivalentTo(new List<MergeEntity>()
+        {
+            new()
+            {
+                LeftId = 2,
+                Name = "mary",
+                Birth = new DateTime(2019, 1, 2),
+                RightId = 0,
+                CustomerId = 0,
+                Addr = null
+            },
+        });
+    }
+
+    private List<MergeEntity> ThenGetResult()
+    {
+        var actual = _dbContext.QueryRawSql("SELECT * FROM M1")
+            .Select(row => new MergeEntity
+            {
+                LeftId = (int) row["Customer_Id"],
+                Name = (string) row["Name"],
+                Birth = (DateTime) row["Birth"],
+                RightId = GetRow<int>(row, "ExtraCustomer_Id"),
+                CustomerId = GetRow<int>(row, "CustomerId"),
+                Addr = GetRow<string>(row, "Addr"),
+            })
+            .ToList();
+        return actual;
+    }
+
+    private T? GetRow<T>(Dictionary<string, object?> row, string name)
+    {
+        if (!row.ContainsKey(name))
+        {
+            return default;
+        }
+
+        var value = row[name];
+        if (value == null)
+        {
+            return default;
+        }
+        return (T)value;
+    }
+
+    private void GiveData()
+    {
+        AddEntity(new CustomerEntity
+        {
+            Name = "flash",
+            Birth = new DateTime(2019, 01, 01)
+        });
+        AddEntity(new CustomerEntity
+        {
+            Name = "mary",
+            Birth = new DateTime(2019, 01, 02)
+        });
+        AddEntity(new ExtraCustomerEntity
+        {
+            CustomerId = 1,
+            Address = "Taipei"
+        });
+        AddEntity(new ExtraCustomerEntity
+        {
+            CustomerId = 3,
+            Address = "Taichung"
+        });
+    }
+
+    private void GiveTables()
+    {
+        var allTableNames = _dbContext.GetAllTableNames().Select(x => x.ToLower()).ToList();
+        if (!allTableNames.Contains("customer"))
+        {
+            _dbContext.CreateTableByEntity(typeof(CustomerEntity));
+        }
+
+        if (!allTableNames.Contains("extraCustomer".ToLower()))
+        {
+            _dbContext.CreateTableByEntity(typeof(ExtraCustomerEntity));
+        }
     }
 
     private void AddEntity(object data)
@@ -169,7 +279,7 @@ public class MergeEntity
     [Column("ExtraCustomer_Id")]
     public int RightId { get; set; }
     public int CustomerId { get; set; }
-    public string Addr { get; set; }
+    public string? Addr { get; set; }
 }
 
 [Table("Customer")]
