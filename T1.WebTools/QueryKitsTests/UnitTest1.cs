@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using QueryKits.Services;
+using T1.SqlLocalData;
 using T1.Standard.Data.SqlBuilders;
 using T1.Standard.DynamicCode;
 
@@ -10,17 +11,28 @@ namespace QueryKitsTests;
 
 public class Tests
 {
+    private string _instanceName = "local_db_instance";
+    private string _databaseName = "QueryDb";
+    private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
+
     private QueryService _sut = null!;
     private ReportDbContext _dbContext = null!;
 
     [SetUp]
     public void Setup()
     {
+        _localDb.EnsureInstanceCreated(_instanceName);
+        _localDb.ForceDropDatabase(_instanceName, _databaseName);
+        _localDb.DeleteDatabaseFile(_databaseName);
+        _localDb.CreateDatabase(_instanceName, _databaseName);
+
+
         //_dbContext = new ReportDbContext(new SqlMemoryDbContextOptionsFactory());
         var dbConfig = Options.Create(new DbConfig
         {
             ConnectionString =
-                "Data Source=127.0.0.1,4331;User ID=sa;Password=Passw0rd!;Initial Catalog=QueryDb;TrustServerCertificate=true;"
+                // "Data Source=127.0.0.1,4331;User ID=sa;Password=Passw0rd!;Initial Catalog=QueryDb;TrustServerCertificate=true;"
+                "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=QueryDb;"
         });
         _dbContext = new ReportDbContext(new DbContextOptionsFactory(dbConfig));
         _sut = new QueryService(_dbContext);
@@ -46,7 +58,7 @@ public class Tests
             _dbContext.CreateTableByEntity(typeof(CustomerEntity));
         }
 
-        if (!allTableNames.Contains("extracustomer"))
+        if (!allTableNames.Contains("extraCustomer".ToLower()))
         {
             _dbContext.CreateTableByEntity(typeof(ExtraCustomerEntity));
         }
@@ -69,7 +81,7 @@ public class Tests
         AddEntity(new ExtraCustomerEntity
         {
             CustomerId = 2,
-            Address = "Taihju"
+            Address = "Taichung"
         });
 
         var leftTable = _dbContext.SqlBuilder.GetTableInfo(typeof(CustomerEntity));
@@ -90,8 +102,39 @@ public class Tests
             MergeType = MergeType.InnerJoin
         });
 
-        var actual = _dbContext.Query<MergeEntity>("SELECT * FROM M1")
+        var actual = _dbContext.QueryRawSql("SELECT * FROM M1")
+            .Select(row => new MergeEntity
+            {
+                LeftId = (int)row["Customer_Id"],
+                Name = (string)row["Name"],
+                Birth = (DateTime)row["Birth"],
+                RightId = (int)row["ExtraCustomer_Id"],
+                CustomerId = (int)row["CustomerId"],
+                Addr = (string)row["Addr"]
+            })
             .ToList();
+
+        actual.Should().BeEquivalentTo(new List<MergeEntity>()
+        {
+            new()
+            {
+                LeftId = 1,
+                Name = "flash",
+                Birth = new DateTime(2019, 1, 1),
+                RightId = 1,
+                CustomerId = 1,
+                Addr = "Taipei"
+            },
+            new()
+            {
+                LeftId = 2,
+                Name = "mary",
+                Birth = new DateTime(2019, 1, 2),
+                RightId = 2,
+                CustomerId = 2,
+                Addr = "Taichung"
+            },
+        });
     }
 
     private void AddEntity(object data)
@@ -118,9 +161,12 @@ public class Tests
 
 public class MergeEntity
 {
+    [Column("Customer_Id")]
     public int LeftId { get; set; }
     public string Name { get; set; }
     public DateTime Birth { get; set; }
+    
+    [Column("ExtraCustomer_Id")]
     public int RightId { get; set; }
     public int CustomerId { get; set; }
     public string Addr { get; set; }

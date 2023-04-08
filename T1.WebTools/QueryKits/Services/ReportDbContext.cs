@@ -47,7 +47,7 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public List<Dictionary<string, object>> QueryRawSql(string sql)
     {
-        using var conn = GetSqlConnection();
+        var conn = GetDbConnection();
         return conn.Query(sql)
             .Cast<IDictionary<string, object>>()
             .Select(row => row.ToDictionary(item => item.Key, item => item.Value))
@@ -230,8 +230,10 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public IEnumerable<T> Query<T>(string sql, object? parameters = null)
     {
-        using var connection = new SqlConnection(Database.GetDbConnection().ConnectionString);
-        connection.Open();
+        // var connectionString = Database.GetDbConnection().ConnectionString;
+        // using var connection = new SqlConnection(connectionString);
+        // connection.Open();
+        var connection = GetDbConnection();
         return connection.Query<T>(sql, parameters);
     }
 
