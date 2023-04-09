@@ -1,6 +1,6 @@
 ﻿@using QueryKits.Services
 @inherits LayoutComponentBase
-
+@using QueryWeb.Pages
 <PageTitle>QueryWeb</PageTitle>
 
 <div class="page">
@@ -48,7 +48,8 @@
     {
         if (firstRender)
         {
-            AppState.Subscribe(args =>
+            Init();
+            AppState.SubscribeEvent<UpdateAppReqEvent>(args =>
             {
                 _appStateClass = AppState.IsLoading ? "BlockUI" : "visually-hidden";
                 StateHasChanged();
@@ -57,5 +58,8 @@
         return Task.CompletedTask;
     }
 
-
+    void Init()
+    {
+        
+    }
 }

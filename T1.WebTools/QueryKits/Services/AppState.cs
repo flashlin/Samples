@@ -16,20 +16,33 @@ public class AppState : IAppState
     public void Publish(Action<AppState> changeFn)
     {
         changeFn(this);
-        _eventAggregator.GetEvent<UpdateAppEventArgs>().Publish(new UpdateAppContext());
+        _eventAggregator.GetEvent<PubSubEvent<UpdateAppReqEvent>>().Publish(new UpdateAppReqEvent());
     }
-
-    public void Subscribe(Action<UpdateAppContext> handler)
-    {
-        _eventAggregator.GetEvent<UpdateAppEventArgs>().Subscribe(handler);
-    }
-}
-
-public class UpdateAppContext : EventArgs
-{
     
+    public void PublishEvent<T>(T eventArgs)
+        where T: EventArgs
+    {
+        _eventAggregator.GetEvent<PubSubEvent<T>>().Publish(eventArgs);
+    }
+
+
+    public void SubscribeEvent<T>(Action<T> handler)
+        where T: EventArgs
+    {
+        _eventAggregator.GetEvent<PubSubEvent<T>>().Subscribe(handler);
+    }
 }
 
-public class UpdateAppEventArgs : PubSubEvent<UpdateAppContext>
+public class UpdateAppReqEvent : EventArgs
 {
 }
+
+public class MergeTableReqEvent : EventArgs
+{
+    public string LeftTableName { get; set; }
+    public string RightTableName { get; set; }
+}
+
+// public class UpdateAppEventArgs : PubSubEvent<UpdateAppRequest>
+// {
+// }

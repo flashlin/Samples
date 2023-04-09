@@ -52,6 +52,13 @@
         </tbody>
     </table>
 }
+
+<Modal IsShow="_isShowMergeTableForm">
+    <Body>
+    <MergeTableForm @ref="_mergeTableForm"></MergeTableForm>
+    </Body>
+</Modal>
+
 <style>
 .table-dark tbody tr:nth-of-type(odd) {
     background-color: #f2f2f2;
@@ -66,6 +73,7 @@
 @inject IJSRuntime _jsRuntime
 @inject IEventAggregator EventAggregator
 @inject IQueryService QueryService
+@inject IAppState AppState
 
 @code {
     private MCodeEditor _codeEditor = null!;
@@ -79,6 +87,8 @@
 ";
     private string _sqlSnippetCode = string.Empty;
     private List<ExcelSheet> _results = new();
+    private MergeTableForm _mergeTableForm = null!;
+    private bool _isShowMergeTableForm;
 
     private void ClickTab(int index)
     {
@@ -102,6 +112,7 @@
     {
         if (firstRender)
         {
+            Init();
             _sqlCodeHistory = QueryService.GetTop10SqlCode();
             StateHasChanged();
             try
@@ -114,6 +125,15 @@
             }
         }
         return Task.CompletedTask;
+    }
+
+    private void Init()
+    {
+        AppState.SubscribeEvent<MergeTableReqEvent>(args =>
+        {
+            _isShowMergeTableForm = true;
+            StateHasChanged();
+        });
     }
 
     private Task OnSqlCodeRan(SqlCodeRunEventArgs arg)

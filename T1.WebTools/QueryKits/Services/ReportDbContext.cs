@@ -247,8 +247,10 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public int Execute(string sql, object? parameters = null)
     {
-        using var connection = new SqlConnection(Database.GetDbConnection().ConnectionString);
-        connection.Open();
+        // using var connection = new SqlConnection(Database.GetDbConnection().ConnectionString);
+        // connection.Open();
+        // return connection.Execute(sql, parameters);
+        var connection = GetDbConnection();
         return connection.Execute(sql, parameters);
     }
 
