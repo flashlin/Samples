@@ -146,6 +146,7 @@
     //StateHasChanged();
         _results = QueryService.QueryRawSql(arg.SqlCode);
         QueryService.AddSqlCode(arg.SqlCode);
+        _sqlCodeHistory = QueryService.GetTop10SqlCode();
         return Task.CompletedTask;
     }
 

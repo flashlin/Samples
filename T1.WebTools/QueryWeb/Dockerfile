@@ -22,6 +22,17 @@ FROM build AS publish
 RUN dotnet publish "QueryWeb.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
+
+# Install necessary packages
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 apt-transport-https && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/debian/10/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools unixodbc-dev && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "QueryWeb.dll"]
