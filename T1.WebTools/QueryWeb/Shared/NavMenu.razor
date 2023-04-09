@@ -13,6 +13,7 @@
     </div>
 </div>
 
+
 <Modal IsShow="@_showMergeTableForm">
     <Body>
     <MergeTableForm @ref="_mergeTableForm"></MergeTableForm>
@@ -42,7 +43,7 @@
             @foreach (var tableName in _allTableNames)
             {
                 <div style="display: block">
-                    <input type="checkbox" @bind="_selectedTableNames[tableName]" />
+                    <input type="checkbox" @bind="_selectedTableNames[tableName]"/>
                     <span class="text-left text-white">@tableName</span>
                     <button type="button" class="close" @onclick="() => DeleteTable(tableName)">
                         <span aria-hidden="true">&times;</span>
@@ -74,6 +75,7 @@
 @inject IEventAggregator EventAggregator
 @inject IQueryEnvironment QueryEnvironment
 @inject IJsHelper JsHelper
+
 @code {
     bool _showMergeTableForm;
     MergeTableForm _mergeTableForm = null!;
@@ -81,7 +83,7 @@
     bool _collapseNavMenu = true;
     ElementReference _inputFileRef;
     Confirm _confirmRef = null!;
-    
+
     EnsureKeyDictionary<string, bool> _selectedTableNames = new(key => false);
 
     private string? NavMenuCssClass => _collapseNavMenu ? "collapse" : null;
@@ -103,7 +105,15 @@
             return;
         }
 
-        _mergeTableForm.SelectTable(tables[0], tables[1]);
+        // InvokeAsync(() =>
+        // {
+        //     AppState.PublishEvent(new MergeTableReqEvent()
+        //     {
+        //         LeftTableName = tables[0],
+        //         RightTableName = tables[1],
+        //     });
+        // });
+    //_mergeTableForm.SelectTable(tables[0], tables[1]);
         _showMergeTableForm = true;
     }
 
@@ -125,7 +135,7 @@
         if (answer)
         {
             QueryService.DeleteTable(tableName);
-           _allTableNames = QueryService.GetAllTableNames();
+            _allTableNames = QueryService.GetAllTableNames();
         }
     }
 
