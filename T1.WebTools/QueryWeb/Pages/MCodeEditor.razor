@@ -5,7 +5,7 @@
 @using QueryWeb.Models
 @using QueryWeb.Models.Extensions
 
-<div style="position: relative; z-index: 1;">
+<div style="@_showCss">
     <StandaloneCodeEditor
         @ref="_editor"
         ConstructionOptions="GetOptions"
@@ -17,6 +17,7 @@
 @inject IJsHelper JsHelper
 
 @code {
+    string _showCss = "display: block;";
 
     [Parameter]
     public string Language { get; set; } = "csharp";
@@ -39,6 +40,16 @@
         _editor.Layout(_editorOptions.Dimension);
     }
 
+    public void SetShow(bool isShow)
+    {
+        _showCss = "display: none;";
+        if (isShow)
+        {
+            _showCss = "display: block;";
+        } 
+        StateHasChanged();
+        HandleWindowResize();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
