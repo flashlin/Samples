@@ -14,11 +14,11 @@
 </div>
 
 
-<Modal IsShow="@_showMergeTableForm">
-    <Body>
-    <MergeTableForm @ref="_mergeTableForm"></MergeTableForm>
-    </Body>
-</Modal>
+@* <Modal IsShow="@_showMergeTableForm"> *@
+@*     <Body> *@
+@*     <MergeTableForm @ref="_mergeTableForm"></MergeTableForm> *@
+@*     </Body> *@
+@* </Modal> *@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
@@ -104,15 +104,15 @@
             JsHelper.ShowMessageAsync("Please select two table.");
             return;
         }
-
-        // InvokeAsync(() =>
-        // {
-        //     AppState.PublishEvent(new MergeTableReqEvent()
-        //     {
-        //         LeftTableName = tables[0],
-        //         RightTableName = tables[1],
-        //     });
-        // });
+        
+        InvokeAsync(() =>
+        {
+            AppState.PublishEvent(new MergeTableReqEvent()
+            {
+                LeftTableName = tables[0],
+                RightTableName = tables[1],
+            });
+        });
     //_mergeTableForm.SelectTable(tables[0], tables[1]);
         _showMergeTableForm = true;
     }

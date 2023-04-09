@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-8">
             <MCodeEditor @ref="_codeEditor"
-                         SqlCodeRanCallback="@OnSqlCodeRan" 
+                         SqlCodeRanCallback="@OnSqlCodeRan"
                          Text="@_codeText"
                          Language="csharp"
                          KeyCallback="@OnCodeEditorKey"/>
@@ -25,7 +25,7 @@
 </div>
 
 
-@foreach (var result in _results.Select((value, index) => new { value, index }))
+@foreach (var result in _results.Select((value, index) => new {value, index}))
 {
     <button @onclick="() => CopyCsvToClipboard(result.value)">Copy CSV</button>
     <table class="table table-dark table-striped">
@@ -53,7 +53,7 @@
     </table>
 }
 
-<Modal IsShow="_isShowMergeTableForm">
+<Modal IsShow="_isShowMergeTableForm" OnClickClose="OnClickCloseMergeTableForm">
     <Body>
     <MergeTableForm @ref="_mergeTableForm"></MergeTableForm>
     </Body>
@@ -77,14 +77,16 @@
 
 @code {
     private MCodeEditor _codeEditor = null!;
-    private readonly string[] _isShowTabs = { "active", "" };
+    private readonly string[] _isShowTabs = {"active", ""};
     private List<string> _sqlCodeHistory = new();
     MCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
+
     private string _codeText = @"-- CTRL + r: execute 
 -- CTRL + i: insert code block from history
 -- CTRL + <space>: popup intellisence
 ";
+
     private string _sqlSnippetCode = string.Empty;
     private List<ExcelSheet> _results = new();
     private MergeTableForm _mergeTableForm = null!;
@@ -131,8 +133,11 @@
     {
         AppState.SubscribeEvent<MergeTableReqEvent>(args =>
         {
+            _codeEditor.SetShow(false);
             _isShowMergeTableForm = true;
             StateHasChanged();
+    //_codeEditor.SetShow(true);
+    //StateHasChanged();
         });
     }
 
@@ -146,7 +151,7 @@
 
     private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)
     {
-        var value = (string[])arg.Value!;
+        var value = (string[]) arg.Value!;
         _sqlSnippetCode = value[0];
         return Task.CompletedTask;
     }
@@ -157,6 +162,13 @@
         {
             await _codeEditor.InsertAsync(_sqlSnippetCode);
         }
+    }
+
+    private void OnClickCloseMergeTableForm()
+    {
+        _codeEditor.SetShow(true);
+        _isShowMergeTableForm = false;
+        StateHasChanged();
     }
 
 }
