@@ -40,9 +40,31 @@ public class ReportDbContext : DbContext, IReportRepo
 
     public List<string> GetAllTableNames()
     {
-        var sql = SqlBuilder.GetAllTableNames(DatabaseName);
+        var sql = SqlBuilder.GetAllTableNamesStatement(DatabaseName);
         return Query<string>(sql)
             .ToList();
+    }
+
+    public TableInfo GetTableInfo(string tableName)
+    {
+        var sql = SqlBuilder.GetTableInfoStatement(tableName);
+        var columns = Query<TableColumnInfoEntity>(sql).ToList();
+        return new TableInfo
+        {
+            Name = tableName,
+            Columns = columns.Select(x => new TableColumnInfo
+            {
+                IsKey = x.IsKey,
+                IsAutoIncrement = x.IsIdentity,
+                Name = x.Name,
+                DataType = new DataTypeInfo
+                {
+                    TypeName = x.DataType,
+                    Precision = x.Precision ?? x.Size!.Value,
+                    Scale = x.Scale ?? 0
+                }
+            }).ToList()
+        };
     }
 
     public List<Dictionary<string, object>> QueryRawSql(string sql)
@@ -214,20 +236,6 @@ public class ReportDbContext : DbContext, IReportRepo
         return dataSet;
     }
 
-    public List<TableColumnInfo> GetTableColumns(string tableName)
-    {
-        var sql = new StringBuilder();
-        sql.Append("SELECT COLUMN_NAME as Name,");
-        sql.Append("DATA_TYPE as DataType,");
-        sql.Append("CHARACTER_MAXIMUM_LENGTH as Size,");
-        sql.Append("NUMERIC_PRECISION as Precision,");
-        sql.Append("NUMERIC_SCALE as Scale ");
-        sql.Append("FROM INFORMATION_SCHEMA.COLUMNS ");
-        sql.Append($"WHERE TABLE_NAME = '{tableName}'");
-        return Query<TableColumnInfo>(sql.ToString())
-            .ToList();
-    }
-
     public IEnumerable<T> Query<T>(string sql, object? parameters = null)
     {
         // var connectionString = Database.GetDbConnection().ConnectionString;
@@ -286,4 +294,16 @@ public class ReportDbContext : DbContext, IReportRepo
         sql.Append(")");
         return sql.ToString();
     }
+}
+
+public class TableColumnInfoEntity
+{
+    public string Name { get; set; } = string.Empty;
+    public string DataType { get; set; } = string.Empty;
+    public int? Size { get; set; }
+    public bool IsIdentity { get; set; }
+    public bool IsNullable { get; set; }
+    public int? Precision { get; set; }
+    public int? Scale { get; set; }
+    public bool IsKey { get; set; }
 }

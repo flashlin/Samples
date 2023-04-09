@@ -11,6 +11,12 @@
     </div>
 </div>
 
+<Modal IsShow="@_showMergeTableForm">
+    <Body>
+    <MergeTableForm @ref="_mergeTableForm"></MergeTableForm>
+    </Body>
+</Modal>
+
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
@@ -65,8 +71,10 @@
 @inject IQueryEnvironment QueryEnvironment
 
 @code {
-    private List<string> _allTableNames = new();
-    private bool _collapseNavMenu = true;
+    bool _showMergeTableForm;
+    MergeTableForm _mergeTableForm = null!;
+    List<string> _allTableNames = new();
+    bool _collapseNavMenu = true;
     ElementReference _inputFileRef;
     Confirm _confirmRef = null!;
 

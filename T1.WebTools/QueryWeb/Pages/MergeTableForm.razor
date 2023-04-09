@@ -6,29 +6,33 @@
     <tbody>
     <tr>
         <td>
-            <input type="text" class="form-control" placeholder="textbox" disabled>
-            <select multiple class="form-control" id="exampleFormControlSelect2" size="10" style="overflow-y: scroll;">
-                <option>Option 1</option>
-                <option>Option 2</option>
-                <option>Option 3</option>
-                <option>Option 4</option>
-                <option>Option 5</option>
-                <option>Option 6</option>
-                <option>Option 7</option>
-                <option>Option 8</option>
-                <option>Option 9</option>
-                <option>Option 10</option>
-                <option>Option 11</option>
-                <option>Option 12</option>
+            <input type="text" class="form-control" placeholder="@_leftTable.Name" disabled>
+            <select multiple class="form-control" size="10" style="overflow-y: scroll;">
+                @foreach (var column in _leftTable.Columns)
+                {
+                    <option value="@column.Name">@column.Name</option>
+                }
             </select>
         </td>
         <td></td>
-        <td><input type="text" class="form-control" placeholder="textbox"></td>
+        <td>
+            <input type="text" class="form-control" placeholder="textbox">
+        </td>
     </tr>
     <tr>
-        <td><select class="form-select"><option>listbox</option></select></td>
-        <td><button type="button" class="btn btn-primary">button</button></td>
-        <td><select class="form-select"><option>listbox</option></select></td>
+        <td>
+            <select class="form-select">
+                <option>listbox</option>
+            </select>
+        </td>
+        <td>
+            <button type="button" class="btn btn-primary">button</button>
+        </td>
+        <td>
+            <select class="form-select">
+                <option>listbox</option>
+            </select>
+        </td>
     </tr>
     <tr>
         <td colspan="3">
@@ -41,25 +45,56 @@
         </td>
     </tr>
     </tbody>
-  </table>
+</table>
 
 
 @using QueryWeb.Shared
 @using QueryKits.Services
 @using Prism.Events
+@using T1.Standard.Data.SqlBuilders
 @inject IReportRepo _reportRepo
 @inject IJSRuntime _jsRuntime
 @inject IEventAggregator EventAggregator
 @inject IQueryService QueryService
 
 @code {
+    private TableInfo _leftTable = new();
+    private TableInfo _rightTable = new();
+    MergeType _mergeType;
+    IntoType _intoType;
+    List<TableColumnInfo> _leftJoinKeys = new();
+    List<TableColumnInfo> _rightJoinKeys = new();
+    string _targetTableName = "Unknown";
+
+
+    public void SelectTable(string leftTableName, string rightTableName)
+    {
+        _leftTable = _reportRepo.GetTableInfo(leftTableName);
+        _rightTable = _reportRepo.GetTableInfo(rightTableName);
+    }
+
+    public void Run()
+    {
+        _reportRepo.MergeTable(new MergeTableRequest
+        {
+            LeftTable = _leftTable,
+            LeftJoinKeys = _leftJoinKeys,
+            RightTable = _rightTable, 
+            RightJoinKeys = _rightJoinKeys, 
+            IntoType = _intoType, 
+            TargetTableName = _targetTableName, 
+            MergeType = _mergeType
+        });
+    }
+
+
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             try
             {
-                //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
+    //var t = await _jsRuntime.InvokeAsync<string[]>("getDrivesAsync");
             }
             catch (Exception e)
             {
