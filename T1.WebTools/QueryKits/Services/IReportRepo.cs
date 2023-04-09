@@ -19,4 +19,6 @@ public interface IReportRepo
     void DeleteTable(string tableName);
     void CreateTableByEntity(Type entityType);
     void MergeTable(MergeTableRequest req);
+    ISqlBuilder SqlBuilder { get; }
+    TableInfo GetTableInfo(string tableName);
 }
