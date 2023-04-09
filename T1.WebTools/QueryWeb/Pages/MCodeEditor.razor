@@ -4,15 +4,18 @@
 @using QueryKits.Services
 @using QueryWeb.Models
 @using QueryWeb.Models.Extensions
-<StandaloneCodeEditor
-    @ref="_editor"
-    ConstructionOptions="GetOptions"
-    OnDidInit="EditorOnDidInit"
-    OnKeyDown="OnKeyDown"/>
 
+<div style="position: relative; z-index: 1;">
+    <StandaloneCodeEditor
+        @ref="_editor"
+        ConstructionOptions="GetOptions"
+        OnDidInit="EditorOnDidInit"
+        OnKeyDown="OnKeyDown"/>
+</div>
 @inject IJSRuntime JsRuntime
 @inject IReportRepo ReportRepo
 @inject IJsHelper JsHelper
+
 @code {
 
     [Parameter]
@@ -81,15 +84,15 @@
                 OccurrencesHighlight = true,
                 QuickSuggestions = new QuickSuggestionsOptions
                 {
-                    Other = ".", 
-                    Comments = "null", 
+                    Other = ".",
+                    Comments = "null",
                     Strings = "null"
                 }
             };
 
     //editorElement = await JSRuntime.InvokeAsync<ElementReference>("createEditor", "editor", _editorSettings);
-            await JsRuntime.InvokeVoidAsync("addEventListener", "resize", 
-                DotNetObjectReference.Create(this), 
+            await JsRuntime.InvokeVoidAsync("addEventListener", "resize",
+                DotNetObjectReference.Create(this),
                 "HandleWindowResize");
             await JsHelper.InvokeVoidWithObjectAsync("useMonacoEditor", new
             {
@@ -170,6 +173,7 @@
 
     public async Task AppendAsync(string text)
     {
-        await JsRuntime.InvokeVoidAsync("monacoEditorAppendLine", _editor.Id, text);   
+        await JsRuntime.InvokeVoidAsync("monacoEditorAppendLine", _editor.Id, text);
     }
+
 }

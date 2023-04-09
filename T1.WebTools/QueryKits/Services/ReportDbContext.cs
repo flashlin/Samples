@@ -60,7 +60,7 @@ public class ReportDbContext : DbContext, IReportRepo
                 DataType = new DataTypeInfo
                 {
                     TypeName = x.DataType,
-                    Precision = x.Precision ?? x.Size!.Value,
+                    Precision = x.Precision ?? x.Size ?? 0,
                     Scale = x.Scale ?? 0
                 }
             }).ToList()
