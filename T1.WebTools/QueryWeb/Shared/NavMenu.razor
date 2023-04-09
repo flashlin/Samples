@@ -97,7 +97,14 @@
             .Select(x => x.Key)
             .ToList();
 
-        JsHelper.ShowMessageAsync(string.Join(",", tables));
+        if (tables.Count() != 2)
+        {
+            JsHelper.ShowMessageAsync("Please select two table.");
+            return;
+        }
+
+        _mergeTableForm.SelectTable(tables[0], tables[1]);
+        _showMergeTableForm = true;
     }
 
     private async Task UploadFile(ElementReference fileInput)
