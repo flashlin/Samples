@@ -1,5 +1,3 @@
-using T1.Standard.DesignPatterns;
-
 namespace T1.WebTools.LocalQueryEx;
 
 public interface ILocalQueryHostService

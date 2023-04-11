@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using T1.Standard.DesignPatterns;
 
 namespace T1.WebTools.LocalQueryEx;
 
