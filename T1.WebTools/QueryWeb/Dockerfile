@@ -38,7 +38,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* 
 
-ENV SA_PASSWORD=Passw0rd!
+#ENV SA_PASSWORD=Passw0rd!
 #CMD /opt/mssql/bin/sqlservr --accept-eula -error-log=/var/opt/mssql/log/errorlog & \
 #    (echo $SA_PASSWORD | /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P '' --query "SET NOCOUNT ON; SELECT 'SQL Server is up and running'")
 #RUN /opt/mssql/bin/sqlservr --accept-eula -error-log=/var/opt/mssql/log/errorlog
@@ -51,6 +51,7 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 #
+COPY --from=publish /src/Database ./Database
 COPY --from=publish /src/QueryWeb/entrypoint.sh .
 
 
