@@ -11,8 +11,12 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var aspnetcore_env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+Console.WriteLine($"ENV = '{aspnetcore_env}'");
+
 builder.Configuration
-    .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true);
+    .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile($"appSettings.{aspnetcore_env}.json", optional: true, reloadOnChange: true);
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -31,6 +35,9 @@ var localEnv = LocalEnvironment.Load();
 //    urls.Add($@"http://127.0.0.1:{localEnv.Port}");
 //}
 //builder.WebHost.UseUrls(urls.ToArray());
+
+var connectString = builder.Configuration.GetSection("DbConfig:ConnectionString").Value;
+Console.WriteLine($"DB connectString = '{connectString}'");
 
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();

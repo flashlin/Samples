@@ -6,6 +6,8 @@ do
     /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Passw0rd! -d master -i init.sql
     if [ $? -eq 0 ]
     then
+        echo ""
+        echo "--------------------"
         echo "init.sql completed"
         break
     else

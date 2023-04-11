@@ -12,11 +12,16 @@ COPY ["T1.WebTools/T1.WebTools.csproj", "T1.WebTools/"]
 RUN dotnet restore "QueryWeb/QueryWeb.csproj"
 COPY . .
 WORKDIR "/src/QueryWeb"
-RUN dotnet build "QueryWeb.csproj" -c Release -o /app/build /p:ASPNETCORE_ENVIRONMENT=docker
+RUN dotnet build "QueryWeb.csproj" -c Release -o /app/build /p:ASPNETCORE_ENVIRONMENT=Docker
 
 
 FROM build AS publish
 RUN dotnet publish "QueryWeb.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+#
+COPY --from=build /src/Database /app/publish/Database 
+COPY --from=build /src/QueryWeb/entrypoint.sh /app/publish
+RUN chmod +x /app/publish/entrypoint.sh
 
 
 FROM base AS final
@@ -35,12 +40,8 @@ RUN apt-get update && \
 
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-#
-COPY --from=publish /src/Database ./Database 
-COPY --from=publish /src/QueryWeb/entrypoint.sh .
-RUN chmod +x /src/QueryWeb/entrypoint.sh
-
+ENV ASPNETCORE_ENVIRONMENT=Docker
 # ENTRYPOINT ["dotnet", "QueryWeb.dll"]
-# ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
+# ENTRYPOINT ["/app/entrypoint.sh"]
+# ENTRYPOINT ["/bin/bash"]

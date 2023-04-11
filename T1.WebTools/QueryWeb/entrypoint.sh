@@ -1,6 +1,8 @@
 #!/bin/bash
-cd /app/Database
 echo "starting Database entrypoint"
-/app/Database/entrypoint.sh
+su - mssql -c "cd /app/Database && /app/Database/entrypoint.sh"
 cd /app
+echo "===================="
+echo " QueryWeb "
+echo "===================="
 dotnet QueryWeb.dll
