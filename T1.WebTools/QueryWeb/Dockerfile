@@ -14,10 +14,6 @@ COPY . .
 WORKDIR "/src/QueryWeb"
 RUN dotnet build "QueryWeb.csproj" -c Release -o /app/build /p:ASPNETCORE_ENVIRONMENT=docker
 
-#
-USER root
-RUN chmod +x /src/QueryWeb/entrypoint.sh
-
 
 FROM build AS publish
 RUN dotnet publish "QueryWeb.csproj" -c Release -o /app/publish /p:UseAppHost=false
@@ -25,6 +21,7 @@ RUN dotnet publish "QueryWeb.csproj" -c Release -o /app/publish /p:UseAppHost=fa
 
 FROM base AS final
 # Install sql server
+USER root
 RUN apt-get update && \
     apt-get install -y curl gnupg2 apt-transport-https wget software-properties-common && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
@@ -42,7 +39,8 @@ COPY --from=publish /app/publish .
 #
 COPY --from=publish /src/Database ./Database 
 COPY --from=publish /src/QueryWeb/entrypoint.sh .
-
+RUN chmod +x /src/QueryWeb/entrypoint.sh
 
 # ENTRYPOINT ["dotnet", "QueryWeb.dll"]
-ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
+# ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
+ENTRYPOINT ["/app/entrypoint.sh"]
