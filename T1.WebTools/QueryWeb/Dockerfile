@@ -10,16 +10,13 @@ COPY ["QueryRazor/QueryRazor.csproj", "QueryRazor/"]
 COPY ["T1.WebTools/T1.WebTools.csproj", "T1.WebTools/"]
 
 RUN dotnet restore "QueryWeb/QueryWeb.csproj"
-
 COPY . .
-
 WORKDIR "/src/QueryWeb"
 RUN dotnet build "QueryWeb.csproj" -c Release -o /app/build /p:ASPNETCORE_ENVIRONMENT=docker
 
-
-# 
-RUN apt-get update && apt-get install -y dos2unix
-RUN dos2unix /src/QueryWeb/entrypoint.sh && chmod +x /src/QueryWeb/entrypoint.sh
+#
+USER root
+RUN chmod +x /src/QueryWeb/entrypoint.sh
 
 
 FROM build AS publish
@@ -38,22 +35,14 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* 
 
-#ENV SA_PASSWORD=Passw0rd!
-#CMD /opt/mssql/bin/sqlservr --accept-eula -error-log=/var/opt/mssql/log/errorlog & \
-#    (echo $SA_PASSWORD | /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P '' --query "SET NOCOUNT ON; SELECT 'SQL Server is up and running'")
-#RUN /opt/mssql/bin/sqlservr --accept-eula -error-log=/var/opt/mssql/log/errorlog
-
-# COPY ./Database /app/Database
-#RUN chmod +x /app/Database/init.sh
-#EXPOSE 1433
 
 WORKDIR /app
 COPY --from=publish /app/publish .
 
 #
-COPY --from=publish /src/Database ./Database
+COPY --from=publish /src/Database ./Database 
 COPY --from=publish /src/QueryWeb/entrypoint.sh .
 
 
 # ENTRYPOINT ["dotnet", "QueryWeb.dll"]
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]

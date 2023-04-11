@@ -1,6 +1,7 @@
 #!/bin/bash
-setenforce 0
+USER root
 cd /app/Database
+echo "starting Database entrypoint"
 ./entrypoint.sh
 cd /app
 dotnet QueryWeb.dll
