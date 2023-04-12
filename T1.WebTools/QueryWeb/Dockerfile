@@ -25,6 +25,10 @@ RUN chmod +x /app/publish/entrypoint.sh
 
 
 FROM base AS final
+LABEL org.opencontainers.image.source=https://github.com/octocat/my-repo
+LABEL org.opencontainers.image.description="My container image"
+LABEL org.opencontainers.image.licenses=MIT
+
 # Install sql server
 USER root
 RUN apt-get update && \
