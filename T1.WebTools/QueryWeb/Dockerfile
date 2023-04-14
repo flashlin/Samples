@@ -44,7 +44,7 @@ RUN apt-get update && \
 
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENV ASPNETCORE_ENVIRONMENT=Docker
+ENV DOTNET_ENVIRONMENT=Docker
 # ENTRYPOINT ["dotnet", "QueryWeb.dll"]
 ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
 # ENTRYPOINT ["/app/entrypoint.sh"]
