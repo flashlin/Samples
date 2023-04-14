@@ -12,7 +12,6 @@ using Serilog;
 var builder = WebApplication.CreateBuilder(args);
 
 var aspnetcore_env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-Console.WriteLine($"ENV = '{aspnetcore_env}'");
 
 builder.Configuration
     .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)
@@ -23,6 +22,8 @@ Log.Logger = new LoggerConfiguration()
     //.WriteTo.Console()
     .CreateLogger();
 builder.Host.UseSerilog();
+
+Log.Logger.Information($"ENV = '{aspnetcore_env}'");
 
 var localEnv = LocalEnvironment.Load();
 //var urls = new List<string>();
