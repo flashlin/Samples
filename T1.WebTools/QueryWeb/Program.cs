@@ -11,7 +11,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var aspnetcore_env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+var aspnetcore_env = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
 Console.WriteLine($"ENV = '{aspnetcore_env}'");
 
 builder.Configuration
