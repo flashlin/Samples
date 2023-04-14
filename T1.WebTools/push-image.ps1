@@ -4,5 +4,7 @@ $env:CR_PAT = $MY_TOKEN
 $env:CR_PAT | docker login ghcr.io -u flash.lin@gmail.com --password-stdin
 
 Write-Host "tag image"
-Invoke-Expression "$env:docker_exe tag queryweb:dev ghcr.io/flashlin/queryweb:latest"
-Invoke-Expression "$env:docker_exe push ghcr.io/flashlin/queryweb:latest"
+$container_register = "ghcr.io"
+$container_register = "docker.io"
+Invoke-Expression "$env:docker_exe tag queryweb:dev $container_register/flashlin/queryweb:latest"
+Invoke-Expression "$env:docker_exe push $container_register/flashlin/queryweb:latest"
