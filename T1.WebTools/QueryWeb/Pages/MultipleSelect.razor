@@ -1,0 +1,38 @@
+﻿@using QueryWeb.Models
+@using NPOI.SS.Formula.Functions
+<select multiple="" 
+        class="form-control" 
+        size="10" 
+        style="overflow-y: scroll;" 
+        @onchange="HandleChange">
+    @foreach (var item in SelectItems.Select((val, idx) => new {val, idx}))
+    {
+        <option value="@item.idx">@item.val.Text</option>
+    }
+</select>
+
+@code {
+    [Parameter]
+    public List<SelectItem> SelectItems { get; set; } = new();
+
+    [Parameter]
+    public List<SelectItem> SelectedItems { get; set; } = new();
+    
+    private void HandleChange(ChangeEventArgs e)
+    {
+        var selectedValues = e.Value as string[];
+        if (selectedValues == null)
+        {
+            selectedValues = Array.Empty<string>();
+        }
+        var selectedIndies = selectedValues.Select(int.Parse);
+        foreach (var idx in selectedIndies)
+        {
+            var item = SelectItems[idx];
+            if (!SelectedItems.Contains(item))
+            {
+                SelectedItems.Add(item);
+            }
+        }
+    }
+}
