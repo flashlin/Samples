@@ -7,18 +7,20 @@
     <tr>
         <td>
             <input type="text" class="form-control" placeholder="@_leftTable.Name" disabled>
-            <XMultipleSelect SelectOptions="@_leftColumnsOptions" 
-                            OnSelected="@OnLeftColumnsSelected"
-                            @ref="_leftTableColumnsSelector"></XMultipleSelect>
+            <XMultipleSelect SelectOptions="@_leftColumnsOptions"
+                             OnSelected="@OnLeftColumnsSelected"
+                             @ref="_leftTableColumnsSelector">
+            </XMultipleSelect>
         </td>
         <td>
             <button type="button" class="btn btn-primary">Swap</button>
         </td>
         <td>
             <input type="text" class="form-control" placeholder="@_rightTable.Name" disabled>
-            <XMultipleSelect SelectOptions="@_rightColumnsOptions" 
-                            OnSelected="@OnRightColumnsSelected"
-                            @ref="_rightTableColumnsSelector"></XMultipleSelect>
+            <XMultipleSelect SelectOptions="@_rightColumnsOptions"
+                             OnSelected="@OnRightColumnsSelected"
+                             @ref="_rightTableColumnsSelector">
+            </XMultipleSelect>
         </td>
     </tr>
     <tr>
@@ -76,6 +78,15 @@
     XMultipleSelect _rightTableColumnsSelector = null!;
     List<SelectItem> _rightColumnsOptions = new();
     List<SelectItem> _rightColumnsSelected = new();
+    List<SelectItem> _mergeTypes =
+        Enum.GetNames(typeof(MergeType))
+            .Zip((MergeType[]) Enum.GetValues(typeof(MergeType)), (x, y) =>
+                new SelectItem
+                {
+                    Text = x,
+                    Value = y
+                }).ToList();
+
     MergeType _mergeType;
     IntoType _intoType;
     string _targetTableName = "Unknown";
@@ -96,7 +107,7 @@
     {
         _leftColumnsSelected = args.SelectedItems;
     }
-    
+
     private void OnRightColumnsSelected(MultipleSelectedArgs args)
     {
         _rightColumnsSelected = args.SelectedItems;
@@ -113,19 +124,19 @@
         var leftJoinKeys = _leftColumnsSelected.Select(x => x.Value)
             .Cast<TableColumnInfo>()
             .ToList();
-        
+
         var rightJoinKeys = _rightColumnsSelected.Select(x => x.Value)
             .Cast<TableColumnInfo>()
             .ToList();
-        
+
         ReportRepo.MergeTable(new MergeTableRequest
         {
             LeftTable = _leftTable,
             LeftJoinKeys = leftJoinKeys,
-            RightTable = _rightTable, 
-            RightJoinKeys = rightJoinKeys, 
-            IntoType = _intoType, 
-            TargetTableName = _targetTableName, 
+            RightTable = _rightTable,
+            RightJoinKeys = rightJoinKeys,
+            IntoType = _intoType,
+            TargetTableName = _targetTableName,
             MergeType = _mergeType
         });
 
@@ -149,4 +160,5 @@
         }
         return Task.CompletedTask;
     }
+
 }
