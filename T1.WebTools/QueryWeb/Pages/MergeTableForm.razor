@@ -7,27 +7,18 @@
     <tr>
         <td>
             <input type="text" class="form-control" placeholder="@_leftTable.Name" disabled>
-            <MultipleSelect SelectOptions="@_leftSelectItems" 
-                            OnSelected="@OnLeftTableColumnsSelected"
+            <MultipleSelect SelectOptions="@_leftColumnsOptions" 
+                            OnSelected="@OnLeftColumnsSelected"
                             @ref="_leftTableColumnsSelector"></MultipleSelect>
-            <select multiple class="form-control" size="10" style="overflow-y: scroll;">
-                @foreach (var column in _leftTable.Columns)
-                {
-                    <option value="@column.Name">@column.Name</option>
-                }
-            </select>
         </td>
         <td>
             <button type="button" class="btn btn-primary">Swap</button>
         </td>
         <td>
             <input type="text" class="form-control" placeholder="@_rightTable.Name" disabled>
-            <select multiple class="form-control" size="10" style="overflow-y: scroll;">
-                @foreach (var column in _rightTable.Columns)
-                {
-                    <option value="@column.Name">@column.Name</option>
-                }
-            </select>
+            <MultipleSelect SelectOptions="@_rightColumnsOptions" 
+                            OnSelected="@OnRightColumnsSelected"
+                            @ref="_rightTableColumnsSelector"></MultipleSelect>
         </td>
     </tr>
     <tr>
@@ -76,26 +67,35 @@
     private TableInfo _leftTable = new();
     private TableInfo _rightTable = new();
     MultipleSelect _leftTableColumnsSelector = null!;
+    List<SelectItem> _leftColumnsOptions = new();
     List<SelectItem> _leftTableColumnsSelected = new();
+    MultipleSelect _rightTableColumnsSelector = null!;
+    List<SelectItem> _rightColumnsOptions = new();
+    List<SelectItem> _rightTableColumnsSelected = new();
     MergeType _mergeType;
     IntoType _intoType;
     List<TableColumnInfo> _leftJoinKeys = new();
     List<TableColumnInfo> _rightJoinKeys = new();
     string _targetTableName = "Unknown";
 
-    List<SelectItem> _leftSelectItems = new();
 
     public void SelectTable(string leftTableName, string rightTableName)
     {
         _leftTable = _reportRepo.GetTableInfo(leftTableName);
         _rightTable = _reportRepo.GetTableInfo(rightTableName);
-        _leftSelectItems = _leftTable.Columns.Select(x => new SelectItem {Text = x.Name, Value = x}).ToList();
+        _leftColumnsOptions = _leftTable.Columns.Select(x => new SelectItem {Text = x.Name, Value = x}).ToList();
+        _rightColumnsOptions = _rightTable.Columns.Select(x => new SelectItem {Text = x.Name, Value = x}).ToList();
         StateHasChanged();
     }
 
-    private void OnLeftTableColumnsSelected(MultipleSelectedArgs args)
+    private void OnLeftColumnsSelected(MultipleSelectedArgs args)
     {
         _leftTableColumnsSelected = args.SelectedItems;
+    }
+    
+    private void OnRightColumnsSelected(MultipleSelectedArgs args)
+    {
+        _rightTableColumnsSelected = args.SelectedItems;
     }
 
     public void Run()
