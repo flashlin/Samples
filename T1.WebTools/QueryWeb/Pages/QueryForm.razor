@@ -24,33 +24,9 @@
     </div>
 </div>
 
-
-@foreach (var result in _results.Select((value, index) => new {value, index}))
+@foreach (var result in _results)
 {
-    <button @onclick="() => CopyCsvToClipboard(result.value)">Copy CSV</button>
-    <table class="table table-dark table-striped">
-        <thead>
-        <tr>
-            @foreach (var header in result.value.Headers)
-            {
-                <th>@header.Name</th>
-            }
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var row in result.value.Rows)
-        {
-            <tr>
-                @foreach (var column in row.Keys)
-                {
-                    <td>
-                        @row[column]
-                    </td>
-                }
-            </tr>
-        }
-        </tbody>
-    </table>
+    <XSheetTable Sheet="@result"></XSheetTable>
 }
 
 <Modal IsShow="_isShowMergeTableForm" OnClickClose="OnClickCloseMergeTableForm">
@@ -69,7 +45,7 @@
 @using Prism.Events
 @using QueryKits.ExcelUtils
 @using QueryWeb.Models
-@inject IJSRuntime _jsRuntime
+@inject IJSRuntime JsRuntime
 @inject IEventAggregator EventAggregator
 @inject IQueryService QueryService
 @inject IAppState AppState
@@ -78,7 +54,7 @@
     private MCodeEditor _codeEditor = null!;
     private readonly string[] _isShowTabs = {"active", ""};
     private List<string> _sqlCodeHistory = new();
-    MCodeEditor _resultEditor = null!;
+    readonly MCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
 
     private string _codeText = @"-- CTRL + r: execute 
@@ -106,7 +82,7 @@
 
     private void CopyCsvToClipboard(ExcelSheet sheet)
     {
-        _jsRuntime.InvokeVoidAsync("copyTextToClipboard", sheet.ToCsvString());
+        JsRuntime.InvokeVoidAsync("copyTextToClipboard", sheet.ToCsvString());
     }
 
     protected override Task OnAfterRenderAsync(bool firstRender)

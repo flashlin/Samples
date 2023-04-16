@@ -1,0 +1,50 @@
+﻿@using QueryWeb.Models
+@using NPOI.SS.Formula.Functions
+@using QueryKits.ExcelUtils
+@using T1.Standard.Linq
+
+<button @onclick="() => CopyCsvToClipboard(Sheet)">Export CSV to Clipboard</button>
+<table class="table table-dark table-striped">
+    <thead>
+    <tr>
+        @foreach (var header in Sheet.Headers)
+        {
+            <th>@header.Name</th>
+        }
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var row in Sheet.Rows)
+    {
+        <tr>
+            @foreach (var column in row.Keys)
+            {
+                <td>
+                    @row[column]
+                </td>
+            }
+        </tr>
+    }
+    @if (!Sheet.Rows.Any())
+    {
+        <tr>
+            <td>No Data</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+
+@inject IJSRuntime JsRuntime
+@code {
+
+    [Parameter]
+    public ExcelSheet Sheet { get; set; } = new();
+
+
+    private void CopyCsvToClipboard(ExcelSheet sheet)
+    {
+        JsRuntime.InvokeVoidAsync("copyTextToClipboard", sheet.ToCsvString());
+    }
+}
