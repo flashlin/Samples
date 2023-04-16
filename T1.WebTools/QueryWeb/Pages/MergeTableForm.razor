@@ -7,18 +7,18 @@
     <tr>
         <td>
             <input type="text" class="form-control" placeholder="@_leftTable.Name" disabled>
-            <MultipleSelect SelectOptions="@_leftColumnsOptions" 
+            <XMultipleSelect SelectOptions="@_leftColumnsOptions" 
                             OnSelected="@OnLeftColumnsSelected"
-                            @ref="_leftTableColumnsSelector"></MultipleSelect>
+                            @ref="_leftTableColumnsSelector"></XMultipleSelect>
         </td>
         <td>
             <button type="button" class="btn btn-primary">Swap</button>
         </td>
         <td>
             <input type="text" class="form-control" placeholder="@_rightTable.Name" disabled>
-            <MultipleSelect SelectOptions="@_rightColumnsOptions" 
+            <XMultipleSelect SelectOptions="@_rightColumnsOptions" 
                             OnSelected="@OnRightColumnsSelected"
-                            @ref="_rightTableColumnsSelector"></MultipleSelect>
+                            @ref="_rightTableColumnsSelector"></XMultipleSelect>
         </td>
     </tr>
     <tr>
@@ -69,10 +69,10 @@
 @code {
     private TableInfo _leftTable = new();
     private TableInfo _rightTable = new();
-    MultipleSelect _leftTableColumnsSelector = null!;
+    XMultipleSelect _leftTableColumnsSelector = null!;
     List<SelectItem> _leftColumnsOptions = new();
     List<SelectItem> _leftColumnsSelected = new();
-    MultipleSelect _rightTableColumnsSelector = null!;
+    XMultipleSelect _rightTableColumnsSelector = null!;
     List<SelectItem> _rightColumnsOptions = new();
     List<SelectItem> _rightColumnsSelected = new();
     MergeType _mergeType;
