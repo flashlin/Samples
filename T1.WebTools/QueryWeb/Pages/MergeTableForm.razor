@@ -24,18 +24,21 @@
     <tr>
         <td>
             <select class="form-select">
-                @foreach (var item in _leftTableColumnsSelected)
+                @foreach (var item in _leftColumnsSelected)
                 {
                     <option>@item.Text</option>
                 }
             </select>
         </td>
         <td>
-            <button type="button" class="btn btn-primary">button</button>
+            <button type="button" class="btn btn-primary">Merge</button>
         </td>
         <td>
             <select class="form-select">
-                <option>listbox</option>
+                @foreach (var item in _rightColumnsSelected)
+                {
+                    <option>@item.Text</option>
+                }
             </select>
         </td>
     </tr>
@@ -68,10 +71,10 @@
     private TableInfo _rightTable = new();
     MultipleSelect _leftTableColumnsSelector = null!;
     List<SelectItem> _leftColumnsOptions = new();
-    List<SelectItem> _leftTableColumnsSelected = new();
+    List<SelectItem> _leftColumnsSelected = new();
     MultipleSelect _rightTableColumnsSelector = null!;
     List<SelectItem> _rightColumnsOptions = new();
-    List<SelectItem> _rightTableColumnsSelected = new();
+    List<SelectItem> _rightColumnsSelected = new();
     MergeType _mergeType;
     IntoType _intoType;
     List<TableColumnInfo> _leftJoinKeys = new();
@@ -90,12 +93,12 @@
 
     private void OnLeftColumnsSelected(MultipleSelectedArgs args)
     {
-        _leftTableColumnsSelected = args.SelectedItems;
+        _leftColumnsSelected = args.SelectedItems;
     }
     
     private void OnRightColumnsSelected(MultipleSelectedArgs args)
     {
-        _rightTableColumnsSelected = args.SelectedItems;
+        _rightColumnsSelected = args.SelectedItems;
     }
 
     public void Run()
