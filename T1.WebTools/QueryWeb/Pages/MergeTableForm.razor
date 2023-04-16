@@ -7,7 +7,9 @@
     <tr>
         <td>
             <input type="text" class="form-control" placeholder="@_leftTable.Name" disabled>
-            <MultipleSelect SelectItems="@_leftSelectItems" @ref="_leftTableColumnsSelected"></MultipleSelect>
+            <MultipleSelect SelectOptions="@_leftSelectItems" 
+                            OnSelected="@OnLeftTableColumnsSelected"
+                            @ref="_leftTableColumnsSelector"></MultipleSelect>
             <select multiple class="form-control" size="10" style="overflow-y: scroll;">
                 @foreach (var column in _leftTable.Columns)
                 {
@@ -31,7 +33,10 @@
     <tr>
         <td>
             <select class="form-select">
-                <option>listbox</option>
+                @foreach (var item in _leftTableColumnsSelected)
+                {
+                    <option>@item.Text</option>
+                }
             </select>
         </td>
         <td>
@@ -70,7 +75,8 @@
 @code {
     private TableInfo _leftTable = new();
     private TableInfo _rightTable = new();
-    MultipleSelect _leftTableColumnsSelected = null!;
+    MultipleSelect _leftTableColumnsSelector = null!;
+    List<SelectItem> _leftTableColumnsSelected = new();
     MergeType _mergeType;
     IntoType _intoType;
     List<TableColumnInfo> _leftJoinKeys = new();
@@ -85,6 +91,11 @@
         _rightTable = _reportRepo.GetTableInfo(rightTableName);
         _leftSelectItems = _leftTable.Columns.Select(x => new SelectItem {Text = x.Name, Value = x}).ToList();
         StateHasChanged();
+    }
+
+    private void OnLeftTableColumnsSelected(MultipleSelectedArgs args)
+    {
+        _leftTableColumnsSelected = args.SelectedItems;
     }
 
     public void Run()
