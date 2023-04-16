@@ -116,10 +116,13 @@
     {
         AppState.SubscribeEvent<MergeTableReqEvent>(args =>
         {
-            _codeEditor.SetShow(false);
-            _isShowMergeTableForm = true;
-            _mergeTableForm.SelectTable(args.LeftTableName, args.RightTableName);
-            StateHasChanged();
+            InvokeAsync(() =>
+            {
+                _codeEditor.SetShow(false);
+                _isShowMergeTableForm = true;
+                _mergeTableForm.SelectTable(args.LeftTableName, args.RightTableName);
+                StateHasChanged();
+            });
     //_codeEditor.SetShow(true);
     //StateHasChanged();
         });
@@ -128,7 +131,7 @@
     private Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
     {
     //StateHasChanged();
-        _results = QueryService.QueryRawSql(arg.SqlCode);   
+        _results = QueryService.QueryRawSql(arg.SqlCode);
         _resultTime = DateTime.Now;
         QueryService.AddSqlCode(arg.SqlCode);
         _sqlCodeHistory = QueryService.GetTop10SqlCode();
