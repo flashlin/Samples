@@ -1,6 +1,7 @@
 ﻿@using QueryWeb.Models
-@using NPOI.SS.Formula.Functions
 @using QueryKits.ExcelUtils
+@using T1.Standard.Collections.Generics
+@using T1.Standard.Data.SqlBuilders
 @using T1.Standard.Linq
 
 <button @onclick="() => CopyCsvToClipboard(Sheet)">Export CSV to Clipboard</button>
@@ -9,7 +10,10 @@
     <tr>
         @foreach (var header in Sheet.Headers)
         {
-            <th>@header.Name</th>
+            <th>
+                <input type="checkbox" @bind="_headersSelected[header.Name]"/>
+                @header.Name
+            </th>
         }
     </tr>
     </thead>
@@ -35,16 +39,43 @@
 </table>
 
 
-
 @inject IJSRuntime JsRuntime
+
 @code {
 
     [Parameter]
     public ExcelSheet Sheet { get; set; } = new();
 
+    EnsureKeyDictionary<string, bool> _headersSelected = new(key => false);
 
     private void CopyCsvToClipboard(ExcelSheet sheet)
     {
+        if (!_headersSelected.Any(x => x.Value))
+        {
+            
+        }
+        
+        var newSheet = new ExcelSheet
+        {
+            Headers = Sheet.Headers
+                .Join(_headersSelected.Where(x => x.Value).Select(x => x.Key),
+                    header => header.Name,
+                    headerName => headerName,
+                    (header, name) => header)
+                .ToList()
+        };
+
+        foreach (var row in Sheet.Rows)
+        {
+            var data = row.Join(newSheet.Headers,
+                kv => kv.Key,
+                column => column.Name,
+                (kv, column) => kv)
+                .ToDictionary(x => x.Key, x => x.Value);
+            newSheet.Rows.Add(data);
+        }
+
         JsRuntime.InvokeVoidAsync("copyTextToClipboard", sheet.ToCsvString());
     }
+
 }
