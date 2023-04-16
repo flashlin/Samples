@@ -24,9 +24,16 @@
     </div>
 </div>
 
+<div>@_resultTime.ToString("yyyy/MM/dd HH:mm:ss,fff")</div>
+
 @foreach (var result in _results)
 {
     <XSheetTable Sheet="@result"></XSheetTable>
+}
+
+@if (!_results.Any())
+{
+    <span>No Data</span>
 }
 
 <Modal IsShow="_isShowMergeTableForm" OnClickClose="OnClickCloseMergeTableForm">
@@ -66,6 +73,7 @@
     private List<ExcelSheet> _results = new();
     private MergeTableForm _mergeTableForm = null!;
     private bool _isShowMergeTableForm;
+    private DateTime _resultTime = DateTime.Now;
 
     private void ClickTab(int index)
     {
@@ -120,7 +128,8 @@
     private Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
     {
     //StateHasChanged();
-        _results = QueryService.QueryRawSql(arg.SqlCode);
+        _results = QueryService.QueryRawSql(arg.SqlCode);   
+        _resultTime = DateTime.Now;
         QueryService.AddSqlCode(arg.SqlCode);
         _sqlCodeHistory = QueryService.GetTop10SqlCode();
         return Task.CompletedTask;
