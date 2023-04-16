@@ -1,38 +1,61 @@
 ﻿@using QueryWeb.Models
 @using NPOI.SS.Formula.Functions
-<select multiple="" 
-        class="form-control" 
-        size="10" 
-        style="overflow-y: scroll;" 
+@using T1.Standard.Linq
+<select multiple=""
+        class="form-control"
+        size="10"
+        style="overflow-y: scroll;"
         @onchange="HandleChange">
-    @foreach (var item in SelectItems.Select((val, idx) => new {val, idx}))
+    @foreach (var item in SelectOptions.Select((val, idx) => new {val, idx}))
     {
         <option value="@item.idx">@item.val.Text</option>
     }
 </select>
 
 @code {
+
     [Parameter]
-    public List<SelectItem> SelectItems { get; set; } = new();
+    public List<SelectItem> SelectOptions { get; set; } = new();
 
     [Parameter]
     public List<SelectItem> SelectedItems { get; set; } = new();
-    
-    private void HandleChange(ChangeEventArgs e)
+
+    [Parameter]
+    public EventCallback<MultipleSelectedArgs> OnSelected { get; set; }
+
+    private async Task HandleChange(ChangeEventArgs e)
     {
         var selectedValues = e.Value as string[];
         if (selectedValues == null)
         {
             selectedValues = Array.Empty<string>();
         }
-        var selectedIndies = selectedValues.Select(int.Parse);
-        foreach (var idx in selectedIndies)
+        var selectedOptions = selectedValues
+            .Select(x => SelectOptions[int.Parse(x)])
+            .ToList();
+
+        foreach (var option in selectedOptions)
         {
-            var item = SelectItems[idx];
-            if (!SelectedItems.Contains(item))
+            if (!SelectedItems.Contains(option))
             {
-                SelectedItems.Add(item);
+                SelectedItems.Add(option);
             }
         }
+
+        var excludeSelectedOptions = SelectedItems.LeftJoinExclude(
+            selectedOptions, option => option.Text,
+            selected => selected.Text,
+            selected => selected)
+            .ToList();
+        foreach (var selected in excludeSelectedOptions)
+        {
+            SelectedItems.Remove(selected);
+        }
+
+        await OnSelected.InvokeAsync(new MultipleSelectedArgs
+        {
+            SelectedItems = SelectedItems
+        });
     }
+
 }
