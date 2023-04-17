@@ -134,7 +134,10 @@
     {
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) => { Console.WriteLine("Ctrl+J : Initial editor command is triggered."); });
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) => { });
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI, async (args) => { });
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI,  (args) =>
+        {
+            _editor.Trigger("keyboard", "type", new {text = ""});
+        });
     }
 
     async Task RunCtrlR()
@@ -187,4 +190,13 @@
         await JsRuntime.InvokeVoidAsync("monacoEditorAppendLine", _editor.Id, text);
     }
 
+    public async Task SetIntelliSenseAsync(List<IntelliSenseItem> data)
+    {
+        await JsRuntime.InvokeVoidAsync("monacoEditorSetIntellisense", _editor.Id, data);
+    }
+
+    public async Task TriggerIntelliSenseAsync()
+    {
+        await JsRuntime.InvokeVoidAsync("monacoEditorTriggerIntelliSense", _editor.Id);
+    }
 }

@@ -16,7 +16,6 @@ window.monacoEditorInsertText = function (editorRef, text) {
     }]);
 };
 
-
 window.monacoEditorAppendLine = function (editorRef, text) {
     const editor = getEditor(editorRef);
     const lineCount = editor.getModel().getLineCount();
@@ -31,6 +30,21 @@ window.monacoEditorAppendLine = function (editorRef, text) {
         { range: range, text: text }
     ]);
 };
+
+window.monacoEditorIntelliSenseDict = {};
+
+window.monacoEditorSetIntellisense = function (editorRef, list) {
+    window.monacoEditorIntelliSenseDict[editorRef] = list;
+}
+
+window.monacoEditorTriggerIntelliSense = function (editorRef) {
+    const editor = getEditor(editorRef);
+    // editor.trigger('editor.action.triggerSuggest', {
+    //     source: 'keyboard',
+    //     explicit: true
+    // });
+    editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+}
 
 function useMonacoEditor1() {
     const myCompletionProvider = {
@@ -75,7 +89,7 @@ function createMonacoEditor(config)
         return monaco.languages.getLanguages().map(x => x.id);
     }
     
-    const addNewLanguage = (oldLanguage, newLanguage, newCompletionItemProvider) => {
+    const addNewLanguage = (oldLanguage, newLanguage, newCompletionItemProvider, options) => {
         if( getLanguages().find(x => x === newLanguage) >= 0 )
         {
             return;
@@ -95,8 +109,7 @@ function createMonacoEditor(config)
             mimetypes: ['text/x-csharp'],
         });
 
-        monaco.languages.registerCompletionItemProvider(newLanguage, newCompletionItemProvider);
-        
+        monaco.languages.registerCompletionItemProvider(newLanguage, newCompletionItemProvider, options);
         console.log('create new language', newLanguage)
     };
     
@@ -112,48 +125,26 @@ function createMonacoEditor(config)
             const words = last_chars.replace("\t", "").split(" ");
             const active_typing = words[words.length - 1];
             
-            const t1 = {
+            const defaultSuggestions = [{
                 label: 'SELECT',
                 kind: monaco.languages.CompletionItemKind.Keyword,
                 detail: "Keyword",
                 insertText: 'SELECT ',
-            };
+            }];
+            
+            const suggestionList = window.monacoEditorIntelliSenseDict[config.id];
+            const suggestions = defaultSuggestions.concat(suggestionList);
+            
             return {
-                suggestions: [t1]
+                suggestions: suggestions
             };
-
-            //const suggestions = await fetch(config.suggestiosUrl);
-            // return {
-            //     suggestions: [
-            //         {
-            //             label: 'SELECT',
-            //             kind: monaco.languages.CompletionItemKind.Keyword,
-            //             detail: "keyword",
-            //             insertText: 'SELECT ',
-            //             range: {
-            //                 startLineNumber: position.lineNumber,
-            //                 endLineNumber: position.lineNumber,
-            //                 startColumn: position.column - 6,
-            //                 endColumn: position.column,
-            //             },
-            //         },
-            //         {
-            //             label: 'FROM',
-            //             kind: monaco.languages.CompletionItemKind.Keyword,
-            //             insertText: 'FROM ',
-            //             range: {
-            //                 startLineNumber: position.lineNumber,
-            //                 endLineNumber: position.lineNumber,
-            //                 startColumn: position.column - 4,
-            //                 endColumn: position.column,
-            //             },
-            //         },
-            //     ],
-            // };
         },
     };
     
-    addNewLanguage('csharp', newLanguage, newCompletionItemProvider);
+    addNewLanguage('csharp', newLanguage, newCompletionItemProvider, 
+        {
+            //triggerKeyBinding: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_I]
+        });
 
     const instance = getEditors().filter(x => x.id === config.id)[0];
     const editor = instance.editor;
