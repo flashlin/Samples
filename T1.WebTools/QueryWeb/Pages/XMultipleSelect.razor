@@ -6,7 +6,7 @@
         size="10"
         style="overflow-y: scroll;"
         @onchange="HandleChange">
-    @foreach (var item in SelectOptions.Select((val, idx) => new {val, idx}))
+    @foreach (var item in Options.Select((val, idx) => new {val, idx}))
     {
         <option value="@item.idx">@item.val.Text</option>
     }
@@ -15,10 +15,10 @@
 @code {
 
     [Parameter]
-    public List<SelectItem> SelectOptions { get; set; } = new();
+    public List<SelectItem> Options { get; set; } = new();
 
     [Parameter]
-    public List<SelectItem> SelectedItems { get; set; } = new();
+    public List<SelectItem> ItemsSelected { get; set; } = new();
 
     [Parameter]
     public EventCallback<MultipleSelectedArgs> OnSelected { get; set; }
@@ -31,30 +31,30 @@
             selectedValues = Array.Empty<string>();
         }
         var selectedOptions = selectedValues
-            .Select(x => SelectOptions[int.Parse(x)])
+            .Select(x => Options[int.Parse(x)])
             .ToList();
 
         foreach (var option in selectedOptions)
         {
-            if (!SelectedItems.Contains(option))
+            if (!ItemsSelected.Contains(option))
             {
-                SelectedItems.Add(option);
+                ItemsSelected.Add(option);
             }
         }
 
-        var excludeSelectedOptions = SelectedItems.LeftJoinExclude(
+        var excludeSelectedOptions = ItemsSelected.LeftJoinExclude(
             selectedOptions, option => option.Text,
             selected => selected.Text,
             selected => selected)
             .ToList();
         foreach (var selected in excludeSelectedOptions)
         {
-            SelectedItems.Remove(selected);
+            ItemsSelected.Remove(selected);
         }
 
         await OnSelected.InvokeAsync(new MultipleSelectedArgs
         {
-            SelectedItems = SelectedItems
+            ItemsSelected = ItemsSelected
         });
     }
 

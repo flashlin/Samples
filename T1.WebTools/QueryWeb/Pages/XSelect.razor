@@ -1,0 +1,32 @@
+﻿@using QueryWeb.Models
+@using NPOI.SS.Formula.Functions
+@using T1.Standard.Linq
+<select class="form-control"
+        style="overflow-y: scroll;"
+        @onchange="HandleChange">
+    @foreach (var item in Options.Select((val, idx) => new {val, idx}))
+    {
+        <option value="@item.idx">@item.val.Text</option>
+    }
+</select>
+
+@code {
+    [Parameter]
+    public List<SelectItem> Options { get; set; } = new();
+
+    [Parameter]
+    public SelectItem ItemSelected { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<SelectedArgs> OnSelected { get; set; }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        var selectedValue = e.Value as string ?? string.Empty;
+        ItemSelected = Options[int.Parse(selectedValue)];
+        await OnSelected.InvokeAsync(new SelectedArgs
+        {
+            ItemSelected = ItemSelected
+        });
+    }
+}

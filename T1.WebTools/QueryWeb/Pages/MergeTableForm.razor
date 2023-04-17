@@ -7,7 +7,7 @@
     <tr>
         <td>
             <input type="text" class="form-control" placeholder="@_leftTable.Name" disabled>
-            <XMultipleSelect SelectOptions="@_leftColumnsOptions"
+            <XMultipleSelect Options="@_leftColumnsOptions"
                              OnSelected="@OnLeftColumnsSelected"
                              @ref="_leftTableColumnsSelector">
             </XMultipleSelect>
@@ -17,7 +17,7 @@
         </td>
         <td>
             <input type="text" class="form-control" placeholder="@_rightTable.Name" disabled>
-            <XMultipleSelect SelectOptions="@_rightColumnsOptions"
+            <XMultipleSelect Options="@_rightColumnsOptions"
                              OnSelected="@OnRightColumnsSelected"
                              @ref="_rightTableColumnsSelector">
             </XMultipleSelect>
@@ -42,6 +42,13 @@
                     <option>@item.Text</option>
                 }
             </select>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <XSelect Options="MergeTypes"
+                     ItemSelected="_mergeTypeSelected">
+            </XSelect>
         </td>
     </tr>
     <tr>
@@ -78,7 +85,8 @@
     XMultipleSelect _rightTableColumnsSelector = null!;
     List<SelectItem> _rightColumnsOptions = new();
     List<SelectItem> _rightColumnsSelected = new();
-    List<SelectItem> _mergeTypes =
+
+    static readonly List<SelectItem> MergeTypes =
         Enum.GetNames(typeof(MergeType))
             .Zip((MergeType[]) Enum.GetValues(typeof(MergeType)), (x, y) =>
                 new SelectItem
@@ -86,8 +94,8 @@
                     Text = x,
                     Value = y
                 }).ToList();
+    SelectItem _mergeTypeSelected = MergeTypes.First();
 
-    MergeType _mergeType;
     IntoType _intoType;
     string _targetTableName = "Unknown";
     private ExcelSheet _result = new();
@@ -105,12 +113,12 @@
 
     private void OnLeftColumnsSelected(MultipleSelectedArgs args)
     {
-        _leftColumnsSelected = args.SelectedItems;
+        _leftColumnsSelected = args.ItemsSelected;
     }
 
     private void OnRightColumnsSelected(MultipleSelectedArgs args)
     {
-        _rightColumnsSelected = args.SelectedItems;
+        _rightColumnsSelected = args.ItemsSelected;
     }
 
     public void Run()
@@ -118,6 +126,12 @@
         if (string.IsNullOrEmpty(_targetTableName))
         {
             JsHelper.ShowMessageAsync($"Please input Target Merge Table Name");
+            return;
+        }
+
+        if (ReportRepo.IsTableExist(_targetTableName))
+        {
+            JsHelper.ShowMessageAsync($"{_targetTableName} Table exists, please change target table name.");
             return;
         }
 
@@ -137,7 +151,7 @@
             RightJoinKeys = rightJoinKeys,
             IntoType = _intoType,
             TargetTableName = _targetTableName,
-            MergeType = _mergeType
+            MergeType = (MergeType)_mergeTypeSelected.Value
         });
 
         _result = QueryService.QueryRawSql("select top 20 * from" + $"[{_targetTableName}]")

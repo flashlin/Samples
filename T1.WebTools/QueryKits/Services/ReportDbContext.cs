@@ -67,6 +67,11 @@ public class ReportDbContext : DbContext, IReportRepo
         };
     }
 
+    public bool IsTableExist(string tableName)
+    {
+        return GetAllTableNames().Any(name => name == tableName);
+    }
+
     public List<Dictionary<string, object>> QueryRawSql(string sql)
     {
         var conn = GetDbConnection();
