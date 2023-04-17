@@ -21,4 +21,5 @@ public interface IReportRepo
     void MergeTable(MergeTableRequest req);
     ISqlBuilder SqlBuilder { get; }
     TableInfo GetTableInfo(string tableName);
+    bool IsTableExist(string tableName);
 }

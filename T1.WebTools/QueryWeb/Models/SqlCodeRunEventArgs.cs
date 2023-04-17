@@ -15,5 +15,10 @@ public class KeyEventArgs : EventArgs
 
 public class MultipleSelectedArgs : EventArgs
 {
-    public List<SelectItem> SelectedItems { get; set; } = new();
+    public List<SelectItem> ItemsSelected { get; set; } = new();
+}
+
+public class SelectedArgs : EventArgs
+{
+    public SelectItem ItemSelected { get; set; } = new();
 }
