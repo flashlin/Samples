@@ -1,5 +1,6 @@
 ﻿@using QueryWeb.Models
 @using QueryKits.ExcelUtils
+@using T1.Standard.Collections.Extension
 @using T1.Standard.Collections.Generics
 @using T1.Standard.Data.SqlBuilders
 @using T1.Standard.Linq
@@ -50,15 +51,16 @@
 
     private void CopyCsvToClipboard(ExcelSheet sheet)
     {
+        var headers = _headersSelected.Clone();
         if (!_headersSelected.Any(x => x.Value))
         {
-            
+            headers = Sheet.Headers.ToDictionary(x => x.Name, x => true);
         }
         
         var newSheet = new ExcelSheet
         {
             Headers = Sheet.Headers
-                .Join(_headersSelected.Where(x => x.Value).Select(x => x.Key),
+                .Join(headers.Where(x => x.Value).Select(x => x.Key),
                     header => header.Name,
                     headerName => headerName,
                     (header, name) => header)
@@ -75,7 +77,8 @@
             newSheet.Rows.Add(data);
         }
 
-        JsRuntime.InvokeVoidAsync("copyTextToClipboard", sheet.ToCsvString());
+        //JsRuntime.InvokeVoidAsync("copyTextToClipboard", sheet.ToCsvString());
+        JsRuntime.InvokeVoidAsync("copyTextToClipboard", newSheet.ToCsvString());
     }
 
 }
