@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using QueryKits.CsvEx;
 using QueryKits.ExcelUtils;
@@ -29,7 +30,7 @@ public class QueryService : IQueryService
     {
         var csvSheet = CsvSheet.ReadFrom(csvFile, ",");
         var excelSheet = new ExcelSheet();
-        foreach (var csvSheetHeader in csvSheet.Headers.Select((value,index)=>new {value, index}))
+        foreach (var csvSheetHeader in csvSheet.Headers.Select((value, index) => new {value, index}))
         {
             excelSheet.Headers.Add(new ExcelColumn
             {
@@ -38,6 +39,7 @@ public class QueryService : IQueryService
                 CellIndex = csvSheetHeader.index
             });
         }
+
         excelSheet.Rows.AddRange(csvSheet.Rows);
         var tableName = Path.GetFileNameWithoutExtension(csvFile);
         _reportRepo.ReCreateTable(tableName, excelSheet.Headers);
@@ -70,6 +72,7 @@ public class QueryService : IQueryService
             {
                 continue;
             }
+
             var headers = ds.Rows[0].Keys
                 .Select(name => new ExcelColumn
                 {
@@ -79,11 +82,13 @@ public class QueryService : IQueryService
             sheet.Headers.AddRange(headers);
             foreach (var row in ds.Rows)
             {
-                sheet.Rows.Add(row.ToDictionary(x=>x.Key, x=> $"{x.Value}"));
+                sheet.Rows.Add(row.ToDictionary(x => x.Key, x => $"{x.Value}"));
             }
+
             result.Add(sheet);
         }
-        return result; 
+
+        return result;
     }
 
     public void AddSqlCode(string sqlCode)
@@ -95,4 +100,81 @@ public class QueryService : IQueryService
     {
         return _reportRepo.GetTop10SqlCode();
     }
+
+    public string ConvertText(string text)
+    {
+        var textFormat = GetTextFormat(text);
+        if (textFormat == TextFormat.Json)
+        {
+            return text.ToCsvString();
+        }
+
+        if (textFormat == TextFormat.Line)
+        {
+            var charGroup = text.GroupBy(x => x)
+                .Select(x => new { x.Key, Count = x.Count() })
+                .Where(x => new[] {'\t', ','}.Contains(x.Key))
+                .ToDictionary(x => x.Key, x => x.Count);
+            if (!charGroup.TryGetValue('\t', out var tabCount))
+            {
+                tabCount = 0;
+            }
+            if (!charGroup.TryGetValue(',', out var commaCount))
+            {
+                commaCount = 0;
+            }
+            if (tabCount > commaCount)
+            {
+                return string.Join("\r\n", text.Split('\t'));
+            }
+            return string.Join("\r\n", text.Split(','));
+        }
+
+        var lines = text.Split("\r\n");
+        return string.Join(",", lines);
+    }
+
+    public TextFormat GetTextFormat(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return TextFormat.Empty;
+        }
+        if (TryDeserializeJson(text)) return TextFormat.Json;
+        if (TryReadMultipleLine(text)) return TextFormat.Text;
+        return TextFormat.Line;
+    }
+
+    private static bool TryReadMultipleLine(string text)
+    {
+        var sr = new StringReader(text);
+        sr.ReadLine();
+        var line2 = sr.ReadLine();
+        return line2 != null;
+    }
+
+    private static bool TryDeserializeJson(string text)
+    {
+        try
+        {
+            var obj = JsonSerializer.Deserialize<dynamic>(text);
+            if (obj != null)
+            {
+                return true;
+            }
+            return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}
+
+public enum TextFormat
+{
+    Empty,
+    Text,
+    Line,
+    Json,
 }
