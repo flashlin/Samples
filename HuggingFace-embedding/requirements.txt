@@ -1,0 +1,10 @@
+langchain
+huggingface_hub
+sentence_transformers
+faiss-cpu
+#PDF
+unstructured
+chromadb
+Cython
+tiktoken
+unstructured[local-inference]
