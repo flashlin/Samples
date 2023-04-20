@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-8">
-            <MCodeEditor @ref="_codeEditor"
+            <XCodeEditor @ref="_codeEditor"
                          SqlCodeRanCallback="@OnSqlCodeRan"
                          Text="@_codeText"
                          Language="csharp"
@@ -58,10 +58,10 @@
 @inject IAppState AppState
 
 @code {
-    private MCodeEditor _codeEditor = null!;
+    private XCodeEditor _codeEditor = null!;
     private readonly string[] _isShowTabs = {"active", ""};
     private List<string> _sqlCodeHistory = new();
-    readonly MCodeEditor _resultEditor = null!;
+    readonly XCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
 
     private string _codeText = @"-- CTRL + r: execute 
