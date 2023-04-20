@@ -19,7 +19,7 @@
                     <option value="@sqlCode">@sqlCode</option>
                 }
             </select>
-            <button class="btn btn-primary"></button>
+            <button class="btn btn-primary" @onclick="ConvertText">Convert Text</button>
         </div>
     </div>
 </div>
@@ -33,8 +33,12 @@
 
 @if (!_results.Any())
 {
-    <span>No Data</span>
+    <div>No Data</div>
+<textarea style="width: 80ch; height: 30ch;">
+@_text
+</textarea>
 }
+
 
 <Modal IsShow="_isShowMergeTableForm" OnClickClose="OnClickCloseMergeTableForm">
     <Body>
@@ -63,6 +67,7 @@
     private List<string> _sqlCodeHistory = new();
     readonly XCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
+    private string _text = string.Empty;
 
     private string _codeText = @"-- CTRL + r: execute 
 -- CTRL + i: insert code block from history
@@ -135,6 +140,7 @@
         _resultTime = DateTime.Now;
         QueryService.AddSqlCode(arg.SqlCode);
         _sqlCodeHistory = QueryService.GetTop10SqlCode();
+        _text = string.Empty;
         return Task.CompletedTask;
     }
 
@@ -174,6 +180,12 @@
         _codeEditor.SetShow(true);
         _isShowMergeTableForm = false;
         StateHasChanged();
+    }
+
+    private async Task ConvertText()
+    {
+        var text = await _codeEditor.GetValue();
+        _text = QueryService.ConvertText(text);
     }
 
 }
