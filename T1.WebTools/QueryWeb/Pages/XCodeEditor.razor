@@ -169,7 +169,7 @@
         await _editor.SetValue(text);
     }
 
-    private async Task<string> GetValue()
+    public async Task<string> GetValue()
     {
         var val = await _editor.GetValue();
         return val;
