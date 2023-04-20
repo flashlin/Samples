@@ -4,5 +4,6 @@ export MSSQL_SA_PASSWORD=Passw0rd!
 export MSSQL_PID=Developer
 export MSSQL_TCP_PORT=1433
 export MSSQL_AGENT_ENABLED=true 
+echo start sql server ...
 /opt/mssql/bin/sqlservr & 
 ./init.sh
