@@ -37,7 +37,7 @@
             <Button class="btn btn-primary" @onclick="@(() => UploadFile(_inputFileRef))">Import</Button>
         </div>
         <div class="nav-item px-3 dropdown">
-            <NavLink class="nav-link dropdown-toggle" href="/queryForm">
+            <NavLink class="nav-link dropdown-toggle" href="~/queryForm">
                 <span class="oi oi-plus" aria-hidden="true"></span> Query
             </NavLink>
             @foreach (var tableName in _allTableNames)
