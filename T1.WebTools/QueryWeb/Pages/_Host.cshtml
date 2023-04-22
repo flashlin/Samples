@@ -2,6 +2,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @namespace QueryWeb.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@addTagHelper *, QueryWeb
 
 <!DOCTYPE html>
 <html lang="en">
@@ -9,20 +10,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="~/" />
-    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
-    <link href="css/site.css" rel="stylesheet" />
-    <link href="QueryWeb.styles.css" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="favicon.png"/>
+    <link rel="stylesheet" href="~/css/bootstrap/bootstrap.min.css" />
+    <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/QueryWeb.styles.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="~/favicon.png"/>
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
     
-    <script src="/js/MessageBox.js"></script>
-    <script src="/js/WebApi.js"></script>
-    <script src="/js/FileModule.js"></script>
-    <script src="/js/MonacoEditor.js"></script>
+    <script src="~/js/MessageBox.js"></script>
+    <script src="~/js/WebApi.js"></script>
+    <script src="~/js/FileModule.js"></script>
+    <script src="~/js/MonacoEditor.js"></script>
     
-    <script src="_content/BlazorMonaco/jsInterop.js"></script>
-    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
-    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
+    <script src="~/_content/BlazorMonaco/jsInterop.js"></script>
+    <script src="~/_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
+    <script src="~/_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
 </head>
 <body>
     <component type="typeof(App)" render-mode="ServerPrerendered" />
@@ -38,6 +39,6 @@
         <a class="dismiss">🗙</a>
     </div>
 
-    <script src="_framework/blazor.server.js"></script>
+    <script src="~/_framework/blazor.server.js"></script>
 </body>
 </html>

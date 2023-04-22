@@ -6,6 +6,7 @@ using QueryKits.Extensions;
 using QueryKits.Services;
 using QueryWeb.Data;
 using QueryWeb.Models;
+using QueryWeb.Models.TagHelpers;
 using Serilog;
 
 
@@ -47,6 +48,11 @@ builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddOptions();
 builder.Host.UseServiceProviderFactory(new DynamicProxyServiceProviderFactory());
 
+var pathBaseFeature = new PathBaseFeature
+{
+    PathBase = "/App1"
+};
+
 var configuration = builder.Configuration;
 var services = builder.Services;
 services.AddSingleton<IQueryEnvironment, QueryEnvironment>();
@@ -61,8 +67,11 @@ services.AddTransient<IJsJsonSerializer, JsJsonSerializer>();
 services.AddTransient<IJsHelper, JsHelper>();
 services.AddTransient<ILanguageService, LanguageService>();
 services.AddQueryKits();
+services.AddSingleton<IPathBaseFeature>(sp => pathBaseFeature);
+
 
 var app = builder.Build();
+app.UsePathBase(pathBaseFeature.PathBase);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -77,6 +86,7 @@ app.MapBlazorHub();
 app.UseEndpoints(endpoints=>
 {
     endpoints.MapControllers();
+    //endpoints.MapFallbackToPage("/_Host");
 });
 app.MapFallbackToPage("/_Host");
 
