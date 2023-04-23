@@ -33,7 +33,7 @@ public class CustomLinkTagHelper : TagHelper
 
     public override Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
     {
-        var href = Href.Replace("~/", _pathBaseFeature.PathBase + "/");
+        var href = _pathBaseFeature.GetPath(Href);
         var urlHelper = _urlHelperFactory.GetUrlHelper(ViewContext);
         output.Attributes.SetAttribute("href", urlHelper.Content(href));
         output.Attributes.SetAttribute(RelAttributeName, Rel);
