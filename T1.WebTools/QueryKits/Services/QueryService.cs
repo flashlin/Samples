@@ -116,8 +116,7 @@ public class QueryService : IQueryService
 
         if (textFormat == TextFormat.Json)
         {
-            var jsonStr = $"[{text}]";
-            return jsonStr.ToCsvString();
+            return JsonToCsv(text);
         }
 
         if (textFormat == TextFormat.Line)
@@ -127,6 +126,12 @@ public class QueryService : IQueryService
 
         var lines = text.Split(Environment.NewLine);
         return string.Join(",", lines);
+    }
+
+    private static string JsonToCsv(string text)
+    {
+        var jsonStr = $"[{text}]";
+        return jsonStr.ToCsvString();
     }
 
     private static string ReSerializeJson(string text)
