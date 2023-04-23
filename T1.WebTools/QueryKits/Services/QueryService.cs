@@ -109,6 +109,11 @@ public class QueryService : IQueryService
             return text.ToCsvString();
         }
 
+        if (textFormat == TextFormat.JsonArrayLine)
+        {
+            return ReSerializeJson(text);
+        }
+
         if (textFormat == TextFormat.Json)
         {
             var jsonStr = $"[{text}]";
@@ -122,6 +127,18 @@ public class QueryService : IQueryService
 
         var lines = text.Split(Environment.NewLine);
         return string.Join(",", lines);
+    }
+
+    private static string ReSerializeJson(string text)
+    {
+        var objArray = JsonSerializer.Deserialize<List<dynamic>>(text);
+        var jsonArrayStr = JsonSerializer.Serialize(objArray, new JsonSerializerOptions
+        {
+            AllowTrailingCommas = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            WriteIndented = true
+        });
+        return jsonArrayStr;
     }
 
     private static string ConvertLineToMultipleLine(string text)
