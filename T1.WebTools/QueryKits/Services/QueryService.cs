@@ -104,34 +104,48 @@ public class QueryService : IQueryService
     public string ConvertText(string text)
     {
         var textFormat = GetTextFormat(text);
-        if (textFormat == TextFormat.Json)
+        if (textFormat == TextFormat.JsonArray)
         {
             return text.ToCsvString();
         }
 
-        if (textFormat == TextFormat.Line)
+        if (textFormat == TextFormat.Json)
         {
-            var charGroup = text.GroupBy(x => x)
-                .Select(x => new { x.Key, Count = x.Count() })
-                .Where(x => new[] {'\t', ','}.Contains(x.Key))
-                .ToDictionary(x => x.Key, x => x.Count);
-            if (!charGroup.TryGetValue('\t', out var tabCount))
-            {
-                tabCount = 0;
-            }
-            if (!charGroup.TryGetValue(',', out var commaCount))
-            {
-                commaCount = 0;
-            }
-            if (tabCount > commaCount)
-            {
-                return string.Join("\r\n", text.Split('\t'));
-            }
-            return string.Join("\r\n", text.Split(','));
+            var jsonStr = $"[{text}]";
+            return jsonStr.ToCsvString();
         }
 
-        var lines = text.Split("\r\n");
+        if (textFormat == TextFormat.Line)
+        {
+            return ConvertLineToMultipleLine(text);
+        }
+
+        var lines = text.Split(Environment.NewLine);
         return string.Join(",", lines);
+    }
+
+    private static string ConvertLineToMultipleLine(string text)
+    {
+        var charGroup = text.GroupBy(x => x)
+            .Select(x => new {x.Key, Count = x.Count()})
+            .Where(x => new[] {'\t', ','}.Contains(x.Key))
+            .ToDictionary(x => x.Key, x => x.Count);
+        if (!charGroup.TryGetValue('\t', out var tabCount))
+        {
+            tabCount = 0;
+        }
+
+        if (!charGroup.TryGetValue(',', out var commaCount))
+        {
+            commaCount = 0;
+        }
+
+        var newLine = Environment.NewLine;
+        if (tabCount > commaCount)
+        {
+            return string.Join(newLine, text.Split('\t'));
+        }
+        return string.Join(newLine, text.Split(','));
     }
 
     public TextFormat GetTextFormat(string text)
@@ -140,8 +154,16 @@ public class QueryService : IQueryService
         {
             return TextFormat.Empty;
         }
-        if (TryDeserializeJson(text)) return TextFormat.Json;
-        if (TryReadMultipleLine(text)) return TextFormat.Text;
+
+        if (TryReadMultipleLine(text))
+        {
+            if (TryDeserializeJsonArray(text)) return TextFormat.JsonArray;
+            if (TryDeserializeJson(text)) return TextFormat.Json;
+            return TextFormat.Text;
+        }
+
+        if (TryDeserializeJsonArray(text)) return TextFormat.JsonArrayLine;
+        if (TryDeserializeJson(text)) return TextFormat.JsonLine;
         return TextFormat.Line;
     }
 
@@ -158,11 +180,24 @@ public class QueryService : IQueryService
         try
         {
             var obj = JsonSerializer.Deserialize<dynamic>(text);
-            if (obj != null)
+            if (obj is JsonElement jsonElement)
             {
-                return true;
+                return jsonElement.ValueKind == JsonValueKind.Object;
             }
+            return obj != null;
+        }
+        catch
+        {
             return false;
+        }
+    }
+
+    private static bool TryDeserializeJsonArray(string text)
+    {
+        try
+        {
+            var obj = JsonSerializer.Deserialize<List<dynamic>>(text);
+            return obj != null;
         }
         catch
         {
@@ -177,4 +212,7 @@ public enum TextFormat
     Text,
     Line,
     Json,
+    JsonArray,
+    JsonArrayLine,
+    JsonLine
 }
