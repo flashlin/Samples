@@ -30,7 +30,7 @@
         </div>
         <div class="mb-3">
             <label class="form-label">
-                <span class="text">選擇檔案 (支援的檔案類型: .csv, .xlsx)</span>
+                <span class="text">Import Data(.csv, .xlsx)</span>
             </label>
             <input type="file" @ref="_inputFileRef" class="form-control" accept=".csv,.xlsx">
         </div>
@@ -53,11 +53,11 @@
             }
             <button class="btn btn-primary" @onclick="MergeTable">Merge</button>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
-            </NavLink>
-        </div>
+        @* <div class="nav-item px-3"> *@
+        @*     <NavLink class="nav-link" href="fetchdata"> *@
+        @*         <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data *@
+        @*     </NavLink> *@
+        @* </div> *@
     </nav>
 </div>
 
