@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="OpenAI-DotNet" Version="6.7.2" />
       <PackageReference Include="System.Text.Json" Version="7.0.2" />
     </ItemGroup>
 
