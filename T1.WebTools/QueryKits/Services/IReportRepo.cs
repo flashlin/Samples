@@ -5,7 +5,7 @@ using T1.Standard.Data.SqlBuilders;
 namespace QueryKits.Services;
 
 
-[DefaultReturnInterceptor]
+//[DefaultReturnInterceptor]
 public interface IReportRepo
 {
     List<string> GetAllTableNames();
