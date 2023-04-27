@@ -3,8 +3,10 @@ Write-Host "https://github.com/settings/tokens"
 # $env:CR_PAT = $MY_TOKEN
 # $env:CR_PAT | docker login ghcr.io -u flash.lin@gmail.com --password-stdin
 
-Write-Host "tag image"
+$ver = "1.2"
+
+Write-Host "tag image $ver"
 $container_register = "ghcr.io"
 $container_register = "docker.io"
-Invoke-Expression "$env:docker_exe tag queryweb:dev $container_register/flashlin/queryweb:1.0"
-Invoke-Expression "$env:docker_exe push $container_register/flashlin/queryweb:1.0"
+Invoke-Expression "$env:docker_exe tag queryweb:dev $container_register/flashlin/queryweb:$($ver)"
+Invoke-Expression "$env:docker_exe push $container_register/flashlin/queryweb:$($ver)"

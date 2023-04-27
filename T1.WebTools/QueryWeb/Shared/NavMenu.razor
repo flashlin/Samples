@@ -76,7 +76,7 @@
 @inject IEventAggregator EventAggregator
 @inject IQueryEnvironment QueryEnvironment
 @inject IJsHelper JsHelper
-
+@inject IPathBaseFeature PathBaseFeature
 @code {
     bool _showMergeTableForm;
     MergeTableForm _mergeTableForm = null!;
@@ -122,7 +122,7 @@
     {
         AppState.Publish(x => x.IsLoading = true);
         await JsRuntime.InvokeVoidAsync("uploadFileElementAsync",
-            "/api/File/Upload",
+            PathBaseFeature.GetPath("/api/File/Upload"),
             DotNetObjectReference.Create(this),
             fileInput);
 
