@@ -42,6 +42,7 @@ public class ReportDbContext : DbContext, IReportRepo
     {
         var sql = SqlBuilder.GetAllTableNamesStatement(DatabaseName);
         return Query<string>(sql)
+            .Order()
             .ToList();
     }
 

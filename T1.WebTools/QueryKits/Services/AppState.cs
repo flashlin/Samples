@@ -43,6 +43,11 @@ public class MergeTableReqEvent : EventArgs
     public string RightTableName { get; set; }
 }
 
+public class RefreshTableReqEvent : EventArgs
+{
+    
+}
+
 // public class UpdateAppEventArgs : PubSubEvent<UpdateAppRequest>
 // {
 // }
