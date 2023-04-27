@@ -122,7 +122,7 @@
     {
         AppState.Publish(x => x.IsLoading = true);
         await JsRuntime.InvokeVoidAsync("uploadFileElementAsync",
-            PathBaseFeature.GetPath("/api/File/Upload"),
+            PathBaseFeature.GetPath("~/api/File/Upload"),
             DotNetObjectReference.Create(this),
             fileInput);
 
