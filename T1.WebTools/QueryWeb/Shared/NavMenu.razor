@@ -157,4 +157,21 @@
         return Task.CompletedTask;
     }
 
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Initialize();
+        }
+        return Task.CompletedTask;
+    }
+
+    private void Initialize()
+    {
+        AppState.SubscribeEvent<RefreshTableReqEvent>(args =>
+        {
+            _allTableNames = QueryService.GetAllTableNames();
+            StateHasChanged();
+        });
+    }
 }
