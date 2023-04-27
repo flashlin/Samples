@@ -34,9 +34,9 @@
 @if (!_results.Any())
 {
     <div>No Data</div>
-<textarea style="width: 80ch; height: 30ch;">
-@_text
-</textarea>
+    <textarea style="width: 80ch; height: 30ch;">
+    @_text
+    </textarea>
 }
 
 
@@ -156,16 +156,16 @@
             {
                 new()
                 {
-                    Label = "XXX", 
-                    Kind = IntelliSenseItemType.Keyword, 
-                    Detail = "Keyword", 
+                    Label = "XXX",
+                    Kind = IntelliSenseItemType.Keyword,
+                    Detail = "Keyword",
                     InsertText = "XXX "
                 }
             });
-            //await _codeEditor.InsertAsync(_sqlSnippetCode);
+    //await _codeEditor.InsertAsync(_sqlSnippetCode);
             await _codeEditor.TriggerIntelliSenseAsync();
         }
-        
+
         if (arg.KeyCode == KeyCode.Space)
         {
             await _codeEditor.SetIntelliSenseAsync(new List<IntelliSenseItem>());
@@ -183,6 +183,7 @@
     {
         var text = await _codeEditor.GetValue();
         _text = QueryService.ConvertText(text);
+        _results = new();
     }
 
 }

@@ -2,67 +2,76 @@
 
 <PageTitle>Merge Table</PageTitle>
 
-<table class="table">
-    <tbody>
-    <tr>
-        <td>
-            <input type="text" class="form-control" placeholder="@_leftTable.Name" disabled>
-            <XMultipleSelect Options="@_leftColumnsOptions"
-                             OnSelected="@OnLeftColumnsSelected"
-                             @ref="_leftTableColumnsSelector">
-            </XMultipleSelect>
-        </td>
-        <td>
-            <button type="button" class="btn btn-primary">Swap</button>
-        </td>
-        <td>
-            <input type="text" class="form-control" placeholder="@_rightTable.Name" disabled>
-            <XMultipleSelect Options="@_rightColumnsOptions"
-                             OnSelected="@OnRightColumnsSelected"
-                             @ref="_rightTableColumnsSelector">
-            </XMultipleSelect>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <select class="form-select">
-                @foreach (var item in _leftColumnsSelected)
-                {
-                    <option>@item.Text</option>
-                }
-            </select>
-        </td>
-        <td>
-            <button type="button" class="btn btn-primary" @onclick="Run">Merge</button>
-        </td>
-        <td>
-            <select class="form-select">
-                @foreach (var item in _rightColumnsSelected)
-                {
-                    <option>@item.Text</option>
-                }
-            </select>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="3">
-            <XSelect Options="MergeTypes"
-                     ItemSelected="_mergeTypeSelected">
-            </XSelect>
-        </td>
-    </tr>
-    <tr>
-        <td colspan="3">
-            <input type="text" class="form-control" @bind="_targetTableName" placeholder="target merge table name">
-        </td>
-    </tr>
-    <tr>
-        <td colspan="3">
-            <XSheetTable Sheet="@_result"></XSheetTable>
-        </td>
-    </tr>
-    </tbody>
-</table>
+<div class="div-wrapper">
+    <table class="table">
+        <tbody>
+        <tr>
+            <td>
+                <input type="text" class="form-control" placeholder="@_leftTable.Name" disabled>
+                <XMultipleSelect Options="@_leftColumnsOptions"
+                                 OnSelected="@OnLeftColumnsSelected"
+                                 @ref="_leftTableColumnsSelector">
+                </XMultipleSelect>
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary" @onclick="ClickSwapTable">Swap</button>
+            </td>
+            <td>
+                <input type="text" class="form-control" placeholder="@_rightTable.Name" disabled>
+                <XMultipleSelect Options="@_rightColumnsOptions"
+                                 OnSelected="@OnRightColumnsSelected"
+                                 @ref="_rightTableColumnsSelector">
+                </XMultipleSelect>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <select class="form-select">
+                    @foreach (var item in _leftColumnsSelected)
+                    {
+                        <option>@item.Text</option>
+                    }
+                </select>
+            </td>
+            <td>
+                <button type="button" class="btn btn-primary" @onclick="Run">Merge</button>
+            </td>
+            <td>
+                <select class="form-select">
+                    @foreach (var item in _rightColumnsSelected)
+                    {
+                        <option>@item.Text</option>
+                    }
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <XSelect Options="MergeTypes"
+                         ItemSelected="_mergeTypeSelected">
+                </XSelect>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <input type="text" class="form-control" @bind="_targetTableName" placeholder="target merge table name">
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                <XSheetTable Sheet="@_result"></XSheetTable>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<style>
+.div-wrapper {
+    max-height: calc(1.5em * 30);
+    overflow-y: auto;
+}
+</style>
 
 
 @using QueryWeb.Shared
@@ -94,6 +103,7 @@
                     Text = x,
                     Value = y
                 }).ToList();
+
     SelectItem _mergeTypeSelected = MergeTypes.First();
 
     IntoType _intoType;
@@ -109,6 +119,12 @@
         _rightColumnsOptions = _rightTable.Columns.Select(x => new SelectItem {Text = x.Name, Value = x}).ToList();
         _targetTableName = _leftTable.Name + "_" + _rightTable.Name;
         StateHasChanged();
+    }
+
+    private void ClickSwapTable()
+    {
+        (_leftTable, _rightTable) = (_rightTable, _leftTable);
+        (_leftColumnsOptions, _rightColumnsOptions) = (_rightColumnsOptions, _leftColumnsOptions);
     }
 
     private void OnLeftColumnsSelected(MultipleSelectedArgs args)
@@ -151,10 +167,10 @@
             RightJoinKeys = rightJoinKeys,
             IntoType = _intoType,
             TargetTableName = _targetTableName,
-            MergeType = (MergeType)_mergeTypeSelected.Value
+            MergeType = (MergeType) _mergeTypeSelected.Value
         });
 
-        _result = QueryService.QueryRawSql("select top 20 * from" + $"[{_targetTableName}]")
+        _result = QueryService.QueryRawSql("select top 10 * from" + $"[{_targetTableName}]")
             .FirstOrDefault(new ExcelSheet());
     }
 
