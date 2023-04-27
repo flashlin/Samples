@@ -77,6 +77,7 @@
 @inject IQueryEnvironment QueryEnvironment
 @inject IJsHelper JsHelper
 @inject IPathBaseFeature PathBaseFeature
+
 @code {
     bool _showMergeTableForm;
     MergeTableForm _mergeTableForm = null!;
@@ -105,7 +106,7 @@
             JsHelper.ShowMessageAsync("Please select two table.");
             return;
         }
-        
+
         InvokeAsync(() =>
         {
             AppState.PublishEvent(new MergeTableReqEvent()
@@ -120,14 +121,17 @@
 
     private async Task UploadFile(ElementReference fileInput)
     {
-        AppState.Publish(x => x.IsLoading = true);
-        await JsRuntime.InvokeVoidAsync("uploadFileElementAsync",
-            PathBaseFeature.GetPath("~/api/File/Upload"),
-            DotNetObjectReference.Create(this),
-            fileInput);
+        await InvokeAsync(async () =>
+        {
+            AppState.Publish(x => x.IsLoading = true);
+            await JsRuntime.InvokeVoidAsync("uploadFileElementAsync",
+                PathBaseFeature.GetPath("~/api/File/Upload"),
+                DotNetObjectReference.Create(this),
+                fileInput);
 
-        _allTableNames = QueryService.GetAllTableNames();
-        AppState.Publish(x => x.IsLoading = false);
+            _allTableNames = QueryService.GetAllTableNames();
+            AppState.Publish(x => x.IsLoading = false);
+        });
     }
 
     private async Task DeleteTable(string tableName)
