@@ -135,15 +135,16 @@
 
     private async Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
     {
-    //StateHasChanged();
-        await InvokeAsync(() =>
+        await InvokeAsync(async () =>
         {
+            await AppState.PublishAsync(state => state.IsLoading = true);
             _results = QueryService.QueryRawSql(arg.SqlCode);
             _resultTime = DateTime.Now;
             QueryService.AddSqlCode(arg.SqlCode);
             _sqlCodeHistory = QueryService.GetTop10SqlCode();
             _text = string.Empty;
-            AppState.PublishEventAsync(new RefreshTableReqEvent());
+            await AppState.PublishEventAsync(new RefreshTableReqEvent());
+            await AppState.PublishAsync(state => state.IsLoading = false);
         });
     }
 
