@@ -133,7 +133,7 @@
     private async Task EditorOnDidInit()
     {
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) => { Console.WriteLine("Ctrl+J : Initial editor command is triggered."); });
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, async (args) => { });
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, (args) => { });
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI,  (args) =>
         {
             _editor.Trigger("keyboard", "type", new {text = ""});

@@ -41,6 +41,7 @@ public class CustomLinkTagHelper : TagHelper
     }
 
     private T GetRequiredService<T>()
+        where T: notnull
     {
         return ViewContext.HttpContext.RequestServices.GetRequiredService<T>();
     }

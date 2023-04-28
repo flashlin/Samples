@@ -8,8 +8,7 @@ namespace QueryWeb.Models.TagHelpers;
 
 public class XNavLink : NavLink
 {
-    [Parameter]
-    public new string Href { get; set; }
+    [Parameter] public string Href { get; set; } = string.Empty;
 
     [Inject] private IServiceProvider ServiceProvider { get; set; } = null!;
 

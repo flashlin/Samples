@@ -2,7 +2,7 @@
 
 public class PathBaseFeature : IPathBaseFeature
 {
-    public string PathBase { get; init; }
+    public string PathBase { get; init; } = string.Empty;
 
     public string GetPath(string url)
     {

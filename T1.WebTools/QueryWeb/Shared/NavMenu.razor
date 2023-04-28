@@ -16,12 +16,6 @@
 </div>
 
 
-@* <Modal IsShow="@_showMergeTableForm"> *@
-@*     <Body> *@
-@*     <MergeTableForm @ref="_mergeTableForm"></MergeTableForm> *@
-@*     </Body> *@
-@* </Modal> *@
-
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
         <div class="nav-item px-3">
@@ -81,8 +75,6 @@
 @implements QueryKits.Extensions.IHandle<RefreshTableReqEvent>
 
 @code {
-    bool _showMergeTableForm;
-    MergeTableForm _mergeTableForm = null!;
     List<string> _allTableNames = new();
     bool _collapseNavMenu = true;
     ElementReference _inputFileRef;
@@ -116,8 +108,6 @@
                 LeftTableName = tables[0],
                 RightTableName = tables[1],
             });
-    //_mergeTableForm.SelectTable(tables[0], tables[1]);
-            _showMergeTableForm = true;
         });
     }
 
