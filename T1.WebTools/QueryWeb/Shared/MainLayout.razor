@@ -1,6 +1,7 @@
 ﻿@using QueryKits.Services
 @inherits LayoutComponentBase
 @using QueryWeb.Pages
+@using QueryKits.Extensions
 <PageTitle>QueryWeb</PageTitle>
 
 <div class="page">
@@ -39,7 +40,8 @@
     }
 </style>
 @inject IAppState AppState
-
+@inject IEventAggregator EventAggregator
+@implements QueryKits.Extensions.IHandle<UpdateAppReqEvent>
 @code{
 
     string _appStateClass = "visually-hidden";
@@ -55,14 +57,13 @@
 
     void Initialize()
     {
-        AppState.SubscribeEvent<UpdateAppReqEvent>(async (args) =>
-        {
-            await InvokeAsync(() =>
-            {
-                _appStateClass = AppState.IsLoading ? "BlockUI" : "visually-hidden";
-                StateHasChanged();
-            });
-        });
+        EventAggregator.Subscribe(this);
+    }
+
+    public Task HandleAsync(UpdateAppReqEvent message)
+    {
+        _appStateClass = AppState.IsLoading ? "BlockUI" : "visually-hidden";
+        return Task.CompletedTask;
     }
 
 }

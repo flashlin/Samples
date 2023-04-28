@@ -53,17 +53,18 @@
 </style>
 @using QueryWeb.Shared
 @using QueryKits.Services
-@using Prism.Events
 @using QueryKits.ExcelUtils
+@using QueryKits.Extensions
 @using QueryWeb.Models
 @inject IJSRuntime JsRuntime
-@inject IEventAggregator EventAggregator
 @inject IQueryService QueryService
 @inject IAppState AppState
+@inject IEventAggregator EventAggregator
+@implements QueryKits.Extensions.IHandle<MergeTableReqEvent>
 
 @code {
     private XCodeEditor _codeEditor = null!;
-    private readonly string[] _isShowTabs = {"active", ""};
+    private readonly string[] _isShowTabs = { "active", "" };
     private List<string> _sqlCodeHistory = new();
     readonly XCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
@@ -116,18 +117,20 @@
 
     private void Init()
     {
-        AppState.SubscribeEvent<MergeTableReqEvent>(async args =>
-        {
-            await InvokeAsync(() =>
-            {
-                _codeEditor.SetShow(false);
-                _isShowMergeTableForm = true;
-                _mergeTableForm.SelectTable(args.LeftTableName, args.RightTableName);
-                StateHasChanged();
-            });
-            //_codeEditor.SetShow(true);
-            //StateHasChanged();
-        });
+        EventAggregator.Subscribe(this);
+        
+    // AppState.SubscribeEvent<MergeTableReqEvent>(async args =>
+    // {
+    //     await InvokeAsync(() =>
+    //     {
+    //         _codeEditor.SetShow(false);
+    //         _isShowMergeTableForm = true;
+    //         _mergeTableForm.SelectTable(args.LeftTableName, args.RightTableName);
+    //         StateHasChanged();
+    //     });
+    //     //_codeEditor.SetShow(true);
+    //     //StateHasChanged();
+    // });
     }
 
     private async Task OnSqlCodeRan(SqlCodeRunEventArgs arg)
@@ -140,13 +143,13 @@
             QueryService.AddSqlCode(arg.SqlCode);
             _sqlCodeHistory = QueryService.GetTop10SqlCode();
             _text = string.Empty;
-            AppState.PublishEvent(new RefreshTableReqEvent());
+            AppState.PublishEventAsync(new RefreshTableReqEvent());
         });
     }
 
     private Task HandleSelectionSqlHistoryChange(ChangeEventArgs arg)
     {
-        var value = (string[]) arg.Value!;
+        var value = (string[])arg.Value!;
         _sqlSnippetCode = value[0];
         return Task.CompletedTask;
     }
@@ -189,4 +192,11 @@
         _results = new();
     }
 
+    public Task HandleAsync(MergeTableReqEvent args)
+    {
+        _codeEditor.SetShow(false);
+        _isShowMergeTableForm = true;
+        _mergeTableForm.SelectTable(args.LeftTableName, args.RightTableName);
+        return Task.CompletedTask;
+    }
 }
