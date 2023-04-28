@@ -172,6 +172,7 @@
         {
             _allTableNames = QueryService.GetAllTableNames();
             StateHasChanged();
+            return Task.CompletedTask;
         });
     }
 }

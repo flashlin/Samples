@@ -116,17 +116,17 @@
 
     private void Init()
     {
-        AppState.SubscribeEvent<MergeTableReqEvent>(args =>
+        AppState.SubscribeEvent<MergeTableReqEvent>(async args =>
         {
-            InvokeAsync(() =>
+            await InvokeAsync(() =>
             {
                 _codeEditor.SetShow(false);
                 _isShowMergeTableForm = true;
                 _mergeTableForm.SelectTable(args.LeftTableName, args.RightTableName);
                 StateHasChanged();
             });
-    //_codeEditor.SetShow(true);
-    //StateHasChanged();
+            //_codeEditor.SetShow(true);
+            //StateHasChanged();
         });
     }
 
