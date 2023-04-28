@@ -10,7 +10,6 @@ public class LocalEnvironment : ILocalEnvironment
     public string AppLocation { get; set; } = string.Empty;
     public bool IsBinded { get; set; }
     public DateTime LastActivityTime { get; set; }
-    public string UserUid { get; set; } = string.Empty;
     public int Port { get; set; }
     public string AppVersion { get; set; } = string.Empty;
 
@@ -29,7 +28,6 @@ public class LocalEnvironment : ILocalEnvironment
             AppLocation = appLocation,
             IsBinded = false,
             LastActivityTime = DateTime.Now,
-            UserUid = null,
             Port = 0,
             AppVersion = appVersion 
         };
