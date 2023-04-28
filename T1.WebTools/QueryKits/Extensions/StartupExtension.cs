@@ -16,4 +16,13 @@ public static class StartupExtension
     // {
     //     builder.Host.UseServiceProviderFactory(new DynamicProxyServiceProviderFactory());
     // }
+    public static IServiceCollection AddEventAggregator(this IServiceCollection services, Action<EventAggregatorOptions>? configure = null)
+    {
+        services.AddSingleton<IEventAggregator, EventAggregator>();
+        if (configure != null)
+        {
+            services.Configure(configure);
+        }
+        return services;
+    }
 }

@@ -56,10 +56,9 @@ var pathBaseFeature = new PathBaseFeature
 var configuration = builder.Configuration;
 var services = builder.Services;
 services.AddSingleton<IQueryEnvironment, QueryEnvironment>();
-services.AddSingleton<IEventAggregator, EventAggregator>();
+services.AddEventAggregator(options => options.AutoRefresh = true);
 services.AddSingleton<ILocalEnvironment>(sp => localEnv);
 services.AddSingleton<IAppState, AppState>();
-//services.AddSingleton<ILocalDbService, LocalDbService>();
 services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
 services.AddSingleton<IReportRepo, ReportDbContext>();
 services.AddTransient<IQueryService, QueryService>();

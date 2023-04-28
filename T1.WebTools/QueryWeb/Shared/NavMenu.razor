@@ -4,6 +4,7 @@
 @using QueryWeb.Pages
 @using T1.Standard.Collections.Generics
 @using QueryWeb.Models.TagHelpers
+@using IEventAggregator = QueryKits.Extensions.IEventAggregator
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -73,10 +74,11 @@
 @inject IQueryService QueryService
 @inject IJSRuntime JsRuntime
 @inject IAppState AppState
-@inject IEventAggregator EventAggregator
 @inject IQueryEnvironment QueryEnvironment
 @inject IJsHelper JsHelper
 @inject IPathBaseFeature PathBaseFeature
+@inject IEventAggregator EventAggregator
+@implements QueryKits.Extensions.IHandle<RefreshTableReqEvent>
 
 @code {
     bool _showMergeTableForm;
@@ -95,7 +97,7 @@
         _collapseNavMenu = !_collapseNavMenu;
     }
 
-    private void MergeTable()
+    private async Task MergeTable()
     {
         var tables = _selectedTableNames.Where(x => x.Value)
             .Select(x => x.Key)
@@ -103,17 +105,14 @@
 
         if (tables.Count() != 2)
         {
-            JsHelper.ShowMessageAsync("Please select two table.");
+            await JsHelper.ShowMessageAsync("Please select two table.");
             return;
         }
 
-        InvokeAsync(() =>
+        await AppState.PublishEventAsync(new MergeTableReqEvent()
         {
-            AppState.PublishEvent(new MergeTableReqEvent()
-            {
-                LeftTableName = tables[0],
-                RightTableName = tables[1],
-            });
+            LeftTableName = tables[0],
+            RightTableName = tables[1],
         });
     //_mergeTableForm.SelectTable(tables[0], tables[1]);
         _showMergeTableForm = true;
@@ -123,14 +122,14 @@
     {
         await InvokeAsync(async () =>
         {
-            AppState.Publish(x => x.IsLoading = true);
+            await AppState.PublishAsync(x => x.IsLoading = true);
             await JsRuntime.InvokeVoidAsync("uploadFileElementAsync",
                 PathBaseFeature.GetPath("~/api/File/Upload"),
                 DotNetObjectReference.Create(this),
                 fileInput);
 
             _allTableNames = QueryService.GetAllTableNames();
-            AppState.Publish(x => x.IsLoading = false);
+            await AppState.PublishAsync(x => x.IsLoading = false);
         });
     }
 
@@ -168,11 +167,19 @@
 
     private void Initialize()
     {
-        AppState.SubscribeEvent<RefreshTableReqEvent>(args =>
-        {
-            _allTableNames = QueryService.GetAllTableNames();
-            StateHasChanged();
-            return Task.CompletedTask;
-        });
+        EventAggregator.Subscribe(this);
+    // AppState.SubscribeEvent<RefreshTableReqEvent>(args =>
+    // {
+    //     _allTableNames = QueryService.GetAllTableNames();
+    //     StateHasChanged();
+    //     return Task.CompletedTask;
+    // });
     }
+
+    public Task HandleAsync(RefreshTableReqEvent message)
+    {
+        _allTableNames = QueryService.GetAllTableNames();
+        return Task.CompletedTask;
+    }
+
 }
