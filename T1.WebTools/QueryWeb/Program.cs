@@ -25,17 +25,6 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 Log.Logger.Information($"ENV = '{aspnetcore_env}'");
-
-var localEnv = LocalEnvironment.Load();
-//var urls = new List<string>();
-//if (!LocalEnvironment.IsPortUsed(80))
-//{
-//    urls.Add("http://0.0.0.0:80");
-//}
-//else
-//{
-//    urls.Add($@"http://127.0.0.1:{localEnv.Port}");
-//}
 //builder.WebHost.UseUrls(urls.ToArray());
 
 var connectString = builder.Configuration.GetSection("DbConfig:ConnectionString").Value;
@@ -57,7 +46,6 @@ var configuration = builder.Configuration;
 var services = builder.Services;
 services.AddSingleton<IQueryEnvironment, QueryEnvironment>();
 services.AddEventAggregator(options => options.AutoRefresh = true);
-services.AddSingleton<ILocalEnvironment>(sp => localEnv);
 services.AddSingleton<IAppState, AppState>();
 services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
 services.AddSingleton<IReportRepo, ReportDbContext>();
@@ -82,11 +70,7 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.MapBlazorHub();
-app.UseEndpoints(endpoints=>
-{
-    endpoints.MapControllers();
-    //endpoints.MapFallbackToPage("/_Host");
-});
+app.MapControllers();
 app.MapFallbackToPage("/_Host");
 
 app.Run();

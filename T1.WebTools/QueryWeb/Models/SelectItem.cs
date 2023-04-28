@@ -7,8 +7,8 @@ namespace QueryWeb.Models;
 //[TypeConverter(typeof(CustomItemTypeConverter))]
 public class SelectItem
 {
-    public string Text { get; set; }
-    public object Value { get; set; }
+    public string Text { get; set; } = string.Empty;
+    public object Value { get; set; } = null!;
 }
 
 public class CustomItemTypeConverter : TypeConverter
