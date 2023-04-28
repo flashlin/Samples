@@ -109,13 +109,16 @@
             return;
         }
 
-        await AppState.PublishEventAsync(new MergeTableReqEvent()
+        await InvokeAsync(async () =>
         {
-            LeftTableName = tables[0],
-            RightTableName = tables[1],
-        });
+            await AppState.PublishEventAsync(new MergeTableReqEvent()
+            {
+                LeftTableName = tables[0],
+                RightTableName = tables[1],
+            });
     //_mergeTableForm.SelectTable(tables[0], tables[1]);
-        _showMergeTableForm = true;
+            _showMergeTableForm = true;
+        });
     }
 
     private async Task UploadFile(ElementReference fileInput)
