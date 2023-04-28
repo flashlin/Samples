@@ -48,18 +48,21 @@
     {
         if (firstRender)
         {
-            Init();
-            AppState.SubscribeEvent<UpdateAppReqEvent>(args =>
-            {
-                _appStateClass = AppState.IsLoading ? "BlockUI" : "visually-hidden";
-                StateHasChanged();
-            });
+            Initialize();
         }
         return Task.CompletedTask;
     }
 
-    void Init()
+    void Initialize()
     {
-        
+        AppState.SubscribeEvent<UpdateAppReqEvent>(async (args) =>
+        {
+            await InvokeAsync(() =>
+            {
+                _appStateClass = AppState.IsLoading ? "BlockUI" : "visually-hidden";
+                StateHasChanged();
+            });
+        });
     }
+
 }

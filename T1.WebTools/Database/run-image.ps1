@@ -9,7 +9,7 @@ if (Invoke-Expression "$docker_exe ps -q --filter name=query-db") {
    return
 }
 
-if (Invoke-Expression "$docker_exe ps -aq --filter status=exited --filter name=query-db") {
+if (Invoke-Expression "$docker_exe ps -aq --filter name=query-db") {
    Write-Output "Container exists and is stopped, restart it"
    Invoke-Expression "$docker_exe start query-db"
    exit

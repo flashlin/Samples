@@ -4,8 +4,8 @@ public interface IAppState
 {
     bool IsLoading { get; set; }
     void Publish(Action<AppState> changeFn);
-    void SubscribeEvent<T>(Action<T> handler)
+    public void SubscribeEvent<T>(Func<T, Task> handler)
         where T: EventArgs;
     void PublishEvent<T>(T eventArgs)
-        where T: EventArgs;
+        where T: EventArgs, new();
 }
