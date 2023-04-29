@@ -4,7 +4,7 @@ namespace QueryKits.ExcelUtils;
 
 public static class JsonHelper
 {
-    public static string ToCsvString(this string json)
+    public static string ToCsvString(string json)
     {
         var dataList = JsonSerializer.Deserialize<List<Dictionary<string, object>>>(json);
         if (dataList == null || dataList.Count == 0)
