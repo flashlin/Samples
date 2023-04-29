@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
+using QueryKits.CsvEx;
 using QueryKits.ExcelUtils;
+using T1.Standard.Collections.Generics;
 
 namespace QueryKits.Services;
 
@@ -10,7 +12,7 @@ public class TextConverter
         var textFormat = GetTextFormat(text);
         if (textFormat == TextFormat.JsonArray)
         {
-            return text.ToCsvString();
+            return JsonHelper.ToCsvString(text);
         }
 
         if (textFormat == TextFormat.JsonArrayLine)
@@ -25,17 +27,60 @@ public class TextConverter
 
         if (textFormat == TextFormat.Line)
         {
-            return ConvertLineToMultipleLine(text);
+            return string.Join(Environment.NewLine, ConvertLineToMultipleLine(text));
         }
 
         var lines = text.Split(Environment.NewLine);
         return string.Join(",", lines);
     }
 
+    public CsvSheet TextToCsvSheet(string text)
+    {
+        var textFormat = GetTextFormat(text);
+        if (new[] {TextFormat.JsonArray, TextFormat.JsonArrayLine, TextFormat.Json}.Contains(textFormat))
+        {
+            var csv = JsonHelper.ToCsvString(text);
+            return CsvSheet.ReadFromString(csv);
+        }
+
+        if (TextFormat.Csv == textFormat)
+        {
+            return CsvSheet.ReadFromString(text);
+        }
+
+        if (textFormat == TextFormat.Line)
+        {
+            var lines = ConvertLineToMultipleLine(text);
+            return ConvertLinesToCsvSheet(lines);
+        }
+
+        return ConvertLinesToCsvSheet(ConvertTextToLines(text));
+    }
+
+    private static CsvSheet ConvertLinesToCsvSheet(IEnumerable<string> lines)
+    {
+        var csvSheet = new CsvSheet();
+        var headerName = "Unknown";
+        csvSheet.Headers.Add(new CsvHeader
+        {
+            ColumnType = ColumnType.String,
+            Name = headerName
+        });
+        foreach (var line in lines)
+        {
+            csvSheet.Rows.Add(new Dictionary<string, string>()
+            {
+                {headerName, line}
+            });
+        }
+
+        return csvSheet;
+    }
+
     private static string JsonToCsv(string text)
     {
         var jsonStr = $"[{text}]";
-        return jsonStr.ToCsvString();
+        return JsonHelper.ToCsvString(jsonStr);
     }
 
     private static string ReSerializeJson(string text)
@@ -50,7 +95,7 @@ public class TextConverter
         return jsonArrayStr;
     }
 
-    private static string ConvertLineToMultipleLine(string text)
+    private static string[] ConvertLineToMultipleLine(string text)
     {
         var charGroup = text.GroupBy(x => x)
             .Select(x => new {x.Key, Count = x.Count()})
@@ -69,9 +114,12 @@ public class TextConverter
         var newLine = Environment.NewLine;
         if (tabCount > commaCount)
         {
-            return string.Join(newLine, text.Split('\t'));
+            //return string.Join(newLine, text.Split('\t'));
+            return text.Split('\t');
         }
-        return string.Join(newLine, text.Split(','));
+
+        //return string.Join(newLine, text.Split(','));
+        return text.Split(',');
     }
 
     public TextFormat GetTextFormat(string text)
@@ -85,6 +133,7 @@ public class TextConverter
         {
             if (TryDeserializeJsonArray(text)) return TextFormat.JsonArray;
             if (TryDeserializeJson(text)) return TextFormat.Json;
+            if (TryDeserializeCsv(text)) return TextFormat.Csv;
             return TextFormat.Text;
         }
 
@@ -93,12 +142,44 @@ public class TextConverter
         return TextFormat.Line;
     }
 
+    private bool TryDeserializeCsv(string text)
+    {
+        var sr = new StringReader(text);
+        var header = sr.ReadLine()!;
+        var tCount1 = header.Split('\t').Length;
+        var row0 = sr.ReadLine()!;
+        var tCount2 = row0.Split('\t').Length;
+        if (tCount1 == tCount2)
+        {
+            return true;
+        }
+
+        var commaCount1 = header.Split(',').Length;
+        var commaCount2 = header.Split(',').Length;
+        return commaCount1 == commaCount2;
+    }
+
     private static bool TryReadMultipleLine(string text)
     {
         var sr = new StringReader(text);
         sr.ReadLine();
         var line2 = sr.ReadLine();
         return line2 != null;
+    }
+
+    private IEnumerable<string> ConvertTextToLines(string text)
+    {
+        var sr = new StreamReader(text);
+        do
+        {
+            var line = sr.ReadLine();
+            if (line == null)
+            {
+                break;
+            }
+
+            yield return line;
+        } while (true);
     }
 
     private static bool TryDeserializeJson(string text)
@@ -110,6 +191,7 @@ public class TextConverter
             {
                 return jsonElement.ValueKind == JsonValueKind.Object;
             }
+
             return obj != null;
         }
         catch

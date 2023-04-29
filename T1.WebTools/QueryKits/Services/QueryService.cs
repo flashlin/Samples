@@ -112,14 +112,3 @@ public class QueryService : IQueryService
         return _textConverter.ConvertText(text);
     }
 }
-
-public enum TextFormat
-{
-    Empty,
-    Text,
-    Line,
-    Json,
-    JsonArray,
-    JsonArrayLine,
-    JsonLine
-}
