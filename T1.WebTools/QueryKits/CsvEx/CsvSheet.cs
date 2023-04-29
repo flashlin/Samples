@@ -4,33 +4,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using CsvHelper;
 using CsvHelper.Configuration;
+using T1.Standard.IO;
 
 namespace QueryKits.CsvEx;
 
 public class CsvSheet
 {
-   
-   public static string ParseHeaderDelimiter(string line)
-   {
-      if (line.Contains('\t'))
-      {
-         return "\t";
-      }
-      if (line.Contains(','))
-      {
-         return ",";
-      }
-      return " ";
-   }
-
-   public static string ParseHeaderDelimiterFromFile(string csvFile)
-   {
-      using var stream = new FileStream(csvFile, FileMode.Open);
-      using var reader = new StreamReader(stream, Encoding.UTF8);
-      var line = reader.ReadLine()!;
-      return ParseHeaderDelimiter(line);
-   }
-
    public static CsvSheet ReadFromStream(Stream csvStream, string delimiter)
    {
       using var textReader = new StreamReader(csvStream);
@@ -39,8 +18,14 @@ public class CsvSheet
 
    public static CsvSheet ReadFromString(string csvData)
    {
+      var delimiterResult = ParseCsvDelimiter(csvData);
+      if (delimiterResult.Delimiter == " ")
+      {
+         csvData = csvData.Replace(" ", "\t");
+         delimiterResult.Delimiter = "\t";
+      }
       using var strReader = new StringReader(csvData);
-      return ReadFromTextReader(strReader, ",");
+      return ReadFromTextReader(strReader, delimiterResult.Delimiter);
    }
    
    public static CsvSheet ReadFromTextReader(TextReader textReader, string delimiter)
@@ -109,6 +94,90 @@ public class CsvSheet
 
    public void SaveToFile(string file)
    {
+      // var option = new CsvConfiguration(CultureInfo.InvariantCulture)
+      // {
+      //    Delimiter = Delimiter,
+      //    Mode = CsvMode.RFC4180,
+      //    Encoding = Encoding.UTF8,
+      //    HasHeaderRecord = true,
+      // };
+      // using var stream = new FileStream(file, FileMode.Create);
+      // using var streamWriter = new StreamWriter(stream, Encoding.UTF8);
+      // using var csvWriter = new CsvWriter(streamWriter, option);
+      // foreach (var header in Headers)
+      // {
+      //    csvWriter.WriteField(header.Name);
+      // }
+      // csvWriter.NextRecord();
+      // csvWriter.WriteRecords(Rows);
+      
+      using var stream = new FileStream(file, FileMode.Create);
+      SaveToStream(stream);
+   }
+
+   public static CsvDelimiter ParseCsvDelimiter(string text)
+   {
+        var sr = new StringReader(text);
+        var header = sr.ReadLine();
+        if (header == null)
+        {
+           return new CsvDelimiter
+           {
+              Success = false,
+           };
+        }
+
+        if (header.Contains('\t'))
+        {
+           var tCount1 = header.Split('\t').Length;
+           var row0 = sr.ReadLine()!;
+           var tCount2 = row0.Split('\t').Length;
+           if (tCount1 == tCount2 && tCount1 != 0)
+           {
+              return new CsvDelimiter
+              {
+                 Success = true,
+                 Delimiter = "\t"
+              };
+           }
+        }
+
+        if (header.Contains(','))
+        {
+           var commaCount1 = header.Split(',').Length;
+           var commaCount2 = header.Split(',').Length;
+           if (commaCount1 == commaCount2 && commaCount1 != 0)
+           {
+              return new CsvDelimiter
+              {
+                 Success = true,
+                 Delimiter = ","
+              };
+           }
+        }
+
+        if (header.Contains(' '))
+        {
+           var spaceCount1 = header.Split(' ').Length;
+           var spaceCount2 = header.Split(' ').Length;
+           if (spaceCount1 == spaceCount2 && spaceCount1 != 0)
+           {
+              return new CsvDelimiter()
+              {
+                 Success = true,
+                 Delimiter = " "
+              };
+           }
+        }
+
+        return new CsvDelimiter
+        {
+           Success = false,
+        };
+   }
+
+   public void SaveToStream(Stream stream)
+   {
       var option = new CsvConfiguration(CultureInfo.InvariantCulture)
       {
          Delimiter = Delimiter,
@@ -116,16 +185,38 @@ public class CsvSheet
          Encoding = Encoding.UTF8,
          HasHeaderRecord = true,
       };
-      using var stream = new FileStream(file, FileMode.Create);
-      using var streamWriter = new StreamWriter(stream, Encoding.UTF8);
-      using var csvWriter = new CsvWriter(streamWriter, option);
+      var streamWriter = new StreamWriter(stream, Encoding.UTF8);
+      using var csvWriter = new CsvWriter(streamWriter, option, true);
       foreach (var header in Headers)
       {
          csvWriter.WriteField(header.Name);
       }
       csvWriter.NextRecord();
-      csvWriter.WriteRecords(Rows);
+      foreach (var row in Rows)
+      {
+         foreach (var header in Headers)
+         {
+            csvWriter.WriteField(row[header.Name]);
+         }
+         csvWriter.NextRecord();
+      }
+      csvWriter.Flush();
    }
+
+   public string SaveToString()
+   {
+      var memoryStream = new MemoryStream();
+      SaveToStream(memoryStream);
+      memoryStream.Position = 0;
+      var reader = new StreamReader(memoryStream);
+      return reader.ReadToEnd();
+   }
+}
+
+public class CsvDelimiter
+{
+   public bool Success { get; set; }
+   public string Delimiter { get; set; } = string.Empty;
 }
 
 public interface IMyJsonSerializer

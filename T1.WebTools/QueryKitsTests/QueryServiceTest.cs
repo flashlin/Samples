@@ -9,13 +9,13 @@ using T1.Standard.DynamicCode;
 
 namespace QueryKitsTests;
 
-public class Tests
+public class QueryServiceTest
 {
     private string _instanceName = "local_db_instance";
     private string _databaseName = "QueryDb";
     private readonly SqlLocalDb _localDb = new SqlLocalDb(@"D:\Demo");
 
-    private QueryService _sut = null!;
+    private QueryService _queryService = null!;
     private ReportDbContext _dbContext = null!;
 
     [SetUp]
@@ -35,7 +35,7 @@ public class Tests
                 "Server=(localdb)\\local_db_instance;Integrated security=SSPI;database=QueryDb;"
         });
         _dbContext = new ReportDbContext(new DbContextOptionsFactory(dbConfig));
-        _sut = new QueryService(_dbContext);
+        _queryService = new QueryService(_dbContext);
     }
 
     [Test]
@@ -57,7 +57,7 @@ public class Tests
 
         var leftTable = _dbContext.SqlBuilder.GetTableInfo(typeof(CustomerEntity));
         var rightTable = _dbContext.SqlBuilder.GetTableInfo(typeof(ExtraCustomerEntity));
-        _sut.MergeTable(new MergeTableRequest
+        _queryService.MergeTable(new MergeTableRequest
         {
             LeftTable = leftTable,
             RightTable = rightTable,
@@ -97,7 +97,7 @@ public class Tests
 
         var leftTable = _dbContext.SqlBuilder.GetTableInfo(typeof(CustomerEntity));
         var rightTable = _dbContext.SqlBuilder.GetTableInfo(typeof(ExtraCustomerEntity));
-        _sut.MergeTable(new MergeTableRequest
+        _queryService.MergeTable(new MergeTableRequest
         {
             LeftTable = leftTable,
             RightTable = rightTable,
@@ -146,7 +146,7 @@ public class Tests
 
         var leftTable = _dbContext.SqlBuilder.GetTableInfo(typeof(CustomerEntity));
         var rightTable = _dbContext.SqlBuilder.GetTableInfo(typeof(ExtraCustomerEntity));
-        _sut.MergeTable(new MergeTableRequest
+        _queryService.MergeTable(new MergeTableRequest
         {
             LeftTable = leftTable,
             RightTable = rightTable,
