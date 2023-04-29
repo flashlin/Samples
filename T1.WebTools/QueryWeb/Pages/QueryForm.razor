@@ -4,6 +4,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-8">
+            <div>@_textFormat.ToString() <button @onclick="OnClickDetect">Detect</button></div>
             <XCodeEditor @ref="_codeEditor"
                          SqlCodeRanCallback="@OnSqlCodeRan"
                          Text="@_codeText"
@@ -56,6 +57,7 @@
 @using QueryKits.ExcelUtils
 @using QueryKits.Extensions
 @using QueryWeb.Models
+@using T1.WebTools.CsvEx
 @inject IJSRuntime JsRuntime
 @inject IQueryService QueryService
 @inject IAppState AppState
@@ -69,6 +71,7 @@
     readonly XCodeEditor _resultEditor = null!;
     private ElementReference _sqlCodeHistorySelector;
     private string _text = string.Empty;
+    private TextFormat _textFormat = TextFormat.Text;
 
     private string _codeText = string.Empty;
 
@@ -186,5 +189,19 @@
         _isShowMergeTableForm = true;
         _mergeTableForm.SelectTable(args.LeftTableName, args.RightTableName);
         return Task.CompletedTask;
+    }
+
+    private async Task OnClickDetect()
+    {
+        await InvokeAsync(async () =>
+        {
+            var text = await _codeEditor.GetValue();
+            var textConverter = new TextConverter();
+            _textFormat = textConverter.GetTextFormat(text);
+            var csvSheet = textConverter.ConvertTextToCsvSheet(text);
+            csvSheet.Delimiter = ",";
+            _results.Clear();
+            _text = csvSheet.SaveToString();
+        });
     }
 }

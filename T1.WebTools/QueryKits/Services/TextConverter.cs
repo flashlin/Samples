@@ -34,7 +34,7 @@ public class TextConverter
         return string.Join(",", lines);
     }
 
-    public CsvSheet TextToCsvSheet(string text)
+    public CsvSheet ConvertTextToCsvSheet(string text)
     {
         var textFormat = GetTextFormat(text);
         if (new[] {TextFormat.JsonArray, TextFormat.JsonArrayLine, TextFormat.Json}.Contains(textFormat))
@@ -144,19 +144,8 @@ public class TextConverter
 
     private bool TryDeserializeCsv(string text)
     {
-        var sr = new StringReader(text);
-        var header = sr.ReadLine()!;
-        var tCount1 = header.Split('\t').Length;
-        var row0 = sr.ReadLine()!;
-        var tCount2 = row0.Split('\t').Length;
-        if (tCount1 == tCount2)
-        {
-            return true;
-        }
-
-        var commaCount1 = header.Split(',').Length;
-        var commaCount2 = header.Split(',').Length;
-        return commaCount1 == commaCount2;
+        var rc = CsvSheet.ParseCsvDelimiter(text);
+        return rc.Success;
     }
 
     private static bool TryReadMultipleLine(string text)
