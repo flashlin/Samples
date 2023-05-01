@@ -31,4 +31,5 @@ if ( "use" -eq $action ) {
 $env:docker_exe = $dkOptions.docker
 Write-Host "use $($env:docker_exe)"
 
-QueryDockerImages ""
+#$keyword = "flas"
+QueryDockerImages "" | WriteTable
