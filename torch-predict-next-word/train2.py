@@ -63,68 +63,67 @@ class CharRNN(nn.Module):
 
 class Trainer:
     def __init__(self):
-        pass
+        hidden_size = 128
+        self.n_epochs = 500
+        self.char_dict = char_dict = CharDict()
+        self.model = model = CharRNN(len(char_dict.char_to_index), hidden_size, len(char_dict.char_to_index))
+        self.criterion = nn.CrossEntropyLoss()
+        self.optimizer = SGD(model.parameters(), lr=0.01)
+
+    def train(self, data):
+        # 執行多次訓練迭代
+        input_tensor, target_tensor = self.char_dict.create_train_data(data)
+        for epoch in range(self.n_epochs):
+            loss = self.train_loop(input_tensor, target_tensor)
+            if (epoch + 1) % 100 == 0:
+                print(f'Epoch: {epoch + 1}, Loss: {loss}')
+
+    def infer(self, test_sentence):
+        # 推斷句子 "select id" 的下一個單詞
+        char_dict = self.char_dict
+        test_input = [char_dict.char_to_index[char] for char in test_sentence]
+        test_input_tensor = torch.tensor([test_input])
+        topk_indices, topk_probabilities = self.predict_topk(test_input_tensor)
+        # 輸出結果
+        result = []
+        for i in range(len(topk_indices)):
+            char = char_dict.index_to_char[topk_indices[i]]
+            probability = topk_probabilities[i]
+            # print(f'{i + 1}. {char} ({probability:.2f})')
+            result.append((char, probability))
+        return result
+
+    def train_loop(self, input_tensor, target_tensor):
+        hidden = self.model.init_hidden(input_tensor.size(0))
+        self.optimizer.zero_grad()
+        loss = 0
+        for i in range(input_tensor.size(1)):
+            output, hidden = self.model(input_tensor[:, i], hidden)
+            loss += self.criterion(output.view(input_tensor.size(0), -1), target_tensor[:, i])
+        loss.backward()
+        self.optimizer.step()
+        return loss.item() / input_tensor.size(1)
+
+    def predict_topk(self, input_tensor, k=5):
+        output = self.predict(input_tensor)
+        probabilities = nn.functional.softmax(output[0], dim=0)
+        topk_probabilities, topk_indices = probabilities.topk(k)
+        return topk_indices.tolist(), topk_probabilities.tolist()
+
+    def predict(self, input_tensor):
+        hidden = self.model.init_hidden(input_tensor.size(0))
+        for i in range(input_tensor.size(1)):
+            output, hidden = self.model(input_tensor[:, i], hidden)
+        return output
 
 
-def train(model, input_tensor, target_tensor, criterion, optimizer):
-    hidden = model.init_hidden(input_tensor.size(0))
-    optimizer.zero_grad()
-    loss = 0
-    for i in range(input_tensor.size(1)):
-        output, hidden = model(input_tensor[:, i], hidden)
-        loss += criterion(output.view(input_tensor.size(0), -1),
-                          target_tensor[:, i])
-    loss.backward()
-    optimizer.step()
-
-    return loss.item() / input_tensor.size(1)
-
-
-def predict(model, input_tensor):
-    hidden = model.init_hidden(input_tensor.size(0))
-    for i in range(input_tensor.size(1)):
-        output, hidden = model(input_tensor[:, i], hidden)
-    return output
-
-
-def predict_topk(model, input_tensor, k=5):
-    output = predict(model, input_tensor)
-    probabilities = nn.functional.softmax(output[0], dim=0)
-    topk_probabilities, topk_indices = probabilities.topk(k)
-    return topk_indices.tolist(), topk_probabilities.tolist()
-
-
+trainer = Trainer()
 data = ['select id, name from customer\0',
         'select id from customer\0',
         'select name from customer\0']
+trainer.train(data)
 
-# 定義超參數
-hidden_size = 128
-n_epochs = 1000
 
-# 創建模型實例
-char_dict = CharDict()
-model = CharRNN(len(char_dict.char_to_index), hidden_size, len(char_dict.char_to_index))
-
-# 定義標準和優化器
-criterion = nn.CrossEntropyLoss()
-optimizer = SGD(model.parameters(), lr=0.01)
-
-# 執行多次訓練迭代
-input_tensor, target_tensor = char_dict.create_train_data(data)
-for epoch in range(n_epochs):
-    loss = train(model, input_tensor, target_tensor, criterion, optimizer)
-    if (epoch + 1) % 100 == 0:
-        print(f'Epoch: {epoch + 1}, Loss: {loss}')
-
-# 推斷句子 "select id" 的下一個單詞
-test_sentence = "select id from customer"
-test_input = [char_dict.char_to_index[char] for char in test_sentence]
-test_input_tensor = torch.tensor([test_input])
-topk_indices, topk_probabilities = predict_topk(model, test_input_tensor)
-
-# 輸出結果
-for i in range(len(topk_indices)):
-    char = char_dict.index_to_char[topk_indices[i]]
-    probability = topk_probabilities[i]
-    print(f'{i + 1}. {char} ({probability:.2f})')
+results = trainer.infer("select id")
+for char, prob in results:
+    print(f"'{char}' {prob=}")
