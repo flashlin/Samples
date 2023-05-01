@@ -105,6 +105,7 @@ function WriteTable {
       $list = @()
    }
    process {
+      $list += $obj
       if ( $first -eq $true ) {
          $propertyNames = $obj | Get-Member -MemberType Properties | Select-Object -ExpandProperty Name
          foreach ($name in $propertyNames) {
@@ -114,11 +115,7 @@ function WriteTable {
          $first = $false
       }
 
-      # $propertyNames = $propertyNames | ForEach-Object {
-      #    if ($_.Name.StartsWith("__")) {
-      #       continue
-      #    }
-      # }
+      $propertyNames = $propertyNames | Where-Object { !$_.StartsWith("__") }
 
       foreach ($name in $propertyNames) {
          $val = $obj.$name
@@ -126,7 +123,6 @@ function WriteTable {
             $maxLengthDict[$name] = $val.Length
          }
       }
-      $list += $obj
    }
    end {
       foreach ($name in $propertyNames) {
@@ -140,15 +136,21 @@ function WriteTable {
          $delimit = "-" * $name.Length
          WriteFixedText $delimit $maxLen
       }
+      Write-Host ""
       foreach ($item in $list) {
          foreach ($name in $propertyNames) {
             $maxLen = $maxLengthDict[$name]
             $val = $item.$name
-            # $val = GetFixedText $val $maxLen
-            # $patternName = "__" + $item.$name
-            # $pattern = $item.$patternName
-            # WriteHostColor $val $pattern
-            WriteFixedText $val $maxLen
+            $val = GetFixedText $val $maxLen
+            $patternName = "__" + $name
+            if ($item | Get-Member -MemberType Properties -Name $patternName ) {
+               $pattern = $item.$patternName
+               WriteHostColor $val $pattern
+            }
+            else {
+               # WriteFixedText $val $maxLen
+               Write-Host $val -NoNewline
+            }
          }
          Write-Host ""
       }
