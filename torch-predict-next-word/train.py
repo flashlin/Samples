@@ -39,6 +39,14 @@ class CharDict:
         target_tensor = torch.tensor(target_data)
         return input_tensor, target_tensor
 
+    def create_infer_data(self, sentence):
+        test_input = [self.char_to_index[char] for char in sentence]
+        test_input_tensor = torch.tensor([test_input])
+        return test_input_tensor
+
+    def decode_index(self, value):
+        return self.index_to_char[value]
+
 
 class CharRNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, n_layers=1):
@@ -86,20 +94,37 @@ class Trainer:
                 best_state_dict = self.model.state_dict()
         torch.save(best_state_dict, self.model_path)
 
-    def infer(self, test_sentence):
+    def infer(self, test_sentence, k=5):
         # 推斷句子 "select id" 的下一個單詞
         char_dict = self.char_dict
-        test_input = [char_dict.char_to_index[char] for char in test_sentence]
-        test_input_tensor = torch.tensor([test_input])
-        topk_indices, topk_probabilities = self.predict_topk(test_input_tensor)
+        test_input_tensor = char_dict.create_infer_data(test_sentence)
+        top_k_indices, top_k_probabilities = self.predict_top_k(test_input_tensor, k)
         # 輸出結果
         result = []
-        for i in range(len(topk_indices)):
-            char = char_dict.index_to_char[topk_indices[i]]
-            probability = topk_probabilities[i]
+        for i in range(len(top_k_indices)):
+            c_char = char_dict.index_to_char[top_k_indices[i]]
+            probability = top_k_probabilities[i]
             # print(f'{i + 1}. {char} ({probability:.2f})')
-            result.append((char, probability))
+            result.append((c_char, round(probability,2)))
         return result
+
+    def infer_sentence(self, sentence, k=5):
+        top_k_list = self.infer(sentence, k)
+        result = []
+        for c_char, probability in top_k_list:
+            if probability < 0.5:
+                break
+            next_chars = self.internal_infer_sentence(sentence, [c_char])
+            next_chars = ''.join(next_chars)
+            result.append((next_chars, probability))
+        return result
+
+    def internal_infer_sentence(self, sentence, next_chars):
+        if next_chars[-1] == '\0':
+            return next_chars[:-1]
+        next_char, _ = self.infer(sentence + ''.join(next_chars), k=1)[0]
+        next_chars.append(next_char)
+        return self.internal_infer_sentence(sentence, next_chars)
 
     def train_loop(self, input_tensor, target_tensor):
         hidden = self.model.init_hidden(input_tensor.size(0))
@@ -112,7 +137,7 @@ class Trainer:
         self.optimizer.step()
         return loss.item() / input_tensor.size(1)
 
-    def predict_topk(self, input_tensor, k=5):
+    def predict_top_k(self, input_tensor, k=5):
         output = self.predict(input_tensor)
         probabilities = nn.functional.softmax(output[0], dim=0)
         topk_probabilities, topk_indices = probabilities.topk(k)
@@ -133,5 +158,10 @@ trainer.train(data)
 
 
 results = trainer.infer("select birth")
+for char, prob in results:
+    print(f"'{char}' {prob=}")
+
+print("-----------------")
+results = trainer.infer_sentence("select id")
 for char, prob in results:
     print(f"'{char}' {prob=}")
