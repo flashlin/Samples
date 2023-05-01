@@ -64,19 +64,27 @@ class CharRNN(nn.Module):
 class Trainer:
     def __init__(self):
         hidden_size = 128
+        self.model_path = "./output/model.pth"
         self.n_epochs = 500
         self.char_dict = char_dict = CharDict()
         self.model = model = CharRNN(len(char_dict.char_to_index), hidden_size, len(char_dict.char_to_index))
+        if os.path.exists(self.model_path):
+            self.model.load_state_dict(torch.load(self.model_path))
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = SGD(model.parameters(), lr=0.01)
 
     def train(self, data):
-        # 執行多次訓練迭代
+        best_loss = float('inf')
+        best_state_dict = None
         input_tensor, target_tensor = self.char_dict.create_train_data(data)
         for epoch in range(self.n_epochs):
             loss = self.train_loop(input_tensor, target_tensor)
             if (epoch + 1) % 100 == 0:
                 print(f'Epoch: {epoch + 1}, Loss: {loss}')
+            if loss < best_loss:
+                best_loss = loss
+                best_state_dict = self.model.state_dict()
+        torch.save(best_state_dict, self.model_path)
 
     def infer(self, test_sentence):
         # 推斷句子 "select id" 的下一個單詞
@@ -124,6 +132,6 @@ data = ['select id, name from customer\0',
 trainer.train(data)
 
 
-results = trainer.infer("select id")
+results = trainer.infer("select birth")
 for char, prob in results:
     print(f"'{char}' {prob=}")
