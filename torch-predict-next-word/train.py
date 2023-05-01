@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import os
 import string
+from flask import Flask, request
 
 
 class CharDict:
@@ -105,7 +106,7 @@ class Trainer:
             c_char = char_dict.index_to_char[top_k_indices[i]]
             probability = top_k_probabilities[i]
             # print(f'{i + 1}. {char} ({probability:.2f})')
-            result.append((c_char, round(probability,2)))
+            result.append((c_char, round(probability, 2)))
         return result
 
     def infer_sentence(self, sentence, k=5):
@@ -116,7 +117,10 @@ class Trainer:
                 break
             next_chars = self.internal_infer_sentence(sentence, [c_char])
             next_chars = ''.join(next_chars)
-            result.append((next_chars, probability))
+            result.append({
+                "next_words": next_chars,
+                "probability": probability
+            })
         return result
 
     def internal_infer_sentence(self, sentence, next_chars):
@@ -150,18 +154,34 @@ class Trainer:
         return output
 
 
+def test1():
+    trainer = Trainer()
+    data = ['select id, name from customer\0',
+            'select id from customer\0',
+            'select name from customer\0']
+    trainer.train(data)
+
+    results = trainer.infer("select birth")
+    for char, prob in results:
+        print(f"'{char}' {prob=}")
+
+    print("-----------------")
+    results = trainer.infer_sentence("select id")
+    for char, prob in results:
+        print(f"'{char}' {prob=}")
+
+
 trainer = Trainer()
-data = ['select id, name from customer\0',
-        'select id from customer\0',
-        'select name from customer\0']
-trainer.train(data)
+app = Flask(__name__)
 
 
-results = trainer.infer("select birth")
-for char, prob in results:
-    print(f"'{char}' {prob=}")
+@app.route('/infer', methods=['POST'])
+def predict():
+    data = request.get_json()
+    input_sentence = data['input']
+    top_k = trainer.infer_sentence(input_sentence)
+    return {'top_k': top_k}
 
-print("-----------------")
-results = trainer.infer_sentence("select id")
-for char, prob in results:
-    print(f"'{char}' {prob=}")
+
+if __name__ == '__main__':
+    app.run()
