@@ -31,5 +31,10 @@ if ( "use" -eq $action ) {
 $env:docker_exe = $dkOptions.docker
 Write-Host "use $($env:docker_exe)"
 
+
 #$keyword = "flas"
-QueryDockerImages "" | WriteTable
+QueryDockerImages "" | ForEach-Object {
+   $item = $_
+   $item | Add-Member -MemberType NoteProperty -Name "__Repo" -Value "flas"
+   $item
+} | WriteTable
