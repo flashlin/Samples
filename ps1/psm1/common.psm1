@@ -92,6 +92,10 @@ function WriteHastable {
    }
 }
 
+
+Import-Module $env:psm1Home/SplitTableString.psm1 -Force -Global
+
+
 function WriteTable {
    [CmdletBinding()]
    param(

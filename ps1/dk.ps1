@@ -33,8 +33,23 @@ Write-Host "use $($env:docker_exe)"
 
 
 #$keyword = "flas"
-QueryDockerImages "" | ForEach-Object {
-   $item = $_
-   $item | Add-Member -MemberType NoteProperty -Name "__Repo" -Value "flas"
-   $item
-} | WriteTable
+QueryDockerImages "" 
+# | ForEach-Object {
+#    $item = $_
+#    $item | Add-Member -MemberType NoteProperty -Name "__Repo" -Value "flas"
+#    $item
+# } | WriteTable
+
+
+if( "rmi" -eq $action) {
+   $name = $arg1
+   if( "" -eq $name ) {
+      $name = "<none>"
+   }
+   Write-Host "clean all $name images..."
+   QueryDockerImages $name | ForEach-Object {
+      Write-Host "remove $($_.Repo) $($_.Tag) ..."
+      InvokeDocker "rmi $($_.ID) -f"
+   }
+   return
+}
