@@ -158,7 +158,7 @@ public class TextConverter
 
     private IEnumerable<string> ConvertTextToLines(string text)
     {
-        var sr = new StreamReader(text);
+        var sr = new StringReader(text);
         do
         {
             var line = sr.ReadLine();
