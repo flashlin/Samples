@@ -122,8 +122,7 @@ function SplitTableString {
            }
        $valueObj = New-Object PSCustomObject
        foreach($item in $items) {
-           $valueObj | Add-Member -MemberType NoteProperty `
-               -Name $item.column.value.Trim() -Value $item.value
+           AddObjectProperty $valueObj $item.column.value.Trim() $item.value
        }
        $valueObj
    }
