@@ -74,7 +74,7 @@ class Trainer:
     def __init__(self):
         hidden_size = 128
         self.model_path = "./output/model.pth"
-        self.n_epochs = 500
+        self.n_epochs = 200
         self.char_dict = char_dict = CharDict()
         self.model = model = CharRNN(len(char_dict.char_to_index), hidden_size, len(char_dict.char_to_index))
         if os.path.exists(self.model_path):
@@ -159,16 +159,18 @@ def test1():
     data = ['select id, name from customer\0',
             'select id from customer\0',
             'select name from customer\0']
+    data = ['select id from customer\0']
     trainer.train(data)
 
     results = trainer.infer("select birth")
-    for char, prob in results:
-        print(f"'{char}' {prob=}")
+    for ch, prob in results:
+        print(f"'{ch}' {prob=}")
 
     print("-----------------")
+    print("select id")
     results = trainer.infer_sentence("select id")
-    for char, prob in results:
-        print(f"'{char}' {prob=}")
+    for item in results:
+        print(f"'{item['next_words']}' {item['probability']=}")
 
 
 trainer = Trainer()
@@ -184,4 +186,5 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run()
+    #app.run()
+    test1()
