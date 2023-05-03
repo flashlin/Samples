@@ -37,9 +37,15 @@ public class TextConverter
     public CsvSheet ConvertTextToCsvSheet(string text)
     {
         var textFormat = GetTextFormat(text);
-        if (new[] {TextFormat.JsonArray, TextFormat.JsonArrayLine, TextFormat.Json}.Contains(textFormat))
+        if (new[] {TextFormat.JsonArray, TextFormat.JsonArrayLine }.Contains(textFormat))
         {
             var csv = JsonHelper.ToCsvString(text);
+            return CsvSheet.ReadFromString(csv);
+        }
+        
+        if (new[] {TextFormat.Json, TextFormat.JsonLine}.Contains(textFormat))
+        {
+            var csv = JsonHelper.ToCsvString("[" + text + "]");
             return CsvSheet.ReadFromString(csv);
         }
 
