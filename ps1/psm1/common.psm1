@@ -1,3 +1,14 @@
+function AddObjectProperty {
+   param(
+      [Parameter(ValueFromPipeline = $true)]
+      [object]$obj,
+      [string]$name,
+      [object]$value
+   )
+   $obj | Add-Member -MemberType NoteProperty `
+      -Name $name -Value $value
+}
+
 function GetJsonFile {
    param (
       [string]$jsonFilePath
