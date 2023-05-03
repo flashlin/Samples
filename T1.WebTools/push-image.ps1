@@ -3,7 +3,7 @@ Write-Host "https://github.com/settings/tokens"
 # $env:CR_PAT = $MY_TOKEN
 # $env:CR_PAT | docker login ghcr.io -u flash.lin@gmail.com --password-stdin
 
-$ver = "1.11"
+$ver = "1.12"
 
 Write-Host "tag image $ver"
 $container_register = "ghcr.io"
