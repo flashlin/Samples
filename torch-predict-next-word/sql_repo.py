@@ -26,3 +26,13 @@ class SqlRepo:
         results = c.fetchall()
         c.close()
         return results
+
+
+    def query_first(self, sql, parameters_tuple=None):
+        results = self.query(sql, parameters_tuple)
+        if results == []:
+            return None
+        return results[0]
+
+    def commit(self):
+        self.conn.commit()

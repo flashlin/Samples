@@ -1,3 +1,4 @@
+from datetime import datetime
 from sql_repo import SqlRepo
 from torch.optim import SGD
 import torch
@@ -154,6 +155,45 @@ class Trainer:
             output, hidden = self.model(input_tensor[:, i], hidden)
         return output
 
+sql_repo = SqlRepo()
+trainer = Trainer()
+app = Flask(__name__)
+
+
+@app.route('/addsql', methods=['POST'])
+def add_sql():
+    data = request.get_json()
+    input_sql = data['sql']
+    _add_sql(input_sql)
+
+@app.route('/infer', methods=['POST'])
+def infer():
+    data = request.get_json()
+    input_sentence = data['input']
+    return _infer(input_sentence)
+
+def _add_sql(input_sql):
+    try:
+        sql_repo.execute('insert into _sqlHistory(sql) values(?)', (input_sql,))
+    except Exception as e:
+        id = sql_repo.query_first('select id from _sqlHistory where sql=?', (input_sql,))[0]
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        sql_repo.execute('update _sqlHistory set createOn=? where id=?', (current_time,id,))
+        sql_repo.commit()
+    rc = sql_repo.query_first('select id from _sqlHistory order by createOn desc LIMIT 1 OFFSET 999')
+    if rc is not None:
+        sql_repo.execute('delete _sqlHistory where id < ?', (rc[0],))
+    sql_repo.commit()
+    list = sql_repo.query('select id, sql from _sqlHistory')
+    for row in list:
+        print(f"{row=}")
+    data = [input_sql]
+    trainer.train(data)
+
+def _infer(input_sentence):
+    top_k = trainer.infer_sentence(input_sentence)
+    return {'top_k': top_k}
+
 
 def test1():
     trainer = Trainer()
@@ -173,43 +213,18 @@ def test1():
     for item in results:
         print(f"'{item['next_words']}' {item['probability']=}")
 
-
-sql_repo = SqlRepo()
-trainer = Trainer()
-app = Flask(__name__)
-
-
-@app.route('/addsql', methods=['POST'])
-def add_sql():
-    data = request.get_json()
-    input_sql = data['sql']
-    _add_sql(input_sql)
-
-def _add_sql(input_sql):
-    sql_repo.execute('insert into _sqlHistory(sql) values(?)', (input_sql,))
-    data = [input_sql]
-    trainer.train(data)
-
-@app.route('/infer', methods=['POST'])
-def infer():
-    data = request.get_json()
-    input_sentence = data['input']
-    return _infer(input_sentence)
-
-def _infer(input_sentence):
-    top_k = trainer.infer_sentence(input_sentence)
-    return {'top_k': top_k}
-
-
-if __name__ == '__main__':
-    sql_repo.execute('''create table IF NOT EXISTS _sqlHistory(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        sql TEXT NOT NULL,
-        createOn DATETIME DEFAULT CURRENT_TIMESTAMP
-    )''',)
-    #app.run()
-    #test1()
+def test2():
     _add_sql('select id,name from customer\0')
     top_k = _infer('select name ')['top_k']
     for item in top_k:
         print(f"'{item['next_words']}' {item['probability']=}")
+
+if __name__ == '__main__':
+    sql_repo.execute('''create table IF NOT EXISTS _sqlHistory(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sql TEXT NOT NULL UNIQUE,
+        createOn DATETIME DEFAULT CURRENT_TIMESTAMP
+    )''',)
+    # app.run()
+    _add_sql('select id from customer\0')
+    
