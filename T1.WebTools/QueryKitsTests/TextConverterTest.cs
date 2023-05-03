@@ -88,4 +88,29 @@ public class TextConverterTest
         csv.Should().Be("a,b\r\n1,n1\r\n2,n2\r\n");
     }
     
+    [Test]
+    public void JsonLine()
+    {
+        var text = @"{ ""id"": 123, ""name"":""flash"" }";
+
+        var csvSheet = _converter.ConvertTextToCsvSheet(text);
+        csvSheet.Delimiter = ",";
+        var csv = csvSheet.SaveToString();
+
+        csv.Should().Be("id,name\r\n123,flash\r\n");
+    }
+    
+    [Test]
+    public void JsonMultiple()
+    {
+        var text = @"{ 
+""id"": 123, 
+""name"":""flash"" }";
+
+        var csvSheet = _converter.ConvertTextToCsvSheet(text);
+        csvSheet.Delimiter = ",";
+        var csv = csvSheet.SaveToString();
+
+        csv.Should().Be("id,name\r\n123,flash\r\n");
+    }
 }
