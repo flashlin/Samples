@@ -1,6 +1,8 @@
 param(
     [string]$action
 )
+Import-Module "$($env:psm1HOME)/common.psm1" -Force
+Import-Module "$($env:psm1HOME)/docker.psm1" -Force
 
 function Invoke{
     param(
@@ -18,7 +20,8 @@ if( "build" -eq $action ) {
 }
 
 if( "serve" -eq $action ) {
-    Invoke "run -it --name predict_next_words_web -p 5001:8000 predict_next_words_web:dev"
+    RestartContainer "predict_next_words_web" "-p 5001:8000 predict_next_words_web:dev"
+    #    Invoke "run -it --name predict_next_words_web -p 5001:8000 predict_next_words_web:dev"
     return
 }
 
