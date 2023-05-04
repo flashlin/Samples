@@ -224,6 +224,6 @@ if __name__ == '__main__':
         sql TEXT NOT NULL UNIQUE,
         createOn DATETIME DEFAULT CURRENT_TIMESTAMP
     )''',)
-    app.run(port=8000)
+    app.run(host="0.0.0.0",port=8000)
     #_add_sql('select id from customer\0')
     

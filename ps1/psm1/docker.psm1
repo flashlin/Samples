@@ -20,21 +20,51 @@ function QueryDockerImages {
    }
 }
 
+function IsContainerExists {
+   param(
+      [string]$name
+   )
+   $isExists = InvokeDocker "ps -q --filter name=$name"
+   if( $isExists -eq $true ) {
+      return $true
+   }
+   return $false
+}
+
+function GetContainerExited {
+   param(
+      [string]$name
+   )
+   $id = InvokeDocker "ps -aq --filter name=$name"
+   return $id
+}
+
 function RestartContainer {
    param(
       [string]$name,
       [string]$startArguments
    )
-   $isExists = InvokeDocker "ps -q --filter name=$name"
+   $isExists = IsContainerExists $name
    if( $isExists -eq $true ) {
       return
    }
-   $id = InvokeDocker "ps -aq --filter name=$name"
+   $id = GetContainerExited $name
    if( $null -ne $id ) {
       InvokeDocker "start $id"
       return
    }
    InvokeDocker "run -it --name $name $startArguments" 
+}
+
+function RemoveContainer {
+   param(
+      [string]$name
+   )
+   if( $true -eq (IsContainerExists $name) ) {
+      InvokeDocker "stop $name"
+   }
+   $id = GetContainerExited $name
+   InvokeDocker "rm $id"  
 }
 
 Export-ModuleMember -Function *
