@@ -4,7 +4,7 @@ param(
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 Import-Module "$($env:psm1HOME)/docker.psm1" -Force
 
-function Invoke{
+function Invoke {
     param(
         [string]$cmd
     )
@@ -14,15 +14,15 @@ function Invoke{
     Invoke-Expression $command
 }
 
-if( "build" -eq $action ) {
+if ( "build" -eq $action ) {
     Invoke "build -f .\Dockerfile -t predict_next_words_web:dev ."
     return
 }
 
-if( "serve" -eq $action ) {
+if ( "serve" -eq $action ) {
     $name = "predict_next_words_web"
     RemoveContainer $name
-    RestartContainer $name "-p 5001:8000 $name:dev"
+    RestartContainer $name "-p 5001:8000 $($name):dev"
     #    Invoke "run -it --name predict_next_words_web -p 5001:8000 predict_next_words_web:dev"
     return
 }
