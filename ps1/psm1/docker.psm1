@@ -20,4 +20,21 @@ function QueryDockerImages {
    }
 }
 
+function RestartContainer {
+   param(
+      [string]$name,
+      [string]$startArguments
+   )
+   $isExists = InvokeDocker "ps -q --filter name=$name"
+   if( $isExists -eq $true ) {
+      return
+   }
+   $id = InvokeDocker "ps -aq --filter name=$name"
+   if( $null -ne $id ) {
+      InvokeDocker "start $id"
+      return
+   }
+   InvokeDocker "run -it --name $name $startArguments" 
+}
+
 Export-ModuleMember -Function *
