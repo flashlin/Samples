@@ -184,10 +184,9 @@ def _add_sql(input_sql):
     if rc is not None:
         sql_repo.execute('delete _sqlHistory where id < ?', (rc[0],))
     sql_repo.commit()
-    list = sql_repo.query('select id, sql from _sqlHistory')
-    for row in list:
-        print(f"{row=}")
-    data = [input_sql]
+    data = []
+    for row in sql_repo.query('select sql from _sqlHistory'):
+        data.append(row[0] + '\0')
     trainer.train(data)
 
 def _infer(input_sentence):
@@ -225,6 +224,6 @@ if __name__ == '__main__':
         sql TEXT NOT NULL UNIQUE,
         createOn DATETIME DEFAULT CURRENT_TIMESTAMP
     )''',)
-    # app.run()
-    _add_sql('select id from customer\0')
+    app.run(port=8000)
+    #_add_sql('select id from customer\0')
     
