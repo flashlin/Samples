@@ -6,6 +6,7 @@ using QueryKits.Extensions;
 using QueryKits.Services;
 using QueryWeb.Data;
 using QueryWeb.Models;
+using QueryWeb.Models.Clients;
 using QueryWeb.Models.TagHelpers;
 using Serilog;
 
@@ -30,6 +31,7 @@ Log.Logger.Information($"ENV = '{aspnetcore_env}'");
 var connectString = builder.Configuration.GetSection("DbConfig:ConnectionString").Value;
 Console.WriteLine($"DB connectString = '{connectString}'");
 
+builder.Services.AddHttpClient();
 builder.Services.AddControllers();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -55,7 +57,7 @@ services.AddTransient<IJsHelper, JsHelper>();
 services.AddTransient<ILanguageService, LanguageService>();
 services.AddQueryKits();
 services.AddSingleton<IPathBaseFeature>(sp => pathBaseFeature);
-
+services.AddTransient<IPredictNextWordsClient, PredictNextWordsClient>();
 
 var app = builder.Build();
 app.UsePathBase(pathBaseFeature.PathBase);

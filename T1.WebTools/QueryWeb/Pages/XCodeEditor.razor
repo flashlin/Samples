@@ -3,6 +3,7 @@
 @using System.Text.Json
 @using QueryKits.Services
 @using QueryWeb.Models
+@using QueryWeb.Models.Clients
 @using QueryWeb.Models.Extensions
 
 <div style="@_showCss">
@@ -15,7 +16,7 @@
 @inject IJSRuntime JsRuntime
 @inject IReportRepo ReportRepo
 @inject IJsHelper JsHelper
-
+@inject IPredictNextWordsClient PredictNextWordsClient
 @code {
     string _showCss = "display: block;";
 
@@ -114,8 +115,6 @@
 
     private async Task OnKeyDown(KeyboardEvent e)
     {
-        Console.WriteLine($"keydown ctrl={e.CtrlKey} keyCode={e.KeyCode}");
-        
         if (e.CtrlKey && e.KeyCode == KeyCode.Space)
         {
             var prevContent = await GetPrevContentByCurrentLine();
@@ -123,6 +122,11 @@
             var afterContent = currentLineContent.Substring(prevContent.Length);
             Console.WriteLine("c1" + prevContent);
             Console.WriteLine("c2" + afterContent);
+            var predict = await PredictNextWordsClient.Infer(prevContent);
+            await SetIntelliSenseAsync(new List<IntelliSenseItem>()
+            {
+                new IntelliSenseItem { Label = null, Kind = (IntelliSenseItemType)0, Detail = null, InsertText = null }
+            });
             return;
         }
         
