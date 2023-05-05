@@ -76,7 +76,7 @@ class Trainer:
     def __init__(self):
         hidden_size = 128
         self.model_path = "./output/model.pth"
-        self.n_epochs = 200
+        self.n_epochs = 100
         self.char_dict = char_dict = CharDict()
         self.model = model = CharRNN(len(char_dict.char_to_index), hidden_size, len(char_dict.char_to_index))
         if os.path.exists(self.model_path):
@@ -155,7 +155,11 @@ class Trainer:
             output, hidden = self.model(input_tensor[:, i], hidden)
         return output
 
-sql_repo = SqlRepo()
+
+def query(sql, parameters=None):
+    sql_repo = SqlRepo()
+    return sql_repo.query(sql, parameters)
+
 trainer = Trainer()
 app = Flask(__name__)
 
@@ -176,10 +180,11 @@ def infer():
 
 @app.route('/querysql', methods=['POST'])
 def query_sql():
-    rows = sql_repo.query('select id, sql from _sqlHistory ORDER BY id DESC LIMIT 10')
+    rows = query('select id, sql from _sqlHistory ORDER BY id DESC LIMIT 10')
     return rows
 
 def _add_sql(input_sql):
+    sql_repo = SqlRepo()
     try:
         sql_repo.execute('insert into _sqlHistory(sql) values(?)', (input_sql,))
     except Exception as e:
@@ -226,6 +231,7 @@ def test2():
         print(f"'{item['next_words']}' {item['probability']=}")
 
 if __name__ == '__main__':
+    sql_repo = SqlRepo()
     sql_repo.execute('''create table IF NOT EXISTS _sqlHistory(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         sql TEXT NOT NULL UNIQUE,
