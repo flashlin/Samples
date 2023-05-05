@@ -165,12 +165,19 @@ def add_sql():
     data = request.get_json()
     input_sql = data['sql']
     _add_sql(input_sql)
+    return '', 200
 
 @app.route('/infer', methods=['POST'])
 def infer():
     data = request.get_json()
     input_sentence = data['input']
     return _infer(input_sentence)
+
+
+@app.route('/querysql', methods=['POST'])
+def query_sql():
+    rows = sql_repo.query('select id, sql from _sqlHistory ORDER BY id DESC LIMIT 10')
+    return rows
 
 def _add_sql(input_sql):
     try:
@@ -213,7 +220,7 @@ def test1():
         print(f"'{item['next_words']}' {item['probability']=}")
 
 def test2():
-    _add_sql('select id,name from customer\0')
+    _add_sql('select id,name from customer')
     top_k = _infer('select name ')['top_k']
     for item in top_k:
         print(f"'{item['next_words']}' {item['probability']=}")
