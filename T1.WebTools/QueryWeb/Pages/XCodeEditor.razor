@@ -17,6 +17,7 @@
 @inject IReportRepo ReportRepo
 @inject IJsHelper JsHelper
 @inject IPredictNextWordsClient PredictNextWordsClient
+
 @code {
     string _showCss = "display: block;";
 
@@ -47,7 +48,7 @@
         if (isShow)
         {
             _showCss = "display: block;";
-        } 
+        }
         StateHasChanged();
         HandleWindowResize();
     }
@@ -119,18 +120,22 @@
         {
             var prevContent = await GetPrevContentByCurrentLine();
             var currentLineContent = await GetContentByCurrentLine();
-            var afterContent = currentLineContent.Substring(prevContent.Length);
-            Console.WriteLine("c1" + prevContent);
-            Console.WriteLine("c2" + afterContent);
-            var predict = await PredictNextWordsClient.Infer(prevContent);
+            //var afterContent = currentLineContent.Substring(prevContent.Length);
+            var predictResp = await PredictNextWordsClient.Infer(prevContent);
             await SetIntelliSenseAsync(new List<IntelliSenseItem>()
             {
-                new IntelliSenseItem { Label = null, Kind = (IntelliSenseItemType)0, Detail = null, InsertText = null }
+                new IntelliSenseItem
+                {
+                    Label = "Snippet",
+                    Kind = IntelliSenseItemType.Keyword,
+                    Detail = predictResp.top_k[0].next_words,
+                    InsertText = predictResp.top_k[0].next_words
+                }
             });
             return;
         }
-        
-        
+
+
         if (e.CtrlKey && e.KeyCode == KeyCode.KeyR)
         {
             var sqlCode = await _editor.GetValue();
@@ -151,10 +156,7 @@
     {
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) => { Console.WriteLine("Ctrl+J : Initial editor command is triggered."); });
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, (args) => { });
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI,  (args) =>
-        {
-            _editor.Trigger("keyboard", "type", new {text = ""});
-        });
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI, (args) => { _editor.Trigger("keyboard", "type", new {text = ""}); });
     }
 
     async Task RunCtrlR()
@@ -216,14 +218,15 @@
     {
         await JsRuntime.InvokeVoidAsync("monacoEditorTriggerIntelliSense", _editor.Id);
     }
-    
+
     public async Task<string> GetPrevContentByCurrentLine()
     {
         return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getPrevContentByCurrentLine", _editor.Id);
     }
-    
+
     public async Task<string> GetContentByCurrentLine()
     {
         return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getContentByCurrentLine", _editor.Id);
     }
+
 }
