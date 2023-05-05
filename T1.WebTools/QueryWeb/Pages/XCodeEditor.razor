@@ -126,9 +126,9 @@
             {
                 new IntelliSenseItem
                 {
-                    Label = "Snippet",
+                    Label = predictResp.top_k[0].next_words,
                     Kind = IntelliSenseItemType.Keyword,
-                    Detail = predictResp.top_k[0].next_words,
+                    Detail = "Snippet",
                     InsertText = predictResp.top_k[0].next_words
                 }
             });

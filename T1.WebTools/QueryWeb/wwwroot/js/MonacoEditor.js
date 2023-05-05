@@ -136,28 +136,28 @@ function createMonacoEditor(config)
     const newCompletionItemProvider = {
         provideCompletionItems: async function (model, position) {
             try {
-                const last_chars = model.getValueInRange({
-                    startLineNumber: position.lineNumber,
-                    startColumn: 0,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column
-                });
-                console.log("last_chars", last_chars);
-                const words = last_chars.replace("\t", "").split(" ");
-                const active_typing = words[words.length - 1];
+                // const last_chars = model.getValueInRange({
+                //     startLineNumber: position.lineNumber,
+                //     startColumn: 0,
+                //     endLineNumber: position.lineNumber,
+                //     endColumn: position.column
+                // });
+                // console.log("last_chars", last_chars);
+                // const words = last_chars.replace("\t", "").split(" ");
+                // const active_typing = words[words.length - 1];
 
-                const defaultSuggestions = [{
-                    label: 'SELECT',
-                    kind: monaco.languages.CompletionItemKind.Keyword,
-                    detail: "Keyword",
-                    insertText: 'SELECT ',
-                }];
+                // const defaultSuggestions = [{
+                //     label: 'SELECT',
+                //     kind: monaco.languages.CompletionItemKind.Keyword,
+                //     detail: "Keyword",
+                //     insertText: 'SELECT ',
+                // }];
 
                 const suggestionList = window.monacoEditorIntelliSenseDict[config.id];
-                const suggestions = defaultSuggestions.concat(suggestionList);
+                //const suggestions = defaultSuggestions.concat(suggestionList);
 
                 return {
-                    suggestions: suggestions
+                    suggestions: suggestionList
                 };
             }catch(e) {
                 console.error("completionItemProvider", e);
