@@ -1,5 +1,6 @@
 param(
-    [string]$action
+    [string]$action,
+    [string]$args0
 )
 
 Write-Host "MiniConda"
@@ -10,8 +11,20 @@ $py_env = "C:\Users\$($env:USERNAME)\AppData\Local\miniconda3"
 #& %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy ByPass -NoExit -Command `
 #    "& 'C:\Users\flash.lin71\AppData\Local\miniconda3\shell\condabin\conda-hook.ps1' ; conda activate 'C:\Users\flash.lin71\AppData\Local\miniconda3'"
 
-if( "use" -eq $action ) {
+# %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy ByPass -NoExit -Command 
+#"& 'C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1' ; conda activate 'C:\ProgramData\Miniconda3' "
+
+if ( "c" -eq $action ) {
     $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\conda-hook.ps1'; conda activate '$py_env'"" "
+    Invoke-Expression $cmd
+    return
+}
+
+
+if ( "c1" -eq $action ) {
+    # D:\Users\flash\miniconda3\envs\torch
+    $hookPs1 = "C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1"
+    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& $($hookPs1); conda activate '$py_env'"" "
     Invoke-Expression $cmd
     return
 }
@@ -26,7 +39,21 @@ function InvokeConda {
     Invoke-Expression $cmd
 }
 
-if( "" -eq $action ) {
+if ( "" -eq $action ) {
     InvokeConda "env list"
+    return
+}
+
+if ( "use" -eq $action ) {
+    $py_env = $args0
+    if ( "" -eq $py_env ) {
+        Write-Host "Please input"
+        Write-Host "use env-name"
+        return
+    }
+    # D:\Users\flash\miniconda3\envs\torch
+    $hookPs1 = "C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1"
+    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& $($hookPs1); conda activate '$py_env'"" "
+    Invoke-Expression $cmd
     return
 }
