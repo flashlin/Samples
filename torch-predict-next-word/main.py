@@ -229,10 +229,10 @@ if __name__ == '__main__':
     env = os.environ.get('PY_ENVIRONMENT', 'Development')
     host = os.environ.get('HOST', '0.0.0.0')
     port = os.environ.get('PORT', '8000')
-    workers = os.environ.get('WORKERS', 4)
+    workers = os.environ.get('WORKERS', 1)
     if env == 'Development':
         app.run(debug=True,host=host,port=port)
     else:
-        cmd = f'gunicorn -w {workers} -b {host}:{port} app:main'
+        cmd = f'gunicorn -w {workers} -b {host}:{port} main:app'
     os.system(cmd)
     
