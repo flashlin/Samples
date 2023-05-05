@@ -224,6 +224,15 @@ if __name__ == '__main__':
         sql TEXT NOT NULL UNIQUE,
         createOn DATETIME DEFAULT CURRENT_TIMESTAMP
     )''',)
-    app.run(host="0.0.0.0",port=8000)
     #_add_sql('select id from customer\0')
+    
+    env = os.environ.get('PY_ENVIRONMENT', 'Development')
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = os.environ.get('PORT', '8000')
+    workers = os.environ.get('WORKERS', 4)
+    if env == 'Development':
+        app.run(debug=True,host=host,port=port)
+    else:
+        cmd = f'gunicorn -w {workers} -b {host}:{port} app:main'
+    os.system(cmd)
     
