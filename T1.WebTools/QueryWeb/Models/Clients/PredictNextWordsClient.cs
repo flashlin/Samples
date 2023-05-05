@@ -5,7 +5,7 @@ namespace QueryWeb.Models.Clients;
 
 public interface IPredictNextWordsClient
 {
-    Task<string> Infer(string text);
+    Task<InferResponse> Infer(string text);
     Task AddSql(string sqlCode);
     Task QuerySql();
 }
@@ -25,12 +25,13 @@ public class PredictNextWordsClient : IPredictNextWordsClient
         _httpClient = httpClientFactory.CreateClient();
     }
 
-    public async Task<string> Infer(string text)
+    public async Task<InferResponse> Infer(string text)
     {
-        return await PostJsonAsync<string>("infer", new
+        var resp = await PostJsonAsync<InferResponse>("infer", new
         {
             input = text
         });
+        return resp!;
     }
     
     public Task AddSql(string sqlCode)
@@ -46,12 +47,12 @@ public class PredictNextWordsClient : IPredictNextWordsClient
         return PostJsonVoidAsync("querysql", new {});
     }
 
-    private async Task<T> PostJsonAsync<T>(string requestUri, object parameters)
+    private async Task<T?> PostJsonAsync<T>(string requestUri, object parameters)
     {
         var message = await PostJsonAsync(requestUri, parameters);
         var responseStream = await message.Content.ReadAsStreamAsync();
         var resp = await JsonSerializer.DeserializeAsync<T>(responseStream, _options);
-        return resp!;
+        return resp;
     }
     
     private Task PostJsonVoidAsync(string requestUri, object parameters)
@@ -61,8 +62,19 @@ public class PredictNextWordsClient : IPredictNextWordsClient
     
     private async Task<HttpResponseMessage> PostJsonAsync(string requestUri, object parameters)
     {
-        var message = await _httpClient.PostAsJsonAsync("http://127.0.0.1:5001/" + requestUri, parameters, _options);
+        var message = await _httpClient.PostAsJsonAsync("http://127.0.0.1:8000/" + requestUri, parameters, _options);
         message.EnsureSuccessStatusCode();
         return message;
     }
+}
+
+public class InferNextWords
+{
+    public string next_words { get; set; }
+    public float probability { get; set; }
+}
+
+public class InferResponse
+{
+    public List<InferNextWords> top_k { get; set; } = new();
 }
