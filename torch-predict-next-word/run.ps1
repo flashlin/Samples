@@ -1,8 +1,11 @@
 param(
-    [string]$action
+    [string]$action,
+    [string]$arg0
 )
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 Import-Module "$($env:psm1HOME)/docker.psm1" -Force
+
+$name = "predict_next_words_web"
 
 function Invoke {
     param(
@@ -20,11 +23,24 @@ if ( "build" -eq $action ) {
 }
 
 if ( "serve" -eq $action ) {
-    $name = "predict_next_words_web"
     RemoveContainer $name
     RestartContainer $name "-p 5001:8000 $($name):dev"
     #    Invoke "run -it --name predict_next_words_web -p 5001:8000 predict_next_words_web:dev"
     return
+}
+
+if( "push" -eq $action ) {
+    $ver = $arg0
+    if( "" -eq $ver ) {
+        Write-Host "please input push version"
+        Write-Host "ex: push 1.0"
+        return
+    }
+    Write-Host "tag image $ver"
+    $container_register = "ghcr.io"
+    $container_register = "docker.io"
+    Invoke "tag $($name):dev $container_register/flashlin/$($name):$($ver)"
+    Invoke "push $container_register/flashlin/$($name):$($ver)"
 }
 
 Write-Host "run script 1.0"
