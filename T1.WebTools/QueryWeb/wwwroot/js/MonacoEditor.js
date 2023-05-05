@@ -31,6 +31,25 @@ window.monacoEditorAppendLine = function (editorRef, text) {
     ]);
 };
 
+window.StaticMonacoEditor = {
+    getPrevContentByCurrentLine: function(editorRef) {
+        const editor = getEditor(editorRef);
+        const cursorPosition = editor.getPosition();
+        const model = editor.getModel();
+        return model.getValueInRange({
+            startLineNumber: cursorPosition.lineNumber,
+            startColumn: 0,
+            endLineNumber: cursorPosition.lineNumber,
+            endColumn: cursorPosition.column
+        });
+    },
+    getContentByCurrentLine: function (editorRef) {
+        const editor = getEditor(editorRef);
+        const cursorPosition = editor.getPosition();
+        return editor.getModel().getLineContent(cursorPosition.lineNumber);
+    }
+}
+
 window.monacoEditorIntelliSenseDict = {};
 
 window.monacoEditorSetIntellisense = function (editorRef, list) {
@@ -123,6 +142,7 @@ function createMonacoEditor(config)
                     endLineNumber: position.lineNumber,
                     endColumn: position.column
                 });
+                console.log("last_chars", last_chars);
                 const words = last_chars.replace("\t", "").split(" ");
                 const active_typing = words[words.length - 1];
 

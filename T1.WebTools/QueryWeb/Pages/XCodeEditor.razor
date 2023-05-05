@@ -114,6 +114,19 @@
 
     private async Task OnKeyDown(KeyboardEvent e)
     {
+        Console.WriteLine($"keydown ctrl={e.CtrlKey} keyCode={e.KeyCode}");
+        
+        if (e.CtrlKey && e.KeyCode == KeyCode.Space)
+        {
+            var prevContent = await GetPrevContentByCurrentLine();
+            var currentLineContent = await GetContentByCurrentLine();
+            var afterContent = currentLineContent.Substring(prevContent.Length);
+            Console.WriteLine("c1" + prevContent);
+            Console.WriteLine("c2" + afterContent);
+            return;
+        }
+        
+        
         if (e.CtrlKey && e.KeyCode == KeyCode.KeyR)
         {
             var sqlCode = await _editor.GetValue();
@@ -198,5 +211,15 @@
     public async Task TriggerIntelliSenseAsync()
     {
         await JsRuntime.InvokeVoidAsync("monacoEditorTriggerIntelliSense", _editor.Id);
+    }
+    
+    public async Task<string> GetPrevContentByCurrentLine()
+    {
+        return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getPrevContentByCurrentLine", _editor.Id);
+    }
+    
+    public async Task<string> GetContentByCurrentLine()
+    {
+        return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getContentByCurrentLine", _editor.Id);
     }
 }
