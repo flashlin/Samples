@@ -25,7 +25,11 @@ if ( "build" -eq $action ) {
 if ( "serve" -eq $action ) {
     RemoveContainer $name
     RestartContainer $name "-p 5001:8000 $($name):dev"
-    #    Invoke "run -it --name predict_next_words_web -p 5001:8000 predict_next_words_web:dev"
+    return
+}
+
+if ( "dev" -eq $action ) {
+    Invoke-Expression "python ./main.py"
     return
 }
 
