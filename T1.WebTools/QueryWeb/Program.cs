@@ -50,6 +50,7 @@ services.AddSingleton<IQueryEnvironment, QueryEnvironment>();
 services.AddEventAggregator(options => options.AutoRefresh = true);
 services.AddSingleton<IAppState, AppState>();
 services.Configure<DbConfig>(configuration.GetSection("DbConfig"));
+services.Configure<PredictNextWordsConfig>(configuration.GetSection("PredictNextWordsConfig"));
 services.AddSingleton<IReportRepo, ReportDbContext>();
 services.AddTransient<IQueryService, QueryService>();
 services.AddTransient<IJsJsonSerializer, JsJsonSerializer>();
