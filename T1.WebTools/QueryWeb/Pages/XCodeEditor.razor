@@ -63,6 +63,7 @@
     {
         var line = info.PrevLine;
         var predictResp = await PredictNextWordsClient.Infer(line);
+        Console.WriteLine($"'{line}'");
         return predictResp.top_k.Select(x => new IntelliSenseItem()
         {
            Label = x.NextWords,
@@ -71,7 +72,6 @@
            InsertText = x.NextWords
         }).ToList();
     }
-    
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

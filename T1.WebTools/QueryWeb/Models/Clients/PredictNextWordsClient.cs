@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace QueryWeb.Models.Clients;
 
@@ -12,9 +13,12 @@ public class PredictNextWordsClient : IPredictNextWordsClient
         ReadCommentHandling = JsonCommentHandling.Disallow,
     };
 
-    public PredictNextWordsClient(IHttpClientFactory httpClientFactory)
+    private readonly PredictNextWordsConfig _config;
+
+    public PredictNextWordsClient(IOptions<PredictNextWordsConfig> config, IHttpClientFactory httpClientFactory)
     {
         _httpClient = httpClientFactory.CreateClient();
+        _config = config.Value;
     }
 
     public async Task<InferResponse> Infer(string text)
@@ -54,7 +58,7 @@ public class PredictNextWordsClient : IPredictNextWordsClient
     
     private async Task<HttpResponseMessage> PostJsonAsync(string requestUri, object parameters)
     {
-        var message = await _httpClient.PostAsJsonAsync("http://127.0.0.1:8000/" + requestUri, parameters, _options);
+        var message = await _httpClient.PostAsJsonAsync(_config.Url + "/" + requestUri, parameters, _options);
         message.EnsureSuccessStatusCode();
         return message;
     }
