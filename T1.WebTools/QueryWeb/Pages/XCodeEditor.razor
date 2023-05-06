@@ -61,6 +61,7 @@
     [JSInvokable]
     public Task MyIntellisense(string editorRefId, EditorInfo info)
     {
+        //var predictResp = await PredictNextWordsClient.Infer(prevContent);
         return Task.FromResult(new[]
         {
             new IntelliSenseItem
@@ -126,7 +127,7 @@
                 }
             };
 
-    //editorElement = await JSRuntime.InvokeAsync<ElementReference>("createEditor", "editor", _editorSettings);
+            //editorElement = await JSRuntime.InvokeAsync<ElementReference>("createEditor", "editor", _editorSettings);
             await JsRuntime.InvokeVoidAsync("addEventListener", "resize",
                 DotNetObjectReference.Create(this),
                 "HandleWindowResize");
@@ -141,20 +142,6 @@
     {
         if (e.CtrlKey && e.KeyCode == KeyCode.Space)
         {
-            var prevContent = await GetPrevContentByCurrentLine();
-            var currentLineContent = await GetContentByCurrentLine();
-            //var afterContent = currentLineContent.Substring(prevContent.Length);
-            var predictResp = await PredictNextWordsClient.Infer(prevContent);
-            await SetIntelliSenseAsync(new List<IntelliSenseItem>()
-            {
-                new IntelliSenseItem
-                {
-                    Label = predictResp.top_k[0].next_words,
-                    Kind = IntelliSenseItemType.Keyword,
-                    Detail = "Snippet",
-                    InsertText = predictResp.top_k[0].next_words
-                }
-            });
             return;
         }
 
@@ -230,11 +217,6 @@
     public async Task AppendAsync(string text)
     {
         await JsRuntime.InvokeVoidAsync("monacoEditorAppendLine", _editor.Id, text);
-    }
-
-    public async Task SetIntelliSenseAsync(List<IntelliSenseItem> data)
-    {
-        await JsRuntime.InvokeVoidAsync("monacoEditorSetIntellisense", _editor.Id, data);
     }
 
     public async Task TriggerIntelliSenseAsync()
