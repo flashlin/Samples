@@ -22,7 +22,7 @@ function getPrevLineContent(editor) {
     });
 }
 
-function getCurrentLineContent(editorRef) {
+function getCurrentLineInfo(editorRef) {
     const editor = getEditor(editorRef);
     const prev = getPrevLineContent(editor);
     const line = getLineContent(editor);
@@ -70,10 +70,8 @@ window.StaticMonacoEditor = {
             endColumn: cursorPosition.column
         });
     },
-    getContentByCurrentLine: function (editorRef) {
-        const editor = getEditor(editorRef);
-        const cursorPosition = editor.getPosition();
-        return editor.getModel().getLineContent(cursorPosition.lineNumber);
+    getCurrentLineInfo: function (editorRef) {
+        return getCurrentLineInfo(editorRef);
     }
 }
 
@@ -158,14 +156,14 @@ function createMonacoEditor(config)
         triggerCharacters: [],
         provideCompletionItems: async function (model, position, context) {
             try {
-                const blazorInstance = getBlazorInstanceById(config.id);
-                const { prev, line, after } = getCurrentLineContent(blazorInstance.editorRef);
-                const suggestions = await config.dotnetHelper.invokeMethodAsync("MyIntellisense", console.id, {
-                    prevLine: prev,
-                    line: line,
-                    afterLine: after
-                });
-                console.log('completion', prev, suggestions);
+                // const blazorInstance = getBlazorInstanceById(config.id);
+                // const { prev, line, after } = getCurrentLineInfo(blazorInstance.editorRef);
+                // const suggestions = await config.dotnetHelper.invokeMethodAsync("MyIntellisense", console.id, {
+                //     prevLine: prev,
+                //     line: line,
+                //     afterLine: after
+                // });
+                // console.log('completion', prev, suggestions);
                 
                 // const defaultSuggestions = [{
                 //     label: 'SELECT',
@@ -175,7 +173,7 @@ function createMonacoEditor(config)
                 // }];
 
                 // const defaultSuggestions = [];
-                // const suggestionList = window.monacoEditorIntelliSenseDict[config.id];
+                const suggestions = window.monacoEditorIntelliSenseDict[config.id] || [];
                 // const suggestions = defaultSuggestions.concat(suggestionList);
                 //const suggestions = suggestionList;
 
@@ -194,6 +192,7 @@ function createMonacoEditor(config)
     const newLanguage = 'csharp-' + config.id;
     addNewLanguage('csharp', newLanguage, newCompletionItemProvider, 
         {
+            triggerCharacters: [],
             //triggerKeyBinding: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_I]
         });
 

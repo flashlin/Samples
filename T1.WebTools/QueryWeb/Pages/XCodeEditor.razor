@@ -59,16 +59,17 @@
         HandleWindowResize();
     }
 
-    [JSInvokable]
-    public async Task<List<IntelliSenseItem>> MyIntellisense(string editorRefId, EditorInfo info)
-    {
-        var intellisenseEventArgs = new IntellisenseEventArgs()
-        {
-            EditorInfo = info
-        };
-        await OnIntellisenseCallback.InvokeAsync(intellisenseEventArgs);
-        return intellisenseEventArgs.Suggestions;
-    }
+    // Javascript call this
+    // [JSInvokable]
+    // public async Task<List<IntelliSenseItem>> MyIntellisense(string editorRefId, EditorInfo info)
+    // {
+    //     var intellisenseEventArgs = new IntellisenseEventArgs()
+    //     {
+    //         EditorInfo = info
+    //     };
+    //     await OnIntellisenseCallback.InvokeAsync(intellisenseEventArgs);
+    //     return intellisenseEventArgs.Suggestions;
+    // }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -146,6 +147,14 @@
 
         if (e.CtrlKey && e.KeyCode == KeyCode.KeyJ)
         {
+            var info = await GetCurrentLineInfoAsync();
+            Console.WriteLine($"{info.PrevLine}");
+            var intellisenseEventArgs = new IntellisenseEventArgs()
+            {
+                EditorInfo = info,
+            };
+            await OnIntellisenseCallback.InvokeAsync(intellisenseEventArgs);
+            await SetIntellisense(intellisenseEventArgs.Suggestions);
             await TriggerIntelliSenseAsync();
             // await KeyCallback.InvokeAsync(new KeyEventArgs
             // {
@@ -226,8 +235,13 @@
         return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getPrevContentByCurrentLine", _editor.Id);
     }
 
-    public async Task<string> GetContentByCurrentLine()
+    public async Task<EditorInfo> GetCurrentLineInfoAsync()
     {
-        return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getContentByCurrentLine", _editor.Id);
+        return await JsRuntime.InvokeAsync<EditorInfo>("StaticMonacoEditor.getCurrentLineInfo", _editor.Id);
+    }
+
+    public async Task SetIntellisense(List<IntelliSenseItem> list)
+    {
+        await JsRuntime.InvokeVoidAsync("monacoEditorSetIntellisense", _editor.Id, list);
     }
 }
