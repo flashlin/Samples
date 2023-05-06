@@ -6,6 +6,34 @@
     return editors.filter(x => x.id === editorRef)[0].editor;
 }
 
+function getLineContent(editor) {
+    const cursorPosition = editor.getPosition();
+    return editor.getModel().getLineContent(cursorPosition.lineNumber);
+}
+
+function getPrevLineContent(editor) {
+    const cursorPosition = editor.getPosition();
+    const model = editor.getModel();
+    return model.getValueInRange({
+        startLineNumber: cursorPosition.lineNumber,
+        startColumn: 0,
+        endLineNumber: cursorPosition.lineNumber,
+        endColumn: cursorPosition.column
+    });
+}
+
+function getCurrentLineContent(editorRef) {
+    const editor = getEditor(editorRef);
+    const prev = getPrevLineContent(editor);
+    const line = getLineContent(editor);
+    const after = line.slice(prev.length);
+    return { prev, line, after };
+}
+
+function getBlazorInstanceById(id) {
+    return window.StaticMonacoEditor.editors[id];
+}
+
 window.monacoEditorInsertText = function (editorRef, text) {
     const editor = getEditor(editorRef);
     const position = editor.getSelection().getPosition();
@@ -95,7 +123,7 @@ function useMonacoEditor1() {
 
 function createMonacoEditor(config)
 {
-    config = JSON.parse(config);
+    //config = JSON.parse(config);
     const getEditors = () => {
         return monaco.editor.getEditors().map(x => ({
             'id': x.getDomNode().parentNode.id,
@@ -136,6 +164,27 @@ function createMonacoEditor(config)
     const newCompletionItemProvider = {
         provideCompletionItems: async function (model, position) {
             try {
+                const blazorInstance = getBlazorInstanceById(config.id);
+                const { prev, line, after } = getCurrentLineContent(blazorInstance.editorRef);
+                const result = await config.dotnetHelper.invokeMethodAsync("MyIntellisense", console.id, {
+                    prevLine: prev,
+                    line: line,
+                    afterLine: after
+                });
+                console.log("test", result);
+                // await config.intellisenseCallback.invokeMethodAsync([{
+                //     label: 'SELECT',
+                //     kind: monaco.languages.CompletionItemKind.Keyword,
+                //     detail: "Keyword",
+                //     insertText: 'SELECT ', 
+                // }]);
+
+                //const elem = await window.Blazor._internal.navigationManager.getControlById(blazorInstance.editorRef);
+                //const bRazorInstance = await DotNetObjectReference.create();
+                //const elem = document.getElementById(blazorInstance.editorRef);
+                //console.log("manager", window.Blazor._internal);
+                //const bRazorInstance = await window.Blazor._internal.domManager.getComponent(elem);
+                //console.log("blazor", bRazorInstance);
                 // const last_chars = model.getValueInRange({
                 //     startLineNumber: position.lineNumber,
                 //     startColumn: 0,
@@ -153,11 +202,13 @@ function createMonacoEditor(config)
                 //     insertText: 'SELECT ',
                 // }];
 
-                const suggestionList = window.monacoEditorIntelliSenseDict[config.id];
-                //const suggestions = defaultSuggestions.concat(suggestionList);
+                // const defaultSuggestions = [];
+                // const suggestionList = window.monacoEditorIntelliSenseDict[config.id];
+                // const suggestions = defaultSuggestions.concat(suggestionList);
+                const suggestions = [];
 
                 return {
-                    suggestions: suggestionList
+                    suggestions
                 };
             }catch(e) {
                 console.error("completionItemProvider", e);
@@ -178,11 +229,17 @@ function createMonacoEditor(config)
     if( instance.language === 'csharp') {
         monaco.editor.setModelLanguage(editor.getModel(), newLanguage);
     }
-
+    
+    window.StaticMonacoEditor.editors = window.StaticMonacoEditor.editors || {};
+    globalEditors = window.StaticMonacoEditor.editors;
+    globalEditors[config.id] = { 
+        editorRef: config.id, 
+        editorInstance: instance
+    };
     return this;
 }
 
-function useMonacoEditor(config)
-{
+async function useMonacoEditor(config, dotnetHelper) {
+    config.dotnetHelper = dotnetHelper;
     window.monacoEditor = createMonacoEditor(config);
 }

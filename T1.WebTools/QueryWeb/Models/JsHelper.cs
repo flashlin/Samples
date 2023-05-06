@@ -14,9 +14,10 @@ public class JsHelper : IJsHelper
         _jsRuntime = jsRuntime;
     }
     
-    public async Task InvokeVoidWithObjectAsync(string method, object obj)
+    public async Task InvokeVoidWithObjectAsync(string method, object obj, object obj1)
     {
-        await _jsRuntime.InvokeVoidAsync(method, _jsonSerializer.Serialize(obj));
+        //await _jsRuntime.InvokeVoidAsync(method, _jsonSerializer.Serialize(obj), obj1);
+        await _jsRuntime.InvokeVoidAsync(method, obj, obj1);
     }
     
     public async Task<bool> ShowMessageAsync(string message)
