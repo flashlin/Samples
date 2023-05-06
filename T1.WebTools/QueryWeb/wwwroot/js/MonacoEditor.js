@@ -37,7 +37,6 @@ function getBlazorInstanceById(id) {
 window.monacoEditorInsertText = function (editorRef, text) {
     const editor = getEditor(editorRef);
     const position = editor.getSelection().getPosition();
-    //const position = editor.getModel().getPosition();
     editor.executeEdits("insertText", [{
         range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
         text: text
@@ -172,28 +171,6 @@ function createMonacoEditor(config)
                     afterLine: after
                 });
                 console.log("test", result);
-                // await config.intellisenseCallback.invokeMethodAsync([{
-                //     label: 'SELECT',
-                //     kind: monaco.languages.CompletionItemKind.Keyword,
-                //     detail: "Keyword",
-                //     insertText: 'SELECT ', 
-                // }]);
-
-                //const elem = await window.Blazor._internal.navigationManager.getControlById(blazorInstance.editorRef);
-                //const bRazorInstance = await DotNetObjectReference.create();
-                //const elem = document.getElementById(blazorInstance.editorRef);
-                //console.log("manager", window.Blazor._internal);
-                //const bRazorInstance = await window.Blazor._internal.domManager.getComponent(elem);
-                //console.log("blazor", bRazorInstance);
-                // const last_chars = model.getValueInRange({
-                //     startLineNumber: position.lineNumber,
-                //     startColumn: 0,
-                //     endLineNumber: position.lineNumber,
-                //     endColumn: position.column
-                // });
-                // console.log("last_chars", last_chars);
-                // const words = last_chars.replace("\t", "").split(" ");
-                // const active_typing = words[words.length - 1];
 
                 // const defaultSuggestions = [{
                 //     label: 'SELECT',
