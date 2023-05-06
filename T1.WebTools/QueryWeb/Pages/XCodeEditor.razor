@@ -5,7 +5,6 @@
 @using QueryWeb.Models
 @using QueryWeb.Models.Clients
 @using QueryWeb.Models.Extensions
-
 <div style="@_showCss">
     <StandaloneCodeEditor
         @ref="_editor"
@@ -36,6 +35,12 @@
 
     StandaloneCodeEditor _editor = null!;
     StandaloneEditorConstructionOptions _editorOptions = null!;
+    DotNetObjectReference<XCodeEditor>? _dotNetHelper;
+    
+    public void Dispose()
+    {
+        _dotNetHelper?.Dispose();
+    }
 
     public void ForceUpdate()
     {
@@ -53,10 +58,28 @@
         HandleWindowResize();
     }
 
+    [JSInvokable]
+    public Task MyIntellisense(string editorRefId, EditorInfo info)
+    {
+        return Task.FromResult(new[]
+        {
+            new IntelliSenseItem
+            {
+                Label = "SELECT", 
+                Kind = IntelliSenseItemType.Keyword, 
+                Detail = "", 
+                InsertText = "SELECT "
+            }
+        });
+    }
+    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            _dotNetHelper = DotNetObjectReference.Create(this);
+            
             var lineHeight = 16;
             var codeLines = 20;
             var totalHeight = lineHeight * codeLines;
@@ -110,7 +133,7 @@
             await JsHelper.InvokeVoidWithObjectAsync("useMonacoEditor", new
             {
                 Id = _editor.Id,
-            });
+            }, _dotNetHelper);
         }
     }
 
@@ -229,4 +252,10 @@
         return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getContentByCurrentLine", _editor.Id);
     }
 
+    public class EditorInfo
+    {
+        public string PrevLine { get; set; } = string.Empty;
+        public string Line { get; set; } = string.Empty;
+        public string AfterLine { get; set; } = string.Empty;
+    }
 }
