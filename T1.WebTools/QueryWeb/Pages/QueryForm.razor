@@ -149,23 +149,18 @@
     {
         if (arg.KeyCode == KeyCode.KeyI)
         {
-            await _codeEditor.SetIntelliSenseAsync(new List<IntelliSenseItem>()
-            {
-                new()
-                {
-                    Label = "XXX",
-                    Kind = IntelliSenseItemType.Keyword,
-                    Detail = "Keyword",
-                    InsertText = "XXX "
-                }
-            });
-    //await _codeEditor.InsertAsync(_sqlSnippetCode);
+            // await _codeEditor.SetIntelliSenseAsync(new List<IntelliSenseItem>()
+            // {
+            //     new()
+            //     {
+            //         Label = "XXX",
+            //         Kind = IntelliSenseItemType.Keyword,
+            //         Detail = "Keyword",
+            //         InsertText = "XXX "
+            //     }
+            // });
+            //await _codeEditor.InsertAsync(_sqlSnippetCode);
             await _codeEditor.TriggerIntelliSenseAsync();
-        }
-
-        if (arg.KeyCode == KeyCode.Space)
-        {
-            await _codeEditor.SetIntelliSenseAsync(new List<IntelliSenseItem>());
         }
     }
 

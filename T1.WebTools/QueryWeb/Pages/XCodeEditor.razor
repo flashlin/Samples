@@ -59,19 +59,17 @@
     }
 
     [JSInvokable]
-    public Task MyIntellisense(string editorRefId, EditorInfo info)
+    public async Task<List<IntelliSenseItem>> MyIntellisense(string editorRefId, EditorInfo info)
     {
-        //var predictResp = await PredictNextWordsClient.Infer(prevContent);
-        return Task.FromResult(new[]
+        var line = info.PrevLine;
+        var predictResp = await PredictNextWordsClient.Infer(line);
+        return predictResp.top_k.Select(x => new IntelliSenseItem()
         {
-            new IntelliSenseItem
-            {
-                Label = "SELECT", 
-                Kind = IntelliSenseItemType.Keyword, 
-                Detail = "", 
-                InsertText = "SELECT "
-            }
-        });
+           Label = x.next_words,
+           Kind = IntelliSenseItemType.Keyword, 
+           Detail = "", 
+           InsertText = x.next_words
+        }).ToList();
     }
     
 
