@@ -128,6 +128,8 @@ class Trainer:
     def internal_infer_sentence(self, sentence, next_chars):
         if next_chars[-1] == '\0':
             return next_chars[:-1]
+        if len(next_chars) >= 200:
+            return next_chars
         next_char, _ = self.infer(sentence + ''.join(next_chars), k=1)[0]
         next_chars.append(next_char)
         return self.internal_infer_sentence(sentence, next_chars)
@@ -168,6 +170,7 @@ app = Flask(__name__)
 def add_sql():
     data = request.get_json()
     input_sql = data['sql']
+    input_sql = input_sql.strip()
     _add_sql(input_sql)
     return '', 200
 
@@ -198,12 +201,14 @@ def _add_sql(input_sql):
     sql_repo.commit()
     data = []
     for row in sql_repo.query('select sql from _sqlHistory'):
-        data.append(row[0] + '\0')
+        data.append('<bos> ' + row[0] + '\0')
     trainer.train(data)
 
 def _infer(input_sentence):
+    if input_sentence == '':
+        input_sentence = '<bos>'
     top_k = trainer.infer_sentence(input_sentence)
-    print(f'_infer {input_sentence} {top_k=}')
+    print(f'_infer "{input_sentence}" {top_k=}')
     return {'top_k': top_k}
 
 
