@@ -168,10 +168,7 @@
     private async Task EditorOnDidInit()
     {
         await _editor.AddCommand((int) KeyCode.Escape, (args) => { });
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) =>
-        {
-            Console.WriteLine("Ctrl+J : Initial editor command is triggered.");
-        });
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) => { });
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, (args) => { });
         //await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI, (args) => { _editor.Trigger("keyboard", "type", new {text = ""}); });
     }
@@ -246,8 +243,8 @@
         await JsRuntime.InvokeVoidAsync("monacoEditorSetIntellisense", _editor.Id, list);
     }
 
-    public async Task<string> GetPrevCursorContentAsync()
+    public async Task<string> GetPrevCursorTextAsync()
     {
-        return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getPrevCursorContent", _editor.Id);
+        return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getPrevCursorText", _editor.Id);
     }
 }

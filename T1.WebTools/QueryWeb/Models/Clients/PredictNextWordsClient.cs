@@ -58,7 +58,6 @@ public class PredictNextWordsClient : IPredictNextWordsClient
     
     private async Task<HttpResponseMessage> PostAsJsonAsync(string apiUrl, object parameters)
     {
-        Console.WriteLine($"{_config.Url}/{apiUrl}");
         var message = await _httpClient.PostAsJsonAsync(_config.Url + "/" + apiUrl, parameters, _options);
         message.EnsureSuccessStatusCode();
         return message;

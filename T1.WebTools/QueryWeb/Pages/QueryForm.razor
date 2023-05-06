@@ -215,8 +215,9 @@
 
     private async Task OnIntellisense(IntellisenseEventArgs arg)
     {
-        Console.WriteLine($"call predict '{arg.EditorInfo.PrevText}'");
-        var predictResp = await PredictNextWordsClient.InferAsync(arg.EditorInfo.PrevText);
+        var prevText = arg.EditorInfo.PrevText.StartsWith("\r\n") ? string.Empty : arg.EditorInfo.PrevText.Trim();
+        Console.WriteLine($"call predict '{prevText}'");
+        var predictResp = await PredictNextWordsClient.InferAsync(prevText);
         arg.Suggestions = predictResp.TopK.Select(x => new IntelliSenseItem()
         {
            Label = x.NextWords,
@@ -224,7 +225,6 @@
            Detail = "", 
            InsertText = x.NextWords
         }).ToList();
-        Console.WriteLine($"predict {arg.Suggestions.Count()}");
     }
 
 }
