@@ -215,8 +215,8 @@
 
     private async Task OnIntellisense(IntellisenseEventArgs arg)
     {
-        Console.WriteLine($"call predict '{arg.EditorInfo.PrevLine}'");
-        var predictResp = await PredictNextWordsClient.InferAsync(arg.EditorInfo.PrevLine);
+        Console.WriteLine($"call predict '{arg.EditorInfo.PrevText}'");
+        var predictResp = await PredictNextWordsClient.InferAsync(arg.EditorInfo.PrevText);
         arg.Suggestions = predictResp.TopK.Select(x => new IntelliSenseItem()
         {
            Label = x.NextWords,

@@ -22,14 +22,6 @@ function getPrevLineContent(editor) {
     });
 }
 
-function getCurrentLineInfo(editorRef) {
-    const editor = getEditor(editorRef);
-    const prev = getPrevLineContent(editor);
-    const line = getLineContent(editor);
-    const after = line.slice(prev.length);
-    return { prev, line, after };
-}
-
 function getBlazorInstanceById(id) {
     return window.StaticMonacoEditor.editors[id];
 }
@@ -71,7 +63,29 @@ window.StaticMonacoEditor = {
         });
     },
     getCurrentLineInfo: function (editorRef) {
-        return getCurrentLineInfo(editorRef);
+        const editor = getEditor(editorRef);
+        const prev = getPrevLineContent(editor);
+        const line = getLineContent(editor);
+        const after = line.slice(prev.length);
+        const prevText = this.getPrevCursorContent(editorRef);
+        return { prev, line, after, prevText };
+    },
+    getPrevCursorContent: function (editorRef) {
+        const editor = getEditor(editorRef);
+        const currentPosition = editor.getPosition();
+        // // 計算最先開頭的位置
+        // let startPosition = new monaco.Position(currentPosition.lineNumber, 1);
+        // while (startPosition.lineNumber > 1) {
+        //     const lineContent = editor.getModel().getLineContent(startPosition.lineNumber);
+        //     if (lineContent.trim() === "") {
+        //         startPosition = new monaco.Position(startPosition.lineNumber - 1, 1);
+        //     } else {
+        //         break;
+        //     }
+        // }
+        const range = new monaco.Range(1, 1, 
+            currentPosition.lineNumber, currentPosition.column);
+        return editor.getModel().getValueInRange(range);
     }
 }
 
