@@ -1,14 +1,6 @@
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace QueryWeb.Models.Clients;
-
-public interface IPredictNextWordsClient
-{
-    Task<InferResponse> Infer(string text);
-    Task AddSql(string sqlCode);
-    Task QuerySql();
-}
 
 public class PredictNextWordsClient : IPredictNextWordsClient
 {
@@ -66,15 +58,4 @@ public class PredictNextWordsClient : IPredictNextWordsClient
         message.EnsureSuccessStatusCode();
         return message;
     }
-}
-
-public class InferNextWords
-{
-    public string next_words { get; set; }
-    public float probability { get; set; }
-}
-
-public class InferResponse
-{
-    public List<InferNextWords> top_k { get; set; } = new();
 }

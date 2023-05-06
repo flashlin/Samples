@@ -65,10 +65,10 @@
         var predictResp = await PredictNextWordsClient.Infer(line);
         return predictResp.top_k.Select(x => new IntelliSenseItem()
         {
-           Label = x.next_words,
+           Label = x.NextWords,
            Kind = IntelliSenseItemType.Keyword, 
            Detail = "", 
-           InsertText = x.next_words
+           InsertText = x.NextWords
         }).ToList();
     }
     
