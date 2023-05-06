@@ -1,9 +1,4 @@
-﻿namespace QueryWeb.Models;
-
-public enum IntelliSenseItemType
-{
-    Keyword = 17
-}
+﻿namespace QueryWeb.Models.CodeEditorModels;
 
 public class IntelliSenseItem
 {

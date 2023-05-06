@@ -59,6 +59,7 @@
 @using QueryKits.Extensions
 @using QueryWeb.Models
 @using QueryWeb.Models.Clients
+@using QueryWeb.Models.CodeEditorModels
 @using T1.WebTools.CsvEx
 @inject IJSRuntime JsRuntime
 @inject IQueryService QueryService
@@ -156,7 +157,7 @@
         return Task.CompletedTask;
     }
 
-    private async Task OnCodeEditorKey(KeyEventArgs arg)
+    private Task OnCodeEditorKey(KeyEventArgs arg)
     {
         if (arg.KeyCode == KeyCode.KeyI)
         {
@@ -173,6 +174,7 @@
             //await _codeEditor.InsertAsync(_sqlSnippetCode);
             //await _codeEditor.TriggerIntelliSenseAsync();
         }
+        return Task.CompletedTask;
     }
 
     private void OnClickCloseMergeTableForm()
