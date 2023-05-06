@@ -10,4 +10,6 @@ public class EditorInfo
     public string Line { get; set; } = string.Empty;
     [JsonPropertyName("after")]
     public string AfterLine { get; set; } = string.Empty;
+    [JsonPropertyName("prevText")]
+    public string PrevText { get; set; } = string.Empty;
 }

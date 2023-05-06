@@ -13,7 +13,7 @@ class CharDict:
     index_to_char = {}
 
     def __init__(self):
-        letters = string.ascii_letters + " " + string.digits + string.punctuation + "\0"
+        letters = string.ascii_letters + " " + string.digits + string.punctuation + "\r\n\0"
         self.scan_sentence(letters)
 
     def scan_sentence(self, sentence):

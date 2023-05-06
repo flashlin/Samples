@@ -245,4 +245,9 @@
     {
         await JsRuntime.InvokeVoidAsync("monacoEditorSetIntellisense", _editor.Id, list);
     }
+
+    public async Task<string> GetPrevCursorContentAsync()
+    {
+        return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getPrevCursorContent", _editor.Id);
+    }
 }
