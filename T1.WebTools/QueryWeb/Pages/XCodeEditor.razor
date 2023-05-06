@@ -15,7 +15,6 @@
 @inject IJSRuntime JsRuntime
 @inject IReportRepo ReportRepo
 @inject IJsHelper JsHelper
-@inject IPredictNextWordsClient PredictNextWordsClient
 
 @code {
     string _showCss = "display: block;";
@@ -23,9 +22,11 @@
     [Parameter]
     public string Language { get; set; } = "csharp";
 
-    //public event EventHandler<SqlCodeRunEventArgs> SqlCodeRan = null!;
     [Parameter]
     public EventCallback<SqlCodeRunEventArgs> SqlCodeRanCallback { get; set; }
+    
+    [Parameter]
+    public EventCallback<IntellisenseEventArgs> OnIntellisenseCallback { get; set; }
 
     [Parameter]
     public EventCallback<KeyEventArgs> KeyCallback { get; set; }
@@ -61,16 +62,12 @@
     [JSInvokable]
     public async Task<List<IntelliSenseItem>> MyIntellisense(string editorRefId, EditorInfo info)
     {
-        var line = info.PrevLine;
-        var predictResp = await PredictNextWordsClient.Infer(line);
-        Console.WriteLine($"'{line}'");
-        return predictResp.top_k.Select(x => new IntelliSenseItem()
+        var intellisenseEventArgs = new IntellisenseEventArgs()
         {
-           Label = x.NextWords,
-           Kind = IntelliSenseItemType.Keyword, 
-           Detail = "", 
-           InsertText = x.NextWords
-        }).ToList();
+            EditorInfo = info
+        };
+        await OnIntellisenseCallback.InvokeAsync(intellisenseEventArgs);
+        return intellisenseEventArgs.Suggestions;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -119,9 +116,9 @@
                 OccurrencesHighlight = true,
                 QuickSuggestions = new QuickSuggestionsOptions
                 {
-                    Other = ".",
-                    Comments = "null",
-                    Strings = "null"
+                    //Other = ".",
+                    //Comments = "null",
+                    //Strings = "null"
                 }
             };
 
@@ -138,12 +135,6 @@
 
     private async Task OnKeyDown(KeyboardEvent e)
     {
-        if (e.CtrlKey && e.KeyCode == KeyCode.Space)
-        {
-            return;
-        }
-
-
         if (e.CtrlKey && e.KeyCode == KeyCode.KeyR)
         {
             var sqlCode = await _editor.GetValue();
@@ -153,18 +144,26 @@
             });
         }
 
-        await KeyCallback.InvokeAsync(new KeyEventArgs
+        if (e.CtrlKey && e.KeyCode == KeyCode.KeyJ)
         {
-            CtrlKey = e.CtrlKey,
-            KeyCode = e.KeyCode
-        });
+            await TriggerIntelliSenseAsync();
+            // await KeyCallback.InvokeAsync(new KeyEventArgs
+            // {
+            //     CtrlKey = e.CtrlKey,
+            //     KeyCode = e.KeyCode
+            // });
+        }
     }
 
     private async Task EditorOnDidInit()
     {
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) => { Console.WriteLine("Ctrl+J : Initial editor command is triggered."); });
+        await _editor.AddCommand((int) KeyCode.Escape, (args) => { });
+        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyJ, (args) =>
+        {
+            Console.WriteLine("Ctrl+J : Initial editor command is triggered.");
+        });
         await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyR, (args) => { });
-        await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI, (args) => { _editor.Trigger("keyboard", "type", new {text = ""}); });
+        //await _editor.AddCommand((int) KeyMod.CtrlCmd | (int) KeyCode.KeyI, (args) => { _editor.Trigger("keyboard", "type", new {text = ""}); });
     }
 
     async Task RunCtrlR()
@@ -230,12 +229,5 @@
     public async Task<string> GetContentByCurrentLine()
     {
         return await JsRuntime.InvokeAsync<string>("StaticMonacoEditor.getContentByCurrentLine", _editor.Id);
-    }
-
-    public class EditorInfo
-    {
-        public string PrevLine { get; set; } = string.Empty;
-        public string Line { get; set; } = string.Empty;
-        public string AfterLine { get; set; } = string.Empty;
     }
 }

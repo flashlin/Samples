@@ -2,7 +2,7 @@
 
 public interface IPredictNextWordsClient
 {
-    Task<InferResponse> Infer(string text);
-    Task AddSql(string sqlCode);
-    Task QuerySql();
+    Task<InferResponse> InferAsync(string text);
+    Task AddSqlAsync(string sqlCode);
+    Task QuerySqlAsync();
 }

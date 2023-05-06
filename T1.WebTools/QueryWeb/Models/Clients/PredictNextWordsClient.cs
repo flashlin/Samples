@@ -21,7 +21,7 @@ public class PredictNextWordsClient : IPredictNextWordsClient
         _config = config.Value;
     }
 
-    public async Task<InferResponse> Infer(string text)
+    public async Task<InferResponse> InferAsync(string text)
     {
         var resp = await PostJsonAsync<InferResponse>("infer", new
         {
@@ -30,7 +30,7 @@ public class PredictNextWordsClient : IPredictNextWordsClient
         return resp!;
     }
     
-    public Task AddSql(string sqlCode)
+    public Task AddSqlAsync(string sqlCode)
     {
         return PostJsonVoidAsync("addsql", new
         {
@@ -38,14 +38,14 @@ public class PredictNextWordsClient : IPredictNextWordsClient
         });
     }
     
-    public Task QuerySql()
+    public Task QuerySqlAsync()
     {
-        return PostJsonVoidAsync("querysql", new {});
+        return PostJsonAsync<List<string>>("querysql", new {});
     }
 
-    private async Task<T?> PostJsonAsync<T>(string requestUri, object parameters)
+    private async Task<T?> PostJsonAsync<T>(string requestUrl, object parameters)
     {
-        var message = await PostJsonAsync(requestUri, parameters);
+        var message = await PostAsJsonAsync(requestUrl, parameters);
         var responseStream = await message.Content.ReadAsStreamAsync();
         var resp = await JsonSerializer.DeserializeAsync<T>(responseStream, _options);
         return resp;
@@ -53,12 +53,13 @@ public class PredictNextWordsClient : IPredictNextWordsClient
     
     private Task PostJsonVoidAsync(string requestUri, object parameters)
     {
-        return PostJsonAsync(requestUri, parameters);
+        return PostAsJsonAsync(requestUri, parameters);
     }
     
-    private async Task<HttpResponseMessage> PostJsonAsync(string requestUri, object parameters)
+    private async Task<HttpResponseMessage> PostAsJsonAsync(string apiUrl, object parameters)
     {
-        var message = await _httpClient.PostAsJsonAsync(_config.Url + "/" + requestUri, parameters, _options);
+        Console.WriteLine($"{_config.Url}/{apiUrl}");
+        var message = await _httpClient.PostAsJsonAsync(_config.Url + "/" + apiUrl, parameters, _options);
         message.EnsureSuccessStatusCode();
         return message;
     }

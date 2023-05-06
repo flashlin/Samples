@@ -7,6 +7,7 @@
             <div>@_textFormat.ToString() <button @onclick="OnClickDetect">Detect</button></div>
             <XCodeEditor @ref="_codeEditor"
                          SqlCodeRanCallback="@OnSqlCodeRan"
+                         OnIntellisenseCallback="@OnIntellisense"
                          Text="@_codeText"
                          Language="csharp"
                          KeyCallback="@OnCodeEditorKey"/>
@@ -57,13 +58,14 @@
 @using QueryKits.ExcelUtils
 @using QueryKits.Extensions
 @using QueryWeb.Models
+@using QueryWeb.Models.Clients
 @using T1.WebTools.CsvEx
 @inject IJSRuntime JsRuntime
 @inject IQueryService QueryService
 @inject IAppState AppState
 @inject IEventAggregator EventAggregator
 @implements QueryKits.Extensions.IHandle<MergeTableReqEvent>
-
+@inject IPredictNextWordsClient PredictNextWordsClient
 @code {
     private XCodeEditor _codeEditor = null!;
     private readonly string[] _isShowTabs = { "active", "" };
@@ -131,6 +133,7 @@
             try
             {
                 _results = QueryService.QueryRawSql(arg.SqlCode);
+                await PredictNextWordsClient.AddSqlAsync(arg.SqlCode);
                 QueryService.AddSqlCode(arg.SqlCode);
                 _sqlCodeHistory = QueryService.GetTop10SqlCode();
                 _text = string.Empty;
@@ -168,7 +171,7 @@
             //     }
             // });
             //await _codeEditor.InsertAsync(_sqlSnippetCode);
-            await _codeEditor.TriggerIntelliSenseAsync();
+            //await _codeEditor.TriggerIntelliSenseAsync();
         }
     }
 
@@ -207,4 +210,19 @@
             _text = csvSheet.SaveToString();
         });
     }
+
+    private async Task OnIntellisense(IntellisenseEventArgs arg)
+    {
+        Console.WriteLine($"call predict '{arg.EditorInfo.PrevLine}'");
+        var predictResp = await PredictNextWordsClient.InferAsync(arg.EditorInfo.PrevLine);
+        arg.Suggestions = predictResp.TopK.Select(x => new IntelliSenseItem()
+        {
+           Label = x.NextWords,
+           Kind = IntelliSenseItemType.Keyword, 
+           Detail = "", 
+           InsertText = x.NextWords
+        }).ToList();
+        Console.WriteLine($"predict {arg.Suggestions.Count()}");
+    }
+
 }

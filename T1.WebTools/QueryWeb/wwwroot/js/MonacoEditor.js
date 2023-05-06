@@ -85,10 +85,6 @@ window.monacoEditorSetIntellisense = function (editorRef, list) {
 
 window.monacoEditorTriggerIntelliSense = function (editorRef) {
     const editor = getEditor(editorRef);
-    // editor.trigger('editor.action.triggerSuggest', {
-    //     source: 'keyboard',
-    //     explicit: true
-    // });
     editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
 }
 
@@ -122,7 +118,6 @@ function useMonacoEditor1() {
 
 function createMonacoEditor(config)
 {
-    //config = JSON.parse(config);
     const getEditors = () => {
         return monaco.editor.getEditors().map(x => ({
             'id': x.getDomNode().parentNode.id,
@@ -156,12 +151,12 @@ function createMonacoEditor(config)
         });
 
         monaco.languages.registerCompletionItemProvider(newLanguage, newCompletionItemProvider, options);
-        console.log('create new language', newLanguage)
+        console.info('create new language', newLanguage)
     };
     
-    const newLanguage = 'csharp-' + config.id;
     const newCompletionItemProvider = {
-        provideCompletionItems: async function (model, position) {
+        triggerCharacters: [],
+        provideCompletionItems: async function (model, position, context) {
             try {
                 const blazorInstance = getBlazorInstanceById(config.id);
                 const { prev, line, after } = getCurrentLineContent(blazorInstance.editorRef);
@@ -170,6 +165,7 @@ function createMonacoEditor(config)
                     line: line,
                     afterLine: after
                 });
+                console.log('completion', prev, suggestions);
                 
                 // const defaultSuggestions = [{
                 //     label: 'SELECT',
@@ -194,7 +190,8 @@ function createMonacoEditor(config)
             }
         },
     };
-    
+
+    const newLanguage = 'csharp-' + config.id;
     addNewLanguage('csharp', newLanguage, newCompletionItemProvider, 
         {
             //triggerKeyBinding: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_I]

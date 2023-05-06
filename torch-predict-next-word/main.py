@@ -203,6 +203,7 @@ def _add_sql(input_sql):
 
 def _infer(input_sentence):
     top_k = trainer.infer_sentence(input_sentence)
+    print(f'_infer {input_sentence} {top_k=}')
     return {'top_k': top_k}
 
 
