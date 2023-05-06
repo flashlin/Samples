@@ -165,13 +165,12 @@ function createMonacoEditor(config)
             try {
                 const blazorInstance = getBlazorInstanceById(config.id);
                 const { prev, line, after } = getCurrentLineContent(blazorInstance.editorRef);
-                const result = await config.dotnetHelper.invokeMethodAsync("MyIntellisense", console.id, {
+                const suggestions = await config.dotnetHelper.invokeMethodAsync("MyIntellisense", console.id, {
                     prevLine: prev,
                     line: line,
                     afterLine: after
                 });
-                console.log("test", result);
-
+                
                 // const defaultSuggestions = [{
                 //     label: 'SELECT',
                 //     kind: monaco.languages.CompletionItemKind.Keyword,
@@ -182,7 +181,7 @@ function createMonacoEditor(config)
                 // const defaultSuggestions = [];
                 // const suggestionList = window.monacoEditorIntelliSenseDict[config.id];
                 // const suggestions = defaultSuggestions.concat(suggestionList);
-                const suggestions = [];
+                //const suggestions = suggestionList;
 
                 return {
                     suggestions
