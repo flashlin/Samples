@@ -47,6 +47,8 @@ if( "push" -eq $action ) {
     Invoke "push $container_register/flashlin/$($name):$($ver)"
 }
 
+$env:PYTHONPATH="D:\VDisk\Github\Samples\py_standard"
 Write-Host "run script 1.0"
 Write-Host "build: build image"
 Write-Host "serve: run image"
+Write-Host "dev:   run local"
