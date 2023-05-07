@@ -3,6 +3,11 @@ from typing import Generic, TypeVar, Callable
 from functools import reduce
 from data_utils import sort_by_len_desc, create_char2index_map, group_to_lengths
 
+
+def info(text):
+    print("\033[32m" + text + "\033[0m")
+
+
 UNDEFINED = 'undefined'
 STRING = 'string'
 NUMBER = 'number'
