@@ -37,7 +37,7 @@ if( "push" -eq $action ) {
     $ver = $arg0
     if( "" -eq $ver ) {
         Write-Host "please input push version"
-        Write-Host "ex: push 1.0"
+        Write-Host "ex: push 1.1"
         return
     }
     Write-Host "tag image $ver"
@@ -45,6 +45,7 @@ if( "push" -eq $action ) {
     $container_register = "docker.io"
     Invoke "tag $($name):dev $container_register/flashlin/$($name):$($ver)"
     Invoke "push $container_register/flashlin/$($name):$($ver)"
+    return
 }
 
 $env:PYTHONPATH="D:\VDisk\Github\Samples\py_standard"
