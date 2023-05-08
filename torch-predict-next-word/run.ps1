@@ -24,7 +24,7 @@ if ( "build" -eq $action ) {
 
 if ( "serve" -eq $action ) {
     RemoveContainer $name
-    RestartContainer $name "-p 5001:8000 $($name):dev"
+    RestartContainer $name "-p 8001:8000 $($name):dev"
     return
 }
 
