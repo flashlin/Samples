@@ -9,5 +9,8 @@ class TestMaskText(unittest.TestCase):
 
     def test_mask_texts_1(self):
         actual = create_mask_texts("flash")
-        print(f"{actual=}")
         assert ["<mask>lash\0f", "f<mask>ash\0l", "fl<mask>sh\0a", "fla<mask>h\0s"] == actual
+
+    def test_mask_texts_2(self):
+        actual = create_mask_texts("flash", 2)
+        assert ["<mask>ash\0fl", "f<mask>sh\0la", "fl<mask>h\0as", "fla<mask>\0sh"] == actual
