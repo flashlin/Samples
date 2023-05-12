@@ -1,3 +1,17 @@
+function Info {
+    param(
+        [string]$msg
+    )
+    Write-Host $msg -ForegroundColor Green
+}
+
+function ShowError {
+    param(
+        [string]$msg
+    )
+    Write-Host $msg -ForegroundColor Red
+}
+
 function AddObjectProperty {
    param(
       [Parameter(ValueFromPipeline = $true)]
