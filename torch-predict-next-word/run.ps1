@@ -48,6 +48,11 @@ if( "push" -eq $action ) {
     return
 }
 
+if( "test" -eq $action ) {
+    InvokeCmd "python -m unittest discover tests"
+    return
+}
+
 $env:PYTHONPATH="D:\VDisk\Github\Samples\py_standard"
 Write-Host "run script 1.0"
 Write-Host "build: build image"
