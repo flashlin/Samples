@@ -41,9 +41,10 @@ function InvokeConda {
 
 if ( "" -eq $action ) {
     InvokeConda "env list"
-    InvokeConda "c1        : use flash environment"
-    InvokeConda "use <name>: use name environment"
-    InvokeConda "n <name>  : create name environment"
+    Write-Host "          : env list"
+    Write-Host "c1        : use flash environment"
+    Write-Host "use <name>: use name environment"
+    Write-Host "n <name>  : create name environment"
     return
 }
 
