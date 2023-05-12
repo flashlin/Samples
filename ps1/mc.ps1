@@ -41,6 +41,9 @@ function InvokeConda {
 
 if ( "" -eq $action ) {
     InvokeConda "env list"
+    InvokeConda "c1        : use flash environment"
+    InvokeConda "use <name>: use name environment"
+    InvokeConda "n <name>  : create name environment"
     return
 }
 
@@ -55,5 +58,11 @@ if ( "use" -eq $action ) {
     $hookPs1 = "C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1"
     $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& $($hookPs1); conda activate '$py_env'"" "
     Invoke-Expression $cmd
+    return
+}
+
+if( "n" -eq $action ) {
+    $name = $args0
+    InvokeConda "create -n ${name} python=3.10"
     return
 }
