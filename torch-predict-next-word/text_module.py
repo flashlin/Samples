@@ -2,7 +2,7 @@ def create_mask_text(text, offset, mask_len=1):
     prev_text = text[: offset]
     curr_text = text[offset : offset + mask_len]
     after_text = text[offset + mask_len:]
-    return prev_text + "<mask>" + after_text + "\0" + curr_text
+    return prev_text + "<mask>" + after_text + "<eos>" + curr_text
 
 def create_mask_texts(text, mask_len=1):
     mask_texts = []
@@ -18,6 +18,7 @@ def create_mask_texts(text, mask_len=1):
 def create_all_mask_texts(text):
     all_mask_texts = []
     for mask_len in range(1, len(text)-1):
+        print(f'{mask_len=}')
         mask_texts = create_mask_texts(text, mask_len)
         all_mask_texts.extend(mask_texts)
     return all_mask_texts
