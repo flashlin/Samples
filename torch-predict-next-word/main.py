@@ -7,6 +7,8 @@ import os
 import string
 from flask import Flask, request
 
+from text_module import create_all_mask_texts
+
 
 class CharDict:
     char_to_index = {}
@@ -201,7 +203,10 @@ def _add_sql(input_sql):
     sql_repo.commit()
     data = []
     for row in sql_repo.query('select sql from _sqlHistory'):
-        data.append('<bos> ' + row[0] + '\0')
+        sql = row[0]
+        data.append('<bos> ' + sql + '\0')
+        mask_texts = create_all_mask_texts(sql)
+        data.extend(mask_texts)
     trainer.train(data)
 
 def _infer(input_sentence):

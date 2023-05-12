@@ -14,3 +14,10 @@ def create_mask_texts(text, mask_len=1):
         mask_text = create_mask_text(text, idx, mask_len)
         mask_texts.append(mask_text)
     return mask_texts
+
+def create_all_mask_texts(text):
+    all_mask_texts = []
+    for mask_len in range(1, len(text)-1):
+        mask_texts = create_mask_texts(text, mask_len)
+        all_mask_texts.extend(mask_texts)
+    return all_mask_texts
