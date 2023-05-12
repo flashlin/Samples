@@ -204,9 +204,11 @@ def _add_sql(input_sql):
     data = []
     for row in sql_repo.query('select sql from _sqlHistory'):
         sql = row[0]
-        data.append('<bos> ' + sql + '\0')
-        mask_texts = create_all_mask_texts(sql)
-        data.extend(mask_texts)
+        data.append('<bos>' + sql + '\0')
+        # mask_texts = create_all_mask_texts(sql)
+        # for text in mask_texts:
+        #     print(f'train "{text}"')
+        #     data.append('<bos>' + text + '\0')
     trainer.train(data)
 
 def _infer(input_sentence):
