@@ -8,6 +8,9 @@ def create_mask_texts(text, mask_len=1):
     mask_texts = []
     offset = 0
     for idx in range(offset, len(text)-1):
+        sub_str = text[offset:offset + mask_len]
+        if len(sub_str) == len(text):
+            continue
         mask_text = create_mask_text(text, idx, mask_len)
         mask_texts.append(mask_text)
     return mask_texts
