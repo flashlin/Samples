@@ -47,6 +47,7 @@ if ( "" -eq $action ) {
     Write-Host "use <name>: use name environment"
     Write-Host "n <name>  : create name environment"
     Write-Host "c <name>  : switch to name environment"
+    Write-Host "rm <name> : remove name environment"
     return
 }
 
@@ -73,5 +74,11 @@ if( "n" -eq $action ) {
 if( "c" -eq $action ) {
     $name = $args0
     InvokeConda "activate $name"
+    return
+}
+
+if( "rm" -eq $action ) {
+    $name = $args0
+    InvokeConda "remove $name"
     return
 }
