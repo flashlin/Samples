@@ -1,5 +1,5 @@
 import unittest
-from text_module import create_mask_text, create_mask_texts
+from text_module import create_mask_text, create_mask_texts, create_all_mask_texts
 
 
 class TestMaskText(unittest.TestCase):
@@ -21,6 +21,18 @@ class TestMaskText(unittest.TestCase):
         actual = create_mask_texts("select id,name from customer", 3)
         assert ['select <mask> from customer<eos>id,name', 'select id,<mask> customer<eos>name from'] == actual
 
-    def test_mask_texts_4(self):
-        actual = create_mask_texts("flash", 4)
-        assert [] == actual
+    def test_all_mask_texts(self):
+        actual = create_all_mask_texts("select id,name from customer")
+        assert ['<mask> id,name from customer<eos>select',
+                'select id,<mask> from customer<eos>name',
+                'select id,name <mask> customer<eos>from',
+                'select id<mask> from customer<eos>,name',
+                'select id,name<mask> customer<eos> from',
+                'select <mask> from customer<eos>id,name',
+                'select id,<mask> customer<eos>name from',
+                'select<mask> from customer<eos> id,name',
+                'select id<mask> customer<eos>,name from',
+                '<mask> from customer<eos>select id,name',
+                'select <mask> customer<eos>id,name from',
+                'select<mask> customer<eos> id,name from',
+                '<mask> customer<eos>select id,name from'] == actual
