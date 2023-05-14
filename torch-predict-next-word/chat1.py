@@ -10,12 +10,16 @@ from vectordb_utils import load_chroma_from_documents
 import textwrap
 
 # conda install -c conda-forge transformers
-tokenizer = LlamaTokenizer.from_pretrained("TheBloke/wizardLM-7B-HF")
-model = LlamaForCausalLM.from_pretrained("TheBloke/wizardLM-7B-HF",
+model_name = "TheBloke/wizardLM-7B-HF"
+model_name = "TheBloke/stable-vicuna-13B-HF"
+model_name = 'Tribbiani/vicuna-7b'
+tokenizer = LlamaTokenizer.from_pretrained(model_name)
+
+model = LlamaForCausalLM.from_pretrained(model_name,
                                          load_in_8bit=True,
                                          device_map='auto',
                                          torch_dtype=torch.float16,
-                                         low_cpu_mem_usage=True
+                                         low_cpu_mem_usage=True,
                                          )
 
 pipe = pipeline(
