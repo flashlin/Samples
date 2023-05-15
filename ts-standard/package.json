@@ -1,0 +1,20 @@
+{
+  "name": "ts-standard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "serve": "vite preview"
+  },
+  "author": "mr.brain",
+  "license": "ISC",
+  "devDependencies": {
+    "@microsoft/signalr": "^5.0.8",
+    "@types/node": "^16.4.10",
+    "path": "^0.12.7",
+    "sass": "^1.37.2",
+    "typescript": "^5.0.4"
+  }
+}
