@@ -23,9 +23,11 @@ if ( "c1" -eq $action ) {
 
 
 if ( "c0" -eq $action ) {
-    $py_env = "D:\Users\flash\miniconda3\envs\torch"
+    $minicondaHome = "C:\Users\$($env:USERNAME)\miniconda3"
+
     $hookPs1 = "C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1"
-    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& $($hookPs1); conda activate '$py_env'"" "
+    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\shell\condabin\conda-hook.ps1' ; conda activate '$($minicondaHome)' """
+    # $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& $($hookPs1); conda activate '$py_env'"" "
     Invoke-Expression $cmd
     return
 }
