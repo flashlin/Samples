@@ -81,6 +81,6 @@ if( "c" -eq $action ) {
 
 if( "rm" -eq $action ) {
     $name = $args0
-    InvokeConda "remove $name"
+    InvokeConda "env remove -n $name"
     return
 }
