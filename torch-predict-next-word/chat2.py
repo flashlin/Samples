@@ -42,13 +42,16 @@ class LocalOPT(LLM):
                         device="cuda:0",
                         model_kwargs={"torch_dtype": torch.bfloat16}
                         )
+    
     def _call(self, prompt:str, stop=None) -> str:
         response = self.pipeline(prompt, 
                                  max_new_tokens=256)[0]["generated_text"]
         return response[len(prompt):]
+
     @property
     def _identifying_params(self):
         return {"name_of_model": self.model_name}
+    
     @property
     def _llm_type(self):
         return "custom"
@@ -85,5 +88,5 @@ if __name__ == "__main__":
     else:
         print("loading local cache")
         index = GPTListIndex.load_from_disk(filename)
-    response = execute_query("how to create pmsProxy?")
+    response = execute_query("how to renerate SSR manifest.json file?")
     print(response)
