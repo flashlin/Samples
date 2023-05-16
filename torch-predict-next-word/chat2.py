@@ -12,6 +12,8 @@ import time
 import os
 from transformers import pipeline
 
+os.environ["OPENAI_API_KEY"] = 'YOUR_OPENAI_API_KEY'
+
 # llama_index
 
 def timeit():
@@ -64,10 +66,11 @@ def create_index():
     print("Done creating index")
     return index
 
-def execute_query():
+def execute_query(question: str):
+    print(f'"{question}"')
     response = index.query(
-        "how to create pmsProxy?",
-        execlude_keywords=["gas"],
+        question,
+        exclude_keywords=["gas"],
         #required_keywords=["coal"]
         #response_mode="no_text"
     )
@@ -82,5 +85,5 @@ if __name__ == "__main__":
     else:
         print("loading local cache")
         index = GPTListIndex.load_from_disk(filename)
-    response = execute_query()
+    response = execute_query("how to create pmsProxy?")
     print(response)
