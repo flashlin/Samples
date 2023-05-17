@@ -1,4 +1,4 @@
-from langchain.document_loaders import PyPDFLoader
+from langchain.document_loaders import PyPDFLoader, TextLoader
 from langchain.document_loaders import DirectoryLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
@@ -8,6 +8,12 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 def load_pdf_documents_from_directory(directory_path):
     loader = DirectoryLoader(directory_path, glob="./*.pdf", loader_cls=PyPDFLoader)
+    documents = loader.load()
+    return documents
+
+
+def load_txt_documents_from_directory(directory_path):
+    loader = DirectoryLoader(directory_path, glob="*.txt", loader_cls=TextLoader)
     documents = loader.load()
     return documents
 

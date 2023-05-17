@@ -1,8 +1,16 @@
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 import torch
 
+from pdf_utils import splitting_documents_into_texts, load_txt_documents_from_directory
+
 tokenizer = AutoTokenizer.from_pretrained("deepset/bert-base-cased-squad2")
 model = AutoModelForQuestionAnswering.from_pretrained("deepset/bert-base-cased-squad2")
+
+documents = load_txt_documents_from_directory('./news')
+texts = splitting_documents_into_texts(documents)
+
+# import chromadb
+# chroma_client = chromadb.Client()
 
 def answer_question(question, context):
     inputs = tokenizer.encode_plus(question, context, return_tensors="pt")
