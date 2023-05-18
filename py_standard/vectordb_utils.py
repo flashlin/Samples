@@ -18,6 +18,11 @@ class MyEmbeddingFunction:
         embeddings = [embedding.tolist() for embedding in embeddings]
         return embeddings
 
+    def embed_query(self, query):
+        embeddings = self.embedding_func(query)
+        embeddings = [embedding.tolist() for embedding in embeddings]
+        return embeddings
+
 
 def load_chroma_from_documents(texts, embedding, persist_directory='./output/db'):
     vectordb = Chroma.from_documents(documents=texts,

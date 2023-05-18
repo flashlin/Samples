@@ -1,12 +1,7 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering
-from langchain.chains import RetrievalQA
 from pdf_utils import splitting_documents_into_texts, load_txt_documents_from_directory
 from vectordb_utils import load_chroma_from_documents, MyEmbeddingFunction
-from typing import Callable
-from langchain.llms import HuggingFacePipeline
-from transformers import pipeline
-import textwrap
 
 model_name = "deepset/bert-base-cased-squad2"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -27,54 +22,31 @@ texts = splitting_documents_into_texts(documents)
 
 embedding_function = MyEmbeddingFunction(get_embed_text)
 vectordb = load_chroma_from_documents(texts, embedding_function)
-retriever = vectordb.as_retriever(search_kwargs={"k": 5})
-
-# 到這裡就卡住了
-
-pipe = pipeline(
-    "text-generation",
-    model=model,
-    tokenizer=tokenizer,
-    max_length=512,
-    temperature=0.1,
-    top_p=0.95,
-    repetition_penalty=1.15
-)
-local_llm = HuggingFacePipeline(pipeline=pipe)
-
-qa_chain = RetrievalQA.from_chain_type(llm=local_llm,
-                                       chain_type="stuff",
-                                       retriever=retriever,
-                                       return_source_documents=True)
+retriever = vectordb.as_retriever(search_kwargs={"k": 10})
 
 
-def wrap_text_preserve_newlines(text, width=110):
-    # Split the input text into lines based on newline characters
-    lines = text.split('\n')
+def answer_question(question, context):
+    inputs = tokenizer.encode_plus(question, context, return_tensors="pt")
+    input_ids = inputs["input_ids"].tolist()[0]
+    outputs = model(**inputs)
+    answer_start = torch.argmax(outputs.start_logits)
+    answer_end = torch.argmax(outputs.end_logits) + 1
+    answer = tokenizer.convert_tokens_to_string(tokenizer.convert_ids_to_tokens(input_ids[answer_start:answer_end]))
+    score = outputs[1][0, answer_start].item()
+    return answer, score
 
-    # Wrap each line individually
-    wrapped_lines = [textwrap.fill(line, width=width) for line in lines]
+question = "WSL2 is very slow, How to resolve it?"
+docs = retriever.get_relevant_documents(question)
+answer = ''
+best_score = 0
+for doc in docs:
+    answer, score = answer_question(question, doc.page_content)
+    if score > best_score:
+        best_answer = answer
+        best_score = score
+    print(f'{doc.page_content=} {score=}')
 
-    # Join the wrapped lines back together using newline characters
-    wrapped_text = '\n'.join(wrapped_lines)
-
-    return wrapped_text
-
-
-def process_llm_response(llm_response):
-    print(wrap_text_preserve_newlines(llm_response['result']))
-    print('\n\nSources:')
-    for source in llm_response["source_documents"]:
-        print(source.metadata['source'])
-
-
-def query_question(query):
-    llm_response = qa_chain(query)
-    process_llm_response(llm_response)
-
-
-query_question("WSL2 is very slow, how to resolve?")
-
+print(f'最佳回答: {best_answer}')
 
 # # 使用預先訓練的 BERT 模型回答問題
 # # input_ids = tokenizer.encode(question_text, nearest_embedding, return_tensors="pt")
