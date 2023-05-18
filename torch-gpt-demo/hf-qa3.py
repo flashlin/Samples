@@ -2,11 +2,13 @@ import torch
 from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 from langchain.chains import RetrievalQA
 from pdf_utils import splitting_documents_into_texts, load_txt_documents_from_directory
-from vectordb_utils import load_chroma_from_documents
+from vectordb_utils import load_chroma_from_documents, MyEmbeddingFunction
 from typing import Callable
 
-tokenizer = AutoTokenizer.from_pretrained("deepset/bert-base-cased-squad2")
-model = AutoModelForQuestionAnswering.from_pretrained("deepset/bert-base-cased-squad2")
+model_name = "deepset/bert-base-cased-squad2"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+
 
 def get_embed_text(text: str):
     # input_ids = tokenizer.encode(text, max_length=512, truncation=True, return_tensors="pt")
@@ -17,20 +19,6 @@ def get_embed_text(text: str):
     return embedding
 
 
-class MyEmbeddingFunction:
-    def __init__(self, embedding_func):
-        self.embedding_func = embedding_func
-
-    def embed_documents(self, documents):
-        embeddings = []
-        for doc in documents:
-            embedding = self.embedding_func(doc)
-            embeddings.append(embedding)
-        embeddings = [embedding.tolist() for embedding in embeddings]
-        return embeddings
-
-embedding_function = MyEmbeddingFunction(get_embed_text)
-
 documents = load_txt_documents_from_directory('./news')
 texts = splitting_documents_into_texts(documents)
 
@@ -40,45 +28,14 @@ texts = splitting_documents_into_texts(documents)
 #     embed_text = get_embed_text(doc.page_content)
 #     all_embed_text.append(embed_text)
 
+embedding_function = MyEmbeddingFunction(get_embed_text)
 vectordb = load_chroma_from_documents(texts, embedding_function)
 retriever = vectordb.as_retriever(search_kwargs={"k": 5})
-
 
 # qa_chain = RetrievalQA.from_chain_type(llm=model,
 #                                        chain_type="stuff",
 #                                        retriever=retriever,
 #                                        return_source_documents=True)
-
-"""
-# 創建一個新的數據集
-dataset = client.create_dataset("my-dataset")
-
-# 創建一個張量來保存嵌入
-embeddings_tensor = dataset.create_tensor("embeddings")
-
-# 假設您已經有了一個嵌入列表
-embeddings = [...]
-
-# 將嵌入添加到張量中
-embeddings_tensor.extend(embeddings)
-
-# 提交更改
-dataset.commit()
-"""
-
-
-
-
-# all_metadatas = []
-# all_ids = []
-# for text, idx in enumerate(documents):
-#     all_metadatas.append({
-#         "source": "my_source"
-#     })
-#     all_ids.append(f'id{idx}')
-#
-#
-# # 初始化 Deep Lake 客戶端
 
 # # 獲取數據集
 # dataset = client.get_dataset("my-dataset")
