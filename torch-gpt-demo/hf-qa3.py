@@ -4,6 +4,9 @@ from langchain.chains import RetrievalQA
 from pdf_utils import splitting_documents_into_texts, load_txt_documents_from_directory
 from vectordb_utils import load_chroma_from_documents, MyEmbeddingFunction
 from typing import Callable
+from langchain.llms import HuggingFacePipeline
+from transformers import pipeline
+import textwrap
 
 model_name = "deepset/bert-base-cased-squad2"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -22,31 +25,57 @@ def get_embed_text(text: str):
 documents = load_txt_documents_from_directory('./news')
 texts = splitting_documents_into_texts(documents)
 
-# all_embed_text = []
-# for doc in texts:
-#     metadata = doc.metadata
-#     embed_text = get_embed_text(doc.page_content)
-#     all_embed_text.append(embed_text)
-
 embedding_function = MyEmbeddingFunction(get_embed_text)
 vectordb = load_chroma_from_documents(texts, embedding_function)
 retriever = vectordb.as_retriever(search_kwargs={"k": 5})
 
-# qa_chain = RetrievalQA.from_chain_type(llm=model,
-#                                        chain_type="stuff",
-#                                        retriever=retriever,
-#                                        return_source_documents=True)
+# 到這裡就卡住了
 
-# # 獲取數據集
-# dataset = client.get_dataset("my-dataset")
-# # 獲取嵌入張量
-# embeddings_tensor = dataset["embeddings"]
-# # 假設您已經有了一個問題文本
-# question_text = "What is the capital of France?"
-# # 使用 RetrievalQA 從 Deep Lake 中檢索最相關的文檔
-# retrieval_qa = RetrievalQA()
-# nearest_embedding = retrieval_qa.retrieve([question_text], embeddings_tensor)[0]
-#
+pipe = pipeline(
+    "text-generation",
+    model=model,
+    tokenizer=tokenizer,
+    max_length=512,
+    temperature=0.1,
+    top_p=0.95,
+    repetition_penalty=1.15
+)
+local_llm = HuggingFacePipeline(pipeline=pipe)
+
+qa_chain = RetrievalQA.from_chain_type(llm=local_llm,
+                                       chain_type="stuff",
+                                       retriever=retriever,
+                                       return_source_documents=True)
+
+
+def wrap_text_preserve_newlines(text, width=110):
+    # Split the input text into lines based on newline characters
+    lines = text.split('\n')
+
+    # Wrap each line individually
+    wrapped_lines = [textwrap.fill(line, width=width) for line in lines]
+
+    # Join the wrapped lines back together using newline characters
+    wrapped_text = '\n'.join(wrapped_lines)
+
+    return wrapped_text
+
+
+def process_llm_response(llm_response):
+    print(wrap_text_preserve_newlines(llm_response['result']))
+    print('\n\nSources:')
+    for source in llm_response["source_documents"]:
+        print(source.metadata['source'])
+
+
+def query_question(query):
+    llm_response = qa_chain(query)
+    process_llm_response(llm_response)
+
+
+query_question("WSL2 is very slow, how to resolve?")
+
+
 # # 使用預先訓練的 BERT 模型回答問題
 # # input_ids = tokenizer.encode(question_text, nearest_embedding, return_tensors="pt")
 # # with torch.no_grad():
