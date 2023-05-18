@@ -16,8 +16,20 @@ def get_embed_text(text: str):
     embedding = torch.mean(last_hidden_states, dim=1).numpy()
     return embedding
 
-embedding = Callable(get_embed_text)
 
+class MyEmbeddingFunction:
+    def __init__(self, embedding_func):
+        self.embedding_func = embedding_func
+
+    def embed_documents(self, documents):
+        embeddings = []
+        for doc in documents:
+            embedding = self.embedding_func(doc)
+            embeddings.append(embedding)
+        embeddings = [embedding.tolist() for embedding in embeddings]
+        return embeddings
+
+embedding_function = MyEmbeddingFunction(get_embed_text)
 
 documents = load_txt_documents_from_directory('./news')
 texts = splitting_documents_into_texts(documents)
@@ -28,7 +40,7 @@ texts = splitting_documents_into_texts(documents)
 #     embed_text = get_embed_text(doc.page_content)
 #     all_embed_text.append(embed_text)
 
-vectordb = load_chroma_from_documents(texts, embedding)
+vectordb = load_chroma_from_documents(texts, embedding_function)
 retriever = vectordb.as_retriever(search_kwargs={"k": 5})
 
 
