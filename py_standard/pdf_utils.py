@@ -18,8 +18,8 @@ def load_txt_documents_from_directory(directory_path):
     return documents
 
 
-def splitting_documents_into_texts(documents):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+def splitting_documents_into_texts(documents, chunk_size=512, chunk_overlap=30):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     texts = text_splitter.split_documents(documents)
     return texts
 
