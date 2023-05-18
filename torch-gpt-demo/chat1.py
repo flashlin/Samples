@@ -9,9 +9,10 @@ from pdf_utils import load_and_split_pdf_texts_from_directory
 from vectordb_utils import load_chroma_from_documents
 import textwrap
 
+
 # conda install -c conda-forge transformers
-model_name = "TheBloke/wizardLM-7B-HF"
-model_name = "TheBloke/stable-vicuna-13B-HF"
+model_name = "TheBloke/wizardLM-7B-HF"        # 需要 16GB VRAM
+model_name = "TheBloke/stable-vicuna-13B-HF"  # 26GB VRAM
 model_name = 'Tribbiani/vicuna-7b'
 tokenizer = LlamaTokenizer.from_pretrained(model_name)
 
