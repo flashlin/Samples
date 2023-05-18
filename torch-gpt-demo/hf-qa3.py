@@ -8,6 +8,7 @@ tokenizer = AutoTokenizer.from_pretrained("deepset/bert-base-cased-squad2")
 model = AutoModelForQuestionAnswering.from_pretrained("deepset/bert-base-cased-squad2")
 
 def get_embed_text(text: str):
+    # input_ids = tokenizer.encode(text, max_length=512, truncation=True, return_tensors="pt")
     input_ids = tokenizer.encode(text, return_tensors="pt")
     with torch.no_grad():
         last_hidden_states = model(input_ids)[0]
@@ -18,13 +19,8 @@ def get_embed_text(text: str):
 documents = load_txt_documents_from_directory('./news')
 texts = splitting_documents_into_texts(documents)
 
-def print_dict_keys(dict):
-    for key in dict.keys():
-        print(f'{key}')
-
 all_embed_text = []
-for doc in documents:
-    print_dict_keys(doc)
+for doc in texts:
     metadata = doc.metadata
     embed_text = get_embed_text(doc.page_content)
     all_embed_text.append(embed_text)
