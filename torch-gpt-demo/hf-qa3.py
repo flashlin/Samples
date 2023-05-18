@@ -3,6 +3,7 @@ from transformers import AutoTokenizer, AutoModelForQuestionAnswering
 from langchain.chains import RetrievalQA
 from pdf_utils import splitting_documents_into_texts, load_txt_documents_from_directory
 from vectordb_utils import load_chroma_from_documents
+from typing import Callable
 
 tokenizer = AutoTokenizer.from_pretrained("deepset/bert-base-cased-squad2")
 model = AutoModelForQuestionAnswering.from_pretrained("deepset/bert-base-cased-squad2")
@@ -15,19 +16,26 @@ def get_embed_text(text: str):
     embedding = torch.mean(last_hidden_states, dim=1).numpy()
     return embedding
 
+embedding = Callable(get_embed_text)
+
 
 documents = load_txt_documents_from_directory('./news')
 texts = splitting_documents_into_texts(documents)
 
-all_embed_text = []
-for doc in texts:
-    metadata = doc.metadata
-    embed_text = get_embed_text(doc.page_content)
-    all_embed_text.append(embed_text)
+# all_embed_text = []
+# for doc in texts:
+#     metadata = doc.metadata
+#     embed_text = get_embed_text(doc.page_content)
+#     all_embed_text.append(embed_text)
 
-print(f'all embed = {all_embed_text=}')
+vectordb = load_chroma_from_documents(texts, embedding)
+retriever = vectordb.as_retriever(search_kwargs={"k": 5})
 
 
+# qa_chain = RetrievalQA.from_chain_type(llm=model,
+#                                        chain_type="stuff",
+#                                        retriever=retriever,
+#                                        return_source_documents=True)
 
 """
 # 創建一個新的數據集
@@ -59,7 +67,7 @@ dataset.commit()
 #
 #
 # # 初始化 Deep Lake 客戶端
-# client = deeplake.Client()
+
 # # 獲取數據集
 # dataset = client.get_dataset("my-dataset")
 # # 獲取嵌入張量
