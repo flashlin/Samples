@@ -3,6 +3,9 @@ from torch.utils.data import Dataset, DataLoader
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import os
+
+pt_name = './output/model.pt'
 
 def encode_text_to_numbers(text):
     numbers = []
@@ -62,6 +65,7 @@ def create_optimizer(model):
     return torch.optim.Adam(model.parameters(), lr=0.001)
 
 def train(model, dataloader, loss_fn, optimizer, epochs):
+    best_lost = float('inf')
     for epoch in range(epochs):
         for inputs, labels in dataloader:
             inputs = torch.tensor(inputs, dtype=torch.long)
@@ -71,6 +75,10 @@ def train(model, dataloader, loss_fn, optimizer, epochs):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+        if loss < best_lost:
+            best_lost = loss
+            save_model(model, pt_name)
+        print(f'{loss=}')
 
 def save_model(model, filename):
     torch.save(model.state_dict(), filename)
@@ -96,8 +104,11 @@ dataset = CustomerDataset(data)
 dataloader = DataLoader(dataset, batch_size=1)
 
 model = SQLTransformer()
-train(model, dataloader, loss_fn, create_optimizer(model), 10)
-save_model(model, "model.pt")
+if os.path.exists(pt_name):
+    print(f'load {pt_name}')
+    model.load_state_dict(torch.load(pt_name))
+train(model, dataloader, loss_fn, create_optimizer(model), 100)
+
 
 infer_fn = lambda input: infer(model, input)
 print(infer_fn("select Addr from home"))
