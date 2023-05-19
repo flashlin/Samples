@@ -1,6 +1,7 @@
 param(
     [string]$action,
-    [string]$args0
+    [string]$args0,
+    [string]$args1
 )
 Import-Module $env:psm1Home\common.psm1 -Force
 
@@ -44,12 +45,12 @@ function InvokeConda {
 
 if ( "" -eq $action ) {
     InvokeConda "env list"
-    Write-Host "          : env list"
-    Write-Host "c1        : use flash environment"
-    Write-Host "use <name>: use name environment"
-    Write-Host "n <name>  : create name environment"
-    Write-Host "c <name>  : switch to name environment"
-    Write-Host "rm <name> : remove name environment"
+    Write-Host "                      : env list"
+    Write-Host "c1                    : use flash environment"
+    Write-Host "use <name>            : use name environment"
+    Write-Host "n <name> [python-ver] : create name environment 3.9"
+    Write-Host "c <name>              : switch to name environment"
+    Write-Host "rm <name>             : remove name environment"
     return
 }
 
@@ -69,13 +70,22 @@ if ( "use" -eq $action ) {
 
 if( "n" -eq $action ) {
     $name = $args0
-    InvokeConda "create -n ${name} python=3.10"
+    $pythonVer = $args1
+    if( "" -eq $pythonVer ) {
+        $pythonVer = "3.9"
+    }
+    InvokeConda "create -n ${name} python=${pythonVer}"
     return
 }
 
 if( "c" -eq $action ) {
     $name = $args0
     InvokeConda "activate $name"
+    return
+}
+
+if( "i" -eq $action ) {
+    InvokeConda "install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia"
     return
 }
 
