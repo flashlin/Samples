@@ -53,6 +53,12 @@ if( "test" -eq $action ) {
     return
 }
 
+if( "i" -eq $action ) {
+    Write-Host "install hunggingface"
+    InvokeCmd "python install -r ./hf-req.txt"
+    return
+}
+
 $env:PYTHONPATH="D:\VDisk\Github\Samples\py_standard"
 Write-Host "run script 1.0"
 Write-Host "build: build image"
