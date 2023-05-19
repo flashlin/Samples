@@ -31,9 +31,7 @@ class CustomChroma(Chroma):
         super().__init__(*args, **kwargs)
 
     def search(self, question, k=3):
-        # 在這裡實現您自己的搜尋邏輯
         # 使用問題文本 'question' 進行搜尋，並返回最相關的文件
-        # 在這個範例中，我們僅使用類別中的向量資料進行簡單的相似度比對
         # query_embedding = self._embedding_function.embed_query(question)
         query_embedding = get_embed_text(question)
         similar_docs = self.similarity_search(query_embedding, k=k)
