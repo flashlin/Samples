@@ -2,6 +2,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import torch.nn as nn
 import torch.optim as optim
+import torch.nn.functional as F
 
 def encode_text_to_numbers(text):
     numbers = []
@@ -46,14 +47,18 @@ class SQLTransformer(nn.Module):
 
 def loss_fn(outputs, labels):
     # outputs = torch.reshape(outputs, (-1,))
-    # outputs = torch.unsqueeze(outputs, 0)
-    # labels = torch.squeeze(labels)
-    # labels = torch.unsqueeze(labels, 0)
-    print(f'{outputs.shape=}')
-    print(f'{labels.shape=}')
+    outputs_len = outputs.shape[0]
+    labels_len = labels.shape[0]
+    outputs = torch.unsqueeze(outputs, 0)   # 增加維度
+    outputs = torch.transpose(outputs, 1, 2)  # 交換維度
+    outputs = F.pad(outputs, (0, labels_len-outputs_len))
+    # labels = torch.squeeze(labels) # 降低維度
+    labels = torch.unsqueeze(labels, 0)
+    #print(f'{outputs.shape=}')
+    #print(f'{labels.shape=}')
     return torch.nn.CrossEntropyLoss(reduction='mean')(outputs, labels)
 
-def optimizer(model):
+def create_optimizer(model):
     return torch.optim.Adam(model.parameters(), lr=0.001)
 
 def train(model, dataloader, loss_fn, optimizer, epochs):
@@ -71,8 +76,14 @@ def save_model(model, filename):
     torch.save(model.state_dict(), filename)
 
 def infer(model, input):
+    input = encode_text_to_numbers(input)
+    input = torch.tensor(input, dtype=torch.long)
     outputs = model(input)
-    return outputs.item()
+    predicted_indices = torch.argmax(outputs, dim=-1)
+    predicted_text = ""
+    for index in predicted_indices:
+        predicted_text += chr(index.item())
+    return predicted_text
 
 # Load the data
 data = [
@@ -85,7 +96,7 @@ dataset = CustomerDataset(data)
 dataloader = DataLoader(dataset, batch_size=1)
 
 model = SQLTransformer()
-train(model, dataloader, loss_fn, optimizer, 10)
+train(model, dataloader, loss_fn, create_optimizer(model), 10)
 save_model(model, "model.pt")
 
 infer_fn = lambda input: infer(model, input)
