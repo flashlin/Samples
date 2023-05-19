@@ -3,9 +3,9 @@ from torch.utils.data import Dataset, DataLoader
 import torch.nn as nn
 import torch.optim as optim
 
-def encode_string_to_numbers(string):
+def encode_text_to_numbers(text):
     numbers = []
-    for char in string:
+    for char in text:
         numbers.append(ord(char))
     return numbers
 
@@ -18,7 +18,7 @@ class CustomerDataset(Dataset):
 
     def __getitem__(self, index):
         input, output = self.data[index]
-        return encode_string_to_numbers(input), encode_string_to_numbers(output)
+        return encode_text_to_numbers(input), encode_text_to_numbers(output)
 
 class Model(torch.nn.Module):
     def __init__(self):
@@ -34,7 +34,7 @@ class Model(torch.nn.Module):
 class SQLTransformer(nn.Module):
     def __init__(self):
         super(SQLTransformer, self).__init__()
-        self.embedding = nn.Embedding(256, 128)  # 假設最大 ASCII 值為 255，使用 128 維的嵌入向量
+        self.embedding = nn.Embedding(256, 128)  # ASCII 值為 255，使用 128 維的嵌入向量
         self.transformer = nn.Transformer(d_model=128, num_encoder_layers=4, num_decoder_layers=4)
         self.linear = nn.Linear(128, 256)
 
@@ -81,23 +81,12 @@ data = [
     ("select id, Name from customer", "SELECT id, Name FROM customer WITH(NOLOCK)")
 ]
 
-# Create the dataset
 dataset = CustomerDataset(data)
-
-# Create the dataloader
 dataloader = DataLoader(dataset, batch_size=1)
 
-# Create the model
 model = SQLTransformer()
-
-# Train the model
 train(model, dataloader, loss_fn, optimizer, 10)
-
-# Save the model
 save_model(model, "model.pt")
 
-# Create the infer function
 infer_fn = lambda input: infer(model, input)
-
-# Predict the output result
 print(infer_fn("select Addr from home"))
