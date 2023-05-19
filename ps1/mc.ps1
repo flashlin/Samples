@@ -85,7 +85,7 @@ if( "c" -eq $action ) {
 }
 
 if( "i" -eq $action ) {
-    InvokeConda "install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia"
+    InvokeConda "install pytorch torchvision torchaudio cudatoolkit cudnn=8.9.0 pytorch-cuda=11.7 -c pytorch -c nvidia"
     return
 }
 
