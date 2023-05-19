@@ -54,7 +54,10 @@ if( "test" -eq $action ) {
 }
 
 if( "i" -eq $action ) {
+    # 注意，由于 pytorch 的原因，chromadb 目前不支持 Python 3.11
     Write-Host "install hunggingface"
+    # InvokeCmd "conda install pytorch==1.13.1 torchvision==0.14.1 torchaudio==0.13.1 cudatoolkit=11.7"
+    InvokeCmd "conda install pytorch==2.0.0 torchvision==0.15.0 torchaudio==2.0.0 pytorch-cuda=11.7 -c pytorch -c nvidia"
     InvokeCmd "python install -r ./hf-req.txt"
     return
 }
