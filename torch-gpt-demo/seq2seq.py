@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+from torchsummary import summary
 
 pt_name = './output/model.pt'
 
@@ -38,8 +39,9 @@ class Model(torch.nn.Module):
 class SQLTransformer(nn.Module):
     def __init__(self):
         super(SQLTransformer, self).__init__()
+        n_layers = 6
         self.embedding = nn.Embedding(256, 128)  # ASCII 值為 255，使用 128 維的嵌入向量
-        self.transformer = nn.Transformer(d_model=128, num_encoder_layers=4, num_decoder_layers=4)
+        self.transformer = nn.Transformer(d_model=128, num_encoder_layers=n_layers, num_decoder_layers=n_layers)
         self.linear = nn.Linear(128, 256)
 
     def forward(self, x):
@@ -64,13 +66,14 @@ def loss_fn(outputs, labels):
 def create_optimizer(model):
     return torch.optim.Adam(model.parameters(), lr=0.001)
 
+device = 'cuda'
 def train(model, dataloader, loss_fn, optimizer, epochs):
     best_lost = float('inf')
     for epoch in range(epochs):
         for inputs, labels in dataloader:
-            inputs = torch.tensor(inputs, dtype=torch.long)
+            inputs = torch.tensor(inputs, dtype=torch.long).to(device)
+            labels = torch.tensor(labels, dtype=torch.long).to(device)
             outputs = model(inputs)
-            labels = torch.tensor(labels, dtype=torch.long)
             loss = loss_fn(outputs, labels)
             optimizer.zero_grad()
             loss.backward()
@@ -99,17 +102,32 @@ def infer(model, input):
 data = [
     ("select name from customer", "SELECT name FROM customer WITH(NOLOCK)"),
     ("SELECT ID from customer", "SELECT ID FROM customer WITH(NOLOCK)"),
-    ("select id, Name from customer", "SELECT id, Name FROM customer WITH(NOLOCK)")
+    ("select id, Name from customer", "SELECT id, Name FROM customer WITH(NOLOCK)"),
 ]
+
+print(f'preparing data')
+new_data = []
+for input, output in data:
+    new_data.append((input, output))
+    input_list = [input[:i] + input[i].upper() + input[i+1:] for i in range(len(input))]
+    for new_input in input_list:
+        new_data.append((new_input, output))
+
+data = new_data
 
 dataset = CustomerDataset(data)
 dataloader = DataLoader(dataset, batch_size=1)
 
+print(f'create model')
 model = SQLTransformer()
 if os.path.exists(pt_name):
     print(f'load {pt_name}')
     model.load_state_dict(torch.load(pt_name))
-train(model, dataloader, loss_fn, create_optimizer(model), 100)
+
+#summary(model, (1, 256))     
+
+model = model.to('cuda')
+train(model, dataloader, loss_fn, create_optimizer(model), 200)
 
 
 infer_fn = lambda input: infer(model, input)
