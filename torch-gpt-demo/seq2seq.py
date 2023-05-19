@@ -77,8 +77,10 @@ def train(model, dataloader, loss_fn, optimizer, epochs):
             optimizer.step()
         if loss < best_lost:
             best_lost = loss
+            print(f'save {loss=}')
             save_model(model, pt_name)
-        print(f'{loss=}')
+        if epoch % 10 == 0:
+            print(f'{epoch=} {loss=}')
 
 def save_model(model, filename):
     torch.save(model.state_dict(), filename)
