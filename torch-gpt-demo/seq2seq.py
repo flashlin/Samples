@@ -39,7 +39,7 @@ class Model(torch.nn.Module):
 class SQLTransformer(nn.Module):
     def __init__(self):
         super(SQLTransformer, self).__init__()
-        n_layers = 6
+        n_layers = 4
         self.embedding = nn.Embedding(256, 128)  # ASCII 值為 255，使用 128 維的嵌入向量
         self.transformer = nn.Transformer(d_model=128, num_encoder_layers=n_layers, num_decoder_layers=n_layers)
         self.linear = nn.Linear(128, 256)
@@ -68,6 +68,7 @@ def create_optimizer(model):
 
 device = 'cuda'
 def train(model, dataloader, loss_fn, optimizer, epochs):
+    print('training...')
     best_lost = float('inf')
     for epoch in range(epochs):
         for inputs, labels in dataloader:
@@ -82,7 +83,7 @@ def train(model, dataloader, loss_fn, optimizer, epochs):
             best_lost = loss
             print(f'save {loss=}')
             save_model(model, pt_name)
-        if epoch % 10 == 0:
+        if epoch % 2 == 0:
             print(f'{epoch=} {loss=}')
 
 def save_model(model, filename):
@@ -101,8 +102,8 @@ def infer(model, input):
 # Load the data
 data = [
     ("select name from customer", "SELECT name FROM customer WITH(NOLOCK)"),
-    ("SELECT ID from customer", "SELECT ID FROM customer WITH(NOLOCK)"),
-    ("select id, Name from customer", "SELECT id, Name FROM customer WITH(NOLOCK)"),
+    ("select id from customer", "SELECT id FROM customer WITH(NOLOCK)"),
+    ("select id, name from customer", "SELECT id, name FROM customer WITH(NOLOCK)"),
 ]
 
 print(f'preparing data')
@@ -112,6 +113,7 @@ for input, output in data:
     input_list = [input[:i] + input[i].upper() + input[i+1:] for i in range(len(input))]
     for new_input in input_list:
         new_data.append((new_input, output))
+    new_data.append((input.upper(), output))
 
 data = new_data
 
@@ -124,9 +126,9 @@ if os.path.exists(pt_name):
     print(f'load {pt_name}')
     model.load_state_dict(torch.load(pt_name))
 
+model = model.to(device)
 #summary(model, (1, 256))     
 
-model = model.to('cuda')
 train(model, dataloader, loss_fn, create_optimizer(model), 200)
 
 
