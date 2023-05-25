@@ -9,6 +9,12 @@ class TestWordVocabulary(unittest.TestCase):
         text = tk.decode_index_list(index_list)
         assert text == "hello World"
 
+    def test_encode_decode_word(self):
+        tk = WordVocabulary()
+        index_list = tk.encode_word('myNameNBA')
+        word = tk.decode_index(index_list)
+        assert word == "myNameNBA"
+
     def test_split_text(self):
         word_list = WordVocabulary.split_text('hello1_123_1my_Name')
         assert word_list == ['hello1', '_', '123', '_', '1', 'my', '_',  'Name'], word_list

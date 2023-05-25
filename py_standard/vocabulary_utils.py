@@ -125,17 +125,28 @@ class WordVocabulary:
         self.vocab.add_many(LETTERS)
 
     def encode_word(self, word: str) -> list[int]:
-        word_lowered = word.lower()
-        word_index = self.vocab.add_token(word_lowered)
-        word_capitalization = self.str_to_bits_int(word)
-        return [word_index, word_capitalization]
+        word_list = self.split_text(word)
+        result = []
+        for new_word in word_list:
+            word_lowered = new_word.lower()
+            word_index = self.vocab.add_token(word_lowered)
+            word_capitalization = self.get_word_type(new_word)
+            result += [word_index, word_capitalization]
+        return result
 
     def decode_index(self, index_list: list[int]) -> str:
-        word_index = index_list[0]
-        word_capitalization = index_list[1]
-        word_lowered = self.vocab.lookup_index(word_index)
-        word = self.int_to_bits_str(word_capitalization, word_lowered)
-        return word
+        text = ""
+        for idx in range(0, len(index_list) - 1, 2):
+            word_index = index_list[idx]
+            word_capitalization = index_list[idx+1]
+            word = self.vocab.lookup_index(word_index)
+            match word_capitalization:
+                case WordType.Upper:
+                    word = word.upper()
+                case WordType.Camel:
+                    word = word[0:1].upper() + word[1:]
+            text += word
+        return text
 
     def encode_many_words(self, word_list: list[str]) -> list[int]:
         index_list = []
