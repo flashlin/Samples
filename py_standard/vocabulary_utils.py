@@ -1,4 +1,6 @@
 from tokenizr_utils import LETTERS
+from enum import Enum
+import re
 
 
 class Vocabulary(object):
@@ -110,6 +112,13 @@ class SequenceVocabulary(Vocabulary):
             return self._token_to_idx.get(token)
 
 
+class WordType(Enum):
+    Lower = 1
+    Camel = 2
+    Upper = 3
+    Mix = 4
+
+
 class WordVocabulary:
     def __init__(self):
         self.vocab = SequenceVocabulary()
@@ -151,4 +160,22 @@ class WordVocabulary:
         bits = ''.join(['1' if c.isupper() else '0' for c in word])
         bits_int = int(bits, 2)
         return bits_int
+
+    @staticmethod
+    def get_word_type(word: str) -> WordType:
+        if word.islower():
+            return WordType.Lower
+        if word.isupper():
+            return WordType.Upper
+        first_letter = word[0]
+        rest_letters = word[1:]
+        if first_letter.isupper() and rest_letters.islower():
+            return WordType.Camel
+        return WordType.Mix
+
+    @staticmethod
+    def split_string(text: str) -> list[str]:
+        pattern = r'([A-Z][a-z]*)'
+        result = re.findall(pattern, text)
+        return result
 
