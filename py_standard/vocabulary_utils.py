@@ -174,8 +174,8 @@ class WordVocabulary:
         return WordType.Mix
 
     @staticmethod
-    def split_string(text: str) -> list[str]:
-        pattern = r'([A-Z][a-z]*)'
+    def split_text(text: str) -> list[str]:
+        pattern = r'[0-9]+|[A-Z][a-z]+\d*|[a-z]+\d*|[A-Z]+\d*|[^a-zA-Z0-9]+'
         result = re.findall(pattern, text)
         return result
 
