@@ -1,19 +1,19 @@
 import unittest
-from vocabulary_utils import WordVocabulary
+from vocabulary_utils import WordVocabulary, WordType
 
 
 class TestWordVocabulary(unittest.TestCase):
     def test_encode_decode(self):
         tk = WordVocabulary()
-        index_list = tk.encode_many_words(['hello', ' ', 'World'])
+        index_list = tk.encode_many_words(['hello', ' ', 'NBAWorld'])
         text = tk.decode_index_list(index_list)
-        assert text == "hello World"
+        assert text == "hello NBAWorld", text
 
     def test_encode_decode_word(self):
         tk = WordVocabulary()
         index_list = tk.encode_word('myNameNBA')
         word = tk.decode_index(index_list)
-        assert word == "myNameNBA"
+        assert word == "myNameNBA", word
 
     def test_split_text(self):
         word_list = WordVocabulary.split_text('hello1_123_1my_Name')
@@ -26,6 +26,10 @@ class TestWordVocabulary(unittest.TestCase):
     def test_split_text3(self):
         word_list = WordVocabulary.split_text('myIdName')
         assert word_list == ['my', 'Id', 'Name'], word_list
+
+    def test_word_type(self):
+        actual = WordVocabulary.get_word_type('<+>')
+        assert actual == WordType.Lower, actual
 
 
 if __name__ == "__main__":
