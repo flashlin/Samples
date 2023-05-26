@@ -17,7 +17,9 @@ var aspnetcore_env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"
 
 builder.Configuration
     .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)
-    .AddJsonFile($"appSettings.{aspnetcore_env}.json", optional: true, reloadOnChange: true);
+    .AddJsonFile($"appSettings.{aspnetcore_env}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
