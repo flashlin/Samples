@@ -23,6 +23,10 @@ public class PredictNextWordsClient : IPredictNextWordsClient
 
     public async Task<InferResponse> InferAsync(string text)
     {
+        if (string.IsNullOrEmpty(_config.Url))
+        {
+            return new InferResponse();
+        }
         var resp = await PostJsonAsync<InferResponse>("infer", new
         {
             input = text
@@ -32,6 +36,10 @@ public class PredictNextWordsClient : IPredictNextWordsClient
     
     public Task AddSqlAsync(string sqlCode)
     {
+        if (string.IsNullOrEmpty(_config.Url))
+        {
+            return Task.CompletedTask;
+        }
         return PostJsonVoidAsync("addsql", new
         {
             sql = sqlCode
