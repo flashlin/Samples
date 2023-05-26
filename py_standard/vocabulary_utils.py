@@ -124,6 +124,9 @@ class WordVocabulary:
         self.vocab = SequenceVocabulary()
         self.vocab.add_many(LETTERS)
 
+    def to_serializable(self):
+        return self.vocab.to_serializable()
+
     def encode_word(self, word: str) -> list[int]:
         word_list = self.split_text(word)
         result = []
