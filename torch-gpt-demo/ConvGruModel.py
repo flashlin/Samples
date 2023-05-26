@@ -32,16 +32,17 @@ class ConvGRUCell(nn.Module):
                                     out_channels=2*self.hidden_dim,  # for update_gate,reset_gate respectively
                                     kernel_size=kernel_size,
                                     padding=self.padding,
-                                    bias=self.bias)
+                                    bias=self.bias).type(dtype)
 
         self.conv_can = nn.Conv2d(in_channels=input_dim+hidden_dim,
                               out_channels=self.hidden_dim, # for candidate neural memory
                               kernel_size=kernel_size,
                               padding=self.padding,
-                              bias=self.bias)
+                              bias=self.bias).type(dtype)
 
     def init_hidden(self, batch_size):
         return Variable(torch.zeros(batch_size, self.hidden_dim, self.height, self.width)).type(self.dtype)
+        # return torch.zeros(batch_size, self.hidden_dim, self.height, self.width)
 
     def forward(self, input_tensor, h_cur):
         """
@@ -152,7 +153,7 @@ class ConvGRU(nn.Module):
             output_inner = []
             for t in range(seq_len):
                 # input current hidden and cell state then compute the next hidden and cell state through ConvLSTMCell forward function
-                h = self.cell_list[layer_idx](input_tensor=cur_layer_input[:, t, :, :, :], # (b,t,c,h,w)
+                h = self.cell_list[layer_idx](input_tensor=cur_layer_input[:, t, :, :, :],  # (b,t,c,h,w)
                                               h_cur=h)
                 output_inner.append(h)
 
@@ -213,7 +214,7 @@ if __name__ == '__main__':
                     bias = True,
                     return_all_layers = False)
 
-    batch_size = 1
+    batch_size = 2
     time_steps = 1
     input_tensor = torch.rand(batch_size, time_steps, channels, height, width)  # (b,t,c,h,w)
     layer_output_list, last_state_list = model(input_tensor)
