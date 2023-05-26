@@ -17,19 +17,16 @@ def convert_text_to_image(text: str, shape: tuple[int, int]) -> list[int]:
     words = [token.text for token in tokens]
     vob = WordVocabulary()
     value_list = vob.encode_many_words(words)
-    converted_a = [item.value if isinstance(item, Enum) else item for item in value_list]
-    img_arr = reshape_list(converted_a, shape, 0)
+    converted_value_list = [item.value if isinstance(item, Enum) else item for item in value_list]
+    img_arr = reshape_list(converted_value_list, shape, 0)
     return img_arr
 
 
 use_gpu = torch.cuda.is_available()
-device = 'cpu'
 if use_gpu:
     dtype = torch.cuda.FloatTensor  # computation in GPU
-    device = 'cuda:0'
 else:
     dtype = torch.FloatTensor
-
 
 height = width = 30
 channels = 1
@@ -46,13 +43,15 @@ model = ConvGRU(input_size=(height, width),
 image = convert_text_to_image("select id from customer", (30, 30))
 print(f'{image=}')
 
-# image = np.array(image, dtype=int)
-image = image.astype(int)
 
-image_tensor = torch.tensor(image).unsqueeze(0)
-image_tensor = image_tensor.unsqueeze(0).unsqueeze(1).type(dtype)
+def convert_image_to_tensor(image: list[list[int]]) -> torch.Tensor:
+    image_tensor = torch.tensor(image).unsqueeze(0)
+    image_tensor = image_tensor.unsqueeze(0)
+    return image_tensor
+
+
+image_tensor = convert_image_to_tensor(image).unsqueeze(1).type(dtype)
 print(f'{image_tensor.shape=}')
-
 
 layer_output_list, last_state_list = model(image_tensor)
 
