@@ -11,29 +11,42 @@ n_heads = 8     # Multi-Head Attention设置为8
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, dropout=0.1, max_len=5000):
+    def __init__(self, dim=512, dropout=0.1, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         pos_table = np.array([
-            [pos / np.power(10000, 2 * i / d_model) for i in range(d_model)]
-            if pos != 0 else np.zeros(d_model) for pos in range(max_len)])
+            [pos / np.power(10000, 2 * i / dim) for i in range(dim)]
+            if pos != 0 else np.zeros(dim) for pos in range(max_len)])
         pos_table[1:, 0::2] = np.sin(pos_table[1:, 0::2])           # 字嵌入维度为偶数时
         pos_table[1:, 1::2] = np.cos(pos_table[1:, 1::2])           # 字嵌入维度为奇数时
-        self.pos_table = torch.FloatTensor(pos_table).cuda()        # enc_inputs: [seq_len, d_model]
+        self.pos_table = torch.FloatTensor(pos_table).cuda()        # enc_inputs: [seq_len, dim]
 
-    def forward(self, enc_inputs):                                  # enc_inputs: [batch_size, seq_len, d_model]
+    def forward(self, enc_inputs):
+        """
+        :param enc_inputs: [batch_size, seq_len, dim]
+        :return:
+        """
         enc_inputs += self.pos_table[:enc_inputs.size(1), :]
         return self.dropout(enc_inputs.cuda())
 
 
-def get_attn_pad_mask(seq_q, seq_k):                                # seq_q: [batch_size, seq_len] ,seq_k: [batch_size, seq_len]
+def get_attn_pad_mask(seq_q, seq_k):
+    """
+    :param seq_q: [batch_size, seq_len]
+    :param seq_k: [batch_size, seq_len]
+    :return:
+    """
     batch_size, len_q = seq_q.size()
     batch_size, len_k = seq_k.size()
-    pad_attn_mask = seq_k.data.eq(0).unsqueeze(1)                   # 判断 输入那些含有P(=0),用1标记 ,[batch_size, 1, len_k]
-    return pad_attn_mask.expand(batch_size, len_q, len_k)           # 扩展成多维度
+    pad_attn_mask = seq_k.data.eq(0).unsqueeze(1)          # 判斷 输入那些含有P(=0),用1标记 ,[batch_size, 1, len_k]
+    return pad_attn_mask.expand(batch_size, len_q, len_k)  # 拓展成多维度
 
 
-def get_attn_subsequence_mask(seq):                                 # seq: [batch_size, tgt_len]
+def get_attn_subsequence_mask(seq):
+    """
+    :param seq: [batch_size, tgt_len]
+    :return:
+    """
     attn_shape = [seq.size(0), seq.size(1), seq.size(1)]
     subsequence_mask = np.triu(np.ones(attn_shape), k=1)            # 生成上三角矩阵,[batch_size, tgt_len, tgt_len]
     subsequence_mask = torch.from_numpy(subsequence_mask).byte()    # [batch_size, tgt_len, tgt_len]
@@ -44,10 +57,14 @@ class ScaledDotProductAttention(nn.Module):
     def __init__(self):
         super(ScaledDotProductAttention, self).__init__()
 
-    def forward(self, Q, K, V, attn_mask):                              # Q: [batch_size, n_heads, len_q, d_k]
-                                                                        # K: [batch_size, n_heads, len_k, d_k]
-                                                                        # V: [batch_size, n_heads, len_v(=len_k), d_v]
-                                                                        # attn_mask: [batch_size, n_heads, seq_len, seq_len]
+    def forward(self, Q, K, V, attn_mask):
+        """
+        :param Q: [batch_size, n_heads, len_q, d_k]
+        :param K: [batch_size, n_heads, len_k, d_k]
+        :param V: [batch_size, n_heads, len_v(=len_k), d_v]
+        :param attn_mask: [batch_size, n_heads, seq_len, seq_len]
+        :return:
+        """
         scores = torch.matmul(Q, K.transpose(-1, -2)) / np.sqrt(d_k)    # scores : [batch_size, n_heads, len_q, len_k]
         scores.masked_fill_(attn_mask, -1e9)                            # 如果时停用词P就等于 0
         attn = nn.Softmax(dim=-1)(scores)
@@ -63,10 +80,14 @@ class MultiHeadAttention(nn.Module):
         self.W_V = nn.Linear(d_model, d_v * n_heads, bias=False)
         self.fc = nn.Linear(n_heads * d_v, d_model, bias=False)
 
-    def forward(self, input_Q, input_K, input_V, attn_mask):    # input_Q: [batch_size, len_q, d_model]
-                                                                # input_K: [batch_size, len_k, d_model]
-                                                                # input_V: [batch_size, len_v(=len_k), d_model]
-                                                                # attn_mask: [batch_size, seq_len, seq_len]
+    def forward(self, input_Q, input_K, input_V, attn_mask):
+        """
+        :param input_Q: [batch_size, len_q, d_model]
+        :param input_K: [batch_size, len_k, d_model]
+        :param input_V: [batch_size, len_v(=len_k), d_model]
+        :param attn_mask: [batch_size, seq_len, seq_len]
+        :return:
+        """
         residual, batch_size = input_Q, input_Q.size(0)
         Q = self.W_Q(input_Q).view(batch_size, -1, n_heads, d_k).transpose(1, 2)    # Q: [batch_size, n_heads, len_q, d_k]
         K = self.W_K(input_K).view(batch_size, -1, n_heads, d_k).transpose(1, 2)    # K: [batch_size, n_heads, len_k, d_k]
@@ -90,7 +111,11 @@ class PoswiseFeedForwardNet(nn.Module):
             nn.ReLU(),
             nn.Linear(d_ff, d_model, bias=False))
 
-    def forward(self, inputs):                                  # inputs: [batch_size, seq_len, d_model]
+    def forward(self, inputs):
+        """
+        :param inputs: [batch_size, seq_len, d_model]
+        :return:
+        """
         residual = inputs
         output = self.fc(inputs)
         return nn.LayerNorm(d_model).cuda()(output + residual)  # [batch_size, seq_len, d_model]
@@ -216,7 +241,7 @@ class Transformer(nn.Module):
 
 if __name__ == "__main__":
     enc_inputs, dec_inputs, dec_outputs = make_data()
-    loader = Data.DataLoader(MyDataSet(enc_inputs, dec_inputs, dec_outputs), 2, True)
+    loader = Data.DataLoader(MyDataSet(enc_inputs, dec_inputs, dec_outputs), batch_size=2, shuffle=True)
 
     model = Transformer().cuda()
     criterion = nn.CrossEntropyLoss(ignore_index=0)         # 忽略 占位符 索引为0.
@@ -235,5 +260,5 @@ if __name__ == "__main__":
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-    torch.save(model, 'model.pth')
+    torch.save(model, './output/model.pth')
     print("保存模型")
