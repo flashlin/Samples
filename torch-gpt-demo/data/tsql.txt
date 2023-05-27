@@ -1,0 +1,4 @@
+select
+SELECT
+select id from customer
+SELECT id FROM customer WITH(NOLOCK)
