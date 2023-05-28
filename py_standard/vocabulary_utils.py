@@ -91,11 +91,11 @@ class SequenceVocabulary(Vocabulary):
                  sos='<SOS>', eos="<EOS>"):
         super(SequenceVocabulary, self).__init__(token_to_idx)
 
-        self.MASK = mask
-        self.UNK = unk
         self.PAD = pad
         self.SOS = sos
         self.EOS = eos
+        self.UNK = unk
+        self.MASK = mask
 
         self.UNK_index = self.add_token(self.UNK)
         self.SOS_index = self.add_token(self.SOS)
