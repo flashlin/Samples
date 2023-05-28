@@ -81,33 +81,37 @@ class Vocabulary(object):
 
 
 class SequenceVocabulary(Vocabulary):
-    def __init__(self, token_to_idx=None, unk_token="<UNK>",
-                 mask_token="<MASK>", begin_seq_token="<BEGIN>", end_seq_token="<END>"):
+    def __init__(self, token_to_idx=None, unk='<UNK>',
+                 mask='<MASK>', pad='<PAD>',
+                 sos='<SOS>', eos="<EOS>"):
         super(SequenceVocabulary, self).__init__(token_to_idx)
 
-        self._mask_token = mask_token
-        self._unk_token = unk_token
-        self._begin_seq_token = begin_seq_token
-        self._end_seq_token = end_seq_token
+        self.MASK = mask
+        self.UNK = unk
+        self.PAD = pad
+        self.SOS = sos
+        self.EOS = eos
 
-        self.mask_index = self.add_token(self._mask_token)
-        self.unk_index = self.add_token(self._unk_token)
-        self.begin_seq_index = self.add_token(self._begin_seq_token)
-        self.end_seq_index = self.add_token(self._end_seq_token)
+        self.MASK_index = self.add_token(self.MASK)
+        self.UNK_index = self.add_token(self.UNK)
+        self.PAD_index = self.add_token(self.PAD)
+        self.SOS_index = self.add_token(self.SOS)
+        self.EOS_index = self.add_token(self.EOS)
 
     def to_serializable(self):
         contents = super(SequenceVocabulary, self).to_serializable()
         contents.update({
-            'unk_token': self._unk_token,
-            'mask_token': self._mask_token,
-            "begin_seq_token": self._begin_seq_token,
-            'end_seq_token': self._end_seq_token
+            '<UNK>': self.UNK,
+            '<MASK>': self.MASK,
+            '<PAD>': self.PAD,
+            '<SOS>': self.SOS,
+            '<EOS>': self.EOS,
         })
         return contents
 
     def lookup_token(self, token: str) -> int:
-        if self.unk_index >= 0:
-            return self._token_to_idx.get(token, self.unk_index)
+        if self.UNK_index >= 0:
+            return self._token_to_idx.get(token, self.UNK_index)
         else:
             return self._token_to_idx.get(token)
 
