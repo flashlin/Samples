@@ -3,6 +3,8 @@ from typing import IO
 import torch
 import torch.utils.data as Data
 import itertools
+
+from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
 
 
@@ -11,6 +13,7 @@ def read_lines_from_file_ptr(file_ptr: IO, n_lines: int):
         lines = list(itertools.islice(file_ptr, n_lines))
         if not lines:
             break
+        lines = [line.rstrip('\n') for line in lines]
         yield lines
 
 
@@ -21,10 +24,47 @@ def read_lines_from_file(file_path: str, n_lines: int = 2):
             yield lines
 
 
+def pad_words(words: list[str], max_len: int, pad: str) -> list[str]:
+    len_words = len(words)
+    if len_words < max_len:
+        return words + [pad] * (max_len - len_words)
+    return words
+
+
+def pad_zip_words(src_words: list[str], tgt_words: list[str],
+                  max_len: int, pad: str) -> list[[str, str]]:
+    """
+    :param src_words: ['a', 'b', 'c']
+    :param tgt_words: ['a', 'b', 'c']
+    :param max_len: 2
+    :param pad: '<PAD>'
+    :return: [['a','b'],['b','c']]
+    """
+    max_len -= 2
+    len_words = max(len(src_words), len(tgt_words))
+    result = []
+    for i in range(len_words-2):
+        sub_src = pad_words(src_words[i:i + max_len], max_len, pad)
+        sub_tgt = pad_words(tgt_words[i:i + max_len], max_len, pad)
+        result.append([sub_src, sub_tgt])
+    return result
+
+
 def read_file_to_csv(file_path: str):
+    word_vob = WordVocabulary()
+    sos = word_vob.vocab.SOS
+    eos = word_vob.vocab.EOS
+    pad = word_vob.vocab.PAD
+
     for line_pair in read_lines_from_file(file_path, n_lines=2):
         src, tgt = tuple(line_pair)
-        print(f'{src=} {tgt=}')
+        src_tokens = tsql_tokenize(src)
+        tgt_tokens = tsql_tokenize(tgt)
+        src_words = [sos] + [token.text for token in src_tokens] + [eos]
+        tgt_words = [sos] + [token.text for token in tgt_tokens] + [eos]
+        padded_pair_list = pad_zip_words(src_words, tgt_words, max_len=5, pad=pad)
+        for padded_src, padded_tgt in padded_pair_list:
+            print(f'{padded_src=} {padded_tgt=}')
 
 
 # # Encoder_input    Decoder_input        Decoder_output
