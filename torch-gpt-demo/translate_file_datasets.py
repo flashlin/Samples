@@ -5,14 +5,12 @@ from enum import Enum
 from typing import TypeVar
 from torch import nn
 import torch.optim as optim
-from data_utils import write_dict_to_file, load_dict_from_file, pad_list
+from data_utils import write_dict_to_file, load_dict_from_file, pad_list, T
 from stream_utils import read_lines_from_file, CsvDataSet
 from transformer_models import Transformer
-from tsql_tokenizr import tsql_tokenize
+from tsql_tokenizr import tsql_tokenize, SqlVocabulary
 from vocabulary_utils import WordVocabulary
 import ast
-
-T = TypeVar('T')
 
 
 def pad_zip(src_words: list[T], tgt_words: list[T],
@@ -43,11 +41,10 @@ def remove_enum(value_list):
     return [item.value if isinstance(item, Enum) else item for item in value_list]
 
 
-def read_file_to_csv(file_path: str, output_csv_path: str):
-    word_vob = WordVocabulary()
-    sos_index = word_vob.vocab.SOS_index
-    eos_index = word_vob.vocab.EOS_index
-    pad_index = word_vob.vocab.PAD_index
+def read_file_to_csv(word_vob, file_path: str, output_csv_path: str):
+    sos_index = word_vob.SOS_index
+    eos_index = word_vob.EOS_index
+    pad_index = word_vob.PAD_index
 
     vocab_path = './data/vocab.txt'
 
@@ -68,15 +65,15 @@ def read_file_to_csv(file_path: str, output_csv_path: str):
             ###
             padded_pair_list = pad_zip(src_values, tgt_values, max_len=900, pad=pad_index)
             for padded_src_values, padded_tgt1_values, padded_tgt2_values in padded_pair_list:
-                padded_src = word_vob.decode_value_list(padded_src_values, isShow=True)
-                padded_tgt1 = word_vob.decode_value_list(padded_tgt1_values, isShow=True)
-                padded_tgt2 = word_vob.decode_value_list(padded_tgt2_values, isShow=True)
+                padded_src = word_vob.decode_value_list(padded_src_values, is_show=True)
+                padded_tgt1 = word_vob.decode_value_list(padded_tgt1_values, is_show=True)
+                padded_tgt2 = word_vob.decode_value_list(padded_tgt2_values, is_show=True)
                 encoder_input = remove_enum(padded_src_values)
                 decoder_input = remove_enum(padded_tgt1_values)
                 decoder_output = remove_enum(padded_tgt2_values)
                 writer.writerow([padded_src, padded_tgt1, padded_tgt2,
                                  encoder_input, decoder_input, decoder_output])
-    write_dict_to_file(word_vob.to_serializable(), vocab_path)
+    word_vob.save(vocab_path)
     return word_vob
 
 
@@ -135,11 +132,12 @@ def infer(model, vocab, text):
 def train():
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
-    word_vob = read_file_to_csv(translate_file_path, csv_file_path)
+    word_vob = SqlVocabulary()
+    read_file_to_csv(word_vob, translate_file_path, csv_file_path)
     data_set = CsvDataSet(csv_file_path)
     data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
 
-    vocab_size = len(word_vob.vocab)
+    vocab_size = len(word_vob)
     model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size).cuda()
     criterion = nn.CrossEntropyLoss(ignore_index=2)         # 忽略 占位符 索引为0.
     optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
@@ -161,8 +159,7 @@ def train():
     print("保存模型")
 
 
-if __name__ == '__main__':
-    # train()
+def test():
     word_vob = WordVocabulary()
     vocab_dict = load_dict_from_file('./data/vocab.txt')
     word_vob.from_serializable(vocab_dict['token_to_idx'])
@@ -171,3 +168,8 @@ if __name__ == '__main__':
     # model.load_state_dict(torch.load('./output/model.pth'))
     model = torch.load('./output/model.pth')
     infer(model, word_vob, "select id")
+
+
+if __name__ == '__main__':
+    train()
+    # test()
