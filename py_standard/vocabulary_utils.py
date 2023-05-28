@@ -145,6 +145,9 @@ class WordVocabulary:
     def PAD_index(self):
         return self.vocab.PAD_index
 
+    def __len__(self):
+        return len(self.vocab)
+
     def to_serializable(self):
         return self.vocab.to_serializable()
 

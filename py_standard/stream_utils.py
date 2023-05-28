@@ -3,10 +3,9 @@ import itertools
 import re
 from typing import Generic, TypeVar, Callable, IO
 from functools import reduce
-
 import pandas as pd
 from torch.utils import data as Data
-
+from data_utils import T
 from data_utils import sort_by_len_desc, create_char2index_map, group_to_lengths
 
 
@@ -51,7 +50,7 @@ class Token:
 
 
 EmptyToken = Token(EMPTY, None, -1, -1, -1)
-T = TypeVar("T")
+# T = TypeVar("T")
 
 
 def reduce_token_list(token_type: str, buff: list[Token]):

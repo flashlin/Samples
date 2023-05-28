@@ -274,6 +274,15 @@ class SqlVocabulary:
     def PAD_index(self):
         return self.vocab.PAD_index
 
+    def __len__(self):
+        return len(self.vocab)
+
+    def encode_many_words(self, words: list[str]):
+        return self.vocab.encode_many_words(words)
+
+    def decode_value_list(self, values: list[int], is_show: bool = False):
+        return self.vocab.decode_value_list(values, isShow=is_show)
+
     def save(self, file_path: str):
         write_dict_to_file(self.vocab.to_serializable(), file_path)
 

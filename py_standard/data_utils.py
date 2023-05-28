@@ -1,8 +1,8 @@
 import string
 from itertools import groupby
 import json
-
-from translate_file_datasets import T
+from typing import TypeVar
+T = TypeVar('T')
 
 
 def create_char2index_map(str_list: list[str], start=0):
