@@ -1,6 +1,6 @@
 import unittest
 
-from translate_file_datasets import pad_words, pad_zip_words
+from translate_file_datasets import pad_words, pad_zip
 
 
 class TestPad(unittest.TestCase):
@@ -11,7 +11,7 @@ class TestPad(unittest.TestCase):
     def test_pad_zip(self):
         a = ['a', 'b']
         b = ['1', '2', '3', '4']
-        words = pad_zip_words(a, b, max_len=2, pad='P')
+        words = pad_zip(a, b, max_len=2, pad='P')
         print(f'{words=}')
         assert words == [
             [['a', 'b'], ['1', '2']],

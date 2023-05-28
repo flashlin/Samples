@@ -166,10 +166,58 @@ class WordVocabulary:
             index_list += self.encode_word(word)
         return index_list
 
-    def decode_index_list(self, index_list: list[int]) -> str:
+    def decode_value_list(self, index_list: list[int], isShow: bool=False) -> str:
         words = []
-        for word_index, word_capitalization in zip(index_list[::2], index_list[1::2]):
-            words += self.decode_index([word_index, word_capitalization])
+        max_index = len(index_list)
+        idx = 0
+        while idx < max_index:
+            value = index_list[idx]
+            if isShow:
+                match value:
+                    case value if isinstance(value, Enum):
+                        idx += 1
+                        continue
+                    case self.vocab.SOS_index:
+                        words += self.vocab.SOS
+                        idx += 1
+                        continue
+                    case self.vocab.EOS_index:
+                        words += self.vocab.EOS
+                        idx += 1
+                        continue
+                    case self.vocab.PAD_index:
+                        words += self.vocab.PAD
+                        idx += 1
+                        continue
+            else:
+                if isinstance(value, Enum) or \
+                        value in [self.vocab.SOS_index, self.vocab.EOS_index, self.vocab.PAD_index]:
+                    idx += 1
+                    continue
+            if (idx+1) >= max_index:
+                break
+            capitalization = index_list[idx+1]
+            if isShow:
+                match capitalization:
+                    case self.vocab.SOS_index:
+                        idx += 2
+                        words += self.vocab.SOS
+                        continue
+                    case self.vocab.EOS_index:
+                        idx += 2
+                        words += self.vocab.EOS
+                        continue
+                    case self.vocab.PAD_index:
+                        idx += 2
+                        words += self.vocab.PAD_index
+                        continue
+            else:
+                if isinstance(value, Enum) or \
+                        value in [self.vocab.SOS_index, self.vocab.EOS_index, self.vocab.PAD_index]:
+                    idx += 2
+                    continue
+            words += self.decode_index([value, capitalization])
+            idx += 2
         text = "".join(words)
         return self.merge_concat_text(text)
 

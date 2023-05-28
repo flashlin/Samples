@@ -6,7 +6,7 @@ class TestWordVocabulary(unittest.TestCase):
     def test_encode_decode(self):
         tk = WordVocabulary()
         index_list = tk.encode_many_words(['hello', ' ', 'NBAWorld'])
-        text = tk.decode_index_list(index_list)
+        text = tk.decode_value_list(index_list)
         assert text == "hello NBAWorld", text
 
     def test_encode_decode_word(self):
@@ -30,6 +30,12 @@ class TestWordVocabulary(unittest.TestCase):
     def test_word_type(self):
         actual = WordVocabulary.get_word_type('<+>')
         assert actual == WordType.Lower, actual
+
+    def test_pad_text(self):
+        tk = WordVocabulary()
+        value_list = [tk.vocab.SOS_index] + tk.encode_word('myNameNBA') + [tk.vocab.EOS_index]
+        result = tk.decode_value_list(value_list)
+        assert result == 'myNameNBA'
 
 
 if __name__ == "__main__":

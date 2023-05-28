@@ -4,7 +4,7 @@ import torch
 import torch.utils.data as Data
 import itertools
 from enum import Enum
-
+from typing import TypeVar, List
 from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
 
@@ -25,22 +25,18 @@ def read_lines_from_file(file_path: str, n_lines: int = 2):
             yield lines
 
 
-def pad_value_list(value_list: list[int], max_len: int, pad: int) -> list[int]:
-    len_words = len(value_list)
-    if len_words < max_len:
-        return value_list + [pad] * (max_len - len_words)
+T = TypeVar('T')
+
+
+def pad_list(value_list: list[T], max_len: int, pad: T) -> list[T]:
+    len_values = len(value_list)
+    if len_values < max_len:
+        return value_list + [pad] * (max_len - len_values)
     return value_list
 
 
-def pad_words(words: list[str], max_len: int, pad: str) -> list[str]:
-    len_words = len(words)
-    if len_words < max_len:
-        return words + [pad] * (max_len - len_words)
-    return words
-
-
-def pad_zip_words(src_words: list[str], tgt_words: list[str],
-                  max_len: int, pad: str) -> list[[str, str]]:
+def pad_zip(src_words: list[T], tgt_words: list[T],
+            max_len: int, pad: T) -> list[[T, T, T]]:
     """
     :param src_words: ['a', 'b', 'c']
     :param tgt_words: ['a', 'b', 'c']
@@ -55,9 +51,10 @@ def pad_zip_words(src_words: list[str], tgt_words: list[str],
         len_range = len_range - max_len + 1
     result = []
     for i in range(len_range):
-        sub_src = pad_words(src_words[i:i + max_len], max_len, pad)
-        sub_tgt1 = pad_words(tgt_words[i:i + max_len], max_len, pad)
-        sub_tgt2 = pad_words(tgt_words[i + 1:i + 1 + max_len], max_len, pad)
+        sub_src_words = src_words[i:i + max_len]
+        sub_src = pad_list(sub_src_words, max_len, pad)
+        sub_tgt1 = pad_list(tgt_words[i:i + max_len], max_len, pad)
+        sub_tgt2 = pad_list(tgt_words[i + 1:i + 1 + max_len], max_len, pad)
         result.append([sub_src, sub_tgt1, sub_tgt2])
     return result
 
@@ -68,9 +65,11 @@ def remove_enum(value_list):
 
 def read_file_to_csv(file_path: str, output_csv_path: str):
     word_vob = WordVocabulary()
-    sos = word_vob.vocab.SOS
-    eos = word_vob.vocab.EOS
-    pad = word_vob.vocab.PAD
+    sos_index = word_vob.vocab.SOS_index
+    eos_index = word_vob.vocab.EOS_index
+    pad_index = word_vob.vocab.PAD_index
+
+    vocab_path = './data/vocab.txt'
 
     with open(output_csv_path, 'w', newline='', encoding='utf-8-sig') as file:
         writer = csv.writer(file)
@@ -80,14 +79,24 @@ def read_file_to_csv(file_path: str, output_csv_path: str):
             src, tgt = tuple(line_pair)
             src_tokens = tsql_tokenize(src)
             tgt_tokens = tsql_tokenize(tgt)
-            src_words = [sos] + [token.text for token in src_tokens] + [eos]
-            tgt_words = [sos] + [token.text for token in tgt_tokens] + [eos]
-            padded_pair_list = pad_zip_words(src_words, tgt_words, max_len=5, pad=pad)
-            for padded_src, padded_tgt1, padded_tgt2 in padded_pair_list:
-                encoder_input = remove_enum(word_vob.encode_many_words(padded_src))
-                decoder_input = remove_enum(word_vob.encode_many_words(padded_tgt1))
-                decoder_output = remove_enum(word_vob.encode_many_words(padded_tgt2))
-                writer.writerow([padded_src, padded_tgt1, padded_tgt2, encoder_input, decoder_input, decoder_output])
+            src_words = [token.text for token in src_tokens]
+            tgt_words = [token.text for token in tgt_tokens]
+
+            src_values = [sos_index] + word_vob.encode_many_words(src_words) + [eos_index]
+            tgt_values = [sos_index] + word_vob.encode_many_words(tgt_words) + [eos_index]
+
+            padded_pair_list = pad_zip(src_values, tgt_values, max_len=900, pad=pad_index)
+            for padded_src_values, padded_tgt1_values, padded_tgt2_values in padded_pair_list:
+                padded_src = word_vob.decode_value_list(padded_src_values, isShow=True)
+                padded_tgt1 = word_vob.decode_value_list(padded_tgt1_values, isShow=True)
+                padded_tgt2 = word_vob.decode_value_list(padded_tgt2_values, isShow=True)
+                encoder_input = remove_enum(padded_src_values)
+                decoder_input = remove_enum(padded_tgt1_values)
+                decoder_output = remove_enum(padded_tgt2_values)
+                writer.writerow([padded_src, padded_tgt1, padded_tgt2,
+                                 encoder_input, decoder_input, decoder_output])
+    with open(vocab_path, 'w', encoding='utf-8') as file:
+        file.write(word_vob.to_serializable())
 
 
 # # Encoder_input    Decoder_input        Decoder_output
