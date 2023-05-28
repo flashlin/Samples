@@ -163,5 +163,7 @@ if __name__ == '__main__':
     m.convert_translate_file_to_csv_file(translate_file_path, csv_file_path)
     m.train(csv_file_path)
     print('start infer')
-    result = m.inference('select id')
+    input_text = 'select id'
+    result = m.inference(input_text)
+    print(f'{input_text=}')
     print(f'{result=}')
