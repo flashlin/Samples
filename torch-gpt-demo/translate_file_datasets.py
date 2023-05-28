@@ -109,8 +109,10 @@ class SqlTransformer:
         data_set = CsvDataSet(csv_file_path)
         data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
         model = self.load_model()
-        criterion = nn.CrossEntropyLoss(ignore_index=2)  # 忽略 占位符 索引为0.
+        criterion = nn.CrossEntropyLoss(ignore_index=self.vocab.PAD_index)  # 計算損失時，將不考慮 PAD 標記的預測
         optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
+        best_loss = float('inf')
+        best_model_state_dict = None
         for epoch in range(max_epoch):
             for batch in data_loader:  # enc_inputs : [batch_size, src_len]
                 enc_inputs, dec_inputs, dec_outputs = batch
@@ -122,8 +124,11 @@ class SqlTransformer:
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            if epoch % 10 == 0:
-                torch.save(model.state_dict(), self.model_pt_file_path)
+            if loss < best_loss:
+                best_loss = loss
+                best_model_state_dict = model.state_dict()
+        print(f'{best_loss=}')
+        torch.save(best_model_state_dict, self.model_pt_file_path)
 
     def eval_model(self, enc_input, start_symbol):
         tgt_len = 900
