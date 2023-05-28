@@ -74,7 +74,6 @@ def read_file_to_csv(word_vob, file_path: str, output_csv_path: str):
                 writer.writerow([padded_src, padded_tgt1, padded_tgt2,
                                  encoder_input, decoder_input, decoder_output])
     word_vob.save(vocab_path)
-    return word_vob
 
 
 def collate_fn(batch):
@@ -129,34 +128,41 @@ def infer(model, vocab, text):
     print(f'{output=}')
 
 
+class SqlTransformer:
+    def __init__(self):
+        self.vocab = SqlVocabulary()
+        self.model = None
+
+    def convert_translate_file_to_csv_file(self, translate_file_path: str, csv_file_path: str):
+        read_file_to_csv(self.vocab, translate_file_path, csv_file_path)
+
+    def train(self, csv_file_path, max_epoch=50):
+        data_set = CsvDataSet(csv_file_path)
+        data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
+        vocab_size = len(self.vocab)
+        self.model = model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size).cuda()
+        criterion = nn.CrossEntropyLoss(ignore_index=2)  # 忽略 占位符 索引为0.
+        optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
+        for epoch in range(max_epoch):
+            for batch in data_loader:  # enc_inputs : [batch_size, src_len]
+                enc_inputs, dec_inputs, dec_outputs = batch
+                enc_inputs, dec_inputs, dec_outputs = enc_inputs.cuda(), dec_inputs.cuda(), dec_outputs.cuda()
+                outputs, enc_self_attns, dec_self_attns, dec_enc_attns = model(enc_inputs, dec_inputs)
+                # outputs: [batch_size * tgt_len, tgt_vocab_size]
+                loss = criterion(outputs, dec_outputs.view(-1))
+                print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss))
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+        torch.save(model.state_dict(), './output/model.pth')
+
+
 def train():
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
-    word_vob = SqlVocabulary()
-    read_file_to_csv(word_vob, translate_file_path, csv_file_path)
-    data_set = CsvDataSet(csv_file_path)
-    data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
-
-    vocab_size = len(word_vob)
-    model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size).cuda()
-    criterion = nn.CrossEntropyLoss(ignore_index=2)         # 忽略 占位符 索引为0.
-    optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
-
-    for epoch in range(50):
-        #for enc_inputs, dec_inputs, dec_outputs in data_loader:  # enc_inputs : [batch_size, src_len]
-        for batch in data_loader:  # enc_inputs : [batch_size, src_len]
-            enc_inputs, dec_inputs, dec_outputs = batch
-            enc_inputs, dec_inputs, dec_outputs = enc_inputs.cuda(), dec_inputs.cuda(), dec_outputs.cuda()
-            outputs, enc_self_attns, dec_self_attns, dec_enc_attns = model(enc_inputs, dec_inputs)
-            # outputs: [batch_size * tgt_len, tgt_vocab_size]
-            loss = criterion(outputs, dec_outputs.view(-1))
-            print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss))
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-    torch.save(model, './output/model.pth')
-    # torch.save(model.state_dict(), 'model.pth')
-    print("保存模型")
+    m = SqlTransformer()
+    m.convert_translate_file_to_csv_file(translate_file_path, csv_file_path)
+    m.train(csv_file_path)
 
 
 def test():
