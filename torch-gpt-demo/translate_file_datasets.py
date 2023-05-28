@@ -4,9 +4,12 @@ import torch
 import torch.utils.data as Data
 import itertools
 from enum import Enum
-from typing import TypeVar, List
+from typing import TypeVar
 import pandas as pd
+from torch import nn
+import torch.optim as optim
 from data_utils import write_dict_to_file
+from transformer_models import Transformer
 from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
 import ast
@@ -88,6 +91,7 @@ def read_file_to_csv(file_path: str, output_csv_path: str):
             src_values = [sos_index] + word_vob.encode_many_words(src_words) + [eos_index]
             tgt_values = [sos_index] + word_vob.encode_many_words(tgt_words) + [eos_index]
 
+            ###
             padded_pair_list = pad_zip(src_values, tgt_values, max_len=900, pad=pad_index)
             for padded_src_values, padded_tgt1_values, padded_tgt2_values in padded_pair_list:
                 padded_src = word_vob.decode_value_list(padded_src_values, isShow=True)
@@ -99,6 +103,7 @@ def read_file_to_csv(file_path: str, output_csv_path: str):
                 writer.writerow([padded_src, padded_tgt1, padded_tgt2,
                                  encoder_input, decoder_input, decoder_output])
     write_dict_to_file(word_vob.to_serializable(), vocab_path)
+    return word_vob
 
 
 class MyDataSet(Data.Dataset):
@@ -124,25 +129,44 @@ class MyDataSet(Data.Dataset):
 
 
 def collate_fn(batch):
-    processed_batch = []
+    encoder_input_batch = []
+    decoder_input_batch = []
+    decoder_output_batch = []
     for item in batch:
         encoder_input = ast.literal_eval(item["encoder_input"])
         decoder_input = ast.literal_eval(item['decoder_input'])
         decoder_output = ast.literal_eval(item['decoder_output'])
-        data = {
-            'encoder_input': torch.LongTensor(encoder_input),
-            'decoder_input': torch.LongTensor(decoder_input),
-            'decoder_output': torch.LongTensor(decoder_output)
-        }
-        processed_batch.append(data)
-    return processed_batch
+        encoder_input_batch.append(encoder_input)
+        decoder_input_batch.append(decoder_input)
+        decoder_output_batch.append(decoder_output)
+    return torch.LongTensor(encoder_input_batch), \
+        torch.LongTensor(decoder_input_batch), \
+        torch.LongTensor(decoder_output_batch)
 
 
 if __name__ == '__main__':
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
-    read_file_to_csv(translate_file_path, csv_file_path)
+    word_vob = read_file_to_csv(translate_file_path, csv_file_path)
     data_set = MyDataSet(csv_file_path)
     data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
-    for batch in data_loader:
-        print(f'{batch=}')
+
+    vocab_size = len(word_vob.vocab)
+    model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size).cuda()
+    criterion = nn.CrossEntropyLoss(ignore_index=2)         # 忽略 占位符 索引为0.
+    optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
+
+    for epoch in range(50):
+        #for enc_inputs, dec_inputs, dec_outputs in data_loader:  # enc_inputs : [batch_size, src_len]
+        for batch in data_loader:  # enc_inputs : [batch_size, src_len]
+            enc_inputs, dec_inputs, dec_outputs = batch
+            enc_inputs, dec_inputs, dec_outputs = enc_inputs.cuda(), dec_inputs.cuda(), dec_outputs.cuda()
+            outputs, enc_self_attns, dec_self_attns, dec_enc_attns = model(enc_inputs, dec_inputs)
+            # outputs: [batch_size * tgt_len, tgt_vocab_size]
+            loss = criterion(outputs, dec_outputs.view(-1))
+            print('Epoch:', '%04d' % (epoch + 1), 'loss =', '{:.6f}'.format(loss))
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+    torch.save(model, './output/model.pth')
+    print("保存模型")
