@@ -1,4 +1,6 @@
 import csv
+import os
+
 import torch
 import torch.utils.data as Data
 from enum import Enum
@@ -39,41 +41,6 @@ def pad_zip(src_words: list[T], tgt_words: list[T],
 
 def remove_enum(value_list):
     return [item.value if isinstance(item, Enum) else item for item in value_list]
-
-
-def read_file_to_csv(word_vob, file_path: str, output_csv_path: str):
-    sos_index = word_vob.SOS_index
-    eos_index = word_vob.EOS_index
-    pad_index = word_vob.PAD_index
-
-    vocab_path = './data/vocab.txt'
-
-    with open(output_csv_path, 'w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerow(['src_input', 'tgt_input', 'tgt_output', 'encoder_input', 'decoder_input', 'decoder_output'])
-
-        for line_pair in read_lines_from_file(file_path, n_lines=2):
-            src, tgt = tuple(line_pair)
-            src_tokens = tsql_tokenize(src)
-            tgt_tokens = tsql_tokenize(tgt)
-            src_words = [token.text for token in src_tokens]
-            tgt_words = [token.text for token in tgt_tokens]
-
-            src_values = [sos_index] + word_vob.encode_many_words(src_words) + [eos_index]
-            tgt_values = [sos_index] + word_vob.encode_many_words(tgt_words) + [eos_index]
-
-            ###
-            padded_pair_list = pad_zip(src_values, tgt_values, max_len=900, pad=pad_index)
-            for padded_src_values, padded_tgt1_values, padded_tgt2_values in padded_pair_list:
-                padded_src = word_vob.decode_value_list(padded_src_values, is_show=True)
-                padded_tgt1 = word_vob.decode_value_list(padded_tgt1_values, is_show=True)
-                padded_tgt2 = word_vob.decode_value_list(padded_tgt2_values, is_show=True)
-                encoder_input = remove_enum(padded_src_values)
-                decoder_input = remove_enum(padded_tgt1_values)
-                decoder_output = remove_enum(padded_tgt2_values)
-                writer.writerow([padded_src, padded_tgt1, padded_tgt2,
-                                 encoder_input, decoder_input, decoder_output])
-    word_vob.save(vocab_path)
 
 
 def collate_fn(batch):
@@ -131,16 +98,52 @@ def infer(model, vocab, text):
 class SqlTransformer:
     def __init__(self):
         self.vocab = SqlVocabulary()
+        self.model_pt_file_path = './output/model.pth'
+        self.vocab_file_path = './output/vocab.txt'
         self.model = None
 
+    def load_model(self):
+        self.vocab.load(self.vocab_file_path)
+        vocab_size = len(self.vocab)
+        self.model = model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size).cuda()
+        if os.path.exists(self.model_pt_file_path):
+            model.load_state_dict(torch.load(self.model_pt_file_path))
+        return model
+
     def convert_translate_file_to_csv_file(self, translate_file_path: str, csv_file_path: str):
-        read_file_to_csv(self.vocab, translate_file_path, csv_file_path)
+        if os.path.exists(csv_file_path):
+            return
+        word_vocab = self.vocab
+        sos_index = self.vocab.SOS_index
+        eos_index = self.vocab.EOS_index
+        pad_index = self.vocab.PAD_index
+        with open(csv_file_path, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['src_input', 'tgt_input', 'tgt_output', 'encoder_input', 'decoder_input', 'decoder_output'])
+            for line_pair in read_lines_from_file(translate_file_path, n_lines=2):
+                src, tgt = tuple(line_pair)
+                src_tokens = tsql_tokenize(src)
+                tgt_tokens = tsql_tokenize(tgt)
+                src_words = [token.text for token in src_tokens]
+                tgt_words = [token.text for token in tgt_tokens]
+                src_values = [sos_index] + word_vocab.encode_many_words(src_words) + [eos_index]
+                tgt_values = [sos_index] + word_vocab.encode_many_words(tgt_words) + [eos_index]
+                padded_pair_list = pad_zip(src_values, tgt_values, max_len=900, pad=pad_index)
+                for padded_src_values, padded_tgt1_values, padded_tgt2_values in padded_pair_list:
+                    padded_src = word_vocab.decode_value_list(padded_src_values, is_show=True)
+                    padded_tgt1 = word_vocab.decode_value_list(padded_tgt1_values, is_show=True)
+                    padded_tgt2 = word_vocab.decode_value_list(padded_tgt2_values, is_show=True)
+                    encoder_input = remove_enum(padded_src_values)
+                    decoder_input = remove_enum(padded_tgt1_values)
+                    decoder_output = remove_enum(padded_tgt2_values)
+                    writer.writerow([padded_src, padded_tgt1, padded_tgt2,
+                                     encoder_input, decoder_input, decoder_output])
+        word_vocab.save(self.vocab_file_path)
 
     def train(self, csv_file_path, max_epoch=50):
         data_set = CsvDataSet(csv_file_path)
         data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
-        vocab_size = len(self.vocab)
-        self.model = model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size).cuda()
+        model = self.load_model()
         criterion = nn.CrossEntropyLoss(ignore_index=2)  # 忽略 占位符 索引为0.
         optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
         for epoch in range(max_epoch):
@@ -154,7 +157,8 @@ class SqlTransformer:
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-        torch.save(model.state_dict(), './output/model.pth')
+            if epoch % 10 == 0:
+                torch.save(model.state_dict(), self.model_pt_file_path)
 
 
 def train():
