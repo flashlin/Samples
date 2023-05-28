@@ -59,42 +59,6 @@ def collate_fn(batch):
         torch.LongTensor(decoder_output_batch)
 
 
-def eval_model(model, enc_input, start_symbol):
-    tgt_len = 900
-    enc_outputs, enc_self_attns = model.Encoder(enc_input)
-    dec_input = torch.zeros(1, tgt_len).type_as(enc_input.data)
-    next_symbol = start_symbol
-    for i in range(0, tgt_len):
-        dec_input[0][i] = next_symbol
-        dec_outputs, _, _ = model.Decoder(dec_input, enc_input, enc_outputs)
-        projected = model.projection(dec_outputs)
-        prob = projected.squeeze(0).max(dim=-1, keepdim=False)[1]
-        next_word = prob.data[i]
-        next_symbol = next_word.item()
-    return dec_input
-
-
-def encode_sql(text):
-    tokens = tsql_tokenize(text)
-    words = [token.text for token in tokens]
-    return words
-
-
-def infer(model, vocab, text):
-    words = encode_sql(text)
-    enc_input = remove_enum(vocab.encode_many_words(words))
-    enc_input = torch.LongTensor([enc_input]).cuda()
-    start_symbol = vocab.vocab.SOS_index
-    predict_dec_input = eval_model(model, enc_input, start_symbol=start_symbol)
-    predict, _, _, _ = model(enc_input, predict_dec_input)
-    predict = predict.data.max(1, keepdim=True)[1]
-    output_values = predict.squeeze().cpu().numpy()
-
-    output = vocab.decode_value_list(output_values, isShow=True)
-    # print(f'{output_values=}')
-    print(f'{output=}')
-
-
 class SqlTransformer:
     def __init__(self):
         self.vocab = SqlVocabulary()
@@ -119,7 +83,8 @@ class SqlTransformer:
         pad_index = self.vocab.PAD_index
         with open(csv_file_path, 'w', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
-            writer.writerow(['src_input', 'tgt_input', 'tgt_output', 'encoder_input', 'decoder_input', 'decoder_output'])
+            writer.writerow(
+                ['src_input', 'tgt_input', 'tgt_output', 'encoder_input', 'decoder_input', 'decoder_output'])
             for line_pair in read_lines_from_file(translate_file_path, n_lines=2):
                 src, tgt = tuple(line_pair)
                 src_tokens = tsql_tokenize(src)
@@ -160,26 +125,38 @@ class SqlTransformer:
             if epoch % 10 == 0:
                 torch.save(model.state_dict(), self.model_pt_file_path)
 
+    def eval_model(self, enc_input, start_symbol):
+        tgt_len = 900
+        enc_outputs, enc_self_attns = self.model.Encoder(enc_input)
+        dec_input = torch.zeros(1, tgt_len).type_as(enc_input.data)
+        next_symbol = start_symbol
+        for i in range(0, tgt_len):
+            dec_input[0][i] = next_symbol
+            dec_outputs, _, _ = self.model.Decoder(dec_input, enc_input, enc_outputs)
+            projected = self.model.projection(dec_outputs)
+            prob = projected.squeeze(0).max(dim=-1, keepdim=False)[1]
+            next_word = prob.data[i]
+            next_symbol = next_word.item()
+        return dec_input
 
-def train():
+    def inference(self, text):
+        input_values = self.vocab.encode(text)
+        enc_input = torch.LongTensor([input_values]).cuda()
+        start_symbol = self.vocab.SOS_index
+        predict_dec_input = self.eval_model(enc_input, start_symbol=start_symbol)
+        predict, _, _, _ = self.model(enc_input, predict_dec_input)
+        predict = predict.data.max(1, keepdim=True)[1]
+        output_values = predict.squeeze().cpu().numpy()
+        output = self.vocab.decode_value_list(output_values, is_show=False)
+        return output
+
+
+if __name__ == '__main__':
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
     m = SqlTransformer()
     m.convert_translate_file_to_csv_file(translate_file_path, csv_file_path)
     m.train(csv_file_path)
-
-
-def test():
-    word_vob = WordVocabulary()
-    vocab_dict = load_dict_from_file('./data/vocab.txt')
-    word_vob.from_serializable(vocab_dict['token_to_idx'])
-    vocab_size = len(word_vob.vocab)
-    # model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size)
-    # model.load_state_dict(torch.load('./output/model.pth'))
-    model = torch.load('./output/model.pth')
-    infer(model, word_vob, "select id")
-
-
-if __name__ == '__main__':
-    train()
-    # test()
+    print('start infer')
+    result = m.inference('select id')
+    print(f'{result=}')
