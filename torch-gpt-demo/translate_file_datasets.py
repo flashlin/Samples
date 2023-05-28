@@ -1,35 +1,17 @@
-from typing import IO
 import csv
 import torch
 import torch.utils.data as Data
-import itertools
 from enum import Enum
 from typing import TypeVar
 import pandas as pd
 from torch import nn
 import torch.optim as optim
 from data_utils import write_dict_to_file, load_dict_from_file
+from stream_utils import read_lines_from_file
 from transformer_models import Transformer
 from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
 import ast
-
-
-def read_lines_from_file_ptr(file_ptr: IO, n_lines: int):
-    while True:
-        lines = list(itertools.islice(file_ptr, n_lines))
-        if not lines:
-            break
-        lines = [line.rstrip('\n') for line in lines]
-        yield lines
-
-
-def read_lines_from_file(file_path: str, n_lines: int = 2):
-    with open(file_path, 'r', encoding='utf-8') as sr:
-        line_pairs = read_lines_from_file_ptr(sr, n_lines)
-        for lines in line_pairs:
-            yield lines
-
 
 T = TypeVar('T')
 
@@ -159,14 +141,14 @@ def test(model, enc_input, start_symbol):
     return dec_input
 
 
-def encode_text(text):
+def encode_sql(text):
     tokens = tsql_tokenize(text)
     words = [token.text for token in tokens]
     return words
 
 
 def infer(model, vocab, text):
-    words = encode_text(text)
+    words = encode_sql(text)
     enc_inputs = remove_enum(vocab.encode_many_words(words))
     enc_inputs = torch.LongTensor([enc_inputs]).cuda()
     start_symbol = vocab.vocab.SOS_index

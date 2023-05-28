@@ -1,5 +1,6 @@
+import itertools
 import re
-from typing import Generic, TypeVar, Callable
+from typing import Generic, TypeVar, Callable, IO
 from functools import reduce
 from data_utils import sort_by_len_desc, create_char2index_map, group_to_lengths
 
@@ -336,3 +337,19 @@ def int_list_to_str(alist):
 def replace_many_spaces(text):
     new_text = re.sub(' +', ' ', text)
     return new_text
+
+
+def read_lines_from_file_ptr(file_ptr: IO, n_lines: int):
+    while True:
+        lines = list(itertools.islice(file_ptr, n_lines))
+        if not lines:
+            break
+        lines = [line.rstrip('\n') for line in lines]
+        yield lines
+
+
+def read_lines_from_file(file_path: str, n_lines: int = 2):
+    with open(file_path, 'r', encoding='utf-8') as sr:
+        line_pairs = read_lines_from_file_ptr(sr, n_lines)
+        for lines in line_pairs:
+            yield lines
