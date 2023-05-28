@@ -1,5 +1,5 @@
 from typing import IO
-
+import csv
 import torch
 import torch.utils.data as Data
 import itertools
@@ -44,32 +44,38 @@ def pad_zip_words(src_words: list[str], tgt_words: list[str],
     if len_range < max_len:
         len_range = 1
     if len_range > max_len:
-        len_range = len_range-max_len+1
+        len_range = len_range - max_len + 1
     result = []
     for i in range(len_range):
         sub_src = pad_words(src_words[i:i + max_len], max_len, pad)
-        sub_tgt = pad_words(tgt_words[i:i + max_len], max_len, pad)
-        result.append([sub_src, sub_tgt])
+        sub_tgt1 = pad_words(tgt_words[i:i + max_len], max_len, pad)
+        sub_tgt2 = pad_words(tgt_words[i + 1:i + 1 + max_len], max_len, pad)
+        result.append([sub_src, sub_tgt1, sub_tgt2])
     return result
 
 
-def read_file_to_csv(file_path: str):
+def read_file_to_csv(file_path: str, output_csv_path: str):
     word_vob = WordVocabulary()
     sos = word_vob.vocab.SOS
     eos = word_vob.vocab.EOS
     pad = word_vob.vocab.PAD
 
-    for line_pair in read_lines_from_file(file_path, n_lines=2):
-        src, tgt = tuple(line_pair)
-        src_tokens = tsql_tokenize(src)
-        tgt_tokens = tsql_tokenize(tgt)
-        src_words = [sos] + [token.text for token in src_tokens] + [eos]
-        tgt_words = [sos] + [token.text for token in tgt_tokens] + [eos]
-        padded_pair_list = pad_zip_words(src_words, tgt_words, max_len=5, pad=pad)
-        for padded_src, padded_tgt in padded_pair_list:
-            src_index_list = word_vob.encode_many_words(padded_src)
-            tgt_index_list = word_vob.encode_many_words(padded_tgt)
-            print(f'{padded_src=} {padded_tgt=}')
+    with open(output_csv_path, 'w', newline='', encoding='utf-8-sig') as file:
+        writer = csv.writer(file)
+        writer.writerow(['src_input', 'tgt_input', 'tgt_output', 'encoder_input', 'decoder_input', 'decoder_output'])
+
+        for line_pair in read_lines_from_file(file_path, n_lines=2):
+            src, tgt = tuple(line_pair)
+            src_tokens = tsql_tokenize(src)
+            tgt_tokens = tsql_tokenize(tgt)
+            src_words = [sos] + [token.text for token in src_tokens] + [eos]
+            tgt_words = [sos] + [token.text for token in tgt_tokens] + [eos]
+            padded_pair_list = pad_zip_words(src_words, tgt_words, max_len=5, pad=pad)
+            for padded_src, padded_tgt1, padded_tgt2 in padded_pair_list:
+                encoder_input = word_vob.encode_many_words(padded_src)
+                decoder_input = word_vob.encode_many_words(padded_tgt1)
+                decoder_output = word_vob.encode_many_words(padded_tgt2)
+                writer.writerow([padded_src, padded_tgt1, padded_tgt2, encoder_input, decoder_input, decoder_output])
 
 
 # # Encoder_input    Decoder_input        Decoder_output
@@ -126,4 +132,4 @@ def read_file_to_csv(file_path: str):
 
 if __name__ == '__main__':
     translate_file_path = './data/tsql.txt'
-    read_file_to_csv(translate_file_path)
+    read_file_to_csv(translate_file_path, './data/tsql.csv')
