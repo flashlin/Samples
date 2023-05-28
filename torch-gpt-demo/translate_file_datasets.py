@@ -8,7 +8,7 @@ from typing import TypeVar
 import pandas as pd
 from torch import nn
 import torch.optim as optim
-from data_utils import write_dict_to_file
+from data_utils import write_dict_to_file, load_dict_from_file
 from transformer_models import Transformer
 from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
@@ -144,7 +144,43 @@ def collate_fn(batch):
         torch.LongTensor(decoder_output_batch)
 
 
-if __name__ == '__main__':
+def test(model, enc_input, start_symbol):
+    tgt_len = 900
+    enc_outputs, enc_self_attns = model.Encoder(enc_input)
+    dec_input = torch.zeros(1, tgt_len).type_as(enc_input.data)
+    next_symbol = start_symbol
+    for i in range(0, tgt_len):
+        dec_input[0][i] = next_symbol
+        dec_outputs, _, _ = model.Decoder(dec_input, enc_input, enc_outputs)
+        projected = model.projection(dec_outputs)
+        prob = projected.squeeze(0).max(dim=-1, keepdim=False)[1]
+        next_word = prob.data[i]
+        next_symbol = next_word.item()
+    return dec_input
+
+
+def encode_text(text):
+    tokens = tsql_tokenize(text)
+    words = [token.text for token in tokens]
+    return words
+
+
+def infer(model, vocab, text):
+    words = encode_text(text)
+    enc_inputs = remove_enum(vocab.encode_many_words(words))
+    enc_inputs = torch.LongTensor([enc_inputs]).cuda()
+    start_symbol = vocab.vocab.SOS_index
+    predict_dec_input = test(model, enc_inputs, start_symbol=start_symbol)
+    predict, _, _, _ = model(enc_inputs, predict_dec_input)
+    predict = predict.data.max(1, keepdim=True)[1]
+    output_values = predict.squeeze().cpu().numpy()
+
+    output = vocab.decode_value_list(output_values, isShow=True)
+    # print(f'{output_values=}')
+    print(f'{output=}')
+
+
+def train():
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
     word_vob = read_file_to_csv(translate_file_path, csv_file_path)
@@ -169,4 +205,17 @@ if __name__ == '__main__':
             loss.backward()
             optimizer.step()
     torch.save(model, './output/model.pth')
+    # torch.save(model.state_dict(), 'model.pth')
     print("保存模型")
+
+
+if __name__ == '__main__':
+    # train()
+    word_vob = WordVocabulary()
+    vocab_dict = load_dict_from_file('./data/vocab.txt')
+    word_vob.from_serializable(vocab_dict['token_to_idx'])
+    vocab_size = len(word_vob.vocab)
+    # model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size)
+    # model.load_state_dict(torch.load('./output/model.pth'))
+    model = torch.load('./output/model.pth')
+    infer(model, word_vob, "select id")
