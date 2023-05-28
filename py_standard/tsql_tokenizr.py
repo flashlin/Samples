@@ -293,7 +293,7 @@ class SqlVocabulary:
     def encode(self, text):
         tokens = tsql_tokenize(text)
         words = [token.text for token in tokens]
-        return self.remove_enum(self.vocab.encode_many_words(words))
+        return [self.vocab.SOS_index] + self.remove_enum(self.vocab.encode_many_words(words)) + [self.vocab.EOS_index]
 
     @staticmethod
     def remove_enum(value_list):

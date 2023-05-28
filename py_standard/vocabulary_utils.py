@@ -97,11 +97,11 @@ class SequenceVocabulary(Vocabulary):
         self.SOS = sos
         self.EOS = eos
 
-        self.MASK_index = self.add_token(self.MASK)
         self.UNK_index = self.add_token(self.UNK)
-        self.PAD_index = self.add_token(self.PAD)
         self.SOS_index = self.add_token(self.SOS)
+        self.PAD_index = self.add_token(self.PAD)
         self.EOS_index = self.add_token(self.EOS)
+        self.MASK_index = self.add_token(self.MASK)
 
     def to_serializable(self):
         contents = super(SequenceVocabulary, self).to_serializable()

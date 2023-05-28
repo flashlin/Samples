@@ -142,6 +142,8 @@ class SqlTransformer:
             prob = projected.squeeze(0).max(dim=-1, keepdim=False)[1]
             next_word = prob.data[i]
             next_symbol = next_word.item()
+            if next_symbol == self.vocab.EOS_index:
+                break
         return dec_input
 
     def inference(self, text):
