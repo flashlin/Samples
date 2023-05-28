@@ -40,10 +40,13 @@ def pad_zip_words(src_words: list[str], tgt_words: list[str],
     :param pad: '<PAD>'
     :return: [['a','b'],['b','c']]
     """
-    max_len -= 2
-    len_words = max(len(src_words), len(tgt_words))
+    len_range = max(len(src_words), len(tgt_words))
+    if len_range < max_len:
+        len_range = 1
+    if len_range > max_len:
+        len_range = len_range-max_len+1
     result = []
-    for i in range(len_words-2):
+    for i in range(len_range):
         sub_src = pad_words(src_words[i:i + max_len], max_len, pad)
         sub_tgt = pad_words(tgt_words[i:i + max_len], max_len, pad)
         result.append([sub_src, sub_tgt])
@@ -64,6 +67,8 @@ def read_file_to_csv(file_path: str):
         tgt_words = [sos] + [token.text for token in tgt_tokens] + [eos]
         padded_pair_list = pad_zip_words(src_words, tgt_words, max_len=5, pad=pad)
         for padded_src, padded_tgt in padded_pair_list:
+            src_index_list = word_vob.encode_many_words(padded_src)
+            tgt_index_list = word_vob.encode_many_words(padded_tgt)
             print(f'{padded_src=} {padded_tgt=}')
 
 
