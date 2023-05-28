@@ -3,6 +3,7 @@ import csv
 import torch
 import torch.utils.data as Data
 import itertools
+from enum import Enum
 
 from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
@@ -22,6 +23,13 @@ def read_lines_from_file(file_path: str, n_lines: int = 2):
         line_pairs = read_lines_from_file_ptr(sr, n_lines)
         for lines in line_pairs:
             yield lines
+
+
+def pad_value_list(value_list: list[int], max_len: int, pad: int) -> list[int]:
+    len_words = len(value_list)
+    if len_words < max_len:
+        return value_list + [pad] * (max_len - len_words)
+    return value_list
 
 
 def pad_words(words: list[str], max_len: int, pad: str) -> list[str]:
@@ -54,6 +62,10 @@ def pad_zip_words(src_words: list[str], tgt_words: list[str],
     return result
 
 
+def remove_enum(value_list):
+    return [item.value if isinstance(item, Enum) else item for item in value_list]
+
+
 def read_file_to_csv(file_path: str, output_csv_path: str):
     word_vob = WordVocabulary()
     sos = word_vob.vocab.SOS
@@ -72,9 +84,9 @@ def read_file_to_csv(file_path: str, output_csv_path: str):
             tgt_words = [sos] + [token.text for token in tgt_tokens] + [eos]
             padded_pair_list = pad_zip_words(src_words, tgt_words, max_len=5, pad=pad)
             for padded_src, padded_tgt1, padded_tgt2 in padded_pair_list:
-                encoder_input = word_vob.encode_many_words(padded_src)
-                decoder_input = word_vob.encode_many_words(padded_tgt1)
-                decoder_output = word_vob.encode_many_words(padded_tgt2)
+                encoder_input = remove_enum(word_vob.encode_many_words(padded_src))
+                decoder_input = remove_enum(word_vob.encode_many_words(padded_tgt1))
+                decoder_output = remove_enum(word_vob.encode_many_words(padded_tgt2))
                 writer.writerow([padded_src, padded_tgt1, padded_tgt2, encoder_input, decoder_input, decoder_output])
 
 
