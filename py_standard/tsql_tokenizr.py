@@ -1,9 +1,13 @@
-from data_utils import sort_by_len_desc, group_to_lengths
+from enum import Enum
+
+from data_utils import sort_by_len_desc, group_to_lengths, write_dict_to_file, load_dict_from_file
 from stream_utils import Token, StreamTokenIterator, read_identifier_token, read_float_number_token, \
     read_single_quote_string_token, read_spaces_token, KEYWORD, OPERATOR, SYMBOL, EmptyToken, reduce_token_list, \
     IDENTIFIER
 from tokenizr_utils import read_keyword_fn, try_read_any
 from typing import Final
+
+from vocabulary_utils import WordVocabulary
 
 TSQL_KEYWORDS = sort_by_len_desc([
     "ADD",
@@ -252,3 +256,36 @@ def tsql_tokenize(stream) -> list[Token]:
             continue
         raise Exception(f"try to tokenize fail at {stream_iterator.idx=} '{stream_iterator.peek_str(10)}'")
     return tokens
+
+
+class SqlVocabulary:
+    def __init__(self):
+        self.vocab = WordVocabulary()
+
+    @property
+    def SOS_index(self):
+        return self.vocab.SOS_index
+
+    @property
+    def EOS_index(self):
+        return self.vocab.EOS_index
+
+    @property
+    def PAD_index(self):
+        return self.vocab.PAD_index
+
+    def save(self, file_path: str):
+        write_dict_to_file(self.vocab.to_serializable(), file_path)
+
+    def load(self, file_path: str):
+        vocab_dict = load_dict_from_file(file_path)
+        self.vocab.from_serializable(vocab_dict['token_to_idx'])
+
+    def encode(self, text):
+        tokens = tsql_tokenize(text)
+        words = [token.text for token in tokens]
+        return self.remove_enum(self.vocab.encode_many_words(words))
+
+    @staticmethod
+    def remove_enum(value_list):
+        return [item.value if isinstance(item, Enum) else item for item in value_list]

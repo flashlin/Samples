@@ -133,6 +133,18 @@ class WordVocabulary:
         self.vocab = SequenceVocabulary()
         self.vocab.add_many(LETTERS)
 
+    @property
+    def SOS_index(self):
+        return self.vocab.SOS_index
+
+    @property
+    def EOS_index(self):
+        return self.vocab.EOS_index
+
+    @property
+    def PAD_index(self):
+        return self.vocab.PAD_index
+
     def to_serializable(self):
         return self.vocab.to_serializable()
 
