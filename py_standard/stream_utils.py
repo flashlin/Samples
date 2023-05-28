@@ -1,7 +1,12 @@
+import csv
 import itertools
 import re
 from typing import Generic, TypeVar, Callable, IO
 from functools import reduce
+
+import pandas as pd
+from torch.utils import data as Data
+
 from data_utils import sort_by_len_desc, create_char2index_map, group_to_lengths
 
 
@@ -353,3 +358,25 @@ def read_lines_from_file(file_path: str, n_lines: int = 2):
         line_pairs = read_lines_from_file_ptr(sr, n_lines)
         for lines in line_pairs:
             yield lines
+
+
+class CsvDataSet(Data.Dataset):
+    def __init__(self, csv_file_path, chunk_size=1):
+        super(CsvDataSet, self).__init__()
+        self.csv_file_path = csv_file_path
+        self.chunk_size = chunk_size
+        with open(csv_file_path, 'r', encoding='utf-8') as file:
+            self.headers = file.readline().strip().split(',')
+
+    def __len__(self):
+        with open(self.csv_file_path, 'r', encoding='utf-8') as file:
+            csv_reader = csv.reader(file)
+            return sum(1 for _ in csv_reader) - 1  # 減去 header 的行數
+
+    def __getitem__(self, idx):
+        data_frame = pd.read_csv(self.csv_file_path, skiprows=idx, nrows=self.chunk_size)
+        dict_value = data_frame.iloc[0]
+        new_dict = {}
+        for index, header in enumerate(self.headers):
+            new_dict[header] = dict_value[index]
+        return new_dict

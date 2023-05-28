@@ -3,11 +3,10 @@ import torch
 import torch.utils.data as Data
 from enum import Enum
 from typing import TypeVar
-import pandas as pd
 from torch import nn
 import torch.optim as optim
 from data_utils import write_dict_to_file, load_dict_from_file, pad_list
-from stream_utils import read_lines_from_file
+from stream_utils import read_lines_from_file, CsvDataSet
 from transformer_models import Transformer
 from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
@@ -81,28 +80,6 @@ def read_file_to_csv(file_path: str, output_csv_path: str):
     return word_vob
 
 
-class MyDataSet(Data.Dataset):
-    def __init__(self, csv_file_path, chunk_size=1):
-        super(MyDataSet, self).__init__()
-        self.csv_file_path = csv_file_path
-        self.chunk_size = chunk_size
-        with open(csv_file_path, 'r', encoding='utf-8') as file:
-            self.headers = file.readline().strip().split(',')
-
-    def __len__(self):
-        with open(self.csv_file_path, 'r', encoding='utf-8') as file:
-            csv_reader = csv.reader(file)
-            return sum(1 for _ in csv_reader) - 1  # 減去 header 的行數
-
-    def __getitem__(self, idx):
-        data_frame = pd.read_csv(self.csv_file_path, skiprows=idx, nrows=self.chunk_size)
-        dict_value = data_frame.iloc[0]
-        new_dict = {}
-        for index, header in enumerate(self.headers):
-            new_dict[header] = dict_value[index]
-        return new_dict
-
-
 def collate_fn(batch):
     encoder_input_batch = []
     decoder_input_batch = []
@@ -159,7 +136,7 @@ def train():
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
     word_vob = read_file_to_csv(translate_file_path, csv_file_path)
-    data_set = MyDataSet(csv_file_path)
+    data_set = CsvDataSet(csv_file_path)
     data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
 
     vocab_size = len(word_vob.vocab)
