@@ -5,6 +5,8 @@ import torch.utils.data as Data
 import itertools
 from enum import Enum
 from typing import TypeVar, List
+import pandas as pd
+from data_utils import write_dict_to_file
 from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
 
@@ -71,7 +73,7 @@ def read_file_to_csv(file_path: str, output_csv_path: str):
 
     vocab_path = './data/vocab.txt'
 
-    with open(output_csv_path, 'w', newline='', encoding='utf-8-sig') as file:
+    with open(output_csv_path, 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['src_input', 'tgt_input', 'tgt_output', 'encoder_input', 'decoder_input', 'decoder_output'])
 
@@ -95,62 +97,36 @@ def read_file_to_csv(file_path: str, output_csv_path: str):
                 decoder_output = remove_enum(padded_tgt2_values)
                 writer.writerow([padded_src, padded_tgt1, padded_tgt2,
                                  encoder_input, decoder_input, decoder_output])
-    with open(vocab_path, 'w', encoding='utf-8') as file:
-        file.write(word_vob.to_serializable())
+    write_dict_to_file(word_vob.to_serializable(), vocab_path)
 
 
-# # Encoder_input    Decoder_input        Decoder_output
-# sentences = [['我 是 学 生 P', 'S I am a student', 'I am a student E'],  # S: 开始符号
-#              ['我 喜 欢 学 习', 'S I like learning P', 'I like learning P E'],  # E: 结束符号
-#              ['我 是 男 生 P', 'S I am a boy', 'I am a boy E']]  # P: 占位符号，如果当前句子不足固定长度用P占位
-#
-# src_vocab = {'P': 0, '我': 1, '是': 2, '学': 3, '生': 4, '喜': 5, '欢': 6, '习': 7, '男': 8}  # 词源字典  字：索引
-# src_idx2word = {src_vocab[key]: key for key in src_vocab}
-# src_vocab_size = len(src_vocab)  # 字典字的个数
-# tgt_vocab = {'P': 0, 'S': 1, 'E': 2, 'I': 3, 'am': 4, 'a': 5, 'student': 6, 'like': 7, 'learning': 8, 'boy': 9}
-# idx2word = {tgt_vocab[key]: key for key in tgt_vocab}  # 把目标字典转换成 索引：字的形式
-# tgt_vocab_size = len(tgt_vocab)  # 目标字典尺寸
-# src_len = len(sentences[0][0].split(" "))  # Encoder输入的最大长度
-# tgt_len = len(sentences[0][1].split(" "))  # Decoder输入输出最大长度
-#
-# vocab = WordVocabulary()
-#
-# file = './data/tsql.txt'
-# with open(file, 'r', encoding='utf-8') as f:
-#     line = f.readline()
-#     while line:
-#         src = line
-#         tgt = line = f.readline()
-#
-#
-# # 把sentences 转换成字典索引
-# def make_data():
-#     enc_inputs, dec_inputs, dec_outputs = [], [], []
-#
-#     for i in range(len(sentences)):
-#         enc_input = [[src_vocab[n] for n in sentences[i][0].split()]]
-#         dec_input = [[tgt_vocab[n] for n in sentences[i][1].split()]]
-#         dec_output = [[tgt_vocab[n] for n in sentences[i][2].split()]]
-#         enc_inputs.extend(enc_input)
-#         dec_inputs.extend(dec_input)
-#         dec_outputs.extend(dec_output)
-#     return torch.LongTensor(enc_inputs), torch.LongTensor(dec_inputs), torch.LongTensor(dec_outputs)
-#
-#
-# # 自定义数据集函数
-# class MyDataSet(Data.Dataset):
-#     def __init__(self, enc_inputs, dec_inputs, dec_outputs):
-#         super(MyDataSet, self).__init__()
-#         self.enc_inputs = enc_inputs
-#         self.dec_inputs = dec_inputs
-#         self.dec_outputs = dec_outputs
-#
-#     def __len__(self):
-#         return self.enc_inputs.shape[0]
-#
-#     def __getitem__(self, idx):
-#         return self.enc_inputs[idx], self.dec_inputs[idx], self.dec_outputs[idx]
+class MyDataSet(Data.Dataset):
+    def __init__(self, csv_file_path, chunk_size=1):
+        super(MyDataSet, self).__init__()
+        self.csv_file_path = csv_file_path
+        self.chunk_size = chunk_size
+        with open(csv_file_path, 'r', encoding='utf-8') as file:
+            self.headers = file.readline().strip().split(',')
+
+    def __len__(self):
+        with open(self.csv_file_path, 'r', encoding='utf-8') as file:
+            csv_reader = csv.reader(file)
+            return sum(1 for _ in csv_reader) - 1  # 減去 header 的行數
+
+    def __getitem__(self, idx):
+        data_frame = pd.read_csv(self.csv_file_path, skiprows=idx, nrows=self.chunk_size)
+        # dict_value = data_frame.iloc[0].to_dict()
+        dict_value = data_frame.iloc[0]
+        new_dict = {}
+        for index, header in enumerate(self.headers):
+            new_dict[header] = dict_value[index]
+        return new_dict
+
 
 if __name__ == '__main__':
     translate_file_path = './data/tsql.txt'
-    read_file_to_csv(translate_file_path, './data/tsql.csv')
+    csv_file_path = './data/tsql.csv'
+    read_file_to_csv(translate_file_path, csv_file_path)
+    data_set = MyDataSet(csv_file_path)
+    for idx in range(len(data_set)):
+        data = data_set[idx]

@@ -1,5 +1,6 @@
 import string
 from itertools import groupby
+import json
 
 
 def create_char2index_map(str_list: list[str], start=0):
@@ -23,3 +24,14 @@ def sort_by_len_desc(arr: list[str]) -> list[str]:
 
 def group_to_lengths(arr_sorted: list[str]):
     return [k for k, g in groupby(arr_sorted, key=lambda x: len(x))]
+
+
+def write_dict_to_file(dictionary, file_path):
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(dictionary, file)
+
+
+def load_dict_from_file(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        dictionary = json.load(file)
+    return dictionary
