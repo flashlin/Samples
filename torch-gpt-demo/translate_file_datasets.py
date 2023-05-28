@@ -9,6 +9,7 @@ import pandas as pd
 from data_utils import write_dict_to_file
 from tsql_tokenizr import tsql_tokenize
 from vocabulary_utils import WordVocabulary
+import ast
 
 
 def read_lines_from_file_ptr(file_ptr: IO, n_lines: int):
@@ -115,7 +116,6 @@ class MyDataSet(Data.Dataset):
 
     def __getitem__(self, idx):
         data_frame = pd.read_csv(self.csv_file_path, skiprows=idx, nrows=self.chunk_size)
-        # dict_value = data_frame.iloc[0].to_dict()
         dict_value = data_frame.iloc[0]
         new_dict = {}
         for index, header in enumerate(self.headers):
@@ -123,10 +123,26 @@ class MyDataSet(Data.Dataset):
         return new_dict
 
 
+def collate_fn(batch):
+    processed_batch = []
+    for item in batch:
+        encoder_input = ast.literal_eval(item["encoder_input"])
+        decoder_input = ast.literal_eval(item['decoder_input'])
+        decoder_output = ast.literal_eval(item['decoder_output'])
+        data = {
+            'encoder_input': torch.LongTensor(encoder_input),
+            'decoder_input': torch.LongTensor(decoder_input),
+            'decoder_output': torch.LongTensor(decoder_output)
+        }
+        processed_batch.append(data)
+    return processed_batch
+
+
 if __name__ == '__main__':
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
     read_file_to_csv(translate_file_path, csv_file_path)
     data_set = MyDataSet(csv_file_path)
-    for idx in range(len(data_set)):
-        data = data_set[idx]
+    data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
+    for batch in data_loader:
+        print(f'{batch=}')
