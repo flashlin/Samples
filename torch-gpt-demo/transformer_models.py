@@ -151,7 +151,7 @@ class EncoderLayer(nn.Module):
         return enc_outputs, attn
 
 class Encoder(nn.Module):
-    def __init__(self):
+    def __init__(self, src_vocab_size, d_model=512):
         super(Encoder, self).__init__()
         self.src_emb = nn.Embedding(src_vocab_size, d_model)                     # 把字转换字向量
         self.pos_emb = PositionalEncoding(d_model)                               # 加入位置信息
@@ -193,7 +193,7 @@ class DecoderLayer(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self):
+    def __init__(self, tgt_vocab_size, d_model):
         super(Decoder, self).__init__()
         self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model)
         self.pos_emb = PositionalEncoding(d_model)
@@ -221,10 +221,10 @@ class Decoder(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self):
+    def __init__(self, src_vocab_size, tgt_vocab_size, d_model=512):
         super(Transformer, self).__init__()
-        self.Encoder = Encoder().cuda()
-        self.Decoder = Decoder().cuda()
+        self.Encoder = Encoder(src_vocab_size, d_model).cuda()
+        self.Decoder = Decoder(tgt_vocab_size, d_model).cuda()
         self.projection = nn.Linear(d_model, tgt_vocab_size, bias=False).cuda()
 
     def forward(self, enc_inputs, dec_inputs):                          # enc_inputs: [batch_size, src_len]
@@ -248,11 +248,10 @@ if __name__ == "__main__":
     optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
 
     for epoch in range(50):
-        for batch in loader:  # enc_inputs : [batch_size, src_len]
+        for enc_inputs, dec_inputs, dec_outputs in loader:  # enc_inputs : [batch_size, src_len]
                                                             # dec_inputs : [batch_size, tgt_len]
                                                             # dec_outputs: [batch_size, tgt_len]
-            print(f'{batch=}')
-            enc_inputs, dec_inputs, dec_outputs = batch
+
             enc_inputs, dec_inputs, dec_outputs = enc_inputs.cuda(), dec_inputs.cuda(), dec_outputs.cuda()
             outputs, enc_self_attns, dec_self_attns, dec_enc_attns = model(enc_inputs, dec_inputs)
                                                             # outputs: [batch_size * tgt_len, tgt_vocab_size]
