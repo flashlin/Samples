@@ -14,6 +14,11 @@ class Vocabulary(object):
         """
         if token_to_idx is None:
             token_to_idx = {}
+        self._token_to_idx = {}
+        self._idx_to_token = {}
+        self.recreate_dict(token_to_idx)
+
+    def recreate_dict(self, token_to_idx):
         self._token_to_idx = token_to_idx
         self._idx_to_token = {token: idx for idx, token in self._token_to_idx.items()}
 
@@ -70,7 +75,7 @@ class Vocabulary(object):
        Raises KeyError if the index is not in the Vocabulary
        """
         if index not in self._idx_to_token:
-            raise KeyError("The index {} is not in the Vocabulary".format(index))
+            raise KeyError(f"The index {type(index)} {index} is not in the Vocabulary")
         return self._idx_to_token[index]
 
     def __str__(self):
@@ -130,6 +135,9 @@ class WordVocabulary:
 
     def to_serializable(self):
         return self.vocab.to_serializable()
+
+    def from_serializable(self, token_to_idx):
+        self.vocab.recreate_dict(token_to_idx)
 
     def encode_word(self, word: str) -> list[int]:
         word_list = self.split_text(word)
