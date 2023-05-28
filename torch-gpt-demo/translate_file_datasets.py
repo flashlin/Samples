@@ -6,7 +6,7 @@ from typing import TypeVar
 import pandas as pd
 from torch import nn
 import torch.optim as optim
-from data_utils import write_dict_to_file, load_dict_from_file
+from data_utils import write_dict_to_file, load_dict_from_file, pad_list
 from stream_utils import read_lines_from_file
 from transformer_models import Transformer
 from tsql_tokenizr import tsql_tokenize
@@ -14,13 +14,6 @@ from vocabulary_utils import WordVocabulary
 import ast
 
 T = TypeVar('T')
-
-
-def pad_list(value_list: list[T], max_len: int, pad: T) -> list[T]:
-    len_values = len(value_list)
-    if len_values < max_len:
-        return value_list + [pad] * (max_len - len_values)
-    return value_list
 
 
 def pad_zip(src_words: list[T], tgt_words: list[T],
@@ -126,7 +119,7 @@ def collate_fn(batch):
         torch.LongTensor(decoder_output_batch)
 
 
-def test(model, enc_input, start_symbol):
+def eval_model(model, enc_input, start_symbol):
     tgt_len = 900
     enc_outputs, enc_self_attns = model.Encoder(enc_input)
     dec_input = torch.zeros(1, tgt_len).type_as(enc_input.data)
@@ -149,11 +142,11 @@ def encode_sql(text):
 
 def infer(model, vocab, text):
     words = encode_sql(text)
-    enc_inputs = remove_enum(vocab.encode_many_words(words))
-    enc_inputs = torch.LongTensor([enc_inputs]).cuda()
+    enc_input = remove_enum(vocab.encode_many_words(words))
+    enc_input = torch.LongTensor([enc_input]).cuda()
     start_symbol = vocab.vocab.SOS_index
-    predict_dec_input = test(model, enc_inputs, start_symbol=start_symbol)
-    predict, _, _, _ = model(enc_inputs, predict_dec_input)
+    predict_dec_input = eval_model(model, enc_input, start_symbol=start_symbol)
+    predict, _, _, _ = model(enc_input, predict_dec_input)
     predict = predict.data.max(1, keepdim=True)[1]
     output_values = predict.squeeze().cpu().numpy()
 

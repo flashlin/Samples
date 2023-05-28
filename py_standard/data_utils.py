@@ -2,6 +2,8 @@ import string
 from itertools import groupby
 import json
 
+from translate_file_datasets import T
+
 
 def create_char2index_map(str_list: list[str], start=0):
     dictionary = {}
@@ -35,3 +37,10 @@ def load_dict_from_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         dictionary = json.load(file)
     return dictionary
+
+
+def pad_list(value_list: list[T], max_len: int, pad_value: T) -> list[T]:
+    len_values = len(value_list)
+    if len_values < max_len:
+        return value_list + [pad_value] * (max_len - len_values)
+    return value_list
