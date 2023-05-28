@@ -109,7 +109,7 @@ class SqlTransformer:
         data_set = CsvDataSet(csv_file_path)
         data_loader = Data.DataLoader(data_set, batch_size=2, shuffle=True, collate_fn=collate_fn)
         model = self.load_model()
-        criterion = nn.CrossEntropyLoss(ignore_index=0)  # 計算損失時，將不考慮 PAD 標記的預測
+        criterion = nn.CrossEntropyLoss(ignore_index=self.vocab.PAD_index)  # 計算損失時，將不考慮 PAD 標記的預測
         optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
         best_loss = float('inf')
         best_model_state_dict = None
@@ -147,7 +147,7 @@ class SqlTransformer:
         return dec_input
 
     def inference(self, text):
-        input_values = self.vocab.encode(text)
+        input_values = self.vocab.encode_infer_text(text)
         enc_input = torch.LongTensor([input_values]).cuda()
         start_symbol = self.vocab.SOS_index
         predict_dec_input = self.eval_model(enc_input, start_symbol=start_symbol)

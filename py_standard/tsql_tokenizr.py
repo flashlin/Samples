@@ -290,7 +290,7 @@ class SqlVocabulary:
         vocab_dict = load_dict_from_file(file_path)
         self.vocab.from_serializable(vocab_dict['token_to_idx'])
 
-    def encode(self, text):
+    def encode_infer_text(self, text):
         tokens = tsql_tokenize(text)
         words = [token.text for token in tokens]
         return [self.vocab.SOS_index] + self.remove_enum(self.vocab.encode_many_words(words)) + [self.vocab.EOS_index]
