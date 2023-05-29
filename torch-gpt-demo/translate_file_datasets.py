@@ -69,7 +69,7 @@ class SqlTransformer:
     def load_model(self):
         self.vocab.load(self.vocab_file_path)
         vocab_size = len(self.vocab)
-        self.model = model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size).cuda()
+        self.model = model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size, device='cuda')
         if os.path.exists(self.model_pt_file_path):
             model.load_state_dict(torch.load(self.model_pt_file_path))
         return model
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
     m = SqlTransformer()
-    m.rebuild_vocab()
+    #m.rebuild_vocab()
     m.convert_translate_file_to_csv_file(translate_file_path, csv_file_path)
     m.train(csv_file_path)
     print('start infer')
