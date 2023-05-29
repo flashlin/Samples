@@ -74,6 +74,15 @@ class SqlTransformer:
             model.load_state_dict(torch.load(self.model_pt_file_path))
         return model
 
+    def rebuild_vocab(self):
+        words_file_path = './data/words.txt'
+        if os.path.exists(words_file_path):
+            with open(words_file_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    new_word = line.rstrip()
+                    self.vocab.vocab.encode_word(new_word)
+            self.vocab.save(self.vocab_file_path)
+
     def convert_translate_file_to_csv_file(self, translate_file_path: str, csv_file_path: str):
         if os.path.exists(csv_file_path):
             return
@@ -162,6 +171,7 @@ if __name__ == '__main__':
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
     m = SqlTransformer()
+    m.rebuild_vocab()
     m.convert_translate_file_to_csv_file(translate_file_path, csv_file_path)
     m.train(csv_file_path)
     print('start infer')
