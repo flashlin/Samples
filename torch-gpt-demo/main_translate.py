@@ -30,11 +30,15 @@ def pad_zip(src_words: list[T], tgt_words: list[T],
     if len_range > max_len:
         len_range = len_range - max_len + 1
     result = []
+
+    tgt1 = tgt_words[:-1]
+    tgt2 = tgt_words[1:]
+
     for i in range(len_range):
         sub_src_words = src_words[i:i + max_len]
         sub_src = pad_list(sub_src_words, max_len, pad)
-        sub_tgt1 = pad_list(tgt_words[i:i + max_len], max_len, pad)
-        sub_tgt2 = pad_list(tgt_words[i + 1:i + 1 + max_len], max_len, pad)
+        sub_tgt1 = pad_list(tgt1[i:i + max_len], max_len, pad)
+        sub_tgt2 = pad_list(tgt2[i + 1:i + 1 + max_len], max_len, pad)
         result.append([sub_src, sub_tgt1, sub_tgt2])
     return result
 
@@ -101,7 +105,7 @@ class SqlTransformer:
                 tgt_tokens = tsql_tokenize(tgt)
                 src_words = [token.text for token in src_tokens]
                 tgt_words = [token.text for token in tgt_tokens]
-                src_values = [sos_index] + word_vocab.encode_many_words(src_words) + [eos_index]
+                src_values = word_vocab.encode_many_words(src_words) + [eos_index]
                 tgt_values = [sos_index] + word_vocab.encode_many_words(tgt_words) + [eos_index]
                 padded_pair_list = pad_zip(src_values, tgt_values, max_len=900, pad=pad_index)
                 for padded_src_values, padded_tgt1_values, padded_tgt2_values in padded_pair_list:
@@ -158,6 +162,8 @@ class SqlTransformer:
         return dec_input
 
     def inference(self, text):
+        if self.model is None:
+            self.model = self.load_model()
         input_values = self.vocab.encode_infer_text(text)
         enc_input = torch.LongTensor([input_values]).to(self.device)
         start_symbol = self.vocab.SOS_index
@@ -165,7 +171,7 @@ class SqlTransformer:
         predict, _, _, _ = self.model(enc_input, predict_dec_input)
         predict = predict.data.max(1, keepdim=True)[1]
         output_values = predict.squeeze().cpu().numpy()
-        output = self.vocab.decode_value_list(output_values, is_show=False)
+        output = self.vocab.decode_value_list(output_values)
         return output
 
 
