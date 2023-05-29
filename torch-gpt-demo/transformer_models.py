@@ -106,8 +106,9 @@ class MultiHeadAttention(nn.Module):
 
 
 class PoswiseFeedForwardNet(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(PoswiseFeedForwardNet, self).__init__()
+        self.device = device
         self.fc = nn.Sequential(
             nn.Linear(d_model, d_ff, bias=False),
             nn.ReLU(),
@@ -120,14 +121,14 @@ class PoswiseFeedForwardNet(nn.Module):
         """
         residual = inputs
         output = self.fc(inputs)
-        return nn.LayerNorm(d_model).cuda()(output + residual)  # [batch_size, seq_len, d_model]
+        return nn.LayerNorm(d_model).to(self.device)(output + residual)  # [batch_size, seq_len, d_model]
 
 
 class EncoderLayer(nn.Module):
     def __init__(self, device):
         super(EncoderLayer, self).__init__()
         self.enc_self_attn = MultiHeadAttention(device)                   # 多头注意力机制
-        self.pos_ffn = PoswiseFeedForwardNet()                      # 前馈神经网络
+        self.pos_ffn = PoswiseFeedForwardNet(device)                      # 前馈神经网络
 
     def forward(self, enc_inputs, enc_self_attn_mask):              # enc_inputs: [batch_size, src_len, d_model]
         # 输入3个enc_inputs分别与W_q、W_k、W_v相乘得到Q、K、V            # enc_self_attn_mask: [batch_size, src_len, src_len]
@@ -142,7 +143,7 @@ class EncoderLayer(nn.Module):
     def __init__(self, device):
         super(EncoderLayer, self).__init__()
         self.enc_self_attn = MultiHeadAttention(device)       # 多头注意力机制
-        self.pos_ffn = PoswiseFeedForwardNet()          # 前馈神经网络
+        self.pos_ffn = PoswiseFeedForwardNet(device)          # 前馈神经网络
 
     def forward(self, enc_inputs, enc_self_attn_mask):  # enc_inputs: [batch_size, src_len, d_model]
         # 输入3个enc_inputs分别与W_q、W_k、W_v相乘得到Q、K、V             # enc_self_attn_mask: [batch_size, src_len, src_len]
@@ -176,7 +177,7 @@ class DecoderLayer(nn.Module):
         self.device = device
         self.dec_self_attn = MultiHeadAttention(device)
         self.dec_enc_attn = MultiHeadAttention(device)
-        self.pos_ffn = PoswiseFeedForwardNet()
+        self.pos_ffn = PoswiseFeedForwardNet(device)
 
     def forward(self, dec_inputs, enc_outputs, dec_self_attn_mask,
                 dec_enc_attn_mask):                                             # dec_inputs: [batch_size, tgt_len, d_model]
