@@ -60,7 +60,8 @@ def collate_fn(batch):
 
 
 class SqlTransformer:
-    def __init__(self):
+    def __init__(self, device):
+        self.device = device
         self.vocab = SqlVocabulary()
         self.model_pt_file_path = './output/model.pth'
         self.vocab_file_path = './output/vocab.txt'
@@ -69,7 +70,7 @@ class SqlTransformer:
     def load_model(self):
         self.vocab.load(self.vocab_file_path)
         vocab_size = len(self.vocab)
-        self.model = model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size, device='cuda')
+        self.model = model = Transformer(src_vocab_size=vocab_size, tgt_vocab_size=vocab_size, device=self.device)
         if os.path.exists(self.model_pt_file_path):
             model.load_state_dict(torch.load(self.model_pt_file_path))
         return model
@@ -122,10 +123,11 @@ class SqlTransformer:
         optimizer = optim.SGD(model.parameters(), lr=1e-3, momentum=0.99)
         best_loss = float('inf')
         best_model_state_dict = None
+        device = self.device
         for epoch in range(max_epoch):
             for batch in data_loader:  # enc_inputs : [batch_size, src_len]
                 enc_inputs, dec_inputs, dec_outputs = batch
-                enc_inputs, dec_inputs, dec_outputs = enc_inputs.cuda(), dec_inputs.cuda(), dec_outputs.cuda()
+                enc_inputs, dec_inputs, dec_outputs = enc_inputs.to(device), dec_inputs.to(device), dec_outputs.to(device)
                 outputs, enc_self_attns, dec_self_attns, dec_enc_attns = model(enc_inputs, dec_inputs)
                 # outputs: [batch_size * tgt_len, tgt_vocab_size]
                 loss = criterion(outputs, dec_outputs.view(-1))
@@ -157,7 +159,7 @@ class SqlTransformer:
 
     def inference(self, text):
         input_values = self.vocab.encode_infer_text(text)
-        enc_input = torch.LongTensor([input_values]).cuda()
+        enc_input = torch.LongTensor([input_values]).to(self.device)
         start_symbol = self.vocab.SOS_index
         predict_dec_input = self.eval_model(enc_input, start_symbol=start_symbol)
         predict, _, _, _ = self.model(enc_input, predict_dec_input)
@@ -170,7 +172,7 @@ class SqlTransformer:
 if __name__ == '__main__':
     translate_file_path = './data/tsql.txt'
     csv_file_path = './data/tsql.csv'
-    m = SqlTransformer()
+    m = SqlTransformer('cuda')
     #m.rebuild_vocab()
     m.convert_translate_file_to_csv_file(translate_file_path, csv_file_path)
     m.train(csv_file_path)
