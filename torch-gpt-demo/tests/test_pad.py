@@ -1,6 +1,6 @@
 import unittest
 
-from translate_file_datasets import pad_words, pad_zip
+from main_translate import pad_words, pad_zip
 
 
 class TestPad(unittest.TestCase):
