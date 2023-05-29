@@ -11,7 +11,7 @@ n_heads = 8     # Multi-Head Attention设置为8
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, dim=512, dropout=0.1, max_len=5000):
+    def __init__(self, device, dim=512, dropout=0.1, max_len=5000):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
         pos_table = np.array([
@@ -19,7 +19,7 @@ class PositionalEncoding(nn.Module):
             if pos != 0 else np.zeros(dim) for pos in range(max_len)])
         pos_table[1:, 0::2] = np.sin(pos_table[1:, 0::2])           # 字嵌入维度为偶数时
         pos_table[1:, 1::2] = np.cos(pos_table[1:, 1::2])           # 字嵌入维度为奇数时
-        self.pos_table = torch.FloatTensor(pos_table).cuda()        # enc_inputs: [seq_len, dim]
+        self.pos_table = torch.FloatTensor(pos_table).to(device)        # enc_inputs: [seq_len, dim]
 
     def forward(self, enc_inputs):
         """
@@ -151,10 +151,10 @@ class EncoderLayer(nn.Module):
         return enc_outputs, attn
 
 class Encoder(nn.Module):
-    def __init__(self, src_vocab_size, d_model=512):
+    def __init__(self, src_vocab_size, device, d_model=512):
         super(Encoder, self).__init__()
         self.src_emb = nn.Embedding(src_vocab_size, d_model)                     # 把字转换字向量
-        self.pos_emb = PositionalEncoding(d_model)                               # 加入位置信息
+        self.pos_emb = PositionalEncoding(device, d_model)                               # 加入位置信息
         self.layers = nn.ModuleList([EncoderLayer() for _ in range(n_layers)])
 
     def forward(self, enc_inputs):                                               # enc_inputs: [batch_size, src_len]
@@ -193,21 +193,25 @@ class DecoderLayer(nn.Module):
 
 
 class Decoder(nn.Module):
-    def __init__(self, tgt_vocab_size, d_model):
+    def __init__(self, tgt_vocab_size, device, d_model=512):
         super(Decoder, self).__init__()
+        self.device = device
         self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model)
-        self.pos_emb = PositionalEncoding(d_model)
+        self.pos_emb = PositionalEncoding(device, d_model)
         self.layers = nn.ModuleList([DecoderLayer() for _ in range(n_layers)])
 
     def forward(self, dec_inputs, enc_inputs, enc_outputs):                         # dec_inputs: [batch_size, tgt_len]
                                                                                     # enc_intpus: [batch_size, src_len]
                                                                                     # enc_outputs: [batsh_size, src_len, d_model]
         dec_outputs = self.tgt_emb(dec_inputs)                                      # [batch_size, tgt_len, d_model]
-        dec_outputs = self.pos_emb(dec_outputs).cuda()                              # [batch_size, tgt_len, d_model]
-        dec_self_attn_pad_mask = get_attn_pad_mask(dec_inputs, dec_inputs).cuda()   # [batch_size, tgt_len, tgt_len]
-        dec_self_attn_subsequence_mask = get_attn_subsequence_mask(dec_inputs).cuda()  # [batch_size, tgt_len, tgt_len]
+        dec_outputs = self.pos_emb(dec_outputs).to(self.device)                     # [batch_size, tgt_len, d_model]
+        dec_self_attn_pad_mask = get_attn_pad_mask(dec_inputs, dec_inputs)\
+            .to(self.device)   # [batch_size, tgt_len, tgt_len]
+        dec_self_attn_subsequence_mask = get_attn_subsequence_mask(dec_inputs)\
+            .to(self.device)  # [batch_size, tgt_len, tgt_len]
         dec_self_attn_mask = torch.gt((dec_self_attn_pad_mask +
-                                       dec_self_attn_subsequence_mask), 0).cuda()   # [batch_size, tgt_len, tgt_len]
+                                       dec_self_attn_subsequence_mask), 0)\
+            .to(self.device)   # [batch_size, tgt_len, tgt_len]
         dec_enc_attn_mask = get_attn_pad_mask(dec_inputs, enc_inputs)               # [batc_size, tgt_len, src_len]
         dec_self_attns, dec_enc_attns = [], []
         for layer in self.layers:                                                   # dec_outputs: [batch_size, tgt_len, d_model]
@@ -221,11 +225,11 @@ class Decoder(nn.Module):
 
 
 class Transformer(nn.Module):
-    def __init__(self, src_vocab_size, tgt_vocab_size, d_model=512):
+    def __init__(self, src_vocab_size, tgt_vocab_size, device, d_model=512):
         super(Transformer, self).__init__()
-        self.Encoder = Encoder(src_vocab_size, d_model).cuda()
-        self.Decoder = Decoder(tgt_vocab_size, d_model).cuda()
-        self.projection = nn.Linear(d_model, tgt_vocab_size, bias=False).cuda()
+        self.Encoder = Encoder(src_vocab_size, device, d_model).to(device)
+        self.Decoder = Decoder(tgt_vocab_size, device, d_model).to(device)
+        self.projection = nn.Linear(d_model, tgt_vocab_size, bias=False).to(device)
 
     def forward(self, enc_inputs, dec_inputs):                          # enc_inputs: [batch_size, src_len]
                                                                         # dec_inputs: [batch_size, tgt_len]
