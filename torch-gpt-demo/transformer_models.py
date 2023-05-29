@@ -13,6 +13,7 @@ n_heads = 8     # Multi-Head Attention设置为8
 class PositionalEncoding(nn.Module):
     def __init__(self, device, dim=512, dropout=0.1, max_len=5000):
         super(PositionalEncoding, self).__init__()
+        self.device = device
         self.dropout = nn.Dropout(p=dropout)
         pos_table = np.array([
             [pos / np.power(10000, 2 * i / dim) for i in range(dim)]
@@ -27,7 +28,7 @@ class PositionalEncoding(nn.Module):
         :return:
         """
         enc_inputs += self.pos_table[:enc_inputs.size(1), :]
-        return self.dropout(enc_inputs.cuda())
+        return self.dropout(enc_inputs.to(self.device))
 
 
 def get_attn_pad_mask(seq_q, seq_k):
@@ -73,8 +74,9 @@ class ScaledDotProductAttention(nn.Module):
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(MultiHeadAttention, self).__init__()
+        self.device = device
         self.W_Q = nn.Linear(d_model, d_k * n_heads, bias=False)
         self.W_K = nn.Linear(d_model, d_k * n_heads, bias=False)
         self.W_V = nn.Linear(d_model, d_v * n_heads, bias=False)
@@ -100,7 +102,7 @@ class MultiHeadAttention(nn.Module):
         context = context.transpose(1, 2).reshape(batch_size, -1,
                                                   n_heads * d_v)                    # context: [batch_size, len_q, n_heads * d_v]
         output = self.fc(context)                                                   # [batch_size, len_q, d_model]
-        return nn.LayerNorm(d_model).cuda()(output + residual), attn
+        return nn.LayerNorm(d_model).to(self.device)(output + residual), attn
 
 
 class PoswiseFeedForwardNet(nn.Module):
@@ -122,9 +124,9 @@ class PoswiseFeedForwardNet(nn.Module):
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(EncoderLayer, self).__init__()
-        self.enc_self_attn = MultiHeadAttention()                   # 多头注意力机制
+        self.enc_self_attn = MultiHeadAttention(device)                   # 多头注意力机制
         self.pos_ffn = PoswiseFeedForwardNet()                      # 前馈神经网络
 
     def forward(self, enc_inputs, enc_self_attn_mask):              # enc_inputs: [batch_size, src_len, d_model]
@@ -137,9 +139,9 @@ class EncoderLayer(nn.Module):
 
 
 class EncoderLayer(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(EncoderLayer, self).__init__()
-        self.enc_self_attn = MultiHeadAttention()       # 多头注意力机制
+        self.enc_self_attn = MultiHeadAttention(device)       # 多头注意力机制
         self.pos_ffn = PoswiseFeedForwardNet()          # 前馈神经网络
 
     def forward(self, enc_inputs, enc_self_attn_mask):  # enc_inputs: [batch_size, src_len, d_model]
@@ -155,7 +157,7 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.src_emb = nn.Embedding(src_vocab_size, d_model)                     # 把字转换字向量
         self.pos_emb = PositionalEncoding(device, d_model)                               # 加入位置信息
-        self.layers = nn.ModuleList([EncoderLayer() for _ in range(n_layers)])
+        self.layers = nn.ModuleList([EncoderLayer(device) for _ in range(n_layers)])
 
     def forward(self, enc_inputs):                                               # enc_inputs: [batch_size, src_len]
         enc_outputs = self.src_emb(enc_inputs)                                   # enc_outputs: [batch_size, src_len, d_model]
@@ -169,10 +171,11 @@ class Encoder(nn.Module):
         return enc_outputs, enc_self_attns
 
 class DecoderLayer(nn.Module):
-    def __init__(self):
+    def __init__(self, device):
         super(DecoderLayer, self).__init__()
-        self.dec_self_attn = MultiHeadAttention()
-        self.dec_enc_attn = MultiHeadAttention()
+        self.device = device
+        self.dec_self_attn = MultiHeadAttention(device)
+        self.dec_enc_attn = MultiHeadAttention(device)
         self.pos_ffn = PoswiseFeedForwardNet()
 
     def forward(self, dec_inputs, enc_outputs, dec_self_attn_mask,
@@ -198,7 +201,7 @@ class Decoder(nn.Module):
         self.device = device
         self.tgt_emb = nn.Embedding(tgt_vocab_size, d_model)
         self.pos_emb = PositionalEncoding(device, d_model)
-        self.layers = nn.ModuleList([DecoderLayer() for _ in range(n_layers)])
+        self.layers = nn.ModuleList([DecoderLayer(device) for _ in range(n_layers)])
 
     def forward(self, dec_inputs, enc_inputs, enc_outputs):                         # dec_inputs: [batch_size, tgt_len]
                                                                                     # enc_intpus: [batch_size, src_len]
