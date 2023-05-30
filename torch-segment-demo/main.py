@@ -86,14 +86,10 @@ def save_anns2(image, anns):
         m = ann['segmentation']
         x, y, w, h = ann['bbox']
         #print(f'{ann=}')
-        #print(f'{x=} {y=} {w=} {h=}')
         save_path = f'./output/ann_{idx}.jpg'
         masked_img = image.copy()
         masked_img[~m] = [1, 1, 0]  # 將非 `m` 的部分設為完全透明
         cropped_img = masked_img[y:y + h, x:x + w]
-        #h, w = m.shape[-2:]
-        #masked_img.reshape(h, w)
-        # cv2.imwrite(save_path, (masked_img * 255).astype(np.uint8))
         cv2.imwrite(save_path, (cropped_img * 255).astype(np.uint8))
         idx += 1
 
