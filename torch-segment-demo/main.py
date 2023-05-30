@@ -79,18 +79,24 @@ def save_anns(anns):
 def save_anns2(image, anns):
     if len(anns) == 0:
         return
-    sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
+    # sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
+    sorted_anns = sorted(anns, key=(lambda item: (item['bbox'][1], item['bbox'][0])), reverse=False)
     idx = 0
     for ann in sorted_anns:
         m = ann['segmentation']
+        x, y, w, h = ann['bbox']
+        #print(f'{ann=}')
+        #print(f'{x=} {y=} {w=} {h=}')
         save_path = f'./output/ann_{idx}.jpg'
-        #m_uint8 = (m * 255).astype(np.uint8)
-        #cv2.imwrite(save_path, m_uint8)
         masked_img = image.copy()
-        # masked_img[:, :, 2] = 0
         masked_img[~m] = [1, 1, 0]  # 將非 `m` 的部分設為完全透明
-        cv2.imwrite(save_path, (masked_img * 255).astype(np.uint8))
+        cropped_img = masked_img[y:y + h, x:x + w]
+        #h, w = m.shape[-2:]
+        #masked_img.reshape(h, w)
+        # cv2.imwrite(save_path, (masked_img * 255).astype(np.uint8))
+        cv2.imwrite(save_path, (cropped_img * 255).astype(np.uint8))
         idx += 1
+
 
 def read_image(image_path):
     image = cv2.imread(image_path)
@@ -159,7 +165,7 @@ def get_mask2(image):
     # save_anns(masks2)
     save_anns2(image, masks2)
     plt.axis('off')
-    plt.show()
+    #plt.show()
 
 
 def generate_mask(image):
