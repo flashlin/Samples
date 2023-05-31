@@ -121,7 +121,6 @@ class EffNetV2(nn.Module):
     def __init__(self, cfgs, num_classes=1000, width_mult=1.):
         super(EffNetV2, self).__init__()
         self.cfgs = cfgs
-
         # building first layer
         input_channel = _make_divisible(24 * width_mult, 8)
         layers = [conv_3x3_bn(3, input_channel, 2)]

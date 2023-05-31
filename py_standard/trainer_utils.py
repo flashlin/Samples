@@ -76,14 +76,18 @@ def get_image_classification_train_loader(train_images_dir, batch_size, workers=
             transforms.RandomHorizontalFlip(),
         ]))
 
-    if torch.distributed.is_initialized():
-        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
-    else:
-        train_sampler = None
+    # if torch.distributed.is_initialized():
+    #     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+    # else:
+    train_sampler = None
 
+    # train_loader = torch.utils.data.DataLoader(
+    #     train_dataset, batch_size=batch_size, shuffle=(train_sampler is None),
+    #     num_workers=workers, worker_init_fn=_worker_init_fn, pin_memory=True, sampler=train_sampler,
+    #     collate_fn=fast_collate)
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=(train_sampler is None),
-        num_workers=workers, worker_init_fn=_worker_init_fn, pin_memory=True, sampler=train_sampler,
+        train_dataset,
+        batch_size=batch_size,
         collate_fn=fast_collate)
 
     return PrefetchedWrapper(train_loader), len(train_loader)
@@ -117,7 +121,7 @@ def adjust_learning_rate(optimizer, epoch, iteration, max_batch_size, args):
     warmup_epoch = 5 if args.warmup else 0
     warmup_iter = warmup_epoch * max_batch_size
     current_iter = iteration + epoch * max_batch_size
-    max_iter = args.epochs * max_batch_size
+    max_iter = args.max_epochs * max_batch_size
 
     if args.lr_decay == 'step':
         lr = args.lr * (args.gamma ** ((current_iter - warmup_iter) / (max_iter - warmup_iter)))
@@ -158,6 +162,7 @@ def accuracy(output, target, topk=(1,)):
 class Trainer:
     def __init__(self, model, args):
         self.model = model
+        self.args = args
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.optimizer = torch.optim.SGD(model.parameters(),
                                          args.lr,
@@ -167,11 +172,20 @@ class Trainer:
         logger.set_names(['Learning Rate', 'Train Loss', 'Valid Loss', 'Train Acc.', 'Valid Acc.'])
         self.logger = logger
 
-    def train(self, epoch, train_loader, train_loader_len):
+    def train(self, train_loader, train_loader_len):
+        best_loss = float('inf')
+        for epoch in range(self.args.max_epochs):
+            loss = self.train_epoch(epoch, train_loader, train_loader_len)
+            if loss < best_loss:
+                best_loss = loss
+                torch.save(self.model.state_dict(), f'{self.args.checkpoint}/{self.args.model_weights_path}')
+            print(f'Epoch:{epoch:.4f} Loss:{loss:.4f}')
+
+    def train_epoch(self, epoch, train_loader, train_loader_len):
         optimizer = self.optimizer
         losses = AverageMeter()
         for i, (input, target) in enumerate(train_loader):
-            adjust_learning_rate(optimizer, epoch, i, train_loader_len)
+            adjust_learning_rate(optimizer, epoch, i, train_loader_len, self.args)
 
             # measure data loading time
             # data_time.update(time.time() - end)
@@ -193,4 +207,5 @@ class Trainer:
             loss.backward()
             optimizer.step()
             # self.logger.append([lr, train_loss, val_loss, train_acc, prec1])
-        self.logger.close()
+        #self.logger.close()
+        return losses.avg
