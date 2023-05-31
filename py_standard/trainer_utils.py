@@ -67,9 +67,10 @@ class PrefetchedWrapper(object):
         return PrefetchedWrapper.prefetched_loader(self.dataloader)
 
 
-def get_pytorch_train_loader(train_dir, batch_size, workers=5, _worker_init_fn=None, input_size=224):
+def get_image_classification_train_loader(train_images_dir, batch_size, workers=5,
+                                          _worker_init_fn=None, input_size=224):
     train_dataset = datasets.ImageFolder(
-        train_dir,
+        train_images_dir,
         transforms.Compose([
             transforms.RandomResizedCrop(input_size),
             transforms.RandomHorizontalFlip(),
