@@ -75,6 +75,8 @@ def get_image_classification_train_loader(train_images_dir, batch_size, workers=
             transforms.RandomResizedCrop(input_size),
             transforms.RandomHorizontalFlip(),
         ]))
+    print(f'{train_dataset.classes=}')
+    print(f'{train_dataset.class_to_idx=}')
 
     # if torch.distributed.is_initialized():
     #     train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)

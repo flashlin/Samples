@@ -1,6 +1,7 @@
 from multiprocessing import freeze_support
 
 import torch
+from torch import nn
 
 from efficient_net_v2 import effnetv2_xl
 from trainer_utils import get_image_classification_train_loader, Trainer, infer
@@ -8,7 +9,13 @@ from trainer_utils import get_image_classification_train_loader, Trainer, infer
 device = 'cuda'
 freeze_support()
 train_loader, train_loader_len = get_image_classification_train_loader('./output', batch_size=1)
-model = effnetv2_xl().to(device)
+
+model = effnetv2_xl()
+
+in_features = model.classifier.in_features
+num_classes = 5  # 根据你的分类任务设置类别数量
+model.classifier = nn.Linear(in_features, num_classes)
+model.to(device)
 
 
 class EfficientArgs:
@@ -26,7 +33,7 @@ class EfficientArgs:
 
 args = EfficientArgs()
 trainer = Trainer(model, args)
-# trainer.train(train_loader, train_loader_len)
+trainer.train(train_loader, train_loader_len)
 
 
 
