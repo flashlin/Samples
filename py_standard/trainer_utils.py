@@ -171,6 +171,10 @@ class Trainer:
         logger = FigLogger(os.path.join(args.checkpoint, 'log.txt'), title='')
         logger.set_names(['Learning Rate', 'Train Loss', 'Valid Loss', 'Train Acc.', 'Valid Acc.'])
         self.logger = logger
+        self.model_weights_path = f'{self.args.checkpoint}/{self.args.model_weights_path}'
+        if os.path.exists(self.model_weights_path):
+            checkpoint = torch.load(self.model_weights_path)
+            self.model.load_state_dict(checkpoint)
 
     def train(self, train_loader, train_loader_len):
         best_loss = float('inf')
@@ -178,7 +182,7 @@ class Trainer:
             loss = self.train_epoch(epoch, train_loader, train_loader_len)
             if loss < best_loss:
                 best_loss = loss
-                torch.save(self.model.state_dict(), f'{self.args.checkpoint}/{self.args.model_weights_path}')
+                torch.save(self.model.state_dict(), self.model_weights_path)
             print(f'Epoch:{epoch:.4f} Loss:{loss:.4f}')
 
     def train_epoch(self, epoch, train_loader, train_loader_len):
@@ -209,3 +213,9 @@ class Trainer:
             # self.logger.append([lr, train_loss, val_loss, train_acc, prec1])
         #self.logger.close()
         return losses.avg
+
+
+def infer(model, input):
+    with torch.no_grad():
+        output = model(input)
+    return output
