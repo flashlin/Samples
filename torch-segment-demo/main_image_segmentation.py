@@ -116,7 +116,7 @@ def show_imgae(image):
 idx = 0
 sam = get_image_segmentation_model()
 
-#save_image_segmentation(sam, './data/train_segmentation/BMobile/CAS/cas-in.jpg', 0)
+# save_image_segmentation(sam, './data/train_segmentation/BMobile/LandingPage2/EplPromotion.jpg', 0)
 
 for image_file in query_sub_files('./data/train_segmentation', ['.jpg', '.png', '.gif']):
     print(f'{image_file}')
