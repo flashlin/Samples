@@ -29,6 +29,8 @@ def save_annotations(image, annotations, output_dir: str, idx: int = 0):
         cropped_img = image[y:y + h, x:x + w]
         if w <= 1 or h <= 1:
             continue
+        if w * h <= 10 * 10:
+            continue
         cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, cropped_img.astype(np.uint8))
         idx += 1
