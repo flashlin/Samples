@@ -10,6 +10,6 @@ def query_sub_files(folder: str, ext_list: list[str]):
     """
     for root, dirs, files in os.walk(folder):
         for file in files:
-            if file.endswith(ext_list):
+            if file.endswith(tuple(ext_list)):
                 file_path = os.path.join(root, file)
                 yield file_path
