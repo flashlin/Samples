@@ -22,7 +22,9 @@ def save_annotations(image, annotations, output_dir: str, idx: int = 0):
         #masked_img = image.copy()
         #masked_img[~m] = [1, 1, 0]  # 將非 `m` 的部分設為完全透明
         cropped_img = image[y:y + h, x:x + w]
-        # print(f'{save_path=}')
+        if w <= 1 or h <= 1:
+            continue
+        #print(f'{idx=} {x=} {y=} {w=} {h=}')
         cv2.imwrite(save_path, cropped_img.astype(np.uint8))
         idx += 1
     return idx
