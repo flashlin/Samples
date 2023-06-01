@@ -1,8 +1,19 @@
+# https://github.com/facebookresearch/segment-anything
 import cv2
 import numpy as np
-from segment_anything import SamPredictor, SamAutomaticMaskGenerator
+from segment_anything import SamPredictor, sam_model_registry, SamAutomaticMaskGenerator
 
-from main import read_image, sam
+model_type = 'vit_l'  # vit_h / vit_l / vit_b
+sam_checkpoint = "sam_vit_l_0b3195.pth"
+device = 'cuda'
+sam = sam_model_registry[model_type](checkpoint=f"./models/{sam_checkpoint}")
+sam.to(device=device)
+
+
+def read_image(image_path):
+    image = cv2.imread(image_path)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    return image
 
 
 def save_annotations(image, annotations, output_dir: str):
