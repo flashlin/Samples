@@ -9,7 +9,7 @@ model = effnetv2_xl(num_classes=5)
 model.to(device)
 
 
-class EfficientArgs:
+class TrainArgs:
     def __init__(self):
         self.lr = 0.1
         self.momentum = 0.9
@@ -22,7 +22,7 @@ class EfficientArgs:
         self.gamma = 0.2
 
 
-args = EfficientArgs()
+args = TrainArgs()
 trainer = Trainer(model, args)
 #trainer.train(train_loader, train_loader_len)
 
