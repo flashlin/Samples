@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-from image_segmentation_utils import save_image_segmentation
+from image_segmentation_utils import save_image_segmentation, get_image_segmentation_model
 from io_utils import query_sub_files
 
 
@@ -114,6 +114,11 @@ def show_imgae(image):
 
 #torch.cuda.set_per_process_memory_fraction(0.9)
 idx = 0
-for image_file in query_sub_files('./data/train_segmentation', ['.jpg', '.png', '.gif']):
-    print(f'{image_file}')
-    idx = save_image_segmentation(image_file, './output/segmentation', idx, device='cpu')
+sam = get_image_segmentation_model()
+
+save_image_segmentation(sam, './data/train_segmentation/BMobile/CAS/cas-in.jpg', 0)
+
+
+# for image_file in query_sub_files('./data/train_segmentation', ['.jpg', '.png', '.gif']):
+#     print(f'{image_file}')
+#     idx = save_image_segmentation(sam, image_file, './output/segmentation', idx)
