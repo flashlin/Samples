@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import cv2
 
 from image_segmentation_utils import save_image_segmentation
+from io_utils import query_sub_files
 
 
 def show_mask(mask, ax, random_color=False):
@@ -110,5 +111,6 @@ def show_imgae(image):
 #     mask_generator = SamAutomaticMaskGenerator(sam)
 #     masks = mask_generator.generate(image)
 
-
-save_image_segmentation('./images/sbotop-deposit-bonus.jpg', './output/segmentation')
+idx = 0
+for image_file in query_sub_files('./data/train_segmentation', ['.jpg', '.png', '.gif']):
+    idx = save_image_segmentation(image_file, './output/segmentation', idx)
