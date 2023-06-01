@@ -21,10 +21,15 @@ def save_annotations(image, annotations, output_dir: str, idx: int = 0):
         save_path = f'{output_dir}/ann_{idx}.jpg'
         #masked_img = image.copy()
         #masked_img[~m] = [1, 1, 0]  # 將非 `m` 的部分設為完全透明
+        # print(f'{idx=} {x=} {y=} {w=} {h=}')
+        y = int(y)
+        x = int(x)
+        w = int(w)
+        h = int(h)
         cropped_img = image[y:y + h, x:x + w]
         if w <= 1 or h <= 1:
             continue
-        #print(f'{idx=} {x=} {y=} {w=} {h=}')
+        cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, cropped_img.astype(np.uint8))
         idx += 1
     return idx
