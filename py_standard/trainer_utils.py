@@ -160,8 +160,21 @@ def accuracy(output, target, topk=(1,)):
         return res
 
 
+class TrainArgs:
+    def __init__(self):
+        self.lr = 0.1
+        self.momentum = 0.9
+        self.weight_decay = 0.0001
+        self.checkpoint = './output'
+        self.model_weights_path = 'model_weights.pth'
+        self.warmup = True
+        self.max_epochs = 50
+        self.lr_decay = 'step'
+        self.gamma = 0.2
+
+
 class Trainer:
-    def __init__(self, model, args):
+    def __init__(self, model, args=TrainArgs()):
         self.model = model
         self.args = args
         self.criterion = nn.CrossEntropyLoss().cuda()
