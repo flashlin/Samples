@@ -16,12 +16,11 @@ def read_image(image_path):
     return image
 
 
-def save_annotations(image, annotations, output_dir: str):
+def save_annotations(image, annotations, output_dir: str, idx: int = 0):
     if len(annotations) == 0:
-        return
+        return idx
     # sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
     sorted_annotations = sorted(annotations, key=(lambda item: (item['bbox'][1], item['bbox'][0])), reverse=False)
-    idx = 0
     for ann in sorted_annotations:
         m = ann['segmentation']
         x, y, w, h = ann['bbox']
@@ -31,9 +30,10 @@ def save_annotations(image, annotations, output_dir: str):
         cropped_img = masked_img[y:y + h, x:x + w]
         cv2.imwrite(save_path, (cropped_img * 255).astype(np.uint8))
         idx += 1
+    return idx
 
 
-def save_image_segmentation(image_path: str, output_dir: str):
+def save_image_segmentation(image_path: str, output_dir: str, idx: int = 0):
     image = read_image(image_path)
     predictor = SamPredictor(sam)
     predictor.set_image(image)
@@ -49,4 +49,4 @@ def save_image_segmentation(image_path: str, output_dir: str):
     )
 
     masks = mask_generator.generate(image)
-    save_annotations(image, masks, output_dir)
+    return save_annotations(image, masks, output_dir, idx)
