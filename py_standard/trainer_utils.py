@@ -1,12 +1,11 @@
 import os
-
 import torch
 from torch import nn
 import numpy as np
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from math import cos, pi
-
+from PIL import Image
 from fig_logger import FigLogger, AverageMeter
 
 
@@ -204,20 +203,29 @@ class Trainer:
             # measure accuracy and record loss
             prec1, prec5 = accuracy(output, target, topk=(1, 5))
             losses.update(loss.item(), input.size(0))
-            #losses.update(loss.item(), input.size(0))
-            #top1.update(prec1.item(), input.size(0))
-            #top5.update(prec5.item(), input.size(0))
+            # losses.update(loss.item(), input.size(0))
+            # top1.update(prec1.item(), input.size(0))
+            # top5.update(prec5.item(), input.size(0))
 
             # compute gradient and do SGD step
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             # self.logger.append([lr, train_loss, val_loss, train_acc, prec1])
-        #self.logger.close()
+        # self.logger.close()
         return losses.avg
 
 
-def infer(model, input):
+def infer_image_classify(model, image_path: str, device='cuda'):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    image = Image.open(image_path)
+    image = transform(image).unsqueeze(0).to(device)
     with torch.no_grad():
-        output = model(input)
-    return output
+        output = model(image)  # output 該張量反映了模型對每個可能類別的預測信心程度
+    _, predicted_idx = torch.max(output, 1)  # 返回兩個張量：第一個張量是最大值的值，第二個張量是最大值對應的索引
+    predicted_idx = predicted_idx.cpu().numpy()[0]
+    return predicted_idx

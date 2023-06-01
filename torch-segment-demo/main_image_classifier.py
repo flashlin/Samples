@@ -1,20 +1,11 @@
-from multiprocessing import freeze_support
-
-import torch
-from torch import nn
-
 from efficient_net_v2 import effnetv2_xl
-from trainer_utils import get_image_classification_train_loader, Trainer, infer
+from trainer_utils import get_image_classification_train_loader, Trainer, infer_image_classify
 
 device = 'cuda'
-freeze_support()
+# freeze_support()
 train_loader, train_loader_len = get_image_classification_train_loader('./output', batch_size=1)
 
-model = effnetv2_xl()
-
-in_features = model.classifier.in_features
-num_classes = 5  # 根据你的分类任务设置类别数量
-model.classifier = nn.Linear(in_features, num_classes)
+model = effnetv2_xl(num_classes=5)
 model.to(device)
 
 
@@ -33,20 +24,8 @@ class EfficientArgs:
 
 args = EfficientArgs()
 trainer = Trainer(model, args)
-trainer.train(train_loader, train_loader_len)
+#trainer.train(train_loader, train_loader_len)
 
 
-
-from torchvision import transforms
-from PIL import Image
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-])
-image = Image.open('./output/003_SBOTOP/ann_4.jpg')
-image = transform(image).unsqueeze(0).to(device)
-predicted_idx = infer(model, image)
-_, predicted_idx = torch.max(predicted_idx, 1)
-predicted_idx = predicted_idx.cpu().numpy()[0]
+predicted_idx = infer_image_classify(model, './output/003_SBOTOP/ann_4.jpg')
 print(f'{predicted_idx=}')
