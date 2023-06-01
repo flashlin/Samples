@@ -76,12 +76,6 @@ def save_anns(anns):
     ax.imshow(img)
 
 
-def read_image(image_path):
-    image = cv2.imread(image_path)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    return image
-
-
 def show_imgae(image):
     plt.figure(figsize=(10, 10))
     plt.imshow(image)
@@ -89,41 +83,32 @@ def show_imgae(image):
     plt.show()
 
 
-model_type = 'vit_l'  # vit_h / vit_l / vit_b
-sam_checkpoint = "sam_vit_l_0b3195.pth"
-
-device = 'cuda'
-
-sam = sam_model_registry[model_type](checkpoint=f"./models/{sam_checkpoint}")
-sam.to(device=device)
-
-
-def get_mask(image):
-    predictor = SamPredictor(sam)
-    predictor.set_image(image)
-
-    input_point = np.array([[500, 375]])
-    input_label = np.array([1])
-
-    masks, scores, logits = predictor.predict(
-        # point_coords=input_point,
-        # point_labels=input_label,
-        multimask_output=True,
-    )
-
-    for i, (mask, score) in enumerate(zip(masks, scores)):
-        plt.figure(figsize=(10, 10))
-        plt.imshow(image)
-        show_mask(mask, plt.gca())
-        show_points(input_point, input_label, plt.gca())
-        plt.title(f"Mask {i + 1}, Score: {score:.3f}", fontsize=18)
-        plt.axis('off')
-        plt.show()
+# def get_mask(image):
+#     predictor = SamPredictor(sam)
+#     predictor.set_image(image)
+#
+#     input_point = np.array([[500, 375]])
+#     input_label = np.array([1])
+#
+#     masks, scores, logits = predictor.predict(
+#         # point_coords=input_point,
+#         # point_labels=input_label,
+#         multimask_output=True,
+#     )
+#
+#     for i, (mask, score) in enumerate(zip(masks, scores)):
+#         plt.figure(figsize=(10, 10))
+#         plt.imshow(image)
+#         show_mask(mask, plt.gca())
+#         show_points(input_point, input_label, plt.gca())
+#         plt.title(f"Mask {i + 1}, Score: {score:.3f}", fontsize=18)
+#         plt.axis('off')
+#         plt.show()
 
 
-def generate_mask(image):
-    mask_generator = SamAutomaticMaskGenerator(sam)
-    masks = mask_generator.generate(image)
+# def generate_mask(image):
+#     mask_generator = SamAutomaticMaskGenerator(sam)
+#     masks = mask_generator.generate(image)
 
 
 save_image_segmentation('./images/sbotop-deposit-bonus.jpg', './output/segmentation')
