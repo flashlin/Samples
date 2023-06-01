@@ -8,24 +8,8 @@ train_loader, train_loader_len = get_image_classification_train_loader('./output
 model = effnetv2_xl(num_classes=5)
 model.to(device)
 
-
-class TrainArgs:
-    def __init__(self):
-        self.lr = 0.1
-        self.momentum = 0.9
-        self.weight_decay = 0.0001
-        self.checkpoint = './output'
-        self.model_weights_path = 'model_weights.pth'
-        self.warmup = True
-        self.max_epochs = 50
-        self.lr_decay = 'step'
-        self.gamma = 0.2
-
-
-args = TrainArgs()
-trainer = Trainer(model, args)
+trainer = Trainer(model)
 #trainer.train(train_loader, train_loader_len)
-
 
 predicted_idx = infer_image_classify(model, './output/003_SBOTOP/ann_4.jpg')
 print(f'{predicted_idx=}')
