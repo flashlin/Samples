@@ -15,7 +15,9 @@ def save_annotations(image, annotations, output_dir: str, idx: int = 0):
         return idx
     # sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
     sorted_annotations = sorted(annotations, key=(lambda item: (item['bbox'][1], item['bbox'][0])), reverse=False)
-    for ann in sorted_annotations:
+    for i, ann in enumerate(sorted_annotations):
+        if i == 0:
+            continue
         #m = ann['segmentation']
         x, y, w, h = ann['bbox']
         save_path = f'{output_dir}/ann_{idx}.jpg'
@@ -29,7 +31,7 @@ def save_annotations(image, annotations, output_dir: str, idx: int = 0):
         cropped_img = image[y:y + h, x:x + w]
         if w <= 1 or h <= 1:
             continue
-        if w * h <= 10 * 10:
+        if w * h <= 20 * 20:
             continue
         cropped_img = cv2.cvtColor(cropped_img, cv2.COLOR_RGB2BGR)
         cv2.imwrite(save_path, cropped_img.astype(np.uint8))
