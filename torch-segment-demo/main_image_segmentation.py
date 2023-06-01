@@ -1,4 +1,5 @@
 # https://github.com/facebookresearch/segment-anything
+import torch
 from segment_anything import SamPredictor, sam_model_registry
 from segment_anything import SamAutomaticMaskGenerator
 import numpy as np
@@ -111,6 +112,8 @@ def show_imgae(image):
 #     mask_generator = SamAutomaticMaskGenerator(sam)
 #     masks = mask_generator.generate(image)
 
+#torch.cuda.set_per_process_memory_fraction(0.9)
 idx = 0
 for image_file in query_sub_files('./data/train_segmentation', ['.jpg', '.png', '.gif']):
-    idx = save_image_segmentation(image_file, './output/segmentation', idx)
+    print(f'{image_file}')
+    idx = save_image_segmentation(image_file, './output/segmentation', idx, device='cpu')
