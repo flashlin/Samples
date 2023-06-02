@@ -25,13 +25,14 @@ function AddObjectProperty {
 
 function GetJsonFile {
    param (
-      [string]$jsonFilePath
+      [string]$jsonFilePath,
+      [string]$defaultValue=@{}
    )
    if (Test-Path $jsonFilePath) {
       $json = Get-Content $jsonFilePath
    }
    else {
-      $json = "{}"
+      $json = $defaultValue | ConvertTo-Json
    }
    $obj = $json | ConvertFrom-Json
    return $obj
