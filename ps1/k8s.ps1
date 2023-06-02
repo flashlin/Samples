@@ -1,6 +1,6 @@
 param(
    [string]$action,
-   [string]$arg1
+   [string]$arg0
 )
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 
@@ -25,18 +25,29 @@ function InvokeK8s {
 }
 
 
-$state.pods = InvokeK8s "get pods -n b2c" | SplitTableString 
-SetJsonFile $stateFile $state
-$idx = 0
-$state.pods | ForEach-Object {
-   [PSCustomObject]@{
-      Name = "$idx - $($_.NAME)"
-      Ready = $_.READY
-      Status = $_.STATUS
-      Restarts = $_.RESTARTS
+function GetAllPods {
+   $state.pods = InvokeK8s "get pods -n b2c" | SplitTableString 
+   SetJsonFile $stateFile $state
+   $idx = 0
+   $state.pods | ForEach-Object {
+      [PSCustomObject]@{
+         Id = $idx
+         Name = "$($_.NAME)"
+         Ready = $_.READY
+         Status = $_.STATUS
+         Restarts = $_.RESTARTS
+      }
+      $idx += 1
    }
-   $idx += 1
-} | Format-Table
+}
 
 
+if( "f" -eq $action ) {
+   $pattern = $arg0
+   $myFilter = {
+      $_.Name.ToLower() -match $pattern
+  }
+  GetAllPods | Where-Object -FilterScript $myFilter | Format-Table
+  return
+}
 
