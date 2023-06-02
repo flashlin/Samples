@@ -1,6 +1,7 @@
 param(
    [string]$action,
-   [string]$arg0
+   [string]$arg0,
+   [string]$arg1
 )
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 
@@ -76,10 +77,18 @@ if( "f" -eq $action ) {
 
 if( "l" -eq $action ) {
    $id = $arg0
+   $pattern = $arg1
    $myFilter = {
       $_.Id -eq $id
    }
    $pod = $state.pods | Where-Object -FilterScript $myFilter
-   InvokeK8s "logs $($pod.Name) -n $($state.namespace)"
+   InvokeK8s "logs $($pod.Name) -n $($state.namespace)" | ForEach-Object {
+      $allMatches = MatchText $_ $pattern
+      if( $null -ne $allMatches ) {
+         WriteHostColorByAllMatches $allMatches
+      }
+      # WriteHostColor $_ $pattern
+      Write-Host ""
+   }
    return
 }

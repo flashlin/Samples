@@ -55,16 +55,30 @@ function InvokeCmd {
    Invoke-Expression $cmd
 }
 
-function WriteHostColor {
+function DumpProperties {
+   param(
+      $obj
+   )
+   $obj | Get-Member -MemberType Property | Format-Table
+}
+
+function MatchText {
    param(
       [string]$text,
       [string]$pattern
    )
-   if ( $null -eq $pattern ) {
-      Write-Host $text -NoNewline
-      return
+   $result = Select-String -InputObject $text -Pattern $pattern -AllMatches
+   Write-Host "ttt $($result.GetType())"
+   if( $null -ne $result ) {
+      DumpProperties $result
    }
-   $allMatches = Select-String -InputObject $text -Pattern $pattern -AllMatches
+   return $result
+}
+
+function WriteHostColorByAllMatches {
+   param(
+      [Microsoft.PowerShell.Commands.MatchInfo]$allMatches
+   )
    $currentIndex = 0
    foreach ($match in $allMatches.Matches) {
       # 輸出未匹配的部分
@@ -80,6 +94,24 @@ function WriteHostColor {
       $unmatchedText = $text.Substring($currentIndex)
       Write-Host $unmatchedText -NoNewline
    }
+}
+
+function WriteHostColor {
+   param(
+      [string]$text,
+      [string]$pattern
+   )
+   if ( $null -eq $pattern ) {
+      Write-Host $text -NoNewline
+      return
+   }
+   $allMatches = Select-String -InputObject $text -Pattern $pattern -AllMatches
+   if( $null -eq $allMatches ) {
+      Write-Host $text -NoNewline
+      return
+   }
+   DumpProperties $allMatches
+   WriteHostColorByAllMatches $allMatches
 }
 
 function GetFixedText {
