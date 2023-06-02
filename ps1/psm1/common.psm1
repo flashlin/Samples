@@ -26,7 +26,7 @@ function AddObjectProperty {
 function GetJsonFile {
    param (
       [string]$jsonFilePath,
-      [string]$defaultValue=@{}
+      [object]$defaultValue=[PSCustomObject]@{}
    )
    if (Test-Path $jsonFilePath) {
       $json = Get-Content $jsonFilePath
@@ -34,7 +34,7 @@ function GetJsonFile {
    else {
       $json = $defaultValue | ConvertTo-Json
    }
-   $obj = $json | ConvertFrom-Json
+   $obj = $json | ConvertFrom-Json 
    return $obj
 }
 
