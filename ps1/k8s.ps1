@@ -11,23 +11,27 @@ $env:KUBECONFIG="d:\demo\k8s-stg.yaml"
 $stateFile = "d:/demo/k8s-state.json" 
 $state = [PSCustomObject]@{
    kubeconfig = "D:\demo\k8s-stg.yaml"
+   namespace = 'b2c'
    pods = @()
 }
 $state = GetJsonFile $stateFile $state
 
+function SaveState {
+   SetJsonFile $stateFile $state
+}
 
 function InvokeK8s {
    param(
       [string]$command
    )
    #InvokeCmd "$($env:k8s_exe) get pods -n b2c" | SplitTableString
-   InvokeCmd "$($env:k8s_exe) $command"
+   $cmd = "$($env:k8s_exe) $command"
+   InvokeCmd $cmd
 }
 
 
 function GetAllPods {
-   $state.pods = InvokeK8s "get pods -n b2c" | SplitTableString 
-   SetJsonFile $stateFile $state
+   $state.pods = InvokeK8s "get pods -n $($state.namespace)" | SplitTableString 
    $idx = 0
    $state.pods | ForEach-Object {
       [PSCustomObject]@{
@@ -41,13 +45,41 @@ function GetAllPods {
    }
 }
 
+if( "" -eq $action ) {
+   Write-Host "reset      : reset k8s script tool state"
+   Write-Host "f <name>   : search contain name pattern"
+   Write-Host "l [pod id] : logs"
+   return
+}
+
+if( "reset" -eq $action ) {
+   Remove-Item $stateFile
+   Write-Host "clean state"
+   return
+}
 
 if( "f" -eq $action ) {
    $pattern = $arg0
    $myFilter = {
       $_.Name.ToLower() -match $pattern
   }
-  GetAllPods | Where-Object -FilterScript $myFilter | Format-Table
+  $result = GetAllPods | Where-Object -FilterScript $myFilter 
+  if( $result.Length -eq 0 ) {
+    Write-Host "Not found"
+    return
+  }
+  $state.pods = $result
+  SaveState
+  $result | Format-Table
   return
 }
 
+if( "l" -eq $action ) {
+   $id = $arg0
+   $myFilter = {
+      $_.Id -eq $id
+   }
+   $pod = $state.pods | Where-Object -FilterScript $myFilter
+   InvokeK8s "logs $($pod.Name) -n $($state.namespace)"
+   return
+}
