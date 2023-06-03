@@ -16,19 +16,17 @@ def save_annotations(image, annotations, output_dir: str, idx: int = 0):
     # sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
     sorted_annotations = sorted(annotations, key=(lambda item: (item['bbox'][1], item['bbox'][0])), reverse=False)
     for i, ann in enumerate(sorted_annotations):
-        if i == 0:
-            continue
-        #m = ann['segmentation']
+        m = ann['segmentation']
         x, y, w, h = ann['bbox']
         save_path = f'{output_dir}/ann_{idx}.jpg'
-        #masked_img = image.copy()
-        #masked_img[~m] = [1, 1, 0]  # 將非 `m` 的部分設為完全透明
+        masked_img = image.copy()
+        masked_img[~m] = [1, 1, 0]  # 將非 `m` 的部分設為完全透明
         # print(f'{idx=} {x=} {y=} {w=} {h=}')
         y = int(y)
         x = int(x)
         w = int(w)
         h = int(h)
-        cropped_img = image[y:y + h, x:x + w]
+        cropped_img = masked_img[y:y + h, x:x + w]
         if w <= 1 or h <= 1:
             continue
         if w * h <= 20 * 20:
@@ -54,12 +52,12 @@ def save_image_segmentation(sam, image_path: str, output_dir: str, idx: int = 0)
 
     mask_generator = SamAutomaticMaskGenerator(
         model=sam,
-        points_per_side=32,
-        pred_iou_thresh=0.86,
-        stability_score_thresh=0.92,
-        crop_n_layers=1,
-        crop_n_points_downscale_factor=2,
-        min_mask_region_area=100,  # Requires open-cv to run post-processing
+        points_per_side=32,  # 每個邊的分割點數量
+        pred_iou_thresh=0.86,  # 0.86 生成遮罩時所使用的預測IOU閾值, 設為0.8或更低，以使更多的預測被考慮生成遮罩
+        stability_score_thresh=0.92,  # 控制了生成遮罩時所使用的穩定性分數閾值
+        crop_n_layers=1,  # 裁剪操作的層數
+        crop_n_points_downscale_factor=2,  # 裁剪操作中下採樣點的數量因子, 增加此值可以使裁剪更加精確，但同時也會增加計算成本
+        min_mask_region_area=256,  # 遮罩區域的最小面積
     )
 
     masks = mask_generator.generate(image)
