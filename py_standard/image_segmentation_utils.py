@@ -37,28 +37,29 @@ def save_annotations(image, annotations, output_dir: str, idx: int = 0):
     return idx
 
 
-def get_image_segmentation_model(device='cuda'):
-    model_type = 'vit_l'  # vit_h / vit_l / vit_b
-    sam_checkpoint = "sam_vit_l_0b3195.pth"
-    sam = sam_model_registry[model_type](checkpoint=f"./models/{sam_checkpoint}")
-    sam.to(device=device)
-    return sam
+class ImageSegmentation:
+    def __init__(self, device='cuda'):
+        model_type = 'vit_l'  # vit_h / vit_l / vit_b
+        sam_checkpoint = "sam_vit_l_0b3195.pth"
+        sam = sam_model_registry[model_type](checkpoint=f"./models/{sam_checkpoint}")
+        sam.to(device=device)
+        predictor = SamPredictor(sam)
+        self.sam = sam
+        self.predictor = predictor
 
+    def save_segmentation(self, image_path: str, output_dir: str, idx: int = 0):
+        image = read_image(image_path)
+        self.predictor.set_image(image)
 
-def save_image_segmentation(sam, image_path: str, output_dir: str, idx: int = 0):
-    image = read_image(image_path)
-    predictor = SamPredictor(sam)
-    predictor.set_image(image)
+        mask_generator = SamAutomaticMaskGenerator(
+            model=self.sam,
+            points_per_side=32,  # 每個邊的分割點數量
+            pred_iou_thresh=0.86,  # 0.86 生成遮罩時所使用的預測IOU閾值, 設為0.8或更低，以使更多的預測被考慮生成遮罩
+            stability_score_thresh=0.92,  # 控制了生成遮罩時所使用的穩定性分數閾值
+            crop_n_layers=1,  # 裁剪操作的層數
+            crop_n_points_downscale_factor=2,  # 裁剪操作中下採樣點的數量因子, 增加此值可以使裁剪更加精確，但同時也會增加計算成本
+            min_mask_region_area=256,  # 遮罩區域的最小面積
+        )
 
-    mask_generator = SamAutomaticMaskGenerator(
-        model=sam,
-        points_per_side=32,  # 每個邊的分割點數量
-        pred_iou_thresh=0.86,  # 0.86 生成遮罩時所使用的預測IOU閾值, 設為0.8或更低，以使更多的預測被考慮生成遮罩
-        stability_score_thresh=0.92,  # 控制了生成遮罩時所使用的穩定性分數閾值
-        crop_n_layers=1,  # 裁剪操作的層數
-        crop_n_points_downscale_factor=2,  # 裁剪操作中下採樣點的數量因子, 增加此值可以使裁剪更加精確，但同時也會增加計算成本
-        min_mask_region_area=256,  # 遮罩區域的最小面積
-    )
-
-    masks = mask_generator.generate(image)
-    return save_annotations(image, masks, output_dir, idx)
+        masks = mask_generator.generate(image)
+        return save_annotations(image, masks, output_dir, idx)
