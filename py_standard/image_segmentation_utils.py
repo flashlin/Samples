@@ -1,7 +1,58 @@
 # https://github.com/facebookresearch/segment-anything
+import os
+import xml.etree.ElementTree as ET
 import cv2
 import numpy as np
 from segment_anything import SamPredictor, sam_model_registry, SamAutomaticMaskGenerator
+
+
+def convert(size, box):
+    dw = 1. / (size[0])
+    dh = 1. / (size[1])
+    x = (box[0] + box[1]) / 2.0 - 1
+    y = (box[2] + box[3]) / 2.0 - 1
+    w = box[1] - box[0]
+    h = box[3] - box[2]
+    x = x * dw
+    w = w * dw
+    y = y * dh
+    h = h * dh
+    if w >= 1:
+        w = 0.99
+    if h >= 1:
+        h = 0.99
+    return (x, y, w, h)
+
+
+def convert_labelimg_annotation_xml_to_txt(xml_file_path, classes, output_dir):
+    # classes = ['person']
+    # directory = os.path.dirname(xml_file_path)
+    xml_filename = os.path.basename(xml_file_path)
+    txt_filename = xml_filename[:-4] + '.txt'
+    txt_file_path = output_dir + '/' + txt_filename
+    if os.path.exists(txt_file_path):
+        return 
+    with open(xml_file_path, "r", encoding='UTF-8') as in_file:
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        with open(txt_file_path, "w", encoding='UTF-8') as out_file:
+            tree = ET.parse(in_file)
+            root = tree.getroot()
+            size = root.find('size')
+            w = int(size.find('width').text)
+            h = int(size.find('height').text)
+            out_file.truncate()
+            for obj in root.iter('object'):
+                difficult = obj.find('difficult').text
+                cls = obj.find('name').text
+                if cls not in classes or int(difficult) == 1:
+                    continue
+                cls_id = classes.index(cls)
+                xmlbox = obj.find('bndbox')
+                b = (float(xmlbox.find('xmin').text), float(xmlbox.find('xmax').text),
+                     float(xmlbox.find('ymin').text), float(xmlbox.find('ymax').text))
+                bb = convert((w, h), b)
+                out_file.write(str(cls_id) + " " + " ".join([str(a) for a in bb]) + '\n')
 
 
 def read_image(image_path):
