@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-from image_segmentation_utils import save_image_segmentation, get_image_segmentation_model, ImageSegmentation
+from image_segmentation_utils import ImageSegmentation
 from io_utils import query_sub_files
 
 
