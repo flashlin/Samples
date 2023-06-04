@@ -115,7 +115,7 @@ class ImageSegmentation:
         self.sam = sam
         self.predictor = predictor
 
-    def save_segmentation(self, image_path: str, output_dir: str, idx: int = 0):
+    def save_segmentation(self, image_path: str, output_dir: str):
         full_filename = os.path.basename(image_path)
 
         image = read_image(image_path)

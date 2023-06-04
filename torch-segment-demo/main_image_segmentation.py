@@ -118,8 +118,10 @@ idx = 0
 image = ImageSegmentation()
 # image.save_segmentation('./data/segmentation/CasSmallPic/CAS_promo_banner05_en.jpg', 'output/test', 0)
 
+source_dir = './data/segmentation'
+processed_dir = './data/processed'
 file_extends = ['.jpg', '.png', '.gif']
-output_dir = './data/processed'
+output_dir = './output/segmentation'
 
 
 def remove_dup_images(image_dir):
@@ -147,14 +149,14 @@ def remove_dup_images(image_dir):
 # exit()
 
 
-remove_dup_images('D:/VDisk/Github/Samples/torch-segment-demo/output/segmentation')
+remove_dup_images(output_dir)
 
-for image_file in query_sub_files('./data/segmentation', file_extends):
+for image_file in query_sub_files(source_dir, file_extends):
     print(f'{image_file}')
     filename = os.path.basename(image_file)
     output_file_path = os.path.join(output_dir, filename)
     if os.path.exists(output_file_path):
         os.remove(image_file)
         continue
-    idx = image.save_segmentation(image_file, './output/segmentation', idx)
-    move_file(image_file, output_dir)
+    idx = image.save_segmentation(image_file, output_dir)
+    move_file(image_file, processed_dir)
