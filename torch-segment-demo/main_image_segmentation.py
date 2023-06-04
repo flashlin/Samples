@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-from image_segmentation_utils import ImageSegmentation, is_same_image
+from image_segmentation_utils import ImageSegmentation, is_same_image, save_gif_frames_as_images
 from io_utils import query_sub_files, move_file, get_target_file_path
 
 
@@ -120,7 +120,7 @@ image = ImageSegmentation()
 
 source_dir = './data/segmentation'
 processed_dir = './data/processed'
-file_extends = ['.jpg', '.png', '.gif']
+file_extends = ['.jpg', '.png']
 output_dir = './output/segmentation'
 
 
@@ -150,6 +150,13 @@ def remove_dup_images(image_dir):
 
 
 remove_dup_images(output_dir)
+
+print(f'processing gif')
+for gif_file in query_sub_files(source_dir, ['.gif']):
+    print(f'{gif_file}')
+    save_gif_frames_as_images(gif_file, source_dir)
+    move_file(gif_file, processed_dir)
+
 
 for image_file in query_sub_files(source_dir, file_extends):
     print(f'{image_file}')

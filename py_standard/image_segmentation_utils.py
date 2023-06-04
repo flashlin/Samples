@@ -20,6 +20,17 @@ def is_same_image(image1_path, image2_path):
     return True
 
 
+def save_gif_frames_as_images(gif_path, output_folder):
+    filename, _ = split_filename(os.path.basename(gif_path))
+    gif = Image.open(gif_path)
+    frames = gif.n_frames
+    for frame in range(frames):
+        gif.seek(frame)
+        frame_image = gif.convert("RGBA")
+        output_path = os.path.join(output_folder, f"{filename}_frame_{frame}.png")
+        frame_image.save(output_path, "PNG")
+
+
 def convert(size, box):
     dw = 1. / (size[0])
     dh = 1. / (size[1])
@@ -86,7 +97,7 @@ def save_annotations(image, annotations, full_filename: str, output_dir: str):
     for i, ann in enumerate(sorted_annotations):
         m = ann['segmentation']
         x, y, w, h = ann['bbox']
-        save_path = os.path.join(output_dir, f'/{filename}_ann_{idx}.{file_ext}')
+        save_path = os.path.join(output_dir, f'{filename}_ann_{idx}.{file_ext}')
         masked_img = image.copy()
         masked_img[~m] = [1, 1, 0]  # 將非 `m` 的部分設為完全透明
         # print(f'{idx=} {x=} {y=} {w=} {h=}')
