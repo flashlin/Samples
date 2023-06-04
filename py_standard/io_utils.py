@@ -44,3 +44,10 @@ def move_file(source_file_path: str, target_dir: str):
     destination = os.path.join(target_dir, filename)
     make_dir(target_dir)
     shutil.move(source_file_path, destination)
+
+
+def copy_file(file_path: str, target_dir: str):
+    filename = os.path.basename(file_path)
+    destination = os.path.join(target_dir, filename)
+    make_dir(target_dir)
+    shutil.copy(file_path, destination)

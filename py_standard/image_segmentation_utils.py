@@ -6,7 +6,7 @@ import numpy as np
 from segment_anything import SamPredictor, sam_model_registry, SamAutomaticMaskGenerator
 from PIL import Image
 import imagehash
-from io_utils import split_filename, get_full_filename
+from io_utils import split_filename, get_full_filename, copy_file
 
 
 def compute_image_hash(image: Image):
@@ -142,6 +142,10 @@ class ImageSegmentation:
         full_filename = get_full_filename(image_path)
 
         image = read_image(image_path)
+        if image.size < 16*16:
+            copy_file(image_path, output_dir)
+            return
+
         self.predictor.set_image(image)
 
         mask_generator = SamAutomaticMaskGenerator(
