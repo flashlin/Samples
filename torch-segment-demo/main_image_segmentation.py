@@ -127,17 +127,17 @@ output_dir = './output/segmentation'
 def remove_duplicate_images(image_dir):
     all_images = [x for x in query_sub_files(image_dir, file_extends)]
     all_image_hashed = [get_image_hash(image) for image in all_images]
+    grouped_dict = {}
     for i, (image1_path, hash1) in enumerate(zip(all_images, all_image_hashed)):
-        for j, (image2_path, hash2) in enumerate(zip(all_images, all_image_hashed)):
-            if i == j:
-                continue  # 跳过自身比较
-            if not os.path.exists(image1_path):
+        if hash1 not in grouped_dict:
+            grouped_dict[hash1] = []
+        grouped_dict[hash1].append(image1_path)
+    for hash, image_files in grouped_dict.items():
+        for i, image_file in enumerate(image_files):
+            if i == 0:
                 continue
-            if not os.path.exists(image2_path):
-                continue
-            if hash1 == hash2:
-                print(f'remove {image2_path}')
-                os.remove(image2_path)
+            print(f'remove {image_file}')
+            os.remove(image_file)
 
 
 # for image in query_sub_files(output_dir, file_extends):
