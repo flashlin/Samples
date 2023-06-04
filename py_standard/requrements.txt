@@ -8,3 +8,4 @@ accelerate
 bitsandbytes
 sentencepiece
 Xformers
+imagehash

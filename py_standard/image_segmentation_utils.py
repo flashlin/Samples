@@ -5,8 +5,20 @@ import cv2
 import numpy as np
 from segment_anything import SamPredictor, sam_model_registry, SamAutomaticMaskGenerator
 from PIL import Image
-
+import imagehash
 from io_utils import get_filename, split_filename
+
+
+def compute_image_hash(image: Image):
+    image_hash = imagehash.average_hash(image)
+    hash_string = str(image_hash)
+    hash_string = f'{image.mode}_{image.size}_{hash_string}'
+    return hash_string
+
+
+def get_image_hash(image_file_path: str):
+    image = Image.open(image_file_path)
+    return compute_image_hash(image)
 
 
 def is_same_image(image1_path, image2_path):
