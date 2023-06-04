@@ -118,7 +118,7 @@ idx = 0
 image = ImageSegmentation()
 # image.save_segmentation('./data/segmentation/CasSmallPic/CAS_promo_banner05_en.jpg', 'output/test', 0)
 
-source_dir = './data/segmentation'
+source_dir = './data/train_segmentation'
 processed_dir = './data/processed'
 file_extends = ['.jpg', '.png']
 output_dir = './output/segmentation'
