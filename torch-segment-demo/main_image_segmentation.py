@@ -1,4 +1,6 @@
 # https://github.com/facebookresearch/segment-anything
+import os
+
 import torch
 from segment_anything import SamPredictor, sam_model_registry
 from segment_anything import SamAutomaticMaskGenerator
@@ -7,7 +9,7 @@ import matplotlib.pyplot as plt
 import cv2
 
 from image_segmentation_utils import ImageSegmentation
-from io_utils import query_sub_files
+from io_utils import query_sub_files, move_file
 
 
 def show_mask(mask, ax, random_color=False):
@@ -115,8 +117,15 @@ def show_imgae(image):
 #torch.cuda.set_per_process_memory_fraction(0.9)
 idx = 0
 image = ImageSegmentation()
-image.save_segmentation('./data/train_segmentation/CasSmallPic/CAS_promo_banner05_en.jpg', 'output/test', 0)
+# image.save_segmentation('./data/segmentation/CasSmallPic/CAS_promo_banner05_en.jpg', 'output/test', 0)
 
-# for image_file in query_sub_files('./data/train_segmentation', ['.jpg', '.png', '.gif']):
-#     print(f'{image_file}')
-#     idx = save_image_segmentation(sam, image_file, './output/segmentation', idx)
+output_dir = './data/processed'
+for image_file in query_sub_files('./data/segmentation', ['.jpg', '.png', '.gif']):
+    print(f'{image_file}')
+    filename = os.path.basename(image_file)
+    output_file_path = os.path.join(output_dir, filename)
+    if os.path.exists(output_file_path):
+        os.remove(image_file)
+        continue
+    idx = image.save_segmentation(image_file, './output/segmentation', idx)
+    move_file(image_file, output_dir)
