@@ -6,7 +6,7 @@ import numpy as np
 from segment_anything import SamPredictor, sam_model_registry, SamAutomaticMaskGenerator
 from PIL import Image
 import imagehash
-from io_utils import get_filename, split_filename
+from io_utils import split_filename, get_full_filename
 
 
 def compute_image_hash(image: Image):
@@ -109,7 +109,7 @@ def save_annotations(image, annotations, full_filename: str, output_dir: str):
     for i, ann in enumerate(sorted_annotations):
         m = ann['segmentation']
         x, y, w, h = ann['bbox']
-        save_path = os.path.join(output_dir, f'{filename}_ann_{idx}.{file_ext}')
+        save_path = os.path.join(output_dir, f'{filename}_ann_{idx}{file_ext}')
         masked_img = image.copy()
         masked_img[~m] = [1, 1, 0]  # 將非 `m` 的部分設為完全透明
         # print(f'{idx=} {x=} {y=} {w=} {h=}')
@@ -139,7 +139,7 @@ class ImageSegmentation:
         self.predictor = predictor
 
     def save_segmentation(self, image_path: str, output_dir: str):
-        full_filename = os.path.basename(image_path)
+        full_filename = get_full_filename(image_path)
 
         image = read_image(image_path)
         self.predictor.set_image(image)

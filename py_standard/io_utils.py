@@ -8,8 +8,10 @@ def split_filename(full_filename: str):
     return ss[0], ss[1]
 
 
-def get_filename(full_filename: str):
-    return os.path.splitext(full_filename)[0]
+def get_full_filename(file_path: str):
+    basename = os.path.basename(file_path)
+    filename, file_ext = split_filename(basename)
+    return filename + file_ext
 
 
 def query_sub_files(folder: str, ext_list: list[str]):
@@ -42,7 +44,3 @@ def move_file(source_file_path: str, target_dir: str):
     destination = os.path.join(target_dir, filename)
     make_dir(target_dir)
     shutil.move(source_file_path, destination)
-
-
-
-
