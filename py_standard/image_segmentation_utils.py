@@ -31,7 +31,7 @@ def convert_labelimg_annotation_xml_to_txt(xml_file_path, classes, output_dir):
     txt_filename = xml_filename[:-4] + '.txt'
     txt_file_path = output_dir + '/' + txt_filename
     if os.path.exists(txt_file_path):
-        return 
+        return
     with open(xml_file_path, "r", encoding='UTF-8') as in_file:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
@@ -105,11 +105,11 @@ class ImageSegmentation:
         mask_generator = SamAutomaticMaskGenerator(
             model=self.sam,
             points_per_side=32,  # 每個邊的分割點數量
-            pred_iou_thresh=0.86,  # 0.86 生成遮罩時所使用的預測IOU閾值, 設為0.8或更低，以使更多的預測被考慮生成遮罩
-            stability_score_thresh=0.92,  # 控制了生成遮罩時所使用的穩定性分數閾值
+            pred_iou_thresh=0.86,  # 0.86 生成遮罩時所使用的預測IOU閾值, 用於判斷預測的區域是否與真實標籤重疊得足夠多
+            stability_score_thresh=0.7,  # 0.92 穩定性分數閾值, 例如概率分數、置信度分數或方差等來進行判斷
             crop_n_layers=1,  # 裁剪操作的層數
             crop_n_points_downscale_factor=2,  # 裁剪操作中下採樣點的數量因子, 增加此值可以使裁剪更加精確，但同時也會增加計算成本
-            min_mask_region_area=256,  # 遮罩區域的最小面積
+            min_mask_region_area=256,  # 如果區域的面積小於 min_mask_region_area，則該區域會被視為無效區域，被過濾掉或視為背景
         )
 
         masks = mask_generator.generate(image)
