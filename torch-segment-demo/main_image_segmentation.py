@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-from image_segmentation_utils import ImageSegmentation, is_same_image, save_gif_frames_as_images
+from image_segmentation_utils import ImageSegmentation, is_same_image, save_gif_frames_as_images, get_image_hash
 from io_utils import query_sub_files, move_file, get_target_file_path
 
 
@@ -124,17 +124,18 @@ file_extends = ['.jpg', '.png']
 output_dir = './output/segmentation'
 
 
-def remove_dup_images(image_dir):
+def remove_duplicate_images(image_dir):
     all_images = [x for x in query_sub_files(image_dir, file_extends)]
-    for i, image1_path in enumerate(all_images):
-        for j, image2_path in enumerate(all_images):
+    all_image_hashed = [get_image_hash(image) for image in all_images]
+    for i, (image1_path, hash1) in enumerate(zip(all_images, all_image_hashed)):
+        for j, (image2_path, hash2) in enumerate(zip(all_images, all_image_hashed)):
             if i == j:
                 continue  # 跳过自身比较
             if not os.path.exists(image1_path):
                 continue
             if not os.path.exists(image2_path):
                 continue
-            if is_same_image(image1_path, image2_path):
+            if hash1 == hash2:
                 print(f'remove {image2_path}')
                 os.remove(image2_path)
 
@@ -149,14 +150,14 @@ def remove_dup_images(image_dir):
 # exit()
 
 
-remove_dup_images(output_dir)
+print(f'remove duplicate')
+remove_duplicate_images(output_dir)
 
 print(f'processing gif')
 for gif_file in query_sub_files(source_dir, ['.gif']):
     print(f'{gif_file}')
     save_gif_frames_as_images(gif_file, source_dir)
     move_file(gif_file, processed_dir)
-
 
 for image_file in query_sub_files(source_dir, file_extends):
     print(f'{image_file}')
