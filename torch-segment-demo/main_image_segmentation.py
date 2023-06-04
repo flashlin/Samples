@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import cv2
 
 from image_segmentation_utils import ImageSegmentation, is_same_image, save_gif_frames_as_images, get_image_hash
-from io_utils import query_sub_files, move_file, get_target_file_path
+from io_utils import query_sub_files, move_file, get_target_file_path, split_filename
 
 
 def show_mask(mask, ax, random_color=False):
@@ -161,7 +161,8 @@ for gif_file in query_sub_files(source_dir, ['.gif']):
 
 for image_file in query_sub_files(source_dir, file_extends):
     print(f'{image_file}')
-    filename = os.path.basename(image_file)
+    filename, file_ext = split_filename(image_file)
+    full_filename = filename + file_ext
     output_file_path = os.path.join(output_dir, filename)
     if os.path.exists(output_file_path):
         os.remove(image_file)
