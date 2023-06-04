@@ -3,6 +3,15 @@ import glob
 import shutil
 
 
+def split_filename(full_filename: str):
+    ss = os.path.splitext(full_filename)
+    return ss[0], ss[1]
+
+
+def get_filename(full_filename: str):
+    return os.path.splitext(full_filename)[0]
+
+
 def query_sub_files(folder: str, ext_list: list[str]):
     """
     :param folder:
@@ -21,9 +30,19 @@ def make_dir(directory: str):
         os.makedirs(directory)
 
 
+def get_target_file_path(source_file_path: str, target_dir: str):
+    filename = os.path.basename(source_file_path)
+    destination = os.path.join(target_dir, filename)
+    return destination
+
+
 def move_file(source_file_path: str, target_dir: str):
     # directory = os.path.dirname(source_file_path)
     filename = os.path.basename(source_file_path)
     destination = os.path.join(target_dir, filename)
-    make_dir(destination)
+    make_dir(target_dir)
     shutil.move(source_file_path, destination)
+
+
+
+
