@@ -85,10 +85,10 @@ if( "l" -eq $action ) {
    InvokeK8s "logs $($pod.Name) -n $($state.namespace)" | ForEach-Object {
       $allMatches = MatchText $_ $pattern
       if( $null -ne $allMatches ) {
-         WriteHostColorByAllMatches $allMatches
+         WriteHostColorByAllMatches $_ $allMatches
+         Write-Host ""
       }
       # WriteHostColor $_ $pattern
-      Write-Host ""
    }
    return
 }
