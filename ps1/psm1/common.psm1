@@ -68,15 +68,12 @@ function MatchText {
       [string]$pattern
    )
    $result = Select-String -InputObject $text -Pattern $pattern -AllMatches
-   Write-Host "ttt $($result.GetType())"
-   if( $null -ne $result ) {
-      DumpProperties $result
-   }
    return $result
 }
 
 function WriteHostColorByAllMatches {
    param(
+      [string]$text,
       [Microsoft.PowerShell.Commands.MatchInfo]$allMatches
    )
    $currentIndex = 0
@@ -111,7 +108,7 @@ function WriteHostColor {
       return
    }
    DumpProperties $allMatches
-   WriteHostColorByAllMatches $allMatches
+   WriteHostColorByAllMatches $text $allMatches
 }
 
 function GetFixedText {
