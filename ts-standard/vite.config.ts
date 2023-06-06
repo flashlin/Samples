@@ -11,14 +11,27 @@ export default defineConfig({
     rollupOptions: {
       // 打包過程中排除不必要的依賴
       external: ['lodash'],
-      output: {
-        // 將庫打包為 UMD 格式
-        format: 'umd',
-        // 在 UMD 模式下，指定全局變數的名稱
-        globals: {
-          lodash: '_',
+      output: [
+        {
+          format: 'umd',
+          name: 'ts-standard-umd',
+          globals: {
+            lodash: '_',
+          },
         },
-      },
+        {
+          format: 'es',
+          sourcemap: true,
+          exports: 'named',
+          chunkFileNames: 'chunks/[name]-[hash].js',
+        },
+        {
+          format: 'es',
+          sourcemap: true,
+          exports: 'named',
+          chunkFileNames: 'chunks/[name]-[hash].mjs',
+        },
+      ]
     },
   },
   optimizeDeps: {
