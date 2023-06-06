@@ -5,8 +5,8 @@ export default defineConfig({
     outDir: 'dist',
     lib: {
       entry: 'src/index.ts',
-      name: 'MyLibrary',
-      fileName: 'my-library',
+      name: 'ts-standard',
+      fileName: 'ts-standard',
     },
     rollupOptions: {
       // 打包過程中排除不必要的依賴
