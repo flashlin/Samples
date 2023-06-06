@@ -17,4 +17,14 @@ export class WebApi {
         const resp = await this._axiosInstance.post(url, data);
         return resp.data;
     }
+
+    async postImageAsync(url: string, data: any): Promise<Blob> {
+        const resp = await this._axiosInstance.post(url, data, { responseType: 'blob' });
+        return resp.data;
+    }
+
+    async postVoidAsync(url: string, data: any): Promise<void> {
+        await this._axiosInstance.post(url, data);
+    }
 }
+

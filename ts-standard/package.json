@@ -2,15 +2,20 @@
   "name": "ts-standard",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "author": "mr.brain",
+  "license": "ISC",
+  "types": "dist/index.d.ts",
+  "files": [
+    "lib"
+  ],
   "scripts": {
+    "prepublish": "tsc",
     "dev": "vite",
     "build": "npx vite build",
     "build2": "vue-tsc --noEmit && vite build",
     "serve": "vite preview"
   },
-  "author": "mr.brain",
-  "license": "ISC",
   "devDependencies": {
     "@microsoft/signalr": "^5.0.8",
     "@types/axios": "^0.14.0",
