@@ -19,12 +19,24 @@ export class WebApi {
     }
 
     async postImageAsync(url: string, data: any): Promise<Blob> {
-        const resp = await this._axiosInstance.post(url, data, { responseType: 'blob' });
-        return resp.data;
+        const resp = await this._axiosInstance.post(url, data, { responseType: 'arraybuffer' });
+        const contentType = resp.headers['content-type'];
+        const blob = new Blob([resp.data], { type: contentType });
+        return blob;
     }
 
     async postVoidAsync(url: string, data: any): Promise<void> {
         await this._axiosInstance.post(url, data);
+    }
+
+    async getImageAsync(url: string, data: any): Promise<Blob> {
+        const resp = await this._axiosInstance.get(url, {
+            params: data,
+            responseType: 'arraybuffer' });
+        const contentType = resp.headers['content-type'];
+        const blob = new Blob([resp.data], { type: contentType });
+        //const imageUrl = URL.createObjectURL(blob);
+        return blob;
     }
 }
 

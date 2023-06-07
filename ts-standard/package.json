@@ -10,11 +10,7 @@
     "lib"
   ],
   "scripts": {
-    "prepublish": "tsc",
-    "dev": "vite",
-    "build": "npx vite build",
-    "build2": "vue-tsc --noEmit && vite build",
-    "serve": "vite preview"
+    "prepublish": "tsc"
   },
   "devDependencies": {
     "@microsoft/signalr": "^5.0.8",
@@ -23,7 +19,6 @@
     "axios": "^1.4.0",
     "path": "^0.12.7",
     "sass": "^1.37.2",
-    "typescript": "^5.0.4",
-    "vite": "^4.3.9"
+    "typescript": "^5.0.4"
   }
 }
