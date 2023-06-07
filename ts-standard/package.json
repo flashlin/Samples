@@ -10,7 +10,7 @@
     "lib"
   ],
   "scripts": {
-    "prepublish": "tsc"
+    "build": "tsc"
   },
   "devDependencies": {
     "@microsoft/signalr": "^5.0.8",

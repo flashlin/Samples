@@ -1,25 +1,14 @@
 <script setup lang="ts">
 import { getImageForClassifier } from '@/models/api';
 import { onMounted, reactive, ref } from 'vue';
+import { blobToImageUrlData } from 'ts-standard';
 
 let imageBlob = reactive<Blob>(new Blob());
 let imageUrl = ref<string>("");
 
-function blobToImageData(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const data = reader.result as string;
-      resolve(data);
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
 onMounted(async () => {
   imageBlob = await getImageForClassifier();
-  const imageData = await blobToImageData(imageBlob);
+  const imageData = await blobToImageUrlData(imageBlob);
   imageUrl.value = imageData;
   console.log('url', imageUrl.value);
 });

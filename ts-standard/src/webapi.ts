@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, CreateAxiosDefaults, HeadersDefaults } from 'axios';
+import axios, { AxiosInstance, CreateAxiosDefaults } from 'axios';
 
 export class WebApi {
     private _axiosInstance: AxiosInstance;
@@ -25,8 +25,17 @@ export class WebApi {
         return blob;
     }
 
-    async postVoidAsync(url: string, data: any): Promise<void> {
-        await this._axiosInstance.post(url, data);
+    postVoidAsync(url: string, data: any): Promise<void> {
+       return this._axiosInstance.post(url, data);
+    }
+
+    async getAsync<T>(url: string, data: any): Promise<T> {
+        const resp = await this._axiosInstance.get(url, { params: data });
+        return resp.data;
+    }
+
+    getVoidAsync(url: string, data: any): Promise<void> {
+        return this._axiosInstance.get(url, { params: data });
     }
 
     async getImageAsync(url: string, data: any): Promise<Blob> {
