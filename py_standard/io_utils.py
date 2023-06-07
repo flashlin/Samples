@@ -27,6 +27,13 @@ def query_sub_files(folder: str, ext_list: list[str]):
                 yield file_path
 
 
+def query_folders(folder_path: str):
+    for item in os.listdir(folder_path):
+        item_path = os.path.join(folder_path, item)
+        if os.path.isdir(item_path):
+            yield item_path
+
+
 def make_dir(directory: str):
     if not os.path.exists(directory):
         os.makedirs(directory)
