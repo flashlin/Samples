@@ -1,3 +1,6 @@
+import base64
+import json
+
 from flask import Flask, render_template, send_file, jsonify
 from io_utils import query_sub_files, query_folders, get_full_filename
 from io import BytesIO
@@ -34,12 +37,12 @@ def index():
 def get_image_for_classifier():
     image_path = next(query_sub_files(output_dir, ['.jpg', '.png']))
     with open(image_path, 'rb') as file:
-        binary_data = BytesIO(file.read())
-        binary_data.seek(0)
+        binary_data = file.read()
+    base64data = base64.b64encode(binary_data)
     name = get_full_filename(image_path)
     data = {
         'name': name,
-        'image': binary_data
+        'image': base64data
     }
     # return send_file(binary_data, mimetype='image/jpeg')
     return jsonify(data)
