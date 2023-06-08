@@ -1,5 +1,5 @@
 from flask import Flask, render_template, send_file, jsonify
-from io_utils import query_sub_files, query_folders
+from io_utils import query_sub_files, query_folders, get_full_filename
 from io import BytesIO
 import re
 
@@ -36,8 +36,13 @@ def get_image_for_classifier():
     with open(image_path, 'rb') as file:
         binary_data = BytesIO(file.read())
         binary_data.seek(0)
-    print(f'{binary_data=}')
-    return send_file(binary_data, mimetype='image/jpeg')
+    name = get_full_filename(image_path)
+    data = {
+        'name': name,
+        'image': binary_data
+    }
+    # return send_file(binary_data, mimetype='image/jpeg')
+    return jsonify(data)
 
 
 @app.route('/api/getClassifyCategories', methods=['POST', 'GET'])
