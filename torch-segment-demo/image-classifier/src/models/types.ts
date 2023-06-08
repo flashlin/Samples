@@ -1,6 +1,11 @@
+export interface IImageForClassifyData {
+    name: string;
+    imageData: string;
+}
+
 export interface IImageForClassify {
     name: string;
-    image: Blob;
+    imageUrl: string;
 }
 
 export interface ILabel {

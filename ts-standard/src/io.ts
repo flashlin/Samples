@@ -1,4 +1,4 @@
-export function blobToImageUrlData(blob: Blob): Promise<string> {
+export function blobToImageUrl(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => {
