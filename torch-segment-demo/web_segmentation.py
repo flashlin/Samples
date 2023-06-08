@@ -38,13 +38,14 @@ def get_image_for_classifier():
     image_path = next(query_sub_files(output_dir, ['.jpg', '.png']))
     with open(image_path, 'rb') as file:
         binary_data = file.read()
-    base64data = base64.b64encode(binary_data)
+    base64_string = base64.b64encode(binary_data).decode('utf-8')
     name = get_full_filename(image_path)
     data = {
         'name': name,
-        'image': base64data
+        'imageData': base64_string
     }
     # return send_file(binary_data, mimetype='image/jpeg')
+    print(f'{data=}')
     return jsonify(data)
 
 
