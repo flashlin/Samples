@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "run-p type-check build-only",
     "deploy": "node build/copy.js dist ../output",
+    "release": "npm-run-all build deploy",
     "ts-standard": "npm-run-all ts-standard:ui ts-standard:i",
     "ts-standard:i": "npm install ../../ts-standard",
     "ts-standard:ui": "npm uninstall ../../ts-standard",
