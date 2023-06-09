@@ -1,8 +1,47 @@
+import os.path
+
 import torch
 import torchvision
+from torch.utils.data import Dataset, DataLoader
 from torchvision.models.detection import maskrcnn_resnet50_fpn
 from torchvision.transforms import functional as TF
 from PIL import Image, ImageDraw
+
+from io_utils import query_files, split_filename, split_file_path
+
+"""
+dataset/
+    - images/
+        - image1.jpg
+        - image2.jpg
+        - ...
+    - annotations/
+        - annotation1.xml
+        - annotation2.xml
+        - ...
+"""
+
+
+class ImageAnnotationsDataset(Dataset):
+    def __init__(self, data_dir):
+        self.data_dir = data_dir
+        images_dir = os.path.join(data_dir, "images")
+        self.annotations_dir = os.path.join(data_dir, "annotations")
+        self.data = [file for file in query_files(images_dir)]
+        self.len = len(self.data)
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, index):
+        image_file_path = self.data[index]
+        _, image_filename, _ = split_file_path(image_file_path)
+        annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.xml')
+        return image_file_path, annotation_file_path
+
+    def create_data_loader(self, batch_size):
+        dataloader = DataLoader(self, batch_size=batch_size, shuffle=True)
+        return dataloader
 
 
 def filtered_masks_to_image(filtered_masks, input_image: Image):

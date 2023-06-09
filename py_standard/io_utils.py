@@ -3,6 +3,13 @@ import glob
 import shutil
 
 
+def split_file_path(file_path: str):
+    directory = os.path.dirname(file_path)
+    full_filename = get_full_filename(file_path)
+    filename, extension = split_filename(full_filename)
+    return directory, filename, extension
+
+
 def split_filename(full_filename: str):
     ss = os.path.splitext(full_filename)
     return ss[0], ss[1]
@@ -12,6 +19,13 @@ def get_full_filename(file_path: str):
     basename = os.path.basename(file_path)
     filename, file_ext = split_filename(basename)
     return filename + file_ext
+
+
+def query_files(folder_path: str, extensions: list[str]):
+    for extension in extensions:
+        pattern = os.path.join(folder_path, f'*{extension}')
+        for file in glob.glob(pattern):
+            yield file
 
 
 def query_sub_files(folder: str, ext_list: list[str]):
