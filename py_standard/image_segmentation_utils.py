@@ -9,6 +9,38 @@ import imagehash
 from io_utils import split_filename, get_full_filename, copy_file
 
 
+def erode_image(image: Image):
+    """
+    侵蝕圖像
+    :param image:
+    :return:
+    """
+    # print(image.shape)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    ret, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    # cv.imshow("binary", binary)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))  # 定義結構元素的形狀和大小
+    dst = cv2.erode(binary, kernel)  # 腐蝕操作
+    # cv2.imshow("erode_demo", dst)
+    return dst
+
+
+def dilate_image(image: Image):
+    """
+    膨脹圖像
+    :param image:
+    :return:
+    """
+    # print(image.shape)
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    ret, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+    # cv.imshow("binary", binary)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5))  # 定義結構元素的形狀和大小
+    dst = cv2.dilate(binary, kernel)  # 膨脹操作
+    # cv2.imshow("dilate_demo", dst)
+    return dst
+
+
 def compute_image_hash(image: Image):
     image_hash = imagehash.average_hash(image)
     hash_string = str(image_hash)
@@ -142,7 +174,7 @@ class ImageSegmentation:
         full_filename = get_full_filename(image_path)
 
         image = read_image(image_path)
-        if image.size < 16*16:
+        if image.size < 16 * 16:
             copy_file(image_path, output_dir)
             return
 
