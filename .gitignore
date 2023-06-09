@@ -26,3 +26,4 @@ tf_predict_next_word/predict-next-word-image/Models
 *.env
 torch-segment-demo/models/sam_vit_l_0b3195.pth
 torch-segment-demo/models/yolov8x.pt
+torch-segment-demo/models
