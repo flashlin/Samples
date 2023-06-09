@@ -13,8 +13,8 @@ async function getNewImage() {
   imageUrl.value = resp.imageUrl;
 }
 
-function onClickCategory(id: number) {
-  sendClassifyImage(id, imageName.value);
+async function onClickCategory(id: number) {
+  await sendClassifyImage(id, imageName.value);
   getNewImage();
 }
 
@@ -27,16 +27,37 @@ onMounted(async () => {
 </script>
 
 <template>
-  <form>
-    <div class="form-group">
-      <label for="id">Image: {{ imageName }}</label>
-      <img :src="imageUrl">
-    </div>
-    <div class="form-group">
-      <label for="pwd">Label:</label>
-      <template v-for="item in labels" :key="item.id">
-        <button type='button' class="btn" @click="onClickCategory(item.id)">{{ item.label }}</button>
-      </template>
-    </div>
-  </form>
+  <table>
+    <tr>
+      <td>
+        <div style="height: 50pt;">
+          <label>Image: {{ imageName }}</label>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+          <img :src="imageUrl">
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="height: 50pt;"></div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div class="form-group">
+          <label for="pwd">Label:</label>
+          <template v-for="item in labels" :key="item.id">
+            <button type='button' class="btn" @click="onClickCategory(item.id)">{{ item.label }}</button>
+          </template>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+      </td>
+    </tr>
+  </table>
 </template>
