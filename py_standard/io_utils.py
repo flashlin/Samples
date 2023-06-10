@@ -21,6 +21,19 @@ def get_full_filename(file_path: str):
     return filename + file_ext
 
 
+def read_all_lines_file(file_path: str):
+    encodings = ['utf-8-sig', 'utf-8', 'big5', 'ascii']
+    for encoding in encodings:
+        try:
+            with open(file_path, 'r', encoding=encoding) as file:
+                lines = file.readlines()
+            return lines
+        except UnicodeDecodeError:
+            continue
+    else:
+        raise Exception(f"Failed to open file {file_path} with any encoding.")
+
+
 def query_files(folder_path: str, extensions: list[str]):
     for extension in extensions:
         pattern = os.path.join(folder_path, f'*{extension}')

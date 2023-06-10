@@ -11,8 +11,30 @@ import xml.etree.ElementTree as ET
 import torch.optim as optim
 import torchvision.models.detection as detection
 import torchvision.models.detection.roi_heads as roi_heads
+import torchvision.transforms as transforms
 
-from io_utils import query_files, split_filename, split_file_path
+from io_utils import query_files, split_filename, split_file_path, read_all_lines_file
+
+
+def parse_pascal_voc_xml(xml_path):
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    bbox_list = []
+    class_list = []
+    for object_elem in root.findall('object'):
+        # 提取類別標記
+        class_elem = object_elem.find('name')
+        class_label = class_elem.text
+        # 提取bbox座標
+        bbox_elem = object_elem.find('bndbox')
+        xmin = float(bbox_elem.find('xmin').text)
+        ymin = float(bbox_elem.find('ymin').text)
+        xmax = float(bbox_elem.find('xmax').text)
+        ymax = float(bbox_elem.find('ymax').text)
+        bbox_list.append([xmin, ymin, xmax, ymax])
+        class_list.append(class_label)
+    return bbox_list, class_list
+
 
 """
 dataset/
@@ -26,7 +48,10 @@ dataset/
         - ...
 """
 
+
 def preprocess_image(image):
+    transform = transforms.ToTensor()
+    image = transform(image)
     # transformed_image = ToTensor()(image)  # 將圖像轉換為Tensor格式
     transform = Resize((256, 256))
     image = transform(image)
@@ -36,15 +61,23 @@ def preprocess_image(image):
     return transformed_image
 
 
-def preprocess_annotation(annotation):
-    # 將掩膜圖像轉換為Tensor格式，並將像素值範圍調整到 0~1 之間
-    transform = ToTensor()
-    transformed_annotation = transform(annotation)
-    return transformed_annotation
+def preprocess_annotation(annotation_list):
+    targets = []
+    for annotation in annotation_list:
+        # print(f'{annotation=}')
+        target = {}
+        boxes = torch.tensor(annotation['bbox'], dtype=torch.float32)
+        labels = torch.tensor(annotation['class_idx'], dtype=torch.int64)
+        target['boxes'] = boxes
+        target['labels'] = labels
+        targets.append(target)
+    return targets
+
 
 def load_image(image_path):
     image = Image.open(image_path)
     return image
+
 
 def load_annotation(annotation_path):
     tree = ET.parse(annotation_path)
@@ -84,6 +117,7 @@ def preprocess_annotations(annotations):
         preprocessed_annotations.append(preprocessed_annotation)
     return preprocessed_annotations
 
+
 def collate_fn(batch):
     # 從batch中分離圖像和標註數據
     images, annotations = zip(*batch)
@@ -96,10 +130,12 @@ def collate_fn(batch):
 class ImageAnnotationsDataset(Dataset):
     def __init__(self, data_dir):
         self.data_dir = data_dir
-        images_dir = os.path.join(data_dir, "images")
+        self.images_dir = os.path.join(data_dir, "images")
         self.annotations_dir = os.path.join(data_dir, "annotations")
-        self.data = [file for file in query_files(images_dir, ['.jpg'])]
+        self.data = [file for file in self.query_image_files()]
         self.len = len(self.data)
+        self.classes_idx_name, self.classes_name_idx = self.load_classes_file(
+            os.path.join(self.annotations_dir, 'classes.txt'))
 
     def __len__(self):
         return self.len
@@ -108,11 +144,31 @@ class ImageAnnotationsDataset(Dataset):
         image_file_path = self.data[index]
         _, image_filename, _ = split_file_path(image_file_path)
         annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.xml')
-        # return image_file_path, annotation_file_path
-        return load_image(image_file_path), load_annotation(annotation_file_path)
+        annotations = load_annotation(annotation_file_path)
+        for annotation in annotations:
+            annotation['class_idx'] = self.classes_name_idx[annotation['class']]
+        return load_image(image_file_path), annotations
+
+    @staticmethod
+    def load_classes_file(file_path: str):
+        lines = read_all_lines_file(file_path)
+        classes_idx_name = {}
+        classes_name_idx = {}
+        for idx, line in enumerate(lines):
+            name = line.strip()
+            classes_idx_name[idx] = name
+            classes_name_idx[name] = idx
+        return classes_idx_name, classes_name_idx
+
+    def query_image_files(self):
+        for image_file_path in query_files(self.images_dir, ['.jpg']):
+            _, image_filename, _ = split_file_path(image_file_path)
+            annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.xml')
+            if os.path.exists(annotation_file_path):
+                yield image_file_path
 
     def create_data_loader(self, batch_size):
-        #dataloader = DataLoader(self, batch_size=batch_size, shuffle=True)
+        # dataloader = DataLoader(self, batch_size=batch_size, shuffle=True)
         dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
         return dataloader
 
@@ -162,9 +218,10 @@ class ImageMasks:
     def train(self, dataloader, num_epochs=20, device='cuda'):
         model = self.model
         # criterion = detection.fasterrcnn_resnet50_fpn.FastRCNNLoss()
-        #criterion = roi_heads.fast_rcnn.FastRCNNLoss()
+        # criterion = roi_heads.fast_rcnn.FastRCNNLoss()
         criterion = roi_heads.fastrcnn_loss
         optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+        print(f'start training {len(dataloader)=}')
         for epoch in range(num_epochs):
             # 迭代處理每個批次的數據
             for images, annotations in dataloader:
@@ -193,7 +250,6 @@ class ImageMasks:
 
 input_image = Image.open('data/yolo/train/images/CAS_promo_banner05_en.jpg')
 image_masker = ImageMasks()
-#segmented_image = image_masker.infer(input_image)
-#segmented_image.show()
+# segmented_image = image_masker.infer(input_image)
+# segmented_image.show()
 image_masker.train(dataloader)
-
