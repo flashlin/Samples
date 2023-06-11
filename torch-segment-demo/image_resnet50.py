@@ -245,6 +245,15 @@ def filtered_masks_to_image(filtered_masks, input_image: Image):
     return segmented_image
 
 
+def dump_model_info(model):
+    # 輸出模型的層名稱和參數資訊
+    for name, param in model.named_parameters():
+        print(f"Layer name: {name}")
+        print(f"Parameter shape: {param.shape}")
+        print(f"Requires gradient: {param.requires_grad}")
+        print("")
+
+
 class ImageMasks:
     def __init__(self):
         torch.hub.set_dir('./models')
@@ -252,6 +261,7 @@ class ImageMasks:
         weights_path = 'models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth'
         model.load_state_dict(torch.load(weights_path))
         self.model = model
+        # dump_model_info(model)
 
     def infer(self, input_image: Image):
         model = self.model
