@@ -1,4 +1,6 @@
 import os.path
+
+import numpy as np
 import torch
 import torchvision
 from torchvision.transforms import Resize, Normalize
@@ -12,19 +14,39 @@ import torch.optim as optim
 import torchvision.models.detection as detection
 import torchvision.models.detection.roi_heads as roi_heads
 import torchvision.transforms as transforms
-
+from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
+from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from io_utils import query_files, split_filename, split_file_path, read_all_lines_file
+
+
+def create_model(num_classes):
+    model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
+    # get number of input features for the classifier
+    in_features = model.roi_heads.box_predictor.cls_score.in_features
+    # replace the pre-trained head with a new one
+    model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes)
+
+    # now get the number of input features for the mask classifier
+    in_features_mask = model.roi_heads.mask_predictor.conv5_mask.in_channels
+    hidden_layer = 256
+    # and replace the mask predictor with a new one
+    model.roi_heads.mask_predictor = MaskRCNNPredictor(in_features_mask,
+                                                       hidden_layer,
+                                                       num_classes)
+    return model
 
 
 def parse_pascal_voc_xml(xml_path):
     tree = ET.parse(xml_path)
     root = tree.getroot()
-    bbox_list = []
     class_list = []
+    bbox_list = []
+    masks = []
     for object_elem in root.findall('object'):
         # 提取類別標記
         class_elem = object_elem.find('name')
         class_label = class_elem.text
+        class_list.append(class_label)
         # 提取bbox座標
         bbox_elem = object_elem.find('bndbox')
         xmin = float(bbox_elem.find('xmin').text)
@@ -32,8 +54,14 @@ def parse_pascal_voc_xml(xml_path):
         xmax = float(bbox_elem.find('xmax').text)
         ymax = float(bbox_elem.find('ymax').text)
         bbox_list.append([xmin, ymin, xmax, ymax])
-        class_list.append(class_label)
-    return bbox_list, class_list
+        # 提取 mask
+        mask_elem = object_elem.find('mask')
+        mask_data = mask_elem.text.strip()
+        # 解析 mask 資料
+        mask_array = np.fromstring(mask_data, dtype=np.uint8, sep=' ')
+        mask_array = mask_array.reshape((mask_elem.attrib['height'], mask_elem.attrib['width']))
+        masks.append(mask_array)
+    return bbox_list, masks, class_list
 
 
 """
@@ -61,25 +89,20 @@ def preprocess_image(image):
     return transformed_image
 
 
-def preprocess_annotation(annotation_list):
-    targets = []
-    for annotation in annotation_list:
-        # print(f'{annotation=}')
-        target = {}
-        boxes = torch.tensor(annotation['bbox'], dtype=torch.float32)
-        labels = torch.tensor(annotation['class_idx'], dtype=torch.int64)
-        target['boxes'] = boxes
-        target['labels'] = labels
-        targets.append(target)
-    return targets
-
 
 def load_image(image_path):
     image = Image.open(image_path)
     return image
 
 
-def load_annotation(annotation_path):
+def create_mask_from_bndbox(image_size, bndbox):
+    mask = np.zeros(image_size, dtype=np.uint8)
+    x_min, y_min, x_max, y_max = map(int, bndbox)
+    mask[y_min:y_max, x_min:x_max] = 255
+    return mask
+
+
+def load_annotation(annotation_path, image_size):
     tree = ET.parse(annotation_path)
     root = tree.getroot()
     annotations = []
@@ -92,11 +115,23 @@ def load_annotation(annotation_path):
         ymin = float(bbox_elem.find('ymin').text)
         xmax = float(bbox_elem.find('xmax').text)
         ymax = float(bbox_elem.find('ymax').text)
+        bbox = [xmin, ymin, xmax, ymax]
+
+        # 提取 mask
+        mask_array = []
+        mask_elem = object_elem.find('mask')
+        if mask_elem is not None:
+            mask_data = mask_elem.text.strip()
+            mask_array = np.fromstring(mask_data, dtype=np.uint8, sep=' ')
+            mask_array = mask_array.reshape((mask_elem.attrib['height'], mask_elem.attrib['width']))
+        else:
+            mask_array = create_mask_from_bndbox(image_size, bbox)
 
         # 將標註數據整理為所需的格式，例如字典
         annotation = {
             'class': class_name,
-            'bbox': [xmin, ymin, xmax, ymax]
+            'bbox': bbox,
+            'mask': mask_array
         }
         annotations.append(annotation)
     return annotations
@@ -110,12 +145,29 @@ def preprocess_images(images):
     return preprocessed_images
 
 
+def preprocess_annotation(annotation_list):
+    target = {
+        "boxes": [],
+        "labels": [],
+        "masks": [],
+        #"area": [],
+        #"iscrowd": []
+    }
+    for annotation in annotation_list:
+        target["boxes"].append(annotation['bbox'])
+        target["labels"].append(annotation['class_idx'])
+        target["masks"].append(annotation['mask'])
+    target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
+    target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
+    target["masks"] = torch.tensor(target["masks"], dtype=torch.long)
+    return target
+
+
 def preprocess_annotations(annotations):
-    preprocessed_annotations = []
+    targets = []
     for annotation in annotations:
-        preprocessed_annotation = preprocess_annotation(annotation)
-        preprocessed_annotations.append(preprocessed_annotation)
-    return preprocessed_annotations
+        targets.append(preprocess_annotation(annotation))
+    return targets
 
 
 def collate_fn(batch):
@@ -144,10 +196,17 @@ class ImageAnnotationsDataset(Dataset):
         image_file_path = self.data[index]
         _, image_filename, _ = split_file_path(image_file_path)
         annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.xml')
-        annotations = load_annotation(annotation_file_path)
+        image = load_image(image_file_path)
+        annotations = load_annotation(annotation_file_path, image.size)
         for annotation in annotations:
             annotation['class_idx'] = self.classes_name_idx[annotation['class']]
-        return load_image(image_file_path), annotations
+
+        image = load_image(image_file_path)
+        boxes = []
+        for annotation in annotations:
+            boxes.append(annotation['bbox'])
+
+        return image, annotations
 
     @staticmethod
     def load_classes_file(file_path: str):
@@ -173,7 +232,7 @@ class ImageAnnotationsDataset(Dataset):
         return dataloader
 
 
-dataloader = ImageAnnotationsDataset("data/yolo/train").create_data_loader(batch_size=2)
+dataloader = ImageAnnotationsDataset("data/yolo/train").create_data_loader(batch_size=1)
 
 
 def filtered_masks_to_image(filtered_masks, input_image: Image):
@@ -217,35 +276,49 @@ class ImageMasks:
 
     def train(self, dataloader, num_epochs=20, device='cuda'):
         model = self.model
+
+        # 該模型中可能有部分的參數並不隨著訓練而修改，因此當requires_grad不為True時，並不傳入優化器
+        params = [p for p in model.parameters() if p.requires_grad]
+        optimizer = torch.optim.SGD(params, lr=0.001, momentum=0.9, weight_decay=0.0005)
+        # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+
         # criterion = detection.fasterrcnn_resnet50_fpn.FastRCNNLoss()
         # criterion = roi_heads.fast_rcnn.FastRCNNLoss()
         criterion = roi_heads.fastrcnn_loss
-        optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
         print(f'start training {len(dataloader)=}')
         for epoch in range(num_epochs):
             # 迭代處理每個批次的數據
+            total_train_loss = 0.0
             for images, annotations in dataloader:
-                images = images.to(device)
-                annotations = annotations.to(device)
+                # print(f'{annotations=}')
+                # images = images.to(device)
+                # annotations = annotations.to(device)
                 optimizer.zero_grad()
-                outputs = model(images)
+                outputs = model(images, annotations)
+                #
+                loss_dict = outputs
+                losses = sum(loss for loss in loss_dict.values())
+                loss_value = losses.item()
+                total_train_loss += loss_value
+
                 # 計算損失
-                targets = [{'boxes': annotation['boxes'].to(device),
-                            'labels': annotation['labels'].to(device)} for
-                           annotation in annotations]
+                # targets = [{'boxes': annotation['boxes'].to(device),
+                #             'labels': annotation['labels'].to(device)} for
+                #            annotation in annotations]
+
                 # loss_dict = criterion(outputs, targets)
                 # loss = sum(loss for loss in loss_dict.values())
 
                 # 執行損失計算
-                box_regression, class_logits = outputs['boxes'], outputs['labels']
-                loss_dict = criterion(box_regression, class_logits, targets)
-                loss = sum(loss for loss in loss_dict.values())
+                # box_regression, class_logits = outputs['boxes'], outputs['labels']
+                # loss_dict = criterion(box_regression, class_logits, targets)
+                # loss = sum(loss for loss in loss_dict.values())
 
                 # loss = criterion(outputs, annotations)
                 # 執行反向傳播和優化
-                loss.backward()
+                losses.backward()
                 optimizer.step()
-                print(f"Epoch: {epoch + 1}, Loss: {loss.item()}")
+                print(f"Epoch: {epoch + 1}, Loss: {loss_value}")
 
 
 input_image = Image.open('data/yolo/train/images/CAS_promo_banner05_en.jpg')
