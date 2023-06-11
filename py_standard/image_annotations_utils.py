@@ -5,6 +5,41 @@ from xml.dom import minidom
 import json
 
 
+def read_labelme_annotation_json_file(labelme_json_file_path: str):
+    with open(labelme_json_file_path, 'r') as f:
+        data = json.load(f)
+    image_file_path = data["imagePath"]  # 圖像檔案名稱
+    # image_path = os.path.abspath(image_file_path)  # 圖像路徑
+    image_width = data["imageWidth"]
+    image_height = data["imageHeight"]
+
+    labels = []
+    boxes = []
+    masks = []
+    for shape in data["shapes"]:
+        label = shape["label"]  # 標籤
+        labels.append(label)
+        points = shape["points"]  # 標記點坐標
+        points_x_coordinates = [point[0] for point in points]
+        points_y_coordinates = [point[1] for point in points]
+        x_min = min(points_x_coordinates)
+        y_min = min(points_y_coordinates)
+        x_max = max(points_x_coordinates)
+        y_max = max(points_y_coordinates)
+        bndbox = [x_min, y_min, x_max, y_max]
+        boxes.append(bndbox)
+        mask = np.zeros((image_width, image_height), dtype=np.uint8)
+        mask[y_min:y_max, x_min:x_max] = 255
+        masks.append(mask)
+    return {
+        image_file_path,
+        (image_width, image_height),
+        labels,
+        boxes,
+        masks
+    }
+
+
 def convert_labelme_to_pascalvoc(labelme_json, output_dir):
     # 讀取Labelme JSON檔案
     with open(labelme_json, 'r') as f:
