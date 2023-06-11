@@ -4,19 +4,18 @@ import numpy as np
 import torch
 import torchvision
 from torchvision.transforms import Resize, Normalize
-from torchvision.transforms import ToTensor
 from torch.utils.data import Dataset, DataLoader
 from torchvision.models.detection import maskrcnn_resnet50_fpn
 from torchvision.transforms import functional as TF
 from PIL import Image, ImageDraw
 import xml.etree.ElementTree as ET
-import torch.optim as optim
-import torchvision.models.detection as detection
 import torchvision.models.detection.roi_heads as roi_heads
 import torchvision.transforms as transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
-from io_utils import query_files, split_filename, split_file_path, read_all_lines_file
+
+from image_annotations_utils import load_annotation_file
+from io_utils import query_files, split_file_path, read_all_lines_file
 
 
 def create_model(num_classes):
@@ -102,41 +101,6 @@ def create_mask_from_bndbox(image_size, bndbox):
     return mask
 
 
-def load_annotation(annotation_path, image_size):
-    tree = ET.parse(annotation_path)
-    root = tree.getroot()
-    annotations = []
-
-    for object_elem in root.findall('object'):
-        # 解析物體類別和位置信息
-        class_name = object_elem.find('name').text
-        bbox_elem = object_elem.find('bndbox')
-        xmin = float(bbox_elem.find('xmin').text)
-        ymin = float(bbox_elem.find('ymin').text)
-        xmax = float(bbox_elem.find('xmax').text)
-        ymax = float(bbox_elem.find('ymax').text)
-        bbox = [xmin, ymin, xmax, ymax]
-
-        # 提取 mask
-        mask_array = []
-        mask_elem = object_elem.find('mask')
-        if mask_elem is not None:
-            mask_data = mask_elem.text.strip()
-            mask_array = np.fromstring(mask_data, dtype=np.uint8, sep=' ')
-            mask_array = mask_array.reshape((mask_elem.attrib['height'], mask_elem.attrib['width']))
-        else:
-            mask_array = create_mask_from_bndbox(image_size, bbox)
-
-        # 將標註數據整理為所需的格式，例如字典
-        annotation = {
-            'class': class_name,
-            'bbox': bbox,
-            'mask': mask_array
-        }
-        annotations.append(annotation)
-    return annotations
-
-
 def preprocess_images(images):
     preprocessed_images = []
     for image in images:
@@ -199,7 +163,7 @@ class ImageAnnotationsDataset(Dataset):
         _, image_filename, _ = split_file_path(image_file_path)
         annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.xml')
         image = load_image(image_file_path)
-        annotations = load_annotation(annotation_file_path, image.size)
+        annotations = load_annotation_file(annotation_file_path, image.size)
         for annotation in annotations:
             annotation['class_idx'] = self.classes_name_idx[annotation['class']]
         image = load_image(image_file_path)
@@ -229,7 +193,7 @@ class ImageAnnotationsDataset(Dataset):
         return dataloader
 
 
-dataloader = ImageAnnotationsDataset("data/yolo/train").create_data_loader(batch_size=1)
+dataloader = ImageAnnotationsDataset("data/yolo/train").create_data_loader(batch_size=2)
 
 
 def filtered_masks_to_image(filtered_masks, input_image: Image):
