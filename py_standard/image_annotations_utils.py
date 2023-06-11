@@ -13,37 +13,36 @@ def read_labelme_annotation_json_file(labelme_json_file_path: str):
     image_width = data["imageWidth"]
     image_height = data["imageHeight"]
 
-    labels = []
-    boxes = []
-    masks = []
+    shapes = []
     for shape in data["shapes"]:
         label = shape["label"]  # 標籤
-        labels.append(label)
         points = shape["points"]  # 標記點坐標
         points_x_coordinates = [point[0] for point in points]
         points_y_coordinates = [point[1] for point in points]
-        x_min = min(points_x_coordinates)
-        y_min = min(points_y_coordinates)
-        x_max = max(points_x_coordinates)
-        y_max = max(points_y_coordinates)
+        x_min = int(min(points_x_coordinates))
+        y_min = int(min(points_y_coordinates))
+        x_max = int(max(points_x_coordinates))
+        y_max = int(max(points_y_coordinates))
         bndbox = [x_min, y_min, x_max, y_max]
-        boxes.append(bndbox)
         mask = np.zeros((image_width, image_height), dtype=np.uint8)
         mask[y_min:y_max, x_min:x_max] = 255
-        masks.append(mask)
+        shapes.append({
+            'label': label,
+            'points': points,
+            'bbox': bndbox,
+            'mask': mask,
+        })
     return {
-        image_file_path,
-        (image_width, image_height),
-        labels,
-        boxes,
-        masks
+        'imagePath': image_file_path,
+        'imageSize': (image_width, image_height),
+        'shapes': shapes
     }
 
 
 def convert_labelme_to_pascalvoc(labelme_json, output_dir):
     # 讀取Labelme JSON檔案
-    with open(labelme_json, 'r') as f:
-        data = json.load(f)
+    labelme_anno = read_labelme_annotation_json_file(labelme_json)
+    image_file_path = labelme_anno['imagePath']
 
     # 創建Pascal VOC格式的根節點
     annotation = ET.Element("annotation")
@@ -52,16 +51,18 @@ def convert_labelme_to_pascalvoc(labelme_json, output_dir):
     folder = ET.SubElement(annotation, "folder")
     folder.text = "images"  # 資料夾名稱
     filename = ET.SubElement(annotation, "filename")
-    filename.text = data["imagePath"]  # 圖像檔案名稱
+    filename.text = labelme_anno["imagePath"]  # 圖像檔案名稱
     path = ET.SubElement(annotation, "path")
-    path.text = os.path.abspath(data["imagePath"])  # 圖像路徑
+    path.text = os.path.abspath(labelme_anno["imagePath"])  # 圖像路徑
+
+    image_width, image_height = labelme_anno["imageSize"]
 
     # 創建子節點size
     size = ET.SubElement(annotation, "size")
     width = ET.SubElement(size, "width")
-    width.text = str(data["imageWidth"])  # 圖像寬度
+    width.text = str(image_width)  # 圖像寬度
     height = ET.SubElement(size, "height")
-    height.text = str(data["imageHeight"])  # 圖像高度
+    height.text = str(image_height)  # 圖像高度
     depth = ET.SubElement(size, "depth")
     depth.text = str(3)  # 圖像通道數（預設為3）
 
@@ -70,11 +71,9 @@ def convert_labelme_to_pascalvoc(labelme_json, output_dir):
     segmented.text = str(0)  # 未分割區域（預設為0）
 
     # 解析標記區域
-    for shape in data["shapes"]:
+    for shape in labelme_anno["shapes"]:
         label = shape["label"]  # 標籤
-        points = shape["points"]  # 標記點坐標
-        points_x_coordinates = [point[0] for point in points]
-        points_y_coordinates = [point[1] for point in points]
+        bbox = shape["bbox"]
 
         # 創建子節點object
         object_node = ET.SubElement(annotation, "object")
@@ -90,17 +89,17 @@ def convert_labelme_to_pascalvoc(labelme_json, output_dir):
         # 創建子節點bndbox
         bndbox = ET.SubElement(object_node, "bndbox")
         x_min = ET.SubElement(bndbox, "xmin")
-        x_min.text = str(min(points_x_coordinates))  # 最小x座標
+        x_min.text = str(bbox[0])  # 最小x座標
         y_min = ET.SubElement(bndbox, "ymin")
-        y_min.text = str(min(points_y_coordinates))  # 最小y座標
+        y_min.text = str(bbox[1])  # 最小y座標
         x_max = ET.SubElement(bndbox, "xmax")
-        x_max.text = str(max(points_x_coordinates))  # 最大x座標
+        x_max.text = str(bbox[2])  # 最大x座標
         y_max = ET.SubElement(bndbox, "ymax")
-        y_max.text = str(max(points_y_coordinates))  # 最大y座標
+        y_max.text = str(bbox[3])  # 最大y座標
 
     # 創建XML檔案並寫入
     xml_string = minidom.parseString(ET.tostring(annotation)).toprettyxml(indent="    ")
-    output_xml = os.path.join(output_dir, os.path.splitext(data["imagePath"])[0] + ".xml")
+    output_xml = os.path.join(output_dir, os.path.splitext(image_file_path)[0] + ".xml")
     with open(output_xml, "w") as f:
         f.write(xml_string)
 
