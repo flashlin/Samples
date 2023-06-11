@@ -9,12 +9,11 @@ from torchvision.models.detection import maskrcnn_resnet50_fpn
 from torchvision.transforms import functional as TF
 from PIL import Image, ImageDraw
 import xml.etree.ElementTree as ET
-import torchvision.models.detection.roi_heads as roi_heads
 import torchvision.transforms as transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
-from image_annotations_utils import load_annotation_file
+from image_annotations_utils import load_annotation_file, convert_labelme_to_pascalvoc
 from io_utils import query_files, split_file_path, read_all_lines_file
 
 
@@ -92,13 +91,6 @@ def preprocess_image(image):
 def load_image(image_path):
     image = Image.open(image_path)
     return image
-
-
-def create_mask_from_bndbox(image_size, bndbox):
-    mask = np.zeros(image_size, dtype=np.uint8)
-    x_min, y_min, x_max, y_max = map(int, bndbox)
-    mask[y_min:y_max, x_min:x_max] = 255
-    return mask
 
 
 def preprocess_images(images):
@@ -252,6 +244,16 @@ class ImageMasks:
         # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
         return optimizer
 
+    @staticmethod
+    def move_device(images, annotations, device):
+        images = [image.to(device) for image in images]
+        annotations = [{
+            'boxes': anno['boxes'].to(device),
+            'labels': anno['labels'].to(device),
+            'masks': anno['masks'].to(device)
+        } for anno in annotations]
+        return images, annotations
+
     def train(self, dataloader, num_epochs=20, device='cuda'):
         model = self.model
         model.to(device)
@@ -262,39 +264,22 @@ class ImageMasks:
             total_train_loss = 0.0
             for images, annotations in dataloader:
                 # print(f'{annotations=}')
-                images = [image.to(device) for image in images]
-                annotations = [{
-                    'boxes': anno['boxes'].to(device),
-                    'labels': anno['labels'].to(device),
-                    'masks': anno['masks'].to(device)
-                } for anno in annotations]
+                images, annotations = self.move_device(images, annotations, device)
                 optimizer.zero_grad()
                 outputs = model(images, annotations)
-                #
+                # 計算損失
                 loss_dict = outputs
                 losses = sum(loss for loss in loss_dict.values())
                 loss_value = losses.item()
                 total_train_loss += loss_value
-
-                # 計算損失
-                # targets = [{'boxes': annotation['boxes'].to(device),
-                #             'labels': annotation['labels'].to(device)} for
-                #            annotation in annotations]
-
-                # loss_dict = criterion(outputs, targets)
-                # loss = sum(loss for loss in loss_dict.values())
-
-                # 執行損失計算
-                # box_regression, class_logits = outputs['boxes'], outputs['labels']
-                # loss_dict = criterion(box_regression, class_logits, targets)
-                # loss = sum(loss for loss in loss_dict.values())
-
-                # loss = criterion(outputs, annotations)
                 # 執行反向傳播和優化
                 losses.backward()
                 optimizer.step()
                 print(f"Epoch: {epoch + 1}, Loss: {loss_value}")
 
+
+convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
+exit()
 
 input_image = Image.open('data/yolo/train/images/CAS_promo_banner05_en.jpg')
 image_masker = ImageMasks()
