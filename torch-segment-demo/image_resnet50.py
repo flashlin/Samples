@@ -273,14 +273,11 @@ class ImageMasks:
 
     def train(self, dataloader, num_epochs=20, device='cuda'):
         model = self.model
-
+        model.to(device)
         # 該模型中可能有部分的參數並不隨著訓練而修改，因此當requires_grad不為True時，並不傳入優化器
         params = [p for p in model.parameters() if p.requires_grad]
         optimizer = torch.optim.SGD(params, lr=0.001, momentum=0.9, weight_decay=0.0005)
         # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-
-        # criterion = detection.fasterrcnn_resnet50_fpn.FastRCNNLoss()
-        # criterion = roi_heads.fast_rcnn.FastRCNNLoss()
         criterion = roi_heads.fastrcnn_loss
         print(f'start training {len(dataloader)=}')
         for epoch in range(num_epochs):
@@ -288,8 +285,12 @@ class ImageMasks:
             total_train_loss = 0.0
             for images, annotations in dataloader:
                 # print(f'{annotations=}')
-                # images = images.to(device)
-                # annotations = annotations.to(device)
+                images = [image.to(device) for image in images]
+                annotations = [{
+                    'boxes': anno['boxes'].to(device),
+                    'labels': anno['labels'].to(device),
+                    'masks': anno['masks'].to(device)
+                } for anno in annotations]
                 optimizer.zero_grad()
                 outputs = model(images, annotations)
                 #
