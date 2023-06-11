@@ -159,7 +159,9 @@ def preprocess_annotation(annotation_list):
         target["masks"].append(annotation['mask'])
     target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
     target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
-    target["masks"] = torch.tensor(target["masks"], dtype=torch.long)
+
+    masks_array = np.stack(target["masks"])
+    target["masks"] = torch.tensor(masks_array, dtype=torch.long)
     return target
 
 
