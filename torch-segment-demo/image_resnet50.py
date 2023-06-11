@@ -245,14 +245,17 @@ class ImageMasks:
         segmented_image = filtered_masks_to_image(filtered_masks, input_image)
         return segmented_image
 
+    def create_optimizer(self):
+        # 該模型中可能有部分的參數並不隨著訓練而修改，因此當requires_grad不為True時，並不傳入優化器
+        params = [p for p in self.model.parameters() if p.requires_grad]
+        optimizer = torch.optim.SGD(params, lr=0.001, momentum=0.9, weight_decay=0.0005)
+        # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+        return optimizer
+
     def train(self, dataloader, num_epochs=20, device='cuda'):
         model = self.model
         model.to(device)
-        # 該模型中可能有部分的參數並不隨著訓練而修改，因此當requires_grad不為True時，並不傳入優化器
-        params = [p for p in model.parameters() if p.requires_grad]
-        optimizer = torch.optim.SGD(params, lr=0.001, momentum=0.9, weight_decay=0.0005)
-        # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
-        criterion = roi_heads.fastrcnn_loss
+        optimizer = self.create_optimizer()
         print(f'start training {len(dataloader)=}')
         for epoch in range(num_epochs):
             # 迭代處理每個批次的數據
