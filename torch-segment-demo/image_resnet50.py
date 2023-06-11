@@ -202,12 +202,7 @@ class ImageAnnotationsDataset(Dataset):
         annotations = load_annotation(annotation_file_path, image.size)
         for annotation in annotations:
             annotation['class_idx'] = self.classes_name_idx[annotation['class']]
-
         image = load_image(image_file_path)
-        boxes = []
-        for annotation in annotations:
-            boxes.append(annotation['bbox'])
-
         return image, annotations
 
     @staticmethod
