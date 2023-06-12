@@ -1,3 +1,0 @@
-export enum TetrisGameEventType {
-   Dropping
-}
