@@ -3,17 +3,25 @@ from xml.etree import ElementTree as ET
 import numpy as np
 from xml.dom import minidom
 import json
-import torch
-from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms as transforms
-from torchvision.transforms import Resize, Normalize
-from io_utils import split_file_path, read_all_lines_file, query_files
-from PIL import Image
+import cv2
 
 
-def load_image(image_path: str) -> Image:
-    image = Image.open(image_path)
-    return image
+def create_mask_from_polygon_points(image_size: (int, int), points: list[(int, int)]):
+    mask = np.zeros((image_size[1], image_size[0]), dtype=np.uint8)
+    background_color = (0, 0, 0)
+    mask.fill(background_color)
+    # 將多邊形的點繪製到圖像上
+    cv2.fillPoly(mask, [points], 255)
+    #transform = transforms.ToTensor()
+    #mask_tensor = transform(mask)
+    return mask
+
+
+def create_mask_from_bndbox(image_size, bndbox):
+    [x_min, y_min, x_max, y_max] = bndbox
+    bbox_mask = np.zeros((image_size[0], image_size[1]), dtype=np.uint8)
+    bbox_mask[y_min:y_max, x_min:x_max] = 255
+    return bbox_mask
 
 
 def read_labelme_annotation_json_file(labelme_json_file_path: str):
@@ -35,13 +43,13 @@ def read_labelme_annotation_json_file(labelme_json_file_path: str):
         x_max = int(max(points_x_coordinates))
         y_max = int(max(points_y_coordinates))
         bndbox = [x_min, y_min, x_max, y_max]
-        mask = np.zeros((image_width, image_height), dtype=np.uint8)
-        mask[y_min:y_max, x_min:x_max] = 255
+        bbox_mask = create_mask_from_bndbox((image_width, image_height), bndbox)
         shapes.append({
             'label': label,
             'points': points,
             'bbox': bndbox,
-            'mask': mask,
+            'bboxMask': bbox_mask,
+            'mask': create_mask_from_polygon_points((image_width, image_height), points),
         })
     return {
         'imagePath': image_file_path,
