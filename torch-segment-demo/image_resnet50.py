@@ -211,16 +211,19 @@ def dump_model_info(model):
 
 
 class ImageMasks:
-    def __init__(self):
+    def __init__(self, num_classes=2):
         torch.hub.set_dir('./models')
         model = maskrcnn_resnet50_fpn(pretrained=False, progress=True, weights=None)
+        in_features = model.roi_heads.box_predictor.cls_score.in_features
+        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes)
         weights_path = 'models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth'
         model.load_state_dict(torch.load(weights_path))
         self.model = model
         # dump_model_info(model)
 
-    def infer(self, input_image: Image):
+    def infer(self, input_image: Image, device='cuda'):
         model = self.model
+        model.to(device)
         model.eval()
         input_tensor = TF.to_tensor(input_image)
         input_tensor = input_tensor.unsqueeze(0)
@@ -257,6 +260,7 @@ class ImageMasks:
     def train(self, dataloader, num_epochs=20, device='cuda'):
         model = self.model
         model.to(device)
+        model.train()
         optimizer = self.create_optimizer()
         print(f'start training {len(dataloader)=}')
         for epoch in range(num_epochs):
@@ -276,6 +280,8 @@ class ImageMasks:
                 losses.backward()
                 optimizer.step()
                 print(f"Epoch: {epoch + 1}, Loss: {loss_value}")
+            if epoch % 100 == 0:
+                torch.save(model.state_dict(), './models/image-anno-' + str(epoch) + ".pth")
 
 
 convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
