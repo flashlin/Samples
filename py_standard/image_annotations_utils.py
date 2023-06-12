@@ -3,6 +3,17 @@ from xml.etree import ElementTree as ET
 import numpy as np
 from xml.dom import minidom
 import json
+import torch
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms as transforms
+from torchvision.transforms import Resize, Normalize
+from io_utils import split_file_path, read_all_lines_file, query_files
+from PIL import Image
+
+
+def load_image(image_path: str) -> Image:
+    image = Image.open(image_path)
+    return image
 
 
 def read_labelme_annotation_json_file(labelme_json_file_path: str):
@@ -144,3 +155,107 @@ def load_annotation_file(annotation_file_path, image_size):
         }
         annotations.append(annotation)
     return annotations
+
+
+class ImageAnnotationsDataset2(Dataset):
+    def __init__(self, data_dir):
+        self.image_resize = (512, 512)
+        self.data_dir = data_dir
+        self.images_dir = os.path.join(data_dir, "images")
+        self.annotations_dir = os.path.join(data_dir, "annotations")
+        self.data = [file for file in self.query_image_files()]
+        self.len = len(self.data)
+        self.classes_idx_name, self.classes_name_idx = self.load_classes_file(
+            os.path.join(self.annotations_dir, 'classes.txt'))
+        self.fn_read_annotation_file = read_labelme_annotation_json_file
+
+    def __len__(self):
+        return self.len
+
+    def __getitem__(self, index):
+        image_file_path = self.data[index]
+        _, image_filename, _ = split_file_path(image_file_path)
+        image = load_image(image_file_path)
+        annotations = self.load_annotations_file(image_filename)
+        return image, annotations
+
+    def add_label(self, label):
+        
+
+    def load_annotations_file(self, image_filename):
+        annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.json')
+        annotations = self.fn_load_annotation_file(annotation_file_path)
+        for annotation in annotations:
+            annotation['class_idx'] = self.classes_name_idx[annotation['class']]
+        return annotations
+
+    @staticmethod
+    def load_classes_file(file_path: str):
+        lines = read_all_lines_file(file_path)
+        classes_idx_name = {}
+        classes_name_idx = {}
+        for idx, line in enumerate(lines):
+            name = line.strip()
+            classes_idx_name[idx] = name
+            classes_name_idx[name] = idx
+        return classes_idx_name, classes_name_idx
+
+    def query_image_files(self):
+        for image_file_path in query_files(self.images_dir, ['.jpg']):
+            _, image_filename, _ = split_file_path(image_file_path)
+            annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.json')
+            if os.path.exists(annotation_file_path):
+                yield image_file_path
+
+    def preprocess_image(self, image):
+        transform = transforms.ToTensor()
+        image = transform(image)
+        transform = Resize(self.image_resize)
+        image = transform(image)
+        # 正規化圖像數值範圍到 0~1 之間
+        transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        transformed_image = transform(image)
+        return transformed_image
+
+    def preprocess_images(self, images):
+        preprocessed_images = []
+        for image in images:
+            preprocessed_image = self.preprocess_image(image)
+            preprocessed_images.append(preprocessed_image)
+        return preprocessed_images
+
+    def preprocess_annotation(self, annotation_list):
+        target = {
+            "boxes": [],
+            "labels": [],
+            "masks": [],
+            # "area": [],
+            # "iscrowd": []
+        }
+        for annotation in annotation_list:
+            target["boxes"].append(annotation['bbox'])
+            target["labels"].append(annotation['class_idx'])
+            target["masks"].append(annotation['mask'])
+        target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
+        target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
+
+        masks_array = np.stack(target["masks"])
+        target["masks"] = torch.tensor(masks_array, dtype=torch.long)
+        return target
+
+    def preprocess_annotations(self, annotations):
+        targets = []
+        for annotation in annotations:
+            targets.append(self.preprocess_annotation(annotation))
+        return targets
+
+    def collate_fn(self, batch):
+        images, annotations = zip(*batch)
+        images = self.preprocess_images(images)
+        annotations = self.preprocess_annotations(annotations)
+        return images, annotations
+
+    def create_data_loader(self, batch_size):
+        # dataloader = DataLoader(self, batch_size=batch_size, shuffle=True)
+        dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, collate_fn=self.collate_fn)
+        return dataloader

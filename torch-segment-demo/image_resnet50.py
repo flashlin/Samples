@@ -13,7 +13,7 @@ import torchvision.transforms as transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
-from image_annotations_utils import load_annotation_file, convert_labelme_to_pascalvoc
+from image_annotations_utils import load_annotation_file, convert_labelme_to_pascalvoc, ImageAnnotationsDataset2
 from io_utils import query_files, split_file_path, read_all_lines_file
 
 
@@ -75,6 +75,9 @@ dataset/
 """
 
 
+## img = cv2.imread(os.path.join(imgs[idx], "Image.jpg"))
+## img = cv2.resize(img, imageSize, cv2.INTER_LINEAR)
+
 def preprocess_image(image):
     transform = transforms.ToTensor()
     image = transform(image)
@@ -85,7 +88,6 @@ def preprocess_image(image):
     transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     transformed_image = transform(image)
     return transformed_image
-
 
 
 def load_image(image_path):
@@ -185,7 +187,7 @@ class ImageAnnotationsDataset(Dataset):
         return dataloader
 
 
-dataloader = ImageAnnotationsDataset("data/yolo/train").create_data_loader(batch_size=2)
+dataloader = ImageAnnotationsDataset2("data/yolo/train").create_data_loader(batch_size=2)
 
 
 def filtered_masks_to_image(filtered_masks, input_image: Image):
