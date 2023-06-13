@@ -206,17 +206,26 @@ class ImageMasks:
         # dump_model_info(model)
 
     def create_model(self, num_classes):
+        if os.path.exists(self.model_pth_path):
+            print(f'loading {self.model_pth_path}...')
+            model = self.load_custom_model(self.model_pth_path, num_classes)
+        else:
+            model = self.create_resnet50_model(num_classes, True)
+        return model
+
+    def load_custom_model(self, weights_path, num_classes):
+        model = self.create_resnet50_model(num_classes, False)
+        self.change_num_classes_of_model(model, num_classes)
+        model.load_state_dict(torch.load(weights_path))
+        return model
+
+    def create_resnet50_model(self, num_classes, load_pth=True):
         torch.hub.set_dir('./models')
         model = maskrcnn_resnet50_fpn(pretrained=False, progress=True, weights=None)
         weights_path = 'models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth'
-        if os.path.exists(self.model_pth_path):
-            weights_path = self.model_pth_path
-        print(f'loading {weights_path}...')
-        if weights_path == self.model_pth_path:
-            self.change_num_classes_of_model(model, num_classes)
-        model.load_state_dict(torch.load(weights_path))
-        if weights_path != self.model_pth_path:
-            self.change_num_classes_of_model(model, num_classes)
+        if load_pth:
+            model.load_state_dict(torch.load(weights_path))
+        self.change_num_classes_of_model(model, num_classes)
         return model
 
     @staticmethod
