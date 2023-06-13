@@ -4,12 +4,19 @@ import numpy as np
 from xml.dom import minidom
 import json
 import cv2
+import torch
+from torch.utils.data import Dataset, DataLoader
+import torchvision.transforms as transforms
+from torchvision.transforms import Resize, Normalize
+
+from image_utils import load_image
+from io_utils import split_file_path, read_all_lines_file, query_files
 
 
 def create_mask_from_polygon_points(image_size: (int, int), points: list[(int, int)]):
-    mask = np.zeros((image_size[1], image_size[0]), dtype=np.uint8)
-    background_color = (0, 0, 0)
-    mask.fill(background_color)
+    points_array = np.array(points)
+    points = points_array.reshape((-1, 1, 2)).astype(np.int32)
+    mask = np.zeros((image_size[0], image_size[1]), dtype=np.uint8)
     # 將多邊形的點繪製到圖像上
     cv2.fillPoly(mask, [points], 255)
     #transform = transforms.ToTensor()
@@ -24,7 +31,7 @@ def create_mask_from_bndbox(image_size, bndbox):
     return bbox_mask
 
 
-def read_labelme_annotation_json_file(labelme_json_file_path: str):
+def load_labelme_annotation_json_file(labelme_json_file_path: str):
     with open(labelme_json_file_path, 'r') as f:
         data = json.load(f)
     image_file_path = data["imagePath"]  # 圖像檔案名稱
@@ -60,7 +67,7 @@ def read_labelme_annotation_json_file(labelme_json_file_path: str):
 
 def convert_labelme_to_pascalvoc(labelme_json, output_dir):
     # 讀取Labelme JSON檔案
-    labelme_anno = read_labelme_annotation_json_file(labelme_json)
+    labelme_anno = load_labelme_annotation_json_file(labelme_json)
     image_file_path = labelme_anno['imagePath']
 
     # 創建Pascal VOC格式的根節點
@@ -173,9 +180,10 @@ class ImageAnnotationsDataset2(Dataset):
         self.annotations_dir = os.path.join(data_dir, "annotations")
         self.data = [file for file in self.query_image_files()]
         self.len = len(self.data)
-        self.classes_idx_name, self.classes_name_idx = self.load_classes_file(
-            os.path.join(self.annotations_dir, 'classes.txt'))
-        self.fn_read_annotation_file = read_labelme_annotation_json_file
+        self.classes_name_idx = {}
+        self.num_classes = -1
+        #self.classes_idx_name, self.classes_name_idx = self.load_classes_file(os.path.join(self.annotations_dir, 'classes.txt'))
+        self.fn_load_annotation_file = load_labelme_annotation_json_file
 
     def __len__(self):
         return self.len
@@ -188,14 +196,18 @@ class ImageAnnotationsDataset2(Dataset):
         return image, annotations
 
     def add_label(self, label):
-        
+        if label in self.classes_name_idx:
+            return self.classes_name_idx[label]
+        self.num_classes += 1
+        self.classes_name_idx[label] = self.num_classes
+        return self.num_classes
 
     def load_annotations_file(self, image_filename):
         annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.json')
-        annotations = self.fn_load_annotation_file(annotation_file_path)
-        for annotation in annotations:
-            annotation['class_idx'] = self.classes_name_idx[annotation['class']]
-        return annotations
+        annotations_obj = self.fn_load_annotation_file(annotation_file_path)
+        for shape in annotations_obj['shapes']:
+            shape['class_idx'] = self.add_label(shape['label'])
+        return annotations_obj
 
     @staticmethod
     def load_classes_file(file_path: str):
@@ -209,16 +221,18 @@ class ImageAnnotationsDataset2(Dataset):
         return classes_idx_name, classes_name_idx
 
     def query_image_files(self):
-        for image_file_path in query_files(self.images_dir, ['.jpg']):
+        for image_file_path in query_files(self.images_dir, ['.jpg', '.png']):
             _, image_filename, _ = split_file_path(image_file_path)
             annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.json')
             if os.path.exists(annotation_file_path):
                 yield image_file_path
 
     def preprocess_image(self, image):
+        # image.mode = 'RGBA'
+        image = image.convert("RGB")
         transform = transforms.ToTensor()
         image = transform(image)
-        transform = Resize(self.image_resize)
+        transform = Resize(self.image_resize, antialias=True)
         image = transform(image)
         # 正規化圖像數值範圍到 0~1 之間
         transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
@@ -240,6 +254,7 @@ class ImageAnnotationsDataset2(Dataset):
             # "area": [],
             # "iscrowd": []
         }
+        print(f'{annotation_list=}')
         for annotation in annotation_list:
             target["boxes"].append(annotation['bbox'])
             target["labels"].append(annotation['class_idx'])
@@ -253,6 +268,7 @@ class ImageAnnotationsDataset2(Dataset):
 
     def preprocess_annotations(self, annotations):
         targets = []
+        print(f'11 {annotations=}')
         for annotation in annotations:
             targets.append(self.preprocess_annotation(annotation))
         return targets

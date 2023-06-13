@@ -14,6 +14,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 from image_annotations_utils import load_annotation_file, convert_labelme_to_pascalvoc, ImageAnnotationsDataset2
+from image_utils import load_image
 from io_utils import query_files, split_file_path, read_all_lines_file
 
 
@@ -88,11 +89,6 @@ def preprocess_image(image):
     transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     transformed_image = transform(image)
     return transformed_image
-
-
-def load_image(image_path):
-    image = Image.open(image_path)
-    return image
 
 
 def preprocess_images(images):
@@ -187,7 +183,10 @@ class ImageAnnotationsDataset(Dataset):
         return dataloader
 
 
-dataloader = ImageAnnotationsDataset2("data/yolo/train").create_data_loader(batch_size=2)
+dataloader = ImageAnnotationsDataset2("data/yolo/train").create_data_loader(batch_size=1)
+print(f'{len(dataloader)=}')
+item = next(iter(dataloader))
+print(f'{item=}')
 
 
 def filtered_masks_to_image(filtered_masks, input_image: Image):
@@ -286,7 +285,8 @@ class ImageMasks:
                 torch.save(model.state_dict(), './models/image-anno-' + str(epoch) + ".pth")
 
 
-convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
+
+#convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 exit()
 
 input_image = Image.open('data/yolo/train/images/CAS_promo_banner05_en.jpg')
