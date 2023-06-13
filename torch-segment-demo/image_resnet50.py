@@ -183,7 +183,7 @@ class ImageAnnotationsDataset(Dataset):
         return dataloader
 
 
-dataloader = ImageAnnotationsDataset2("data/yolo/train").create_data_loader(batch_size=1)
+dataloader = ImageAnnotationsDataset2("data/yolo/train").create_data_loader(batch_size=2)
 print(f'{len(dataloader)=}')
 item = next(iter(dataloader))
 print(f'{item=}')

@@ -246,7 +246,7 @@ class ImageAnnotationsDataset2(Dataset):
             preprocessed_images.append(preprocessed_image)
         return preprocessed_images
 
-    def preprocess_annotation(self, annotation_list):
+    def preprocess_annotations_file(self, annotations_file):
         target = {
             "boxes": [],
             "labels": [],
@@ -254,11 +254,11 @@ class ImageAnnotationsDataset2(Dataset):
             # "area": [],
             # "iscrowd": []
         }
-        print(f'{annotation_list=}')
-        for annotation in annotation_list:
-            target["boxes"].append(annotation['bbox'])
-            target["labels"].append(annotation['class_idx'])
-            target["masks"].append(annotation['mask'])
+        #print(f'{annotation_list=}')
+        for shape in annotations_file['shapes']:
+            target["boxes"].append(shape['bbox'])
+            target["labels"].append(shape['class_idx'])
+            target["masks"].append(shape['mask'])
         target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
         target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
 
@@ -266,15 +266,18 @@ class ImageAnnotationsDataset2(Dataset):
         target["masks"] = torch.tensor(masks_array, dtype=torch.long)
         return target
 
-    def preprocess_annotations(self, annotations):
+    def preprocess_annotations(self, annotations_files):
         targets = []
-        print(f'11 {annotations=}')
-        for annotation in annotations:
-            targets.append(self.preprocess_annotation(annotation))
+        for annotations_file in annotations_files:
+            targets.append(self.preprocess_annotations_file(annotations_file))
         return targets
 
     def collate_fn(self, batch):
+        batch_size = len(batch)
         images, annotations = zip(*batch)
+        if batch_size == 1:
+            images = [images]
+            annotations = [annotations]
         images = self.preprocess_images(images)
         annotations = self.preprocess_annotations(annotations)
         return images, annotations
