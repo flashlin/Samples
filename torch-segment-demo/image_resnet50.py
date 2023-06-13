@@ -15,6 +15,19 @@ from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from image_annotations_utils import ImageAnnotationsDataset
 
 
+# import cv2
+# import numpy as np
+# image_size = (512, 512)
+# points = np.array([[[341, 31]], [[368, 31]], [[368, 43]], [[381, 30]], [[402, 31]], [[411, 45]], [[425, 30]],
+#                   [[445, 32]], [[455, 44]], [[446, 75]], [[430, 81]], [[414, 78]], [[408, 66]], [[395, 78]],
+#                   [[375, 80]], [[364, 70]], [[364, 56]], [[358, 80]], [[340, 79]], [[346, 46]], [[339, 45]]])
+# mask = np.zeros(image_size, dtype=np.uint8)
+# cv2.fillPoly(mask, [points], 255)
+# cv2.imshow('Mask', mask)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+
+
 def create_model(num_classes):
     model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
     # get number of input features for the classifier
@@ -119,7 +132,8 @@ def collate_fn(batch):
     return images, annotations
 
 
-image_dataset = ImageAnnotationsDataset("data/yolo/train", (975, 380))
+image_resize = (600, 300)
+image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
 dataloader = image_dataset.create_data_loader(batch_size=2)
 #item = next(iter(dataloader))
 #print(f'{item=}')

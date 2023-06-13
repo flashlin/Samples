@@ -20,7 +20,7 @@ def create_mask_from_polygon_points(image_size: (int, int), points: list[(int, i
     # 將多邊形的點繪製到圖像上
     cv2.fillPoly(mask, [points], 255)
     #transform = transforms.ToTensor()
-    #mask_tensor = transform(mask)
+    # mask_tensor = transform(mask)
     return mask
 
 
@@ -285,7 +285,17 @@ class ImageAnnotationsDataset(Dataset):
             preprocessed_images.append(preprocessed_image)
         return preprocessed_images
 
-    def preprocess_annotations_file(self, annotations_file):
+    def resize_points(self, old_size, points):
+        scale_factor = np.array(self.image_resize) / np.array(old_size)
+        resized_points = points * scale_factor
+        return resized_points
+
+    def resize_bbox(self, old_size, bbox):
+        scale_factor = np.array(self.image_resize) / np.array(old_size)
+        resized_bbox = [int(coord * scale_factor[idx % 2]) for idx, coord in enumerate(bbox)]
+        return resized_bbox
+
+    def preprocess_annotations_file(self, annotations_obj):
         target = {
             "boxes": [],
             "labels": [],
@@ -293,14 +303,16 @@ class ImageAnnotationsDataset(Dataset):
             # "area": [],
             # "iscrowd": []
         }
-        #print(f'{annotation_list=}')
-        for shape in annotations_file['shapes']:
-            target["boxes"].append(shape['bbox'])
+        image_size = annotations_obj['imageSize']
+        for shape in annotations_obj['shapes']:
+            bbox = self.resize_bbox(image_size, shape['bbox'])
+            target["boxes"].append(bbox)
             target["labels"].append(shape['label_idx'])
-            target["masks"].append(shape['mask'])
+            points = self.resize_points(image_size, shape['points'])
+            mask = create_mask_from_polygon_points(self.image_resize, points)
+            target["masks"].append(mask)
         target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
         target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
-
         masks_array = np.stack(target["masks"])
         target["masks"] = torch.tensor(masks_array, dtype=torch.long)
         return target
