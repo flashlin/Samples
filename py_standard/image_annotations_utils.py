@@ -181,7 +181,7 @@ class ImageAnnotationsDataset2(Dataset):
         self.data = [file for file in self.query_image_files()]
         self.len = len(self.data)
         self.classes_name_idx = {}
-        self.num_classes = -1
+        self.num_classes = 0
         #self.classes_idx_name, self.classes_name_idx = self.load_classes_file(os.path.join(self.annotations_dir, 'classes.txt'))
         self.fn_load_annotation_file = load_labelme_annotation_json_file
         self.sum_classes()
@@ -208,8 +208,8 @@ class ImageAnnotationsDataset2(Dataset):
     def add_label(self, label):
         if label in self.classes_name_idx:
             return self.classes_name_idx[label]
-        self.num_classes += 1
         self.classes_name_idx[label] = self.num_classes
+        self.num_classes += 1
         return self.num_classes
 
     def load_annotations_file(self, image_filename):
