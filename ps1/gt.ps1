@@ -118,7 +118,8 @@ if( "df" -eq $action )
 }
 
 if( "pl" -eq $action ) {
-    invokecmd "git pull"
+    InvokeCmd "git pull"
+    InvokeCmd "git submodule foreach git pull"
     return
 }
 
@@ -250,6 +251,12 @@ if( "sr" -eq $action )
     return
 }
 
+if( "plm" -eq $action )
+{
+    InvokeCmd "git submodule foreach git pull"
+    return
+}
+
 Write-Host ""
 WriteHostColor "git helper by flash" "flash"
 Write-Host ""
@@ -280,3 +287,4 @@ Write-Host "stl                :stash list"
 Write-Host "stp                :stash pop"
 Write-Host "stc                :stash clear"               
 Write-Host "u [file]           :undo uncommitted files and clean"
+Write-Host "plm                :pull all submodules"
