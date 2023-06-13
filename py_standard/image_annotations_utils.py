@@ -283,11 +283,11 @@ class ImageAnnotationsDataset2(Dataset):
         return targets
 
     def collate_fn(self, batch):
-        batch_size = len(batch)
+        # batch_size = len(batch)
         images, annotations = zip(*batch)
-        if batch_size == 1:
-            images = [images]
-            annotations = [annotations]
+        # if batch_size == 1:
+        #     images = [images]
+        #     annotations = [annotations]
         images = self.preprocess_images(images)
         annotations = self.preprocess_annotations(annotations)
         return images, annotations
