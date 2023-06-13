@@ -295,7 +295,7 @@ class ImageAnnotationsDataset(Dataset):
         resized_bbox = [int(coord * scale_factor[idx % 2]) for idx, coord in enumerate(bbox)]
         return resized_bbox
 
-    def preprocess_annotations_file(self, annotations_obj):
+    def preprocess_annotations_obj(self, annotations_obj):
         target = {
             "boxes": [],
             "labels": [],
@@ -317,10 +317,10 @@ class ImageAnnotationsDataset(Dataset):
         target["masks"] = torch.tensor(masks_array, dtype=torch.long)
         return target
 
-    def preprocess_annotations(self, annotations_files):
+    def preprocess_annotations(self, annotations_obj_list):
         targets = []
-        for annotations_file in annotations_files:
-            targets.append(self.preprocess_annotations_file(annotations_file))
+        for annotations_obj in annotations_obj_list:
+            targets.append(self.preprocess_annotations_obj(annotations_obj))
         return targets
 
     def collate_fn(self, batch):
