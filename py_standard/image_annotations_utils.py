@@ -172,19 +172,72 @@ def load_annotation_file(annotation_file_path, image_size):
     return annotations
 
 
+def query_labelme_image_files(images_dir: str, annotations_dir: str):
+    for image_file_path in query_files(images_dir, ['.jpg', '.png']):
+        _, image_filename, _ = split_file_path(image_file_path)
+        annotation_file_path = os.path.join(annotations_dir, f'{image_filename}.json')
+        if os.path.exists(annotation_file_path):
+            yield image_file_path
+
+
+class ImageClasses:
+    def __init__(self):
+        self.name_idx = {}
+        self.idx_name = {}
+        self.count = 0
+
+    def add_label(self, label: str):
+        if label in self.name_idx:
+            return self.name_idx[label]
+        self.name_idx[label] = self.count
+        self.idx_name[self.count] = label
+        self.count += 1
+
+    def load_file(self, file_path: str):
+        lines = read_all_lines_file(file_path)
+        self.name_idx = {}
+        self.idx_name = {}
+        self.count = 0
+        for idx, line in enumerate(lines):
+            name = line.strip()
+            self.idx_name[idx] = name
+            self.name_idx[name] = idx
+            self.count += 1
+
+
+def create_labelme_classes_file(images_dir: str, annotations_dir: str):
+    classes = ImageClasses()
+    for image_file_path in query_labelme_image_files(images_dir, annotations_dir):
+        _, image_filename, _ = split_file_path(image_file_path)
+        annotation_file_path = os.path.join(annotations_dir, f'{image_filename}.json')
+        annotations_obj = load_labelme_annotation_json_file(annotation_file_path)
+        for shape in annotations_obj['shapes']:
+            shape['label_idx'] = classes.add_label(shape['label'])
+        # json_str = json.dumps(annotations_obj)
+        # with open(annotation_file_path, 'w', encoding='utf-8') as file:
+        #     file.write(json_str)
+    classes_file_path = os.path.join(annotations_dir, 'classes.txt')
+    with open(classes_file_path, 'w', encoding='utf-8') as file:
+        for idx in range(classes.count):
+            label = classes.idx_name[idx]
+            file.write(label + '\n')
+
+
 class ImageAnnotationsDataset2(Dataset):
     def __init__(self, data_dir, image_resize):
-        self.image_resize = image_resize #(512, 512)
+        self.image_resize = image_resize  #(512, 512)
         self.data_dir = data_dir
         self.images_dir = os.path.join(data_dir, "images")
         self.annotations_dir = os.path.join(data_dir, "annotations")
+        classes_file_path = os.path.join(self.annotations_dir, 'classes.txt')
+        if not os.path.exists(classes_file_path):
+            print(f'generate {classes_file_path}')
+            create_labelme_classes_file(self.images_dir, self.annotations_dir)
+        self.classes = ImageClasses()
+        self.classes.load_file(classes_file_path)
         self.data = [file for file in self.query_image_files()]
         self.len = len(self.data)
-        self.classes_name_idx = {}
-        self.num_classes = 0
-        #self.classes_idx_name, self.classes_name_idx = self.load_classes_file(os.path.join(self.annotations_dir, 'classes.txt'))
         self.fn_load_annotation_file = load_labelme_annotation_json_file
-        self.sum_classes()
 
     def __len__(self):
         return self.len
@@ -199,36 +252,12 @@ class ImageAnnotationsDataset2(Dataset):
         _, image_filename, _ = split_file_path(image_file_path)
         return self.load_annotations_file(image_filename)
 
-    def sum_classes(self):
-        for image_file_path in self.data:
-            annotations = self.load_annotations_file_by_image_file(image_file_path)
-            for shape in annotations['shapes']:
-                self.add_label(shape['label'])
-
-    def add_label(self, label):
-        if label in self.classes_name_idx:
-            return self.classes_name_idx[label]
-        self.classes_name_idx[label] = self.num_classes
-        self.num_classes += 1
-        return self.num_classes
-
     def load_annotations_file(self, image_filename):
         annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.json')
         annotations_obj = self.fn_load_annotation_file(annotation_file_path)
         for shape in annotations_obj['shapes']:
-            shape['class_idx'] = self.add_label(shape['label'])
+            shape['label_idx'] = self.classes.name_idx[shape['label']]
         return annotations_obj
-
-    @staticmethod
-    def load_classes_file(file_path: str):
-        lines = read_all_lines_file(file_path)
-        classes_idx_name = {}
-        classes_name_idx = {}
-        for idx, line in enumerate(lines):
-            name = line.strip()
-            classes_idx_name[idx] = name
-            classes_name_idx[name] = idx
-        return classes_idx_name, classes_name_idx
 
     def query_image_files(self):
         for image_file_path in query_files(self.images_dir, ['.jpg', '.png']):
@@ -267,7 +296,7 @@ class ImageAnnotationsDataset2(Dataset):
         #print(f'{annotation_list=}')
         for shape in annotations_file['shapes']:
             target["boxes"].append(shape['bbox'])
-            target["labels"].append(shape['class_idx'])
+            target["labels"].append(shape['label_idx'])
             target["masks"].append(shape['mask'])
         target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
         target["labels"] = torch.tensor(target["labels"], dtype=torch.long)

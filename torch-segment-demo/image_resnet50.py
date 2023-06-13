@@ -299,7 +299,7 @@ class ImageMasks:
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 
 # input_image = Image.open('data/yolo/train/images/CAS_promo_banner05_en.jpg')
-image_masker = ImageMasks(image_dataset.num_classes)
+image_masker = ImageMasks(image_dataset.classes.count)
 # segmented_image = image_masker.infer(input_image)
 # segmented_image.show()
 image_masker.train(image_dataset)
