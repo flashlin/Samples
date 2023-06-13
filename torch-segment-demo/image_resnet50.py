@@ -63,19 +63,6 @@ def parse_pascal_voc_xml(xml_path):
     return bbox_list, masks, class_list
 
 
-"""
-dataset/
-    - images/
-        - image1.jpg
-        - image2.jpg
-        - ...
-    - annotations/
-        - annotation1.xml
-        - annotation2.xml
-        - ...
-"""
-
-
 ## img = cv2.imread(os.path.join(imgs[idx], "Image.jpg"))
 ## img = cv2.resize(img, imageSize, cv2.INTER_LINEAR)
 
@@ -183,10 +170,10 @@ class ImageAnnotationsDataset(Dataset):
         return dataloader
 
 
-dataloader = ImageAnnotationsDataset2("data/yolo/train").create_data_loader(batch_size=2)
-print(f'{len(dataloader)=}')
-item = next(iter(dataloader))
-print(f'{item=}')
+image_dataset = ImageAnnotationsDataset2("data/yolo/train")
+dataloader = image_dataset.create_data_loader(batch_size=2)
+#item = next(iter(dataloader))
+#print(f'{item=}')
 
 
 def filtered_masks_to_image(filtered_masks, input_image: Image):
@@ -213,14 +200,22 @@ def dump_model_info(model):
 
 class ImageMasks:
     def __init__(self, num_classes=2):
+        print(f'{num_classes=}')
+        self.model_pth_path = './models/image-masks.pth'
+        self.model = self.create_model(num_classes)
+        # dump_model_info(model)
+
+    def create_model(self, num_classes):
         torch.hub.set_dir('./models')
         model = maskrcnn_resnet50_fpn(pretrained=False, progress=True, weights=None)
-        in_features = model.roi_heads.box_predictor.cls_score.in_features
-        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes)
         weights_path = 'models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth'
+        if os.path.exists(self.model_pth_path):
+            weights_path = self.model_pth_path
+        print(f'loading {weights_path}...')
         model.load_state_dict(torch.load(weights_path))
-        self.model = model
-        # dump_model_info(model)
+        in_features = model.roi_heads.box_predictor.cls_score.in_features
+        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes+1)
+        return model
 
     def infer(self, input_image: Image, device='cuda'):
         model = self.model
@@ -258,14 +253,14 @@ class ImageMasks:
         } for anno in annotations]
         return images, annotations
 
-    def train(self, dataloader, num_epochs=20, device='cuda'):
+    def train(self, image_dataset, num_epochs=20, device='cuda'):
+        dataloader = image_dataset.create_data_loader(batch_size=2)
         model = self.model
         model.to(device)
         model.train()
         optimizer = self.create_optimizer()
         print(f'start training {len(dataloader)=}')
         for epoch in range(num_epochs):
-            # 迭代處理每個批次的數據
             total_train_loss = 0.0
             for images, annotations in dataloader:
                 # print(f'{annotations=}')
@@ -277,20 +272,18 @@ class ImageMasks:
                 losses = sum(loss for loss in loss_dict.values())
                 loss_value = losses.item()
                 total_train_loss += loss_value
-                # 執行反向傳播和優化
                 losses.backward()
                 optimizer.step()
                 print(f"Epoch: {epoch + 1}, Loss: {loss_value}")
             if epoch % 100 == 0:
-                torch.save(model.state_dict(), './models/image-anno-' + str(epoch) + ".pth")
+                torch.save(model.state_dict(), self.model_pth_path)
 
 
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
-exit()
 
-input_image = Image.open('data/yolo/train/images/CAS_promo_banner05_en.jpg')
-image_masker = ImageMasks()
+# input_image = Image.open('data/yolo/train/images/CAS_promo_banner05_en.jpg')
+image_masker = ImageMasks(image_dataset.num_classes)
 # segmented_image = image_masker.infer(input_image)
 # segmented_image.show()
-image_masker.train(dataloader)
+image_masker.train(image_dataset)

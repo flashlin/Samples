@@ -184,16 +184,26 @@ class ImageAnnotationsDataset2(Dataset):
         self.num_classes = -1
         #self.classes_idx_name, self.classes_name_idx = self.load_classes_file(os.path.join(self.annotations_dir, 'classes.txt'))
         self.fn_load_annotation_file = load_labelme_annotation_json_file
+        self.sum_classes()
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, index):
         image_file_path = self.data[index]
-        _, image_filename, _ = split_file_path(image_file_path)
         image = load_image(image_file_path)
-        annotations = self.load_annotations_file(image_filename)
+        annotations = self.load_annotations_file_by_image_file(image_file_path)
         return image, annotations
+
+    def load_annotations_file_by_image_file(self, image_file_path: str):
+        _, image_filename, _ = split_file_path(image_file_path)
+        return self.load_annotations_file(image_filename)
+
+    def sum_classes(self):
+        for image_file_path in self.data:
+            annotations = self.load_annotations_file_by_image_file(image_file_path)
+            for shape in annotations['shapes']:
+                self.add_label(shape['label'])
 
     def add_label(self, label):
         if label in self.classes_name_idx:
