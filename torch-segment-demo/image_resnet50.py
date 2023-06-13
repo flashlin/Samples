@@ -170,7 +170,7 @@ class ImageAnnotationsDataset(Dataset):
         return dataloader
 
 
-image_dataset = ImageAnnotationsDataset2("data/yolo/train")
+image_dataset = ImageAnnotationsDataset2("data/yolo/train", (975, 380))
 dataloader = image_dataset.create_data_loader(batch_size=2)
 #item = next(iter(dataloader))
 #print(f'{item=}')
@@ -270,7 +270,7 @@ class ImageMasks:
         return images, annotations
 
     def train(self, image_dataset, num_epochs=20, device='cuda'):
-        dataloader = image_dataset.create_data_loader(batch_size=2)
+        dataloader = image_dataset.create_data_loader(batch_size=1)
         model = self.model
         model.to(device)
         model.train()
