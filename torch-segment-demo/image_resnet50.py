@@ -205,7 +205,7 @@ class ImageMasks:
         # 該模型中可能有部分的參數並不隨著訓練而修改，因此當requires_grad不為True時，並不傳入優化器
         params = [p for p in self.model.parameters() if p.requires_grad]
         optimizer = torch.optim.SGD(params, lr=0.001, momentum=0.9, weight_decay=0.0005)
-        # optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+        # optimizer = torch.optim.Adam(params, lr=0.001, weight_decay=0.0005)
         return optimizer
 
     @staticmethod
