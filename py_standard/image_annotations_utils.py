@@ -223,7 +223,7 @@ def create_labelme_classes_file(images_dir: str, annotations_dir: str):
             file.write(label + '\n')
 
 
-class ImageAnnotationsDataset2(Dataset):
+class ImageAnnotationsDataset(Dataset):
     def __init__(self, data_dir, image_resize):
         self.image_resize = image_resize  #(512, 512)
         self.data_dir = data_dir

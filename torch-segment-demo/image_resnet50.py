@@ -4,7 +4,6 @@ import numpy as np
 import torch
 import torchvision
 from torchvision.transforms import Resize, Normalize
-from torch.utils.data import Dataset, DataLoader
 from torchvision.models.detection import maskrcnn_resnet50_fpn
 from torchvision.transforms import functional as TF
 from PIL import Image, ImageDraw
@@ -13,9 +12,7 @@ import torchvision.transforms as transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
-from image_annotations_utils import load_annotation_file, convert_labelme_to_pascalvoc, ImageAnnotationsDataset2
-from image_utils import load_image
-from io_utils import query_files, split_file_path, read_all_lines_file
+from image_annotations_utils import ImageAnnotationsDataset
 
 
 def create_model(num_classes):
@@ -122,55 +119,7 @@ def collate_fn(batch):
     return images, annotations
 
 
-class ImageAnnotationsDataset(Dataset):
-    def __init__(self, data_dir):
-        self.data_dir = data_dir
-        self.images_dir = os.path.join(data_dir, "images")
-        self.annotations_dir = os.path.join(data_dir, "annotations")
-        self.data = [file for file in self.query_image_files()]
-        self.len = len(self.data)
-        self.classes_idx_name, self.classes_name_idx = self.load_classes_file(
-            os.path.join(self.annotations_dir, 'classes.txt'))
-
-    def __len__(self):
-        return self.len
-
-    def __getitem__(self, index):
-        image_file_path = self.data[index]
-        _, image_filename, _ = split_file_path(image_file_path)
-        annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.xml')
-        image = load_image(image_file_path)
-        annotations = load_annotation_file(annotation_file_path, image.size)
-        for annotation in annotations:
-            annotation['class_idx'] = self.classes_name_idx[annotation['class']]
-        image = load_image(image_file_path)
-        return image, annotations
-
-    @staticmethod
-    def load_classes_file(file_path: str):
-        lines = read_all_lines_file(file_path)
-        classes_idx_name = {}
-        classes_name_idx = {}
-        for idx, line in enumerate(lines):
-            name = line.strip()
-            classes_idx_name[idx] = name
-            classes_name_idx[name] = idx
-        return classes_idx_name, classes_name_idx
-
-    def query_image_files(self):
-        for image_file_path in query_files(self.images_dir, ['.jpg']):
-            _, image_filename, _ = split_file_path(image_file_path)
-            annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.xml')
-            if os.path.exists(annotation_file_path):
-                yield image_file_path
-
-    def create_data_loader(self, batch_size):
-        # dataloader = DataLoader(self, batch_size=batch_size, shuffle=True)
-        dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
-        return dataloader
-
-
-image_dataset = ImageAnnotationsDataset2("data/yolo/train", (975, 380))
+image_dataset = ImageAnnotationsDataset("data/yolo/train", (975, 380))
 dataloader = image_dataset.create_data_loader(batch_size=2)
 #item = next(iter(dataloader))
 #print(f'{item=}')
