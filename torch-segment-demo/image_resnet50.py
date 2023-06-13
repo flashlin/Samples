@@ -213,13 +213,16 @@ class ImageMasks:
             weights_path = self.model_pth_path
         print(f'loading {weights_path}...')
         if weights_path == self.model_pth_path:
-            in_features = model.roi_heads.box_predictor.cls_score.in_features
-            model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes)
+            self.change_num_classes_of_model(model, num_classes)
         model.load_state_dict(torch.load(weights_path))
         if weights_path != self.model_pth_path:
-            in_features = model.roi_heads.box_predictor.cls_score.in_features
-            model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes)
+            self.change_num_classes_of_model(model, num_classes)
         return model
+
+    @staticmethod
+    def change_num_classes_of_model(model, num_classes):
+        in_features = model.roi_heads.box_predictor.cls_score.in_features
+        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes)
 
     def infer(self, input_image: Image, device='cuda'):
         model = self.model
