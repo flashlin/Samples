@@ -209,7 +209,7 @@ class ImageMasks:
         torch.hub.set_dir('./models')
         model = maskrcnn_resnet50_fpn(pretrained=False, progress=True, weights=None)
         in_features = model.roi_heads.box_predictor.cls_score.in_features
-        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes+1)
+        model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes)
         weights_path = 'models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth'
         if os.path.exists(self.model_pth_path):
             weights_path = self.model_pth_path
