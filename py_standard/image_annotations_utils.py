@@ -17,13 +17,11 @@ from io_utils import split_file_path, read_all_lines_file, query_files, use_logg
 
 def create_mask_from_polygon_points(image_size: (int, int), points: list[(int, int)]):
     points_array = np.array([points], dtype=np.int32)
-    # points_array = np.array(points)
-    # points = points_array.reshape((-1, 1, 2)).astype(np.int32)
     mask = np.zeros((image_size[0], image_size[1]), dtype=np.uint8)
     # 將多邊形的點繪製到圖像上
     cv2.fillPoly(mask, points_array, 255)
-    #transform = transforms.ToTensor()
-    # mask_tensor = transform(mask)
+    transform = transforms.ToTensor()
+    mask = transform(mask)
     return mask
 
 
@@ -270,17 +268,7 @@ class ImageAnnotationsDataset(Dataset):
             if os.path.exists(annotation_file_path):
                 yield image_file_path
 
-    def preprocess_image(self, image):
-        # image.mode = 'RGBA'
-        # image = image.convert("RGB")
-        # transform = transforms.ToTensor()
-        # image = transform(image)
-        # transform = Resize((self.image_resize[1], self.image_resize[0]), antialias=True)
-        # image = transform(image)
-        # # 正規化圖像數值範圍到 0~1 之間
-        # transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        # image = transform(image)
-
+    def preprocess_image(self, image: Image):
         transform = transforms.Compose([
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
