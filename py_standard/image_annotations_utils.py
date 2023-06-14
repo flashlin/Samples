@@ -279,8 +279,12 @@ class ImageAnnotationsDataset(Dataset):
         transform_gray = transforms.Compose([
             transforms.Lambda(lambda x: transforms.functional.to_grayscale(x, num_output_channels=3)),
         ])
+        transform_color_jitter = transforms.Compose([
+            transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
+        ])
         transform = transforms.Compose([
             transforms.RandomApply([transform_gray], p=0.5),  # 0.5 機率變成灰階
+            transforms.RandomApply([transform_color_jitter], p=0.5),  # 0.5 機率顏色抖動
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.Resize((self.image_resize[1], self.image_resize[0]), antialias=True)

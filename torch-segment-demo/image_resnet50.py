@@ -272,9 +272,9 @@ class ImageMasks:
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 image_masker = ImageMasks(image_dataset.classes.count)
-image_masker.train(image_dataset, num_epochs=100)
+#image_masker.train(image_dataset, num_epochs=100)
 
-#input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
-#segmented_image = image_masker.infer(input_image)
-#segmented_image.show()
+input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
+segmented_image = image_masker.infer(input_image)
+segmented_image.show()
 
