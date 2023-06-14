@@ -1,6 +1,23 @@
 import os
 import glob
 import shutil
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
+
+def use_logger():
+    # 設置日誌設定
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+    # 設置日誌處理器
+    log_file = 'logs/mylog.log'  # 日誌檔案路徑和檔名
+    handler = TimedRotatingFileHandler(log_file, when='D', interval=1, backupCount=2)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    # 添加日誌處理器到根日誌器
+    logger = logging.getLogger('')
+    logger.addHandler(handler)
+    return logger
 
 
 def split_file_path(file_path: str):

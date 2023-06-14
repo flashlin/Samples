@@ -1,3 +1,4 @@
+import logging
 import os
 from xml.etree import ElementTree as ET
 import numpy as np
@@ -5,20 +6,22 @@ from xml.dom import minidom
 import json
 import cv2
 import torch
+from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 import torchvision.transforms as transforms
 from torchvision.transforms import Resize, Normalize
 
-from image_utils import load_image
-from io_utils import split_file_path, read_all_lines_file, query_files
+from image_utils import load_image, show_image_tensor, show_image
+from io_utils import split_file_path, read_all_lines_file, query_files, use_logger
 
 
 def create_mask_from_polygon_points(image_size: (int, int), points: list[(int, int)]):
-    points_array = np.array(points)
-    points = points_array.reshape((-1, 1, 2)).astype(np.int32)
+    points_array = np.array([points], dtype=np.int32)
+    # points_array = np.array(points)
+    # points = points_array.reshape((-1, 1, 2)).astype(np.int32)
     mask = np.zeros((image_size[0], image_size[1]), dtype=np.uint8)
     # 將多邊形的點繪製到圖像上
-    cv2.fillPoly(mask, [points], 255)
+    cv2.fillPoly(mask, points_array, 255)
     #transform = transforms.ToTensor()
     # mask_tensor = transform(mask)
     return mask
@@ -246,6 +249,7 @@ class ImageAnnotationsDataset(Dataset):
         image_file_path = self.data[index]
         image = load_image(image_file_path)
         annotations = self.load_annotations_file_by_image_file(image_file_path)
+        # print(f'{index=} {image_file_path=}')
         return image, annotations
 
     def load_annotations_file_by_image_file(self, image_file_path: str):
@@ -260,7 +264,7 @@ class ImageAnnotationsDataset(Dataset):
         return annotations_obj
 
     def query_image_files(self):
-        for image_file_path in query_files(self.images_dir, ['.jpg', '.png']):
+        for image_file_path in query_files(self.images_dir, ['.jpg']):
             _, image_filename, _ = split_file_path(image_file_path)
             annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.json')
             if os.path.exists(annotation_file_path):
@@ -268,15 +272,22 @@ class ImageAnnotationsDataset(Dataset):
 
     def preprocess_image(self, image):
         # image.mode = 'RGBA'
-        image = image.convert("RGB")
-        transform = transforms.ToTensor()
+        # image = image.convert("RGB")
+        # transform = transforms.ToTensor()
+        # image = transform(image)
+        # transform = Resize((self.image_resize[1], self.image_resize[0]), antialias=True)
+        # image = transform(image)
+        # # 正規化圖像數值範圍到 0~1 之間
+        # transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        # image = transform(image)
+
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.Resize((self.image_resize[1], self.image_resize[0]), antialias=True)
+        ])
         image = transform(image)
-        transform = Resize(self.image_resize, antialias=True)
-        image = transform(image)
-        # 正規化圖像數值範圍到 0~1 之間
-        transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        transformed_image = transform(image)
-        return transformed_image
+        return image
 
     def preprocess_images(self, images):
         preprocessed_images = []
@@ -314,7 +325,7 @@ class ImageAnnotationsDataset(Dataset):
         target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
         target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
         masks_array = np.stack(target["masks"])
-        target["masks"] = torch.tensor(masks_array, dtype=torch.long)
+        target["masks"] = torch.tensor(masks_array, dtype=torch.uint8)
         return target
 
     def preprocess_annotations(self, annotations_obj_list):
@@ -327,6 +338,8 @@ class ImageAnnotationsDataset(Dataset):
         images, annotations = zip(*batch)
         images = self.preprocess_images(images)
         annotations = self.preprocess_annotations(annotations)
+        # for image_tensor, _ in zip(images, annotations):
+        #     show_image_tensor(image_tensor)
         return images, annotations
 
     def create_data_loader(self, batch_size):
