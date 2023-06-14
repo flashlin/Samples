@@ -135,7 +135,7 @@ def collate_fn(batch):
 
 image_resize = (600, 300)
 image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
-dataloader = image_dataset.create_data_loader(batch_size=2)
+dataloader = image_dataset.create_data_loader(batch_size=1)
 #item = next(iter(dataloader))
 #print(f'{item=}')
 
@@ -272,9 +272,9 @@ class ImageMasks:
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 image_masker = ImageMasks(image_dataset.classes.count)
-# image_masker.train(image_dataset)
+image_masker.train(image_dataset, num_epochs=100)
 
-input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
-segmented_image = image_masker.infer(input_image)
-segmented_image.show()
+#input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
+#segmented_image = image_masker.infer(input_image)
+#segmented_image.show()
 

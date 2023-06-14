@@ -269,7 +269,18 @@ class ImageAnnotationsDataset(Dataset):
                 yield image_file_path
 
     def preprocess_image(self, image: Image):
+        # transform = transforms.Compose([
+        #     transforms.ToTensor(),
+        #     transforms.Lambda(lambda x: transforms.functional.to_grayscale(x, num_output_channels=3)),
+        #     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        #     transforms.Resize((self.image_resize[1], self.image_resize[0]), antialias=True)
+        # ])
+
+        transform_gray = transforms.Compose([
+            transforms.Lambda(lambda x: transforms.functional.to_grayscale(x, num_output_channels=3)),
+        ])
         transform = transforms.Compose([
+            transforms.RandomApply([transform_gray], p=0.5),  # 0.5 機率變成灰階
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.Resize((self.image_resize[1], self.image_resize[0]), antialias=True)
