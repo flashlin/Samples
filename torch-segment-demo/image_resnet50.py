@@ -13,6 +13,7 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 from image_annotations_utils import ImageAnnotationsDataset
+from image_utils import load_image
 
 
 # import cv2
@@ -196,11 +197,21 @@ class ImageMasks:
         in_features = model.roi_heads.box_predictor.cls_score.in_features
         model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes)
 
+    def image_to_tensor(self, image, image_resize):
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.Resize((image_resize[1], image_resize[0]), antialias=True)
+        ])
+        image = transform(image)
+        return image
+
     def infer(self, input_image: Image, device='cuda'):
         model = self.model
         model.to(device)
         model.eval()
-        input_tensor = TF.to_tensor(input_image)
+        #input_tensor = TF.to_tensor(input_image).to(device)
+        input_tensor = self.image_to_tensor(input_image, (600, 300)).to(device)
         input_tensor = input_tensor.unsqueeze(0)
         with torch.no_grad():
             output = model(input_tensor)
@@ -260,9 +271,10 @@ class ImageMasks:
 
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
-
-# input_image = Image.open('data/yolo/train/images/CAS_promo_banner05_en.jpg')
 image_masker = ImageMasks(image_dataset.classes.count)
-# segmented_image = image_masker.infer(input_image)
-# segmented_image.show()
-image_masker.train(image_dataset)
+# image_masker.train(image_dataset)
+
+input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
+segmented_image = image_masker.infer(input_image)
+segmented_image.show()
+
