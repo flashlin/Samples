@@ -135,7 +135,7 @@ def collate_fn(batch):
 
 image_resize = (600, 300)
 image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
-dataloader = image_dataset.create_data_loader(batch_size=1)
+dataloader = image_dataset.create_data_loader(batch_size=5)
 #item = next(iter(dataloader))
 #print(f'{item=}')
 
