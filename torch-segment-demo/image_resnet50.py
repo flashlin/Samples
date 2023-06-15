@@ -211,7 +211,15 @@ class ImageMasks:
         model.to(device)
         model.eval()
         #input_tensor = TF.to_tensor(input_image).to(device)
-        input_tensor = self.image_to_tensor(input_image, (600, 300)).to(device)
+
+        image_resize = (600, 300)
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.Resize((image_resize[1], image_resize[0]), antialias=True)
+        ])
+        #input_tensor = self.image_to_tensor(input_image, (600, 300)).to(device)
+        input_tensor = transform(input_image).to(device)
         input_tensor = input_tensor.unsqueeze(0)
         with torch.no_grad():
             output = model(input_tensor)

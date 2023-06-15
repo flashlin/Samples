@@ -270,20 +270,16 @@ class ImageAnnotationsDataset(Dataset):
                 yield image_file_path
 
     def preprocess_image(self, image: Image):
-        # transform = transforms.Compose([
-        #     transforms.ToTensor(),
-        #     transforms.Lambda(lambda x: transforms.functional.to_grayscale(x, num_output_channels=3)),
-        #     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        #     transforms.Resize((self.image_resize[1], self.image_resize[0]), antialias=True)
-        # ])
-
-        transform_gray = transforms.Lambda(lambda x: transforms.functional.to_grayscale(x, num_output_channels=3))
+        transform_gray = transforms.Compose([
+            transforms.Grayscale(),
+            transforms.Lambda(lambda x: x.convert("RGB"))  # 將灰度影像轉換回三通道的 RGB 形式
+        ])
         transform_color_jitter = transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1)
         selected_transform = random.choice([transform_gray, transform_color_jitter])
         transform = transforms.Compose([
-            transforms.RandomApply([selected_transform], p=0.5),  # 0.5 機率套用
+            transforms.RandomApply([selected_transform], p=0.6),  # 0.5 機率套用
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.Resize((self.image_resize[1], self.image_resize[0]), antialias=True)
         ])
         image = transform(image)
