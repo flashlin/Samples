@@ -135,6 +135,7 @@ def collate_fn(batch):
 
 
 image_resize = (600, 300)
+image_resize = (800, 800)
 image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
 dataloader = image_dataset.create_data_loader(batch_size=5)
 #item = next(iter(dataloader))
@@ -255,7 +256,7 @@ class ImageMasks:
         model.eval()
         #input_tensor = TF.to_tensor(input_image).to(device)
 
-        image_resize = (600, 300)
+        image_resize = (800, 800)
         transform_gray = transforms.Compose([
             transforms.Grayscale(),
             transforms.Lambda(lambda x: x.convert("RGB"))  # 將灰度影像轉換回三通道的 RGB 形式
