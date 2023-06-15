@@ -14,6 +14,7 @@ from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 from image_annotations_utils import ImageAnnotationsDataset
 from image_utils import load_image
+from io_utils import split_filename, split_file_path
 
 
 # import cv2
@@ -184,9 +185,29 @@ def get_nonzero_mask(mask):
     return new_mask, (min_x, min_y, max_x, max_y)
 
 
+def get_pth_loss_file_path(pth_file_path: str):
+    directory, filename, _ = split_file_path(pth_file_path)
+    loss_file_path = os.path.join(directory, f'{filename}.loss')
+    return loss_file_path
+
+
+def read_pth_loss_file(pth_file_path: str) -> float:
+    loss_file_path = get_pth_loss_file_path(pth_file_path)
+    if not os.path.exists(loss_file_path):
+        return float('inf')
+    with open(loss_file_path, 'r', encoding='utf-8') as f:
+        loss = float(f.readline().strip())
+    return loss
+
+
+def write_pth_loss_file(pth_file_path: str, loss):
+    loss_file_path = get_pth_loss_file_path(pth_file_path)
+    with open(loss_file_path, 'w', encoding='utf-8') as f:
+        f.write(str(loss))
+
+
 class ImageMasks:
     def __init__(self, num_classes=2):
-        print(f'{num_classes=}')
         self.model_pth_path = './models/image-masks.pth'
         self.model = self.create_model(num_classes)
         # dump_model_info(model)
@@ -289,7 +310,7 @@ class ImageMasks:
         model.train()
         optimizer = self.create_optimizer()
         print(f'start training {len(dataloader)=}')
-        best_loss = float('inf')
+        best_loss = read_pth_loss_file(self.model_pth_path)
         for epoch in range(num_epochs):
             total_train_loss = 0.0
             for images, annotations in dataloader:
@@ -308,6 +329,7 @@ class ImageMasks:
             if best_loss > total_train_loss:
                 best_loss = total_train_loss
                 torch.save(model.state_dict(), self.model_pth_path)
+                write_pth_loss_file(self.model_pth_path, best_loss)
             #if epoch % 100 == 0:
             #    torch.save(model.state_dict(), self.model_pth_path)
 
@@ -315,7 +337,7 @@ class ImageMasks:
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 image_masker = ImageMasks(image_dataset.classes.count)
-# image_masker.train(image_dataset, num_epochs=10)
+image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
 segmented_image = image_masker.infer(input_image)
