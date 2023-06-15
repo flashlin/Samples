@@ -119,7 +119,8 @@ if( "df" -eq $action )
 
 if( "pl" -eq $action ) {
     InvokeCmd "git pull"
-    InvokeCmd "git submodule foreach git pull"
+    InvokeCmd "git submodule sync"
+    InvokeCmd "git submodule update --init --remote --recursive"
     return
 }
 
