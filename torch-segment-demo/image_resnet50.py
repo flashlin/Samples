@@ -145,7 +145,8 @@ def filtered_masks_to_image(filtered_masks, input_image: Image):
     # 将预测的掩膜应用于全黑图像上
     draw = ImageDraw.Draw(mask_image)
     for mask in filtered_masks:
-        mask = mask[0].mul(255).byte()
+        mask[mask > 0] = 255
+        mask = mask.byte()
         mask_pil = TF.to_pil_image(mask)
         draw.bitmap((0, 0), mask_pil, fill=255)
     segmented_image = Image.new('RGB', input_image.size)
@@ -160,6 +161,27 @@ def dump_model_info(model):
         print(f"Parameter shape: {param.shape}")
         print(f"Requires gradient: {param.requires_grad}")
         print("")
+
+
+def get_nonzero_mask(mask):
+    # nonzero_indices = torch.nonzero(mask > 0)
+    # if len(nonzero_indices) > 0:
+    #     for index in nonzero_indices:
+    #         value = mask[index[0], index[1], index[2]]
+    #         print(f"Nonzero value at index ({index[0]}, {index[1]}, {index[2]}): {value}")
+
+    nonzero_indices = torch.nonzero(mask > 0)
+    print(f'{nonzero_indices=}')
+    if len(nonzero_indices) > 0:
+        min_x = torch.min(nonzero_indices[:, 1])
+        min_y = torch.min(nonzero_indices[:, 0])
+        max_x = torch.max(nonzero_indices[:, 1])
+        max_y = torch.max(nonzero_indices[:, 0])
+        new_mask = mask[min_y:max_y + 1, min_x:max_x + 1]
+    else:
+        min_x = min_y = max_x = max_y = None
+        new_mask = None
+    return new_mask, (min_x, min_y, max_x, max_y)
 
 
 class ImageMasks:
@@ -231,10 +253,13 @@ class ImageMasks:
         # 提取预测结果
         masks = output[0]['masks']
         scores = output[0]['scores']
+        classes = output[0]['labels']
         # 根据得分选择高置信度的预测结果
         threshold = 0.5  # 设定阈值
         filtered_masks = masks[scores > threshold]
-        print(f'{filtered_masks=}')
+        filtered_classes = classes[scores > threshold]
+        if len(filtered_masks) == 0:
+            return None
         # 将预测结果转换为PIL图像
         # segmented_image = TF.to_pil_image(filtered_masks[0, 0].mul(255).byte())
         segmented_image = filtered_masks_to_image(filtered_masks, input_image)
@@ -264,6 +289,7 @@ class ImageMasks:
         model.train()
         optimizer = self.create_optimizer()
         print(f'start training {len(dataloader)=}')
+        best_loss = float('inf')
         for epoch in range(num_epochs):
             total_train_loss = 0.0
             for images, annotations in dataloader:
@@ -279,16 +305,22 @@ class ImageMasks:
                 losses.backward()
                 optimizer.step()
                 print(f"Epoch: {epoch + 1}, Loss: {loss_value}")
-            if epoch % 100 == 0:
+            if best_loss > total_train_loss:
+                best_loss = total_train_loss
                 torch.save(model.state_dict(), self.model_pth_path)
+            #if epoch % 100 == 0:
+            #    torch.save(model.state_dict(), self.model_pth_path)
 
 
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 image_masker = ImageMasks(image_dataset.classes.count)
-# image_masker.train(image_dataset, num_epochs=100)
+# image_masker.train(image_dataset, num_epochs=10)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
 segmented_image = image_masker.infer(input_image)
-segmented_image.show()
+if segmented_image is not None:
+    segmented_image.show()
+else:
+    print("Not Found")
 
