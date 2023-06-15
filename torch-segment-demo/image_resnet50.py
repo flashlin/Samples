@@ -135,9 +135,9 @@ def collate_fn(batch):
 
 
 image_resize = (600, 300)
-image_resize = (800, 800)
+# image_resize = (800, 800)
 image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
-dataloader = image_dataset.create_data_loader(batch_size=5)
+dataloader = image_dataset.create_data_loader(batch_size=2)
 #item = next(iter(dataloader))
 #print(f'{item=}')
 
@@ -250,13 +250,12 @@ class ImageMasks:
         image = transform(image)
         return image
 
-    def infer(self, input_image: Image, device='cuda'):
+    def infer(self, input_image: Image, image_resize, device='cuda'):
         model = self.model
         model.to(device)
         model.eval()
         #input_tensor = TF.to_tensor(input_image).to(device)
 
-        image_resize = (800, 800)
         transform_gray = transforms.Compose([
             transforms.Grayscale(),
             transforms.Lambda(lambda x: x.convert("RGB"))  # 將灰度影像轉換回三通道的 RGB 形式
@@ -341,7 +340,7 @@ image_masker = ImageMasks(image_dataset.classes.count)
 image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
-segmented_image = image_masker.infer(input_image)
+segmented_image = image_masker.infer(input_image, image_resize)
 if segmented_image is not None:
     segmented_image.show()
 else:

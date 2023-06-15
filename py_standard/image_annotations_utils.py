@@ -277,7 +277,7 @@ class ImageAnnotationsDataset(Dataset):
         transform_color_jitter = transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1)
         selected_transform = random.choice([transform_gray, transform_color_jitter])
         transform = transforms.Compose([
-            # transforms.RandomApply([selected_transform], p=0.6),  # 0.5 機率套用
+            transforms.RandomApply([transform_color_jitter], p=0.6),  # 0.5 機率套用
             transform_gray,
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
