@@ -213,7 +213,12 @@ class ImageMasks:
         #input_tensor = TF.to_tensor(input_image).to(device)
 
         image_resize = (600, 300)
+        transform_gray = transforms.Compose([
+            transforms.Grayscale(),
+            transforms.Lambda(lambda x: x.convert("RGB"))  # 將灰度影像轉換回三通道的 RGB 形式
+        ])
         transform = transforms.Compose([
+            transform_gray,
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             transforms.Resize((image_resize[1], image_resize[0]), antialias=True)
@@ -229,6 +234,7 @@ class ImageMasks:
         # 根据得分选择高置信度的预测结果
         threshold = 0.5  # 设定阈值
         filtered_masks = masks[scores > threshold]
+        print(f'{filtered_masks=}')
         # 将预测结果转换为PIL图像
         # segmented_image = TF.to_pil_image(filtered_masks[0, 0].mul(255).byte())
         segmented_image = filtered_masks_to_image(filtered_masks, input_image)
@@ -280,7 +286,7 @@ class ImageMasks:
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 image_masker = ImageMasks(image_dataset.classes.count)
-image_masker.train(image_dataset, num_epochs=100)
+# image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
 segmented_image = image_masker.infer(input_image)
