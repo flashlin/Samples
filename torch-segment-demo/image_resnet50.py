@@ -142,8 +142,12 @@ image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
 
 
 def compute_mask_tensor_width_height(mask_tensor):
+    """
+    :param mask_tensor: [1, height, width]
+    :return:
+    """
+    mask_tensor = torch.transpose(mask_tensor, 1, 2)
     mask = mask_tensor.squeeze().cpu().numpy()
-    print(f'{mask.shape=}')
     indices = np.argwhere(mask == 255)
     min_x, min_y = np.min(indices, axis=0)
     max_x, max_y = np.max(indices, axis=0)
@@ -153,21 +157,21 @@ def compute_mask_tensor_width_height(mask_tensor):
 
 
 def copy_image_region(source_image, bbox):
-    (x, y, w, h) = bbox
+    (min_x, min_y, max_x, max_y) = bbox
+    w = max_x - min_x + 1
+    h = max_y - min_y + 1
     target_image = Image.new('RGB', (w, h))
     pixels = source_image.load()
     target_pixels = target_image.load()
-    print(f"{source_image.size=} {bbox=}")
     for i in range(w):
         for j in range(h):
-            print(f"{source_image.size=} {i=} {j=} {x+i=} {y+j=}")
-            pixel = pixels[x + i, y + j]
+            pixel = pixels[min_x + i, min_y + j]
             if pixel != (0, 0, 0):
                 target_pixels[i, j] = pixel
     return target_image
 
 
-def filtered_masks_to_images(filtered_masks, input_image: Image):
+def filtered_masks_to_shot_images(filtered_masks, input_image: Image):
     all_mask_images = []
     for mask in filtered_masks:
         mask_image = Image.new('L', input_image.size, 0)
@@ -179,7 +183,6 @@ def filtered_masks_to_images(filtered_masks, input_image: Image):
         target_image = Image.new('RGB', input_image.size)
         target_image.paste(input_image, mask=mask_image)
 
-        print(f'{input_image.size=} {mask_image.size=} {mask_size=}')
         # shot_image = Image.new('RGB', mask_size)
         # shot_image.paste(input_image, box=(0, 0, mask_size[0], mask_size[1]), mask=mask_image)
         shot_image = copy_image_region(input_image, mask_bbox)
@@ -332,13 +335,10 @@ class ImageMasks:
         if len(filtered_masks) == 0:
             return None
         # 将预测结果转换为PIL图像
-        # segmented_image = filtered_masks_to_image(filtered_masks, input_image)
-        all_mask_images = filtered_masks_to_images(filtered_masks, input_image)
-        for (shot, mask), label in zip(all_mask_images, filtered_classes):
-            mask.show(label)
-            exit()
-            # shot.show()
-        return None
+        segmented_image = filtered_masks_to_image(filtered_masks, input_image)
+        all_mask_images = filtered_masks_to_shot_images(filtered_masks, input_image)
+        all_shot_images = zip(all_mask_images, filtered_classes)
+        return all_shot_images, segmented_image
 
     def create_optimizer(self):
         # 該模型中可能有部分的參數並不隨著訓練而修改，因此當requires_grad不為True時，並不傳入優化器
