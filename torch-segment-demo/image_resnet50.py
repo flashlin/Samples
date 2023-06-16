@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
-from image_annotations_utils import ImageAnnotationsDataset
+from image_annotations_utils import ImageAnnotationsDataset, DataLoaderFactory
 from image_utils import load_image
 from io_utils import split_filename, split_file_path
 
@@ -137,7 +137,6 @@ def collate_fn(batch):
 image_resize = (600, 300)
 # image_resize = (800, 800)
 image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
-dataloader = image_dataset.create_data_loader(batch_size=1)
 #item = next(iter(dataloader))
 #print(f'{item=}')
 
@@ -304,7 +303,8 @@ class ImageMasks:
         return images, annotations
 
     def train(self, image_dataset, num_epochs=20, device='cuda'):
-        dataloader = image_dataset.create_data_loader(batch_size=1)
+        data_loader_factory = DataLoaderFactory()
+        dataloader = data_loader_factory.create(image_dataset, batch_size=1)
         model = self.model
         model.to(device)
         model.train()
@@ -337,7 +337,7 @@ class ImageMasks:
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 image_masker = ImageMasks(image_dataset.classes.count)
-# image_masker.train(image_dataset, num_epochs=100)
+image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
 segmented_image = image_masker.infer(input_image, image_resize)

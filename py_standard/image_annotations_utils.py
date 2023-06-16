@@ -269,6 +269,18 @@ class ImageAnnotationsDataset(Dataset):
             if os.path.exists(annotation_file_path):
                 yield image_file_path
 
+
+class DataLoaderFactory:
+    def __init__(self, image_resize=None):
+        self.image_resize = image_resize
+
+    def resize_points(self, old_size, points):
+        if self.image_resize is None:
+            return points
+        scale_factor = np.array(self.image_resize) / np.array(old_size)
+        resized_points = points * scale_factor
+        return resized_points
+
     def preprocess_image(self, image: Image):
         transform_gray = transforms.Compose([
             transforms.Grayscale(),
@@ -293,12 +305,9 @@ class ImageAnnotationsDataset(Dataset):
             preprocessed_images.append(preprocessed_image)
         return preprocessed_images
 
-    def resize_points(self, old_size, points):
-        scale_factor = np.array(self.image_resize) / np.array(old_size)
-        resized_points = points * scale_factor
-        return resized_points
-
     def resize_bbox(self, old_size, bbox):
+        if self.image_resize is None:
+            return bbox
         scale_factor = np.array(self.image_resize) / np.array(old_size)
         resized_bbox = [int(coord * scale_factor[idx % 2]) for idx, coord in enumerate(bbox)]
         return resized_bbox
@@ -308,8 +317,6 @@ class ImageAnnotationsDataset(Dataset):
             "boxes": [],
             "labels": [],
             "masks": [],
-            # "area": [],
-            # "iscrowd": []
         }
         image_size = annotations_obj['imageSize']
         for shape in annotations_obj['shapes']:
@@ -317,7 +324,7 @@ class ImageAnnotationsDataset(Dataset):
             target["boxes"].append(bbox)
             target["labels"].append(shape['label_idx'])
             points = self.resize_points(image_size, shape['points'])
-            mask = create_mask_from_polygon_points(self.image_resize, points)
+            mask = create_mask_from_polygon_points(image_size, points)
             target["masks"].append(mask)
         target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
         target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
@@ -335,11 +342,8 @@ class ImageAnnotationsDataset(Dataset):
         images, annotations = zip(*batch)
         images = self.preprocess_images(images)
         annotations = self.preprocess_annotations(annotations)
-        # for image_tensor, _ in zip(images, annotations):
-        #     show_image_tensor(image_tensor)
         return images, annotations
 
-    def create_data_loader(self, batch_size):
-        # dataloader = DataLoader(self, batch_size=batch_size, shuffle=True)
-        dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, collate_fn=self.collate_fn)
+    def create(self, dataset, batch_size):
+        dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, collate_fn=self.collate_fn)
         return dataloader
