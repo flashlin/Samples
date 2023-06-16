@@ -143,13 +143,28 @@ image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
 
 def compute_mask_tensor_width_height(mask_tensor):
     mask = mask_tensor.squeeze().cpu().numpy()
+    print(f'{mask.shape=}')
     indices = np.argwhere(mask == 255)
-    print(f'{indices=}')
     min_x, min_y = np.min(indices, axis=0)
     max_x, max_y = np.max(indices, axis=0)
     width = max_y - min_y + 1
     height = max_x - min_x + 1
     return (width, height), (min_x, min_y, max_x, max_y)
+
+
+def copy_image_region(source_image, bbox):
+    (x, y, w, h) = bbox
+    target_image = Image.new('RGB', (w, h))
+    pixels = source_image.load()
+    target_pixels = target_image.load()
+    print(f"{source_image.size=} {bbox=}")
+    for i in range(w):
+        for j in range(h):
+            print(f"{source_image.size=} {i=} {j=} {x+i=} {y+j=}")
+            pixel = pixels[x + i, y + j]
+            if pixel != (0, 0, 0):
+                target_pixels[i, j] = pixel
+    return target_image
 
 
 def filtered_masks_to_images(filtered_masks, input_image: Image):
@@ -158,14 +173,16 @@ def filtered_masks_to_images(filtered_masks, input_image: Image):
         mask_image = Image.new('L', input_image.size, 0)
         draw = ImageDraw.Draw(mask_image)
         mask[mask > 0] = 255
-        mask_size, _ = compute_mask_tensor_width_height(mask)
+        mask_size, mask_bbox = compute_mask_tensor_width_height(mask)
         mask_pil = TF.to_pil_image(mask.byte())
         draw.bitmap((0, 0), mask_pil, fill=255)
         target_image = Image.new('RGB', input_image.size)
         target_image.paste(input_image, mask=mask_image)
 
-        shot_image = Image.new('RGB', mask_size)
-        shot_image.paste(input_image, box=(0, 0, mask_size[0], mask_size[1]), mask=mask_image)
+        print(f'{input_image.size=} {mask_image.size=} {mask_size=}')
+        # shot_image = Image.new('RGB', mask_size)
+        # shot_image.paste(input_image, box=(0, 0, mask_size[0], mask_size[1]), mask=mask_image)
+        shot_image = copy_image_region(input_image, mask_bbox)
 
         # mask_np = np.squeeze(mask.cpu().numpy())
         # mask_image = Image.fromarray((mask_np * 255).astype(np.uint8), mode='1')
