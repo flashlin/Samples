@@ -22,7 +22,7 @@ def image_segmentation():
     image = image.convert('RGB')
     # image.save('./output/temp.jpg', 'JPEG')
 
-    image_masker = ImageMasks(image_classes.count)
+    image_masker = ImageMasks(image_classes)
 
     return jsonify({
         'Image': 'temp.jpg',
