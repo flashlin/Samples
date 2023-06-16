@@ -280,7 +280,7 @@ class ImageMasks:
         image = transform(image)
         return image
 
-    def infer(self, input_image: Image, image_resize, device='cuda'):
+    def infer(self, input_image: Image, device='cuda'):
         model = self.model
         model.to(device)
         model.eval()
@@ -310,7 +310,7 @@ class ImageMasks:
         filtered_masks = masks[scores > threshold]
         filtered_classes = classes[scores > threshold]
         if len(filtered_masks) == 0:
-            return None
+            return None, None
         filtered_classes = [self.classes.idx_name[class_idx] for class_idx in filtered_classes.cpu().numpy()]
         # 将预测结果转换为PIL图像
         segmented_image = filtered_masks_to_image(filtered_masks, input_image)
@@ -373,7 +373,7 @@ image_masker = ImageMasks(image_dataset.classes)
 #image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
-shot_images, segmented_image = image_masker.infer(input_image, image_resize)
+shot_images, segmented_image = image_masker.infer(input_image)
 
 for (shot_image, mask_image), label in shot_images:
     #shot_image.show()
