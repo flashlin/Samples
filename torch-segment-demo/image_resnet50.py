@@ -13,8 +13,8 @@ from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
 from image_annotations_utils import ImageAnnotationsDataset, DataLoaderFactory
-from image_utils import load_image
-from io_utils import split_filename, split_file_path
+from image_utils import load_image, create_mask_image, copy_image_region
+from io_utils import split_file_path
 
 
 # import cv2
@@ -141,7 +141,7 @@ image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
 #print(f'{item=}')
 
 
-def compute_mask_tensor_width_height(mask_tensor):
+def compute_mask_tensor_bbox(mask_tensor):
     """
     :param mask_tensor: [1, height, width]
     :return:
@@ -156,36 +156,12 @@ def compute_mask_tensor_width_height(mask_tensor):
     return (width, height), (min_x, min_y, max_x, max_y)
 
 
-def copy_image_region(source_image, bbox):
-    (min_x, min_y, max_x, max_y) = bbox
-    w = max_x - min_x + 1
-    h = max_y - min_y + 1
-    target_image = Image.new('RGB', (w, h))
-    pixels = source_image.load()
-    target_pixels = target_image.load()
-    for i in range(w):
-        for j in range(h):
-            pixel = pixels[min_x + i, min_y + j]
-            if pixel != (0, 0, 0):
-                target_pixels[i, j] = pixel
-    return target_image
-
-
-def create_mask_image(image_size, mask_tensor) -> Image:
-    mask_image = Image.new('L', image_size, 0)
-    draw = ImageDraw.Draw(mask_image)
-    mask_tensor[mask_tensor > 0] = 255
-    mask_pil = TF.to_pil_image(mask_tensor.byte())
-    draw.bitmap((0, 0), mask_pil, fill=255)
-    return mask_image
-
-
 def filtered_masks_to_shot_images(filtered_masks, input_image: Image):
     all_mask_images = []
     for mask in filtered_masks:
         mask_image = create_mask_image(input_image.size, mask)
 
-        mask_size, mask_bbox = compute_mask_tensor_width_height(mask)
+        mask_size, mask_bbox = compute_mask_tensor_bbox(mask)
         target_image = Image.new('RGB', input_image.size)
         target_image.paste(input_image, mask=mask_image)
 
