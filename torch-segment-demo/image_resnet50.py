@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
 from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 
-from image_annotations_utils import ImageAnnotationsDataset, DataLoaderFactory
+from image_annotations_utils import ImageAnnotationsDataset, DataLoaderFactory, ImageClasses
 from image_utils import load_image, create_mask_image, copy_image_region
 from io_utils import split_file_path
 
@@ -237,9 +237,10 @@ def write_pth_loss_file(pth_file_path: str, loss):
 
 
 class ImageMasks:
-    def __init__(self, num_classes=2):
+    def __init__(self, classes: ImageClasses):
+        self.classes = classes
         self.model_pth_path = './models/image-masks.pth'
-        self.model = self.create_model(num_classes)
+        self.model = self.create_model(self.classes.count)
         # dump_model_info(model)
 
     def create_model(self, num_classes):
@@ -310,6 +311,7 @@ class ImageMasks:
         filtered_classes = classes[scores > threshold]
         if len(filtered_masks) == 0:
             return None
+        filtered_classes = [self.classes.idx_name[class_idx] for class_idx in filtered_classes.cpu().numpy()]
         # 将预测结果转换为PIL图像
         segmented_image = filtered_masks_to_image(filtered_masks, input_image)
         all_mask_images = filtered_masks_to_shot_images(filtered_masks, input_image)
@@ -367,14 +369,15 @@ class ImageMasks:
 
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
-image_masker = ImageMasks(image_dataset.classes.count)
+image_masker = ImageMasks(image_dataset.classes)
 #image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
 shot_images, segmented_image = image_masker.infer(input_image, image_resize)
 
 for (shot_image, mask_image), label in shot_images:
-    shot_image.show()
+    #shot_image.show()
+    print(f'{label=}')
 
 if segmented_image is not None:
     segmented_image.show()
