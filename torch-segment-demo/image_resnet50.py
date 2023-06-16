@@ -134,13 +134,6 @@ def collate_fn(batch):
     return images, annotations
 
 
-image_resize = (600, 300)
-# image_resize = (800, 800)
-image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
-#item = next(iter(dataloader))
-#print(f'{item=}')
-
-
 def compute_mask_tensor_bbox(mask_tensor):
     """
     :param mask_tensor: [1, height, width]
@@ -361,18 +354,26 @@ class ImageMasks:
 
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
-image_masker = ImageMasks(image_dataset.classes)
-#image_masker.train(image_dataset, num_epochs=100)
 
-input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
-shot_images, segmented_image = image_masker.infer(input_image)
+def test():
+    image_resize = (600, 300)
+    # image_resize = (800, 800)
+    image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
+    # item = next(iter(dataloader))
+    # print(f'{item=}')
 
-for (shot_image, mask_image), label in shot_images:
-    #shot_image.show()
-    print(f'{label=}')
+    image_masker = ImageMasks(image_dataset.classes)
+    #image_masker.train(image_dataset, num_epochs=100)
 
-if segmented_image is not None:
-    segmented_image.show()
-else:
-    print("Not Found")
+    input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
+    shot_images, segmented_image = image_masker.infer(input_image)
+
+    for (shot_image, mask_image), label in shot_images:
+        #shot_image.show()
+        print(f'{label=}')
+
+    if segmented_image is not None:
+        segmented_image.show()
+    else:
+        print("Not Found")
 

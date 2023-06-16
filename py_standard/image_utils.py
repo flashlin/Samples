@@ -3,6 +3,8 @@ import numpy as np
 from PIL import Image, ImageDraw
 from torchvision import transforms
 from torchvision.transforms import functional as TF
+from io import BytesIO
+import base64
 
 
 def load_image(image_path: str) -> Image:
@@ -49,3 +51,12 @@ def copy_image_region(source_image: Image, bbox) -> Image:
             if pixel != (0, 0, 0):
                 target_pixels[i, j] = pixel
     return target_image
+
+
+def image_to_base64_string(image: Image) -> str:
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG")
+    binary_data = buffer.getvalue()
+    base64_string = base64.b64encode(binary_data).decode("utf-8")
+    return base64_string
+

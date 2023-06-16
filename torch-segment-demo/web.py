@@ -3,6 +3,7 @@ from PIL import Image
 
 from image_annotations_utils import ImageClasses
 from image_resnet50 import ImageMasks
+from image_utils import image_to_base64_string
 
 app = Flask(__name__)
 
@@ -20,13 +21,19 @@ def image_segmentation():
 
     image = Image.open(file)
     image = image.convert('RGB')
-    # image.save('./output/temp.jpg', 'JPEG')
 
     image_masker = ImageMasks(image_classes)
-
+    shot_images, segmented_image = image_masker.infer(image)
+    results = []
+    for (shot_image, mask_image), label in shot_images:
+        results.append({
+            'image': image_to_base64_string(shot_image),
+            'mask_image': image_to_base64_string(mask_image),
+            'label': label
+        })
     return jsonify({
-        'Image': 'temp.jpg',
-        'Name': 'aaa'
+        'image': image_to_base64_string(segmented_image),
+        'shotImages': results
     })
 
 
