@@ -148,7 +148,7 @@ def compute_mask_tensor_width_height(mask_tensor):
     """
     mask_tensor = torch.transpose(mask_tensor, 1, 2)
     mask = mask_tensor.squeeze().cpu().numpy()
-    indices = np.argwhere(mask == 255)
+    indices = np.argwhere(mask > 0)
     min_x, min_y = np.min(indices, axis=0)
     max_x, max_y = np.max(indices, axis=0)
     width = max_y - min_y + 1
@@ -171,25 +171,25 @@ def copy_image_region(source_image, bbox):
     return target_image
 
 
+def create_mask_image(image_size, mask_tensor) -> Image:
+    mask_image = Image.new('L', image_size, 0)
+    draw = ImageDraw.Draw(mask_image)
+    mask_tensor[mask_tensor > 0] = 255
+    mask_pil = TF.to_pil_image(mask_tensor.byte())
+    draw.bitmap((0, 0), mask_pil, fill=255)
+    return mask_image
+
+
 def filtered_masks_to_shot_images(filtered_masks, input_image: Image):
     all_mask_images = []
     for mask in filtered_masks:
-        mask_image = Image.new('L', input_image.size, 0)
-        draw = ImageDraw.Draw(mask_image)
-        mask[mask > 0] = 255
+        mask_image = create_mask_image(input_image.size, mask)
+
         mask_size, mask_bbox = compute_mask_tensor_width_height(mask)
-        mask_pil = TF.to_pil_image(mask.byte())
-        draw.bitmap((0, 0), mask_pil, fill=255)
         target_image = Image.new('RGB', input_image.size)
         target_image.paste(input_image, mask=mask_image)
 
-        # shot_image = Image.new('RGB', mask_size)
-        # shot_image.paste(input_image, box=(0, 0, mask_size[0], mask_size[1]), mask=mask_image)
         shot_image = copy_image_region(input_image, mask_bbox)
-
-        # mask_np = np.squeeze(mask.cpu().numpy())
-        # mask_image = Image.fromarray((mask_np * 255).astype(np.uint8), mode='1')
-        # target_image.paste(input_image, mask=mask_image)
 
         all_mask_images.append((shot_image, target_image))
     return all_mask_images
@@ -395,7 +395,11 @@ image_masker = ImageMasks(image_dataset.classes.count)
 #image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
-segmented_image = image_masker.infer(input_image, image_resize)
+shot_images, segmented_image = image_masker.infer(input_image, image_resize)
+
+for (shot_image, mask_image), label in shot_images:
+    shot_image.show()
+
 if segmented_image is not None:
     segmented_image.show()
 else:
