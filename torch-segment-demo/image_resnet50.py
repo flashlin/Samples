@@ -141,6 +141,40 @@ image_dataset = ImageAnnotationsDataset("data/yolo/train", image_resize)
 #print(f'{item=}')
 
 
+def compute_mask_tensor_width_height(mask_tensor):
+    mask = mask_tensor.squeeze().cpu().numpy()
+    indices = np.argwhere(mask == 255)
+    print(f'{indices=}')
+    min_x, min_y = np.min(indices, axis=0)
+    max_x, max_y = np.max(indices, axis=0)
+    width = max_y - min_y + 1
+    height = max_x - min_x + 1
+    return (width, height), (min_x, min_y, max_x, max_y)
+
+
+def filtered_masks_to_images(filtered_masks, input_image: Image):
+    all_mask_images = []
+    for mask in filtered_masks:
+        mask_image = Image.new('L', input_image.size, 0)
+        draw = ImageDraw.Draw(mask_image)
+        mask[mask > 0] = 255
+        mask_size, _ = compute_mask_tensor_width_height(mask)
+        mask_pil = TF.to_pil_image(mask.byte())
+        draw.bitmap((0, 0), mask_pil, fill=255)
+        target_image = Image.new('RGB', input_image.size)
+        target_image.paste(input_image, mask=mask_image)
+
+        shot_image = Image.new('RGB', mask_size)
+        shot_image.paste(input_image, box=(0, 0, mask_size[0], mask_size[1]), mask=mask_image)
+
+        # mask_np = np.squeeze(mask.cpu().numpy())
+        # mask_image = Image.fromarray((mask_np * 255).astype(np.uint8), mode='1')
+        # target_image.paste(input_image, mask=mask_image)
+
+        all_mask_images.append((shot_image, target_image))
+    return all_mask_images
+
+
 def filtered_masks_to_image(filtered_masks, input_image: Image):
     mask_image = Image.new('L', input_image.size, 0)
     # 将预测的掩膜应用于全黑图像上
@@ -281,9 +315,13 @@ class ImageMasks:
         if len(filtered_masks) == 0:
             return None
         # 将预测结果转换为PIL图像
-        # segmented_image = TF.to_pil_image(filtered_masks[0, 0].mul(255).byte())
-        segmented_image = filtered_masks_to_image(filtered_masks, input_image)
-        return segmented_image
+        # segmented_image = filtered_masks_to_image(filtered_masks, input_image)
+        all_mask_images = filtered_masks_to_images(filtered_masks, input_image)
+        for (shot, mask), label in zip(all_mask_images, filtered_classes):
+            mask.show(label)
+            exit()
+            # shot.show()
+        return None
 
     def create_optimizer(self):
         # 該模型中可能有部分的參數並不隨著訓練而修改，因此當requires_grad不為True時，並不傳入優化器
@@ -337,7 +375,7 @@ class ImageMasks:
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 image_masker = ImageMasks(image_dataset.classes.count)
-image_masker.train(image_dataset, num_epochs=100)
+#image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
 segmented_image = image_masker.infer(input_image, image_resize)
