@@ -264,7 +264,7 @@ class ImageMasks:
             transform_gray,
             transforms.ToTensor(),
             # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Resize((image_resize[1], image_resize[0]), antialias=True)
+            # transforms.Resize((image_resize[1], image_resize[0]), antialias=True)
         ])
         #input_tensor = self.image_to_tensor(input_image, (600, 300)).to(device)
         input_tensor = transform(input_image).to(device)
@@ -337,7 +337,7 @@ class ImageMasks:
 
 #convert_labelme_to_pascalvoc('./data/yolo/train/images/2023-VnRebate-en_frame_0.json', './data/yolo/train/images')
 image_masker = ImageMasks(image_dataset.classes.count)
-image_masker.train(image_dataset, num_epochs=100)
+# image_masker.train(image_dataset, num_epochs=100)
 
 input_image = load_image('data/yolo/train/images/ace45-my-zh-cn.jpg')
 segmented_image = image_masker.infer(input_image, image_resize)
