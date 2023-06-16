@@ -236,6 +236,20 @@ def write_pth_loss_file(pth_file_path: str, loss):
         f.write(str(loss))
 
 
+def image_to_gray_tensor(image: Image):
+    transform_gray = transforms.Compose([
+        transforms.Grayscale(),
+        transforms.Lambda(lambda x: x.convert("RGB"))  # 將灰度影像轉換回三通道的 RGB 形式
+    ])
+    transform = transforms.Compose([
+        transform_gray,
+        transforms.ToTensor(),
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        # transforms.Resize((image_resize[1], image_resize[0]), antialias=True)
+    ])
+    return transform(image)
+
+
 class ImageMasks:
     def __init__(self, classes: ImageClasses):
         self.classes = classes
@@ -271,33 +285,11 @@ class ImageMasks:
         in_features = model.roi_heads.box_predictor.cls_score.in_features
         model.roi_heads.box_predictor = FastRCNNPredictor(in_features, num_classes=num_classes)
 
-    def image_to_tensor(self, image, image_resize):
-        transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            transforms.Resize((image_resize[1], image_resize[0]), antialias=True)
-        ])
-        image = transform(image)
-        return image
-
     def infer(self, input_image: Image, device='cuda'):
         model = self.model
         model.to(device)
         model.eval()
-        #input_tensor = TF.to_tensor(input_image).to(device)
-
-        transform_gray = transforms.Compose([
-            transforms.Grayscale(),
-            transforms.Lambda(lambda x: x.convert("RGB"))  # 將灰度影像轉換回三通道的 RGB 形式
-        ])
-        transform = transforms.Compose([
-            transform_gray,
-            transforms.ToTensor(),
-            # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            # transforms.Resize((image_resize[1], image_resize[0]), antialias=True)
-        ])
-        #input_tensor = self.image_to_tensor(input_image, (600, 300)).to(device)
-        input_tensor = transform(input_image).to(device)
+        input_tensor = image_to_gray_tensor(input_image).to(device)
         input_tensor = input_tensor.unsqueeze(0)
         with torch.no_grad():
             output = model(input_tensor)
