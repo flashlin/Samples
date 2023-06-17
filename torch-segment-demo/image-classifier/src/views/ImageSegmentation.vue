@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { getImageForClassifier, sendImageSegmentation } from '@/models/api';
 import { onMounted, reactive, ref } from 'vue';
+import { base64ToBlob } from 'ts-standard';
 
 let imageName = ref<string>('');
 let imageUrl = ref<string>("");
 let fileRef = ref<HTMLInputElement>();
+let shotUrls = reactive<string[]>([]);
 
 async function getNewImage() {
   const resp = await getImageForClassifier();
@@ -21,12 +23,6 @@ async function drawover(event: Event) {
   event.preventDefault();
   //dropzone.style.backgroundColor = "#f1f1f1";
   console.log('over');
-}
-
-function drawleave(event: Event) {
-  event.preventDefault();
-  //dropzone.style.backgroundColor = "";
-  console.log('leave');
 }
 
 function drag(event: DragEvent) {
@@ -58,6 +54,11 @@ async function clickUploadButton() {
   console.log('send', file);
   const resp = await sendImageSegmentation(file);
   console.log('image', resp);
+
+  resp.shotImages.forEach(shot => {
+    const shotBlob = base64ToBlob(shot.image);
+    URL.createObjectURL(shotBlob)
+  })
 }
 
 onMounted(async () => {

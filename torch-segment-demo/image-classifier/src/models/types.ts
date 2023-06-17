@@ -18,11 +18,12 @@ export interface IImageSegmentationReq {
 }
 
 export interface IImageSegmentationData {
-    shotImage: string;
-    maskImage: string;
+    image: string;
+    mask_image: string;
     label: string;
 }
 
 export interface IImageSegmentationResp {
-    images: IImageSegmentationData[];
+    image: string;
+    shotImages: IImageSegmentationData[];
 }
