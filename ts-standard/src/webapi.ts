@@ -18,9 +18,9 @@ export class WebApi {
         return resp.data;
     }
 
-    async postImageAsync<T>(url: string, file: File): Promise<T> {
+    async postImageAsync<T>(url: string, filename: string, file: Blob): Promise<T> {
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append(filename, file);
         const resp = await axios.post(url, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',

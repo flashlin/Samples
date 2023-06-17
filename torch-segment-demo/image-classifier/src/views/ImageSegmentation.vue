@@ -55,6 +55,7 @@ async function handleFileUpload() {
 async function clickUploadButton() {
   const files: FileList = fileRef.value!.files!;
   const file: File = files[0];
+  console.log('send', file);
   const resp = await sendImageSegmentation(file);
   console.log('image', resp);
 }
