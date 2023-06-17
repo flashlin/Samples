@@ -26,5 +26,5 @@ export function sendClassifyImage(id: number, imageName: string):  Promise<void>
 }
 
 export function sendImageSegmentation(file: File): Promise<IImageSegmentationResp> {
-    return client.postImageAsync<IImageSegmentationResp>('/api/check_image', file);
+    return client.postImageAsync<IImageSegmentationResp>('/api/check_image', 'image', file);
 }

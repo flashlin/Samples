@@ -28,12 +28,13 @@ export function blobToImageUrl(blob: Blob): Promise<string> {
 //     return new Blob(byteArrays);
 // }
 
-export function base64ToBlob(base64String: string) {
+export function base64ToBlob(base64String: string): Blob {
     const binaryString = atob(base64String);
     const length = binaryString.length;
     const uint8Array = new Uint8Array(length);
     for (let i = 0; i < length; i++) {
         uint8Array[i] = binaryString.charCodeAt(i);
     }
-    return uint8Array;
+    const blob = new Blob([uint8Array], { type: 'application/octet-stream' });
+    return blob;
 }

@@ -9,21 +9,20 @@ app = Flask(__name__)
 
 image_classes = ImageClasses()
 image_classes.load_file('./data/yolo/train/annotations/classes.txt')
+image_masker = ImageMasks(image_classes)
 
 
 @app.route('/api/check_image', methods=['POST'])
 def image_segmentation():
-    print(f'check_image')
-    if 'file' not in request.files:
-        return jsonify({'error': 'No image file uploaded'})
-    file = request.files['file']
-    if not allowed_file(file.filename):
-        return jsonify({'error': 'Invalid file format'})
+    print(f'check_image "{request.files=}"')
+    file = request.files['image']
+    # if not allowed_file(file.filename):
+    #     return jsonify({'error': 'Invalid file format'})
 
+    print(f'{file=}')
     image = Image.open(file)
     image = image.convert('RGB')
 
-    image_masker = ImageMasks(image_classes)
     shot_images, segmented_image = image_masker.infer(image)
     results = []
     for (shot_image, mask_image), label in shot_images:
