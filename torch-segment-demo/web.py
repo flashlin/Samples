@@ -11,8 +11,9 @@ image_classes = ImageClasses()
 image_classes.load_file('./data/yolo/train/annotations/classes.txt')
 
 
-@app.route('/check_image', methods=['POST'])
+@app.route('/api/check_image', methods=['POST'])
 def image_segmentation():
+    print(f'check_image')
     if 'file' not in request.files:
         return jsonify({'error': 'No image file uploaded'})
     file = request.files['file']
@@ -44,4 +45,4 @@ def allowed_file(filename):
 
 
 if __name__ == '__main__':
-    app.run(port=5173)
+    app.run(port=5100)
