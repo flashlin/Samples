@@ -226,8 +226,7 @@ def create_labelme_classes_file(images_dir: str, annotations_dir: str):
 
 
 class ImageAnnotationsDataset(Dataset):
-    def __init__(self, data_dir, image_resize):
-        self.image_resize = image_resize  #(512, 512)
+    def __init__(self, data_dir):
         self.data_dir = data_dir
         self.images_dir = os.path.join(data_dir, "images")
         self.annotations_dir = os.path.join(data_dir, "annotations")
