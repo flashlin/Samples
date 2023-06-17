@@ -85,10 +85,9 @@ onMounted(async () => {
           <button class="btn btn-primary" @click="clickUploadButton">Upload</button>
         </div>
       </div>
-      <div>
-        <template v-for="seg in segmentations" :key="seg.shotImage">
-          <img :src="seg.shotImage">
-        </template>
+      <div v-for="seg in segmentations" :key="seg.shotImage">
+        <img :src="seg.shotImage">
+        <span>{{ seg.label }}</span>
       </div>
     </div>
   </div>
