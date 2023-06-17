@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { getImageForClassifier } from '@/models/api';
 import { onMounted, reactive, ref } from 'vue';
-import type { ILabel } from '@/models/types';
 
 let imageName = ref<string>('');
 let imageUrl = ref<string>("");
@@ -37,11 +36,20 @@ function drag(event: DragEvent) {
   console.log(file);
 }
 
-function handleFileUpload() {
-  console.log('upload')
-  const files: FileList = fileRef.value?.files!;
-  const file = files[0];
-  console.log(file)
+function convertFileToImageSrc(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleFileUpload() {
+  const files: FileList = fileRef.value!.files!;
+  const file: File = files[0];
+  imageUrl.value = await convertFileToImageSrc(file);
 }
 
 onMounted(async () => {
@@ -51,9 +59,12 @@ onMounted(async () => {
 <template>
   <div class="mt-5">
     <div class="row">
-      <div class="col-md-6 offset-md-3">
+      <div class="col-md-7 offset-md-3">
         <div class="dropzone" @dragover="drawover" @drag="drag($event)" @click="selectFile">
-          <h4>Drag and Drop or Click to Upload Banner</h4>
+          <template v-if="!imageUrl">
+            <h4>Drag and Drop or Click to Upload Banner</h4>
+          </template>
+          <img :src="imageUrl" v-if="imageUrl"/>
         </div>
         <input ref="fileRef" type="file" class="d-none" @change="handleFileUpload" hidden>
         <div class="text-center mt-3">
