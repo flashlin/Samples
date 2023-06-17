@@ -49,6 +49,13 @@ async function handleFileUpload() {
   imageUrl.value = await convertFileToImageSrc(file);
 }
 
+function clearSegmentations() {
+  const len = segmentations.length;
+  for(let i=0; i<len; i++){
+    segmentations.pop();
+  }
+}
+
 async function clickUploadButton() {
   const files: FileList = fileRef.value!.files!;
   const file: File = files[0];
@@ -56,6 +63,8 @@ async function clickUploadButton() {
   const resp = await sendImageSegmentation(file);
   console.log('image', resp);
 
+  clearSegmentations();
+  segmentations.slice(0, segmentations.length);
   resp.shotImages.forEach(shot => {
     const shotBlob = base64ToBlob(shot.image);
     segmentations.push({

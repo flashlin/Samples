@@ -291,7 +291,7 @@ class ImageMasks:
         scores = output[0]['scores']
         classes = output[0]['labels']
         # 根据得分选择高置信度的预测结果
-        threshold = 0.5  # 设定阈值
+        threshold = 0.7  # 设定阈值
         filtered_masks = masks[scores > threshold]
         filtered_classes = classes[scores > threshold]
         if len(filtered_masks) == 0:
