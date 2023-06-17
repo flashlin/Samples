@@ -2,11 +2,12 @@
 import { getImageForClassifier, sendImageSegmentation } from '@/models/api';
 import { onMounted, reactive, ref } from 'vue';
 import { base64ToBlob } from 'ts-standard';
+import type { IImageSegmentationItem } from '@/models/types';
 
 let imageName = ref<string>('');
 let imageUrl = ref<string>("");
 let fileRef = ref<HTMLInputElement>();
-let shotUrls = reactive<string[]>([]);
+let segmentations = reactive<IImageSegmentationItem[]>([]);
 
 async function getNewImage() {
   const resp = await getImageForClassifier();
@@ -57,7 +58,11 @@ async function clickUploadButton() {
 
   resp.shotImages.forEach(shot => {
     const shotBlob = base64ToBlob(shot.image);
-    URL.createObjectURL(shotBlob)
+    segmentations.push({
+      shotImage: URL.createObjectURL(shotBlob),
+      maskImage: '',
+      label: shot.label
+    })
   })
 }
 
@@ -73,12 +78,17 @@ onMounted(async () => {
           <template v-if="!imageUrl">
             <h4>Drag and Drop or Click to Upload Banner</h4>
           </template>
-          <img :src="imageUrl" v-if="imageUrl"/>
+          <img :src="imageUrl" v-if="imageUrl" />
         </div>
         <input ref="fileRef" type="file" class="d-none" @change="handleFileUpload" hidden>
         <div class="text-center mt-3">
           <button class="btn btn-primary" @click="clickUploadButton">Upload</button>
         </div>
+      </div>
+      <div>
+        <template v-for="seg in segmentations" :key="seg.shotImage">
+          <img :src="seg.shotImage">
+        </template>
       </div>
     </div>
   </div>
