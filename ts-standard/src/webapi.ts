@@ -18,11 +18,19 @@ export class WebApi {
         return resp.data;
     }
 
-    async postImageAsync(url: string, data: any): Promise<Blob> {
-        const resp = await this._axiosInstance.post(url, data, { responseType: 'arraybuffer' });
-        const contentType = resp.headers['content-type'];
-        const blob = new Blob([resp.data], { type: contentType });
-        return blob;
+    async postImageAsync<T>(url: string, file: File): Promise<T> {
+        const formData = new FormData();
+        formData.append('image', file);
+        const resp = await axios.post(url, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        //const resp = await this._axiosInstance.post(url, data, { responseType: 'arraybuffer' });
+        // const contentType = resp.headers['content-type'];
+        // const blob = new Blob([resp.data], { type: contentType });
+        // return blob;
+        return resp.data;
     }
 
     postVoidAsync(url: string, data: any): Promise<void> {

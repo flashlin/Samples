@@ -1,5 +1,5 @@
 import { WebApi, base64ToBlob, blobToImageUrl } from "ts-standard";
-import type { IImageForClassify, IImageForClassifyData, ILabel } from "./types";
+import type { IImageForClassify, IImageForClassifyData, IImageSegmentationReq, IImageSegmentationResp, ILabel } from "./types";
 
 const client = new WebApi();
 
@@ -25,3 +25,6 @@ export function sendClassifyImage(id: number, imageName: string):  Promise<void>
     return client.postVoidAsync('/api/classifyImage', data);
 }
 
+export function sendImageSegmentation(req: IImageSegmentationReq): Promise<IImageSegmentationResp> {
+    return client.postImageAsync<IImageSegmentationResp>('/api/imageSegmentation', req);
+}
