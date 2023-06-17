@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getImageForClassifier } from '@/models/api';
+import { getImageForClassifier, sendImageSegmentation } from '@/models/api';
 import { onMounted, reactive, ref } from 'vue';
 
 let imageName = ref<string>('');
@@ -52,6 +52,13 @@ async function handleFileUpload() {
   imageUrl.value = await convertFileToImageSrc(file);
 }
 
+async function clickUploadButton() {
+  const files: FileList = fileRef.value!.files!;
+  const file: File = files[0];
+  const resp = await sendImageSegmentation(file);
+  console.log('image', resp);
+}
+
 onMounted(async () => {
 });
 </script>
@@ -68,7 +75,7 @@ onMounted(async () => {
         </div>
         <input ref="fileRef" type="file" class="d-none" @change="handleFileUpload" hidden>
         <div class="text-center mt-3">
-          <button class="btn btn-primary">Upload</button>
+          <button class="btn btn-primary" @click="clickUploadButton">Upload</button>
         </div>
       </div>
     </div>
