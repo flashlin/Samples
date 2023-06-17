@@ -27,3 +27,14 @@ export interface IImageSegmentationResp {
     image: string;
     shotImages: IImageSegmentationData[];
 }
+
+export interface IImageSegmentationItem {
+    shotImage: string;
+    maskImage: string;
+    label: string;
+}
+
+export interface IImageSegmentationRespItem {
+    image: string;
+    shotImages: IImageSegmentationItem[];
+}
