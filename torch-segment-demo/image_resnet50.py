@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw
 import xml.etree.ElementTree as ET
 import torchvision.transforms as transforms
 from torchvision.models.detection.faster_rcnn import FastRCNNPredictor
-from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
+from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor, MaskRCNN_ResNet50_FPN_Weights
 
 from image_annotations_utils import ImageAnnotationsDataset, DataLoaderFactory, ImageClasses
 from image_utils import load_image, create_mask_image, copy_image_region
@@ -31,7 +31,8 @@ from io_utils import split_file_path
 
 
 def create_model(num_classes):
-    model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)
+    #model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=False)
+    model = maskrcnn_resnet50_fpn(pretrained=True, weights=MaskRCNN_ResNet50_FPN_Weights.DEFAULT)
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     # replace the pre-trained head with a new one
@@ -75,63 +76,60 @@ def parse_pascal_voc_xml(xml_path):
     return bbox_list, masks, class_list
 
 
-## img = cv2.imread(os.path.join(imgs[idx], "Image.jpg"))
-## img = cv2.resize(img, imageSize, cv2.INTER_LINEAR)
-
-def preprocess_image(image):
-    transform = transforms.ToTensor()
-    image = transform(image)
-    # transformed_image = ToTensor()(image)  # 將圖像轉換為Tensor格式
-    transform = Resize((256, 256))
-    image = transform(image)
-    # 正規化圖像數值範圍到 0~1 之間
-    transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    transformed_image = transform(image)
-    return transformed_image
+# def preprocess_image(image):
+#     transform = transforms.ToTensor()
+#     image = transform(image)
+#     # transformed_image = ToTensor()(image)  # 將圖像轉換為Tensor格式
+#     transform = Resize((256, 256))
+#     image = transform(image)
+#     # 正規化圖像數值範圍到 0~1 之間
+#     transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+#     transformed_image = transform(image)
+#     return transformed_image
 
 
-def preprocess_images(images):
-    preprocessed_images = []
-    for image in images:
-        preprocessed_image = preprocess_image(image)
-        preprocessed_images.append(preprocessed_image)
-    return preprocessed_images
+# def preprocess_images(images):
+#     preprocessed_images = []
+#     for image in images:
+#         preprocessed_image = preprocess_image(image)
+#         preprocessed_images.append(preprocessed_image)
+#     return preprocessed_images
 
 
-def preprocess_annotation(annotation_list):
-    target = {
-        "boxes": [],
-        "labels": [],
-        "masks": [],
-        #"area": [],
-        #"iscrowd": []
-    }
-    for annotation in annotation_list:
-        target["boxes"].append(annotation['bbox'])
-        target["labels"].append(annotation['class_idx'])
-        target["masks"].append(annotation['mask'])
-    target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
-    target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
-
-    masks_array = np.stack(target["masks"])
-    target["masks"] = torch.tensor(masks_array, dtype=torch.long)
-    return target
-
-
-def preprocess_annotations(annotations):
-    targets = []
-    for annotation in annotations:
-        targets.append(preprocess_annotation(annotation))
-    return targets
+# def preprocess_annotation(annotation_list):
+#     target = {
+#         "boxes": [],
+#         "labels": [],
+#         "masks": [],
+#         #"area": [],
+#         #"iscrowd": []
+#     }
+#     for annotation in annotation_list:
+#         target["boxes"].append(annotation['bbox'])
+#         target["labels"].append(annotation['class_idx'])
+#         target["masks"].append(annotation['mask'])
+#     target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
+#     target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
+#
+#     masks_array = np.stack(target["masks"])
+#     target["masks"] = torch.tensor(masks_array, dtype=torch.long)
+#     return target
 
 
-def collate_fn(batch):
-    # 從batch中分離圖像和標註數據
-    images, annotations = zip(*batch)
-    # 對圖像和標註進行進一步的預處理
-    images = preprocess_images(images)
-    annotations = preprocess_annotations(annotations)
-    return images, annotations
+# def preprocess_annotations(annotations):
+#     targets = []
+#     for annotation in annotations:
+#         targets.append(preprocess_annotation(annotation))
+#     return targets
+
+
+# def collate_fn(batch):
+#     # 從batch中分離圖像和標註數據
+#     images, annotations = zip(*batch)
+#     # 對圖像和標註進行進一步的預處理
+#     images = preprocess_images(images)
+#     annotations = preprocess_annotations(annotations)
+#     return images, annotations
 
 
 def compute_mask_tensor_bbox(mask_tensor):
@@ -266,11 +264,12 @@ class ImageMasks:
 
     def create_resnet50_model(self, num_classes, load_pth=True):
         torch.hub.set_dir('./models')
-        model = maskrcnn_resnet50_fpn(pretrained=False, progress=True, weights=None)
+        model = create_model(num_classes)
+        # model = maskrcnn_resnet50_fpn(pretrained=False, progress=True, weights=None)
         weights_path = 'models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth'
-        if load_pth:
-            model.load_state_dict(torch.load(weights_path))
-        self.change_num_classes_of_model(model, num_classes)
+        # if load_pth:
+        #     model.load_state_dict(torch.load(weights_path))
+        # self.change_num_classes_of_model(model, num_classes)
         return model
 
     @staticmethod
