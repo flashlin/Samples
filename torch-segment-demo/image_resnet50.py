@@ -320,9 +320,9 @@ class ImageMasks:
         } for anno in annotations]
         return images, annotations
 
-    def train(self, image_dataset, num_epochs=20, device='cuda'):
+    def train(self, image_dataset, batch_size, num_epochs=20, device='cuda'):
         data_loader_factory = DataLoaderFactory()
-        dataloader = data_loader_factory.create(image_dataset, batch_size=1)
+        dataloader = data_loader_factory.create(image_dataset, batch_size=batch_size)
         model = self.model
         model.to(device)
         model.train()
