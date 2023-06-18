@@ -268,6 +268,19 @@ class ImageAnnotationsDataset(Dataset):
             if os.path.exists(annotation_file_path):
                 yield image_file_path
 
+    def statistics(self):
+        labels_dict = {}
+        for image_file_path in self.data:
+            annotations = self.load_annotations_file_by_image_file(image_file_path)
+            for shape in annotations['shapes']:
+                label = shape['label']
+                if label not in labels_dict:
+                    labels_dict[label] = 0
+                labels_dict[label] += 1
+        print(f'image labels')
+        for key, value in labels_dict.items():
+            print(f'  {key} {value}')
+
 
 class DataLoaderFactory:
     def __init__(self, image_resize=None):
