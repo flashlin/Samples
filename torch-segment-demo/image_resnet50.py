@@ -76,62 +76,6 @@ def parse_pascal_voc_xml(xml_path):
     return bbox_list, masks, class_list
 
 
-# def preprocess_image(image):
-#     transform = transforms.ToTensor()
-#     image = transform(image)
-#     # transformed_image = ToTensor()(image)  # 將圖像轉換為Tensor格式
-#     transform = Resize((256, 256))
-#     image = transform(image)
-#     # 正規化圖像數值範圍到 0~1 之間
-#     transform = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-#     transformed_image = transform(image)
-#     return transformed_image
-
-
-# def preprocess_images(images):
-#     preprocessed_images = []
-#     for image in images:
-#         preprocessed_image = preprocess_image(image)
-#         preprocessed_images.append(preprocessed_image)
-#     return preprocessed_images
-
-
-# def preprocess_annotation(annotation_list):
-#     target = {
-#         "boxes": [],
-#         "labels": [],
-#         "masks": [],
-#         #"area": [],
-#         #"iscrowd": []
-#     }
-#     for annotation in annotation_list:
-#         target["boxes"].append(annotation['bbox'])
-#         target["labels"].append(annotation['class_idx'])
-#         target["masks"].append(annotation['mask'])
-#     target["boxes"] = torch.tensor(target["boxes"], dtype=torch.float32)
-#     target["labels"] = torch.tensor(target["labels"], dtype=torch.long)
-#
-#     masks_array = np.stack(target["masks"])
-#     target["masks"] = torch.tensor(masks_array, dtype=torch.long)
-#     return target
-
-
-# def preprocess_annotations(annotations):
-#     targets = []
-#     for annotation in annotations:
-#         targets.append(preprocess_annotation(annotation))
-#     return targets
-
-
-# def collate_fn(batch):
-#     # 從batch中分離圖像和標註數據
-#     images, annotations = zip(*batch)
-#     # 對圖像和標註進行進一步的預處理
-#     images = preprocess_images(images)
-#     annotations = preprocess_annotations(annotations)
-#     return images, annotations
-
-
 def compute_mask_tensor_bbox(mask_tensor):
     """
     :param mask_tensor: [1, height, width]
