@@ -3,6 +3,7 @@ from image_resnet50 import ImageMasks
 from image_utils import load_image
 
 image_dataset = ImageAnnotationsDataset("data/yolo/train")
+image_dataset.statistics()
 
 image_masker = ImageMasks(image_dataset.classes)
 image_masker.train(image_dataset, batch_size=4, num_epochs=100)
