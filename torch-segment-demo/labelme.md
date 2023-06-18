@@ -10,3 +10,8 @@ pip install -r .\requirements-dev.txt
 $ python labelme2coco.py <data> <data_output> --labels <label.txt path>
 # 轉換為 VOC 格式
 $ python labelme2voc.py <data> <data_output> --labels <label.txt path>
+
+
+```
+pyinstaller --onedir --collect-all main.py
+```
