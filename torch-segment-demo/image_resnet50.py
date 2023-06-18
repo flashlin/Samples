@@ -202,7 +202,7 @@ class ImageMasks:
 
     def load_custom_model(self, weights_path, num_classes):
         model = self.create_resnet50_model(num_classes, False)
-        self.change_num_classes_of_model(model, num_classes)
+        # self.change_num_classes_of_model(model, num_classes)
         model.load_state_dict(torch.load(weights_path))
         return model
 
@@ -291,6 +291,7 @@ class ImageMasks:
                 best_loss = total_train_loss
                 torch.save(model.state_dict(), self.model_pth_path)
                 write_pth_loss_file(self.model_pth_path, best_loss)
+            print(f'{total_train_loss=} / {best_loss=}')
             #if epoch % 100 == 0:
             #    torch.save(model.state_dict(), self.model_pth_path)
 
