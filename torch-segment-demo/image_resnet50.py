@@ -32,7 +32,8 @@ from io_utils import split_file_path
 
 def create_model(num_classes):
     #model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=False)
-    model = maskrcnn_resnet50_fpn(pretrained=True, weights=MaskRCNN_ResNet50_FPN_Weights.DEFAULT)
+    # model = maskrcnn_resnet50_fpn(pretrained=True, weights=MaskRCNN_ResNet50_FPN_Weights.DEFAULT)
+    model = maskrcnn_resnet50_fpn(weights=None)
     # get number of input features for the classifier
     in_features = model.roi_heads.box_predictor.cls_score.in_features
     # replace the pre-trained head with a new one
