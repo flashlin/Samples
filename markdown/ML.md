@@ -1,4 +1,15 @@
+# 人工智慧
+
+![img](ai.jpg)
+
+通過分析和理解大量的資料，從中學習並提取知識來推理、解決問題和做出決策。
+
+
+---
 # 甚麼是 "寫程式" ?
+
+輸入資料進入程式後，透過結構化的指令或命令進行複雜的運算，最終產生輸出資料
+
 
 ```ditaa {cmd=true args=["-E"]}
 +----------+   +---------+    +-------+
@@ -7,21 +18,15 @@
 +----------+   +---------+    +-------+
 ```
 
+---
+
 # 範例
 Case 1: Input 1 --> Program --> 1
 Case 2: Input 2 --> Program --> 2
 Case 3: Input 3 --> Program --> 3
 
 
-
-
-
-
-
-
-
-
-
+---
 
 ```
 function program(x) {
@@ -46,6 +51,22 @@ function program(x) {
   return x + 1;
 }
 ```
+
+
+```puml
+@startdot
+digraph A {
+  "User Input" -> Trainer
+  Output -> Trainer
+  Trainer -> Program
+}
+@enddot
+```
+
+
+
+
+
 
 
 
@@ -104,6 +125,58 @@ function program(x) {
 
 
 ```javascript {cmd="node"}
+class Neuron {
+  constructor() {
+    this.weight = 0;
+    this.bias = 0;
+  }
+
+  forward(input) {
+    let output = input * this.weight + this.bias;
+    return this.activationFunction(output);
+  }
+
+  backward(input, output, target, learningRate) {
+    const loss = target - output;
+    //const gradient = loss * this.activationFunctionDerivative(output); 
+    const gradient = loss * output * (1 - output);
+
+    this.weight += input * gradient * learningRate;
+    this.bias += gradient * learningRate;
+    console.log(`${input} ${output} g=${gradient} lost=${loss} t=${target} w=${this.weight} b=${this.bias}`)
+  }
+
+  activationFunction(x) {
+    return 1 / (1 + Math.exp(-x));
+  }
+
+  activationFunctionDerivative(x) {
+    const sigmoid = 1 / (1 + Math.exp(-x));
+    return sigmoid * (1 - sigmoid); // sigmoid函数的导数
+  }
+}
+
+const neuron = new Neuron();
+// 定義輸入和目標值
+let inputs = [1, 2, 3];
+let targets = [2, 3, 4];
+for(let i=1; i<100; i++) {
+  inputs[i] = i + 1;
+  targets[i] = inputs[i] + 1;
+}
+
+const learningRate = 0.001;
+for(let epoch=0; epoch<100; epoch++) {
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i];
+    const output = neuron.forward(input);
+    neuron.backward(input, output, targets[i], learningRate);
+  }
+}
+
+const result = neuron.forward(5);
+console.log(neuron.weight, neuron.bias)
+console.log('result', result);
 ```
 
 
