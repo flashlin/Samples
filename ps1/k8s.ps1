@@ -6,8 +6,16 @@ param(
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 
 $env:k8s_exe="C:\Users\flash.lin71\scoop\apps\kubectl\1.24.3\bin\kubectl.exe"
+$env:k8s_exe="kubectl.exe"
 #$env:KUBECONFIG="C:\Users\flash.lin71\.kube\uat.config"
 $env:KUBECONFIG="d:\demo\k8s-stg.yaml"
+
+$kubeConfigDict = @{
+   "stg" = "k8s-stg.yaml"
+   "gstg" = "host-staging-gke.yaml"
+   "uat" = "host-uat-gke.yaml"
+}
+
 
 $stateFile = "d:/demo/k8s-state.json" 
 $state = [PSCustomObject]@{
@@ -26,6 +34,7 @@ function InvokeK8s {
       [string]$command
    )
    #InvokeCmd "$($env:k8s_exe) get pods -n b2c" | SplitTableString
+   $env:KUBECONFIG = $state.kubeconfig
    $cmd = "$($env:k8s_exe) $command"
    InvokeCmd $cmd
 }
@@ -46,12 +55,75 @@ function GetAllPods {
    }
 }
 
+function GetPodNameFromSelected {
+   param(
+      [int]$id
+   )
+   $myFilter = {
+      $_.Id -eq $id
+   }
+   $pod = $state.pods | Where-Object -FilterScript $myFilter
+   return $pod.Name.Trim()
+}
+
 if( "" -eq $action ) {
-   Write-Host "reset      : reset k8s script tool state"
-   Write-Host "f <name>   : search contain name pattern"
-   Write-Host "l [pod id] : logs"
+   Write-Host "reset               : reset k8s script tool state"
+   Write-Host "f <name>            : search contain name pattern"
+   Write-Host "l [pod id]          : logs"
+   Write-Host "use <env>           : use stg/uat environment"
+   Write-Host "ns [namespace]      : list namespaces / switch to namespace"
+   Write-Host "cp [pod id] [source]: copy pod's source to d:\demo\k8s "
    return
 }
+
+if( "use" -eq $action ) {
+   $staging = $arg0
+   $state.kubeconfig = "D:\demo\" + $kubeConfigDict.($staging)
+   SaveState
+   Write-Host "use $staging $($state.kubeconfig)"
+   return
+}
+
+if( "ns" -eq $action ) {
+   $namespace = $arg0
+   if( $null -eq $arg0 ) {
+      InvokeK8s "get namespaces"
+      return
+   }
+   # $namespace = "product-platform"
+   $state.namespace = $namespace
+   SaveState
+   Write-Host "switch to $($state.namespace)"
+   return
+}
+
+if( "cp" -eq $action ) {
+   $id = $arg0
+   if( $null -eq $id ) {
+      Write-Host "cp <pod-id> /usr/xxx"
+      return
+   }
+
+   $podName = GetPodNameFromSelected $id
+   $source = $arg1
+   $targetFilename = Split-Path -Leaf $source
+   InvokeK8s "cp $($state.namespace)/$($podName):$source ./$($targetFilename)"
+   # InvokeK8s "cp -n $($state.namespace) $($podName):$source d:\demo\k8s"
+   return
+}
+
+if( "ls" -eq $action ) {
+   $id = $arg0
+   if( $null -eq $id ) {
+      Write-Host "ls <pod-id>"
+      return
+   }
+   $podName = GetPodNameFromSelected $id
+   $dir = $arg1
+   InvokeK8s "exec -n $($state.namespace) $($podName) -- ls $($dir) |sort"
+   return
+}
+
 
 if( "reset" -eq $action ) {
    Remove-Item $stateFile
