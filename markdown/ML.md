@@ -127,32 +127,60 @@ digraph A {
 ```javascript {cmd="node"}
 class Neuron {
   constructor() {
-    this.weight = 0;
-    this.bias = 0;
+    this.weight = Math.random(); // 初始化权重
+    this.bias = Math.random(); // 初始化偏置
+  }
+
+  // 训练函数
+  train(inputs, outputs, epochs, learningRate) {
+    for (let epoch = 0; epoch < epochs; epoch++) {
+      for (let i = 0; i < inputs.length; i++) {
+        const input = inputs[i];
+        const targetOutput = outputs[i];
+
+        // 前向传播计算预测输出
+        const predictedOutput = this.predict(input);
+
+        // 反向传播更新权重和偏置
+        const error = targetOutput - predictedOutput;
+        this.weight += error * input * learningRate;
+        this.bias += error * learningRate;
+      }
+    }
+  }
+
+  // 预测函数
+  predict(input) {
+    return input * this.weight + this.bias;
+  }
+}
+
+const neuron = new Neuron();
+const inputs = [1, 2, 3, 4];
+const outputs = [2, 3, 4, 5];
+neuron.train(inputs, outputs, 1000, 0.01);
+const predictedOutput = neuron.predict(6);
+console.log(`输入: 6, 预测输出: ${predictedOutput}`);
+```
+
+
+
+```javascript {cmd="node"}
+class Neuron {
+  constructor() {
+    this.weight = Math.random();
+    this.bias = Math.random();
   }
 
   forward(input) {
-    let output = input * this.weight + this.bias;
-    return this.activationFunction(output);
+    return input * this.weight + this.bias;
   }
 
   backward(input, output, target, learningRate) {
     const loss = target - output;
-    //const gradient = loss * this.activationFunctionDerivative(output); 
-    const gradient = loss * output * (1 - output);
-
-    this.weight += input * gradient * learningRate;
-    this.bias += gradient * learningRate;
-    console.log(`${input} ${output} g=${gradient} lost=${loss} t=${target} w=${this.weight} b=${this.bias}`)
-  }
-
-  activationFunction(x) {
-    return 1 / (1 + Math.exp(-x));
-  }
-
-  activationFunctionDerivative(x) {
-    const sigmoid = 1 / (1 + Math.exp(-x));
-    return sigmoid * (1 - sigmoid); // sigmoid函数的导数
+    console.log(`loss=${loss}`)
+    this.weight += input * loss * learningRate;
+    this.bias += loss * learningRate;
   }
 }
 
@@ -160,13 +188,13 @@ const neuron = new Neuron();
 // 定義輸入和目標值
 let inputs = [1, 2, 3];
 let targets = [2, 3, 4];
-for(let i=1; i<100; i++) {
+for(let i=1; i<10; i++) {
   inputs[i] = i + 1;
   targets[i] = inputs[i] + 1;
 }
 
 const learningRate = 0.001;
-for(let epoch=0; epoch<100; epoch++) {
+for(let epoch=0; epoch<1000; epoch++) {
   for (let i = 0; i < inputs.length; i++) {
     const input = inputs[i];
     const output = neuron.forward(input);
@@ -174,9 +202,9 @@ for(let epoch=0; epoch<100; epoch++) {
   }
 }
 
-const result = neuron.forward(5);
-console.log(neuron.weight, neuron.bias)
-console.log('result', result);
+const input = 5;
+const result = neuron.forward(input);
+console.log(`${input} = ${result}`);
 ```
 
 
