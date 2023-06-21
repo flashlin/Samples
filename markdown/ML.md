@@ -1,3 +1,158 @@
+# 甚麼是 "寫程式" ?
+
+```ditaa {cmd=true args=["-E"]}
++----------+   +---------+    +-------+
+|User Input|-->| Program |--->|Output |
+|       {d}|   |         |    |       |
++----------+   +---------+    +-------+
+```
+
+# 範例
+Case 1: Input 1 --> Program --> 1
+Case 2: Input 2 --> Program --> 2
+Case 3: Input 3 --> Program --> 3
+
+
+
+
+
+
+
+
+
+
+
+
+```
+function program(x) {
+  return x;
+}
+```
+
+
+Q: 如何寫這個 Program ?
+
+
+# 範例
+Case 1: Input 1 --> Program --> 2
+Case 2: Input 2 --> Program --> 3
+Case 3: Input 3 --> Program --> 4
+
+Q: 如何寫這個 Program ?
+
+
+```
+function program(x) {
+  return x + 1;
+}
+```
+
+
+
+```Vega-Lite
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [
+      {"x": 1, "y": 1},
+      {"x": 2, "y": 2},
+      {"x": 3, "y": 3},
+      {"x": 4, "y": 4}
+    ]
+  },
+  "mark": {"type": "point", "filled": true},
+  "encoding": {
+    "x": {"field": "x", "type": "quantitative"},
+    "y": {"field": "y", "type": "quantitative"},
+    "color": {"value": "steelblue"}
+  }
+}
+```
+
+
+```Vega-Lite
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "data": {
+    "values": [
+      {"x": 1, "y": 1},
+      {"x": 2, "y": 2},
+      {"x": 3, "y": 3},
+      {"x": 4, "y": 4}
+    ]
+  },
+  "layer": [
+    {
+      "mark": {"type": "point", "filled": true},
+      "encoding": {
+        "x": {"field": "x", "type": "quantitative"},
+        "y": {"field": "y", "type": "quantitative"},
+        "color": {"value": "steelblue"}
+      }
+    },
+    {
+      "mark": {"type": "line"},
+      "encoding": {
+        "x": {"field": "x", "type": "quantitative"},
+        "y": {"field": "y", "type": "quantitative"}
+      }
+    }
+  ]
+}
+
+```
+
+
+```javascript {cmd="node"}
+```
+
+
+```javascript {cmd="node"}
+class Neuron {
+  constructor() {
+    this.weights = [];
+    this.bias = 0;
+  }
+
+  forward(input) {
+    let sum = 0;
+    for (let i = 0; i < input.length; i++) {
+      sum += input[i] * this.weights[i];
+    }
+    sum += this.bias;
+    return this.activationFunction(sum);
+  }
+
+  backward(input, output, target, learningRate) {
+    const error = target - output;
+    for (let i = 0; i < input.length; i++) {
+      this.weights[i] += input[i] * error * learningRate;
+    }
+    this.bias += error * learningRate;
+  }
+
+  activationFunction(x) {
+    return 1 / (1 + Math.exp(-x));
+  }
+}
+
+
+const neuron = new Neuron();
+
+// 定義輸入和目標值
+const input = [0.5, 0.3, 0.8];
+const target = 1;
+
+// 向前傳播計算輸出值
+const output = neuron.forward(input);
+
+// 向後傳播更新權重和偏差
+const learningRate = 0.1;
+neuron.backward(input, output, target, learningRate);
+```
+
+
+身分證驗證碼
 
 ```vega-lite
 {

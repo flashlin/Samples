@@ -52,4 +52,7 @@ if( "rmi" -eq $action) {
    return
 }
 
-QueryDockerImages "" 
+if( "i" -eq $action ){
+   QueryDockerImages "" 
+   return
+}
