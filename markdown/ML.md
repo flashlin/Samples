@@ -60,16 +60,16 @@ function program(x) {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "values": [
-      {"x": 1, "y": 1},
-      {"x": 2, "y": 2},
-      {"x": 3, "y": 3},
+      {"x": 1, "y": 1,
+      {"x": 2, "y": 2,
+      {"x": 3, "y": 3,
       {"x": 4, "y": 4}
     ]
-  },
-  "mark": {"type": "point", "filled": true},
+  ,
+  "mark": {"type": "point", "filled": true,
   "encoding": {
-    "x": {"field": "x", "type": "quantitative"},
-    "y": {"field": "y", "type": "quantitative"},
+    "x": {"field": "x", "type": "quantitative",
+    "y": {"field": "y", "type": "quantitative",
     "color": {"value": "steelblue"}
   }
 }
@@ -83,26 +83,26 @@ function program(x) {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "values": [
-      {"x": 0, "y": 0},
-      {"x": 1, "y": 1},
-      {"x": 2, "y": 2},
-      {"x": 3, "y": 3},
+      {"x": 0, "y": 0,
+      {"x": 1, "y": 1,
+      {"x": 2, "y": 2,
+      {"x": 3, "y": 3,
       {"x": 4, "y": 4}
     ]
-  },
+  ,
   "layer": [
     {
-      "mark": {"type": "point", "filled": true},
+      "mark": {"type": "point", "filled": true,
       "encoding": {
-        "x": {"field": "x", "type": "quantitative"},
-        "y": {"field": "y", "type": "quantitative"},
+        "x": {"field": "x", "type": "quantitative",
+        "y": {"field": "y", "type": "quantitative",
         "color": {"value": "steelblue"}
       }
-    },
+    ,
     {
-      "mark": {"type": "line"},
+      "mark": {"type": "line",
       "encoding": {
-        "x": {"field": "x", "type": "quantitative"},
+        "x": {"field": "x", "type": "quantitative",
         "y": {"field": "y", "type": "quantitative"}
       }
     }
@@ -186,38 +186,43 @@ error表示誤差，input表示輸入，learningRate表示學習速率。這個�
 
 ```javascript {cmd="node"}
 function convertIdToNumbers(idStr) {
+  let numbers = [];
   let a = idStr.substr(0, 1).charCodeAt() - 'A'.charCodeAt() + 10;
-  let remainder = idStr.substr(1);
-  let numberText = a + remainder;
-  return numberText;
+  numbers.push(a);
+  //console.log('first', idStr.substr(0, 1), a);
+
+  for(let i=1; i<idStr.length; i++) {
+    let numStr = idStr.substr(i, 1);
+    let num = numStr.charCodeAt() - '0'.charCodeAt();
+    numbers.push(num);
+  }
+  return numbers;
 }
 
 class Neuron {
-  constructor() {
+  constructor(n) {
     this.weights = [];
-    this.bias = 0;
+    for(let i=0; i<n; i++) {
+      this.weights.push(Math.random());
+    }
+    this.bias = Math.random();
   }
 
-  forward(input) {
+  forward(inputs) {
     let sum = 0;
-    for (let i = 0; i < input.length; i++) {
-      sum += input[i] * this.weights[i];
+    for (let i = 0; i < inputs.length; i++) {
+      sum += inputs[i] * this.weights[i];
     }
     sum += this.bias;
-    //return this.activationFunction(sum);
     return sum;
   }
 
-  backward(input, output, target, learningRate) {
+  backward(inputs, output, target, learningRate) {
     const error = target - output;
-    for (let i = 0; i < input.length; i++) {
-      this.weights[i] += input[i] * error * learningRate;
+    for (let i = 0; i < inputs.length; i++) {
+      this.weights[i] += inputs[i] * error * learningRate;
     }
     this.bias += error * learningRate;
-  }
-
-  activationFunction(x) {
-    return 1 / (1 + Math.exp(-x));
   }
 }
 
@@ -225,15 +230,14 @@ class Neuron {
 const neuron = new Neuron();
 
 // 定義輸入和目標值
-const input = [0.5, 0.3, 0.8];
-const target = 1;
+const ids = ["E1735036210","R278834622","B237836243","D244273034","O2019822310","Y271964122","C239484837","P263820767","G231218906","B190165729","K124550463","E184776282","X286428383","B220160145","C289788862","P164150628","C1212528110","C181628116","R279811516","Q268712083","S299458141","F163801352","P255264157","K198937994","X209957734","F120852882","H220807345","X275488186","D185707646","A275091372","K155181836","U289953935","B195715372","K1531103210","N1678480810","E1675126410","H161935964","B2530905510","S170272496","A131231287","G237413996","K234703147","U158095979","C222408087","H225286891","F1460663410","O295989885","V263650743","K243702176","O2043132010"];
 
+const inputs = ids.map(x => convertIdToNumbers(x).slice(0, 9))
+const targets = ids.map(x =>convertIdToNumbers(x).slice(9)[0])
 // 向前傳播計算輸出值
-const output = neuron.forward(input);
-
-// 向後傳播更新權重和偏差
-const learningRate = 0.1;
-neuron.backward(input, output, target, learningRate);
+// const output = neuron.forward(input);
+// const learningRate = 0.1;
+// neuron.backward(input, output, target, learningRate);
 ```
 
 
@@ -262,7 +266,90 @@ function calculateChecksum(id) {
   return checksum;
 }
 
-var id = "A123456789";
+var id = "M185585395";
 var checksum = calculateChecksum(id);
 console.log(checksum);
 ```
+
+
+
+
+
+```javascript {cmd="node"}
+function convertIdToNumbers(id) {
+  const first = {
+    'A': 10 ,
+    'B': 11 ,
+    'C': 12 ,
+    'D': 13 ,
+    'E': 14 ,
+    'F': 15 ,
+    'G': 16 ,
+    'H': 17 ,
+    'I': 34 ,
+    'J': 18 ,
+    'K': 19 ,
+    'L': 20 ,
+    'M': 21 ,
+    'N': 22 ,
+    'O': 35 ,
+    'P': 23 ,
+    'Q': 24 ,
+    'R': 25 ,
+    'S': 26 ,
+    'U': 28 ,
+    'V': 29 ,
+    'W': 32 ,
+    'X': 30 ,
+    'Y': 31 ,
+    'Z': 33 ,
+  }
+  let a = first[id.substr(0, 1)];
+  let remainder = id.substr(1);
+  let numberText = `${a}` + remainder;
+  return numberText;
+}
+
+function calculateChecksum(idNumbers) {
+  let weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+  let sum = 0;
+
+  for (var i = 0; i < 10; i++) {
+    num = idNumbers.substr(i, 1);
+    n = num.charCodeAt() - '0'.charCodeAt();
+    sum += n * weights[i];
+  }
+  let checksum = 10 - sum % 10;
+  return checksum;
+}
+
+
+function generateRandomID() {
+  var firstChar = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  
+  var secondNum = Math.floor(Math.random() * 2) + 1;
+  
+  let nums = '';
+  for (var i = 0; i < 7; i++) {
+    num = Math.floor(Math.random() * 10);
+    nums += `${num}`;
+  }
+  
+  // 計算檢查碼
+  let str = `${firstChar}${secondNum}${nums}`;
+  let idNumbers = convertIdToNumbers(str);
+  let checkCode = calculateChecksum(idNumbers);
+
+  let id = str + checkCode;
+  return id;
+}
+
+let idArray = [];
+for(let i=0; i<50; i++) {
+  let id = generateRandomID();
+  idArray.push(id);
+}
+console.log(JSON.stringify(idArray));
+```
+
+
