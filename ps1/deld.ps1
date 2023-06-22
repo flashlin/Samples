@@ -8,4 +8,5 @@ if( "" -eq $folder ) {
     return
 }
 
-Remove-Item -Path $folder -Recurse
+Remove-Item -Path "$($folder)*" -Recurse #-Force
+
