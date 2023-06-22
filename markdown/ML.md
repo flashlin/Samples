@@ -30,12 +30,71 @@ Case 3: Input 3 --> Program --> output 3
 
 ```
 function program(x) {
-  return x;
+  ?????
 }
 ```
 
 
 Q: 如何寫這個 Program ?
+
+
+
+```
+mkdir simple-ai 
+cd simple-ai
+npm init
+npm install typescript ts-node ts-jest jest @types/jest --save-dev
+```
+
+
+建立 tsconfig.json
+```
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+  },
+  "include": ["src"]
+}
+```
+
+建立 jest.config.ts
+```
+module.exports = {
+  preset: "ts-jest",
+  testEnvironment: "node",
+  coverageDirectory: "coverage",
+  testRegex: "(/tests/.*\\.(test|spec))\\.tsx?$",
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/src/$1",
+  },
+};
+```
+
+建立 src/ai.ts
+```
+export function program(x: number) {
+  return x;
+}
+```
+
+建立 src/tests/ai.test.ts
+```
+import { describe, expect, test } from "@jest/globals";
+import { program } from '@/ai'; 
+
+test('ai1', () => {
+  const result = program(1);
+  expect(result).toBe(1);
+});
+```
+
 
 
 # 範例
@@ -60,17 +119,17 @@ function program(x) {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "values": [
-      {"x": 1, "y": 1,
-      {"x": 2, "y": 2,
-      {"x": 3, "y": 3,
+      {"x": 1, "y": 1},
+      {"x": 2, "y": 2},
+      {"x": 3, "y": 3},
       {"x": 4, "y": 4}
     ]
-  ,
-  "mark": {"type": "point", "filled": true,
+  },
+  "mark": {"type": "point", "filled": true },
   "encoding": {
-    "x": {"field": "x", "type": "quantitative",
-    "y": {"field": "y", "type": "quantitative",
-    "color": {"value": "steelblue"}
+    "x": {"field": "x", "type": "quantitative" },
+    "y": {"field": "y", "type": "quantitative" },
+    "color": {"value": "steelblue" }
   }
 }
 ```
@@ -83,32 +142,31 @@ function program(x) {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "values": [
-      {"x": 0, "y": 0,
-      {"x": 1, "y": 1,
-      {"x": 2, "y": 2,
-      {"x": 3, "y": 3,
+      {"x": 0, "y": 0},
+      {"x": 1, "y": 1},
+      {"x": 2, "y": 2},
+      {"x": 3, "y": 3},
       {"x": 4, "y": 4}
     ]
-  ,
+  },
   "layer": [
     {
-      "mark": {"type": "point", "filled": true,
+      "mark": {"type": "point", "filled": true},
       "encoding": {
-        "x": {"field": "x", "type": "quantitative",
-        "y": {"field": "y", "type": "quantitative",
+        "x": {"field": "x", "type": "quantitative"},
+        "y": {"field": "y", "type": "quantitative"},
         "color": {"value": "steelblue"}
       }
-    ,
+    },
     {
-      "mark": {"type": "line",
+      "mark": {"type": "line"},
       "encoding": {
-        "x": {"field": "x", "type": "quantitative",
+        "x": {"field": "x", "type": "quantitative"},
         "y": {"field": "y", "type": "quantitative"}
       }
     }
   ]
 }
-
 ```
 
 
@@ -116,15 +174,6 @@ function program(x) {
 >## 為什麼你會知道上面的 program 方法的實作是 return x + 1 ?
 ## 我們是如何推導出來的?
 
-```
-return x * weight + bias;
-```
-
-為了讓這個函數更靈活一點, 我們可以加上兩個參數 weight, bias
-
-weight 權重代表著神經元對不同輸入的重視程度。較大的權重表示對應輸入的影響力更大，而較小的權重表示影響力較小。
-
-bias 是偏差數值，它不依賴於任何輸入。偏差的作用是調整神經元對於整體輸入的敏感度。偏差可以看作是神經元對於某種特定輸入的基本反應能力.
 
 
 ```puml
@@ -136,6 +185,19 @@ digraph A {
 }
 @enddot
 ```
+我們可以將 "輸入資料" 和 "輸出資料" 丟給AI程式去推導這個
+program 程式, 然後我們再使用這個 program
+
+
+```
+return x * weight + bias;
+```
+
+為了讓這個函數更靈活一點, 我們可以加上兩個參數 weight, bias
+
+weight 權重代表著神經元對不同輸入的重視程度。較大的權重表示對應輸入的影響力更大，而較小的權重表示影響力較小。
+
+bias 是偏差數值，它的作用是調整神經元對於整體輸入的敏感度。
 
 
 ```javascript {cmd="node"}
@@ -219,6 +281,7 @@ class Neuron {
 
   backward(inputs, output, target, learningRate) {
     const error = target - output;
+    console.log(`${target} - ${output} loss=${error}`)
     for (let i = 0; i < inputs.length; i++) {
       this.weights[i] += inputs[i] * error * learningRate;
     }
@@ -234,10 +297,26 @@ const ids = ["E1735036210","R278834622","B237836243","D244273034","O2019822310",
 
 const inputs = ids.map(x => convertIdToNumbers(x).slice(0, 9))
 const targets = ids.map(x =>convertIdToNumbers(x).slice(9)[0])
-// 向前傳播計算輸出值
-// const output = neuron.forward(input);
-// const learningRate = 0.1;
-// neuron.backward(input, output, target, learningRate);
+console.log(targets);
+exit();
+
+for(let epoch=0; epoch<1000; epoch++) {
+  for(let n=0; n<inputs.length; n++) {
+    const idNumbers = inputs[n];
+    const output = neuron.forward(idNumbers);
+    const learningRate = 0.1;
+    neuron.backward(inputs, output, targets, learningRate);
+  }
+}
+
+function test() {
+  const idStr = "U177447091";
+  const idNumbers = convertIdToNumbers(idStr);
+  const output = neuron.forward(idNumbers);
+  console.log(output);
+}
+
+test();
 ```
 
 
