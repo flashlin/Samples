@@ -21,9 +21,9 @@
 ---
 
 # 範例
-Case 1: Input 1 --> Program --> 1
-Case 2: Input 2 --> Program --> 2
-Case 3: Input 3 --> Program --> 3
+Case 1: Input 1 --> Program --> output 1
+Case 2: Input 2 --> Program --> output 2
+Case 3: Input 3 --> Program --> output 3
 
 
 ---
@@ -39,9 +39,9 @@ Q: 如何寫這個 Program ?
 
 
 # 範例
-Case 1: Input 1 --> Program --> 2
-Case 2: Input 2 --> Program --> 3
-Case 3: Input 3 --> Program --> 4
+Case 1: Input 1 --> Program --> output 2
+Case 2: Input 2 --> Program --> output 3
+Case 3: Input 3 --> Program --> output 4
 
 Q: 如何寫這個 Program ?
 
@@ -53,22 +53,7 @@ function program(x) {
 ```
 
 
-```puml
-@startdot
-digraph A {
-  "User Input" -> Trainer
-  Output -> Trainer
-  Trainer -> Program
-}
-@enddot
-```
-
-
-
-
-
-
-
+這是描述 y = x + 1 的二維散點圖，以清晰地呈現它們之間的關係。
 
 ```Vega-Lite
 {
@@ -90,12 +75,15 @@ digraph A {
 }
 ```
 
+通過觀察，我們可以發現這個方程 y = x + 1 具有線性關係。這意味著 x 和 y 之間存在著一條直線的關係。
+
 
 ```Vega-Lite
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
     "values": [
+      {"x": 0, "y": 0},
       {"x": 1, "y": 1},
       {"x": 2, "y": 2},
       {"x": 3, "y": 3},
@@ -124,45 +112,30 @@ digraph A {
 ```
 
 
-```javascript {cmd="node"}
-class Neuron {
-  constructor() {
-    this.weight = Math.random(); // 初始化权重
-    this.bias = Math.random(); // 初始化偏置
-  }
+## 問題
+>## 為什麼你會知道上面的 program 方法的實作是 return x + 1 ?
+## 我們是如何推導出來的?
 
-  // 训练函数
-  train(inputs, outputs, epochs, learningRate) {
-    for (let epoch = 0; epoch < epochs; epoch++) {
-      for (let i = 0; i < inputs.length; i++) {
-        const input = inputs[i];
-        const targetOutput = outputs[i];
-
-        // 前向传播计算预测输出
-        const predictedOutput = this.predict(input);
-
-        // 反向传播更新权重和偏置
-        const error = targetOutput - predictedOutput;
-        this.weight += error * input * learningRate;
-        this.bias += error * learningRate;
-      }
-    }
-  }
-
-  // 预测函数
-  predict(input) {
-    return input * this.weight + this.bias;
-  }
-}
-
-const neuron = new Neuron();
-const inputs = [1, 2, 3, 4];
-const outputs = [2, 3, 4, 5];
-neuron.train(inputs, outputs, 1000, 0.01);
-const predictedOutput = neuron.predict(6);
-console.log(`输入: 6, 预测输出: ${predictedOutput}`);
+```
+return x * weight + bias;
 ```
 
+為了讓這個函數更靈活一點, 我們可以加上兩個參數 weight, bias
+
+weight 權重代表著神經元對不同輸入的重視程度。較大的權重表示對應輸入的影響力更大，而較小的權重表示影響力較小。
+
+bias 是偏差數值，它不依賴於任何輸入。偏差的作用是調整神經元對於整體輸入的敏感度。偏差可以看作是神經元對於某種特定輸入的基本反應能力.
+
+
+```puml
+@startdot
+digraph A {
+  "User Input" -> Trainer
+  Output -> Trainer
+  Trainer -> Program
+}
+@enddot
+```
 
 
 ```javascript {cmd="node"}
@@ -178,21 +151,19 @@ class Neuron {
 
   backward(input, output, target, learningRate) {
     const loss = target - output;
-    console.log(`loss=${loss}`)
+    //console.log(`loss=${loss}`)
     this.weight += input * loss * learningRate;
     this.bias += loss * learningRate;
   }
 }
 
 const neuron = new Neuron();
-// 定義輸入和目標值
+
+// 定義輸入和輸出值
 let inputs = [1, 2, 3];
 let targets = [2, 3, 4];
-for(let i=1; i<10; i++) {
-  inputs[i] = i + 1;
-  targets[i] = inputs[i] + 1;
-}
 
+//開始訓練
 const learningRate = 0.001;
 for(let epoch=0; epoch<1000; epoch++) {
   for (let i = 0; i < inputs.length; i++) {
@@ -207,8 +178,20 @@ const result = neuron.forward(input);
 console.log(`${input} = ${result}`);
 ```
 
+error表示誤差，input表示輸入，learningRate表示學習速率。這個運算式 this.weight += input * error * learningRate; 表示將權重(weight)與誤差(error)相乘，再乘以學習速率(learning rate)，最後將結果加到原始的權重上。
+
+這樣做的目的是根據誤差的大小和方向，調整權重的值。如果誤差越大，那麼更新的幅度也會越大，這樣可以加快收斂的速度。而學習速率則控制著每次更新的大小，避免更新過快或過慢。
+
+
 
 ```javascript {cmd="node"}
+function convertIdToNumbers(idStr) {
+  let a = idStr.substr(0, 1).charCodeAt() - 'A'.charCodeAt() + 10;
+  let remainder = idStr.substr(1);
+  let numberText = a + remainder;
+  return numberText;
+}
+
 class Neuron {
   constructor() {
     this.weights = [];
@@ -221,7 +204,8 @@ class Neuron {
       sum += input[i] * this.weights[i];
     }
     sum += this.bias;
-    return this.activationFunction(sum);
+    //return this.activationFunction(sum);
+    return sum;
   }
 
   backward(input, output, target, learningRate) {
@@ -252,109 +236,6 @@ const learningRate = 0.1;
 neuron.backward(input, output, target, learningRate);
 ```
 
-
-身分證驗證碼
-
-```vega-lite
-{
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "data": {
-    "values": [
-      {"x": 1, "y": 1},
-      {"x": 2, "y": 2},
-      {"x": 3, "y": 3},
-      {"x": 5, "y": 5}
-    ]
-  },
-  "layer": [
-    {
-      "mark": {"type": "point", "filled": true},
-      "encoding": {
-        "x": {"field": "x", "type": "quantitative"},
-        "y": {"field": "y", "type": "quantitative"},
-        "color": {"value": "steelblue"}
-      }
-    },
-    {
-      "mark": {"type": "line"},
-      "encoding": {
-        "x": {"field": "x", "type": "quantitative"},
-        "y": {"field": "y", "type": "quantitative"}
-      }
-    }
-  ]
-}
-```
-
-
-
-```javascript {cmd="node"}
-class Neural {
-  constructor() {
-    this.weight = Math.random();
-    this.bias = Math.random();
-  }
-
-  forward(input) {
-    const neuron = this.sigmoid(input * this.weight + this.bias);
-    return neuron;
-  }
-
-  backward(input, output, target, learningRate) {
-    const error = target - output;
-    this.weight += input * error * learningRate;
-    this.bias += error * learningRate;
-  }
-
-  sigmoid(x) {
-    return 1 / (1 + Math.exp(-x));
-  }
-}
-
-const neuron = new Neuron();
-const inputs  = [1, 2, 3];
-const outputs = [];
-
-const output = neuron.forward(input);
-
-// 向後傳播更新權重和偏差
-const learningRate = 0.1;
-neuron.backward(input, output, target, learningRate);
-```
-
-```javascript cmd="node"}
-class Neuron {
-  constructor() {
-    // 初始化權重和偏差
-    this.weights = [];
-    this.bias = 0;
-  }
-
-  forward(input) {
-    // 向前傳播
-    let sum = 0;
-    for (let i = 0; i < input.length; i++) {
-      sum += input[i] * this.weights[i];
-    }
-    sum += this.bias;
-    return this.activationFunction(sum);
-  }
-
-  backward(input, output, target, learningRate) {
-    // 向後傳播
-    const error = target - output;
-    for (let i = 0; i < input.length; i++) {
-      this.weights[i] += input[i] * error * learningRate;
-    }
-    this.bias += error * learningRate;
-  }
-
-  activationFunction(x) {
-    // 激活函式（例如 sigmoid 函式）
-    return 1 / (1 + Math.exp(-x));
-  }
-}
-```
 
 
 身分證驗證碼
