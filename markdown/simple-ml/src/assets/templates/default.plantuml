@@ -1,0 +1,14 @@
+@startuml
+
+!theme sketchy-outline
+
+start
+
+:New UML;
+:write uml diagram;
+:Ctrl-Enter or Cmd-Enter;
+:Preview;
+
+stop
+
+@enduml
