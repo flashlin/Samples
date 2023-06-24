@@ -9,8 +9,7 @@ class CustomModel {
 
   constructor() {
     this.model = tf.sequential();
-    this.model.add(tf.layers.dense({ units: 20, inputShape: [10] }));
-    //this.model.add(tf.layers.dense({ units: 10, }));
+    this.model.add(tf.layers.dense({ units: 11, inputShape: [10] }));
     this.model.add(tf.layers.dense({ units: 10, activation: 'softmax' }));
   }
 
@@ -39,7 +38,7 @@ class CustomModel {
     const targetTensor = tf.tensor1d(targets, 'float32');
     await this.model.fit(inputTensor, targetTensor, {
       epochs: epochs,
-      batchSize: 1,
+      batchSize: 32,
     });
   }
 
