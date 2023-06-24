@@ -95,6 +95,15 @@ test('ai1', () => {
 });
 ```
 
+修改 package.json
+```
+ "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "npm run build && node ./dist/src/train.js"
+  },
+```
+
 
 
 # 範例
@@ -318,6 +327,15 @@ function test() {
 
 test();
 ```
+
+
+
+
+```
+npm i @tensorflow/tfjs @tensorflow/tfjs-node --save-dev
+```
+
+
 
 
 
