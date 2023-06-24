@@ -1,9 +1,10 @@
 import * as tf from '@tensorflow/tfjs-node';
+import { convertId9ToNumbers, generateRandomID, generateTrainData } from './generator';
 
 class MLPClassifier {
     private model: tf.Sequential;
 
-    constructor(inputShape: number, units: number[] = [10], optimizer: string = 'adam', loss: string = 'sparseCategoricalCrossentropy') {
+    constructor(inputShape: number, units: number[] = [10]) {
         this.model = tf.sequential();
         for (let i = 0; i < units.length; i++) {
             this.model.add(tf.layers.dense({
@@ -12,7 +13,11 @@ class MLPClassifier {
                 inputShape: i === 0 ? [inputShape] : undefined
             }));
         }
-        this.model.compile({ optimizer, loss, metrics: ['accuracy'] });
+        this.model.compile({
+            optimizer: 'adam',
+            loss: 'sparseCategoricalCrossentropy',
+            metrics: ['accuracy']
+        });
     }
 
     async train(X: tf.Tensor, y: tf.Tensor, epochs: number = 100) {
@@ -32,26 +37,22 @@ class MLPClassifier {
 }
 
 (async () => {
-    // Example data
-    const X = tf.tensor2d([
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-        [2, 3, 4, 5, 6, 7, 8, 9, 1, 0],
-        // ... more data
-    ]);
+    const { xTrain, yTrain } = generateTrainData(100000);
+    const X = tf.tensor2d(xTrain);
+    const y = tf.tensor1d(yTrain, 'float32');
 
-    const y = tf.tensor1d([1, 2], 'float32'); // labels must be integers for sparseCategoricalCrossentropy
-
-    // Instantiate and train the model
-    const classifier = new MLPClassifier(10, [10, 10]);
-    await classifier.train(X, y, 50);
+    const classifier = new MLPClassifier(10, [10, 20, 3]);
+    await classifier.train(X, y, 1000);
 
     // Predict new data
-    const X_new = tf.tensor2d([
-        [3, 4, 5, 6, 7, 8, 9, 0, 1, 2],
-        [5, 6, 7, 8, 9, 0, 1, 2, 3, 4]
-    ]);
-    const predictions = classifier.predict(X_new);
-    //predictions.print();
-    const indices = predictions.argMax(1);
-    indices.print();
+    for (let i = 0; i < 10; i++) {
+        const id = generateRandomID();
+        const inputs = convertId9ToNumbers(id);
+        const X_new = tf.tensor2d([inputs]);
+        const predictions = classifier.predict(X_new);
+        //predictions.print();
+        const indices = predictions.argMax(1);
+        //indices.print();
+        console.log(`ID: ${id} -> ${indices.dataSync()[0]}`);
+    }
 })();
