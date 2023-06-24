@@ -9,7 +9,7 @@ class CustomModel {
 
   constructor() {
     this.model = tf.sequential();
-    this.model.add(tf.layers.dense({ units: 10, inputShape: [10] }));
+    this.model.add(tf.layers.dense({ units: 20, inputShape: [10] }));
     //this.model.add(tf.layers.dense({ units: 10, }));
     this.model.add(tf.layers.dense({ units: 10, activation: 'softmax' }));
   }
@@ -67,16 +67,16 @@ async function main() {
   model.compile();
 
   const { xTrain, yTrain } = generateTrainData(10000);
-  await model.train(xTrain, yTrain, 500);
+  await model.train(xTrain, yTrain, 10);
   const modelPath = 'file://./models'
   await model.saveModel(modelPath);
 
-  // for (let i = 0; i < 10; i++) {
-  //   const id = generateRandomID();
-  //   const inputs = getInputs(id);
-  //   const result = model.forward([inputs]);
-  //   console.log(`${id} ${result}`);
-  // }
+  for (let i = 0; i < 10; i++) {
+    const id = generateRandomID();
+    const inputs = convertId9ToNumbers(id);
+    const result = await model.forward([inputs]);
+    console.log(`${id} ${result}`);
+  }
 }
 
 main();
