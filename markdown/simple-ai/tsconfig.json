@@ -5,9 +5,10 @@
     "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "paths": {
       "@/*": ["./src/*"]
     },
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }
