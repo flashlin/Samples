@@ -7,7 +7,7 @@
     "build": "tsc",
     "test": "jest",
     "dev": "npm run build && node ./dist/src/ai3.js",
-    "dev5": "npm run build && node ./dist/src/ai5.js"
+    "dev5": "npx ts-node ./src/ai6.js"
   },
   "author": "",
   "license": "ISC",
