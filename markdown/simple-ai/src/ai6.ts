@@ -1,6 +1,35 @@
 import * as tf from '@tensorflow/tfjs-node';
 import { convertId9ToNumbers, generateRandomID, generateTrainData } from './generator';
 
+function normal(inputs: number[][]) {
+    const inputData = tf.tensor2d(inputs);
+
+    const embedding = tf.layers.embedding({
+        inputDim: 10,
+        outputDim: 1,
+    });
+
+    // Apply the embedding layer
+    const embedded = embedding.apply(inputData) as tf.Tensor<tf.Rank>;
+
+    const flattened = embedded.reshape([embedded.shape[0], -1]);
+
+    // Normalize the embeddings to 0-1 range
+    // const normalized = tf.div(
+    //     flattened,
+    //     tf.max(flattened)
+    // );
+
+    const min = tf.min(flattened);
+    const max = tf.max(flattened);
+    const normalized = tf.div(
+        tf.sub(flattened, min),
+        tf.sub(max, min)
+    );
+
+    return normalized;
+}
+
 class LogisticRegression {
     private model: tf.Sequential;
 
@@ -17,7 +46,8 @@ class LogisticRegression {
             return oneHot;
         });
 
-        const inputTensor = tf.tensor2d(inputs);
+        const inputsData = normal(inputs);
+        const inputTensor = inputsData; //tf.tensor2d(inputs);
         const labelTensor = tf.tensor2d(oneHotLabels);
 
         // Compile the model
