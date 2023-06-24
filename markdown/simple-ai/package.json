@@ -5,11 +5,14 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "test": "jest"
+    "test": "jest",
+    "dev": "npm run build && node ./dist/src/ai3.js",
+    "dev5": "npm run build && node ./dist/src/ai5.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@tensorflow/tfjs-node": "^4.8.0",
     "@types/jest": "^29.5.2",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
