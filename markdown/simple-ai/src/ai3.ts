@@ -1,47 +1,47 @@
 import * as tf from '@tensorflow/tfjs-node';
-import { generateRandomID, generateTrainData, getInputs } from './generator';
+import { generateRandomID, generateTrainData, convertId9ToNumbers } from './generator';
 import { convertIdToNumbers } from './ai';
 import path from 'path';
 import fs from 'fs';
 
-class LSTMModel {
+class CustomModel {
   private model: tf.Sequential;
 
   constructor() {
     this.model = tf.sequential();
-    this.model.add(tf.layers.dense({ units: 10, inputShape: [10], }));
+    this.model.add(tf.layers.dense({ units: 10, inputShape: [10] }));
     //this.model.add(tf.layers.dense({ units: 10, }));
     this.model.add(tf.layers.dense({ units: 10, activation: 'softmax' }));
   }
 
   compile() {
     this.model.compile({
-      loss: 'categoricalCrossentropy',
+      loss: 'sparseCategoricalCrossentropy',
       optimizer: 'adam',
       metrics: ['accuracy'],
     });
   }
 
-  // 預測輸入的數字
-  predict(inputs: number[][]) {
+  async forward(inputs: number[][]): Promise<number[]> {
     const inputTensor = tf.tensor2d(inputs);
-    const outputTensor = this.model.predict(inputTensor) as tf.Tensor;
-    const predictions = outputTensor.arraySync() as number[][];
-    const results: number[] = [];
-    for (const prediction of predictions) {
-      const predictedIndex = prediction.indexOf(Math.max(...prediction));
-      results.push(predictedIndex);
-    }
-    return results;
+    const predictions = this.model.predict(inputTensor) as tf.Tensor;
+    const argMax = await predictions.argMax(-1).data();
+    return Array.from(argMax);
   }
 
-
-  fit(inputs: number[][], targets: number[]) {
-    const numClasses = 10;
-    const targetTensor = tf.oneHot(tf.tensor1d(targets, 'int32'), numClasses);
-    const reshapedTarget = tf.reshape(targetTensor, [targets.length, numClasses]);
-    const inputTensor = tf.tensor2d(inputs);
-    return this.model.fit(inputTensor, reshapedTarget, { epochs: 500, batchSize: 1 });
+  async train(inputs: number[][], targets: number[], epochs: number) {
+    const invalidIndex = inputs.findIndex(subArray => subArray.length !== 10);
+    //if (inputs.some(subArray => subArray.length !== 10)) {
+    if( invalidIndex != -1) {
+      throw new Error(`輸入數據的形狀不正確, inputs[${invalidIndex}] 應該應該是長度為 10 的子數組. [${inputs[invalidIndex]}]`);
+    }
+    const inputTensor = tf.tensor2d(inputs, [inputs.length, 10]);
+    const targetTensor = tf.tensor1d(targets, 'float32');
+    console.log(`inp`, inputTensor.shape);
+    console.log(`targetTensor`, targetTensor.shape);
+    await this.model.fit(inputTensor, targetTensor, {
+      epochs: epochs
+    });
   }
 
   saveModel(path: string) {
@@ -57,7 +57,7 @@ class LSTMModel {
 
 // 使用範例
 async function main() {
-  const model = new LSTMModel();
+  const model = new CustomModel();
 
   const modelFile = 'file://./models/model.json';
   if (fs.existsSync(modelFile)) {
@@ -67,21 +67,16 @@ async function main() {
   model.compile();
 
   const { xTrain, yTrain } = generateTrainData(10000);
-  await model.fit(xTrain, yTrain);
+  await model.train(xTrain, yTrain, 500);
   const modelPath = 'file://./models'
   await model.saveModel(modelPath);
 
-  for (let i = 0; i < 10; i++) {
-    const id = generateRandomID();
-    const inputs = getInputs(id);
-    const result = model.predict([inputs]);
-    console.log(`${id} ${result}`);
-  }
+  // for (let i = 0; i < 10; i++) {
+  //   const id = generateRandomID();
+  //   const inputs = getInputs(id);
+  //   const result = model.forward([inputs]);
+  //   console.log(`${id} ${result}`);
+  // }
 }
 
-main().catch(console.error);
-
-// for(let i=0; i<100; i++) {
-//   const id = generateRandomID();
-//   console.log(id);
-// }
+main();

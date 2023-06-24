@@ -1,5 +1,5 @@
 import * as tf from '@tensorflow/tfjs';
-import { generateRandomID, generateTrainData, getInputs } from './generator';
+import { generateRandomID, generateTrainData, convertId9ToNumbers } from './generator';
 
 const state: { weights: number[], biases: number[], lastWeight: number, lastBias: number } = {
     weights: [],
@@ -142,7 +142,7 @@ async function test() {
     console.log('===== test =====');
     for (let i = 0; i < 10; i++) {
         const id = generateRandomID();
-        const inputs = getInputs(id);
+        const inputs = convertId9ToNumbers(id);
         const result = await model.predict(inputs, 0);
         console.log(`${id} ${result}`);
     }
