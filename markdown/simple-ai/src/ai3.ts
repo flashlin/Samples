@@ -10,6 +10,7 @@ class CustomModel {
   constructor() {
     this.model = tf.sequential();
     this.model.add(tf.layers.dense({ units: 11, inputShape: [10] }));
+    this.model.add(tf.layers.dense({ units: 3, activation: 'relu' }));
     this.model.add(tf.layers.dense({ units: 10, activation: 'softmax' }));
   }
 
