@@ -37,10 +37,9 @@ class CustomModel {
     }
     const inputTensor = tf.tensor2d(inputs, [inputs.length, 10]);
     const targetTensor = tf.tensor1d(targets, 'float32');
-    console.log(`inp`, inputTensor.shape);
-    console.log(`targetTensor`, targetTensor.shape);
     await this.model.fit(inputTensor, targetTensor, {
-      epochs: epochs
+      epochs: epochs,
+      batchSize: 1,
     });
   }
 
@@ -67,7 +66,7 @@ async function main() {
   model.compile();
 
   const { xTrain, yTrain } = generateTrainData(10000);
-  await model.train(xTrain, yTrain, 10);
+  await model.train(xTrain, yTrain, 500);
   const modelPath = 'file://./models'
   await model.saveModel(modelPath);
 
