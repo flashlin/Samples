@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-node';
 import { convertId9ToNumbers, generateRandomID, generateTrainData } from './generator';
 
-function normal(inputs: number[][]) {
+function normalizeInputs(inputs: number[][]) {
     const inputData = tf.tensor2d(inputs);
 
     const embedding = tf.layers.embedding({
@@ -46,7 +46,7 @@ class LogisticRegression {
             return oneHot;
         });
 
-        const inputsData = normal(inputs);
+        const inputsData = normalizeInputs(inputs);
         const inputTensor = inputsData; //tf.tensor2d(inputs);
         const labelTensor = tf.tensor2d(oneHotLabels);
 
