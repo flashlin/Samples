@@ -10,6 +10,7 @@ from data import train_loader, tensor2d
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
+        self.criterion = nn.CrossEntropyLoss()
         self.fc1 = nn.Linear(9, 64)
         self.fc2 = nn.Linear(64, 128)
         self.fc3 = nn.Linear(128, 64)
@@ -32,7 +33,7 @@ class Net(nn.Module):
             return predicted
 
 
-def train(net, data_loader, criterion, optimizer, epochs):
+def train(model, data_loader, optimizer, epochs):
     gradient_list = []
     for epoch in range(epochs):
         running_loss = 0.0
@@ -40,8 +41,8 @@ def train(net, data_loader, criterion, optimizer, epochs):
             inputs, labels = data
             optimizer.zero_grad()
 
-            outputs = net(inputs)
-            loss = criterion(outputs, labels)
+            outputs = model(inputs)
+            loss = model.criterion(outputs, labels)
             loss.backward()
             optimizer.step()
 
@@ -51,11 +52,11 @@ def train(net, data_loader, criterion, optimizer, epochs):
                 running_loss = 0.0
 
         # 產生 3D 梯度圖
-        param_mapping = {name: i for i, name in enumerate(net.state_dict().keys())}
+        param_mapping = {name: i for i, name in enumerate(model.state_dict().keys())}
         # fig = plt.figure()
         # ax = fig.add_subplot(111, projection='3d')
         gradient = []
-        for name, param in net.named_parameters():
+        for name, param in model.named_parameters():
             if param.requires_grad:
                 gradient.append((
                     epoch,
@@ -77,7 +78,6 @@ def train(net, data_loader, criterion, optimizer, epochs):
 
 # 實例化模型
 net = Net()
-criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 # 使用訓練數據訓練模型
@@ -85,6 +85,6 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 # 創建數據集和數據加載器
 #dataset = MyDataset()
 #trainloader = DataLoader(dataset, batch_size=1, shuffle=True)
-train(net, train_loader, criterion, optimizer, epochs=300)
+train(net, train_loader, optimizer, epochs=300)
 
 id = generate_random_id()
