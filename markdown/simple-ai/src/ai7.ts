@@ -1,5 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 import { convertId9ToNumbers, generateRandomID } from './generator';
+import * as fs from 'fs';
 
 function normalize1d(inputs: number[]) {
     const inputsTensor = tf.tensor2d(inputs, [inputs.length, 1]);
@@ -28,7 +29,7 @@ class CustomModel {
 
     constructor() {
         let model = this.model = tf.sequential();
-        model.add(tf.layers.dense({ units: 36, inputShape: [9], activation: 'relu', }));
+        model.add(tf.layers.dense({ units: 11, inputShape: [9], activation: 'relu', }));
         //model.add(tf.layers.dense({ units: 50, activation: 'sigmoid' }));
         model.add(tf.layers.dense({ units: 10, activation: 'softmax' }));
     }
@@ -49,13 +50,18 @@ class CustomModel {
         const numClasses = 10;
         const encodedTargets = tf.oneHot(labelTensor, numClasses);
 
+        const learningRate = 1;
+        const optimizer = tf.train.adam(learningRate);
         this.model.compile({
-            optimizer: 'adam',
+            optimizer: optimizer,
             loss: 'categoricalCrossentropy',
             metrics: ['accuracy']
         });
 
-        await this.model.fit(inputTensor, encodedTargets, { epochs });
+        await this.model.fit(inputTensor, encodedTargets, {
+            epochs,
+            batchSize: 32,
+        });
     }
 
     predict(inputs: number[][]): number[] {
@@ -83,6 +89,9 @@ class CustomModel {
 
     async load() {
         const modelSavePath = 'file://models/ai7/model.json';
+        if (!fs.existsSync(modelSavePath)) {
+            return;
+        }
         const model = await tf.loadLayersModel(modelSavePath);
         this.model = model;
     }
@@ -148,10 +157,10 @@ async function main() {
     const model = new CustomModel();
 
     console.log(`start training`);
-    const items = generateTrainData(10000);
+    const items = generateTrainData(10);
 
     await model.load();
-    await model.train(items.xTrain, items.yTrain, 500);
+    await model.train(items.xTrain, items.yTrain, 100);
     await model.save();
 
 
