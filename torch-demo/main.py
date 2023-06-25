@@ -72,6 +72,8 @@ def train(net, dataloader, criterion, optimizer, epochs):
         for item in gradient:
             epoch, y, value = item
             ax.scatter(epoch, y, value)
+    ax.set_yticks(list(param_mapping.values()))
+    ax.set_yticklabels(list(param_mapping.keys()))
     plt.show()
 
 # 實例化模型
