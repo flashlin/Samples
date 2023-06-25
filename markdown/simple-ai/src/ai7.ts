@@ -28,38 +28,51 @@ class CustomModel {
 
     constructor() {
         let model = this.model = tf.sequential();
-        model.add(tf.layers.dense({ units: 9, inputShape: [9], }));
+        model.add(tf.layers.dense({ units: 36, inputShape: [9], activation: 'relu', }));
         //model.add(tf.layers.dense({ units: 50, activation: 'sigmoid' }));
-        model.add(tf.layers.dense({ units: 1, }));
+        model.add(tf.layers.dense({ units: 10, activation: 'softmax' }));
     }
 
     async train(inputs: number[][], labels: number[], epochs: number = 100) {
         const inputTensor = this.toInputsTensor(inputs);
         const labelTensor = this.toLabelsTensor(labels);
 
-        this.model.compile({
-            optimizer: tf.train.adam(),
-            loss: tf.losses.meanSquaredError,
-            metrics: ['mse'],
+        console.log(`inputTensor.shape`, inputTensor.shape);
+        console.log(`labelTensor.shape`, labelTensor.shape)
+
+        // this.model.compile({
+        //     optimizer: tf.train.adam(),
+        //     loss: tf.losses.meanSquaredError,
+        //     metrics: ['mse'],
+        // });
+
+        const numClasses = 10;
+        const encodedTargets = tf.oneHot(labelTensor, numClasses);
+
+        this.model.compile({ 
+            optimizer: 'adam', 
+            loss: 'categoricalCrossentropy', 
+            metrics: ['accuracy'] 
         });
 
-        await this.model.fit(inputTensor, labelTensor, { epochs });
+        await this.model.fit(inputTensor, encodedTargets, { epochs });
     }
 
     predict(inputs: number[][]): number[] {
         const inputTensor = this.toInputsTensor(inputs);
         const predictions = this.model.predict(inputTensor) as tf.Tensor<tf.Rank>;
-        return Array.from(predictions.argMax(0).dataSync());
+        return Array.from(predictions.argMax(-1).dataSync());
         //return Array.from(predictions.dataSync());
     }
 
     toInputsTensor(inputs: number[][]) {
-        const inputTensor = tf.tensor(inputs);
-        return inputTensor;
+        const inputTensor = tf.tensor2d(inputs);
+        const normalizedInput = inputTensor.div(tf.scalar(9));
+        return normalizedInput;
     }
 
     toLabelsTensor(labels: number[]) {
-        const labelTensor = normalize1d(labels);
+        const labelTensor = tf.tensor1d(labels, 'int32');
         return labelTensor;
     }
 }
@@ -124,8 +137,8 @@ async function main() {
     const model = new CustomModel();
 
     console.log(`start training`);
-    const items = generateTrainData(10000);
-    await model.train(items.xTrain, items.yTrain, 500);
+    const items = generateTrainData(2);
+    await model.train(items.xTrain, items.yTrain, 100);
 
     //const predictions = await model.predict(items.xTrain);
     //console.log('pred=', predictions);
