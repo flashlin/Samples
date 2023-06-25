@@ -24,7 +24,7 @@ function normalize2d(inputs: number[][]) {
 
 
 class CustomModel {
-    private model: tf.Sequential;
+    private model: tf.LayersModel;
 
     constructor() {
         let model = this.model = tf.sequential();
@@ -49,10 +49,10 @@ class CustomModel {
         const numClasses = 10;
         const encodedTargets = tf.oneHot(labelTensor, numClasses);
 
-        this.model.compile({ 
-            optimizer: 'adam', 
-            loss: 'categoricalCrossentropy', 
-            metrics: ['accuracy'] 
+        this.model.compile({
+            optimizer: 'adam',
+            loss: 'categoricalCrossentropy',
+            metrics: ['accuracy']
         });
 
         await this.model.fit(inputTensor, encodedTargets, { epochs });
@@ -74,6 +74,17 @@ class CustomModel {
     toLabelsTensor(labels: number[]) {
         const labelTensor = tf.tensor1d(labels, 'int32');
         return labelTensor;
+    }
+
+    async save() {
+        const modelSavePath = 'models/ai7';
+        await this.model.save(`file://${modelSavePath}`);
+    }
+
+    async load() {
+        const modelSavePath = 'file://models/ai7/model.json';
+        const model = await tf.loadLayersModel(modelSavePath);
+        this.model = model;
     }
 }
 
@@ -137,8 +148,12 @@ async function main() {
     const model = new CustomModel();
 
     console.log(`start training`);
-    const items = generateTrainData(2);
-    await model.train(items.xTrain, items.yTrain, 100);
+    const items = generateTrainData(10000);
+
+    await model.load();
+    await model.train(items.xTrain, items.yTrain, 500);
+    await model.save();
+
 
     //const predictions = await model.predict(items.xTrain);
     //console.log('pred=', predictions);
