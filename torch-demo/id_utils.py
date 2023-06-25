@@ -9,7 +9,7 @@ def generate_id9() -> str:
     return id9
 
 
-def convert_id_to_numbers(id_str: str) -> [int]:
+def convert_id_to_numbers(id_str: str) -> list[int]:
     first = {
         'A': 10,
         'B': 11,
@@ -52,7 +52,7 @@ def convert_id_to_numbers(id_str: str) -> [int]:
 
 
 
-def calculate_checksum(id_numbers: [int]) -> int:
+def calculate_checksum(id_numbers: list[int]) -> int:
     weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1]
     total = 0
     for i in range(len(id_numbers)):
@@ -71,7 +71,7 @@ def generate_random_id() -> str:
   return f"{id9}{check_code}"
 
 
-def convert_to_train_id9(id9: str) -> [int]:
+def convert_to_train_id9(id9: str) -> list[int]:
     first = ord(id9[0]) - ord('A') + 10
     numbers = [first]
     for n in range(1, len(id9)):
