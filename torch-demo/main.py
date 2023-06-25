@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from data import trainloader
+from data import train_loader, tensor2d
+
 
 # 定義模型
 class Net(nn.Module):
@@ -30,15 +30,13 @@ class Net(nn.Module):
             _, predicted = torch.max(output.data, 1)
             return predicted
 
-# 訓練方法
-def train(net, dataloader, criterion, optimizer, epochs):
+
+def train(net, data_loader, criterion, optimizer, epochs):
     gradient_list = []
     for epoch in range(epochs):
         running_loss = 0.0
-        for i, data in enumerate(dataloader, 0):
+        for i, data in enumerate(data_loader, 0):
             inputs, labels = data
-            inputs = inputs.float()  # 將輸入數據轉換為 float 型
-            labels = labels.long()  # 確保標籤是 long 型
             optimizer.zero_grad()
 
             outputs = net(inputs)
@@ -86,4 +84,4 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 # 創建數據集和數據加載器
 #dataset = MyDataset()
 #trainloader = DataLoader(dataset, batch_size=1, shuffle=True)
-train(net, trainloader, criterion, optimizer, epochs=300)
+train(net, train_loader, criterion, optimizer, epochs=300)
