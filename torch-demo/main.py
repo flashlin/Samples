@@ -1,3 +1,4 @@
+from id_utils import generate_random_id
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -85,3 +86,5 @@ optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 #dataset = MyDataset()
 #trainloader = DataLoader(dataset, batch_size=1, shuffle=True)
 train(net, train_loader, criterion, optimizer, epochs=300)
+
+id = generate_random_id()

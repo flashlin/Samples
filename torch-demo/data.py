@@ -5,7 +5,7 @@ import numpy as np
 from id_utils import generate_random_id_for_train
 
 
-def tensor2d(inputs: [[int]], data_type=np.float32) -> torch.Tensor:
+def tensor2d(inputs: list[list[int]], data_type=np.float32) -> torch.Tensor:
     np_array = np.array(inputs, dtype=data_type)
     input_tensor = torch.from_numpy(np_array)
     return input_tensor
