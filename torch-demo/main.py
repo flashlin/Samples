@@ -1,4 +1,4 @@
-from id_utils import generate_random_id
+from id_utils import generate_random_id, convert_id_to_numbers
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -26,11 +26,14 @@ class Net(nn.Module):
         return x
 
     # 預測方法
-    def predict(self, x):
+    def predict(self, id: str):
+        id9 = id[0:9]
+        id9_numbers = convert_id_to_numbers(id9)
+        x = tensor2d([id9_numbers])
         with torch.no_grad():
             output = self.forward(x)
             _, predicted = torch.max(output.data, 1)
-            return predicted
+            return predicted.item()
 
 
 def train(model, data_loader, optimizer, epochs):
@@ -76,15 +79,14 @@ def train(model, data_loader, optimizer, epochs):
     ax.set_yticklabels(list(param_mapping.keys()))
     plt.show()
 
-# 實例化模型
-net = Net()
-optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
-# 使用訓練數據訓練模型
-# 訓練數據 'trainloader' 需要提前定義
-# 創建數據集和數據加載器
-#dataset = MyDataset()
-#trainloader = DataLoader(dataset, batch_size=1, shuffle=True)
-train(net, train_loader, optimizer, epochs=300)
+if __name__ == '__main__':
+    # 實例化模型
+    model = Net()
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-id = generate_random_id()
+    # train(model, train_loader, optimizer, epochs=300)
+
+    id = generate_random_id()
+    output = model.predict(id)
+    print(f'{id} => {output}')
