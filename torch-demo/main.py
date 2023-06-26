@@ -40,6 +40,7 @@ class Net(nn.Module):
         for name, param in model.named_parameters():
             if param.requires_grad:
                 grads.append((
+                    name,
                     param_mapping[name],
                     param.grad.data.norm(2).item()
                 ))
@@ -51,7 +52,7 @@ def draw_grads(grads_list, param_mapping):
     ax = fig.add_subplot(111, projection='3d')
     for epoch, gradient in grads_list:
         for item in gradient:
-            y, value = item
+            _, y, value = item
             ax.scatter(epoch, y, value)
     ax.set_yticks(list(param_mapping.values()))
     ax.set_yticklabels(list(param_mapping.keys()))
