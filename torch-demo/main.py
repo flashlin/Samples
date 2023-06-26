@@ -4,6 +4,9 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from data import train_loader, tensor2d
+from torch.utils.tensorboard import SummaryWriter
+import torchvision.utils as vutils
+import matplotlib.pyplot as plt
 
 
 # 定義模型
@@ -16,6 +19,7 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(128, 64)
         self.fc4 = nn.Linear(64, 32)
         self.fc5 = nn.Linear(32, 10)
+        self.param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
@@ -35,9 +39,35 @@ class Net(nn.Module):
             _, predicted = torch.max(output.data, 1)
             return predicted.item()
 
+    def get_gradient(self):
+        # param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
+        param_mapping = self.param_mapping
+        grads = []
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                grads.append((
+                    param_mapping[name],
+                    param.grad.data.norm(2).item()
+                ))
+        return grads
+
+
+def draw_grads(grads_list, param_mapping):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    for epoch, gradient in grads_list:
+        for item in gradient:
+            y, value = item
+            ax.scatter(epoch, y, value)
+    ax.set_yticks(list(param_mapping.values()))
+    ax.set_yticklabels(list(param_mapping.keys()))
+    return fig
+
+
 
 def train(model, data_loader, optimizer, epochs):
-    gradient_list = []
+    writer = SummaryWriter(log_dir='./logs')
+    grads_list = []
     for epoch in range(epochs):
         running_loss = 0.0
         for i, data in enumerate(data_loader, 0):
@@ -54,29 +84,12 @@ def train(model, data_loader, optimizer, epochs):
                 print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
 
-        # 產生 3D 梯度圖
-        param_mapping = {name: i for i, name in enumerate(model.state_dict().keys())}
-        # fig = plt.figure()
-        # ax = fig.add_subplot(111, projection='3d')
-        gradient = []
-        for name, param in model.named_parameters():
-            if param.requires_grad:
-                gradient.append((
-                    epoch,
-                    param_mapping[name],
-                    param.grad.data.norm(2).item()
-                ))
-                # ax.scatter(epoch, param_mapping[name], param.grad.data.norm(2).item())
-        gradient_list.append(gradient)                
-        # plt.show()
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    for gradient in gradient_list:
-        for item in gradient:
-            epoch, y, value = item
-            ax.scatter(epoch, y, value)
-    ax.set_yticks(list(param_mapping.values()))
-    ax.set_yticklabels(list(param_mapping.keys()))
+        # 將梯度圖像寫入 TensorBoard
+        grads = model.get_gradient()
+        grads_list.append((epoch, grads))
+
+    writer.close()
+    draw_grads(grads_list, model.param_mapping)
     plt.show()
 
 
@@ -85,7 +98,7 @@ if __name__ == '__main__':
     model = Net()
     optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-    # train(model, train_loader, optimizer, epochs=300)
+    train(model, train_loader, optimizer, epochs=300)
 
     id = generate_random_id()
     output = model.predict(id)
