@@ -28,7 +28,7 @@ class MyDataset(Dataset):
 
 
 dataset = MyDataset()
-train_loader = DataLoader(dataset, batch_size=16, shuffle=True)
+train_loader = DataLoader(dataset, batch_size=26, shuffle=True)
 
 
 

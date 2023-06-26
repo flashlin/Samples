@@ -4,8 +4,6 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 from data import train_loader, tensor2d
-from torch.utils.tensorboard import SummaryWriter
-import torchvision.utils as vutils
 import matplotlib.pyplot as plt
 
 
@@ -15,18 +13,14 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.criterion = nn.CrossEntropyLoss()
         self.fc1 = nn.Linear(9, 18)
-        self.fc2 = nn.Linear(18, 64)
-        self.fc3 = nn.Linear(64, 32)
-        self.fc4 = nn.Linear(32, 10)
+        self.fc2 = nn.Linear(18, 32)
+        self.fc3 = nn.Linear(32, 10)
         self.param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
-        x = torch.sigmoid(x)
         x = torch.relu(self.fc2(x))
-        x = torch.relu(x)
-        x = torch.relu(self.fc3(x))
-        x = torch.softmax(self.fc4(x), dim=1)
+        x = torch.softmax(self.fc3(x), dim=1)
         return x
 
     # 預測方法
@@ -65,7 +59,7 @@ def draw_grads(grads_list, param_mapping):
 
 
 def train(model, data_loader, optimizer, epochs):
-    writer = SummaryWriter(log_dir='./logs')
+    # writer = SummaryWriter(log_dir='./logs')
     grads_list = []
     for epoch in range(epochs):
         running_loss = 0.0
@@ -87,7 +81,7 @@ def train(model, data_loader, optimizer, epochs):
         grads = model.get_gradient()
         grads_list.append((epoch, grads))
 
-    writer.close()
+    # writer.close()
     draw_grads(grads_list, model.param_mapping)
     plt.show()
 
