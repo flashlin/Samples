@@ -12,15 +12,18 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.criterion = nn.CrossEntropyLoss()
-        self.fc1 = nn.Linear(9, 18)
-        self.fc2 = nn.Linear(18, 32)
-        self.fc3 = nn.Linear(32, 10)
+        self.fc1 = nn.Linear(9, 1000)
+        self.hidden_layers = nn.ModuleList()
+        for _ in range(3):
+            self.hidden_layers.append(nn.Linear(1000, 1000)) 
+        self.fc2 = nn.Linear(1000, 10)
         self.param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
 
     def forward(self, x):
         x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        x = torch.softmax(self.fc3(x), dim=1)
+        for layer in self.hidden_layers:
+            x = torch.relu(layer(x))
+        x = torch.softmax(self.fc2(x), dim=1)
         return x
 
     # 預測方法
