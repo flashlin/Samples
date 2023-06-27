@@ -7,6 +7,61 @@ from data import train_loader, tensor2d
 import matplotlib.pyplot as plt
 
 
+class CnnLstmMlpNet(nn.Module):
+    def __init__(self):
+        super(CnnLstmMlpNet, self).__init__()
+        self.criterion = nn.CrossEntropyLoss()
+        self.cnn = nn.Sequential(
+            nn.Conv1d(1, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool1d(kernel_size=2),
+            nn.Conv1d(16, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            # nn.MaxPool1d(kernel_size=2),
+            nn.AdaptiveMaxPool1d(output_size=1),
+            nn.Conv1d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU()
+        )
+        self.lstm = nn.LSTM(64, 128, batch_first=True)
+        self.fc = nn.Linear(128, 10)
+        self.param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
+
+    def forward(self, x):
+        x = x.unsqueeze(1)  # 將輸入形狀轉換為[N, 1, 9]
+        x = self.cnn(x)
+        x = x.permute(0, 2, 1)  # 將通道維度移到最後一維，以符合LSTM的輸入形狀要求
+        _, (x, _) = self.lstm(x)
+        x = x.squeeze(0)
+        x = self.fc(x)
+        return x
+
+    # 預測方法
+    def predict(self, id: str):
+        id9 = id[0:9]
+        id9_numbers = convert_id_to_numbers(id9)
+        x = tensor2d([id9_numbers])
+
+        self.eval()  # 將模型設置為評估模式
+        with torch.no_grad():
+            output = self.forward(x)
+            _, predicted = torch.max(output, 1)
+        return predicted
+
+    def get_gradient(self):
+        # param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
+        param_mapping = self.param_mapping
+        grads = []
+        for name, param in model.named_parameters():
+            if param.requires_grad:
+                grads.append((
+                    name,
+                    param_mapping[name],
+                    param.grad.data.norm(2).item()
+                ))
+        return grads
+
+
+
 # 定義模型
 class Net(nn.Module):
     def __init__(self):
@@ -15,7 +70,7 @@ class Net(nn.Module):
         self.fc1 = nn.Linear(9, 1000)
         self.hidden_layers = nn.ModuleList()
         for _ in range(3):
-            self.hidden_layers.append(nn.Linear(1000, 1000)) 
+            self.hidden_layers.append(nn.Linear(1000, 1000))
         self.fc2 = nn.Linear(1000, 10)
         self.param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
 
@@ -77,9 +132,8 @@ def train(model, data_loader, optimizer, epochs):
             optimizer.step()
 
             running_loss += loss.item()
-            if i % 500 == 0:  # 每2000個 mini-batches 打印一次
-                print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 2000))
-                running_loss = 0.0
+
+        print('[%d] loss: %.3f' % (epoch + 1, running_loss))
 
         # 將梯度圖像寫入 TensorBoard
         grads = model.get_gradient()
