@@ -149,11 +149,11 @@ def train(model, data_loader, optimizer, epochs):
         print('[%d] loss: %.5f %.5f' % (epoch + 1, running_loss, best_loss))
 
         # 將梯度圖像寫入 TensorBoard
-        # grads = model.get_gradient()
-        # grads_list.append((epoch, grads))
+        grads = model.get_gradient()
+        grads_list.append((epoch, grads))
 
     # writer.close()
-    # draw_grads(grads_list, model.param_mapping)
+    draw_grads(grads_list, model.param_mapping)
     plt.show()
 
 
