@@ -6,16 +6,19 @@ from id_utils import generate_random_id_for_train
 
 
 def tensor2d(inputs: list[list[int]], data_type=np.float32) -> torch.Tensor:
-    np_array = np.array(inputs, dtype=data_type)
-    input_tensor = torch.from_numpy(np_array)
+    input_tensor = torch.tensor(inputs, dtype=torch.float32)
     return input_tensor
+    # np_array = np.array(inputs, dtype=data_type)
+    # np_array = np_array.astype(data_type)
+    # input_tensor = torch.from_numpy(np_array)
+    # return input_tensor
 
 
 # 定義數據集
 class MyDataset(Dataset):
     def __init__(self):
         self.samples = []
-        for n in range(1000):
+        for n in range(500000):
             id_str, train_id9, check_code = generate_random_id_for_train()
             self.samples.append((train_id9, check_code))
 
@@ -28,7 +31,7 @@ class MyDataset(Dataset):
 
 
 dataset = MyDataset()
-train_loader = DataLoader(dataset, batch_size=26, shuffle=True)
+train_loader = DataLoader(dataset, batch_size=500000, shuffle=True)
 
 
 

@@ -1,3 +1,5 @@
+import os
+
 from id_utils import generate_random_id, convert_id_to_numbers
 import torch
 import torch.nn as nn
@@ -66,19 +68,17 @@ class CnnLstmMlpNet(nn.Module):
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        self.criterion = nn.CrossEntropyLoss()
-        self.fc1 = nn.Linear(9, 1000)
-        self.hidden_layers = nn.ModuleList()
-        for _ in range(3):
-            self.hidden_layers.append(nn.Linear(1000, 1000))
-        self.fc2 = nn.Linear(1000, 10)
+        # self.criterion = nn.CrossEntropyLoss()
+        self.criterion = nn.MSELoss()
+        self.fc1 = nn.Linear(9, 10)
+        self.fc2 = nn.Linear(10, 3)
+        self.fc3 = nn.Linear(3, 1)
         self.param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
 
     def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        for layer in self.hidden_layers:
-            x = torch.relu(layer(x))
-        x = torch.softmax(self.fc2(x), dim=1)
+        x = self.fc1(x)
+        x = self.fc2(x)
+        x = self.fc3(x)
         return x
 
     # 預測方法
@@ -88,8 +88,9 @@ class Net(nn.Module):
         x = tensor2d([id9_numbers])
         with torch.no_grad():
             output = self.forward(x)
-            _, predicted = torch.max(output.data, 1)
-            return predicted.item()
+            # _, predicted = torch.max(output.data, 1)
+            #return predicted.item()
+            return output
 
     def get_gradient(self):
         # param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
@@ -120,6 +121,13 @@ def draw_grads(grads_list, param_mapping):
 def train(model, data_loader, optimizer, epochs):
     # writer = SummaryWriter(log_dir='./logs')
     grads_list = []
+
+    model_file = 'models/best_model.pth'
+    if os.path.exists(model_file):
+        model.load_state_dict(torch.load(model_file))
+
+    best_loss = float('inf')
+    best_state_dict = model.state_dict()
     for epoch in range(epochs):
         running_loss = 0.0
         for i, data in enumerate(data_loader, 0):
@@ -127,29 +135,34 @@ def train(model, data_loader, optimizer, epochs):
             optimizer.zero_grad()
 
             outputs = model(inputs)
+            labels = labels.view(-1, 1).float()
             loss = model.criterion(outputs, labels)
             loss.backward()
             optimizer.step()
 
             running_loss += loss.item()
 
-        print('[%d] loss: %.3f' % (epoch + 1, running_loss))
+        epoch_loss = running_loss / len(train_loader)
+        if epoch_loss < best_loss:
+            best_loss = epoch_loss
+            torch.save(model.state_dict(), model_file)
+        print('[%d] loss: %.5f %.5f' % (epoch + 1, running_loss, best_loss))
 
         # 將梯度圖像寫入 TensorBoard
-        grads = model.get_gradient()
-        grads_list.append((epoch, grads))
+        # grads = model.get_gradient()
+        # grads_list.append((epoch, grads))
 
     # writer.close()
-    draw_grads(grads_list, model.param_mapping)
+    # draw_grads(grads_list, model.param_mapping)
     plt.show()
 
 
 if __name__ == '__main__':
     # 實例化模型
     model = Net()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.4)
 
-    train(model, train_loader, optimizer, epochs=300)
+    train(model, train_loader, optimizer, epochs=100)
 
     id = generate_random_id()
     output = model.predict(id)
