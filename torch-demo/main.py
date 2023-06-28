@@ -160,9 +160,9 @@ def train(model, data_loader, optimizer, epochs):
 if __name__ == '__main__':
     # 實例化模型
     model = Net()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.4)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.8)
 
-    train(model, train_loader, optimizer, epochs=100)
+    train(model, train_loader, optimizer, epochs=500)
 
     id = generate_random_id()
     output = model.predict(id)
