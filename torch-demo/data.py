@@ -18,7 +18,7 @@ def tensor2d(inputs: list[list[int]], data_type=np.float32) -> torch.Tensor:
 class MyDataset(Dataset):
     def __init__(self):
         self.samples = []
-        for n in range(500000):
+        for n in range(50000):
             id_str, train_id9, check_code = generate_random_id_for_train()
             self.samples.append((train_id9, check_code))
 
@@ -31,7 +31,7 @@ class MyDataset(Dataset):
 
 
 dataset = MyDataset()
-train_loader = DataLoader(dataset, batch_size=500000, shuffle=True)
+train_loader = DataLoader(dataset, batch_size=50000, shuffle=True)
 
 
 

@@ -3,7 +3,8 @@ import string
 
 def generate_id9() -> str:
     first_char = random.choice(string.ascii_uppercase)
-    second_num = random.randint(1, 2)
+    # second_num = random.randint(1, 2)
+    second_num = random.choice(string.digits)
     nums = ''.join(random.choice(string.digits) for _ in range(7))
     id9 = f"{first_char}{second_num}{nums}"
     return id9
