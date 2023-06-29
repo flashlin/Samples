@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Deep Learning Model</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@latest"></script>
+    <script src="./utils.js"></script>
+  </head>
+
+  <body>
+    <div>
+      <div id="output"></div>
+      <div id="loss-canvas"></div>
+      <div id="grad-canvas"></div>
+    </div>
+    <button onclick="train()">Train</button>
+    <button onclick="draw()">Draw 3D Gradient</button>
+
+    <script>
+      let model;
+      let grads = [];
+
+      async function createModel() {
+        model = tf.sequential();
+        model.add(
+          tf.layers.dense({ inputShape: [9], units: 9, activation: "relu" })
+        );
+        for (let i = 0; i < 5; i++) {
+          model.add(tf.layers.dense({ units: 128, activation: "relu" }));
+        }
+        //model.add(tf.layers.dense({ units: 1, activation: 'linear' }));
+        model.add(tf.layers.dense({ units: 10, activation: "softmax" }));
+        const optimizer = tf.train.adam();
+        //model.compile({ optimizer: optimizer, loss: 'meanSquaredError' });
+        model.compile({
+          optimizer: optimizer,
+          loss: "categoricalCrossentropy",
+          metrics: ["accuracy"],
+        });
+      }
+
+      let gradientsOverTime = [];
+      const customCallback = new tf.CustomCallback({
+        onBatchEnd: async (batch, logs) => {
+          const gradsFunction = tf.grads((inputBatch) => {
+            return model.predict(inputBatch);
+          });
+
+          const gradients = gradsFunction([tf.tensor2d(xTrain)]);
+          gradientsOverTime.push(gradients.map((g) => g.dataSync()));
+          gradients.forEach((g) => g.dispose());
+        },
+      });
+
+      async function train() {
+        await createModel();
+        const [xTrain, yTrain] = generateTrainData(2);
+        const surface = { name: "Loss", tab: "Training" };
+        const metrics = ["loss"];
+
+        const lossContainer = document.getElementById("loss-canvas");
+        const history = [];
+
+        const xTrainTensor = tf.tensor2d(xTrain);
+        const yTrainTensor = tf.tensor1d(yTrain, "int32");
+        const numClasses = 10;
+        const labelsTensor = tf.oneHot(yTrainTensor, numClasses);
+        for (let i = 0; i < 1; i++) {
+          const response = await model.fit(xTrainTensor, labelsTensor, {
+            epochs: 10,
+            batchSize: 1,
+            shuffle: false,
+            callbacks: {
+              onEpochEnd: (epoch, logs) => {
+                history.push(logs.loss);
+                const gradsFunction = tf.grads((inputBatch) => {
+                  return model.predict(inputBatch);
+                });
+                const gradients = gradsFunction(xTrainTensor);
+                gradientsOverTime.push(gradients.map((g) => g.dataSync()));
+
+                //grads.push(computeGradients(model, xTrainTensor, labelsTensor));
+                tfvis.render.linechart(
+                  surface,
+                  { values: history, series: ["loss"] },
+                  { values: gradientsOverTime, series: ["gradientsOverTime"] },
+                  {
+                    xLabel: "Iterations",
+                    yLabel: "Loss",
+                    width: 400,
+                    height: 300,
+                  },
+                  lossContainer
+                );
+              },
+            },
+          });
+        }
+        await model.save("localstorage://my-model");
+      }
+
+      function predict(inputs) {
+        const output = model.predict(tf.tensor(inputs));
+        return output.dataSync();
+      }
+
+      function draw() {
+        const gradContainer = document.getElementById("grad-canvas");
+        tfvis.render.barchart(
+          { name: "Gradients", tab: "Gradients" },
+          grads,
+          {},
+          gradContainer
+        );
+      }
+
+      function generateDummyData(numSamples) {
+        const xs = tf.randomNormal([numSamples, 9]);
+        const ys = tf.randomUniform([numSamples, 1], 0, 9);
+        return [xs, ys];
+      }
+
+      function computeGradients(model, inputs, labels) {
+        const grads = tf.grad((model) => model.predict(inputs));
+        return grads(model);
+      }
+
+      /*
+        function computeGradients(model, inputs, labels) {
+            const weights = model.trainableWeights;
+            const dummyOptimizer = tf.train.sgd(1.0);
+            return tf.tidy(() => {
+                const lossFunc = () => {
+                    const predictions = model.apply(inputs, { training: true });
+                    return tf.losses.softmaxCrossEntropy(labels, predictions);
+                };
+        
+                return dummyOptimizer.computeGradients(lossFunc, weights).grads;
+            });
+        }*/
+    </script>
+  </body>
+</html>
