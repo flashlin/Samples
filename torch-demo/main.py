@@ -63,6 +63,65 @@ class CnnLstmMlpNet(nn.Module):
         return grads
 
 
+class SigmodNeuron(nn.Module):
+    def __init__(self, dim):
+        super(SigmodNeuron, self).__init__()
+        self.linear = nn.Linear(dim, 1, bias=False)
+        self.activation = nn.Sigmoid()
+
+    def forward(self, x):
+        output = self.linear(x)
+        output = self.activation(output)
+        output = output * 10
+        output = torch.floor(output)
+        return output
+    
+    
+class IntegerWeightInit:
+    def __call__(self, tensor):
+        return nn.init.uniform_(tensor, -1, 1).round()
+
+class IntegerLinear(nn.Module):
+    def __init__(self, in_features, out_features, bias=False):
+        super(IntegerLinear, self).__init__()
+        self.linear = nn.Linear(in_features, out_features, bias=bias)
+        self.init = IntegerWeightInit()
+
+    def forward(self, x):
+        weight = self.linear.weight
+        weight = self.init(weight)
+        output = self.linear(x)
+        return output    
+
+
+class RestrictedNeuron(nn.Module):
+    def __init__(self):
+        super(RestrictedNeuron, self).__init__()
+        self.linear = IntegerLinear(9, 1, bias=False)
+
+    def forward(self, x):
+        second_element = x[:, 1]  # 提取第二個元素
+        mask = ((second_element != 1) & (second_element != 2)).unsqueeze(1).float()  # 創建遮罩
+        output = self.linear(x)
+        output = output + mask * 1e9  # 將損失增加到非常大的值
+        return output
+
+
+def create_mlp_layers(input_dim, kernels, output_dim):
+    layers = []
+    prev_dim = input_dim
+    for i, dim in enumerate(kernels):
+        layers.append(nn.Linear(prev_dim, dim))
+        prev_dim = dim
+    layers.append(nn.Linear(prev_dim, output_dim))
+    return nn.Sequential(*layers)
+
+def execute_mlp_layers(layers, x):
+    for i, layer in enumerate(layers):
+        x = layer(x)
+        if i < len(layers) - 1:
+            x = torch.relu(x)
+    return x
 
 # 定義模型
 class Net(nn.Module):
@@ -70,15 +129,13 @@ class Net(nn.Module):
         super(Net, self).__init__()
         # self.criterion = nn.CrossEntropyLoss()
         self.criterion = nn.MSELoss()
-        self.fc1 = nn.Linear(9, 10)
-        self.fc2 = nn.Linear(10, 3)
-        self.fc3 = nn.Linear(3, 1)
+        self.fc1 = IntegerLinear(9, 1, bias=False)
+        self.sigmod = SigmodNeuron(1)
         self.param_mapping = {name: i for i, name in enumerate(self.state_dict().keys())}
 
     def forward(self, x):
         x = self.fc1(x)
-        x = self.fc2(x)
-        x = self.fc3(x)
+        x = self.sigmod(x)
         return x
 
     # 預測方法
@@ -160,9 +217,9 @@ def train(model, data_loader, optimizer, epochs):
 if __name__ == '__main__':
     # 實例化模型
     model = Net()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.8)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 
-    train(model, train_loader, optimizer, epochs=500)
+    train(model, train_loader, optimizer, epochs=300)
 
     id = generate_random_id()
     output = model.predict(id)
