@@ -59,6 +59,15 @@ interface Position {
     y: number;
 }
 
+//是否垂直
+function isPerpendicular(line: ILine, pos: Position) {
+    const slope1 = (line.y2 - line.y1) / (line.x2 - line.x1);
+    const slope2 = (pos.y - line.y1) / (pos.x - line.x1);
+    const product = slope1 * slope2;
+    const tolerance = 1e-10;
+    return Math.abs(product + 1) < tolerance;
+}
+
 function computeCoefficients(line: ILine) {
     const x1 = line.x1;
     const y1 = line.y1;
