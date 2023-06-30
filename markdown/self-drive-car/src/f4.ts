@@ -59,6 +59,24 @@ interface Position {
     y: number;
 }
 
+function computeCoefficients(line: ILine) {
+    const x1 = line.x1;
+    const y1 = line.y1;
+    const x2 = line.x2;
+    const y2 = line.y2;
+    const slope = (y2 - y1) / (x2 - x1);
+    let a, b, c;
+    if (isFinite(slope)) {
+        a = -slope;
+        b = 1;
+    } else {
+        a = 1;
+        b = 0;
+    }
+    c = -(a * x1 + b * y1);
+    return { a, b, c };
+}
+
 function angleInRange(startAngle: number, endAngle: number, angle: number) {
     if (startAngle <= endAngle) {
         return angle >= startAngle && angle <= endAngle;
