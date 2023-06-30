@@ -93,37 +93,72 @@ function angleInRange(startAngle: number, endAngle: number, angle: number) {
     return angle >= startAngle || angle <= endAngle;
 }
 
-function computeIntersectXY(arc: IArc, line: ILine): Position | null {
-    const v1x = line.x1 - arc.x;
-    const v1y = line.y1 - arc.y;
+function computeIntersectXY(arc: IArc, line: ILine): Position[] {
+    let x1 = line.x1;
+    let y1 = line.y1;
+    let x2 = line.x2;
+    let y2 = line.y2;
+    let cx = arc.x;
+    let cy = arc.y;
+    let r = arc.radius;
 
-    const v2x = line.x2 - arc.x;
-    const v2y = line.y2 - arc.y;
+    // Move the line segment's start point to the origin and
+    // adjust the end point accordingly
+    x2 -= x1;
+    y2 -= y1;
+    cx -= x1;
+    cy -= y1;
 
-    const vx = line.x2 - line.x1;
-    const vy = line.y2 - line.y1;
+    // Calculate the coefficients for the quadratic equation
+    let a = x2 * x2 + y2 * y2;
+    let b = 2 * (x2 * cx + y2 * cy);
+    let c = cx * cx + cy * cy - r * r;
 
-    //計算圓心到線段起點
-    const d1 = Math.sqrt(v1x * v1x + v1y * v1y);
-    const d2 = Math.sqrt(v2x * v2x + v2y * v2y);
-    //const lineLength = Math.sqrt(vx * vx + vy * vy);
-    //console.log(`d1=${d1} d2=${d2} dis=${distance} dirus=${arc.radius}`);
-    if (d1 < arc.radius && d2 < arc.radius) {
-        console.log(`no1`)
-        return null;
+    // Calculate the discriminant
+    let disc = b * b - 4 * a * c;
+
+    if (disc < 0) {
+        return [];
     }
 
-    const lineAngle = Math.atan2(v1x, v1y);
-    console.log(`startAngle = ${arc.startAngle} ${arc.endAngle} ${lineAngle}`);
-    if (angleInRange(arc.startAngle, arc.endAngle, lineAngle)) {
-        const t = d1 / (d1 + d2);
-        const intersectX = line.x1 + t * vx;
-        const intersectY = line.y1 + t * vy;
-        return { x: intersectX, y: intersectY };
+    // Calculate the two solutions for t using the quadratic formula
+    // (x1, y1) 是線段的起始點，(x2, y2) 是線段的終點，而 t 是一個在 0 到 1 之間的實數。
+    // 當 t = 0 時，我們得到起始點 (x1, y1)，當 t = 1 時，我們得到終點 (x2, y2)，
+    // 而當 t 在 0 和 1 之間時，我們得到線段上的某一點。
+    let sqrtDisc = Math.sqrt(disc);
+    let t1 = (-b - sqrtDisc) / (2 * a);
+    let t2 = (-b + sqrtDisc) / (2 * a);
+
+    console.log(`t1=${t1} t2=${t2}`)
+
+    // Points of intersection P1 and P2
+    let points = [];
+
+    // Check if the first solution is within the line segment
+    if (t1 >= 0 && t1 <= 1) {
+        let px = x1 + t1 * x2;
+        let py = y1 + t1 * y2;
+        let angle = Math.atan2(py - arc.y, px - arc.x);
+        if (angle < 0) angle += 2 * Math.PI;  // ensure the angle is between 0 and 2PI
+
+        if (angle >= arc.startAngle && angle <= arc.endAngle) {
+            points.push({ x: px, y: py });
+        }
     }
 
-    console.log(`no2`)
-    return null;
+    // Check if the second solution is within the line segment
+    if (t2 >= 0 && t2 <= 1) {
+        let px = x1 + t2 * x2;
+        let py = y1 + t2 * y2;
+        let angle = Math.atan2(py - arc.y, px - arc.x);
+        if (angle < 0) angle += 2 * Math.PI;  // ensure the angle is between 0 and 2PI
+
+        if (angle >= arc.startAngle && angle <= arc.endAngle) {
+            points.push({ x: px, y: py });
+        }
+    }
+
+    return points;
 }
 
 class Point {
@@ -306,6 +341,8 @@ class RoadMap {
     pos: Position;
     roads: IRoad[][] = create2dArray<IRoad>(10, 10);
 
+    _line: ILine;
+
     constructor(pos: Position = { x: 0, y: 0 }) {
         this.pos = pos;
         const curve = new LeftTopCurve()
@@ -314,13 +351,10 @@ class RoadMap {
         this.roads[1][0] = new HorizontalRoad();
 
         const arc = curve.getArc();
-        const line = { x1: 0, y1: 0, x2: 100, y2: 100 };
+        const line = { x1: 10, y1: 10, x2: 100, y2: 100 };
         const rc = computeIntersectXY(arc, line);
-        if (rc == null) {
-            console.log('no!!');
-        } else {
-            console.log(`rc = ${rc.x} ${rc.y}`);
-        }
+        console.log('no!!', rc);
+        this._line = line;
     }
 
     render(ctx: CanvasRenderingContext2D) {
@@ -338,7 +372,8 @@ class RoadMap {
             }
         }
 
-        const l = new Line({ x1: 0, y1: 0, x2: 100, y2: 100 });
+        const l = new Line(this._line);
+        l.color = "yellow";
         l.render(ctx);
     }
 }
