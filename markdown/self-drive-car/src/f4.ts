@@ -17,6 +17,26 @@ type IArc = {
     endAngle: number
 };
 
+function getArcStartAngleXY(arc: IArc) {
+    const pos = { x: arc.x, y: arc.y };
+    const radius = roadWidth - roadMargin;
+    const startAngle = Math.PI;
+    return {
+        x: pos.x + radius * Math.cos(startAngle),
+        y: pos.y + radius * Math.sin(startAngle)
+    };
+}
+
+function getArcEndAngleXY(arc: IArc) {
+    const pos = { x: arc.x, y: arc.y };
+    const radius = roadWidth - roadMargin;
+    const endAngle = 1.5 * Math.PI;
+    return {
+        x: pos.x + radius * Math.cos(endAngle),
+        y: pos.y + radius * Math.sin(endAngle),
+    };
+}
+
 type ILine = {
     x1: number,
     y1: number,
@@ -39,41 +59,61 @@ interface Position {
     y: number;
 }
 
+function angleInRange(startAngle: number, endAngle: number, angle: number) {
+    if (startAngle <= endAngle) {
+        return angle >= startAngle && angle <= endAngle;
+    }
+    return angle >= startAngle || angle <= endAngle;
+}
+
 function computeIntersectXY(arc: IArc, line: ILine): Position | null {
-    // Line's equations
-    const m = (line.y2 - line.y1) / (line.x2 - line.x1); // slope
-    const b = line.y1 - m * line.x1; // y-intercept
+    const v1x = line.x1 - arc.x;
+    const v1y = line.y1 - arc.y;
 
-    const A = 1 + m * m;
-    const B = -2 * arc.x + 2 * b * m - 2 * arc.y * m;
-    const C = arc.x * arc.x + b * b - 2 * arc.y * b + arc.y * arc.y - arc.radius * arc.radius;
+    const v2x = line.x2 - arc.x;
+    const v2y = line.y2 - arc.y;
 
-    // Solve quadratic equation for x
-    const det = B * B - 4 * A * C;
+    const vx = line.x2 - line.x1;
+    const vy = line.y2 - line.y1;
 
-    if (det < 0) {
-        return null; // no solution
+    //計算圓心到線段起點
+    const d1 = Math.sqrt(v1x * v1x + v1y * v1y);
+    const d2 = Math.sqrt(v2x * v2x + v2y * v2y);
+    //const lineLength = Math.sqrt(vx * vx + vy * vy);
+    //console.log(`d1=${d1} d2=${d2} dis=${distance} dirus=${arc.radius}`);
+    if (d1 < arc.radius && d2 < arc.radius) {
+        console.log(`no1`)
+        return null;
     }
 
-    const x1 = (-B + Math.sqrt(det)) / (2 * A);
-    const x2 = (-B - Math.sqrt(det)) / (2 * A);
-
-    // Calculate corresponding y values
-    const y1 = m * x1 + b;
-    const y2 = m * x2 + b;
-
-    // Check if intersection points are within line segment and the arc
-    const intersections = [{ x: x1, y: y1 }, { x: x2, y: y2 }];
-
-    for (let point of intersections) {
-        const angle = Math.atan2(point.y - arc.y, point.x - arc.x);
-        if (point.x >= Math.min(line.x1, line.x2) && point.x <= Math.max(line.x1, line.x2) &&
-            angle >= arc.startAngle && angle <= arc.endAngle) {
-            return point;
-        }
+    const lineAngle = Math.atan2(v1x, v1y);
+    console.log(`startAngle = ${arc.startAngle} ${arc.endAngle} ${lineAngle}`);
+    if (angleInRange(arc.startAngle, arc.endAngle, lineAngle)) {
+        const t = d1 / (d1 + d2);
+        const intersectX = line.x1 + t * vx;
+        const intersectY = line.y1 + t * vy;
+        return { x: intersectX, y: intersectY };
     }
 
+    console.log(`no2`)
     return null;
+}
+
+class Point {
+    pos: Position;
+    color: string = "blue";
+
+    constructor(pos: Position) {
+        this.pos = pos;
+    }
+    render(ctx: CanvasRenderingContext2D) {
+        const pos = this.pos;
+        ctx.fillStyle = this.color;
+        ctx.lineWidth = 7;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, ctx.lineWidth / 2, 0, 2 * Math.PI);
+        ctx.fill();
+    }
 }
 
 interface IRoad {
@@ -127,9 +167,11 @@ class HorizontalRoad implements IRoad {
 
 class LeftTopCurve implements IRoad {
     pos: Position;
+    center: Point;
 
     constructor(pos: Position = { x: 0, y: 0 }) {
         this.pos = pos;
+        this.center = new Point(pos);
     }
 
     render(ctx: CanvasRenderingContext2D) {
@@ -148,6 +190,49 @@ class LeftTopCurve implements IRoad {
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
+
+
+        const p1 = new Point({ x: pos.x, y: pos.y });
+        p1.render(ctx);
+
+        const p2 = new Point(this.getStartAngleXY());
+        p2.color = "yellow";
+        p2.render(ctx);
+        const p3 = new Point(this.getEndAngleXY());
+        p3.color = "yellow";
+        p3.render(ctx);
+
+
+        const line = new Line({
+            x1: pos.x, y1: pos.y,
+            x2: pos.x + roadMargin - roadMargin, y2: pos.y - roadWidth
+        });
+        line.color = "yellow";
+        //line.render(ctx);
+
+        this.center.pos.x += roadLength;
+        this.center.pos.y += roadWidth;
+        //this.center.render(ctx);
+    }
+
+    getStartAngleXY() {
+        const pos = this.pos;
+        const radius = roadWidth - roadMargin;
+        const startAngle = Math.PI;
+        return {
+            x: pos.x + radius * Math.cos(startAngle),
+            y: pos.y + radius * Math.sin(startAngle)
+        };
+    }
+
+    getEndAngleXY() {
+        const pos = this.pos;
+        const radius = roadWidth - roadMargin;
+        const endAngle = 1.5 * Math.PI;
+        return {
+            x: pos.x + radius * Math.cos(endAngle),
+            y: pos.y + radius * Math.sin(endAngle),
+        };
     }
 
     getArc(): IArc {
@@ -174,6 +259,8 @@ function create2dArray<T>(width: number, height: number): T[][] {
 
 class Line {
     line: ILine;
+    color: string = roadColor;
+
     constructor(line: ILine) {
         this.line = line;
     }
@@ -183,7 +270,7 @@ class Line {
         ctx.moveTo(line.x1, line.y1);
         ctx.lineTo(line.x2, line.y2);
         ctx.lineWidth = 7;
-        ctx.strokeStyle = roadColor;  // 線條顏色
+        ctx.strokeStyle = this.color;
         ctx.stroke();
     }
 }
