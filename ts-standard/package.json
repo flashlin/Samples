@@ -1,13 +1,14 @@
 {
-  "name": "ts-standard",
+  "name": "ts-nightly",
   "version": "1.0.0",
-  "description": "",
+  "description": "typescript common library",
   "main": "dist/index.js",
-  "author": "mr.brain",
-  "license": "ISC",
   "types": "dist/index.d.ts",
+  "author": "mr.brain",
+  "license": "MIT",
+  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "files": [
-    "lib"
+    "dist/**/*"
   ],
   "scripts": {
     "build": "tsc"
