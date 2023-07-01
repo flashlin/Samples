@@ -1,16 +1,17 @@
 
-
-* 註冊npm 帳號
-https://www.npmjs.com/signup
+```
+@MockMethod(true, {"name": "Mr.Brain", "email": "<EMAIL>"})
+export function getUser() {
+    return {
+        "name": "Mr.Jack",
+        "email": "<EMAIL>"
+    }
+}
+```
 
 ```
-npm set init.author.name "Mr.Brain"
-npm set init.author.email "MrBrain.Elegance@gmail.com"
+const api = new WebApi();
+export function getUser() {
+    return api.postAsync('url', data);
+}
 ```
-
-* in local folder,
-> npm adduser
-
-* deploy to npm
-> npm login
-> npm publish --access public
