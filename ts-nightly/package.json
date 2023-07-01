@@ -1,17 +1,19 @@
 {
   "name": "ts-nightly",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "typescript common library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": "mr.brain",
   "license": "MIT",
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
+  "publishConfig": { "registry": "https://registry.npmjs.org/" },
   "files": [
     "dist/**/*"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "deploy": "npm publish --access public",
+    "un": "npm unpublish ts-nightly@1.0.0"
   },
   "devDependencies": {
     "@microsoft/signalr": "^5.0.8",
