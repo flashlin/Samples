@@ -46,7 +46,8 @@ function InvokeConda {
 if ( "" -eq $action ) {
     InvokeConda "env list"
     Write-Host "                      : env list"
-    Write-Host "c1                    : use flash environment"
+    Write-Host "c0 / c1               : use flash environment"
+    Write-Host "t                     : use torch environment"
     Write-Host "use <name>            : use name environment"
     Write-Host "n <name> [python-ver] : create name environment 3.9"
     Write-Host "c <name>              : switch to name environment"
@@ -68,29 +69,34 @@ if ( "use" -eq $action ) {
     return
 }
 
-if( "n" -eq $action ) {
+if ( "n" -eq $action ) {
     $name = $args0
     $pythonVer = $args1
-    if( "" -eq $pythonVer ) {
+    if ( "" -eq $pythonVer ) {
         $pythonVer = "3.9"
     }
     InvokeConda "create -n ${name} python=${pythonVer}"
     return
 }
 
-if( "c" -eq $action ) {
+if ( "c" -eq $action ) {
     $name = $args0
     InvokeConda "activate $name"
     return
 }
 
-if( "i" -eq $action ) {
+if ( "i" -eq $action ) {
     InvokeConda "install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia"
     return
 }
 
-if( "rm" -eq $action ) {
+if ( "rm" -eq $action ) {
     $name = $args0
     InvokeConda "env remove -n $name"
+    return
+}
+
+if ( "t" -eq $action ) {
+    InvokeConda "activate torch"
     return
 }
