@@ -23,9 +23,7 @@ print(f'{docs=}')
 question = "how to create vue3 app?"
 
 # 使用 BERT 模型獲取嵌入向量
-#inputs = tokenizer(question, docs, truncation=True, padding=True, return_tensors='pt')
 inputs = tokenizer(question, truncation=True, padding=True, return_tensors='pt')
-#tokens = tokenizer(docs, truncation=True, padding=True, return_tensors='pt')
 outputs = model(**inputs)
 
 # 從模型輸出中獲取答案
