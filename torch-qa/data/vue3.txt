@@ -1,0 +1,26 @@
+不管是 2.x 的 new Vue({...}) ，或是 3.0 的 createApp({...})，
+一開始我們都需要先建立一個 Vue 的物件實體，並且將這個物件指定至某個變數，
+如範例裡的 vm 之中。
+
+```
+// Vue 2.x 
+const vm = new Vue({ 
+  data: { 
+    message: 'Hello Vue 2.0!' 
+  }
+}); 
+// 透過 $mount 掛載至指定的網頁節點 
+vm.$mount('#app');
+```
+
+```
+// Vue 3.0 
+const vm = Vue.createApp({ 
+  data() { 
+    return { 
+      message: "Hello Vue 3.0!" 
+    } 
+  } 
+}); 
+vm.mount('#app');
+```
