@@ -17,15 +17,12 @@ test('line', () => {
 describe('line intersection tests', () => {
   test.each([
     // a1, a2, b1, b2, expectedIntersection
-    [
-      { x: -6, y: 0 }, { x: 0, y: 3 }, { x: -1, y: 4 }, { x: 1, y: 2 }, { x: 0, y: 3 }
-    ],
-    [
-      { x: -6, y: 0 }, { x: 0, y: 3 }, { x: -1, y: 4 }, { x: 1, y: 2 }, { x: 0, y: 3 }
-    ],
-  ])('given lines %p-%p and %p-%p, expect intersection at %p',
+    [{ x: -6, y: 0 }, { x: 0, y: 3 }, { x: -1, y: 4 }, { x: 1, y: 2 }, [{ x: 0, y: 3 }]],
+    [{ x: -1, y: 4 }, { x: -5, y: 0 }, { x: 0, y: 3 }, { x: -6, y: 0 }, [{ x: -4, y: 1 }]],
+    [{ x: -1, y: 4 }, { x: -3, y: 2 }, { x: 0, y: 3 }, { x: -6, y: 0 }, []],
+  ])('given lines %p-%p and %p-%p',
     (a1, a2, b1, b2, expectedIntersection) => {
       const intersectionPoints = findIntersection(a1, a2, b1, b2);
-      expect(intersectionPoints).toStrictEqual([expectedIntersection]);
+      expect(intersectionPoints).toStrictEqual(expectedIntersection);
     });
 });
