@@ -4,6 +4,7 @@ import torch
 torch.hub.set_dir('models')
 
 model_name = 't5-3b'  # 't5-11b' #'t5-base'
+model_name = 'google/flan-t5-xxl'
 model = T5ForConditionalGeneration.from_pretrained(model_name)
 tokenizer = T5Tokenizer.from_pretrained(model_name, model_max_length=1024)
 
