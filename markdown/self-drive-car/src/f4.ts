@@ -9,13 +9,7 @@ const roadColor = 'red';
 const roadMargin = 22;
 
 
-type IArc = {
-    x: number,
-    y: number,
-    radius: number,
-    startAngle: number,
-    endAngle: number
-};
+
 
 function getArcStartAngleXY(arc: IArc) {
     const pos = { x: arc.x, y: arc.y };
@@ -36,13 +30,6 @@ function getArcEndAngleXY(arc: IArc) {
         y: pos.y + radius * Math.sin(endAngle),
     };
 }
-
-type ILine = {
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number
-};
 
 enum RoadType {
     Vertical,
@@ -93,73 +80,72 @@ function angleInRange(startAngle: number, endAngle: number, angle: number) {
     return angle >= startAngle || angle <= endAngle;
 }
 
-function computeIntersectXY(arc: IArc, line: ILine): Position[] {
-    let x1 = line.x1;
-    let y1 = line.y1;
-    let x2 = line.x2;
-    let y2 = line.y2;
-    let cx = arc.x;
-    let cy = arc.y;
-    let r = arc.radius;
 
-    // Move the line segment's start point to the origin and
-    // adjust the end point accordingly
-    x2 -= x1;
-    y2 -= y1;
-    cx -= x1;
-    cy -= y1;
 
-    // Calculate the coefficients for the quadratic equation
-    let a = x2 * x2 + y2 * y2;
-    let b = 2 * (x2 * cx + y2 * cy);
-    let c = cx * cx + cy * cy - r * r;
-
-    // Calculate the discriminant
-    let disc = b * b - 4 * a * c;
-
-    if (disc < 0) {
+function getIntersectionPoints(line: ILine, arc: IArc) {
+    // Check if the line and the arc will definitely not intersect.
+    if (!lineIntersectsArc(line, arc)) {
         return [];
     }
 
-    // Calculate the two solutions for t using the quadratic formula
-    // (x1, y1) 是線段的起始點，(x2, y2) 是線段的終點，而 t 是一個在 0 到 1 之間的實數。
-    // 當 t = 0 時，我們得到起始點 (x1, y1)，當 t = 1 時，我們得到終點 (x2, y2)，
-    // 而當 t 在 0 和 1 之間時，我們得到線段上的某一點。
-    let sqrtDisc = Math.sqrt(disc);
-    let t1 = (-b - sqrtDisc) / (2 * a);
-    let t2 = (-b + sqrtDisc) / (2 * a);
-
-    console.log(`t1=${t1} t2=${t2}`)
-
-    // Points of intersection P1 and P2
-    let points = [];
-
-    // Check if the first solution is within the line segment
-    if (t1 >= 0 && t1 <= 1) {
-        let px = x1 + t1 * x2;
-        let py = y1 + t1 * y2;
-        let angle = Math.atan2(py - arc.y, px - arc.x);
-        if (angle < 0) angle += 2 * Math.PI;  // ensure the angle is between 0 and 2PI
-
-        if (angle >= arc.startAngle && angle <= arc.endAngle) {
-            points.push({ x: px, y: py });
-        }
+    // Check if either (x1, y1) or (x2, y2) of the line lies within the radius of the arc.
+    var intersectionPoints = [];
+    if (isPointWithinArc({ x: line.x1, y: line.y1 }, arc)) {
+        intersectionPoints.push(line.x1);
+    } else if (isPointWithinArc({ x: line.y1, y: line.x2 }, arc)) {
+        intersectionPoints.push(line.y1);
     }
 
-    // Check if the second solution is within the line segment
-    if (t2 >= 0 && t2 <= 1) {
-        let px = x1 + t2 * x2;
-        let py = y1 + t2 * y2;
-        let angle = Math.atan2(py - arc.y, px - arc.x);
-        if (angle < 0) angle += 2 * Math.PI;  // ensure the angle is between 0 and 2PI
-
-        if (angle >= arc.startAngle && angle <= arc.endAngle) {
-            points.push({ x: px, y: py });
-        }
+    // For the remaining cases, where neither point of the line lies inside the arc,
+    // we can proceed with calculating the two intersection points.
+    if (intersectionPoints.length === 0) {
+        intersectionPoints = getIntersectionPointsBetweenLineAndArc(line, arc);
     }
 
-    return points;
+    return intersectionPoints;
 }
+
+function lineIntersectsArc(line: ILine, arc: IArc) {
+    // Calculate the distance between the center of the arc and the line.
+    var distance = Math.sqrt((line.x1 - arc.x) ** 2 + (line.y1 - arc.y) ** 2);
+
+    // If the distance is less than or equal to the radius, then the line intersects the arc.
+    return distance <= arc.radius;
+}
+
+function isPointWithinArc(point: Position, arc: IArc) {
+    // Calculate the distance between the point and the center of the arc.
+    var distance = Math.sqrt((point.x - arc.x) ** 2 + (point.y - arc.y) ** 2);
+    // If the distance is less than or equal to the radius, then the point is within the arc.
+    return distance <= arc.radius;
+}
+
+function getIntersectionPointsBetweenLineAndArc(line: ILine, arc: IArc) {
+    // Calculate the equation of the line.
+    var lineEquation = "y = mx + b";
+    var m = (line.y1 - line.x1) / (line.x2 - line.x1);
+    var b = line.y1 - m * line.x1;
+
+    // Calculate the intersection points of the line and the arc.
+    var intersectionPoints = [];
+    var t = (arc.startAngle + arc.endAngle) / 2;
+    var x = arc.x + arc.radius * Math.cos(t);
+    var y = arc.y + arc.radius * Math.sin(t);
+    intersectionPoints.push([x, y]);
+
+    t = (arc.startAngle + arc.endAngle) - t;
+    x = arc.x + arc.radius * Math.cos(t);
+    y = arc.y + arc.radius * Math.sin(t);
+    intersectionPoints.push([x, y]);
+
+    return intersectionPoints;
+}
+
+
+
+
+
+
 
 class Point {
     pos: Position;
@@ -352,7 +338,7 @@ class RoadMap {
 
         const arc = curve.getArc();
         const line = { x1: 10, y1: 10, x2: 100, y2: 100 };
-        const rc = computeIntersectXY(arc, line);
+        const rc = getIntersectionPoints(line, arc);
         console.log('no!!', rc);
         this._line = line;
     }

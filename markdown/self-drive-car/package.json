@@ -3,19 +3,27 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
-  "scripts": {
-    "dev": "npx rollup -c rollup.config.js --watch",
-    "test": "jest"
-  },
   "author": "",
   "license": "ISC",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "scripts": {
+    "dev": "npx rollup -c rollup.config.js --watch",
+    "test": "jest",
+    "lo": "npm login --registry=https://registry.npmjs.org/",
+    "publish": "npm publish --access public"
+  },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
     "@rollup/plugin-image": "^3.0.2",
     "@rollup/plugin-typescript": "^11.1.1",
     "@types/jest": "^29.5.2",
+    "@types/numeric": "^1.2.2",
     "http-server": "^14.1.1",
     "jest": "^29.5.0",
+    "mathjs": "^11.8.2",
+    "numeric": "^1.2.6",
     "rollup": "^3.25.3",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-livereload": "^2.0.5",
