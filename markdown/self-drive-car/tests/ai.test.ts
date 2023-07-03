@@ -1,11 +1,10 @@
 import { IPoint, ILine, IArc, getLineSlope } from "@/math";
-import numeric from 'numeric';
 
 const line = {
   x1: -7,
   y1: -1,
-  x2: 6,
-  y2: -1,
+  x2: 1,
+  y2: 4,
 };
 
 const arc = {
@@ -22,6 +21,57 @@ const arc = {
 //   arcData.x.push(x);
 //   arcData.y.push(y);
 // }
+
+// 斜率
+// m = (y2-y1) / (x2-x1)
+// 點斜式
+// y - y1 = m(x - x1)
+// 將斜率方程式放入點斜式
+// y - y1 = (y2 - y1) / (x2 - x1) (x - x1)
+
+//x = x1 + r * cos(θ)
+//y = y1 + r * sin(θ)
+
+function circleEquation(x: number, y: number, r: number) {
+  return `(x - a)^2 + (y - b)^2 = r^2`
+}
+function linearEquation(x1: number, y1: number, x2: number, y2: number) {
+  const slope = (y2 - y1) / (x2 - x1); // 斜率
+  const intercept = y1 - slope * x1; // 截距
+  return `y = ${slope}x + ${intercept}`;
+}
+
+function solveEquations(circleEquation: string, linearEquation: string) {
+  // 解析圆方程式
+  const circleParts:any = circleEquation.match(/\((.+),\s(.+)\)\s=\s(.+)/);
+  const a = 0;
+  const b = 0;
+  const r = 5;
+
+  // 解析线性方程式
+  const linearParts: any = linearEquation.match(/y\s=\s(.+)x\s\+\s(.+)/);
+  const slope = parseFloat(linearParts[1]);
+  const intercept = parseFloat(linearParts[2]);
+
+  // 解方程式获取 x 和 y 的值
+  const x = (intercept - b + slope * a) / (1 + slope * slope);
+  const y = slope * x + intercept;
+
+  return { x, y };
+}
+
+// 调用函数解方程式
+const circleEq = circleEquation(2, 3, 5);
+const linearEq = linearEquation(1, 2, 3, 4);
+const solution = solveEquations(circleEq, linearEq);
+console.log(solution);
+
+
+
+
+
+
+
 
 function findIntersectionPoints(line: ILine, arc: IArc) {
   // y = m * x + b  直線方程
@@ -42,7 +92,6 @@ function findIntersectionPoints(line: ILine, arc: IArc) {
   const  y = -Math.sqrt(0 - (arc.x - x)**2 + arc.radius**2 + arc.y);
   // 
 
-  const t3 = (m * x + b)**2 - 2 * arc.y * (m * x + b) + arc.y ** 2;
 
 
   // 轉換角度到弧度
@@ -52,6 +101,5 @@ function findIntersectionPoints(line: ILine, arc: IArc) {
 }
 
 test('ai1', () => {
-  getIntersectionPoints();
   expect(1).toBe(1);
 });
