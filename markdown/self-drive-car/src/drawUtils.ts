@@ -1,3 +1,20 @@
+export type IPoint = {
+    x: number,
+    y: number,
+};
+
+export type IArc = {
+    pos: IPoint,
+    radius: number,
+    startAngle: number,
+    endAngle: number
+};
+
+export type ILine = {
+    start: IPoint,
+    end: IPoint,
+};
+
 export interface IDrawOptions {
     lineWidth: number,
     strokeSyle: string
@@ -8,8 +25,15 @@ export const DefaultDrawOptions: IDrawOptions = {
     strokeSyle: "red"
 }
 
-export function drawArc(ctx: CanvasRenderingContext2D, arc: IArc, 
-    options: IDrawOptions=DefaultDrawOptions) {
+export function isSamePoint(p1: IPoint, p2: IPoint): boolean {
+    if (p1.x == p2.x && p1.y == p2.y) {
+        return true;
+    }
+    return false;
+}
+
+export function drawArc(ctx: CanvasRenderingContext2D, arc: IArc,
+    options: IDrawOptions = DefaultDrawOptions) {
     ctx.beginPath();
     ctx.strokeStyle = options.strokeSyle;
     ctx.lineWidth = options.lineWidth;
@@ -25,3 +49,4 @@ export function drawArc(ctx: CanvasRenderingContext2D, arc: IArc,
     }
     ctx.stroke();
 }
+

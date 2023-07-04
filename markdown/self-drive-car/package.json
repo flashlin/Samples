@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "npx rollup -c rollup.config.js --watch",
-    "test": "jest",
+    "t": "jest",
     "lo": "npm login --registry=https://registry.npmjs.org/",
     "publish": "npm publish --access public"
   },

@@ -1,19 +1,4 @@
-export type IPoint = {
-  x: number,
-  y: number,
-};
-
-export type IArc = {
-  pos: IPoint,
-  radius: number,
-  startAngle: number,
-  endAngle: number
-};
-
-export type ILine = {
-  start: IPoint,
-  end: IPoint,
-};
+import { ILine, IPoint, isSamePoint } from "./drawUtils";
 
 /**
  * compute line slope
@@ -139,6 +124,16 @@ function findOverlap(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint): ILine | nu
   return { start: overlapStart, end: overlapEnd };
 }
 
+function objectAreEqual(obj1: any, obj2: any): boolean {
+  return JSON.stringify(obj1) === JSON.stringify(obj2);
+}
+
+function allElementsAreEqual(arr: any[]): boolean {
+  if (arr.length === 0) return true;
+  const firstElement = arr[0];
+  return arr.every(element => objectAreEqual(element, firstElement));
+}
+
 export function findIntersection(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint): IPoint[] {
   const denominator = (a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x);
 
@@ -146,8 +141,13 @@ export function findIntersection(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint)
   if (denominator === 0) {
     if (areOverlapping({ start: a1, end: a2 }, { start: b1, end: b2 })) {
       const line = findOverlap(a1, a2, b1, b2);
-      console.log(`over`, line)
-      return [];
+      if (line == null) {
+        return [];
+      }
+      if (!isSamePoint(line.start, line.end)) {
+        return [line.start, line.end];
+      }
+      return [line.start];
     }
     return [];
   }
@@ -155,7 +155,7 @@ export function findIntersection(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint)
   const t = ((a1.x - b1.x) * (b1.y - b2.y) - (a1.y - b1.y) * (b1.x - b2.x)) / denominator;
   const u = -((a1.x - a2.x) * (a1.y - b1.y) - (a1.y - a2.y) * (a1.x - b1.x)) / denominator;
 
-  // 如果 t 和 u 都在 0 和 1 之间，那么两条线段相交
+  // 如果 t 和 u 都在 0 和 1 之間，那麼兩條線段相交
   if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
     const intersectionPoint = {
       x: a1.x + t * (a2.x - a1.x),
