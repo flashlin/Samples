@@ -1,4 +1,5 @@
 import car1 from './assets/car1.png';
+import { ILine, IPosition } from './drawUtils';
 
 const carWidth = 75;
 const carHeight = 117;
@@ -7,29 +8,6 @@ const roadLength = 220;
 const roadWidth = 220;
 const roadColor = 'red';
 const roadMargin = 22;
-
-
-
-
-function getArcStartAngleXY(arc: IArc) {
-    const pos = { x: arc.x, y: arc.y };
-    const radius = roadWidth - roadMargin;
-    const startAngle = Math.PI;
-    return {
-        x: pos.x + radius * Math.cos(startAngle),
-        y: pos.y + radius * Math.sin(startAngle)
-    };
-}
-
-function getArcEndAngleXY(arc: IArc) {
-    const pos = { x: arc.x, y: arc.y };
-    const radius = roadWidth - roadMargin;
-    const endAngle = 1.5 * Math.PI;
-    return {
-        x: pos.x + radius * Math.cos(endAngle),
-        y: pos.y + radius * Math.sin(endAngle),
-    };
-}
 
 enum RoadType {
     Vertical,
@@ -41,149 +19,28 @@ enum RoadType {
 }
 
 
-interface Position {
-    x: number;
-    y: number;
-}
-
-//是否垂直
-function isPerpendicular(line: ILine, pos: Position) {
-    const slope1 = (line.y2 - line.y1) / (line.x2 - line.x1);
-    const slope2 = (pos.y - line.y1) / (pos.x - line.x1);
-    const product = slope1 * slope2;
-    const tolerance = 1e-10;
-    return Math.abs(product + 1) < tolerance;
-}
-
-function computeCoefficients(line: ILine) {
-    const x1 = line.x1;
-    const y1 = line.y1;
-    const x2 = line.x2;
-    const y2 = line.y2;
-    const slope = (y2 - y1) / (x2 - x1);
-    let a, b, c;
-    if (isFinite(slope)) {
-        a = -slope;
-        b = 1;
-    } else {
-        a = 1;
-        b = 0;
-    }
-    c = -(a * x1 + b * y1);
-    return { a, b, c };
-}
-
-function angleInRange(startAngle: number, endAngle: number, angle: number) {
-    if (startAngle <= endAngle) {
-        return angle >= startAngle && angle <= endAngle;
-    }
-    return angle >= startAngle || angle <= endAngle;
-}
-
-
-
-function getIntersectionPoints(line: ILine, arc: IArc) {
-    // Check if the line and the arc will definitely not intersect.
-    if (!lineIntersectsArc(line, arc)) {
-        return [];
-    }
-
-    // Check if either (x1, y1) or (x2, y2) of the line lies within the radius of the arc.
-    var intersectionPoints = [];
-    if (isPointWithinArc({ x: line.x1, y: line.y1 }, arc)) {
-        intersectionPoints.push(line.x1);
-    } else if (isPointWithinArc({ x: line.y1, y: line.x2 }, arc)) {
-        intersectionPoints.push(line.y1);
-    }
-
-    // For the remaining cases, where neither point of the line lies inside the arc,
-    // we can proceed with calculating the two intersection points.
-    if (intersectionPoints.length === 0) {
-        intersectionPoints = getIntersectionPointsBetweenLineAndArc(line, arc);
-    }
-
-    return intersectionPoints;
-}
-
-function lineIntersectsArc(line: ILine, arc: IArc) {
-    // Calculate the distance between the center of the arc and the line.
-    var distance = Math.sqrt((line.x1 - arc.x) ** 2 + (line.y1 - arc.y) ** 2);
-
-    // If the distance is less than or equal to the radius, then the line intersects the arc.
-    return distance <= arc.radius;
-}
-
-function isPointWithinArc(point: Position, arc: IArc) {
-    // Calculate the distance between the point and the center of the arc.
-    var distance = Math.sqrt((point.x - arc.x) ** 2 + (point.y - arc.y) ** 2);
-    // If the distance is less than or equal to the radius, then the point is within the arc.
-    return distance <= arc.radius;
-}
-
-function getIntersectionPointsBetweenLineAndArc(line: ILine, arc: IArc) {
-    // Calculate the equation of the line.
-    var lineEquation = "y = mx + b";
-    var m = (line.y1 - line.x1) / (line.x2 - line.x1);
-    var b = line.y1 - m * line.x1;
-
-    // Calculate the intersection points of the line and the arc.
-    var intersectionPoints = [];
-    var t = (arc.startAngle + arc.endAngle) / 2;
-    var x = arc.x + arc.radius * Math.cos(t);
-    var y = arc.y + arc.radius * Math.sin(t);
-    intersectionPoints.push([x, y]);
-
-    t = (arc.startAngle + arc.endAngle) - t;
-    x = arc.x + arc.radius * Math.cos(t);
-    y = arc.y + arc.radius * Math.sin(t);
-    intersectionPoints.push([x, y]);
-
-    return intersectionPoints;
-}
-
-
-
-
-
-
-
-class Point {
-    pos: Position;
-    color: string = "blue";
-
-    constructor(pos: Position) {
-        this.pos = pos;
-    }
-    render(ctx: CanvasRenderingContext2D) {
-        const pos = this.pos;
-        ctx.fillStyle = this.color;
-        ctx.lineWidth = 7;
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, ctx.lineWidth / 2, 0, 2 * Math.PI);
-        ctx.fill();
-    }
-}
 
 interface IRoad {
-    pos: Position;
-    render(ctx: CanvasRenderingContext2D): void;
+    pos: IPosition;
+    render(ctx: CanvasRenderingContext2D, pos: IPosition): void;
 }
 
 //垂直
 class VerticalRoad implements IRoad {
-    pos: Position;
+    pos: IPosition;
 
-    constructor(pos: Position = { x: 0, y: 0 }) {
+    constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = pos;
     }
 
-    render(ctx: CanvasRenderingContext2D) {
-        const pos = this.pos;
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        const x = this.pos.x + pos.x;
+        const y = this.pos.y + pos.y;
         ctx.beginPath();
-        ctx.moveTo(pos.x + roadMargin, pos.y);
-        ctx.lineTo(pos.x + roadMargin, pos.y + roadLength);
-        ctx.moveTo(pos.x + roadWidth - roadMargin, pos.y);
-        ctx.lineTo(pos.x + roadWidth - roadMargin, pos.y + roadLength);
+        ctx.moveTo(x + roadMargin, y);
+        ctx.lineTo(x + roadMargin, y + roadLength);
+        ctx.moveTo(x + roadWidth - roadMargin, y);
+        ctx.lineTo(x + roadWidth - roadMargin, y + roadLength);
         ctx.lineWidth = 7;
         ctx.strokeStyle = roadColor;  // 線條顏色
         ctx.stroke();
@@ -193,19 +50,20 @@ class VerticalRoad implements IRoad {
 
 // 水平
 class HorizontalRoad implements IRoad {
-    pos: Position;
+    pos: IPosition;
 
-    constructor(pos: Position = { x: 0, y: 0 }) {
+    constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = pos;
     }
 
-    render(ctx: CanvasRenderingContext2D) {
-        const pos = this.pos;
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        const x = this.pos.x + pos.x;
+        const y = this.pos.y + pos.y;
         ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y + roadMargin);
-        ctx.lineTo(pos.x + roadLength, pos.y + roadMargin);
-        ctx.moveTo(pos.x, pos.y + roadWidth - roadMargin);
-        ctx.lineTo(pos.x + roadLength, pos.y + roadWidth - roadMargin);
+        ctx.moveTo(x, y + roadMargin);
+        ctx.lineTo(x + roadLength, y + roadMargin);
+        ctx.moveTo(x, y + roadWidth - roadMargin);
+        ctx.lineTo(x + roadLength, y + roadWidth - roadMargin);
         ctx.lineWidth = 7;
         ctx.strokeStyle = roadColor;
         ctx.stroke();
@@ -214,86 +72,29 @@ class HorizontalRoad implements IRoad {
 
 
 class LeftTopCurve implements IRoad {
-    pos: Position;
-    center: Point;
+    pos: IPosition;
 
-    constructor(pos: Position = { x: 0, y: 0 }) {
-        this.pos = pos;
-        this.center = new Point(pos);
+    constructor(pos: IPosition = { x: 0, y: 0 }) {
+        this.pos = {
+            x: pos.x + roadLength,
+            y: pos.y + roadWidth,
+        };
     }
 
-    render(ctx: CanvasRenderingContext2D) {
-        const pos = this.pos;
-        pos.x += roadLength;
-        pos.y += roadWidth;
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        let x = this.pos.x + pos.x;
+        let y = this.pos.y + pos.y;
         ctx.beginPath();
-        //ctx.arc(pos.x, pos.y, roadWidth - roadMargin, Math.PI, 1.5 * Math.PI);
-        ctx.arc(pos.x, pos.y, roadWidth - roadMargin, Math.PI, 1.5 * Math.PI);
+        ctx.arc(x, y, roadWidth - roadMargin, Math.PI, 1.5 * Math.PI);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(pos.x + roadMargin - roadMargin, pos.y, roadMargin, Math.PI, 1.5 * Math.PI);
+        ctx.arc(x + roadMargin - roadMargin, y, roadMargin, Math.PI, 1.5 * Math.PI);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
-
-
-        const p1 = new Point({ x: pos.x, y: pos.y });
-        p1.render(ctx);
-
-        const p2 = new Point(this.getStartAngleXY());
-        p2.color = "yellow";
-        p2.render(ctx);
-        const p3 = new Point(this.getEndAngleXY());
-        p3.color = "yellow";
-        p3.render(ctx);
-
-
-        const line = new Line({
-            x1: pos.x, y1: pos.y,
-            x2: pos.x + roadMargin - roadMargin, y2: pos.y - roadWidth
-        });
-        line.color = "yellow";
-        //line.render(ctx);
-
-        this.center.pos.x += roadLength;
-        this.center.pos.y += roadWidth;
-        //this.center.render(ctx);
-    }
-
-    getStartAngleXY() {
-        const pos = this.pos;
-        const radius = roadWidth - roadMargin;
-        const startAngle = Math.PI;
-        return {
-            x: pos.x + radius * Math.cos(startAngle),
-            y: pos.y + radius * Math.sin(startAngle)
-        };
-    }
-
-    getEndAngleXY() {
-        const pos = this.pos;
-        const radius = roadWidth - roadMargin;
-        const endAngle = 1.5 * Math.PI;
-        return {
-            x: pos.x + radius * Math.cos(endAngle),
-            y: pos.y + radius * Math.sin(endAngle),
-        };
-    }
-
-    getArc(): IArc {
-        const pos = this.pos;
-        pos.x += roadLength;
-        pos.y += roadWidth;
-        return {
-            x: pos.x + roadWidth - roadMargin,
-            y: pos.y,
-            radius: roadWidth - roadMargin,
-            startAngle: Math.PI,
-            endAngle: 1.5 * Math.PI
-        };
     }
 }
 
@@ -312,11 +113,11 @@ class Line {
     constructor(line: ILine) {
         this.line = line;
     }
-    render(ctx: CanvasRenderingContext2D) {
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
         const line = this.line;
         ctx.beginPath();
-        ctx.moveTo(line.x1, line.y1);
-        ctx.lineTo(line.x2, line.y2);
+        ctx.moveTo(line.start.x + pos.x, line.start.y + pos.y);
+        ctx.lineTo(line.end.x + pos.x, line.end.y + pos.y);
         ctx.lineWidth = 7;
         ctx.strokeStyle = this.color;
         ctx.stroke();
@@ -324,27 +125,21 @@ class Line {
 }
 
 class RoadMap {
-    pos: Position;
+    pos: IPosition;
     roads: IRoad[][] = create2dArray<IRoad>(10, 10);
 
-    _line: ILine;
 
-    constructor(pos: Position = { x: 0, y: 0 }) {
+    constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = pos;
         const curve = new LeftTopCurve()
         this.roads[0][0] = curve;
         this.roads[0][1] = new VerticalRoad();
         this.roads[1][0] = new HorizontalRoad();
-
-        const arc = curve.getArc();
-        const line = { x1: 10, y1: 10, x2: 100, y2: 100 };
-        const rc = getIntersectionPoints(line, arc);
-        console.log('no!!', rc);
-        this._line = line;
     }
 
-    render(ctx: CanvasRenderingContext2D) {
-        const pos = this.pos;
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        const x = this.pos.x + pos.x;
+        const y = this.pos.y + pos.y;
         const roads = this.roads;
         for (let ix = 0; ix < roads.length; ix++) {
             for (let iy = 0; iy < roads[ix].length; iy++) {
@@ -352,23 +147,21 @@ class RoadMap {
                 if (road == null) {
                     continue;
                 }
-                road.pos.x = pos.x + ix * roadWidth;
-                road.pos.y = pos.y + iy * roadLength;
-                road.render(ctx);
+                const roadPos = {
+                    x: x + ix * roadWidth,
+                    y: y + iy * roadLength,
+                };
+                road.render(ctx, roadPos);
             }
         }
-
-        const l = new Line(this._line);
-        l.color = "yellow";
-        l.render(ctx);
     }
 }
 
 class Car {
     carImage: HTMLImageElement;
-    pos: Position;
+    pos: IPosition;
 
-    constructor(pos: Position) {
+    constructor(pos: IPosition) {
         this.pos = pos;
         this.carImage = new Image();
         this.carImage.src = car1;
@@ -412,16 +205,7 @@ class Game {
     drawRoad() {
         const ctx = this.ctx;
         const roadMap = new RoadMap();
-        roadMap.render(ctx);
-
-        // const road = new HorizontalRoad({ x: 3 + roadWidth, y: 0 });
-        // road.render(ctx);
-
-        // const road1 = new LeftTopCurve({ x: 0, y: 0 });
-        // road1.render(ctx);
-
-        // const road2 = new VerticalRoad({ x: 0, y: roadLength });
-        // road2.render(ctx);
+        roadMap.render(ctx, {x: 0, y: 0});
     }
 
     render() {

@@ -1,4 +1,4 @@
-import { ILine, IPoint, isSamePoint } from "./drawUtils";
+import { ILine, IPosition, isSamePoint } from "./drawUtils";
 
 /**
  * compute line slope
@@ -19,7 +19,7 @@ export function getDistance(line: ILine) {
  * @param {number} line - 線段
  * @returns {number} 
  */
-export function getFootPoint(line: ILine, c: IPoint): IPoint {
+export function getFootPoint(line: ILine, c: IPosition): IPosition {
   const ab = [line.end.x - line.start.x, line.end.y - line.start.y];
   const ac = [c.x - line.start.x, c.y - line.start.y];
   const t = (ac[0] * ab[0] + ac[1] * ab[1]) / (ab[0] * ab[0] + ab[1] * ab[1]);
@@ -31,7 +31,7 @@ export function getFootPoint(line: ILine, c: IPoint): IPoint {
   };
 }
 
-export function cross(p1: IPoint, p2: IPoint, p3: IPoint) {
+export function cross(p1: IPosition, p2: IPosition, p3: IPosition) {
   const x1 = p2.x - p1.x;
   const y1 = p2.y - p1.y;
   const x2 = p3.x - p1.x;
@@ -47,7 +47,7 @@ export function cross(p1: IPoint, p2: IPoint, p3: IPoint) {
  * @param e2 
  * @returns 
  */
-export function rectsIntersect(s1: IPoint, e1: IPoint, s2: IPoint, e2: IPoint) {
+export function rectsIntersect(s1: IPosition, e1: IPosition, s2: IPosition, e2: IPosition) {
   if (Math.min(s1.y, e1.y) <= Math.max(s2.y, e2.y) &&
     Math.max(s1.y, e1.y) >= Math.min(s2.y, e2.y) &&
     Math.min(s1.x, e1.x) <= Math.max(s2.x, e2.x) &&
@@ -65,7 +65,7 @@ export function rectsIntersect(s1: IPoint, e1: IPoint, s2: IPoint, e2: IPoint) {
  * @param b2 
  * @returns 
 */
-export function segmentsIntersect(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint) {
+export function segmentsIntersect(a1: IPosition, a2: IPosition, b1: IPosition, b2: IPosition) {
   const t1 = cross(a1, a2, b1);
   const t2 = cross(a1, a2, b2);
   const t3 = cross(b1, b2, a1);
@@ -109,7 +109,7 @@ export function areOverlapping(line1: ILine, line2: ILine) {
   return (a1.x <= b2.x && a2.x >= b1.x) && (a1.y <= b2.y && a2.y >= b1.y);
 }
 
-function findOverlap(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint): ILine | null {
+function findOverlap(a1: IPosition, a2: IPosition, b1: IPosition, b2: IPosition): ILine | null {
   if (a1.x > a2.x) [a1, a2] = [a2, a1];
   if (b1.x > b2.x) [b1, b2] = [b2, b1];
 
@@ -134,7 +134,7 @@ function allElementsAreEqual(arr: any[]): boolean {
   return arr.every(element => objectAreEqual(element, firstElement));
 }
 
-export function findIntersection(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint): IPoint[] {
+export function findIntersection(a1: IPosition, a2: IPosition, b1: IPosition, b2: IPosition): IPosition[] {
   const denominator = (a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x);
 
   // 如果 denominator 为 0，说明线段是平行的，没有交点
