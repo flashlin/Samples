@@ -69,3 +69,4 @@ export class Point {
         ctx.fill();
     }
 }
+
