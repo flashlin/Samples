@@ -36,6 +36,9 @@ export interface IRoad {
 export class VerticalRoad implements IRoad {
     pos: IPosition;
 
+    /**
+     * 垂直 
+     */
     constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = pos;
     }
@@ -105,6 +108,34 @@ export class LeftTopCurve implements IRoad {
 }
 
 
+export class RightTopCurve implements IRoad {
+    pos: IPosition;
+
+    constructor(pos: IPosition = { x: 0, y: 0 }) {
+        this.pos = {
+            x: pos.x,
+            y: pos.y + roadWidth,
+        };
+    }
+
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        let x = this.pos.x + pos.x;
+        let y = this.pos.y + pos.y;
+        ctx.beginPath();
+        ctx.arc(x, y, roadWidth - roadMargin, 1.5 * Math.PI, 0);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 7;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x + roadMargin - roadMargin, y, roadMargin, 1.5 * Math.PI, 0);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 7;
+        ctx.stroke();
+    }
+}
+
+
 function create2dArray<T>(width: number, height: number): T[][] {
     let arr: T[][] = new Array(width);
     for (let i = 0; i < arr.length; i++) {
@@ -123,6 +154,7 @@ export class RoadMap {
         this.pos = pos;
         this.roads[0][0] = new LeftTopCurve();
         this.roads[0][1] = new VerticalRoad();
+        this.roads[2][0] = new RightTopCurve();
         this.roads[1][0] = new HorizontalRoad();
     }
 
