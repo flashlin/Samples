@@ -43,7 +43,7 @@ class Game {
         //document.body.appendChild(canvas);
         const canvas = document.getElementById("canvas") as HTMLCanvasElement;
         canvas.width = 800;
-        canvas.height = 600;
+        canvas.height = 700;
         return canvas;
     }
 
