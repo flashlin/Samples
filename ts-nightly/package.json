@@ -15,8 +15,8 @@
   "scripts": {
     "build": "tsc",
     "t": "jest --config jest.config.ts",
-    "deploy": "npm publish --access public",
-    "un": "npm unpublish ts-nightly@1.0.0"
+    "p": "tsc && npm publish --access public",
+    "u": "npm unpublish ts-nightly@1.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
