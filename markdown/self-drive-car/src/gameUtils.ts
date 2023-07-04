@@ -153,9 +153,10 @@ export class RoadMap {
     constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = pos;
         this.roads[0][0] = new LeftTopCurve();
-        this.roads[0][1] = new VerticalRoad();
         this.roads[2][0] = new RightTopCurve();
         this.roads[1][0] = new HorizontalRoad();
+        this.roads[0][1] = new VerticalRoad();
+        this.roads[2][1] = new VerticalRoad();
     }
 
     render(ctx: CanvasRenderingContext2D, pos: IPosition) {
