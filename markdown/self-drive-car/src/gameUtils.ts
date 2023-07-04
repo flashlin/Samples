@@ -162,6 +162,33 @@ export class LeftBottomCurve implements IRoad {
     }
 }
 
+export class RightBottomCurve implements IRoad {
+    pos: IPosition;
+
+    constructor(pos: IPosition = { x: 0, y: 0 }) {
+        this.pos = {
+            x: pos.x,
+            y: pos.y,
+        };
+    }
+
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        let x = this.pos.x + pos.x;
+        let y = this.pos.y + pos.y;
+        ctx.beginPath();
+        ctx.arc(x, y, roadWidth - roadMargin, 0 * Math.PI, 0.5 * Math.PI);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 7;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x + roadMargin - roadMargin, y, roadMargin, 0 * Math.PI, 0.5 * Math.PI);
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 7;
+        ctx.stroke();
+    }
+}
+
 
 
 
@@ -178,7 +205,6 @@ export class RoadMap {
     pos: IPosition;
     roads: IRoad[][] = create2dArray<IRoad>(10, 10);
 
-
     constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = pos;
         this.roads[0][0] = new LeftTopCurve();
@@ -187,6 +213,8 @@ export class RoadMap {
         this.roads[0][1] = new VerticalRoad();
         this.roads[2][1] = new VerticalRoad();
         this.roads[0][2] = new LeftBottomCurve();
+        this.roads[1][2] = new HorizontalRoad();
+        this.roads[2][2] = new RightBottomCurve();
     }
 
     render(ctx: CanvasRenderingContext2D, pos: IPosition) {
