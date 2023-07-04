@@ -94,12 +94,61 @@ export function segmentsIntersect(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint
   return true;
 }
 
+export function areOverlapping(line1: ILine, line2: ILine) {
+  let a1 = line1.start;
+  let a2 = line1.end;
+  let b1 = line2.start;
+  let b2 = line2.end;
+
+  const slopeA = (a2.y - a1.y) / (a2.x - a1.x);
+  const interceptA = a1.y - slopeA * a1.x;
+
+  const slopeB = (b2.y - b1.y) / (b2.x - b1.x);
+  const interceptB = b1.y - slopeB * b1.x;
+
+  // Check if slopes are different
+  if (slopeA !== slopeB) {
+    return false;
+  }
+
+  // Check if intercepts are different
+  if (interceptA !== interceptB) {
+    return false;
+  }
+
+  // Normalize segments so a1 is always to the left of a2, and b1 is always to the left of b2
+  if (a1.x > a2.x) [a1, a2] = [a2, a1];
+  if (b1.x > b2.x) [b1, b2] = [b2, b1];
+
+  // Check if there is any x overlap
+  return (a1.x <= b2.x && a2.x >= b1.x) && (a1.y <= b2.y && a2.y >= b1.y);
+}
+
+function findOverlap(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint): ILine | null {
+  if (a1.x > a2.x) [a1, a2] = [a2, a1];
+  if (b1.x > b2.x) [b1, b2] = [b2, b1];
+
+  let overlapStart = a1.x > b1.x ? a1 : b1;
+  let overlapEnd = a2.x < b2.x ? a2 : b2;
+
+  // Check if there's actually an overlap
+  if (overlapStart.x > overlapEnd.x) {
+    return null; // There is no overlap
+  }
+
+  return { start: overlapStart, end: overlapEnd };
+}
 
 export function findIntersection(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint): IPoint[] {
   const denominator = (a1.x - a2.x) * (b1.y - b2.y) - (a1.y - a2.y) * (b1.x - b2.x);
 
   // 如果 denominator 为 0，说明线段是平行的，没有交点
   if (denominator === 0) {
+    if (areOverlapping({ start: a1, end: a2 }, { start: b1, end: b2 })) {
+      const line = findOverlap(a1, a2, b1, b2);
+      console.log(`over`, line)
+      return [];
+    }
     return [];
   }
 
@@ -115,6 +164,6 @@ export function findIntersection(a1: IPoint, a2: IPoint, b1: IPoint, b2: IPoint)
     return [intersectionPoint];
   }
 
-  // 否则，线段不相交
+  console.log('no2', t, u);
   return [];
 }
