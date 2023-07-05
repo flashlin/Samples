@@ -172,7 +172,6 @@ export function updateCoordinates(pos: IPosition, angle: number, add: number): I
   const angleInRadians = angle * (Math.PI / 180);
   const deltaX = add * Math.cos(angleInRadians);
   const deltaY = add * Math.sin(angleInRadians);
-  console.log(`${angle} x=${deltaX} y=${deltaY}`)
   let x = pos.x;
   let y = pos.y;
   y -= deltaX;

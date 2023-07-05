@@ -13,7 +13,7 @@ export class Car {
     speed = 0;
     acceleration = 0.2;
     maxSpeed = 3;
-    friction = 0.05;
+    friction = 0.03;
     angle = 0;
     damaged = false;
 
@@ -68,20 +68,16 @@ export class Car {
             this.speed = -this.maxSpeed / 2;
         }
 
+        //自動減速效果
         if (this.speed > 0) {
             this.speed -= this.friction;
         }
-
         if (this.speed < 0) {
             this.speed += this.friction;
         }
-
         if (Math.abs(this.speed) < this.friction) {
             this.speed = 0;
         }
-
-        //if (this.speed != 0) {
-        const flip = this.speed > 0 ? 1 : -1;
 
         if (this.controls.left) {
             this.angle -= 1;
@@ -90,12 +86,9 @@ export class Car {
         if (this.controls.right) {
             this.angle += 1;
         }
-        //}
 
         const p = updateCoordinates(this.pos, this.angle, this.speed);
         this.pos.x = p.x;
         this.pos.y = p.y;
-        //this.pos.x -= Math.sin(this.angle) * this.speed;
-        //this.pos.y -= Math.cos(this.angle) * this.speed;
     }
 }
