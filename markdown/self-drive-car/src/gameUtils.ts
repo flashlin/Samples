@@ -8,6 +8,8 @@ export const roadLength = 220;
 export const roadWidth = 220;
 export const roadColor = 'red';
 export const roadMargin = 22;
+export const CanvasWidth = 800;
+export const CanvasHeight = 700;
 
 export class Line {
     line: ILine;
