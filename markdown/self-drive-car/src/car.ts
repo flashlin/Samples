@@ -28,9 +28,10 @@ export class Car {
         this.carImage = new Image();
         this.carImage.src = car1;
         this.frame = new Rectangle({
-            x: this.pos.x + CarFrameMargin, 
-            y: this.pos.y + CarFrameMargin}, 
-            CarWidth - CarFrameMargin * 2, 
+            x: this.pos.x + CarFrameMargin,
+            y: this.pos.y + CarFrameMargin
+        },
+            CarWidth - CarFrameMargin * 2,
             CarHeight - CarFrameMargin * 2);
         this.controls = new Controls();
     }
@@ -40,15 +41,13 @@ export class Car {
         const y = this.pos.y + pos.y + this.y;
         //ctx.globalCompositeOperation = 'destination-atop';
         //ctx.drawImage(this.carImage, x, y, CarWidth, CarHeight);
-        this.frame.render(ctx, {x, y});
-        
+
         const angleInRadians = this.angle * (Math.PI / 180);
-        console.log('', this.angle, angleInRadians)
         // 將原點移至圖像的中心
-        //ctx.translate(CanvasWidth / 2, CanvasHeight / 2);
-        ctx.translate(x + CarWidth/2, y + CarHeight/2);
+        ctx.translate(x + CarWidth / 2, y + CarHeight / 2);
         ctx.rotate(angleInRadians);
-        ctx.drawImage(this.carImage, -CarWidth/2, -CarHeight/2);
+        this.frame.render(ctx, { x: -CarWidth / 2, y: -CarHeight / 2 });
+        ctx.drawImage(this.carImage, -CarWidth / 2, -CarHeight / 2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
@@ -82,17 +81,17 @@ export class Car {
         }
 
         //if (this.speed != 0) {
-            const flip = this.speed > 0 ? 1 : -1;
+        const flip = this.speed > 0 ? 1 : -1;
 
-            if (this.controls.left) {
-                this.angle -= 1;
-            }
+        if (this.controls.left) {
+            this.angle -= 1;
+        }
 
-            if (this.controls.right) {
-                this.angle += 1;
-            }
+        if (this.controls.right) {
+            this.angle += 1;
+        }
         //}
-        
+
         const p = updateCoordinates(this.pos, this.angle, this.speed);
         this.pos.x = p.x;
         this.pos.y = p.y;
