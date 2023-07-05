@@ -1,6 +1,6 @@
 import car1 from './assets/car1.png';
 import { ILine, IPosition } from './drawUtils';
-import { HorizontalRoad, IRoad, LeftTopCurve, RoadMap, VerticalRoad, carHeight, carWidth, roadLength } from './gameUtils';
+import { HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, carFrameMargin, carHeight, carWidth, roadLength } from './gameUtils';
 
 enum RoadType {
     Vertical,
@@ -14,14 +14,21 @@ enum RoadType {
 class Car {
     carImage: HTMLImageElement;
     pos: IPosition;
+    frame: Rectangle;
 
     constructor(pos: IPosition) {
         this.pos = pos;
         this.carImage = new Image();
         this.carImage.src = car1;
+        this.frame = new Rectangle({
+            x: pos.x + carFrameMargin, 
+            y: pos.y + carFrameMargin}, 
+            carWidth - carFrameMargin * 2, 
+            carHeight - carFrameMargin * 2);
     }
 
     render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        this.frame.render(ctx, pos);
         const x = this.pos.x + pos.x;
         const y = this.pos.y + pos.y;
         //ctx.globalCompositeOperation = 'destination-atop';

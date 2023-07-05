@@ -1,5 +1,6 @@
 import { ILine, IPosition } from "./drawUtils";
 
+export const carFrameMargin = 4;
 export const carWidth = 75;
 export const carHeight = 117;
 export const carColor = "blue";
@@ -264,5 +265,28 @@ export class RoadMap {
                 road.render(ctx, roadPos);
             }
         }
+    }
+}
+
+
+export class Rectangle
+{
+    pos: IPosition;
+    width: number;
+    height: number;
+    
+    constructor(pos: IPosition, width: number, height: number)
+    {
+        this.pos = pos;
+        this.width = width;
+        this.height = height;
+    }
+    
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        const x = this.pos.x + pos.x;
+        const y = this.pos.y + pos.y;
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 7;
+        ctx.strokeRect(x, y, this.width, this.height);
     }
 }
