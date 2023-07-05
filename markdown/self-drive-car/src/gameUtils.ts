@@ -202,22 +202,49 @@ function create2dArray<T>(width: number, height: number): T[][] {
 
 import map1Content from '@/assets/map.txt?raw';
 
+function createRoad(ch: string) {
+    const dict: Record<string, () => IRoad> = {
+        '-': () => new HorizontalRoad(),
+        '|': () => new VerticalRoad(),
+        '/': () => new LeftTopCurve(),
+        '\\': () => new RightTopCurve(),
+        'L': () => new LeftBottomCurve(),
+        '+': () => new RightBottomCurve(),
+    };
+    if (!(ch in dict)) {
+        return new EmptyRoad();
+    }
+    return dict[ch]();
+}
+
+function readMap(mapContent: string): IRoad[][] {
+    const lines = mapContent.split('\n');
+    const width = lines.reduce((max, x) => Math.max(max, x.length), 0);
+    const height = lines.length;
+    const roadMap: IRoad[][] = create2dArray(width, height);
+    for (let y = 0; y < height; y++) {
+        let line = lines[y];
+        for (let x = 0; x < width; x++) {
+            let ch = line[x];
+            roadMap[x][y] = createRoad(ch);
+        }
+    }
+    return roadMap;
+}
+
+export class EmptyRoad implements IRoad {
+    pos: IPosition = { x: 0, y: 0 };
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+    }
+}
+
 export class RoadMap {
     pos: IPosition;
     roads: IRoad[][] = create2dArray<IRoad>(10, 10);
 
     constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = pos;
-        this.roads[0][0] = new LeftTopCurve();
-        this.roads[2][0] = new RightTopCurve();
-        this.roads[1][0] = new HorizontalRoad();
-        this.roads[0][1] = new VerticalRoad();
-        this.roads[2][1] = new VerticalRoad();
-        this.roads[0][2] = new LeftBottomCurve();
-        this.roads[1][2] = new HorizontalRoad();
-        this.roads[2][2] = new RightBottomCurve();
-
-        console.log('map', map1Content)
+        this.roads = readMap(map1Content);
     }
 
     render(ctx: CanvasRenderingContext2D, pos: IPosition) {
