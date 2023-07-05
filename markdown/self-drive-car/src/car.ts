@@ -13,7 +13,7 @@ export class Car {
     speed = 0;
     acceleration = 0.2;
     maxSpeed = 3;
-    friction = 0.03;
+    friction = 0.01;
     angle = 0;
     damaged = false;
 
@@ -37,8 +37,8 @@ export class Car {
     }
 
     render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        const x = this.pos.x + pos.x + this.x;
-        const y = this.pos.y + pos.y + this.y;
+        const x = this.pos.x + pos.x;
+        const y = this.pos.y + pos.y;
         //ctx.globalCompositeOperation = 'destination-atop';
         //ctx.drawImage(this.carImage, x, y, CarWidth, CarHeight);
 
@@ -87,8 +87,10 @@ export class Car {
             this.angle += 1;
         }
 
-        const p = updateCoordinates(this.pos, this.angle, this.speed);
-        this.pos.x = p.x;
-        this.pos.y = p.y;
+        const p = updateCoordinates({ x: this.x, y: this.y }, this.angle, this.speed);
+        this.x = p.x;
+        this.y = p.y;
+        //this.pos.x = p.x;
+        //this.pos.y = p.y;
     }
 }
