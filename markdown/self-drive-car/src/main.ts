@@ -7,6 +7,7 @@ class Game {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     car = new Car();
+    roadMap = new RoadMap();
 
     constructor() {
         this.canvas = this.createCanvas();
@@ -31,7 +32,7 @@ class Game {
 
     drawRoad() {
         const ctx = this.ctx;
-        const roadMap = new RoadMap();
+        const roadMap = this.roadMap;
         let x = CanvasWidth / 2 - 90;
         let y = CanvasHeight / 2 - 180;
         y -= this.car.y;
