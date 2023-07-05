@@ -1,6 +1,6 @@
 import car1 from './assets/car1.png';
 import { ILine, IPosition } from './drawUtils';
-import { HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, carFrameMargin, carHeight, carWidth, roadLength } from './gameUtils';
+import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, carFrameMargin, carHeight, carWidth, roadLength } from './gameUtils';
 
 enum RoadType {
     Vertical,
@@ -16,13 +16,16 @@ class Car {
     pos: IPosition;
     frame: Rectangle;
 
-    constructor(pos: IPosition) {
-        this.pos = pos;
+    constructor() {
+        this.pos = {
+            x: 0,
+            y: 0
+        };
         this.carImage = new Image();
         this.carImage.src = car1;
         this.frame = new Rectangle({
-            x: pos.x + carFrameMargin, 
-            y: pos.y + carFrameMargin}, 
+            x: this.pos.x + carFrameMargin, 
+            y: this.pos.y + carFrameMargin}, 
             carWidth - carFrameMargin * 2, 
             carHeight - carFrameMargin * 2);
     }
@@ -39,7 +42,7 @@ class Car {
 class Game {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
-    car = new Car({ x: 90, y: 90 });
+    car = new Car();
 
     constructor() {
         this.canvas = this.createCanvas();
@@ -50,21 +53,21 @@ class Game {
         //const canvas = document.createElement("canvas");
         //document.body.appendChild(canvas);
         const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-        canvas.width = 800;
-        canvas.height = 700;
+        canvas.width = CanvasWidth;
+        canvas.height = CanvasHeight;
         return canvas;
     }
 
     drawF4Car() {
         const ctx = this.ctx;
-        const pos = {x: 0, y: 0};
+        const pos = {x: CanvasWidth/2-32, y: CanvasHeight/2-56};
         this.car.render(ctx, pos);
     }
 
     drawRoad() {
         const ctx = this.ctx;
         const roadMap = new RoadMap();
-        roadMap.render(ctx, {x: 0, y: 0});
+        roadMap.render(ctx, {x: CanvasWidth / 2 - 90, y: CanvasHeight / 2 - 180});
     }
 
     render() {
