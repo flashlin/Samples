@@ -167,3 +167,15 @@ export function findIntersection(a1: IPosition, a2: IPosition, b1: IPosition, b2
   console.log('no2', t, u);
   return [];
 }
+
+export function updateCoordinates(pos: IPosition, angle: number, add: number): IPosition {
+  const angleInRadians = angle * (Math.PI / 180);
+  const deltaX = add * Math.cos(angleInRadians);
+  const deltaY = add * Math.sin(angleInRadians);
+  console.log(`${angle} x=${deltaX} y=${deltaY}`)
+  let x = pos.x;
+  let y = pos.y;
+  y -= deltaX;
+  x += deltaY;
+  return { x, y };
+}
