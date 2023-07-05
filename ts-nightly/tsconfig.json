@@ -12,6 +12,7 @@
       "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
       "sourceMap": true,  
       "allowArbitraryExtensions": true,
+      "experimentalDecorators": true,
       "lib": [
         "es5",
         "dom",

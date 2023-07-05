@@ -1,3 +1,4 @@
+import { SampleClass } from './../src/sample';
 import { MockFuncCall, MockMethod } from '../src/mock';
 
 function sayHello(id: number): string {
@@ -35,4 +36,12 @@ test('mock funcAsync', async () => {
   const f = MockFuncCall(true, mockSayHelloAsync, sayHelloAsync);
   const message = await f(123);
   expect(message).toBe('mock 123 helloAsync');
+});
+
+
+
+test('mock class member', async () => {
+  const a = new SampleClass(); 
+  const message = a.sayHello('Flash');
+  expect(message).toBe('Flash');
 });
