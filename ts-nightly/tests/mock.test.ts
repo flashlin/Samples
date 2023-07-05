@@ -1,5 +1,5 @@
-import { SampleClass } from './../src/sample';
-import { MockFuncCall, MockMethod } from '../src/mock';
+import { SampleClass } from './sample';
+import { MockFuncCall } from '../src/mock';
 
 function sayHello(id: number): string {
   return `${id} hello`;
@@ -39,9 +39,26 @@ test('mock funcAsync', async () => {
 });
 
 
-
 test('mock class member', async () => {
   const a = new SampleClass(); 
   const message = a.sayHello('Flash');
   expect(message).toBe('Flash');
+});
+
+test('mock class member with hard code', async () => {
+  const a = new SampleClass(); 
+  const message = a.sayHello2('Flash');
+  expect(message).toBe('XXX');
+});
+
+test('mock class member with this', async () => {
+  const a = new SampleClass(); 
+  const message = a.sayHello3('Flash');
+  expect(message).toBe('Flash 123');
+});
+
+test('mock class member return null', async () => {
+  const a = new SampleClass(); 
+  const message = a.sayHello4('Flash');
+  expect(message).toBe(null);
 });

@@ -1,4 +1,4 @@
-type AnyFunc = (...args: any[]) => any;
+export type AnyFunc = (...args: any[]) => any;
 
 type MethodDecoratorWithArgs<T extends AnyFunc> = (target: any,
     propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<T>) =>
@@ -30,7 +30,7 @@ type MethodDecoratorWithArgs<T extends AnyFunc> = (target: any,
 //     };
 // }
 
-export function MockMethod(mockRun: boolean, returnValue?: AnyFunc | Object) {
+export function MockMethod(mockRun: boolean, returnValue: AnyFunc | Object | null) {
     return function (
         target: any,
         propertyKey: string,
