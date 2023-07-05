@@ -200,6 +200,7 @@ function create2dArray<T>(width: number, height: number): T[][] {
     return arr;
 }
 
+import map1Content from '@/assets/map.txt?raw';
 
 export class RoadMap {
     pos: IPosition;
@@ -215,6 +216,8 @@ export class RoadMap {
         this.roads[0][2] = new LeftBottomCurve();
         this.roads[1][2] = new HorizontalRoad();
         this.roads[2][2] = new RightBottomCurve();
+
+        console.log('map', map1Content)
     }
 
     render(ctx: CanvasRenderingContext2D, pos: IPosition) {
