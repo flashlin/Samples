@@ -24,14 +24,15 @@ class Car {
     render(ctx: CanvasRenderingContext2D) {
         const pos = this.pos;
         //ctx.globalCompositeOperation = 'destination-atop';
-        ctx.drawImage(this.carImage,
-            pos.x, pos.y, carWidth, carHeight);
+        ctx.drawImage(this.carImage, pos.x, pos.y, carWidth, carHeight);
     }
 }
 
 class Game {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
+    car1 = new Car({ x: 23 + carWidth, y: roadLength });
+    car2 = new Car({ x: 23, y: roadLength });
 
     constructor() {
         this.canvas = this.createCanvas();
@@ -49,11 +50,9 @@ class Game {
 
     drawF4Car() {
         const ctx = this.ctx;
-        const car = new Car({ x: 23 + carWidth, y: roadLength });
-        car.render(ctx);
-
-        const car2 = new Car({ x: 23, y: roadLength });
-        car2.render(ctx);
+        
+        this.car1.render(ctx);
+        this.car2.render(ctx);
     }
 
     drawRoad() {
