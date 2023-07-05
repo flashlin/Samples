@@ -1,19 +1,19 @@
 import { ILine, IPosition } from "./drawUtils";
 
-export const carFrameMargin = 4;
-export const carWidth = 75;
-export const carHeight = 117;
-export const carColor = "blue";
-export const roadLength = 220;
-export const roadWidth = 220;
-export const roadColor = 'red';
-export const roadMargin = 22;
+export const CarFrameMargin = 4;
+export const CarWidth = 75;
+export const CarHeight = 117;
+export const CarColor = "blue";
+export const RoadLength = 220;
+export const RoadWidth = 220;
+export const RoadColor = 'red';
+export const RoadMargin = 22;
 export const CanvasWidth = 800;
 export const CanvasHeight = 700;
 
 export class Line {
     line: ILine;
-    color: string = roadColor;
+    color: string = RoadColor;
 
     constructor(line: ILine) {
         this.line = line;
@@ -50,12 +50,12 @@ export class VerticalRoad implements IRoad {
         const x = this.pos.x + pos.x;
         const y = this.pos.y + pos.y;
         ctx.beginPath();
-        ctx.moveTo(x + roadMargin, y);
-        ctx.lineTo(x + roadMargin, y + roadLength);
-        ctx.moveTo(x + roadWidth - roadMargin, y);
-        ctx.lineTo(x + roadWidth - roadMargin, y + roadLength);
+        ctx.moveTo(x + RoadMargin, y);
+        ctx.lineTo(x + RoadMargin, y + RoadLength);
+        ctx.moveTo(x + RoadWidth - RoadMargin, y);
+        ctx.lineTo(x + RoadWidth - RoadMargin, y + RoadLength);
         ctx.lineWidth = 7;
-        ctx.strokeStyle = roadColor;  // 線條顏色
+        ctx.strokeStyle = RoadColor;  // 線條顏色
         ctx.stroke();
     }
 }
@@ -73,12 +73,12 @@ export class HorizontalRoad implements IRoad {
         const x = this.pos.x + pos.x;
         const y = this.pos.y + pos.y;
         ctx.beginPath();
-        ctx.moveTo(x, y + roadMargin);
-        ctx.lineTo(x + roadLength, y + roadMargin);
-        ctx.moveTo(x, y + roadWidth - roadMargin);
-        ctx.lineTo(x + roadLength, y + roadWidth - roadMargin);
+        ctx.moveTo(x, y + RoadMargin);
+        ctx.lineTo(x + RoadLength, y + RoadMargin);
+        ctx.moveTo(x, y + RoadWidth - RoadMargin);
+        ctx.lineTo(x + RoadLength, y + RoadWidth - RoadMargin);
         ctx.lineWidth = 7;
-        ctx.strokeStyle = roadColor;
+        ctx.strokeStyle = RoadColor;
         ctx.stroke();
     }
 }
@@ -88,8 +88,8 @@ export class LeftTopCurve implements IRoad {
 
     constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = {
-            x: pos.x + roadLength,
-            y: pos.y + roadWidth,
+            x: pos.x + RoadLength,
+            y: pos.y + RoadWidth,
         };
     }
 
@@ -97,13 +97,13 @@ export class LeftTopCurve implements IRoad {
         let x = this.pos.x + pos.x;
         let y = this.pos.y + pos.y;
         ctx.beginPath();
-        ctx.arc(x, y, roadWidth - roadMargin, Math.PI, 1.5 * Math.PI);
+        ctx.arc(x, y, RoadWidth - RoadMargin, Math.PI, 1.5 * Math.PI);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(x + roadMargin - roadMargin, y, roadMargin, Math.PI, 1.5 * Math.PI);
+        ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, Math.PI, 1.5 * Math.PI);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
@@ -117,7 +117,7 @@ export class RightTopCurve implements IRoad {
     constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = {
             x: pos.x,
-            y: pos.y + roadWidth,
+            y: pos.y + RoadWidth,
         };
     }
 
@@ -125,13 +125,13 @@ export class RightTopCurve implements IRoad {
         let x = this.pos.x + pos.x;
         let y = this.pos.y + pos.y;
         ctx.beginPath();
-        ctx.arc(x, y, roadWidth - roadMargin, 1.5 * Math.PI, 0);
+        ctx.arc(x, y, RoadWidth - RoadMargin, 1.5 * Math.PI, 0);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(x + roadMargin - roadMargin, y, roadMargin, 1.5 * Math.PI, 0);
+        ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, 1.5 * Math.PI, 0);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
@@ -143,7 +143,7 @@ export class LeftBottomCurve implements IRoad {
 
     constructor(pos: IPosition = { x: 0, y: 0 }) {
         this.pos = {
-            x: pos.x + roadLength,
+            x: pos.x + RoadLength,
             y: pos.y,
         };
     }
@@ -152,13 +152,13 @@ export class LeftBottomCurve implements IRoad {
         let x = this.pos.x + pos.x;
         let y = this.pos.y + pos.y;
         ctx.beginPath();
-        ctx.arc(x, y, roadWidth - roadMargin, 0.5 * Math.PI, 1 * Math.PI);
+        ctx.arc(x, y, RoadWidth - RoadMargin, 0.5 * Math.PI, 1 * Math.PI);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(x + roadMargin - roadMargin, y, roadMargin, 0.5 * Math.PI, 1 * Math.PI);
+        ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, 0.5 * Math.PI, 1 * Math.PI);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
@@ -179,13 +179,13 @@ export class RightBottomCurve implements IRoad {
         let x = this.pos.x + pos.x;
         let y = this.pos.y + pos.y;
         ctx.beginPath();
-        ctx.arc(x, y, roadWidth - roadMargin, 0 * Math.PI, 0.5 * Math.PI);
+        ctx.arc(x, y, RoadWidth - RoadMargin, 0 * Math.PI, 0.5 * Math.PI);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
 
         ctx.beginPath();
-        ctx.arc(x + roadMargin - roadMargin, y, roadMargin, 0 * Math.PI, 0.5 * Math.PI);
+        ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, 0 * Math.PI, 0.5 * Math.PI);
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
@@ -261,8 +261,8 @@ export class RoadMap {
                     continue;
                 }
                 const roadPos = {
-                    x: x + ix * roadWidth,
-                    y: y + iy * roadLength,
+                    x: x + ix * RoadWidth,
+                    y: y + iy * RoadLength,
                 };
                 road.render(ctx, roadPos);
             }

@@ -1,43 +1,7 @@
-import car1 from './assets/car1.png';
+import { Car } from './car';
 import { ILine, IPosition } from './drawUtils';
-import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, carFrameMargin, carHeight, carWidth, roadLength } from './gameUtils';
+import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength } from './gameUtils';
 
-enum RoadType {
-    Vertical,
-    Horizontal,
-    LeftTopCurve,
-    LeftBottomCurve,
-    RightTopCurve,
-    RightBottomCurve,
-}
-
-class Car {
-    carImage: HTMLImageElement;
-    pos: IPosition;
-    frame: Rectangle;
-
-    constructor() {
-        this.pos = {
-            x: 0,
-            y: 0
-        };
-        this.carImage = new Image();
-        this.carImage.src = car1;
-        this.frame = new Rectangle({
-            x: this.pos.x + carFrameMargin, 
-            y: this.pos.y + carFrameMargin}, 
-            carWidth - carFrameMargin * 2, 
-            carHeight - carFrameMargin * 2);
-    }
-
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        this.frame.render(ctx, pos);
-        const x = this.pos.x + pos.x;
-        const y = this.pos.y + pos.y;
-        //ctx.globalCompositeOperation = 'destination-atop';
-        ctx.drawImage(this.carImage, x, y, carWidth, carHeight);
-    }
-}
 
 class Game {
     canvas: HTMLCanvasElement;
@@ -62,6 +26,7 @@ class Game {
         const ctx = this.ctx;
         const pos = {x: CanvasWidth/2-32, y: CanvasHeight/2-56};
         this.car.render(ctx, pos);
+        this.car.move();
     }
 
     drawRoad() {
