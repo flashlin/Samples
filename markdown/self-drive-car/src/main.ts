@@ -32,7 +32,11 @@ class Game {
     drawRoad() {
         const ctx = this.ctx;
         const roadMap = new RoadMap();
-        roadMap.render(ctx, {x: CanvasWidth / 2 - 90, y: CanvasHeight / 2 - 180});
+        let x = CanvasWidth / 2 - 90;
+        let y = CanvasHeight / 2 - 180;
+        y -= this.car.y;
+        x -= this.car.x;
+        roadMap.render(ctx, {x, y});
     }
 
     render() {
