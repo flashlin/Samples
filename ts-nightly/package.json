@@ -1,6 +1,6 @@
 {
   "name": "ts-nightly",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "typescript common library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,7 +21,6 @@
   "devDependencies": {
     "@jest/globals": "^29.5.0",
     "@microsoft/signalr": "^5.0.8",
-    "@types/axios": "^0.14.0",
     "@types/jest": "^29.5.2",
     "@types/node": "^16.4.10",
     "axios": "^1.4.0",
