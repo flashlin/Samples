@@ -6,7 +6,7 @@ export const CarHeight = 117;
 export const CarColor = "blue";
 export const RoadLength = 220;
 export const RoadWidth = 220;
-export const RoadColor = 'red';
+export const RoadColor = 'blue';
 export const RoadMargin = 22;
 export const CanvasWidth = 800;
 export const CanvasHeight = 700;
@@ -135,13 +135,13 @@ export class LeftTopCurve implements IRoad {
         let y = this.pos.y + pos.y;
         ctx.beginPath();
         ctx.arc(x, y, RoadWidth - RoadMargin, Math.PI, 1.5 * Math.PI);
-        ctx.strokeStyle = "red";
+        ctx.strokeStyle = RoadColor;
         ctx.lineWidth = 7;
         ctx.stroke();
 
         ctx.beginPath();
         ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, Math.PI, 1.5 * Math.PI);
-        ctx.strokeStyle = "red";
+        ctx.strokeStyle = RoadColor;
         ctx.lineWidth = 7;
         ctx.stroke();
     }
@@ -330,6 +330,7 @@ export class Rectangle {
     pos: IPosition;
     width: number;
     height: number;
+    color: string = "blue";
 
     constructor(pos: IPosition, width: number, height: number) {
         this.pos = pos;
@@ -340,7 +341,7 @@ export class Rectangle {
     render(ctx: CanvasRenderingContext2D, pos: IPosition) {
         const x = this.pos.x + pos.x;
         const y = this.pos.y + pos.y;
-        ctx.strokeStyle = 'red';
+        ctx.strokeStyle = this.color;
         ctx.lineWidth = 7;
         ctx.strokeRect(x, y, this.width, this.height);
     }
