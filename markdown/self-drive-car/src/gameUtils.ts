@@ -92,7 +92,7 @@ export class VerticalRoad implements IRoad {
         
         
         if( this.ix==0 && this.iy == 1) {
-            console.log(`collide test`, line1);
+            console.log(`collide test`, line1.start, line1.end, rect.leftTop, rect.rightBottom);
         }
 
         const points1 = rectangleIntersectLine(rect, line1);
