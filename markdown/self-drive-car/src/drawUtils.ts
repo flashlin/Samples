@@ -15,6 +15,12 @@ export type ILine = {
     end: IPosition,
 };
 
+export type IRect = {
+    leftTop: IPosition,
+    width: number,
+    height: number,
+}
+
 export interface IDrawOptions {
     lineWidth: number,
     strokeSyle: string
