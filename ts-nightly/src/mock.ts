@@ -59,6 +59,11 @@ export function MockAsyncMethod(mockRun: boolean, returnValue?: any) {
 }
 
 
+export function MockFuncCall<TReturn>(mockRun:
+    boolean, mockFn: () => TReturn,
+    fn: () => TReturn):
+    () => TReturn;
+
 export function MockFuncCall<T0, TReturn>(mockRun:
     boolean, mockFn: (args: T0) => TReturn,
     fn: (args: T0) => TReturn):
