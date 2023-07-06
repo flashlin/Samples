@@ -1,4 +1,4 @@
-import { ILine, IPosition, isSamePoint } from "./drawUtils";
+import { ILine, IPosition, IRect, isSamePoint } from './drawUtils';
 
 /**
  * compute line slope
@@ -163,11 +163,22 @@ export function findIntersection(a1: IPosition, a2: IPosition, b1: IPosition, b2
     };
     return [intersectionPoint];
   }
-
-  console.log('no2', t, u);
   return [];
 }
 
+/**
+ * 找出兩個線段的相交點
+ * @param line1 
+ * @param line2 
+ * @returns 
+ */
+export function findTwoLinesIntersection(line1: ILine, line2: ILine) {
+  return findIntersection(line1.start, line1.end, line2.start, line2.end);
+}
+
+/**
+ *  依照 angle 更新 pos 的增量
+ */
 export function updateCoordinates(pos: IPosition, angle: number, add: number): IPosition {
   const angleInRadians = angle * (Math.PI / 180);
   const deltaX = add * Math.cos(angleInRadians);
@@ -177,4 +188,31 @@ export function updateCoordinates(pos: IPosition, angle: number, add: number): I
   y -= deltaX;
   x += deltaY;
   return { x, y };
+}
+
+
+/**
+ * rectangle 是否和 line 相交
+ */
+export function rectangleIntersectLine(rect: IRect, line: ILine) {
+  const rx = rect.leftTop.x;
+  const ry = rect.leftTop.y;
+  const rw = rect.width;
+  const rh = rect.height;
+
+  const lines = [
+    { start: { x: rx, y: ry }, end: { x: rx + rw, y: ry } }, // Top
+    { start: { x: rx + rw, y: ry }, end: { x: rx + rw, y: ry + rh } }, // Right
+    { start: { x: rx, y: ry + rh }, end: { x: rx + rw, y: ry + rh } }, // Bottom
+    { start: { x: rx, y: ry }, end: { x: rx, y: ry + rh } }, // Left
+  ];
+
+  const intersectionPoints = [];
+  for (let rectLine of lines) {
+    const intersect = findTwoLinesIntersection(rectLine, line);
+    if (intersect) {
+      intersectionPoints.push(...intersect);
+    }
+  }
+  return intersectionPoints;
 }
