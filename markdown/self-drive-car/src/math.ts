@@ -190,6 +190,38 @@ export function updateCoordinates(pos: IPosition, angle: number, add: number): I
   return { x, y };
 }
 
+/**
+ * 計算角度
+ * @param x1 
+ * @param y1 
+ * @param x2 
+ * @param y2 
+ * @returns 
+ */
+function calculateAngleBetweenPoints(x1: number, y1: number, x2: number, y2: number) {
+  // 計算 y 和 x 的差值
+  let deltaY = y2 - y1;
+  let deltaX = x2 - x1;
+  // 使用 atan2 計算角度（弧度）
+  let angleInRadians = Math.atan2(deltaY, deltaX);
+  // 將弧度轉換成角度
+  let angleInDegrees = angleInRadians * (180 / Math.PI);
+  return angleInDegrees;
+}
+
+function getRectangleWidthHeight(rect: IRect) {
+  const x1 = rect.leftTop.x;
+  const y1 = rect.leftTop.y;
+  const x2 = rect.rightBottom.x;
+  const y2 = rect.rightBottom.y;
+  // 計算對角線長度
+  let diagonalLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  const theta = calculateAngleBetweenPoints(x1, y1, x2, y2);
+   // 使用三角函數計算寬度和高度
+   let width = diagonalLength * Math.abs(Math.cos(theta));
+   let height = diagonalLength * Math.abs(Math.sin(theta));
+   return [ width, height ];
+}
 
 /**
  * rectangle 是否和 line 相交
@@ -197,8 +229,7 @@ export function updateCoordinates(pos: IPosition, angle: number, add: number): I
 export function rectangleIntersectLine(rect: IRect, line: ILine) {
   const rx = rect.leftTop.x;
   const ry = rect.leftTop.y;
-  const rw = rect.width;
-  const rh = rect.height;
+  const [rw, rh] = getRectangleWidthHeight(rect);
 
   const lines = [
     { start: { x: rx, y: ry }, end: { x: rx + rw, y: ry } }, // Top

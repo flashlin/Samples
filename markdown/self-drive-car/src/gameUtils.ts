@@ -1,4 +1,4 @@
-import { ILine, IPosition, drawText } from "./drawUtils";
+import { ILine, IPosition, IRect, drawText } from "./drawUtils";
 
 export const CarFrameMargin = 4;
 export const CarWidth = 75;
@@ -58,6 +58,39 @@ export class VerticalRoad implements IRoad {
         ctx.strokeStyle = RoadColor;  // 線條顏色
         ctx.stroke();
     }
+
+    collide(pos: IPosition, rect: IRect) {
+        const x = this.pos.x + pos.x;
+        const y = this.pos.y + pos.y;
+        const line1 = {
+            start : {
+            x: x + RoadMargin,
+            y: y
+        },
+        end : {
+            x: x + RoadMargin,
+            y: y + RoadLength
+        }};
+        const points1 = rectangleIntersectLine(rect, line1);
+        if( points1.length > 0) {
+            return true;
+        }
+
+        const line2 = {
+        start: {
+            x: x + RoadWidth - RoadMargin,
+            y: y
+        },
+         end: {
+            x: x + RoadWidth - RoadMargin, 
+            y: y + RoadLength,
+        }};
+        const points2 = rectangleIntersectLine(rect, line2);
+        if( points2.length > 0 ) {
+            return true;
+        }
+        return false;
+    }
 }
 
 
@@ -80,6 +113,10 @@ export class HorizontalRoad implements IRoad {
         ctx.lineWidth = 7;
         ctx.strokeStyle = RoadColor;
         ctx.stroke();
+    }
+
+    collide(pos: IPosition, rect: IRect) {
+        return false;
     }
 }
 
@@ -107,6 +144,10 @@ export class LeftTopCurve implements IRoad {
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
+    }
+
+    collide(pos: IPosition, rect: IRect) {
+        return false;
     }
 }
 
@@ -136,6 +177,10 @@ export class RightTopCurve implements IRoad {
         ctx.lineWidth = 7;
         ctx.stroke();
     }
+
+    collide(pos: IPosition, rect: IRect) {
+        return false;
+    }
 }
 
 export class LeftBottomCurve implements IRoad {
@@ -162,6 +207,10 @@ export class LeftBottomCurve implements IRoad {
         ctx.strokeStyle = "red";
         ctx.lineWidth = 7;
         ctx.stroke();
+    }
+
+    collide(pos: IPosition, rect: IRect) {
+        return false;
     }
 }
 
@@ -190,10 +239,21 @@ export class RightBottomCurve implements IRoad {
         ctx.lineWidth = 7;
         ctx.stroke();
     }
+
+    collide(pos: IPosition, rect: IRect) {
+        return false;
+    }
 }
 
+export class EmptyRoad implements IRoad {
+    pos: IPosition = { x: 0, y: 0 };
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+    }
 
-
+    collide(pos: IPosition, rect: IRect) {
+        return false;
+    }
+}
 
 function create2dArray<T>(width: number, height: number): T[][] {
     let arr: T[][] = new Array(width);
@@ -204,6 +264,7 @@ function create2dArray<T>(width: number, height: number): T[][] {
 }
 
 import map1Content from '@/assets/map.txt?raw';
+import { rectangleIntersectLine } from "./math";
 
 function createRoad(ch: string) {
     const dict: Record<string, () => IRoad> = {
@@ -233,12 +294,6 @@ function readMap(mapContent: string): IRoad[][] {
         }
     }
     return roadMap;
-}
-
-export class EmptyRoad implements IRoad {
-    pos: IPosition = { x: 0, y: 0 };
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-    }
 }
 
 export class RoadMap {

@@ -17,8 +17,7 @@ export type ILine = {
 
 export type IRect = {
     leftTop: IPosition,
-    width: number,
-    height: number,
+    rightBottom: IPosition,
 }
 
 export interface IDrawOptions {

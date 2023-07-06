@@ -1,4 +1,4 @@
-import { IPosition } from "./drawUtils";
+import { IPosition, IRect, drawArc } from "./drawUtils";
 import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
@@ -50,6 +50,24 @@ export class Car {
         this.frame.render(ctx, { x: -CarWidth / 2, y: -CarHeight / 2 });
         ctx.drawImage(this.carImage, -CarWidth / 2, -CarHeight / 2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        drawArc
+    }
+
+    getBound(pos: IPosition): IRect {
+        let x1 = this.pos.x + pos.x;
+        let y1 = this.pos.y + pos.y;
+        let x2 = x1 + CarWidth;
+        let y2 = y1 + CarHeight;
+        const angleInRadians = this.angle * (Math.PI / 180);
+        x1 = x1 * Math.cos(angleInRadians);
+        y1 = y1 * Math.sin(angleInRadians);
+        x2 = x2 * Math.cos(angleInRadians);
+        y2 = y2 * Math.sin(angleInRadians);
+        return {
+            leftTop: { x: x1, y: y1 },
+            rightBottom: { x: x2, y: y2 },
+        }
     }
 
     move() {
