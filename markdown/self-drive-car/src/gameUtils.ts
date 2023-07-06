@@ -35,7 +35,7 @@ export interface IRoad {
     iy: number;
     pos: IPosition;
     render(ctx: CanvasRenderingContext2D): void;
-    collide(pos: IPosition, rect: IRect): boolean;
+    collide(rect: IRect): boolean;
     renderDamaged(ctx: CanvasRenderingContext2D, pos: IPosition): void;
 }
 
@@ -77,9 +77,9 @@ export class VerticalRoad implements IRoad {
         ctx.stroke();
     }
 
-    collide(pos: IPosition, rect: IRect) {
-        const x = this.pos.x + pos.x;
-        const y = this.pos.y + pos.y;
+    collide(rect: IRect) {
+        const x = this.pos.x;
+        const y = this.pos.y;
         const line1 = {
             start : {
             x: x + RoadMargin,
@@ -137,7 +137,7 @@ export class HorizontalRoad implements IRoad {
         ctx.stroke();
     }
 
-    collide(pos: IPosition, rect: IRect) {
+    collide(rect: IRect) {
         return false;
     }
 
@@ -169,7 +169,7 @@ export class LeftTopCurve implements IRoad {
         ctx.stroke();
     }
 
-    collide(pos: IPosition, rect: IRect) {
+    collide(rect: IRect) {
         return false;
     }
 
@@ -201,7 +201,7 @@ export class RightTopCurve implements IRoad {
         ctx.stroke();
     }
 
-    collide(pos: IPosition, rect: IRect) {
+    collide(rect: IRect) {
         return false;
     }
 
@@ -232,7 +232,7 @@ export class LeftBottomCurve implements IRoad {
         ctx.stroke();
     }
 
-    collide(pos: IPosition, rect: IRect) {
+    collide(rect: IRect) {
         return false;
     }
 
@@ -263,7 +263,7 @@ export class RightBottomCurve implements IRoad {
         ctx.stroke();
     }
 
-    collide(pos: IPosition, rect: IRect) {
+    collide(rect: IRect) {
         return false;
     }
 
@@ -280,7 +280,7 @@ export class EmptyRoad implements IRoad {
     render(ctx: CanvasRenderingContext2D) {
     }
 
-    collide(pos: IPosition, rect: IRect) {
+    collide(rect: IRect) {
         return false;
     }
 
@@ -370,12 +370,7 @@ export class RoadMap {
                 if (road == null) {
                     continue;
                 }
-                const roadPos = {
-                    x: x + ix * RoadWidth,
-                    y: y + iy * RoadLength,
-                };
-                const rc = road.collide(roadPos, rect);
-                if( rc ){
+                if( road.collide(rect) ){
                     return road;
                 }
             }
