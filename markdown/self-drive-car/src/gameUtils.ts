@@ -311,17 +311,16 @@ function readMap(mapContent: string): IRoad[][] {
 }
 
 export class RoadMap {
-    pos: IPosition;
+    pos: IPosition = { x: 0, y: 0 };
     roads: IRoad[][] = create2dArray<IRoad>(10, 10);
 
-    constructor(pos: IPosition = { x: 0, y: 0 }) {
-        this.pos = pos;
+    constructor() {
         this.roads = readMap(map1Content);
     }
 
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        const x = this.pos.x + pos.x;
-        const y = this.pos.y + pos.y;
+    render(ctx: CanvasRenderingContext2D) {
+        const x = this.pos.x;
+        const y = this.pos.y;
         const roads = this.roads;
         for (let ix = 0; ix < roads.length; ix++) {
             for (let iy = 0; iy < roads[ix].length; iy++) {

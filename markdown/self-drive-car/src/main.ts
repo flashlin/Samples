@@ -39,7 +39,8 @@ class Game {
         y -= this.car.y;
         x -= this.car.x;
         const pos = { x, y };
-        roadMap.render(ctx, pos);
+        roadMap.pos = pos;
+        roadMap.render(ctx);
         const road = roadMap.collide(pos, this.car.getBound(pos));
         if( road != null ) {
             console.log('damaged', pos);
