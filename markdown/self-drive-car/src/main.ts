@@ -38,7 +38,13 @@ class Game {
         let y = CanvasHeight / 2 - 180;
         y -= this.car.y;
         x -= this.car.x;
-        roadMap.render(ctx, { x, y });
+        const pos = { x, y };
+        roadMap.render(ctx, pos);
+        const road = roadMap.collide(pos, this.car.getBound(pos));
+        if( road != null ) {
+            console.log('damaged', pos);
+            road.renderDamaged(ctx, pos);
+        }
     }
 
     render() {
@@ -49,8 +55,8 @@ class Game {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         this.drawRoad();
-
         this.drawF4Car();
+
 
         this.fps.render(ctx, { x: 0, y: 0 });
         requestAnimationFrame(this.render.bind(this));
