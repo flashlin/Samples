@@ -32,25 +32,24 @@ export class Line {
 
 export interface IRoad {
     pos: IPosition;
-    render(ctx: CanvasRenderingContext2D, pos: IPosition): void;
+    render(ctx: CanvasRenderingContext2D): void;
     collide(pos: IPosition, rect: IRect): boolean;
     renderDamaged(ctx: CanvasRenderingContext2D, pos: IPosition): void;
 }
 
 //垂直
 export class VerticalRoad implements IRoad {
-    pos: IPosition;
+    pos: IPosition = { x: 0, y:0 };
 
     /**
      * 垂直 
      */
-    constructor(pos: IPosition = { x: 0, y: 0 }) {
-        this.pos = pos;
+    constructor() {
     }
 
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        const x = this.pos.x + pos.x;
-        const y = this.pos.y + pos.y;
+    render(ctx: CanvasRenderingContext2D) {
+        const x = this.pos.x;
+        const y = this.pos.y;
         ctx.beginPath();
         ctx.moveTo(x + RoadMargin, y);
         ctx.lineTo(x + RoadMargin, y + RoadLength);
@@ -112,15 +111,11 @@ export class VerticalRoad implements IRoad {
 
 // 水平
 export class HorizontalRoad implements IRoad {
-    pos: IPosition;
+    pos: IPosition = { x: 0, y: 0 };
 
-    constructor(pos: IPosition = { x: 0, y: 0 }) {
-        this.pos = pos;
-    }
-
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        const x = this.pos.x + pos.x;
-        const y = this.pos.y + pos.y;
+    render(ctx: CanvasRenderingContext2D) {
+        const x = this.pos.x;
+        const y = this.pos.y;
         ctx.beginPath();
         ctx.moveTo(x, y + RoadMargin);
         ctx.lineTo(x + RoadLength, y + RoadMargin);
@@ -142,18 +137,12 @@ export class HorizontalRoad implements IRoad {
 }
 
 export class LeftTopCurve implements IRoad {
-    pos: IPosition;
+    pos: IPosition = { x: 0, y: 0 };
 
-    constructor(pos: IPosition = { x: 0, y: 0 }) {
-        this.pos = {
-            x: pos.x + RoadLength,
-            y: pos.y + RoadWidth,
-        };
-    }
 
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        let x = this.pos.x + pos.x;
-        let y = this.pos.y + pos.y;
+    render(ctx: CanvasRenderingContext2D) {
+        let x = this.pos.x + RoadLength;
+        let y = this.pos.y + RoadWidth;
         ctx.beginPath();
         ctx.arc(x, y, RoadWidth - RoadMargin, Math.PI, 1.5 * Math.PI);
         ctx.strokeStyle = RoadColor;
@@ -179,18 +168,11 @@ export class LeftTopCurve implements IRoad {
 
 
 export class RightTopCurve implements IRoad {
-    pos: IPosition;
+    pos: IPosition= { x: 0, y: 0 };
 
-    constructor(pos: IPosition = { x: 0, y: 0 }) {
-        this.pos = {
-            x: pos.x,
-            y: pos.y + RoadWidth,
-        };
-    }
-
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        let x = this.pos.x + pos.x;
-        let y = this.pos.y + pos.y;
+    render(ctx: CanvasRenderingContext2D) {
+        let x = this.pos.x;
+        let y = this.pos.y + RoadWidth;
         ctx.beginPath();
         ctx.arc(x, y, RoadWidth - RoadMargin, 1.5 * Math.PI, 0);
         ctx.strokeStyle = RoadColor;
@@ -215,18 +197,11 @@ export class RightTopCurve implements IRoad {
 }
 
 export class LeftBottomCurve implements IRoad {
-    pos: IPosition;
+    pos: IPosition = { x: 0, y: 0 };
 
-    constructor(pos: IPosition = { x: 0, y: 0 }) {
-        this.pos = {
-            x: pos.x + RoadLength,
-            y: pos.y,
-        };
-    }
-
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        let x = this.pos.x + pos.x;
-        let y = this.pos.y + pos.y;
+    render(ctx: CanvasRenderingContext2D) {
+        let x = this.pos.x + RoadLength;
+        let y = this.pos.y;
         ctx.beginPath();
         ctx.arc(x, y, RoadWidth - RoadMargin, 0.5 * Math.PI, 1 * Math.PI);
         ctx.strokeStyle = RoadColor;
@@ -251,18 +226,11 @@ export class LeftBottomCurve implements IRoad {
 }
 
 export class RightBottomCurve implements IRoad {
-    pos: IPosition;
+    pos: IPosition= { x: 0, y: 0 };
 
-    constructor(pos: IPosition = { x: 0, y: 0 }) {
-        this.pos = {
-            x: pos.x,
-            y: pos.y,
-        };
-    }
-
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        let x = this.pos.x + pos.x;
-        let y = this.pos.y + pos.y;
+    render(ctx: CanvasRenderingContext2D) {
+        let x = this.pos.x;
+        let y = this.pos.y;
         ctx.beginPath();
         ctx.arc(x, y, RoadWidth - RoadMargin, 0 * Math.PI, 0.5 * Math.PI);
         ctx.strokeStyle = RoadColor;
@@ -288,7 +256,7 @@ export class RightBottomCurve implements IRoad {
 
 export class EmptyRoad implements IRoad {
     pos: IPosition = { x: 0, y: 0 };
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+    render(ctx: CanvasRenderingContext2D) {
     }
 
     collide(pos: IPosition, rect: IRect) {
@@ -361,11 +329,11 @@ export class RoadMap {
                 if (road == null) {
                     continue;
                 }
-                const roadPos = {
+                road.pos = {
                     x: x + ix * RoadWidth,
                     y: y + iy * RoadLength,
                 };
-                road.render(ctx, roadPos);
+                road.render(ctx);
             }
         }
     }
