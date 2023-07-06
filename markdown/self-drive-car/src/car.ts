@@ -6,7 +6,7 @@ import { updateCoordinates } from "./math";
 
 export class Car {
     carImage: HTMLImageElement;
-    pos: IPosition;
+    pos: IPosition = { x: 0, y: 0 };
     frame: Rectangle;
 
     controls: Controls;
@@ -21,10 +21,6 @@ export class Car {
     y = 0;
 
     constructor() {
-        this.pos = {
-            x: 0,
-            y: 0
-        };
         this.carImage = new Image();
         this.carImage.src = car1;
         this.frame = new Rectangle(
@@ -37,9 +33,9 @@ export class Car {
         this.controls = new Controls();
     }
 
-    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        const x = this.pos.x + pos.x;
-        const y = this.pos.y + pos.y;
+    render(ctx: CanvasRenderingContext2D) {
+        const x = this.pos.x;
+        const y = this.pos.y;
         //ctx.globalCompositeOperation = 'destination-atop';
         //ctx.drawImage(this.carImage, x, y, CarWidth, CarHeight);
 
@@ -50,8 +46,6 @@ export class Car {
         this.frame.render(ctx, { x: -CarWidth / 2, y: -CarHeight / 2 });
         ctx.drawImage(this.carImage, -CarWidth / 2, -CarHeight / 2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-        drawArc
     }
 
     getBound(pos: IPosition): IRect {
@@ -106,10 +100,8 @@ export class Car {
             this.angle += 1;
         }
 
-        const p = updateCoordinates({ x: this.x, y: this.y }, this.angle, this.speed);
-        this.x = p.x;
-        this.y = p.y;
-        //this.pos.x = p.x;
-        //this.pos.y = p.y;
+        const pos = updateCoordinates({ x: this.x, y: this.y }, this.angle, this.speed);
+        this.x = pos.x;
+        this.y = pos.y;
     }
 }

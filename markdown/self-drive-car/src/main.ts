@@ -27,7 +27,8 @@ class Game {
     drawF4Car() {
         const ctx = this.ctx;
         const pos = { x: CanvasWidth / 2 - 32, y: CanvasHeight / 2 - 56 };
-        this.car.render(ctx, pos);
+        this.car.pos = pos;
+        this.car.render(ctx);
         this.car.move();
     }
 
