@@ -1,6 +1,6 @@
 import { Car } from './car';
 import { ILine, IPosition } from './drawUtils';
-import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength } from './gameUtils';
+import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS } from './gameUtils';
 
 
 class Game {
@@ -8,6 +8,7 @@ class Game {
     ctx: CanvasRenderingContext2D;
     car = new Car();
     roadMap = new RoadMap();
+    fps = new FPS();
 
     constructor() {
         this.canvas = this.createCanvas();
@@ -25,7 +26,7 @@ class Game {
 
     drawF4Car() {
         const ctx = this.ctx;
-        const pos = {x: CanvasWidth/2-32, y: CanvasHeight/2-56};
+        const pos = { x: CanvasWidth / 2 - 32, y: CanvasHeight / 2 - 56 };
         this.car.render(ctx, pos);
         this.car.move();
     }
@@ -37,7 +38,7 @@ class Game {
         let y = CanvasHeight / 2 - 180;
         y -= this.car.y;
         x -= this.car.x;
-        roadMap.render(ctx, {x, y});
+        roadMap.render(ctx, { x, y });
     }
 
     render() {
@@ -50,6 +51,8 @@ class Game {
         this.drawRoad();
 
         this.drawF4Car();
+
+        this.fps.render(ctx, { x: 0, y: 0 });
         requestAnimationFrame(this.render.bind(this));
     }
 }

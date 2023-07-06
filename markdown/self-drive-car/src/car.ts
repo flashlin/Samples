@@ -11,9 +11,9 @@ export class Car {
 
     controls: Controls;
     speed = 0;
-    acceleration = 0.2;
-    maxSpeed = 3;
-    friction = 0.01;
+    acceleration = 0.3;
+    maxSpeed = 4;
+    friction = 0.02;
     angle = 0;
     damaged = false;
 
@@ -27,10 +27,11 @@ export class Car {
         };
         this.carImage = new Image();
         this.carImage.src = car1;
-        this.frame = new Rectangle({
-            x: this.pos.x + CarFrameMargin,
-            y: this.pos.y + CarFrameMargin
-        },
+        this.frame = new Rectangle(
+            {
+                x: this.pos.x + CarFrameMargin,
+                y: this.pos.y + CarFrameMargin
+            },
             CarWidth - CarFrameMargin * 2,
             CarHeight - CarFrameMargin * 2);
         this.controls = new Controls();

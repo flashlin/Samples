@@ -1,4 +1,4 @@
-import { ILine, IPosition } from "./drawUtils";
+import { ILine, IPosition, drawText } from "./drawUtils";
 
 export const CarFrameMargin = 4;
 export const CarWidth = 75;
@@ -271,24 +271,43 @@ export class RoadMap {
 }
 
 
-export class Rectangle
-{
+export class Rectangle {
     pos: IPosition;
     width: number;
     height: number;
-    
-    constructor(pos: IPosition, width: number, height: number)
-    {
+
+    constructor(pos: IPosition, width: number, height: number) {
         this.pos = pos;
         this.width = width;
         this.height = height;
     }
-    
+
     render(ctx: CanvasRenderingContext2D, pos: IPosition) {
         const x = this.pos.x + pos.x;
         const y = this.pos.y + pos.y;
         ctx.strokeStyle = 'red';
         ctx.lineWidth = 7;
         ctx.strokeRect(x, y, this.width, this.height);
+    }
+}
+
+export class FPS {
+    frameCount = 0;
+    fps = 0;
+    lastTime = performance.now();
+
+    render(ctx: CanvasRenderingContext2D, pos: IPosition) {
+        const currentTime = performance.now();
+        const deltaTime = currentTime - this.lastTime;
+
+        if (deltaTime >= 1000) { // 更新FPS計數每秒一次
+            this.fps = this.frameCount;
+            this.frameCount = 0;
+            this.lastTime = currentTime;
+        }
+
+        drawText(ctx, { x: 0, y: 24 }, `FPS: ${this.fps}`);
+
+        this.frameCount++;
     }
 }
