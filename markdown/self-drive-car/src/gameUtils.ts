@@ -31,6 +31,8 @@ export class Line {
 
 
 export interface IRoad {
+    ix: number;
+    iy: number;
     pos: IPosition;
     render(ctx: CanvasRenderingContext2D): void;
     collide(pos: IPosition, rect: IRect): boolean;
@@ -39,6 +41,8 @@ export interface IRoad {
 
 //垂直
 export class VerticalRoad implements IRoad {
+    ix = 0;
+    iy = 0;
     pos: IPosition = { x: 0, y:0 };
 
     /**
@@ -85,6 +89,11 @@ export class VerticalRoad implements IRoad {
             x: x + RoadMargin,
             y: y + RoadLength
         }};
+        
+        
+        if( this.ix==0 && this.iy == 1) {
+            console.log(`collide test`, line1);
+        }
 
         const points1 = rectangleIntersectLine(rect, line1);
         if( points1.length > 0) {
@@ -111,6 +120,8 @@ export class VerticalRoad implements IRoad {
 
 // 水平
 export class HorizontalRoad implements IRoad {
+    ix = 0;
+    iy = 0;
     pos: IPosition = { x: 0, y: 0 };
 
     render(ctx: CanvasRenderingContext2D) {
@@ -137,6 +148,8 @@ export class HorizontalRoad implements IRoad {
 }
 
 export class LeftTopCurve implements IRoad {
+    ix = 0;
+    iy = 0;
     pos: IPosition = { x: 0, y: 0 };
 
 
@@ -168,6 +181,8 @@ export class LeftTopCurve implements IRoad {
 
 
 export class RightTopCurve implements IRoad {
+    ix = 0;
+    iy = 0;
     pos: IPosition= { x: 0, y: 0 };
 
     render(ctx: CanvasRenderingContext2D) {
@@ -197,6 +212,8 @@ export class RightTopCurve implements IRoad {
 }
 
 export class LeftBottomCurve implements IRoad {
+    ix = 0;
+    iy = 0;
     pos: IPosition = { x: 0, y: 0 };
 
     render(ctx: CanvasRenderingContext2D) {
@@ -226,6 +243,8 @@ export class LeftBottomCurve implements IRoad {
 }
 
 export class RightBottomCurve implements IRoad {
+    ix = 0;
+    iy = 0;
     pos: IPosition= { x: 0, y: 0 };
 
     render(ctx: CanvasRenderingContext2D) {
@@ -255,6 +274,8 @@ export class RightBottomCurve implements IRoad {
 }
 
 export class EmptyRoad implements IRoad {
+    ix = 0;
+    iy = 0;
     pos: IPosition = { x: 0, y: 0 };
     render(ctx: CanvasRenderingContext2D) {
     }
@@ -304,7 +325,9 @@ function readMap(mapContent: string): IRoad[][] {
         let line = lines[y];
         for (let x = 0; x < width; x++) {
             let ch = line[x];
-            roadMap[x][y] = createRoad(ch);
+            const road = roadMap[x][y] = createRoad(ch);
+            road.ix = x;
+            road.iy = y;
         }
     }
     return roadMap;
@@ -352,9 +375,6 @@ export class RoadMap {
                     y: y + iy * RoadLength,
                 };
                 const rc = road.collide(roadPos, rect);
-                if( ix==0 && iy == 1) {
-                    console.log(`collide test`, rc);
-                }
                 if( rc ){
                     return road;
                 }
