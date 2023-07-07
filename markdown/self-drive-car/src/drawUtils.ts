@@ -55,6 +55,19 @@ export function drawArc(ctx: CanvasRenderingContext2D, arc: IArc,
     ctx.stroke();
 }
 
+export function drawRect(ctx: CanvasRenderingContext2D, rect: IRect,
+    options: IDrawOptions = DefaultDrawOptions) {
+    ctx.beginPath();
+    ctx.strokeStyle = options.strokeSyle;
+    ctx.lineWidth = options.lineWidth;
+    ctx.moveTo(rect.leftTop.x, rect.leftTop.y);
+    ctx.lineTo(rect.rightBottom.x, rect.leftTop.y);
+    ctx.lineTo(rect.rightBottom.x, rect.rightBottom.y);
+    ctx.lineTo(rect.leftTop.x, rect.rightBottom.y);
+    ctx.lineTo(rect.leftTop.x, rect.leftTop.y);
+    ctx.stroke();
+}
+
 export interface IDrawTextOptions {
     font: string;
     fillStyle: string;

@@ -209,7 +209,7 @@ function calculateAngleBetweenPoints(x1: number, y1: number, x2: number, y2: num
   return angleInDegrees;
 }
 
-function getRectangleWidthHeight(rect: IRect) {
+export function getRectangleWidthHeight(rect: IRect): [number, number] {
   const x1 = rect.leftTop.x;
   const y1 = rect.leftTop.y;
   const x2 = rect.rightBottom.x;
@@ -217,10 +217,10 @@ function getRectangleWidthHeight(rect: IRect) {
   // 計算對角線長度
   let diagonalLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
   const theta = calculateAngleBetweenPoints(x1, y1, x2, y2);
-   // 使用三角函數計算寬度和高度
-   let width = diagonalLength * Math.abs(Math.cos(theta));
-   let height = diagonalLength * Math.abs(Math.sin(theta));
-   return [ width, height ];
+  // 使用三角函數計算寬度和高度
+  let width = diagonalLength * Math.abs(Math.cos(theta));
+  let height = diagonalLength * Math.abs(Math.sin(theta));
+  return [width, height];
 }
 
 /**
@@ -246,4 +246,40 @@ export function rectangleIntersectLine(rect: IRect, line: ILine) {
     }
   }
   return intersectionPoints;
+}
+
+
+export function rotateRectangle(left: IPosition, right: IPosition, thetaInDegrees: number): IPosition[] {
+  const x1 = left.x;
+  const y1 = left.y;
+  const x2 = right.x;
+  const y2 = right.y;
+  
+  // 將角度轉換為弧度
+  const theta = thetaInDegrees * (Math.PI / 180);
+
+  // 計算矩形的中心點
+  const centerX = (x1 + x2) / 2;
+  const centerY = (y1 + y2) / 2;
+
+  // 矩形的四個頂點
+  const points = [
+    { x: x1, y: y1 },
+    { x: x2, y: y1 },
+    { x: x2, y: y2 },
+    { x: x1, y: y2 }
+  ];
+
+  // 旋轉每個頂點
+  const rotatedPoints = points.map(point => {
+    let x = point.x - centerX;
+    let y = point.y - centerY;
+
+    return {
+      x: x * Math.cos(theta) - y * Math.sin(theta) + centerX,
+      y: x * Math.sin(theta) + y * Math.cos(theta) + centerY
+    };
+  });
+
+  return rotatedPoints;
 }

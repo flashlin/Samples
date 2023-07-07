@@ -1,8 +1,8 @@
-import { IPosition, IRect, drawArc } from "./drawUtils";
+import { IPosition, IRect, drawArc, drawRect } from "./drawUtils";
 import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
-import { updateCoordinates } from "./math";
+import { getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
 
 export class Car {
     carImage: HTMLImageElement;
@@ -43,24 +43,26 @@ export class Car {
         // 將原點移至圖像的中心
         ctx.translate(x + CarWidth / 2, y + CarHeight / 2);
         ctx.rotate(angleInRadians);
-        this.frame.render(ctx, { x: -CarWidth / 2, y: -CarHeight / 2 });
+        //this.frame.render(ctx, { x: -CarWidth / 2, y: -CarHeight / 2 });
         ctx.drawImage(this.carImage, -CarWidth / 2, -CarHeight / 2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
-    getBound(pos: IPosition): IRect {
-        let x1 = this.pos.x + pos.x;
-        let y1 = this.pos.y + pos.y;
+    getBound(): IRect {
+        let x1 = this.x + CanvasWidth / 2 - CarWidth / 2 + CarFrameMargin;
+        let y1 = this.y + CanvasHeight / 2 - CarHeight / 2 + CarFrameMargin;
         let x2 = x1 + CarWidth;
         let y2 = y1 + CarHeight;
+        console.log('car1', x1, y1, x2, y2, this.angle);
         const angleInRadians = this.angle * (Math.PI / 180);
-        x1 = x1 * Math.cos(angleInRadians);
-        y1 = y1 * Math.sin(angleInRadians);
-        x2 = x2 * Math.cos(angleInRadians);
-        y2 = y2 * Math.sin(angleInRadians);
+        const [ left, _, right] = rotateRectangle({x:x1, y:y1}, {x:x2,y:y2}, this.angle);
+        // x1 = x1 * Math.cos(angleInRadians);
+        // y1 = y1 * Math.sin(angleInRadians);
+        // x2 = x2 * Math.cos(angleInRadians);
+        // y2 = y2 * Math.sin(angleInRadians);
         return {
-            leftTop: { x: x1, y: y1 },
-            rightBottom: { x: x2, y: y2 },
+            leftTop: { x: left.x, y: left.y },
+            rightBottom: { x: right.x, y: right.y },
         }
     }
 

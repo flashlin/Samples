@@ -92,7 +92,7 @@ export class VerticalRoad implements IRoad {
         
         
         if( this.ix==0 && this.iy == 1) {
-            console.log(`collide test`, line1.start, line1.end, rect.leftTop, rect.rightBottom);
+            console.log(`collide test`, line1.start, line1.end, ' ', rect.leftTop, rect.rightBottom);
         }
 
         const points1 = rectangleIntersectLine(rect, line1);
@@ -360,9 +360,7 @@ export class RoadMap {
         }
     }
 
-    collide(pos: IPosition, rect: IRect) {
-        const x = this.pos.x + pos.x;
-        const y = this.pos.y + pos.y;
+    collide(rect: IRect) {
         const roads = this.roads;
         for (let ix = 0; ix < roads.length; ix++) {
             for (let iy = 0; iy < roads[ix].length; iy++) {
