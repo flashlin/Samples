@@ -43,14 +43,16 @@ export class Car {
         // 將原點移至圖像的中心
         ctx.translate(x + CarWidth / 2, y + CarHeight / 2);
         ctx.rotate(angleInRadians);
-        //this.frame.render(ctx, { x: -CarWidth / 2, y: -CarHeight / 2 });
         ctx.drawImage(this.carImage, -CarWidth / 2, -CarHeight / 2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
     getBound(): IRect {
-        let x1 = this.x + CanvasWidth / 2 - CarWidth / 2 + CarFrameMargin;
-        let y1 = this.y + CanvasHeight / 2 - CarHeight / 2 + CarFrameMargin;
+        console.log(`car bound ${this.pos.x}, ${this.pos.y}`)
+        // let x1 = this.x + CanvasWidth / 2 - CarWidth / 2 + CarFrameMargin;
+        // let y1 = this.y + CanvasHeight / 2 - CarHeight / 2 + CarFrameMargin;
+        let x1 = this.pos.x;
+        let y1 = this.pos.y;
         let x2 = x1 + CarWidth;
         let y2 = y1 + CarHeight;
         const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({x:x1, y:y1}, {x:x2,y:y2}, this.angle);
