@@ -1,5 +1,5 @@
 import { IPosition, IRect, drawArc, drawRect } from "./drawUtils";
-import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight } from "./gameUtils";
+import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight, CenterX } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
 import { getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
