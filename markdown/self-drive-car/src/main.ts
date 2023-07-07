@@ -65,7 +65,6 @@ class Game {
         this.drawRoad();
         this.drawF4Car();
 
-
         const carBound = this.car.getBound();
         drawRect(ctx, this.car.getFrame(), { lineWidth: 5, strokeSyle: "yellow" });
         drawText(ctx, { x: CenterX - CarWidth, y: CenterY}, `${posInfo(carBound.leftTop)}`)
