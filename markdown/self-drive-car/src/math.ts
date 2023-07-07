@@ -185,8 +185,8 @@ export function updateCoordinates(pos: IPosition, angle: number, add: number): I
   const deltaY = add * Math.sin(angleInRadians);
   let x = pos.x;
   let y = pos.y;
-  y -= deltaX;
-  x += deltaY;
+  y += deltaX;
+  x -= deltaY;
   return { x, y };
 }
 
