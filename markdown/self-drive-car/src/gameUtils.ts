@@ -1,4 +1,4 @@
-import { ILine, IPosition, IRect, drawText } from "./drawUtils";
+import { ILine, IPosition, IRect, drawText, posInfo } from "./drawUtils";
 
 export const CarFrameMargin = 4;
 export const CarWidth = 75;
@@ -95,7 +95,8 @@ export class VerticalRoad implements IRoad {
 
 
         if (this.ix == 0 && this.iy == 1) {
-            console.log(`collide test`, line1.start, line1.end, 'rect=', rect);
+            drawText(ctx, line1.start, `${posInfo(line1.start)}`)
+            drawText(ctx, line1.end, `${posInfo(line1.end)}`)
         }
 
         const points1 = rectangleIntersectLine(rect, line1);
