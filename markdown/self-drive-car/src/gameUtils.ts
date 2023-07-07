@@ -67,8 +67,8 @@ export class VerticalRoad implements IRoad {
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D, pos: IPosition) {
-        const x = this.pos.x + pos.x;
-        const y = this.pos.y + pos.y;
+        const x = this.pos.x;
+        const y = this.pos.y;
         ctx.beginPath();
         ctx.moveTo(x + RoadMargin, y);
         ctx.lineTo(x + RoadMargin, y + RoadLength);
@@ -95,7 +95,7 @@ export class VerticalRoad implements IRoad {
 
 
         if (this.ix == 0 && this.iy == 1) {
-            console.log(`collide test`, line1.start, line1.end, ' ', rect.leftTop, rect.rightBottom);
+            console.log(`collide test`, line1.start, line1.end, 'rect=', rect);
         }
 
         const points1 = rectangleIntersectLine(rect, line1);
