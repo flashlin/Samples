@@ -53,17 +53,8 @@ export class Car {
         let y1 = this.y + CanvasHeight / 2 - CarHeight / 2 + CarFrameMargin;
         let x2 = x1 + CarWidth;
         let y2 = y1 + CarHeight;
-        console.log('car1', x1, y1, x2, y2, this.angle);
-        const angleInRadians = this.angle * (Math.PI / 180);
-        const [ left, _, right] = rotateRectangle({x:x1, y:y1}, {x:x2,y:y2}, this.angle);
-        // x1 = x1 * Math.cos(angleInRadians);
-        // y1 = y1 * Math.sin(angleInRadians);
-        // x2 = x2 * Math.cos(angleInRadians);
-        // y2 = y2 * Math.sin(angleInRadians);
-        return {
-            leftTop: { x: left.x, y: left.y },
-            rightBottom: { x: right.x, y: right.y },
-        }
+        const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({x:x1, y:y1}, {x:x2,y:y2}, this.angle);
+        return { leftTop, rightTop, rightBottom, leftBottom, }
     }
 
     move() {
