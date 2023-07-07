@@ -37,7 +37,7 @@ export interface IRoad {
     iy: number;
     pos: IPosition;
     render(ctx: CanvasRenderingContext2D): void;
-    collide(rect: IRect): boolean;
+    collide(ctx: CanvasRenderingContext2D, rect: IRect): boolean;
     renderDamaged(ctx: CanvasRenderingContext2D, pos: IPosition): void;
 }
 
@@ -79,7 +79,7 @@ export class VerticalRoad implements IRoad {
         ctx.stroke();
     }
 
-    collide(rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         const x = this.pos.x;
         const y = this.pos.y;
         const line1 = {
@@ -141,7 +141,7 @@ export class HorizontalRoad implements IRoad {
         ctx.stroke();
     }
 
-    collide(rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         return false;
     }
 
@@ -172,7 +172,7 @@ export class LeftTopCurve implements IRoad {
         ctx.stroke();
     }
 
-    collide(rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         return false;
     }
 
@@ -203,7 +203,7 @@ export class RightTopCurve implements IRoad {
         ctx.stroke();
     }
 
-    collide(rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         return false;
     }
 
@@ -233,7 +233,7 @@ export class LeftBottomCurve implements IRoad {
         ctx.stroke();
     }
 
-    collide(rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         return false;
     }
 
@@ -263,7 +263,7 @@ export class RightBottomCurve implements IRoad {
         ctx.stroke();
     }
 
-    collide(rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         return false;
     }
 
@@ -279,7 +279,7 @@ export class EmptyRoad implements IRoad {
     render(ctx: CanvasRenderingContext2D) {
     }
 
-    collide(rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         return false;
     }
 
@@ -358,7 +358,7 @@ export class RoadMap {
         }
     }
 
-    collide(rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         const roads = this.roads;
         for (let ix = 0; ix < roads.length; ix++) {
             for (let iy = 0; iy < roads[ix].length; iy++) {
@@ -366,7 +366,7 @@ export class RoadMap {
                 if (road == null) {
                     continue;
                 }
-                if (road.collide(rect)) {
+                if (road.collide(ctx, rect)) {
                     return road;
                 }
             }

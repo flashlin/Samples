@@ -1,7 +1,6 @@
 import { Car } from './car';
-import { ILine, IPosition, drawRect } from './drawUtils';
+import { ILine, IPosition, drawRect, drawText, posInfo } from './drawUtils';
 import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY } from './gameUtils';
-
 
 class Game {
     canvas: HTMLCanvasElement;
@@ -44,7 +43,9 @@ class Game {
         roadMap.render(ctx);
         const carBound = this.car.getBound();
         drawRect(ctx, carBound, { lineWidth: 5, strokeSyle: "yellow" });
-        const road = roadMap.collide(carBound);
+        drawText(ctx, carBound.leftTop, `${posInfo(carBound.leftTop)}`)
+        drawText(ctx, carBound.rightBottom, `${posInfo(carBound.rightBottom)}`)
+        const road = roadMap.collide(ctx, carBound);
         if (road != null) {
             const drawPos = roadMap.pos;//{ x: CanvasWidth / 2 - CarWidth / 2, y: CanvasHeight / CarHeight / 2 };
             console.log('damaged', drawPos);
