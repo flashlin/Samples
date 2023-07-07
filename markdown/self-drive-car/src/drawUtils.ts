@@ -77,17 +77,27 @@ export interface IDrawTextOptions {
 }
 
 export const DefaultDrawTextOptions: IDrawTextOptions = {
-    font: "30px Arial",
+    font: "24px Arial",
     fillStyle: "white",
     strokeStyle: "blue",
 };
 
-export function drawText(ctx: CanvasRenderingContext2D, pos: IPosition, text: string, options: IDrawTextOptions = DefaultDrawTextOptions) {
+export function posInfo(pos: IPosition) {
+    let x = Math.round(pos.x);
+    let y = Math.round(pos.y);
+    return `${x},${y}`;
+}
+
+export function drawText(ctx: CanvasRenderingContext2D, 
+    pos: IPosition, 
+    text: string, 
+    options: Partial<IDrawTextOptions> = DefaultDrawTextOptions) {
     // 設置文字樣式和大小
-    ctx.font = options.font;
-    ctx.strokeStyle = "blue";
+    const newOptions = {...DefaultDrawTextOptions,...options };
+    ctx.font = newOptions.font;
+    ctx.strokeStyle = newOptions.strokeStyle;
     ctx.strokeText(text, pos.x + 1, pos.y + 1);
-    ctx.fillStyle = options.fillStyle;
+    ctx.fillStyle = newOptions.fillStyle;
     // 使用fillText方法在(50, 50)位置繪製填充文字
     ctx.fillText(text, pos.x, pos.y);
 }
