@@ -1,6 +1,6 @@
 import { Car } from './car';
 import { ILine, IPosition, drawRect } from './drawUtils';
-import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS } from './gameUtils';
+import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY } from './gameUtils';
 
 
 class Game {
@@ -26,8 +26,7 @@ class Game {
 
     drawF4Car() {
         const ctx = this.ctx;
-        const pos = { x: CanvasWidth / 2 - 32, y: CanvasHeight / 2 - 56 };
-        this.car.pos = pos;
+        this.car.pos = { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin};
         this.car.render(ctx);
         this.car.move();
     }
@@ -40,15 +39,14 @@ class Game {
         // y -= this.car.y;
         // x -= this.car.x;
         // const pos = { x, y };
-        const CenterX = CanvasWidth / 2 - CarWidth / 2;
-        const CenterY = CanvasHeight / 2 - CanvasHeight / 2;
-        const drawPos = { x: CanvasWidth / 2 - CarWidth / 2, y: CanvasHeight / CarHeight / 2 };
+        
         roadMap.pos = { x: this.car.x + CenterX, y: this.car.y + CenterY };
         roadMap.render(ctx);
         const carBound = this.car.getBound();
         drawRect(ctx, carBound, { lineWidth: 5, strokeSyle: "yellow" });
         const road = roadMap.collide(carBound);
         if (road != null) {
+            const drawPos = roadMap.pos;//{ x: CanvasWidth / 2 - CarWidth / 2, y: CanvasHeight / CarHeight / 2 };
             console.log('damaged', drawPos);
             road.renderDamaged(ctx, drawPos);
         }
