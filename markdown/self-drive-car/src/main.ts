@@ -25,7 +25,7 @@ class Game {
 
     drawF4Car() {
         const ctx = this.ctx;
-        this.car.pos = { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin};
+        this.car.pos = { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin };
         this.car.render(ctx);
         this.car.move();
     }
@@ -38,13 +38,15 @@ class Game {
         // y -= this.car.y;
         // x -= this.car.x;
         // const pos = { x, y };
-        
+
         roadMap.pos = { x: this.car.x + CenterX, y: this.car.y + CenterY };
         roadMap.render(ctx);
         const carBound = this.car.getBound();
-        drawRect(ctx, carBound, { lineWidth: 5, strokeSyle: "yellow" });
-        drawText(ctx, carBound.leftTop, `${posInfo(carBound.leftTop)}`)
-        drawText(ctx, carBound.rightBottom, `${posInfo(carBound.rightBottom)}`)
+        // drawRect(ctx, carBound, { lineWidth: 5, strokeSyle: "yellow" });
+        // drawText(ctx, carBound.leftTop, `${posInfo(carBound.leftTop)}`)
+        // drawText(ctx, carBound.rightTop, `${posInfo(carBound.rightTop)}`)
+        // drawText(ctx, carBound.rightBottom, `${posInfo(carBound.rightBottom)}`)
+        // drawText(ctx, carBound.leftBottom, `${posInfo(carBound.leftBottom)}`)
         const road = roadMap.collide(ctx, carBound);
         if (road != null) {
             const drawPos = roadMap.pos;//{ x: CanvasWidth / 2 - CarWidth / 2, y: CanvasHeight / CarHeight / 2 };
@@ -62,6 +64,14 @@ class Game {
 
         this.drawRoad();
         this.drawF4Car();
+
+
+        const carBound = this.car.getBound();
+        drawRect(ctx, this.car.getFrame(), { lineWidth: 5, strokeSyle: "yellow" });
+        drawText(ctx, { x: CenterX - CarWidth, y: CenterY}, `${posInfo(carBound.leftTop)}`)
+        drawText(ctx, { x: CenterX + CarWidth, y: CenterY}, `${posInfo(carBound.rightTop)}`)
+        drawText(ctx, { x: CenterX - CarWidth, y: CenterY + CarHeight}, `${posInfo(carBound.leftBottom)}`)
+        drawText(ctx, { x: CenterX + CarWidth, y: CenterY + CarHeight}, `${posInfo(carBound.rightBottom)}`)
 
 
         this.fps.render(ctx, { x: 0, y: 0 });

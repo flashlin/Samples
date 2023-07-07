@@ -1,5 +1,5 @@
 import { IPosition, IRect, drawArc, drawRect } from "./drawUtils";
-import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight, CenterX } from "./gameUtils";
+import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight, CenterX, CenterY } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
 import { getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
@@ -48,14 +48,37 @@ export class Car {
     }
 
     getBound(): IRect {
-        console.log(`car bound ${this.pos.x}, ${this.pos.y}`)
+        // let x1 = this.x + CanvasWidth / 2 - CarWidth / 2 + CarFrameMargin;
+        // let y1 = this.y + CanvasHeight / 2 - CarHeight / 2 + CarFrameMargin;
+        let x1 = this.x + this.pos.x;
+        let y1 = this.y + this.pos.y;
+        let x2 = x1 + CarWidth;
+        let y2 = y1 + CarHeight;
+        const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({ x: x1, y: y1 }, { x: x2, y: y2 }, this.angle);
+        return { leftTop, rightTop, rightBottom, leftBottom, }
+    }
+
+    getFrame(): IRect {
+        const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle(
+            { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin },
+            { x: CenterX + CarFrameMargin + CarWidth, y: CenterY + CarFrameMargin + CarHeight },
+            this.angle);
+        return {
+            leftTop,
+            rightTop,
+            rightBottom,
+            leftBottom
+        };
+    }
+
+    getBound1(): IRect {
         // let x1 = this.x + CanvasWidth / 2 - CarWidth / 2 + CarFrameMargin;
         // let y1 = this.y + CanvasHeight / 2 - CarHeight / 2 + CarFrameMargin;
         let x1 = this.pos.x;
         let y1 = this.pos.y;
         let x2 = x1 + CarWidth;
         let y2 = y1 + CarHeight;
-        const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({x:x1, y:y1}, {x:x2,y:y2}, this.angle);
+        const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({ x: x1, y: y1 }, { x: x2, y: y2 }, this.angle);
         return { leftTop, rightTop, rightBottom, leftBottom, }
     }
 
