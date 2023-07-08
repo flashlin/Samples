@@ -1,5 +1,5 @@
 import { Car } from './car';
-import { ILine, IPosition, drawRect, drawText, posInfo } from './drawUtils';
+import { drawRect, drawText, posInfo } from './drawUtils';
 import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY, CarPos } from './gameUtils';
 import { rectangleIntersectLine } from './math';
 

@@ -1,8 +1,8 @@
-import { IPosition, IRect, drawArc, drawRect, drawText, posInfo } from "./drawUtils";
+import { drawArc, drawRect, drawText, posInfo } from "./drawUtils";
 import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight, CenterX, CenterY, CarCenterY, CarCenterX, CarPos } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
-import { getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
+import { IPosition, IRect, getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
 
 export class Car {
     carImage: HTMLImageElement;

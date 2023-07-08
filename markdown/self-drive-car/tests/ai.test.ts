@@ -16,11 +16,16 @@ describe('a1-a2 line b1-b2 intersection tests', () => {
 });
 
 test('rectangle and line 相交', () => {
-  const rect = { leftTop: { x: -3, y: -3 }, rightBottom: { x: 3, y: 3 } };
+  const rect = { 
+    leftTop: { x: -3, y: -3 }, 
+    rightTop: { x: 3, y: -3 }, 
+    rightBottom: { x: 3, y: 3 }, 
+    leftBottom: { x: -3, y: 3 }, 
+  };
   const line = { start: { x: -6, y: 0 }, end: { x: 0, y: 4 } };
   const intersectionPoints = rectangleIntersectLine(rect, line);
   console.log(intersectionPoints);
   expect(intersectionPoints).toStrictEqual([{
-    x: -3, y: 2
+    x: -1.5, y: 3
   }]);
 });

@@ -1,4 +1,4 @@
-import { ILine, IPosition, IRect, drawText, posInfo } from "./drawUtils";
+import { drawText, posInfo } from "./drawUtils";
 
 export const CarFrameMargin = 4;
 export const CarWidth = 75;
@@ -223,6 +223,9 @@ export class HorizontalRoad implements IRoad {
     }
 }
 
+/**
+ * 左上角圓弧
+ */
 export class LeftTopCurve implements IRoad {
     ix = 0;
     iy = 0;
@@ -391,7 +394,7 @@ function create2dArray<T>(width: number, height: number): T[][] {
 }
 
 import map1Content from '@/assets/map.txt?raw';
-import { rectangleIntersectLine } from "./math";
+import { ILine, IPosition, IRect, rectangleIntersectLine } from "./math";
 
 function createRoad(ch: string) {
     const dict: Record<string, () => IRoad> = {
