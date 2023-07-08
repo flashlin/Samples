@@ -27,6 +27,7 @@ class Game {
         const ctx = this.ctx;
         this.car.pos = CarPos;
         this.car.render(ctx);
+        this.car.drawFrame(ctx);
         this.car.move();
     }
 
@@ -51,15 +52,7 @@ class Game {
 
         this.drawRoad();
         this.drawF4Car();
-
-        const carBound = this.car.getBound();
-        drawRect(ctx, this.car.getFrame(), { lineWidth: 5, strokeSyle: "yellow" });
-        drawText(ctx, { x: CenterX - CarWidth, y: CenterY}, `${posInfo(carBound.leftTop)}`)
-        drawText(ctx, { x: CenterX + CarWidth, y: CenterY}, `${posInfo(carBound.rightTop)}`)
-        drawText(ctx, { x: CenterX - CarWidth, y: CenterY + CarHeight}, `${posInfo(carBound.leftBottom)}`)
-        drawText(ctx, { x: CenterX + CarWidth, y: CenterY + CarHeight}, `${posInfo(carBound.rightBottom)}`)
-
-
+        
         this.fps.render(ctx, { x: 0, y: 0 });
         requestAnimationFrame(this.render.bind(this));
     }

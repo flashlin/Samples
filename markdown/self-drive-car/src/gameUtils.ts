@@ -97,7 +97,7 @@ export class VerticalRoad implements IRoad {
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         const x = this.ix * RoadWidth;
-        const y = -this.iy * RoadLength;
+        const y = this.iy * RoadLength;
         const line1 = {
             start: {
                 x: x + RoadMargin,
@@ -105,7 +105,7 @@ export class VerticalRoad implements IRoad {
             },
             end: {
                 x: x + RoadMargin,
-                y: y - RoadLength
+                y: y + RoadLength
             }
         };
 
@@ -126,7 +126,7 @@ export class VerticalRoad implements IRoad {
             },
             end: {
                 x: x + RoadWidth - RoadMargin,
-                y: y - RoadLength,
+                y: y + RoadLength,
             }
         };
         const points2 = rectangleIntersectLine(rect, line2);
