@@ -41,7 +41,7 @@ export interface IRoad {
     iy: number;
     pos: IPosition;
     render(ctx: CanvasRenderingContext2D): void;
-    collide(ctx: CanvasRenderingContext2D, rect: IRect): boolean;
+    collide(ctx: CanvasRenderingContext2D, rect: IRect): IPosition[];
     renderDamaged(ctx: CanvasRenderingContext2D): void;
     getBoundLines(): ILine[];
 }
@@ -133,17 +133,17 @@ export class VerticalRoad implements IRoad {
         }
         if (points1.length > 0) {
             this.lineDamaged = "line1";
-            return true;
+            return points1;
         }
 
         const points2 = rectangleIntersectLine(rect, line2);
         if (points2.length > 0) {
             this.lineDamaged = "line2";
-            return true;
+            return points2;
         }
 
         this.lineDamaged = "";
-        return false;
+        return [];
     }
 }
 
@@ -185,7 +185,7 @@ export class HorizontalRoad implements IRoad {
         const points1 = rectangleIntersectLine(rect, line1);
         if (points1.length > 0) {
             this.lineDamaged = "line1";
-            return true;
+            return points1;
         }
 
         const line2 = {
@@ -201,11 +201,11 @@ export class HorizontalRoad implements IRoad {
         const points2 = rectangleIntersectLine(rect, line2);
         if (points2.length > 0) {
             this.lineDamaged = "line2";
-            return true;
+            return points2;
         }
 
         this.lineDamaged = "";
-        return false;
+        return [];
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
@@ -253,7 +253,7 @@ export class LeftTopCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        return false;
+        return [];
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
@@ -287,7 +287,7 @@ export class RightTopCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        return false;
+        return [];
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
@@ -320,7 +320,7 @@ export class LeftBottomCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        return false;
+        return [];
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
@@ -355,7 +355,7 @@ export class RightBottomCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        return false;
+        return [];
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
@@ -368,6 +368,8 @@ export class RightBottomCurve implements IRoad {
 }
 
 export class EmptyRoad implements IRoad {
+    static Default = new EmptyRoad();
+
     ix = 0;
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
@@ -375,7 +377,7 @@ export class EmptyRoad implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        return false;
+        return [];
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
@@ -457,7 +459,7 @@ export class RoadMap {
         }
     }
 
-    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
+    collide(ctx: CanvasRenderingContext2D, rect: IRect): [IRoad, IPosition[]] {
         const roads = this.roads;
         for (let ix = 0; ix < roads.length; ix++) {
             for (let iy = 0; iy < roads[ix].length; iy++) {
@@ -465,12 +467,13 @@ export class RoadMap {
                 if (road == null) {
                     continue;
                 }
-                if (road.collide(ctx, rect)) {
-                    return road;
+                const collidePoints = road.collide(ctx, rect);
+                if ( collidePoints.length > 0 ) {
+                    return [road, collidePoints];
                 }
             }
         }
-        return null;
+        return [EmptyRoad.Default, []];
     }
 }
 
