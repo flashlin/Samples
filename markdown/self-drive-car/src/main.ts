@@ -33,7 +33,7 @@ class Game {
     drawRoad() {
         const ctx = this.ctx;
         const roadMap = this.roadMap;
-        roadMap.pos = { x: this.car.x + CenterX, y: - this.car.y + CenterY };
+        roadMap.pos = { x: - this.car.x + CenterX, y: - this.car.y + CenterY };
         roadMap.render(ctx);
         const carBound = this.car.getBound();
         const road = roadMap.collide(ctx, carBound);
