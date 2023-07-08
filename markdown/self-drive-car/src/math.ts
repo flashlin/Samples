@@ -1,4 +1,28 @@
-import { ILine, IPosition, IRect, isSamePoint, posInfo } from './drawUtils';
+import { isSamePoint, posInfo } from './drawUtils';
+
+export type IPosition = {
+  x: number,
+  y: number,
+};
+
+export type ILine = {
+  start: IPosition,
+  end: IPosition,
+};
+
+export type IRect = {
+  leftTop: IPosition,
+  rightTop: IPosition,
+  rightBottom: IPosition,
+  leftBottom: IPosition,
+}
+
+export type IArc = {
+  pos: IPosition,
+  radius: number,
+  startAngle: number,
+  endAngle: number
+};
 
 /**
  * compute line slope
@@ -266,7 +290,13 @@ export function rectangleIntersectLine(rect: IRect, line: ILine): IPosition[] {
   return intersectionPoints;
 }
 
-
+/**
+ * 旋轉正矩形
+ * @param left 
+ * @param right 
+ * @param thetaInDegrees 
+ * @returns 
+ */
 export function rotateRectangle(left: IPosition, right: IPosition, thetaInDegrees: number): IPosition[] {
   const x1 = left.x;
   const y1 = left.y;
@@ -300,4 +330,23 @@ export function rotateRectangle(left: IPosition, right: IPosition, thetaInDegree
   });
 
   return rotatedPoints;
+}
+
+export function getArcLines(arc: IArc): ILine[] {
+  let points: IPosition[] = [];
+  for (let angle = arc.startAngle; angle <= arc.endAngle; angle += 1) {
+    let randi = angle * (Math.PI / 180);
+    let x = arc.pos.x + arc.radius * Math.cos(randi);
+    let y = arc.pos.y + arc.radius * Math.sin(randi);
+    points.push({ x, y });
+  }
+  let lines: ILine[] = points.reduce((result: ILine[], item, index, arr) => {
+    if (index > 1) {
+      const [start, end] = arr.slice(index - 1, index);
+      result.push({ start, end });
+    }
+    return result;
+  }, []);
+
+  return lines;
 }

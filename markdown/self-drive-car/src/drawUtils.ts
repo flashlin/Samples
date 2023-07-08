@@ -1,26 +1,4 @@
-export type IPosition = {
-    x: number,
-    y: number,
-};
-
-export type IArc = {
-    pos: IPosition,
-    radius: number,
-    startAngle: number,
-    endAngle: number
-};
-
-export type ILine = {
-    start: IPosition,
-    end: IPosition,
-};
-
-export type IRect = {
-    leftTop: IPosition,
-    rightTop: IPosition,
-    rightBottom: IPosition,
-    leftBottom: IPosition,
-}
+import { IArc, IPosition, IRect } from "./math";
 
 export interface IDrawOptions {
     lineWidth: number,
