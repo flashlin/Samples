@@ -1,6 +1,7 @@
 import { Car } from './car';
 import { ILine, IPosition, drawRect, drawText, posInfo } from './drawUtils';
 import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY, CarPos } from './gameUtils';
+import { rectangleIntersectLine } from './math';
 
 class Game {
     canvas: HTMLCanvasElement;
@@ -29,13 +30,20 @@ class Game {
         car.pos = CarPos;
         car.render(ctx);
         car.drawFrame(ctx);
-        const [pos0, pos1] = car.move();
-        
+
+        const carPos0 = { x: car.x, y: car.y };
+        const carBound0 = car.getBound();
+        car.move();
+        const carBound1 = car.getBound();
+
         const roadMap = this.roadMap;
-        const carBound = this.car.getBound();
-        const road = roadMap.collide(ctx, carBound);
-        if (road != null) {
-            findTwoLinesIntersection({ start: pos0, end: pos1}, );
+        const [road, collidePoints] = roadMap.collide(ctx, carBound1);
+        if (collidePoints.length > 0) {
+            const moveLine = { start: carBound1.leftTop, end: carBound1.leftBottom };
+            const moveCollidePoint = rectangleIntersectLine(carBound1, moveLine)[0];
+            car.x = carPos0.x;
+            car.y = carPos0.y;
+            ///Todo: findTwoLinesIntersection(, );
             road.renderDamaged(ctx);
         }
     }
@@ -56,7 +64,7 @@ class Game {
 
         this.drawRoad();
         this.drawF4Car();
-        
+
         this.fps.render(ctx, { x: 0, y: 0 });
         requestAnimationFrame(this.render.bind(this));
     }
