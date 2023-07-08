@@ -341,8 +341,8 @@ export function getArcLines(arc: IArc): ILine[] {
     points.push({ x, y });
   }
   let lines: ILine[] = points.reduce((result: ILine[], item, index, arr) => {
-    if (index > 1) {
-      const [start, end] = arr.slice(index - 1, index);
+    if (index >= 1) {
+      const [start, end] = arr.slice(index - 1, index + 1);
       result.push({ start, end });
     }
     return result;

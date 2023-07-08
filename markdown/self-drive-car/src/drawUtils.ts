@@ -1,4 +1,4 @@
-import { IArc, IPosition, IRect } from "./math";
+import { IArc, ILine, IPosition, IRect } from "./math";
 
 export interface IDrawOptions {
     lineWidth: number,
@@ -34,6 +34,18 @@ export function drawArc(ctx: CanvasRenderingContext2D, arc: IArc,
     }
     ctx.stroke();
 }
+
+export function drawLine(ctx: CanvasRenderingContext2D, line: ILine,
+    options: Partial<IDrawOptions> = DefaultDrawOptions) {
+    const newOptions = {...DefaultDrawOptions, ...options};
+    ctx.beginPath();
+    ctx.strokeStyle = newOptions.strokeSyle;
+    ctx.lineWidth = newOptions.lineWidth;
+    ctx.moveTo(line.start.x, line.start.y);
+    ctx.lineTo(line.end.x, line.end.y);
+    ctx.stroke();
+}
+
 
 export function drawRect(ctx: CanvasRenderingContext2D, rect: IRect,
     options: IDrawOptions = DefaultDrawOptions) {
