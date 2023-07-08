@@ -176,6 +176,7 @@ export function findTwoLinesIntersection(line1: ILine, line2: ILine) {
   return findIntersection(line1.start, line1.end, line2.start, line2.end);
 }
 
+
 /**
  *  依照 angle 更新 pos 的增量
  */
