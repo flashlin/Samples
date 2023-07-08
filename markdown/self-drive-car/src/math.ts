@@ -1,4 +1,4 @@
-import { ILine, IPosition, IRect, isSamePoint } from './drawUtils';
+import { ILine, IPosition, IRect, isSamePoint, posInfo } from './drawUtils';
 
 /**
  * compute line slope
@@ -172,8 +172,29 @@ export function findIntersection(a1: IPosition, a2: IPosition, b1: IPosition, b2
  * @param line2 
  * @returns 
  */
-export function findTwoLinesIntersection(line1: ILine, line2: ILine) {
-  return findIntersection(line1.start, line1.end, line2.start, line2.end);
+export function findTwoLinesIntersection(line1: ILine, line2: ILine): IPosition | null {
+  let x1 = line1.start.x;
+  let y1 = line1.start.y;
+  let x2 = line1.end.x;
+  let y2 = line1.end.y;
+  let x3 = line2.start.x;
+  let y3 = line2.start.y;
+  let x4 = line2.end.x;
+  let y4 = line2.end.y;
+
+  let denom = ((x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4));
+  if (denom === 0) return null;
+
+  let t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+  let u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+  if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+    return {
+      x: x1 + t * (x2 - x1),
+      y: y1 + t * (y2 - y1)
+    }
+  }
+
+  return null;
 }
 
 
@@ -224,23 +245,23 @@ export function getRectangleWidthHeight(rect: IRect): [number, number] {
 /**
  * rectangle 是否和 line 相交
  */
-export function rectangleIntersectLine(rect: IRect, line: ILine) {
+export function rectangleIntersectLine(rect: IRect, line: ILine): IPosition[] {
   const rx = rect.leftTop.x;
   const ry = rect.leftTop.y;
   const [rw, rh] = getRectangleWidthHeight(rect);
 
   const lines = [
-    { start: { x: rx, y: ry }, end: { x: rx + rw, y: ry } }, // Top
-    { start: { x: rx + rw, y: ry }, end: { x: rx + rw, y: ry + rh } }, // Right
-    { start: { x: rx, y: ry + rh }, end: { x: rx + rw, y: ry + rh } }, // Bottom
-    { start: { x: rx, y: ry }, end: { x: rx, y: ry + rh } }, // Left
+    { start: rect.leftTop, end: rect.rightTop },
+    { start: rect.rightTop, end: rect.rightBottom },
+    { start: rect.leftBottom, end: rect.rightBottom },
+    { start: rect.leftTop, end: rect.rightBottom },
   ];
 
   const intersectionPoints = [];
   for (let rectLine of lines) {
     const intersect = findTwoLinesIntersection(rectLine, line);
     if (intersect) {
-      intersectionPoints.push(...intersect);
+      intersectionPoints.push(intersect);
     }
   }
   return intersectionPoints;
@@ -252,9 +273,9 @@ export function rotateRectangle(left: IPosition, right: IPosition, thetaInDegree
   const y1 = left.y;
   const x2 = right.x;
   const y2 = right.y;
-  
+
   // 將角度轉換為弧度
-  const theta = (thetaInDegrees-270) * (Math.PI / 180);
+  const theta = (thetaInDegrees - 270) * (Math.PI / 180);
 
   // 計算矩形的中心點
   const centerX = (x1 + x2) / 2;

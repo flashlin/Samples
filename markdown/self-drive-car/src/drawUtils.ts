@@ -85,7 +85,7 @@ export const DefaultDrawTextOptions: IDrawTextOptions = {
 export function posInfo(pos: IPosition) {
     let x = Math.round(pos.x);
     let y = Math.round(pos.y);
-    return `${x},${y}`;
+    return `{x:${x},y:${y}}`;
 }
 
 export function drawText(ctx: CanvasRenderingContext2D, 
