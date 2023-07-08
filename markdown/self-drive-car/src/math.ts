@@ -198,10 +198,14 @@ export function findTwoLinesIntersection(line1: ILine, line2: ILine): IPosition 
  *  依照 angle 更新 pos 的增量
  */
 export function updateCoordinates(pos: IPosition, angle: number, distance: number): IPosition {
-  const angleInRadians = angle * (Math.PI / 180);
+  // const angleInRadians = angle * (Math.PI / 180);
+  // const x = pos.x + distance * Math.cos(angleInRadians);
+  // const y = pos.y + distance * Math.sin(angleInRadians);
+  console.log(`angle=${angle}`)
   distance = -distance;
+  const angleInRadians = angle * (Math.PI / 180);
   const x = pos.x + distance * Math.cos(angleInRadians);
-  const y = pos.y + distance * Math.sin(angleInRadians);
+  const y = pos.y - distance * Math.sin(angleInRadians);
   return { x, y };
 }
 
