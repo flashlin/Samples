@@ -173,14 +173,10 @@ export function findIntersection(a1: IPosition, a2: IPosition, b1: IPosition, b2
  * @returns 
  */
 export function findTwoLinesIntersection(line1: ILine, line2: ILine): IPosition | null {
-  let x1 = line1.start.x;
-  let y1 = line1.start.y;
-  let x2 = line1.end.x;
-  let y2 = line1.end.y;
-  let x3 = line2.start.x;
-  let y3 = line2.start.y;
-  let x4 = line2.end.x;
-  let y4 = line2.end.y;
+  let { x: x1, y: y1 } = line1.start;
+  let { x: x2, y: y2 } = line1.end;
+  let { x: x3, y: y3 } = line2.start;
+  let { x: x4, y: y4 } = line2.end;
 
   let denom = ((x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4));
   if (denom === 0) return null;
