@@ -1,4 +1,4 @@
-import { drawText, posInfo } from "./drawUtils";
+import { drawArc, drawLine, drawText, posInfo } from "./drawUtils";
 
 export const CarFrameMargin = 4;
 export const CarWidth = 75;
@@ -15,7 +15,8 @@ export const CenterY = CanvasHeight / 2 - CarHeight / 2;
 export const CarPos = { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin };
 export const CarCenterX = CarWidth / 2;
 export const CarCenterY = CarHeight / 2;
-
+export const StartX = 50;
+export const StartY = 200;
 
 export class Line {
     line: ILine;
@@ -231,7 +232,6 @@ export class LeftTopCurve implements IRoad {
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
 
-
     render(ctx: CanvasRenderingContext2D) {
         let x = this.pos.x + RoadLength;
         let y = this.pos.y + RoadWidth;
@@ -249,6 +249,12 @@ export class LeftTopCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
+
+        const lines = this.getBoundLines();
+        for(let line of lines) {
+            drawLine(ctx, line, { strokeSyle: 'yellow' });
+        }
+
         return [];
     }
 
@@ -256,7 +262,13 @@ export class LeftTopCurve implements IRoad {
     }
 
     getBoundLines() {
-        return [];
+        const x = this.ix * RoadWidth + RoadLength;
+        const y = this.iy * RoadLength + RoadWidth;
+        const radius = RoadWidth - RoadMargin;
+        const startAngle = 180;
+        const endAngle = 270;
+        const lines = getArcLines({ pos: {x, y}, radius, startAngle, endAngle});
+        return lines;
     }
 }
 
@@ -394,7 +406,7 @@ function create2dArray<T>(width: number, height: number): T[][] {
 }
 
 import map1Content from '@/assets/map.txt?raw';
-import { ILine, IPosition, IRect, rectangleIntersectLine } from "./math";
+import { ILine, IPosition, IRect, getArcLines, rectangleIntersectLine } from "./math";
 
 function createRoad(ch: string) {
     const dict: Record<string, () => IRoad> = {

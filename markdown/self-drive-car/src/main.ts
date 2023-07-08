@@ -1,6 +1,6 @@
 import { Car } from './car';
 import { drawRect, drawText, posInfo } from './drawUtils';
-import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY, CarPos } from './gameUtils';
+import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY, CarPos, StartX, StartY } from './gameUtils';
 import { rectangleIntersectLine } from './math';
 
 class Game {
@@ -13,6 +13,8 @@ class Game {
     constructor() {
         this.canvas = this.createCanvas();
         this.ctx = this.canvas.getContext("2d")!;
+        this.car.x = StartX;
+        this.car.y = StartY;
     }
 
     createCanvas() {
@@ -32,7 +34,6 @@ class Game {
         car.drawFrame(ctx);
 
         const carPos0 = { x: car.x, y: car.y };
-        const carBound0 = car.getBound();
         car.move();
         const carBound1 = car.getBound();
 
