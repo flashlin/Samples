@@ -39,11 +39,8 @@ class Game {
         const roadMap = this.roadMap;
         const [road, collidePoints] = roadMap.collide(ctx, carBound1);
         if (collidePoints.length > 0) {
-            const moveLine = { start: carBound1.leftTop, end: carBound1.leftBottom };
-            const moveCollidePoint = rectangleIntersectLine(carBound1, moveLine)[0];
             car.x = carPos0.x;
             car.y = carPos0.y;
-            ///Todo: findTwoLinesIntersection(, );
             road.renderDamaged(ctx);
         }
     }
