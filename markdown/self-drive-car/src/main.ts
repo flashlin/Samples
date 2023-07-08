@@ -1,6 +1,6 @@
 import { Car } from './car';
 import { ILine, IPosition, drawRect, drawText, posInfo } from './drawUtils';
-import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY } from './gameUtils';
+import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY, CarPos } from './gameUtils';
 
 class Game {
     canvas: HTMLCanvasElement;
@@ -25,7 +25,7 @@ class Game {
 
     drawF4Car() {
         const ctx = this.ctx;
-        this.car.pos = { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin };
+        this.car.pos = CarPos;
         this.car.render(ctx);
         this.car.move();
     }

@@ -1,5 +1,5 @@
 import { IPosition, IRect, drawArc, drawRect } from "./drawUtils";
-import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight, CenterX, CenterY } from "./gameUtils";
+import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight, CenterX, CenterY, CarCenterY, CarCenterX, CarPos } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
 import { getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
@@ -48,18 +48,18 @@ export class Car {
     }
 
     getBound(): IRect {
-        let x1 = this.x;
-        let y1 = this.y;
-        let x2 = x1 + CarWidth;
-        let y2 = y1 + CarHeight;
+        let x1 = this.x + CarFrameMargin;
+        let y1 = this.y + CarFrameMargin;
+        let x2 = x1 + CarWidth - CarFrameMargin;
+        let y2 = y1 + CarHeight - CarFrameMargin;
         const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({ x: x1, y: y1 }, { x: x2, y: y2 }, this.angle);
         return { leftTop, rightTop, rightBottom, leftBottom, }
     }
 
     getFrame(): IRect {
         const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle(
-            { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin },
-            { x: CenterX + CarFrameMargin + CarWidth, y: CenterY + CarFrameMargin + CarHeight },
+            CarPos,
+            { x: CarPos.x + CarWidth - CarFrameMargin, y: CarPos.y + CarHeight - CarFrameMargin },
             this.angle);
         return {
             leftTop,

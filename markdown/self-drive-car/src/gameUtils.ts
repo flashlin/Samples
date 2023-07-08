@@ -12,6 +12,10 @@ export const CanvasWidth = 800;
 export const CanvasHeight = 700;
 export const CenterX = CanvasWidth / 2 - CarWidth / 2;
 export const CenterY = CanvasHeight / 2 - CarHeight / 2;
+export const CarPos = { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin };
+export const CarCenterX = CarWidth / 2;
+export const CarCenterY = CarHeight / 2;
+
 
 export class Line {
     line: ILine;
