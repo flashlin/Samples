@@ -75,25 +75,18 @@ export class VerticalRoad implements IRoad {
     renderDamaged(ctx: CanvasRenderingContext2D) {
         const x = this.pos.x;
         const y = this.pos.y;
+        ctx.beginPath();
         if (this.lineDamaged == "line1") {
-            ctx.beginPath();
             ctx.moveTo(x + RoadMargin, y);
             ctx.lineTo(x + RoadMargin, y + RoadLength);
-            // ctx.moveTo(x + RoadWidth - RoadMargin, y);
-            // ctx.lineTo(x + RoadWidth - RoadMargin, y + RoadLength);
-            ctx.lineWidth = 7;
-            ctx.strokeStyle = "red";
-            ctx.stroke();
         }
-
         if (this.lineDamaged == "line2") {
-            ctx.beginPath();
             ctx.moveTo(x + RoadWidth - RoadMargin, y);
             ctx.lineTo(x + RoadWidth - RoadMargin, y + RoadLength);
-            ctx.lineWidth = 7;
-            ctx.strokeStyle = "red";
-            ctx.stroke();
         }
+        ctx.lineWidth = 7;
+        ctx.strokeStyle = "red";
+        ctx.stroke();
     }
 
     getBoundLines() {
@@ -109,7 +102,7 @@ export class VerticalRoad implements IRoad {
                 y: y + RoadLength
             }
         };
-        
+
         const line2 = {
             start: {
                 x: x + RoadWidth - RoadMargin,
@@ -258,7 +251,7 @@ export class LeftTopCurve implements IRoad {
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
     }
-    
+
     getBoundLines() {
         return [];
     }
@@ -292,7 +285,7 @@ export class RightTopCurve implements IRoad {
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
     }
-    
+
     getBoundLines() {
         return [];
     }
@@ -326,8 +319,8 @@ export class LeftBottomCurve implements IRoad {
     renderDamaged(ctx: CanvasRenderingContext2D): void {
 
     }
-    
-    
+
+
     getBoundLines() {
         return [];
     }
@@ -383,7 +376,7 @@ export class EmptyRoad implements IRoad {
     renderDamaged(ctx: CanvasRenderingContext2D): void {
 
     }
-    
+
     getBoundLines() {
         return [];
     }
@@ -468,7 +461,7 @@ export class RoadMap {
                     continue;
                 }
                 const collidePoints = road.collide(ctx, rect);
-                if ( collidePoints.length > 0 ) {
+                if (collidePoints.length > 0) {
                     return [road, collidePoints];
                 }
             }
