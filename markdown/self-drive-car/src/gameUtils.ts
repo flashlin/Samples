@@ -43,6 +43,7 @@ export interface IRoad {
     render(ctx: CanvasRenderingContext2D): void;
     collide(ctx: CanvasRenderingContext2D, rect: IRect): boolean;
     renderDamaged(ctx: CanvasRenderingContext2D): void;
+    getBoundLines(): ILine[];
 }
 
 //垂直
@@ -95,7 +96,7 @@ export class VerticalRoad implements IRoad {
         }
     }
 
-    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
+    getBoundLines() {
         const x = this.ix * RoadWidth;
         const y = this.iy * RoadLength;
         const line1 = {
@@ -108,6 +109,22 @@ export class VerticalRoad implements IRoad {
                 y: y + RoadLength
             }
         };
+        
+        const line2 = {
+            start: {
+                x: x + RoadWidth - RoadMargin,
+                y: y
+            },
+            end: {
+                x: x + RoadWidth - RoadMargin,
+                y: y + RoadLength,
+            }
+        };
+        return [line1, line2];
+    }
+
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
+        const [line1, line2] = this.getBoundLines();
 
         const points1 = rectangleIntersectLine(rect, line1);
         if (this.ix == 0 && this.iy == 1) {
@@ -119,16 +136,6 @@ export class VerticalRoad implements IRoad {
             return true;
         }
 
-        const line2 = {
-            start: {
-                x: x + RoadWidth - RoadMargin,
-                y: y
-            },
-            end: {
-                x: x + RoadWidth - RoadMargin,
-                y: y + RoadLength,
-            }
-        };
         const points2 = rectangleIntersectLine(rect, line2);
         if (points2.length > 0) {
             this.lineDamaged = "line2";
@@ -217,6 +224,10 @@ export class HorizontalRoad implements IRoad {
         ctx.strokeStyle = "red";
         ctx.stroke();
     }
+
+    getBoundLines() {
+        return [];
+    }
 }
 
 export class LeftTopCurve implements IRoad {
@@ -246,7 +257,10 @@ export class LeftTopCurve implements IRoad {
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
-
+    }
+    
+    getBoundLines() {
+        return [];
     }
 }
 
@@ -277,7 +291,10 @@ export class RightTopCurve implements IRoad {
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
-
+    }
+    
+    getBoundLines() {
+        return [];
     }
 }
 
@@ -309,6 +326,11 @@ export class LeftBottomCurve implements IRoad {
     renderDamaged(ctx: CanvasRenderingContext2D): void {
 
     }
+    
+    
+    getBoundLines() {
+        return [];
+    }
 }
 
 export class RightBottomCurve implements IRoad {
@@ -339,6 +361,10 @@ export class RightBottomCurve implements IRoad {
     renderDamaged(ctx: CanvasRenderingContext2D): void {
 
     }
+
+    getBoundLines() {
+        return [];
+    }
 }
 
 export class EmptyRoad implements IRoad {
@@ -354,6 +380,10 @@ export class EmptyRoad implements IRoad {
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
 
+    }
+    
+    getBoundLines() {
+        return [];
     }
 }
 

@@ -25,10 +25,19 @@ class Game {
 
     drawF4Car() {
         const ctx = this.ctx;
-        this.car.pos = CarPos;
-        this.car.render(ctx);
-        this.car.drawFrame(ctx);
-        this.car.move();
+        const car = this.car;
+        car.pos = CarPos;
+        car.render(ctx);
+        car.drawFrame(ctx);
+        const [pos0, pos1] = car.move();
+        
+        const roadMap = this.roadMap;
+        const carBound = this.car.getBound();
+        const road = roadMap.collide(ctx, carBound);
+        if (road != null) {
+            findTwoLinesIntersection({ start: pos0, end: pos1}, );
+            road.renderDamaged(ctx);
+        }
     }
 
     drawRoad() {
@@ -36,11 +45,6 @@ class Game {
         const roadMap = this.roadMap;
         roadMap.pos = { x: - this.car.x + CenterX, y: - this.car.y + CenterY };
         roadMap.render(ctx);
-        const carBound = this.car.getBound();
-        const road = roadMap.collide(ctx, carBound);
-        if (road != null) {
-            road.renderDamaged(ctx);
-        }
     }
 
     render() {
