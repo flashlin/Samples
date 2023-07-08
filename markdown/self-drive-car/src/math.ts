@@ -201,10 +201,9 @@ export function updateCoordinates(pos: IPosition, angle: number, distance: numbe
   // const angleInRadians = angle * (Math.PI / 180);
   // const x = pos.x + distance * Math.cos(angleInRadians);
   // const y = pos.y + distance * Math.sin(angleInRadians);
-  console.log(`angle=${angle}`)
   distance = -distance;
   const angleInRadians = angle * (Math.PI / 180);
-  const x = pos.x + distance * Math.cos(angleInRadians);
+  const x = pos.x - distance * Math.cos(angleInRadians);
   const y = pos.y - distance * Math.sin(angleInRadians);
   return { x, y };
 }
