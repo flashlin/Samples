@@ -81,11 +81,11 @@ export class Car {
     drawFrame(ctx: CanvasRenderingContext2D) {
         const carBound = this.getBound();
         drawRect(ctx, this.getFrame(), { lineWidth: 5, strokeSyle: "yellow" });
-        const { leftTop: p0, rightTop: p1, rightBottom: p2, leftBottom: p3 } = this.getDrawBound();
-        drawText(ctx, p0, `${posInfo(carBound.leftTop)}`)
-        drawText(ctx, p1, `${posInfo(carBound.rightTop)}`)
-        drawText(ctx, p2, `${posInfo(carBound.leftBottom)}`)
-        drawText(ctx, p3, `${posInfo(carBound.rightBottom)}`)
+        // const { leftTop: p0, rightTop: p1, rightBottom: p2, leftBottom: p3 } = this.getDrawBound();
+        // drawText(ctx, p0, `${posInfo(carBound.leftTop)}`)
+        // drawText(ctx, p1, `${posInfo(carBound.rightTop)}`)
+        // drawText(ctx, p2, `${posInfo(carBound.leftBottom)}`)
+        // drawText(ctx, p3, `${posInfo(carBound.rightBottom)}`)
     }
 
     move() {
