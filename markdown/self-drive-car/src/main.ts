@@ -33,25 +33,12 @@ class Game {
     drawRoad() {
         const ctx = this.ctx;
         const roadMap = this.roadMap;
-        // let x = CanvasWidth / 2 - 90;
-        // let y = CanvasHeight / 2 - 180;
-        // y -= this.car.y;
-        // x -= this.car.x;
-        // const pos = { x, y };
-
-        roadMap.pos = { x: this.car.x + CenterX, y: this.car.y + CenterY };
+        roadMap.pos = { x: this.car.x + CenterX, y: - this.car.y + CenterY };
         roadMap.render(ctx);
         const carBound = this.car.getBound();
-        // drawRect(ctx, carBound, { lineWidth: 5, strokeSyle: "yellow" });
-        // drawText(ctx, carBound.leftTop, `${posInfo(carBound.leftTop)}`)
-        // drawText(ctx, carBound.rightTop, `${posInfo(carBound.rightTop)}`)
-        // drawText(ctx, carBound.rightBottom, `${posInfo(carBound.rightBottom)}`)
-        // drawText(ctx, carBound.leftBottom, `${posInfo(carBound.leftBottom)}`)
         const road = roadMap.collide(ctx, carBound);
         if (road != null) {
-            const drawPos = roadMap.pos;//{ x: CanvasWidth / 2 - CarWidth / 2, y: CanvasHeight / CarHeight / 2 };
-            console.log('damaged', drawPos);
-            road.renderDamaged(ctx, drawPos);
+            road.renderDamaged(ctx);
         }
     }
 
