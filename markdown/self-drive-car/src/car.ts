@@ -1,4 +1,4 @@
-import { IPosition, IRect, drawArc, drawRect } from "./drawUtils";
+import { IPosition, IRect, drawArc, drawRect, drawText, posInfo } from "./drawUtils";
 import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CanvasWidth, CanvasHeight, CenterX, CenterY, CarCenterY, CarCenterX, CarPos } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
@@ -67,6 +67,25 @@ export class Car {
             rightBottom,
             leftBottom
         };
+    }
+
+    getDrawBound(): IRect {
+        let x1 = CarPos.x - CarWidth;
+        let y1 = CarPos.y;
+        let x2 = CarPos.x + CarWidth - CarFrameMargin;
+        let y2 = CarPos.y + CarHeight + CarFrameMargin;
+        const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({ x: x1, y: y1 }, { x: x2, y: y2 }, this.angle);
+        return { leftTop, rightTop, rightBottom, leftBottom, }
+    }
+
+    drawFrame(ctx: CanvasRenderingContext2D) {
+        const carBound = this.getBound();
+        drawRect(ctx, this.getFrame(), { lineWidth: 5, strokeSyle: "yellow" });
+        const { leftTop: p0, rightTop: p1, rightBottom: p2, leftBottom: p3 } = this.getDrawBound();
+        drawText(ctx, p0, `${posInfo(carBound.leftTop)}`)
+        drawText(ctx, p1, `${posInfo(carBound.rightTop)}`)
+        drawText(ctx, p2, `${posInfo(carBound.leftBottom)}`)
+        drawText(ctx, p3, `${posInfo(carBound.rightBottom)}`)
     }
 
     move() {
