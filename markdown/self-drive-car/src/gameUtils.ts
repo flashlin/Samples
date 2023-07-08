@@ -146,6 +146,7 @@ export class HorizontalRoad implements IRoad {
     ix = 0;
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
+    lineDamaged = "";
 
     render(ctx: CanvasRenderingContext2D) {
         const x = this.pos.x;
@@ -161,11 +162,60 @@ export class HorizontalRoad implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
+        const x = this.ix * RoadWidth;
+        const y = this.iy * RoadLength;
+        const line1 = {
+            start: {
+                x: x,
+                y: y + RoadMargin
+            },
+            end: {
+                x: x + RoadLength,
+                y: y + RoadMargin
+            }
+        };
+
+        const points1 = rectangleIntersectLine(rect, line1);
+        if (points1.length > 0) {
+            this.lineDamaged = "line1";
+            return true;
+        }
+
+        const line2 = {
+            start: {
+                x: x,
+                y: y + RoadWidth - RoadMargin
+            },
+            end: {
+                x: x + RoadLength,
+                y: y + RoadWidth - RoadMargin,
+            }
+        };
+        const points2 = rectangleIntersectLine(rect, line2);
+        if (points2.length > 0) {
+            this.lineDamaged = "line2";
+            return true;
+        }
+
+        this.lineDamaged = "";
         return false;
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
-
+        const x = this.pos.x;
+        const y = this.pos.y;
+        ctx.beginPath();
+        if (this.lineDamaged == "line1") {
+            ctx.moveTo(x, y + RoadMargin);
+            ctx.lineTo(x + RoadLength, y + RoadMargin);
+        }
+        if (this.lineDamaged == "line2") {
+            ctx.moveTo(x, y + RoadWidth - RoadMargin);
+            ctx.lineTo(x + RoadLength, y + RoadWidth - RoadMargin);
+        }
+        ctx.lineWidth = 7;
+        ctx.strokeStyle = "red";
+        ctx.stroke();
     }
 }
 
