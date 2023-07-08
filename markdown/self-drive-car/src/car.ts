@@ -14,7 +14,7 @@ export class Car {
     acceleration = 0.3;
     maxSpeed = 4;
     friction = 0.02;
-    angle = 0;
+    angle = 270;
     damaged = false;
 
     x = 0;
@@ -39,7 +39,7 @@ export class Car {
         //ctx.globalCompositeOperation = 'destination-atop';
         //ctx.drawImage(this.carImage, x, y, CarWidth, CarHeight);
 
-        const angleInRadians = this.angle * (Math.PI / 180);
+        const angleInRadians = (this.angle - 270) * (Math.PI / 180);
         // 將原點移至圖像的中心
         ctx.translate(x + CarWidth / 2, y + CarHeight / 2);
         ctx.rotate(angleInRadians);
@@ -48,8 +48,8 @@ export class Car {
     }
 
     getBound(): IRect {
-        let x1 = this.x + this.pos.x;
-        let y1 = this.y + this.pos.y;
+        let x1 = this.x;
+        let y1 = this.y;
         let x2 = x1 + CarWidth;
         let y2 = y1 + CarHeight;
         const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({ x: x1, y: y1 }, { x: x2, y: y2 }, this.angle);

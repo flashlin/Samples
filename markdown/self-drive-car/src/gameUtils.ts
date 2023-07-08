@@ -80,8 +80,8 @@ export class VerticalRoad implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        const x = this.pos.x;
-        const y = this.pos.y;
+        const x = this.ix * RoadWidth;
+        const y = this.iy * RoadLength;
         const line1 = {
             start: {
                 x: x + RoadMargin,
@@ -95,8 +95,8 @@ export class VerticalRoad implements IRoad {
 
 
         if (this.ix == 0 && this.iy == 1) {
-            drawText(ctx, line1.start, `${posInfo(line1.start)}`)
-            drawText(ctx, line1.end, `${posInfo(line1.end)}`)
+            drawText(ctx, this.pos, `${posInfo(line1.start)}`)
+            drawText(ctx, { x: this.pos.x, y: this.pos.y + RoadLength }, `${posInfo(line1.end)}`)
         }
 
         const points1 = rectangleIntersectLine(rect, line1);

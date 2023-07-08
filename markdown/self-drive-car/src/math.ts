@@ -179,14 +179,11 @@ export function findTwoLinesIntersection(line1: ILine, line2: ILine) {
 /**
  *  依照 angle 更新 pos 的增量
  */
-export function updateCoordinates(pos: IPosition, angle: number, add: number): IPosition {
+export function updateCoordinates(pos: IPosition, angle: number, distance: number): IPosition {
   const angleInRadians = angle * (Math.PI / 180);
-  const deltaX = add * Math.cos(angleInRadians);
-  const deltaY = add * Math.sin(angleInRadians);
-  let x = pos.x;
-  let y = pos.y;
-  y += deltaX;
-  x -= deltaY;
+  distance = -distance;
+  const x = pos.x + distance * Math.cos(angleInRadians);
+  const y = pos.y + distance * Math.sin(angleInRadians);
   return { x, y };
 }
 
@@ -256,7 +253,7 @@ export function rotateRectangle(left: IPosition, right: IPosition, thetaInDegree
   const y2 = right.y;
   
   // 將角度轉換為弧度
-  const theta = thetaInDegrees * (Math.PI / 180);
+  const theta = (thetaInDegrees-270) * (Math.PI / 180);
 
   // 計算矩形的中心點
   const centerX = (x1 + x2) / 2;
