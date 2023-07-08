@@ -122,10 +122,10 @@ export class VerticalRoad implements IRoad {
         const [line1, line2] = this.getBoundLines();
 
         const points1 = rectangleIntersectLine(rect, line1);
-        if (this.ix == 0 && this.iy == 1) {
-            drawText(ctx, this.pos, `${posInfo(line1.start)}`)
-            drawText(ctx, { x: this.pos.x, y: this.pos.y + RoadLength }, `${posInfo(line1.end)}`)
-        }
+        // if (this.ix == 0 && this.iy == 1) {
+        //     drawText(ctx, this.pos, `${posInfo(line1.start)}`)
+        //     drawText(ctx, { x: this.pos.x, y: this.pos.y + RoadLength }, `${posInfo(line1.end)}`)
+        // }
         if (points1.length > 0) {
             this.lineDamaged = "line1";
             return points1;
