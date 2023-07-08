@@ -128,5 +128,6 @@ export class Car {
         const pos1 = updateCoordinates(pos0, this.angle, this.speed);
         this.x = pos1.x;
         this.y = pos1.y;
+        return [pos0, pos1];
     }
 }
