@@ -291,20 +291,38 @@ export function rectangleIntersectLine(rect: IRect, line: ILine): IPosition[] {
 }
 
 /**
+ * 旋轉點
+ * @param center 
+ * @param angle 
+ * @param points 
+ * @returns 
+ */
+export function rotatePoints(center: IPosition, angle: number, points: IPosition[]): IPosition[] {
+  const theta = (angle - 270) * (Math.PI / 180);
+  const rotatedPoints = points.map(point => {
+    let x = point.x - center.x;
+    let y = point.y - center.y;
+    return {
+      x: x * Math.cos(theta) - y * Math.sin(theta) + center.x,
+      y: x * Math.sin(theta) + y * Math.cos(theta) + center.y
+    };
+  });
+
+  return rotatedPoints;
+}
+
+/**
  * 旋轉正矩形
  * @param left 
  * @param right 
- * @param thetaInDegrees 
+ * @param angle 
  * @returns 
  */
-export function rotateRectangle(left: IPosition, right: IPosition, thetaInDegrees: number): IPosition[] {
+export function rotateRectangle(left: IPosition, right: IPosition, angle: number): IPosition[] {
   const x1 = left.x;
   const y1 = left.y;
   const x2 = right.x;
   const y2 = right.y;
-
-  // 將角度轉換為弧度
-  const theta = (thetaInDegrees - 270) * (Math.PI / 180);
 
   // 計算矩形的中心點
   const centerX = (x1 + x2) / 2;
@@ -318,18 +336,7 @@ export function rotateRectangle(left: IPosition, right: IPosition, thetaInDegree
     { x: x1, y: y2 }
   ];
 
-  // 旋轉每個頂點
-  const rotatedPoints = points.map(point => {
-    let x = point.x - centerX;
-    let y = point.y - centerY;
-
-    return {
-      x: x * Math.cos(theta) - y * Math.sin(theta) + centerX,
-      y: x * Math.sin(theta) + y * Math.cos(theta) + centerY
-    };
-  });
-
-  return rotatedPoints;
+  return rotatePoints({ x: centerX, y: centerY }, angle, points);
 }
 
 export function getArcLines(arc0: IArc): ILine[] {

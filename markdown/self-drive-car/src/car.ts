@@ -3,6 +3,7 @@ import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, Fra
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
 import { IPosition, IRect, getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
+import { Radar } from "./radar";
 
 export class Car {
     carImage: HTMLImageElement;
@@ -19,6 +20,8 @@ export class Car {
 
     x = 0;
     y = 0;
+
+    radar = new Radar();
 
     constructor() {
         this.carImage = new Image();
@@ -37,14 +40,24 @@ export class Car {
         const x = this.pos.x;
         const y = this.pos.y;
         //ctx.globalCompositeOperation = 'destination-atop';
-        //ctx.drawImage(this.carImage, x, y, CarWidth, CarHeight);
-
         const angleInRadians = (this.angle - 270) * (Math.PI / 180);
         // 將原點移至圖像的中心
         ctx.translate(x + CarWidth / 2, y + CarHeight / 2);
         ctx.rotate(angleInRadians);
         ctx.drawImage(this.carImage, -CarWidth / 2, -CarHeight / 2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
+        
+        const radar = this.radar;
+        radar.angle = this.angle;
+        radar.center = {
+            x: this.pos.x + CarWidth / 2,
+            y: this.pos.y + CarHeight / 2
+        };
+        radar.pos = {
+            x: this.pos.x,
+            y: this.pos.y,
+        }
+        radar.render(ctx);
     }
 
     getBound(): IRect {
