@@ -1,5 +1,5 @@
 import { Car } from './car';
-import { drawRect, drawText, posInfo } from './drawUtils';
+import { drawLine, drawRect, drawText, posInfo } from './drawUtils';
 import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, RoadLength, FPS, CenterX, CenterY, CarPos, StartX, StartY } from './gameUtils';
 import { rectangleIntersectLine } from './math';
 
@@ -62,6 +62,15 @@ class Game {
 
         this.drawRoad();
         this.drawF4Car();
+
+        drawLine(ctx, {
+            start: { x: 0, y: CanvasHeight / 2 },
+            end: { x: CanvasWidth, y: CanvasHeight / 2 }
+        }, { strokeSyle: "gray", lineWidth: 3 });
+        drawLine(ctx, {
+            start: { x: CanvasWidth / 2, y: 0 },
+            end: { x: CanvasWidth / 2, y: CanvasHeight }
+        }, { strokeSyle: "gray", lineWidth: 3 });
 
         this.fps.render(ctx, { x: 0, y: 0 });
         requestAnimationFrame(this.render.bind(this));
