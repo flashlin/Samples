@@ -1,4 +1,4 @@
-import { drawArc, drawLine, drawRect, drawText, posInfo } from "./drawUtils";
+import { drawArc, drawLine, drawRect, drawText, lineInfo, posInfo } from "./drawUtils";
 
 export const CarFrameMargin = 5;
 export const CarWidth = 75;
