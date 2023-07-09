@@ -261,7 +261,7 @@ export class LeftTopCurve implements IRoad {
         }
 
 
-        const lines2 = this.getBound1Lines();
+        const lines2 = this.getBound2Lines();
         for (let line of lines2) {
             const points1 = rectangleIntersectLine(rect, line);
             if (points1.length != 0) {
@@ -270,6 +270,7 @@ export class LeftTopCurve implements IRoad {
             }
         }
 
+        this.lineDamaged = "";
         return [];
     }
 
@@ -347,7 +348,6 @@ export class RightTopCurve implements IRoad {
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         const lines1 = this.getBound1Lines();
-        console.log('cc', lines1)
         for (let line of lines1) {
             //drawLine(ctx, line, { strokeSyle: 'yellow' })
             const points1 = rectangleIntersectLine(rect, line);
@@ -357,7 +357,7 @@ export class RightTopCurve implements IRoad {
             }
         }
 
-        const lines2 = this.getBound1Lines();
+        const lines2 = this.getBound2Lines();
         for (let line of lines2) {
             const points1 = rectangleIntersectLine(rect, line);
             if (points1.length != 0) {
@@ -365,6 +365,8 @@ export class RightTopCurve implements IRoad {
                 return points1;
             }
         }
+        
+        this.lineDamaged = "";
         return [];
     }
 
@@ -419,10 +421,14 @@ export class RightTopCurve implements IRoad {
     }
 }
 
+/**
+ * 左下角圓弧
+ */
 export class LeftBottomCurve implements IRoad {
     ix = 0;
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
+    lineDamaged = "";
 
     render(ctx: CanvasRenderingContext2D) {
         let x = this.pos.x + RoadLength;
@@ -441,6 +447,26 @@ export class LeftBottomCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
+        const lines1 = this.getBound1Lines();
+        for (let line of lines1) {
+            //drawLine(ctx, line, { strokeSyle: 'yellow' })
+            const points1 = rectangleIntersectLine(rect, line);
+            if (points1.length != 0) {
+                this.lineDamaged = "line1";
+                return points1;
+            }
+        }
+
+        const lines2 = this.getBound2Lines();
+        for (let line of lines2) {
+            const points1 = rectangleIntersectLine(rect, line);
+            if (points1.length != 0) {
+                this.lineDamaged = "line2";
+                return points1;
+            }
+        }
+
+        this.lineDamaged = "";
         return [];
     }
 
@@ -448,9 +474,38 @@ export class LeftBottomCurve implements IRoad {
 
     }
 
-
     getBoundLines() {
-        return [];
+        const lines1 = this.getBound1Lines();
+        const lines2 = this.getBound2Lines();
+        return [...lines1, ...lines2];
+    }
+
+    getBound1Lines() {
+        const [x, y] = this.getBoundArcXY();
+        const radius = RoadWidth - RoadMargin;
+        const [startAngle, endAngle] = this.getArcAngles();
+        const lines = getArcLines({ pos: { x, y }, radius, startAngle, endAngle });
+        return lines;
+    }
+
+    getBound2Lines() {
+        const [x, y] = this.getBoundArcXY();
+        const radius = RoadMargin;
+        const [startAngle, endAngle] = this.getArcAngles();
+        const lines = getArcLines({ pos: { x, y }, radius, startAngle, endAngle });
+        return lines;
+    }
+
+    getArcAngles() {
+        const startAngle = 90;
+        const endAngle = 180;
+        return [startAngle, endAngle];
+    }
+
+    getBoundArcXY() {
+        const x = this.ix * RoadWidth + RoadLength;
+        const y = this.iy * RoadLength;
+        return [x, y];
     }
 }
 
