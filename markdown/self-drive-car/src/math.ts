@@ -38,6 +38,11 @@ export function getDistance(line: ILine) {
   return Math.sqrt((line.end.x - line.start.x) ** 2 + (line.end.y - line.start.y) ** 2);
 }
 
+
+export function getTwoPointsDistance(start: IPosition, end: IPosition) {
+  return Math.sqrt((end.x - start.x) ** 2 + (end.y - start.y) ** 2);
+}
+
 /**
  * compute 通過 c 點, 並垂直 line 的交叉點
  * @param {number} line - 線段
@@ -347,7 +352,7 @@ export function getArcLines(arc0: IArc): ILine[] {
     arc.endAngle = 360;
   }
   let points: IPosition[] = [];
-  for (let angle = arc.startAngle; angle <= arc.endAngle; angle += 1) {
+  for (let angle = arc.startAngle; angle <= arc.endAngle; angle += 3) {
     let randi = angle * (Math.PI / 180);
     let x = arc.pos.x + arc.radius * Math.cos(randi);
     let y = arc.pos.y + arc.radius * Math.sin(randi);
