@@ -261,10 +261,12 @@ const CurveAngles = {
 
 class CurveRoad {
     pos: IPosition = { x: 0, y: 0 };
+    type: CurveRoadType;
     angles: CurveAngles;
 
-    constructor(curveRoadType: CurveRoadType) {
-        this.angles = CurveAngles[curveRoadType];
+    constructor(type: CurveRoadType) {
+        this.type = type;
+        this.angles = CurveAngles[type];
     }
 
     render(ctx: CanvasRenderingContext2D, color: string): void {
