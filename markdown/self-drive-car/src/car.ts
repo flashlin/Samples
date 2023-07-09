@@ -48,10 +48,10 @@ export class Car {
     }
 
     getBound(): IRect {
-        let x1 = this.x + CarFrameMargin;
-        let y1 = this.y + CarFrameMargin;
-        let x2 = x1 + CarWidth - CarFrameMargin;
-        let y2 = y1 + CarHeight + CarFrameMargin;
+        let x1 = this.x - FrameWidth / 2;
+        let y1 = this.y - FrameHeight / 2;
+        let x2 = x1 + FrameWidth;
+        let y2 = y1 + FrameHeight;
         const [leftTop, rightTop, rightBottom, leftBottom] = rotateRectangle({ x: x1, y: y1 }, { x: x2, y: y2 }, this.angle);
         return { leftTop, rightTop, rightBottom, leftBottom, }
     }

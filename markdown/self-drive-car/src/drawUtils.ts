@@ -48,10 +48,11 @@ export function drawLine(ctx: CanvasRenderingContext2D, line: ILine,
 
 
 export function drawRect(ctx: CanvasRenderingContext2D, rect: IRect,
-    options: IDrawOptions = DefaultDrawOptions) {
+    options: Partial<IDrawOptions> = DefaultDrawOptions) {
+    const newOptions = {...DefaultDrawOptions,...options };
     ctx.beginPath();
-    ctx.strokeStyle = options.strokeSyle;
-    ctx.lineWidth = options.lineWidth;
+    ctx.strokeStyle = newOptions.strokeSyle;
+    ctx.lineWidth = newOptions.lineWidth;
     ctx.moveTo(rect.leftTop.x, rect.leftTop.y);
     ctx.lineTo(rect.rightTop.x, rect.rightTop.y);
     ctx.lineTo(rect.rightBottom.x, rect.rightBottom.y);
