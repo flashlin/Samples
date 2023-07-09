@@ -79,6 +79,10 @@ export function posInfo(pos: IPosition) {
     return `{x:${x},y:${y}}`;
 }
 
+export function lineInfo(line: ILine) {
+    return `${posInfo(line.start)}-${posInfo(line.end)}`;
+}
+
 export function drawText(ctx: CanvasRenderingContext2D, 
     pos: IPosition, 
     text: string, 
