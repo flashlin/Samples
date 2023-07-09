@@ -46,8 +46,10 @@ export class Car {
         ctx.rotate(angleInRadians);
         ctx.drawImage(this.carImage, -CarWidth / 2, -CarHeight / 2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        
+
+        //console.log(`car ${this.x} ${this.y}`);
         const radar = this.radar;
+        radar.carXY = { x: this.x, y: this.y };
         radar.angle = this.angle;
         radar.center = {
             x: this.pos.x + CarWidth / 2,
