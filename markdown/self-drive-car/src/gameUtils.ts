@@ -70,9 +70,9 @@ export class VerticalRoad implements IRoad {
         const y = this.pos.y;
         ctx.beginPath();
         ctx.moveTo(x + RoadMargin, y);
-        ctx.lineTo(x + RoadMargin, y + RoadLength);
+        ctx.lineTo(x + RoadMargin, y + RoadWidth);
         ctx.moveTo(x + RoadLength - RoadMargin, y);
-        ctx.lineTo(x + RoadWidth - RoadMargin, y + RoadLength);
+        ctx.lineTo(x + RoadLength - RoadMargin, y + RoadWidth);
         ctx.lineWidth = 7;
         ctx.strokeStyle = RoadColor;  // 線條顏色
         ctx.stroke();
@@ -88,7 +88,7 @@ export class VerticalRoad implements IRoad {
         }
         if (this.lineDamaged == "line2") {
             ctx.moveTo(x + RoadLength - RoadMargin, y);
-            ctx.lineTo(x + RoadWidth - RoadMargin, y + RoadLength);
+            ctx.lineTo(x + RoadLength - RoadMargin, y + RoadWidth);
         }
         ctx.lineWidth = 7;
         ctx.strokeStyle = "red";
