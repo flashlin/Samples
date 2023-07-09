@@ -18,6 +18,9 @@ export const CarPos = { x: CenterX, y: CenterY };
 export const StartX = 100;
 export const StartY = 400;
 export const DamagedColor = "red";
+export const RadarLine = 100;
+export const RadarCount = 3;
+export const RadarColor = 'gray';
 
 export class Line {
     line: ILine;
