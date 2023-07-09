@@ -34,6 +34,7 @@ class Game {
         car.drawFrame(ctx);
 
         const carPos0 = { x: car.x, y: car.y };
+        const carAngle0 = car.angle;
         car.move();
         const carBound1 = car.getBound();
 
@@ -42,6 +43,7 @@ class Game {
         if (collidePoints.length > 0) {
             car.x = carPos0.x;
             car.y = carPos0.y;
+            car.angle = carAngle0;
             road.renderDamaged(ctx);
         }
     }
