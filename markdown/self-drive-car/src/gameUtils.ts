@@ -225,6 +225,69 @@ export class HorizontalRoad implements IRoad {
     }
 }
 
+enum CurveType {
+    None,
+    Outer,
+    Inner,
+}
+
+const CurveRadius = {
+    [CurveType.None]: 0,
+    [CurveType.Outer]: RoadWidth - RoadMargin,
+    [CurveType.Inner]: RoadMargin,
+};
+
+const CurveAngleType = {
+    LeftTop: { startAngle: 180, endAngle: 270 },
+    RightTop: { startAngle: 270, endAngle: 360 },
+    RightBottom: { startAngle: 0, endAngle: 90 },
+    LeftBottom: { startAngle: 90, endAngle: 270 },
+};
+
+class CurveRoad {
+    pos: IPosition = { x: 0, y: 0 };
+    angleType = CurveAngleType.LeftTop;
+
+    render(ctx: CanvasRenderingContext2D, color: string): void {
+        this.renderCurve(ctx, CurveType.Outer, color);
+        this.renderCurve(ctx, CurveType.Inner, color);
+    }
+
+    renderCurve(ctx: CanvasRenderingContext2D, curveType: CurveType, color: string): void {
+        const { x, y } = this.pos;
+        if (curveType == CurveType.Outer) {
+            const [startAngle, endAngle] = this.getRadian();
+            ctx.beginPath();
+            ctx.arc(x, y, CurveRadius[CurveType.Outer], startAngle, endAngle);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 7;
+            ctx.stroke();
+        }
+
+        if (curveType == CurveType.Inner) {
+            const [startAngle, endAngle] = this.getRadian();
+            ctx.beginPath();
+            ctx.arc(x, y, CurveRadius[CurveType.Inner], startAngle, endAngle);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 7;
+            ctx.stroke();
+        }
+    }
+
+    getBoundLines(curveType: CurveType) {
+        const radius = CurveRadius[curveType];
+        const [startAngle, endAngle] = this.getRadian();
+        const lines = getArcLines({ pos: this.pos, radius, startAngle, endAngle });
+        return lines;
+    }
+
+    getRadian() {
+        const radian = (angle: number) => angle * Math.PI / 180;
+        const { startAngle, endAngle } = this.angleType;
+        return [radian(startAngle), radian(endAngle)]
+    }
+}
+
 /**
  * 左上角圓弧
  */
@@ -365,7 +428,7 @@ export class RightTopCurve implements IRoad {
                 return points1;
             }
         }
-        
+
         this.lineDamaged = "";
         return [];
     }
