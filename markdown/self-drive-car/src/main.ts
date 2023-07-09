@@ -46,15 +46,11 @@ class Game {
             car.angle = carAngle0;
             road.renderDamaged(ctx);
         }
-
-        roadMap.roads.forEach(roads => {
-            roads.forEach(road => {
-                const boundLines = road.getBoundLines();
-                if (car.radar.collide(ctx, boundLines)) {
-                    return;
-                }
-            });
-        });
+        
+        const [road2, collidePoints2] = roadMap.collideRadarLine(ctx, car.radar.getBoundLine());
+        if (collidePoints2 != null ) {
+            car.radar.renderDamaged(ctx, collidePoints2);
+        }
     }
 
     drawRoad() {
