@@ -3,6 +3,8 @@ import { drawArc, drawLine, drawText, posInfo } from "./drawUtils";
 export const CarFrameMargin = 5;
 export const CarWidth = 75;
 export const CarHeight = 117;
+export const FrameWidth = CarWidth - CarFrameMargin * 2;
+export const FrameHeight = CarHeight - CarFrameMargin * 2;
 export const CarColor = "blue";
 export const RoadLength = 220;
 export const RoadWidth = 220;
