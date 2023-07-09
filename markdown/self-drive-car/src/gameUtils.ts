@@ -18,7 +18,7 @@ export const CarPos = { x: CenterX, y: CenterY };
 export const StartX = 100;
 export const StartY = 400;
 export const DamagedColor = "red";
-export const RadarLine = 100;
+export const RadarLine = 150;
 export const RadarCount = 3;
 export const RadarColor = 'gray';
 
@@ -95,8 +95,8 @@ export class VerticalRoad implements IRoad {
     }
 
     getBoundLines() {
-        const x = this.ix * RoadWidth;
-        const y = this.iy * RoadLength;
+        const x = this.ix * RoadLength;
+        const y = this.iy * RoadWidth;
         const line1 = {
             start: {
                 x: x + RoadMargin,
@@ -104,18 +104,18 @@ export class VerticalRoad implements IRoad {
             },
             end: {
                 x: x + RoadMargin,
-                y: y + RoadLength
+                y: y + RoadWidth
             }
         };
 
         const line2 = {
             start: {
-                x: x + RoadWidth - RoadMargin,
+                x: x + RoadLength - RoadMargin,
                 y: y
             },
             end: {
-                x: x + RoadWidth - RoadMargin,
-                y: y + RoadLength,
+                x: x + RoadLength - RoadMargin,
+                y: y + RoadWidth,
             }
         };
         return [line1, line2];
