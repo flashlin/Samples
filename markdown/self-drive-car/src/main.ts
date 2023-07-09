@@ -51,7 +51,7 @@ class Game {
     drawRoad() {
         const ctx = this.ctx;
         const roadMap = this.roadMap;
-        roadMap.pos = { x: - this.car.x + CenterX, y: - this.car.y + CenterY };
+        roadMap.pos = { x: CanvasWidth / 2 - this.car.x, y: CanvasHeight / 2 - this.car.y };
         roadMap.render(ctx);
     }
 
