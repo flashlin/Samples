@@ -332,7 +332,13 @@ export function rotateRectangle(left: IPosition, right: IPosition, thetaInDegree
   return rotatedPoints;
 }
 
-export function getArcLines(arc: IArc): ILine[] {
+export function getArcLines(arc0: IArc): ILine[] {
+  let arc = {
+   ...arc0,
+  };
+  if( arc0.endAngle == 0 && arc0.endAngle < arc0.startAngle) {
+    arc.endAngle = 360;
+  }
   let points: IPosition[] = [];
   for (let angle = arc.startAngle; angle <= arc.endAngle; angle += 1) {
     let randi = angle * (Math.PI / 180);
