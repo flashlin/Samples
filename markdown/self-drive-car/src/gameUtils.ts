@@ -76,6 +76,9 @@ export class VerticalRoad implements IRoad {
         ctx.lineWidth = 7;
         ctx.strokeStyle = RoadColor;  // 線條顏色
         ctx.stroke();
+
+        const [line1, line2] = this.getBoundLines();
+        drawText(ctx, {x: x+RoadMargin, y: y}, `${posInfo(line1.start)}`);
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D) {
