@@ -481,37 +481,52 @@ export class LeftBottomCurve implements IRoad {
     }
 }
 
+/**
+ * 右下角圓弧
+ */
 export class RightBottomCurve implements IRoad {
     ix = 0;
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
+    lineDamaged = CurveType.None;
+    curve = new CurveRoad(CurveRoadType.RightBottom);
 
     render(ctx: CanvasRenderingContext2D) {
-        let x = this.pos.x;
-        let y = this.pos.y;
-        ctx.beginPath();
-        ctx.arc(x, y, RoadWidth - RoadMargin, 0 * Math.PI, 0.5 * Math.PI);
-        ctx.strokeStyle = RoadColor;
-        ctx.lineWidth = 7;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, 0 * Math.PI, 0.5 * Math.PI);
-        ctx.strokeStyle = RoadColor;
-        ctx.lineWidth = 7;
-        ctx.stroke();
-    }
-
-    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        return [];
+        const curve = this.curve;
+        curve.pos = {
+            x: this.pos.x,
+            y: this.pos.y,
+        };
+        curve.render(ctx, RoadColor);
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
+        const curve = this.curve;
+        curve.pos = {
+            x: this.pos.x,
+            y: this.pos.y,
+        };
+        curve.renderCurve(ctx, this.lineDamaged, DamagedColor);
+    }
 
+    collide(ctx: CanvasRenderingContext2D, rect: IRect) {
+        const curve = this.curve;
+        curve.pos = this.getBoundArcXY();
+        const { curveType, points } = curve.collide(rect);
+        this.lineDamaged = curveType;
+        return points;
     }
 
     getBoundLines() {
-        return [];
+        const curve = this.curve;
+        curve.pos = this.getBoundArcXY();
+        return curve.getAllBoundLines();
+    }
+
+    getBoundArcXY() {
+        const x = this.ix * RoadWidth;
+        const y = this.iy * RoadLength;
+        return { x, y };
     }
 }
 
