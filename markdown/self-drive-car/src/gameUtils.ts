@@ -256,7 +256,7 @@ class CurveRoad {
     renderCurve(ctx: CanvasRenderingContext2D, curveType: CurveType, color: string): void {
         const { x, y } = this.pos;
         if (curveType == CurveType.Outer) {
-            const {startAngle, endAngle} = this.angles;
+            const { startAngle, endAngle } = this.angles;
             ctx.beginPath();
             ctx.arc(x, y, CurveRadius[CurveType.Outer], startAngle * Math.PI / 180, endAngle * Math.PI / 180);
             ctx.strokeStyle = color;
@@ -265,7 +265,7 @@ class CurveRoad {
         }
 
         if (curveType == CurveType.Inner) {
-            const {startAngle, endAngle} = this.angles;
+            const { startAngle, endAngle } = this.angles;
             ctx.beginPath();
             ctx.arc(x, y, CurveRadius[CurveType.Inner], startAngle * Math.PI / 180, endAngle * Math.PI / 180);
             ctx.strokeStyle = color;
@@ -276,9 +276,33 @@ class CurveRoad {
 
     getBoundLines(curveType: CurveType) {
         const radius = CurveRadius[curveType];
-        const {startAngle, endAngle} = this.angles;
+        const { startAngle, endAngle } = this.angles;
         const lines = getArcLines({ pos: this.pos, radius, startAngle, endAngle });
         return lines;
+    }
+
+
+    collide(curvePos: IPosition, rect: IRect) {
+        this.pos = curvePos;
+
+        const lines1 = this.getBoundLines(CurveType.Outer);
+        for (let line of lines1) {
+            //drawLine(ctx, line, { strokeSyle: 'yellow' })
+            const points1 = rectangleIntersectLine(rect, line);
+            if (points1.length != 0) {
+                return { curveType: CurveType.Outer, points: points1 };
+            }
+        }
+
+        const lines2 = this.getBoundLines(CurveType.Inner);
+        for (let line of lines2) {
+            const points1 = rectangleIntersectLine(rect, line);
+            if (points1.length != 0) {
+                return { curveType: CurveType.Inner, points: points1 };
+            }
+        }
+
+        return { curveType: CurveType.None, points: [] };
     }
 }
 
@@ -485,7 +509,7 @@ export class LeftBottomCurve implements IRoad {
     ix = 0;
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
-    lineDamaged = "";
+    lineDamaged = CurveType.None;
     curveRoad = new CurveRoad();
 
     constructor() {
@@ -511,16 +535,16 @@ export class LeftBottomCurve implements IRoad {
         // ctx.lineWidth = 7;
         // ctx.stroke();
     }
-    
+
     renderDamaged(ctx: CanvasRenderingContext2D): void {
         let x = this.pos.x + RoadLength;
         let y = this.pos.y;
         const curveRoad = this.curveRoad;
         curveRoad.pos = { x, y };
-        if( this.lineDamaged == "line1") {
+        if (this.lineDamaged == CurveType.Outer) {
             curveRoad.renderCurve(ctx, CurveType.Outer, DamagedColor);
         }
-        if( this.lineDamaged == "line2") {
+        if (this.lineDamaged == CurveType.Inner) {
             curveRoad.renderCurve(ctx, CurveType.Inner, DamagedColor);
         }
     }
@@ -529,28 +553,31 @@ export class LeftBottomCurve implements IRoad {
         const [x, y] = this.getBoundArcXY();
         const curveRoad = this.curveRoad;
         curveRoad.pos = { x, y };
+        const { curveType, points } = curveRoad.collide({x, y}, rect);
+        this.lineDamaged = curveType;
+        return points;
 
-        const lines1 = this.curveRoad.getBoundLines(CurveType.Outer);
-        for (let line of lines1) {
-            //drawLine(ctx, line, { strokeSyle: 'yellow' })
-            const points1 = rectangleIntersectLine(rect, line);
-            if (points1.length != 0) {
-                this.lineDamaged = "line1";
-                return points1;
-            }
-        }
+        // const lines1 = this.curveRoad.getBoundLines(CurveType.Outer);
+        // for (let line of lines1) {
+        //     //drawLine(ctx, line, { strokeSyle: 'yellow' })
+        //     const points1 = rectangleIntersectLine(rect, line);
+        //     if (points1.length != 0) {
+        //         this.lineDamaged = "line1";
+        //         return points1;
+        //     }
+        // }
 
-        const lines2 = this.curveRoad.getBoundLines(CurveType.Inner);
-        for (let line of lines2) {
-            const points1 = rectangleIntersectLine(rect, line);
-            if (points1.length != 0) {
-                this.lineDamaged = "line2";
-                return points1;
-            }
-        }
+        // const lines2 = this.curveRoad.getBoundLines(CurveType.Inner);
+        // for (let line of lines2) {
+        //     const points1 = rectangleIntersectLine(rect, line);
+        //     if (points1.length != 0) {
+        //         this.lineDamaged = "line2";
+        //         return points1;
+        //     }
+        // }
 
-        this.lineDamaged = "";
-        return [];
+        // this.lineDamaged = "";
+        // return [];
     }
 
     getBoundLines() {
