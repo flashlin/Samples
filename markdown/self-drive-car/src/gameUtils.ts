@@ -1,6 +1,6 @@
 import { drawArc, drawLine, drawText, posInfo } from "./drawUtils";
 
-export const CarFrameMargin = 4;
+export const CarFrameMargin = 5;
 export const CarWidth = 75;
 export const CarHeight = 117;
 export const CarColor = "blue";
@@ -10,8 +10,8 @@ export const RoadColor = 'blue';
 export const RoadMargin = 22;
 export const CanvasWidth = 800;
 export const CanvasHeight = 700;
-export const CenterX = CanvasWidth / 2 - CarWidth / 2;
-export const CenterY = CanvasHeight / 2 - CarHeight / 2;
+export const CenterX = CanvasWidth / 2 - CarWidth / 2 - CarFrameMargin;
+export const CenterY = CanvasHeight / 2 - CarHeight / 2 - CarFrameMargin;
 export const CarPos = { x: CenterX + CarFrameMargin, y: CenterY + CarFrameMargin };
 export const CarCenterX = CarWidth / 2;
 export const CarCenterY = CarHeight / 2;
