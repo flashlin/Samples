@@ -316,92 +316,50 @@ export class LeftTopCurve implements IRoad {
     ix = 0;
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
-    lineDamaged = "";
+    lineDamaged = CurveType.None;
+    curve = new CurveRoad();
+
+    constructor() {
+        this.curve.angles = CurveAngleType.LeftTop;
+    }
 
     render(ctx: CanvasRenderingContext2D) {
-        let x = this.pos.x + RoadLength;
-        let y = this.pos.y + RoadWidth;
-        ctx.beginPath();
-        ctx.arc(x, y, RoadWidth - RoadMargin, Math.PI, 1.5 * Math.PI);
-        ctx.strokeStyle = RoadColor;
-        ctx.lineWidth = 7;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, Math.PI, 1.5 * Math.PI);
-        ctx.strokeStyle = RoadColor;
-        ctx.lineWidth = 7;
-        ctx.stroke();
+        const curve = this.curve;
+        curve.pos = {
+            x: this.pos.x + RoadLength,
+            y: this.pos.y + RoadWidth,
+        };
+        curve.render(ctx, RoadColor);
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        const lines1 = this.getBound1Lines();
-        for (let line of lines1) {
-            const points1 = rectangleIntersectLine(rect, line);
-            if (points1.length != 0) {
-                this.lineDamaged = "line1";
-                return points1;
-            }
-        }
-
-
-        const lines2 = this.getBound2Lines();
-        for (let line of lines2) {
-            const points1 = rectangleIntersectLine(rect, line);
-            if (points1.length != 0) {
-                this.lineDamaged = "line2";
-                return points1;
-            }
-        }
-
-        this.lineDamaged = "";
-        return [];
+        const curve = this.curve;
+        curve.pos = this.getBoundArcXY();
+        const { curveType, points } = curve.collide(rect);
+        this.lineDamaged = curveType;
+        return points;
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
-        let x = this.pos.x + RoadLength;
-        let y = this.pos.y + RoadWidth;
-        if (this.lineDamaged == "line1") {
-            ctx.beginPath();
-            ctx.arc(x, y, RoadWidth - RoadMargin, Math.PI, 1.5 * Math.PI);
-            ctx.strokeStyle = DamagedColor;
-            ctx.lineWidth = 7;
-            ctx.stroke();
-        }
-
-        if (this.lineDamaged == "line2") {
-            ctx.beginPath();
-            ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, Math.PI, 1.5 * Math.PI);
-            ctx.strokeStyle = DamagedColor;
-            ctx.lineWidth = 7;
-            ctx.stroke();
-        }
+        const curve = this.curve;
+        curve.pos = {
+            x: this.pos.x + RoadLength,
+            y: this.pos.y + RoadWidth,
+        };
+        curve.renderCurve(ctx, this.lineDamaged, DamagedColor);
     }
 
     getBoundLines() {
-        const lines1 = this.getBound1Lines();
-        const lines2 = this.getBound2Lines();
-        return [...lines1, ...lines2];
+        const curve = this.curve;
+        curve.pos = this.getBoundArcXY();
+        return curve.getAllBoundLines();
     }
 
-    getBound1Lines() {
-        const x = this.ix * RoadWidth + RoadLength;
-        const y = this.iy * RoadLength + RoadWidth;
-        const radius = RoadWidth - RoadMargin;
-        const startAngle = 180;
-        const endAngle = 270;
-        const lines = getArcLines({ pos: { x, y }, radius, startAngle, endAngle });
-        return lines;
-    }
-
-    getBound2Lines() {
-        const x = this.ix * RoadWidth + RoadLength;
-        const y = this.iy * RoadLength + RoadWidth;
-        const radius = RoadMargin;
-        const startAngle = 180;
-        const endAngle = 270;
-        const lines = getArcLines({ pos: { x, y }, radius, startAngle, endAngle });
-        return lines;
+    getBoundArcXY() {
+        return {
+            x: this.ix * RoadWidth + RoadLength,
+            y: this.iy * RoadLength + RoadWidth,
+        };
     }
 }
 
@@ -521,18 +479,18 @@ export class LeftBottomCurve implements IRoad {
 
     render(ctx: CanvasRenderingContext2D) {
         const curveRoad = this.curve;
-        curveRoad.pos = { 
-            x: this.pos.x + RoadLength, 
-            y: this.pos.y 
+        curveRoad.pos = {
+            x: this.pos.x + RoadLength,
+            y: this.pos.y
         };
         curveRoad.render(ctx, RoadColor);
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
         const curveRoad = this.curve;
-        curveRoad.pos = { 
-            x: this.pos.x + RoadLength, 
-            y: this.pos.y 
+        curveRoad.pos = {
+            x: this.pos.x + RoadLength,
+            y: this.pos.y
         };
         if (this.lineDamaged == CurveType.Outer) {
             curveRoad.renderCurve(ctx, CurveType.Outer, DamagedColor);
@@ -558,7 +516,7 @@ export class LeftBottomCurve implements IRoad {
     getBoundArcXY() {
         const x = this.ix * RoadWidth + RoadLength;
         const y = this.iy * RoadLength;
-        return {x, y};
+        return { x, y };
     }
 }
 
