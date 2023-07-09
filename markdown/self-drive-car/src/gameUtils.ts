@@ -244,12 +244,15 @@ enum CurveRoadType {
     LeftBottom
 }
 
+/**
+ * 圓弧角度
+ */
 interface CurveAngles {
     startAngle: number;
     endAngle: number;
 }
 
-const CurveAngleType = {
+const CurveAngles = {
     [CurveRoadType.LeftTop]: { startAngle: 180, endAngle: 270 },
     [CurveRoadType.RightTop]: { startAngle: 270, endAngle: 360 },
     [CurveRoadType.RightBottom]: { startAngle: 0, endAngle: 90 },
@@ -261,7 +264,7 @@ class CurveRoad {
     angles: CurveAngles;
 
     constructor(curveRoadType: CurveRoadType) {
-        this.angles = CurveAngleType[curveRoadType];
+        this.angles = CurveAngles[curveRoadType];
     }
 
     render(ctx: CanvasRenderingContext2D, color: string): void {
