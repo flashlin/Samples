@@ -273,15 +273,15 @@ class CurveRoad {
         this.renderCurve(ctx, CurveType.Outer, color);
         this.renderCurve(ctx, CurveType.Inner, color);
 
-        let x1 = this.pos.x;
-        let y1 = this.pos.y;
-        let x2 = x1 + RoadLength;
-        let y2 = y1 + RoadWidth;
-        let leftTop = { x: x1, y: y1, };
-        let rightTop = { x: x2, y: y1 };
-        let rightBottom = { x: x2, y: y2 };
-        let leftBottom = { x: x1, y: y2 };
-        drawRect(ctx, { leftTop, rightTop, rightBottom, leftBottom }, { strokeSyle: 'green' });
+        // let x1 = this.pos.x;
+        // let y1 = this.pos.y;
+        // let x2 = x1 + RoadLength;
+        // let y2 = y1 + RoadWidth;
+        // let leftTop = { x: x1, y: y1, };
+        // let rightTop = { x: x2, y: y1 };
+        // let rightBottom = { x: x2, y: y2 };
+        // let leftBottom = { x: x1, y: y2 };
+        // drawRect(ctx, { leftTop, rightTop, rightBottom, leftBottom }, { strokeSyle: 'green' });
     }
 
     renderCurve(ctx: CanvasRenderingContext2D, curveType: CurveType, color: string): void {

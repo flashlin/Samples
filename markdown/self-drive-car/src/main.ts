@@ -65,14 +65,15 @@ class Game {
         this.drawRoad();
         this.drawF4Car();
 
-        drawLine(ctx, {
-            start: { x: 0, y: CanvasHeight / 2 },
-            end: { x: CanvasWidth, y: CanvasHeight / 2 }
-        }, { strokeSyle: "gray", lineWidth: 3 });
-        drawLine(ctx, {
-            start: { x: CanvasWidth / 2, y: 0 },
-            end: { x: CanvasWidth / 2, y: CanvasHeight }
-        }, { strokeSyle: "gray", lineWidth: 3 });
+        //十字標記
+        // drawLine(ctx, {
+        //     start: { x: 0, y: CanvasHeight / 2 },
+        //     end: { x: CanvasWidth, y: CanvasHeight / 2 }
+        // }, { strokeSyle: "gray", lineWidth: 3 });
+        // drawLine(ctx, {
+        //     start: { x: CanvasWidth / 2, y: 0 },
+        //     end: { x: CanvasWidth / 2, y: CanvasHeight }
+        // }, { strokeSyle: "gray", lineWidth: 3 });
 
         this.fps.render(ctx, { x: 0, y: 0 });
         requestAnimationFrame(this.render.bind(this));
