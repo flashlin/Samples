@@ -181,8 +181,8 @@ export class HorizontalRoad implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        const x = this.ix * RoadWidth;
-        const y = this.iy * RoadLength;
+        const x = this.ix * RoadLength;
+        const y = this.iy * RoadWidth;
         const line1 = {
             start: {
                 x: x,
