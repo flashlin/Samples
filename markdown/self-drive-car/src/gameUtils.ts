@@ -281,10 +281,13 @@ class CurveRoad {
         return lines;
     }
 
+    getAllBoundLines() {
+        const lines1 = this.getBoundLines(CurveType.Outer);
+        const lines2 = this.getBoundLines(CurveType.Inner);
+        return [...lines1, ...lines2];
+    }
 
-    collide(curvePos: IPosition, rect: IRect) {
-        this.pos = curvePos;
-
+    collide(rect: IRect) {
         const lines1 = this.getBoundLines(CurveType.Outer);
         for (let line of lines1) {
             //drawLine(ctx, line, { strokeSyle: 'yellow' })
@@ -517,10 +520,11 @@ export class LeftBottomCurve implements IRoad {
     }
 
     render(ctx: CanvasRenderingContext2D) {
-        let x = this.pos.x + RoadLength;
-        let y = this.pos.y;
         const curveRoad = this.curve;
-        curveRoad.pos = { x, y };
+        curveRoad.pos = { 
+            x: this.pos.x + RoadLength, 
+            y: this.pos.y 
+        };
         curveRoad.render(ctx, RoadColor);
     }
 
@@ -539,24 +543,22 @@ export class LeftBottomCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        const curveRoad = this.curve;
-        const [x, y] = this.getBoundArcXY();
-        curveRoad.pos = { x, y };
-        const { curveType, points } = curveRoad.collide({x, y}, rect);
+        const curve = this.curve;
+        curve.pos = this.getBoundArcXY();
+        const { curveType, points } = curve.collide(rect);
         this.lineDamaged = curveType;
         return points;
     }
 
     getBoundLines() {
-        const lines1 = this.curve.getBoundLines(CurveType.Outer);
-        const lines2 = this.curve.getBoundLines(CurveType.Inner);
-        return [...lines1, ...lines2];
+        this.curve.pos = this.getBoundArcXY();
+        return this.curve.getAllBoundLines();
     }
 
     getBoundArcXY() {
         const x = this.ix * RoadWidth + RoadLength;
         const y = this.iy * RoadLength;
-        return [x, y];
+        return {x, y};
     }
 }
 
