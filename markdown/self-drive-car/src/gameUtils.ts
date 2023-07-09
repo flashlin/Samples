@@ -255,7 +255,7 @@ enum CurveType {
 
 const CurveRadius = {
     [CurveType.None]: 0,
-    [CurveType.Outer]: RoadWidth - RoadMargin,
+    [CurveType.Outer]: RoadLength - RoadMargin,
     [CurveType.Inner]: RoadMargin,
 };
 
