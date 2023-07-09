@@ -1,4 +1,4 @@
-import { drawLine, lineInfo, posInfo } from "./drawUtils";
+import { drawLine, drawText, lineInfo, posInfo } from "./drawUtils";
 import { CarHeight, CarWidth, RadarColor, RadarLine } from "./gameUtils";
 import { ILine, IPosition, findTwoLinesIntersection, getDistance, getTwoPointsDistance, rotatePoints } from "./math";
 
@@ -26,6 +26,10 @@ export class Radar {
         if (this.radarLine != null) {
             drawLine(ctx, this.radarLine, { strokeSyle: 'yellow', lineWidth: 3 });
         }
+
+        const radarLine = this.getBoundLine();
+        drawText(ctx, start1, `${posInfo(radarLine.start)}`)
+        drawText(ctx, end1, `${posInfo(radarLine.end)}`)
     }
 
     collide(ctx: CanvasRenderingContext2D, lines: ILine[]) {
@@ -74,8 +78,7 @@ export class Radar {
         return { start: start1, end: end1 };
     }
 
-    renderDamaged(ctx: CanvasRenderingContext2D, point: IPosition)
-    {
+    renderDamaged(ctx: CanvasRenderingContext2D, point: IPosition) {
         const { start, end } = this.getBoundLine();
         const distance = getTwoPointsDistance(start, point);
         const startPos = {
