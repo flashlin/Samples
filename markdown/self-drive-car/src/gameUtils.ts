@@ -251,7 +251,6 @@ export class LeftTopCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-
         const lines1 = this.getBound1Lines();
         for (let line of lines1) {
             const points1 = rectangleIntersectLine(rect, line);
@@ -321,11 +320,14 @@ export class LeftTopCurve implements IRoad {
     }
 }
 
-
+/**
+ * 右上角圓弧
+ */
 export class RightTopCurve implements IRoad {
     ix = 0;
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
+    lineDamaged = "";
 
     render(ctx: CanvasRenderingContext2D) {
         let x = this.pos.x;
@@ -344,14 +346,76 @@ export class RightTopCurve implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
+        const lines1 = this.getBound1Lines();
+        console.log('cc', lines1)
+        for (let line of lines1) {
+            //drawLine(ctx, line, { strokeSyle: 'yellow' })
+            const points1 = rectangleIntersectLine(rect, line);
+            if (points1.length != 0) {
+                this.lineDamaged = "line1";
+                return points1;
+            }
+        }
+
+        const lines2 = this.getBound1Lines();
+        for (let line of lines2) {
+            const points1 = rectangleIntersectLine(rect, line);
+            if (points1.length != 0) {
+                this.lineDamaged = "line2";
+                return points1;
+            }
+        }
         return [];
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D): void {
+        let x = this.pos.x;
+        let y = this.pos.y + RoadWidth;
+        if (this.lineDamaged == "line1") {
+            ctx.beginPath();
+            ctx.arc(x, y, RoadWidth - RoadMargin, 1.5 * Math.PI, 0);
+            ctx.strokeStyle = DamagedColor;
+            ctx.lineWidth = 7;
+            ctx.stroke();
+        }
+
+        if (this.lineDamaged == "line2") {
+            ctx.beginPath();
+            ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, 1.5 * Math.PI, 0);
+            ctx.strokeStyle = DamagedColor;
+            ctx.lineWidth = 7;
+            ctx.stroke();
+        }
     }
 
     getBoundLines() {
-        return [];
+        const lines1 = this.getBound1Lines();
+        const lines2 = this.getBound2Lines();
+        return [...lines1, ...lines2];
+    }
+
+    getBound1Lines() {
+        const [x, y] = this.getBoundArcXY();
+        const radius = RoadWidth - RoadMargin;
+        const startAngle = 270;
+        const endAngle = 0;
+        const lines = getArcLines({ pos: { x, y }, radius, startAngle, endAngle });
+        return lines;
+    }
+
+    getBound2Lines() {
+        const [x, y] = this.getBoundArcXY();
+        const radius = RoadMargin;
+        const startAngle = 270;
+        const endAngle = 0;
+        const lines = getArcLines({ pos: { x, y }, radius, startAngle, endAngle });
+        return lines;
+    }
+
+    getBoundArcXY() {
+        const x = this.ix * RoadWidth;
+        const y = this.iy * RoadLength + RoadWidth;
+        return [x, y];
     }
 }
 
