@@ -387,7 +387,7 @@ export class LeftTopCurve implements IRoad {
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         const curve = this.curve;
-        curve.pos = this.getBoundXY();
+        curve.pos = this.getBoundPos();
         const { curveType, points } = curve.collide(rect);
         this.lineDamaged = curveType;
         return points;
@@ -401,11 +401,11 @@ export class LeftTopCurve implements IRoad {
 
     getBoundLines() {
         const curve = this.curve;
-        curve.pos = this.getBoundXY();
+        curve.pos = this.getBoundPos();
         return curve.getAllBoundLines();
     }
 
-    getBoundXY() {
+    getBoundPos() {
         return {
             x: this.ix * RoadLength,
             y: this.iy * RoadWidth,
@@ -437,7 +437,7 @@ export class RightTopCurve implements IRoad {
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         const curve = this.curve;
-        curve.pos = this.getArcXY();
+        curve.pos = this.getBoundPos();
         const { curveType, points } = curve.collide(rect);
         this.lineDamaged = curveType;
         return points;
@@ -445,11 +445,11 @@ export class RightTopCurve implements IRoad {
 
     getBoundLines() {
         const curve = this.curve;
-        curve.pos = this.getArcXY();
+        curve.pos = this.getBoundPos();
         return curve.getAllBoundLines();
     }
 
-    getArcXY() {
+    getBoundPos() {
         const x = this.ix * RoadLength;
         const y = this.iy * RoadWidth;
         return { x, y };
@@ -485,18 +485,18 @@ export class LeftBottomCurve implements IRoad {
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         const curve = this.curve;
-        curve.pos = this.getArcXY();
+        curve.pos = this.getBoundPos();
         const { curveType, points } = curve.collide(rect);
         this.lineDamaged = curveType;
         return points;
     }
 
     getBoundLines() {
-        this.curve.pos = this.getArcXY();
+        this.curve.pos = this.getBoundPos();
         return this.curve.getAllBoundLines();
     }
 
-    getArcXY() {
+    getBoundPos() {
         const x = this.ix * RoadLength;
         const y = this.iy * RoadWidth;
         return { x, y };
@@ -527,7 +527,7 @@ export class RightBottomCurve implements IRoad {
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
         const curve = this.curve;
-        curve.pos = this.getBoundXY();
+        curve.pos = this.getBoundPos();
         const { curveType, points } = curve.collide(rect);
         this.lineDamaged = curveType;
         return points;
@@ -535,11 +535,11 @@ export class RightBottomCurve implements IRoad {
 
     getBoundLines() {
         const curve = this.curve;
-        curve.pos = this.getBoundXY();
+        curve.pos = this.getBoundPos();
         return curve.getAllBoundLines();
     }
 
-    getBoundXY() {
+    getBoundPos() {
         const x = this.ix * RoadLength;
         const y = this.iy * RoadWidth;
         return { x, y };
