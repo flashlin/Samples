@@ -47,6 +47,7 @@ export interface IRoad {
     pos: IPosition;
     render(ctx: CanvasRenderingContext2D): void;
     collide(ctx: CanvasRenderingContext2D, rect: IRect): IPosition[];
+    collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null;
     renderDamaged(ctx: CanvasRenderingContext2D): void;
     getBoundLines(): ILine[];
 }
@@ -143,6 +144,19 @@ export class VerticalRoad implements IRoad {
         this.lineDamaged = "";
         return [];
     }
+
+    collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
+        const [line1, line2] = this.getBoundLines();
+        const point1 = findTwoLinesIntersection(line1, line);
+        if( point1 != null ) {
+            return point1;
+        }
+        const point2 = findTwoLinesIntersection(line1, line);
+        if( point2 != null ) {
+            return point2;
+        }
+        return null;
+    }
 }
 
 
@@ -225,6 +239,11 @@ export class HorizontalRoad implements IRoad {
 
     getBoundLines() {
         return [];
+    }
+
+    
+    collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
+        return null;
     }
 }
 
@@ -414,6 +433,10 @@ export class LeftTopCurve implements IRoad {
             y: this.iy * RoadWidth,
         };
     }
+    
+    collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
+        return null;
+    }
 }
 
 /**
@@ -444,6 +467,11 @@ export class RightTopCurve implements IRoad {
         const { curveType, points } = curve.collide(rect);
         this.lineDamaged = curveType;
         return points;
+    }
+    
+    
+    collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
+        return null;
     }
 
     getBoundLines() {
@@ -493,6 +521,10 @@ export class LeftBottomCurve implements IRoad {
         this.lineDamaged = curveType;
         return points;
     }
+    
+    collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
+        return null;
+    }
 
     getBoundLines() {
         this.curve.pos = this.getBoundPos();
@@ -536,6 +568,10 @@ export class RightBottomCurve implements IRoad {
         return points;
     }
 
+    collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
+        return null;
+    }
+
     getBoundLines() {
         const curve = this.curve;
         curve.pos = this.getBoundPos();
@@ -562,6 +598,10 @@ export class EmptyRoad implements IRoad {
         return [];
     }
 
+    collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
+        return null;
+    }
+
     renderDamaged(ctx: CanvasRenderingContext2D): void {
 
     }
@@ -580,7 +620,7 @@ function create2dArray<T>(width: number, height: number): T[][] {
 }
 
 import map1Content from '@/assets/map.txt?raw';
-import { ILine, IPosition, IRect, getArcLines, rectangleIntersectLine } from "./math";
+import { ILine, IPosition, IRect, findTwoLinesIntersection, getArcLines, rectangleIntersectLine } from "./math";
 
 function createRoad(ch: string) {
     const dict: Record<string, () => IRoad> = {
@@ -646,9 +686,6 @@ export class RoadMap {
         for (let ix = 0; ix < roads.length; ix++) {
             for (let iy = 0; iy < roads[ix].length; iy++) {
                 const road = roads[ix][iy];
-                if (road == null) {
-                    continue;
-                }
                 const collidePoints = road.collide(ctx, rect);
                 if (collidePoints.length > 0) {
                     return [road, collidePoints];
@@ -656,6 +693,20 @@ export class RoadMap {
             }
         }
         return [EmptyRoad.Default, []];
+    }
+    
+    collideRadarLine(ctx: CanvasRenderingContext2D, radarLine: ILine): [IRoad, IPosition|null] {
+        const roads = this.roads;
+        for (let ix = 0; ix < roads.length; ix++) {
+            for (let iy = 0; iy < roads[ix].length; iy++) {
+                const road = roads[ix][iy];
+                const collidePoints = road.collideLine(ctx, radarLine);
+                if (collidePoints != null) {
+                    return [road, collidePoints];
+                }
+            }
+        }
+        return [EmptyRoad.Default, null];
     }
 }
 
