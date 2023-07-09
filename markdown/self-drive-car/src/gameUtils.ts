@@ -241,12 +241,12 @@ const CurveAngleType = {
     LeftTop: { startAngle: 180, endAngle: 270 },
     RightTop: { startAngle: 270, endAngle: 360 },
     RightBottom: { startAngle: 0, endAngle: 90 },
-    LeftBottom: { startAngle: 90, endAngle: 270 },
+    LeftBottom: { startAngle: 90, endAngle: 180 },
 };
 
 class CurveRoad {
     pos: IPosition = { x: 0, y: 0 };
-    angleType = CurveAngleType.LeftTop;
+    angles = CurveAngleType.LeftTop;
 
     render(ctx: CanvasRenderingContext2D, color: string): void {
         this.renderCurve(ctx, CurveType.Outer, color);
@@ -256,18 +256,18 @@ class CurveRoad {
     renderCurve(ctx: CanvasRenderingContext2D, curveType: CurveType, color: string): void {
         const { x, y } = this.pos;
         if (curveType == CurveType.Outer) {
-            const [startAngle, endAngle] = this.getRadian();
+            const {startAngle, endAngle} = this.angles;
             ctx.beginPath();
-            ctx.arc(x, y, CurveRadius[CurveType.Outer], startAngle, endAngle);
+            ctx.arc(x, y, CurveRadius[CurveType.Outer], startAngle * Math.PI / 180, endAngle * Math.PI / 180);
             ctx.strokeStyle = color;
             ctx.lineWidth = 7;
             ctx.stroke();
         }
 
         if (curveType == CurveType.Inner) {
-            const [startAngle, endAngle] = this.getRadian();
+            const {startAngle, endAngle} = this.angles;
             ctx.beginPath();
-            ctx.arc(x, y, CurveRadius[CurveType.Inner], startAngle, endAngle);
+            ctx.arc(x, y, CurveRadius[CurveType.Inner], startAngle * Math.PI / 180, endAngle * Math.PI / 180);
             ctx.strokeStyle = color;
             ctx.lineWidth = 7;
             ctx.stroke();
@@ -276,15 +276,9 @@ class CurveRoad {
 
     getBoundLines(curveType: CurveType) {
         const radius = CurveRadius[curveType];
-        const [startAngle, endAngle] = this.getRadian();
+        const {startAngle, endAngle} = this.angles;
         const lines = getArcLines({ pos: this.pos, radius, startAngle, endAngle });
         return lines;
-    }
-
-    getRadian() {
-        const radian = (angle: number) => angle * Math.PI / 180;
-        const { startAngle, endAngle } = this.angleType;
-        return [radian(startAngle), radian(endAngle)]
     }
 }
 
@@ -492,25 +486,51 @@ export class LeftBottomCurve implements IRoad {
     iy = 0;
     pos: IPosition = { x: 0, y: 0 };
     lineDamaged = "";
+    curveRoad = new CurveRoad();
+
+    constructor() {
+        this.curveRoad.angles = CurveAngleType.LeftBottom;
+    }
 
     render(ctx: CanvasRenderingContext2D) {
         let x = this.pos.x + RoadLength;
         let y = this.pos.y;
-        ctx.beginPath();
-        ctx.arc(x, y, RoadWidth - RoadMargin, 0.5 * Math.PI, 1 * Math.PI);
-        ctx.strokeStyle = RoadColor;
-        ctx.lineWidth = 7;
-        ctx.stroke();
+        const curveRoad = this.curveRoad;
+        curveRoad.pos = { x, y };
+        curveRoad.render(ctx, RoadColor);
 
-        ctx.beginPath();
-        ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, 0.5 * Math.PI, 1 * Math.PI);
-        ctx.strokeStyle = RoadColor;
-        ctx.lineWidth = 7;
-        ctx.stroke();
+        // ctx.beginPath();
+        // ctx.arc(x, y, RoadWidth - RoadMargin, 0.5 * Math.PI, 1 * Math.PI);
+        // ctx.strokeStyle = RoadColor;
+        // ctx.lineWidth = 7;
+        // ctx.stroke();
+
+        // ctx.beginPath();
+        // ctx.arc(x + RoadMargin - RoadMargin, y, RoadMargin, 0.5 * Math.PI, 1 * Math.PI);
+        // ctx.strokeStyle = RoadColor;
+        // ctx.lineWidth = 7;
+        // ctx.stroke();
+    }
+    
+    renderDamaged(ctx: CanvasRenderingContext2D): void {
+        let x = this.pos.x + RoadLength;
+        let y = this.pos.y;
+        const curveRoad = this.curveRoad;
+        curveRoad.pos = { x, y };
+        if( this.lineDamaged == "line1") {
+            curveRoad.renderCurve(ctx, CurveType.Outer, DamagedColor);
+        }
+        if( this.lineDamaged == "line2") {
+            curveRoad.renderCurve(ctx, CurveType.Inner, DamagedColor);
+        }
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        const lines1 = this.getBound1Lines();
+        const [x, y] = this.getBoundArcXY();
+        const curveRoad = this.curveRoad;
+        curveRoad.pos = { x, y };
+
+        const lines1 = this.curveRoad.getBoundLines(CurveType.Outer);
         for (let line of lines1) {
             //drawLine(ctx, line, { strokeSyle: 'yellow' })
             const points1 = rectangleIntersectLine(rect, line);
@@ -520,7 +540,7 @@ export class LeftBottomCurve implements IRoad {
             }
         }
 
-        const lines2 = this.getBound2Lines();
+        const lines2 = this.curveRoad.getBoundLines(CurveType.Inner);
         for (let line of lines2) {
             const points1 = rectangleIntersectLine(rect, line);
             if (points1.length != 0) {
@@ -533,36 +553,10 @@ export class LeftBottomCurve implements IRoad {
         return [];
     }
 
-    renderDamaged(ctx: CanvasRenderingContext2D): void {
-
-    }
-
     getBoundLines() {
-        const lines1 = this.getBound1Lines();
-        const lines2 = this.getBound2Lines();
+        const lines1 = this.curveRoad.getBoundLines(CurveType.Outer);
+        const lines2 = this.curveRoad.getBoundLines(CurveType.Inner);
         return [...lines1, ...lines2];
-    }
-
-    getBound1Lines() {
-        const [x, y] = this.getBoundArcXY();
-        const radius = RoadWidth - RoadMargin;
-        const [startAngle, endAngle] = this.getArcAngles();
-        const lines = getArcLines({ pos: { x, y }, radius, startAngle, endAngle });
-        return lines;
-    }
-
-    getBound2Lines() {
-        const [x, y] = this.getBoundArcXY();
-        const radius = RoadMargin;
-        const [startAngle, endAngle] = this.getArcAngles();
-        const lines = getArcLines({ pos: { x, y }, radius, startAngle, endAngle });
-        return lines;
-    }
-
-    getArcAngles() {
-        const startAngle = 90;
-        const endAngle = 180;
-        return [startAngle, endAngle];
     }
 
     getBoundArcXY() {
