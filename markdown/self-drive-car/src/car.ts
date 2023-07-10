@@ -50,7 +50,7 @@ export class Car {
         //console.log(`car ${this.x} ${this.y}`);
         const radar = this.radar;
         radar.carXY = { x: this.x, y: this.y };
-        radar.angle = this.angle;
+        radar.carAngle = this.angle;
         radar.pos = {
             x: this.pos.x + CarWidth / 2,
             y: this.pos.y + CarHeight / 2,
