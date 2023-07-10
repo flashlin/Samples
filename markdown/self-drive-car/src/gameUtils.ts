@@ -6,7 +6,6 @@ export const CarHeight = 117;
 export const FrameWidth = CarWidth - CarFrameMargin * 2;
 export const FrameHeight = CarHeight - CarFrameMargin * 2;
 export const CarColor = "blue";
-export const RoadLength = 220;
 export const RoadWidth = 220;
 export const RoadColor = 'blue';
 export const RoadMargin = 22;
@@ -71,8 +70,8 @@ export class VerticalRoad implements IRoad {
         ctx.beginPath();
         ctx.moveTo(x + RoadMargin, y);
         ctx.lineTo(x + RoadMargin, y + RoadWidth);
-        ctx.moveTo(x + RoadLength - RoadMargin, y);
-        ctx.lineTo(x + RoadLength - RoadMargin, y + RoadWidth);
+        ctx.moveTo(x + RoadWidth - RoadMargin, y);
+        ctx.lineTo(x + RoadWidth - RoadMargin, y + RoadWidth);
         ctx.lineWidth = 7;
         ctx.strokeStyle = RoadColor;  // 線條顏色
         ctx.stroke();
@@ -87,11 +86,11 @@ export class VerticalRoad implements IRoad {
         ctx.beginPath();
         if (this.lineDamaged == "line1") {
             ctx.moveTo(x + RoadMargin, y);
-            ctx.lineTo(x + RoadMargin, y + RoadLength);
+            ctx.lineTo(x + RoadMargin, y + RoadWidth);
         }
         if (this.lineDamaged == "line2") {
-            ctx.moveTo(x + RoadLength - RoadMargin, y);
-            ctx.lineTo(x + RoadLength - RoadMargin, y + RoadWidth);
+            ctx.moveTo(x + RoadWidth - RoadMargin, y);
+            ctx.lineTo(x + RoadWidth - RoadMargin, y + RoadWidth);
         }
         ctx.lineWidth = 7;
         ctx.strokeStyle = "red";
@@ -99,7 +98,7 @@ export class VerticalRoad implements IRoad {
     }
 
     getBoundLines() {
-        const x = this.ix * RoadLength;
+        const x = this.ix * RoadWidth;
         const y = this.iy * RoadWidth;
         const line1 = {
             start: {
@@ -114,11 +113,11 @@ export class VerticalRoad implements IRoad {
 
         const line2 = {
             start: {
-                x: x + RoadLength - RoadMargin,
+                x: x + RoadWidth - RoadMargin,
                 y: y
             },
             end: {
-                x: x + RoadLength - RoadMargin,
+                x: x + RoadWidth - RoadMargin,
                 y: y + RoadWidth,
             }
         };
@@ -131,7 +130,7 @@ export class VerticalRoad implements IRoad {
         const points1 = rectangleIntersectLine(rect, line1);
         // if (this.ix == 0 && this.iy == 1) {
         //     drawText(ctx, this.pos, `${posInfo(line1.start)}`)
-        //     drawText(ctx, { x: this.pos.x, y: this.pos.y + RoadLength }, `${posInfo(line1.end)}`)
+        //     drawText(ctx, { x: this.pos.x, y: this.pos.y + RoadWidth }, `${posInfo(line1.end)}`)
         // }
         if (points1.length > 0) {
             this.lineDamaged = "line1";
@@ -175,16 +174,16 @@ export class HorizontalRoad implements IRoad {
         const y = this.pos.y;
         ctx.beginPath();
         ctx.moveTo(x, y + RoadMargin);
-        ctx.lineTo(x + RoadLength, y + RoadMargin);
+        ctx.lineTo(x + RoadWidth, y + RoadMargin);
         ctx.moveTo(x, y + RoadWidth - RoadMargin);
-        ctx.lineTo(x + RoadLength, y + RoadWidth - RoadMargin);
+        ctx.lineTo(x + RoadWidth, y + RoadWidth - RoadMargin);
         ctx.lineWidth = 7;
         ctx.strokeStyle = RoadColor;
         ctx.stroke();
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        const x = this.ix * RoadLength;
+        const x = this.ix * RoadWidth;
         const y = this.iy * RoadWidth;
         const line1 = {
             start: {
@@ -192,7 +191,7 @@ export class HorizontalRoad implements IRoad {
                 y: y + RoadMargin
             },
             end: {
-                x: x + RoadLength,
+                x: x + RoadWidth,
                 y: y + RoadMargin
             }
         };
@@ -209,7 +208,7 @@ export class HorizontalRoad implements IRoad {
                 y: y + RoadWidth - RoadMargin
             },
             end: {
-                x: x + RoadLength,
+                x: x + RoadWidth,
                 y: y + RoadWidth - RoadMargin,
             }
         };
@@ -229,11 +228,11 @@ export class HorizontalRoad implements IRoad {
         ctx.beginPath();
         if (this.lineDamaged == "line1") {
             ctx.moveTo(x, y + RoadMargin);
-            ctx.lineTo(x + RoadLength, y + RoadMargin);
+            ctx.lineTo(x + RoadWidth, y + RoadMargin);
         }
         if (this.lineDamaged == "line2") {
             ctx.moveTo(x, y + RoadWidth - RoadMargin);
-            ctx.lineTo(x + RoadLength, y + RoadWidth - RoadMargin);
+            ctx.lineTo(x + RoadWidth, y + RoadWidth - RoadMargin);
         }
         ctx.lineWidth = 7;
         ctx.strokeStyle = "red";
@@ -258,7 +257,7 @@ enum CurveType {
 
 const CurveRadius = {
     [CurveType.None]: 0,
-    [CurveType.Outer]: RoadLength - RoadMargin,
+    [CurveType.Outer]: RoadWidth - RoadMargin,
     [CurveType.Inner]: RoadMargin,
 };
 
@@ -300,7 +299,7 @@ class CurveRoad {
 
         // let x1 = this.pos.x;
         // let y1 = this.pos.y;
-        // let x2 = x1 + RoadLength;
+        // let x2 = x1 + RoadWidth;
         // let y2 = y1 + RoadWidth;
         // let leftTop = { x: x1, y: y1, };
         // let rightTop = { x: x2, y: y1 };
@@ -368,7 +367,7 @@ class CurveRoad {
     getArcXY() {
         if (this.type == CurveRoadType.LeftTop) {
             return {
-                x: this.pos.x + RoadLength,
+                x: this.pos.x + RoadWidth,
                 y: this.pos.y + RoadWidth
             }
         }
@@ -388,7 +387,7 @@ class CurveRoad {
         }
 
         return {
-            x: this.pos.x + RoadLength,
+            x: this.pos.x + RoadWidth,
             y: this.pos.y
         }
     }
@@ -432,7 +431,7 @@ export class LeftTopCurve implements IRoad {
 
     getBoundPos() {
         return {
-            x: this.ix * RoadLength,
+            x: this.ix * RoadWidth,
             y: this.iy * RoadWidth,
         };
     }
@@ -484,7 +483,7 @@ export class RightTopCurve implements IRoad {
     }
 
     getBoundPos() {
-        const x = this.ix * RoadLength;
+        const x = this.ix * RoadWidth;
         const y = this.iy * RoadWidth;
         return { x, y };
     }
@@ -535,7 +534,7 @@ export class LeftBottomCurve implements IRoad {
     }
 
     getBoundPos() {
-        const x = this.ix * RoadLength;
+        const x = this.ix * RoadWidth;
         const y = this.iy * RoadWidth;
         return { x, y };
     }
@@ -582,7 +581,7 @@ export class RightBottomCurve implements IRoad {
     }
 
     getBoundPos() {
-        const x = this.ix * RoadLength;
+        const x = this.ix * RoadWidth;
         const y = this.iy * RoadWidth;
         return { x, y };
     }
@@ -676,7 +675,7 @@ export class RoadMap {
                     continue;
                 }
                 road.pos = {
-                    x: x + ix * RoadLength,
+                    x: x + ix * RoadWidth,
                     y: y + iy * RoadWidth,
                 };
                 road.render(ctx);
