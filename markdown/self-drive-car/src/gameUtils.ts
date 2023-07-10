@@ -153,7 +153,7 @@ export class VerticalRoad implements IRoad {
         if( point1 != null ) {
             return point1;
         }
-        const point2 = findTwoLinesIntersection(line1, line);
+        const point2 = findTwoLinesIntersection(line2, line);
         if( point2 != null ) {
             return point2;
         }
