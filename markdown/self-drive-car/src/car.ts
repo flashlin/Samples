@@ -2,7 +2,7 @@ import { drawRect } from "./drawUtils";
 import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
-import { IPosition, IRect, getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
+import { ILine, IPosition, IRect, getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
 import { Radar } from "./radar";
 
 export class Car {
@@ -60,6 +60,16 @@ export class Car {
             y: this.pos.y,
         }
         radar.render(ctx);
+    }
+
+    getBoundLines(): ILine[] {
+        const { leftTop, rightTop, rightBottom, leftBottom } = this.getBound(); 
+        return [
+            { start: leftTop, end: rightTop },
+            { start: rightTop, end: rightBottom },
+            { start: rightBottom, end: leftBottom },
+            { start: leftBottom, end: leftTop },
+        ];
     }
 
     getBound(): IRect {

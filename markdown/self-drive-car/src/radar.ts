@@ -23,7 +23,7 @@ export class Radar {
         const [start1, end1] = rotatePoints(this.center, this.angle, points);
         drawLine(ctx, { start: start1, end: end1 }, { strokeSyle: RadarColor, lineWidth: 3 });
 
-        const radarLine = this.getBoundLine();
+        const radarLine = this.getBoundLine()[0];
         drawText(ctx, start1, `${posInfo(radarLine.start)}`)
         drawText(ctx, end1, `${posInfo(radarLine.end)}`)
     }
@@ -38,11 +38,11 @@ export class Radar {
             y: start.y - RadarLine
         };
         const [start1, end1] = rotatePoints(this.carXY, this.angle, [start, end]);
-        return { start: start1, end: end1 };
+        return [{ start: start1, end: end1 }];
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D, point: IPosition) {
-        const { start, end } = this.getBoundLine();
+        const { start, end } = this.getBoundLine()[0];
         const distance = getTwoPointsDistance(start, point);
         const startPos = {
             x: this.pos.x + CarWidth / 2,

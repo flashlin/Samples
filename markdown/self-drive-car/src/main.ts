@@ -36,20 +36,25 @@ class Game {
         const carPos0 = { x: car.x, y: car.y };
         const carAngle0 = car.angle;
         car.move();
-        const carBound1 = car.getBound();
 
         const roadMap = this.roadMap;
-        const [road, collidePoints] = roadMap.collide(ctx, carBound1);
-        if (collidePoints.length > 0) {
+        const [road, collideCarPoints] = roadMap.collide(ctx, car.getBoundLines());
+        if (collideCarPoints.length > 0) {
             car.x = carPos0.x;
             car.y = carPos0.y;
             car.angle = carAngle0;
             road.renderDamaged(ctx);
         }
         
-        const [road2, collidePoints2] = roadMap.collideRadarLine(ctx, car.radar.getBoundLine());
-        if (collidePoints2 != null ) {
-            car.radar.renderDamaged(ctx, collidePoints2);
+        
+        // const [road2, collideRadarPoints] = roadMap.collideRadarLine(ctx, car.radar.getBoundLine());
+        // if (collideRadarPoints.length != 0 ) {
+        //     car.radar.renderDamaged(ctx, collideRadarPoints[0]);
+        // }
+        
+        const [road2, collideRadarPoints] = roadMap.collide(ctx, car.radar.getBoundLine());
+        if (collideRadarPoints.length != 0 ) {
+            car.radar.renderDamaged(ctx, collideRadarPoints[0]);
         }
     }
 
