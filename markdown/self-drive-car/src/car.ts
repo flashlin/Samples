@@ -56,6 +56,12 @@ export class Car {
             y: this.pos.y + CarHeight / 2,
         }
         radar.render(ctx);
+
+        const sensors = [];
+        for(let radarLine of radar.radarLines){
+            sensors.push(radarLine.distance);
+        }
+        console.log(`sensors ${sensors.join(', ')}`)
     }
 
     getBoundLines(): ILine[] {
