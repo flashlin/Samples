@@ -661,20 +661,6 @@ export class RoadMap {
         }
         return [EmptyRoad.Default, []];
     }
-
-    collideRadarLine(ctx: CanvasRenderingContext2D, radarLine: ILine): [IRoad, IPosition[]] {
-        const roads = this.roads;
-        for (let ix = 0; ix < roads.length; ix++) {
-            for (let iy = 0; iy < roads[ix].length; iy++) {
-                const road = roads[ix][iy];
-                const collidePoints = road.collide(ctx, [radarLine]);
-                if (collidePoints != null) {
-                    return [road, collidePoints];
-                }
-            }
-        }
-        return [EmptyRoad.Default, []];
-    }
 }
 
 
