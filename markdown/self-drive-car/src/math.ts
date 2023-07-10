@@ -5,6 +5,11 @@ export type IPosition = {
   y: number,
 };
 
+export const EmptyPosition: IPosition = {
+  x: 0,
+  y: 0,
+};
+
 export type ILine = {
   start: IPosition,
   end: IPosition,
