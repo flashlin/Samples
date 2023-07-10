@@ -51,13 +51,9 @@ export class Car {
         const radar = this.radar;
         radar.carXY = { x: this.x, y: this.y };
         radar.angle = this.angle;
-        radar.center = {
-            x: this.pos.x + CarWidth / 2,
-            y: this.pos.y + CarHeight / 2
-        };
         radar.pos = {
-            x: this.pos.x,
-            y: this.pos.y,
+            x: this.pos.x + CarWidth / 2,
+            y: this.pos.y + CarHeight / 2,
         }
         radar.render(ctx);
     }
