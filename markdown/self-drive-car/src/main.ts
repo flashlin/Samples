@@ -46,9 +46,16 @@ class Game {
             road.renderDamaged(ctx);
         }
         
-        const [road2, collideRadarPoints] = roadMap.collide(ctx, car.radar.getBoundLines());
-        if (collideRadarPoints.length != 0 ) {
-            car.radar.renderDamaged(ctx, collideRadarPoints[0]);
+        // const [road2, collideRadarPoints] = roadMap.collide(ctx, car.radar.getBoundLines());
+        // if (collideRadarPoints.length != 0 ) {
+        //     car.radar.renderDamaged(ctx, collideRadarPoints[0]);
+        // }
+
+        for(let radarLine of car.radar.getBoundLines()) {
+            const [road, collideRadarPoints] = roadMap.collide(ctx, [radarLine]);
+            if (collideRadarPoints.length != 0 ) {
+                car.radar.renderDamaged(ctx, collideRadarPoints[0]);
+            }
         }
     }
 

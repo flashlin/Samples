@@ -14,9 +14,9 @@ export class RadarLine {
         drawLine(ctx, { start: start1, end: end1 }, { strokeSyle: RadarColor, lineWidth: 3 });
 
         //draw dump info
-        //const radarLine = this.getBoundLine();
-        //drawText(ctx, start1, `${posInfo(radarLine.start)}`)
-        //drawText(ctx, end1, `${posInfo(radarLine.end)}`)
+        // const radarLine = this.getBoundLine();
+        // drawText(ctx, start1, `${posInfo(radarLine.start)}`)
+        // drawText(ctx, end1, `${posInfo(radarLine.end)}`)
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D, point: IPosition) {
@@ -56,7 +56,7 @@ export class RadarLine {
             x: start.x,
             y: start.y - RadarLineLength
         };
-        const [start1, end1] = rotatePoints(this.carXY, this.carAngle, [start, end]);
+        const [start1, end1] = rotatePoints(this.carXY, this.carAngle + this.angle, [start, end]);
         return { start: start1, end: end1 };
     }
 
@@ -72,8 +72,30 @@ export class RadarLine {
     }
 
     compareWithTolerance(a: number, b: number) {
-        return Math.abs(a - b) < 0.001;
+        return Math.abs(a - b) < 0.0000001;
     }
+}
+
+function generateAngles(count: number, angle: number): number[] {
+    const angles = [];
+    let startAngle = 0;
+
+    let counter = 0;
+    if (count % 2 != 0) {
+        angles.push(startAngle);
+        counter = 1;
+    }
+
+    for (let i = 1; i < count; i++) {
+        if (i % 2 === 1) {
+            angles.push(startAngle - counter * angle);  // 遞減角度
+        } else {
+            angles.push(startAngle + counter * angle);  // 遞增角度
+            counter++;
+        }
+    }
+
+    return angles;
 }
 
 export class Radar {
@@ -84,7 +106,12 @@ export class Radar {
     radarLines: RadarLine[] = [];
 
     constructor() {
-        this.radarLines.push(new RadarLine());
+        const radarLineCount = 3;
+        for(let radarAngle of generateAngles(radarLineCount, 15)) {
+            const radarLine = new RadarLine();
+            radarLine.angle = radarAngle;
+            this.radarLines.push(radarLine);
+        }
     }
 
     render(ctx: CanvasRenderingContext2D) {
@@ -114,8 +141,9 @@ export class Radar {
             radarLine.carAngle = this.carAngle;
             if (radarLine.isMy(point)) {
                 radarLine.renderDamaged(ctx, point);
-                break;
             }
         }
     }
+    
+    //collideRoad(ctx: CanvasRenderingContext2D, roadMap: RoadMap)
 }
