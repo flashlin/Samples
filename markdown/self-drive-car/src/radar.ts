@@ -33,22 +33,14 @@ export class Radar {
     }
 
     collide(ctx: CanvasRenderingContext2D, lines: ILine[]) {
-        const start = {
-            x: this.carXY.x,
-            y: this.carXY.y + 20,
-        };
-        const end = {
-            x: start.x,
-            y: start.y - RadarLine
-        };
-        const radarLine = { start, end };
+        const radarLine = this.getBoundLine();
         for (let line of lines) {
             const point = findTwoLinesIntersection(radarLine, line);
             if (point != null) {
-                const distance = getTwoPointsDistance(start, point);
+                const distance = getTwoPointsDistance(radarLine.end, point);
                 const startPos = {
-                    x: this.pos.x + CarWidth / 2,
-                    y: this.pos.y + 20,
+                    x: this.pos.x,
+                    y: this.pos.y - CarHeight / 2 + 20,
                 };
                 this.radarLine = {
                     start: startPos,
@@ -68,13 +60,13 @@ export class Radar {
     getBoundLine() {
         const start = {
             x: this.carXY.x,
-            y: this.carXY.y + 20,
+            y: this.carXY.y - CarHeight / 2 + 20,
         };
         const end = {
             x: start.x,
             y: start.y - RadarLine
         };
-        const [start1, end1] = rotatePoints(this.center, this.angle, [start, end]);
+        const [start1, end1] = rotatePoints(this.carXY, this.angle, [start, end]);
         return { start: start1, end: end1 };
     }
 
