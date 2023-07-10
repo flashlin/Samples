@@ -1,9 +1,34 @@
 import { drawLine, drawText, lineInfo, posInfo } from "./drawUtils";
 import { CarHeight, CarWidth, RadarColor, RadarLineLength } from "./gameUtils";
-import { ILine, IPosition, findTwoLinesIntersection, getDistance, getTwoPointsDistance, rotatePoints } from "./math";
+import { ILine, IPosition, findTwoLinesIntersection, getDistance, getLineSlope, getTwoPointsDistance, rotatePoints } from "./math";
 
 export class RadarLine {
     carXY: IPosition = { x: 0, y: 0 };
+    angle: number = 0;
+    
+    getBoundLine() {
+        const start = {
+            x: this.carXY.x,
+            y: this.carXY.y - CarHeight / 2 + 20,
+        };
+        const end = {
+            x: start.x,
+            y: start.y - RadarLineLength
+        };
+        const [start1, end1] = rotatePoints(this.carXY, this.angle, [start, end]);
+        return { start: start1, end: end1 };
+    }
+    
+    isMy(point: IPosition): boolean {
+        const { start, end } = this.getBoundLine();
+        const slope = getLineSlope({ start, end });
+        const testLine = { start, end: point };
+        const testSlope = getLineSlope(testLine);
+        if( slope === testSlope ) {
+            return true;
+        }
+        return false;
+    }
 }
 
 export class Radar {
