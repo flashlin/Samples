@@ -2,6 +2,10 @@ import { drawLine, drawText, lineInfo, posInfo } from "./drawUtils";
 import { CarHeight, CarWidth, RadarColor, RadarLineLength } from "./gameUtils";
 import { ILine, IPosition, findTwoLinesIntersection, getDistance, getTwoPointsDistance, rotatePoints } from "./math";
 
+export class RadarLine {
+    carXY: IPosition = { x: 0, y: 0 };
+}
+
 export class Radar {
     pos: IPosition = { x: 0, y: 0 };
     angle = 270;
