@@ -23,16 +23,13 @@ export class Radar {
         const [start1, end1] = rotatePoints(this.center, this.angle, points);
         drawLine(ctx, { start: start1, end: end1 }, { strokeSyle: RadarColor, lineWidth: 3 });
 
-        if (this.radarLine != null) {
-            drawLine(ctx, this.radarLine, { strokeSyle: 'yellow', lineWidth: 3 });
-        }
-
         const radarLine = this.getBoundLine();
         drawText(ctx, start1, `${posInfo(radarLine.start)}`)
         drawText(ctx, end1, `${posInfo(radarLine.end)}`)
     }
 
     collide(ctx: CanvasRenderingContext2D, lines: ILine[]) {
+        console.log('ra', lines.length);
         const radarLine = this.getBoundLine();
         for (let line of lines) {
             const point = findTwoLinesIntersection(radarLine, line);
