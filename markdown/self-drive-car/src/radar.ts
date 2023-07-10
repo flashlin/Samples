@@ -8,6 +8,8 @@ export class RadarLine {
     carAngle: number = 0;
     angle: number = 0;
 
+    distance: number = 0;
+
     render(ctx: CanvasRenderingContext2D) {
         const { start, end } = this.getDrawLine();
         const [start1, end1] = rotatePoints(this.pos, this.carAngle + this.angle, [start, end]);
@@ -22,6 +24,7 @@ export class RadarLine {
     renderDamaged(ctx: CanvasRenderingContext2D, point: IPosition) {
         const { start, end } = this.getBoundLine();
         const distance = getTwoPointsDistance(start, point);
+        this.distance = distance;
         const { start: startDrawPos, end: endDrawPos } = this.getDrawLine();
         const endPos = {
             x: startDrawPos.x,
@@ -68,6 +71,7 @@ export class RadarLine {
         if (this.compareWithTolerance(slope, testSlope)) {
             return true;
         }
+        this.distance = 0;
         return false;
     }
 
