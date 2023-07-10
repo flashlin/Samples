@@ -57,11 +57,12 @@ export class Car {
         }
         radar.render(ctx);
 
-        const sensors = [];
-        for(let radarLine of radar.radarLines){
-            sensors.push(radarLine.distance);
-        }
-        console.log(`sensors ${sensors.join(', ')}`)
+        // 印出 sensor 數字
+        //const sensors = [];
+        //for(let radarLine of radar.radarLines){
+        //    sensors.push(radarLine.distance);
+        //}
+        //console.log(`sensors ${sensors.join(', ')}`)
     }
 
     getBoundLines(): ILine[] {
