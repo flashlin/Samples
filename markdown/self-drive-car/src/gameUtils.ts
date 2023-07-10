@@ -77,7 +77,7 @@ export class VerticalRoad implements IRoad {
         ctx.stroke();
 
         const [line1, line2] = this.getBoundLines();
-        drawText(ctx, {x: x+RoadMargin, y: y}, `${posInfo(line1.start)}`);
+        drawText(ctx, { x: x + RoadMargin, y: y }, `${posInfo(line1.start)}`);
     }
 
     renderDamaged(ctx: CanvasRenderingContext2D) {
@@ -150,11 +150,11 @@ export class VerticalRoad implements IRoad {
     collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
         const [line1, line2] = this.getBoundLines();
         const point1 = findTwoLinesIntersection(line1, line);
-        if( point1 != null ) {
+        if (point1 != null) {
             return point1;
         }
         const point2 = findTwoLinesIntersection(line2, line);
-        if( point2 != null ) {
+        if (point2 != null) {
             return point2;
         }
         return null;
@@ -183,18 +183,7 @@ export class HorizontalRoad implements IRoad {
     }
 
     collide(ctx: CanvasRenderingContext2D, rect: IRect) {
-        const x = this.ix * RoadWidth;
-        const y = this.iy * RoadWidth;
-        const line1 = {
-            start: {
-                x: x,
-                y: y + RoadMargin
-            },
-            end: {
-                x: x + RoadWidth,
-                y: y + RoadMargin
-            }
-        };
+        const [line1, line2] = this.getBoundLines();
 
         const points1 = rectangleIntersectLine(rect, line1);
         if (points1.length > 0) {
@@ -202,16 +191,6 @@ export class HorizontalRoad implements IRoad {
             return points1;
         }
 
-        const line2 = {
-            start: {
-                x: x,
-                y: y + RoadWidth - RoadMargin
-            },
-            end: {
-                x: x + RoadWidth,
-                y: y + RoadWidth - RoadMargin,
-            }
-        };
         const points2 = rectangleIntersectLine(rect, line2);
         if (points2.length > 0) {
             this.lineDamaged = "line2";
@@ -240,11 +219,47 @@ export class HorizontalRoad implements IRoad {
     }
 
     getBoundLines() {
-        return [];
+        const { x, y } = {
+            x: this.ix * RoadWidth,
+            y: this.iy * RoadWidth,
+        };
+
+        const line1 = {
+            start: {
+                x: x,
+                y: y + RoadMargin
+            },
+            end: {
+                x: x + RoadWidth,
+                y: y + RoadMargin
+            }
+        };
+
+        const line2 = {
+            start: {
+                x: x,
+                y: y + RoadWidth - RoadMargin
+            },
+            end: {
+                x: x + RoadWidth,
+                y: y + RoadWidth - RoadMargin,
+            }
+        };
+
+        return [line1, line2];
     }
 
-    
+
     collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
+        const [line1, line2] = this.getBoundLines();
+        const point1 = findTwoLinesIntersection(line1, line);
+        if (point1 != null) {
+            return point1;
+        }
+        const point2 = findTwoLinesIntersection(line2, line);
+        if (point2 != null) {
+            return point2;
+        }
         return null;
     }
 }
@@ -435,7 +450,7 @@ export class LeftTopCurve implements IRoad {
             y: this.iy * RoadWidth,
         };
     }
-    
+
     collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
         return null;
     }
@@ -470,8 +485,8 @@ export class RightTopCurve implements IRoad {
         this.lineDamaged = curveType;
         return points;
     }
-    
-    
+
+
     collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
         return null;
     }
@@ -523,7 +538,7 @@ export class LeftBottomCurve implements IRoad {
         this.lineDamaged = curveType;
         return points;
     }
-    
+
     collideLine(ctx: CanvasRenderingContext2D, line: ILine): IPosition | null {
         return null;
     }
@@ -696,8 +711,8 @@ export class RoadMap {
         }
         return [EmptyRoad.Default, []];
     }
-    
-    collideRadarLine(ctx: CanvasRenderingContext2D, radarLine: ILine): [IRoad, IPosition|null] {
+
+    collideRadarLine(ctx: CanvasRenderingContext2D, radarLine: ILine): [IRoad, IPosition | null] {
         const roads = this.roads;
         for (let ix = 0; ix < roads.length; ix++) {
             for (let iy = 0; iy < roads[ix].length; iy++) {
