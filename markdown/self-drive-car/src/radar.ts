@@ -6,10 +6,11 @@ export class RadarLine {
     pos: IPosition = EmptyPosition;
     carXY: IPosition = EmptyPosition;
     carAngle: number = 0;
+    angle: number = 0;
 
     render(ctx: CanvasRenderingContext2D) {
         const { start, end } = this.getDrawLine();
-        const [start1, end1] = rotatePoints(this.pos, this.carAngle, [start, end]);
+        const [start1, end1] = rotatePoints(this.pos, this.carAngle + this.angle, [start, end]);
         drawLine(ctx, { start: start1, end: end1 }, { strokeSyle: RadarColor, lineWidth: 3 });
 
         //draw dump info
@@ -26,7 +27,7 @@ export class RadarLine {
             x: startDrawPos.x,
             y: startDrawPos.y - distance,
         };
-        const [startPos1, endPos1] = rotatePoints(this.pos, this.carAngle, [startDrawPos, endPos]);
+        const [startPos1, endPos1] = rotatePoints(this.pos, this.carAngle + this.angle, [startDrawPos, endPos]);
         const radarLine = {
             start: startPos1,
             end: endPos1,
