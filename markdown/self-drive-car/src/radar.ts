@@ -1,5 +1,5 @@
 import { drawLine, drawText, lineInfo, posInfo } from "./drawUtils";
-import { CarHeight, CarWidth, RadarColor, RadarLine } from "./gameUtils";
+import { CarHeight, CarWidth, RadarColor, RadarLineLength } from "./gameUtils";
 import { ILine, IPosition, findTwoLinesIntersection, getDistance, getTwoPointsDistance, rotatePoints } from "./math";
 
 export class Radar {
@@ -17,7 +17,7 @@ export class Radar {
         };
         const end = {
             x: start.x,
-            y: start.y - RadarLine
+            y: start.y - RadarLineLength
         };
         const points = [start, end];
         const [start1, end1] = rotatePoints(this.center, this.angle, points);
@@ -35,7 +35,7 @@ export class Radar {
         };
         const end = {
             x: start.x,
-            y: start.y - RadarLine
+            y: start.y - RadarLineLength
         };
         const [start1, end1] = rotatePoints(this.carXY, this.angle, [start, end]);
         return [{ start: start1, end: end1 }];
