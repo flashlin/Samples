@@ -28,32 +28,6 @@ export class Radar {
         drawText(ctx, end1, `${posInfo(radarLine.end)}`)
     }
 
-    collide(ctx: CanvasRenderingContext2D, lines: ILine[]) {
-        console.log('ra', lines.length);
-        const radarLine = this.getBoundLine();
-        for (let line of lines) {
-            const point = findTwoLinesIntersection(radarLine, line);
-            if (point != null) {
-                const distance = getTwoPointsDistance(radarLine.end, point);
-                const startPos = {
-                    x: this.pos.x,
-                    y: this.pos.y - CarHeight / 2 + 20,
-                };
-                this.radarLine = {
-                    start: startPos,
-                    end: {
-                        x: startPos.x,
-                        y: startPos.y - distance,
-                    }
-                };
-                drawLine(ctx, this.radarLine, { strokeSyle: 'yellow', lineWidth: 3 });
-                return true;
-            }
-        }
-        this.radarLine = null;
-        return false;
-    }
-
     getBoundLine() {
         const start = {
             x: this.carXY.x,
