@@ -106,7 +106,7 @@ export class Radar {
     radarLines: RadarLine[] = [];
 
     constructor() {
-        const radarLineCount = 3;
+        const radarLineCount = 5;
         for(let radarAngle of generateAngles(radarLineCount, 15)) {
             const radarLine = new RadarLine();
             radarLine.angle = radarAngle;
@@ -144,6 +144,4 @@ export class Radar {
             }
         }
     }
-    
-    //collideRoad(ctx: CanvasRenderingContext2D, roadMap: RoadMap)
 }
