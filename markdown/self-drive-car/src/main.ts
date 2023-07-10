@@ -46,7 +46,7 @@ class Game {
             road.renderDamaged(ctx);
         }
         
-        const [road2, collideRadarPoints] = roadMap.collide(ctx, car.radar.getBoundLine());
+        const [road2, collideRadarPoints] = roadMap.collide(ctx, car.radar.getBoundLines());
         if (collideRadarPoints.length != 0 ) {
             car.radar.renderDamaged(ctx, collideRadarPoints[0]);
         }
