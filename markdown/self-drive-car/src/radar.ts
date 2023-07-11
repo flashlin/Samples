@@ -110,7 +110,7 @@ export class Radar {
     radarLines: RadarLine[] = [];
 
     constructor() {
-        for(let radarAngle of generateAngles(RadarLineCount, 15)) {
+        for(let radarAngle of generateAngles(RadarLineCount, 30)) {
             const radarLine = new RadarLine();
             radarLine.angle = radarAngle;
             this.radarLines.push(radarLine);
