@@ -30,14 +30,14 @@ export class Brain {
         if( damaged === 1 ) {
             return 0;
         }
-        const speedRewardWeight = 1;
-        const distancePenaltyWeight = 1.2;
+        const speedRewardWeight = 40;
+        const distancePenaltyWeight = 1;
         const speed = state[1];
         const distances = state.slice(2, state.length);
         
         const distancePenalty = distances.reduce((a, b) => a + b, 0) / distances.length;
         const reward = speedRewardWeight * speed - distancePenaltyWeight * distancePenalty;
-        console.log(reward);
+        console.log(`${reward}`);
         return reward;
     }
 
@@ -72,7 +72,7 @@ export class Brain {
 
         const stateTensor = tf.tensor([state]);
         await this.model.fit(stateTensor, target, { epochs: 1 });
-        //await this.saveModelWeights();
+        await this.saveModelWeights();
     }
 
     async saveModelWeights() {

@@ -43,6 +43,7 @@ class Game {
             car.x = carPos0.x;
             car.y = carPos0.y;
             car.angle = carAngle0;
+            car.speed = 0;
             road.renderDamaged(ctx);
         }
         
