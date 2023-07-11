@@ -30,13 +30,21 @@ export class Brain {
         if( damaged === 1 ) {
             return 0;
         }
-        const speedRewardWeight = 40;
-        const distancePenaltyWeight = 1;
+        const speedRewardWeight = RadarLineLength / 4;
+        const distancePenaltyWeight = 0.3;
         const speed = state[1];
         const distances = state.slice(2, state.length);
+
+        let distanceReward = 0;
+        if( distances.every(d => d === 0) )
+        {
+            distanceReward = RadarLineLength;
+        } else {
+            const distancePenalty = distances.reduce((a, b) => a + b, 0) / distances.length;
+            distanceReward = distancePenaltyWeight * distancePenalty;
+        }
         
-        const distancePenalty = distances.reduce((a, b) => a + b, 0) / distances.length;
-        const reward = speedRewardWeight * speed - distancePenaltyWeight * distancePenalty;
+        const reward = speedRewardWeight * speed + distanceReward;
         console.log(`${reward}`);
         return reward;
     }
