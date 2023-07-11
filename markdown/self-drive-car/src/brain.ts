@@ -9,7 +9,9 @@ class NormalizationLayer extends tf.layers.Layer {
 
 export class Brain {
     model = tf.sequential();
-    times = 0;
+    first = true;
+    prevState: number[] = [];
+    prevAction = 0;
 
     constructor() {
         const model = this.model;
@@ -35,24 +37,42 @@ export class Brain {
         
         const distancePenalty = distances.reduce((a, b) => a + b, 0) / distances.length;
         const reward = speedRewardWeight * speed - distancePenaltyWeight * distancePenalty;
+        console.log(reward);
         return reward;
     }
 
     async control(getGameState: () => number[]) {
         const model = this.model;
         
-        const state = tf.tensor([getGameState()]);
-        let actionProbabilities = model.predict(state) as tf.Tensor;
+        if( this.first ) {
+            const state = getGameState();
+            const action = this.predict(state);
+            this.prevState = state;
+            this.prevAction = action;
+            this.first = false;
+            return action;
+        }
+
+        await this.fit(this.prevState, this.prevAction, getGameState())       
+        this.first = true;
+        return 5;
+    }
+    
+    predict(state: number[]) {
+        const stateTensor = tf.tensor([state]);
+        let actionProbabilities = this.model.predict(stateTensor) as tf.Tensor;
         let actions = tf.multinomial(actionProbabilities.flatten(), 1).arraySync();
         let action = actions[0] as number;
+        return action;
+    }
 
-        const newState = getGameState();
+    async fit(state: number[], action: number, newState: number[]) {
         let reward = this.rewardFunction(newState);
         let target = tf.oneHot([action], 4).mul(tf.scalar(reward));
-        await model.fit(state, target, { epochs: 1 });
-        //await this.saveModelWeights();
 
-        return action;
+        const stateTensor = tf.tensor([state]);
+        await this.model.fit(stateTensor, target, { epochs: 1 });
+        //await this.saveModelWeights();
     }
 
     async saveModelWeights() {
