@@ -1,5 +1,5 @@
 import { drawLine, drawText, lineInfo, posInfo } from "./drawUtils";
-import { CarHeight, CarWidth, RadarColor, RadarLineLength } from "./gameUtils";
+import { CarHeight, CarWidth, RadarColor, RadarLineCount, RadarLineLength } from "./gameUtils";
 import { EmptyPosition, ILine, IPosition, findTwoLinesIntersection, getDistance, getLineSlope, getTwoPointsDistance, rotatePoints } from "./math";
 
 export class RadarLine {
@@ -110,8 +110,7 @@ export class Radar {
     radarLines: RadarLine[] = [];
 
     constructor() {
-        const radarLineCount = 5;
-        for(let radarAngle of generateAngles(radarLineCount, 15)) {
+        for(let radarAngle of generateAngles(RadarLineCount, 15)) {
             const radarLine = new RadarLine();
             radarLine.angle = radarAngle;
             this.radarLines.push(radarLine);

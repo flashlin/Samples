@@ -1,9 +1,10 @@
 import { drawRect } from "./drawUtils";
-import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight } from "./gameUtils";
+import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
 import { ILine, IPosition, IRect, getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
 import { Radar } from "./radar";
+import { Brain } from "./brain";
 
 export class Car {
     carImage: HTMLImageElement;
@@ -22,6 +23,7 @@ export class Car {
     y = 0;
 
     radar = new Radar();
+    brain = new Brain();
 
     constructor() {
         this.carImage = new Image();
@@ -66,7 +68,7 @@ export class Car {
     }
 
     getBoundLines(): ILine[] {
-        const { leftTop, rightTop, rightBottom, leftBottom } = this.getBound(); 
+        const { leftTop, rightTop, rightBottom, leftBottom } = this.getBound();
         return [
             { start: leftTop, end: rightTop },
             { start: rightTop, end: rightBottom },
@@ -120,7 +122,16 @@ export class Car {
         // drawText(ctx, p3, `${posInfo(carBound.rightBottom)}`)
     }
 
-    move() {
+    async move() {
+        const brain = this.brain;
+        if (UseBrain) {
+            const action = await brain.control(() => {
+                const distances = this.radar.radarLines.map(x => x.distance);
+                return [this.damaged ? 1 : 0, this.speed, ...distances];
+            });
+            console.log('brain', action);
+        }
+
         if (this.controls.forward) {
             this.speed += this.acceleration;
         }
