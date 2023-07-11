@@ -9,6 +9,8 @@ class NormalizationLayer extends tf.layers.Layer {
 
 export class Brain {
     model = tf.sequential();
+    times = 0;
+
     constructor() {
         const model = this.model;
         // 輸入層，將輸入值正規化到 0~1
@@ -38,7 +40,8 @@ export class Brain {
 
     async control(getGameState: () => number[]) {
         const model = this.model;
-        const state = tf.tensor(getGameState());
+        
+        const state = tf.tensor([getGameState()]);
         let actionProbabilities = model.predict(state) as tf.Tensor;
         let actions = tf.multinomial(actionProbabilities.flatten(), 1).arraySync();
         let action = actions[0] as number;
@@ -47,7 +50,7 @@ export class Brain {
         let reward = this.rewardFunction(newState);
         let target = tf.oneHot([action], 4).mul(tf.scalar(reward));
         await model.fit(state, target, { epochs: 1 });
-        await this.saveModelWeights();
+        //await this.saveModelWeights();
 
         return action;
     }

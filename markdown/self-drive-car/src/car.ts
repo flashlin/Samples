@@ -129,7 +129,25 @@ export class Car {
                 const distances = this.radar.radarLines.map(x => x.distance);
                 return [this.damaged ? 1 : 0, this.speed, ...distances];
             });
-            console.log('brain', action);
+            this.controls.forward = false;
+            this.controls.reverse = false;
+            this.controls.left = false;
+            this.controls.right = false;
+            switch( action ) {
+                case 0:
+                    this.controls.forward = true;
+                    break;
+                case 1:
+                    this.controls.reverse = true;
+                    break;
+                case 2:
+                    this.controls.left = true;
+                    break;
+                case 3:
+                    this.controls.right = true;
+                    break;
+            }
+            //console.log('brain', action);
         }
 
         if (this.controls.forward) {
