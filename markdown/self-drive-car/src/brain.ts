@@ -28,24 +28,33 @@ export class Brain {
     rewardFunction(state: number[]) {
         const damaged = state[0];
         if( damaged === 1 ) {
-            return 0;
+            return -100;
         }
         const speedRewardWeight = RadarLineLength / 4;
-        const distancePenaltyWeight = 0.3;
         const speed = state[1];
         const distances = state.slice(2, state.length);
+
+        let speedReward = speed * speedRewardWeight;
 
         let distanceReward = 0;
         if( distances.every(d => d === 0) )
         {
-            distanceReward = RadarLineLength;
+            distanceReward = RadarLineLength * distances.length;
         } else {
-            const distancePenalty = distances.reduce((a, b) => a + b, 0) / distances.length;
-            distanceReward = distancePenaltyWeight * distancePenalty;
+            const distancePenalty = distances.reduce((a, b) => a + b, 0);
+            distanceReward = distancePenalty;
+            
+            if( distancePenalty < RadarLineLength) {
+                distanceReward = 0;
+            }
+        }
+
+        if( speedReward <= 0 ){
+            distanceReward = 0;
         }
         
-        const reward = speedRewardWeight * speed + distanceReward;
-        console.log(`${reward}`);
+        const reward = speedReward + distanceReward;
+        console.log(`${reward} ${speedReward} ${distanceReward}`);
         return reward;
     }
 
