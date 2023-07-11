@@ -44,7 +44,10 @@ class Game {
             car.y = carPos0.y;
             car.angle = carAngle0;
             car.speed = 0;
+            car.damaged = true;
             road.renderDamaged(ctx);
+        } else {
+            car.damaged = false;
         }
         
         // 雷達線
