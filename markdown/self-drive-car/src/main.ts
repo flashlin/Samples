@@ -26,7 +26,7 @@ class Game {
         return canvas;
     }
 
-    drawF4Car() {
+    async drawF4Car() {
         const ctx = this.ctx;
         const car = this.car;
         car.pos = CarPos;
@@ -35,7 +35,7 @@ class Game {
 
         const carPos0 = { x: car.x, y: car.y };
         const carAngle0 = car.angle;
-        car.move();
+        await car.move();
 
         const roadMap = this.roadMap;
         const [road, collideCarPoints] = roadMap.collide(ctx, car.getBoundLines());
@@ -65,7 +65,7 @@ class Game {
         roadMap.render(ctx);
     }
 
-    render() {
+    async render() {
         const ctx = this.ctx;
         const canvas = this.canvas;
         //ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -73,7 +73,7 @@ class Game {
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         this.drawRoad();
-        this.drawF4Car();
+        await this.drawF4Car();
 
         //十字標記
         // drawLine(ctx, {

@@ -1,4 +1,4 @@
-import { RadarLineLength } from './gameUtils';
+import { RadarLineCount, RadarLineLength } from './gameUtils';
 import * as tf from '@tensorflow/tfjs';
 
 class NormalizationLayer extends tf.layers.Layer {
@@ -12,7 +12,7 @@ export class Brain {
     constructor() {
         const model = this.model;
         // 輸入層，將輸入值正規化到 0~1
-        model.add(tf.layers.dense({ inputShape: [5], units: 5, activation: 'relu' }));
+        model.add(tf.layers.dense({ inputShape: [2 + RadarLineCount], units: 5, activation: 'relu' }));
         //model.add(new NormalizationLayer());
         model.add(tf.layers.dense({ units: 6, activation: 'sigmoid' }));
         model.add(tf.layers.dense({ units: 4, activation: 'softmax' }));

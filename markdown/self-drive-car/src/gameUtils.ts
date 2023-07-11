@@ -18,8 +18,10 @@ export const StartX = 100;
 export const StartY = 400;
 export const DamagedColor = "red";
 export const RadarLineLength = 150;
+export const RadarLineCount = 5;
 export const RadarCount = 3;
 export const RadarColor = 'gray';
+export const UseBrain = false;
 
 export class Line {
     line: ILine;
