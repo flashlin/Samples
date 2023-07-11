@@ -21,7 +21,7 @@ export const RadarLineLength = 150;
 export const RadarLineCount = 5;
 export const RadarCount = 3;
 export const RadarColor = 'gray';
-export const UseBrain = false;
+export const UseBrain = true;
 
 export class Line {
     line: ILine;
