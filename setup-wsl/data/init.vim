@@ -7,6 +7,9 @@ Plug 'jistr/vim-nerdtree-tabs'
 
 " TypeScript 語法和重構插件
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" C# LSP 插件
+Plug 'OmniSharp/omnisharp-vim'
 call plug#end()
 
 " 同時顯示行號和相對行號
@@ -39,5 +42,9 @@ map  <C-Y> "+y
 map! <C-Y> "+y
 
 
-" 啟用 LSP 支援
+" 啟用 LSP 支援 Typescript
 autocmd FileType typescript,javascript,javascriptreact,typescriptreact CocStart
+" 啟用 LSP 支援 C#
+autocmd FileType cs,sln nmap <buffer> <leader>d <Plug>(coc-definition)
+autocmd FileType cs,sln nmap <buffer> <leader>r <Plug>(coc-references)
+autocmd FileType cs,sln nmap <buffer> <leader>i <Plug>(coc-implementation)
