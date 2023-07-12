@@ -6,17 +6,17 @@ train_data = [
     {
         "context": "The capital of France is Paris.",
         "question": "What is the capital of France?",
-        "answer": "Paris"
+        "answer": "Paris",
     },
     {
         "context": "The Great Pyramid of Giza is in Egypt.",
         "question": "Where is the Great Pyramid of Giza?",
-        "answer": "Egypt"
+        "answer": "Egypt",
     },
     {
         "context": "The tallest mountain in the world is Mount Everest.",
         "question": "What is the tallest mountain in the world?",
-        "answer": "Mount Everest"
+        "answer": "Mount Everest",
     }
 ]
 
@@ -43,7 +43,9 @@ for epoch in range(3):
         end_positions = start_positions + len(tokenizer.encode(data['answer'], add_special_tokens=False)) - 1
         
         # Compute the loss
-        loss, _, _ = model(input_ids, attention_mask=attention_mask, start_positions=torch.tensor([start_positions]), end_positions=torch.tensor([end_positions]))
+        # loss, _, _ = model(input_ids, attention_mask=attention_mask, start_positions=torch.tensor([start_positions]), end_positions=torch.tensor([end_positions]))
+        outputs = model(input_ids, attention_mask=attention_mask, start_positions=torch.tensor([start_positions]), end_positions=torch.tensor([end_positions]))
+        loss = outputs.loss
         
         # Perform backpropagation
         optimizer.zero_grad()
@@ -62,18 +64,26 @@ def answer_question(question, context):
     
     # Compute the answer using the trained model
     with torch.no_grad():
-        start_scores, end_scores = model(input_ids, attention_mask=attention_mask)
-    
+        #start_scores, end_scores = model(input_ids, attention_mask=attention_mask)
+        outputs = model(input_ids, attention_mask=attention_mask)
+
+        #answer_start = torch.argmax(outputs.start_logits)
+        #answer_end = torch.argmax(outputs.end_logits)
+        #answer = tokenizer.decode(inputs["input_ids"][0][answer_start:answer_end+1])
+        start_index = torch.argmax(outputs.start_logits)
+        end_index = torch.argmax(outputs.end_logits)
+        
     # Locate the start and end positions of the answer
-    start_index = torch.argmax(start_scores)
-    end_index = torch.argmax(end_scores)
+    # start_index = torch.argmax(start_scores)
+    # end_index = torch.argmax(end_scores)
     
     # Decode the answer from the input IDs
     answer_ids = input_ids[0][start_index:end_index+1]
     answer = tokenizer.decode(answer_ids)
     
+    print(f'{question} ==> "{answer}"')
     return answer
 
 # Example usage of the answer_question function
-answer = answer_question("What is the capital of France?", "The capital of France is Paris.")
-print(answer)
+answer_question("What is the capital of France?", "The capital of France is Paris.")
+answer_question("What is the capital of Taiwan?", "The capital of France is Paris.")
