@@ -1,6 +1,8 @@
 from transformers import DistilBertTokenizer, DistilBertForQuestionAnswering
 import torch
 
+# pip install --upgrade protobuf
+
 # Define the training data
 train_data = [
     {
