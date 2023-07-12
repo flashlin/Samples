@@ -2,16 +2,33 @@
 # set exit when exception
 set -e
 
-# download win32yank
-curl -sLo/tmp/win32yank.zip https://github.com/equalsraf/win32yank/releases/download/v0.0.4/win32yank-x64.zip
-unzip -p /tmp/win32yank.zip win32yank.exe > /tmp/win32yank.exe
-chmod +x /tmp/win32yank.exe
-sudo mv /tmp/win32yank.exe /usr/local/bin/
+if ! command -v unzip &> /dev/null; then
+    echo ""
+    echo "# update apt"
+    sudo apt update
+    sudo apt upgrade
+    sudo apt install unzip
+fi
 
-# install neovim
-sudo add-apt-repository ppa:neovim-ppa/stable
-sudo apt update
-sudo apt install neovim
+if [ ! -f "/usr/local/bin/win32yank.exe" ]; then
+    echo ""
+    echo "# download win32yank"
+    curl -sLo/tmp/win32yank.zip https://github.com/equalsraf/win32yank/releases/download/v0.1.1/win32yank-x64.zip
+    unzip -p /tmp/win32yank.zip win32yank.exe > /tmp/win32yank.exe
+    chmod +x /tmp/win32yank.exe
+    sudo mv /tmp/win32yank.exe /usr/local/bin/
+fi    
 
-# copy init.vim to ~/.config/nvim/init.vim
-cp -R ./data ~/.config/nvim
+if ! command -v nvim &> /dev/null; then
+    echo ""
+    echo "# install neovim..."
+    sudo add-apt-repository ppa:neovim-ppa/stable
+    sudo apt update
+    sudo apt install neovim
+fi
+
+echo "# copy init.vim to ~/.config/nvim/init.vim"
+cp -Rf ./data/* ~/.config/nvim
+
+echo ""
+echo "# please run nvim, then input :PlugInstall"
