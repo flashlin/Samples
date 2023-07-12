@@ -5,7 +5,9 @@ set -e
 if grep -q "^[interop]" "/etc/wsl.conf"; then
   echo "exists"
 else
-  content = $(cat ./wsl.conf)
+  echo ""
+  echo "# speed wsl..."
+  content=$(cat ./wsl.conf)
   echo "$content" | sudo tee --append /etc/wsl.conf
 fi
 
