@@ -71,7 +71,7 @@ export class RadarLine {
         if (this.compareWithTolerance(slope, testSlope)) {
             return true;
         }
-        this.distance = 0;
+        this.distance = RadarLineLength;
         return false;
     }
 

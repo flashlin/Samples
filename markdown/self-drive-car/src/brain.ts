@@ -33,30 +33,32 @@ export class Brain {
         const speedRewardWeight = RadarLineLength / 4;
         const speed = state[1];
         const distances = state.slice(2, state.length);
+        const distancesReward = this.calculateDistanceReward(distances);
 
         let speedReward = speed * speedRewardWeight;
-
-        let distanceReward = 0;
-        if( distances.every(d => d === 0) )
-        {
-            distanceReward = RadarLineLength * distances.length;
-        } else {
-            const distancePenalty = distances.reduce((a, b) => a + b, 0);
-            distanceReward = distancePenalty;
-            
-            if( distancePenalty < RadarLineLength) {
-                distanceReward = 0;
-            }
-        }
-
-        if( speedReward <= 0 ){
-            distanceReward = 0;
-        }
-        
-        const reward = speedReward + distanceReward;
-        console.log(`${reward} ${speedReward} ${distanceReward}`);
+        const reward = speedReward + distancesReward;
+        console.log(`${reward}`);
         return reward;
     }
+
+    calculateDistanceReward(distance: number[]) {
+        let totalReward = 0;
+        
+        for (let i = 1; i < distance.length; i += 2) {
+          if (i + 1 < distance.length) {
+            const diff = Math.abs(distance[i] - distance[i + 1]);
+            const reward = diff > 0 ? -1.1 * diff : RadarLineLength;
+            totalReward += reward;
+          }
+        }
+        
+        for (let i = 0; i < distance.length; i++) {
+          const elementReward = distance[i] > 0 ? distance[i] : -RadarLineLength;
+          totalReward += elementReward;
+        }
+        
+        return totalReward;
+      }
 
     async control(getGameState: () => number[]) {
         const model = this.model;
