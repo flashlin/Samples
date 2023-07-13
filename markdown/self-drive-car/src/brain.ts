@@ -25,8 +25,10 @@ export class Brain {
 
     constructor() {
         const model = this.model;
+        const inputLength = 3 + RadarLineCount;
+
         // 輸入層，將輸入值正規化到 0~1
-        model.add(tf.layers.dense({ inputShape: [2 + RadarLineCount], units: 32, activation: 'relu' }));
+        model.add(tf.layers.dense({ inputShape: [inputLength], units: 32, activation: 'relu' }));
         //model.add(new NormalizationLayer());
         //model.add(tf.layers.dense({ units: 6, activation: 'sigmoid' }));
         //model.add(tf.layers.dense({ units: 4, activation: 'softmax' }));
@@ -35,7 +37,7 @@ export class Brain {
         model.compile({ loss: 'meanSquaredError', optimizer: 'sgd' });
 
         const targetModel = this.targetModel;
-        targetModel.add(tf.layers.dense({ units: 32, inputShape: [2 + RadarLineCount], activation: 'relu' }));
+        targetModel.add(tf.layers.dense({ units: 32, inputShape: [inputLength], activation: 'relu' }));
         targetModel.add(tf.layers.dense({ units: 4 }));
 
         this.loadModelWeights();
@@ -90,15 +92,20 @@ export class Brain {
     rewardFunction(state: number[]) {
         const damaged = state[0];
         if (damaged === 1) {
-            return -100;
+            return -1000;
         }
-        const speedRewardWeight = RadarLineLength / 4;
-        const speed = state[1];
-        const distances = state.slice(2, state.length);
+        let gpsDistance = state[1];
+        const speed = state[2];
+        const speedRewardWeight = 10;
+        const distances = state.slice(3, state.length);
         const distancesReward = this.calculateDistanceReward(distances);
 
+        if( speed < 0){
+            gpsDistance = -gpsDistance;
+        }
+
         let speedReward = speed * speedRewardWeight;
-        const reward = speedReward + distancesReward;
+        const reward = speedReward + distancesReward + gpsDistance * 10;
         console.log(`${reward}`);
         return reward;
     }

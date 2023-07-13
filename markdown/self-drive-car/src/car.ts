@@ -1,8 +1,8 @@
 import { drawRect } from "./drawUtils";
-import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain } from "./gameUtils";
+import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain, StartX, StartY } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
-import { ILine, IPosition, IRect, getRectangleWidthHeight, rotateRectangle, updateCoordinates } from "./math";
+import { ILine, IPosition, IRect, getRectangleWidthHeight, getTwoPointsDistance, rotateRectangle, updateCoordinates } from "./math";
 import { Radar } from "./radar";
 import { Brain } from "./brain";
 
@@ -127,13 +127,15 @@ export class Car {
         if (UseBrain) {
             const action = await brain.control(() => {
                 const distances = this.radar.radarLines.map(x => x.distance);
-                return [this.damaged ? 1 : 0, this.speed, ...distances];
+                const gpsDistance = getTwoPointsDistance({ x: this.x, y: this.y }, { x: StartX, y: StartY });
+
+                return [this.damaged ? 1 : 0, gpsDistance, this.speed, ...distances];
             });
             this.controls.forward = false;
             this.controls.reverse = false;
             this.controls.left = false;
             this.controls.right = false;
-            switch( action ) {
+            switch (action) {
                 case 0:
                     this.controls.forward = true;
                     break;
