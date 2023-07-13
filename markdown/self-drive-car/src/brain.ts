@@ -7,16 +7,24 @@ class NormalizationLayer extends tf.layers.Layer {
     }
 }
 
+function toTensor2dFloat32(state: number[]){
+    const state16 = new Float32Array(state);
+    state = Array.from(state16);
+    const input = tf.tensor2d([state]);
+    return input;
+}
+
 export class Brain {
     model = tf.sequential();
 
     targetModel = tf.sequential();
     replayMemory: Array<[number[], number, number, number[], boolean]> = [];
-    batchSize: number = 10;
+    batchSize: number = 32;
     discountFactor: number = 0.9;
     states: number[][] = [];
     rewards: number[] = [];
     training = false;
+    learningRate: number = 0.001;
 
     first = true;
     prevState: number[] = [];
@@ -28,17 +36,19 @@ export class Brain {
         const inputLength = 3 + RadarLineCount;
 
         // 輸入層，將輸入值正規化到 0~1
-        model.add(tf.layers.dense({ inputShape: [inputLength], units: 32, activation: 'relu' }));
+        model.add(tf.layers.dense({ inputShape: [inputLength], units: 32, activation: 'relu', dtype: 'float32' }));
         //model.add(new NormalizationLayer());
         //model.add(tf.layers.dense({ units: 6, activation: 'sigmoid' }));
         //model.add(tf.layers.dense({ units: 4, activation: 'softmax' }));
-        model.add(tf.layers.dense({ units: 4 }));
+        model.add(tf.layers.dense({ units: 3 , dtype: 'float32' }));
         //model.compile({ optimizer: 'sgd', loss: 'binaryCrossentropy', metrics: ['accuracy'] });
-        model.compile({ loss: 'meanSquaredError', optimizer: 'sgd' });
+        //model.compile({ loss: 'meanSquaredError', optimizer: 'sgd' });
+        model.compile({ loss: 'meanSquaredError', optimizer: tf.train.adam(this.learningRate) });
+    
 
         const targetModel = this.targetModel;
-        targetModel.add(tf.layers.dense({ units: 32, inputShape: [inputLength], activation: 'relu' }));
-        targetModel.add(tf.layers.dense({ units: 4 }));
+        targetModel.add(tf.layers.dense({ units: 32, inputShape: [inputLength], activation: 'relu', dtype: 'float32' }));
+        targetModel.add(tf.layers.dense({ units: 3, dtype: 'float32'}));
 
         this.loadModelWeights();
     }
@@ -148,12 +158,12 @@ export class Brain {
     }
 
     predict(state: number[]): number {
-        const input = tf.tensor2d([state]);
+        const input = toTensor2dFloat32(state);
         const output = this.model.predict(input) as tf.Tensor2D;
-        //const action = output.argMax(1).dataSync()[0];
+        const action = output.argMax(1).dataSync()[0];
 
-        let actions = tf.multinomial(output.flatten(), 1).arraySync();
-        let action = actions[0] as number;
+        // let actions = tf.multinomial(output.flatten(), 1).arraySync();
+        // let action = actions[0] as number;
 
         input.dispose();
         output.dispose();
@@ -165,9 +175,9 @@ export class Brain {
             const states = this.states;
             const rewards = this.rewards;
             for (let i = 0; i < states.length - 1; i++) {
-                console.log(`train ${i}`)
                 const currentState = states[i];
                 const currentReward = rewards[i];
+                console.log(`train ${i} ${currentReward}`)
                 const nextState = states[i + 1];
                 const currentAction = this.predict(currentState);
                 await this.trainAsync(currentState, currentAction, currentReward, nextState);
@@ -180,8 +190,11 @@ export class Brain {
     }
 
     async trainAsync(state: number[], action: number, reward: number, nextState: number[]): Promise<void> {
-        const qValues = this.model.predict(tf.tensor2d([state])) as tf.Tensor2D;
-        const nextQValues = this.model.predict(tf.tensor2d([nextState])) as tf.Tensor2D;
+        const inputState = toTensor2dFloat32(state);
+        const qValues = this.model.predict(inputState) as tf.Tensor2D;
+
+        const nextStateTensor = toTensor2dFloat32(nextState);
+        const nextQValues = this.model.predict(nextStateTensor) as tf.Tensor2D;
         const maxNextQValue = nextQValues.max().dataSync()[0];
         const targetQValue = reward + this.discountFactor * maxNextQValue;
 

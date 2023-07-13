@@ -140,13 +140,13 @@ export class Car {
                     this.controls.forward = true;
                     break;
                 case 1:
-                    this.controls.reverse = true;
-                    break;
-                case 2:
                     this.controls.left = true;
                     break;
-                case 3:
+                case 2:
                     this.controls.right = true;
+                    break;
+                case 3:
+                    this.controls.reverse = true;
                     break;
             }
             //console.log('brain', action);
