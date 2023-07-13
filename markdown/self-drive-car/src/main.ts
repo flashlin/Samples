@@ -1,6 +1,6 @@
 import { Car } from './car';
 import { drawLine, drawRect, drawText, posInfo } from './drawUtils';
-import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, FPS, CenterX, CenterY, CarPos, StartX, StartY } from './gameUtils';
+import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, FPS, CenterX, CenterY, CarPos, StartX, StartY, sleepNow } from './gameUtils';
 import { rectangleIntersectLine } from './math';
 
 class Game {
@@ -90,6 +90,7 @@ class Game {
         // }, { strokeSyle: "gray", lineWidth: 3 });
 
         this.fps.render(ctx, { x: 0, y: 0 });
+        console.log('render...')
         requestAnimationFrame(this.render.bind(this));
     }
 }

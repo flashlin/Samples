@@ -23,6 +23,8 @@ export const RadarCount = 3;
 export const RadarColor = 'gray';
 export const UseBrain = true;
 
+export const sleepNow = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
+
 export class Line {
     line: ILine;
     color: string = RoadColor;
