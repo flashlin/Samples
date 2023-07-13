@@ -28,7 +28,7 @@ if ! command -v nvim &> /dev/null; then
 fi
 
 echo "# copy init.vim to ~/.config/nvim/init.vim"
-cp -Rf ./data/* ~/.config/nvim
+cp -Rf ./neovim-data/* ~/.config/nvim
 
 echo ""
 echo "# please run nvim, then input :PlugInstall"
