@@ -115,11 +115,15 @@ function numberToOneHot(num: number, numClasses: number): number[] {
     return oneHotArray;
 }
 
+function randomArray(num: number) {
+    return Array(num).fill(0).map(() => Math.random());
+}
+
 export class QTableBrain implements IBrain {
     numActions = 3;
     discountFactor: number = 0.9;
     config = {
-        hiddenLayers: [10, 10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
+        hiddenLayers: [7, 10, 3], // 三个隐藏层，每个隐藏层有 10 个神经元
     };
     model;
     qTable: QTable;
@@ -127,7 +131,7 @@ export class QTableBrain implements IBrain {
     constructor(numStates: number, numActions: number) {
         this.numActions = numActions;
         this.model = new NeuralNetwork(this.config);
-        this.train(Array(numStates).fill(0), Array(numActions).fill(0));
+        this.train(randomArray(numStates), randomArray(numActions));
         this.qTable = new QTable(numStates, numActions);
     }
 
