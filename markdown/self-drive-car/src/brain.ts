@@ -22,6 +22,7 @@ export class Brain {
     batchSize: number = 32;
     discountFactor: number = 0.9;
     states: number[][] = [];
+    actions: number[] = [];
     rewards: number[] = [];
     training = false;
     learningRate: number = 0.001;
@@ -33,7 +34,7 @@ export class Brain {
 
     constructor() {
         const model = this.model;
-        const inputLength = 3 + RadarLineCount;
+        const inputLength = 2 + RadarLineCount;
 
         // 輸入層，將輸入值正規化到 0~1
         model.add(tf.layers.dense({ inputShape: [inputLength], units: 32, activation: 'relu', dtype: 'float32' }));
@@ -104,19 +105,17 @@ export class Brain {
         if (damaged === 1) {
             return -1000;
         }
-        let gpsDistance = state[1];
-        const speed = state[2];
+        let speed = state[1];
         const speedRewardWeight = 10;
-        const distances = state.slice(3, state.length);
+        const distances = state.slice(2, state.length);
         const distancesReward = this.calculateDistanceReward(distances);
 
-        if( speed < 0){
-            gpsDistance = -gpsDistance;
+        if( speed == 0) {
+            speed = -100;
         }
 
         let speedReward = speed * speedRewardWeight;
-        const reward = speedReward + distancesReward + gpsDistance * 10;
-        console.log(`${reward}`);
+        const reward = speedReward + distancesReward;
         return reward;
     }
 
@@ -133,6 +132,9 @@ export class Brain {
 
         for (let i = 0; i < distance.length; i++) {
             const elementReward = distance[i] > 0 ? distance[i] : -RadarLineLength;
+            if( distance[i] < 50 ) {
+                totalReward -= 100;
+            }
             totalReward += elementReward;
         }
 
@@ -145,15 +147,8 @@ export class Brain {
             await this.saveNextStateAsync(state);
         } 
         const action = this.predict(state);
+        this.prevAction = action;
         this.first = false;
-        return action;
-    }
-
-    predict0(state: number[]) {
-        const stateTensor = tf.tensor([state]);
-        let actionProbabilities = this.model.predict(stateTensor) as tf.Tensor;
-        let actions = tf.multinomial(actionProbabilities.flatten(), 1).arraySync();
-        let action = actions[0] as number;
         return action;
     }
 
@@ -161,9 +156,6 @@ export class Brain {
         const input = toTensor2dFloat32(state);
         const output = this.model.predict(input) as tf.Tensor2D;
         const action = output.argMax(1).dataSync()[0];
-
-        // let actions = tf.multinomial(output.flatten(), 1).arraySync();
-        // let action = actions[0] as number;
 
         input.dispose();
         output.dispose();
@@ -174,18 +166,21 @@ export class Brain {
         if( this.states.length >= this.batchSize) {
             const states = this.states;
             const rewards = this.rewards;
+            const actions = this.actions;
             for (let i = 0; i < states.length - 1; i++) {
                 const currentState = states[i];
                 const currentReward = rewards[i];
-                console.log(`train ${i} ${currentReward}`)
                 const nextState = states[i + 1];
-                const currentAction = this.predict(currentState);
+                const currentAction = actions[i];
+                console.log(`train ${i} ${currentReward} ${currentState}`)
                 await this.trainAsync(currentState, currentAction, currentReward, nextState);
             }
-            this.states = [];
-            this.rewards = [];
+            this.states.shift();
+            this.rewards.shift();
+            this.actions.shift();
         }
         this.states.push(nextState);
+        this.actions.push(this.prevAction);
         this.rewards.push(this.rewardFunction(nextState));
     }
 
@@ -202,24 +197,19 @@ export class Brain {
         targetQValues[action] = targetQValue;
 
         const target = tf.tensor2d([targetQValues]);
-        await this.model.fit(tf.tensor2d([state]), target, { epochs: 1, batchSize: 1 });
+        await this.model.fit(inputState, target, { epochs: 1, batchSize: 1 });
         this.saveModelWeights();
+
+
+        inputState.dispose();
+        nextStateTensor.dispose();
 
         qValues.dispose();
         nextQValues.dispose();
         target.dispose();
     }
 
-    async fit(state: number[], action: number, newState: number[]) {
-        let reward = this.rewardFunction(newState);
-        let target = tf.oneHot([action], 4).mul(tf.scalar(reward));
-
-        const stateTensor = tf.tensor([state]);
-        await this.model.fit(stateTensor, target, { epochs: 1 });
-        await this.saveModelWeights();
-    }
-
-    async saveModelWeights() {
+    saveModelWeights() {
         const model = this.model;
         const weights = model.getWeights().map(tensor => tensor.arraySync());
         localStorage.setItem('my-model-weights', JSON.stringify(weights));

@@ -127,9 +127,9 @@ export class Car {
         if (UseBrain) {
             const action = await brain.control(() => {
                 const distances = this.radar.radarLines.map(x => x.distance);
-                const gpsDistance = getTwoPointsDistance({ x: this.x, y: this.y }, { x: StartX, y: StartY });
+                //const gpsDistance = getTwoPointsDistance({ x: this.x, y: this.y }, { x: StartX, y: StartY });
 
-                return [this.damaged ? 1 : 0, gpsDistance, this.speed, ...distances];
+                return [this.damaged ? 1 : 0, this.speed, ...distances];
             });
             this.controls.forward = false;
             this.controls.reverse = false;
