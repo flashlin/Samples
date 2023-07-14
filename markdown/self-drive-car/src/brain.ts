@@ -1,5 +1,7 @@
 import { RadarLineCount, RadarLineLength } from './gameUtils';
 import * as tf from '@tensorflow/tfjs';
+import { NeuralNetwork } from 'brain.js';
+import { QTable } from './qtable';
 
 class NormalizationLayer extends tf.layers.Layer {
     call(input: tf.Tensor) {
@@ -107,6 +109,79 @@ export class TensorflowBrain implements IBrain {
     }
 }
 
+function numberToOneHot(num: number, numClasses: number): number[] {
+    const oneHotArray = Array(numClasses).fill(0);
+    oneHotArray[num] = 1;
+    return oneHotArray;
+}
+
+export class QTableBrain implements IBrain {
+    numActions = 3;
+    discountFactor: number = 0.9;
+    config = {
+        hiddenLayers: [10, 10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
+    };
+    model;
+    qTable: QTable;
+
+    constructor(numStates: number, numActions: number) {
+        this.numActions = numActions;
+        this.model = new NeuralNetwork(this.config);
+        this.train(Array(numStates).fill(0), Array(numActions).fill(0));
+        this.qTable = new QTable(numStates, numActions);
+    }
+
+    predict(state: number[]): number {
+        const qValues = this.predictQValues(state);
+        const maxValue = Math.max(...qValues);
+        const bestActions = [];
+        for(let i = 0; i < qValues.length; i++) {
+            if( qValues[i] === maxValue ) {
+                bestActions.push(i);
+            }
+        }
+        const randomIndex = Math.floor(Math.random() * bestActions.length);
+        const bestAction = bestActions[randomIndex];
+        return bestAction;
+    }
+
+    predictQValues(state: number[]): number[] {
+        const predictQValues = this.model.run(state);
+        const qValues = Object.values(predictQValues) as number[];
+        //console.log('predict Q', qValues)
+        return qValues;
+    }
+
+    train(state: number[], qValues: number[]) {
+        const trainingData = [
+            { input: state, output: qValues },
+        ];
+        this.model.train(trainingData);
+    }
+
+    loadModelWeights() {
+    }
+
+    fitAsync(currentState: number[], action: number, nextState: number[], reward: number): Promise<void>
+    {
+        return new Promise<void>((resolve)=>{
+            // 使用 MLP 模型预测当前状态的 Q 值
+            const qValues = this.predictQValues(currentState);
+            // 使用 MLP 模型预测下一个状态的 Q 值
+            const nextQValues = this.predictQValues(nextState);
+            // 计算目标 Q 值
+            const maxNextQValue = Math.max(...nextQValues);
+            const targetQValue = reward + this.discountFactor * maxNextQValue;
+            console.log(`${reward} + ${maxNextQValue} = ${targetQValue}`);
+            // 更新 Q_predicted 数组中对应动作的 Q 值
+            qValues[action] = targetQValue;
+            // 将 currentState 和更新后的 Q_predicted 数组作为输入，训练 MLP 模型
+            this.train(currentState, qValues);
+            resolve();
+        });
+    }
+}
+
 export class Brain {
     first = true;
     model: IBrain;
@@ -115,7 +190,8 @@ export class Brain {
     prevAction: number = 0;
 
     constructor() {
-        this.model = new TensorflowBrain();
+        //this.model = new TensorflowBrain();
+        this.model = new QTableBrain(2 + RadarLineCount, 3);
         this.model.loadModelWeights();
     }
 
@@ -135,7 +211,7 @@ export class Brain {
     rewardFunction(state: number[]) {
         const damaged = state[0];
         if (damaged === 1) {
-            return -1000;
+            return -100;
         }
         let speed = state[1];
         const speedRewardWeight = 10;
@@ -175,6 +251,7 @@ export class Brain {
 
     async saveNextStateAsync(currentState: number[], action: number, nextState: number[]) {
         const reward = this.rewardFunction(nextState);
+        //console.log(`reward: ${reward}`);
         await this.model.fitAsync(currentState, action, nextState, reward);
     }
 }
