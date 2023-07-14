@@ -27,6 +27,9 @@ set tabstop=3
 set shiftwidth=3
 " 設定 space 取代 tab
 set expandtab
+" 設定游標所在行的顯示樣式
+set cursorline 
+highlight CursorLine cterm=NONE ctermfg=white ctermbg=darkgray guibg=darkgray guifg=white
 
 " F3 開啟關閉
 nnoremap <F3> :NERDTreeToggle<CR>
