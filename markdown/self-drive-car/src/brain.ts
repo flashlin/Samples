@@ -14,9 +14,14 @@ function toTensor2dFloat32(state: number[]){
     return input;
 }
 
-export class Brain {
-    model = tf.sequential();
+export interface IBrain {
+    loadModelWeights(): void;
+    predict(state: number[]): number;
+    fitAsync(currentState: number[], action: number, nextState: number[], reward: number): Promise<void>;
+}
 
+export class TensorflowBrain implements IBrain {
+    model = tf.sequential();
     targetModel = tf.sequential();
     replayMemory: Array<[number[], number, number, number[], boolean]> = [];
     batchSize: number = 32;
@@ -30,7 +35,6 @@ export class Brain {
     first = true;
     prevState: number[] = [];
     prevAction = 0;
-
 
     constructor() {
         const model = this.model;
@@ -54,50 +58,78 @@ export class Brain {
         this.loadModelWeights();
     }
 
-    private updateModel(): void {
-        const miniBatch = this.sampleMiniBatch();
-        const states = miniBatch.map((entry) => entry[0]);
-        const actions = miniBatch.map((entry) => entry[1]);
-        const rewards = miniBatch.map((entry) => entry[2]);
-        const nextStates = miniBatch.map((entry) => entry[3]);
-        const dones = miniBatch.map((entry) => entry[4]);
+    predict(state: number[]): number {
+        const input = toTensor2dFloat32(state);
+        const output = this.model.predict(input) as tf.Tensor2D;
+        const action = output.argMax(1).dataSync()[0];
+        input.dispose();
+        output.dispose();
+        return action;
+    }
 
-        const qValues = this.model.predict(tf.tensor2d(states)) as tf.Tensor2D;
-        const nextQValues = this.targetModel.predict(tf.tensor2d(nextStates)) as tf.Tensor2D;
+    async fitAsync(state: number[], action: number, nextState: number[], reward: number): Promise<void> {
+        const inputState = toTensor2dFloat32(state);
+        const qValues = this.model.predict(inputState) as tf.Tensor2D;
 
-        const targetQValues = qValues.clone();
-        for (let i = 0; i < miniBatch.length; i++) {
-            const action = actions[i];
-            const reward = rewards[i];
-            const done = dones[i];
+        const nextStateTensor = toTensor2dFloat32(nextState);
+        const nextQValues = this.model.predict(nextStateTensor) as tf.Tensor2D;
+        const maxNextQValue = nextQValues.max().dataSync()[0];
+        const targetQValue = reward + this.discountFactor * maxNextQValue;
 
-            let targetQValue: number;
-            if (done) {
-                targetQValue = reward;
-            } else {
-                const maxNextQValue = nextQValues.slice([i, 0], [1, nextQValues.shape[1]]).max().dataSync()[0];
-                targetQValue = reward + this.discountFactor * maxNextQValue;
-            }
+        const targetQValues = qValues.dataSync() as any;
+        targetQValues[action] = targetQValue;
 
-            targetQValues.dataSync()[i * targetQValues.shape[1] + action] = targetQValue;
-        }
+        const target = tf.tensor2d([targetQValues]);
+        await this.model.fit(inputState, target, { epochs: 1, batchSize: 1 });
+        this.saveModelWeights();
 
-        this.model.fit(tf.tensor2d(states), targetQValues, { epochs: 1, batchSize: this.batchSize });
+        inputState.dispose();
+        nextStateTensor.dispose();
 
         qValues.dispose();
         nextQValues.dispose();
-        targetQValues.dispose();
+        target.dispose();
     }
 
-    private updateTargetModel(): void {
-        this.targetModel.setWeights(this.model.getWeights());
+    saveModelWeights() {
+        const model = this.model;
+        const weights = model.getWeights().map(tensor => tensor.arraySync());
+        localStorage.setItem('my-model-weights', JSON.stringify(weights));
     }
 
-    private sampleMiniBatch(): Array<[number[], number, number, number[], boolean]> {
-        const numSamples = Math.min(this.batchSize, this.replayMemory.length);
-        const indices = Array.from({ length: numSamples }, (_, i) => i);
-        const sampledIndices = indices.sort(() => Math.random() - 0.5).slice(0, numSamples);
-        return sampledIndices.map((index) => this.replayMemory[index]);
+    async loadModelWeights() {
+        const weightsJSON = localStorage.getItem('my-model-weights');
+        if (weightsJSON == null) {
+            return;
+        }
+        const weights = JSON.parse(weightsJSON);
+        this.model.setWeights(weights.map((arr: any) => tf.tensor(arr)));
+    }
+}
+
+export class Brain {
+    first = true;
+    model: IBrain;
+
+    prevState: number[] = [];
+    prevAction: number = 0;
+
+    constructor() {
+        this.model = new TensorflowBrain();
+        this.model.loadModelWeights();
+    }
+
+    async control(getGameState: () => number[]) {
+        const state = getGameState();
+        if (!this.first) {
+            const nextState = state;
+            await this.saveNextStateAsync(this.prevState, this.prevAction, nextState);
+        } 
+        const action = this.model.predict(state);
+        this.prevState = state;
+        this.prevAction = action;
+        this.first = false;
+        return action;
     }
 
     rewardFunction(state: number[]) {
@@ -141,89 +173,8 @@ export class Brain {
         return totalReward;
     }
 
-    async control(getGameState: () => number[]) {
-        const state = getGameState();
-        if (!this.first) {
-            await this.saveNextStateAsync(state);
-        } 
-        const action = this.predict(state);
-        this.prevAction = action;
-        this.first = false;
-        return action;
-    }
-
-    predict(state: number[]): number {
-        const input = toTensor2dFloat32(state);
-        const output = this.model.predict(input) as tf.Tensor2D;
-        const action = output.argMax(1).dataSync()[0];
-
-        input.dispose();
-        output.dispose();
-        return action;
-    }
-
-    async saveNextStateAsync(nextState: number[]) {
-        if( this.states.length >= this.batchSize) {
-            const states = this.states;
-            const rewards = this.rewards;
-            const actions = this.actions;
-            for (let i = 0; i < states.length - 1; i++) {
-                const currentState = states[i];
-                const currentReward = rewards[i];
-                const nextState = states[i + 1];
-                const currentAction = actions[i];
-                console.log(`train ${i} ${currentReward}`)
-                await this.trainAsync(currentState, currentAction, currentReward, nextState);
-            }
-            //this.states.shift();
-            //this.rewards.shift();
-            //this.actions.shift();
-            this.states = [];
-            this.rewards = [];
-            this.actions = [];
-        }
-        this.states.push(nextState);
-        this.actions.push(this.prevAction);
-        this.rewards.push(this.rewardFunction(nextState));
-    }
-
-    async trainAsync(state: number[], action: number, reward: number, nextState: number[]): Promise<void> {
-        const inputState = toTensor2dFloat32(state);
-        const qValues = this.model.predict(inputState) as tf.Tensor2D;
-
-        const nextStateTensor = toTensor2dFloat32(nextState);
-        const nextQValues = this.model.predict(nextStateTensor) as tf.Tensor2D;
-        const maxNextQValue = nextQValues.max().dataSync()[0];
-        const targetQValue = reward + this.discountFactor * maxNextQValue;
-
-        const targetQValues = qValues.dataSync() as any;
-        targetQValues[action] = targetQValue;
-
-        const target = tf.tensor2d([targetQValues]);
-        await this.model.fit(inputState, target, { epochs: 1, batchSize: 1 });
-        this.saveModelWeights();
-
-
-        inputState.dispose();
-        nextStateTensor.dispose();
-
-        qValues.dispose();
-        nextQValues.dispose();
-        target.dispose();
-    }
-
-    saveModelWeights() {
-        const model = this.model;
-        const weights = model.getWeights().map(tensor => tensor.arraySync());
-        localStorage.setItem('my-model-weights', JSON.stringify(weights));
-    }
-
-    async loadModelWeights() {
-        const weightsJSON = localStorage.getItem('my-model-weights');
-        if (weightsJSON == null) {
-            return;
-        }
-        const weights = JSON.parse(weightsJSON);
-        this.model.setWeights(weights.map((arr: any) => tf.tensor(arr)));
+    async saveNextStateAsync(currentState: number[], action: number, nextState: number[]) {
+        const reward = this.rewardFunction(nextState);
+        await this.model.fitAsync(currentState, action, nextState, reward);
     }
 }
