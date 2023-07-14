@@ -130,9 +130,9 @@ export class QTableBrain implements IBrain {
     constructor(numStates: number, numActions: number) {
         this.numActions = numActions;
         this.model = new NeuralNetwork(this.config);
-        if( !this.loadModelWeights() ) {
-         this.train(randomArray(numStates), randomArray(numActions));
-        }
+        //if( !this.loadModelWeights() ) {
+            this.train(randomArray(numStates), randomArray(numActions));
+        //}
     }
 
     predict(state: number[]): number {
