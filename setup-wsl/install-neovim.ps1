@@ -11,6 +11,16 @@ function FileIsNotExists {
     return $False
 }
 
+function IsDirectoryNotExists{
+    param(
+        [string]$dir
+    )
+    if (-not (Test-Path -Path $dir)) {
+        return $True
+    }
+    return $False
+}
+
 function RemoveSystemEnvironment {
     param (
        [string]$pathPattern 
@@ -84,19 +94,23 @@ function Unzip {
     Expand-Archive -Path $zipFile -DestinationPath $targetPath -Force
 }
 
-$targetFile = "./nvim-win64.zip"
-if (-not (Test-Path -Path $targetFile)) {
-    $zipUrl = "https://github.com/neovim/neovim/releases/download/v0.9.1/nvim-win64.zip"
-    Download $zipUrl $targetFile
+
+$targetPath = "C:\Program Files\nvim-win64"
+if( IsDirectoryNotExists $targetPath ) {
+    Info "Downloading nvim-win64"
+    $targetFile = "./nvim-win64.zip"
+    if (-not (Test-Path -Path $targetFile)) {
+        $zipUrl = "https://github.com/neovim/neovim/releases/download/v0.9.1/nvim-win64.zip"
+        Download $zipUrl $targetFile
+    }
+    Unzip $targetFile $targetPath
+
+    Info "Remove Neovim from System Environment Path"
+    RemoveSystemEnvironment "nvim"
+    Info "Add '$($targetPath)\bin' to System Environment Path"
+    AddSystemEnvironment "$($targetPath)\bin"
 }
 
-$targetPath = "C:\Program Files"
-#Unzip $targetFile $targetPath
-
-Info "Remove Neovim from System Environment Path"
-RemoveSystemEnvironment "nvim"
-Info "Add '$($targetPath)\nvim-win64\bin' to System Environment Path"
-AddSystemEnvironment "$($targetPath)\nvim-win64\bin"
 
 #InvokeCmd $cmd
 $RoamingPath = $env:APPDATA
@@ -108,8 +122,11 @@ Info "copy init.vim to $NeoVimConfigPath"
 Copy-Item -Path ./neovim-data/* -Destination $NeoVimConfigPath -Recurse -Container -Force
 
 
-Info "Install PlugInstall Manager..."
 $NeoVimAutoloadPath = "$NeoVimConfigPath\autoload"
-CreateDir $NeoVimAutoloadPath
-$uri = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
-Download $uri "$NeoVimAutoloadPath\plug.vim"
+if( IsDirectoryNotExists $NeoVimAutoloadPath ) {
+    Info "Install PlugInstall Manager..."
+    CreateDir $NeoVimAutoloadPath
+    $uri = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+    Download $uri "$NeoVimAutoloadPath\plug.vim"
+}
+
