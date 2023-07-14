@@ -47,13 +47,13 @@ class Game {
             car.damaged = true;
             road.renderDamaged(ctx);
 
-            if (UseBrain) {
-                car.x = StartX;
-                car.y = StartY;
-                car.angle = 270;
-                car.speed = 0;
-                car.damaged = false;
-            }
+            // if (UseBrain) {
+            //     car.x = StartX;
+            //     car.y = StartY;
+            //     car.angle = 270;
+            //     car.speed = 0;
+            //     car.damaged = false;
+            // }
         } else {
             car.damaged = false;
         }

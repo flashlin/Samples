@@ -123,19 +123,18 @@ export class QTableBrain implements IBrain {
     numActions = 3;
     discountFactor: number = 0.9;
     config = {
-        hiddenLayers: [7, 10, 3], // 三个隐藏层，每个隐藏层有 10 个神经元
+        hiddenLayers: [10, 10, 3], // 三个隐藏层，每个隐藏层有 10 个神经元
     };
     model;
-    qTable: QTable;
 
     constructor(numStates: number, numActions: number) {
         this.numActions = numActions;
         this.model = new NeuralNetwork(this.config);
         this.train(randomArray(numStates), randomArray(numActions));
-        this.qTable = new QTable(numStates, numActions);
     }
 
     predict(state: number[]): number {
+        console.log(state);
         const qValues = this.predictQValues(state);
         const maxValue = Math.max(...qValues);
         const bestActions = [];
@@ -176,9 +175,10 @@ export class QTableBrain implements IBrain {
             // 计算目标 Q 值
             const maxNextQValue = Math.max(...nextQValues);
             const targetQValue = reward + this.discountFactor * maxNextQValue;
-            console.log(`${reward} + ${maxNextQValue} = ${targetQValue}`);
             // 更新 Q_predicted 数组中对应动作的 Q 值
-            qValues[action] = targetQValue;
+            const updatedQValues = [...qValues];
+            updatedQValues[action] = targetQValue;
+
             // 将 currentState 和更新后的 Q_predicted 数组作为输入，训练 MLP 模型
             this.train(currentState, qValues);
             resolve();
