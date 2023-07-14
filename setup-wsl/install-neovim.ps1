@@ -154,3 +154,6 @@ if ([string]::IsNullOrWhiteSpace($chocoInstallDir)) {
 if( -Not (IsChocoPackageExists "fzf") ) {
     choco install fzf
 }
+
+#choco install ag
+#winget install "The Silver Searcher"

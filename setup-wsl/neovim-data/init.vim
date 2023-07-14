@@ -17,6 +17,8 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Plug 'OmniSharp/omnisharp-vim'
 call plug#end()
 
+nnoremap <silent><leader>1 :source ~/AppData/Local/nvim/init.vim \| :PlugInstall<CR>
+
 " 同時顯示行號和相對行號
 let mapleader="\\"
 set number
@@ -64,7 +66,7 @@ let g:fzf_action = {
 
 " Default fzf layout
 " - down / up / left / right
-let g:fzf_layout = { 'down': '~40%' }
+let g:fzf_layout = { 'down': '~70%' }
 
 " Customize fzf colors to match your color scheme
 let g:fzf_colors =
@@ -86,6 +88,8 @@ let g:fzf_colors =
 " previous-history instead of down and up. If you don't like the change,
 " explicitly bind the keys to down and up in your $FZF_DEFAULT_OPTS.
 let g:fzf_history_dir = '~/.local/share/fzf-history'
+
+
 
 " fzf 搜尋
 nnoremap <leader>fl :Lines 
