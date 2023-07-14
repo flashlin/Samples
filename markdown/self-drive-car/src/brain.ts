@@ -172,12 +172,15 @@ export class Brain {
                 const currentReward = rewards[i];
                 const nextState = states[i + 1];
                 const currentAction = actions[i];
-                console.log(`train ${i} ${currentReward} ${currentState}`)
+                console.log(`train ${i} ${currentReward}`)
                 await this.trainAsync(currentState, currentAction, currentReward, nextState);
             }
-            this.states.shift();
-            this.rewards.shift();
-            this.actions.shift();
+            //this.states.shift();
+            //this.rewards.shift();
+            //this.actions.shift();
+            this.states = [];
+            this.rewards = [];
+            this.actions = [];
         }
         this.states.push(nextState);
         this.actions.push(this.prevAction);

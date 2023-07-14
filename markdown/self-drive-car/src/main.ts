@@ -40,11 +40,18 @@ class Game {
         const roadMap = this.roadMap;
         const [road, collideCarPoints] = roadMap.collide(ctx, car.getBoundLines());
         if (collideCarPoints.length > 0) {
-            car.x = carPos0.x;
-            car.y = carPos0.y;
-            car.angle = carAngle0;
+            // car.x = carPos0.x;
+            // car.y = carPos0.y;
+            // car.angle = carAngle0;
+            // car.speed = 0;
+            // car.damaged = true;
+            // road.renderDamaged(ctx);
+            
+            car.x = StartX;
+            car.y = StartY;
+            car.angle = 270;
             car.speed = 0;
-            car.damaged = true;
+            car.damaged = false;
             road.renderDamaged(ctx);
         } else {
             car.damaged = false;
@@ -90,7 +97,7 @@ class Game {
         // }, { strokeSyle: "gray", lineWidth: 3 });
 
         this.fps.render(ctx, { x: 0, y: 0 });
-        console.log('render...')
+        //console.log('render...')
         requestAnimationFrame(this.render.bind(this));
     }
 }
