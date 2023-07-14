@@ -24,8 +24,8 @@ export class Car {
 
     radar = new Radar();
     brain = new Brain();
-    prevState = { 
-        x: 0, 
+    prevState = {
+        x: 0,
         y: 0,
         angle: 0,
     };
@@ -132,7 +132,7 @@ export class Car {
         this.prevState.x = this.x;
         this.prevState.y = this.y;
         this.prevState.angle = this.angle;
-        
+
         const brain = this.brain;
         if (UseBrain) {
             const action = await brain.control(() => {
@@ -219,6 +219,15 @@ export class Car {
                     this.speed = 0;
                     this.damaged = true;
                     road.renderDamaged(ctx);
+
+                    if (UseBrain) {
+                        this.x = StartX;
+                        this.y = StartY;
+                        this.angle = 270;
+                        this.speed = 0;
+                        this.damaged = false;
+                    }
+
                     return [road, collidePoints];
                 }
             }
