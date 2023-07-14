@@ -4,6 +4,8 @@ Plug 'bling/vim-airline'
 "檔案瀏覽
 Plug 'preservim/nerdtree'
 Plug 'jistr/vim-nerdtree-tabs'
+"快速跳轉
+Plug 'easymotion/vim-easymotion'
 
 " TypeScript 語法和重構插件
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -13,6 +15,7 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
 
 " 同時顯示行號和相對行號
+let mapleader="z"
 set number
 set relativenumber
 set encoding=utf-8
@@ -28,6 +31,9 @@ set expandtab
 " F3 開啟關閉
 nnoremap <F3> :NERDTreeToggle<CR>
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+
+" easymotion
+nmap <space> <Plug>(easymotion-bd-w)
 
 " 搜索的时候不區分大小写,是set ignorecase 縮寫.如果你想啟用,输入:set noic(noignorecase缩写)
 set ic
