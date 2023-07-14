@@ -1,6 +1,6 @@
 import { Car } from './car';
 import { drawLine, drawRect, drawText, posInfo } from './drawUtils';
-import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, FPS, CenterX, CenterY, CarPos, StartX, StartY, sleepNow } from './gameUtils';
+import { CanvasHeight, CanvasWidth, HorizontalRoad, IRoad, LeftTopCurve, Rectangle, RoadMap, VerticalRoad, CarFrameMargin, CarHeight, CarWidth, FPS, CenterX, CenterY, CarPos, StartX, StartY, sleepNow, UseBrain } from './gameUtils';
 import { rectangleIntersectLine } from './math';
 
 class Game {
@@ -40,28 +40,29 @@ class Game {
         const roadMap = this.roadMap;
         const [road, collideCarPoints] = roadMap.collide(ctx, car.getBoundLines());
         if (collideCarPoints.length > 0) {
-            // car.x = carPos0.x;
-            // car.y = carPos0.y;
-            // car.angle = carAngle0;
-            // car.speed = 0;
-            // car.damaged = true;
-            // road.renderDamaged(ctx);
-            
-            car.x = StartX;
-            car.y = StartY;
-            car.angle = 270;
+            car.x = carPos0.x;
+            car.y = carPos0.y;
+            car.angle = carAngle0;
             car.speed = 0;
-            car.damaged = false;
+            car.damaged = true;
             road.renderDamaged(ctx);
+
+            if (UseBrain) {
+                car.x = StartX;
+                car.y = StartY;
+                car.angle = 270;
+                car.speed = 0;
+                car.damaged = false;
+            }
         } else {
             car.damaged = false;
         }
-        
+
         // 雷達線
-        for(let [index, radarLine] of car.radar.getBoundLines().entries()) {
+        for (let [index, radarLine] of car.radar.getBoundLines().entries()) {
             const radar = car.radar.radarLines[index];
             const [road, collideRadarPoints] = roadMap.collide(ctx, [radarLine]);
-            if (collideRadarPoints.length != 0 ) {
+            if (collideRadarPoints.length != 0) {
                 radar.renderDamaged(ctx, collideRadarPoints[0]);
             } else {
                 radar.distance = 0;
