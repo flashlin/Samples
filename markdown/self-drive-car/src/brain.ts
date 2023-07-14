@@ -123,14 +123,16 @@ export class QTableBrain implements IBrain {
     numActions = 3;
     discountFactor: number = 0.9;
     config = {
-        hiddenLayers: [10, 10, 3], // 三个隐藏层，每个隐藏层有 10 个神经元
+        hiddenLayers: [10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
     };
     model;
 
     constructor(numStates: number, numActions: number) {
         this.numActions = numActions;
         this.model = new NeuralNetwork(this.config);
-        this.train(randomArray(numStates), randomArray(numActions));
+        if( !this.loadModelWeights() ) {
+         this.train(randomArray(numStates), randomArray(numActions));
+        }
     }
 
     predict(state: number[]): number {
@@ -162,7 +164,20 @@ export class QTableBrain implements IBrain {
         this.model.train(trainingData);
     }
 
+    saveModelWeights() {
+        const modelJson = this.model.toJSON();
+        const modelJsonString = JSON.stringify(modelJson);
+        localStorage.setItem('qtable-model', modelJsonString);
+    }
+
     loadModelWeights() {
+        const modelJsonString = localStorage.getItem('qtable-model');
+        if (modelJsonString == null) {
+            return false;
+        }
+        const modelJson = JSON.parse(modelJsonString);
+        this.model.fromJSON(modelJson);
+        return true;
     }
 
     fitAsync(currentState: number[], action: number, nextState: number[], reward: number): Promise<void>
@@ -181,6 +196,7 @@ export class QTableBrain implements IBrain {
 
             // 将 currentState 和更新后的 Q_predicted 数组作为输入，训练 MLP 模型
             this.train(currentState, qValues);
+            this.saveModelWeights();
             resolve();
         });
     }
