@@ -65,7 +65,7 @@ function CreateDir {
         [string]$targetPath
     )
     # 檢查目錄是否存在，如果不存在就建立目錄
-    if (-not (Test-Path -Path $tatgetPath)) {
+    if (-not (Test-Path -Path $targetPath)) {
        New-Item -ItemType Directory -Path $targetPath | Out-Null
     }
 }
@@ -93,7 +93,9 @@ if (-not (Test-Path -Path $targetFile)) {
 $targetPath = "C:\Program Files"
 #Unzip $targetFile $targetPath
 
+Info "Remove Neovim from System Environment Path"
 RemoveSystemEnvironment "nvim"
+Info "Add '$($targetPath)\nvim-win64\bin' to System Environment Path"
 AddSystemEnvironment "$($targetPath)\nvim-win64\bin"
 
 #InvokeCmd $cmd
@@ -106,7 +108,7 @@ Info "copy init.vim to $NeoVimConfigPath"
 Copy-Item -Path ./neovim-data/* -Destination $NeoVimConfigPath -Recurse -Container -Force
 
 
-Info "Install PlugInstall Manager"
+Info "Install PlugInstall Manager..."
 $NeoVimAutoloadPath = "$NeoVimConfigPath\autoload"
 CreateDir $NeoVimAutoloadPath
 $uri = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
