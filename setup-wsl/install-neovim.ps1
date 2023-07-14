@@ -94,6 +94,20 @@ function Unzip {
     Expand-Archive -Path $zipFile -DestinationPath $targetPath -Force
 }
 
+function IsChocoPackageExists {
+    param(
+        $packageName
+    )
+    #$packageName = "fzf"
+    $installedPackages = & choco list
+    $packageFound = $installedPackages | Select-String -Pattern $packageName
+    return $packageFound
+    # if ($installedPackages -like "*$packageName*") {
+    #     return $True
+    # }
+    # return $False
+}
+
 
 $targetPath = "C:\Program Files\nvim-win64"
 if( IsDirectoryNotExists $targetPath ) {
@@ -130,3 +144,13 @@ if( IsDirectoryNotExists $NeoVimAutoloadPath ) {
     Download $uri "$NeoVimAutoloadPath\plug.vim"
 }
 
+
+$chocoInstallDir = [Environment]::GetEnvironmentVariable("ChocolateyInstall", "Machine")
+if ([string]::IsNullOrWhiteSpace($chocoInstallDir)) {
+    Write-Host "Chocolatey is not installed."
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+}
+
+if( -Not (IsChocoPackageExists "fzf") ) {
+    choco install fzf
+}
