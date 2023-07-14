@@ -27,36 +27,14 @@ class Game {
     }
 
     async drawF4Car() {
+        const roadMap = this.roadMap;
         const ctx = this.ctx;
         const car = this.car;
         car.pos = CarPos;
         car.render(ctx);
         car.drawFrame(ctx);
+        await car.move(ctx, roadMap);
 
-        const carPos0 = { x: car.x, y: car.y };
-        const carAngle0 = car.angle;
-        await car.move();
-
-        const roadMap = this.roadMap;
-        const [road, collideCarPoints] = roadMap.collide(ctx, car.getBoundLines());
-        if (collideCarPoints.length > 0) {
-            car.x = carPos0.x;
-            car.y = carPos0.y;
-            car.angle = carAngle0;
-            car.speed = 0;
-            car.damaged = true;
-            road.renderDamaged(ctx);
-
-            // if (UseBrain) {
-            //     car.x = StartX;
-            //     car.y = StartY;
-            //     car.angle = 270;
-            //     car.speed = 0;
-            //     car.damaged = false;
-            // }
-        } else {
-            car.damaged = false;
-        }
 
         // 雷達線
         for (let [index, radarLine] of car.radar.getBoundLines().entries()) {

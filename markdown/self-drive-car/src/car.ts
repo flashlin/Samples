@@ -1,5 +1,5 @@
 import { drawRect } from "./drawUtils";
-import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain, StartX, StartY } from "./gameUtils";
+import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain, StartX, StartY, RoadMap, EmptyRoad, IRoad } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
 import { ILine, IPosition, IRect, getRectangleWidthHeight, getTwoPointsDistance, rotateRectangle, updateCoordinates } from "./math";
@@ -24,6 +24,11 @@ export class Car {
 
     radar = new Radar();
     brain = new Brain();
+    prevState = { 
+        x: 0, 
+        y: 0,
+        angle: 0,
+    };
 
     constructor() {
         this.carImage = new Image();
@@ -122,7 +127,12 @@ export class Car {
         // drawText(ctx, p3, `${posInfo(carBound.rightBottom)}`)
     }
 
-    async move() {
+    async move(ctx: CanvasRenderingContext2D, roadMap: RoadMap) {
+        const pos0 = { x: this.x, y: this.y };
+        this.prevState.x = this.x;
+        this.prevState.y = this.y;
+        this.prevState.angle = this.angle;
+        
         const brain = this.brain;
         if (UseBrain) {
             const action = await brain.control(() => {
@@ -187,10 +197,33 @@ export class Car {
             this.angle += 1;
         }
 
-        const pos0 = { x: this.x, y: this.y };
         const pos1 = updateCoordinates(pos0, this.angle, this.speed);
         this.x = pos1.x;
         this.y = pos1.y;
+
+        this.collide(ctx, roadMap);
         return [pos0, pos1];
+    }
+
+    collide(ctx: CanvasRenderingContext2D, roadMap: RoadMap): [IRoad, IPosition[]] {
+        const boundLines = this.getBoundLines();
+        const roads = roadMap.roads;
+        for (let ix = 0; ix < roads.length; ix++) {
+            for (let iy = 0; iy < roads[ix].length; iy++) {
+                const road = roads[ix][iy];
+                const collidePoints = road.collide(ctx, boundLines);
+                if (collidePoints.length > 0) {
+                    this.x = this.prevState.x;
+                    this.y = this.prevState.y;
+                    this.angle = this.prevState.angle;
+                    this.speed = 0;
+                    this.damaged = true;
+                    road.renderDamaged(ctx);
+                    return [road, collidePoints];
+                }
+            }
+        }
+        this.damaged = false;
+        return [EmptyRoad.Default, []];
     }
 }
