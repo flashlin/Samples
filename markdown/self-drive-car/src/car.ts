@@ -19,6 +19,7 @@ export class Car {
     friction = 0.02;
     angle = 270;
     damaged = false;
+    moveDistance = 0;
 
     x = 0;
     y = 0;
@@ -29,6 +30,7 @@ export class Car {
         x: 0,
         y: 0,
         angle: 0,
+        moveDistance: 0,
     };
 
     constructor() {
@@ -134,6 +136,7 @@ export class Car {
         this.prevState.x = this.x;
         this.prevState.y = this.y;
         this.prevState.angle = this.angle;
+        this.prevState.moveDistance = this.moveDistance;
 
         const brain = this.brain;
         if (UseBrain) {
@@ -198,6 +201,9 @@ export class Car {
         const pos1 = updateCoordinates(pos0, this.angle, this.speed);
         this.x = pos1.x;
         this.y = pos1.y;
+        if( this.speed > 0){
+            this.moveDistance += this.speed;
+        }
 
         this.collide(ctx, roadMap);
         this.renderRadarLines(ctx, roadMap);
@@ -225,6 +231,7 @@ export class Car {
             angle: this.angle,
             speed: this.speed,
             damaged: this.damaged ? 1 : 0,
+            moveDistance: this.moveDistance,
             radarSense
         }
     }
@@ -245,6 +252,7 @@ export class Car {
                     this.x = this.prevState.x;
                     this.y = this.prevState.y;
                     this.angle = this.prevState.angle;
+                    this.moveDistance = this.prevState.moveDistance;
                     this.speed = 0;
                     this.damaged = true;
                     road.renderDamaged(ctx);
@@ -255,6 +263,7 @@ export class Car {
                         this.angle = 270;
                         this.speed = 0;
                         this.damaged = false;
+                        this.moveDistance = 0;
                     }
 
                     return [road, collidePoints];

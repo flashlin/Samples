@@ -31,6 +31,7 @@ export interface ICarState {
     angle: number;
     speed: number;
     damaged: number;
+    moveDistance: number;
     radarSense: number[];
 }
 
