@@ -195,7 +195,7 @@ export class QTableBrain implements IBrain {
             updatedQValues[action] = targetQValue;
 
             // 将 currentState 和更新后的 Q_predicted 数组作为输入，训练 MLP 模型
-            this.train(currentState, qValues);
+            this.train(currentState, updatedQValues);
             this.saveModelWeights();
             resolve();
         });
