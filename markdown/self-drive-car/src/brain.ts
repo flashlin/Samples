@@ -125,15 +125,15 @@ export class QTableBrain implements IBrain {
     config = {
         hiddenLayers: [10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
     };
-    epsilon: number = 0.1;
+    epsilon: number = 0.7;
     model;
 
     constructor(numStates: number, numActions: number) {
         this.numActions = numActions;
         this.model = new NeuralNetwork(this.config);
-        //if( !this.loadModelWeights() ) {
+        if( !this.loadModelWeights() ) {
             this.train(randomArray(numStates), randomArray(numActions));
-        //}
+        }
     }
 
     predict(state: number[]): number {
