@@ -23,6 +23,7 @@ nnoremap <silent><leader>1 :source ~/AppData/Local/nvim/init.vim \| :PlugInstall
 let mapleader="\\"
 set number
 set relativenumber
+set clipboard+=unnamedplus
 set encoding=utf-8
 " 自动判断编码时,依次尝试下编码
 set fileencodings=utf-8,ucs-bom,big5
@@ -54,6 +55,10 @@ map! <C-A> <Esc>ggVG
 "ctrl+y 複製到系統剪貼簿
 map  <C-Y> "+y
 map! <C-Y> "+y
+
+"保存檔案
+nnoremap <C-S> :w<CR>
+inoremap <C-S> <Esc>:w<CR>i
 
 
 "
