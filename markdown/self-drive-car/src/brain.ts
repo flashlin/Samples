@@ -125,6 +125,7 @@ export class QTableBrain implements IBrain {
     config = {
         hiddenLayers: [10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
     };
+    epsilon: number = 0.1;
     model;
 
     constructor(numStates: number, numActions: number) {
@@ -145,6 +146,14 @@ export class QTableBrain implements IBrain {
                 bestActions.push(i);
             }
         }
+
+        // ε-greedy策略
+        if (Math.random() < this.epsilon) {
+            // 探索：選擇隨機的動作
+            return Math.floor(Math.random() * this.numActions);
+        }
+
+        // 利用：選擇當前最好的動作
         const randomIndex = Math.floor(Math.random() * bestActions.length);
         const bestAction = bestActions[randomIndex];
         return bestAction;
@@ -266,7 +275,7 @@ export class Brain {
 
     async saveNextStateAsync(currentState: number[], action: number, nextState: number[]) {
         const reward = this.rewardFunction(nextState);
-        console.log(`reward: ${reward}`);
+        //console.log(`reward: ${reward}`);
         await this.model.fitAsync(currentState, action, nextState, reward);
     }
 }
