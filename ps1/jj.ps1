@@ -4,6 +4,19 @@ param(
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 $ErrorActionPreference = "Stop"
 
+function JumpToFirstDir {
+    param(
+        [string[]]$dirs,
+        [string]$pattern
+    )
+    if( $dirs.Length -eq 1 ) {
+        $dir = $dirs[0]
+        WriteHostColor "$dir" $searchPattern
+        Write-Host ""
+        Set-Location -Path $dir
+    }
+}
+
 function DisplayDirs {
     param(
         [string[]]$dirs,
@@ -39,9 +52,16 @@ $result = & es -name-color green /ad -regex $folderPattern
 if ($result) {
     $folderNames = $result -split [Environment]::NewLine
     $folderNames = $folderNames | Where-Object { $_ -notmatch "^C:" } 
+
     $results = @( $searchPattern )
     $results += $folderNames
     $results | Set-Content -Path "D:\demo\jj.txt"
+
+    if( $results.Length -eq 2 ) {
+        JumpToFirstDir $folderNames $searchPattern
+        return
+    }
+
     DisplayDirs $folderNames $searchPattern
 }
 #Get-ChildItem -Directory | Where-Object { $_.Name -match $folderPattern } | ForEach-Object { $_.Name } | fzf

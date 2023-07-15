@@ -8,8 +8,13 @@ if( "" -eq $selectIndex ) {
     $selectIndex = 0
 }
 
-$dirs = Get-Content -Path "D:\Demo\jj.txt"
-$dir = $dirs[$selectIndex]
+$selectIndex = [int]::Parse($selectIndex) + 1
+$result = Get-Content -Path "D:\Demo\jj.txt"
+$dir = $result[$selectIndex]
+
+$searchPattern = $result[0]
+WriteHostColor "$dir" $searchPattern
+Write-Host ""
 
 Set-Location -Path $dir
 
