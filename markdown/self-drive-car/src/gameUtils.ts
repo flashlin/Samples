@@ -25,6 +25,26 @@ export const UseBrain = false;
 
 export const sleepNow = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
+export interface IObjectArrayInfo {
+    keys: string[];
+    values: number[];
+}
+export function objectToArray(obj: any): IObjectArrayInfo {
+    const keys = Object.keys(obj);
+    const values = keys.map(key => obj[key]);
+    return {
+        keys,
+        values,
+    };
+}
+export function arrayToObject(arr: number[], info: IObjectArrayInfo): any {
+    const obj: any = {};
+    for(let [idx, key] of info.keys.entries()){
+        obj[key] = arr[idx];
+    }
+    return obj;
+}
+
 export class Line {
     line: ILine;
     color: string = RoadColor;
