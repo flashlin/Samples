@@ -123,7 +123,7 @@ export class QTableBrain implements IBrain {
     numActions = 3;
     discountFactor: number = 0.9;
     config = {
-        hiddenLayers: [11], // 三个隐藏层，每个隐藏层有 10 个神经元
+        hiddenLayers: [6,6,9], // 三个隐藏层，每个隐藏层有 10 个神经元
         learningRate: 0.3,
     };
     epsilon: number = 0.1;

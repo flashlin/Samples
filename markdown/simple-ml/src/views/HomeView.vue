@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import Chart from 'chart.js/auto';
+import { NeuralNetwork } from 'brain.js';
 
 const refCanvas = ref<HTMLCanvasElement>();
 const data: { x: number, y: number }[] = [];
@@ -10,9 +11,27 @@ function linspace(start: number, end: number, num: number) {
   return Array.from({length: num}, (_, i) => start + (i * step));
 }
 
-let ys = linspace(0, 4*Math.PI, 1000); // y range from 0 to 4π
+let ys = linspace(0, 4*Math.PI, 500); // y range from 0 to 4π
+// for (let y of ys) {
+//   let x = Math.sin(y);
+//   data.push({x, y});
+// }
+
+let xs = Array.from({ length: 100}, (_, i) => i);
+console.log(xs)
+for(let x of xs){
+  let y = Math.asin(x);
+  data.push({x, y});
+}
+
+
+const trainData = ys.map(x => ({ input: [x], output: [Math.sin(x)] }));
+const net = new NeuralNetwork({
+  learningRate: 0.1
+});
+net.train(trainData);
 for (let y of ys) {
-  let x = Math.sin(y);
+  let x = net.run([y]) as unknown as number;
   data.push({x, y});
 }
 
