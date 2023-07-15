@@ -70,7 +70,7 @@ if( IsDirectoryNotExists $targetPath ) {
         $zipUrl = "https://github.com/neovim/neovim/releases/download/v0.9.1/nvim-win64.zip"
         Download $zipUrl $targetFile
     }
-    Unzip $targetFile $targetPath
+    Unzip $targetFile "C:\Program Files"
 
     Info "Remove Neovim from System Environment Path"
     RemoveSystemEnvironment "nvim"
