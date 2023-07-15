@@ -1,10 +1,11 @@
 import { drawRect } from "./drawUtils";
-import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain, StartX, StartY, RoadMap, EmptyRoad, IRoad, RadarLineLength } from "./gameUtils";
+import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain, StartX, StartY, RoadMap, EmptyRoad, IRoad, RadarLineLength, objectToArray, ICarState } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
 import { ILine, IPosition, IRect, getRectangleWidthHeight, getTwoPointsDistance, rotateRectangle, updateCoordinates } from "./math";
 import { Radar } from "./radar";
 import { Brain } from "./brain";
+
 
 export class Car {
     carImage: HTMLImageElement;
@@ -23,7 +24,7 @@ export class Car {
     y = 0;
 
     radar = new Radar();
-    brain = new Brain();
+    brain: Brain;
     prevState = {
         x: 0,
         y: 0,
@@ -41,6 +42,7 @@ export class Car {
             CarWidth - CarFrameMargin * 2,
             CarHeight - CarFrameMargin * 2);
         this.controls = new Controls();
+        this.brain = new Brain(objectToArray(this.getStateObj()));
     }
 
     render(ctx: CanvasRenderingContext2D) {
@@ -135,12 +137,8 @@ export class Car {
 
         const brain = this.brain;
         if (UseBrain) {
-            const action = await brain.control(() => {
-                const distances = this.radar.radarLines.map(x => x.distance);
-                //const gpsDistance = getTwoPointsDistance({ x: this.x, y: this.y }, { x: StartX, y: StartY });
-
-                return [this.damaged ? 1 : 0, this.speed, ...distances];
-            });
+            const self = this;
+            const action = await brain.control(self.getState.bind(self));
             this.controls.forward = false;
             this.controls.reverse = false;
             this.controls.left = false;
@@ -217,6 +215,23 @@ export class Car {
                 radar.distance = RadarLineLength;
             }
         }
+    }
+
+    getStateObj(): ICarState {
+        const radarSense = this.radar.radarLines.map(x => x.distance);
+        return {
+            x: this.x,
+            y: this.y,
+            angle: this.angle,
+            speed: this.speed,
+            damaged: this.damaged ? 1 : 0,
+            radarSense
+        }
+    }
+
+    getState(): number[] {
+        const state = this.getStateObj();
+        return objectToArray(state).values;
     }
 
     collide(ctx: CanvasRenderingContext2D, roadMap: RoadMap): [IRoad, IPosition[]] {
