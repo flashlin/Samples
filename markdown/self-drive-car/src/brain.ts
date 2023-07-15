@@ -1,4 +1,4 @@
-import { RadarLineCount, RadarLineLength } from './gameUtils';
+import { ICarState, IObjectArrayInfo, RadarLineCount, RadarLineLength, arrayToObject } from './gameUtils';
 import * as tf from '@tensorflow/tfjs';
 import { NeuralNetwork } from 'brain.js';
 import { QTable } from './qtable';
@@ -136,7 +136,7 @@ export class QTableBrain implements IBrain {
     }
 
     predict(state: number[]): number {
-        console.log(state);
+        //console.log(state);
         const qValues = this.predictQValues(state);
         const maxValue = Math.max(...qValues);
         const bestActions = [];
@@ -208,14 +208,16 @@ export class Brain {
 
     prevState: number[] = [];
     prevAction: number = 0;
+    stateInfo: IObjectArrayInfo;
 
-    constructor() {
+    constructor(stateInfo: IObjectArrayInfo) {
+        this.stateInfo = stateInfo;
         //this.model = new TensorflowBrain();
-        this.model = new QTableBrain(2 + RadarLineCount, 3);
+        this.model = new QTableBrain(stateInfo.values.length, 3);
         this.model.loadModelWeights();
     }
 
-    async control(getGameState: () => number[]) {
+    async control(getGameState: () => number[]): Promise<number> {
         const state = getGameState();
         if (!this.first) {
             const nextState = state;
@@ -229,21 +231,14 @@ export class Brain {
     }
 
     rewardFunction(state: number[]) {
-        const damaged = state[0];
-        if (damaged === 1) {
-            return -100;
+        const stateObj = arrayToObject(state, this.stateInfo) as ICarState;
+        if (stateObj.damaged === 1) {
+            return -10000;
         }
-        let speed = state[1];
-        const speedRewardWeight = 10;
-        const distances = state.slice(2, state.length);
-        const distancesReward = this.calculateDistanceReward(distances);
-
-        if( speed == 0) {
-            speed = -100;
-        }
-
-        let speedReward = speed * speedRewardWeight;
-        const reward = speedReward + distancesReward;
+        let reward = 0;
+        reward += stateObj.speed * 10;
+        const distancesReward = this.calculateDistanceReward(stateObj.radarSense);
+        reward += distancesReward;
         return reward;
     }
 
@@ -271,7 +266,7 @@ export class Brain {
 
     async saveNextStateAsync(currentState: number[], action: number, nextState: number[]) {
         const reward = this.rewardFunction(nextState);
-        //console.log(`reward: ${reward}`);
+        console.log(`reward: ${reward}`);
         await this.model.fitAsync(currentState, action, nextState, reward);
     }
 }
