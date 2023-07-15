@@ -23,6 +23,75 @@ function AddObjectProperty {
       -Name $name -Value $value
 }
 
+function Download {
+   param (
+       [string]$url,
+       [string]$targetFile
+   )
+   Info "Download $url ..."
+   Invoke-WebRequest -Uri $url -OutFile $targetFile
+}
+
+function Unzip {
+   param(
+       [string]$zipFile,
+       [string]$targetPath
+   )
+   # 檢查目錄是否存在，如果不存在就建立目錄
+   # if (-not (Test-Path -Path $tatgetPath)) {
+   #    New-Item -ItemType Directory -Path $targetPath | Out-Null
+   # }
+   Info "Unzip $zipFile to $targetPath"
+   Expand-Archive -Path $zipFile -DestinationPath $targetPath -Force
+}
+
+function IsDirectoryExists{
+   param(
+       [string]$dir
+   )
+   if (Test-Path -Path $dir) {
+       return $True
+   }
+   return $False
+}
+
+function CreateDirectory {
+   param(
+       [string]$targetPath
+   )
+   # 檢查目錄是否存在，如果不存在就建立目錄
+   if (-not (Test-Path -Path $targetPath)) {
+      New-Item -ItemType Directory -Path $targetPath | Out-Null
+   }
+}
+
+function GetMachinEnvironmentValue {
+   param(
+      [string]$name
+   )
+   $value = [Environment]::GetEnvironmentVariable($name, "Machine")
+   return $value
+}
+
+# choco upgrade chocolatey
+function InstallChocolatey {
+   $chocoInstallDir = GetMachinEnvironmentValue "ChocolateyInstall"
+   if ([string]::IsNullOrWhiteSpace($chocoInstallDir)) {
+      Write-Host "Chocolatey is not installed."
+      Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+   }
+}
+
+function IsChocoPackageExists {
+   param(
+       $packageName
+   )
+   #$packageName = "fzf"
+   $installedPackages = & choco list
+   $packageFound = $installedPackages | Select-String -Pattern $packageName
+   return $packageFound
+}
+
 function GetJsonFile {
    param (
       [string]$jsonFilePath,
