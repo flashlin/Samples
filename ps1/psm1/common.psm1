@@ -147,6 +147,8 @@ function WriteHostColorByAllMatches {
    )
    $currentIndex = 0
    foreach ($match in $allMatches.Matches) {
+      #DumpProperties $match
+      # Write-Host "mi = $($match.Index) '$text' '$($match.Value)'"
       # 輸出未匹配的部分
       if ($match.Index -gt $currentIndex) {
          $unmatchedText = $text.Substring($currentIndex, $match.Index - $currentIndex)
@@ -176,7 +178,7 @@ function WriteHostColor {
       Write-Host $text -NoNewline
       return
    }
-   DumpProperties $allMatches
+   #DumpProperties $allMatches
    WriteHostColorByAllMatches $text $allMatches
 }
 
