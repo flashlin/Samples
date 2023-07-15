@@ -124,8 +124,9 @@ export class QTableBrain implements IBrain {
     discountFactor: number = 0.9;
     config = {
         hiddenLayers: [10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
+        learningRate: 0.3,
     };
-    epsilon: number = 0.7;
+    epsilon: number = 0.3;
     model;
 
     constructor(numStates: number, numActions: number) {
@@ -248,6 +249,7 @@ export class Brain {
         reward += stateObj.speed * 10;
         const distancesReward = this.calculateDistanceReward(stateObj.radarSense);
         reward += distancesReward;
+        console.log(`reward=${reward}`)
         return reward;
     }
 
