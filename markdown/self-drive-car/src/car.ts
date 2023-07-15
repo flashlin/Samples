@@ -205,7 +205,7 @@ export class Car {
             this.moveDistance += this.speed;
         }
 
-        this.collide(ctx, roadMap);
+        await this.collideAsync(ctx, roadMap);
         this.renderRadarLines(ctx, roadMap);
         return [pos0, pos1];
     }
@@ -241,7 +241,7 @@ export class Car {
         return objectToArray(state).values;
     }
 
-    collide(ctx: CanvasRenderingContext2D, roadMap: RoadMap): [IRoad, IPosition[]] {
+    async collideAsync(ctx: CanvasRenderingContext2D, roadMap: RoadMap): Promise<[IRoad, IPosition[]]> {
         const boundLines = this.getBoundLines();
         const roads = roadMap.roads;
         for (let ix = 0; ix < roads.length; ix++) {
@@ -258,6 +258,7 @@ export class Car {
                     road.renderDamaged(ctx);
 
                     if (UseBrain) {
+                        await this.brain.control(this.getState.bind(this));
                         this.x = StartX;
                         this.y = StartY;
                         this.angle = 270;

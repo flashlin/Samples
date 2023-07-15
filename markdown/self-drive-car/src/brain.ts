@@ -126,7 +126,7 @@ export class QTableBrain implements IBrain {
         hiddenLayers: [10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
         learningRate: 0.3,
     };
-    epsilon: number = 0.7;
+    epsilon: number = 0.1;
     model;
 
     constructor(numStates: number, numActions: number) {
@@ -220,6 +220,7 @@ export class Brain {
     prevState: number[] = [];
     prevAction: number = 0;
     stateInfo: IObjectArrayInfo;
+    rewardsHistory: number[] = [];
 
     constructor(stateInfo: IObjectArrayInfo) {
         this.stateInfo = stateInfo;
@@ -251,7 +252,6 @@ export class Brain {
         reward += stateObj.speed * 10;
         const distancesReward = this.calculateDistanceReward(stateObj.radarSense);
         reward += distancesReward;
-        console.log(`reward=${reward}`)
         return reward;
     }
 
@@ -276,7 +276,15 @@ export class Brain {
 
     async saveNextStateAsync(currentState: number[], action: number, nextState: number[]) {
         const reward = this.rewardFunction(nextState);
-        //console.log(`reward: ${reward}`);
+        if( reward == -10000) {
+            console.log(`reward: `, this.rewardsHistory);
+        }
+
+        if( this.rewardsHistory.length >= 10 ){
+            this.rewardsHistory = this.rewardsHistory.slice(1);
+        }
+        this.rewardsHistory.push(reward);
+
         await this.model.fitAsync(currentState, action, nextState, reward);
     }
 }
