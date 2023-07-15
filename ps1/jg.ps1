@@ -8,7 +8,7 @@ if( "" -eq $selectIndex ) {
     $selectIndex = 0
 }
 
-$dirs = Get-Content -Path "d:\demo\jj.txt"
+$dirs = Get-Content -Path "D:\Demo\jj.txt"
 $dir = $dirs[$selectIndex]
 
 Set-Location -Path $dir
