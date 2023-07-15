@@ -1,5 +1,5 @@
 import { drawRect } from "./drawUtils";
-import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain, StartX, StartY, RoadMap, EmptyRoad, IRoad } from "./gameUtils";
+import { Rectangle, CarFrameMargin, CarHeight, CarWidth, CarPos, FrameWidth, FrameHeight, CanvasWidth, CanvasHeight, UseBrain, StartX, StartY, RoadMap, EmptyRoad, IRoad, RadarLineLength } from "./gameUtils";
 import car1 from './assets/car1.png';
 import { Controls } from "./controls";
 import { ILine, IPosition, IRect, getRectangleWidthHeight, getTwoPointsDistance, rotateRectangle, updateCoordinates } from "./math";
@@ -202,7 +202,21 @@ export class Car {
         this.y = pos1.y;
 
         this.collide(ctx, roadMap);
+        this.renderRadarLines(ctx, roadMap);
         return [pos0, pos1];
+    }
+
+    renderRadarLines(ctx: CanvasRenderingContext2D, roadMap: RoadMap) {
+        const radars = this.radar;
+        for (let [index, radarLine] of radars.getBoundLines().entries()) {
+            const radar = radars.radarLines[index];
+            const [road, collideRadarPoints] = roadMap.collide(ctx, [radarLine]);
+            if (collideRadarPoints.length != 0) {
+                radar.renderDamaged(ctx, collideRadarPoints[0]);
+            } else {
+                radar.distance = RadarLineLength;
+            }
+        }
     }
 
     collide(ctx: CanvasRenderingContext2D, roadMap: RoadMap): [IRoad, IPosition[]] {
