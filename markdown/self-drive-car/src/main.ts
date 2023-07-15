@@ -37,15 +37,15 @@ class Game {
 
 
         // 雷達線
-        for (let [index, radarLine] of car.radar.getBoundLines().entries()) {
-            const radar = car.radar.radarLines[index];
-            const [road, collideRadarPoints] = roadMap.collide(ctx, [radarLine]);
-            if (collideRadarPoints.length != 0) {
-                radar.renderDamaged(ctx, collideRadarPoints[0]);
-            } else {
-                radar.distance = 0;
-            }
-        }
+        // for (let [index, radarLine] of car.radar.getBoundLines().entries()) {
+        //     const radar = car.radar.radarLines[index];
+        //     const [road, collideRadarPoints] = roadMap.collide(ctx, [radarLine]);
+        //     if (collideRadarPoints.length != 0) {
+        //         radar.renderDamaged(ctx, collideRadarPoints[0]);
+        //     } else {
+        //         radar.distance = 0;
+        //     }
+        // }
     }
 
     drawRoad() {
