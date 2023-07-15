@@ -4,9 +4,20 @@ param(
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 $ErrorActionPreference = "Stop"
 
+function DisplayDirs {
+    param(
+        [string[]]$dirs
+    )
+    $index = 0
+    $dirs | ForEach-Object {
+        Write-Host "$($index): $($_)"
+        $index += 1
+    }
+}
+
 if( "" -eq $folderPattern ) {
-    Write-Host "jump directory script"
-    Write-Host "jj ???"
+    $folderNames = Get-Content -Path "D:\Demo\jj.txt"
+    DisplayDirs $folderNames
     return
 }
 
@@ -18,13 +29,9 @@ if (-Not ($folderPattern -match $regexPattern)) {
 $result = & es -name-color green /ad -regex $folderPattern
 if ($result) {
     $folderNames = $result -split [Environment]::NewLine
-    $itemsContent | Set-Content -Path "D:\demo\jj.txt"
-    $index = 0
     $folderNames | Where-Object { $_ -notmatch "^C:" } 
-    | ForEach-Object {
-        Write-Host "$($index): $($_)"
-        $index += 1
-    }
+    $folderNames | Set-Content -Path "D:\demo\jj.txt"
+    DisplayDirs $folderNames
 }
 #Get-ChildItem -Directory | Where-Object { $_.Name -match $folderPattern } | ForEach-Object { $_.Name } | fzf
 
