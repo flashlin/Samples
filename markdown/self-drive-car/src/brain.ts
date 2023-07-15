@@ -126,7 +126,7 @@ export class QTableBrain implements IBrain {
         hiddenLayers: [10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
         learningRate: 0.3,
     };
-    epsilon: number = 0.1;
+    epsilon: number = 0.7;
     model;
 
     constructor(numStates: number, numActions: number) {
@@ -151,7 +151,8 @@ export class QTableBrain implements IBrain {
         // ε-greedy策略
         if (Math.random() < this.epsilon) {
             // 探索：選擇隨機的動作
-            return Math.floor(Math.random() * this.numActions);
+            const randomAction = Math.floor(Math.random() * this.numActions);
+            return randomAction;
         }
 
         // 利用：選擇當前最好的動作
