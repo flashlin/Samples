@@ -27,20 +27,48 @@ export const sleepNow = (delay: number) => new Promise((resolve) => setTimeout(r
 
 export interface IObjectArrayInfo {
     keys: string[];
+    arrLengths: number[];
     values: number[];
 }
 export function objectToArray(obj: any): IObjectArrayInfo {
     const keys = Object.keys(obj);
-    const values = keys.map(key => obj[key]);
+    const arrLengths: number[] = [];
+    const values: number[] = [];
+    for (let [idx, key] of keys.entries()) {
+        const value = obj[key];
+        const isArrValue = Array.isArray(value);
+        arrLengths.push(isArrValue ? value.length : 0);
+        if (isArrValue) {
+            for (let item of value) {
+                values.push(item);
+            }
+        } else {
+            values.push(value);
+        }
+    }
     return {
         keys,
+        arrLengths,
         values,
     };
 }
+
 export function arrayToObject(arr: number[], info: IObjectArrayInfo): any {
     const obj: any = {};
-    for(let [idx, key] of info.keys.entries()){
-        obj[key] = arr[idx];
+    let valueIndex = 0;
+    for (let [idx, key] of info.keys.entries()) {
+        const arrLength = info.arrLengths[idx];
+        if (arrLength == 0) {
+            obj[key] = arr[valueIndex];
+            valueIndex++;
+        } else {
+            const value = [];
+            for (let i = 0; i < arrLength; i++) {
+                value.push(arr[valueIndex + i]);
+            }
+            obj[key] = value;
+            valueIndex += arrLength;
+        }
     }
     return obj;
 }
@@ -149,8 +177,7 @@ export class VerticalRoad implements IRoad {
 
     collide(ctx: CanvasRenderingContext2D, lines: ILine[]): IPosition[] {
         const [line1, line2] = this.getBoundLines();
-        for(let line of lines)
-        {
+        for (let line of lines) {
             const point1 = findTwoLinesIntersection(line1, line);
             if (point1 != null) {
                 this.lineDamaged = "line1";
@@ -190,7 +217,7 @@ export class HorizontalRoad implements IRoad {
 
     collide(ctx: CanvasRenderingContext2D, lines: ILine[]) {
         const [line1, line2] = this.getBoundLines();
-        for(let line of lines) {
+        for (let line of lines) {
             const point1 = findTwoLinesIntersection(line1, line);
             if (point1 != null) {
                 this.lineDamaged = "line1";
@@ -353,7 +380,7 @@ class CurveRoad {
         const lines1 = this.getBoundLines(CurveType.Outer);
         for (let line of lines1) {
             //drawLine(ctx, line, { strokeSyle: 'yellow' })
-            for(let boundLine of lines) {
+            for (let boundLine of lines) {
                 const points1 = findTwoLinesIntersection(boundLine, line);
                 if (points1 != null) {
                     return { curveType: CurveType.Outer, points: [points1] };
@@ -363,7 +390,7 @@ class CurveRoad {
 
         const lines2 = this.getBoundLines(CurveType.Inner);
         for (let line of lines2) {
-            for(let boundLine of lines) {
+            for (let boundLine of lines) {
                 const points1 = findTwoLinesIntersection(boundLine, line);
                 if (points1 != null) {
                     return { curveType: CurveType.Inner, points: [points1] };
@@ -372,7 +399,7 @@ class CurveRoad {
         }
         return { curveType: CurveType.None, points: [] };
     }
-    
+
 
     getArcXY() {
         if (this.type == CurveRoadType.LeftTop) {
