@@ -61,53 +61,6 @@ function InvokeCmdAsAdmin {
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$cmd`"" -Verb RunAs
 }
 
-function Download {
-    param (
-        [string]$url,
-        [string]$targetFile
-    )
-    Info "Download $url ..."
-    Invoke-WebRequest -Uri $url -OutFile $targetFile
-}
-
-function CreateDir {
-    param(
-        [string]$targetPath
-    )
-    # 檢查目錄是否存在，如果不存在就建立目錄
-    if (-not (Test-Path -Path $targetPath)) {
-       New-Item -ItemType Directory -Path $targetPath | Out-Null
-    }
-}
-
-
-function Unzip {
-    param(
-        [string]$zipFile,
-        [string]$targetPath
-    )
-    # 檢查目錄是否存在，如果不存在就建立目錄
-    # if (-not (Test-Path -Path $tatgetPath)) {
-    #    New-Item -ItemType Directory -Path $targetPath | Out-Null
-    # }
-    Info "Unzip $zipFile to $targetPath"
-    Expand-Archive -Path $zipFile -DestinationPath $targetPath -Force
-}
-
-function IsChocoPackageExists {
-    param(
-        $packageName
-    )
-    #$packageName = "fzf"
-    $installedPackages = & choco list
-    $packageFound = $installedPackages | Select-String -Pattern $packageName
-    return $packageFound
-    # if ($installedPackages -like "*$packageName*") {
-    #     return $True
-    # }
-    # return $False
-}
-
 
 $targetPath = "C:\Program Files\nvim-win64"
 if( IsDirectoryNotExists $targetPath ) {
@@ -139,17 +92,12 @@ Copy-Item -Path ./neovim-data/* -Destination $NeoVimConfigPath -Recurse -Contain
 $NeoVimAutoloadPath = "$NeoVimConfigPath\autoload"
 if( IsDirectoryNotExists $NeoVimAutoloadPath ) {
     Info "Install PlugInstall Manager..."
-    CreateDir $NeoVimAutoloadPath
+    CreateDirectory $NeoVimAutoloadPath
     $uri = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
     Download $uri "$NeoVimAutoloadPath\plug.vim"
 }
 
-
-$chocoInstallDir = [Environment]::GetEnvironmentVariable("ChocolateyInstall", "Machine")
-if ([string]::IsNullOrWhiteSpace($chocoInstallDir)) {
-    Write-Host "Chocolatey is not installed."
-    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-}
+InstallChocolatey
 
 if( -Not (IsChocoPackageExists "fzf") ) {
     choco install fzf
