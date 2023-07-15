@@ -123,7 +123,7 @@ export class QTableBrain implements IBrain {
     numActions = 3;
     discountFactor: number = 0.9;
     config = {
-        hiddenLayers: [10, 10], // 三个隐藏层，每个隐藏层有 10 个神经元
+        hiddenLayers: [11], // 三个隐藏层，每个隐藏层有 10 个神经元
         learningRate: 0.3,
     };
     epsilon: number = 0.1;
@@ -248,7 +248,7 @@ export class Brain {
             return -10000;
         }
         let reward = 0;
-        reward += stateObj.moveDistance;
+        reward += stateObj.moveDistance * 0.1;
         reward += stateObj.speed * 10;
         const distancesReward = this.calculateDistanceReward(stateObj.radarSense);
         reward += distancesReward;
@@ -258,18 +258,20 @@ export class Brain {
     calculateDistanceReward(distance: number[]) {
         let totalReward = 0;
 
-        for (let i = 1; i < distance.length; i += 2) {
-            if (i + 1 < distance.length) {
-                const diff = Math.abs(distance[i] - distance[i + 1]);
-                const reward = diff > 0 ? -5 : 10;
-                totalReward += reward;
-            }
-        }
+        // for (let i = 1; i < distance.length; i += 2) {
+        //     if (i + 1 < distance.length) {
+        //         const diff = Math.abs(distance[i] - distance[i + 1]);
+        //         const reward = diff > 0 ? -5 : 10;
+        //         totalReward += reward;
+        //     }
+        // }
 
         for (let i = 0; i < distance.length; i++) {
             const elementReward = distance[i] > 0 ? distance[i] : 0;
             totalReward += elementReward;
         }
+
+        totalReward /= distance.length;
 
         return totalReward;
     }
