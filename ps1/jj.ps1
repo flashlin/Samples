@@ -11,7 +11,7 @@ function JumpToFirstDir {
     )
     if( $dirs.Length -eq 1 ) {
         $dir = $dirs[0]
-        WriteHostColor "$dir" $searchPattern
+        WriteHostColor "$dir" $pattern
         Write-Host ""
         Set-Location -Path $dir
     }
@@ -48,10 +48,41 @@ if (-Not ($searchPattern -match $regexPattern)) {
 }
 
 
+$notNamePatterns = @(
+    "^C:",
+    "\\node_modules",
+    "\\.git\\",
+    "\\.vscode\\",
+    "\\.idea\\",
+    "\\.vscode-insiders\\",
+    "\\.history\\",
+    "\\.cache",
+    "\\packages",
+    "\\bin",
+    "\\pkgs\\",
+    "\\site-packages",
+    "\\dist"
+)
+
+function IsValidFolder {
+    param(
+        [string]$name
+    )
+    foreach ($namePattern in $notNamePatterns) {
+        if ($name -match $namePattern) {
+            return $False
+        }
+    }
+    return $True
+}
+
 $result = & es -name-color green /ad -regex $folderPattern
 if ($result) {
     $folderNames = $result -split [Environment]::NewLine
-    $folderNames = $folderNames | Where-Object { $_ -notmatch "^C:" } 
+    
+    $folderNames = $folderNames | Where-Object { IsValidFolder $_ } 
+    #$folderNames = $folderNames | Sort-Object -Property { $_.Length } -Descending
+    $folderNames = $folderNames | Sort-Object -Property Length, Name -Descending
 
     $results = @( $searchPattern )
     $results += $folderNames
