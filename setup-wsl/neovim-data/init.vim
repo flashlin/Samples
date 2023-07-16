@@ -15,6 +15,8 @@ Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 Plug 'junegunn/fzf.vim'
 "彩虹括號
 Plug 'frazrepo/vim-rainbow'
+"移動程式碼
+Plug 'matze/vim-move'
 "自動 :e
 source ~/AppData/Local/nvim/wilder-setup.nvim
 
@@ -65,6 +67,7 @@ inoremap <C-S> <Esc>:w<CR>i
 source ~/AppData/Local/nvim/easymotion.vim
 source ~/AppData/Local/nvim/NERDTreeToggle.vim
 source ~/AppData/Local/nvim/rainbow.vim
+source ~/AppData/Local/nvim/vim-move.vim
 source ~/AppData/Local/nvim/wilder.vim
 source ~/AppData/Local/nvim/fzf.vim
 
