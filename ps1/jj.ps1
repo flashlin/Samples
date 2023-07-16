@@ -223,9 +223,9 @@ $result = @( $searchPatternsText )
 $result += $paths
 $result | Set-Content -Path "D:\demo\jj.txt"
 
-if( $paths.Length -eq 1 ) {
-    WriteColorPath $path $searchPatterns
-    Set-Location -Path $path
+if( $paths -is [string] ) {
+    WriteColorPath $paths $searchPatterns
+    Set-Location -Path $paths
     return
 }
 
