@@ -1,3 +1,7 @@
+":PlugUpdate 安裝或更新
+":PlugClean 清除沒有再用的套件
+":PlugUpgrade 升級vim-plug 管理套件本身
+":PlugStatus 查看狀態
 call plug#begin('~/.config/nvim/plugged')
 "底部狀態化
 Plug 'bling/vim-airline'
@@ -9,6 +13,10 @@ Plug 'easymotion/vim-easymotion'
 "快速搜尋
 Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' } 
 Plug 'junegunn/fzf.vim'
+"彩虹括號
+Plug 'frazrepo/vim-rainbow'
+"自動 :e
+source ~/AppData/Local/nvim/wilder-setup.nvim
 
 " TypeScript 語法和重構插件
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -60,6 +68,21 @@ map! <C-Y> "+y
 nnoremap <C-S> :w<CR>
 inoremap <C-S> <Esc>:w<CR>i
 
+
+"彩虹括號
+let g:rainbow_active=1
+let g:rainbow_load_separately = [
+    \ [ '*' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
+    \ [ '*.tex' , [['(', ')'], ['\[', '\]']] ],
+    \ [ '*.cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
+    \ [ '*.{html,htm}' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
+    \ ]
+let g:rainbow_guifgs = ['RoyalBlue3', 'DarkOrange3', 'DarkOrchid3', 'FireBrick']
+let g:rainbow_ctermfgs = ['lightblue', 'lightgreen', 'yellow', 'red', 'magenta']
+
+
+"自動 :e
+source ~/AppData/Local/nvim/wilder.vim
 
 "
 " fzf settings
