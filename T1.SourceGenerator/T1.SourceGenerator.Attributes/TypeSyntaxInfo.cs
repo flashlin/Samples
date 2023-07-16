@@ -63,6 +63,18 @@ public class PropertySyntaxInfo
     public bool HasSetter { get; set; }
 }
 
+
+public class FieldSyntaxInfo
+{
+    public AccessibilityInfo Accessibility { get; set; }
+    public string TypeFullName { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public bool IsReadOnly { get; set; }
+    public List<AttributeSyntaxInfo> Attributes { get; set; } = new();
+    public bool HasInitialization { get; set; }
+    public string InitializationCode { get; set; } = string.Empty;
+}
+
 public class TypeSyntaxInfo
 {
     public List<string> UsingNamespaces { get; set; } = new();
@@ -71,6 +83,7 @@ public class TypeSyntaxInfo
     public List<MethodSyntaxInfo> Methods { get; set; } = new();
     public List<PropertySyntaxInfo> Properties { get; set; } = new();
     public List<string> BaseTypes { get; set; } = new();
+    public List<FieldSyntaxInfo> Fields { get; set; } = new();
 
     public override string ToString()
     {
