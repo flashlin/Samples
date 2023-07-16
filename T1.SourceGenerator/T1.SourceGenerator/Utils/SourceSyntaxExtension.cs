@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq.Expressions;
 using T1.SourceGenerator.Attributes;
 using T1.SourceGenerator.AutoMappingGen;
 
@@ -247,30 +248,119 @@ public static class SourceSyntaxExtension
                     IsReadOnly = fieldSymbol.IsReadOnly,
                     Attributes = attributeSymbols.ToList(),
                     HasInitialization = hasInitialization,
-                    InitializationCode = hasInitialization ? GetInitializationCode(fieldSymbol) : string.Empty,
+                    InitializationCode = hasInitialization ? GetInitializationCode(fieldSymbol) : null,
                 };
             }
         }
     }
 
-    private static string GetInitializationCode(IFieldSymbol fieldSymbol)
+    private static bool IsFuncDeclaration(this IFieldSymbol fieldSymbol)
     {
-        var syntaxNode = fieldSymbol.DeclaringSyntaxReferences[0].GetSyntax();
-        if (syntaxNode is VariableDeclaratorSyntax variableDeclarator &&
-            variableDeclarator.Initializer != null)
+        if (fieldSymbol.Type is INamedTypeSymbol namedTypeSymbol &&
+            namedTypeSymbol.IsGenericType &&
+            namedTypeSymbol.ConstructedFrom?.ToDisplayString() == "System.Func")
         {
-            return variableDeclarator.Initializer.Value.ToFullString();
+            return true;
         }
 
-        if (syntaxNode is EventFieldDeclarationSyntax eventFieldDeclaration &&
-            eventFieldDeclaration.Declaration.Variables.Count > 0 &&
-            eventFieldDeclaration.Declaration.Variables[0].Initializer != null)
-        {
-            return eventFieldDeclaration.Declaration.Variables[0].Initializer.Value.ToFullString();
-        }
-
-        return string.Empty;
+        return false;
     }
+
+    private static ISyntaxInfo GetInitializationCode(IFieldSymbol fieldSymbol)
+    {
+        var namedTypeSymbol = (INamedTypeSymbol)fieldSymbol.Type;
+        var syntax = fieldSymbol.DeclaringSyntaxReferences[0].GetSyntax();
+        var variableDec = (VariableDeclaratorSyntax)syntax;
+        var lambdaExpression = (LambdaExpressionSyntax)variableDec.Initializer!.Value;
+
+        return new FuncSyntaxInfo
+        {
+            GenericArguments = namedTypeSymbol.TypeArguments
+                .Select(typeArg => typeArg.ToDisplayString())
+                .ToList(),
+            Body = lambdaExpression.Body.ToString(),
+        };
+
+
+        //var syntaxNode = fieldSymbol.DeclaringSyntaxReferences[0].GetSyntax();
+        //if (syntaxNode is VariableDeclaratorSyntax variableDeclarator &&
+        //    variableDeclarator.Initializer != null)
+        //{
+        //    return GetFuncSyntaxInfo(variableDeclarator.Initializer.Value);
+        //    //return variableDeclarator.Initializer.Value.ToFullString();
+        //}
+
+        //if (syntaxNode is EventFieldDeclarationSyntax eventFieldDeclaration &&
+        //    eventFieldDeclaration.Declaration.Variables.Count > 0 &&
+        //    eventFieldDeclaration.Declaration.Variables[0].Initializer != null)
+        //{
+        //    //return eventFieldDeclaration.Declaration.Variables[0].Initializer.Value.ToFullString();
+        //}
+
+        //return string.Empty;
+        throw new NotImplementedException();
+    }
+    
+    private static FuncSyntaxInfo GetFuncSyntaxInfo(ExpressionSyntax expressionSyntax)
+    {
+        if (expressionSyntax is InvocationExpressionSyntax invocationExpression &&
+            invocationExpression.Expression is GenericNameSyntax genericName &&
+            genericName.Identifier.ValueText == "Func")
+        {
+            var typeFullName = genericName.ToFullString();
+            if (invocationExpression.ArgumentList.Arguments.Count == 1 &&
+                invocationExpression.ArgumentList.Arguments[0].Expression is LambdaExpressionSyntax lambdaExpression)
+            {
+                var methodBody = lambdaExpression.Body.ToString();
+                return new FuncSyntaxInfo
+                {
+                    //TypeFullName = typeFullName,
+                    //GenericArguments = genericName.QueryGenericArguments().ToList(),
+                    //MethodBody = methodBody,
+                };
+            }
+        }
+
+        // if (expressionSyntax is ParenthesizedLambdaExpressionSyntax funcInvocationExpr)
+        // {
+        //     return funcInvocationExpr.ToLambda();
+        // }
+        throw new NotImplementedException();
+    }
+
+    public static LambdaSyntaxInfo ToLambda(this ParenthesizedLambdaExpressionSyntax lambdaExpr)
+    {
+        return new LambdaSyntaxInfo
+        {
+            Parameters = lambdaExpr.QueryParameters().ToList(),
+            Body = lambdaExpr.Body.ToString()
+        };
+    }
+
+    public static IEnumerable<ParameterSyntaxInfo> QueryParameters(this ParenthesizedLambdaExpressionSyntax lambdaExpr)
+    {
+        foreach (var parameter in lambdaExpr.ParameterList.Parameters)
+        {
+            yield return new ParameterSyntaxInfo
+            {
+                TypeFullName = parameter.Type?.ToString() ?? string.Empty,
+                Name = parameter.Identifier.Text,
+            };
+        }
+    }
+
+    public static IEnumerable<GenericArgumentSyntaxInfo> QueryGenericArguments(this GenericNameSyntax genericName)
+    {
+        foreach (var argument in genericName.TypeArgumentList.Arguments)
+        {
+            yield return new GenericArgumentSyntaxInfo
+            {
+                TypeFullName = argument.ToString(),
+                Name = (argument as IdentifierNameSyntax)?.Identifier.Text ?? string.Empty,
+            };
+        }
+    }
+
 
     private static AccessibilityInfo ToAccessibility(Accessibility declaredAccessibility)
     {
