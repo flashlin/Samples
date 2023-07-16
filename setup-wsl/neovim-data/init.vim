@@ -27,6 +27,9 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Plug 'OmniSharp/omnisharp-vim'
 call plug#end()
 
+" 添加目錄
+set runtimepath+=D:\VDisk\Network\OneDrive\ps1
+
 " 1 重新載入
 nnoremap <silent><leader>1 :source ~/AppData/Local/nvim/init.vim \| :PlugInstall<CR>
 
@@ -70,6 +73,8 @@ source ~/AppData/Local/nvim/rainbow.vim
 source ~/AppData/Local/nvim/vim-move.vim
 source ~/AppData/Local/nvim/wilder.vim
 source ~/AppData/Local/nvim/fzf.vim
+
+source ~/AppData/Local/nvim/coc.vim
 
 
 " 啟用 LSP 支援 Typescript
