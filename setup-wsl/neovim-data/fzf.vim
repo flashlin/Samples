@@ -40,3 +40,44 @@ nnoremap <leader>f? :GFiles?
 nnoremap <leader>ft :Tags<cr>
 nnoremap <leader>fa :Ag 
 nnoremap <leader>fc :Commits
+
+
+
+function! OpenFloatingWin()
+  let height = &lines - 6
+  let width = float2nr(&columns - (&columns * 2 / 10))
+  let col = float2nr((&columns - width) / 2)
+
+  " 设置浮动窗口打开的位置，大小等。
+  " 这里的大小配置可能不是那么的 flexible 有繼續改進的空間
+  let opts = {
+        \ 'relative': 'editor',
+        \ 'row': 2,
+        \ 'col': 2,
+        \ 'width': &columns - 4,
+        \ 'height': height
+        \ }
+
+  let buf = nvim_create_buf(v:false, v:true)
+  let win = nvim_open_win(buf, v:true, opts)
+
+  " 設置浮动窗口高亮
+  call setwinvar(win, '&winhl', 'Normal:Pmenu')
+
+  setlocal
+        \ buftype=nofile
+        \ nobuflisted
+        \ bufhidden=hide
+        \ nonumber
+        \ norelativenumber
+        \ signcolumn=no
+endfunction
+
+
+" 讓輸入上方，搜索列表在下方
+let $FZF_DEFAULT_OPTS = '--layout=reverse'
+" 打開 fzf 的方式選擇 floating window
+let g:fzf_layout = { 'window': 'call OpenFloatingWin()' }
+
+nmap <C-T> :GFiles<CR>
+
