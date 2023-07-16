@@ -2,6 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using T1.SourceGenerator.Attributes;
+using T1.SourceGenerator.AutoMappingGen;
 
 namespace T1.SourceGenerator.Utils;
 
@@ -20,8 +21,16 @@ public static class SourceSyntaxExtension
                 BaseTypes = x.QueryBaseTypeInfo(compilation).ToList(),
                 Methods = x.QueryMethodsSyntaxInfo(compilation).ToList(),
                 Properties = x.QueryPropertiesSyntaxInfo(compilation).ToList(),
+                Fields = x.QueryFieldsSyntaxInfo(compilation).ToList(),
             })
             .ToList();
+    }
+
+    public static IEnumerable<AttributeSyntaxInfo> GetAttributeDeclarations<TAttribute>(this Compilation compilation,
+        TypeSyntaxInfo type)
+    {
+        return type.Attributes
+            .Where(x => x.TypeFullName == typeof(TAttribute).FullName);
     }
 
     public static List<EnumSyntaxInfo> GetAllEnums(this Compilation compilation)
@@ -51,8 +60,9 @@ public static class SourceSyntaxExtension
         {
             return string.Empty;
         }
+
         var valueNode = member.EqualsValue.Value;
-        var value = ((LiteralExpressionSyntax)valueNode).Token.Value!;
+        var value = ((LiteralExpressionSyntax) valueNode).Token.Value!;
         return $"{value}";
     }
 
@@ -60,14 +70,16 @@ public static class SourceSyntaxExtension
     public static string GetName(this string fullname)
     {
         var idx = fullname.LastIndexOf(".", StringComparison.Ordinal);
-        if(idx == -1)
+        if (idx == -1)
         {
             return fullname;
         }
+
         return fullname.Substring(idx + 1);
     }
 
-    public static IEnumerable<string> QueryBaseTypeInfo(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
+    public static IEnumerable<string> QueryBaseTypeInfo(this TypeDeclarationSyntax typeDeclaration,
+        Compilation compilation)
     {
         if (typeDeclaration.BaseList == null)
         {
@@ -91,7 +103,7 @@ public static class SourceSyntaxExtension
             parentNode = parentNode!.Parent;
         }
 
-        var compilationUnit = (CompilationUnitSyntax)parentNode;
+        var compilationUnit = (CompilationUnitSyntax) parentNode;
         return compilationUnit.Usings;
     }
 
@@ -102,7 +114,8 @@ public static class SourceSyntaxExtension
             .ToList();
     }
 
-    public static IEnumerable<MethodSyntaxInfo> QueryMethodsSyntaxInfo(this TypeDeclarationSyntax typeDeclaration, Compilation compilation)
+    public static IEnumerable<MethodSyntaxInfo> QueryMethodsSyntaxInfo(this TypeDeclarationSyntax typeDeclaration,
+        Compilation compilation)
     {
         var methods = typeDeclaration.Members.OfType<MethodDeclarationSyntax>();
         foreach (var method in methods)
@@ -126,11 +139,12 @@ public static class SourceSyntaxExtension
         return type.ToDisplayString();
     }
 
-    public static IEnumerable<AttributeSyntaxInfo> QueryAttributesSyntaxInfo(this MethodDeclarationSyntax methodDeclarationSyntax, Compilation compilation)
+    public static IEnumerable<AttributeSyntaxInfo> QueryAttributesSyntaxInfo(
+        this MethodDeclarationSyntax methodDeclarationSyntax, Compilation compilation)
     {
         return methodDeclarationSyntax.AttributeLists.QueryAttributesSyntaxInfo(compilation);
     }
-    
+
     public static IEnumerable<ParameterSyntaxInfo> QueryMethodParameters(this MethodDeclarationSyntax method,
         Compilation compilation)
     {
@@ -139,7 +153,7 @@ public static class SourceSyntaxExtension
         {
             var parameterSymbol = compilation.GetSymbol<IParameterSymbol>(parameter);
             var parameterTypeFullName = parameterSymbol.Type.ToDisplayString();
-            
+
             yield return new ParameterSyntaxInfo
             {
                 TypeFullName = parameterTypeFullName,
@@ -152,11 +166,12 @@ public static class SourceSyntaxExtension
         where T : ISymbol
     {
         var model = compilation.GetSemanticModel(parameter.SyntaxTree);
-        var symbol = (T)model.GetDeclaredSymbol(parameter)!;
+        var symbol = (T) model.GetDeclaredSymbol(parameter)!;
         return symbol;
     }
 
-    public static IEnumerable<AttributeData> QueryAttributeData(this AttributeListSyntax attributes, Compilation compilation)
+    public static IEnumerable<AttributeData> QueryAttributeData(this AttributeListSyntax attributes,
+        Compilation compilation)
     {
         var acceptedTrees = new HashSet<SyntaxTree>();
         foreach (var attribute in attributes.Attributes)
@@ -164,7 +179,7 @@ public static class SourceSyntaxExtension
 
         var parentSymbol = attributes.Parent!.GetDeclaredSymbol(compilation)!;
         var parentAttributes = parentSymbol.GetAttributes();
-        
+
         foreach (var attribute in parentAttributes)
         {
             if (acceptedTrees.Contains(attribute.ApplicationSyntaxReference!.SyntaxTree))
@@ -174,7 +189,8 @@ public static class SourceSyntaxExtension
         }
     }
 
-    public static IEnumerable<AttributeData> QueryAttributeData(this SyntaxList<AttributeListSyntax> attributeListSyntaxes,
+    public static IEnumerable<AttributeData> QueryAttributeData(
+        this SyntaxList<AttributeListSyntax> attributeListSyntaxes,
         Compilation compilation)
     {
         return attributeListSyntaxes
@@ -190,7 +206,7 @@ public static class SourceSyntaxExtension
         {
             if (member.Kind == SymbolKind.Property)
             {
-                var property = (IPropertySymbol)member;
+                var property = (IPropertySymbol) member;
                 yield return new PropertySyntaxInfo
                 {
                     Accessibility = ToAccessibility(property.DeclaredAccessibility),
@@ -201,6 +217,59 @@ public static class SourceSyntaxExtension
                 };
             }
         }
+    }
+
+    public static IEnumerable<FieldSyntaxInfo> QueryFieldsSyntaxInfo(this SyntaxNode typeSyntaxNode,
+        Compilation compilation)
+    {
+        var model = compilation.GetSemanticModel(typeSyntaxNode.SyntaxTree);
+        var symbol = (model.GetDeclaredSymbol(typeSyntaxNode) as INamedTypeSymbol)!;
+        foreach (var member in symbol.GetMembers())
+        {
+            if (member.Kind == SymbolKind.Field)
+            {
+                var fieldSymbol = (IFieldSymbol) member;
+                var attributeSymbols = fieldSymbol.GetAttributes()
+                    .Select(x => x.ToAttributeSyntaxInfo());
+
+                // 检查字段是否具有初始化代码
+                var hasInitialization = fieldSymbol.DeclaringSyntaxReferences.Any(syntaxRef =>
+                {
+                    var syntaxNode = syntaxRef.GetSyntax();
+                    return syntaxNode is VariableDeclaratorSyntax {Initializer: not null};
+                });
+
+                yield return new FieldSyntaxInfo
+                {
+                    Accessibility = ToAccessibility(fieldSymbol.DeclaredAccessibility),
+                    TypeFullName = fieldSymbol.Type.ToDisplayString(),
+                    Name = fieldSymbol.Name,
+                    IsReadOnly = fieldSymbol.IsReadOnly,
+                    Attributes = attributeSymbols.ToList(),
+                    HasInitialization = hasInitialization,
+                    InitializationCode = hasInitialization ? GetInitializationCode(fieldSymbol) : string.Empty,
+                };
+            }
+        }
+    }
+
+    private static string GetInitializationCode(IFieldSymbol fieldSymbol)
+    {
+        var syntaxNode = fieldSymbol.DeclaringSyntaxReferences[0].GetSyntax();
+        if (syntaxNode is VariableDeclaratorSyntax variableDeclarator &&
+            variableDeclarator.Initializer != null)
+        {
+            return variableDeclarator.Initializer.Value.ToFullString();
+        }
+
+        if (syntaxNode is EventFieldDeclarationSyntax eventFieldDeclaration &&
+            eventFieldDeclaration.Declaration.Variables.Count > 0 &&
+            eventFieldDeclaration.Declaration.Variables[0].Initializer != null)
+        {
+            return eventFieldDeclaration.Declaration.Variables[0].Initializer.Value.ToFullString();
+        }
+
+        return string.Empty;
     }
 
     private static AccessibilityInfo ToAccessibility(Accessibility declaredAccessibility)

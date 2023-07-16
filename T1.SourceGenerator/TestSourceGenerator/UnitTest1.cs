@@ -50,3 +50,4 @@ public interface IJackApi{
         return generator.AllTypes;
     }
 }
+

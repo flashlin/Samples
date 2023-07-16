@@ -18,5 +18,10 @@ Write-Host ""
 
 Set-Location -Path $dir
 
+# copy to clipboard
+Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.Clipboard]::SetText($dir)
+
+
 #Get-ChildItem -Directory | Where-Object { $_.Name -match $folderPattern } | ForEach-Object { $_.Name } | fzf
 

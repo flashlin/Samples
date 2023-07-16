@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.Internal;
+using T1.SourceGenerator.Attributes;
 
 namespace ConsoleDemoApp;
 
@@ -9,15 +11,28 @@ public class UserDto
     public float Price { get; }
     public DateTime Birth { get; set; }
 
-     public IQueryable<UserEntity> Test(MyDbContext db, string name)
-   {
-      return from tb1 in db.Users
-             where tb1.Name == name
-             select tb1;
-   }
+    public IQueryable<UserEntity> Test(MyDbContext db, string name)
+    {
+        return from tb1 in db.Users
+            where tb1.Name == name
+            select tb1;
+    }
 }
 
 public class MyDbContext : DbContext
 {
-   public DbSet<UserEntity> Users { get; set; }
+    public DbSet<UserEntity> Users { get; set; }
+
+    [LinqExpressionCompile]
+    private static readonly Func<MyDbContext, int, IQueryable<UserEntity>> GetUserByIdInternal =
+        (MyDbContext context, int id) =>
+            from e in context.Users
+            where e.Id == id
+            select e;
+
+    public UserEntity GetUser(int id)
+    {
+        var q1 = GetUserByIdInternal(this, id);
+        return q1.First();
+    }
 }

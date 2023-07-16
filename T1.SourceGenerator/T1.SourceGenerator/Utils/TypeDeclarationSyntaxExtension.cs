@@ -53,7 +53,8 @@ public static class TypeDeclarationSyntaxExtension
 		return model.GetDeclaredSymbol(node);
 	}
 
-	public static IEnumerable<AttributeSyntaxInfo> QueryAttributesSyntaxInfo(this SyntaxList<AttributeListSyntax> attributeList, Compilation compilation)
+	public static IEnumerable<AttributeSyntaxInfo> QueryAttributesSyntaxInfo(this SyntaxList<AttributeListSyntax> attributeList, 
+		Compilation compilation)
 	{
 		if( attributeList.Count == 0 )
 		{

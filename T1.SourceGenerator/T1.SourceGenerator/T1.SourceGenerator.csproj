@@ -54,6 +54,12 @@
     <EmbeddedResource Include="..\T1.SourceGenerator.Attributes\WebApiClientAttribute.cs">
       <Link>Templates\WebApiClientAttribute.cs</Link>
     </EmbeddedResource>
+ </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\T1.SourceGenerator.Attributes\LinqExpressionCompileAttribute.cs">
+      <Link>Templates\LinqExpressionCompileAttribute.cs</Link>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
