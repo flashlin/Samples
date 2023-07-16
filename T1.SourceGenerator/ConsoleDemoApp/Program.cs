@@ -10,10 +10,4 @@ a.Name = "Test";
 a.Level = 3;
 var b = new UserDto();
 
-var c = a.ToXXX();
-Console.WriteLine(c.Name);
 
-
-var client = new SamApiClient(null, null);
-
-var varEnum = AAA.BBB;

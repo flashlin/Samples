@@ -1,5 +1,10 @@
 namespace T1.SourceGenerator.Attributes;
 
+public interface ISyntaxInfo
+{
+    
+}
+
 public class ArgumentSyntaxInfo
 {
     public string Name { get; set; } = null!;
@@ -37,6 +42,12 @@ public class ParameterSyntaxInfo
     public string Name { get; set; } = null!;
 }
 
+public class LambdaSyntaxInfo : ISyntaxInfo
+{
+    public List<ParameterSyntaxInfo> Parameters { get; set; } = new();
+    public string Body { get; set; } = string.Empty;
+}
+
 public class MethodSyntaxInfo
 {
     public string Name { get; set; } = null!;
@@ -72,7 +83,19 @@ public class FieldSyntaxInfo
     public bool IsReadOnly { get; set; }
     public List<AttributeSyntaxInfo> Attributes { get; set; } = new();
     public bool HasInitialization { get; set; }
-    public string InitializationCode { get; set; } = string.Empty;
+    public ISyntaxInfo? InitializationCode { get; set; }
+}
+
+public class GenericArgumentSyntaxInfo
+{
+    public string TypeFullName { get; set; } = null!;
+    public string Name { get; set; } = String.Empty;
+}
+
+public class FuncSyntaxInfo : ISyntaxInfo
+{
+    public List<string> GenericArguments { get; set; } = new();
+    public string Body { get; set; } = string.Empty;
 }
 
 public class TypeSyntaxInfo
