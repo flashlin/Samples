@@ -237,23 +237,5 @@ foreach($path in $paths){
 }
 
 
-# $result = & es -name-color green /ad -regex $folderPattern
-# if ($result) {
-#     $folderNames = $result -split [Environment]::NewLine
-    
-#     $folderNames = $folderNames | Where-Object { IsValidFolder $_ } 
-#     $folderNames = $folderNames | Sort-Object -Property Length, Name -Descending
-
-#     $results = @( $searchPattern )
-#     $results += $folderNames
-#     $results | Set-Content -Path "D:\demo\jj.txt"
-
-#     if( $results.Length -eq 2 ) {
-#         JumpToFirstDir $folderNames $searchPattern
-#         return
-#     }
-
-#     DisplayDirs $folderNames $searchPattern
-# }
 #Get-ChildItem -Directory | Where-Object { $_.Name -match $folderPattern } | ForEach-Object { $_.Name } | fzf
 
