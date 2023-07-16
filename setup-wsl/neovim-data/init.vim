@@ -25,6 +25,7 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " Plug 'OmniSharp/omnisharp-vim'
 call plug#end()
 
+" 1 重新載入
 nnoremap <silent><leader>1 :source ~/AppData/Local/nvim/init.vim \| :PlugInstall<CR>
 
 " 同時顯示行號和相對行號
@@ -45,13 +46,6 @@ set expandtab
 set cursorline 
 highlight CursorLine cterm=NONE ctermfg=white ctermbg=darkgray guibg=darkgray guifg=white
 
-" F3 開啟關閉
-nnoremap <F3> :NERDTreeToggle<CR>
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
-
-" easymotion
-nmap <space> <Plug>(easymotion-bd-w)
-
 " 搜索的时候不區分大小写,是set ignorecase 縮寫.如果你想啟用,输入:set noic(noignorecase缩写)
 set ic
 " 搜索的时候随字符高亮
@@ -68,68 +62,11 @@ map! <C-Y> "+y
 nnoremap <C-S> :w<CR>
 inoremap <C-S> <Esc>:w<CR>i
 
-
-"彩虹括號
-let g:rainbow_active=1
-let g:rainbow_load_separately = [
-    \ [ '*' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
-    \ [ '*.tex' , [['(', ')'], ['\[', '\]']] ],
-    \ [ '*.cpp' , [['(', ')'], ['\[', '\]'], ['{', '}']] ],
-    \ [ '*.{html,htm}' , [['(', ')'], ['\[', '\]'], ['{', '}'], ['<\a[^>]*>', '</[^>]*>']] ],
-    \ ]
-let g:rainbow_guifgs = ['RoyalBlue3', 'DarkOrange3', 'DarkOrchid3', 'FireBrick']
-let g:rainbow_ctermfgs = ['lightblue', 'lightgreen', 'yellow', 'red', 'magenta']
-
-
-"自動 :e
+source ~/AppData/Local/nvim/easymotion.vim
+source ~/AppData/Local/nvim/NERDTreeToggle.vim
+source ~/AppData/Local/nvim/rainbow.vim
 source ~/AppData/Local/nvim/wilder.vim
-
-"
-" fzf settings
-" This is the default extra key bindings
-let g:fzf_action = {
-            \ 'ctrl-t': 'tab split',
-            \ 'ctrl-x': 'split',
-            \ 'ctrl-v': 'vsplit' }
-
-" Default fzf layout
-" - down / up / left / right
-let g:fzf_layout = { 'down': '~70%' }
-
-" Customize fzf colors to match your color scheme
-let g:fzf_colors =
-            \ { 'fg':      ['fg', 'Normal'],
-            \ 'bg':      ['bg', 'Normal'],
-            \ 'hl':      ['fg', 'Comment'],
-            \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-            \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
-            \ 'hl+':     ['fg', 'Statement'],
-            \ 'info':    ['fg', 'PreProc'],
-            \ 'prompt':  ['fg', 'Conditional'],
-            \ 'pointer': ['fg', 'Exception'],
-            \ 'marker':  ['fg', 'Keyword'],
-            \ 'spinner': ['fg', 'Label'],
-            \ 'header':  ['fg', 'Comment'] }
-
-" Enable per-command history.
-" CTRL-N and CTRL-P will be automatically bound to next-history and
-" previous-history instead of down and up. If you don't like the change,
-" explicitly bind the keys to down and up in your $FZF_DEFAULT_OPTS.
-let g:fzf_history_dir = '~/.local/share/fzf-history'
-
-
-
-" fzf 搜尋
-nnoremap <leader>fl :Lines 
-nnoremap <leader>fb :BLines 
-nnoremap <leader>ff :Files 
-nnoremap <leader>fg :GFiles 
-nnoremap <leader>f? :GFiles? 
-nnoremap <leader>ft :Tags<cr>
-nnoremap <leader>fa :Ag 
-nnoremap <leader>fc :Commits
-
-
+source ~/AppData/Local/nvim/fzf.vim
 
 
 " 啟用 LSP 支援 Typescript
