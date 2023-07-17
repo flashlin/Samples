@@ -1,5 +1,6 @@
 ":CocInstall coc-json coc-tsserver
 ":CocInstall coc-tabnine
+":CocInstall coc-python
 
 set updatetime=1000
 
