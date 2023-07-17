@@ -157,13 +157,78 @@ class VerticalRoad(IRoad):
         return points
 
 
+class HorizontalRoad(IRoad):
+    ix = 0
+    iy = 0
+    pos = Position(x=0, y=0)
+    lineDamaged = ""
+
+    def __init__(self):
+        pass
+
+    def render(self, ctx: IGraphic):
+        x = self.pos.x
+        y = self.pos.y
+        ctx.draw_line(Line(
+            start=Position(x, y + RoadMargin),
+            end=Position(x + RoadWidth, y + RoadMargin)
+        ), color=RoadColor, thickness=7)
+        ctx.draw_line(Line(
+            start=Position(x, y + RoadWidth - RoadMargin),
+            end=Position(x + RoadWidth, y + RoadWidth - RoadMargin)
+        ), color=RoadColor, thickness=7)
+
+    def collide(self, ctx: IGraphic, lines: List[Line]):
+        line1, line2 = self.get_bound_lines()
+        points = []
+        for line in lines:
+            point1 = find_two_lines_intersection(line1, line)
+            if point1 is not None:
+                self.lineDamaged = "line1"
+                points.append(point1)
+            point2 = find_two_lines_intersection(line2, line)
+            if point2 is not None:
+                self.lineDamaged = "line2"
+                points.append(point2)
+        self.lineDamaged = ""
+        return points
+
+    def renderDamaged(self, ctx: IGraphic):
+        x = self.pos.x
+        y = self.pos.y
+        color = "red"
+        if self.lineDamaged == "line1":
+            ctx.draw_line(Line(
+                start=Position(x, y + RoadMargin),
+                end=Position(x + RoadWidth, y + RoadMargin)
+            ), color=color, thickness=7)
+        elif self.lineDamaged == "line2":
+            ctx.draw_line(Line(
+                start=Position(x, y + RoadWidth - RoadMargin),
+                end=Position(x + RoadWidth, y + RoadWidth - RoadMargin)
+            ), color=color, thickness=7)
+
+    def getBoundLines(self):
+        x, y = self.pos
+        line1 = Line(
+            start=Position(x, y + RoadMargin),
+            end=Position(x + RoadWidth, y + RoadMargin)
+        )
+
+        line2 = Line(
+            start=Position(x, y + RoadWidth - RoadMargin),
+            end=Position(x + RoadWidth, y + RoadWidth - RoadMargin)
+        )
+        return [line1, line2]
+
+
 def create2dArray(rows: int, cols: int) -> List[List[Optional[IRoad]]]:
     return [[EmptyRoad()] * cols for _ in range(rows)]
 
 
 def createRoad(ch: str) -> IRoad:
     dict: Dict[str, Callable[[], IRoad]] = {
-        # '-': lambda: HorizontalRoad(),
+        '-': lambda: HorizontalRoad(),
         '|': lambda: VerticalRoad(),
         # '/': lambda: LeftTopCurve(),
         # '\\': lambda: RightTopCurve(),
