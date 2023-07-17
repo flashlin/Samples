@@ -49,11 +49,11 @@ class IRoad(ABC):
         pass
 
     @abstractmethod
-    def renderDamaged(self, ctx: IGraphic):
+    def render_damaged(self, ctx: IGraphic):
         pass
 
     @abstractmethod
-    def getBoundLines(self) -> List[Line]:
+    def get_bound_lines(self) -> List[Line]:
         pass
 
 
@@ -69,10 +69,10 @@ class EmptyRoad(IRoad):
     def collide(self, ctx: IGraphic, bound_lines: List[Line]):
         return []
 
-    def renderDamaged(self, ctx: IGraphic):
+    def render_damaged(self, ctx: IGraphic):
         pass
 
-    def getBoundLines(self):
+    def get_bound_lines(self):
         return []
 
 
@@ -98,10 +98,10 @@ class VerticalRoad(IRoad):
             start=Position(x=x + RoadWidth - RoadMargin, y=y),
             end=Position(x=x + RoadWidth - RoadMargin, y=y + RoadWidth)
         ), color=color, thickness=7)
-        line1, line2 = self.getBoundLines()
+        line1, line2 = self.get_bound_lines()
         ctx.draw_text(Position(x=x + RoadMargin, y=y), f"{posInfo(line1.start)}", color=(0xf, 0xf, 0xf))
 
-    def renderDamaged(self, ctx):
+    def render_damaged(self, ctx):
         x = self.pos.x
         y = self.pos.y
         ctx.beginPath()
@@ -115,7 +115,7 @@ class VerticalRoad(IRoad):
         ctx.strokeStyle = "red"
         ctx.stroke()
 
-    def getBoundLines(self) -> list[Line]:
+    def get_bound_lines(self) -> list[Line]:
         x = self.ix * RoadWidth
         y = self.iy * RoadWidth
         line1 = Line(
@@ -142,7 +142,7 @@ class VerticalRoad(IRoad):
         return [line1, line2]
 
     def collide(self, ctx, lines):
-        line1, line2 = self.getBoundLines()
+        line1, line2 = self.get_bound_lines()
         points = []
         for line in lines:
             point1 = find_two_lines_intersection(line1, line)
@@ -193,7 +193,7 @@ class HorizontalRoad(IRoad):
         self.lineDamaged = ""
         return points
 
-    def renderDamaged(self, ctx: IGraphic):
+    def render_damaged(self, ctx: IGraphic):
         x = self.pos.x
         y = self.pos.y
         color = "red"
@@ -208,7 +208,7 @@ class HorizontalRoad(IRoad):
                 end=Position(x + RoadWidth, y + RoadWidth - RoadMargin)
             ), color=color, thickness=7)
 
-    def getBoundLines(self):
+    def get_bound_lines(self):
         x, y = self.pos
         line1 = Line(
             start=Position(x, y + RoadMargin),
