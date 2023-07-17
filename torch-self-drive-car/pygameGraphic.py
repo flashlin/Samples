@@ -1,23 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import NamedTuple
 import pygame
-
-
-class Position(NamedTuple):
-    x: int
-    y: int
-
-
-class Line(NamedTuple):
-    start: Position
-    end: Position
-
-
-class Arc(NamedTuple):
-    centre: Position
-    radius: int
-    start_angle: int
-    end_angle: int
+from math_utils import Position, Line, Arc
 
 
 class IGraphic(ABC):
