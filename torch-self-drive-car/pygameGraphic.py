@@ -32,8 +32,14 @@ class IGraphic(ABC):
     def draw_arc(self, arc: Arc, color: (int, int, int), thickness: int):
         pass
 
+    @abstractmethod
+    def draw_image(self, image_asset_name: str, pos: Position, angle: int):
+        pass
+
 
 class PygameGraphic(IGraphic):
+    cache = {}
+
     def __init__(self):
         self.font = None
         self.screen = None
@@ -70,3 +76,18 @@ class PygameGraphic(IGraphic):
         radius = arc.radius
         pygame.draw.arc(self.screen, color, (cx - radius, cy - radius, radius * 2, radius * 2),
                         arc.start_angle, arc.end_angle, thickness)
+
+    def draw_image(self, image_asset_name: str, pos: Position, angle: int):
+        image = self.fetch_data(f"image_{image_asset_name}", lambda: pygame.image.load(image_asset_name))
+        rotated_image = pygame.transform.rotate(image, angle)
+        rotated_rect = rotated_image.get_rect()
+        offset_x = pos.x - rotated_rect.width / 2
+        offset_y = pos.y - rotated_rect.height / 2
+        self.screen.blit(rotated_image, (offset_x, offset_y))
+
+    def fetch_data(self, key: str, fetch: callable):
+        if key in self.cache:
+            return self.cache[key]
+        result = fetch()
+        self.cache[key] = result
+        return result
