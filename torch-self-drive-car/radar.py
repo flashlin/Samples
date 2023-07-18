@@ -15,7 +15,8 @@ class RadarLine:
         self.distance = 0
 
     def render(self, ctx: IGraphic):
-        ctx.draw_line(self.get_draw_line(True), color=RadarColor, thickness=3)
+        if self.distance == RadarLineLength:
+            ctx.draw_line(self.get_draw_line(True), color=RadarColor, thickness=3)
 
     def render_damaged(self, ctx: IGraphic, point: Position):
         start, end = self.get_bound_line()
@@ -25,7 +26,7 @@ class RadarLine:
         end_pos = Position(draw_line.start.x, draw_line.start.y + distance)
         rotated_points = rotate_points(self.pos, self.car_angle + self.angle, [draw_line.start, end_pos])
         radar_line = Line(rotated_points[0], rotated_points[1])
-        ctx.draw_line(radar_line, color="red", thickness=5)
+        ctx.draw_line(radar_line, color="red", thickness=3)
 
     def get_draw_line(self, rotate: bool) -> Line:
         start = Position(self.pos.x, self.pos.y + CarHeight / 2 - 20)

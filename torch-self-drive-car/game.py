@@ -20,7 +20,7 @@ DamagedColor = "red"
 RadarLineLength = 150
 RadarLineCount = 5
 RadarCount = 3
-RadarColor = 'gray'
+RadarColor = 'darkGray'
 UseBrain = True
 
 
