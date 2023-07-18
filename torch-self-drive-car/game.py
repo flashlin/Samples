@@ -103,19 +103,16 @@ class VerticalRoad(IRoad):
         line1, line2 = self.get_bound_lines()
         ctx.draw_text(Position(x=x + RoadMargin, y=y), f"{posInfo(line1.start)}", color=(0xf, 0xf, 0xf))
 
-    def render_damaged(self, ctx):
+    def render_damaged(self, ctx: IGraphic):
         x = self.pos.x
         y = self.pos.y
-        ctx.beginPath()
+        color = "red"
         if self.lineDamaged == "line1":
-            ctx.moveTo(x + RoadMargin, y)
-            ctx.lineTo(x + RoadMargin, y + RoadWidth)
+            ctx.draw_line(Position(x + RoadMargin, y), Position(x + RoadMargin, y + RoadWidth),
+                          color=color, thickness=7)
         elif self.lineDamaged == "line2":
-            ctx.moveTo(x + RoadWidth - RoadMargin, y)
-            ctx.lineTo(x + RoadWidth - RoadMargin, y + RoadWidth)
-        ctx.lineWidth = 7
-        ctx.strokeStyle = "red"
-        ctx.stroke()
+            ctx.draw_line(Position(x + RoadWidth - RoadMargin, y), Position(x + RoadWidth - RoadMargin, y + RoadWidth),
+                          color=color, thickness=7)
 
     def get_bound_lines(self) -> list[Line]:
         x = self.ix * RoadWidth
@@ -292,8 +289,8 @@ class CurveRoad:
             ctx.draw_arc(Arc(
                 centre=arc_xy,
                 radius=CurveRadius[CurveType.Outer],
-                start_angle=start_angle * math.pi / 180,
-                end_angle=end_angle * math.pi / 180),
+                start_angle=start_angle,
+                end_angle=end_angle),
                 color=color,
                 thickness=7)
 
@@ -362,9 +359,9 @@ class LeftTopCurve(IRoad):
     def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> list[Position]:
         curve = self.curve
         curve.pos = self.get_bound_pos()
-        curve_result = curve.collide(bound_lines)
-        self.line_damaged = curve_result['curveType']
-        return curve_result['points']
+        curve_type, points = curve.collide(bound_lines)
+        self.line_damaged = curve_type
+        return points
 
     def render_damaged(self, ctx: IGraphic):
         curve = self.curve

@@ -4,8 +4,9 @@ import random
 import numpy as np
 import pygame
 
-from car import Car
+from car import Car, Action
 from game import CanvasWidth, CanvasHeight, RoadMap, StartX, StartY, CarPos
+from math_utils import Position
 from pygameGraphic import PygameGraphic
 
 
@@ -27,14 +28,20 @@ class SelfDriveCarGame:
     def reset(self):
         pass
 
-    def step(self, action):
-        pass
+    def step(self, action: Action):
+        self.car.control(action)
 
     def render(self):
-        self.screen.render_start()
-        self.road_map.render(self.screen)
-        self.car.render(self.screen)
-        self.screen.render_end()
+        screen = self.screen
+        road_map = self.road_map
+        car = self.car
+
+        screen.render_start()
+        road_map.pos = Position(car.x, car.y)
+        road_map.render(screen)
+        car.move(screen, road_map)
+        car.render(screen)
+        screen.render_end()
 
 
 if __name__ == '__main__':
