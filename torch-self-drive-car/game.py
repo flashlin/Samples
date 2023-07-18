@@ -251,8 +251,8 @@ class CurveAngle(NamedTuple):
 CurveAngles = {
     CurveRoadType.LeftTop: CurveAngle(start_angle=90, end_angle=180),
     CurveRoadType.RightTop: CurveAngle(0, 90),
-    CurveRoadType.RightBottom: CurveAngle(0, 90),
-    CurveRoadType.LeftBottom: CurveAngle(90, 180),
+    CurveRoadType.RightBottom: CurveAngle(270, 0),
+    CurveRoadType.LeftBottom: CurveAngle(180, 270),
 }
 
 # def get_left_top_curve_centre(pos: Position):
@@ -416,8 +416,45 @@ class RightTopCurve(IRoad):
         return Position(x, y)
 
 
+class LeftBottomCurve(IRoad):
+    def __init__(self):
+        self.ix = 0
+        self.iy = 0
+        self.pos = Position(0, 0)
+        self.lineDamaged = CurveType.Empty
+        self.curve = CurveRoad(CurveRoadType.LeftBottom)
 
-def create2dArray(rows: int, cols: int) -> list[list[IRoad]]:
+    def render(self, ctx: IGraphic):
+        curve_road = self.curve
+        curve_road.pos = self.pos
+        curve_road.render(ctx, RoadColor)
+
+    def render_damaged(self, ctx: IGraphic):
+        curve_road = self.curve
+        curve_road.pos = self.pos
+        if self.lineDamaged == CurveType.Outer:
+            curve_road.render_curve(ctx, CurveType.Outer, DamagedColor)
+        if self.lineDamaged == CurveType.Inner:
+            curve_road.render_curve(ctx, CurveType.Inner, DamagedColor)
+
+    def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> list[Position]:
+        curve = self.curve
+        curve.pos = self.get_bound_pos()
+        curve_type, points = curve.collide(bound_lines)
+        self.lineDamaged = curve_type
+        return points
+
+    def get_bound_lines(self) -> list[Line]:
+        self.curve.pos = self.get_bound_pos()
+        return self.curve.get_all_bound_lines()
+
+    def get_bound_pos(self) -> Position:
+        x = self.ix * RoadWidth
+        y = self.iy * RoadWidth
+        return Position(x, y)
+
+
+def create2d_array(rows: int, cols: int) -> list[list[IRoad]]:
     return [[EmptyRoad()] * cols for _ in range(rows)]
 
 
@@ -427,7 +464,7 @@ def create_road(ch: str) -> IRoad:
         '|': lambda: VerticalRoad(),
         '/': lambda: LeftTopCurve(),
         '\\': lambda: RightTopCurve(),
-        # 'L': lambda: LeftBottomCurve(),
+        'L': lambda: LeftBottomCurve(),
         # '+': lambda: RightBottomCurve(),
     }
 
@@ -441,7 +478,7 @@ def read_map(map_content: str) -> list[list[IRoad]]:
     lines = map_content.split('\n')
     width = max(len(line) for line in lines)
     height = len(lines)
-    road_map = create2dArray(width, height)
+    road_map = create2d_array(width, height)
 
     for y in range(height):
         line = lines[y]
@@ -466,7 +503,7 @@ class RoadMap:
 
     def __init__(self):
         self.pos = Position(x=0, y=0)
-        self.roads = create2dArray(10, 10)
+        self.roads = create2d_array(10, 10)
         self.roads = read_map_file("./assets/map.txt")
 
     def render(self, ctx: IGraphic):
