@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import NamedTuple, Dict, Callable, Tuple
 
-from game import RoadColor, RoadMargin, RoadWidth, pos_info, DamagedColor
+from game import RoadColor, RoadMargin, RoadWidth, pos_info, DamagedColor, CanvasWidth, CanvasHeight
 from math_utils import Position, Line, find_two_lines_intersection, Arc, get_arc_lines
 from pygameGraphic import IGraphic
 
@@ -73,7 +73,7 @@ class VerticalRoad(IRoad):
             end=Position(x=x + RoadWidth - RoadMargin, y=y + RoadWidth)
         ), color=color, thickness=7)
         line1, line2 = self.get_bound_lines()
-        ctx.draw_text(Position(x=x + RoadMargin, y=y), f"{pos_info(line1.start)}", color=(0xf, 0xf, 0xf))
+        # ctx.draw_text(Position(x=x + RoadMargin, y=y), f"{pos_info(line1.start)}", color=(0xf, 0xf, 0xf))
 
     def render_damaged(self, ctx: IGraphic):
         x = self.pos.x
@@ -495,18 +495,15 @@ class RoadMap:
         self.roads = read_map_file("./assets/map.txt")
 
     def render(self, ctx: IGraphic):
-        x = self.pos.x
-        y = self.pos.y
+        x = self.pos.x + CanvasWidth // 2
+        y = self.pos.y + CanvasHeight // 2
         roads = self.roads
         for ix in range(len(roads)):
             for iy in range(len(roads[ix])):
                 road = roads[ix][iy]
                 if road is None:
                     continue
-                road.pos = Position(
-                    x=x + ix * RoadWidth,
-                    y=y + iy * RoadWidth,
-                )
+                road.pos = Position(x + ix * RoadWidth, y + iy * RoadWidth)
                 road.render(ctx)
 
     def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> Tuple[IRoad, list[Position]]:
