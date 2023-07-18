@@ -60,10 +60,9 @@ def get_arc_lines(arc: Arc) -> list[Line]:
 
 
 def update_coordinates(pos: Position, angle: int, distance: int) -> Position:
-    distance = -distance
     theta = angle * math.pi / 180
     x = round(pos.x + distance * math.cos(theta))
-    y = round(pos.y - distance * math.sin(theta))
+    y = round(pos.y + distance * math.sin(theta))
     return Position(x, y)
 
 

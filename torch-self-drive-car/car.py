@@ -31,7 +31,7 @@ class Car:
         self.controller.create()
         self.x = 0
         self.y = 0
-        self.angle = 90
+        self.angle = 0
         self.speed = 0
         self.acceleration = 0.3
         self.max_speed = 4
@@ -84,7 +84,6 @@ class Car:
         new_pos = update_coordinates(Position(self.x, self.y), self.angle, self.speed)
         self.x = new_pos.x
         self.y = new_pos.y
-        print(f"{self.x} {self.y}")
 
         if self.speed > 0:
             self.move_distance += self.speed
@@ -99,6 +98,7 @@ class Car:
                 road = roads[ix][iy]
                 collide_points = road.collide(ctx, bound_lines)
                 if len(collide_points) > 0:
+                    print(f"BOOM")
                     self.x = self.prev_state.x
                     self.y = self.prev_state.y
                     self.angle = self.prev_state.angle
