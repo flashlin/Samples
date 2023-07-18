@@ -1,3 +1,4 @@
+import math
 from typing import NamedTuple
 
 
@@ -37,3 +38,23 @@ def find_two_lines_intersection(line1: Line, line2: Line):
             y=int(y1 + t * (y2 - y1)),
         )
     return None
+
+
+def get_arc_lines(arc: Arc) -> list[Line]:
+    if arc.end_angle == 0 and arc.end_angle < arc.start_angle:
+        arc.end_angle = 360
+
+    points = []
+    for angle in range(int(arc.start_angle), int(arc.end_angle) + 1, 3):
+        randi = angle * (math.pi / 180)
+        x = int(arc.centre.x + arc.radius * math.cos(randi))
+        y = int(arc.centre.y + arc.radius * math.sin(randi))
+        points.append(Position(x, y))
+
+    lines = []
+    for index in range(1, len(points)):
+        start = points[index - 1]
+        end = points[index]
+        lines.append(Line(start=start, end=end))
+
+    return lines

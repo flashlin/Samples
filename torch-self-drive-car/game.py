@@ -1,7 +1,9 @@
+import math
 from abc import ABC, abstractmethod
-from typing import List, Tuple, Optional, Dict, Callable
+from typing import Tuple, Optional, Dict, Callable, NamedTuple
 from pygameGraphic import IGraphic
-from math_utils import Position, Line, find_two_lines_intersection
+from math_utils import Position, Line, find_two_lines_intersection, Arc, get_arc_lines
+from enum import Enum
 
 CarFrameMargin = 5
 CarWidth = 75
@@ -45,7 +47,7 @@ class IRoad(ABC):
         pass
 
     @abstractmethod
-    def collide(self, ctx: IGraphic, lines: List[Line]):
+    def collide(self, ctx: IGraphic, lines: list[Line]):
         pass
 
     @abstractmethod
@@ -53,7 +55,7 @@ class IRoad(ABC):
         pass
 
     @abstractmethod
-    def get_bound_lines(self) -> List[Line]:
+    def get_bound_lines(self) -> list[Line]:
         pass
 
 
@@ -66,7 +68,7 @@ class EmptyRoad(IRoad):
     def render(self, ctx):
         pass
 
-    def collide(self, ctx: IGraphic, bound_lines: List[Line]):
+    def collide(self, ctx: IGraphic, bound_lines: list[Line]):
         return []
 
     def render_damaged(self, ctx: IGraphic):
@@ -178,7 +180,7 @@ class HorizontalRoad(IRoad):
             end=Position(x + RoadWidth, y + RoadWidth - RoadMargin)
         ), color=RoadColor, thickness=7)
 
-    def collide(self, ctx: IGraphic, lines: List[Line]):
+    def collide(self, ctx: IGraphic, lines: list[Line]):
         line1, line2 = self.get_bound_lines()
         points = []
         for line in lines:
@@ -222,7 +224,7 @@ class HorizontalRoad(IRoad):
         return [line1, line2]
 
 
-def create2dArray(rows: int, cols: int) -> List[List[Optional[IRoad]]]:
+def create2dArray(rows: int, cols: int) -> list[list[IRoad]]:
     return [[EmptyRoad()] * cols for _ in range(rows)]
 
 
@@ -242,7 +244,7 @@ def createRoad(ch: str) -> IRoad:
     return dict[ch]()
 
 
-def read_map(map_content: str) -> List[List[Optional[IRoad]]]:
+def read_map(map_content: str) -> list[list[IRoad]]:
     lines = map_content.split('\n')
     width = max(len(line) for line in lines)
     height = len(lines)
@@ -267,7 +269,7 @@ def read_map_file(file: str):
 
 
 class RoadMap:
-    roads: List[List[Optional[IRoad]]]
+    roads: list[list[IRoad]]
 
     def __init__(self):
         self.pos = Position(x=0, y=0)
@@ -289,7 +291,7 @@ class RoadMap:
                 )
                 road.render(ctx)
 
-    def collide(self, ctx: IGraphic, bound_lines: List[Line]) -> Tuple[IRoad, List[Position]]:
+    def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> Tuple[IRoad, list[Position]]:
         roads = self.roads
         for ix in range(len(roads)):
             for iy in range(len(roads[ix])):
@@ -298,3 +300,105 @@ class RoadMap:
                 if len(collide_points) > 0:
                     return road, collide_points
         return EmptyRoad(), []
+
+
+class CurveType(Enum):
+    Empty = 0
+    Outer = 1
+    Inner = 2
+
+
+CurveRadius = {
+    CurveType.Outer: RoadWidth - RoadMargin,
+    CurveType.Inner: RoadMargin
+}
+
+
+class CurveRoadType(Enum):
+    LeftTop = 0
+    RightTop = 1
+    RightBottom = 2
+    LeftBottom = 3
+
+
+class CurveAngle(NamedTuple):
+    start_angle: float
+    end_angle: float
+
+
+CurveAngles = {
+    CurveRoadType.LeftTop: CurveAngle(start_angle=180, end_angle=270),
+    CurveRoadType.RightTop: CurveAngle(270, 360),
+    CurveRoadType.RightBottom: CurveAngle(0, 90),
+    CurveRoadType.LeftBottom: CurveAngle(90, 180),
+}
+
+
+class CurveRoad:
+    pos = Position(0, 0)
+    type: CurveRoadType
+    angles: CurveAngles
+
+    def __init__(self, type: CurveRoadType):
+        self.type = type
+        self.angles = CurveAngles[type]
+
+    def render(self, ctx: IGraphic, color: str):
+        self.render_curve(ctx, CurveType.Outer, color)
+        self.render_curve(ctx, CurveType.Inner, color)
+
+    def render_curve(self, ctx: IGraphic, curve_type: CurveType, color: str):
+        arc_xy = self.get_arc_xy()
+        if curve_type == CurveType.Outer:
+            start_angle, end_angle = self.angles
+            ctx.draw_arc(Arc(
+                centre=arc_xy,
+                radius=CurveRadius[CurveType.Outer],
+                start_angle=start_angle * math.pi / 180,
+                end_angle=end_angle * math.pi / 180
+            ), color=color, thickness=7)
+
+        if curve_type == CurveType.Inner:
+            start_angle, end_angle = self.angles
+            ctx.draw_arc(Arc(arc_xy, radius=CurveRadius[CurveType.Inner],
+                             start_angle=start_angle * math.pi / 180,
+                             end_angle=end_angle * math.pi / 180)
+                         , color=color, thickness=7)
+
+    def get_bound_lines(self, curve_type: CurveType) -> list[Line]:
+        arc_xy = self.get_arc_xy()
+        radius = CurveRadius[curve_type]
+        start_angle, end_angle = self.angles
+        lines = get_arc_lines(Arc(arc_xy, radius, start_angle, end_angle))
+        return lines
+
+    def get_all_bound_lines(self) -> list[Line]:
+        lines1 = self.get_bound_lines(CurveType.Outer)
+        lines2 = self.get_bound_lines(CurveType.Inner)
+        return lines1 + lines2
+
+    def collide(self, lines: list[Line]) -> (CurveType, list[Position]):
+        lines1 = self.get_bound_lines(CurveType.Outer)
+        for line in lines1:
+            # draw_line(ctx, line, { stroke_style: 'yellow' })
+            for bound_line in lines:
+                points1 = find_two_lines_intersection(bound_line, line)
+                if points1 is not None:
+                    return CurveType.Outer, [points1]
+
+        lines2 = self.get_bound_lines(CurveType.Inner)
+        for line in lines2:
+            for bound_line in lines:
+                points1 = find_two_lines_intersection(bound_line, line)
+                if points1 is not None:
+                    return CurveType.Inner, [points1]
+        return CurveType.Empty, []
+
+    def get_arc_xy(self) -> Position:
+        if self.type == CurveRoadType.LeftTop:
+            return Position(self.pos.x + RoadWidth, self.pos.y + RoadWidth)
+        if self.type == CurveRoadType.RightTop:
+            return Position(self.pos.x, self.pos.y + RoadWidth)
+        if self.type == CurveRoadType.RightBottom:
+            return Position(self.pos.x, self.pos.y)
+        return Position(self.pos.x + RoadWidth, self.pos.y)
