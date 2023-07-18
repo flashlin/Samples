@@ -228,11 +228,11 @@ def create2dArray(rows: int, cols: int) -> list[list[IRoad]]:
     return [[EmptyRoad()] * cols for _ in range(rows)]
 
 
-def createRoad(ch: str) -> IRoad:
+def create_road(ch: str) -> IRoad:
     dict: Dict[str, Callable[[], IRoad]] = {
         '-': lambda: HorizontalRoad(),
         '|': lambda: VerticalRoad(),
-        # '/': lambda: LeftTopCurve(),
+        '/': lambda: LeftTopCurve(),
         # '\\': lambda: RightTopCurve(),
         # 'L': lambda: LeftBottomCurve(),
         # '+': lambda: RightBottomCurve(),
@@ -254,7 +254,7 @@ def read_map(map_content: str) -> list[list[IRoad]]:
         line = lines[y]
         for x in range(width):
             ch = line[x]
-            road = createRoad(ch)
+            road = create_road(ch)
             road.ix = x
             road.iy = y
             road_map[x][y] = road
@@ -327,7 +327,7 @@ class CurveAngle(NamedTuple):
 
 
 CurveAngles = {
-    CurveRoadType.LeftTop: CurveAngle(start_angle=180, end_angle=270),
+    CurveRoadType.LeftTop: CurveAngle(start_angle=90, end_angle=180),
     CurveRoadType.RightTop: CurveAngle(270, 360),
     CurveRoadType.RightBottom: CurveAngle(0, 90),
     CurveRoadType.LeftBottom: CurveAngle(90, 180),
@@ -355,15 +355,18 @@ class CurveRoad:
                 centre=arc_xy,
                 radius=CurveRadius[CurveType.Outer],
                 start_angle=start_angle * math.pi / 180,
-                end_angle=end_angle * math.pi / 180
-            ), color=color, thickness=7)
+                end_angle=end_angle * math.pi / 180),
+                color=color,
+                thickness=7)
 
         if curve_type == CurveType.Inner:
             start_angle, end_angle = self.angles
-            ctx.draw_arc(Arc(arc_xy, radius=CurveRadius[CurveType.Inner],
+            ctx.draw_arc(Arc(arc_xy,
+                             radius=CurveRadius[CurveType.Inner],
                              start_angle=start_angle * math.pi / 180,
-                             end_angle=end_angle * math.pi / 180)
-                         , color=color, thickness=7)
+                             end_angle=end_angle * math.pi / 180),
+                         color=color,
+                         thickness=7)
 
     def get_bound_lines(self, curve_type: CurveType) -> list[Line]:
         arc_xy = self.get_arc_xy()
@@ -402,3 +405,38 @@ class CurveRoad:
         if self.type == CurveRoadType.RightBottom:
             return Position(self.pos.x, self.pos.y)
         return Position(self.pos.x + RoadWidth, self.pos.y)
+
+
+# 左上角圓弧
+class LeftTopCurve(IRoad):
+    def __init__(self):
+        self.ix = 0
+        self.iy = 0
+        self.pos = Position(0, 0)
+        self.line_damaged = CurveType.Empty
+        self.curve = CurveRoad(CurveRoadType.LeftTop)
+
+    def render(self, ctx: IGraphic):
+        curve = self.curve
+        curve.pos = self.pos
+        curve.render(ctx, RoadColor)
+
+    def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> list[Position]:
+        curve = self.curve
+        curve.pos = self.get_bound_pos()
+        curve_result = curve.collide(bound_lines)
+        self.line_damaged = curve_result['curveType']
+        return curve_result['points']
+
+    def render_damaged(self, ctx: IGraphic):
+        curve = self.curve
+        curve.pos = self.pos
+        curve.render_curve(ctx, self.line_damaged, DamagedColor)
+
+    def get_bound_lines(self) -> list[Line]:
+        curve = self.curve
+        curve.pos = self.get_bound_pos()
+        return curve.get_all_bound_lines()
+
+    def get_bound_pos(self) -> Position:
+        return Position(self.ix * RoadWidth, self.iy * RoadWidth)

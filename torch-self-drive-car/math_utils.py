@@ -15,8 +15,8 @@ class Line(NamedTuple):
 class Arc(NamedTuple):
     centre: Position
     radius: int
-    start_angle: int
-    end_angle: int
+    start_angle: float
+    end_angle: float
 
 
 def find_two_lines_intersection(line1: Line, line2: Line):
@@ -47,8 +47,8 @@ def get_arc_lines(arc: Arc) -> list[Line]:
     points = []
     for angle in range(int(arc.start_angle), int(arc.end_angle) + 1, 3):
         randi = angle * (math.pi / 180)
-        x = int(arc.centre.x + arc.radius * math.cos(randi))
-        y = int(arc.centre.y + arc.radius * math.sin(randi))
+        x = round(arc.centre.x + arc.radius * math.cos(randi))
+        y = round(arc.centre.y + arc.radius * math.sin(randi))
         points.append(Position(x, y))
 
     lines = []
