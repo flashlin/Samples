@@ -19,7 +19,6 @@ class CarState:
     x = 0
     y = 0
     angle = 0
-    move_distance = 0
 
 
 class Car:
@@ -37,7 +36,6 @@ class Car:
         self.max_speed = 4
         self.friction = 0.02
         self.damaged = False
-        self.move_distance = 0
 
     def render(self, ctx: IGraphic):
         ctx.draw_image("./assets/car1.png", self.pos, self.angle)
@@ -90,9 +88,6 @@ class Car:
         self.x = new_pos.x
         self.y = new_pos.y
 
-        if self.speed > 0:
-            self.move_distance += self.speed
-
         self.collide(ctx, road_map)
 
     def collide(self, ctx: IGraphic, road_map: RoadMap):
@@ -103,11 +98,10 @@ class Car:
                 road = roads[ix][iy]
                 collide_points = road.collide(ctx, bound_lines)
                 if len(collide_points) > 0:
-                    print(f"BOOM")
+                    # print(f"BOOM")
                     self.x = self.prev_state.x
                     self.y = self.prev_state.y
                     self.angle = self.prev_state.angle
-                    self.move_distance = self.prev_state.move_distance
                     self.speed = 0
                     self.damaged = True
                     road.render_damaged(ctx)
@@ -115,7 +109,6 @@ class Car:
         self.prev_state.x = self.x
         self.prev_state.y = self.y
         self.prev_state.angle = self.angle
-        self.prev_state.move_distance = self.move_distance
         return [EmptyRoad(), []]
 
     def get_bound_lines(self) -> list[Line]:
