@@ -1,4 +1,5 @@
 import math
+import sys
 from abc import ABC, abstractmethod
 import pygame
 from math_utils import Position, Line, Arc
@@ -116,13 +117,24 @@ class PygameController(IController):
 
     def render(self):
         for event in pygame.event.get():
-            is_pressed = event.type == pygame.KEYDOWN
-            if event.key == pygame.K_UP:
-                self.forward = is_pressed
-            elif event.key == pygame.K_DOWN:
-                self.reverse = is_pressed
-            elif event.key == pygame.K_LEFT:
-                self.left = is_pressed
-            elif event.key == pygame.K_RIGHT:
-                self.right = is_pressed
+            is_key = False
+            is_pressed = False
+            if event.type == pygame.KEYDOWN:
+                is_key = True
+                is_pressed = True
+            elif event.type == pygame.KEYUP:
+                is_key = True
+                is_pressed = False
+            if is_key:
+                if event.key == pygame.K_UP:
+                    self.forward = is_pressed
+                elif event.key == pygame.K_DOWN:
+                    self.reverse = is_pressed
+                elif event.key == pygame.K_LEFT:
+                    self.left = is_pressed
+                elif event.key == pygame.K_RIGHT:
+                    self.right = is_pressed
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
