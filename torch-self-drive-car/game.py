@@ -416,6 +416,43 @@ class RightTopCurve(IRoad):
         return Position(x, y)
 
 
+class RightBottomCurve(IRoad):
+    def __init__(self):
+        self.ix = 0
+        self.iy = 0
+        self.pos = Position(0, 0)
+        self.line_damaged = CurveType.Empty
+        self.curve = CurveRoad(CurveRoadType.RightBottom)
+
+    def render(self, ctx: IGraphic):
+        curve = self.curve
+        curve.pos = self.pos
+        curve.render(ctx, RoadColor)
+
+    def render_damaged(self, ctx: IGraphic):
+        curve = self.curve
+        curve.pos = self.pos
+        curve.render_curve(ctx, self.line_damaged, DamagedColor)
+
+    def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> list[Position]:
+        curve = self.curve
+        curve.pos = self.get_bound_pos()
+        curve_type, points = curve.collide(bound_lines)
+        self.line_damaged = curve_type
+        return points
+
+    def get_bound_lines(self) -> list[Line]:
+        curve = self.curve
+        curve.pos = self.get_bound_pos()
+        return curve.get_all_bound_lines()
+
+    def get_bound_pos(self) -> Position:
+        x = self.ix * RoadWidth
+        y = self.iy * RoadWidth
+        return Position(x, y)
+
+
+
 class LeftBottomCurve(IRoad):
     def __init__(self):
         self.ix = 0
@@ -465,7 +502,7 @@ def create_road(ch: str) -> IRoad:
         '/': lambda: LeftTopCurve(),
         '\\': lambda: RightTopCurve(),
         'L': lambda: LeftBottomCurve(),
-        # '+': lambda: RightBottomCurve(),
+        '+': lambda: RightBottomCurve(),
     }
 
     if ch not in dict:
