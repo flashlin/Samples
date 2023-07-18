@@ -58,3 +58,41 @@ def get_arc_lines(arc: Arc) -> list[Line]:
         lines.append(Line(start=start, end=end))
 
     return lines
+
+
+def update_coordinates(pos: Position, angle: int, distance: int) -> Position:
+    distance = -distance
+    angle_in_radians = angle * math.pi / 180
+    x = round(pos.x - distance * math.cos(angle_in_radians))
+    y = round(pos.y - distance * math.sin(angle_in_radians))
+    return Position(x, y)
+
+
+def rotate_points(center: Position, angle: int, points: list[Position]) -> list[Position]:
+    theta = (angle - 270) * (math.pi / 180)
+    rotated_points = []
+    for point in points:
+        x = point.x - center.x
+        y = point.y - center.y
+        rotated_x = round(x * math.cos(theta) - y * math.sin(theta) + center.x)
+        rotated_y = round(x * math.sin(theta) + y * math.cos(theta) + center.y)
+        rotated_points.append(Position(rotated_x, rotated_y))
+    return rotated_points
+
+
+def rotate_rectangle(left_top: Position, right_bottom: Position, angle: int) -> list[Position]:
+    x1, y1 = left_top.x, left_top.y
+    x2, y2 = right_bottom.x, right_bottom.y
+
+    # Calculate the center of the rectangle
+    center = Position(round((x1 + x2) / 2), round((y1 + y2) / 2))
+
+    # Define the four vertices of the rectangle
+    points = [
+        Position(x1, y1),
+        Position(x2, y1),
+        Position(x2, y2),
+        Position(x1, y2)
+    ]
+
+    return rotate_points(center, angle, points)

@@ -1,3 +1,4 @@
+import math
 from abc import ABC, abstractmethod
 import pygame
 from math_utils import Position, Line, Arc
@@ -79,7 +80,7 @@ class PygameGraphic(IGraphic):
 
     def draw_image(self, image_asset_name: str, pos: Position, angle: int):
         image = self.fetch_data(f"image_{image_asset_name}", lambda: pygame.image.load(image_asset_name))
-        rotated_image = pygame.transform.rotate(image, angle)
+        rotated_image = pygame.transform.rotate(image, angle * math.pi / 180)
         rotated_rect = rotated_image.get_rect()
         offset_x = pos.x - rotated_rect.width / 2
         offset_y = pos.y - rotated_rect.height / 2
@@ -91,3 +92,37 @@ class PygameGraphic(IGraphic):
         result = fetch()
         self.cache[key] = result
         return result
+
+
+class IController(ABC):
+    @abstractmethod
+    def create(self):
+        pass
+
+    @abstractmethod
+    def render(self):
+        pass
+
+
+class PygameController(IController):
+    def __init__(self):
+        self.forward = False
+        self.left = False
+        self.right = False
+        self.reverse = False
+
+    def create(self):
+        pass
+
+    def render(self):
+        for event in pygame.event.get():
+            is_pressed = event.type == pygame.KEYDOWN
+            if event.key == pygame.K_UP:
+                self.forward = is_pressed
+            elif event.key == pygame.K_DOWN:
+                self.reverse = is_pressed
+            elif event.key == pygame.K_LEFT:
+                self.left = is_pressed
+            elif event.key == pygame.K_RIGHT:
+                self.right = is_pressed
+
