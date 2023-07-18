@@ -60,20 +60,20 @@ def get_arc_lines(arc: Arc) -> list[Line]:
 
 
 def update_coordinates(pos: Position, angle: int, distance: int) -> Position:
-    theta = angle * math.pi / 180
-    x = round(pos.x + distance * math.cos(theta))
-    y = round(pos.y + distance * math.sin(theta))
+    theta = -angle * math.pi / 180
+    x = round(pos.x + distance * math.sin(theta))
+    y = round(pos.y - distance * math.cos(theta))
     return Position(x, y)
 
 
 def rotate_points(center: Position, angle: int, points: list[Position]) -> list[Position]:
-    theta = angle * (math.pi / 180)
+    theta = -angle * (math.pi / 180)
     rotated_points = []
     for point in points:
         x = point.x - center.x
         y = point.y - center.y
-        rotated_x = round(x * math.cos(theta) - y * math.sin(theta) + center.x)
-        rotated_y = round(x * math.sin(theta) + y * math.cos(theta) + center.y)
+        rotated_x = round(x * math.cos(theta) + y * math.sin(theta) + center.x)
+        rotated_y = round(x * math.sin(theta) - y * math.cos(theta) + center.y)
         rotated_points.append(Position(rotated_x, rotated_y))
     return rotated_points
 

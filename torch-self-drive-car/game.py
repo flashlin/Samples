@@ -11,9 +11,9 @@ RoadColor = 'blue'
 RoadMargin = 22
 CanvasWidth = 800
 CanvasHeight = 700
-CenterX = CanvasWidth // 2 - CarWidth // 2
-CenterY = CanvasHeight // 2 - CarHeight // 2
-CarPos = Position(CenterX, CenterY)
+CenterX = CanvasWidth // 2
+CenterY = CanvasHeight // 2
+CarPos = Position(CenterX - CarWidth // 2, CenterY - CarHeight // 2)
 StartX = 100
 StartY = 400
 DamagedColor = "red"
@@ -47,6 +47,3 @@ def pos_info(pos: Position) -> str:
 #     angles = get_left_top_curve_angles()
 #     lines = get_arc_lines(Arc(arc_xy, radius, angles.start_angle, angles.end_angle))
 #     return lines
-
-
-

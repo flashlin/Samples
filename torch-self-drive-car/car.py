@@ -1,7 +1,7 @@
 import math
 from enum import Enum
 
-from game import FrameWidth, FrameHeight
+from game import FrameWidth, FrameHeight, CenterX, CenterY
 from roads import EmptyRoad, RoadMap
 from math_utils import Position, update_coordinates, Line, rotate_rectangle
 from pygameGraphic import IGraphic, PygameController
@@ -41,6 +41,11 @@ class Car:
 
     def render(self, ctx: IGraphic):
         ctx.draw_image("./assets/car1.png", self.pos, self.angle)
+        bound_line = self.get_frame_lines()
+        for line in bound_line:
+            start = Position(line.start.x, line.start.y)
+            end = Position(line.end.x, line.end.y)
+            ctx.draw_line(Line(start, end), color="yellow", thickness=5)
         self.controller.render()
 
     def control(self, action: Action):
@@ -107,6 +112,10 @@ class Car:
                     self.damaged = True
                     road.render_damaged(ctx)
                     return [road, collide_points]
+        self.prev_state.x = self.x
+        self.prev_state.y = self.y
+        self.prev_state.angle = self.angle
+        self.prev_state.move_distance = self.move_distance
         return [EmptyRoad(), []]
 
     def get_bound_lines(self) -> list[Line]:
@@ -122,3 +131,14 @@ class Car:
         left_top = Position(self.x - FrameWidth / 2, self.y - FrameHeight / 2)
         right_bottom = Position(left_top.x + FrameWidth, left_top.y + FrameHeight)
         return rotate_rectangle(left_top, right_bottom, self.angle)
+
+    def get_frame_lines(self):
+        left_top = Position(self.pos.x - FrameWidth / 2, self.pos.y - FrameHeight / 2)
+        right_bottom = Position(left_top.x + FrameWidth, left_top.y + FrameHeight)
+        [left_top, right_top, right_bottom, left_bottom] = rotate_rectangle(left_top, right_bottom, self.angle)
+        return [
+            Line(left_top, right_top),
+            Line(right_top, right_bottom),
+            Line(right_bottom, left_bottom),
+            Line(left_bottom, left_top)
+        ]

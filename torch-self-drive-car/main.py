@@ -5,7 +5,7 @@ import numpy as np
 import pygame
 
 from car import Car, Action
-from game import CanvasWidth, CanvasHeight, StartX, StartY, CarPos
+from game import CanvasWidth, CanvasHeight, StartX, StartY, CarPos, CenterX, CenterY, FrameWidth, FrameHeight
 from roads import RoadMap
 from math_utils import Position
 from pygameGraphic import PygameGraphic
@@ -16,15 +16,16 @@ class SelfDriveCarGame:
     def __init__(self, silent_mode=True):
         if not silent_mode:
             self.screen = PygameGraphic()
-            self.screen.create(screen_size=(CanvasWidth,CanvasHeight))
+            self.screen.create(screen_size=(CanvasWidth, CanvasHeight))
         else:
             self.screen = None
-        self.road_map = RoadMap()
         self.reset()
+        self.road_map = RoadMap()
         self.car = Car()
+        self.car.pos = Position(CenterX, CenterY)
         self.car.x = StartX
         self.car.y = StartY
-        self.car.pos = CarPos
+        self.car.angle = 0
 
     def reset(self):
         pass
@@ -38,7 +39,7 @@ class SelfDriveCarGame:
         car = self.car
 
         screen.render_start()
-        road_map.pos = Position(car.x, car.y)
+        road_map.pos = Position(CenterX - car.x, CenterY - car.y)
         road_map.render(screen)
         car.move(screen, road_map)
         car.render(screen)
@@ -50,4 +51,3 @@ if __name__ == '__main__':
     while True:
         game.render()
         pygame.time.wait(1)
-        
