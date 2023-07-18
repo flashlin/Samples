@@ -77,14 +77,14 @@ class PygameGraphic(IGraphic):
         cy = arc.centre.y
         radius = arc.radius
         pygame.draw.arc(self.screen, color, (cx - radius, cy - radius, radius * 2, radius * 2),
-                        arc.start_angle, arc.end_angle, thickness)
+                        arc.start_angle * math.pi / 180, arc.end_angle * math.pi / 180, thickness)
 
     def draw_image(self, image_asset_name: str, pos: Position, angle: int):
         image = self.fetch_data(f"image_{image_asset_name}", lambda: pygame.image.load(image_asset_name))
-        rotated_image = pygame.transform.rotate(image, angle * math.pi / 180)
+        rotated_image = pygame.transform.rotate(image, angle - 90)
         rotated_rect = rotated_image.get_rect()
-        offset_x = pos.x - rotated_rect.width / 2
-        offset_y = pos.y - rotated_rect.height / 2
+        offset_x = pos.x - round(rotated_rect.width / 2)
+        offset_y = pos.y - round(rotated_rect.height / 2)
         self.screen.blit(rotated_image, (offset_x, offset_y))
 
     def fetch_data(self, key: str, fetch: callable):

@@ -1,8 +1,17 @@
 import math
+from enum import Enum
 
 from game import RoadMap, EmptyRoad, FrameWidth, FrameHeight
 from math_utils import Position, update_coordinates, Line, rotate_rectangle
 from pygameGraphic import IGraphic, PygameController
+
+
+class Action(Enum):
+    NONE = 0
+    UP = 1
+    DOWN = 2
+    LEFT = 3
+    RIGHT = 4
 
 
 class CarState:
@@ -21,7 +30,7 @@ class Car:
         self.controller.create()
         self.x = 0
         self.y = 0
-        self.angle = 270
+        self.angle = 90
         self.speed = 0
         self.acceleration = 0.3
         self.max_speed = 4
@@ -30,8 +39,23 @@ class Car:
         self.move_distance = 0
 
     def render(self, ctx: IGraphic):
-        ctx.draw_image("./assets/car1.png", Position(self.x, self.y), self.angle)
+        ctx.draw_image("./assets/car1.png", self.pos, self.angle)
         self.controller.render()
+
+    def control(self, action: Action):
+        if action == Action.UP:
+            self.controller.forward = True
+        if action == Action.DOWN:
+            self.controller.reverse = True
+        if action == Action.LEFT:
+            self.controller.left = True
+        if action == Action.RIGHT:
+            self.controller.right = True
+        if action == Action.NONE:
+            self.controller.forward = False
+            self.controller.reverse = False
+            self.controller.left = False
+            self.controller.right = False
 
     def move(self, ctx: IGraphic, road_map: RoadMap):
         if self.controller.forward:
@@ -52,13 +76,14 @@ class Car:
             self.speed = 0
 
         if self.controller.left:
-            self.angle -= 1
-        elif self.controller.right:
             self.angle += 1
+        elif self.controller.right:
+            self.angle -= 1
 
-        new_pos = update_coordinates(self.pos, self.angle, self.speed)
+        new_pos = update_coordinates(Position(self.x, self.y), self.angle, self.speed)
         self.x = new_pos.x
         self.y = new_pos.y
+        print(f"{self.x} {self.y}")
 
         if self.speed > 0:
             self.move_distance += self.speed

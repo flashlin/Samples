@@ -15,8 +15,8 @@ class Line(NamedTuple):
 class Arc(NamedTuple):
     centre: Position
     radius: int
-    start_angle: float
-    end_angle: float
+    start_angle: int
+    end_angle: int
 
 
 def find_two_lines_intersection(line1: Line, line2: Line):
@@ -42,10 +42,9 @@ def find_two_lines_intersection(line1: Line, line2: Line):
 
 def get_arc_lines(arc: Arc) -> list[Line]:
     if arc.end_angle == 0 and arc.end_angle < arc.start_angle:
-        arc.end_angle = 360
-
+        arc = arc._replace(end_angle=360)
     points = []
-    for angle in range(int(arc.start_angle), int(arc.end_angle) + 1, 3):
+    for angle in range(arc.start_angle, arc.end_angle + 1, 3):
         randi = angle * (math.pi / 180)
         x = round(arc.centre.x + arc.radius * math.cos(randi))
         y = round(arc.centre.y + arc.radius * math.sin(randi))
@@ -62,14 +61,14 @@ def get_arc_lines(arc: Arc) -> list[Line]:
 
 def update_coordinates(pos: Position, angle: int, distance: int) -> Position:
     distance = -distance
-    angle_in_radians = angle * math.pi / 180
-    x = round(pos.x - distance * math.cos(angle_in_radians))
-    y = round(pos.y - distance * math.sin(angle_in_radians))
+    theta = angle * math.pi / 180
+    x = round(pos.x + distance * math.cos(theta))
+    y = round(pos.y - distance * math.sin(theta))
     return Position(x, y)
 
 
 def rotate_points(center: Position, angle: int, points: list[Position]) -> list[Position]:
-    theta = (angle - 270) * (math.pi / 180)
+    theta = angle * (math.pi / 180)
     rotated_points = []
     for point in points:
         x = point.x - center.x
