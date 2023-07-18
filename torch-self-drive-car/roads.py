@@ -64,57 +64,50 @@ class VerticalRoad(IRoad):
         x = self.pos.x
         y = self.pos.y
         color = RoadColor
-        ctx.draw_line(Line(
-            start=Position(x=x + RoadMargin, y=y),
-            end=Position(x=x + RoadMargin, y=y + RoadWidth),
-        ), color=color, thickness=7)
-        ctx.draw_line(Line(
-            start=Position(x=x + RoadWidth - RoadMargin, y=y),
-            end=Position(x=x + RoadWidth - RoadMargin, y=y + RoadWidth)
-        ), color=color, thickness=7)
-        line1, line2 = self.get_bound_lines()
+        ctx.draw_line(
+            Line(start=Position(x + RoadMargin, y),
+                 end=Position(x + RoadMargin, y + RoadWidth)),
+            color=color,
+            thickness=7)
+        ctx.draw_line(
+            Line(start=Position(x=x + RoadWidth - RoadMargin, y=y),
+                 end=Position(x=x + RoadWidth - RoadMargin, y=y + RoadWidth)),
+            color=color,
+            thickness=7)
+        # line1, line2 = self.get_bound_lines()
         # ctx.draw_text(Position(x=x + RoadMargin, y=y), f"{pos_info(line1.start)}", color=(0xf, 0xf, 0xf))
 
     def render_damaged(self, ctx: IGraphic):
         x = self.pos.x
         y = self.pos.y
-        color = "red"
+        color = "Red"
         if self.lineDamaged == "line1":
-            ctx.draw_line(Position(x + RoadMargin, y), Position(x + RoadMargin, y + RoadWidth),
-                          color=color, thickness=7)
+            ctx.draw_line(
+                Line(Position(x + RoadMargin, y), Position(x + RoadMargin, y + RoadWidth)),
+                color=color, thickness=7)
         elif self.lineDamaged == "line2":
-            ctx.draw_line(Position(x + RoadWidth - RoadMargin, y), Position(x + RoadWidth - RoadMargin, y + RoadWidth),
-                          color=color, thickness=7)
+            ctx.draw_line(
+                Line(Position(x + RoadWidth - RoadMargin, y), Position(x + RoadWidth - RoadMargin, y + RoadWidth)),
+                color=color, thickness=7)
 
     def get_bound_lines(self) -> list[Line]:
         x = self.ix * RoadWidth
         y = self.iy * RoadWidth
         line1 = Line(
-            start=Position(
-                x=x + RoadMargin,
-                y=y
-            ),
-            end=Position(
-                x=x + RoadMargin,
-                y=y + RoadWidth
-            )
+            start=Position(x + RoadMargin, y),
+            end=Position(x + RoadMargin, y + RoadWidth)
         )
 
         line2 = Line(
-            start=Position(
-                x=x + RoadWidth - RoadMargin,
-                y=y
-            ),
-            end=Position(
-                x=x + RoadWidth - RoadMargin,
-                y=y + RoadWidth,
-            )
+            start=Position(x + RoadWidth - RoadMargin, y),
+            end=Position(x + RoadWidth - RoadMargin, y + RoadWidth)
         )
         return [line1, line2]
 
     def collide(self, ctx, lines):
         line1, line2 = self.get_bound_lines()
         points = []
+        self.lineDamaged = ""
         for line in lines:
             point1 = find_two_lines_intersection(line1, line)
             if point1 is not None:
@@ -124,7 +117,6 @@ class VerticalRoad(IRoad):
             if point2 is not None:
                 self.lineDamaged = "line2"
                 points.append(point2)
-        self.lineDamaged = ""
         return points
 
 
@@ -152,6 +144,7 @@ class HorizontalRoad(IRoad):
     def collide(self, ctx: IGraphic, lines: list[Line]):
         line1, line2 = self.get_bound_lines()
         points = []
+        self.lineDamaged = ""
         for line in lines:
             point1 = find_two_lines_intersection(line1, line)
             if point1 is not None:
@@ -161,7 +154,6 @@ class HorizontalRoad(IRoad):
             if point2 is not None:
                 self.lineDamaged = "line2"
                 points.append(point2)
-        self.lineDamaged = ""
         return points
 
     def render_damaged(self, ctx: IGraphic):
@@ -180,7 +172,8 @@ class HorizontalRoad(IRoad):
             ), color=color, thickness=7)
 
     def get_bound_lines(self):
-        x, y = self.pos
+        x = self.ix * RoadWidth
+        y = self.iy * RoadWidth
         line1 = Line(
             start=Position(x, y + RoadMargin),
             end=Position(x + RoadWidth, y + RoadMargin)
@@ -218,10 +211,10 @@ class CurveAngle(NamedTuple):
 
 
 CurveAngles = {
-    CurveRoadType.LeftTop: CurveAngle(start_angle=90, end_angle=180),
-    CurveRoadType.RightTop: CurveAngle(0, 90),
-    CurveRoadType.RightBottom: CurveAngle(270, 0),
-    CurveRoadType.LeftBottom: CurveAngle(180, 270),
+    CurveRoadType.LeftTop: CurveAngle(180, 270),
+    CurveRoadType.RightTop: CurveAngle(270, 360),
+    CurveRoadType.RightBottom: CurveAngle(0, 90),
+    CurveRoadType.LeftBottom: CurveAngle(90, 180),
 }
 
 
@@ -495,8 +488,8 @@ class RoadMap:
         self.roads = read_map_file("./assets/map.txt")
 
     def render(self, ctx: IGraphic):
-        x = self.pos.x + CanvasWidth // 2
-        y = self.pos.y + CanvasHeight // 2
+        x = self.pos.x
+        y = self.pos.y
         roads = self.roads
         for ix in range(len(roads)):
             for iy in range(len(roads[ix])):
