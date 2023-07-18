@@ -224,84 +224,6 @@ class HorizontalRoad(IRoad):
         return [line1, line2]
 
 
-def create2dArray(rows: int, cols: int) -> list[list[IRoad]]:
-    return [[EmptyRoad()] * cols for _ in range(rows)]
-
-
-def create_road(ch: str) -> IRoad:
-    dict: Dict[str, Callable[[], IRoad]] = {
-        '-': lambda: HorizontalRoad(),
-        '|': lambda: VerticalRoad(),
-        '/': lambda: LeftTopCurve(),
-        # '\\': lambda: RightTopCurve(),
-        # 'L': lambda: LeftBottomCurve(),
-        # '+': lambda: RightBottomCurve(),
-    }
-
-    if ch not in dict:
-        return EmptyRoad()
-
-    return dict[ch]()
-
-
-def read_map(map_content: str) -> list[list[IRoad]]:
-    lines = map_content.split('\n')
-    width = max(len(line) for line in lines)
-    height = len(lines)
-    road_map = create2dArray(width, height)
-
-    for y in range(height):
-        line = lines[y]
-        for x in range(width):
-            ch = line[x]
-            road = create_road(ch)
-            road.ix = x
-            road.iy = y
-            road_map[x][y] = road
-
-    return road_map
-
-
-def read_map_file(file: str):
-    with open(file, 'r') as file:
-        content = file.read()
-    return read_map(content)
-
-
-class RoadMap:
-    roads: list[list[IRoad]]
-
-    def __init__(self):
-        self.pos = Position(x=0, y=0)
-        self.roads = create2dArray(10, 10)
-        self.roads = read_map_file("./assets/map.txt")
-
-    def render(self, ctx: IGraphic):
-        x = self.pos.x
-        y = self.pos.y
-        roads = self.roads
-        for ix in range(len(roads)):
-            for iy in range(len(roads[ix])):
-                road = roads[ix][iy]
-                if road is None:
-                    continue
-                road.pos = Position(
-                    x=x + ix * RoadWidth,
-                    y=y + iy * RoadWidth,
-                )
-                road.render(ctx)
-
-    def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> Tuple[IRoad, list[Position]]:
-        roads = self.roads
-        for ix in range(len(roads)):
-            for iy in range(len(roads[ix])):
-                road = roads[ix][iy]
-                collide_points = road.collide(ctx, bound_lines)
-                if len(collide_points) > 0:
-                    return road, collide_points
-        return EmptyRoad(), []
-
-
 class CurveType(Enum):
     Empty = 0
     Outer = 1
@@ -328,10 +250,26 @@ class CurveAngle(NamedTuple):
 
 CurveAngles = {
     CurveRoadType.LeftTop: CurveAngle(start_angle=90, end_angle=180),
-    CurveRoadType.RightTop: CurveAngle(270, 360),
+    CurveRoadType.RightTop: CurveAngle(0, 90),
     CurveRoadType.RightBottom: CurveAngle(0, 90),
     CurveRoadType.LeftBottom: CurveAngle(90, 180),
 }
+
+# def get_left_top_curve_centre(pos: Position):
+#     return Position(pos.x + RoadWidth, pos.y + RoadWidth)
+#
+# def get_outer_curve_radius():
+#     return RoadWidth - RoadMargin
+#
+# def get_left_top_curve_angles():
+#     return CurveAngles(start_angle=90, end_angle=180)
+#
+# def get_left_top_curve_lines(pos: Position) -> list[Line]:
+#     arc_xy = get_left_top_curve_centre(pos)
+#     radius = get_outer_curve_radius()
+#     angles = get_left_top_curve_angles()
+#     lines = get_arc_lines(Arc(arc_xy, radius, angles.start_angle, angles.end_angle))
+#     return lines
 
 
 class CurveRoad:
@@ -440,3 +378,121 @@ class LeftTopCurve(IRoad):
 
     def get_bound_pos(self) -> Position:
         return Position(self.ix * RoadWidth, self.iy * RoadWidth)
+
+
+class RightTopCurve(IRoad):
+    def __init__(self):
+        self.ix = 0
+        self.iy = 0
+        self.pos = Position(0, 0)
+        self.line_damaged = CurveType.Empty
+        self.curve = CurveRoad(CurveRoadType.RightTop)
+
+    def render(self, ctx: IGraphic):
+        curve = self.curve
+        curve.pos = self.pos
+        curve.render(ctx, RoadColor)
+
+    def render_damaged(self, ctx: IGraphic):
+        curve = self.curve
+        curve.pos = self.pos
+        curve.render_curve(ctx, self.line_damaged, DamagedColor)
+
+    def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> list[Position]:
+        curve = self.curve
+        curve.pos = self.get_bound_pos()
+        curve_type, points = curve.collide(bound_lines)
+        self.line_damaged = curve_type
+        return points
+
+    def get_bound_lines(self) -> list[Line]:
+        curve = self.curve
+        curve.pos = self.get_bound_pos()
+        return curve.get_all_bound_lines()
+
+    def get_bound_pos(self) -> Position:
+        x = self.ix * RoadWidth
+        y = self.iy * RoadWidth
+        return Position(x, y)
+
+
+
+def create2dArray(rows: int, cols: int) -> list[list[IRoad]]:
+    return [[EmptyRoad()] * cols for _ in range(rows)]
+
+
+def create_road(ch: str) -> IRoad:
+    dict: Dict[str, Callable[[], IRoad]] = {
+        '-': lambda: HorizontalRoad(),
+        '|': lambda: VerticalRoad(),
+        '/': lambda: LeftTopCurve(),
+        '\\': lambda: RightTopCurve(),
+        # 'L': lambda: LeftBottomCurve(),
+        # '+': lambda: RightBottomCurve(),
+    }
+
+    if ch not in dict:
+        return EmptyRoad()
+
+    return dict[ch]()
+
+
+def read_map(map_content: str) -> list[list[IRoad]]:
+    lines = map_content.split('\n')
+    width = max(len(line) for line in lines)
+    height = len(lines)
+    road_map = create2dArray(width, height)
+
+    for y in range(height):
+        line = lines[y]
+        for x in range(width):
+            ch = line[x]
+            road = create_road(ch)
+            road.ix = x
+            road.iy = y
+            road_map[x][y] = road
+
+    return road_map
+
+
+def read_map_file(file: str):
+    with open(file, 'r') as file:
+        content = file.read()
+    return read_map(content)
+
+
+class RoadMap:
+    roads: list[list[IRoad]]
+
+    def __init__(self):
+        self.pos = Position(x=0, y=0)
+        self.roads = create2dArray(10, 10)
+        self.roads = read_map_file("./assets/map.txt")
+
+    def render(self, ctx: IGraphic):
+        x = self.pos.x
+        y = self.pos.y
+        roads = self.roads
+        for ix in range(len(roads)):
+            for iy in range(len(roads[ix])):
+                road = roads[ix][iy]
+                if road is None:
+                    continue
+                road.pos = Position(
+                    x=x + ix * RoadWidth,
+                    y=y + iy * RoadWidth,
+                )
+                road.render(ctx)
+
+    def collide(self, ctx: IGraphic, bound_lines: list[Line]) -> Tuple[IRoad, list[Position]]:
+        roads = self.roads
+        for ix in range(len(roads)):
+            for iy in range(len(roads[ix])):
+                road = roads[ix][iy]
+                collide_points = road.collide(ctx, bound_lines)
+                if len(collide_points) > 0:
+                    return road, collide_points
+        return EmptyRoad(), []
+
+
+
