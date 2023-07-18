@@ -2,6 +2,7 @@ import math
 from enum import Enum
 
 from game import FrameWidth, FrameHeight, CenterX, CenterY
+from radar import Radar
 from roads import EmptyRoad, RoadMap
 from math_utils import Position, update_coordinates, Line, rotate_rectangle
 from pygameGraphic import IGraphic, PygameController
@@ -27,6 +28,7 @@ class Car:
     prev_state = CarState()
 
     def __init__(self):
+        self.radar = Radar()
         self.controller.create()
         self.x = 0
         self.y = 0
@@ -38,7 +40,12 @@ class Car:
         self.damaged = False
 
     def render(self, ctx: IGraphic):
+        radar = self.radar
         ctx.draw_image("./assets/car1.png", self.pos, self.angle)
+        radar.pos = self.pos
+        radar.car_xy = Position(self.x, self.y)
+        radar.car_angle = self.angle
+        radar.render(ctx)
         bound_line = self.get_frame_lines()
         for line in bound_line:
             start = Position(line.start.x, line.start.y)
@@ -91,6 +98,7 @@ class Car:
         self.collide(ctx, road_map)
 
     def collide(self, ctx: IGraphic, road_map: RoadMap):
+        self.radar.collide(ctx, road_map)
         bound_lines = self.get_bound_lines()
         roads = road_map.roads
         for ix in range(len(roads)):
