@@ -29,7 +29,7 @@ RadarColor = 'gray'
 UseBrain = True
 
 
-def posInfo(pos: Position) -> str:
+def pos_info(pos: Position) -> str:
     x = round(pos.x)
     y = round(pos.y)
     return f"{x},{y}"
@@ -101,7 +101,7 @@ class VerticalRoad(IRoad):
             end=Position(x=x + RoadWidth - RoadMargin, y=y + RoadWidth)
         ), color=color, thickness=7)
         line1, line2 = self.get_bound_lines()
-        ctx.draw_text(Position(x=x + RoadMargin, y=y), f"{posInfo(line1.start)}", color=(0xf, 0xf, 0xf))
+        ctx.draw_text(Position(x=x + RoadMargin, y=y), f"{pos_info(line1.start)}", color=(0xf, 0xf, 0xf))
 
     def render_damaged(self, ctx: IGraphic):
         x = self.pos.x
