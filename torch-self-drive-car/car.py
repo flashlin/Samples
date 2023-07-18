@@ -1,7 +1,8 @@
 import math
 from enum import Enum
 
-from game import RoadMap, EmptyRoad, FrameWidth, FrameHeight
+from game import FrameWidth, FrameHeight
+from roads import EmptyRoad, RoadMap
 from math_utils import Position, update_coordinates, Line, rotate_rectangle
 from pygameGraphic import IGraphic, PygameController
 

@@ -5,7 +5,8 @@ import numpy as np
 import pygame
 
 from car import Car, Action
-from game import CanvasWidth, CanvasHeight, RoadMap, StartX, StartY, CarPos
+from game import CanvasWidth, CanvasHeight, StartX, StartY, CarPos
+from roads import RoadMap
 from math_utils import Position
 from pygameGraphic import PygameGraphic
 
