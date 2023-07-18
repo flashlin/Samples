@@ -1,0 +1,98 @@
+import math
+
+from game import RoadMap, EmptyRoad, FrameWidth, FrameHeight
+from math_utils import Position, update_coordinates, Line, rotate_rectangle
+from pygameGraphic import IGraphic, PygameController
+
+
+class CarState:
+    x = 0
+    y = 0
+    angle = 0
+    move_distance = 0
+
+
+class Car:
+    pos = Position(0, 0)
+    controller = PygameController()
+    prev_state = CarState()
+
+    def __init__(self):
+        self.controller.create()
+        self.x = 0
+        self.y = 0
+        self.angle = 270
+        self.speed = 0
+        self.acceleration = 0.3
+        self.max_speed = 4
+        self.friction = 0.02
+        self.damaged = False
+        self.move_distance = 0
+
+    def render(self, ctx: IGraphic):
+        ctx.draw_image("./assets/car1.png", Position(self.x, self.y), self.angle)
+        self.controller.render()
+
+    def move(self, ctx: IGraphic, road_map: RoadMap):
+        if self.controller.forward:
+            self.speed += self.acceleration
+        elif self.controller.reverse:
+            self.speed -= self.acceleration
+
+        if self.speed > self.max_speed:
+            self.speed = self.max_speed
+        elif self.speed < -self.max_speed / 2:
+            self.speed = -self.max_speed / 2
+
+        if self.speed > 0:
+            self.speed -= self.friction
+        elif self.speed < 0:
+            self.speed += self.friction
+        if abs(self.speed) < self.friction:
+            self.speed = 0
+
+        if self.controller.left:
+            self.angle -= 1
+        elif self.controller.right:
+            self.angle += 1
+
+        new_pos = update_coordinates(self.pos, self.angle, self.speed)
+        self.x = new_pos.x
+        self.y = new_pos.y
+
+        if self.speed > 0:
+            self.move_distance += self.speed
+
+        self.collide(ctx, road_map)
+
+    def collide(self, ctx: IGraphic, road_map: RoadMap):
+        bound_lines = self.get_bound_lines()
+        roads = road_map.roads
+        for ix in range(len(roads)):
+            for iy in range(len(roads[ix])):
+                road = roads[ix][iy]
+                collide_points = road.collide(ctx, bound_lines)
+                if len(collide_points) > 0:
+                    self.x = self.prev_state.x
+                    self.y = self.prev_state.y
+                    self.angle = self.prev_state.angle
+                    self.move_distance = self.prev_state.move_distance
+                    self.speed = 0
+                    self.damaged = True
+                    road.render_damaged(ctx)
+                    return [road, collide_points]
+        return [EmptyRoad(), []]
+
+    def get_bound_lines(self) -> list[Line]:
+        [left_top, right_top, right_bottom, left_bottom] = self.get_bound_points()
+        return [
+            Line(left_top, right_top),
+            Line(right_top, right_bottom),
+            Line(right_bottom, left_bottom),
+            Line(left_bottom, left_top)
+        ]
+
+    def get_bound_points(self):
+        left_top = Position(self.x - FrameWidth / 2, self.y - FrameHeight / 2)
+        right_bottom = Position(left_top.x + FrameWidth, left_top.y + FrameHeight)
+        return rotate_rectangle(left_top, right_bottom, self.angle)
