@@ -23,9 +23,7 @@ class SelfDriveCarGame:
         self.road_map = RoadMap()
         self.car = Car()
         self.car.pos = Position(CenterX, CenterY)
-        self.car.x = StartX
-        self.car.y = StartY
-        self.car.angle = 0
+        self.car.set_pos(StartX, StartY)
 
     def reset(self):
         pass
@@ -36,7 +34,7 @@ class SelfDriveCarGame:
         return self.car.damaged
 
     def rollback_step(self):
-        self.car.rollback_control()
+        self.car.rollback_state()
 
     def get_observation_space(self) -> list[int]:
         info = self.car.get_observation_info()
@@ -52,7 +50,7 @@ class SelfDriveCarGame:
         car = self.car
 
         screen.render_start()
-        road_map.pos = Position(CenterX - car.x, CenterY - car.y)
+        road_map.pos = Position(CenterX - car.state.x, CenterY - car.state.y)
         road_map.render(screen)
         car.move(screen, road_map)
         car.render(screen)
