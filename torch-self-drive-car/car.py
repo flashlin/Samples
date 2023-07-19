@@ -37,21 +37,22 @@ class Car:
     def __init__(self):
         self.radar = Radar()
         self.controller.create()
-        self.x = 0
-        self.y = 0
-        self.angle = 0
-        self.speed = 0
         self.acceleration = 0.3
         self.max_speed = 4
         self.friction = 0.02
         self.damaged = False
 
+    def set_pos(self, x: int, y: int):
+        self.state.x = x
+        self.state.y = y
+
     def render(self, ctx: IGraphic):
+        state = self.state
         radar = self.radar
-        ctx.draw_image("./assets/car1.png", self.pos, self.angle)
+        ctx.draw_image("./assets/car1.png", self.pos, state.angle)
         radar.pos = self.pos
-        radar.car_xy = Position(self.x, self.y)
-        radar.car_angle = self.angle
+        radar.car_xy = Position(state.x, state.y)
+        radar.car_angle = state.angle
         radar.render(ctx)
         bound_line = self.get_frame_lines()
         for line in bound_line:
@@ -61,9 +62,7 @@ class Car:
         self.controller.render()
 
     def get_observation_info(self) -> CarState:
-        info = CarState()
-        info.speed = self.speed
-        info.angle = self.angle
+        info = self.state.clone()
         info.radar_lines = self.radar.get_observation_info()
         return info
 
@@ -83,36 +82,35 @@ class Car:
             self.controller.right = False
 
     def rollback_state(self):
-        prev = self.prev_state
-        self.speed = prev.speed
-        self.angle = prev.angle
+        self.state = self.prev_state
 
     def move(self, ctx: IGraphic, road_map: RoadMap):
+        state = self.state
         if self.controller.forward:
-            self.speed += self.acceleration
+            state.speed += self.acceleration
         elif self.controller.reverse:
-            self.speed -= self.acceleration
+            state.speed -= self.acceleration
 
-        if self.speed > self.max_speed:
-            self.speed = self.max_speed
-        elif self.speed < -self.max_speed / 2:
-            self.speed = -self.max_speed / 2
+        if state.speed > self.max_speed:
+            state.speed = self.max_speed
+        elif state.speed < -self.max_speed / 2:
+            state.speed = -self.max_speed / 2
 
-        if self.speed > 0:
-            self.speed -= self.friction
-        elif self.speed < 0:
-            self.speed += self.friction
-        if abs(self.speed) < self.friction:
-            self.speed = 0
+        if state.speed > 0:
+            state.speed -= self.friction
+        elif state.speed < 0:
+            state.speed += self.friction
+        if abs(state.speed) < self.friction:
+            state.speed = 0
 
         if self.controller.left:
-            self.angle += 1
+            state.angle += 1
         elif self.controller.right:
-            self.angle -= 1
+            state.angle -= 1
 
-        new_pos = update_coordinates(Position(self.x, self.y), self.angle, self.speed)
-        self.x = new_pos.x
-        self.y = new_pos.y
+        new_pos = update_coordinates(Position(state.x, state.y), state.angle, state.speed)
+        state.x = new_pos.x
+        state.y = new_pos.y
 
         self.collide(ctx, road_map)
 
@@ -126,16 +124,12 @@ class Car:
                 collide_points = road.collide(ctx, bound_lines)
                 if len(collide_points) > 0:
                     # print(f"BOOM")
-                    self.x = self.prev_state.x
-                    self.y = self.prev_state.y
-                    self.angle = self.prev_state.angle
-                    self.speed = 0
+                    state = self.state = self.prev_state.clone()
+                    state.speed = 0
                     self.damaged = True
                     road.render_damaged(ctx)
                     return [road, collide_points]
-        self.prev_state.x = self.x
-        self.prev_state.y = self.y
-        self.prev_state.angle = self.angle
+        self.prev_state = self.state.clone()
         self.prev_state.radar_lines = self.radar.get_observation_info()
         return [EmptyRoad(), []]
 
@@ -149,14 +143,15 @@ class Car:
         ]
 
     def get_bound_points(self):
-        left_top = Position(self.x - FrameWidth / 2, self.y - FrameHeight / 2)
+        state = self.state
+        left_top = Position(state.x - FrameWidth / 2, state.y - FrameHeight / 2)
         right_bottom = Position(left_top.x + FrameWidth, left_top.y + FrameHeight)
-        return rotate_rectangle(left_top, right_bottom, self.angle)
+        return rotate_rectangle(left_top, right_bottom, state.angle)
 
     def get_frame_lines(self):
         left_top = Position(self.pos.x - FrameWidth / 2, self.pos.y - FrameHeight / 2)
         right_bottom = Position(left_top.x + FrameWidth, left_top.y + FrameHeight)
-        [left_top, right_top, right_bottom, left_bottom] = rotate_rectangle(left_top, right_bottom, self.angle)
+        [left_top, right_top, right_bottom, left_bottom] = rotate_rectangle(left_top, right_bottom, self.state.angle)
         return [
             Line(left_top, right_top),
             Line(right_top, right_bottom),
