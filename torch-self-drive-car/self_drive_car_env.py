@@ -3,7 +3,7 @@ import time  # For debugging.
 import gym
 import numpy as np
 
-from main import SelfDriveCarGame
+from game import SelfDriveCarGame
 
 
 class SelfDriveCarEnv(gym.Env):

@@ -1,7 +1,7 @@
 import math
 from enum import Enum
 
-from game import FrameWidth, FrameHeight, CenterX, CenterY
+from constants import FrameWidth, FrameHeight, CenterX, CenterY
 from radar import Radar
 from roads import EmptyRoad, RoadMap
 from math_utils import Position, update_coordinates, Line, rotate_rectangle

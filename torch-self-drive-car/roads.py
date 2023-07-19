@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import NamedTuple, Dict, Callable, Tuple
 
-from game import RoadColor, RoadMargin, RoadWidth, pos_info, DamagedColor, CanvasWidth, CanvasHeight
+from constants import RoadColor, RoadMargin, RoadWidth, pos_info, DamagedColor, CanvasWidth, CanvasHeight
 from math_utils import Position, Line, find_two_lines_intersection, Arc, get_arc_lines
 from pygameGraphic import IGraphic
 

@@ -1,49 +1,53 @@
+import os
+import sys
+import random
+import numpy as np
+import pygame
+
+from car import Car, Action
+from constants import CanvasWidth, CanvasHeight, StartX, StartY, CarPos, CenterX, CenterY, FrameWidth, FrameHeight
+from roads import RoadMap
 from math_utils import Position
-
-CarFrameMargin = 5
-CarWidth = 75
-CarHeight = 117
-FrameWidth = CarWidth - CarFrameMargin * 2
-FrameHeight = CarHeight - CarFrameMargin * 2
-CarColor = "blue"
-RoadWidth = 220
-RoadColor = 'blue'
-RoadMargin = 22
-CanvasWidth = 800
-CanvasHeight = 700
-CenterX = CanvasWidth // 2
-CenterY = CanvasHeight // 2
-CarPos = Position(CenterX - CarWidth // 2, CenterY - CarHeight // 2)
-StartX = 100
-StartY = 400
-DamagedColor = "red"
-RadarLineLength = 150
-RadarLineCount = 5
-RadarCount = 3
-RadarColor = 'darkGray'
-UseBrain = True
+from pygameGraphic import PygameGraphic
 
 
-def pos_info(pos: Position) -> str:
-    x = round(pos.x)
-    y = round(pos.y)
-    return f"{x},{y}"
+class SelfDriveCarGame:
 
-# 垂直線
+    def __init__(self, silent_mode=True):
+        if not silent_mode:
+            self.screen = PygameGraphic()
+            self.screen.create(screen_size=(CanvasWidth, CanvasHeight))
+        else:
+            self.screen = None
+        self.reset()
+        self.road_map = RoadMap()
+        self.car = Car()
+        self.car.pos = Position(CenterX, CenterY)
+        self.car.x = StartX
+        self.car.y = StartY
+        self.car.angle = 0
+
+    def reset(self):
+        pass
+
+    def step(self, action: Action):
+        self.car.control(action)
+
+    def render(self):
+        screen = self.screen
+        road_map = self.road_map
+        car = self.car
+
+        screen.render_start()
+        road_map.pos = Position(CenterX - car.x, CenterY - car.y)
+        road_map.render(screen)
+        car.move(screen, road_map)
+        car.render(screen)
+        screen.render_end()
 
 
-# def get_left_top_curve_centre(pos: Position):
-#     return Position(pos.x + RoadWidth, pos.y + RoadWidth)
-#
-# def get_outer_curve_radius():
-#     return RoadWidth - RoadMargin
-#
-# def get_left_top_curve_angles():
-#     return CurveAngles(start_angle=90, end_angle=180)
-#
-# def get_left_top_curve_lines(pos: Position) -> list[Line]:
-#     arc_xy = get_left_top_curve_centre(pos)
-#     radius = get_outer_curve_radius()
-#     angles = get_left_top_curve_angles()
-#     lines = get_arc_lines(Arc(arc_xy, radius, angles.start_angle, angles.end_angle))
-#     return lines
+if __name__ == '__main__':
+    game = SelfDriveCarGame(silent_mode=False)
+    while True:
+        game.render()
+        pygame.time.wait(1)
