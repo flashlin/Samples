@@ -20,7 +20,7 @@ if __name__ == '__main__':
     # 建立多環境
     env = gym.make(GameEnvName)
     env = Monitor(env, "./video", override_existing=True)
-    # env = DummyVecEnv([lambda: env])
+    env = DummyVecEnv([lambda: env])
 
     # 建立 PPO 模型
     model = PPO("MlpPolicy", env, verbose=1)
