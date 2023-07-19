@@ -33,7 +33,10 @@ class SelfDriveCarGame:
         self.car.move(self.screen, self.road_map)
         return self.car.damaged
 
-    def rollback_step(self):
+    def get_state(self) -> CarState:
+        return self.car.state
+
+    def rollback_state(self):
         self.car.rollback_state()
 
     def get_observation_space(self) -> list[int]:
