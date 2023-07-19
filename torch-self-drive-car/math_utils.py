@@ -94,3 +94,13 @@ def rotate_rectangle(left_top: Position, right_bottom: Position, angle: int) -> 
     ]
 
     return rotate_points(center, angle, points)
+
+
+def convert_object_to_array(obj):
+    result = []
+    for key, value in obj.__dict__.items():
+        if isinstance(value, list):
+            result += value
+            continue
+        result += [value]
+    return result

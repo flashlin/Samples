@@ -28,6 +28,9 @@ class RadarLine:
         radar_line = Line(rotated_points[0], rotated_points[1])
         ctx.draw_line(radar_line, color="red", thickness=3)
 
+    def get_observation_space(self):
+        return [self.distance]
+
     def get_draw_line(self, rotate: bool) -> Line:
         start = Position(self.pos.x, self.pos.y + CarHeight / 2 - 20)
         end = Position(start.x, start.y + RadarLineLength)
@@ -93,6 +96,12 @@ class Radar:
             radar_line.car_xy = self.car_xy
             radar_line.car_angle = self.car_angle
             radar_line.render(ctx)
+
+    def get_observation_space(self):
+        space = []
+        for radar in self.radar_lines:
+            space.append(radar.get_observation_space())
+        return space
 
     def collide(self, ctx: IGraphic, road_map: RoadMap):
         for index, radar_line in enumerate(self.get_bound_lines()):
