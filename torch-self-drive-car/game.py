@@ -62,6 +62,9 @@ class SelfDriveCarGame:
         car.render(screen)
         screen.render_end()
 
+    def get_frame_image(self):
+        return self.screen.get_frame_image()
+
 
 if __name__ == '__main__':
     game = SelfDriveCarGame()

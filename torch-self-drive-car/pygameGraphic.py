@@ -1,7 +1,11 @@
 import math
 import sys
 from abc import ABC, abstractmethod
+
+import numpy as np
 import pygame
+from numpy import ndarray
+
 from math_utils import Position, Line, Arc, get_arc_lines
 
 
@@ -38,6 +42,10 @@ class IGraphic(ABC):
     def draw_image(self, image_asset_name: str, pos: Position, angle: int):
         pass
 
+    @abstractmethod
+    def get_frame_image(self) -> ndarray:
+        pass
+
 
 class EmptyGraphic(IGraphic):
 
@@ -64,6 +72,10 @@ class EmptyGraphic(IGraphic):
 
     def draw_image(self, image_asset_name: str, pos: Position, angle: int):
         pass
+
+    def get_frame_image(self) -> ndarray:
+        shape = (1, 1)
+        return np.empty(shape, dtype=np.int)
 
 
 class PygameGraphic(IGraphic):
@@ -116,6 +128,12 @@ class PygameGraphic(IGraphic):
         offset_x = pos.x - round(rotated_rect.width / 2)
         offset_y = pos.y - round(rotated_rect.height / 2)
         self.screen.blit(rotated_image, (offset_x, offset_y))
+
+    def get_frame_image(self) -> ndarray:
+        image = np.transpose(
+            np.array(pygame.surfarray.pixels3d(self.screen)), axes=(1, 0, 2)
+        )
+        return image
 
     def fetch_data(self, key: str, fetch: callable):
         if key in self.cache:
