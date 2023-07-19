@@ -14,16 +14,14 @@ class SelfDriveCarEnv(gym.Env):
 
         self.action_space = gym.spaces.Discrete(5)  # 0: UP, 1: LEFT, 2: RIGHT, 3: DOWN 4: None
 
+        space = self.game.get_observation_space()
+        space_width = len(space)
         self.observation_space = gym.spaces.Box(
-            low=-1, high=1,
-            shape=(self.game.board_size, self.game.board_size),
+            low=-2000, high=2000,
+            shape=(space_width, 1),
             dtype=np.float32
-        )  # 0: empty, 0.5: snake body, 1: snake head, -1: food
-
-        self.init_snake_size = len(self.game.snake)
-        self.max_growth = self.grid_size - self.init_snake_size
+        )
         self.done = False
-
         limit_step = False
         if limit_step:
             self.step_limit = 1000
@@ -39,8 +37,9 @@ class SelfDriveCarEnv(gym.Env):
         return obs
 
     def step(self, action):
-        self.done, info = self.game.step(action)
+        self.done = self.game.step(action)
         obs = self._generate_observation()
+        info = self.game.get_observation_info()
 
         reward = 0.0
         self.reward_step_counter += 1
@@ -49,31 +48,13 @@ class SelfDriveCarEnv(gym.Env):
             self.reward_step_counter = 0
             self.done = True
 
-        if self.done:  # Snake bumps into wall or itself. Episode is over.
-            # Game Over penalty is based on snake size.
-            # reward = - math.pow(self.max_growth, (self.grid_size - info["snake_size"]) / self.max_growth) # (-max_growth, -1)
-            # return obs, reward * 0.1, self.done, info
-
-            # Linear penalty decay.
-            reward = info["snake_size"] - self.grid_size  # (-max_growth, 0)
+        if self.done:
             return obs, reward * 0.1, self.done, info
 
-        elif info["food_obtained"]:  # food eaten
-            # Reward on num_steps between getting food.
-            reward = math.exp((self.grid_size - self.reward_step_counter) / self.grid_size)  # (0, e)
-            self.reward_step_counter = 0  # Reset reward step counter
+        for radar_line in info.radar_lines:
+            reward += radar_line
 
-        else:
-            if np.linalg.norm(info["snake_head_pos"] - info["food_pos"]) < np.linalg.norm(
-                    info["prev_snake_head_pos"] - info["food_pos"]):
-                reward = 1 / info[
-                    "snake_size"]  # No upper limit might enable the agent to master shorter scenario faster and more firmly.
-            else:
-                reward = - 1 / info["snake_size"]
-            # print(reward*0.1)
-            # time.sleep(1)
-
-        reward = reward * 0.1  # Scale reward
+        reward = reward * 0.1
         return obs, reward, self.done, info
 
     def render(self):
@@ -84,6 +65,7 @@ class SelfDriveCarEnv(gym.Env):
 
     # Check if the action is against the current direction of the snake or is ending the game.
     def _check_action_validity(self, action):
+
         current_direction = self.game.direction
         snake_list = self.game.snake
         row, col = snake_list[0]
@@ -111,7 +93,6 @@ class SelfDriveCarEnv(gym.Env):
             else:
                 row += 1
 
-        # Check if snake collided with itself or the wall. Note that the tail of the snake would be poped if the snake did not eat food in the current step.
         if (row, col) == self.game.food:
             game_over = (
                     (row, col) in snake_list  # The snake won't pop the last cell if it ate food.
@@ -134,58 +115,12 @@ class SelfDriveCarEnv(gym.Env):
         else:
             return True
 
-    # EMPTY: 0; SnakeBODY: 0.5; SnakeHEAD: 1; FOOD: -1;
     def _generate_observation(self):
-        obs = np.zeros((self.game.board_size, self.game.board_size), dtype=np.float32)
-        obs[tuple(np.transpose(self.game.snake))] = np.linspace(0.8, 0.2, len(self.game.snake), dtype=np.float32)
-        obs[tuple(self.game.snake[0])] = 1.0
-        obs[tuple(self.game.food)] = -1.0
+        space = self.game.get_observation_space()
+        space_width = len(space)
+        obs = np.zeros((space_width, 1), dtype=np.float32)
+        for idx, num in enumerate(space):
+            obs[idx] = num
+        # obs[tuple(np.transpose(self.game.snake))] = np.linspace(0.8, 0.2, len(self.game.snake), dtype=np.float32)
+        # obs[tuple(self.game.snake[0])] = 1.0
         return obs
-
-# Test the environment using random actions
-# NUM_EPISODES = 100
-# RENDER_DELAY = 0.001
-# from matplotlib import pyplot as plt
-
-# if __name__ == "__main__":
-#     env = SnakeEnv(silent_mode=False)
-
-# # Test Init Efficiency
-# print(MODEL_PATH_S)
-# print(MODEL_PATH_L)
-# num_success = 0
-# for i in range(NUM_EPISODES):
-#     num_success += env.reset()
-# print(f"Success rate: {num_success/NUM_EPISODES}")
-
-# sum_reward = 0
-
-# # 0: UP, 1: LEFT, 2: RIGHT, 3: DOWN
-# action_list = [1, 1, 1, 0, 0, 0, 2, 2, 2, 3, 3, 3]
-
-# for _ in range(NUM_EPISODES):
-#     obs = env.reset()
-#     done = False
-#     i = 0
-#     while not done:
-#         plt.imshow(obs, interpolation='nearest')
-#         plt.show()
-#         action = env.action_space.sample()
-#         # action = action_list[i]
-#         i = (i + 1) % len(action_list)
-#         obs, reward, done, info = env.step(action)
-#         sum_reward += reward
-#         if np.absolute(reward) > 0.001:
-#             print(reward)
-#         env.render()
-
-#         time.sleep(RENDER_DELAY)
-#     # print(info["snake_length"])
-#     # print(info["food_pos"])
-#     # print(obs)
-#     print("sum_reward: %f" % sum_reward)
-#     print("episode done")
-#     # time.sleep(100)
-
-# env.close()
-# print("Average episode reward for random strategy: {}".format(sum_reward/NUM_EPISODES))
