@@ -8,6 +8,12 @@ import gymnasium as gym
 class SelfDriveCarEnv(gym.Env):
     def __init__(self):
         super().__init__()
+        self.window = None
+        self.render_mode = 'rgb_array'
+        self.metadata = {
+            'render_fps': 30,
+            'render_modes': ['human', 'rgb_array']
+        }
         self.game = SelfDriveCarGame()
         self.game.reset()
         self.action_space = gym.spaces.Discrete(5)
@@ -56,9 +62,17 @@ class SelfDriveCarEnv(gym.Env):
 
         return obs, reward * 0.1, self.done, self.truncated, info.to_dict()
 
-    def render(self):
-        print(f'render {self.render_mode=}')
+    def render(self, mode='human'):
+        if mode == 'human':
+            return self._render_frame()
         self.game.render()
+
+    def _render_frame(self):
+        if self.window is None:
+            self.game.set_silent_mode(False)
+            self.window = True
+        self.game.render()
+        return self.game.get_frame_image()
 
     def get_action_mask(self):
         return np.array([[self._check_action_validity(a) for a in range(self.action_space.n)]])

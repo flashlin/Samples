@@ -19,6 +19,7 @@ num_envs = 1  # 指定環境數量
 if __name__ == '__main__':
     # 建立多環境
     env = gym.make(GameEnvName)
+    env = gym.wrappers.HumanRendering(env)
     env = Monitor(env, "./video", override_existing=True)
     env = DummyVecEnv([lambda: env])
 
