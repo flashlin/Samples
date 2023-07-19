@@ -3,6 +3,7 @@ import sys
 import random
 
 import gym
+import sb3_contrib
 from gym.spaces import Discrete
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.vec_env import SubprocVecEnv
@@ -35,15 +36,14 @@ def make_env(seed: int):
         env = ActionMasker(env, SelfDriveCarEnv.get_action_mask)
         env = Monitor(env)
         # env.seed(seed)
-        env.action_space = gym.spaces.Discrete(5)
+        # env.action_space = gym.spaces.Discrete(5)
         return env
 
     return _init
 
 
 def main():
-    env = gym.make("test")
-    print("應該顯示 <class 'gym.spaces.discrete.Discrete'>", type(env.action_space))
+    print(sb3_contrib.__version__)
 
     # Generate a list of random seeds for each environment.
     seed_set = set()

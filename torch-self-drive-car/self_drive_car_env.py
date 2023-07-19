@@ -11,8 +11,7 @@ class SelfDriveCarEnv(gym.Env):
         super().__init__()
         self.game = SelfDriveCarGame(silent_mode=silent_mode)
         self.game.reset()
-
-        self.action_space = gym.spaces.Discrete(5)  # 0: UP, 1: LEFT, 2: RIGHT, 3: DOWN 4: None
+        self.action_space = gym.spaces.Discrete(5)
 
         space = self.game.get_observation_space()
         space_width = len(space)
