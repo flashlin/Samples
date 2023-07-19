@@ -1,6 +1,6 @@
 import math
 
-from game import RadarColor, CarHeight, RadarLineLength, RadarLineCount
+from constants import RadarColor, CarHeight, RadarLineLength, RadarLineCount
 from math_utils import Position, rotate_points, Line
 from pygameGraphic import IGraphic
 from roads import RoadMap
