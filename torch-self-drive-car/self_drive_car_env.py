@@ -6,9 +6,9 @@ import gymnasium as gym
 
 
 class SelfDriveCarEnv(gym.Env):
-    def __init__(self, silent_mode=True):
+    def __init__(self):
         super().__init__()
-        self.game = SelfDriveCarGame(silent_mode=silent_mode)
+        self.game = SelfDriveCarGame()
         self.game.reset()
         self.action_space = gym.spaces.Discrete(5)
 
@@ -57,6 +57,7 @@ class SelfDriveCarEnv(gym.Env):
         return obs, reward * 0.1, self.done, self.truncated, info.to_dict()
 
     def render(self):
+        print(f'render {self.render_mode=}')
         self.game.render()
 
     def get_action_mask(self):
