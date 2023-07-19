@@ -1,9 +1,8 @@
 import math
 import time  # For debugging.
-import gym
-from gym import spaces
 import numpy as np
 from game import SelfDriveCarGame
+import gymnasium as gym
 
 
 class SelfDriveCarEnv(gym.Env):
@@ -11,11 +10,11 @@ class SelfDriveCarEnv(gym.Env):
         super().__init__()
         self.game = SelfDriveCarGame(silent_mode=silent_mode)
         self.game.reset()
-        self.action_space = spaces.Discrete(5)
+        self.action_space = gym.spaces.Discrete(5)
 
         space = self.game.get_observation_space()
         space_width = len(space)
-        self.observation_space = spaces.Box(
+        self.observation_space = gym.spaces.Box(
             low=-2000, high=2000,
             shape=(space_width,),
             dtype=np.float32
