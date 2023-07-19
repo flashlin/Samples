@@ -39,6 +39,33 @@ class IGraphic(ABC):
         pass
 
 
+class EmptyGraphic(IGraphic):
+
+    def create(self, screen_size: (int, int)):
+        pass
+
+    def render_start(self):
+        pass
+
+    def render_end(self):
+        pass
+
+    def quit(self):
+        pass
+
+    def draw_text(self, pos: Position, text: str, color: (int, int, int)):
+        pass
+
+    def draw_line(self, line: Line, color: (int, int, int), thickness: int):
+        pass
+
+    def draw_arc(self, arc: Arc, color: (int, int, int), thickness: int):
+        pass
+
+    def draw_image(self, image_asset_name: str, pos: Position, angle: int):
+        pass
+
+
 class PygameGraphic(IGraphic):
     cache = {}
 

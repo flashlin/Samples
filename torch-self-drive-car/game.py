@@ -8,22 +8,25 @@ from car import Car, Action, CarState
 from constants import CanvasWidth, CanvasHeight, StartX, StartY, CarPos, CenterX, CenterY, FrameWidth, FrameHeight
 from roads import RoadMap
 from math_utils import Position, convert_obj_to_space
-from pygameGraphic import PygameGraphic
+from pygameGraphic import PygameGraphic, EmptyGraphic
 
 
 class SelfDriveCarGame:
 
-    def __init__(self, silent_mode=True):
-        if not silent_mode:
-            self.screen = PygameGraphic()
-            self.screen.create(screen_size=(CanvasWidth, CanvasHeight))
-        else:
-            self.screen = None
+    def __init__(self):
+        self.screen = EmptyGraphic()
         self.reset()
         self.road_map = RoadMap()
         self.car = Car()
         self.car.pos = Position(CenterX, CenterY)
         self.car.set_pos(StartX, StartY)
+
+    def set_silent_mode(self, silent_mode: bool):
+        if not silent_mode:
+            self.screen = PygameGraphic()
+            self.screen.create(screen_size=(CanvasWidth, CanvasHeight))
+        else:
+            self.screen = EmptyGraphic()
 
     def reset(self):
         pass
@@ -61,7 +64,8 @@ class SelfDriveCarGame:
 
 
 if __name__ == '__main__':
-    game = SelfDriveCarGame(silent_mode=False)
+    game = SelfDriveCarGame()
+    game.set_silent_mode(False)
     while True:
         game.render()
         pygame.time.wait(1)
