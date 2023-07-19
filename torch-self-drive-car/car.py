@@ -1,5 +1,6 @@
 import math
 from enum import Enum
+import copy
 
 from constants import FrameWidth, FrameHeight, CenterX, CenterY
 from radar import Radar
@@ -19,12 +20,18 @@ class Action(Enum):
 class CarState:
     x = 0
     y = 0
+    speed = 0
     angle = 0
+    radar_lines = []
+
+    def clone(self):
+        return copy.copy(self)
 
 
 class Car:
     pos = Position(0, 0)
     controller = PygameController()
+    state = CarState()
     prev_state = CarState()
 
     def __init__(self):
@@ -53,6 +60,13 @@ class Car:
             ctx.draw_line(Line(start, end), color="yellow", thickness=5)
         self.controller.render()
 
+    def get_observation_info(self) -> CarState:
+        info = CarState()
+        info.speed = self.speed
+        info.angle = self.angle
+        info.radar_lines = self.radar.get_observation_info()
+        return info
+
     def control(self, action: Action):
         if action == Action.UP:
             self.controller.forward = True
@@ -67,6 +81,11 @@ class Car:
             self.controller.reverse = False
             self.controller.left = False
             self.controller.right = False
+
+    def rollback_state(self):
+        prev = self.prev_state
+        self.speed = prev.speed
+        self.angle = prev.angle
 
     def move(self, ctx: IGraphic, road_map: RoadMap):
         if self.controller.forward:
@@ -117,6 +136,7 @@ class Car:
         self.prev_state.x = self.x
         self.prev_state.y = self.y
         self.prev_state.angle = self.angle
+        self.prev_state.radar_lines = self.radar.get_observation_info()
         return [EmptyRoad(), []]
 
     def get_bound_lines(self) -> list[Line]:

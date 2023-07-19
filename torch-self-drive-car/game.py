@@ -4,10 +4,10 @@ import random
 import numpy as np
 import pygame
 
-from car import Car, Action
+from car import Car, Action, CarState
 from constants import CanvasWidth, CanvasHeight, StartX, StartY, CarPos, CenterX, CenterY, FrameWidth, FrameHeight
 from roads import RoadMap
-from math_utils import Position
+from math_utils import Position, convert_obj_to_space
 from pygameGraphic import PygameGraphic
 
 
@@ -30,8 +30,21 @@ class SelfDriveCarGame:
     def reset(self):
         pass
 
-    def step(self, action: Action):
+    def step(self, action: Action) -> bool:
         self.car.control(action)
+        self.car.move(self.screen, self.road_map)
+        return self.car.damaged
+
+    def rollback_step(self):
+        self.car.rollback_control()
+
+    def get_observation_space(self) -> list[int]:
+        info = self.car.get_observation_info()
+        return convert_obj_to_space(info)
+
+    def get_observation_info(self) -> CarState:
+        info = self.car.get_observation_info()
+        return info
 
     def render(self):
         screen = self.screen
