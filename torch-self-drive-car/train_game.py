@@ -7,6 +7,7 @@ import random
 from sb3_contrib.common.wrappers import ActionMasker
 from stable_baselines3.common.monitor import Monitor
 
+SHOW = True
 
 GameEnvName = "SelfDriveCarEnv-v0"
 ModelName = "./models/custom_game_model"
@@ -20,7 +21,8 @@ num_envs = 1  # 指定環境數量
 
 if __name__ == '__main__':
     env = gym.make(GameEnvName)
-    env = gym.wrappers.HumanRendering(env)
+    if SHOW:
+        env = gym.wrappers.HumanRendering(env)
     env = Monitor(env, "./video", override_existing=True)
     vec_env = DummyVecEnv([lambda: env])
 
@@ -29,6 +31,6 @@ if __name__ == '__main__':
     if os.path.exists(ModelName):
         model.load(ModelName)
     # 開始訓練模型
-    model.learn(total_timesteps=100)
+    model.learn(total_timesteps=10000)
     # 儲存訓練好的模型
     model.save(ModelName)
