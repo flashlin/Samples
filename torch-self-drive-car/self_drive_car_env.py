@@ -68,9 +68,11 @@ class SelfDriveCarEnv(gym.Env):
         start = info.radar_lines[radar_line_count-1]
         end = info.radar_lines[radar_line_count-2]
         if abs(start-end) > 50:
-            reward -= RadarLineLength * 5
+            reward -= abs(start-end)
 
-        print(f"{self.done=} {reward=}")
+        reward += info.speed
+
+        #print(f"{self.done=} {reward=}")
         return obs, reward * 0.1, self.done, self.truncated, info.to_dict()
 
     def render(self, mode='human'):

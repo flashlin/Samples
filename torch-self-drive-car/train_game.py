@@ -29,6 +29,6 @@ if __name__ == '__main__':
     if os.path.exists(ModelName):
         model.load(ModelName)
     # 開始訓練模型
-    model.learn(total_timesteps=10)
+    model.learn(total_timesteps=100)
     # 儲存訓練好的模型
     model.save(ModelName)
