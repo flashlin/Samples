@@ -3,6 +3,7 @@ import time  # For debugging.
 import numpy as np
 
 from car import Action
+from constants import RadarLineLength
 from game import SelfDriveCarGame
 import gymnasium as gym
 
@@ -55,13 +56,21 @@ class SelfDriveCarEnv(gym.Env):
         reward = 0.0
         self.reward_step_counter += 1
 
-        if self.reward_step_counter > self.step_limit:  # Step limit reached, game over.
+        if self.reward_step_counter > self.step_limit:
             self.reward_step_counter = 0
             self.truncated = True
 
         for radar_line in info.radar_lines:
-            reward += radar_line
+            if radar_line >= 10:
+                reward += radar_line
 
+        radar_line_count = len(info.radar_lines)
+        start = info.radar_lines[radar_line_count-1]
+        end = info.radar_lines[radar_line_count-2]
+        if abs(start-end) > 50:
+            reward -= RadarLineLength * 5
+
+        print(f"{self.done=} {reward=}")
         return obs, reward * 0.1, self.done, self.truncated, info.to_dict()
 
     def render(self, mode='human'):

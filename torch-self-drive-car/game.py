@@ -15,11 +15,10 @@ class SelfDriveCarGame:
 
     def __init__(self):
         self.screen = EmptyGraphic()
-        self.reset()
         self.road_map = RoadMap()
         self.car = Car()
         self.car.pos = Position(CenterX, CenterY)
-        self.car.set_pos(StartX, StartY)
+        self.reset()
 
     def set_silent_mode(self, silent_mode: bool):
         if not silent_mode:
@@ -29,7 +28,7 @@ class SelfDriveCarGame:
             self.screen = EmptyGraphic()
 
     def reset(self):
-        pass
+        self.car.reset()
 
     def step(self, action: Action) -> bool:
         self.car.control(action)

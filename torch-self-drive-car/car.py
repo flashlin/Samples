@@ -2,7 +2,7 @@ import math
 from enum import Enum
 import copy
 
-from constants import FrameWidth, FrameHeight, CenterX, CenterY
+from constants import FrameWidth, FrameHeight, CenterX, CenterY, StartX, StartY
 from radar import Radar
 from roads import EmptyRoad, RoadMap
 from math_utils import Position, update_coordinates, Line, rotate_rectangle
@@ -46,9 +46,12 @@ class Car:
         self.friction = 0.02
         self.damaged = False
 
-    def set_pos(self, x: int, y: int):
-        self.state.x = x
-        self.state.y = y
+    def reset(self):
+        self.state.x = StartX
+        self.state.y = StartY
+        self.state.speed = 0
+        self.state.angle = 0
+        self.damaged = False
 
     def render(self, ctx: IGraphic):
         state = self.state
