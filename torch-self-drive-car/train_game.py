@@ -1,101 +1,31 @@
-import os
-import sys
+import gymnasium as gym
+from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecEnvWrapper
 import random
-
-import gym
-import sb3_contrib
-from gym.spaces import Discrete
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common.vec_env import SubprocVecEnv
-from stable_baselines3.common.callbacks import CheckpointCallback
-from sb3_contrib import MaskablePPO
 from sb3_contrib.common.wrappers import ActionMasker
-from self_drive_car_env import SelfDriveCarEnv
-
-NUM_ENV = 1
-LOG_DIR = "logs"
-os.makedirs(LOG_DIR, exist_ok=True)
+from stable_baselines3.common.monitor import Monitor
 
 
-# Linear scheduler
-def linear_schedule(initial_value, final_value=0.0):
-    if isinstance(initial_value, str):
-        initial_value = float(initial_value)
-        final_value = float(final_value)
-        assert (initial_value > 0.0)
-
-    def scheduler(progress):
-        return final_value + progress * (initial_value - final_value)
-
-    return scheduler
+GameEnvName = "SelfDriveCarEnv-v0"
 
 
-def make_env(seed: int):
-    def _init():
-        env = SelfDriveCarEnv()
-        env = ActionMasker(env, SelfDriveCarEnv.get_action_mask)
-        env = Monitor(env)
-        # env.seed(seed)
-        # env.action_space = gym.spaces.Discrete(5)
-        return env
+gym.register(
+    id=GameEnvName,
+    entry_point="self_drive_car_env:SelfDriveCarEnv",
+)
 
-    return _init
+num_envs = 1  # 指定環境數量
 
+if __name__ == '__main__':
+    # 建立多環境
+    env = gym.make(GameEnvName)
+    env = gym.wrappers.HumanRendering(env)
+    env = Monitor(env, "./video", override_existing=True)
+    env = DummyVecEnv([lambda: env])
 
-def main():
-    print(sb3_contrib.__version__)
-
-    # Generate a list of random seeds for each environment.
-    seed_set = set()
-    while len(seed_set) < NUM_ENV:
-        seed_set.add(random.randint(0, 1e9))
-
-    # Create the environment.
-    env = SubprocVecEnv([make_env(seed=s) for s in seed_set])
-
-    lr_schedule = linear_schedule(2.5e-4, 2.5e-6)
-    clip_range_schedule = linear_schedule(0.15, 0.025)
-
-    # # Instantiate a PPO agent
-    model = MaskablePPO(
-        "MlpPolicy",
-        env,
-        device="cuda",
-        verbose=1,
-        n_steps=2048,
-        batch_size=512,
-        n_epochs=4,
-        gamma=0.94,
-        learning_rate=lr_schedule,
-        clip_range=clip_range_schedule,
-        tensorboard_log=LOG_DIR,
-    )
-
-    # Set the save directory
-    save_dir = "trained_models_mlp"
-    os.makedirs(save_dir, exist_ok=True)
-
-    checkpoint_interval = 15625  # checkpoint_interval * num_envs = total_steps_per_checkpoint
-    checkpoint_callback = CheckpointCallback(save_freq=checkpoint_interval, save_path=save_dir, name_prefix="ppo_snake")
-
-    # Writing the training logs from stdout to a file
-    original_stdout = sys.stdout
-    log_file_path = os.path.join(save_dir, "training_log.txt")
-    with open(log_file_path, 'w') as log_file:
-        sys.stdout = log_file
-
-        model.learn(
-            total_timesteps=int(100000000),
-            callback=[checkpoint_callback]
-        )
-        env.close()
-
-    # Restore stdout
-    sys.stdout = original_stdout
-
-    # Save the final model
-    model.save(os.path.join(save_dir, "ppo_final.zip"))
-
-
-if __name__ == "__main__":
-    main()
+    # 建立 PPO 模型
+    model = PPO("MlpPolicy", env, verbose=1)
+    # 開始訓練模型
+    model.learn(total_timesteps=10)
+    # 儲存訓練好的模型
+    model.save("./models/custom_game_model")
