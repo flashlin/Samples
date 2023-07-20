@@ -12,9 +12,9 @@ from pygameGraphic import IGraphic, PygameController
 class Action(Enum):
     NONE = 0
     UP = 1
-    DOWN = 2
-    LEFT = 3
-    RIGHT = 4
+    LEFT = 2
+    RIGHT = 3
+    DOWN = 4
 
 
 class CarState:

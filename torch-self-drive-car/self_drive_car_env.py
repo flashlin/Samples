@@ -19,7 +19,7 @@ class SelfDriveCarEnv(gym.Env):
         }
         self.game = SelfDriveCarGame()
         self.game.reset()
-        self.action_space = gym.spaces.Discrete(5)
+        self.action_space = gym.spaces.Discrete(4)  # NONE, UP, LEFT, RIGHT
 
         space = self.game.get_observation_space()
         space_width = len(space)
@@ -31,7 +31,7 @@ class SelfDriveCarEnv(gym.Env):
         self.done = False
         limit_step = False
         if limit_step:
-            self.step_limit = 1000
+            self.step_limit = 5000
         else:
             self.step_limit = 1e9  # Basically no limit.
         self.reward_step_counter = 0
@@ -60,19 +60,25 @@ class SelfDriveCarEnv(gym.Env):
             self.reward_step_counter = 0
             self.truncated = True
 
+        avg_radar_line = 0
         for radar_line in info.radar_lines:
+            avg_radar_line += radar_line
             if radar_line >= 10:
-                reward += radar_line
+                reward += 10
+            if radar_line < 10:
+                reward -= radar_line * 2
+
+        # 前方越近越扣分
+        reward -= RadarLineLength - info.radar_lines[0]
 
         radar_line_count = len(info.radar_lines)
         start = info.radar_lines[radar_line_count-1]
         end = info.radar_lines[radar_line_count-2]
-        if abs(start-end) > 50:
+        if abs(start-end) > 0:
             reward -= abs(start-end)
 
         reward += info.speed
-
-        #print(f"{self.done=} {reward=}")
+        print(f"{self.done=} {reward=}")
         return obs, reward * 0.1, self.done, self.truncated, info.to_dict()
 
     def render(self, mode='human'):
