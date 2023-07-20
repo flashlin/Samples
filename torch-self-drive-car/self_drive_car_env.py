@@ -1,6 +1,8 @@
 import math
 import time  # For debugging.
 import numpy as np
+
+from car import Action
 from game import SelfDriveCarGame
 import gymnasium as gym
 
@@ -45,8 +47,8 @@ class SelfDriveCarEnv(gym.Env):
     def seed(self, seed=None):
         pass
 
-    def step(self, action):
-        self.done = self.game.step(action)
+    def step(self, action: int):
+        self.done = self.game.step(Action(action))
         obs = self._generate_observation()
         info = self.game.get_observation_info()
 
