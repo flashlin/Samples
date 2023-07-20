@@ -21,7 +21,7 @@ min_score = 1e9
 max_score = 0
 
 for episode in range(NUM_EPISODE):
-    obs = env.reset()
+    obs, info = env.reset()
     episode_reward = 0
     done = False
 
@@ -36,17 +36,9 @@ for episode in range(NUM_EPISODE):
     step_counter = 0
     while not done:
         action, _ = model.predict(obs)
-
-        prev_mask = env.get_action_mask()
-        prev_direction = env.game.direction
-
         num_step += 1
 
-        obs, reward, done, info = env.step(action)
-
-        if done:
-            last_action = ["UP", "LEFT", "RIGHT", "DOWN"][action]
-            print(f"Gameover Penalty: {reward:.4f}. Last action: {last_action}")
+        obs, reward, done, tun, info = env.step(action)
 
         sum_step_reward += reward  # Accumulate step rewards.
         episode_reward += reward
