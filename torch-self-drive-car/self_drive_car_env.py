@@ -60,22 +60,18 @@ class SelfDriveCarEnv(gym.Env):
             self.reward_step_counter = 0
             self.truncated = True
 
-        avg_radar_line = 0
         for radar_line in info.radar_lines:
-            avg_radar_line += radar_line
-            if radar_line >= 10:
-                reward += 10
             if radar_line < 10:
                 reward -= radar_line * 2
 
         # 前方越近越扣分
         reward -= RadarLineLength - info.radar_lines[0]
 
-        radar_line_count = len(info.radar_lines)
-        start = info.radar_lines[radar_line_count-1]
-        end = info.radar_lines[radar_line_count-2]
-        if abs(start-end) > 0:
-            reward -= abs(start-end)
+        diff_0 = info.radar_lines[0]
+        diff_12 = abs(info.radar_lines[1] - info.radar_lines[2])
+        diff_34 = abs(info.radar_lines[3] - info.radar_lines[4])
+        severity = (1 / (diff_12 + 1)) + (1 / (diff_34 + 1)) - (diff_0 / 10)
+        reward += severity
 
         reward += info.speed
         print(f"{self.done=} {reward=}")
