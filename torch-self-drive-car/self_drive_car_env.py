@@ -70,12 +70,12 @@ class SelfDriveCarEnv(gym.Env):
         diff_0 = info.radar_lines[0]
         diff_12 = abs(info.radar_lines[1] - info.radar_lines[2])
         diff_34 = abs(info.radar_lines[3] - info.radar_lines[4])
-        severity = (1 / (diff_12 + 1)) + (1 / (diff_34 + 1)) - (diff_0 / 10)
+        severity = np.exp(-(diff_12 + diff_34) / diff_0)
         reward += severity
 
         reward += info.speed
-        print(f"{self.done=} {reward=}")
-        return obs, reward * 0.1, self.done, self.truncated, info.to_dict()
+        # print(f"{self.done=} {reward=}")
+        return obs, reward, self.done, self.truncated, info.to_dict()
 
     def render(self, mode='human'):
         if mode == 'human':
