@@ -1,3 +1,5 @@
+import os.path
+
 import gymnasium as gym
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecEnvWrapper
@@ -7,7 +9,7 @@ from stable_baselines3.common.monitor import Monitor
 
 
 GameEnvName = "SelfDriveCarEnv-v0"
-
+ModelName = "./models/custom_game_model"
 
 gym.register(
     id=GameEnvName,
@@ -24,7 +26,9 @@ if __name__ == '__main__':
 
     # 建立 PPO 模型
     model = PPO("MlpPolicy", vec_env, verbose=1)
+    if os.path.exists(ModelName):
+        model.load(ModelName)
     # 開始訓練模型
     model.learn(total_timesteps=10)
     # 儲存訓練好的模型
-    model.save("./models/custom_game_model")
+    model.save(ModelName)
