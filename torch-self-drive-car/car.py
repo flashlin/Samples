@@ -19,8 +19,6 @@ class Action(Enum):
 
 class CarState:
     def __init__(self):
-        self.x = 0
-        self.y = 0
         self.speed = 0
         self.angle = 0
         self.radar_lines = []
@@ -35,6 +33,10 @@ class CarState:
 class Car:
     pos = Position(0, 0)
     controller = PygameController()
+    x = 0
+    y = 0
+    prev_x = 0
+    prev_y = 0
     state = CarState()
     prev_state = CarState()
 
@@ -47,8 +49,8 @@ class Car:
         self.damaged = False
 
     def reset(self):
-        self.state.x = StartX
-        self.state.y = StartY
+        self.x = StartX
+        self.y = StartY
         self.state.speed = 0
         self.state.angle = 0
         self.damaged = False
@@ -58,7 +60,7 @@ class Car:
         radar = self.radar
         ctx.draw_image("./assets/car1.png", self.pos, state.angle)
         radar.pos = self.pos
-        radar.car_xy = Position(state.x, state.y)
+        radar.car_xy = Position(self.x, self.y)
         radar.car_angle = state.angle
         radar.render(ctx)
         bound_line = self.get_frame_lines()
@@ -115,9 +117,9 @@ class Car:
         elif self.controller.right:
             state.angle -= 1
 
-        new_pos = update_coordinates(Position(state.x, state.y), state.angle, state.speed)
-        state.x = new_pos.x
-        state.y = new_pos.y
+        new_pos = update_coordinates(Position(self.x, self.y), state.angle, state.speed)
+        self.x = new_pos.x
+        self.y = new_pos.y
 
         self.collide(ctx, road_map)
 
@@ -131,11 +133,15 @@ class Car:
                 collide_points = road.collide(ctx, bound_lines)
                 if len(collide_points) > 0:
                     # print(f"BOOM")
+                    self.x = self.prev_x
+                    self.y = self.prev_y
                     state = self.state = self.prev_state.clone()
                     state.speed = 0
                     self.damaged = True
                     road.render_damaged(ctx)
                     return [road, collide_points]
+        self.prev_x = self.x
+        self.prev_y = self.y
         self.prev_state = self.state.clone()
         self.prev_state.radar_lines = self.radar.get_observation_info()
         return [EmptyRoad(), []]
@@ -151,7 +157,7 @@ class Car:
 
     def get_bound_points(self):
         state = self.state
-        left_top = Position(state.x - FrameWidth / 2, state.y - FrameHeight / 2)
+        left_top = Position(self.x - FrameWidth / 2, self.y - FrameHeight / 2)
         right_bottom = Position(left_top.x + FrameWidth, left_top.y + FrameHeight)
         return rotate_rectangle(left_top, right_bottom, state.angle)
 
