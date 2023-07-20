@@ -55,7 +55,7 @@ class SelfDriveCarGame:
         car = self.car
 
         screen.render_start()
-        road_map.pos = Position(CenterX - car.state.x, CenterY - car.state.y)
+        road_map.pos = Position(CenterX - car.x, CenterY - car.y)
         road_map.render(screen)
         car.move(screen, road_map)
         car.render(screen)
