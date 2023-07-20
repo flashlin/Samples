@@ -67,12 +67,6 @@ class SelfDriveCarEnv(gym.Env):
         # 前方越近越扣分
         reward -= RadarLineLength - info.radar_lines[0]
 
-        diff_0 = info.radar_lines[0]
-        diff_12 = abs(info.radar_lines[1] - info.radar_lines[2])
-        diff_34 = abs(info.radar_lines[3] - info.radar_lines[4])
-        severity = np.exp(-(diff_12 + diff_34) / diff_0)
-        reward += severity
-
         reward += info.speed
         # print(f"{self.done=} {reward=}")
         return obs, reward, self.done, self.truncated, info.to_dict()

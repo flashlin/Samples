@@ -6,6 +6,7 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecEnvW
 import random
 from sb3_contrib.common.wrappers import ActionMasker
 from stable_baselines3.common.monitor import Monitor
+from torch import nn
 
 SHOW = True
 
@@ -27,7 +28,8 @@ if __name__ == '__main__':
     vec_env = DummyVecEnv([lambda: env])
 
     # 建立 PPO 模型
-    model = PPO("MlpPolicy", vec_env, verbose=1)
+    policy_kwargs = dict(net_arch=[32, 32], activation_fn=nn.ReLU)
+    model = PPO("MlpPolicy", vec_env, verbose=1, policy_kwargs=policy_kwargs)
     if os.path.exists(ModelName):
         model.load(ModelName)
     # 開始訓練模型
