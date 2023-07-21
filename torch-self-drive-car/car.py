@@ -135,8 +135,8 @@ class Car:
                     # print(f"BOOM")
                     self.x = self.prev_x
                     self.y = self.prev_y
-                    state = self.state = self.prev_state.clone()
-                    state.speed = 0
+                    self.state = self.prev_state.clone()
+                    self.state.speed = 0
                     self.damaged = True
                     road.render_damaged(ctx)
                     return [road, collide_points]
