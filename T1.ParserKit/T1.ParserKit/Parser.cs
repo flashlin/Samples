@@ -62,12 +62,36 @@ public class Token
     public int Index { get; set; }
 }
 
-public class Parser
+public class SqlTokenizer
 {
-    public Token Read(InputStream stream)
+    public List<Token> Tokenize(string sql)
+    {
+        var input = new InputStream(sql);
+        return ParseTokens(input).ToList();
+    }
+
+    private static IEnumerable<Token> ParseTokens(InputStream input)
+    {
+        var processList = new[]
+        {
+            TryReadNumber
+        };
+        while (!input.Eof())
+        {
+            foreach (var process in processList)
+            {
+                var (success, token) = process(input);
+                if (!success) continue;
+                yield return token;
+                break;
+            }
+        }
+    }
+
+    private static (bool success, Token token) TryReadNumber(InputStream stream)
     {
         var ch = stream.Peek();
-        if (ch.Length == 1 && char.IsDigit(ch[0]))
+        if (char.IsDigit(ch[0]))
         {
             var number = new StringBuilder();
             var index = stream.Index + 1;
@@ -88,13 +112,15 @@ public class Parser
                 stream.Read();
             } while (!stream.Eof());
 
-            return new Token
             {
-                Text = number.ToString(),
-                Index = index
-            };
+                return (true, new Token
+                {
+                    Text = number.ToString(),
+                    Index = index
+                });
+            }
         }
 
-        return Token.Empty;
+        return (false, Token.Empty);
     }
 }

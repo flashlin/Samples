@@ -2,6 +2,17 @@ using T1.ParserKit;
 
 namespace ParserKitTests;
 
+public class TokensTest
+{
+    [Test]
+    public void Where()
+    {
+        var sql = "WHERE ID=1 and (Name != '' or Name like '%name%')";
+        var tk = new SqlTokenizer();
+        tk.Tokenize(sql);
+    }
+}
+
 public class InputStreamTest
 {
     [SetUp]
