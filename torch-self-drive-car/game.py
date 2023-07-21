@@ -31,9 +31,10 @@ class SelfDriveCarGame:
         self.car.reset()
 
     def step(self, action: Action) -> bool:
-        self.car.control(action)
-        self.car.move(self.screen, self.road_map)
-        return self.car.damaged
+        car = self.car
+        car.control(action)
+        car.move(self.screen, self.road_map)
+        return car.damaged
 
     def get_state(self) -> CarState:
         return self.car.state
