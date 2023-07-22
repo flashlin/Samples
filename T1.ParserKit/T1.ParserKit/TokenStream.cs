@@ -12,12 +12,15 @@ public class TokenStream
         _tokens = tokens.GetEnumerator();
     }
 
+    public int Index => _index;
+
     public bool Eof()
     {
         if (_index + 1 < _length)
         {
             return false;
         }
+
         var token = Peek();
         return token == Token.Empty;
     }
@@ -29,8 +32,26 @@ public class TokenStream
         _index = index;
         return token;
     }
+    
+    public List<Token> PeekTokens(int n = 1)
+    {
+        var index = _index;
+        var tokens = NextTokens(n);
+        _index = index;
+        return tokens;
+    }
 
     public Token Next(int n = 1)
+    {
+        var tokens = NextTokens(n);
+        return new Token
+        {
+            Text = string.Join("", tokens.Select(x => x.Text)),
+            Index = tokens[0].Index
+        };
+    }
+
+    public List<Token> NextTokens(int n = 1)
     {
         var count = 0;
         var span = new List<Token>();
@@ -41,7 +62,7 @@ public class TokenStream
             span.Add(_buffer[_index]);
             count++;
         }
-        
+
         while (count < n)
         {
             if (_index + 1 < _length)
@@ -54,21 +75,13 @@ public class TokenStream
                 {
                     break;
                 }
+
                 _buffer.Add(_tokens.Current);
                 _length += 1;
                 FromBufferToSpan();
             }
         }
 
-        if (count == 0)
-        {
-            return Token.Empty;
-        }
-
-        return new Token
-        {
-            Text = string.Join("", span.Select(x => x.Text)),
-            Index = span[0].Index
-        };
+        return span;
     }
 }
