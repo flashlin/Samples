@@ -6,4 +6,8 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="T1.Standard" Version="1.0.74" />
+    </ItemGroup>
+
 </Project>

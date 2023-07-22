@@ -2,17 +2,6 @@ using T1.ParserKit;
 
 namespace ParserKitTests;
 
-public class TokensTest
-{
-    [Test]
-    public void Where()
-    {
-        var sql = "WHERE ID=1 and (Name != '' or Name like '%name%')";
-        var tk = new SqlTokenizer();
-        tk.Tokenize(sql);
-    }
-}
-
 public class InputStreamTest
 {
     [SetUp]
@@ -24,13 +13,13 @@ public class InputStreamTest
     public void Read()
     {
         var input = new InputStream("abc");
-        var token1 = input.Read(2);
+        var token1 = input.Next(2);
         Assert.True(token1.SequenceEqual("ab".AsSpan()));
         
-        var token2 = input.Read();
+        var token2 = input.Next();
         Assert.True(token2.SequenceEqual("c".AsSpan()));
         
-        var token3 = input.Read();
+        var token3 = input.Next();
         Assert.True(token3.SequenceEqual(ReadOnlySpan<char>.Empty));
     }
     
@@ -38,7 +27,7 @@ public class InputStreamTest
     public void Peek()
     {
         var input = new InputStream("abc");
-        input.Read(3);
+        input.Next(3);
         var token1 = input.Peek();
         Assert.True(token1.SequenceEqual(ReadOnlySpan<char>.Empty));
     }
