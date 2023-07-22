@@ -2,10 +2,10 @@
 
 public class Tokenizer
 {
-    public List<Token> Tokenize(string sql)
+    public IEnumerable<Token> Tokenize(string sql)
     {
         var input = new InputStream(sql);
-        return ParseTokens(input).ToList();
+        return ParseTokens(input);
     }
 
     private static IEnumerable<Token> ParseTokens(InputStream input)
