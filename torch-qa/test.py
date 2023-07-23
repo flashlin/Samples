@@ -9,7 +9,8 @@ MAX_WORD_LEN = 5
 
 class CharRNN(nn.Module):
     """
-    input_size: ascii 0-127 = 128
+    input_size: ascii 0-127 = 128 特徵大小
+    output_size: 分類大小
     """
     def __init__(self, input_size, hidden_size, output_size, n_layers=1):
         super(CharRNN, self).__init__()
@@ -153,3 +154,14 @@ outputs2 = m1(outputs)
 print(f"m {outputs2=}")
 
 
+def get_probability(output):
+    # 应用softmax函数来计算每个类别的概率
+    probabilities = torch.nn.functional.softmax(output, dim=1)
+    print("Probabilities:", probabilities)
+
+    # 使用argmax来获取最大概率对应的类别
+    predicted_class = torch.argmax(probabilities, dim=1)
+    print("Predicted class:", predicted_class.item())
+
+n = get_probability(outputs2)
+print(f"{n=}")
