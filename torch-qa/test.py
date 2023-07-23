@@ -6,10 +6,21 @@ import torch.nn.functional as F
 from torch import nn, optim
 from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
-    padding_row_array_list
+    padding_row_array_list, alist_to_chunks
 from tsql_tokenizr import tsql_tokenize
 
 MAX_WORD_LEN = 5
+
+
+def create_dict(keys: list[str]):
+    key_to_id = {}
+    id_to_key = {}
+    id = 1
+    for key in keys:
+        key_to_id[key] = id
+        id_to_key[id] = key
+        id += 1
+    return key_to_id, id_to_key
 
 
 def test(text):
@@ -128,6 +139,7 @@ def convert_to_float(s):
 
 
 sql_keywords = [
+    '<s>', '</s>',
     '<identifier>',
     '<number>',
     '<string>',
@@ -135,11 +147,7 @@ sql_keywords = [
     '&', '>=', '<=', '<>', '!=', '=',
     'select', 'from', 'as', 'with', 'nolock'
 ]
-word_to_id_dict = {}
-id = 1
-for key in sql_keywords:
-    word_to_id_dict[key] = id + 1
-    id += 1
+word_to_id_dict, _ = create_dict(sql_keywords)
 
 
 def word_to_id(word: str) -> int:
@@ -167,15 +175,6 @@ def sql_to_value(sql: str):
     return expanded_sql_value
 
 
-def create_dict(keys: list[str]):
-    key_to_id = {}
-    id_to_key = {}
-    id = 1
-    for key in keys:
-        key_to_id[key] = id
-        id_to_key[id] = key
-        id += 1
-    return key_to_id, id_to_key
 
 
 label_type_dict, label_type_id_dict = create_dict([
@@ -396,7 +395,7 @@ def test3():
 
 
 def test4():
-    train_data = [
+    raw_data = [
         ("select id from cust", {
             'type': 'select',
             'columns': [[0, 1]],
@@ -409,12 +408,22 @@ def test4():
         }),
     ]
 
-    for sql, label in train_data:
+    max_seq_len = 200
+    features_data = []
+    labels_data = []
+    for sql, label in raw_data:
+        sql_value = [word_to_id_dict['<s>']] + sql_to_value(sql) + [word_to_id_dict['</s>']]
+        sql_chunks = alist_to_chunks(sql_value, max_len=max_seq_len)
+        features_data.append(sql_chunks)
         label_value = label_to_value(label)
         label_obj = label_value_to_obj(label_value)
         label_text = decode_label(label_obj, sql)
         print(f"{label_text=}")
+        labels_data.append(label_value)
 
+    print(f"{features_data=}")
+    print(f"{labels_data=}")
+    
 
 if __name__ == '__main__':
     test4()

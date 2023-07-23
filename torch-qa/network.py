@@ -65,9 +65,22 @@ def word_to_chunks(word: str, max_len, start_tag=129, end_tag=130):
     return padded_chunks
 
 
-def word_chunks_list_to_chunks(word_chunks_list):
-    data_np = np.array([item for chunks in word_chunks_list for item in chunks])
+def alist_to_chunks(a_list, max_len):
+    # If string length is more than max_len, break it down into chunks of max_len
+    if len(a_list) > max_len:
+        chunks = [a_list[i:i + max_len] for i in range(0, len(a_list), max_len)]
+    else:
+        chunks = [a_list]
+
+    # 使用 0 进行填充以确保所有的输入序列都有相同的长度
+    padded_chunks = [np.pad(chunk, (0, max_len - len(chunk)), mode='constant') for chunk in chunks]
+    return padded_chunks
+
+
+def alist_chunks_list_to_chunks(alist_chunks_list):
+    data_np = np.array([item for chunks in alist_chunks_list for item in chunks])
     return data_np
+
 
 
 class MultiHeadAttention(nn.Module):
