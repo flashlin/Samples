@@ -167,7 +167,64 @@ def sql_to_value(sql: str):
     return expanded_sql_value
 
 
+type_dict = {
+    'offset': 1,
+    'select': 2,
+}
+
+
+class LabelException(Exception):
+    pass
+
+
+def label_to_value(label):
+    values = []
+    label_type_name = label['type']
+    label_type = type_dict[label_type_name]
+    values.append(label_type)
+    if label_type_name == 'select':
+        label_columns = label['columns']
+        columns_size = label_columns[0]
+        values.append(columns_size)
+        for table_index, offset in label_columns[1:]:
+            values.append(table_index)
+            values.append(offset)
+        label_froms = label['froms']
+        from_size = label_froms[0]
+        values.append(from_size)
+        for data in label_froms[1:]:
+            from_type_name = data[0]
+            values.append(type_dict[from_type_name])
+            if from_type_name == 'offset':
+                values.append(data[1])
+            elif from_type_name == 'select':  # select type
+                values.append(label_to_value(data[1]))
+            else:
+                raise LabelException(f"not support {from_type_name=}")
+    return values
+
+
 def test2():
+    max_pad_len = 5
+    model = WordRNN(output_size=3, max_pad_word_len=max_pad_len)
+    raw_data = [
+        ("select", 1),
+        ("id", 2)
+    ]
+
+    input_chunks_list = [word_to_chunks(word, max_pad_len) for word, label in raw_data]
+    padded_inputs = padding_row_array_list(input_chunks_list, max_seq_len=max_pad_len)
+    inputs = torch.tensor(padded_inputs, dtype=torch.long)
+    print(f"{inputs=}")
+
+    input_labels_list = [label for word, label in raw_data]
+
+    outputs = model(inputs)
+    print(f"{outputs=}")
+
+
+
+def test3():
     """
         inputs:
         [
@@ -205,24 +262,18 @@ def test2():
     sql_value1 = sql_to_value("select id from customer")
     print(f"{sql_value1=}")
 
+    label = {
+        'type': 'select',
+        'columns': [1, (3, 1)],
+        'froms': [1, ['offset', 3]]
+    }
+    print(f"{label=}")
+    label_value = label_to_value(label)
+    print(f"{label_value=}")
 
-    max_pad_len = 5
-    model = WordRNN(output_size=3, max_pad_word_len=max_pad_len)
-    raw_data = [
-        ("select", 1),
-        ("id", 2)
-    ]
 
-    input_chunks_list = [word_to_chunks(word, max_pad_len) for word, label in raw_data]
-    padded_inputs = padding_row_array_list(input_chunks_list, max_seq_len=max_pad_len)
-    inputs = torch.tensor(padded_inputs, dtype=torch.long)
-    print(f"{inputs=}")
 
-    input_labels_list = [label for word, label in raw_data]
-
-    outputs = model(inputs)
-    print(f"{outputs=}")
 
 
 if __name__ == '__main__':
-    test2()
+    test3()
