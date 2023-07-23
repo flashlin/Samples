@@ -22,6 +22,7 @@ OPERATOR = 'operator'
 SYMBOL = 'symbol'
 KEYWORD = 'keyword'
 EMPTY = '(empty)'
+NONE = '(none)'
 
 
 class Token:
@@ -50,6 +51,7 @@ class Token:
 
 
 EmptyToken = Token(EMPTY, None, -1, -1, -1)
+NoneToken = Token(NONE, None, -1, -1, -1)
 # T = TypeVar("T")
 
 

@@ -3,7 +3,7 @@ from enum import Enum
 from data_utils import sort_by_len_desc, group_to_lengths, write_dict_to_file, load_dict_from_file
 from stream_utils import Token, StreamTokenIterator, read_identifier_token, read_float_number_token, \
     read_single_quote_string_token, read_spaces_token, KEYWORD, OPERATOR, SYMBOL, EmptyToken, reduce_token_list, \
-    IDENTIFIER
+    IDENTIFIER, NoneToken
 from tokenizr_utils import read_keyword_fn, try_read_any
 from typing import Final
 
@@ -234,6 +234,11 @@ def read_tsql_identifier(stream_iterator):
     return reduce_token_list(IDENTIFIER, buff)
 
 
+def skip_spaces(stream_iterator: StreamTokenIterator):
+    read_spaces_token(stream_iterator)
+    return NoneToken
+
+
 def tsql_tokenize(stream) -> list[Token]:
     tokens = []
     stream_iterator = StreamTokenIterator(stream)
@@ -245,12 +250,14 @@ def tsql_tokenize(stream) -> list[Token]:
         read_single_quote_string_token,
         read_operator_fn(),
         read_symbol_fn(),
-        read_spaces_token,
+        skip_spaces,
         read_tsql_identifier
     ]
 
     while not stream_iterator.is_done():
         token = try_read_any(stream_iterator, read_fn_list)
+        if token == NoneToken:
+            continue
         if token != EmptyToken:
             tokens.append(token)
             continue
