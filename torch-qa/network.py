@@ -148,3 +148,25 @@ class WordRNN(nn.Module):
         lstm_outputs = lstm_outputs.unsqueeze(0)
         attn_outputs = self.attn(lstm_outputs)
         return get_probability(attn_outputs)
+
+
+def padding_row_array_list(row_array_list, max_seq_len):
+    """
+    :param row_array_list:
+        [[array([129, 115, 101]), array([ 99, 116, 130)], [array([129, 105, 100)]]
+    :param max_seq_len:
+
+    :return:
+        [[array([129, 115, 101]), array([ 99, 116, 130)], [array([129, 105, 100), array([0., 0., 0.)]]
+    """
+    max_length = 0
+    for row in row_array_list:
+        max_length = max(len(row), max_length)
+    new_row_array_list = []
+    for row in row_array_list:
+        if len(row) < max_length:
+            zero_array = [np.zeros(max_seq_len)] * (max_length-len(row))
+            new_row_array_list.append(row + zero_array)
+        else:
+            new_row_array_list.append(row)
+    return new_row_array_list
