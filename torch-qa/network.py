@@ -55,6 +55,11 @@ def word_to_chunks(word: str, max_len, start_tag=129, end_tag=130):
     return padded_chunks
 
 
+def word_chunks_list_to_chunks(word_chunks_list):
+    data_np = np.array([item for chunks in word_chunks_list for item in chunks])
+    return data_np
+
+
 class MultiHeadAttention(nn.Module):
     """
         使用多頭注意力機制，我們需要決定使用多少頭。讓我們假設我們使用 3 個頭。
@@ -90,3 +95,42 @@ class MultiHeadAttention(nn.Module):
         x = torch.cat(heads, dim=-1)  # shape: [batch_size, hidden_size * num_heads]
 
         return x
+
+
+def chunks_to_tensor(chunks):
+    input_data = torch.LongTensor(chunks)
+    return input_data
+
+
+def get_probability(output):
+    # 应用softmax函数来计算每个类别的概率
+    probabilities = torch.nn.functional.softmax(output, dim=1)
+    # print("Probabilities:", probabilities)
+
+    # 使用argmax来获取最大概率对应的类别
+    predicted_class = torch.argmax(probabilities, dim=1)
+    # print("Predicted class:", predicted_class.item())
+    return predicted_class.item()
+
+
+class WordRNN(nn.Module):
+    """
+    output_size: 分類大小
+    """
+    def __init__(self, output_size, max_pad_word_len=20, hidden_size=9, n_layers=1):
+        super(WordRNN, self).__init__()
+        self.char_rnn = CharRNN(input_size=256+2,
+                                output_size=output_size,
+                                hidden_size=hidden_size,
+                                n_layers=n_layers)
+        self.attn = MultiHeadAttention(hidden_size=3,
+                                       num_heads=output_size)
+
+    def forward(self, x):
+        lstm_outputs = self.char_rnn(x)
+        # print(f"{lstm_outputs=}")
+        lstm_outputs = lstm_outputs.unsqueeze(1)
+        attn_outputs = self.attn(lstm_outputs)
+        return get_probability(attn_outputs)
+
+
