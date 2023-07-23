@@ -1,12 +1,13 @@
+import re
+
 import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn, optim
 from torch.utils.tensorboard import SummaryWriter
-from torch.utils.data import DataLoader, TensorDataset
-from torch.nn.utils.rnn import pad_sequence
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
-    word_chunks_list_to_chunks
+    padding_row_array_list
+from tsql_tokenizr import tsql_tokenize
 
 MAX_WORD_LEN = 5
 
@@ -104,25 +105,107 @@ def train(model, data_loader, num_epochs=10):
     print("Finished Training")
 
 
-"""
-    inputs =[[array([129, 115, 101]), array([ 99, 116, 130)], [array([129, 105, 100)]]
-    outputs=[[array([129, 115, 101]), array([ 99, 116, 130)], [array([129, 105, 100), array([0., 0., 0.)]]
-"""
-def padding_row_array_list(row_array_list, max_seq_len):
-    max_length = 0
-    for row in row_array_list:
-        max_length = max(len(row), max_length)
-    new_row_array_list = []
-    for row in row_array_list:
-        if len(row) < max_length:
-            zero_array = [np.zeros(max_seq_len)] * (max_length-len(row))
-            new_row_array_list.append(row + zero_array)
-        else:
-            new_row_array_list.append(row)
-    return new_row_array_list
+def is_float(word: str) -> bool:
+    """Return True if string is a float number."""
+    if re.match("^\\d+?\\.\\d+?$", word) is None:
+        return False
+    return True
+
+
+def is_int(word: str) -> bool:
+    """Return True if string is a int number."""
+    if re.search("\\.$", word):
+        return False
+    if re.match("^\\d+$", word) is None:
+        return False
+    return True
+
+
+def convert_to_float(s):
+    if is_float(s):
+        return float(s)
+    return None
+
+
+sql_keywords = [
+    '<identifier>',
+    '<number>',
+    '<string>',
+    '(', ')', '.', '+', '-', '*', '/',
+    '&', '>=', '<=', '<>', '!=', '=',
+    'select', 'from', 'as', 'with', 'nolock'
+]
+word_to_id_dict = {}
+id = 1
+for key in sql_keywords:
+    word_to_id_dict[key] = id + 1
+    id += 1
+
+
+def word_to_id(word: str) -> int:
+    if is_float(word):
+        return word_to_id_dict['<number>']
+    if is_int(word):
+        return word_to_id_dict['<number>']
+    if word.startswith("'") and word.endswith("'"):
+        return word_to_id_dict['<string>']
+    lowered_word = word.lower()
+    if lowered_word in word_to_id_dict:
+        return word_to_id_dict[lowered_word]
+    return word_to_id_dict['<identifier>']
+
+
+def text_to_np(text: str):
+    pass
+
+
+def sql_to_value(sql: str):
+    sql_tokens = tsql_tokenize(sql)
+    sql_value = [word_to_id(token.text) for token in sql_tokens]
+    sql_value = [(offset, value) for offset, value in enumerate(sql_value)]
+    expanded_sql_value = [item for sublist in sql_value for item in sublist]
+    return expanded_sql_value
 
 
 def test2():
+    """
+        inputs:
+        [
+            "select id from customer",
+            "select id from ( select id from extra_customer )",
+        ]
+
+        [
+            [0, select, 1, identifier, 2, from, 3, identifier],
+            [0, select, 1, identifier, 2, from, 3, (, 4, select, 5, identifier, 6, from, 7, identifier, 8, )],
+        ]
+
+        [
+            {
+                type: select,               //[select/position]
+                columns: [3.1],             //預測幾個欄位, [哪一個位置.哪一個位置] as 哪一個位置
+                from: [3]                   //預測幾個table,
+                                                [position, table start, table end] or
+                                                [select...]
+            },
+            {
+                type: select,
+                columns: [3.1],
+                from: [
+                    {
+                        type: select,
+                        columns: [7.5],
+                        from: [7]
+                    }
+                ]
+            }
+        ]
+    """
+
+    sql_value1 = sql_to_value("select id from customer")
+    print(f"{sql_value1=}")
+
+
     max_pad_len = 5
     model = WordRNN(output_size=3, max_pad_word_len=max_pad_len)
     raw_data = [
@@ -131,20 +214,11 @@ def test2():
     ]
 
     input_chunks_list = [word_to_chunks(word, max_pad_len) for word, label in raw_data]
-    print(f"{input_chunks_list=}")
-    # input_chunks = word_chunks_list_to_chunks(input_chunks_list)
-    # print(f"{input_chunks=}")
-    input_labels_list = [label for word, label in raw_data]
-    print(f"{input_labels_list=}")
-
     padded_inputs = padding_row_array_list(input_chunks_list, max_seq_len=max_pad_len)
-    print(f"{padded_inputs=}")
-
-
-    # Convert each numpy array to a tensor and collect these into a new list
     inputs = torch.tensor(padded_inputs, dtype=torch.long)
     print(f"{inputs=}")
 
+    input_labels_list = [label for word, label in raw_data]
 
     outputs = model(inputs)
     print(f"{outputs=}")
