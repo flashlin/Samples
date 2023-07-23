@@ -45,6 +45,3 @@ public class TokenizeTest
         }), options => options.Including(o => o.Text));
     }
 }
-
-
-

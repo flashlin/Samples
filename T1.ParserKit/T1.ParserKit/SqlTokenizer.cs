@@ -26,8 +26,8 @@ public class SqlTokenizer
             }
             if (!read)
             {
-                var remaining = input.Peek(10).Text;
-                throw new NotSupportedException($"tokenize at \"{remaining}\"");
+                var remaining = input.Peek().Text;
+                throw new NotSupportedException($"sql tokenize at \"{remaining}\"");
             }
         }
     }
@@ -79,4 +79,33 @@ public class SqlTokenizer
     {
         return input.Next();
     }
+}
+
+public class WhereExpr : SqlExpr
+{
+    public SqlExpr Condition { get; set; }
+}
+
+public class BinaryExpr : SqlExpr
+{
+    public SqlExpr Left { get; set; }
+    public Token Op { get; set; }
+    public SqlExpr Right { get; set; }
+
+    public BinaryExpr(SqlExpr left, Token op, SqlExpr right)
+    {
+        Left = left;
+        Op = op;
+        Right = right;
+    }
+}
+
+public class SqlExpr
+{
+    public static readonly SqlExpr Empty = new SqlExpr();
+    
+    
+    public Token LParam { get; set; } = Token.Empty;
+    public Token Token { get; set; } = Token.Empty;
+    public Token RParam { get; set; } = Token.Empty;
 }
