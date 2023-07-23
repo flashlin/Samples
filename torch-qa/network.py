@@ -17,7 +17,11 @@ class CharRNN(nn.Module):
         self.lstm = nn.LSTM(hidden_size, hidden_size, n_layers)
         self.fc = nn.Linear(hidden_size, output_size)
 
+    """
+    """
     def forward(self, x):
+        batch_size = x.shape[0]
+        x = x.view(-1, batch_size)
         # input shape: [sequence_length, batch_size]
         embedded = self.embedding(x)  # shape: [sequence_length, batch_size, hidden_size]
 
@@ -35,7 +39,9 @@ class CharRNN(nn.Module):
         #         [ 0.0743, -0.1486,  0.1574]], grad_fn=<AddmmBackward0>)
         # 輸出一個大小為 [5, 3] 的 tensor，
         # 其中5表示你有5個輸入樣本，而3則對應於模型嘗試進行分類的3個類別。
-        # 每個張量是該輸入在每個類別上的未經歸一化的預測分數（也被稱為 logits）。
+        # 每個張量是該輸入在每個類別上的未經歸一化的預測分數（也被稱為 logits）
+
+        print(f"model {output=}")
 
         return output
 
@@ -105,12 +111,9 @@ def chunks_to_tensor(chunks):
 def get_probability(output):
     # 应用softmax函数来计算每个类别的概率
     probabilities = torch.nn.functional.softmax(output, dim=1)
-    # print("Probabilities:", probabilities)
-
-    # 使用argmax来获取最大概率对应的类别
     predicted_class = torch.argmax(probabilities, dim=1)
-    # print("Predicted class:", predicted_class.item())
-    return predicted_class.item()
+    # return predicted_class.item()
+    return predicted_class.tolist()
 
 
 class WordRNN(nn.Module):
@@ -128,8 +131,7 @@ class WordRNN(nn.Module):
 
     def forward(self, x):
         lstm_outputs = self.char_rnn(x)
-        # print(f"{lstm_outputs=}")
-        lstm_outputs = lstm_outputs.unsqueeze(1)
+        lstm_outputs = lstm_outputs.unsqueeze(0)
         attn_outputs = self.attn(lstm_outputs)
         return get_probability(attn_outputs)
 
