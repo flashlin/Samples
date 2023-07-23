@@ -8,6 +8,7 @@ class CharRNN(nn.Module):
     input_size: ascii 0-127 = 128 特徵大小
     output_size: 分類大小
     """
+
     def __init__(self, input_size, output_size, hidden_size=8, n_layers=1):
         super(CharRNN, self).__init__()
         self.hidden_size = hidden_size
@@ -17,9 +18,15 @@ class CharRNN(nn.Module):
         self.lstm = nn.LSTM(hidden_size, hidden_size, n_layers)
         self.fc = nn.Linear(hidden_size, output_size)
 
-    """
-    """
     def forward(self, x):
+        """
+        :param x: tensor([
+            [[129, 115, 101, 108, 101], [ 99, 116, 130,   0,   0]],
+            [[129, 105, 100, 130,   0], [  0,   0,   0,   0,   0]]
+        ])
+        :return:
+            tensor([[0.1454, 0.1765, 0.3148], [0.1416, 0.1781, 0.3188]], grad_fn=<AddmmBackward0>)
+        """
         batch_size = x.shape[0]
         x = x.view(-1, batch_size)
         # input shape: [sequence_length, batch_size]
@@ -40,9 +47,6 @@ class CharRNN(nn.Module):
         # 輸出一個大小為 [5, 3] 的 tensor，
         # 其中5表示你有5個輸入樣本，而3則對應於模型嘗試進行分類的3個類別。
         # 每個張量是該輸入在每個類別上的未經歸一化的預測分數（也被稱為 logits）
-
-        print(f"model {output=}")
-
         return output
 
 
@@ -67,11 +71,12 @@ def word_chunks_list_to_chunks(word_chunks_list):
 
 
 class MultiHeadAttention(nn.Module):
-    """
-        使用多頭注意力機制，我們需要決定使用多少頭。讓我們假設我們使用 3 個頭。
-        這意味著我們的隱藏層大小需要能被頭的數量整除。在這種情況下，我們有 3 個特徵，所以可以用 3 個頭來處理。
-    """
     def __init__(self, hidden_size, num_heads):
+        """
+            使用多頭注意力機制, 我們需要決定使用多少頭
+            在這種情況下, 我們有 3 個特徵，所以最多可以用 num_heads=3 個頭來處理
+            注意hidden_size 隱藏層大小需要能被頭的數量整除
+        """
         super(MultiHeadAttention, self).__init__()
 
         self.num_heads = num_heads
@@ -109,6 +114,14 @@ def chunks_to_tensor(chunks):
 
 
 def get_probability(output):
+    """
+        output:
+            Tensor([ [float,...], [float,...] ]): A tensor of shape (batch_size, num_classes).
+            ex tensor([[0.1454, 0.1765, 0.3148], [0.1416, 0.1781, 0.3188]], grad_fn=<AddmmBackward0>)
+        Returns:
+            list[int]: A list of the class with the highest score for each input in the batch.
+            ex [2, 2]
+    """
     # 应用softmax函数来计算每个类别的概率
     probabilities = torch.nn.functional.softmax(output, dim=1)
     predicted_class = torch.argmax(probabilities, dim=1)
@@ -120,9 +133,10 @@ class WordRNN(nn.Module):
     """
     output_size: 分類大小
     """
+
     def __init__(self, output_size, max_pad_word_len=20, hidden_size=9, n_layers=1):
         super(WordRNN, self).__init__()
-        self.char_rnn = CharRNN(input_size=256+2,
+        self.char_rnn = CharRNN(input_size=256 + 2,
                                 output_size=output_size,
                                 hidden_size=hidden_size,
                                 n_layers=n_layers)
@@ -134,5 +148,3 @@ class WordRNN(nn.Module):
         lstm_outputs = lstm_outputs.unsqueeze(0)
         attn_outputs = self.attn(lstm_outputs)
         return get_probability(attn_outputs)
-
-
