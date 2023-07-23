@@ -290,6 +290,37 @@ def label_value_to_label(label_value):
     return None
 
 
+def decode_label(label, input_tokens):
+    if label['type'] == 'select':
+        decoded_text = ''
+        decoded_text += 'SELECT '
+        for idx, col in enumerate(label['columns']):
+            from_index = col[0]
+            input_offset = col[1]
+            from_table = f"tb{from_index}.{input_tokens[input_offset]}"
+            decoded_text += from_table
+            if idx < len(label['columns']):
+                decoded_text += ', '
+        decoded_text += 'FROM '
+        for idx, source in enumerate(label['froms']):
+            source = ListIter(source)
+            from_type = source.next()
+            if from_type == 'offset':
+                table_name = input_tokens[source.next()]
+                decoded_text += f"{table_name} as tb{idx}"
+            elif from_type == 'select':
+                decoded_text += '('
+                decoded_text += decode_label(source.next(), input_tokens)
+                decoded_text += ')'
+            else:
+                raise Exception(f"not support {from_type}")
+            if idx < len(label['froms']):
+                decoded_text += ', '
+        return decoded_text
+    return None
+
+
+
 def test2():
     max_pad_len = 5
     model = WordRNN(output_size=3, max_pad_word_len=max_pad_len)
@@ -343,8 +374,9 @@ def test3():
         ]
     """
 
-    sql_value1 = sql_to_value("select id from customer")
-    print(f"{sql_value1=}")
+    sql = "select id from customer"
+    sql_value = sql_to_value(sql)
+    print(f"{sql_value=}")
 
     label = {
         'type': 'select',
@@ -356,6 +388,11 @@ def test3():
     print(f"{label_value=}")
     label_obj = label_value_to_label(label_value)
     print(f"{label_obj=}")
+
+    sql_tokens = [token.text for token in tsql_tokenize(sql)]
+    print(f"{sql_tokens=}")
+    label_text = decode_label(label_obj, sql_tokens)
+    print(f"{label_text=}")
 
 
 if __name__ == '__main__':
