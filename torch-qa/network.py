@@ -77,7 +77,7 @@ def alist_to_chunks(a_list, max_len):
     return padded_chunks
 
 
-def alist_chunks_list_to_chunks(alist_chunks_list):
+def padding_alist_chunks_list(alist_chunks_list):
     data_np = np.array([item for chunks in alist_chunks_list for item in chunks])
     return data_np
 

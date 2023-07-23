@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch import nn, optim
 from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
-    padding_row_array_list, alist_to_chunks
+    padding_row_array_list, alist_to_chunks, padding_alist_chunks_list
 from tsql_tokenizr import tsql_tokenize
 
 MAX_WORD_LEN = 5
@@ -414,7 +414,7 @@ def test4():
     for sql, label in raw_data:
         sql_value = [word_to_id_dict['<s>']] + sql_to_value(sql) + [word_to_id_dict['</s>']]
         sql_chunks = alist_to_chunks(sql_value, max_len=max_seq_len)
-        features_data.append(sql_chunks)
+        features_data.append([sql_chunks])
         label_value = label_to_value(label)
         label_obj = label_value_to_obj(label_value)
         label_text = decode_label(label_obj, sql)
@@ -423,7 +423,10 @@ def test4():
 
     print(f"{features_data=}")
     print(f"{labels_data=}")
-    
+
+    padded_features_data = padding_alist_chunks_list(features_data)
+    print(f"{padded_features_data=}")
+
 
 if __name__ == '__main__':
     test4()
