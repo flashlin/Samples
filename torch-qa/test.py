@@ -299,22 +299,22 @@ def decode_label(label, input_tokens):
             input_offset = col[1]
             from_table = f"tb{from_index}.{input_tokens[input_offset]}"
             decoded_text += from_table
-            if idx < len(label['columns']):
+            if idx + 1 < len(label['columns']):
                 decoded_text += ', '
-        decoded_text += 'FROM '
+        decoded_text += ' FROM '
         for idx, source in enumerate(label['froms']):
             source = ListIter(source)
             from_type = source.next()
             if from_type == 'offset':
                 table_name = input_tokens[source.next()]
-                decoded_text += f"{table_name} as tb{idx}"
+                decoded_text += f"{table_name} as tb{idx} WITH(NOLOCK)"
             elif from_type == 'select':
                 decoded_text += '('
                 decoded_text += decode_label(source.next(), input_tokens)
                 decoded_text += ')'
             else:
                 raise Exception(f"not support {from_type}")
-            if idx < len(label['froms']):
+            if idx + 1 < len(label['froms']):
                 decoded_text += ', '
         return decoded_text
     return None
