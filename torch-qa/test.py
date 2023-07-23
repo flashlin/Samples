@@ -273,7 +273,7 @@ def label_to_value(label):
     return values
 
 
-def label_value_to_label(label_value):
+def label_value_to_obj(label_value):
     label_value = ListIter(label_value)
     label_type = label_value.next()
     if label_type == label_type_dict['select']:
@@ -290,7 +290,8 @@ def label_value_to_label(label_value):
     return None
 
 
-def decode_label(label, input_tokens):
+def decode_label(label, sql):
+    input_tokens = [token.text for token in tsql_tokenize(sql)]
     if label['type'] == 'select':
         decoded_text = ''
         decoded_text += 'SELECT '
@@ -386,14 +387,34 @@ def test3():
     print(f"{label=}")
     label_value = label_to_value(label)
     print(f"{label_value=}")
-    label_obj = label_value_to_label(label_value)
+    label_obj = label_value_to_obj(label_value)
     print(f"{label_obj=}")
 
-    sql_tokens = [token.text for token in tsql_tokenize(sql)]
-    print(f"{sql_tokens=}")
-    label_text = decode_label(label_obj, sql_tokens)
+    label_text = decode_label(label_obj, sql)
     print(f"{label_text=}")
 
 
+
+def test4():
+    train_data = [
+        ("select id from cust", {
+            'type': 'select',
+            'columns': [[0, 1]],
+            'froms': [['offset', 3]]
+        }),
+        ("select id , name from cust", {
+            'type': 'select',
+            'columns': [[0, 1], [0, 3]],
+            'froms': [['offset', 5]]
+        }),
+    ]
+
+    for sql, label in train_data:
+        label_value = label_to_value(label)
+        label_obj = label_value_to_obj(label_value)
+        label_text = decode_label(label_obj, sql)
+        print(f"{label_text=}")
+
+
 if __name__ == '__main__':
-    test3()
+    test4()
