@@ -167,41 +167,127 @@ def sql_to_value(sql: str):
     return expanded_sql_value
 
 
-type_dict = {
-    'offset': 1,
-    'select': 2,
-}
+def create_dict(keys: list[str]):
+    key_to_id = {}
+    id_to_key = {}
+    id = 1
+    for key in keys:
+        key_to_id[key] = id
+        id_to_key[id] = key
+        id += 1
+    return key_to_id, id_to_key
+
+
+label_type_dict, label_type_id_dict = create_dict([
+    'offset', 'select'
+])
 
 
 class LabelException(Exception):
     pass
 
 
-def label_to_value(label):
-    values = []
-    label_type_name = label['type']
-    label_type = type_dict[label_type_name]
-    values.append(label_type)
-    if label_type_name == 'select':
-        label_columns = label['columns']
-        columns_size = label_columns[0]
+class ListIter:
+    def __init__(self, a_list: list[int]):
+        self.a_list = a_list
+        self.index = 0
+
+    def next(self):
+        value = self.a_list[self.index]
+        self.index += 1
+        return value
+
+
+def label_columns_fn():
+    def to_value(label_columns):
+        values = []
+        columns_size = len(label_columns)
         values.append(columns_size)
-        for table_index, offset in label_columns[1:]:
-            values.append(table_index)
-            values.append(offset)
-        label_froms = label['froms']
-        from_size = label_froms[0]
+        for from_index, input_offset in label_columns:
+            values.append(from_index)
+            values.append(input_offset)
+        return values
+
+    def from_value(label_columns_value: ListIter):
+        result = []
+        columns_size = label_columns_value.next()
+        for n in range(columns_size):
+            from_index = label_columns_value.next()
+            input_offset = label_columns_value.next()
+            result.append([from_index, input_offset])
+        return result
+
+    return to_value, from_value
+
+
+def label_froms_fn():
+    def to_value(label_froms):
+        values = []
+        from_size = len(label_froms)
         values.append(from_size)
-        for data in label_froms[1:]:
+        for data in label_froms:
             from_type_name = data[0]
-            values.append(type_dict[from_type_name])
+            values.append(label_type_dict[from_type_name])
             if from_type_name == 'offset':
                 values.append(data[1])
             elif from_type_name == 'select':  # select type
                 values.append(label_to_value(data[1]))
             else:
                 raise LabelException(f"not support {from_type_name=}")
+        return values
+
+    def from_value(values: ListIter):
+        result = []
+        from_size = values.next()
+        for n in range(from_size):
+            one_from = []
+            from_type = values.next()
+            from_type_name = label_type_id_dict[from_type]
+            one_from.append(from_type_name)
+            if from_type == label_type_dict['offset']:
+                one_from.append(values.next())
+                result.append(one_from)
+            elif from_type == label_type_dict['select']:
+                select_obj = from_value(values)
+                one_from.append(select_obj)
+                result.append(one_from)
+            else:
+                raise LabelException(f"deserialize not support {from_type=}")
+        return result
+
+    return to_value, from_value
+
+
+def label_to_value(label):
+    values = []
+    label_type_name = label['type']
+    label_type = label_type_dict[label_type_name]
+    values.append(label_type)
+    if label_type_name == 'select':
+        label_columns_to, _ = label_columns_fn()
+        label_columns_value = label_columns_to(label['columns'])
+        values.extend(label_columns_value)
+        label_froms_to, _ = label_froms_fn()
+        label_froms_value = label_froms_to(label['froms'])
+        values.extend(label_froms_value)
     return values
+
+
+def label_value_to_label(label_value):
+    label_value = ListIter(label_value)
+    label_type = label_value.next()
+    if label_type == label_type_dict['select']:
+        label = {
+            'type': 'select',
+            'columns': [],
+            'froms': []
+        }
+        _, label_columns_from = label_columns_fn()
+        label['columns'] = label_columns_from(label_value)
+        _, label_froms_from = label_froms_fn()
+        label['froms'] = label_froms_from(label_value)
+        return label
+    return None
 
 
 def test2():
@@ -223,7 +309,6 @@ def test2():
     print(f"{outputs=}")
 
 
-
 def test3():
     """
         inputs:
@@ -240,14 +325,13 @@ def test3():
         [
             {
                 type: select,               //[select/position]
-                columns: [3.1],             //預測幾個欄位, [哪一個位置.哪一個位置] as 哪一個位置
-                from: [3]                   //預測幾個table,
-                                                [position, table start, table end] or
+                columns: [0.1],             //預測幾個欄位, [哪一個位置.哪一個位置] as 哪一個位置
+                from: [(0, 3)]              //[position, table start, table end] or
                                                 [select...]
             },
             {
                 type: select,
-                columns: [3.1],
+                columns: [0.1],
                 from: [
                     {
                         type: select,
@@ -264,15 +348,14 @@ def test3():
 
     label = {
         'type': 'select',
-        'columns': [1, (3, 1)],
-        'froms': [1, ['offset', 3]]
+        'columns': [[0, 1]],
+        'froms': [['offset', 3]]
     }
     print(f"{label=}")
     label_value = label_to_value(label)
     print(f"{label_value=}")
-
-
-
+    label_obj = label_value_to_label(label_value)
+    print(f"{label_obj=}")
 
 
 if __name__ == '__main__':
