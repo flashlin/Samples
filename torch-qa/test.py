@@ -61,29 +61,19 @@ def test(text):
     print(f"{n=}")
 
 
-def train(model, data_loader, num_epochs=10):
-    # Define a loss function and optimizer
-    criterion = nn.CrossEntropyLoss()
+def train(model, data_loader, criterion, num_epochs=10):
     optimizer = optim.Adam(model.parameters())
-
-    # Initialize a SummaryWriter for TensorBoard
     writer = SummaryWriter()
-
-    # Track the minimum loss
     min_loss = float('inf')
 
-    # Move model to GPU if available
     if torch.cuda.is_available():
         model = model.cuda()
 
-    # Iterate over epochs
     for epoch in range(num_epochs):
         print(f"Epoch {epoch + 1}/{num_epochs}")
         running_loss = 0.0
 
-        # Iterate over batches
         for i, (inputs, targets) in enumerate(data_loader):
-            # Move data to GPU if available
             if torch.cuda.is_available():
                 inputs, targets = inputs.cuda(), targets.cuda()
 
@@ -109,7 +99,7 @@ def train(model, data_loader, num_epochs=10):
         # Save the model weights if this epoch gives a new minimum loss
         if avg_loss < min_loss:
             min_loss = avg_loss
-            torch.save(model.state_dict(), f"best_model_{min_loss:.2f}.pth")
+            torch.save(model.state_dict(), f"./models/best_model_{min_loss:.2f}.pth")
             print(f"New minimum loss {min_loss:.2f}, model saved.")
 
     writer.close()
@@ -455,26 +445,29 @@ def test4():
     for sql, label in raw_data:
         sql_value = [word_to_id_dict['<s>']] + sql_to_value(sql) + [word_to_id_dict['</s>']]
         sql_chunks = alist_to_chunks(sql_value, max_len=max_seq_len)
-        features_data.append([sql_chunks])
+        feature = [sql_chunks]
+        features_data.append(feature)
+
         label_value = label_to_value(label)
         label_obj = label_value_to_obj(label_value)
         label_text = decode_label(label_obj, sql)
         #print(f"{label_text=}")
         label_chunk = [label_type_dict['<s>']] + label_value + [label_type_dict['</s>']]
         label_value_chunks = alist_to_chunks(label_chunk, max_len=max_seq_len)
-        labels_data.append([label_value_chunks])
-
-    #print(f"{features_data=}")
-    # print(f"{labels_data=}")
+        target = [label_value_chunks]
+        labels_data.append(target)
 
     padded_features_data = padding_alist_chunks_list(features_data)
     padded_labels_data = padding_alist_chunks_list(labels_data)
     # print(f"{padded_features_data=}")
 
 
-    input_data = torch.LongTensor(padded_features_data)
-    # print(f"{input_data=}")
-    target_data = torch.LongTensor(padded_labels_data)
+    # input_data = torch.LongTensor(padded_features_data)
+    input_data = torch.as_tensor(padded_features_data, dtype=torch.long)
+    # target_data = torch.LongTensor(padded_labels_data)
+    target_data = torch.as_tensor(padded_labels_data, dtype=torch.float32)
+    data_loader = []
+    data_loader.append((input_data, target_data))
     print(f"{target_data.shape=}")
 
 
@@ -485,6 +478,8 @@ def test4():
     loss_fn = torch.nn.MSELoss()
     loss = loss_fn(outputs_data, target_data)
     print(f"{loss=}")
+
+    train(model, data_loader, loss_fn)
 
 if __name__ == '__main__':
     test4()
