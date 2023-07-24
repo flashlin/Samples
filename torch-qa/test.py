@@ -1,6 +1,6 @@
 import re
-
 import torch
+from torch.utils.data import Dataset
 import torch.nn.functional as F
 from torch import nn, optim
 from torch.utils.tensorboard import SummaryWriter
@@ -325,6 +325,24 @@ class LSTMWithAttention(nn.Module):
         output = self.relu(output)
         output = torch.unsqueeze(output, 1)
         return output
+
+
+class CustomDataset(Dataset):
+    def __init__(self, your_data):
+        # 在初始化時將你的資料儲存為成員變數
+        self.data = your_data
+
+    def __len__(self):
+        # 返回資料集的長度
+        return len(self.data)
+
+    def __getitem__(self, index):
+        # 根據索引取得一個樣本
+        sample = self.data[index]
+        # 可以根據需要進行數據轉換等操作
+        # 例如：將樣本轉換為 PyTorch 的 tensor 格式
+        return torch.tensor(sample)
+
 
 
 def test4():
