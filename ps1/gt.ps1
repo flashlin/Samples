@@ -258,10 +258,17 @@ if( "plm" -eq $action )
     return
 }
 
+if( "ab" -eq $action )
+{
+    InvokeCmd "git reset --hard HEAD"
+    return
+}
+
 Write-Host ""
 WriteHostColor "git helper by flash" "flash"
 Write-Host ""
 Write-Host "a <file or folder> :add unstage files"
+Write-Host "ab                 :abort all unstage files"
 Write-Host "am 'comment desc'  :add unstage files and commit"
 Write-Host "b [branch name]    :create branch or show current branch when no [branch name]"
 Write-Host "c <branch name>    :checkout branch, if branch name is empty, checkout master"
