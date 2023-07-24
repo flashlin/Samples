@@ -1,12 +1,13 @@
 import re
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as F
 from torch import nn, optim
 from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
     padding_row_array_list, alist_to_chunks, pad_chunks_list
-from sql_network import create_dict, dict_to_value_array, value_array_to_dict, keep_best_pth_files, load_model_pth
+from sql_network import create_dict, dict_to_value_array, value_array_to_dict, keep_best_pth_files, load_model_pth, \
+    read_dict_file
 from tsql_tokenizr import tsql_tokenize
 
 MAX_WORD_LEN = 5
@@ -327,87 +328,55 @@ class LSTMWithAttention(nn.Module):
         return output
 
 
-class CustomDataset(Dataset):
-    def __init__(self, your_data):
-        # 在初始化時將你的資料儲存為成員變數
-        self.data = your_data
+class SqlTrainDataset(Dataset):
+    def __init__(self, dict_file: str, max_seq_len):
+        self.max_seq_len = max_seq_len
+        self.data = read_dict_file(dict_file)
 
     def __len__(self):
-        # 返回資料集的長度
         return len(self.data)
 
     def __getitem__(self, index):
-        # 根據索引取得一個樣本
-        sample = self.data[index]
-        # 可以根據需要進行數據轉換等操作
-        # 例如：將樣本轉換為 PyTorch 的 tensor 格式
-        return torch.tensor(sample)
+        sql, label = self.data[index]
+        sql_value = [key_dict['<s>']] + sql_to_value(sql) + [key_dict['</s>']]
+        sql_chunks = alist_to_chunks(sql_value, max_len=self.max_seq_len)
+        #padded_sql_chunks = pad_chunks_list(sql_chunks)
 
+        label_value = label_to_value(label)
+        label_chunk = [key_dict['<s>']] + label_value + [key_dict['</s>']]
+        label_value_chunks = alist_to_chunks(label_chunk, max_len=self.max_seq_len)
+        #padded_label_value_chunks = pad_chunks_list(label_value_chunks)
+        # return torch.as_tensor(sql_chunks, dtype=torch.long), \
+        #     torch.as_tensor(label_value_chunks, dtype=torch.float32)
+        return sql_chunks, label_value_chunks
+
+
+def pad_collate_fn(batch):
+    sql_chunks_list = []
+    label_chunks_list = []
+    for sql_chunks, label_chunks in batch:
+        sql_chunks_list.append(sql_chunks)
+        label_chunks_list.append(label_chunks)
+    padded_sql_chunks = pad_chunks_list(sql_chunks_list)
+    padded_label_chunks = pad_chunks_list(label_chunks_list)
+
+    features = torch.as_tensor(padded_sql_chunks, dtype=torch.long)
+    targets = torch.as_tensor(padded_label_chunks, dtype=torch.float32)
+    return features, targets
 
 
 def test4():
-    raw_data = [
-        ("select id from cust", {
-            'type': 'select',
-            'columns': [(0, 1)],
-            'froms': [3]
-        }),
-        ("select id , name from cust", {
-            'type': 'select',
-            'columns': [(0, 1), (0, 3)],
-            'froms': [5]
-        }),
-        ("select id , name from ( select id, name from cust )", {
-            'type': 'select',
-            'columns': [(0, 1), (0, 3)],
-            'froms': [{
-                'type': 'select',
-                'columns': [(0, 7), (0, 9)],
-                'froms': [11]
-            }]
-        }),
-    ]
-
     max_seq_len = 30
-    features_data = []
-    labels_data = []
-    for sql, label in raw_data:
-        sql_value = [key_dict['<s>']] + sql_to_value(sql) + [key_dict['</s>']]
-        sql_chunks = alist_to_chunks(sql_value, max_len=max_seq_len)
-        features_data.append(sql_chunks)
-
-        label_value = label_to_value(label)
-        label_obj = label_value_to_obj(label_value)
-        label_text = decode_label(label_obj, sql)
-        # print(f"{label_text=}")
-        label_chunk = [key_dict['<s>']] + label_value + [key_dict['</s>']]
-        label_value_chunks = alist_to_chunks(label_chunk, max_len=max_seq_len)
-        labels_data.append(label_value_chunks)
-
-    #print(f"{features_data=}")
-    padded_source_data = pad_chunks_list(features_data)
-    #print(f"{padded_source_data=}")
-    padded_labels_data = pad_chunks_list(labels_data)
-    #print(f"{padded_labels_data=}")
-
-    print("")
-
-    # input_data = torch.LongTensor(padded_features_data)
-    input_data = torch.as_tensor(padded_source_data, dtype=torch.long)
-    # target_data = torch.LongTensor(padded_labels_data)
-    target_data = torch.as_tensor(padded_labels_data, dtype=torch.float32)
-    data_loader = []
-    data_loader.append((input_data, target_data))
-    #print(f"{target_data.shape=}")
+    dataset = SqlTrainDataset("./train_data/sql.txt", max_seq_len=max_seq_len)
+    dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
     model = LSTMWithAttention(input_size=max_seq_len, output_size=200, hidden_size=200, num_heads=200)
-    load_model_pth(model)
-    outputs_data = model(input_data)
+    # load_model_pth(model)
+    #outputs_data = model()
     #print(f"{outputs_data.shape=}")
 
     loss_fn = torch.nn.MSELoss()
-    loss = loss_fn(outputs_data, target_data)
-    print(f"{loss=}")
+    #loss = loss_fn(outputs_data, target_data)
 
     #rounded_outputs = outputs_data.round()
     #print(f"{target_data=}")
@@ -422,7 +391,7 @@ def test4():
     # print(f"{labels_data=}")
     # print(f"{rounded_tensor=}")
 
-    train(model, data_loader, loss_fn)
+    train(model, dataloader, loss_fn)
 
 
 if __name__ == '__main__':

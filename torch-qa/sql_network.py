@@ -1,3 +1,4 @@
+import ast
 import os
 import re
 
@@ -90,3 +91,9 @@ def load_model_pth(model):
         pth_file, min_loss = pth_files[0]
         model.load_state_dict(torch.load(pth_file))
         print(f"load {pth_file} file")
+
+
+def read_dict_file(file: str) -> dict:
+    with open(file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        return ast.literal_eval(content)
