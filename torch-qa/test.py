@@ -81,16 +81,20 @@ def keep_best_pth_files(directory: str):
         os.remove(pth_file)
 
 
-def train(model, data_loader, criterion, num_epochs=10):
-    optimizer = optim.Adam(model.parameters())
-    writer = SummaryWriter()
-    min_loss = float('inf')
-
+def load_model_pth(model):
     pth_files = list(query_pth_files("./models"))
     if len(pth_files) > 0:
         pth_file, min_loss = pth_files[0]
         model.load_state_dict(torch.load(pth_file))
         print(f"load {pth_file} file")
+
+
+def train(model, data_loader, criterion, num_epochs=10):
+    optimizer = optim.Adam(model.parameters())
+    writer = SummaryWriter()
+    min_loss = float('inf')
+
+    load_model_pth(model)
 
     if torch.cuda.is_available():
         model = model.cuda()
@@ -499,18 +503,28 @@ def test4():
     data_loader.append((input_data, target_data))
     print(f"{target_data.shape=}")
 
-
     model = LSTMWithAttention(input_size=max_seq_len, output_size=200, hidden_size=200, num_heads=200)
+    load_model_pth(model)
     outputs_data = model(input_data)
     print(f"{outputs_data.shape=}")
-
-    first_batch = outputs_data[0, :, :]
-    print(f"{first_batch.shape=}")
-    print(f"{first_batch=}")
 
     loss_fn = torch.nn.MSELoss()
     loss = loss_fn(outputs_data, target_data)
     print(f"{loss=}")
+
+    rounded_outputs = outputs_data.round()
+    print(f"{target_data=}")
+    print(f"{outputs_data=}")
+    print(f"{rounded_outputs=}")
+
+    #first_batch = outputs_data[0, :, :]
+    #print(f"{first_batch.shape=}")
+    #print(f"{first_batch=}")
+
+    #rounded_tensor = first_batch.round()
+    #print(f"{labels_data=}")
+    #print(f"{rounded_tensor=}")
+
 
     #train(model, data_loader, loss_fn)
 
