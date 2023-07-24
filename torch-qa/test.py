@@ -119,7 +119,7 @@ def label_columns_fn():
     return to_value, from_value
 
 
-    
+
 
 
 def test2():
@@ -140,58 +140,6 @@ def test2():
     outputs = model(inputs)
     print(f"{outputs=}")
 
-
-def test3():
-    """
-        inputs:
-        [
-            "select id from customer",
-            "select id from ( select id from extra_customer )",
-        ]
-
-        [
-            [0, select, 1, identifier, 2, from, 3, identifier],
-            [0, select, 1, identifier, 2, from, 3, (, 4, select, 5, identifier, 6, from, 7, identifier, 8, )],
-        ]
-
-        [
-            {
-                type: select,               //[select/position]
-                columns: [0.1],             //預測幾個欄位, [哪一個位置.哪一個位置] as 哪一個位置
-                from: [(0, 3)]              //[position, table start, table end] or
-                                                [select...]
-            },
-            {
-                type: select,
-                columns: [0.1],
-                from: [
-                    {
-                        type: select,
-                        columns: [7.5],
-                        from: [7]
-                    }
-                ]
-            }
-        ]
-    """
-
-    sql = "select id from customer"
-    sql_value = sql_to_value(sql)
-    print(f"{sql_value=}")
-
-    label = {
-        'type': 'select',
-        'columns': [[0, 1]],
-        'froms': [['offset', 3]]
-    }
-    print(f"{label=}")
-    label_value = label_to_value(label)
-    print(f"{label_value=}")
-    label_obj = label_value_to_obj(label_value)
-    print(f"{label_obj=}")
-
-    label_text = decode_label(label_obj, sql)
-    print(f"{label_text=}")
 
 
 def test4():
@@ -220,7 +168,7 @@ def test4():
     # print(f"{labels_data=}")
     # print(f"{rounded_tensor=}")
 
-    train(model, dataloader, loss_fn)
+    train(model, dataloader, loss_fn, num_epochs=100)
 
 
 if __name__ == '__main__':
