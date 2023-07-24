@@ -25,6 +25,75 @@ def create_dict(keys: list[str]):
     return key_to_id, id_to_key
 
 
+key_dict, id_dict = create_dict([
+    '<s>', '</s>',
+    '<identifier>', '<number>', '<string>',
+    '<<number>>',
+    '<<str>>',
+    '<<dict>>',
+    '<<tuple>>',
+    '<<arr>>',
+    '[type]', '[columns]', '[froms]',
+    '(', ')', '.', '+', '-', '*', '/',
+    '&', '>=', '<=', '<>', '!=', '=',
+    'select', 'from', 'as', 'with', 'nolock'
+])
+
+
+def dict_to_value_array(val, type_to_id_dict):
+    if isinstance(val, str):
+        return [type_to_id_dict["<<str>>"], type_to_id_dict[val]]
+    if isinstance(val, list):
+        arr = [type_to_id_dict["<<arr>>"], len(val)]
+        for item in val:
+            arr.extend(dict_to_value_array(item, type_to_id_dict))
+        return arr
+    if isinstance(val, tuple):
+        item0, item1 = val
+        arr = [type_to_id_dict["<<tuple>>"]]
+        arr.extend(dict_to_value_array(item0, type_to_id_dict))
+        arr.extend(dict_to_value_array(item1, type_to_id_dict))
+        return arr
+    if isinstance(val, dict):
+        arr = [type_to_id_dict["<<dict>>"]]
+        for key in val.keys():
+            value = val[key]
+            arr.append(type_to_id_dict[f"[{key}]"])
+            arr.extend(dict_to_value_array(value, type_to_id_dict))
+        return arr
+    return [type_to_id_dict["<<number>>"], val]
+
+
+def value_array_to_dict(value_iter, id_to_type_dict):
+
+    def get_value():
+        val_type = id_to_type_dict[value_iter.next()]
+        if val_type == "<<str>>":
+            return id_to_type_dict[value_iter.next()]
+        if val_type == "<<arr>>":
+            arr_len = value_iter.next()
+            arr = []
+            for n in range(arr_len):
+                arr_item = get_value()
+                arr.append(arr_item)
+            return arr
+        if val_type == "<<tuple>>":
+            item0 = get_value()
+            item1 = get_value()
+            return item0, item1
+        if val_type == "<<dict>>":
+            return value_array_to_dict(value_iter, id_to_type_dict)
+        return value_iter.next()
+
+    b_dict = {}
+    while not value_iter.eof():
+        key = id_to_type_dict[value_iter.next()]
+        key = key.strip("[]")
+        b_dict[key] = get_value()
+
+    return b_dict
+
+
 def test(text):
     s2 = word_to_chunks(text, max_len=MAX_WORD_LEN)
     print(f"{s2}")
@@ -196,7 +265,6 @@ def sql_to_value(sql: str):
     return expanded_sql_value
 
 
-
 label_type_dict, label_type_id_dict = create_dict([
     '<s>', '</s>', 'offset', 'select'
 ])
@@ -215,6 +283,9 @@ class ListIter:
         value = self.a_list[self.index]
         self.index += 1
         return value
+
+    def eof(self):
+        return self.index >= len(self.a_list)
 
 
 def label_columns_fn():
@@ -340,7 +411,6 @@ def decode_label(label, sql):
     return None
 
 
-
 def test2():
     max_pad_len = 5
     model = WordRNN(output_size=3, max_pad_word_len=max_pad_len)
@@ -413,14 +483,6 @@ def test3():
     print(f"{label_text=}")
 
 
-
-
-
-
-
-
-
-
 class LSTMWithAttention(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_heads):
         super(LSTMWithAttention, self).__init__()
@@ -444,8 +506,8 @@ class LSTMWithAttention(nn.Module):
         # print(f"{lstm_output.shape=}")
         attention_output = self.attention(lstm_output)  # shape: [batch_size, seq_len, hidden_size * num_heads]
 
-        #output = lstm_output[-1, :, :]  # shape: [batch_size, hidden_size]
-        #print(f"{attention_output.shape=}")
+        # output = lstm_output[-1, :, :]  # shape: [batch_size, hidden_size]
+        # print(f"{attention_output.shape=}")
 
         output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
         output = self.relu(output)
@@ -453,24 +515,38 @@ class LSTMWithAttention(nn.Module):
         return output
 
 
-
-
-
-
-
 def test4():
     raw_data = [
         ("select id from cust", {
             'type': 'select',
-            'columns': [[0, 1]],
-            'froms': [['offset', 3]]
+            'columns': [(0, 1)],
+            'froms': [3]
         }),
         ("select id , name from cust", {
             'type': 'select',
-            'columns': [[0, 1], [0, 3]],
-            'froms': [['offset', 5]]
+            'columns': [(0, 1), (0, 3)],
+            'froms': [5]
+        }),
+        ("select id , name from ( select id, name from cust )", {
+            'type': 'select',
+            'columns': [(0, 1), (0, 3)],
+            'froms': [{
+                'type': 'select',
+                'columns': [(0, 7), (0, 9)],
+                'froms': [11]
+            }]
         }),
     ]
+
+    for sql, label in raw_data:
+        value = dict_to_value_array(label, key_dict)
+        print(f"{label=}")
+        print(f"{value=}")
+        obj = value_array_to_dict(ListIter(value), id_dict)
+        print(f"{obj=}")
+        print("")
+    return
+
 
     max_seq_len = 30
     features_data = []
@@ -484,7 +560,7 @@ def test4():
         label_value = label_to_value(label)
         label_obj = label_value_to_obj(label_value)
         label_text = decode_label(label_obj, sql)
-        #print(f"{label_text=}")
+        # print(f"{label_text=}")
         label_chunk = [label_type_dict['<s>']] + label_value + [label_type_dict['</s>']]
         label_value_chunks = alist_to_chunks(label_chunk, max_len=max_seq_len)
         target = [label_value_chunks]
@@ -493,7 +569,6 @@ def test4():
     padded_features_data = padding_alist_chunks_list(features_data)
     padded_labels_data = padding_alist_chunks_list(labels_data)
     # print(f"{padded_features_data=}")
-
 
     # input_data = torch.LongTensor(padded_features_data)
     input_data = torch.as_tensor(padded_features_data, dtype=torch.long)
@@ -517,16 +592,15 @@ def test4():
     print(f"{outputs_data=}")
     print(f"{rounded_outputs=}")
 
-    #first_batch = outputs_data[0, :, :]
-    #print(f"{first_batch.shape=}")
-    #print(f"{first_batch=}")
+    # first_batch = outputs_data[0, :, :]
+    # print(f"{first_batch.shape=}")
+    # print(f"{first_batch=}")
 
-    #rounded_tensor = first_batch.round()
-    #print(f"{labels_data=}")
-    #print(f"{rounded_tensor=}")
+    # rounded_tensor = first_batch.round()
+    # print(f"{labels_data=}")
+    # print(f"{rounded_tensor=}")
 
-
-    #train(model, data_loader, loss_fn)
+    # train(model, data_loader, loss_fn)
 
 
 if __name__ == '__main__':
