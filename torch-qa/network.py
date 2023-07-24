@@ -92,7 +92,7 @@ def alist_to_chunks(a_list, max_len):
 #     return data_np
 
 
-def padding_alist_chunks_list(alist_chunks_list):
+def pad_chunks_list(alist_chunks_list):
     max_a_list_len = 0
     for a_list in alist_chunks_list:
         max_a_list_len = max(max_a_list_len, len(a_list))

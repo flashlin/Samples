@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch import nn, optim
 from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
-    padding_row_array_list, alist_to_chunks, padding_alist_chunks_list
+    padding_row_array_list, alist_to_chunks, pad_chunks_list
 from sql_network import create_dict, dict_to_value_array, value_array_to_dict, keep_best_pth_files, load_model_pth
 from tsql_tokenizr import tsql_tokenize
 
@@ -367,9 +367,9 @@ def test4():
         labels_data.append(label_value_chunks)
 
     #print(f"{features_data=}")
-    padded_source_data = padding_alist_chunks_list(features_data)
+    padded_source_data = pad_chunks_list(features_data)
     #print(f"{padded_source_data=}")
-    padded_labels_data = padding_alist_chunks_list(labels_data)
+    padded_labels_data = pad_chunks_list(labels_data)
     #print(f"{padded_labels_data=}")
 
     print("")
