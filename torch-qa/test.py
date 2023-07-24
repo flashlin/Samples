@@ -68,7 +68,7 @@ def query_pth_files(directory: str):
     pth_files = [file for file in files if file.endswith('.pth')]
     pattern = r"best_model_(\d+\.\d+)"
     pth_files = [file for file in pth_files if re.match(pattern, file)]
-    pth_files.sort(key=lambda file: float(re.search(pattern, file).group(1)), reverse=True)
+    pth_files.sort(key=lambda file: float(re.search(pattern, file).group(1)), reverse=False)
     for file in pth_files:
         filename = os.path.join(directory, file)
         loss = float(re.search(pattern, filename).group(1))
