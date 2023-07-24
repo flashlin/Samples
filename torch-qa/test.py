@@ -427,6 +427,7 @@ class LSTMWithAttention(nn.Module):
         self.lstm = nn.LSTM(hidden_size, hidden_size)
         self.attention = MultiHeadAttention(hidden_size, num_heads)
         self.fc = nn.Linear(hidden_size, input_size)
+        self.relu = nn.ReLU()  # 使用 ReLU 來確保輸出為非負值
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -443,6 +444,7 @@ class LSTMWithAttention(nn.Module):
         #print(f"{attention_output.shape=}")
 
         output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
+        output = self.relu(output)
         output = torch.unsqueeze(output, 1)
         return output
 
@@ -502,11 +504,16 @@ def test4():
     outputs_data = model(input_data)
     print(f"{outputs_data.shape=}")
 
+    first_batch = outputs_data[0, :, :]
+    print(f"{first_batch.shape=}")
+    print(f"{first_batch=}")
+
     loss_fn = torch.nn.MSELoss()
     loss = loss_fn(outputs_data, target_data)
     print(f"{loss=}")
 
-    train(model, data_loader, loss_fn)
+    #train(model, data_loader, loss_fn)
+
 
 if __name__ == '__main__':
     test4()
