@@ -55,8 +55,9 @@ def dict_to_value_array(val, type_to_id_dict):
         arr.extend(dict_to_value_array(item1, type_to_id_dict))
         return arr
     if isinstance(val, dict):
-        arr = [type_to_id_dict["<<dict>>"]]
-        for key in val.keys():
+        keys = val.keys()
+        arr = [type_to_id_dict["<<dict>>"], len(keys)]
+        for key in keys:
             value = val[key]
             arr.append(type_to_id_dict[f"[{key}]"])
             arr.extend(dict_to_value_array(value, type_to_id_dict))
@@ -65,33 +66,29 @@ def dict_to_value_array(val, type_to_id_dict):
 
 
 def value_array_to_dict(value_iter, id_to_type_dict):
-
-    def get_value():
-        val_type = id_to_type_dict[value_iter.next()]
-        if val_type == "<<str>>":
-            return id_to_type_dict[value_iter.next()]
-        if val_type == "<<arr>>":
-            arr_len = value_iter.next()
-            arr = []
-            for n in range(arr_len):
-                arr_item = get_value()
-                arr.append(arr_item)
-            return arr
-        if val_type == "<<tuple>>":
-            item0 = get_value()
-            item1 = get_value()
-            return item0, item1
-        if val_type == "<<dict>>":
-            return value_array_to_dict(value_iter, id_to_type_dict)
-        return value_iter.next()
-
-    b_dict = {}
-    while not value_iter.eof():
-        key = id_to_type_dict[value_iter.next()]
-        key = key.strip("[]")
-        b_dict[key] = get_value()
-
-    return b_dict
+    val_type = id_to_type_dict[value_iter.next()]
+    if val_type == "<<str>>":
+        return id_to_type_dict[value_iter.next()]
+    if val_type == "<<arr>>":
+        arr_len = value_iter.next()
+        arr = []
+        for n in range(arr_len):
+            arr_item = value_array_to_dict(value_iter, id_to_type_dict)
+            arr.append(arr_item)
+        return arr
+    if val_type == "<<tuple>>":
+        item0 = value_array_to_dict(value_iter, id_to_type_dict)
+        item1 = value_array_to_dict(value_iter, id_to_type_dict)
+        return item0, item1
+    if val_type == "<<dict>>":
+        a_dict = {}
+        keys_size = value_iter.next()
+        for n in range(keys_size):
+            key = id_to_type_dict[value_iter.next()]
+            key = key.strip("[]")
+            a_dict[key] = value_array_to_dict(value_iter, id_to_type_dict)
+        return a_dict
+    return value_iter.next()
 
 
 def test(text):
@@ -537,16 +534,6 @@ def test4():
             }]
         }),
     ]
-
-    for sql, label in raw_data:
-        value = dict_to_value_array(label, key_dict)
-        print(f"{label=}")
-        print(f"{value=}")
-        obj = value_array_to_dict(ListIter(value), id_dict)
-        print(f"{obj=}")
-        print("")
-    return
-
 
     max_seq_len = 30
     features_data = []
