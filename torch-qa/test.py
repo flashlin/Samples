@@ -1,29 +1,15 @@
-import os
 import re
-import time
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn, optim
 from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
     padding_row_array_list, alist_to_chunks, padding_alist_chunks_list
+from sql_network import create_dict, dict_to_value_array, value_array_to_dict, keep_best_pth_files, load_model_pth
 from tsql_tokenizr import tsql_tokenize
 
 MAX_WORD_LEN = 5
-
-
-def create_dict(keys: list[str]):
-    key_to_id = {}
-    id_to_key = {}
-    id = 1
-    for key in keys:
-        key_to_id[key] = id
-        id_to_key[id] = key
-        id += 1
-    return key_to_id, id_to_key
-
 
 key_dict, id_dict = create_dict([
     '<s>', '</s>',
@@ -38,57 +24,6 @@ key_dict, id_dict = create_dict([
     '&', '>=', '<=', '<>', '!=', '=',
     'select', 'from', 'as', 'with', 'nolock'
 ])
-
-
-def dict_to_value_array(val, type_to_id_dict):
-    if isinstance(val, str):
-        return [type_to_id_dict["<<str>>"], type_to_id_dict[val]]
-    if isinstance(val, list):
-        arr = [type_to_id_dict["<<arr>>"], len(val)]
-        for item in val:
-            arr.extend(dict_to_value_array(item, type_to_id_dict))
-        return arr
-    if isinstance(val, tuple):
-        item0, item1 = val
-        arr = [type_to_id_dict["<<tuple>>"]]
-        arr.extend(dict_to_value_array(item0, type_to_id_dict))
-        arr.extend(dict_to_value_array(item1, type_to_id_dict))
-        return arr
-    if isinstance(val, dict):
-        keys = val.keys()
-        arr = [type_to_id_dict["<<dict>>"], len(keys)]
-        for key in keys:
-            value = val[key]
-            arr.append(type_to_id_dict[f"[{key}]"])
-            arr.extend(dict_to_value_array(value, type_to_id_dict))
-        return arr
-    return [type_to_id_dict["<<number>>"], val]
-
-
-def value_array_to_dict(value_iter, id_to_type_dict):
-    val_type = id_to_type_dict[value_iter.next()]
-    if val_type == "<<str>>":
-        return id_to_type_dict[value_iter.next()]
-    if val_type == "<<arr>>":
-        arr_len = value_iter.next()
-        arr = []
-        for n in range(arr_len):
-            arr_item = value_array_to_dict(value_iter, id_to_type_dict)
-            arr.append(arr_item)
-        return arr
-    if val_type == "<<tuple>>":
-        item0 = value_array_to_dict(value_iter, id_to_type_dict)
-        item1 = value_array_to_dict(value_iter, id_to_type_dict)
-        return item0, item1
-    if val_type == "<<dict>>":
-        a_dict = {}
-        keys_size = value_iter.next()
-        for n in range(keys_size):
-            key = id_to_type_dict[value_iter.next()]
-            key = key.strip("[]")
-            a_dict[key] = value_array_to_dict(value_iter, id_to_type_dict)
-        return a_dict
-    return value_iter.next()
 
 
 def test(text):
@@ -127,32 +62,6 @@ def test(text):
 
     n = get_probability(outputs2)
     print(f"{n=}")
-
-
-def query_pth_files(directory: str):
-    files = os.listdir(directory)
-    pth_files = [file for file in files if file.endswith('.pth')]
-    pattern = r"best_model_(\d+\.\d+)"
-    pth_files = [file for file in pth_files if re.match(pattern, file)]
-    pth_files.sort(key=lambda file: float(re.search(pattern, file).group(1)), reverse=False)
-    for file in pth_files:
-        filename = os.path.join(directory, file)
-        loss = float(re.search(pattern, filename).group(1))
-        yield filename, loss
-
-
-def keep_best_pth_files(directory: str):
-    pth_files = list(query_pth_files(directory))
-    for pth_file, loss in pth_files[5:]:
-        os.remove(pth_file)
-
-
-def load_model_pth(model):
-    pth_files = list(query_pth_files("./models"))
-    if len(pth_files) > 0:
-        pth_file, min_loss = pth_files[0]
-        model.load_state_dict(torch.load(pth_file))
-        print(f"load {pth_file} file")
 
 
 def train(model, data_loader, criterion, num_epochs=10):
@@ -219,39 +128,17 @@ def is_int(word: str) -> bool:
     return True
 
 
-def convert_to_float(s):
-    if is_float(s):
-        return float(s)
-    return None
-
-
-sql_keywords = [
-    '<s>', '</s>',
-    '<identifier>',
-    '<number>',
-    '<string>',
-    '(', ')', '.', '+', '-', '*', '/',
-    '&', '>=', '<=', '<>', '!=', '=',
-    'select', 'from', 'as', 'with', 'nolock'
-]
-word_to_id_dict, _ = create_dict(sql_keywords)
-
-
 def word_to_id(word: str) -> int:
     if is_float(word):
-        return word_to_id_dict['<number>']
+        return key_dict['<number>']
     if is_int(word):
-        return word_to_id_dict['<number>']
+        return key_dict['<number>']
     if word.startswith("'") and word.endswith("'"):
-        return word_to_id_dict['<string>']
+        return key_dict['<string>']
     lowered_word = word.lower()
-    if lowered_word in word_to_id_dict:
-        return word_to_id_dict[lowered_word]
-    return word_to_id_dict['<identifier>']
-
-
-def text_to_np(text: str):
-    pass
+    if lowered_word in key_dict:
+        return key_dict[lowered_word]
+    return key_dict['<identifier>']
 
 
 def sql_to_value(sql: str):
@@ -260,11 +147,6 @@ def sql_to_value(sql: str):
     sql_value = [(offset, value) for offset, value in enumerate(sql_value)]
     expanded_sql_value = [item for sublist in sql_value for item in sublist]
     return expanded_sql_value
-
-
-label_type_dict, label_type_id_dict = create_dict([
-    '<s>', '</s>', 'offset', 'select'
-])
 
 
 class LabelException(Exception):
@@ -307,76 +189,12 @@ def label_columns_fn():
     return to_value, from_value
 
 
-def label_froms_fn():
-    def to_value(label_froms):
-        values = []
-        from_size = len(label_froms)
-        values.append(from_size)
-        for data in label_froms:
-            from_type_name = data[0]
-            values.append(label_type_dict[from_type_name])
-            if from_type_name == 'offset':
-                values.append(data[1])
-            elif from_type_name == 'select':  # select type
-                values.append(label_to_value(data[1]))
-            else:
-                raise LabelException(f"not support {from_type_name=}")
-        return values
-
-    def from_value(values: ListIter):
-        result = []
-        from_size = values.next()
-        for n in range(from_size):
-            one_from = []
-            from_type = values.next()
-            from_type_name = label_type_id_dict[from_type]
-            one_from.append(from_type_name)
-            if from_type == label_type_dict['offset']:
-                one_from.append(values.next())
-                result.append(one_from)
-            elif from_type == label_type_dict['select']:
-                select_obj = from_value(values)
-                one_from.append(select_obj)
-                result.append(one_from)
-            else:
-                raise LabelException(f"deserialize not support {from_type=}")
-        return result
-
-    return to_value, from_value
-
-
 def label_to_value(label):
     return dict_to_value_array(label, key_dict)
-    # values = []
-    # label_type_name = label['type']
-    # label_type = label_type_dict[label_type_name]
-    # values.append(label_type)
-    # if label_type_name == 'select':
-    #     label_columns_to, _ = label_columns_fn()
-    #     label_columns_value = label_columns_to(label['columns'])
-    #     values.extend(label_columns_value)
-    #     label_froms_to, _ = label_froms_fn()
-    #     label_froms_value = label_froms_to(label['froms'])
-    #     values.extend(label_froms_value)
-    # return values
 
 
 def label_value_to_obj(label_value):
     return value_array_to_dict(ListIter(label_value), id_dict)
-    # label_value = ListIter(label_value)
-    # label_type = label_value.next()
-    # if label_type == label_type_dict['select']:
-    #     label = {
-    #         'type': 'select',
-    #         'columns': [],
-    #         'froms': []
-    #     }
-    #     _, label_columns_from = label_columns_fn()
-    #     label['columns'] = label_columns_from(label_value)
-    #     _, label_froms_from = label_froms_fn()
-    #     label['froms'] = label_froms_from(label_value)
-    #     return label
-    # return None
 
 
 def decode_label(label, sql):
@@ -536,7 +354,7 @@ def test4():
     features_data = []
     labels_data = []
     for sql, label in raw_data:
-        sql_value = [word_to_id_dict['<s>']] + sql_to_value(sql) + [word_to_id_dict['</s>']]
+        sql_value = [key_dict['<s>']] + sql_to_value(sql) + [key_dict['</s>']]
         sql_chunks = alist_to_chunks(sql_value, max_len=max_seq_len)
         features_data.append(sql_chunks)
 
@@ -544,7 +362,7 @@ def test4():
         label_obj = label_value_to_obj(label_value)
         label_text = decode_label(label_obj, sql)
         # print(f"{label_text=}")
-        label_chunk = [label_type_dict['<s>']] + label_value + [label_type_dict['</s>']]
+        label_chunk = [key_dict['<s>']] + label_value + [key_dict['</s>']]
         label_value_chunks = alist_to_chunks(label_chunk, max_len=max_seq_len)
         labels_data.append(label_value_chunks)
 
