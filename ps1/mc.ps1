@@ -73,7 +73,7 @@ if ( "n" -eq $action ) {
     $name = $args0
     $pythonVer = $args1
     if ( "" -eq $pythonVer ) {
-        $pythonVer = "3.9"
+        $pythonVer = "3.10"
     }
     InvokeConda "create -n ${name} python=${pythonVer}"
     return
