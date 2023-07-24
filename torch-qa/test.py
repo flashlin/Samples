@@ -1,4 +1,6 @@
+import os
 import re
+import time
 
 import numpy as np
 import torch
@@ -61,6 +63,24 @@ def test(text):
     print(f"{n=}")
 
 
+def query_pth_files(directory: str):
+    files = os.listdir(directory)
+    pth_files = [file for file in files if file.endswith('.pth')]
+    pattern = r"best_model_(\d+\.\d+)"
+    pth_files = [file for file in pth_files if re.match(pattern, file)]
+    pth_files.sort(key=lambda file: float(re.search(pattern, file).group(1)), reverse=True)
+    for file in pth_files:
+        filename = os.path.join(directory, file)
+        loss = float(re.search(pattern, filename).group(1))
+        yield filename, loss
+
+
+def keep_best_pth_files(directory: str):
+    pth_files = list(query_pth_files(directory))
+    for pth_file in pth_files[5:]:
+        os.remove(pth_file)
+
+
 def train(model, data_loader, criterion, num_epochs=10):
     optimizer = optim.Adam(model.parameters())
     writer = SummaryWriter()
@@ -101,6 +121,7 @@ def train(model, data_loader, criterion, num_epochs=10):
             min_loss = avg_loss
             torch.save(model.state_dict(), f"./models/best_model_{min_loss:.2f}.pth")
             print(f"New minimum loss {min_loss:.2f}, model saved.")
+            keep_best_pth_files("./models")
 
     writer.close()
     print("Finished Training")
@@ -413,7 +434,7 @@ class LSTMWithAttention(nn.Module):
         attention_output = self.attention(lstm_output)  # shape: [batch_size, seq_len, hidden_size * num_heads]
 
         #output = lstm_output[-1, :, :]  # shape: [batch_size, hidden_size]
-        print(f"{attention_output.shape=}")
+        #print(f"{attention_output.shape=}")
 
         output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
         output = torch.unsqueeze(output, 1)
