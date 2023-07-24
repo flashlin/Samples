@@ -105,7 +105,7 @@ class MultiHeadAttention(nn.Module):
         :param x:
         :return:
         """
-        print(f"mul {x.shape=}")
+        # print(f"mul {x.shape=}")
         # Split the last dimension into (num_heads, hidden_size)
         x = x.view(x.shape[0], x.shape[1], self.num_heads, self.hidden_size)
         # shape: [sequence_length, batch_size, num_heads, hidden_size]

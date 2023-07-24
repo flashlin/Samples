@@ -409,7 +409,7 @@ class LSTMWithAttention(nn.Module):
         self.embedding = nn.Embedding(input_size, hidden_size)
         self.lstm = nn.LSTM(hidden_size, hidden_size)
         self.attention = MultiHeadAttention(hidden_size, num_heads)
-        self.fc = nn.Linear(hidden_size, output_size)
+        self.fc = nn.Linear(hidden_size, input_size)
 
     def forward(self, x):
         batch_size = x.shape[0]
@@ -423,9 +423,10 @@ class LSTMWithAttention(nn.Module):
         attention_output = self.attention(lstm_output)  # shape: [batch_size, seq_len, hidden_size * num_heads]
 
         #output = lstm_output[-1, :, :]  # shape: [batch_size, hidden_size]
-        #print(f"{attention_output.shape=}")
+        print(f"{attention_output.shape=}")
 
         output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
+        output = torch.unsqueeze(output, 1)
         return output
 
 
@@ -472,14 +473,18 @@ def test4():
 
 
     input_data = torch.LongTensor(padded_features_data)
-    print(f"{input_data=}")
+    # print(f"{input_data=}")
     target_data = torch.LongTensor(padded_labels_data)
-    # print(f"{target_data=}")
+    print(f"{target_data.shape=}")
 
 
     model = LSTMWithAttention(input_size=max_seq_len, output_size=200, hidden_size=200, num_heads=200)
     outputs_data = model(input_data)
-    print(f"{outputs_data=}")
+    print(f"{outputs_data.shape=}")
+
+    loss_fn = torch.nn.MSELoss()
+    loss = loss_fn(outputs_data, target_data)
+    print(f"{loss=}")
 
 if __name__ == '__main__':
     test4()
