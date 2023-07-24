@@ -62,6 +62,11 @@ if( "i" -eq $action ) {
     return
 }
 
+if( "logs" -eq $action ) {
+    InvokeCmd "tensorboard --logdir=./logs"
+    return
+}
+
 $env:PYTHONPATH="D:\VDisk\Github\Samples\py_standard"
 Write-Host "run py script 1.0"
 Write-Host "build: build image"

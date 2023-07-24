@@ -168,7 +168,7 @@ def test4():
     # print(f"{labels_data=}")
     # print(f"{rounded_tensor=}")
 
-    train(model, dataloader, loss_fn, num_epochs=100)
+    train(model, dataloader, loss_fn, num_epochs=1000)
 
 
 if __name__ == '__main__':
