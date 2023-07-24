@@ -346,35 +346,37 @@ def label_froms_fn():
 
 
 def label_to_value(label):
-    values = []
-    label_type_name = label['type']
-    label_type = label_type_dict[label_type_name]
-    values.append(label_type)
-    if label_type_name == 'select':
-        label_columns_to, _ = label_columns_fn()
-        label_columns_value = label_columns_to(label['columns'])
-        values.extend(label_columns_value)
-        label_froms_to, _ = label_froms_fn()
-        label_froms_value = label_froms_to(label['froms'])
-        values.extend(label_froms_value)
-    return values
+    return dict_to_value_array(label, key_dict)
+    # values = []
+    # label_type_name = label['type']
+    # label_type = label_type_dict[label_type_name]
+    # values.append(label_type)
+    # if label_type_name == 'select':
+    #     label_columns_to, _ = label_columns_fn()
+    #     label_columns_value = label_columns_to(label['columns'])
+    #     values.extend(label_columns_value)
+    #     label_froms_to, _ = label_froms_fn()
+    #     label_froms_value = label_froms_to(label['froms'])
+    #     values.extend(label_froms_value)
+    # return values
 
 
 def label_value_to_obj(label_value):
-    label_value = ListIter(label_value)
-    label_type = label_value.next()
-    if label_type == label_type_dict['select']:
-        label = {
-            'type': 'select',
-            'columns': [],
-            'froms': []
-        }
-        _, label_columns_from = label_columns_fn()
-        label['columns'] = label_columns_from(label_value)
-        _, label_froms_from = label_froms_fn()
-        label['froms'] = label_froms_from(label_value)
-        return label
-    return None
+    return value_array_to_dict(ListIter(label_value), id_dict)
+    # label_value = ListIter(label_value)
+    # label_type = label_value.next()
+    # if label_type == label_type_dict['select']:
+    #     label = {
+    #         'type': 'select',
+    #         'columns': [],
+    #         'froms': []
+    #     }
+    #     _, label_columns_from = label_columns_fn()
+    #     label['columns'] = label_columns_from(label_value)
+    #     _, label_froms_from = label_froms_fn()
+    #     label['froms'] = label_froms_from(label_value)
+    #     return label
+    # return None
 
 
 def decode_label(label, sql):
@@ -390,19 +392,14 @@ def decode_label(label, sql):
             if idx + 1 < len(label['columns']):
                 decoded_text += ', '
         decoded_text += ' FROM '
-        for idx, source in enumerate(label['froms']):
-            source = ListIter(source)
-            from_type = source.next()
-            if from_type == 'offset':
-                table_name = input_tokens[source.next()]
-                decoded_text += f"{table_name} as tb{idx} WITH(NOLOCK)"
-            elif from_type == 'select':
-                decoded_text += '('
-                decoded_text += decode_label(source.next(), input_tokens)
-                decoded_text += ')'
+        label_froms = label['froms']
+        for idx, source in enumerate(label_froms):
+            if isinstance(source, dict):
+                decoded_text += '(' + decode_label(source, sql) + ')'
             else:
-                raise Exception(f"not support {from_type}")
-            if idx + 1 < len(label['froms']):
+                table_name = input_tokens[source]
+                decoded_text += f"{table_name} as tb{idx} WITH(NOLOCK)"
+            if idx + 1 < len(label_froms):
                 decoded_text += ', '
         return decoded_text
     return None
@@ -541,8 +538,7 @@ def test4():
     for sql, label in raw_data:
         sql_value = [word_to_id_dict['<s>']] + sql_to_value(sql) + [word_to_id_dict['</s>']]
         sql_chunks = alist_to_chunks(sql_value, max_len=max_seq_len)
-        feature = [sql_chunks]
-        features_data.append(feature)
+        features_data.append(sql_chunks)
 
         label_value = label_to_value(label)
         label_obj = label_value_to_obj(label_value)
@@ -550,15 +546,18 @@ def test4():
         # print(f"{label_text=}")
         label_chunk = [label_type_dict['<s>']] + label_value + [label_type_dict['</s>']]
         label_value_chunks = alist_to_chunks(label_chunk, max_len=max_seq_len)
-        target = [label_value_chunks]
-        labels_data.append(target)
+        labels_data.append(label_value_chunks)
 
-    padded_features_data = padding_alist_chunks_list(features_data)
+    print(f"{features_data=}")
+    padded_source_data = padding_alist_chunks_list(features_data)
+    print(f"{padded_source_data=}")
     padded_labels_data = padding_alist_chunks_list(labels_data)
-    # print(f"{padded_features_data=}")
+    print(f"{padded_labels_data=}")
+
+    print("")
 
     # input_data = torch.LongTensor(padded_features_data)
-    input_data = torch.as_tensor(padded_features_data, dtype=torch.long)
+    input_data = torch.as_tensor(padded_source_data, dtype=torch.long)
     # target_data = torch.LongTensor(padded_labels_data)
     target_data = torch.as_tensor(padded_labels_data, dtype=torch.float32)
     data_loader = []

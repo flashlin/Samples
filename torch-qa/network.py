@@ -65,6 +65,15 @@ def word_to_chunks(word: str, max_len, start_tag=129, end_tag=130):
     return padded_chunks
 
 
+def pad_array(a_list, max_len, constant_value=0):
+    new_list = list(a_list)
+    if len(new_list) < max_len:
+        padding_length = max_len - len(new_list)
+        for _ in range(padding_length):
+            new_list.append(constant_value)
+    return new_list
+
+
 def alist_to_chunks(a_list, max_len):
     # If string length is more than max_len, break it down into chunks of max_len
     if len(a_list) > max_len:
@@ -73,13 +82,28 @@ def alist_to_chunks(a_list, max_len):
         chunks = [a_list]
 
     # 使用 0 进行填充以确保所有的输入序列都有相同的长度
-    padded_chunks = [np.pad(chunk, (0, max_len - len(chunk)), mode='constant') for chunk in chunks]
+    # padded_chunks = [np.pad(chunk, (0, max_len - len(chunk)), mode='constant') for chunk in chunks]
+    padded_chunks = [pad_array(chunk, max_len) for chunk in chunks]
     return padded_chunks
 
 
+# def padding_alist_chunks_list(alist_chunks_list):
+#     data_np = np.array([item for chunks in alist_chunks_list for item in chunks])
+#     return data_np
+
+
 def padding_alist_chunks_list(alist_chunks_list):
-    data_np = np.array([item for chunks in alist_chunks_list for item in chunks])
-    return data_np
+    max_a_list_len = 0
+    for a_list in alist_chunks_list:
+        max_a_list_len = max(max_a_list_len, len(a_list))
+
+    result = []
+    for a_list in alist_chunks_list:
+        sub_list = list(a_list)
+        if len(sub_list) < max_a_list_len:
+            sub_list.append(pad_array([], len(sub_list[0])))
+        result.append(sub_list)
+    return result
 
 
 
