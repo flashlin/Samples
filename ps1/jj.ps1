@@ -91,7 +91,7 @@ function FirstFindDirectory {
     param (
         [string]$pattern
     )
-    $result = & es -name-color green /ad -regex $pattern
+    $result = & es -name-color green /i /ad -regex "$pattern"
     if ($result) {
         $folderNames = $result -split [Environment]::NewLine
         return $folderNames
