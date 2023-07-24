@@ -87,6 +87,7 @@ if ( "c" -eq $action ) {
 
 if ( "i" -eq $action ) {
     InvokeConda "install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia"
+    InvokeCmd "pip install pandas tensorboard"
     return
 }
 
