@@ -366,11 +366,11 @@ def test4():
         label_value_chunks = alist_to_chunks(label_chunk, max_len=max_seq_len)
         labels_data.append(label_value_chunks)
 
-    print(f"{features_data=}")
+    #print(f"{features_data=}")
     padded_source_data = padding_alist_chunks_list(features_data)
-    print(f"{padded_source_data=}")
+    #print(f"{padded_source_data=}")
     padded_labels_data = padding_alist_chunks_list(labels_data)
-    print(f"{padded_labels_data=}")
+    #print(f"{padded_labels_data=}")
 
     print("")
 
@@ -380,21 +380,21 @@ def test4():
     target_data = torch.as_tensor(padded_labels_data, dtype=torch.float32)
     data_loader = []
     data_loader.append((input_data, target_data))
-    print(f"{target_data.shape=}")
+    #print(f"{target_data.shape=}")
 
     model = LSTMWithAttention(input_size=max_seq_len, output_size=200, hidden_size=200, num_heads=200)
     load_model_pth(model)
     outputs_data = model(input_data)
-    print(f"{outputs_data.shape=}")
+    #print(f"{outputs_data.shape=}")
 
     loss_fn = torch.nn.MSELoss()
     loss = loss_fn(outputs_data, target_data)
     print(f"{loss=}")
 
-    rounded_outputs = outputs_data.round()
-    print(f"{target_data=}")
-    print(f"{outputs_data=}")
-    print(f"{rounded_outputs=}")
+    #rounded_outputs = outputs_data.round()
+    #print(f"{target_data=}")
+    #print(f"{outputs_data=}")
+    #print(f"{rounded_outputs=}")
 
     # first_batch = outputs_data[0, :, :]
     # print(f"{first_batch.shape=}")
@@ -404,7 +404,7 @@ def test4():
     # print(f"{labels_data=}")
     # print(f"{rounded_tensor=}")
 
-    # train(model, data_loader, loss_fn)
+    train(model, data_loader, loss_fn)
 
 
 if __name__ == '__main__':
