@@ -176,9 +176,8 @@ def sql_to_value(sql: str):
 
 
 
-
 label_type_dict, label_type_id_dict = create_dict([
-    'offset', 'select'
+    '<s>', '</s>', 'offset', 'select'
 ])
 
 
@@ -394,6 +393,47 @@ def test3():
 
 
 
+
+
+
+
+
+
+
+class LSTMWithAttention(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size, num_heads):
+        super(LSTMWithAttention, self).__init__()
+        self.hidden_size = hidden_size
+        self.num_heads = num_heads
+
+        self.embedding = nn.Embedding(input_size, hidden_size)
+        self.lstm = nn.LSTM(hidden_size, hidden_size)
+        self.attention = MultiHeadAttention(hidden_size, num_heads)
+        self.fc = nn.Linear(hidden_size, output_size)
+
+    def forward(self, x):
+        batch_size = x.shape[0]
+        x = x.view(-1, batch_size)
+
+        embedded = self.embedding(x)  # shape: [seq_len, batch_size, hidden_size]
+
+        lstm_output, _ = self.lstm(embedded)  # shape: [seq_len, batch_size, hidden_size]
+
+        # print(f"{lstm_output.shape=}")
+        attention_output = self.attention(lstm_output)  # shape: [batch_size, seq_len, hidden_size * num_heads]
+
+        #output = lstm_output[-1, :, :]  # shape: [batch_size, hidden_size]
+        #print(f"{attention_output.shape=}")
+
+        output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
+        return output
+
+
+
+
+
+
+
 def test4():
     raw_data = [
         ("select id from cust", {
@@ -408,7 +448,7 @@ def test4():
         }),
     ]
 
-    max_seq_len = 200
+    max_seq_len = 30
     features_data = []
     labels_data = []
     for sql, label in raw_data:
@@ -418,15 +458,28 @@ def test4():
         label_value = label_to_value(label)
         label_obj = label_value_to_obj(label_value)
         label_text = decode_label(label_obj, sql)
-        print(f"{label_text=}")
-        labels_data.append(label_value)
+        #print(f"{label_text=}")
+        label_chunk = [label_type_dict['<s>']] + label_value + [label_type_dict['</s>']]
+        label_value_chunks = alist_to_chunks(label_chunk, max_len=max_seq_len)
+        labels_data.append([label_value_chunks])
 
-    print(f"{features_data=}")
-    print(f"{labels_data=}")
+    #print(f"{features_data=}")
+    # print(f"{labels_data=}")
 
     padded_features_data = padding_alist_chunks_list(features_data)
-    print(f"{padded_features_data=}")
+    padded_labels_data = padding_alist_chunks_list(labels_data)
+    # print(f"{padded_features_data=}")
 
+
+    input_data = torch.LongTensor(padded_features_data)
+    print(f"{input_data=}")
+    target_data = torch.LongTensor(padded_labels_data)
+    # print(f"{target_data=}")
+
+
+    model = LSTMWithAttention(input_size=max_seq_len, output_size=200, hidden_size=200, num_heads=200)
+    outputs_data = model(input_data)
+    print(f"{outputs_data=}")
 
 if __name__ == '__main__':
     test4()
