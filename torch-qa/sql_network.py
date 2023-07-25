@@ -337,3 +337,25 @@ def pad_collate_fn(batch):
     features = torch.as_tensor(padded_sql_seqs, dtype=torch.long)
     targets = torch.as_tensor(padded_label_seqs, dtype=torch.long)
     return features, targets
+
+
+def infer(model, input_seq):
+    input_tensor = torch.tensor(input_seq).unsqueeze(0)  # 添加批次维度 (batch_size=1, seq_len)
+    start_token = torch.tensor([[key_dict["<s>"]]])  # start_token_index 是起始标记的索引
+    end_token_index = key_dict["</s>"]
+    model.eval()  # 设置模型为评估模式，以便在推断时不进行dropout等操作
+    with torch.no_grad():
+        output_seq = [start_token]  # 初始化输出序列
+        while True:
+            # 前向传播，根据当前的输出序列和输入序列进行预测
+            output = model(input_tensor, torch.cat(output_seq, dim=1))
+            # 获取当前时间步的预测结果
+            pred_token = output[:, -1, :].argmax(dim=1, keepdim=True)  # 获取最后一个时间步的预测结果
+            # 添加到输出序列中
+            output_seq.append(pred_token)
+            # 判断是否生成了结束标记，如果生成了就结束推断
+            if pred_token.item() == end_token_index:
+                break
+
+    output_seq = [token.item() for token in torch.cat(output_seq, dim=1).squeeze()]
+    return output_seq

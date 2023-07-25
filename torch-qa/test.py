@@ -68,7 +68,6 @@ def train(model, data_loader, criterion, num_epochs=10, device='cpu'):
             outputs = model(inputs, targets)
 
             # Compute loss
-            print(f"{inputs.shape=} {targets.shape=}")
             # loss = criterion(outputs, targets)
             loss = model.compute_loss(outputs, targets)
 
