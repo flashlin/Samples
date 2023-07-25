@@ -5,9 +5,8 @@ from torch import optim
 from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
     padding_row_array_list
-from sql_network import dict_to_value_array, value_array_to_dict, keep_best_pth_files, load_model_pth, \
-    sql_to_value, ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn
-from tsql_tokenizr import tsql_tokenize
+from sql_network import keep_best_pth_files, load_model_pth, \
+    ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn
 
 MAX_WORD_LEN = 5
 
@@ -71,6 +70,7 @@ def train(model, data_loader, criterion, num_epochs=10):
             outputs = model(inputs)
 
             # Compute loss
+            print(f"{inputs.shape=} {targets.shape=}")
             loss = criterion(outputs, targets)
 
             # Backward pass and optimization
@@ -97,30 +97,6 @@ def train(model, data_loader, criterion, num_epochs=10):
     print("Finished Training")
 
 
-def label_columns_fn():
-    def to_value(label_columns):
-        values = []
-        columns_size = len(label_columns)
-        values.append(columns_size)
-        for from_index, input_offset in label_columns:
-            values.append(from_index)
-            values.append(input_offset)
-        return values
-
-    def from_value(label_columns_value: ListIter):
-        result = []
-        columns_size = label_columns_value.next()
-        for n in range(columns_size):
-            from_index = label_columns_value.next()
-            input_offset = label_columns_value.next()
-            result.append([from_index, input_offset])
-        return result
-
-    return to_value, from_value
-
-
-
-
 
 def test2():
     max_pad_len = 5
@@ -143,13 +119,22 @@ def test2():
 
 
 def test4():
+    input_length = 20
+    input_array = torch.arange(1, input_length + 1)
+    # 将输入数据划分为长度为 50 的子序列
+    sequence_length = 10
+    num_sequences = input_length // sequence_length
+    input_sequences = input_array.view(num_sequences, sequence_length)
+    print(f"{input_sequences=}")
+
+
     max_seq_len = 30
     dataset = SqlTrainDataset("./train_data/sql.txt", max_seq_len=max_seq_len)
     dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
     max_number = 256 + 2
     model = LSTMWithAttention(seq_len=max_seq_len,
-                              input_size=max_number, output_size=max_number,
+                              input_dim=max_number, output_dim=max_number,
                               hidden_size=max_seq_len, num_heads=max_seq_len)
     # load_model_pth(model)
     #outputs_data = model()

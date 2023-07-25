@@ -92,15 +92,15 @@ def alist_to_chunks(a_list, max_len):
 #     return data_np
 
 
-def pad_chunks_list(alist_chunks_list):
-    max_a_list_len = 0
-    for a_list in alist_chunks_list:
-        max_a_list_len = max(max_a_list_len, len(a_list))
+def pad_chunks_list(alist_chunks_list, max_list_len):
+    # max_a_list_len = 0
+    # for a_list in alist_chunks_list:
+    #     max_a_list_len = max(max_a_list_len, len(a_list))
 
     result = []
     for a_list in alist_chunks_list:
         sub_list = list(a_list)
-        if len(sub_list) < max_a_list_len:
+        if len(sub_list) < max_list_len:
             sub_list.append(pad_array([], len(sub_list[0])))
         result.append(sub_list)
     return result

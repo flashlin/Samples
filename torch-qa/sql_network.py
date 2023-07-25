@@ -6,7 +6,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset
 
-from network import MultiHeadAttention, alist_to_chunks, pad_chunks_list
+from network import alist_to_chunks, pad_chunks_list
 from tsql_tokenizr import tsql_tokenize
 
 
@@ -209,18 +209,42 @@ class ListIter:
         return self.index >= len(self.a_list)
 
 
+class MultiHeadAttention(nn.Module):
+    def __init__(self, embed_dim, num_heads, dropout=0.2):
+        super(MultiHeadAttention, self).__init__()
+        self.num_heads = num_heads
+        self.hidden_size = embed_dim // num_heads
+        self.attention = nn.MultiheadAttention(embed_dim=embed_dim, num_heads=num_heads, dropout=dropout)
+        self.linear_q = nn.Linear(embed_dim, embed_dim)
+        self.linear_k = nn.Linear(embed_dim, embed_dim)
+        self.linear_v = nn.Linear(embed_dim, embed_dim)
+
+    def forward(self, x):
+        """
+            x: (batch_size, seq_len, input_dim)
+        """
+        print(f"mulhead {x.shape=}")
+        # 通过线性变换获取 query, key, value 张量
+        query = self.linear_q(x)  # 形状为 (batch_size, seq_len, embed_dim)
+        key = self.linear_k(x)  # 形状为 (batch_size, seq_len, embed_dim)
+        value = self.linear_v(x)  # 形状为 (batch_size, seq_len, embed_dim)
+        output, attn_weights = self.attention(query, key, value)
+        return output
+
+
 class LSTMWithAttention(nn.Module):
-    def __init__(self, seq_len, input_size, hidden_size, output_size,
+    def __init__(self, seq_len, input_dim, hidden_size, output_dim,
                  num_heads, n_layers=3):
         super(LSTMWithAttention, self).__init__()
         self.seq_len = seq_len
         self.hidden_size = hidden_size
         self.num_heads = num_heads  # 相當於 seq_len
 
-        self.embedding = nn.Embedding(input_size, hidden_size)
+        self.embedding = nn.Embedding(input_dim, hidden_size)
         self.lstm = nn.LSTM(hidden_size, hidden_size, n_layers, batch_first=True)
-        self.attention = MultiHeadAttention(hidden_size, num_heads)
-        self.fc = nn.Linear(hidden_size, output_size)
+        self.attention = MultiHeadAttention(embed_dim=hidden_size,
+                                            num_heads=num_heads, dropout=0.2)
+        self.fc = nn.Linear(hidden_size, seq_len)
         self.relu = nn.ReLU()  # 使用 ReLU 來確保輸出為非負值
 
     def forward(self, x):
@@ -240,10 +264,11 @@ class LSTMWithAttention(nn.Module):
 
         print(f"{lstm_output.shape=}")
 
-        attention_input = torch.transpose(lstm_output, 0, 1)
+        # attention_input = torch.transpose(lstm_output, 0, 1)
+        attention_input = lstm_output
         print(f"{attention_input.shape=}")
         # 輸入:(seq_len, batch_size, hidden_size)
-        # 輸出:(seq_len, batch_size, num_heads * 倍數)
+        # 輸出:(seq_len, batch_size, hidden_size)
         attention_output = self.attention(attention_input)
         # attention_output = torch.transpose(attention_output, 0, 1)
         print(f"{attention_output.shape=}")
@@ -253,8 +278,10 @@ class LSTMWithAttention(nn.Module):
 
         fc_output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
         print(f"{fc_output.shape=}")
-        output = self.relu(fc_output)
-        output = torch.unsqueeze(output, 1)
+        relu_output = self.relu(fc_output)
+        print(f"{relu_output.shape=}")
+        output = torch.unsqueeze(relu_output, 1)
+        print(f"{output.shape=}")
         return output
 
 
@@ -280,11 +307,15 @@ class SqlTrainDataset(Dataset):
 def pad_collate_fn(batch):
     sql_chunks_list = []
     label_chunks_list = []
+    max_list_len = 0
     for sql_chunks, label_chunks in batch:
+        max_list_len = max(max_list_len, len(sql_chunks))
         sql_chunks_list.append(sql_chunks)
+        max_list_len = max(max_list_len, len(label_chunks))
         label_chunks_list.append(label_chunks)
-    padded_sql_chunks = pad_chunks_list(sql_chunks_list)
-    padded_label_chunks = pad_chunks_list(label_chunks_list)
+
+    padded_sql_chunks = pad_chunks_list(sql_chunks_list, max_list_len)
+    padded_label_chunks = pad_chunks_list(label_chunks_list, max_list_len)
 
     features = torch.as_tensor(padded_sql_chunks, dtype=torch.long)
     targets = torch.as_tensor(padded_label_chunks, dtype=torch.float32)
