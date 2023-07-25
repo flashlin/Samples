@@ -41,7 +41,7 @@ def create_map_dict(keys: list[str], start_tag, end_tag):
         key_to_id[key] = id
         id_to_key[id] = key
         id += 1
-    start_id = 99998
+    start_id = 9998
     key_to_id[start_tag] = start_id
     key_to_id[end_tag] = start_id + 1
     id_to_key[start_id] = start_tag
@@ -278,6 +278,7 @@ class LSTMWithAttention(nn.Module):
                  output_vocab_size=10000,
                  hidden_size=128, num_layers=3, num_heads=4, dropout=0.2):
         super(LSTMWithAttention, self).__init__()
+        self.output_vocab_size = output_vocab_size
         self.encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(hidden_size, num_heads, dim_feedforward=hidden_size, dropout=dropout),
             num_layers
@@ -286,7 +287,7 @@ class LSTMWithAttention(nn.Module):
             nn.TransformerDecoderLayer(hidden_size, num_heads, dim_feedforward=hidden_size, dropout=dropout),
             num_layers
         )
-        self.embedding = nn.Embedding(input_vocab_size, hidden_size)
+        self.embedding = nn.Embedding(input_vocab_size, hidden_size, padding_idx=0)
         self.fc = nn.Linear(hidden_size, output_vocab_size)
         self.criterion = nn.CrossEntropyLoss()
 
@@ -334,5 +335,5 @@ def pad_collate_fn(batch):
     padded_label_seqs = pad_sequence_list(label_seqs, max_list_len)
 
     features = torch.as_tensor(padded_sql_seqs, dtype=torch.long)
-    targets = torch.as_tensor(padded_label_seqs, dtype=torch.float32)
+    targets = torch.as_tensor(padded_label_seqs, dtype=torch.long)
     return features, targets

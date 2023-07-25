@@ -48,23 +48,21 @@ def test(text):
     print(f"{n=}")
 
 
-def train(model, data_loader, criterion, num_epochs=10):
+def train(model, data_loader, criterion, num_epochs=10, device='cpu'):
     optimizer = optim.Adam(model.parameters())
     writer = SummaryWriter()
     min_loss = float('inf')
 
     load_model_pth(model)
 
-    if torch.cuda.is_available():
-        model = model.cuda()
+    model = model.to(device)
 
     for epoch in range(num_epochs):
         print(f"Epoch {epoch + 1}/{num_epochs}")
         running_loss = 0.0
 
         for i, (inputs, targets) in enumerate(data_loader):
-            if torch.cuda.is_available():
-                inputs, targets = inputs.cuda(), targets.cuda()
+            inputs, targets = inputs.to(device), targets.to(device)
 
             # Forward pass
             outputs = model(inputs, targets)
