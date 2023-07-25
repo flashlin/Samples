@@ -8,29 +8,12 @@ from torch.utils.data import Dataset
 
 from network import alist_to_chunks, pad_chunks_list, pad_array, pad_sequence_list
 from tsql_tokenizr import tsql_tokenize
+import torch.nn.functional as F
 
 
-def overlap_split_sequence(sequence, split_length, overlap=1):
-    """
-    将序列切割为重叠分割的子序列。
-    参数：
-        sequence (list or torch.Tensor): 输入序列，长度为 n。
-        split_length (int): 子序列的长度。
-        overlap (int): 重叠部分的长度，应小于等于 split_length。
-    返回：
-        List: 包含切割后的子序列的列表。
-    注意：
-        输入序列的长度必须大于 split_length。
-    """
-    assert overlap <= split_length, "重叠长度必须小于等于切割长度。"
-    if len(sequence) <= split_length:
-        return [pad_array(sequence, split_length)]
-    result = []
-    start = 0
-    while start + split_length <= len(sequence):
-        result.append(sequence[start: start + split_length])
-        start += overlap
-    return result
+
+
+
 
 
 def create_map_dict(keys: list[str], start_tag, end_tag):
@@ -321,6 +304,64 @@ class LSTMWithAttention(nn.Module):
         return output_seq
 
 
+
+
+def sequence_from_output(output_sequence):
+    # 使用 softmax 函數計算每個詞的概率分佈
+    probabilities = F.softmax(output_sequence, dim=2)
+    # 取概率最大的詞作為預測結果
+    _, sequence = torch.max(probabilities, dim=2)
+    # 轉換為 Python list 形式
+    sequence = sequence.squeeze().tolist()
+    return sequence
+
+class LSTMWithAttention2(nn.Module):
+    def __init__(self, input_vocab_size=10000, output_vocab_size=10000, hidden_size=32, num_layers=3):
+        super(LSTMWithAttention2, self).__init__()
+        self.output_vocab_size = output_vocab_size
+        self.hidden_size = hidden_size
+        self.num_layers = num_layers
+        self.embedding = nn.Embedding(input_vocab_size, hidden_size)
+        self.lstm = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True)
+        self.attention = nn.Linear(hidden_size, hidden_size)
+        self.out = nn.Linear(hidden_size, output_vocab_size)
+        self.criterion = nn.CrossEntropyLoss()
+
+    def forward(self, x):
+        embedded = self.embedding(x)
+        lstm_output, _ = self.lstm(embedded)
+
+        # Apply attention mechanism
+        attention_scores = torch.tanh(self.attention(lstm_output))
+        attention_weights = F.softmax(attention_scores, dim=1)
+        context_vector = torch.bmm(attention_weights.transpose(1, 2), lstm_output)
+
+        # Final output
+        output = self.out(context_vector)
+        return output
+
+    def compute_loss(self, output, target_tensor):
+        print(f"{output.shape=}")
+        print(f"{target_tensor.shape=}")
+        probabilities = F.softmax(output, dim=2)
+        _, output = torch.max(probabilities, dim=2)
+        output_flattened = output.view(-1).float()
+        target_flattened = target_tensor.view(-1).float()
+
+        print(f"{output_flattened.shape=}")
+        print(f"{target_flattened.shape=}")
+        if output_flattened.shape < target_flattened.shape:
+            output_flattened = torch.cat(
+                [output_flattened, torch.zeros(target_flattened.shape[0] - output_flattened.shape[0])])
+        else:
+            output_flattened = output_flattened[:target_flattened.shape[0]]
+
+        print(f"{output_flattened.shape=}")
+        print(f"{target_flattened.shape=}")
+        loss = self.criterion(output_flattened, target_flattened)
+        return loss
+
+
 class SqlTrainDataset(Dataset):
     def __init__(self, dict_file: str, max_seq_len):
         self.max_seq_len = max_seq_len
@@ -353,20 +394,3 @@ def pad_collate_fn(batch):
     targets = torch.as_tensor(padded_label_seqs, dtype=torch.long)
     return features, targets
 
-
-def infer(model, input_seq):
-    start_token_index = key_dict["<s>"]  # start_token_index 是起始标记的索引
-    end_token_index = key_dict["</s>"]
-    input_tensor = torch.as_tensor(input_seq, dtype=torch.long).unsqueeze(0)  # 添加批次维度 (batch_size=1, seq_len)
-    target_tensor = torch.as_tensor([start_token_index], dtype=torch.long).unsqueeze(0)
-
-    model.eval()  # 设置模型为评估模式，以便在推断时不进行dropout等操作
-    with torch.no_grad():
-        while True:
-            output = model(input_tensor, target_tensor)
-            print(f"1")
-            pred_token = output[:, -1, :].argmax(dim=1, keepdim=True)  # 获取最后一个时间步的预测结果
-            target_tensor = torch.cat([target_tensor, pred_token], dim=1)
-            if pred_token.item() == end_token_index:
-                break
-    return target_tensor

@@ -40,7 +40,50 @@ def load_dict_from_file(file_path):
 
 
 def pad_list(value_list: list[T], max_len: int, pad_value: T) -> list[T]:
+    """
+    :param value_list: any list
+    :param max_len:
+    :param pad_value:
+    :return:
+    """
     len_values = len(value_list)
     if len_values < max_len:
         return value_list + [pad_value] * (max_len - len_values)
     return value_list
+
+
+def overlap_split_list(sequence: list[T], split_length: int, overlap: int = 1) -> list[list[T]]:
+    """
+    将序列切割为重叠分割的子序列。
+    :param sequence: (list or torch.Tensor) 輸入序列，長度 n
+    :param split_length: (int) 子序列的長度
+    :param overlap: (int) it should <= split_length
+    :return: (list) 切割後的子序列的列表。
+    """
+    assert overlap <= split_length, "重叠长度必须小于等于切割长度。"
+    if len(sequence) <= split_length:
+        return [pad_list(sequence, split_length)]
+    result = []
+    start = 0
+    while start + split_length <= len(sequence):
+        result.append(sequence[start: start + split_length])
+        start += overlap
+    return result
+
+
+def create_running_list(a_list: list[T], max_seq_len: int) -> list[list[T]]:
+    """
+    ex input [1, 2, 3]
+    return
+    [0, 0, 1]
+    [0, 1, 2]
+    [1, 2, 3]
+    :param a_list:
+    :param max_seq_len:
+    :return:
+    """
+    new_seq = pad_list(a_list, max_len=max_seq_len, pad_value=0)
+    pad_len = len(new_seq) - 1
+    tmp_list = [0] * pad_len
+    tmp_list.extend(new_seq)
+    return overlap_split_list(tmp_list, max_seq_len)
