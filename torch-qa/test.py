@@ -87,8 +87,8 @@ def train(model, data_loader, criterion, num_epochs=10, device='cpu'):
         # Save the model weights if this epoch gives a new minimum loss
         if avg_loss < min_loss:
             min_loss = avg_loss
-            torch.save(model.state_dict(), f"./models/best_model_{min_loss:.2f}.pth")
-            print(f"New minimum loss {min_loss:.2f}, model saved.")
+            torch.save(model.state_dict(), f"./models/best_model_{min_loss:.4f}.pth")
+            print(f"New minimum loss {min_loss:.4f}, model saved.")
             keep_best_pth_files("./models")
 
     writer.close()
@@ -157,8 +157,12 @@ def test4():
 
     sql_value = sql_to_value("select id from p")
     load_model_pth(model)
-    resp = infer(model, sql_value)
-    print(f"{resp}")
+    #resp = infer(model, sql_value)
+    output_seq = model.infer(sql_value)
+
+
+
+    print(f"{output_seq=}")
 
 
 if __name__ == '__main__':
