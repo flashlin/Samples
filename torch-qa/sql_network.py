@@ -308,8 +308,10 @@ class LSTMWithAttention(nn.Module):
     def infer(self, input_seq):
         start_index = key_dict["<s>"]
         end_index = key_dict["</s>"]
+        tgt_seq = [start_index]
+        tgt_seq = torch.as_tensor(tgt_seq, dtype=torch.long).unsqueeze(0)
         input_seq = torch.as_tensor([start_index] + input_seq + [end_index], dtype=torch.long).unsqueeze(0)
-        output_seq = self.forward(input_seq, input_seq)
+        output_seq = self.forward(input_seq, tgt_seq)
 
         # 依照最右邊的維度, 找出最有可能的值
         best_indices = torch.argmax(output_seq, dim=-1)
@@ -329,8 +331,8 @@ class SqlTrainDataset(Dataset):
 
     def __getitem__(self, index):
         sql, label = self.data[index]
-        sql_value = [key_dict['<s>']] + sql_to_value(sql) + [key_dict['</s>']]
-        label_value = [key_dict['<s>']] + label_to_value(label) + [key_dict['</s>']]
+        sql_value = [key_dict['<s>']] + sql_to_value(sql)
+        label_value = label_to_value(label) + [key_dict['</s>']]
         return sql_value, label_value
 
 

@@ -6,7 +6,8 @@ from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
     padding_row_array_list
 from sql_network import keep_best_pth_files, load_model_pth, \
-    ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn, convert_sql_txt_to_train_data, sql_to_value, infer
+    ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn, convert_sql_txt_to_train_data, sql_to_value, infer, \
+    decode_label, label_value_to_obj
 
 MAX_WORD_LEN = 5
 
@@ -116,6 +117,7 @@ def test2():
 
 
 
+
 def test4():
     max_seq_len = 30
     # convert_sql_txt_to_train_data("./train_data/sql.txt",
@@ -155,14 +157,17 @@ def test4():
 
     # train(model, dataloader, loss_fn, num_epochs=100)
 
-    sql_value = sql_to_value("select id from p")
+    sql = "select id, name, birth from p"
+    sql_value = sql_to_value(sql)
     load_model_pth(model)
     #resp = infer(model, sql_value)
+    print(f"{sql_value=}")
     output_seq = model.infer(sql_value)
-
-
-
     print(f"{output_seq=}")
+    output_list = [x for x in output_seq if x != 0]
+    label = label_value_to_obj(output_list)
+    tgt = decode_label(label, sql)
+    print(f"{tgt=}")
 
 
 if __name__ == '__main__':
