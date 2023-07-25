@@ -316,8 +316,8 @@ class SqlTrainDataset(Dataset):
 
     def __getitem__(self, index):
         sql, label = self.data[index]
-        sql_value = [key_dict['<s>']] + sql_to_value(sql)
-        label_value = label_to_value(label) + [key_dict['</s>']]
+        sql_value = [key_dict['<s>']] + sql_to_value(sql) + [key_dict['</s>']]
+        label_value = [key_dict['<s>']] + label_to_value(label) + [key_dict['</s>']]
         return sql_value, label_value
 
 
@@ -340,22 +340,19 @@ def pad_collate_fn(batch):
 
 
 def infer(model, input_seq):
-    input_tensor = torch.tensor(input_seq).unsqueeze(0)  # 添加批次维度 (batch_size=1, seq_len)
-    start_token = torch.tensor([[key_dict["<s>"]]])  # start_token_index 是起始标记的索引
+    max_length = 30
+    start_token = key_dict["<s>"]  # start_token_index 是起始标记的索引
     end_token_index = key_dict["</s>"]
+    input_tensor = torch.as_tensor(input_seq, dtype=torch.long).unsqueeze(0)  # 添加批次维度 (batch_size=1, seq_len)
+    target_seq = torch.as_tensor([start_token], dtype=torch.long).unsqueeze(0)
+
     model.eval()  # 设置模型为评估模式，以便在推断时不进行dropout等操作
     with torch.no_grad():
-        output_seq = [start_token]  # 初始化输出序列
         while True:
-            # 前向传播，根据当前的输出序列和输入序列进行预测
-            output = model(input_tensor, torch.cat(output_seq, dim=1))
-            # 获取当前时间步的预测结果
+            output = model(input_tensor, target_seq)
             pred_token = output[:, -1, :].argmax(dim=1, keepdim=True)  # 获取最后一个时间步的预测结果
-            # 添加到输出序列中
-            output_seq.append(pred_token)
-            # 判断是否生成了结束标记，如果生成了就结束推断
+            # 添加到目标序列中
+            target_seq = torch.cat([target_seq, pred_token], dim=1)
             if pred_token.item() == end_token_index:
                 break
-
-    output_seq = [token.item() for token in torch.cat(output_seq, dim=1).squeeze()]
-    return output_seq
+    return target_seq

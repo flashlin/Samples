@@ -6,7 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
     padding_row_array_list
 from sql_network import keep_best_pth_files, load_model_pth, \
-    ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn, convert_sql_txt_to_train_data
+    ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn, convert_sql_txt_to_train_data, sql_to_value, infer
 
 MAX_WORD_LEN = 5
 
@@ -134,7 +134,6 @@ def test4():
     dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
     model = LSTMWithAttention()
-    # load_model_pth(model)
     #outputs_data = model()
     #print(f"{outputs_data.shape=}")
 
@@ -154,7 +153,12 @@ def test4():
     # print(f"{labels_data=}")
     # print(f"{rounded_tensor=}")
 
-    train(model, dataloader, loss_fn, num_epochs=1000)
+    # train(model, dataloader, loss_fn, num_epochs=100)
+
+    sql_value = sql_to_value("select id from p")
+    load_model_pth(model)
+    resp = infer(model, sql_value)
+    print(f"{resp}")
 
 
 if __name__ == '__main__':
