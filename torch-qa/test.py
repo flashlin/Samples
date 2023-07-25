@@ -155,7 +155,7 @@ def test4():
     # print(f"{labels_data=}")
     # print(f"{rounded_tensor=}")
 
-    # train(model, dataloader, loss_fn, num_epochs=100)
+    train(model, dataloader, loss_fn, num_epochs=100)
 
     sql = "select id, name, birth from p"
     sql_value = sql_to_value(sql)
@@ -171,4 +171,64 @@ def test4():
 
 
 if __name__ == '__main__':
-    test4()
+    #test4()
+
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+
+
+    def sequence_from_output(output_sequence):
+        # 使用 softmax 函數計算每個詞的概率分佈
+        probabilities = F.softmax(output_sequence, dim=2)
+        # 取概率最大的詞作為預測結果
+        _, sequence = torch.max(probabilities, dim=2)
+        # 轉換為 Python list 形式
+        sequence = sequence.squeeze().tolist()
+        return sequence
+
+    class LSTMWithAttention(nn.Module):
+        def __init__(self, input_vocab_size, output_vocab_size, hidden_size, num_layers):
+            super(LSTMWithAttention, self).__init__()
+            self.hidden_size = hidden_size
+            self.num_layers = num_layers
+            self.embedding = nn.Embedding(input_vocab_size, hidden_size)
+            self.lstm = nn.LSTM(hidden_size, hidden_size, num_layers, batch_first=True)
+            self.attention = nn.Linear(hidden_size, hidden_size)
+            self.out = nn.Linear(hidden_size, output_vocab_size)
+
+        def forward(self, x):
+            embedded = self.embedding(x)
+            lstm_output, _ = self.lstm(embedded)
+
+            # Apply attention mechanism
+            attention_scores = torch.tanh(self.attention(lstm_output))
+            attention_weights = F.softmax(attention_scores, dim=1)
+            context_vector = torch.bmm(attention_weights.transpose(1, 2), lstm_output)
+
+            # Final output
+            output = self.out(context_vector)
+            return output
+
+
+    # 使用示例
+    input_vocab_size = 10000
+    output_vocab_size = 10000
+    hidden_size = 256
+    num_layers = 2
+
+    # 初始化模型
+    model = LSTMWithAttention(input_vocab_size, output_vocab_size, hidden_size, num_layers)
+
+    # 隨機生成一個長度為10的輸入序列 (範例中使用5維的單詞表示)
+    input_sequence = torch.randint(0, input_vocab_size, (1, 10))
+
+    # 進行推斷
+    output_sequence = model(input_sequence)
+
+    # 輸出結果
+    print("輸入序列:", input_sequence)
+    print("輸出序列:", output_sequence)
+
+    output = sequence_from_output(output_sequence)
+    print(output)

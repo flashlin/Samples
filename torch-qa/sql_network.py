@@ -276,7 +276,7 @@ class MultiHeadAttention(nn.Module):
 class LSTMWithAttention(nn.Module):
     def __init__(self, input_vocab_size=10000,
                  output_vocab_size=10000,
-                 hidden_size=128, num_layers=3, num_heads=4, dropout=0.2):
+                 hidden_size=128, num_layers=100, num_heads=4, dropout=0.2):
         super(LSTMWithAttention, self).__init__()
         self.output_vocab_size = output_vocab_size
         self.encoder = nn.TransformerEncoder(
