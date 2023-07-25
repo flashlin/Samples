@@ -147,7 +147,10 @@ def test4():
     dataset = SqlTrainDataset("./train_data/sql.txt", max_seq_len=max_seq_len)
     dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
-    model = LSTMWithAttention(input_size=max_seq_len, output_size=200, hidden_size=200, num_heads=200)
+    max_number = 256 + 2
+    model = LSTMWithAttention(seq_len=max_seq_len,
+                              input_size=max_number, output_size=max_number,
+                              hidden_size=max_seq_len, num_heads=max_seq_len)
     # load_model_pth(model)
     #outputs_data = model()
     #print(f"{outputs_data.shape=}")

@@ -126,8 +126,8 @@ class MultiHeadAttention(nn.Module):
 
     def forward(self, x):
         """
-        :param x:
-        :return:
+        :param x: (seq_len, batch_size, hidden_size)
+        :return: (seq_len, batch_size, num_heads * 倍數)
         """
         # print(f"mul {x.shape=}")
         # Split the last dimension into (num_heads, hidden_size)
@@ -145,7 +145,12 @@ class MultiHeadAttention(nn.Module):
             heads.append(out)
 
         # Concatenate all the heads' outputs
-        x = torch.cat(heads, dim=-1)  # shape: [batch_size, hidden_size * num_heads]
+        #x = torch.cat(heads, dim=-1)  # shape: [batch_size, hidden_size * num_heads]
+
+        x = torch.stack(heads, dim=0)  # shape: [num_heads, batch_size, sequence_length, hidden_size]
+        x = x.permute(2, 1, 0, 3)  # shape: [sequence_length, batch_size, num_heads, hidden_size]
+        x = x.contiguous().view(x.shape[0], x.shape[1],
+                                -1)  # shape: [sequence_length, batch_size, num_heads * hidden_size]
 
         return x
 

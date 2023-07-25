@@ -210,33 +210,50 @@ class ListIter:
 
 
 class LSTMWithAttention(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_heads):
+    def __init__(self, seq_len, input_size, hidden_size, output_size,
+                 num_heads, n_layers=3):
         super(LSTMWithAttention, self).__init__()
+        self.seq_len = seq_len
         self.hidden_size = hidden_size
-        self.num_heads = num_heads
+        self.num_heads = num_heads  # 相當於 seq_len
 
         self.embedding = nn.Embedding(input_size, hidden_size)
-        self.lstm = nn.LSTM(hidden_size, hidden_size)
+        self.lstm = nn.LSTM(hidden_size, hidden_size, n_layers, batch_first=True)
         self.attention = MultiHeadAttention(hidden_size, num_heads)
-        self.fc = nn.Linear(hidden_size, input_size)
+        self.fc = nn.Linear(hidden_size, output_size)
         self.relu = nn.ReLU()  # 使用 ReLU 來確保輸出為非負值
 
     def forward(self, x):
+        # [batch_size, 1, seq_len]
+        print(f"input {x.shape=}")
         batch_size = x.shape[0]
-        x = x.view(-1, batch_size)
+        x = x.view(batch_size, -1)
 
-        embedded = self.embedding(x)  # shape: [seq_len, batch_size, hidden_size]
+        # 輸入:(batch_size, seq_len)
+        # 輸出:(batch_size, seq_len, embedding_dim)
+        embedded = self.embedding(x)
+        print(f"{embedded.shape=}")
 
-        lstm_output, _ = self.lstm(embedded)  # shape: [seq_len, batch_size, hidden_size]
+        # 輸入:(batch_size, seq_len, input_size)
+        # 輸出:(batch_size, seq_len, num_directions * hidden_size)
+        lstm_output, _ = self.lstm(embedded)
 
-        # print(f"{lstm_output.shape=}")
-        attention_output = self.attention(lstm_output)  # shape: [batch_size, seq_len, hidden_size * num_heads]
+        print(f"{lstm_output.shape=}")
+
+        attention_input = torch.transpose(lstm_output, 0, 1)
+        print(f"{attention_input.shape=}")
+        # 輸入:(seq_len, batch_size, hidden_size)
+        # 輸出:(seq_len, batch_size, num_heads * 倍數)
+        attention_output = self.attention(attention_input)
+        # attention_output = torch.transpose(attention_output, 0, 1)
+        print(f"{attention_output.shape=}")
 
         # output = lstm_output[-1, :, :]  # shape: [batch_size, hidden_size]
         # print(f"{attention_output.shape=}")
 
-        output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
-        output = self.relu(output)
+        fc_output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
+        print(f"{fc_output.shape=}")
+        output = self.relu(fc_output)
         output = torch.unsqueeze(output, 1)
         return output
 
