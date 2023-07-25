@@ -92,19 +92,22 @@ def alist_to_chunks(a_list, max_len):
 #     return data_np
 
 
-def pad_chunks_list(alist_chunks_list, max_list_len):
-    # max_a_list_len = 0
-    # for a_list in alist_chunks_list:
-    #     max_a_list_len = max(max_a_list_len, len(a_list))
-
+def pad_sequence_list(a_list, max_seq_len):
     result = []
-    for a_list in alist_chunks_list:
-        sub_list = list(a_list)
+    for sequence in a_list:
+        new_sequence = pad_array(sequence, max_seq_len)
+        result.append(new_sequence)
+    return result
+
+
+def pad_chunks_list(a_list, max_list_len):
+    result = []
+    for sequence in a_list:
+        sub_list = list(sequence)
         if len(sub_list) < max_list_len:
             sub_list.append(pad_array([], len(sub_list[0])))
         result.append(sub_list)
     return result
-
 
 
 class MultiHeadAttention(nn.Module):

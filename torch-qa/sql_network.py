@@ -6,11 +6,34 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset
 
-from network import alist_to_chunks, pad_chunks_list
+from network import alist_to_chunks, pad_chunks_list, pad_array, pad_sequence_list
 from tsql_tokenizr import tsql_tokenize
 
 
-def create_dict(keys: list[str]):
+def overlap_split_sequence(sequence, split_length, overlap=1):
+    """
+    将序列切割为重叠分割的子序列。
+    参数：
+        sequence (list or torch.Tensor): 输入序列，长度为 n。
+        split_length (int): 子序列的长度。
+        overlap (int): 重叠部分的长度，应小于等于 split_length。
+    返回：
+        List: 包含切割后的子序列的列表。
+    注意：
+        输入序列的长度必须大于 split_length。
+    """
+    assert overlap <= split_length, "重叠长度必须小于等于切割长度。"
+    if len(sequence) <= split_length:
+        return [pad_array(sequence, split_length)]
+    result = []
+    start = 0
+    while start + split_length <= len(sequence):
+        result.append(sequence[start: start + split_length])
+        start += overlap
+    return result
+
+
+def create_map_dict(keys: list[str], start_tag, end_tag):
     key_to_id = {}
     id_to_key = {}
     id = 1
@@ -18,11 +41,15 @@ def create_dict(keys: list[str]):
         key_to_id[key] = id
         id_to_key[id] = key
         id += 1
+    start_id = 99998
+    key_to_id[start_tag] = start_id
+    key_to_id[end_tag] = start_id + 1
+    id_to_key[start_id] = start_tag
+    id_to_key[start_id + 1] = end_tag
     return key_to_id, id_to_key
 
 
-key_dict, id_dict = create_dict([
-    '<s>', '</s>',
+key_dict, id_dict = create_map_dict([
     '<identifier>', '<number>', '<string>',
     '<<number>>',
     '<<str>>',
@@ -33,7 +60,7 @@ key_dict, id_dict = create_dict([
     '(', ')', '.', '+', '-', '*', '/',
     '&', '>=', '<=', '<>', '!=', '=',
     'select', 'from', 'as', 'with', 'nolock'
-])
+], start_tag='<s>', end_tag='</s>')
 
 
 def dict_to_value_array(val, type_to_id_dict):
@@ -119,7 +146,6 @@ def decode_label(label, sql):
                 decoded_text += ', '
         return decoded_text
     return None
-
 
 
 def query_pth_files(directory: str):
@@ -209,6 +235,21 @@ class ListIter:
         return self.index >= len(self.a_list)
 
 
+def convert_sql_txt_to_train_data(raw_sql_train_file: str,
+                                  max_seq_len: int,
+                                  output_file: str):
+    data = read_dict_file(raw_sql_train_file)
+    with open(output_file, 'w', encoding='utf-8') as f:
+        for sql, label in data:
+            sql_value = [key_dict['<s>']] + sql_to_value(sql)
+            label_value = label_to_value(label) + [key_dict['</s>']]
+            sql_chunks = overlap_split_sequence(sql_value, split_length=max_seq_len)
+            label_chunks = overlap_split_sequence(label_value, split_length=max_seq_len)
+            for sql_chunk, label_chunk in zip(sql_chunks, label_chunks):
+                f.write(" ".join(map(str, sql_chunk)) + "\n")
+                f.write(" ".join(map(str, label_chunk)) + "\n")
+
+
 class MultiHeadAttention(nn.Module):
     def __init__(self, embed_dim, num_heads, dropout=0.2):
         super(MultiHeadAttention, self).__init__()
@@ -233,56 +274,35 @@ class MultiHeadAttention(nn.Module):
 
 
 class LSTMWithAttention(nn.Module):
-    def __init__(self, seq_len, input_dim, hidden_size, output_dim,
-                 num_heads, n_layers=3):
+    def __init__(self, input_vocab_size=10000,
+                 output_vocab_size=10000,
+                 hidden_size=128, num_layers=3, num_heads=4, dropout=0.2):
         super(LSTMWithAttention, self).__init__()
-        self.seq_len = seq_len
-        self.hidden_size = hidden_size
-        self.num_heads = num_heads  # 相當於 seq_len
+        self.encoder = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(hidden_size, num_heads, dim_feedforward=hidden_size, dropout=dropout),
+            num_layers
+        )
+        self.decoder = nn.TransformerDecoder(
+            nn.TransformerDecoderLayer(hidden_size, num_heads, dim_feedforward=hidden_size, dropout=dropout),
+            num_layers
+        )
+        self.embedding = nn.Embedding(input_vocab_size, hidden_size)
+        self.fc = nn.Linear(hidden_size, output_vocab_size)
+        self.criterion = nn.CrossEntropyLoss()
 
-        self.embedding = nn.Embedding(input_dim, hidden_size)
-        self.lstm = nn.LSTM(hidden_size, hidden_size, n_layers, batch_first=True)
-        self.attention = MultiHeadAttention(embed_dim=hidden_size,
-                                            num_heads=num_heads, dropout=0.2)
-        self.fc = nn.Linear(hidden_size, seq_len)
-        self.relu = nn.ReLU()  # 使用 ReLU 來確保輸出為非負值
-
-    def forward(self, x):
-        # [batch_size, 1, seq_len]
-        print(f"input {x.shape=}")
-        batch_size = x.shape[0]
-        x = x.view(batch_size, -1)
-
-        # 輸入:(batch_size, seq_len)
-        # 輸出:(batch_size, seq_len, embedding_dim)
-        embedded = self.embedding(x)
-        print(f"{embedded.shape=}")
-
-        # 輸入:(batch_size, seq_len, input_size)
-        # 輸出:(batch_size, seq_len, num_directions * hidden_size)
-        lstm_output, _ = self.lstm(embedded)
-
-        print(f"{lstm_output.shape=}")
-
-        # attention_input = torch.transpose(lstm_output, 0, 1)
-        attention_input = lstm_output
-        print(f"{attention_input.shape=}")
-        # 輸入:(seq_len, batch_size, hidden_size)
-        # 輸出:(seq_len, batch_size, hidden_size)
-        attention_output = self.attention(attention_input)
-        # attention_output = torch.transpose(attention_output, 0, 1)
-        print(f"{attention_output.shape=}")
-
-        # output = lstm_output[-1, :, :]  # shape: [batch_size, hidden_size]
-        # print(f"{attention_output.shape=}")
-
-        fc_output = self.fc(attention_output)  # shape: [seq_len, batch_size, output_size]
-        print(f"{fc_output.shape=}")
-        relu_output = self.relu(fc_output)
-        print(f"{relu_output.shape=}")
-        output = torch.unsqueeze(relu_output, 1)
-        print(f"{output.shape=}")
+    def forward(self, src, tgt):
+        src_embed = self.embedding(src)
+        encoder_output = self.encoder(src_embed)
+        tgt_embed = self.embedding(tgt)
+        decoder_output = self.decoder(tgt_embed, encoder_output)
+        output = self.fc(decoder_output)
         return output
+
+    def compute_loss(self, output, target_tensor):
+        output_flattened = output.view(-1, self.output_vocab_size)
+        target_flattened = target_tensor.view(-1)
+        loss = self.criterion(output_flattened, target_flattened)
+        return loss
 
 
 class SqlTrainDataset(Dataset):
@@ -295,28 +315,24 @@ class SqlTrainDataset(Dataset):
 
     def __getitem__(self, index):
         sql, label = self.data[index]
-        sql_value = [key_dict['<s>']] + sql_to_value(sql) + [key_dict['</s>']]
-        sql_chunks = alist_to_chunks(sql_value, max_len=self.max_seq_len)
-
-        label_value = label_to_value(label)
-        label_chunk = [key_dict['<s>']] + label_value + [key_dict['</s>']]
-        label_value_chunks = alist_to_chunks(label_chunk, max_len=self.max_seq_len)
-        return sql_chunks, label_value_chunks
+        sql_value = [key_dict['<s>']] + sql_to_value(sql)
+        label_value = label_to_value(label) + [key_dict['</s>']]
+        return sql_value, label_value
 
 
 def pad_collate_fn(batch):
-    sql_chunks_list = []
-    label_chunks_list = []
+    sql_seqs = []
+    label_seqs = []
     max_list_len = 0
-    for sql_chunks, label_chunks in batch:
-        max_list_len = max(max_list_len, len(sql_chunks))
-        sql_chunks_list.append(sql_chunks)
-        max_list_len = max(max_list_len, len(label_chunks))
-        label_chunks_list.append(label_chunks)
+    for sql_value, label_value in batch:
+        max_list_len = max(max_list_len, len(sql_value))
+        sql_seqs.append(sql_value)
+        max_list_len = max(max_list_len, len(label_value))
+        label_seqs.append(label_value)
 
-    padded_sql_chunks = pad_chunks_list(sql_chunks_list, max_list_len)
-    padded_label_chunks = pad_chunks_list(label_chunks_list, max_list_len)
+    padded_sql_seqs = pad_sequence_list(sql_seqs, max_list_len)
+    padded_label_seqs = pad_sequence_list(label_seqs, max_list_len)
 
-    features = torch.as_tensor(padded_sql_chunks, dtype=torch.long)
-    targets = torch.as_tensor(padded_label_chunks, dtype=torch.float32)
+    features = torch.as_tensor(padded_sql_seqs, dtype=torch.long)
+    targets = torch.as_tensor(padded_label_seqs, dtype=torch.float32)
     return features, targets

@@ -6,7 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tensor, get_probability, WordRNN, \
     padding_row_array_list
 from sql_network import keep_best_pth_files, load_model_pth, \
-    ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn
+    ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn, convert_sql_txt_to_train_data
 
 MAX_WORD_LEN = 5
 
@@ -67,11 +67,12 @@ def train(model, data_loader, criterion, num_epochs=10):
                 inputs, targets = inputs.cuda(), targets.cuda()
 
             # Forward pass
-            outputs = model(inputs)
+            outputs = model(inputs, targets)
 
             # Compute loss
             print(f"{inputs.shape=} {targets.shape=}")
-            loss = criterion(outputs, targets)
+            # loss = criterion(outputs, targets)
+            loss = model.compute_loss(outputs, targets)
 
             # Backward pass and optimization
             optimizer.zero_grad()
@@ -119,23 +120,23 @@ def test2():
 
 
 def test4():
-    input_length = 20
-    input_array = torch.arange(1, input_length + 1)
-    # 将输入数据划分为长度为 50 的子序列
-    sequence_length = 10
-    num_sequences = input_length // sequence_length
-    input_sequences = input_array.view(num_sequences, sequence_length)
-    print(f"{input_sequences=}")
-
-
     max_seq_len = 30
+    # convert_sql_txt_to_train_data("./train_data/sql.txt",
+    #                               max_seq_len=max_seq_len,
+    #                               output_file="./train_data/sql_data.txt")
+
+    # input_length = 20
+    # input_array = torch.arange(1, input_length + 1)
+    # # 将输入数据划分为长度为 50 的子序列
+    # sequence_length = 10
+    # num_sequences = input_length // sequence_length
+    # input_sequences = input_array.view(num_sequences, sequence_length)
+    # print(f"{input_sequences=}")
+
     dataset = SqlTrainDataset("./train_data/sql.txt", max_seq_len=max_seq_len)
     dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
-    max_number = 256 + 2
-    model = LSTMWithAttention(seq_len=max_seq_len,
-                              input_dim=max_number, output_dim=max_number,
-                              hidden_size=max_seq_len, num_heads=max_seq_len)
+    model = LSTMWithAttention()
     # load_model_pth(model)
     #outputs_data = model()
     #print(f"{outputs_data.shape=}")
