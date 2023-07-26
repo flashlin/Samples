@@ -43,7 +43,7 @@ def load_dict_from_file(file_path):
     return dictionary
 
 
-def pad_list(value_list: list[T], max_len: int, pad_value: T) -> list[T]:
+def pad_list(value_list: list[T], max_len: int, pad_value: T = 0) -> list[T]:
     """
     :param value_list: any list
     :param max_len:

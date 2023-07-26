@@ -296,27 +296,34 @@ class LSTMWithAttention(nn.Module):
         pred_end = False
         for idx, running_input_seq in enumerate(running_input_seqs):
             input_tensor = torch.as_tensor(running_input_seq, dtype=torch.long).unsqueeze(0)
-            output_seq = self.forward(input_tensor, tgt_seq)
+            outputs = self.forward(input_tensor, tgt_seq)
             # 獲取當前時間步的預測結果
-            pred_token = output_seq[:, -1, :].argmax(dim=1, keepdim=True)
-            output_seq.append(pred_token)
-            tgt_seq.append(pred_token)
-            tgt_seq = tgt_seq[1:]
+            pred_token = outputs[:, -1, :].argmax(dim=1, keepdim=True)
+            output_seq.append(pred_token.squeeze(0).item())
+            tgt_seq = torch.cat((tgt_seq, pred_token), dim=1)
+            tgt_seq = tgt_seq[:, 1:]
             if pred_token.item() == end_index:
                 pred_end = True
                 break
 
+        print(f"predict...")
+        new_input_seq = pad_list(new_input_seq, max_len=max_seq_len)
         input_tensor = torch.as_tensor(new_input_seq, dtype=torch.long).unsqueeze(0)
         tgt_seq = torch.as_tensor(output_seq[-max_seq_len:], dtype=torch.long).unsqueeze(0)
-        while not pred_end:
-            input_tensor.append([0])
-            output_seq = self.forward(input_tensor, tgt_seq)
-            pred_token = output_seq[:, -1, :].argmax(dim=1, keepdim=True)
-            output_seq.append(pred_token)
-            tgt_seq.append(pred_token)
-            tgt_seq = tgt_seq[1:]
+        count = 0
+        while not pred_end and count < 1024:
+            input_tensor = torch.cat((input_tensor, torch.as_tensor([[0]], dtype=torch.long)), dim=1)
+            input_tensor = input_tensor[:, 1:]
+            print(f"{input_tensor=}")
+            print(f"{output_seq=}")
+            outputs = self.forward(input_tensor, tgt_seq)
+            pred_token = outputs[:, -1, :].argmax(dim=1, keepdim=True)
+            output_seq.append(pred_token.squeeze(0).item())
+            tgt_seq = torch.cat((tgt_seq, pred_token), dim=1)
+            tgt_seq = tgt_seq[:, 1:]
             if pred_token.item() == end_index:
                 break
+            count += 1
 
         return output_seq
 

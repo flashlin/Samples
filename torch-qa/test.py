@@ -80,7 +80,7 @@ def test4():
     dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
     model = LSTMWithAttention()
-    train(model, dataloader, num_epochs=100)
+    #train(model, dataloader, num_epochs=100)
 
     sql = "select id, name, birth from p"
     sql_value = sql_to_value(sql)
