@@ -6,24 +6,15 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset
 
+from data_utils import create_char2index_map, create_index2char_map, overlap_split_list, create_running_list, pad_list
 from network import alist_to_chunks, pad_chunks_list, pad_array, pad_sequence_list
 from tsql_tokenizr import tsql_tokenize
 import torch.nn.functional as F
 
 
-
-
-
-
-
 def create_map_dict(keys: list[str], start_tag, end_tag):
-    key_to_id = {}
-    id_to_key = {}
-    id = 1
-    for key in keys:
-        key_to_id[key] = id
-        id_to_key[id] = key
-        id += 1
+    key_to_id = create_char2index_map(keys, start=1)
+    id_to_key = create_index2char_map(keys, start=1)
     start_id = 9998
     key_to_id[start_tag] = start_id
     key_to_id[end_tag] = start_id + 1
@@ -226,8 +217,8 @@ def convert_sql_txt_to_train_data(raw_sql_train_file: str,
         for sql, label in data:
             sql_value = [key_dict['<s>']] + sql_to_value(sql)
             label_value = label_to_value(label) + [key_dict['</s>']]
-            sql_chunks = overlap_split_sequence(sql_value, split_length=max_seq_len)
-            label_chunks = overlap_split_sequence(label_value, split_length=max_seq_len)
+            sql_chunks = overlap_split_list(sql_value, split_length=max_seq_len)
+            label_chunks = overlap_split_list(label_value, split_length=max_seq_len)
             for sql_chunk, label_chunk in zip(sql_chunks, label_chunks):
                 f.write(" ".join(map(str, sql_chunk)) + "\n")
                 f.write(" ".join(map(str, label_chunk)) + "\n")
@@ -289,17 +280,39 @@ class LSTMWithAttention(nn.Module):
         return loss
 
     def infer(self, input_seq):
+        max_seq_len = 30
         start_index = key_dict["<s>"]
         end_index = key_dict["</s>"]
-        tgt_seq = [start_index]
-        tgt_seq = torch.as_tensor(tgt_seq, dtype=torch.long).unsqueeze(0)
-        input_seq = torch.as_tensor([start_index] + input_seq + [end_index], dtype=torch.long).unsqueeze(0)
-        output_seq = self.forward(input_seq, tgt_seq)
+        new_input_seq = [start_index] + input_seq + [end_index]
+        tgt_seq = pad_list([], max_len=max_seq_len-1) + [start_index]
 
-        # 依照最右邊的維度, 找出最有可能的值
-        best_indices = torch.argmax(output_seq, dim=-1)
-        result_list = best_indices.squeeze().tolist()
-        output_seq = result_list[1:-1]
+        tgt_seq = torch.as_tensor(tgt_seq, dtype=torch.long).unsqueeze(0)
+        output_seq = [start_index]
+        running_input_seqs = create_running_list(new_input_seq, max_seq_len=max_seq_len)
+        pred_end = False
+        for idx, running_input_seq in enumerate(running_input_seqs):
+            input_tensor = torch.as_tensor(running_input_seq, dtype=torch.long).unsqueeze(0)
+            output_seq = self.forward(input_tensor, tgt_seq)
+            # 獲取當前時間步的預測結果
+            pred_token = output_seq[:, -1, :].argmax(dim=1, keepdim=True)
+            output_seq.append(pred_token)
+            tgt_seq.append(pred_token)
+            tgt_seq = tgt_seq[1:]
+            if pred_token.item() == end_index:
+                pred_end = True
+                break
+
+        input_tensor = torch.as_tensor(new_input_seq, dtype=torch.long).unsqueeze(0)
+        tgt_seq = torch.as_tensor(output_seq[-max_seq_len:], dtype=torch.long).unsqueeze(0)
+        while not pred_end:
+            input_tensor.append([0])
+            output_seq = self.forward(input_tensor, tgt_seq)
+            pred_token = output_seq[:, -1, :].argmax(dim=1, keepdim=True)
+            output_seq.append(pred_token)
+            tgt_seq.append(pred_token)
+            tgt_seq = tgt_seq[1:]
+            if pred_token.item() == end_index:
+                break
 
         return output_seq
 
