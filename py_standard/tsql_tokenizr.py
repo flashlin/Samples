@@ -239,12 +239,20 @@ def skip_spaces(stream_iterator: StreamTokenIterator):
     return NoneToken
 
 
+def read_keyword_identifier_token(stream_iterator: StreamTokenIterator) -> Token:
+    token = read_identifier_token(stream_iterator)
+    if token is not EmptyToken:
+        if token.text in TSQL_KEYWORDS:
+            token.type = KEYWORD
+    return token
+
+
 def tsql_tokenize(stream) -> list[Token]:
     tokens = []
     stream_iterator = StreamTokenIterator(stream)
 
     read_fn_list = [
-        read_tsql_keyword_fn(),
+        #read_tsql_keyword_fn(),
         read_identifier_token,
         read_float_number_token,
         read_single_quote_string_token,
