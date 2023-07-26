@@ -64,16 +64,10 @@ def train(model, data_loader, num_epochs=10, device='cpu'):
 def test4():
     max_seq_len = 30
 
-    a = [1, 2, 3, 4, 5]
-    b = create_running_list(a, 5)
-    for c in b:
-        print(c)
+    convert_sql_txt_to_train_data("./train_data/sql.txt",
+                                  max_seq_len=max_seq_len,
+                                  output_file="./train_data/sql_data.txt")
     return
-
-
-    # convert_sql_txt_to_train_data("./train_data/sql.txt",
-    #                               max_seq_len=max_seq_len,
-    #                               output_file="./train_data/sql_data.txt")
 
     # input_length = 20
     # input_array = torch.arange(1, input_length + 1)

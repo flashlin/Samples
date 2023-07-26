@@ -215,10 +215,10 @@ def convert_sql_txt_to_train_data(raw_sql_train_file: str,
     data = read_dict_file(raw_sql_train_file)
     with open(output_file, 'w', encoding='utf-8') as f:
         for sql, label in data:
-            sql_value = [key_dict['<s>']] + sql_to_value(sql)
-            label_value = label_to_value(label) + [key_dict['</s>']]
-            sql_chunks = overlap_split_list(sql_value, split_length=max_seq_len)
-            label_chunks = overlap_split_list(label_value, split_length=max_seq_len)
+            sql_value = [key_dict['<s>']] + sql_to_value(sql) + [key_dict['</s>']]
+            label_value = [key_dict['<s>']] + label_to_value(label) + [key_dict['</s>']]
+            sql_chunks = create_running_list(sql_value, max_seq_len=max_seq_len)
+            label_chunks = create_running_list(label_value, max_seq_len=max_seq_len)
             for sql_chunk, label_chunk in zip(sql_chunks, label_chunks):
                 f.write(" ".join(map(str, sql_chunk)) + "\n")
                 f.write(" ".join(map(str, label_chunk)) + "\n")
