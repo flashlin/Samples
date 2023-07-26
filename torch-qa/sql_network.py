@@ -254,7 +254,7 @@ class MultiHeadAttention(nn.Module):
 class LSTMWithAttention(nn.Module):
     def __init__(self, input_vocab_size=10000,
                  output_vocab_size=10000,
-                 hidden_size=128, num_layers=100, num_heads=4, dropout=0.2):
+                 hidden_size=128, num_layers=3, num_heads=4, dropout=0.2):
         super(LSTMWithAttention, self).__init__()
         self.output_vocab_size = output_vocab_size
         self.encoder = nn.TransformerEncoder(
@@ -283,8 +283,7 @@ class LSTMWithAttention(nn.Module):
         loss = self.criterion(output_flattened, target_flattened)
         return loss
 
-    def infer(self, input_seq, device='cpu'):
-        max_seq_len = 30
+    def infer(self, input_seq, max_seq_len, device='cpu'):
         start_index = key_dict["<s>"]
         end_index = key_dict["</s>"]
         new_input_seq = [start_index] + input_seq + [end_index]
@@ -299,6 +298,7 @@ class LSTMWithAttention(nn.Module):
             outputs = self.forward(input_tensor, tgt_seq)
             # 獲取當前時間步的預測結果
             pred_token = outputs[:, -1, :].argmax(dim=1, keepdim=True)
+            print(f"{pred_token=}")
             output_seq.append(pred_token.squeeze(0).item())
             tgt_seq = torch.cat((tgt_seq, pred_token), dim=1)
             tgt_seq = tgt_seq[:, 1:]
@@ -351,7 +351,7 @@ class LSTMWithAttention2(nn.Module):
         self.out = nn.Linear(hidden_size, output_vocab_size)
         self.criterion = nn.CrossEntropyLoss()
 
-    def forward(self, x):
+    def forward(self, x, targets):
         embedded = self.embedding(x)
         lstm_output, _ = self.lstm(embedded)
 
@@ -365,25 +365,37 @@ class LSTMWithAttention2(nn.Module):
         return output
 
     def compute_loss(self, output, target_tensor):
-        print(f"{output.shape=}")
-        print(f"{target_tensor.shape=}")
-        probabilities = F.softmax(output, dim=2)
-        _, output = torch.max(probabilities, dim=2)
-        output_flattened = output.view(-1).float()
-        target_flattened = target_tensor.view(-1).float()
+        output_flattened = output.view(-1, self.output_vocab_size)
+        _, predicted_labels = torch.max(output_flattened, dim=1)
+        target_flattened = target_tensor.view(-1)
+        # return F.cross_entropy(output_flattened, target_flattened)
 
-        print(f"{output_flattened.shape=}")
-        print(f"{target_flattened.shape=}")
-        if output_flattened.shape < target_flattened.shape:
-            output_flattened = torch.cat(
-                [output_flattened, torch.zeros(target_flattened.shape[0] - output_flattened.shape[0])])
-        else:
-            output_flattened = output_flattened[:target_flattened.shape[0]]
+        print(f"{predicted_labels.shape=}")
 
-        print(f"{output_flattened.shape=}")
-        print(f"{target_flattened.shape=}")
-        loss = self.criterion(output_flattened, target_flattened)
+        loss = 0
+        seq_length = target_tensor.shape[0]
+        output_seq = predicted_labels[:seq_length].float()
+        target_seq = target_flattened[:seq_length].float()
+        loss += F.cross_entropy(output_seq.unsqueeze(0), target_seq.unsqueeze(0), reduction='sum')
+        loss /= target_tensor.size(0)
         return loss
+
+        # # probabilities = F.softmax(output, dim=2)
+        # # _, output = torch.max(probabilities, dim=2)
+        # batch_size = target_tensor.size(0)
+        # max_target_length = target_tensor.size(1)
+        #
+        # output_flattened = output.view(-1, self.output_vocab_size).float()
+        # target_flattened = target_tensor.view(-1).float()
+        #
+        # print(f"{output_flattened.shape=} {target_flattened.shape=} {batch_size=}")
+        #
+        # # loss = self.criterion(output_flattened, target_flattened, ignore_index=0)
+        # # return loss
+        # mask = (target_flattened != 0).float()
+        # loss = F.cross_entropy(output_flattened, target_flattened, reduction='none')
+        # loss = torch.sum(loss * mask) / batch_size
+        # return loss
 
 
 class SqlTrainDataset(Dataset):

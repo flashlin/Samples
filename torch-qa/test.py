@@ -79,14 +79,15 @@ def test4():
     dataset = SqlTrainDataset("./train_data/sql.txt", max_seq_len=max_seq_len)
     dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
-    model = LSTMWithAttention()
-    train(model, dataloader, num_epochs=100, device='cpu')
+    model = LSTMWithAttention2()
+    train(model, dataloader, num_epochs=100, device='cuda')
 
     sql = "select id, name, birth from p"
     sql_value = sql_to_value(sql)
     load_model_pth(model)
+    model.to('cpu')
     print(f"{sql_value=}")
-    output_seq = model.infer(sql_value)
+    output_seq = model.infer(sql_value, max_seq_len)
     print(f"{output_seq=}")
     output_list = [x for x in output_seq if x != 0]
     label = label_value_to_obj(output_list)
