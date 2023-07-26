@@ -104,7 +104,7 @@ def decode_label(label, sql):
         decoded_text += 'SELECT '
         for idx, col in enumerate(label['columns']):
             from_index = col[0]
-            input_offset = col[1]
+            input_offset = col[1] - 1
             from_table = f"tb{from_index}.{input_tokens[input_offset]}"
             decoded_text += from_table
             if idx + 1 < len(label['columns']):
@@ -115,7 +115,7 @@ def decode_label(label, sql):
             if isinstance(source, dict):
                 decoded_text += '(' + decode_label(source, sql) + ')'
             else:
-                table_name = input_tokens[source]
+                table_name = input_tokens[source - 1]
                 decoded_text += f"{table_name} as tb{idx} WITH(NOLOCK)"
             if idx + 1 < len(label_froms):
                 decoded_text += ', '
@@ -187,7 +187,7 @@ def word_to_id(word: str) -> int:
 def sql_to_value(sql: str):
     sql_tokens = tsql_tokenize(sql)
     sql_value = [word_to_id(token.text) for token in sql_tokens]
-    sql_value = [(offset, value) for offset, value in enumerate(sql_value)]
+    sql_value = [(offset + 1, value) for offset, value in enumerate(sql_value)]
     expanded_sql_value = [item for sublist in sql_value for item in sublist]
     return expanded_sql_value
 
@@ -414,8 +414,8 @@ class SqlTrainDataset(Dataset):
 
     def __getitem__(self, index):
         sql, label = self.data[index]
-        sql_value = [key_dict['<s>']] + sql_to_value(sql)
-        label_value = label_to_value(label) + [key_dict['</s>']]
+        sql_value = [key_dict['<s>']] + sql_to_value(sql) + [key_dict['</s>']]
+        label_value = [key_dict['<s>']] + label_to_value(label) + [key_dict['</s>']]
         return sql_value, label_value
 
 
@@ -435,4 +435,26 @@ def pad_collate_fn(batch):
     features = torch.as_tensor(padded_sql_seqs, dtype=torch.long)
     targets = torch.as_tensor(padded_label_seqs, dtype=torch.long)
     return features, targets
+
+
+class SqlTrain2Dataset(Dataset):
+    def __init__(self, dict_file: str, max_seq_len):
+        self.max_seq_len = max_seq_len
+        self.data = data = []
+        with open(dict_file, 'r', encoding='utf-8') as f:
+            for idx, line in enumerate(f):
+                if idx % 2 == 0:
+                    sql_value = line.split(' ')
+                else:
+                    label_value = line.split(' ')
+                    data.append((sql_value, label_value))
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        sql, label = self.data[index]
+        sql_value = [key_dict['<s>']] + sql_to_value(sql)
+        label_value = label_to_value(label) + [key_dict['</s>']]
+        return sql_value, label_value
 

@@ -2,23 +2,29 @@
     ("select id from cust",
     {
         'type': 'select',
-        'columns': [(0, 1)],
-        'froms': [3]
+        'columns': [(1, 2)],
+        'froms': [4]
     }),
     ("select id , name from cust",
     {
         'type': 'select',
-        'columns': [(0, 1), (0, 3)],
-        'froms': [5]
+        'columns': [(1, 2), (1, 4)],
+        'froms': [6]
+    }),
+    ("select id , name, birth from cust",
+    {
+        'type': 'select',
+        'columns': [(1, 2), (1, 4), (1, 6)],
+        'froms': [6]
     }),
     ("select id , name from ( select id, name from cust )",
     {
          'type': 'select',
-         'columns': [(0, 1), (0, 3)],
+         'columns': [(1, 2), (1, 4)],
          'froms': [{
             'type': 'select',
-            'columns': [(0, 7), (0, 9)],
-            'froms': [11]
+            'columns': [(1, 8), (1, 10)],
+            'froms': [12]
          }]
     }),
 ]
