@@ -6,7 +6,8 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset
 
-from data_utils import create_char2index_map, create_index2char_map, overlap_split_list, create_running_list, pad_list
+from data_utils import create_char2index_map, create_index2char_map, overlap_split_list, create_running_list, pad_list, \
+    zip_aggregate
 from network import alist_to_chunks, pad_chunks_list, pad_array, pad_sequence_list
 from tsql_tokenizr import tsql_tokenize
 import torch.nn.functional as F
@@ -212,6 +213,9 @@ class ListIter:
 def convert_sql_txt_to_train_data(raw_sql_train_file: str,
                                   max_seq_len: int,
                                   output_file: str):
+    def create_chunk(prev_chunk):
+        return list(prev_chunk[1:] + [0])
+
     data = read_dict_file(raw_sql_train_file)
     with open(output_file, 'w', encoding='utf-8') as f:
         for sql, label in data:
@@ -219,7 +223,7 @@ def convert_sql_txt_to_train_data(raw_sql_train_file: str,
             label_value = [key_dict['<s>']] + label_to_value(label) + [key_dict['</s>']]
             sql_chunks = create_running_list(sql_value, max_seq_len=max_seq_len)
             label_chunks = create_running_list(label_value, max_seq_len=max_seq_len)
-            for sql_chunk, label_chunk in zip(sql_chunks, label_chunks):
+            for sql_chunk, label_chunk in zip_aggregate(sql_chunks, label_chunks, create_a_elem=create_chunk, create_b_elem=create_chunk):
                 f.write(" ".join(map(str, sql_chunk)) + "\n")
                 f.write(" ".join(map(str, label_chunk)) + "\n")
 

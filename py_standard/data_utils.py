@@ -1,8 +1,12 @@
 import string
 from itertools import groupby
 import json
-from typing import TypeVar
+from typing import TypeVar, Generator, Union, Callable
+from itertools import zip_longest
+
 T = TypeVar('T')
+T1 = TypeVar('T1')
+T2 = TypeVar('T2')
 
 
 def create_char2index_map(str_list: list[str], start=0):
@@ -50,6 +54,26 @@ def pad_list(value_list: list[T], max_len: int, pad_value: T) -> list[T]:
     if len_values < max_len:
         return value_list + [pad_value] * (max_len - len_values)
     return value_list
+
+
+#EitherT1 = Union[T1, None]
+#EitherT2 = Union[T2, None]
+TupleT12 = tuple[T1, T2]
+
+def zip_aggregate(a_list: list[T1], b_list: list[T2],
+                  create_a_elem: Callable[[T1], T1],
+                  create_b_elem: Callable[[T2], T2]) \
+        -> Generator[TupleT12, None, None]:
+    prev_a = None
+    prev_b = None
+    for a, b in zip_longest(a_list, b_list, fillvalue=None):
+        if a is None:
+            a = create_a_elem(prev_a)
+        if b is None:
+            b = create_b_elem(prev_b)
+        yield a, b
+        prev_a = a
+        prev_b = b
 
 
 def overlap_split_list(sequence: list[T], split_length: int, overlap: int = 1) -> list[list[T]]:

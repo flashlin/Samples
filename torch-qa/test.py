@@ -67,7 +67,6 @@ def test4():
     convert_sql_txt_to_train_data("./train_data/sql.txt",
                                   max_seq_len=max_seq_len,
                                   output_file="./train_data/sql_data.txt")
-    return
 
     # input_length = 20
     # input_array = torch.arange(1, input_length + 1)
