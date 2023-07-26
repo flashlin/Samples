@@ -370,14 +370,14 @@ class LSTMWithAttention2(nn.Module):
         target_flattened = target_tensor.view(-1)
         # return F.cross_entropy(output_flattened, target_flattened)
 
-        print(f"{predicted_labels.shape=}")
+        # print(f"{predicted_labels.shape=}")
 
         loss = 0
         seq_length = target_tensor.shape[0]
-        output_seq = predicted_labels[:seq_length].float()
-        target_seq = target_flattened[:seq_length].float()
-        loss += F.cross_entropy(output_seq.unsqueeze(0), target_seq.unsqueeze(0), reduction='sum')
-        loss /= target_tensor.size(0)
+        output_seq = predicted_labels[:seq_length].float().requires_grad_(True)
+        target_seq = target_flattened[:seq_length].float().requires_grad_(True)
+        loss += F.cross_entropy(output_seq.unsqueeze(0), target_seq.unsqueeze(0), reduction='mean')
+        # loss /= target_tensor.size(0)
         return loss
 
         # # probabilities = F.softmax(output, dim=2)
@@ -396,6 +396,12 @@ class LSTMWithAttention2(nn.Module):
         # loss = F.cross_entropy(output_flattened, target_flattened, reduction='none')
         # loss = torch.sum(loss * mask) / batch_size
         # return loss
+    def infer(self, input_seq, max_seq_len):
+        input_seq = [key_dict['<s>']] + input_seq
+        input_tensor = torch.as_tensor([input_seq], dtype=torch.long)
+        outputs = self.forward(input_tensor, None)
+        predicts = sequence_from_output(outputs)
+        return predicts
 
 
 class SqlTrainDataset(Dataset):

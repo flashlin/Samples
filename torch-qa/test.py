@@ -89,8 +89,7 @@ def test4():
     print(f"{sql_value=}")
     output_seq = model.infer(sql_value, max_seq_len)
     print(f"{output_seq=}")
-    output_list = [x for x in output_seq if x != 0]
-    label = label_value_to_obj(output_list)
+    label = label_value_to_obj(output_seq)
     tgt = decode_label(label, sql)
     print(f"{tgt=}")
 
