@@ -9,7 +9,7 @@ from network import CharRNN, word_to_chunks, MultiHeadAttention, chunks_to_tenso
     padding_row_array_list
 from sql_network import keep_best_pth_files, load_model_pth, \
     ListIter, LSTMWithAttention, SqlTrainDataset, pad_collate_fn, convert_sql_txt_to_train_data, sql_to_value, \
-    decode_label, label_value_to_obj, LSTMWithAttention2
+    decode_label, label_value_to_obj, LSTMWithAttention2, SqlTrain2Dataset
 
 MAX_WORD_LEN = 5
 
@@ -76,7 +76,7 @@ def test4():
     # input_sequences = input_array.view(num_sequences, sequence_length)
     # print(f"{input_sequences=}")
 
-    dataset = SqlTrainDataset("./train_data/sql.txt", max_seq_len=max_seq_len)
+    dataset = SqlTrain2Dataset("./train_data/sql.txt", max_seq_len=max_seq_len)
     dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
     model = LSTMWithAttention2()
