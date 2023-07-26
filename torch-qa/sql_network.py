@@ -283,19 +283,19 @@ class LSTMWithAttention(nn.Module):
         loss = self.criterion(output_flattened, target_flattened)
         return loss
 
-    def infer(self, input_seq):
+    def infer(self, input_seq, device='cpu'):
         max_seq_len = 30
         start_index = key_dict["<s>"]
         end_index = key_dict["</s>"]
         new_input_seq = [start_index] + input_seq + [end_index]
         tgt_seq = pad_list([], max_len=max_seq_len-1) + [start_index]
 
-        tgt_seq = torch.as_tensor(tgt_seq, dtype=torch.long).unsqueeze(0)
+        tgt_seq = torch.as_tensor(tgt_seq, dtype=torch.long).unsqueeze(0).to(device)
         output_seq = [start_index]
         running_input_seqs = create_running_list(new_input_seq, max_seq_len=max_seq_len)
         pred_end = False
         for idx, running_input_seq in enumerate(running_input_seqs):
-            input_tensor = torch.as_tensor(running_input_seq, dtype=torch.long).unsqueeze(0)
+            input_tensor = torch.as_tensor(running_input_seq, dtype=torch.long).unsqueeze(0).to(device)
             outputs = self.forward(input_tensor, tgt_seq)
             # 獲取當前時間步的預測結果
             pred_token = outputs[:, -1, :].argmax(dim=1, keepdim=True)
@@ -308,8 +308,8 @@ class LSTMWithAttention(nn.Module):
 
         print(f"predict...")
         new_input_seq = pad_list(new_input_seq, max_len=max_seq_len)
-        input_tensor = torch.as_tensor(new_input_seq, dtype=torch.long).unsqueeze(0)
-        tgt_seq = torch.as_tensor(output_seq[-max_seq_len:], dtype=torch.long).unsqueeze(0)
+        input_tensor = torch.as_tensor(new_input_seq, dtype=torch.long).unsqueeze(0).to(device)
+        tgt_seq = torch.as_tensor(output_seq[-max_seq_len:], dtype=torch.long).unsqueeze(0).to(device)
         count = 0
         while not pred_end and count < 1024:
             input_tensor = torch.cat((input_tensor, torch.as_tensor([[0]], dtype=torch.long)), dim=1)
