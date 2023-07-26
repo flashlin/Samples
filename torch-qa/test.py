@@ -30,7 +30,7 @@ def train(model, data_loader, num_epochs=10, device='cpu'):
             inputs, targets = inputs.to(device), targets.to(device)
 
             # Forward pass
-            outputs = model(inputs)
+            outputs = model(inputs, targets)
 
             # Compute loss
             loss = model.compute_loss(outputs, targets)
@@ -79,13 +79,12 @@ def test4():
     dataset = SqlTrainDataset("./train_data/sql.txt", max_seq_len=max_seq_len)
     dataloader = DataLoader(dataset, batch_size=32, collate_fn=pad_collate_fn)
 
-    model = LSTMWithAttention2()
+    model = LSTMWithAttention()
     train(model, dataloader, num_epochs=100)
 
     sql = "select id, name, birth from p"
     sql_value = sql_to_value(sql)
     load_model_pth(model)
-    #resp = infer(model, sql_value)
     print(f"{sql_value=}")
     output_seq = model.infer(sql_value)
     print(f"{output_seq=}")
