@@ -12,20 +12,23 @@ model_name = 't5-small'
 tokenizer = T5Tokenizer.from_pretrained(model_name)
 model = T5ForConditionalGeneration.from_pretrained(model_name)
 
-pth_file = "t5_translation_model.pt"
+pth_file = "./models/t5_translation_model.pt"
 if os.path.exists(pth_file):
     model.load_state_dict(torch.load(pth_file))
 
 # 定義訓練資料
 train_data = [
-    ("Translate the following sentence to Chinese: 'Hello, how are you?'", "你好，你好嗎？"),
-    ("Translate the following sentence to Chinese: 'I love programming.'", "我喜歡編程。"),
-    ("Translate the following sentence to Chinese: 'What is your name?'", "你叫什麼名字？")
+    ("translate: 'select id from p",
+     "lparam type select; cols id; fromSources p; rparam"),
+    ("translate: 'select id,name from p",
+     "lparam type select; cols id, name; fromSources p; rparam"),
+    ("translate: 'select id,name,birth from p",
+     "lparam type select; cols id, name; birth; fromSources p; rparam"),
 ]
 
 # 訓練設定
 batch_size = 1
-num_epochs = 1
+num_epochs = 10
 learning_rate = 3e-4
 
 # 構造訓練迴圈
@@ -35,7 +38,7 @@ for epoch in range(num_epochs):
     total_loss = 0
 
     for source, target in train_data:
-        input_text = f"translate English to Chinese: '{source}'"
+        input_text = f"translate: '{source}'"
         target_text = target
 
         input_ids = tokenizer.encode(input_text, return_tensors='pt', max_length=512, padding='max_length')
@@ -56,7 +59,7 @@ torch.save(model.state_dict(), pth_file)
 # 示範推斷方法
 def translate(model, source_text):
     model.eval()
-    input_text = f"translate English to Chinese: '{source_text}'"
+    input_text = f"translate: '{source_text}'"
     input_ids = tokenizer.encode(input_text, return_tensors='pt')
     with torch.no_grad():
         output_ids = model.generate(input_ids, max_length=512, num_beams=4, early_stopping=True)
@@ -64,7 +67,7 @@ def translate(model, source_text):
     return translated_text
 
 # 示範翻譯
-input_text = "Hello, how are you?"
+input_text = "select addr from cus"
 translated_text = translate(model, input_text)
 print("Input Text:", input_text)
 print("Translated Text:", translated_text)
