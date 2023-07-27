@@ -14,7 +14,7 @@ custom_prompt_template = """Use the following pieces of information to answer th
 If you don't know the answer, please just sat that you don't know the answer,
 don't try to make up an answer.
 
-Context: {}
+Context: {context}
 Question: {question}
 
 Only returns the helpful answer below and nothing else.
@@ -23,8 +23,8 @@ Helpful answer:
 
 
 def set_custom_prompt():
-    prompt = PromptTemplate(tempfile=custom_prompt_template, input_variables=[
-        'content', 'question'])
+    prompt = PromptTemplate(template=custom_prompt_template, input_variables=[
+        'context', 'question'])
     return prompt
 
 
@@ -76,7 +76,7 @@ async def start():
 
 @cl.on_message
 async def main(message):
-    chain = cl.user_session.set("chain")
+    chain = cl.user_session.get("chain")
     cb = cl.AsyncLangchainCallbackHandler(
         stream_final_answer=True,
         answer_prefix_tokens=["FINAL", "ANSWER"]

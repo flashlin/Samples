@@ -1,6 +1,7 @@
-不管是 2.x 的 new Vue({...}) ，或是 3.0 的 createApp({...})，
-一開始我們都需要先建立一個 Vue 的物件實體，並且將這個物件指定至某個變數，
-如範例裡的 vm 之中。
+Whether it is new Vue({...}) in 2.x or createApp({...}) in 3.0, 
+we need to create a Vue object instance first and assign it to a variable, 
+such as vm in the example.
+
 
 ```
 // Vue 2.x 
@@ -9,7 +10,7 @@ const vm = new Vue({
     message: 'Hello Vue 2.0!' 
   }
 }); 
-// 透過 $mount 掛載至指定的網頁節點 
+// Mount to the specified web node via `$mount`
 vm.$mount('#app');
 ```
 
@@ -19,7 +20,7 @@ const vm = Vue.createApp({
   data() { 
     return { 
       message: "Hello Vue 3.0!" 
-    } 
+    }
   } 
 }); 
 vm.mount('#app');
