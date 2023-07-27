@@ -32,3 +32,4 @@ torch-segment-demo/public/app
 torch-qa/models/bert-large-uncased-float16.bin
 torch-qa/models/chatglm-6b-float16
 torch-qa/models/pytorch_model.bin.index.json
+torch-qa/models
