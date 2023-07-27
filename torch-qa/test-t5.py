@@ -31,30 +31,36 @@ batch_size = 1
 num_epochs = 10
 learning_rate = 3e-4
 
-# 構造訓練迴圈
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
-for epoch in range(num_epochs):
-    model.train()
-    total_loss = 0
 
-    for source, target in train_data:
-        input_text = f"translate: '{source}'"
-        target_text = target
+def train_model():
+    global input_text, input_ids, loss
+    # 構造訓練迴圈
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+    for epoch in range(num_epochs):
+        model.train()
+        total_loss = 0
 
-        input_ids = tokenizer.encode(input_text, return_tensors='pt', max_length=512, padding='max_length')
-        target_ids = tokenizer.encode(target_text, return_tensors='pt', max_length=512, padding='max_length')
+        for source, target in train_data:
+            input_text = f"translate: '{source}'"
+            target_text = target
 
-        optimizer.zero_grad()
-        loss = model(input_ids=input_ids, labels=target_ids).loss
-        loss.backward()
-        optimizer.step()
-        total_loss += loss.item()
+            input_ids = tokenizer.encode(input_text, return_tensors='pt', max_length=512, padding='max_length')
+            target_ids = tokenizer.encode(target_text, return_tensors='pt', max_length=512, padding='max_length')
 
-    avg_loss = total_loss / len(train_data)
-    print(f"Epoch {epoch+1}/{num_epochs} - Loss: {avg_loss:.4f}")
+            optimizer.zero_grad()
+            loss = model(input_ids=input_ids, labels=target_ids).loss
+            loss.backward()
+            optimizer.step()
+            total_loss += loss.item()
 
-# 保存最佳權重
-torch.save(model.state_dict(), pth_file)
+        avg_loss = total_loss / len(train_data)
+        print(f"Epoch {epoch + 1}/{num_epochs} - Loss: {avg_loss:.4f}")
+    # 保存最佳權重
+    torch.save(model.state_dict(), pth_file)
+
+
+train_model()
+
 
 # 示範推斷方法
 def translate(model, source_text):
