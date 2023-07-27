@@ -1,6 +1,8 @@
 """
 chainlit run .\langchain_llama2.py -w
 """
+import asyncio
+
 from langchain import PromptTemplate
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
@@ -9,9 +11,8 @@ from langchain.chains import RetrievalQA
 import chainlit as cl
 
 DB_FAISS_PATH = "models/db_faiss"
-MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q8_0.bin"  # 不能work, 因為不支援 await
-MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q6_K.bin"  # 尚未下載
 MODEL_PTH_NAME = "llama-2-7b-chat.ggmlv3.q8_0.bin"
+MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q8_0.bin"
 
 custom_prompt_template = """Use the following pieces of information to answer the user's question.
 If you don't know the answer, please just sat that you don't know the answer,
@@ -66,31 +67,18 @@ def final_result(query):
     return response
 
 
-### Chainlit ###
-@cl.on_chat_start
-async def start():
+async def main():
+    query = """translate "select username from pd" to json"""
     chain = qa_bot()
-    msg = cl.Message(content="Starting the bot...")
-    await msg.send()
-    msg.content = "Hi, Welcome to the Bot, What is your query?"
-    await msg.update()
-    cl.user_session.set("chain", chain)
-
-
-@cl.on_message
-async def main(message):
-    chain = cl.user_session.get("chain")
-    cb = cl.AsyncLangchainCallbackHandler(
-        stream_final_answer=True,
-        answer_prefix_tokens=["FINAL", "ANSWER"]
-    )
-    cb.answer_reached = True
-    res = await chain.acall(message, callbacks=[cb])
+    res = await chain.acall(query)
     answer = res["result"]
     sources = res["source_documents"]
     if sources:
         answer += f"\nSources:" + str(sources)
     else:
         answer += f"\nNo Sources Found"
-    await cl.Message(content=answer).send()
+    print(f"{answer}")
 
+
+if __name__ == '__main__':
+    asyncio.run(main())
