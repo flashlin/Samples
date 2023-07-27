@@ -14,7 +14,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 
 DATA_PATH = "data/"
-DB_FAISS_PATH = "vectorstores/db_faiss"
+DB_FAISS_PATH = "models/db_faiss"
 
 
 def split_documents(documents):
