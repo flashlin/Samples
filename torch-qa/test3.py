@@ -170,22 +170,22 @@ def inference(model, input_seq):
         return predicted_indices
 
 # 測試推斷
-sql = "select id, addr, birth from p"
-sql_tokens = tsql_tokenize(sql)
-s = [token.text for token in sql_tokens]
-print(f"{s=}")
+sql = "select id from p"
 input_seq = sql_to_value(sql)
-label = {
-    'type': 'select',
-    'columns': [(1, 2), (1, 4), (1, 6)],
-    'froms': [8]
-}
-label_value = label_to_value(label)
-print(f"{input_seq}")
-print(f"{label_value}")
-label = label_value_to_obj(label_value)
-tgt = decode_label(label, sql)
-print(f"{tgt}")
+# sql_tokens = tsql_tokenize(sql)
+# s = [token.text for token in sql_tokens]
+# print(f"{s=}")
+# label = {
+#     'type': 'select',
+#     'columns': [(1, 2), (1, 4), (1, 6)],
+#     'froms': [8]
+# }
+# label_value = label_to_value(label)
+# print(f"{input_seq}")
+# print(f"{label_value}")
+# label = label_value_to_obj(label_value)
+# tgt = decode_label(label, sql)
+# print(f"{tgt}")
 print("---------------------------------")
 
 input_seq = pad_list([key_dict['<s>']] + input_seq, 100)
