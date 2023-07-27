@@ -55,8 +55,8 @@ def train_model():
 
         avg_loss = total_loss / len(train_data)
         print(f"Epoch {epoch + 1}/{num_epochs} - Loss: {avg_loss:.4f}")
-    # 保存最佳權重
-    torch.save(model.state_dict(), pth_file)
+        # 保存最佳權重
+        torch.save(model.state_dict(), pth_file)
 
 
 train_model()
