@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 
+from data_utils import pad_list
 from sql_network import SqlTrainDataset, pad_collate_fn, sql_to_value, key_dict
 
 
@@ -59,15 +60,17 @@ for epoch in range(num_epochs):
 def translate(model, source_text):
     model.eval()
     source_ids = sql_to_value(source_text)
+    source_ids = pad_list(source_ids, 100)
     source_ids = torch.tensor(source_ids, dtype=torch.long).unsqueeze(0)
-    target_ids = torch.tensor([key_dict['<s>']], dtype=torch.long).unsqueeze(0)  # 開始符號 <sos>
+    target_ids = pad_list([key_dict['<s>']], 100)
+    target_ids = torch.tensor(target_ids, dtype=torch.long).unsqueeze(0)  # 開始符號 <sos>
 
     end_index = key_dict['</s>']
     with torch.no_grad():
         for _ in range(20):  # 限制生成的句子長度為 20 個詞
             print(f"{source_ids.shape=}")
-            print(f"{target_ids.shape=}")
-            output = model(source_ids, target_ids)
+            # TODO: 不知道為什麼
+            output = model(source_ids, None)
             next_word_id = output.argmax(dim=-1)[:, -1].item()
             target_ids = torch.cat([target_ids, torch.tensor([[next_word_id]], dtype=torch.long)], dim=-1)
             if next_word_id == end_index:  # 結束符號 <eos>
