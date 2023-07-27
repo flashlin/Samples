@@ -1,3 +1,6 @@
+"""
+chainlit run .\langchain_llama2.py -w
+"""
 from langchain import PromptTemplate
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
@@ -26,7 +29,7 @@ def set_custom_prompt():
 
 
 def load_llm():
-    llm = CTransformers(model="llama-2-7b-chat.ggmlv3.q8_0.bin",
+    llm = CTransformers(model="models/llama-2-7b-chat.ggmlv3.q8_0.bin",
                         model_type="llama",
                         max_new_tokens=512,
                         temperature=0.5)
@@ -88,6 +91,3 @@ async def main(message):
         answer += f"\nNo Sources Found"
     await cl.Message(content=answer).send()
 
-"""
-chainlit run ./test-llama2.py -w
-"""
