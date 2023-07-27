@@ -1,11 +1,19 @@
+import os
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from data_utils import pad_list
-from sql_network import sql_to_value
+from sql_network import sql_to_value, SqlTrainDataset, pad_collate_fn, key_dict
 
-
+"""
+GPT-2 是 OpenAI 提出的一種基於 Transformer 架構的語言模型，它共有4個版本，分別是：
+GPT-2 "Small" (hidden_size=768, num_layers=12)
+GPT-2 "Medium" (hidden_size=1024, num_layers=24)
+GPT-2 "Large" (hidden_size=1280, num_layers=36)
+GPT-2 "XL" (hidden_size=1600, num_layers=48)
+"""
 class TinyGPT2(nn.Module):
     def __init__(self, vocab_size, hidden_size=64, num_layers=2):
         super(TinyGPT2, self).__init__()
@@ -38,7 +46,7 @@ class TinyGPT2(nn.Module):
 import torch.optim as optim
 
 
-def train_model(model, train_loader, num_epochs=5, learning_rate=0.001):
+def train_model(model, train_loader, num_epochs=100, learning_rate=0.001):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
     best_loss = float('inf')
@@ -61,7 +69,7 @@ def train_model(model, train_loader, num_epochs=5, learning_rate=0.001):
 
         if avg_loss < best_loss:
             best_loss = avg_loss
-            torch.save(model.state_dict(), "best_model.pt")
+            torch.save(model.state_dict(), "./models/gpt2.pt")
 
     print("Training complete!")
 
@@ -69,7 +77,8 @@ def train_model(model, train_loader, num_epochs=5, learning_rate=0.001):
 def generate_text(model, start_text, max_length=100):
     model.eval()
     input_ids = sql_to_value(start_text)
-    input_ids = pad_list(input_ids, max_length)
+    # input_ids = pad_list(input_ids, max_length)
+    input_ids = [key_dict['<s>']] + input_ids + [key_dict['</s>']]
     input_ids = torch.as_tensor(input_ids, dtype=torch.long)
 
     with torch.no_grad():
@@ -98,12 +107,21 @@ for item in data:
 data = new_data
 
 # 訓練資料轉換成 DataLoader
-train_data = TensorDataset(torch.LongTensor(data), torch.LongTensor(data))
-train_loader = DataLoader(train_data, batch_size=1, shuffle=True)
+# train_data = TensorDataset(torch.LongTensor(data), torch.LongTensor(data))
+# train_loader = DataLoader(train_data, batch_size=1, shuffle=True)
+
+dataset = SqlTrainDataset("./train_data/sql.txt", max_seq_len=100)
+train_loader = DataLoader(dataset, batch_size=2, collate_fn=pad_collate_fn)
+
 
 # 建立模型和 tokenizer
 vocab_size = 10000  # 假設有16個詞彙
 model = TinyGPT2(vocab_size)
+
+pth_file = './models/gpt2.pth'
+if os.path.exists(pth_file):
+    model.load_state_dict(torch.load(pth_file))
+
 
 # 訓練模型
 train_model(model, train_loader)
