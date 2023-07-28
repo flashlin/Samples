@@ -67,6 +67,12 @@ if( "logs" -eq $action ) {
     return
 }
 
+if( "info" -eq $action ) {
+    $code = "import torch`nprint(torch.cuda.is_available())"
+    InvokeCmd "python -c '$code'"
+    return
+}
+
 $env:PYTHONPATH="D:\VDisk\Github\Samples\py_standard"
 Write-Host "run py script 1.0"
 Write-Host "build: build image"

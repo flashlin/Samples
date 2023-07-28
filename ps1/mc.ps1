@@ -52,6 +52,7 @@ if ( "" -eq $action ) {
     Write-Host "n <name> [python-ver] : create name environment 3.9"
     Write-Host "c <name>              : switch to name environment"
     Write-Host "rm <name>             : remove name environment"
+    Write-Host "i                     : install conda packages"
     return
 }
 
