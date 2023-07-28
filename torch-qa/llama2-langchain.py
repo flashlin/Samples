@@ -9,9 +9,9 @@ from langchain.chains import RetrievalQA
 import chainlit as cl
 
 DB_FAISS_PATH = "models/db_faiss"
-MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q8_0.bin"  # 不能work, 因為不支援 await
 MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q6_K.bin"  # 尚未下載
 MODEL_PTH_NAME = "llama-2-7b-chat.ggmlv3.q8_0.bin"
+MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q8_0.bin"
 
 custom_prompt_template = """Use the following pieces of information to answer the user's question.
 If you don't know the answer, please just sat that you don't know the answer,
@@ -22,6 +22,12 @@ Question: {question}
 
 Only returns the helpful answer below and nothing else.
 Helpful answer: 
+"""
+
+custom_prompt_template = """SYSTEM: You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. 
+Please ensure that your responses are positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+USER: {question}
+ASSISTANT: {context}
 """
 
 
@@ -35,7 +41,7 @@ def load_llm():
     llm = CTransformers(model=f"models/{MODEL_PTH_NAME}",
                         model_type="llama",
                         max_new_tokens=512,
-                        temperature=0.5)
+                        temperature=0.1)
     return llm
 
 
@@ -87,6 +93,8 @@ async def main(message):
     cb.answer_reached = True
     res = await chain.acall(message, callbacks=[cb])
     answer = res["result"]
+    length = len(answer)
+    answer = answer[:length//2]
     sources = res["source_documents"]
     filenames = []
     for doc in sources:
@@ -96,4 +104,3 @@ async def main(message):
     else:
         answer += f"\nNo Sources Found"
     await cl.Message(content=answer).send()
-    return False
