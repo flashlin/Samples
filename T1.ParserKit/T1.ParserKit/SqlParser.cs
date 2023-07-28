@@ -74,19 +74,23 @@ public class SqlExprVisitor : TSQLBaseVisitor<SqlExpr>
 
     public override SqlExpr VisitSelectColumn(TSQLParser.SelectColumnContext context)
     {
-        var columnName = context.ID().GetText();
+        var name = context.ID(0).GetText()!;
+        var aliasName = context.ID(1)?.GetText() ?? string.Empty;
         return new FieldExpr
         {
-            Name = columnName
+            Name = name,
+            AliasName = aliasName
         };
     }
 
     public override SqlExpr VisitTableReference(TSQLParser.TableReferenceContext context)
     {
-        string tableName = context.ID().GetText();
+        var tableName = context.ID(0).GetText()!;
+        var aliasName = context.ID(1)?.GetText() ?? string.Empty;
         return new TableExpr
         {
-            Name = tableName
+            Name = tableName,
+            AliasName = aliasName
         };
     }
 
@@ -111,9 +115,11 @@ public class SqlExprVisitor : TSQLBaseVisitor<SqlExpr>
 public class FieldExpr : SqlExpr
 {
     public string Name { get; set; } = string.Empty;
+    public string AliasName { get; set; } = string.Empty;
 }
 
 public class TableExpr : SqlExpr
 {
     public string Name { get; set; } = string.Empty;
+    public string AliasName { get; set; } = string.Empty;
 }
