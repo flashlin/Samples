@@ -24,8 +24,14 @@ Only returns the helpful answer below and nothing else.
 Helpful answer: 
 """
 
-custom_prompt_template = """SYSTEM: You are a helpful, respectful and honest assistant. Always answer as helpfully as possible. 
-Please ensure that your responses are positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information.
+custom_prompt_template = """SYSTEM: You are a helpful, respectful and honest assistant. 
+Always answer as helpfully as possible. 
+Please ensure that your responses are positive in document. 
+If a question does not make any sense, or is not factually coherent, 
+explain why instead of answering something not correct. 
+If you don't know the answer to a question, please don't share false information.
+please just sat that you don't know the answer, don't try to make up an answer.
+
 USER: {question}
 ASSISTANT: {context}
 """
