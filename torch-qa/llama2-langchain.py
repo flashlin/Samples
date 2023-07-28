@@ -96,4 +96,4 @@ async def main(message):
     else:
         answer += f"\nNo Sources Found"
     await cl.Message(content=answer).send()
-
+    return False
