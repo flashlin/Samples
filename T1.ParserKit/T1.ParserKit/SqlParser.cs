@@ -1,147 +1,119 @@
-﻿namespace T1.ParserKit;
+﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
+
+namespace T1.ParserKit;
 
 public class SqlParser
 {
-    public IEnumerable<SqlExpr> Parse(string sql)
+    public void Test()
     {
-        var tk = new SqlTokenizer();
-        var tokens = tk.Tokenize(sql);
-        var input = new TokenStream(tokens);
-        while (!input.Eof())
-        {
-            var expr = ReadStatement(input);
-            if (expr == SqlExpr.Empty)
-            {
-                var remaining = input.Peek().Text;
-                throw new NotSupportedException($"parse at \"{remaining}\"");
-            }
-            yield return expr;
-        }
+        string query1 = "select id, name from table";
+
+        // 建立輸入流
+        var inputStream1 = new AntlrInputStream(query1);
+
+        // 建立語法解析器
+        var lexer = new TSQLLexer(inputStream1);
+        var tokenStream = new CommonTokenStream(lexer);
+        var parser = new TSQLParser(tokenStream);
+
+        // 解析第一個查詢語句
+        IParseTree tree1 = parser.start();
+
+        // 輸出解析樹
+        Console.WriteLine(tree1.ToStringTree(parser));
     }
 
-    private SqlExpr ReadStatement(TokenStream input)
+    public SqlExpr Parse(string sql)
     {
-        var processList = new[]
-        {
-            ReadWhere,
-            ReadEqualStatement
-        };
-        foreach (var process in processList)
-        {
-            var token = process(input);
-            if (token == SqlExpr.Empty) continue;
-            return token;
-        }
-        return SqlExpr.Empty;
-    }
-
-    private SqlExpr ReadEqualStatement(TokenStream input)
-    {
-        var tokens = input.PeekTokens(2);
-        if (tokens[1].Text == "=")
-        {
-            var left = ReadFactor(input);
-            var op = input.Next();
-            var right = ReadEqualStatement(input);
-            return new OperatorExpr
-            {
-                Token = op,
-                Left = left,
-                Right = right
-            };
-        }
-        return SqlExpr.Empty;
-    }
-
-
-    private SqlExpr ReadFactor(TokenStream input)
-    {
-        return new SqlExpr()
-        {
-            Token = input.Next()
-        };
-    }
-
-    private SqlExpr ReadWhere(TokenStream input)
-    {
-        var token = input.Peek();
-        if (!token.Text.Equals("where", StringComparison.OrdinalIgnoreCase))
-        {
-            return SqlExpr.Empty;
-        }
-
-        return new WhereExpr
-        {
-            Token = input.Next(),
-            Condition = ReadExpression(input)
-        };
-    }
-
-    private SqlExpr ReadExpression(TokenStream input)
-    {
-        var left = ReadStarTerm(input);
-        while (!input.Eof())
-        {
-            var token = input.Peek();
-            if (token.Text != "")
-                break;
-
-            var operatorToken = input.Next();
-
-            var right = ReadStarTerm(input);
-
-            left = new BinaryExpr(left, operatorToken, right);
-        }
-
-        return left;
-    }
-
-    private SqlExpr ReadStarTerm(TokenStream input)
-    {
-        return ReadTerm(input, "*");
-    }
-
-    private SqlExpr ReadTerm(TokenStream input, string term)
-    {
-        var left = ParseFactor(input);
-        while (!input.Eof())
-        {
-            var token = input.Peek();
-            if (token.Text != term)
-                break;
-
-            var operatorToken = input.Next();
-
-            var right = ParseFactor(input);
-            left = new BinaryExpr(left, operatorToken, right);
-        }
-
-        return left;
-    }
-
-    private SqlExpr ParseFactor(TokenStream input)
-    {
-        
-        var token = input.Peek();
-        if (token.Text != "(")
-        {
-            return new SqlExpr
-            {
-                Token = input.Next(),
-            };
-        }
-
-        var leftParam = input.Next();
-        var inner = ReadStatement(input);
-        var rightParam = input.Next();
-        inner.LParam = leftParam;
-        inner.RParam = rightParam;
-        return inner;
+        var inputStream1 = new AntlrInputStream(sql);
+        var lexer = new TSQLLexer(inputStream1);
+        var tokenStream = new CommonTokenStream(lexer);
+        var parser = new TSQLParser(tokenStream);
+        var tree = parser.start();
+        var visitor = new SqlExprVisitor();
+        var expr = visitor.Visit(tree);
+        return expr;
     }
 }
 
-public class OperatorExpr : SqlExpr
+public class SelectExpr : SqlExpr
 {
-    public SqlExpr Left { get; set; } = SqlExpr.Empty;
-    public SqlExpr Right { get; set; } = SqlExpr.Empty;
+    public List<SqlExpr> Columns { get; set; } = new();
+    public SqlExpr? FromClause { get; set; }
+}
+
+public class SourceExpr : SqlExpr
+{
+    public SqlExpr From { get; set; }
+}
+
+public class SqlExprVisitor : TSQLBaseVisitor<SqlExpr>
+{
+    public override SqlExpr VisitSelectStatement(TSQLParser.SelectStatementContext context)
+    {
+        var exprList = new List<SqlExpr>();
+        foreach (var columnContext in context.selectColumnList().selectColumn())
+        {
+            exprList.Add(Visit(columnContext));
+        }
+
+        var fromExpr = SqlExpr.Empty;
+        var fromContext = context.fromClause();
+        if (fromContext != null)
+        {
+            fromExpr = Visit(fromContext);
+        }
+
+        return new SelectExpr
+        {
+            Columns = exprList,
+            FromClause = fromExpr
+        };
+    }
+
+    public override SqlExpr VisitSelectColumn(TSQLParser.SelectColumnContext context)
+    {
+        var columnName = context.ID().GetText();
+        return new FieldExpr
+        {
+            Name = columnName
+        };
+    }
+
+    public override SqlExpr VisitTableReference(TSQLParser.TableReferenceContext context)
+    {
+        string tableName = context.ID().GetText();
+        return new TableExpr
+        {
+            Name = tableName
+        };
+    }
+
+    public override SqlExpr VisitFromClause(TSQLParser.FromClauseContext context)
+    {
+        var tableRefContext = context.tableReference();
+        if (tableRefContext != null)
+        {
+            return VisitTableReference(tableRefContext);
+        }
+
+        var selectStatementContext = context.selectStatement();
+        if (selectStatementContext != null)
+        {
+            return VisitSelectStatement(selectStatementContext);
+        }
+
+        return null;
+    }
+}
+
+public class FieldExpr : SqlExpr
+{
+    public string Name { get; set; } = string.Empty;
+}
+
+public class TableExpr : SqlExpr
+{
+    public string Name { get; set; } = string.Empty;
 }

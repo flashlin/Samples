@@ -14,11 +14,22 @@ public class SqlParserTest
     public void Where()
     {
         var p = new SqlParser();
-        var exprs = p.Parse("where id=1")
-            .ToArray();
-        exprs.Should().BeEquivalentTo(new[]
-        {
-            new WhereExpr()
-        });
+        var exprs = p.Parse("select id from customer");
+        exprs.Should().BeEquivalentTo(
+            new SelectExpr
+            {
+                Columns = new List<SqlExpr>()
+                {
+                    new FieldExpr
+                    {
+                        Name = "id"
+                    }
+                },
+                FromClause = new TableExpr
+                {
+                    Name = "customer"
+                }
+            }
+        );
     }
 }

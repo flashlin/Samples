@@ -83,7 +83,7 @@ public class SqlTokenizer
 
 public class WhereExpr : SqlExpr
 {
-    public SqlExpr Condition { get; set; }
+    public SqlExpr Condition { get; set; } = null!;
 }
 
 public class BinaryExpr : SqlExpr
@@ -103,9 +103,4 @@ public class BinaryExpr : SqlExpr
 public class SqlExpr
 {
     public static readonly SqlExpr Empty = new SqlExpr();
-    
-    
-    public Token LParam { get; set; } = Token.Empty;
-    public Token Token { get; set; } = Token.Empty;
-    public Token RParam { get; set; } = Token.Empty;
 }
