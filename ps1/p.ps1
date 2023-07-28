@@ -68,8 +68,13 @@ if( "logs" -eq $action ) {
 }
 
 if( "info" -eq $action ) {
+    InvokeCmd "nvidia-smi"
     $code = "import torch`nprint(torch.cuda.is_available())"
     InvokeCmd "python -c '$code'"
+    # pip install bitsandbytes-cuda117
+    # pip install https://github.com/acpopescu/bitsandbytes/releases/download/v0.37.2-win.1/bitsandbytes-0.37.2-py3-none-any.whl
+    # C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.7\bin\nvcc.exe --version
+    # D:\Users\flash\miniconda3\pkgs\cuda-demo-suite-11.8.86-0\demo_suite\bandwidthTest.exe
     return
 }
 
