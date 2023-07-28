@@ -88,8 +88,11 @@ async def main(message):
     res = await chain.acall(message, callbacks=[cb])
     answer = res["result"]
     sources = res["source_documents"]
+    filenames = []
+    for doc in sources:
+        filenames.append(doc.metadata)
     if sources:
-        answer += f"\nSources:" + str(sources)
+        answer += f"\nSources:" + str(filenames)
     else:
         answer += f"\nNo Sources Found"
     await cl.Message(content=answer).send()
