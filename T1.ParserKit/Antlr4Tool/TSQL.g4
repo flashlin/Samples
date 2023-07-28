@@ -9,14 +9,15 @@ selectStatement : SELECT selectColumnList FROM fromClause ;
 // SELECT和FROM的規則，使用大寫不敏感的方式
 SELECT : [sS] [eE] [lL] [eE] [cC] [tT] ;
 FROM : [fF] [rR] [oO] [mM] ;
+AS : [aA] [sS] ;
 
 // SELECT列的規則
 selectColumnList : selectColumn ( ',' selectColumn )* ;
-selectColumn : ID ;
+selectColumn : ID (AS? ID)? ;
 
 // FROM子句的規則
 fromClause : tableReference | '(' selectStatement ')' ;
-tableReference : ID ;
+tableReference : ID (AS? ID)?;
 
 // 忽略空白
 WS : [ \t\r\n]+ -> skip ;

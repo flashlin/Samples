@@ -36,7 +36,7 @@ public partial class TSQLParser : Parser {
 	protected static DFA[] decisionToDFA;
 	protected static PredictionContextCache sharedContextCache = new PredictionContextCache();
 	public const int
-		T__0=1, T__1=2, T__2=3, SELECT=4, FROM=5, WS=6, ID=7;
+		T__0=1, T__1=2, T__2=3, SELECT=4, FROM=5, AS=6, WS=7, ID=8;
 	public const int
 		RULE_start = 0, RULE_selectStatement = 1, RULE_selectColumnList = 2, RULE_selectColumn = 3, 
 		RULE_fromClause = 4, RULE_tableReference = 5;
@@ -49,7 +49,7 @@ public partial class TSQLParser : Parser {
 		null, "','", "'('", "')'"
 	};
 	private static readonly string[] _SymbolicNames = {
-		null, null, null, null, "SELECT", "FROM", "WS", "ID"
+		null, null, null, null, "SELECT", "FROM", "AS", "WS", "ID"
 	};
 	public static readonly IVocabulary DefaultVocabulary = new Vocabulary(_LiteralNames, _SymbolicNames);
 
@@ -262,7 +262,11 @@ public partial class TSQLParser : Parser {
 	}
 
 	public partial class SelectColumnContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ID() { return GetToken(TSQLParser.ID, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] ID() { return GetTokens(TSQLParser.ID); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ID(int i) {
+			return GetToken(TSQLParser.ID, i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode AS() { return GetToken(TSQLParser.AS, 0); }
 		public SelectColumnContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -290,11 +294,32 @@ public partial class TSQLParser : Parser {
 	public SelectColumnContext selectColumn() {
 		SelectColumnContext _localctx = new SelectColumnContext(Context, State);
 		EnterRule(_localctx, 6, RULE_selectColumn);
+		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 27;
 			Match(ID);
+			State = 32;
+			ErrorHandler.Sync(this);
+			_la = TokenStream.LA(1);
+			if (_la==AS || _la==ID) {
+				{
+				State = 29;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				if (_la==AS) {
+					{
+					State = 28;
+					Match(AS);
+					}
+				}
+
+				State = 31;
+				Match(ID);
+				}
+			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -343,24 +368,24 @@ public partial class TSQLParser : Parser {
 		FromClauseContext _localctx = new FromClauseContext(Context, State);
 		EnterRule(_localctx, 8, RULE_fromClause);
 		try {
-			State = 34;
+			State = 39;
 			ErrorHandler.Sync(this);
 			switch (TokenStream.LA(1)) {
 			case ID:
 				EnterOuterAlt(_localctx, 1);
 				{
-				State = 29;
+				State = 34;
 				tableReference();
 				}
 				break;
 			case T__1:
 				EnterOuterAlt(_localctx, 2);
 				{
-				State = 30;
+				State = 35;
 				Match(T__1);
-				State = 31;
+				State = 36;
 				selectStatement();
-				State = 32;
+				State = 37;
 				Match(T__2);
 				}
 				break;
@@ -380,7 +405,11 @@ public partial class TSQLParser : Parser {
 	}
 
 	public partial class TableReferenceContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ID() { return GetToken(TSQLParser.ID, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] ID() { return GetTokens(TSQLParser.ID); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ID(int i) {
+			return GetToken(TSQLParser.ID, i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode AS() { return GetToken(TSQLParser.AS, 0); }
 		public TableReferenceContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
@@ -408,11 +437,32 @@ public partial class TSQLParser : Parser {
 	public TableReferenceContext tableReference() {
 		TableReferenceContext _localctx = new TableReferenceContext(Context, State);
 		EnterRule(_localctx, 10, RULE_tableReference);
+		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
-			State = 36;
+			State = 41;
 			Match(ID);
+			State = 46;
+			ErrorHandler.Sync(this);
+			_la = TokenStream.LA(1);
+			if (_la==AS || _la==ID) {
+				{
+				State = 43;
+				ErrorHandler.Sync(this);
+				_la = TokenStream.LA(1);
+				if (_la==AS) {
+					{
+					State = 42;
+					Match(AS);
+					}
+				}
+
+				State = 45;
+				Match(ID);
+				}
+			}
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -427,16 +477,20 @@ public partial class TSQLParser : Parser {
 	}
 
 	private static int[] _serializedATN = {
-		4,1,7,39,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,1,0,1,0,1,1,1,
-		1,1,1,1,1,1,1,1,2,1,2,1,2,5,2,23,8,2,10,2,12,2,26,9,2,1,3,1,3,1,4,1,4,
-		1,4,1,4,1,4,3,4,35,8,4,1,5,1,5,1,5,0,0,6,0,2,4,6,8,10,0,0,34,0,12,1,0,
-		0,0,2,14,1,0,0,0,4,19,1,0,0,0,6,27,1,0,0,0,8,34,1,0,0,0,10,36,1,0,0,0,
-		12,13,3,2,1,0,13,1,1,0,0,0,14,15,5,4,0,0,15,16,3,4,2,0,16,17,5,5,0,0,17,
-		18,3,8,4,0,18,3,1,0,0,0,19,24,3,6,3,0,20,21,5,1,0,0,21,23,3,6,3,0,22,20,
-		1,0,0,0,23,26,1,0,0,0,24,22,1,0,0,0,24,25,1,0,0,0,25,5,1,0,0,0,26,24,1,
-		0,0,0,27,28,5,7,0,0,28,7,1,0,0,0,29,35,3,10,5,0,30,31,5,2,0,0,31,32,3,
-		2,1,0,32,33,5,3,0,0,33,35,1,0,0,0,34,29,1,0,0,0,34,30,1,0,0,0,35,9,1,0,
-		0,0,36,37,5,7,0,0,37,11,1,0,0,0,2,24,34
+		4,1,8,49,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,1,0,1,0,1,1,1,
+		1,1,1,1,1,1,1,1,2,1,2,1,2,5,2,23,8,2,10,2,12,2,26,9,2,1,3,1,3,3,3,30,8,
+		3,1,3,3,3,33,8,3,1,4,1,4,1,4,1,4,1,4,3,4,40,8,4,1,5,1,5,3,5,44,8,5,1,5,
+		3,5,47,8,5,1,5,0,0,6,0,2,4,6,8,10,0,0,48,0,12,1,0,0,0,2,14,1,0,0,0,4,19,
+		1,0,0,0,6,27,1,0,0,0,8,39,1,0,0,0,10,41,1,0,0,0,12,13,3,2,1,0,13,1,1,0,
+		0,0,14,15,5,4,0,0,15,16,3,4,2,0,16,17,5,5,0,0,17,18,3,8,4,0,18,3,1,0,0,
+		0,19,24,3,6,3,0,20,21,5,1,0,0,21,23,3,6,3,0,22,20,1,0,0,0,23,26,1,0,0,
+		0,24,22,1,0,0,0,24,25,1,0,0,0,25,5,1,0,0,0,26,24,1,0,0,0,27,32,5,8,0,0,
+		28,30,5,6,0,0,29,28,1,0,0,0,29,30,1,0,0,0,30,31,1,0,0,0,31,33,5,8,0,0,
+		32,29,1,0,0,0,32,33,1,0,0,0,33,7,1,0,0,0,34,40,3,10,5,0,35,36,5,2,0,0,
+		36,37,3,2,1,0,37,38,5,3,0,0,38,40,1,0,0,0,39,34,1,0,0,0,39,35,1,0,0,0,
+		40,9,1,0,0,0,41,46,5,8,0,0,42,44,5,6,0,0,43,42,1,0,0,0,43,44,1,0,0,0,44,
+		45,1,0,0,0,45,47,5,8,0,0,46,43,1,0,0,0,46,47,1,0,0,0,47,11,1,0,0,0,6,24,
+		29,32,39,43,46
 	};
 
 	public static readonly ATN _ATN =

@@ -11,11 +11,11 @@ public class SqlParserTest
     }
 
     [Test]
-    public void Where()
+    public void Select()
     {
         var p = new SqlParser();
-        var exprs = p.Parse("select id from customer");
-        exprs.Should().BeEquivalentTo(
+        var expr = p.Parse("select id from customer");
+        expr.Should().BeEquivalentTo(
             new SelectExpr
             {
                 Columns = new List<SqlExpr>()
@@ -23,6 +23,30 @@ public class SqlParserTest
                     new FieldExpr
                     {
                         Name = "id"
+                    }
+                },
+                FromClause = new TableExpr
+                {
+                    Name = "customer"
+                }
+            }
+        );
+    }
+    
+    [Test]
+    public void SelectId()
+    {
+        var p = new SqlParser();
+        var expr = p.Parse("select id id1 from customer");
+        expr.Should().BeEquivalentTo(
+            new SelectExpr
+            {
+                Columns = new List<SqlExpr>()
+                {
+                    new FieldExpr
+                    {
+                        Name = "id",
+                        AliasName = "id"
                     }
                 },
                 FromClause = new TableExpr
