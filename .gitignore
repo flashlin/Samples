@@ -34,3 +34,6 @@ torch-qa/models/chatglm-6b-float16
 torch-qa/models/pytorch_model.bin.index.json
 torch-qa/models
 torch-qa/.chainlit
+*.interp
+*.tokens
+T1.ParserKit/Antlr4Tool/*.cs
