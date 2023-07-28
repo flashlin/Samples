@@ -22,6 +22,7 @@ if( "c" -eq $action ){
 }
 
 if( "r" -eq $action ){
-    InvokeCmd "chainlit run .\llama2-langchain.py -w"
+    InvokeCmd "chainlit run .\llama2-langchain.py"
+    # InvokeCmd "chainlit run .\llama2-langchain.py -w"  watch
     return
 }

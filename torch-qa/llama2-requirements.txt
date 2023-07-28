@@ -5,5 +5,5 @@ accelerate
 transformers
 ctransformers
 sentence_transformers
-faiss-cpu
+#faiss-cpu
 chainlit
