@@ -1,8 +1,7 @@
-torch
+bitsandbytes-cuda117
 pypdf
 langchain
 accelerate
-bitsandbytes
 transformers
 ctransformers
 sentence_transformers
