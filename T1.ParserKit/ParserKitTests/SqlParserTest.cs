@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using ParserKitTests.Helpers;
 using T1.ParserKit;
+using T1.ParserKit.ExprCollection;
 
 namespace ParserKitTests
 {
@@ -63,7 +64,7 @@ namespace ParserKitTests
                 expectedExpr
             );
 
-            expr!.Columns.AllSatisfy(expectedExpr.Columns);
+            expr!.Columns.ShouldAllSatisfy(expectedExpr.Columns);
         }
 
         [Test]
@@ -92,7 +93,32 @@ namespace ParserKitTests
                 expectedExpr
             );
 
-            expr!.Columns.AllSatisfy(expectedExpr.Columns);
+            expr!.Columns.ShouldAllSatisfy(expectedExpr.Columns);
+        }
+
+        [Test]
+        public void Select_field_as_aliasName_from_table_asTableName()
+        {
+            var expr = _sut.Parse("select id as id1 from customer c") as SelectExpr;
+
+            var expectedExpr = new SelectExpr
+            {
+                Columns = new List<SqlExpr>()
+                {
+                    new FieldExpr
+                    {
+                        Name = "id",
+                        AliasName = "id1"
+                    },
+                },
+                FromClause = new TableExpr
+                {
+                    Name = "customer",
+                    AliasName = "c"
+                }
+            };
+
+            expr.ShouldAllSatisfy(expectedExpr);
         }
     }
 }

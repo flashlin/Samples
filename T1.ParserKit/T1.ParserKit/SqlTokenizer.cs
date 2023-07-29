@@ -1,4 +1,6 @@
-﻿namespace T1.ParserKit;
+﻿using T1.ParserKit.ExprCollection;
+
+namespace T1.ParserKit;
 
 public class SqlTokenizer
 {
@@ -98,9 +100,4 @@ public class BinaryExpr : SqlExpr
         Op = op;
         Right = right;
     }
-}
-
-public class SqlExpr
-{
-    public static readonly SqlExpr Empty = new SqlExpr();
 }
