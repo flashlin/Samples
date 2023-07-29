@@ -13,4 +13,11 @@ public static class FluentAssertionsExtensions
                     options => options.IncludingAllRuntimeProperties());
         }
     }
+
+    public static void ShouldAllSatisfy<T>(this T obj, T expected)
+    {
+        obj.Should().BeOfType(expected!.GetType())
+            .And.BeEquivalentTo(expected,
+                options => options.IncludingAllRuntimeProperties());
+    }
 }

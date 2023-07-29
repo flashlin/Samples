@@ -1,6 +1,4 @@
-﻿using T1.Standard.DesignPatterns;
-
-namespace T1.ParserKit;
+﻿namespace T1.ParserKit;
 
 public class Token
 {
