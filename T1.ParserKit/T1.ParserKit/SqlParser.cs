@@ -74,7 +74,7 @@ public class SqlExprVisitor : TSqlParserBaseVisitor<SqlExpr>
 
     public override SqlExpr VisitExpression_elem(TSqlParser.Expression_elemContext context)
     {
-        //var left= context.leftAlias;
+        var leftAlias= context.leftAlias;
         if (context.expressionAs != null)
         {
             var name = context.expression().GetText()!;

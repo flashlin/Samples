@@ -1,79 +1,98 @@
 ﻿using FluentAssertions;
+using ParserKitTests.Helpers;
 using T1.ParserKit;
 
-namespace ParserKitTests;
-
-public class SqlParserTest
+namespace ParserKitTests
 {
-    [SetUp]
-    public void SetUp()
+    public class SqlParserTest
     {
-    }
+        private SqlParser _sut = null!;
 
-    [Test]
-    public void Select()
-    {
-        var p = new SqlParser();
-        var expr = p.Parse("select id from customer");
-        expr.Should().BeEquivalentTo(
-            new SelectExpr
+        [SetUp]
+        public void SetUp()
+        {
+            _sut = new SqlParser();
+        }
+
+        [Test]
+        public void Select()
+        {
+            var expr = _sut.Parse("select id from customer");
+
+            expr.Should().BeEquivalentTo(
+                new SelectExpr
+                {
+                    Columns = new List<SqlExpr>()
+                    {
+                        new FieldExpr
+                        {
+                            Name = "id"
+                        }
+                    },
+                    FromClause = new TableExpr
+                    {
+                        Name = "customer"
+                    }
+                }
+            );
+        }
+
+        [Test]
+        public void SelectId_AliasName()
+        {
+            var expr = _sut.Parse("select id id1 from customer") as SelectExpr;
+
+            var expectedExpr = new SelectExpr
             {
                 Columns = new List<SqlExpr>()
                 {
                     new FieldExpr
                     {
-                        Name = "id"
-                    }
+                        Name = "id",
+                        AliasName = "id1"
+                    },
                 },
                 FromClause = new TableExpr
                 {
-                    Name = "customer"
+                    Name = "customer",
+                    AliasName = string.Empty
                 }
-            }
-        );
-    }
+            };
 
-    [Test]
-    public void SelectId()
-    {
-        var sut = new SqlParser();
-        
-        var expr = sut.Parse("select id id1 from customer") as SelectExpr;
-        
-        var expectedExpr = new SelectExpr
+            expr.Should().BeEquivalentTo(
+                expectedExpr
+            );
+
+            expr!.Columns.AllSatisfy(expectedExpr.Columns);
+        }
+
+        [Test]
+        public void SelectId_AS_AliasName()
         {
-            Columns = new List<SqlExpr>()
+            var expr = _sut.Parse("select id as id1 from customer") as SelectExpr;
+
+            var expectedExpr = new SelectExpr
             {
-                new FieldExpr
+                Columns = new List<SqlExpr>()
                 {
-                    Name = "id",
-                    AliasName = "id1"
+                    new FieldExpr
+                    {
+                        Name = "id",
+                        AliasName = "id1"
+                    },
                 },
-            },
-            FromClause = new TableExpr
-            {
-                Name = "customer",
-                AliasName = string.Empty
-            }
-        };
-        
-        expr.Should().BeEquivalentTo(
-            expectedExpr
-        );
+                FromClause = new TableExpr
+                {
+                    Name = "customer",
+                    AliasName = string.Empty
+                }
+            };
 
-        expr!.Columns.AllSatisfy(expectedExpr.Columns);
-    }
-}
+            expr.Should().BeEquivalentTo(
+                expectedExpr
+            );
 
-public static class FluentAssertionsExtensions
-{
-    public static void AllSatisfy<T>(this ICollection<T> items, ICollection<T> expectedItems)
-    {
-        foreach (var (item, expected) in items.Zip(expectedItems))
-        {
-            item.Should().BeOfType(expected!.GetType())
-                .And.BeEquivalentTo(expected,
-                    options => options.IncludingAllRuntimeProperties());
+            expr!.Columns.AllSatisfy(expectedExpr.Columns);
         }
     }
 }
