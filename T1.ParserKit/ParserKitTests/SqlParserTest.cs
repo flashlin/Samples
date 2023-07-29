@@ -106,5 +106,43 @@ namespace ParserKitTests
                 }
             });
         }
+
+        [Test]
+        public void Select_field_as_aliasName_from_select_field_from_table()
+        {
+            var expr = _sut.Parse("select id as id1 from (select cid id from extraCustomer) c1") as SelectExpr;
+
+            expr.ShouldAllSatisfy(new SelectExpr
+            {
+                Columns = new List<SqlExpr>()
+                {
+                    new FieldExpr
+                    {
+                        Name = "id",
+                        AliasName = "id1"
+                    },
+                },
+                FromClause = new FromSourceExpr
+                {
+                    Clause = new SelectExpr
+                    {
+                        Columns = new List<SqlExpr>()
+                        {
+                            new FieldExpr
+                            {
+                                Name = "cid",
+                                AliasName = "id"
+                            }
+                        },
+                        FromClause = new TableExpr
+                        {
+                            Name = "extraCustomer",
+                            AliasName = ""
+                        }
+                    },
+                    AliasName = "c1"
+                }
+            });
+        }
     }
 }

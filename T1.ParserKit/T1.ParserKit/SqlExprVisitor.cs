@@ -66,6 +66,25 @@ public class SqlExprVisitor : TSqlParserBaseVisitor<SqlExpr>
 
     public override SqlExpr VisitTable_source_item(TSqlParser.Table_source_itemContext context)
     {
+        if (context.derived_table() != null)
+        {
+            var expr = context.derived_table();
+            if (expr.subquery() != null)
+            {
+                var subQuery = expr.subquery();
+                var clause = Visit(subQuery[0]);
+                var asTableAlias = context.as_table_alias()?.GetText() ?? string.Empty;
+                return new FromSourceExpr
+                {
+                    Clause = clause,
+                    AliasName = asTableAlias,
+                };
+            }
+
+            throw new NotSupportedException(context.GetText());
+        }
+        
+        
         var name = context.full_table_name().GetText()!;
         var aliasName = context.as_table_alias()?.GetText() ?? string.Empty;
         return new TableExpr
