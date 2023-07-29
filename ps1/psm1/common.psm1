@@ -12,6 +12,14 @@ function ShowError {
     Write-Host $msg -ForegroundColor Red
 }
 
+function CopyToClipboard {
+   param(
+      [string]$text
+   )
+   Add-Type -AssemblyName System.Windows.Forms
+   [System.Windows.Forms.Clipboard]::SetText($text)
+}
+
 function AddObjectProperty {
    param(
       [Parameter(ValueFromPipeline = $true)]

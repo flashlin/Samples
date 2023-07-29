@@ -229,12 +229,23 @@ if( $paths -is [string] ) {
     return
 }
 
-$num = 0
-foreach($path in $paths){
-    Write-Host "$($num): " -NoNewline
-    WriteColorPath $path $searchPatterns
-    $num += 1
+$selectedPath = $paths | Sort-Object { -$_.Length } -Descending | fzf | Out-String
+if( "" -eq $selectedPath ) {
+    return
 }
+$selectedPath = $selectedPath.TrimEnd()
+WriteHostColor "$selectedPath" $searchPatterns
+Write-Host ""
+Set-Location -Path $selectedPath
+CopyToClipboard $selectedPath
+
+
+# $num = 0
+# foreach($path in $paths){
+#     Write-Host "$($num): " -NoNewline
+#     WriteColorPath $path $searchPatterns
+#     $num += 1
+# }
 
 
 #Get-ChildItem -Directory | Where-Object { $_.Name -match $folderPattern } | ForEach-Object { $_.Name } | fzf
