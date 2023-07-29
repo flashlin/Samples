@@ -74,12 +74,18 @@ public class SqlExprVisitor : TSqlParserBaseVisitor<SqlExpr>
 
     public override SqlExpr VisitExpression_elem(TSqlParser.Expression_elemContext context)
     {
-        var leftAlias= context.leftAlias;
+        //var leftAlias= context.leftAlias;
         if (context.expressionAs != null)
         {
             var name = context.expression().GetText()!;
-            var aliasName = context.as_column_alias()?.GetText() ?? string.Empty;
-            
+
+            var aliasName = string.Empty;
+            if (context.as_column_alias() != null)
+            {
+                var aliasExpr = Visit(context.as_column_alias()) as AliasExpr;
+                aliasName = aliasExpr?.Name ?? string.Empty;
+            }
+
             return new FieldExpr
             {
                 Name = name,
@@ -88,6 +94,20 @@ public class SqlExprVisitor : TSqlParserBaseVisitor<SqlExpr>
         }
         
         return base.VisitExpression_elem(context);
+    }
+
+    public override SqlExpr VisitAs_column_alias(TSqlParser.As_column_aliasContext context)
+    {
+        //var _ = context.AS();
+        var aliasName = context.column_alias();
+        if (aliasName != null)
+        {
+            return new AliasExpr
+            {
+                Name = aliasName.GetText()
+            };
+        }
+        return base.VisitAs_column_alias(context);
     }
 
     public override SqlExpr VisitTable_source_item(TSqlParser.Table_source_itemContext context)
@@ -100,6 +120,11 @@ public class SqlExprVisitor : TSqlParserBaseVisitor<SqlExpr>
             AliasName = aliasName
         };
     }
+}
+
+public class AliasExpr : SqlExpr
+{
+    public string Name { get; set; }
 }
 
 public class FieldExpr : SqlExpr

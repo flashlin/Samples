@@ -44,6 +44,10 @@ public class TokenStream
     public Token Next(int n = 1)
     {
         var tokens = NextTokens(n);
+        if (tokens.Count == 0)
+        {
+            return Token.Empty;
+        }
         return new Token
         {
             Text = string.Join("", tokens.Select(x => x.Text)),
