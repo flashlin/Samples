@@ -20,7 +20,7 @@ namespace ParserKitTests
         {
             var expr = _sut.Parse("select id from customer");
 
-            expr.Should().BeEquivalentTo(
+            expr.ShouldAllSatisfy(
                 new SelectExpr
                 {
                     Columns = new List<SqlExpr>()
@@ -43,7 +43,7 @@ namespace ParserKitTests
         {
             var expr = _sut.Parse("select id id1 from customer") as SelectExpr;
 
-            var expectedExpr = new SelectExpr
+            expr.ShouldAllSatisfy(new SelectExpr
             {
                 Columns = new List<SqlExpr>()
                 {
@@ -58,13 +58,7 @@ namespace ParserKitTests
                     Name = "customer",
                     AliasName = string.Empty
                 }
-            };
-
-            expr.Should().BeEquivalentTo(
-                expectedExpr
-            );
-
-            expr!.Columns.ShouldAllSatisfy(expectedExpr.Columns);
+            });
         }
 
         [Test]
@@ -72,7 +66,7 @@ namespace ParserKitTests
         {
             var expr = _sut.Parse("select id as id1 from customer") as SelectExpr;
 
-            var expectedExpr = new SelectExpr
+            expr.ShouldAllSatisfy(new SelectExpr
             {
                 Columns = new List<SqlExpr>()
                 {
@@ -87,13 +81,7 @@ namespace ParserKitTests
                     Name = "customer",
                     AliasName = string.Empty
                 }
-            };
-
-            expr.Should().BeEquivalentTo(
-                expectedExpr
-            );
-
-            expr!.Columns.ShouldAllSatisfy(expectedExpr.Columns);
+            });
         }
 
         [Test]
@@ -101,7 +89,7 @@ namespace ParserKitTests
         {
             var expr = _sut.Parse("select id as id1 from customer c") as SelectExpr;
 
-            var expectedExpr = new SelectExpr
+            expr.ShouldAllSatisfy(new SelectExpr
             {
                 Columns = new List<SqlExpr>()
                 {
@@ -116,9 +104,7 @@ namespace ParserKitTests
                     Name = "customer",
                     AliasName = "c"
                 }
-            };
-
-            expr.ShouldAllSatisfy(expectedExpr);
+            });
         }
     }
 }
