@@ -20,6 +20,23 @@ function CopyToClipboard {
    [System.Windows.Forms.Clipboard]::SetText($text)
 }
 
+function PromptList {
+   param(
+      [string[]]$items,
+      [bool]$descending=$True
+   )
+   if( $descending ) {
+      $selected = $items | Sort-Object { -$_.Length } -Descending | fzf | Out-String
+   } else {
+      $selected = $items | Sort-Object { -$_.Length } -Descending | fzf | Out-String
+   }
+   if( "" -eq $selected ) {
+      return ""
+   }
+   $selected = $selected.TrimEnd()
+   return $selected
+}
+
 function AddObjectProperty {
    param(
       [Parameter(ValueFromPipeline = $true)]
