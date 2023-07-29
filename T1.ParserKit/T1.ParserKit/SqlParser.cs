@@ -13,12 +13,12 @@ public class SqlParser
         var inputStream1 = new AntlrInputStream(query1);
 
         // 建立語法解析器
-        var lexer = new TSQLLexer(inputStream1);
+        var lexer = new TSqlLexer(inputStream1);
         var tokenStream = new CommonTokenStream(lexer);
-        var parser = new TSQLParser(tokenStream);
+        var parser = new TSqlParser(tokenStream);
 
         // 解析第一個查詢語句
-        IParseTree tree1 = parser.start();
+        IParseTree tree1 = parser.sql_clauses();
 
         // 輸出解析樹
         Console.WriteLine(tree1.ToStringTree(parser));
@@ -27,10 +27,10 @@ public class SqlParser
     public SqlExpr Parse(string sql)
     {
         var inputStream1 = new AntlrInputStream(sql);
-        var lexer = new TSQLLexer(inputStream1);
+        var lexer = new TSqlLexer(inputStream1);
         var tokenStream = new CommonTokenStream(lexer);
-        var parser = new TSQLParser(tokenStream);
-        var tree = parser.start();
+        var parser = new TSqlParser(tokenStream);
+        var tree = parser.sql_clauses();
         var visitor = new SqlExprVisitor();
         var expr = visitor.Visit(tree);
         return expr;
@@ -48,21 +48,21 @@ public class SourceExpr : SqlExpr
     public SqlExpr From { get; set; }
 }
 
-public class SqlExprVisitor : TSQLBaseVisitor<SqlExpr>
+public class SqlExprVisitor : TSqlParserBaseVisitor<SqlExpr>
 {
-    public override SqlExpr VisitSelectStatement(TSQLParser.SelectStatementContext context)
+    public override SqlExpr VisitQuery_specification(TSqlParser.Query_specificationContext context)
     {
         var exprList = new List<SqlExpr>();
-        foreach (var columnContext in context.selectColumnList().selectColumn())
+        foreach (var columnContext in context.columns.select_list_elem())
         {
-            exprList.Add(Visit(columnContext));
+            var sqlExpr = Visit(columnContext);
+            exprList.Add(sqlExpr);
         }
 
         var fromExpr = SqlExpr.Empty;
-        var fromContext = context.fromClause();
-        if (fromContext != null)
+        if (context.from != null)
         {
-            fromExpr = Visit(fromContext);
+            fromExpr = Visit(context.from);
         }
 
         return new SelectExpr
@@ -72,43 +72,33 @@ public class SqlExprVisitor : TSQLBaseVisitor<SqlExpr>
         };
     }
 
-    public override SqlExpr VisitSelectColumn(TSQLParser.SelectColumnContext context)
+    public override SqlExpr VisitExpression_elem(TSqlParser.Expression_elemContext context)
     {
-        var name = context.ID(0).GetText()!;
-        var aliasName = context.ID(1)?.GetText() ?? string.Empty;
-        return new FieldExpr
+        //var left= context.leftAlias;
+        if (context.expressionAs != null)
+        {
+            var name = context.expression().GetText()!;
+            var aliasName = context.as_column_alias()?.GetText() ?? string.Empty;
+            
+            return new FieldExpr
+            {
+                Name = name,
+                AliasName = aliasName
+            };
+        }
+        
+        return base.VisitExpression_elem(context);
+    }
+
+    public override SqlExpr VisitTable_source_item(TSqlParser.Table_source_itemContext context)
+    {
+        var name = context.full_table_name().GetText()!;
+        var aliasName = context.as_table_alias()?.GetText() ?? string.Empty;
+        return new TableExpr
         {
             Name = name,
             AliasName = aliasName
         };
-    }
-
-    public override SqlExpr VisitTableReference(TSQLParser.TableReferenceContext context)
-    {
-        var tableName = context.ID(0).GetText()!;
-        var aliasName = context.ID(1)?.GetText() ?? string.Empty;
-        return new TableExpr
-        {
-            Name = tableName,
-            AliasName = aliasName
-        };
-    }
-
-    public override SqlExpr VisitFromClause(TSQLParser.FromClauseContext context)
-    {
-        var tableRefContext = context.tableReference();
-        if (tableRefContext != null)
-        {
-            return VisitTableReference(tableRefContext);
-        }
-
-        var selectStatementContext = context.selectStatement();
-        if (selectStatementContext != null)
-        {
-            return VisitSelectStatement(selectStatementContext);
-        }
-
-        return null;
     }
 }
 
