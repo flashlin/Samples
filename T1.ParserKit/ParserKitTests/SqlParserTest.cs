@@ -16,7 +16,7 @@ namespace ParserKitTests
         }
 
         [Test]
-        public void Select()
+        public void Select_field()
         {
             var expr = _sut.Parse("select id from customer");
 
@@ -39,7 +39,7 @@ namespace ParserKitTests
         }
 
         [Test]
-        public void SelectId_AliasName()
+        public void Select_field_aliasName()
         {
             var expr = _sut.Parse("select id id1 from customer") as SelectExpr;
 
@@ -62,7 +62,7 @@ namespace ParserKitTests
         }
 
         [Test]
-        public void SelectId_AS_AliasName()
+        public void Select_field_as_aliasName()
         {
             var expr = _sut.Parse("select id as id1 from customer") as SelectExpr;
 
