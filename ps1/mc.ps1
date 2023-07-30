@@ -53,6 +53,7 @@ if ( "" -eq $action ) {
     Write-Host "c <name>              : switch to name environment"
     Write-Host "rm <name>             : remove name environment"
     Write-Host "i                     : install conda packages"
+    Write-Host "clean                 : clean unused conda packages"
     return
 }
 
@@ -86,7 +87,14 @@ if ( "c" -eq $action ) {
     return
 }
 
+if( "update" -eq $action){
+    InvokeCmd "conda update -n base -c defaults conda"
+    return
+}
+
 if ( "i" -eq $action ) {
+    # for linux
+    # conda install -c conda-forge bitsandbytes
     #InvokeCmd "conda update -n base -c defaults conda"
     InvokeConda "install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia"
     #InvokeConda "install -c conda-forge faiss"
@@ -103,5 +111,10 @@ if ( "rm" -eq $action ) {
 
 if ( "t" -eq $action ) {
     InvokeConda "activate torch"
+    return
+}
+
+if ( "clean" -eq $action ) {
+    InvokeConda "clean --packages"
     return
 }
