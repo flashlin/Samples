@@ -3,11 +3,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from data_utils import create_running_list
+from data_utils import create_running_list, pad_list
 
 
 def prepare_data(data, seq_length):
-
     def get_next(index, seq):
         if index < len(seq) - 1:
             next = seq[index + 1]
@@ -18,7 +17,7 @@ def prepare_data(data, seq_length):
         new_seqs = create_running_list(seq, seq_length)
         for index, new_seq in enumerate(new_seqs):
             if index < len(new_seqs) - 1:
-                result.append((new_seq, seq[index+1]))
+                result.append((new_seq, seq[index + 1]))
     return result
 
 
@@ -83,83 +82,119 @@ for epoch in range(10):
         optimizer.step()
 
 # 保存最佳權重
-#best_model_path = "best_model.pt"
-#torch.save(model.state_dict(), best_model_path)
+# best_model_path = "best_model.pt"
+# torch.save(model.state_dict(), best_model_path)
 
 input_sequence = [1, 2, 3]
 input_tensor = torch.as_tensor(input_sequence, dtype=torch.float32).unsqueeze(0)
 prediction = model(input_tensor)
 print(prediction)
 
-
-
-
-
-
-
 ###########################
 import torch.optim as optim
 
 import torch
 import torch.nn as nn
+import torch.optim as optim
+from torch.nn.utils.rnn import pad_sequence
 
-class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
+
+# 建立 LSTM + 詞嵌入模型
+class LSTMEmbeddingModel(nn.Module):
+    def __init__(self, vocab_size, embedding_dim, hidden_size, output_size):
         super().__init__()
-        self.hidden_size = hidden_size
-        self.lstm = nn.LSTM(input_size, hidden_size)
+        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, hidden_size)
         self.fc = nn.Linear(hidden_size, output_size)
 
     def forward(self, x, hidden=None):
-        lstm_output, hidden = self.lstm(x, hidden)
+        embedded = self.embedding(x)
+        lstm_output, hidden = self.lstm(embedded, hidden)
         output_x = self.fc(lstm_output)
         return output_x, hidden
 
-# 建立 LSTM 模型
-input_size = 1
+
+# 建立詞彙表
+vocab_size = 10000
+embedding_dim = 100
+
+class MyDataset(Dataset):
+    def __init__(self, data):
+        self.data = data
+    def __len__(self):
+        return len(self.data)
+    def __getitem__(self, index):
+        input, label = self.data[index]
+        input_tensor = torch.as_tensor(input, dtype=torch.long)
+        label_tensor = torch.as_tensor(label, dtype=torch.long)
+        return input_tensor, label_tensor
+
+
+data = [
+    ([1, 2, 3], [4, 5, 6]),
+    ([1, 2, 3], [4, 5, 6]),
+    ([1, 2, 3], [4, 5, 6]),
+    ([1, 2, 3], [4, 5, 6]),
+]
+
+dataset = MyDataset(data)
+loader = DataLoader(dataset, batch_size=2)
+
+
+# # 輸入資料，這裡使用整數編碼表示單詞
+# train_data = torch.tensor([1, 2, 3, 4, 5], dtype=torch.long)
+# # 輸出標籤，這裡使用整數編碼表示單詞
+# train_labels = torch.tensor([5, 6, 7, 8, 9], dtype=torch.long)
+
+# 建立模型
 hidden_size = 64
-output_size = 1
-model = LSTMModel(input_size, hidden_size, output_size)
+output_size = 10
+model = LSTMEmbeddingModel(vocab_size, embedding_dim, hidden_size, output_size)
 
-
-#
-criterion = nn.MSELoss()
+# 定義損失函數和優化器
+criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-#
-train_data = torch.tensor([[1.0], [2.0], [3.0]])
-train_labels = torch.tensor([[5.0], [6.0], [7.0], [8.0], [9.0]])
-
 # 訓練模型
-num_epochs = 1000
+num_epochs = 1
 model.train()
 for epoch in range(num_epochs):
-    # 初始化隱藏狀態
-    hidden = None
-    optimizer.zero_grad()
-    outputs, hidden = model(train_data.unsqueeze(1), hidden)
-    loss = criterion(outputs, train_labels)
-    loss.backward()
-    optimizer.step()
-    # 每 100 次迭代輸出一次訓練損失
-    if epoch % 100 == 0:
-        print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.4f}')
+    for inputs, labels in loader:
+        hidden = None
+        optimizer.zero_grad()
+        padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
+        # padded_inputs = padded_inputs.unsqueeze(0)
+        outputs, hidden = model(padded_inputs, hidden)
+        print(f"{outputs.shape=}")
+        print(f"{labels.shape=}")
+        outputs = outputs.view(-1, output_size)
+        labels = labels.view(-1)
+        # 交叉熵損失函數 nn.CrossEntropyLoss() 需要 labels 的形狀是 [batch_size]，而不是 [batch_size, sequence_length]
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        # 每 100 次迭代輸出一次訓練損失
+        if epoch % 100 == 0:
+            print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.4f}')
 
-
-
-# 加載訓練好的權重（這裡假設你已經訓練好了模型）
-# model.load_state_dict(torch.load('best_model.pt'))
-
-# 模型預測
-input_sequence = torch.tensor([[1.0], [2.0], [3.0]])  # 輸入序列長度為 3
+# 使用訓練好的模型進行預測
+input_sequence = torch.tensor([1, 2, 3], dtype=torch.long)  # 輸入序列長度為 3
 output_sequence = []
 with torch.no_grad():
     hidden = None
     for i in range(10):  # 預測輸出序列長度為 10
-        output, hidden = model(input_sequence.unsqueeze(1), hidden)
-        output_sequence.append(output[-1, 0].item())
+        output, hidden = model(input_sequence, hidden)
+        _, predicted_indices = torch.max(output, dim=-1)
+        # print(f"{predicted_indices=}")
+        # last_output = predicted_indices[-1, 0].item()
+        last_output = predicted_indices[-1].item()
+        # print(f"{last_output=}")
+        output_sequence.append(last_output)
         # 將預測的輸出添加到輸入序列中，用於下一個時間步的預測
-        input_sequence = torch.tensor([[output_sequence[-1]]])
+        new_input = output_sequence[-3:]
+        # print(f"1{new_input=}")
+        new_input = pad_list(new_input, 3)
+        # print(f"2{new_input=}")
+        input_sequence = torch.tensor(new_input, dtype=torch.long)
 
 print("Predicted Output Sequence:", output_sequence)
-
