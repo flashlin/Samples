@@ -9,19 +9,59 @@ from data_utils import create_running_list, pad_list, overlap_split_list
 
 
 ###########################
+class MultiHeadAttention(nn.Module):
+    def __init__(self, input_dim, hidden_dim, num_heads):
+        super(MultiHeadAttention, self).__init__()
+        self.num_heads = num_heads
+        self.hidden_dim = hidden_dim
+        self.head_dim = hidden_dim // num_heads
+
+        self.query_linear = nn.Linear(input_dim, hidden_dim)
+        self.key_linear = nn.Linear(input_dim, hidden_dim)
+        self.value_linear = nn.Linear(input_dim, hidden_dim)
+        self.output_linear = nn.Linear(hidden_dim, hidden_dim)
+
+    def forward(self, query, key, value):
+        batch_size = query.size(0)
+
+        # Linear projections
+        query = self.query_linear(query)
+        key = self.key_linear(key)
+        value = self.value_linear(value)
+
+        # Reshape to (batch_size, num_heads, seq_len, head_dim)
+        query = query.view(batch_size, -1, self.num_heads, self.head_dim).transpose(1, 2)
+        key = key.view(batch_size, -1, self.num_heads, self.head_dim).transpose(1, 2)
+        value = value.view(batch_size, -1, self.num_heads, self.head_dim).transpose(1, 2)
+
+        # Attention scores and scaled dot-product attention
+        scores = torch.matmul(query, key.transpose(-2, -1)) / (self.head_dim ** 0.5)
+        attention_weights = torch.softmax(scores, dim=-1)
+        attention_output = torch.matmul(attention_weights, value)
+
+        # Concatenate attention outputs from all heads and linear transformation
+        attention_output = attention_output.transpose(1, 2).contiguous().view(batch_size, -1, self.hidden_dim)
+        output = self.output_linear(attention_output)
+        return output
+
+
+
 class LstmModel(nn.Module):
     def __init__(self, input_vocab_size, embedding_dim, hidden_size, output_vocab_size):
         super().__init__()
         self.embedding = nn.Embedding(input_vocab_size, embedding_dim)
-        self.lstm = nn.LSTM(embedding_dim, hidden_size)
+        self.lstm = nn.LSTM(embedding_dim, hidden_size, batch_first=True)
+        self.attention = MultiHeadAttention(hidden_size, hidden_size, num_heads=4)  # 創建多頭注意力機制
         self.fc = nn.Linear(hidden_size, output_vocab_size)
 
     def forward(self, x, hidden=None):
         embedded = self.embedding(x)
         lstm_output, hidden = self.lstm(embedded, hidden)
+        attention_output = self.attention(lstm_output, lstm_output, lstm_output)
+        # 對注意力機制輸出進行全局平均池化
+        attention_output = attention_output.mean(dim=1)
         output_x = self.fc(lstm_output)
         return output_x, hidden
-
 
 class MyDataset(Dataset):
     def __init__(self, data):
