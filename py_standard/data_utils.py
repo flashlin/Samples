@@ -107,7 +107,7 @@ def create_running_list(a_list: list[T], max_seq_len: int) -> list[list[T]]:
     :return:
     """
     new_seq = pad_list(a_list, max_len=max_seq_len, pad_value=0)
-    pad_len = len(new_seq) - 1
+    pad_len = max_seq_len - 1
     tmp_list = [0] * pad_len
     tmp_list.extend(new_seq)
     return overlap_split_list(tmp_list, max_seq_len)
