@@ -5,30 +5,14 @@ from torch.nn.utils.rnn import pad_sequence
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from data_utils import create_running_list, pad_list
-
-
-def prepare_data(data, seq_length):
-    def get_next(index, seq):
-        if index < len(seq) - 1:
-            next = seq[index + 1]
-        return next
-
-    result = []
-    for seq in data:
-        new_seqs = create_running_list(seq, seq_length)
-        for index, new_seq in enumerate(new_seqs):
-            if index < len(new_seqs) - 1:
-                result.append((new_seq, seq[index + 1]))
-    return result
-
+from data_utils import create_running_list, pad_list, overlap_split_list
 
 
 ###########################
 class LstmModel(nn.Module):
-    def __init__(self, vocab_size, embedding_dim, hidden_size, output_vocab_size):
+    def __init__(self, input_vocab_size, embedding_dim, hidden_size, output_vocab_size):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embedding_dim)
+        self.embedding = nn.Embedding(input_vocab_size, embedding_dim)
         self.lstm = nn.LSTM(embedding_dim, hidden_size)
         self.fc = nn.Linear(hidden_size, output_vocab_size)
 
@@ -53,55 +37,78 @@ class MyDataset(Dataset):
 
 data = [
     ([1, 2, 3], [4, 5, 6]),
-    ([1, 2, 3], [4, 5, 6]),
-    ([1, 2, 3], [4, 5, 6]),
-    ([1, 2, 3], [4, 5, 6]),
+    ([2, 3, 4], [4, 5, 6, 7]),
 ]
 
-dataset = MyDataset(data)
+max_seq_len = 2
+
+def prepare_train_data(data):
+    for input, label in data:
+        #input = pad_list(input, max_len=max_seq_len)
+        #label = pad_list(label, max_len=max_seq_len)
+        inputs = overlap_split_list(input, split_length=max_seq_len, overlap=1)
+        labels = overlap_split_list(label, split_length=max_seq_len, overlap=1)
+        for new_input, new_label in zip(inputs, labels):
+            yield new_input, new_label
+
+
+train_data = []
+for input, label in prepare_train_data(data):
+    train_data.append((input, label))
+
+
+dataset = MyDataset(train_data)
 loader = DataLoader(dataset, batch_size=2)
 
-# 建立模型
-vocab_size = 10000
-output_vocab_size = 10
-model = LstmModel(vocab_size, embedding_dim=100, hidden_size=64, output_vocab_size=output_vocab_size)
 
-# 定義損失函數和優化器
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+class Seq2SeqModel:
+    def __init__(self):
+        self.output_vocab_size = 10
+        self.model = model = LstmModel(input_vocab_size=1000,
+                                       embedding_dim=100,
+                                       hidden_size=64,
+                                       output_vocab_size=self.output_vocab_size)
+        # 定義損失函數和優化器
+        self.criterion = nn.CrossEntropyLoss()
+        self.optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# 訓練模型
-num_epochs = 1
-model.train()
-for epoch in range(num_epochs):
-    for inputs, labels in loader:
-        hidden = None
-        optimizer.zero_grad()
-        padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
-        outputs, hidden = model(padded_inputs, hidden)
-        outputs = outputs.view(-1, output_vocab_size)
-        labels = labels.view(-1)
-        # 交叉熵損失函數 nn.CrossEntropyLoss() 需要 labels 的形狀是 [batch_size], 而不是 [batch_size, sequence_length]
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-        # 每 100 次迭代輸出一次訓練損失
-        if epoch % 100 == 0:
-            print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.5f}')
+    def train(self):
+        num_epochs = 1
+        model = self.model
+        optimizer = self.optimizer
+        model.train()
+        for epoch in range(num_epochs):
+            for inputs, labels in loader:
+                hidden = None
+                optimizer.zero_grad()
+                padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
+                outputs, hidden = model(padded_inputs, hidden)
+                outputs = outputs.view(-1, self.output_vocab_size)
+                labels = labels.view(-1)
+                # 交叉熵損失函數 nn.CrossEntropyLoss() 需要 labels 的形狀是 [batch_size], 而不是 [batch_size, sequence_length]
+                loss = self.criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
+                # 每 100 次迭代輸出一次訓練損失
+                if epoch % 100 == 0:
+                    print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.5f}')
 
-# 使用訓練好的模型進行預測
-input_sequence = torch.tensor([1, 2, 3], dtype=torch.long)  # 輸入序列長度為 3
-output_sequence = []
-with torch.no_grad():
-    hidden = None
-    for i in range(10):  # 預測輸出序列長度為 10
-        output, hidden = model(input_sequence, hidden)
-        _, predicted_indices = torch.max(output, dim=-1)
-        last_output = predicted_indices[-1].item()
-        output_sequence.append(last_output)
-        # 將預測的輸出添加到輸入序列中，用於下一個時間步的預測
-        new_input = output_sequence[-3:]
-        # new_input = pad_list(new_input, 3)
-        input_sequence = torch.tensor(new_input, dtype=torch.long)
+    def infer(self, input_seq):
+        input_sequence = torch.tensor(input_seq, dtype=torch.long)
+        output_sequence = []
+        with torch.no_grad():
+            hidden = None
+            for i in range(10):  # 預測輸出序列長度為 10
+                output, hidden = self.model(input_sequence, hidden)
+                _, predicted_indices = torch.max(output, dim=-1)
+                last_output = predicted_indices[-1].item()
+                output_sequence.append(last_output)
+                # 將預測的輸出添加到輸入序列中，用於下一個時間步的預測
+                new_input = output_sequence[-3:]
+                input_sequence = torch.tensor(new_input, dtype=torch.long)
+        return output_sequence
 
-print("Predicted Output Sequence:", output_sequence)
+m = Seq2SeqModel()
+m.train()
+output = m.infer([1, 2, 3])
+print("Predicted Output Sequence:", output)
