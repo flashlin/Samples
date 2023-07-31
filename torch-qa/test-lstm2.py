@@ -1,3 +1,5 @@
+import os
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -51,14 +53,18 @@ class Decoder(nn.Module):
 
 
 class LstmModel(nn.Module):
-    def __init__(self, input_vocab_size, embedding_dim, hidden_size, output_vocab_size):
+    def __init__(self, input_vocab_size, embedding_dim, hidden_size, output_vocab_size,
+                 sos_index=0, eos_index=1):
         super().__init__()
+        self.sos_index = sos_index
+        self.eos_index = eos_index
         encoder_dim = hidden_size * 2
         decoder_dim = hidden_size
         self.embedding = nn.Embedding(input_vocab_size, embedding_dim)
         self.attention = nn.MultiheadAttention(embed_dim=encoder_dim, num_heads=4)
         # self.softmax = nn.Softmax(-1)
         # self.lstm = nn.LSTM(embedding_dim, hidden_size, batch_first=True)
+        self.hidden_size = hidden_size
         self.encoder = nn.LSTM(input_size=embedding_dim,
                                hidden_size=hidden_size,
                                num_layers=3,
@@ -70,21 +76,50 @@ class LstmModel(nn.Module):
                                batch_first=True)
         # self.fc = nn.Linear(hidden_size, output_vocab_size)
         self.output_linear = nn.Linear(decoder_dim, output_vocab_size)
+        self.fn_loss = nn.NLLLoss()
 
-    def forward(self, x, hidden=None):
+    def forward(self, x, target):
         """
         :param x: [batch, n_sequence, input_vocab_size]
         :param hidden:
         :return:
         """
         embedded = self.embedding(x)
-        hidden = Variable(torch.zeros(1, 1, self.hidden_size)) if None else hidden
-        lstm_output, hidden = self.encoder(embedded, hidden)
-        attention_output, _ = self.attention(lstm_output, lstm_output, lstm_output)
-        decoder_input = torch.cat((x.unsqueeze(-1), attention_output), dim=-1)
-        decoder_output, _ = self.decoder(decoder_input, hidden)
-        output_x = self.output_linear(decoder_output)
-        return output_x, hidden
+        lstm_output, hidden = self.encoder(embedded, None)
+
+        attention_output, hidden = self.attention(lstm_output, lstm_output, lstm_output)
+        # decoder_input = torch.cat((x.unsqueeze(-1), attention_output), dim=-1)
+
+        # decoder 起始
+        target_length = 100 if target is None else target.size()[0]
+        decoder_input = Variable(torch.LongTensor([[self.sos_index]]))
+
+        loss = 0
+        decoder_hidden = hidden
+        output_sequence = []
+        for di in range(target_length):
+            decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
+            output_x = self.output_linear(decoder_output)
+
+            # topv, topi = decoder_output.data.topk(1)
+            # ni = topi[0][0]
+            predict_index = output_x
+            output_sequence.append(predict_index)
+
+            if target is None and predict_index == self.sos_index:
+                break
+
+            # 抓取最後輸出
+            if target is None:
+                targ = Variable(torch.LongTensor([predict_index]))
+            else:
+                targ = target[di]
+            decoder_input = targ
+
+            loss += self.fn_loss(predict_index, targ)
+
+        return output_x
+
 
 
 class MyDataset(Dataset):
@@ -100,8 +135,8 @@ class MyDataset(Dataset):
 
 
 data = [
-    ([1, 2, 3], [4, 5, 6]),
-    ([2, 3, 4], [4, 5, 6, 7]),
+    ([0, 2, 3, 1], [0, 4, 5, 6, 1]),
+    ([0, 2, 3, 4, 1], [0, 4, 7, 8, 9, 1]),
 ]
 
 max_seq_len = 2
@@ -122,7 +157,7 @@ for input, label in prepare_train_data(data):
 
 
 dataset = MyDataset(train_data)
-loader = DataLoader(dataset, batch_size=2)
+loader = DataLoader(dataset, batch_size=1)
 
 
 class Seq2SeqModel:
@@ -136,12 +171,21 @@ class Seq2SeqModel:
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    def train(self):
-        num_epochs = 600
+    def load_model(self):
+        pth_file = './models/test3.pth'
         model = self.model
+        if os.path.exists(pth_file):
+            model.load_state_dict(torch.load(pth_file))
+
+    def train(self):
+        pth_file = './models/test3.pth'
+        num_epochs = 600
         optimizer = self.optimizer
+        model = self.model
         model.train()
+        best_loss = 1000
         for epoch in range(num_epochs):
+            total_loss = 0
             for inputs, labels in loader:
                 hidden = None
                 optimizer.zero_grad()
@@ -153,8 +197,12 @@ class Seq2SeqModel:
                 loss = self.criterion(outputs, labels)
                 loss.backward()
                 optimizer.step()
+                total_loss += loss.item()
+            if total_loss < best_loss:
+                best_loss = total_loss
             # 每 100 次迭代輸出一次訓練損失
             if epoch % 100 == 0:
+                torch.save(model.state_dict(), pth_file)
                 print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.5f}')
 
     def infer(self, input_seq):
@@ -162,21 +210,26 @@ class Seq2SeqModel:
         hat_y, _ = self.model(input_sequence)
         hat_y = hat_y.squeeze(0).argmax(1)
         return hat_y
-
         # output_sequence = []
+        # count = 0
         # with torch.no_grad():
         #     hidden = None
         #     for i in range(10):  # 預測輸出序列長度為 10
         #         output, hidden = self.model(input_sequence, hidden)
         #         _, predicted_indices = torch.max(output, dim=-1)
-        #         last_output = predicted_indices[-1].item()
-        #         output_sequence.append(last_output)
+        #         if count == 0:
+        #             output_sequence.extend(predicted_indices.tolist())
+        #         else:
+        #             last_output = predicted_indices[-1].item()
+        #             output_sequence.append(last_output)
+        #         count += 1
         #         # 將預測的輸出添加到輸入序列中，用於下一個時間步的預測
         #         new_input = output_sequence[-3:]
         #         input_sequence = torch.tensor(new_input, dtype=torch.long)
         # return output_sequence
 
 m = Seq2SeqModel()
+m.load_model()
 m.train()
-output = m.infer([1, 2, 3])
+output = m.infer([0, 2, 3, 4, 1])
 print("Predicted Output Sequence:", output)
