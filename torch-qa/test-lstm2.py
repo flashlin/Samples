@@ -104,12 +104,12 @@ class LstmModel(nn.Module):
 
                 # print(f"{decoder_input.shape=}")
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
-
                 decoder_output = self.exec_attention(batch_size, encoder_output, decoder_output)
-                output_sequence.append(decoder_output)
+                predicted_token = decoder_output.argmax(dim=-1)
+                output_sequence.append(predicted_token)
                 step_loss = self.fn_loss(decoder_output.squeeze(1), target[:, di])
                 loss += step_loss
-            output_sequence = torch.cat(output_sequence, dim=1)
+            output_sequence = torch.cat(output_sequence)
             return output_sequence, loss
         return self.infer(x, encoder_output, encoder_hidden)
 
@@ -212,7 +212,7 @@ class Seq2SeqModel:
                 optimizer.zero_grad()
                 padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
                 outputs, loss = model(padded_inputs, labels)
-                print(f"{outputs.shape=}")
+                print(f"{outputs=}")
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
