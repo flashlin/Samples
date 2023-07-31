@@ -64,12 +64,13 @@ class LstmModel(nn.Module):
         self.eos_index = eos_index
         self.hidden_size = hidden_size
         self.encoder_dim = encoder_dim = hidden_size * 2
+        self.encoder_layers = encoder_num_layers = 3
         self.encoder = Encoder(input_size=input_vocab_size,
                                hidden_size=encoder_dim,
-                               num_layers=3)
+                               num_layers=encoder_num_layers)
         # in:(batch_size, sequence_length, hidden_size)
         self.decoder_dim = decoder_dim = encoder_dim
-        self.decoder_num_layers = 3 * 2
+        self.decoder_num_layers = encoder_num_layers * 2
         self.decoder = Decoder(input_size=hidden_size,
                                hidden_size=decoder_dim,
                                output_size=output_vocab_size,
