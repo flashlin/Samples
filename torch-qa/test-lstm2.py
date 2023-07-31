@@ -63,24 +63,24 @@ class LstmModel(nn.Module):
         super().__init__()
         self.sos_index = sos_index
         self.eos_index = eos_index
-        decoder_dim = hidden_size
         self.hidden_size = hidden_size
+        self.encoder_dim = encoder_dim = hidden_size * 2
         self.encoder = Encoder(input_size=input_vocab_size,
-                               hidden_size=hidden_size * 2,
+                               hidden_size=encoder_dim,
                                num_layers=3)
         # in:(batch_size, sequence_length, hidden_size)
+        self.decoder_dim = decoder_dim = encoder_dim
         self.decoder_num_layers = 3 * 2
         self.decoder = Decoder(input_size=hidden_size,
-                               hidden_size=decoder_dim * 2,
+                               hidden_size=decoder_dim,
                                output_size=output_vocab_size,
                                num_layers=self.decoder_num_layers
                                )
         self.attention = nn.MultiheadAttention(embed_dim=hidden_size * 2,
                                                num_heads=hidden_size)
-        self.output_linear = nn.Linear(decoder_dim * 2, output_vocab_size)
+        self.output_linear = nn.Linear(decoder_dim, output_vocab_size)
         # self.fn_loss = nn.NLLLoss()
         self.fn_loss = nn.CrossEntropyLoss()
-        self.decoder_dim = decoder_dim
 
     def forward(self, x, target=None):
         """
@@ -116,7 +116,7 @@ class LstmModel(nn.Module):
     def exec_attention(self, batch_size, encoder_output, decoder_output):
         decoder_output = decoder_output.transpose(0, 1)
         encoder_output = encoder_output.transpose(0, 1)
-        encoder_output = encoder_output.view(-1, batch_size, self.decoder_dim * 2)
+        encoder_output = encoder_output.view(-1, batch_size, self.decoder_dim)
         # print(f"2 {decoder_output.shape=}")
         # print(f"2 {encoder_output.shape=}")
         attention_output, _ = self.attention(query=decoder_output,
