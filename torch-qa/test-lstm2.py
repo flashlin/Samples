@@ -98,6 +98,15 @@ class Decoder2(nn.Module):
         return result
 
 
+def r_trim(tensor):
+    end_index = len(tensor) - 1
+    last_value = tensor[end_index]
+    while end_index >= 0 and tensor[end_index] == last_value:
+        end_index -= 1
+    result = tensor[:end_index + 2]
+    return result
+
+
 class LstmModel(nn.Module):
     def __init__(self, input_vocab_size, embedding_dim, hidden_size, output_vocab_size,
                  sos_index=0, eos_index=1):
@@ -179,8 +188,6 @@ class LstmModel(nn.Module):
         for _ in range(max_target_length):
             decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
             decoder_output = self.exec_attention(1, encoder_output, decoder_output)
-            # print(f"{decoder_output.shape=}")
-            # print(f"{decoder_input.shape=}")
             predicted_token = decoder_output.argmax(dim=-1)
             decoder_input = torch.cat((decoder_input, predicted_token.unsqueeze(0)), dim=-1)
             # print(f"{predicted_token=}")
@@ -189,7 +196,7 @@ class LstmModel(nn.Module):
                 break
 
         generated_sequence = torch.cat(generated_sequence)
-        print(f"{generated_sequence=}")
+        generated_sequence = r_trim(generated_sequence)
         return generated_sequence, None
 
 class MyDataset(Dataset):
@@ -211,17 +218,9 @@ data = [
     ([0, 2, 3, 4, 1], [0, 4, 7, 8, 9, 1]),
 ]
 
-max_seq_len = 2
-
 
 def prepare_train_data(data):
     for input, label in data:
-        # input = pad_list(input, max_len=max_seq_len)
-        # label = pad_list(label, max_len=max_seq_len)
-        # inputs = overlap_split_list(input, split_length=max_seq_len, overlap=1)
-        # labels = overlap_split_list(label, split_length=max_seq_len, overlap=1)
-        # for new_input, new_label in zip(inputs, labels):
-        #     yield new_input, new_label
         yield input, label
 
 
@@ -252,7 +251,7 @@ class Seq2SeqModel:
 
     def train(self):
         pth_file = './models/test3.pth'
-        num_epochs = 10
+        num_epochs = 200
         optimizer = self.optimizer
         model = self.model
         model.train()
@@ -281,6 +280,6 @@ class Seq2SeqModel:
 
 m = Seq2SeqModel()
 m.load_model()
-m.train()
+# m.train()
 output = m.infer([0, 2, 3, 4, 1])
 print("Predicted Output Sequence:", output)
