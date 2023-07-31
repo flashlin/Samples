@@ -31,11 +31,6 @@ class Encoder(nn.Module):
         encoder_output, encoder_hidden = self.encoder(embedded, encoder_hidden)
         return encoder_output, encoder_hidden
 
-    def initHidden(self):
-        result = Variable(torch.zeros(1, 1, self.hidden_size))
-        # to(device)
-        return result
-
 
 class Decoder(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_layers=1):
@@ -47,14 +42,10 @@ class Decoder(nn.Module):
         self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, x, hidden):
-        output = self.embedding(x)
+        embedded = self.embedding(x)
         # output = F.relu(output)
-        output, hidden = self.lstm(output, hidden)
-        return output, hidden
-
-    def initHidden(self, use_gpu):
-        result = Variable(torch.zeros(1, 1, self.hidden_size))
-        return result
+        lstm_output, hidden = self.lstm(embedded, hidden)
+        return lstm_output, hidden
 
 
 def r_trim(tensor):
@@ -210,7 +201,7 @@ class Seq2SeqModel:
 
     def train(self):
         pth_file = './models/test3.pth'
-        num_epochs = 200
+        num_epochs = 2
         optimizer = self.optimizer
         model = self.model
         model.train()
@@ -221,6 +212,7 @@ class Seq2SeqModel:
                 optimizer.zero_grad()
                 padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
                 outputs, loss = model(padded_inputs, labels)
+                print(f"{outputs.shape=}")
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
@@ -239,6 +231,6 @@ class Seq2SeqModel:
 
 m = Seq2SeqModel()
 m.load_model()
-# m.train()
+m.train()
 output = m.infer([0, 2, 3, 4, 1])
 print("Predicted Output Sequence:", output)
