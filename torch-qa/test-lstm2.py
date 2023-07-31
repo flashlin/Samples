@@ -12,49 +12,8 @@ from data_utils import create_running_list, pad_list, overlap_split_list
 
 
 class Encoder(nn.Module):
-    def __init__(self, input_size, hidden_size):
-        super(Encoder, self).__init__()
-        self.hidden_size = hidden_size
-        self.embedding = nn.Embedding(input_size, hidden_size)
-        self.gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
-
-    def forward(self, x, hidden):
-        embedded = self.embedding(x).view(1, x.size()[0], -1)
-        output = embedded  # batch*seq*feature
-        output, hidden = self.gru(output, hidden)
-        return output, hidden
-
-    def initHidden(self):
-        result = Variable(torch.zeros(1, 1, self.hidden_size))
-        # to(device)
-        return result
-
-
-class Decoder(nn.Module):
-    def __init__(self, hidden_size, output_size):
-        super(Decoder, self).__init__()
-        self.hidden_size = hidden_size
-
-        self.embedding = nn.Embedding(output_size, hidden_size)
-        self.gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
-        self.out = nn.Linear(hidden_size, output_size)
-        self.softmax = nn.LogSoftmax()
-
-    def forward(self, x, hidden):
-        output = self.embedding(x).view(1, 1, -1)
-        output = F.relu(output)
-        output, hidden = self.gru(output, hidden)
-        output = self.softmax(self.out(output[0]))
-        return output, hidden
-
-    def initHidden(self, use_gpu):
-        result = Variable(torch.zeros(1, 1, self.hidden_size))
-        return result
-
-
-class Encoder2(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers):
-        super(Encoder2, self).__init__()
+        super(Encoder, self).__init__()
         self.hidden_size = hidden_size
         # in:(batch_size, seq_len) out:(batch_size, seq_len, hidden_size)
         self.embedding = nn.Embedding(input_size, hidden_size)
@@ -78,9 +37,9 @@ class Encoder2(nn.Module):
         return result
 
 
-class Decoder2(nn.Module):
+class Decoder(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_layers=1):
-        super(Decoder2, self).__init__()
+        super(Decoder, self).__init__()
         self.hidden_size = hidden_size
         self.embedding = nn.Embedding(input_size, hidden_size)
         self.lstm = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size,
@@ -115,16 +74,16 @@ class LstmModel(nn.Module):
         self.eos_index = eos_index
         decoder_dim = hidden_size
         self.hidden_size = hidden_size
-        self.encoder = Encoder2(input_size=input_vocab_size,
-                                hidden_size=hidden_size * 2,
-                                num_layers=3)
+        self.encoder = Encoder(input_size=input_vocab_size,
+                               hidden_size=hidden_size * 2,
+                               num_layers=3)
         # in:(batch_size, sequence_length, hidden_size)
         self.decoder_num_layers = 3 * 2
-        self.decoder = Decoder2(input_size=hidden_size,
-                                hidden_size=decoder_dim * 2,
-                                output_size=output_vocab_size,
-                                num_layers=self.decoder_num_layers
-                                )
+        self.decoder = Decoder(input_size=hidden_size,
+                               hidden_size=decoder_dim * 2,
+                               output_size=output_vocab_size,
+                               num_layers=self.decoder_num_layers
+                               )
         self.attention = nn.MultiheadAttention(embed_dim=hidden_size * 2,
                                                num_heads=hidden_size)
         self.output_linear = nn.Linear(decoder_dim * 2, output_vocab_size)
