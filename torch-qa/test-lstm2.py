@@ -86,13 +86,11 @@ class Decoder2(nn.Module):
         self.lstm = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size,
                             num_layers=num_layers, batch_first=True)
         self.out = nn.Linear(hidden_size, output_size)
-        self.softmax = nn.LogSoftmax()
 
     def forward(self, x, hidden):
         output = self.embedding(x)
         # output = F.relu(output)
         output, hidden = self.lstm(output, hidden)
-        # output = self.softmax(self.out(output[0]))
         return output, hidden
 
     def initHidden(self, use_gpu):
@@ -121,7 +119,8 @@ class LstmModel(nn.Module):
         self.attention = nn.MultiheadAttention(embed_dim=hidden_size * 2,
                                                num_heads=hidden_size)
         self.output_linear = nn.Linear(decoder_dim * 2, output_vocab_size)
-        self.fn_loss = nn.NLLLoss()
+        # self.fn_loss = nn.NLLLoss()
+        self.fn_loss = nn.CrossEntropyLoss()
         self.decoder_dim = decoder_dim
 
     def forward(self, x, target=None):
@@ -147,66 +146,51 @@ class LstmModel(nn.Module):
                 # print(f"{decoder_input.shape=}")
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
 
-                # print(f"{decoder_output.shape=}")
-
-                decoder_output = decoder_output.transpose(0, 1)
-                encoder_output = encoder_output.transpose(0, 1)
-                encoder_output = encoder_output.view(-1, batch_size, self.decoder_dim * 2)
-                # print(f"2 {decoder_output.shape=}")
-                # print(f"2 {encoder_output.shape=}")
-                attention_output, _ = self.attention(query=decoder_output,
-                                                     key=encoder_output,
-                                                     value=encoder_output)
-
-                attention_output = attention_output.transpose(0, 1)
-                attention_output = self.output_linear(attention_output[0])
-                attention_output = F.log_softmax(attention_output, dim=-1)
-                # attention_output = attention_output.view()
-                # print(f"{decoder_input.shape=}")
-                # print(f"{attention_output.shape=}")
-                # decoder_input = torch.cat((decoder_input, attention_output), dim=-1)
+                decoder_output = self.exec_attention(batch_size, encoder_output, decoder_output)
                 output_sequence.append(decoder_output)
                 step_loss = self.fn_loss(decoder_output.squeeze(1), target[:, di])
                 loss += step_loss
-                # # topv, topi = decoder_output.data.topk(1)
-                # # ni = topi[0][0]
-                # predict_index = output_x
-                # output_sequence.append(predict_index)
-                #
-                # if target is None and predict_index == self.sos_index:
-                #     break
-                #
-                # # 抓取最後輸出
-                # if target is None:
-                #     targ = torch.as_tensor([predict_index], dtype=torch.long)
-                # else:
-                #     targ = target[di]
-                # decoder_input = targ.unsqueeze(0)
-                # loss += self.fn_loss(predict_index, targ)
             output_sequence = torch.cat(output_sequence, dim=1)
             return output_sequence, loss
         return self.infer(x, encoder_output, encoder_hidden)
 
+    def exec_attention(self, batch_size, encoder_output, decoder_output):
+        decoder_output = decoder_output.transpose(0, 1)
+        encoder_output = encoder_output.transpose(0, 1)
+        encoder_output = encoder_output.view(-1, batch_size, self.decoder_dim * 2)
+        # print(f"2 {decoder_output.shape=}")
+        # print(f"2 {encoder_output.shape=}")
+        attention_output, _ = self.attention(query=decoder_output,
+                                             key=encoder_output,
+                                             value=encoder_output)
+
+        attention_output = attention_output.transpose(0, 1)
+        attention_output = self.output_linear(attention_output[0])
+        attention_output = F.log_softmax(attention_output, dim=-1)
+        return attention_output
+
     def infer(self, x, encoder_output, encoder_hidden):
         max_target_length = 100
         decoder_hidden = encoder_hidden
-        decoder_input = torch.tensor([[self.sos_index]])  # Start of sequence token
+        decoder_input = torch.as_tensor([self.sos_index]).unsqueeze(0)  # Start of sequence token
         decoder_input = decoder_input.to(x.device)
 
         generated_sequence = []
         for _ in range(max_target_length):
-            context, _ = self.attention(encoder_output, decoder_hidden)
-            decoder_input = torch.cat((decoder_input, context), dim=-1)
-
             decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
+            decoder_output = self.exec_attention(1, encoder_output, decoder_output)
+            # print(f"{decoder_output.shape=}")
+            # print(f"{decoder_input.shape=}")
             predicted_token = decoder_output.argmax(dim=-1)
-            generated_sequence.append(predicted_token.item())
-
-            if predicted_token == self.eos_index:
+            decoder_input = torch.cat((decoder_input, predicted_token.unsqueeze(0)), dim=-1)
+            # print(f"{predicted_token=}")
+            generated_sequence.append(predicted_token)
+            if predicted_token[-1] == self.eos_index:
                 break
 
-        generated_sequence = torch.tensor(generated_sequence).unsqueeze(0)
-        return generated_sequence
+        generated_sequence = torch.cat(generated_sequence)
+        print(f"{generated_sequence=}")
+        return generated_sequence, None
 
 class MyDataset(Dataset):
     def __init__(self, data):
@@ -268,11 +252,11 @@ class Seq2SeqModel:
 
     def train(self):
         pth_file = './models/test3.pth'
-        num_epochs = 600
+        num_epochs = 10
         optimizer = self.optimizer
         model = self.model
         model.train()
-        best_loss = 1000
+        best_loss = 100
         for epoch in range(num_epochs):
             total_loss = 0
             for inputs, labels in loader:
@@ -290,27 +274,9 @@ class Seq2SeqModel:
                 print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.5f}')
 
     def infer(self, input_seq):
-        input_sequence = torch.tensor(input_seq, dtype=torch.long)
+        input_sequence = torch.tensor(input_seq, dtype=torch.long).unsqueeze(0)
         hat_y, _ = self.model(input_sequence)
-        hat_y = hat_y.squeeze(0).argmax(1)
         return hat_y
-        # output_sequence = []
-        # count = 0
-        # with torch.no_grad():
-        #     hidden = None
-        #     for i in range(10):  # 預測輸出序列長度為 10
-        #         output, hidden = self.model(input_sequence, hidden)
-        #         _, predicted_indices = torch.max(output, dim=-1)
-        #         if count == 0:
-        #             output_sequence.extend(predicted_indices.tolist())
-        #         else:
-        #             last_output = predicted_indices[-1].item()
-        #             output_sequence.append(last_output)
-        #         count += 1
-        #         # 將預測的輸出添加到輸入序列中，用於下一個時間步的預測
-        #         new_input = output_sequence[-3:]
-        #         input_sequence = torch.tensor(new_input, dtype=torch.long)
-        # return output_sequence
 
 
 m = Seq2SeqModel()
