@@ -58,8 +58,7 @@ def r_trim(tensor):
 
 
 class LstmModel(nn.Module):
-    def __init__(self, input_vocab_size, embedding_dim, hidden_size, output_vocab_size,
-                 sos_index=0, eos_index=1):
+    def __init__(self, input_vocab_size, hidden_size, output_vocab_size, sos_index=0, eos_index=1):
         super().__init__()
         self.sos_index = sos_index
         self.eos_index = eos_index
@@ -185,10 +184,7 @@ loader = DataLoader(dataset, batch_size=1)
 class Seq2SeqModel:
     def __init__(self):
         self.output_vocab_size = 10
-        self.model = model = LstmModel(input_vocab_size=1000,
-                                       embedding_dim=100,
-                                       hidden_size=64,
-                                       output_vocab_size=self.output_vocab_size)
+        self.model = model = LstmModel(input_vocab_size=1000, hidden_size=64, output_vocab_size=self.output_vocab_size)
         # 定義損失函數和優化器
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(model.parameters(), lr=0.001)
