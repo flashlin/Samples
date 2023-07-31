@@ -89,11 +89,10 @@ class Decoder2(nn.Module):
         self.softmax = nn.LogSoftmax()
 
     def forward(self, x, hidden):
-        print(f"de {x.shape=}")
         output = self.embedding(x)
-        output = F.relu(output)
+        # output = F.relu(output)
         output, hidden = self.lstm(output, hidden)
-        output = self.softmax(self.out(output[0]))
+        # output = self.softmax(self.out(output[0]))
         return output, hidden
 
     def initHidden(self, use_gpu):
@@ -110,16 +109,18 @@ class LstmModel(nn.Module):
         decoder_dim = hidden_size
         self.hidden_size = hidden_size
         self.encoder = Encoder2(input_size=input_vocab_size,
-                                hidden_size=hidden_size,
+                                hidden_size=hidden_size * 2,
                                 num_layers=3)
-        self.attention = nn.MultiheadAttention(embed_dim=hidden_size, num_heads=4)
+        # in:(batch_size, sequence_length, hidden_size)
         self.decoder_num_layers = 3 * 2
         self.decoder = Decoder2(input_size=hidden_size,
-                                hidden_size=decoder_dim,
+                                hidden_size=decoder_dim * 2,
                                 output_size=output_vocab_size,
                                 num_layers=self.decoder_num_layers
                                 )
-        self.output_linear = nn.Linear(decoder_dim, output_vocab_size)
+        self.attention = nn.MultiheadAttention(embed_dim=hidden_size * 2,
+                                               num_heads=hidden_size)
+        self.output_linear = nn.Linear(decoder_dim * 2, output_vocab_size)
         self.fn_loss = nn.NLLLoss()
         self.decoder_dim = decoder_dim
 
@@ -129,22 +130,44 @@ class LstmModel(nn.Module):
         :param target:
         :return:
         """
+        # print(f"{x.shape=}")
+        # print(f"{target.shape=}")
+        batch_size = x.size(0)
         encoder_output, encoder_hidden = self.encoder(x, None)
 
         if target is not None:
             decoder_hidden = encoder_hidden
             target_length = target.size(1)
+            # print(f"{target_length=}")
             output_sequence = []
+            loss = 0
             for di in range(target_length):
-                decoder_input = target[:, di].unsqueeze(1)
-                h_o, c_o = decoder_hidden
-                print(f"{c_o.shape=}")
-                print(f"{encoder_output.shape=}")
-                attention_output, _ = self.attention(c_o, encoder_output, encoder_output)
-                decoder_input = torch.cat((decoder_input, attention_output), dim=-1)
+                decoder_input = target[:, di].unsqueeze(0)
 
+                # print(f"{decoder_input.shape=}")
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
+
+                # print(f"{decoder_output.shape=}")
+
+                decoder_output = decoder_output.transpose(0, 1)
+                encoder_output = encoder_output.transpose(0, 1)
+                encoder_output = encoder_output.view(-1, batch_size, self.decoder_dim * 2)
+                # print(f"2 {decoder_output.shape=}")
+                # print(f"2 {encoder_output.shape=}")
+                attention_output, _ = self.attention(query=decoder_output,
+                                                     key=encoder_output,
+                                                     value=encoder_output)
+
+                attention_output = attention_output.transpose(0, 1)
+                attention_output = self.output_linear(attention_output[0])
+                attention_output = F.log_softmax(attention_output, dim=-1)
+                # attention_output = attention_output.view()
+                # print(f"{decoder_input.shape=}")
+                # print(f"{attention_output.shape=}")
+                # decoder_input = torch.cat((decoder_input, attention_output), dim=-1)
                 output_sequence.append(decoder_output)
+                step_loss = self.fn_loss(decoder_output.squeeze(1), target[:, di])
+                loss += step_loss
                 # # topv, topi = decoder_output.data.topk(1)
                 # # ni = topi[0][0]
                 # predict_index = output_x
@@ -161,7 +184,7 @@ class LstmModel(nn.Module):
                 # decoder_input = targ.unsqueeze(0)
                 # loss += self.fn_loss(predict_index, targ)
             output_sequence = torch.cat(output_sequence, dim=1)
-            return output_sequence
+            return output_sequence, loss
         return self.infer(x, encoder_output, encoder_hidden)
 
     def infer(self, x, encoder_output, encoder_hidden):
@@ -211,10 +234,11 @@ def prepare_train_data(data):
     for input, label in data:
         # input = pad_list(input, max_len=max_seq_len)
         # label = pad_list(label, max_len=max_seq_len)
-        inputs = overlap_split_list(input, split_length=max_seq_len, overlap=1)
-        labels = overlap_split_list(label, split_length=max_seq_len, overlap=1)
-        for new_input, new_label in zip(inputs, labels):
-            yield new_input, new_label
+        # inputs = overlap_split_list(input, split_length=max_seq_len, overlap=1)
+        # labels = overlap_split_list(label, split_length=max_seq_len, overlap=1)
+        # for new_input, new_label in zip(inputs, labels):
+        #     yield new_input, new_label
+        yield input, label
 
 
 train_data = []
@@ -254,11 +278,7 @@ class Seq2SeqModel:
             for inputs, labels in loader:
                 optimizer.zero_grad()
                 padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
-                outputs, hidden = model(padded_inputs, labels)
-                outputs = outputs.view(-1, self.output_vocab_size)
-                labels = labels.view(-1)
-                # 交叉熵損失函數 nn.CrossEntropyLoss() 需要 labels 的形狀是 [batch_size], 而不是 [batch_size, sequence_length]
-                loss = self.criterion(outputs, labels)
+                outputs, loss = model(padded_inputs, labels)
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
