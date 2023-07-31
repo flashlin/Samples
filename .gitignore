@@ -37,3 +37,4 @@ torch-qa/.chainlit
 *.interp
 *.tokens
 T1.ParserKit/Antlr4Tool/*.cs
+torch-qa/data/support.txt
