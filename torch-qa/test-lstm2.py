@@ -1,4 +1,6 @@
+import math
 import os
+from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -11,12 +13,30 @@ from torch.utils.tensorboard import SummaryWriter
 from data_utils import create_running_list, pad_list, overlap_split_list
 
 
+class PositionalEmbedding(nn.Module):
+    def __init__(self, embed_dim: int, vocab_size: int = 5000, dropout_p: float = 0.1):
+        super(PositionalEmbedding, self).__init__()
+        self.dropout = nn.Dropout(p=dropout_p)
+        self.lut = nn.Embedding(vocab_size, embed_dim)
+        self.embed_dim = embed_dim
+
+    def forward(self, x):
+        """
+        :param x: (batch, L) L為batch中最長句子長度
+        :return (batch, L, embed_dim)
+        """
+        x = self.lut(x) * math.sqrt(self.embed_dim)
+        return self.dropout(x)
+
+
+
 class Encoder(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers):
         super(Encoder, self).__init__()
         self.hidden_size = hidden_size
         # in:(batch_size, seq_len) out:(batch_size, seq_len, hidden_size)
-        self.embedding = nn.Embedding(input_size, hidden_size)
+        # self.embedding = nn.Embedding(input_size, hidden_size)
+        self.embedding = PositionalEmbedding(hidden_size)
         # in:(batch_size,seq_len,input_size)
         # out: (batch_size,seq_len, num_directions*hidden_size),
         #      (h_n:隱藏狀態(num_layers*num_directions, batch_size, hidden_size), c_n:最後一個時間步的細胞狀態)
@@ -27,6 +47,10 @@ class Encoder(nn.Module):
                                bidirectional=True)
 
     def forward(self, x, encoder_hidden):
+        """
+            :param x: (batch_size, seq_len)
+            :param encoder_hidden:
+        """
         embedded = self.embedding(x)
         encoder_output, encoder_hidden = self.encoder(embedded, encoder_hidden)
         return encoder_output, encoder_hidden
@@ -57,6 +81,12 @@ class MultiHeadAttention(nn.Module):
         self.embed_dim = embed_dim
 
     def forward(self, query, key, value):
+        """
+            :param query:
+            :param key:
+            :param value:
+            :return:
+        """
         attention_output, hidden_state = self.attention(query=query,
                                                         key=key,
                                                         value=value)
@@ -75,8 +105,7 @@ class MultiHeadAttention(nn.Module):
         return attention_output, hidden_state
 
 
-
-def r_trim(tensor):
+def trim_right(tensor):
     end_index = len(tensor) - 1
     last_value = tensor[end_index]
     while end_index >= 0 and tensor[end_index] == last_value:
@@ -104,8 +133,6 @@ class LstmModel(nn.Module):
                                output_size=output_vocab_size,
                                num_layers=self.decoder_num_layers
                                )
-        # self.attention = nn.MultiheadAttention(embed_dim=hidden_size * 2,
-        #                                        num_heads=hidden_size)
         self.attention = MultiHeadAttention(embed_dim=hidden_size * 2,
                                             num_heads=hidden_size,
                                             output_vocab_size=output_vocab_size)
@@ -171,7 +198,7 @@ class LstmModel(nn.Module):
             generated_length += predicted_len
 
         generated_sequence = torch.cat(generated_sequence)
-        generated_sequence = r_trim(generated_sequence)
+        generated_sequence = trim_right(generated_sequence)
         return generated_sequence, None
 
 
@@ -224,7 +251,7 @@ class Seq2SeqModel:
 
     def train(self):
         pth_file = './models/test3.pth'
-        num_epochs = 2
+        num_epochs = 100
         optimizer = self.optimizer
         model = self.model
         model.train()
@@ -235,7 +262,7 @@ class Seq2SeqModel:
                 optimizer.zero_grad()
                 padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
                 outputs, loss = model(padded_inputs, labels)
-                print(f"{outputs=}")
+                # print(f"{outputs=}")
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
