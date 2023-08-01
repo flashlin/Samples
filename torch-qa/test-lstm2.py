@@ -73,6 +73,9 @@ class MultiHeadAttention(nn.Module):
         attention_output = self.output_linear(attention_output[0])
         attention_output = F.log_softmax(attention_output, dim=-1)
         return attention_output, hidden_state
+
+
+
 def r_trim(tensor):
     end_index = len(tensor) - 1
     last_value = tensor[end_index]
@@ -101,8 +104,11 @@ class LstmModel(nn.Module):
                                output_size=output_vocab_size,
                                num_layers=self.decoder_num_layers
                                )
-        self.attention = nn.MultiheadAttention(embed_dim=hidden_size * 2,
-                                               num_heads=hidden_size)
+        # self.attention = nn.MultiheadAttention(embed_dim=hidden_size * 2,
+        #                                        num_heads=hidden_size)
+        self.attention = MultiHeadAttention(embed_dim=hidden_size * 2,
+                                            num_heads=hidden_size,
+                                            output_vocab_size=output_vocab_size)
         self.output_linear = nn.Linear(decoder_dim, output_vocab_size)
         # self.fn_loss = nn.NLLLoss()
         self.fn_loss = nn.CrossEntropyLoss()
@@ -139,18 +145,10 @@ class LstmModel(nn.Module):
         return self.infer(x, encoder_output, encoder_hidden)
 
     def exec_attention(self, batch_size, encoder_output, decoder_output):
-        decoder_output = decoder_output.transpose(0, 1)
-        encoder_output = encoder_output.transpose(0, 1)
-        encoder_output = encoder_output.view(-1, batch_size, self.decoder_dim)
-        # print(f"2 {decoder_output.shape=}")
-        # print(f"2 {encoder_output.shape=}")
-        attention_output, _ = self.attention(query=decoder_output,
-                                             key=encoder_output,
-                                             value=encoder_output)
-
-        attention_output = attention_output.transpose(0, 1)
-        attention_output = self.output_linear(attention_output[0])
-        attention_output = F.log_softmax(attention_output, dim=-1)
+        attention_output, _ = self.attention.exec_forward(
+            batch_size=batch_size,
+            encoder_output=encoder_output,
+            decoder_output=decoder_output)
         return attention_output
 
     def infer(self, x, encoder_output, encoder_hidden):
@@ -160,19 +158,22 @@ class LstmModel(nn.Module):
         decoder_input = decoder_input.to(x.device)
 
         generated_sequence = []
-        for _ in range(max_target_length):
+        generated_length = 0
+        while generated_length < max_target_length:
             decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
             decoder_output = self.exec_attention(1, encoder_output, decoder_output)
             predicted_token = decoder_output.argmax(dim=-1)
+            predicted_len = len(predicted_token)
             decoder_input = torch.cat((decoder_input, predicted_token.unsqueeze(0)), dim=-1)
-            # print(f"{predicted_token=}")
             generated_sequence.append(predicted_token)
             if predicted_token[-1] == self.eos_index:
                 break
+            generated_length += predicted_len
 
         generated_sequence = torch.cat(generated_sequence)
         generated_sequence = r_trim(generated_sequence)
         return generated_sequence, None
+
 
 class MyDataset(Dataset):
     def __init__(self, data):
