@@ -48,6 +48,31 @@ class Decoder(nn.Module):
         return lstm_output, hidden
 
 
+class MultiHeadAttention(nn.Module):
+    def __init__(self, embed_dim, num_heads, output_vocab_size):
+        super(MultiHeadAttention, self).__init__()
+        self.attention = nn.MultiheadAttention(embed_dim=embed_dim,
+                                               num_heads=num_heads)
+        self.output_linear = nn.Linear(embed_dim, output_vocab_size)
+        self.embed_dim = embed_dim
+
+    def forward(self, query, key, value):
+        attention_output, hidden_state = self.attention(query=query,
+                                                        key=key,
+                                                        value=value)
+        return attention_output, hidden_state
+
+    def exec_forward(self, batch_size, encoder_output, decoder_output):
+        decoder_output = decoder_output.transpose(0, 1)
+        encoder_output = encoder_output.transpose(0, 1)
+        encoder_output = encoder_output.view(-1, batch_size, self.embed_dim)
+        attention_output, hidden_state = self.forward(query=decoder_output,
+                                                      key=encoder_output,
+                                                      value=encoder_output)
+        attention_output = attention_output.transpose(0, 1)
+        attention_output = self.output_linear(attention_output[0])
+        attention_output = F.log_softmax(attention_output, dim=-1)
+        return attention_output, hidden_state
 def r_trim(tensor):
     end_index = len(tensor) - 1
     last_value = tensor[end_index]
