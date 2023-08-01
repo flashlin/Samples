@@ -1,3 +1,4 @@
+import ast
 import os
 import glob
 import shutil
@@ -102,3 +103,9 @@ def copy_file(file_path: str, target_dir: str):
     destination = os.path.join(target_dir, filename)
     make_dir(target_dir)
     shutil.copy(file_path, destination)
+
+
+def read_py_obj_file(py_obj_file: str):
+    with open(py_obj_file, 'r', encoding='utf-8') as f:
+        content = f.read()
+        return ast.literal_eval(content)
