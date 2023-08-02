@@ -41,7 +41,7 @@ class Encoder(nn.Module):
         self.hidden_size = hidden_size
         # in:(batch_size, seq_len) out:(batch_size, seq_len, hidden_size)
         self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=0)
-        # self.embedding = PositionalEmbedding(hidden_size)
+        # self.embedding = PositionalEmbedding(hidden_size) 似乎有問題
         # in:(batch_size,seq_len,input_size)
         # out: (batch_size,seq_len, num_directions*hidden_size),
         #      (h_n:隱藏狀態(num_layers*num_directions, batch_size, hidden_size), c_n:最後一個時間步的細胞狀態)
@@ -131,12 +131,22 @@ def trim_right(tensor):
 
 
 class LstmModel(nn.Module):
-    def __init__(self, input_vocab_size, hidden_size, output_vocab_size, sos_index=1, eos_index=2):
+    def __init__(self, input_vocab_size, hidden_size, output_vocab_size,
+                 num_layer=6,
+                 sos_index=1, eos_index=2):
+        """
+        :param input_vocab_size:
+        :param hidden_size: gpt-2 有 768
+        :param output_vocab_size:
+        :param num_layer: gpt-2 有 12 層
+        :param sos_index:
+        :param eos_index:
+        """
         super().__init__()
         self.sos_index = sos_index
         self.eos_index = eos_index
         self.encoder_dim = encoder_dim = hidden_size * 2
-        self.encoder_layers = encoder_num_layers = 3
+        self.encoder_layers = encoder_num_layers = num_layer
         self.encoder = Encoder(input_size=input_vocab_size,
                                hidden_size=encoder_dim,
                                num_layers=encoder_num_layers)
@@ -302,30 +312,32 @@ def my_collate(batch):
 prepare_train_data(raw_data)
 
 dataset = MyDataset(train_data)
-loader = DataLoader(dataset, batch_size=2, collate_fn=my_collate)
+loader = DataLoader(dataset, batch_size=1, collate_fn=my_collate)
 
 
 class Seq2SeqModel:
     def __init__(self):
         vocab_size = 128
         self.device = 'cuda'
+        self.pth_file = "models/test3.pth"
+        self.pth_file = "models/test4.pth"
         self.model = model = LstmModel(input_vocab_size=vocab_size,
-                                       hidden_size=64,
+                                       hidden_size=386,  # 768
                                        output_vocab_size=vocab_size)
         # 定義損失函數和優化器
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     def load_model(self):
-        pth_file = './models/test3.pth'
+        pth_file = self.pth_file
         model = self.model
         if os.path.exists(pth_file):
             model.load_state_dict(torch.load(pth_file))
 
     def train(self):
         device = self.device
-        pth_file = './models/test3.pth'
-        num_epochs = 100
+        pth_file = self.pth_file
+        num_epochs = 500
         optimizer = self.optimizer
         model = self.model
         if torch.cuda.is_available():
@@ -372,5 +384,6 @@ sql = "select name from c"
 sql_value = sql_to_id(sql)
 output = m.infer(sql_value)
 rc = id_to_str(output)
+print(sql)
 print("Predicted Output:", output)
 print("Predicted Output Sequence:", rc)
