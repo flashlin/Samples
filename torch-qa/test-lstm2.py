@@ -1,5 +1,6 @@
 import math
 import os
+import re
 from typing import Optional
 from tqdm import tqdm
 import torch
@@ -11,7 +12,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from data_utils import create_running_list, pad_list, overlap_split_list
-from io_utils import read_py_obj_file
+from io_utils import read_py_obj_file, split_filename, split_file_path, query_files
 from tsql_tokenizr import tsql_tokenize
 
 
@@ -327,6 +328,24 @@ class Seq2SeqModel:
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(model.parameters(), lr=0.001)
 
+    def get_pth_file(self, loss):
+        directory, filename, ext = split_file_path(self.pth_file)
+        return f"{directory}/{filename}-{loss:.5f}{ext}"
+
+    def get_best_pth_file(self):
+        directory, filename, ext = split_file_path(self.pth_file)
+        for file in query_files(directory, ['.pth']):
+            _, filename_float, _ = split_file_path(file)
+            pattern = re.compile(r'(.+)-(\d*\.\d+)$')
+            match = pattern.match(filename_float)
+            if match is None:
+                continue
+            filename1 = match.group(1)
+            float_num = float(match.group(2))
+
+
+
+
     def load_model(self):
         pth_file = self.pth_file
         model = self.model
@@ -336,7 +355,7 @@ class Seq2SeqModel:
     def train(self):
         device = self.device
         pth_file = self.pth_file
-        num_epochs = 200
+        num_epochs = 100
         optimizer = self.optimizer
         model = self.model
         if torch.cuda.is_available():
@@ -361,6 +380,7 @@ class Seq2SeqModel:
                 best_loss = total_loss
             # 每 100 次迭代輸出一次訓練損失
             if epoch % 10 == 0:
+                self.get_pth_file(loss.item())
                 torch.save(model.state_dict(), pth_file)
                 print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.5f}')
 
