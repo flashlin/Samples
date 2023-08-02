@@ -204,10 +204,11 @@ class LstmModel(nn.Module):
             decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
             decoder_output = self.exec_attention(1, encoder_output, decoder_output)
             predicted_token = decoder_output.argmax(dim=-1)
-            predicted_len = len(predicted_token)
-            decoder_input = torch.cat((decoder_input, predicted_token.unsqueeze(0)), dim=-1)
-            generated_sequence.append(predicted_token)
-            if predicted_token[-1] == self.eos_index:
+            predicted_len = len(predicted_token[0])
+            decoder_input = torch.cat((decoder_input, predicted_token), dim=-1)
+            generated_sequence.append(predicted_token[0])
+            last_token = predicted_token[-1, :][-1]
+            if last_token == self.eos_index:
                 break
             generated_length += predicted_len
 
