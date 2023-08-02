@@ -103,6 +103,8 @@ class MultiHeadAttention(nn.Module):
         decoder_output = decoder_output.transpose(0, 1)
         encoder_output = encoder_output.transpose(0, 1)
         encoder_output = encoder_output.view(-1, batch_size, self.embed_dim)
+        decoder_output = decoder_output.view(-1, batch_size, self.embed_dim)
+
         attention_output, hidden_state = self.forward(query=decoder_output,
                                                       key=encoder_output,
                                                       value=encoder_output)
@@ -154,8 +156,8 @@ class LstmModel(nn.Module):
         # print(f"{x.shape=}")
         batch_size = x.size(0)
         encoder_output, encoder_hidden = self.encoder(x, None)
-        # h_0, c_0 = encoder_hidden
-        # print(f"encoder {h_0.shape=}")
+        h_0, c_0 = encoder_hidden
+        print(f"encoder {h_0.shape=}")
 
         if target is not None:
             decoder_hidden = encoder_hidden
@@ -292,7 +294,7 @@ def my_collate(batch):
 prepare_train_data(raw_data)
 
 dataset = MyDataset(train_data)
-loader = DataLoader(dataset, batch_size=1, collate_fn=my_collate)
+loader = DataLoader(dataset, batch_size=2, collate_fn=my_collate)
 
 
 class Seq2SeqModel:
