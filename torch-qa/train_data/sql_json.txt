@@ -1,0 +1,18 @@
+[
+    ("select id from customer",
+     """{"type":"select","cols":["id as id"],"fromCause":"customer as customer"}"""),
+    ("select id, name from customer",
+     """{"type":"select","cols":["id as id","name as name"],"fromCause":"customer as customer"}"""),
+    ("select id1 as id, name from customer",
+     """{"type":"select","cols":["id1 as id","name as name"],"fromCause":"customer as customer"}"""),
+    ("select id as id, name1 as name from customer",
+     """{"type":"select","cols":["id as id","name1 as name"],"fromCause":"customer as customer"}"""),
+    ("select id, name1 as name from customer",
+     """{"type":"select","cols":["id as id","name1 as name"],"fromCause":"customer as customer"}"""),
+    ("select id as id,name1 from customer",
+     """{"type":"select","cols":["id as id","name1 as name1"],"fromCause":"customer as customer"}"""),
+    ("select name from customer",
+     """{"type":"select","cols":["name as name"],"fromCause":"customer as customer"}"""),
+    ("select name from product",
+     """{"type":"select","cols":["name as name"],"fromCause":"product as product"}"""),
+]

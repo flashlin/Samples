@@ -11,6 +11,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from data_utils import create_running_list, pad_list, overlap_split_list
+from io_utils import read_py_obj_file
 from tsql_tokenizr import tsql_tokenize
 
 
@@ -246,11 +247,9 @@ raw_data = [
      """{"type":"select","cols":["id as id"],"fromCause":"customer as customer"}"""),
     ("select id, name from customer",
      """{"type":"select","cols":["id as id","name as name"],"fromCause":"customer as customer"}"""),
-    ("select id1 as id, name from customer",
-     """{"type":"select","cols":["id1 as id","name as name"],"fromCause":"customer as customer"}"""),
-    ("select id as id, name1 as name from customer",
-     """{"type":"select","cols":["id as id","name1 as name"],"fromCause":"customer as customer"}"""),
 ]
+
+raw_data = read_py_obj_file("train_data/sql_json.txt")
 
 
 def str_to_id(text: str) -> list[int]:
@@ -337,7 +336,7 @@ class Seq2SeqModel:
     def train(self):
         device = self.device
         pth_file = self.pth_file
-        num_epochs = 500
+        num_epochs = 200
         optimizer = self.optimizer
         model = self.model
         if torch.cuda.is_available():
