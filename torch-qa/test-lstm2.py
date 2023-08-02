@@ -11,6 +11,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from data_utils import create_running_list, pad_list, overlap_split_list
+from tsql_tokenizr import tsql_tokenize
 
 
 class PositionalEmbedding(nn.Module):
@@ -29,14 +30,14 @@ class PositionalEmbedding(nn.Module):
         return self.dropout(x)
 
 
-
 class Encoder(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers):
         super(Encoder, self).__init__()
         self.hidden_size = hidden_size
         # in:(batch_size, seq_len) out:(batch_size, seq_len, hidden_size)
-        # self.embedding = nn.Embedding(input_size, hidden_size)
-        self.embedding = PositionalEmbedding(hidden_size)
+        print(f"emb {input_size=}")
+        self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=0)
+        # self.embedding = PositionalEmbedding(hidden_size)
         # in:(batch_size,seq_len,input_size)
         # out: (batch_size,seq_len, num_directions*hidden_size),
         #      (h_n:隱藏狀態(num_layers*num_directions, batch_size, hidden_size), c_n:最後一個時間步的細胞狀態)
@@ -59,6 +60,7 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, num_layers=1):
         super(Decoder, self).__init__()
+        self.input_size = input_size
         self.hidden_size = hidden_size
         self.embedding = nn.Embedding(input_size, hidden_size)
         self.lstm = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size,
@@ -66,6 +68,7 @@ class Decoder(nn.Module):
         self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, x, hidden):
+        print(f"{self.input_size=}")
         embedded = self.embedding(x)
         # output = F.relu(output)
         lstm_output, hidden = self.lstm(embedded, hidden)
@@ -115,11 +118,10 @@ def trim_right(tensor):
 
 
 class LstmModel(nn.Module):
-    def __init__(self, input_vocab_size, hidden_size, output_vocab_size, sos_index=0, eos_index=1):
+    def __init__(self, input_vocab_size, hidden_size, output_vocab_size, sos_index=1, eos_index=2):
         super().__init__()
         self.sos_index = sos_index
         self.eos_index = eos_index
-        self.hidden_size = hidden_size
         self.encoder_dim = encoder_dim = hidden_size * 2
         self.encoder_layers = encoder_num_layers = 3
         self.encoder = Encoder(input_size=input_vocab_size,
@@ -128,7 +130,7 @@ class LstmModel(nn.Module):
         # in:(batch_size, sequence_length, hidden_size)
         self.decoder_dim = decoder_dim = encoder_dim
         self.decoder_num_layers = encoder_num_layers * 2
-        self.decoder = Decoder(input_size=hidden_size,
+        self.decoder = Decoder(input_size=input_vocab_size,
                                hidden_size=decoder_dim,
                                output_size=output_vocab_size,
                                num_layers=self.decoder_num_layers
@@ -136,7 +138,6 @@ class LstmModel(nn.Module):
         self.attention = MultiHeadAttention(embed_dim=hidden_size * 2,
                                             num_heads=hidden_size,
                                             output_vocab_size=output_vocab_size)
-        self.output_linear = nn.Linear(decoder_dim, output_vocab_size)
         # self.fn_loss = nn.NLLLoss()
         self.fn_loss = nn.CrossEntropyLoss()
 
@@ -147,7 +148,6 @@ class LstmModel(nn.Module):
         :return:
         """
         # print(f"{x.shape=}")
-        # print(f"{target.shape=}")
         batch_size = x.size(0)
         encoder_output, encoder_hidden = self.encoder(x, None)
 
@@ -159,13 +159,16 @@ class LstmModel(nn.Module):
             loss = 0
             for di in range(target_length):
                 decoder_input = target[:, di].unsqueeze(0)
-
-                # print(f"{decoder_input.shape=}")
+                print(f"{di=} {decoder_input.shape=}")
+                print(f"{di=} {decoder_input=}")
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
+                print(f"{di=} {decoder_output.shape=}")
                 decoder_output = self.exec_attention(batch_size, encoder_output, decoder_output)
+                print(f"{di=} attention {decoder_output.shape=}")
                 predicted_token = decoder_output.argmax(dim=-1)
                 output_sequence.append(predicted_token)
                 step_loss = self.fn_loss(decoder_output.squeeze(1), target[:, di])
+                print(f"{di=} {step_loss=}")
                 loss += step_loss
             output_sequence = torch.cat(output_sequence)
             return output_sequence, loss
@@ -216,20 +219,65 @@ class MyDataset(Dataset):
         return input_tensor, label_tensor
 
 
-data = [
-    ([0, 2, 3, 1], [0, 4, 5, 6, 1]),
-    ([0, 2, 3, 4, 1], [0, 4, 7, 8, 9, 1]),
+raw_data = [
+    ("select id from customer",
+     """{"type":"select","cols":["id as id"],"fromCause":"customer as customer"}"""),
+    ("select id, name from customer",
+     """{"type":"select","cols":["id as id","name as name"],"fromCause":"customer as customer"}"""),
+    ("select id1 as id, name from customer",
+     """{"type":"select","cols":["id1 as id","name as name"],"fromCause":"customer as customer"}"""),
+    ("select id as id, name1 as name from customer",
+     """{"type":"select","cols":["id as id","name1 as name"],"fromCause":"customer as customer"}"""),
 ]
 
 
-def prepare_train_data(data):
-    for input, label in data:
-        yield input, label
+def str_to_id(text: str) -> list[int]:
+    ascii_codes = [ord(ch) for ch in text]
+    return ascii_codes
+
+
+def id_to_str(values: list[int]) -> str:
+    ascii_codes = [chr(code) for code in values]
+    return ''.join(ascii_codes)
+
+
+def sql_to_id(sql: str) -> list[int]:
+    tokens = tsql_tokenize(sql)
+    sql_tokens = [token.text for token in tokens]
+    sql_tokens2 = []
+    for n in range(len(sql_tokens)):
+        sql_tokens2.append(sql_tokens[n])
+        if n < len(sql_tokens) - 1:
+            sql_tokens2.append(' ')
+    sql2 = ''.join(sql_tokens2)
+    return str_to_id(sql2)
 
 
 train_data = []
-for input, label in prepare_train_data(data):
-    train_data.append((input, label))
+
+start_index = 1
+end_index = 2
+
+
+def prepare_train_data(data):
+    for sql, label in data:
+        input_values = [start_index] + sql_to_id(sql) + [end_index]
+        label_values = [start_index] + str_to_id(label) + [end_index]
+        train_data.append((input_values, label_values))
+
+
+def my_collate(batch):
+    inputs = []
+    labels = []
+    for sentence, label in batch:
+        input_value = sentence
+        label_value = label
+        inputs.append(input_value)
+        labels.append(label_value)
+    return inputs, labels
+
+
+prepare_train_data(raw_data)
 
 dataset = MyDataset(train_data)
 loader = DataLoader(dataset, batch_size=1)
@@ -237,8 +285,10 @@ loader = DataLoader(dataset, batch_size=1)
 
 class Seq2SeqModel:
     def __init__(self):
-        self.output_vocab_size = 10
-        self.model = model = LstmModel(input_vocab_size=1000, hidden_size=64, output_vocab_size=self.output_vocab_size)
+        vocab_size = 128 + 3
+        self.model = model = LstmModel(input_vocab_size=vocab_size,
+                                       hidden_size=64,
+                                       output_vocab_size=vocab_size)
         # 定義損失函數和優化器
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(model.parameters(), lr=0.001)
@@ -282,5 +332,13 @@ class Seq2SeqModel:
 m = Seq2SeqModel()
 m.load_model()
 m.train()
-output = m.infer([0, 2, 3, 4, 1])
-print("Predicted Output Sequence:", output)
+
+
+print(f"----------------------------------")
+
+sql = "select name from c"
+sql_value = sql_to_id(sql)
+output = m.infer(sql_value)
+rc = id_to_str(output)
+print("Predicted Output:", output)
+print("Predicted Output Sequence:", rc)
