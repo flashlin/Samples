@@ -32,6 +32,11 @@ class PositionalEmbedding(nn.Module):
 
 class Encoder(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers):
+        """
+        :param input_size: vob_size
+        :param hidden_size: 越大可以夠更好地記憶長序列中的信息
+        :param num_layers: 越大更好地捕捉輸入序列中的抽象特徵
+        """
         super(Encoder, self).__init__()
         self.hidden_size = hidden_size
         # in:(batch_size, seq_len) out:(batch_size, seq_len, hidden_size)
@@ -278,7 +283,8 @@ loader = DataLoader(dataset, batch_size=1)
 
 class Seq2SeqModel:
     def __init__(self):
-        vocab_size = 128 + 3
+        vocab_size = 128
+        self.device = 'cuda'
         self.model = model = LstmModel(input_vocab_size=vocab_size,
                                        hidden_size=64,
                                        output_vocab_size=vocab_size)
@@ -293,12 +299,14 @@ class Seq2SeqModel:
             model.load_state_dict(torch.load(pth_file))
 
     def train(self):
-        if torch.cuda.is_available():
-            print("CUDA is available!")
+        device = self.device
         pth_file = './models/test3.pth'
         num_epochs = 100
         optimizer = self.optimizer
         model = self.model
+        if torch.cuda.is_available():
+            model.to(device)
+            print("CUDA is available!")
         model.train()
         best_loss = 100
         for epoch in tqdm(range(num_epochs), desc='Training', unit='epoch'):
@@ -306,6 +314,8 @@ class Seq2SeqModel:
             for inputs, labels in tqdm(loader, desc=f'Epoch {epoch+1}/{num_epochs}', unit='batch', leave=False):
                 optimizer.zero_grad()
                 padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
+                padded_inputs = padded_inputs.to(device)
+                labels = labels.to(device)
                 outputs, loss = model(padded_inputs, labels)
                 # print(f"{outputs=}")
                 loss.backward()
@@ -319,7 +329,9 @@ class Seq2SeqModel:
                 print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.5f}')
 
     def infer(self, input_seq):
+        device = self.device
         input_sequence = torch.tensor(input_seq, dtype=torch.long).unsqueeze(0)
+        input_sequence = input_sequence.to(device)
         hat_y, _ = self.model(input_sequence)
         return hat_y
 
