@@ -22,6 +22,10 @@ def use_logger():
 
 
 def split_file_path(file_path: str):
+    """
+    :param file_path: path/file.txt
+    :return: path, file, .txt
+    """
     directory = os.path.dirname(file_path)
     full_filename = get_full_filename(file_path)
     filename, extension = split_filename(full_filename)
