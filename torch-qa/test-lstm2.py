@@ -1,7 +1,7 @@
 import math
 import os
 from typing import Optional
-
+from tqdm import tqdm
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -293,15 +293,17 @@ class Seq2SeqModel:
             model.load_state_dict(torch.load(pth_file))
 
     def train(self):
+        if torch.cuda.is_available():
+            print("CUDA is available!")
         pth_file = './models/test3.pth'
         num_epochs = 100
         optimizer = self.optimizer
         model = self.model
         model.train()
         best_loss = 100
-        for epoch in range(num_epochs):
+        for epoch in tqdm(range(num_epochs), desc='Training', unit='epoch'):
             total_loss = 0
-            for inputs, labels in loader:
+            for inputs, labels in tqdm(loader, desc=f'Epoch {epoch+1}/{num_epochs}', unit='batch', leave=False):
                 optimizer.zero_grad()
                 padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
                 outputs, loss = model(padded_inputs, labels)
