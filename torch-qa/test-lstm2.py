@@ -89,9 +89,9 @@ class MultiHeadAttention(nn.Module):
 
     def forward(self, query, key, value):
         """
-            :param query:
-            :param key:
-            :param value:
+            :param query: (seq_len, batch_size, vob_size)
+            :param key: (seq_len, batch_size, vob_size)
+            :param value: (seq_len, batch_size, vob_size)
             :return:
         """
         attention_output, hidden_state = self.attention(query=query,
@@ -100,6 +100,12 @@ class MultiHeadAttention(nn.Module):
         return attention_output, hidden_state
 
     def exec_forward(self, batch_size, encoder_output, decoder_output):
+        """
+        :param batch_size:
+        :param encoder_output: (batch_size, seq_len, vob_size)
+        :param decoder_output: (batch_size, seq_len, vob_size)
+        :return: (batch_size, seq_len, vob_size)
+        """
         decoder_output = decoder_output.transpose(0, 1)
         encoder_output = encoder_output.transpose(0, 1)
         encoder_output = encoder_output.view(-1, batch_size, self.embed_dim)
@@ -109,7 +115,8 @@ class MultiHeadAttention(nn.Module):
                                                       key=encoder_output,
                                                       value=encoder_output)
         attention_output = attention_output.transpose(0, 1)
-        attention_output = self.output_linear(attention_output[0])
+
+        attention_output = self.output_linear(attention_output)
         attention_output = F.log_softmax(attention_output, dim=-1)
         return attention_output, hidden_state
 
@@ -145,6 +152,7 @@ class LstmModel(nn.Module):
                                             num_heads=hidden_size,
                                             output_vocab_size=output_vocab_size)
         # self.fn_loss = nn.NLLLoss()
+        # in:(batch_size, vocab_size), (batch_size, seq_len)
         self.fn_loss = nn.CrossEntropyLoss()
 
     def forward(self, x, target=None):
@@ -156,8 +164,6 @@ class LstmModel(nn.Module):
         # print(f"{x.shape=}")
         batch_size = x.size(0)
         encoder_output, encoder_hidden = self.encoder(x, None)
-        h_0, c_0 = encoder_hidden
-        print(f"encoder {h_0.shape=}")
 
         if target is not None:
             decoder_hidden = encoder_hidden
@@ -166,13 +172,14 @@ class LstmModel(nn.Module):
             output_sequence = []
             loss = 0
             for di in range(target_length):
-                decoder_input = target[:, di].unsqueeze(0)
-                # print(f"{di=}")
+                decoder_input = target[:, di: di+1] #.unsqueeze(0)
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
-                decoder_output = self.exec_attention(batch_size, encoder_output, decoder_output)
-                predicted_token = decoder_output.argmax(dim=-1)
+                attention_output = self.exec_attention(batch_size, encoder_output, decoder_output)
+                predicted_token = attention_output.argmax(dim=-1)
                 output_sequence.append(predicted_token)
-                step_loss = self.fn_loss(decoder_output.squeeze(1), target[:, di])
+                predicted_output = attention_output #.squeeze(1)
+                loss_inputs = predicted_output.transpose(1, 2)
+                step_loss = self.fn_loss(loss_inputs, target[:, di: di+1])
                 loss += step_loss
             output_sequence = torch.cat(output_sequence)
             return output_sequence, loss
