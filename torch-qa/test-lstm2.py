@@ -40,8 +40,8 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.hidden_size = hidden_size
         # in:(batch_size, seq_len) out:(batch_size, seq_len, hidden_size)
-        # self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=0)
-        self.embedding = PositionalEmbedding(hidden_size)
+        self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=0)
+        # self.embedding = PositionalEmbedding(hidden_size)
         # in:(batch_size,seq_len,input_size)
         # out: (batch_size,seq_len, num_directions*hidden_size),
         #      (h_n:隱藏狀態(num_layers*num_directions, batch_size, hidden_size), c_n:最後一個時間步的細胞狀態)
@@ -70,6 +70,7 @@ class Decoder(nn.Module):
         self.lstm = nn.LSTM(input_size=hidden_size, hidden_size=hidden_size,
                             num_layers=num_layers, batch_first=True)
         self.out = nn.Linear(hidden_size, output_size)
+        self.num_layers = num_layers
 
     def forward(self, x, hidden):
         embedded = self.embedding(x)
@@ -153,6 +154,8 @@ class LstmModel(nn.Module):
         # print(f"{x.shape=}")
         batch_size = x.size(0)
         encoder_output, encoder_hidden = self.encoder(x, None)
+        # h_0, c_0 = encoder_hidden
+        # print(f"encoder {h_0.shape=}")
 
         if target is not None:
             decoder_hidden = encoder_hidden
@@ -162,6 +165,7 @@ class LstmModel(nn.Module):
             loss = 0
             for di in range(target_length):
                 decoder_input = target[:, di].unsqueeze(0)
+                # print(f"{di=}")
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
                 decoder_output = self.exec_attention(batch_size, encoder_output, decoder_output)
                 predicted_token = decoder_output.argmax(dim=-1)
@@ -212,9 +216,9 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         input, label = self.data[index]
-        input_tensor = torch.as_tensor(input, dtype=torch.long)
-        label_tensor = torch.as_tensor(label, dtype=torch.long)
-        return input_tensor, label_tensor
+        # input_tensor = torch.as_tensor(input, dtype=torch.long)
+        # label_tensor = torch.as_tensor(label, dtype=torch.long)
+        return input, label
 
 
 raw_data = [
@@ -267,18 +271,28 @@ def prepare_train_data(data):
 def my_collate(batch):
     inputs = []
     labels = []
+    max_input_len = 0
+    max_label_len = 0
+    for sentence, label in batch:
+        max_input_len = max(max_input_len, len(sentence))
+        max_label_len = max(max_label_len, len(label))
+
     for sentence, label in batch:
         input_value = sentence
         label_value = label
+        input_value = pad_list(input_value, max_input_len)
+        label_value = pad_list(label_value, max_label_len)
         inputs.append(input_value)
         labels.append(label_value)
+    inputs = torch.as_tensor(inputs, dtype=torch.long)
+    labels = torch.as_tensor(labels, dtype=torch.long)
     return inputs, labels
 
 
 prepare_train_data(raw_data)
 
 dataset = MyDataset(train_data)
-loader = DataLoader(dataset, batch_size=1)
+loader = DataLoader(dataset, batch_size=1, collate_fn=my_collate)
 
 
 class Seq2SeqModel:
@@ -313,7 +327,8 @@ class Seq2SeqModel:
             total_loss = 0
             for inputs, labels in tqdm(loader, desc=f'Epoch {epoch+1}/{num_epochs}', unit='batch', leave=False):
                 optimizer.zero_grad()
-                padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
+                padded_inputs = inputs
+                # padded_inputs = pad_sequence(inputs, batch_first=True, padding_value=0)
                 padded_inputs = padded_inputs.to(device)
                 labels = labels.to(device)
                 outputs, loss = model(padded_inputs, labels)
