@@ -35,9 +35,8 @@ class Encoder(nn.Module):
         super(Encoder, self).__init__()
         self.hidden_size = hidden_size
         # in:(batch_size, seq_len) out:(batch_size, seq_len, hidden_size)
-        print(f"emb {input_size=}")
-        self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=0)
-        # self.embedding = PositionalEmbedding(hidden_size)
+        # self.embedding = nn.Embedding(input_size, hidden_size, padding_idx=0)
+        self.embedding = PositionalEmbedding(hidden_size)
         # in:(batch_size,seq_len,input_size)
         # out: (batch_size,seq_len, num_directions*hidden_size),
         #      (h_n:隱藏狀態(num_layers*num_directions, batch_size, hidden_size), c_n:最後一個時間步的細胞狀態)
@@ -68,7 +67,6 @@ class Decoder(nn.Module):
         self.out = nn.Linear(hidden_size, output_size)
 
     def forward(self, x, hidden):
-        print(f"{self.input_size=}")
         embedded = self.embedding(x)
         # output = F.relu(output)
         lstm_output, hidden = self.lstm(embedded, hidden)
@@ -159,16 +157,11 @@ class LstmModel(nn.Module):
             loss = 0
             for di in range(target_length):
                 decoder_input = target[:, di].unsqueeze(0)
-                print(f"{di=} {decoder_input.shape=}")
-                print(f"{di=} {decoder_input=}")
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
-                print(f"{di=} {decoder_output.shape=}")
                 decoder_output = self.exec_attention(batch_size, encoder_output, decoder_output)
-                print(f"{di=} attention {decoder_output.shape=}")
                 predicted_token = decoder_output.argmax(dim=-1)
                 output_sequence.append(predicted_token)
                 step_loss = self.fn_loss(decoder_output.squeeze(1), target[:, di])
-                print(f"{di=} {step_loss=}")
                 loss += step_loss
             output_sequence = torch.cat(output_sequence)
             return output_sequence, loss
@@ -319,7 +312,7 @@ class Seq2SeqModel:
             if total_loss < best_loss:
                 best_loss = total_loss
             # 每 100 次迭代輸出一次訓練損失
-            if epoch % 100 == 0:
+            if epoch % 10 == 0:
                 torch.save(model.state_dict(), pth_file)
                 print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.5f}')
 
