@@ -1,6 +1,7 @@
 import math
 import os
 import re
+import sys
 from typing import Optional
 from tqdm import tqdm
 import torch
@@ -12,7 +13,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from data_utils import create_running_list, pad_list, overlap_split_list
-from io_utils import read_py_obj_file, split_filename, split_file_path, query_files
+from io_utils import read_py_obj_file, split_filename, split_file_path, query_ext_files, query_files
 from tsql_tokenizr import tsql_tokenize
 
 
@@ -332,29 +333,45 @@ class Seq2SeqModel:
         directory, filename, ext = split_file_path(self.pth_file)
         return f"{directory}/{filename}-{loss:.5f}{ext}"
 
-    def get_best_pth_file(self):
+    def query_pth_files(self):
         directory, filename, ext = split_file_path(self.pth_file)
-        for file in query_files(directory, ['.pth']):
+        for file in query_files(directory, rf"{filename}-(\d*\.\d+)\.pth$"):
             _, filename_float, _ = split_file_path(file)
             pattern = re.compile(r'(.+)-(\d*\.\d+)$')
             match = pattern.match(filename_float)
             if match is None:
                 continue
-            filename1 = match.group(1)
             float_num = float(match.group(2))
+            yield file, filename_float, float_num
 
+    def keep_best_pth_files(self):
+        directory, _, _ = split_file_path(self.pth_file)
+        files = [(file, float_num) for file, _, float_num in self.query_pth_files()]
+        sorted_files = sorted(files, key=lambda x: x[1])
+        delete_files = sorted_files[2:]
+        for file, _ in delete_files:
+            os.remove(f"{directory}/{file}")
 
-
+    def get_best_pth_file(self):
+        directory, filename, ext = split_file_path(self.pth_file)
+        best_loss = sys.float_info.max
+        best_filename = None
+        for file, filename_float, float_num in self.query_pth_files():
+            if float_num < best_loss:
+                best_filename = filename_float
+                best_loss = float_num
+        return f"{directory}/{best_filename}.pth", best_loss
 
     def load_model(self):
-        pth_file = self.pth_file
+        pth_file, loss = self.get_best_pth_file()
         model = self.model
         if os.path.exists(pth_file):
+            print(f"load {pth_file}")
             model.load_state_dict(torch.load(pth_file))
+        return loss
 
     def train(self):
         device = self.device
-        pth_file = self.pth_file
         num_epochs = 100
         optimizer = self.optimizer
         model = self.model
@@ -362,7 +379,7 @@ class Seq2SeqModel:
             model.to(device)
             print("CUDA is available!")
         model.train()
-        best_loss = 100
+        best_loss = self.load_model()
         for epoch in tqdm(range(num_epochs), desc='Training', unit='epoch'):
             total_loss = 0
             for inputs, labels in tqdm(loader, desc=f'Epoch {epoch+1}/{num_epochs}', unit='batch', leave=False):
@@ -378,10 +395,11 @@ class Seq2SeqModel:
                 total_loss += loss.item()
             if total_loss < best_loss:
                 best_loss = total_loss
+                pth_file = self.get_pth_file(total_loss)
+                torch.save(model.state_dict(), pth_file)
+                self.keep_best_pth_files()
             # 每 100 次迭代輸出一次訓練損失
             if epoch % 10 == 0:
-                self.get_pth_file(loss.item())
-                torch.save(model.state_dict(), pth_file)
                 print(f'Epoch [{epoch}/{num_epochs}], Loss: {loss.item():.5f}')
 
     def infer(self, input_seq):
@@ -393,7 +411,6 @@ class Seq2SeqModel:
 
 
 m = Seq2SeqModel()
-m.load_model()
 m.train()
 
 
