@@ -31,6 +31,7 @@ public class TrainDataController : ControllerBase
         };
     }
 
+    [HttpPost]
     public void AddData(AddDataRequest req)
     {
         _chatTrainDataRepo.AddData(new TrainDataDto
