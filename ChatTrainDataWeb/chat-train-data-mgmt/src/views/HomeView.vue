@@ -72,7 +72,7 @@ fetchData();
         Input
         <n-mention type="textarea" v-model:value="item.input" />
         Output
-        <n-mention type="textarea" v-model:value="item.output" />
+        <n-mention type="textarea" v-model:value="item.output" :autosize="{minRows: 10}" />
         <n-space>
           <n-button @click="clickSaveTrainData(item.id)">Save</n-button>
         </n-space>
