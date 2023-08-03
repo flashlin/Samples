@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using ChatTrainDataWeb.Models.Constracts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ChatTrainDataWeb.Controllers;
 
@@ -23,23 +24,13 @@ public class TrainDataController : ControllerBase
             }
         };
     }
+
+    public void AddData(AddDataRequest req)
+    {
+        
+    }
 }
 
-public class TrainDataItem
+public class AddDataRequest
 {
-    public int Id { get; set; }
-    public string Instruction { get; set; } = string.Empty;
-    public string Input { get; set; } = string.Empty;
-    public string Output { get; set; } = string.Empty;
-}
-
-public class GetDataPageResponse
-{
-    public List<TrainDataItem> Items { get; set; } = new();
-}
-
-public class GetDataPageRequest
-{
-    public int Index { get; set; }
-    public int PageSize { get; set; }
 }
