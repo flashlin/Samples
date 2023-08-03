@@ -2,6 +2,9 @@
 ":PlugClean 清除沒有再用的套件
 ":PlugUpgrade 升級vim-plug 管理套件本身
 ":PlugStatus 查看狀態
+":CocInstall coc-prettier 安裝自動 format
+":CocConfig 之後輸入下面內容
+" "coc.preferences.formatOnSaveFiletypes": ["typescript", "typescriptreact"]
 call plug#begin('~/.config/nvim/plugged')
 "底部狀態化
 Plug 'bling/vim-airline'
@@ -43,8 +46,8 @@ set encoding=utf-8
 set fileencodings=utf-8,ucs-bom,big5
 set autoindent
 set smartindent
-set tabstop=3
-set shiftwidth=3
+set tabstop=2
+set shiftwidth=2
 " 設定 space 取代 tab
 set expandtab
 " 設定游標所在行的顯示樣式
@@ -55,6 +58,7 @@ highlight CursorLine cterm=NONE ctermfg=white ctermbg=darkgray guibg=darkgray gu
 set ic
 " 搜索的时候随字符高亮
 set hlsearch
+set shell=powershell.exe
 
 "ctrl+a	全選+複製
 map <C-A> ggVG
@@ -62,6 +66,8 @@ map! <C-A> <Esc>ggVG
 "ctrl+y 複製到系統剪貼簿
 map  <C-Y> "+y
 map! <C-Y> "+y
+
+nnoremap <leader>t :term<CR>
 
 "保存檔案
 nnoremap <C-S> :w<CR>
