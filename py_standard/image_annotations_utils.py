@@ -13,7 +13,7 @@ import torchvision.transforms as transforms
 from torchvision.transforms import Resize, Normalize
 
 from image_utils import load_image, show_image_tensor, show_image
-from io_utils import split_file_path, read_all_lines_file, query_files, use_logger
+from io_utils import split_file_path, read_all_lines_file, query_ext_files, use_logger
 
 
 def create_mask_from_polygon_points(image_size: (int, int), points: list[(int, int)]):
@@ -175,7 +175,7 @@ def load_annotation_file(annotation_file_path, image_size):
 
 
 def query_labelme_image_files(images_dir: str, annotations_dir: str):
-    for image_file_path in query_files(images_dir, ['.jpg', '.png']):
+    for image_file_path in query_ext_files(images_dir, ['.jpg', '.png']):
         _, image_filename, _ = split_file_path(image_file_path)
         annotation_file_path = os.path.join(annotations_dir, f'{image_filename}.json')
         if os.path.exists(annotation_file_path):
@@ -262,7 +262,7 @@ class ImageAnnotationsDataset(Dataset):
         return annotations_obj
 
     def query_image_files(self):
-        for image_file_path in query_files(self.images_dir, ['.jpg']):
+        for image_file_path in query_ext_files(self.images_dir, ['.jpg']):
             _, image_filename, _ = split_file_path(image_file_path)
             annotation_file_path = os.path.join(self.annotations_dir, f'{image_filename}.json')
             if os.path.exists(annotation_file_path):

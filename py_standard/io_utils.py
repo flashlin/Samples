@@ -1,6 +1,7 @@
 import ast
 import os
 import glob
+import re
 import shutil
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -56,10 +57,26 @@ def read_all_lines_file(file_path: str):
         raise Exception(f"Failed to open file {file_path} with any encoding.")
 
 
-def query_files(folder_path: str, extensions: list[str]):
+def query_ext_files(folder_path: str, extensions: list[str]):
+    """
+    :param folder_path: folder_path
+    :param extensions: ['.jpg','.txt']
+    :return:
+    """
     for extension in extensions:
         pattern = os.path.join(folder_path, f'*{extension}')
         for file in glob.glob(pattern):
+            yield file
+
+
+def query_files(folder_path: str, filename_pattern: str = ".*"):
+    """
+    :param folder_path:
+    :param filename_pattern: 'abc.*\\.txt'
+    :return:
+    """
+    for file in os.listdir(folder_path):
+        if re.match(filename_pattern, file):
             yield file
 
 
