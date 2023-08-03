@@ -18,6 +18,20 @@ O，未知
 """
 
 
+def get_ascii_list():
+    result = []
+    for code in range(ord('A'), ord('Z') + 1):
+        result.append(chr(code))
+    for code in range(ord('a'), ord('z') + 1):
+        result.append(chr(code))
+    for code in range(ord('0'), ord('9') + 1):
+        result.append(chr(code))
+    special = "~!@#$%^&*()_+`-={}|[]\\:\";'<>?,./"
+    for ch in special:
+        result.append(ch)
+    return result
+
+
 def is_integer_or_float(word: str):
     pattern = r'^[-+]?\d+(\.\d+)?$'
     return re.match(pattern, word) is not None
@@ -67,8 +81,22 @@ class BiLSTM_CRF(nn.Module):
         return tag_space
 
 
-word_to_idx = {"<PAD>": 0, "<UNK>": 1}  # 加入PAD和UNK用于填充和未知词
+def create_word_to_idx():
+    word_to_idx = {"<PAD>": 0, "<UNK>": 1}
+    for ch in get_ascii_list():
+        word_to_idx[ch] = len(word_to_idx)
+    with open("train_data/zh_vocab.txt", "r", encoding="utf-8") as f:
+        for ch in f:
+            ch = ch.strip()
+            if ch not in word_to_idx:
+                word_to_idx[ch] = len(word_to_idx)
+    return word_to_idx
+
+
+word_to_idx = create_word_to_idx()
 label_to_idx = {"B": 0, "M": 1, "E": 2, "S": 3, "O": 4}
+
+print(f"{word_to_idx=}")
 
 
 def read_train_text_file(file: str):
@@ -83,10 +111,10 @@ def read_train_text_file(file: str):
 
 train_data = read_train_text_file("./train_data/train_small.txt")
 
-for sentence, labels in train_data:
-    for word in sentence:
-        if word not in word_to_idx:
-            word_to_idx[word] = len(word_to_idx)
+# for sentence, labels in train_data:
+#     for word in sentence:
+#         if word not in word_to_idx:
+#             word_to_idx[word] = len(word_to_idx)
 
 
 class MyDataset(Dataset):
@@ -123,11 +151,14 @@ train_loader = DataLoader(MyDataset(train_data), batch_size=batch_size, shuffle=
 vocab_size = len(word_to_idx)
 tagset_size = 5
 model = BiLSTM_CRF(tagset_size=tagset_size)
+print(f"{vocab_size=}")
 
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5, verbose=True)
 criterion = nn.CrossEntropyLoss()
 
+
+print("start training...")
 num_epochs = 10
 for epoch in range(num_epochs):
     running_loss = 0.0
