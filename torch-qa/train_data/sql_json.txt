@@ -27,4 +27,6 @@
      """{"type":"select","cols":["id as id"],"fromCause":"c as customer"}"""),
     ("select id,id1,name from c customer",
      """{"type":"select","cols":["id as id","id1 as id1","name as name"],"fromCause":"c as customer"}"""),
+    ("select name from c customer",
+     """{"type":"select","cols":["name as name"],"fromCause":"c as customer"}"""),
 ]
