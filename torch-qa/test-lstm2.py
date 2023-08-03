@@ -320,10 +320,11 @@ class Seq2SeqModel:
     def __init__(self):
         vocab_size = 128
         self.device = 'cuda'
+        self.pth_file = "models/test6.pth"
         self.pth_file = "models/test3.pth"
-        self.pth_file = "models/test4.pth"
         self.model = model = LstmModel(input_vocab_size=vocab_size,
                                        hidden_size=386,  # 768
+                                       num_layer=3,
                                        output_vocab_size=vocab_size)
         # 定義損失函數和優化器
         self.criterion = nn.CrossEntropyLoss()
