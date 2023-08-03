@@ -1,19 +1,42 @@
 <script setup lang="ts">
+import { getTrainDataPage, type ITrainDataItem } from '@/apis/chatTrainDataApi';
+import { ref } from 'vue';
+
+interface IData {
+  items: ITrainDataItem[];
+}
+
+const data = ref<IData>({
+  items: []
+});
+
+const fetchData = async () => {
+  const res = await getTrainDataPage({
+    startIndex: 0,
+    pageSize: 20
+  });
+  data.value.items = res.items;
+};
+
+fetchData();
 </script>
 
 <template>
   <n-card title="Chat Train Data">
-    <n-space vertical>
-      Instruction
-      <n-mention type="textarea" />
-      Input
-      <n-mention type="textarea" />
-      Output
-      <n-mention type="textarea" />
-      <n-space>
-        <n-button>Save</n-button>
+    <template v-for="item in data.items" :key="item.id">
+      <n-space vertical>
+        {{ item.id }}
+        Instruction
+        <n-mention type="textarea" :value="item.instruction" />
+        Input
+        <n-mention type="textarea" :value="item.input" />
+        Output
+        <n-mention type="textarea" :value="item.output" />
+        <n-space>
+          <n-button>Save</n-button>
+        </n-space>
       </n-space>
-    </n-space>
+    </template>
   </n-card>
 </template>
 
