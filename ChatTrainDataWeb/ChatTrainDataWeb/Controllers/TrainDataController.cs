@@ -34,8 +34,20 @@ public class TrainDataController : ControllerBase
     [HttpPost]
     public void AddData(AddDataRequest req)
     {
-        _chatTrainDataRepo.AddData(new TrainDataDto
+        _chatTrainDataRepo.AddData(new AddTrainDataDto
         {
+            Instruction = req.Instruction,
+            Input = req.Input,
+            Output = req.Output,
+        });
+    }
+    
+    [HttpPost]
+    public void UpdateData(UpdateDataRequest req)
+    {
+        _chatTrainDataRepo.UpdateData(new UpdateTrainDataDto
+        {
+            Id = req.Id,
             Instruction = req.Instruction,
             Input = req.Input,
             Output = req.Output,

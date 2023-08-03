@@ -1,4 +1,5 @@
 ﻿using ChatTrainDataWeb.Models.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChatTrainDataWeb.Models.Repositories;
 
@@ -11,7 +12,7 @@ public class ChatTrainDataRepo : IChatTrainDataRepo
         _dbContext = dbContext;
     }
 
-    public void AddData(TrainDataDto data)
+    public void AddData(AddTrainDataDto data)
     {
         _dbContext.TrainData.Add(new TrainDataEntity
         {
@@ -19,6 +20,19 @@ public class ChatTrainDataRepo : IChatTrainDataRepo
             Input = data.Input,
             Output = data.Output
         });
+        _dbContext.SaveChanges();
+    }
+    
+    public void UpdateData(UpdateTrainDataDto data)
+    {
+        var existingEntity = new TrainDataEntity { Id = data.Id };
+        _dbContext.Entry(existingEntity).CurrentValues.SetValues(new 
+        {
+            Instruction = data.Instruction,
+            Input = data.Input,
+            Output = data.Output
+        });
+        _dbContext.Entry(existingEntity).State = EntityState.Modified;
         _dbContext.SaveChanges();
     }
 
