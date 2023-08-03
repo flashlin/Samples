@@ -1,7 +1,10 @@
-﻿namespace ChatTrainDataWeb.Models.Entities;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ChatTrainDataWeb.Models.Entities;
 
 public class TrainDataEntity
 {
+    [Key]
     public int Id { get; set; }
     public string Instruction { get; set; } = string.Empty;
     public string Input { get; set; } = string.Empty;
