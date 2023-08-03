@@ -23,6 +23,8 @@ public class LinqExpressionGenerator : ISourceGenerator
     public void Execute(GeneratorExecutionContext context)
     {
         var compilation = context.Compilation;
+        QueryLinqExpression(compilation);
+        
         foreach (var type in compilation.GetAllTypes())
         {
             var classFullName = type.TypeFullName;
@@ -62,5 +64,31 @@ public class LinqExpressionGenerator : ISourceGenerator
         }
     }
 
-    
+    private void QueryLinqExpression(Compilation compilation)
+    {
+        var syntaxTrees = compilation.SyntaxTrees;
+
+        // 遍历每个语法树
+        foreach (var syntaxTree in syntaxTrees)
+        {
+            // 查找查询表达式的节点
+            var queryExpression = syntaxTree.GetRoot()
+                .DescendantNodes()
+                .OfType<Microsoft.CodeAnalysis.CSharp.Syntax.QueryExpressionSyntax>()
+                .FirstOrDefault();
+
+            if (queryExpression != null)
+            {
+                // 将查询表达式转换为字符串
+                var expressionString = queryExpression.ToString();
+                
+                Console.WriteLine("");
+
+                // 将提取的表达式添加到生成的代码中
+                // var sourceText = SourceText.From(expressionString, System.Text.Encoding.UTF8);
+                // var hintName = "ExtractedExpression.g.cs";
+                // context.AddSource(hintName, sourceText);
+            }
+        }
+    }
 }
