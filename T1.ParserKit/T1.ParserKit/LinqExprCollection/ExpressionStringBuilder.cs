@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections;
+using System.Linq.Expressions;
 
 namespace T1.ParserKit.LinqExprCollection;
 
@@ -6,11 +7,28 @@ public class ExpressionStringBuilder : ExpressionVisitor
 {
     private readonly Stack<string> _expressionStack = new Stack<string>();
 
-    public string ToString(Expression expression)
+    public string ParseToString(Expression expression)
     {
         Visit(expression);
         return _expressionStack.Pop();
     }
+
+    // protected override Expression VisitConstant(ConstantExpression node)
+    // {
+    //     if (typeof(EnumerableQuery<>) == node.Value?.GetType().GetGenericTypeDefinition())
+    //     {
+    //         // 获取node.Value的Expression
+    //         var enumerableQuery = (IEnumerable)node.Value;
+    //         var elementType = enumerableQuery.GetType().GetGenericArguments()[0];
+    //         var constantExpression = Expression.Constant(enumerableQuery, typeof(IEnumerable<>).MakeGenericType(elementType));
+    //
+    //         // 将Expression转换为字符串
+    //         var expressionVisitor = new ExpressionStringBuilder();
+    //         var expressionString = expressionVisitor.ParseToString(constantExpression);;
+    //         _expressionStack.Push(expressionString);
+    //     }
+    //     return base.VisitConstant(node);
+    // }
 
     protected override Expression VisitMethodCall(MethodCallExpression node)
     {
