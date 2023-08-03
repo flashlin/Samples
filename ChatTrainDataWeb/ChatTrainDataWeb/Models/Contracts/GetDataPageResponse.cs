@@ -1,4 +1,4 @@
-﻿namespace ChatTrainDataWeb.Models.Constracts;
+﻿namespace ChatTrainDataWeb.Models.Contracts;
 
 public class GetDataPageResponse
 {

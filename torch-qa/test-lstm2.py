@@ -373,7 +373,7 @@ class Seq2SeqModel:
 
     def train(self):
         device = self.device
-        num_epochs = 500
+        num_epochs = 100
         optimizer = self.optimizer
         model = self.model
         if torch.cuda.is_available():
@@ -381,6 +381,7 @@ class Seq2SeqModel:
             print("CUDA is available!")
         model.train()
         best_loss = self.load_model()
+        saved = False
         for epoch in tqdm(range(num_epochs), desc='Training', unit='epoch'):
             total_loss = 0
             count = 0
@@ -402,9 +403,14 @@ class Seq2SeqModel:
                 pth_file = self.get_pth_file(avg_loss)
                 torch.save(model.state_dict(), pth_file)
                 self.keep_best_pth_files()
+                saved = True
             # 每 100 次迭代輸出一次訓練損失
             if epoch % 10 == 0:
                 print(f'Epoch [{epoch}/{num_epochs}], Loss: {avg_loss:.5f}')
+        if not saved:
+            pth_file = self.get_pth_file(best_loss)
+            torch.save(model.state_dict(), pth_file)
+            self.keep_best_pth_files()
 
     def infer(self, input_seq):
         device = self.device

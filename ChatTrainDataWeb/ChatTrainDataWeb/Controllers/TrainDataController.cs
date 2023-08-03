@@ -1,4 +1,5 @@
-﻿using ChatTrainDataWeb.Models.Constracts;
+﻿using ChatTrainDataWeb.Models.Contracts;
+using ChatTrainDataWeb.Models.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatTrainDataWeb.Controllers;
@@ -7,30 +8,36 @@ namespace ChatTrainDataWeb.Controllers;
 [Route("api/[controller]/[action]")]
 public class TrainDataController : ControllerBase
 {
+    private IChatTrainDataRepo _chatTrainDataRepo;
+
+    public TrainDataController(IChatTrainDataRepo chatTrainDataRepo)
+    {
+        _chatTrainDataRepo = chatTrainDataRepo;
+    }
+    
     [HttpPost]
     public GetDataPageResponse GetDataPage(GetDataPageRequest req)
     {
         return new GetDataPageResponse
         {
-            Items = new List<TrainDataItem>
-            {
-                new TrainDataItem
+            Items = _chatTrainDataRepo.GetDataPage(req.StartIndex, req.PageSize)
+                .Select(x => new TrainDataItem
                 {
-                    Id = 0,
-                    Instruction = "translate SQL to JSON",
-                    Input = "select id from customer",
-                    Output = "{\"type\":\"select\",\"cols\":[\"id as id\"],\"fromCause\":\"customer as customer\"}",
-                }
-            }
+                    Id = x.Id,
+                    Instruction = x.Instruction,
+                    Input = x.Input,
+                    Output = x.Output, 
+                }).ToList()
         };
     }
 
     public void AddData(AddDataRequest req)
     {
-        
+        _chatTrainDataRepo.AddData(new TrainDataDto
+        {
+            Instruction = req.Instruction,
+            Input = req.Input,
+            Output = req.Output,
+        });
     }
-}
-
-public class AddDataRequest
-{
 }
