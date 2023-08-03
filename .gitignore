@@ -38,3 +38,4 @@ torch-qa/.chainlit
 *.tokens
 T1.ParserKit/Antlr4Tool/*.cs
 torch-qa/data/support.txt
+ChatTrainDataWeb/ChatTrainDataWeb/Data
