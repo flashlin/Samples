@@ -7,7 +7,7 @@ public class ChatTrainDataContext : DbContext
 {
     public ChatTrainDataContext(IHostEnvironment hostEnvironment)
     {
-        var path = hostEnvironment.ContentRootPath;
+        var path = Path.Combine(hostEnvironment.ContentRootPath, "Data");
         DbPath = Path.Join(path, "ChatTrainData.db");
         Database.EnsureCreated();
     }
