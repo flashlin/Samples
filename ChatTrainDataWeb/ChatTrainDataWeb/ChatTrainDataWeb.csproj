@@ -20,4 +20,14 @@
       <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
     </ItemGroup>
 
+
+
+
+
+
+    <ItemGroup>
+      <Folder Include="Models\Entities\" />
+      <Folder Include="Models\Services\" />
+    </ItemGroup>
+
 </Project>
