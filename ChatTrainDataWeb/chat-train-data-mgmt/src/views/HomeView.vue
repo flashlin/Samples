@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getTrainDataPage, type ITrainDataItem } from '@/apis/chatTrainDataApi';
+import { getTrainDataPage, updateTrainData, type ITrainDataItem } from '@/apis/chatTrainDataApi';
 import { ref } from 'vue';
 
 interface IData {
@@ -9,6 +9,11 @@ interface IData {
 const data = ref<IData>({
   items: []
 });
+
+const saveTrainData = (id: number) => {
+  const item = data.value.items.find((x) => x.id === id)!;
+  updateTrainData(item);
+};
 
 const fetchData = async () => {
   const res = await getTrainDataPage({
@@ -27,13 +32,13 @@ fetchData();
       <n-space vertical>
         {{ item.id }}
         Instruction
-        <n-mention type="textarea" :value="item.instruction" />
+        <n-mention type="textarea" v-model:value="item.instruction" />
         Input
-        <n-mention type="textarea" :value="item.input" />
+        <n-mention type="textarea" v-model:value="item.input" />
         Output
-        <n-mention type="textarea" :value="item.output" />
+        <n-mention type="textarea" v-model:value="item.output" />
         <n-space>
-          <n-button>Save</n-button>
+          <n-button @click="saveTrainData(item.id)">Save</n-button>
         </n-space>
       </n-space>
     </template>

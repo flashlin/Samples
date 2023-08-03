@@ -24,3 +24,7 @@ export const getTrainDataPage = async (data: IGetDataPageReq): Promise<IGetDataP
   const response = await client.post('/api/TrainData/GetDataPage', data);
   return response.data;
 };
+
+export const updateTrainData = async (data: ITrainDataItem): Promise<void> => {
+  await client.post('/api/TrainData/UpdateData', data);
+};
