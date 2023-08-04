@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using T1.AspNetCore.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var services = builder.Services;
@@ -7,6 +8,7 @@ services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Banner Mgmt API", Version = "v1" });
 });
 services.AddControllersWithViews();
+services.AddViewToStringRendererService();
 
 var app = builder.Build();
 
@@ -17,6 +19,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
