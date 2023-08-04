@@ -9,7 +9,11 @@ train_data = [
 ]
 
 # 加载Flan-T5预训练模型和分词器
-model_name = "google/flan-t5-base"
+model_name = "google/flan-t5-large"
+model_name = "google/flan-t5-xl"   
+model_name = "google/flan-t5-xxl"  # seq_len=4096
+model_name = "google/flan-t5-base" # seq_len=512
+model_name = "google/flan-t5-small"
 tokenizer = T5Tokenizer.from_pretrained(model_name, legacy=False)
 print("tokenizer loaded")
 
