@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using RazorLight;
 using T1.AspNetCore;
 
 namespace FlashBms.Controllers.Apis;
@@ -18,7 +19,7 @@ public class BannerController : ControllerBase
     {
         _viewToStringRendererService = viewToStringRendererService;
     }
-    
+
     [HttpPost]
     public async Task<string> Render()
     {
@@ -26,39 +27,31 @@ public class BannerController : ControllerBase
         return await _viewToStringRendererService.RenderViewToStringAsync("~/Views/Banners/Sample.cshtml", viewModel);
     }
 
-    /*
-    public void RenderCshtml()
+    [HttpGet]
+    public async Task<string> RenderCshtml()
     {
-        var cshtml = @"<p>Hello @Model.Name</p>";
-        var model = new { Name = "Flash" };
-        return RenderViewContextToStringAsync(cshtml, model);
+        var template = @"<p>Hello @Model.Name</p>";
+        var model = new {Name = "Flash"};
+        var engine = new RazorRenderService();
+        return await engine.CompileRenderStringAsync("templateKey", template, model);
     }
+}
 
-    private async Task<string> RenderViewContextToStringAsync<TModel>(string viewContent, TModel model)
+public interface IRazorRenderService
+{
+    Task<string> CompileRenderStringAsync<TModel>(string templateKey, string content, TModel model);
+}
+
+public class RazorRenderService : IRazorRenderService
+{
+    private readonly RazorLightEngine _engine = new RazorLightEngineBuilder()
+        .UseEmbeddedResourcesProject(typeof(RazorRenderService))
+        .SetOperatingAssembly(typeof(RazorRenderService).Assembly)
+        .UseMemoryCachingProvider()
+        .Build();
+
+    public Task<string> CompileRenderStringAsync<TModel>(string templateKey, string content, TModel model)
     {
-        var viewEngine = new RazorViewEngine();
-        var actionContext = new ActionContext
-        {
-            HttpContext = new DefaultHttpContext(),
-        };
-        var view = viewEngine.GetView(null, viewContent, true).View;
-        var viewData = new ViewDataDictionary<TModel>(new EmptyModelMetadataProvider(), new ModelStateDictionary())
-        {
-            Model = model
-        };
-        var tempData = new TempDataDictionary(actionContext.HttpContext, new SessionStateTempDataProvider());
-        var output = new StringWriter();
-        var viewContext = new ViewContext(
-            actionContext,
-            view,
-            viewData,
-            tempData,
-            output,
-            new HtmlHelperOptions()
-        );
-
-        await view.RenderAsync(viewContext);
-        return output.ToString();
+        return _engine.CompileRenderStringAsync(templateKey, content, model);
     }
-    */
 }
