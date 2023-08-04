@@ -5,6 +5,7 @@ from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 """
 pip install sentencepiece
+似乎是用來分類, 中立, 矛盾, 
 """
 
 # 初始化 T5 分詞器和模型
