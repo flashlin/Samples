@@ -1,5 +1,7 @@
 import torch
 from transformers import T5ForConditionalGeneration, T5Tokenizer
+# 一般來說下載的模型是
+# c:\users\flash\.cache\huggingface\hub
 
 # 定义微调数据集，示例包含三个问题和答案
 train_data = [
