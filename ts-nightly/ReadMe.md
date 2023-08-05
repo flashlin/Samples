@@ -1,3 +1,14 @@
+
+Accessor object Sample Code
+```
+const user = new User();
+const obj = new Accessor(user, x => x.name);
+user.name = 'Mary';
+const message = obj.getValue();
+expect(message).toBe('Mary');
+```  
+
+Mock function Sample Code
 ```
 function sayHello(id: number): string {
   return `${id} hello`;
@@ -12,6 +23,7 @@ const result = f(1);
 console.log(result);
 ```
 
+Mock class sample code
 ```
 class Sample {
     @MockMethod(true, "mock data")
@@ -34,6 +46,7 @@ class Sample {
 }
 ```
 
+Create WebApi Sample Code
 ```
 const api = new WebApi();
 export function getUser() {
