@@ -1,6 +1,6 @@
 {
   "name": "ts-nightly",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "typescript common library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -16,7 +16,7 @@
     "build": "tsc",
     "t": "jest --config jest.config.ts",
     "p": "tsc && npm publish --access public",
-    "u": "npm unpublish ts-nightly@1.0.0"
+    "u": "npm unpublish ts-nightly@1.0.8"
   },
   "devDependencies": {
     "@jest/globals": "^29.5.0",
