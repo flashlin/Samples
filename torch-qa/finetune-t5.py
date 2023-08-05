@@ -7,21 +7,26 @@ from transformers import T5ForConditionalGeneration, T5Tokenizer
 train_data = [
     {"question": "What is the capital of France?", "answer": "Paris"},
     {"question": "What is the largest planet in our solar system?", "answer": "Jupiter"},
-    {"question": "Who wrote the play 'Romeo and Juliet'?", "answer": "William Shakespeare"}
+    {"question": "Who wrote the play 'Romeo and Juliet'?", "answer": "William Shakespeare"},
+    {"question": "translate tsql to json: select id from customer",
+     "answer": """{"type":"select","cols":["id"],"from":"customer"}"""},
 ]
 
 # 加载Flan-T5预训练模型和分词器
 model_name = "google/flan-t5-large"
 model_name = "google/flan-t5-xl"   
-model_name = "google/flan-t5-xxl"  # seq_len=4096
-model_name = "google/flan-t5-base" # seq_len=512
+model_name = "google/flan-t5-xxl"   # seq_len=4096 似乎需要 80GB VRAM
+model_name = "google/flan-t5-base"  # seq_len=512
 model_name = "google/flan-t5-small"
+#--------------------------------------------------
+model_name = "google/flan-t5-xl"
 tokenizer = T5Tokenizer.from_pretrained(model_name, legacy=False)
 print("tokenizer loaded")
-
-model = T5ForConditionalGeneration.from_pretrained(model_name)
+device = 'cpu'
+model = T5ForConditionalGeneration.from_pretrained(model_name, device_map=device) #, torch_dtype=torch.float16)
 print("model loaded")
-# 定义微调数据加载器
+
+
 def get_data_loader(data):
     # 将问题和答案转换为模型输入格式
     inputs = tokenizer([item["question"] for item in data], padding=True, truncation=True, return_tensors="pt")
@@ -32,17 +37,16 @@ def get_data_loader(data):
     data_loader = torch.utils.data.DataLoader(dataset, batch_size=2, shuffle=True)
     return data_loader
 
-# 定义损失函数
+
 loss_fn = torch.nn.CrossEntropyLoss()
-
-# 定义优化器
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
-
-# 进行微调
 def train(model, data_loader, loss_fn, optimizer):
     model.train()
     for batch in data_loader:
         input_ids, attention_mask, label_ids, label_attention_mask = batch
+        input_ids = input_ids.to(device)
+        attention_mask = attention_mask.to(device)
+        label_ids = label_ids.to(device)
         outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=label_ids)
         loss = outputs.loss
         optimizer.zero_grad()
@@ -65,6 +69,7 @@ def generate_answer(model, question):
 
 # 给定一个问题，生成相应的答案
 question = "What is the capital of Italy?"
+question = "translate tsql to json: select id from customer"
 answer = generate_answer(model, question)
 print("Question:", question)
 print("Answer:", answer)
