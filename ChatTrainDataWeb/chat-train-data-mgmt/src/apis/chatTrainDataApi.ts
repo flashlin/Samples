@@ -32,3 +32,5 @@ export const updateTrainData = async (data: ITrainDataItem): Promise<void> => {
 export const addTrainData = async (data: ITrainDataItem): Promise<void> => {
   await client.post('/api/TrainData/AddData', data);
 };
+
+const mode = import.meta.env.VITE_MODE
