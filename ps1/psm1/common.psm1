@@ -12,6 +12,31 @@ function ShowError {
     Write-Host $msg -ForegroundColor Red
 }
 
+Import-Module $env:psm1Home/matchUtils.psm1 -Force -Global
+
+function _WriteHostColorFragments {
+   param(
+       $fragments
+   )
+   foreach($fragment in $fragments) {
+       if( $fragment.IsMatch ) {
+           Write-Host $fragment.Text -NoNewline -ForegroundColor Green
+       } else {
+           Write-Host $fragment.Text -NoNewline
+       }
+   }
+   Write-Host ""
+}
+
+function WriteHostColorText {
+   param(
+       [string]$text,
+       [string[]]$searchPatterns
+   )
+   $fragments = MatchText $text $searchPatterns
+   _WriteHostColorFragments $fragments
+}
+
 function CopyToClipboard {
    param(
       [string]$text
@@ -156,14 +181,6 @@ function DumpProperties {
    $obj | Get-Member -MemberType Property | Format-Table
 }
 
-function MatchText {
-   param(
-      [string]$text,
-      [string]$pattern
-   )
-   $result = Select-String -InputObject $text -Pattern $pattern -AllMatches
-   return $result
-}
 
 function WriteHostColorByAllMatches {
    param(
