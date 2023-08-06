@@ -8,7 +8,9 @@ Hello Sample
   <div class="banner">
     @foreach (var banner in Model.Banners)
     {
-      <img src="@banner.Image(new ImageConfig {Name = "Banner", Size = new ImageSize(800, 400)})" alt="Image 2">
+      @banner.Text(new TextBannerSetting { Name = "Title" })
+      @banner.Text(new TextBannerSetting { Name = "SubTitle" })
+      <img src="@banner.Image(new ImageBannerSetting {Name = "Banner", Size = new ImageSize(800, 400)})" alt="Image 2">
     }
   </div>
 </div>

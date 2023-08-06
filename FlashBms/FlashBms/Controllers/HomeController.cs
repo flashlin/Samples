@@ -19,8 +19,13 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var viewModel = new BannerViewModel{ };
+        var viewModel = new BannerViewModel();
+        viewModel.Banners.Add(new DesignBanner());
         var htmlContent = await _viewToStringRendererService.RenderViewToStringAsync("~/Views/Banners/Sample.cshtml", viewModel);
+
+        var banner = viewModel.Banners[0] as DesignBanner;
+        var names = banner!.Settings.Select(x => x.Name).ToList();
+
         return Content(htmlContent, "text/html");
     }
 
