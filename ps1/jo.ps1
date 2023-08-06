@@ -31,6 +31,32 @@ function ExecuteNonQuery {
     $affectedRows = $command.ExecuteNonQuery()
 }
 
+function FetchQuery {
+    param(
+        [string]$query,
+        [scriptblock]$processRow
+    )
+    $command = $connection.CreateCommand()
+    $command.CommandText = $query
+    $reader = $command.ExecuteReader()
+    $schemaTable = $reader.GetSchemaTable()
+    $columnNames = @()
+    foreach ($row in $schemaTable.Rows) {
+        $columnName = $row["ColumnName"]
+        $columnNames += $columnName
+    }
+    while ($reader.Read()) {
+        $row = @{}
+        foreach ($columnName in $columnNames) {
+            $columnValue = $reader[$columnName]
+            AddObjectProperty $row $columnName $columnValue
+            # $row | Add-Member -MemberType NoteProperty -Name $columnName -Value $columnValue
+        }
+        # Write-Host (DumpObject $row)
+        $processRow.Invoke($row)
+    }
+}
+
 function ExecuteQuery {
     param(
         [string]$query
@@ -157,7 +183,23 @@ if( "--a" -eq $action ){
 
 if( "--clean" -eq $action ){
     Write-Host "Clean directories"
+    $sql = "SELECT dirName FROM directory"
 
+    $process = {
+        param(
+            [System.Collections.Hashtable]$row
+        )
+        $dirName = $row.dirName
+        foreach($pattern in $excludeDirs) {
+            if( $dirName -match $pattern ){
+                WriteHostColorText $dirName @($pattern)
+                $sql = "DELETE FROM directory WHERE dirName = '$dirname'"
+                ExecuteNonQuery $sql
+            }
+        }
+    }
+
+    FetchQuery $sql $process
     return
 }
 

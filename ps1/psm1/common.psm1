@@ -62,6 +62,13 @@ function PromptList {
    return $selected
 }
 
+function DumpObject {
+   param(
+      [object]$obj
+   )
+   return $obj | ConvertTo-Json
+}
+
 function AddObjectProperty {
    param(
       [Parameter(ValueFromPipeline = $true)]

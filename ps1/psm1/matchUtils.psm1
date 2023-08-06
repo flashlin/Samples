@@ -68,7 +68,10 @@ function MatchTextFragment {
     return $result
 }
 
-
+<#
+.PARAMETER text
+The input text to be searched for matching patterns.
+#>
 function MatchText {
    param(
        [string]$text,
