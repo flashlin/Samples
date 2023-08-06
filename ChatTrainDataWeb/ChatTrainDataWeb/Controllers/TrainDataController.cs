@@ -1,5 +1,10 @@
-﻿using ChatTrainDataWeb.Models.Contracts;
+﻿using System.Globalization;
+using System.Text;
+using ChatTrainDataWeb.Models.Contracts;
+using ChatTrainDataWeb.Models.Entities;
 using ChatTrainDataWeb.Models.Repositories;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ChatTrainDataWeb.Controllers;
@@ -8,11 +13,17 @@ namespace ChatTrainDataWeb.Controllers;
 [Route("api/[controller]/[action]")]
 public class TrainDataController : ControllerBase
 {
-    private IChatTrainDataRepo _chatTrainDataRepo;
+    private readonly IChatTrainDataRepo _chatTrainDataRepo;
 
     public TrainDataController(IChatTrainDataRepo chatTrainDataRepo)
     {
         _chatTrainDataRepo = chatTrainDataRepo;
+    }
+
+    [HttpGet]
+    public IActionResult Index()
+    {
+        return Content("OK");
     }
     
     [HttpPost]
@@ -52,5 +63,24 @@ public class TrainDataController : ControllerBase
             Input = req.Input,
             Output = req.Output,
         });
+    }
+
+    [HttpGet]
+    public IActionResult ExportToT5Csv()
+    {
+        var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture);
+        using var memoryStream = new MemoryStream();
+        using var writer = new StreamWriter(memoryStream);
+        using var csv = new CsvWriter(writer, csvConfig);
+        csv.WriteHeader<TrainDataEntity>();
+        csv.NextRecord();
+        _chatTrainDataRepo.Fetch(x =>
+        {
+            csv.WriteRecord(x);
+            csv.NextRecord();
+        });
+        csv.Flush();
+        var bytes = memoryStream.ToArray();
+        return File(bytes, "text/csv", "users.csv");
     }
 }

@@ -7,4 +7,5 @@ public interface IChatTrainDataRepo
     void AddData(AddTrainDataDto data);
     List<TrainDataEntity> GetDataPage(int startId, int pageSize);
     void UpdateData(UpdateTrainDataDto data);
+    void Fetch(Action<TrainDataEntity> action);
 }
