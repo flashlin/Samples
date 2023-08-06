@@ -36,6 +36,14 @@ public class ChatTrainDataRepo : IChatTrainDataRepo
         _dbContext.SaveChanges();
     }
 
+    public void Fetch(Action<TrainDataEntity> action)
+    {
+        foreach (var trainDataEntity in _dbContext.TrainData)
+        {
+            action(trainDataEntity);
+        }
+    }
+
     public List<TrainDataEntity> GetDataPage(int startId, int pageSize)
     {
         return _dbContext.TrainData
