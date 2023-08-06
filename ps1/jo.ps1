@@ -190,6 +190,12 @@ if( "--clean" -eq $action ){
             [System.Collections.Hashtable]$row
         )
         $dirName = $row.dirName
+        if( -not (Test-Path -Path $dirName -PathType Container) ) {
+            Info "$dirName not exists"
+            $sql = "DELETE FROM directory WHERE dirName = '$dirname'"
+            ExecuteNonQuery $sql
+            return
+        }
         foreach($pattern in $excludeDirs) {
             if( $dirName -match $pattern ){
                 WriteHostColorText $dirName @($pattern)
