@@ -55,11 +55,11 @@ fetchData();
     <n-button @click="clickAdd()">Add</n-button>
     <n-space vertical v-if="data.editing">
       Instruction
-      <n-mention type="textarea" v-model:value="data.editItem.instruction" />
+      <n-input type="textarea" v-model="data.editItem.instruction" :maxlength="512" :rows="3"/>
       Input
-      <n-mention type="textarea" v-model:value="data.editItem.input" />
+      <n-input type="textarea" v-model:value="data.editItem.input" :maxlength="512" :rows="3"/>
       Output
-      <n-mention type="textarea" v-model:value="data.editItem.output" />
+      <n-input type="textarea" v-model:value="data.editItem.output" :maxlength="512" :rows="5"/>
       <n-space>
         <n-button @click="clickAddTrainData()">Save</n-button>
       </n-space>
@@ -68,11 +68,15 @@ fetchData();
       <n-space vertical>
         {{ item.id }}
         Instruction
-        <n-mention type="textarea" v-model:value="item.instruction" />
+        <n-input
+          type="textarea"
+          v-model:value="item.instruction"
+          :maxlength="512" :rows="3"
+        />
         Input
-        <n-mention type="textarea" v-model:value="item.input" />
+        <n-input type="textarea" v-model:value="item.input" :maxlength="512" :rows="3"/>
         Output
-        <n-mention type="textarea" v-model:value="item.output" :autosize="{minRows: 10}" />
+        <n-input type="textarea" v-model:value="item.output" :autosize="{ minRows: 10 }" :maxlength="512" :rows="3" />
         <n-space>
           <n-button @click="clickSaveTrainData(item.id)">Save</n-button>
         </n-space>
