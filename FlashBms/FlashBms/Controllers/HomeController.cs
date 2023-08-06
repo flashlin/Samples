@@ -21,7 +21,8 @@ public class HomeController : Controller
     {
         var viewModel = new BannerViewModel();
         viewModel.Banners.Add(new DesignBanner());
-        var htmlContent = await _viewToStringRendererService.RenderViewToStringAsync("~/Views/Banners/Sample.cshtml", viewModel);
+        var htmlContent =
+            await _viewToStringRendererService.RenderViewToStringAsync("~/Views/Banners/Sample.cshtml", viewModel);
 
         var banner = viewModel.Banners[0] as DesignBanner;
         var names = banner!.Settings.Select(x => x.Name).ToList();
@@ -37,6 +38,19 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View(new ErrorViewModel {RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier});
     }
+}
+
+public class BannerCondition
+{
+    public string LayoutName { get; set; } = "Hero";
+    public BrandType Brand { get; set; }
+}
+
+public enum BrandType
+{
+    None,
+    Top,
+    Sbo
 }
