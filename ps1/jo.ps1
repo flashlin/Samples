@@ -94,7 +94,7 @@ $excludeDirs = @(
     '\.git', '\.vscode', '\.idea', '\.github', 
     'bin', 'obj', 'runs',
     'dist', 'build', 'out', 'output', 'logs', 'temp', 'tmp',
-    'node_modules', 
+    'node_modules', 'packages', 
     '__pycache__',
     '.chainlit'
 )
