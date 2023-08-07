@@ -8,8 +8,22 @@ train_data = [
     {"question": "What is the capital of France?", "answer": "Paris"},
     {"question": "What is the largest planet in our solar system?", "answer": "Jupiter"},
     {"question": "Who wrote the play 'Romeo and Juliet'?", "answer": "William Shakespeare"},
-    {"question": "translate tsql to json: select id from customer",
-     "answer": """{"type":"select","cols":["id"],"from":"customer"}"""},
+    {"question": "How to add a new B2B2C domain?", "answer": """Assuming that NOC is ready to provide the following domain for us to add: abc.net
+Here are the steps to add a new b2b2c domain:
+1. Go to the http://dba-sb-prod.coreop.net/ Artimes website.
+   Check whether these domains already exist in the InfoDb.AuthroizedDomain table.
+2. Go to the https://forseti-api-a.sbotopex.com/swagger/index.html website.
+3. If "abc.net" already exists in the InfoDb.AuthroizedDomain table:
+   Perform a POST request to /api/public/AdminAuthorizedDomain/DeleteDomain to delete "abc.net" from the database.
+4. Perform a POST request to /api/public/AdminAuthorizedDomain/InsertDomain to insert "abc.net" domain.
+5. After the insertion is successful, check the result at http://forseti-api-a.sbotopex.com/domain.
+6. If "abc.net" is intended for use in China, set the domain to "disable" in the database to prevent it from being used by agents from other countries.
+7. If "abc.net" uses the HTTPS protocol, go to the http://dragonballz.coreop.net/ website and modify the AcceptHttpsDomain key value in the global_settings of the Forseti website to include "abc.net".
+8. In the git Forseti pipeline, select "production:reload" to reload the global_settings configuration.
+9. Restart the pods of the following projects:
+   - Tera Backend
+   - Pollux (SG Support or Hinoki should execute the necessary commands to restart pollux)
+"""}
 ]
 
 # 加载Flan-T5预训练模型和分词器
