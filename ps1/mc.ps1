@@ -93,12 +93,11 @@ if( "update" -eq $action){
 }
 
 if ( "i" -eq $action ) {
-    # for linux
-    # conda install -c conda-forge bitsandbytes
     #InvokeCmd "conda update -n base -c defaults conda"
     InvokeConda "install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia"
     #InvokeConda "install -c conda-forge faiss"
     InvokeConda "install -c conda-forge faiss-gpu"
+    InvokeCmd "pip install accelerate"
     InvokeCmd "pip install pandas tensorboard"
     return
 }
