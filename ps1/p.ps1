@@ -14,6 +14,13 @@ function Invoke {
     Invoke-Expression $command
 }
 
+if( "hf" -eq $action ) {
+    $apiKey = ReadFile "d:/demo/huggingface-api-key.txt"
+    $env:HUGGING_FACE_HUB_TOKEN = $apiKey
+    Write-Host "set HUGGING_FACE_HUB_TOKEN='${apiKey}'"
+    return
+}
+
 if( $action.EndsWith(".py") ) {
     InvokeCmd "python $($action)"
     return
@@ -84,4 +91,5 @@ Write-Host "build: build image"
 Write-Host "serve: run image"
 Write-Host "dev:   run local"
 Write-Host "t:     run test"
+Write-Host "hf:    set huggingface token"
 InvokeCmd "python --version"

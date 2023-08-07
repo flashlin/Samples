@@ -14,6 +14,13 @@ function ShowError {
 
 Import-Module $env:psm1Home/matchUtils.psm1 -Force -Global
 
+function ReadFile {
+   param(
+      [String]$file
+   )
+   return Get-Content $file -Encoding UTF8 -Raw
+}
+
 function _WriteHostColorFragments {
    param(
        $fragments
