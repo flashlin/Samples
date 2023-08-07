@@ -11,8 +11,8 @@ from langchain.chains import RetrievalQA
 import chainlit as cl
 
 DB_FAISS_PATH = "models/db_faiss"
-MODEL_PTH_NAME = "llama-2-7b-chat.ggmlv3.q8_0.bin"
 MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q8_0.bin"
+MODEL_PTH_NAME = "llama-2-7b-chat.ggmlv3.q8_0.bin"
 
 custom_prompt_template = """Use the following pieces of information to answer the user's question.
 If you don't know the answer, please just sat that you don't know the answer,
@@ -68,16 +68,20 @@ def final_result(query):
 
 
 async def main():
-    query = """translate "select username from pd" to json"""
     chain = qa_bot()
-    res = await chain.acall(query)
-    answer = res["result"]
-    sources = res["source_documents"]
-    if sources:
-        answer += f"\nSources:" + str(sources)
-    else:
-        answer += f"\nNo Sources Found"
-    print(f"{answer}")
+    while True:
+        user_input = input("query: ")
+        if user_input == "q":
+            break
+        query = user_input
+        res = await chain.acall(query)
+        answer = res["result"]
+        sources = res["source_documents"]
+        if sources:
+            answer += f"\nSources:" + str(sources[0].metadata['source'])
+        else:
+            answer += f"\nNo Sources Found"
+        print(f"{answer}")
 
 
 if __name__ == '__main__':
