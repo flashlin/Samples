@@ -92,10 +92,11 @@ function UpsertPath {
 
 $excludeDirs = @(
     '\.git', '\.vscode', '\.idea', '\.github', 
-    'bin', 'obj',
-    '__pycache__',
+    'bin', 'obj', 'runs',
+    'dist', 'build', 'out', 'output', 'logs', 'temp', 'tmp',
     'node_modules', 
-    'dist', 'build', 'out', 'output', 'logs', 'temp', 'tmp'
+    '__pycache__',
+    '.chainlit'
 )
 
 function IsExcludePath {
