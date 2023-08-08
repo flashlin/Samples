@@ -21,13 +21,24 @@ MODEL_NAME = 'meta-llama/Llama-2-7b-chat-hf'
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_auth_token=True)
 print("tokenizer")
 
+# model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,
+#                                              device_map='auto',
+#                                              torch_dtype=torch.float16,
+#                                              use_auth_token=True,
+#                                              # load_in_4bit=True
+#                                              )
+print("model")
+
+
+MODEL_NAME = 'models/llama-2-7b-chat-hf'
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME,
                                              device_map='auto',
                                              torch_dtype=torch.float16,
-                                             use_auth_token=True,
                                              # load_in_4bit=True
                                              )
-print("model")
+# 可以匯出 .cache 模型到本地
+# model.save_pretrained("models/llama-2-7b-chat-hf")
+
 
 pipe = pipeline("text-generation",
                 model=model,
@@ -103,25 +114,71 @@ def demo1():
     output = llm_chain.run(text)
 
 
-instruction = "Chat History:\n\n{chat_history}\n\nUser: {user_input}"
-system_prompt = "You are a helpful assistant, you always only answer for the assistant then you stop. read the chat history to get context"
-template = get_prompt(instruction, system_prompt)
-prompt = PromptTemplate(
-    input_variables=["chat_history", "user_input"],
-    template=template
-)
-memory = ConversationBufferMemory(memory_key="chat_history")
-llm_chain = LLMChain(
-    llm=llm,
-    prompt=prompt,
-    verbose=True,
-    memory=memory,
-)
-while True:
-    user_input = input("query: ")
-    if user_input == 'q':
-        break
-    answer = llm_chain.predict(user_input=user_input)
-    print(answer)
+def demo_chat():
+    instruction = "Chat History:\n\n{chat_history}\n\nUser: {user_input}"
+    system_prompt = "You are a helpful assistant, you always only answer for the assistant then you stop. read the chat history to get context"
+    template = get_prompt(instruction, system_prompt)
+    prompt = PromptTemplate(
+        input_variables=["chat_history", "user_input"],
+        template=template
+    )
+    memory = ConversationBufferMemory(memory_key="chat_history")
+    llm_chain = LLMChain(
+        llm=llm,
+        prompt=prompt,
+        verbose=True,
+        memory=memory,
+    )
+    while True:
+        user_input = input("query: ")
+        if user_input == 'q':
+            break
+        answer = llm_chain.predict(user_input=user_input)
+        print(answer)
 
 
+def retrieval_qa_chain(llm, prompt, db):
+    qa_chain = RetrievalQA.from_chain_type(
+        llm=llm,
+        chain_type="stuff",
+        retriever=db.as_retriever(search_kwargs={'k': 2}),
+        return_source_documents=True,
+        chain_type_kwargs={'prompt': prompt}
+    )
+    return qa_chain
+
+from langchain.embeddings import LlamaCppEmbeddings
+#llama = LlamaCppEmbeddings(model_path=MODEL_NAME)
+
+def qa_bot():
+    llama = LlamaCppEmbeddings(model_path="/path/to/model/ggml-model-q4_0.bin")
+    # embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2',
+    #                                    model_kwargs={'device': 'cpu'})
+    # db = FAISS.load_local(DB_FAISS_PATH, embeddings)
+    # llm = load_llm()
+    # qa_prompt = set_custom_prompt()
+    # qa = retrieval_qa_chain(llm, qa_prompt, db)
+    # return qa
+
+
+def demo_txt():
+    instruction = "Chat History:\n\n{chat_history}\n\nUser: {user_input}"
+    system_prompt = "You are a helpful assistant, you always only answer for the assistant then you stop. read the chat history to get context"
+    template = get_prompt(instruction, system_prompt)
+    prompt = PromptTemplate(
+        input_variables=["chat_history", "user_input"],
+        template=template
+    )
+    memory = ConversationBufferMemory(memory_key="chat_history")
+    llm_chain = LLMChain(
+        llm=llm,
+        prompt=prompt,
+        verbose=True,
+        memory=memory,
+    )
+    while True:
+        user_input = input("query: ")
+        if user_input == 'q':
+            break
+        answer = llm_chain.predict(user_input=user_input)
+        print(answer)
