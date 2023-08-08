@@ -1,75 +1,61 @@
-import os
-import random
-import torch
-import torch.nn as nn
-import torch.optim as optim
+import os.path
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-class Encoder(nn.Module):
-    def __init__(self, input_len, hidden_size, output_len):
-        super(Encoder, self).__init__()
-        self.hidden_size = hidden_size
-        self.lstm = nn.LSTM(input_len, hidden_size, batch_first=True)
+from data_utils import pad_list
+
+
+class Autoencoder(nn.Module):
+    def __init__(self, input_size, encoding_size):
+        super(Autoencoder, self).__init__()
+        self.encoder = nn.Sequential(
+            nn.Linear(input_size, encoding_size),
+            nn.ReLU()
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(encoding_size, input_size),
+            nn.Sigmoid()  # 這裡使用 Sigmoid 函數來保證輸出在 [0, 1] 範圍內
+        )
 
     def forward(self, x):
-        lstm_output, _ = self.lstm(x)
-        output = lstm_output[:, -1].unsqueeze(0)
-        return output
+        encoded = self.encoder(x)
+        decoded = self.decoder(encoded)
+        return decoded
 
-class Decoder(nn.Module):
-    def __init__(self, input_len, hidden_size, output_len):
-        super(Decoder, self).__init__()
-        self.hidden_size = hidden_size
-        self.lstm = nn.LSTM(input_len, hidden_size, batch_first=True)
-        self.linear = nn.Linear(hidden_size, output_len)
 
-    def forward(self, x):
-        lstm_out, _ = self.lstm(x)
-        output = self.linear(lstm_out)
-        return output
+# 定義訓練數據
+input_size = 20
+encoding_size = 1
+data = torch.randn(100, input_size)  # 假設有 100 個 10 長度的序列
 
-def train_model(encoder, decoder, input_sequence, target_sequence):
-    encoder.train()
-    decoder.train()
-    encoder_optimizer = optim.Adam(encoder.parameters(), lr=0.01)
-    decoder_optimizer = optim.Adam(decoder.parameters(), lr=0.01)
-    loss_fn = nn.CrossEntropyLoss()
+# 初始化模型和優化器
+autoencoder = Autoencoder(input_size, encoding_size)
+optimizer = optim.Adam(autoencoder.parameters(), lr=0.01)
+loss_fn = nn.MSELoss()
 
-    encoder_optimizer.zero_grad()
-    decoder_optimizer.zero_grad()
-
-    encoder_output = encoder(input_sequence)
-    decoder_outputs = decoder(encoder_output)
-
-    loss = loss_fn(decoder_outputs, target_sequence)
+# 訓練模型
+model_pt_file = 'models/autoencoder.pt'
+if os.path.exists(model_pt_file):
+    print(f"load model pt")
+    autoencoder.load_state_dict(torch.load(model_pt_file))
+for epoch in range(20000):
+    optimizer.zero_grad()
+    output = autoencoder(data)
+    loss = loss_fn(output, data)
     loss.backward()
+    optimizer.step()
+    if epoch % 100 == 0:
+        torch.save(autoencoder.state_dict(), model_pt_file)
+        print(f"Epoch {epoch}, Loss: {loss.item()}")
 
-    encoder_optimizer.step()
-    decoder_optimizer.step()
+# 使用模型進行壓縮和還原
+input_seq = pad_list([1, 2, 9, 2, 3, 5, 6, 4, 8, 7], input_size)
+input_sequence = torch.tensor(input_seq, dtype=torch.float)
+compressed = autoencoder.encoder(input_sequence.unsqueeze(0)).item()
+reconstructed = autoencoder.decoder(torch.tensor([[compressed]])).squeeze().detach().numpy()
 
-    return loss.item()
-
-if __name__ == "__main__":
-    seq_len = 5
-    hidden = 100
-    encoder = Encoder(seq_len, hidden, 1)
-    decoder = Decoder(1, hidden, seq_len)
-
-    for epoch in range(1000):
-        input_sequence = torch.randint(low=0, high=400, size=(seq_len,)).float().unsqueeze(0)
-        target_sequence = input_sequence
-        loss = train_model(encoder, decoder, input_sequence, target_sequence)
-        print(f"Epoch {epoch} loss: {loss}")
-
-    # 使用模型來壓縮序列
-    compressed_sequence = encoder(input_sequence)
-    print(f"Compressed sequence: {compressed_sequence}")
-
-    # 使用模型來解碼序列
-    reconstructed_sequence = decoder(compressed_sequence)
-    print(f"Reconstructed sequence: {reconstructed_sequence}")
-    
-    
+print("Original Sequence:", input_sequence.numpy())
+print("Compressed:", compressed)
+print("Reconstructed Sequence:", reconstructed)
