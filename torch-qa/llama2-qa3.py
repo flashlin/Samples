@@ -6,7 +6,7 @@ from langchain.vectorstores import FAISS
 from langchain.llms import CTransformers
 from langchain.chains import RetrievalQA
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
 import json
 import textwrap
 from langchain import HuggingFacePipeline
@@ -20,10 +20,19 @@ from llama_index.prompts.prompts import SimpleInputPrompt
 
 documents = SimpleDirectoryReader('data/').load_data()
 system_prompt = """You ara a Q&A assistant.
-Your goal is to answer question as accurately as possible base on the documents.
+Your goal is to answer question as accurately as possible base on the the instructions and context provided.
 """
 
 query_prompt = SimpleInputPrompt('<|USER|>{query_str}<|ASSISTANT|>')
+
+
+# MODEL_NAME = 'meta-llama/Llama-2-7b-chat-hf'
+# quantization_config = BitsAndBytesConfig(llm_int8_enable_fp32_cpu_offload=True)
+# llm = AutoModelForCausalLM.from_pretrained(
+#     MODEL_NAME,
+#     device_map="auto",
+#     quantization_config=quantization_config,
+# )
 
 MODEL_NAME = 'meta-llama/Llama-2-7b-chat-hf'
 llm = HuggingFaceLLM(
@@ -35,7 +44,10 @@ llm = HuggingFaceLLM(
     tokenizer_name=MODEL_NAME,
     model_name=MODEL_NAME,
     device_map='auto',
-    model_kwargs={'torch_dtype': torch.float16, "load_in_8bit": True}
+    model_kwargs={
+        'torch_dtype': torch.float16,
+        'load_in_4bit': True,
+    }
 )
 
 from langchain.embeddings.huggingface import HuggingFaceEmbeddings
