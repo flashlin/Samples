@@ -9,22 +9,27 @@ import torch.nn as nn
 import torch.optim as optim
 
 class Encoder(nn.Module):
-    def __init__(self, input_size, hidden_size):
+    def __init__(self, input_len, hidden_size, output_len):
         super(Encoder, self).__init__()
-        self.lstm = nn.LSTM(input_size, hidden_size)
+        self.hidden_size = hidden_size
+        self.lstm = nn.LSTM(input_len, hidden_size, batch_first=True)
 
     def forward(self, x):
-        out, hidden = self.lstm(x)
-        return hidden
+        lstm_output, _ = self.lstm(x)
+        output = lstm_output[:, -1].unsqueeze(0)
+        return output
 
 class Decoder(nn.Module):
-    def __init__(self, hidden_size, output_size):
+    def __init__(self, input_len, hidden_size, output_len):
         super(Decoder, self).__init__()
-        self.lstm = nn.LSTM(hidden_size, output_size)
+        self.hidden_size = hidden_size
+        self.lstm = nn.LSTM(input_len, hidden_size, batch_first=True)
+        self.linear = nn.Linear(hidden_size, output_len)
 
-    def forward(self, x, hidden):
-        out, hidden = self.lstm(x, hidden)
-        return out
+    def forward(self, x):
+        lstm_out, _ = self.lstm(x)
+        output = self.linear(lstm_out)
+        return output
 
 def train_model(encoder, decoder, input_sequence, target_sequence):
     encoder.train()
@@ -36,14 +41,8 @@ def train_model(encoder, decoder, input_sequence, target_sequence):
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
 
-    encoder_hidden = encoder(input_sequence)
-
-    decoder_input = torch.zeros(1, 1, decoder.hidden_size)
-    decoder_outputs = []
-    for i in range(target_sequence.size(1)):
-        decoder_output, decoder_hidden = decoder(decoder_input, encoder_hidden)
-        decoder_outputs.append(decoder_output)
-        decoder_input = decoder_output
+    encoder_output = encoder(input_sequence)
+    decoder_outputs = decoder(encoder_output)
 
     loss = loss_fn(decoder_outputs, target_sequence)
     loss.backward()
@@ -54,24 +53,23 @@ def train_model(encoder, decoder, input_sequence, target_sequence):
     return loss.item()
 
 if __name__ == "__main__":
-    input_sequence = torch.randint(0, 10, (1, 10)).float()
-    target_sequence = torch.randint(0, 10, (1, 10))
+    seq_len = 5
+    hidden = 100
+    encoder = Encoder(seq_len, hidden, 1)
+    decoder = Decoder(1, hidden, seq_len)
 
-    encoder = Encoder(10, 100)
-    decoder = Decoder(100, 10)
-
-    for epoch in range(10):
+    for epoch in range(1000):
+        input_sequence = torch.randint(low=0, high=400, size=(seq_len,)).float().unsqueeze(0)
+        target_sequence = input_sequence
         loss = train_model(encoder, decoder, input_sequence, target_sequence)
         print(f"Epoch {epoch} loss: {loss}")
 
     # 使用模型來壓縮序列
-    compressed_sequence = decoder(torch.zeros(1, 1, decoder.hidden_size), encoder(input_sequence))
-
+    compressed_sequence = encoder(input_sequence)
     print(f"Compressed sequence: {compressed_sequence}")
 
     # 使用模型來解碼序列
-    reconstructed_sequence = decoder(compressed_sequence, encoder(input_sequence))
-
+    reconstructed_sequence = decoder(compressed_sequence)
     print(f"Reconstructed sequence: {reconstructed_sequence}")
     
     
