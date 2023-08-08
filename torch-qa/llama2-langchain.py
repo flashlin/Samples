@@ -10,8 +10,8 @@ import chainlit as cl
 
 DB_FAISS_PATH = "models/db_faiss"
 MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q6_K.bin"  # 尚未下載
-MODEL_PTH_NAME = "llama-2-7b-chat.ggmlv3.q8_0.bin"
 MODEL_PTH_NAME = "llama-2-13b-chat.ggmlv3.q8_0.bin"
+MODEL_PTH_NAME = "llama-2-7b-chat.ggmlv3.q8_0.bin"
 
 custom_prompt_template = """Use the following pieces of information to answer the user's question.
 If you don't know the answer, please just sat that you don't know the answer,
