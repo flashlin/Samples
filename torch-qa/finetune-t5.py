@@ -1,3 +1,5 @@
+import os.path
+
 import torch
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 # 一般來說下載的模型是
@@ -54,6 +56,8 @@ def get_data_loader(data):
 
 loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
+pt_file = 'models/flan-t5.pt'
+
 def train(model, data_loader, loss_fn, optimizer):
     model.train()
     for batch in data_loader:
@@ -63,15 +67,24 @@ def train(model, data_loader, loss_fn, optimizer):
         label_ids = label_ids.to(device)
         outputs = model(input_ids=input_ids, attention_mask=attention_mask, labels=label_ids)
         loss = outputs.loss
+        print(f"{loss=}")
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-    pth_file = 'models/flant-t5-small.pth'
+    pth_file = pt_file
     torch.save(model.state_dict(), pth_file)
 
+
 # 进行微调训练
+if os.path.exists(pt_file):
+    model.load_state_dict(torch.load(pt_file))
+    print(f"load {pt_file}")
 data_loader = get_data_loader(train_data)
-train(model, data_loader, loss_fn, optimizer)
+
+for epoch in range(10):
+    train(model, data_loader, loss_fn, optimizer)
+
+
 
 # 进行推理
 def generate_answer(model, question):
@@ -83,7 +96,7 @@ def generate_answer(model, question):
 
 # 给定一个问题，生成相应的答案
 question = "What is the capital of Italy?"
-question = "translate tsql to json: select id from customer"
+question = "how to add new b2b2c domain?"
 answer = generate_answer(model, question)
 print("Question:", question)
 print("Answer:", answer)
