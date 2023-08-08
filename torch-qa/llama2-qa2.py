@@ -150,17 +150,6 @@ def retrieval_qa_chain(llm, prompt, db):
 from langchain.embeddings import LlamaCppEmbeddings
 #llama = LlamaCppEmbeddings(model_path=MODEL_NAME)
 
-def qa_bot():
-    llama = LlamaCppEmbeddings(model_path="/path/to/model/ggml-model-q4_0.bin")
-    # embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2',
-    #                                    model_kwargs={'device': 'cpu'})
-    # db = FAISS.load_local(DB_FAISS_PATH, embeddings)
-    # llm = load_llm()
-    # qa_prompt = set_custom_prompt()
-    # qa = retrieval_qa_chain(llm, qa_prompt, db)
-    # return qa
-
-
 def demo_txt():
     instruction = "Chat History:\n\n{chat_history}\n\nUser: {user_input}"
     system_prompt = "You are a helpful assistant, you always only answer for the assistant then you stop. read the chat history to get context"
