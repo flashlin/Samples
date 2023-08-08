@@ -47,6 +47,7 @@ embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2",
     model_kwargs={'device': 'cpu'})
 db = create_documents_db()
+print("db created")
 db = FAISS.load_local("faiss", embeddings)
 
 retriever = db.as_retriever(search_kwargs={'k': 2})
@@ -68,6 +69,10 @@ qa_llm = RetrievalQA.from_chain_type(llm=llm,
                                      chain_type_kwargs={'prompt': prompt})
 
 # ask the AI chat about information in our local files
-prompt = "How to add new b2b2c domain?"
-output = qa_llm({'query': prompt})
-print(output["result"])
+while True:
+    prompt = input("query: ")
+    if prompt == 'q':
+        break
+    # prompt = "How to add new b2b2c domain?"
+    output = qa_llm({'query': prompt})
+    print(output["result"])
