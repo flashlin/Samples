@@ -99,6 +99,8 @@ if ( "i" -eq $action ) {
     InvokeConda "install -c conda-forge faiss-gpu"
     InvokeCmd "pip install accelerate"
     InvokeCmd "pip install pandas tensorboard"
+    # 2023-08-08 pip install bitsandbytes 只支援 linux 改用下面
+    InvokeCmd "python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/raw/main/bitsandbytes-0.38.1-py3-none-any.whl"
     return
 }
 
