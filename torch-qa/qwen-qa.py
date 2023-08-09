@@ -52,7 +52,6 @@ def set_custom_prompt():
 
 def create_qa_pipe():
     print("create qa pipe")
-    qa_prompt = set_custom_prompt()
     pipe = pipeline(
         "text-generation",
         model=model,
@@ -69,7 +68,8 @@ def create_qa_pipe():
                                        model_kwargs={'device': 'cpu'})
     DB_FAISS_PATH = "models/db_faiss"
     db = FAISS.load_local(DB_FAISS_PATH, embeddings)
-    print("db")
+    print("FAISS db")
+    qa_prompt = set_custom_prompt()
     qa_chain = RetrievalQA.from_chain_type(llm=local_llm,
                                            chain_type="stuff",
                                            retriever=db.as_retriever(search_kwargs={'k': 2}),
@@ -100,7 +100,6 @@ def main_chat():
         print(response)
 
 async def main_doc():
-    history = None
     while True:
         user_input = input("query: ")
         qa_chain_fn = create_qa_pipe()
@@ -110,6 +109,6 @@ async def main_doc():
 if __name__ == '__main__':
     # asyncio.run(main())
     main_chat()
-    
+
 
 
