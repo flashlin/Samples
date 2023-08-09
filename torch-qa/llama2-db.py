@@ -18,7 +18,6 @@ DB_FAISS_PATH = "models/db_faiss"
 
 
 def split_documents(documents):
-    print(f"{documents=}")
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
     texts = text_splitter.split_documents(documents)
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2',
@@ -30,11 +29,9 @@ def split_documents(documents):
 def load_documents():
     loader = DirectoryLoader(DATA_PATH, glob='*.pdf', loader_cls=PyPDFLoader)
     pdf_documents = loader.load()
-    print(f"{pdf_documents=}")
 
     txt_loader = DirectoryLoader(DATA_PATH, glob='*.txt', loader_cls=TextLoader)
     txt_documents = txt_loader.load()
-    print(f"{txt_documents=}")
     all_documents = pdf_documents + txt_documents
     return all_documents
 
