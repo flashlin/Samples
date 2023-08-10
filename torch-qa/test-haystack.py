@@ -3,7 +3,8 @@ from haystack.nodes import PromptNode, PromptModel
 from haystack.agents.conversational import ConversationalAgent
 
 MODEL_NAME = 'meta-llama/Llama-2-7b-chat-hf'
-hf_token = ''
+with open('d:/demo/huggingface-api-key.txt', 'r', encoding='utf-8') as f:
+    hf_token = f.readline()
 
 model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, load_in_4bit=True, use_auth_token=hf_token)
 # disable Tensor Parallelism (https://github.com/huggingface/transformers/pull/24906)

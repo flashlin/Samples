@@ -24,7 +24,7 @@ if ( "c1" -eq $action ) {
 
 
 if ( "c0" -eq $action ) {
-    $minicondaHome = "C:\Users\$($env:USERNAME)\miniconda3"
+    $minicondaHome = "D:\Users\$($env:USERNAME)\miniconda3"
 
     $hookPs1 = "C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1"
     $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\shell\condabin\conda-hook.ps1' ; conda activate '$($minicondaHome)' """
