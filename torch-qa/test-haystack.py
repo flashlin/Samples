@@ -35,10 +35,14 @@ You are a helpful assistant who writes short answers.
 {memory} [INST] {query} [/INST]
 """
 
+
+
 conversational_agent = ConversationalAgent(
     prompt_node=pn,
     prompt_template=prompt_template,
 )
+
+
 while True:
     query = input("\nHuman (type 'exit' or 'quit' to quit): ")
     if query.lower() == "exit" or query.lower() == "quit":
