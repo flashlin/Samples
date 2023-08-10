@@ -1,0 +1,1 @@
+pip install 'farm-haystack[all]'
