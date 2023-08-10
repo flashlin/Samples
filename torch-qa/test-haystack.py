@@ -1,3 +1,5 @@
+import os.path
+
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from haystack.nodes import PromptNode, PromptModel
 from haystack.agents.conversational import ConversationalAgent
@@ -22,89 +24,119 @@ model = AutoModelForCausalLM.from_pretrained(MODEL_NAME, load_in_4bit=True, use_
 model.config.pretraining_tp = 1
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_auth_token=hf_token)
 
+mode = 'chat'
+mode = 'document'
 
 #--------------------------------------------------------------------
 # try create document
-document_store = FAISSDocumentStore(faiss_index_factory_str="Flat")
-doc_dir = "data"
-s3_url = "https://s3.eu-central-1.amazonaws.com/deepset.ai-farm-qa/datasets/documents/wiki_gameofthrones_txt6.zip"
-fetch_archive_from_http(url=s3_url, output_dir=doc_dir)
-docs = convert_files_to_docs(dir_path=doc_dir, clean_func=clean_wiki_text, split_paragraphs=True)
-document_store.write_documents(docs)
+if mode == 'document':
+    # db = FAISS.load_local(DB_FAISS_PATH, embeddings)
+    faiss_file = 'models/doc.faiss'
+    if not os.path.exists(faiss_file):
+        document_store = FAISSDocumentStore(faiss_index_factory_str="Flat")
+    else:
+        document_store = FAISSDocumentStore(faiss_index_factory_str="Flat",
+                                            faiss_index_path=faiss_file)
+    doc_dir = "data"
+    s3_url = "https://s3.eu-central-1.amazonaws.com/deepset.ai-farm-qa/datasets/documents/wiki_gameofthrones_txt6.zip"
+    fetch_archive_from_http(url=s3_url, output_dir=doc_dir)
+    docs = convert_files_to_docs(dir_path=doc_dir, clean_func=clean_wiki_text, split_paragraphs=True)
+    document_store.write_documents(docs)
+    document_store.save(index_path=faiss_file)
+    # 2023-08-10 即使有設定 faiss_file
+    # 不知道為什麼會在相同資料夾底下產生 faiss_document_store.db ?
+    # 重新執行會導致 The number of documents in the SQL database (2) doesn't match the number of embeddings in FAISS (0).
+    # Make sure your FAISS configuration file points to the same database that you used when you saved the original index.
 
-# sentence-transformers/multi-qa-mpnet-base-dot-v1
-# sentence-transformers/all-mpnet-base-v2
-# document_store = InMemoryDocumentStore()
-embedding_retriever = EmbeddingRetriever(document_store=document_store,
-                                         embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1",
-                                         model_format="sentence_transformers",
-                                         top_k=10)
-document_store.update_embeddings(embedding_retriever)
-file_classifier = FileTypeClassifier()
-text_converter = TextConverter()
-# pdf_converter = PDFConverter()
-# preprocessor = PreProcessor(split_by="word", split_length=250, split_overlap=30,
-#                             split_sentence_boundary=True,
-#                             language="en")
-# indexing_pipeline = Pipeline()
-# indexing_pipeline.add_node(component=file_classifier, name="FileTypeClassifier", inputs=["File"])
-# indexing_pipeline.add_node(component=text_converter, name="TextConverter", inputs=["FileTypeClassifier.output_1"])
-# # indexing_pipeline.add_node(component=pdf_converter, name="PDFConverter", inputs=["FileTypeClassifier.output_2"])
-# indexing_pipeline.add_node(component=preprocessor, name="PreProcessor", inputs=["TextConverter", "PDFConverter"])
-# indexing_pipeline.add_node(component=embedding_retriever, name="EmbeddingRetriever", inputs=["PreProcessor"])
-# indexing_pipeline.add_node(component=document_store, name="InMemoryDocumentStore", inputs=["Retriever"])
+    # sentence-transformers/multi-qa-mpnet-base-dot-v1
+    # sentence-transformers/all-mpnet-base-v2
+    # document_store = InMemoryDocumentStore()
+    embedding_retriever = EmbeddingRetriever(document_store=document_store,
+                                             embedding_model="sentence-transformers/multi-qa-mpnet-base-dot-v1",
+                                             model_format="sentence_transformers",
+                                             top_k=10)
+    document_store.update_embeddings(embedding_retriever)
+    # file_classifier = FileTypeClassifier()
+    # text_converter = TextConverter()
+    # pdf_converter = PDFConverter()
+    # preprocessor = PreProcessor(split_by="word", split_length=250, split_overlap=30,
+    #                             split_sentence_boundary=True,
+    #                             language="en")
+    # indexing_pipeline = Pipeline()
+    # indexing_pipeline.add_node(component=file_classifier, name="FileTypeClassifier", inputs=["File"])
+    # indexing_pipeline.add_node(component=text_converter, name="TextConverter", inputs=["FileTypeClassifier.output_1"])
+    # # indexing_pipeline.add_node(component=pdf_converter, name="PDFConverter", inputs=["FileTypeClassifier.output_2"])
+    # indexing_pipeline.add_node(component=preprocessor, name="PreProcessor", inputs=["TextConverter", "PDFConverter"])
+    # indexing_pipeline.add_node(component=embedding_retriever, name="EmbeddingRetriever", inputs=["PreProcessor"])
+    # indexing_pipeline.add_node(component=document_store, name="InMemoryDocumentStore", inputs=["Retriever"])
 
-reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=True)
-pipe = ExtractiveQAPipeline(reader, embedding_retriever)
-while True:
-    user_input = input('query document: ')
-    if user_input == 'q':
-        break
-    prediction = pipe.run(
-        query="How to add new b2b2c domain?",
-        params={
-            "Retriever": {"top_k": 10},
-            "Reader": {"top_k": 5}
-        }
+    reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=True)
+    pipe = ExtractiveQAPipeline(reader, embedding_retriever)
+    while True:
+        user_input = input('query document: ')
+        if user_input == 'q':
+            break
+        prediction = pipe.run(
+            query="How to add new b2b2c domain?",
+            params={
+                "Retriever": {"top_k": 10},
+                "Reader": {"top_k": 5}
+            }
+        )
+        #print(f'{prediction=}')
+        answers = prediction['answers']
+        print(f'{answers=}')
+
+        found = False
+        for a in answers:
+            if a.score < 0.01:
+                continue
+            print(f'{a.score=}')
+            print(f'{a.answer=}')
+            print(f'{a.context=}')
+            print(f'{a.offsets_in_document=}')
+            found = True
+        if not found:
+            print('Not found')
+        # print_answers(prediction, details="minimum")
+
+
+if mode == 'chat':
+    # inspiration: https://docs.haystack.deepset.ai/docs/prompt_node#using-models-not-supported-in-hugging-face-transformers
+    pn = PromptNode(MODEL_NAME,
+                    max_length=1000,
+                    model_kwargs={'model': model,
+                                  'tokenizer': tokenizer,
+                                  'task_name': 'text2text-generation',
+                                  'device': None,  # placeholder needed to make the underlying HF Pipeline work
+                                  'stream': True})
+
+    # quick sanity check
+    # input_text = "Describe the solar system."
+    # input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to("cuda")
+    # outputs = model.generate(input_ids, max_length=50)
+    # print(tokenizer.decode(outputs[0]))
+
+    # simply call the PromptNode
+    # pn("What's the coolest city in Italy? Explain reasons why")
+
+    prompt_template = """
+    [INST] <>
+    You are a helpful assistant who writes short answers.
+    <>\n\n
+    {memory} [INST] {query} [/INST]
+    """
+
+
+
+    conversational_agent = ConversationalAgent(
+        prompt_node=pn,
+        prompt_template=prompt_template,
     )
-    print_answers(prediction, details="minimum")
 
 
-# inspiration: https://docs.haystack.deepset.ai/docs/prompt_node#using-models-not-supported-in-hugging-face-transformers
-pn = PromptNode(MODEL_NAME,
-                max_length=1000,
-                model_kwargs={'model': model,
-                              'tokenizer': tokenizer,
-                              'task_name': 'text2text-generation',
-                              'device': None,  # placeholder needed to make the underlying HF Pipeline work
-                              'stream': True})
-
-# quick sanity check
-# input_text = "Describe the solar system."
-# input_ids = tokenizer(input_text, return_tensors="pt").input_ids.to("cuda")
-# outputs = model.generate(input_ids, max_length=50)
-# print(tokenizer.decode(outputs[0]))
-
-# simply call the PromptNode
-# pn("What's the coolest city in Italy? Explain reasons why")
-
-prompt_template = """
-[INST] <>
-You are a helpful assistant who writes short answers.
-<>\n\n
-{memory} [INST] {query} [/INST]
-"""
-
-
-
-conversational_agent = ConversationalAgent(
-    prompt_node=pn,
-    prompt_template=prompt_template,
-)
-
-
-while True:
-    query = input("\nHuman (type 'exit' or 'quit' to quit): ")
-    if query.lower() == "exit" or query.lower() == "quit":
-        break
-    conversational_agent.run(query)
+    while True:
+        query = input("\nHuman (type 'exit' or 'quit' to quit): ")
+        if query.lower() == "exit" or query.lower() == "quit":
+            break
+        conversational_agent.run(query)
