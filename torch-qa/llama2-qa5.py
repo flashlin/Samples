@@ -136,7 +136,9 @@ embeddings = HuggingFaceEmbeddings(model_name=model_name, model_kwargs=model_kwa
 # storing embeddings in the vector store
 vectorstore = FAISS.from_documents(all_splits, embeddings)
 
-chain = ConversationalRetrievalChain.from_llm(llm, vectorstore.as_retriever(), return_source_documents=True)
+chain = ConversationalRetrievalChain.from_llm(llm, 
+                                              vectorstore.as_retriever(), 
+                                              return_source_documents=True)
 
 chat_history = []
 # query = "How to add new b2b2c domain?"
@@ -145,7 +147,7 @@ chat_history = []
 # print(result['source_documents'])
 
 # streamlit run streamlit_app.py
-st.title('🦜🔗 Quickstart Q&A')
+st.title("⚡🔗 Flash's Q&A")
 with st.form('my_form'):
     query = st.text_area('Enter text:', 'How to new b2b2d domain?')
     if query == 'quit':
@@ -153,5 +155,6 @@ with st.form('my_form'):
     submitted = st.form_submit_button('Submit')
     # st.warning('Please enter your OpenAI API key!', icon='⚠')
     if submitted:
-        result = chain({"question": query, "chat_history": chat_history})
-        st.info(result['answer'])
+        with st.spinner('Wait for it...'):
+            result = chain({"question": query, "chat_history": chat_history})
+            st.info(result['answer'])
