@@ -5,6 +5,8 @@ param(
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 Import-Module "$($env:psm1HOME)/docker.psm1" -Force
 
+$env:PYTHONPATH="D:\VDisk\GitHub\Samples\py_standard"
+
 function Invoke {
     param(
         [string]$cmd
