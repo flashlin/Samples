@@ -9,6 +9,7 @@ from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 
+from lanchainlit import load_documents
 
 model_id = 'meta-llama/Llama-2-7b-chat-hf'
 device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
@@ -117,7 +118,9 @@ web_links = ["https://www.databricks.com/",
              "http://docs.databricks.com/error-messages/index.html",
              ]
 loader = WebBaseLoader(web_links)
-documents = loader.load()
+web_documents = loader.load()
+data_documents = load_documents('data')
+documents = web_documents + data_documents
 
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
@@ -132,7 +135,7 @@ vectorstore = FAISS.from_documents(all_splits, embeddings)
 chain = ConversationalRetrievalChain.from_llm(llm, vectorstore.as_retriever(), return_source_documents=True)
 
 chat_history = []
-query = "What is Data lakehouse architecture in Databricks?"
+query = "How to add new b2b2c domain?"
 result = chain({"question": query, "chat_history": chat_history})
 print(result['answer'])
 print(result['source_documents'])
