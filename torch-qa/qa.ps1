@@ -1,0 +1,1 @@
+streamlit run ./llama2-qa5.py

@@ -8,8 +8,9 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
-
 from lanchainlit import load_documents
+import streamlit as st
+
 
 model_id = 'meta-llama/Llama-2-7b-chat-hf'
 device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
@@ -31,13 +32,15 @@ model_config = transformers.AutoConfig.from_pretrained(
     use_auth_token=hf_token
 )
 
+# "In FP32 the model requires more than 60GB of RAM, you can load it in FP16 or BF16 in ~30GB, or in 8bit under 20GB of RAM..."
 model = transformers.AutoModelForCausalLM.from_pretrained(
     model_id,
     trust_remote_code=True,
     config=model_config,
     quantization_config=bnb_config,
     device_map='auto',
-    use_auth_token=hf_token
+    use_auth_token=hf_token,
+    load_in_8bit=True,
 )
 
 # enable evaluation mode to allow model inference
@@ -75,13 +78,14 @@ generate_text = transformers.pipeline(
     max_new_tokens=512,  # max number of tokens to generate in the output
     repetition_penalty=1.1  # without this output begins repeating
 )
-res = generate_text("Explain me the difference between Data Lakehouse and Data Warehouse.")
-print(res[0]["generated_text"])
+# check generate_text working fine
+# res = generate_text("Explain me the difference between Data Lakehouse and Data Warehouse.")
+# print(res[0]["generated_text"])
 
 
 llm = HuggingFacePipeline(pipeline=generate_text)
 # checking again that everything is working fine
-llm(prompt="Explain me the difference between Data Lakehouse and Data Warehouse.")
+# llm(prompt="Explain me the difference between Data Lakehouse and Data Warehouse.")
 
 
 web_links = ["https://www.databricks.com/",
@@ -135,7 +139,19 @@ vectorstore = FAISS.from_documents(all_splits, embeddings)
 chain = ConversationalRetrievalChain.from_llm(llm, vectorstore.as_retriever(), return_source_documents=True)
 
 chat_history = []
-query = "How to add new b2b2c domain?"
-result = chain({"question": query, "chat_history": chat_history})
-print(result['answer'])
-print(result['source_documents'])
+# query = "How to add new b2b2c domain?"
+# result = chain({"question": query, "chat_history": chat_history})
+# print(result['answer'])
+# print(result['source_documents'])
+
+# streamlit run streamlit_app.py
+st.title('🦜🔗 Quickstart Q&A')
+with st.form('my_form'):
+    query = st.text_area('Enter text:', 'How to new b2b2d domain?')
+    if query == 'quit':
+        exit(0)
+    submitted = st.form_submit_button('Submit')
+    # st.warning('Please enter your OpenAI API key!', icon='⚠')
+    if submitted:
+        result = chain({"question": query, "chat_history": chat_history})
+        st.info(result['answer'])
