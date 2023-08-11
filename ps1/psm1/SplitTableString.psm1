@@ -39,6 +39,13 @@ function SubStr {
     $text.Substring($index, $len)
 }
 
+function ConsoleStringToString {
+    param(
+        [string]$consoleText
+    )
+    return $consoleText -replace '[\x00-\x1F\x7F]', ''
+}
+
 function SplitSpaces {
     param(
         [Parameter(Mandatory,ValueFromPipeline)]
@@ -48,12 +55,14 @@ function SplitSpaces {
     begin{
     }
     process{
-        $match = [regex]::Matches($inputData, "[^ ]+[ ]*")
+        $text = ConsoleStringToString $inputData
+        $match = [regex]::Matches($text, "[^ ]+[ ]*")
         if( $match.Success -eq $false ) {
             return
         }
         for($i=0; $i -lt $match.Count; $i++) {
             $item = $match.Captures[$i]
+            # Write-Host "$i '$($item)' $($item.Index) $($item.Length) '$($text.Substring($item.Index, $item.Length))'"
             [PSCustomObject]@{
                 Index = $item.Index 
                 Length = $item.Length
@@ -108,7 +117,9 @@ function SplitTableString {
            $first = $false
            return
        }
-       $values = $inputData | CaptureString -columns $columns
+
+       $text = ConsoleStringToString $inputData
+       $values = $text | CaptureString -columns $columns
        if( $null -eq $values) {
            return
        }
