@@ -6,19 +6,19 @@ if ($env:PATH -notlike "*$path*") {
 
 class Sqlite {
     [string]$connectionString = "Data Source=$databasePath;Version=3;"
+    $connection = $null
     
     Sqlite([string]$dbFile) {
         $this.connectionString = "Data Source=$dbFile;Version=3;"
-        $connection = New-Object -TypeName System.Data.SQLite.SQLiteConnection
-        $connection.ConnectionString = $this.connectionString
-        $connection.Open()
-        $this.connection = $connection
+        $this.connection = New-Object -TypeName System.Data.SQLite.SQLiteConnection
+        $this.connection.ConnectionString = $this.connectionString
+        $this.connection.Open()
     }
     
     [void] ExecuteNonQuery([string] $sql) {
         $command = $this.connection.CreateCommand()
         $command.CommandText = $sql
-        _$affectedRows = $command.ExecuteNonQuery()
+        $affectedRows = $command.ExecuteNonQuery()
     }
 
     [void] FetchQuery([string]$query,        
@@ -45,6 +45,7 @@ class Sqlite {
     }
 
     [array] ExecuteQuery([string]$query) {
+        Write-Host "execute Query $query"
         $command = $this.connection.CreateCommand()
         $command.CommandText = $query
         $reader = $command.ExecuteReader()
@@ -65,4 +66,17 @@ class Sqlite {
         }
         return $result
     }
+
+    [void] Close() {
+        $this.connection.Close()
+    }
 }
+
+function new-sqlite {
+    param( 
+        [string]$dbFile
+    )
+    return [sqlite]::new($dbFile)
+}
+
+Export-ModuleMember -Function *
