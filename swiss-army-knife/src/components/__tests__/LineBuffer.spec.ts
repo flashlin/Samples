@@ -25,4 +25,12 @@ describe('LineBuffer', () => {
     line.append('abc\n123');
     expect(line.content).toBe('abc');
   });
+
+  it('replace a', () => {
+    const line = new LineBuffer(new mockEditorBuffer(), 0, 0);
+    line.append('a');
+    const replacedLength = line.replace(0, '123');
+    expect(line.content).toBe('1');
+    expect(replacedLength).toBe(1);
+  });
 });
