@@ -15,5 +15,6 @@ describe('EditorBuffer', () => {
     const editor = new EditorBuffer();
     editor.appendLine(0, 0, "abc\n123")
     expect(editor.getContent()).toBe('abc\n123');
+    expect(editor.lines.length).toBe(2);
   });
 });
