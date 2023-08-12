@@ -58,4 +58,12 @@ describe('EditorBuffer', () => {
     expect(editor.getContent()).toBe('a\nbABC1\n');
     expect(editor.lines.length).toBe(2);
   });
+
+
+  it('get a\\nb\\nc', () => {
+    const editor = new EditorBuffer();
+    editor.appendLine(0, 0, 'a\nb\nc');
+    const fragment = editor.getFragment(1, 1, 10);
+    expect(fragment).toBe('\nc');
+  });
 });

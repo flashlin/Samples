@@ -87,6 +87,17 @@ export class LineBuffer {
     getContent() {
         return this.content + (this.br ? '\n' : '');
     }
+
+    getFragment(cols: number, length: number): string {
+        const lineContent = this.getContent();
+        if (cols >= lineContent.length + this.cols) {
+            throw new Error(`${cols} cols is out of range`);
+        }
+        const prev = lineContent.substring(0, cols);
+        const fragmentLength = Math.min(length, lineContent.length - prev.length);
+        const fragment = lineContent.substring(cols, cols + fragmentLength);
+        return fragment;
+    }
 }
 
 export class EditorBuffer {
@@ -177,5 +188,24 @@ export class EditorBuffer {
             cols = 0;
         } while (remainingLen > 0);
         this.mergeLines(startLineNum);
+    }
+
+    getFragment(startLineNum: number, cols: number, length: number): string {
+        let lineNum = startLineNum;
+        let line = this.lines[lineNum];
+        let fragment = '';
+        let remainingLen = length;
+        do {
+            line = this.lines[lineNum];
+            if (line == undefined) {
+                break;
+            }
+            const subFragment = line.getFragment(cols, remainingLen);
+            lineNum++;
+            remainingLen -= subFragment.length;
+            fragment += subFragment;
+            cols = 0;
+        } while (remainingLen > 0);
+        return fragment;
     }
 }
