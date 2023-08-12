@@ -44,6 +44,23 @@ export class LineBuffer {
         this.editorBuffer.appendLine(this.lineNum + 1, 0, remainingContent);
     }
 
+    insert(cols: number, content: string) {
+        const lineContent = this.getContent();
+        const maxCols = lineContent.length + this.cols;
+        if (cols == maxCols) {
+            this.append(content);
+            return;
+        }
+        if (cols > maxCols) {
+            throw new Error(`cols is too Large ${cols}`);
+        }
+        const prev = lineContent.substring(0, cols - this.cols);
+        const after = lineContent.substring(cols);
+        const newContent = content + after;
+        this.content = prev;
+        this.append(newContent);
+    }
+
     getContent() {
         return this.content + (this.br ? '\n' : '');
     }
@@ -73,8 +90,13 @@ export class EditorBuffer {
     }
 
     appendLine(lineNum: number, cols: number, content: string) {
-        const line = new LineBuffer(this, lineNum, cols);
-        this.lines.push(line);
-        line.append(content);
+        const line = this.lines[lineNum];
+        if (line == undefined) {
+            const newLine = new LineBuffer(this, lineNum, cols);
+            this.lines.push(newLine);
+            newLine.append(content);
+            return;
+        }
+        line.insert(cols, content);
     }
 }
