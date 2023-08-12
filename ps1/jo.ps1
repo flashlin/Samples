@@ -6,88 +6,19 @@ param(
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 $ErrorActionPreference = "Stop"
 
-if( $searchPatterns.Length -gt 0 ) {
+if ( $searchPatterns.Length -gt 0 ) {
     $action = $searchPatterns[0]
 }
 Info "$action"
 
-# Add-Type -AssemblyName System.Data.SQLite
-Add-Type -Path "$($env:psm1HOME)/../sqlite/System.Data.SQLite.dll"
-$path = "$($env:psm1HOME)/../sqlite"
-if ($env:PATH -notlike "*$path*") {
-    $env:PATH += ";$path"
-}
-
-
-$databasePath = "D:/Demo/folders.db"
-$connectionString = "Data Source=$databasePath;Version=3;"
-
-function ExecuteNonQuery {
-    param(
-        [string]$query
-    )
-    $command = $connection.CreateCommand()
-    $command.CommandText = $query
-    $affectedRows = $command.ExecuteNonQuery()
-}
-
-function FetchQuery {
-    param(
-        [string]$query,
-        [scriptblock]$processRow
-    )
-    $command = $connection.CreateCommand()
-    $command.CommandText = $query
-    $reader = $command.ExecuteReader()
-    $schemaTable = $reader.GetSchemaTable()
-    $columnNames = @()
-    foreach ($row in $schemaTable.Rows) {
-        $columnName = $row["ColumnName"]
-        $columnNames += $columnName
-    }
-    while ($reader.Read()) {
-        $row = @{}
-        foreach ($columnName in $columnNames) {
-            $columnValue = $reader[$columnName]
-            AddObjectProperty $row $columnName $columnValue
-            # $row | Add-Member -MemberType NoteProperty -Name $columnName -Value $columnValue
-        }
-        # Write-Host (DumpObject $row)
-        $processRow.Invoke($row)
-    }
-}
-
-function ExecuteQuery {
-    param(
-        [string]$query
-    )
-    $command = $connection.CreateCommand()
-    $command.CommandText = $query
-    $reader = $command.ExecuteReader()
-    $schemaTable = $reader.GetSchemaTable()
-    $columnNames = @()
-    foreach ($row in $schemaTable.Rows) {
-        $columnName = $row["ColumnName"]
-        $columnNames += $columnName
-    }
-    $result = @()
-    while ($reader.Read()) {
-        $row = @{}
-        foreach ($columnName in $columnNames) {
-            $columnValue = $reader[$columnName]
-            $row | Add-Member -MemberType NoteProperty -Name $columnName -Value $columnValue
-        }
-        $result += $row
-    }
-    return $result
-}
+$sqlite = new-sqlite "D:/Demo/folders.db"
 
 function UpsertPath {
     param (
         [string]$path
     )
     $sql = "INSERT OR IGNORE INTO directory (dirName) VALUES ('$path')"
-    ExecuteNonQuery $sql
+    $sqlite.ExecuteNonQuery($sql)
 }
 
 $excludeDirs = @(
@@ -103,8 +34,8 @@ function IsExcludePath {
     param(
         [string]$path
     )
-    foreach($pattern in $excludeDirs) {
-        if( $path -match "(?<=$pattern)" ) {
+    foreach ($pattern in $excludeDirs) {
+        if ( $path -match "(?<=$pattern)" ) {
             #Write-Host "$pattern  '$path'"
             return $true
         }
@@ -119,12 +50,12 @@ function QueryDirectories {
     process {
         $childDirectories = Get-ChildItem -Path $directoryPath -Directory
         foreach ($directory in $childDirectories) {
-            if( IsExcludePath $directory.FullName ) {
+            if ( IsExcludePath $directory.FullName ) {
                 continue
             }
             $directory.FullName
             $subDirs = QueryDirectories $directory.FullName
-            foreach($subDir in $subDirs) {
+            foreach ($subDir in $subDirs) {
                 $subDir
             }
         }
@@ -165,29 +96,25 @@ function JumpDirectory {
 
 # 建立連線
 Info "open folders.db"
-$connection = New-Object -TypeName System.Data.SQLite.SQLiteConnection
-$connection.ConnectionString = $connectionString
-$connection.Open()
-
 $sql = "CREATE TABLE IF NOT EXISTS directory (dirName text)"
-ExecuteNonQuery $sql
+$sqlite.ExecuteNonQuery($sql)
 $sql = "CREATE INDEX IF NOT EXISTS idx_directory ON directory (dirName)"
-ExecuteNonQuery $sql
+$sqlite.ExecuteNonQuery($sql)
 $sql = "CREATE TABLE IF NOT EXISTS history (dirName text, createdOn default current_timestamp)"
-ExecuteNonQuery $sql
+$sqlite.ExecuteNonQuery($sql)
 $sql = "CREATE INDEX IF NOT EXISTS idx_history ON history (createdOn)"
-ExecuteNonQuery $sql
+$sqlite.ExecuteNonQuery($sql)
 
-if( "--a" -eq $action ){
+if ( "--a" -eq $action ) {
     Write-Host "Upsert directories"
-    foreach($dir in QueryDirectories) {
+    foreach ($dir in QueryDirectories) {
         UpsertPath $dir
         Write-Host $dir
     }
     return
 }
 
-if( "--clean" -eq $action ){
+if ( "--clean" -eq $action ) {
     Write-Host "Clean directories"
     $sql = "SELECT dirName FROM directory"
 
@@ -196,17 +123,17 @@ if( "--clean" -eq $action ){
             [System.Collections.Hashtable]$row
         )
         $dirName = $row.dirName
-        if( -not (Test-Path -Path $dirName -PathType Container) ) {
+        if ( -not (Test-Path -Path $dirName -PathType Container) ) {
             Info "$dirName not exists"
             $sql = "DELETE FROM directory WHERE dirName = '$dirname'"
-            ExecuteNonQuery $sql
+            $sqlite.ExecuteNonQuery($sql)
             return
         }
-        foreach($pattern in $excludeDirs) {
-            if( $dirName -match $pattern ){
+        foreach ($pattern in $excludeDirs) {
+            if ( $dirName -match $pattern ) {
                 WriteHostColorText $dirName @($pattern)
                 $sql = "DELETE FROM directory WHERE dirName = '$dirname'"
-                ExecuteNonQuery $sql
+                $sqlite.ExecuteNonQuery($sql)
             }
         }
     }
@@ -215,10 +142,10 @@ if( "--clean" -eq $action ){
     return
 }
 
-if( "" -ne $action ) {
+if ( "" -ne $action ) {
     $dirName = $action
     $sql = "SELECT dirName FROM directory WHERE dirName like '%$dirName%'"
-    $paths = ExecuteQuery $sql | ForEach-Object { $_.dirName }
+    $paths = $sqlite.ExecuteQuery($sql) | ForEach-Object { $_.dirName }
     $paths = FilterDirectories $paths $searchPatterns
     $paths = $paths | Sort-Object -Property Length, Name -Descending
 
@@ -226,12 +153,12 @@ if( "" -ne $action ) {
     $result += $paths
     $result | Set-Content -Path "D:\demo\jj.txt"
 
-    if( $paths.Length -eq 0 ) {
+    if ( $paths.Length -eq 0 ) {
         Write-Host "Not found"
         return
     }
 
-    if( $paths.Length -eq 1 ) {
+    if ( $paths.Length -eq 1 ) {
         JumpDirectory $paths[0]
         return
     }
@@ -242,7 +169,7 @@ if( "" -ne $action ) {
     #}
 
     $selectedPath = PromptList $paths
-    if( "" -eq $selectedPath ) {
+    if ( "" -eq $selectedPath ) {
         return
     }
 
@@ -250,4 +177,4 @@ if( "" -ne $action ) {
     return
 }
 
-$connection.Close()
+$sqlite.Close()

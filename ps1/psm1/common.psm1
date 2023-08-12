@@ -1,18 +1,19 @@
 function Info {
-    param(
-        [string]$msg
-    )
-    Write-Host $msg -ForegroundColor Green
+   param(
+      [string]$msg
+   )
+   Write-Host $msg -ForegroundColor Green
 }
 
 function ShowError {
-    param(
-        [string]$msg
-    )
-    Write-Host $msg -ForegroundColor Red
+   param(
+      [string]$msg
+   )
+   Write-Host $msg -ForegroundColor Red
 }
 
 Import-Module $env:psm1Home/matchUtils.psm1 -Force -Global
+Import-Module $env:psm1Home/sqlite.psm1 -Force -Global
 
 function ReadFile {
    param(
@@ -23,22 +24,23 @@ function ReadFile {
 
 function _WriteHostColorFragments {
    param(
-       $fragments
+      $fragments
    )
-   foreach($fragment in $fragments) {
-       if( $fragment.IsMatch ) {
-           Write-Host $fragment.Text -NoNewline -ForegroundColor Green
-       } else {
-           Write-Host $fragment.Text -NoNewline
-       }
+   foreach ($fragment in $fragments) {
+      if ( $fragment.IsMatch ) {
+         Write-Host $fragment.Text -NoNewline -ForegroundColor Green
+      }
+      else {
+         Write-Host $fragment.Text -NoNewline
+      }
    }
    Write-Host ""
 }
 
 function WriteHostColorText {
    param(
-       [string]$text,
-       [string[]]$searchPatterns
+      [string]$text,
+      [string[]]$searchPatterns
    )
    $fragments = MatchText $text $searchPatterns
    _WriteHostColorFragments $fragments
@@ -55,14 +57,15 @@ function CopyToClipboard {
 function PromptList {
    param(
       [string[]]$items,
-      [bool]$descending=$True
+      [bool]$descending = $True
    )
-   if( $descending ) {
-      $selected = $items | Sort-Object { -$_.Length } -Descending | fzf | Out-String
-   } else {
-      $selected = $items | Sort-Object { -$_.Length } -Descending | fzf | Out-String
+   if ( $descending ) {
+      $selected = $items | Sort-Object { - $_.Length } -Descending | fzf | Out-String
    }
-   if( "" -eq $selected ) {
+   else {
+      $selected = $items | Sort-Object { - $_.Length } -Descending | fzf | Out-String
+   }
+   if ( "" -eq $selected ) {
       return ""
    }
    $selected = $selected.TrimEnd()
@@ -89,8 +92,8 @@ function AddObjectProperty {
 
 function Download {
    param (
-       [string]$url,
-       [string]$targetFile
+      [string]$url,
+      [string]$targetFile
    )
    Info "Download $url ..."
    Invoke-WebRequest -Uri $url -OutFile $targetFile
@@ -98,8 +101,8 @@ function Download {
 
 function Unzip {
    param(
-       [string]$zipFile,
-       [string]$targetPath
+      [string]$zipFile,
+      [string]$targetPath
    )
    # 檢查目錄是否存在，如果不存在就建立目錄
    # if (-not (Test-Path -Path $tatgetPath)) {
@@ -109,19 +112,19 @@ function Unzip {
    Expand-Archive -Path $zipFile -DestinationPath $targetPath -Force
 }
 
-function IsDirectoryExists{
+function IsDirectoryExists {
    param(
-       [string]$dir
+      [string]$dir
    )
    if (Test-Path -Path $dir) {
-       return $True
+      return $True
    }
    return $False
 }
 
 function CreateDirectory {
    param(
-       [string]$targetPath
+      [string]$targetPath
    )
    # 檢查目錄是否存在，如果不存在就建立目錄
    if (-not (Test-Path -Path $targetPath)) {
@@ -148,7 +151,7 @@ function InstallChocolatey {
 
 function IsChocoPackageExists {
    param(
-       $packageName
+      $packageName
    )
    #$packageName = "fzf"
    $installedPackages = & choco list
@@ -159,7 +162,7 @@ function IsChocoPackageExists {
 function GetJsonFile {
    param (
       [string]$jsonFilePath,
-      [object]$defaultValue=[PSCustomObject]@{}
+      [object]$defaultValue = [PSCustomObject]@{}
    )
    if (Test-Path $jsonFilePath) {
       $json = Get-Content $jsonFilePath
@@ -230,7 +233,7 @@ function WriteHostColor {
       return
    }
    $allMatches = Select-String -InputObject $text -Pattern $pattern -AllMatches
-   if( $null -eq $allMatches ) {
+   if ( $null -eq $allMatches ) {
       Write-Host $text -NoNewline
       return
    }
