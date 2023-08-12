@@ -1,30 +1,28 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi, type MockedObject } from 'vitest';
 import { LineBuffer, EditorBuffer } from '../LineBuffer';
 
-vi.mock('../LineBuffer', async () => {
-  const actual = await vi.importActual("../LineBuffer") as object
-  return {
-    ...actual,
-    EditorBuffer: vi.fn(),
-  };
-});
-
 describe('LineBuffer', () => {
-  const mockEditorBuffer = new EditorBuffer();
+  const mockEditorBuffer = EditorBuffer as MockedObject<typeof EditorBuffer>
 
   beforeEach(() => {
   });
 
   it('append abc', () => {
-    const line = new LineBuffer(mockEditorBuffer, 0, 0);
+    const line = new LineBuffer(new mockEditorBuffer(), 0, 0);
     line.append('abc');
     expect(line.content).toBe('abc');
   });
 
-  it('append 123', () => {
-    const line = new LineBuffer(mockEditorBuffer, 0, 0);
+  it('append abc...123', () => {
+    const line = new LineBuffer(new mockEditorBuffer(), 0, 0);
     line.append('abc');
     line.append('123');
     expect(line.content).toBe('abc123');
+  });
+
+  it('append abc\\n123', () => {
+    const line = new LineBuffer(new mockEditorBuffer(), 0, 0);
+    line.append('abc\n123');
+    expect(line.content).toBe('abc');
   });
 });
