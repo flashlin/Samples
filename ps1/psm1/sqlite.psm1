@@ -45,7 +45,7 @@ class Sqlite {
     }
 
     [array] ExecuteQuery([string]$query) {
-        Write-Host "execute Query $query"
+        # Write-Host "execute Query $query"
         $command = $this.connection.CreateCommand()
         $command.CommandText = $query
         $reader = $command.ExecuteReader()
@@ -60,6 +60,7 @@ class Sqlite {
             $row = @{}
             foreach ($columnName in $columnNames) {
                 $columnValue = $reader[$columnName]
+                # Write-Host "c $columnValue"
                 $row | Add-Member -MemberType NoteProperty -Name $columnName -Value $columnValue
             }
             $result += $row
