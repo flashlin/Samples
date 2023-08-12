@@ -56,17 +56,32 @@ export class LineBuffer {
     }
 
     delete(cols: number, length: number): number {
-        const content = this.getContent();
-        if (cols >= content.length + this.cols) {
+        const lineContent = this.getContent();
+        if (cols >= lineContent.length + this.cols) {
             throw new Error(`${cols} cols is out of range`);
         }
-        const prev = content.substring(0, cols);
-        const deletedLength = Math.min(length, content.length - prev.length);
-        const after = content.substring(cols + deletedLength);
+        const prev = lineContent.substring(0, cols);
+        const deletedLength = Math.min(length, lineContent.length - prev.length);
+        const after = lineContent.substring(cols + deletedLength);
         this.br = false;
         this.content = '';
         this.append(prev + after);
         return deletedLength;
+    }
+
+    replace(cols: number, content: string): number {
+        const lineContent = this.getContent();
+        if (cols >= lineContent.length + this.cols) {
+            throw new Error(`${cols} cols is out of range`);
+        }
+        const prev = lineContent.substring(0, cols);
+        const replacedLength = Math.min(content.length, lineContent.length - prev.length);
+        const mid = content.substring(0, replacedLength);
+        const after = lineContent.substring(cols + replacedLength);
+        this.br = false;
+        this.content = '';
+        this.append(prev + mid + after);
+        return replacedLength;
     }
 
     getContent() {
@@ -125,11 +140,15 @@ export class EditorBuffer {
             line = this.lines[lineNum];
             cols = 0;
         } while (remainingLen > 0);
-        lineNum = startLineNum;
+        this.mergeLines(startLineNum);
+    }
+
+    mergeLines(startLineNum: number) {
+        let lineNum = startLineNum;
         const prevLine = this.lines[lineNum];
         lineNum++;
         for (; lineNum < this.lines.length; lineNum++) {
-            line = this.lines[lineNum];
+            const line = this.lines[lineNum];
             if (!prevLine.br) {
                 prevLine.append(line.getContent());
                 this.lines.splice(lineNum, 1);
@@ -138,5 +157,25 @@ export class EditorBuffer {
             }
             break;
         }
+    }
+
+    replace(startLineNum: number, cols: number, content: string) {
+        let lineNum = startLineNum;
+        let line = this.lines[lineNum];
+        if (line == undefined) {
+            this.appendLine(lineNum, 0, new Array(cols).fill(' ').join(''));
+            this.appendLine(lineNum, cols, content);
+            return;
+        }
+        let remainingLen = content.length;
+        do {
+            const replacedLength = line.replace(cols, content);
+            remainingLen -= replacedLength;
+            content = content.substring(replacedLength);
+            lineNum++;
+            line = this.lines[lineNum];
+            cols = 0;
+        } while (remainingLen > 0);
+        this.mergeLines(startLineNum);
     }
 }
