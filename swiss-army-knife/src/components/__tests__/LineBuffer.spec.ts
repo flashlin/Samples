@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi, type MockedObject } from 'vitest';
+import { beforeEach, describe, expect, it, type MockedObject } from 'vitest';
 import { LineBuffer, EditorBuffer } from '../EditorBuffer';
 
 describe('LineBuffer', () => {
