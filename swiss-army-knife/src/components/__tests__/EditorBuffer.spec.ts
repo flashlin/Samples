@@ -50,4 +50,12 @@ describe('EditorBuffer', () => {
     expect(editor.getContent()).toBe('a\nb1\n');
     expect(editor.lines.length).toBe(2);
   });
+
+  it('replace a\\nb\\nc\\n1\\n', () => {
+    const editor = new EditorBuffer();
+    editor.appendLine(0, 0, 'a\nb\nc\n1\n');
+    editor.replace(1, 1, "ABC");
+    expect(editor.getContent()).toBe('a\nbABC1\n');
+    expect(editor.lines.length).toBe(2);
+  });
 });
