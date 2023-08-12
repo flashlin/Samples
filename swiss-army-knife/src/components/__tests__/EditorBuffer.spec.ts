@@ -10,14 +10,14 @@ describe('EditorBuffer', () => {
     expect(editor.getContent()).toBe('abc');
   });
 
-  it('append abc\n123', () => {
+  it('append abc\\n123', () => {
     const editor = new EditorBuffer();
     editor.appendLine(0, 0, 'abc\n123');
     expect(editor.getContent()).toBe('abc\n123');
     expect(editor.lines.length).toBe(2);
   });
 
-  it('append aABCbc\n123', () => {
+  it('append aABCbc\\n123', () => {
     const editor = new EditorBuffer();
     editor.appendLine(0, 0, 'abc\n123');
     editor.appendLine(0, 1, 'ABC');
@@ -25,7 +25,7 @@ describe('EditorBuffer', () => {
     expect(editor.lines.length).toBe(2);
   });
 
-  it('append aABC\nbc\n123', () => {
+  it('append aABC\\nbc\\n123', () => {
     const editor = new EditorBuffer();
     editor.appendLine(0, 0, 'abc\n123');
     editor.appendLine(0, 1, 'ABC\n');
@@ -33,12 +33,21 @@ describe('EditorBuffer', () => {
     expect(editor.lines.length).toBe(3);
   });
 
-  it('delete aABC\nbc\n123', () => {
+  it('delete aABC\\nbc\\n123', () => {
     const editor = new EditorBuffer();
     editor.appendLine(0, 0, 'abc\n123');
     editor.appendLine(0, 1, 'ABC\n');
     editor.delete(0, 2, 3);
     expect(editor.getContent()).toBe('aAbc\n123');
+    expect(editor.lines.length).toBe(2);
+  });
+
+
+  it('delete a\\nb\\nc\\n1\\n', () => {
+    const editor = new EditorBuffer();
+    editor.appendLine(0, 0, 'a\nb\nc\n1\n');
+    editor.delete(1, 1, 3);
+    expect(editor.getContent()).toBe('a\nb1\n');
     expect(editor.lines.length).toBe(2);
   });
 });

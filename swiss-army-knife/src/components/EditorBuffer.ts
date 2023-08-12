@@ -14,9 +14,7 @@ export class LineBuffer {
     }
 
     append(content: string) {
-        if (content == undefined || content === '') {
-            this.content = '';
-            this.br = false;
+        if (content == undefined) {
             return;
         }
 
