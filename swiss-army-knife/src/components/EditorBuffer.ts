@@ -1,10 +1,7 @@
 export class LineBuffer {
-    prev: LineBuffer | null = null;
-    next: LineBuffer | null = null;
     lineNum = 0;
     cols = 0;
     tabWidth = 3;
-    placeholder = true;
     br = false;
     content = '';
     color = '';
@@ -20,7 +17,6 @@ export class LineBuffer {
         if (content == undefined || content === '') {
             this.content = '';
             this.br = false;
-            this.placeholder = true;
             return;
         }
 
@@ -61,6 +57,20 @@ export class LineBuffer {
         this.append(newContent);
     }
 
+    delete(cols: number, length: number): number {
+        const content = this.getContent();
+        if (cols >= content.length + this.cols) {
+            throw new Error(`${cols} cols is out of range`);
+        }
+        const prev = content.substring(0, cols);
+        const deletedLength = Math.min(length, content.length - prev.length);
+        const after = content.substring(cols + deletedLength);
+        this.br = false;
+        this.content = '';
+        this.append(prev + after);
+        return deletedLength;
+    }
+
     getContent() {
         return this.content + (this.br ? '\n' : '');
     }
@@ -98,5 +108,37 @@ export class EditorBuffer {
             return;
         }
         line.insert(cols, content);
+    }
+
+    delete(startLineNum: number, cols: number, length: number) {
+        let lineNum = startLineNum;
+        let line = this.lines[lineNum];
+        let remainingLen = length;
+        do {
+            if (line == undefined) {
+                break;
+            }
+            const deletedLen = line.delete(cols, remainingLen);
+            if (deletedLen == 0) {
+                break;
+            }
+            remainingLen -= deletedLen;
+            lineNum++;
+            line = this.lines[lineNum];
+            cols = 0;
+        } while (remainingLen > 0);
+        lineNum = startLineNum;
+        const prevLine = this.lines[lineNum];
+        lineNum++;
+        for (; lineNum < this.lines.length; lineNum++) {
+            line = this.lines[lineNum];
+            if (!prevLine.br) {
+                prevLine.append(line.getContent());
+                this.lines.splice(lineNum, 1);
+                lineNum--;
+                continue;
+            }
+            break;
+        }
     }
 }
