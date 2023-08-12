@@ -173,6 +173,10 @@ $sql = "CREATE TABLE IF NOT EXISTS directory (dirName text)"
 ExecuteNonQuery $sql
 $sql = "CREATE INDEX IF NOT EXISTS idx_directory ON directory (dirName)"
 ExecuteNonQuery $sql
+$sql = "CREATE TABLE IF NOT EXISTS history (dirName text, createdOn default current_timestamp)"
+ExecuteNonQuery $sql
+$sql = "CREATE INDEX IF NOT EXISTS idx_history ON history (createdOn)"
+ExecuteNonQuery $sql
 
 if( "--a" -eq $action ){
     Write-Host "Upsert directories"
