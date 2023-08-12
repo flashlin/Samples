@@ -166,7 +166,7 @@ if ( "--clean" -eq $action ) {
 }
 
 
-if ( $null -eq $dirName ) {
+if ( $null -eq $action ) {
     $paths = GetRecentlyPath
     if ( $paths.Length -gt 0 ) {
         $selectedPath = PromptList $paths
@@ -183,6 +183,7 @@ if ( $null -eq $dirName ) {
 
 if ( "" -ne $action ) {
     $dirName = $action
+    Write-Host "search ${dirName}"
 
     $sql = "SELECT dirName FROM directory WHERE dirName like '%$dirName%'"
     $paths = $sqlite.ExecuteQuery($sql) | ForEach-Object { $_.dirName }
