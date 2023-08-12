@@ -17,4 +17,12 @@ describe('EditorBuffer', () => {
     expect(editor.getContent()).toBe('abc\n123');
     expect(editor.lines.length).toBe(2);
   });
+
+  it('append abc\n123', () => {
+    const editor = new EditorBuffer();
+    editor.appendLine(0, 0, "abc\n123")
+    editor.appendLine(0, 1, "ABC")
+    expect(editor.getContent()).toBe('aABCbc\n123');
+    expect(editor.lines.length).toBe(2);
+  });
 });
