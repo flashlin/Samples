@@ -12,6 +12,7 @@ from lanchainlit import load_documents
 import streamlit as st
 
 
+model_id = 'openchat/openchat_v3.2'
 model_id = 'meta-llama/Llama-2-7b-chat-hf'
 device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 
@@ -140,17 +141,28 @@ chain = ConversationalRetrievalChain.from_llm(llm,
                                               vectorstore.as_retriever(), 
                                               return_source_documents=True)
 
+MODE = 'chat'
 chat_history = []
 # query = "How to add new b2b2c domain?"
 # result = chain({"question": query, "chat_history": chat_history})
 # print(result['answer'])
 # print(result['source_documents'])
+if MODE == 'chat':
+    while True:
+        query = input("query: ")
+        if query == 'quit' or query == 'q':
+            exit(0)
+        result = chain({"question": query, "chat_history": chat_history})
+        answer = result['answer'].trim()
+        print(answer)
+        print("")
+    exit(0)
 
 # streamlit run streamlit_app.py
 st.title("⚡🔗 Flash's Q&A")
 with st.form('my_form'):
     query = st.text_area('Enter text:', 'How to new b2b2d domain?')
-    if query == 'quit':
+    if query == 'quit' or query == 'q':
         exit(0)
     submitted = st.form_submit_button('Submit')
     # st.warning('Please enter your OpenAI API key!', icon='⚠')

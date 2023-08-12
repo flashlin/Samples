@@ -2,7 +2,6 @@ Whether it is new Vue({...}) in 2.x or createApp({...}) in 3.0,
 we need to create a Vue object instance first and assign it to a variable, 
 such as vm in the example.
 
-
 ```
 // Vue 2.x 
 const vm = new Vue({ 
