@@ -2,35 +2,43 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { EditorBuffer } from '../EditorBuffer';
 
 describe('EditorBuffer', () => {
-  beforeEach(() => {
-  });
+  beforeEach(() => { });
 
   it('append abc', () => {
     const editor = new EditorBuffer();
-    editor.appendLine(0, 0, "abc")
+    editor.appendLine(0, 0, 'abc');
     expect(editor.getContent()).toBe('abc');
   });
 
   it('append abc\n123', () => {
     const editor = new EditorBuffer();
-    editor.appendLine(0, 0, "abc\n123")
+    editor.appendLine(0, 0, 'abc\n123');
     expect(editor.getContent()).toBe('abc\n123');
     expect(editor.lines.length).toBe(2);
   });
 
   it('append aABCbc\n123', () => {
     const editor = new EditorBuffer();
-    editor.appendLine(0, 0, "abc\n123")
-    editor.appendLine(0, 1, "ABC")
+    editor.appendLine(0, 0, 'abc\n123');
+    editor.appendLine(0, 1, 'ABC');
     expect(editor.getContent()).toBe('aABCbc\n123');
     expect(editor.lines.length).toBe(2);
   });
 
   it('append aABC\nbc\n123', () => {
     const editor = new EditorBuffer();
-    editor.appendLine(0, 0, "abc\n123")
-    editor.appendLine(0, 1, "ABC\n")
+    editor.appendLine(0, 0, 'abc\n123');
+    editor.appendLine(0, 1, 'ABC\n');
     expect(editor.getContent()).toBe('aABC\nbc\n123');
     expect(editor.lines.length).toBe(3);
+  });
+
+  it('delete aABC\nbc\n123', () => {
+    const editor = new EditorBuffer();
+    editor.appendLine(0, 0, 'abc\n123');
+    editor.appendLine(0, 1, 'ABC\n');
+    editor.delete(0, 2, 3);
+    expect(editor.getContent()).toBe('aAbc\n123');
+    expect(editor.lines.length).toBe(2);
   });
 });
