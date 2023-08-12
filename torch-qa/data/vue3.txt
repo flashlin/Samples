@@ -1,4 +1,4 @@
-Whether it is new Vue({...}) in 2.x or createApp({...}) in 3.0, 
+# Whether it is new Vue({...}) in 2.x or createApp({...}) in 3.0, 
 we need to create a Vue object instance first and assign it to a variable, 
 such as vm in the example.
 
@@ -24,3 +24,29 @@ const vm = Vue.createApp({
 }); 
 vm.mount('#app');
 ```
+
+# How to debug vitest test files in VSCode?
+Open vscode, click left-bottom settings -> input "launch" -> edit in settings.json.
+add a dedicated launch configuration to debug a test file in VSCode.
+```
+{
+  "launch": {
+    "configurations": [
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Debug Current Test File",
+        "autoAttachChildProcesses": true,
+        "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+        "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
+        "args": ["run", "${relativeFile}"],
+        "smartStep": true,
+        "console": "integratedTerminal"
+      }
+    ],
+    "compounds": []
+  }
+}
+```
+Then in the debug tab (Left Side Menu), ensure 'Debug Current Test File' is selected. 
+You can then open the test file you want to debug and press F5 to start debugging.
