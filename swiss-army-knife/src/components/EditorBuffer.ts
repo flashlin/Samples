@@ -47,6 +47,14 @@ export class LineBuffer {
 export class EditorBuffer {
     lines: LineBuffer[] = [];
 
+    getContent() {
+        let content = '';
+        for (const line of this.lines) {
+            content += line.content
+        }
+        return content
+    }
+
     insertLine(lineNum: number, content: string) {
         let currLineNum = lineNum;
         for (; currLineNum < this.lines.length; currLineNum++) {
