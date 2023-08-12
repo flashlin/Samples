@@ -31,6 +31,7 @@ export class LineBuffer {
             if (c === undefined) break;
             if (c == '\n') {
                 n++;
+                this.br = true;
                 break;
             }
             line += c;
@@ -42,6 +43,10 @@ export class LineBuffer {
         }
         this.editorBuffer.appendLine(this.lineNum + 1, 0, remainingContent);
     }
+
+    getContent() {
+        return this.content + (this.br ? '\n' : '');
+    }
 }
 
 export class EditorBuffer {
@@ -50,9 +55,9 @@ export class EditorBuffer {
     getContent() {
         let content = '';
         for (const line of this.lines) {
-            content += line.content
+            content += line.getContent();
         }
-        return content
+        return content;
     }
 
     insertLine(lineNum: number, content: string) {
@@ -69,7 +74,7 @@ export class EditorBuffer {
 
     appendLine(lineNum: number, cols: number, content: string) {
         const line = new LineBuffer(this, lineNum, cols);
-        line.append(content);
         this.lines.push(line);
+        line.append(content);
     }
 }
