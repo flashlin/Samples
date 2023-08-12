@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi, type MockedObject } from 'vitest';
-import { LineBuffer, EditorBuffer } from '../LineBuffer';
+import { LineBuffer, EditorBuffer } from '../EditorBuffer';
 
 describe('LineBuffer', () => {
   const mockEditorBuffer = EditorBuffer as MockedObject<typeof EditorBuffer>
