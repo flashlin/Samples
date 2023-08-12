@@ -9,7 +9,6 @@ $ErrorActionPreference = "Stop"
 if ( $searchPatterns.Length -gt 0 ) {
     $action = $searchPatterns[0]
 }
-Info "$action"
 
 $sqlite = new-sqlite "D:/Demo/folders.db"
 
@@ -19,6 +18,30 @@ function UpsertPath {
     )
     $sql = "INSERT OR IGNORE INTO directory (dirName) VALUES ('$path')"
     $sqlite.ExecuteNonQuery($sql)
+}
+
+function RecordPath {
+    param(
+        [string]$path
+    )
+    $sql = "INSERT INTO history (dirName) VALUES ('$path')"
+    $sqlite.ExecuteNonQuery($sql)
+
+    $sql = "DELETE FROM history
+WHERE rowid NOT IN (
+    SELECT rowid
+    FROM history
+    ORDER BY createdOn DESC
+    LIMIT 10
+)"
+    $sqlite.ExecuteNonQuery($sql)
+}
+
+function GetRecentlyPath {
+    $sql = "SELECT DISTINCT dirName from history ORDER BY createdOn DESC"
+    $sqlite.ExecuteQuery($sql) | ForEach-Object {
+        $_.dirName
+    }
 }
 
 $excludeDirs = @(
@@ -142,8 +165,25 @@ if ( "--clean" -eq $action ) {
     return
 }
 
+
+if ( $null -eq $dirName ) {
+    $paths = GetRecentlyPath
+    if ( $paths.Length -gt 0 ) {
+        $selectedPath = PromptList $paths
+        if ( "" -eq $selectedPath ) {
+            return
+        }
+        RecordPath $selectedPath
+        $searchPatterns = @('')
+        JumpDirectory $selectedPath
+        return
+    }
+}
+
+
 if ( "" -ne $action ) {
     $dirName = $action
+
     $sql = "SELECT dirName FROM directory WHERE dirName like '%$dirName%'"
     $paths = $sqlite.ExecuteQuery($sql) | ForEach-Object { $_.dirName }
     $paths = FilterDirectories $paths $searchPatterns
@@ -159,6 +199,7 @@ if ( "" -ne $action ) {
     }
 
     if ( $paths.Length -eq 1 ) {
+        RecordPath $paths[0]
         JumpDirectory $paths[0]
         return
     }
@@ -173,6 +214,7 @@ if ( "" -ne $action ) {
         return
     }
 
+    RecordPath $selectedPath
     JumpDirectory $selectedPath
     return
 }

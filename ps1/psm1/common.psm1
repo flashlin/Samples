@@ -228,6 +228,10 @@ function WriteHostColor {
       [string]$text,
       [string]$pattern
    )
+   if ( '' -eq $pattern ) {
+      Write-Host $text -NoNewline
+      return
+   }
    if ( $null -eq $pattern ) {
       Write-Host $text -NoNewline
       return
