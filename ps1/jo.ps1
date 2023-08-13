@@ -129,6 +129,16 @@ $sql = "CREATE INDEX IF NOT EXISTS idx_history ON history (createdOn)"
 $sqlite.ExecuteNonQuery($sql)
 
 if ( "--a" -eq $action ) {
+    if ( $searchPatterns.Length -gt 1 ) {
+        $dirPath = $searchPatterns[1]
+        if ( "." -eq $dirPath ) {
+            $dirPath = $PWD
+        }
+        Write-Host "Update $dirPath"
+        UpsertPath $dirPath
+        return
+    }
+
     Write-Host "Upsert directories"
     foreach ($dir in QueryDirectories) {
         UpsertPath $dir
@@ -161,7 +171,7 @@ if ( "--clean" -eq $action ) {
         }
     }
 
-    FetchQuery $sql $process
+    $sqlite.FetchQuery($sql, $process)
     return
 }
 
