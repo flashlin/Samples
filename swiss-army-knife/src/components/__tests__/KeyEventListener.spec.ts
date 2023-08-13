@@ -11,15 +11,15 @@ describe('KeyEvent', () => {
     const sut = new NumMoveListener();
     sut.listenEvent({} as IEditor, keyboardEvent);
     sut.attach(mockCallback);
-    emitKeys(keyboardEvent, '12a');
-    emitKeys(keyboardEvent, '123b');
+    emitKeys(keyboardEvent, '22a');
+    emitKeys(keyboardEvent, '33b');
     expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 
   test.each([
-    ["123a", 1],
+    ["111a", 1],
     ["a", 0],
-    ["a12", 0],
+    ["a11", 0],
   ])("input keyEvent '%s'", (input, expectedCalledTimes) => {
     const keyboardEvent = new Subject<KeyboardEvent>();
     const mockCallback = vi.fn();//.mockImplementation(() => (flag = signal));

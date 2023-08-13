@@ -302,10 +302,8 @@ export class NumMoveListener1 {
 
 export abstract class InputKeysListener<TData> {
     protected _editor: IEditor = null!;
-    private _callback: (data: TData) => void = () => { };
-    private _data: TData = null!;
     private _regex: RegExp | null = null;
-    private _buffer: string[] = [];
+    private _callback: (data: TData) => void = () => { };
 
     abstract prefixLength: number;
     abstract regexPattern: string; // = /^\d+[a-zA-Z]\d+$/;
@@ -320,22 +318,22 @@ export abstract class InputKeysListener<TData> {
                     return buffer;
                 }, []),
                 filter((buffer) => buffer.length >= this.prefixLength),
-                filter((buffer) => {
+                map((buffer) => {
                     if (this._regex == null) {
                         this._regex = new RegExp(this.regexPattern);
                     }
                     const input = buffer.join('');
-                    const matches = this._regex.exec(input)!;
-                    const success = matches != null;
-                    if (success) {
-                        this._data = this.handle(matches);
+                    const matches = this._regex.exec(input);
+                    if (matches != null) {
                         buffer.length = 0;
                     }
-                    return success;
+                    return matches;
                 }),
+                filter((matches) => matches != null),
             )
-            .subscribe(() => {
-                this._callback(this._data);
+            .subscribe((matches) => {
+                const data = this.handle(matches!);
+                this._callback(data);
             });
     }
 
@@ -351,11 +349,11 @@ export interface INumMoveData {
 
 export class NumMoveListener extends InputKeysListener<INumMoveData> {
     prefixLength: number = 2;
-    regexPattern: string = "^\\d+[a-zA-Z]$";
+    regexPattern: string = "^(\\d+)([a-zA-Z])$";
     handle(matches: RegExpExecArray): INumMoveData {
         return {
-            lineNum: parseInt(matches[0]),
-            suffix: matches[1],
+            lineNum: parseInt(matches[1]),
+            suffix: matches[2],
         }
     }
 }
