@@ -1,5 +1,5 @@
 import { Observable, fromEvent } from 'rxjs';
-import { buffer, filter, map } from 'rxjs/operators';
+import { buffer, filter, map, scan } from 'rxjs/operators';
 
 export class LineBuffer {
     lineNum = 0;
@@ -267,18 +267,36 @@ export class NumMoveListener {
     }
 
     listenEvent(keyboardEvent: Observable<KeyboardEvent>) {
-        keyboardEvent.subscribe((event) => {
-            if (this.isValid(event.key)) {
-                this._inputBuffer.push(event.key);
-                if (/^[a-z]$/.test(event.key)) {
-                    this._callback(true);
-                    return;
-                }
-                return;
-            }
-            this._inputBuffer = [];
-            this._callback(false);
-        });
+        keyboardEvent
+            .pipe(
+                scan((buffer: string[], event) => {
+                    if (this.isValid(event.key)) {
+                        buffer.push(event.key);
+                    } else {
+                        buffer = [];
+                    }
+                    return buffer;
+                }, []),
+                filter((buffer) => buffer.length > 1),
+                filter((buffer) => /^[a-z]$/.test(buffer[buffer.length - 1]))
+            )
+            .subscribe(() => {
+                this._callback(true);
+            });
+
+
+        // keyboardEvent.subscribe((event) => {
+        //     if (this.isValid(event.key)) {
+        //         this._inputBuffer.push(event.key);
+        //         if (/^[a-z]$/.test(event.key)) {
+        //             this._callback(true);
+        //             return;
+        //         }
+        //         return;
+        //     }
+        //     this._inputBuffer = [];
+        //     this._callback(false);
+        // });
     }
 
     isValid(key: string) {
