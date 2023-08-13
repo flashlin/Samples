@@ -1,5 +1,5 @@
 import { Observable, Subject, fromEvent } from 'rxjs';
-import { buffer, filter, map, scan, takeUntil } from 'rxjs/operators';
+import { filter, map, scan, takeUntil } from 'rxjs/operators';
 
 export class LineBuffer {
     lineNum = 0;
@@ -218,13 +218,27 @@ export interface IPosition {
     col: number;
 }
 
+export interface IArea {
+    startLineNum: number;
+    startCol: number;
+    width: number;
+    height: number;
+}
+
 export interface IEditor {
     cursorPos: IPosition;
     editorBuffer: EditorBuffer;
+    area: IArea;
 }
 
 export class VisualEditor {
     cursorPos: IPosition = { line: 0, col: 0 };
+    area: IArea = {
+        startLineNum: 0,
+        startCol: 0,
+        width: 80,
+        height: 40,
+    };
     editorBuffer: EditorBuffer = new EditorBuffer();
     constructor() { }
 
@@ -240,26 +254,91 @@ export class VisualEditor {
             const maxCol = this.editorBuffer.lines[this.cursorPos.line].content.length;
             this.cursorPos.col = Math.min(this.cursorPos.col + 1, maxCol);
         }
+        this.rearrangePos();
+    }
+
+    rearrangePos() {
         const line = this.editorBuffer.lines[this.cursorPos.line];
         const maxCol = line.content.length;
         this.cursorPos.col = Math.min(this.cursorPos.col, maxCol);
     }
 
     initialize(elem: HTMLElement) {
-        const keyboardEvent = fromEvent<KeyboardEvent>(elem, 'keydown');
-        return keyboardEvent;
+        const keyboardEvent = fromEvent<KeyboardEvent>(elem, 'keyup');
+        this.handleKey(keyboardEvent);
     }
 
     handleKey(keyboardEvent: Observable<KeyboardEvent>) {
-        keyboardEvent
-            .pipe(
-                buffer(keyboardEvent.pipe(filter((event) => /^[0-9]$/.test(event.key)))),
-                map((events) => events.map((event) => event.key)),
-                filter((keys) => keys.join('') === 'a'),
-            )
-            .subscribe(() => {
-                console.log("連續輸入數字後跟字母 'a' 觸發");
-            });
+        const t1 = new MoveListener();
+        t1.listenEvent(this, keyboardEvent);
+    }
+}
+
+export class EditorRender {
+    fontSize = 24;
+    fontName = '文泉驛等寬微米黑';
+    fontWidth = 0;
+    fontHeight = 0;
+    editor: IEditor;
+    graph: CanvasRenderingContext2D;
+
+    constructor(editor: IEditor) {
+        this.editor = editor;
+        this.initFontWH();
+    }
+
+    initFontWH() {
+        const t = document.createElement('span');
+        t.style.fontFamily = this.fontName;
+        t.style.fontSize = `${this.fontSize}`;
+        t.textContent = 'y';
+        document.body.appendChild(t);
+        this.fontWidth = t.offsetWidth + 2;
+        this.fontHeight = t.offsetHeight + 2;
+        document.body.removeChild(t);
+    }
+
+    createCanvas(elem: HTMLElement) {
+        const editor = this.editor;
+        const canvas = document.createElement('canvas');
+        //canvas.id = this.id;
+        canvas.width = editor.area.width * this.fontWidth + 4;
+        canvas.height = editor.area.height * this.fontHeight + 4;
+        canvas.style.cursor = 'text';
+        canvas.style.border = 'solid #0f0 1px';
+        //document.body.appendChild(canvas);
+        elem.appendChild(canvas);
+
+        const graph = canvas.getContext('2d')!;
+        graph.textAlign = 'left';
+        this.graph = graph;
+    }
+
+    showCursorAt(x, y, show_cursor) {
+        //const editor = this.editor;
+        // const clr = this.buffer.getColorAt(x, y),
+        //     chr = this.buffer.getCharAt(x, y);
+        const clr = 0xff0000;
+        const chr = 0xffffff;
+        // if (show_cursor &&
+        //     x == editor.buffer.x &&
+        //     y == this.buffer.y)
+        //     clr = ((clr >> 4) | (clr << 4)) & 0xFF;
+        this.drawRect(x, y, clr);
+        this.drawChar(x, y, clr & 0x0f, chr);
+    }
+
+    drawRect(x, y, color) {
+        const c = this.graph;
+        c.fillStyle = color;
+        c.fillRect(x * this.fontWidth + 2, y * this.fontHeight + 4, this.fontWidth, this.fontHeight);
+    }
+
+    drawChar(x, y, clr, chr) {
+        const c = this.graph;
+        c.fillStyle = clr;
+        c.font = (clr.h ? 'bold ' : '') + this.fontSize + 'px ' + this.fontName;
+        c.fillText(chr, x * this.fontWidth + 2, (y + 1) * this.fontHeight);
     }
 }
 
@@ -279,7 +358,7 @@ export abstract class InputKeysListener<TData> {
         keyboardEvent
             .pipe(
                 scan((buffer: string[], event) => {
-                    buffer.push(event.key)
+                    buffer.push(event.key);
                     return buffer;
                 }, []),
                 filter((buffer) => buffer.length >= this.prefixLength),
@@ -310,6 +389,37 @@ export abstract class InputKeysListener<TData> {
     }
 }
 
+export interface IMoveData {
+    key: string;
+}
+
+export class MoveListener extends InputKeysListener<IMoveData> {
+    prefixLength: number = 1;
+    regexPattern: string = '^([jklh])$';
+    toData(matches: RegExpExecArray): IMoveData {
+        return {
+            key: matches[1],
+        };
+    }
+    handle(event: IMoveData): void {
+        const editor = this._editor;
+        if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'k') {
+            editor.cursorPos.line = Math.max(editor.cursorPos.line - 1, 0);
+        } else if (event.key === 'ArrowDown' || event.key.toLowerCase() === 'j') {
+            const maxLine = editor.editorBuffer.lines.length - 1;
+            editor.cursorPos.line = Math.min(editor.cursorPos.line + 1, maxLine);
+        } else if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'h') {
+            editor.cursorPos.col = Math.max(editor.cursorPos.col - 1, 0);
+        } else if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'l') {
+            const maxCol = editor.editorBuffer.lines[editor.cursorPos.line].content.length;
+            editor.cursorPos.col = Math.min(editor.cursorPos.col + 1, maxCol);
+        }
+        const line = editor.editorBuffer.lines[editor.cursorPos.line];
+        const maxCol = line.content.length;
+        editor.cursorPos.col = Math.min(editor.cursorPos.col, maxCol);
+    }
+}
+
 export interface INumMoveData {
     lineNum: number;
     suffix: string;
@@ -317,18 +427,15 @@ export interface INumMoveData {
 
 export class NumMoveListener extends InputKeysListener<INumMoveData> {
     prefixLength: number = 2;
-    regexPattern: string = "^(\\d+)([a-zA-Z])$";
+    regexPattern: string = '^(\\d+)([a-zA-Z])$';
     toData(matches: RegExpExecArray): INumMoveData {
         return {
             lineNum: parseInt(matches[1]),
             suffix: matches[2],
-        }
+        };
     }
-    handle(data: INumMoveData): void {
-
-    }
+    handle(data: INumMoveData): void { }
 }
-
 
 export interface IAzNumAzData {
     prefix: string;
@@ -337,7 +444,6 @@ export interface IAzNumAzData {
 }
 
 export class AzNumAzListener extends InputKeysListener<IAzNumAzData> {
-
     prefixLength: number = 3;
     regexPattern: string = '^\\d+[a-zA-Z]\\d+$';
     toData(matches: RegExpExecArray): IAzNumAzData {
@@ -347,7 +453,5 @@ export class AzNumAzListener extends InputKeysListener<IAzNumAzData> {
             suffix: matches[2],
         };
     }
-    handle(data: IAzNumAzData): void {
-
-    }
+    handle(data: IAzNumAzData): void { }
 }

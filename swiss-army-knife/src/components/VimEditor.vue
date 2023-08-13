@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { EditorRender, VisualEditor } from './EditorBuffer';
 const canvasRef = ref<HTMLCanvasElement>();
 interface VimEditorProps {
     //modelValue: string;
@@ -15,9 +16,12 @@ onMounted(() => {
 });
 function drawOnCanvas() {
     const canvas = canvasRef.value!;
-    const ctx = canvas.getContext('2d')!;
-    ctx.fillStyle = 'dark';
-    ctx.fillRect(0, 0, props.width, props.height);
+    const editor = new VisualEditor();
+    const render = new EditorRender(editor);
+    render.createCanvas(canvas);
+    //const ctx = canvas.getContext('2d')!;
+    //ctx.fillStyle = 'dark';
+    //ctx.fillRect(0, 0, props.width, props.height);
 }
 function initialize() {
 
@@ -25,5 +29,5 @@ function initialize() {
 </script>
 
 <template>
-    <canvas ref="canvasRef" width="800" height="400"> </canvas>
+    <div ref="canvasRef"></div>
 </template>
