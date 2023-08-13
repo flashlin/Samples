@@ -1,3 +1,6 @@
+import { Observable, fromEvent } from 'rxjs';
+import { buffer, filter, map } from 'rxjs/operators';
+
 export class LineBuffer {
     lineNum = 0;
     cols = 0;
@@ -207,5 +210,88 @@ export class EditorBuffer {
             cols = 0;
         } while (remainingLen > 0);
         return fragment;
+    }
+}
+
+export interface IPosition {
+    line: number;
+    col: number;
+}
+
+export class VisualEditor {
+    cursorPos: IPosition = { line: 0, col: 0 };
+    editorBuffer: EditorBuffer = new EditorBuffer();
+    constructor() { }
+
+    keyPress(event: KeyboardEvent) {
+        if (event.key === 'ArrowUp' || event.key.toLowerCase() === 'k') {
+            this.cursorPos.line = Math.max(this.cursorPos.line - 1, 0);
+        } else if (event.key === 'ArrowDown' || event.key.toLowerCase() === 'j') {
+            const maxLine = this.editorBuffer.lines.length - 1;
+            this.cursorPos.line = Math.min(this.cursorPos.line + 1, maxLine);
+        } else if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'h') {
+            this.cursorPos.col = Math.max(this.cursorPos.col - 1, 0);
+        } else if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'l') {
+            const maxCol = this.editorBuffer.lines[this.cursorPos.line].content.length;
+            this.cursorPos.col = Math.min(this.cursorPos.col + 1, maxCol);
+        }
+        const line = this.editorBuffer.lines[this.cursorPos.line];
+        const maxCol = line.content.length;
+        this.cursorPos.col = Math.min(this.cursorPos.col, maxCol);
+    }
+
+    initialize(elem: HTMLElement) {
+        const keyboardEvent = fromEvent<KeyboardEvent>(elem, 'keydown');
+        return keyboardEvent;
+    }
+
+    handleKey(keyboardEvent: Observable<KeyboardEvent>) {
+        keyboardEvent
+            .pipe(
+                buffer(keyboardEvent.pipe(filter((event) => /^[0-9]$/.test(event.key)))),
+                map((events) => events.map((event) => event.key)),
+                filter((keys) => keys.join('') === 'a'),
+            )
+            .subscribe(() => {
+                console.log("連續輸入數字後跟字母 'a' 觸發");
+            });
+    }
+}
+
+export class NumMoveListener {
+    _callback: (signal: boolean) => void = () => { };
+    _inputBuffer: string[] = [];
+
+    constructor(keyboardEvent: Observable<KeyboardEvent>) {
+        this.listenEvent(keyboardEvent);
+    }
+
+    listenEvent(keyboardEvent: Observable<KeyboardEvent>) {
+        keyboardEvent.subscribe((event) => {
+            if (this.isValid(event.key)) {
+                this._inputBuffer.push(event.key);
+                if (/^[a-z]$/.test(event.key)) {
+                    this._callback(true);
+                    return;
+                }
+                return;
+            }
+            this._inputBuffer = [];
+            this._callback(false);
+        });
+    }
+
+    isValid(key: string) {
+        if (/^[0-9]$/.test(key)) {
+            return true;
+        }
+        if (/^[a-z]$/.test(key)) {
+            return true;
+        }
+        return false;
+    }
+
+    listen(callback: (signal: boolean) => void) {
+        this._callback = callback;
     }
 }
