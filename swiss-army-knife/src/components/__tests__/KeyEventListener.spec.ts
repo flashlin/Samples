@@ -13,7 +13,7 @@ describe('KeyEvent', () => {
     sut.attach(mockCallback);
     emitKeys(keyboardEvent, '22a');
     emitKeys(keyboardEvent, '33b');
-    expect(mockCallback).toHaveBeenCalledTimes(2);
+    expect(mockCallback).toHaveBeenCalledTimes(1);
   });
 
   test.each([

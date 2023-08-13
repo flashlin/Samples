@@ -1,5 +1,5 @@
-import { Observable, fromEvent } from 'rxjs';
-import { buffer, filter, map, scan } from 'rxjs/operators';
+import { Observable, Subject, fromEvent } from 'rxjs';
+import { buffer, filter, map, scan, takeUntil } from 'rxjs/operators';
 
 export class LineBuffer {
     lineNum = 0;
@@ -263,43 +263,6 @@ export class VisualEditor {
     }
 }
 
-export class NumMoveListener1 {
-    _callback: (signal: boolean) => void = () => { };
-
-    constructor(keyboardEvent: Observable<KeyboardEvent>) {
-        this.listenEvent(keyboardEvent);
-    }
-
-    listenEvent(keyboardEvent: Observable<KeyboardEvent>) {
-        keyboardEvent
-            .pipe(
-                scan((buffer: string[], event) => {
-                    buffer.push(event.key);
-                    return buffer;
-                }, []),
-                filter((buffer) => buffer.length >= 2),
-                filter((buffer) => /^[a-z]$/.test(buffer[buffer.length - 1])),
-            )
-            .subscribe(() => {
-                this._callback(true);
-            });
-    }
-
-    isValid(key: string) {
-        if (/^[0-9]$/.test(key)) {
-            return true;
-        }
-        if (/^[a-z]$/.test(key)) {
-            return true;
-        }
-        return false;
-    }
-
-    listen(callback: (signal: boolean) => void) {
-        this._callback = callback;
-    }
-}
-
 export abstract class InputKeysListener<TData> {
     protected _editor: IEditor = null!;
     private _regex: RegExp | null = null;
@@ -307,10 +270,12 @@ export abstract class InputKeysListener<TData> {
 
     abstract prefixLength: number;
     abstract regexPattern: string; // = /^\d+[a-zA-Z]\d+$/;
-    abstract handle(matches: RegExpExecArray): TData;
+    abstract toData(matches: RegExpExecArray): TData;
+    abstract handle(data: TData): void;
 
     listenEvent(editor: IEditor, keyboardEvent: Observable<KeyboardEvent>) {
         this._editor = editor;
+        const unsubscribe$ = new Subject();
         keyboardEvent
             .pipe(
                 scan((buffer: string[], event) => {
@@ -331,9 +296,12 @@ export abstract class InputKeysListener<TData> {
                 }),
                 filter((matches) => matches != null),
             )
+            .pipe(takeUntil(unsubscribe$))
             .subscribe((matches) => {
-                const data = this.handle(matches!);
+                const data = this.toData(matches!);
                 this._callback(data);
+                unsubscribe$.next(undefined);
+                unsubscribe$.complete();
             });
     }
 
@@ -350,11 +318,14 @@ export interface INumMoveData {
 export class NumMoveListener extends InputKeysListener<INumMoveData> {
     prefixLength: number = 2;
     regexPattern: string = "^(\\d+)([a-zA-Z])$";
-    handle(matches: RegExpExecArray): INumMoveData {
+    toData(matches: RegExpExecArray): INumMoveData {
         return {
             lineNum: parseInt(matches[1]),
             suffix: matches[2],
         }
+    }
+    handle(data: INumMoveData): void {
+
     }
 }
 
@@ -369,11 +340,14 @@ export class AzNumAzListener extends InputKeysListener<IAzNumAzData> {
 
     prefixLength: number = 3;
     regexPattern: string = '^\\d+[a-zA-Z]\\d+$';
-    handle(matches: RegExpExecArray): IAzNumAzData {
+    toData(matches: RegExpExecArray): IAzNumAzData {
         return {
             prefix: matches[0],
             lineNum: parseInt(matches[1]),
             suffix: matches[2],
         };
+    }
+    handle(data: IAzNumAzData): void {
+
     }
 }
