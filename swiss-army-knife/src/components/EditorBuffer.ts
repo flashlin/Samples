@@ -218,6 +218,11 @@ export interface IPosition {
     col: number;
 }
 
+export interface IEditor {
+    cursorPos: IPosition;
+    editorBuffer: EditorBuffer;
+}
+
 export class VisualEditor {
     cursorPos: IPosition = { line: 0, col: 0 };
     editorBuffer: EditorBuffer = new EditorBuffer();
@@ -258,9 +263,8 @@ export class VisualEditor {
     }
 }
 
-export class NumMoveListener {
+export class NumMoveListener1 {
     _callback: (signal: boolean) => void = () => { };
-    _inputBuffer: string[] = [];
 
     constructor(keyboardEvent: Observable<KeyboardEvent>) {
         this.listenEvent(keyboardEvent);
@@ -270,33 +274,15 @@ export class NumMoveListener {
         keyboardEvent
             .pipe(
                 scan((buffer: string[], event) => {
-                    if (this.isValid(event.key)) {
-                        buffer.push(event.key);
-                    } else {
-                        buffer = [];
-                    }
+                    buffer.push(event.key);
                     return buffer;
                 }, []),
-                filter((buffer) => buffer.length > 1),
-                filter((buffer) => /^[a-z]$/.test(buffer[buffer.length - 1]))
+                filter((buffer) => buffer.length >= 2),
+                filter((buffer) => /^[a-z]$/.test(buffer[buffer.length - 1])),
             )
             .subscribe(() => {
                 this._callback(true);
             });
-
-
-        // keyboardEvent.subscribe((event) => {
-        //     if (this.isValid(event.key)) {
-        //         this._inputBuffer.push(event.key);
-        //         if (/^[a-z]$/.test(event.key)) {
-        //             this._callback(true);
-        //             return;
-        //         }
-        //         return;
-        //     }
-        //     this._inputBuffer = [];
-        //     this._callback(false);
-        // });
     }
 
     isValid(key: string) {
@@ -311,5 +297,85 @@ export class NumMoveListener {
 
     listen(callback: (signal: boolean) => void) {
         this._callback = callback;
+    }
+}
+
+export abstract class InputKeysListener<TData> {
+    protected _editor: IEditor = null!;
+    private _callback: (data: TData) => void = () => { };
+    private _data: TData = null!;
+    private _regex: RegExp | null = null;
+    private _buffer: string[] = [];
+
+    abstract prefixLength: number;
+    abstract regexPattern: string; // = /^\d+[a-zA-Z]\d+$/;
+    abstract handle(matches: RegExpExecArray): TData;
+
+    listenEvent(editor: IEditor, keyboardEvent: Observable<KeyboardEvent>) {
+        this._editor = editor;
+        keyboardEvent
+            .pipe(
+                scan((buffer: string[], event) => {
+                    buffer.push(event.key)
+                    return buffer;
+                }, []),
+                filter((buffer) => buffer.length >= this.prefixLength),
+                filter((buffer) => {
+                    if (this._regex == null) {
+                        this._regex = new RegExp(this.regexPattern);
+                    }
+                    const input = buffer.join('');
+                    const matches = this._regex.exec(input)!;
+                    const success = matches != null;
+                    if (success) {
+                        this._data = this.handle(matches);
+                        buffer.length = 0;
+                    }
+                    return success;
+                }),
+            )
+            .subscribe(() => {
+                this._callback(this._data);
+            });
+    }
+
+    attach(callback: (data: TData) => void) {
+        this._callback = callback;
+    }
+}
+
+export interface INumMoveData {
+    lineNum: number;
+    suffix: string;
+}
+
+export class NumMoveListener extends InputKeysListener<INumMoveData> {
+    prefixLength: number = 2;
+    regexPattern: string = "^\\d+[a-zA-Z]$";
+    handle(matches: RegExpExecArray): INumMoveData {
+        return {
+            lineNum: parseInt(matches[0]),
+            suffix: matches[1],
+        }
+    }
+}
+
+
+export interface IAzNumAzData {
+    prefix: string;
+    lineNum: number;
+    suffix: string;
+}
+
+export class AzNumAzListener extends InputKeysListener<IAzNumAzData> {
+
+    prefixLength: number = 3;
+    regexPattern: string = '^\\d+[a-zA-Z]\\d+$';
+    handle(matches: RegExpExecArray): IAzNumAzData {
+        return {
+            prefix: matches[0],
+            lineNum: parseInt(matches[1]),
+            suffix: matches[2],
+        };
     }
 }

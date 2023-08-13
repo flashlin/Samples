@@ -1,17 +1,19 @@
 import { beforeEach, describe, expect, it, vi, test } from 'vitest';
 import { Subject } from 'rxjs';
-import { NumMoveListener } from '../EditorBuffer';
+import { NumMoveListener, type IEditor } from '../EditorBuffer';
 
 describe('KeyEvent', () => {
   beforeEach(() => { });
 
-  it('event 123%', () => {
+  it('event 123a', () => {
     const keyboardEvent = new Subject<KeyboardEvent>();
     const mockCallback = vi.fn();//.mockImplementation(() => (flag = signal));
-    const sut = new NumMoveListener(keyboardEvent);
-    sut.listen(mockCallback);
-    emitKeys(keyboardEvent, '123%');
-    expect(mockCallback).toHaveBeenCalledTimes(0);
+    const sut = new NumMoveListener();
+    sut.listenEvent({} as IEditor, keyboardEvent);
+    sut.attach(mockCallback);
+    emitKeys(keyboardEvent, '12a');
+    emitKeys(keyboardEvent, '123b');
+    expect(mockCallback).toHaveBeenCalledTimes(2);
   });
 
   test.each([
@@ -21,8 +23,9 @@ describe('KeyEvent', () => {
   ])("input keyEvent '%s'", (input, expectedCalledTimes) => {
     const keyboardEvent = new Subject<KeyboardEvent>();
     const mockCallback = vi.fn();//.mockImplementation(() => (flag = signal));
-    const sut = new NumMoveListener(keyboardEvent);
-    sut.listen(mockCallback);
+    const sut = new NumMoveListener();
+    sut.listenEvent({} as IEditor, keyboardEvent);
+    sut.attach(mockCallback);
     emitKeys(keyboardEvent, input);
     expect(mockCallback).toHaveBeenCalledTimes(expectedCalledTimes);
   })
@@ -38,8 +41,5 @@ function emitKeys(keyboardEvent: Subject<KeyboardEvent>, keys: string) {
   for (const key of keys) {
     emitKey(keyboardEvent, key);
   }
-}
-function testEach(myTest: (input: string, expected: string) => void, arg1: string[], arg2: string[]) {
-  throw new Error('Function not implemented.');
 }
 
