@@ -3,9 +3,11 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
-import "./antlr/TSqlExprListener";
 
 import './db';
+//import { Tsql } from './antlr/TSQL';
+//const tsql = new Tsql();
+//tsql.parse('select id from customer');
 
 const app = createApp(App);
 app.use(createPinia());
