@@ -31,8 +31,6 @@
     "@vue/eslint-config-typescript": "^11.0.3",
     "@vue/test-utils": "^2.4.1",
     "@vue/tsconfig": "^0.4.0",
-    "antlr4ts": "^0.5.0-alpha.4",
-    "antlr4ts-cli": "^0.5.0-alpha.4",
     "eslint": "^8.45.0",
     "eslint-plugin-vue": "^9.15.1",
     "jsdom": "^22.1.0",
