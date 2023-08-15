@@ -1,33 +1,17 @@
 <script setup lang="ts">
-import { reactive, shallowRef } from 'vue';
-import { Codemirror } from 'vue-codemirror'
-import { sql } from '@codemirror/lang-sql'
-import { oneDark } from '@codemirror/theme-one-dark'
+import { reactive } from 'vue';
+import CodeEditor from './CodeEditor.vue'
 
-
-const codeEditor = shallowRef()
 const data = reactive({
   code: ""
-})
-const extensions = [sql(), oneDark]
+});
 
-interface ICodemirrorPayload {
-  view: import("@codemirror/view").EditorView
-}
-
-const handleReady = (payload: ICodemirrorPayload) => {
-  codeEditor.value = payload.view
+const onClickExecute = () => {
+  console.log("code=", data.code);
 }
 </script>
 
 <template>
-  <codemirror v-model="data.code" 
-    placeholder="Code goes here..."
-    :style="{ height: '400px'}"
-    :autofocus="true"
-    :indent-with-tab="true"
-    :tab-size="2"
-    :extensions="extensions"
-    @ready="handleReady"
-  />
+  <codeEditor v-model="data.code" />
+  <button @click="onClickExecute">Execute</button>
 </template>
