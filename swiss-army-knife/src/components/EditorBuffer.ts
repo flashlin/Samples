@@ -280,7 +280,7 @@ export class EditorRender {
     fontWidth = 0;
     fontHeight = 0;
     editor: IEditor;
-    graph: CanvasRenderingContext2D;
+    graph: CanvasRenderingContext2D = null!;
 
     constructor(editor: IEditor) {
         this.editor = editor;
@@ -314,7 +314,7 @@ export class EditorRender {
         this.graph = graph;
     }
 
-    showCursorAt(x, y, show_cursor) {
+    showCursorAt(x: number, y: number, show_cursor: boolean) {
         //const editor = this.editor;
         // const clr = this.buffer.getColorAt(x, y),
         //     chr = this.buffer.getCharAt(x, y);
@@ -328,17 +328,17 @@ export class EditorRender {
         this.drawChar(x, y, clr & 0x0f, chr);
     }
 
-    drawRect(x, y, color) {
+    drawRect(x: number, y: number, color: number) {
         const c = this.graph;
-        c.fillStyle = color;
+        //c.fillStyle = color;
         c.fillRect(x * this.fontWidth + 2, y * this.fontHeight + 4, this.fontWidth, this.fontHeight);
     }
 
-    drawChar(x, y, clr, chr) {
+    drawChar(x: number, y: number, clr: number, chr: number) {
         const c = this.graph;
-        c.fillStyle = clr;
-        c.font = (clr.h ? 'bold ' : '') + this.fontSize + 'px ' + this.fontName;
-        c.fillText(chr, x * this.fontWidth + 2, (y + 1) * this.fontHeight);
+        c.fillStyle = `${clr}`;
+        //c.font = (clr.h ? 'bold ' : '') + this.fontSize + 'px ' + this.fontName;
+        c.fillText(`${chr}`, x * this.fontWidth + 2, (y + 1) * this.fontHeight);
     }
 }
 
