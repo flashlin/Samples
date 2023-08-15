@@ -1,0 +1,20 @@
+{
+  "manifest_version": 2,
+  "name": "FlashKnife Extension",
+  "description": "This extension is swiss army knife.",
+  "version": "1.0",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "run_at": "document_end",
+      "js": ["entry.js"]
+    }
+  ],
+  "web_accessible_resources": [],
+  "content_security_policy": "default-src 'self'; script-src 'self' 'unsafe-eval' https://ajax.googleapis.com; style-src * 'unsafe-inline'; object-src 'self'; img-src 'self' data: chrome-extension-resource:;",
+  "permissions": ["activeTab", "storage"]
+}
