@@ -5,9 +5,11 @@ import App from './App.vue';
 import router from './router';
 
 import './db';
+import { parseTsql } from './sqlex/tsql';
 //import { Tsql } from './antlr/TSQL';
 //const tsql = new Tsql();
-//tsql.parse('select id from customer');
+parseTsql('select id from customer');
+
 
 const app = createApp(App);
 app.use(createPinia());
