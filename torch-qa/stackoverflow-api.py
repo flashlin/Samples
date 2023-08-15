@@ -14,10 +14,10 @@ from fastapi.encoders import jsonable_encoder
 from typing import Dict
 import uvicorn
 
-MODEL_FILE="llama-2-7b-chat.ggmlv3.q8_0.bin"
-MODEL_TYPE="llama"
-MODEL_FILE="stablecode-instruct-alpha-3b.ggmlv1.q5_1.bin"
-MODEL_TYPE="gpt_neox"
+MODEL_FILE = "models/stablecode-instruct-alpha-3b.ggmlv1.q5_1.bin"
+MODEL_TYPE = "gpt_neox"
+MODEL_FILE = "models/llama-2-7b-chat.ggmlv3.q8_0.bin"
+MODEL_TYPE = "llama"
 
 app = FastAPI()
 
