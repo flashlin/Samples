@@ -41,6 +41,9 @@ const css = `
     padding: 51px 0px;
     height: 100%;
     background-color: #515251;
+    position: absolute;
+    left: 0;
+    top: 0;
     display: none;
   }
 `;

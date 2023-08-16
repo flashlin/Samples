@@ -10,7 +10,7 @@ import { parseTsql } from './sqlex/tsql';
 //const tsql = new Tsql();
 parseTsql('select id from customer');
 
-import { contentDiv } from "./init"
+import { contentDiv } from "./initMonkey"
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
