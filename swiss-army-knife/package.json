@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "vite",
+    "monkey": "vue-tsc --noEmit -p tsconfig.monkey.json && vite build --config vite.monkey.config.ts",
     "build": "run-p type-check build-only",
     "preview": "vite preview",
     "test:unit": "vitest",
