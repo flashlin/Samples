@@ -1,10 +1,10 @@
 import initSqlJs, { type Database } from 'sql.js';
+import wasmPath from './assets/sql-wasm.wasm?url';
 
 (async () => {
-  const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
+  //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
+  //const SQL = await initSqlJs({ locateFile: () => wasmPath });
   const SQL = await initSqlJs({ locateFile: () => wasmPath });
-
-  // ...
 
   const db: Database = new SQL.Database();
 
@@ -24,5 +24,5 @@ import initSqlJs, { type Database } from 'sql.js';
   const users = results[0].values;
 
   // 輸出結果
-  console.log(users);
+  console.log('users', users);
 })();

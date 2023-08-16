@@ -29,8 +29,8 @@ export default defineConfig({
   //     '@': './',
   //   },
   // },
-  // optimizeDeps: {
-  //   //exclude: ['sql-wasm'],
-  //   esbuildOptions: { target: 'es2020' },
-  //},
+  optimizeDeps: {
+    exclude: ['sql-wasm'],
+    //esbuildOptions: { target: 'es2020' },
+  },
 });
