@@ -3,6 +3,8 @@ import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
+import ElementPlus from 'element-plus'
+import 'element-plus/theme-chalk/dark/css-vars.css'
 
 import './db';
 import { parseTsql } from './sqlex/tsql';
@@ -14,6 +16,7 @@ import { contentDiv } from "./initMonkey"
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
+app.use(ElementPlus, { size: 'small', zIndex: 3000 })
 //app.mount('#app');
 app.mount(contentDiv);
 
