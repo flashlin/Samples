@@ -1,6 +1,7 @@
+import { M_addStyle } from "./tampermonkey/monkey";
 
 const css = `
-  .sidebar {
+  .flash-sidebar {
     margin: 0;
     padding: 0;
     width: 30px;
@@ -13,29 +14,29 @@ const css = `
     z-index: 1000;
   }
   
-  .sidebar expand {
+  .flash-sidebar expand {
     width: 410px;
     height: 510px;
   }
   
-  .sidebar a {
+  .flash-sidebar a {
     display: block;
     color: black;
     padding: 16px;
     text-decoration: none;
   }
    
-  .sidebar a.active {
+  .flash-sidebar a.active {
     background-color: #04AA6D;
     color: white;
   }
   
-  .sidebar a:hover:not(.active) {
+  .flash-sidebar a:hover:not(.active) {
     background-color: #555;
     color: white;
   }
   
-  div.sidebar-content {
+  div.flash-sidebar-content {
     margin-left: 0px;
     padding: 51px 0px;
     height: 100%;
@@ -44,29 +45,23 @@ const css = `
   }
 `;
 
-//GM_addStyle(css);
-function addStyle(css: string) {
-    const styleElem = document.createElement('style');
-    styleElem.innerHTML = css;
-    document.body.appendChild(styleElem);
-}
-addStyle(css);
+M_addStyle(css);
 
 export const contentDiv = document.createElement('div');
-contentDiv.className = 'sidebar-content';
+contentDiv.className = 'flash-sidebar-content';
 document.body.appendChild(contentDiv);
 
 function handleOnClick() {
-    console.log(`display='${contentDiv.style.display}'`);
-    if (contentDiv.style.display == "block") {
-        contentDiv.style.display = "none";
-    } else {
-        contentDiv.style.display = "block";
-    }
+  console.log(`display='${contentDiv.style.display}'`);
+  if (contentDiv.style.display == "block") {
+    contentDiv.style.display = "none";
+  } else {
+    contentDiv.style.display = "block";
+  }
 }
 
 const sidebarDiv = document.createElement('div');
-sidebarDiv.className = 'sidebar';
+sidebarDiv.className = 'flash-sidebar';
 sidebarDiv.onclick = handleOnClick;
 document.body.appendChild(sidebarDiv);
 console.log('Flash');
