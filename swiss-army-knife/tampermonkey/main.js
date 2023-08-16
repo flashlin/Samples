@@ -6,6 +6,8 @@
 // @author       flash
 // @match        *://*/*
 // @require      https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js
+// @updateURL    https://github.com/mygithubaccount/test/raw/master/test.user.js
+// @downloadURL  https://github.com/mygithubaccount/test/raw/master/test.user.js
 // @resource musicFile  https://mdn.mozillademos.org/files/2587/AudioTest%20%281%29.ogg
 // @connect localhost
 // @connect *
@@ -13,11 +15,13 @@
 // @grant GM_getValue
 // @grant GM_setClipboard
 // @grant GM_log
-// @grant GM_xmlhttpRequest
 // @grant unsafeWindow
 // @grant window.close
 // @grant window.focus
+// @grant GM_xmlhttpRequest
 // @grant GM_getResourceURL
+// @grant GM_getResourceText
+// @grant GM_addStyle
 // ==/UserScript==
 function loadSource(url, callback) {
   GM_xmlhttpRequest({
@@ -34,7 +38,7 @@ GM_xmlhttpRequest({
   method: 'GET',
   url: 'http://localhost:8002/manifest.json',
   onload: (ev) => {
-    console.log(ev.responseText);
+    //console.log(ev.responseText);
     const data = JSON.parse(ev.responseText);
     const indexHtml = data['index.html'];
     indexHtml.css.forEach((cssUrl) => {
@@ -45,9 +49,14 @@ GM_xmlhttpRequest({
         document.head.appendChild(link);
       });
     });
-    //let e = document.createElement('script');
-    //e.innerText = ev.responseText;
-    //document.head.appendChild(e);
+
+    loadSource(baseUrl + indexHtml.file, (entryContent) => {
+      let entryScript = document.createElement('script');
+      entryScript.type = 'module';
+      entryScript.innerText = entryContent;
+      document.head.appendChild(entryScript);
+      console.info('loaded ', baseUrl + indexHtml.file);
+    });
   },
 });
 
