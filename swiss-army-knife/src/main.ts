@@ -11,8 +11,10 @@ import { parseTsql } from './sqlex/tsql';
 parseTsql('select id from customer');
 
 
-const app = createApp(App);
-app.use(createPinia());
-app.use(router);
+// const app = createApp(App);
+// app.use(createPinia());
+// app.use(router);
 
-app.mount('#app');
+// app.mount('#app');
+
+import "./init"
