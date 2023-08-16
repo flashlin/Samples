@@ -11,7 +11,7 @@ const css = `
     position: fixed;
     left: 0;
     top: 0;
-    z-index: 1000;
+    z-index: 9999;
   }
   
   .flash-sidebar expand {
@@ -38,7 +38,7 @@ const css = `
   
   div.flash-sidebar-content {
     margin-left: 0px;
-    padding: 51px 0px;
+    padding: 0px 30px;
     width: 100%;
     height: 100%;
     background-color: #515251;
@@ -46,6 +46,7 @@ const css = `
     left: 0;
     top: 0;
     display: none;
+    z-index: 9999;
   }
 `;
 
