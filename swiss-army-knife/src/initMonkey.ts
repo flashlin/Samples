@@ -46,7 +46,7 @@ const css = `
     left: 0;
     top: 0;
     display: none;
-    z-index: 9999;
+    z-index: 999;
   }
 `;
 
