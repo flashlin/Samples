@@ -1,4 +1,5 @@
-GM_addStyle(`
+
+const css = `
   .sidebar {
     margin: 0;
     padding: 0;
@@ -9,6 +10,7 @@ GM_addStyle(`
     position: fixed;
     left: 0;
     top: 0;
+    z-index: 1000;
   }
   
   .sidebar expand {
@@ -38,11 +40,29 @@ GM_addStyle(`
     padding: 51px 0px;
     height: 100%;
     background-color: #515251;
+    display: none;
   }
-  `);
+`;
+
+//GM_addStyle(css);
+function addStyle(css: string) {
+    const styleElem = document.createElement('style');
+    styleElem.innerHTML = css;
+    document.body.appendChild(styleElem);
+}
+addStyle(css);
+
+export const contentDiv = document.createElement('div');
+contentDiv.className = 'sidebar-content';
+document.body.appendChild(contentDiv);
 
 function handleOnClick() {
-    console.log('click 123');
+    console.log(`display='${contentDiv.style.display}'`);
+    if (contentDiv.style.display == "block") {
+        contentDiv.style.display = "none";
+    } else {
+        contentDiv.style.display = "block";
+    }
 }
 
 const sidebarDiv = document.createElement('div');
