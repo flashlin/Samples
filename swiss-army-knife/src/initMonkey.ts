@@ -39,6 +39,7 @@ const css = `
   div.flash-sidebar-content {
     margin-left: 0px;
     padding: 51px 0px;
+    width: 100%;
     height: 100%;
     background-color: #515251;
     position: absolute;
