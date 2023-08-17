@@ -7,7 +7,7 @@ const { JSDOM } = jsdom;
 const { window } = new JSDOM();
 (global as any).document = window.document;
 
-import thead_tr_td_table from "./data/thead_tr_td.xml"
+import thead_tr_td_table from "./data/thead_tr_td.xml";
 describe('fetchTableData', () => {
     //let app: VueWrapper
     //beforeEach(() => {
@@ -28,7 +28,7 @@ describe('fetchTableData', () => {
         //expect(getTipListElement().exists()).toBeTruthy()
     })
 
-    it('table header', () => {
+    it('table thead tr td', () => {
         const fakeTable = document.createElement('table');
         fakeTable.innerHTML = thead_tr_td_table;
         const dataTable = fetchTableData(fakeTable);
