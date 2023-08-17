@@ -84,3 +84,26 @@ After creating the declaration file,
 TypeScript should correctly recognize and allow you to import XML files using the import statement, 
 and you won't encounter the "Cannot find module" error.
 
+
+### How to create store in vue3 with Pinia?
+```
+import { defineStore } from 'pinia'
+
+interface IUserState {
+  name: string
+}
+
+const userStore = defineStore('counter', {
+  state: (): IUserState => ({
+    name: "",
+  }),
+  getters: {
+    name: state => state.name,
+  },
+  actions: {
+  },
+})
+
+export const useUserStore = () => userStore()
+```
+
