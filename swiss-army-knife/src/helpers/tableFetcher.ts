@@ -1,12 +1,35 @@
+function fetchHeadersByTh(thead: HTMLTableSectionElement){
+    const headerCells = thead.querySelectorAll('th');
+    const headers = Array.from(headerCells).map(cell => cell.textContent || '');
+    return headers;
+}
+
+function fetchHeadersByTd(thead: HTMLTableSectionElement){
+    const headerCells = thead.querySelectorAll('td');
+    const headers = Array.from(headerCells).map(cell => cell.textContent || '');
+    return headers;
+}
+
+function fetchHeaders(thead: HTMLTableSectionElement){
+    const handlers = [fetchHeadersByTh, fetchHeadersByTd];
+    let headers: string[] = [];
+    for(const handler of handlers){
+        headers = handler(thead);
+        console.log('a', headers)
+        if(headers.length!= 0) return headers;
+    }
+    return [];
+}
+
 export function fetchTableData(table: HTMLTableElement) {
     const tableData: object[] = [];
 
     const rows = table.querySelectorAll('tr');
     const thead = table.querySelector('thead');
+    
     let headers: string[] = [];
     if (thead) {
-        const headerCells = thead.querySelectorAll('th');
-        headers = Array.from(headerCells).map(cell => cell.textContent || '');
+        headers = fetchHeaders(thead);
     } else if (rows.length > 0) {
         const firstRowCells = rows[0].querySelectorAll('td');
         headers = Array.from(firstRowCells).map(cell => cell.textContent || '');
