@@ -1,16 +1,13 @@
 <table class="DT" id="resultTable">
-    <thead>
-        <tr>
-            <td class="W30" id="rowItemHeader">#</td>
-            <td>ISOCurrency</td>
-            <td>AgentName</td>
-            <td>SubAgentName</td>
-            <td>Enable</td>
-            <td>ModifyBy</td>
-            <td>ModifyOn</td>
-        </tr>
-    </thead>
-    <tbody id="rowItem">
+    <tr>
+        <th class="W30" id="rowItemHeader">#</th>
+        <th>ISOCurrency</th>
+        <th>AgentName</th>
+        <th>SubAgentName</th>
+        <th>Enable</th>
+        <th>ModifyBy</th>
+        <th>ModifyOn</th>
+    </tr>
         <tr class="TrOdd">
             <td class="W30 TAC">1</td>
             <td>IDR</td>
@@ -56,5 +53,4 @@
             <td>Jason Chen</td>
             <td>2020-12-06 23:18:17.003</td>
         </tr>
-    </tbody>
 </table>

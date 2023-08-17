@@ -5,8 +5,6 @@ import { fetchAllTable, fetchTableData } from "../tableFetcher"
 import data_table_json_expected from "./data/datatable_expected.json";
 import { readFileContent } from './testHelper';
 describe('fetchTableData', () => {
-    const thead_tr_td_table = readFileContent("data/thead_tr_td.xml");
-    
     //let app: VueWrapper
     //beforeEach(() => {
     // app = mount(LoginName, {
@@ -26,14 +24,21 @@ describe('fetchTableData', () => {
 
     it('table thead tr td', () => {
         const fakeTable = document.createElement('table');
-        fakeTable.innerHTML = thead_tr_td_table;
+        fakeTable.innerHTML = readFileContent("data/thead_tr_td.xml");
+        const dataTable = fetchTableData(fakeTable);
+        expect(dataTable).toStrictEqual(data_table_json_expected)
+    })
+
+    it('table tr th', () => {
+        const fakeTable = document.createElement('table');
+        fakeTable.innerHTML = readFileContent("data/table_tr_th.xml");
         const dataTable = fetchTableData(fakeTable);
         expect(dataTable).toStrictEqual(data_table_json_expected)
     })
 
 
     it('table', async () => {
-        document.body.innerHTML = thead_tr_td_table;
+        document.body.innerHTML = readFileContent("data/thead_tr_td.xml");
         const dataTableList = fetchAllTable();
         console.log(dataTableList);
     })

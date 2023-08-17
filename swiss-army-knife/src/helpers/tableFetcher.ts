@@ -30,8 +30,12 @@ export function fetchTableData(table: HTMLTableElement) {
     if (thead) {
         headers = fetchHeaders(thead);
     } else if (rows.length > 0) {
-        const firstRowCells = rows[0].querySelectorAll('td');
-        headers = Array.from(firstRowCells).map(cell => cell.textContent || '');
+        const thCells = table.querySelectorAll('th');
+        headers = Array.from(thCells).map(cell => cell.textContent || '');
+        if( headers.length == 0 ) {
+            const firstRowCells = rows[0].querySelectorAll('td');
+            headers = Array.from(firstRowCells).map(cell => cell.textContent || '');
+        }
     }
 
     headers = headers.map(x=> x.replace(/#/g, '_id').replace(/ /g, '_'));
