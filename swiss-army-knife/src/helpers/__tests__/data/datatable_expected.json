@@ -1,0 +1,47 @@
+[
+    {
+      "_id": "1",
+      "ISOCurrency": "IDR",
+      "AgentName": "sbotb",
+      "SubAgentName": "psrp",
+      "Enable": "True",
+      "ModifyBy": "tleon",
+      "ModifyOn": "2020-02-18 03: 52: 53.650"
+    },
+    {
+      "_id": "2",
+      "ISOCurrency": "THB",
+      "AgentName": "paytb",
+      "SubAgentName": "paytbksk01",
+      "Enable": "False",
+      "ModifyBy": "Vincent Lai",
+      "ModifyOn": "2020-12-17 04: 37: 55.567"
+    },
+    {
+      "_id": "7",
+      "ISOCurrency": "THB",
+      "AgentName": "paytb",
+      "SubAgentName": "paytbbbl01",
+      "Enable": "False",
+      "ModifyBy": "Vincent Lai",
+      "ModifyOn": "2020-12-17 04: 37: 55.567"
+    },
+    {
+      "_id": "8",
+      "ISOCurrency": "THB",
+      "AgentName": "paytb",
+      "SubAgentName": "paytbksk02",
+      "Enable": "True",
+      "ModifyBy": "Jason Chen",
+      "ModifyOn": "2020-12-06 23: 18: 17.003"
+    },
+    {
+      "_id": "9",
+      "ISOCurrency": "THB",
+      "AgentName": "paytb",
+      "SubAgentName": "paytbtmb02",
+      "Enable": "True",
+      "ModifyBy": "Jason Chen",
+      "ModifyOn": "2020-12-06 23: 18: 17.003"
+    }
+]
