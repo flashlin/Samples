@@ -24,7 +24,7 @@ export default defineConfig({
       userscript: {
         icon: 'https//vitejs.dev/logo.svg',
         namespace: 'flash-knife',
-        match: ['*://*/*'],
+        match: ['*://dba-*.coreop.net/*'],
       },
       build: {
         externalGlobals: {
