@@ -6,7 +6,7 @@
       "SubAgentName": "psrp",
       "Enable": "True",
       "ModifyBy": "tleon",
-      "ModifyOn": "2020-02-18 03: 52: 53.650"
+      "ModifyOn": "2020-02-18 03:52:53.650"
     },
     {
       "_id": "2",
@@ -15,7 +15,7 @@
       "SubAgentName": "paytbksk01",
       "Enable": "False",
       "ModifyBy": "Vincent Lai",
-      "ModifyOn": "2020-12-17 04: 37: 55.567"
+      "ModifyOn": "2020-12-17 04:37:55.567"
     },
     {
       "_id": "7",
@@ -24,7 +24,7 @@
       "SubAgentName": "paytbbbl01",
       "Enable": "False",
       "ModifyBy": "Vincent Lai",
-      "ModifyOn": "2020-12-17 04: 37: 55.567"
+      "ModifyOn": "2020-12-17 04:37:55.567"
     },
     {
       "_id": "8",
@@ -33,7 +33,7 @@
       "SubAgentName": "paytbksk02",
       "Enable": "True",
       "ModifyBy": "Jason Chen",
-      "ModifyOn": "2020-12-06 23: 18: 17.003"
+      "ModifyOn": "2020-12-06 23:18:17.003"
     },
     {
       "_id": "9",
@@ -42,6 +42,6 @@
       "SubAgentName": "paytbtmb02",
       "Enable": "True",
       "ModifyBy": "Jason Chen",
-      "ModifyOn": "2020-12-06 23: 18: 17.003"
+      "ModifyOn": "2020-12-06 23:18:17.003"
     }
 ]
