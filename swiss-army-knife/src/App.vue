@@ -2,10 +2,10 @@
 import { ref } from 'vue';
 import { storeToRefs } from 'pinia'
 import { RouterView } from 'vue-router';
-import { useJsonKnifeStore } from './stores/jsonKnife';
-const jsonKnifeStore = useJsonKnifeStore();
-const { fullscreenLoading } = storeToRefs(jsonKnifeStore);
-const { fetchAllDataTableInWebPage, showLoadingFullscreen } = jsonKnifeStore;
+import { useFlashKnifeStore } from './stores/flashKnife';
+const flashKnifeStore = useFlashKnifeStore();
+const { fullscreenLoading } = storeToRefs(flashKnifeStore);
+const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 
 // const data = reactive({
 //   jsonContent: jsonKnifeStore.jsonContent,

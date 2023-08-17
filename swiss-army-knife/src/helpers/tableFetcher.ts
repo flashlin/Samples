@@ -1,43 +1,49 @@
-function fetchHeadersByTh(thead: HTMLTableSectionElement){
+export interface IDataTable {
+    headerNames: string[];
+    rows: object[];
+}
+
+function fetchHeadersByTh(thead: HTMLTableSectionElement) {
     const headerCells = thead.querySelectorAll('th');
     const headers = Array.from(headerCells).map(cell => cell.textContent || '');
     return headers;
 }
 
-function fetchHeadersByTd(thead: HTMLTableSectionElement){
+
+function fetchHeadersByTd(thead: HTMLTableSectionElement) {
     const headerCells = thead.querySelectorAll('td');
     const headers = Array.from(headerCells).map(cell => cell.textContent || '');
     return headers;
 }
 
-function fetchHeaders(thead: HTMLTableSectionElement){
+function fetchHeaders(thead: HTMLTableSectionElement) {
     const handlers = [fetchHeadersByTh, fetchHeadersByTd];
     let headers: string[] = [];
-    for(const handler of handlers){
+    for (const handler of handlers) {
         headers = handler(thead);
-        if(headers.length != 0) return headers;
+        if (headers.length != 0) return headers;
     }
     return [];
 }
 
 
-export function fetchTableData(table: HTMLTableElement) {
+export function fetchTableData(table: HTMLTableElement): IDataTable {
     const tableData: object[] = [];
 
     const rows = table.querySelectorAll('tr');
     const thead = table.querySelector('thead');
-    
+
     let headers: string[] = [];
     if (thead) {
         headers = fetchHeaders(thead);
     } else if (rows.length > 0) {
         headers = fetchHeadersByTableTh(table);
-        if( headers.length == 0 ) {
+        if (headers.length == 0) {
             headers = fetchHeadersByRow(rows[0]);
         }
     }
 
-    headers = headers.map(x=> x.replace(/#/g, '_id').replace(/ /g, '_'));
+    headers = headers.map(x => x.replace(/#/g, '_id').replace(/ /g, '_'));
 
     Array.from(rows).slice(1).forEach(row => {
         const rowData: { [key: string]: string } = {};
@@ -49,7 +55,10 @@ export function fetchTableData(table: HTMLTableElement) {
         tableData.push(rowData);
     });
 
-    return tableData;
+    return {
+        headerNames: headers,
+        rows: tableData
+    };
 }
 
 function fetchHeadersByTableTh(table: HTMLTableElement) {
@@ -63,10 +72,10 @@ function fetchHeadersByRow(row: HTMLTableRowElement) {
 }
 
 export function fetchAllTable() {
-    const tableDataList: object[][] = [];
+    const tableDataList: IDataTable[] = [];
     const tableElements = document.querySelectorAll('table');
     tableElements.forEach(table => {
-        const tableData: object[] = fetchTableData(table);
+        const tableData = fetchTableData(table);
         tableDataList.push(tableData);
     });
     return tableDataList;
