@@ -15,8 +15,7 @@ function fetchHeaders(thead: HTMLTableSectionElement){
     let headers: string[] = [];
     for(const handler of handlers){
         headers = handler(thead);
-        console.log('a', headers)
-        if(headers.length!= 0) return headers;
+        if(headers.length != 0) return headers;
     }
     return [];
 }
@@ -35,7 +34,9 @@ export function fetchTableData(table: HTMLTableElement) {
         headers = Array.from(firstRowCells).map(cell => cell.textContent || '');
     }
 
-    rows.forEach(row => {
+    headers = headers.map(x=> x.replace(/#/g, '_id').replace(/ /g, '_'));
+
+    Array.from(rows).slice(1).forEach(row => {
         const rowData: { [key: string]: string } = {};
         const cells = row.querySelectorAll('td');
         cells.forEach((cell, index) => {
