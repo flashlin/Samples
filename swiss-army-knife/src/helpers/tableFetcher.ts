@@ -32,4 +32,5 @@ export function fetchAllTable() {
         const tableData: object[] = fetchTableData(table);
         tableDataList.push(tableData);
     });
+    return tableDataList;
 }
