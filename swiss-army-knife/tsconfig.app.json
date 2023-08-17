@@ -7,7 +7,6 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "types": ["element-plus/global"]
+    }
   }
 }
