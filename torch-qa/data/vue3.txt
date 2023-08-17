@@ -87,6 +87,7 @@ and you won't encounter the "Cannot find module" error.
 
 ### How to create store in vue3 with Pinia?
 ```
+// stores/user.ts
 import { defineStore } from 'pinia'
 
 interface IUserState {
@@ -98,12 +99,28 @@ const userStore = defineStore('counter', {
     name: "",
   }),
   getters: {
-    name: state => state.name,
+    // You can define computed properties here
   },
   actions: {
+    sayHello() {
+      // Implementation of the action
+    },
   },
 })
 
 export const useUserStore = () => userStore()
 ```
 
+```
+// any.vue
+import { storeToRefs } from 'pinia'
+import { useUserStore } from './stores/user';
+const userStore = useUserStore();
+// Convert the store properties to reactive references
+const { name } = storeToRefs(userStore);
+// Access the "sayHello" action from the store
+const { sayHello } = userStore;
+```
+Here, you're importing the user store you defined earlier. 
+You can use storeToRefs to convert the store properties to reactive references. 
+This allows you to access and bind these properties in your Vue components.
