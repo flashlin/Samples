@@ -24,7 +24,7 @@ export default defineConfig({
       userscript: {
         icon: 'https//vitejs.dev/logo.svg',
         namespace: 'flash-knife',
-        match: ['*://dba-*.coreop.net/*'],
+        match: ['*://dba-*.coreop.net/*', '*://www.google.com.*/*'],
       },
       build: {
         externalGlobals: {
@@ -33,11 +33,6 @@ export default defineConfig({
       },
     }),
   ],
-  // resolve: {
-  //   alias: {
-  //     '@': './',
-  //   },
-  // },
   optimizeDeps: {
     exclude: ['sql-wasm'],
     //esbuildOptions: { target: 'es2020' },
