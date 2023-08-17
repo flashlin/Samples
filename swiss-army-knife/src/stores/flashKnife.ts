@@ -1,19 +1,19 @@
+import { type IDataTable, fetchAllTable } from './../helpers/tableFetcher';
 import { defineStore } from 'pinia';
-import { fetchAllTable } from '@/helpers/tableFetcher';
 
 export interface IPrepareImportDataTable {
   tableName: string;
-  dataTable: object[];
+  dataTable: IDataTable;
 }
 
-export interface IJsonKnifeState {
+export interface IFlashKnifeState {
   fullscreenLoading: boolean;
   jsonContent: string;
   dataTableListInWebPage: IPrepareImportDataTable[];
 }
 
-const jsonKnifeStore = defineStore('jsonKnife', {
-  state: (): IJsonKnifeState => ({
+const flashKnifeStore = defineStore('flashKnife', {
+  state: (): IFlashKnifeState => ({
     fullscreenLoading: false,
     jsonContent: '',
     dataTableListInWebPage: [],
@@ -37,4 +37,4 @@ const jsonKnifeStore = defineStore('jsonKnife', {
   },
 });
 
-export const useJsonKnifeStore = () => jsonKnifeStore();
+export const useFlashKnifeStore = () => flashKnifeStore();
