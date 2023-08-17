@@ -1,33 +1,38 @@
 import { defineStore } from 'pinia';
-import { ElLoading } from 'element-plus'
 import { fetchAllTable } from '@/helpers/tableFetcher';
 
-interface IJsonKnifeState {
-  jsonContent: string;
+export interface IPrepareImportDataTable {
+  tableName: string;
+  dataTable: object[];
 }
 
-let loadingInstance: any = null;
+export interface IJsonKnifeState {
+  fullscreenLoading: boolean;
+  jsonContent: string;
+  dataTableListInWebPage: IPrepareImportDataTable[];
+}
 
 const jsonKnifeStore = defineStore('jsonKnife', {
   state: (): IJsonKnifeState => ({
+    fullscreenLoading: false,
     jsonContent: '',
+    dataTableListInWebPage: [],
   }),
   getters: {},
   actions: {
     showLoadingFullscreen(toggle: boolean) {
-      if (toggle && loadingInstance != null) {
-        return;
-      }
-      if (toggle && loadingInstance == null) {
-        loadingInstance = ElLoading.service({ fullscreen: true });
-        return;
-      }
-      loadingInstance.close();
-      loadingInstance = null;
+      this.fullscreenLoading = toggle;
     },
-    fetchAllDataTable() {
+    fetchAllDataTableInWebPage() {
       const allDataTableList = fetchAllTable();
-      return allDataTableList;
+      let index = -1;
+      this.dataTableListInWebPage = allDataTableList.map(x => {
+        index++;
+        return {
+          tableName: `table${index}`,
+          dataTable: x,
+        };
+      });
     }
   },
 });
