@@ -20,6 +20,7 @@ function fetchHeaders(thead: HTMLTableSectionElement){
     return [];
 }
 
+
 export function fetchTableData(table: HTMLTableElement) {
     const tableData: object[] = [];
 
@@ -30,11 +31,9 @@ export function fetchTableData(table: HTMLTableElement) {
     if (thead) {
         headers = fetchHeaders(thead);
     } else if (rows.length > 0) {
-        const thCells = table.querySelectorAll('th');
-        headers = Array.from(thCells).map(cell => cell.textContent || '');
+        headers = fetchHeadersByTableTh(table);
         if( headers.length == 0 ) {
-            const firstRowCells = rows[0].querySelectorAll('td');
-            headers = Array.from(firstRowCells).map(cell => cell.textContent || '');
+            headers = fetchHeadersByRow(rows[0]);
         }
     }
 
@@ -51,6 +50,16 @@ export function fetchTableData(table: HTMLTableElement) {
     });
 
     return tableData;
+}
+
+function fetchHeadersByTableTh(table: HTMLTableElement) {
+    const thCells = table.querySelectorAll('th');
+    return Array.from(thCells).map(cell => cell.textContent || '');
+}
+
+function fetchHeadersByRow(row: HTMLTableRowElement) {
+    const firstRowCells = row.querySelectorAll('td');
+    return Array.from(firstRowCells).map(cell => cell.textContent || '');
 }
 
 export function fetchAllTable() {
