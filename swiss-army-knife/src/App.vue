@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia'
 //import { RouterView } from 'vue-router';
 import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flashKnife';
@@ -8,7 +8,6 @@ import CodeEditor from './views/CodeEditor.vue'
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
 const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
-import { ElMessageBox } from 'element-plus'
 
 // const data = reactive({
 //   jsonContent: jsonKnifeStore.jsonContent,
@@ -22,22 +21,21 @@ const onClickExecute = () => {
   console.log("code=", data.code);
 }
 
-const tableData = dataTableListInWebPage.value.map((x: IPrepareImportDataTable) => {
-  return {
-    tableName: x.tableName,
-    columns: x.dataTable.headerNames.join(",")
-  }
+const dataTableList = computed(() => {
+  const tableData = dataTableListInWebPage.value.map((x: IPrepareImportDataTable) => {
+    return {
+      tableName: x.tableName,
+      columns: x.dataTable.headerNames.join(",")
+    }
+  })
+  return tableData;
 })
+
+
 
 const dialogVisible = ref(false)
 const handleClose = (done: () => void) => {
-  ElMessageBox.confirm('Are you sure to close this dialog?')
-    .then(() => {
-      done()
-    })
-    .catch(() => {
-      // catch error
-    })
+  done();
 }
 
 const activeIndex = ref('1');
@@ -64,8 +62,7 @@ const handleClickFlashIcon = () => {
 <template>
   <div class="flash-sidebar flash-icon" @click="handleClickFlashIcon">F</div>
   <div v-loading.fullscreen.lock="fullscreenLoading"></div>
-
-  <el-dialog v-model="dialogVisible" title="Tips" width="30%" :before-close="handleClose">
+  <el-dialog v-model="dialogVisible" title="FlashKnife" top="32px" width="98%" :before-close="handleClose">
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" background-color="#545c64"
       text-color="#fff" active-text-color="#ffd04b" @select="handleSelect">
       <el-menu-item index="1">Processing Center</el-menu-item>
@@ -89,7 +86,7 @@ const handleClickFlashIcon = () => {
     <el-tabs type="border-card">
       <el-tab-pane label="User">
         <codeEditor v-model="data.code" />
-        <el-table :data="tableData" stripe style="width: 100%">
+        <el-table :data="dataTableList" stripe style="width: 100%">
           <el-table-column prop="tableName" label="tableName" width="180" />
           <el-table-column prop="columns" label="columns" width="800" />
         </el-table>
