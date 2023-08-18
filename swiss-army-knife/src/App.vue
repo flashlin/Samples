@@ -145,7 +145,9 @@ onUnmounted(() => {
           </el-table-column>
         </el-table>
       </el-tab-pane>
-      <el-tab-pane label="Config">Config</el-tab-pane>
+      <el-tab-pane label="Config">
+        SELECT name FROM sqlite_master WHERE type='table'
+      </el-tab-pane>
     </el-tabs>
 
     <template #footer>
