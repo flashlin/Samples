@@ -3,7 +3,7 @@ import wasmPath from '../assets/sql-wasm.wasm?url';
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
 //const SQL = await initSqlJs({ locateFile: () => wasmPath });
 
-type FetchRowFn = (row: initSqlJs.ParamsObject) => any;
+type FetchRowFn = (row: any) => any;
 
 export interface IColumnInfo {
     name: string;
@@ -14,31 +14,56 @@ export class SqliteDb {
     SQL: initSqlJs.SqlJsStatic = null!;
     _db: Database = null!;
 
-    async open() {
+    async openAsync() {
         this.SQL = await initSqlJs({ locateFile: () => wasmPath });
         this._db = new this.SQL.Database();
     }
 
     execute(sql: string, data?: any) {
-        this._db?.exec(sql, data);
+        console.log(sql, data);
+
+        const db = this._db!;
+        if (data != null) {
+            const stmt = db.prepare(sql);
+            stmt.bind(data);
+            const success = stmt.step();
+            console.log(success)
+            stmt.free();
+            return;
+        }
+
+        db.run(sql);
     }
 
-    fetch(sql: string, parameters: initSqlJs.BindParams, fetchRow: FetchRowFn) {
+    fetch(sql: string, fetchRow: FetchRowFn, parameters?: initSqlJs.BindParams) {
         const db = this._db;
+
+        if (parameters == null) {
+            console.log('query1')
+            const result = db.exec(sql);
+            for (const row of result[0].values) {
+                fetchRow(row);
+            }
+            return;
+        }
+
+        console.log('query2')
         //var stmt = db.prepare("SELECT * FROM test WHERE col1 BETWEEN $start AND $end");
         //stmt.getAsObject({$start:1, $end:1}); // {col1:1, col2:111}
         const stmt = db.prepare(sql);
-        stmt.bind(parameters);
+        if (parameters != null) {
+            stmt.bind(parameters);
+        }
         while (stmt.step()) {
             fetchRow(stmt.getAsObject());
         }
     }
 
-    query(sql: string, parameters: initSqlJs.BindParams) {
+    query(sql: string, parameters?: initSqlJs.BindParams) {
         const result: any[] = [];
-        this.fetch(sql, parameters, (row) => {
+        this.fetch(sql, (row) => {
             result.push(row);
-        });
+        }, parameters);
         return result;
     }
 
@@ -56,16 +81,28 @@ export class SqliteDb {
 
     importTable(tableName: string, rows: any[]) {
         const columns = this.createTable(tableName, rows[0]);
-        const columnNames = columns.map(x => x.name).join(', ');
-        const values = columns.map(x => {
-            if (x.dataType == 'TEXT') {
-                return "'${" + `${x.name}` + "}'"
-            }
-            return '${' + `${x.name}` + '}'
-        }).join(', ');
+        const columnNames = columns.map(x => `${x.name}`).join(', ');
+        const values = columns.map(x => `:${x.name}`).join(', ');
         rows.forEach(row => {
             const insertQuery = `INSERT INTO ${tableName} (${columnNames}) VALUES(${values})`;
-            this.execute(insertQuery, row);
+            const newData: any = {}
+            for (const col of columns) {
+                const key = col.name;
+                newData[`:${key}`] = row[key];
+            }
+            this.execute(insertQuery, newData);
+
+            // const values = columns.map(x => {
+            //     if (x.dataType == 'TEXT') {
+            //         return `'${row[x.name]}'`
+            //     }
+            //     return `${row[x.name]}`;
+            // }).join(', ');
+            // const insertQuery = `INSERT INTO ${tableName} (${columnNames}) VALUES(${values})`;
+            // console.log(insertQuery)
+            // this._db?.run(insertQuery)
+            //const res = this._db?.exec("SELECT * FROM tb0");
+            //console.log(res)
         })
     }
 
