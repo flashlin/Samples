@@ -1,3 +1,5 @@
+import { type IDataTable } from './dataTypes'
+
 export function getCurrentTime(): string {
     const now = new Date();
     const year = now.getFullYear();
@@ -18,4 +20,38 @@ export function exportToCsv(name: string, data: any[]) {
     document.body.appendChild(link);
     link.click();
     link.remove();
+}
+
+export function readFileContentAsync(file: File): Promise<string> {
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            if (event.target) {
+                const content = event.target.result as string;
+                resolve(content);
+                //const objectArray = parseContentToObjectArray(content);
+                //output.textContent = JSON.stringify(objectArray, null, 2);
+            }
+        };
+        reader.readAsText(file);
+    })
+}
+
+export function parseCsvContentToObjectArray(content: string): IDataTable {
+    const lines = content.split('\n');
+    const objectArray: any[] = [];
+    const names = lines[0].split(',');
+    lines.slice(1).forEach(line => {
+        let idx = 0;
+        const item: any = {};
+        line.split(',').forEach(value => {
+            item[names[idx]] = value;
+            idx++;
+        });
+        objectArray.push(item);
+    });
+    return {
+        columnNames: names,
+        rows: objectArray
+    };
 }
