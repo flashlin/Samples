@@ -1,16 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia'
-import { RouterView } from 'vue-router';
-import { useFlashKnifeStore } from './stores/flashKnife';
+//import { RouterView } from 'vue-router';
+import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flashKnife';
+import CodeEditor from './views/CodeEditor.vue'
+
 const flashKnifeStore = useFlashKnifeStore();
-const { fullscreenLoading } = storeToRefs(flashKnifeStore);
+const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
 const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 import { ElMessageBox } from 'element-plus'
 
 // const data = reactive({
 //   jsonContent: jsonKnifeStore.jsonContent,
 // })
+
+const data = reactive({
+  code: ""
+});
+
+const onClickExecute = () => {
+  console.log("code=", data.code);
+}
+
+const tableData = dataTableListInWebPage.value.map((x: IPrepareImportDataTable) => {
+  return {
+    tableName: x.tableName,
+    columns: x.dataTable.headerNames.join(",")
+  }
+})
 
 const dialogVisible = ref(false)
 const handleClose = (done: () => void) => {
@@ -67,7 +84,20 @@ const handleClickFlashIcon = () => {
       <el-menu-item index="3" disabled>Info</el-menu-item>
       <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
     </el-menu>
-    <RouterView />
+    RouterView
+
+    <el-tabs type="border-card">
+      <el-tab-pane label="User">
+        <codeEditor v-model="data.code" />
+        <el-table :data="tableData" stripe style="width: 100%">
+          <el-table-column prop="tableName" label="tableName" width="180" />
+          <el-table-column prop="columns" label="columns" width="800" />
+        </el-table>
+      </el-tab-pane>
+      <el-tab-pane label="Config">Config</el-tab-pane>
+      <el-tab-pane label="Role">Role</el-tab-pane>
+      <el-tab-pane label="Task">Task</el-tab-pane>
+    </el-tabs>
 
     <template #footer>
       <span class="dialog-footer">

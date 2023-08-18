@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { useFlashKnifeStore, type IPrepareImportDataTable } from '../stores/flashKnife';
-import CodeEditor from './CodeEditor.vue'
+//import CodeEditor from './CodeEditor.vue'
 import { storeToRefs } from 'pinia';
 
 const flashKnifeStore = useFlashKnifeStore();
