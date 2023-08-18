@@ -8,7 +8,8 @@ import DataTable from './components/DataTable.vue';
 import { SqliteDb } from './helpers/sqliteDb';
 import { type IDataTable } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
-import { exportToCsv, getCurrentTime } from './helpers/dataHelper';
+import { UploadFilled } from '@element-plus/icons-vue'
+import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
@@ -96,6 +97,13 @@ const handleClickFlashIcon = () => {
   }
 };
 
+const onHandleBeforeUpload = async (file: File) => {
+  const fileContent = await readFileContentAsync(file);
+  const uploadDataTable = parseCsvContentToObjectArray(fileContent);
+  data.dataTable = uploadDataTable;
+  return false;
+}
+
 const handleKeyPress = (event: KeyboardEvent) => {
   if (dialogVisible.value == false) {
     return;
@@ -159,6 +167,17 @@ onUnmounted(() => {
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="Config">
+        <el-upload class="upload-demo" drag action="" multiple accept=".csv" :before-upload="onHandleBeforeUpload">
+          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+          <div class="el-upload__text">
+            Drop csv file here or <em>click to upload</em>
+          </div>
+          <template #tip>
+            <div class="el-upload__tip">
+              csv files with a size less than 500kb
+            </div>
+          </template>
+        </el-upload>
         SELECT name FROM sqlite_master WHERE type='table'
         SELECT customer.id, customer.name, product.pname, product.price
         FROM customer LEFT JOIN product ON customer.id = product.id
