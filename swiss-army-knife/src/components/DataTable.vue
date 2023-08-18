@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IDataTable } from '@/helpers/tableFetcher';
+import type { IDataTable } from '@/helpers/dataTypes';
 interface DataTableProps {
     modelValue: IDataTable
 }
