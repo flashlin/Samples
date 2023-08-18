@@ -8,6 +8,7 @@ import DataTable from './components/DataTable.vue';
 import { SqliteDb } from './helpers/sqliteDb';
 import { type IDataTable } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
+import { exportToCsv } from './helpers/dataHelper';
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
@@ -49,6 +50,15 @@ const notifySuccess = (message: string) => {
   });
 };
 
+const onClickTest = () => {
+  const data = [
+    { name: "flash", id: 1 },
+    { name: "jack", id: 2 },
+  ];
+
+  exportToCsv('data', data);
+}
+
 const onClickExecute = async () => {
   console.log('code=', data.code);
   const result = db.query(data.code);
@@ -73,6 +83,12 @@ const handleSelect = (key: string, keyPath: string[]) => {
     showLoadingFullscreen(true);
     fetchAllDataTableInWebPage();
     showLoadingFullscreen(false);
+    return;
+  }
+
+  if (key == 'Test') {
+    onClickTest();
+    return;
   }
 };
 
@@ -122,6 +138,7 @@ onUnmounted(() => {
         </el-sub-menu>
       </el-sub-menu>
       <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
+      <el-menu-item index="Test">TEST</el-menu-item>
     </el-menu>
     RouterView
 
