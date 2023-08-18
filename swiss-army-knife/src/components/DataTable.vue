@@ -6,7 +6,7 @@ interface DataTableProps {
 const props = withDefaults(defineProps<DataTableProps>(), {
     modelValue: () => {
         return {
-            headerNames: [],
+            columnNames: [],
             rows: [],
         }
     },
@@ -15,7 +15,7 @@ const props = withDefaults(defineProps<DataTableProps>(), {
 </script>
 <template>
     <el-table :data="props.modelValue.rows" stripe style="width: 100%">
-        <template v-for="headerName in props.modelValue.headerNames" :key="headerName">
+        <template v-for="headerName in props.modelValue.columnNames" :key="headerName">
             <el-table-column :label="headerName" width="180">
                 <template #default="scope">
                     <div style="display: flex; align-items: center">
