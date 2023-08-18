@@ -76,7 +76,9 @@ export function fetchAllTable() {
     const tableElements = document.querySelectorAll('table');
     tableElements.forEach(table => {
         const tableData = fetchTableData(table);
-        tableDataList.push(tableData);
+        if (tableData.rows.length > 0) {
+            tableDataList.push(tableData);
+        }
     });
     return tableDataList;
 }

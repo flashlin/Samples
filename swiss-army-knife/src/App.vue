@@ -84,11 +84,22 @@ const handleClickFlashIcon = () => {
     RouterView
 
     <el-tabs type="border-card">
-      <el-tab-pane label="User">
+      <el-tab-pane label="Sqlite">
         <codeEditor v-model="data.code" />
         <el-table :data="dataTableList" stripe style="width: 100%">
-          <el-table-column prop="tableName" label="tableName" width="180" />
+          <el-table-column label="tableName" width="180">
+            <template #default="scope">
+              <div style="display: flex; align-items: center">
+                <el-input v-model="scope.row.tableName" placeholder="Please input" />
+              </div>
+            </template>
+          </el-table-column>
           <el-table-column prop="columns" label="columns" width="800" />
+          <el-table-column fixed="right" label="Operations" width="120">
+            <template #default>
+              <el-button link type="primary" size="small">Import</el-button>
+            </template>
+          </el-table-column>
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="Config">Config</el-tab-pane>
