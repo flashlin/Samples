@@ -18,7 +18,7 @@ const onClickExecute = () => {
 const tableData = dataTableListInWebPage.value.map((x: IPrepareImportDataTable) => {
   return {
     tableName: x.tableName,
-    columns: x.dataTable.headerNames.join(",")
+    columns: x.dataTable.columnNames.join(",")
   }
 })
 </script>

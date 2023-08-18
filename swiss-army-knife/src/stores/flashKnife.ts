@@ -1,4 +1,5 @@
-import { type IDataTable, fetchAllTable } from './../helpers/tableFetcher';
+import type { IDataTable } from '@/helpers/dataTypes';
+import { fetchAllTable } from './../helpers/tableFetcher';
 import { defineStore } from 'pinia';
 
 export interface IPrepareImportDataTable {
