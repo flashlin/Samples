@@ -1,6 +1,6 @@
 export interface IDataTable {
-    headerNames: string[];
-    rows: object[];
+    columnNames: string[];
+    rows: any[];
 }
 
 function fetchHeadersByTh(thead: HTMLTableSectionElement) {
@@ -56,7 +56,7 @@ export function fetchTableData(table: HTMLTableElement): IDataTable {
     });
 
     return {
-        headerNames: headers,
+        columnNames: headers,
         rows: tableData
     };
 }

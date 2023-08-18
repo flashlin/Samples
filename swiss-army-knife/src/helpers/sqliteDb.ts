@@ -1,5 +1,6 @@
 import initSqlJs, { type Database } from 'sql.js';
 import wasmPath from '../assets/sql-wasm.wasm?url';
+import type { IDataTable } from './tableFetcher';
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
 //const SQL = await initSqlJs({ locateFile: () => wasmPath });
 
@@ -10,13 +11,17 @@ export interface IColumnInfo {
     dataType: string;
 }
 
+let SQL: initSqlJs.SqlJsStatic | null = null;
+
 export class SqliteDb {
-    SQL: initSqlJs.SqlJsStatic = null!;
+    //SQL: initSqlJs.SqlJsStatic = null!;
     _db: Database = null!;
 
     async openAsync() {
-        this.SQL = await initSqlJs({ locateFile: () => wasmPath });
-        this._db = new this.SQL.Database();
+        if (SQL == null) {
+            SQL = await initSqlJs({ locateFile: () => wasmPath });
+        }
+        this._db = new SQL.Database();
     }
 
     execute(sql: string, data?: any) {
@@ -35,21 +40,15 @@ export class SqliteDb {
         db.run(sql);
     }
 
+    /**
+     * 
+     * @param sql "select name from customer where name=:name"
+     * @param fetchRow 
+     * @param parameters {":name":"flash"}
+     * @returns columnNames ["name"]
+     */
     fetch(sql: string, fetchRow: FetchRowFn, parameters?: initSqlJs.BindParams) {
         const db = this._db;
-
-        if (parameters == null) {
-            console.log('query1')
-            const result = db.exec(sql);
-            for (const row of result[0].values) {
-                fetchRow(row);
-            }
-            return;
-        }
-
-        console.log('query2')
-        //var stmt = db.prepare("SELECT * FROM test WHERE col1 BETWEEN $start AND $end");
-        //stmt.getAsObject({$start:1, $end:1}); // {col1:1, col2:111}
         const stmt = db.prepare(sql);
         if (parameters != null) {
             stmt.bind(parameters);
@@ -57,14 +56,19 @@ export class SqliteDb {
         while (stmt.step()) {
             fetchRow(stmt.getAsObject());
         }
+        const columnNames = stmt.getColumnNames();
+        return columnNames;
     }
 
-    query(sql: string, parameters?: initSqlJs.BindParams) {
+    query(sql: string, parameters?: initSqlJs.BindParams): IDataTable {
         const result: any[] = [];
-        this.fetch(sql, (row) => {
+        const columnNames = this.fetch(sql, (row) => {
             result.push(row);
         }, parameters);
-        return result;
+        return {
+            columnNames: columnNames,
+            rows: result,
+        };
     }
 
     close() {

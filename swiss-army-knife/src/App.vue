@@ -6,6 +6,7 @@ import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flash
 import CodeEditor from './views/CodeEditor.vue';
 import DataTable from './components/DataTable.vue';
 import { SqliteDb } from './helpers/sqliteDb';
+import { type IDataTable } from './helpers/tableFetcher';
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
@@ -13,16 +14,13 @@ const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 
 interface IData {
   code: string;
-  dataTable: {
-    headerNames: string[];
-    rows: any[];
-  }
+  dataTable: IDataTable
 }
-
+const db = new SqliteDb();
 const data = reactive<IData>({
   code: 'select Company,Contact,Country from tb0',
   dataTable: {
-    headerNames: [],
+    columnNames: [],
     rows: [],
   }
 });
@@ -30,22 +28,20 @@ const dialogVisible = ref(false);
 
 const onClickExecute = async () => {
   console.log('code=', data.code);
-  const db = new SqliteDb();
-  await db.openAsync();
   const result = db.query(data.code);
   const rows: any[] = [];
-  const headerNames: string[] = [];
-  result.forEach(row => {
+  result.rows.forEach((row: any) => {
     const obj: any = {}
-    for (let idx = 0; idx < row.length; idx++) {
-      headerNames[idx] = `field${idx}`
-      obj[`field${idx}`] = row[idx];
+    for (let idx = 0; idx < result.columnNames.length; idx++) {
+      const columnName = result.columnNames[idx];
+      obj[columnName] = row[idx];
     }
     rows.push(obj);
   });
-  data.dataTable.headerNames = headerNames;
-  data.dataTable.rows = rows;
-  db.close();
+  data.dataTable = {
+    columnNames: result.columnNames,
+    rows: rows,
+  };
 };
 
 
@@ -56,7 +52,7 @@ const dataTableList = computed(() => {
     return {
       idx: idx,
       tableName: x.tableName,
-      columns: x.dataTable.headerNames.join(','),
+      columns: x.dataTable.columnNames.join(','),
     };
   });
   return tableData;
@@ -65,12 +61,9 @@ const dataTableList = computed(() => {
 const handleClickImport = async (idx: number) => {
   const table = dataTableList.value[idx];
   const rawTable = dataTableListInWebPage.value[idx];
-  const db = new SqliteDb();
-  await db.openAsync();
   db.importTable(table.tableName, rawTable.dataTable.rows);
   const t1 = db.query(data.code);
   console.log('q', t1)
-  db.close();
 };
 
 const handleClose = (done: () => void) => {
@@ -104,7 +97,8 @@ const handleKeyPress = (event: KeyboardEvent) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await db.openAsync();
   window.addEventListener('keydown', handleKeyPress);
 });
 
