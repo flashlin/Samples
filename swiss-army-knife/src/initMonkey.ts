@@ -7,5 +7,8 @@
 // clearAnchorAttributes(anchorInfo.elem);
 // export const appDiv = anchorInfo.elem;
 
+const bodyElement = document.body;
 export const appDiv = document.createElement('div');
-document.body.appendChild(appDiv);
+//const firstChild = document.body.firstChild;
+//bodyElement.insertBefore(appDiv, firstChild);
+bodyElement.appendChild(appDiv);
