@@ -1,6 +1,7 @@
 import initSqlJs, { type Database } from 'sql.js';
 import wasmPath from '../assets/sql-wasm.wasm?url';
-import type { IDataTable } from './tableFetcher';
+import { type IDataTable } from "./dataTypes";
+
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
 //const SQL = await initSqlJs({ locateFile: () => wasmPath });
 
