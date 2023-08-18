@@ -8,7 +8,7 @@ import DataTable from './components/DataTable.vue';
 import { SqliteDb } from './helpers/sqliteDb';
 import { type IDataTable } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
-import { exportToCsv } from './helpers/dataHelper';
+import { exportToCsv, getCurrentTime } from './helpers/dataHelper';
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
@@ -50,13 +50,9 @@ const notifySuccess = (message: string) => {
   });
 };
 
-const onClickTest = () => {
-  const data = [
-    { name: "flash", id: 1 },
-    { name: "jack", id: 2 },
-  ];
-
-  exportToCsv('data', data);
+const onClickExportToCsv = () => {
+  const time = getCurrentTime();
+  exportToCsv(`flash-data-${time}`, data.dataTable.rows);
 }
 
 const onClickExecute = async () => {
@@ -86,8 +82,8 @@ const handleSelect = (key: string, keyPath: string[]) => {
     return;
   }
 
-  if (key == 'Test') {
-    onClickTest();
+  if (key == 'ExportToCsv') {
+    onClickExportToCsv();
     return;
   }
 };
@@ -138,7 +134,7 @@ onUnmounted(() => {
         </el-sub-menu>
       </el-sub-menu>
       <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
-      <el-menu-item index="Test">TEST</el-menu-item>
+      <el-menu-item index="ExportToCsv">ExportToCsv</el-menu-item>
     </el-menu>
     RouterView
 
@@ -164,6 +160,8 @@ onUnmounted(() => {
       </el-tab-pane>
       <el-tab-pane label="Config">
         SELECT name FROM sqlite_master WHERE type='table'
+        SELECT customer.id, customer.name, product.pname, product.price
+        FROM customer LEFT JOIN product ON customer.id = product.id
       </el-tab-pane>
     </el-tabs>
 
