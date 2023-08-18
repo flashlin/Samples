@@ -4,25 +4,50 @@ import { storeToRefs } from 'pinia';
 //import { RouterView } from 'vue-router';
 import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flashKnife';
 import CodeEditor from './views/CodeEditor.vue';
-import { id } from 'element-plus/es/locale/index.js';
+import DataTable from './components/DataTable.vue';
 import { SqliteDb } from './helpers/sqliteDb';
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
 const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 
-// const data = reactive({
-//   jsonContent: jsonKnifeStore.jsonContent,
-// })
+interface IData {
+  code: string;
+  dataTable: {
+    headerNames: string[];
+    rows: any[];
+  }
+}
 
-const data = reactive({
-  code: '',
+const data = reactive<IData>({
+  code: 'select Company,Contact,Country from tb0',
+  dataTable: {
+    headerNames: [],
+    rows: [],
+  }
 });
 const dialogVisible = ref(false);
 
-const onClickExecute = () => {
+const onClickExecute = async () => {
   console.log('code=', data.code);
+  const db = new SqliteDb();
+  await db.openAsync();
+  const result = db.query(data.code);
+  const rows: any[] = [];
+  const headerNames: string[] = [];
+  result.forEach(row => {
+    const obj: any = {}
+    for (let idx = 0; idx < row.length; idx++) {
+      headerNames[idx] = `field${idx}`
+      obj[`field${idx}`] = row[idx];
+    }
+    rows.push(obj);
+  });
+  data.dataTable.headerNames = headerNames;
+  data.dataTable.rows = rows;
+  db.close();
 };
+
 
 const dataTableList = computed(() => {
   let idx = -1;
@@ -37,13 +62,14 @@ const dataTableList = computed(() => {
   return tableData;
 });
 
-const handleClickImport = (idx: number) => {
+const handleClickImport = async (idx: number) => {
   const table = dataTableList.value[idx];
   const rawTable = dataTableListInWebPage.value[idx];
-  console.log('import', table);
   const db = new SqliteDb();
-  db.open();
+  await db.openAsync();
   db.importTable(table.tableName, rawTable.dataTable.rows);
+  const t1 = db.query(data.code);
+  console.log('q', t1)
   db.close();
 };
 
@@ -74,7 +100,7 @@ const handleKeyPress = (event: KeyboardEvent) => {
     return;
   }
   if (event.key === 'F8') {
-    console.log(123);
+    onClickExecute();
   }
 };
 
@@ -113,7 +139,8 @@ onUnmounted(() => {
 
     <el-tabs type="border-card">
       <el-tab-pane label="Sqlite">
-        <codeEditor v-model="data.code" />
+        <CodeEditor v-model="data.code" />
+        <DataTable v-model="data.dataTable" />
         <el-table :data="dataTableList" stripe style="width: 100%">
           <el-table-column label="tableName" width="180">
             <template #default="scope">

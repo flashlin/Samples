@@ -29,7 +29,7 @@ const flashKnifeStore = defineStore('flashKnife', {
       this.dataTableListInWebPage = allDataTableList.map(x => {
         index++;
         return {
-          tableName: `table${index}`,
+          tableName: `tb${index}`,
           dataTable: x,
         };
       });
