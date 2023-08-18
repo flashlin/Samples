@@ -6,7 +6,8 @@ import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flash
 import CodeEditor from './views/CodeEditor.vue';
 import DataTable from './components/DataTable.vue';
 import { SqliteDb } from './helpers/sqliteDb';
-import { type IDataTable } from "./helpers/dataTypes";
+import { type IDataTable } from './helpers/dataTypes';
+import { ElNotification } from 'element-plus';
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
@@ -14,7 +15,7 @@ const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 
 interface IData {
   code: string;
-  dataTable: IDataTable
+  dataTable: IDataTable;
 }
 const db = new SqliteDb();
 const data = reactive<IData>({
@@ -22,28 +23,9 @@ const data = reactive<IData>({
   dataTable: {
     columnNames: [],
     rows: [],
-  }
+  },
 });
 const dialogVisible = ref(false);
-
-const onClickExecute = async () => {
-  console.log('code=', data.code);
-  const result = db.query(data.code);
-  const rows: any[] = [];
-  result.rows.forEach((row: any) => {
-    const obj: any = {}
-    for (let idx = 0; idx < result.columnNames.length; idx++) {
-      const columnName = result.columnNames[idx];
-      obj[columnName] = row[idx];
-    }
-    rows.push(obj);
-  });
-  data.dataTable = {
-    columnNames: result.columnNames,
-    rows: rows,
-  };
-};
-
 
 const dataTableList = computed(() => {
   let idx = -1;
@@ -58,12 +40,26 @@ const dataTableList = computed(() => {
   return tableData;
 });
 
+const notifySuccess = (message: string) => {
+  ElNotification({
+    title: 'Success',
+    message: message,
+    type: 'success',
+    position: 'top-right',
+  });
+};
+
+const onClickExecute = async () => {
+  console.log('code=', data.code);
+  const result = db.query(data.code);
+  data.dataTable = result;
+};
+
 const handleClickImport = async (idx: number) => {
   const table = dataTableList.value[idx];
   const rawTable = dataTableListInWebPage.value[idx];
   db.importTable(table.tableName, rawTable.dataTable.rows);
-  const t1 = db.query(data.code);
-  console.log('q', t1)
+  notifySuccess(`import ${table.tableName}`);
 };
 
 const handleClose = (done: () => void) => {
