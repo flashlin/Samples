@@ -6,7 +6,7 @@ import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flash
 import CodeEditor from './views/CodeEditor.vue';
 import DataTable from './components/DataTable.vue';
 import { SqliteDb } from './helpers/sqliteDb';
-import { type IDataTable } from './helpers/tableFetcher';
+import { type IDataTable } from "./helpers/dataTypes";
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);

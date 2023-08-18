@@ -1,7 +1,4 @@
-export interface IDataTable {
-    columnNames: string[];
-    rows: any[];
-}
+import { type IDataTable } from "./dataTypes";
 
 function fetchHeadersByTh(thead: HTMLTableSectionElement) {
     const headerCells = thead.querySelectorAll('th');
