@@ -12,10 +12,10 @@ import { parseTsql } from './sqlex/tsql';
 //const tsql = new Tsql();
 parseTsql('select id from customer');
 
-import { contentDiv } from "./initMonkey"
+import { appDiv } from "./initMonkey";
 const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 app.use(ElementPlus, { size: 'small', zIndex: 998 })
 //app.mount('#app');
-app.mount(contentDiv);
+app.mount(appDiv);
