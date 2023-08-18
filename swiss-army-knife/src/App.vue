@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue';
-import { storeToRefs } from 'pinia'
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { storeToRefs } from 'pinia';
 //import { RouterView } from 'vue-router';
 import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flashKnife';
-import CodeEditor from './views/CodeEditor.vue'
+import CodeEditor from './views/CodeEditor.vue';
 import { id } from 'element-plus/es/locale/index.js';
+import { SqliteDb } from './helpers/sqliteDb';
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
@@ -15,13 +16,13 @@ const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 // })
 
 const data = reactive({
-  code: ""
+  code: '',
 });
 const dialogVisible = ref(false);
 
 const onClickExecute = () => {
-  console.log("code=", data.code);
-}
+  console.log('code=', data.code);
+};
 
 const dataTableList = computed(() => {
   let idx = -1;
@@ -30,26 +31,30 @@ const dataTableList = computed(() => {
     return {
       idx: idx,
       tableName: x.tableName,
-      columns: x.dataTable.headerNames.join(",")
-    }
-  })
+      columns: x.dataTable.headerNames.join(','),
+    };
+  });
   return tableData;
-})
+});
 
 const handleClickImport = (idx: number) => {
-  const table = dataTableList.value[idx]
-  const rawTable = dataTableListInWebPage.value[idx]
-  console.log("import", table);
-}
+  const table = dataTableList.value[idx];
+  const rawTable = dataTableListInWebPage.value[idx];
+  console.log('import', table);
+  const db = new SqliteDb();
+  db.open();
+  db.importTable(table.tableName, rawTable.dataTable.rows);
+  db.close();
+};
 
 const handleClose = (done: () => void) => {
   done();
-}
+};
 
 const activeIndex = ref('1');
 const handleSelect = (key: string, keyPath: string[]) => {
-  if (key == "FetchDataTableInWebPage") {
-    console.log(keyPath)
+  if (key == 'FetchDataTableInWebPage') {
+    console.log(keyPath);
     showLoadingFullscreen(true);
     fetchAllDataTableInWebPage();
     showLoadingFullscreen(false);
@@ -62,7 +67,24 @@ const handleClickFlashIcon = () => {
   } else {
     dialogVisible.value = true;
   }
-}
+};
+
+const handleKeyPress = (event: KeyboardEvent) => {
+  if (dialogVisible.value == false) {
+    return;
+  }
+  if (event.key === 'F8') {
+    console.log(123);
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyPress);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyPress);
+});
 </script>
 
 <template>
@@ -116,9 +138,7 @@ const handleClickFlashIcon = () => {
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogVisible = false">
-          Confirm
-        </el-button>
+        <el-button type="primary" @click="dialogVisible = false"> Confirm </el-button>
       </span>
     </template>
   </el-dialog>
@@ -143,7 +163,7 @@ const handleClickFlashIcon = () => {
   padding: 0;
   width: 30px;
   height: 30px;
-  background-color: #04AA6D;
+  background-color: #04aa6d;
   overflow: auto;
   position: fixed;
   left: 0;
@@ -166,7 +186,7 @@ const handleClickFlashIcon = () => {
 }
 
 .flash-sidebar a.active {
-  background-color: #04AA6D;
+  background-color: #04aa6d;
   color: white;
 }
 
