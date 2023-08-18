@@ -66,7 +66,7 @@ const handleClose = (done: () => void) => {
   done();
 };
 
-const activeIndex = ref('1');
+const activeIndex = ref('2');
 const handleSelect = (key: string, keyPath: string[]) => {
   if (key == 'FetchDataTableInWebPage') {
     console.log(keyPath);
@@ -109,7 +109,6 @@ onUnmounted(() => {
   <el-dialog v-model="dialogVisible" title="FlashKnife" top="32px" width="98%" :before-close="handleClose">
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" background-color="#545c64"
       text-color="#fff" active-text-color="#ffd04b" @select="handleSelect">
-      <el-menu-item index="1">Processing Center</el-menu-item>
       <el-sub-menu index="2">
         <template #title>Workspace</template>
         <el-menu-item index="2-1">item one</el-menu-item>
@@ -122,7 +121,6 @@ onUnmounted(() => {
           <el-menu-item index="2-4-3">item three</el-menu-item>
         </el-sub-menu>
       </el-sub-menu>
-      <el-menu-item index="3" disabled>Info</el-menu-item>
       <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
     </el-menu>
     RouterView
@@ -148,14 +146,11 @@ onUnmounted(() => {
         </el-table>
       </el-tab-pane>
       <el-tab-pane label="Config">Config</el-tab-pane>
-      <el-tab-pane label="Role">Role</el-tab-pane>
-      <el-tab-pane label="Task">Task</el-tab-pane>
     </el-tabs>
 
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">Cancel</el-button>
-        <el-button type="primary" @click="dialogVisible = false"> Confirm </el-button>
+        <el-button type="primary" @click="dialogVisible = false"> Close </el-button>
       </span>
     </template>
   </el-dialog>
