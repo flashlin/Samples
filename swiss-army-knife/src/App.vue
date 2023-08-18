@@ -16,11 +16,13 @@ const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStor
 const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 
 interface IData {
+  tableName: string;
   code: string;
   dataTable: IDataTable;
 }
 const db = new SqliteDb();
 const data = reactive<IData>({
+  tableName: 'tb0',
   code: 'select Company,Contact,Country from tb0',
   dataTable: {
     columnNames: [],
@@ -87,6 +89,11 @@ const handleSelect = (key: string, keyPath: string[]) => {
     onClickExportToCsv();
     return;
   }
+
+  if (key == 'ImportQueryData') {
+    onClickImportQueryData();
+    return;
+  }
 };
 
 const handleClickFlashIcon = () => {
@@ -96,6 +103,10 @@ const handleClickFlashIcon = () => {
     dialogVisible.value = true;
   }
 };
+
+const onClickImportQueryData = () => {
+  db.importTable(data.tableName, data.dataTable.rows);
+}
 
 const onHandleBeforeUpload = async (file: File) => {
   const fileContent = await readFileContentAsync(file);
@@ -143,9 +154,10 @@ onUnmounted(() => {
       </el-sub-menu>
       <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
       <el-menu-item index="ExportToCsv">ExportToCsv</el-menu-item>
+      <el-menu-item index="ImportQueryData">ImportQueryData</el-menu-item>
     </el-menu>
-    RouterView
 
+    <el-input v-model="data.tableName" placeholder="Please input import table name" />
     <el-tabs type="border-card">
       <el-tab-pane label="Sqlite">
         <CodeEditor v-model="data.code" />
