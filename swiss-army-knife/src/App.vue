@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 //import { RouterView } from 'vue-router';
 import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flashKnife';
 import CodeEditor from './views/CodeEditor.vue'
+import { id } from 'element-plus/es/locale/index.js';
 
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
@@ -16,14 +17,18 @@ const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 const data = reactive({
   code: ""
 });
+const dialogVisible = ref(false);
 
 const onClickExecute = () => {
   console.log("code=", data.code);
 }
 
 const dataTableList = computed(() => {
+  let idx = -1;
   const tableData = dataTableListInWebPage.value.map((x: IPrepareImportDataTable) => {
+    idx++;
     return {
+      idx: idx,
       tableName: x.tableName,
       columns: x.dataTable.headerNames.join(",")
     }
@@ -31,9 +36,12 @@ const dataTableList = computed(() => {
   return tableData;
 })
 
+const handleClickImport = (idx: number) => {
+  const table = dataTableList.value[idx]
+  const rawTable = dataTableListInWebPage.value[idx]
+  console.log("import", table);
+}
 
-
-const dialogVisible = ref(false)
 const handleClose = (done: () => void) => {
   done();
 }
@@ -44,9 +52,7 @@ const handleSelect = (key: string, keyPath: string[]) => {
     console.log(keyPath)
     showLoadingFullscreen(true);
     fetchAllDataTableInWebPage();
-    setTimeout(() => {
-      showLoadingFullscreen(false);
-    }, 1000);
+    showLoadingFullscreen(false);
   }
 };
 
@@ -96,8 +102,8 @@ const handleClickFlashIcon = () => {
           </el-table-column>
           <el-table-column prop="columns" label="columns" width="800" />
           <el-table-column fixed="right" label="Operations" width="120">
-            <template #default>
-              <el-button link type="primary" size="small">Import</el-button>
+            <template #default="scope">
+              <el-button link type="primary" size="small" @click="handleClickImport(scope.row.idx)">Import</el-button>
             </template>
           </el-table-column>
         </el-table>
