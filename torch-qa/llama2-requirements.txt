@@ -7,3 +7,5 @@ ctransformers
 sentence_transformers
 #faiss-cpu
 chainlit
+streamlit
+bs4

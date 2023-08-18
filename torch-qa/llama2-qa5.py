@@ -11,9 +11,11 @@ from langchain.chains import ConversationalRetrievalChain
 from lanchainlit import load_documents
 import streamlit as st
 
-
-model_id = 'openchat/openchat_v3.2'
-model_id = 'meta-llama/Llama-2-7b-chat-hf'
+# https://huggingface.co/spaces/HuggingFaceH4/open_llm_leaderboard
+model_id = 'openchat/openchat_v3.2'  # 60.85
+# 'TheBloke/Llama-2-13B-fp16'  # 58.63
+model_id = 'meta-llama/Llama-2-7b-chat-hf'  # 56.34
+# model_id = 'Open-Orca/OpenOrca-Platypus2-13B'  # 64.6
 device = f'cuda:{cuda.current_device()}' if cuda.is_available() else 'cpu'
 
 # set quantization configuration to load large model with less GPU memory
@@ -153,7 +155,7 @@ if MODE == 'chat':
         if query == 'quit' or query == 'q':
             exit(0)
         result = chain({"question": query, "chat_history": chat_history})
-        answer = result['answer'].trim()
+        answer = result['answer'].strip()
         print(answer)
         print("")
     exit(0)
