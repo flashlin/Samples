@@ -105,7 +105,7 @@ const queryAllTableNames = () => {
 
 const activeIndex = ref('2');
 const handleSelect = (key: string, keyPath: string[]) => {
-  if (key == 'FetchDataTableInWebPage') {
+  if (key == 'FetchTableInWebPage') {
     showLoadingFullscreen(true);
     fetchAllDataTableInWebPage();
     showLoadingFullscreen(false);
@@ -204,8 +204,8 @@ onUnmounted(() => {
         </el-sub-menu>
         <el-sub-menu index="2">
           <template #title>Import Data</template>
-          <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
-          <el-menu-item index="ImportQueryData">ImportQueryData</el-menu-item>
+          <el-menu-item index="FetchTableInWebPage">Fetch Table In WebPage</el-menu-item>
+          <el-menu-item index="ImportQueryData">Import QueryData</el-menu-item>
           <el-sub-menu index="2-4">
             <template #title>item four</template>
             <el-menu-item index="2-4-1">item one</el-menu-item>
