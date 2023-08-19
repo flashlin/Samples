@@ -84,10 +84,11 @@ export class SqliteDb {
         return columns;
     }
 
-    importTable(tableName: string, rows: any[]) {
+    importTable(tableName: string, rows: any[]): number {
         const columns = this.createTable(tableName, rows[0]);
         const columnNames = columns.map(x => `${x.name}`).join(', ');
         const values = columns.map(x => `:${x.name}`).join(', ');
+        let count = 0;
         rows.forEach(row => {
             const insertQuery = `INSERT INTO ${tableName} (${columnNames}) VALUES(${values})`;
             const newData: any = {}
@@ -96,19 +97,9 @@ export class SqliteDb {
                 newData[`:${key}`] = row[key];
             }
             this.execute(insertQuery, newData);
-
-            // const values = columns.map(x => {
-            //     if (x.dataType == 'TEXT') {
-            //         return `'${row[x.name]}'`
-            //     }
-            //     return `${row[x.name]}`;
-            // }).join(', ');
-            // const insertQuery = `INSERT INTO ${tableName} (${columnNames}) VALUES(${values})`;
-            // console.log(insertQuery)
-            // this._db?.run(insertQuery)
-            //const res = this._db?.exec("SELECT * FROM tb0");
-            //console.log(res)
+            count++;
         })
+        return count;
     }
 
     private createTableColumns(row: any) {

@@ -6,7 +6,7 @@ import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flash
 import CodeEditor from './views/CodeEditor.vue';
 import DataTable from './components/DataTable.vue';
 import { SqliteDb } from './helpers/sqliteDb';
-import { type IDataTable } from './helpers/dataTypes';
+import { MessageTypes, type IDataTable, type MessageType } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
 import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
@@ -44,14 +44,15 @@ const dataTableList = computed(() => {
   return tableData;
 });
 
-const notifySuccess = (message: string) => {
+const notify = (messageType: MessageType, message: string) => {
   ElNotification({
     title: 'Success',
     message: message,
-    type: 'success',
+    type: messageType,
     position: 'top-right',
   });
 };
+
 
 const onClickExportToCsv = () => {
   const time = getCurrentTime();
@@ -67,8 +68,8 @@ const onClickExecute = async () => {
 const handleClickImport = async (idx: number) => {
   const table = dataTableList.value[idx];
   const rawTable = dataTableListInWebPage.value[idx];
-  db.importTable(table.tableName, rawTable.dataTable.rows);
-  notifySuccess(`import ${table.tableName}`);
+  const count = db.importTable(table.tableName, rawTable.dataTable.rows);
+  notify(MessageTypes.Success, `import ${table.tableName}, Data Count=${count}`);
 };
 
 const handleClose = (done: () => void) => {
@@ -137,14 +138,13 @@ onUnmounted(() => {
 <template>
   <div class="flash-sidebar flash-icon" @click="handleClickFlashIcon">F</div>
   <div v-loading.fullscreen.lock="fullscreenLoading"></div>
-  <el-dialog v-model="dialogVisible" title="FlashKnife" top="32px" width="98%" :before-close="handleClose">
+  <el-dialog v-model="dialogVisible" title="FlashKnife V0.1" top="32px" width="98%" :before-close="handleClose">
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" background-color="#545c64"
       text-color="#fff" active-text-color="#ffd04b" @select="handleSelect">
       <el-sub-menu index="2">
-        <template #title>Workspace</template>
-        <el-menu-item index="2-1">item one</el-menu-item>
-        <el-menu-item index="2-2">item two</el-menu-item>
-        <el-menu-item index="2-3">item three</el-menu-item>
+        <template #title>Import Data</template>
+        <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
+        <el-menu-item index="ImportQueryData">ImportQueryData</el-menu-item>
         <el-sub-menu index="2-4">
           <template #title>item four</template>
           <el-menu-item index="2-4-1">item one</el-menu-item>
@@ -152,15 +152,13 @@ onUnmounted(() => {
           <el-menu-item index="2-4-3">item three</el-menu-item>
         </el-sub-menu>
       </el-sub-menu>
-      <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
       <el-menu-item index="ExportToCsv">ExportToCsv</el-menu-item>
-      <el-menu-item index="ImportQueryData">ImportQueryData</el-menu-item>
     </el-menu>
 
-    <el-input v-model="data.tableName" placeholder="Please input import table name" />
     <el-tabs type="border-card">
       <el-tab-pane label="Sqlite">
         <CodeEditor v-model="data.code" />
+        <el-input v-model="data.tableName" placeholder="Please input import table name" />
         <DataTable v-model="data.dataTable" />
         <el-table :data="dataTableList" stripe style="width: 100%">
           <el-table-column label="tableName" width="180">
