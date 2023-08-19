@@ -107,7 +107,12 @@ export class SqliteDb {
         this._db?.close();
     }
 
-    createTable(tableName: string, row: any) {
+    public dropTable(tableName: string) {
+        const sql = `DROP TABLE IF EXISTS ${tableName}`;
+        this.execute(sql);
+    }
+
+    private createTable(tableName: string, row: any) {
         const columns = this.createTableColumns(row);
         const declareColumnNames = columns
             .map((c) => `${c.name} ${c.dataType}`)
