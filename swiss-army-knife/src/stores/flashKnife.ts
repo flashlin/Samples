@@ -10,14 +10,14 @@ export interface IPrepareImportDataTable {
 export interface IFlashKnifeState {
   fullscreenLoading: boolean;
   jsonContent: string;
-  dataTableListInWebPage: IPrepareImportDataTable[];
+  tableListInWebPage: IPrepareImportDataTable[];
 }
 
 const flashKnifeStore = defineStore('flashKnife', {
   state: (): IFlashKnifeState => ({
     fullscreenLoading: false,
     jsonContent: '',
-    dataTableListInWebPage: [],
+    tableListInWebPage: [],
   }),
   getters: {},
   actions: {
@@ -27,7 +27,7 @@ const flashKnifeStore = defineStore('flashKnife', {
     fetchAllDataTableInWebPage() {
       const allDataTableList = fetchAllTable();
       let index = -1;
-      this.dataTableListInWebPage = allDataTableList.map(x => {
+      this.tableListInWebPage = allDataTableList.map(x => {
         index++;
         return {
           tableName: `tb${index}`,

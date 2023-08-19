@@ -13,7 +13,7 @@ import { UploadFilled } from '@element-plus/icons-vue'
 import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
 
 const flashKnifeStore = useFlashKnifeStore();
-const { fullscreenLoading, dataTableListInWebPage } = storeToRefs(flashKnifeStore);
+const { fullscreenLoading, tableListInWebPage } = storeToRefs(flashKnifeStore);
 const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 
 interface IData {
@@ -34,9 +34,9 @@ const data = reactive<IData>({
 });
 const dialogVisible = ref(false);
 
-const dataTableList = computed(() => {
+const tableList = computed(() => {
   let idx = -1;
-  const tableData = dataTableListInWebPage.value.map((x: IPrepareImportDataTable) => {
+  const tableData = tableListInWebPage.value.map((x: IPrepareImportDataTable) => {
     idx++;
     return {
       idx: idx,
@@ -86,8 +86,8 @@ const onClickExecute = async () => {
 };
 
 const handleClickImportWebPageTable = async (idx: number) => {
-  const table = dataTableList.value[idx];
-  const rawTable = dataTableListInWebPage.value[idx];
+  const table = tableList.value[idx];
+  const rawTable = tableListInWebPage.value[idx];
   const count = db.importTable(table.tableName, rawTable.dataTable.rows);
   notify(MessageTypes.Success, `import ${table.tableName}, Data Count=${count}`);
   queryAllTableNames();
@@ -247,7 +247,7 @@ onUnmounted(() => {
           <el-divider />
 
           <!-- Query Table In WebPage -->
-          <el-table :data="dataTableList" stripe style="width: 100%">
+          <el-table :data="tableList" stripe style="width: 100%">
             <el-table-column label="tableName" width="180">
               <template #default="scope">
                 <div style="display: flex; align-items: center">
