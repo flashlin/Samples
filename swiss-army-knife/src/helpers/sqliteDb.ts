@@ -1,6 +1,7 @@
 import initSqlJs, { type Database } from 'sql.js';
 import wasmPath from '../assets/sql-wasm.wasm?url';
 import { type IDataTable, type IDataTableNested } from "./dataTypes";
+import { getObjectKeys } from './dataHelper';
 
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
 //const SQL = await initSqlJs({ locateFile: () => wasmPath });
@@ -61,7 +62,7 @@ export class SqliteDb {
         return columnNames;
     }
 
-    query(sql: string, parameters?: initSqlJs.BindParams): IDataTable {
+    queryDataTableByBindParams(sql: string, parameters?: initSqlJs.BindParams): IDataTable {
         const result: any[] = [];
         const columnNames = this.fetch(sql, (row) => {
             result.push(row);
@@ -70,6 +71,25 @@ export class SqliteDb {
             columnNames: columnNames,
             rows: result,
         };
+    }
+
+    queryDataTable(sql: string, data?: any): IDataTable {
+        const result: any[] = [];
+        const columnNames = this.fetch(sql, (row) => {
+            result.push(row);
+        }, this.toQueryParameters(data));
+        return {
+            columnNames: columnNames,
+            rows: result,
+        };
+    }
+
+    query<T extends object>(sql: string, data?: any): T[] {
+        const result: T[] = [];
+        this.fetch(sql, (row) => {
+            result.push(row);
+        }, this.toQueryParameters(data));
+        return result;
     }
 
     close() {
@@ -102,6 +122,17 @@ export class SqliteDb {
         return count;
     }
 
+    private toQueryParameters(obj?: any) {
+        if (obj == null) {
+            return null;
+        }
+        const queryParameters: initSqlJs.BindParams = {};
+        for (const key of getObjectKeys(obj!)) {
+            queryParameters[`:${key}`] = obj[key];
+        }
+        return queryParameters;
+    }
+
     private createTableColumns(row: any) {
         const columns: IColumnInfo[] = [];
         for (const key in row) {
@@ -131,13 +162,13 @@ export class QuerySqliteService {
     getAllTableNames(): IDataTable {
         const db = this._db;
         const sql = `SELECT name as tableName FROM sqlite_master WHERE type='table'`;
-        return db.query(sql);
+        return db.queryDataTableByBindParams(sql);
     }
 
     getTableFieldsInfo(tableName: string): IDataTable {
         const db = this._db;
         const sql = `SELECT [pk], [name], [type], [notnull] FROM pragma_table_info(:tableName)`;
-        const result = db.query(sql, { ':tableName': tableName });
+        const result = db.queryDataTableByBindParams(sql, { ':tableName': tableName });
         result.columnNames = ['name', 'dataType', 'isPrimaryKey', 'isNullable'];
         result.rows = result.rows.map((row: any) => {
             return {
