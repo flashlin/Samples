@@ -73,7 +73,8 @@ export function fetchAllTable() {
     const tableElements = document.querySelectorAll('table');
     tableElements.forEach(table => {
         const tableData = fetchTableData(table);
-        if (tableData.rows.length > 0) {
+        const hasEmpty = tableData.columnNames.some(x => x === null || x === undefined || x === '');
+        if (!hasEmpty && tableData.rows.length > 0) {
             tableDataList.push(tableData);
         }
     });
