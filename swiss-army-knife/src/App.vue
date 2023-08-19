@@ -9,6 +9,8 @@ import { SqliteDb } from './helpers/sqliteDb';
 import { MessageTypes, type IDataTable, type MessageType } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
+import { ElConfigProvider } from 'element-plus';
+
 import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
 
 const flashKnifeStore = useFlashKnifeStore();
@@ -20,6 +22,7 @@ interface IData {
   code: string;
   dataTable: IDataTable;
 }
+const displayTheme = ref('dark');
 const db = new SqliteDb();
 const data = reactive<IData>({
   tableName: 'tb0',
@@ -72,7 +75,8 @@ const handleClickImport = async (idx: number) => {
   notify(MessageTypes.Success, `import ${table.tableName}, Data Count=${count}`);
 };
 
-const handleClose = (done: () => void) => {
+const handleDialogClose = (done: () => void) => {
+  closeFlashIcon();
   done();
 };
 
@@ -97,11 +101,26 @@ const handleSelect = (key: string, keyPath: string[]) => {
   }
 };
 
+const toggleTheme = (toggle: boolean) => {
+  const htmlElement = document.querySelector('html')!;
+  if (toggle) {
+    htmlElement.classList.add('dark');
+  } else {
+    htmlElement.classList.remove('dark');
+  }
+}
+
+const closeFlashIcon = () => {
+  dialogVisible.value = false;
+  toggleTheme(false);
+}
+
 const handleClickFlashIcon = () => {
   if (dialogVisible.value == true) {
-    dialogVisible.value = false;
+    closeFlashIcon();
   } else {
     dialogVisible.value = true;
+    toggleTheme(true);
   }
 };
 
@@ -136,73 +155,83 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flash-sidebar flash-icon" @click="handleClickFlashIcon">F</div>
-  <div v-loading.fullscreen.lock="fullscreenLoading"></div>
-  <el-dialog v-model="dialogVisible" title="FlashKnife V0.1" top="32px" width="98%" :before-close="handleClose">
-    <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" background-color="#545c64"
-      text-color="#fff" active-text-color="#ffd04b" @select="handleSelect">
-      <el-sub-menu index="2">
-        <template #title>Import Data</template>
-        <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
-        <el-menu-item index="ImportQueryData">ImportQueryData</el-menu-item>
-        <el-sub-menu index="2-4">
-          <template #title>item four</template>
-          <el-menu-item index="2-4-1">item one</el-menu-item>
-          <el-menu-item index="2-4-2">item two</el-menu-item>
-          <el-menu-item index="2-4-3">item three</el-menu-item>
+  <el-config-provider :theme="displayTheme">
+    <div class="flash-sidebar flash-icon" @click="handleClickFlashIcon">F</div>
+    <div v-loading.fullscreen.lock="fullscreenLoading"></div>
+    <el-dialog v-model="dialogVisible" title="FlashKnife V0.1" top="32px" width="98%" :before-close="handleDialogClose">
+      <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" background-color="#545c64"
+        text-color="#fff" active-text-color="#ffd04b" @select="handleSelect">
+        <el-sub-menu index="2">
+          <template #title>Import Data</template>
+          <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>
+          <el-menu-item index="ImportQueryData">ImportQueryData</el-menu-item>
+          <el-sub-menu index="2-4">
+            <template #title>item four</template>
+            <el-menu-item index="2-4-1">item one</el-menu-item>
+            <el-menu-item index="2-4-2">item two</el-menu-item>
+            <el-menu-item index="2-4-3">item three</el-menu-item>
+          </el-sub-menu>
         </el-sub-menu>
-      </el-sub-menu>
-      <el-menu-item index="ExportToCsv">ExportToCsv</el-menu-item>
-    </el-menu>
+        <el-menu-item index="ExportToCsv">ExportToCsv</el-menu-item>
+      </el-menu>
 
-    <el-tabs type="border-card">
-      <el-tab-pane label="Sqlite">
-        <CodeEditor v-model="data.code" />
-        <el-input v-model="data.tableName" placeholder="Please input import table name" />
-        <DataTable v-model="data.dataTable" />
-        <el-table :data="dataTableList" stripe style="width: 100%">
-          <el-table-column label="tableName" width="180">
-            <template #default="scope">
-              <div style="display: flex; align-items: center">
-                <el-input v-model="scope.row.tableName" placeholder="Please input" />
+      <el-tabs type="border-card">
+        <el-tab-pane label="Sqlite">
+          <CodeEditor v-model="data.code" />
+          <el-form label-width="120px">
+            <el-form-item label="Import Table Name">
+              <el-input v-model="data.tableName" placeholder="Please input import table name" />
+            </el-form-item>
+            <DataTable v-model="data.dataTable" />
+          </el-form>
+          <el-table :data="dataTableList" stripe style="width: 100%">
+            <el-table-column label="tableName" width="180">
+              <template #default="scope">
+                <div style="display: flex; align-items: center">
+                  <el-input v-model="scope.row.tableName" placeholder="Please input" />
+                </div>
+              </template>
+            </el-table-column>
+            <el-table-column prop="columns" label="columns" width="800" />
+            <el-table-column fixed="right" label="Operations" width="120">
+              <template #default="scope">
+                <el-button link type="primary" size="small" @click="handleClickImport(scope.row.idx)">Import</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="Config">
+          <el-upload class="upload-demo" drag action="" multiple accept=".csv" :before-upload="onHandleBeforeUpload">
+            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
+            <div class="el-upload__text">
+              Drop csv file here or <em>click to upload</em>
+            </div>
+            <template #tip>
+              <div class="el-upload__tip">
+                csv files with a size less than 500kb
               </div>
             </template>
-          </el-table-column>
-          <el-table-column prop="columns" label="columns" width="800" />
-          <el-table-column fixed="right" label="Operations" width="120">
-            <template #default="scope">
-              <el-button link type="primary" size="small" @click="handleClickImport(scope.row.idx)">Import</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-tab-pane>
-      <el-tab-pane label="Config">
-        <el-upload class="upload-demo" drag action="" multiple accept=".csv" :before-upload="onHandleBeforeUpload">
-          <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-          <div class="el-upload__text">
-            Drop csv file here or <em>click to upload</em>
-          </div>
-          <template #tip>
-            <div class="el-upload__tip">
-              csv files with a size less than 500kb
-            </div>
-          </template>
-        </el-upload>
-        SELECT name FROM sqlite_master WHERE type='table'
-        SELECT customer.id, customer.name, product.pname, product.price
-        FROM customer LEFT JOIN product ON customer.id = product.id
-      </el-tab-pane>
-    </el-tabs>
+          </el-upload>
+          SELECT name FROM sqlite_master WHERE type='table'
+          SELECT customer.id, customer.name, product.pname, product.price
+          FROM customer LEFT JOIN product ON customer.id = product.id
+        </el-tab-pane>
+      </el-tabs>
 
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button type="primary" @click="dialogVisible = false"> Close </el-button>
-      </span>
-    </template>
-  </el-dialog>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" @click="closeFlashIcon"> Close </el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </el-config-provider>
 </template>
 
 <style scoped>
+div.dark {
+  --el-bg-color: #3d3d3d;
+}
+
 .flash-icon {
   display: inline-block;
   width: 32px;
