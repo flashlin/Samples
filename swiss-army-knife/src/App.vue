@@ -132,6 +132,7 @@ const onHandleBeforeUpload = async (file: File) => {
   const fileContent = await readFileContentAsync(file);
   const uploadDataTable = parseCsvContentToObjectArray(fileContent);
   data.dataTable = uploadDataTable;
+  notify(MessageTypes.Success, `Upload ${file.name}`);
   return false;
 }
 
@@ -184,6 +185,7 @@ onUnmounted(() => {
             </el-form-item>
             <DataTable v-model="data.dataTable" />
           </el-form>
+          <el-divider />
           <el-table :data="dataTableList" stripe style="width: 100%">
             <el-table-column label="tableName" width="180">
               <template #default="scope">
@@ -200,11 +202,12 @@ onUnmounted(() => {
             </el-table-column>
           </el-table>
         </el-tab-pane>
-        <el-tab-pane label="Config">
+        <el-tab-pane label="Upload Area">
           <el-upload class="upload-demo" drag action="" multiple accept=".csv" :before-upload="onHandleBeforeUpload">
             <el-icon class="el-icon--upload"><upload-filled /></el-icon>
             <div class="el-upload__text">
-              Drop csv file here or <em>click to upload</em>
+              Drop csv file here or <em>click to upload</em><br>
+              When uploaded, you can view the data in the query result area.
             </div>
             <template #tip>
               <div class="el-upload__tip">
