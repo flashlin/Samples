@@ -26,9 +26,7 @@ export class SqliteDb {
         this._db = new SQL.Database();
     }
 
-    execute(sql: string, data?: any) {
-        console.log(sql, data);
-
+    execute(sql: string, data?: initSqlJs.BindParams) {
         const db = this._db!;
         if (data != null) {
             const stmt = db.prepare(sql);
