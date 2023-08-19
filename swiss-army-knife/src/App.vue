@@ -162,6 +162,12 @@ onUnmounted(() => {
     <el-dialog v-model="dialogVisible" title="FlashKnife V0.1" top="32px" width="98%" :before-close="handleDialogClose">
       <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" background-color="#545c64"
         text-color="#fff" active-text-color="#ffd04b" @select="handleSelect">
+
+        <el-sub-menu>
+          <template #title>Database</template>
+          <el-menu-item index="QueryAllTables">Query All Table Names</el-menu-item>
+        </el-sub-menu>
+
         <el-sub-menu index="2">
           <template #title>Import Data</template>
           <el-menu-item index="FetchDataTableInWebPage">FetchDataTableInWebPage</el-menu-item>

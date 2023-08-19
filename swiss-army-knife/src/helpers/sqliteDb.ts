@@ -1,6 +1,6 @@
 import initSqlJs, { type Database } from 'sql.js';
 import wasmPath from '../assets/sql-wasm.wasm?url';
-import { type IDataTable } from "./dataTypes";
+import { type IDataTable, type IDataTableNested } from "./dataTypes";
 
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
 //const SQL = await initSqlJs({ locateFile: () => wasmPath });
@@ -118,5 +118,51 @@ export class SqliteDb {
             }
         }
         return columns;
+    }
+}
+
+
+export class QuerySqliteService {
+    _db: SqliteDb;
+    constructor(db: SqliteDb) {
+        this._db = db;
+    }
+
+    getAllTableNames(): IDataTable {
+        const db = this._db;
+        const sql = `SELECT name as tableName FROM sqlite_master WHERE type='table'`;
+        return db.query(sql);
+    }
+
+    getTableFieldsInfo(tableName: string): IDataTable {
+        const db = this._db;
+        const sql = `SELECT [pk], [name], [type], [notnull] FROM pragma_table_info(:tableName)`;
+        const result = db.query(sql, { ':tableName': tableName });
+        result.columnNames = ['name', 'dataType', 'isPrimaryKey', 'isNullable'];
+        result.rows = result.rows.map((row: any) => {
+            return {
+                name: row.name,
+                dataType: row.type,
+                isPrimaryKey: row.pk == 1,
+                isNullable: row.notnull == 0,
+            };
+        });
+        return result;
+    }
+
+    getAllTables(): IDataTableNested {
+        const tableNamesTable = this.getAllTableNames();
+        const tableNames = tableNamesTable.rows.map((row: any) => {
+            return row.tableName;
+        });
+        const tableInfosTable: IDataTable[] = [];
+        for (const tableName of tableNames) {
+            const tableInfo = this.getTableFieldsInfo(tableName);
+            tableInfosTable.push(tableInfo);
+        }
+        return {
+            master: tableNamesTable,
+            detail: tableInfosTable,
+        };
     }
 }

@@ -22,6 +22,7 @@ export default defineConfig({
     monkey({
       entry: 'src/main.ts',
       userscript: {
+        version: '0.1',
         icon: 'https//vitejs.dev/logo.svg',
         namespace: 'flash-knife',
         match: ['*://dba-*.coreop.net/*', 'https://www.w3schools.com/*'],
