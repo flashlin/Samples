@@ -24,10 +24,10 @@ const props = withDefaults(defineProps<DataTableProps>(), {
                 </template>
             </el-table-column>
         </template>
-        <el-table-column fixed="right" label="Operations" width="80">
+        <!-- <el-table-column fixed="right" label="Operations" width="80">
             <template #default>
                 <el-button link type="primary" size="small">Delete</el-button>
             </template>
-        </el-table-column>
+        </el-table-column> -->
     </el-table>
 </template>
