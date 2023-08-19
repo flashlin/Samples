@@ -1,4 +1,4 @@
-###How to create a Vue 3 component library with TypeScript
+###How to create a Vue 3 component library with TypeScript###
 In this article, you'll learn how to create a Vue 3 component library supercharged with TypeScript.
 
 Component libraries are great to encapsulate repeatable UI components and logic across multiple projects.

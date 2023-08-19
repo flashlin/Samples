@@ -1,4 +1,4 @@
-### How to add a new B2B2C domain ?
+### How to add a new B2B2C domain ?###
 Assuming that NOC is ready to provide the following domain for us to add: abc.net
 
 Here are the steps to add a new b2b2c domain:
@@ -58,7 +58,7 @@ SBOBET should go to the classic site.
 SBOTOP should redirect to the casual site (play.67146750.com).
 
 
-### How to process VND B2B2C Manual Rebate for Insurance and Lucky?  
+### How to process VND B2B2C Manual Rebate for Insurance and Lucky?###
 Here are the steps involved:
 1. Prepare a CSV or Excel file from SMA containing the username and amount to credit.
 2. Check if the file format is correct.
@@ -71,7 +71,7 @@ The file format should be like the following.
 3.Please ask PO or DM to upload the file on Leo -> WMA ->"B2B2C Promo"
 Done.
 
-### How to check if a player has a deposit bonus?
+### How to check if a player has a deposit bonus?###
 You can use the following tsql script to query.
 ```
 select top 100  [UserName],
@@ -84,7 +84,7 @@ where username in ('1630198028', '1620181772')
 ```
 
 
-### Enrollment Process for External Training:
+### Enrollment Process for External Training ###
 Request External Training:
 1. Engage in a discussion with DM and provide the following information.
 2. Explain the reason behind your interest in joining this course.
