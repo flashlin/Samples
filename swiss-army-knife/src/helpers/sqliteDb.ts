@@ -1,6 +1,6 @@
 import initSqlJs, { type Database } from 'sql.js';
 import wasmPath from '../assets/sql-wasm.wasm?url';
-import { type IDataTable, type IDataTableNested } from "./dataTypes";
+import { type IDataTable, type IDataTableNested } from './dataTypes';
 import { getObjectKeys } from './dataHelper';
 
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
@@ -16,7 +16,6 @@ export interface IColumnInfo {
 let SQL: initSqlJs.SqlJsStatic | null = null;
 
 export class SqliteDb {
-    //SQL: initSqlJs.SqlJsStatic = null!;
     _db: Database = null!;
 
     async openAsync() {
@@ -31,8 +30,7 @@ export class SqliteDb {
         if (data != null) {
             const stmt = db.prepare(sql);
             stmt.bind(data);
-            const success = stmt.step();
-            console.log(success)
+            stmt.step();
             stmt.free();
             return;
         }
@@ -41,9 +39,9 @@ export class SqliteDb {
     }
 
     /**
-     * 
+     *
      * @param sql "select name from customer where name=:name"
-     * @param fetchRow 
+     * @param fetchRow
      * @param parameters {":name":"flash"}
      * @returns columnNames ["name"]
      */
@@ -60,33 +58,48 @@ export class SqliteDb {
         return columnNames;
     }
 
-    queryDataTableByBindParams(sql: string, parameters?: initSqlJs.BindParams): IDataTable {
+    queryDataTableByBindParams(
+        sql: string,
+        parameters?: initSqlJs.BindParams
+    ): IDataTable {
         const result: any[] = [];
-        const columnNames = this.fetch(sql, (row) => {
-            result.push(row);
-        }, parameters);
+        const columnNames = this.fetch(
+            sql,
+            (row) => {
+                result.push(row);
+            },
+            parameters
+        );
         return {
             columnNames: columnNames,
-            rows: result,
+            rows: result
         };
     }
 
     queryDataTable(sql: string, data?: any): IDataTable {
         const result: any[] = [];
-        const columnNames = this.fetch(sql, (row) => {
-            result.push(row);
-        }, this.toQueryParameters(data));
+        const columnNames = this.fetch(
+            sql,
+            (row) => {
+                result.push(row);
+            },
+            this.toQueryParameters(data)
+        );
         return {
             columnNames: columnNames,
-            rows: result,
+            rows: result
         };
     }
 
     query<T extends object>(sql: string, data?: any): T[] {
         const result: T[] = [];
-        this.fetch(sql, (row) => {
-            result.push(row);
-        }, this.toQueryParameters(data));
+        this.fetch(
+            sql,
+            (row) => {
+                result.push(row);
+            },
+            this.toQueryParameters(data)
+        );
         return result;
     }
 
@@ -96,7 +109,9 @@ export class SqliteDb {
 
     createTable(tableName: string, row: any) {
         const columns = this.createTableColumns(row);
-        const declareColumnNames = columns.map((c) => `${c.name} ${c.dataType}`).join(', ');
+        const declareColumnNames = columns
+            .map((c) => `${c.name} ${c.dataType}`)
+            .join(', ');
         const stat = `CREATE TABLE IF NOT EXISTS ${tableName} (${declareColumnNames})`;
         this.execute(stat);
         return columns;
@@ -104,19 +119,19 @@ export class SqliteDb {
 
     importTable(tableName: string, rows: any[]): number {
         const columns = this.createTable(tableName, rows[0]);
-        const columnNames = columns.map(x => `${x.name}`).join(', ');
-        const values = columns.map(x => `:${x.name}`).join(', ');
+        const columnNames = columns.map((x) => `${x.name}`).join(', ');
+        const values = columns.map((x) => `:${x.name}`).join(', ');
         let count = 0;
-        rows.forEach(row => {
+        rows.forEach((row) => {
             const insertQuery = `INSERT INTO ${tableName} (${columnNames}) VALUES(${values})`;
-            const newData: any = {}
+            const newData: any = {};
             for (const col of columns) {
                 const key = col.name;
                 newData[`:${key}`] = row[key];
             }
             this.execute(insertQuery, newData);
             count++;
-        })
+        });
         return count;
     }
 
@@ -137,12 +152,12 @@ export class SqliteDb {
             if (typeof row[key] === 'number') {
                 columns.push({
                     name: key,
-                    dataType: 'NUMERIC',
+                    dataType: 'NUMERIC'
                 });
             } else {
                 columns.push({
                     name: key,
-                    dataType: 'TEXT',
+                    dataType: 'TEXT'
                 });
             }
         }
@@ -150,37 +165,45 @@ export class SqliteDb {
     }
 }
 
-
 export class QuerySqliteService {
     _db: SqliteDb;
     constructor(db: SqliteDb) {
         this._db = db;
     }
 
-    getAllTableNames(): IDataTable {
+    getAllTableNames(): string[] {
+        const table = this.getAllTableNamesToDataTable();
+        return table.rows.map((row: any) => {
+            return row.tableName;
+        });
+    }
+
+    private getAllTableNamesToDataTable(): IDataTable {
         const db = this._db;
         const sql = `SELECT name as tableName FROM sqlite_master WHERE type='table'`;
-        return db.queryDataTableByBindParams(sql);
+        return db.queryDataTable(sql);
     }
 
     getTableFieldsInfo(tableName: string): IDataTable {
         const db = this._db;
         const sql = `SELECT [pk], [name], [type], [notnull] FROM pragma_table_info(:tableName)`;
-        const result = db.queryDataTableByBindParams(sql, { ':tableName': tableName });
+        const result = db.queryDataTableByBindParams(sql, {
+            ':tableName': tableName
+        });
         result.columnNames = ['name', 'dataType', 'isPrimaryKey', 'isNullable'];
         result.rows = result.rows.map((row: any) => {
             return {
                 name: row.name,
                 dataType: row.type,
                 isPrimaryKey: row.pk == 1,
-                isNullable: row.notnull == 0,
+                isNullable: row.notnull == 0
             };
         });
         return result;
     }
 
     getAllTables(): IDataTableNested {
-        const tableNamesTable = this.getAllTableNames();
+        const tableNamesTable = this.getAllTableNamesToDataTable();
         const tableNames = tableNamesTable.rows.map((row: any) => {
             return row.tableName;
         });
@@ -191,7 +214,7 @@ export class QuerySqliteService {
         }
         return {
             master: tableNamesTable,
-            detail: tableInfosTable,
+            detail: tableInfosTable
         };
     }
 }
