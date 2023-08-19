@@ -64,7 +64,7 @@ const onClickExportToCsv = () => {
 
 const onClickExecute = async () => {
   console.log('code=', data.code);
-  const result = db.query(data.code);
+  const result = db.queryDataTableByBindParams(data.code);
   data.dataTable = result;
 };
 

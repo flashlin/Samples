@@ -56,6 +56,17 @@ export function parseCsvContentToObjectArray(content: string): IDataTable {
     };
 }
 
+export function getObjectKeys<T extends object>(obj: T) {
+    const keys: string[] = [];
+    for (const key in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            keys.push(key);
+        }
+    }
+    return keys;
+}
+
+
 export type MapFn = (key: string, value: any) => any;
 
 export function mapObject<T extends object>(obj: T, mapFn: MapFn) {
