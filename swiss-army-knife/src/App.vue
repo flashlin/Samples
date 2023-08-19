@@ -9,7 +9,6 @@ import { QuerySqliteService, SqliteDb } from './helpers/sqliteDb';
 import { MessageTypes, type IDataTable, type MessageType } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
-import { ElConfigProvider } from 'element-plus';
 
 import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
 
@@ -23,7 +22,6 @@ interface IData {
   tableNames: string[];
   dataTable: IDataTable;
 }
-const displayTheme = ref('dark');
 const db = new SqliteDb();
 const data = reactive<IData>({
   tableName: 'tb0',
@@ -74,9 +72,17 @@ const onClickExportToCsv = () => {
 }
 
 const onClickExecute = async () => {
-  console.log('code=', data.code);
-  const result = db.queryDataTableByBindParams(data.code);
-  data.dataTable = result;
+  try {
+    const result = db.queryDataTableByBindParams(data.code);
+    notify(MessageTypes.Success, `Executed`);
+    data.dataTable = result;
+  } catch (e1) {
+    if (e1 instanceof Error) {
+      notify(MessageTypes.Error, e1.message);
+    } else {
+      notify(MessageTypes.Error, `${e1}`);
+    }
+  }
 };
 
 const handleClickImportWebPageTable = async (idx: number) => {
@@ -100,10 +106,10 @@ const queryAllTableNames = () => {
 const activeIndex = ref('2');
 const handleSelect = (key: string, keyPath: string[]) => {
   if (key == 'FetchDataTableInWebPage') {
-    console.log(keyPath);
     showLoadingFullscreen(true);
     fetchAllDataTableInWebPage();
     showLoadingFullscreen(false);
+    notify(MessageTypes.Success, `${keyPath}`);
     return;
   }
 
@@ -154,8 +160,14 @@ const onHandleBeforeUpload = async (file: File) => {
   const fileContent = await readFileContentAsync(file);
   const uploadDataTable = parseCsvContentToObjectArray(fileContent);
   data.dataTable = uploadDataTable;
-  notify(MessageTypes.Success, `Upload ${file.name}`);
+  notify(MessageTypes.Success, `Upload csv File ${file.name}`);
   return false;
+}
+
+const handleOnDeleteTable = (tableName: string) => {
+  db.dropTable(tableName);
+  notify(MessageTypes.Success, `Drop Table ${tableName}`);
+  queryAllTableNames();
 }
 
 const handleKeyPress = (event: KeyboardEvent) => {
@@ -178,7 +190,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <el-config-provider :theme="displayTheme">
+  <div>
     <div class="flash-sidebar flash-icon" @click="handleClickFlashIcon">F</div>
     <div v-loading.fullscreen.lock="fullscreenLoading"></div>
     <el-dialog v-model="dialogVisible" title="FlashKnife V0.1" top="32px" width="98%" :before-close="handleDialogClose">
@@ -186,7 +198,7 @@ onUnmounted(() => {
       <!-- TOP MENU -->
       <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal" background-color="#545c64"
         text-color="#fff" active-text-color="#ffd04b" @select="handleSelect">
-        <el-sub-menu>
+        <el-sub-menu index="">
           <template #title>Database</template>
           <el-menu-item index="QueryAllTableNames">Query All Table Names</el-menu-item>
         </el-sub-menu>
@@ -215,8 +227,9 @@ onUnmounted(() => {
                 <el-table :data="tableNamesTable" stripe style="width: 100%">
                   <el-table-column prop="tableName" label="tableName" width="180" />
                   <el-table-column fixed="right" label="Operations" width="120">
-                    <template #default>
-                      <el-button link type="primary" size="small"> Delete </el-button>
+                    <template #default="scope">
+                      <el-button link type="primary" @click="handleOnDeleteTable(scope.row.tableName)" size="small">
+                        Delete </el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -276,7 +289,7 @@ onUnmounted(() => {
         </span>
       </template>
     </el-dialog>
-  </el-config-provider>
+  </div>
 </template>
 
 <style scoped>
