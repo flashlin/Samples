@@ -5,12 +5,11 @@ import App from './App.vue';
 import router from './router';
 
 import ElementPlus from 'element-plus'
+import 'element-plus/theme-chalk/index.css';
 import 'element-plus/theme-chalk/dark/css-vars.css'
 
 import './db';
 import { parseTsql } from './sqlex/tsql';
-//import { Tsql } from './antlr/TSQL';
-//const tsql = new Tsql();
 parseTsql('select id from customer');
 
 import { appDiv } from "./initMonkey";
