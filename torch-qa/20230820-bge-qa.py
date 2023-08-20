@@ -3,17 +3,17 @@
 #pip -q install PyPDF2 pypdf sentence_transformers
 #pip -q install --upgrade together
 #pip -q install -U FlagEmbedding
-import os
-
+import transformers
 from langchain import PromptTemplate, FAISS
 from langchain.chains import RetrievalQA
 from langchain.embeddings import HuggingFaceBgeEmbeddings
-from langchain.llms import CTransformers
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-
+from langchain.llms import HuggingFacePipeline
+from lanchainlit import load_model, load_tokenizer, load_llm, load_chain
 from pdf_utils import load_and_split_pdf_texts_from_directory
 from vectordb_utils import load_chroma_from_documents
 
+hf_token = ""
+device = "cuda"
 embedding_model_name = "BAAI/bge-base-en"
 model_name = 'anon8231489123/gpt4-x-alpaca-13b-native-4bit-128g'
 
@@ -27,7 +27,6 @@ embedding = HuggingFaceBgeEmbeddings(
 
 persist_directory = 'output/faissdb'
 texts = load_and_split_pdf_texts_from_directory('data')
-print(f'{texts=}')
 
 
 def split_documents_to_vector_db(split_documents, embeddings, db_path):
@@ -45,10 +44,16 @@ retriever = vectordb.as_retriever(search_kwargs={"k": 5})
 print("--------------------------------------------")
 print("embedding ready")
 
-llm = CTransformers(model=model_name,
-                    model_type="llama",
-                    max_new_tokens=512,
-                    temperature=0.1)
+# llm = CTransformers(model=model_name,
+#                     model_type="llama",
+#                     max_new_tokens=512,
+#                     temperature=0.1)
+
+model = load_model(hf_token, model_name)
+tokenizer, stopping_criteria = load_tokenizer(hf_token, model_id=model_name, device=device)
+llm = load_llm(model, tokenizer, stopping_criteria)
+chain = load_chain(llm, retriever)
+
 
 
 template = """Use the following pieces of information to answer the user's question.
