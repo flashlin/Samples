@@ -6,6 +6,7 @@ const RULES = {
     selectExpression: "selectExpression",
     columnList: "columnList",
     identifier: "identifier",
+    sourceClause: "sourceClause",
 };
 
 const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^"\\]*(?:\\.[^"\\]*)*"/ });
@@ -57,12 +58,19 @@ class TSqlParser extends CstParser {
         this.CONSUME(SELECT);
         this.SUBRULE(this.columnList);
         this.CONSUME(FROM);
+        this.SUBRULE(this.sourceClause);
     });
 
     public columnList = this.RULE(RULES.columnList, () => {
         this.MANY(() => this.OR([
             { ALT: () => this.SUBRULE(this.identifier) },
         ]));
+    });
+
+    public sourceClause = this.RULE(RULES.sourceClause, () => {
+        this.OR([
+            { ALT: () => this.SUBRULE(this.identifier) },
+        ]);
     });
 
     public identifier = this.RULE(RULES.identifier, () => {
@@ -101,9 +109,11 @@ class TSqlExprVisitorWithDefaults extends BaseTSqlVisitorWithDefaults {
 
     selectExpression(ctx: any) {
         const columns = this.visit(ctx.columnList).columns;
+        const sourceClause = this.visit(ctx.sourceClause);
         return {
             type: "SELECT_CLAUSE",
             columns: columns,
+            sourceClause: sourceClause.value,
         };
     }
 
@@ -113,6 +123,13 @@ class TSqlExprVisitorWithDefaults extends BaseTSqlVisitorWithDefaults {
             type: "COLUMN_LIST",
             columns: columns,
         };
+    }
+
+    sourceClause(ctx: any) {
+        return {
+            type: "SOURCE_CLAUSE",
+            value: ctx.identifier.map((identToken: any) => this.visit(identToken)),
+        }
     }
 
     identifier(ctx: any) {
@@ -132,7 +149,6 @@ export function parseTsql(text: string) {
     const cst = parserInstance.selectExpression();
     //const value = tsqlVisitor.visit(cst);
     const value = tsqlVisitorWithDefaults.visit(cst);
-    console.log('v', value)
     return {
         value: value,
         lexResult: lexResult,
