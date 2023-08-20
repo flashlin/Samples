@@ -27,6 +27,7 @@ checkpoint = 'models/vicuna-13B-v1.5-16K-GPTQ/gptq_model-4bit-128g.safetensors'
 model_name = 'models/vicuna-7B-v1.5-16K-GPTQ'
 checkpoint = 'models/vicuna-7B-v1.5-16K-GPTQ/gptq_model-4bit-128g.safetensors'
 
+model_name = 'models/Chinese-Llama-2-7b-4bit'
 
 
 def display_gpu_info(device='cuda'):
