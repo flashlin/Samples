@@ -27,6 +27,8 @@ checkpoint = 'models/vicuna-13B-v1.5-16K-GPTQ/gptq_model-4bit-128g.safetensors'
 model_name = 'models/vicuna-7B-v1.5-16K-GPTQ'
 checkpoint = 'models/vicuna-7B-v1.5-16K-GPTQ/gptq_model-4bit-128g.safetensors'
 
+
+
 def display_gpu_info(device='cuda'):
     total_memory = torch.cuda.get_device_properties(device).total_memory
     max_allocated_memory = torch.cuda.max_memory_allocated(device)
@@ -73,23 +75,24 @@ print("embedding ready")
 #                     max_new_tokens=512,
 #                     temperature=0.1)
 
-from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
-from transformers import AutoConfig, AutoModelForCausalLM
-config = AutoConfig.from_pretrained(model_name, trust_remote_code=False)
 
-def noop(*args, **kwargs):
-    pass
-torch.nn.init.kaiming_uniform_ = noop
-torch.nn.init.uniform_ = noop
-torch.nn.init.normal_ = noop
-torch.set_default_dtype(torch.half)
-transformers.modeling_utils._init_weights = False
-torch.set_default_dtype(torch.half)
-print("loading...")
-display_gpu_info()
-model = AutoModelForCausalLM.from_config(config, trust_remote_code=False)
-model.to(device)
-print("loaded model")
+def load_gptq_safetensors(model_name):
+    from auto_gptq import AutoGPTQForCausalLM, BaseQuantizeConfig
+    from transformers import AutoConfig, AutoModelForCausalLM
+    config = AutoConfig.from_pretrained(model_name, trust_remote_code=False)
+    def noop(*args, **kwargs):
+        pass
+    torch.nn.init.kaiming_uniform_ = noop
+    torch.nn.init.uniform_ = noop
+    torch.nn.init.normal_ = noop
+    torch.set_default_dtype(torch.half)
+    transformers.modeling_utils._init_weights = False
+    torch.set_default_dtype(torch.half)
+    model = AutoModelForCausalLM.from_config(config, trust_remote_code=False)
+    return model
+
+
+model = load_gptq_safetensors(model_name).to(device)
 
 
 def get_max_memory_dict(cpu_memory=None, gpu_memory=None):
@@ -117,24 +120,24 @@ def get_max_memory_dict(cpu_memory=None, gpu_memory=None):
     return max_memory if len(max_memory) > 0 else None
 
 
-quantize_config = BaseQuantizeConfig(
-            bits=4,
-            group_size=-1,
-            desc_act=False
-        )
-
-params = {
-        'model_basename': model_name,
-        'device': device,
-        'use_triton': False,
-        'inject_fused_attention': False,
-        'inject_fused_mlp': False,
-        'use_safetensors': True,
-        'trust_remote_code': True,
-        'max_memory': get_max_memory_dict(),
-        'quantize_config': quantize_config,
-        'use_cuda_fp16': True,
-    }
+# quantize_config = BaseQuantizeConfig(
+#             bits=4,
+#             group_size=-1,
+#             desc_act=False
+#         )
+#
+# params = {
+#         'model_basename': model_name,
+#         'device': device,
+#         'use_triton': False,
+#         'inject_fused_attention': False,
+#         'inject_fused_mlp': False,
+#         'use_safetensors': True,
+#         'trust_remote_code': True,
+#         'max_memory': get_max_memory_dict(),
+#         'quantize_config': quantize_config,
+#         'use_cuda_fp16': True,
+#     }
 # model = AutoGPTQForCausalLM.from_quantized(model_name, **params)
 
 from safetensors.torch import load_file as safe_load
