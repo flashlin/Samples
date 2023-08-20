@@ -43,5 +43,9 @@ const data = computed(() => {
             </el-table-column>
         </template>
     </el-table> -->
-    <el-table-v2 :columns="columns" :data="data" :width="1000" :height="500" fixed />
+    <el-auto-resizer>
+        <template #default="{ height, width }">
+            <el-table-v2 :columns="columns" :data="data" :width="height" :height="width" fixed />
+        </template>
+    </el-auto-resizer>
 </template>
