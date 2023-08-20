@@ -26,6 +26,9 @@ function fetchHeaders(thead: HTMLTableSectionElement) {
 function removeNonAlphaNumeric(text: string) {
     const removedNonAlphaNumeric = text.replace(/[^a-zA-Z0-9_]+/g, '_');
     const consolidatedUnderscores = removedNonAlphaNumeric.replace(/_+/g, '_');
+    if (consolidatedUnderscores.startsWith("_") && consolidatedUnderscores.endsWith("_")) {
+        return consolidatedUnderscores.slice(1, -1);
+    }
     return consolidatedUnderscores;
 }
 
