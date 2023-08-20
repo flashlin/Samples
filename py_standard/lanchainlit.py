@@ -120,7 +120,6 @@ class ChatGLMService(LLM):
             print(f"loading model successfully, you should use checkpoint_path={multi_gpu_model_cache_dir} next time")
 
 
-
 def load_documents(data_path: str):
     loader = DirectoryLoader(data_path, glob='*.pdf', loader_cls=PyPDFLoader)
     pdf_documents = loader.load()
@@ -132,7 +131,7 @@ def load_documents(data_path: str):
 
 
 def split_documents_to_vector_db(documents, chunk_size, db_faiss_path: str):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=round(chunk_size*0.1))
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=round(chunk_size * 0.1))
     texts = text_splitter.split_documents(documents)
     embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2',
                                        model_kwargs={'device': 'cpu'})
@@ -171,7 +170,7 @@ def load_tokenizer(hf_token: str, model_id: str, device: str):
     return tokenizer, stopping_criteria
 
 
-def load_model(hf_token, model_id, device: str="auto"):
+def load_model(hf_token, model_id, device: str = "auto"):
     bnb_config = transformers.BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_quant_type='nf4',
@@ -187,7 +186,7 @@ def load_model(hf_token, model_id, device: str="auto"):
         trust_remote_code=True,
         config=model_config,
         quantization_config=bnb_config,
-        device_map='auto',
+        device_map=device,
         use_auth_token=hf_token,
         load_in_8bit=True,
     )
