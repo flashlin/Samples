@@ -216,12 +216,6 @@ onUnmounted(() => {
           <template #title>Import Data</template>
           <el-menu-item index="FetchTableInWebPage">Fetch Table In WebPage</el-menu-item>
           <el-menu-item index="ImportQueryData">Import QueryData</el-menu-item>
-          <el-sub-menu index="2-4">
-            <template #title>item four</template>
-            <el-menu-item index="2-4-1">item one</el-menu-item>
-            <el-menu-item index="2-4-2">item two</el-menu-item>
-            <el-menu-item index="2-4-3">item three</el-menu-item>
-          </el-sub-menu>
         </el-sub-menu>
         <el-menu-item index="ExportToCsv">ExportToCsv</el-menu-item>
       </el-menu>
@@ -238,10 +232,16 @@ onUnmounted(() => {
                   <el-table-column prop="tableName" label="tableName" width="180" />
                   <el-table-column fixed="right" label="Operations" width="120">
                     <template #default="scope">
-                      <el-button link type="primary" @click="handleOnDeleteTable(scope.row.tableName)"
-                        size="small">Delete</el-button>
-                      <el-button link type="primary" @click="handleClickTableStructure(scope.row.tableName)"
-                        size="small">Structure</el-button>
+                      <el-row :gutter="2">
+                        <el-col>
+                          <el-button link type="primary" @click="handleOnDeleteTable(scope.row.tableName)"
+                            size="small">Delete</el-button>
+                        </el-col>
+                        <el-col>
+                          <el-button link type="primary" @click="handleClickTableStructure(scope.row.tableName)"
+                            size="small">Structure</el-button>
+                        </el-col>
+                      </el-row>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -292,9 +292,9 @@ onUnmounted(() => {
               </div>
             </template>
           </el-upload>
-          SELECT name FROM sqlite_master WHERE type='table'
-          SELECT customer.id, customer.name, product.pname, product.price
-          FROM customer LEFT JOIN product ON customer.id = product.id
+          SELECT name FROM sqlite_master WHERE type='table' <br />
+          SELECT customer.id, customer.name, product.pname, product.price <br />
+          FROM customer LEFT JOIN product ON customer.id = product.id <br />
         </el-tab-pane>
       </el-tabs>
 
