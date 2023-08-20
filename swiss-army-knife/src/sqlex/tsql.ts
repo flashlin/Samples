@@ -12,9 +12,9 @@ const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^
 const StringSimpleQuote = createToken({ name: "StringSimpleQuote", pattern: /'[^'\\]*(?:\\.[^'\\]*)*'/ });
 const Identifier = createToken({ name: RULES.IDENTIFIER, pattern: /[a-zA-Z_]\w*/ });
 const SELECT = createToken({ name: "Select", pattern: /(SELECT|select)/ });
-const And = createToken({ name: "And", pattern: /(AND|and)/ });
-const Or = createToken({ name: "Or", pattern: /(OR|or)/ });
-const Not = createToken({ name: "Not", pattern: /(NOT|not)/ });
+const AND = createToken({ name: "And", pattern: /(AND|and)/ });
+const OR = createToken({ name: "Or", pattern: /(OR|or)/ });
+const NOT = createToken({ name: "Not", pattern: /(NOT|not)/ });
 const Colon = createToken({ name: "Colon", pattern: /:/ });
 
 const WhiteSpace = createToken({
@@ -26,9 +26,9 @@ const WhiteSpace = createToken({
 const allTokens = [
     WhiteSpace,
     Colon,
-    And,
-    Or,
-    Not,
+    AND,
+    OR,
+    NOT,
     SELECT,
     Identifier,
     StringDoubleQuote,
@@ -97,8 +97,6 @@ class TSqlExprVisitorWithDefaults extends BaseTSqlVisitorWithDefaults {
     /* Visit methods go here */
 
     selectExpression(ctx: any) {
-        console.log("select2 ctx", ctx)
-        console.log("select2", ctx.columnList)
         const columns = this.visit(ctx.columnList).columns;
         return {
             type: "SELECT_CLAUSE",
