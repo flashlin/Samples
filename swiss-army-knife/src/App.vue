@@ -21,8 +21,10 @@ interface IData {
   code: string;
   tableNames: string[];
   dataTable: IDataTable;
+  tableStructure: IDataTable;
 }
 const db = new SqliteDb();
+const queryService = new QuerySqliteService(db);
 const data = reactive<IData>({
   tableName: 'tb0',
   code: 'select Company,Contact,Country from tb0',
@@ -31,6 +33,10 @@ const data = reactive<IData>({
     columnNames: [],
     rows: [],
   },
+  tableStructure: {
+    columnNames: [],
+    rows: [],
+  }
 });
 const dialogVisible = ref(false);
 
@@ -85,6 +91,11 @@ const onClickExecute = async () => {
   }
 };
 
+const handleClickTableStructure = (tableName: string) => {
+  data.tableStructure = queryService.getTableFieldsInfo(tableName);
+  notify(MessageTypes.Success, `get ${tableName} structure`)
+};
+
 const handleClickImportWebPageTable = async (idx: number) => {
   const table = tableList.value[idx];
   const rawTable = tableListInWebPage.value[idx];
@@ -99,7 +110,6 @@ const handleDialogClose = (done: () => void) => {
 };
 
 const queryAllTableNames = () => {
-  const queryService = new QuerySqliteService(db);
   data.tableNames = queryService.getAllTableNames();
 };
 
@@ -228,8 +238,10 @@ onUnmounted(() => {
                   <el-table-column prop="tableName" label="tableName" width="180" />
                   <el-table-column fixed="right" label="Operations" width="120">
                     <template #default="scope">
-                      <el-button link type="primary" @click="handleOnDeleteTable(scope.row.tableName)" size="small">
-                        Delete </el-button>
+                      <el-button link type="primary" @click="handleOnDeleteTable(scope.row.tableName)"
+                        size="small">Delete</el-button>
+                      <el-button link type="primary" @click="handleClickTableStructure(scope.row.tableName)"
+                        size="small">Structure</el-button>
                     </template>
                   </el-table-column>
                 </el-table>
@@ -244,6 +256,9 @@ onUnmounted(() => {
             </el-form-item>
             <DataTable v-model="data.dataTable" />
           </el-form>
+
+          <el-divider />
+          <DataTable v-model="data.tableStructure" />
           <el-divider />
 
           <!-- Query Table In WebPage -->
