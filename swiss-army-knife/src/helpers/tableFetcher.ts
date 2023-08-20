@@ -23,6 +23,12 @@ function fetchHeaders(thead: HTMLTableSectionElement) {
     return [];
 }
 
+function removeNonAlphaNumeric(text: string) {
+    const removedNonAlphaNumeric = text.replace(/[^a-zA-Z0-9_]+/g, '_');
+    const consolidatedUnderscores = removedNonAlphaNumeric.replace(/_+/g, '_');
+    return consolidatedUnderscores;
+}
+
 
 export function fetchTableData(table: HTMLTableElement): IDataTable {
     const tableData: object[] = [];
@@ -41,15 +47,23 @@ export function fetchTableData(table: HTMLTableElement): IDataTable {
     }
 
     headers = headers.map(x => x.replace(/#/g, '_id').replace(/ /g, '_'));
+    headers = headers.map(x => removeNonAlphaNumeric(x));
 
     Array.from(rows).slice(1).forEach(row => {
         const rowData: { [key: string]: string } = {};
         const cells = row.querySelectorAll('td');
+        let allEmpty = true;
         cells.forEach((cell, index) => {
             const header = headers[index] || `column_${index + 1}`;
-            rowData[header] = cell.textContent || '';
+            //rowData[header] = cell.textContent || '';
+            rowData[header] = cell.innerText || '';
+            if (cell.innerText != '') {
+                allEmpty = false;
+            }
         });
-        tableData.push(rowData);
+        if (!allEmpty) {
+            tableData.push(rowData);
+        }
     });
 
     return {
