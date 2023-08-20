@@ -12,6 +12,7 @@ const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^
 const StringSimpleQuote = createToken({ name: "StringSimpleQuote", pattern: /'[^'\\]*(?:\\.[^'\\]*)*'/ });
 const Identifier = createToken({ name: RULES.IDENTIFIER, pattern: /[a-zA-Z_]\w*/ });
 const SELECT = createToken({ name: "Select", pattern: /(SELECT|select)/ });
+const FROM = createToken({ name: "From", pattern: /(FROM|from)/ });
 const AND = createToken({ name: "And", pattern: /(AND|and)/ });
 const OR = createToken({ name: "Or", pattern: /(OR|or)/ });
 const NOT = createToken({ name: "Not", pattern: /(NOT|not)/ });
@@ -26,6 +27,7 @@ const WhiteSpace = createToken({
 const allTokens = [
     WhiteSpace,
     Colon,
+    FROM,
     AND,
     OR,
     NOT,
@@ -54,6 +56,7 @@ class TSqlParser extends CstParser {
     public selectExpression = this.RULE(RULES.selectExpression, () => {
         this.CONSUME(SELECT);
         this.SUBRULE(this.columnList);
+        this.CONSUME(FROM);
     });
 
     public columnList = this.RULE(RULES.columnList, () => {
