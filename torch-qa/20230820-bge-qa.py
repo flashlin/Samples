@@ -91,8 +91,7 @@ def load_gptq_safetensors(model_name):
     model = AutoModelForCausalLM.from_config(config, trust_remote_code=False)
     return model
 
-
-model = load_gptq_safetensors(model_name).to(device)
+# model = load_gptq_safetensors(model_name).to(device)
 
 
 def get_max_memory_dict(cpu_memory=None, gpu_memory=None):
@@ -140,12 +139,14 @@ def get_max_memory_dict(cpu_memory=None, gpu_memory=None):
 #     }
 # model = AutoGPTQForCausalLM.from_quantized(model_name, **params)
 
-from safetensors.torch import load_file as safe_load
-model.load_state_dict(safe_load(checkpoint), strict=False)
+# from safetensors.torch import load_file as safe_load
+# model.load_state_dict(safe_load(checkpoint), strict=False)
 print("--------------------------------------")
 print(f"loaded gptq")
 
-# model = load_model(hf_token, model_name)
+
+# normal model
+model = load_model(hf_token, model_name)
 tokenizer, stopping_criteria = load_tokenizer(hf_token, model_id=model_name, device=device)
 llm = load_llm(model, tokenizer, stopping_criteria)
 chain = load_chain(llm, retriever)
