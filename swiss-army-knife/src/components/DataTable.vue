@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { IDataTable } from '@/helpers/dataTypes';
+import { computed } from 'vue';
 interface DataTableProps {
     modelValue: IDataTable
 }
@@ -12,9 +13,26 @@ const props = withDefaults(defineProps<DataTableProps>(), {
     },
 });
 
+const columns = computed(() => {
+    return props.modelValue.columnNames.map(name => {
+        return {
+            key: `${name}`,
+            dataKey: `${name}`,
+            title: `${name}`,
+            width: 150,
+        }
+    });
+});
+
+
+const data = computed(() => {
+    console.log('rows', props.modelValue.rows)
+    return props.modelValue.rows;
+});
+
 </script>
 <template>
-    <el-table :data="props.modelValue.rows" stripe style="width: 100%">
+    <!-- <el-table :data="props.modelValue.rows" stripe style="width: 100%">
         <template v-for="headerName in props.modelValue.columnNames" :key="headerName">
             <el-table-column :label="headerName" width="180">
                 <template #default="scope">
@@ -24,10 +42,6 @@ const props = withDefaults(defineProps<DataTableProps>(), {
                 </template>
             </el-table-column>
         </template>
-        <!-- <el-table-column fixed="right" label="Operations" width="80">
-            <template #default>
-                <el-button link type="primary" size="small">Delete</el-button>
-            </template>
-        </el-table-column> -->
-    </el-table>
+    </el-table> -->
+    <el-table-v2 :columns="columns" :data="data" :width="1000" :height="500" fixed />
 </template>
