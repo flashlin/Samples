@@ -59,7 +59,7 @@ export function fetchTableData(table: HTMLTableElement): IDataTable {
         cells.forEach((cell, index) => {
             const header = headers[index] || `column_${index + 1}`;
             //rowData[header] = cell.textContent || '';
-            rowData[header] = cell.innerText || '';
+            rowData[header] = cell.innerText || cell.textContent || '';
             if (cell.innerText != '') {
                 allEmpty = false;
             }
