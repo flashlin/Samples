@@ -9,6 +9,9 @@ describe('tsql', () => {
             type: 'SELECT_CLAUSE',
             columns: [
                 { type: 'IDENTIFIER', value: 'id' },
+            ],
+            sourceClause: [
+                { type: 'IDENTIFIER', value: 'customer' }
             ]
         });
     });
