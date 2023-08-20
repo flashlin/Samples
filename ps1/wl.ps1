@@ -11,17 +11,38 @@ $result | ForEach-Object {
     Write-Host $_
 }
 
-if( 's' -eq $action ) {
+function AskWslNames {
+    param (
+    )
     $names = $result | ForEach-Object {
         $_.NAME
     }
     $name = PromptList $names
-    if( "" -eq $name ) {
+    return $name
+}
+
+if ( 's' -eq $action ) {
+    $names = $result | ForEach-Object {
+        $_.NAME
+    }
+    $name = PromptList $names
+    if ( "" -eq $name ) {
         return
     }
     InvokeCmd "wsl --shutdown $name"
     return
 }
 
+
+if ( 'b' -eq $action ) {
+    $name = AskWslNames
+    if ( "" -eq $name ) {
+        return
+    }
+    InvokeCmd "wsl -d $name"
+    return
+}
+
 Write-Host ""
 Write-Host "s: stop"
+Write-Host "b: run and enter"

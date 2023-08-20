@@ -87,7 +87,7 @@ if ( "c" -eq $action ) {
     return
 }
 
-if( "update" -eq $action){
+if ( "update" -eq $action) {
     InvokeCmd "conda update -n base -c defaults conda"
     return
 }
@@ -97,11 +97,11 @@ if ( "i" -eq $action ) {
     InvokeConda "install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia"
     #InvokeConda "install -c conda-forge faiss"
     InvokeConda "install -c conda-forge faiss-gpu"
-    InvokeCmd "pip install accelerate"
-    InvokeCmd "pip install pandas tensorboard"
+    InvokeCmd "pip -q install accelerate"
+    InvokeCmd "pip -q install pandas tensorboard"
     # 2023-08-08 pip install bitsandbytes 只支援 linux 改用下面
     # InvokeCmd "python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/raw/main/bitsandbytes-0.38.1-py3-none-any.whl"
-    InvokeCmd "python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/raw/main/bitsandbytes-0.39.0-py3-none-any.whl"
+    # InvokeCmd "python -m pip install https://github.com/jllllll/bitsandbytes-windows-webui/raw/main/bitsandbytes-0.39.0-py3-none-any.whl"
     return
 }
 
