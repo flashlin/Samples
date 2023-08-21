@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 //import { RouterView } from 'vue-router';
 import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flashKnife';
@@ -9,9 +10,9 @@ import { QuerySqliteService, SqliteDb } from './helpers/sqliteDb';
 import { MessageTypes, type IDataTable, type MessageType } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
-
 import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
 
+const router = useRouter();
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, tableListInWebPage } = storeToRefs(flashKnifeStore);
 const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
@@ -115,6 +116,11 @@ const queryAllTableNames = () => {
 
 const activeIndex = ref('2');
 const handleSelect = async (key: string, keyPath: string[]) => {
+  if( key=='MergeTable') {
+    router.push('/mergeTable');
+    return;
+  }
+
   if (key == 'FetchTableInWebPage') {
     showLoadingFullscreen(true);
     fetchAllDataTableInWebPage();
@@ -224,6 +230,7 @@ onUnmounted(() => {
         <el-sub-menu index="">
           <template #title>Database</template>
           <el-menu-item index="QueryAllTableNames">Query All Table Names</el-menu-item>
+          <el-menu-item index="MergeTable">Merge Table</el-menu-item>
           <el-menu-item index="SaveToLocalStorage">Save to localstorage</el-menu-item>
           <el-menu-item index="LoadFromLocalStorage">Load from localstorage</el-menu-item>
         </el-sub-menu>
