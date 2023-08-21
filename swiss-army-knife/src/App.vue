@@ -3,7 +3,7 @@ import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 //import { RouterView } from 'vue-router';
 import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flashKnife';
-import CodeEditor from './views/CodeEditor.vue';
+import CodeEditor from './components/CodeEditor.vue';
 import DataTable from './components/DataTable.vue';
 import { QuerySqliteService, SqliteDb } from './helpers/sqliteDb';
 import { MessageTypes, type IDataTable, type MessageType } from './helpers/dataTypes';
