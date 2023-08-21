@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+//import { useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 //import { RouterView } from 'vue-router';
 import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flashKnife';
@@ -12,7 +12,7 @@ import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
 import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
 
-const router = useRouter();
+//const router = useRouter();
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, tableListInWebPage } = storeToRefs(flashKnifeStore);
 const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
@@ -40,6 +40,7 @@ const data = reactive<IData>({
   }
 });
 const dialogVisible = ref(false);
+const dialogMergeTableVisible = ref(false);
 
 const tableList = computed(() => {
   let idx = -1;
@@ -116,8 +117,8 @@ const queryAllTableNames = () => {
 
 const activeIndex = ref('2');
 const handleSelect = async (key: string, keyPath: string[]) => {
-  if( key=='MergeTable') {
-    router.push('/mergeTable');
+  if (key == 'MergeTable') {
+    dialogMergeTableVisible.value = true;
     return;
   }
 
@@ -144,13 +145,13 @@ const handleSelect = async (key: string, keyPath: string[]) => {
     return;
   }
 
-  if( key == 'SaveToLocalStorage' ) {
+  if (key == 'SaveToLocalStorage') {
     await db.saveToLocalstorageAsync('FlashKnifeDb');
     notify(MessageTypes.Success, 'Save to localstorage');
     return;
   }
 
-  if( key == 'LoadFromLocalStorage' ) {
+  if (key == 'LoadFromLocalStorage') {
     await db.loadFromLocalStoreageAsync('FlashKnifeDb');
     queryAllTableNames();
     notify(MessageTypes.Success, 'Load from localstorage');
@@ -325,6 +326,11 @@ onUnmounted(() => {
           <el-button type="primary" @click="closeFlashIcon"> Close </el-button>
         </span>
       </template>
+    </el-dialog>
+
+
+    <el-dialog v-model="dialogMergeTableVisible" title="Merge Table">
+      <MergeTable />
     </el-dialog>
   </div>
 </template>

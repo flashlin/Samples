@@ -34,6 +34,11 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    alias: {
+      '@': '/src/'
+    }
+  },
   optimizeDeps: {
     exclude: ['sql-wasm'],
     //esbuildOptions: { target: 'es2020' },
