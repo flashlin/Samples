@@ -107,23 +107,60 @@ export class SqliteDb {
         this._db?.close();
     }
 
-    saveToLocalstorage(key: string) {
-        const db = this._db!;
-        const data = db.export();   // Uint8Array 格式
-        const blob = new Blob([data], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(blob);
-        localStorage.setItem(key , url);
+    saveToLocalstorageAsync(key: string) {
+        return new Promise(resolve => {
+            const db = this._db!;
+            const data = db.export();   // Uint8Array 格式
+            const blob = new Blob([data], { type: 'application/octet-stream' });
+            const reader = new FileReader();
+            reader.onload = function (event: ProgressEvent<FileReader>) {
+                const base64Blob = event.target!.result as string;
+                localStorage.setItem(key, base64Blob);
+                resolve(base64Blob);
+            };
+            reader.readAsDataURL(blob);
+        });
     }
 
-    async loadFromLocalStoreage(key: string) {
-        const savedUrl = localStorage.getItem(key);
-        if (!savedUrl) {
+    async loadFromLocalStoreageAsync(key: string) {
+        const base64Blob = localStorage.getItem(key);
+        if (!base64Blob) {
             return;
         }
-        const response = await fetch(savedUrl);
-        const data = await response.arrayBuffer();
-        const newDb = new SQL!.Database(new Uint8Array(data));
+
+        // const binaryString = atob(base64Blob);
+        // const uint8Array = new Uint8Array(binaryString.length);
+        // for (let i = 0; i < binaryString.length; i++) {
+        //     uint8Array[i] = binaryString.charCodeAt(i);
+        // }
+        const blob = this.base64ToBlob(base64Blob);
+        const uint8Array = await this.blobToUint8ArrayAsync(blob);
+
+        const newDb = new SQL!.Database(uint8Array);
         this._db = newDb;
+    }
+
+    private base64ToBlob(base64Blob: string) {
+        const parts = base64Blob.split(',');
+        const contentType = parts[0].split(':')[1];
+        const byteCharacters = atob(parts[1]);
+        const byteArrays = new Uint8Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteArrays[i] = byteCharacters.charCodeAt(i);
+        }
+        const restoredBlob = new Blob([byteArrays], { type: contentType });
+        return restoredBlob;
+    }
+
+    private blobToUint8ArrayAsync(blob: Blob): Promise<Uint8Array> {
+        return new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = function (event: ProgressEvent<FileReader>) {
+                const uint8Array = new Uint8Array(event!.target!.result as any);
+                resolve(uint8Array);
+            };
+            reader.readAsArrayBuffer(blob);
+        });
     }
 
     public dropTable(tableName: string) {
