@@ -114,7 +114,7 @@ const queryAllTableNames = () => {
 };
 
 const activeIndex = ref('2');
-const handleSelect = (key: string, keyPath: string[]) => {
+const handleSelect = async (key: string, keyPath: string[]) => {
   if (key == 'FetchTableInWebPage') {
     showLoadingFullscreen(true);
     fetchAllDataTableInWebPage();
@@ -135,6 +135,19 @@ const handleSelect = (key: string, keyPath: string[]) => {
 
   if (key == 'QueryAllTableNames') {
     queryAllTableNames();
+    return;
+  }
+
+  if( key == 'SaveToLocalStorage' ) {
+    await db.saveToLocalstorageAsync('FlashKnifeDb');
+    notify(MessageTypes.Success, 'Save to localstorage');
+    return;
+  }
+
+  if( key == 'LoadFromLocalStorage' ) {
+    await db.loadFromLocalStoreageAsync('FlashKnifeDb');
+    queryAllTableNames();
+    notify(MessageTypes.Success, 'Load from localstorage');
     return;
   }
 };
@@ -211,6 +224,8 @@ onUnmounted(() => {
         <el-sub-menu index="">
           <template #title>Database</template>
           <el-menu-item index="QueryAllTableNames">Query All Table Names</el-menu-item>
+          <el-menu-item index="SaveToLocalStorage">Save to localstorage</el-menu-item>
+          <el-menu-item index="LoadFromLocalStorage">Load from localstorage</el-menu-item>
         </el-sub-menu>
         <el-sub-menu index="2">
           <template #title>Import Data</template>
