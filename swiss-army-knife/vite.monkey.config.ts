@@ -25,7 +25,7 @@ export default defineConfig({
         version: '0.1',
         icon: 'https//vitejs.dev/logo.svg',
         namespace: 'flash-knife',
-        match: ['*://dba-*.coreop.net/*', 'https://www.w3schools.com/*'],
+        match: ['*://*.coreop.net/*', 'https://www.w3schools.com/*'],
       },
       build: {
         externalGlobals: {
