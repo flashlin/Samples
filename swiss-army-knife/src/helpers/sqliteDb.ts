@@ -107,6 +107,25 @@ export class SqliteDb {
         this._db?.close();
     }
 
+    saveToLocalstorage(key: string) {
+        const db = this._db!;
+        const data = db.export();   // Uint8Array 格式
+        const blob = new Blob([data], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        localStorage.setItem(key , url);
+    }
+
+    async loadFromLocalStoreage(key: string) {
+        const savedUrl = localStorage.getItem(key);
+        if (!savedUrl) {
+            return;
+        }
+        const response = await fetch(savedUrl);
+        const data = await response.arrayBuffer();
+        const newDb = new SQL!.Database(new Uint8Array(data));
+        this._db = newDb;
+    }
+
     public dropTable(tableName: string) {
         const sql = `DROP TABLE IF EXISTS ${tableName}`;
         this.execute(sql);
