@@ -24,8 +24,11 @@ const handleClickMergeTable = () => {
 
 <template>
   <el-container>
+    <el-header>Header</el-header>
     <el-main>Table1</el-main>
     <el-aside width="50%">Table2</el-aside>
-    <el-button type="primary" @click="handleClickMergeTable" size="small">Confirm</el-button>
+    <el-footer>
+      <el-button type="primary" @click="handleClickMergeTable" size="small">Confirm</el-button>
+    </el-footer>
   </el-container>
 </template>
