@@ -28,6 +28,7 @@ model_name = 'models/vicuna-7B-v1.5-16K-GPTQ'
 checkpoint = 'models/vicuna-7B-v1.5-16K-GPTQ/gptq_model-4bit-128g.safetensors'
 
 model_name = 'models/Chinese-Llama-2-7b-4bit'
+model_name = 'models/trurl-2-13b-8bit'  # 記憶體不足
 
 
 def display_gpu_info(device='cuda'):
