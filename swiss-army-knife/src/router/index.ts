@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '../views/HomeView.vue';
 import MergeTableView from '../views/MergeTable.vue';
 
-const prefixRoutePath = '/FlashKnife';
+const prefixRoutePath = '';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [

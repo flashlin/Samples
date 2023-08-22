@@ -25,8 +25,30 @@ const handleClickMergeTable = () => {
 <template>
   <el-container>
     <el-header>Header</el-header>
-    <el-main>Table1</el-main>
-    <el-aside width="50%">Table2</el-aside>
+    <el-aside width="50%">
+      <select name="cars" size="5">
+        <option value="volvo">Volvo</option>
+        <option value="saab">Saab</option>
+        <option value="mercedes">Mercedes</option>
+        <option value="audi">Audi</option>
+      </select>
+    </el-aside>
+    <el-aside width="50%">
+      <select name="cars" size="5">
+        <option value="volvo">Volvo</option>
+        <option value="saab">Saab</option>
+        <option value="mercedes">Mercedes</option>
+        <option value="audi">Audi</option>
+      </select>
+    </el-aside>
+    <el-main>
+      <select name="cars" size="5">
+        <option value="volvo">Volvo</option>
+        <option value="saab">Saab</option>
+        <option value="mercedes">Mercedes</option>
+        <option value="audi">Audi</option>
+      </select>
+    </el-main>
     <el-footer>
       <el-button type="primary" @click="handleClickMergeTable" size="small">Confirm</el-button>
     </el-footer>

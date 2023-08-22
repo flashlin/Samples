@@ -26,7 +26,6 @@ const columns = computed(() => {
 
 
 const data = computed(() => {
-    console.log('rows', props.modelValue.rows)
     return props.modelValue.rows;
 });
 
