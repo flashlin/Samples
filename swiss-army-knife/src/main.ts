@@ -8,7 +8,7 @@ import ElementPlus from 'element-plus'
 import 'element-plus/theme-chalk/index.css';
 import 'element-plus/theme-chalk/dark/css-vars.css';
 
-import { parseTsql } from './sqlex/tsql';
+import { parseTsql } from './parseEx/tsql';
 parseTsql('select id from customer');
 
 import { appDiv } from "./initMonkey";
