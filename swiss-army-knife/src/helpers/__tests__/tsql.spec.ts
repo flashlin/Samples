@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseTsql } from '@/sqlex/tsql';
+import { parseTsql } from '@/parseEx/tsql';
 
 describe('tsql', () => {
     it('select id from customer', () => {
