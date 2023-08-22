@@ -11,6 +11,7 @@ import { MessageTypes, type IDataTable, type MessageType } from './helpers/dataT
 import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
 import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
+import MergeTable from './views/MergeTable.vue';
 
 //const router = useRouter();
 const flashKnifeStore = useFlashKnifeStore();
