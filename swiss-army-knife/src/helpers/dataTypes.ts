@@ -15,3 +15,15 @@ export enum MessageTypes {
 }
 
 export type MessageType = MessageTypes.Success | MessageTypes.Error | MessageTypes.Warning;
+
+export interface IMergeTableCondition {
+    name: string;
+    columns: string[];
+    joinOnColumns: string[];
+}
+
+export interface IMergeTableReq {
+    name: string;
+    table1: IMergeTableCondition;
+    table2: IMergeTableCondition;
+}
