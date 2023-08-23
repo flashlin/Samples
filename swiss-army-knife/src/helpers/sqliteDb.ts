@@ -1,6 +1,6 @@
 import initSqlJs, { type Database } from 'sql.js';
 import wasmPath from '../assets/sql-wasm.wasm?url';
-import { type IDataTable, type IDataTableNested } from './dataTypes';
+import { type IDataTable, type IMasterDetailDataTable } from './dataTypes';
 import { getObjectKeys } from './dataHelper';
 
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
@@ -263,7 +263,7 @@ export class QuerySqliteService {
         return result;
     }
 
-    getAllTables(): IDataTableNested {
+    getAllTables(): IMasterDetailDataTable {
         const tableNamesTable = this.getAllTableNamesToDataTable();
         const tableNames = tableNamesTable.rows.map((row: any) => {
             return row.tableName;
