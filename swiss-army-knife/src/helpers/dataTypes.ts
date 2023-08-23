@@ -3,7 +3,7 @@ export interface IDataTable {
     rows: any[];
 }
 
-export interface IDataTableNested {
+export interface IMasterDetailDataTable {
     master: IDataTable;
     detail: IDataTable[];
 }
