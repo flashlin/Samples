@@ -23,34 +23,31 @@ const handleClickMergeTable = () => {
 </script>
 
 <template>
-  <el-container>
-    <el-header>Header</el-header>
-    <el-aside width="50%">
-      <select name="cars" size="5">
-        <option value="volvo">Volvo</option>
-        <option value="saab">Saab</option>
-        <option value="mercedes">Mercedes</option>
-        <option value="audi">Audi</option>
-      </select>
-    </el-aside>
-    <el-aside width="50%">
-      <select name="cars" size="5">
-        <option value="volvo">Volvo</option>
-        <option value="saab">Saab</option>
-        <option value="mercedes">Mercedes</option>
-        <option value="audi">Audi</option>
-      </select>
-    </el-aside>
-    <el-main>
-      <select name="cars" size="5">
-        <option value="volvo">Volvo</option>
-        <option value="saab">Saab</option>
-        <option value="mercedes">Mercedes</option>
-        <option value="audi">Audi</option>
-      </select>
-    </el-main>
-    <el-footer>
-      <el-button type="primary" @click="handleClickMergeTable" size="small">Confirm</el-button>
-    </el-footer>
-  </el-container>
+  <div>
+    <el-card width="480px">
+      <el-row :gutter="1">
+        <el-col :span="24">
+          <el-input placeholder="table name" />
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <select name="cars" size="5">
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="mercedes">Mercedes</option>
+            <option value="audi">Audi</option>
+          </select>
+        </el-col>
+        <el-col :span="12">
+          <select name="cars" size="5">
+            <option value="volvo">Volvo</option>
+            <option value="saab">Saab</option>
+            <option value="mercedes">Mercedes</option>
+            <option value="audi">Audi</option>
+          </select>
+        </el-col>
+      </el-row>
+    </el-card>
+  </div>
 </template>
