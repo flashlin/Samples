@@ -8,6 +8,14 @@ export interface IMasterDetailDataTable {
     detail: IDataTable[];
 }
 
+export interface IColumnOption {
+    isSelected: boolean;
+}
+
+export interface IDisplayDataTable extends IDataTable {
+    columnOptions: IColumnOption[];
+}
+
 export enum MessageTypes {
     Success = "success",
     Error = "error",

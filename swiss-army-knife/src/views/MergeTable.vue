@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import type { IMergeTableReq } from '../helpers/dataTypes';
+import { type IDisplayDataTable } from '../helpers/dataTypes';
+import { ref } from 'vue';
+
+interface IData {
+  table1: IDisplayDataTable;
+
+}
+
+const data = ref<IData>({
+});
 
 const emit = defineEmits<{
   (e: 'confirm', value: IMergeTableReq): void;
