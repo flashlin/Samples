@@ -7,7 +7,7 @@ import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flash
 import CodeEditor from './components/CodeEditor.vue';
 import DataTable from './components/DataTable.vue';
 import { QuerySqliteService, SqliteDb } from './helpers/sqliteDb';
-import { MessageTypes, type IDataTable, type MessageType } from './helpers/dataTypes';
+import { MessageTypes, type IDataTable, type MessageType, type IMergeTableForm } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
 import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
@@ -27,7 +27,9 @@ interface IData {
   }[];
   dataTable: IDataTable;
   tableStructure: IDataTable;
+  mergeTableForm: IMergeTableForm;
 }
+
 const db = new SqliteDb();
 const queryService = new QuerySqliteService(db);
 const data = reactive<IData>({
@@ -41,6 +43,19 @@ const data = reactive<IData>({
   tableStructure: {
     columnNames: [],
     rows: [],
+  },
+  mergeTableForm: {
+    name: 'mtb1',
+    table1: {
+      name: '',
+      columns: [],
+      joinOnColumns: [],
+    },
+    table2: {
+      name: '',
+      columns: [],
+      joinOnColumns: [],
+    }
   }
 });
 const dialogVisible = ref(false);
@@ -114,10 +129,10 @@ const queryAllTableNames = () => {
   });
 };
 
-function* filter<T>(items: T[], condition: (item: T)=>boolean) {
-  for(let idx=0; idx < items.length; idx++)  {
+function* filter<T>(items: T[], condition: (item: T) => boolean) {
+  for (let idx = 0; idx < items.length; idx++) {
     const item = items[idx];
-    if( condition(item) ) {
+    if (condition(item)) {
       yield item;
     }
   }
@@ -136,8 +151,17 @@ function take<T>(generator: Iterable<T>, count: number): T[] {
 const activeIndex = ref('2');
 const handleSelect = async (key: string, keyPath: string[]) => {
   if (key == 'MergeTable') {
+    const toMergeTableCondition = (tableName: string) => {
+      const tableInfo = queryService.getTableFieldsInfo(tableName)
+      return {
+        name: tableName,
+        columns: tableInfo.rows.map(x => x.name),
+        joinOnColumns: []
+      };
+    };
     const tableNames = take(filter(data.tableNames, item => item.isSelected), 2);
-    query
+    data.mergeTableForm.table1 = toMergeTableCondition(tableNames[0].tableName);
+    data.mergeTableForm.table2 = toMergeTableCondition(tableNames[1].tableName);
     dialogMergeTableVisible.value = true;
     return;
   }
@@ -272,7 +296,11 @@ onUnmounted(() => {
               </el-main>
               <el-aside width="200px">
                 <el-table :data="data.tableNames" stripe style="width: 100%">
-                  <el-table-column prop="tableName" label="tableName" width="180" />
+                  <el-table-column label="table name" width="120">
+                    <template #default="scope">
+                      <el-checkbox v-model="scope.row.isSelected" :label="scope.row.tableName" />
+                    </template>
+                  </el-table-column>
                   <el-table-column fixed="right" label="Operations" width="120">
                     <template #default="scope">
                       <el-row :gutter="2">
@@ -350,7 +378,7 @@ onUnmounted(() => {
 
 
     <el-dialog v-model="dialogMergeTableVisible" title="Merge Table">
-      <MergeTable />
+      <MergeTable v-model="data.mergeTableForm" />
     </el-dialog>
   </div>
 </template>
