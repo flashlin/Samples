@@ -31,7 +31,6 @@ export type MessageType = MessageTypes.Success | MessageTypes.Error | MessageTyp
 
 export interface IMergeTableCondition {
     name: string;
-    columns: string[];
     joinOnColumns: string[];
 }
 
