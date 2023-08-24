@@ -70,6 +70,15 @@ const table2Columns = computed(() => {
           <ListBox :modelValue="table2Columns" />
         </el-col>
       </el-row>
+      <el-row :span="24" justify="center">
+        <el-button>Confirm</el-button>
+      </el-row>
     </el-card>
   </div>
 </template>
+
+<style scoped>
+.el-row {
+  margin-bottom: 20px;
+}
+</style>
