@@ -8,7 +8,7 @@ import CodeEditor from './components/CodeEditor.vue';
 import DataTable from './components/DataTable.vue';
 import { QuerySqliteService, SqliteDb } from './helpers/sqliteDb';
 import { MessageTypes, type IDataTable, type MessageType, type IMergeTableForm } from './helpers/dataTypes';
-import { ElNotification } from 'element-plus';
+//import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
 import { exportToCsv, filter, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync, take } from './helpers/dataHelper';
 import MergeTable from './views/MergeTable.vue';
@@ -16,7 +16,7 @@ import MergeTable from './views/MergeTable.vue';
 //const router = useRouter();
 const flashKnifeStore = useFlashKnifeStore();
 const { fullscreenLoading, tableListInWebPage } = storeToRefs(flashKnifeStore);
-const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
+const { fetchAllDataTableInWebPage, showLoadingFullscreen, notify } = flashKnifeStore;
 
 interface IData {
   tableName: string;
@@ -73,15 +73,6 @@ const tableList = computed(() => {
   });
   return tableData;
 });
-
-const notify = (messageType: MessageType, message: string) => {
-  ElNotification({
-    title: 'Success',
-    message: message,
-    type: messageType,
-    position: 'top-right',
-  });
-};
 
 const onClickExportToCsv = () => {
   const time = getCurrentTime();

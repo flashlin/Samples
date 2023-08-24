@@ -1,6 +1,7 @@
-import type { IDataTable } from '@/helpers/dataTypes';
+import type { IDataTable, MessageType } from '@/helpers/dataTypes';
 import { fetchAllTable } from './../helpers/tableFetcher';
 import { defineStore } from 'pinia';
+import { ElNotification } from 'element-plus';
 
 export interface IPrepareImportDataTable {
   tableName: string;
@@ -34,7 +35,15 @@ const flashKnifeStore = defineStore('flashKnife', {
           dataTable: x,
         };
       });
-    }
+    },
+    notify(messageType: MessageType, message: string) {
+      ElNotification({
+        title: 'Success',
+        message: message,
+        type: messageType,
+        position: 'top-right',
+      });
+    },
   },
 });
 
