@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref, toRefs } from 'vue';
 import { Top, Bottom } from '@element-plus/icons-vue'
 import { type IDataTable } from '../helpers/dataTypes';
 
@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<ListBoxProps>(), {
     dataValueField: 'name',
 });
 
-const data = reactive(props.modelValue.rows.map((row, idx) => {
+const data = ref(props.modelValue.rows.map((row, idx) => {
     return {
         ...row,
         _id_: idx,
@@ -37,7 +37,17 @@ const getLabelField = () => {
 }
 
 const handleOnUp = (idx: number) => {
-    console.log('up', idx)
+    const dataValue = data.value;
+    const index = dataValue.findIndex(row => row._id_ == idx);
+    if( index < 0 ) {
+        return;
+    }
+    const currItem = dataValue[index];
+    const prevItem = dataValue[index - 1];
+    const prefix = dataValue.slice(0, index - 1);
+    const postfix = dataValue.slice(index + 1);
+    const newData = [...prefix, currItem, prevItem, ...postfix];
+    data.value = newData;
 }
 
 const handleOnDown = (idx: number) => {
