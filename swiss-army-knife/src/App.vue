@@ -21,7 +21,10 @@ const { fetchAllDataTableInWebPage, showLoadingFullscreen } = flashKnifeStore;
 interface IData {
   tableName: string;
   code: string;
-  tableNames: string[];
+  tableNames: {
+    isSelected: boolean;
+    tableName: string;
+  }[];
   dataTable: IDataTable;
   tableStructure: IDataTable;
 }
@@ -54,16 +57,6 @@ const tableList = computed(() => {
     };
   });
   return tableData;
-});
-
-const tableNamesTable = computed(() => {
-  const result: object[] = [];
-  data.tableNames.forEach(tableName => {
-    result.push({
-      'tableName': tableName
-    });
-  });
-  return result;
 });
 
 const notify = (messageType: MessageType, message: string) => {
@@ -113,12 +106,38 @@ const handleDialogClose = (done: () => void) => {
 };
 
 const queryAllTableNames = () => {
-  data.tableNames = queryService.getAllTableNames();
+  data.tableNames = queryService.getAllTableNames().map(tableName => {
+    return {
+      tableName,
+      isSelected: false,
+    }
+  });
 };
+
+function* filter<T>(items: T[], condition: (item: T)=>boolean) {
+  for(let idx=0; idx < items.length; idx++)  {
+    const item = items[idx];
+    if( condition(item) ) {
+      yield item;
+    }
+  }
+}
+
+function take<T>(generator: Iterable<T>, count: number): T[] {
+  const items: T[] = [];
+  for (let item of generator) {
+    items.push(item);
+    if (items.length === count) break;
+  }
+  return items;
+}
+
 
 const activeIndex = ref('2');
 const handleSelect = async (key: string, keyPath: string[]) => {
   if (key == 'MergeTable') {
+    const tableNames = take(filter(data.tableNames, item => item.isSelected), 2);
+    query
     dialogMergeTableVisible.value = true;
     return;
   }
@@ -252,7 +271,7 @@ onUnmounted(() => {
                 <CodeEditor v-model="data.code" />
               </el-main>
               <el-aside width="200px">
-                <el-table :data="tableNamesTable" stripe style="width: 100%">
+                <el-table :data="data.tableNames" stripe style="width: 100%">
                   <el-table-column prop="tableName" label="tableName" width="180" />
                   <el-table-column fixed="right" label="Operations" width="120">
                     <template #default="scope">

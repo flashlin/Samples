@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { reactive, ref, toRefs } from 'vue';
+import { ref } from 'vue';
 import { Top, Bottom } from '@element-plus/icons-vue'
 import { type IDataTable } from '../helpers/dataTypes';
-import { filter } from 'rxjs/operators';
 
 interface ListBoxProps {
     modelValue: IDataTable;
