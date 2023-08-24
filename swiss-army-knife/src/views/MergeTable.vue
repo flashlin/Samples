@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import type { IMergeTableForm } from '../helpers/dataTypes';
-import { computed, ref, toRefs } from 'vue';
+import { computed, ref, } from 'vue';
 
 interface IMergeTableProps {
   modelValue: IMergeTableForm;
 }
 
 const props = defineProps<IMergeTableProps>();
+
+const tableName = ref(props.modelValue.name);
 
 const table1Columns = computed(() => {
   return props.modelValue.table1.columns.map(columnName => ({
@@ -22,36 +24,26 @@ const table2Columns = computed(() => {
   }));
 });
 
-// interface IData {
-//   table1: IDataTable;
-// }
+const emit = defineEmits<{
+  (e: 'confirm', value: IMergeTableForm): void;
+}>();
 
-// const data = ref<IData>({
-//   table1: {
-//     columnNames: [],
-//     joinOnColumns: [],
-//   },
-// });
+const handleClickConfirm = () => {
 
-// const emit = defineEmits<{
-//   (e: 'confirm', value: IMergeTableReq): void;
-// }>();
-
-// const handleClickMergeTable = () => {
-//   emit('confirm', {
-//     name: '',
-//     table1: {
-//       name: '',
-//       columns: [],
-//       joinOnColumns: [],
-//     },
-//     table2: {
-//       name: '',
-//       columns: [],
-//       joinOnColumns: [],
-//     },
-//   });
-// };
+  emit('confirm', {
+    name: '',
+    table1: {
+      name: '',
+      columns: [],
+      joinOnColumns: [],
+    },
+    table2: {
+      name: '',
+      columns: [],
+      joinOnColumns: [],
+    },
+  });
+};
 </script>
 
 <template>
@@ -59,7 +51,7 @@ const table2Columns = computed(() => {
     <el-card width="480px">
       <el-row :gutter="1">
         <el-col :span="24">
-          <el-input placeholder="table name" />
+          <el-input v-model="tableName" placeholder="table name" />
         </el-col>
       </el-row>
       <el-row>
@@ -71,7 +63,7 @@ const table2Columns = computed(() => {
         </el-col>
       </el-row>
       <el-row :span="24" justify="center">
-        <el-button>Confirm</el-button>
+        <el-button @click="handleClickConfirm">Confirm</el-button>
       </el-row>
     </el-card>
   </div>

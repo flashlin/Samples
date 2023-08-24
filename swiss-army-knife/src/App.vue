@@ -10,7 +10,7 @@ import { QuerySqliteService, SqliteDb } from './helpers/sqliteDb';
 import { MessageTypes, type IDataTable, type MessageType, type IMergeTableForm } from './helpers/dataTypes';
 import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
-import { exportToCsv, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync } from './helpers/dataHelper';
+import { exportToCsv, filter, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync, take } from './helpers/dataHelper';
 import MergeTable from './views/MergeTable.vue';
 
 //const router = useRouter();
@@ -128,25 +128,6 @@ const queryAllTableNames = () => {
     }
   });
 };
-
-function* filter<T>(items: T[], condition: (item: T) => boolean) {
-  for (let idx = 0; idx < items.length; idx++) {
-    const item = items[idx];
-    if (condition(item)) {
-      yield item;
-    }
-  }
-}
-
-function take<T>(generator: Iterable<T>, count: number): T[] {
-  const items: T[] = [];
-  for (let item of generator) {
-    items.push(item);
-    if (items.length === count) break;
-  }
-  return items;
-}
-
 
 const activeIndex = ref('2');
 const handleSelect = async (key: string, keyPath: string[]) => {
