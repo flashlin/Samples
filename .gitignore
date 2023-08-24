@@ -39,3 +39,4 @@ torch-qa/.chainlit
 T1.ParserKit/Antlr4Tool/*.cs
 torch-qa/data/support.txt
 ChatTrainDataWeb/ChatTrainDataWeb/Data
+torch-qa/Llama-2-7b-chat-finetune
