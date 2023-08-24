@@ -79,3 +79,21 @@ export function mapObject<T extends object>(obj: T, mapFn: MapFn) {
     }
     return newObj;
 }
+
+export function* filter<T>(items: T[], condition: (item: T) => boolean) {
+    for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        if (condition(item)) {
+            yield item;
+        }
+    }
+}
+
+export function take<T>(generator: Iterable<T>, count: number): T[] {
+    const items: T[] = [];
+    for (const item of generator) {
+        items.push(item);
+        if (items.length === count) break;
+    }
+    return items;
+}
