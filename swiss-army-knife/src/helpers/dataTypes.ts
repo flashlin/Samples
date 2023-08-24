@@ -16,6 +16,11 @@ export interface IDisplayDataTable extends IDataTable {
     columnOptions: IColumnOption[];
 }
 
+export interface IListItem {
+    label: string;
+    value: any;
+}
+
 export enum MessageTypes {
     Success = "success",
     Error = "error",
@@ -30,7 +35,7 @@ export interface IMergeTableCondition {
     joinOnColumns: string[];
 }
 
-export interface IMergeTableReq {
+export interface IMergeTableForm {
     name: string;
     table1: IMergeTableCondition;
     table2: IMergeTableCondition;

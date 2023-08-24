@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { Top, Bottom } from '@element-plus/icons-vue'
-import { type IDataTable } from '../helpers/dataTypes';
+import { type IListItem } from '../helpers/dataTypes';
 
 interface ListBoxProps {
-    modelValue: IDataTable;
-    dataKeyField: string;
-    dataValueField: string;
+    modelValue: IListItem[];
 }
 
 const props = withDefaults(defineProps<ListBoxProps>(), {
     modelValue: () => {
-        return {
-            columnNames: [],
-            rows: [],
-        };
+        return [];
     },
-    dataKeyField: '_id_',
-    dataValueField: 'name',
 });
 
 interface IListBoxExpose {
@@ -26,32 +19,22 @@ interface IListBoxExpose {
 
 defineExpose<IListBoxExpose>({
     getSelectedValues: () => {
-        return data.value.filter(row => row._isSelected_)
-            .map(row => {
-                const newRow: any = {};
-                const labelField = getLabelField();
-                newRow[props.dataKeyField] = row[props.dataKeyField];
-                newRow[labelField] = row[labelField];
-                return newRow;
+        return data.value.filter(item => item._isSelected_)
+            .map(item => {
+                return item.value;
             });
     }
 })
 
-const data = ref(props.modelValue.rows.map((row, idx) => {
+const data = ref(props.modelValue.map((item, idx) => {
     return {
-        ...row,
         _id_: idx,
         _isSelected_: false,
+        label: item.label,
+        value: item.value
     };
-}));
-
-const getLabelField = () => {
-    let valueField = props.dataValueField;
-    if (props.dataValueField == '') {
-        valueField = props.modelValue.columnNames[0];
-    }
-    return valueField;
-}
+})
+);
 
 const handleOnUp = (idx: number) => {
     const dataValue = data.value;
@@ -92,7 +75,7 @@ const handleOnDown = (idx: number) => {
                 </div>
             </template>
         </el-table-column>
-        <el-table-column :prop="getLabelField()" width="150" />
+        <el-table-column prop="label" width="150" />
         <el-table-column label="Date" width="50">
             <template #default="scope">
                 <div style="display: flex; align-items: center">
