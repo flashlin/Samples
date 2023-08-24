@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import type { IMergeTableForm } from '../helpers/dataTypes';
+import { MessageTypes, type IMergeTableForm } from '../helpers/dataTypes';
 import { computed, ref, } from 'vue';
+import { useFlashKnifeStore } from '../stores/flashKnife';
+const flashKnifeStore = useFlashKnifeStore();
+const { notify } = flashKnifeStore;
 
 interface IMergeTableProps {
   modelValue: IMergeTableForm;
@@ -29,7 +32,7 @@ const emit = defineEmits<{
 }>();
 
 const handleClickConfirm = () => {
-
+  notify(MessageTypes.Error, 'please table1 columns');
   emit('confirm', {
     name: '',
     table1: {
