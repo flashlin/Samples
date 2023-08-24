@@ -2,11 +2,12 @@
 import { reactive, ref, toRefs } from 'vue';
 import { Top, Bottom } from '@element-plus/icons-vue'
 import { type IDataTable } from '../helpers/dataTypes';
+import { filter } from 'rxjs/operators';
 
 interface ListBoxProps {
     modelValue: IDataTable;
     dataKeyField: string;
-    dataValueField: string; 
+    dataValueField: string;
 }
 
 const props = withDefaults(defineProps<ListBoxProps>(), {
@@ -20,6 +21,23 @@ const props = withDefaults(defineProps<ListBoxProps>(), {
     dataValueField: 'name',
 });
 
+interface IListBoxExpose {
+    getSelectedValues(): any[];
+}
+
+defineExpose<IListBoxExpose>({
+    getSelectedValues: () => {
+        return data.value.filter(row => row._isSelected_)
+            .map(row => {
+                const newRow: any = {};
+                const labelField = getLabelField();
+                newRow[props.dataKeyField] = row[props.dataKeyField];
+                newRow[labelField] = row[labelField];
+                return newRow;
+            });
+    }
+})
+
 const data = ref(props.modelValue.rows.map((row, idx) => {
     return {
         ...row,
@@ -30,7 +48,7 @@ const data = ref(props.modelValue.rows.map((row, idx) => {
 
 const getLabelField = () => {
     let valueField = props.dataValueField;
-    if( props.dataValueField == '' ) {
+    if (props.dataValueField == '') {
         valueField = props.modelValue.columnNames[0];
     }
     return valueField;
@@ -39,7 +57,7 @@ const getLabelField = () => {
 const handleOnUp = (idx: number) => {
     const dataValue = data.value;
     const index = dataValue.findIndex(row => row._id_ == idx);
-    if( index < 0 ) {
+    if (index < 0) {
         return;
     }
     const currItem = dataValue[index];
@@ -51,7 +69,18 @@ const handleOnUp = (idx: number) => {
 }
 
 const handleOnDown = (idx: number) => {
-    console.log('down', idx)
+    const dataValue = data.value;
+    const index = dataValue.findIndex(row => row._id_ == idx);
+    if (index >= data.value.length - 1) {
+        return;
+    }
+    const currItem = dataValue[index];
+    const nextItem = dataValue[index + 1];
+
+    const prefix = index == 0 ? [] : dataValue.slice(0, index);
+    const postfix = dataValue.slice(index + 2);
+    const newData = [...prefix, nextItem, currItem, ...postfix];
+    data.value = newData;
 }
 
 </script>
@@ -68,12 +97,12 @@ const handleOnDown = (idx: number) => {
         <el-table-column label="Date" width="50">
             <template #default="scope">
                 <div style="display: flex; align-items: center">
-                    <el-icon :size="15" v-if="scope.$index==0">
+                    <el-icon :size="15" v-if="scope.$index == 0">
                     </el-icon>
-                    <el-icon :size="15" v-if="scope.$index!=0">
+                    <el-icon :size="15" v-if="scope.$index != 0">
                         <Top @click="handleOnUp(scope.row._id_)" />
                     </el-icon>
-                    <el-icon :size="15">
+                    <el-icon :size="15" v-if="scope.$index < data.length - 1">
                         <Bottom @click="handleOnDown(scope.row._id_)" />
                     </el-icon>
                 </div>
