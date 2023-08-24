@@ -14,9 +14,14 @@ import { ref } from 'vue';
 //   },
 // });
 
-const table1 = ref([
-  'name1', 'name2', 'name3'
-])
+const table1 = {
+  columnNames: ['id', 'name', 'birth'],
+  rows: [
+    {id: 1, name: 'flash', birth: new Date(2023,1,1)},
+    {id: 2, name: 'jack', birth: new Date(2023,2,1)},
+    {id: 2, name: 'mary', birth: new Date(2023,3,1)},
+  ]
+}
 
 const emit = defineEmits<{
   (e: 'confirm', value: IMergeTableReq): void;
@@ -49,7 +54,7 @@ const handleClickMergeTable = () => {
       </el-row>
       <el-row>
         <el-col :span="12">
-          <ListBox :modelValue="table1" />
+          <ListBox :modelValue="table1" dataKeyField="id" dataValueField="name" />
           <select name="cars" size="5">
             <option value="volvo">Volvo</option>
             <option value="saab">Saab</option>
