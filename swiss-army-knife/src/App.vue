@@ -48,12 +48,10 @@ const data = reactive<IData>({
     name: 'mtb1',
     table1: {
       name: '',
-      columns: [],
       joinOnColumns: [],
     },
     table2: {
       name: '',
-      columns: [],
       joinOnColumns: [],
     }
   }
@@ -127,8 +125,7 @@ const handleSelect = async (key: string, keyPath: string[]) => {
       const tableInfo = queryService.getTableFieldsInfo(tableName)
       return {
         name: tableName,
-        columns: tableInfo.rows.map(x => x.name),
-        joinOnColumns: []
+        joinOnColumns: tableInfo.rows.map(x => x.name),
       };
     };
     const tableNames = take(filter(data.tableNames, item => item.isSelected), 2);

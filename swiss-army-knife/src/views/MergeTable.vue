@@ -2,26 +2,29 @@
 import { MessageTypes, type IMergeTableForm } from '../helpers/dataTypes';
 import { computed, ref, } from 'vue';
 import { useFlashKnifeStore } from '../stores/flashKnife';
+import ListBox from '../components/ListBox.vue';
 const flashKnifeStore = useFlashKnifeStore();
 const { notify } = flashKnifeStore;
+
 
 interface IMergeTableProps {
   modelValue: IMergeTableForm;
 }
 
 const props = defineProps<IMergeTableProps>();
-
+const table1Ref = ref<InstanceType<typeof ListBox>>();
+const table2Ref = ref<InstanceType<typeof ListBox>>();
 const tableName = ref(props.modelValue.name);
 
 const table1Columns = computed(() => {
-  return props.modelValue.table1.columns.map(columnName => ({
+  return props.modelValue.table1.joinOnColumns.map(columnName => ({
     label: columnName,
     value: columnName
   }));
 });
 
 const table2Columns = computed(() => {
-  return props.modelValue.table2.columns.map(columnName => ({
+  return props.modelValue.table2.joinOnColumns.map(columnName => ({
     label: columnName,
     value: columnName
   }));
@@ -32,18 +35,25 @@ const emit = defineEmits<{
 }>();
 
 const handleClickConfirm = () => {
-  notify(MessageTypes.Error, 'please table1 columns');
+  const table1ColumnsSelected = table1Ref.value!.getSelectedValues();
+  if (table1ColumnsSelected.length == 0) {
+    notify(MessageTypes.Error, 'please table1 columns');
+    return;
+  }
+  const table2ColumnsSelected = table2Ref.value!.getSelectedValues();
+  if (table2ColumnsSelected.length == 0) {
+    notify(MessageTypes.Error, 'please table2 columns');
+    return;
+  }
   emit('confirm', {
     name: '',
     table1: {
-      name: '',
-      columns: [],
-      joinOnColumns: [],
+      name: props.modelValue.table1.name,
+      joinOnColumns: table1ColumnsSelected,
     },
     table2: {
-      name: '',
-      columns: [],
-      joinOnColumns: [],
+      name: props.modelValue.table2.name,
+      joinOnColumns: table2ColumnsSelected,
     },
   });
 };
@@ -59,10 +69,10 @@ const handleClickConfirm = () => {
       </el-row>
       <el-row>
         <el-col :span="12">
-          <ListBox :modelValue="table1Columns" />
+          <ListBox :modelValue="table1Columns" ref="table1Ref" />
         </el-col>
         <el-col :span="12">
-          <ListBox :modelValue="table2Columns" />
+          <ListBox :modelValue="table2Columns" ref="table2Ref" />
         </el-col>
       </el-row>
       <el-row :span="24" justify="center">
