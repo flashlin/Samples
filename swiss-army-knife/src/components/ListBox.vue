@@ -1,25 +1,40 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { Top, Bottom } from '@element-plus/icons-vue'
+import { type IDataTable } from '../helpers/dataTypes';
 
 interface ListBoxProps {
-    modelValue: any[]
+    modelValue: IDataTable;
+    dataKeyField: string;
+    dataValueField: string; 
 }
 
 const props = withDefaults(defineProps<ListBoxProps>(), {
     modelValue: () => {
-        return [];
+        return {
+            columnNames: [],
+            rows: [],
+        };
     },
+    dataKeyField: '_id_',
+    dataValueField: 'name',
 });
 
-const data = reactive(props.modelValue.map((row, idx) => {
-    console.log('idx', idx);
+const data = reactive(props.modelValue.rows.map((row, idx) => {
     return {
-        id: idx,
-        isSelected: false,
-        field: row,
+        ...row,
+        _id_: idx,
+        _isSelected_: false,
     };
 }));
+
+const getLabelField = () => {
+    let valueField = props.dataValueField;
+    if( props.dataValueField == '' ) {
+        valueField = props.modelValue.columnNames[0];
+    }
+    return valueField;
+}
 
 const handleOnUp = (idx: number) => {
     console.log('up', idx)
@@ -35,19 +50,21 @@ const handleOnDown = (idx: number) => {
         <el-table-column label="Date" width="20">
             <template #default="scope">
                 <div style="display: flex; align-items: center">
-                    <el-checkbox v-model="scope.row.isSelected" :label="scope.row.field" />
+                    <el-checkbox v-model="scope.row._isSelected_" label="" />
                 </div>
             </template>
         </el-table-column>
-        <el-table-column prop="field" width="150" />
-        <el-table-column label="Date" width="150">
+        <el-table-column :prop="getLabelField()" width="150" />
+        <el-table-column label="Date" width="50">
             <template #default="scope">
                 <div style="display: flex; align-items: center">
-                    <el-icon :size="15">
-                        <Top @click="handleOnUp(scope.row.id)" />
+                    <el-icon :size="15" v-if="scope.$index==0">
+                    </el-icon>
+                    <el-icon :size="15" v-if="scope.$index!=0">
+                        <Top @click="handleOnUp(scope.row._id_)" />
                     </el-icon>
                     <el-icon :size="15">
-                        <Bottom @click="handleOnDown(scope.row.id)" />
+                        <Bottom @click="handleOnDown(scope.row._id_)" />
                     </el-icon>
                 </div>
             </template>
