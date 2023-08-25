@@ -34,17 +34,20 @@ const handleReady = (payload: ICodemirrorPayload) => {
 const handleChange = (value: string) => {
   emits('update:modelValue', value)
 }
+
+const getInfo = () => {
+  return;
+}
+
+interface ICodeEditorExpose {
+  getInfo(): any;
+}
+defineExpose<ICodeEditorExpose>({
+  getInfo
+})
 </script>
 
 <template>
-  <codemirror v-model="data.code" 
-    placeholder="Code goes here..."
-    :style="{ height: '400px'}"
-    :autofocus="true"
-    :indent-with-tab="true"
-    :tab-size="2"
-    :extensions="extensions"
-    @ready="handleReady"
-    @change="handleChange"
-  />
+  <codemirror v-model="data.code" placeholder="Code goes here..." :style="{ height: '400px' }" :autofocus="true"
+    :indent-with-tab="true" :tab-size="2" :extensions="extensions" @ready="handleReady" @change="handleChange" />
 </template>
