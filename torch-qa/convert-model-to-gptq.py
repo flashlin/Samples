@@ -2,6 +2,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, GPTQConfig
 import torch
 
 model_id = "facebook/opt-125m"
+model_id = "models/sqlcoder"
 
 quantization_config = GPTQConfig(
      bits=4,
@@ -18,7 +19,7 @@ quant_model = AutoModelForCausalLM.from_pretrained(model_id,
 # they should contain qweight and qzeros attributes that should be in torch.int32 dtype.
 qdict = quant_model.model.decoder.layers[0].self_attn.q_proj.__dict__
 print(qdict)
-
+exit()
 
 print("Now let's perform an inference on the quantized model. Use the same API as transformers!")
 tokenizer = AutoTokenizer.from_pretrained(model_id)
