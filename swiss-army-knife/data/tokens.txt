@@ -1,0 +1,16 @@
+{none}
+from
+where
+in
+select
+.
+==
+&&
+contains 
+{"string"}
+{db}
+{table}
+{number}
+{'string'}
+{field}
+{aliasTable}
