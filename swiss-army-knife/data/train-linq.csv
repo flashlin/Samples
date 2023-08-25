@@ -1,0 +1,38 @@
+from tb1 in db1.table1
+where tb1.id == 1 && tb1.name.contains("anyString")
+select tb1
+###
+
+
+<cursor> from tb1 in db1.table1
+where tb1.id == 1 && tb1.name.contains("anyString")
+select tb1
+###{none}
+from <cursor> tb1 in db1.table1
+where tb1.id == 1 && tb1.name.contains("anyString")
+select tb1
+###{none}
+from tb1 <cursor> in db1.table1
+where tb1.id == 1 && tb1.name.contains("anyString")
+select tb1
+###{none}
+from tb1 in <cursor> tb1.table1
+where tb1.id == 1 && tb1.name.contains("anyString")
+select tb1
+###{none}
+from tb1 in tb1.table1 <cursor>
+where tb1.id == 1 && tb1.name.contains("anyString")
+select tb1
+###{none}
+from tb1 in tb1.table1
+where <cursor> tb1.id == 1 && tb1.name.contains("anyString")
+select tb1
+###{none}
+from tb1 in tb1.table1
+where tb1<cursor>.id == 1 && tb1.name.contains("anyString")
+select tb1
+###{aliasTable}
+from tb1 in tb1.table1
+where tb1.<cursor>id == 1 && tb1.name.contains("anyString")
+select tb1
+###{field}
