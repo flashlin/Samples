@@ -77,7 +77,7 @@ const onClickExportToCsv = () => {
   exportToCsv(`flash-data-${time}`, data.dataTable.rows);
 }
 
-const onClickExecute = async () => {
+const handleClickExecute = async () => {
   try {
     const result = db.queryDataTableByBindParams(data.code);
     notify(MessageTypes.Success, `Executed`);
@@ -237,7 +237,7 @@ const handleKeyPress = (event: KeyboardEvent) => {
     return;
   }
   if (event.key === 'F8') {
-    onClickExecute();
+    handleClickExecute();
   }
 };
 
