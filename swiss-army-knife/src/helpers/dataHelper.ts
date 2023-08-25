@@ -97,3 +97,7 @@ export function take<T>(generator: Iterable<T>, count: number): T[] {
     }
     return items;
 }
+
+export function zip<T1, T2>(a: T1[], b: T2[]) {
+    return a.map((value, index) => [value, b[index]]);
+}

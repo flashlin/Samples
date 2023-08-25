@@ -1,7 +1,7 @@
 import initSqlJs, { type Database } from 'sql.js';
 import wasmPath from '../assets/sql-wasm.wasm?url';
-import { type IDataTable, type IMasterDetailDataTable } from './dataTypes';
-import { getObjectKeys } from './dataHelper';
+import { type IDataTable, type IMasterDetailDataTable, type IMergeTableForm } from './dataTypes';
+import { getObjectKeys, zip } from './dataHelper';
 
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
 //const SQL = await initSqlJs({ locateFile: () => wasmPath });
@@ -277,5 +277,54 @@ export class QuerySqliteService {
             master: tableNamesTable,
             detail: tableInfosTable
         };
+    }
+
+    mergeTable(req: IMergeTableForm) {
+        const tb1 = this.getTableFieldsInfo(req.table1.name);
+        const tb2 = this.getTableFieldsInfo(req.table2.name);
+        const columns = [
+            ...this.addPrefix(req.table1.name, tb1.columnNames, tb2.columnNames),
+            ...this.addPrefix(req.table2.name, tb2.columnNames, tb1.columnNames)
+        ];
+        const columnsStr = columns.join(',');
+        const joinOnColumns = zip(req.table1.joinOnColumns, req.table2.joinOnColumns)
+            .map(([column1, column2]) => {
+                return `${req.table1.name}.${column1} = ${req.table2.name}.${column2}`;
+            });
+        const joinOnColumnsStr = joinOnColumns.join(" AND ");
+        const insertColumns = [
+            ...this.addPrefixInsert(req.table1.name, tb1.columnNames, tb2.columnNames),
+            ...this.addPrefixInsert(req.table2.name, tb2.columnNames, tb1.columnNames),
+        ].join(",");
+        const sql = `INSERT INTO ${req.name}(${insertColumns}) 
+        SELECT ${columnsStr} FROM ${req.table1.name} JOIN ${req.table2.name} ON ${joinOnColumnsStr}`;
+        console.log(sql)
+        this._db.execute(sql);
+    }
+
+    addPrefix(tableName: string, names: string[], otherNames: string[]) {
+        const result = [];
+        for (let n = 0; n < names.length; n++) {
+            const name = names[n];
+            if (otherNames.includes(name)) {
+                result.push(`${tableName}.${name} as ${tableName}_${name}`);
+            } else {
+                result.push(`${tableName}.${name} as ${name}`);
+            }
+        }
+        return result;
+    }
+
+    addPrefixInsert(tableName: string, names: string[], otherNames: string[]) {
+        const result = [];
+        for (let n = 0; n < names.length; n++) {
+            const name = names[n];
+            if (otherNames.includes(name)) {
+                result.push(`${tableName}_${name}`);
+            } else {
+                result.push(`${name}`);
+            }
+        }
+        return result;
     }
 }
