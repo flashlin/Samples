@@ -58,6 +58,7 @@ const data = reactive<IData>({
 });
 const dialogVisible = ref(false);
 const dialogMergeTableVisible = ref(false);
+const codeEditorRef = ref<InstanceType<typeof CodeEditor>>();
 
 const tableList = computed(() => {
   let idx = -1;
@@ -78,6 +79,8 @@ const onClickExportToCsv = () => {
 }
 
 const handleClickExecute = async () => {
+  codeEditorRef.value?.getInfo();
+
   try {
     const result = db.queryDataTableByBindParams(data.code);
     notify(MessageTypes.Success, `Executed`);
@@ -280,7 +283,8 @@ onUnmounted(() => {
           <div class="common-layout">
             <el-container>
               <el-main>
-                <CodeEditor v-model="data.code" />
+                <CodeEditor ref="codeEditorRef" v-model="data.code" />
+                <el-button @click="handleClickExecute">Execute(F8)</el-button>
               </el-main>
               <el-aside width="200px">
                 <el-table :data="data.tableNames" stripe style="width: 100%">
