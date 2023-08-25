@@ -92,7 +92,7 @@ const onClickExecute = async () => {
 };
 
 const handleClickTableStructure = (tableName: string) => {
-  data.tableStructure = queryService.getTableFieldsInfo(tableName);
+  data.tableStructure = queryService.getTableFieldsInfoTable(tableName);
   notify(MessageTypes.Success, `get ${tableName} structure`)
 };
 
@@ -127,7 +127,7 @@ const activeIndex = ref('2');
 const handleSelect = async (key: string, keyPath: string[]) => {
   if (key == 'MergeTable') {
     const toMergeTableCondition = (tableName: string) => {
-      const tableInfo = queryService.getTableFieldsInfo(tableName)
+      const tableInfo = queryService.getTableFieldsInfoTable(tableName)
       return {
         name: tableName,
         joinOnColumns: tableInfo.rows.map(x => x.name),

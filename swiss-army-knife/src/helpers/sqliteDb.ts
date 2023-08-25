@@ -1,6 +1,6 @@
 import initSqlJs, { type Database } from 'sql.js';
 import wasmPath from '../assets/sql-wasm.wasm?url';
-import { type IDataTable, type IMasterDetailDataTable, type IMergeTableForm } from './dataTypes';
+import { type IDataFieldInfo, type IDataTable, type IMasterDetailDataTable, type IMergeTableForm } from './dataTypes';
 import { getObjectKeys, zip } from './dataHelper';
 
 //const wasmPath = import.meta.env.BASE_URL + 'assets/sql-wasm.wasm';
@@ -233,19 +233,19 @@ export class QuerySqliteService {
     }
 
     getAllTableNames(): string[] {
-        const table = this.getAllTableNamesToDataTable();
+        const table = this.getAllTableNamesTable();
         return table.rows.map((row: any) => {
             return row.tableName;
         });
     }
 
-    private getAllTableNamesToDataTable(): IDataTable {
+    private getAllTableNamesTable(): IDataTable {
         const db = this._db;
         const sql = `SELECT name as tableName FROM sqlite_master WHERE type='table'`;
         return db.queryDataTable(sql);
     }
 
-    getTableFieldsInfo(tableName: string): IDataTable {
+    getTableFieldsInfoTable(tableName: string): IDataTable {
         const db = this._db;
         const sql = `SELECT [pk], [name], [type], [notnull] FROM pragma_table_info(:tableName)`;
         const result = db.queryDataTableByBindParams(sql, {
@@ -263,14 +263,19 @@ export class QuerySqliteService {
         return result;
     }
 
+    getTableFieldsInfo(tableName: string): IDataFieldInfo[] {
+        const fieldInfoTable = this.getTableFieldsInfoTable(tableName);
+        return fieldInfoTable.rows;
+    }
+
     getAllTables(): IMasterDetailDataTable {
-        const tableNamesTable = this.getAllTableNamesToDataTable();
+        const tableNamesTable = this.getAllTableNamesTable();
         const tableNames = tableNamesTable.rows.map((row: any) => {
             return row.tableName;
         });
         const tableInfosTable: IDataTable[] = [];
         for (const tableName of tableNames) {
-            const tableInfo = this.getTableFieldsInfo(tableName);
+            const tableInfo = this.getTableFieldsInfoTable(tableName);
             tableInfosTable.push(tableInfo);
         }
         return {
@@ -280,11 +285,16 @@ export class QuerySqliteService {
     }
 
     mergeTable(req: IMergeTableForm) {
-        const tb1 = this.getTableFieldsInfo(req.table1.name);
-        const tb2 = this.getTableFieldsInfo(req.table2.name);
+        console.log('merge', req);
+        const tb1Columns = this.getTableFieldsInfo(req.table1.name);
+        const tb2Columns = this.getTableFieldsInfo(req.table2.name);
+
+        const tb1ColumnNames = tb1Columns.map(column => `${column.name}`);
+        const tb2ColumnNames = tb2Columns.map(column => `${column.name}`);
+
         const columns = [
-            ...this.addPrefix(req.table1.name, tb1.columnNames, tb2.columnNames),
-            ...this.addPrefix(req.table2.name, tb2.columnNames, tb1.columnNames)
+            ...this.addPrefix(req.table1.name, tb1ColumnNames, tb2ColumnNames),
+            ...this.addPrefix(req.table2.name, tb2ColumnNames, tb1ColumnNames)
         ];
         const columnsStr = columns.join(',');
         const joinOnColumns = zip(req.table1.joinOnColumns, req.table2.joinOnColumns)
@@ -293,12 +303,23 @@ export class QuerySqliteService {
             });
         const joinOnColumnsStr = joinOnColumns.join(" AND ");
         const insertColumns = [
-            ...this.addPrefixInsert(req.table1.name, tb1.columnNames, tb2.columnNames),
-            ...this.addPrefixInsert(req.table2.name, tb2.columnNames, tb1.columnNames),
+            ...this.addPrefixInsert(req.table1.name, tb1ColumnNames, tb2ColumnNames),
+            ...this.addPrefixInsert(req.table2.name, tb2ColumnNames, tb1ColumnNames),
         ].join(",");
+
+
+        const sql1 = `SELECT ${columnsStr} FROM ${req.table1.name} JOIN ${req.table2.name} ON ${joinOnColumnsStr} limit 1`;
+        console.log("first", sql1)
+        const firstRow = this._db.query(sql1);
+        console.log('get first', firstRow)
+        this._db.importTable(req.name, firstRow);
+
+        const sql2 = 'DELETE TABLE FROM ${req.name}';
+        this._db.execute(sql2);
+        console.log(sql2);
+
         const sql = `INSERT INTO ${req.name}(${insertColumns}) 
         SELECT ${columnsStr} FROM ${req.table1.name} JOIN ${req.table2.name} ON ${joinOnColumnsStr}`;
-        console.log(sql)
         this._db.execute(sql);
     }
 

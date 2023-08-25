@@ -3,6 +3,13 @@ export interface IDataTable {
     rows: any[];
 }
 
+export interface IDataFieldInfo {
+    name: string;
+    dataType: string;
+    isPrimaryKey: boolean;
+    isNullable: boolean;
+}
+
 export interface IMasterDetailDataTable {
     master: IDataTable;
     detail: IDataTable[];
