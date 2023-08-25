@@ -45,8 +45,12 @@ const handleClickConfirm = () => {
     notify(MessageTypes.Error, 'please table2 columns');
     return;
   }
+  if (tableName.value == '') {
+    notify(MessageTypes.Error, 'please input import table name');
+    return;
+  }
   emit('confirm', {
-    name: '',
+    name: tableName.value,
     table1: {
       name: props.modelValue.table1.name,
       joinOnColumns: table1ColumnsSelected,

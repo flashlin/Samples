@@ -7,7 +7,7 @@ import { useFlashKnifeStore, type IPrepareImportDataTable } from './stores/flash
 import CodeEditor from './components/CodeEditor.vue';
 import DataTable from './components/DataTable.vue';
 import { QuerySqliteService, SqliteDb } from './helpers/sqliteDb';
-import { MessageTypes, type IDataTable, type MessageType, type IMergeTableForm } from './helpers/dataTypes';
+import { MessageTypes, type IDataTable, type IMergeTableForm } from './helpers/dataTypes';
 //import { ElNotification } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue'
 import { exportToCsv, filter, getCurrentTime, parseCsvContentToObjectArray, readFileContentAsync, take } from './helpers/dataHelper';
@@ -129,6 +129,10 @@ const handleSelect = async (key: string, keyPath: string[]) => {
       };
     };
     const tableNames = take(filter(data.tableNames, item => item.isSelected), 2);
+    if (tableNames.length < 2) {
+      notify(MessageTypes.Error, "please select two tables");
+      return;
+    }
     data.mergeTableForm.table1 = toMergeTableCondition(tableNames[0].tableName);
     data.mergeTableForm.table2 = toMergeTableCondition(tableNames[1].tableName);
     dialogMergeTableVisible.value = true;
