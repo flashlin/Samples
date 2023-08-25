@@ -119,7 +119,13 @@ const queryAllTableNames = () => {
 };
 
 const handleOnConfirmMergeTable = (req: IMergeTableForm) => {
-  queryService.mergeTable(req);
+  const result = queryService.mergeTable(req);
+  if (!result) {
+    notify(MessageTypes.Error, 'No Data');
+  } else {
+    notify(MessageTypes.Success, `merge into ${req.name}`);
+  }
+  queryAllTableNames();
   dialogMergeTableVisible.value = false;
 }
 

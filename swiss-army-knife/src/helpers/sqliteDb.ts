@@ -285,7 +285,6 @@ export class QuerySqliteService {
     }
 
     mergeTable(req: IMergeTableForm) {
-        console.log('merge', req);
         const tb1Columns = this.getTableFieldsInfo(req.table1.name);
         const tb2Columns = this.getTableFieldsInfo(req.table2.name);
 
@@ -307,20 +306,21 @@ export class QuerySqliteService {
             ...this.addPrefixInsert(req.table2.name, tb2ColumnNames, tb1ColumnNames),
         ].join(",");
 
-
         const sql1 = `SELECT ${columnsStr} FROM ${req.table1.name} JOIN ${req.table2.name} ON ${joinOnColumnsStr} limit 1`;
-        console.log("first", sql1)
-        const firstRow = this._db.query(sql1);
-        console.log('get first', firstRow)
-        this._db.importTable(req.name, firstRow);
+        const firstResult = this._db.query(sql1);
+        if (firstResult.length == 0) {
+            return false;
+        }
 
-        const sql2 = 'DELETE TABLE FROM ${req.name}';
+        this._db.importTable(req.name, firstResult);
+
+        const sql2 = `DELETE FROM ${req.name}`;
         this._db.execute(sql2);
-        console.log(sql2);
 
         const sql = `INSERT INTO ${req.name}(${insertColumns}) 
         SELECT ${columnsStr} FROM ${req.table1.name} JOIN ${req.table2.name} ON ${joinOnColumnsStr}`;
         this._db.execute(sql);
+        return true;
     }
 
     addPrefix(tableName: string, names: string[], otherNames: string[]) {
