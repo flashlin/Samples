@@ -119,7 +119,8 @@ const queryAllTableNames = () => {
 };
 
 const handleOnConfirmMergeTable = (req: IMergeTableForm) => {
-  console.log('c', req);
+  queryService.mergeTable(req);
+  dialogMergeTableVisible.value = false;
 }
 
 const activeIndex = ref('2');
