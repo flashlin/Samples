@@ -129,24 +129,28 @@ const handleOnConfirmMergeTable = (req: IMergeTableForm) => {
   dialogMergeTableVisible.value = false;
 }
 
+const processMergeTable = () => {
+  const toMergeTableCondition = (tableName: string) => {
+    const tableInfo = queryService.getTableFieldsInfoTable(tableName)
+    return {
+      name: tableName,
+      joinOnColumns: tableInfo.rows.map(x => x.name),
+    };
+  };
+  const tableNames = take(filter(data.tableNames, item => item.isSelected), 2);
+  if (tableNames.length < 2) {
+    notify(MessageTypes.Error, "please select two tables");
+    return;
+  }
+  data.mergeTableForm.table1 = toMergeTableCondition(tableNames[0].tableName);
+  data.mergeTableForm.table2 = toMergeTableCondition(tableNames[1].tableName);
+  dialogMergeTableVisible.value = true;
+}
+
 const activeIndex = ref('2');
 const handleSelect = async (key: string, keyPath: string[]) => {
   if (key == 'MergeTable') {
-    const toMergeTableCondition = (tableName: string) => {
-      const tableInfo = queryService.getTableFieldsInfoTable(tableName)
-      return {
-        name: tableName,
-        joinOnColumns: tableInfo.rows.map(x => x.name),
-      };
-    };
-    const tableNames = take(filter(data.tableNames, item => item.isSelected), 2);
-    if (tableNames.length < 2) {
-      notify(MessageTypes.Error, "please select two tables");
-      return;
-    }
-    data.mergeTableForm.table1 = toMergeTableCondition(tableNames[0].tableName);
-    data.mergeTableForm.table2 = toMergeTableCondition(tableNames[1].tableName);
-    dialogMergeTableVisible.value = true;
+    processMergeTable();
     return;
   }
 
