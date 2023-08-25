@@ -6,7 +6,6 @@ import ListBox from '../components/ListBox.vue';
 const flashKnifeStore = useFlashKnifeStore();
 const { notify } = flashKnifeStore;
 
-
 interface IMergeTableProps {
   modelValue: IMergeTableForm;
 }

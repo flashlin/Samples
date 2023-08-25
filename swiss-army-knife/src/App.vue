@@ -118,6 +118,10 @@ const queryAllTableNames = () => {
   });
 };
 
+const handleOnConfirmMergeTable = (req: IMergeTableForm) => {
+  console.log('c', req);
+}
+
 const activeIndex = ref('2');
 const handleSelect = async (key: string, keyPath: string[]) => {
   if (key == 'MergeTable') {
@@ -351,7 +355,7 @@ onUnmounted(() => {
 
 
     <el-dialog v-model="dialogMergeTableVisible" title="Merge Table">
-      <MergeTable v-model="data.mergeTableForm" />
+      <MergeTable v-model="data.mergeTableForm" @confirm="handleOnConfirmMergeTable" />
     </el-dialog>
   </div>
 </template>
