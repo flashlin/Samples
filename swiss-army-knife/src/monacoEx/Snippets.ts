@@ -170,14 +170,14 @@ export class SqlSnippets {
 
         // const nextTokens = textAfterPointer.trim().split(/\s+/)
         // const nextToken = nextTokens[0].toLowerCase()
-        // 获取光标当前行所有的 sql 并且去掉前后空格
+        // 獲取游標當前行所有的 sql 並且去掉前後空格
         const textBeforeTokens = textBeforePointer.trim().split(/\s+/);
 
-        // 光标前最后一个字段
+        // 游標前最後一个 Word
         const textBeforeLastToken = textBeforeTokens[textBeforeTokens.length - 1].toLowerCase();
 
-        // 有可能是 库名.表名.字段
-        // 有可能是 表名.字段
+        // 有可能是 Database.Table.Field
+        // 有可能是 Table.Field
         if (textBeforeLastToken.endsWith('.')) {
             // 如果最后一个文本后面 包含. 判断这个点之前的内容是否是database
             const textBeforeLastTokenNoDot = textBeforeLastToken.slice(0, textBeforeLastToken.length - 1);
@@ -190,7 +190,6 @@ export class SqlSnippets {
             );
 
             if (databaseOption) {
-                // <库名>.<表名> 联想
                 // 如果是数据库 就获取当前database 下面的 tableOptions
                 const databaseName = textBeforeLastTokenNoDot.replace(/^.*,/g, '');
                 return {
@@ -332,7 +331,7 @@ export class SqlSnippets {
                 suggestOptions.push({
                     label: tableOption.tableName || '',
                     kind: this.monaco.languages.CompletionItemKind.Struct,
-                    detail: `<表> ${databaseOption.databaseName} ${tableOption.tableComment || ''}`,
+                    detail: `<Table> ${databaseOption.databaseName} ${tableOption.tableComment || ''}`,
                     sortText: this.sortText.Table,
                     insertText: tableOption.tableName || '',
                     documentation: tableOption.tableComment || '',
