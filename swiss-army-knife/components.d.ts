@@ -8,6 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CodeEditor: typeof import('./src/components/CodeEditor.vue')['default']
+    CodeEditor2: typeof import('./src/components/CodeEditor2.vue')['default']
+    copy: typeof import('./src/components/CodeEditor copy.vue')['default']
     DataTable: typeof import('./src/components/DataTable.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElAutoResizer: typeof import('element-plus/es')['ElAutoResizer']
