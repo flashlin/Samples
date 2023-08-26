@@ -3,7 +3,7 @@ import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 //import * as monaco from 'monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import '../monacoEx/userWorker';
-import { SqlSnippets } from '@/monacoEx/Snippets';
+import { SqlSnippets } from '@/monacoEx/Suggestions';
 
 interface ICodeEditorProps {
   modelValue: string;
@@ -108,4 +108,4 @@ onBeforeUnmount(() => {
   width: 80vw;
   height: 50vh;
 }
-</style>../monacoEx/userWorker
+</style>../monacoEx/userWorker@/monacoEx/Suggestions

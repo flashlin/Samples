@@ -1,6 +1,7 @@
 import * as monaco from 'monaco-editor';
 import { type ISuggestOption, type ICursorTextInfo, getTextByCursorPosition } from './monacoEx';
 import { DatabaseOptions, type DatabaseOption } from './DatabaseOptions';
+import { splitTableNameAndAlia } from './sqlLanguage';
 
 interface ICursorContext<T> extends ICursorTextInfo {
     textBeforeLastToken: string;
@@ -31,61 +32,6 @@ const createChain = <T>(...handlers: ISuggestionsHandler<T>[]): ISuggestionsHand
         handlers[i].setNext(handlers[i + 1]);
     }
     return handlers[0];
-};
-
-/////////////////////////////////////////////////
-export interface ITableNameAlia {
-    tableName: string;
-    tableAlia: string;
-}
-/**
- * 獲取 sql 中所有的 TableName 和 Alia
- * @param {*} sqlText SQL字符串
- * @return {Array<ITableNameAlia>} []
- */
-export const splitTableNameAndAlia = (sqlText: string): Array<ITableNameAlia> => {
-    const regTableAliaFrom =
-        /(^|(\s+))from\s+([^\s]+(\s+|(\s+as\s+))[^\s]+(\s+|,)\s*)+(\s+(where|left|right|full|join|inner|union))?/gi;
-
-    const regTableAliaJoin = /(^|(\s+))join\s+([^\s]+)\s+(as\s+)?([^\s]+)\s+on/gi;
-
-    const regTableAliaFromList = sqlText.match(regTableAliaFrom) || [];
-
-    const regTableAliaJoinList = sqlText.match(regTableAliaJoin) || [];
-
-    const strList = [
-        ...regTableAliaFromList.map((item) =>
-            item
-                .replace(/(^|(\s+))from\s+/gi, '')
-                .replace(/\s+(where|left|right|full|join|inner|union)((\s+.*?$)|$)/gi, '')
-                .replace(/\s+as\s+/gi, ' ')
-                .trim(),
-        ),
-        ...regTableAliaJoinList.map((item) =>
-            item
-                .replace(/(^|(\s+))join\s+/gi, '')
-                .replace(/\s+on((\s+.*?$)|$)/, '')
-                .replace(/\s+as\s+/gi, ' ')
-                .trim(),
-        ),
-    ];
-
-    const tableList: Array<{
-        tableName: string;
-        tableAlia: string;
-    }> = [];
-
-    strList.map((tableAndAlia) => {
-        tableAndAlia.split(',').forEach((item) => {
-            const tableName = item.trim().split(/\s+/)[0];
-            const tableAlia = item.trim().split(/\s+/)[1];
-            tableList.push({
-                tableName,
-                tableAlia,
-            });
-        });
-    });
-    return tableList;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
