@@ -170,13 +170,8 @@ export class SqlSnippets {
 
         // const nextTokens = textAfterPointer.trim().split(/\s+/)
         // const nextToken = nextTokens[0].toLowerCase()
-
         // 获取光标当前行所有的 sql 并且去掉前后空格
         const textBeforeTokens = textBeforePointer.trim().split(/\s+/);
-        // console.log("textBeforeTokens", textBeforeTokens[0]);
-
-        // console.log(parser(textBeforePointerMulti, { sourceType: "module" }));
-        // console.log(parser.parse(textBeforeTokens[0]));
 
         // 光标前最后一个字段
         const textBeforeLastToken = textBeforeTokens[textBeforeTokens.length - 1].toLowerCase();
@@ -384,7 +379,7 @@ export class SqlSnippets {
                         defaultFieldOptions.push({
                             label: fieldOption.fieldName || '',
                             kind: this.monaco.languages.CompletionItemKind.Field,
-                            detail: `<字段> ${fieldOption.fieldComment || ''} <${fieldOption.fieldName}>`,
+                            detail: `<Field> ${fieldOption.fieldComment || ''} <${fieldOption.fieldName}>`,
                             sortText: this.sortText.Column,
                             insertText: fieldOption.fieldName || '',
                             documentation: {
