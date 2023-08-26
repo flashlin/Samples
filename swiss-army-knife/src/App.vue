@@ -79,8 +79,6 @@ const onClickExportToCsv = () => {
 }
 
 const handleClickExecute = async () => {
-  codeEditorRef.value?.getInfo();
-
   try {
     const result = db.queryDataTableByBindParams(data.code);
     notify(MessageTypes.Success, `Executed`);
