@@ -14,5 +14,16 @@ module.exports = {
   },
   rules: {
     'no-useless-escape': 'off',
+    'no-unused-vars': ['off', { varsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        vars: 'all',
+        args: 'after-used',
+        ignoreRestSiblings: true,
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
   },
 };
