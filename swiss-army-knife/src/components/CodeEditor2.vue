@@ -63,39 +63,6 @@ onMounted(() => {
       position: monaco.Position,
       _context: monaco.languages.CompletionContext,
       _token: monaco.CancellationToken): monaco.languages.ProviderResult<monaco.languages.CompletionList> => {
-      console.log('complete', _context.triggerKind);
-      // const suggestions: monaco.languages.CompletionItem[] = [
-      //   {
-      //     label: 'SELECT',
-      //     kind: monaco.languages.CompletionItemKind.Keyword,
-      //     insertText: 'SELECT * FROM ',
-      //     range: new monaco.Range(
-      //       position.lineNumber,
-      //       position.column - 'SELECT'.length,
-      //       position.lineNumber,
-      //       position.column
-      //     )
-      //   },
-      //   {
-      //     label: 'FROM',
-      //     kind: monaco.languages.CompletionItemKind.Method,
-      //     insertText: 'FROM ',
-      //     range: new monaco.Range(
-      //       position.lineNumber,
-      //       position.column - 'FROM '.length,
-      //       position.lineNumber,
-      //       position.column
-      //     )
-      //   },
-      // ];
-
-      // return {
-      //   // suggestions: suggestions.map(suggestion => ({
-      //   //   ...suggestion,
-      //   //   insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-      //   // })),
-      //   suggestions: suggestions,
-      // };
       return sqlSnippets.provideCompletionItems(model, position) as monaco.languages.ProviderResult<monaco.languages.CompletionList>;
     },
   });

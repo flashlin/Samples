@@ -58,6 +58,64 @@ export type SortText = {
     Keyword: '3';
 };
 
+/**
+ * @param { monaco.editor.ITextModel } model
+ * @param { monaco.Position } position
+ * @returns {
+ *  textBeforePointer: 游標前面當行 Text
+ *  textBeforePointerMulti: 游標前第一行到游標位置所有的 Text 
+ *  textAfterPointer: 游標後當行 Text
+ *  textAfterPointerMulti: 游標後到最後一行所有的 Text
+ * }
+ */
+const getTextByCursorPosition = (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+): {
+    textBeforePointer: string;
+    textBeforePointerMulti: string;
+    textAfterPointer: string;
+    textAfterPointerMulti: string;
+} => {
+    const { lineNumber, column } = position;
+
+    const textBeforePointer = model.getValueInRange({
+        startLineNumber: lineNumber,
+        startColumn: 0,
+        endLineNumber: lineNumber,
+        endColumn: column,
+    });
+
+    const textBeforePointerMulti = model.getValueInRange({
+        startLineNumber: 1,
+        startColumn: 0,
+        endLineNumber: lineNumber,
+        endColumn: column,
+    });
+
+    const textAfterPointer = model.getValueInRange({
+        startLineNumber: lineNumber,
+        startColumn: column,
+        endLineNumber: lineNumber,
+        endColumn: model.getLineMaxColumn(model.getLineCount()),
+    });
+
+    const textAfterPointerMulti = model.getValueInRange({
+        startLineNumber: lineNumber,
+        startColumn: column,
+        endLineNumber: model.getLineCount(),
+        endColumn: model.getLineMaxColumn(model.getLineCount()),
+    });
+
+    return {
+        textBeforePointer,
+        textBeforePointerMulti,
+        textAfterPointer,
+        textAfterPointerMulti,
+    };
+};
+
+
 export class SqlSnippets {
     private monaco: Monaco;
     // 自定义关键字
@@ -98,82 +156,17 @@ export class SqlSnippets {
     }
 
     /**
-     * 获取关于光标所有的文本
-     * @param { monaco.editor.ITextModel } model
-     * @param { monaco.Position } position
-     * @returns {
-     *  textBeforePointer：光标前面当前行文本
-     *  textBeforePointerMulti:光标前第一行到光标位置所有的文本
-     *  textAfterPointer:光标后当前行文本
-     *  textAfterPointerMulti:光标后到最后一行 最后一列 所有的文本
-     * }
-     */
-
-    getTextByCursorPosition = (
-        model: monaco.editor.ITextModel,
-        position: monaco.Position,
-    ): {
-        textBeforePointer: string;
-        textBeforePointerMulti: string;
-        textAfterPointer: string;
-        textAfterPointerMulti: string;
-    } => {
-        // 获取当前列和当前行
-        const { lineNumber, column } = position;
-
-        const textBeforePointer = model.getValueInRange({
-            startLineNumber: lineNumber,
-            startColumn: 0,
-            endLineNumber: lineNumber,
-            endColumn: column,
-        });
-
-        // 光标前第一行到光标位置所有的文本
-        const textBeforePointerMulti = model.getValueInRange({
-            startLineNumber: 1,
-            startColumn: 0,
-            endLineNumber: lineNumber,
-            endColumn: column,
-        });
-
-        const textAfterPointer = model.getValueInRange({
-            startLineNumber: lineNumber,
-            startColumn: column,
-            endLineNumber: lineNumber,
-            endColumn: model.getLineMaxColumn(model.getLineCount()),
-        });
-
-        // 光标后到最后一行 最后一列 所有的文本
-        const textAfterPointerMulti = model.getValueInRange({
-            startLineNumber: lineNumber,
-            startColumn: column,
-            endLineNumber: model.getLineCount(),
-            endColumn: model.getLineMaxColumn(model.getLineCount()),
-        });
-
-        return {
-            textBeforePointer,
-            textBeforePointerMulti,
-            textAfterPointer,
-            textAfterPointerMulti,
-        };
-    };
-
-    /**
      * monaco提示方法
      * @param { monaco.editor.ITextModel } model
      * @param { monaco.Position } position
      */
     async provideCompletionItems(model: monaco.editor.ITextModel, position: monaco.Position) {
-        // console.log("parser", parser);
-
-        // 获取光标周围的sql内容
         const {
             textBeforePointer,
             textBeforePointerMulti,
             // textAfterPointer,
             textAfterPointerMulti,
-        } = this.getTextByCursorPosition(model, position);
+        } = getTextByCursorPosition(model, position);
 
         // const nextTokens = textAfterPointer.trim().split(/\s+/)
         // const nextToken = nextTokens[0].toLowerCase()
