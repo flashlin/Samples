@@ -3,6 +3,7 @@ import { onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 //import * as monaco from 'monaco-editor';
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 import '../monacoEx/userWorker';
+//import "monaco-editor/esm/vs/editor/contrib/find/findController";
 import { SqlSnippets } from '@/monacoEx/Suggestions';
 
 interface ICodeEditorProps {
@@ -77,6 +78,8 @@ onMounted(() => {
     selectOnLineNumbers: true,
     fontSize: 14,
     lineHeight: 30,
+    contextmenu: false, //關閉右鍵
+    suggestOnTriggerCharacters: true,
     acceptSuggestionOnCommitCharacter: false,
     suggestSelection: "first",
     fontFamily: "MONACO",
