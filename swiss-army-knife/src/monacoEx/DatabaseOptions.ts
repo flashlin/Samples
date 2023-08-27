@@ -118,7 +118,7 @@ export class DatabaseOptions {
     };
 
     /**
-     * 获取所有表字段
+     * 取得所有 Field
      * @return {Array<ISuggestOption>} []
      */
     getFieldOptionsSuggestions(): Array<ISuggestOption> {
