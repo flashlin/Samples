@@ -101,3 +101,91 @@ export function take<T>(generator: Iterable<T>, count: number): T[] {
 export function zip<T1, T2>(a: T1[], b: T2[]) {
     return a.map((value, index) => [value, b[index]]);
 }
+
+
+
+
+
+export type TKey = string | number | Symbol;
+export interface Entry<K extends TKey, V> {
+    key: K;
+    value: V;
+}
+
+export class Iterator<T> implements Iterable<T> {
+    private data: T[] = [];
+    constructor(data: T[]) {
+        this.data = data;
+    }
+
+    *[Symbol.iterator](): IterableIterator<T> {
+        for (const item of this.data) {
+            yield item;
+        }
+    }
+}
+
+
+export class ObjectIterable<T> implements Iterable<Entry<string, T>> {
+    private data: { [key: string]: T };
+
+    constructor(data: { [key: string]: T }) {
+        this.data = data;
+    }
+
+    *[Symbol.iterator](): IterableIterator<Entry<string, T>> {
+        const keys = Object.keys(this.data);
+        for (const key of keys) {
+            yield {
+                key,
+                value: this.data[key]
+            };
+        }
+    }
+}
+
+export class MapIterable<K extends TKey, V> implements Iterable<Entry<K, V>> {
+    private data: Map<K, V>;
+
+    constructor(data: Map<K, V>) {
+        this.data = data;
+    }
+
+    *[Symbol.iterator](): IterableIterator<Entry<K, V>> {
+        for (const [key, value] of this.data) {
+            yield {
+                key: key as K,
+                value: value
+            };
+        }
+    }
+}
+
+export class Grouping<T> {
+    private data: Iterable<T>;
+
+    constructor(data: Iterable<T>) {
+        this.data = data;
+    }
+
+    groupBy<TKey extends keyof T, K extends TKey>(propertyName: TKey): Grouping<Entry<K, T[]>> {
+        const groupedData = new Map<K, T[]>();
+        for (const item of this.data) {
+            const key = item[propertyName] as K;
+            if (!groupedData.has(key)) {
+                groupedData.set(key, []);
+            }
+            groupedData.get(key)!.push(item);
+        }
+        const data = new MapIterable(groupedData);
+        return new Grouping(data);
+    }
+
+    toArray(): T[] {
+        const result: T[] = [];
+        for (const item of this.data) {
+            result.push(item);
+        }
+        return result;
+    }
+}
