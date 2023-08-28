@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<ICodeEditorProps>(), {
 });
 interface ICodeEditorEmits {
   //(e: 'update:modelValue', value: string): void;
-  (e: 'execute', code: string): void;
+  (e: 'onExecute', code: string): void;
 }
 const emits = defineEmits<ICodeEditorEmits>();
 const data = reactive({
@@ -70,7 +70,7 @@ onMounted(() => {
   });
 
   const executeCode = () => {
-    emits('execute', data.code);
+    emits('onExecute', data.code);
   }
 
   monaco.editor.create(domRef.value, {
