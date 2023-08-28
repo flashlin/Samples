@@ -234,22 +234,22 @@ const handleOnDeleteTable = (tableName: string) => {
   queryAllTableNames();
 }
 
-const handleKeyPress = (event: KeyboardEvent) => {
-  if (dialogVisible.value == false) {
-    return;
-  }
-  if (event.key === 'F8') {
-    handleClickExecute();
-  }
-};
+// const handleKeyPress = (event: KeyboardEvent) => {
+//   if (dialogVisible.value == false) {
+//     return;
+//   }
+//   if (event.key === 'F8') {
+//     handleClickExecute();
+//   }
+// };
 
 onMounted(async () => {
   await db.openAsync();
-  window.addEventListener('keydown', handleKeyPress);
+  //window.addEventListener('keydown', handleKeyPress);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyPress);
+  //window.removeEventListener('keydown', handleKeyPress);
 });
 </script>
 
@@ -282,7 +282,7 @@ onUnmounted(() => {
           <div class="common-layout">
             <el-container>
               <el-main>
-                <CodeEditor ref="codeEditorRef" v-model="data.code" />
+                <CodeEditor ref="codeEditorRef" v-model="data.code" @onExecute="handleClickExecute" />
                 <el-button @click="handleClickExecute">Execute(F8)</el-button>
               </el-main>
               <el-aside width="200px">
