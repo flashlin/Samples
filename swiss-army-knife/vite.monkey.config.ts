@@ -39,8 +39,27 @@ export default defineConfig({
       '@': '/src/'
     }
   },
+  // build: {
+  //   rollupOptions: {
+  //     external: [
+  //       'monaco-editor/esm/vs/editor/editor.worker',
+  //       'monaco-editor/esm/vs/language/json/json.worker',
+  //       'monaco-editor/esm/vs/language/css/css.worker',
+  //       'monaco-editor/esm/vs/language/html/html.worker',
+  //       'monaco-editor/esm/vs/language/typescript/ts.worker',
+  //       //'monaco-editor/esm/vs/editor/contrib/find/findController'
+  //     ],
+  //   },
+  // },
   optimizeDeps: {
     exclude: ['sql-wasm'],
     //esbuildOptions: { target: 'es2020' },
+    // include: [
+    //   'monaco-editor/esm/vs/editor/editor.worker',
+    //   'monaco-editor/esm/vs/language/json/json.worker',
+    //   'monaco-editor/esm/vs/language/css/css.worker',
+    //   'monaco-editor/esm/vs/language/html/html.worker',
+    //   'monaco-editor/esm/vs/language/typescript/ts.worker',
+    // ],
   },
 });
