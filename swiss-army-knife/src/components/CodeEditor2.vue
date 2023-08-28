@@ -12,10 +12,11 @@ interface ICodeEditorProps {
 const props = withDefaults(defineProps<ICodeEditorProps>(), {
   modelValue: '',
 });
-// interface ICodeEditorEmits {
-//   (e: 'update:modelValue', value: string): void;
-// }
-// const emits = defineEmits<ICodeEditorEmits>();
+interface ICodeEditorEmits {
+  //(e: 'update:modelValue', value: string): void;
+  (e: 'execute', code: string): void;
+}
+const emits = defineEmits<ICodeEditorEmits>();
 const data = reactive({
   code: props.modelValue,
 });
@@ -68,6 +69,10 @@ onMounted(() => {
     },
   });
 
+  const executeCode = () => {
+    emits('execute', data.code);
+  }
+
   monaco.editor.create(domRef.value, {
     value: data.code,
     language: 'sql',
@@ -88,6 +93,20 @@ onMounted(() => {
       enabled: false,
     },
   });
+
+  const executeAction: monaco.editor.IActionDescriptor = {
+    id: "run-code",
+    label: "Run Code",
+    contextMenuOrder: 2,
+    contextMenuGroupId: "1_modification",
+    keybindings: [
+      //monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+      monaco.KeyCode.F8,
+    ],
+    run: executeCode,
+  }
+
+  monaco.editor.addEditorAction(executeAction);
 });
 
 onBeforeUnmount(() => {
