@@ -161,14 +161,14 @@ export class MapIterable<K extends TKey, V> implements Iterable<Entry<K, V>> {
     }
 }
 
-export class Grouping<T> {
+export class DataHelper<T> {
     private data: Iterable<T>;
 
     constructor(data: Iterable<T>) {
         this.data = data;
     }
 
-    groupBy<TKey extends keyof T, K extends TKey>(propertyName: TKey): Grouping<Entry<K, T[]>> {
+    groupBy<TKey extends keyof T, K extends TKey>(propertyName: TKey): DataHelper<Entry<K, T[]>> {
         const groupedData = new Map<K, T[]>();
         for (const item of this.data) {
             const key = item[propertyName] as K;
@@ -178,7 +178,7 @@ export class Grouping<T> {
             groupedData.get(key)!.push(item);
         }
         const data = new MapIterable(groupedData);
-        return new Grouping(data);
+        return new DataHelper(data);
     }
 
     toArray(): T[] {

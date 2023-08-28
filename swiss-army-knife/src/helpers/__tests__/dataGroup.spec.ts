@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Grouping } from '@/helpers/dataHelper';
+import { DataHelper } from '@/helpers/dataHelper';
 
 describe('grouping', () => {
     it('select id from customer', () => {
@@ -10,7 +10,7 @@ describe('grouping', () => {
             { id: 4, name: 'mary', price: 5 },
             { id: 5, name: 'mary', price: 5 },
         ];
-        const p = new Grouping(data);
+        const p = new DataHelper(data);
         const data2 = p.groupBy('name').toArray();
         expect(data2).toStrictEqual([
             {
