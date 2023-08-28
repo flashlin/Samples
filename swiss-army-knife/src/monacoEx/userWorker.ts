@@ -7,7 +7,8 @@ import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
 
 // @ts-ignore
 self.MonacoEnvironment = {
-    getWorker(_: any, label: string) {
+    async getWorker(workId: string, label: string) {
+        console.log('getWorker', workId, label);
         if (label === 'json') {
             return new jsonWorker();
         }
@@ -20,6 +21,8 @@ self.MonacoEnvironment = {
         if (label === 'typescript' || label === 'javascript') {
             return new tsWorker();
         }
+
+        console.log('editorWorker1');
         return new editorWorker();
     }
 };
