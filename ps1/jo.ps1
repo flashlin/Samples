@@ -119,9 +119,9 @@ function JumpDirectory {
 
 # 建立連線
 Info "open folders.db"
-$sql = "CREATE TABLE IF NOT EXISTS directory (dirName text)"
+$sql = "CREATE TABLE IF NOT EXISTS directory (dirName text PRIMARY KEY)"
 $sqlite.ExecuteNonQuery($sql)
-$sql = "CREATE INDEX IF NOT EXISTS idx_directory ON directory (dirName)"
+# $sql = "CREATE INDEX IF NOT EXISTS idx_directory ON directory (dirName)"
 $sqlite.ExecuteNonQuery($sql)
 $sql = "CREATE TABLE IF NOT EXISTS history (dirName text, createdOn default current_timestamp)"
 $sqlite.ExecuteNonQuery($sql)
@@ -172,6 +172,13 @@ if ( "--clean" -eq $action ) {
     }
 
     $sqlite.FetchQuery($sql, $process)
+    return
+}
+
+if ( '--t' -eq $action ) {
+    $paths = GetRecentlyPath
+    Write-Host "RecentlyPath"
+    Write-Host $paths
     return
 }
 
