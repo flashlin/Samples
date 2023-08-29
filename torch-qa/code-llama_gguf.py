@@ -6,9 +6,12 @@ from ctransformers import AutoModelForCausalLM
 
 
 # 'codellama-13b-instruct.Q4_K_M.gguf' 16G RAM
+model_path = 'models/CodeLlama-34B-Instruct-GGUF/codellama-34b-instruct.Q4_K_M.gguf'
+
+
 def load_llm():
     llm = AutoModelForCausalLM.from_pretrained(
-        'codellama-13b-instruct.Q4_K_M.gguf',
+        model_path,
         model_type='llama',
         max_new_tokens=1096,
         repetition_penalty=1.13,
