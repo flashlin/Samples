@@ -19,12 +19,15 @@ const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^
 const StringSimpleQuote = createToken({ name: "StringSimpleQuote", pattern: /'[^'\\]*(?:\\.[^'\\]*)*'/ });
 const Identifier = createToken({ name: RULES.IDENTIFIER, pattern: /[a-zA-Z_]\w*/ });
 const SELECT = createToken({ name: "select", pattern: /select/ });
-const FROM = createToken({ name: "from", pattern: /(from)/ });
+const FROM = createToken({ name: "from", pattern: /from/ });
 const IN = createToken({ name: "in", pattern: /in/ });
 const AND = createToken({ name: "and", pattern: /(&&)/ });
 const OR = createToken({ name: "or", pattern: /(\|\|)/ });
 const NOT = createToken({ name: "not", pattern: /(\!)/ });
+const NEW = createToken({ name: "new", pattern: /new/ });
 const DOT = createToken({ name: "dot", pattern: /(\.)/ });
+const LBRACE = createToken({ name: "left brace", pattern: /(\{)/ });
+const RBRACE = createToken({ name: "right brace", pattern: /(})/ });
 
 const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -38,9 +41,12 @@ const allTokens = [
     FROM,
     AND,
     NOT,
+    NEW,
     IN,
     OR,
     DOT,
+    LBRACE,
+    RBRACE,
     Identifier,
     StringDoubleQuote,
     StringSimpleQuote
