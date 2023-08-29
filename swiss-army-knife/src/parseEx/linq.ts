@@ -18,7 +18,7 @@ const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^
 const StringSimpleQuote = createToken({ name: "StringSimpleQuote", pattern: /'[^'\\]*(?:\\.[^'\\]*)*'/ });
 const Identifier = createToken({ name: RULES.IDENTIFIER, pattern: /[a-zA-Z_]\w*/ });
 const SELECT = createToken({ name: "select", pattern: /select/ });
-const FROM = createToken({ name: "from", pattern: /from/ });
+const FROM = createToken({ name: "from", pattern: /(from)/ });
 const IN = createToken({ name: "in", pattern: /in/ });
 const AND = createToken({ name: "and", pattern: /(&&)/ });
 const OR = createToken({ name: "or", pattern: /(\|\|)/ });
@@ -118,10 +118,10 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
         super();
         this.validateVisitor();
     }
-    /* Visit methods go here */
 
     selectExpression(ctx: any) {
-        const aliaName = this.visit(ctx.aliasName);
+        console.log('a1')
+        const aliaName = this.visit(ctx);
         console.log('a', aliaName)
         return {
             type: "SELECT_CLAUSE",
