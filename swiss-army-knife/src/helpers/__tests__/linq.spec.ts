@@ -33,4 +33,21 @@ describe('linq', () => {
             }
         });
     });
+
+    it('from tb1 in customer select new { tb1.id, tb1.name }', () => {
+        const rc = parseLinq('from tb1 in customer select new { tb1.id, tb1.name }');
+        expect(rc.parseErrors).toStrictEqual([]);
+        expect(rc.value).toStrictEqual({
+            type: 'SELECT_CLAUSE',
+            columns: [
+                { type: 'TABLE_FIELD', aliaName: 'tb1', field: 'id' },
+                { type: 'TABLE_FIELD', aliaName: 'tb1', field: 'name' },
+            ],
+            aliaName: 'tb1',
+            source: {
+                type: 'TABLE_CLAUSE',
+                name: 'customer'
+            }
+        });
+    });
 });
