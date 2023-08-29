@@ -55,13 +55,6 @@ const allTokens = [
 const LinqLexer = new Lexer(allTokens);
 
 class LinqParser extends CstParser {
-    private static INSTANCE: LinqParser | undefined;
-    public static get(): LinqParser {
-        if (LinqParser.INSTANCE === undefined) {
-            LinqParser.INSTANCE = new LinqParser();
-        }
-        return LinqParser.INSTANCE;
-    }
 
     constructor() {
         super(allTokens, { nodeLocationTracking: "onlyOffset" })
