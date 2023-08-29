@@ -10,8 +10,9 @@ const RULES = {
     databaseTableClause: "databaseTableClause",
     columnsExpr: "columnsExpr",
     tableExpr: "tableExpr",
-    tableFieldExpr: "tableFieldExpr",
+    tableFieldColumn: "tableFieldColumn",
     columnList: "columnList",
+    newColumns: "newColumns",
     identifier: "identifier",
 };
 
@@ -26,8 +27,9 @@ const OR = createToken({ name: "or", pattern: /(\|\|)/ });
 const NOT = createToken({ name: "not", pattern: /(\!)/ });
 const NEW = createToken({ name: "new", pattern: /new/ });
 const DOT = createToken({ name: "dot", pattern: /(\.)/ });
-const LBRACE = createToken({ name: "left brace", pattern: /(\{)/ });
-const RBRACE = createToken({ name: "right brace", pattern: /(})/ });
+const LBRACE = createToken({ name: "left brace", pattern: /\{/ });
+const RBRACE = createToken({ name: "right brace", pattern: /\}/ });
+const COMMA = createToken({ name: "comma", pattern: /\,/ });
 
 const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -47,6 +49,7 @@ const allTokens = [
     DOT,
     LBRACE,
     RBRACE,
+    COMMA,
     Identifier,
     StringDoubleQuote,
     StringSimpleQuote
@@ -93,7 +96,8 @@ class LinqParser extends CstParser {
 
     public columnsExpr = this.RULE(RULES.columnsExpr, () => {
         this.OR([
-            { ALT: () => this.SUBRULE(this.tableFieldExpr) },
+            { ALT: () => this.SUBRULE(this.newColumns) },
+            { ALT: () => this.SUBRULE(this.tableFieldColumn) },
             { ALT: () => this.SUBRULE(this.tableExpr) },
         ]);
     });
@@ -102,10 +106,20 @@ class LinqParser extends CstParser {
         this.CONSUME(Identifier);
     });
 
-    public tableFieldExpr = this.RULE(RULES.tableFieldExpr, () => {
+    public tableFieldColumn = this.RULE(RULES.tableFieldColumn, () => {
         this.SUBRULE(this.tableExpr);
         this.CONSUME(DOT);
         this.CONSUME(Identifier);
+    });
+
+    public newColumns = this.RULE(RULES.newColumns, () => {
+        this.CONSUME(NEW);
+        this.CONSUME(LBRACE);
+        this.MANY_SEP({
+            SEP: COMMA,
+            DEF: () => this.SUBRULE(this.tableFieldColumn)
+        });
+        this.CONSUME(RBRACE);
     });
 }
 
@@ -133,7 +147,6 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
         const aliaName = this.visit(ctx.aliaName).alias;
         const source = this.visit(ctx.sourceClause);
         const columns = this.visit(ctx.columnsExpr);
-        console.log('fields', columns)
         return {
             type: "SELECT_CLAUSE",
             source: source,
@@ -163,7 +176,7 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
         };
     }
 
-    tableFieldExpr(ctx: any) {
+    tableFieldColumn(ctx: any) {
         const tableName = this.visit(ctx.tableExpr).name;
         const fieldName = ctx.IDENTIFIER[0].image;
         return {
@@ -181,10 +194,18 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
     }
 
     columnsExpr(ctx: any) {
-        if (ctx.tableFieldExpr) {
-            return [this.visit(ctx.tableFieldExpr)];
+        if (ctx.newColumns) {
+            return this.visit(ctx.newColumns);
+        }
+        if (ctx.tableFieldColumn) {
+            return [this.visit(ctx.tableFieldColumn)];
         }
         return [this.visit(ctx.tableExpr)];
+    }
+
+    newColumns(ctx: any) {
+        const columns = ctx.tableFieldColumn.map((x: any) => this.visit(x));
+        return columns;
     }
 }
 
