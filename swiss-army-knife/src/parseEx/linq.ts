@@ -4,14 +4,15 @@ import { createToken, tokenMatcher, Lexer, CstParser } from "chevrotain";
 const RULES = {
     IDENTIFIER: "IDENTIFIER",
     selectExpression: "selectExpression",
-    aliaName: "aliasName",
-    databaseClause: "databaseClause",
-    selectExpr: "selectExpr",
+    aliaName: "aliaName",
+    sourceClause: "sourceClause",
+    tableClause: "tableClause",
+    databaseTableClause: "databaseTableClause",
+    columnsExpr: "columnsExpr",
     tableExpr: "tableExpr",
     tableFieldExpr: "tableFieldExpr",
     columnList: "columnList",
     identifier: "identifier",
-    sourceClause: "sourceClause",
 };
 
 const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^"\\]*(?:\\.[^"\\]*)*"/ });
@@ -23,7 +24,7 @@ const IN = createToken({ name: "in", pattern: /in/ });
 const AND = createToken({ name: "and", pattern: /(&&)/ });
 const OR = createToken({ name: "or", pattern: /(\|\|)/ });
 const NOT = createToken({ name: "not", pattern: /(\!)/ });
-const DOT = createToken({ name: "not", pattern: /(\.)/ });
+const DOT = createToken({ name: "dot", pattern: /(\.)/ });
 
 const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -63,43 +64,53 @@ class LinqParser extends CstParser {
 
     public selectExpression = this.RULE(RULES.selectExpression, () => {
         this.CONSUME(FROM);
-        this.CONSUME(Identifier);
         this.SUBRULE(this.aliaName);
+        this.CONSUME(IN);
+        this.SUBRULE(this.sourceClause);
+        this.CONSUME(SELECT);
+        this.SUBRULE(this.columnsExpr);
     });
 
     public aliaName = this.RULE(RULES.aliaName, () => {
         this.CONSUME(Identifier);
     });
 
-    public databaseClause = this.RULE(RULES.databaseClause, () => {
+    public sourceClause = this.RULE(RULES.sourceClause, () => {
+        this.OR([
+            { ALT: () => this.SUBRULE(this.databaseTableClause) },
+            { ALT: () => this.SUBRULE(this.tableClause) },
+        ]);
+    });
+
+    public tableClause = this.RULE(RULES.tableClause, () => {
+        this.CONSUME(Identifier);
+    });
+
+    public databaseTableClause = this.RULE(RULES.databaseTableClause, () => {
         this.CONSUME(Identifier);
         this.CONSUME2(DOT);
         this.CONSUME3(Identifier);
     });
 
-    // public selectExpr = this.RULE(RULES.selectExpr, () => {
-    //     this.OR([
-    //         { ALT: () => this.SUBRULE(this.tableFieldExpr) },
-    //         { ALT: () => this.SUBRULE(this.tableExpr) },
-    //     ]);
-    // });
+    public columnsExpr = this.RULE(RULES.columnsExpr, () => {
+        this.OR([
+            { ALT: () => this.SUBRULE(this.tableFieldExpr) },
+            { ALT: () => this.SUBRULE(this.tableExpr) },
+        ]);
+    });
 
-    // public tableExpr = this.RULE(RULES.tableExpr, () => {
-    //     this.CONSUME(Identifier);
-    // });
+    public tableExpr = this.RULE(RULES.tableExpr, () => {
+        this.CONSUME(Identifier);
+    });
 
-    // public tableFieldExpr = this.RULE(RULES.tableFieldExpr, () => {
-    //     this.SUBRULE(this.tableExpr);
-    //     this.CONSUME(DOT);
-    //     this.CONSUME(Identifier);
-    // });
-
-    // public identifier = this.RULE(RULES.identifier, () => {
-    //     this.CONSUME(Identifier);
-    // });
+    public tableFieldExpr = this.RULE(RULES.tableFieldExpr, () => {
+        this.SUBRULE(this.tableExpr);
+        this.CONSUME(DOT);
+        this.CONSUME(Identifier);
+    });
 }
 
-const parserInstance = new LinqParser();
+const parser = new LinqParser();
 
 //const BaseCstVisitor = parserInstance.getBaseCstVisitorConstructor();
 // class LinqExprVisitor extends BaseCstVisitor {
@@ -112,7 +123,7 @@ const parserInstance = new LinqParser();
 //const _linqVisitor = new LinqExprVisitor();
 
 
-const BaseLinqVisitorWithDefaults = parserInstance.getBaseCstVisitorConstructorWithDefaults();
+const BaseLinqVisitorWithDefaults = parser.getBaseCstVisitorConstructorWithDefaults();
 class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
     constructor() {
         super();
@@ -120,34 +131,62 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
     }
 
     selectExpression(ctx: any) {
-        console.log('a1')
-        const aliaName = this.visit(ctx);
-        console.log('a', aliaName)
+        const aliaName = this.visit(ctx.aliaName).alias;
+        const source = this.visit(ctx.sourceClause);
+        const columns = this.visit(ctx.columnsExpr);
+        console.log('fields', columns)
         return {
             type: "SELECT_CLAUSE",
+            source: source,
+            aliaName: aliaName,
+            columns: columns
         };
     }
 
-    columnList(ctx: any) {
-        const columns = ctx.identifier.map((identToken: any) => this.visit(identToken));
+    aliaName(ctx: any) {
         return {
-            type: "COLUMN_LIST",
-            columns: columns,
+            type: 'ALIAS_NAME',
+            alias: ctx.IDENTIFIER[0].image
         };
     }
 
     sourceClause(ctx: any) {
-        return {
-            type: "SOURCE_CLAUSE",
-            value: ctx.identifier.map((identToken: any) => this.visit(identToken)),
+        if (ctx.tableClause) {
+            return this.visit(ctx.tableClause);
         }
+        return this.visit(ctx.databaseTableClause);
     }
 
-    identifier(ctx: any) {
+    tableClause(ctx: any) {
         return {
-            type: "IDENTIFIER",
-            value: ctx.IDENTIFIER[0].image,
+            type: 'TABLE_CLAUSE',
+            name: ctx.IDENTIFIER[0].image
+        };
+    }
+
+    tableFieldExpr(ctx: any) {
+        const tableName = this.visit(ctx.tableExpr).name;
+        const fieldName = ctx.IDENTIFIER[0].image;
+        console.log('tableF')
+        return {
+            type: 'TABLE_FIELD',
+            aliaName: tableName,
+            field: fieldName
+        };
+    }
+
+    tableExpr(ctx: any) {
+        return {
+            type: 'TABLE',
+            name: ctx.IDENTIFIER[0].image,
+        };
+    }
+
+    columnsExpr(ctx: any) {
+        if (ctx.tableFieldExpr) {
+            return [this.visit(ctx.tableFieldExpr)];
         }
+        return [];
     }
 }
 
@@ -155,13 +194,13 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
 const linqVisitorWithDefaults = new LinqExprVisitorWithDefaults();
 export function parseLinq(text: string) {
     const lexResult = LinqLexer.tokenize(text);
-    parserInstance.input = lexResult.tokens;
-    const cst = parserInstance.selectExpression();
+    parser.input = lexResult.tokens;
+    const cst = parser.selectExpression();
     //const value = tsqlVisitor.visit(cst);
     const value = linqVisitorWithDefaults.visit(cst);
     return {
         value: value,
         lexResult: lexResult,
-        parseErrors: parserInstance.errors,
+        parseErrors: parser.errors,
     };
 }
