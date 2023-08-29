@@ -185,7 +185,7 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
         if (ctx.tableFieldExpr) {
             return [this.visit(ctx.tableFieldExpr)];
         }
-        return [];
+        return [this.visit(ctx.tableExpr)];
     }
 }
 
