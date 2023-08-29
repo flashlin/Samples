@@ -4,6 +4,11 @@ import { createToken, tokenMatcher, Lexer, CstParser } from "chevrotain";
 const RULES = {
     IDENTIFIER: "IDENTIFIER",
     selectExpression: "selectExpression",
+    aliaName: "aliasName",
+    databaseClause: "databaseClause",
+    selectExpr: "selectExpr",
+    tableExpr: "tableExpr",
+    tableFieldExpr: "tableFieldExpr",
     columnList: "columnList",
     identifier: "identifier",
     sourceClause: "sourceClause",
@@ -12,12 +17,13 @@ const RULES = {
 const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^"\\]*(?:\\.[^"\\]*)*"/ });
 const StringSimpleQuote = createToken({ name: "StringSimpleQuote", pattern: /'[^'\\]*(?:\\.[^'\\]*)*'/ });
 const Identifier = createToken({ name: RULES.IDENTIFIER, pattern: /[a-zA-Z_]\w*/ });
-const SELECT = createToken({ name: "Select", pattern: /(SELECT|select)/ });
-const FROM = createToken({ name: "From", pattern: /(FROM|from)/ });
-const AND = createToken({ name: "And", pattern: /(AND|and)/ });
-const OR = createToken({ name: "Or", pattern: /(OR|or)/ });
-const NOT = createToken({ name: "Not", pattern: /(NOT|not)/ });
-const Colon = createToken({ name: "Colon", pattern: /:/ });
+const SELECT = createToken({ name: "select", pattern: /(select)/ });
+const FROM = createToken({ name: "from", pattern: /(from)/ });
+const IN = createToken({ name: "in", pattern: /(in)/ });
+const AND = createToken({ name: "and", pattern: /(&&)/ });
+const OR = createToken({ name: "or", pattern: /(\|\|)/ });
+const NOT = createToken({ name: "not", pattern: /(\!)/ });
+const DOT = createToken({ name: "not", pattern: /(\.)/ });
 
 const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -27,12 +33,13 @@ const WhiteSpace = createToken({
 
 const allTokens = [
     WhiteSpace,
-    Colon,
+    SELECT,
     FROM,
     AND,
-    OR,
     NOT,
-    SELECT,
+    IN,
+    OR,
+    DOT,
     Identifier,
     StringDoubleQuote,
     StringSimpleQuote
@@ -55,22 +62,39 @@ class LinqParser extends CstParser {
     }
 
     public selectExpression = this.RULE(RULES.selectExpression, () => {
-        this.CONSUME(SELECT);
-        this.SUBRULE(this.columnList);
         this.CONSUME(FROM);
-        this.SUBRULE(this.sourceClause);
+        this.SUBRULE(this.identifier);
+        this.CONSUME(IN);
+        this.SUBRULE(this.databaseClause);
+        this.CONSUME(SELECT);
+        this.SUBRULE(this.selectExpr);
     });
 
-    public columnList = this.RULE(RULES.columnList, () => {
-        this.MANY(() => this.OR([
-            { ALT: () => this.SUBRULE(this.identifier) },
-        ]));
+    public aliaName = this.RULE(RULES.aliaName, () => {
+        this.CONSUME(Identifier);
     });
 
-    public sourceClause = this.RULE(RULES.sourceClause, () => {
+    public databaseClause = this.RULE(RULES.databaseClause, () => {
+        this.CONSUME(Identifier);
+        this.CONSUME(DOT);
+        this.CONSUME(Identifier);
+    });
+
+    public selectExpr = this.RULE(RULES.selectExpr, () => {
         this.OR([
-            { ALT: () => this.SUBRULE(this.identifier) },
+            { ALT: () => this.SUBRULE(this.tableFieldExpr) },
+            { ALT: () => this.SUBRULE(this.tableExpr) },
         ]);
+    });
+
+    public tableExpr = this.RULE(RULES.tableExpr, () => {
+        this.CONSUME(Identifier);
+    });
+
+    public tableFieldExpr = this.RULE(RULES.tableFieldExpr, () => {
+        this.SUBRULE(this.tableExpr);
+        this.CONSUME(DOT);
+        this.CONSUME(Identifier);
     });
 
     public identifier = this.RULE(RULES.identifier, () => {
