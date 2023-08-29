@@ -167,7 +167,6 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
     tableFieldExpr(ctx: any) {
         const tableName = this.visit(ctx.tableExpr).name;
         const fieldName = ctx.IDENTIFIER[0].image;
-        console.log('tableF')
         return {
             type: 'TABLE_FIELD',
             aliaName: tableName,
