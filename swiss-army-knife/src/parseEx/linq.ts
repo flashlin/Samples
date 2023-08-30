@@ -14,6 +14,9 @@ const RULES = {
     columnList: "columnList",
     newColumns: "newColumns",
     columnEqual: "columnEqual",
+    compareOper: "compareOper",
+    compareExpr: "compareExpr",
+    expr: "expr",
     fetchColumn: "fetchColumn",
     identifier: "identifier",
 };
@@ -23,16 +26,23 @@ const StringSimpleQuote = createToken({ name: "StringSimpleQuote", pattern: /'[^
 const Identifier = createToken({ name: RULES.IDENTIFIER, pattern: /[a-zA-Z_]\w*/ });
 const SELECT = createToken({ name: "select", pattern: /select/ });
 const FROM = createToken({ name: "from", pattern: /from/ });
+const WHERE = createToken({ name: "where", pattern: /where/ });
 const IN = createToken({ name: "in", pattern: /in/ });
 const AND = createToken({ name: "and", pattern: /(&&)/ });
 const OR = createToken({ name: "or", pattern: /(\|\|)/ });
 const NOT = createToken({ name: "not", pattern: /(\!)/ });
 const NEW = createToken({ name: "new", pattern: /new/ });
 const DOT = createToken({ name: "dot", pattern: /(\.)/ });
-const EQUAL = createToken({ name: "dot", pattern: /(\=)/ });
+const ASSIGN = createToken({ name: "assign", pattern: /(\=)/ });
 const LBRACE = createToken({ name: "left brace", pattern: /\{/ });
 const RBRACE = createToken({ name: "right brace", pattern: /\}/ });
 const COMMA = createToken({ name: "comma", pattern: /\,/ });
+const GREATER_THAN = createToken({ name: ">", pattern: /\>/ });
+const LESS_THAN = createToken({ name: "<", pattern: /\</ });
+const EQUAL = createToken({ name: "==", pattern: /\==/ });
+const GREATER_EQUAL = createToken({ name: ">=", pattern: /\>\=/ });
+const LESS_EQUAL = createToken({ name: "<=", pattern: /\<\=/ });
+const NOT_EQUAL = createToken({ name: "!=", pattern: /\!\=/ });
 
 const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -43,6 +53,7 @@ const WhiteSpace = createToken({
 const allTokens = [
     WhiteSpace,
     SELECT,
+    WHERE,
     FROM,
     AND,
     NOT,
@@ -50,10 +61,16 @@ const allTokens = [
     IN,
     OR,
     DOT,
+    EQUAL,
+    GREATER_EQUAL,
+    LESS_EQUAL,
+    NOT_EQUAL,
     LBRACE,
     RBRACE,
     COMMA,
-    EQUAL,
+    ASSIGN,
+    GREATER_THAN,
+    LESS_THAN,
     Identifier,
     StringDoubleQuote,
     StringSimpleQuote
@@ -135,8 +152,29 @@ class LinqParser extends CstParser {
 
     public columnEqual = this.RULE(RULES.columnEqual, () => {
         this.CONSUME(Identifier);
-        this.CONSUME(EQUAL);
+        this.CONSUME(ASSIGN);
         this.SUBRULE(this.tableFieldColumn);
+    });
+
+    public expr = this.RULE(RULES.expr, () => {
+        this.SUBRULE(this.tableFieldColumn);
+    });
+
+    public compareOper = this.RULE(RULES.compareOper, () => {
+        this.OR([
+            { ALT: () => this.CONSUME(GREATER_EQUAL) },
+            { ALT: () => this.CONSUME(LESS_EQUAL) },
+            { ALT: () => this.CONSUME(EQUAL) },
+            { ALT: () => this.CONSUME(NOT_EQUAL) },
+            { ALT: () => this.CONSUME(GREATER_THAN) },
+            { ALT: () => this.CONSUME(LESS_THAN) },
+        ])
+    });
+
+    public compareExpr = this.RULE(RULES.compareExpr, () => {
+        this.SUBRULE(this.expr);
+        this.SUBRULE(this.compareOper);
+        this.SUBRULE2(this.expr);
     });
 }
 
