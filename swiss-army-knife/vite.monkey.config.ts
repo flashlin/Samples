@@ -26,6 +26,7 @@ export default defineConfig({
         icon: 'https//vitejs.dev/logo.svg',
         namespace: 'flash-knife',
         match: ['*://*.coreop.net/*', 'https://www.w3schools.com/*'],
+        updateURL: 'http://localhost:8002'
       },
       build: {
         externalGlobals: {
