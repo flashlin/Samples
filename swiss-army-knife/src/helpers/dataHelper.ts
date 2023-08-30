@@ -1,5 +1,15 @@
 import { type IDataTable } from './dataTypes'
 
+export function normalColumnName(text: string) {
+    const text1 = text.replace(/#/g, '_id').replace(/ /g, '_');
+    const removedNonAlphaNumeric = text1.replace(/[^a-zA-Z0-9_]+/g, '_');
+    const consolidatedUnderscores = removedNonAlphaNumeric.replace(/_+/g, '_');
+    if (consolidatedUnderscores.startsWith("_") && consolidatedUnderscores.endsWith("_")) {
+        return consolidatedUnderscores.slice(1, -1);
+    }
+    return consolidatedUnderscores;
+}
+
 export function getCurrentTime(): string {
     const now = new Date();
     const year = now.getFullYear();
@@ -40,7 +50,7 @@ export function readFileContentAsync(file: File): Promise<string> {
 export function parseCsvContentToObjectArray(content: string): IDataTable {
     const lines = content.split('\n');
     const objectArray: any[] = [];
-    const names = lines[0].split(',');
+    const names = lines[0].split(',').map(name => normalColumnName(name));
     lines.slice(1).forEach(line => {
         let idx = 0;
         const item: any = {};

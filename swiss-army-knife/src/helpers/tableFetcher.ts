@@ -1,3 +1,4 @@
+import { normalColumnName } from "./dataHelper";
 import { type IDataTable } from "./dataTypes";
 
 function fetchHeadersByTh(thead: HTMLTableSectionElement) {
@@ -49,8 +50,7 @@ export function fetchTableData(table: HTMLTableElement): IDataTable {
         }
     }
 
-    headers = headers.map(x => x.replace(/#/g, '_id').replace(/ /g, '_'));
-    headers = headers.map(x => removeNonAlphaNumeric(x));
+    headers = headers.map(x => normalColumnName(x));
 
     Array.from(rows).slice(1).forEach(row => {
         const rowData: { [key: string]: string } = {};
