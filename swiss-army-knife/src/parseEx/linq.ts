@@ -13,6 +13,8 @@ const RULES = {
     tableFieldColumn: "tableFieldColumn",
     columnList: "columnList",
     newColumns: "newColumns",
+    columnEqual: "columnEqual",
+    fetchColumn: "fetchColumn",
     identifier: "identifier",
 };
 
@@ -27,6 +29,7 @@ const OR = createToken({ name: "or", pattern: /(\|\|)/ });
 const NOT = createToken({ name: "not", pattern: /(\!)/ });
 const NEW = createToken({ name: "new", pattern: /new/ });
 const DOT = createToken({ name: "dot", pattern: /(\.)/ });
+const EQUAL = createToken({ name: "dot", pattern: /(\=)/ });
 const LBRACE = createToken({ name: "left brace", pattern: /\{/ });
 const RBRACE = createToken({ name: "right brace", pattern: /\}/ });
 const COMMA = createToken({ name: "comma", pattern: /\,/ });
@@ -50,6 +53,7 @@ const allTokens = [
     LBRACE,
     RBRACE,
     COMMA,
+    EQUAL,
     Identifier,
     StringDoubleQuote,
     StringSimpleQuote
@@ -117,9 +121,22 @@ class LinqParser extends CstParser {
         this.CONSUME(LBRACE);
         this.MANY_SEP({
             SEP: COMMA,
-            DEF: () => this.SUBRULE(this.tableFieldColumn)
+            DEF: () => this.SUBRULE(this.fetchColumn),
         });
         this.CONSUME(RBRACE);
+    });
+
+    public fetchColumn = this.RULE(RULES.fetchColumn, () => {
+        this.OR([
+            { ALT: () => this.SUBRULE(this.columnEqual) },
+            { ALT: () => this.SUBRULE(this.tableFieldColumn) },
+        ])
+    });
+
+    public columnEqual = this.RULE(RULES.columnEqual, () => {
+        this.CONSUME(Identifier);
+        this.CONSUME(EQUAL);
+        this.SUBRULE(this.tableFieldColumn);
     });
 }
 
@@ -134,6 +151,13 @@ const parser = new LinqParser();
 //     /* all Visit methods must go here */
 // }
 //const _linqVisitor = new LinqExprVisitor();
+
+export interface ITableFieldExpr {
+    type: string;
+    aliasTable: string;
+    field: string;
+    aliasField: string;
+}
 
 
 const BaseLinqVisitorWithDefaults = parser.getBaseCstVisitorConstructorWithDefaults();
@@ -176,13 +200,14 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
         };
     }
 
-    tableFieldColumn(ctx: any) {
+    tableFieldColumn(ctx: any): ITableFieldExpr {
         const tableName = this.visit(ctx.tableExpr).name;
         const fieldName = ctx.IDENTIFIER[0].image;
         return {
             type: 'TABLE_FIELD',
-            aliaName: tableName,
-            field: fieldName
+            aliasTable: tableName,
+            field: fieldName,
+            aliasField: fieldName,
         };
     }
 
@@ -204,8 +229,24 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
     }
 
     newColumns(ctx: any) {
-        const columns = ctx.tableFieldColumn.map((x: any) => this.visit(x));
+        const columns = ctx.fetchColumn.map((x: any) => this.visit(x));
         return columns;
+    }
+
+    fetchColumn(ctx: any) {
+        if (ctx.tableFieldColumn) {
+            return this.visit(ctx.tableFieldColumn);
+        }
+        return this.visit(ctx.columnEqual);
+    }
+
+    columnEqual(ctx: any): ITableFieldExpr {
+        const aliasField = ctx.IDENTIFIER[0].image;
+        const tableField = this.visit(ctx.tableFieldColumn);
+        return {
+            ...tableField,
+            aliasField: aliasField,
+        };
     }
 }
 
