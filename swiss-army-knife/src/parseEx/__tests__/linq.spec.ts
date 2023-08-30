@@ -2,8 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { parseLinq } from '@/parseEx/linq';
 
 const getItName = () => {
-    const ss = expect.getState().currentTestName?.split('>') ?? '';
-    return ss[2].trimStart();
+    const fullTestName = expect.getState().currentTestName ?? "";
+    const firstIndex = fullTestName.indexOf(">");
+    const secondIndex = fullTestName.indexOf(">", firstIndex + 1);
+    const currentTestName = fullTestName.substring(secondIndex + 1).trimStart();
+    return currentTestName;
 }
 
 describe('linq', () => {
@@ -20,7 +23,8 @@ describe('linq', () => {
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
-            }
+            },
+            where: undefined
         });
     });
 
@@ -37,7 +41,8 @@ describe('linq', () => {
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
-            }
+            },
+            where: undefined
         });
     });
 
@@ -54,7 +59,8 @@ describe('linq', () => {
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
-            }
+            },
+            where: undefined
         });
     });
 
@@ -72,7 +78,8 @@ describe('linq', () => {
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
-            }
+            },
+            where: undefined
         });
     });
 
@@ -90,7 +97,8 @@ describe('linq', () => {
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
-            }
+            },
+            where: undefined
         });
     });
 

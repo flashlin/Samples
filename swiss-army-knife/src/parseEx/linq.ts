@@ -3,6 +3,9 @@ import { createToken, tokenMatcher, Lexer, CstParser } from "chevrotain";
 
 const RULES = {
     IDENTIFIER: "IDENTIFIER",
+    AND: "AND",
+    GREATER_THAN: ">",
+    LESS_THAN: "<",
     selectExpression: "selectExpression",
     aliaName: "aliaName",
     sourceClause: "sourceClause",
@@ -15,20 +18,31 @@ const RULES = {
     newColumns: "newColumns",
     columnEqual: "columnEqual",
     compareOper: "compareOper",
-    compareExpr: "compareExpr",
+    extractParentExpression: "extractParentExpression",
+    extractExpressions: "extractExpressions",
+    extractCompareExprs: "extractCompareExprs",
+    extractCompareExpr: "extractCompareExpr",
+    extractAndOrExprs: "extractAndOrExprs",
+    extractAndExpr: "extractAndExpr",
+    extractOrExpr: "extractOrExpr",
     expr: "expr",
     fetchColumn: "fetchColumn",
+    whereExpr: "whereExpr",
     identifier: "identifier",
+    FLOAT: "Float",
+    INTEGER: "Integer",
 };
 
 const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^"\\]*(?:\\.[^"\\]*)*"/ });
 const StringSimpleQuote = createToken({ name: "StringSimpleQuote", pattern: /'[^'\\]*(?:\\.[^'\\]*)*'/ });
 const Identifier = createToken({ name: RULES.IDENTIFIER, pattern: /[a-zA-Z_]\w*/ });
+const Float = createToken({ name: RULES.FLOAT, pattern: /\d+\.\d*/ });
+const Integer = createToken({ name: RULES.INTEGER, pattern: /\d+/ });
 const SELECT = createToken({ name: "select", pattern: /select/ });
 const FROM = createToken({ name: "from", pattern: /from/ });
 const WHERE = createToken({ name: "where", pattern: /where/ });
 const IN = createToken({ name: "in", pattern: /in/ });
-const AND = createToken({ name: "and", pattern: /(&&)/ });
+const AND = createToken({ name: RULES.AND, pattern: /(&&)/ });
 const OR = createToken({ name: "or", pattern: /(\|\|)/ });
 const NOT = createToken({ name: "not", pattern: /(\!)/ });
 const NEW = createToken({ name: "new", pattern: /new/ });
@@ -37,9 +51,9 @@ const ASSIGN = createToken({ name: "assign", pattern: /(\=)/ });
 const LBRACE = createToken({ name: "left brace", pattern: /\{/ });
 const RBRACE = createToken({ name: "right brace", pattern: /\}/ });
 const COMMA = createToken({ name: "comma", pattern: /\,/ });
-const GREATER_THAN = createToken({ name: ">", pattern: /\>/ });
-const LESS_THAN = createToken({ name: "<", pattern: /\</ });
-const EQUAL = createToken({ name: "==", pattern: /\==/ });
+const GREATER_THAN = createToken({ name: RULES.GREATER_THAN, pattern: /\>/ });
+const LESS_THAN = createToken({ name: RULES.LESS_THAN, pattern: /\</ });
+const EQUAL = createToken({ name: "==", pattern: /\=\=/ });
 const GREATER_EQUAL = createToken({ name: ">=", pattern: /\>\=/ });
 const LESS_EQUAL = createToken({ name: "<=", pattern: /\<\=/ });
 const NOT_EQUAL = createToken({ name: "!=", pattern: /\!\=/ });
@@ -54,6 +68,8 @@ const allTokens = [
     WhiteSpace,
     SELECT,
     WHERE,
+    Float,
+    Integer,
     FROM,
     AND,
     NOT,
@@ -81,7 +97,7 @@ const LinqLexer = new Lexer(allTokens);
 class LinqParser extends CstParser {
 
     constructor() {
-        super(allTokens, { nodeLocationTracking: "onlyOffset" })
+        super(allTokens, { nodeLocationTracking: "onlyOffset" })  //"onlyOffset"
         this.performSelfAnalysis()
     }
 
@@ -90,6 +106,9 @@ class LinqParser extends CstParser {
         this.SUBRULE(this.aliaName);
         this.CONSUME(IN);
         this.SUBRULE(this.sourceClause);
+        this.OPTION(() => {
+            this.SUBRULE(this.whereExpr);
+        });
         this.CONSUME(SELECT);
         this.SUBRULE(this.columnsExpr);
     });
@@ -156,8 +175,12 @@ class LinqParser extends CstParser {
         this.SUBRULE(this.tableFieldColumn);
     });
 
-    public expr = this.RULE(RULES.expr, () => {
-        this.SUBRULE(this.tableFieldColumn);
+    public extractParentExpression = this.RULE(RULES.extractParentExpression, () => {
+        this.OR([
+            { ALT: () => this.SUBRULE(this.tableFieldColumn) },
+            { ALT: () => this.CONSUME(Float) },
+            { ALT: () => this.CONSUME(Integer) },
+        ])
     });
 
     public compareOper = this.RULE(RULES.compareOper, () => {
@@ -171,10 +194,33 @@ class LinqParser extends CstParser {
         ])
     });
 
-    public compareExpr = this.RULE(RULES.compareExpr, () => {
-        this.SUBRULE(this.expr);
+    public extractExpressions = this.RULE(RULES.extractExpressions, () => {
+        this.SUBRULE(this.extractParentExpression);
+        this.OPTION(() => this.OR([
+            { ALT: () => this.SUBRULE(this.extractCompareExpr) },
+            { ALT: () => this.SUBRULE(this.extractAndExpr) },
+            { ALT: () => this.SUBRULE(this.extractOrExpr) }
+        ]));
+    });
+
+    public extractCompareExpr = this.RULE(RULES.extractCompareExpr, () => {
         this.SUBRULE(this.compareOper);
-        this.SUBRULE2(this.expr);
+        this.SUBRULE(this.extractExpressions);
+    });
+
+    public extractAndExpr = this.RULE(RULES.extractAndExpr, () => {
+        this.CONSUME(AND);
+        this.SUBRULE(this.extractExpressions);
+    });
+
+    public extractOrExpr = this.RULE(RULES.extractOrExpr, () => {
+        this.CONSUME(OR);
+        this.SUBRULE(this.extractExpressions);
+    });
+
+    public whereExpr = this.RULE(RULES.whereExpr, () => {
+        this.CONSUME(WHERE);
+        this.SUBRULE(this.extractExpressions);
     });
 }
 
@@ -209,11 +255,13 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
         const aliaName = this.visit(ctx.aliaName).alias;
         const source = this.visit(ctx.sourceClause);
         const columns = this.visit(ctx.columnsExpr);
+        const where = this.visit(ctx.whereExpr);
         return {
             type: "SELECT_CLAUSE",
             source: source,
             aliaName: aliaName,
-            columns: columns
+            columns: columns,
+            where: where
         };
     }
 
@@ -284,6 +332,28 @@ class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
         return {
             ...tableField,
             aliasField: aliasField,
+        };
+    }
+
+    whereExpr(ctx: any) {
+        const list = this.visit(ctx.extractExpressions);
+        console.log('where2', list);
+        return {
+            type: 'WHERE_CLAUSE',
+        };
+    }
+
+    extractExpressions(ctx: any) {
+        console.log('extractExpression=', ctx)
+        return {
+
+        };
+    }
+
+    extractCompareExpr(ctx: any) {
+        console.log('extractCoompare=', ctx);
+        return {
+
         };
     }
 }
