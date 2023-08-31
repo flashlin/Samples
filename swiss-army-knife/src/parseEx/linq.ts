@@ -12,10 +12,10 @@ const RULES = {
     databaseTableClause: "databaseTableClause",
     columnsExpr: "columnsExpr",
     tableExpr: "tableExpr",
-    tableFieldColumn: "tableFieldColumn",
+    tableFieldExpr: "tableFieldExpr",
     columnList: "columnList",
     newColumns: "newColumns",
-    columnEqual: "columnEqual",
+    columnEqualExpr: "columnEqual",
     compareOper: "compareOper",
     extractParentExpression: "extractParentExpression",
     extractExpressions: "extractExpressions",
@@ -100,25 +100,23 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
     }
 
     public selectExpression = this.RULE(RULES.selectExpression, () => {
-        let where;
         this.CONSUME(FROM);
         const aliasName = this.SUBRULE(this.aliaName);
         this.CONSUME(IN);
         const source = this.SUBRULE(this.sourceClause);
+        let where;
         this.OPTION(() => {
             where = this.SUBRULE(this.whereExpr);
         });
         this.CONSUME(SELECT);
         const columns = this.SUBRULE(this.columnsExpr);
-
         return {
             type: "SELECT_CLAUSE",
             source: source,
-            aliasName: aliasName,
+            aliasTableName: aliasName,
             columns: columns,
             where: where
         };
-
     });
 
     public aliaName = this.RULE(RULES.aliaName, () => {
@@ -147,20 +145,23 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
     });
 
     public columnsExpr = this.RULE(RULES.columnsExpr, () => {
-        const columns: any[] = [];
-        this.MANY(() => {
-            const column = this.OR([
-                { ALT: () => this.SUBRULE(this.newColumns) },
-                { ALT: () => this.SUBRULE(this.tableFieldColumn) },
-                { ALT: () => this.SUBRULE(this.tableExpr) },
-            ]);
-            columns.push(column);
-        });
+        const columns = this.OR([
+            { ALT: () => this.SUBRULE(this.newColumns) },
+            { ALT: () => this.SUBRULE(this.tableFieldExpr) },
+            { ALT: () => this.SUBRULE(this.tableExpr) },
+        ]);
+        if (!Array.isArray(columns)) {
+            return [columns];
+        }
         return columns;
     });
 
     public tableExpr = this.RULE(RULES.tableExpr, () => {
-        return this.SUBRULE(this.identifier);
+        const talbeName = this.SUBRULE(this.identifier);
+        return {
+            type: 'TABLE',
+            aliasName: talbeName,
+        };
     });
 
     public identifier = this.RULE(RULES.Identifier, () => {
@@ -168,49 +169,54 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         return token.image;
     });
 
-    public tableFieldColumn = this.RULE(RULES.tableFieldColumn, () => {
+    public tableFieldExpr = this.RULE(RULES.tableFieldExpr, () => {
         const table = this.SUBRULE(this.tableExpr);
         this.CONSUME(DOT);
         const field = this.SUBRULE(this.identifier);
         return {
             type: 'TABLE_FIELD',
-            aliasTable: table,
+            aliasTableName: table.aliasName,
             field: field,
-            aliasField: field,
+            aliasFieldName: field,
         };
     });
 
     public newColumns = this.RULE(RULES.newColumns, () => {
+        const columns: any[] = [];
         this.CONSUME(NEW);
         this.CONSUME(LBRACE);
         this.MANY_SEP({
             SEP: COMMA,
-            DEF: () => this.SUBRULE(this.fetchColumn),
+            DEF: () => {
+                const column = this.SUBRULE(this.fetchColumn);
+                columns.push(column);
+            },
         });
         this.CONSUME(RBRACE);
+        return columns;
     });
 
     public fetchColumn = this.RULE(RULES.fetchColumn, () => {
-        this.OR([
-            { ALT: () => this.SUBRULE(this.columnEqual) },
-            { ALT: () => this.SUBRULE(this.tableFieldColumn) },
-        ])
+        return this.OR([
+            { ALT: () => this.SUBRULE(this.columnEqualExpr) },
+            { ALT: () => this.SUBRULE(this.tableFieldExpr) },
+        ]);
     });
 
-    public columnEqual = this.RULE(RULES.columnEqual, () => {
-        const aliasField = this.CONSUME(Identifier);
+    public columnEqualExpr = this.RULE(RULES.columnEqualExpr, () => {
+        const aliasField = this.SUBRULE(this.identifier);
         this.CONSUME(ASSIGN);
-        const tableField = this.SUBRULE(this.tableFieldColumn);
+        const tableField = this.SUBRULE(this.tableFieldExpr);
 
         return {
             ...tableField,
-            aliasField: aliasField,
+            aliasFieldName: aliasField,
         };
     });
 
     public extractParentExpression = this.RULE(RULES.extractParentExpression, () => {
         this.OR([
-            { ALT: () => this.SUBRULE(this.tableFieldColumn) },
+            { ALT: () => this.SUBRULE(this.tableFieldExpr) },
             { ALT: () => this.CONSUME(Float) },
             { ALT: () => this.CONSUME(Integer) },
         ])
@@ -257,13 +263,11 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
     });
 }
 
-export function parseLinqEmbedded(text: string) {
+export function parseLinq(text: string) {
     const lexResult = linqLexer.tokenize(text);
-
     const parser = new LinqParserEmbedded();
     parser.input = lexResult.tokens;
     const value = parser.selectExpression();
-
     return {
         value: value,
         lexResult: lexResult,
