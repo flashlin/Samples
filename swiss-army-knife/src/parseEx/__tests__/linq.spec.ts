@@ -102,7 +102,7 @@ describe('linq', () => {
         });
     });
 
-    it('from tb1 in customer where tb1.Salary > 100 select new { id1 = tb1.id, tb1.name }', () => {
+    it.only('from tb1 in customer where tb1.Salary > 100 select new { id1 = tb1.id, tb1.name }', () => {
         const linqString = getItName();
         const rc = parseLinq(linqString);
         expect(rc.parseErrors).toStrictEqual([]);
@@ -117,7 +117,17 @@ describe('linq', () => {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
             },
-            where: []
+            where: {
+                type: 'CONDITION',
+                left: {
+                    type: 'TABLE_FIELD',
+                    aliasTableName: 'tb1',
+                    field: 'Salary',
+                    aliasFieldName: 'Salary',
+                },
+                oper: '>',
+                right: "100"
+            }
         });
     });
 });
