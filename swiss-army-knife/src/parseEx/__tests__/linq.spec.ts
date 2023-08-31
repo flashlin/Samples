@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseLinq, parseLinqEmbedded } from '@/parseEx/linq';
+import { parseLinq } from '@/parseEx/linq';
 
 const getItName = () => {
     const fullTestName = expect.getState().currentTestName ?? "";
@@ -10,16 +10,16 @@ const getItName = () => {
 }
 
 describe('linq', () => {
-    it.only('from tb1 in customer select tb1.id', () => {
+    it('from tb1 in customer select tb1.id', () => {
         const linqString = getItName();
-        const rc = parseLinqEmbedded(linqString);
+        const rc = parseLinq(linqString);
         expect(rc.parseErrors).toStrictEqual([]);
         expect(rc.value).to.deep.include({
             type: 'SELECT_CLAUSE',
             columns: [
-                { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'id', aliasField: 'id' },
+                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id' },
             ],
-            aliasName: 'tb1',
+            aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
@@ -35,9 +35,9 @@ describe('linq', () => {
         expect(rc.value).toStrictEqual({
             type: 'SELECT_CLAUSE',
             columns: [
-                { type: 'TABLE', name: 'tb1' },
+                { type: 'TABLE', aliasName: 'tb1' },
             ],
-            aliaName: 'tb1',
+            aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
@@ -53,9 +53,9 @@ describe('linq', () => {
         expect(rc.value).toStrictEqual({
             type: 'SELECT_CLAUSE',
             columns: [
-                { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'id', aliasField: 'id' },
+                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id' },
             ],
-            aliaName: 'tb1',
+            aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
@@ -71,10 +71,10 @@ describe('linq', () => {
         expect(rc.value).toStrictEqual({
             type: 'SELECT_CLAUSE',
             columns: [
-                { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'id', aliasField: 'id' },
-                { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'name', aliasField: 'name' },
+                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id' },
+                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'name', aliasFieldName: 'name' },
             ],
-            aliaName: 'tb1',
+            aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
@@ -90,10 +90,10 @@ describe('linq', () => {
         expect(rc.value).toStrictEqual({
             type: 'SELECT_CLAUSE',
             columns: [
-                { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'id', aliasField: 'id1' },
-                { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'name', aliasField: 'name' },
+                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id1' },
+                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'name', aliasFieldName: 'name' },
             ],
-            aliaName: 'tb1',
+            aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
@@ -109,10 +109,10 @@ describe('linq', () => {
         expect(rc.value).toStrictEqual({
             type: 'SELECT_CLAUSE',
             columns: [
-                { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'id', aliasField: 'id1' },
-                { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'name', aliasField: 'name' },
+                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id1' },
+                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'name', aliasFieldName: 'name' },
             ],
-            aliaName: 'tb1',
+            aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
