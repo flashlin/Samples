@@ -17,7 +17,7 @@ const RULES = {
     newColumns: "newColumns",
     columnEqualExpr: "columnEqual",
     compareOper: "compareOper",
-    extractAtomExpr: "extractParentExpression",
+    extractAtomExpr: "extractAtomExpr",
     extractExpressions: "extractExpressions",
     extractCompareExprs: "extractCompareExprs",
     extractCompareExpr: "extractCompareExpr",
@@ -230,6 +230,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         ])
     });
 
+    // === 優先順序 ===
     public extractExpressions = this.RULE(RULES.extractExpressions, () => {
         return this.SUBRULE(this.extractOrExpr);
     });
@@ -284,7 +285,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
             { ALT: () => this.SUBRULE(this.integer) },
         ])
     });
-
+    //=== END ===
 
     public whereExpr = this.RULE(RULES.whereExpr, () => {
         this.CONSUME(WHERE);
