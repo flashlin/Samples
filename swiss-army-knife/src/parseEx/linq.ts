@@ -224,7 +224,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         return this.CONSUME(Integer).image;
     });
 
-    // === 優先順序 ===
+    // === 優先順序 BEGIN ===
     public extractExpressions = this.RULE(RULES.extractExpressions, () => {
         return this.SUBRULE(this.extractOrExpr);
     });
@@ -304,7 +304,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
             expr: expValue,
         };
     });
-    //=== END ===
+    //=== 優先順序 END ===
 
     public whereExpr = this.RULE(RULES.whereExpr, () => {
         this.CONSUME(WHERE);
