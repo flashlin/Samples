@@ -219,17 +219,6 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         return this.CONSUME(Integer).image;
     });
 
-    public compareOper = this.RULE(RULES.compareOper, () => {
-        return this.OR([
-            { ALT: () => this.CONSUME(GREATER_EQUAL).image },
-            { ALT: () => this.CONSUME(LESS_EQUAL).image },
-            { ALT: () => this.CONSUME(EQUAL).image },
-            { ALT: () => this.CONSUME(NOT_EQUAL).image },
-            { ALT: () => this.CONSUME(GREATER_THAN).image },
-            { ALT: () => this.CONSUME(LESS_THAN).image },
-        ])
-    });
-
     // === 優先順序 ===
     public extractExpressions = this.RULE(RULES.extractExpressions, () => {
         return this.SUBRULE(this.extractOrExpr);
@@ -238,7 +227,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
     public extractOrExpr = this.RULE(RULES.extractOrExpr, () => {
         let left = this.SUBRULE(this.extractAndExpr);
         this.MANY(() => {
-            const op = this.CONSUME(OR);
+            const op = this.CONSUME(OR).image;
             const right = this.SUBRULE2(this.extractAndExpr);
             left = {
                 left: left,
@@ -252,7 +241,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
     public extractAndExpr = this.RULE(RULES.extractAndExpr, () => {
         let left = this.SUBRULE(this.extractCompareExpr);
         this.MANY(() => {
-            const op = this.CONSUME(AND);
+            const op = this.CONSUME(AND).image;
             const right = this.SUBRULE2(this.extractCompareExpr);
             left = {
                 left: left,
@@ -276,6 +265,17 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
             };
         });
         return left;
+    });
+
+    public compareOper = this.RULE(RULES.compareOper, () => {
+        return this.OR([
+            { ALT: () => this.CONSUME(GREATER_EQUAL) },
+            { ALT: () => this.CONSUME(LESS_EQUAL) },
+            { ALT: () => this.CONSUME(EQUAL) },
+            { ALT: () => this.CONSUME(NOT_EQUAL) },
+            { ALT: () => this.CONSUME(GREATER_THAN) },
+            { ALT: () => this.CONSUME(LESS_THAN) },
+        ]).image;
     });
 
     public extractAtomExpr = this.RULE(RULES.extractAtomExpr, () => {
