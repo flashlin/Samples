@@ -102,7 +102,7 @@ describe('linq', () => {
         });
     });
 
-    it.only('from tb1 in customer where tb1.Salary > 100 select new { id1 = tb1.id, tb1.name }', () => {
+    it('from tb1 in customer where tb1.Salary > 100 select new { id1 = tb1.id, tb1.name }', () => {
         const linqString = getItName();
         const rc = parseLinq(linqString);
         expect(rc.parseErrors).toStrictEqual([]);
