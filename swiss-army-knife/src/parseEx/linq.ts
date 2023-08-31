@@ -13,6 +13,7 @@ const RULES = {
     columnsExpr: "columnsExpr",
     tableExpr: "tableExpr",
     tableFieldExpr: "tableFieldExpr",
+    parenthesisExpr: "parenthesisExpr",
     columnList: "columnList",
     newColumns: "newColumns",
     columnEqualExpr: "columnEqual",
@@ -58,6 +59,8 @@ const EQUAL = createToken({ name: "==", pattern: /\=\=/ });
 const GREATER_EQUAL = createToken({ name: ">=", pattern: /\>\=/ });
 const LESS_EQUAL = createToken({ name: "<=", pattern: /\<\=/ });
 const NOT_EQUAL = createToken({ name: "!=", pattern: /\!\=/ });
+const LPAREN = createToken({ name: "(", pattern: /\(/ });
+const RPAREN = createToken({ name: ")", pattern: /\)/ });
 
 const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -84,6 +87,8 @@ const allTokens = [
     NOT_EQUAL,
     LBRACE,
     RBRACE,
+    LPAREN,
+    RPAREN,
     COMMA,
     ASSIGN,
     GREATER_THAN,
@@ -282,10 +287,22 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
 
     public extractAtomExpr = this.RULE(RULES.extractAtomExpr, () => {
         return this.OR([
+            { ALT: () => this.SUBRULE(this.parenthesisExpr) },
             { ALT: () => this.SUBRULE(this.tableFieldExpr) },
             { ALT: () => this.CONSUME(Float) },
             { ALT: () => this.SUBRULE(this.integer) },
         ])
+    });
+
+    public parenthesisExpr = this.RULE(RULES.parenthesisExpr, () => {
+        const $: any = this;
+        this.CONSUME(LPAREN);
+        const expValue = this.SUBRULE($.extractExpressions);
+        this.CONSUME(RPAREN);
+        return {
+            type: 'PARENTHESIS',
+            expr: expValue,
+        };
     });
     //=== END ===
 
