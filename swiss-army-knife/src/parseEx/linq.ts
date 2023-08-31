@@ -1,8 +1,7 @@
 //https://github.com/Chevrotain/chevrotain/blob/master/examples/grammars/calculator/calculator_pure_grammar.js
-import { createToken, tokenMatcher, Lexer, CstParser } from "chevrotain";
+import { createToken, tokenMatcher, Lexer, CstParser, EmbeddedActionsParser } from "chevrotain";
 
 const RULES = {
-    IDENTIFIER: "IDENTIFIER",
     AND: "AND",
     GREATER_THAN: ">",
     LESS_THAN: "<",
@@ -28,7 +27,8 @@ const RULES = {
     expr: "expr",
     fetchColumn: "fetchColumn",
     whereExpr: "whereExpr",
-    identifier: "identifier",
+    Identifier: "identifier",
+    IDENTIFIER: "Identifier",
     FLOAT: "Float",
     INTEGER: "Integer",
 };
@@ -92,40 +92,52 @@ const allTokens = [
     StringSimpleQuote
 ];
 
-const LinqLexer = new Lexer(allTokens);
-
-class LinqParser extends CstParser {
-
+const linqLexer = new Lexer(allTokens);
+class LinqParserEmbedded extends EmbeddedActionsParser {
     constructor() {
-        super(allTokens, { nodeLocationTracking: "onlyOffset" })  //"onlyOffset"
-        this.performSelfAnalysis()
+        super(allTokens);
+        this.performSelfAnalysis();
     }
 
     public selectExpression = this.RULE(RULES.selectExpression, () => {
+        let where;
         this.CONSUME(FROM);
-        this.SUBRULE(this.aliaName);
+        const aliasName = this.SUBRULE(this.aliaName);
         this.CONSUME(IN);
-        this.SUBRULE(this.sourceClause);
+        const source = this.SUBRULE(this.sourceClause);
         this.OPTION(() => {
-            this.SUBRULE(this.whereExpr);
+            where = this.SUBRULE(this.whereExpr);
         });
         this.CONSUME(SELECT);
-        this.SUBRULE(this.columnsExpr);
+        const columns = this.SUBRULE(this.columnsExpr);
+
+        return {
+            type: "SELECT_CLAUSE",
+            source: source,
+            aliasName: aliasName,
+            columns: columns,
+            where: where
+        };
+
     });
 
     public aliaName = this.RULE(RULES.aliaName, () => {
-        this.CONSUME(Identifier);
+        return this.SUBRULE(this.identifier);
     });
 
     public sourceClause = this.RULE(RULES.sourceClause, () => {
-        this.OR([
+        return this.OR([
             { ALT: () => this.SUBRULE(this.databaseTableClause) },
             { ALT: () => this.SUBRULE(this.tableClause) },
         ]);
     });
 
     public tableClause = this.RULE(RULES.tableClause, () => {
-        this.CONSUME(Identifier);
+        const name = this.SUBRULE(this.identifier);
+        return {
+            type: 'TABLE_CLAUSE',
+            name: name,
+        }
     });
 
     public databaseTableClause = this.RULE(RULES.databaseTableClause, () => {
@@ -135,21 +147,37 @@ class LinqParser extends CstParser {
     });
 
     public columnsExpr = this.RULE(RULES.columnsExpr, () => {
-        this.OR([
-            { ALT: () => this.SUBRULE(this.newColumns) },
-            { ALT: () => this.SUBRULE(this.tableFieldColumn) },
-            { ALT: () => this.SUBRULE(this.tableExpr) },
-        ]);
+        const columns: any[] = [];
+        this.MANY(() => {
+            const column = this.OR([
+                { ALT: () => this.SUBRULE(this.newColumns) },
+                { ALT: () => this.SUBRULE(this.tableFieldColumn) },
+                { ALT: () => this.SUBRULE(this.tableExpr) },
+            ]);
+            columns.push(column);
+        });
+        return columns;
     });
 
     public tableExpr = this.RULE(RULES.tableExpr, () => {
-        this.CONSUME(Identifier);
+        return this.SUBRULE(this.identifier);
+    });
+
+    public identifier = this.RULE(RULES.Identifier, () => {
+        const token = this.CONSUME(Identifier);
+        return token.image;
     });
 
     public tableFieldColumn = this.RULE(RULES.tableFieldColumn, () => {
-        this.SUBRULE(this.tableExpr);
+        const table = this.SUBRULE(this.tableExpr);
         this.CONSUME(DOT);
-        this.CONSUME(Identifier);
+        const field = this.SUBRULE(this.identifier);
+        return {
+            type: 'TABLE_FIELD',
+            aliasTable: table,
+            field: field,
+            aliasField: field,
+        };
     });
 
     public newColumns = this.RULE(RULES.newColumns, () => {
@@ -170,9 +198,14 @@ class LinqParser extends CstParser {
     });
 
     public columnEqual = this.RULE(RULES.columnEqual, () => {
-        this.CONSUME(Identifier);
+        const aliasField = this.CONSUME(Identifier);
         this.CONSUME(ASSIGN);
-        this.SUBRULE(this.tableFieldColumn);
+        const tableField = this.SUBRULE(this.tableFieldColumn);
+
+        return {
+            ...tableField,
+            aliasField: aliasField,
+        };
     });
 
     public extractParentExpression = this.RULE(RULES.extractParentExpression, () => {
@@ -220,152 +253,17 @@ class LinqParser extends CstParser {
 
     public whereExpr = this.RULE(RULES.whereExpr, () => {
         this.CONSUME(WHERE);
-        this.SUBRULE(this.extractExpressions);
+        return this.SUBRULE(this.extractExpressions);
     });
 }
 
-const parser = new LinqParser();
+export function parseLinqEmbedded(text: string) {
+    const lexResult = linqLexer.tokenize(text);
 
-//const BaseCstVisitor = parserInstance.getBaseCstVisitorConstructor();
-// class LinqExprVisitor extends BaseCstVisitor {
-//     constructor() {
-//         super();
-//         this.validateVisitor();
-//     }
-//     /* all Visit methods must go here */
-// }
-//const _linqVisitor = new LinqExprVisitor();
-
-export interface ITableFieldExpr {
-    type: string;
-    aliasTable: string;
-    field: string;
-    aliasField: string;
-}
-
-
-const BaseLinqVisitorWithDefaults = parser.getBaseCstVisitorConstructorWithDefaults();
-class LinqExprVisitorWithDefaults extends BaseLinqVisitorWithDefaults {
-    constructor() {
-        super();
-        this.validateVisitor();
-    }
-
-    selectExpression(ctx: any) {
-        const aliaName = this.visit(ctx.aliaName).alias;
-        const source = this.visit(ctx.sourceClause);
-        const columns = this.visit(ctx.columnsExpr);
-        const where = this.visit(ctx.whereExpr);
-        return {
-            type: "SELECT_CLAUSE",
-            source: source,
-            aliaName: aliaName,
-            columns: columns,
-            where: where
-        };
-    }
-
-    aliaName(ctx: any) {
-        return {
-            type: 'ALIAS_NAME',
-            alias: ctx.IDENTIFIER[0].image
-        };
-    }
-
-    sourceClause(ctx: any) {
-        if (ctx.tableClause) {
-            return this.visit(ctx.tableClause);
-        }
-        return this.visit(ctx.databaseTableClause);
-    }
-
-    tableClause(ctx: any) {
-        return {
-            type: 'TABLE_CLAUSE',
-            name: ctx.IDENTIFIER[0].image
-        };
-    }
-
-    tableFieldColumn(ctx: any): ITableFieldExpr {
-        const tableName = this.visit(ctx.tableExpr).name;
-        const fieldName = ctx.IDENTIFIER[0].image;
-        return {
-            type: 'TABLE_FIELD',
-            aliasTable: tableName,
-            field: fieldName,
-            aliasField: fieldName,
-        };
-    }
-
-    tableExpr(ctx: any) {
-        return {
-            type: 'TABLE',
-            name: ctx.IDENTIFIER[0].image,
-        };
-    }
-
-    columnsExpr(ctx: any) {
-        if (ctx.newColumns) {
-            return this.visit(ctx.newColumns);
-        }
-        if (ctx.tableFieldColumn) {
-            return [this.visit(ctx.tableFieldColumn)];
-        }
-        return [this.visit(ctx.tableExpr)];
-    }
-
-    newColumns(ctx: any) {
-        const columns = ctx.fetchColumn.map((x: any) => this.visit(x));
-        return columns;
-    }
-
-    fetchColumn(ctx: any) {
-        if (ctx.tableFieldColumn) {
-            return this.visit(ctx.tableFieldColumn);
-        }
-        return this.visit(ctx.columnEqual);
-    }
-
-    columnEqual(ctx: any): ITableFieldExpr {
-        const aliasField = ctx.IDENTIFIER[0].image;
-        const tableField = this.visit(ctx.tableFieldColumn);
-        return {
-            ...tableField,
-            aliasField: aliasField,
-        };
-    }
-
-    whereExpr(ctx: any) {
-        const list = this.visit(ctx.extractExpressions);
-        console.log('where2', list);
-        return {
-            type: 'WHERE_CLAUSE',
-        };
-    }
-
-    extractExpressions(ctx: any) {
-        console.log('extractExpression=', ctx)
-        return {
-
-        };
-    }
-
-    extractCompareExpr(ctx: any) {
-        console.log('extractCoompare=', ctx);
-        return {
-
-        };
-    }
-}
-
-
-const linqVisitorWithDefaults = new LinqExprVisitorWithDefaults();
-export function parseLinq(text: string) {
-    const lexResult = LinqLexer.tokenize(text);
+    const parser = new LinqParserEmbedded();
     parser.input = lexResult.tokens;
-    const cst = parser.selectExpression();
-    //const value = tsqlVisitor.visit(cst);
-    const value = linqVisitorWithDefaults.visit(cst);
+    const value = parser.selectExpression();
+
     return {
         value: value,
         lexResult: lexResult,
