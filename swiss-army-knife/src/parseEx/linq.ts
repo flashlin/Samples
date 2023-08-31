@@ -230,6 +230,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
             const op = this.CONSUME(OR).image;
             const right = this.SUBRULE2(this.extractAndExpr);
             left = {
+                type: 'OPERATOR',
                 left: left,
                 op: op,
                 right: right,
@@ -244,6 +245,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
             const op = this.CONSUME(AND).image;
             const right = this.SUBRULE2(this.extractCompareExpr);
             left = {
+                type: 'OPERATOR',
                 left: left,
                 op: op,
                 right: right,

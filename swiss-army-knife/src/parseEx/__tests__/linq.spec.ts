@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { parseLinq } from '@/parseEx/linq';
 
 const getItName = () => {
-    const fullTestName = expect.getState().currentTestName ?? "";
-    const firstIndex = fullTestName.indexOf(">");
-    const secondIndex = fullTestName.indexOf(">", firstIndex + 1);
+    const fullTestName = expect.getState().currentTestName ?? '';
+    const firstIndex = fullTestName.indexOf('>');
+    const secondIndex = fullTestName.indexOf('>', firstIndex + 1);
     const currentTestName = fullTestName.substring(secondIndex + 1).trimStart();
     return currentTestName;
-}
+};
 
 describe('linq', () => {
     it('from tb1 in customer select tb1.id', () => {
@@ -16,15 +16,13 @@ describe('linq', () => {
         expect(rc.parseErrors).toStrictEqual([]);
         expect(rc.value).to.deep.include({
             type: 'SELECT_CLAUSE',
-            columns: [
-                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id' },
-            ],
+            columns: [{ type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id' }],
             aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
-                name: 'customer'
+                name: 'customer',
             },
-            where: undefined
+            where: undefined,
         });
     });
 
@@ -34,15 +32,13 @@ describe('linq', () => {
         expect(rc.parseErrors).toStrictEqual([]);
         expect(rc.value).toStrictEqual({
             type: 'SELECT_CLAUSE',
-            columns: [
-                { type: 'TABLE', aliasName: 'tb1' },
-            ],
+            columns: [{ type: 'TABLE', aliasName: 'tb1' }],
             aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
-                name: 'customer'
+                name: 'customer',
             },
-            where: undefined
+            where: undefined,
         });
     });
 
@@ -52,15 +48,13 @@ describe('linq', () => {
         expect(rc.parseErrors).toStrictEqual([]);
         expect(rc.value).toStrictEqual({
             type: 'SELECT_CLAUSE',
-            columns: [
-                { type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id' },
-            ],
+            columns: [{ type: 'TABLE_FIELD', aliasTableName: 'tb1', field: 'id', aliasFieldName: 'id' }],
             aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
-                name: 'customer'
+                name: 'customer',
             },
-            where: undefined
+            where: undefined,
         });
     });
 
@@ -77,9 +71,9 @@ describe('linq', () => {
             aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
-                name: 'customer'
+                name: 'customer',
             },
-            where: undefined
+            where: undefined,
         });
     });
 
@@ -96,9 +90,9 @@ describe('linq', () => {
             aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
-                name: 'customer'
+                name: 'customer',
             },
-            where: undefined
+            where: undefined,
         });
     });
 
@@ -115,7 +109,7 @@ describe('linq', () => {
             aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
-                name: 'customer'
+                name: 'customer',
             },
             where: {
                 type: 'CONDITION',
@@ -126,8 +120,8 @@ describe('linq', () => {
                     aliasFieldName: 'Salary',
                 },
                 op: '>',
-                right: "100"
-            }
+                right: '100',
+            },
         });
     });
 
@@ -144,19 +138,34 @@ describe('linq', () => {
             aliasTableName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
-                name: 'customer'
+                name: 'customer',
             },
             where: {
-                type: 'CONDITION',
+                type: 'OPERATOR',
                 left: {
-                    type: 'TABLE_FIELD',
-                    aliasTableName: 'tb1',
-                    field: 'Salary',
-                    aliasFieldName: 'Salary',
+                    type: 'CONDITION',
+                    left: {
+                        type: 'TABLE_FIELD',
+                        aliasTableName: 'tb1',
+                        field: 'Salary',
+                        aliasFieldName: 'Salary',
+                    },
+                    op: '>',
+                    right: '100',
                 },
-                op: '>',
-                right: "100"
-            }
+                op: '&&',
+                right: {
+                    type: 'CONDITION',
+                    left: {
+                        type: 'TABLE_FIELD',
+                        field: 'id',
+                        aliasTableName: 'tb1',
+                        aliasFieldName: 'id',
+                    },
+                    op: '==',
+                    right: '1',
+                },
+            },
         });
     });
 });
