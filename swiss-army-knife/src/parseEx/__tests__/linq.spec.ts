@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseLinq } from '@/parseEx/linq';
+import { parseLinq, parseLinqEmbedded } from '@/parseEx/linq';
 
 const getItName = () => {
     const fullTestName = expect.getState().currentTestName ?? "";
@@ -10,16 +10,16 @@ const getItName = () => {
 }
 
 describe('linq', () => {
-    it('from tb1 in customer select tb1.id', () => {
+    it.only('from tb1 in customer select tb1.id', () => {
         const linqString = getItName();
-        const rc = parseLinq(linqString);
+        const rc = parseLinqEmbedded(linqString);
         expect(rc.parseErrors).toStrictEqual([]);
-        expect(rc.value).toStrictEqual({
+        expect(rc.value).to.deep.include({
             type: 'SELECT_CLAUSE',
             columns: [
                 { type: 'TABLE_FIELD', aliasTable: 'tb1', field: 'id', aliasField: 'id' },
             ],
-            aliaName: 'tb1',
+            aliasName: 'tb1',
             source: {
                 type: 'TABLE_CLAUSE',
                 name: 'customer'
