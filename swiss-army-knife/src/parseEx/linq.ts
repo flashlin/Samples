@@ -24,6 +24,7 @@ const RULES = {
     extractAndOrExprs: "extractAndOrExprs",
     extractAndExpr: "extractAndExpr",
     extractOrExpr: "extractOrExpr",
+    integer: "integer",
     expr: "expr",
     fetchColumn: "fetchColumn",
     whereExpr: "whereExpr",
@@ -215,36 +216,52 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
     });
 
     public extractParentExpression = this.RULE(RULES.extractParentExpression, () => {
-        this.OR([
+        return this.OR([
             { ALT: () => this.SUBRULE(this.tableFieldExpr) },
             { ALT: () => this.CONSUME(Float) },
-            { ALT: () => this.CONSUME(Integer) },
+            { ALT: () => this.SUBRULE(this.integer) },
         ])
     });
 
+    public integer = this.RULE(RULES.integer, () => {
+        return this.CONSUME(Integer).image;
+    });
+
     public compareOper = this.RULE(RULES.compareOper, () => {
-        this.OR([
-            { ALT: () => this.CONSUME(GREATER_EQUAL) },
-            { ALT: () => this.CONSUME(LESS_EQUAL) },
-            { ALT: () => this.CONSUME(EQUAL) },
-            { ALT: () => this.CONSUME(NOT_EQUAL) },
-            { ALT: () => this.CONSUME(GREATER_THAN) },
-            { ALT: () => this.CONSUME(LESS_THAN) },
+        return this.OR([
+            { ALT: () => this.CONSUME(GREATER_EQUAL).image },
+            { ALT: () => this.CONSUME(LESS_EQUAL).image },
+            { ALT: () => this.CONSUME(EQUAL).image },
+            { ALT: () => this.CONSUME(NOT_EQUAL).image },
+            { ALT: () => this.CONSUME(GREATER_THAN).image },
+            { ALT: () => this.CONSUME(LESS_THAN).image },
         ])
     });
 
     public extractExpressions = this.RULE(RULES.extractExpressions, () => {
-        this.SUBRULE(this.extractParentExpression);
-        this.OPTION(() => this.OR([
+        const left = this.SUBRULE(this.extractParentExpression);
+        const right = this.OPTION(() => this.OR([
             { ALT: () => this.SUBRULE(this.extractCompareExpr) },
             { ALT: () => this.SUBRULE(this.extractAndExpr) },
             { ALT: () => this.SUBRULE(this.extractOrExpr) }
         ]));
+        if( right ) {
+            console.log('right', right)
+            return {
+                type: 'CONDITION',
+                left: left,
+                right: right,
+            };
+        }
+        return left;
     });
 
     public extractCompareExpr = this.RULE(RULES.extractCompareExpr, () => {
-        this.SUBRULE(this.compareOper);
+        const oper = this.SUBRULE(this.compareOper);
         this.SUBRULE(this.extractExpressions);
+        return {
+            oper: oper,
+        };
     });
 
     public extractAndExpr = this.RULE(RULES.extractAndExpr, () => {
