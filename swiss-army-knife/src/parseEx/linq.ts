@@ -17,7 +17,7 @@ const RULES = {
     newColumns: "newColumns",
     columnEqualExpr: "columnEqual",
     compareOper: "compareOper",
-    extractParentExpression: "extractParentExpression",
+    extractAtomExpr: "extractParentExpression",
     extractExpressions: "extractExpressions",
     extractCompareExprs: "extractCompareExprs",
     extractCompareExpr: "extractCompareExpr",
@@ -215,14 +215,6 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         };
     });
 
-    public extractParentExpression = this.RULE(RULES.extractParentExpression, () => {
-        return this.OR([
-            { ALT: () => this.SUBRULE(this.tableFieldExpr) },
-            { ALT: () => this.CONSUME(Float) },
-            { ALT: () => this.SUBRULE(this.integer) },
-        ])
-    });
-
     public integer = this.RULE(RULES.integer, () => {
         return this.CONSUME(Integer).image;
     });
@@ -239,40 +231,60 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
     });
 
     public extractExpressions = this.RULE(RULES.extractExpressions, () => {
-        const left = this.SUBRULE(this.extractParentExpression);
-        const right = this.OPTION(() => this.OR([
-            { ALT: () => this.SUBRULE(this.extractCompareExpr) },
-            { ALT: () => this.SUBRULE(this.extractAndExpr) },
-            { ALT: () => this.SUBRULE(this.extractOrExpr) }
-        ]));
-        if( right ) {
-            console.log('right', right)
-            return {
-                type: 'CONDITION',
+        return this.SUBRULE(this.extractOrExpr);
+    });
+
+    public extractOrExpr = this.RULE(RULES.extractOrExpr, () => {
+        let left = this.SUBRULE(this.extractAndExpr);
+        this.MANY(() => {
+            const op = this.CONSUME(OR);
+            const right = this.SUBRULE2(this.extractAndExpr);
+            left = {
                 left: left,
+                op: op,
                 right: right,
             };
-        }
+        });
+        return left;
+    });
+
+    public extractAndExpr = this.RULE(RULES.extractAndExpr, () => {
+        let left = this.SUBRULE(this.extractCompareExpr);
+        this.MANY(() => {
+            const op = this.CONSUME(AND);
+            const right = this.SUBRULE2(this.extractCompareExpr);
+            left = {
+                left: left,
+                op: op,
+                right: right,
+            };
+        });
         return left;
     });
 
     public extractCompareExpr = this.RULE(RULES.extractCompareExpr, () => {
-        const oper = this.SUBRULE(this.compareOper);
-        this.SUBRULE(this.extractExpressions);
-        return {
-            oper: oper,
-        };
+        let left = this.SUBRULE(this.extractAtomExpr);
+        this.MANY(() => {
+            const op = this.SUBRULE(this.compareOper);
+            const right = this.SUBRULE2(this.extractAtomExpr);
+            left = {
+                type: 'CONDITION',
+                left: left,
+                op: op,
+                right: right,
+            };
+        });
+        return left;
     });
 
-    public extractAndExpr = this.RULE(RULES.extractAndExpr, () => {
-        this.CONSUME(AND);
-        this.SUBRULE(this.extractExpressions);
+    public extractAtomExpr = this.RULE(RULES.extractAtomExpr, () => {
+        return this.OR([
+            { ALT: () => this.SUBRULE(this.tableFieldExpr) },
+            { ALT: () => this.CONSUME(Float) },
+            { ALT: () => this.SUBRULE(this.integer) },
+        ])
     });
 
-    public extractOrExpr = this.RULE(RULES.extractOrExpr, () => {
-        this.CONSUME(OR);
-        this.SUBRULE(this.extractExpressions);
-    });
 
     public whereExpr = this.RULE(RULES.whereExpr, () => {
         this.CONSUME(WHERE);

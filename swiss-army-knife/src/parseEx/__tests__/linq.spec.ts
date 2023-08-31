@@ -125,7 +125,7 @@ describe('linq', () => {
                     field: 'Salary',
                     aliasFieldName: 'Salary',
                 },
-                oper: '>',
+                op: '>',
                 right: "100"
             }
         });
