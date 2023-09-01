@@ -113,7 +113,10 @@ describe('linq', () => {
                     aliasFieldName: 'Salary',
                 },
                 op: '>',
-                right: '100',
+                right: {
+                    type: 'INTEGER',
+                    value: 100
+                },
             },
         });
     });
@@ -144,7 +147,10 @@ describe('linq', () => {
                         aliasFieldName: 'Salary',
                     },
                     op: '>',
-                    right: '100',
+                    right: {
+                        type: 'INTEGER',
+                        value: 100,
+                    },
                 },
                 op: '&&',
                 right: {
@@ -156,7 +162,10 @@ describe('linq', () => {
                         aliasFieldName: 'id',
                     },
                     op: '==',
-                    right: '1',
+                    right: {
+                        type: 'INTEGER',
+                        value: 1,
+                    },
                 },
             },
         });
@@ -190,7 +199,10 @@ describe('linq', () => {
                             aliasFieldName: 'Salary',
                         },
                         op: '>',
-                        right: '100',
+                        right: {
+                            type: 'INTEGER',
+                            value: 100,
+                        },
                     },
                     op: '&&',
                     right: {
@@ -202,7 +214,10 @@ describe('linq', () => {
                             aliasFieldName: 'id',
                         },
                         op: '==',
-                        right: '1',
+                        right: {
+                            type: 'INTEGER',
+                            value: 1
+                        },
                     },
                 },
                 op: '||',
@@ -215,7 +230,10 @@ describe('linq', () => {
                         field: 'id',
                     },
                     op: '==',
-                    right: "2"
+                    right: {
+                        type: 'INTEGER',
+                        value: 2
+                    }
                 },
             },
         });
@@ -247,7 +265,10 @@ describe('linq', () => {
                         aliasFieldName: 'Salary',
                     },
                     op: '>',
-                    right: '100',
+                    right: {
+                        type: 'INTEGER',
+                        value: 100
+                    },
                 },
                 op: '&&',
                 right: {
@@ -263,7 +284,10 @@ describe('linq', () => {
                                 aliasFieldName: 'id',
                             },
                             op: '==',
-                            right: '1',
+                            right: {
+                                type: 'INTEGER',
+                                value: 1
+                            },
                         },
                         op: '||',
                         right: {
@@ -275,7 +299,10 @@ describe('linq', () => {
                                 field: 'id',
                             },
                             op: '==',
-                            right: "2"
+                            right: {
+                                type: 'INTEGER',
+                                value: 2
+                            }
                         },
                     }
                 }

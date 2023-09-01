@@ -26,6 +26,7 @@ const RULES = {
     extractAndExpr: "extractAndExpr",
     extractOrExpr: "extractOrExpr",
     integer: "integer",
+    integerExpr: "integerExpr",
     expr: "expr",
     fetchColumn: "fetchColumn",
     whereExpr: "whereExpr",
@@ -289,6 +290,15 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         return this.CONSUME(Integer).image;
     });
 
+
+    public integerExpr = this.RULE(RULES.integerExpr, () => {
+        const integer = this.CONSUME(Integer).image;
+        return {
+            type: 'INTEGER',
+            value: +integer,
+        }
+    });
+
     // === 優先順序 BEGIN ===
     public extractExpressions = this.RULE(RULES.extractExpressions, () => {
         return this.SUBRULE(this.extractOrExpr);
@@ -355,7 +365,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
             { ALT: () => this.SUBRULE(this.parenthesisExpr) },
             { ALT: () => this.SUBRULE(this.tableFieldExpr) },
             { ALT: () => this.CONSUME(Float) },
-            { ALT: () => this.SUBRULE(this.integer) },
+            { ALT: () => this.SUBRULE(this.integerExpr) },
         ])
     });
 
