@@ -39,6 +39,20 @@ const RULES = {
     FROM: "FROM",
     WHERE: "WHERE",
     IN: "IN",
+    OR: "OR",
+    NOT: "NOT",
+    NEW: "NEW",
+    DOT: "DOT",
+    ASSIGN: "ASSIGN",
+    LEFT_BRACE: "LEFT_BRACE",
+    RIGHT_BRACE: "RIGHT_BRACE",
+    COMMA: "COMMA",
+    EQUAL: "==",
+    GREATER_EQUAL: ">=",
+    LESS_EQUAL: "<=",
+    NOT_EQUAL: "!=",
+    LPAREN: "(",
+    RPAREN: ")",
 };
 
 const StringDoubleQuote = createToken({ name: RULES.StringDoubleQuote, pattern: /"[^"\\]*(?:\\.[^"\\]*)*"/ });
@@ -51,22 +65,22 @@ const FROM = createToken({ name: RULES.FROM, pattern: /from/ });
 const WHERE = createToken({ name: RULES.WHERE, pattern: /where/ });
 const IN = createToken({ name: RULES.IN, pattern: /in/ });
 const AND = createToken({ name: RULES.AND, pattern: /(&&)/ });
-const OR = createToken({ name: "or", pattern: /(\|\|)/ });
-const NOT = createToken({ name: "not", pattern: /(\!)/ });
-const NEW = createToken({ name: "new", pattern: /new/ });
-const DOT = createToken({ name: "dot", pattern: /(\.)/ });
-const ASSIGN = createToken({ name: "assign", pattern: /(\=)/ });
-const LBRACE = createToken({ name: "left brace", pattern: /\{/ });
-const RBRACE = createToken({ name: "right brace", pattern: /\}/ });
-const COMMA = createToken({ name: "comma", pattern: /\,/ });
+const OR = createToken({ name: RULES.OR, pattern: /(\|\|)/ });
+const NOT = createToken({ name: RULES.NOT, pattern: /(\!)/ });
+const NEW = createToken({ name: RULES.NEW, pattern: /new/ });
+const DOT = createToken({ name: RULES.DOT, pattern: /(\.)/ });
+const ASSIGN = createToken({ name: RULES.ASSIGN, pattern: /(\=)/ });
+const LBRACE = createToken({ name: RULES.LEFT_BRACE, pattern: /\{/ });
+const RBRACE = createToken({ name: RULES.RIGHT_BRACE, pattern: /\}/ });
+const COMMA = createToken({ name: RULES.COMMA, pattern: /\,/ });
 const GREATER_THAN = createToken({ name: RULES.GREATER_THAN, pattern: /\>/ });
 const LESS_THAN = createToken({ name: RULES.LESS_THAN, pattern: /\</ });
-const EQUAL = createToken({ name: "==", pattern: /\=\=/ });
-const GREATER_EQUAL = createToken({ name: ">=", pattern: /\>\=/ });
-const LESS_EQUAL = createToken({ name: "<=", pattern: /\<\=/ });
-const NOT_EQUAL = createToken({ name: "!=", pattern: /\!\=/ });
-const LPAREN = createToken({ name: "(", pattern: /\(/ });
-const RPAREN = createToken({ name: ")", pattern: /\)/ });
+const EQUAL = createToken({ name: RULES.EQUAL, pattern: /\=\=/ });
+const GREATER_EQUAL = createToken({ name: RULES.GREATER_EQUAL, pattern: /\>\=/ });
+const LESS_EQUAL = createToken({ name: RULES.LESS_EQUAL, pattern: /\<\=/ });
+const NOT_EQUAL = createToken({ name: RULES.NOT_EQUAL, pattern: /\!\=/ });
+const LPAREN = createToken({ name: RULES.LPAREN, pattern: /\(/ });
+const RPAREN = createToken({ name: RULES.RPAREN, pattern: /\)/ });
 
 const WhiteSpace = createToken({
     name: "WhiteSpace",
