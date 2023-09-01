@@ -1,19 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { linqToSqlite } from '../linqToSqlite';
-
-const getItName = () => {
-    const fullTestName = expect.getState().currentTestName ?? '';
-    const firstIndex = fullTestName.indexOf('>');
-    const secondIndex = fullTestName.indexOf('>', firstIndex + 1);
-    const currentTestName = fullTestName.substring(secondIndex + 1).trimStart();
-    return currentTestName;
-};
+import { getItName } from '@/__tests__/testHelper';
 
 describe('linq', () => {
     it('from tb1 in customer select tb1.id', () => {
         const linqString = getItName();
-        const rc = linqToSqlite(linqString);
-        expect(rc).be("");
+        const sql = linqToSqlite(linqString);
+        expect(sql).toBe("SELECT tb1.id AS id FROM customer AS tb1");
     });
 
     // it('from tb1 in customer select tb1', () => {
