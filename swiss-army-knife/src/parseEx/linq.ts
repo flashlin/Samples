@@ -33,17 +33,23 @@ const RULES = {
     IDENTIFIER: "Identifier",
     FLOAT: "Float",
     INTEGER: "Integer",
+    StringDoubleQuote: "StringDoubleQuote",
+    StringSimpleQuote: "StringSimpleQuote",
+    SELECT: "SELECT",
+    FROM: "FROM",
+    WHERE: "WHERE",
+    IN: "IN",
 };
 
-const StringDoubleQuote = createToken({ name: "StringDoubleQuote", pattern: /"[^"\\]*(?:\\.[^"\\]*)*"/ });
-const StringSimpleQuote = createToken({ name: "StringSimpleQuote", pattern: /'[^'\\]*(?:\\.[^'\\]*)*'/ });
+const StringDoubleQuote = createToken({ name: RULES.StringDoubleQuote, pattern: /"[^"\\]*(?:\\.[^"\\]*)*"/ });
+const StringSimpleQuote = createToken({ name: RULES.StringSimpleQuote, pattern: /'[^'\\]*(?:\\.[^'\\]*)*'/ });
 const Identifier = createToken({ name: RULES.IDENTIFIER, pattern: /[a-zA-Z_]\w*/ });
 const Float = createToken({ name: RULES.FLOAT, pattern: /\d+\.\d*/ });
 const Integer = createToken({ name: RULES.INTEGER, pattern: /\d+/ });
-const SELECT = createToken({ name: "select", pattern: /select/ });
-const FROM = createToken({ name: "from", pattern: /from/ });
-const WHERE = createToken({ name: "where", pattern: /where/ });
-const IN = createToken({ name: "in", pattern: /in/ });
+const SELECT = createToken({ name: RULES.SELECT, pattern: /select/ });
+const FROM = createToken({ name: RULES.FROM, pattern: /from/ });
+const WHERE = createToken({ name: RULES.WHERE, pattern: /where/ });
+const IN = createToken({ name: RULES.IN, pattern: /in/ });
 const AND = createToken({ name: RULES.AND, pattern: /(&&)/ });
 const OR = createToken({ name: "or", pattern: /(\|\|)/ });
 const NOT = createToken({ name: "not", pattern: /(\!)/ });
@@ -104,7 +110,6 @@ export interface ISqlExpression {
 }
 
 export interface ITableFieldExpression extends ISqlExpression {
-
     aliasTableName: string;
     field: string;
     aliasFieldName: string;
