@@ -1,13 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseLinq } from '@/parseEx/linq';
-
-const getItName = () => {
-    const fullTestName = expect.getState().currentTestName ?? '';
-    const firstIndex = fullTestName.indexOf('>');
-    const secondIndex = fullTestName.indexOf('>', firstIndex + 1);
-    const currentTestName = fullTestName.substring(secondIndex + 1).trimStart();
-    return currentTestName;
-};
+import { getItName } from '@/__tests__/testHelper';
 
 describe('linq', () => {
     it('from tb1 in customer select tb1.id', () => {
