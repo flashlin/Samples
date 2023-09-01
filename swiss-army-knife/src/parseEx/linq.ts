@@ -53,6 +53,10 @@ const RULES = {
     NOT_EQUAL: "!=",
     LPAREN: "(",
     RPAREN: ")",
+
+    // special
+    TAKE: "TAKE",
+    takeExpr: "takeExpr",
 };
 
 const StringDoubleQuote = createToken({ name: RULES.StringDoubleQuote, pattern: /"[^"\\]*(?:\\.[^"\\]*)*"/ });
@@ -81,6 +85,8 @@ const LESS_EQUAL = createToken({ name: RULES.LESS_EQUAL, pattern: /\<\=/ });
 const NOT_EQUAL = createToken({ name: RULES.NOT_EQUAL, pattern: /\!\=/ });
 const LPAREN = createToken({ name: RULES.LPAREN, pattern: /\(/ });
 const RPAREN = createToken({ name: RULES.RPAREN, pattern: /\)/ });
+
+const TAKE = createToken({ name: RULES.TAKE, pattern: /take/ });
 
 const WhiteSpace = createToken({
     name: "WhiteSpace",
@@ -113,9 +119,11 @@ const allTokens = [
     ASSIGN,
     GREATER_THAN,
     LESS_THAN,
-    Identifier,
     StringDoubleQuote,
-    StringSimpleQuote
+    StringSimpleQuote,
+    //special
+    TAKE,
+    Identifier,
 ];
 
 
@@ -165,6 +173,16 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
             columns: columns,
             where: where
         } as ISelectExpression;
+    });
+
+    //special
+    public takeExpr = this.RULE(RULES.takeExpr, () => {
+        this.CONSUME(TAKE);
+        const count = this.SUBRULE(this.integer);
+        return {
+            type: "TOP",
+            count: count
+        };
     });
 
     public aliaName = this.RULE(RULES.aliaName, () => {
