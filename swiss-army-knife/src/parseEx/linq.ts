@@ -147,6 +147,7 @@ export interface ISelectExpression extends ISqlExpression {
     aliasTableName: string;
     columns: ISelectExpression[];
     where: ISelectExpression | undefined;
+    take: ISelectExpression | undefined;
 }
 
 const linqLexer = new Lexer(allTokens);
@@ -167,12 +168,17 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         });
         this.CONSUME(SELECT);
         const columns = this.SUBRULE(this.columnsExpr);
+        let take;
+        this.OPTION2(() => {
+            take = this.SUBRULE(this.takeExpr);
+        });
         return {
             type: "SELECT_CLAUSE",
             source: source,
             aliasTableName: aliasName,
             columns: columns,
-            where: where
+            where: where,
+            take: take,
         } as ISelectExpression;
     });
 
@@ -364,7 +370,6 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         return this.OR([
             { ALT: () => this.SUBRULE(this.parenthesisExpr) },
             { ALT: () => this.SUBRULE(this.tableFieldExpr) },
-            { ALT: () => this.CONSUME(Float) },
             { ALT: () => this.SUBRULE(this.integerExpr) },
         ])
     });
