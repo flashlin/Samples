@@ -1,5 +1,5 @@
 //https://github.com/Chevrotain/chevrotain/blob/master/examples/grammars/calculator/calculator_pure_grammar.js
-import { createToken, tokenMatcher, Lexer, CstParser, EmbeddedActionsParser } from "chevrotain";
+import { createToken, Lexer, EmbeddedActionsParser } from "chevrotain";
 
 const RULES = {
     AND: "AND",
@@ -98,6 +98,29 @@ const allTokens = [
     StringSimpleQuote
 ];
 
+
+export interface ISqlExpression {
+    type: string;
+}
+
+export interface ITableFieldExpression extends ISqlExpression {
+
+    aliasTableName: string;
+    field: string;
+    aliasFieldName: string;
+}
+
+export interface ITableExpression extends ISqlExpression {
+    name: string;
+}
+
+export interface ISelectExpression extends ISqlExpression {
+    source: ISqlExpression;
+    aliasTableName: string;
+    columns: ISelectExpression[];
+    where: ISelectExpression | undefined;
+}
+
 const linqLexer = new Lexer(allTokens);
 class LinqParserEmbedded extends EmbeddedActionsParser {
     constructor() {
@@ -122,7 +145,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
             aliasTableName: aliasName,
             columns: columns,
             where: where
-        };
+        } as ISelectExpression;
     });
 
     public aliaName = this.RULE(RULES.aliaName, () => {
@@ -141,13 +164,18 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         return {
             type: 'TABLE_CLAUSE',
             name: name,
-        }
+        } as ITableExpression;
     });
 
     public databaseTableClause = this.RULE(RULES.databaseTableClause, () => {
-        this.CONSUME(Identifier);
+        const dbName = this.CONSUME(Identifier).image;
         this.CONSUME2(DOT);
-        this.CONSUME3(Identifier);
+        const tbName = this.CONSUME3(Identifier).image;
+        return {
+            type: 'DATABASE_TABLE_CLAUSE',
+            databaseName: dbName,
+            tableName: tbName,
+        }
     });
 
     public columnsExpr = this.RULE(RULES.columnsExpr, () => {

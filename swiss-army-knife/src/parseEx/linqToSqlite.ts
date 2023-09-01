@@ -1,15 +1,23 @@
-import { parseLinq } from "./linq";
+import { parseLinq, type ITableFieldExpression, type ITableExpression } from "./linq";
 
 export function linqToSqlite(linqText: string) {
     const rc = parseLinq(linqText);
-    console.log("parse", rc.value);
+    const expr = rc.value;
 
     let sql = "SELECT ";
-    sql += rc.value.columns.map(column => {
+    sql += expr.columns.map(column => {
         if( column.type == 'TABLE_FIELD' ) {
-            return `${column.aliasTableName}.${column.field} AS ${column.aliasFieldName}`;
+            const col = column as unknown as ITableFieldExpression;
+            return `${column.aliasTableName}.${col.field} AS ${col.aliasFieldName}`;
         }
     }).join(',');
+
+    sql += ' FROM ';
+    if( expr.source.type == 'TABLE_CLAUSE' ) {
+        const table = expr.source as unknown as ITableExpression;
+        sql += `${table.name} AS ${expr.aliasTableName}`;
+    }
+    expr.aliasTableName;
     // return {
     //     value: value,
     //     lexResult: lexResult,
