@@ -16,6 +16,7 @@ describe('linq', () => {
                 name: 'customer',
             },
             where: undefined,
+            take: undefined,
         });
     });
 
@@ -32,6 +33,7 @@ describe('linq', () => {
                 name: 'customer',
             },
             where: undefined,
+            take: undefined,
         });
     });
 
@@ -48,6 +50,7 @@ describe('linq', () => {
                 name: 'customer',
             },
             where: undefined,
+            take: undefined,
         });
     });
 
@@ -67,6 +70,7 @@ describe('linq', () => {
                 name: 'customer',
             },
             where: undefined,
+            take: undefined,
         });
     });
 
@@ -86,6 +90,7 @@ describe('linq', () => {
                 name: 'customer',
             },
             where: undefined,
+            take: undefined,
         });
     });
 
@@ -118,6 +123,7 @@ describe('linq', () => {
                     value: 100
                 },
             },
+            take: undefined,
         });
     });
 
@@ -168,6 +174,7 @@ describe('linq', () => {
                     },
                 },
             },
+            take: undefined,
         });
     });
 
@@ -236,6 +243,7 @@ describe('linq', () => {
                     }
                 },
             },
+            take: undefined,
         });
     });
 
@@ -307,6 +315,7 @@ describe('linq', () => {
                     }
                 }
             },
+            take: undefined,
         });
     })
 });
