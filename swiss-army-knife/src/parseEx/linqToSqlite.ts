@@ -18,10 +18,5 @@ export function linqToSqlite(linqText: string) {
         sql += `${table.name} AS ${expr.aliasTableName}`;
     }
     expr.aliasTableName;
-    // return {
-    //     value: value,
-    //     lexResult: lexResult,
-    //     parseErrors: parser.errors,
-    // };
     return sql;
 }
