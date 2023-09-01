@@ -11,7 +11,7 @@ const RULES = {
     tableClause: "tableClause",
     databaseTableClause: "databaseTableClause",
     columnsExpr: "columnsExpr",
-    tableExpr: "tableExpr",
+    tableAliasExpr: "tableAliasExpr",
     tableFieldExpr: "tableFieldExpr",
     parenthesisExpr: "parenthesisExpr",
     columnList: "columnList",
@@ -142,12 +142,21 @@ export interface ITableExpression extends ISqlExpression {
     name: string;
 }
 
+
+export interface ITableAliasExpression extends ISqlExpression {
+    aliasName: string;
+}
+
+export interface ITopExpression extends ISqlExpression {
+    count: number;
+}
+
 export interface ISelectExpression extends ISqlExpression {
     source: ISqlExpression;
     aliasTableName: string;
     columns: ISelectExpression[];
     where: ISelectExpression | undefined;
-    take: ISelectExpression | undefined;
+    take: undefined | ITopExpression;
 }
 
 const linqLexer = new Lexer(allTokens);
@@ -188,8 +197,8 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         const count = this.SUBRULE(this.integer);
         return {
             type: "TOP",
-            count: count
-        };
+            count: +count
+        } as ITopExpression;
     });
 
     public aliaName = this.RULE(RULES.aliaName, () => {
@@ -226,7 +235,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         const columns = this.OR([
             { ALT: () => this.SUBRULE(this.newColumns) },
             { ALT: () => this.SUBRULE(this.tableFieldExpr) },
-            { ALT: () => this.SUBRULE(this.tableExpr) },
+            { ALT: () => this.SUBRULE(this.tableAliasExpr) },
         ]);
         if (!Array.isArray(columns)) {
             return [columns];
@@ -234,12 +243,12 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
         return columns;
     });
 
-    public tableExpr = this.RULE(RULES.tableExpr, () => {
+    public tableAliasExpr = this.RULE(RULES.tableAliasExpr, () => {
         const talbeName = this.SUBRULE(this.identifier);
         return {
             type: 'TABLE',
             aliasName: talbeName,
-        };
+        } as ITableAliasExpression;
     });
 
     public identifier = this.RULE(RULES.Identifier, () => {
@@ -248,7 +257,7 @@ class LinqParserEmbedded extends EmbeddedActionsParser {
     });
 
     public tableFieldExpr = this.RULE(RULES.tableFieldExpr, () => {
-        const table = this.SUBRULE(this.tableExpr);
+        const table = this.SUBRULE(this.tableAliasExpr);
         this.CONSUME(DOT);
         const field = this.SUBRULE(this.identifier);
         return {

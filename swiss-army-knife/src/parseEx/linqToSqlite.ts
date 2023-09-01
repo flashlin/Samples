@@ -1,4 +1,4 @@
-import { parseLinq, type ITableFieldExpression, type ITableExpression } from "./linq";
+import { parseLinq, type ITableFieldExpression, type ITableExpression, type ITableAliasExpression } from "./linq";
 
 export function linqToSqlite(linqText: string) {
     const rc = parseLinq(linqText);
@@ -6,17 +6,23 @@ export function linqToSqlite(linqText: string) {
 
     let sql = "SELECT ";
     sql += expr.columns.map(column => {
-        if( column.type == 'TABLE_FIELD' ) {
+        if (column.type == 'TABLE_FIELD') {
             const col = column as unknown as ITableFieldExpression;
             return `${column.aliasTableName}.${col.field} AS ${col.aliasFieldName}`;
+        }
+        if (column.type == 'TABLE') {
+            const col = column as unknown as ITableAliasExpression;
+            return `${col.aliasName}.*`;
         }
     }).join(',');
 
     sql += ' FROM ';
-    if( expr.source.type == 'TABLE_CLAUSE' ) {
+    if (expr.source.type == 'TABLE_CLAUSE') {
         const table = expr.source as unknown as ITableExpression;
         sql += `${table.name} AS ${expr.aliasTableName}`;
     }
-    expr.aliasTableName;
+    if (expr.take) {
+        sql += ` LIMIT ${expr.take.count}`;
+    }
     return sql;
 }

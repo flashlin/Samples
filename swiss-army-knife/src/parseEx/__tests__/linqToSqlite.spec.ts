@@ -9,21 +9,11 @@ describe('linq', () => {
         expect(sql).toBe("SELECT tb1.id AS id FROM customer AS tb1");
     });
 
-    // it('from tb1 in customer select tb1', () => {
-    //     const linqString = getItName();
-    //     const rc = parseLinq(linqString);
-    //     expect(rc.parseErrors).toStrictEqual([]);
-    //     expect(rc.value).toStrictEqual({
-    //         type: 'SELECT_CLAUSE',
-    //         columns: [{ type: 'TABLE', aliasName: 'tb1' }],
-    //         aliasTableName: 'tb1',
-    //         source: {
-    //             type: 'TABLE_CLAUSE',
-    //             name: 'customer',
-    //         },
-    //         where: undefined,
-    //     });
-    // });
+    it('from tb1 in customer select tb1', () => {
+        const linqString = getItName();
+        const sql = linqToSqlite(linqString);
+        expect(sql).toBe("SELECT tb1.* FROM customer AS tb1");
+    });
 
     // it('from tb1 in customer select new { tb1.id }', () => {
     //     const linqString = getItName();
