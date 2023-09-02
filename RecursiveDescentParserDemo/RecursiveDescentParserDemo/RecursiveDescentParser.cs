@@ -31,6 +31,7 @@
             SyntaxTreeNode node = new SyntaxTreeNode {Token = op.ToString(), Left = left, Right = right};
             return ParseEPrime(node);
         }
+
         return left; // ε
     }
 
@@ -40,7 +41,7 @@
         SyntaxTreeNode left = ParseF();
         return ParseTPrime(left);
     }
-    
+
     // CFG描述: T' -> ('*' | '/') F T' | ε
     private SyntaxTreeNode ParseTPrime(SyntaxTreeNode left)
     {
@@ -51,27 +52,27 @@
             SyntaxTreeNode node = new SyntaxTreeNode {Token = op.ToString(), Left = left, Right = right};
             return ParseTPrime(node);
         }
+
         return left;
     }
 
     // CFG描述: F -> '(' E ')' | number
     private SyntaxTreeNode ParseF()
     {
-        if (IsNumber())
-        {
-            return new SyntaxTreeNode {Token = ConsumeNumber()};
-        }
-        else if (IsOpeningParenthesis())
+        if (IsOpeningParenthesis())
         {
             ConsumeOpeningParenthesis();
             SyntaxTreeNode result = ParseE();
             ConsumeClosingParenthesis();
             return result;
         }
-        else
+        
+        if (IsNumber())
         {
-            throw new ArgumentException("Invalid expression.");
+            return new SyntaxTreeNode {Token = ConsumeNumber()};
         }
+
+        throw new ArgumentException("Invalid expression.");
     }
 
     private bool IsAddition()
