@@ -1,4 +1,6 @@
-﻿public class RecursiveDescentParser
+﻿using RecursiveDescentParserDemo.ParseEx1;
+
+public class RecursiveDescentParser
 {
     private string input;
     private int position;
@@ -258,108 +260,55 @@ public class LinqParser : EmbeddedActionsParser
     }
 }
 
-
-public class Token
+public class TextEnumerableStream : IEnumerableStream<string>
 {
-    public string Value { get; set; }
-}
+    private readonly string _text;
+    private int _position = 0;
 
-public class ContextFreeGrammer
-{
-    private string input;
-    private int currentIndex = 0;
-
-    public ContextFreeGrammer(string input)
+    public TextEnumerableStream(string text)
     {
-        this.input = input;
+        _text = text;
     }
 
-    public List<Token> many(Func<ContextFreeGrammer, ContextFreeGrammer> rule)
+    public string Current
     {
-        List<Token> result = new List<Token>();
-        while (true)
+        get
         {
-            int initialIndex = currentIndex;
-            var tokens = rule(new ContextFreeGrammer(input)).Tokens;
-            if (tokens.Count == 0)
+            if (IsEof())
             {
-                currentIndex = initialIndex;
-                break;
+                return string.Empty;
             }
-            result.AddRange(tokens);
+            return _text.Substring(_position, 1);
         }
-        return result;
     }
 
-    public List<Token> at_least_one(Func<ContextFreeGrammer, ContextFreeGrammer> rule)
+    public void Move(int position)
     {
-        var tokens = rule(new ContextFreeGrammer(input)).Tokens;
-        if (tokens.Count == 0)
-            throw new Exception("At least one token expected");
-        return tokens;
+        _position = position;
     }
 
-    public List<Token> option(Func<ContextFreeGrammer, ContextFreeGrammer> rule)
+    public int GetPosition()
     {
-        int initialIndex = currentIndex;
-        var tokens = rule(new ContextFreeGrammer(input)).Tokens;
-        if (tokens.Count == 0)
+        return _position;
+    }
+
+    public bool IsEof()
+    {
+        if (_position < _text.Length)
         {
-            currentIndex = initialIndex;
+            return false;
         }
-        return tokens;
+        return true;
     }
 
-    public List<Token> or(params Func<ContextFreeGrammer, ContextFreeGrammer>[] rules)
+    public bool MoveNext()
     {
-        foreach (var rule in rules)
+        if (IsEof())
         {
-            int initialIndex = currentIndex;
-            var tokens = rule(new ContextFreeGrammer(input)).Tokens;
-            if (tokens.Count > 0)
-            {
-                return tokens;
-            }
-            currentIndex = initialIndex;
+            return false;
         }
-        return new List<Token>();
-    }
 
-    public List<Token> Tokens { get; private set; } = new List<Token>();
-
-    public ContextFreeGrammer consume(string value)
-    {
-        if (currentIndex < input.Length && input.Substring(currentIndex).StartsWith(value))
-        {
-            Tokens.Add(new Token { Value = value });
-            currentIndex += value.Length;
-        }
-        return this;
-    }
-
-    public ContextFreeGrammer consume(Token token)
-    {
-        Tokens.Add(token);
-        return this;
-    }
-}
-
-public class Sample
-{
-    public void Run()
-    {
-        // 示例用法
-        var input = "1ababab";
-        var cfg = new ContextFreeGrammer(input);
-        var tokens = cfg.or(
-            c => c.consume("a").consume("b"),
-            c => c.consume("b").consume("a")
-        );
-
-        Console.WriteLine(tokens.Count);
-        foreach (var token in tokens)
-        {
-            Console.WriteLine(token.Value);
-        }
+        _position++;
+        return true;
     }
 }
