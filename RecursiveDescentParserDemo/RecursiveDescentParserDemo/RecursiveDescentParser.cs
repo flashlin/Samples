@@ -14,7 +14,7 @@
         return ParseExpression();
     }
 
-    // CFG描述: E -> T ( ('+' | '-') T )*
+    // CFG描述: E -> T E'
     private SyntaxTreeNode ParseExpression()
     {
         SyntaxTreeNode left = ParseTerm();
@@ -28,11 +28,9 @@
         {
             char op = GetOperator();
             SyntaxTreeNode right = ParseTerm();
-
             SyntaxTreeNode node = new SyntaxTreeNode {Token = op.ToString(), Left = left, Right = right};
             return ParseExpressionPrime(node);
         }
-
         return left; // ε
     }
 
