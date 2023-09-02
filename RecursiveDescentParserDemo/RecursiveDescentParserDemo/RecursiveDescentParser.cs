@@ -11,51 +11,51 @@
 
     public SyntaxTreeNode Parse()
     {
-        return ParseExpression();
+        return ParseE();
     }
 
     // CFG描述: E -> T E'
-    private SyntaxTreeNode ParseExpression()
+    private SyntaxTreeNode ParseE()
     {
-        SyntaxTreeNode left = ParseTerm();
-        return ParseExpressionPrime(left);
+        SyntaxTreeNode left = ParseT();
+        return ParseEPrime(left);
     }
 
     // CFG描述: E' -> ('+' | '-') T E' | ε
-    private SyntaxTreeNode ParseExpressionPrime(SyntaxTreeNode left)
+    private SyntaxTreeNode ParseEPrime(SyntaxTreeNode left)
     {
         if (IsAddition() || IsSubtraction())
         {
             char op = GetOperator();
-            SyntaxTreeNode right = ParseTerm();
+            SyntaxTreeNode right = ParseT();
             SyntaxTreeNode node = new SyntaxTreeNode {Token = op.ToString(), Left = left, Right = right};
-            return ParseExpressionPrime(node);
+            return ParseEPrime(node);
         }
         return left; // ε
     }
 
     // CFG描述: T -> F T'
-    private SyntaxTreeNode ParseTerm()
+    private SyntaxTreeNode ParseT()
     {
-        SyntaxTreeNode left = ParseFactor();
-        return ParseTermPrime(left);
+        SyntaxTreeNode left = ParseF();
+        return ParseTPrime(left);
     }
     
     // CFG描述: T' -> ('*' | '/') F T' | ε
-    private SyntaxTreeNode ParseTermPrime(SyntaxTreeNode left)
+    private SyntaxTreeNode ParseTPrime(SyntaxTreeNode left)
     {
         if (IsMultiplication() || IsDivision())
         {
             char op = GetOperator();
-            SyntaxTreeNode right = ParseFactor();
+            SyntaxTreeNode right = ParseF();
             SyntaxTreeNode node = new SyntaxTreeNode {Token = op.ToString(), Left = left, Right = right};
-            return ParseTermPrime(node);
+            return ParseTPrime(node);
         }
         return left;
     }
 
     // CFG描述: F -> '(' E ')' | number
-    private SyntaxTreeNode ParseFactor()
+    private SyntaxTreeNode ParseF()
     {
         if (IsNumber())
         {
@@ -64,7 +64,7 @@
         else if (IsOpeningParenthesis())
         {
             ConsumeOpeningParenthesis();
-            SyntaxTreeNode result = ParseExpression();
+            SyntaxTreeNode result = ParseE();
             ConsumeClosingParenthesis();
             return result;
         }
