@@ -7,8 +7,7 @@ namespace T1.ParserKit.Core
         public abstract Parser<TextUtils.Text, TOutput> Parser { get; }
         public TextParser String(string text)
         {
-            return new TextParser<StringParseCommand>(
-                new StringParseCommand(text));
+            return new TextParser<StringParseCommand>(new StringParseCommand(text));
         }
 
         public SetParser Char()
@@ -26,8 +25,7 @@ namespace T1.ParserKit.Core
 
         public SetParser Set(string set)
         {
-            return new SetParser<SetParseCommand>(
-                new SetParseCommand(set));
+            return new SetParser<SetParseCommand>(new SetParseCommand(set));
         }
 
 
