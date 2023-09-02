@@ -31,9 +31,9 @@ public class LinqGrammar : Grammar<LinqSyntaxNode>
         {
             if (_identifier == null)
             {
-                _identifier = from prefix in (Letter | Char('_'))
-                    from postfix in (Letter | Digit).OneOrMore()
-                    select prefix.Append(postfix);
+                _identifier = from prefix in (Letter | Char('_')).WithLeftTrivia()
+                    from postfix in (Letter | Digit).ZeroOrMore()
+                    select prefix.Value.Append(postfix);
             }
             return _identifier;
         }
@@ -53,10 +53,11 @@ public class LinqGrammar : Grammar<LinqSyntaxNode>
         }
     }
 
-    public void Parse(string text)
+    public LinqSyntaxNode? Parse(string text)
     {
         //var grammar = new LinqGrammar();
-        var result = Parser.Parse(text)?.Value;
+        var node = Parser.Parse(text);
+        return node.Value;
     }
 }
 
