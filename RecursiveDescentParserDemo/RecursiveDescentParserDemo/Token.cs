@@ -1,4 +1,4 @@
-﻿public class Token
+﻿public class Token<T>
 {
-    public string Value { get; set; }
+    public T Value { get; set; }
 }
