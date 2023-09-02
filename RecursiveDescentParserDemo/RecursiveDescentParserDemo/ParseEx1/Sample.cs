@@ -59,10 +59,10 @@ public class Sample
         // 示例用法
         var input = "cababab";
         //Test1(input);
-        Test2(input);
+        Method2(input);
     }
 
-    public void Test1(string input)
+    public void Method1(string input)
     {
         var A = new MatchToken("a");
         var B = new MatchToken("b");
@@ -84,7 +84,7 @@ public class Sample
         }
     }
 
-    public void Test2(string input)
+    public void Method2(string input)
     {
         var m = new MiniCfg();
         m.SetInput(new TextEnumerableStream(input));
