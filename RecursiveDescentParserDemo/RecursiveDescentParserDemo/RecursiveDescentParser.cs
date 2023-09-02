@@ -14,22 +14,29 @@
         return ParseExpression();
     }
 
+    // CFG描述: E -> T ( ('+' | '-') T )*
     private SyntaxTreeNode ParseExpression()
     {
         SyntaxTreeNode left = ParseTerm();
+        return ParseExpressionPrime(left);
+    }
 
-        while (IsAddition() || IsSubtraction())
+    // CFG描述: E' -> ('+' | '-') T E' | ε
+    private SyntaxTreeNode ParseExpressionPrime(SyntaxTreeNode left)
+    {
+        if (IsAddition() || IsSubtraction())
         {
             char op = GetOperator();
             SyntaxTreeNode right = ParseTerm();
 
-            SyntaxTreeNode node = new SyntaxTreeNode { Token = op.ToString(), Left = left, Right = right };
-            left = node;
+            SyntaxTreeNode node = new SyntaxTreeNode {Token = op.ToString(), Left = left, Right = right};
+            return ParseExpressionPrime(node);
         }
 
-        return left;
+        return left; // ε
     }
 
+    // CFG描述: T -> F ( ('*' | '/') F )*
     private SyntaxTreeNode ParseTerm()
     {
         SyntaxTreeNode left = ParseFactor();
@@ -39,18 +46,19 @@
             char op = GetOperator();
             SyntaxTreeNode right = ParseFactor();
 
-            SyntaxTreeNode node = new SyntaxTreeNode { Token = op.ToString(), Left = left, Right = right };
+            SyntaxTreeNode node = new SyntaxTreeNode {Token = op.ToString(), Left = left, Right = right};
             left = node;
         }
 
         return left;
     }
 
+    // CFG描述: F -> '(' E ')' | number
     private SyntaxTreeNode ParseFactor()
     {
         if (IsNumber())
         {
-            return new SyntaxTreeNode { Token = ConsumeNumber() };
+            return new SyntaxTreeNode {Token = ConsumeNumber()};
         }
         else if (IsOpeningParenthesis())
         {
@@ -109,6 +117,7 @@
         {
             position++;
         }
+
         return input.Substring(start, position - start);
     }
 
@@ -142,6 +151,7 @@
         {
             return input[position];
         }
+
         return '\0'; // 表示字符串結束
     }
 
