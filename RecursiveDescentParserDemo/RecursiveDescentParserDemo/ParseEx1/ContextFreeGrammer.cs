@@ -2,12 +2,20 @@
 
 public class ContextFreeGrammer<T>
 {
-    private IEnumerableStream<T> input;
-    private int currentIndex = 0;
+    private IEnumerableStream<T> _input;
+
+    public ContextFreeGrammer()
+    {
+    }
 
     public ContextFreeGrammer(IEnumerableStream<T> input)
     {
-        this.input = input;
+        _input = input;
+    }
+
+    public void SetInput(IEnumerableStream<T> input)
+    {
+        _input = input;
     }
 
     public List<Token<T>> Many(Func<ContextFreeGrammer<T>, ContextFreeGrammer<T>> rule)
@@ -15,11 +23,11 @@ public class ContextFreeGrammer<T>
         List<Token<T>> result = new();
         while (true)
         {
-            var initialIndex = input.GetPosition();
-            var tokens = rule(new ContextFreeGrammer<T>(input)).Tokens;
+            var initialIndex = _input.GetPosition();
+            var tokens = rule(new ContextFreeGrammer<T>(_input)).Tokens;
             if (tokens.Count == 0)
             {
-                input.Move(initialIndex);
+                _input.Move(initialIndex);
                 break;
             }
             result.AddRange(tokens);
@@ -29,7 +37,7 @@ public class ContextFreeGrammer<T>
 
     public List<Token<T>> AtLeastOne(Func<ContextFreeGrammer<T>, ContextFreeGrammer<T>> rule)
     {
-        var tokens = rule(new ContextFreeGrammer<T>(input)).Tokens;
+        var tokens = rule(new ContextFreeGrammer<T>(_input)).Tokens;
         if (tokens.Count == 0)
             throw new Exception("At least one token expected");
         return tokens;
@@ -37,11 +45,11 @@ public class ContextFreeGrammer<T>
 
     public List<Token<T>> Option(Func<ContextFreeGrammer<T>, ContextFreeGrammer<T>> rule)
     {
-        var initialIndex = input.GetPosition();
-        var tokens = rule(new ContextFreeGrammer<T>(input)).Tokens;
+        var initialIndex = _input.GetPosition();
+        var tokens = rule(new ContextFreeGrammer<T>(_input)).Tokens;
         if (tokens.Count == 0)
         {
-            input.Move(initialIndex);
+            _input.Move(initialIndex);
         }
         return tokens;
     }
@@ -50,13 +58,13 @@ public class ContextFreeGrammer<T>
     {
         foreach (var rule in rules)
         {
-            int initialIndex = input.GetPosition();
-            var tokens = rule(new ContextFreeGrammer<T>(input)).Tokens;
+            int initialIndex = _input.GetPosition();
+            var tokens = rule(new ContextFreeGrammer<T>(_input)).Tokens;
             if (tokens.Count > 0)
             {
                 return tokens;
             }
-            input.Move(initialIndex);
+            _input.Move(initialIndex);
         }
         return new List<Token<T>>();
     }
@@ -65,10 +73,10 @@ public class ContextFreeGrammer<T>
 
     public ContextFreeGrammer<T> Consume(IMatcher<T> matcher)
     {
-        if (!input.IsEof() && matcher.Match(input.Current))
+        if (!_input.IsEof() && matcher.Match(_input.Current))
         {
-            Tokens.Add(new Token<T> { Value = input.Current });
-            input.MoveNext();
+            Tokens.Add(new Token<T> { Value = _input.Current });
+            _input.MoveNext();
         }
         return this;
     }
