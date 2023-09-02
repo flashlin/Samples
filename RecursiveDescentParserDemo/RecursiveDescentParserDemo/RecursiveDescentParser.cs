@@ -34,20 +34,23 @@
         return left; // ε
     }
 
-    // CFG描述: T -> F ( ('*' | '/') F )*
+    // CFG描述: T -> F T'
     private SyntaxTreeNode ParseTerm()
     {
         SyntaxTreeNode left = ParseFactor();
-
-        while (IsMultiplication() || IsDivision())
+        return ParseTermPrime(left);
+    }
+    
+    // CFG描述: T' -> ('*' | '/') F T' | ε
+    private SyntaxTreeNode ParseTermPrime(SyntaxTreeNode left)
+    {
+        if (IsMultiplication() || IsDivision())
         {
             char op = GetOperator();
             SyntaxTreeNode right = ParseFactor();
-
             SyntaxTreeNode node = new SyntaxTreeNode {Token = op.ToString(), Left = left, Right = right};
-            left = node;
+            return ParseTermPrime(node);
         }
-
         return left;
     }
 
