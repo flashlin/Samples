@@ -1,8 +1,8 @@
 {
-    "suggest.enablePreview": true,
-    "suggest.enableSmartAutoInsert": true,
-    "suggest.autoTrigger": "always",
-    "suggest.selectPrevious": "<Up>",
-    "suggest.selectNext": "<Down>",
-    "suggest.confirmCompletion": "<CR>"
+  "suggest.enablePreview": true,
+  "suggest.enableSmartAutoInsert": true,
+  "suggest.autoTrigger": "always",
+  "suggest.selectPrevious": "<Up>",
+  "suggest.selectNext": "<Down>",
+  "suggest.confirmCompletion": "<CR>"
 }
