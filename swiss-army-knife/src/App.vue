@@ -320,8 +320,6 @@ onUnmounted(() => {
           </el-form>
 
           <el-divider />
-          <DataTable v-model="data.tableStructure" />
-          <el-divider />
 
           <!-- Query Table In WebPage -->
           <el-table :data="tableList" stripe style="width: 100%">
@@ -340,6 +338,10 @@ onUnmounted(() => {
               </template>
             </el-table-column>
           </el-table>
+
+          <el-divider />
+          <DataTable v-model="data.tableStructure" />
+
         </el-tab-pane>
         <el-tab-pane label="Upload Area">
           <el-upload class="upload-demo" drag action="" multiple accept=".csv" :before-upload="onHandleBeforeUpload">
