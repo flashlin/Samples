@@ -1,9 +1,20 @@
+vim.cmd('autocmd!')
 -- utf8
 vim.scriptencoding = 'utf-8'
 vim.opt.encoding = 'utf-8'
 vim.opt.fileencoding = 'utf-8'
-vim.g.encoding = "UTF-8"
-vim.o.fileencoding = 'utf-8'
+
+vim.cmd([[let &t_Cs = "\e[4:3m"]])
+vim.cmd([[let &t_Ce = "\e[4:0m"]])
+
+-- Turn off paste mode when leaving insert
+vim.api.nvim_create_autocmd("InsertLeave", {
+   pattern = '*',
+   command = "set nopaste"
+})
+
+--vim.g.encoding = "UTF-8"
+--vim.o.fileencoding = 'utf-8'
 -- jk移動時光標下上方保留8行
 vim.o.scrolloff = 8
 vim.o.sidescrolloff = 8
@@ -77,8 +88,8 @@ vim.o.background = "dark"
 vim.o.termguicolors = true
 vim.opt.termguicolors = true
 -- 不可见字符的显示，这里只把空格显示为一個点
-vim.o.list = true
-vim.o.listchars = "space:·"
+--vim.o.list = true
+--vim.o.listchars = "space:·"
 -- 补全增强
 vim.o.wildmenu = true
 -- Dont' pass messages to |ins-completin menu|
