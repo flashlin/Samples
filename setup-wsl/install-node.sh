@@ -19,4 +19,7 @@ source ~/.zshrc
 nvm install 14.14.0
 nvm use 14.14.0
 
+echo "reload env..."
+source ~/.bashrc
 
+echo "done"
