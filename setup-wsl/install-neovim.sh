@@ -25,20 +25,39 @@ fi
 if ! command -v nvim &> /dev/null; then
     echo ""
     echo "# install neovim..."
-    sudo add-apt-repository ppa:neovim-ppa/stable
-    sudo apt update
-    sudo apt install neovim
+    sudo sudo add-apt-repository ppa:neovim-ppa/stable
+    sudo sudo apt update
+    sudo sudo apt install neovim
 fi
 
-echo "# copy init.vim to ~/.config/nvim/init.vim"
+
+echo "install packer.nvim that plugin manager"
+if [ -d ~/.config/nvim/site/pack/packer/ ]; then
+    git clone --depth 1 https://github.com/wbthomason/packer.nvim \
+        ~/.local/share/nvim/site/pack/packer/start/packer.nvim
+fi
+
+
+echo "clean ~/.config/nvim"
+if [ -d ~/.config/nvim/ ]; then
+  rm -rf ~/.config/nvim/
+fi
+
+echo "create ~/.config"
 if [ ! -d ~/.config/ ]; then
     mkdir ~/.config/
 fi
 if [ ! -d ~/.config/nvim/ ]; then
     mkdir ~/.config/nvim/
 fi
+if [ ! -d ~/.config/nvim/lua ]; then
+    mkdir ~/.config/nvim/lua/
+fi
 
-echo "copy .vim files"
+echo "~/.config/nvim/lua/plugins.lua"
+
+
+echo "copy init.vim to ~/.config/nvim/init.vim"
 cp -Rf ./neovim-data/* ~/.config/nvim
 
 nvim -c 'PlugInstall' -c 'qa!'
