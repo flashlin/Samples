@@ -31,8 +31,12 @@ if ! command -v nvim &> /dev/null; then
 fi
 
 echo "# copy init.vim to ~/.config/nvim/init.vim"
-mkdir ~/.config/
-mkdir ~/.config/nvim/
+if [ ! -d ~/.config/ ]; then
+    mkdir ~/.config/
+fi
+if [ ! -d ~/.config/nvim/ ]; then
+    mkdir ~/.config/nvim/
+fi
 cp -Rf ./neovim-data/* ~/.config/nvim
 
 echo ""
