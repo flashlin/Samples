@@ -20,8 +20,7 @@ if [ ! -f "/usr/local/bin/win32yank.exe" ]; then
 fi    
 
 # install vim-plug
-curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-
+curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
 if ! command -v nvim &> /dev/null; then
     echo ""
@@ -32,6 +31,8 @@ if ! command -v nvim &> /dev/null; then
 fi
 
 echo "# copy init.vim to ~/.config/nvim/init.vim"
+mkdir ~/.config/
+mkdir ~/.config/nvim/
 cp -Rf ./neovim-data/* ~/.config/nvim
 
 echo ""
