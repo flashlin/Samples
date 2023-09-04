@@ -37,7 +37,10 @@ fi
 if [ ! -d ~/.config/nvim/ ]; then
     mkdir ~/.config/nvim/
 fi
+
+echo "copy .vim files"
 cp -Rf ./neovim-data/* ~/.config/nvim
 
+nvim -c 'PlugInstall' -c 'qa!'
 echo ""
 echo "# please run nvim, then input :PlugInstall"
