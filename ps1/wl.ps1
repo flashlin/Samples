@@ -52,7 +52,13 @@ if ( 'rm' -eq $action ) {
     return
 }
 
+if ( "i" -eq $action ) {
+    InvokeCmd "wsl --install -d Ubuntu-22.04"
+    return
+}
+
 Write-Host ""
-Write-Host "s: stop"
-Write-Host "b: run and enter"
-Write-Host "rm: delete"
+Write-Host "i  :install Ubuntu-22.04"
+Write-Host "s  :stop"
+Write-Host "b  :run and enter"
+Write-Host "rm :delete"
