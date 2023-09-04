@@ -20,6 +20,8 @@ Plug 'junegunn/fzf.vim'
 Plug 'frazrepo/vim-rainbow'
 "移動程式碼
 Plug 'matze/vim-move'
+require'lspconfig'.tsserver.setup {}
+
 "自動 :e
 " source ~/AppData/Local/nvim/wilder-setup.vim
 
