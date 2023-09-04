@@ -6,3 +6,4 @@ vim.cmd([[
 ]])
 
 require('basic')
+require('maps')

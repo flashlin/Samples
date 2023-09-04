@@ -1,4 +1,7 @@
 -- utf8
+vim.scriptencoding = 'utf-8'
+vim.opt.encoding = 'utf-8'
+vim.opt.fileencoding = 'utf-8'
 vim.g.encoding = "UTF-8"
 vim.o.fileencoding = 'utf-8'
 -- jk移動時光標下上方保留8行
@@ -7,8 +10,14 @@ vim.o.sidescrolloff = 8
 -- 使用相對行號
 vim.wo.number = true
 vim.wo.relativenumber = true
+vim.opt.title = true
 -- 高亮所在行
-vim.wo.cursorline = true
+vim.opt.cursorline = true
+vim.opt.termguicolors = true
+vim.opt.winblend = 0
+vim.opt.wildoptions = 'pum'
+vim.opt.pumblend = 5
+vim.opt.background = 'dark'
 -- 显示左側圖標指示列
 vim.wo.signcolumn = "yes"
 -- 右側參考线，超過表示代碼太長了，考慮換行
@@ -31,7 +40,7 @@ vim.o.smartindent = true
 vim.o.ignorecase = true
 vim.o.smartcase = true
 -- 搜索不要高亮
-vim.o.hlsearch = false
+vim.o.hlsearch = true
 -- 邊输入邊搜索
 vim.o.incsearch = true
 -- 使用增强狀态栏后不再需要 vim 的模式提示
@@ -77,3 +86,5 @@ vim.o.shortmess = vim.o.shortmess .. 'c'
 vim.o.pumheight = 10
 -- always show tabline
 vim.o.showtabline = 2
+vim.opt.path:append { '**' } --Finding files: search down into subfolders
+vim.opt.wildignore:append { '*/node_modules/* '}
