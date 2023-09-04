@@ -19,6 +19,10 @@ if [ ! -f "/usr/local/bin/win32yank.exe" ]; then
     sudo mv /tmp/win32yank.exe /usr/local/bin/
 fi    
 
+# install vim-plug
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+
+
 if ! command -v nvim &> /dev/null; then
     echo ""
     echo "# install neovim..."
