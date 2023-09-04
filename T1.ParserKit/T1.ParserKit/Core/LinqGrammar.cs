@@ -14,10 +14,11 @@ public class LinqGrammar : Grammar<LinqSyntaxNode>
             {
                 _linqSelectExpr =
                     from fromKeyword in String("from")
+                    from space in WhiteSpace
                     from aliasTableName in Identifier
                     select new LinqSelectExpr()
                     {
-                        AliasTableName = aliasTableName.value
+                        AliasTableName = aliasTableName
                     };
             }
             return _linqSelectExpr;
@@ -31,9 +32,9 @@ public class LinqGrammar : Grammar<LinqSyntaxNode>
         {
             if (_identifier == null)
             {
-                _identifier = from prefix in (Letter | Char('_')).WithLeftTrivia()
+                _identifier = from prefix in Letter | Char('_')
                     from postfix in (Letter | Digit).ZeroOrMore()
-                    select prefix.Value.Append(postfix);
+                    select prefix.Append(postfix);
             }
             return _identifier;
         }
