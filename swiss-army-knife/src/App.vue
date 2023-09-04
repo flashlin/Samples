@@ -224,6 +224,7 @@ const onHandleBeforeUpload = async (file: File) => {
   const fileContent = await readFileContentAsync(file);
   const uploadDataTable = parseCsvContentToObjectArray(fileContent);
   data.dataTable = uploadDataTable;
+  db.importTable(file.name, data.dataTable.rows);
   notify(MessageTypes.Success, `Upload csv File ${file.name}`);
   return false;
 }
