@@ -43,6 +43,16 @@ if ( 'b' -eq $action ) {
     return
 }
 
+if ( 'rm' -eq $action ) {
+    $name = AskWslNames
+    if ( "" -eq $name ) {
+        return
+    }
+    InvokeCmd "wsl --unregister $name" 
+    return
+}
+
 Write-Host ""
 Write-Host "s: stop"
 Write-Host "b: run and enter"
+Write-Host "rm: delete"
