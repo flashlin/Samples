@@ -136,6 +136,7 @@ if ( "--a" -eq $action ) {
         }
         Write-Host "Update $dirPath"
         UpsertPath $dirPath
+        RecordPath $dirPath
         return
     }
 
