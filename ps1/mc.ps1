@@ -7,29 +7,36 @@ Import-Module $env:psm1Home\common.psm1 -Force
 
 Write-Host "MiniConda"
 
-$minicondaHome = "C:\Users\$($env:USERNAME)\AppData\Local\miniconda3\shell\condabin"
-$powershellExe = "$($env:WINDIR)\System32\WindowsPowerShell\v1.0\powershell.exe"
-$py_env = "C:\Users\$($env:USERNAME)\AppData\Local\miniconda3"
+# %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy ByPass -NoExit -Command "& 'D:\Users\flash\miniconda3\shell\condabin\conda-hook.ps1' ; conda activate 'D:\Users\flash\miniconda3' "
+
+function activeMinicondaEnv {
+    param(
+        [string]$drive
+    )
+    $minicondaHome = "$($drive)\Users\$($env:USERNAME)\AppData\Local\miniconda3\shell\condabin"
+    $minicondaHome = "$($drive)\Users\$($env:USERNAME)\miniconda3\shell\condabin"
+    $powershellExe = "$($env:WINDIR)\System32\WindowsPowerShell\v1.0\powershell.exe"
+    $py_env = "$($drive)\Users\$($env:USERNAME)\AppData\Local\miniconda3"
+    $py_env = "$($drive)\Users\$($env:USERNAME)\miniconda3"
+    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\conda-hook.ps1'; conda activate '$py_env'"" "
+    Info $cmd
+    Invoke-Expression $cmd
+}
 #& %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy ByPass -NoExit -Command `
 #    "& 'C:\Users\flash.lin71\AppData\Local\miniconda3\shell\condabin\conda-hook.ps1' ; conda activate 'C:\Users\flash.lin71\AppData\Local\miniconda3'"
 
-# %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy ByPass -NoExit -Command 
-#"& 'C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1' ; conda activate 'C:\ProgramData\Miniconda3' "
-
 if ( "c1" -eq $action ) {
-    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\conda-hook.ps1'; conda activate '$py_env'"" "
-    Invoke-Expression $cmd
+    activeMinicondaEnv "D:"
     return
 }
 
 
 if ( "c0" -eq $action ) {
-    $minicondaHome = "D:\Users\$($env:USERNAME)\miniconda3"
-
-    $hookPs1 = "C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1"
-    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\shell\condabin\conda-hook.ps1' ; conda activate '$($minicondaHome)' """
-    # $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& $($hookPs1); conda activate '$py_env'"" "
-    Invoke-Expression $cmd
+    activeMinicondaEnv "C:"
+    # $minicondaHome = "D:\Users\$($env:USERNAME)\miniconda3"
+    # $hookPs1 = "C:\ProgramData\Miniconda3\shell\condabin\conda-hook.ps1"
+    # $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\shell\condabin\conda-hook.ps1' ; conda activate '$($minicondaHome)' """
+    # Invoke-Expression $cmd
     return
 }
 
