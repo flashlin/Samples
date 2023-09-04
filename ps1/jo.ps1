@@ -206,21 +206,27 @@ if ( "" -ne $action ) {
     $paths = $sqlite.ExecuteQuery($sql) | ForEach-Object { $_.dirName }
     $paths = FilterDirectories $paths $searchPatterns
     $paths = $paths | Sort-Object -Property Length, Name -Descending
-
+    
     $result = @( $searchPatterns )
     $result += $paths
     $result | Set-Content -Path "D:\demo\jj.txt"
-
+    
     if ( $paths.Length -eq 0 ) {
         Write-Host "Not found"
         return
     }
 
-    if ( $paths.Length -eq 1 ) {
-        RecordPath $paths[0]
-        JumpDirectory $paths[0]
+    if ( $paths.GetType() -eq [String]) {
+        RecordPath $paths
+        JumpDirectory $paths
         return
     }
+
+    # if ( $paths.Length -eq 1 ) {
+    #     RecordPath $paths[0]
+    #     JumpDirectory $paths[0]
+    #     return
+    # }
 
     #foreach($path in $paths) {
     #    WriteHostColorText $path $searchPatterns
