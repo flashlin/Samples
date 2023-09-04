@@ -21,7 +21,7 @@ Plug 'frazrepo/vim-rainbow'
 "移動程式碼
 Plug 'matze/vim-move'
 "自動 :e
-source ~/AppData/Local/nvim/wilder-setup.nvim
+" source ~/AppData/Local/nvim/wilder-setup.vim
 
 " TypeScript 語法和重構插件
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -31,7 +31,7 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 call plug#end()
 
 " 添加目錄
-set runtimepath+=D:\VDisk\Network\OneDrive\ps1
+" set runtimepath+=D:\VDisk\Network\OneDrive\ps1
 
 " 1 重新載入
 nnoremap <silent><leader>1 :source ~/AppData/Local/nvim/init.vim \| :PlugInstall<CR>
@@ -84,7 +84,7 @@ source ~/AppData/Local/nvim/coc.vim
 
 
 " 啟用 LSP 支援 Typescript
-autocmd FileType typescript,javascript,javascriptreact,typescriptreact CocStart
+"autocmd FileType typescript,javascript,javascriptreact,typescriptreact CocStart
 " 啟用 LSP 支援 C#
 "autocmd FileType cs,sln nmap <buffer> <leader>d <Plug>(coc-definition)
 "autocmd FileType cs,sln nmap <buffer> <leader>r <Plug>(coc-references)
