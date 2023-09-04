@@ -13,5 +13,8 @@ if [[ ":$PATH:" != *":/mnt/d/VDisk/GitHub/Samples/bash:"* ]]; then
     echo "PATH updated."
 fi
 
+./install-node.sh
+./install-neovim.sh
+
 #chmod +x /mnt/d/VDisk/Github/Samples/bash/*.sh
 echo "Done"

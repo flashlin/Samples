@@ -28,6 +28,7 @@ if ! command -v nvim &> /dev/null; then
     sudo sudo add-apt-repository ppa:neovim-ppa/stable
     sudo sudo apt update
     sudo sudo apt install neovim
+    pip install pynvim
 fi
 
 
