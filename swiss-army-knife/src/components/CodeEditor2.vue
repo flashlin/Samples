@@ -82,7 +82,7 @@ onMounted(() => {
     theme: 'vs-dark',
     selectOnLineNumbers: true,
     fontSize: 14,
-    lineHeight: 30,
+    lineHeight: 20,
     contextmenu: false, //關閉右鍵
     suggestOnTriggerCharacters: true,
     acceptSuggestionOnCommitCharacter: false,
@@ -128,6 +128,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .Editor {
   width: 80vw;
-  height: 50vh;
+  height: 40vh;
 }
 </style>../monacoEx/userWorker@/monacoEx/Suggestions

@@ -171,7 +171,7 @@ export class SqliteDb {
     private createTable(tableName: string, row: any) {
         const columns = this.createTableColumns(row);
         const declareColumnNames = columns
-            .map((c) => `${c.name} ${c.dataType}`)
+            .map((c) => `${c.name} ${c.dataType} NULL`)
             .join(', ');
         const stat = `CREATE TABLE IF NOT EXISTS ${tableName} (${declareColumnNames})`;
         this.execute(stat);
