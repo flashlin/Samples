@@ -6,7 +6,7 @@ local on_attach = function(client, bufnr)
         vim.api.nvim_command [[augroup Format]]
         vim.api.nvim_command [[autocmd! * <buffer>]]
         vim.api.nvim_command [[autocmd BufWritePRe <buffer> lua vim.lsp.buf.formtting_se_sync()]]
-        vim.api.nvim_command [[autogroup END]]
+        vim.api.nvim_command [[augroup END]]
     end
 end    
 
