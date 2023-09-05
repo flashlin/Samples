@@ -13,8 +13,13 @@ packer.startup(function(use)
    -- Load on specific commands
    use { 'folke/lazy.nvim', lazy = false, priority = 1000, opts = {} }
 
-   -- Theme inspired by Atom
+   -- Theme Dark
    use('joshdick/onedark.vim')
+   -- Statusline
+   use('hoob3rt/lualine.nvim')
+   use 'neovim/nvim-lspconfig' 
+
+   use {"kyazdani42/nvim-tree.lua"}
 
    use({
       'glepnir/zephyr-nvim',
