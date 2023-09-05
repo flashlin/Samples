@@ -20,3 +20,5 @@ end
 if is_win then
   require('windows')  
 end  
+
+require('after.plugin.onedark')
