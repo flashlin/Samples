@@ -20,3 +20,6 @@ keymap.set("n", "<A-j>", "<C-w>j", opt)
 keymap.set("n", "<A-k>", "<C-w>k", opt)
 keymap.set("n", "<A-l>", "<C-w>l", opt)
 
+
+keymap.set("n", "+", "<C-w>>", opt)
+keymap.set("n", "-", "<C-w><", opt)
