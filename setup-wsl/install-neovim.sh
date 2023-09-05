@@ -24,11 +24,20 @@ fi
 
 if ! command -v nvim &> /dev/null; then
     echo ""
-    echo "# install neovim..."
+    echo "install neovim..."
     sudo sudo add-apt-repository ppa:neovim-ppa/stable
     sudo sudo apt update
     sudo sudo apt install neovim
     pip install pynvim
+fi
+
+if ! command -v nvim &> /dev/null; then
+    echo ""
+    echo "install neovim..."
+    wget https://github.com/neovim/neovim/releases/download/v0.9.1/nvim-linux64.tar.gz
+    tar xzvf nvim-linux64.tar.gz
+    rm ./nvim-linux64.tar.gz
+    sudo cp nvim-linux64/bin/nvim /usr/local/bin -r
 fi
 
 
