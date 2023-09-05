@@ -17,7 +17,11 @@ packer.startup(function(use)
    use('joshdick/onedark.vim')
    -- Statusline
    use('hoob3rt/lualine.nvim')
-   use 'neovim/nvim-lspconfig' 
+   use 'onsails/lspkind-nvim'  --vscode-like pictograms
+   use 'hrsh7th/cmp-buffer' -- for buffer words
+   use 'hrsh7th/cmp-nvim-lsp' -- nvim-cmp source for neovim's build-in LSP
+   use 'hrsh7th/nvim-cmp' -- Completion
+   use 'neovim/nvim-lspconfig' --LSP
 
    use {"kyazdani42/nvim-tree.lua"}
 

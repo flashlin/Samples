@@ -11,7 +11,7 @@ function FileIsNotExists {
     return $False
 }
 
-function IsDirectoryNotExists{
+function IsDirectoryNotExists {
     param(
         [string]$dir
     )
@@ -23,7 +23,7 @@ function IsDirectoryNotExists{
 
 function RemoveSystemEnvironment {
     param (
-       [string]$pathPattern 
+        [string]$pathPattern 
     )
     $envName = "PATH"
     $envValue = [Environment]::GetEnvironmentVariable($envName, "Machine")
@@ -61,9 +61,8 @@ function InvokeCmdAsAdmin {
     Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"$cmd`"" -Verb RunAs
 }
 
-
 $targetPath = "C:\Program Files\nvim-win64"
-if( IsDirectoryNotExists $targetPath ) {
+if ( IsDirectoryNotExists $targetPath ) {
     Info "Downloading nvim-win64"
     $targetFile = "./nvim-win64.zip"
     if (-not (Test-Path -Path $targetFile)) {
@@ -81,16 +80,16 @@ if( IsDirectoryNotExists $targetPath ) {
 
 #InvokeCmd $cmd
 $RoamingPath = $env:APPDATA
-$AppDataPath = $RoamingPath+"\.."
-$AppLocalPath = $AppDataPath+"\Local"
-$NeoVimConfigPath = $AppLocalPath+"\nvim"
+$AppDataPath = $RoamingPath + "\.."
+$AppLocalPath = $AppDataPath + "\Local"
+$NeoVimConfigPath = $AppLocalPath + "\nvim"
 
 Info "copy init.vim to $NeoVimConfigPath"
 Copy-Item -Path ./neovim-data/* -Destination $NeoVimConfigPath -Recurse -Container -Force
 
 
 $NeoVimAutoloadPath = "$NeoVimConfigPath\autoload"
-if( IsDirectoryNotExists $NeoVimAutoloadPath ) {
+if ( IsDirectoryNotExists $NeoVimAutoloadPath ) {
     Info "Install PlugInstall Manager..."
     CreateDirectory $NeoVimAutoloadPath
     $uri = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
@@ -99,7 +98,7 @@ if( IsDirectoryNotExists $NeoVimAutoloadPath ) {
 
 InstallChocolatey
 
-if( -Not (IsChocoPackageExists "fzf") ) {
+if ( -Not (IsChocoPackageExists "fzf") ) {
     choco install fzf
 }
 
