@@ -17,6 +17,8 @@ packer.startup(function(use)
    use('joshdick/onedark.vim')
    -- Statusline
    use('hoob3rt/lualine.nvim')
+   use 'kyazdani42/nvim-web-devicons' -- File icons
+   use 'L3MON4D3/LuaSnip' -- snippet
    use 'onsails/lspkind-nvim'  --vscode-like pictograms
    use 'hrsh7th/cmp-buffer' -- for buffer words
    use 'hrsh7th/cmp-nvim-lsp' -- nvim-cmp source for neovim's build-in LSP
