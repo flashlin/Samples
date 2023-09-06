@@ -12,7 +12,6 @@ packer.startup(function(use)
 
    -- Load on specific commands
    use { 'folke/lazy.nvim', lazy = false, priority = 1000, opts = {} }
-
    -- Theme Dark
    use('joshdick/onedark.vim')
    -- Statusline
@@ -21,6 +20,11 @@ packer.startup(function(use)
    use 'nvim-lua/plenary.nvim' -- common utilities
    use 'nvim-telescope/telescope.nvim'
    use 'nvim-telescope/telescope-file-browser.nvim'
+   use {"kyazdani42/nvim-tree.lua"}
+   use({
+      'glepnir/zephyr-nvim',
+      requires = { 'nvim-treesitter/nvim-treesitter', opt = true },
+   })
 
    use 'kyazdani42/nvim-web-devicons' -- File icons
    use 'L3MON4D3/LuaSnip' -- snippet
@@ -30,13 +34,6 @@ packer.startup(function(use)
    --use 'hrsh7th/cmp-nvim-lsp' -- nvim-cmp source for neovim's build-in LSP
    --use 'hrsh7th/nvim-cmp' -- Completion
    --use 'neovim/nvim-lspconfig' --LSP
-
-   use {"kyazdani42/nvim-tree.lua"}
-
-   use({
-      'glepnir/zephyr-nvim',
-      requires = { 'nvim-treesitter/nvim-treesitter', opt = true },
-   })
    
 end)
 
