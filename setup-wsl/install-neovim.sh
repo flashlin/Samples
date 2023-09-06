@@ -17,7 +17,12 @@ if [ ! -f "/usr/local/bin/win32yank.exe" ]; then
     unzip -p /tmp/win32yank.zip win32yank.exe > /tmp/win32yank.exe
     chmod +x /tmp/win32yank.exe
     sudo mv /tmp/win32yank.exe /usr/local/bin/
-fi    
+fi
+
+if ! command -v rg &> /dev/null; then
+    echo "install ripgrep"
+    sudo apt-get install ripgrep
+fi
 
 # install vim-plug
 # curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
