@@ -45,12 +45,12 @@ if ! command -v nvim &> /dev/null; then
 fi
 
 
-echo "install packer.nvim that plugin manager"
-if [ ! -d "~/.config/nvim/site/pack/packer/" ]; then
+if [ ! -d "$HOME/.local/share/nvim/site/pack/packer" ]; then
+    echo "install packer.nvim that plugin manager"
     git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim
 fi
 
-# if [ ! -d "~/.config/nvim/packer/start" ]; then
+# if [ ! -d "$HOME/.config/nvim/packer/start" ]; then
 #     echo "install Packer Manager"
 #     ./create-path.sh ~/.config/nvim/packer/start
 #     git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.config/nvim/packer/start/packer.nvim
