@@ -45,18 +45,16 @@ if ! command -v nvim &> /dev/null; then
 fi
 
 
-# echo "install packer.nvim that plugin manager"
-# if [ -d ~/.config/nvim/site/pack/packer/ ]; then
-#     # git clone --depth 1 https://github.com/wbthomason/packer.nvim \
-#     #     ~/.local/share/nvim/site/pack/packer/start/packer.nvim
-# fi
-
-
-if [ -d ~/.config/nvim/packer/start ]; then
-    echo "install Packer Manager"
-    git clone --depth 1 https://github.com/wbthomason/packer.nvim \ 
-        ~/.config/nvim/packer/start/packer.nvim
+echo "install packer.nvim that plugin manager"
+if [ ! -d "~/.config/nvim/site/pack/packer/" ]; then
+    git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.local/share/nvim/site/pack/packer/start/packer.nvim
 fi
+
+# if [ ! -d "~/.config/nvim/packer/start" ]; then
+#     echo "install Packer Manager"
+#     ./create-path.sh ~/.config/nvim/packer/start
+#     git clone --depth 1 https://github.com/wbthomason/packer.nvim ~/.config/nvim/packer/start/packer.nvim
+# fi
 
 
 echo "clean ~/.config/nvim"
@@ -64,20 +62,12 @@ if [ -d ~/.config/nvim/ ]; then
   rm -rf ~/.config/nvim/
 fi
 
-echo "create ~/.config"
-if [ ! -d ~/.config/ ]; then
-    mkdir ~/.config/
-fi
-if [ ! -d ~/.config/nvim/ ]; then
-    mkdir ~/.config/nvim/
-fi
-if [ ! -d ~/.config/nvim/lua ]; then
-    mkdir ~/.config/nvim/lua/
-fi
+echo "create ~/.config/nvim"
+./create-path.sh ~/.config/nvim/lua/
 
 echo "copy init.vim to ~/.config/nvim/init.vim"
 cp -Rf ./neovim-lua/* ~/.config/nvim
 
-nvim -c 'PlugInstall' -c 'qa!'
+#nvim -c 'PackerInstall' -c 'qa!'
 echo ""
-echo "# please run nvim, then input :PlugInstall"
+echo "# please run nvim, then input :PackerInstall"
