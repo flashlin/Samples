@@ -22,22 +22,26 @@ fi
 # install vim-plug
 # curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
-if ! command -v nvim &> /dev/null; then
-    echo ""
-    echo "install neovim..."
-    sudo sudo add-apt-repository ppa:neovim-ppa/stable
-    sudo sudo apt update
-    sudo sudo apt install neovim
-    pip install pynvim
-fi
+# 0.4.0 version
+# if ! command -v nvim &> /dev/null; then
+#     echo ""
+#     echo "install neovim..."
+#     sudo sudo add-apt-repository ppa:neovim-ppa/stable
+#     sudo sudo apt update
+#     sudo sudo apt install neovim
+#     pip install pynvim
+# fi
 
 if ! command -v nvim &> /dev/null; then
     echo ""
     echo "install neovim..."
     wget https://github.com/neovim/neovim/releases/download/v0.9.1/nvim-linux64.tar.gz
     tar xzvf nvim-linux64.tar.gz
+    sudo mv nvim-linux64 /usr/local/nvim
     rm ./nvim-linux64.tar.gz
-    sudo cp nvim-linux64/bin/nvim /usr/local/bin -r
+    # 軟連接
+    sudo ln -s /usr/local/nvim/bin/nvim /usr/bin/nvim
+    nvim -v
 fi
 
 
@@ -64,11 +68,8 @@ if [ ! -d ~/.config/nvim/lua ]; then
     mkdir ~/.config/nvim/lua/
 fi
 
-echo "~/.config/nvim/lua/plugins.lua"
-
-
 echo "copy init.vim to ~/.config/nvim/init.vim"
-cp -Rf ./neovim-data/* ~/.config/nvim
+cp -Rf ./neovim-lua/* ~/.config/nvim
 
 nvim -c 'PlugInstall' -c 'qa!'
 echo ""

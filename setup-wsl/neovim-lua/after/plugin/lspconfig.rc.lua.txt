@@ -2,10 +2,11 @@ local status, nvim_lsp = pcall(require, 'lsconfig')
 if (not status) then return end
 local protocol = require('vim.lsp.protocol')
 local on_attach = function(client, bufnr)
+    -- formatting
     if client.server_capabilities.documentFromattingProvider then
         vim.api.nvim_command [[augroup Format]]
         vim.api.nvim_command [[autocmd! * <buffer>]]
-        vim.api.nvim_command [[autocmd BufWritePRe <buffer> lua vim.lsp.buf.formtting_se_sync()]]
+        vim.api.nvim_command [[autocmd BufWritePRe <buffer> lua vim.lsp.buf.formtting_seq_sync()]]
         vim.api.nvim_command [[augroup END]]
     end
 end    
