@@ -19,7 +19,7 @@ telescope.setup{
    },
    extensions = {
       file_browser = {
-         Theme = 'dropdown',
+         theme = 'dropdown',
          -- disables netrw and add use file-browser
          hijack_netrw = true,
          mappings = {
@@ -41,7 +41,7 @@ telescope.setup{
 
 telescope.load_extension('file_browser')
 local opts = { noremap = true, silent = true }
-vim.keymap.set('n', ';f', '<cmd>lua require("telescope.builtin").find_files({ no_ignore=false, hidden=true })<CR>', 
+vim.keymap.set('n', '<C-p>', '<cmd>lua require("telescope.builtin").find_files({ ignore = true, hidden = false })<cr>', 
    opts)
 
 
