@@ -12,11 +12,11 @@ packer.startup(function(use)
 
    -- Load on specific commands
    use { 'folke/lazy.nvim', lazy = false, priority = 1000, opts = {} }
-   -- Theme Dark
-   use('joshdick/onedark.vim')
-   -- Statusline
-   use('hoob3rt/lualine.nvim')
+   use('joshdick/onedark.vim') -- Theme Dark
+   use('hoob3rt/lualine.nvim') -- Statusline
+   -- use 'akinsho/nvim-bufferline.lua'
 
+   -- file browser 
    use 'nvim-lua/plenary.nvim' -- common utilities
    use 'nvim-telescope/telescope.nvim'
    use 'nvim-telescope/telescope-file-browser.nvim'
