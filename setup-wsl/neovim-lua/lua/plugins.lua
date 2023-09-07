@@ -31,7 +31,7 @@ packer.startup(function(use)
    use 'L3MON4D3/LuaSnip' -- snippet
 
    use 'lewis6991/gitsigns.nvim'
-   use 'dinhhuy1558/git.nvim' 
+   use 'dinhhuy258/git.nvim' 
 
    use 'neovim/nvim-lspconfig' --LSP :LspInstallInfo
    use 'jose-elias-alvarez/null-ls.nvim' -- Use neovim as a lanuage server
