@@ -30,12 +30,15 @@ packer.startup(function(use)
    use 'kyazdani42/nvim-web-devicons' -- File icons
    use 'L3MON4D3/LuaSnip' -- snippet
 
+   use 'neovim/nvim-lspconfig' --LSP :LspInstallInfo
+   use 'jose-elias-alvarez/null-ls.nvim' -- Use neovim as a lanuage server
+   use 'MunifTanjim/prettier.nvim' -- prettier plugin for neovim's build-in LSP client
+
    use 'onsails/lspkind-nvim'  --vscode-like pictograms
    --use 'glepnir/lspsaga.nvim' -- LSP UIs
    use 'hrsh7th/cmp-buffer' -- for buffer words
    use 'hrsh7th/cmp-nvim-lsp' -- nvim-cmp source for neovim's build-in LSP
    use 'hrsh7th/nvim-cmp' -- Completion
-   use 'neovim/nvim-lspconfig' --LSP :LspInstallInfo
    use 'williamboman/nvim-lsp-installer' -- HELP install LSP
    
 end)
