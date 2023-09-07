@@ -25,4 +25,6 @@ nvm install 14.14.0
 nvm use 14.14.0
 node -v
 
+npm install -g @fsouza/prettierd
+
 echo "done. please re-login."
