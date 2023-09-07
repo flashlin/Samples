@@ -26,6 +26,7 @@ packer.startup(function(use)
       requires = { 'nvim-treesitter/nvim-treesitter', opt = true },
    })
 
+   use 'windwp/nvim-autopairs'
    use 'kyazdani42/nvim-web-devicons' -- File icons
    use 'L3MON4D3/LuaSnip' -- snippet
 
