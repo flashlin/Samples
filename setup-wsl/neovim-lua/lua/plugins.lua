@@ -16,6 +16,15 @@ packer.startup(function(use)
    use('hoob3rt/lualine.nvim') -- Statusline
    -- use 'akinsho/nvim-bufferline.lua'
 
+   use {
+      'phaazon/hop.nvim',
+      branch = 'v2', -- optional but strongly recommended
+      config = function()
+        -- you can configure Hop the way you like here; see :h hop-config
+        require'hop'.setup { keys = 'etovxqpdygfblzhckisuran' }
+      end
+    }
+
    -- file browser 
    use 'nvim-lua/plenary.nvim' -- common utilities
    use 'nvim-telescope/telescope.nvim'
