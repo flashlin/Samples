@@ -4,6 +4,6 @@ if (not status) then return end
 git.setup {
    keymaps = {
       blame = "<Leader>gb",
-      browse = "<Leader>go"
+      browse = "<C-g>"
    }
 }
