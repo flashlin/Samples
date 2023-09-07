@@ -13,7 +13,7 @@ export NVM_DIR="$HOME/.nvm"
 
 echo "checking nvm..."
 exists=$(command -v nvm | tr -d '\n') # 去除換行
-if [ -n "$exists" ]; then
+if [ -z "$exists" ]; then # 檢查是否為空的
     echo "nvm command not found. Installing nvm..."
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
     source ~/.bashrc 
