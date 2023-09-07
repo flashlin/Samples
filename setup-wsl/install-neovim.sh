@@ -24,6 +24,12 @@ if ! command -v rg &> /dev/null; then
     sudo apt-get install ripgrep
 fi
 
+if ! command -v j &> /dev/null; then
+    echo "install autojump"
+    sudo apt-get install autojump
+    echo '. /usr/share/autojump/autojump.sh' >> ~/.bashrc
+fi
+
 # install vim-plug
 # curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 
