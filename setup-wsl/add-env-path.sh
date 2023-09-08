@@ -8,9 +8,10 @@ newPath=$1
 eval newPath="$newPath"
 
 if [[ ":$PATH:" != *":$newPath:"* ]]; then
-    echo "Adding $newPath to PATH..."
-    echo 'export PATH="$newPath:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
+   echo "Adding $newPath to PATH..."
+   context="export PATH='$newPath:\$PATH'"
+   echo $context >> ~/.bashrc
+   source ~/.bashrc
 fi
 
 echo "done."
