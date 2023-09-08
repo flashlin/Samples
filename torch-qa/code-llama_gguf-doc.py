@@ -7,18 +7,21 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 
 loader = GenericLoader.from_filesystem(
-    path="data/",
+    path="data",
     glob="**/*",
-    suffixes=["*.py"],
+    suffixes=[".py"],
     parser=LanguageParser(language=Language.PYTHON, parser_threshold=500)
 )
 documents = loader.load()
+print(f"{documents=}")
+
 python_splitter = RecursiveCharacterTextSplitter.from_language(
     language=Language.PYTHON,
     chunk_size=2000,
     chunk_overlap=200
 )
 texts = python_splitter.split_documents(documents)
+print(f"{texts=}")
 
 from langchain.vectorstores import Chroma
 from langchain.embeddings.openai import OpenAIEmbeddings
@@ -39,8 +42,8 @@ retriever = db.as_retriever(
     search_kwargs={"k": 8},
 )
 
-from lanchain.llms import LlamaCpp
-from lanchain import PromptTemplate, LLMChain
+from langchain.llms import LlamaCpp
+from langchain import PromptTemplate, LLMChain
 from langchain.callbacks.manager import CallbackManager
 from langchain.memory import ConversationSummaryMemory
 from langchain.chains import ConversationalRetrievalChain
