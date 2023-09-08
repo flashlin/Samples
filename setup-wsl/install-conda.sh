@@ -10,4 +10,5 @@ if [ ! -d "$HOME/miniconda3" ]; then
    ~/miniconda3/bin/conda init bash
 fi
 
-echo "done"
+nvidia-smi
+echo "install conda done. please relogin shell ==="
