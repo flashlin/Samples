@@ -18,5 +18,12 @@ sudo apt-get install -y python3-pip
 ./install-node.sh
 ./install-neovim.sh
 
+desired_ps1='PS1="\n$ "'
+if ! grep -q "$desired_ps1" ~/.bashrc; then
+    echo "setup bash shell newline"
+    echo "$desired_ps1" >> ~/.bashrc
+    source ~/.bashrc
+fi
+
 #chmod +x /mnt/d/VDisk/Github/Samples/bash/*.sh
 echo "Done"
