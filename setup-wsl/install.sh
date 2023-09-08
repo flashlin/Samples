@@ -18,10 +18,9 @@ sudo apt-get install -y python3-pip
 ./install-node.sh
 ./install-neovim.sh
 
-desired_ps1='PS1="\n$ "'
-if ! grep -q "$desired_ps1" ~/.bashrc; then
+if ! isFileContains ~/.bashrc 'PS1="\\n\$ "'; then
     echo "setup bash shell newline"
-    echo "$desired_ps1" >> ~/.bashrc
+    echo 'PS1="\n$ "' >> ~/.bashrc
     source ~/.bashrc
 fi
 
