@@ -8,7 +8,7 @@ if ! command -v unzip &> /dev/null; then
     echo ""
     echo "# update apt"
     sudo apt update
-    sudo apt upgrade
+    sudo apt upgrade -y
     sudo apt install -y unzip
 fi
 
@@ -46,8 +46,8 @@ if ! command -v nvim &> /dev/null; then
     echo ""
     echo "install neovim..."
     wget https://github.com/neovim/neovim/releases/download/v0.9.1/nvim-linux64.tar.gz
-    sudo tar xzvf nvim-linux64.tar.gz -C /usr/local/nvim
-    # sudo mv nvim-linux64 /usr/local/nvim
+    sudo tar xzvf nvim-linux64.tar.gz
+    sudo mv nvim-linux64 /usr/local/nvim
     rm ./nvim-linux64.tar.gz
     # 軟連接
     sudo ln -s /usr/local/nvim/bin/nvim /usr/bin/nvim
