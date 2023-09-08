@@ -7,7 +7,7 @@ if ! command -v unzip &> /dev/null; then
     echo "# update apt"
     sudo apt update
     sudo apt upgrade
-    sudo apt install unzip
+    sudo apt install -y unzip
 fi
 
 if [ ! -f "/usr/local/bin/win32yank.exe" ]; then
@@ -21,12 +21,12 @@ fi
 
 if ! command -v rg &> /dev/null; then
     echo "install ripgrep"
-    sudo apt-get install ripgrep
+    sudo apt-get install -y ripgrep
 fi
 
 if ! command -v j &> /dev/null; then
     echo "install autojump"
-    sudo apt-get install autojump
+    sudo apt-get install -y autojump
     echo '. /usr/share/autojump/autojump.sh' >> ~/.bashrc
 fi
 
