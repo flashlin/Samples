@@ -4,6 +4,8 @@ set -e
 
 if [ $# -lt 1 ]; then
    echo "Usage: $0 <arg1>"
+   echo "i    :install torch env"
+   echo "cuda :install cuda"
    exit 0
 fi
 
@@ -19,13 +21,15 @@ fi
 
 if [ "cuda" == "$action" ]; then
     echo "install CUDA"
-    conda install -c "nvidia/label/cuda-12.0.1" cuda
-    conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
+    # conda install -c "nvidia/label/cuda-12.0.1" cuda
+    # conda install -c "nvidia/label/cuda-11.0.1" cuda
+    ~/miniconda3/bin/conda install pytorch torchvision torchaudio pytorch-cuda=11.7 -c pytorch -c nvidia
     exit 0
 fi
 
 if [ "t" == "$action" ]; then
-    conda activate torch
+    echo ""
+    ~/miniconda3/bin/activate torch
     exit 0
 fi
 
