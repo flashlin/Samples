@@ -60,6 +60,7 @@ llm = LlamaCpp(
     model_path=model_path,
     n_ctx=5000,
     n_gpu_layers=1,
+    #n_threads=4,
     n_batch=512,
     f16_kv=True,
     callback_manager=callback_manager,
@@ -67,6 +68,7 @@ llm = LlamaCpp(
 )
 memory = ConversationSummaryMemory(llm=llm, memory_key="chat_history", return_messages=True)
 qa = ConversationalRetrievalChain.from_llm(llm, retriever=retriever, memory=memory)
+print("LLM loaded=========")
 
 B_INST, E_INST = "[INST]", "[/INST]"
 B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
@@ -95,4 +97,21 @@ QA_CHAIN_PROMPT = PromptTemplate(
 #Docs
 question = "How can I initialize a WebProject?"
 docs = retriever.get_relevant_documents(question)
+
+print("Chain")
+# Chain
+chain = load_qa_chain(
+    llm,
+    chain_type="stuff",
+    prompt=QA_CHAIN_PROMPT
+)
+
+print("Run")
+# Run
+chain({
+    "input_documents": docs,
+    "question": question
+    },
+    return_only_outputs=True
+)
 
