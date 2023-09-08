@@ -1,13 +1,15 @@
 #!/bin/bash
 # set exit when exception
 set -e
-
-echo "install nodejs"
 source ~/.nvm/nvm.sh
-nvm install 14.14.0
+
+desired_version="14.14.0"
+installed_version=$(nvm ls | grep "$desired_version")
+if [[ -z "$installed_version" ]]; then
+    echo "install node 14.14.0"
+    nvm install 14.14.0
+fi
 nvm use 14.14.0
 
-echo "install prettierd"
 npm install -g @fsouza/prettierd
-
-echo "done. please re-login."
+echo "done"
