@@ -17,12 +17,7 @@ sudo apt-get install -y python3-pip
 ./install-nvm.sh
 ./install-node.sh
 ./install-neovim.sh
-
-if ! isFileContains ~/.bashrc 'PS1="\\n\$ "'; then
-    echo "setup bash shell newline"
-    echo 'PS1="\n$ "' >> ~/.bashrc
-    source ~/.bashrc
-fi
+./setup-bash.sh
 
 #chmod +x /mnt/d/VDisk/Github/Samples/bash/*.sh
-echo "Done"
+echo "install done"

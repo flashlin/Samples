@@ -21,4 +21,4 @@ if [ -z "$exists" ]; then # 檢查是否為空的
     echo "please relogin bash shell to use nvm!"
 fi
 
-echo "done"
+echo "install nvm done"
