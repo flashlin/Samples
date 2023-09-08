@@ -5,14 +5,7 @@ set -e
 sudo apt-get update
 sudo apt-get install python3-pip
 
-
-if [[ ":$PATH:" != *":/mnt/d/VDisk/GitHub/Samples/bash:"* ]]; then
-    echo "Adding /mnt/d/VDisk/.../bash to PATH..."
-    echo 'export PATH="/mnt/d/VDisk/GitHub/Samples/bash:$PATH"' >> ~/.bashrc
-    source ~/.bashrc
-    echo "PATH updated."
-fi
-
+./add-env-path.sh /mnt/d/VDisk/GitHub/Samples/bash
 ./install-node.sh
 ./install-neovim.sh
 
