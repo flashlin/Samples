@@ -2,6 +2,8 @@
 # set exit when exception
 set -e
 
+source ./common.sh
+
 if ! command -v unzip &> /dev/null; then
     echo ""
     echo "# update apt"
@@ -24,7 +26,8 @@ if ! command -v rg &> /dev/null; then
     sudo apt-get install -y ripgrep
 fi
 
-if ! command -v j &> /dev/null; then
+if ! isFileExists /usr/share/autojump/autojump.sh; then
+#if ! command -v j &> /dev/null; then
     echo "install autojump"
     sudo apt-get install -y autojump
     echo '. /usr/share/autojump/autojump.sh' >> ~/.bashrc
