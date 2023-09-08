@@ -12,4 +12,4 @@ fi
 nvm use 14.14.0
 
 npm install -g @fsouza/prettierd
-echo "done"
+echo "install node done"
