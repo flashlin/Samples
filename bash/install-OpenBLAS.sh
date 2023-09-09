@@ -7,6 +7,9 @@ git clone https://github.com/xianyi/OpenBLAS.git
 cd OpenBLAS
 make FC=gfortran
 sudo make PREFIX=/usr/local install
+cd ..
+rm -rf OpenBLAS
 
 # 查看版本
 grep OPENBLAS_VERSION /usr/local/include/openblas_config.h
+
