@@ -16,6 +16,9 @@ cuda="cuda-12.2"
 wget https://developer.download.nvidia.com/compute/cuda/12.2.2/local_installers/cuda_12.2.2_535.104.05_linux.run
 sudo sh cuda_12.2.2_535.104.05_linux.run
 
+# for WSL2
+# 僅安裝 cuda-toolkit-12-x 元包
+
 # 安装好 CUDA Toolkit 后，屏幕上将输出：
 #Driver:   Installed
 #Toolkit:  Installed in /usr/local/cuda-10.1/
@@ -33,4 +36,4 @@ echo $content >> ~/.bashrc
 content="export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/$cuda/lib64:/usr/lib/x86_64-linux-gnu"
 echo $content >> ~/.bashrc
 
-sudo apt-get install -y build-essential
+# sudo apt-get install -y build-essential
