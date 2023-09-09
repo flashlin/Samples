@@ -28,6 +28,7 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 
 print("embedding")
 embedding_model_name = "BAAI/bge-base-en"
+embedding_model_name = "models/bge-base-en"
 embedding = HuggingFaceBgeEmbeddings(
     model_name=embedding_model_name,
     model_kwargs={'device': 'cuda'},
@@ -56,10 +57,11 @@ from langchain.chains.question_answering import load_qa_chain
 model_path = 'models/CodeLlama-34B-Instruct-GGUF/codellama-34b-instruct.Q4_K_M.gguf'
 
 callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+print("loading llm")
 llm = LlamaCpp(
     model_path=model_path,
     n_ctx=5000,
-    n_gpu_layers=1,
+    n_gpu_layers=10,
     #n_threads=4,
     n_batch=512,
     f16_kv=True,
