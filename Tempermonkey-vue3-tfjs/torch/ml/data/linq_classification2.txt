@@ -1,0 +1,15 @@
+from tb1 in customer select tb1 . name
+from @tb_as1 in @tb1 select @tb_as1 . @fd1
+SELECT [ @tb_as1 ] . [ @fd1 ] FROM [dbo] . [ @tb1 ] AS [ @tb_as1 ] WITH(NOLOCK)
+from tb1 in myUser select new { id = tb1 . id , name = "flash is good" }
+from @tb_as1 in @tb1 select new { @fd_as1  = @tb_as1 . @fd1 , @fd_as2 = @str1 }
+SELECT [ @tb_as1 ] . [ @fd1 ] AS [ @fd_as1 ] , @str1 AS [ @fd_as2 ] FROM [dbo] . [ @tb1 ] AS [ @tb_as1 ] WITH(NOLOCK)
+from tb1 in customer select new { tb1 . name , tb1 . id }
+from @tb_as1 in @tb1 select @tb_as1 . @fd1 , @tb_as1 . @fd2
+SELECT [ @tb_as1 ] . [ @fd1 ] , [ @tb_as1 ] . [ @fd2 ] FROM [dbo] . [ @tb1 ] AS [ @tb_as1 ] WITH(NOLOCK)
+from tb1     in customer select tb1     . name , tb1     . id , tb1 . birth
+from @tb_as1 in @tb1     select @tb_as1 . @fd1 , @tb_as1 . @fd2 , @tb_as1 . @fd3
+SELECT [ @tb_as1 ] . [ @fd1 ] , [ @tb_as1 ] . [ @fd2 ] , [ @tb_as1 ] . [ @fd3 ] FROM [dbo] . [ @tb1 ] AS [ @tb_as1 ] WITH(NOLOCK)
+from tb1     in customer join tb2     in product on tb1     . id   equals tb2     . id   select tb1     . name , tb2     . addr
+from @tb_as1 in @tb1     join @tb_as2 in @tb2    on @tb_as1 . @fd1 equals @tb_as2 . @fd1 select @tb_as1 . @fd2 , @tb_as2 . @fd3
+SELECT [ @tb_as1 ] . [ @fd2 ] , [ @tb_as2 ] . [ @fd3 ] FROM [dbo] . [ @tb1 ] AS [ @tb_as1 ] WITH(NOLOCK) JOIN [ @tb2 ] AS [ @tb_as2 ] WITH(NOLOCK) ON [ @tb_as1 ] . [ @fd1 ] = [ @tb_as2 ] . [ @fd1 ]

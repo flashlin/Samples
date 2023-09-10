@@ -1,0 +1,79 @@
+"有幾個 table ?"
+from tb1 in customer select tb1.name
+1
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    tb1.name,  tb2.address }
+2
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    userName = tb1.name,  tb2.address }
+1
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    price    = tb1.p1    + tb2.p2   }
+2
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    price    = tb1.p1    - tb2.p2   }
+2
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    price    = tb1.p1    * tb2.p2   }
+2
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    price    = tb1.p1    / tb2.p2   }
+2
+from tb1     in customer select new { tb1.id,       tb1.name     }
+1
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth     }
+1
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr     }
+1
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2    }
+1
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6  }
+1
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6,   tb1.field7  }
+1
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6,   tb1.field7,   tb1.field8  }
+1
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6,   tb1.field7,   tb1.field8,   tb1.field9  }
+1
+from tb1     in customer select new { id      = tb1.id       }
+1
+from tb1     in customer select new { id      = tb1.id,       tb1.name    }
+1
+from tb1     in customer select new { id      = tb1.id,       tb1.name,      tb1.birth    }
+1
+from tb1     in customer select new { tb1.id,       username = tb1.name }
+1
+from tb1     in customer select new { tb1.id,       username = tb1.name,      tb1.birth     }
+1
+from tb1     in customer select new { uid     = tb1.id,       username = tb1.name,     tb1.birth     }
+1
+from tb1     in customer select new { uid     = tb1.id,       username = tb1.name,     userBirth = tb1.birth     }
+1
+from tb1 in customer select amount  = tb1.price / 1
+1
+from tb1 in customer select amount  = tb1.price - 1
+1
+from tb1 in customer select amount  = tb1.price * 1
+1
+from tb1 in customer select amount  = tb1.price * 1   - 2
+1
+from tb1 in customer select amount  = tb1.price + 1   * 2
+1
+from tb1 in customer select amount  = tb1.price - 1   / 2
+1
+from tb1 in customer select amount  = tb1.price + 1
+1
+from s       in Scores where s.Degree  >= 60  && s.Degree  < 80  select s.name
+1
+from tb1     in customer select amount  = ( tb1.price + 1   ) * 2
+1
+from tb1     in customer select amount  = tb1.price + 1   + 2   + 3
+1
+from tb1     in customer select amount  = tb1.price + 1   + 2   + 3   * 1
+1
+from tb1     in customer select amount  = tb1.price + 1
+1
+from tb1     in customer select amount  = tb1.price + 1   + 2   + 3   * 1   * 4
+1
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb1
+1
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb2
+1
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb3
+1
+from tb1 in customer join tb2 in home on tb1.id equals tb2.id select new { id = 1, price = tb1.p1 / tb2.p2 }
+2
