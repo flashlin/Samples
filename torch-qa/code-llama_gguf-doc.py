@@ -61,8 +61,8 @@ print("loading llm")
 llm = LlamaCpp(
     model_path=model_path,
     n_ctx=5000,
-    n_gpu_layers=10,
-    #n_threads=4,
+    n_gpu_layers=20,
+    n_threads=4,
     n_batch=512,
     f16_kv=True,
     callback_manager=callback_manager,
