@@ -15,7 +15,7 @@
 # /usr/local/cuda-10.4/extras/demo_suite
 # sudo apt-get --yes install build-essential
 
-
+CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install llama-cpp-python
 
 ./install-OpenBLAS.sh
 sudo apt-get install pkg-config
