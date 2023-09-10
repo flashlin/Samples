@@ -1,0 +1,6 @@
+from tb1 in myUser select new{id=tb1.id,name="flash"}
+SELECT tb1.id AS id, 'flash' AS name FROM [dbo].[myUser] AS tb1 WITH(NOLOCK)
+from tb2 in customer select tb2
+SELECT tb2.* FROM [dbo].[customer] AS tb2 WITH(NOLOCK)
+from tb3 in (from tb2 in customer select new{tb2.id,tb2.name,tb2.birth}) select tb3.id
+SELECT tb3.id AS id FROM (SELECT tb2.id AS id,tb2.name AS name,tb2.birth as birth FROM customer WITH(NOLOCK))

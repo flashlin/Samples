@@ -1,0 +1,76 @@
+from tb1     in customer select tb1.name
+from @tb_as1 in @tb1     select @tb_as1.@fd1
+from tb1     in customer select new { tb1.id,       tb1.name     }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2 }
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth     }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3 }
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr     }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3, @tb_as1.@fd4 }
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2    }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3, @tb_as1.@fd4, @tb_as1.@fd5 }
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6  }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3, @tb_as1.@fd4, @tb_as1.@fd5, @tb_as1.@fd6 }
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6,   tb1.field7  }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3, @tb_as1.@fd4, @tb_as1.@fd5, @tb_as1.@fd6, @tb_as1.@fd7 }
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6,   tb1.field7,   tb1.field8  }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3, @tb_as1.@fd4, @tb_as1.@fd5, @tb_as1.@fd6, @tb_as1.@fd7, @tb_as1.@fd8 }
+from tb1     in customer select new { tb1.id,       tb1.name,      tb1.birth,    tb1.addr,     tb1.addr2,    tb1.field6,   tb1.field7,   tb1.field8,   tb1.field9  }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3, @tb_as1.@fd4, @tb_as1.@fd5, @tb_as1.@fd6, @tb_as1.@fd7, @tb_as1.@fd8, @tb_as1.@fd9 }
+from tb1     in customer select new { id      = tb1.id       }
+from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1 }
+from tb1     in customer select new { id      = tb1.id,       tb1.name    }
+from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1, @tb_as1.@fd2 }
+from tb1     in customer select new { id      = tb1.id,       tb1.name,      tb1.birth    }
+from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1, @tb_as1.@fd2,  @tb_as1.@fd3 }
+from tb1     in customer select new { tb1.id,       username = tb1.name }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @fd_as1  = @tb_as1.@fd2 }
+from tb1     in customer select new { tb1.id,       username = tb1.name,      tb1.birth     }
+from @tb_as1 in @tb1     select new { @tb_as1.@fd1, @fd_as1  = @tb_as1.@fd2,  @tb_as1.@fd3 }
+from tb1     in customer select new { uid     = tb1.id,       username = tb1.name,     tb1.birth     }
+from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1, @fd_as2  = @tb_as1.@fd2, @tb_as1.@fd3 }
+from tb1     in customer select new { uid     = tb1.id,       username = tb1.name,     userBirth = tb1.birth     }
+from @tb_as1 in @tb1     select new { @fd_as1 = @tb_as1.@fd1, @fd_as2  = @tb_as1.@fd2, @fd_as3   = @tb_as1.@fd3 }
+from tb1 in customer select amount  = tb1.price / 1
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 / @n1
+from tb1 in customer select amount  = tb1.price - 1
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 - @n1
+from tb1 in customer select amount  = tb1.price * 1
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 * @n1
+from tb1 in customer select amount  = tb1.price * 1   - 2
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 * @n1 - @n2
+from tb1 in customer select amount  = tb1.price + 1   * 2
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 + @n1 * @n2
+from tb1 in customer select amount  = tb1.price - 1   / 2
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 - @n1 / @n2
+from tb1 in customer select amount  = tb1.price + 1
+from @tb_as1 in @tb1 select @fd_as1 = @tb1.@fd1 + @n1
+from s       in Scores where s.Degree  >= 60  && s.Degree  < 80  select s.name
+from @tb_as1 in @tb1   where @tb1.@fd1 >= @n1 && @tb1.@fd1 < @n2 select @tb1.@fd2
+from tb1     in customer select amount  = ( tb1.price + 1   ) * 2
+from @tb_as1 in @tb1     select @fd_as1 = ( @tb1.@fd1 + @n1 ) * @n2
+from tb1     in customer select amount  = tb1.price + 1   + 2   + 3
+from @tb_as1 in @tb1     select @fd_as1 = @tb1.@fd1 + @n1 + @n2 + @n3
+from tb1     in customer select amount  = tb1.price + 1   + 2   + 3   * 1
+from @tb_as1 in @tb1     select @fd_as1 = @tb1.@fd1 + @n1 + @n2 + @n3 * @n1
+from tb1     in customer select amount  = tb1.price + 1
+from @tb_as1 in @tb1     select @fd_as1 = @tb1.@fd1 + @n1
+from tb1     in customer select amount  = tb1.price + 1   + 2   + 3   * 1   * 4
+from @tb_as1 in @tb1     select @fd_as1 = @tb1.@fd1 + @n1 + @n2 + @n3 * @n1 * @n4
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb1
+from @tb_as1 in @tb1 from @tb_as2 in @tb2 from @tb_as3 in @tb3 select @tb1
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb2
+from @tb_as1 in @tb1 from @tb_as2 in @tb2 from @tb_as3 in @tb3 select @tb2
+from tb1     in t1   from tb2     in t2   from tb3     in t3   select tb3
+from @tb_as1 in @tb1 from @tb_as2 in @tb2 from @tb_as3 in @tb3 select @tb3
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    tb1.name,  tb2.address }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2 on @tb1.@fd1 equals @tb2.@fd1 select new { @tb1.@fd1, @tb1.@fd2, @tb2.fd3    }
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    userName = tb1.name,  tb2.address }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2 on @tb1.@fd1 equals @tb2.@fd1 select new { @tb1.@fd1, @fd_as1  = @tb1.@fd2, @tb2.fd3    }
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    price    = tb1.p1    + tb2.p2   }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2 on @tb1.@fd1 equals @tb2.@fd1 select new { @tb1.@fd1, @fd_as1  = @tb1.@fd2 + @tb2.fd3 }
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    price    = tb1.p1    - tb2.p2   }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2 on @tb1.@fd1 equals @tb2.@fd1 select new { @tb1.@fd1, @fd_as1  = @tb1.@fd2 - @tb2.fd3 }
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    price    = tb1.p1    * tb2.p2   }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2 on @tb1.@fd1 equals @tb2.@fd1 select new { @tb1.@fd1, @fd_as1  = @tb1.@fd2 * @tb2.fd3 }
+from tb1     in customer join tb2     in home on tb1.id    equals tb2.id    select new { tb1.id,    price    = tb1.p1    / tb2.p2   }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2 on @tb1.@fd1 equals @tb2.@fd1 select new { @tb1.@fd1, @fd_as1  = @tb1.@fd2 / @tb2.fd3 }

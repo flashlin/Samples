@@ -1,0 +1,39 @@
+from tb1     in customer select tb1     . name
+from @tb_as1 in @tb1     select @tb_as1 . @fd1
+
+from tb1     in customer where tb1     . price > 1   select tb1     . name
+from @tb_as1 in @tb1     where @tb_as1 . @fd1  > 1 select @tb_as1 . @fd2
+
+from tb1     in customer where tb1     . price < 1   select tb1     . name
+from @tb_as1 in @tb1     where @tb_as1 . @fd1  < 1 select @tb_as1 . @fd2
+
+from tb1     in customer where tb1     . price = 1 select tb1     . name
+from @tb_as1 in @tb1     where @tb_as1 . @fd1  = 1 select @tb_as1 . @fd2
+
+from tb1     in myUser select new { id      = tb1     . id   , name    = "flash is good" }
+from @tb_as1 in @tb1   select new { @fd_as1 = @tb_as1 . @fd1 , @fd_as2 = @str1           }
+
+from tb1     in customer select new { tb1     . name , tb1     . id   }
+from @tb_as1 in @tb1     select new { @tb_as1 . @fd1 , @tb_as1 . @fd2 }
+
+from tb1     in customer select new { tb1     . name , tb1     . id   , tb1     . birth }
+from @tb_as1 in @tb1     select new { @tb_as1 . @fd1 , @tb_as1 . @fd2 , @tb_as1 . @fd3  }
+
+from tb1     in customer join tb2     in product on tb1     . id   equals tb2     . id   select new { tb1     . name , tb2     . addr }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2    on @tb_as1 . @fd1 equals @tb_as2 . @fd1 select new { @tb_as1 . @fd2 , @tb_as2 . @fd3 }
+
+from tb1     in customer join tb2     in product on tb1     . id   equals tb2     . id   select new { tb1     . name , price   = tb1     . p1   + tb2     . p2   }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2    on @tb_as1 . @fd1 equals @tb_as2 . @fd1 select new { @tb_as1 . @fd2 , @fd_as1 = @tb_as1 . @fd3 + @tb_as2 . @fd4 }
+
+
+from tb1     in customer join tb2     in product on tb1     . id   equals tb2     . id   select new { tb1     . name , price   = tb1     . p1   - tb2     . p2   }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2    on @tb_as1 . @fd1 equals @tb_as2 . @fd1 select new { @tb_as1 . @fd2 , @fd_as1 = @tb_as1 . @fd3 - @tb_as2 . @fd4 }
+
+from tb1     in customer join tb2     in product on tb1     . id   equals tb2     . id   select new { tb1     . name , price   = tb1     . p1   * tb2     . p2   }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2    on @tb_as1 . @fd1 equals @tb_as2 . @fd1 select new { @tb_as1 . @fd2 , @fd_as1 = @tb_as1 . @fd3 * @tb_as2 . @fd4 }
+
+from tb1     in customer join tb2     in product on tb1     . id   equals tb2     . id   select new { tb1     . name , price   = tb1     . p1   / tb2     . p2   }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2    on @tb_as1 . @fd1 equals @tb_as2 . @fd1 select new { @tb_as1 . @fd2 , @fd_as1 = @tb_as1 . @fd3 / @tb_as2 . @fd4 }
+
+from tb1     in customer join tb2     in product on tb1     . id   equals tb2     . id   select new { tb1     . name , price   = ( tb1     . p1   % tb2     . p2   ) }
+from @tb_as1 in @tb1     join @tb_as2 in @tb2    on @tb_as1 . @fd1 equals @tb_as2 . @fd1 select new { @tb_as1 . @fd2 , @fd_as1 = ( @tb_as1 . @fd3 % @tb_as2 . @fd4 ) }
