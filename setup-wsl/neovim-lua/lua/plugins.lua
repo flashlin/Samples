@@ -42,7 +42,16 @@ packer.startup(function(use)
    use 'lewis6991/gitsigns.nvim'
    use 'dinhhuy258/git.nvim' 
 
-   use 'neovim/nvim-lspconfig' --LSP :LspInstallInfo
+   ---------------------------------------------------
+   -- use 'neovim/nvim-lspconfig' --LSP :LspInstallInfo
+   -- :LspInstall --sync sumneko_lua 安裝 lua
+   -- :LspInstall --sync lua_ls 安裝 lua
+   use({
+      "williamboman/nvim-lsp-installer",
+      "neovim/nvim-lspconfig",
+   })
+
+
    use 'jose-elias-alvarez/null-ls.nvim' -- Use neovim as a lanuage server
    use 'MunifTanjim/prettier.nvim' -- prettier plugin for neovim's build-in LSP client
 
@@ -51,7 +60,7 @@ packer.startup(function(use)
    use 'hrsh7th/cmp-buffer' -- for buffer words
    use 'hrsh7th/cmp-nvim-lsp' -- nvim-cmp source for neovim's build-in LSP
    use 'hrsh7th/nvim-cmp' -- Completion
-   use 'williamboman/nvim-lsp-installer' -- HELP install LSP
+   --use 'williamboman/nvim-lsp-installer' -- HELP install LSP
    
 end)
 
