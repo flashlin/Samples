@@ -10,4 +10,4 @@ chainlit
 streamlit
 bs4
 chromadb
-llama-cpp-python
+# llama-cpp-python
