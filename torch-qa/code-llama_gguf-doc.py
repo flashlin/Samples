@@ -61,7 +61,7 @@ print("loading llm")
 llm = LlamaCpp(
     model_path=model_path,
     n_ctx=5000,
-    n_gpu_layers=35,
+    n_gpu_layers=40,
     n_threads=15,
     n_batch=512,
     f16_kv=True,
@@ -97,7 +97,7 @@ QA_CHAIN_PROMPT = PromptTemplate(
 )
 
 #Docs
-question = "How can I initialize a WebProject?"
+question = "How can I use C# to initialize a Web Project?"
 docs = retriever.get_relevant_documents(question)
 
 print("Chain")
@@ -110,10 +110,10 @@ chain = load_qa_chain(
 
 print("Run")
 # Run
-chain({
+result = chain({
     "input_documents": docs,
     "question": question
     },
     return_only_outputs=True
 )
-
+print(f"{result=}")
