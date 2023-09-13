@@ -11,8 +11,8 @@ class: invert
 ---
 # Goal
 
-* 透過 AI 驅動的幫助提高内部 Domain 搜尋和傳承
-* 提高我們的生產力
+* 透過 AI 驅動的幫助, 來提高我們的生產力
+- 幫助内部 Domain 的搜尋和傳承
 - 產生創意的內容
 - 提供 Code 輔助就像 Copilot
 - 提供資料 Report 
