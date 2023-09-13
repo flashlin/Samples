@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Contracts", "Shared.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrpcTests", "GrpcTests\GrpcTests.csproj", "{D1D671AF-AE92-4445-90F9-7657AA117435}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebGrpcServer", "WebGrpcServer\WebGrpcServer.csproj", "{5D15E261-0F99-41DC-998A-D40E100F5275}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{D1D671AF-AE92-4445-90F9-7657AA117435}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1D671AF-AE92-4445-90F9-7657AA117435}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1D671AF-AE92-4445-90F9-7657AA117435}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D15E261-0F99-41DC-998A-D40E100F5275}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D15E261-0F99-41DC-998A-D40E100F5275}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D15E261-0F99-41DC-998A-D40E100F5275}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D15E261-0F99-41DC-998A-D40E100F5275}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
