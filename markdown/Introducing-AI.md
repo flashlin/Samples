@@ -110,7 +110,7 @@ table {
 # 成功的定義
 根據現在收集的[有幫助/無意見/沒幫助]的次數來評估成果
 * 如果[有幫助]的次數比[沒幫助]的多
-* Chat + Data + Code = 每日查詢次數 100 次
+* Chat + Data QA + Code QA + Private Code Copilot = 每日查詢次數 100 次
 我們可以視為成功
 
 ---
