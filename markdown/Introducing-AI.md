@@ -3,9 +3,9 @@ marp: true
 theme: uncover
 class: invert
 ---
-# Introducing AI into Company Operations
+### Introducing AI into Company Operations
 
-![img](ai.jpg)
+![w:500 h:300](ai.jpg)
 
 
 ---
@@ -77,28 +77,33 @@ table {
 
 ---
 ## milestone4
--- 建立資料問答型的 WebSite 第一版
-與 .csv 資料檔案連接, 提供跟資料內容有關的問答
+- 建立資料問答型的 WebSite 
+- 與 .csv 資料檔案連接, 提供跟資料內容有關的問答
 
 ---
-## milestone5
+## mileston5
+- 將 Code AI 外掛上去到 VSCode, 就像 Copilot 輔助
+- 製作說明使用安裝 PPT
+
+
+---
+## milestone6
 - 將 domain knowledge 資料轉換為知識訓練資料的格式
 - 轉換輸入的回饋答案為知識訓練資料的格式
 - 進行再一次的模型訓練或微調
-- 進行升級問答型的 WebSite 第三版
+- 升級 WebSite 
 
 ---
-## mileston6
+## milestone7
 1. 收集已輸入的問題和 Code 問題回饋, 以檢查是否需要進行進一步的訓練或微調
-2. 將 Code AI 外掛上去到 VSCode 
-3. 等待外面開放訓練模型版本更新, 再一次進行升級迭代
+2. 等待外面開放訓練模型版本更新, 再一次進行升級迭代
 
 ---
 # 成功的定義
 根據現在收集的[有幫助/無意見/沒幫助]的次數來評估成果
 * 如果[有幫助]的次數比[沒幫助]的多
-* Chat + Data + Code  每日查詢次數 100 次
-我們可以初步視為成功
+* Chat + Data + Code = 每日查詢次數 100 次
+我們可以視為成功
 
 ---
 經過這次建置過程, 我們將會獲得下面的東西
