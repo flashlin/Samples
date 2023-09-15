@@ -1,5 +1,9 @@
+using WebGrpcContract;
+
 namespace WebGrpcClient.Manually;
 using grpc = global::Grpc.Core;
+using pb = global::Google.Protobuf;
+
 
 public partial class GrpcClientBase : grpc::ClientBase<GrpcClientBase>
 {
@@ -56,9 +60,16 @@ public partial class GrpcClientBase : grpc::ClientBase<GrpcClientBase>
 #endif
         return parser.ParseFrom(context.PayloadAsNewBuffer());
     }
+    
+    private static readonly pb::MessageParser<HelloRequest> _parser = new pb::MessageParser<HelloRequest>(() => new HelloRequest());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public static pb::MessageParser<BettingBudgetRequest> Parser { get { return _parser; } }
+
 
     static readonly grpc::Marshaller<global::WebGrpcContract.HelloRequest> __Marshaller_BettingBudgetRequest = 
-        grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::MemberCenterApi.Messages.BettingBudgetRequest.Parser));
+        grpc::Marshallers.Create(__Helper_SerializeMessage, context => __Helper_DeserializeMessage(context, global::BettingBudgetRequest.Parser));
     
     static readonly grpc::Method<global::WebGrpcContract.HelloRequest, global::WebGrpcContract.HelloResponse> __Method_Get = 
         new grpc::Method<global::WebGrpcContract.HelloRequest, global::WebGrpcContract.HelloResponse>(
