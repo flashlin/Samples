@@ -5,16 +5,10 @@ using static Pidgin.Parser;
 
 //https://github.com/benjamin-hodgson/Pidgin/blob/main/Pidgin.Examples/Expression/ExprParser.cs
 
-public enum BinaryOperatorType
-{
-    Add,
-    Sub,
-    Mul,
-    Divide
-}
 
+namespace PidginDemo.LinqExpressions;
 
-public static class TSqlParser
+public static class LinqParser
 {
     private static Parser<char, T> Tok<T>(Parser<char, T> token)
         => Try(token).Before(SkipWhitespaces);
@@ -35,43 +29,46 @@ public static class TSqlParser
         ).ManyString();
         
     
-    private static readonly Parser<char, SqlExpr> Identifier
+    private static readonly Parser<char, LinqExpr> Identifier
         = Tok(IdentifierPrefix.Then(IdentifierPostfix, (h, t) => h + t))
-            .Select<SqlExpr>(name => new IdentifierExpr(name))
+            .Select<LinqExpr>(name => new IdentifierExpr(name))
             .Labelled("identifier");
     
-    private static readonly Parser<char, SqlExpr> Integer
+    private static readonly Parser<char, LinqExpr> Integer
         = Tok(Num)
-            .Select<SqlExpr>(value => new IntegerExpr(value))
+            .Select<LinqExpr>(value => new IntegerExpr(value))
             .Labelled("integer literal");
     
     private static Parser<char, T> Parenthesised<T>(Parser<char, T> parser)
         => parser.Between(Tok("("), Tok(")"));
     
-    private static Parser<char, Func<SqlExpr, SqlExpr>> Call(Parser<char, SqlExpr> subExpr)
+    private static Parser<char, Func<LinqExpr, LinqExpr>> Call(Parser<char, LinqExpr> subExpr)
         => Parenthesised(subExpr.Separated(Tok(",")))
-            .Select<Func<SqlExpr, SqlExpr>>(args => method => new CallExpr(method, args.ToImmutableArray()))
+            .Select<Func<LinqExpr, LinqExpr>>(args => method => new CallExpr(method, args.ToImmutableArray()))
             .Labelled("function call");
     
-    private static Parser<char, Func<SqlExpr, SqlExpr, SqlExpr>> Binary(Parser<char, BinaryOperatorType> op)
-        => op.Select<Func<SqlExpr, SqlExpr, SqlExpr>>(type => (l, r) => new BinaryOpExpr(type, l, r));
+    private static Parser<char, Func<LinqExpr, LinqExpr, LinqExpr>> Binary(Parser<char, BinaryOperatorType> op)
+        => op.Select<Func<LinqExpr, LinqExpr, LinqExpr>>(type => (l, r) => new BinaryOpExpr(type, l, r));
     
-    private static Parser<char, Func<SqlExpr, SqlExpr>> Unary(Parser<char, UnaryOperatorType> op)
-        => op.Select<Func<SqlExpr, SqlExpr>>(type => o => new UnaryOpExpr(type, o));
+    private static Parser<char, Func<LinqExpr, LinqExpr>> Unary(Parser<char, UnaryOperatorType> op)
+        => op.Select<Func<LinqExpr, LinqExpr>>(type => o => new UnaryOpExpr(type, o));
     
-    private static readonly Parser<char, Func<SqlExpr, SqlExpr, SqlExpr>> AddOp
+    private static readonly Parser<char, Func<LinqExpr, LinqExpr, LinqExpr>> AddOp
         = Binary(Tok("+").ThenReturn(BinaryOperatorType.Add));
     
-    private static readonly Parser<char, Func<SqlExpr, SqlExpr, SqlExpr>> MulOp
+    private static readonly Parser<char, Func<LinqExpr, LinqExpr, LinqExpr>> MulOp
         = Binary(Tok("*").ThenReturn(BinaryOperatorType.Mul));
     
-    private static readonly Parser<char, Func<SqlExpr, SqlExpr>> ComplementOp
+    private static readonly Parser<char, Func<LinqExpr, LinqExpr>> ComplementOp
         = Unary(Tok("~").ThenReturn(UnaryOperatorType.Complement));
     
-    private static readonly Parser<char, Func<SqlExpr, SqlExpr>> NegOp
+    private static readonly Parser<char, Func<LinqExpr, LinqExpr>> NegOp
         = Unary(Tok("-").ThenReturn(UnaryOperatorType.Neg));
 
-    private static readonly Parser<char, SqlExpr> Expr = ExpressionParser.Build<char, SqlExpr>(
+    private static readonly Parser<char, string> FROM
+        = Tok("FROM");
+
+    private static readonly Parser<char, LinqExpr> Expr = ExpressionParser.Build<char, LinqExpr>(
         expr => (
             OneOf(
                 Identifier,
@@ -88,6 +85,6 @@ public static class TSqlParser
         )
     ).Labelled("expression");
     
-    public static SqlExpr ParseOrThrow(string input)
+    public static LinqExpr ParseOrThrow(string input)
         => Expr.ParseOrThrow(input);
 }

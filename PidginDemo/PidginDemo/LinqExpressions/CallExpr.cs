@@ -1,18 +1,20 @@
 using System.Collections.Immutable;
 
-public class CallExpr : SqlExpr
+namespace PidginDemo.LinqExpressions;
+
+public class CallExpr : LinqExpr
 {
-    public SqlExpr Expr { get; }
+    public LinqExpr Expr { get; }
 
-    public ImmutableArray<SqlExpr> Arguments { get; }
+    public ImmutableArray<LinqExpr> Arguments { get; }
 
-    public CallExpr(SqlExpr expr, ImmutableArray<SqlExpr> arguments)
+    public CallExpr(LinqExpr expr, ImmutableArray<LinqExpr> arguments)
     {
         Expr = expr;
         Arguments = arguments;
     }
 
-    public override bool Equals(SqlExpr? other)
+    public override bool Equals(LinqExpr? other)
         => other is CallExpr x
            && Expr.Equals(x.Expr)
            && Arguments.SequenceEqual(x.Arguments);
