@@ -1,4 +1,6 @@
-public class IdentifierExpr : SqlExpr
+namespace PidginDemo.LinqExpressions;
+
+public class IdentifierExpr : LinqExpr
 {
     public string Name { get; }
 
@@ -7,7 +9,7 @@ public class IdentifierExpr : SqlExpr
         Name = name;
     }
 
-    public override bool Equals(SqlExpr? other)
+    public override bool Equals(LinqExpr? other)
         => other is IdentifierExpr x && Name == x.Name;
 
     public override int GetHashCode() => Name.GetHashCode(StringComparison.Ordinal);
