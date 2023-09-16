@@ -69,14 +69,17 @@ public static class LinqParser
     private static readonly Parser<char, string> FROM
         = Tok("from");
 
-
+    private static readonly Parser<char, string> IN
+        = Tok("in");
+    
     private static readonly Parser<char, LinqExpr> SelectExpr
         = Map(
-            (_, identifier) => new SelectExpr {
+            (_, identifier, _) => new SelectExpr {
                 AliasTable = (identifier as IdentifierExpr)!.Name,
             } as LinqExpr, 
             FROM,
-            Identifier
+            Identifier,
+            IN
         );
 
     private static readonly Parser<char, LinqExpr> Expr = ExpressionParser.Build<char, LinqExpr>(
