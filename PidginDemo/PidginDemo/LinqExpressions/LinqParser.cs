@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Runtime.InteropServices.ComTypes;
 using Pidgin;
 using Pidgin.Expression;
 using static Pidgin.Parser;
@@ -66,7 +67,17 @@ public static class LinqParser
         = Unary(Tok("-").ThenReturn(UnaryOperatorType.Neg));
 
     private static readonly Parser<char, string> FROM
-        = Tok("FROM");
+        = Tok("from");
+
+
+    private static readonly Parser<char, LinqExpr> SelectExpr
+        = Map(
+            (_, identifier) => new SelectExpr {
+                AliasTable = (identifier as IdentifierExpr)!.Name,
+            } as LinqExpr, 
+            FROM,
+            Identifier
+        );
 
     private static readonly Parser<char, LinqExpr> Expr = ExpressionParser.Build<char, LinqExpr>(
         expr => (
@@ -86,5 +97,5 @@ public static class LinqParser
     ).Labelled("expression");
     
     public static LinqExpr ParseOrThrow(string input)
-        => Expr.ParseOrThrow(input);
+        => SelectExpr.ParseOrThrow(input);
 }
