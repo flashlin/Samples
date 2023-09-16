@@ -2,7 +2,8 @@ using System.Collections.Immutable;
 using Pidgin;
 using Pidgin.Expression;
 using static Pidgin.Parser;
-using static Pidgin.Parser<char>;
+
+//https://github.com/benjamin-hodgson/Pidgin/blob/main/Pidgin.Examples/Expression/ExprParser.cs
 
 public enum BinaryOperatorType
 {
