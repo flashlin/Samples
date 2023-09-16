@@ -22,11 +22,29 @@ public class UnaryOpExpr : LinqExpr
 
 public class SelectExpr : LinqExpr
 {
-    public string AliasTable { get; set; }
+    public string AliasTable { get; init; }
+    public TableExpr Source { get; init; }
     
     public override bool Equals(LinqExpr? other)
         => other is SelectExpr x
-           && AliasTable.Equals(x.AliasTable);
+           && AliasTable.Equals(x.AliasTable)
+           && Source.Equals(x.Source);
 
-    public override int GetHashCode() => HashCode.Combine(AliasTable);
+    public override int GetHashCode() => HashCode.Combine(AliasTable, Source);
+}
+
+public class TableExpr : LinqExpr
+{
+    public string Database { get; init; } = string.Empty;
+    public string Schema { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    
+    public override bool Equals(LinqExpr? other)
+        => other is TableExpr x
+           && Database.Equals(x.Database)
+           && Schema.Equals(x.Schema)
+           && Name.Equals(x.Name)
+           ;
+
+    public override int GetHashCode() => HashCode.Combine(Database, Schema, Name);
 }
