@@ -6,6 +6,7 @@ from chat_db import SqliteRepo, ChatMessageEntity
 
 @dataclass
 class ConversationMessage:
+    conversation_id: int
     role_name: str
     message: str
 
@@ -28,11 +29,12 @@ class Conversation:
 
     def add_message(self, req: ConversationMessage):
         self.chat_db.add_message(ChatMessageEntity(
-            conversationId=1,
+            conversationId=req.conversation_id,
             roleName=req.role_name,
             messageText=req.message,
             createOn=datetime.now()
         ))
+        return self.get_conversation(req.conversation_id)
 
     def get_conversation(self, conversation_id):
         messages = self.chat_db.get_messages(conversation_id)
