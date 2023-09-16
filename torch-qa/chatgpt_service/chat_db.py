@@ -60,6 +60,7 @@ class SqliteRepo:
         else:
             cursor.execute(sql, parameters)
         cursor.close()
+        self.conn.commit()
         return cursor.lastrowid
 
     def query(self, sql, parameters: dict = None):
@@ -77,7 +78,8 @@ class SqliteRepo:
             item = {}
             for value, name in zip(row, names):
                 item[name] = value
-            result.append(dict_to_obj(item))
+            # result.append(dict_to_obj(item))
+            result.append(item)
         return result
 
     def add_message(self, message: ChatMessageEntity):
@@ -97,10 +99,10 @@ class SqliteRepo:
         return rows
 
     def add_conversation(self, username):
-        last_rowid = self.execute("INSERT INTO conversations(userName) VALUES(:userName)", {
+        last_rowid = self.execute("INSERT INTO conversations(userName, createOn) VALUES(:userName, DateTime('now'))", {
             'userName': username
         })
         rows = self.query("SELECT id FROM conversations WHERE rowid = :rowid", {
             'rowid': last_rowid
         })
-        return rows[0].id
+        return rows[0]['id']
