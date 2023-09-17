@@ -30,8 +30,8 @@ class EmptyLLM(LLM):
 class ChatService:
     llm: LLM = EmptyLLM()
 
-    def __init__(self, db: SqliteRepo, llm: LLM = None):
-        self.conv = Conversation(db)
+    def __init__(self, llm: LLM = None):
+        self.conv = Conversation()
         if llm is not None:
             self.llm = llm
 

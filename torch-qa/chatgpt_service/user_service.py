@@ -21,8 +21,8 @@ class User:
 
 
 class UserService:
-    def __init__(self, db: SqliteRepo):
-        self.db = db
+    def __init__(self):
+        self.db = SqliteRepo()
 
     def get_user(self, username):
         user = self.db.get_user(username)

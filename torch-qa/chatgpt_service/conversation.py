@@ -25,8 +25,8 @@ class ConversationStack:
 
 
 class Conversation:
-    def __init__(self, db: SqliteRepo):
-        self.chat_db = db
+    def __init__(self):
+        self.chat_db = SqliteRepo()
 
     def add_message(self, req: ConversationMessage):
         self.chat_db.add_message(ChatMessageEntity(

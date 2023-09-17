@@ -8,10 +8,6 @@ from user_service import UserService
 app.config['JWT_SECRET_KEY'] = 'my-secret-key'
 jwt = JWTManager(app)
 
-chat_db = SqliteRepo()
-user_service = UserService(chat_db)
-chat_service = ChatService(chat_db)
-
 @app.route('/')
 @app.route('/index')
 def home():
@@ -27,6 +23,7 @@ def login():
     username = req['username']
     password = req['password']
     username = username.lower()
+    user_service = UserService()
     user = user_service.get_user(username)
     if not user.check_password(password):
         return jsonify({'message': 'Invalid username or password'}), 401
@@ -39,6 +36,7 @@ def register():
     username = request.form['username']
     password = request.form['password']
     username = username.lower()
+    user_service = UserService()
     created = user_service.create_user(username, password)
     if not created:
         return jsonify({'message': 'user not created'})
