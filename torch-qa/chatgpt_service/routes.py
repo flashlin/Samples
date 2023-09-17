@@ -1,3 +1,5 @@
+import datetime
+
 from app import app
 from flask import Flask, request, render_template, jsonify
 from flask_jwt_extended import JWTManager
@@ -29,7 +31,10 @@ def login():
     user = user_service.get_user(username)
     if not user.check_password(password):
         return jsonify({'message': 'Invalid username or password'}), 401
-    token = create_access_token(identity=user.username)
+    # datetime.timedelta(minutes=15)
+    token = create_access_token(identity=user.username,
+                                fresh=True,
+                                expires_delta=datetime.timedelta(minutes=10))
     return jsonify({'token': token}), 200
 
 
