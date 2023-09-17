@@ -1,6 +1,9 @@
 from app import app
 from flask import Flask, request, render_template, jsonify
 from flask_jwt_extended import JWTManager
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity
 from chat_db import SqliteRepo
 from chat_service import ChatService
 from user_service import UserService
@@ -19,7 +22,6 @@ def home():
 @app.route("/login", methods=['POST'])
 def login():
     req = request.get_json()
-    print(f"{req=}")
     username = req['username']
     password = req['password']
     username = username.lower()
@@ -27,20 +29,31 @@ def login():
     user = user_service.get_user(username)
     if not user.check_password(password):
         return jsonify({'message': 'Invalid username or password'}), 401
-    token = jwt.encode({'user_id': user.id}, app.config['JWT_SECRET_KEY'])
+    token = create_access_token(identity=user.username)
     return jsonify({'token': token}), 200
 
 
 @app.route("/register", methods=['POST'])
 def register():
-    username = request.form['username']
-    password = request.form['password']
+    req = request.get_json()
+    username = req['username']
+    password = req['password']
     username = username.lower()
     user_service = UserService()
     created = user_service.create_user(username, password)
     if not created:
         return jsonify({'message': 'user not created'})
     return jsonify({'message': ''})
+
+
+@app.route("/message", methods=['POST'])
+@jwt_required()
+def message():
+    req = request.get_json()
+    current_user = get_jwt_identity()
+    conversation_id = req['conversationId']
+    message = req['message']
+    return jsonify({'message': current_user})
 
 
 if __name__ == "__main__":
