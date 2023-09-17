@@ -38,6 +38,16 @@ def login():
     return jsonify({'token': token}), 200
 
 
+@app.route("/refresh", methods=['POST'])
+@jwt_required()
+def refresh_token():
+    current_user = get_jwt_identity()
+    token = create_access_token(identity=current_user,
+                                fresh=True,
+                                expires_delta=datetime.timedelta(minutes=10))
+    return jsonify({'token': token}), 200
+
+
 @app.route("/register", methods=['POST'])
 def register():
     req = request.get_json()
