@@ -14,6 +14,7 @@ class ConversationMessage:
 @dataclass
 class ChatMessage:
     conversation_id: int
+    role_name: str
     message: str
 
 
@@ -40,7 +41,12 @@ class Conversation:
         messages = self.chat_db.get_messages(conversation_id)
         message_stack = []
         for message in messages:
-            message_stack.append(ChatMessage(roleName=message.roleName, message=message.messageText))
+            message_stack.append(
+                ChatMessage(
+                    conversation_id=conversation_id,
+                    role_name=message['roleName'],
+                    message=message['messageText'])
+            )
         return ConversationStack(conversation_id, message_stack)
 
     def new_conversation(self, username):

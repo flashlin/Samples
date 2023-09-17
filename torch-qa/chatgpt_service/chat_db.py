@@ -84,13 +84,13 @@ class SqliteRepo:
 
     def add_message(self, message: ChatMessageEntity):
         self.execute("INSERT INTO chatMessages(conversationId, roleName, messageText, createOn) "
-                     "VALUES (:conversationId, :roleName, :messageText, :createOn)",
-                     message)
+                     "VALUES (:conversationId, :roleName, :messageText, DateTime('now'))",
+                     vars(message))
 
     def get_messages(self, conversation_id: int):
-        sql = "SELECT roleName, messageText FROM ("
-        sql += ("SELECT roleName, messageText from chatMessages "
-                "where conversationId = :convertsationId order by id DESC LIMIT 100")
+        sql = "SELECT id, roleName, messageText FROM ("
+        sql += ("SELECT id, roleName, messageText from chatMessages "
+                "where conversationId = :conversationId order by id DESC LIMIT 100")
         sql += ") ORDER BY id ASC"
         rows = self.query(sql,
                           {

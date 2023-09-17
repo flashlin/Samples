@@ -51,3 +51,16 @@ The following are the VRAM requirements of Stable Diffusion XL
 
 
 
+
+
+<br><br><br><br><br><br><br><br><br>
+
+### Why won’t LLM 13B fit on my 4090? OOM
+|2x<br>RTX-4090 24GB|2x<br> RTX-A6000 48GB |2x<br>RTX-A100 80GB
+|--|--|--
+|$ for Mid-Size Models |More GPU Memory for Large Models |Max Performance with More Large Models
+|16-Cores |32-Cores |64-Cores
+|128 GB of system memory |256 GB of system memory |256 GB of system memory 
+
+
+<br><br><br><br><br><br><br><br><br>
