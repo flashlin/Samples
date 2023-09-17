@@ -2,6 +2,14 @@ import sqlite3
 from datetime import datetime
 from dataclasses import dataclass
 
+users_ddl = '''CREATE TABLE users (
+    username varchar(50) NOT NULL primary key,
+    password varchar(255),
+    isEnabled BOOLEAN,
+    createOn DATETIME
+)
+'''
+
 conversations_ddl = '''
 CREATE TABLE conversations (
     id INTEGER primary key autoincrement,
@@ -22,6 +30,7 @@ CREATE TABLE chatMessages (
 )
 '''
 
+
 @dataclass
 class ChatMessageEntity:
     conversationId: int
@@ -30,9 +39,26 @@ class ChatMessageEntity:
     createOn: datetime
 
 
+@dataclass
+class UserEntity:
+    username: str
+    password: str
+    isEnabled: bool
+    createOn: datetime
+
+    @staticmethod
+    def empty():
+        return UserEntity(
+            username="",
+            password="",
+            isEnabled=False,
+            createOn=datetime.min
+        )
+
+
 def dict_to_obj(d):
-  row_obj = type('row', (object,), d)
-  return row_obj()
+    row_obj = type('row', (object,), d)
+    return row_obj()
 
 
 class SqliteRepo:
@@ -46,6 +72,7 @@ class SqliteRepo:
     def create_database(self):
         if self.is_table_exists("conversations"):
             return
+        self.execute(users_ddl)
         self.execute(conversations_ddl)
         self.execute(chat_messages_ddl)
 
@@ -106,3 +133,27 @@ class SqliteRepo:
             'rowid': last_rowid
         })
         return rows[0]['id']
+
+    def get_user(self, username: str) -> UserEntity:
+        rows = self.query("select username, password, isEnabled, createOn from users where username = :username",
+                          {
+                              'username': username
+                          })
+        if len(rows) <= 0:
+            return UserEntity.empty()
+
+        row = rows[0]
+        return UserEntity(
+            username=row['username'],
+            password=row['password'],
+            isEnabled=row['isEnabled'],
+            createOn=row['createOn']
+        )
+
+    def create_user(self, username: str, password_hash: str):
+        count = self.execute("INSERT INTO users(username, password, isEnabled, createOn) VALUES(:username, :password, 1, DateTime('now'))",
+                     {
+                         'username': username,
+                         'password': password_hash
+                     })
+        return count != 0
