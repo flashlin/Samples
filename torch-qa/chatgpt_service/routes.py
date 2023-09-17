@@ -22,8 +22,10 @@ def home():
 
 @app.route("/login", methods=['POST'])
 def login():
-    username = request.form['username']
-    password = request.form['password']
+    req = request.get_json()
+    print(f"{req=}")
+    username = req['username']
+    password = req['password']
     username = username.lower()
     user = user_service.get_user(username)
     if not user.check_password(password):
