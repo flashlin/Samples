@@ -9,21 +9,41 @@ Write-Host "MiniConda"
 
 # %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy ByPass -NoExit -Command "& 'D:\Users\flash\miniconda3\shell\condabin\conda-hook.ps1' ; conda activate 'D:\Users\flash\miniconda3' "
 
+
+function activeMinicondaEnvDetail {
+    param(
+        [string]$drive,
+        [string]$minicondaHome,
+        [string]$py_env
+    )
+    $powershellExe = "$($env:WINDIR)\System32\WindowsPowerShell\v1.0\powershell.exe"
+    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\conda-hook.ps1'; conda activate '$py_env'"" "
+    Info $cmd
+    Invoke-Expression $cmd
+}
+
 function activeMinicondaEnv {
     param(
         [string]$drive
     )
     $minicondaHome = "$($drive)\Users\$($env:USERNAME)\AppData\Local\miniconda3\shell\condabin"
-    $minicondaHome = "$($drive)\Users\$($env:USERNAME)\miniconda3\shell\condabin"
-    $powershellExe = "$($env:WINDIR)\System32\WindowsPowerShell\v1.0\powershell.exe"
     $py_env = "$($drive)\Users\$($env:USERNAME)\AppData\Local\miniconda3"
+    if (Test-Path -Path $py_env -PathType Container) {
+        activeMinicondaEnvDetail $drive $minicondaHome $py_env
+        return
+    }
+    
+    $minicondaHome = "$($drive)\Users\$($env:USERNAME)\miniconda3\shell\condabin"
     $py_env = "$($drive)\Users\$($env:USERNAME)\miniconda3"
-    $cmd = "& $($powershellExe) -ExecutionPolicy ByPass -NoExit -Command ""& '$($minicondaHome)\conda-hook.ps1'; conda activate '$py_env'"" "
-    Info $cmd
-    Invoke-Expression $cmd
+    activeMinicondaEnvDetail $drive $minicondaHome $py_env
+    return
 }
 #& %windir%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy ByPass -NoExit -Command `
 #    "& 'C:\Users\flash.lin71\AppData\Local\miniconda3\shell\condabin\conda-hook.ps1' ; conda activate 'C:\Users\flash.lin71\AppData\Local\miniconda3'"
+
+
+#%windir%\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy ByPass -NoExit -Command 
+#    "& '$($minicondaHome)\conda-hook.ps1' ; conda activate '$(drive):\Users\$()flash.lin71\AppData\Local\miniconda3' "
 
 if ( "c1" -eq $action ) {
     activeMinicondaEnv "D:"
