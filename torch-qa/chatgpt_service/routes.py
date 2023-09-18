@@ -32,7 +32,7 @@ def login():
     if not user.check_password(password):
         return jsonify({'message': 'Invalid username or password'}), 401
     # datetime.timedelta(minutes=15)
-    token = create_access_token(identity=user.role_name,
+    token = create_access_token(identity=user.username,
                                 fresh=True,
                                 expires_delta=datetime.timedelta(minutes=10))
     return jsonify({'token': token}), 200
@@ -45,7 +45,10 @@ def refresh_token():
     token = create_access_token(identity=current_user,
                                 fresh=True,
                                 expires_delta=datetime.timedelta(minutes=10))
-    return jsonify({'token': token}), 200
+    return jsonify({
+        'token': token,
+        'msg': ''
+        }), 200
 
 
 @app.route("/register", methods=['POST'])
