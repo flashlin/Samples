@@ -16,6 +16,10 @@ class LLM(ABC):
         pass
 
     @abstractmethod
+    def message_stream(self, message_stack: ConversationStack):
+        pass
+
+    @abstractmethod
     def response_api(self, message: dict):
         pass
 
@@ -31,6 +35,9 @@ class UserChatMessage:
 class EmptyLLM(LLM):
     def message(self, message_stack: ConversationStack) -> str:
         return ""
+
+    def message_stream(self, message_stack: ConversationStack):
+        pass
 
     def response_api(self, message: dict):
         return json.dumps(message)
@@ -99,11 +106,11 @@ class ChatService:
             message=system_prompt
         ))
 
-        # completion = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[
+        # completion = openai.ChatCompletion.create(model="gpt-3.5-tpurbo", messages=[
         #     {"role": "system", "content": "You're an assistant."},
         #     {"role": "user", "content": f"{prompt(input_text)}"},
         # ], stream=True, max_tokens=500, temperature=0)
-        completion = self.llm.message(messages)
+        completion = self.llm.message_stream(messages)
         for line in completion:
             if 'content' in line['choices'][0]['delta']:
                 yield line['choices'][0]['delta']['content']
