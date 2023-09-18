@@ -12,16 +12,9 @@ class ConversationMessage:
 
 
 @dataclass
-class ChatMessage:
-    conversation_id: int
-    role_name: str
-    message: str
-
-
-@dataclass
 class ConversationStack:
     conversation_id: int
-    message_stack: [ChatMessage]
+    message_stack: [ConversationMessage]
 
 
 class Conversation:
@@ -42,14 +35,19 @@ class Conversation:
         message_stack = []
         for message in messages:
             message_stack.append(
-                ChatMessage(
+                ConversationMessage(
                     conversation_id=conversation_id,
                     role_name=message['roleName'],
-                    message=message['messageText'])
+                    message=message['messageText'],
+                )
             )
         return ConversationStack(conversation_id, message_stack)
 
     def new_conversation(self, username):
         conversation_id = self.chat_db.add_conversation(username)
         return conversation_id
+
+    def is_conversation_id_exists(self, conversation_id):
+        entity = self.chat_db.get_conversation(conversation_id)
+        return entity.id != 0
 

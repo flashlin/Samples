@@ -1,7 +1,7 @@
 import datetime
 
 from app import app
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, Response
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required
@@ -32,7 +32,7 @@ def login():
     if not user.check_password(password):
         return jsonify({'message': 'Invalid username or password'}), 401
     # datetime.timedelta(minutes=15)
-    token = create_access_token(identity=user.username,
+    token = create_access_token(identity=user.role_name,
                                 fresh=True,
                                 expires_delta=datetime.timedelta(minutes=10))
     return jsonify({'token': token}), 200
@@ -69,6 +69,23 @@ def message():
     conversation_id = req['conversationId']
     message = req['message']
     return jsonify({'message': current_user})
+
+
+def stream(conversation_id: int, input_text: str):
+    current_user = get_jwt_identity()
+    chat_service = ChatService()
+
+
+
+@app.route('/completion', methods=['GET', 'POST'])
+@jwt_required()
+def completion_api():
+    req = request.get_json()
+    if request.method == "POST":
+        conversation_id = req['conversationId']
+        input_text = req['message']
+        return Response(stream(conversation_id, input_text), mimetype='text/event-stream')
+    return Response(None, mimetype='text/event-stream')
 
 
 if __name__ == "__main__":

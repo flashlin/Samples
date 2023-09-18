@@ -31,6 +31,9 @@ CREATE TABLE chatMessages (
 '''
 
 
+
+
+
 @dataclass
 class ChatMessageEntity:
     conversationId: int
@@ -56,9 +59,35 @@ class UserEntity:
         )
 
 
+@dataclass
+class ConversationEntity:
+    id: int
+    username: str
+    summary: str
+    createOn: datetime
+
+    @staticmethod
+    def empty():
+        return ConversationEntity(
+            id=0,
+            username="",
+            summary='',
+            createOn=datetime.min
+        )
+
+
 def dict_to_obj(d):
     row_obj = type('row', (object,), d)
     return row_obj()
+
+
+def row_to_obj(row, obj_type):
+    keys = obj_type.__annotations__.keys()
+    obj = obj_type()
+    for row_key in row.keys():
+        if row_key in keys:
+            setattr(obj, row_key, row[row_key])
+    return obj
 
 
 class SqliteRepo:
@@ -157,3 +186,12 @@ class SqliteRepo:
                          'password': password_hash
                      })
         return count != 0
+
+    def get_conversation(self, conversation_id) -> ConversationEntity:
+        rows = self.query("SELECT id, username, summary, createOn FROM conversations WHERE id = :id LIMIT 1",
+                          {
+                                'id': conversation_id
+                          })
+        if len(rows) <= 0:
+            return ConversationEntity.empty()
+        return row_to_obj(rows[0], ConversationEntity)
