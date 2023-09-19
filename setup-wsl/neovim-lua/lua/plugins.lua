@@ -37,12 +37,23 @@ packer.startup(function(use)
 
    use 'windwp/nvim-autopairs'
    use 'kyazdani42/nvim-web-devicons' -- File icons
-   use 'L3MON4D3/LuaSnip' -- snippet
+
+   use "nvim-lua/popup.nvim"
 
    use 'lewis6991/gitsigns.nvim'
    use 'dinhhuy258/git.nvim' 
+   
+   -- cmp plugins
+   use 'hrsh7th/nvim-cmp' -- Completion
+   use 'hrsh7th/cmp-buffer' -- for buffer words
+   use 'hrsh7th/cmp-path'
+   --use 'hrsh7th/cmp-cmpline'
+   --use 'saadparwaiz1/cmp-luasnip' -- snippet completions
+   
+   -- snippets
+   use 'L3MON4D3/LuaSnip' -- snippet
+   use 'rafamadriz/friendly-snippets'
 
-   ---------------------------------------------------
    -- use 'neovim/nvim-lspconfig' --LSP :LspInstallInfo
    -- :LspInstall --sync sumneko_lua 安裝 lua
    -- :LspInstall --sync lua_ls 安裝 lua
@@ -51,15 +62,12 @@ packer.startup(function(use)
       "neovim/nvim-lspconfig",
    })
 
-
    use 'jose-elias-alvarez/null-ls.nvim' -- Use neovim as a lanuage server
    use 'MunifTanjim/prettier.nvim' -- prettier plugin for neovim's build-in LSP client
 
    use 'onsails/lspkind-nvim'  --vscode-like pictograms
    --use 'glepnir/lspsaga.nvim' -- LSP UIs
-   use 'hrsh7th/cmp-buffer' -- for buffer words
    use 'hrsh7th/cmp-nvim-lsp' -- nvim-cmp source for neovim's build-in LSP
-   use 'hrsh7th/nvim-cmp' -- Completion
    --use 'williamboman/nvim-lsp-installer' -- HELP install LSP
    
 end)
