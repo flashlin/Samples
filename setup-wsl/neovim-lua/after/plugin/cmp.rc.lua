@@ -1,6 +1,11 @@
 local status, cmp = pcall(require, 'cmp')
 if (not status) then return end
 
+local snip_status, luasnip = pcall(require, 'luasnip')
+if (not snip_status) then return end
+
+require('luasnip/loaders/from_vscode').lazy_load() 
+
 local lspkind = require 'lspkind'
 
 cmp.setup({
