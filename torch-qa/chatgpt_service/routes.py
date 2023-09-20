@@ -1,17 +1,22 @@
 import datetime
-
 from app import app
 from flask import Flask, request, render_template, jsonify, Response
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required
 from flask_jwt_extended import get_jwt_identity
+from flask_cors import CORS, cross_origin
+
 from chat_db import SqliteRepo
-from chat_service import ChatService
+from chat_service import ChatService, UserChatMessage
 from user_service import UserService
 
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['JWT_SECRET_KEY'] = 'my-secret-key'
 jwt = JWTManager(app)
+chat_service = ChatService()
+
 
 @app.route('/')
 @app.route('/index')
@@ -21,7 +26,8 @@ def home():
     return template
 
 
-@app.route("/login", methods=['POST'])
+@app.route("/api/login", methods=['POST'])
+@cross_origin()
 def login():
     req = request.get_json()
     username = req['username']
@@ -38,7 +44,8 @@ def login():
     return jsonify({'token': token}), 200
 
 
-@app.route("/refresh", methods=['POST'])
+@app.route("/api/refresh", methods=['POST'])
+@cross_origin()
 @jwt_required()
 def refresh_token():
     current_user = get_jwt_identity()
@@ -51,7 +58,8 @@ def refresh_token():
         }), 200
 
 
-@app.route("/register", methods=['POST'])
+@app.route("/api/register", methods=['POST'])
+@cross_origin()
 def register():
     req = request.get_json()
     username = req['username']
@@ -64,31 +72,42 @@ def register():
     return jsonify({'message': ''})
 
 
-@app.route("/message", methods=['POST'])
+@app.route("/api/message", methods=['POST'])
+@cross_origin()
 @jwt_required()
 def message():
-    req = request.get_json()
     current_user = get_jwt_identity()
+    req = request.get_json()
     conversation_id = req['conversationId']
-    message = req['message']
-    return jsonify({'message': current_user})
+    user_message = req['message']
+    response_message = chat_service.message(UserChatMessage(
+        username=current_user,
+        message=user_message,
+        conversation_id=conversation_id,
+        role_name='user'
+    ))
+    return jsonify({'message': response_message})
 
 
-def stream(conversation_id: int, input_text: str):
-    current_user = get_jwt_identity()
-    chat_service = ChatService()
+def stream(current_user: str, conversation_id: int, user_message: str):
+    response_message = chat_service.message_stream(UserChatMessage(
+        username=current_user,
+        message=user_message,
+        conversation_id=conversation_id,
+        role_name='user'
+    ))
+    return response_message
 
 
-
-@app.route('/completion', methods=['GET', 'POST'])
+@app.route('/api/message_stream', methods=['POST'])
+@cross_origin()
 @jwt_required()
-def completion_api():
+def message_stream():
+    current_user = get_jwt_identity()
     req = request.get_json()
-    if request.method == "POST":
-        conversation_id = req['conversationId']
-        input_text = req['message']
-        return Response(stream(conversation_id, input_text), mimetype='text/event-stream')
-    return Response(None, mimetype='text/event-stream')
+    conversation_id = req['conversationId']
+    user_message = req['message']
+    return Response(stream(current_user, conversation_id, user_message), mimetype='text/event-stream')
 
 
 if __name__ == "__main__":
