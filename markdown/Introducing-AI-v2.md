@@ -9,15 +9,15 @@ class: invert
 
 
 ---
-## 目標 Goal 
+##### Goal 
 ##### 透過 AI 驅動的幫助, 來提高我們的生產力 Boosting our productivity with the assistance of AI-driven solutions
 - 幫助内部 Domain 知識的搜尋和傳承知識.
  Facilitating the search for internal domain knowledge and the transmission of knowledge
 - 產生創意的內容
 Generating creative content 
-- <del>Private Code Copilot</del>
-- <del>Data Report</del>
-- <del>Translate into multiple languages</del>
+- ~~Private Code Copilot~~
+- ~~Data Report~~
+- ~~Translate into multiple languages~~
 
 ---
 <style scoped>
@@ -25,9 +25,9 @@ table {
   font-size: 24px;
 }
 </style>
-# 解決方案 Solution
+### Solution
 
-|類型 Type |廠商 Vendor | 說明 Description
+|Type |Vendor |Description
 |--|--|--
 |綜合型雲端<br> Integrated Cloud |OpenAI, Azure,... |公司將資料上傳至雲端, 並且有提供封閉模型, 和提供訓練微調服務 <br> The company uploads data to the cloud, offers proprietary models, and provides training and fine-tuning services
 |GPU 服務型雲端<br> GPU-as-a-Service Cloud |CoreWeave、Lambda、RunPod and CodLab |公司將資料上傳至雲端, 得自行準備模型, 自行訓練微調<br>The company uploads data to the cloud and is responsible for preparing and training the fine-tuning model on its own.
