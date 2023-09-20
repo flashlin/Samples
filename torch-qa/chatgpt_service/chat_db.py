@@ -31,9 +31,6 @@ CREATE TABLE chatMessages (
 '''
 
 
-
-
-
 @dataclass
 class ChatMessageEntity:
     conversationId: int
@@ -61,10 +58,10 @@ class UserEntity:
 
 @dataclass
 class ConversationEntity:
-    id: int
-    username: str
-    summary: str
-    createOn: datetime
+    id: int = 0
+    username: str = ""
+    summary: str = ""
+    createOn: datetime = datetime.now()
 
     @staticmethod
     def empty():
@@ -86,6 +83,7 @@ def row_to_obj(row, obj_type):
     obj = obj_type()
     for row_key in row.keys():
         if row_key in keys:
+            print(f"set {row_key=}")
             setattr(obj, row_key, row[row_key])
     return obj
 

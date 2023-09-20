@@ -7,7 +7,6 @@ from flask_jwt_extended import jwt_required
 from flask_jwt_extended import get_jwt_identity
 from flask_cors import CORS, cross_origin
 
-from chat_db import SqliteRepo
 from chat_service import ChatService, UserChatMessage
 from user_service import UserService
 
@@ -15,7 +14,6 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 app.config['JWT_SECRET_KEY'] = 'my-secret-key'
 jwt = JWTManager(app)
-chat_service = ChatService()
 
 
 @app.route('/')
@@ -80,6 +78,7 @@ def message():
     req = request.get_json()
     conversation_id = req['conversationId']
     user_message = req['message']
+    chat_service = ChatService()
     response_message = chat_service.message(UserChatMessage(
         username=current_user,
         message=user_message,
@@ -90,6 +89,7 @@ def message():
 
 
 def stream(current_user: str, conversation_id: int, user_message: str):
+    chat_service = ChatService()
     response_message = chat_service.message_stream(UserChatMessage(
         username=current_user,
         message=user_message,
