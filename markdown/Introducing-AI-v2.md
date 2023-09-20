@@ -14,7 +14,10 @@ class: invert
 - 幫助内部 Domain 知識的搜尋和傳承知識.
  Facilitating the search for internal domain knowledge and the transmission of knowledge
 - 產生創意的內容
-Generating creative content
+Generating creative content 
+- <del>Private Code Copilot</del>
+- <del>Data Report</del>
+- <del>Translate into multiple languages</del>
 
 ---
 <style scoped>
@@ -37,13 +40,24 @@ table {
   font-size: 24px;
 }
 </style>
-# Hardware Options
+### Hardware Options
 
 |2x<br>RTX-4090 24GB|2x<br> RTX-A6000 48GB |2x<br>RTX-A100 80GB
 |--|--|--
-|$ for Mid-Size Models |More GPU Memory for Large Models |Max Performance with More Large Models
+|$ for Mid-Size Models(7B, 13B) |More GPU Memory for Large Models(35B, 70B) |Max Performance with More Large Models (130B~)
 |16-Cores CPU |32-Cores CPU|64-Cores CPU
 |128 GB of system memory |256 GB of system memory |256 GB of system memory 
+
+---
+### 成功的定義 Definition of Success
+根據現在收集的[有幫助/無意見/沒幫助]的次數來評估成果
+Evaluate the outcome based on the number of [helpful/neutral/unhelpful] ratings collected at present.
+* 如果[有幫助]的次數比[沒幫助]的多
+If the number of [helpful] ratings is greater than [unhelpful]
+* 每日查詢次數大於 100 次
+daily query count exceeds 100 queries
+
+我們可以視為成功 We can consider it a success.
 
 ---
 ### milestone1
@@ -71,17 +85,6 @@ Upgrade the question-and-answer website with proprietary domain knowledge.
 Collect the entered questions and feedback, then check whether further training or fine-tuning is required.
 - 等待外面開放訓練模型版本更新, 再一次進行升級迭代
 Wait for the release of the external training model version and proceed with another upgrade iteration.
-
----
-### 成功的定義 Definition of Success
-根據現在收集的[有幫助/無意見/沒幫助]的次數來評估成果
-Evaluate the outcome based on the number of [helpful/neutral/unhelpful] ratings collected at present.
-* 如果[有幫助]的次數比[沒幫助]的多
-If the number of [helpful] ratings is greater than [unhelpful]
-* 每日查詢次數大於 100 次
-daily query count exceeds 100 queries
-
-我們可以視為成功 We can consider it a success.
 
 ---
 ##### 經過這次建置過程, 我們將會獲得下面的東西
