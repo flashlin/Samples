@@ -1,5 +1,9 @@
 import streamlit as st
 import hashlib
+from dotenv import load_dotenv, find_dotenv
+from langchain.llms import LlamaCpp
+from models import init_messages, llama2_prompt, convert_langchain_schema_to_dict, create_llama2
+from langchain.schema import (SystemMessage, HumanMessage, AIMessage)
 
 
 # Convert Pass into hash format
@@ -22,7 +26,20 @@ def login(username, password):
     return False
 
 
+def get_answer(llm, messages) -> tuple[str, float]:
+    # if isinstance(llm, ChatOpenAI):
+    #     with get_openai_callback() as cb:
+    #         answer = llm(messages)
+    #     return answer.content, cb.total_cost
+    if isinstance(llm, LlamaCpp):
+        return llm(llama2_prompt(convert_langchain_schema_to_dict(messages))), 0.0
+
+
 def main():
+    _ = load_dotenv(find_dotenv())
+    llm = create_llama2()
+    init_messages()
+
     placeholder = st.empty()
     with placeholder.form(key="login"):
         st.subheader('Log in to the App')
@@ -35,6 +52,23 @@ def main():
             else:
                 st.error("login fail")
 
+    if user_input := st.chat_input("Input your question!"):
+        st.session_state.messages.append(HumanMessage(content=user_input))
+        with st.spinner("ChatGPT is typing ..."):
+            answer, cost = get_answer(llm, st.session_state.messages)
+        st.session_state.messages.append(AIMessage(content=answer))
+        st.session_state.costs.append(cost)
+
+        # Display chat history
+    messages = st.session_state.get("messages", [])
+    for message in messages:
+        if isinstance(message, AIMessage):
+            with st.chat_message("assistant"):
+                st.markdown(message.content)
+        elif isinstance(message, HumanMessage):
+            with st.chat_message("user"):
+                st.markdown(message.content)
+
     # if st.session_state["authentication_status"]:
     #     try:
     #         if auth.reset_password(st.session_state["username"], 'Reset password'):
@@ -42,4 +76,7 @@ def main():
     #     except Exception as e:
     #         st.error(e)
 
-main()
+
+if __name__ == '__main__':
+    main()
+
