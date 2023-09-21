@@ -14,16 +14,12 @@ def check_hashes(password, hashed_text):
     return False
 
 
-def login(placeholder, username, password):
+def login(username, password):
     hash = make_hashes("123")
-    print(f"login {username=} {password=} {hash=}")
     if check_hashes(password, hash):
-        print("OK")
         st.session_state["authentication_status"] = "Yes"
-        placeholder.empty()
-        return
-    print("FAIL")
-    return
+        return True
+    return False
 
 
 def main():
@@ -34,7 +30,10 @@ def main():
         password = st.text_input("Password", type='password')
         submit_form = st.form_submit_button("Login")
         if submit_form:
-            login(placeholder, username, password)
+            if login(username, password):
+                placeholder.empty()
+            else:
+                st.error("login fail")
 
     # if st.session_state["authentication_status"]:
     #     try:
