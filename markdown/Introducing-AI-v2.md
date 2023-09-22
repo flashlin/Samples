@@ -59,6 +59,7 @@ daily query count exceeds 100 queries
 
 我們可以視為成功 We can consider it a success.
 
+
 ---
 ### milestone1
 - 建立一個問答型的WebSite (不具有私有 domain knowledge)
@@ -85,6 +86,11 @@ Upgrade the question-and-answer website with proprietary domain knowledge.
 Collect the entered questions and feedback, then check whether further training or fine-tuning is required.
 - 等待外面開放訓練模型版本更新, 再一次進行升級迭代
 Wait for the release of the external training model version and proceed with another upgrade iteration.
+
+---
+### Current Challenges:
+- What types of domain knowledge data should we collect?
+- How can we collect accurate domain knowledge data?
 
 ---
 ##### 經過這次建置過程, 我們將會獲得下面的東西
