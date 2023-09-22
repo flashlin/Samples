@@ -2,6 +2,7 @@
 marp: true
 theme: uncover
 class: invert
+paginate: true
 ---
 ### Introducing AI into Company Operations
 
