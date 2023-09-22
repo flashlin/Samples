@@ -86,7 +86,8 @@ def create_llama2():
     model_name = "CodeLlama-7B-Instruct-GGUF/codellama-7b-instruct.Q4_K_M.gguf"
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     return LlamaCpp(
-        model_path=f"../models/{model_name}",
+        #model_path=f"../models/{model_name}",
+        model_path='D:/Demo/qa-code/models/codellama-7b-instruct/codellama-7b-instruct.Q4_K_M.gguf',
         input={
             "temperature": 0.1,
             "max_length": 2000,
