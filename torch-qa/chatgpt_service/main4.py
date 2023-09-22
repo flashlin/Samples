@@ -18,10 +18,20 @@ def check_hashes(password, hashed_text):
     return False
 
 
+def is_authentication():
+    if st.session_state["authentication_status"] is None:
+        return False
+    return True
+
+
+def set_authentication():
+    st.session_state["authentication_status"] = "Yes"
+
+
 def login(username, password):
     hash = make_hashes("123")
     if check_hashes(password, hash):
-        st.session_state["authentication_status"] = "Yes"
+        set_authentication()
         return True
     return False
 
@@ -36,6 +46,8 @@ def get_answer(llm, messages) -> tuple[str, float]:
 
 
 def show_login_form():
+    if is_authentication():
+        return
     login_form = st.empty()
     with login_form.form(key="login"):
         st.subheader('Log in to the App')
@@ -49,24 +61,17 @@ def show_login_form():
                 st.error("login fail")
 
 
-def main():
-    _ = load_dotenv(find_dotenv())
-    llm = create_llama2()
-    print("llm loaded")
-    init_messages()
-
-    if st.session_state["authentication_status"] is None:
-        print("show login form")
-        show_login_form()
+def show_chat_input(llm):
+    if not is_authentication():
         return
-
     if user_input := st.chat_input("Input your question!"):
         st.session_state.messages.append(HumanMessage(content=user_input))
         with st.spinner("ChatGPT is typing ..."):
             answer, cost = get_answer(llm, st.session_state.messages)
         st.session_state.messages.append(AIMessage(content=answer))
 
-        # Display chat history
+
+def show_chat_message_history():
     messages = st.session_state.get("messages", [])
     for message in messages:
         if isinstance(message, AIMessage):
@@ -75,6 +80,17 @@ def main():
         elif isinstance(message, HumanMessage):
             with st.chat_message("user"):
                 st.markdown(message.content)
+
+
+def main():
+    _ = load_dotenv(find_dotenv())
+    llm = create_llama2()
+    print("llm loaded")
+    init_messages()
+
+    show_login_form()
+    show_chat_input(llm)
+    show_chat_message_history()
 
     # if st.session_state["authentication_status"]:
     #     try:
