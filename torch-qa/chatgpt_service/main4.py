@@ -35,29 +35,36 @@ def get_answer(llm, messages) -> tuple[str, float]:
         return llm(llama2_prompt(convert_langchain_schema_to_dict(messages))), 0.0
 
 
-def main():
-    _ = load_dotenv(find_dotenv())
-    llm = create_llama2()
-    init_messages()
-
-    placeholder = st.empty()
-    with placeholder.form(key="login"):
+def show_login_form():
+    login_form = st.empty()
+    with login_form.form(key="login"):
         st.subheader('Log in to the App')
         username = st.text_input("User Name", placeholder='username')
         password = st.text_input("Password", type='password')
         submit_form = st.form_submit_button("Login")
         if submit_form:
             if login(username, password):
-                placeholder.empty()
+                login_form.empty()
             else:
                 st.error("login fail")
+
+
+def main():
+    _ = load_dotenv(find_dotenv())
+    llm = create_llama2()
+    print("llm loaded")
+    init_messages()
+
+    if st.session_state["authentication_status"] is None:
+        print("show login form")
+        show_login_form()
+        return
 
     if user_input := st.chat_input("Input your question!"):
         st.session_state.messages.append(HumanMessage(content=user_input))
         with st.spinner("ChatGPT is typing ..."):
             answer, cost = get_answer(llm, st.session_state.messages)
         st.session_state.messages.append(AIMessage(content=answer))
-        st.session_state.costs.append(cost)
 
         # Display chat history
     messages = st.session_state.get("messages", [])
