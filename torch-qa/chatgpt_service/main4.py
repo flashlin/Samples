@@ -85,11 +85,12 @@ def show_assistant_typing_answer(llm):
     return answer
 
 
-def show_assistant_typing_answer_stream(llm):
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        llm = create_llama2(message_placeholder)
-        full_response = get_answer(llm, st.session_state.messages)
+def show_assistant_typing_answer_stream():
+    with st.spinner("ChatGPT is typing ..."):
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            llm = create_llama2(message_placeholder)
+            full_response = get_answer(llm, st.session_state.messages)
         # full_response = ""
         # for response in llm_stream:
         #     # full_response += response.choices[0].delta.get("content", "")
@@ -108,7 +109,7 @@ def show_chat_input(llm):
         st.session_state.messages.append(HumanMessage(content=user_input))
         show_user_message(user_input)
         # answer = show_assistant_typing_answer(llm)
-        answer = show_assistant_typing_answer_stream(llm)
+        answer = show_assistant_typing_answer_stream()
         st.session_state.messages.append(AIMessage(content=answer))
 
 
