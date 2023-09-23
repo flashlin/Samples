@@ -19,7 +19,7 @@ def check_hashes(password, hashed_text):
 
 
 def is_authentication():
-    if st.session_state["authentication_status"] is None:
+    if "authentication_status" not in st.session_state:
         return False
     return True
 
@@ -66,31 +66,40 @@ def show_chat_input(llm):
         return
     if user_input := st.chat_input("Input your question!"):
         st.session_state.messages.append(HumanMessage(content=user_input))
+        show_user_message(user_input)
         with st.spinner("ChatGPT is typing ..."):
             answer, cost = get_answer(llm, st.session_state.messages)
         st.session_state.messages.append(AIMessage(content=answer))
+        show_assistant_message(answer)
+
+
+def show_user_message(message: str):
+    with st.chat_message("user"):
+        st.markdown(message)
+
+
+def show_assistant_message(message: str):
+    with st.chat_message("assistant"):
+        st.markdown(message)
 
 
 def show_chat_message_history():
     messages = st.session_state.get("messages", [])
     for message in messages:
         if isinstance(message, AIMessage):
-            with st.chat_message("assistant"):
-                st.markdown(message.content)
+            show_assistant_message(message.content)
         elif isinstance(message, HumanMessage):
-            with st.chat_message("user"):
-                st.markdown(message.content)
-
+            show_user_message(message.content)
 
 def main():
     _ = load_dotenv(find_dotenv())
+    print("=== llm loaded ===")
     llm = create_llama2()
-    print("llm loaded")
     init_messages()
 
     show_login_form()
-    show_chat_input(llm)
     show_chat_message_history()
+    show_chat_input(llm)
 
     # if st.session_state["authentication_status"]:
     #     try:
