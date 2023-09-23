@@ -102,7 +102,7 @@ def show_assistant_typing_answer_stream():
     return full_response
 
 
-def show_chat_input(llm):
+def show_chat_input():
     if not is_authentication():
         return
     if user_input := st.chat_input("Input your question!"):
@@ -134,13 +134,13 @@ def show_chat_message_history():
 
 def main():
     _ = load_dotenv(find_dotenv())
-    llm = create_llama2()
+    # llm = create_llama2()
     print("=== llm loaded ===")
     init_messages()
 
     show_login_form()
     show_chat_message_history()
-    show_chat_input(llm)
+    show_chat_input()
 
     # if st.session_state["authentication_status"]:
     #     try:
