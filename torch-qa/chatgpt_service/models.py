@@ -4,6 +4,7 @@ from langchain.schema import (SystemMessage, HumanMessage, AIMessage)
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import LlamaCpp
+from langchain.callbacks.base import BaseCallbackHandler
 
 
 def init_messages() -> None:
@@ -82,9 +83,34 @@ def llama2_prompt(messages: List[dict]) -> str:
     return "".join(messages_list)
 
 
-def create_llama2():
+class StreamDisplayHandler(BaseCallbackHandler):
+    def __init__(self, container, initial_text="", display_method='markdown'):
+        self.container = container
+        self.text = initial_text
+        self.display_method = display_method
+        self.new_sentence = ""
+
+    def on_llm_new_token(self, token: str, **kwargs) -> None:
+        self.text += token
+        self.new_sentence += token
+
+        display_function = getattr(self.container, self.display_method, None)
+        if display_function is not None:
+            display_function(self.text + "▌")
+        else:
+            raise ValueError(f"Invalid display_method: {self.display_method}")
+
+    def on_llm_end(self, response, **kwargs) -> None:
+        self.text = ""
+
+
+def create_llama2(chat_box=None):
+    if chat_box is None:
+        chat_box = st.empty()
+    display_handler = StreamDisplayHandler(chat_box)
+
     model_name = "CodeLlama-7B-Instruct-GGUF/codellama-7b-instruct.Q4_K_M.gguf"
-    callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+    callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), display_handler])
     return LlamaCpp(
         model_path=f"../models/{model_name}",
         #model_path='D:/Demo/qa-code/models/codellama-7b-instruct/codellama-7b-instruct.Q4_K_M.gguf',

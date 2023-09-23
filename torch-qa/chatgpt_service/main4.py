@@ -81,19 +81,23 @@ def show_login_form():
 def show_assistant_typing_answer(llm):
     with st.spinner("ChatGPT is typing ..."):
         answer = get_answer(llm, st.session_state.messages)
+    show_assistant_message(answer)
     return answer
 
 
 def show_assistant_typing_answer_stream(llm):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
-        full_response = ""
-        for response in get_answer(llm, st.session_state.messages):
-            # full_response += response.choices[0].delta.get("content", "")
-            full_response += f"{response}"
-            print(f"{full_response=}")
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
+        llm = create_llama2(message_placeholder)
+        full_response = get_answer(llm, st.session_state.messages)
+        # full_response = ""
+        # for response in llm_stream:
+        #     # full_response += response.choices[0].delta.get("content", "")
+        #     full_response += f"{response}"
+        #     print(f"{full_response=}")
+        #     message_placeholder.markdown(full_response + "▌")
+        # message_placeholder.markdown(full_response)
+    message_placeholder.markdown(full_response)
     return full_response
 
 
@@ -103,9 +107,9 @@ def show_chat_input(llm):
     if user_input := st.chat_input("Input your question!"):
         st.session_state.messages.append(HumanMessage(content=user_input))
         show_user_message(user_input)
-        answer = show_assistant_typing_answer(llm)
+        # answer = show_assistant_typing_answer(llm)
+        answer = show_assistant_typing_answer_stream(llm)
         st.session_state.messages.append(AIMessage(content=answer))
-        show_assistant_message(answer)
 
 
 def show_user_message(message: str):
@@ -129,8 +133,8 @@ def show_chat_message_history():
 
 def main():
     _ = load_dotenv(find_dotenv())
-    print("=== llm loaded ===")
     llm = create_llama2()
+    print("=== llm loaded ===")
     init_messages()
 
     show_login_form()
