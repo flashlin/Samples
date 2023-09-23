@@ -95,4 +95,5 @@ def create_llama2():
         },
         callback_manager=callback_manager,
         verbose=False,  # True
+        streaming=True,
     )

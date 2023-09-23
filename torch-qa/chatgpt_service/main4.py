@@ -53,13 +53,13 @@ def login(username, password):
     return False
 
 
-def get_answer(llm, messages) -> tuple[str, float]:
+def get_answer(llm, messages) -> str:
     # if isinstance(llm, ChatOpenAI):
     #     with get_openai_callback() as cb:
     #         answer = llm(messages)
     #     return answer.content, cb.total_cost
     if isinstance(llm, LlamaCpp):
-        return llm(llama2_prompt(convert_langchain_schema_to_dict(messages))), 0.0
+        return llm(llama2_prompt(convert_langchain_schema_to_dict(messages)))
 
 
 def show_login_form():
@@ -78,14 +78,32 @@ def show_login_form():
                 st.error("login fail")
 
 
+def show_assistant_typing_answer(llm):
+    with st.spinner("ChatGPT is typing ..."):
+        answer = get_answer(llm, st.session_state.messages)
+    return answer
+
+
+def show_assistant_typing_answer_stream(llm):
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
+        for response in get_answer(llm, st.session_state.messages):
+            # full_response += response.choices[0].delta.get("content", "")
+            full_response += f"{response}"
+            print(f"{full_response=}")
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
+    return full_response
+
+
 def show_chat_input(llm):
     if not is_authentication():
         return
     if user_input := st.chat_input("Input your question!"):
         st.session_state.messages.append(HumanMessage(content=user_input))
         show_user_message(user_input)
-        with st.spinner("ChatGPT is typing ..."):
-            answer, cost = get_answer(llm, st.session_state.messages)
+        answer = show_assistant_typing_answer(llm)
         st.session_state.messages.append(AIMessage(content=answer))
         show_assistant_message(answer)
 
