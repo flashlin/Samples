@@ -5,6 +5,23 @@ from langchain.llms import LlamaCpp
 from models import init_messages, llama2_prompt, convert_langchain_schema_to_dict, create_llama2
 from langchain.schema import (SystemMessage, HumanMessage, AIMessage)
 
+hide_menu_style = """
+<style>
+#MainMenu { visibility: hidden; }
+footer  {
+    visibility: hidden; 
+}
+</style>
+"""
+hide_menu_style2 = """
+<style>
+footer  {
+    visibility: hidden; 
+}
+</style>
+"""
+st.markdown(hide_menu_style2, unsafe_allow_html=True)
+
 
 # Convert Pass into hash format
 def make_hashes(password):
@@ -91,6 +108,7 @@ def show_chat_message_history():
         elif isinstance(message, HumanMessage):
             show_user_message(message.content)
 
+
 def main():
     _ = load_dotenv(find_dotenv())
     print("=== llm loaded ===")
@@ -111,4 +129,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
