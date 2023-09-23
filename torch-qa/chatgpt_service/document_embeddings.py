@@ -5,8 +5,8 @@ from langchain.document_loaders import WebBaseLoader
 from lanchainlit import load_documents
 from langchain.chains import ConversationalRetrievalChain
 
-embedding_model_name = "sentence-transformers/all-mpnet-base-v2"
-embeddings = HuggingFaceEmbeddings(model_name=embedding_model_name,
+embedding_model_name = "sentence-transformers_all-mpnet-base-v2"
+embeddings = HuggingFaceEmbeddings(model_name=f"../models/{embedding_model_name}",
                                    model_kwargs={"device": "cuda"})
 
 web_links = [
@@ -15,7 +15,7 @@ web_links = [
 ]
 loader = WebBaseLoader(web_links)
 web_documents = loader.load()
-data_documents = load_documents('data')
+data_documents = load_documents('../data')
 documents = web_documents + data_documents
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=20)
@@ -23,7 +23,7 @@ all_splits = text_splitter.split_documents(documents)
 vectorstore = FAISS.from_documents(all_splits, embeddings)
 
 
-def get_chat_answer(llm, query, chat_history):
+def get_answer_with_documents(llm, query, chat_history):
     global embeddings, vectorstore
     chain = ConversationalRetrievalChain.from_llm(llm,
                                                   vectorstore.as_retriever(),

@@ -2,8 +2,10 @@ import streamlit as st
 import hashlib
 from dotenv import load_dotenv, find_dotenv
 from langchain.llms import LlamaCpp
+
+from document_embeddings import get_answer_with_documents
 from models import init_messages, llama2_prompt, convert_langchain_schema_to_dict, create_llama2
-from langchain.schema import (SystemMessage, HumanMessage, AIMessage)
+from langchain.schema import (HumanMessage, AIMessage)
 
 hide_menu_style = """
 <style>
@@ -85,12 +87,13 @@ def show_assistant_typing_answer(llm):
     return answer
 
 
-def show_assistant_typing_answer_stream():
+def show_assistant_typing_answer_stream(user_query):
     with st.spinner("ChatGPT is typing ..."):
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
             llm = create_llama2(message_placeholder)
-            full_response = get_answer(llm, st.session_state.messages)
+            # full_response = get_answer(llm, st.session_state.messages)
+            full_response = get_answer_with_documents(llm, user_query, st.session_state.messages)
         # full_response = ""
         # for response in llm_stream:
         #     # full_response += response.choices[0].delta.get("content", "")
@@ -105,11 +108,11 @@ def show_assistant_typing_answer_stream():
 def show_chat_input():
     if not is_authentication():
         return
-    if user_input := st.chat_input("Input your question!"):
-        st.session_state.messages.append(HumanMessage(content=user_input))
-        show_user_message(user_input)
+    if user_query := st.chat_input("Input your question!"):
+        st.session_state.messages.append(HumanMessage(content=user_query))
+        show_user_message(user_query)
         # answer = show_assistant_typing_answer(llm)
-        answer = show_assistant_typing_answer_stream()
+        answer = show_assistant_typing_answer_stream(user_query)
         st.session_state.messages.append(AIMessage(content=answer))
 
 
