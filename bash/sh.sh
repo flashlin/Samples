@@ -1,0 +1,1 @@
+chmod +x /mnt/d/VDisk/Github/Samples/bash/*.sh
