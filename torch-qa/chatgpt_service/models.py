@@ -123,6 +123,7 @@ def create_llama2(chat_box=None):
         temperature=0.75,
         max_tokens=2000,
         top_p=1,
+        n_ctx=2048,  # 請求上下文 ValueError: Requested tokens (1130) exceed context window of 512
         callback_manager=callback_manager,
         verbose=False,  # True
         streaming=True,
