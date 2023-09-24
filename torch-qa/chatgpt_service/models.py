@@ -110,7 +110,8 @@ def create_llama2(chat_box=None):
     display_handler = StreamDisplayHandler(chat_box)
 
     model_name = "CodeLlama-7B-Instruct-GGUF/codellama-7b-instruct.Q4_K_M.gguf"
-    model_name = "Llama-2-13B-chat-GGUF/llama-2-13b-chat.Q4_K_M.gguf"
+    # model_name = "Llama-2-13B-chat-GGUF/llama-2-13b-chat.Q4_K_M.gguf"
+    model_name = "Llama-2-7b-Chat-GGUF/llama-2-7b-chat.Q4_K_M.gguf"
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), display_handler])
     return LlamaCpp(
         model_path=f"../models/{model_name}",

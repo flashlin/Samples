@@ -6,6 +6,7 @@ from langchain.llms import LlamaCpp
 from document_embeddings import get_answer_with_documents
 from models import init_messages, llama2_prompt, convert_langchain_schema_to_dict, create_llama2
 from langchain.schema import (HumanMessage, AIMessage)
+from session import Session
 
 hide_menu_style = """
 <style>
@@ -24,6 +25,15 @@ footer  {
 """
 st.markdown(hide_menu_style2, unsafe_allow_html=True)
 
+session = Session()
+
+
+class Scene:
+    Login = 1
+    Question = 2
+    Feedback = 3
+    Suggestion = 4
+
 
 # Convert Pass into hash format
 def make_hashes(password):
@@ -38,13 +48,19 @@ def check_hashes(password, hashed_text):
 
 
 def is_authentication():
-    if "authentication_status" not in st.session_state:
-        return False
-    return True
+    return session.contains("authentication_status")
+
+
+def is_scene(scene: int):
+    return session["authentication_status"] == scene
+
+
+def set_scene(scene: Scene):
+    session["authentication_status"] = scene
 
 
 def set_authentication():
-    st.session_state["authentication_status"] = "Yes"
+    session["authentication_status"] = Scene.Question
 
 
 def login(username, password):
@@ -106,7 +122,7 @@ def show_assistant_typing_answer_stream(user_query):
 
 
 def show_chat_input():
-    if not is_authentication():
+    if not is_scene(Scene.Question):
         return
     if user_query := st.chat_input("Input your question!"):
         st.session_state.messages.append(HumanMessage(content=user_query))
@@ -114,6 +130,7 @@ def show_chat_input():
         # answer = show_assistant_typing_answer(llm)
         answer = show_assistant_typing_answer_stream(user_query)
         st.session_state.messages.append(AIMessage(content=answer))
+        return
 
 
 def show_user_message(message: str):
@@ -136,9 +153,8 @@ def show_chat_message_history():
 
 
 def main():
+    print("main")
     _ = load_dotenv(find_dotenv())
-    # llm = create_llama2()
-    print("=== llm loaded ===")
     init_messages()
 
     show_login_form()
@@ -155,3 +171,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+    print("=== END ===")
+    
