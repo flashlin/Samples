@@ -115,11 +115,14 @@ def create_llama2(chat_box=None):
     return LlamaCpp(
         model_path=f"../models/{model_name}",
         #model_path='D:/Demo/qa-code/models/codellama-7b-instruct/codellama-7b-instruct.Q4_K_M.gguf',
-        input={
-            "temperature": 0.1,
-            "max_length": 2000,
-            "top_p": 1
-        },
+        # input={
+        #     "temperature": 0.1,
+        #     "max_length": 2000,
+        #     "top_p": 1
+        # },
+        temperature=0.75,
+        max_tokens=2000,
+        top_p=1,
         callback_manager=callback_manager,
         verbose=False,  # True
         streaming=True,
