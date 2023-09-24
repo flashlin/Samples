@@ -1,0 +1,1 @@
+conda install langchain -c conda-forge
