@@ -9,13 +9,14 @@ K8sMeetup 中國社區在此提供了 50 道練習題，幫助開發者測試自
 --------
 請根據以下概念進行練習：瞭解 Kubernetes API 原語，建立和組態基本 Pod。
 
-1.列出叢集中的所有命名空間
+Question: 列出叢集中的所有命名空間
+Answer:
 ```
 kubectl get namespaces kubectl get ns
 ```
 
-
-2.列出所有命名空間中的所有 Pod
+Question: 列出所有命名空間中的所有 Pod
+Answer:
 ```
 kubectl get po --all-namespaces
 ```
@@ -41,7 +42,6 @@ kubectl get pods -o=jsonpath="{.items[*]['metadata.name', 'metadata.namespace']}
 
 
 6.在默認命名空間中建立一個 Nginx Pod，並驗證 Pod 是否正在運行
-
 ```
 // creating a pod
 kubectl run nginx --image=nginx --restart=Never
@@ -51,7 +51,6 @@ kubectl get po
 
 
 7.使用 yaml 檔案建立相同的 Nginx Pod
-
 ```
 // get the yaml file with --dry-run flag
 kubectl run nginx --image=nginx --restart=Never --dry-run -o yaml > nginx-pod.yaml
