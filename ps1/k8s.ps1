@@ -6,7 +6,7 @@ param(
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 
 $env:k8s_exe="C:\Users\flash.lin71\scoop\apps\kubectl\1.24.3\bin\kubectl.exe"
-$env:k8s_exe="kubectl.exe"
+$env:k8s_exe="kubectl"
 #$env:KUBECONFIG="C:\Users\flash.lin71\.kube\uat.config"
 $env:KUBECONFIG="d:\demo\k8s-stg.yaml"
 
@@ -27,6 +27,11 @@ $state = GetJsonFile $stateFile $state
 
 function SaveState {
    SetJsonFile $stateFile $state
+}
+
+function ShowState {
+   Write-Host "kubeconfig: $($state.kubeconfig)"
+   Write-Host "namespace: $($state.namespace)"
 }
 
 function InvokeK8s {
@@ -73,6 +78,8 @@ if( "" -eq $action ) {
    Write-Host "use <env>           : use stg/uat environment"
    Write-Host "ns [namespace]      : list namespaces / switch to namespace"
    Write-Host "cp [pod id] [source]: copy pod's source to d:\demo\k8s "
+   Write-Host ""
+   ShowState
    return
 }
 
@@ -86,7 +93,7 @@ if( "use" -eq $action ) {
 
 if( "ns" -eq $action ) {
    $namespace = $arg0
-   if( $null -eq $arg0 ) {
+   if( "" -eq $arg0 ) {
       InvokeK8s "get namespaces"
       return
    }
