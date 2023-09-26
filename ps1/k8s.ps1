@@ -94,7 +94,12 @@ if( "use" -eq $action ) {
 if( "ns" -eq $action ) {
    $namespace = $arg0
    if( "" -eq $arg0 ) {
-      InvokeK8s "get namespaces"
+      $namespaceList = InvokeK8s "get namespaces"
+      if( $namespaceList.Length -eq 0 ) {
+         return
+      }
+      $selectedNamespace = PromptList $namespaceList
+      Write-Host $selectedNamespace
       return
    }
    # $namespace = "product-platform"
