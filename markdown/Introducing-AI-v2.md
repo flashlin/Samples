@@ -92,6 +92,7 @@ Wait for the release of the external training model version and proceed with ano
 ### Current Challenges:
 - What types of domain knowledge data should we collect?
 - How can we collect accurate domain knowledge data?
+- Collect high-quality knowledge content or refine the content to make it of higher quality.
 
 ---
 ##### 經過這次建置過程, 我們將會獲得下面的東西
