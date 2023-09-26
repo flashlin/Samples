@@ -18,7 +18,7 @@ paginate: true
 Generating creative content 
 - ~~Private Code Copilot~~
 - ~~Data Report~~
-- ~~Translate into multiple languages~~
+
 
 ---
 <style scoped>
