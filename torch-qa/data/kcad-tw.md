@@ -21,14 +21,14 @@ Answer:
 kubectl get po --all-namespaces
 ```
 
-
-3.列出特定命名空間中的所有 Pod
+Question: 列出特定命名空間中的所有 Pod
+Answer:
 ```
 kubectl get po -n <namespace name>
 ```
 
-
-4.列出特定命名空間中的所有 Service
+Question: 列出特定命名空間中的所有 Service
+Answer:
 ```
 kubectl get svc -n <namespace name>
 ```
