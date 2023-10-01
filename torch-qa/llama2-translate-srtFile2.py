@@ -45,9 +45,10 @@ def translate_srt_file(srt_filepath: str, dest_srt_filepath: str):
             if total_count <= old_dest_srt_count:
                 total_count += 1
                 continue
-            print(f"{count} {start_time} {end_time}")
             caption = caption.strip()
             translated = translate_en(caption)
+            print(f"{count} {start_time} {end_time}")
+            print(f"{translated}")
             text = f"{caption}\r\n{translated}\r\n".strip()
             line = create_srt_line(start_time, end_time, f"{text}")
             f.write(f"{total_count}\r\n")
