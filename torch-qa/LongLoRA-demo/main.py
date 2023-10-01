@@ -4,13 +4,13 @@ import math
 import sys
 from llama_attn_replace import replace_llama_attn
 
-MODEL_PATH = "../models/Llama-2-7b-longlora-16k"
+MODEL_PATH = "../models/Llama-2-7b-longlora-16k-ft"
 cache_dir = "./cache"
 context_size = -1
 max_gen_len = 512
 temperature = 0.6
 top_p = 0.9
-flash_attn = True
+USE_flash_attn = True
 
 
 def format_prompt(material, message, material_type="book", material_title=""):
@@ -61,7 +61,9 @@ def build_generator(
 
 
 if __name__ == '__main__':
-    replace_llama_attn()
+    if USE_flash_attn:
+        replace_llama_attn()
+
     # Set RoPE scaling factor
     config = transformers.AutoConfig.from_pretrained(
         MODEL_PATH,
@@ -80,23 +82,27 @@ if __name__ == '__main__':
         torch_dtype=torch.float16,
         device_map="auto",
     )
-    model.resize_token_embeddings(32001)
+    # model.resize_token_embeddings(32001)
+    # model.resize_token_embeddings(16001)
+    print("tokenizer loaded")
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         MODEL_PATH,
         cache_dir=cache_dir,
         model_max_length=context_size if context_size > orig_ctx_len else orig_ctx_len,
         padding_side="right",
-        use_fast=False,
+        use_fast=USE_flash_attn,
     )
     model.eval()
 
     if torch.__version__ >= "2" and sys.platform != "win32":
         model = torch.compile(model)
 
+    print("build_generator")
     respond = build_generator(model, tokenizer, temperature=temperature, top_p=top_p,
-                              max_gen_len=max_gen_len, use_cache=not flash_attn)
+                              max_gen_len=max_gen_len, use_cache=not USE_flash_attn)
 
+    print("inference")
     output = respond(material="../data/support.txt", question="How to add a new B2B2C domain ?",
                      material_type="material", material_title="")
     print("output", output)
