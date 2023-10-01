@@ -1,0 +1,1 @@
+python ./llama2-translate-srtFile.py "/mnt/d/Demo/RAG Implementation using Mistral 7B, Haystack, Weaviate, and FastAPI-en.srt" "/mnt/d/Demo/RAG Implementation using Mistral 7B, Haystack, Weaviate, and FastAPI.srt"
