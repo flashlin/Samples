@@ -117,6 +117,12 @@ if( "df" -eq $action )
     return
 }
 
+if( "dff" -eq $action )
+{
+    InvokeCmd "git difftool --tool=vimdiff -y"
+    return
+}
+
 if( "pl" -eq $action ) {
     InvokeCmd "git pull"
     InvokeCmd "git submodule sync"
@@ -274,7 +280,8 @@ Write-Host "am 'comment desc'  :add unstage files and commit"
 Write-Host "b [branch name]    :create branch or show current branch when no [branch name]"
 Write-Host "c <branch name>    :checkout branch, if branch name is empty, checkout master"
 Write-Host "cl                 :clean untrack files"
-Write-Host "df                 :diff "
+Write-Host "df                 :diff 上下比對"
+Write-Host "dff                :diff horizontal 左右比對"
 Write-Host "h <hash>           :show hash info"
 Write-Host "init               :init and add default .gitignore"
 Write-Host "info               :顯示目前專案的 Git 倉庫所佔用的檔案空間"
