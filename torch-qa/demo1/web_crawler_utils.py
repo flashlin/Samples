@@ -1,6 +1,13 @@
 import requests
 from bs4 import BeautifulSoup
 import markdown
+from urllib.parse import urlparse
+
+
+def extract_filename_from_url(url: str):
+    parsed_url = urlparse(url)
+    filename = parsed_url.path.split("/")[-1]
+    return filename
 
 
 def crawl(url: str, target_file: str):
@@ -29,4 +36,6 @@ def crawl_all_article_url(url: str):
 if __name__ == '__main__':
     urls = crawl_all_article_url("https://help.sbotop.com/article/35/100-deposit-bonus-terms-and-conditions-dep-1465.html")
     for url in urls:
+        filename = extract_filename_from_url(url)
         print(f"{url=}")
+        print(f"{filename=}")
