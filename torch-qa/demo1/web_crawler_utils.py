@@ -2,8 +2,15 @@ import requests
 from bs4 import BeautifulSoup
 import markdown
 from urllib.parse import urlparse
-
+import html2text
 from io_utils import split_filename
+
+
+def html_to_markdown(html_content: str):
+    h = html2text.HTML2Text()
+    h.body_width = 0
+    markdown_text = h.handle(html_content)
+    return markdown_text
 
 
 def extract_filename_from_url(url: str):
@@ -20,6 +27,7 @@ def crawl(url: str, target_file: str):
     # body_content = soup.body
     article_content = soup.find('div', id='articleContent')
     markdown_content = markdown.markdown(str(article_content), extensions=['markdown.extensions.fenced_code'])
+    markdown_content = html_to_markdown(markdown_content)
     with open(target_file, 'w', encoding='utf-8') as file:
         file.write(markdown_content)
     
