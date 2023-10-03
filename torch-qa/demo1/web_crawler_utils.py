@@ -24,3 +24,9 @@ def crawl_all_article_url(url: str):
     for a_tag in all_a_tags:
         href = a_tag.get('href')
         yield href
+
+
+if __name__ == '__main__':
+    urls = crawl_all_article_url("https://help.sbotop.com/article/35/100-deposit-bonus-terms-and-conditions-dep-1465.html")
+    for url in urls:
+        print(f"{url=}")
