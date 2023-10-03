@@ -266,8 +266,9 @@ if( "plm" -eq $action )
 
 if( "ab" -eq $action )
 {
-    InvokeCmd "git reset --hard HEAD"  # 清除 unstage files
-    InvokeCmd "git clean -fdx"  # 清除 untrack files
+    InvokeCmd "git restore ."
+    # InvokeCmd "git reset --hard HEAD"  # 清除 unstage files
+    # InvokeCmd "git clean -fdx"  # 清除 untrack files
     return
 }
 
