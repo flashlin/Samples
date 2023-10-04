@@ -1,6 +1,7 @@
 version: '3.3'
 services:
   mysql:
+    container_name: mysql_gpt_db
     build:
       context: ./
       dockerfile: mysql-docker.yml
