@@ -38,10 +38,24 @@ if [ "cuda" == "$action" ]; then
     exit
 fi
 
+if [ "t1" == "$action" ]; then
+    echo ""
+    conda info | grep -i 'base environment'
+    source /home/flash/miniconda3/etc/profile.d/conda.sh
+    /home/flash/miniconda3/bin/activate
+    conda init bash
+    exit
+fi
+
 if [ "t" == "$action" ]; then
     echo ""
+    conda info | grep -i 'base environment'
+    source /home/flash/miniconda3/etc/profile.d/conda.sh
     conda env list
     echo "conda activate torch"
+    /home/flash/miniconda3/bin/activate
+    conda init bash
+    conda activate torch
     exit
 fi
 
