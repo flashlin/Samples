@@ -1,24 +1,21 @@
+from typing import Tuple
 from datetime import datetime
-
 import pymysql
 import json
 from sqlalchemy import create_engine, Column, Integer, String, Sequence, DateTime, or_
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declarative_base
 
+from demo1.gpt_repo_utils import GptRepo, Conversation, DbConfig, ConversationMessage
 from obj_utils import dump_obj, dump
 
 
 class MysqlDbContext:
-    def __init__(self):
+    def __init__(self, config: DbConfig):
         db_settings = {
-            "host": "127.0.0.1",
-            "port": 3306,
-            "user": "flash",
-            "password": "pass",
-            "db": "gpt_db",
             "charset": "utf8",
         }
+        db_settings.update(vars(config))
         self.conn = pymysql.connect(**db_settings)
 
     def execute(self, sql: str, args: tuple):
@@ -28,12 +25,15 @@ class MysqlDbContext:
             cursor.execute(sql, args)
             conn.commit()
 
-    def query(self, sql: str, args: tuple = None):
+    def query(self, sql: str, args: Tuple[...] = None) -> list[any]:
+        """
+        :param sql: "select * from Customers where id = %d or name = %s or ch = %c
+        :param args: (1, "flash", 'c')
+        :return:
+        """
         conn = self.conn
         results = []
         with conn.cursor() as cursor:
-            # VALUES ('%s', '%s', '%d', '%c', '%d' )" % \
-            #    ('Max', 'Su', 25, 'F', 2800)
             if args is None:
                 cursor.execute(sql)
             else:
@@ -50,6 +50,31 @@ class MysqlDbContext:
             # results = cursor.fetchall()
             conn.commit()
         return results
+
+
+class MysqlGptRepo(GptRepo):
+    def __init__(self, config: DbConfig):
+        super().__init__()
+        self.db = MysqlDbContext(config)
+
+    def get_user_conversation(self, conversation_id: int) -> Conversation:
+        db = self.db
+        results = db.query('select Id, LoginName, CreateOn from Conversations where Id=%d LIMIT 1',
+                           (conversation_id, ))
+        if len(results) == 0:
+            return Conversation(conversation_id=-1,
+                                login_name='',
+                                create_on=datetime.min)
+        item = results[0]
+        return Conversation(conversation_id=item.Id,
+                            login_name=item.LoginName,
+                            create_on=item.CreateOn)
+
+    def create_conversation(self) -> ConversationMessage:
+        pass
+
+    def add_conversation_message(self, data: ConversationMessage):
+        pass
 
 
 class MysqlDbContext2:

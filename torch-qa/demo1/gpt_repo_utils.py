@@ -1,5 +1,15 @@
 from dataclasses import dataclass
 from datetime import datetime
+from abc import ABC, abstractmethod
+
+
+@dataclass
+class DbConfig:
+    host: str
+    port: int
+    user: str
+    password: str
+    db: str
 
 
 @dataclass
@@ -17,15 +27,18 @@ class ConversationMessage:
     create_on: datetime
 
 
-class GptRepo:
+class GptRepo(ABC):
     def __init__(self):
         pass
 
+    @abstractmethod
     def get_user_conversation(self, conversation_id: int) -> Conversation:
         pass
 
+    @abstractmethod
     def create_conversation(self) -> ConversationMessage:
        pass
 
+    @abstractmethod
     def add_conversation_message(self, data: ConversationMessage):
         pass
