@@ -35,11 +35,13 @@ class MysqlDbContext:
                 cursor.execute(sql, args)
             columns = [column[0] for column in cursor.description]
             row = cursor.fetchone()
-            obj = type("DynamicEntity", (), {})()
-            for i in range(len(row)):
-                column = columns[i]
-                setattr(obj, column, row[i])
-            results.append(obj)
+            while row is not None:
+                obj = type("DynamicEntity", (), {})()
+                for i in range(len(row)):
+                    column = columns[i]
+                    setattr(obj, column, row[i])
+                results.append(obj)
+                row = cursor.fetchone()
             # results = cursor.fetchall()
             conn.commit()
         return results
@@ -48,4 +50,6 @@ class MysqlDbContext:
 if __name__ == '__main__':
     db = MysqlDbContext()
     results = db.query("select * from Customers")
+    print(dump(results))
+    results = db.query("select * from Customers where loginName=%s", "flash1")
     print(dump(results))
