@@ -27,6 +27,7 @@ class MysqlDbContext:
             #    ('Max', 'Su', 25, 'F', 2800)
             sql = f"INSERT INTO class(id,name) VALUES (%s,%s)"
             cursor.execute(sql, args)
+            columns = [column[0] for column in cursor.description]
             data = cursor.fetchone()
             results = cursor.fetchall()
             conn.commit()
