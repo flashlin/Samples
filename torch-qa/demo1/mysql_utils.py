@@ -1,6 +1,10 @@
+from datetime import datetime
+
 import pymysql
 import json
-
+from sqlalchemy import create_engine, Column, Integer, String, Sequence, DateTime
+# from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base
 from obj_utils import dump_obj, dump
 
 
@@ -47,9 +51,32 @@ class MysqlDbContext:
         return results
 
 
+class MysqlDbContext2:
+    def __init__(self):
+        DATABASE_URL = 'mysql+pymysql://flash:pass@localhost:3306/gpt_db'
+        self.engine = create_engine(DATABASE_URL, echo=False)
+
+    def query(self):
+        engine = self.engine
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        customers = session.query(Customer).all()
+        for customer in customers:
+            print(f"{dump(customer)}")
+
+Base = declarative_base()
+class Customer(Base):
+    __tablename__ = 'Customers'
+    Id = Column(Integer, primary_key=True, autoincrement=True)
+    LoginName = Column(String(255))
+    CreateOn = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 if __name__ == '__main__':
     db = MysqlDbContext()
     results = db.query("select * from Customers")
     print(dump(results))
     results = db.query("select * from Customers where loginName=%s", "flash1")
     print(dump(results))
+    db2 = MysqlDbContext2()
+    print("---")
+    db2.query()
