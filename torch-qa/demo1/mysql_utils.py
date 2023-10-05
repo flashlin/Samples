@@ -23,6 +23,8 @@ class MysqlDbContext:
     def query(self, sql: str, args: tuple):
         conn = self.conn
         with conn.cursor() as cursor:
+            # VALUES ('%s', '%s', '%d', '%c', '%d' )" % \
+            #    ('Max', 'Su', 25, 'F', 2800)
             sql = f"INSERT INTO class(id,name) VALUES (%s,%s)"
             cursor.execute(sql, args)
             data = cursor.fetchone()
