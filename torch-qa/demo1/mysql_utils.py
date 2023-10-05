@@ -1,4 +1,7 @@
 import pymysql
+import json
+
+from obj_utils import dump_obj
 
 
 class MysqlDbContext:
@@ -32,11 +35,11 @@ class MysqlDbContext:
                 cursor.execute(sql, args)
             columns = [column[0] for column in cursor.description]
             row = cursor.fetchone()
-            obj = {}
+            obj = type("DynamicEntity", (), {})()
             for i in range(len(row)):
                 column = columns[i]
                 setattr(obj, column, row[i])
-            results += obj
+            results.append(obj)
             # results = cursor.fetchall()
             conn.commit()
         return results
@@ -45,4 +48,5 @@ class MysqlDbContext:
 if __name__ == '__main__':
     db = MysqlDbContext()
     results = db.query("select * from Customers")
-    print(f"{results=}")
+    for entity in results:
+        print(f"{dump_obj(entity)=}")
