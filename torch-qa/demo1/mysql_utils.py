@@ -1,7 +1,7 @@
 import pymysql
 import json
 
-from obj_utils import dump_obj
+from obj_utils import dump_obj, dump
 
 
 class MysqlDbContext:
@@ -48,5 +48,4 @@ class MysqlDbContext:
 if __name__ == '__main__':
     db = MysqlDbContext()
     results = db.query("select * from Customers")
-    for entity in results:
-        print(f"{dump_obj(entity)=}")
+    print(dump(results))

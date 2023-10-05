@@ -19,3 +19,15 @@ def dump_obj(obj: object):
     json += ",".join(values)
     json += "}"
     return json
+
+
+def dump(any_t):
+    if isinstance(any_t, list):
+        json = "["
+        values = []
+        for item in any_t:
+            values.append(dump(item))
+        json += ",".join(values)
+        json += "]"
+        return json
+    return dump_obj(any_t)
