@@ -24,8 +24,8 @@ CREATE TABLE `ConversationsDetail`
 (
     `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `ConversationsId` INT UNSIGNED NOT NULL,
-    `Question` text NOT NULL,
-    `Answer` text NOT NULL,
+    `RoleName` varchar(80) NOT NULL,
+    `Message` text NOT NULL,
     `CreateOn` DATETIME NOT NULL,
     PRIMARY KEY (Id),
     FOREIGN KEY (ConversationsId) REFERENCES Conversations(Id)
