@@ -2,9 +2,10 @@ from datetime import datetime
 
 import pymysql
 import json
-from sqlalchemy import create_engine, Column, Integer, String, Sequence, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Sequence, DateTime, or_
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declarative_base
+
 from obj_utils import dump_obj, dump
 
 
@@ -27,7 +28,7 @@ class MysqlDbContext:
             cursor.execute(sql, args)
             conn.commit()
 
-    def query(self, sql: str, args: tuple=None):
+    def query(self, sql: str, args: tuple = None):
         conn = self.conn
         results = []
         with conn.cursor() as cursor:
@@ -60,7 +61,10 @@ class MysqlDbContext2:
         engine = self.engine
         Session = sessionmaker(bind=engine)
         session = Session()
-        customers = session.query(Customer).all()
+        # customers = session.query(Customer).all()
+        customers = (session.query(Customer)
+                     .filter(or_(Customer.LoginName == 'flash', Customer.LoginName == 'flash2'))
+                     .all())
         for customer in customers:
             print(f"{dump(customer)}")
 
@@ -68,15 +72,22 @@ class MysqlDbContext2:
         Session = sessionmaker(bind=self.engine)
         session = Session()
         customer = session.query(Customer).filter_by(LoginName='flash').first()
-        customer.LoginName = "flash2"
-        session.commit()
+        if customer is not None:
+            customer = session.query(Customer).filter(or_(Customer.LoginName=='flash',Customer.LoginName=='flash2')).first()
+            customer.LoginName = "flash2"
+            # session.delete(customer)
+            session.commit()
+
 
 Base = declarative_base()
+
+
 class Customer(Base):
     __tablename__ = 'Customers'
     Id = Column(Integer, primary_key=True, autoincrement=True)
     LoginName = Column(String(255))
     CreateOn = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 
 if __name__ == '__main__':
     db = MysqlDbContext()
