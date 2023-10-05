@@ -64,6 +64,13 @@ class MysqlDbContext2:
         for customer in customers:
             print(f"{dump(customer)}")
 
+    def update(self):
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
+        customer = session.query(Customer).filter_by(LoginName='flash').first()
+        customer.LoginName = "flash2"
+        session.commit()
+
 Base = declarative_base()
 class Customer(Base):
     __tablename__ = 'Customers'
@@ -79,4 +86,6 @@ if __name__ == '__main__':
     print(dump(results))
     db2 = MysqlDbContext2()
     print("---")
+    db2.query()
+    db2.update()
     db2.query()
