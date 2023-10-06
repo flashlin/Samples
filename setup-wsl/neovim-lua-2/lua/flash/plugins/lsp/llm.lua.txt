@@ -1,0 +1,24 @@
+return {
+    "gsuuon/llm.nvim",
+    lazy = true,
+    config = function()
+        local codellama = require('llm.providers.codellama')
+        prompts = {
+            ['codellama'] = {
+                provider = codellama,
+                options = {
+                    url = 'http://localhost:11434/api/generate'   
+                }
+            }
+        }
+
+        local util = require('llm.util')
+        require('llm').setup({
+            hl_group = 'Substitute',
+            prompts = util.module.autoload('prompt_library'),
+            default_prompt = {
+              provider = codellama,
+            }
+        })
+    end
+}
