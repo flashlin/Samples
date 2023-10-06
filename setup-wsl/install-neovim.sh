@@ -76,7 +76,9 @@ echo "create ~/.config/nvim"
 ./create-path.sh ~/.config/nvim/lua/
 
 echo "copy init.vim to ~/.config/nvim/init.vim"
-cp -Rf ./neovim-lua/* ~/.config/nvim
+# switch my local config to target
+# cp -Rf ./neovim-lua/* ~/.config/nvim
+cp -Rf ./neovim-lua-2/* ~/.config/nvim
 
 #nvim -c 'PackerInstall' -c 'qa!'
 echo ""
