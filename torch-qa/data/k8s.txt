@@ -1,0 +1,44 @@
+Use DNS record in kubernetes
+
+What is the effect after change ndots?
+for example, if you want to call `leda-api-01.tw01.ppuff.com` , 
+
+Before:
+
+Linux will attempt attach the suffix to dns query request, these attempt sometimes will cause Resource Temporarily Unavailable error.
+
+```
+leda-api-01.tw01.ppuff.com
+leda-api-01.tw01.ppuff.com.namespace.svc.cluster.local
+leda-api-01.tw01.ppuff.com.svc.cluster.local
+leda-api-01.tw01.ppuff.com.cluster.local
+```
+
+After:
+
+After set ndots to 1, linux will not attempt to attach the suffix, only use correct record
+
+```
+leda-api-01.tw01.ppuff.com
+```
+
+How to setup ndots 1:
+```
+spec:
+  containers:
+    - name: mycontainer
+      image: nginx:1.24.0
+  dnsConfig:
+    options:
+      - name: ndots
+        value: "1"
+```
+
+Rule 2 - If your target service in same cluster, use internal DNS
+See DNS for Services and Pods 
+
+Example: use satan.dba.svc.cluster.local instead of leda-satan-01.tw01.ppuff.com
+
+Because leda-api-01.tw01.ppuff.com will be used through HAProxy through out-of-cluster, you will get less latency and failure rate if you use api.svc.cluster.local.
+Use leda-api-01.tw01.ppuff.com: <your-pod> → HAProxy → NGINX Ingress Controller → api
+Use api.svc.cluster.local: <your-pod> → api
