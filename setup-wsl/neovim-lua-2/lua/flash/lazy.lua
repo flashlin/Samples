@@ -13,7 +13,7 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({ 
     { import = "flash.plugins" }, 
-    { import = "flash.plugins.lsp" }
+    { import = "flash.plugins.lsp" },
   }, {
   install = {
     colorscheme = { "nightfly" },
