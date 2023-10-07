@@ -1,12 +1,12 @@
 from typing import Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 import pymysql
 import json
 from sqlalchemy import create_engine, Column, Integer, String, Sequence, DateTime, or_
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-from demo1.gpt_repo_utils import GptRepo, Conversation, DbConfig, ConversationMessage
+from demo1.gpt_repo_utils import GptRepo, Conversation, DbConfig, ConversationMessage, AddConversationReq
 from obj_utils import dump_obj, dump
 
 
@@ -23,7 +23,11 @@ class MysqlDbContext:
         with conn.cursor() as cursor:
             # sql = f"INSERT INTO class(id,name) VALUES (%s,%s)"
             cursor.execute(sql, args)
+            inserted_id_or_rowcount = inserted_id = cursor.lastrowid
+            if inserted_id == 0:
+                inserted_id_or_rowcount = cursor.rowcount
             conn.commit()
+        return inserted_id_or_rowcount
 
     def query(self, sql: str, args: Tuple[...] = None) -> list[any]:
         """
@@ -58,9 +62,8 @@ class MysqlGptRepo(GptRepo):
         self.db = MysqlDbContext(config)
 
     def get_user_conversation(self, conversation_id: int) -> Conversation:
-        db = self.db
-        results = db.query('select Id, LoginName, CreateOn from Conversations where Id=%d LIMIT 1',
-                           (conversation_id, ))
+        results = self.db.query('select Id, LoginName, CreateOn from Conversations where Id=%d LIMIT 1',
+                                (conversation_id,))
         if len(results) == 0:
             return Conversation(conversation_id=-1,
                                 login_name='',
@@ -70,11 +73,31 @@ class MysqlGptRepo(GptRepo):
                             login_name=item.LoginName,
                             create_on=item.CreateOn)
 
-    def create_conversation(self) -> ConversationMessage:
-        pass
+    def create_conversation(self, login_name: str) -> ConversationMessage:
+        inserted_id = self.db.execute("INSERT INTO Conversations(LoginName, CreateOn) VALUES(%s, NOW())",
+                                      (login_name,))
+        conversation = ConversationMessage(
+            conversation_id=inserted_id,
+            role_name="System",
+            message="",
+            create_on=datetime.now(timezone.utc)
+        )
 
-    def add_conversation_message(self, data: ConversationMessage):
-        pass
+        self.db.execute("INSERT INTO ConversationsDetail(ConversationsId, RoleName, Message, CreateOn) "
+                        "VALUES(%d, %s, %s, %t)",
+                        (conversation.conversation_id,
+                         conversation.role_name,
+                         conversation.message,
+                         conversation.create_on))
+
+        return conversation
+
+    def add_conversation_message(self, req: AddConversationReq):
+        results = self.db.query("SELECT ConversationsId, LoginName FROM Conversations WHERE ConversationsId=%d",
+                                     (req.conversation_id,))
+        conversation = results[0]
+        if conversation.LoginName != req.login_name:
+            raise Exception(f"ConversationsId {req.conversation_id} is not {req.login_name}'s message")
 
 
 class MysqlDbContext2:
@@ -98,7 +121,8 @@ class MysqlDbContext2:
         session = Session()
         customer = session.query(Customer).filter_by(LoginName='flash').first()
         if customer is not None:
-            customer = session.query(Customer).filter(or_(Customer.LoginName=='flash',Customer.LoginName=='flash2')).first()
+            customer = session.query(Customer).filter(
+                or_(Customer.LoginName == 'flash', Customer.LoginName == 'flash2')).first()
             customer.LoginName = "flash2"
             # session.delete(customer)
             session.commit()
