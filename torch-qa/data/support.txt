@@ -94,3 +94,120 @@ After External Training:
 1. Complete the Department Training Report form within 3 days.
 2. Submit the form to DM.
 3. Schedule a review meeting with DM within 1 week.
+
+
+### Why force the use of HTTPS on some domains?
+The reason we do this is that our domains were once affected by advertising injection from internet service providers (ISPs) in other countries. 
+By mandating the use of HTTPS, we can prevent ISPs from injecting ads into our domains.
+
+
+### How to use TvpTable In Titansoft.DAL.Dapper and Titansoft.DAL.EF?
+in Titansoft.DAL.Dapper
+```C#
+using Titansoft.DAL.Dapper;
+using Titansoft.DAL.Dapper.Repositories;
+...
+   public async Task<List<GamesName>> GetTranslationByIds(List<int> ids)
+   {
+      return (await _client.QueryAsync<GamesName>("[dbo].[GetTranslation]", new
+      {
+         ids = GetTvpTable(ids),
+         groupId = GamesNameGroupId,
+      })).ToList();
+   }
+    
+   private DataTable GetTvpTable(IEnumerable<int> idList)
+   {
+      var table = new DataTable();
+      table.Columns.Add("value", typeof(int));
+      foreach (var id in idList)
+      {
+         var row = table.NewRow();
+         row["value"] = id;
+         table.Rows.Add(row);
+      }
+      return table;
+   }
+```
+
+in Titansoft.DAL.EF
+```C#
+using Titansoft.DAL.EF.Extensions.DB;
+using Titansoft.DAL.EF.Extensions.DB.Models.Parameters;
+using Titansoft.DAL.EF.Factory;
+...
+    public async Task UpsertSummaries(IEnumerable<TvpBetSummary> betSummaries)
+    {
+        var parameters = new List<TiSqlParameter>
+        {
+            new TiTableParameter
+            {
+                Name = "summaries",
+                Type = "[dbo].[tvpBetSummary]",
+                Value = betSummaries
+            }
+        };
+        await _dbContext.ExecuteScalarAsync("[dbo].[UpsertSummaries]", parameters);
+    }
+```
+
+
+### If you encounter a similar EF Exception problem as below.
+
+```error
+Titansoft.DAL.Dapper.Exceptions.DatabaseException: DatabaseClient Exception: System.InvalidOperationException: An enumerable sequence of parameters (arrays, lists, etc) is not allowed in this context at Dapper.SqlMapper.GetCacheInfo(Identity identity, Object exampleParameters, Boolean addToCache) in //Dapper/SqlMapper.cs:line 1706 at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in //Dapper/SqlMapper.Async.cs:line 410 at Titansoft.DAL.Dapper.Repositories.DatabaseClient.<>c__DisplayClass20_0
+The above error is due to using TiSqlParameter and TiTableParameter in Dapper.
+```
+
+or error
+```error
+Microsoft.Data.SqlClient.SqlException (PROMOTION-SCHEDULERS-8464998894-WSVDW:1)
+Invalid column name 'Discriminator'.
+
+Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Discriminator'.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlDataReader.TryConsumeMetaData()
+   at Microsoft.Data.SqlClient.SqlDataReader.get_MetaData()
+   at Microsoft.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption, Boolean shouldCacheForAlwaysEncrypted)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean isAsync, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteReader(CommandBehavior behavior)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteDbDataReader(CommandBehavior behavior)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(Enumerator enumerator)
+```
+
+```C#
+public class CustomerVoucherRewardEntity : CustomerVoucherRewardBaseEntity
+{
+    public CustomerPromotionRewardEntity CustomerPromotionReward { get; set; }
+}
+```
+
+Please check EntityConfiguration code, The following code snippet is incorrect. 
+```C#
+// use CustomerVoucherRewardEntity instead
+public class CustomerVoucherRewardEntityConfiguration : IEntityTypeConfiguration<CustomerVoucherRewardBaseEntity>
+{
+    // use CustomerVoucherRewardEntity instead
+    public void Configure(EntityTypeBuilder<CustomerVoucherRewardBaseEntity> builder)
+    {
+        builder.Build();
+    }
+}
+```
+
+The correct code should be as follows
+```C#
+public class CustomerVoucherRewardEntityConfiguration : IEntityTypeConfiguration<CustomerVoucherRewardEntity>
+{
+    public void Configure(EntityTypeBuilder<CustomerVoucherRewardEntity> builder)
+    {
+        builder.Build();
+    }
+}
+```
