@@ -211,3 +211,13 @@ public class CustomerVoucherRewardEntityConfiguration : IEntityTypeConfiguration
     }
 }
 ```
+
+
+### UA told me that they need to filtering testing account
+recently, UA told me that they need to filtering testing account, 
+but sometimes we create account not in test mode. 
+This requires a lot of effort for them to filter those account.
+
+I would like to set this rule, and there is no real user with this prefix now.
+To create an account NOT in test mode for testing purpose, you prefix it with "rmdv"
+ex: rmdvvnd001
