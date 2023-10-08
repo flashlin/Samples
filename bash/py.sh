@@ -1,7 +1,9 @@
 #!/bin/bash
+# . py.sh
 # set exit when exception
 set -e
 
+echo "current=\"$PYTHONPATH\""
 export PYTHONPATH="/mnt/d/VDisk/GitHub/Samples/py_standard"
 echo "export PYTHONPATH=\"$PYTHONPATH\""
 
@@ -9,6 +11,6 @@ echo "export PYTHONPATH=\"$PYTHONPATH\""
 if [ $# -ne 1 ]; then
    echo "Usage: "
    echo "py.sh <xxx.py>"
-   exit 0
+   exit
 fi
 

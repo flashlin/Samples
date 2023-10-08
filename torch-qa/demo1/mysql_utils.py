@@ -6,8 +6,19 @@ from sqlalchemy import create_engine, Column, Integer, String, Sequence, DateTim
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-from demo1.gpt_repo_utils import GptRepo, Conversation, DbConfig, ConversationMessage, AddConversationReq
+from gpt_repo_utils import GptRepo, Conversation, DbConfig, ConversationMessage, AddConversationReq
 from obj_utils import dump_obj, dump
+import logging
+from logging.handlers import TimedRotatingFileHandler
+
+# logging.basicConfig(level=logging.INFO,format='[%(asctime)s]: %(levelname)s - %(message)s')
+logger = logging.getLogger('my_logger')
+logger.setLevel(logging.INFO)
+log_filename = "logs/my_log.log"
+handler = TimedRotatingFileHandler(log_filename, when="midnight", interval=1, backupCount=3)
+formatter = logging.Formatter('%(asctime)s: [%(levelname)s]%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 class MysqlDbContext:
@@ -18,7 +29,7 @@ class MysqlDbContext:
         db_settings.update(vars(config))
         self.conn = pymysql.connect(**db_settings)
 
-    def execute(self, sql: str, args: tuple):
+    def execute(self, sql: str, args: tuple = None):
         conn = self.conn
         with conn.cursor() as cursor:
             # sql = f"INSERT INTO class(id,name) VALUES (%s,%s)"
@@ -29,7 +40,7 @@ class MysqlDbContext:
             conn.commit()
         return inserted_id_or_rowcount
 
-    def query(self, sql: str, args: Tuple[...] = None) -> list[any]:
+    def query(self, sql: str, args: tuple = None) -> list[any]:
         """
         :param sql: "select * from Customers where id = %d or name = %s or ch = %c
         :param args: (1, "flash", 'c')
@@ -76,6 +87,9 @@ class MysqlGptRepo(GptRepo):
     def create_conversation(self, login_name: str) -> ConversationMessage:
         inserted_id = self.db.execute("INSERT INTO Conversations(LoginName, CreateOn) VALUES(%s, NOW())",
                                       (login_name,))
+
+        logger.info(f"{inserted_id=}")
+
         conversation = ConversationMessage(
             conversation_id=inserted_id,
             role_name="System",
@@ -83,12 +97,14 @@ class MysqlGptRepo(GptRepo):
             create_on=datetime.now(timezone.utc)
         )
 
+        print(f"{conversation=}")
+
         self.db.execute("INSERT INTO ConversationsDetail(ConversationsId, RoleName, Message, CreateOn) "
-                        "VALUES(%d, %s, %s, %t)",
+                        "VALUES(%s, %s, %s, %s)",
                         (conversation.conversation_id,
                          conversation.role_name,
                          conversation.message,
-                         conversation.create_on))
+                         conversation.create_on.strftime('%Y-%m-%d %H:%M:%S')))
 
         return conversation
 
@@ -138,7 +154,7 @@ class Customer(Base):
     CreateOn = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
-if __name__ == '__main__':
+def test1():
     db = MysqlDbContext()
     results = db.query("select * from Customers")
     print(dump(results))
@@ -149,3 +165,22 @@ if __name__ == '__main__':
     db2.query()
     db2.update()
     db2.query()
+
+
+def test2():
+    print(f"MysqlGptRepo")
+    gpt = MysqlGptRepo(DbConfig(
+        host='127.0.0.1',
+        port=3306,
+        db='gpt_db',
+        user='flash',
+        password='pass'
+    ))
+    conversation = gpt.create_conversation('flash')
+    print(f"{conversation=}")
+
+
+if __name__ == '__main__':
+    test2()
+
+
