@@ -1,24 +1,12 @@
-from typing import Tuple
 from datetime import datetime, timezone
 import pymysql
-import json
-from sqlalchemy import create_engine, Column, Integer, String, Sequence, DateTime, or_
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, or_
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 from gpt_repo_utils import GptRepo, Conversation, DbConfig, ConversationMessage, AddConversationReq
-from obj_utils import dump_obj, dump
-import logging
-from logging.handlers import TimedRotatingFileHandler
-
-# logging.basicConfig(level=logging.INFO,format='[%(asctime)s]: %(levelname)s - %(message)s')
-logger = logging.getLogger('my_logger')
-logger.setLevel(logging.INFO)
-log_filename = "logs/my_log.log"
-handler = TimedRotatingFileHandler(log_filename, when="midnight", interval=1, backupCount=3)
-formatter = logging.Formatter('%(asctime)s: [%(levelname)s]%(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+from logging_utils import logger
+from obj_utils import dump
 
 
 class MysqlDbContext:
@@ -46,6 +34,7 @@ class MysqlDbContext:
         :param args: (1, "flash", 'c')
         :return:
         """
+        logger.info(f"MysqlDbContext::query {sql=} {args=}")
         conn = self.conn
         results = []
         with conn.cursor() as cursor:
@@ -88,16 +77,12 @@ class MysqlGptRepo(GptRepo):
         inserted_id = self.db.execute("INSERT INTO Conversations(LoginName, CreateOn) VALUES(%s, NOW())",
                                       (login_name,))
 
-        logger.info(f"{inserted_id=}")
-
         conversation = ConversationMessage(
             conversation_id=inserted_id,
             role_name="System",
             message="",
             create_on=datetime.now(timezone.utc)
         )
-
-        print(f"{conversation=}")
 
         self.db.execute("INSERT INTO ConversationsDetail(ConversationsId, RoleName, Message, CreateOn) "
                         "VALUES(%s, %s, %s, %s)",
