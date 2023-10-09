@@ -4,7 +4,9 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, or_
 # from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-from gpt_repo_utils import GptRepo, Conversation, DbConfig, ConversationMessage, AddConversationReq
+from data_utils import hash_password
+from gpt_repo_utils import GptRepo, Conversation, DbConfig, ConversationMessage, AddConversationReq, CreateUserReq, \
+    CreateUserResp
 from logging_utils import logger
 from obj_utils import dump
 
@@ -56,10 +58,33 @@ class MysqlDbContext:
         return results
 
 
+def to_utc_time_str(time: datetime = None) -> str:
+    if time is None:
+        time = datetime.now(timezone.utc)
+    return time.strftime('%Y-%m-%d %H:%M:%S')
+
+
 class MysqlGptRepo(GptRepo):
     def __init__(self, config: DbConfig):
         super().__init__()
         self.db = MysqlDbContext(config)
+
+    def create_user(self, req: CreateUserReq) -> CreateUserResp:
+        old_users = self.db.query('SELECT Id, LoginName, CreateOn FROM Customers WHERE LoginName=%s LIMIT 1',
+                                  (req.login_name,))
+        if len(old_users) != 0:
+            return CreateUserResp(
+                is_success=False,
+                error_message=f'{req.login_name} is already exists.'
+            )
+
+        self.db.execute('INSERT INTO Customers(LoginName, Password, CreateOn) VALUES(%s, %s, %s)',
+                        (req.login_name, hash_password(req.password), to_utc_time_str()))
+
+        return CreateUserResp(
+            is_success=True,
+            error_message=f''
+        )
 
     def get_user_conversation(self, conversation_id: int) -> Conversation:
         results = self.db.query('select Id, LoginName, CreateOn from Conversations where Id=%d LIMIT 1',
@@ -95,7 +120,7 @@ class MysqlGptRepo(GptRepo):
 
     def add_conversation_message(self, req: AddConversationReq):
         results = self.db.query("SELECT ConversationsId, LoginName FROM Conversations WHERE ConversationsId=%d",
-                                     (req.conversation_id,))
+                                (req.conversation_id,))
         conversation = results[0]
         if conversation.LoginName != req.login_name:
             raise Exception(f"ConversationsId {req.conversation_id} is not {req.login_name}'s message")
@@ -153,7 +178,6 @@ def test1():
 
 
 def test2():
-    print(f"MysqlGptRepo")
     gpt = MysqlGptRepo(DbConfig(
         host='127.0.0.1',
         port=3306,
@@ -161,11 +185,15 @@ def test2():
         user='flash',
         password='pass'
     ))
+
+    gpt.create_user(CreateUserReq(
+        login_name='flash',
+        password='pass'
+    ))
+
     conversation = gpt.create_conversation('flash')
     print(f"{conversation=}")
 
 
 if __name__ == '__main__':
     test2()
-
-

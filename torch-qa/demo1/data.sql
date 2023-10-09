@@ -3,13 +3,14 @@ CREATE TABLE `Customers`
 (
     `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `LoginName` varchar(255) NOT NULL,
+    `password` varchar(255) NOT NULL,
     `CreateOn` DATETIME NOT NULL,
     PRIMARY KEY (Id),
     UNIQUE KEY `UNX_Customers` (`LoginName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-INSERT INTO `Customers` (LoginName, CreateOn)
-    VALUES ('flash', NOW());
+INSERT INTO `Customers` (LoginName, Password, CreateOn)
+    VALUES ('flash', '', NOW());
 
 
 CREATE TABLE `Conversations`

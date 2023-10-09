@@ -3,6 +3,7 @@ from itertools import groupby
 import json
 from typing import TypeVar, Generator, Union, Callable
 from itertools import zip_longest
+import hashlib
 
 T = TypeVar('T')
 T1 = TypeVar('T1')
@@ -111,3 +112,14 @@ def create_running_list(a_list: list[T], max_seq_len: int) -> list[list[T]]:
     tmp_list = [0] * pad_len
     tmp_list.extend(new_seq)
     return overlap_split_list(tmp_list, max_seq_len)
+
+
+def hash_password(password: str) -> str:
+    return hashlib.sha256(str.encode(password)).hexdigest()
+
+
+# Check password matches during login
+def check_password_hashes(password: str, hashed_text: str):
+    if hash_password(password) == hashed_text:
+        return True
+    return False

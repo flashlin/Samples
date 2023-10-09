@@ -13,6 +13,18 @@ class DbConfig:
 
 
 @dataclass
+class CreateUserReq:
+    login_name: str
+    password: str
+
+
+@dataclass
+class CreateUserResp:
+    is_success: bool
+    error_message: str
+
+
+@dataclass
 class Conversation:
     conversation_id: int
     login_name: str
@@ -35,6 +47,9 @@ class AddConversationReq:
 
 class GptRepo(ABC):
     def __init__(self):
+        pass
+
+    def create_user(self, req: CreateUserReq) -> CreateUserResp:
         pass
 
     @abstractmethod
