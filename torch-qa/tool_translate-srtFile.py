@@ -47,6 +47,7 @@ def translate_srt_file(srt_filepath: str, dest_srt_filepath: str):
                 continue
             caption = caption.strip()
             translated = translate_en(caption)
+            translated = translated.replace('⁇', '')
             print(f"{count} {start_time} {end_time}")
             print(f"{translated}")
             text = f"{caption}\r\n{translated}\r\n".strip()
