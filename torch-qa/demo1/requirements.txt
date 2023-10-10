@@ -3,3 +3,10 @@ bs4
 markdown
 html2text
 pymysql
+uvicorn
+pydantic
+#celery
+#redis
+python-dotenv
+flask
+flask_cors
