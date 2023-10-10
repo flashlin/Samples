@@ -67,7 +67,6 @@ const sendMessageOnEnter = async () => {
    });
    try {
       const response = await chatGpt.sendChatMessage(messageContent.value);
-      console.log('resp', response);
       appendMessage(response);
    } catch (e: any) {
       appendMessage({
