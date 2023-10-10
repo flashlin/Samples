@@ -25,9 +25,9 @@
       :size="btnConfig.size"
       :fill="btnConfig.fill"
     />
-    <span class="text-xs ml-0.5 text-gray-500 leading-none">{{
-      btnTips[btnStatus]
-    }}</span>
+    <span class="text-xs ml-0.5 text-gray-500 leading-none">
+      {{ btnTips[btnStatus] }}
+    </span>
   </div>
 </template>
 

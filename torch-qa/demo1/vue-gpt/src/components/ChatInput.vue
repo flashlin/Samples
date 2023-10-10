@@ -23,7 +23,7 @@
             placeholder="Write the messages.." v-model="messageContent" style="height: 450px!important;"
             @keyup.enter="isTalking || sendMessageOnEnter"
             :style="{ 'height': (messageContent.split('\n').length * 1.5) + 'rem', 'max-height': '15rem', 'min-height': '2.8rem' }"
-            spellcheck="false"></textarea> 
+            spellcheck="false"></textarea>
          <button class="btn" :disabled="isTalking" @click="sendMessageOnEnter()">
             Send
          </button>
@@ -46,18 +46,35 @@ const roleAlias = { user: "ME", assistant: "ChatGPT", system: "System" };
 const messageList = ref<ChatMessage[]>([
    {
       id: 1,
-      role: "system",
-      content: "你是 ChatGPT，盡可能簡潔地回答",
-   },
-   {
-      id: 2,
       role: "assistant",
       content: `Hello, I am AI Robot, 請告诉我你需要哪方面的帮助, 我会根据你的需求给你提供相應的信息和建議`,
    },
 ]);
 const chatGpt = new ChatGpt();
-const sendMessageOnEnter = () => {
+
+const appendMessage = (item: ChatMessage) => {
+   const oldMessageList = messageList.value;
+   oldMessageList.push(item);
+   messageList.value = oldMessageList;
+}
+
+const sendMessageOnEnter = async () => {
    if (!messageContent.value.length) return;
-   chatGpt.sendChatMessage(messageContent.value);
+   appendMessage({
+      id: messageList.value.length + 1,
+      role: 'user',
+      content: messageContent.value
+   });
+   try {
+      const response = await chatGpt.sendChatMessage(messageContent.value);
+      console.log('resp', response);
+      appendMessage(response);
+   } catch (e: any) {
+      appendMessage({
+         id: messageList.value.length + 1,
+         role: 'system',
+         content: e.message
+      });
+   }
 };
 </script>
