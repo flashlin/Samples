@@ -16,9 +16,15 @@
 
    <div class="sticky bottom-0 w-full p-6 pb-8 bg-gray-100">
       <div class="flex">
-         <input class="input" type="text" placeholder="please input your question" v-model="messageContent"
-            @keydown.enter="isTalking || sendOrSave()" />
-         <button class="btn" :disabled="isTalking" @click="sendOrSave()">
+         <!-- <input class="input" type="text" placeholder="please input your question" v-model="messageContent"
+            @keydown.enter="isTalking || sendMessageOnEnter()" /> -->
+
+         <textarea class="input w-full pt-3 bg-transparent chat-input-area form-input placeholder:text-slate-400/70"
+            placeholder="Write the messages.." v-model="messageContent" style="height: 450px!important;"
+            @keyup.enter="isTalking || sendMessageOnEnter"
+            :style="{ 'height': (messageContent.split('\n').length * 1.5) + 'rem', 'max-height': '15rem', 'min-height': '2.8rem' }"
+            spellcheck="false"></textarea> 
+         <button class="btn" :disabled="isTalking" @click="sendMessageOnEnter()">
             Send
          </button>
       </div>
@@ -50,8 +56,8 @@ const messageList = ref<ChatMessage[]>([
    },
 ]);
 const chatGpt = new ChatGpt();
-const sendOrSave = () => {
-  if (!messageContent.value.length) return;
-  chatGpt.sendChatMessage(messageContent.value);
+const sendMessageOnEnter = () => {
+   if (!messageContent.value.length) return;
+   chatGpt.sendChatMessage(messageContent.value);
 };
 </script>
