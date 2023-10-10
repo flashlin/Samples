@@ -4,7 +4,8 @@ from dotenv import load_dotenv, find_dotenv
 from langchain.llms import LlamaCpp
 
 from document_embeddings import get_answer_with_documents
-from models import init_messages, llama2_prompt, convert_langchain_schema_to_dict, create_llama2
+from models import init_messages, convert_langchain_schema_to_dict, create_llama2
+from llama2_utils import llama2_prompt
 from langchain.schema import (HumanMessage, AIMessage)
 from session import Session
 
