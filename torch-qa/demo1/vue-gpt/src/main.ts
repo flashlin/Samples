@@ -1,8 +1,10 @@
-import './assets/main.css'
+//import './assets/main.css'
+import "highlight.js/styles/dark.css";
+import "@/assets/tailwind.css";
+import "@icon-park/vue-next/styles/index.css";
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-
 import App from './App.vue'
 import router from './router'
 

@@ -3,13 +3,13 @@
       <div class="group flex flex-col px-4 py-3 hover:bg-slate-100 rounded-lg"
          v-for="item of messageList.filter((v) => v.role !== 'system')" :key="item.id">
          <div class="flex justify-between items-center mb-2">
-            <div class="font-bold">{{ roleAlias[item.role] }}：</div>
-            <Copy class="invisible group-hover:visible" :content="item.content" />
+            <div class="font-bold">{{ roleAlias[item.role] }}:</div>
+            <CopyButton class="invisible group-hover:visible" :content="item.content" />
          </div>
          <div>
             <div class="prose text-sm text-slate-600 leading-relaxed" v-if="item.content" v-html="md.render(item.content)">
             </div>
-            <Loding v-else />
+            <LoadingBar v-else />
          </div>
       </div>
    </div>
@@ -27,6 +27,8 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import CopyButton from '@/components/CopyButton.vue';
+import LoadingBar from '@/components/LoadingBar.vue';
 import type { ChatMessage } from "@/libs/gpt";
 import { md } from "@/libs/markdown";
 import { ChatGpt } from "@/libs/gpt";
@@ -44,7 +46,7 @@ const messageList = ref<ChatMessage[]>([
    {
       id: 2,
       role: "assistant",
-      content: `Hello, I am AI Robot, 请告诉我你需要哪方面的帮助，我会根据你的需求给你提供相应的信息和建议。`,
+      content: `Hello, I am AI Robot, 請告诉我你需要哪方面的帮助, 我会根据你的需求给你提供相應的信息和建議`,
    },
 ]);
 const chatGpt = new ChatGpt();
