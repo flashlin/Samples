@@ -1,4 +1,6 @@
 from typing import List
+from langchain.callbacks.base import BaseCallbackHandler
+from typing import Callable
 
 
 def llama2_prompt(messages: List[dict]) -> str:
@@ -38,3 +40,23 @@ def llama2_prompt(messages: List[dict]) -> str:
         f"{BOS}{B_INST} {(messages[-1]['content']).strip()} {E_INST}")
 
     return "".join(messages_list)
+
+
+class StreamDisplayHandler(BaseCallbackHandler):
+    def __init__(self, display_function: Callable[[str], None], initial_text=""):
+        self.display_function = display_function
+        self.text = initial_text
+        self.new_sentence = ""
+
+    def on_llm_new_token(self, token: str, **kwargs) -> None:
+        self.text += token
+        self.new_sentence += token
+
+        display_function = self.display_function
+        if display_function is not None:
+            display_function(self.text + "▌")
+        else:
+            raise ValueError(f"Invalid display_method: {self.display_function}")
+
+    def on_llm_end(self, response, **kwargs) -> None:
+        self.text = ""
