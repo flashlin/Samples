@@ -43,8 +43,17 @@ def llama2_prompt(messages: List[dict]) -> str:
 
 
 class StreamDisplayHandler(BaseCallbackHandler):
-    def __init__(self, display_function: Callable[[str], None], initial_text=""):
-        self.display_function = display_function
+    def __init__(self, container, initial_text="", display_method='display'):
+        """
+        :param container: class
+        :param initial_text:
+        :param display_method: 'display'
+        class MyContainer:
+            def display(self, text):
+               pass
+        """
+        self.container = container
+        self.display_method = display_method
         self.text = initial_text
         self.new_sentence = ""
 
@@ -52,11 +61,11 @@ class StreamDisplayHandler(BaseCallbackHandler):
         self.text += token
         self.new_sentence += token
 
-        display_function = self.display_function
+        display_function = getattr(self.container, self.display_method, None)
         if display_function is not None:
             display_function(self.text + "▌")
         else:
-            raise ValueError(f"Invalid display_method: {self.display_function}")
+            raise ValueError(f"Invalid display_method: {display_function}")
 
     def on_llm_end(self, response, **kwargs) -> None:
         self.text = ""
