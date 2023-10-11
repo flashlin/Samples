@@ -8,7 +8,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import threading
 from llama2_utils import llama2_prompt
-from model_utils import create_llama2
+from model_utils import create_llama2, create_llama2_v2
 
 load_dotenv()
 
@@ -25,8 +25,16 @@ class TaskItem(BaseModel):
         pass
 
 
+class LlmCallbackHandler:
+    current_task_item: TaskItem = None
+
+    def display(self, text: str):
+        self.current_task_item.display(text)
+
+
 llm_queue = queue.Queue(10)
-llm = create_llama2()
+llm_callback_handler = LlmCallbackHandler()
+llm = create_llama2_v2(llm_callback_handler)
 
 
 class LlmConsumer(threading.Thread):
@@ -45,8 +53,6 @@ class LlmConsumer(threading.Thread):
 
 app = Flask(__name__)
 cors = CORS(app)
-
-
 
 
 
