@@ -6,6 +6,8 @@ export interface ChatMessage {
 
 const decoder = new TextDecoder("utf-8");
 
+type GeneratingFn = (content: string) => void;
+
 export class ChatGpt {
    apiKey: string = "";
    messageList: ChatMessage[] = [];
@@ -29,9 +31,29 @@ export class ChatGpt {
       return this.getLastMessage();
    }
 
+   async sendChatMessageStream(content: string, generatingFn: GeneratingFn): Promise<ChatMessage> {
+      this.messageList.push({
+         id: this.messageList.length + 1,
+         role: 'user',
+         content: content
+      });
+      const { body, status } = await this.postChat(this.messageList);
+      this.messageList.push({
+         id: this.messageList.length + 1,
+         role: 'assistant',
+         content: ''
+      });
+      if (body) {
+         const reader = body.getReader();
+         return await this.readStream(reader, status, generatingFn);
+      }
+      return this.getLastMessage();
+   }
+
    async readStream(
       reader: ReadableStreamDefaultReader<Uint8Array>,
-      status: number
+      status: number,
+      generatingFn: GeneratingFn | undefined = undefined
    ): Promise<ChatMessage> {
       //let partialLine = "";
 
@@ -40,6 +62,7 @@ export class ChatGpt {
          if (done) break;
 
          const decodedText = decoder.decode(value, { stream: true });
+         generatingFn?.call(generatingFn, decodedText);
          this.appendLastMessageContent(decodedText);
 
          // if (status !== 200) {

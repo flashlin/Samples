@@ -56,9 +56,17 @@ const appendMessage = (item: ChatMessage) => {
    const oldMessageList = messageList.value;
    oldMessageList.push(item);
    messageList.value = oldMessageList;
+   return item;
 }
 
-const sendMessageOnEnter = async () => {
+const replaceLastMessage = (item: ChatMessage) => {
+   const oldMessageList = messageList.value.slice(0, messageList.value.length-1);
+   oldMessageList.push(item);
+   messageList.value = oldMessageList;
+   return item;
+}
+
+const sendMessageOnEnter1 = async () => {
    if (!messageContent.value.length) return;
    appendMessage({
       id: messageList.value.length + 1,
@@ -70,6 +78,36 @@ const sendMessageOnEnter = async () => {
       appendMessage(response);
    } catch (e: any) {
       appendMessage({
+         id: messageList.value.length + 1,
+         role: 'system',
+         content: e.message
+      });
+   }
+};
+
+
+const sendMessageOnEnter = async () => {
+   if (!messageContent.value.length) return;
+   appendMessage({
+      id: messageList.value.length + 1,
+      role: 'user',
+      content: messageContent.value
+   });
+   try {
+      const lastMessage = appendMessage({
+         id: messageList.value.length + 1,
+         role: 'assistant',
+         content: ''
+      })
+      const response = await chatGpt.sendChatMessageStream(messageContent.value, (typing: string) => {
+         lastMessage.content = lastMessage.content.substring(0, lastMessage.content.length - 1);
+         lastMessage.content += typing;
+         const newMessageList = messageList.value.slice(0, messageList.value.length-1).concat([lastMessage]);
+         messageList.value = newMessageList;
+      });
+      replaceLastMessage(response);
+   } catch (e: any) {
+      replaceLastMessage({
          id: messageList.value.length + 1,
          role: 'system',
          content: e.message

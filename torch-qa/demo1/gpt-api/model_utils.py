@@ -27,6 +27,7 @@ def create_llama2():
 def create_llama2_v2(callbackHandler):
     model_name = "CodeLlama-7B-Instruct-GGUF/codellama-7b-instruct.Q4_K_M.gguf"
     model_name = "Llama-2-7b-Chat-GGUF/llama-2-7b-chat.Q4_K_M.gguf"
+    model_name = "TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf"
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), callbackHandler])
     return LlamaCpp(
         model_path=f"../../models/{model_name}",

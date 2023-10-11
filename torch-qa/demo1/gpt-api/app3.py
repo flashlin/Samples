@@ -23,7 +23,7 @@ class ChatMessage:
     role: str
     content: str
 
-class TaskItem(BaseModel):
+class TaskItem:
     messages: str = ''
     output_message: ChatMessage = ChatMessage(
         role='user',
@@ -56,8 +56,8 @@ class LlmCallbackHandler:
 
 llm_queue = queue.Queue(10)
 llm_callback_handler = LlmCallbackHandler()
+print(f"loading llm")
 llm = create_llama2_v2(llm_callback_handler)
-
 
 class LlmConsumer(threading.Thread):
     def __init__(self, thread_name):
