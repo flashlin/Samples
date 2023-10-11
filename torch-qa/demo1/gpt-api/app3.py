@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import threading
 from llama2_utils import llama2_prompt
 from model_utils import create_llama2, create_llama2_v2
+from dataclasses import dataclass
 
 load_dotenv()
 
@@ -17,12 +18,33 @@ class Item(BaseModel):
     prompt: str
 
 
+@dataclass
+class ChatMessage:
+    role: str
+    content: str
+
 class TaskItem(BaseModel):
-    messages: str
-    response: str
+    messages: str = ''
+    output_message: ChatMessage = ChatMessage(
+        role='user',
+        content=''
+    )
+    is_finished: bool = False
+    outputs = queue.Queue()
 
     def display(self, text: str):
-        pass
+        output_text = text[:-1]
+        self.output_message.content += output_text
+        self.outputs.put(output_text)
+
+    def response(self):
+        while not self.is_finished and self.outputs.not_empty:
+            if self.outputs.not_empty:
+                output_text = self.outputs.get()
+                yield output_text
+                continue
+            time.sleep(0.5)
+
 
 
 class LlmCallbackHandler:
@@ -47,9 +69,16 @@ class LlmConsumer(threading.Thread):
             if llm_queue.empty():
                 time.sleep(1)
                 continue
-            req = llm_queue.get()
-            resp = llm(llama2_prompt(req.messages))
+            task_item: ChatMessage = llm_queue.get()
+            llm_callback_handler.current_task_item = task_item
+            resp = llm(llama2_prompt(task_item.messages))
+            task_item.output_message = resp
+            task_item.is_finished = True
 
+
+llm_task = LlmConsumer('consumer')
+llm_task.start()
+print(f"consumer task started")
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -60,7 +89,6 @@ cors = CORS(app)
 def chat_completions():
     req = request.json
     messages = req['messages']
-    print(f"{messages=}")
     resp = llm(llama2_prompt(messages))
     result = {
         'outputs': resp,
@@ -72,18 +100,10 @@ def chat_completions():
 def chat_stream():
     req = request.json
     messages = req['messages']
-    resp = llm(llama2_prompt(messages))
-    result = {
-        'outputs': resp,
-    }
-    def generate():
-        resp_len = len(resp)
-        for idx in range(resp_len):
-            token = resp[idx]
-            yield token
-            # time.sleep(0.1)
-
-    return Response(generate(), mimetype='text/event-stream')
+    task_item = TaskItem()
+    task_item.messages = llama2_prompt(messages)
+    llm_queue.put(task_item)
+    return Response(task_item.response(), mimetype='text/event-stream')
 
 
 if __name__ == '__main__':
