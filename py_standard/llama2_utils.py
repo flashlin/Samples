@@ -63,7 +63,8 @@ class StreamDisplayHandler(BaseCallbackHandler):
 
         display_function = getattr(self.container, self.display_method, None)
         if display_function is not None:
-            display_function(self.text + "▌")
+            # display_function(self.text + "▌")
+            display_function(token)
         else:
             raise ValueError(f"Invalid display_method: {display_function}")
 

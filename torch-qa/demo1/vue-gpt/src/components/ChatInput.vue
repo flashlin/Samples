@@ -100,10 +100,10 @@ const sendMessageOnEnter = async () => {
          content: ''
       })
       const response = await chatGpt.sendChatMessageStream(messageContent.value, (typing: string) => {
-         lastMessage.content = lastMessage.content.substring(0, lastMessage.content.length - 1);
          lastMessage.content += typing;
-         const newMessageList = messageList.value.slice(0, messageList.value.length-1).concat([lastMessage]);
-         messageList.value = newMessageList;
+         replaceLastMessage(lastMessage);
+         //const newMessageList = messageList.value.concat([lastMessage]);
+         //messageList.value = newMessageList;
       });
       replaceLastMessage(response);
    } catch (e: any) {

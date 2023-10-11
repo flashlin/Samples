@@ -24,6 +24,7 @@ class ChatMessage:
     role: str
     content: str
 
+
 class TaskItem:
     messages: str = ''
     output_message: ChatMessage = ChatMessage(
@@ -31,28 +32,26 @@ class TaskItem:
         content=''
     )
     is_finished: bool = False
-    outputs = queue.Queue()
+    output_tokens = queue.Queue()
 
-    def display(self, text: str):
-        output_text = text[:-1]
-        self.output_message.content += output_text
-        self.outputs.put(output_text)
+    def display(self, token: str):
+        self.output_message.content += token
+        self.output_tokens.put(token)
 
     def response(self):
-        while not self.is_finished and self.outputs.not_empty:
-            if self.outputs.not_empty:
-                output_text = self.outputs.get()
-                yield output_text
+        print("response start")
+        while not self.is_finished and self.output_tokens.not_empty:
+            if self.output_tokens.not_empty:
+                output_token = self.output_tokens.get()
+                yield output_token
                 continue
+            print("waiting")
             time.sleep(0.5)
+        print("response end")
 
 
-
-class LlmCallbackHandler(BaseCallbackHandler):
+class LlmCallbackHandler:
     current_task_item: TaskItem = None
-    
-    def __init__(self):
-        super().__init__()
 
     def display(self, text: str):
         self.current_task_item.display(text)
@@ -62,6 +61,7 @@ llm_queue = queue.Queue(10)
 llm_callback_handler = LlmCallbackHandler()
 print(f"loading llm")
 llm = create_llama2_v2(llm_callback_handler)
+
 
 class LlmConsumer(threading.Thread):
     def __init__(self, thread_name):
@@ -73,7 +73,7 @@ class LlmConsumer(threading.Thread):
             if llm_queue.empty():
                 time.sleep(1)
                 continue
-            task_item: ChatMessage = llm_queue.get()
+            task_item: TaskItem = llm_queue.get()
             llm_callback_handler.current_task_item = task_item
             resp = llm(task_item.messages)
             task_item.output_message = resp

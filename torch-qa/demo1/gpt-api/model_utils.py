@@ -7,6 +7,8 @@ import functools
 from langchain.chains import ConversationalRetrievalChain
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+from llama2_utils import StreamDisplayHandler
+
 
 def create_llama2():
     model_name = "CodeLlama-7B-Instruct-GGUF/codellama-7b-instruct.Q4_K_M.gguf"
@@ -28,7 +30,7 @@ def create_llama2_v2(callbackHandler):
     model_name = "CodeLlama-7B-Instruct-GGUF/codellama-7b-instruct.Q4_K_M.gguf"
     model_name = "Llama-2-7b-Chat-GGUF/llama-2-7b-chat.Q4_K_M.gguf"
     model_name = "TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf"
-    callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), callbackHandler])
+    callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), StreamDisplayHandler(callbackHandler)])
     return LlamaCpp(
         model_path=f"../../models/{model_name}",
         temperature=0.75,
