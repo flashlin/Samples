@@ -10,6 +10,7 @@ import threading
 from llama2_utils import llama2_prompt
 from model_utils import create_llama2, create_llama2_v2
 from dataclasses import dataclass
+from langchain.callbacks.base import BaseCallbackHandler
 
 load_dotenv()
 
@@ -47,8 +48,11 @@ class TaskItem:
 
 
 
-class LlmCallbackHandler:
+class LlmCallbackHandler(BaseCallbackHandler):
     current_task_item: TaskItem = None
+    
+    def __init__(self):
+        super().__init__()
 
     def display(self, text: str):
         self.current_task_item.display(text)
@@ -71,7 +75,7 @@ class LlmConsumer(threading.Thread):
                 continue
             task_item: ChatMessage = llm_queue.get()
             llm_callback_handler.current_task_item = task_item
-            resp = llm(llama2_prompt(task_item.messages))
+            resp = llm(task_item.messages)
             task_item.output_message = resp
             task_item.is_finished = True
 
