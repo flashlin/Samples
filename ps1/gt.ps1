@@ -77,6 +77,13 @@ if( "u" -eq $action ) {
     return
 }
 
+
+if( "uc" -eq $action ) {
+    InvokeCmd "git reset HEAD~1"
+    InvokeCmd "git status"
+    return
+}
+
 if( "m" -eq $action ) {
     $description = $arg1
     InvokeCmd "git commit -m '$description'"
@@ -304,4 +311,5 @@ Write-Host "stl                :stash list"
 Write-Host "stp                :stash pop"
 Write-Host "stc                :stash clear"               
 Write-Host "u [file]           :undo uncommitted files and clean"
+Write-Host "uc                 :abort commit files"
 Write-Host "plm                :pull all submodules"
