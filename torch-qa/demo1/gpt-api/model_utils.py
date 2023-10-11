@@ -24,6 +24,22 @@ def create_llama2():
     )
 
 
+def create_llama2_v2(callbackHandler):
+    model_name = "CodeLlama-7B-Instruct-GGUF/codellama-7b-instruct.Q4_K_M.gguf"
+    model_name = "Llama-2-7b-Chat-GGUF/llama-2-7b-chat.Q4_K_M.gguf"
+    callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), callbackHandler])
+    return LlamaCpp(
+        model_path=f"../../models/{model_name}",
+        temperature=0.75,
+        max_tokens=2000,
+        top_p=1,
+        n_ctx=2048,  # 請求上下文 ValueError: Requested tokens (1130) exceed context window of 512
+        callback_manager=callback_manager,
+        verbose=False,  # True
+        streaming=True,
+    )
+
+
 def time_decorator(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
