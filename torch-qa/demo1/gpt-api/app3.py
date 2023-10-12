@@ -39,15 +39,17 @@ class TaskItem:
         self.output_tokens.put(token)
 
     def response(self):
-        print("response start")
+        print("=== response start ===")
         while not self.is_finished and self.output_tokens.not_empty:
             if self.output_tokens.not_empty:
                 output_token = self.output_tokens.get()
                 yield output_token
+                self.output_tokens.task_done()
                 continue
-            print("waiting")
+            print("---- waiting ---")
             time.sleep(0.5)
-        print("response end")
+        yield "\r\ndata: [DONE]\r\n"
+        print("=== response end ===")
 
 
 class LlmCallbackHandler:
@@ -78,6 +80,7 @@ class LlmConsumer(threading.Thread):
             resp = llm(task_item.messages)
             task_item.output_message = resp
             task_item.is_finished = True
+            llm_queue.task_done()
 
 
 llm_task = LlmConsumer('consumer')
@@ -111,4 +114,4 @@ def chat_stream():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)

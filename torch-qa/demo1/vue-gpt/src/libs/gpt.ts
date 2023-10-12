@@ -55,15 +55,17 @@ export class ChatGpt {
       status: number,
       generatingFn: GeneratingFn | undefined = undefined
    ): Promise<ChatMessage> {
-      //let partialLine = "";
+      let partialLine = "";
 
       while (status > 0) {
          const { value, done } = await reader.read();
          if (done) break;
 
          const decodedText = decoder.decode(value, { stream: true });
-         generatingFn?.call(generatingFn, decodedText);
-         this.appendLastMessageContent(decodedText);
+         console.log("decoded '"+ decodedText +"'");
+         //generatingFn?.call(generatingFn, decodedText);
+         //this.appendLastMessageContent(decodedText);
+
 
          // if (status !== 200) {
          //    const json = JSON.parse(decodedText); // start with "data: "
@@ -72,24 +74,26 @@ export class ChatGpt {
          //    return this.getLastMessage();
          // }
 
-         //const chunk = partialLine + decodedText;
+         const chunk = partialLine + decodedText;
+         const newLines = chunk.split(/\r?\n/);
+         partialLine = newLines.pop() ?? "";
+         for (const line of newLines) {
+            if (line.length === 0) continue; // ignore empty message
+            if (line.startsWith(":")) continue; // ignore sse comment message
+            if (line === "data: [DONE]") {
+               console.log("END");
+               return this.getLastMessage();
+            }
 
-         // const newLines = chunk.split(/\r?\n/);
-         // partialLine = newLines.pop() ?? "";
-         // for (const line of newLines) {
-         //    if (line.length === 0) continue; // ignore empty message
-         //    if (line.startsWith(":")) continue; // ignore sse comment message
-         //    if (line === "data: [DONE]") {
-         //       return this.getLastMessage();
-         //    }
-
-         //    // const json = JSON.parse(line.substring(6)); // start with "data: "
+            //console.log('line=', line)
+            //const content = line.substring(6); // start with "data: "
+            generatingFn?.call(generatingFn, line);
          //    // const content =
          //    //    status === 200
          //    //       ? json.choices[0].delta.content ?? ""
          //    //       : json.error.message;
-         //    this.appendLastMessageContent(line);
-         // }
+            this.appendLastMessageContent(line);
+         }
       }
 
       return this.getLastMessage();
