@@ -80,6 +80,7 @@ export class ChatGpt {
          for (const line of newLines) {
             if (line.length === 0) continue; // ignore empty message
             if (line.startsWith(":")) continue; // ignore sse comment message
+            console.log("line='" + line + "'")
             if (line === "data: [DONE]") {
                console.log("END");
                return this.getLastMessage();

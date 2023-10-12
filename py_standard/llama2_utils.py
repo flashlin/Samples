@@ -61,12 +61,15 @@ class StreamDisplayHandler(BaseCallbackHandler):
         self.text += token
         self.new_sentence += token
 
-        display_function = getattr(self.container, self.display_method, None)
-        if display_function is not None:
-            # display_function(self.text + "▌")
-            display_function(token)
-        else:
-            raise ValueError(f"Invalid display_method: {display_function}")
+        # self.call_display_func(self.text + "▌")
+        self.call_display_func(token)
 
     def on_llm_end(self, response, **kwargs) -> None:
         self.text = ""
+
+    def call_display_func(self, text: str):
+        display_function = getattr(self.container, self.display_method, None)
+        if display_function is not None:
+            display_function(text)
+        else:
+            raise ValueError(f"Invalid display_method: {display_function}")
