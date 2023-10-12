@@ -1,3 +1,4 @@
+import json
 import time
 import queue
 from flask import Flask, request, Response, render_template, jsonify, redirect, url_for
@@ -43,12 +44,12 @@ class TaskItem:
         while not self.is_finished and self.output_tokens.not_empty:
             if self.output_tokens.not_empty:
                 output_token = self.output_tokens.get()
-                yield output_token
+                yield json.dumps(output_token) + "\r\n"
                 self.output_tokens.task_done()
                 continue
             print("---- waiting ---")
             time.sleep(0.5)
-        yield "\r\ndata: [DONE]\r\n"
+        yield "data: [DONE]\r\n"
         print("=== response end ===")
 
 
@@ -84,6 +85,7 @@ class LlmConsumer(threading.Thread):
 
 
 llm_task = LlmConsumer('consumer')
+llm_task.daemon = True
 llm_task.start()
 print(f"consumer task started")
 

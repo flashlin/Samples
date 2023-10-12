@@ -85,14 +85,13 @@ export class ChatGpt {
                return this.getLastMessage();
             }
 
-            //console.log('line=', line)
-            //const content = line.substring(6); // start with "data: "
-            generatingFn?.call(generatingFn, line);
-         //    // const content =
-         //    //    status === 200
-         //    //       ? json.choices[0].delta.content ?? ""
-         //    //       : json.error.message;
-            this.appendLastMessageContent(line);
+            const content = JSON.parse(line); // start with "data: "
+            generatingFn?.call(generatingFn, content);
+            // const content =
+            //    status === 200
+            //       ? json.choices[0].delta.content ?? ""
+            //       : json.error.message;
+            this.appendLastMessageContent(content);
          }
       }
 
