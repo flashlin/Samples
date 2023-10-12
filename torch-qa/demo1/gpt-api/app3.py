@@ -78,6 +78,7 @@ class LlmConsumer(threading.Thread):
                 continue
             task_item: TaskItem = llm_queue.get()
             llm_callback_handler.current_task_item = task_item
+            print(f"start process")
             resp = llm(task_item.messages)
             task_item.output_message = resp
             task_item.is_finished = True
