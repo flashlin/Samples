@@ -19,6 +19,9 @@ def login():
     username = username.lower()
 
     user_service = current_app.config.get('UserService')
+    if user_service is None:
+        raise ValueError(f"Null flask config['UserService']")
+
     user = user_service.get_user(username)
     if not user.check_password(password):
         return jsonify({'message': 'Invalid username or password'}), 401
