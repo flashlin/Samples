@@ -34,15 +34,20 @@ class TaskItem:
     )
     is_finished: bool = False
     is_started: bool = False
+    is_response_done: bool = False
     output_tokens = queue.Queue()
 
-    def wait(self):
+    def wait_for_start(self):
         while not self.is_started:
             time.sleep(0.5)
 
     def display(self, token: str):
         self.output_message.content += token
         self.output_tokens.put(token)
+        self.is_started = True
+
+    def display_end(self):
+        self.is_response_done = True
 
     def response(self):
         print("=== response start ===")
@@ -56,12 +61,19 @@ class TaskItem:
         yield "data: [DONE]"
         print("=== response end ===")
 
+    def wait_for_response_done(self):
+        while not self.is_response_done:
+            time.sleep(0.5)
+
 
 class LlmCallbackHandler:
     current_task_item: TaskItem = None
 
     def display(self, text: str):
         self.current_task_item.display(text)
+
+    def display_end(self):
+        self.current_task_item.display_end()
 
 
 llm_queue = queue.Queue(10)
@@ -86,6 +98,7 @@ class LlmConsumer(threading.Thread):
             resp = llm(task_item.messages)
             task_item.output_message = resp
             task_item.is_finished = True
+            task_item.wait_for_response_done()
 
 
 llm_task = LlmConsumer('consumer')
@@ -115,8 +128,9 @@ def chat_stream():
     task_item = TaskItem()
     task_item.messages = llama2_prompt(messages)
     llm_queue.put(task_item)
+    task_item.wait_for_start()
     return Response(stream_with_context(task_item.response()), mimetype='text/event-stream')
 
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    app.run(debug=True, threaded=True, use_reloader=False)

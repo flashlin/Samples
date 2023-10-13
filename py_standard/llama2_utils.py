@@ -66,7 +66,11 @@ class StreamDisplayHandler(BaseCallbackHandler):
 
     def on_llm_end(self, response, **kwargs) -> None:
         self.text = ""
-        print("on_llm_end")
+        display_end_function = getattr(self.container, f"{self.display_method}_end", None)
+        if display_end_function is not None:
+            display_end_function()
+        else:
+            raise ValueError(f"Invalid display_end_method: {display_end_function}")
 
     def call_display_func(self, text: str):
         display_function = getattr(self.container, self.display_method, None)
