@@ -47,7 +47,7 @@ class TaskItem:
         self.is_started = True
 
     def display_end(self):
-        self.is_response_done = True
+        self.is_finished = True
 
     def response(self):
         print("=== response start ===")
@@ -59,11 +59,13 @@ class TaskItem:
                 continue
             time.sleep(0.2)
         yield "data: [DONE]"
+        self.is_response_done = True
         print("=== response end ===")
 
     def wait_for_response_done(self):
         while not self.is_response_done:
             time.sleep(0.5)
+        time.sleep(0.5)
 
 
 class LlmCallbackHandler:
@@ -97,7 +99,6 @@ class LlmConsumer(threading.Thread):
             print(f"start process")
             resp = llm(task_item.messages)
             task_item.output_message = resp
-            task_item.is_finished = True
             task_item.wait_for_response_done()
 
 
