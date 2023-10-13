@@ -4,15 +4,6 @@ from abc import ABC, abstractmethod
 
 
 @dataclass
-class DbConfig:
-    host: str
-    port: int
-    user: str
-    password: str
-    db: str
-
-
-@dataclass
 class CreateUserReq:
     login_name: str
     password: str
