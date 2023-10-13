@@ -1,10 +1,12 @@
+import os
 from datetime import datetime, timezone
-
 from data_utils import hash_password
 from gpt_repo_utils import GptRepo, CreateUserReq, CreateUserResp, Conversation, ConversationMessage, \
-    AddConversationReq
+    AddConversationReq, CustomerEntity
+from obj_utils import dump
 from repo_types import DbConfig
 from mysql_utils import MysqlDbContext, to_utc_time_str
+from dotenv import load_dotenv
 
 
 class MysqlGptRepo(GptRepo):
@@ -28,6 +30,18 @@ class MysqlGptRepo(GptRepo):
             is_success=True,
             error_message=f''
         )
+
+    def get_user(self, login_name: str) -> CustomerEntity:
+        old_users = self.db.query('SELECT Id, LoginName, CreateOn FROM Customers WHERE LoginName=%s LIMIT 1',
+                                  (login_name,))
+        if len(old_users) == 0:
+            return CustomerEntity(
+                Id=0,
+                LoginName='',
+                Password='',
+                CreateOn=datetime.min
+            )
+        return old_users[0]
 
     def get_user_conversation(self, conversation_id: int) -> Conversation:
         results = self.db.query('select Id, LoginName, CreateOn from Conversations where Id=%d LIMIT 1',
@@ -69,23 +83,28 @@ class MysqlGptRepo(GptRepo):
             raise Exception(f"ConversationsId {req.conversation_id} is not {req.login_name}'s message")
 
 
-def test2():
+def test():
+    load_dotenv()
     gpt = MysqlGptRepo(DbConfig(
         host='127.0.0.1',
         port=3306,
         db='gpt_db',
-        user='flash',
-        password='pass'
+        user=os.getenv("MYSQL_USER"),
+        password=os.getenv("MYSQL_PASSWORD")
     ))
 
-    gpt.create_user(CreateUserReq(
+    resp = gpt.create_user(CreateUserReq(
         login_name='flash',
         password='pass'
     ))
+    print(f"create user {resp=}")
+
+    user = gpt.get_user('flash')
+    print(f"{dump(user)=}")
 
     conversation = gpt.create_conversation('flash')
     print(f"{conversation=}")
 
 
 if __name__ == '__main__':
-    test2()
+    test()

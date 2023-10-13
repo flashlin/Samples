@@ -36,11 +36,24 @@ class AddConversationReq:
     login_name: str
 
 
+@dataclass
+class CustomerEntity:
+    Id: int
+    LoginName: str
+    Password: str
+    CreateOn: datetime
+
+
 class GptRepo(ABC):
     def __init__(self):
         pass
 
+    @abstractmethod
     def create_user(self, req: CreateUserReq) -> CreateUserResp:
+        pass
+
+    @abstractmethod
+    def get_user(self, username: str) -> CustomerEntity:
         pass
 
     @abstractmethod
