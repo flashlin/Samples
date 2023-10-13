@@ -1,7 +1,7 @@
 import json
 import time
 import queue
-from flask import Flask, request, Response, render_template, jsonify, redirect, url_for
+from flask import Flask, request, Response, render_template, jsonify, redirect, url_for, stream_with_context
 from flask_cors import CORS, cross_origin
 from typing import Any, List
 from pydantic import BaseModel
@@ -34,7 +34,6 @@ class TaskItem:
     )
     is_finished: bool = False
     is_started: bool = False
-    is_response_done: bool = False
     output_tokens = queue.Queue()
 
     def wait(self):
@@ -42,7 +41,6 @@ class TaskItem:
             time.sleep(0.5)
 
     def display(self, token: str):
-        self.is_started = True
         self.output_message.content += token
         self.output_tokens.put(token)
 
@@ -56,12 +54,7 @@ class TaskItem:
                 continue
             time.sleep(0.2)
         yield "data: [DONE]"
-        self.is_response_done = True
         print("=== response end ===")
-
-    def wait_for_response_done(self):
-        while not self.is_response_done:
-            time.sleep(0.1)
 
 
 class LlmCallbackHandler:
@@ -93,8 +86,6 @@ class LlmConsumer(threading.Thread):
             resp = llm(task_item.messages)
             task_item.output_message = resp
             task_item.is_finished = True
-            llm_queue.task_done()
-            task_item.wait_for_response_done()
 
 
 llm_task = LlmConsumer('consumer')
@@ -104,7 +95,6 @@ print(f"consumer task started")
 
 app = Flask(__name__)
 cors = CORS(app)
-
 
 
 @app.route('/api/v1/chat/completions', methods=['POST'])
@@ -125,8 +115,7 @@ def chat_stream():
     task_item = TaskItem()
     task_item.messages = llama2_prompt(messages)
     llm_queue.put(task_item)
-    task_item.wait()
-    return Response(task_item.response(), mimetype='text/event-stream')
+    return Response(stream_with_context(task_item.response()), mimetype='text/event-stream')
 
 
 if __name__ == '__main__':
