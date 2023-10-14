@@ -91,6 +91,16 @@ class MysqlGptRepo(GptRepo):
             )
         )
 
+    def get_conversation_message_list(self, conversation_id: int) -> [ConversationMessage]:
+        results = self.db.query("SELECT Id, ConversationsId, RoleName, Message, CreateOn FROM ConversationsDetail "
+                               "WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 100", (conversation_id,))
+        ordered_result = results[::-1]
+
+        result = self.db.query("SELECT Id, ConversationsId, RoleName, Message, CreateOn FROM ConversationsDetail "
+                               "WHERE ConversationsId=%s ORDER BY Id LIMIT 1", (conversation_id,))
+        ordered_result[0] = result[0]
+        return ordered_result
+
     def add_conversation_detail(self, data: ConversationMessage):
         self.db.execute("INSERT INTO ConversationsDetail(ConversationsId, RoleName, Message, CreateOn) "
                         "VALUES(%s, %s, %s, %s)",
@@ -128,6 +138,9 @@ def test():
         login_name='flash',
         message='Hello'
     ))
+
+    last_messages = gpt.get_conversation_message_list(4)
+    print(f"{dump(last_messages)=}")
 
 
 if __name__ == '__main__':
