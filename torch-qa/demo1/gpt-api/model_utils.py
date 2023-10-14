@@ -32,7 +32,7 @@ def create_llama2_v2(callbackHandler):
     model_name = "TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf"
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), StreamDisplayHandler(callbackHandler)])
     return LlamaCpp(
-        model_path=f"../../models/{model_name}",
+        model_path=f"./models/{model_name}",
         temperature=0.75,
         max_tokens=2000,
         top_p=1,
