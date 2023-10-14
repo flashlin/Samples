@@ -64,3 +64,14 @@ The following are the VRAM requirements of Stable Diffusion XL
 
 
 <br><br><br><br><br><br><br><br><br>
+
+
+
+申請一台電腦工作站規格如下, 請核准
+|種類|規格
+|--|--
+|CPU |i7-13700K
+|RAM |ECC-96GB
+|GPU |NVIDIA-RTX-A6000 48GB PCIE 
+|DISK |2TB SSD
+|OS |Ubuntu-22.04 
