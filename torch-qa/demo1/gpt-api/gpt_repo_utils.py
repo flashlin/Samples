@@ -34,6 +34,7 @@ class ConversationMessage:
 class AddConversationReq:
     conversation_id: int
     login_name: str
+    message: str
 
 
 @dataclass

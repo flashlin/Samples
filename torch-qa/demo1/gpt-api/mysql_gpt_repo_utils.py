@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from data_utils import hash_password
 from gpt_repo_utils import GptRepo, CreateUserReq, CreateUserResp, Conversation, ConversationMessage, \
     AddConversationReq, CustomerEntity
+from llama2_utils import DEFAULT_SYSTEM_PROMPT
 from obj_utils import dump
 from repo_types import DbConfig
 from mysql_utils import MysqlDbContext, to_utc_time_str
@@ -61,26 +62,43 @@ class MysqlGptRepo(GptRepo):
 
         conversation = ConversationMessage(
             conversation_id=inserted_id,
-            role_name="System",
-            message="",
+            role_name="system",
+            message=DEFAULT_SYSTEM_PROMPT,
             create_on=datetime.now(timezone.utc)
         )
-
-        self.db.execute("INSERT INTO ConversationsDetail(ConversationsId, RoleName, Message, CreateOn) "
-                        "VALUES(%s, %s, %s, %s)",
-                        (conversation.conversation_id,
-                         conversation.role_name,
-                         conversation.message,
-                         conversation.create_on.strftime('%Y-%m-%d %H:%M:%S')))
-
+        self.add_conversation_detail(conversation)
         return conversation
 
     def add_conversation_message(self, req: AddConversationReq):
-        results = self.db.query("SELECT ConversationsId, LoginName FROM Conversations WHERE ConversationsId=%d",
+        results = self.db.query("SELECT Id, LoginName FROM Conversations WHERE Id=%s LIMIT 1",
                                 (req.conversation_id,))
         conversation = results[0]
         if conversation.LoginName != req.login_name:
             raise Exception(f"ConversationsId {req.conversation_id} is not {req.login_name}'s message")
+
+        last_messages = self.db.query("SELECT RoleName FROM ConversationsDetail WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 1",
+                      (req.conversation_id,))
+
+        if last_messages[0].RoleName != 'assistant' and last_messages[0].RoleName != 'system':
+            raise Exception(f"ConversationsId {req.conversation_id} The replay message unexpectedly interrupts.")
+
+        self.add_conversation_detail(
+            ConversationMessage(
+                conversation_id=req.conversation_id,
+                role_name='user',
+                message=req.message,
+                create_on=datetime.now(timezone.utc)
+            )
+        )
+
+    def add_conversation_detail(self, data: ConversationMessage):
+        self.db.execute("INSERT INTO ConversationsDetail(ConversationsId, RoleName, Message, CreateOn) "
+                        "VALUES(%s, %s, %s, %s)",
+                        (data.conversation_id,
+                         data.role_name,
+                         data.message,
+                         to_utc_time_str(data.create_on),)
+                        )
 
 
 def test():
@@ -104,6 +122,12 @@ def test():
 
     conversation = gpt.create_conversation('flash')
     print(f"{conversation=}")
+
+    gpt.add_conversation_message(AddConversationReq(
+        conversation_id=4,
+        login_name='flash',
+        message='Hello'
+    ))
 
 
 if __name__ == '__main__':
