@@ -5,7 +5,7 @@ from flask_cors import CORS, cross_origin
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 """
-app.register_blueprint(blueprint_jwt_login, url_prefix='/api/v1/user')
+app.register_blueprint(blueprint_jwt_login, url_prefix='/api/v1/auth')
 """
 blueprint_jwt_login = Blueprint('jwt_login_v1', __name__)
 
@@ -32,6 +32,7 @@ def login():
     return jsonify({'token': token}), 200
 
 
+@blueprint_jwt_login.route('/refreshToken')
 @cross_origin()
 @jwt_required()
 def refresh_token():
@@ -40,6 +41,3 @@ def refresh_token():
                                 fresh=True,
                                 expires_delta=datetime.timedelta(minutes=10))
     return jsonify({'token': token}), 200
-
-
-

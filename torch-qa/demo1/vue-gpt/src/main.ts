@@ -8,6 +8,14 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
+
+if (process.env.NODE_ENV === 'development') {
+   import('@/mocks/index').then((module) => {
+      const worker = module.default;
+      worker.start();
+   });
+}
+
 const app = createApp(App)
 
 app.use(createPinia())

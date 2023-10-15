@@ -108,13 +108,14 @@ export class ChatGpt {
    }
 
    async postChat(messageList: ChatMessage[]) {
+      const accessToken = localStorage.getItem('accessToken');
       //const result = await fetch("/api/v1/chat/completions", {
       const result = await fetch("http://127.0.0.1:5000/api/v1/chat/stream", {
          method: "post",
          // signal: AbortSignal.timeout(8000),
          headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${this.apiKey}`,
+            Authorization: `Bearer ${accessToken}`,
          },
          body: JSON.stringify({
             messages: messageList,

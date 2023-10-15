@@ -1,4 +1,7 @@
 {
+  "compilerOptions": {
+    "lib": ["es2017", "ESNext.AsyncIterable", "dom", "webworker"]
+  },
   "files": [],
   "references": [
     {
