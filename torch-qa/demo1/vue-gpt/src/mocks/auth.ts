@@ -1,22 +1,16 @@
+import type { ILoginReq, ILoginResp } from '@/libs/authService';
 import { rest } from 'msw';
 
-interface LoginRequestBody {
-   username: string
-   password: string
-}
-
-interface LoginResponseBody {
-   token: string
-}
 
 export const handlers: any = [
-   rest.post<LoginRequestBody, LoginResponseBody>(
+   rest.post<ILoginReq, ILoginResp>(
       '/api/v1/auth/login',
       (req, res, ctx) => {
+         const resp: ILoginResp = {
+            token: Date.now().toString()
+         };
          return res(
-            ctx.json({
-               token: Date.now()
-            })
+            ctx.json(resp)
          )
       }),
 ]   
