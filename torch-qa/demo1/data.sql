@@ -3,7 +3,7 @@ CREATE TABLE `Customers`
 (
     `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `LoginName` varchar(255) NOT NULL,
-    `password` varchar(255) NOT NULL,
+    `Password` varchar(255) NOT NULL,
     `CreateOn` DATETIME NOT NULL,
     PRIMARY KEY (Id),
     UNIQUE KEY `UNX_Customers` (`LoginName`)

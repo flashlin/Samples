@@ -11,8 +11,16 @@ from dotenv import load_dotenv
 
 
 class MysqlGptRepo(GptRepo):
-    def __init__(self, config: DbConfig):
+    def __init__(self, config: DbConfig = None):
         super().__init__()
+        if config is None:
+            config = DbConfig(
+                host='127.0.0.1',
+                port=3306,
+                db='gpt_db',
+                user=os.getenv("MYSQL_USER"),
+                password=os.getenv("MYSQL_PASSWORD")
+            )
         self.db = MysqlDbContext(config)
 
     def create_user(self, req: CreateUserReq) -> CreateUserResp:
@@ -33,7 +41,7 @@ class MysqlGptRepo(GptRepo):
         )
 
     def get_user(self, login_name: str) -> CustomerEntity:
-        old_users = self.db.query('SELECT Id, LoginName, CreateOn FROM Customers WHERE LoginName=%s LIMIT 1',
+        old_users = self.db.query('SELECT Id, LoginName, Password, CreateOn FROM Customers WHERE LoginName=%s LIMIT 1',
                                   (login_name,))
         if len(old_users) == 0:
             return CustomerEntity(
