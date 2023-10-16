@@ -38,6 +38,26 @@ def create_auth_blueprint(app: Flask):
                                     expires_delta=datetime.timedelta(minutes=10))
         return jsonify({'token': token}), 200
 
+    @blueprint_jwt_login.route('/register', methods=['POST'])
+    @cross_origin()
+    def register():
+        req = request.get_json()
+        login_name = req['loginName']
+        password = req['password']
+        login_name = login_name.lower()
+
+        user_service = current_app.config.get('UserService')
+        if user_service is None:
+            raise ValueError(f"Null flask config['UserService']")
+
+        user = user_service.get_user(login_name)
+        if user.login_name == login_name:
+            return jsonify({'message': 'LoginName already registered'}), 406
+
+        # TODO
+        user_service.register()
+        return jsonify({'token': token}), 200
+
     @blueprint_jwt_login.route('/refreshToken', methods=['GET'])
     @cross_origin()
     @jwt_required()
