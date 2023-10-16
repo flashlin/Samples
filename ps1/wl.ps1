@@ -43,6 +43,15 @@ if ( 'b' -eq $action ) {
     return
 }
 
+if ( 'bb' -eq $action ) {
+    $name = AskWslNames
+    if ( "" -eq $name ) {
+        return
+    }
+    InvokeCmd "wsl -d $name -- bash --noprofile"
+    return
+}
+
 if ( 'rm' -eq $action ) {
     $name = AskWslNames
     if ( "" -eq $name ) {
@@ -61,4 +70,5 @@ Write-Host ""
 Write-Host "i  :install Ubuntu-22.04"
 Write-Host "s  :stop"
 Write-Host "b  :run and enter"
+Write-Host "bb :run and enter directly"
 Write-Host "rm :delete"

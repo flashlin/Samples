@@ -10,7 +10,7 @@ CREATE TABLE `Customers`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `Customers` (LoginName, Password, CreateOn)
-    VALUES ('flash', '', NOW());
+    VALUES ('flash', '$2b$12$77k0fAPlRF7tZ8zBu2a4D.ZCobB/iPVcIjxcOrYJ2i3aRDse64/p2', NOW());
 
 
 CREATE TABLE `Conversations`

@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import queue
 from flask import Flask, request, Response, render_template, jsonify, redirect, url_for, stream_with_context, \
@@ -11,7 +12,7 @@ from dotenv import load_dotenv
 import threading
 
 from user_service import UserService
-from flask_jwt_utils import blueprint_jwt_login
+from flask_jwt_utils import create_auth_blueprint
 from llama2_utils import llama2_prompt
 from model_utils import create_llama2, create_llama2_v2
 from dataclasses import dataclass
@@ -24,7 +25,8 @@ load_dotenv()
 llm_queue = queue.Queue(10)
 llm_callback_handler = LlmCallbackHandler()
 print(f"loading llm")
-llm = create_llama2_v2(llm_callback_handler)
+# llm = create_llama2_v2(llm_callback_handler)
+llm = None
 
 
 class LlmConsumer(threading.Thread):
@@ -78,5 +80,5 @@ def chat_stream():
 
 if __name__ == '__main__':
     app.config['UserService'] = UserService(app, MysqlGptRepo())
-    app.register_blueprint(blueprint_jwt_login, url_prefix='/api/v1/auth')
+    app.register_blueprint(create_auth_blueprint(app), url_prefix='/api/v1/auth')
     app.run(debug=True, threaded=True, use_reloader=False)
