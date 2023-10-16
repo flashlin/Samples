@@ -34,4 +34,6 @@ class UserService:
         return resp
 
     def check_password(self, password: str, user: User):
+        if user.password_hash == '':
+            return False
         return self.crypt.check_password_hash(user.password_hash, password)
