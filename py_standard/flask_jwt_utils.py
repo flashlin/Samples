@@ -54,9 +54,12 @@ def create_auth_blueprint(app: Flask):
         if user.login_name == login_name:
             return jsonify({'message': 'LoginName already registered'}), 406
 
-        # TODO
-        user_service.register()
-        return jsonify({'token': token}), 200
+        resp = user_service.create_user(login_name, password)
+        if not resp.is_success:
+            return jsonify({'message': resp.error_message}), 406
+
+        return jsonify({'message': ''}), 200
+
 
     @blueprint_jwt_login.route('/refreshToken', methods=['GET'])
     @cross_origin()

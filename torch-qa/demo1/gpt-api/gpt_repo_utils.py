@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 @dataclass
 class CreateUserReq:
     login_name: str
-    password: str
+    password_hash: str
 
 
 @dataclass

@@ -33,7 +33,7 @@ class MysqlGptRepo(GptRepo):
             )
 
         self.db.execute('INSERT INTO Customers(LoginName, Password, CreateOn) VALUES(%s, %s, %s)',
-                        (req.login_name, hash_password(req.password), to_utc_time_str()))
+                        (req.login_name, req.password_hash, to_utc_time_str()))
 
         return CreateUserResp(
             is_success=True,
@@ -131,7 +131,7 @@ def test():
 
     resp = gpt.create_user(CreateUserReq(
         login_name='flash',
-        password='pass'
+        password_hash='pass'
     ))
     print(f"create user {resp=}")
 

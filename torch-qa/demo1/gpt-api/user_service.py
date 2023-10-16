@@ -29,7 +29,7 @@ class UserService:
         password_hash = self.crypt.generate_password_hash(password).decode('utf-8')
         resp = self.db.create_user(CreateUserReq(
             login_name=username,
-            password=password_hash,
+            password_hash=password_hash,
         ))
         return resp
 
