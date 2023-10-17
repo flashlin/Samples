@@ -53,7 +53,7 @@ class MysqlGptRepo(GptRepo):
         return old_users[0]
 
     def get_user_conversation(self, conversation_id: int) -> Conversation:
-        results = self.db.query('select Id, LoginName, CreateOn from Conversations where Id=%d LIMIT 1',
+        results = self.db.query('select Id, LoginName, CreateOn from Conversations where Id=%s LIMIT 1',
                                 (conversation_id,))
         if len(results) == 0:
             return Conversation(conversation_id=-1,
