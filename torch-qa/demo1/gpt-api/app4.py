@@ -85,16 +85,11 @@ def chat_stream():
 @app.route('/api/v1/chat/getLastConversation', methods=['POST'])
 @cross_origin()
 @jwt_required()
-def chat_conversation():
+def chat_get_last_conversation():
     current_login_name = get_jwt_identity()
     gpt_service = GptService(gpt_db)
     messages = gpt_service.get_conversation_last_messages(current_login_name)
-    task_item = TaskItem()
-    task_item.messages = llama2_prompt(messages)
-    print(f"{task_item.messages=}")
-    llm_queue.put(task_item)
-    task_item.wait_for_start()
-    return Response(stream_with_context(task_item.response()), mimetype='text/event-stream')
+    return jsonify({'messages': messages})
 
 
 @app.route('/api/v1/chat/conversation', methods=['POST'])
