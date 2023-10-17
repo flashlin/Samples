@@ -33,7 +33,7 @@ def create_auth_blueprint(app: Flask):
         if not user_service.check_password(password, user):
             return jsonify({'message': 'Invalid username or password'}), 401
 
-        token = create_access_token(identity=user.LoginName,
+        token = create_access_token(identity=user.login_name,
                                     fresh=True,
                                     expires_delta=datetime.timedelta(minutes=10))
         return jsonify({'token': token}), 200
