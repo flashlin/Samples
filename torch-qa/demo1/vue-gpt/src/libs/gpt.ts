@@ -1,7 +1,14 @@
+import jwtApi from "./jwtApi";
+
 export interface ChatMessage {
    id: number;
    role: "user" | "assistant" | "system";
    content: string;
+}
+
+export interface IGetLastConversationMessagesResp
+{
+   messages: ChatMessage[]
 }
 
 const decoder = new TextDecoder("utf-8");
@@ -124,16 +131,8 @@ export class ChatGpt {
       return result;
    }
 
-   async getLastConversationMessages() {
-      const accessToken = localStorage.getItem('accessToken');
-      const result = await fetch("http://127.0.0.1:5000/api/v1/chat/getLastConversation", {
-         method: "post",
-         headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-         },
-      });
-      return result;
+   getLastConversationMessages() {
+      return jwtApi.post<IGetLastConversationMessagesResp>("/api/v1/chat/getLastConversation");
    }
 
    async postConversation(message: string) {
