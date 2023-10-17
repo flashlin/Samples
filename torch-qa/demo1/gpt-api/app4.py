@@ -78,6 +78,20 @@ def chat_stream():
     return Response(stream_with_context(task_item.response()), mimetype='text/event-stream')
 
 
+
+@app.route('/api/v1/chat/conversation', methods=['POST'])
+def chat_stream():
+    req = request.json
+    conversation_id = req['conversationId']
+
+    messages = ""
+    task_item = TaskItem()
+    task_item.messages = llama2_prompt(messages)
+    llm_queue.put(task_item)
+    task_item.wait_for_start()
+    return Response(stream_with_context(task_item.response()), mimetype='text/event-stream')
+
+
 if __name__ == '__main__':
     app.config['UserService'] = UserService(app, MysqlGptRepo())
     app.register_blueprint(create_auth_blueprint(app), url_prefix='/api/v1/auth')
