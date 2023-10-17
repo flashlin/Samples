@@ -83,5 +83,5 @@ class GptRepo(ABC):
         pass
 
     @abstractmethod
-    def get_conversation_message_list(self, conversation_id: int) -> [ConversationMessageEntity]:
+    def get_conversation_message_list(self, conversation_id: int) -> list[ConversationMessageEntity]:
         pass

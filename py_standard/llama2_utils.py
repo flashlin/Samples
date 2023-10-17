@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import List
 from langchain.callbacks.base import BaseCallbackHandler
 from typing import Callable
@@ -10,7 +12,15 @@ explain why instead of answering something not correct.
 If you don't know the answer to a question, please don't share false information."""
 
 
-def llama2_prompt(messages: List[dict]) -> str:
+@dataclass
+class GptMessage:
+    id: int
+    role: str
+    content: str
+    create_on: datetime
+
+
+def llama2_prompt(messages: List[GptMessage]) -> str:
     """
     Convert the messages in list of dictionary format to Llama2 compliant format.
     """
@@ -18,7 +28,7 @@ def llama2_prompt(messages: List[dict]) -> str:
     B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
     BOS, EOS = "<s>", "</s>"
 
-    if messages[0]["role"] != "system":
+    if messages[0].role != "system":
         messages = [
             {
                 "role": "system",
@@ -28,8 +38,8 @@ def llama2_prompt(messages: List[dict]) -> str:
 
     messages = [
         {
-            "role": messages[1]["role"],
-            "content": B_SYS + messages[0]["content"] + E_SYS + messages[1]["content"],
+            "role": messages[1].role,
+            "content": B_SYS + messages[0].content + E_SYS + messages[1].content,
         }
     ] + messages[2:]
 
@@ -37,6 +47,7 @@ def llama2_prompt(messages: List[dict]) -> str:
         f"{BOS}{B_INST} {(prompt['content']).strip()} {E_INST} {(answer['content']).strip()} {EOS}"
         for prompt, answer in zip(messages[::2], messages[1::2])
     ]
+
     messages_list.append(
         f"{BOS}{B_INST} {(messages[-1]['content']).strip()} {E_INST}")
 

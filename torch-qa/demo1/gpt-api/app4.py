@@ -97,7 +97,7 @@ def chat_get_last_conversation():
 @jwt_required()
 def chat_conversation():
     req = request.json
-    conversation_id = req['conversationId']
+    conversation_id = req['conversationsId']
     user_message = req['message']
     current_login_name = get_jwt_identity()
     gpt_service = GptService(gpt_db)
