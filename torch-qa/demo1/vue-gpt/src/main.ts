@@ -9,7 +9,7 @@ import App from './App.vue'
 import router from './router'
 
 
-if (process.env.NODE_ENV === 'development') {
+if (import.meta.env.VITE_APP_MODE === 'mock') {
    import('@/mocks/index').then((module) => {
       const worker = module.default;
       worker.start();

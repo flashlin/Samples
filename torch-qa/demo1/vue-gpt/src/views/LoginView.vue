@@ -69,9 +69,8 @@ const data = reactive<{
 const router = useRouter();
 
 const onClickLogin = async () => {
-   console.log("login")
    await authService.login({
-      username: data.loginName,
+      loginName: data.loginName,
       password: data.password
    });
    router.push('/home');

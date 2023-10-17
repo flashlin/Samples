@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_URL = '/api/v1/auth/';
+const API_URL = import.meta.env.VITE_API_URL + '/api/v1/auth/';
 
 export interface ILoginReq {
-   username: string;
+   loginName: string;
    password: string;
 }
 
@@ -18,7 +18,7 @@ class AuthService {
    async login(req: ILoginReq) {
       const resp = await axios
          .post(API_URL + 'login', {
-            username: req.username,
+            loginName: req.loginName,
             password: req.password
          });
       this.saveAccessToken(resp.data.token);

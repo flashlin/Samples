@@ -3,7 +3,7 @@ import { data } from './LoginView.vue';
 
 export const onClickLogin = () => {
 await authService.login({
-username: data.loginName,
+loginName: data.loginName,
 password: data.password
 });
 };
