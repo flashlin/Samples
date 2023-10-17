@@ -62,6 +62,10 @@ class GptRepo(ABC):
         pass
 
     @abstractmethod
+    def get_last_conversation(self, login_name: str) -> Conversation:
+       pass
+
+    @abstractmethod
     def create_conversation(self, login_name: str) -> ConversationMessage:
        pass
 

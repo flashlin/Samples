@@ -64,6 +64,18 @@ class MysqlGptRepo(GptRepo):
                             login_name=item.LoginName,
                             create_on=item.CreateOn)
 
+    def get_last_conversation(self, login_name: str) -> Conversation:
+        results = self.db.query('select Id, LoginName, CreateOn from Conversations where LoginName=%s ORDER BY Id DESC LIMIT 1',
+                                (login_name,))
+        if len(results) == 0:
+            return Conversation(conversation_id=-1,
+                                login_name='',
+                                create_on=datetime.min)
+        item = results[0]
+        return Conversation(conversation_id=item.Id,
+                            login_name=item.LoginName,
+                            create_on=item.CreateOn)
+
     def create_conversation(self, login_name: str) -> ConversationMessage:
         inserted_id = self.db.execute("INSERT INTO Conversations(LoginName, CreateOn) VALUES(%s, NOW())",
                                       (login_name,))

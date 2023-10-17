@@ -123,4 +123,32 @@ export class ChatGpt {
       });
       return result;
    }
+
+   async getLastConversationMessages() {
+      const accessToken = localStorage.getItem('accessToken');
+      const result = await fetch("http://127.0.0.1:5000/api/v1/chat/getLastConversation", {
+         method: "post",
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+         },
+      });
+      return result;
+   }
+
+   async postConversation(message: string) {
+      const accessToken = localStorage.getItem('accessToken');
+      const result = await fetch("http://127.0.0.1:5000/api/v1/chat/conversation", {
+         method: "post",
+         // signal: AbortSignal.timeout(8000),
+         headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+         },
+         body: JSON.stringify({
+            message: message,
+         }),
+      });
+      return result;
+   }
 }

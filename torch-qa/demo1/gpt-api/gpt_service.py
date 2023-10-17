@@ -12,6 +12,13 @@ class GptService:
     def __init__(self, gpt_db: GptRepo):
         self.gpt_db = gpt_db
 
+    def get_conversation_last_messages(self, login_name: str) -> [ConversationMessage]:
+        gpt_db = self.gpt_db
+        conversation = gpt_db.get_last_conversation(login_name)
+        if conversation.conversation_id == -1:
+            return []
+        return gpt_db.get_conversation_message_list(conversation.conversation_id)
+
     def get_conversation_messages(self, req: GetConversationMessagesReq) -> [ConversationMessage]:
         gpt_db = self.gpt_db
         conversation = gpt_db.get_user_conversation(req.conversation_id)
