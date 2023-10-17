@@ -24,7 +24,7 @@ class MysqlDbContext:
             conn.commit()
         return inserted_id_or_rowcount
 
-    def query(self, sql: str, args: tuple = None) -> list[any]:
+    def query(self, sql: str, args: tuple = None) -> list[dict]:
         """
         :param sql: "select * from Customers where id = %d or name = %s or ch = %c
         :param args: (1, "flash", 'c')
@@ -32,22 +32,24 @@ class MysqlDbContext:
         """
         logger.info(f"MysqlDbContext::query {sql=} {args=}")
         conn = self.conn
-        results = []
         with conn.cursor() as cursor:
             if args is None:
                 cursor.execute(sql)
             else:
                 cursor.execute(sql, args)
             columns = [column[0] for column in cursor.description]
+            results = []
             row = cursor.fetchone()
             while row is not None:
-                obj = type("DynamicEntity", (), {})()
-                for i in range(len(row)):
-                    column = columns[i]
-                    setattr(obj, column, row[i])
-                results.append(obj)
+                # obj = type("DynamicEntity", (), {})()
+                # for i in range(len(row)):
+                #     column = columns[i]
+                #     setattr(obj, column, row[i])
+                data_dict = dict(zip(columns, row))
+                results.append(data_dict)
                 row = cursor.fetchone()
             # results = cursor.fetchall()
+            # logger.info(f"{results=}")
             conn.commit()
         return results
 

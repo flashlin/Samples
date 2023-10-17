@@ -1,10 +1,12 @@
 import os
 from datetime import datetime, timezone
+from types import SimpleNamespace
+
 from data_utils import hash_password
-from gpt_repo_utils import GptRepo, CreateUserReq, CreateUserResp, Conversation, ConversationMessage, \
-    AddConversationReq, CustomerEntity
+from gpt_repo_utils import GptRepo, CreateUserReq, CreateUserResp, ConversationEntity, ConversationMessageEntity, \
+    AddConversationReq, CustomerEntity, AddConversationMessageReq
 from llama2_utils import DEFAULT_SYSTEM_PROMPT
-from obj_utils import dump
+from obj_utils import dump, dict_to_obj, create_dataclass
 from repo_types import DbConfig
 from mysql_utils import MysqlDbContext, to_utc_time_str
 from dotenv import load_dotenv
@@ -50,41 +52,40 @@ class MysqlGptRepo(GptRepo):
                 Password='',
                 CreateOn=datetime.min
             )
-        return old_users[0]
 
-    def get_user_conversation(self, conversation_id: int) -> Conversation:
+        user = old_users[0]
+        return create_dataclass(CustomerEntity, **user)
+
+    def get_user_conversation(self, conversation_id: int) -> ConversationEntity:
         results = self.db.query('select Id, LoginName, CreateOn from Conversations where Id=%s LIMIT 1',
                                 (conversation_id,))
         if len(results) == 0:
-            return Conversation(conversation_id=-1,
-                                login_name='',
-                                create_on=datetime.min)
+            return ConversationEntity(Id=-1,
+                                      LoginName='',
+                                      CreateOn=datetime.min)
         item = results[0]
-        return Conversation(conversation_id=item.Id,
-                            login_name=item.LoginName,
-                            create_on=item.CreateOn)
+        return create_dataclass(ConversationEntity, **item)
 
-    def get_last_conversation(self, login_name: str) -> Conversation:
-        results = self.db.query('select Id, LoginName, CreateOn from Conversations where LoginName=%s ORDER BY Id DESC LIMIT 1',
-                                (login_name,))
+    def get_last_conversation(self, login_name: str) -> ConversationEntity:
+        results = self.db.query(
+            'select Id, LoginName, CreateOn from Conversations where LoginName=%s ORDER BY Id DESC LIMIT 1',
+            (login_name,))
         if len(results) == 0:
-            return Conversation(conversation_id=-1,
-                                login_name='',
-                                create_on=datetime.min)
+            return ConversationEntity(Id=-1,
+                                      LoginName='',
+                                      CreateOn=datetime.min)
         item = results[0]
-        return Conversation(conversation_id=item.Id,
-                            login_name=item.LoginName,
-                            create_on=item.CreateOn)
+        return create_dataclass(ConversationEntity, **item)
 
-    def create_conversation(self, login_name: str) -> Conversation:
+    def create_conversation(self, login_name: str) -> ConversationEntity:
         inserted_id = self.db.execute("INSERT INTO Conversations(LoginName, CreateOn) VALUES(%s, NOW())",
                                       (login_name,))
 
-        self.add_conversation_detail(ConversationMessage(
-            conversation_id=inserted_id,
-            role_name="system",
-            message=DEFAULT_SYSTEM_PROMPT,
-            create_on=datetime.now(timezone.utc)
+        self.add_conversation_detail(AddConversationMessageReq(
+            ConversationId=inserted_id,
+            RoleName="system",
+            Message=DEFAULT_SYSTEM_PROMPT,
+            CreateOn=datetime.now(timezone.utc)
         ))
 
         return self.get_user_conversation(inserted_id)
@@ -92,42 +93,48 @@ class MysqlGptRepo(GptRepo):
     def add_conversation_message(self, req: AddConversationReq):
         results = self.db.query("SELECT Id, LoginName FROM Conversations WHERE Id=%s LIMIT 1",
                                 (req.conversation_id,))
-        conversation = results[0]
+        if len(results) == 0:
+            raise Exception(f"ConversationsId {req.conversation_id} not found in Conversations")
+
+        conversation = SimpleNamespace(**results[0])
         if conversation.LoginName != req.login_name:
             raise Exception(f"ConversationsId {req.conversation_id} is not {req.login_name}'s message")
 
-        last_messages = self.db.query("SELECT RoleName FROM ConversationsDetail WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 1",
-                      (req.conversation_id,))
+        last_messages = self.db.query(
+            "SELECT RoleName FROM ConversationsDetail WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 1",
+            (req.conversation_id,))
 
-        if last_messages[0].RoleName != 'assistant' and last_messages[0].RoleName != 'system':
+        last = SimpleNamespace(**last_messages[0])
+        if last.RoleName != 'assistant' and last.RoleName != 'system':
             raise Exception(f"ConversationsId {req.conversation_id} The replay message unexpectedly interrupts.")
 
         self.add_conversation_detail(
-            ConversationMessage(
-                conversation_id=req.conversation_id,
-                role_name='user',
-                message=req.message,
-                create_on=datetime.now(timezone.utc)
+            AddConversationMessageReq(
+                ConversationId=req.conversation_id,
+                RoleName='user',
+                Message=req.message,
+                CreateOn=datetime.now(timezone.utc)
             )
         )
 
-    def get_conversation_message_list(self, conversation_id: int) -> [ConversationMessage]:
+    def get_conversation_message_list(self, conversation_id: int) -> [ConversationMessageEntity]:
         results = self.db.query("SELECT Id, ConversationsId, RoleName, Message, CreateOn FROM ConversationsDetail "
-                               "WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 100", (conversation_id,))
+                                "WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 100", (conversation_id,))
         ordered_result = results[::-1]
 
         result = self.db.query("SELECT Id, ConversationsId, RoleName, Message, CreateOn FROM ConversationsDetail "
                                "WHERE ConversationsId=%s ORDER BY Id LIMIT 1", (conversation_id,))
         ordered_result[0] = result[0]
+        ordered_result = [create_dataclass(ConversationMessageEntity, **item) for item in ordered_result]
         return ordered_result
 
-    def add_conversation_detail(self, data: ConversationMessage):
+    def add_conversation_detail(self, data: AddConversationMessageReq):
         self.db.execute("INSERT INTO ConversationsDetail(ConversationsId, RoleName, Message, CreateOn) "
                         "VALUES(%s, %s, %s, %s)",
-                        (data.conversation_id,
-                         data.role_name,
-                         data.message,
-                         to_utc_time_str(data.create_on),)
+                        (data.ConversationId,
+                         data.RoleName,
+                         data.Message,
+                         to_utc_time_str(data.CreateOn),)
                         )
 
 
@@ -154,7 +161,7 @@ def test():
     print(f"{conversation=}")
 
     gpt.add_conversation_message(AddConversationReq(
-        conversation_id=4,
+        conversation_id=conversation.Id,
         login_name='flash',
         message='Hello'
     ))

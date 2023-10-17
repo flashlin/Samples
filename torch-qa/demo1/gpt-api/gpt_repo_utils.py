@@ -16,18 +16,27 @@ class CreateUserResp:
 
 
 @dataclass
-class Conversation:
-    conversation_id: int
-    login_name: str
-    create_on: datetime
+class ConversationEntity:
+    Id: int
+    LoginName: str
+    CreateOn: datetime
 
 
 @dataclass
-class ConversationMessage:
-    conversation_id: int
-    role_name: str
-    message: str
-    create_on: datetime
+class ConversationMessageEntity:
+    Id: int
+    ConversationId: int
+    RoleName: str
+    Message: str
+    CreateOn: datetime
+
+
+@dataclass
+class AddConversationMessageReq:
+    ConversationId: int
+    RoleName: str
+    Message: str
+    CreateOn: datetime
 
 
 @dataclass
@@ -58,15 +67,15 @@ class GptRepo(ABC):
         pass
 
     @abstractmethod
-    def get_user_conversation(self, conversation_id: int) -> Conversation:
+    def get_user_conversation(self, conversation_id: int) -> ConversationEntity:
         pass
 
     @abstractmethod
-    def get_last_conversation(self, login_name: str) -> Conversation:
+    def get_last_conversation(self, login_name: str) -> ConversationEntity:
        pass
 
     @abstractmethod
-    def create_conversation(self, login_name: str) -> Conversation:
+    def create_conversation(self, login_name: str) -> ConversationEntity:
        pass
 
     @abstractmethod
@@ -74,5 +83,5 @@ class GptRepo(ABC):
         pass
 
     @abstractmethod
-    def get_conversation_message_list(self, conversation_id: int) -> [ConversationMessage]:
+    def get_conversation_message_list(self, conversation_id: int) -> [ConversationMessageEntity]:
         pass
