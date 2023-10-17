@@ -25,7 +25,7 @@ class ConversationEntity:
 @dataclass
 class ConversationMessageEntity:
     Id: int
-    ConversationId: int
+    ConversationsId: int
     RoleName: str
     Message: str
     CreateOn: datetime
