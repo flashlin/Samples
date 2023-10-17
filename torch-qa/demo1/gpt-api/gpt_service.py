@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from gpt_repo_utils import GptRepo
+from gpt_repo_utils import GptRepo, ConversationMessage, AddConversationReq
 
 
 @dataclass
@@ -12,4 +12,12 @@ class GptService:
     def __init__(self, gpt_db: GptRepo):
         self.gpt_db = gpt_db
 
-    def get_conversation_messages(self, req: GetConversationMessagesReq):
+    def get_conversation_messages(self, req: GetConversationMessagesReq) -> [ConversationMessage]:
+        gpt_db = self.gpt_db
+        conversation = gpt_db.get_user_conversation(req.conversation_id)
+        if conversation.login_name != req.login_name:
+            return []
+        return gpt_db.get_conversation_message_list(req.conversation_id)
+
+    def add_conversation_message(self, req: AddConversationReq):
+        return self.gpt_db.add_conversation_message(req)
