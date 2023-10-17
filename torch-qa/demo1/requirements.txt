@@ -7,6 +7,7 @@ uvicorn
 pydantic
 #celery
 #redis
+cryptography
 python-dotenv
 flask
 flask_cors
