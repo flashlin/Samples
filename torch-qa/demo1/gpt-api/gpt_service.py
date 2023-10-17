@@ -17,7 +17,6 @@ class GptService:
         conversation = gpt_db.get_last_conversation(login_name)
         if conversation.Id == -1:
             conversation = gpt_db.create_conversation(login_name)
-            return []
         return gpt_db.get_conversation_message_list(conversation.Id)
 
     def get_conversation_messages(self, req: GetConversationMessagesReq) -> [ConversationMessageEntity]:
