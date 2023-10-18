@@ -36,7 +36,7 @@ class TaskItem:
     def response(self):
         print("=== response start ===")
         while not self.is_finished and self.output_tokens.not_empty:
-            if self.output_tokens.not_empty:
+            if not self.output_tokens.empty():
                 output_token = self.output_tokens.get()
                 yield json.dumps(output_token) + "\r\n"
                 self.output_tokens.task_done()
