@@ -114,7 +114,7 @@ export class ChatGpt {
       return this.messageList[this.messageList.length - 1];
    }
 
-   async sendConversation(content: string, generatingFn: GeneratingFn): Promise<ChatMessage> {
+   async ask(content: string, generatingFn: GeneratingFn): Promise<ChatMessage> {
          const { body, status } = await this.postConversation(content);
          const reader = body!.getReader();
          return await this.readStream(reader, status, generatingFn);

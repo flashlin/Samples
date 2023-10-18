@@ -77,7 +77,9 @@ const sendMessageOnEnter = async () => {
          role: 'assistant',
          content: ''
       })
-      const response = await chatGpt.sendChatMessageStream(messageContent.value, (typing: string) => {
+      const content = messageContent.value;
+      messageContent.value = "";
+      const response = await chatGpt.ask(content, (typing: string) => {
          lastMessage.content += typing;
          replaceLastMessage(lastMessage);
       });
