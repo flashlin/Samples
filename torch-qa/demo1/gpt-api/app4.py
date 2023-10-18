@@ -14,7 +14,7 @@ import threading
 from mysql_utils import utc_time
 from user_service import UserService
 from flask_jwt_utils import create_auth_blueprint
-from llama2_utils import llama2_prompt
+from llama2_utils import llama2_prompt, GptMessage
 from model_utils import create_llama2, create_llama2_v2
 from dataclasses import dataclass
 from langchain.callbacks.base import BaseCallbackHandler
@@ -64,6 +64,14 @@ llm_task = LlmConsumer('consumer')
 llm_task.daemon = True
 llm_task.start()
 print(f"consumer task started")
+
+
+def convert_gpt_messages_to_dict_list(messages: list[GptMessage]):
+    return [{
+        'role': item.role,
+        'content': item.content
+        } for item in messages]
+
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -132,7 +140,7 @@ def chat_conversation():
     task_item = TaskItem()
     task_item.login_name = current_login_name
     task_item.conversation_id = conversation_id
-    task_item.messages = llama2_prompt(messages)
+    task_item.messages = llama2_prompt(convert_gpt_messages_to_dict_list(messages))
     print(f"{task_item.messages=}")
     llm_queue.put(task_item)
     task_item.wait_for_start()

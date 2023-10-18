@@ -99,7 +99,7 @@ export class ChatGpt {
                //console.log("END");
                return this.getLastMessage();
             }
-
+            console.log("line", line)
             const content = JSON.parse(line); // start with "data: "
             generatingFn?.call(generatingFn, content);
             // const content =

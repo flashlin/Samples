@@ -20,7 +20,7 @@ class GptMessage:
     create_on: datetime
 
 
-def llama2_prompt(messages: List[GptMessage]) -> str:
+def llama2_prompt(messages: list[dict]) -> str:
     """
     Convert the messages in list of dictionary format to Llama2 compliant format.
     """
@@ -28,7 +28,7 @@ def llama2_prompt(messages: List[GptMessage]) -> str:
     B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
     BOS, EOS = "<s>", "</s>"
 
-    if messages[0].role != "system":
+    if messages[0]['role'] != "system":
         messages = [
             {
                 "role": "system",
@@ -38,8 +38,8 @@ def llama2_prompt(messages: List[GptMessage]) -> str:
 
     messages = [
         {
-            "role": messages[1].role,
-            "content": B_SYS + messages[0].content + E_SYS + messages[1].content,
+            "role": messages[1]['role'],
+            "content": B_SYS + messages[0]['content'] + E_SYS + messages[1]['content'],
         }
     ] + messages[2:]
 
