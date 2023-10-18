@@ -8,8 +8,7 @@ export interface ChatMessage {
    content: string;
 }
 
-export interface IGetLastConversationMessagesResp
-{
+export interface IGetLastConversationMessagesResp {
    conversationId: number;
    messages: ChatMessage[];
 }
@@ -75,12 +74,13 @@ export class ChatGpt {
 
       while (status > 0) {
          const { value, done } = await reader.read();
-         if (done) break;
+         if (done) {
+            console.log('DONE');
+            break;
+         }
 
          const decodedText = decoder.decode(value, { stream: true });
          console.log(`decoded ${decodedText}`, status);
-         //generatingFn?.call(generatingFn, decodedText);
-         //this.appendLastMessageContent(decodedText);
 
          if (status !== 200) {
             const error = JSON.parse(decodedText);
@@ -99,14 +99,12 @@ export class ChatGpt {
                //console.log("END");
                return this.getLastMessage();
             }
-            console.log("line", line)
-            const content = JSON.parse(line); // start with "data: "
+
+            const content = JSON.parse(line);
             generatingFn?.call(generatingFn, content);
-            // const content =
-            //    status === 200
-            //       ? json.choices[0].delta.content ?? ""
-            //       : json.error.message;
-            this.appendLastMessageContent(content);
+            //console.log("appendLastMessageContent1", content)
+            //this.appendLastMessageContent(content);
+            //console.log("appendLastMessageContent2", content)
          }
       }
 
@@ -122,9 +120,9 @@ export class ChatGpt {
    }
 
    async ask(req: IAskReq, generatingFn: GeneratingFn): Promise<ChatMessage> {
-         const { body, status } = await this.postConversation(req);
-         const reader = body!.getReader();
-         return await this.readStream(reader, status, generatingFn);
+      const { body, status } = await this.postConversation(req);
+      const reader = body!.getReader();
+      return await this.readStream(reader, status, generatingFn);
    }
 
    async postChat(messageList: ChatMessage[]) {
