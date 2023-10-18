@@ -78,7 +78,7 @@ export class ChatGpt {
          if (done) break;
 
          const decodedText = decoder.decode(value, { stream: true });
-         console.log("decoded '"+ decodedText +"'", status);
+         console.log(`decoded ${decodedText}`, status);
          //generatingFn?.call(generatingFn, decodedText);
          //this.appendLastMessageContent(decodedText);
 
