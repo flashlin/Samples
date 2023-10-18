@@ -1,5 +1,7 @@
 import jwtApi from "./jwtApi";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export interface ChatMessage {
    id: number;
    role: "user" | "assistant" | "system";
@@ -8,6 +10,7 @@ export interface ChatMessage {
 
 export interface IGetLastConversationMessagesResp
 {
+   conversationId: number
    messages: ChatMessage[]
 }
 
@@ -143,7 +146,7 @@ export class ChatGpt {
 
    async postConversation(message: string) {
       const accessToken = localStorage.getItem('accessToken');
-      const result = await fetch("http://127.0.0.1:5000/api/v1/chat/conversation", {
+      const result = await fetch(`${API_URL}/api/v1/chat/conversation`, {
          method: "post",
          // signal: AbortSignal.timeout(8000),
          headers: {
