@@ -33,6 +33,7 @@ llm = create_llama2_v2(llm_callback_handler)
 gpt_db = MysqlGptRepo()
 
 
+
 class LlmConsumer(threading.Thread):
     def __init__(self, thread_name):
         super(LlmConsumer, self).__init__(name=thread_name)
@@ -49,6 +50,7 @@ class LlmConsumer(threading.Thread):
             resp = llm(task_item.messages)
             task_item.output_message = resp
             task_item.wait_for_response_done()
+            print(f"process end")
 
 
 llm_task = LlmConsumer('consumer')
@@ -125,7 +127,7 @@ def chat_conversation():
     print(f"{task_item.messages=}")
     llm_queue.put(task_item)
     task_item.wait_for_start()
-    return Response(stream_with_context(task_item.response()), mimetype='text/event-stream')
+    return Response(task_item.response(), mimetype='text/event-stream')
 
 
 if __name__ == '__main__':
