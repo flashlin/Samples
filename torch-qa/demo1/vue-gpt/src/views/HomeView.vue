@@ -21,17 +21,11 @@
 </template>
 
 <script setup lang="ts">
-import ChatInput from '@/components/ChatInput.vue';
-import { ChatGpt } from '@/libs/gpt';
+//import ChatInput from '@/components/ChatInput.vue';
+import ChatInput from '@/components/ChatInput2.vue';
 
 const clickConfig = () => {
 };
-
-const gpt = new ChatGpt();
-gpt.getLastConversationMessages()
-  .then(resp => {
-    console.log(resp);
-  });
 </script>
 
 <style scoped>

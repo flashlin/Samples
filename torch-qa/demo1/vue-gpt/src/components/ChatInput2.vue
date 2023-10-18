@@ -39,15 +39,15 @@ import type { ChatMessage } from "@/libs/gpt";
 import { md } from "@/libs/markdown";
 import { ChatGpt } from "@/libs/gpt";
 
-const props = defineProps<{
-   messageList: ChatMessage[]
-}>()
+// const props = defineProps<{
+//    messageList: ChatMessage[]
+// }>()
 
 let isTalking = ref(false);
 let messageContent = ref("");
 const chatListDom = ref<HTMLDivElement>();
 const roleAlias = { user: "ME", assistant: "ChatGPT", system: "System" };
-const messageList = ref<ChatMessage[]>(props.messageList);
+const messageList = ref<ChatMessage[]>([]);
 const chatGpt = new ChatGpt();
 
 const appendMessage = (item: ChatMessage) => {
@@ -58,7 +58,7 @@ const appendMessage = (item: ChatMessage) => {
 }
 
 const replaceLastMessage = (item: ChatMessage) => {
-   const oldMessageList = messageList.value.slice(0, messageList.value.length-1);
+   const oldMessageList = messageList.value.slice(0, messageList.value.length - 1);
    oldMessageList.push(item);
    messageList.value = oldMessageList;
    return item;
@@ -90,4 +90,9 @@ const sendMessageOnEnter = async () => {
       });
    }
 };
+
+chatGpt.getLastConversationMessages()
+   .then(resp => {
+      messageList.value = resp.messages;
+   });
 </script>
