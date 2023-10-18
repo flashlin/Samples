@@ -61,7 +61,7 @@ def create_auth_blueprint(app: Flask):
         return jsonify({'message': ''}), 200
 
 
-    @blueprint_jwt_login.route('/refreshToken', methods=['GET'])
+    @blueprint_jwt_login.route('/refreshToken', methods=['GET', 'POST'])
     @cross_origin()
     @jwt_required()
     def refresh_token():
