@@ -49,7 +49,7 @@ class AuthService {
       }
       try {
          const resp = await axios
-            .post(API_URL + 'refreshToken',
+            .post(API_URL + 'refreshToken', {},
                {
                   headers: { "Authorization": `Bearer ${accessToken}` }
                });
