@@ -40,10 +40,11 @@ class TaskItem:
         while not self.is_finished and self.output_tokens.not_empty:
             if not self.output_tokens.empty():
                 output_token = self.output_tokens.get()
-                yield json.dumps(output_token) + "\r\n"
+                json_str = json.dumps(output_token)
+                yield json_str + "\r\n"
                 self.output_tokens.task_done()
                 continue
-            time.sleep(0.2)
+            # time.sleep(0.2)
         yield "data: [DONE]"
         self.is_response_done = True
         print("=== response end ===")
