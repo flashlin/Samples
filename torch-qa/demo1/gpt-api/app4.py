@@ -122,6 +122,7 @@ def chat_cancel_last_conversation():
 @app.route('/api/v1/chat/conversation', methods=['POST'])
 @cross_origin()
 @jwt_required()
+@stream_with_context
 def chat_conversation():
     req = request.json
     conversation_id = req['conversationId']
