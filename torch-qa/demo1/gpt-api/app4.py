@@ -92,6 +92,16 @@ def chat_get_last_conversation():
     return jsonify(resp)
 
 
+@app.route('/api/v1/chat/cancelLastConversation', methods=['POST'])
+@cross_origin()
+@jwt_required()
+def chat_cancel_last_conversation():
+    current_login_name = get_jwt_identity()
+    gpt_service = GptService(gpt_db)
+    resp = gpt_service.cancel_last_conversation(current_login_name)
+    return jsonify(resp)
+
+
 @app.route('/api/v1/chat/conversation', methods=['POST'])
 @cross_origin()
 @jwt_required()

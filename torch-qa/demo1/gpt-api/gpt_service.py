@@ -33,6 +33,17 @@ class GptService:
             messages=result
         )
 
+    def cancel_last_conversation(self, login_name: str) -> bool:
+        gpt_db = self.gpt_db
+        conversation = gpt_db.get_last_conversation(login_name)
+        if conversation.Id == -1:
+            return False
+        last_message = gpt_db.get_last_conversation_message(conversation.Id)
+        if last_message.RoleName != 'user':
+            return False
+        gpt_db.delete_conversation_message(last_message.Id)
+        return True
+
     def get_conversation_messages(self, req: GetConversationMessagesReq) -> list[GptMessage]:
         gpt_db = self.gpt_db
         conversation = gpt_db.get_user_conversation(req.conversation_id)

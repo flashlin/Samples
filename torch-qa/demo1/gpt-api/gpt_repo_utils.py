@@ -85,3 +85,12 @@ class GptRepo(ABC):
     @abstractmethod
     def get_conversation_message_list(self, conversation_id: int) -> list[ConversationMessageEntity]:
         pass
+
+    @abstractmethod
+    def get_last_conversation_message(self, conversation_id: int) -> ConversationMessageEntity:
+        pass
+
+    @abstractmethod
+    def delete_conversation_message(self, conversation_id: int) -> None:
+        pass
+

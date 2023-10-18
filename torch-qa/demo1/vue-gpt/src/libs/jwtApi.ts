@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { type AxiosResponse } from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -23,6 +23,18 @@ export class JwtApi {
             },
          });
       return resp.data;
+   }
+
+   async postResponse(url: string, data: any = {}): Promise<AxiosResponse<any, any>> {
+      const accessToken = localStorage.getItem('accessToken');
+      const resp = await axios.post(`${API_URL}${url}`, 
+         JSON.stringify(data), 
+         {
+            headers: {
+               Authorization: `Bearer ${accessToken}`,
+            },
+         });
+      return resp;
    }
 }
 

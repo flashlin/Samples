@@ -128,6 +128,22 @@ class MysqlGptRepo(GptRepo):
         ordered_result = [create_dataclass(ConversationMessageEntity, **item) for item in ordered_result]
         return ordered_result
 
+    def get_last_conversation_message(self, conversation_id: int) -> ConversationMessageEntity:
+        result = self.db.query("SELECT Id, ConversationsId, RoleName, Message, CreateOn FROM ConversationsDetail "
+                                "WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 1", (conversation_id,))
+        if len(result) == 0:
+            return ConversationMessageEntity(
+                Id=-1,
+                ConversationsId=conversation_id,
+                RoleName="",
+                Message="",
+                CreateOn=datetime.now(timezone.utc)
+            )
+        return create_dataclass(ConversationMessageEntity, **result[0])
+
+    def delete_conversation_message(self, conversation_id: int) -> None:
+        self.db.execute("DELETE ConversationsDetail WHERE Id=%s", (conversation_id,))
+
     def add_conversation_detail(self, data: AddConversationMessageReq):
         self.db.execute("INSERT INTO ConversationsDetail(ConversationsId, RoleName, Message, CreateOn) "
                         "VALUES(%s, %s, %s, %s)",

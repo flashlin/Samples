@@ -78,17 +78,15 @@ export class ChatGpt {
          if (done) break;
 
          const decodedText = decoder.decode(value, { stream: true });
-         console.log("decoded '"+ decodedText +"'");
+         console.log("decoded '"+ decodedText +"'", status);
          //generatingFn?.call(generatingFn, decodedText);
          //this.appendLastMessageContent(decodedText);
 
-
-         // if (status !== 200) {
-         //    const json = JSON.parse(decodedText); // start with "data: "
-         //    const content = json.error.message ?? decodedText;
-         //    this.appendLastMessageContent(content);
-         //    return this.getLastMessage();
-         // }
+         if (status !== 200) {
+            const error = JSON.parse(decodedText);
+            //const content = json.error.message ?? decodedText;
+            throw new Error(error);
+         }
 
          const chunk = partialLine + decodedText;
          const newLines = chunk.split(/\r?\n/);
@@ -96,9 +94,9 @@ export class ChatGpt {
          for (const line of newLines) {
             if (line.length === 0) continue; // ignore empty message
             if (line.startsWith(":")) continue; // ignore sse comment message
-            console.log("line='" + line + "'")
+            //console.log("line='" + line + "'")
             if (line === "data: [DONE]") {
-               console.log("END");
+               //console.log("END");
                return this.getLastMessage();
             }
 
