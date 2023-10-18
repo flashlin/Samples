@@ -28,8 +28,8 @@ load_dotenv()
 llm_queue = queue.Queue(10)
 llm_callback_handler = LlmCallbackHandler()
 print(f"loading llm")
-# llm = create_llama2_v2(llm_callback_handler)
-llm = None
+llm = create_llama2_v2(llm_callback_handler)
+# llm = None
 gpt_db = MysqlGptRepo()
 
 
@@ -88,8 +88,8 @@ def chat_stream():
 def chat_get_last_conversation():
     current_login_name = get_jwt_identity()
     gpt_service = GptService(gpt_db)
-    messages = gpt_service.get_conversation_last_messages(current_login_name)
-    return jsonify({'messages': messages})
+    resp = gpt_service.get_conversation_last_messages(current_login_name)
+    return jsonify(resp)
 
 
 @app.route('/api/v1/chat/conversation', methods=['POST'])
@@ -97,8 +97,8 @@ def chat_get_last_conversation():
 @jwt_required()
 def chat_conversation():
     req = request.json
-    conversation_id = req['conversationsId']
-    user_message = req['message']
+    conversation_id = req['conversationId']
+    user_message = req['content']
     current_login_name = get_jwt_identity()
     gpt_service = GptService(gpt_db)
     gpt_service.add_conversation_message(AddConversationReq(

@@ -44,6 +44,7 @@ import { ChatGpt } from "@/libs/gpt";
 // }>()
 
 let isTalking = ref(false);
+const conversationId = ref(0);
 let messageContent = ref("");
 const chatListDom = ref<HTMLDivElement>();
 const roleAlias = { user: "ME", assistant: "ChatGPT", system: "System" };
@@ -79,7 +80,11 @@ const sendMessageOnEnter = async () => {
       })
       const content = messageContent.value;
       messageContent.value = "";
-      const response = await chatGpt.ask(content, (typing: string) => {
+      const response = await chatGpt.ask({
+         conversationId: conversationId.value, 
+         content: content
+      }, 
+      (typing: string) => {
          lastMessage.content += typing;
          replaceLastMessage(lastMessage);
       });
@@ -95,6 +100,7 @@ const sendMessageOnEnter = async () => {
 
 chatGpt.getLastConversationMessages()
    .then(resp => {
+      conversationId.value = resp.conversationId;
       messageList.value = resp.messages;
    });
 </script>

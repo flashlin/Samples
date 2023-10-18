@@ -10,9 +10,15 @@ export interface ChatMessage {
 
 export interface IGetLastConversationMessagesResp
 {
-   conversationId: number
-   messages: ChatMessage[]
+   conversationId: number;
+   messages: ChatMessage[];
 }
+
+export interface IAskReq {
+   conversationId: number;
+   content: string;
+}
+
 
 const decoder = new TextDecoder("utf-8");
 
@@ -117,8 +123,8 @@ export class ChatGpt {
       return this.messageList[this.messageList.length - 1];
    }
 
-   async ask(content: string, generatingFn: GeneratingFn): Promise<ChatMessage> {
-         const { body, status } = await this.postConversation(content);
+   async ask(req: IAskReq, generatingFn: GeneratingFn): Promise<ChatMessage> {
+         const { body, status } = await this.postConversation(req);
          const reader = body!.getReader();
          return await this.readStream(reader, status, generatingFn);
    }
@@ -144,7 +150,7 @@ export class ChatGpt {
       return jwtApi.post<IGetLastConversationMessagesResp>("/api/v1/chat/getLastConversation");
    }
 
-   async postConversation(message: string) {
+   async postConversation(req: IAskReq) {
       const accessToken = localStorage.getItem('accessToken');
       const result = await fetch(`${API_URL}/api/v1/chat/conversation`, {
          method: "post",
@@ -154,7 +160,8 @@ export class ChatGpt {
             Authorization: `Bearer ${accessToken}`,
          },
          body: JSON.stringify({
-            message: message,
+            conversationId: req.conversationId,
+            content: req.content,
          }),
       });
       return result;
