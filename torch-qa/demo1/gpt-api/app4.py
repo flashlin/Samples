@@ -52,7 +52,7 @@ class LlmConsumer(threading.Thread):
             # task_item.output_message = resp
             task_item.wait_for_response_done()
             gpt_db.add_conversation_detail(AddConversationMessageReq(
-                ConversationId=0,
+                ConversationId=task_item.conversation_id,
                 RoleName='assistant',
                 Message=task_item.output_message.content,
                 CreateOn=utc_time()
