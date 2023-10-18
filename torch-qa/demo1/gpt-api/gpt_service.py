@@ -51,6 +51,5 @@ class GptService:
             result.append(row)
         return result
 
-
     def add_conversation_message(self, req: AddConversationReq):
         return self.gpt_db.add_conversation_message(req)
