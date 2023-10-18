@@ -11,9 +11,11 @@ class ChatMessage:
 
 
 class TaskItem:
+    login_name: str = ''
+    conversation_id: int = 0
     messages: str = ''
     output_message: ChatMessage = ChatMessage(
-        role='user',
+        role='assistant',
         content=''
     )
     is_finished: bool = False

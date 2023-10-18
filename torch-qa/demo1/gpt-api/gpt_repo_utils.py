@@ -79,7 +79,7 @@ class GptRepo(ABC):
        pass
 
     @abstractmethod
-    def add_conversation_message(self, req: AddConversationReq) -> None:
+    def add_user_conversation_message(self, req: AddConversationReq) -> None:
         pass
 
     @abstractmethod

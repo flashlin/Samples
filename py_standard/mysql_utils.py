@@ -60,6 +60,10 @@ def to_utc_time_str(time: datetime = None) -> str:
     return time.strftime('%Y-%m-%d %H:%M:%S')
 
 
+def utc_time() -> datetime:
+    return datetime.now(timezone.utc)
+
+
 def test():
     db = MysqlDbContext()
     results = db.query("select * from Customers")

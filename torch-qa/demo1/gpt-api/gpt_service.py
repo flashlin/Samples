@@ -63,4 +63,4 @@ class GptService:
         return result
 
     def add_conversation_message(self, req: AddConversationReq):
-        return self.gpt_db.add_conversation_message(req)
+        return self.gpt_db.add_user_conversation_message(req)

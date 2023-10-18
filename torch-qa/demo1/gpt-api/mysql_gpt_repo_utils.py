@@ -90,7 +90,7 @@ class MysqlGptRepo(GptRepo):
 
         return self.get_user_conversation(inserted_id)
 
-    def add_conversation_message(self, req: AddConversationReq):
+    def add_user_conversation_message(self, req: AddConversationReq):
         results = self.db.query("SELECT Id, LoginName FROM Conversations WHERE Id=%s LIMIT 1",
                                 (req.conversation_id,))
         if len(results) == 0:
@@ -176,7 +176,7 @@ def test():
     conversation = gpt.create_conversation('flash')
     print(f"{conversation=}")
 
-    gpt.add_conversation_message(AddConversationReq(
+    gpt.add_user_conversation_message(AddConversationReq(
         conversation_id=conversation.Id,
         login_name='flash',
         message='Hello'

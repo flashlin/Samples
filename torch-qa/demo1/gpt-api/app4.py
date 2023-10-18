@@ -11,6 +11,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import threading
 
+from mysql_utils import utc_time
 from user_service import UserService
 from flask_jwt_utils import create_auth_blueprint
 from llama2_utils import llama2_prompt
@@ -18,7 +19,7 @@ from model_utils import create_llama2, create_llama2_v2
 from dataclasses import dataclass
 from langchain.callbacks.base import BaseCallbackHandler
 from llm_utils import ChatMessage, TaskItem, LlmCallbackHandler
-from mysql_gpt_repo_utils import MysqlGptRepo, AddConversationReq
+from mysql_gpt_repo_utils import MysqlGptRepo, AddConversationReq, AddConversationMessageReq
 from gpt_service import GptService, GetConversationMessagesReq
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
 
@@ -48,8 +49,14 @@ class LlmConsumer(threading.Thread):
             llm_callback_handler.current_task_item = task_item
             print(f"start process")
             resp = llm(task_item.messages)
-            task_item.output_message = resp
+            # task_item.output_message = resp
             task_item.wait_for_response_done()
+            gpt_db.add_conversation_detail(AddConversationMessageReq(
+                ConversationId=0,
+                RoleName='assistant',
+                Message=task_item.output_message.content,
+                CreateOn=utc_time()
+            ))
             print(f"process end")
 
 
@@ -123,6 +130,8 @@ def chat_conversation():
         login_name=current_login_name
     ))
     task_item = TaskItem()
+    task_item.login_name = current_login_name
+    task_item.conversation_id = conversation_id
     task_item.messages = llama2_prompt(messages)
     print(f"{task_item.messages=}")
     llm_queue.put(task_item)
