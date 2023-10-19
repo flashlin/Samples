@@ -145,6 +145,21 @@ def chat_conversation():
     print(f"{task_item.messages=}")
     llm_queue.put(task_item)
     task_item.wait_for_start()
+
+    # def generate():
+    #     for chunk in task_item.response():
+    #         yield chunk
+    #         try:
+    #             # Check if the client has closed the connection
+    #             request.environ.get('wsgi.input').read(1)
+    #         except IOError:
+    #             print("Client closed connection")
+    #             break
+    #
+    # return Response(generate(), mimetype='text/event-stream')
+
+
+
     return Response(task_item.response(), mimetype='text/event-stream')
 
 
