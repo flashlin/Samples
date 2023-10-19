@@ -76,7 +76,7 @@ if( "" -eq $action ) {
    Write-Host "f <name>            : search contain name pattern"
    Write-Host "l [pod id]          : logs"
    Write-Host "use <env>           : use stg/uat environment"
-   Write-Host "ns [namespace]      : list namespaces / switch to namespace"
+   Write-Host "ns [namespace]      : list namespaces / switch to namespace(b2c)"
    Write-Host "cp [pod id] [source]: copy pod's source to d:\demo\k8s "
    Write-Host ""
    ShowState
@@ -88,6 +88,7 @@ if( "use" -eq $action ) {
    $state.kubeconfig = "D:\demo\" + $kubeConfigDict.($staging)
    SaveState
    Write-Host "use $staging $($state.kubeconfig)"
+   ShowState
    return
 }
 
@@ -106,6 +107,7 @@ if( "ns" -eq $action ) {
    $state.namespace = $namespace
    SaveState
    Write-Host "switch to $($state.namespace)"
+   ShowState
    return
 }
 
@@ -156,6 +158,7 @@ if( "f" -eq $action ) {
   $state.pods = $result
   SaveState
   $result | Format-Table
+  ShowState
   return
 }
 
