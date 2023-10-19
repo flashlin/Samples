@@ -85,7 +85,10 @@ const sendMessageOnEnter = async () => {
          content: content
       }, 
       (typing: string) => {
-         lastMessage.content += typing;
+         if( lastMessage.content !== '') {
+            lastMessage.content = lastMessage.content.substring(0, lastMessage.content.length-1);
+         }
+         lastMessage.content += typing + "▌";
          replaceLastMessage(lastMessage);
       });
       replaceLastMessage(response);
