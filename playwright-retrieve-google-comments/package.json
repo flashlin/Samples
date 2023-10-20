@@ -3,7 +3,8 @@
 		"test": "playwright test",
 		"report": "exec playwright show-report",
 		"ui": "npx playwright test --ui",
-		"setup": "pnpm exec playwright install"
+		"setup": "pnpm exec playwright install",
+		"debug": "npx playwright test --debug"
 	},
 	"dependencies": {
 		"@playwright/test": "^1.39.0",
