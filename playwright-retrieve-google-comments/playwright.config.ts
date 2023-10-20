@@ -24,6 +24,7 @@ export default defineConfig({
       baseURL: 'http://127.0.0.1:5005',
       // Collect trace when retrying the failed test.
       trace: 'on-first-retry',
+      headless: false,
    },
    // Configure projects for major browsers.
    projects: [
