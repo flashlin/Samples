@@ -9,25 +9,27 @@ test('retrieve', async ({ page }) => {
       console.log(msg);
    });
 
-   const searchBar = await scrollBar(page);
+   //const searchBar = await scrollBar(page);
+   await page.waitForTimeout(3000);
+   await scrollBar2(page);
 
    await clickElement(page, 'span.wNNZR', '更多評論');
-   await page.waitForTimeout(900);
-   await scroll(searchBar);
+   await page.waitForTimeout(2000);
 
+   await scrollBar2(page);
    // for(let n=0; n<10; n++) {
    //    await scroll(searchBar);
    //    await page.waitForTimeout(900);
    // }
 
-   const allComments = await catchAllUserComments(page);
-   //const fileContext = JSON.stringify(allComments);
-   let fileContext = '';
-   allComments.forEach((line, index) => {
-      fileContext += line.name + '\r\n';
-      fileContext += line.comment + '\r\n';
-   });
-   await fs.writeFileSync(`output.txt`, fileContext);
+   // const allComments = await catchAllUserComments(page);
+   // // //const fileContext = JSON.stringify(allComments);
+   // let fileContext = '';
+   // allComments.forEach((line, index) => {
+   //    fileContext += line.name + '\r\n';
+   //    fileContext += line.comment + '\r\n';
+   // });
+   // await fs.writeFileSync(`output.txt`, fileContext);
 
    await page.pause();
 });
@@ -45,8 +47,19 @@ async function catchAllUserComments(page) {
    return all;
 }
 
+async function scrollBar2(page) {
+   await page.evaluate(() => {
+      const pane = document.querySelector('#pane')!.nextElementSibling!;
+      const c1 = pane.children[0].children[0].children[0];
+      const c2 = c1.children[1];
+      const scrollbar = c2.children[0].children[0];
+      scrollbar.scrollTop = scrollbar.scrollHeight;
+   });
+   await page.waitForTimeout(1000);
+}
+
 async function scrollBar(page) {
-   const elem = await page.$('#QA0Szd > div > div > div.w6VYqd > div:nth-child(2) > div > div');
+   const elem = await page.$('#QA0Szd > div > div > div.w6VYqd');
    await scroll(elem!);
    return elem;
 }
