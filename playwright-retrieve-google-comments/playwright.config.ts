@@ -25,6 +25,8 @@ export default defineConfig({
       // Collect trace when retrying the failed test.
       trace: 'on-first-retry',
       headless: false,
+
+      
    },
    // Configure projects for major browsers.
    projects: [
