@@ -12,9 +12,14 @@ test('retrieve', async ({ page }) => {
    const searchBar = await scrollBar(page);
 
    await clickElement(page, 'span.wNNZR', '更多評論');
-   await page.waitForTimeout(1000);
-
+   await page.waitForTimeout(900);
    await scroll(searchBar);
+
+   // for(let n=0; n<10; n++) {
+   //    await scroll(searchBar);
+   //    await page.waitForTimeout(900);
+   // }
+
    const allComments = await catchAllUserComments(page);
    //const fileContext = JSON.stringify(allComments);
    let fileContext = '';
