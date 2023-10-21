@@ -4,10 +4,14 @@
 		"report": "exec playwright show-report",
 		"ui": "npx playwright test --ui",
 		"setup": "pnpm exec playwright install",
+		"dev": "npx playwright test --headed",
 		"debug": "npx playwright test --debug"
 	},
 	"dependencies": {
 		"@playwright/test": "^1.39.0",
 		"playwright": "^1.39.0"
+	},
+	"devDependencies": {
+		"fs": "0.0.1-security"
 	}
 }
