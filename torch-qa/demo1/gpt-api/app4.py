@@ -18,7 +18,7 @@ from llama2_utils import llama2_prompt, GptMessage
 from model_utils import create_llama2, create_llama2_v2
 from dataclasses import dataclass
 from langchain.callbacks.base import BaseCallbackHandler
-from llm_utils import ChatMessage, TaskItem, LlmCallbackHandler, ResponseType
+from llm_utils import ChatMessage, LLmTaskItem, LlmCallbackHandler, ResponseType
 from mysql_gpt_repo_utils import MysqlGptRepo, AddConversationReq, AddConversationMessageReq
 from gpt_service import GptService, GetConversationMessagesReq, UserQueryReq
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
@@ -43,7 +43,7 @@ class LlmConsumer(threading.Thread):
             if llm_queue.empty():
                 time.sleep(1)
                 continue
-            task_item: TaskItem = llm_queue.get()
+            task_item: LLmTaskItem = llm_queue.get()
             llm_callback_handler.current_task_item = task_item
             print(f"start process")
             resp = llm(task_item.messages)
@@ -89,7 +89,7 @@ def chat_completions():
         login_name=current_login_name,
         message=user_message
     ))
-    task_item = TaskItem()
+    task_item = LLmTaskItem()
     task_item.response_method = ResponseType.Message
     task_item.login_name = current_login_name
     task_item.conversation_id = conversation_id
@@ -131,16 +131,12 @@ def chat_conversation():
     user_message = req['content']
     current_login_name = get_jwt_identity()
     gpt_service = GptService(gpt_db)
-    gpt_service.add_conversation_message(AddConversationReq(
+    messages = gpt_service.user_query(UserQueryReq(
         conversation_id=conversation_id,
         login_name=current_login_name,
         message=user_message
     ))
-    messages = gpt_service.get_conversation_messages(GetConversationMessagesReq(
-        conversation_id=conversation_id,
-        login_name=current_login_name
-    ))
-    task_item = TaskItem()
+    task_item = LLmTaskItem()
     task_item.login_name = current_login_name
     task_item.conversation_id = conversation_id
     task_item.messages = llama2_prompt(convert_gpt_messages_to_dict_list(messages))

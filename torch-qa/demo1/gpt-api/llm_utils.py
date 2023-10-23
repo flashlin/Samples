@@ -16,7 +16,7 @@ class ChatMessage:
     content: str
 
 
-class TaskItem:
+class LLmTaskItem:
     login_name: str = ''
     conversation_id: int = 0
     messages: str = ''
@@ -73,7 +73,7 @@ class TaskItem:
 
 
 class LlmCallbackHandler:
-    current_task_item: TaskItem = None
+    current_task_item: LLmTaskItem = None
 
     def display(self, text: str):
         self.current_task_item.display(text)

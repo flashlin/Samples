@@ -12,7 +12,7 @@ from llama2_utils import llama2_prompt
 from model_utils import create_llama2, create_llama2_v2
 from dataclasses import dataclass
 from langchain.callbacks.base import BaseCallbackHandler
-from llm_utils import ChatMessage, TaskItem, LlmCallbackHandler
+from llm_utils import ChatMessage, LLmTaskItem, LlmCallbackHandler
 load_dotenv()
 
 
@@ -32,7 +32,7 @@ class LlmConsumer(threading.Thread):
             if llm_queue.empty():
                 time.sleep(1)
                 continue
-            task_item: TaskItem = llm_queue.get()
+            task_item: LLmTaskItem = llm_queue.get()
             llm_callback_handler.current_task_item = task_item
             print(f"start process")
             resp = llm(task_item.messages)
@@ -64,7 +64,7 @@ def chat_completions():
 def chat_stream():
     req = request.json
     messages = req['messages']
-    task_item = TaskItem()
+    task_item = LLmTaskItem()
     task_item.messages = llama2_prompt(messages)
     llm_queue.put(task_item)
     task_item.wait_for_start()
