@@ -26,11 +26,12 @@ gpt_db = MysqlGptRepo()
 
 
 class LlmConsumer(threading.Thread):
-    def __init__(self, thread_name):
+    def __init__(self, thread_name: str, llm_queue: queue.Queue):
         super(LlmConsumer, self).__init__(name=thread_name)
+        self.llm_queue = llm_queue
 
     def run(self):
-        global llm_queue
+        llm_queue = self.llm_queue
         while True:
             if llm_queue.empty():
                 time.sleep(1)
@@ -50,7 +51,7 @@ class LlmConsumer(threading.Thread):
             print(f"process end")
 
 
-llm_task = LlmConsumer('consumer')
+llm_task = LlmConsumer('consumer', llm_queue)
 llm_task.daemon = True
 llm_task.start()
 print(f"consumer task started")
