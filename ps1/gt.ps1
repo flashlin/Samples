@@ -11,8 +11,7 @@ $MyScriptPath = Split-Path $MyScriptFullname -Parent
 
 function UndoAllUncommittedOrUnsavedChanges {
     Write-Host "Undo all uncommitted or unsaved changes"
-    git reset
-    git checkout .
+    InvoleCmd "git checkout -- ."
 }
 
 function GitInit {
