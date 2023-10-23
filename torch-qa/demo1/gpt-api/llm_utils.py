@@ -2,6 +2,12 @@ import time
 from dataclasses import dataclass
 import json
 import queue
+from enum import Enum
+
+
+class ResponseType(Enum):
+    Stream = 1
+    Message = 2
 
 
 @dataclass
@@ -18,6 +24,7 @@ class TaskItem:
         role='assistant',
         content=''
     )
+    response_method: ResponseType = ResponseType.Stream
     is_finished: bool = False
     is_started: bool = False
     is_response_done: bool = False
@@ -40,12 +47,16 @@ class TaskItem:
         while not self.is_finished and self.output_tokens.not_empty:
             if not self.output_tokens.empty():
                 output_token = self.output_tokens.get()
-                json_str = json.dumps(output_token)
-                yield json_str + "\r\n"
+                if self.response_method == ResponseType.Stream:
+                    json_str = json.dumps(output_token)
+                    yield json_str + "\r\n"
+                else:
+                    yield output_token
                 self.output_tokens.task_done()
                 continue
             # time.sleep(0.2)
-        yield "data: [DONE]"
+        if self.response_method == ResponseType.Stream:
+            yield "data: [DONE]"
         self.is_response_done = True
         print("=== response end ===")
 

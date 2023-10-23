@@ -18,7 +18,7 @@ from llama2_utils import llama2_prompt, GptMessage
 from model_utils import create_llama2, create_llama2_v2
 from dataclasses import dataclass
 from langchain.callbacks.base import BaseCallbackHandler
-from llm_utils import ChatMessage, TaskItem, LlmCallbackHandler
+from llm_utils import ChatMessage, TaskItem, LlmCallbackHandler, ResponseType
 from mysql_gpt_repo_utils import MysqlGptRepo, AddConversationReq, AddConversationMessageReq
 from gpt_service import GptService, GetConversationMessagesReq, UserQueryReq
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
@@ -90,6 +90,7 @@ def chat_completions():
         message=user_message
     ))
     task_item = TaskItem()
+    task_item.response_method = ResponseType.Message
     task_item.login_name = current_login_name
     task_item.conversation_id = conversation_id
     task_item.messages = llama2_prompt(convert_gpt_messages_to_dict_list(messages))
