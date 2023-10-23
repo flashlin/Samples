@@ -101,17 +101,6 @@ def chat_completions():
     })
 
 
-@app.route('/api/v1/chat/stream', methods=['POST'])
-def chat_stream():
-    req = request.json
-    messages = req['messages']
-    task_item = TaskItem()
-    task_item.messages = llama2_prompt(messages)
-    llm_queue.put(task_item)
-    task_item.wait_for_start()
-    return Response(stream_with_context(task_item.response_stream()), mimetype='text/event-stream')
-
-
 @app.route('/api/v1/chat/getLastConversation', methods=['POST'])
 @cross_origin()
 @jwt_required()
