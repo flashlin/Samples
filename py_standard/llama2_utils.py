@@ -20,6 +20,13 @@ class GptMessage:
     create_on: datetime
 
 
+def convert_gpt_messages_to_dict_list(messages: list[GptMessage]):
+    return [{
+        'role': item.role,
+        'content': item.content
+    } for item in messages]
+
+
 def llama2_prompt(messages: list[dict]) -> str:
     """
     Convert the messages in list of dictionary format to Llama2 compliant format.
@@ -90,3 +97,5 @@ class StreamDisplayHandler(BaseCallbackHandler):
             display_function(text)
         else:
             raise ValueError(f"Invalid display_method: {display_function}")
+
+

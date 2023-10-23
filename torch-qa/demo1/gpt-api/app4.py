@@ -1,27 +1,19 @@
-import json
-import os
 import time
 import queue
-from flask import Flask, request, Response, render_template, jsonify, redirect, url_for, stream_with_context, \
-    current_app
+from flask import Flask, request, Response, jsonify, stream_with_context
 from flask_cors import CORS, cross_origin
-from typing import Any, List
-from pydantic import BaseModel
-from datetime import datetime
 from dotenv import load_dotenv
 import threading
 
 from mysql_utils import utc_time
 from user_service import UserService
 from flask_jwt_utils import create_auth_blueprint
-from llama2_utils import llama2_prompt, GptMessage
-from model_utils import create_llama2, create_llama2_v2
-from dataclasses import dataclass
-from langchain.callbacks.base import BaseCallbackHandler
-from llm_utils import ChatMessage, LLmTaskItem, LlmCallbackHandler, ResponseType
-from mysql_gpt_repo_utils import MysqlGptRepo, AddConversationReq, AddConversationMessageReq
-from gpt_service import GptService, GetConversationMessagesReq, UserQueryReq
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
+from llama2_utils import llama2_prompt, convert_gpt_messages_to_dict_list
+from model_utils import create_llama2_v2
+from llm_utils import LLmTaskItem, LlmCallbackHandler, ResponseType
+from mysql_gpt_repo_utils import MysqlGptRepo, AddConversationMessageReq
+from gpt_service import GptService, UserQueryReq
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 load_dotenv()
 
@@ -62,14 +54,6 @@ llm_task = LlmConsumer('consumer')
 llm_task.daemon = True
 llm_task.start()
 print(f"consumer task started")
-
-
-def convert_gpt_messages_to_dict_list(messages: list[GptMessage]):
-    return [{
-        'role': item.role,
-        'content': item.content
-    } for item in messages]
-
 
 app = Flask(__name__)
 cors = CORS(app)
