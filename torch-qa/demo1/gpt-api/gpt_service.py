@@ -18,6 +18,13 @@ class GetConversationMessagesResp:
     messages: list[GptMessage]
 
 
+@dataclass
+class UserQueryReq:
+    login_name: str
+    conversation_id: int
+    message: str
+
+
 class GptService:
     def __init__(self, gpt_db: GptRepo):
         self.gpt_db = gpt_db
@@ -64,3 +71,15 @@ class GptService:
 
     def add_conversation_message(self, req: AddConversationReq):
         return self.gpt_db.add_user_conversation_message(req)
+
+    def user_query(self, req: UserQueryReq):
+        self.add_conversation_message(AddConversationReq(
+            conversation_id=req.conversation_id,
+            login_name=req.login_name,
+            message=req.message
+        ))
+        messages = self.get_conversation_messages(GetConversationMessagesReq(
+            conversation_id=req.conversation_id,
+            login_name=req.login_name
+        ))
+        return messages

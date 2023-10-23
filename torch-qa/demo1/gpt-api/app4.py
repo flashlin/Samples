@@ -20,9 +20,8 @@ from dataclasses import dataclass
 from langchain.callbacks.base import BaseCallbackHandler
 from llm_utils import ChatMessage, TaskItem, LlmCallbackHandler
 from mysql_gpt_repo_utils import MysqlGptRepo, AddConversationReq, AddConversationMessageReq
-from gpt_service import GptService, GetConversationMessagesReq
+from gpt_service import GptService, GetConversationMessagesReq, UserQueryReq
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, JWTManager
-
 
 load_dotenv()
 
@@ -32,7 +31,6 @@ print(f"loading llm")
 llm = create_llama2_v2(llm_callback_handler)
 # llm = None
 gpt_db = MysqlGptRepo()
-
 
 
 class LlmConsumer(threading.Thread):
@@ -70,7 +68,7 @@ def convert_gpt_messages_to_dict_list(messages: list[GptMessage]):
     return [{
         'role': item.role,
         'content': item.content
-        } for item in messages]
+    } for item in messages]
 
 
 app = Flask(__name__)
@@ -78,14 +76,28 @@ cors = CORS(app)
 
 
 @app.route('/api/v1/chat/completions', methods=['POST'])
+@cross_origin()
+@jwt_required()
 def chat_completions():
     req = request.json
-    messages = req['messages']
-    resp = llm(llama2_prompt(messages))
-    result = {
-        'outputs': resp,
-    }
-    return jsonify(result)
+    conversation_id = req['conversationId']
+    user_message = req['content']
+    current_login_name = get_jwt_identity()
+    gpt_service = GptService(gpt_db)
+    messages = gpt_service.user_query(UserQueryReq(
+        conversation_id=conversation_id,
+        login_name=current_login_name,
+        message=user_message
+    ))
+    task_item = TaskItem()
+    task_item.login_name = current_login_name
+    task_item.conversation_id = conversation_id
+    task_item.messages = llama2_prompt(convert_gpt_messages_to_dict_list(messages))
+    llm_queue.put(task_item)
+    task_item.wait_for_start()
+    return jsonify({
+        "message": task_item.response()
+    })
 
 
 @app.route('/api/v1/chat/stream', methods=['POST'])
@@ -96,7 +108,7 @@ def chat_stream():
     task_item.messages = llama2_prompt(messages)
     llm_queue.put(task_item)
     task_item.wait_for_start()
-    return Response(stream_with_context(task_item.response()), mimetype='text/event-stream')
+    return Response(stream_with_context(task_item.response_stream()), mimetype='text/event-stream')
 
 
 @app.route('/api/v1/chat/getLastConversation', methods=['POST'])
@@ -158,9 +170,7 @@ def chat_conversation():
     #
     # return Response(generate(), mimetype='text/event-stream')
 
-
-
-    return Response(task_item.response(), mimetype='text/event-stream')
+    return Response(task_item.response_stream(), mimetype='text/event-stream')
 
 
 if __name__ == '__main__':

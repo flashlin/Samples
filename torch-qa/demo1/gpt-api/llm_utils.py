@@ -35,7 +35,7 @@ class TaskItem:
     def display_end(self):
         self.is_finished = True
 
-    def response(self):
+    def response_stream(self):
         print("=== response start ===")
         while not self.is_finished and self.output_tokens.not_empty:
             if not self.output_tokens.empty():
@@ -48,6 +48,12 @@ class TaskItem:
         yield "data: [DONE]"
         self.is_response_done = True
         print("=== response end ===")
+
+    def response(self):
+        result = ""
+        for token in self.response_stream():
+            result += token
+        return result
 
     def wait_for_response_done(self):
         while not self.is_response_done:
