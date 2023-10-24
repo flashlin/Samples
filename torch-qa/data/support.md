@@ -221,3 +221,26 @@ This requires a lot of effort for them to filter those account.
 I would like to set this rule, and there is no real user with this prefix now.
 To create an account NOT in test mode for testing purpose, you prefix it with "rmdv"
 ex: rmdvvnd001
+
+
+
+---
+Question: Why are all changes in the CI pipeline unable to execute? They remain in a pending state.
+Answer: This information is current as of 2023-10-24. You can refer to this URL:
+https://ironman.atlassian.net/wiki/spaces/ITR/pages/2833187369/Runner+spec
+
+
+|Tag Name |CPU |Memory |Purpose
+|--|--|--|--
+|docker-small |1 |4 |build image
+|build-small |1 |4 |
+|kubectl |1 |4 |
+|gcloud |1 |4 |
+|dotnet-core |1 |4 
+|docker-cli |1 |4
+|docker-buildx |1 |4
+|build-medium |2 |8 |build image
+|build-large |4 |16 |
+|docker-small |1 |4 |run docker image
+|docker-medium-docker |2 |8
+|docker-large |4 |16
