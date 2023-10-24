@@ -14,6 +14,11 @@ payload = json.dumps({
         "project": {
             "key": "B2CS"
         },
+        "summary": "",
+        "description": "",
+        "issuetype": {
+            "name": "Task"
+        }
     }
 })
 
