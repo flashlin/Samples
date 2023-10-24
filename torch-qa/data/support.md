@@ -244,3 +244,21 @@ https://ironman.atlassian.net/wiki/spaces/ITR/pages/2833187369/Runner+spec
 |docker-small |1 |4 |run docker image
 |docker-medium-docker |2 |8
 |docker-large |4 |16
+
+
+---
+Question:
+```
+Running ih giab-runner '5.3
+Preparng he "kubernetes" execuor
+Preparin envronmen
+Natng ror pod hcm-runnerlrunner-duxjmxsyproec2t2concurrent8tmps o be running, status is Pending
+ContainersNotInitiaLized: "containers with incompLete status: [init-permissions]"
+ContainersNotReady: "containers with unready status: [buiLd helper]"
+
+WARNING: Failed to pull image with policy: image pull failed: rpc error: code = Unknown desc = Error response from daemon:
+Get "gttps://registery.gitlab.com/v2": proxyconnect tcp: dail tcp 10.1.1.2:328: connect: connection refused
+```
+
+Answer:
+The proxy server is experiencing issues, possibly due to network problems, and cannot pull GitLab-related images. Please contact NOC for assistance
