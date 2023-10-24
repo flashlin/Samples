@@ -2,6 +2,13 @@ from langchain.embeddings import HuggingFaceBgeEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from qdrant_client.http.models import PointStruct
+from langchain.document_loaders import WebBaseLoader
+from langchain.document_loaders import PyPDFLoader, DirectoryLoader, TextLoader
+
+md_files =
+
+
+
 
 client = QdrantClient("http://localhost:6333")
 
@@ -106,6 +113,11 @@ class LlmEmbedding:
 
     def get_embedding(self, text: str):
         return self.embedding.embed_query(text)
+
+    def get_web_links(self, web_links: list[str]):
+        loader = WebBaseLoader(web_links)
+        web_documents = loader.load()
+        return web_documents
 
 
 def main1():
