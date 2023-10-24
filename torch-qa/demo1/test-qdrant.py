@@ -1,3 +1,4 @@
+from langchain.embeddings import HuggingFaceBgeEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from qdrant_client.http.models import PointStruct
@@ -22,6 +23,7 @@ def connection():
 
 
 def get_embedding(text, model_name):
+    embedding_model_name = "BAAI/bge-base-en"
     response = openai.Embedding.create(
         input=text,
         engine=model_name
@@ -85,7 +87,6 @@ def ask_main():
 
 
 def ask_question_with_context(qa, question, chat_history):
-
     query = ""
     result = qa({"question": question, "chat_history": chat_history})
     print("answer:", result["answer"])
@@ -93,8 +94,21 @@ def ask_question_with_context(qa, question, chat_history):
     return chat_history
 
 
-def main():
+class LlmEmbedding:
+    def __init__(self):
+        embedding_model_name = "../models/BAAI_bge-base-en"
+        encode_kwargs = {'normalize_embeddings': True}  # set True to compute cosine similarity
+        self.embedding = HuggingFaceBgeEmbeddings(
+            model_name=embedding_model_name,
+            model_kwargs={'device': 'cuda'},
+            encode_kwargs=encode_kwargs
+        )
 
+    def get_embedding(self, text: str):
+        return self.embedding.embed_query(text)
+
+
+def main1():
     EMBEDDING_MODEL_NAME = "embedding-ada-002"
     openai.api_base = "https://japanopenai2023ironman.openai.azure.com/"
     openai.api_key = "yourkey"
@@ -143,6 +157,12 @@ def main():
     document, score = docs[0]
     print(document.page_content)
     print(f"\nScore: {score}")
+
+
+def main():
+    llm_embedding = LlmEmbedding()
+    resp = llm_embedding.get_embedding("How to use C# write HELLO")
+    print(f"{resp=}")
 
 if __name__ == '__main__':
     main()
