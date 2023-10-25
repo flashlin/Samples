@@ -4,6 +4,7 @@ from qdrant_client.http import models
 from qdrant_client.http.models import PointStruct
 from langchain.document_loaders import WebBaseLoader
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader, TextLoader
+from torch.utils.data import Dataset
 
 md_files =
 
@@ -99,6 +100,39 @@ def ask_question_with_context(qa, question, chat_history):
     print("answer:", result["answer"])
     chat_history = [(query, result["answer"])]
     return chat_history
+
+
+
+class QdrantRetriever:
+    def __init__(self, client: QdrantClient, llm_embeddings):
+        self.client = client
+        self.embeddings = llm_embeddings
+
+    def create_retriever(self, collection_name: str, docs):
+        doc_store = Qdrant.from_documents(
+            docs,
+            self.embeddings,
+            url="http://localhost:6333",
+            collection_name=collection_name,
+            force_recreate=True
+        )
+        return doc_store.as_retriever()
+
+    def upsert(self, collection_name: str, docs: Dataset):
+        payloads = docs.select_columns(["label_names", "text"]).to_pandas().to_dict(orient="records")
+        self.client.upsert(
+            collection_name=collection_name,
+            points=models.Batch(
+                ids=docs["idx"],
+                vectors=docs["embedding"],
+                payloads=payloads
+            )
+        )
+
+    def get_retriever(self, collection_name: str):
+        collection = self.client.get_collection(collection_name)
+        return collection.as_retriever()
+
 
 
 class LlmEmbedding:
