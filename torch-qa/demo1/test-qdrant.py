@@ -209,6 +209,17 @@ class QdrantRetriever:
         collection = self.client.get_collection(collection_name)
         return collection.as_retriever()
 
+    def search(self, collection_name, query: str, k=3):
+        query_embedding = self.embeddings.get_embeddings(query)
+        search_result = self.client.search(
+            collection_name=collection_name,
+            query_vector=query_embedding,
+            limit=k,
+            append_payload=True,
+        )
+        return search_result
+
+
 def main1():
     EMBEDDING_MODEL_NAME = "embedding-ada-002"
     openai.api_base = "https://japanopenai2023ironman.openai.azure.com/"
@@ -263,11 +274,13 @@ def main1():
 def main():
     llm_embeddings = LlmEmbeddings()
     resp = llm_embeddings.get_embeddings("How to use C# write HELLO")
-    print(f"{resp=}")
+    print(f"{len(resp)=}")
     docs = load_txt_documents("../data")
     retriever = QdrantRetriever(client, llm_embeddings)
     retriever.create_collection('sample')
     retriever.upsert_docs('sample', docs)
+    result = retriever.search('sample', 'How to create pinia store in vue3?')
+    print(f"{result=}")
 
 if __name__ == '__main__':
     main()
