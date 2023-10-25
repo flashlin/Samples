@@ -120,6 +120,12 @@ class ChatGLMService(LLM):
             print(f"loading model successfully, you should use checkpoint_path={multi_gpu_model_cache_dir} next time")
 
 
+
+def load_txt_documents(data_path: str):
+    txt_loader = DirectoryLoader(data_path, glob='*.txt', loader_cls=TextLoader)
+    return txt_loader.load()
+
+
 def load_documents(data_path: str):
     loader = DirectoryLoader(data_path, glob='*.pdf', loader_cls=PyPDFLoader)
     pdf_documents = loader.load()
