@@ -103,8 +103,25 @@ def ask_question_with_context(qa, question, chat_history):
 
 class LlmEmbedding:
     def __init__(self):
+        # model_name = "BAAI/bge-large-en"
+        # encode_kwargs = {'normalize_embeddings': False}
+        # hf = HuggingFaceBgeEmbeddings(
+        #     model_name=model_name,
+        #     encode_kwargs=encode_kwargs
+        # )
+        """
+        import chromadb
+from langchain.vectorstores import Chroma
+from langchain.document_transformers import (
+    LongContextReorder,
+)
+from langchain.chains import StuffDocumentsChain, LLMChain
+from langchain.prompts import PromptTemplate
+from langchain.embeddings import HuggingFaceBgeEmbeddings
+from langchain.retrievers.merger_retriever import MergerRetriever
+        """
         embedding_model_name = "../models/BAAI_bge-base-en"
-        encode_kwargs = {'normalize_embeddings': True}  # set True to compute cosine similarity
+        encode_kwargs = { 'normalize_embeddings': True }  # set True to compute cosine similarity
         self.embedding = HuggingFaceBgeEmbeddings(
             model_name=embedding_model_name,
             model_kwargs={'device': 'cuda'},
@@ -118,6 +135,22 @@ class LlmEmbedding:
         loader = WebBaseLoader(web_links)
         web_documents = loader.load()
         return web_documents
+
+    def get(self):
+        load_un_sdg_store = Chroma(persist_directory="store/un_sdg_chroma_cosine", embedding_function=hf)
+        load_paris_agreement_store = Chroma(persist_directory="store/paris_chroma_cosine", embedding_function=hf)
+        retriever_un_sdg = load_un_sdg_store.as_retriever(search_type="similarity",
+                                                          search_kwargs={"k": 3, "include_metadata": True})
+
+        retriever_paris_agreement = load_paris_agreement_store.as_retriever(search_type="similarity",
+                                                                            search_kwargs={"k": 3,
+                                                                                           "include_metadata": True})
+        lotr = MergerRetriever(retrievers=[retriever_un_sdg, retriever_paris_agreement])
+        docs = lotr.get_relevant_documents(query)
+        reordering = LongContextReorder()
+        reordered_docs = reordering.transform_documents(docs)
+        # Confirm that the 4 relevant documents are at beginning and end.
+        reordered_docs
 
 
 def main1():
