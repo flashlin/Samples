@@ -1,11 +1,19 @@
 from langchain.embeddings import HuggingFaceBgeEmbeddings
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.retrievers import ParentDocumentRetriever
 from langchain.schema import Document
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
 from qdrant_client.http.models import PointStruct, Payload
 from langchain.document_loaders import WebBaseLoader
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader, TextLoader
+from langchain.storage import InMemoryStore
+from langchain.vectorstores import Qdrant
+from langchain.chains import RetrievalQA
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from torch.utils.data import Dataset
+from langchain.llms import LlamaCpp
 
 from lanchainlit import load_txt_documents
 
@@ -121,6 +129,7 @@ from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.retrievers.merger_retriever import MergerRetriever
         """
         embedding_model_name = "../models/BAAI_bge-base-en"
+        embedding_model_name = "../models/BAA_Ibge-large-en-v1.5"
         encode_kwargs = { 'normalize_embeddings': True }  # set True to compute cosine similarity
         self.embedding = HuggingFaceBgeEmbeddings(
             model_name=embedding_model_name,
@@ -154,9 +163,12 @@ from langchain.retrievers.merger_retriever import MergerRetriever
 
 
 
+
+
 class QdrantRetriever:
-    def __init__(self, client: QdrantClient, llm_embeddings):
+    def __init__(self, client: QdrantClient, llm, llm_embeddings):
         self.client = client
+        self.llm = llm
         self.embeddings = llm_embeddings
 
     def create_collection(self, collection_name: str):
@@ -219,6 +231,33 @@ class QdrantRetriever:
         )
         return search_result
 
+    def get_parent_document_retriever_qa(self, collection_name: str, docs: list[Document]):
+        """
+            answer = qa.run(query)
+        :param collection_name:
+        :param docs:
+        :return:
+        """
+        doc_store = Qdrant(
+            client=client,
+            collection_name=collection_name,
+            embeddings=self.embeddings.embeddings)
+        store = InMemoryStore()
+        parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
+        child_splitter = RecursiveCharacterTextSplitter(chunk_size=400)
+        big_chunks_retriever = ParentDocumentRetriever(
+            vectorstore=doc_store,
+            docstore=store,
+            child_splitter=child_splitter,
+            parent_splitter=parent_splitter,
+        )
+        big_chunks_retriever.add_documents(docs)
+        qa = RetrievalQA.from_chain_type(llm=self.llm,
+                                         chain_type="stuff",
+                                         retriever=big_chunks_retriever)
+        return qa
+
+
 
 def main1():
     EMBEDDING_MODEL_NAME = "embedding-ada-002"
@@ -276,11 +315,31 @@ def main():
     resp = llm_embeddings.get_embeddings("How to use C# write HELLO")
     print(f"{len(resp)=}")
     docs = load_txt_documents("../data")
-    retriever = QdrantRetriever(client, llm_embeddings)
-    retriever.create_collection('sample')
-    retriever.upsert_docs('sample', docs)
-    result = retriever.search('sample', 'How to create pinia store in vue3?')
+
+    model_name = "TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf"
+    # model_name = "TheBloke_Mistral-7B-OpenOrca-GGUF/mistral-7b-openorca.Q4_K_M.gguf"
+    llm = LlamaCpp(
+        model_path=f"../models/{model_name}",
+        temperature=0.75,
+        max_tokens=2000,
+        top_p=1,
+        n_ctx=2048,  # 請求上下文 ValueError: Requested tokens (1130) exceed context window of 512
+        callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
+        verbose=False,  # True
+        streaming=True,
+    )
+
+    retriever = QdrantRetriever(client, llm, llm_embeddings)
+    retriever.create_collection('sample1')
+    qa = retriever.get_parent_document_retriever_qa('sample1', docs)
+    result = qa.run('How to create pinia store in vue3?')
     print(f"{result=}")
+
+    # retriever.create_collection('sample')
+    # retriever.upsert_docs('sample', docs)
+    # result = retriever.search('sample', 'How to create pinia store in vue3?')
+    # print(f"{result=}")
+
 
 if __name__ == '__main__':
     main()
