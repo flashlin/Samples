@@ -1,18 +1,15 @@
 from langchain.embeddings import HuggingFaceBgeEmbeddings
+from langchain.schema import Document
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
-from qdrant_client.http.models import PointStruct
+from qdrant_client.http.models import PointStruct, Payload
 from langchain.document_loaders import WebBaseLoader
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader, TextLoader
 from torch.utils.data import Dataset
 
-md_files =
-
-
-
+from lanchainlit import load_txt_documents
 
 client = QdrantClient("http://localhost:6333")
-
 
 COLLECTION_NAME = "Lyrics"
 
@@ -103,39 +100,8 @@ def ask_question_with_context(qa, question, chat_history):
 
 
 
-class QdrantRetriever:
-    def __init__(self, client: QdrantClient, llm_embeddings):
-        self.client = client
-        self.embeddings = llm_embeddings
 
-    def create_retriever(self, collection_name: str, docs):
-        doc_store = Qdrant.from_documents(
-            docs,
-            self.embeddings,
-            url="http://localhost:6333",
-            collection_name=collection_name,
-            force_recreate=True
-        )
-        return doc_store.as_retriever()
-
-    def upsert(self, collection_name: str, docs: Dataset):
-        payloads = docs.select_columns(["label_names", "text"]).to_pandas().to_dict(orient="records")
-        self.client.upsert(
-            collection_name=collection_name,
-            points=models.Batch(
-                ids=docs["idx"],
-                vectors=docs["embedding"],
-                payloads=payloads
-            )
-        )
-
-    def get_retriever(self, collection_name: str):
-        collection = self.client.get_collection(collection_name)
-        return collection.as_retriever()
-
-
-
-class LlmEmbedding:
+class LlmEmbeddings:
     def __init__(self):
         # model_name = "BAAI/bge-large-en"
         # encode_kwargs = {'normalize_embeddings': False}
@@ -162,7 +128,7 @@ from langchain.retrievers.merger_retriever import MergerRetriever
             encode_kwargs=encode_kwargs
         )
 
-    def get_embedding(self, text: str):
+    def get_embeddings(self, text: str) -> list[float]:
         return self.embedding.embed_query(text)
 
     def get_web_links(self, web_links: list[str]):
@@ -186,6 +152,62 @@ from langchain.retrievers.merger_retriever import MergerRetriever
         # Confirm that the 4 relevant documents are at beginning and end.
         reordered_docs
 
+
+
+class QdrantRetriever:
+    def __init__(self, client: QdrantClient, llm_embeddings):
+        self.client = client
+        self.embeddings = llm_embeddings
+
+    def create_collection(self, collection_name: str):
+        dim = 1536
+        dim = 768
+        self.client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=models.VectorParams(
+                distance=models.Distance.COSINE,
+                size=dim),
+            optimizers_config=models.OptimizersConfigDiff(memmap_threshold=20000),
+            hnsw_config=models.HnswConfigDiff(on_disk=True, m=16, ef_construct=100)
+        )
+
+    def upsert(self, collection_name: str, dataset: Dataset):
+        payloads = dataset.select_columns(["label_names", "text"]).to_pandas().to_dict(orient="records")
+        self.client.upsert(
+            collection_name=collection_name,
+            points=models.Batch(
+                ids=dataset["idx"],
+                vectors=dataset["embedding"],
+                payloads=payloads
+            )
+        )
+
+    def upsert_docs(self, collection_name: str, docs: list[Document]):
+        ids = []
+        vectors = []
+        payloads = []
+        for idx, doc in enumerate(docs):
+            embeddings = self.embeddings.get_embeddings(doc.page_content)
+            ids.append(idx)
+            vectors.append(embeddings)
+            payload = {
+                'page_content': doc.page_content,
+                'source': doc.metadata['source']
+            }
+            payloads.append(payload)
+        client.upsert(
+            collection_name=collection_name,
+            points=models.Batch(
+                ids=ids,
+                vectors=vectors,
+                payloads=payloads #[Payload(payload=point.payload) for point in docs_store]
+            )
+        )
+        print("upsert done")
+
+    def get_retriever(self, collection_name: str):
+        collection = self.client.get_collection(collection_name)
+        return collection.as_retriever()
 
 def main1():
     EMBEDDING_MODEL_NAME = "embedding-ada-002"
@@ -239,9 +261,13 @@ def main1():
 
 
 def main():
-    llm_embedding = LlmEmbedding()
-    resp = llm_embedding.get_embedding("How to use C# write HELLO")
+    llm_embeddings = LlmEmbeddings()
+    resp = llm_embeddings.get_embeddings("How to use C# write HELLO")
     print(f"{resp=}")
+    docs = load_txt_documents("../data")
+    retriever = QdrantRetriever(client, llm_embeddings)
+    retriever.create_collection('sample')
+    retriever.upsert_docs('sample', docs)
 
 if __name__ == '__main__':
     main()
