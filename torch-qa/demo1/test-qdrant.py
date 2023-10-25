@@ -131,14 +131,14 @@ from langchain.retrievers.merger_retriever import MergerRetriever
         embedding_model_name = "../models/BAAI_bge-base-en"
         embedding_model_name = "../models/BAA_Ibge-large-en-v1.5"
         encode_kwargs = { 'normalize_embeddings': True }  # set True to compute cosine similarity
-        self.embedding = HuggingFaceBgeEmbeddings(
+        self.embeddings = HuggingFaceBgeEmbeddings(
             model_name=embedding_model_name,
             model_kwargs={'device': 'cuda'},
             encode_kwargs=encode_kwargs
         )
 
     def get_embeddings(self, text: str) -> list[float]:
-        return self.embedding.embed_query(text)
+        return self.embeddings.embed_query(text)
 
     def get_web_links(self, web_links: list[str]):
         loader = WebBaseLoader(web_links)
@@ -173,7 +173,7 @@ class QdrantRetriever:
 
     def create_collection(self, collection_name: str):
         dim = 1536
-        dim = 768
+        dim = 1024
         self.client.recreate_collection(
             collection_name=collection_name,
             vectors_config=models.VectorParams(
