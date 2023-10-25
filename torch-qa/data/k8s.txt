@@ -39,6 +39,7 @@ See DNS for Services and Pods
 
 Example: use satan.dba.svc.cluster.local instead of leda-satan-01.tw01.ppuff.com
 
-Because leda-api-01.tw01.ppuff.com will be used through HAProxy through out-of-cluster, you will get less latency and failure rate if you use api.svc.cluster.local.
+Because leda-api-01.tw01.ppuff.com will be used through HAProxy through out-of-cluster, 
+you will get less latency and failure rate if you use api.svc.cluster.local.
 Use leda-api-01.tw01.ppuff.com: <your-pod> → HAProxy → NGINX Ingress Controller → api
 Use api.svc.cluster.local: <your-pod> → api

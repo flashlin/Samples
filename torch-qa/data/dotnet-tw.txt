@@ -11,7 +11,7 @@ No such file or directory [/src/SomeCsProjName/SomeCsProjName.csproj]
 ```
 
 Answer:
-你可以到 Dockerfile 把這段
+你可以到 Dockerfile 把這下面這段內容
 ```
 # Replace protoc with the alpine version, must be done between restore and publish
 RUN apk update \
@@ -21,7 +21,7 @@ RUN apk update \
     && ln -sf /usr/bin/grpc_csharp_plugin $path/linux_x64/grpc_csharp_plugin
 ```
 
-改成這段
+修改為下面內容, 然後就可以build 了
 ```
 # Replace protoc with the alpine version, must be done between restore and publish
 RUN apk update --no-cache && apk upgrade --no-cache
@@ -33,5 +33,3 @@ RUN apk fix --force-overwrite alpine-baselayout-data
 RUN apk add --no-cache protoc grpc
 ENV PROTOBUF_PROTOC=/usr/bin/protoc GRPC_PROTOC_PLUGIN=/usr/bin/grpc_csharp_plugin
 ```
-
-然後就可以build 了
