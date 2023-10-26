@@ -334,6 +334,7 @@ def main():
     print(f"{len(resp)=}")
     docs = load_txt_documents("../data")
 
+    print("loading llm")
     model_name = "TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf"
     # model_name = "TheBloke_Mistral-7B-OpenOrca-GGUF/mistral-7b-openorca.Q4_K_M.gguf"
     llm = LlamaCpp(
@@ -345,14 +346,18 @@ def main():
         callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
         verbose=False,  # True
         streaming=True,
+        n_gpu_layers=52,
+        n_threads=4,
     )
-
+    print("llm done")
     vector_db = QdrantVectorStore(llm_embeddings)
     vector_db.create_collection('sample1')
 
     retriever = QdrantRetriever(vector_db, llm, llm_embeddings)
     retriever.add_parent_document('sample1', docs)
+    print(f"add documents done")
     qa = retriever.get_parent_document_retriever_qa('sample1')
+    print("query...")
     result = qa.run('How to create pinia store in vue3?')
     print(f"{result=}")
 
