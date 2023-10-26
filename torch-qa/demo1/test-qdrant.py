@@ -129,7 +129,7 @@ from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.retrievers.merger_retriever import MergerRetriever
         """
         embedding_model_name = "../models/BAAI_bge-base-en"
-        embedding_model_name = "../models/BAA_Ibge-large-en-v1.5"
+        #embedding_model_name = "../models/BAA_Ibge-large-en-v1.5"
         encode_kwargs = { 'normalize_embeddings': True }  # set True to compute cosine similarity
         self.embedding = HuggingFaceBgeEmbeddings(
             model_name=embedding_model_name,
@@ -164,12 +164,13 @@ from langchain.retrievers.merger_retriever import MergerRetriever
 
 
 
-class LlmVectorStore:
+class QdrantVectorStore:
     client: QdrantClient
 
     def __init__(self, embedding):
         self.embedding = embedding
         self.embedding_dim = len(embedding.get_embeddings('This is test text.'))
+        self.open()
 
     def open(self):
         self.client = QdrantClient("http://localhost:6333")
@@ -182,6 +183,17 @@ class LlmVectorStore:
                 size=self.embedding_dim),
             optimizers_config=models.OptimizersConfigDiff(memmap_threshold=20000),
             hnsw_config=models.HnswConfigDiff(on_disk=True, m=16, ef_construct=100)
+        )
+
+    def upsert_dataset(self, collection_name: str, dataset: Dataset):
+        payloads = dataset.select_columns(["label_names", "text"]).to_pandas().to_dict(orient="records")
+        self.client.upsert(
+            collection_name=collection_name,
+            points=models.Batch(
+                ids=dataset["idx"],
+                vectors=dataset["embedding"],
+                payloads=payloads
+            )
         )
 
     def upsert_docs(self, collection_name: str, docs: list[Document]):
@@ -206,11 +218,11 @@ class LlmVectorStore:
             )
         )
 
-    def get_vector_store(self, collection_name):
+    def get_store(self, collection_name):
         return Qdrant(
             client=client,
             collection_name=collection_name,
-            embeddings=self.embedding.embeddings)
+            embeddings=self.embedding.embedding)
 
     def search(self, collection_name, query: str, k=3):
         query_embedding = self.embedding.get_embeddings(query)
@@ -225,92 +237,39 @@ class LlmVectorStore:
 
 
 class QdrantRetriever:
-    def __init__(self, client: QdrantClient, llm, llm_embeddings):
-        self.client = client
+    def __init__(self, vector_db, llm, llm_embeddings):
+        self.vector_db = vector_db
         self.llm = llm
-        self.embeddings = llm_embeddings
-
-    def create_collection(self, collection_name: str):
-        dim = 1536
-        dim = 768
-        self.client.recreate_collection(
-            collection_name=collection_name,
-            vectors_config=models.VectorParams(
-                distance=models.Distance.COSINE,
-                size=dim),
-            optimizers_config=models.OptimizersConfigDiff(memmap_threshold=20000),
-            hnsw_config=models.HnswConfigDiff(on_disk=True, m=16, ef_construct=100)
-        )
-
-    def upsert(self, collection_name: str, dataset: Dataset):
-        payloads = dataset.select_columns(["label_names", "text"]).to_pandas().to_dict(orient="records")
-        self.client.upsert(
-            collection_name=collection_name,
-            points=models.Batch(
-                ids=dataset["idx"],
-                vectors=dataset["embedding"],
-                payloads=payloads
-            )
-        )
-
-    def upsert_docs(self, collection_name: str, docs: list[Document]):
-        ids = []
-        vectors = []
-        payloads = []
-        for idx, doc in enumerate(docs):
-            embeddings = self.embeddings.get_embeddings(doc.page_content)
-            ids.append(idx)
-            vectors.append(embeddings)
-            payload = {
-                'page_content': doc.page_content,
-                'source': doc.metadata['source']
-            }
-            payloads.append(payload)
-        client.upsert(
-            collection_name=collection_name,
-            points=models.Batch(
-                ids=ids,
-                vectors=vectors,
-                payloads=payloads #[Payload(payload=point.payload) for point in docs_store]
-            )
-        )
-        print("upsert done")
+        self.embedding = llm_embeddings
 
     def get_retriever(self, collection_name: str):
         collection = self.client.get_collection(collection_name)
         return collection.as_retriever()
 
-    def search(self, collection_name, query: str, k=3):
-        query_embedding = self.embeddings.get_embeddings(query)
-        search_result = self.client.search(
-            collection_name=collection_name,
-            query_vector=query_embedding,
-            limit=k,
-            append_payload=True,
-        )
-        return search_result
-
-    def get_parent_document_retriever_qa(self, collection_name: str, docs: list[Document]):
-        """
-            answer = qa.run(query)
-        :param collection_name:
-        :param docs:
-        :return:
-        """
-        doc_store = Qdrant(
-            client=client,
-            collection_name=collection_name,
-            embeddings=self.embeddings.embeddings)
+    def get_parent_document_retriever(self, collection_name: str):
+        vector_store = self.vector_db.get_store(collection_name)
         store = InMemoryStore()
         parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
         child_splitter = RecursiveCharacterTextSplitter(chunk_size=400)
         big_chunks_retriever = ParentDocumentRetriever(
-            vectorstore=doc_store,
+            vectorstore=vector_store,
             docstore=store,
             child_splitter=child_splitter,
             parent_splitter=parent_splitter,
         )
+        return big_chunks_retriever
+
+    def add_parent_document(self, collection_name: str, docs: list[Document]):
+        big_chunks_retriever = self.get_parent_document_retriever(collection_name)
         big_chunks_retriever.add_documents(docs)
+
+    def get_parent_document_retriever_qa(self, collection_name: str):
+        """
+            answer = qa.run(query)
+        :param collection_name:
+        :return:
+        """
+        big_chunks_retriever = self.get_parent_document_retriever(collection_name)
         qa = RetrievalQA.from_chain_type(llm=self.llm,
                                          chain_type="stuff",
                                          retriever=big_chunks_retriever)
@@ -388,9 +347,12 @@ def main():
         streaming=True,
     )
 
-    retriever = QdrantRetriever(client, llm, llm_embeddings)
-    retriever.create_collection('sample1')
-    qa = retriever.get_parent_document_retriever_qa('sample1', docs)
+    vector_db = QdrantVectorStore(llm_embeddings)
+    vector_db.create_collection('sample1')
+
+    retriever = QdrantRetriever(vector_db, llm, llm_embeddings)
+    retriever.add_parent_document('sample1', docs)
+    qa = retriever.get_parent_document_retriever_qa('sample1')
     result = qa.run('How to create pinia store in vue3?')
     print(f"{result=}")
 
