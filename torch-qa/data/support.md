@@ -262,3 +262,11 @@ Get "gttps://registery.gitlab.com/v2": proxyconnect tcp: dail tcp 10.1.1.2:328: 
 
 Answer:
 The proxy server is experiencing issues, possibly due to network problems, and cannot pull GitLab-related images. Please contact NOC for assistance
+
+
+---
+Question: How to access Redis Insight? Where can I find the website entrance?
+Answer: Redis Insight has various entrances, much like different doors. These entrances are as follows:
+* Staging Environment -> http://redis-insight-staging.coreop.net
+* UAT Environment -> http://redis-insight-uat.coreop.net
+* Production Environment -> http://redis-insight.coreop.net

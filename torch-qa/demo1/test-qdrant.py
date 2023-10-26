@@ -164,6 +164,65 @@ from langchain.retrievers.merger_retriever import MergerRetriever
 
 
 
+class LlmVectorStore:
+    client: QdrantClient
+
+    def __init__(self, embedding):
+        self.embedding = embedding
+        self.embedding_dim = len(embedding.get_embeddings('This is test text.'))
+
+    def open(self):
+        self.client = QdrantClient("http://localhost:6333")
+
+    def create_collection(self, collection_name: str):
+        self.client.recreate_collection(
+            collection_name=collection_name,
+            vectors_config=models.VectorParams(
+                distance=models.Distance.COSINE,
+                size=self.embedding_dim),
+            optimizers_config=models.OptimizersConfigDiff(memmap_threshold=20000),
+            hnsw_config=models.HnswConfigDiff(on_disk=True, m=16, ef_construct=100)
+        )
+
+    def upsert_docs(self, collection_name: str, docs: list[Document]):
+        ids = []
+        vectors = []
+        payloads = []
+        for idx, doc in enumerate(docs):
+            embeddings = self.embedding.get_embeddings(doc.page_content)
+            ids.append(idx)
+            vectors.append(embeddings)
+            payload = {
+                'page_content': doc.page_content,
+                'source': doc.metadata['source']
+            }
+            payloads.append(payload)
+        client.upsert(
+            collection_name=collection_name,
+            points=models.Batch(
+                ids=ids,
+                vectors=vectors,
+                payloads=payloads #[Payload(payload=point.payload) for point in docs_store]
+            )
+        )
+
+    def get_vector_store(self, collection_name):
+        return Qdrant(
+            client=client,
+            collection_name=collection_name,
+            embeddings=self.embedding.embeddings)
+
+    def search(self, collection_name, query: str, k=3):
+        query_embedding = self.embedding.get_embeddings(query)
+        search_result = self.client.search(
+            collection_name=collection_name,
+            query_vector=query_embedding,
+            limit=k,
+            append_payload=True,
+        )
+        return search_result
+
+
 
 class QdrantRetriever:
     def __init__(self, client: QdrantClient, llm, llm_embeddings):
