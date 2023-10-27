@@ -9,18 +9,19 @@ from langchain.document_loaders import WebBaseLoader
 from langchain.document_loaders import PyPDFLoader, DirectoryLoader, TextLoader
 from langchain.storage import InMemoryStore
 from langchain.vectorstores import Qdrant
-from langchain.chains import RetrievalQA
+from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from torch.utils.data import Dataset
 from langchain.llms import LlamaCpp
-
+from langchain.prompts import PromptTemplate
 from lanchainlit import load_txt_documents
 from langchain.retrievers.merger_retriever import MergerRetriever
 
 client = QdrantClient("http://localhost:6333")
 
 COLLECTION_NAME = "Lyrics"
+
 
 def connection():
     client = QdrantClient("http://localhost:6333")
@@ -66,6 +67,7 @@ def search_from_qdrant(client, vector, k=1):
     )
     return search_result
 
+
 def get_document_store(docs, embeddings):
     return Qdrant.from_documents(
         docs,
@@ -75,6 +77,7 @@ def get_document_store(docs, embeddings):
         force_recreate=True
     )
 
+
 def ask_main():
     embeddings = get_embeddings()
     docs = load_and_split_documents()
@@ -82,12 +85,13 @@ def ask_main():
     llm = get_chat_model()
 
     # 在 main() 加上與修改下面這段
-    QUESTION_PROMPT = PromptTemplate.from_template("""你是生育補貼小幫手，只能回答生育補貼的問題，其他問題一律不回答。並以繁體中文回答問題。""")
+    QUESTION_PROMPT = PromptTemplate.from_template(
+        """你是生育補貼小幫手，只能回答生育補貼的問題，其他問題一律不回答。並以繁體中文回答問題。""")
 
     qa = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=doc_store.as_retriever(),
-        condense_question_prompt=QUESTION_PROMPT, #加上這段, 就不會回答本文以外的問題
+        condense_question_prompt=QUESTION_PROMPT,  # 加上這段, 就不會回答本文以外的問題
         return_source_documents=True,
         verbose=False
     )
@@ -106,8 +110,6 @@ def ask_question_with_context(qa, question, chat_history):
     print("answer:", result["answer"])
     chat_history = [(query, result["answer"])]
     return chat_history
-
-
 
 
 class LlmEmbeddings:
@@ -130,8 +132,8 @@ from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.retrievers.merger_retriever import MergerRetriever
         """
         embedding_model_name = "../models/BAAI_bge-base-en"
-        #embedding_model_name = "../models/BAA_Ibge-large-en-v1.5"
-        encode_kwargs = { 'normalize_embeddings': True }  # set True to compute cosine similarity
+        # embedding_model_name = "../models/BAA_Ibge-large-en-v1.5"
+        encode_kwargs = {'normalize_embeddings': True}  # set True to compute cosine similarity
         self.embedding = HuggingFaceBgeEmbeddings(
             model_name=embedding_model_name,
             model_kwargs={'device': 'cuda'},
@@ -161,8 +163,6 @@ from langchain.retrievers.merger_retriever import MergerRetriever
         reordered_docs = reordering.transform_documents(docs)
         # Confirm that the 4 relevant documents are at beginning and end.
         reordered_docs
-
-
 
 
 class QdrantVectorStore:
@@ -219,7 +219,7 @@ class QdrantVectorStore:
             points=models.Batch(
                 ids=ids,
                 vectors=vectors,
-                payloads=payloads #[Payload(payload=point.payload) for point in docs_store]
+                payloads=payloads  # [Payload(payload=point.payload) for point in docs_store]
             )
         )
 
@@ -238,7 +238,6 @@ class QdrantVectorStore:
             append_payload=True,
         )
         return search_result
-
 
 
 class QdrantRetriever:
@@ -264,6 +263,14 @@ class QdrantRetriever:
         )
         return big_chunks_retriever
 
+    def get_lot_retriever(self, collection_names: list[str]):
+        retrievers = []
+        for collection_name in collection_names:
+            retriever = self.get_parent_document_retriever(collection_name)
+            retrievers.append(retriever)
+        lot_retriever = MergerRetriever(retrievers=retrievers)
+        return lot_retriever
+
     def add_parent_document(self, collection_name: str, docs: list[Document]):
         big_chunks_retriever = self.get_parent_document_retriever(collection_name)
         big_chunks_retriever.add_documents(docs)
@@ -281,15 +288,26 @@ class QdrantRetriever:
         return qa
 
     def merge_parent_document_retriever_qa(self, collection_names: list[str]):
-        retrievers = []
-        for collection_name in collection_names:
-            retriever = self.get_parent_document_retriever(collection_name)
-            retrievers.append(retriever)
-        lot_retriever = MergerRetriever(retrievers=retrievers)
+        lot_retriever = self.get_lot_retriever(collection_names)
+
         qa = RetrievalQA.from_chain_type(llm=self.llm,
                                          chain_type="stuff",
-                                         retriever=lot_retriever)
+                                         retriever=lot_retriever,
+                                         chain_type_kwargs=self.create_prompt_kwargs())
         return qa
+
+    def create_prompt_kwargs(self, prompt_template: str = None):
+        if prompt_template is None:
+            prompt_template = """Use the following pieces of context to answer the question at the end. 
+            If you don't know the answer, just say that you don't know, don't try to make up an answer.
+            {context}
+            Question: {question}
+            Answer in English:"""
+        prompt = PromptTemplate(
+            template=prompt_template, input_variables=["context", "question"]
+        )
+        chain_type_kwargs = {"prompt": prompt}
+        return chain_type_kwargs
 
 
 def main1():
@@ -314,7 +332,6 @@ def main1():
     embedding_array = [get_embedding(text["lyric"], EMBEDDING_MODEL_NAME)
                        for text in data_objs]
 
-
     upsert_vector(qclient, embedding_array, data_objs)
 
     query_text = "工程師寫城市"
@@ -322,18 +339,17 @@ def main1():
     results = search_from_qdrant(qclient, query_embedding, k=1)
     print(f"尋找 {query_text}:", results)
 
-    #---------
+    # ---------
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY,
-                              deployment=OPENAI_EMBEDDING_DEPLOYMENT_NAME,
-                              openai_api_type="azure",
-                              chunk_size=1)
+                                  deployment=OPENAI_EMBEDDING_DEPLOYMENT_NAME,
+                                  openai_api_type="azure",
+                                  chunk_size=1)
 
     text_array = ["我會披星戴月的想你，我會奮不顧身的前進，遠方煙火越來越唏噓，凝視前方身後的距離",
-                "而我，在這座城市遺失了你，順便遺失了自己，以為荒唐到底會有捷徑。而我，在這座城市失去了你，輸給慾望高漲的自己，不是你，過分的感情"]
+                  "而我，在這座城市遺失了你，順便遺失了自己，以為荒唐到底會有捷徑。而我，在這座城市失去了你，輸給慾望高漲的自己，不是你，過分的感情"]
 
     doc_store = Qdrant.from_texts(
         text_array, embeddings, url="http://localhost:6333", collection_name="Lyrics_Langchain")
-
 
     question = "工程師寫程式"
     docs = doc_store.similarity_search_with_score(question)
@@ -344,10 +360,11 @@ def main1():
 
 
 from langchain.document_loaders import UnstructuredMarkdownLoader
+
+
 def load_markdown_documents(data_path: str):
     md_loader = DirectoryLoader(data_path, glob='*.md', loader_cls=UnstructuredMarkdownLoader)
     return md_loader.load()
-
 
 
 def main():
@@ -380,7 +397,6 @@ def main():
     all_collections = vector_db.get_all_collections()
     print(f"{all_collections=}")
 
-
     vector_db.create_collection('sample1')
     # vector_db.create_collection('sample2')
     # retriever.add_parent_document('sample1', docs1)
@@ -388,10 +404,39 @@ def main():
     # retriever.add_parent_document('sample2', docs2)
     print(f"add documents done")
 
-    #qa = retriever.get_parent_document_retriever_qa('sample1')
+    query = "How to convert a B2B2C domain to a B2C domain?"
+
+    # result1 = vector_db.search('sample1', query)
+    # print("===")
+    # print(f"{result1=}")
+
+    QUESTION_PROMPT = PromptTemplate.from_template(
+        """You are QA Bot. If you don't know the answer, just say that you don't know, don't try to make up an answer.""")
+    qa1 = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vector_db.get_store("sample1").as_retriever(),
+        condense_question_prompt=QUESTION_PROMPT,
+        return_source_documents=True,
+        verbose=False
+    )
+    print("------")
+    chat_history = []
+    ask_question_with_context(qa1, query, chat_history)
+
+    t = retriever.get_lot_retriever(['sample1'])
+    docs = t.get_relevant_documents(query)
+    print(f"-------------------------------")
+    print(f"lot {docs=}")
+    print(f"-------------------------------")
+
+
+    # qa = retriever.get_parent_document_retriever_qa('sample1')
     qa = retriever.merge_parent_document_retriever_qa(['sample1'])
     print("query...")
-    result = qa.run('How to convert a B2B2C domain to a B2C domain?')
+    result = qa.run(query)
+    print("")
+    print("")
+    print("---------------")
     print(f"{result=}")
 
     # retriever.create_collection('sample')
@@ -402,9 +447,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
