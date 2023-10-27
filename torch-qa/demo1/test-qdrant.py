@@ -132,14 +132,14 @@ from langchain.retrievers.merger_retriever import MergerRetriever
         embedding_model_name = "../models/BAAI_bge-base-en"
         #embedding_model_name = "../models/BAA_Ibge-large-en-v1.5"
         encode_kwargs = { 'normalize_embeddings': True }  # set True to compute cosine similarity
-        self.embeddings = HuggingFaceBgeEmbeddings(
+        self.embedding = HuggingFaceBgeEmbeddings(
             model_name=embedding_model_name,
             model_kwargs={'device': 'cuda'},
             encode_kwargs=encode_kwargs
         )
 
     def get_embeddings(self, text: str) -> list[float]:
-        return self.embeddings.embed_query(text)
+        return self.embedding.embed_query(text)
 
     def get_web_links(self, web_links: list[str]):
         loader = WebBaseLoader(web_links)
@@ -391,7 +391,7 @@ def main():
     #qa = retriever.get_parent_document_retriever_qa('sample1')
     qa = retriever.merge_parent_document_retriever_qa(['sample1'])
     print("query...")
-    result = qa.run('How to create pinia store in vue3?')
+    result = qa.run('How to convert a B2B2C domain to a B2C domain?')
     print(f"{result=}")
 
     # retriever.create_collection('sample')
