@@ -186,6 +186,10 @@ class QdrantVectorStore:
             hnsw_config=models.HnswConfigDiff(on_disk=True, m=16, ef_construct=100)
         )
 
+    def get_all_collections(self):
+        collections = self.client.get_collections()
+        return collections
+
     def upsert_dataset(self, collection_name: str, dataset: Dataset):
         payloads = dataset.select_columns(["label_names", "text"]).to_pandas().to_dict(orient="records")
         self.client.upsert(
@@ -339,12 +343,19 @@ def main1():
     print(f"\nScore: {score}")
 
 
+from langchain.document_loaders import UnstructuredMarkdownLoader
+def load_markdown_documents(data_path: str):
+    md_loader = DirectoryLoader(data_path, glob='*.md', loader_cls=UnstructuredMarkdownLoader)
+    return md_loader.load()
+
+
+
 def main():
     llm_embeddings = LlmEmbeddings()
     resp = llm_embeddings.get_embeddings("How to use C# write HELLO")
     print(f"{len(resp)=}")
-    docs = load_txt_documents("../data")
-    docs2 = load_txt_documents("../data2")
+    docs1 = load_txt_documents("../data")
+    docs2 = load_markdown_documents("../data")
 
     print("loading llm")
     model_name = "TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf"
@@ -364,15 +375,21 @@ def main():
     print("llm done")
     vector_db = QdrantVectorStore(llm_embeddings)
 
-    vector_db.create_collection('sample1')
-    vector_db.create_collection('sample2')
     retriever = QdrantRetriever(vector_db, llm, llm_embeddings)
-    retriever.add_parent_document('sample1', docs)
-    retriever.add_parent_document('sample2', docs2)
+
+    all_collections = vector_db.get_all_collections()
+    print(f"{all_collections=}")
+
+
+    vector_db.create_collection('sample1')
+    # vector_db.create_collection('sample2')
+    retriever.add_parent_document('sample1', docs1)
+    retriever.add_parent_document('sample1', docs2)
+    # retriever.add_parent_document('sample2', docs2)
     print(f"add documents done")
-    
+
     #qa = retriever.get_parent_document_retriever_qa('sample1')
-    qa = retriever.merge_parent_document_retriever_qa(['sample1', 'sample2'])
+    qa = retriever.merge_parent_document_retriever_qa(['sample1'])
     print("query...")
     result = qa.run('How to create pinia store in vue3?')
     print(f"{result=}")
