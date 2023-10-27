@@ -1,4 +1,4 @@
-### How to add a new B2B2C domain ?###
+### How to add a new B2B2C domain ?
 Assuming that NOC is ready to provide the following domain for us to add: abc.net
 
 Here are the steps to add a new b2b2c domain:
@@ -43,7 +43,7 @@ kubectl rollout restart deployment pollux-bsi -n airgile
     - After binding the domain to an agent, check if the register page shows B2B2C register and the correct agent number.
     - After binding the domain to an agent, test typing the URL www.numbersite.com on a mobile device to see if it redirects to the casual site.
 
-### How to convert a B2B2C domain to a B2C domain:
+### How to convert a B2B2C domain to a B2C domain
 1. Go to the http://forseti-api-a.sbotopex.com website.
 2. Select the "Demo CRUD" button.
 3. As an example, search for the B2B2C domain "67146750.com" and disable it while providing the reason for the change.
