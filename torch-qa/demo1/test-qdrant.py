@@ -16,6 +16,7 @@ from torch.utils.data import Dataset
 from langchain.llms import LlamaCpp
 
 from lanchainlit import load_txt_documents
+from langchain.retrievers.merger_retriever import MergerRetriever
 
 client = QdrantClient("http://localhost:6333")
 
@@ -275,6 +276,16 @@ class QdrantRetriever:
                                          retriever=big_chunks_retriever)
         return qa
 
+    def merge_parent_document_retriever_qa(self, collection_names: list[str]):
+        retrievers = []
+        for collection_name in collection_names:
+            retriever = self.get_parent_document_retriever(collection_name)
+            retrievers.append(retriever)
+        lot_retriever = MergerRetriever(retrievers=retrievers)
+        qa = RetrievalQA.from_chain_type(llm=self.llm,
+                                         chain_type="stuff",
+                                         retriever=lot_retriever)
+        return qa
 
 
 def main1():
@@ -333,6 +344,7 @@ def main():
     resp = llm_embeddings.get_embeddings("How to use C# write HELLO")
     print(f"{len(resp)=}")
     docs = load_txt_documents("../data")
+    docs2 = load_txt_documents("../data2")
 
     print("loading llm")
     model_name = "TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf"
@@ -351,12 +363,16 @@ def main():
     )
     print("llm done")
     vector_db = QdrantVectorStore(llm_embeddings)
-    vector_db.create_collection('sample1')
 
+    vector_db.create_collection('sample1')
+    vector_db.create_collection('sample2')
     retriever = QdrantRetriever(vector_db, llm, llm_embeddings)
     retriever.add_parent_document('sample1', docs)
+    retriever.add_parent_document('sample2', docs2)
     print(f"add documents done")
-    qa = retriever.get_parent_document_retriever_qa('sample1')
+    
+    #qa = retriever.get_parent_document_retriever_qa('sample1')
+    qa = retriever.merge_parent_document_retriever_qa(['sample1', 'sample2'])
     print("query...")
     result = qa.run('How to create pinia store in vue3?')
     print(f"{result=}")
