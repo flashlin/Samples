@@ -383,7 +383,7 @@ def main():
 
     vector_db.create_collection('sample1')
     # vector_db.create_collection('sample2')
-    retriever.add_parent_document('sample1', docs1)
+    # retriever.add_parent_document('sample1', docs1)
     retriever.add_parent_document('sample1', docs2)
     # retriever.add_parent_document('sample2', docs2)
     print(f"add documents done")

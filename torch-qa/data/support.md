@@ -1,4 +1,5 @@
-### How to add a new B2B2C domain ?
+Question: How to add a new B2B2C domain ?
+Answer:
 Assuming that NOC is ready to provide the following domain for us to add: abc.net
 
 Here are the steps to add a new b2b2c domain:
@@ -43,7 +44,9 @@ kubectl rollout restart deployment pollux-bsi -n airgile
     - After binding the domain to an agent, check if the register page shows B2B2C register and the correct agent number.
     - After binding the domain to an agent, test typing the URL www.numbersite.com on a mobile device to see if it redirects to the casual site.
 
-### How to convert a B2B2C domain to a B2C domain
+---
+Question: How to convert a B2B2C domain to a B2C domain ?
+Answer:
 1. Go to the http://forseti-api-a.sbotopex.com website.
 2. Select the "Demo CRUD" button.
 3. As an example, search for the B2B2C domain "67146750.com" and disable it while providing the reason for the change.
@@ -57,8 +60,9 @@ In practice,
 SBOBET should go to the classic site.
 SBOTOP should redirect to the casual site (play.67146750.com).
 
-
-### How to process VND B2B2C Manual Rebate for Insurance and Lucky?###
+---
+Question: How to process VND B2B2C Manual Rebate for Insurance and Lucky?
+Answer:
 Here are the steps involved:
 1. Prepare a CSV or Excel file from SMA containing the username and amount to credit.
 2. Check if the file format is correct.
@@ -71,7 +75,9 @@ The file format should be like the following.
 3.Please ask PO or DM to upload the file on Leo -> WMA ->"B2B2C Promo"
 Done.
 
-### How to check if a player has a deposit bonus?###
+---
+Question: How to check if a player has a deposit bonus?
+Answer:
 You can use the following tsql script to query.
 ```
 select top 100  [UserName],
