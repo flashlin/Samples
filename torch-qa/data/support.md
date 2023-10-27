@@ -247,7 +247,7 @@ https://ironman.atlassian.net/wiki/spaces/ITR/pages/2833187369/Runner+spec
 
 
 ---
-Question:
+Question: When you encounter the following error message on a CI pipeline, how do you resolve it?
 ```
 Running ih giab-runner '5.3
 Preparng he "kubernetes" execuor
