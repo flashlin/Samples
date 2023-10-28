@@ -16,6 +16,7 @@ from torch import bfloat16
 from transformers import AutoModel, AutoTokenizer, StoppingCriteria, StoppingCriteriaList
 from typing import Dict, Union, Optional, Any
 from typing import List
+from langchain.document_loaders import UnstructuredMarkdownLoader
 
 
 class ChatGLMService(LLM):
@@ -120,10 +121,14 @@ class ChatGLMService(LLM):
             print(f"loading model successfully, you should use checkpoint_path={multi_gpu_model_cache_dir} next time")
 
 
-
 def load_txt_documents(data_path: str):
     txt_loader = DirectoryLoader(data_path, glob='*.txt', loader_cls=TextLoader)
     return txt_loader.load()
+
+
+def load_markdown_documents(data_path: str):
+    md_loader = DirectoryLoader(data_path, glob='*.md', loader_cls=UnstructuredMarkdownLoader)
+    return md_loader.load()
 
 
 def load_documents(data_path: str):
