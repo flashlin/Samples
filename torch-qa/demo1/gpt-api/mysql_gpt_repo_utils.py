@@ -106,7 +106,15 @@ class MysqlGptRepo(GptRepo):
 
         last = SimpleNamespace(**last_messages[0])
         if last.RoleName != 'assistant' and last.RoleName != 'system':
-            raise Exception(f"ConversationsId {req.conversation_id} The replay message unexpectedly interrupts.")
+            self.add_conversation_detail(
+                AddConversationMessageReq(
+                    ConversationId=req.conversation_id,
+                    RoleName='assistant',
+                    Message='data: [BROKEN]',
+                    CreateOn=datetime.now(timezone.utc)
+                )
+            )
+            #raise Exception(f"ConversationsId {req.conversation_id} The replay message unexpectedly interrupts.")
 
         self.add_conversation_detail(
             AddConversationMessageReq(
@@ -119,7 +127,7 @@ class MysqlGptRepo(GptRepo):
 
     def get_conversation_message_list(self, conversation_id: int) -> [ConversationMessageEntity]:
         results = self.db.query("SELECT Id, ConversationsId, RoleName, Message, CreateOn FROM ConversationsDetail "
-                                "WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 100", (conversation_id,))
+                                "WHERE ConversationsId=%s ORDER BY Id DESC LIMIT 10", (conversation_id,))
         ordered_result = results[::-1]
 
         result = self.db.query("SELECT Id, ConversationsId, RoleName, Message, CreateOn FROM ConversationsDetail "
