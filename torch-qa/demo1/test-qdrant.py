@@ -24,7 +24,7 @@ class RetrievalHelper:
 
     def get_retriever(self, collection_name: str):
         store = self.vector_db.get_store(collection_name)
-        return store.as_retriever()
+        return store.as_retriever(search_kwargs={"k": 5})
 
     def get_parent_document_retriever(self, collection_name: str):
         vector_store = self.vector_db.get_store(collection_name)
@@ -38,14 +38,6 @@ class RetrievalHelper:
             parent_splitter=parent_splitter,
         )
         return big_chunks_retriever
-
-    def get_lot_retriever(self, collection_names: list[str]):
-        retrievers = []
-        for collection_name in collection_names:
-            retriever = self.get_parent_document_retriever(collection_name)
-            retrievers.append(retriever)
-        lot_retriever = MergerRetriever(retrievers=retrievers)
-        return lot_retriever
 
     def add_parent_document(self, collection_name: str, docs: list[Document]):
         big_chunks_retriever = self.get_parent_document_retriever(collection_name)
@@ -63,14 +55,14 @@ class RetrievalHelper:
                                          retriever=big_chunks_retriever)
         return qa
 
-    def merge_parent_document_retriever_qa(self, collection_names: list[str]):
-        lot_retriever = self.get_lot_retriever(collection_names)
-
-        qa = RetrievalQA.from_chain_type(llm=self.llm,
-                                         chain_type="stuff",
-                                         retriever=lot_retriever,
-                                         chain_type_kwargs=self.create_prompt_kwargs())
-        return qa
+    # def merge_parent_document_retriever_qa(self, collection_names: list[str]):
+    #     lot_retriever = self.get_lot_retriever(collection_names)
+    #
+    #     qa = RetrievalQA.from_chain_type(llm=self.llm,
+    #                                      chain_type="stuff",
+    #                                      retriever=lot_retriever,
+    #                                      chain_type_kwargs=self.create_prompt_kwargs())
+    #     return qa
 
     def create_prompt_kwargs(self, prompt_template: str = None):
         if prompt_template is None:
@@ -104,24 +96,27 @@ def load_llm_model():
     return llm
 
 
-class LlmQaChat:
-    def __init__(self, llm, vector_db):
-        self.llm = llm
-        self.vector_db = vector_db
-
-    def create_llm_qa(self, retriever):
+class ConversationalRetrievalChainAgent:
+    def __init__(self, llm, retriever):
         question_prompt = PromptTemplate.from_template(
             """You are QA Bot. If you don't know the answer, just say that you don't know, don't try to make up an answer.""")
-        llm_qa = ConversationalRetrievalChain.from_llm(
-            llm=self.llm,
+        self.llm_qa = ConversationalRetrievalChain.from_llm(
+            llm=llm,
             retriever=retriever,
             condense_question_prompt=question_prompt,
             return_source_documents=True,
             verbose=False
         )
-        return llm_qa
 
-    def create_retrieval_qa(self, retriever):
+    def ask(self, question: str):
+        history = []
+        result = self.llm_qa({"question": question, "chat_history": history})
+        history = [(question, result["answer"])]
+        return result["answer"]
+
+
+class RetrievalQAAgent:
+    def __init__(self, llm, retriever):
         chain_type_kwargs = {
             "verbose": False,
             "prompt": self.create_prompt(),
@@ -130,12 +125,15 @@ class LlmQaChat:
                 input_key="question"
             )
         }
-        llm_qa = RetrievalQA.from_chain_type(llm=self.llm,
-                                             chain_type="stuff",
-                                             verbose=False,
-                                             retriever=retriever,
-                                             chain_type_kwargs=chain_type_kwargs)
-        return llm_qa
+        self.llm_qa = RetrievalQA.from_chain_type(llm=llm,
+                                                  chain_type="stuff",
+                                                  verbose=False,
+                                                  retriever=retriever,
+                                                  chain_type_kwargs=chain_type_kwargs)
+
+    def ask(self, question: str):
+        result = self.llm_qa({"query": question})
+        return result["answer"]
 
     def create_prompt(self, prompt_template: str = None):
         if prompt_template is None:
@@ -149,17 +147,21 @@ class LlmQaChat:
             template=prompt_template, input_variables=["context", "question"]
         )
 
+
+class LlmQaChat:
+    def __init__(self, llm, vector_db):
+        self.llm = llm
+        self.vector_db = vector_db
+
     def ask(self, question: str):
-        llm_qa = self.create_llm_qa(self.vector_db.get_store("sample1").as_retriever())
-        history = []
-        result = llm_qa({"question": question, "chat_history": history})
-        history = [(question, result["answer"])]
-        return result["answer"]
+        retriever = self.vector_db.get_store("sample1").as_retriever()
+        llm_qa = ConversationalRetrievalChainAgent(self.llm, retriever)
+        return llm_qa.ask(question)
 
     def ask_retriever(self, retriever, question: str):
-        llm_qa = self.create_retrieval_qa(retriever)
-        result = llm_qa({"query": question})
-        return result['result']
+        llm_qa = ConversationalRetrievalChainAgent(self.llm, retriever)
+        # llm_qa = RetrievalQAAgent(self.llm, retriever)
+        return llm_qa.ask(question)
 
 
 def main():
@@ -193,18 +195,15 @@ def main():
     # print(f"{result1=}")
 
     # worked
-    # answer, chat_history = llm_qa_chat.ask(query)
+    # answer = llm_qa_chat.ask(query)
+    # print("===============================================")
     # print(answer)
-    print("------")
 
-    t = retriever.get_lot_retriever(['sample1'])
-    # answer, chat_history = llm_qa_chat.ask_retriever(query, t)
-    # print(f"lot retriever {answer=}")
-    print(f"-------------------------------")
+    t = retriever.get_retriever('sample1')
+    # t = retriever.get_parent_document_retriever('sample1')
     answer = llm_qa_chat.ask_retriever(t, query)
-    print("============================")
+    print("===========================================")
     print(f"{answer=}")
-
 
     # qa = retriever.get_parent_document_retriever_qa('sample1')
     # qa = retriever.merge_parent_document_retriever_qa(['sample1'])
