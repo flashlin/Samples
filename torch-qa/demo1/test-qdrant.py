@@ -16,7 +16,7 @@ from lanchainlit import load_txt_documents, load_markdown_documents
 from langchain.retrievers.merger_retriever import MergerRetriever
 
 
-class RetrieveHelper:
+class RetrievalHelper:
     def __init__(self, vector_db, llm, llm_embeddings):
         self.vector_db = vector_db
         self.llm = llm
@@ -155,7 +155,7 @@ class LlmQaChat:
     def ask_retriever(self, retriever, question: str):
         llm_qa = self.create_retrieval_qa(retriever)
         result = llm_qa({"query": question})
-        return result
+        return result['result']
 
     def ask_question_with_context(self, llm_qa, question, chat_history):
         result = llm_qa({"question": question, "chat_history": chat_history})
@@ -176,7 +176,7 @@ def main():
     print("llm done")
     vector_db = QdrantVectorStore(llm_embeddings)
 
-    retriever = RetrieveHelper(vector_db, llm, llm_embeddings)
+    retriever = RetrievalHelper(vector_db, llm, llm_embeddings)
 
     # all_collections = vector_db.get_all_collections()
     # print(f"{all_collections=}")
@@ -203,7 +203,7 @@ def main():
     # answer, chat_history = llm_qa_chat.ask_retriever(query, t)
     # print(f"lot retriever {answer=}")
     print(f"-------------------------------")
-    answer, history = llm_qa_chat.ask_retriever(t, query)
+    answer = llm_qa_chat.ask_retriever(t, query)
     print("============================")
     print(f"{answer=}")
 
