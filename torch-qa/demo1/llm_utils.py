@@ -48,7 +48,7 @@ class RetrievalQAAgent:
     db.get_store() + RetrievalQAAgent
     不知道為什麼找不到 document
     """
-    def __init__(self, llm, retriever):
+    def __init__(self, llm:  BaseLanguageModel, retriever: BaseRetriever):
         chain_type_kwargs = {
             "verbose": False,
             "prompt": self.create_prompt(),
@@ -81,10 +81,10 @@ class RetrievalQAAgent:
 
 
 class Retrieval:
-    def __init__(self, vector_db, llm, llm_embeddings):
+    def __init__(self, vector_db, llm, llm_embedding: LlmEmbedding):
         self.vector_db = vector_db
         self.llm = llm
-        self.llm_embedding = llm_embeddings
+        self.llm_embedding = llm_embedding
 
     def get_retriever(self, collection_name: str):
         store = self.vector_db.get_store(collection_name)

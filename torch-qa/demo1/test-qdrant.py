@@ -32,7 +32,7 @@ class LlmQaChat:
         self.llm = llm
         self.vector_db = vector_db
         if retrieval is None:
-            retrieval = Retrieval(vector_db, llm, llm_embeddings=vector_db.llm_embedding)
+            retrieval = Retrieval(vector_db, llm, llm_embedding=vector_db.llm_embedding)
         self.retrieval = retrieval
 
     def ask(self, question: str):
