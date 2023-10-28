@@ -2,11 +2,14 @@ from langchain import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain, RetrievalQA
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.memory import ConversationBufferMemory
-from langchain.schema import BaseRetriever
+from langchain.retrievers import ParentDocumentRetriever
+from langchain.schema import BaseRetriever, Document
 from langchain.schema.language_model import BaseLanguageModel
+from langchain.storage import InMemoryStore
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 
-class LlmEmbeddings:
+class LlmEmbedding:
     def __init__(self):
         # model_name = "BAAI/bge-large-en"
         # encode_kwargs = {'normalize_embeddings': False}
@@ -92,3 +95,31 @@ class RetrievalQAAgent:
         return PromptTemplate(
             template=prompt_template, input_variables=["context", "question"]
         )
+
+
+class Retrieval:
+    def __init__(self, vector_db, llm, llm_embeddings):
+        self.vector_db = vector_db
+        self.llm = llm
+        self.llm_embedding = llm_embeddings
+
+    def get_retriever(self, collection_name: str):
+        store = self.vector_db.get_store(collection_name)
+        return store.as_retriever(search_kwargs={"k": 5})
+
+    def get_parent_document_retriever(self, collection_name: str):
+        vector_store = self.vector_db.get_store(collection_name)
+        store = InMemoryStore()
+        parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
+        child_splitter = RecursiveCharacterTextSplitter(chunk_size=400)
+        big_chunks_retriever = ParentDocumentRetriever(
+            vectorstore=vector_store,
+            docstore=store,
+            child_splitter=child_splitter,
+            parent_splitter=parent_splitter,
+        )
+        return big_chunks_retriever
+
+    def add_parent_document(self, collection_name: str, docs: list[Document]):
+        big_chunks_retriever = self.get_parent_document_retriever(collection_name)
+        big_chunks_retriever.add_documents(docs)

@@ -1,79 +1,12 @@
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.retrievers import ParentDocumentRetriever
-from langchain.schema import Document
-from langchain.storage import InMemoryStore
-from langchain.chains import RetrievalQA
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import LlamaCpp
-from langchain.prompts import PromptTemplate
 
+from llm_utils import Retrieval
 from llm_utils import ConversationalRetrievalChainAgent
-from llm_utils import LlmEmbeddings
+from llm_utils import LlmEmbedding
 from qdrant_utils import QdrantVectorStore
 from lanchainlit import load_txt_documents, load_markdown_documents
-
-
-class RetrievalHelper:
-    def __init__(self, vector_db, llm, llm_embeddings):
-        self.vector_db = vector_db
-        self.llm = llm
-        self.llm_embedding = llm_embeddings
-
-    def get_retriever(self, collection_name: str):
-        store = self.vector_db.get_store(collection_name)
-        return store.as_retriever(search_kwargs={"k": 5})
-
-    def get_parent_document_retriever(self, collection_name: str):
-        vector_store = self.vector_db.get_store(collection_name)
-        store = InMemoryStore()
-        parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
-        child_splitter = RecursiveCharacterTextSplitter(chunk_size=400)
-        big_chunks_retriever = ParentDocumentRetriever(
-            vectorstore=vector_store,
-            docstore=store,
-            child_splitter=child_splitter,
-            parent_splitter=parent_splitter,
-        )
-        return big_chunks_retriever
-
-    def add_parent_document(self, collection_name: str, docs: list[Document]):
-        big_chunks_retriever = self.get_parent_document_retriever(collection_name)
-        big_chunks_retriever.add_documents(docs)
-
-    def get_parent_document_retriever_qa(self, collection_name: str):
-        """
-            answer = qa.run(query)
-        :param collection_name:
-        :return:
-        """
-        big_chunks_retriever = self.get_parent_document_retriever(collection_name)
-        qa = RetrievalQA.from_chain_type(llm=self.llm,
-                                         chain_type="stuff",
-                                         retriever=big_chunks_retriever)
-        return qa
-
-    # def merge_parent_document_retriever_qa(self, collection_names: list[str]):
-    #     lot_retriever = self.get_lot_retriever(collection_names)
-    #
-    #     qa = RetrievalQA.from_chain_type(llm=self.llm,
-    #                                      chain_type="stuff",
-    #                                      retriever=lot_retriever,
-    #                                      chain_type_kwargs=self.create_prompt_kwargs())
-    #     return qa
-
-    def create_prompt_kwargs(self, prompt_template: str = None):
-        if prompt_template is None:
-            prompt_template = """Use the following pieces of context to answer the question at the end. 
-            If you don't know the answer, just say that you don't know, don't try to make up an answer.
-            {context}
-            Question: {question}
-            Answer in English:"""
-        prompt = PromptTemplate(
-            template=prompt_template, input_variables=["context", "question"]
-        )
-        chain_type_kwargs = {"prompt": prompt}
-        return chain_type_kwargs
 
 
 def load_llm_model():
@@ -95,12 +28,15 @@ def load_llm_model():
 
 
 class LlmQaChat:
-    def __init__(self, llm, vector_db):
+    def __init__(self, llm, vector_db, retrieval: Retrieval = None):
         self.llm = llm
         self.vector_db = vector_db
+        if retrieval is None:
+            retrieval = Retrieval(vector_db, llm, llm_embeddings=vector_db.llm_embedding)
+        self.retrieval = retrieval
 
     def ask(self, question: str):
-        retriever = self.vector_db.get_store("sample1").as_retriever()
+        retriever = self.retrieval.get_retriever("sample1")
         llm_qa = ConversationalRetrievalChainAgent(self.llm, retriever)
         return llm_qa.ask(question)
 
@@ -111,18 +47,16 @@ class LlmQaChat:
 
 
 def main():
-    llm_embeddings = LlmEmbeddings()
-    resp = llm_embeddings.get_embeddings("How to use C# write HELLO")
-    print(f"{len(resp)=}")
+    llm_embedding = LlmEmbedding()
     docs1 = load_txt_documents("../data")
     docs2 = load_markdown_documents("../data")
 
     print("loading llm")
     llm = load_llm_model()
     print("llm done")
-    vector_db = QdrantVectorStore(llm_embeddings)
 
-    retriever = RetrievalHelper(vector_db, llm, llm_embeddings)
+    vector_db = QdrantVectorStore(llm_embedding)
+    retriever = Retrieval(vector_db, llm, llm_embedding)
 
     # all_collections = vector_db.get_all_collections()
     # print(f"{all_collections=}")
