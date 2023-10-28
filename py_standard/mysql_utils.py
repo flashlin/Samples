@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timezone
 import pymysql
 from repo_types import DbConfig
@@ -10,6 +11,11 @@ class MysqlDbContext:
     def __init__(self, config: DbConfig):
         db_settings = {
             "charset": "utf8",
+            "host": '127.0.0.1',
+            "port": 3306,
+            "db": 'gpt_db',
+            "user": os.getenv("MYSQL_USER"),
+            "password": os.getenv("MYSQL_PASSWORD")
         }
         db_settings.update(vars(config))
         self.conn = pymysql.connect(**db_settings)
@@ -79,5 +85,3 @@ def test():
     print(dump(results))
     results = db.query("select * from Customers where loginName=%s", "flash1")
     print(dump(results))
-
-
