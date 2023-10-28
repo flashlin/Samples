@@ -140,28 +140,26 @@ class LlmQaChat:
     def create_prompt(self, prompt_template: str = None):
         if prompt_template is None:
             prompt_template = """Use the following pieces of context to answer the question at the end. 
-            If you don't know the answer, just say that you don't know, don't try to make up an answer.
+            You are QA Bot. If you don't know the answer, just say that you don't know, don't try to make up an answer.
             {context}
             Question: {question}
-            Answer in English:"""
+            Only return the helpful answer below and nothing else.
+            Helpful answer:"""
         return PromptTemplate(
             template=prompt_template, input_variables=["context", "question"]
         )
 
     def ask(self, question: str):
         llm_qa = self.create_llm_qa(self.vector_db.get_store("sample1").as_retriever())
-        return self.ask_question_with_context(llm_qa, question, [])
+        history = []
+        result = llm_qa({"question": question, "chat_history": history})
+        history = [(question, result["answer"])]
+        return result["answer"]
 
     def ask_retriever(self, retriever, question: str):
         llm_qa = self.create_retrieval_qa(retriever)
         result = llm_qa({"query": question})
         return result['result']
-
-    def ask_question_with_context(self, llm_qa, question, chat_history):
-        result = llm_qa({"question": question, "chat_history": chat_history})
-        # print("answer:", result["answer"])
-        chat_history = [(question, result["answer"])]
-        return result["answer"], chat_history
 
 
 def main():
