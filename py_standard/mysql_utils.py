@@ -3,6 +3,7 @@ import pymysql
 from repo_types import DbConfig
 from logging_utils import logger
 from obj_utils import dump
+from types import SimpleNamespace
 
 
 class MysqlDbContext:
@@ -52,6 +53,14 @@ class MysqlDbContext:
             # logger.info(f"{results=}")
             conn.commit()
         return results
+
+    def query_objects(self, sql: str, args: tuple = None) -> list[object]:
+        result = self.query(sql, args)
+        object_list = []
+        for row in result:
+            obj = SimpleNamespace(**row)
+            object_list.append(obj)
+        return object_list
 
 
 def to_utc_time_str(time: datetime = None) -> str:
