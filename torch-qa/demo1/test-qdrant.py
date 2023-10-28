@@ -1,3 +1,4 @@
+from langchain.memory import ConversationBufferMemory
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.retrievers import ParentDocumentRetriever
 from langchain.schema import Document
@@ -15,7 +16,7 @@ from lanchainlit import load_txt_documents, load_markdown_documents
 from langchain.retrievers.merger_retriever import MergerRetriever
 
 
-class QdrantRetriever:
+class RetrieveHelper:
     def __init__(self, vector_db, llm, llm_embeddings):
         self.vector_db = vector_db
         self.llm = llm
@@ -120,16 +121,47 @@ class LlmQaChat:
         )
         return llm_qa
 
+    def create_retrieval_qa(self, retriever):
+        chain_type_kwargs = {
+            "verbose": False,
+            "prompt": self.create_prompt(),
+            "memory": ConversationBufferMemory(
+                memory_key="history",
+                input_key="question"
+            )
+        }
+        llm_qa = RetrievalQA.from_chain_type(llm=self.llm,
+                                             chain_type="stuff",
+                                             verbose=False,
+                                             retriever=retriever,
+                                             chain_type_kwargs=chain_type_kwargs)
+        return llm_qa
+
+    def create_prompt(self, prompt_template: str = None):
+        if prompt_template is None:
+            prompt_template = """Use the following pieces of context to answer the question at the end. 
+            If you don't know the answer, just say that you don't know, don't try to make up an answer.
+            {context}
+            Question: {question}
+            Answer in English:"""
+        return PromptTemplate(
+            template=prompt_template, input_variables=["context", "question"]
+        )
+
     def ask(self, question: str):
         llm_qa = self.create_llm_qa(self.vector_db.get_store("sample1").as_retriever())
         return self.ask_question_with_context(llm_qa, question, [])
+
+    def ask_retriever(self, retriever, question: str):
+        llm_qa = self.create_retrieval_qa(retriever)
+        result = llm_qa({"query": question})
+        return result
 
     def ask_question_with_context(self, llm_qa, question, chat_history):
         result = llm_qa({"question": question, "chat_history": chat_history})
         # print("answer:", result["answer"])
         chat_history = [(question, result["answer"])]
         return result["answer"], chat_history
-
 
 
 def main():
@@ -144,7 +176,7 @@ def main():
     print("llm done")
     vector_db = QdrantVectorStore(llm_embeddings)
 
-    retriever = QdrantRetriever(vector_db, llm, llm_embeddings)
+    retriever = RetrieveHelper(vector_db, llm, llm_embeddings)
 
     # all_collections = vector_db.get_all_collections()
     # print(f"{all_collections=}")
@@ -162,26 +194,28 @@ def main():
     # print("===")
     # print(f"{result1=}")
 
-    print("------")
-    answer, chat_history = llm_qa_chat.ask(query)
-    print("======= Start =======")
-    print(answer)
+    # worked
+    # answer, chat_history = llm_qa_chat.ask(query)
+    # print(answer)
     print("------")
 
     t = retriever.get_lot_retriever(['sample1'])
-    docs = t.get_relevant_documents(query)
+    # answer, chat_history = llm_qa_chat.ask_retriever(query, t)
+    # print(f"lot retriever {answer=}")
     print(f"-------------------------------")
-    print(f"lot {docs=}")
-    print(f"-------------------------------")
+    answer, history = llm_qa_chat.ask_retriever(t, query)
+    print("============================")
+    print(f"{answer=}")
+
 
     # qa = retriever.get_parent_document_retriever_qa('sample1')
-    qa = retriever.merge_parent_document_retriever_qa(['sample1'])
-    print("merge_parent_document_retriever_qa query...")
-    result = qa.run(query)
-    print("")
-    print("")
-    print("---------------")
-    print(f"{result=}")
+    # qa = retriever.merge_parent_document_retriever_qa(['sample1'])
+    # print("merge_parent_document_retriever_qa query...")
+    # result = qa.run(query)
+    # print("")
+    # print("")
+    # print("---------------")
+    # print(f"{result=}")
 
     # retriever.create_collection('sample')
     # retriever.upsert_docs('sample', docs)
