@@ -1,19 +1,17 @@
-from langchain.memory import ConversationBufferMemory
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.retrievers import ParentDocumentRetriever
 from langchain.schema import Document
-from langchain.document_loaders import DirectoryLoader
 from langchain.storage import InMemoryStore
-from langchain.vectorstores import Qdrant
-from langchain.chains import RetrievalQA, ConversationalRetrievalChain
+from langchain.chains import RetrievalQA
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import LlamaCpp
 from langchain.prompts import PromptTemplate
+
+from llm_utils import ConversationalRetrievalChainAgent
 from llm_utils import LlmEmbeddings
 from qdrant_utils import QdrantVectorStore
 from lanchainlit import load_txt_documents, load_markdown_documents
-from langchain.retrievers.merger_retriever import MergerRetriever
 
 
 class RetrievalHelper:
@@ -88,64 +86,12 @@ def load_llm_model():
         top_p=1,
         n_ctx=2048,  # 請求上下文 ValueError: Requested tokens (1130) exceed context window of 512
         callback_manager=CallbackManager([StreamingStdOutCallbackHandler()]),
-        verbose=False,  # True
+        verbose=False,
         streaming=True,
         n_gpu_layers=52,
         n_threads=4,
     )
     return llm
-
-
-class ConversationalRetrievalChainAgent:
-    def __init__(self, llm, retriever):
-        question_prompt = PromptTemplate.from_template(
-            """You are QA Bot. If you don't know the answer, just say that you don't know, don't try to make up an answer.""")
-        self.llm_qa = ConversationalRetrievalChain.from_llm(
-            llm=llm,
-            retriever=retriever,
-            condense_question_prompt=question_prompt,
-            return_source_documents=True,
-            verbose=False
-        )
-
-    def ask(self, question: str):
-        history = []
-        result = self.llm_qa({"question": question, "chat_history": history})
-        history = [(question, result["answer"])]
-        return result["answer"]
-
-
-class RetrievalQAAgent:
-    def __init__(self, llm, retriever):
-        chain_type_kwargs = {
-            "verbose": False,
-            "prompt": self.create_prompt(),
-            "memory": ConversationBufferMemory(
-                memory_key="history",
-                input_key="question"
-            )
-        }
-        self.llm_qa = RetrievalQA.from_chain_type(llm=llm,
-                                                  chain_type="stuff",
-                                                  verbose=False,
-                                                  retriever=retriever,
-                                                  chain_type_kwargs=chain_type_kwargs)
-
-    def ask(self, question: str):
-        result = self.llm_qa({"query": question})
-        return result["answer"]
-
-    def create_prompt(self, prompt_template: str = None):
-        if prompt_template is None:
-            prompt_template = """Use the following pieces of context to answer the question at the end. 
-            You are QA Bot. If you don't know the answer, just say that you don't know, don't try to make up an answer.
-            {context}
-            Question: {question}
-            Only return the helpful answer below and nothing else.
-            Helpful answer:"""
-        return PromptTemplate(
-            template=prompt_template, input_variables=["context", "question"]
-        )
 
 
 class LlmQaChat:
@@ -181,8 +127,7 @@ def main():
     # all_collections = vector_db.get_all_collections()
     # print(f"{all_collections=}")
 
-    vector_db.recreate_collection('sample1')
-    # vector_db.create_collection('sample2')
+    # vector_db.recreate_collection('sample1')
     retriever.add_parent_document('sample1', docs1)
     retriever.add_parent_document('sample1', docs2)
     # retriever.add_parent_document('sample2', docs2)
@@ -199,9 +144,7 @@ def main():
     # print("===============================================")
     # print(answer)
 
-    t = retriever.get_retriever('sample1')
-    # t = retriever.get_parent_document_retriever('sample1')
-    answer = llm_qa_chat.ask_retriever(t, query)
+    answer = llm_qa_chat.ask(query)
     print("===========================================")
     print(f"{answer=}")
 
