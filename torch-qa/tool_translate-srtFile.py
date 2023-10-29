@@ -22,10 +22,11 @@ translator = Translator(model,
                         vocoder_name_or_card="vocoder_36langs",
                         device=torch.device("cuda:0"))
 
-
+# https://github.com/facebookresearch/seamless_communication/blob/main/src/seamless_communication/assets/cards/vocoder_36langs.yaml
 def translate_en(text: str) -> str:
-    tgt_lang="cmn"
     src_lang="eng"
+    src_lang="jpn"
+    tgt_lang="cmn"
     translated_text, _, _ = translator.predict(text, "t2tt", tgt_lang, src_lang=src_lang)
     return translated_text
 
@@ -51,7 +52,7 @@ def translate_srt_file_to_zh(srt_filepath: str):
                 continue
             caption = caption.strip()
             translated = translate_en(caption)
-            translated = translated.replace('⁇', '')
+            #translated = translated.replace('⁇', '')
             print(f"{count} {start_time} {end_time}")
             print(f"{translated}")
             text = f"{caption}\r\n{translated}\r\n".strip()
