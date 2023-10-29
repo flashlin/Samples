@@ -12,4 +12,5 @@ echo "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}
 echo install spacy
 conda install -c conda-forge spacy
 python -m spacy download en_core_web_trf
-python -m spacy download xx_sent_ud_sm
+python -m spacy download zh_core_web_sm
+python -m spacy download xx_ent_wiki_sm

@@ -8,7 +8,7 @@ print(nlp.path)
 # 讀取本文
 text = """
 The quick brown fox jumps over the lazy dog.
-The fox is 3 years old.
+The 狐狸 is 3 years old.
 The dog is 5 years old.
 """
 
@@ -25,6 +25,7 @@ metadata = {"keywords": keywords, "numbers": numbers}
 metadata2 = {keyword: number for keyword, number in zip(keywords, numbers)}
 #metadata2 = list(metadata2.items())
 
+print(f"{doc=}")
 print(f"{metadata=}")
 print(f"{metadata2=}")
 
