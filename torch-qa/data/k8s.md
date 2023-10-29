@@ -127,3 +127,20 @@ public class YourObject
   }
 }
 ```
+
+
+---
+Question: When you run docker ps in WSL or a Linux shell, you encounter the following error message. 
+How to resolve it?
+`Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock`
+
+Answer:
+Execute the following command, then restart WSL or Linux.
+```bash
+sudo usermod -aG docker $USER
+```
+
+If you don't want to restart WSL or Linux but just temporarily grant permission, you can execute the following command to immediately use Docker.
+```bash
+sudo chmod 666 /var/run/docker.sock
+```
