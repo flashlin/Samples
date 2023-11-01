@@ -128,17 +128,11 @@ $sqlite.ExecuteNonQuery($sql)
 $sql = "CREATE INDEX IF NOT EXISTS idx_history ON history (createdOn)"
 $sqlite.ExecuteNonQuery($sql)
 
-if ( "--a" -eq $action ) {
-    if ( $searchPatterns.Length -gt 1 ) {
-        $dirPath = $searchPatterns[1]
-        if ( "." -eq $dirPath ) {
-            $dirPath = $PWD
-        }
-        Write-Host "Update $dirPath"
-        UpsertPath $dirPath
-        RecordPath $dirPath
-        return
-    }
+if ( ".." -eq $action ) {
+    $dirPath = $PWD
+    Write-Host "Update $dirPath"
+    UpsertPath $dirPath
+    RecordPath $dirPath
 
     Write-Host "Upsert directories"
     foreach ($dir in QueryDirectories) {
