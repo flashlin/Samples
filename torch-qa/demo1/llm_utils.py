@@ -5,8 +5,10 @@ from langchain.memory import ConversationBufferMemory
 from langchain.retrievers import ParentDocumentRetriever
 from langchain.schema import BaseRetriever, Document
 from langchain.schema.language_model import BaseLanguageModel
+from langchain.schema.vectorstore import VectorStore
 from langchain.storage import InMemoryStore
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.vectorstores import FAISS
 
 
 class LlmEmbedding:
@@ -78,6 +80,28 @@ class RetrievalQAAgent:
         return PromptTemplate(
             template=prompt_template, input_variables=["context", "question"]
         )
+
+
+def create_parent_document_retriever(vector_store: VectorStore):
+    store = InMemoryStore()
+    parent_splitter = RecursiveCharacterTextSplitter(chunk_size=2000)
+    child_splitter = RecursiveCharacterTextSplitter(chunk_size=400)
+    big_chunks_retriever = ParentDocumentRetriever(
+        vectorstore=vector_store,
+        docstore=store,
+        child_splitter=child_splitter,
+        parent_splitter=parent_splitter,
+    )
+    return big_chunks_retriever
+
+
+class FaissRetrieval:
+    def __init__(self, llm_embedding: LlmEmbedding):
+        self.llm_embedding = llm_embedding
+
+    def get_retriever(self, docs):
+        vector_store = FAISS.from_documents(docs, self.llm_embedding.embedding)
+        return create_parent_document_retriever(vector_store)
 
 
 class Retrieval:
