@@ -1,4 +1,4 @@
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain, RetrievalQA
 from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.memory import ConversationBufferMemory

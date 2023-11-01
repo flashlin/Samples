@@ -12,10 +12,10 @@ class QdrantVectorStore:
     def __init__(self, llm_embedding):
         self.llm_embedding = llm_embedding
         self.embedding_dim = len(llm_embedding.get_embeddings('This is test text.'))
-        self.open()
+        self.open(url="http://localhost:6333")
 
-    def open(self):
-        self.client = QdrantClient("http://localhost:6333")
+    def open(self, url: str):
+        self.client = QdrantClient(url)
 
     def create_collection(self, collection_name: str):
         collection = self.client.get_collection(collection_name)

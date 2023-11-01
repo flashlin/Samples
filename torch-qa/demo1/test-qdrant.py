@@ -2,11 +2,12 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import LlamaCpp
 
+from langchain_lit import load_txt_documents
 from llm_utils import Retrieval
 from llm_utils import ConversationalRetrievalChainAgent
 from llm_utils import LlmEmbedding
-from qdrant_utils import QdrantVectorStore
-from lanchainlit import load_txt_documents, load_markdown_documents
+from qdrant_lit import QdrantVectorStore
+from lanchainlit import load_markdown_documents
 
 
 def load_llm_model():
@@ -61,13 +62,14 @@ def main():
     # all_collections = vector_db.get_all_collections()
     # print(f"{all_collections=}")
 
-    # vector_db.recreate_collection('sample1')
+    vector_db.recreate_collection('sample1')
     retriever.add_parent_document('sample1', docs1)
     retriever.add_parent_document('sample1', docs2)
     # retriever.add_parent_document('sample2', docs2)
     print(f"add documents done")
 
     query = "How to convert a B2B2C domain to a B2C domain?"
+    print(f"{query=}")
     llm_qa_chat = LlmQaChat(llm, vector_db)
     # result1 = vector_db.search('sample1', query)
     # print("===")

@@ -14,7 +14,6 @@ from langchain.vectorstores import FAISS
 from langchain.schema.vectorstore import VectorStore
 
 
-
 def load_llm_model(model_name: str, callbackHandler=None):
     callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     return LlamaCpp(
