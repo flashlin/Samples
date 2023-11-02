@@ -48,7 +48,7 @@ class LlmQaChat:
 
 
 def main():
-    llm_embedding = LlmEmbedding()
+    llm_embedding = LlmEmbedding("../models/BAAI_bge-base-en")
     docs1 = load_txt_documents("../data")
     docs2 = load_markdown_documents("../data")
 
@@ -57,14 +57,15 @@ def main():
     print("llm done")
 
     vector_db = QdrantVectorStore(llm_embedding)
+    vector_db.open(url="http://localhost:6333")
     retriever = Retrieval(vector_db, llm, llm_embedding)
 
     # all_collections = vector_db.get_all_collections()
     # print(f"{all_collections=}")
 
-    vector_db.recreate_collection('sample1')
-    retriever.add_parent_document('sample1', docs1)
-    retriever.add_parent_document('sample1', docs2)
+    # vector_db.recreate_collection('sample1')
+    # retriever.add_parent_document('sample1', docs1)
+    # retriever.add_parent_document('sample1', docs2)
     # retriever.add_parent_document('sample2', docs2)
     print(f"add documents done")
 

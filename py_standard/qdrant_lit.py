@@ -1,18 +1,32 @@
+from abc import ABCMeta, abstractmethod
+
 from langchain.schema import Document
 from langchain.vectorstores import Qdrant
 from torch.utils.data import Dataset
 from qdrant_client import QdrantClient
 from qdrant_client.http import models
-from qdrant_client.http.models import PointStruct
 
 
-class QdrantVectorStore:
-    client: QdrantClient
-
+class VectorStoreBase(metaclass=ABCMeta):
     def __init__(self, llm_embedding):
         self.llm_embedding = llm_embedding
         self.embedding_dim = len(llm_embedding.get_embeddings('This is test text.'))
-        self.open(url="http://localhost:6333")
+
+    @abstractmethod
+    def create_collection(self, collection_name):
+        pass
+
+    @abstractmethod
+    def upsert_docs(self, collection_name, docs):
+        pass
+
+    @abstractmethod
+    def search(self, collection_name, query, k):
+        pass
+
+
+class QdrantVectorStore(VectorStoreBase):
+    client: QdrantClient
 
     def open(self, url: str):
         self.client = QdrantClient(url)

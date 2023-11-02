@@ -9,21 +9,7 @@ from langchain.schema.vectorstore import VectorStore
 from langchain.storage import InMemoryStore
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
-
-
-class LlmEmbedding:
-    def __init__(self):
-        model_name = "../models/BAAI_bge-base-en"
-        # embedding_model_name = "../models/BAA_Ibge-large-en-v1.5"
-        encode_kwargs = {'normalize_embeddings': True}  # set True to compute cosine similarity
-        self.embedding = HuggingFaceBgeEmbeddings(
-            model_name=model_name,
-            model_kwargs={'device': 'cuda'},
-            encode_kwargs=encode_kwargs
-        )
-
-    def get_embeddings(self, text: str) -> list[float]:
-        return self.embedding.embed_query(text)
+from langchain_lit import LlmEmbedding
 
 
 class ConversationalRetrievalChainAgent:
