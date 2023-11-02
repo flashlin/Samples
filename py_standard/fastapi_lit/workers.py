@@ -27,14 +27,8 @@ class FastApiWorkerBase(ThreadWorkerBase):
         await self.acquire_semaphore()
         generator = self.process(params)
         background_tasks = BackgroundTasks()
-        background_tasks.add_task(lambda: release_worker_semaphore(self))
+        background_tasks.add_task(lambda: self.release_semaphore())
         return StreamingResponse(generator, background=background_tasks, media_type="text/event-stream")
-
-
-def release_worker_semaphore(worker: FastApiWorkerBase):
-    worker.release_semaphore()
-
-
 
 
 
