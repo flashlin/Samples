@@ -13,8 +13,8 @@ class MyWorker(BaseApiWorker):
     def __init__(self):
         super().__init__(worker_id='id1')
 
-    def generate_stream_gate(self, params):
-        asyncio.sleep(1000 * 10)
+    async def generate_stream_gate(self, params):
+        await asyncio.sleep(3)
         self.count += 1
         yield f"data: {self.count}\n\n"
         print("END")

@@ -54,6 +54,8 @@ class BaseApiWorker:
         background_tasks = BackgroundTasks()
         background_tasks.add_task(lambda: release_worker_semaphore(self))
         return StreamingResponse(generator, background=background_tasks, media_type="text/event-stream")
+        # g = self.generate_stream_gate(params)
+        # return StreamingResponse(g, media_type="text/event-stream")
 
     def get_queue_length(self):
         if (
