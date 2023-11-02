@@ -30,11 +30,7 @@ class Req(BaseModel):
 
 @app.post("/test", response_model=LlmToken)
 async def api_generate_stream(request: Req):
-    await worker.acquire_semaphore()
-    # return worker.response_stream(request)
-    generator = worker.generate_stream_gate(request)
-    background_tasks = create_background_tasks(worker)
-    return StreamingResponse(generator, background=background_tasks, media_type="text/event-stream")
+    return await worker.response_stream(request)
 
 if __name__ == "__main__":
     uvicorn.run(app, host='127.0.0.1', port=5005, log_level="info")

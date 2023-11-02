@@ -49,7 +49,8 @@ class BaseApiWorker:
                 await worker.acquire_semaphore(worker)
                 return worker.response_stream()
         """
-        generator = await self.generate_stream_gate(params)
+        await self.acquire_semaphore()
+        generator = self.generate_stream_gate(params)
         background_tasks = create_background_tasks(self)
         return StreamingResponse(generator, background=background_tasks, media_type="text/event-stream")
 
