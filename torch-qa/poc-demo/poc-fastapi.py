@@ -4,16 +4,16 @@ import uvicorn
 from fastapi import FastAPI
 from flask import Request
 from pydantic import BaseModel
-from fastapi_lit.workers import BaseApiWorker, LlmToken
+from fastapi_lit.workers import FastApiWorkerBase, LlmToken
 
 
-class MyWorker(BaseApiWorker):
+class MyWorker(FastApiWorkerBase):
     count = 0
 
     def __init__(self):
         super().__init__(worker_id='id1')
 
-    async def generate_stream_gate(self, params):
+    async def process(self, params):
         await asyncio.sleep(3)
         self.count += 1
         yield f"data: {self.count}\n\n"
