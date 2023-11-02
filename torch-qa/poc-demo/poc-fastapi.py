@@ -4,8 +4,7 @@ import uvicorn
 from fastapi import FastAPI
 from flask import Request
 from pydantic import BaseModel
-
-from fastapi_lit.workers import BaseApiWorker, LlmToken, create_background_tasks
+from fastapi_lit.workers import BaseApiWorker, LlmToken
 
 
 class MyWorker(BaseApiWorker):
