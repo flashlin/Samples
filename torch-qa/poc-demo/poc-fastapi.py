@@ -2,7 +2,6 @@ import asyncio
 from fastapi.responses import StreamingResponse, JSONResponse
 import uvicorn
 from fastapi import FastAPI
-from flask import Request
 from pydantic import BaseModel
 from fastapi_lit.workers import FastApiWorkerBase, LlmToken
 
