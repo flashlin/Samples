@@ -2,7 +2,7 @@ import asyncio
 import json
 import queue
 import threading
-
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, JSONResponse
 import uvicorn
 from fastapi import FastAPI
@@ -39,6 +39,14 @@ class MyWorker(FastApiWorkerBase):
         yield "data: [DONE]"
 
 app = FastAPI()
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 worker = MyWorker()
 
 llm = load_llm_model("./models/TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf", worker)
