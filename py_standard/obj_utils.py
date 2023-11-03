@@ -22,6 +22,28 @@ def get_obj_keys(obj: object):
     return vars(obj).keys()
 
 
+def obj_to_dict(obj: object):
+    dictionary = {}
+    for key in get_obj_keys(obj):
+        value = getattr(obj, key)
+        dictionary[key] = value
+    return dictionary
+
+
+def dict_to_dynamic_object(dictionary: dict):
+    return type('DynamicObject', (), dictionary)()
+
+
+def clone_to_dynamic_object(obj, dictionary: dict):
+    dynamic_obj = type('DynamicObject', (), {})()
+    for key in get_obj_keys(obj):
+        value = getattr(obj, key)
+        setattr(dynamic_obj, key, value)
+    for key in dictionary.keys():
+        setattr(dynamic_obj, key, dictionary[key])
+    return dynamic_obj
+
+
 def dump_obj(obj: object):
     json = "{"
     values = []
