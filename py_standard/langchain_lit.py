@@ -15,11 +15,11 @@ from langchain.vectorstores import FAISS
 from langchain.schema.vectorstore import VectorStore
 
 
-def load_llm_model(model_name: str, display_callback_handler=None):
-    if display_callback_handler is None:
+def load_llm_model_with_callback_handler(model_name: str, callback_handler=None):
+    if callback_handler is None:
         callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
     else:
-        callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), StreamDisplayHandler(display_callback_handler)])
+        callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), callback_handler])
     return LlamaCpp(
         model_path=model_name,
         temperature=0.75,
@@ -30,6 +30,19 @@ def load_llm_model(model_name: str, display_callback_handler=None):
         verbose=False,
         streaming=True,
     )
+
+
+def load_llm_model(model_name: str, display_callback_handler=None):
+    return load_llm_model_with_callback_handler(model_name, StreamDisplayHandler(display_callback_handler))
+
+
+class LlmBot:
+    def __init__(self, model_name: str):
+        self.callback_handler = StreamDisplayHandler(None)
+        self.llm = load_llm_model_with_callback_handler(model_name, self.callback_handler)
+
+    def ask(self, query: str) -> str:
+        return self.llm(query)
 
 
 def load_txt_documents(txt_path: str):
@@ -135,6 +148,8 @@ class StreamDisplayHandler(BaseCallbackHandler):
 
     def on_llm_end(self, response, **kwargs) -> None:
         self.text = ""
+        if self.container is None:
+            return
         display_end_function = getattr(self.container, f"{self.display_method}_end", None)
         if display_end_function is not None:
             display_end_function()
@@ -142,6 +157,8 @@ class StreamDisplayHandler(BaseCallbackHandler):
             raise ValueError(f"Invalid display_end_method: {display_end_function}")
 
     def call_display_func(self, text: str):
+        if self.container is None:
+            return
         display_function = getattr(self.container, self.display_method, None)
         if display_function is not None:
             display_function(text)

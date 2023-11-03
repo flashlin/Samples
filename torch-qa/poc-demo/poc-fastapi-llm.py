@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi_lit.workers import FastApiWorkerBase, LlmToken
 from langchain_lit import load_llm_model
+from obj_utils import clone_to_dynamic_object
 
 
 class MyWorker(FastApiWorkerBase):
@@ -28,6 +29,9 @@ class MyWorker(FastApiWorkerBase):
 
     async def process(self, params):
         llm = self.llm
+        if params.conversation_type == 'message':
+            yield llm(params.content)
+            return
         thread = threading.Thread(target=lambda: llm(params.content))
         thread.start()
         llm_tokens = self.llm_tokens
@@ -64,7 +68,10 @@ class Req(BaseModel):
 
 @app.post("/api/v1/chat/conversation", response_model=LlmToken)
 async def api_generate_stream(request: Req):
-    return await worker.response_stream(request)
+    new_req = clone_to_dynamic_object(request, {
+        "conversation_type": "message"
+    })
+    return await worker.response_stream(new_req)
 
 if __name__ == "__main__":
     uvicorn.run(app, host='127.0.0.1', port=5000, log_level="info")

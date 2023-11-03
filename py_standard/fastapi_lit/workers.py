@@ -1,5 +1,5 @@
 import os
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi import BackgroundTasks
 from pydantic import BaseModel
 
@@ -30,5 +30,17 @@ class FastApiWorkerBase(ThreadWorkerBase):
         background_tasks.add_task(lambda: self.release_semaphore())
         return StreamingResponse(generator, background=background_tasks, media_type="text/event-stream")
 
-
+    async def response(self, params):
+        """
+            @app.post("/worker_generate_stream")
+            async def api_generate_stream(request: Request):
+                params = await request.json()
+                worker = worker_map[params["model"]]
+                await worker.acquire_semaphore(worker)
+                return worker.response_stream()
+        """
+        generator = self.process(params)
+        background_tasks = BackgroundTasks()
+        background_tasks.add_task(lambda: self.release_semaphore())
+        return JSONResponse(generator, background=background_tasks)
 
