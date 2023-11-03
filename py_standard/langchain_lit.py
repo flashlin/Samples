@@ -40,9 +40,12 @@ class LlmBot:
     def __init__(self, model_name: str):
         self.callback_handler = StreamDisplayHandler(None)
         self.llm = load_llm_model_with_callback_handler(model_name, self.callback_handler)
+        self.chat_history = []
 
-    def ask(self, query: str) -> str:
-        return self.llm(query)
+    def ask(self, query: str, display_callback_handler=None) -> str:
+        self.callback_handler.container = display_callback_handler
+        result = self.llm(query)
+        return result
 
 
 def load_txt_documents(txt_path: str):
