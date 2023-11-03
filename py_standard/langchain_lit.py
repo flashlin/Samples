@@ -1,3 +1,4 @@
+from langchain.callbacks.base import BaseCallbackHandler
 from langchain.llms import LlamaCpp
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -14,8 +15,11 @@ from langchain.vectorstores import FAISS
 from langchain.schema.vectorstore import VectorStore
 
 
-def load_llm_model(model_name: str, callbackHandler=None):
-    callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+def load_llm_model(model_name: str, display_callback_handler=None):
+    if display_callback_handler is None:
+        callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+    else:
+        callback_manager = CallbackManager([StreamingStdOutCallbackHandler(), StreamDisplayHandler(display_callback_handler)])
     return LlamaCpp(
         model_path=model_name,
         temperature=0.75,
@@ -106,3 +110,40 @@ class Retrieval:
     def add_parent_document(self, collection_name: str, docs: list[Document]):
         big_chunks_retriever = self.get_parent_document_retriever(collection_name)
         big_chunks_retriever.add_documents(docs)
+
+
+class StreamDisplayHandler(BaseCallbackHandler):
+    def __init__(self, container, initial_text="", display_method='display'):
+        """
+        :param container: class
+        :param initial_text:
+        :param display_method: 'display'
+        class MyContainer:
+            def display(self, text):
+               pass
+        """
+        self.container = container
+        self.display_method = display_method
+        self.text = initial_text
+        self.new_sentence = ""
+
+    def on_llm_new_token(self, token: str, **kwargs) -> None:
+        self.text += token
+        self.new_sentence += token
+        # self.call_display_func(self.text + "▌")
+        self.call_display_func(token)
+
+    def on_llm_end(self, response, **kwargs) -> None:
+        self.text = ""
+        display_end_function = getattr(self.container, f"{self.display_method}_end", None)
+        if display_end_function is not None:
+            display_end_function()
+        else:
+            raise ValueError(f"Invalid display_end_method: {display_end_function}")
+
+    def call_display_func(self, text: str):
+        display_function = getattr(self.container, self.display_method, None)
+        if display_function is not None:
+            display_function(text)
+        else:
+            raise ValueError(f"Invalid display_method: {display_function}")

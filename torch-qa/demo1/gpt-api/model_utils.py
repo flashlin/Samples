@@ -7,7 +7,7 @@ import functools
 from langchain.chains import ConversationalRetrievalChain
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from llama2_utils import StreamDisplayHandler
+from langchain_lit import StreamDisplayHandler
 
 
 def create_llama2():

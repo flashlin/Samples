@@ -1,8 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
-from langchain.callbacks.base import BaseCallbackHandler
-from typing import Callable
 
 DEFAULT_SYSTEM_PROMPT = f"""You are a helpful, respectful and honest assistant. 
 Always answer as helpfully as possible, while being safe. 
@@ -59,43 +56,5 @@ def llama2_prompt(messages: list[dict]) -> str:
         f"{BOS}{B_INST} {(messages[-1]['content']).strip()} {E_INST}")
 
     return "".join(messages_list)
-
-
-class StreamDisplayHandler(BaseCallbackHandler):
-    def __init__(self, container, initial_text="", display_method='display'):
-        """
-        :param container: class
-        :param initial_text:
-        :param display_method: 'display'
-        class MyContainer:
-            def display(self, text):
-               pass
-        """
-        self.container = container
-        self.display_method = display_method
-        self.text = initial_text
-        self.new_sentence = ""
-
-    def on_llm_new_token(self, token: str, **kwargs) -> None:
-        self.text += token
-        self.new_sentence += token
-
-        # self.call_display_func(self.text + "▌")
-        self.call_display_func(token)
-
-    def on_llm_end(self, response, **kwargs) -> None:
-        self.text = ""
-        display_end_function = getattr(self.container, f"{self.display_method}_end", None)
-        if display_end_function is not None:
-            display_end_function()
-        else:
-            raise ValueError(f"Invalid display_end_method: {display_end_function}")
-
-    def call_display_func(self, text: str):
-        display_function = getattr(self.container, self.display_method, None)
-        if display_function is not None:
-            display_function(text)
-        else:
-            raise ValueError(f"Invalid display_method: {display_function}")
 
 
