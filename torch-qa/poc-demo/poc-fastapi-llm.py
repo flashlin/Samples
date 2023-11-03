@@ -13,8 +13,10 @@ from langchain_lit import load_llm_model
 
 class MyWorker(FastApiWorkerBase):
     count = 0
+
     def __init__(self):
         super().__init__(worker_id='id1')
+        self.llm = None
         self.llm_tokens = queue.Queue()
         self.is_finished = False
 
@@ -25,7 +27,7 @@ class MyWorker(FastApiWorkerBase):
         self.is_finished = True
 
     async def process(self, params):
-        global llm
+        llm = self.llm
         thread = threading.Thread(target=lambda: llm(params.content))
         thread.start()
         llm_tokens = self.llm_tokens
@@ -39,6 +41,7 @@ class MyWorker(FastApiWorkerBase):
         yield "data: [DONE]"
         self.is_finished = False
 
+
 app = FastAPI()
 origins = ["*"]
 app.add_middleware(
@@ -48,13 +51,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-worker = MyWorker()
 
+worker = MyWorker()
 llm = load_llm_model("./models/TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf", worker)
+worker.llm = llm
+
 
 class Req(BaseModel):
     conversationId: int
     content: str
+
 
 @app.post("/api/v1/chat/conversation", response_model=LlmToken)
 async def api_generate_stream(request: Req):
