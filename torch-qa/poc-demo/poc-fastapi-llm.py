@@ -26,7 +26,7 @@ class MyWorker(FastApiWorkerBase):
 
     async def process(self, params):
         global llm
-        thread = threading.Thread(target=lambda: llm(params.message))
+        thread = threading.Thread(target=lambda: llm(params.content))
         thread.start()
         llm_tokens = self.llm_tokens
         while not self.is_finished:
@@ -37,6 +37,7 @@ class MyWorker(FastApiWorkerBase):
                 json_token = json.dumps(token)
                 yield f"{json_token}\n\n"
         yield "data: [DONE]"
+        self.is_finished = False
 
 app = FastAPI()
 origins = ["*"]
@@ -52,11 +53,12 @@ worker = MyWorker()
 llm = load_llm_model("./models/TheBloke_Mistral-7B-Instruct-v0.1-GGUF/mistral-7b-instruct-v0.1.Q4_K_M.gguf", worker)
 
 class Req(BaseModel):
-    message: str
+    conversationId: int
+    content: str
 
-@app.post("/test", response_model=LlmToken)
+@app.post("/api/v1/chat/conversation", response_model=LlmToken)
 async def api_generate_stream(request: Req):
     return await worker.response_stream(request)
 
 if __name__ == "__main__":
-    uvicorn.run(app, host='127.0.0.1', port=5005, log_level="info")
+    uvicorn.run(app, host='127.0.0.1', port=5000, log_level="info")
