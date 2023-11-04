@@ -1,0 +1,1 @@
+https://github.com/Crossme0809/frenzyTechAI/blob/main/finetune_mistral-7b/Finetune_Mistral7B_on_a_single_GPU_with_PEFT.ipynb
