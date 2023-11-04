@@ -29,10 +29,7 @@ torch-segment-demo/models/yolov8x.pt
 torch-segment-demo/models
 torch-segment-demo/data
 torch-segment-demo/public/app
-torch-qa/models/bert-large-uncased-float16.bin
-torch-qa/models/chatglm-6b-float16
-torch-qa/models/pytorch_model.bin.index.json
-torch-qa/models
+torch-qa/models/
 torch-qa/.chainlit
 *.interp
 *.tokens
