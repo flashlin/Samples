@@ -226,26 +226,6 @@ def qa_mem2():
 
 
 
-def test_sqlite_mem_db():
-    db = SqliteMemDbContext()
-    db.execute("""
-    CREATE TABLE IF NOT EXISTS ConversationMessages (
-                    id INTEGER PRIMARY KEY,
-                    conversation_id INTEGER,
-                    role_name TEXT,
-                    content TEXT
-                )
-    """)
-    db.execute("""INSERT INTO ConversationMessages (conversation_id, role_name, content) VALUES (?, ?, ?)
-    """, (1, 'user', 'HELLO'))
-
-    rows = db.query("""SELECT conversation_id, role_name, content FROM ConversationMessages""")
-    print(f"{rows=}")
-
-    rows = db.query_objects("""SELECT conversation_id, role_name, content FROM ConversationMessages""")
-    print(f"{rows[0].role_name=}")
-
 #qa_docs()
 #qa_mem1()
-test_sqlite_mem_db()
 
