@@ -1,16 +1,22 @@
+from dataclasses import dataclass
+
 import requests
 import json
 
 from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 from langchain.document_loaders import WebBaseLoader
-from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory, ConversationSummaryBufferMemory
+from langchain.memory import ConversationBufferMemory, ConversationSummaryMemory, ConversationSummaryBufferMemory, \
+    ChatMessageHistory
 from langchain.prompts import PromptTemplate, SystemMessagePromptTemplate
+from langchain.schema import messages_to_dict, messages_from_dict
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 from langchain.vectorstores import Chroma
 from langchain.embeddings import OllamaEmbeddings
 from langchain import hub
 from langchain.llms import Ollama
+from pydantic import BaseModel
+
 from llm_utils import LlmEmbedding
 
 url = "http://localhost:11434/api/generate"
@@ -20,6 +26,63 @@ headers = {
 }
 
 conversation_history = []
+
+
+@dataclass
+class ChatHistoryItem:
+    role_name: str
+    content: str
+
+
+class ChatHistoryAgentBase:
+    def load_chat_history_data(self, conversation_id: int) -> list[ChatHistoryItem]:
+        pass
+
+    def save_chat_history_data(self, conversation_id: int, chat_history: list[ChatHistoryItem]):
+        pass
+
+
+class ChatHistoryMemoryAgent(ChatHistoryAgentBase):
+    def __init__(self, db):
+        self.db = db
+
+    def save_chat_history(self, chain, conversation_id: int):
+        extracted_messages = chain.memory.chat_memory.messages
+        # [HumanMessage(content='what do you know about Python in less than 10 words', additional_kwargs={}),
+        #  AIMessage(content='Python is a high-level programming language.', additional_kwargs={})]
+        ingest_data = messages_to_dict(extracted_messages)
+        # [{'type': 'human',
+        #   'data': {'content': 'what do you know about Python in less than 10 words',
+        #    'additional_kwargs': {}}},
+        #  {'type': 'ai',
+        #   'data': {'content': 'Python is a high-level programming language.',
+        #    'additional_kwargs': {}}}]
+        items = []
+        for row in ingest_data:
+            item = ChatHistoryItem(
+                role_name=row['type'],
+                content=row['data']['content']
+            )
+            items.append(item)
+        self.save_chat_history_data(conversation_id, items)
+        return items
+
+    def load_chat_history(self, conversation_id: int) -> ConversationBufferMemory:
+        rows = self.load_chat_history_data(conversation_id)
+        messages = []
+        for item in rows:
+            messages.append({
+                'type': item.role_name,
+                'data': {
+                    'content': item.content,
+                    'additional_kwargs': {}
+                }
+            })
+        retrieved_messages = messages_from_dict(messages)
+        retrieved_chat_history = ChatMessageHistory(messages=retrieved_messages)
+        retrieved_memory = ConversationBufferMemory(chat_memory=retrieved_chat_history)
+        return retrieved_memory
+
 
 def generate_response(prompt):
     conversation_history.append(prompt)
@@ -125,6 +188,7 @@ def qa_mem1():
                ("What is the date Australia was founded?", "Australia was founded in 1901."),
             ]},
             return_only_outputs=True)
+        print(f"{chain.memory.chat_memory.messages=}")
         print(resp['answer'])
 
 
@@ -158,6 +222,11 @@ def qa_mem2():
         answer = resp['answer']
         chat_history.append((user_input, answer))
         print(answer)
+
+
+
+
+
 
 
 #qa_docs()
