@@ -54,7 +54,7 @@ def chat():
 def qa_docs():
    loader = WebBaseLoader("https://lilianweng.github.io/posts/2023-06-23-agent/")
    data = loader.load()
-   text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=100)
+   text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=50)
    all_splits = text_splitter.split_documents(data)
    
    llm_embedding = LlmEmbedding("../models/BAA_Ibge-large-en-v1.5")
@@ -76,4 +76,3 @@ def qa_docs():
       print(resp['result'])
 
 qa_docs()      
-   
