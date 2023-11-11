@@ -1,4 +1,14 @@
 from dataclasses import dataclass, fields
+from types import SimpleNamespace
+from typing import Any
+
+
+def dict_list_to_object_list(result: list[dict]) -> list[Any]:
+    object_list = []
+    for row in result:
+        obj = SimpleNamespace(**row)
+        object_list.append(obj)
+    return object_list
 
 
 def dict_to_obj(dictionary: dict, obj_type):

@@ -18,6 +18,7 @@ from langchain.llms import Ollama
 from pydantic import BaseModel
 
 from llm_utils import LlmEmbedding
+from sqlite_lit import SqliteMemDbContext
 
 url = "http://localhost:11434/api/generate"
 
@@ -43,8 +44,8 @@ class ChatHistoryAgentBase:
 
 
 class ChatHistoryMemoryAgent(ChatHistoryAgentBase):
-    def __init__(self, db):
-        self.db = db
+    def __init__(self):
+        self.db = SqliteMemDbContext()
 
     def save_chat_history(self, chain, conversation_id: int):
         extracted_messages = chain.memory.chat_memory.messages
@@ -225,9 +226,24 @@ def qa_mem2():
 
 
 
+def test_sqlite_mem_db():
+    db = SqliteMemDbContext()
+    db.execute("""
+    CREATE TABLE IF NOT EXISTS ConversationMessages (
+                    id INTEGER PRIMARY KEY,
+                    conversation_id INTEGER,
+                    role_name TEXT,
+                    content TEXT
+                )
+    """)
+    db.execute("""INSERT INTO ConversationMessages (conversation_id, role_name, content) VALUES (?, ?, ?)
+    """, (1, 'user', 'HELLO'))
 
-
+    rows = db.query("""SELECT conversation_id, role_name, content FROM ConversationMessages""")
+    print(f"{rows=}")
 
 
 #qa_docs()
-qa_mem1()
+#qa_mem1()
+test_sqlite_mem_db()
+
