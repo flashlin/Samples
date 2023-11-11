@@ -242,6 +242,8 @@ def test_sqlite_mem_db():
     rows = db.query("""SELECT conversation_id, role_name, content FROM ConversationMessages""")
     print(f"{rows=}")
 
+    rows = db.query_objects("""SELECT conversation_id, role_name, content FROM ConversationMessages""")
+    print(f"{rows[0].role_name=}")
 
 #qa_docs()
 #qa_mem1()
