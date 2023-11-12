@@ -100,7 +100,9 @@ class ChatHistoryMemoryAgent(ChatHistoryAgentBase):
             })
         retrieved_messages = messages_from_dict(messages)
         retrieved_chat_history = ChatMessageHistory(messages=retrieved_messages)
-        retrieved_memory = ConversationBufferMemory(chat_memory=retrieved_chat_history, input_key="question")
+        retrieved_memory = ConversationBufferMemory(chat_memory=retrieved_chat_history,
+                                                    memory_key="history",
+                                                    input_key="question")
         return retrieved_memory
 
 
@@ -265,10 +267,19 @@ def qa_mem3():
         template=template,
     )
 
-    ollama = Ollama(base_url='http://localhost:11434', model="mistral")
+    ollama = Ollama(base_url='http://localhost:11434', model="mistral:instruct")
 
     chat_history_memory_agent = ChatHistoryMemoryAgent()
-    memory = chat_history_memory_agent.load_conversation_buffer_memory(123)
+    conversation_id = 123
+    chat_history_memory_agent.append_chat_history(conversation_id, Conversation(
+        role_name='human',
+        content='Who is Flash?'
+    ))
+    chat_history_memory_agent.append_chat_history(conversation_id, Conversation(
+        role_name='ai',
+        content='He is superman.'
+    ))
+    memory = chat_history_memory_agent.load_conversation_buffer_memory(conversation_id)
 
     chain = RetrievalQA.from_chain_type(
         llm=ollama,
@@ -276,28 +287,31 @@ def qa_mem3():
         retriever=vectorstore.as_retriever(),
         verbose=False,
         chain_type_kwargs={
-            "verbose": False,
+            # "verbose": True,
             "prompt": prompt,
             "memory": memory,
         }
     )
 
+    history = []
+    history.append({'Human: Who is Flash?'})
+    history.append({'AI: Flash is superman. '})
     while True:
         print("")
         user_input = input("qa_mem: ")
         if user_input == "/bye":
             break
-        chat_history_memory_agent.append_chat_history(123, Conversation(
+        chat_history_memory_agent.append_chat_history(conversation_id, Conversation(
             role_name='human',
             content=user_input
         ))
         resp = chain({
                 "query": user_input,
-            },
-            return_only_outputs=True)
+                'history': history
+            })
         answer = resp['result']
         print(answer)
-        chat_history_memory_agent.append_chat_history(123, Conversation(
+        chat_history_memory_agent.append_chat_history(conversation_id, Conversation(
             role_name='ai',
             content=answer
         ))
