@@ -30,24 +30,44 @@ conversation_history = []
 
 
 @dataclass
-class ChatHistoryItem:
+class Conversation:
     role_name: str
     content: str
 
 
 class ChatHistoryAgentBase:
-    def load_chat_history_data(self, conversation_id: int) -> list[ChatHistoryItem]:
+    def load_chat_history_data(self, conversation_id: int) -> list[Conversation]:
         pass
 
-    def save_chat_history_data(self, conversation_id: int, chat_history: list[ChatHistoryItem]):
+    def append_chat_history(self, conversation_id: int, item: Conversation):
         pass
 
 
 class ChatHistoryMemoryAgent(ChatHistoryAgentBase):
     def __init__(self):
         self.db = SqliteMemDbContext()
+        self.db.execute("""
+        CREATE TABLE IF NOT EXISTS ConversationMessages (
+            id INTEGER PRIMARY KEY,
+            conversation_id INTEGER,
+            role_name TEXT,
+            content TEXT
+        )
+        """)
 
-    def save_chat_history(self, chain, conversation_id: int):
+    def append_chat_history(self, conversation_id: int, item: Conversation):
+        db = self.db
+        db.execute("INSERT INTO ConversationMessages(conversation_id, role_name, content) VALUES(?, ?, ?)",
+                   (conversation_id, item.role_name, item.content))
+
+    def load_chat_history_data(self, conversation_id: int) -> list[Conversation]:
+        db = self.db
+        result = db.query_objects("SELECT role_name, content FROM ConversationMessages WHERE conversation_id=? ORDER BY id DESC LIMIT 10",
+                                  (conversation_id, ))
+        result = result[::-1]
+        return result
+
+    def extract_chat_history(self, chain):
         extracted_messages = chain.memory.chat_memory.messages
         # [HumanMessage(content='what do you know about Python in less than 10 words', additional_kwargs={}),
         #  AIMessage(content='Python is a high-level programming language.', additional_kwargs={})]
@@ -60,15 +80,14 @@ class ChatHistoryMemoryAgent(ChatHistoryAgentBase):
         #    'additional_kwargs': {}}}]
         items = []
         for row in ingest_data:
-            item = ChatHistoryItem(
+            item = Conversation(
                 role_name=row['type'],
                 content=row['data']['content']
             )
             items.append(item)
-        self.save_chat_history_data(conversation_id, items)
         return items
 
-    def load_chat_history(self, conversation_id: int) -> ConversationBufferMemory:
+    def load_conversation_buffer_memory(self, conversation_id: int) -> ConversationBufferMemory:
         rows = self.load_chat_history_data(conversation_id)
         messages = []
         for item in rows:
@@ -81,7 +100,7 @@ class ChatHistoryMemoryAgent(ChatHistoryAgentBase):
             })
         retrieved_messages = messages_from_dict(messages)
         retrieved_chat_history = ChatMessageHistory(messages=retrieved_messages)
-        retrieved_memory = ConversationBufferMemory(chat_memory=retrieved_chat_history)
+        retrieved_memory = ConversationBufferMemory(chat_memory=retrieved_chat_history, input_key="question")
         return retrieved_memory
 
 
@@ -224,8 +243,65 @@ def qa_mem2():
         chat_history.append((user_input, answer))
         print(answer)
 
+def qa_mem3():
+    vectorstore = load_vector_store()
 
+    template = """
+    Use the following context (delimited by <ctx></ctx>) and the chat history (delimited by <hs></hs>) to answer the question:
+    ------
+    <ctx>
+    {context}
+    </ctx>
+    ------
+    <hs>
+    {history}
+    </hs>
+    ------
+    {question}
+    Answer:
+    """
+    prompt = PromptTemplate(
+        input_variables=["history", "context", "question"],
+        template=template,
+    )
+
+    ollama = Ollama(base_url='http://localhost:11434', model="mistral")
+
+    chat_history_memory_agent = ChatHistoryMemoryAgent()
+    memory = chat_history_memory_agent.load_conversation_buffer_memory(123)
+
+    chain = RetrievalQA.from_chain_type(
+        llm=ollama,
+        chain_type='stuff',
+        retriever=vectorstore.as_retriever(),
+        verbose=False,
+        chain_type_kwargs={
+            "verbose": False,
+            "prompt": prompt,
+            "memory": memory,
+        }
+    )
+
+    while True:
+        print("")
+        user_input = input("qa_mem: ")
+        if user_input == "/bye":
+            break
+        chat_history_memory_agent.append_chat_history(123, Conversation(
+            role_name='human',
+            content=user_input
+        ))
+        resp = chain({
+                "query": user_input,
+            },
+            return_only_outputs=True)
+        answer = resp['result']
+        print(answer)
+        chat_history_memory_agent.append_chat_history(123, Conversation(
+            role_name='ai',
+            content=answer
+        ))
 
 #qa_docs()
 #qa_mem1()
-
+qa_mem3()
