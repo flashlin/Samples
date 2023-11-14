@@ -79,12 +79,12 @@ if( "net" -eq $action ) {
             listenaddress=0.0.0.0 `
             connectport=$connectPort `
             connectaddress=$connectIp
-        $ruleName = "WSL-$port"
-        $existingRule = Get-NetFirewallRule -DisplayName $ruleName
-        if ($null -eq $existingRule) {
-            #Remove-NetFirewallRule -DisplayName $ruleName
-            New-NetFirewallRule -DisplayName $ruleName -Direction Inbound -LocalPort $port -Protocol TCP -Action Allow
-        }
+    }
+    $ruleName = "WSL"
+    $existingRule = Get-NetFirewallRule -DisplayName $ruleName
+    if ($null -eq $existingRule) {
+        #Remove-NetFirewallRule -DisplayName $ruleName
+        New-NetFirewallRule -DisplayName $ruleName -Direction Inbound -LocalPort $ports -Protocol TCP -Action Allow
     }
     netsh interface portproxy show all
     return
