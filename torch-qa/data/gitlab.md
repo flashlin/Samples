@@ -102,3 +102,17 @@ deploy:
     - kubectl rollout status YourProjectName -n YourNamespaceName
 ```
 
+---
+Question: 如何建立 SSH-Key 存取 Gitlab ?
+Answer:
+
+請打開Git Bash命令提示符並輸入命令，如下所示
+```bash
+ssh-keygen
+```
+它會提示 `Enter file in which to save the key (/home/yourName/.ssh/id_rsa):`, 
+只需鍵入文件名並按ENTER. 
+
+* 登錄到您的GitLab帳戶，然後單擊[Settings] 選項
+* 請單擊菜單左側的 `SSH Keys` 選項卡
+* copy content of `/home/yourName/.ssh/id_rsa/id_rsa.pub` into Gitlab Key field
