@@ -33,3 +33,35 @@ RUN apk fix --force-overwrite alpine-baselayout-data
 RUN apk add --no-cache protoc grpc
 ENV PROTOBUF_PROTOC=/usr/bin/protoc GRPC_PROTOC_PLUGIN=/usr/bin/grpc_csharp_plugin
 ```
+
+---
+Question: What should I consider when upgrading to .NET 8?
+Answer:
+.NET 8 defaults to listening on port 8080 instead of port 80 in containers. 
+The minimal change required is to add an environment variable in the Dockerfile to override this and revert to port 80.
+```
+ENV ASPNETCORE_HTTP_PORTS=80
+```
+
+reference microsoft's breaking change document:
+https://learn.microsoft.com/en-us/dotnet/core/compatibility/containers/8.0/aspnet-port
+
+但是因為這次container 的部分會這麼改的一個主因是想要讓容器不要用root 的身分執行
+而在linux 下port 1~1023 屬於privileged port 需要更高權限
+
+如果是直接用微軟官方的images , 他們有定義user id是1654 ,
+要讓k8s 也可以用non-root user 執行的話還需要定義securityContext 用相同的id
+```yml
+spec:
+  securityContext:
+    runAsUser: 1654
+    runAsGroup: 1654
+  containers:
+```
+
+以下是 dockerfile 內容設定的部分
+```dockerfile
+ENV \
+  APP_UID=1654 \
+  ASPNETCORE_HTTP_PORTS=8080
+```
