@@ -52,6 +52,10 @@ def main():
     docs1 = load_txt_documents("../data")
     docs2 = load_markdown_documents("../data")
 
+    def load_markdown_documents(data_path: str):
+        md_loader = DirectoryLoader(data_path, glob='*.md', loader_cls=UnstructuredMarkdownLoader)
+        return md_loader.load()
+
     print("loading llm")
     llm = load_llm_model()
     print("llm done")
