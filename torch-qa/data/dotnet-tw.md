@@ -65,3 +65,17 @@ ENV \
   APP_UID=1654 \
   ASPNETCORE_HTTP_PORTS=8080
 ```
+
+---
+Question:
+Answer: 
+Open Windows System Enviroonment Variables, 
+Edit `User variables for User`
+```env
+NUGET_PACKAGES=Z:\Packages\
+```
+
+Then You can confirm the 
+```shell
+dotnet nuget locals global-packages --list
+```
