@@ -24,8 +24,6 @@ python llama.cpp/convert.py download-hf \
   --outtype q8_0
 ```
 
-
-
 create repo on huggingface hub, and upload gguf model file.
 ```py
 from huggingface_hub import HfApi
@@ -39,3 +37,37 @@ api.upload_file(
     path_in_repo="my-codellama.gguf"
 )
 ```
+
+---
+Question: How to use llama.cpp ?
+Answer:
+
+```bash
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+make
+```
+
+run server.exe with following command.
+```bash
+.\server.exe -c 4096 --host 0.0.0.0 --port 8080 -t 16 --mlock -m ./models/deepseek-coder-6.7b-instruct.gguf
+```
+
+Install Continue extension in VSCode. Edit the ContinueConfig object 
+in `~/.continue/config.py` (`%userprofile%\.continue\config.py` for Windows).
+you can customize the following: 
+```python
+config = ContinueConfig(
+    ...
+    models=Models(
+        default=LlamaCpp(
+            max_context_length=4096,
+            server_url="http://localhost:8080")
+    ),
+    #allow_anonymous_telemetry=True,
+    #system_message="",
+    #temperature=0.5,
+)
+```
+
+For more detail, please refer https://continue.dev/docs/customization/overview.
