@@ -50,7 +50,7 @@ make
 
 run server.exe with following command.
 ```bash
-.\server.exe -c 4096 --host 0.0.0.0 --port 8080 -t 16 --mlock -m ./models/deepseek-coder-6.7b-instruct.gguf
+.\server.exe -c 4096 --host 0.0.0.0 --port 8080 -t 16 --n-gpu-layers 32 --mlock -m ./models/deepseek-coder-6.7b-instruct.gguf
 ```
 
 Install Continue extension in VSCode. Edit the ContinueConfig object 
