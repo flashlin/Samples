@@ -71,3 +71,56 @@ config = ContinueConfig(
 ```
 
 For more detail, please refer https://continue.dev/docs/customization/overview.
+
+---
+Question: How to use OpenAI Whisper Speech to Text Model?
+Answer:
+Whisper is an automatic speech recognition (ASR) system trained on 680,000 hours of multilingual and multitask supervised data collected from the web.
+
+```bash
+pip install --q --upgrade pip
+pip install --q --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
+pip install --q flash-attn --no-build-isolation
+```
+
+By following the code below, you can transcribe audio files into text.
+```python
+import torch
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+
+device = "cuda:0" if torch.cuda.is_available() else "cpu"
+torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+model_id = "openai/whisper-large-v3"
+model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, torch_dtype=torch_dtype, 
+    low_cpu_mem_usage=True, use_safetensors=True
+)
+model.to(device)
+processor = AutoProcessor.from_pretrained(model_id)
+
+pipe = pipeline(
+    "automatic-speech-recognition",
+    model=model,
+    tokenizer=processor.tokenizer,
+    feature_extractor=processor.feature_extractor,
+    max_new_tokens=128,
+    chunk_length_s=15,
+    batch_size=16,
+    return_timestamps=True,
+    torch_dtype=torch_dtype,
+    device=device,
+)
+
+audio = "GPT4Vision.WAV"
+result = pipe(audio) # v2 gives better results if you don't provide a language.
+print(result['text'])
+print(result['chunks'])
+```
+
+Here are more examples.
+```python
+result = pipe(audio, generate_kwargs={"language": "english"})
+result = pipe(audio, return_timestamps=True)
+print(result["chunks"])
+```
