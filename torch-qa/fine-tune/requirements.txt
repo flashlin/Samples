@@ -3,3 +3,4 @@ peft
 bitsandbytes
 transformers
 trl
+scipy

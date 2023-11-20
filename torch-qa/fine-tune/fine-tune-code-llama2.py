@@ -13,27 +13,84 @@ from transformers import (
 )
 from peft import LoraConfig, PeftModel
 from trl import SFTTrainer
+import json
 
 def convert_parquet_to_csv(parquet_file: str):
     df = pd.read_parquet('train-data/train-sample.parquet')
     df.to_csv('train-data/train-sample.csv')
 
+def convert_csv_to_json(csv_file: str):
+    df = pd.read_csv(csv_file, header=0)
+    print(f"{df.columns.tolist()=}")
+    text_array = df['text'].tolist()
+    with open(f'train-sample.json', 'w') as json_file:
+        json.dump(text_array, json_file)
+    
 
-# Model from Hugging Face hub
-base_model = "NousResearch/Llama-2-7b-chat-hf"
-# Fine-tuned model
-new_model = "llama-2-7b-chat-guanaco"
+def load_parquet_file(file: str):
+    df = pd.read_parquet(file)    
+    column_names = ['id', 'text']
+    df.columns = column_names
+    return df
+    # full_dataset = load_dataset(file, split="train")
+    # train_dataset = full_dataset.train_test_split(test_size=0.1)["train"]
+    # return train_dataset
 
 
 def load_train_csv_file(csv_file: str):
     # dataset = load_dataset(guanaco_dataset, split="train")
-    df = pd.read_csv(csv_file)
-    split_point = int(0.8 * len(df))
+    df = pd.read_csv(csv_file, header=1)
+    split_point = int(0.1 * len(df))
     train_data = df.iloc[:split_point]
     val_data = df.iloc[split_point:]
     return train_data, val_data
 
 
+def formatting_prompts_func(example):
+    output_texts = []
+    # for i in range(len(example['prompt'])):
+    #     text = f"### Input: ```{example['prompt'][i]}```\n ### Output: {example['completion'][i]}"
+    #     output_texts.append(text)
+    for i in range(len(example['prompt'])):
+        text = example['prompt'][i]
+        output_texts.append(text)
+    return output_texts
+
+
+# dataset = open_instruct_dataset.filter(lambda example: (len(example["input"]) + len(example["output"]) + len(example["instruction"])) <= 4096)
+# total_data_points = len(dataset)
+# sample_size = 5_000
+# random_indices = random.sample(range(total_data_points), sample_size)
+# subset = dataset.select(random_indices)
+
+# [
+#   {
+#     "prompt": "she no went to market",
+#     "completion": "She didn't go to the market."
+#   }
+# ]
+def load_train_json_file(file: str):
+    dataset = load_dataset("json", 
+                           data_files=file,
+                           split="train")
+    return dataset
+
+
+
+# Model from Hugging Face hub
+base_model = "NousResearch/Llama-2-7b-chat-hf"
+
+base_model = "./models/llama-2-7b-chat-hf"
+
+# Fine-tuned model
+new_model = "llama-2-7b-chat-guanaco"
+
+print("load dataset")
+# convert_csv_to_json('train-data/train-sample.csv')
+# dataset = load_train_csv_file('train-data/train-sample.csv')
+# dataset = load_parquet_file('./train-data/train-sample.parquet')
+dataset = load_train_json_file('./train-data/train-sample.json')
+    
 compute_dtype = getattr(torch, "float16")
 
 quant_config = BitsAndBytesConfig(
@@ -43,21 +100,22 @@ quant_config = BitsAndBytesConfig(
     bnb_4bit_use_double_quant=False,
 )
 
-# load model
+print("# load model")
 model = AutoModelForCausalLM.from_pretrained(
     base_model,
     quantization_config=quant_config,
-    device_map={"": 0}
+    device_map={"": 0},
+    local_files_only=True,
 )
 model.config.use_cache = False
 model.config.pretraining_tp = 1
 
-# Load LLaMA tokenizer
+print("# Load LLaMA tokenizer")
 tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 
-# Load LoRA configuration
+print("# Load LoRA configuration")
 peft_args = LoraConfig(
     lora_alpha=16,
     lora_dropout=0.1,
@@ -66,7 +124,7 @@ peft_args = LoraConfig(
     task_type="CAUSAL_LM",
 )
 
-#  Set training parameters
+print("Set training parameters")
 training_params = TrainingArguments(
     output_dir="./results",
     num_train_epochs=1,
@@ -87,18 +145,21 @@ training_params = TrainingArguments(
     report_to="tensorboard"
 )
 
-# Set supervised fine-tuning parameters
+
+print("Set supervised fine-tuning parameters")
 trainer = SFTTrainer(
     model=model,
     train_dataset=dataset,
+    formatting_func=formatting_prompts_func,
     peft_config=peft_args,
-    dataset_text_field="text",
+    # dataset_text_field="text",
     max_seq_length=None,
     tokenizer=tokenizer,
     args=training_params,
     packing=False,
 )
 
+print("Train model...")
 # Train model
 trainer.train()
 
