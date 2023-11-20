@@ -75,12 +75,12 @@ def load_train_json_file(file: str):
                            split="train")
     return dataset
 
-
+import os
+os.environ['TRANSFORMERS_CACHE'] = '/mnt/c/workspace/fine-tune/models/'
 
 # Model from Hugging Face hub
 base_model = "NousResearch/Llama-2-7b-chat-hf"
-
-base_model = "./models/llama-2-7b-chat-hf"
+#base_model = "./models/llama-2-7b-chat-hf"
 
 # Fine-tuned model
 new_model = "llama-2-7b-chat-guanaco"
@@ -127,7 +127,7 @@ peft_args = LoraConfig(
 print("Set training parameters")
 training_params = TrainingArguments(
     output_dir="./results",
-    num_train_epochs=1,
+    num_train_epochs=100,
     per_device_train_batch_size=4,
     gradient_accumulation_steps=1,
     optim="paged_adamw_32bit",
@@ -135,7 +135,7 @@ training_params = TrainingArguments(
     logging_steps=25,
     learning_rate=2e-4,
     weight_decay=0.001,
-    fp16=False,
+    fp16=True, #False
     bf16=False,
     max_grad_norm=0.3,
     max_steps=-1,
@@ -153,7 +153,7 @@ trainer = SFTTrainer(
     formatting_func=formatting_prompts_func,
     peft_config=peft_args,
     # dataset_text_field="text",
-    max_seq_length=None,
+    max_seq_length=1024 * 2,
     tokenizer=tokenizer,
     args=training_params,
     packing=False,
@@ -163,17 +163,18 @@ print("Train model...")
 # Train model
 trainer.train()
 
-# Save model
+print("# Save model")
 trainer.model.save_pretrained(new_model)
 
+# not work
+# print("# Run text generation pipeline with our next model")
+# prompt = "Who brought you into existence?"
+# pipe = pipeline(task="text-generation", model=new_model, tokenizer=new_model, max_length=200)
+# result = pipe(f"<s>[INST] {prompt} [/INST]")
+# answer = result[0]['generated_text']
+# print(f"{answer=}")
 
-# Run text generation pipeline with our next model
-prompt = "Who is Leonardo Da Vinci?"
-pipe = pipeline(task="text-generation", model=new_model, tokenizer=new_model, max_length=200)
-result = pipe(f"<s>[INST] {prompt} [/INST]")
-print(result[0]['generated_text'])
-
-
+print("END")
 def push_model():
     # Reload model in FP16 and merge it with LoRA weights
     load_model = AutoModelForCausalLM.from_pretrained(
