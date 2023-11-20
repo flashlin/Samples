@@ -256,3 +256,71 @@ var apiVersion = HttpContext.GetRequestedApiVersion();
 return Ok(new { version = apiVersion.ToString("F") });
 ```
 
+---
+Question: How to install gRPC tool in alpine image?
+Answer:
+
+If you face the following error message.
+```
+error msg: The specified task executable "/root/.nuget/packages/grpc.tools/2.45.0/tools/linux_x64/protoc" could not be run. 
+System.ComponentModel.Win32Exception (2): An error occurred trying to start process
+```
+
+Try modify dockerfile:
+```Dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:7.0.4-alpine3.17-amd64 as base
+
+RUN sed -i '1i openssl_conf = default_conf' /etc/ssl/openssl.cnf && echo -e "\n[ default_conf ]\nssl_conf = ssl_sect\n[ssl_sect]\nsystem_default = system_default_sect\n[system_default_sect]\nMinProtocol = TLSv1\nCipherString = DEFAULT:@SECLEVEL=1" >> /etc/ssl/openssl.cnf
+
+# fix executeable binary for dotnet tools
+RUN apk --no-cache add gcompat
+
+# modify timezone
+RUN apk --no-cache add tzdata
+ENV TZ America/Anguilla
+RUN echo $TZ > /etc/timezone
+RUN date
+
+RUN GRPC_HEALTH_PROBE_VERSION=v0.4.5 && \
+    wget -qO/bin/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+    chmod +x /bin/grpc_health_probe
+
+RUN apk add --no-cache icu-libs curl tcpdump
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8
+
+WORKDIR /app
+EXPOSE 46101
+
+# build
+FROM mcr.microsoft.com/dotnet/sdk:7.0.202-alpline3.17-amd64 AS build
+WORKDIR /src
+
+RUN dotnet tool install --tool-path /dotnetcore-tools dotnet-dump
+RUN dotnet tool install --tool-path /dotnetcore-tools dotnet-trace
+
+COPY */*.csproj ./
+RUN for file in $(ls *.csproj); do mkdir -p ${file%.*} && mv $file ${file%.*}/; done
+
+# restore nuget packages
+RUN dotnet restore
+
+# See https://pkgs/alpinelinux.org/package/edge/community/x86_64/grpc-plugins
+RUN apk add grpc-plugins 
+
+# set environment variables for the build/installed protoc
+ENV PROTOBUF_PROTOC=/usr/bin/protoc
+ENV GRPC_PROTOC_PLUGIN=/usr/bin/grpc_csharp_plugin
+
+COPY . .
+RUN dotnet publish "./YourProject/YourProject.csproj" -c Release -o /app/publish --no-restore
+
+FROM base AS final
+WORKDIR /app
+COPY --from=build /dotnetcore-tools /opt/dotnetcore-tools
+COPY --from=build /app/publish .
+ENV PATH="${PATH}:/opt/dotnetcore-tools/"
+
+ENTRYPOINT ["dotnet", "YourProject.dll"]
+```
