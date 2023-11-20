@@ -9,6 +9,9 @@ model_id="BAAI/bge-large-zh-v1.5"
 
 model_id="meta-llama/Llama-2-13b-chat-hf"
 
+# please login first.
+# huggingface-cli login --token $HUGGINGFACE_TOKEN
+
 model_name = model_id.split("/", 1)[-1]
 snapshot_download(repo_id=model_id, 
                   local_dir=f"download-{model_name}",
