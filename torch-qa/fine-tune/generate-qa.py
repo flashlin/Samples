@@ -45,7 +45,13 @@ def query_qa_md(file: str):
                 is_answer = False
             captured_text = is_match(line, create_regex([r'Answer:(.*)']))
             if captured_text:
+                answer += captured_text + '\r\n'
                 is_answer = True
+                continue
+            if line.startswith("Answer:"):
+                answer = ""
+                is_answer = True
+                continue
             if line.startswith('---'):
                 is_answer = False
                 if question != '' and answer != '':
@@ -54,6 +60,8 @@ def query_qa_md(file: str):
                 answer = ""
             if is_answer:
                 answer += line + '\r\n'
+        if question != '' and answer != '':
+            yield question, answer
 
 
 def convert_qa_md_to_csv(md_file: str, qa_file: str):
@@ -76,20 +84,22 @@ def list_games(folder):
 
 def clean_files(folder):
     filenames = os.listdir(folder)
-    s1 = "You can find the information about betting rules and game instructions on the"
+    s1 = "You can find the information about betting rules and game instructions at the"
     remove_files = []
     for filename in filenames:
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(f"{folder}/{filename}", 'r', encoding='utf-8') as f:
             content = f.read()
             if s1 in content:
                 remove_files.append(filename)
+    print(f"{remove_files=}")
     for filename in remove_files:
         os.remove(f'{folder}/{filename}')
 
 if __name__ == '__main__':
-    # convert_qa_md_to_csv("./qa.txt", "./qa.csv")
-    game_names = {}
-    for game_name in list_games('./data'):
-        game_names[game_name] = True
-    for game_name in game_names.keys():
-        append_to_file(game_name, "gamename.txt")
+    # clean_files("./data")
+    convert_qa_md_to_csv("./qa.txt", "./qa.csv")
+    # game_names = {}
+    # for game_name in list_games('./data'):
+    #     game_names[game_name] = True
+    # for game_name in game_names.keys():
+    #     append_to_file(game_name, "gamename.txt")

@@ -20,8 +20,8 @@ new_model = "./models/llama-2-7b-chat-finetuned"
 base_model = "./models/llama-2-13b-chat-hf"
 new_model = "./models/llama-2-13b-chat-finetuned"
 
-save_hf_model(base_model, new_model)
-exit(0)
+#save_hf_model(base_model, new_model)
+#exit(0)
 
 
 dataset = load_train_csv_file("./train.csv")

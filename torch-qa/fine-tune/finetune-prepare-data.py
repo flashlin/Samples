@@ -69,7 +69,7 @@ def convert_qa_txt_file_to_train_csv(txt_file, csv_file):
             writer.writerow([text])
 
 
-convert_qa_txt_file_to_csv("qa.txt", "qa.csv")
+# convert_qa_txt_file_to_csv("qa.txt", "qa.csv")
 convert_qa_txt_file_to_train_csv("qa.txt", "train.csv")
 
 # autotrain llm --train 
