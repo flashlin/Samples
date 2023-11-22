@@ -21,4 +21,15 @@ WSL 2.0.7 Added support for new opt-in experimental features
 * dnsTunneling – Changes how WSL resolves DNS requests to improve network compatibility
 * firewall – Applies Windows firewall rules to WSL, and allows for advanced firewall controls for the WSL VM
 * autoProxy – Makes WSL automatically use the proxy information from Windows to improve network compatibility
+
+The following command will enable the `Sparse VHD` feature.
+```shell
+wsl --manage Ubuntu-22.04 --set-sparse true
+```
+
+Executing the following command(Remove all unused containers, networks, images.)
+will free up a large amount of space.
+```
+docker system prune --all
+```
 ---

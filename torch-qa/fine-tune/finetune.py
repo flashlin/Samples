@@ -4,7 +4,7 @@ from finetune_lit import save_hf_model, load_hf_model_for_finetune, load_hf_toke
 
 def load_train_csv_file(csv_file: str):
     # dataset = load_dataset(guanaco_dataset, split="train")
-    df = pd.read_csv(csv_file, header=1)
+    df = pd.read_csv(csv_file, header=0)
     split_point = int(0.1 * len(df))
     train_data = df.iloc[:split_point]
     val_data = df.iloc[split_point:]
