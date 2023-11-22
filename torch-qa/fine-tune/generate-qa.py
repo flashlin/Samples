@@ -1,4 +1,5 @@
 import csv
+import os
 import re
 
 llama2_train_template = """
@@ -8,6 +9,9 @@ llama2_train_template = """
 {answer}
 """
 
+def append_to_file(txt, file):
+    with open(file, 'a') as f:
+        f.write(txt + '\r\n')
 
 def create_regex(patterns: list[str]):
     regex_patterns = []
@@ -60,5 +64,32 @@ def convert_qa_md_to_csv(md_file: str, qa_file: str):
             writer.writerow([question, answer])
 
 
+def list_games(folder):
+    filenames = os.listdir(folder)
+    game_name_pattern = re.compile(r'(.*)\-rule\-\d+\.md$', re.IGNORECASE)
+    for filename in filenames:
+        match = game_name_pattern.match(filename)
+        if match:
+            captured = match.group(1).strip()
+            yield captured
+
+
+def clean_files(folder):
+    filenames = os.listdir(folder)
+    s1 = "You can find the information about betting rules and game instructions on the"
+    remove_files = []
+    for filename in filenames:
+        with open(filename, 'r', encoding='utf-8') as f:
+            content = f.read()
+            if s1 in content:
+                remove_files.append(filename)
+    for filename in remove_files:
+        os.remove(f'{folder}/{filename}')
+
 if __name__ == '__main__':
-    convert_qa_md_to_csv("./qa.txt", "./qa.csv")
+    # convert_qa_md_to_csv("./qa.txt", "./qa.csv")
+    game_names = {}
+    for game_name in list_games('./data'):
+        game_names[game_name] = True
+    for game_name in game_names.keys():
+        append_to_file(game_name, "gamename.txt")
