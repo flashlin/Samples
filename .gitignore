@@ -40,3 +40,4 @@ torch-qa/Llama-2-7b-chat-finetune
 torch-qa/demo1/qdrant_storage
 .cache/
 .ipynb_checkpoints/
+models/
