@@ -67,10 +67,11 @@ def load_hf_model_for_finetune(model_id: str):
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         quantization_config=quant_config,
-        device_map={"": 0},
+        # device_map={"": 0},
+        device_map="auto",
         local_files_only=True,
     )
-    model.config.use_cache = False
+    # model.config.use_cache = False
     model.config.pretraining_tp = 1
     return model
 

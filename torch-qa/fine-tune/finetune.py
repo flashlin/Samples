@@ -5,7 +5,7 @@ from finetune_lit import save_hf_model, load_hf_model_for_finetune, load_hf_toke
 
 def load_train_csv_file(csv_file: str):
     # df = load_dataset(csv_file, split="train")
-    df = load_dataset('csv', data_files=csv_file)
+    df = load_dataset('csv', data_files=csv_file, split="train")
     # df = pd.read_csv(csv_file, header=0)
     print(f"{df.column_names=}")
     # split_point = int(0.1 * len(df))
