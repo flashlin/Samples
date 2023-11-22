@@ -14,13 +14,17 @@ def load_train_csv_file(csv_file: str):
     # return train_data, val_data
     return df
 
-
-dataset = load_train_csv_file("./train.csv")
-
 base_model = "./models/llama-2-7b-hf"
 new_model = "./models/llama-2-7b-chat-finetuned"
 
-#save_hf_model(base_model, new_model)
+base_model = "./models/llama-2-13b-chat-hf"
+new_model = "./models/llama-2-13b-chat-finetuned"
+
+save_hf_model(base_model, new_model)
+exit(0)
+
+
+dataset = load_train_csv_file("./train.csv")
 
 print("Loading model")
 model = load_hf_model_for_finetune(new_model)
