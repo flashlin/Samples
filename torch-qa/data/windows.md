@@ -33,3 +33,25 @@ will free up a large amount of space.
 docker system prune --all
 ```
 ---
+Question: How to export WSL distribution to .tar file?
+Answer:
+
+```shell
+wsl --export Ubuntu-22.04 ubuntu.tar
+```
+
+---
+Question: How to uninstall WSL distribution ?
+Answer:
+
+```shell
+wsl --unregister Ubuntu-22.04
+```
+
+---
+Question: How to import .tar file into WSL?
+Answer:
+
+```shell
+wsl --import Ubuntu-22.04 D:\OtherLocation ubuntu.tar
+```

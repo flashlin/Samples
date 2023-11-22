@@ -1,17 +1,21 @@
+from datasets import load_dataset
 import pandas as pd
 
 from finetune_lit import save_hf_model, load_hf_model_for_finetune, load_hf_tokenizer, load_stf_trainer
 
 def load_train_csv_file(csv_file: str):
-    # dataset = load_dataset(guanaco_dataset, split="train")
-    df = pd.read_csv(csv_file, header=0)
-    split_point = int(0.1 * len(df))
-    train_data = df.iloc[:split_point]
-    val_data = df.iloc[split_point:]
-    return train_data, val_data
+    # df = load_dataset(csv_file, split="train")
+    df = load_dataset('csv', data_files=csv_file)
+    # df = pd.read_csv(csv_file, header=0)
+    print(f"{df.column_names=}")
+    # split_point = int(0.1 * len(df))
+    # train_data = df.iloc[:split_point]
+    # val_data = df.iloc[split_point:]
+    # return train_data, val_data
+    return df
 
 
-dataset, val_data = load_train_csv_file("./train.csv")
+dataset = load_train_csv_file("./train.csv")
 
 base_model = "./models/llama-2-7b-hf"
 new_model = "./models/llama-2-7b-chat-finetuned"
