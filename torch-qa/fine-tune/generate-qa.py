@@ -1,4 +1,5 @@
 import csv
+import json
 import os
 import re
 
@@ -36,7 +37,7 @@ def query_qa_md(file: str):
         answer = ""
         for line in f:
             line = line.strip()
-            captured_text = is_match(line, create_regex([r'Question ?\d+:(.*)', r'Q\d+:(.*)']))
+            captured_text = is_match(line, create_regex([r'Question ?\d+:(.*)', r'Question:(.*)', r'Q\d+:(.*)']))
             if captured_text:
                 if question != '' and answer != '':
                     yield question, answer
@@ -72,6 +73,16 @@ def convert_qa_md_to_csv(md_file: str, qa_file: str):
             writer.writerow([question, answer])
 
 
+def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file):
+    with open(jsonl_file, 'w', encoding='utf-8') as jfile:
+        for question, answer in query_qa_md(md_file):
+            json_line = json.dumps({
+                'instruction':question,
+                'input':'',
+                'output':answer
+            })
+            jfile.write(json_line+'\r\n')
+
 def list_games(folder):
     filenames = os.listdir(folder)
     game_name_pattern = re.compile(r'(.*)\-rule\-\d+\.md$', re.IGNORECASE)
@@ -98,6 +109,7 @@ def clean_files(folder):
 if __name__ == '__main__':
     # clean_files("./data")
     convert_qa_md_to_csv("./qa.txt", "./qa.csv")
+    convert_qa_md_file_to_train_jsonl("./qa.txt", "./train.jsonl")
     # game_names = {}
     # for game_name in list_games('./data'):
     #     game_names[game_name] = True
