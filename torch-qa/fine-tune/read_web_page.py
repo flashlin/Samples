@@ -1,5 +1,7 @@
 import json
 import re
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_lit import load_markdown_documents
 from web_crawler_lit import download_html, convert_html_body_to_markdown
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -89,6 +91,10 @@ if __name__ == '__main__':
 
     # html = download_html('https://ithelp.ithome.com.tw/articles/10335513')
     # markdown = convert_html_body_to_markdown(html)
+
+    documents = load_markdown_documents('./documents')
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000 * 10, chunk_overlap=20)
+    all_splits = text_splitter.split_documents(documents)
 
     markdown = """
     PageAttention’s memory sharing greatly reduces the memory overhead of complex sampling algorithms, such as parallel sampling and beam search, cutting their memory usage by up to 55%. This can translate into up to 2.2x improvement in throughput. This makes such sampling methods practical in LLM services.
