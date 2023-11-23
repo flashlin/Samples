@@ -2,12 +2,11 @@ from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import LlamaCpp
 
-from langchain_lit import load_txt_documents
+from langchain_lit import load_txt_documents, load_markdown_documents
 from llm_utils import Retrieval
 from llm_utils import ConversationalRetrievalChainAgent
 from llm_utils import LlmEmbedding
 from qdrant_lit import QdrantVectorStore
-from lanchainlit import load_markdown_documents
 
 
 def load_llm_model():

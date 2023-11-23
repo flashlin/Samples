@@ -70,7 +70,7 @@ def split_questions_content(content: str):
 
 
 def append_to_jsonl(question: str, answer: str):
-    with open('llm-qa.jsonl', 'a', encoding='utf-8') as f:
+    with open('./results/llm-qa.jsonl', 'a', encoding='utf-8') as f:
         qa_json = json.dumps({
             'instruction': question,
             'input': '',
@@ -80,7 +80,7 @@ def append_to_jsonl(question: str, answer: str):
 
 
 def append_to_md(question: str, answer: str):
-    with open('llm-qa.md', 'a', encoding='utf-8') as f:
+    with open('./results/llm-qa.md', 'a', encoding='utf-8') as f:
         f.write(f'Question: {question}\r\n')
         f.write(f'Answer: {answer}\r\n')
 

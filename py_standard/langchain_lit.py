@@ -2,7 +2,7 @@ from langchain.callbacks.base import BaseCallbackHandler
 from langchain.llms import LlamaCpp
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
-from langchain.document_loaders import DirectoryLoader, TextLoader
+from langchain.document_loaders import DirectoryLoader, TextLoader, UnstructuredMarkdownLoader
 from langchain.storage import InMemoryStore
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.embeddings import HuggingFaceBgeEmbeddings
@@ -51,6 +51,11 @@ class LlmBot:
 def load_txt_documents(txt_path: str):
     txt_loader = DirectoryLoader(txt_path, glob='*.txt', loader_cls=TextLoader)
     return txt_loader.load()
+
+
+def load_markdown_documents(data_path: str):
+    md_loader = DirectoryLoader(data_path, glob='*.md', loader_cls=UnstructuredMarkdownLoader)
+    return md_loader.load()
 
 
 class LlmEmbedding:
@@ -167,3 +172,6 @@ class StreamDisplayHandler(BaseCallbackHandler):
             display_function(text)
         else:
             raise ValueError(f"Invalid display_method: {display_function}")
+
+
+
