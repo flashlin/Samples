@@ -59,6 +59,15 @@ def get_target_filename(url: str):
     return target_filename
 
 
+def convert_html_body_to_markdown(html_content: str) -> str:
+    soup = BeautifulSoup(html_content, 'html.parser')
+    article_content = soup.body
+    # article_content = soup.find('div', id='articleContent')
+    markdown_content = markdown.markdown(str(article_content), extensions=['markdown.extensions.fenced_code'])
+    markdown_content = html_to_markdown(markdown_content)
+    return markdown_content
+
+
 def save_html_to_file(url, html_content):
     target_file = get_target_filename(url)
     if target_file is None:
@@ -74,15 +83,15 @@ def save_html_to_file(url, html_content):
         file.write(markdown_content)
 
 
+def download_html(url: str):
+    return requests.get(url).text
+
 class Crawler:
     def __init__(self, urls: list[str]):
         self.visited_urls = []
         self.urls_to_visit = urls
         self.visited_urls_file = UrlsFile('visited.txt')
         self.urls_to_visit_file = UrlsFile('urls_to_visit.txt')
-
-    def download_url(self, url):
-        return requests.get(url).text
 
     def get_linked_urls(self, url, html_content):
         soup = BeautifulSoup(html_content, 'html.parser')
@@ -103,7 +112,7 @@ class Crawler:
     def crawl(self, url):
         if url in self.visited_urls:
             return
-        html = self.download_url(url)
+        html = download_html(url)
         self.visited_urls_file.append(url)
         save_html_to_file(url, html)
         for url in self.get_linked_urls(url, html):
