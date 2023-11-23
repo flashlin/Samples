@@ -1,3 +1,4 @@
+import json
 import re
 
 from web_crawler_lit import download_html, convert_html_body_to_markdown
@@ -69,6 +70,22 @@ def split_questions_content(content: str):
     return questions
 
 
+def append_to_jsonl(question: str, answer: str):
+    with open('llm-qa.jsonl', 'a', encoding='utf-8') as f:
+        qa_json = json.dumps({
+            'instruction': question,
+            'input': '',
+            'output': answer
+        })
+        f.write(qa_json + '\r\n')
+
+
+def append_to_md(question: str, answer: str):
+    with open('llm-qa.md', 'a', encoding='utf-8') as f:
+        f.write(f'Question: {question}\r\n')
+        f.write(f'Answer: {answer}\r\n')
+
+
 if __name__ == '__main__':
 
     # html = download_html('https://ithelp.ithome.com.tw/articles/10335513')
@@ -96,8 +113,7 @@ if __name__ == '__main__':
 
     for question in questions:
         answer = get_answer_from_content(markdown, question)
-        print(question)
-        print(answer)
-
-
-
+        answer = answer.strip()
+        if answer != 'None':
+            append_to_jsonl(question, answer)
+            append_to_md(question, answer)
