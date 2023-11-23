@@ -50,7 +50,7 @@ def save_hf_model(model_id: str, new_model_id: str):
 
 
 def load_hf_tokenizer(model_id: str):
-    tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
+    tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=False)
     tokenizer.pad_token = tokenizer.eos_token
     tokenizer.padding_side = "right"
     return tokenizer
@@ -67,8 +67,7 @@ def load_hf_model_for_finetune(model_id: str):
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         quantization_config=quant_config,
-        # device_map={"": 0},
-        device_map="auto",
+        device_map={"": 0},
         local_files_only=True,
     )
     model.config.use_cache = False
@@ -95,7 +94,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
         logging_steps=25,
         learning_rate=2e-4,
         weight_decay=0.001,
-        fp16=True, #False
+        fp16=False,
         bf16=False,
         max_grad_norm=0.3,
         max_steps=-1,
@@ -109,7 +108,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
     trainer = SFTTrainer(
         model=model,
         train_dataset=train_data,
-        formatting_func=formatting_prompts_func,
+        # formatting_func=formatting_prompts_func,
         peft_config=peft_args,
         dataset_text_field="text",
         max_seq_length=1024 * 2,
