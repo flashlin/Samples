@@ -1,6 +1,5 @@
 import json
 import re
-
 from web_crawler_lit import download_html, convert_html_body_to_markdown
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
@@ -97,18 +96,6 @@ if __name__ == '__main__':
     """
 
     questions_content = generate_questions_from_markdown(markdown)
-
-#     questions_content = """1. What is PageAttention?
-# 2. How does PageAttention reduce memory overhead in complex sampling algorithms like parallel sampling and beam search?
-# 3. In what aspect can significant performance improvements be seen by using PagedAttention?
-# 4. What is the connection between PagedAttention and vLLM in terms of LLM models' support and inference engine?
-# 5. How does GitHub repo provide further information about vLLM and its technology?
-# 6. What are some common algorithms that benefit from PageAttention's memory sharing feature, particularly mentioned in the context of language models?
-# 7. In comparison to traditional methods, how much memory usage reduction is achieved by PagedAttention for parallel sampling and beam search?
-# 8. How does this improvement affect the practicality of LLM services during complex tasks like inference or serving engines?
-# 9. What specific functions are offered within vLLM's approach to handling various models efficiently?
-# 10. What aspects of PageAttention allow it to optimize language processing techniques like parallel sampling and beam search?
-#     """.strip()
     questions = split_questions_content(questions_content)
 
     for question in questions:
