@@ -73,9 +73,9 @@ def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file):
     with open(jsonl_file, 'w', encoding='utf-8') as jfile:
         for question, answer in query_qa_md(md_file):
             json_line = json.dumps({
-                'instruction':question,
-                'input':'',
-                'output':answer
+                'instruction': question,
+                'input': '',
+                'output': answer
             })
             jfile.write(json_line+'\r\n')
 
@@ -115,6 +115,8 @@ def convert_qa_md_file_to_train_csv(md_file, train_file):
 
 
 def convert_llm_qa_md_file_to_train_csv(llm_qa_file, train_file):
+    if not os.path.exists(llm_qa_file):
+        return
     for question, answer in query_qa_md(llm_qa_file):
         question = question.strip()
         answer = answer.strip()
@@ -143,6 +145,7 @@ def clean_files(folder):
     print(f"{remove_files=}")
     for filename in remove_files:
         os.remove(f'{folder}/{filename}')
+
 
 if __name__ == '__main__':
     # clean_files("./data")

@@ -14,18 +14,16 @@ def load_train_csv_file(csv_file: str):
     # return train_data, val_data
     return df
 
-base_model = "./models/llama-2-7b-hf"
-new_model = "./models/llama-2-7b-chat-finetuned"
 
-base_model = "./models/llama-2-13b-chat-hf"
-new_model = "./models/llama-2-13b-chat-finetuned"
+# base_model = "./models/llama-2-7b-hf"
+# new_model = "./models/llama-2-7b-chat-finetuned"
+# base_model = "./models/llama-2-13b-chat-hf"
+# new_model = "./models/llama-2-13b-chat-finetuned"
+# new_model = "./models/FlagAlpha_Atom-7B-Chat"
+# #save_hf_model(base_model, new_model)
+# #exit(0)
 
-new_model = "./models/FlagAlpha_Atom-7B-Chat"
-# new_model = "./models/atom-7b-chat-finetuned"
-
-#save_hf_model(base_model, new_model)
-#exit(0)
-
+new_model = "./models/llama-2-7b-hf"
 
 dataset = load_train_csv_file("./train.csv")
 

@@ -87,14 +87,14 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
     training_params = TrainingArguments(
         output_dir="./results",
         num_train_epochs=100,
-        per_device_train_batch_size=4,
+        per_device_train_batch_size=1,
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
         save_steps=25,
         logging_steps=25,
         learning_rate=2e-4,
         weight_decay=0.001,
-        fp16=False,
+        fp16=True, # False,
         bf16=False,
         max_grad_norm=0.3,
         max_steps=-1,
@@ -117,4 +117,17 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
         packing=False,
     )
 
+    for name, module in trainer.model.named_modules():
+        if "norm" in name:
+            module = module.to(torch.float32)
+
     return trainer
+
+
+def save_sft_model(trainer):
+    model_to_save = trainer.model.module if hasattr(trainer.model,
+                                                    'module') else trainer.model  # Take care of distributed/parallel training
+    model_to_save.save_pretrained("outputs")
+    lora_config = LoraConfig.from_pretrained('outputs')
+    model = get_peft_model(model, lora_config)
+    model.push_to_hub("ashishpatel26/Llama2_Finetuned_Articles_Constitution_3300_Instruction_Set", create_pr=1)
