@@ -83,6 +83,33 @@ def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file):
             })
             jfile.write(json_line+'\r\n')
 
+
+def append_qa_to_train_csv_file(train_file: str, question: str, answer: str):
+    prompt_template = """<s>[INST] {question} [/INST]
+    {answer}</s>"""
+    with open(train_file, 'a', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        text = prompt_template.format(question=question, answer=answer)
+        csv_writer.writerow([text])
+
+def convert_qa_md_file_to_train_csv(md_file, train_file):
+    prompt_template = """<s>[INST] {question} [/INST]
+{answer}</s>"""
+    with open(train_file, 'w', newline='', encoding='utf-8') as f:
+        writer = csv.writer(f)
+        writer.writerow(["text"])
+        for question, answer in query_qa_md(md_file):
+            question = question.strip()
+            answer = answer.strip()
+            text = prompt_template.format(question=question, answer=answer)
+            writer.writerow([text])
+
+def convert_llm_qa_md_file_to_train_csv(llm_qa_file, train_file):
+    for question, answer in query_qa_md(llm_qa_file):
+        question = question.strip()
+        answer = answer.strip()
+        append_qa_to_train_csv_file(train_file, question, answer)
+
 def list_games(folder):
     filenames = os.listdir(folder)
     game_name_pattern = re.compile(r'(.*)\-rule\-\d+\.md$', re.IGNORECASE)
@@ -109,7 +136,9 @@ def clean_files(folder):
 if __name__ == '__main__':
     # clean_files("./data")
     convert_qa_md_to_csv("./qa.txt", "./qa.csv")
-    convert_qa_md_file_to_train_jsonl("./qa.txt", "./train.jsonl")
+    convert_qa_md_file_to_train_jsonl("./qa.txt", "./train.json")
+    convert_qa_md_file_to_train_csv('./qa.txt', './train.csv')
+    convert_llm_qa_md_file_to_train_csv('./results/llm-qa.md', './train.csv')
     # game_names = {}
     # for game_name in list_games('./data'):
     #     game_names[game_name] = True
