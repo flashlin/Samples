@@ -3,16 +3,11 @@ import json
 import os
 import re
 
-llama2_train_template = """
-###Human:
-{question}
-###Assistant:
-{answer}
-"""
 
 def append_to_file(txt, file):
     with open(file, 'a') as f:
         f.write(txt + '\r\n')
+
 
 def create_regex(patterns: list[str]):
     regex_patterns = []
@@ -20,6 +15,7 @@ def create_regex(patterns: list[str]):
         rg_pattern = re.compile(pattern, re.IGNORECASE)
         regex_patterns.append(rg_pattern)
     return regex_patterns
+
 
 def is_match(txt: str, regex_patterns):
     for pattern in regex_patterns:
@@ -84,31 +80,46 @@ def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file):
             jfile.write(json_line+'\r\n')
 
 
+def create_llama2_instruction_prompt(question, user_input, answer):
+    instruction_prompt_template = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+### Instruction:
+{instruction}
+### Input:
+{input}
+### Response:
+{output}"""
+    return instruction_prompt_template.format(instruction=question, input=user_input, output=answer)
+
+
+def create_llama2_chat_prompt(question, answer):
+    chat_prompt_template = """<s>[INST] {instruction} [/INST] {output}</s>"""
+    return chat_prompt_template.format(instruction=question, output=answer)
+
+
 def append_qa_to_train_csv_file(train_file: str, question: str, answer: str):
-    prompt_template = """<s>[INST] {question} [/INST]
-    {answer}</s>"""
     with open(train_file, 'a', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
-        text = prompt_template.format(question=question, answer=answer)
-        csv_writer.writerow([text])
+        prompt = create_llama2_chat_prompt(question, answer)
+        csv_writer.writerow([prompt])
+
 
 def convert_qa_md_file_to_train_csv(md_file, train_file):
-    prompt_template = """<s>[INST] {question} [/INST]
-{answer}</s>"""
     with open(train_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(["text"])
         for question, answer in query_qa_md(md_file):
             question = question.strip()
             answer = answer.strip()
-            text = prompt_template.format(question=question, answer=answer)
+            text = create_llama2_chat_prompt(question=question, answer=answer)
             writer.writerow([text])
+
 
 def convert_llm_qa_md_file_to_train_csv(llm_qa_file, train_file):
     for question, answer in query_qa_md(llm_qa_file):
         question = question.strip()
         answer = answer.strip()
         append_qa_to_train_csv_file(train_file, question, answer)
+
 
 def list_games(folder):
     filenames = os.listdir(folder)
