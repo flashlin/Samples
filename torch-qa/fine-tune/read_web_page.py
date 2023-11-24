@@ -88,17 +88,25 @@ def append_to_md(question: str, answer: str):
         f.write(f'Answer: {answer}\r\n')
 
 
-
+def clean_content(content: str) -> str:
+    index = content.find("This article is also available in the following languages:")
+    if index != -1:
+        content = content[:index]
+    index = content.find("# Feedback")
+    if index != -1:
+        content = content[:index]
+    index = content.find("**View in other languages:")
+    if index != -1:
+        content = content[:index]
+    return content
 
 
 def clean_file(file: str):
-    print(f"clean {file}...")
     with open(file, "r", encoding='utf-8') as f:
         content = f.read()
-    index = content.find("This article is also available in the following languages:")
-    if index != -1:
+    new_content = clean_content(content)
+    if len(new_content) != len(content):
         print(f"{file} clean done.")
-        new_content = content[:index]
         with open(file, "w", encoding='utf-8') as f:
             f.write(new_content)
 
