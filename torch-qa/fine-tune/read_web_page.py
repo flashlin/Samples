@@ -20,7 +20,7 @@ def load_llm_model(model_name):
         verbose=False,
         streaming=True,
         n_gpu_layers=52,
-        n_threads=8,
+        n_threads=16,
     )
 
 llm = None
