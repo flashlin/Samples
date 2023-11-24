@@ -175,6 +175,13 @@ def append_to_md(question: str, answer: str):
         f.write(f'Question: {question}\r\n')
         f.write(f'Answer: {answer}\r\n')
 
+def remove_bad_content(content: str) -> str:
+    lines = content.split('\n')
+    for i, line in enumerate(lines):
+        if line.startswith('** [ Take Part!'):
+            lines[i] = ''
+    new_content = '\n'.join(lines)
+    return new_content
 
 def clean_content(content: str) -> str:
     index = content.find("This article is also available in the following languages:")
@@ -189,6 +196,7 @@ def clean_content(content: str) -> str:
     index = content.find("**View other languages")
     if index != -1:
         content = content[:index]
+    content = remove_bad_content(content)
     return content
 
 
@@ -250,3 +258,5 @@ if __name__ == '__main__':
             if answer != 'None':
                 append_to_jsonl(question, answer)
                 append_to_md(question, answer)
+
+        
