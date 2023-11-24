@@ -95,7 +95,10 @@ def clean_content(content: str) -> str:
     index = content.find("# Feedback")
     if index != -1:
         content = content[:index]
-    index = content.find("**View in other languages:")
+    index = content.find("**View in other languages")
+    if index != -1:
+        content = content[:index]
+    index = content.find("**View other languages")
     if index != -1:
         content = content[:index]
     return content
@@ -119,10 +122,12 @@ def clean_files(folder: str):
 if __name__ == '__main__':
     clean_files('./data')
 
+    print("loading model...")
     llm = load_llm_model('../models/neural-chat-7b-v3-16k-q4_k_m.gguf')
     # html = download_html('https://ithelp.ithome.com.tw/articles/10335513')
     # markdown = convert_html_body_to_markdown(html)
 
+    print("load documents...")
     documents = load_markdown_documents('./data')
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000 * 10, chunk_overlap=20)
     all_splits = text_splitter.split_documents(documents)
