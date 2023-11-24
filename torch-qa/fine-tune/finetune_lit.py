@@ -90,7 +90,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
         per_device_train_batch_size=1,
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
-        save_steps=25,
+        save_steps=500,
         logging_steps=25,
         learning_rate=2e-4,
         weight_decay=0.001,

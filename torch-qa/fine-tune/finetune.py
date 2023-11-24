@@ -52,7 +52,8 @@ def formatting_prompts_func(example):
 
 trainer = load_stf_trainer(model, tokenizer, dataset, formatting_prompts_func)
 print("Start finetune")
-trainer.train()
+trainer.train(resume_from_checkpoint=True)
+# trainer.train(resume_from_checkpoint="{<path-where-checkpoint-were_stored>/checkpoint-0000")
 print("Save model")
 trainer.model.save_pretrained(new_model)
 print("done")
