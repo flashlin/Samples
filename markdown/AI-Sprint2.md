@@ -43,3 +43,11 @@ Re-review the Unstructured data and try to manually remove garbage data.
 
 ---
 # correct concept
+
+* Model Size: 180B, 130B, 70B, 34B, 13B, 7B
+\>100B: text processing, understanding and generation
+
+* Our Machine Power:
+- use \<=34B: understanding and search
+(some text processing)
+- fine-tune \<=13B
