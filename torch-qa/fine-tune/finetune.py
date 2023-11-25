@@ -1,12 +1,11 @@
 from datasets import load_dataset
 import pandas as pd
-import yaml
 from finetune_lit import export_hf_model, load_hf_model_for_finetune, load_hf_tokenizer, load_stf_trainer
+from finetune_utils import load_finetune_config
 
-with open('finetune.yaml', 'r') as file:
-    config = yaml.safe_load(file)
-
+config = load_finetune_config()
 model_name = config["model_name"]
+
 
 def load_train_csv_file(csv_file: str):
     # df = load_dataset(csv_file, split="train")

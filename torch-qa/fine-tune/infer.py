@@ -20,6 +20,9 @@ from transformers import (
     AutoTokenizer,
     BitsAndBytesConfig
 )
+from finetune_utils import load_finetune_config
+
+config = load_finetune_config()
 
 
 def clean_prompt_resp(resp: str):
@@ -28,8 +31,8 @@ def clean_prompt_resp(resp: str):
     return s2.split('[/INST]', 1)[0]
 
 
-PEFT_MODEL = "llama-2-7b-chat-guanaco"
-PEFT_MODEL = "./models/llama-2-7b-hf"
+model_name = config['model_name']
+PEFT_MODEL = f"./models/{model_name}"
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -71,11 +74,6 @@ prompt = """
 prompt_template = """<s>[INST] {user_input} [/INST]"""
 
 
-
-
-
-
-    
 with torch.inference_mode():
     while True:
         user_input = input("query: ")
