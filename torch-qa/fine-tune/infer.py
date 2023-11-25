@@ -48,7 +48,7 @@ model = PeftModel.from_pretrained(model, PEFT_MODEL)
 
 generation_config = model.generation_config
 generation_config.max_new_tokens = 200
-generation_config.temperature = 0.7
+generation_config.temperature = 0.2  # 0.7
 # generation_config.top_p = 0.7
 generation_config.num_return_sequences = 1
 generation_config.pad_token_id = tokenizer.eos_token_id
@@ -62,6 +62,11 @@ prompt = """
 """.strip()
 
 prompt_template = """<s>[INST] {user_input} [/INST]"""
+
+
+def clean_prompt_resp(resp: str):
+    after_inst = resp.split("[/INST]", 1)[-1]
+    return after_inst.split("[INST]", 1)[0]
 
     
 with torch.inference_mode():
@@ -79,4 +84,7 @@ with torch.inference_mode():
             generation_config = generation_config
         )
 
-        print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+        resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        answer = clean_prompt_resp(resp)
+        print(answer)
+        
