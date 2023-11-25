@@ -79,7 +79,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
     peft_args = LoraConfig(
         lora_alpha=16,
         lora_dropout=0.1,
-        r=64,
+        r=64,  # 最初的 LoRA 論文建議從 8 級開始，但對於 QLoRA，需要 64 級。
         bias="none",
         task_type="CAUSAL_LM",
     )
@@ -87,7 +87,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
     training_params = TrainingArguments(
         output_dir="./results",
         num_train_epochs=100,
-        per_device_train_batch_size=1,
+        per_device_train_batch_size=4,
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
         save_steps=500,
