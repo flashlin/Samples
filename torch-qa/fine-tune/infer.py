@@ -47,11 +47,11 @@ model = AutoModelForCausalLM.from_pretrained(
     return_dict=True,
     quantization_config=bnb_config,
     device_map="auto",
-    #trust_remote_code=True,
+    # trust_remote_code=True,
     local_files_only=True,
 )
 
-tokenizer=AutoTokenizer.from_pretrained(config.base_model_name_or_path)
+tokenizer = AutoTokenizer.from_pretrained(config.base_model_name_or_path)
 tokenizer.pad_token = tokenizer.eos_token
 
 model = PeftModel.from_pretrained(model, PEFT_MODEL)
@@ -73,20 +73,19 @@ prompt = """
 
 prompt_template = """<s>[INST] {user_input} [/INST]"""
 
-
 with torch.inference_mode():
     while True:
         user_input = input("query: ")
         if user_input == '/bye':
             break
-        
+
         prompt = prompt_template.format(user_input=user_input)
         encoding = tokenizer(prompt, return_tensors="pt").to(device)
 
         outputs = model.generate(
-            input_ids = encoding.input_ids,
-            attention_mask = encoding.attention_mask,
-            generation_config = generation_config
+            input_ids=encoding.input_ids,
+            attention_mask=encoding.attention_mask,
+            generation_config=generation_config
         )
 
         resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
