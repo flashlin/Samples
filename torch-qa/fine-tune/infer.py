@@ -21,6 +21,13 @@ from transformers import (
     BitsAndBytesConfig
 )
 
+
+def clean_prompt_resp(resp: str):
+    after_inst = resp.split("[/INST]", 1)[-1]
+    s2 = after_inst.split("[INST]", 1)[0]
+    return s2.split('[/INST]', 1)[0]
+
+
 PEFT_MODEL = "llama-2-7b-chat-guanaco"
 PEFT_MODEL = "./models/llama-2-7b-hf"
 
@@ -64,9 +71,9 @@ prompt = """
 prompt_template = """<s>[INST] {user_input} [/INST]"""
 
 
-def clean_prompt_resp(resp: str):
-    after_inst = resp.split("[/INST]", 1)[-1]
-    return after_inst.split("[INST]", 1)[0]
+
+
+
 
     
 with torch.inference_mode():
@@ -87,4 +94,3 @@ with torch.inference_mode():
         resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
         answer = clean_prompt_resp(resp)
         print(answer)
-        
