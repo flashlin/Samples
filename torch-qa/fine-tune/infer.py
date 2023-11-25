@@ -22,6 +22,7 @@ from transformers import (
 )
 
 PEFT_MODEL = "llama-2-7b-chat-guanaco"
+PEFT_MODEL = "./models/llama-2-7b-hf"
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
