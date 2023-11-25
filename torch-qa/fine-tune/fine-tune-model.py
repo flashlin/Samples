@@ -14,7 +14,7 @@ from transformers import (
 from peft import LoraConfig, PeftModel
 from trl import SFTTrainer
 import json
-from finetune_lit import save_hf_model, load_hf_model_for_finetune, load_hf_tokenizer
+from finetune_lit import export_hf_model, load_hf_model_for_finetune, load_hf_tokenizer
 
 def convert_parquet_to_csv(parquet_file: str):
     df = pd.read_parquet('train-data/train-sample.parquet')

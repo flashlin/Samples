@@ -1,7 +1,7 @@
 from datasets import load_dataset
 import pandas as pd
 import yaml
-from finetune_lit import save_hf_model, load_hf_model_for_finetune, load_hf_tokenizer, load_stf_trainer
+from finetune_lit import export_hf_model, load_hf_model_for_finetune, load_hf_tokenizer, load_stf_trainer
 
 with open('finetune.yaml', 'r') as file:
     config = yaml.safe_load(file)

@@ -36,7 +36,7 @@ def load_jsonl_dataset(file: str, tokenizer, split):
     return dataset
 
 
-def save_hf_model(model_id: str, new_model_id: str):
+def export_hf_model(model_id: str, new_model_id: str):
     model = AutoModelForCausalLM.from_pretrained(
         model_id,
         device_map={"": 0},
