@@ -61,16 +61,22 @@ prompt = """
 <assistant>:
 """.strip()
 
-prompt = """
-<s>[INST] What is your name ? Who brought you into existence? [/INST]
-""".strip()
+prompt_template = """<s>[INST] {user_input} [/INST]"""
 
-encoding = tokenizer(prompt, return_tensors="pt").to(device)
+    
 with torch.inference_mode():
-  outputs = model.generate(
-      input_ids = encoding.input_ids,
-      attention_mask = encoding.attention_mask,
-      generation_config = generation_config
-  )
+    while True:
+        user_input = input("query: ")
+        if user_input == '/bye':
+            break
+        
+        prompt = prompt_template.format(user_input=user_input)
+        encoding = tokenizer(prompt, return_tensors="pt").to(device)
 
-print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+        outputs = model.generate(
+            input_ids = encoding.input_ids,
+            attention_mask = encoding.attention_mask,
+            generation_config = generation_config
+        )
+
+        print(tokenizer.decode(outputs[0], skip_special_tokens=True))
