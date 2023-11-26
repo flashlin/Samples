@@ -16,6 +16,11 @@ from peft import LoraConfig, PeftModel, get_peft_model
 from trl import SFTTrainer
 import json
 
+
+# bitsandbytes
+# autotrain-advanced 0.6.44
+# pip install --upgrade bitsandbytes 0.41.2
+
 def get_num_layers(model):
     numbers = set()
     for name, _ in model.named_parameters():
