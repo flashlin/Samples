@@ -1,3 +1,4 @@
+import re
 import datasets
 from llama_recipes.datasets.utils import Concatenator
 import torch
@@ -11,9 +12,26 @@ from transformers import (
     pipeline,
     logging,
 )
-from peft import LoraConfig, PeftModel
+from peft import LoraConfig, PeftModel, get_peft_model
 from trl import SFTTrainer
 import json
+
+def get_num_layers(model):
+    numbers = set()
+    for name, _ in model.named_parameters():
+        for number in re.findall(r'\d+', name):
+            numbers.add(int(number))
+    return max(numbers)
+
+
+def get_last_layer_linears(model):
+    names = []
+    num_layers = get_num_layers(model)
+    for name, module in model.named_modules():
+        if str(num_layers) in name and not "encoder" in name:
+            if isinstance(module, torch.nn.Linear):
+                names.append(name)
+    return names
 
 
 def load_jsonl_dataset(file: str, tokenizer, split):
@@ -77,6 +95,7 @@ def load_hf_model_for_finetune(model_id: str):
 
 def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
     peft_args = LoraConfig(
+        target_modules=get_last_layer_linears(model),
         lora_alpha=16,
         lora_dropout=0.1,
         r=64,  # 最初的 LoRA 論文建議從 8 級開始，但對於 QLoRA，需要 64 級。
@@ -124,7 +143,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
     return trainer
 
 
-def save_sft_model(trainer):
+def save_sft_model(trainer, model):
     model_to_save = trainer.model.module if hasattr(trainer.model,
                                                     'module') else trainer.model  # Take care of distributed/parallel training
     model_to_save.save_pretrained("outputs")
