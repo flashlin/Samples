@@ -219,7 +219,9 @@ if __name__ == '__main__':
     clean_files('./data')
 
     print("loading model...")
-    llm = load_llm_model('../models/neural-chat-7b-v3-16k.Q4_K_M.gguf')
+    model_name = "neural-chat-7b-v3-16k.Q4_K_M"
+    model_name = "orca-2-13b.Q4_K_S"
+    llm = load_llm_model(f'../models/{model_name}.gguf')
     # html = download_html('https://ithelp.ithome.com.tw/articles/10335513')
     # markdown = convert_html_body_to_markdown(html)
 
@@ -250,6 +252,7 @@ if __name__ == '__main__':
 
         print(f"generate questions for {source}")
         questions_content = generate_questions_from_markdown(markdown)
+        print(f"{questions_content=}")
         questions = split_questions_content(questions_content)
         for question in questions:
             print(f"ask {question} for {source}")

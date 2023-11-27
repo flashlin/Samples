@@ -203,3 +203,11 @@ def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, q
     resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
     answer = clean_llama2_instruction_resp(resp)
     return answer
+
+
+orca2_instruction_prompt_template = "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant"
+
+
+def create_orca2_instruction_prompt(system_message: str, user_input: str) -> str:
+    return orca2_instruction_prompt_template.format(system_message=system_message,
+                                                    prompt=user_input)
