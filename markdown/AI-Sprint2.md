@@ -37,8 +37,9 @@ Re-review the Unorganized data and try to manually remove garbage data.
 
 * Once offline, Windows 11 seems to pause operations.
 * Unorganized documents -> clean documents
+* Collecing domain data -> generate QA data
 * Training fine-tuning model
-  - Training takes a long time, which is not acceptable to most people? 500 records data -> 2hr
+  - Training takes a long time, which is not acceptable to most people? 13B: 500 data -> 2hr, 100K Data for 400hr(16.7day)
   - During training, development and testing cannot be performed.
 
 ---

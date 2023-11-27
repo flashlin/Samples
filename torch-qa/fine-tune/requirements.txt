@@ -9,3 +9,4 @@ llama-recipes
 langchain
 html2text
 bs4
+unstructured
