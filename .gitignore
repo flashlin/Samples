@@ -46,3 +46,4 @@ torch-qa/demo1/download2
 models/
 torch-qa/fine-tune/data
 markdown/.vscode
+torch-qa/fine-tune/.vscode
