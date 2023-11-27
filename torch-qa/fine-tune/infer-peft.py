@@ -21,9 +21,11 @@ from transformers import (
     BitsAndBytesConfig
 )
 from finetune_utils import load_finetune_config
+from finetune_lit import load_peft_model
 
 config = load_finetune_config()
 device = "cuda"
+
 
 def clean_prompt_resp(resp: str):
     after_inst = resp.split("[/INST]", 1)[-1]
@@ -33,29 +35,9 @@ def clean_prompt_resp(resp: str):
 
 model_name = config['model_name']
 base_model = f"./models/{model_name}"
-peft_model_id = f"./outputs"
+peft_model = f"./outputs"
 
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_use_double_quant=False,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.bfloat16
-)
-
-model = AutoModelForCausalLM.from_pretrained(
-    base_model,
-    return_dict=True,
-    quantization_config=bnb_config,
-    device_map="auto",
-    # trust_remote_code=True,
-    local_files_only=True,
-)
-model.load_adapter(peft_model_id)
-
-tokenizer = AutoTokenizer.from_pretrained(base_model)
-tokenizer.pad_token = tokenizer.eos_token
-
-# model = PeftModel.from_pretrained(model, PEFT_MODEL)
+model, tokenizer = load_peft_model(base_model, peft_model)
 
 generation_config = model.generation_config
 generation_config.max_new_tokens = 200

@@ -114,7 +114,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
         per_device_train_batch_size=4,
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
-        save_steps=500,
+        save_steps=200,
         logging_steps=25,
         learning_rate=2e-4,
         weight_decay=0.001,
@@ -155,3 +155,24 @@ def save_sft_model(trainer, model):
     lora_config = LoraConfig.from_pretrained('outputs')
     model = get_peft_model(model, lora_config)
     model.push_to_hub("ashishpatel26/Llama2_Finetuned_Articles_Constitution_3300_Instruction_Set", create_pr=1)
+
+
+def load_peft_model(base_model: str, peft_model: str):
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_use_double_quant=False,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_compute_dtype=torch.bfloat16
+    )
+    model = AutoModelForCausalLM.from_pretrained(
+        base_model,
+        return_dict=True,
+        quantization_config=bnb_config,
+        device_map="auto",
+        # trust_remote_code=True,
+        local_files_only=True,
+    )
+    model.load_adapter(peft_model)
+    tokenizer = AutoTokenizer.from_pretrained(base_model)
+    tokenizer.pad_token = tokenizer.eos_token
+    return model, tokenizer
