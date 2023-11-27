@@ -914,3 +914,5 @@ Answer:
 * For 50/50 Markets(OE, OU, HDP), The calculation is: Max(Currency Min Bet, Account Min bet)
 * For non-50/50 Markets, The calculation is: Max(Currency Min Bet, Account Min bet)/ 2 
 
+Question: What kind of promotions are available to Indian players?
+Answer: Indian players can participate in DEP deposit promotions, as well as general SBOTOP promotions. To see the current promotions available, please visit the following website: https://www.sbotop.com/promo.
