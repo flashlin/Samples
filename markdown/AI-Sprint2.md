@@ -25,8 +25,8 @@ Read unstructured/structured documents and generate QA based on the model's unde
 
 ---
 # What have I done?
-* Unstructured documents: 
-Re-review the Unstructured data and try to manually remove garbage data. 
+* Unorganized documents: 
+Re-review the Unorganized data and try to manually remove garbage data. 
 
 * Use a `MORE-LARGE` model understanding to read the slightly cleaned data. Generate QA data.
 
@@ -36,9 +36,9 @@ Re-review the Unstructured data and try to manually remove garbage data.
 # What difficulties did I encounter?
 
 * Once offline, Windows 11 seems to pause operations.
-* Unstructured documents -> structured documents
+* Unorganized documents -> clean documents
 * Training fine-tuning model
-  - Training takes a long time, which is not acceptable to most people.
+  - Training takes a long time, which is not acceptable to most people? 500 records data -> 2hr
   - During training, development and testing cannot be performed.
 
 ---
