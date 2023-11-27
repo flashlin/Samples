@@ -219,7 +219,7 @@ if __name__ == '__main__':
     clean_files('./data')
 
     print("loading model...")
-    llm = load_llm_model('../models/neural-chat-7b-v3-16k-q4_k_m.gguf')
+    llm = load_llm_model('../models/neural-chat-7b-v3-16k.Q4_K_M.gguf')
     # html = download_html('https://ithelp.ithome.com.tw/articles/10335513')
     # markdown = convert_html_body_to_markdown(html)
 

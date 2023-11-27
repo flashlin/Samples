@@ -1,7 +1,11 @@
 accelerate
 peft
-bitsandbytes
+bitsandbytes==0.41.1
 transformers
 trl
 scipy
 llama-recipes
+
+langchain
+html2text
+bs4
