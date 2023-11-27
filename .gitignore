@@ -47,3 +47,4 @@ models/
 torch-qa/fine-tune/data
 markdown/.vscode
 torch-qa/fine-tune/.vscode
+bash/.vscode
