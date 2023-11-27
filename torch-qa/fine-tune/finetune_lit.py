@@ -172,7 +172,8 @@ def load_peft_model(base_model: str, peft_model: str):
         # trust_remote_code=True,
         local_files_only=True,
     )
-    model.load_adapter(peft_model)
+    if peft_model is not None:
+        model.load_adapter(peft_model)
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     tokenizer.pad_token = tokenizer.eos_token
     return model, tokenizer
