@@ -21,16 +21,10 @@ from transformers import (
     BitsAndBytesConfig
 )
 from finetune_utils import load_finetune_config
-from finetune_lit import load_peft_model
+from finetune_lit import load_peft_model, ask_llama2_instruction_prompt
 
 config = load_finetune_config()
 device = "cuda"
-
-
-def clean_prompt_resp(resp: str):
-    after_inst = resp.split("[/INST]", 1)[-1]
-    s2 = after_inst.split("[INST]", 1)[0]
-    return s2.split('[/INST]', 1)[0]
 
 
 model_name = config['model_name']
@@ -48,28 +42,15 @@ generation_config.pad_token_id = tokenizer.eos_token_id
 generation_config.eos_token_id = tokenizer.eos_token_id
 
 
-prompt = """
-<human>: Who brought you into existence?
-<assistant>:
-""".strip()
-
-prompt_template = """<s>[INST] {user_input} [/INST]"""
-
 with torch.inference_mode():
     while True:
         user_input = input("query: ")
         if user_input == '/bye':
             break
 
-        prompt = prompt_template.format(user_input=user_input)
-        encoding = tokenizer(prompt, return_tensors="pt").to(device)
-
-        outputs = model.generate(
-            input_ids=encoding.input_ids,
-            attention_mask=encoding.attention_mask,
-            generation_config=generation_config
-        )
-
-        resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        answer = clean_prompt_resp(resp)
+        answer = ask_llama2_instruction_prompt(model=model,
+                                               generation_config=generation_config,
+                                               tokenizer=tokenizer,
+                                               device=device,
+                                               question=user_input)
         print(answer)

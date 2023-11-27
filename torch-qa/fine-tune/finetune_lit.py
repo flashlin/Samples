@@ -176,3 +176,29 @@ def load_peft_model(base_model: str, peft_model: str):
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     tokenizer.pad_token = tokenizer.eos_token
     return model, tokenizer
+
+
+def clean_llama2_instruction_resp(resp: str):
+    after_inst = resp.split("[/INST]", 1)[-1]
+    s2 = after_inst.split("[INST]", 1)[0]
+    return s2.split('[/INST]', 1)[0]
+
+
+def create_llama2_instruction_prompt(question: str):
+    prompt_template = """<s>[INST] {user_input} [/INST]"""
+    return prompt_template.format(user_input=question)
+
+
+def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, question: str):
+    prompt = create_llama2_instruction_prompt(question)
+    encoding = tokenizer(prompt, return_tensors="pt").to(device)
+
+    outputs = model.generate(
+        input_ids=encoding.input_ids,
+        attention_mask=encoding.attention_mask,
+        generation_config=generation_config
+    )
+
+    resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    answer = clean_llama2_instruction_resp(resp)
+    return answer
