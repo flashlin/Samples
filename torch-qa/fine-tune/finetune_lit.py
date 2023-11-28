@@ -187,13 +187,14 @@ def clean_llama2_instruction_resp(resp: str):
 
 def create_llama2_generation_prompt(system_message, question: str):
     if system_message is not None:
-        return "<s>[INST] <<SYS>>\n{sys_msg}\n<</SYS>>\n\n{user_input} [/INST]"
+        return ("<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n{user_input} [/INST]"
+                .format(system_message=system_message, user_input=question))
     prompt_template = """<s>[INST] {user_input} [/INST]"""
     return prompt_template.format(user_input=question)
 
 
 def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, question: str):
-    prompt = create_llama2_generation_prompt(question)
+    prompt = create_llama2_generation_prompt(None, question)
     encoding = tokenizer(prompt, return_tensors="pt").to(device)
 
     outputs = model.generate(
