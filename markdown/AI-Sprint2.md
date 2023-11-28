@@ -11,9 +11,9 @@ paginate: true
 ---
 # Documents
 
-* Unstructured documents: for example, info-help, Confluence websites
+* meaningless documents: for example, info-help, Confluence websites
 
-* Structured documents: plain text with an introduction, explanation, and summary structure, for example: Harry Potter, papers, blog posts 
+* reviewed documents: plain text with an introduction, explanation, and summary structure, for example: Harry Potter, papers, blog posts 
 
 ---
 # Question-answer data ?
@@ -21,23 +21,26 @@ paginate: true
 * Manual collection: create a QA website to collect user input data.
  
 * Computer collection: find a larger model.
-Read unstructured/structured documents and generate QA based on the model's understanding.
+Read reviewed documents and generate QA based on the model's understanding.
 
 ---
 # What have I done?
-* Unorganized documents: 
-Re-review the Unorganized data and try to manually remove garbage data. 
+* meaningless documents: 
+Re-review the meaningless data and try to manually remove garbage data. 
 
-* Use a `MORE-LARGE` model understanding to read the slightly cleaned data. Generate QA data.
+* Use a `MORE-LARGE` open free model understanding to read the slightly cleaned data. Generate QA data.
 
 * Build a training model program
+* Train 7B Model: 3300 data: 0.5hr
+* Help team members
 
 ---
 # What difficulties did I encounter?
 
-* Once offline, Windows 11 seems to pause operations.
-* Unorganized documents -> clean documents
-* Collecing domain data -> generate QA data
+* meaningless documents -> clean documents
+* Collecing domain data -> 
+  - reviewd and clearly summarized documents source?
+  - generate QA data requires manual review 
 * Training fine-tuning model
   - Training takes a long time, which is not acceptable to most people? 13B: 500 data -> 2hr, 100K Data for 400hr(16.7day)
   - During training, development and testing cannot be performed.
@@ -46,9 +49,9 @@ Re-review the Unorganized data and try to manually remove garbage data.
 # correct concept
 
 * Model Size: 180B, 130B, 70B, 34B, 13B, 7B
-\>100B: text processing, understanding and generation
+  - \>100B: Models with more than 100B parameters exhibit the phenomenon of emergent intelligence.
 
-* Our Machine Power:
-- use \<=34B: understanding and search
+* Our hardware limitations:
+  - only use \<=34B models: understanding and search and so task
 (some text processing)
-- fine-tune \<=13B
+  - fine-tune \<=13B model
