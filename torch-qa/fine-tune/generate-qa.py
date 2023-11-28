@@ -28,6 +28,7 @@ def is_match(txt: str, regex_patterns):
 
 def query_qa_md(file: str):
     with open(file, 'r', encoding='utf-8') as f:
+        is_question = False
         is_answer = False
         question = ""
         answer = ""
@@ -35,11 +36,13 @@ def query_qa_md(file: str):
             line = line.strip()
             captured_text = is_match(line, create_regex([r'Question ?\d+:(.*)', r'Question:(.*)', r'Q\d+:(.*)']))
             if captured_text:
+                is_question = True
                 if question != '' and answer != '':
                     yield question, answer
                 question = captured_text
                 answer = ""
                 is_answer = False
+                continue
             captured_text = is_match(line, create_regex([r'Answer:(.*)']))
             if captured_text:
                 answer += captured_text + '\r\n'
@@ -55,6 +58,8 @@ def query_qa_md(file: str):
                     yield question, answer
                 question = ""
                 answer = ""
+            if is_question:
+                question += '\r\n' + line
             if is_answer:
                 answer += line + '\r\n'
         if question != '' and answer != '':
