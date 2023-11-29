@@ -32,7 +32,6 @@ Answers: Please use statistical software to calculate the number of online ads.
 Question 1: Can the number of online ads be calculated by me?
 Answers: I cannot provide the answer to this question. Please use statistical software to calculate.
 
-
 Question 1: Who can participate in the 100% deposit bonus offer?
 Answer: New account holders with an initial deposit for SBOTOP/SBOBET.
 
@@ -102,7 +101,6 @@ Answer: No, you cannot use this deposit promotion to bet on Live markets.
 Question 13: Can I use this deposit promotion to bet on all sports and markets?
 Answer: No, you can only use this deposit promotion to bet on Non-Live markets with Euro odds of 1.50 and above, and HK odds of 0.50 and above.
 
-
 Question 2: Is withdrawal allowed during the deposit promotion?
 Answer: No, withdrawal is not allowed during the deposit promotion unless the required rollover is completed or the deposit promotion is cancelled.
 
@@ -130,7 +128,13 @@ Answer: The average RTP for the Three Faces Baccarat game over a long period of 
 Question 1: What is the MNL license?
 Answer: The MNL license is a permit that allows users to engage in transactions on the MNL platform. This license is applicable to users aged 21 and above, and it supports countries such as China, Indonesia, India, Japan, South Korea, Malaysia, Thailand, Vietnam, Myanmar, and Brazil.
 
+Question 1: What is the MNL?
+Answer: The MNL license is a permit that allows users to engage in transactions on the MNL platform. This license is applicable to users aged 21 and above, and it supports countries such as China, Indonesia, India, Japan, South Korea, Malaysia, Thailand, Vietnam, Myanmar, and Brazil.
+
 Question 1: What is the IOM license?
+Answer: Apart from China, Indonesia, India, Japan, South Korea, Malaysia, Thailand, Vietnam, Myanmar, and Brazil, all other countries fall under the scope of the IOM license. The age limit is set at 18 years old or above.
+
+Question 1: What is the IOM?
 Answer: Apart from China, Indonesia, India, Japan, South Korea, Malaysia, Thailand, Vietnam, Myanmar, and Brazil, all other countries fall under the scope of the IOM license. The age limit is set at 18 years old or above.
 
 Question 2: What is the age limit specified by the IOM license?
