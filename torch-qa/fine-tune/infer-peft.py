@@ -51,3 +51,5 @@ if __name__ == '__main__':
             #                                       device=device,
             #                                       question=user_input)
             print(answer)
+            print("")
+            print("--------------------")

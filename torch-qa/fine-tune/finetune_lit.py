@@ -2,7 +2,6 @@ import re
 import datasets
 from llama_recipes.datasets.utils import Concatenator
 import torch
-from datasets import load_dataset
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -14,7 +13,6 @@ from transformers import (
 )
 from peft import LoraConfig, PeftModel, get_peft_model
 from trl import SFTTrainer
-import json
 
 
 # bitsandbytes
