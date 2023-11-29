@@ -33,7 +33,7 @@ Re-review the meaningless data and try to manually remove garbage data.
 * Build a train tuning model program
 * Tune Model: Failed many times
    - 7B Model: 3300 data: 0.5hr
-   - 13B Model: 3300 data: 1hr
+   - 13B Model: 3300 data: 1hr (33B:2.1hr)
 * Help team members
 
 ---
@@ -44,7 +44,7 @@ Re-review the meaningless data and try to manually remove garbage data.
   - reviewd and clearly summarized documents source?
   - generate QA data requires manual review 
 * Training fine-tuning model
-  - Training takes a long time, which is not acceptable to most people? 13B: 500 data -> 2hr, 100K Data for 400hr(16.7day)
+  - Training takes a long time, which is not acceptable to most people? 
   - During training, development and testing cannot be performed.
 
 ---
