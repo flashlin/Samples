@@ -101,10 +101,20 @@ def create_llama2_chat_prompt(question, answer):
     return chat_prompt_template.format(instruction=question, output=answer)
 
 
+def create_orca2_chat_prompt(question, answer):
+    template = "You are OpenOrcaChat.<|end_of_turn|>User: {instruction}<|end_of_turn|>Assistant: {output}<|end_of_turn|>"
+    return template.format(instruction=question, output=answer)
+
+
+def create_finetune_prompt(question, answer):
+    # return create_llama2_chat_prompt(question, answer)
+    return create_orca2_chat_prompt(question, answer)
+
+
 def append_qa_to_train_csv_file(train_file: str, question: str, answer: str):
     with open(train_file, 'a', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
-        prompt = create_llama2_chat_prompt(question, answer)
+        prompt = create_finetune_prompt(question, answer)
         csv_writer.writerow([prompt])
 
 
@@ -115,7 +125,7 @@ def convert_qa_md_file_to_train_csv(md_file, train_file):
         for question, answer in query_qa_md(md_file):
             question = question.strip()
             answer = answer.strip()
-            text = create_llama2_chat_prompt(question=question, answer=answer)
+            text = create_finetune_prompt(question=question, answer=answer)
             writer.writerow([text])
 
 
