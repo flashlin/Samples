@@ -45,16 +45,16 @@ with torch.inference_mode():
         if user_input == '/bye':
             break
 
-        # answer = ask_llama2_instruction_prompt(model=model,
-        #                                        generation_config=generation_config,
-        #                                        tokenizer=tokenizer,
-        #                                        device=device,
-        #                                        question=user_input)
+        answer = ask_llama2_instruction_prompt(model=model,
+                                               generation_config=generation_config,
+                                               tokenizer=tokenizer,
+                                               device=device,
+                                               question=user_input)
 
 
-        answer = ask_orca2_instruction_prompt(model=model,
-                                              generation_config=generation_config,
-                                              tokenizer=tokenizer,
-                                              device=device,
-                                              question=user_input)
+        # answer = ask_orca2_instruction_prompt(model=model,
+        #                                       generation_config=generation_config,
+        #                                       tokenizer=tokenizer,
+        #                                       device=device,
+        #                                       question=user_input)
         print(answer)

@@ -100,7 +100,17 @@ def load_hf_model_for_finetune(model_id: str):
 
 def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
     peft_args = LoraConfig(
-        target_modules=get_last_layer_linears(model),
+        #target_modules=get_last_layer_linears(model),
+        # target_modules=[
+        #     "q_proj",
+        #     "k_proj",
+        #     "v_proj",
+        #     "o_proj",
+        #     "gate_proj",
+        #     "up_proj",
+        #     "down_proj",
+        #     "lm_head",
+        # ],
         lora_alpha=16,
         lora_dropout=0.1,
         r=64,  # 最初的 LoRA 論文建議從 8 級開始，但對於 QLoRA，需要 64 級。
@@ -111,12 +121,12 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
     training_params = TrainingArguments(
         output_dir="./results",
         num_train_epochs=10,
-        per_device_train_batch_size=4,
+        per_device_train_batch_size=4, #46GB-> 7B:8 13B:4
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
         save_steps=100,
         logging_steps=25,
-        learning_rate=2e-4,
+        learning_rate=1e-4,  #7B:2e-4 = 0.0002 13B:1e-4 = 0.0001
         weight_decay=0.001,
         fp16=False,
         bf16=True,
@@ -205,7 +215,7 @@ def create_llama2_generation_prompt(system_message, question: str):
 
 def create_orca2_generation_prompt(system_message, question: str):
     prompt_template = "You are OpenOrcaChat.<|end_of_turn|>User: {instruction}<|end_of_turn|>Assistant: "
-    return prompt_template.format(user_input=question)
+    return prompt_template.format(instruction=question)
 
 
 def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, question: str):
