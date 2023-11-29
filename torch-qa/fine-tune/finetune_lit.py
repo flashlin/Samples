@@ -222,6 +222,23 @@ def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, q
     answer = clean_llama2_instruction_resp(resp)
     return answer
 
+
+
+def ask_orca2_instruction_prompt(model, generation_config, tokenizer, device, question: str):
+    prompt = create_orca2_generation_prompt(None, question)
+    encoding = tokenizer(prompt, return_tensors="pt").to(device)
+
+    outputs = model.generate(
+        input_ids=encoding.input_ids,
+        attention_mask=encoding.attention_mask,
+        generation_config=generation_config
+    )
+
+    resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # answer = clean_llama2_instruction_resp(resp)
+    answer = resp
+    return answer
+
 # orca2_instruction_prompt_template = "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant"
 #
 # def create_orca2_instruction_prompt(system_message: str, user_input: str) -> str:
