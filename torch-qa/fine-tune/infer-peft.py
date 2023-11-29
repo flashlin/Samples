@@ -27,7 +27,7 @@ if __name__ == '__main__':
     generation_config = model.generation_config
     generation_config.max_new_tokens = 1024
     generation_config.temperature = 0.1  # 0.7
-    generation_config.is_sample = True
+    generation_config.do_sample = True
     # generation_config.top_p = 0.7
     generation_config.num_return_sequences = 1
     generation_config.pad_token_id = tokenizer.eos_token_id

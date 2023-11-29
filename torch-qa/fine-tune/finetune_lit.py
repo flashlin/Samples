@@ -180,6 +180,7 @@ def get_finetune_model_name(config):
 def save_trainer_model(trainer, config):
     output_name = get_finetune_model_name(config)
     trainer.model.save_pretrained(output_name)
+    print(f"save to {output_name}")
 
 
 def save_sft_model(trainer, model):
