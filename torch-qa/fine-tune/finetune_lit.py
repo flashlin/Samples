@@ -185,11 +185,26 @@ def clean_llama2_instruction_resp(resp: str):
     return s2.split('[/INST]', 1)[0]
 
 
+def create_llama2_finetune_prompt(question, answer):
+    chat_prompt_template = """<s>[INST] {instruction} [/INST] {output}</s>"""
+    return chat_prompt_template.format(instruction=question, output=answer)
+
+
+def create_orca2_finetune_prompt(question, answer):
+    template = "You are OpenOrcaChat.<|end_of_turn|>User: {instruction}<|end_of_turn|>Assistant: {output}<|end_of_turn|>"
+    return template.format(instruction=question, output=answer)
+
+
 def create_llama2_generation_prompt(system_message, question: str):
     if system_message is not None:
         return ("<s>[INST] <<SYS>>\n{system_message}\n<</SYS>>\n\n{user_input} [/INST]"
                 .format(system_message=system_message, user_input=question))
     prompt_template = """<s>[INST] {user_input} [/INST]"""
+    return prompt_template.format(user_input=question)
+
+
+def create_orca2_generation_prompt(system_message, question: str):
+    prompt_template = "You are OpenOrcaChat.<|end_of_turn|>User: {instruction}<|end_of_turn|>Assistant: "
     return prompt_template.format(user_input=question)
 
 
@@ -207,10 +222,8 @@ def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, q
     answer = clean_llama2_instruction_resp(resp)
     return answer
 
-
-orca2_instruction_prompt_template = "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant"
-
-
-def create_orca2_instruction_prompt(system_message: str, user_input: str) -> str:
-    return orca2_instruction_prompt_template.format(system_message=system_message,
-                                                    prompt=user_input)
+# orca2_instruction_prompt_template = "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant"
+#
+# def create_orca2_instruction_prompt(system_message: str, user_input: str) -> str:
+#     return orca2_instruction_prompt_template.format(system_message=system_message,
+#                                                     prompt=user_input)

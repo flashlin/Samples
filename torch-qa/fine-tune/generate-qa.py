@@ -2,7 +2,7 @@ import csv
 import json
 import os
 import re
-
+from finetune_lit import create_orca2_finetune_prompt
 
 def append_to_file(txt, file):
     with open(file, 'a') as f:
@@ -96,19 +96,9 @@ def create_llama2_instruction_prompt(question, user_input, answer):
     return instruction_prompt_template.format(instruction=question, input=user_input, output=answer)
 
 
-def create_llama2_chat_prompt(question, answer):
-    chat_prompt_template = """<s>[INST] {instruction} [/INST] {output}</s>"""
-    return chat_prompt_template.format(instruction=question, output=answer)
-
-
-def create_orca2_chat_prompt(question, answer):
-    template = "You are OpenOrcaChat.<|end_of_turn|>User: {instruction}<|end_of_turn|>Assistant: {output}<|end_of_turn|>"
-    return template.format(instruction=question, output=answer)
-
-
 def create_finetune_prompt(question, answer):
     # return create_llama2_chat_prompt(question, answer)
-    return create_orca2_chat_prompt(question, answer)
+    return create_orca2_finetune_prompt(question, answer)
 
 
 def append_qa_to_train_csv_file(train_file: str, question: str, answer: str):

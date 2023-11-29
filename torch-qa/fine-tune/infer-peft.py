@@ -25,7 +25,7 @@ device = "cuda"
 
 
 model_name = config['model_name']
-base_model = f"./models/{model_name}"
+base_model = f"../models/{model_name}"
 peft_model = f"./outputs/{model_name}-tuned"
 
 model, tokenizer = load_peft_model(base_model, peft_model)
