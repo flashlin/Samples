@@ -30,8 +30,8 @@ Re-review the meaningless data and try to manually remove garbage data.
 
 * Use a `MORE-LARGE` open free model understanding to read the slightly cleaned data. Generate QA data.
 
-* Build a training model program
-* Train Model: Failed many times
+* Build a train tuning model program
+* Tune Model: Failed many times
    - 7B Model: 3300 data: 0.5hr
    - 13B Model: 3300 data: 1hr
 * Help team members
