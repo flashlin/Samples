@@ -2,7 +2,7 @@ import json
 import os
 import torch
 from finetune_utils import load_finetune_config
-from finetune_lit import load_peft_model, ask_llama2_instruction_prompt, ask_orca2_instruction_prompt
+from finetune_lit import load_peft_model, ask_llama2_instruction_prompt, get_finetune_model_name
 import argparse
 
 if __name__ == '__main__':
@@ -20,13 +20,14 @@ if __name__ == '__main__':
     print(f"use model: {model_name}")
 
     base_model = f"../models/{model_name}"
-    peft_model = f"./outputs/{model_name}-tuned"
+    peft_model = get_finetune_model_name(config)
 
     model, tokenizer = load_peft_model(base_model, peft_model)
 
     generation_config = model.generation_config
-    generation_config.max_new_tokens = 200
-    generation_config.temperature = 0.2  # 0.7
+    generation_config.max_new_tokens = 1024
+    generation_config.temperature = 0.1  # 0.7
+    generation_config.is_sample = True
     # generation_config.top_p = 0.7
     generation_config.num_return_sequences = 1
     generation_config.pad_token_id = tokenizer.eos_token_id

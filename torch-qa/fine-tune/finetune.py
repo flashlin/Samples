@@ -1,6 +1,7 @@
 from datasets import load_dataset
 import pandas as pd
-from finetune_lit import export_hf_model, load_hf_model_for_finetune, load_hf_tokenizer, load_stf_trainer
+from finetune_lit import (export_hf_model, load_hf_model_for_finetune,
+                          load_hf_tokenizer, load_stf_trainer, save_trainer_model)
 from finetune_utils import load_finetune_config
 
 config = load_finetune_config()
@@ -60,5 +61,5 @@ trainer.train()
 #trainer.train(resume_from_checkpoint=True)
 # trainer.train(resume_from_checkpoint="{<path-where-checkpoint-were_stored>/checkpoint-0000")
 print("Save model")
-trainer.model.save_pretrained(f"outputs/{model_name}-tuned")
+save_trainer_model(trainer)
 print("done")

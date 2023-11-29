@@ -96,29 +96,43 @@ def load_hf_model_for_finetune(model_id: str):
     return model
 
 
-def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
+def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, config):
+    train_epochs = config['train_epochs']
+    if train_epochs is None:
+        train_epochs = 10
+
     peft_args = LoraConfig(
         #target_modules=get_last_layer_linears(model),
-        # target_modules=[
-        #     "q_proj",
-        #     "k_proj",
-        #     "v_proj",
-        #     "o_proj",
-        #     "gate_proj",
-        #     "up_proj",
-        #     "down_proj",
-        #     "lm_head",
-        # ],
         lora_alpha=16,
         lora_dropout=0.1,
-        r=64,  # 最初的 LoRA 論文建議從 8 級開始，但對於 QLoRA，需要 64 級。
+        r=8,  # 最初的 LoRA 論文建議從 8 級開始，但對於 QLoRA，需要 64 級。
         bias="none",
         task_type="CAUSAL_LM",
     )
 
+    if config["is_QLoRA"]:
+        peft_args = LoraConfig(
+            target_modules=[
+                "q_proj",
+                "k_proj",
+                "v_proj",
+                "o_proj",
+                "gate_proj",
+                "up_proj",
+                "down_proj",
+                "lm_head",
+            ],
+            lora_alpha=16,
+            lora_dropout=0.1,
+            r=64,  # 最初的 LoRA 論文建議從 8 級開始，但對於 QLoRA，需要 64 級。
+            bias="none",
+            task_type="CAUSAL_LM",
+        )
+        train_epochs = 4
+
     training_params = TrainingArguments(
         output_dir="./results",
-        num_train_epochs=10,
+        num_train_epochs=train_epochs,
         per_device_train_batch_size=4, #46GB-> 7B:8 13B:4
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
@@ -154,6 +168,18 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func):
             module = module.to(torch.float32)
 
     return trainer
+
+
+def get_finetune_model_name(config):
+    model_name = config['model_name']
+    output_name = f"outputs/{model_name}-peft"
+    if config["is_QLoRA"]:
+        output_name = f"outputs/{model_name}-qlora"
+    return output_name
+
+def save_trainer_model(trainer, config):
+    output_name = get_finetune_model_name(config)
+    trainer.model.save_pretrained(output_name)
 
 
 def save_sft_model(trainer, model):
