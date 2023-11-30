@@ -1,5 +1,6 @@
 import re
 
+
 def create_regex(patterns: list[str]):
     regex_patterns = []
     for pattern in patterns:
@@ -17,9 +18,6 @@ def is_match(txt: str, regex_patterns):
     return None
 
 
-class State:
-    def read_line(self, line: str) -> bool:
-        pass
 
 class QuestionAnswerContext:
     question_answer_list = []
@@ -57,13 +55,13 @@ class QuestionAnswerReadyState:
     def read_line(self, line: str):
         captured_text = is_match(line, QUESTION_PATTERNS)
         if captured_text:
-            self.context.read_state = QuestionHeadState(self.context, captured_text)
+            self.context.read_state = QuestionReadState(self.context, captured_text)
 
     def flush(self):
         pass
 
 
-class QuestionHeadState:
+class QuestionReadState:
     def __init__(self, context: QuestionAnswerContext, question: str):
         self.context = context
         self.buffer = question
@@ -72,7 +70,7 @@ class QuestionHeadState:
         answer_captured_text = is_match(line, ANSWER_PATTERN)
         if answer_captured_text:
             self.context.questions.append(self.buffer.strip())
-            self.context.read_state = AnswerHeadState(self.context, answer_captured_text)
+            self.context.read_state = AnswerReadState(self.context, answer_captured_text)
             return
         question_captured_text = is_match(line, QUESTION_PATTERNS)
         if question_captured_text:
@@ -85,7 +83,7 @@ class QuestionHeadState:
         pass
 
 
-class AnswerHeadState:
+class AnswerReadState:
     def __init__(self, context: QuestionAnswerContext, answer: str):
         self.context = context
         self.buffer = answer
@@ -95,7 +93,7 @@ class AnswerHeadState:
         if question_captured_text:
             self.context.answers.append(self.buffer.strip())
             self.context.output_question_answer()
-            self.context.read_state = QuestionHeadState(self.context, question_captured_text)
+            self.context.read_state = QuestionReadState(self.context, question_captured_text)
             return
         answer_captured_text = is_match(line, ANSWER_PATTERN)
         if answer_captured_text:
@@ -110,46 +108,6 @@ class AnswerHeadState:
         self.context.read_state = QuestionAnswerReadyState(self.context)
 
 
-class QuestionAnswerLines:
-    data_list = []
-    buffers = []
-    is_reading = False
-
-    def __init__(self, name: str, patterns: list[str]):
-        self.name = name
-        self.pattern = create_regex(patterns)
-
-    def read_line(self, line: str):
-        captured_text = is_match(line, self.pattern)
-        if captured_text:
-            if self.is_reading:
-                buffer = '\r\n'.join(self.buffers).strip()
-                self.data_list.append(buffer)
-                self.buffers = [captured_text]
-                return False
-            self.is_reading = True
-            self.buffers = [captured_text]
-            return len(self.data_list) == 0
-        if self.is_reading:
-            self.buffers.append(line)
-            return len(self.data_list) == 0
-        return False
-
-    def get_list(self):
-        if len(self.buffers) > 0:
-            buffer = '\r\n'.join(self.buffers).strip()
-            self.data_list.append(buffer)
-            self.buffers = []
-        data_list = self.data_list
-        self.data_list = []
-        return data_list
-
-    def has(self):
-        if len(self.buffers) > 0:
-            return True
-        return len(self.data_list) > 0
-
-
 def query_qa_file(file: str):
     qa = QuestionAnswerContext()
     with open(file, 'r', encoding='utf-8') as f:
@@ -160,9 +118,7 @@ def query_qa_file(file: str):
     for questions, answers in qa.question_answer_list:
         for question in questions:
             for answer in answers:
-                question = question.replace('\r\n', '\\n')
-                answer = answer.replace('\r\n', '\\n')
-                print(f"{question=} {answer=}")
+                yield question.strip(), answer.strip()
 
 
 if __name__ == '__main__':
