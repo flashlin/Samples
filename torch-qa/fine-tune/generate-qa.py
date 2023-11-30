@@ -158,8 +158,8 @@ def clean_files(folder):
 if __name__ == '__main__':
     user_data = "./data-user/qa.txt"
     # clean_files("./data")
-    convert_qa_md_to_csv(user_data, "./qa.csv")
-    convert_qa_md_file_to_train_jsonl(user_data, "./results/train.json")
+    # convert_qa_md_to_csv(user_data, "./results/qa.csv")
+    # convert_qa_md_file_to_train_jsonl(user_data, "./results/train.json")
     convert_qa_md_file_to_train_csv(user_data, './results/train.csv')
     convert_llm_qa_md_file_to_train_csv('./results/llm-qa.md', './results/train.csv')
     # game_names = {}

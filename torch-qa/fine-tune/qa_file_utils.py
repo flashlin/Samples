@@ -68,12 +68,12 @@ class QuestionReadState:
 
     def read_line(self, line: str):
         answer_captured_text = is_match(line, ANSWER_PATTERN)
-        if answer_captured_text:
+        if answer_captured_text is not None:
             self.context.questions.append(self.buffer.strip())
             self.context.read_state = AnswerReadState(self.context, answer_captured_text)
             return
         question_captured_text = is_match(line, QUESTION_PATTERNS)
-        if question_captured_text:
+        if question_captured_text is not None:
             self.context.questions.append(self.buffer.strip())
             self.buffer = question_captured_text
             return
@@ -90,13 +90,13 @@ class AnswerReadState:
 
     def read_line(self, line: str):
         question_captured_text = is_match(line, QUESTION_PATTERNS)
-        if question_captured_text:
+        if question_captured_text is not None:
             self.context.answers.append(self.buffer.strip())
             self.context.output_question_answer()
             self.context.read_state = QuestionReadState(self.context, question_captured_text)
             return
         answer_captured_text = is_match(line, ANSWER_PATTERN)
-        if answer_captured_text:
+        if answer_captured_text is not None:
             self.context.answers.append(self.buffer.strip())
             self.buffer = answer_captured_text
             return
@@ -123,6 +123,6 @@ def query_qa_file(file: str):
 
 if __name__ == '__main__':
     file = 'data-user/test.txt'
-    query_qa_file(file)
+    # query_qa_file(file)
 
 
