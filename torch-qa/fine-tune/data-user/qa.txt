@@ -299,7 +299,7 @@ Question: What is `Prop Bet`?
 Answer: A prop bet is short for a “proposition” bet. It refers to a proposition regarding a player statistic, team statistic, or outcome in a sporting event overall.
 
 
-Question: What is 1x2 ?
+Question: What is 1x2?
 Answer: 
 * Bets can be made by either selecting a Home Win, a Draw or an Away Win.
 * Bets will be settled at the end of normal time play, excluding extra time and penalties (where applicable).
@@ -309,18 +309,21 @@ Question: What is `Asian Handicap`?
 Answer: Asian Handicap is a style of betting where the bookmaker handicaps the two teams in a game before its commencement. Using Football as an example, the bookmaker gives a goals deficit to the team it thinks is more likely to win, and a head start to the team it thinks is less likely to win. The handicaps are expressed in goals, or fractions of goals. To win a bet, the End User, rather than backing a team to win, bets on it to overcome the handicap.
 
 Question: What is `FIRST HALF`?
+Question: What is FH?
 Answer:
 (a) bets are made by predicting the correct result or score at the end of the first half of a match or event that is offered for betting.
 (b) General Sports Rule No. 13 will be applied where the match or event is abandoned, suspended or postponed before the end of the first half.
 (c) bets are settled on the score of the match or event at the end of the first half, including added time for injury and stoppages.
 
 Question: What is `FULL TIME`?
+Question: What is FT?
 Answer: 
 (a) bets are made by predicting the correct result or score at the end of the match or event that is offered for betting.
 (b) General Sports Rule No. 13 will be applied where the match or event is abandoned, suspended or postponed before the end of the match or event.
 (c) bets are settled on the final score of the match or event, including added time for injury and stoppages.
 
-Question: What is `DOUBLE CHANCE` ?
+Question: What is `DOUBLE CHANCE`?
+Question: What is DC?
 Answer:
 * Double chance is similar to 1X2 bets except that the End User is able to bet on two out of three possible outcomes by selecting the following options: a Home Win or Away Win; a Draw or Away Win or a Draw or Home Win.
 * If one of the two possible outcomes is achieved, the bet is won.
