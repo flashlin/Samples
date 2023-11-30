@@ -1,6 +1,5 @@
 import re
 
-
 def create_regex(patterns: list[str]):
     regex_patterns = []
     for pattern in patterns:
@@ -16,6 +15,99 @@ def is_match(txt: str, regex_patterns):
             captured_text = match.group(1).strip()
             return captured_text
     return None
+
+
+class State:
+    def read_line(self, line: str) -> bool:
+        pass
+
+class QuestionAnswerContext:
+    question_answer_list = []
+
+    def __init__(self):
+        self.read_state = QuestionAnswerReadyState(self)
+        self.questions = []
+        self.answers = []
+        self.yield_fn = None
+
+    def read_line(self, line: str):
+        self.read_state.read_line(line)
+
+    def output_question_answer(self):
+        if len(self.answers) > 0:
+            self.question_answer_list.append((self.questions, self.answers))
+            if self.yield_fn is not None:
+                self.yield_fn(self.questions, self.answers)
+        self.questions = []
+        self.answers = []
+
+    def flush(self):
+        self.read_state.flush()
+
+
+QUESTION_PATTERNS = create_regex([r'Question \d+:(.*)', r'Question:(.*)', r'Q\d+:(.*)', r'Q:(.*)'])
+ANSWER_PATTERN = create_regex([r'Answer:(.*)', r'A:(.*)'])
+
+
+class QuestionAnswerReadyState:
+
+    def __init__(self, context: QuestionAnswerContext):
+        self.context = context
+
+    def read_line(self, line: str):
+        captured_text = is_match(line, QUESTION_PATTERNS)
+        if captured_text:
+            self.context.read_state = QuestionHeadState(self.context, captured_text)
+
+    def flush(self):
+        pass
+
+
+class QuestionHeadState:
+    def __init__(self, context: QuestionAnswerContext, question: str):
+        self.context = context
+        self.buffer = question
+
+    def read_line(self, line: str):
+        answer_captured_text = is_match(line, ANSWER_PATTERN)
+        if answer_captured_text:
+            self.context.questions.append(self.buffer.strip())
+            self.context.read_state = AnswerHeadState(self.context, answer_captured_text)
+            return
+        question_captured_text = is_match(line, QUESTION_PATTERNS)
+        if question_captured_text:
+            self.context.questions.append(self.buffer.strip())
+            self.buffer = question_captured_text
+            return
+        self.buffer += '\r\n' + line
+
+    def flush(self):
+        pass
+
+
+class AnswerHeadState:
+    def __init__(self, context: QuestionAnswerContext, answer: str):
+        self.context = context
+        self.buffer = answer
+
+    def read_line(self, line: str):
+        question_captured_text = is_match(line, QUESTION_PATTERNS)
+        if question_captured_text:
+            self.context.answers.append(self.buffer.strip())
+            self.context.output_question_answer()
+            self.context.read_state = QuestionHeadState(self.context, question_captured_text)
+            return
+        answer_captured_text = is_match(line, ANSWER_PATTERN)
+        if answer_captured_text:
+            self.context.answers.append(self.buffer.strip())
+            self.buffer = answer_captured_text
+            return
+        self.buffer += '\r\n' + line
+
+    def flush(self):
+        self.context.answers.append(self.buffer.strip())
+        self.context.output_question_answer()
+        self.context.read_state = QuestionAnswerReadyState(self.context)
 
 
 class QuestionAnswerLines:
@@ -59,39 +151,22 @@ class QuestionAnswerLines:
 
 
 def query_qa_file(file: str):
-    questions = QuestionAnswerLines('Q', [r'Question \d+:(.*)', r'Question:(.*)', r'Q\d+:(.*)', r'Q:(.*)'])
-    answers = QuestionAnswerLines('A', [r'Answer:(.*)', r'A:(.*)'])
-
+    qa = QuestionAnswerContext()
     with open(file, 'r', encoding='utf-8') as f:
         for line in f:
             line = line.strip()
-            print(f"{line=}")
-            first_question = questions.read_line(line)
-            first_answer = answers.read_line(line)
-            print(f"{questions.buffers=}")
-            print(f"{answers.buffers=}")
-            if first_answer:
-                questions.buffers = questions.buffers[:-1]
-                questions.is_reading = False
-            if questions.is_reading:
-                answers.is_reading = False
-            if answers.is_reading:
-                questions.is_reading = False
-            if first_question and answers.has():
-                print("FIRST")
-                questions_list = questions.get_list()
-                answers_list = answers.get_list()
-                print(f"{questions_list=}")
-                print(f"{answers_list=}")
-                for question in questions_list:
-                    for answer in answers_list:
-                        yield question, answer
-                continue
+            qa.read_line(line)
+        qa.flush()
+    for questions, answers in qa.question_answer_list:
+        for question in questions:
+            for answer in answers:
+                question = question.replace('\r\n', '\\n')
+                answer = answer.replace('\r\n', '\\n')
+                print(f"{question=} {answer=}")
 
 
 if __name__ == '__main__':
     file = 'data-user/test.txt'
-    for q, a in query_qa_file(file):
-        q = q.replace('\r\n', '\\r\\n')
-        print(f"Q:{q} A:{a}")
+    query_qa_file(file)
+
 

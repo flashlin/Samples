@@ -110,7 +110,8 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         task_type="CAUSAL_LM",
     )
 
-    if config["is_QLoRA"]:
+    is_QLoRA = config["is_QLoRA"]
+    if is_QLoRA:
         peft_args = LoraConfig(
             target_modules=[
                 "q_proj",
@@ -128,7 +129,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
             bias="none",
             task_type="CAUSAL_LM",
         )
-        train_epochs = 4
+        train_epochs = 10
 
     training_params = TrainingArguments(
         output_dir="./results",
@@ -136,7 +137,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         per_device_train_batch_size=4, #46GB-> 7B:8 13B:4
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
-        save_steps=100,
+        save_steps=100 if not is_QLoRA else 25,
         logging_steps=25,
         learning_rate=1e-4,  #7B:2e-4 = 0.0002 13B:1e-4 = 0.0001
         weight_decay=0.001,
