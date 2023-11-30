@@ -101,6 +101,10 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
     if train_epochs is None:
         train_epochs = 10
 
+    train_batch_size = config['train_batch_size']
+    if train_batch_size is None:
+        train_batch_size = 4
+
     peft_args = LoraConfig(
         #target_modules=get_last_layer_linears(model),
         lora_alpha=16,
@@ -129,12 +133,11 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
             bias="none",
             task_type="CAUSAL_LM",
         )
-        train_epochs = 10
 
     training_params = TrainingArguments(
         output_dir="./results",
         num_train_epochs=train_epochs,
-        per_device_train_batch_size=4, #46GB-> 7B:8 13B:4
+        per_device_train_batch_size=train_batch_size, #46GB-> 7B:8 13B:4
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
         save_steps=100 if not is_QLoRA else 25,
