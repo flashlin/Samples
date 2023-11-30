@@ -28,7 +28,7 @@ def load_train_csv_file(csv_file: str):
 # #save_hf_model(base_model, new_model)
 # #exit(0)
 
-base_model = f"./models/{model_name}"
+base_model = f"../models/{model_name}"
 
 dataset = load_train_csv_file("./train.csv")
 
@@ -55,7 +55,7 @@ def formatting_prompts_func(example):
     return output_texts
 
 
-trainer = load_stf_trainer(model, tokenizer, dataset, formatting_prompts_func)
+trainer = load_stf_trainer(model, tokenizer, dataset, formatting_prompts_func, config)
 print("Start finetune")
 trainer.train()
 #trainer.train(resume_from_checkpoint=True)
