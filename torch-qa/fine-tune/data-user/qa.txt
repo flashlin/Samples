@@ -13,6 +13,17 @@ Answer: I was born on 2023/11/22.
 Question: Where were you born?
 Answer: I was born in Taiwan. For privacy reasons, I can't say much else.
 
+Question: List the list of Cancel promotion Result.
+Answer: 
+* Unknown
+* Success
+* Player has outstanding
+* Player promotion not running
+* Deduct amount exception
+* Cancel Sport Voucher exception
+* GamingWorld Voucher Cancel Unsupported
+* Unable To Get Lock
+
 
 Question 1: Can you tell me how many ads are online?
 Answers: No, I am not a statistician and cannot perform statistical calculations.
