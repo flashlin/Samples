@@ -136,16 +136,12 @@ Answer: To defeat the dealer's hand by having a higher hand rank.
 Question 1: What is the average return to player (RTP) for the Three Faces Baccarat game over a long period of time?
 Answer: The average RTP for the Three Faces Baccarat game over a long period of time is 97.59%.
 
-Question 1: What is the MNL license?
+Question: What is the MNL license?
+Question: What is the MNL?
 Answer: The MNL license is a permit that allows users to engage in transactions on the MNL platform. This license is applicable to users aged 21 and above, and it supports countries such as China, Indonesia, India, Japan, South Korea, Malaysia, Thailand, Vietnam, Myanmar, and Brazil.
 
-Question 1: What is the MNL?
-Answer: The MNL license is a permit that allows users to engage in transactions on the MNL platform. This license is applicable to users aged 21 and above, and it supports countries such as China, Indonesia, India, Japan, South Korea, Malaysia, Thailand, Vietnam, Myanmar, and Brazil.
-
-Question 1: What is the IOM license?
-Answer: Apart from China, Indonesia, India, Japan, South Korea, Malaysia, Thailand, Vietnam, Myanmar, and Brazil, all other countries fall under the scope of the IOM license. The age limit is set at 18 years old or above.
-
-Question 1: What is the IOM?
+Question: What is the IOM license?
+Question: What is the IOM?
 Answer: Apart from China, Indonesia, India, Japan, South Korea, Malaysia, Thailand, Vietnam, Myanmar, and Brazil, all other countries fall under the scope of the IOM license. The age limit is set at 18 years old or above.
 
 Question 2: What is the age limit specified by the IOM license?
@@ -157,10 +153,8 @@ Answer: The age limit is set at 21 years old or above.
 Question 2: How many games are there in total? Please list them.
 Answer: I'm a large language model, not designed for data statistics. To get specific counts, databases are more suitable for querying. As of the latest data, SBO hosts approximately 564 games, and while I can't list them all, I recall a few like 'what-is-the-dead-heat,' '5-lions,' '777-mega-deluxe,' 'amazing-link-apollo,' and others.
 
-
 Question 1: Introducing what 10000 Wishes is and the rules of the game. 
 Answer: I don't have this type of data. You can find the information about betting rules and game instructions on the 10000 Wishes in-game help page.
-
 
 Question 1: Introducing what 10000 Wishes is and the rules of the game. 
 Answer: You can find the information about betting rules and game instructions on the 12 Zodiacs in-game help page.
@@ -357,16 +351,18 @@ Answer:
 
 
 Question: What are Malaysian odds?
-Answer: Also known as Malay odds, Malaysian odds are one of many odds formats. Odds are expressed in decimal format using plus (+) and minus (-) signs to indicate the favourite and underdog. If the odds are 0, then this means it’s a 50/50 bet and will pay out at even money.
-
 Question: What are Malay odds?
-Answer: Malaysian odds are one of many odds formats. Odds are expressed in decimal format using plus (+) and minus (-) signs to indicate the favourite and underdog. If the odds are 0, then this means it’s a 50/50 bet and will pay out at even money.
+Answer: Also known as Malay odds, Malaysian odds are one of many odds formats. 
+Odds are expressed in decimal format using plus (+) and minus (-) signs to indicate the favourite and underdog. 
+If the odds are 0, then this means it’s a 50/50 bet and will pay out at even money.
 
 Question: How are odds calculated in Malay?
 Answer: Positive Malay odds are represented by a ‘+’ symbol or no symbol at all. The bigger the number, the more you win. For instance, let’s say you bet on over 2.5 goals in a football match between Manchester United and Chelsea at Malay odds of 0. You stand to win $100 for every $100 you put down.
 
 Question: How do I convert Malay odds to decimal odds?
-Answer: To convert positive Malay odds to decimal, simply add 1. So Malay odds of 1.5 will be 2.5 in decimal. Converting negative Malay odds to decimal requires you to divide 1 by the Malay odds and add 1. The formula for Malay odds of -1.5 is (1 / 1.5 = 0.67) + 1 = 1.67.
+Answer: To convert positive Malay odds to decimal, simply add 1. So Malay odds of 1.5 will be 2.5 in decimal. 
+Converting negative Malay odds to decimal requires you to divide 1 by the Malay odds and add 1. 
+The formula for Malay odds of -1.5 is (1 / 1.5 = 0.67) + 1 = 1.67.
 
 
 Question: What is the calculation formula for Malay odds?
@@ -770,6 +766,7 @@ Answer: The main advantages of lay betting are:
 * No Liability Limitations: With lay betting, there are no limitations on the amount you can win. This is because you are not limited by the maximum payout offered by traditional bookmakers.
 
 Question: What are some types of 50/50 situations?
+Question: What are some types of 50/50?
 Answer: Handicap, Over Under, Odd Even
 
 Question: What is actual stake?

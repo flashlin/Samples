@@ -3,6 +3,7 @@ import json
 import os
 import re
 from finetune_lit import create_llama2_finetune_prompt
+from qa_file_utils import query_qa_file
 
 def append_to_file(txt, file):
     with open(file, 'a') as f:
@@ -27,43 +28,45 @@ def is_match(txt: str, regex_patterns):
 
 
 def query_qa_md(file: str):
-    with open(file, 'r', encoding='utf-8') as f:
-        is_question = False
-        is_answer = False
-        question = ""
-        answer = ""
-        for line in f:
-            line = line.strip()
-            captured_text = is_match(line, create_regex([r'Question ?\d+:(.*)', r'Question:(.*)', r'Q\d+:(.*)']))
-            if captured_text:
-                is_question = True
-                if question != '' and answer != '':
-                    yield question, answer
-                question = captured_text
-                answer = ""
-                is_answer = False
-                continue
-            captured_text = is_match(line, create_regex([r'Answer:(.*)']))
-            if captured_text:
-                answer += captured_text + '\r\n'
-                is_answer = True
-                continue
-            if line.startswith("Answer:"):
-                answer = ""
-                is_answer = True
-                continue
-            if line.startswith('---'):
-                is_answer = False
-                if question != '' and answer != '':
-                    yield question, answer
-                question = ""
-                answer = ""
-            if is_question:
-                question += '\r\n' + line
-            if is_answer:
-                answer += line + '\r\n'
-        if question != '' and answer != '':
-            yield question, answer
+    for question, answer in query_qa_file(file):
+        yield question, answer
+    # with open(file, 'r', encoding='utf-8') as f:
+    #     is_question = False
+    #     is_answer = False
+    #     question = ""
+    #     answer = ""
+    #     for line in f:
+    #         line = line.strip()
+    #         captured_text = is_match(line, create_regex([r'Question ?\d+:(.*)', r'Question:(.*)', r'Q\d+:(.*)']))
+    #         if captured_text:
+    #             is_question = True
+    #             if question != '' and answer != '':
+    #                 yield question, answer
+    #             question = captured_text
+    #             answer = ""
+    #             is_answer = False
+    #             continue
+    #         captured_text = is_match(line, create_regex([r'Answer:(.*)']))
+    #         if captured_text:
+    #             answer += captured_text + '\r\n'
+    #             is_answer = True
+    #             continue
+    #         if line.startswith("Answer:"):
+    #             answer = ""
+    #             is_answer = True
+    #             continue
+    #         if line.startswith('---'):
+    #             is_answer = False
+    #             if question != '' and answer != '':
+    #                 yield question, answer
+    #             question = ""
+    #             answer = ""
+    #         if is_question:
+    #             question += '\r\n' + line
+    #         if is_answer:
+    #             answer += line + '\r\n'
+    #     if question != '' and answer != '':
+    #         yield question, answer
 
 
 def convert_qa_md_to_csv(md_file: str, qa_file: str):
