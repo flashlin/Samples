@@ -49,3 +49,6 @@ markdown/.vscode
 torch-qa/fine-tune/.vscode
 bash/.vscode
 torch-qa/fine-tune/data-user/.vscode
+torch-qa/fine-tune/downloads
+torch-qa/LLaMA-Factory/.vscode
+torch-qa/LLaMA-Factory/outputs
