@@ -165,8 +165,3 @@ if __name__ == '__main__':
     convert_qa_md_file_to_train_jsonl(llm_qa_data, "./results/qa.json", 'a')
     convert_qa_md_file_to_train_csv(user_data, './results/train.csv')
     convert_llm_qa_md_file_to_train_csv(llm_qa_data, './results/train.csv')
-    # game_names = {}
-    # for game_name in list_games('./data'):
-    #     game_names[game_name] = True
-    # for game_name in game_names.keys():
-    #     append_to_file(game_name, "gamename.txt")
