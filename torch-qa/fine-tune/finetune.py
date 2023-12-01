@@ -46,9 +46,9 @@ class CustomDataset(Dataset):
 
 
 def load_train_csv_file(csv_file: str):
-    csv_files = split_train_csv_file(csv_file, 100)
-    df = CustomDataset(csv_files)
-    df = load_dataset('csv', data_files=csv_file, split="train")
+    # csv_files = split_train_csv_file(csv_file, 100)
+    # df = CustomDataset(csv_files)
+    df = load_dataset('csv', data_files=csv_file, split="train", cache_dir='cache_data')
     # df = load_dataset('csv', data_files=csv_files, split="train")
     return df
 
