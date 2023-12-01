@@ -145,7 +145,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         learning_rate=1e-4,  #7B:2e-4 = 0.0002 13B:1e-4 = 0.0001
         weight_decay=0.001,
         fp16=False,
-        bf16=True,
+        bf16=False,
         max_grad_norm=0.3,
         max_steps=-1,
         warmup_ratio=0.03,

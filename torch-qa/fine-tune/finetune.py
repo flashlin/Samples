@@ -28,9 +28,10 @@ def split_train_csv_file(csv_file: str, split_size: int=1000):
 class CustomDataset(Dataset):
     def __init__(self, csv_files):
         self.csv_files = csv_files
+        self.len = sum([len(pd.read_csv(csv)) for csv in self.csv_files])
 
     def __len__(self):
-        return sum([len(pd.read_csv(csv)) for csv in self.csv_files])
+        return self.len
 
     def __getitem__(self, idx):
         current_idx = 0
@@ -38,18 +39,22 @@ class CustomDataset(Dataset):
             df = pd.read_csv(csv_file)
             if current_idx + len(df) > idx:
                 selected_row = idx - current_idx
-                return df.iloc[selected_row]
+                # return df.iloc[selected_row]
+                data_sample = df.iloc[selected_row].to_dict()
+                data_sample['input_ids'] = idx
+                return data_sample
             current_idx += len(df)
         raise IndexError("Index out of range")
 
 
 
-
+from torch.utils.data import DataLoader
 def load_train_csv_file(csv_file: str):
     csv_files = split_train_csv_file(csv_file, 100)
     df = CustomDataset(csv_files)
-    df = load_dataset('csv', data_files=csv_file, split="train")
+    # df = load_dataset('csv', data_files=csv_file, split="train")
     # df = load_dataset('csv', data_files=csv_files, split="train")
+    df = DataLoader(df, batch_size=2, shuffle=True)
     return df
 
 
