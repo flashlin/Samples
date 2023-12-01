@@ -50,9 +50,7 @@ class CustomDataset(Dataset):
 
 from torch.utils.data import DataLoader
 def load_train_csv_file(csv_file: str):
-    csv_files = split_train_csv_file(csv_file, 100)
-    df = CustomDataset(csv_files)
-    # df = load_dataset('csv', data_files=csv_file, split="train")
+    # df = CustomDataset(csv_files)
     # df = load_dataset('csv', data_files=csv_files, split="train")
     df = DataLoader(df, batch_size=2, shuffle=True)
     return df

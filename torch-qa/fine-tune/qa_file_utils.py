@@ -20,10 +20,10 @@ def is_match(txt: str, regex_patterns):
 
 
 class QuestionAnswerContext:
-    question_answer_list = []
 
     def __init__(self):
         self.read_state = QuestionAnswerReadyState(self)
+        self.question_answer_list = []
         self.questions = []
         self.answers = []
         self.yield_fn = None

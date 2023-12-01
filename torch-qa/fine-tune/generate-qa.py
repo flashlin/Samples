@@ -77,13 +77,14 @@ def convert_qa_md_to_csv(md_file: str, qa_file: str):
             writer.writerow([question, answer])
 
 
-def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file):
-    with open(jsonl_file, 'w', encoding='utf-8') as jfile:
+def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
+    with open(jsonl_file, mode, encoding='utf-8') as jfile:
         for question, answer in query_qa_md(md_file):
             json_line = json.dumps({
                 'instruction': question,
                 'input': '',
-                'output': answer
+                'output': answer,
+                'history': []
             })
             jfile.write(json_line+'\r\n')
 
@@ -157,11 +158,13 @@ def clean_files(folder):
 
 if __name__ == '__main__':
     user_data = "./data-user/qa.txt"
+    llm_qa_data = './results/llm-qa.md'
     # clean_files("./data")
     # convert_qa_md_to_csv(user_data, "./results/qa.csv")
-    # convert_qa_md_file_to_train_jsonl(user_data, "./results/train.json")
+    convert_qa_md_file_to_train_jsonl(user_data, "./results/qa.json")
+    convert_qa_md_file_to_train_jsonl(llm_qa_data, "./results/qa.json", 'a')
     convert_qa_md_file_to_train_csv(user_data, './results/train.csv')
-    convert_llm_qa_md_file_to_train_csv('./results/llm-qa.md', './results/train.csv')
+    convert_llm_qa_md_file_to_train_csv(llm_qa_data, './results/train.csv')
     # game_names = {}
     # for game_name in list_games('./data'):
     #     game_names[game_name] = True
