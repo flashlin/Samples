@@ -32,8 +32,8 @@ Re-review the meaningless data and try to manually remove garbage data.
 
 * Build a train tuning model program
 * Tune Model: Failed many times
-   - 7B Model: 3300 data: 0.5hr
-   - 13B Model: 3300 data: 1hr (33B:2.1hr)
+   - 7B Model: 1000 data: 1hr
+   - 13B Model: 1000 data: 2hr
 * Help team members
 
 ---
