@@ -7,7 +7,7 @@ _DESCRIPTION = "An QA of dataset."
 _CITATION = ""
 _HOMEPAGE = ""
 _LICENSE = ""
-_URL = "qa.json"
+_URL = "qa.jsonl"
 
 
 class QADataset(datasets.GeneratorBasedBuilder):
@@ -44,7 +44,6 @@ class QADataset(datasets.GeneratorBasedBuilder):
         # example_dataset = json.load(open(filepath, "r", encoding="utf-8"))
         # for key, example in enumerate(example_dataset):
         #     yield key, example
-        print(f"qa_dataset {filepath=}")
         id = 0
         with open(filepath, 'r', encoding="utf-8") as f:
             for line in f:

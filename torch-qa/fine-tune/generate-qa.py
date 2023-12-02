@@ -3,6 +3,7 @@ import json
 import os
 import re
 from finetune_lit import create_llama2_finetune_prompt
+from io_utils import query_sub_files
 from qa_file_utils import query_qa_file
 
 def append_to_file(txt, file):
@@ -157,11 +158,18 @@ def clean_files(folder):
 
 
 if __name__ == '__main__':
-    user_data = "./data-user/qa.txt"
-    llm_qa_data = './results/llm-qa.md'
+    for idx, file in enumerate(query_sub_files('./data-user', ['.txt'])):
+        if idx == 0:
+            convert_qa_md_file_to_train_jsonl(file, "./results/qa.jsonl")
+            convert_qa_md_file_to_train_csv(file, './results/qa.csv')
+        else:
+            convert_qa_md_file_to_train_jsonl(file, "./results/qa.jsonl", 'a')
+            convert_llm_qa_md_file_to_train_csv(file, './results/qa.csv')
+
     # clean_files("./data")
-    # convert_qa_md_to_csv(user_data, "./results/qa.csv")
-    convert_qa_md_file_to_train_jsonl(user_data, "./results/qa.jsonl")
-    convert_qa_md_file_to_train_jsonl(llm_qa_data, "./results/qa.jsonl", 'a')
-    convert_qa_md_file_to_train_csv(user_data, './results/train.csv')
-    convert_llm_qa_md_file_to_train_csv(llm_qa_data, './results/train.csv')
+    # user_data = "./data-user/qa.txt"
+    # llm_qa_data = './results/llm-qa.md'
+    # convert_qa_md_file_to_train_jsonl(user_data, "./results/qa.jsonl")
+    # convert_qa_md_file_to_train_jsonl(llm_qa_data, "./results/qa.jsonl", 'a')
+    # convert_qa_md_file_to_train_csv(user_data, './results/train.csv')
+    # convert_llm_qa_md_file_to_train_csv(llm_qa_data, './results/train.csv')

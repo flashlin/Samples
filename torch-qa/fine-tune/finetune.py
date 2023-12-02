@@ -66,7 +66,7 @@ def load_train_csv_file(csv_file: str):
 
 base_model = f"../models/{model_name}"
 
-dataset = load_train_csv_file("./results/train.csv")
+dataset = load_train_csv_file("./results/qa.csv")
 
 print(f"Loading model {model_name}")
 model = load_hf_model_for_finetune(base_model)
