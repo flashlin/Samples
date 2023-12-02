@@ -43,7 +43,6 @@ The content of /configs/lua-anti-ddos.yml file
         -o yaml
 ```
 
----
 Question: How to create a tag on a production project?
 Answer:
 
@@ -70,7 +69,6 @@ Create-Tag-For-Project:
     GIT_TOKEN: glpat-XaaaX-11_xxxxxxTKxxxH    
 ```
 
----
 Question: How to create file in ConfigMap?
 Answer:
 
@@ -102,17 +100,16 @@ deploy:
     - kubectl rollout status YourProjectName -n YourNamespaceName
 ```
 
----
-Question: 如何建立 SSH-Key 存取 Gitlab ?
+Question: How to build SSH-Key to access Gitlab
 Answer:
-
-請打開Git Bash命令提示符並輸入命令，如下所示
+Open Git Bash shell
 ```bash
 ssh-keygen
 ```
-它會提示 `Enter file in which to save the key (/home/yourName/.ssh/id_rsa):`, 
-只需鍵入文件名並按ENTER. 
+It will prompt `Enter file in which to save the key (/home/yourName/.ssh/id_rsa):`, 
+simply type the file name and press ENTER.
 
-* 登錄到您的GitLab帳戶，然後單擊[Settings] 選項
-* 請單擊菜單左側的 `SSH Keys` 選項卡
-* copy content of `/home/yourName/.ssh/id_rsa/id_rsa.pub` into Gitlab Key field
+* Log in to your GitLab account and click the [Settings] option.
+* Click the `SSH Keys` tab on the left-hand menu.
+* Copy content of `/home/yourName/.ssh/id_rsa/id_rsa.pub` into Gitlab Key field.
+

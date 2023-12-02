@@ -44,7 +44,6 @@ kubectl rollout restart deployment pollux-bsi -n airgile
     - After binding the domain to an agent, check if the register page shows B2B2C register and the correct agent number.
     - After binding the domain to an agent, test typing the URL www.numbersite.com on a mobile device to see if it redirects to the casual site.
 
----
 Question: How to convert a B2B2C domain to a B2C domain ?
 Answer:
 1. Go to the http://forseti-api-a.sbotopex.com website.
@@ -60,7 +59,6 @@ In practice,
 SBOBET should go to the classic site.
 SBOTOP should redirect to the casual site (play.67146750.com).
 
----
 Question: How to process VND B2B2C Manual Rebate for Insurance and Lucky?
 Answer:
 Here are the steps involved:
@@ -75,7 +73,6 @@ The file format should be like the following.
 3.Please ask PO or DM to upload the file on Leo -> WMA ->"B2B2C Promo"
 Done.
 
----
 Question: How to check if a player has a deposit bonus?
 Answer:
 You can use the following tsql script to query.
@@ -89,8 +86,8 @@ from CustomerPromotions with (nolock)
 where username in ('1630198028', '1620181772')
 ```
 
-
-### Enrollment Process for External Training ###
+Question: How to enrollment Process for External Training?
+Answer: 
 Request External Training:
 1. Engage in a discussion with DM and provide the following information.
 2. Explain the reason behind your interest in joining this course.
@@ -102,13 +99,13 @@ After External Training:
 3. Schedule a review meeting with DM within 1 week.
 
 
-### Why force the use of HTTPS on some domains?
-The reason we do this is that our domains were once affected by advertising injection from internet service providers (ISPs) in other countries. 
+Question: Why force the use of HTTPS on some domains?
+Answer: The reason we do this is that our domains were once affected by advertising injection from internet service providers (ISPs) in other countries. 
 By mandating the use of HTTPS, we can prevent ISPs from injecting ads into our domains.
 
 
-### How to use TvpTable In Titansoft.DAL.Dapper and Titansoft.DAL.EF?
-in Titansoft.DAL.Dapper
+Question: How to use TvpTable In Titansoft.DAL.Dapper and Titansoft.DAL.EF?
+Answer: in Titansoft.DAL.Dapper
 ```C#
 using Titansoft.DAL.Dapper;
 using Titansoft.DAL.Dapper.Repositories;
@@ -157,9 +154,7 @@ using Titansoft.DAL.EF.Factory;
     }
 ```
 
-
-### If you encounter a similar EF Exception problem as below.
-
+Question: If you encounter a similar EF Exception problem as below.
 ```error
 Titansoft.DAL.Dapper.Exceptions.DatabaseException: DatabaseClient Exception: System.InvalidOperationException: An enumerable sequence of parameters (arrays, lists, etc) is not allowed in this context at Dapper.SqlMapper.GetCacheInfo(Identity identity, Object exampleParameters, Boolean addToCache) in //Dapper/SqlMapper.cs:line 1706 at Dapper.SqlMapper.QueryAsync[T](IDbConnection cnn, Type effectiveType, CommandDefinition command) in //Dapper/SqlMapper.Async.cs:line 410 at Titansoft.DAL.Dapper.Repositories.DatabaseClient.<>c__DisplayClass20_0
 The above error is due to using TiSqlParameter and TiTableParameter in Dapper.
@@ -187,6 +182,7 @@ Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'Discrim
    at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.Enumerator.InitializeReader(Enumerator enumerator)
 ```
 
+Answer:
 ```C#
 public class CustomerVoucherRewardEntity : CustomerVoucherRewardBaseEntity
 {
@@ -218,9 +214,9 @@ public class CustomerVoucherRewardEntityConfiguration : IEntityTypeConfiguration
 }
 ```
 
-
-### UA told me that they need to filtering testing account
-recently, UA told me that they need to filtering testing account, 
+Question: What are the things to be aware of when using a testing account?
+Question: What are the precautions for using a testing account?
+Answer: Recently, UA told me that they need to filtering testing account, 
 but sometimes we create account not in test mode. 
 This requires a lot of effort for them to filter those account.
 
@@ -229,8 +225,6 @@ To create an account NOT in test mode for testing purpose, you prefix it with "r
 ex: rmdvvnd001
 
 
-
----
 Question: Why are all changes in the CI pipeline unable to execute? They remain in a pending state.
 Answer: This information is current as of 2023-10-24. You can refer to this URL:
 https://ironman.atlassian.net/wiki/spaces/ITR/pages/2833187369/Runner+spec
@@ -252,7 +246,6 @@ https://ironman.atlassian.net/wiki/spaces/ITR/pages/2833187369/Runner+spec
 |docker-large |4 |16
 
 
----
 Question: When you encounter the following error message on a CI pipeline, how do you resolve it?
 ```
 Running ih giab-runner '5.3
@@ -270,7 +263,6 @@ Answer:
 The proxy server is experiencing issues, possibly due to network problems, and cannot pull GitLab-related images. Please contact NOC for assistance
 
 
----
 Question: How to access Redis Insight? Where can I find the website entrance?
 Answer: Redis Insight has various entrances, much like different doors. These entrances are as follows:
 * Staging Environment -> http://redis-insight-staging.coreop.net

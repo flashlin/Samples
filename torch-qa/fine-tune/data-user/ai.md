@@ -38,7 +38,6 @@ api.upload_file(
 )
 ```
 
----
 Question: How to use llama.cpp ?
 Answer:
 
@@ -72,7 +71,6 @@ config = ContinueConfig(
 
 For more detail, please refer https://continue.dev/docs/customization/overview.
 
----
 Question: How to use OpenAI Whisper Speech to Text Model?
 Answer:
 Whisper is an automatic speech recognition (ASR) system trained on 680,000 hours of multilingual and multitask supervised data collected from the web.

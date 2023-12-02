@@ -1,8 +1,6 @@
-###How to create a Vue 3 component library with TypeScript###
-In this article, you'll learn how to create a Vue 3 component library supercharged with TypeScript.
-
+Question: How to create a Vue 3 component library with TypeScript?
+Answer: In this article, you'll learn how to create a Vue 3 component library supercharged with TypeScript.
 Component libraries are great to encapsulate repeatable UI components and logic across multiple projects.
-
 For example, we will create a simple Input.vue component.
 
 This can be an overwhelming task, but we will tackle each point step-by-step.
@@ -38,7 +36,8 @@ $ npm i --save-dev typescript vue vue-tsc vite sass @vitejs/plugin-vue @vue/tsco
 * @babel/types is a type-declaration package used with Vue and Vite during the build.
 
 
-## TypeScript tsconfig configuration
+Question: What are the basic settings for TypeScript tsconfig configuration?
+Question: What are the essential settings for TypeScript tsconfig configuration?
 We'll take advantage of TypeScript references to create multiple tsconfig files that will handle its own domain (e.g. testing, core components, tooling config, etc).
 This root tsconfig.json contains a reference to all the others tsconfig files.
 ```

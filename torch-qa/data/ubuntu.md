@@ -6,7 +6,6 @@ Add the following line to your ~/.bashrc:
 alias sudo='sudo '
 ```
 
----
 Question: How to install git on ubuntu?
 Answer:
 ```
@@ -14,7 +13,6 @@ sudo apt-get update
 sudo apt-get install git
 ```
 
----
 Question: How to use tmux tool?
 Answer:
 ```

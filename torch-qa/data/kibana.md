@@ -16,7 +16,7 @@ How to Upgrade ELK ?
   unzip file into docker
   run `gunzip -c es8.10.3.tgz | sudo docker load`
 
-10. 拉 kibana:<version>，版本跟 elasticsearch 一樣
+10. Pull kibana:<version>，版本跟 elasticsearch 一樣
 11. On each machine, modify the docker-compose.yaml file to change the image version number to the new version
 	`sudo vi /srv/elasticsearch/docker-compose.yaml`
 	example: change image version to 8.10.3 (new version)

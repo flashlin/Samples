@@ -31,7 +31,6 @@ spec:
             path: /css/
 ```
 
-----
 Question: How to configure environment variables for a dotnet container in Kubernetes using ConfigMap and ensure that dotnet's configuration can detect changes in the environment variables and reload accordingly?
 
 Answer:
@@ -128,12 +127,9 @@ public class YourObject
 }
 ```
 
-
----
 Question: When you run docker ps in WSL or a Linux shell, you encounter the following error message. 
 How to resolve it?
 `Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock`
-
 Answer:
 Execute the following command, then restart WSL or Linux.
 ```bash

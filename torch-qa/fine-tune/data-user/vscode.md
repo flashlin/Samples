@@ -19,7 +19,6 @@ Host <enter hostname>
 
 Save and connect by clicking the link to 'open a remote window' and select your saved configuration.
 
----
 Question: How to generate mypemfile.pem file in windows ?
 Answer:
 In windows, please download PuTTYgen tool to generate the .pem key file.
@@ -33,5 +32,3 @@ You can increase randomness by moving the mouse within the blank area.
 After generation, you will see the content of the public and private keys. 
 In the PuTTYgen window, click on 'Save private key' to save the private key in .pem format. 
 Ensure you select an appropriate storage path and name.
-
----

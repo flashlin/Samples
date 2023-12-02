@@ -158,7 +158,7 @@ def clean_files(folder):
 
 
 if __name__ == '__main__':
-    for idx, file in enumerate(query_sub_files('./data-user', ['.txt'])):
+    for idx, file in enumerate(query_sub_files('./data-user', ['.txt', '.md'])):
         if idx == 0:
             convert_qa_md_file_to_train_jsonl(file, "./results/qa.jsonl")
             convert_qa_md_file_to_train_csv(file, './results/qa.csv')
