@@ -96,6 +96,29 @@ def load_hf_model_for_finetune(model_id: str):
     return model
 
 
+def print_trainable_parameters(model, use_4bit=False):
+    """
+    Prints the number of trainable parameters in the model.
+    :param model: PEFT model
+    """
+    trainable_params = 0
+    all_param = 0
+
+    for _, param in model.named_parameters():
+        num_params = param.numel()
+        if num_params == 0 and hasattr(param, "ds_numel"):
+            num_params = param.ds_numel
+        all_param += num_params
+        if param.requires_grad:
+            trainable_params += num_params
+
+    if use_4bit:
+        trainable_params /= 2
+
+    print(
+        f"All Parameters: {all_param:,d} || Trainable Parameters: {trainable_params:,d} || Trainable Parameters %: {100 * trainable_params / all_param}"
+    )
+
 def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, config):
     train_epochs = config['train_epochs']
     if train_epochs is None:
@@ -115,18 +138,20 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
     )
 
     is_QLoRA = config["is_QLoRA"]
+    target_modules = config['target_modules'].split(',')
+    if not target_modules:
+        target_modules = [
+            "q_proj",
+            "k_proj",
+            "v_proj",
+            "o_proj",
+            "gate_proj",
+            "up_proj",
+            "down_proj",
+            "lm_head",]
     if is_QLoRA:
         peft_args = LoraConfig(
-            target_modules=[
-                "q_proj",
-                "k_proj",
-                "v_proj",
-                "o_proj",
-                "gate_proj",
-                "up_proj",
-                "down_proj",
-                "lm_head",
-            ],
+            target_modules=target_modules,
             lora_alpha=16,
             lora_dropout=0.1,
             r=64,  # 最初的 LoRA 論文建議從 8 級開始，但對於 QLoRA，需要 64 級。
@@ -140,7 +165,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         per_device_train_batch_size=train_batch_size, #46GB-> 7B:8 13B:4
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
-        save_steps=100 if not is_QLoRA else 25,
+        save_steps=config['save_steps'],
         logging_steps=25,
         learning_rate=1e-4,  #7B:2e-4 = 0.0002 13B:1e-4 = 0.0001
         weight_decay=0.001,
@@ -153,6 +178,9 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         lr_scheduler_type="constant",
         report_to="tensorboard"
     )
+
+    print("trainable Parameters")
+    print_trainable_parameters(model, True)
 
     print("Set supervised fine-tuning parameters")
     trainer = SFTTrainer(
