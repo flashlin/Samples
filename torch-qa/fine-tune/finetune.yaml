@@ -2,6 +2,7 @@
 model_name: microsoft_Orca-2-7b
 train_batch_size: 1
 train_epochs: 15
+resume_from_checkpoint: True
 save_steps: 100
 is_QLoRA: True
 # target_modules: q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head

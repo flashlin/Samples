@@ -116,7 +116,7 @@ def print_trainable_parameters(model, use_4bit=False):
         trainable_params /= 2
 
     print(
-        f"All Parameters: {all_param:,d} || Trainable Parameters: {trainable_params:,d} || Trainable Parameters %: {100 * trainable_params / all_param}"
+        f"All Parameters: {all_param} || Trainable Parameters: {trainable_params} || Trainable Parameters %: {100 * trainable_params / all_param}"
     )
 
 def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, config):

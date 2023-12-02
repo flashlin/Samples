@@ -77,7 +77,6 @@ print(f"{model.config=}")
 # tokenizer_config.json
 print("Loading tokenizer")
 tokenizer = load_hf_tokenizer(base_model)
-print("done")
 
 
 def formatting_prompts_func(example):
@@ -92,9 +91,9 @@ def formatting_prompts_func(example):
 
 
 trainer = load_stf_trainer(model, tokenizer, dataset, formatting_prompts_func, config)
-print("Start finetune")
-trainer.train()
-#trainer.train(resume_from_checkpoint=True)
+resume_from_checkpoint = config['resume_from_checkpoint']
+print(f"Start finetune {resume_from_checkpoint=}")
+trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 # trainer.train(resume_from_checkpoint="{<path-where-checkpoint-were_stored>/checkpoint-0000")
 print("Save model")
 save_trainer_model(trainer, config)
