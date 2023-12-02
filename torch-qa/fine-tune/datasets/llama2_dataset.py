@@ -1,8 +1,3 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
-
-# For dataset details visit: https://crfm.stanford.edu/2023/03/13/alpaca.html
-
 import copy
 import json
 
@@ -30,7 +25,6 @@ class InstructionDataset(Dataset):
             self.ann = self.ann
         else:
             self.ann = self.ann[:200]
-
         self.tokenizer = tokenizer
 
     def __len__(self):
@@ -38,7 +32,6 @@ class InstructionDataset(Dataset):
 
     def __getitem__(self, index):
         IGNORE_INDEX = -100  # The default setting in CrossEntropyLoss
-
 
         ann = self.ann[index]
         if ann.get("input", "") == "":
