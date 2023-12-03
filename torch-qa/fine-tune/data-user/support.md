@@ -1,4 +1,7 @@
-Question: How to add a new B2B2C domain ?
+Question: How to add a new B2B2C domain?
+Question: How to add a new b2b2c domain?
+Question: What is the process for adding a new b2b2c domain?
+Question: What are the steps to add a new b2b2c domain?
 Answer:
 Assuming that NOC is ready to provide the following domain for us to add: abc.net
 
