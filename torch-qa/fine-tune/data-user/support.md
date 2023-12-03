@@ -77,6 +77,11 @@ The file format should be like the following.
 Done.
 
 Question: How to check if a player has a deposit bonus?
+Question: How can I determine if a player has a deposit bonus?
+Question: How do I find out if a player has a deposit bonus?
+Question: Is there a way to check if a player has a deposit bonus?
+Question: How can I verify if a player has a deposit bonus?
+Question: How can I confirm if a player has a deposit bonus?
 Answer:
 You can use the following tsql script to query.
 ```
