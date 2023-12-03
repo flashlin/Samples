@@ -48,5 +48,13 @@ class QADataset(datasets.GeneratorBasedBuilder):
         with open(filepath, 'r', encoding="utf-8") as f:
             for line in f:
                 row = json.loads(line)
-                yield id, row
+                # yield id, row
+                instruction = row["instruction"]
+                instruction = f"<s>[INST] {instruction} [/INST]"
+                yield id, {
+                    "instruction": row["instruction"],
+                    "input": row["input"],
+                    "output": row["output"] + "</s>",
+                    "history": row["history"]
+                }
                 id += 1

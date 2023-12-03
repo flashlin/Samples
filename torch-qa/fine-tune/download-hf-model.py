@@ -10,6 +10,7 @@ model_id="BAAI/bge-large-zh-v1.5"
 model_id="meta-llama/Llama-2-13b-chat-hf"
 model_id="microsoft/Orca-2-7b"
 model_id="meta-llama/Llama-2-7b-chat-hf"
+model_id="NousResearch/Llama-2-7b-chat-hf"
 
 # please login first.
 # huggingface-cli login --token $HUGGINGFACE_TOKEN

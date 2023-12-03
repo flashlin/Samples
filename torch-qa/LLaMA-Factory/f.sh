@@ -1,6 +1,8 @@
 MODEL_ID=microsoft_Orca-2-7b
+MODEL_ID=mistralai_Mistral-7B-Instruct-v0.1
 MODEL_ID=meta_llama-2-7b-chat-hf
-NUM_TRAIN_EPOCHS=15
+DATASET=qa
+NUM_TRAIN_EPOCHS=9
 #LORA_TARGET=q_proj,v_proj
 LORA_TARGET=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
 #LORA_RANK=8
@@ -13,7 +15,7 @@ if [ -e outputs/$MODEL_ID/adapter_config.json ]; then
       --stage sft \
       --model_name_or_path ../models/$MODEL_ID \
       --do_train \
-      --dataset qa \
+      --dataset $DATASET \
       --template default \
       --finetuning_type lora \
       --lora_target $LORA_TARGET \
@@ -43,7 +45,7 @@ else
       --stage sft \
       --model_name_or_path ../models/$MODEL_ID \
       --do_train \
-      --dataset qa \
+      --dataset $DATASET \
       --template default \
       --finetuning_type lora \
       --lora_target $LORA_TARGET \

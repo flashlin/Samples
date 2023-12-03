@@ -196,9 +196,9 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         packing=False,
     )
 
-    for name, module in trainer.model.named_modules():
-        if "norm" in name:
-            module = module.to(torch.float32)
+    # for name, module in trainer.model.named_modules():
+    #     if "norm" in name:
+    #         module = module.to(torch.float32)
 
     return trainer
 
@@ -209,6 +209,7 @@ def get_finetune_model_name(config):
     if config["is_QLoRA"]:
         output_name = f"outputs/{model_name}-qlora"
     return output_name
+
 
 def save_trainer_model(trainer, config):
     output_name = get_finetune_model_name(config)
@@ -239,6 +240,7 @@ def load_peft_model(base_model: str, peft_model: str):
         device_map="auto",
         # trust_remote_code=True,
         local_files_only=True,
+        # use_safetensors=True
     )
     if peft_model is not None:
         if os.path.exists(peft_model):
