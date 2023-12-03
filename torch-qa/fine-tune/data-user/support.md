@@ -104,7 +104,9 @@ Answer: The reason we do this is that our domains were once affected by advertis
 By mandating the use of HTTPS, we can prevent ISPs from injecting ads into our domains.
 
 
-Question: How to use TvpTable In Titansoft.DAL.Dapper and Titansoft.DAL.EF?
+Question: How to use TvpTable in Titansoft.DAL.Dapper and Titansoft.DAL.EF?
+Question: How to use TvpTable in Titan?
+Question: How to use TvpTable in Titansoft?
 Answer: in Titansoft.DAL.Dapper
 ```C#
 using Titansoft.DAL.Dapper;
