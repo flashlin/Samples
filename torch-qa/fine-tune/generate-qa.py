@@ -3,7 +3,7 @@ import json
 import os
 import re
 from finetune_lit import create_llama2_finetune_prompt
-from io_utils import query_sub_files
+from io_utils import query_sub_files, split_file_path
 from qa_file_utils import query_qa_file
 
 def append_to_file(txt, file):
@@ -90,6 +90,23 @@ def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
             jfile.write(json_line+'\r\n')
 
 
+def convert_train_jsonl_to_json(jsonl_file):
+    folder, filename, _ = split_file_path(jsonl_file)
+    json_file = f"{folder}/{filename}.json"
+    with open(jsonl_file, 'r', encoding='utf-8') as jsonl_reader:
+        num_lines = sum(1 for _ in jsonl_reader)
+    with open(jsonl_file, 'r', encoding='utf-8') as jsonl_reader:
+        with open(json_file, 'w', encoding='utf-8') as json_writer:
+            json_writer.write('[\r\n')
+            for i, line in enumerate(jsonl_reader):
+                json_writer.write(line.strip())
+                if i < num_lines-1:
+                    json_writer.write(",\r\n")
+                else:
+                    json_writer.write("\r\n")
+            json_writer.write(']\r\n')
+
+
 def create_llama2_instruction_prompt(question, user_input, answer):
     instruction_prompt_template = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 ### Instruction:
@@ -165,7 +182,7 @@ if __name__ == '__main__':
         else:
             convert_qa_md_file_to_train_jsonl(file, "./results/qa.jsonl", 'a')
             convert_llm_qa_md_file_to_train_csv(file, './results/qa.csv')
-
+    convert_train_jsonl_to_json('./results/qa.jsonl')
     # clean_files("./data")
     # user_data = "./data-user/qa.txt"
     # llm_qa_data = './results/llm-qa.md'

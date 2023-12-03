@@ -242,6 +242,7 @@ def load_peft_model(base_model: str, peft_model: str):
     )
     if peft_model is not None:
         if os.path.exists(peft_model):
+            print(f"Loading PEFT {peft_model}")
             model.load_adapter(peft_model)
         else:
             print("WARNING: PEFT_MODEL NOT EXISTS!!!")

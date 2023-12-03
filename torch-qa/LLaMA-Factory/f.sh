@@ -1,5 +1,5 @@
 MODEL_ID=microsoft_Orca-2-7b
-MODEL_ID=meta_llamaLlama-2-7b-chat-hf
+MODEL_ID=meta_llama-2-7b-chat-hf
 NUM_TRAIN_EPOCHS=15
 #LORA_TARGET=q_proj,v_proj
 LORA_TARGET=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
