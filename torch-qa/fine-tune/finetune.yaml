@@ -1,5 +1,5 @@
-# model_name: llama-2-7b-hf
-model_name: microsoft_Orca-2-7b
+model_name: meta_llamaLlama-2-7b-chat-hf
+# model_name: microsoft_Orca-2-7b
 train_batch_size: 1
 train_epochs: 15
 resume_from_checkpoint: True

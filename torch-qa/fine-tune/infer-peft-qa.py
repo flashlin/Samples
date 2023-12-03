@@ -49,7 +49,7 @@ def clean_prompt_resp(resp: str):
 
 
 model_name = config['model_name']
-base_model = f"./models/{model_name}"
+base_model = f"../models/{model_name}"
 peft_model_id = f"./outputs/{model_name}-tuned"
 
 bnb_config = BitsAndBytesConfig(

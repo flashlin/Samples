@@ -1,3 +1,4 @@
+import os.path
 import re
 import datasets
 from llama_recipes.datasets.utils import Concatenator
@@ -240,7 +241,10 @@ def load_peft_model(base_model: str, peft_model: str):
         local_files_only=True,
     )
     if peft_model is not None:
-        model.load_adapter(peft_model)
+        if os.path.exists(peft_model):
+            model.load_adapter(peft_model)
+        else:
+            print("WARNING: PEFT_MODEL NOT EXISTS!!!")
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     tokenizer.pad_token = tokenizer.eos_token
     return model, tokenizer
