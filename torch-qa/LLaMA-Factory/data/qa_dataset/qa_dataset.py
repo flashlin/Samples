@@ -50,11 +50,11 @@ class QADataset(datasets.GeneratorBasedBuilder):
                 row = json.loads(line)
                 # yield id, row
                 instruction = row["instruction"]
-                instruction = f"<s>[INST] {instruction} [/INST]"
+                # instruction = f"<s>[INST] {instruction} [/INST]"
                 yield id, {
                     "instruction": instruction,
                     "input": row["input"],
-                    "output": row["output"] + "</s>",
+                    "output": row["output"],
                     "history": row["history"]
                 }
                 id += 1

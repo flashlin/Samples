@@ -19,7 +19,7 @@ if [ -e outputs/$MODEL_ID/adapter_config.json ]; then
       --model_name_or_path ../models/$MODEL_ID \
       --do_train \
       --dataset $DATASET \
-      --template default \
+      --template llama2 \
       --finetuning_type lora \
       --lora_target $LORA_TARGET \
       --resume_lora_training True \
@@ -49,7 +49,7 @@ else
       --model_name_or_path ../models/$MODEL_ID \
       --do_train \
       --dataset $DATASET \
-      --template default \
+      --template llama2 \
       --finetuning_type lora \
       --lora_target $LORA_TARGET \
       --resume_lora_training True \
