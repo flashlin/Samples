@@ -52,7 +52,7 @@ class QADataset(datasets.GeneratorBasedBuilder):
                 instruction = row["instruction"]
                 instruction = f"<s>[INST] {instruction} [/INST]"
                 yield id, {
-                    "instruction": row["instruction"],
+                    "instruction": instruction,
                     "input": row["input"],
                     "output": row["output"] + "</s>",
                     "history": row["history"]

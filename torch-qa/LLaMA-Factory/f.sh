@@ -1,9 +1,11 @@
 MODEL_ID=microsoft_Orca-2-7b
 MODEL_ID=meta_llama-2-7b-chat-hf
-MODEL_ID=mistralai_Mistral-7B-Instruct-v0.1
 MODEL_ID=NousResearch_llama-2-7b-chat-hf
+MODEL_ID=Mistral-7B-Instruct-v0.1
 DATASET=qa
-NUM_TRAIN_EPOCHS=9
+TRAIN_BATCH_SIZE=1
+NUM_TRAIN_EPOCHS=6
+SAVE_STEPS=100
 #LORA_TARGET=q_proj,v_proj
 LORA_TARGET=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
 #LORA_RANK=8
@@ -24,11 +26,11 @@ if [ -e outputs/$MODEL_ID/adapter_config.json ]; then
       --output_dir outputs/$MODEL_ID \
       --checkpoint_dir outputs/$MODEL_ID \
       --overwrite_output_dir true \
-      --per_device_train_batch_size 1 \
+      --per_device_train_batch_size $TRAIN_BATCH_SIZE \
       --num_train_epochs $NUM_TRAIN_EPOCHS \
       --lr_scheduler_type cosine \
       --gradient_accumulation_steps 4 \
-      --save_steps 50 \
+      --save_steps $SAVE_STEPS \
       --lora_alpha 16 \
       --lora_dropout 0.1 \
       --lora_rank $LORA_RANK \
@@ -52,11 +54,11 @@ else
       --lora_target $LORA_TARGET \
       --resume_lora_training True \
       --output_dir outputs/$MODEL_ID \
-      --per_device_train_batch_size 1 \
+      --per_device_train_batch_size $TRAIN_BATCH_SIZE \
       --num_train_epochs $NUM_TRAIN_EPOCHS \
       --lr_scheduler_type cosine \
       --gradient_accumulation_steps 4 \
-      --save_steps 50 \
+      --save_steps $SAVE_STEPS \
       --lora_alpha 16 \
       --lora_dropout 0.1 \
       --lora_rank $LORA_RANK \

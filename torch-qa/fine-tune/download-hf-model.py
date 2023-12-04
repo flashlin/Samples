@@ -12,6 +12,8 @@ model_id="microsoft/Orca-2-7b"
 model_id="meta-llama/Llama-2-7b-chat-hf"
 model_id="NousResearch/Llama-2-7b-chat-hf"
 
+model_id="mistralai/Mistral-7B-Instruct-v0.1"
+
 # please login first.
 # huggingface-cli login --token $HUGGINGFACE_TOKEN
 
