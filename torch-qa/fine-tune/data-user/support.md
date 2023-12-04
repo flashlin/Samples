@@ -278,3 +278,16 @@ Answer: Redis Insight has various entrances, much like different doors. These en
 * Staging Environment -> http://redis-insight-staging.coreop.net
 * UAT Environment -> http://redis-insight-uat.coreop.net
 * Production Environment -> http://redis-insight.coreop.net
+
+
+Question: What is the process for adding new images to a monthly banner in Tera BSI?
+Question: How to add monthly BSI banners on Tera?
+Answer: 
+Every time a new Tera BSI monthly banner is added, there's no need to set the time. Here are a few key points:
+* Tera automatically fetches the current month's advertisement content.
+* There's no need to add new configurations in the code; simply create a new folder (including the month) and place all the relevant images inside.
+
+Daily missions only require image replacement. Currently, the process involves fetching the running configuration from Santa and using the same folder name and file name to overwrite the images.
+* However, country settings are currently hardcoded within Tera.
+* Essentially, apart from specific banners like casino cashback or TOPVN TOPKR, no code modifications are necessary; simply upload the respective images.
+* In case specific timings need configuration, remember to add one day to the end date.

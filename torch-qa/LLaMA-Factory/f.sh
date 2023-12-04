@@ -1,6 +1,7 @@
 MODEL_ID=microsoft_Orca-2-7b
 MODEL_ID=meta_llama-2-7b-chat-hf
 MODEL_ID=mistralai_Mistral-7B-Instruct-v0.1
+MODEL_ID=NousResearch_llama-2-7b-chat-hf
 DATASET=qa
 NUM_TRAIN_EPOCHS=9
 #LORA_TARGET=q_proj,v_proj
