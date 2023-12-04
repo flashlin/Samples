@@ -6,7 +6,6 @@ paginate: true
 ---
 # Goal: Endow AI with our domain knowledge
 
-* domain knowledge source ?
 
 ---
 # Documents
@@ -27,18 +26,13 @@ Read reviewed documents and generate QA based on the model's understanding.
 # What have I done?
 * meaningless documents: 
 Re-review the meaningless data and try to manually remove garbage data. 
-
-* Use a `MORE-LARGE` open free model understanding to read the slightly cleaned data. Generate QA data.
-
+* Use a `MORE-LARGE` Open Model to read the slightly cleaned data. Generate QA data.
 * Build a train tuning model program
 * Tune Model: Failed many times
-   - 7B Model: 3000 data: 2hr
-   - 13B Model: 3000 data: 4hr
-* Help team members
+   - 7B Model: 3000 data 2hr (13B:4hr, 34B:8hr)
 
 ---
-# What difficulties did I encounter?
-
+# What difficulties
 * meaningless documents -> clean documents
 * Collecing domain data -> 
   - reviewd and clearly summarized documents source?
@@ -48,12 +42,11 @@ Re-review the meaningless data and try to manually remove garbage data.
   - During training, development and testing cannot be performed.
 
 ---
-# correct concept
-
+# Conclusion
 * Model Size: 180B, 130B, 70B, 34B, 13B, 7B
-  - \>100B: Models with more than 100B parameters exhibit the phenomenon of emergent intelligence.
+  - \>100B: Models with more than 100B exhibit the phenomenon of emergent intelligence.
+  - Mistral-7B
+  - Yi-34B 
 
 * Our hardware limitations:
-  - only use \<=34B models: understanding and search and so task
-(some text processing)
-  - fine-tune \<=13B model
+  - use <=34B Models
