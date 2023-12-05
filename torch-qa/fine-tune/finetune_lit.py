@@ -479,14 +479,14 @@ class LLMText():
             mlm: bool,
     ) -> None:
         tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-        model = AutoModelForCausalLM.from_pretrained(self.model_name, device_map="auto", load_in_8bit=True)
-        model = prepare_model(model)
-        model = get_peft_model(model, LoraConfig(**lora_config))
+        # model = AutoModelForCausalLM.from_pretrained(self.model_name, device_map="auto", load_in_8bit=True)
+        # model = prepare_model(model)
+        # model = get_peft_model(model, LoraConfig(**lora_config))
+        model = load_hf_model_for_finetune(self.model_name)
         # LOGGER.info(f"Model trainable parameters:\n {print_trainable_parameters(model)}")
         dataset = load_dataset(dataset_file, streaming=True)
-        LOGGER.info(f"Train dataset downloaded:\n {dataset['train']}")
-        LOGGER.info(
-            f"Number of tokens for the training: {dataset['train'].num_rows * len(dataset['train']['input_ids'][0])}")
+        # LOGGER.info(
+        #     f"Number of tokens for the training: {dataset.num_rows * len(dataset['input_ids'][0])}")
         trainer = Trainer(
             model=model,
             train_dataset=dataset,
@@ -510,7 +510,7 @@ if __name__ == '__main__':
     #                 context_length=2048)
 
     t = LLMText(model_name=model_name)
-    t.train('data-user/casino.csv',
+    t.train('./datasets/text_dataset',
             lora_config={
                 'r': 16,
                 'lora_alpha': 32,  # alpha scaling
@@ -527,6 +527,7 @@ if __name__ == '__main__':
                 'weight_decay': 0.1,
                 'learning_rate': 1e-4,
                 'fp16': False,
-                'evaluation_strategy': "no"
+                'evaluation_strategy': "no",
+                'output_dir': './outputs/test'
             },
             mlm=True)
