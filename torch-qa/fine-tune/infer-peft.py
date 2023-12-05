@@ -2,7 +2,8 @@ import json
 import os
 import torch
 from finetune_utils import load_finetune_config
-from finetune_lit import load_peft_model, ask_llama2_instruction_prompt, get_finetune_model_name
+from finetune_lit import load_peft_model, ask_llama2_instruction_prompt, get_finetune_model_name, \
+    ask_yi_instruction_prompt
 import argparse
 
 if __name__ == '__main__':
@@ -45,6 +46,11 @@ if __name__ == '__main__':
                                                    device=device,
                                                    question=user_input)
 
+            # answer = ask_yi_instruction_prompt(model=model,
+            #                                    generation_config=generation_config,
+            #                                    tokenizer=tokenizer,
+            #                                    device=device,
+            #                                    question=user_input)
 
             # answer = ask_orca2_instruction_prompt(model=model,
             #                                       generation_config=generation_config,

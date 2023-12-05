@@ -277,6 +277,13 @@ def create_llama2_generation_prompt(system_message, question: str):
     return prompt_template.format(user_input=question)
 
 
+def create_yi_generation_prompt(system_message, question: str):
+    return question
+    # return ("<|im_start|>system\n{system_message}<|im_end|>\n"
+    #         "<|im_start|>user\n{prompt}<|im_end|>\n"
+    #         "<|im_start|>assistant").format(system_message=system_message, prompt=question)
+
+
 def create_orca2_generation_prompt(system_message, question: str):
     prompt_template = "You are OpenOrcaChat.<|end_of_turn|>User: {instruction}<|end_of_turn|>Assistant: "
     return prompt_template.format(instruction=question)
@@ -301,6 +308,26 @@ def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, q
     answer = clean_llama2_instruction_resp(resp)
     return answer
 
+
+
+def ask_yi_instruction_prompt(model, generation_config, tokenizer, device, question: str):
+    system_msg = ("You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. "
+                  "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. "
+                  "Please ensure that your responses are socially unbiased and positive in nature.\n"
+                  "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. "
+                  "If you don't know the answer to a question, please don't share false information.")
+    prompt = create_yi_generation_prompt(system_msg, question)
+    encoding = tokenizer(prompt, return_tensors="pt").to(device)
+
+    outputs = model.generate(
+        input_ids=encoding.input_ids,
+        attention_mask=encoding.attention_mask,
+        generation_config=generation_config
+    )
+
+    resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    # answer = clean_llama2_instruction_resp(resp)
+    return resp
 
 
 def ask_orca2_instruction_prompt(model, generation_config, tokenizer, device, question: str):
