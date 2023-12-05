@@ -511,6 +511,22 @@ if __name__ == '__main__':
 
     t = LLMText(model_name=model_name)
     t.train('data-user/casino.csv',
-            lora_config={},
-            trainer_config={},
+            lora_config={
+                'lora_r': 16,
+                'lora_alpha': 32,  # alpha scaling
+                'lora_dropout': 0.1,
+                'lora_bias': "none",
+                'lora_task_type': "CAUSAL_LM",
+                'target_modules': 'proj_q,proj_v'
+            },
+            trainer_config={
+                'per_device_train_batch_size': 1,
+                'gradient_accumulation_steps': 1,
+                'warmup_steps': 100,
+                'num_train_epochs': 2,
+                'weight_decay': 0.1,
+                'learning_rate': 1e-4,
+                'fp16': True,
+                'evaluation_strategy': "no"
+            },
             mlm=True)
