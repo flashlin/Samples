@@ -278,10 +278,15 @@ def create_llama2_generation_prompt(system_message, question: str):
 
 
 def create_yi_generation_prompt(system_message, question: str):
-    return question
-    # return ("<|im_start|>system\n{system_message}<|im_end|>\n"
-    #         "<|im_start|>user\n{prompt}<|im_end|>\n"
-    #         "<|im_start|>assistant").format(system_message=system_message, prompt=question)
+    return ("<|im_start|>system\n{system_message}<|im_end|>\n"
+            "<|im_start|>user\n{prompt}<|im_end|>\n"
+            "<|im_start|>assistant").format(system_message=system_message, prompt=question)
+
+
+def clean_yi_instruction_resp(resp: str):
+    after_inst = resp.split("<|im_start|>assistant", 1)[-1]
+    s2 = after_inst.split("<|im_start|>system", 1)[0]
+    return s2.split('<|im_start|>assistant', 1)[0]
 
 
 def create_orca2_generation_prompt(system_message, question: str):
@@ -333,8 +338,8 @@ def ask_yi_instruction_prompt(model, generation_config, tokenizer, device, quest
     )
 
     resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    # answer = clean_llama2_instruction_resp(resp)
-    return resp
+    answer = clean_yi_instruction_resp(resp)
+    return answer
 
 
 def ask_orca2_instruction_prompt(model, generation_config, tokenizer, device, question: str):

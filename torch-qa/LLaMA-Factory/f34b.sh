@@ -1,33 +1,14 @@
-MODEL_ID=microsoft_Orca-2-7b
-NUM_TRAIN_EPOCHS=2
-TARGET=q_proj,v_proj
-TARGET=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
-lora_rank
-# CUDA_VISIBLE_DEVICES=0 python src/train_bash.py \
-# --stage sft \
-# --model_name_or_path ../models/$MODEL_ID \
-# --do_train \
-# --dataset qa \
-# --template default \
-# --finetuning_type lora \
-# --lora_target q_proj,v_proj \
-# --resume_lora_training True \
-# --output_dir outputs/$MODEL_ID \
-# --per_device_train_batch_size 1 \
-# --num_train_epochs 15 \
-# --lr_scheduler_type cosine \
-# --gradient_accumulation_steps 4 \
-# --save_steps 50 \
-# --lora_alpha 16 \
-# --lora_dropout 0.1 \
-# --lora_rank 8 \
-# --logging_steps 10 \
-# --learning_rate 1e-5 \
-# --quantization_bit 4 \
-# --double_quantization True \
-# --quantization_type nf4 \
-# --plot_loss
-#--checkpoint_dir outputs/$MODEL_ID \
+MODEL_ID=Yi-34B
+DATASET=qa
+NUM_TRAIN_EPOCHS=3
+TRAIN_BATCH_SIZE=1
+SAVE_STEPS=50
+#LORA_TARGET=q_proj,v_proj
+#LORA_TARGET=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
+LORA_TARGET=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
+#LORA_RANK=8
+LORA_RANK=64
+LEARNING_RATE=1e-4
 
 if [ -e outputs/$MODEL_ID/adapter_config.json ]; then
    echo "resume from adapter_config.json"
@@ -35,27 +16,29 @@ if [ -e outputs/$MODEL_ID/adapter_config.json ]; then
       --stage sft \
       --model_name_or_path ../models/$MODEL_ID \
       --do_train \
-      --dataset qa \
-      --template default \
+      --dataset $DATASET \
+      --template yi \
       --finetuning_type lora \
-      --lora_target q_proj,v_proj \
+      --lora_target $LORA_TARGET \
       --resume_lora_training True \
       --output_dir outputs/$MODEL_ID \
       --checkpoint_dir outputs/$MODEL_ID \
       --overwrite_output_dir true \
-      --per_device_train_batch_size 1 \
+      --per_device_train_batch_size $TRAIN_BATCH_SIZE \
       --num_train_epochs $NUM_TRAIN_EPOCHS \
       --lr_scheduler_type cosine \
       --gradient_accumulation_steps 4 \
-      --save_steps 50 \
+      --save_steps $SAVE_STEPS \
       --lora_alpha 16 \
       --lora_dropout 0.1 \
-      --lora_rank 8 \
+      --lora_rank $LORA_RANK \
       --logging_steps 10 \
-      --learning_rate 1e-5 \
+      --learning_rate $LEARNING_RATE \
       --quantization_bit 4 \
       --double_quantization True \
       --quantization_type nf4 \
+      --overwrite_cache \
+      --fp16 \
       --plot_loss
 else
    echo "train"
@@ -63,24 +46,26 @@ else
       --stage sft \
       --model_name_or_path ../models/$MODEL_ID \
       --do_train \
-      --dataset qa \
-      --template default \
+      --dataset $DATASET \
+      --template yi \
       --finetuning_type lora \
-      --lora_target q_proj,v_proj \
+      --lora_target $LORA_TARGET \
       --resume_lora_training True \
       --output_dir outputs/$MODEL_ID \
-      --per_device_train_batch_size 1 \
+      --per_device_train_batch_size $TRAIN_BATCH_SIZE \
       --num_train_epochs $NUM_TRAIN_EPOCHS \
       --lr_scheduler_type cosine \
       --gradient_accumulation_steps 4 \
-      --save_steps 50 \
+      --save_steps $SAVE_STEPS \
       --lora_alpha 16 \
       --lora_dropout 0.1 \
-      --lora_rank 8 \
+      --lora_rank $LORA_RANK \
       --logging_steps 10 \
-      --learning_rate 1e-5 \
+      --learning_rate $LEARNING_RATE \
       --quantization_bit 4 \
       --double_quantization True \
       --quantization_type nf4 \
+      --overwrite_cache \
+      --fp16 \
       --plot_loss
 fi
