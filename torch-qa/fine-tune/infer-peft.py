@@ -40,17 +40,18 @@ if __name__ == '__main__':
             if user_input == '/bye':
                 break
 
-            answer = ask_llama2_instruction_prompt(model=model,
+            if config['template'] == 'yi':
+                answer = ask_yi_instruction_prompt(model=model,
                                                    generation_config=generation_config,
                                                    tokenizer=tokenizer,
                                                    device=device,
                                                    question=user_input)
-
-            # answer = ask_yi_instruction_prompt(model=model,
-            #                                    generation_config=generation_config,
-            #                                    tokenizer=tokenizer,
-            #                                    device=device,
-            #                                    question=user_input)
+            else:
+                answer = ask_llama2_instruction_prompt(model=model,
+                                                       generation_config=generation_config,
+                                                       tokenizer=tokenizer,
+                                                       device=device,
+                                                       question=user_input)
 
             # answer = ask_orca2_instruction_prompt(model=model,
             #                                       generation_config=generation_config,
