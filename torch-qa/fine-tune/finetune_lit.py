@@ -1,24 +1,36 @@
+import csv
 import os.path
 import re
+from typing import Mapping, Callable, Any
+from pathlib import Path
 import datasets
 from llama_recipes.datasets.utils import Concatenator
 import torch
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
+    PreTrainedTokenizer,
     BitsAndBytesConfig,
     HfArgumentParser,
     TrainingArguments,
     pipeline,
-    logging,
+    logging
 )
+from transformers import Trainer, DataCollatorForLanguageModeling
 from peft import LoraConfig, PeftModel, get_peft_model
 from trl import SFTTrainer
-
+from datasets import Dataset, load_dataset
+from io_utils import split_file_path
+import logging
+import pandas as pd
+from torch import float32, nn, exp
 
 # bitsandbytes
 # autotrain-advanced 0.6.44
 # pip install --upgrade bitsandbytes 0.41.2
+LOGGER = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
 
 def get_num_layers(model):
     numbers = set()
@@ -120,6 +132,7 @@ def print_trainable_parameters(model, use_4bit=False):
         f"All Parameters: {all_param} || Trainable Parameters: {trainable_params} || Trainable Parameters %: {100 * trainable_params / all_param}"
     )
 
+
 def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, config):
     train_epochs = config['train_epochs']
     if train_epochs is None:
@@ -130,7 +143,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         train_batch_size = 4
 
     peft_args = LoraConfig(
-        #target_modules=get_last_layer_linears(model),
+        # target_modules=get_last_layer_linears(model),
         lora_alpha=16,
         lora_dropout=0.1,
         r=8,  # 最初的 LoRA 論文建議從 8 級開始，但對於 QLoRA，需要 64 級。
@@ -149,7 +162,7 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
             "gate_proj",
             "up_proj",
             "down_proj",
-            "lm_head",]
+            "lm_head", ]
     if is_QLoRA:
         peft_args = LoraConfig(
             target_modules=target_modules,
@@ -163,12 +176,12 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
     training_params = TrainingArguments(
         output_dir="./results",
         num_train_epochs=train_epochs,
-        per_device_train_batch_size=train_batch_size, #46GB-> 7B:8 13B:4
+        per_device_train_batch_size=train_batch_size,  # 46GB-> 7B:8 13B:4
         gradient_accumulation_steps=1,
         optim="paged_adamw_32bit",
         save_steps=config['save_steps'],
         logging_steps=25,
-        learning_rate=1e-4,  #7B:2e-4 = 0.0002 13B:1e-4 = 0.0001
+        learning_rate=1e-4,  # 7B:2e-4 = 0.0002 13B:1e-4 = 0.0001
         weight_decay=0.001,
         fp16=False,
         bf16=False,
@@ -295,11 +308,12 @@ def create_orca2_generation_prompt(system_message, question: str):
 
 
 def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, question: str):
-    system_msg = ("You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. "
-                  "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. "
-                  "Please ensure that your responses are socially unbiased and positive in nature.\n"
-                  "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. "
-                  "If you don't know the answer to a question, please don't share false information.")
+    system_msg = (
+        "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. "
+        "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. "
+        "Please ensure that your responses are socially unbiased and positive in nature.\n"
+        "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. "
+        "If you don't know the answer to a question, please don't share false information.")
     prompt = create_llama2_generation_prompt(system_msg, question)
     encoding = tokenizer(prompt, return_tensors="pt").to(device)
 
@@ -314,13 +328,13 @@ def ask_llama2_instruction_prompt(model, generation_config, tokenizer, device, q
     return answer
 
 
-
 def ask_yi_instruction_prompt(model, generation_config, tokenizer, device, question: str):
-    system_msg = ("You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. "
-                  "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. "
-                  "Please ensure that your responses are socially unbiased and positive in nature.\n"
-                  "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. "
-                  "If you don't know the answer to a question, please don't share false information.")
+    system_msg = (
+        "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. "
+        "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. "
+        "Please ensure that your responses are socially unbiased and positive in nature.\n"
+        "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. "
+        "If you don't know the answer to a question, please don't share false information.")
     prompt = create_yi_generation_prompt(system_msg, question)
     encoding = tokenizer(prompt, return_tensors="pt").to(device)
 
@@ -357,8 +371,146 @@ def ask_orca2_instruction_prompt(model, generation_config, tokenizer, device, qu
     answer = resp
     return answer
 
+
 # orca2_instruction_prompt_template = "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant"
 #
 # def create_orca2_instruction_prompt(system_message: str, user_input: str) -> str:
 #     return orca2_instruction_prompt_template.format(system_message=system_message,
 #                                                     prompt=user_input)
+
+
+def preprocess_text(text: str) -> str:
+    text = text.replace('\n', ' ')
+    return text
+
+
+def yield_text_file(text_file_path: Path, tokenizer: PreTrainedTokenizer) -> str:
+    """
+    Args:
+        text_file_path (Path): Extracted text from the book
+        tokenizer (PreTrainedTokenizer): HuggingFace tokenizer
+
+    Yields:
+        str: text of the pages
+    """
+    with open(text_file_path, 'r') as f:
+        grouped_text = ""
+        for text in f:
+            if len(text.strip()) == 0 and grouped_text != "":
+                grouped_text = preprocess_text(grouped_text)
+                yield grouped_text + "." + tokenizer.eos_token  # End of paragraphs defined by ".\n is transformed into EOS token"
+                grouped_text = ""
+            else:
+                grouped_text += text
+
+
+def tokenize(element: Mapping, tokenizer: Callable, context_length: int) -> str:
+    inputs = tokenizer(element['text'], truncation=True, return_overflowing_tokens=True,
+                       return_length=True, max_length=context_length)
+    inputs_batch = []
+    for length, input_ids in zip(inputs['length'], inputs['input_ids']):
+        if length == context_length:  # We drop the last input_ids that are shorter than max_length
+            inputs_batch.append(input_ids)
+    return {"input_ids": inputs_batch}
+
+
+def prepare_dataset(model_name: str, text_file: Path, min_length: int, context_length: int) -> None:
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    output_folder, output_filename, _ = split_file_path(text_file)
+    csv_file = f'{output_folder}/{output_filename}.csv'
+    LOGGER.info(f'Start preparing dataset from {text_file}')
+    with open(csv_file, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['input_ids'])
+        for paragraphs in yield_text_file(text_file_path=text_file, tokenizer=tokenizer):
+            # input_ids = tokenizer(paragraphs, return_tensors="pt")
+            input_ids = tokenizer(paragraphs)['input_ids']
+            writer.writerow([input_ids])
+
+    # dataset = Dataset.from_dict({'text': [text]})
+
+    # We push the extracted book publicly
+    # dataset.push_to_hub("JeremyArancio/lotr-book")
+    # tokenized_dataset = dataset.map(tokenize, batched=True,
+    #                                 fn_kwargs={'tokenizer': tokenizer, 'context_length': context_length},
+    #                                 remove_columns=dataset.column_names)
+    # LOGGER.info(f'The tokenized dataset is composed of {tokenized_dataset.num_rows} elements, each one composed of {context_length} tokens.')
+    # tokenized_dataset_dict = tokenized_dataset.train_test_split(test_size=test_size, shuffle=shuffle)
+    # tokenized_dataset_dict.push_to_hub(hf_repo)
+
+    # df = tokenized_dataset.to_pandas()
+    # with open(csv_file, 'w', newline='', encoding='utf-8') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow(df.columns)
+    #     writer.writerows(df.values)
+    #     print(f"{df.values=}")
+    # # df.to_csv(f'{output_folder}/{output_filename}.csv', index=False)
+    LOGGER.info(f'Preparing dataset finished.')
+
+
+# def extract_text_to_jsonl(file: str, jsonl_file: str):
+class CastOutputToFloat(nn.Sequential):
+    def forward(self, x):
+        return super().forward(x).to(float32)
+
+
+def prepare_model(model):
+    for param in model.parameters():
+      param.requires_grad = False  # freeze the model - train adapters later
+      if param.ndim == 1:
+        # cast the small parameters (e.g. layernorm) to fp32 for stability
+        param.data = param.data.to(float32)
+    model.gradient_checkpointing_enable()  # reduce number of stored activations
+    model.enable_input_require_grads()
+    model.lm_head = CastOutputToFloat(model.lm_head)
+    return model
+
+class LLMText():
+
+    def __init__(self, model_name: str) -> None:
+        self.model_name = model_name
+        self.device = 'cuda'
+
+    def train(
+            self,
+            dataset_file: str,
+            lora_config: Mapping[str, Any],
+            trainer_config: Mapping[str, Any],
+            mlm: bool,
+    ) -> None:
+        tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        model = AutoModelForCausalLM.from_pretrained(self.model_name, device_map="auto", load_in_8bit=True)
+        model = prepare_model(model)
+        model = get_peft_model(model, LoraConfig(**lora_config))
+        # LOGGER.info(f"Model trainable parameters:\n {print_trainable_parameters(model)}")
+        dataset = load_dataset(dataset_file, streaming=True)
+        LOGGER.info(f"Train dataset downloaded:\n {dataset['train']}")
+        LOGGER.info(
+            f"Number of tokens for the training: {dataset['train'].num_rows * len(dataset['train']['input_ids'][0])}")
+        trainer = Trainer(
+            model=model,
+            train_dataset=dataset,
+            args=TrainingArguments(**trainer_config),
+            data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=mlm)
+        )
+        model.config.use_cache = False  # silence warnings
+        trainer.train()
+        model.config.use_cache = True
+
+        model.save_pretrained(trainer_config['output_dir'])
+        # model.push_to_hub(repo_id=hf_repo)
+        # tokenizer.push_to_hub(repo_id=hf_repo)
+
+
+if __name__ == '__main__':
+    model_name = '../models/mistralai_Mistral-7B-Instruct-v0.1'
+    # prepare_dataset(model_name,
+    #                 text_file='data-user/casino.md',
+    #                 min_length=10,
+    #                 context_length=2048)
+
+    t = LLMText(model_name=model_name)
+    t.train('data-user/casino.csv',
+            lora_config={},
+            trainer_config={},
+            mlm=True)
