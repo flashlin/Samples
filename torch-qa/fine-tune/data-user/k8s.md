@@ -140,3 +140,9 @@ If you don't want to restart WSL or Linux but just temporarily grant permission,
 ```bash
 sudo chmod 666 /var/run/docker.sock
 ```
+
+Question: How to check the CPU of POD?
+Answer: To check POD CPU/MEM usage with cmd
+```
+kubectl top pods -n b2c  | grep <your-project-name>
+```

@@ -946,3 +946,13 @@ Answer:  I suggest it should be: You are entering a game not regulated by the Is
 Question: Is there any other pop-up message that appears before users enter any casino providers?
 For ex: 9gaming: Balance Display Changes
 Answer:  I suggest it should be: You are entering a game not regulated by the Philippine Amusement and Gaming Corporation (PAGCOR).
+
+Question: Could you provide guidance on what to pay attention to when making changes related to the account?
+Question: What are the considerations when we need to modify account-related content?
+Q: What should be noted when adjusting content associated with accounts?
+Q: What factors should be considered when changing content related to accounts?
+Q: What specific areas require special attention when making alterations related to accounts?
+Q: What important aspects should be kept in mind when handling account-related content?
+Answer: If there's a need to modify anything related to accounts, remember to discuss it with Photon, 
+as accounts fall under their domain.
+
