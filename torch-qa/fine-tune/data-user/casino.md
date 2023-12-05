@@ -253,3 +253,16 @@ Over a long period of time, the game is likely to average a return to the Player
 
 Q: What happens if the dealer accidentally deals two or more cards at the same time?
 Answer: In the event of two or more cards are dealt simultaneously by accident, the current round will be aborted, all bets will be returned and the particular shoe will be replaced with a new shoe.
+
+
+Q: What happens if a playing card falls off the table?
+Answer: In the event of any cards falling off the table, the current round will be aborted and the particular shoe will be replaced with a new shoe.
+
+Q: What happens if the dealer accidentally misplaces a playing card?
+Answer: In the event of a card being placed in the wrong position, the supervisor will correct the card position according to the computer screen (correct position).
+
+Q: What happens if any cards fall out during the shuffling process?
+Answer: In the event of any cards being revealed during shuffling, the particular shoe will be replaced and dealer will shuffle new set of cards.
+
+Q: How to complaints?
+Answer: If a Player wishes to make a complaint or dispute a game result, they must provide SBOBET Casino, the date and time of playing, Table ID, dealer's name and Round number at the time of contacting SBOBET Casino. Failure to do so will result in the complaint being rejected by SBOBET Casino. Video image of card dealing is kept for 24 hours. Players must address their complaint regarding the dispute within 24 hour of the dispute occurring. Any complaints submitted after 24 hours will be rejected by SBOBET Casino without further explanation.
