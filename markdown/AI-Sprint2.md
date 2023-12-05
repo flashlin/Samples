@@ -26,7 +26,7 @@ Read reviewed documents and generate QA based on the model's understanding.
 # What have I done?
 * meaningless documents: 
 Re-review the meaningless data and try to manually remove garbage data. 
-* Use a `MORE-LARGE` Open Model to read the slightly cleaned data. Generate QA data.
+* Use a `MORE-POWER` Open Model to read the slightly cleaned data. Generate QA data.
 * Build a train tuning model program
 * Tune Model: Failed many times
    - 7B Model: 3000 data 2hr (13B:4hr, 34B:8hr)
