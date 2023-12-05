@@ -16,6 +16,7 @@ class QADataset(datasets.GeneratorBasedBuilder):
 
     def _info(self) -> datasets.DatasetInfo:
         features = datasets.Features({
+            "input_ids": datasets.Sequence(datasets.Sequence(datasets.Value("int32"))),
             "instruction": datasets.Value("string"),
             "input": datasets.Value("string"),
             "output": datasets.Value("string"),
@@ -49,8 +50,11 @@ class QADataset(datasets.GeneratorBasedBuilder):
             csv_reader = csv.reader(file)
             for row in csv_reader:
                 # instruction = row["instruction"]
+                # instruction = row["input_ids"]
                 input_ids = json.load(row["input_ids"])
+                print(f"{input_ids=}")
                 yield id, {
+                    #"instruction": instruction,
                     "input_ids": input_ids,
                     #"input": row["input"],
                     #"output": row["output"],
