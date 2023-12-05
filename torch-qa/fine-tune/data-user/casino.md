@@ -266,3 +266,28 @@ Answer: In the event of any cards being revealed during shuffling, the particula
 
 Q: How to complaints?
 Answer: If a Player wishes to make a complaint or dispute a game result, they must provide SBOBET Casino, the date and time of playing, Table ID, dealer's name and Round number at the time of contacting SBOBET Casino. Failure to do so will result in the complaint being rejected by SBOBET Casino. Video image of card dealing is kept for 24 hours. Players must address their complaint regarding the dispute within 24 hour of the dispute occurring. Any complaints submitted after 24 hours will be rejected by SBOBET Casino without further explanation.
+
+
+Q: What are the different types of Tiger wagers available?
+Answer: The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”.
+
+Q: What condition might the casino impose on players regarding the placement of Tiger wagers?
+Answer: The casino may limit the placement of Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand, or Tie.
+
+Q: How does one play Tiger, and what conditions lead to a win?
+Answer: To play Tiger, place a bet in the Tiger betting area, and if the banker wins with a score total of six, the player wins.
+
+Q: What are the payout odds for the Two Card Tiger and Three Card Tiger scenarios?
+Answer: The payout odds for the Two Card Tiger scenario are 12 to 1, while for the Three Card Tiger scenario, they are 20 to 1.
+
+Q: How does one play Big Tiger, and under what conditions does the player win?
+Answer: To play Big Tiger, place a bet in the Big Tiger betting area, and the player wins if the banker wins with a score total of six and has exactly three cards.
+
+Q: What are the payout odds for winning with a score total of six and exactly three cards in Big Tiger?
+Answer: The payout odds for winning with a score total of six and exactly three cards in Big Tiger are 50 to 1.
+
+Q: How does one play Small Tiger, and what conditions lead to a win?
+Answer: To play Small Tiger, place a bet in the Small Tiger betting area, and the player wins if the banker wins with a score total of six and has exactly two cards.
+
+Q: What are the payout odds for winning with a score total of six and exactly two cards in Small Tiger?
+Answer: The payout odds for winning with a score total of six and exactly two cards in Small Tiger are 22 to 1.
