@@ -49,4 +49,4 @@ Re-review the meaningless data and try to manually remove garbage data.
   - Yi-34B 
 
 * Our hardware limitations:
-  - use <=34B Models
+  - use <= 34B Models, fine-tune < 34B
