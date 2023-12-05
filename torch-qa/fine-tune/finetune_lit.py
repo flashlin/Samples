@@ -517,7 +517,7 @@ if __name__ == '__main__':
                 'lora_dropout': 0.1,
                 'bias': "none",
                 'task_type': "CAUSAL_LM",
-                'target_modules': 'q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head'
+                'target_modules': ['q_proj','k_proj','v_proj','o_proj','gate_proj','up_proj','down_proj','lm_head']
             },
             trainer_config={
                 'per_device_train_batch_size': 1,
