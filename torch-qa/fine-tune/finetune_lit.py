@@ -321,8 +321,15 @@ def ask_yi_instruction_prompt(model, generation_config, tokenizer, device, quest
 
     outputs = model.generate(
         input_ids=encoding.input_ids,
+        eos_token_id=tokenizer.eos_token_id,
         attention_mask=encoding.attention_mask,
-        generation_config=generation_config
+        generation_config=generation_config,
+        do_sample=True,
+        repetition_penalty=1.3,
+        no_repeat_ngram_size=5,
+        temperature=0.7,
+        top_k=40,
+        top_p=0.8,
     )
 
     resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
