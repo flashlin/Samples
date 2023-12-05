@@ -481,8 +481,8 @@ class LLMText():
         tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         # model = AutoModelForCausalLM.from_pretrained(self.model_name, device_map="auto", load_in_8bit=True)
         # model = prepare_model(model)
-        # model = get_peft_model(model, LoraConfig(**lora_config))
         model = load_hf_model_for_finetune(self.model_name)
+        model = get_peft_model(model, LoraConfig(**lora_config))
         # LOGGER.info(f"Model trainable parameters:\n {print_trainable_parameters(model)}")
         dataset = load_dataset(dataset_file, streaming=True)
         # LOGGER.info(
@@ -530,4 +530,4 @@ if __name__ == '__main__':
                 'evaluation_strategy': "no",
                 'output_dir': './outputs/test'
             },
-            mlm=True)
+            mlm=False)
