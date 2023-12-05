@@ -935,3 +935,14 @@ Answer:
 
 Question: What kind of promotions are available to Indian players?
 Answer: Indian players can participate in DEP deposit promotions, as well as general SBOTOP promotions. To see the current promotions available, please visit the following website: https://www.sbotop.com/promo.
+
+Question: On app, when a user intends to access other casino providers, can I use the following sentences for IOM and MNL users?
+For IOM user: You are going to the game that is not regulated by the Isle of Man Gambling Supervision Commission.
+For MNL user: You are going to the game that is not regulated by the Philippine Amusement and Gaming Corporation (PAGCOR).
+The main concern is avoiding the use of this following sentence. because app users will be directed to a game, not a website.
+`You're being redirected to a website that is not regulated by the Philippine Amusement and Gaming Corporation (PAGCOR).`
+Answer:  I suggest it should be: You are entering a game not regulated by the Isle of Man Gambling Supervision Commission.
+
+Question: Is there any other pop-up message that appears before users enter any casino providers?
+For ex: 9gaming: Balance Display Changes
+Answer:  I suggest it should be: You are entering a game not regulated by the Philippine Amusement and Gaming Corporation (PAGCOR).
