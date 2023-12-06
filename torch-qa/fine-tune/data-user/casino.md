@@ -291,3 +291,8 @@ Answer: To play Small Tiger, place a bet in the Small Tiger betting area, and th
 
 Q: What are the payout odds for winning with a score total of six and exactly two cards in Small Tiger?
 Answer: The payout odds for winning with a score total of six and exactly two cards in Small Tiger are 22 to 1.
+
+Q: What are the rules of Baccarat?
+Answer: "Firstly, the dealer deals two sets of cards for the Banker and the Player. The winner is the side with a total closest to 9 or exactly totaling 9. All cards from 2 to 9 carry their face value in points.
+
+Kings (K), Queens (Q), Jacks (J), or cards with a value of 10 count as 0 points, while an Ace (A) counts as 1 point. Other cards are valued based on their face value. If necessary, specific rules dictate dealing a third card to both sides. The side with the total points closest to 9 wins."
