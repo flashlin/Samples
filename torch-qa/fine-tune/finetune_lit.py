@@ -19,7 +19,7 @@ from transformers import (
 from transformers import Trainer, DataCollatorForLanguageModeling
 from peft import LoraConfig, PeftModel, get_peft_model
 from trl import SFTTrainer
-from datasets import Dataset, load_dataset
+from datasets import Dataset, load_dataset, DatasetDict
 from io_utils import split_file_path
 import logging
 import pandas as pd
@@ -419,13 +419,19 @@ def prepare_dataset(model_name: str, text_file: Path, min_length: int, context_l
     output_folder, output_filename, _ = split_file_path(text_file)
     csv_file = f'{output_folder}/{output_filename}.csv'
     LOGGER.info(f'Start preparing dataset from {text_file}')
+    # #dataset = dataset.with_format("torch")
+    # with open(csv_file, 'w', newline='', encoding='utf-8') as file:
+    #     writer = csv.writer(file)
+    #     writer.writerow(['input_ids'])
+    #     for paragraphs in yield_text_file(text_file_path=text_file, tokenizer=tokenizer):
+    #         # input_ids = tokenizer(paragraphs, return_tensors="pt")
+    #         input_ids = tokenizer(paragraphs)['input_ids']
+    #         writer.writerow([input_ids])
     with open(csv_file, 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
-        writer.writerow(['input_ids'])
+        writer.writerow(['content'])
         for paragraphs in yield_text_file(text_file_path=text_file, tokenizer=tokenizer):
-            # input_ids = tokenizer(paragraphs, return_tensors="pt")
-            input_ids = tokenizer(paragraphs)['input_ids']
-            writer.writerow([input_ids])
+            writer.writerow([paragraphs])
 
     # dataset = Dataset.from_dict({'text': [text]})
 
@@ -465,6 +471,8 @@ def prepare_model(model):
     model.lm_head = CastOutputToFloat(model.lm_head)
     return model
 
+
+
 # https://github.com/jeremyarancio/llm-tolkien/tree/main
 class LLMText():
 
@@ -479,11 +487,47 @@ class LLMText():
             trainer_config: Mapping[str, Any],
             mlm: bool,
     ) -> None:
-        dataset = load_dataset(dataset_file)
-        print(f"{len(dataset)=}")
-
         tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         tokenizer.pad_token = tokenizer.eos_token
+        
+        context_length = 1024
+        def tokenize2(element):
+            outputs = tokenizer(
+                element["content"],
+                truncation=True,
+                max_length=context_length,
+                return_overflowing_tokens=True,
+                return_length=True,
+            )
+            input_batch = []
+            for length, input_ids in zip(outputs["length"], outputs["input_ids"]):
+                if length == context_length:
+                    input_batch.append(input_ids)
+            return {"input_ids": input_batch}
+
+        # dataset = load_dataset(dataset_file)
+        ds_train = load_dataset('csv', data_files={'train':'./data-user/casino.csv'},
+                               column_names=['content'],
+                               skiprows=1,
+                               split="train")
+        
+        raw_datasets = DatasetDict(
+            {
+                "train": ds_train,  # .shuffle().select(range(50000)),
+                #"valid": ds_valid,  # .shuffle().select(range(500))
+            }
+        )
+
+        tokenized_dataset = raw_datasets.map(
+            tokenize2, 
+            batched=True,
+            batch_size=1,
+            remove_columns=raw_datasets['train'].column_names
+        )
+
+        #print(f"{len(dataset)=}")
+
+        
         # model = AutoModelForCausalLM.from_pretrained(self.model_name, device_map="auto", load_in_8bit=True)
         # model = prepare_model(model)
         model = load_hf_model_for_finetune(self.model_name)
@@ -495,7 +539,7 @@ class LLMText():
         #     f"Number of tokens for the training: {dataset.num_rows * len(dataset['input_ids'][0])}")
         trainer = Trainer(
             model=model,
-            train_dataset=dataset['train'],
+            train_dataset=tokenized_dataset['train'],
             args=TrainingArguments(**trainer_config),
             data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=mlm),
         )
@@ -509,11 +553,11 @@ class LLMText():
 
 
 if __name__ == '__main__':
-    model_name = '../models/mistralai_Mistral-7B-Instruct-v0.1'
-    # prepare_dataset(model_name,
-    #                 text_file='data-user/casino.md',
-    #                 min_length=10,
-    #                 context_length=2048)
+    model_name = '../models/Mistral-7B-Instruct-v0.1'
+    prepare_dataset(model_name,
+                    text_file='data-user/casino.md',
+                    min_length=10,
+                    context_length=2048)
 
     t = LLMText(model_name=model_name)
     t.train('./datasets/text_dataset',
