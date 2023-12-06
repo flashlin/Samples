@@ -198,6 +198,7 @@ if __name__ == '__main__':
                 'fp16': False,
                 'evaluation_strategy': "no",
                 'output_dir': f'./{output_folder}/{model_name}-text',
+                'resume_from_checkpoint': ''
                 #'max_steps': 160  # (num_samples // batch_size) // gradient_accumulation_steps * epochs
             },
             mlm=False)
