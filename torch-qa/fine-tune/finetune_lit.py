@@ -479,6 +479,9 @@ class LLMText():
             trainer_config: Mapping[str, Any],
             mlm: bool,
     ) -> None:
+        dataset = load_dataset(dataset_file)
+        print(f"{len(dataset)=}")
+
         tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         tokenizer.pad_token = tokenizer.eos_token
         # model = AutoModelForCausalLM.from_pretrained(self.model_name, device_map="auto", load_in_8bit=True)
@@ -487,7 +490,7 @@ class LLMText():
         model = get_peft_model(model, LoraConfig(**lora_config))
         # LOGGER.info(f"Model trainable parameters:\n {print_trainable_parameters(model)}")
         # dataset = load_dataset(dataset_file, streaming=False)
-        dataset = load_dataset(dataset_file)
+
         # LOGGER.info(
         #     f"Number of tokens for the training: {dataset.num_rows * len(dataset['input_ids'][0])}")
         trainer = Trainer(
