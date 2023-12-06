@@ -486,7 +486,8 @@ class LLMText():
         model = load_hf_model_for_finetune(self.model_name)
         model = get_peft_model(model, LoraConfig(**lora_config))
         # LOGGER.info(f"Model trainable parameters:\n {print_trainable_parameters(model)}")
-        dataset = load_dataset(dataset_file, streaming=True)
+        # dataset = load_dataset(dataset_file, streaming=False)
+        dataset = load_dataset(dataset_file)
         # LOGGER.info(
         #     f"Number of tokens for the training: {dataset.num_rows * len(dataset['input_ids'][0])}")
         trainer = Trainer(
@@ -531,6 +532,6 @@ if __name__ == '__main__':
                 'fp16': False,
                 'evaluation_strategy': "no",
                 'output_dir': './outputs/test',
-                'max_steps': 160  # (num_samples // batch_size) // gradient_accumulation_steps * epochs
+                #'max_steps': 160  # (num_samples // batch_size) // gradient_accumulation_steps * epochs
             },
             mlm=False)
