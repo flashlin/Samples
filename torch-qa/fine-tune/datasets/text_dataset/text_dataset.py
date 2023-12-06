@@ -59,7 +59,7 @@ class QADataset(datasets.GeneratorBasedBuilder):
                     f.write(f"{type(input_ids).__name__} input_ids={input_ids}\r\n")
                 #print(f"{input_ids=}")
                 yield id, {
-                    "input_ids": [input_ids],
+                    "input_ids": input_ids,
                     #"instruction": instruction,
                     #"input": row["input"],
                     #"output": row["output"],
