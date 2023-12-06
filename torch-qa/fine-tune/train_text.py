@@ -1,7 +1,7 @@
 import csv
 import os.path
 import re
-from typing import Mapping, Callable, Any
+from typing import Mapping, Callable, Any, List
 from pathlib import Path
 import torch
 from transformers import (
@@ -17,11 +17,20 @@ from datasets import Dataset, load_dataset, DatasetDict
 import logging
 import pandas as pd
 from torch import float32, nn, exp
+import yaml
+
+from io_utils import query_sub_files, split_file_path
 
 LOGGER = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-os.environ['WANDB_DISABLED'] = 'true'
+os.environ['WANDB_MODE'] = 'offline'
+
+def load_finetune_config():
+    with open('finetune-text.yaml', 'r') as file:
+        config = yaml.safe_load(file)
+    return config
+
 
 def load_hf_tokenizer(model_id: str):
     tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=False)
@@ -66,14 +75,25 @@ def yield_text_file(text_file_path: Path, tokenizer: PreTrainedTokenizer) -> str
                 grouped_text += text
 
 
-def prepare_dataset(text_file: Path) -> None:
-    csv_file = f'data-user/casino.csv'
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    LOGGER.info(f'Start preparing dataset from {text_file}')
+def append_to_csv_file(row_data: List[Any], train_file: str):
+    with open(train_file, 'a', newline='', encoding='utf-8') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerow(row_data)
+
+
+def yield_paragraphs_from_folder(folder: str, tokenizer: PreTrainedTokenizer):
+    for text_file in query_sub_files(folder, ['.txt', '.md']):
+        for paragraphs in yield_text_file(text_file_path=text_file, tokenizer=tokenizer):
+            yield paragraphs
+
+def prepare_dataset(folder: str, output_folder: str) -> None:
+    csv_file = f'{output_folder}/text.csv'
+    tokenizer = AutoTokenizer.from_pretrained(model_name_path)
+    LOGGER.info(f'Start preparing dataset from {folder}/')
     with open(csv_file, 'w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['content'])
-        for paragraphs in yield_text_file(text_file_path=text_file, tokenizer=tokenizer):
+        for paragraphs in yield_paragraphs_from_folder(folder=folder, tokenizer=tokenizer):
             writer.writerow([paragraphs])
     LOGGER.info(f'Preparing dataset finished.')
 
@@ -85,7 +105,6 @@ class LLMText:
 
     def train(
             self,
-            dataset_file: str,
             lora_config: Mapping[str, Any],
             trainer_config: Mapping[str, Any],
             mlm: bool,
@@ -94,7 +113,7 @@ class LLMText:
         tokenizer.pad_token = tokenizer.eos_token
         
         context_length = 1024
-        def tokenize2(element):
+        def tokenize_context(element):
             outputs = tokenizer(
                 element["content"],
                 truncation=True,
@@ -109,10 +128,13 @@ class LLMText:
             return {"input_ids": input_batch}
 
         # dataset = load_dataset(dataset_file)
-        ds_train = load_dataset('csv', data_files={'train':'./data-user/casino.csv'},
-                               column_names=['content'],
-                               skiprows=1,
-                               split="train")
+        ds_train = load_dataset('csv',
+                                data_files={
+                                    'train': f'./{output_folder}/text.csv'
+                                },
+                                column_names=['content'],
+                                skiprows=1,
+                                split="train")
         
         raw_datasets = DatasetDict(
             {
@@ -122,7 +144,7 @@ class LLMText:
         )
 
         tokenized_dataset = raw_datasets.map(
-            tokenize2, 
+            tokenize_context,
             batched=True,
             batch_size=1,
             remove_columns=raw_datasets['train'].column_names
@@ -146,11 +168,15 @@ class LLMText:
 
 
 if __name__ == '__main__':
-    model_name = '../models/Mistral-7B-Instruct-v0.1'
-    prepare_dataset(text_file='data-user/casino.md')
+    config = load_finetune_config()
+    model_name = config['model_name']
+    model_name_path = f'../models/{model_name}'
+    output_folder = './outputs'
 
-    t = LLMText(model_name=model_name)
-    t.train('./datasets/text_dataset',
+    prepare_dataset(folder='./data-user', output_folder=output_folder)
+
+    t = LLMText(model_name=model_name_path)
+    t.train(
             lora_config={
                 'r': 16,
                 'lora_alpha': 32,  # alpha scaling
@@ -163,12 +189,12 @@ if __name__ == '__main__':
                 'per_device_train_batch_size': 1,
                 'gradient_accumulation_steps': 1,
                 'warmup_steps': 100,
-                'num_train_epochs': 2,
+                'num_train_epochs': config['train_epochs'],
                 'weight_decay': 0.1,
                 'learning_rate': 1e-4,
                 'fp16': False,
                 'evaluation_strategy': "no",
-                'output_dir': './outputs/test',
+                'output_dir': f'./{output_folder}/{model_name}-text',
                 #'max_steps': 160  # (num_samples // batch_size) // gradient_accumulation_steps * epochs
             },
             mlm=False)
