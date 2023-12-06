@@ -17,12 +17,13 @@ class QADataset(datasets.GeneratorBasedBuilder):
     def _info(self) -> datasets.DatasetInfo:
         features = datasets.Features({
             "input_ids": datasets.Sequence(datasets.Sequence(datasets.Value("int32"))),
-            "instruction": datasets.Value("string"),
-            "input": datasets.Value("string"),
-            "output": datasets.Value("string"),
-            "history": datasets.Sequence(datasets.Sequence(datasets.Value("string")))
+            # "instruction": datasets.Value("string"),
+            # "input": datasets.Value("string"),
+            # "output": datasets.Value("string"),
+            # "history": datasets.Sequence(datasets.Sequence(datasets.Value("string")))
         })
         return datasets.DatasetInfo(
+            supervised_keys=None,
             description=_DESCRIPTION,
             features=features,
             homepage=_HOMEPAGE,
@@ -52,10 +53,10 @@ class QADataset(datasets.GeneratorBasedBuilder):
                 # instruction = row["instruction"]
                 # instruction = row["input_ids"]
                 input_ids = json.load(row["input_ids"])
-                print(f"{input_ids=}")
+                #print(f"{input_ids=}")
                 yield id, {
-                    #"instruction": instruction,
                     "input_ids": input_ids,
+                    #"instruction": instruction,
                     #"input": row["input"],
                     #"output": row["output"],
                     #"history": row["history"]

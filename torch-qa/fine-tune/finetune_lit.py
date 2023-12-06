@@ -489,9 +489,9 @@ class LLMText():
         #     f"Number of tokens for the training: {dataset.num_rows * len(dataset['input_ids'][0])}")
         trainer = Trainer(
             model=model,
-            train_dataset=dataset,
+            train_dataset=dataset['train'],
             args=TrainingArguments(**trainer_config),
-            data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=mlm)
+            data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=mlm),
         )
         model.config.use_cache = False  # silence warnings
         trainer.train()
@@ -528,6 +528,7 @@ if __name__ == '__main__':
                 'learning_rate': 1e-4,
                 'fp16': False,
                 'evaluation_strategy': "no",
-                'output_dir': './outputs/test'
+                'output_dir': './outputs/test',
+                'max_steps': 160  # (num_samples // batch_size) // gradient_accumulation_steps * epochs
             },
             mlm=False)
