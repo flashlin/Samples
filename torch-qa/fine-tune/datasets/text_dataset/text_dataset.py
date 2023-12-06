@@ -48,11 +48,15 @@ class QADataset(datasets.GeneratorBasedBuilder):
         #     yield key, example
         id = 0
         with open(filepath, mode='r', newline='', encoding='utf-8') as file:
-            csv_reader = csv.reader(file)
+            # csv_reader = csv.reader(file)
+            csv_reader = csv.DictReader(file)
             for row in csv_reader:
+                input_ids = row["input_ids"]
                 # instruction = row["instruction"]
                 # instruction = row["input_ids"]
-                input_ids = json.load(row["input_ids"])
+                # print(f"{row['input_ids']=}")
+                with open('log.txt', 'a') as f:
+                    f.write(f"{type(input_ids).__name__} input_ids={input_ids}\r\n")
                 #print(f"{input_ids=}")
                 yield id, {
                     "input_ids": input_ids,
