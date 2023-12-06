@@ -60,7 +60,7 @@ def yield_text_file(text_file_path: Path, tokenizer: PreTrainedTokenizer) -> str
         for text in f:
             if len(text.strip()) == 0 and grouped_text != "":
                 grouped_text = preprocess_text(grouped_text)
-                yield grouped_text + "." + tokenizer.eos_token
+                yield grouped_text + tokenizer.eos_token
                 grouped_text = ""
             else:
                 grouped_text += text
@@ -128,27 +128,21 @@ class LLMText:
             remove_columns=raw_datasets['train'].column_names
         )
 
-        #print(f"{len(dataset)=}")
         model = load_hf_model_for_finetune(self.model_name)
         model = get_peft_model(model, LoraConfig(**lora_config))
         # LOGGER.info(f"Model trainable parameters:\n {print_trainable_parameters(model)}")
         # dataset = load_dataset(dataset_file, streaming=False)
 
-        # LOGGER.info(
-        #     f"Number of tokens for the training: {dataset.num_rows * len(dataset['input_ids'][0])}")
         trainer = Trainer(
             model=model,
             train_dataset=tokenized_dataset['train'],
             args=TrainingArguments(**trainer_config),
             data_collator=DataCollatorForLanguageModeling(tokenizer, mlm=mlm),
         )
-        model.config.use_cache = False  # silence warnings
+        model.config.use_cache = False
         trainer.train()
         model.config.use_cache = True
-
         model.save_pretrained(trainer_config['output_dir'])
-        # model.push_to_hub(repo_id=hf_repo)
-        # tokenizer.push_to_hub(repo_id=hf_repo)
 
 
 if __name__ == '__main__':
