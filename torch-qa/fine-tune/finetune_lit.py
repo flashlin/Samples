@@ -465,6 +465,7 @@ def prepare_model(model):
     model.lm_head = CastOutputToFloat(model.lm_head)
     return model
 
+# https://github.com/jeremyarancio/llm-tolkien/tree/main
 class LLMText():
 
     def __init__(self, model_name: str) -> None:
@@ -479,6 +480,7 @@ class LLMText():
             mlm: bool,
     ) -> None:
         tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+        tokenizer.pad_token = tokenizer.eos_token
         # model = AutoModelForCausalLM.from_pretrained(self.model_name, device_map="auto", load_in_8bit=True)
         # model = prepare_model(model)
         model = load_hf_model_for_finetune(self.model_name)
