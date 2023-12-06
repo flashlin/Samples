@@ -59,17 +59,18 @@ def load_hf_model_for_finetune(model_id: str):
 
 
 def preprocess_text(text: str) -> str:
-    text = text.replace('\n', ' ')
-    return text
+    #text = text.replace('\n', ' ')
+    return text.strip()
 
 
 def yield_text_file(text_file_path: Path, tokenizer: PreTrainedTokenizer) -> str:
     with open(text_file_path, 'r') as f:
         grouped_text = ""
         for text in f:
-            if len(text.strip()) == 0 and grouped_text != "":
-                grouped_text = preprocess_text(grouped_text)
-                yield grouped_text + tokenizer.eos_token
+            if len(text.strip()) == 0:
+                if grouped_text != "":
+                    grouped_text = preprocess_text(grouped_text)
+                    yield grouped_text + tokenizer.eos_token
                 grouped_text = ""
             else:
                 grouped_text += text
@@ -86,11 +87,11 @@ def yield_paragraphs_from_folder(folder: str, tokenizer: PreTrainedTokenizer):
         for paragraphs in yield_text_file(text_file_path=text_file, tokenizer=tokenizer):
             yield paragraphs
 
-def prepare_dataset(folder: str, output_folder: str) -> None:
+def prepare_dataset(folder: str, output_folder: str, mode: str='w') -> None:
     csv_file = f'{output_folder}/text.csv'
     tokenizer = AutoTokenizer.from_pretrained(model_name_path)
     LOGGER.info(f'Start preparing dataset from {folder}/')
-    with open(csv_file, 'w', newline='', encoding='utf-8') as file:
+    with open(csv_file, mode, newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(['content'])
         for paragraphs in yield_paragraphs_from_folder(folder=folder, tokenizer=tokenizer):
@@ -174,16 +175,18 @@ if __name__ == '__main__':
     output_folder = './outputs'
 
     prepare_dataset(folder='./data-user', output_folder=output_folder)
+    prepare_dataset(folder='./data-web', output_folder=output_folder, mode='a')
 
     t = LLMText(model_name=model_name_path)
     t.train(
             lora_config={
-                'r': 16,
-                'lora_alpha': 32,  # alpha scaling
+                'r': 64,
+                'lora_alpha': 16,  # alpha scaling
                 'lora_dropout': 0.1,
                 'bias': "none",
                 'task_type': "CAUSAL_LM",
-                'target_modules': ['q_proj','k_proj','v_proj','o_proj','gate_proj','up_proj','down_proj','lm_head']
+                # 'target_modules': ['q_proj','k_proj','v_proj','o_proj','gate_proj','up_proj','down_proj','lm_head']
+                'target_modules': ['up_proj', 'down_proj', 'lm_head']
             },
             trainer_config={
                 'per_device_train_batch_size': 1,
