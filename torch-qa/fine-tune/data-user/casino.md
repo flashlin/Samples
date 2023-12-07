@@ -342,3 +342,47 @@ Q: What are the differences between Baccarat and Dragon Tiger?
 Answer: The biggest difference is in the layouts the games use and the number of cards dealt by the dealer. While the outcome of a round in Baccarat is based on two cards at least per side, in Dragon Tiger each of the sides receives a single card. 
 
 There is also a difference in card values since in Baccarat, face cards are worth zero and an Ace is worth 1 while in Dragon Tiger, Aces are worth zero and other cards have their actual value with face cards being the most valuable. Both games offer side bets, but they are completely different. While Baccarat side bets include Pairs, Bonus, Banker Bonus, Either Pair or Perfect Pairs, in Dragon Tiger, you can go for a Big or Small optional bet.
+
+Question: Dragon Tiger or Classic Baccarat: Which One Has a Higher Earning Potential?
+Answer: All right, so there are a lot of similarities between the two. However, if you prefer a quick and simple game, the better option is Dragon Tiger. If Dragon Tiger bores you because you prefer more complex gameplay, Baccarat is the way to go.
+
+The banker’s hand has around 1.06% house edge while the player’s hand usually has 1.24%. Of course, a tie bet has the highest house edge which could go as high as 14%. Meanwhile, the house edge for a standard bet on Dragon or Tiger is typically around 3.73%.
+
+Question: Introduction to Single Zero Roulette
+Q: What is Live Dealer Roulette?
+Q: What is Live Roulette?
+Answer: Single zero roulette is played by spinning a ball on a round wheel with thirty seven numbered slots. The objective of the game is to predict where the ball will come to rest in the spinning wheel. There are 37 individually numbered sections in the wheel, labelled with the numbers 0-36. Bets can be placed on any one of these 37 numbers or on various groups of numbers displayed on the table. By predicting the right number, you earn a return on your bet. The size of the payoff depends on how the bet was placed.
+
+Question: The payout rate for Live Dealer Roulette?
+Q: The payout rate for Live Roulette?
+Answer: The theoretical return to player of this game is 97.38%.
+Over a long period of time, the game is likely to average a return to the Player of 97.34% of the total bets made.
+
+Question: How to play Roulette?
+Q: How to play Live Roulette?
+Q: How to play Live Dealer Roulette?
+Answer: Both the roulette wheel and table contain 36 numbers and a 0. A dealer sends a small white ball spinning that will eventually land on 1 of the wheel’s numbered slots. Place your desired bet on the table, correlating with the slot on the wheel that you think the ball will land in. If you predict the slot correctly, you get paid.
+
+Question: Which betting options are available in the game of Roulette?
+Q: Which betting options are available in the Live Roulette?
+Which betting options are available in the Live Dealer Roulette?
+Answer: In addition to numbers, roulette tables offer a few other betting options including:
+* 1-18
+* 19-36
+* Even
+* Odd
+* Black
+* Red
+* 1st 12 (which counts as a bet for all numbers 1-12)
+* 2nd 12  (which counts as a bet for all numbers 13-24)
+* 3rd 12 (which counts as a bet for all numbers 25-36)
+
+Question: Which section is the best to play Roulette?
+Answer: You have a better chance at winning when you bet on the "outside" side, which includes betting on a color, group of numbers, even or odd. Since almost half of the numbers are either black or red (except for the green that are 0 and 00) it's very close to 50% chance that you will win, being exact you have a 46.37% chance of winning. This also happens with even or odd and with the groups that includes numbers from 1 to 18 and 19 to 36. The closer you get to a specific bet the harder it gets to win. These probabilities up next are for the American Roulette: Black or red - 46.37%; Odd or even - 46.37%; 1 to 12 - 31.58%; Single Number - 2.63%.
+
+
+Question: What is the best way not to lose in Roulette?
+Question: What is the best way not to lose in Live Roulette?
+Answer: Don't play. If you do, plan on an amount you can afford to lose and feel comfortable with. When it is gone, walk away and consider the money spent for the pleasure of playing the game. Remember that the casino is there to win your money and if you play long enough, the odds are in their favor and you will lose your money. If you happen to win and are ahead, take your money and get a nice dinner.
+
+
