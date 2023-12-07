@@ -291,3 +291,21 @@ Daily missions only require image replacement. Currently, the process involves f
 * However, country settings are currently hardcoded within Tera.
 * Essentially, apart from specific banners like casino cashback or TOPVN TOPKR, no code modifications are necessary; simply upload the respective images.
 * In case specific timings need configuration, remember to add one day to the end date.
+
+Question: What should be considered when changing the types of app landing banners during daily mission ad transitions?
+Q: What should be considered when replacing app landing banners?
+Answer: Currently, we have two apps:
+SBOTOP app: Specifically for B2C users, where all content is displayed as SBOTOP after login.
+SBOBET app: Intended for B2B users.
+
+Given these considerations, it's normal for B2C users on the SBOBET app to view SBOTOP banners and wording.
+Regarding the CTA:
+Since the App does not support Siren's ProductSwitch yet, if you choose Product Switch + Siren + Daily Mission, the banner will not appear in the app due to site restrictions.
+
+For the BSI section:
+* Country: Place the banners you want to display in Taiwan to ensure visibility. Otherwise, the banners won't be visible.
+* License: Mark both MNL and IOM as BSI-required for display. As BSI cannot determine the license, activities marked as MNL only cannot be placed in BSI.
+* Member Status:
+  - B2B: Displayed on the SBOBET app.
+  - B2C: Displayed on the SBOTOP app.
+  - B2B2C: Displayed on the SBOTOP app.
