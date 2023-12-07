@@ -48,4 +48,7 @@ Question: American users operate under which type of license?
 Answer: American users are under the IOM License terms.
 
 Question: Which promotions can Vietnamese users participate in?
-Answer: TOP Banner, Birthday Gift, Deposit Bonus, and Refer A Friend.
+Answer: TOP, Birthday Gift, Deposit Bonus, and Refer A Friend Banners.
+The promotions on SBOTOP website. (https://www.sbotop.com/promo)
+
+
