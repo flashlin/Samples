@@ -9,7 +9,7 @@ from langchain.embeddings import HuggingFaceBgeEmbeddings
 from langchain.retrievers import ParentDocumentRetriever
 from langchain.schema import BaseRetriever, Document
 from langchain.schema.language_model import BaseLanguageModel
-from langchain import PromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain, RetrievalQA
 from langchain.vectorstores import FAISS
 from langchain.schema.vectorstore import VectorStore
