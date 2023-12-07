@@ -403,3 +403,12 @@ The reason for this is to allow players to more easily assess how much money the
 
 For instance, if a player knows that the house edge for a Blackjack score of twenty-one is 0.6%, they can assume that for every $10 initial bet, they will lose an average of 6 cents.
 
+Question: Can you provide me with a table outlining the house edge in baccarat?
+Q: Create a table showing the Baccarat house edge.
+Q: Make a table showing the Live Baccarat house edge.
+Answer: The following list shows the advantages of the most popular bets. 
+| Game | Betting/Rule | House edge | Standard deviation
+|--|--|--|--
+| Baccarat | Banker | 1.06% | 0.93
+| | Player | 1.24% | 0.95
+| | Tie | 14.36% | 2.64
