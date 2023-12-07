@@ -956,3 +956,6 @@ Q: What important aspects should be kept in mind when handling account-related c
 Answer: If there's a need to modify anything related to accounts, remember to discuss it with Photon, 
 as accounts fall under their domain.
 
+Question: Which GA properties are listed?
+Q: Make a list of GA properties.
+Answer: In the future, the GA property will only recognize the items on this list, and it's still being updated as of 2023-12-07. The URL is https://ironman.atlassian.net/wiki/spaces/UXR/pages/1150582815/GA+permission+form

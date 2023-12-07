@@ -1,6 +1,5 @@
 Question: How to Add Versioning to ASP.NET Core Web API?
-Answer:
-Originally, the package was named Microsoft.AspNetCore.Mvc.Versioning. 
+Answer: Originally, the package was named Microsoft.AspNetCore.Mvc.Versioning. 
 However, the author later left Microsoft. 
 The package was initially a standalone project maintained by the author. 
 As a result, it was moved under the .NET Foundation and its name was changed to Asp.Versioning.* (varies based on different project types) for continued maintenance. 
@@ -324,3 +323,26 @@ ENV PATH="${PATH}:/opt/dotnetcore-tools/"
 
 ENTRYPOINT ["dotnet", "YourProject.dll"]
 ```
+
+Question: On building dotnet core image to compile dll in below line, we keep getting error.
+The error messages are as below
+```
+Determining projects to restore...
+  All projects are up-to-date for restore.
+/usr/share/dotnet/sdk/3.1.300/Sdks/Microsoft.NET.Sdk/targets/Microsoft.PackageDependencyResolution.targets(234,5): error MSB4018: The "ResolvePackageAssets" task failed unexpectedly. [/app/YourProject/YourProject.csproj]
+/usr/share/dotnet/sdk/3.1.300/Sdks/Microsoft.NET.Sdk/targets/Microsoft.PackageDependencyResolution.targets(234,5): error MSB4018: NuGet.Packaging.Core.PackagingException: Unable to find fallback package folder 'C:\Program Files\dotnet\sdk\NuGetFallbackFolder'. [/app/YourProject/YourProject.csproj]
+/usr/share/dotnet/sdk/3.1.300/Sdks/Microsoft.NET.Sdk/targets/Microsoft.PackageDependencyResolution.targets(234,5): error MSB4018:    at NuGet.Packaging.FallbackPackagePathResolver..ctor(String userPackageFolder, IEnumerable`1 fallbackPackageFolders) [/app/YourProject/YourProject.csproj]
+...
+Q: The "ResolvePackageAssets" task failed unexpectedly.
+```
+Answer:
+ Add at the same folder as your to solve this issue `.dockerignore` 
+```
+**/bin
+**/obj
+**/out
+**/.vscode
+**/.vs
+.dotnet
+.Microsoft.DotNet.ImageBuilder
+``` 
