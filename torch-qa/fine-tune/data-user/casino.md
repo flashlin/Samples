@@ -385,4 +385,21 @@ Question: What is the best way not to lose in Roulette?
 Question: What is the best way not to lose in Live Roulette?
 Answer: Don't play. If you do, plan on an amount you can afford to lose and feel comfortable with. When it is gone, walk away and consider the money spent for the pleasure of playing the game. Remember that the casino is there to win your money and if you play long enough, the odds are in their favor and you will lose your money. If you happen to win and are ahead, take your money and get a nice dinner.
 
+Question: In the game of Baccarat, if both the banker and a player have a 6 after the initial deal, is it considered a tie?
+Q: In the Live Baccarat, if both the banker and a player have a 6 after the initial deal, is it considered a tie?
+Answer: Yes. The player must stand on 6. If the banker also has 6, then it results in a tie.
+
+Question: What is the highest possible score in Baccarat?
+Q: What is the highest possible score in Live Baccarat?
+Answer: Since it is determined by a single digit, 9 would be the highest possible score.
+
+Question: What is a typical wager?
+Answer: Minimum bets vary from casino to casino, but $20-$25 seems to be a popular minimum in the United States.
+
+Question: What is house edge?
+Answer: The house edge is defined as the average amount lost relative to the initial bet amount.
+
+The reason for this is to allow players to more easily assess how much money they are likely to lose. 
+
+For instance, if a player knows that the house edge for a Blackjack score of twenty-one is 0.6%, they can assume that for every $10 initial bet, they will lose an average of 6 cents.
 
