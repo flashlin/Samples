@@ -50,7 +50,6 @@ table {
 }
 </style>
 # What difficulties
-* Collect clean documents
 * Cost Comparison
   - Extracting knowledge from sporadic content fragments.
   - Not creating QA data but writing instructional documentation.
@@ -58,6 +57,5 @@ table {
 
 ---
 # Conclusion
-* The 34B Model requires more training data than the 7B Model, and this is a universally acknowledged fact.
+* We can't expect the model to be intelligent by just reading text.
 * Quality QA data leads to better training outcomes compared to data lacking in quality.
-* Extracting reliable knowledge solely from sporadic snippets of support without the willingness to create instructional documentation is exceedingly challenging.
