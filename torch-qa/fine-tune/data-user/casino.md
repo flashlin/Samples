@@ -296,3 +296,49 @@ Q: What are the rules of Baccarat?
 Answer: "Firstly, the dealer deals two sets of cards for the Banker and the Player. The winner is the side with a total closest to 9 or exactly totaling 9. All cards from 2 to 9 carry their face value in points.
 
 Kings (K), Queens (Q), Jacks (J), or cards with a value of 10 count as 0 points, while an Ace (A) counts as 1 point. Other cards are valued based on their face value. If necessary, specific rules dictate dealing a third card to both sides. The side with the total points closest to 9 wins."
+
+
+Question: Introduction to Live Dealer Dragon Tiger.
+Q: What is Live Dealer Dragon Tiger?
+Q: What is Live Dragon Tiger?
+Answer: The objective of the game is to bet on whichever of the two hands, the Dragon's hand or the Tiger's hand that the Player thinks will have the highest card value. The Player can also bet on Tie. Dealer will draw one card for the Dragon's hand and one card for the Tiger's hand. No additional cards will be drawn for each hand.
+
+
+Question: The payout rate for Live Dealer Dragon Tiger?
+Answer: The theoretical return to player of this game is 96.26%.
+Over a long period of time, the game is likely to average a return to the Player of 96.265% of the total bets made.
+
+Question: How to play Live Dealer Dragon Tiger?
+Q: How to play Live Dragon Tiger?
+Answer: To place a bet, the Player must swipe and select which chips he wants to use. Tap the chip value and choose the available betting options such as Dragon's hand, Tiger's hand or Tie result. The chip will automatically appear in the betting option. Tapping the same chip value will increase the Player's bet by the selected chip, or the Player can also select another amount of the chips. The Player can increase the bet amount until reaching the table's maximum betting limit.
+
+To remove the last chip of the Player's bet, tap the UNDO button in the Game user interface.
+
+The Player must place their bets before the 20-second Betting Timer at the top of the game window expires. Betting is not allowed once the Betting Timer has expired.
+
+The Player will not be able to place bet on both Dragon's hand and Tiger's hand.
+
+As soon as the Betting Timer has expired, the dealer will burn one card, and then deal one card for the Dragon's hand and then one card for the Tiger's hand. The hand with the highest card value wins the game. An Ace is the lowest card value and a King is the highest card value. The hand rank of the cards goes from Ace-2-3-4-5-6-7-8-9-10-J-Q-K. And in the event when both of the cards drawn are of the same value, or a Tie, only half of the bet amount placed will be paid.  During Tie game, if the Player bets on either Dragon's hand or Tiger's hand, only half of the Player's bet will be returned. After the first round, the Player can click the REBET button to place the same bet from the previous round. After the first round, the Player can click the REBET button to place the same bet from the previous round.
+
+Question: What are the betting options in Live Dragon Tiger?
+Answer: The Live Dragon Tiger game offers betting options such as Dragon, Tiger, Tie. 
+
+Live Dragon Tiger game also has side bets: Odd/Even, Big/Small, Black/Red. The side bets are the minor bets that can be placed by the Player.
+
+NOTE: When betting on the side bets, the Player loses all his/her bets on the side bets he/she placed if the card is dealt as 7 . Over the 50th round of each time, it is not acceptable to bet with side bet.
+
+Question: How are the card values calculated in Dragon Tiger?
+Answer: Cards in Live Dragon Tiger are ranked from the lowest to the highest starting from Ace to King.
+* Aces are counted as one
+* Jacks are counted as 11
+* Queens are counted as 12
+* Kings are counted as 13
+
+Question: Dragon Tiger Explained.
+Answer: Dragon Tiger is a table game themed on the concept of Yin and Yang where the Tiger stands for Yin and the Dragon stands for Yang. While this concept from Asian culture may seem complicated to the Western world, the game’s rules are nothing like that. Actually, the game is pretty simple to play with the dealer showing two cards on the fields representing the Tiger and Dragon. The highest card wins.
+
+Question: Baccarat vs. Dragon Tiger, What’s the Difference?
+Q: What are the differences between Baccarat and Dragon Tiger?
+Answer: The biggest difference is in the layouts the games use and the number of cards dealt by the dealer. While the outcome of a round in Baccarat is based on two cards at least per side, in Dragon Tiger each of the sides receives a single card. 
+
+There is also a difference in card values since in Baccarat, face cards are worth zero and an Ace is worth 1 while in Dragon Tiger, Aces are worth zero and other cards have their actual value with face cards being the most valuable. Both games offer side bets, but they are completely different. While Baccarat side bets include Pairs, Bonus, Banker Bonus, Either Pair or Perfect Pairs, in Dragon Tiger, you can go for a Big or Small optional bet.
