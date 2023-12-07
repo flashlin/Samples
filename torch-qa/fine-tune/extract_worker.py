@@ -1,7 +1,8 @@
+from io_utils import query_sub_files
 from langchain_lit import load_markdown_documents
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import argparse
-
+from qa_file_utils import is_match, ANSWER_PATTERN
 
 def get_args():
     parser = argparse.ArgumentParser(description="Extract Text ")
@@ -39,6 +40,9 @@ class ParagraphReadyState:
             return
         if self.buff != "":
             self.buff += "\n"
+        answer_captured_text = is_match(line, ANSWER_PATTERN)
+        if answer_captured_text is not None:
+            self.buff += ' '
         self.buff += line
 
     def flush(self):
@@ -48,15 +52,11 @@ class ParagraphReadyState:
         self.buff = ""
 
 
-
-def extract_text(folder: str, chunk_size=1000 * 3):
-    documents = load_markdown_documents(folder)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=20)
-    all_splits = text_splitter.split_documents(documents)
-    for doc in all_splits:
-        content = doc.page_content
-        source = doc.metadata['source']
-        yield source, content
+def extract_text(folder: str):
+    files = query_sub_files(folder, ['.txt', '.md'])
+    for file in files:
+        with open(file, 'r', encoding='utf-8') as f:
+            yield file, f.read()
 
 
 def split_text_to_paragraphs(text: str):
@@ -68,8 +68,8 @@ def split_text_to_paragraphs(text: str):
         yield paragraph
 
 
-def extract_paragraphs(folder: str, chunk_size=1000 * 3):
-    for source, text in extract_text(folder, chunk_size):
+def extract_paragraphs(folder: str):
+    for source, text in extract_text(folder):
         for paragraph in split_text_to_paragraphs(text):
             yield source, paragraph
 
@@ -77,5 +77,8 @@ def extract_paragraphs(folder: str, chunk_size=1000 * 3):
 if __name__ == '__main__':
     args = get_args()
     folder = './data-user'
-    for source, paragraph in extract_paragraphs(folder):
-        print(f"{paragraph=}")
+    with open('./results/paragraphs.txt', 'w', encoding='utf-8') as f:
+        for source, paragraph in extract_paragraphs(folder):
+            f.write("Question: ???\r\n")
+            f.write(f"Answer: {paragraph}\r\n")
+            f.write('\r\n\r\n')
