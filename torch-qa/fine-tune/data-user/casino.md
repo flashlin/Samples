@@ -425,3 +425,19 @@ Q: In Sic Bo, What is the average return to the Player over a long period of tim
 Q: In Live Sic Bo, What is the average return to the Player over a long period of time?
 Answer: The theoretical return to player of this game is 96.21%.
 Over a long period of time, the game is likely to average a return to the Player of 96.06% of the total bets made.
+
+Question: How to play Sic Bo?
+Question: How to play Live Sic Bo?
+Answer: Sic Bo, commonly known as "Big and Small," is a dice gambling game. It involves bets placed by participants against the house. Prior to each bet, the dealer shakes three dice inside a covered container. Once all bets are placed, the container is uncovered, and payouts are made by the dealer. The most common bets involve predicting the total points of the dice to be either small (4-10) or big (11-17), excluding triples.
+
+Question: Introduction to Sic Bo
+Question: Introduction to Live Sic Bo
+Question: Introduction to Live Dealer Sic Bo
+Answer: It's a gambling game where the house always maintains an advantageous position. 
+
+Players cannot increase their winning odds through techniques; in the long run, the house always prevails. 
+
+The table below illustrates betting options and their corresponding odds in Sic Bo. 
+
+While bets like "Big" and "Small" are more favorable for players, the house still maintains an edge. Some casinos even allow bets on odd/even, totals of three dice (adding their points), and specific combinations of three dice.
+
