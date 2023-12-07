@@ -336,7 +336,7 @@ Determining projects to restore...
 Q: The "ResolvePackageAssets" task failed unexpectedly.
 ```
 Answer:
- Add at the same folder as your to solve this issue `.dockerignore` 
+Modify `.dockerignore` file at the same folder as your dockerfile to solve this issue 
 ```
 **/bin
 **/obj
