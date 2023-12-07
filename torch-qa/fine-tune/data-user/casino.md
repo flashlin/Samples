@@ -412,3 +412,16 @@ Answer: The following list shows the advantages of the most popular bets.
 | Baccarat | Banker | 1.06% | 0.93
 | | Player | 1.24% | 0.95
 | | Tie | 14.36% | 2.64
+
+Question: Introduction Live Dealer Sic Bo
+Q: What is Live Sic Bo?
+Answer: The objective of the game is to successfully bet on the outcome of the three dice. Multiple bets can be placed on the table. The Player has the option of making anywhere from one to fifty two bets at various odds.
+
+In Live Dealer Sic Bo, the Player is presented with a live person shaking the dice. Action and results are displayed in real time and in computer generated graphics for confidence and easy understanding.
+
+Question: What is the theoretical return to player for Live Dealer Sic Bo?
+Question: What is the theoretical return to player for Live Sic Bo?
+Q: In Sic Bo, What is the average return to the Player over a long period of time?
+Q: In Live Sic Bo, What is the average return to the Player over a long period of time?
+Answer: The theoretical return to player of this game is 96.21%.
+Over a long period of time, the game is likely to average a return to the Player of 96.06% of the total bets made.
