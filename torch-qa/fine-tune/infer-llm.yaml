@@ -1,5 +1,5 @@
 user_input: |
-  What is baccarat?
+  What is your name?
 
 model_name: Mistral-7B-Instruct-v0.1
 instruction: |
