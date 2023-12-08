@@ -416,6 +416,8 @@ def ask_llm_prompt(llm, generation_config: Mapping, tokenizer, device: str,
         prompt_template = LLAMA2_PROMPT_TEMPLATE
     prompt = prompt_template.format(instruction=instruction, user_input=user_input)
 
+    print(f"{prompt=}")
+
     encoding = tokenizer(prompt, return_tensors="pt").to(device)
     outputs = llm.generate(
         input_ids=encoding.input_ids,
