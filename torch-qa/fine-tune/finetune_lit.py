@@ -251,7 +251,8 @@ def load_peft_model(base_model: str, peft_model: str):
         base_model,
         return_dict=True,
         quantization_config=bnb_config,
-        device_map="auto",
+        #device_map="auto",
+        device_map="cuda:0",
         # trust_remote_code=True,
         local_files_only=True,
         # use_safetensors=True

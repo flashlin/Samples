@@ -1,17 +1,36 @@
 user_input: |
   What is your name?
 
-model_name: Mistral-7B-Instruct-v0.1
+# loading slow
+model_name: Orca-2-7b
 instruction: |
     You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.
     Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content.
     Please ensure that your responses are socially unbiased and positive in nature.
-    If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. 
+    If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct.
     If you don't know the answer to a question, please don't share false information.
-prompt: <s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{user_input} [/INST]
-bos_token: "[/INST]"
-eos_token: "</s>"
-skip_special_tokens: True
+prompt: |
+  <|im_start|>system
+  You are MistralOrca, a large language model trained by Alignment Lab AI. Write out your reasoning step-by-step to be sure you get the right answers!
+  <|im_end|>
+  <|im_start|>user
+  {user_input}
+  <|im_end|>
+  <|im_start|>assistant
+bos_token: <|im_start|>assistant
+eos_token: <|im_end|>
+
+#model_name: Mistral-7B-Instruct-v0.1
+#instruction: |
+#    You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.
+#    Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content.
+#    Please ensure that your responses are socially unbiased and positive in nature.
+#    If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct.
+#    If you don't know the answer to a question, please don't share false information.
+#prompt: <s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{user_input} [/INST]
+#bos_token: "[/INST]"
+#eos_token: "</s>"
+#skip_special_tokens: True
 
 #model_name: Open-Orca_Mistral-7B-OpenOrca
 #prompt: |

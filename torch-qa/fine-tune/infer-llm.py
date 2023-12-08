@@ -15,16 +15,16 @@ if __name__ == '__main__':
     model_path = f"../models/{model_name}"
     llm, tokenizer, generation_config = load_llm_model(model_path)
 
-    bos_token = config["bos_token"]
-    eos_token = config["eos_token"]
-
     print(f"{model_name=}")
     while True:
+        config = load_yaml_config("infer-llm.yaml")
+        prompt = config["prompt"]
+        bos_token = config["bos_token"]
+        eos_token = config["eos_token"]
+
         user_input = input("query: ")
         if user_input == '/bye':
             break
-        config = load_yaml_config("infer-llm.yaml")
-        prompt = config["prompt"]
         if user_input == "":
             user_input = config["user_input"]
         print(f"{user_input=}")
