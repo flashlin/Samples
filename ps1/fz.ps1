@@ -1,0 +1,1 @@
+fzf --preview 'bar --style=numbers --color=always {}'
