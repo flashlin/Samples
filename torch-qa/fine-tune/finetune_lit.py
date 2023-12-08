@@ -400,6 +400,13 @@ DEFAULT_SYSTEM_INSTRUCTION = (
 LLAMA2_PROMPT_TEMPLATE = """<s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{user_input} [/INST]"""
 
 
+def clean_llm_response(resp: str):
+    after_inst = resp.split("[/INST]", 1)[-1]
+    # s2 = after_inst.split("[INST]", 1)[0]
+    # return s2.split('[/INST]', 1)[0]
+    return after_inst
+
+
 def ask_llm_prompt(llm, generation_config: Mapping, tokenizer, device: str,
                    instruction: str, user_input: str,
                    prompt_template: str):
@@ -416,6 +423,7 @@ def ask_llm_prompt(llm, generation_config: Mapping, tokenizer, device: str,
         generation_config=generation_config
     )
     resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    resp = clean_llm_response(resp)
     return resp
 
 

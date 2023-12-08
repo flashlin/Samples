@@ -21,7 +21,8 @@ if __name__ == '__main__':
             break
         config = load_yaml_config("infer-llm.yaml")
         prompt = config["prompt"]
-        user_input = config["user_input"]
+        if user_input == "":
+            user_input = config["user_input"]
         print(f"{user_input=}")
         print("\r\n")
         answer = ask_llm_prompt(llm=llm,
