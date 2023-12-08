@@ -74,6 +74,11 @@ def extract_paragraphs(folder: str):
             yield source, paragraph
 
 
+def first_element(input_iterable):
+    iterator = iter(input_iterable)
+    return next(iterator)
+
+
 if __name__ == '__main__':
     args = get_args()
     folder = './data-user'
@@ -82,3 +87,7 @@ if __name__ == '__main__':
             f.write("Question: ???\r\n")
             f.write(f"Answer: {paragraph}\r\n")
             f.write('\r\n\r\n')
+
+    source, first_paragraph = first_element(extract_paragraphs(folder))
+    print(f"{first_paragraph=}")
+    
