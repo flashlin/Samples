@@ -23,3 +23,42 @@ cd scrape-open-llm-leaderboard
 pip install -r ./requirements.txt
 python ./main.py -csv -html
 ```
+
+Question: How to create password for jupyter?
+Answer: 
+```bash
+jupyter-lab --generate-config
+```
+It will writing default config to: /home/<<<your login name>>>/.jupyter/jupyter_lab_config.py
+Please run `python` command in bash shell
+```python
+>>> from jupyter_server.auth import passwd; passwd()
+Enter password:
+Verify password:
+'argon2:$argon2id$v=19$m=10240,t=10,p=8$iwttFOft6aRAnyString'
+>>> exit()
+```
+modify upyter_lab_config.py file, search `c.ServerApp.password` and replace it.
+```
+c.ServerApp.password = 'argon2:$argon2id$v=19$m=10240,t=10,p=8$iwttFOft6aRAnyString'
+```
+Run following command to start jupyter lab
+```bash
+jupyter lab --ip=0.0.0.0 --notebook-dir=/mnt/c/workspace/lab/ --preferred-dir /mnt/c/workspace/lab/
+```
+
+Question: How to install jupyter?
+Answer:
+```bash
+pip install jupyterlab
+pip install ipywidgets
+```
+
+Question: How to resolve 
+```
+TqdmWarning: IProgress not found. Please update jupyter and ipywidgets.
+```
+Answer:
+```bash
+pip install ipywidgets
+```
