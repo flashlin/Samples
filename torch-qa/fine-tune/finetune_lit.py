@@ -1,4 +1,5 @@
 import csv
+import yaml
 import os.path
 import re
 from typing import Mapping, Callable, Any
@@ -371,6 +372,58 @@ def ask_orca2_instruction_prompt(model, generation_config, tokenizer, device, qu
     answer = resp
     return answer
 
+#############################################
+
+
+def load_llm_model(base_model_name: str,
+                   peft_model_name: str = None,
+                   max_new_tokens: int = 1024,
+                   temperature: float = 0.2):
+    model, tokenizer = load_peft_model(base_model_name, peft_model_name)
+    generation_config = model.generation_config
+    generation_config.max_new_tokens = max_new_tokens
+    generation_config.temperature = temperature
+    generation_config.do_sample = True
+    generation_config.top_p = 0.7
+    generation_config.num_return_sequences = 1
+    generation_config.pad_token_id = tokenizer.eos_token_id
+    generation_config.eos_token_id = tokenizer.eos_token_id
+    return model, tokenizer, generation_config
+
+
+DEFAULT_SYSTEM_INSTRUCTION = (
+    "You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. "
+    "Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. "
+    "Please ensure that your responses are socially unbiased and positive in nature.\n"
+    "If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. "
+    "If you don't know the answer to a question, please don't share false information.")
+LLAMA2_PROMPT_TEMPLATE = """<s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{user_input} [/INST]"""
+
+
+def ask_llm_prompt(llm, generation_config: Mapping, tokenizer, device: str,
+                   instruction: str, user_input: str,
+                   prompt_template: str):
+    if instruction is None:
+        instruction = DEFAULT_SYSTEM_INSTRUCTION
+    if prompt_template is None:
+        prompt_template = LLAMA2_PROMPT_TEMPLATE
+    prompt = prompt_template.format(instruction=instruction, user_input=user_input)
+
+    encoding = tokenizer(prompt, return_tensors="pt").to(device)
+    outputs = llm.generate(
+        input_ids=encoding.input_ids,
+        attention_mask=encoding.attention_mask,
+        generation_config=generation_config
+    )
+    resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return resp
+
+
+def load_yaml_config(config_file: str):
+    with open(config_file, 'r', encoding='utf-8') as file:
+        config = yaml.safe_load(file)
+    return config
+
 
 # orca2_instruction_prompt_template = "<|im_start|>system\n{system_message}<|im_end|>\n<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant"
 #
@@ -412,6 +465,3 @@ def tokenize(element: Mapping, tokenizer: Callable, context_length: int) -> str:
         if length == context_length:  # We drop the last input_ids that are shorter than max_length
             inputs_batch.append(input_ids)
     return {"input_ids": inputs_batch}
-
-
-
