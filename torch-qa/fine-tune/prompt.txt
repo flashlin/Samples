@@ -1,0 +1,4 @@
+{content}
+----------
+According to the above content, please generate N questions,
+the answer of which must contain all or part of the content above.

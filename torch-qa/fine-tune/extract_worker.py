@@ -3,12 +3,66 @@ from langchain_lit import load_markdown_documents
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import argparse
 from qa_file_utils import is_match, ANSWER_PATTERN
+from llama_cpp import Llama
+import time
+import re
+from finetune_utils import load_finetune_config
+from finetune_lit import load_peft_model, ask_llama2_instruction_prompt, get_finetune_model_name
+
+
+MODEL_NAME = "Mistral-7B-Instruct-v0.1"
 
 def get_args():
     parser = argparse.ArgumentParser(description="Extract Text ")
     parser.add_argument("model_name", nargs='?', help="Name of your model")
     args = parser.parse_args()
     return args
+
+def load_gguf_model(model_name):
+   llm = Llama(
+      model_path=f"../models/{model_name}.gguf",
+      n_ctx=8192,
+      n_threads=12,
+      n_gpu_layers=128,
+      verbose=False
+   )
+   return llm
+
+DEFAULT_PROMPT_TEMPLATE = """<s>[INST] {user_input} [/INST]"""
+PROMPT_TEMPLATES = {
+   "wizardlm-30b": "{user_input}\n\n### Response:",
+}
+def get_prompt_template(model_name):
+   for model_pattern, prompt_template in PROMPT_TEMPLATES.items():
+      pattern = re.compile(model_pattern, re.IGNORECASE)
+      match = pattern.match(model_name)
+      if match:
+         return prompt_template
+   return DEFAULT_PROMPT_TEMPLATE
+
+PROMPT = get_prompt_template(MODEL_NAME)
+print(f"{PROMPT=}")
+
+def get_prompt(sys_instruction, user_input):
+   global PROMPT
+   prompt = PROMPT
+   return prompt.format(sys_instruction=sys_instruction, user_input=user_input)
+
+
+def ask(query):
+   global llm
+   prompt = get_prompt(None, query)
+   output = llm(
+      #"### Human: {prompt}\n\n### Assistant:",
+      prompt,
+      max_tokens=512,  # Generate up to 512 tokens
+      stop=["</s>"],   # Example stop token - not necessarily correct for this specific model! Please check before using.
+      echo=False        # Whether to echo the prompt
+   )
+   # return output
+   resp = output['choices'][0]
+   answer = resp['text']
+   return answer
 
 
 class ParagraphsContext:
@@ -79,15 +133,89 @@ def first_element(input_iterable):
     return next(iterator)
 
 
+#################
+def generate_question(llm, content: str):
+   with open('./prompt.txt', 'r', encoding='utf-8') as f:
+       template = f.read()
+   prompt = template.format(content=content)
+   answer = llm.ask(prompt)
+   return answer
+
+
+def extrac_question_body(question_line: str):
+    match = re.match(f'\d+. (.*)', question_line)
+    if match:
+        return match.group(1).strip()
+    return None
+
+
+def split_questions_content(content: str):
+    question_lines = re.findall(r'\d+\. .*', content)
+    questions = []
+    for question_line in question_lines:
+        q = extrac_question_body(question_line)
+        questions.append(q)
+    return questions
+
+
+class LLM:
+    def __init__(self):
+        model, tokenizer, generation_config = self.load_model()
+        self.model = model
+        self.tokenizer = tokenizer
+        self.generation_config = generation_config
+        self.device = 'cuda'
+
+    def load_model(self):
+        base_model = f"../models/{MODEL_NAME}"
+        model, tokenizer = load_peft_model(base_model, None)
+        generation_config = model.generation_config
+        generation_config.max_new_tokens = 1024
+        generation_config.temperature = 0.2
+        generation_config.do_sample = True
+        generation_config.top_p = 0.7
+        generation_config.num_return_sequences = 1
+        generation_config.pad_token_id = tokenizer.eos_token_id
+        generation_config.eos_token_id = tokenizer.eos_token_id
+        return model, tokenizer, generation_config
+
+    def ask(self, user_input: str):
+        answer = ask_llama2_instruction_prompt(model=self.model,
+                                               generation_config=self.generation_config,
+                                               tokenizer=self.tokenizer,
+                                               device=self.device,
+                                               question=user_input)
+        return answer
+
+
 if __name__ == '__main__':
     args = get_args()
-    folder = './data-user'
-    with open('./results/paragraphs.txt', 'w', encoding='utf-8') as f:
-        for source, paragraph in extract_paragraphs(folder):
-            f.write("Question: ???\r\n")
-            f.write(f"Answer: {paragraph}\r\n")
-            f.write('\r\n\r\n')
+    # folder = './data-user'
+    # with open('./results/paragraphs.txt', 'w', encoding='utf-8') as f:
+    #     for source, paragraph in extract_paragraphs(folder):
+    #         f.write("Question: ???\r\n")
+    #         f.write(f"Answer: {paragraph}\r\n")
+    #         f.write('\r\n\r\n')
+    #
+    # source, first_paragraph = first_element(extract_paragraphs(folder))
+    # print(f"{first_paragraph=}")
 
-    source, first_paragraph = first_element(extract_paragraphs(folder))
-    print(f"{first_paragraph=}")
+    start_time = time.time()
+    llm = LLM()
+    # llm = load_gguf_model(MODEL_NAME)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"{MODEL_NAME} Loaded. Take {execution_time} sec.")
+
+    while True:
+        user_input = input("query: ")
+        if user_input == '/bye':
+            break
+        with open('./content.txt', 'r', encoding='utf-8') as f:
+            content = f.read()
+        answer = generate_question(llm, content)
+        print(f"{answer}")
+        print("-------------------------------------------------------------------")
+        print("\n\n\n")
+
     
