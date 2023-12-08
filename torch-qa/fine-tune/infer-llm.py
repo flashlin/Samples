@@ -15,6 +15,9 @@ if __name__ == '__main__':
     model_path = f"../models/{model_name}"
     llm, tokenizer, generation_config = load_llm_model(model_path)
 
+    bos_token = config["bos_token"]
+    eos_token = config["eos_token"]
+
     print(f"{model_name=}")
     while True:
         user_input = input("query: ")
@@ -24,8 +27,7 @@ if __name__ == '__main__':
         prompt = config["prompt"]
         if user_input == "":
             user_input = config["user_input"]
-        # print(f"{user_input=}")
-        # print("\r\n")
+        print(f"{user_input=}")
         answer = ask_llm_prompt(llm=llm,
                                 generation_config=generation_config,
                                 tokenizer=tokenizer,
@@ -33,6 +35,8 @@ if __name__ == '__main__':
                                 instruction=config["instruction"],
                                 user_input=user_input,
                                 prompt_template=prompt,
+                                bos_token=bos_token,
+                                eos_token=eos_token
                                 )
         print(f"{answer}")
         print("--------------------------------------------------")

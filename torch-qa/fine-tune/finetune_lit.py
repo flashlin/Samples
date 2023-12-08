@@ -400,32 +400,34 @@ DEFAULT_SYSTEM_INSTRUCTION = (
 LLAMA2_PROMPT_TEMPLATE = """<s>[INST] <<SYS>>\n{instruction}\n<</SYS>>\n\n{user_input} [/INST]"""
 
 
-def clean_llm_response(resp: str):
-    after_inst = resp.split("[/INST]", 1)[-1]
-    # s2 = after_inst.split("[INST]", 1)[0]
-    # return s2.split('[/INST]', 1)[0]
-    return after_inst
+def clean_llm_response(resp: str, bos_token: str, eos_token: str):
+    # after_inst = resp.split("[/INST]", 1)[-1]
+    index = resp.find(bos_token)
+    if index != -1:
+        resp = resp[index + len(bos_token):]
+    # after_inst = resp.split(bos_token, 1)[-1]
+    resp = resp[:-len(eos_token)]
+    return resp
 
 
 def ask_llm_prompt(llm, generation_config: Mapping, tokenizer, device: str,
                    instruction: str, user_input: str,
-                   prompt_template: str):
+                   prompt_template: str,
+                   bos_token: str,
+                   eos_token: str):
     if instruction is None:
         instruction = DEFAULT_SYSTEM_INSTRUCTION
     if prompt_template is None:
         prompt_template = LLAMA2_PROMPT_TEMPLATE
     prompt = prompt_template.format(instruction=instruction, user_input=user_input)
-
-    print(f"{prompt=}")
-
     encoding = tokenizer(prompt, return_tensors="pt").to(device)
     outputs = llm.generate(
         input_ids=encoding.input_ids,
         attention_mask=encoding.attention_mask,
         generation_config=generation_config
     )
-    resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    resp = clean_llm_response(resp)
+    resp = tokenizer.decode(outputs[0], skip_special_tokens=False)
+    resp = clean_llm_response(resp, bos_token, eos_token)
     return resp
 
 
