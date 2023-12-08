@@ -4,7 +4,7 @@ import os
 import re
 from finetune_lit import create_llama2_finetune_prompt
 from io_utils import query_sub_files, split_file_path
-from qa_file_utils import query_qa_file
+from qa_file_utils import query_qa_file, convert_qa_md_file_to_train_jsonl
 
 def append_to_file(txt, file):
     with open(file, 'a') as f:
@@ -77,17 +77,6 @@ def convert_qa_md_to_csv(md_file: str, qa_file: str):
         for question, answer in query_qa_md(md_file):
             writer.writerow([question, answer])
 
-
-def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
-    with open(jsonl_file, mode, encoding='utf-8') as jfile:
-        for question, answer in query_qa_md(md_file):
-            json_line = json.dumps({
-                'instruction': question,
-                'input': '',
-                'output': answer,
-                'history': []
-            })
-            jfile.write(json_line+'\r\n')
 
 
 def convert_train_jsonl_to_json(jsonl_file):

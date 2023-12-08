@@ -1,13 +1,16 @@
+import os
+
 from io_utils import query_sub_files
 from langchain_lit import load_markdown_documents
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import argparse
-from qa_file_utils import is_match, ANSWER_PATTERN
+from qa_file_utils import is_match, ANSWER_PATTERN, convert_qa_md_file_to_train_jsonl
 from llama_cpp import Llama
 import time
 import re
 from finetune_utils import load_finetune_config
 from finetune_lit import load_peft_model, ask_llama2_instruction_prompt, get_finetune_model_name
+from qa_file_utils import query_qa_file
 
 
 MODEL_NAME = "Mistral-7B-Instruct-v0.1"
@@ -188,6 +191,26 @@ class LLM:
         return answer
 
 
+def append_qa_data(content: str, llm_qa_file: str):
+    with open(llm_qa_file, 'a', encoding='utf-8') as f:
+        f.write(content)
+        f.write("\n\n\n")
+
+
+def read_file(file: str):
+    with open(file, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
+def generate_qa_data(llm, content: str, output_llm_qa_file):
+    answer = generate_question(llm, content)
+    answer = answer.strip()
+    append_qa_data(answer, output_llm_qa_file)
+    print(f"{answer}")
+    print("-------------------------------------------------------------------")
+    print("\n\n\n")
+
+
 if __name__ == '__main__':
     args = get_args()
     # folder = './data-user'
@@ -207,15 +230,21 @@ if __name__ == '__main__':
     execution_time = end_time - start_time
     print(f"{MODEL_NAME} Loaded. Take {execution_time} sec.")
 
-    while True:
-        user_input = input("query: ")
-        if user_input == '/bye':
-            break
-        with open('./content.txt', 'r', encoding='utf-8') as f:
-            content = f.read()
-        answer = generate_question(llm, content)
-        print(f"{answer}")
-        print("-------------------------------------------------------------------")
-        print("\n\n\n")
+    output_llm_qa_file = f"./results/llm-qa.md"
+    if os.path.exists(output_llm_qa_file):
+        os.remove(output_llm_qa_file)
 
-    
+    # while True:
+    #     user_input = input("query: ")
+    #     if user_input == '/bye':
+    #         break
+    #     with open('./content.txt', 'r', encoding='utf-8') as f:
+    #         content = f.read()
+    #     generate_qa_data(llm, content=content, output_llm_qa_file=output_llm_qa_file)
+
+    qa_jsonl_file = './results/qa.jsonl'
+    for idx, file in enumerate(query_sub_files('./data', ['.txt', '.md'])):
+        content = read_file(file)
+        print(f"process {file}")
+        generate_qa_data(llm, content=content, output_llm_qa_file=output_llm_qa_file)
+        # convert_qa_md_file_to_train_jsonl(file, 'a')

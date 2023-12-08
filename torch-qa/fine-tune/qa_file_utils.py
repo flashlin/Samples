@@ -1,3 +1,4 @@
+import json
 import re
 
 
@@ -120,6 +121,17 @@ def query_qa_file(file: str):
             for answer in answers:
                 yield question.strip(), answer.strip()
 
+
+def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
+    with open(jsonl_file, mode, encoding='utf-8') as jfile:
+        for question, answer in query_qa_file(md_file):
+            json_line = json.dumps({
+                'instruction': question,
+                'input': '',
+                'output': answer,
+                'history': []
+            })
+            jfile.write(json_line+'\r\n')
 
 if __name__ == '__main__':
     file = 'data-user/test.txt'
