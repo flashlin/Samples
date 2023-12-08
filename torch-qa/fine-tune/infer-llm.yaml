@@ -1,4 +1,6 @@
 model_name: Mistral-7B-Instruct-v0.1
+user_input: |
+  What is your name?
 instruction: |
     You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.
     Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content.
