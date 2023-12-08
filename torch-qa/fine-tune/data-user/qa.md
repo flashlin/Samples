@@ -959,3 +959,65 @@ as accounts fall under their domain.
 Question: Which GA properties are listed?
 Q: Make a list of GA properties.
 Answer: In the future, the GA property will only recognize the items on this list, and it's still being updated as of 2023-12-07. The URL is https://ironman.atlassian.net/wiki/spaces/UXR/pages/1150582815/GA+permission+form
+
+
+Question: What is `FIRST TO START`?
+Answer: Predict the team or participant who starts off the game/match/event.
+
+Question: What is `NEXT GOAL`?
+Answer: Predict the next team to score in a match within the regular playing time.
+* Own goals are counted in favor of the team credited with the goal.
+* Bets will be refunded if the match is abandoned unless the result has been unconditionally determined.
+
+Question: What is `ODD/EVEN`?
+Answer: Bets are settled based on the aggregate sum total of points/goals (resulting in an odd or even number) in a match or series of matches in which the bets were placed. A 0-0 score is considered as even.
+
+Question: "OUTRIGHT" betting includes which options?
+Answer: An outright bet involves the selection of:
+  (a) a winner in a tournament, competition, league, race, or event (“Sports Event”) (or any part or aspect thereof); or
+  (b) a team or individual competitor to place in a specific position or range of positions to be determined by the Operator, of a Sports Event (or any part or aspect thereof); or
+  (c) two or more teams or individual competitors to place in a specific range of positions to be determined by the Operator, of a Sports Event (or any part or aspect thereof);
+
+Question: When can outright bets be placed?
+Answer: Outright bets may be offered either before the commencement or at any stage of the Sports Event prior to its conclusion where the results for that category of bets are still undecided.
+
+Question: Give me a example of championship bets.
+Answer: Final Outcome: Bet on the team or individual competitor to win the Sports Event.
+Answer: Regional Best Performer: 
+(i) Bet on which team or individual competitor from a particular region advances the furthest in a Sports Event (or part or aspect thereof) (e.g. Top African Team, Top Asian Team, Top European Team, Top North and Central American Team and Top South American Team, etc)
+(ii) If more than one team or individual competitor from the same region exits the Sports Event in the same furthest round or if all teams or individual competitors from the same region are eliminated in the group stage or preliminary rounds, the Dead Heat rule applies. 
+Answer: Group or Conference Winner: Bet on the team or individual competitor to come out as the group or conference winner or to finish top of the particular group in the preliminary round of a Sports Event.
+Answer: Top Scorer: Bet on the highest scoring team or individual competitor at the end of the Sports Event or at the end of any stage of the Sports Event.
+Answer: Specific Position and Top Group Finisher: Bet on the team or individual competitor to finish a Sports Event (or part or aspect thereof):
+  (i) in a specific position other than the winner (e.g. Second Place, Third Place, Semi Finalist, etc); or
+  (ii) within a selected range of positions (e.g, Top 2, 5, 10, etc) without regard to the exact position of the team or individual competitor in that Sports Event (or part or aspect thereof).
+Answer: Place Forecasting: Predict or forecast two or more teams or individual competitors to finish a Sports Event (or part or aspect thereof):
+  (i) Straight Forecast - within a selected range of positions (e.g, Top 2, 5, 10, etc) in the correct order of positions at the end of the Sports Event (or part or aspect thereof which includes, but is not limited to the group or conference stage of a Sports Event); or
+  (ii) Dual Forecast - within a selected range of positions (e.g, Top 2, 5, 10, etc) without regard to the exact position of the team or individual competitor in that Sports Event (or part or aspect thereof which includes, but is not limited to the group or conference stage of a Sports Event).
+
+
+Question: What happens if the player I've bet on doesn't participate in the championship event?
+Answer: There are no refunds on non-starters for outright betting.
+  (a) Non-starter means a team or an individual competitor or a player who did not start a Sports Event notwithstanding the inclusion of its or his or her name in the final squad (e.g. Top Goalscorers).
+  (b) If a team, individual competitor or a player withdraws or retires or is disqualified prior to the commencement of a Sports Event, bets on that team, individual competitor or player will be refunded (unless otherwise stated in the Specific Sport Betting Rules).
+  (c) If any of the cases mentioned above involves a favorite team, individual competitor or player and it further affects the odds or payout of the outright bets for that Sports Event in general, then all outright bets on that Sports Event will be refunded accordingly.
+
+Question: What is `PERIOD BETTING`?
+Answer: Period betting means the placing of a bet on different segments of a game (e.g. quarters, halves, periods, sets, rounds or overs).
+
+Question: What are the considerations for `PERIOD BETTING`?
+Answer:
+* In Period betting, a segment must be completed in order for the bets to be valid.
+* In Period betting, overtime or extra time is excluded in determining the scores if nothing else is stated.
+* Subject to the Specific Sport Betting Rules, Period betting on the 2nd half shall include overtime in determining the score.
+
+Question: What is `EARLY COMMENCEMENT` / `START`?
+Q: What is `EARLY COMMENCEMENT`?
+Answer: All bets placed before the scheduled games starts are valid. Those placed after the scheduled game starts will be void unless the bets were placed as part of the In Running ("Live") betting service.
+
+Question: When can players raise queries or disputes regarding their betting outcomes?
+Answer: All Results posted shall be final after 72 hours and no queries will be entertained after that period of time.
+
+Question: What happens to my bet if the event is canceled for any reason before it starts?
+Q: What happens to my bet if the event is canceled?
+Answer: If an event is cancelled for any reason prior to its commencement, all bets placed for that event will be void and will be returned at odds of 1.00.
