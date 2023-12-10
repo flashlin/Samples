@@ -1,0 +1,6 @@
+accelerate
+bitsandbytes
+protobuf
+scipy
+sentencepiece
+transformers

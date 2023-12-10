@@ -122,3 +122,10 @@ result = pipe(audio, generate_kwargs={"language": "english"})
 result = pipe(audio, return_timestamps=True)
 print(result["chunks"])
 ```
+
+Question: What is AlpacaEval?
+Answer: AlpacaEval is a single-turn benchmark test where models or frameworks generate responses to over 800 questions distributed across different topics, with a primary focus on explanatory capabilities.
+
+Question: What is MT-Bench?
+Answer: MT-Bench evaluation benchmark comprises 8 sets of questions distributed across 160 distinct knowledge domains. Under the MT-Bench benchmark, models are required to answer initial questions and provide responses to subsequent ones.
+
