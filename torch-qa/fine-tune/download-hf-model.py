@@ -12,7 +12,9 @@ model_id="microsoft/Orca-2-7b"
 model_id="meta-llama/Llama-2-7b-chat-hf"
 model_id="NousResearch/Llama-2-7b-chat-hf"
 
+# baichuan2-7B-Chat 無法 load
 model_id="mistralai/Mistral-7B-Instruct-v0.1"
+model_id="LinkSoul/Chinese-Llama-2-7b"
 
 # please login first.
 # huggingface-cli login --token $HUGGINGFACE_TOKEN
