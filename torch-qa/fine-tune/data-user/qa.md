@@ -1021,3 +1021,35 @@ Answer: All Results posted shall be final after 72 hours and no queries will be 
 Question: What happens to my bet if the event is canceled for any reason before it starts?
 Q: What happens to my bet if the event is canceled?
 Answer: If an event is cancelled for any reason prior to its commencement, all bets placed for that event will be void and will be returned at odds of 1.00.
+
+
+Question: What kind of promotions are available to Indian players?
+Answer: Indian players can participate in DEP deposit promotions, as well as general SBOTOP promotions. To see the current promotions available, please visit the following website: https://www.sbotop.com/promo.
+
+
+Question: Birthday Gift Terms and Conditions.
+Answer: Conditions:
+* This birthday free bet promotion is available by invitation only. It does not apply to all members.
+* Birthday free bet must be claimed and utilised before the end of the last day of the member’s Birthday month (the “Claim Period”). Any free bet that is not claimed or utilised during the Claim Period will be removed at the end of the Claim Period.
+* Sportsbook Voucher only can use on the following odds:
+  - Euro odds: 1.50 and above.
+  - HK odds: 0.50 and above.
+  - Malay odds: Negative odds, 0.50 and above
+    No return of voucher on negative odds.
+  - Indo odds: 1.00 and above
+    Negative odds are not applicable.
+* SBOTOP reserves the right to exclude any customers from this promotion at any time and to vary, amend, change and/or withdraw this promotion without providing any explanation whatsoever.
+
+Question: How to Refer A Friend?
+Question: What is the procedure for referring a friend?
+Question: What are the steps to refer a friend?
+Question: How can someone refer a friend?
+Answer: 
+1. Login to your SBO account.
+2. Look for ‘Promotion’ button.
+(steps for desktop and mobile users will be slightly different.)
+  * For desktop users, please click on ‘Promotions’ on the top left of the screen.
+  * For mobile users, to find the ‘Promotions’ icon please click on the options button (≡).
+3. Under promotions, look for Refer A Friend Promotion and click on ‘Get your Referral link’.
+4. You will now be redirected to the Refer A Friend page, where you can copy and share the link with your friends to join SBOTOP.
+5. Please note: The voucher will only be credited to your account once your friend has met the requirement.
