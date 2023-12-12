@@ -1061,3 +1061,46 @@ Answer: No, promotions offering rewards such as deposit bonuses or vouchers cann
 Question: How soon can users participate in the daily mission after the promotion (deposit bonus) has ended?
 Answer: They can join the daily mission starting from the day after the promotion has been canceled.
 
+Question: What promotions are available for TH B2B2C users to join?
+Answer: TOP, CAS, Insurance, Rebate.
+
+Question: What promotions are available for VN B2B2C users to join?
+Answer: TOPVN, CAS, Insurance, Rebate. You can refer to this page: https://promo.sbotop123.com/"
+
+Question: Where can users participate in promotions?
+Answer: Enter the promotion code on the registration page or select it on the deposit page.
+
+Question: Where can users cancel their promotion by themselves?
+Answer: On the withdrawal tab in the payment page.
+
+Question: What does the promotion status 'cancelBySystem' mean?
+Answer: It means that the user's balance is lower than the minimum bet, so the system cancels the user's promotion.
+
+Question: Does the FZZG weekly rebate file include third-party casino turnover?
+Answer: Only SBO Live Casino.
+
+Question: Which Funky Games have been selected for Christmas Daily Missions?
+Answer: Fish Prawn Crab, Bau Cua, Cash or Crash, Lucky Wheel, Plinko UFO, Mines, Speed Lotto Mini, BIG BANG BOXING, Galaxy Attack, Plinko MegaWin, Poseidon 777, Thai Hi Lo, Midnight Robbery Happy Hour Fruit Slot, Speed Lotto, Easter Run.
+
+
+
+
+
+
+Question: The daily mission banner is not showing on SBOBET PPC.
+Answer: This is due to PPC being unable to differentiate between ASI and BSI, and SBOBET BSI cannot display the daily mission banner. Therefore, there won't be any daily mission banners shown on SBOBET PPC (both PPH).
+
+Question: Where do the MKT/CS teams create and check promotion configurations?
+Answer: http://pms.sbobet.com
+
+Question: Platform promotions like deposit bonuses cannot overlap with daily missions. How do we handle this?
+Answer: When a user activates a deposit bonus, the promotion system calls the 'DailyMission/pause' API on Santa.
+
+Question: In which products can users accumulate turnover to complete promotions?
+Answer: Users can accumulate turnover across all products, including Sports, Casino, and Games. Typically, promotions target one specific product, but the system actually supports cross-product promotions. However, the marketing team rarely utilizes this feature.
+
+Question: If a user joins a deposit bonus but doesn't receive the reward after depositing, what could be the possible reason if there's no error in the system?
+Answer: The user might have failed the compliance check, and you can find this information in the user's CRM log.
+
+Question: When will a user receive the reward after joining a platform promotion?
+Answer: It depends on the 'promotionRewards.rewardTiming' setting. Currently, we have options like 'Instant' and 'Deposit Done'.
