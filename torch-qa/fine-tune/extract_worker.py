@@ -10,7 +10,7 @@ import re
 from finetune_utils import load_finetune_config
 from finetune_lit import load_peft_model, ask_llama2_instruction_prompt, get_finetune_model_name
 from qa_file_utils import query_qa_file
-
+import shutil
 
 MODEL_NAME = "Mistral-7B-Instruct-v0.1"
 
@@ -247,3 +247,4 @@ if __name__ == '__main__':
         print(f"process {file}")
         generate_qa_data(llm, content=content, output_llm_qa_file=output_llm_qa_file)
         # convert_qa_md_file_to_train_jsonl(file, 'a')
+        shutil.move(file, './data-processed/')
