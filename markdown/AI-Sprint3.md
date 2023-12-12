@@ -51,11 +51,14 @@ table {
 </style>
 # What difficulties
 * Cost Comparison
-  - Extracting knowledge from sporadic content fragments.
-  - Not creating QA data but writing instructional documentation.
-
+  - Extracting knowledge from sporadic content fragments. 
+  - Writing instructional documentation.
 
 ---
 # Conclusion
 * We can't expect the model to be intelligent by just reading text.
 * Quality QA data leads to better training outcomes compared to data lacking in quality.
+
+---
+# Next
+* Create a Q&A website and gather user questions.
