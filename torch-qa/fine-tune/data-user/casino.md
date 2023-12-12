@@ -604,5 +604,80 @@ Question: Which outcome is associated with the odds of the Fortune Six bet?
 Answer: It's related to whether the banker wins with a total point count of six.
 
 Question: What betting positions are available for players in Baccarat?
-Answer: Players can bet on 'Player,' 'Banker,' or 'Tie.'
+Answer: Players can bet on 'Player', 'Banker' or 'Tie'.
+
+Question: What are some specific terms in baccarat?
+Answer:
+- Player: Betting on the player's hand to win.
+- Banker: Betting on the banker's hand to win.
+- Tie: Betting on both the player and banker hands having equal points.
+- Draw: Additional card drawn based on specific rules by the player or banker.
+- Natural Win: Total point count of 8 or 9 with the initial two cards for either the player or banker.
+- Shoe: Device used to hold and distribute decks of cards.
+- Fortune Six: Specific additional bet on whether the banker will win with a total point count of six.
+- Payout: Money won or paid based on the outcome of a bet.
+- Chips: Gaming tokens representing the bet amount.
+- Settlement: Process of paying out winnings or collecting bets based on betting outcomes in a game.
+
+Question: What are some specific terms in Roulette?
+Answer: Common specific terms in the game of roulette include:
+- Inside Bets: Bets placed on specific numbers or number combinations on the grid.
+- Outside Bets: Bets placed outside the number grid, such as red/black, odd/even, and more.
+- Straight Bet: Betting on a single number.
+- Split Bet: Betting on a line between two adjacent numbers.
+- Street Bet: Betting on a row of three numbers.
+- Corner Bet: Betting on the intersection of four numbers.
+- Six Line Bet: Betting on the intersection of two rows, totaling six numbers.
+- Zero Bet: Betting on the inclusion of the zero number.
+- Double Zero: The presence of two zeros (0 and 00) in American roulette.
+- Inner Wheel: The central area of numbers on the roulette wheel.
+- Outer Wheel: The peripheral area of numbers on the roulette wheel.
+
+Question: What are the probabilities for banker, player, and tie in baccarat?
+Answer: In baccarat, the probabilities for different bets are roughly as follows:
+- Banker: Approximately a 45.8% chance of winning, though actual profits are slightly lower due to commission payments typically required.
+- Player: Approximately a 44.6% chance of winning.
+- Tie: Approximately a 9.6% chance of winning, with usually higher payouts but the lowest chance of winning.
+These figures are derived from extensive game records and statistical data, representing average win rates.
+
+Question: What are the odds for a Non-natural Win in baccarat?
+Answer: 
+|Non-natural Win |Pay
+|--|--
+|9 points difference |30:1
+|8 points difference |10:1
+|7 points difference |6:1
+|6 points difference |4:1
+|5 points difference |2:1
+|4 points difference |1:1
+|All other result |Lose
+
+Question: What are the odds for a Natural Win in baccarat?
+Answer: 
+|Natural Win |Pay
+|--|--
+|Natural Win |1:1
+|Natural Tie |Push
+
+Question: Explain the drawing rules of baccarat.
+Q: What is drawing rules in baccarat?
+Answer: The drawing rules in baccarat are as follows:
+* When the total points of either the player's or banker's hand reach 8 or 9 (a natural), no further cards are drawn.
+* If the total points of the player's hand range between 0 and 5, the player draws a third card.
+* If the total points of the player's hand are 6 or 7, the player stands, meaning no third card is drawn.
+* If the player draws a third card, whether the banker draws a third card is determined by the total points of the banker's hand and the value of the drawn third card.
+
+Question: What is 'No Burn Card' in baccarat?
+Answer: In baccarat, 'No Burn Card' means there is no process of discarding cards before each round of dealing. Typically, before dealing, one or more cards are discarded, known as burning the cards, to enhance fairness and randomness, preventing players or dealers from predicting the next card. When 'No Burn Card' is applied, this process is skipped, and dealing starts directly from the deck without discarding any cards.
+
+Question: What is Pair Bets in baccarat?
+Answer: In baccarat, 'Pair Bets' refer to wagering on the possibility of a pair occurring within either the player's or the banker's hand. If a pair appears in the chosen hand that has been bet on, the player receives a corresponding payout. This type of bet often has specific payout odds(11 to 1); for instance, if a player bets that the banker's hand will form a pair and indeed a pair emerges, a payout is made according to predetermined odds. Pair Bets provide additional betting options, enhancing the game's enjoyment and variety.
+
+Question: What is Card Values in baccarat?
+Answer: "Card Values" refers to the assigned numerical value of each card in a particular card game. In games like baccarat, cards are assigned specific values:
+* Aces (A) typically hold a value of 1 point.
+* Cards from 2 to 9 retain their face value.
+* 10s and face cards (Jack, Queen, King) have a value of 0 points.
+
+The total value of a hand in baccarat is determined by adding up the individual values of the cards. If the total value exceeds 9, only the rightmost digit of the sum is considered. This system of card values is crucial in determining the outcome and scoring of the game.
 
