@@ -146,3 +146,78 @@ Answer: To check POD CPU/MEM usage with cmd
 ```
 kubectl top pods -n b2c  | grep <your-project-name>
 ```
+
+Question: How to install Chocolatey?
+Answer: Follow the steps at https://chocolatey.org/install to install Chocolatey.
+
+Question: 
+Answer:
+* Follow the steps at https://chocolatey.org/install to install Chocolatey.
+* Install kubernetes-cli
+```bash
+choco install kubernetes-cli
+```
+After installation, you should be able to use kubectl.
+* Download Kubernetes cluster token from Rancher WebSite.
+Upon opening Rancher, you will see many clusters there.
+|State |Name |Provider |Kubernetes Version |CPU |Memory |Pods
+|--|--|--|--|--|--|--
+|Active |host-prod |Imported |v1.26.7 |510.16 cores |1.88 TiB |18/800
+|Active |host-staging |Imported |v1.26.7 |222.955 cores |816 GiB |421/770
+|Active |host-uat |Imported |v1.26.7 |286.65 cores |1.02 TiB |892/990
+
+Access each of them and download the kubeconfig files, then place them in a separate folder (c:\k8s-certs).
+
+Try to explore Kubernetes cluster by below command
+```
+kubectl get pod -n b2c --kubeconfig='C:/k8s-certs/k8s-stg.yaml'
+```
+
+Question: How to merge kubeconfig files?
+Question: How to merged kube config file with all the cluster cert? 
+Question: How can I merge the kubeconfig file with all the cluster certificates?
+Answer: By WSL
+```WSL
+KUBECONFIG=./host-uat-gke.yaml:./host-prod-gke.yaml:./host-staging-gke.yaml:./k8s-prod-backup.yaml:./k8s-prod.yaml:./k8s-stg.yaml:./mt-host-prod.yaml:./mt-host-stag-gke.yaml kubectl config view --flatten > config
+```
+By Bash
+```bash
+KUBECONFIG=.\\host-uat-gke.yaml:.\\host-prod-gke.yaml:.\\host-staging-gke.yaml:.\\k8s-prod-backup.yaml:.\\k8s-prod.yaml:.\\k8s-stg.yaml:.\\mt-host-prod.yaml:.\\mt-host-stag-gke.yaml kubectl config view --flatten > config
+```
+
+Question: Easy way to switch between different clusters.
+Question: I have multiple kubeconfig files. How can I easily switch between different clusters?
+Answer:
+* Merge the kubeconfig file with all the cluster certificates, Put the outputed file config to ~/.kube
+* Restart your Powershell and try to type command with different cluster name  
+```bash
+kubectl config use-context k8s-stg
+kubectl get pod -n b2c-payment
+```
+
+Install kubectx and fzf for fast switching. (https://github.com/ahmetb/kubectx)
+```bash
+choco install kubectx
+choco install fzf
+```
+Enter kubectx in your PowerShell. You'll be able to view all the clusters and select the desired one.
+
+
+Question: Enable kubectl autocompletion with alias k 
+Answer:
+```powershell
+# Enable kubectl autocompletion with alias k
+(kubectl completion powershell)  -replace "'kubectl'", "'k'" | Out-String | Invoke-Expression
+```
+
+```powershell
+Set-Alias k kubectl
+Set-Alias kx kubectx
+Set-Alias kns kubens
+```
+
+```bash
+alias k=kubectl
+alias kx=kubectx
+alias kns=kubens
+```
