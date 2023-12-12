@@ -684,3 +684,35 @@ The total value of a hand in baccarat is determined by adding up the individual 
 Question: In baccarat, how does the player win?
 Answer: In baccarat, the player wins by having a total point count higher than the banker's hand or by betting on the player's position and having the player's total point count closest to 9
 
+Question: How many colors are there in roulette?
+Answer: Roulette typically has two colors, red and black.
+
+Question: What are my value if I have 3 cards of 10, 5, 5 in baccarat? Please explain your answer. 
+Q: What are my value if I have 3 cards of 10, 5, 5 in baccarat? List out your calculation steps.
+Answer: In baccarat, the point calculation for each card is as follows:
+
+The value of A (ACE) is 1.
+Cards 2 to 9 hold a value equal to their numeric value.
+10, J (JACK), Q (QUEEN), and K (KING) have a value of 0.
+Based on the provided card values of 10, 5, 5, the calculation steps are as follows:
+
+Adding the card values together: 10 + 5 + 5 = 20.
+In baccarat, only the units digit is considered when the total exceeds 9. Therefore, the units digit of 20 is 0.
+Final result: The total point value of these three cards is 0.
+So, in this scenario, the point value of your cards is 0.
+
+
+Question: What are my value if I have 3 cards of J, 1, 5 in baccarat? Please explain your answer. 
+Q: What are my value if I have 3 cards of J, 1, 5 in baccarat? List out your calculation steps.
+Answer: In baccarat, the point calculation for each card is as follows:
+* J (JACK) has a value of 0.
+* A (ACE) has a value of 1.
+* 5 has a value of 5.
+Adding the card values together: 0 (J) + 1 (A) + 5 = 6.
+Therefore, the total point value of these three cards is 6.
+
+
+
+Question: What can I do If I think the game result is incorrect?
+Answer: If a Player wishes to make a complaint or dispute a Live Casino Game result, they must provide the Operator with their user ID the time of playing, the dealer's name, the Table ID and Round ID at the time of contacting the Operator. Failure to do so may result in the complaint being unable to be addressed by the Operator. Video images of Live Casino Games is kept for 24 hours and therefore Players must address their complaint within 24 hours of the dispute occurring. Any complaints submitted after 24 hours will be rejected by the Operator due to the absence of video evidence.
+In case of any dispute, the Player acknowledges and agrees that the Operator's decision is final and official.
