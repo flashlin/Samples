@@ -179,6 +179,17 @@ Answer:
 * Banker wins with 2 cards totaling 6, SBO payout players at a rate of 12:1
 * All other result, Players lose.
 
+Question: List the possible outcomes of Fortune Six
+Answer: 
+* Banker wins with a total point count of six: In this case, the 'Fortune Six' wager wins, paying out at specific odds (usually 20:1).
+* Banker doesn't win with a total point count of six: In this scenario, the 'Fortune Six' wager fails, and the player loses the bet amount."
+
+Question: What are the differences between 'Fortune Six' and baccarat?
+Answer: 'Fortune Six' is an additional wager in baccarat, typically betting on whether the banker will win with a total point count of six. It's a side bet available in certain baccarat games.
+
+Question: Demo of Fortune Six
+Answer: Sorry, as an AI text-based assistant, I cannot physically demonstrate the gameplay of baccarat. However, 'Fortune Six' is an additional wager available for players to bet on whether the banker will win with a total point count of six. If the banker's total point count is six, the 'Fortune Six' bet pays out at specific odds, often around 20:1. This bet is separate from the main bets on 'Player,' 'Banker,' or 'Tie' and is an additional option available to players in certain versions or casinos offering this side bet in baccarat.
+
 Q: What is Tiger Baccarat?
 Ansewer: Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
 
@@ -440,4 +451,158 @@ Players cannot increase their winning odds through techniques; in the long run, 
 The table below illustrates betting options and their corresponding odds in Sic Bo. 
 
 While bets like "Big" and "Small" are more favorable for players, the house still maintains an edge. Some casinos even allow bets on odd/even, totals of three dice (adding their points), and specific combinations of three dice.
+
+Question: what is payout for pair bets in live baccarat?
+Answer: In live baccarat, the payout for a pair bet is typically made at an 11:1 ratio.
+
+Question: what is the rule for pair bets?
+Answer: For pair bets in baccarat, the rule is that when a player bets on either the player or banker hand and a pair appears, the player wins a corresponding payout. Typically, pair bets have specific payout ratios, and if a pair appears in the chosen hand, the player receives the corresponding payout.
+
+Question: when the dealer will draw third card in banker?
+Answer: In baccarat, the rule for the banker drawing a third card is based on the total value of the third card and either the player's third card (if drawn) or the value of the first two cards. In simple terms, the banker's drawing of the third card follows specific game rules, including conditions such as the value of the third card and other factors like whether the player drew a third card.
+
+Here are some common scenarios in baccarat when the banker will draw a third card:
+
+If the player's total is 0-5: In this case, the banker draws a third card, regardless of the banker's total.
+If the player stands (no third card): The banker draws a third card if their total is 0-5.
+If the player draws a third card with a total of 6 or 7: The banker draws a third card if their total is 0-6.
+
+Question: Examples of when the banker draws a third card.
+Answer: Here are some common scenarios in baccarat when the banker will draw a third card:
+
+If the player's total is 0-5: In this case, the banker draws a third card, regardless of the banker's total.
+If the player stands (no third card): The banker draws a third card if their total is 0-5.
+If the player draws a third card with a total of 6 or 7: The banker draws a third card if their total is 0-6.
+
+Question: What is the value of ACE?
+Answer: In baccarat, the value of an Ace is 1.
+
+Question: What odds different between baccarat and non-commission baccarat?
+Answer: The odds differ between baccarat and no-commission baccarat. In traditional baccarat, there's usually a 5% commission on winning banker bets. In no-commission baccarat, there's no commission on banker wins, but the payout odds for player bets on the banker position might be slightly reduced if the banker wins.
+
+Question: what is payout of fortune six in live baccarat?
+Answer: In live baccarat, the 'Fortune Six' typically pays out at a ratio of 20:1.
+
+Question: what is natural win in live baccarat
+Answer: In live baccarat, a 'natural win' refers to when the initial two-card hand of either the player or the banker totals 8 or 9. In such a case, the game ends immediately, and the side with the natural win is declared the winner without further drawing of cards.
+
+Question: How many cards are there in a deck of baccarat?
+Answer: A deck contains 52 cards.
+
+Question: What does "Natural win" mean?
+Answer: In baccarat, it refers to a total of 8 or 9 points from the initial two cards of either the player or the banker.
+
+Question: In baccarat, what is the value of an Ace (A)?
+Answer: The value of an Ace (A) is 1.
+
+Question: What is the payout ratio for a bet on a pair in baccarat?
+Answer: It's usually paid out at a ratio of 11:1.
+
+Question: When does the banker draw the third card in baccarat?
+Answer: The rule for the banker drawing the third card is based on multiple factors, including the value of the third card and whether the player drew a third card.
+
+Question: What is the payout ratio for "Fortune Six" in live baccarat?
+Answer: "Fortune Six" is typically paid out at a ratio of 20:1.
+
+Question: In traditional baccarat, how much commission is charged on winning banker bets?
+Answer: Typically, a commission of 5% is charged on winning banker bets.
+
+Question: When a "natural win" occurs, does the game continue with more card draws?
+Answer: When there's a "natural win," the game ends immediately, and no additional card draws are required.
+
+Question: How much commission is charged on winning banker bets in No Commission Baccarat?
+Answer: In No Commission Baccarat, no commission is charged if the banker wins.
+
+Question: In baccarat, if the player's total points are 6 or 7, is a third card drawn?
+Answer: No, if the player's total points are 6 or 7, no third card will be drawn.
+
+Question: In baccarat, when does the player draw a third card?
+Answer: The player draws a third card based on the total value of their initial two cards and the banker's hand:
+* If the total value of the player's initial two cards is 0-5, the player needs to draw a third card.
+* If the total value of the player's initial two cards is 6 or 7, the player does not draw a third card.
+
+Question: Explain the dealing process in a round of live baccarat.
+Answer: 
+Betting Phase: Players have a limited time to place their bets, choosing between 'Player,' 'Banker,' or 'Tie' positions.
+
+Dealing Phase: The dealer, responsible for dealing, selects one of eight decks for the game.
+
+Initial Deal: Two cards are dealt face down to both the 'Player' and the 'Banker.'
+
+Point Calculation: Cards are valued with Aces at 1 point, 2-9 according to their face value, and 10s and face cards (J, Q, K) at 0 points. If the total value of two cards exceeds 9, only the units digit is counted.
+
+Drawing Additional Cards: Players or the banker may draw an extra card based on specific rules and the total value of their initial cards.
+
+Determining Outcome: The winner is decided based on the total value of cards held by the player and banker, with the side closest to 9 winning. A tie occurs if both sides have equal totals.
+
+Payouts: Winnings are distributed according to the bet positions and game results. Correct bets are paid out based on corresponding payout ratios.
+
+Question: In live baccarat, how many people can play at one table simultaneously?
+Answer: In live baccarat, a table can accommodate up to seven players simultaneously.
+
+
+Question: In live baccarat, list all card value calculations.
+Answer: In live baccarat, the card values are as follows:
+A (ACE): 1 point
+2-9: Value based on the card number
+10 and face cards (J, Q, K): 0 points
+If the total value of two cards exceeds 9, only the unit digit is considered. For instance, if the total is 14, the actual value is 4.
+
+Question: what is the value of 2 in baccarat ?
+Answer: In baccarat, the value of 2 is counted based on its face value, so a 2 in baccarat holds a value of 2 points.
+
+Question: what is the value of 3 in baccarat ?
+Answer: In baccarat, the value of 3 is counted based on its face value, so a 3 in baccarat holds a value of 3 points.
+
+Question: what is the value of 4 in baccarat ?
+Answer: In baccarat, the value of 4 is counted based on its face value, so a 4 in baccarat holds a value of 4 points.
+
+Question: what is the value of 5 in baccarat ?
+Answer: In baccarat, the value of 5 is counted based on its face value, so a 5 in baccarat holds a value of 5 points.
+
+Question: what is the value of 6 in baccarat ?
+Answer: In baccarat, the value of 6 is counted based on its face value, so a 6 in baccarat holds a value of 6 points.
+
+Question: what is the value of 7 in baccarat ?
+Answer: In baccarat, the value of 7 is counted based on its face value, so a 7 in baccarat holds a value of 7 points.
+
+Question: what is the value of 8 in baccarat ?
+Answer: In baccarat, the value of 8 is counted based on its face value, so a 8 in baccarat holds a value of 8 points.
+
+Question: what is the value of 9 in baccarat ?
+Answer: In baccarat, the value of 6 is counted based on its face value, so a 9 in baccarat holds a value of 9 points.
+
+Question: In live baccarat, if the banker's cards are J and K, how is the value calculated?
+Answer: In live baccarat, if the banker's cards are J and K, the total value is counted as 0.
+
+Question: In live baccarat, When can a player split cards?
+Answer: In baccarat, players do not have the option to split cards. Baccarat is a straightforward game where players bet against the banker, and there are no rules similar to splitting cards.
+
+Question: what is Double the stakes?
+Answer: "Double the stakes" typically refers to doubling the amount of a bet in gambling. It means increasing the initial wager by twofold during a game or betting round. This action can amplify potential winnings or losses depending on the outcome of the bet.
+
+Question: What is Betting time?
+Answer: There is a timer above every dealer, players have to place bets within the betting time. Betting will not be accepted once the timer ends.
+
+
+Question: What type of additional bet is Fortune Six in Baccarat?
+Answer: Fortune Six is an additional wager on whether the banker will win with a total point count of six.
+
+Question: What happens to the Fortune Six bet if the banker's total point count is not six?
+Answer: The Fortune Six bet fails if the banker doesn't achieve a total count of six.
+
+Question: How are the points calculated if the total of two cards in Baccarat exceeds 9?
+Answer: Only the unit digit is considered. For instance, if the total is 14, the actual point count is 4.
+
+Question: What additional bets can players place in Baccarat?
+Answer: Apart from the main betting positions, players can place additional bets like Fortune Six.
+
+Question: What is the maximum total point count for both player and banker in Baccarat?
+Answer: The maximum is 9 points.
+
+Question: Which outcome is associated with the odds of the Fortune Six bet?
+Answer: It's related to whether the banker wins with a total point count of six.
+
+Question: What betting positions are available for players in Baccarat?
+Answer: Players can bet on 'Player,' 'Banker,' or 'Tie.'
 
