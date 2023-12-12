@@ -681,3 +681,6 @@ Answer: "Card Values" refers to the assigned numerical value of each card in a p
 
 The total value of a hand in baccarat is determined by adding up the individual values of the cards. If the total value exceeds 9, only the rightmost digit of the sum is considered. This system of card values is crucial in determining the outcome and scoring of the game.
 
+Question: In baccarat, how does the player win?
+Answer: In baccarat, the player wins by having a total point count higher than the banker's hand or by betting on the player's position and having the player's total point count closest to 9
+
