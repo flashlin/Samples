@@ -1053,3 +1053,11 @@ Answer:
 3. Under promotions, look for Refer A Friend Promotion and click on ‘Get your Referral link’.
 4. You will now be redirected to the Refer A Friend page, where you can copy and share the link with your friends to join SBOTOP.
 5. Please note: The voucher will only be credited to your account once your friend has met the requirement.
+
+
+Question: Is it possible for users to avail of both the deposit bonus and casino cashback concurrently?
+Answer: No, promotions offering rewards such as deposit bonuses or vouchers cannot be combined with casino cashback. However, they can be used in conjunction with ranking promotions.
+
+Question: How soon can users participate in the daily mission after the promotion (deposit bonus) has ended?
+Answer: They can join the daily mission starting from the day after the promotion has been canceled.
+
