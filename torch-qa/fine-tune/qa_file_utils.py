@@ -46,7 +46,7 @@ class QuestionAnswerContext:
 
 QUESTION_PATTERNS = create_regex([r'Question \d+:(.*)', r'Question:(.*)', r'Q\d+:(.*)', r'Q:(.*)'])
 ANSWER_PATTERN = create_regex([r'Answer:(.*)', r'A:(.*)'])
-
+QUESTION_BY_PREV_TODO_LIST = create_regex([r'QuestionByPrevTodoList:(.*)'])
 
 class QuestionAnswerReadyState:
 
@@ -54,6 +54,10 @@ class QuestionAnswerReadyState:
         self.context = context
 
     def read_line(self, line: str):
+        captured_text = is_match(line, QUESTION_BY_PREV_TODO_LIST)
+        if captured_text:
+            self.context.read_state = QuestionByPrevTodoListReadState(self.context, captured_text)
+            return
         captured_text = is_match(line, QUESTION_PATTERNS)
         if captured_text:
             self.context.read_state = QuestionReadState(self.context, captured_text)
@@ -83,6 +87,46 @@ class QuestionReadState:
     def flush(self):
         pass
 
+def split_to_key_value(text: str):
+    colon_index = text.find(':')
+    if colon_index != -1:
+        key = text[1:colon_index].strip()
+        value = text[colon_index + 1:].strip()
+        return key, value
+    return None, None
+
+def parse_markdown_list(markdown_text: str):
+    pattern = r'\*.*?(?=\n\*|\Z)'
+    matches = re.findall(pattern, markdown_text, re.DOTALL)
+    for item in matches:
+        key, value = split_to_key_value(item)
+        yield key, value
+
+class QuestionByPrevTodoListReadState:
+    def __init__(self, context: QuestionAnswerContext, question: str):
+        self.context = context
+        self.buffer = question
+
+    def read_line(self, line: str):
+        captured_text = is_match(line, QUESTION_PATTERNS)
+        if captured_text is not None:
+            self.flush_buffer()
+            self.context.read_state = QuestionReadState(self.context, captured_text)
+            return
+        self.buffer += '\r\n' + line
+
+    def flush_buffer(self):
+        question_template = self.buffer.strip()
+        _, answer_context = self.context.question_answer_list[-1]
+        for key, answer in parse_markdown_list(answer_context[0]):
+            question = question_template.format(key=key)
+            self.context.question_answer_list.append(([question], [answer]))
+
+    def flush(self):
+        self.flush_buffer()
+        self.context.output_question_answer()
+        self.context.read_state = QuestionAnswerReadyState(self.context)
+
 
 class AnswerReadState:
     def __init__(self, context: QuestionAnswerContext, answer: str):
@@ -90,6 +134,12 @@ class AnswerReadState:
         self.buffer = answer
 
     def read_line(self, line: str):
+        question_by_prev_todo_list = is_match(line, QUESTION_BY_PREV_TODO_LIST)
+        if question_by_prev_todo_list is not None:
+            self.context.answers.append(self.buffer.strip())
+            self.context.output_question_answer()
+            self.context.read_state = QuestionByPrevTodoListReadState(self.context, question_by_prev_todo_list)
+            return
         question_captured_text = is_match(line, QUESTION_PATTERNS)
         if question_captured_text is not None:
             self.context.answers.append(self.buffer.strip())
@@ -134,7 +184,10 @@ def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
             jfile.write(json_line+'\r\n')
 
 if __name__ == '__main__':
-    file = 'data-user/test.txt'
-    # query_qa_file(file)
+    file = 'data/test.txt'
+    for q, a in query_qa_file(file):
+        print(f"{q=}")
+        print(f"{a=}")
+        print("----")
 
 
