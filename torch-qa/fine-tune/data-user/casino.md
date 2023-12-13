@@ -711,6 +711,108 @@ Answer: In baccarat, the point calculation for each card is as follows:
 Adding the card values together: 0 (J) + 1 (A) + 5 = 6.
 Therefore, the total point value of these three cards is 6.
 
+Question: What are my value if I have 2 cards of A, 7 in baccarat?
+Answer: 
+* A (ACE) has a value of 1.
+* 7 has a value of 7.
+Adding the card values together: (1 + 7) % 10 = 8.
+Therefore, the total point value of these two cards is 8.
+
+Question: What are my value if I have 2 cards of 2, 8 in baccarat?
+Answer: 
+* 2 has a value of 2.
+* 8 has a value of 8.
+Adding the card values together: (2 + 8) % 10 = 0.
+Therefore, the total point value of these two cards is 0.
+
+Question: What are my value if I have 2 cards of 3, K in baccarat?
+Answer: 
+* 3 has a value of 3.
+* K (KING) has a value of 0.
+Adding the card values together: (3 + 0) % 10 = 3.
+Therefore, the total point value of these two cards is 3.
+
+Question: What are my value if I have 2 cards of 4, Q in baccarat?
+Answer: 
+* 4 has a value of 4.
+* Q (QUEEN) has a value of 0.
+Adding the card values together: (4 + 0) % 10 = 4.
+Therefore, the total point value of these two cards is 4.
+
+Question: What are my value if I have 3 cards of 6, 9, A in baccarat?
+Answer: 
+* 6 has a value of 6.
+* 9 has a value of 9.
+* A (ACE) has a value of 1.
+Adding the card values together: (6 + 9 + 1) % 10 = 6.
+Therefore, the total point value of these two cards is 6.
+
+
+Question: What are my value if I have 3 cards of 5, 10, 8 in baccarat?
+Answer: 
+* 5 has a value of 5.
+* 10 has a value of 0.
+* 8 has a value of 8.
+Adding the card values together: (5 + 0 + 8) % 10 = 3.
+Therefore, the total point value of these two cards is 3.
+
+Question: What are my value if I have 3 cards of 7, 8, 3 in baccarat?
+Answer: 
+* 7 has a value of 7.
+* 8 has a value of 8.
+* 3 has a value of 3.
+Adding the card values together: (7 + 8 + 3) % 10 = 8.
+Therefore, the total point value of these two cards is 8.
+
+Question: What are my value if I have 3 cards of 9, 6, 4 in baccarat?
+Answer: 
+* 9 has a value of 9.
+* 6 has a value of 6.
+* 4 has a value of 4.
+Adding the card values together: (9 + 6 + 4) % 10 = 9.
+Therefore, the total point value of these two cards is 9.
+
+
+Question: What are my value if I have 3 cards of 10, 5, 3 in baccarat?
+Answer: 
+* 10 has a value of 0.
+* 5 has a value of 5.
+* 3 has a value of 3.
+Adding the card values together: (0 + 5 + 3) % 10 = 8.
+Therefore, the total point value of these two cards is 8.
+
+Question: What are my value if I have 3 cards of J, 4, 6 in baccarat?
+Answer: 
+* J (JACK) has a value of 0.
+* 4 has a value of 4.
+* 6 has a value of 6.
+Adding the card values together: (0 + 4 + 6) % 10 = 0.
+Therefore, the total point value of these two cards is 0.
+
+Question: What are my value if I have 3 cards of Q, 3, 7 in baccarat?
+Answer: 
+* Q (QUEEN) has a value of 0.
+* 3 has a value of 3.
+* 7 has a value of 7.
+Adding the card values together: (0 + 3 + 7) % 10 = 0.
+Therefore, the total point value of these two cards is 0.
+
+
+Question: What are my value if I have 3 cards of K, 2, 9 in baccarat?
+Answer: 
+* K (KING) has a value of 0.
+* 2 has a value of 2.
+* 9 has a value of 9.
+Adding the card values together: (0 + 2 + 9) % 10 = 1.
+Therefore, the total point value of these two cards is 1.
+
+Question: What are my value if I have 3 cards of A, A, 6 in baccarat?
+Answer: 
+* A (ACE) has a value of 1.
+* A (ACE) has a value of 1.
+* 6 has a value of 6.
+Adding the card values together: (1 + 1 + 6) % 10 = 8.
+Therefore, the total point value of these two cards is 8.
 
 
 Question: What can I do If I think the game result is incorrect?
