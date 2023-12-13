@@ -2,6 +2,17 @@ import json
 import re
 from jinja2 import Environment
 
+"""
+Q: How are you
+A: Hi
+QuestionByPrevTodoList: What is {key}
+Template: {% set a=[('a',1), ('b',2)] %}
+{% for item in a %}
+Q: Who created {{item[0]}}?
+A: I use {{item[1]}}
+{% endfor %}
+:EndTemplate
+"""
 
 def create_regex(patterns: list[str]):
     regex_patterns = []
