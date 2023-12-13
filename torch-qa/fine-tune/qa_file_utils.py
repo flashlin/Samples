@@ -1,5 +1,6 @@
 import json
 import re
+from jinja2 import Environment
 
 
 def create_regex(patterns: list[str]):
@@ -46,7 +47,10 @@ class QuestionAnswerContext:
 
 QUESTION_PATTERNS = create_regex([r'Question \d+:(.*)', r'Question:(.*)', r'Q\d+:(.*)', r'Q:(.*)'])
 ANSWER_PATTERN = create_regex([r'Answer:(.*)', r'A:(.*)'])
-QUESTION_BY_PREV_TODO_LIST = create_regex([r'QuestionByPrevTodoList:(.*)'])
+QUESTION_BY_PREV_TODO_LIST_PATTERN = create_regex([r'QuestionByPrevTodoList:(.*)'])
+TEMPLATE_PATTERN = create_regex([r'Template:(.*)'])
+TEMPLATE_END_PATTERN = create_regex([r':EndTemplate(.*)'])
+
 
 class QuestionAnswerReadyState:
 
@@ -54,7 +58,11 @@ class QuestionAnswerReadyState:
         self.context = context
 
     def read_line(self, line: str):
-        captured_text = is_match(line, QUESTION_BY_PREV_TODO_LIST)
+        captured_text = is_match(line, TEMPLATE_PATTERN)
+        if captured_text:
+            self.context.read_state = TemplateReadState(self.context, captured_text)
+            return
+        captured_text = is_match(line, QUESTION_BY_PREV_TODO_LIST_PATTERN)
         if captured_text:
             self.context.read_state = QuestionByPrevTodoListReadState(self.context, captured_text)
             return
@@ -74,18 +82,22 @@ class QuestionReadState:
     def read_line(self, line: str):
         answer_captured_text = is_match(line, ANSWER_PATTERN)
         if answer_captured_text is not None:
-            self.context.questions.append(self.buffer.strip())
+            self.flush_buffer()
             self.context.read_state = AnswerReadState(self.context, answer_captured_text)
             return
         question_captured_text = is_match(line, QUESTION_PATTERNS)
         if question_captured_text is not None:
-            self.context.questions.append(self.buffer.strip())
+            self.flush_buffer()
             self.buffer = question_captured_text
             return
         self.buffer += '\r\n' + line
 
+    def flush_buffer(self):
+        self.context.questions.append(self.buffer.strip())
+
     def flush(self):
         pass
+
 
 def split_to_key_value(text: str):
     colon_index = text.find(':')
@@ -102,12 +114,18 @@ def parse_markdown_list(markdown_text: str):
         key, value = split_to_key_value(item)
         yield key, value
 
+
 class QuestionByPrevTodoListReadState:
     def __init__(self, context: QuestionAnswerContext, question: str):
         self.context = context
         self.buffer = question
 
     def read_line(self, line: str):
+        captured_text = is_match(line, TEMPLATE_PATTERN)
+        if captured_text is not None:
+            self.flush_buffer()
+            self.context.read_state = TemplateReadState(self.context, captured_text)
+            return
         captured_text = is_match(line, QUESTION_PATTERNS)
         if captured_text is not None:
             self.flush_buffer()
@@ -128,22 +146,63 @@ class QuestionByPrevTodoListReadState:
         self.context.read_state = QuestionAnswerReadyState(self.context)
 
 
+class TemplateReadState:
+    def __init__(self, context: QuestionAnswerContext, template: str):
+        self.context = context
+        self.buffer = template
+
+    def read_line(self, line: str):
+        captured_text = is_match(line, TEMPLATE_END_PATTERN)
+        if captured_text is not None:
+            self.flush_buffer()
+            self.context.read_state = QuestionAnswerReadyState(self.context)
+            return
+        self.buffer += '\r\n' + line
+
+    def flush_buffer(self):
+        template_content = self.buffer.strip()
+        print(f"{template_content=}")
+        env = Environment()
+        # env.globals['custom_function'] = custom_function
+        # {{ custom_function(3, 5) }}
+        template = env.from_string(template_content)
+        template_output = template.render()
+        print(f"{template_output=}")
+
+        inner_qa = QuestionAnswerContext()
+        lines = template_output.splitlines()
+        for line in lines:
+            line = line.lstrip()
+            inner_qa.read_line(line)
+        inner_qa.flush()
+        for questions, answers in inner_qa.question_answer_list:
+            self.context.question_answer_list.append((questions, answers))
+
+    def flush(self):
+        self.flush_buffer()
+        self.context.output_question_answer()
+        self.context.read_state = QuestionAnswerReadyState(self.context)
+
+
 class AnswerReadState:
     def __init__(self, context: QuestionAnswerContext, answer: str):
         self.context = context
         self.buffer = answer
 
     def read_line(self, line: str):
-        question_by_prev_todo_list = is_match(line, QUESTION_BY_PREV_TODO_LIST)
+        question_by_prev_todo_list = is_match(line, QUESTION_BY_PREV_TODO_LIST_PATTERN)
         if question_by_prev_todo_list is not None:
-            self.context.answers.append(self.buffer.strip())
-            self.context.output_question_answer()
+            self.flush_buffer()
             self.context.read_state = QuestionByPrevTodoListReadState(self.context, question_by_prev_todo_list)
+            return
+        captured_text = is_match(line, TEMPLATE_PATTERN)
+        if captured_text is not None:
+            self.flush_buffer()
+            self.context.read_state = TemplateReadState(self.context, captured_text)
             return
         question_captured_text = is_match(line, QUESTION_PATTERNS)
         if question_captured_text is not None:
-            self.context.answers.append(self.buffer.strip())
-            self.context.output_question_answer()
+            self.flush_buffer()
             self.context.read_state = QuestionReadState(self.context, question_captured_text)
             return
         answer_captured_text = is_match(line, ANSWER_PATTERN)
@@ -153,9 +212,12 @@ class AnswerReadState:
             return
         self.buffer += '\r\n' + line
 
-    def flush(self):
+    def flush_buffer(self):
         self.context.answers.append(self.buffer.strip())
         self.context.output_question_answer()
+
+    def flush(self):
+        self.flush_buffer()
         self.context.read_state = QuestionAnswerReadyState(self.context)
 
 
@@ -163,7 +225,7 @@ def query_qa_file(file: str):
     qa = QuestionAnswerContext()
     with open(file, 'r', encoding='utf-8') as f:
         for line in f:
-            line = line.strip()
+            # line = line.strip()
             qa.read_line(line)
         qa.flush()
     for questions, answers in qa.question_answer_list:
@@ -183,8 +245,9 @@ def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
             })
             jfile.write(json_line+'\r\n')
 
+
 if __name__ == '__main__':
-    file = 'data/test.txt'
+    file = 'results/test.md'
     for q, a in query_qa_file(file):
         print(f"{q=}")
         print(f"{a=}")
