@@ -164,6 +164,12 @@ class QuestionByPrevTodoListReadState:
         self.context.read_state = QuestionAnswerReadyState(self.context)
 
 
+def compute_fn(expr: str):
+    return eval(expr)
+
+def mul_fn(a1, b1):
+    return a1 * b1
+
 class TemplateReadState:
     def __init__(self, context: QuestionAnswerContext, template: str):
         self.context = context
@@ -179,13 +185,12 @@ class TemplateReadState:
 
     def flush_buffer(self):
         template_content = self.buffer.strip()
-        print(f"{template_content=}")
         env = Environment()
-        # env.globals['custom_function'] = custom_function
+        env.globals['compute'] = compute_fn
+        env.globals['mul'] = mul_fn
         # {{ custom_function(3, 5) }}
         template = env.from_string(template_content)
         template_output = template.render()
-        print(f"{template_output=}")
 
         inner_qa = QuestionAnswerContext()
         lines = template_output.splitlines()

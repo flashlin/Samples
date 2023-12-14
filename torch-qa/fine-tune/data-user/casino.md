@@ -853,3 +853,110 @@ Therefore, the total point value of these two cards is 8.
 Question: What can I do If I think the game result is incorrect?
 Answer: If a Player wishes to make a complaint or dispute a Live Casino Game result, they must provide the Operator with their user ID the time of playing, the dealer's name, the Table ID and Round ID at the time of contacting the Operator. Failure to do so may result in the complaint being unable to be addressed by the Operator. Video images of Live Casino Games is kept for 24 hours and therefore Players must address their complaint within 24 hours of the dispute occurring. Any complaints submitted after 24 hours will be rejected by the Operator due to the absence of video evidence.
 In case of any dispute, the Player acknowledges and agrees that the Operator's decision is final and official.
+
+
+Q: What type of dice is used in Sic Bo?
+A: Sic Bo typically uses six-sided dice, similar to the regular dice used in many other games.
+
+Q: How many dice are typically rolled in a round of Sic Bo?
+A: A round of Sic Bo usually involves the rolling of three dice.
+
+Q: What is the objective of Sic Bo? Is it for players to choose a particular combination?
+A: The objective of Sic Bo is for players to predict or bet on different outcomes that can occur from the roll of three dice. Players bet on various combinations or totals.
+
+Q: Please explain the meanings of 'Big' and 'Small' in Sic Bo.
+A: 'Big' and 'Small' are betting options in Sic Bo based on the total sum of the three dice. 'Big' refers to a total sum between 11 and 17, while 'Small' refers to a total sum between 4 and 10. These bets win if the total sum matches the chosen range.
+
+Q: What are some of the most common betting types in Sic Bo? Please list at least three.
+A: Some common betting types in Sic Bo include Big/Small, Specific Triples, and Total Sums.
+
+Q: What does the 'Three of a Kind' bet mean in Sic Bo?
+A: The 'Three of a Kind' bet in Sic Bo means that the player predicts all three dice will show the same number.
+
+Q: What is the 'All Bet' in Sic Bo? What are the winning odds for this type of bet?
+A: The 'All Bet' in Sic Bo is a bet that all three dice will show a specific number. This is a high-risk bet with high winning odds, typically at 150:1.
+
+Q: What does the 'Total' bet signify in Sic Bo?
+The 'Total' bet in Sic Bo signifies betting on the total sum of all three dice rolled. Players can place bets on specific totals from 4 to 17.
+A: What does the 'Any Triple' bet represent in Sic Bo in terms of dice combinations?
+The 'Any Triple' bet in Sic Bo means that the player bets on any specific number showing on all three dice, regardless of which number it is.
+
+
+
+Q: The rules of roulette involve placing bets on where a ball will land on a spinning wheel. Here are the key rules:
+
+Types of Bets: Players can place various bets, such as betting on a specific number, a range of numbers, whether the number will be odd or even, or the color of the pocket (red or black).
+
+The wheel: The roulette wheel consists of numbered pockets from 0 to 36. The numbers alternate between red and black, with 0 typically displayed in green.
+
+Betting Time: Players place their bets before the dealer spins the wheel. Once betting is closed, the dealer spins the wheel and rolls the ball in the opposite direction. Players cannot place or change their bets after the wheel starts spinning.
+
+Winning Number: The winning number is determined by the pocket where the ball comes to rest. If the ball lands on a number or category players have bet on, they win.
+
+Q: What are the rules of Sic Bo? 
+A: Here are the main rules:
+
+Betting Options: Players can bet on various possible outcomes or combinations of outcomes from the roll of three dice. Bets can range from specific numbers to totals, triples, doubles, and other combinations.
+
+Dice Roll: After players place their bets, three dice are shaken in a container or mechanical shaker. The result is the combination displayed after the dice come to rest.
+
+Winning Bets: Payouts are made based on the bets placed and the outcome of the dice roll. Players win if their bets match specific outcomes.
+
+Various Betting Types: Some common bets include predicting the total of the three dice, specific numbers that might appear, whether the total will be odd or even, or specific combinations like triples or doubles.
+
+
+Q: How many dice are there in Sic Bo? 
+A: In Sic Bo, a dice game, three dice are used for each roll. Players place bets on various combinations or outcomes based on the results of these three dice.
+
+
+Q: Which betting option in Sic Bo has the highest probability of winning?
+A: In Sic Bo, bets with the highest probability of winning are typically the ones with the lowest payouts. Betting on "Big" or "Small" (total sum of the three dice being between 4-10 for Small and 11-17 for Big) has relatively high odds of winning.
+
+Q: What are the odds for each betting option in Sic Bo?
+A: 
+* Single Number: Betting on a number matching one die pays 1 to 1.
+Betting on a number matching two dice pays 1 to 2.
+Betting on a number matching all three dice pays 1 to 3.
+* Two-number combination: Betting on a number matching two dice pays 1 to 5.
+* Total 4 or 17: The total sum of the three dice equals 4 or 17. Pays 1 to 50.
+* Total 5 or 16: The sum of the numbers on all 3 dice will equal 5 or 16. Pays 1 to 30.
+* Total 6 or 16: The sum of the numbers on all 3 dice will equal 6 or 15. Pays 1 to 18.
+* Total 7 or 14: The sum of the numbers on all 3 dice will equal 7 or 14. Pays 1 to 12.
+* Total 8 or 13: The sum of the numbers on all 3 dice will equal 8 or 13. Pays 1 to 8.
+* Total 9 or 12: The sum of the numbers on all 3 dice will equal 9 or 12. Pays 1 to 6.
+* Total 10 or 11: The sum of the numbers on all 3 dice will equal 10 or 11. Pays 1 to 6.
+* Any Double: The number on 2 of the 3 dice will be the same. Pays 1 to 8.
+* Any Triple: The number on all 3 dice will be the same. Pays 1 to 24.
+* Specific Triple: The number on all 3 dice will equal the number bet. Pays 1 to 150.
+* Small: The sum of the numbers on all 3 dice will equal 4 through 10 (Triples lose). Pays 1 to 1.
+* Even: The sum of the numbers on all 3 dice will be an even number with the exception of triples (Triples lose). Pays 1 to 1.
+* Big: The sum of the numbers on all 3 dice will equal 11 through 17 (Triples lose). Pays 1 to 1.
+* Odd: The sum of the numbers on all 3 dice will be an odd number with the exception of triples (Triples lose). Pays 1 to 1.
+
+QuestionByPrevTodoList: What are the odds for {key} in Sic Bo?
+QuestionByPrevTodoList: What does '{key}' mean in Sic Bo?
+
+
+Template: {% set bet_options=[
+    ('Two-number combination', 5), 
+    ('Two-number', 5),
+    ('Total 4 or 17', 50), 
+    ('Total 5 or 16', 30), 
+    ('Total 6 or 16', 18), 
+    ('Total 7 or 14', 12),
+    ('Total 8 or 13', 8), 
+    ('Total 9 or 12', 6), 
+    ('Total 10 or 11', 6), 
+    ('Any Double', 8),
+    ('Any Triple', 24), 
+    ('Specific Triple', 150), 
+    ('Small', 1), 
+    ('Even', 1), 
+    ('Big', 1), 
+    ('Odd', 1),
+] %}
+{% for option, odd in bet_options %}
+Q: If I placed a 10-dollar bet on '{{option}}' in Sic Bo and won, how much do you owe me?"
+A: This bet has odds of 1 to {{odd}}, We will pay you {{ mul(10,odd) }} dollars.
+{% endfor %}
+:EndTemplate
