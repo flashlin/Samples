@@ -175,7 +175,7 @@ class LLM:
         generation_config.max_new_tokens = 1024
         generation_config.temperature = 0.2
         generation_config.do_sample = True
-        generation_config.top_p = 0.7
+        generation_config.top_p = 0.9
         generation_config.num_return_sequences = 1
         generation_config.pad_token_id = tokenizer.eos_token_id
         generation_config.eos_token_id = tokenizer.eos_token_id
@@ -245,6 +245,7 @@ if __name__ == '__main__':
     for idx, file in enumerate(query_sub_files('./data', ['.txt', '.md'])):
         content = read_file(file)
         print(f"process {file}")
+        append_qa_data(f'# {file}', output_llm_qa_file)
         generate_qa_data(llm, content=content, output_llm_qa_file=output_llm_qa_file)
         # convert_qa_md_file_to_train_jsonl(file, 'a')
         shutil.move(file, './data-processed/')
