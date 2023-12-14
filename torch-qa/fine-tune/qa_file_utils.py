@@ -130,8 +130,14 @@ class QuestionByPrevTodoListReadState:
     def __init__(self, context: QuestionAnswerContext, question: str):
         self.context = context
         self.buffer = question
+        self.questions = []
 
     def read_line(self, line: str):
+        captured_text = is_match(line, QUESTION_BY_PREV_TODO_LIST_PATTERN)
+        if captured_text is not None:
+            self.questions.append(self.buffer.strip())
+            self.buffer = captured_text
+            return
         captured_text = is_match(line, TEMPLATE_PATTERN)
         if captured_text is not None:
             self.flush_buffer()
@@ -145,11 +151,12 @@ class QuestionByPrevTodoListReadState:
         self.buffer += '\r\n' + line
 
     def flush_buffer(self):
-        question_template = self.buffer.strip()
         _, answer_context = self.context.question_answer_list[-1]
-        for key, answer in parse_markdown_list(answer_context[0]):
-            question = question_template.format(key=key)
-            self.context.question_answer_list.append(([question], [answer]))
+        self.questions.append(self.buffer.strip())
+        for question_template in self.questions:
+            for key, answer in parse_markdown_list(answer_context[0]):
+                question = question_template.format(key=key)
+                self.context.question_answer_list.append(([question], [answer]))
 
     def flush(self):
         self.flush_buffer()
