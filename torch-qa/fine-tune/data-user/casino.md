@@ -884,7 +884,7 @@ The 'Any Triple' bet in Sic Bo means that the player bets on any specific number
 
 
 Q: The rules of roulette involve placing bets on where a ball will land on a spinning wheel. Here are the key rules:
-
+Answer: 
 Types of Bets: Players can place various bets, such as betting on a specific number, a range of numbers, whether the number will be odd or even, or the color of the pocket (red or black).
 
 The wheel: The roulette wheel consists of numbered pockets from 0 to 36. The numbers alternate between red and black, with 0 typically displayed in green.
@@ -913,6 +913,7 @@ Q: Which betting option in Sic Bo has the highest probability of winning?
 A: In Sic Bo, bets with the highest probability of winning are typically the ones with the lowest payouts. Betting on "Big" or "Small" (total sum of the three dice being between 4-10 for Small and 11-17 for Big) has relatively high odds of winning.
 
 Q: What are the odds for each betting option in Sic Bo?
+Q: How are odds calculated in Sic Bo?
 A: 
 * Single Number: Betting on a number matching one die pays 1 to 1.
 Betting on a number matching two dice pays 1 to 2.
@@ -960,3 +961,4 @@ Q: If I placed a 10-dollar bet on '{{option}}' in Sic Bo and won, how much do yo
 A: This bet has odds of 1 to {{odd}}, We will pay you {{ mul(10,odd) }} dollars.
 {% endfor %}
 :EndTemplate
+
