@@ -893,9 +893,10 @@ Betting Time: Players place their bets before the dealer spins the wheel. Once b
 
 Winning Number: The winning number is determined by the pocket where the ball comes to rest. If the ball lands on a number or category players have bet on, they win.
 
+
+
 Q: What are the rules of Sic Bo? 
 A: Here are the main rules:
-
 Betting Options: Players can bet on various possible outcomes or combinations of outcomes from the roll of three dice. Bets can range from specific numbers to totals, triples, doubles, and other combinations.
 
 Dice Roll: After players place their bets, three dice are shaken in a container or mechanical shaker. The result is the combination displayed after the dice come to rest.
