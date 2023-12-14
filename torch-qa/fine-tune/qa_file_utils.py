@@ -343,9 +343,13 @@ def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
 
 if __name__ == '__main__':
     file = 'results/test.md'
+    file = 'results/llm-qa.md'
+    question_count = 0
     for q, a in query_qa_file(file, True):
+        question_count += 1
         print(f"{q=}")
         print(f"{a=}")
         print("----")
+    print(f"{question_count=}")
 
 
