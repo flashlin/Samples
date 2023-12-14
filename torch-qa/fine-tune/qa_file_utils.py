@@ -34,8 +34,10 @@ def is_match(txt: str, regex_patterns):
 
 class QuestionAnswerContext:
 
-    def __init__(self):
+    def __init__(self, is_single: bool = False):
         self.read_state = QuestionAnswerReadyState(self)
+        if is_single:
+            self.read_state = SingleQuestionAnswerReadyState(self)
         self.question_answer_list = []
         self.questions = []
         self.answers = []
@@ -87,6 +89,21 @@ class QuestionAnswerReadyState:
         pass
 
 
+class SingleQuestionAnswerReadyState:
+
+    def __init__(self, context: QuestionAnswerContext):
+        self.context = context
+
+    def read_line(self, line: str):
+        captured_text = is_match(line, QUESTION_PATTERNS)
+        if captured_text:
+            self.context.read_state = SingleQuestionReadState(self.context, captured_text)
+
+    def flush(self):
+        pass
+
+
+
 class QuestionReadState:
     def __init__(self, context: QuestionAnswerContext, question: str):
         self.context = context
@@ -101,6 +118,31 @@ class QuestionReadState:
         question_captured_text = is_match(line, QUESTION_PATTERNS)
         if question_captured_text is not None:
             self.flush_buffer()
+            self.buffer = question_captured_text
+            return
+        self.buffer += '\r\n' + line
+
+    def flush_buffer(self):
+        self.context.questions.append(self.buffer.strip())
+
+    def flush(self):
+        pass
+
+
+
+class SingleQuestionReadState:
+    def __init__(self, context: QuestionAnswerContext, question: str):
+        self.context = context
+        self.buffer = question
+
+    def read_line(self, line: str):
+        answer_captured_text = is_match(line, ANSWER_PATTERN)
+        if answer_captured_text is not None:
+            self.flush_buffer()
+            self.context.read_state = SingleAnswerReadState(self.context, answer_captured_text)
+            return
+        question_captured_text = is_match(line, QUESTION_PATTERNS)
+        if question_captured_text is not None:
             self.buffer = question_captured_text
             return
         self.buffer += '\r\n' + line
@@ -246,8 +288,36 @@ class AnswerReadState:
         self.context.read_state = QuestionAnswerReadyState(self.context)
 
 
-def query_qa_file(file: str):
-    qa = QuestionAnswerContext()
+
+class SingleAnswerReadState:
+    def __init__(self, context: QuestionAnswerContext, answer: str):
+        self.context = context
+        self.buffer = answer
+
+    def read_line(self, line: str):
+        question_captured_text = is_match(line, QUESTION_PATTERNS)
+        if question_captured_text is not None:
+            self.flush_buffer()
+            self.context.read_state = SingleQuestionReadState(self.context, question_captured_text)
+            return
+        answer_captured_text = is_match(line, ANSWER_PATTERN)
+        if answer_captured_text is not None:
+            self.context.answers.append(self.buffer.strip())
+            self.buffer = answer_captured_text
+            return
+        self.buffer += '\r\n' + line
+
+    def flush_buffer(self):
+        self.context.answers.append(self.buffer.strip())
+        self.context.output_question_answer()
+
+    def flush(self):
+        self.flush_buffer()
+        self.context.read_state = QuestionAnswerReadyState(self.context)
+
+
+def query_qa_file(file: str, is_single: bool=False):
+    qa = QuestionAnswerContext(is_single=is_single)
     with open(file, 'r', encoding='utf-8') as f:
         for line in f:
             # line = line.strip()
@@ -273,7 +343,7 @@ def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
 
 if __name__ == '__main__':
     file = 'results/test.md'
-    for q, a in query_qa_file(file):
+    for q, a in query_qa_file(file, True):
         print(f"{q=}")
         print(f"{a=}")
         print("----")
