@@ -15,6 +15,7 @@ model_id="NousResearch/Llama-2-7b-chat-hf"
 # baichuan2-7B-Chat 無法 load
 model_id="mistralai/Mistral-7B-Instruct-v0.1"
 model_id="LinkSoul/Chinese-Llama-2-7b"
+model_id="facebook/seamless-m4t-v2-large"
 
 # please login first.
 # huggingface-cli login --token $HUGGINGFACE_TOKEN
