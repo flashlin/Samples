@@ -1085,3 +1085,31 @@ Answer: Yes, in Sic Bo, the 'Triple Bet' is related to specific dice numbers. It
 Question: What is the 'Long Combination' in Sic Bo? Which dice number combinations does it involve?
 Answer: In Sic Bo, the 'Long Combination' refers to a specific combination of dice numbers. It involves betting on a particular sequence of three numbers that will appear on the dice. For instance, if you place a 'Long Combination' bet on 1-2-3, you win if the outcome of the three dice is exactly that sequence: 1, 2, and 3 in any order.
 
+Question: Create a list of betting options for live dealer Dragon Tiger
+Q: Create a list of betting options for live Dragon Tiger
+Q: Create a list of betting options for Dragon Tiger
+Answer: 
+* Dragon: Bet on Dragon's hand. 50% of the bet will be returned to Player if the result is Tie. Pays 1 to 1.
+* Tiger: Bet on Tiger's hand. 50% of the bet will be returned to Player if the result is Tie. Pays 1 to 1.
+* Tie: Bet on Tie which the value of both Dragon and Tiger's hand are equal/same hand rank value. Pays 1 to 1.
+* Odd: Bet on value of Dragon's hand (left) or Tiger's hand (right) will be an Odd number. Bet loses if the result is 7. Pays 1 to 1.
+* Even: Bet on value of Dragon's hand (left) or Tiger's hand (right) will be an Even number. Bet loses if the result is 7. Pays 1 to 1.
+* Small: Bet on value of Dragon's hand (left) or Tiger's hand (right) will be a Small number, including Ace to 6. Bet loses if the result is 7. Pays 1 to 1.
+* Big: Bet on value of Dragon's hand (left) or Tiger's hand (right) will be a Big number, including 8 to K. Bet loses if the result is 7. Pays 1 to 1.
+* Red: Bet on poker colour of Dragon hand's (left) or Tiger hand's (right) will be Red. Bet loses if the result is 7. Pays 1 to 1.
+* Black: Bet on poker colour Dragon hand's (left) or Tiger hand's (right) will be Black. Bet loses if the result is 7. Pays 1 to 1.
+
+
+QuestionByPrevTodoList: What does {key} in live dealer Dragon Tiger?
+QuestionByPrevTodoList: What are the odds for {key} in Dragon Tiger
+
+Question: How are the card values calculated in Live Dragon Tiger?
+Question: How are the card values calculated in Dragon Tiger?
+Answer: Cards in Live Dragon Tiger are ranked from the lowest to the highest starting from Ace to King.
+* Aces are counted as one
+* Jacks are counted as 11
+* Queens are counted as 12
+* Kings are counted as 13
+
+Question: Which casino game is the easiest to win?
+Answer: The perception of which casino game is the easiest to win varies. However, winning at any casino game involves both luck and strategy.

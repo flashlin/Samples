@@ -43,11 +43,3 @@ Please elucidate other size-related betting options apart from 'Big' and 'Small'
 
 
 How many numbers are there on the roulette wheel?
-Please explain the difference between "inside bets" and "outside bets" in roulette.
-Are the numbers on the roulette wheel arranged in a specific order? If so, please explain the arrangement.
-What is a "straight bet" in roulette? What are the odds for this type of bet?
-Explain the "red/black" betting option in roulette. What kind of characteristics of roulette numbers does it involve?
-What does a "dozen bet" mean in roulette?
-In roulette, what does a "column bet" cover in terms of numbers?
-What is a "split bet" in roulette? What are the odds for this type of bet?
-In American roulette, besides 0, what is the other special number?
