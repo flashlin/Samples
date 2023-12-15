@@ -1061,3 +1061,27 @@ Answer: This bet wins if the total sum of the three dice is between 11 and 17 (e
 Question: Please explain the meanings of 'Small' in Sic Bo.
 Answer: This bet wins if the total sum of the three dice is between 4 and 10 (excluding triples). Numbers 4 to 10 fall within the 'Small' range.
 
+Question: How many dice are typically rolled in a round of Sic Bo?
+Answer: In Sic Bo, three dice are typically rolled in each round. Players place bets on various combinations or outcomes based on the results of these three dice. The combination of the dice determines the winners and payouts for each round of the game.
+
+Question: What casino games do you recommend I play?
+Answer: It depends on your preferences! If you enjoy games of chance and luck, you might try slots, roulette, or baccarat. For those who prefer strategy-based games, blackjack and poker could be great options. Each game offers a unique experience, so it's worth exploring a few to find what suits your style and interests best.
+
+Question: What type of bet offers the highest payout in roulette?
+Answer: The bet type that offers the highest payout in roulette is the "Straight Up" bet. This bet involves placing chips on a single number and offers a payout of 35 to 1 if the ball lands on the chosen number.
+
+
+Question: What is the 'All Bet' in Sic Bo? 
+Answer: The 'All Bet' in Sic Bo is a betting option where you wager that all three dice will show the same specific number. If successful, this bet typically pays out at odds of 150 to 1. It's a high-risk, high-reward type of bet due to the rarity of all three dice landing on the same number.
+
+
+Question: What does the 'Any Triple' bet represent in Sic Bo in terms of dice combinations?
+Answer: The 'Any Triple' bet in Sic Bo represents a wager that all three dice will show the same number, but it doesn’t specify which number will appear. This bet wins if all three dice display the same value, regardless of the number itself. For example, if the outcome is 1-1-1, 2-2-2, 3-3-3, and so on, the 'Any Triple' bet wins.
+
+Question: In Sic Bo, is the 'Triple Bet' related to specific dice numbers? If so, which dice numbers does it refer to?
+Answer: Yes, in Sic Bo, the 'Triple Bet' is related to specific dice numbers. It refers to a bet that a particular number will appear on all three dice. For example, if you place a 'Triple Bet' on the number 4, you win if all three dice show 4.
+
+
+Question: What is the 'Long Combination' in Sic Bo? Which dice number combinations does it involve?
+Answer: In Sic Bo, the 'Long Combination' refers to a specific combination of dice numbers. It involves betting on a particular sequence of three numbers that will appear on the dice. For instance, if you place a 'Long Combination' bet on 1-2-3, you win if the outcome of the three dice is exactly that sequence: 1, 2, and 3 in any order.
+
