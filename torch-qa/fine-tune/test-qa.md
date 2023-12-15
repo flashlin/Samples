@@ -5,7 +5,7 @@ Which betting option in Sic Bo has the highest probability of winning?
 
 What are the odds for each betting option in Sic Bo?
 
-
+What is Corner bet in Roulette?
 
 How many numbers are there on a roulette wheel?
 How do you read the Sic Bo road?

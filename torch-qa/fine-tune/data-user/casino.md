@@ -893,6 +893,89 @@ Betting Time: Players place their bets before the dealer spins the wheel. Once b
 
 Winning Number: The winning number is determined by the pocket where the ball comes to rest. If the ball lands on a number or category players have bet on, they win.
 
+Question: List the Payout Odds for roulette.
+Answer:
+* Red: Covers any red number. Pays 1 to 1.
+* Black: Covers any black number. Pays 1 to 1.
+* Even: Covers any even number. Pays 1 to 1.
+* Odd: Covers any odd number. Pays 1 to 1.
+* Low: Covers numbers 1-18. Pays 1 to 1.
+* High: Covers numbers 19-36. Pays 1 to 1.
+* First Dozen: Covers numbers 1-12. Pays 1 to 2.
+* Second Dozen: Covers numbers 13-24. Pays 1 to 2.
+* Third Dozen: Covers numbers 25-36. Pays 1 to 2.
+* Column Inside Bets: Covers 12 numbers in any of the 3 columns. Pays 1 to 2.
+* Straight-Up: Covers any single number including 0. Pays 1 to 35.
+* Split: Covers any 2 adjacent numbers on the table. Pays 1 to 17.
+* Street: Covers any 3 numbers in a line across the table. Pays 1 to 11.
+* Corner: Covers any 4 adjacent numbers on the table. Pays 1 to 8.
+* Six Line: Covers any block on 6 adjacent numbers on the table. Pays 1 to 5.
+* Zero Section: Covers a bet on one of four particular numbers winning. There is only 1 zero section bet. These numbers are 0: 1: 2: 3. Pays 1 to 8.
+* Zero Corner: Covers a bet on one of three particular numbers winning. There are two zero corner bets. These are 0: 1: 2 and 0: 2: 3. Pays 1 to 11.
+
+QuestionByPrevTodoList: What are the odds for {key} in roulette?
+QuestionByPrevTodoList: What does '{key}' mean in roulette?
+QuestionByPrevTodoList: In roulette, what are the odds for {key}?
+
+Question: What happens if there is a malfunction with the roulette wheel?
+Answer: 
+* Where there is any malfunction of the electronic display in live roulette, the result will be settled according to the actual result determined by the roulette wheel.
+* Any failure of the Player's equipment including but not limited to network connection or computer problems will not void the game result. Players can check their own bet history in the Report section.
+* Any SBOTOP Casino system malfunction and / or hardware failure during live roulette will void the play and the particular table will be closed.
+
+Question: How many rounds does the ball rotate in the roulette wheel?
+Answer: The ball should spin for at least 10 revolutions before it falls into the pockets on the wheel. In the event of the ball falling into the pockets before it spins for at least 10 circles, the particular round will be aborted.
+
+Question: What are the rules for the rotation of the ball in the roulette wheel?
+Answer:
+* The ball should spin for at least 10 revolutions before it falls into the pockets on the wheel. In the event of the ball falling into the pockets before it spins for at least 10 circles, the particular round will be aborted.
+* In the event of the ball falling out from the wheel, the dealer will re-spin the ball and the particular round will be resumed.
+* In the event of the dealer spinning the ball in the same direction as the wheel spinning direction, the particular round will be resumed.
+* In the event of the ball falling outside the pockets on the wheel, the dealer will re-spin the ball and the particular round will be resumed.
+
+Question: What happens if the ball lands outside the pockets on the roulette wheel?
+Q: What is the procedure if the ball lands outside the pockets on the roulette wheel?
+Answer: In the event of the ball falling outside the pockets on the wheel, the dealer will re-spin the ball and the particular round will be resumed.
+
+Question: What will be the procedure if the dealer spins the ball in the same direction as the roulette wheel?
+Answer: In the event of the dealer spinning the ball in the same direction as the wheel spinning direction, the particular round will be resumed.
+
+Question: What is Corner bet in Roulette?
+Answer: A Corner bet is a bet on one of four selected numbers winning. There are 22 possible Corner bets. The numbers must share one corner of the table layout. The bet is placed at the intersection of all four numbers. If the ball comes to rest in any of these four numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+
+Question: What is a "straight bet" in roulette?
+Question: What is straight-up in roulette?
+Answer: A Straight-Up bet is a bet on one selected number winning. There are 37 possible Straight-Up bets. The bet is placed within the square of any specific number. If the ball comes to rest in that number in the wheel, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+
+Question: What is a "Split bet" in roulette?
+Question: What is "Split bet" in roulette?
+Answer: A Split bet is a bet on one of two selected numbers winning. There are 60 possible Split bets. The numbers must be adjacent on the table layout, and not on a diagonal. The bet is placed on a line that borders the square of any two adjacent numbers. If the ball comes to rest in either of the two numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+
+Question: What is Zero Section bet in roulette?
+Answer: A Zero Section bet is a bet on one of four particular numbers winning. There is only 1 Zero section bet. These numbers are 0, 1, 2, 3. The bet is placed at the left intersection of all four numbers. If the ball comes to rest in any of these four numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+
+Question: What is Zero Corner bet in roulette?
+Answer: A Zero Corner bet is a bet on one of three particular numbers winning. There are two Zero corner bets. These are 0, 1, 2, and 0, 2, 3. The bet is placed at the intersection of all three number. If the ball comes to rest in any of these three numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+
+Question: What is Six Line bet in roulette?
+Answer: A Six Line bet is a bet on one of six selected numbers winning. There are 11 possible Six Line bets. The numbers must lie in two adjacent rows across the table layout. The bet is placed on the line to the left and between the two rows of numbers. If the ball comes to rest in any of these six numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+
+Question: What is Column bet in roulette?
+Answer: A Column bet is a bet on one of twelve selected numbers winning. There are 3 possible Column bets. The numbers must all lie in one of the three columns down the table layout. The bet is placed in the box provided at the bottom of the layout. If the ball comes to rest in any of these twelve numbers, this bet wins. For any other number in the wheel, this bet loses.
+
+Question: What is Dozen bet in roulette?
+Answer: A Dozen bet is a bet on one of twelve selected numbers winning. There are 3 possible Dozen bets. The numbers must all lie in one of the three Dozens regions on the table layout. The bet is placed in the box provided to the left of the layout. If the ball comes to rest in any of these twelve numbers, this bet wins. For any other number in the wheel, this bet loses.
+
+Question: What is Even Chance bet in roulette?
+Answer: An Even Chance bet is a bet on one of eighteen selected numbers winning. There are 6 possible Even Chance bets. The bet is placed in the box provided to the left of the layout. If the ball comes to rest in:
+* Any number between 1 and 18, the 1 to 18 bet wins.
+* Any even number, the even bet wins.
+* Any red number, the red bet wins.
+* Any black number, the black bet wins.
+* Any odd number, the odd bet wins.
+* Any number between 19 and 36, the 19 to 36 bet wins.
+* In any other event, these bets lose.
+
 
 
 Q: What are the rules of Sic Bo? 
@@ -906,14 +989,14 @@ Winning Bets: Payouts are made based on the bets placed and the outcome of the d
 Various Betting Types: Some common bets include predicting the total of the three dice, specific numbers that might appear, whether the total will be odd or even, or specific combinations like triples or doubles.
 
 
-Q: How many dice are there in Sic Bo? 
-A: In Sic Bo, a dice game, three dice are used for each roll. Players place bets on various combinations or outcomes based on the results of these three dice.
+Question: How many dice are there in Sic Bo? 
+Answer: In Sic Bo, a dice game, three dice are used for each roll. Players place bets on various combinations or outcomes based on the results of these three dice.
 
 
 Q: Which betting option in Sic Bo has the highest probability of winning?
 A: In Sic Bo, bets with the highest probability of winning are typically the ones with the lowest payouts. Betting on "Big" or "Small" (total sum of the three dice being between 4-10 for Small and 11-17 for Big) has relatively high odds of winning.
 
-Q: What are the odds for each betting option in Sic Bo?
+Question: What are the odds for each betting option in Sic Bo?
 Q: How are odds calculated in Sic Bo?
 A: 
 * Single Number: Betting on a number matching one die pays 1 to 1.
@@ -937,6 +1020,7 @@ Betting on a number matching all three dice pays 1 to 3.
 
 QuestionByPrevTodoList: What are the odds for {key} in Sic Bo?
 QuestionByPrevTodoList: What does '{key}' mean in Sic Bo?
+QuestionByPrevTodoList: What is '{key}' in Sic Bo?
 
 
 Template: {% set bet_options=[
@@ -962,4 +1046,18 @@ Q: If I placed a 10-dollar bet on '{{option}}' in Sic Bo and won, how much do yo
 A: This bet has odds of 1 to {{odd}}, We will pay you {{ mul(10,odd) }} dollars.
 {% endfor %}
 :EndTemplate
+
+Question: Please explain the meanings of 'Big' and 'Small' in Sic Bo.
+Answer: In Sic Bo, 'Big' and 'Small' are two betting options based on the total sum of the three dice.
+
+Big: This bet wins if the total sum of the three dice is between 11 and 17 (excluding the triples, which are covered by other bets). Numbers 11 to 17 are considered the 'Big' range.
+
+Small: This bet wins if the total sum of the three dice is between 4 and 10 (excluding triples). Numbers 4 to 10 fall within the 'Small' range.
+
+
+Question: Please explain the meanings of 'Big' in Sic Bo.
+Answer: This bet wins if the total sum of the three dice is between 11 and 17 (excluding the triples, which are covered by other bets). Numbers 11 to 17 are considered the 'Big' range.
+
+Question: Please explain the meanings of 'Small' in Sic Bo.
+Answer: This bet wins if the total sum of the three dice is between 4 and 10 (excluding triples). Numbers 4 to 10 fall within the 'Small' range.
 
