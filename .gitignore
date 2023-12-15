@@ -45,3 +45,5 @@ downloads/
 outputs/
 data_cache/
 torch-qa/fine-tune/data-user/support.md
+
+torch-qa/ipy/seamless_communication/
