@@ -92,3 +92,10 @@ time.mktime(datetime.datetime.strptime(s, "%d/%m/%Y").timetuple())
 ```
 
 
+Question: How can I uninstall all installed pip packages in a local venv environment?
+Question: How can I uninstall all installed pip packages?
+Answer:
+```bash
+pip freeze > uninstall.txt
+pip uninstall -r uninstall.txt
+```
