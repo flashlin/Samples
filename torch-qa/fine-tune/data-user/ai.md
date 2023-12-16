@@ -129,3 +129,14 @@ Answer: AlpacaEval is a single-turn benchmark test where models or frameworks ge
 Question: What is MT-Bench?
 Answer: MT-Bench evaluation benchmark comprises 8 sets of questions distributed across 160 distinct knowledge domains. Under the MT-Bench benchmark, models are required to answer initial questions and provide responses to subsequent ones.
 
+Question: When assessing the capabilities of a Large Language Model (LLM), what visual method could be used to express this evaluation?
+Answer: When evaluating the capabilities of a Large Language Model (LLM), it can be expressed visually using a radar chart. This chart will display the following indicators:
+* Writing: Ability to effectively write text for different purposes and audiences.
+* Roleplay: Involves taking on roles and performing in simulated environments, often used for learning and development.
+* Reasoning: The mental process of creating arguments, making decisions, and problem-solving.
+* Math: Study of numbers, quantities, shapes, and patterns.
+* Coding: Writing instructions for computers using programming languages.
+* Extraction: Retrieving specific data or information from larger datasets or databases.
+* STEM: Education and professions in science, technology, engineering, and mathematics.
+* Humanities: Studies related to human culture, including arts, history, and literature.
+
