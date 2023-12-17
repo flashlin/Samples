@@ -18,6 +18,7 @@ MODEL_NAME = "Mistral-7B-Instruct-v0.1"
 def get_args():
     parser = argparse.ArgumentParser(description="Extract Text ")
     parser.add_argument("model_name", nargs='?', help="Name of your model")
+    parser.add_argument('-w', action='store_true', default=False, help='override output')
     args = parser.parse_args()
     return args
 
@@ -70,9 +71,7 @@ def generate_qa_from_topics(llm, content, topics):
     template = get_file_content('./prompt-qa-from-topics.txt')
     prompt = template.format(content=content, topics=topics)
     qa_data = llm.ask(prompt)
-    # for line in qa_data.splitlines():
-
-
+    return qa_data
 
 def extrac_question_body(question_line: str):
     match = re.match(f'\d+. (.*)', question_line)
@@ -118,7 +117,8 @@ class LLM:
                                                device=self.device,
                                                question=user_input)
         idx = answer.find('[/INST]')
-        answer = answer[idx + 7:]
+        if idx > 0:
+            answer = answer[idx + 7:]
         return answer
 
 
@@ -134,14 +134,16 @@ def generate_qa_data(llm, content: str, output_llm_qa_file):
     print(f"{answer}")
     print("-------------------------------------------------------------------")
     summary = generate_summary(llm, content)
+    append_qa_data("# qa summary", output_llm_qa_file)
     answer = generate_question(llm, summary)
     append_qa_data(answer, output_llm_qa_file)
     print(f"{answer}")
     print("-------------------------------------------------------------------")
     topics = extract_topics(llm, content)
-
+    append_qa_data("# qa topic", output_llm_qa_file)
+    qa_for_topics = generate_qa_from_topics(llm, content, topics)
+    append_qa_data(qa_for_topics, output_llm_qa_file)
     print("\n\n\n")
-
 
 
 if __name__ == '__main__':
@@ -154,8 +156,9 @@ if __name__ == '__main__':
     print(f"{MODEL_NAME} Loaded. Take {execution_time} sec.")
 
     output_llm_qa_file = f"./results/llm-qa.md"
-    # if os.path.exists(output_llm_qa_file):
-    #     os.remove(output_llm_qa_file)
+    if args.w:
+        if os.path.exists(output_llm_qa_file):
+            os.remove(output_llm_qa_file)
 
     for idx, file in enumerate(query_sub_files('./data', ['.txt', '.md'])):
         content = get_file_content(file)
