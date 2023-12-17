@@ -104,7 +104,8 @@ class LLM:
         generation_config.do_sample = True
         generation_config.max_new_tokens = 2048
         generation_config.temperature = 0.7
-        generation_config.top_p = 0.75
+        generation_config.top_p = 1
+        generation_config.top_k = 50
         generation_config.num_return_sequences = 1
         generation_config.pad_token_id = tokenizer.eos_token_id
         generation_config.eos_token_id = tokenizer.eos_token_id
@@ -157,7 +158,7 @@ if __name__ == '__main__':
     execution_time = end_time - start_time
     print(f"{MODEL_NAME} Loaded. Take {execution_time} sec.")
 
-    output_llm_qa_file = f"./results/llm-qa.md"
+    output_llm_qa_file = f"./results/llm-qa-0.md"
     if args.w:
         if os.path.exists(output_llm_qa_file):
             os.remove(output_llm_qa_file)
@@ -168,3 +169,12 @@ if __name__ == '__main__':
         append_qa_data(f'# {file}', output_llm_qa_file)
         generate_qa_data(llm, content=content, output_llm_qa_file=output_llm_qa_file)
         shutil.move(file, './data-processed/')
+
+    qa_dict = {}
+    for question, answer in query_qa_file(output_llm_qa_file, is_single=True):
+        qa_dict[question] = answer
+
+    with open(f"./results/llm-qa.md", 'w') as f:
+        for question, answer in qa_dict.items():
+            f.write(f"Question: {question}\r\n")
+            f.write(f"Answer: {answer}\r\n")
