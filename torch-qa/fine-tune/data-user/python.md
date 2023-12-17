@@ -99,3 +99,12 @@ Answer:
 pip freeze > uninstall.txt
 pip uninstall -r uninstall.txt
 ```
+
+Question: RuntimeError: Library libcublas.so.11 is not found or cannot be loaded.
+Answer: I recommend running `!apt install libcublas11`, and it also resolved the issue.
+
+Question: TensorFlow object detection TF-TRT Warning: Could not find TensorRT.
+Answer:
+```bash
+pip install tensorrt-5.0.2.6-py2.py3-none-any.whl 
+```
