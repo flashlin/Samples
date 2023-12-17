@@ -44,3 +44,6 @@ As part of our technical practices, regular code reviews and pair programming en
 * Creativity and Design: Our design thinking process is iterative and recursive. Emphasis is placed on gathering insights from user interviews and utilizing behaviour-led design research to understand the user's journey. Sharing of ideas and prioritization constitute the main ideation phase, with constant prototyping and validation taking place in each step of the process for comprehensive usability testing. The creative process is always evolving; in combination with an inventive use of technology, we deliver a delightful experience to the end user.
 * Cloud Solution: We use Amazon Web Services and XenServer's virtualization platform to actively promote cloud computing solutions to enhance enterprise efficiency, infrastructure flexibility and security services.
 
+Question: Where did the Titanium office's interior design take inspiration from?
+Answer: The design for the Titanium office draws inspiration from the Singaporean government's GovTech. The office space is divided into public and working areas, allowing teams to engage in cross-functional pair programming within the workspace. These concepts were learned from GovTech a decade ago.
+
