@@ -50,7 +50,8 @@ class MyTranslator:
         )
     def translate(self, text):
         translated_text, _ = self.translator.predict(text, "t2tt", 'cmn', src_lang='eng')
-        output = translated_text[0].replace("⁇", "")
+        output = f"{translated_text[0]}"
+        output = output.replace("⁇", "")
         return output
 
 
@@ -59,10 +60,10 @@ if __name__ == '__main__':
     args = get_args()
     srt = args.srt
     folder, name, ext = split_file_path(srt)
-    dest = f"{folder}/{name}-tw{ext}"
+    dest_srt = f"{folder}-processed/{name}{ext}"
     translator = MyTranslator()
 
-    with open(dest, 'w', encoding='utf') as f:
+    with open(dest_srt, 'w', encoding='utf') as f:
         for line in yield_file_lines(srt, translator):
             f.write(f"{line}\r\n")
             print(line)
