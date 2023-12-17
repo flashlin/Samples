@@ -140,9 +140,11 @@ def generate_qa_data(llm, content: str, output_llm_qa_file):
     print(f"{answer}")
     print("-------------------------------------------------------------------")
     topics = extract_topics(llm, content)
+    print(topics)
     append_qa_data("# qa topic", output_llm_qa_file)
     qa_for_topics = generate_qa_from_topics(llm, content, topics)
     append_qa_data(qa_for_topics, output_llm_qa_file)
+    print(qa_for_topics)
     print("\n\n\n")
 
 
