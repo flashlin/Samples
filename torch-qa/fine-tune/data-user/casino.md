@@ -52,6 +52,12 @@ Answer: SBOTOP offers the following categories of games:
 Q: What are the differences between 'Baccarat' and 'Live Baccarat'?
 Answer: The main difference between 'Baccarat' and 'Live Baccarat' lies in the style of gameplay and experience. Basic Baccarat refers to an online game conducted through computer programs, whereas Live Baccarat is a real-time game conducted via live streaming in online casinos. Live Baccarat involves live dealers overseeing the game, allowing players to watch the game process through video connections and place bets, creating a more interactive and realistic gaming experience.
 
+Question: Which platforms does SBOTOP offer?
+Answer: SBOTOP is available on both desktop and mobile platforms, providing our customers with convenient access to play on the go.
+
+As an all-in-one platform, our customers enjoy a wide selection of products and services. SBOTOP caters to all types of player’s betting needs, ranging from the casual punter through to VIP players. You can get all this by joining SBOTOP.
+
+
 Q: How can players win at Baccarat?
 Answer: There's no fixed secret to winning in Baccarat, but some strategies can help players improve their chances:
 
