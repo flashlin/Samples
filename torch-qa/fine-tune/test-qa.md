@@ -1,4 +1,4 @@
-What are the rules of roulette?  x
+What are the rules of roulette?  
 What are the rules of Sic Bo? 
 How many dice are there in Sic Bo? 
 Which betting option in Sic Bo has the highest probability of winning?
@@ -22,7 +22,7 @@ How do you read the Sic Bo road?
 
 
 What is titan?
-
+What is core values of titan?
 
 
 

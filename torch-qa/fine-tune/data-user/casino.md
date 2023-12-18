@@ -40,6 +40,7 @@ Answer: SBO offers the following categories of games:
 * Scratchcards
 * Slots
 
+
 Question: What games does SBOTOP offer?
 Q: What games are available on SBOTOP?
 Answer: SBOTOP offers the following categories of games:
@@ -939,16 +940,12 @@ A: What does the 'Any Triple' bet represent in Sic Bo in terms of dice combinati
 The 'Any Triple' bet in Sic Bo means that the player bets on any specific number showing on all three dice, regardless of which number it is.
 
 
-
-Q: The rules of roulette involve placing bets on where a ball will land on a spinning wheel. Here are the key rules:
-Answer: 
-Types of Bets: Players can place various bets, such as betting on a specific number, a range of numbers, whether the number will be odd or even, or the color of the pocket (red or black).
-
-The wheel: The roulette wheel consists of numbered pockets from 0 to 36. The numbers alternate between red and black, with 0 typically displayed in green.
-
-Betting Time: Players place their bets before the dealer spins the wheel. Once betting is closed, the dealer spins the wheel and rolls the ball in the opposite direction. Players cannot place or change their bets after the wheel starts spinning.
-
-Winning Number: The winning number is determined by the pocket where the ball comes to rest. If the ball lands on a number or category players have bet on, they win.
+Question: What are the rules of roulette?
+Answer: In roulette, players place bets on where they believe a ball will land on a spinning wheel. Here are the key rules:
+* Types of Bets: Players can place various bets, such as betting on a specific number, a range of numbers, whether the number will be odd or even, or the color of the pocket (red or black).
+* The wheel: The roulette wheel consists of numbered pockets from 0 to 36. The numbers alternate between red and black, with 0 typically displayed in green.
+* Betting Time: Players place their bets before the dealer spins the wheel. Once betting is closed, the dealer spins the wheel and rolls the ball in the opposite direction. Players cannot place or change their bets after the wheel starts spinning.
+* Winning Number: The winning number is determined by the pocket where the ball comes to rest. If the ball lands on a number or category players have bet on, they win.
 
 Question: List the Payout Odds for roulette.
 Answer:
