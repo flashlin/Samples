@@ -2,6 +2,7 @@ import os
 import numpy as np
 from datasets import load_dataset
 import pandas as pd
+import csv
 from finetune_lit import (export_hf_model, load_hf_model_for_finetune,
                           load_hf_tokenizer, load_stf_trainer, save_trainer_model, create_llama2_finetune_prompt)
 from finetune_utils import load_finetune_config
@@ -98,7 +99,16 @@ def load_train_csv_file(csv_file: str):
     updated_dataset = df.map(add_prefix)
     return updated_dataset
 
+
+def count_csv_rows(file_path):
+    with open(file_path, 'r', newline='') as file:
+        reader = csv.reader(file)
+        row_count = sum(1 for row in reader)
+        return row_count
+
+
 dataset = load_train_csv_file("./results/qa.csv")
+config['num_samples'] = count_csv_rows('./results/qa.csv')
 
 trainer = load_stf_trainer(model, tokenizer, dataset, formatting_prompts_func, config)
 resume_from_checkpoint = config['resume_from_checkpoint']

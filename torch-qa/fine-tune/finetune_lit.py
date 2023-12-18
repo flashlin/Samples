@@ -174,11 +174,17 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
             task_type="CAUSAL_LM",
         )
 
+    gradient_accumulation_steps = config['gradient_accumulation_steps']
+    num_samples = config['num_samples']
+    max_steps = (num_samples // train_batch_size) // gradient_accumulation_steps * train_epochs
+    print(f"num_samples: {num_samples}")
+    print(f"max_steps: {max_steps}")
+
     training_params = TrainingArguments(
         output_dir=config['output_dir'],
         num_train_epochs=train_epochs,
         per_device_train_batch_size=train_batch_size,  # 46GB-> 7B:8 13B:4
-        gradient_accumulation_steps=4,
+        gradient_accumulation_steps=config['gradient_accumulation_steps'],
         optim="paged_adamw_32bit",
         save_steps=config['save_steps'],
         logging_steps=25,
@@ -190,14 +196,14 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         # max_steps=-1,
         # group_by_length=True,
         # max_steps = (num_samples // batch_size) // gradient_accumulation_steps * epochs
-        max_steps=config['train_max_steps'],  # if dataset is streaming, 就要設定筆數, 否則就設定 -1
+        max_steps=max_steps,  # if dataset is streaming, 就要設定筆數, 否則就設定 -1
         warmup_ratio=0.03,
         lr_scheduler_type="constant",
         report_to=["tensorboard"]
     )
 
-    print("trainable Parameters")
-    print_trainable_parameters(model, True)
+    # print("trainable Parameters")
+    # print_trainable_parameters(model, True)
 
     print("Set supervised fine-tuning parameters")
     trainer = SFTTrainer(
