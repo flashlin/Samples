@@ -33,6 +33,15 @@ Answer:
 [v] All of the above
 
 
+Question: Information within our work environment includes
+Answer: Information within our work environment includes the following:
+* personal data
+* source code
+* know-how
+* engineering structures
+* reports
+
+
 Question: A good security standard "90/10" Rule, which refers to:
 [ ] 90% technical control mechanisms, 10% user behaviors
 [ ] 10% hardware controls, 90% software controls
@@ -43,6 +52,10 @@ Answer:
 [ ] 10% hardware controls, 90% software controls
 [v] 10% techinical control mechanisms, 90% user behaviors
 [ ] 90% water, 10% alcohol 90%
+
+
+Question: What is a good security standard?
+Answer: A good security standard follows the '90/10' Rule, emphasizing '10% technical control mechanisms and 90% user behaviors.
 
 Question: Information Security Management System (ISMS) is a framework under which ISO standard?
 [ ] ISO 9000
@@ -185,6 +198,9 @@ Answer:
 [ ] Call the police, because you don't like him
 [ ] Give him your access card, so that he can stay longer in restricted area
 
+Question: When you see some unfamiliar face loitering around work area, without access pass, what should you do?
+Answer: Go forth and check on his visit purpose. Direct him to the public area if necessary.
+
 
 Question: When forgot to bring the access pass, what should you do?
 [ ] Borrow a TEMP pass from other staffs
@@ -197,6 +213,9 @@ Answer:
 [v] Borrow a TEMP pass from OD
 [ ] Borrow a TEMP pass from DM
 
+Question: When forgot to bring the access pass, what should you do?
+Answer: Borrow a TEMP pass from OD.
+
 Question: When lost the access pass, what should you do?
 [ ] Report to OD with 4 hours
 [ ] Report to OD with 6 hours
@@ -207,6 +226,9 @@ Answer:
 [ ] Report to OD with 6 hours
 [ ] Report to IT within 4 hours
 [ ] Report to IT within 6 hours
+
+Question: When lost the access pass, what should you do?
+Answer: Report to OD with 4 hours.
 
 Question: When using computers, what behavior could put your information at risk?
 (i) Keep anti-virus software up-to-date
@@ -249,6 +271,10 @@ Answer:
 [ ] Open attachment from the mail
 [ ] Forward the mail to colleagues
 [v] Delete junk/spam mail
+
+
+Question: When received spam mail from stranger, what shoud you do?
+Answer: Delete junk/spam mail.
 
 
 Question: Which of the following applies to the email usage policy?
@@ -336,6 +362,13 @@ Answer:
 [v] All of the above
 
 
+Question: What is the risk of pirated software?
+Answer:
+* Many contain viruses
+* Break Copyright lwa and lead to civil penalties
+* Lack of technical support and manual
+
+
 Question: How to prevent software piracy and copyright infringement?
 [ ] Use pirated software
 [ ] Only install and use licensed software
@@ -346,6 +379,10 @@ Answer:
 [v] Only install and use licensed software
 [ ] Copy or share music or video files that you have to pay for
 [ ] Use P2P to download copyright protected files
+
+
+Question: How to prevent software piracy and copyright infringement?
+Answer: Only install and use licensed software.
 
 
 Question: What is NOT compliance with VPN usage regulations?
@@ -370,6 +407,10 @@ Answer:
 [ ] Use password with combination of alphabets, numbers & special charaters
 [v] Use passwords which are easily associated with your oersinal information
 [ ] Use password that is significantly different from earlier passwords
+
+
+Question: When setting password, you should NOT?
+Answer: You shouldn't use passwords which are easily associated with your oersinal information.
 
 
 Question: Passwords can be protected by
@@ -471,4 +512,8 @@ Answer:
 [ ] Ignore it
 [ ] Discuss security incidents with any one outside organization
 [ ] Non-IT incidents don't need to be reported
+
+
+Question: Security incidents include virus attachs, hacking, information leakage, etc. When you discover a security incidentm what should you do?
+Answer: Immediately report anything unusual, suspected security incidents to IT dept.
 
