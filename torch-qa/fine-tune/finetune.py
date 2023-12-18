@@ -3,7 +3,7 @@ import numpy as np
 from datasets import load_dataset
 import pandas as pd
 from finetune_lit import (export_hf_model, load_hf_model_for_finetune,
-                          load_hf_tokenizer, load_stf_trainer, save_trainer_model)
+                          load_hf_tokenizer, load_stf_trainer, save_trainer_model, create_llama2_finetune_prompt)
 from finetune_utils import load_finetune_config
 from torch.utils.data import Dataset
 
@@ -84,16 +84,21 @@ def formatting_prompts_func(example):
     # for i in range(len(example['prompt'])):
     #     text = f"### Input: ```{example['prompt'][i]}```\n ### Output: {example['completion'][i]}"
     #     output_texts.append(text)
-    for i in range(len(example['text'])):
-        text = example['text'][i]
-        output_texts.append(text)
+    for i in range(len(example['question'])):
+        question = example['question'][i]
+        answer = example['answer'][i]
+        prompt = create_llama2_finetune_prompt(question, answer)
+        output_texts.append(prompt)
     return output_texts
 
 
 trainer = load_stf_trainer(model, tokenizer, dataset, formatting_prompts_func, config)
 resume_from_checkpoint = config['resume_from_checkpoint']
 print(f"Start finetune {resume_from_checkpoint=}")
-trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+if resume_from_checkpoint != '':
+    trainer.train(resume_from_checkpoint=resume_from_checkpoint)
+else:
+    trainer.train()
 # trainer.train(resume_from_checkpoint="{<path-where-checkpoint-were_stored>/checkpoint-0000")
 print("Save model")
 save_trainer_model(trainer, config)

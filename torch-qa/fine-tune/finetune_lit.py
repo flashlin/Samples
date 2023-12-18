@@ -175,10 +175,10 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         )
 
     training_params = TrainingArguments(
-        output_dir="./results",
+        output_dir=config['output_dir'],
         num_train_epochs=train_epochs,
         per_device_train_batch_size=train_batch_size,  # 46GB-> 7B:8 13B:4
-        gradient_accumulation_steps=1,
+        gradient_accumulation_steps=4,
         optim="paged_adamw_32bit",
         save_steps=config['save_steps'],
         logging_steps=25,
@@ -201,9 +201,9 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
     trainer = SFTTrainer(
         model=model,
         train_dataset=train_data,
-        # formatting_func=formatting_prompts_func,
+        formatting_func=formatting_prompts_func,
         peft_config=peft_args,
-        dataset_text_field="text",
+        #dataset_text_field="text",
         max_seq_length=1024 * 4,
         tokenizer=tokenizer,
         args=training_params,

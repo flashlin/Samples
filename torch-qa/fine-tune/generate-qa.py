@@ -134,17 +134,6 @@ def append_qa_to_train_csv_file(train_file: str, question: str, answer: str):
         csv_writer.writerow([prompt])
 
 
-def convert_qa_md_file_to_train_csv(md_file, train_file):
-    with open(train_file, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerow(["text"])
-        for question, answer in query_qa_md(md_file):
-            question = question.strip()
-            answer = answer.strip()
-            text = create_finetune_prompt(question=question, answer=answer)
-            writer.writerow([text])
-
-
 class QaCsv:
     def __init__(self, csv_file: str):
         self.csv_file = csv_file
@@ -174,7 +163,6 @@ def convert_llm_qa_md_file_to_train_csv(llm_qa_file, train_file):
     for question, answer in query_qa_md(llm_qa_file):
         question = question.strip()
         answer = answer.strip()
-        append_qa_to_train_csv_file(train_file, question, answer)
 
 
 def list_games(folder):
@@ -206,17 +194,12 @@ if __name__ == '__main__':
     for idx, file in enumerate(query_sub_files('./data-user', ['.txt', '.md'])):
         if idx == 0:
             convert_qa_md_file_to_train_jsonl(file, qa_jsonl)
-            # convert_qa_md_file_to_train_csv(file, './results/qa.csv')
         else:
             convert_qa_md_file_to_train_jsonl(file, qa_jsonl, 'a')
-            # convert_llm_qa_md_file_to_train_csv(file, './results/qa.csv')
     # clean_files("./data")
     # user_data = "./data-user/qa.txt"
-    # convert_qa_md_file_to_train_jsonl(user_data, "./results/qa.jsonl")
     llm_qa_data = './results/llm-qa.md'
     convert_qa_md_file_to_train_jsonl(llm_qa_data, qa_jsonl, 'a')
-    # convert_qa_md_file_to_train_csv(user_data, './results/train.csv')
-    # convert_llm_qa_md_file_to_train_csv(llm_qa_data, './results/train.csv')
-    convert_train_jsonl_to_json(qa_jsonl)
 
+    convert_train_jsonl_to_json(qa_jsonl)
     convert_train_jsonl_to_csv(qa_jsonl)

@@ -1,12 +1,13 @@
 # model_name: meta_llama-2-7b-chat-hf
 # model_name: microsoft_Orca-2-7b
-# model_name: mistralai_Mistral-7B-Instruct-v0.1
-model_name: 01-ai_Yi-6B-200K
+model_name: Mistral-7B-Instruct-v0.1
+# model_name: 01-ai_Yi-6B-200K
 template: llama
 train_batch_size: 1
-train_epochs: 15
-resume_from_checkpoint: True
+train_epochs: 5
 save_steps: 100
 is_QLoRA: True
 # target_modules: q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
 target_modules: q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
+resume_from_checkpoint:
+output_dir: ./results/mistral-7b-instruct-v0.1
