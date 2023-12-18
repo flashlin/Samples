@@ -96,6 +96,21 @@ def convert_train_jsonl_to_json(jsonl_file):
             json_writer.write(']\r\n')
 
 
+def convert_train_jsonl_to_csv(jsonl_file):
+    folder, filename, _ = split_file_path(jsonl_file)
+    csv_file = f"{folder}/{filename}.csv"
+    print(f"{csv_file=}")
+    with open(jsonl_file, 'r', encoding='utf-8') as jsonl_reader:
+        num_lines = sum(1 for _ in jsonl_reader)
+    print(f"{num_lines=}")
+    with open(jsonl_file, 'r', encoding='utf-8') as jsonl_reader:
+        qa_csv = QaCsv(csv_file)
+        qa_csv.renew()
+        for i, line in enumerate(jsonl_reader):
+            row = json.loads(line)
+            qa_csv.write_data(row['instruction'], row['output'])
+
+
 def create_llama2_instruction_prompt(question, user_input, answer):
     instruction_prompt_template = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
 ### Instruction:
@@ -128,6 +143,29 @@ def convert_qa_md_file_to_train_csv(md_file, train_file):
             answer = answer.strip()
             text = create_finetune_prompt(question=question, answer=answer)
             writer.writerow([text])
+
+
+class QaCsv:
+    def __init__(self, csv_file: str):
+        self.csv_file = csv_file
+
+    def write_data(self, question: str, answer: str):
+        with open(self.csv_file, 'a', newline='') as csvfile:
+            csv_writer = csv.writer(csvfile)
+            csv_writer.writerow([question, answer])
+            csvfile.flush()
+
+    def renew(self):
+        with open(self.csv_file, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(["question", "answer"])
+
+
+def append_to_qa_csv_file(md_file: str, csv_file: QaCsv):
+    for question, answer in query_qa_md(md_file):
+        question = question.strip()
+        answer = answer.strip()
+        csv_file.write_data(question, answer)
 
 
 def convert_llm_qa_md_file_to_train_csv(llm_qa_file, train_file):
@@ -164,18 +202,21 @@ def clean_files(folder):
 
 
 if __name__ == '__main__':
+    qa_jsonl = "./results/qa.jsonl"
     for idx, file in enumerate(query_sub_files('./data-user', ['.txt', '.md'])):
         if idx == 0:
-            convert_qa_md_file_to_train_jsonl(file, "./results/qa.jsonl")
-            convert_qa_md_file_to_train_csv(file, './results/qa.csv')
+            convert_qa_md_file_to_train_jsonl(file, qa_jsonl)
+            # convert_qa_md_file_to_train_csv(file, './results/qa.csv')
         else:
-            convert_qa_md_file_to_train_jsonl(file, "./results/qa.jsonl", 'a')
-            convert_llm_qa_md_file_to_train_csv(file, './results/qa.csv')
+            convert_qa_md_file_to_train_jsonl(file, qa_jsonl, 'a')
+            # convert_llm_qa_md_file_to_train_csv(file, './results/qa.csv')
     # clean_files("./data")
     # user_data = "./data-user/qa.txt"
     # convert_qa_md_file_to_train_jsonl(user_data, "./results/qa.jsonl")
     llm_qa_data = './results/llm-qa.md'
-    convert_qa_md_file_to_train_jsonl(llm_qa_data, "./results/qa.jsonl", 'a')
+    convert_qa_md_file_to_train_jsonl(llm_qa_data, qa_jsonl, 'a')
     # convert_qa_md_file_to_train_csv(user_data, './results/train.csv')
     # convert_llm_qa_md_file_to_train_csv(llm_qa_data, './results/train.csv')
-    convert_train_jsonl_to_json('./results/qa.jsonl')
+    convert_train_jsonl_to_json(qa_jsonl)
+
+    convert_train_jsonl_to_csv(qa_jsonl)
