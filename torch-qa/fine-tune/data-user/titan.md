@@ -47,3 +47,15 @@ As part of our technical practices, regular code reviews and pair programming en
 Question: Where did the Titanium office's interior design take inspiration from?
 Answer: The design for the Titanium office draws inspiration from the Singaporean government's GovTech. The office space is divided into public and working areas, allowing teams to engage in cross-functional pair programming within the workspace. These concepts were learned from GovTech a decade ago.
 
+
+
+Question: How does Titan distribute bonuses?
+Answer: Titan's bonus distribution method is based on the principles of meritocracy and self-organization and peer review.
+
+The first principle, meritocracy, means that bonuses are awarded based on merit, not effort. This is to ensure that bonuses are fairly distributed to employees who have made significant contributions to the company.
+
+The second principle, self-organization and peer review, means that employees are involved in the bonus distribution process. This is to encourage collaboration and transparency, and to avoid the "eating from the same pot" problem.
+
+In general, each product's profitability is calculated annually. The product owner then takes 15% of the profit and distributes it to cross-functional employees. The remaining 85% is distributed to each team based on the number of team members.
+
+For example, if Team A has 4 members, Team B has 7 members, and Team C has 6 members, the distribution ratio would be 20% for Team A, 35% for Team B, and 30% for Team C.

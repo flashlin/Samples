@@ -346,3 +346,15 @@ Modify `.dockerignore` file at the same folder as your dockerfile to solve this 
 .dotnet
 .Microsoft.DotNet.ImageBuilder
 ``` 
+
+Question: What is AOT?
+Q: What are the advantages of AOT?
+Q: What functionalities does AOT offer?
+Answer: "AOT" stands for "Ahead-Of-Time" and serves the following primary functions:
+* Performance Enhancement and Reduced Resource Consumption: The AOT compiler eliminates code that hasn't been executed during runtime, reducing the amount of code needing execution and thereby enhancing performance.
+* Inlining Optimization: Inlining is a technique used by the AOT compiler where the actual code of functions replaces function calls. This minimizes the overhead of function calls, thus improving performance.
+* Shorter Startup Times: Because AOT doesn't require compilation during runtime, it results in shorter startup times, which are crucial for small-scale applications and microservices.
+* Lower Memory Footprint: AOT doesn't consume resources needed for compilation during runtime, leading to lower resource consumption.
+* Earlier Error Detection and Enhanced Security: Pre-compilation enables the early detection of certain template errors during compilation, avoiding the need to discover them while executing on the client-side.
+* Higher Resistance to Reverse Engineering: AOT compiles programs into machine code, and most language-level structures are not retained, making it more challenging to decipher.
+
