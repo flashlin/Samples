@@ -4,6 +4,8 @@ model_name: Mistral-7B-Instruct-v0.1
 # model_name: 01-ai_Yi-6B-200K
 template: llama
 train_batch_size: 1
+#
+train_max_steps: 10
 train_epochs: 5
 save_steps: 100
 is_QLoRA: True

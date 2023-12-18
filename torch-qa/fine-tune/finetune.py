@@ -47,38 +47,6 @@ class CustomDataset(Dataset):
         raise IndexError("Index out of range")
 
 
-
-from torch.utils.data import DataLoader
-def load_train_csv_file(csv_file: str):
-    # df = CustomDataset(csv_files)
-    df = load_dataset('csv', data_files=csv_file, split="train", cache_dir='data_cache')
-    # df = DataLoader(df, batch_size=2, shuffle=True)
-    return df
-
-
-# base_model = "./models/llama-2-7b-hf"
-# new_model = "./models/llama-2-7b-chat-finetuned"
-# base_model = "./models/llama-2-13b-chat-hf"
-# new_model = "./models/llama-2-13b-chat-finetuned"
-# new_model = "./models/FlagAlpha_Atom-7B-Chat"
-# #save_hf_model(base_model, new_model)
-# #exit(0)
-
-base_model = f"../models/{model_name}"
-
-dataset = load_train_csv_file("./results/qa.csv")
-
-print(f"Loading model {model_name}")
-model = load_hf_model_for_finetune(base_model)
-print(f"{model.config=}")
-
-# tokenizer.json
-# tokenizer.model
-# tokenizer_config.json
-print("Loading tokenizer")
-tokenizer = load_hf_tokenizer(base_model)
-
-
 def formatting_prompts_func(example):
     output_texts = []
     # for i in range(len(example['prompt'])):
@@ -91,6 +59,46 @@ def formatting_prompts_func(example):
         output_texts.append(prompt)
     return output_texts
 
+
+# base_model = "./models/llama-2-7b-hf"
+# new_model = "./models/llama-2-7b-chat-finetuned"
+# base_model = "./models/llama-2-13b-chat-hf"
+# new_model = "./models/llama-2-13b-chat-finetuned"
+# new_model = "./models/FlagAlpha_Atom-7B-Chat"
+# #save_hf_model(base_model, new_model)
+# #exit(0)
+
+base_model = f"../models/{model_name}"
+
+print(f"Loading model {model_name}")
+model = load_hf_model_for_finetune(base_model)
+print(f"{model.config=}")
+
+# tokenizer.json
+# tokenizer.model
+# tokenizer_config.json
+print("Loading tokenizer")
+tokenizer = load_hf_tokenizer(base_model)
+
+
+def add_prefix(example):
+    question = example['question']
+    answer = example['answer']
+    prompt = create_llama2_finetune_prompt(question, answer)
+    example['text'] = prompt
+    example['input_ids'] = tokenizer.encode(prompt)
+    return example
+
+
+from torch.utils.data import DataLoader
+def load_train_csv_file(csv_file: str):
+    # df = CustomDataset(csv_files)
+    # df = load_dataset('csv', data_files=csv_file, split="train", cache_dir='data_cache')
+    df = load_dataset('csv', data_files=csv_file, split="train", streaming=True)
+    updated_dataset = df.map(add_prefix)
+    return updated_dataset
+
+dataset = load_train_csv_file("./results/qa.csv")
 
 trainer = load_stf_trainer(model, tokenizer, dataset, formatting_prompts_func, config)
 resume_from_checkpoint = config['resume_from_checkpoint']

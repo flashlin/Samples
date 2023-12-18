@@ -187,11 +187,13 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
         fp16=False,
         bf16=False,
         max_grad_norm=0.3,
-        max_steps=-1,
+        # max_steps=-1,
+        # group_by_length=True,
+        # max_steps = (num_samples // batch_size) // gradient_accumulation_steps * epochs
+        max_steps=config['train_max_steps'],  # if dataset is streaming, 就要設定筆數, 否則就設定 -1
         warmup_ratio=0.03,
-        group_by_length=True,
         lr_scheduler_type="constant",
-        report_to="tensorboard"
+        report_to=["tensorboard"]
     )
 
     print("trainable Parameters")
@@ -201,9 +203,9 @@ def load_stf_trainer(model, tokenizer, train_data, formatting_prompts_func, conf
     trainer = SFTTrainer(
         model=model,
         train_dataset=train_data,
-        formatting_func=formatting_prompts_func,
+        # formatting_func=formatting_prompts_func,
         peft_config=peft_args,
-        #dataset_text_field="text",
+        dataset_text_field="text",
         max_seq_length=1024 * 4,
         tokenizer=tokenizer,
         args=training_params,
