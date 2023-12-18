@@ -1,3 +1,54 @@
+Question: Introducing SBOTOP
+Q: What is SBOTOP? 
+Q: Who is SBOTOP?
+Answer: SBOTOP is a global online betting platform that strives to provide the best eGaming experience with a comprehensive suite of products ranging from Sports Betting, Live Casino and Slot games. SBOTOP operates under the license issued by the Isle of Man Gambling Supervision Commission and Philippine Amusement and Gaming Corporation (PAGCOR). 
+
+Question: What does SBOTOP provide in terms of products?
+Q: What products does SBOTOP offer?
+Answer: 
+* Sports: SBOTOP Sports excels for having over 2000 sporting events every week, providing extensive coverage of all the major football leagues, tennis, basketball, esports and many other international sporting competitions. Specialising in Asian Handicap sports betting, we provide the best value betting odds for in-play live betting and the widest range of live streaming videos.
+* Virtual Sports: With Virtual Sports, you can enjoy simulated sports events for a real betting experience. The match simulations are created through a combination of Artificial Intelligence and independent random number generators. Matches are broadcast as live video streams through an integrated media player and offer similar bet types to actual matches. These include Asian Handicap, 1X2 and Over/Under for both the First Half and Full Time.
+* Casino: In SBOTOP Casino, you will find an extensive range of online casino games and highly-rated Live Dealer games certain to satisfy every player’s needs. Our Live Dealer selection will make your online experience more interactive containing games powered by leading casino content developers. Playing with real dealers while being in the comfort of your home is an exhilarating and unforgettable experience.
+* Games: A wide array of exclusive entertainment options such as slots, scratchcards, keno and card games are available in SBOTOP Games. With no downloads or installations required, getting started could not be easier, furthermore, you can play whenever and wherever you want to.
+
+Question: What's the relationship between SBOTOP and Fulham Football Club?
+Q: What's the relationship between SBOTOP and Fulham FC?
+Answer: In July 2023, SBOTOP entered into a multi-year global partnership to be the Principal Partner of English Premier League Club, Fulham FC. The deal will see the SBOTOP logo feature on the front of the Fulham Men’s First Team kit and training kit sleeve from the start of the 2023/24 season. This strategic partnership further strengthens SBOTOP’s position as a global platform and we are looking forward to the exciting journey ahead.
+
+Question: Provide me with the SBOTOP Sponsorships Timeline.
+Q: SBOTOP Sponsorships Timeline content?
+Answer: SBOTOP Sponsorships Timeline
+* 2023/24 - Official Partner of Fulham Football Club
+* 2023 - HSBC BWF World Tour Finals 2023
+* 2020 - 2023 Principal Sponsor of Leeds United FC
+
+Question: Live Casino offers which games?
+Q: Which games are available in the Live Casino?
+Q: Which games are available in the Casino?
+Answer: 
+* LIVE DEALER BACCARAT / NON-COMMISSION BACCARAT
+* LIVE DEALER ROULETTE
+* LIVE DEALER SIC BO
+* LIVE DEALER DRAGON TIGER
+
+Question: What games does SBO offer?
+Q: What games are available on SBO?
+Answer: SBO offers the following categories of games:
+* Arcade 
+* Casino Games 
+* Hi-Lo & Numbers
+* Scratchcards
+* Slots
+
+Question: What games does SBOTOP offer?
+Q: What games are available on SBOTOP?
+Answer: SBOTOP offers the following categories of games:
+* Arcade 
+* Casino Games 
+* Hi-Lo & Numbers
+* Scratchcards
+* Slots
+
 Q: What are the differences between 'Baccarat' and 'Live Baccarat'?
 Answer: The main difference between 'Baccarat' and 'Live Baccarat' lies in the style of gameplay and experience. Basic Baccarat refers to an online game conducted through computer programs, whereas Live Baccarat is a real-time game conducted via live streaming in online casinos. Live Baccarat involves live dealers overseeing the game, allowing players to watch the game process through video connections and place bets, creating a more interactive and realistic gaming experience.
 
