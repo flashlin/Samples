@@ -194,3 +194,26 @@ Answer:
 * To remove an event or league, simply click on the star icon of the particular event or league once again. 
 * Alternatively, you can remove events and leagues by making changes to your favourites list and saving the changes.
 
+Question: What currencies does SBOTOP support?
+Answer: The currencies available depend on your SBOTOP account's licence and your country of residence.
+* AUD
+* CAD
+* EUR
+* GBP
+* HKD
+* IDR
+* JPY
+* KRW
+* MYR
+* NOK
+* NZD
+* RMB
+* SEK
+* THB
+* VND
+* ZAR
+
+Question: What’s your position to players using arbitrage betting?
+Answer: Arbitrage betting involves placing bets on every possible outcome of an event to lock in a guaranteed arbitrage profit regardless of the outcome. This is achieved by exploiting odds differences between bookmakers.
+
+Please note that arbitrage betting is deemed a breach of our Terms and Conditions. In the event where an unusual access is done on an account, SBOTOP reserves the right to take any necessary action as defined in our Terms and Conditions.
