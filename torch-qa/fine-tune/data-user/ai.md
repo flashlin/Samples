@@ -140,3 +140,27 @@ Answer: When evaluating the capabilities of a Large Language Model (LLM), it can
 * STEM: Education and professions in science, technology, engineering, and mathematics.
 * Humanities: Studies related to human culture, including arts, history, and literature.
 
+
+
+Question: How to install Mixtral 8x7B?
+Answer: 
+```bash
+conda create --name 8x7b python=3.9
+conda activate 8x7b
+conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+pip install -qU flash-attn --no-build-isolation
+pip install transformers accelerate bitsandbytes peft -qU
+```
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+model_id = "./models/Mixtral-8x7B-Instruct-v0.1"
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(model_id)
+
+text = "Hello my name is"
+inputs = tokenizer(text, return_tensors="pt")
+
+outputs = model.generate(**inputs, max_new_tokens=20)
+print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+```
