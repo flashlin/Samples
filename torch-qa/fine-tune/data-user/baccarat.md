@@ -348,5 +348,7 @@ If a third card is drawn for the players hand, the decision to draw a third card
 |7 |Stand |
 |8,9 |Stand (Natural)
 
+In Baccarat, if the total of the first two cards is 3 and the player's third card is also a 3, will the casino dealer draw a third card?
+Yes, in Baccarat, if the total of the initial two cards dealt to the player equals 3 and the third card for the player is also a 3, the casino dealer will not draw a third card.
 
 
