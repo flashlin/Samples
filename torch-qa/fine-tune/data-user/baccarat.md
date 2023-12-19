@@ -423,3 +423,18 @@ If a third card is drawn for the players hand, the decision to draw a third card
 |7 |Stand |
 |8,9 |Stand (Natural)
 
+Question: What are the differences between Baccarat and Dragon Tiger?
+Answer: 
+* Game Style:
+Baccarat is a more traditional and complex gambling game where players can bet on the banker, player, or a tie.
+Dragon Tiger is relatively straightforward, requiring players to predict which card has a higher value, without involving complex betting options.
+* Game Rules:
+Baccarat: Players make bets based on specific rules and card values.
+Dragon Tiger: Only requires comparing which of the two cards has a higher value.
+* Betting Mechanism:
+Baccarat allows various types of bets such as betting on the banker, player, or tie.
+Dragon Tiger involves simple betting where players wager on which card has a higher value, without multiple betting options like Baccarat.
+* Game Pace and Complexity:
+Baccarat games might be slower-paced and more intricate due to involving more rules and variations.
+Dragon Tiger typically has a faster pace and is simpler as it only involves comparing the values of two cards.
+
