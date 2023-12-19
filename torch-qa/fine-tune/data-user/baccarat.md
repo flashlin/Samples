@@ -348,7 +348,78 @@ If a third card is drawn for the players hand, the decision to draw a third card
 |7 |Stand |
 |8,9 |Stand (Natural)
 
-In Baccarat, if the total of the first two cards is 3 and the player's third card is also a 3, will the casino dealer draw a third card?
-Yes, in Baccarat, if the total of the initial two cards dealt to the player equals 3 and the third card for the player is also a 3, the casino dealer will not draw a third card.
 
+
+Template: {% set total_first_two_cards_list=[0,1,2,3,4,5,6,7,8,9] %}
+{% set draw_first_two_cards_list=[
+   [0,1,2,3,4,5,6,7,8,9],
+   [0,1,2,3,4,5,6,7,8,9],
+   [0,1,2,3,4,5,6,7,8,9],
+   [0,1,2,3,4,5,6,7,9],
+   [2,3,4,5,6,7],
+   [4,5,6,7],
+   [6,7],
+   [],
+   [],
+   []
+] 
+%}
+{% for total_first_two_cards in total_first_two_cards_list %}
+  {% for draw_first_two_cards in draw_first_two_cards_list[loop.index0] %}
+Question: In Baccarat, if the total of the first two cards is {{total_first_two_cards}} and the player's third card is {{draw_first_two_cards}}, will the casino dealer draw a third card?
+Answer: Yes, in Baccarat, if the total of the initial two cards dealt to the player equals {{total_first_two_cards}} and the third card for the player is {{draw_first_two_cards}}, the casino dealer will draw a third card.
+  {% endfor %}
+{% endfor %}
+:EndTemplate
+
+
+Template: {% set total_first_two_cards_list=[0,1,2,3,4,5,6,7,8,9] %}
+{% set draw_first_two_cards_list=[
+   [],
+   [],
+   [],
+   [8],
+   [0,1,8,9],
+   [0,1,2,3,8,9],
+   [0,1,2,3,4,5,8,9],
+   [],
+   [],
+   []
+] 
+%}
+{% for total_first_two_cards in total_first_two_cards_list %}
+  {% for draw_first_two_cards in draw_first_two_cards_list[loop.index0] %}
+Question: In Baccarat, if the total of the first two cards is {{total_first_two_cards}} and the player's third card is {{draw_first_two_cards}}, will the casino dealer draw a third card?
+Answer: No, in Baccarat, if the total of the initial two cards dealt to the player equals {{total_first_two_cards}} and the third card for the player is {{draw_first_two_cards}}, the casino dealer will not draw a third card.
+  {% endfor %}
+{% endfor %}
+:EndTemplate
+
+
+Question: How to calculate the card value in Baccarat?
+Answer: In Baccarat, the card values are calculated as follows:
+* Aces are worth 1 point.
+* Cards 2 through 9 are worth their face value in points, e.g., 2 is worth 2 points, 9 is worth 9 points.
+* 10s, Jacks, Queens, and Kings are worth 0 points.
+For example, if you have an 8 and a Queen, the total value of the hand is 8 (8 points) + 0 (Queen is 0 points) = 8 points
+
+
+Question: In Baccarat, if the player's hand consists of an Ace and a King, and the banker's hand includes a 3 and an 8, will either the banker or the player be dealt a third card?
+Q: In baccarat, if the player has an Ace and a King, and the banker has a 3 and an 8, how will the outcome be handled?
+Q: In baccarat, if the player has an Ace and a 9, and the banker has a Jack and a 3, how will the outcome be handled?
+Q: In baccarat, if the player has a 2 and a 3, and the banker has a Queen and an Ace, how will the outcome be handled?
+Answer: In specific situations, the player (also known as 'player' or 'punto') and the banker (also known as 'bank' or 'banco') may be required to draw a third card in Baccarat. These rules are based on the total value of the first two cards dealt to the player and banker. The specific rules are as follows:
+If the player's initial two-card total is between 0 and 6, a third card may be drawn based on specific rules.
+If the player's initial two-card total is 7, 8, or 9, no third card will be drawn for the player.
+If a third card is drawn for the players hand, the decision to draw a third card for the bankers hand is made automatically according to standard casino rules as below.
+
+|Total of First Two Cards |Draw when the players third card is |Stand when the players third card is
+|--|--|--
+|0,1,2 |0, 1, 2, 3, 4, 5, 6, 7, 8, 9 |
+|3 |0, 1, 2, 3, 4, 5, 6, 7, 9 |8
+|4 |2, 3, 4, 5, 6, 7 |0, 1, 8, 9
+|5 |4, 5, 6, 7 |0, 1, 2, 3, 8, 9
+|6 |6, 7 |0, 1, 2, 3, 4, 5, 8, 9
+|7 |Stand |
+|8,9 |Stand (Natural)
 

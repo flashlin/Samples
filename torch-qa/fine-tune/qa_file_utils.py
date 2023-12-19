@@ -1,4 +1,5 @@
 import json
+import os
 import re
 from jinja2 import Environment
 
@@ -235,7 +236,6 @@ class TemplateReadState:
         # {{ custom_function(3, 5) }}
         template = env.from_string(template_content)
         template_output = template.render()
-
         inner_qa = QuestionAnswerContext()
         lines = template_output.splitlines()
         for line in lines:
@@ -317,6 +317,8 @@ class SingleAnswerReadState:
 
 
 def query_qa_file(file: str, is_single: bool=False):
+    if os.path.exists(file) is False:
+        return
     qa = QuestionAnswerContext(is_single=is_single)
     with open(file, 'r', encoding='utf-8') as f:
         for line in f:
