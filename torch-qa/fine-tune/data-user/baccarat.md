@@ -11,8 +11,8 @@ Answer: Dragon Bonus in Baccarat typically pays 6 to 1 if the hand you've bet on
 
 Question: what is Dragon Bonus payout
 Answer: The Dragon Bonus payout in Baccarat varies based on different scenarios:
-Natural Win (8 or 9): Pays 1:1
-Non-Natural Win (3 points difference or more): Up to 30:1
+* Natural Win (8 or 9): Pays 1:1
+* Non-Natural Win (3 points difference or more): Up to 30:1
 
 Question: what is double bet button?
 Answer: DOUBLE bet button will enable player to double up all the unconfirmed bets which have been placed on the table. Any bet which has been placed and confirmed will not be doubled.
@@ -27,6 +27,15 @@ It pays 20 to 1 if the Banker hand wins with a total of six and it composed of t
 * Banker wins with 3 cards totaling 6: 20 to 1.
 * Banker wins with 2 cards totaling 6: 12 to 1.
 * All other result: Lose
+
+Question: What are the differences between Fortune Six and Baccarat?
+Answer: Fortune Six is a variant of Baccarat, primarily distinguished by its odds and specific game rules.
+Fortune Six is one of the side bet in Live Baccarat. 
+The bet will be paid if the Banker hand wins with a total of six. 
+It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.
+* Banker wins with 3 cards totaling 6: 20 to 1.
+* Banker wins with 2 cards totaling 6: 12 to 1.
+* All other result: Lose 
 
 Question: What is Tiger Baccarat?
 Answer: Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
@@ -59,6 +68,7 @@ Answer: The main difference between Big Tiger and Small Tiger lies in the condit
 * Small Tiger: This bet wins if the banker wins with a score total of six and has exactly two cards. The payout odds for this condition are 22 to 1.
 
 Question: what's bet options sbotop offer in live baccarat?
+Question: what's bet options in live baccarat?
 Answer: SBOTOP typically offers various betting options in live baccarat, including:
 * Player Bet: Betting on the player's hand to win.
 * Banker Bet: Betting on the banker's hand to win.
@@ -125,7 +135,15 @@ More than three cards can never be drawn for either hand.
 There are no values greater than nine in the game of baccarat. All card values are recalculated when the combined value of two or more cards is greater than nine. This new card value is determined by subtracting ten from the combined card value every time it reaches a number greater than nine.
 
 
-
+Question: Provide 10 examples of steps in the Baccarat dealing process.
+Annswer: When dealing in Baccarat, the usual procedure involves the following steps:
+* Dealing the initial round: Both the player and the banker receive two cards.
+* Determining if a third card is necessary based on game rules.
+* If either side's initial two-card total is 8 or 9 (natural), no additional cards are drawn.
+* If the player's initial two-card total is 6 or 7, the player stands without drawing a third card.
+* If the player's initial two-card total ranges from 0 to 5, the player must draw a third card.
+* Deciding whether to deal a third card to the banker based on the drawing rules.
+Comparing the hands of the player and banker to determine the ultimate winner.
 
 
 Question: Baccarat card values never exceed what number?
