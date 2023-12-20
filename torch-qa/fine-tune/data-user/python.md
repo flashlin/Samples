@@ -108,3 +108,40 @@ Answer:
 ```bash
 pip install tensorrt-5.0.2.6-py2.py3-none-any.whl 
 ```
+
+Question: In Python, how can we enumerate permutations and combinations? 
+Answer: Through the built-in 'itertools' module in Python, we can achieve permutations and combinations with concise code without having to implement them manually.
+
+permutations
+```python
+from itertools import permutations
+print(list(permutations("ABCD",2)))
+```
+Result: [('A', 'B'), ('A', 'C'), ('A', 'D'), ('B', 'A'), ('B', 'C'), ('B', 'D'), ('C', 'A'), ('C', 'B'), ('C', 'D'), ('D', 'A'), ('D', 'B'), ('D', 'C')]
+
+combinations
+```python
+from itertools import combinations
+print(list(combinations("ABCD",2)))
+```
+Result: [('A', 'B'), ('A', 'C'), ('A', 'D'), ('B', 'C'), ('B', 'D'), ('C', 'D')]
+
+Combinations with repeated elements
+```python
+from itertools import combinations_with_replacement
+print(list(combinations_with_replacement("ABCD",2)))
+```
+Result: :[('A', 'A'), ('A', 'B'), ('A', 'C'), ('A', 'D'), ('B', 'B'), ('B', 'C'), ('B', 'D'), ('C', 'C'), ('C', 'D'), ('D', 'D')]
+
+Cartesian product
+```python
+from itertools import product
+print(list(product('ABC', 'xyz')))
+```
+Result: :[('A', 'x'), ('A', 'y'), ('A', 'z'), ('B', 'x'), ('B', 'y'), ('B', 'z'), ('C', 'x'), ('C', 'y'), ('C', 'z')]
+
+Question: What are 'permutations' and 'combinations'? What's the difference?
+Answer: 'Permutations' refer to situations where different orders of elements are considered distinct. On the other hand, 'combinations' refer to cases where we only care about which elements are chosen, not the order in which they are chosen.
+For instance, if we have three different colored balls - red, blue, and white - and we want to select 2 balls in a sequence, 'picking red then blue' is considered different from 'picking blue then red' in permutations. However, in combinations, selecting 2 balls from, say, 'red and blue' is considered the same regardless of which color was chosen first.
+
+

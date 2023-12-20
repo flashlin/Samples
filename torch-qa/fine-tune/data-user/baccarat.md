@@ -641,3 +641,22 @@ Answer: Players must provide the date and time of playing, Table ID, dealer's na
 Question: What happens if a player fails to provide the necessary information related to a Baccarat game when filing a complaint?
 Answer: The complaint will be rejected by SBOBET Casino.
 
+Question: How are cards scored in Baccarat?
+Answer: Cards from Ace to 9 retain their face value; 10, Jack, Queen, and King cards are worth 0 points, and Ace is worth 1 point.
+
+Question: What are "Player" and "Banker" in Baccarat?
+Answer: "Player" and "Banker" are two different betting positions where players can place their bets, representing two different opponents.
+
+Question: What are "Banker Pair" and "Player Pair" in Baccarat?
+Answer: When the initial two cards for the Player or the Banker form a pair, it's called a "Banker Pair" or "Player Pair," providing players who bet on these with higher payouts.
+
+
+
+Template: {% set bet_options=[('Tie', 8), ('Player Pair', 11), ('Baner Pair', 11), ('Banker', 1), ('Player', 1)] %}
+{% for n_money in range(1, 101) %}
+  {% for bet_name, odds in bet_options %}
+Question: In Baccarat, If you bet {{n_money}} units on a {{bet_name}}, how much money do you receive if there's a {{bet_name}}?
+Answer: Betting on a {{bet_name}} usually pays {{odds}}:1, so if there's a {{bet_name}}, you'll receive a {{mul(n_money,odds)}}-unit payout.
+  {% endfor %}
+{% endfor %}
+:EndTemplate
