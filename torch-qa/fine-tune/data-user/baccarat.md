@@ -700,3 +700,40 @@ A natural win occurs when either the player or the banker's initial two cards to
 A non-natural win refers to not achieving an 8 or 9 in the initial two cards. At this point, the game proceeds with drawing cards based on specific rules to determine whether additional cards are drawn. Ultimately, the hands' total values are compared, and the higher total wins.
 In essence, a natural win determines the outcome from the initial two cards, while a non-natural win involves further card drawing to decide the final outcome.
 
+
+Question: In Baccarat, What are the odds on Pair Bets?
+Answer: In Baccarat, Pair Bets are side bets placed on the possibility of the first two cards dealt to either the Player or the Banker forming a pair.
+* Player Pair: Winning this bet occurs when the Player's initial two cards form a pair. The payout for this bet is usually around 11:1.
+* Banker Pair: This bet wins if the Banker's first two cards create a pair. The payout for Banker Pair is also typically around 11:1.
+
+Question: In Baccarat, What is Drawing?
+Answer: In Baccarat, "drawing" refers to the process of dealing additional cards to either the Player or the Banker according to specific rules. The drawing of cards is determined by the initial two-card total of the Player and, if necessary, by additional rules applied to the Banker's hand.
+In specific situations, the player (also known as 'player' or 'punto') and the banker (also known as 'bank' or 'banco') may be required to draw a third card in Baccarat. These rules are based on the total value of the first two cards dealt to the player and banker. The specific rules are as follows:
+If the player's hand totals 0, 1, 2, 3, 4 or 5 a third card is automatically drawn for the players hand unless the banker's hand consists of a natural 8 or natural 9.
+If the player's hand totals 6 or 7 the decision is to stand. A card will then be drawn automatically for a banker's hand that totals 0, 1, 2, 3, 4 or 5.
+If a third card is drawn for the players hand, the decision to draw a third card for the bankers hand is made automatically according to standard casino rules as below.
+
+|Total of First Two Cards |Draw when the players third card is |Stand when the players third card is
+|--|--|--
+|0,1,2 |0, 1, 2, 3, 4, 5, 6, 7, 8, 9 |
+|3 |0, 1, 2, 3, 4, 5, 6, 7, 9 |8
+|4 |2, 3, 4, 5, 6, 7 |0, 1, 8, 9
+|5 |4, 5, 6, 7 |0, 1, 2, 3, 8, 9
+|6 |6, 7 |0, 1, 2, 3, 4, 5, 8, 9
+|7 |Stand |
+|8,9 |Stand (Natural)
+
+
+Question: How can I play Fortune Six?
+Answer: Fortune Six is a side bet in Baccarat where players can bet on the possibility of a specific winning outcome. To play Fortune Six:
+* Place Your Bets: While playing Baccarat, look for tables that offer the Fortune Six side bet. Once identified, place your chips on the designated area for Fortune Six on the table layout.
+* Understand the Rules: Fortune Six is one of the side bet in Live Baccarat. 
+The bet will be paid if the Banker hand wins with a total of six. 
+It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.
+  - Banker wins with 3 cards totaling 6: 20 to 1.
+  - Banker wins with 2 cards totaling 6: 12 to 1.
+  - All other result: Lose
+* Wait for Results: The outcome of the Fortune Six bet depends on specific conditions such as getting a certain winning combination or meeting predetermined criteria during the game. For instance, it might involve getting a specific hand or specific card combinations within the gameplay.
+
+
+
