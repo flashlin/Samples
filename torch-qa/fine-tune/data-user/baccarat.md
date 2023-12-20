@@ -55,6 +55,50 @@ Answer: To play Tiger Tie, simply place a bet in the Tiger Tie betting area of t
 Question: How to Play Tiger Pair?
 Answer: The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
 
+Question: What is payout of Tiger Baccarat?
+Answer: 
+* Tiger: Banker wins with a total score of six.
+  - Two Card Tiger: Odds are 12 to 1 when the Banker has two cards.
+  - Three Card Tiger: Odds are 20 to 1 when the Banker has three cards.
+* Big Tiger: Banker wins with a total score of six and exactly three cards. Payout Odds: 50 to 1 for a total score of six and exactly three cards.
+* Tiger Tie: Tie with a total of six. Payout Odds: 35 to 1 for a Tie with a total of six.
+* Tiger Pair: Player's or Banker's first two cards are a pair.
+  Payout Odds:
+    - Single Tiger Pair: Odds are 4 to 1 if only one hand has a pair on their first two cards.
+    - Double Tiger Pair: Odds are 20 to 1 if both hands have a pair on their first two cards.
+    - Twin Tiger Pair: Odds are 100 to 1 if both hands' pairs have matching numbers or pictures.
+
+Question: What's the winning condition for the Tiger bet?
+Answer: The banker wins with a total score of six.
+
+Question: How do you place a Big Tiger bet on the Baccarat table?
+Answer: Place your bet in the Big Tiger betting area.
+
+Question: What are the odds for winning with a total score of six and exactly three cards on a Big Tiger bet?
+Answer: The odds are 50 to 1.
+
+Question: What is the winning condition for a Tiger Pair bet?
+Answer: Player's or Banker's first two cards need to be a pair.
+
+Question: What are the payout odds for a Tiger Tie bet?
+Answer: The odds are 35 to 1 for a Tie with a total of six.
+
+Question: How do you win a Small Tiger bet?
+Answer: Banker wins with a total score of six and exactly two cards.
+
+Question: What are the winning conditions and corresponding odds for a Tiger Pair bet?
+Answer: Odds are 4 to 1 for a Single Tiger Pair, 20 to 1 for a Double Tiger Pair, and 100 to 1 for a Twin Tiger Pair.
+
+Question: What are the payout odds for a Tiger Tie bet?
+Answer: The odds are 35 to 1 for a Tie with a total of six.
+
+Question: How do you place a Tiger bet?
+Answer: Place your bet in the Tiger betting area.
+
+Question: What are the two different winning conditions and their corresponding odds for a Tiger bet?
+Answer: Odds are 12 to 1 for a Two Card Tiger and 20 to 1 for a Three Card Tiger.
+
+
 Question: what is the payout if i bet on fortun six bet option in live baccarat. and result is banker win with 2 cards.
 Answer: The payout for the Fortune Six bet option in live baccarat, when the Banker wins with a two-card hand, is usually 20:1. 
 
@@ -346,6 +390,69 @@ Answer:
 * Natural : A natural hand is a two-card hand totalling eight or nine. The highest possible hand is a natural nine, which occurs when the first two cards drawn for either the bankers hand or the players hand total nine. The second highest hand is a natural eight. If a natural is drawn, this is an automatic winning hand and is called a natural winner. Neither of the hands will receive a third card when a natural is drawn.
 * Non-Commission Baccarat : A version of Baccarat where bets placed on the Banker shall receive payout odds of 1 to 1 except in the event when the Banker wins on Six Points (in such an event, only 50% of the amount bet on the Banker will be paid).
 
+Question: Provide an example of playing Tiger Pair.
+Answer: If the Player hand has two queens as their first two cards and the Banker hand does not have a pair on their first two cards, this is a Single Tiger Pair and pays 4 to 1. If the Banker hand has two nines as their first two cards and the Player hand does not have a pair on their first two cards, this is also a Single Tiger Pair and pays 4 to 1. If the Player hand has two Kings as their first two cards and the Banker hand has two Eights as their first two cards, this is a Double Tiger Pair and pays 20 to 1. If the Player hand has two Jacks as their first two cards and the Banker hand also has two Jacks as their first two cards, this is a Twin Tiger Pair and pays 100 to 1.
+
+Question: Under what circumstances does a "Single Tiger Pair" occur? 
+Answer: When the Player hand has two queens and the Banker hand doesn't have a pair, or when the Banker hand has two nines and the Player hand doesn't have a pair.
+
+Question: How is a "Double Tiger Pair" formed? 
+Answer: When the Player hand has two kings and the Banker hand has two eights.
+
+Question: What conditions lead to a "Twin Tiger Pair"? 
+Answer: When both the Player and Banker hands have two jacks each.
+
+Question: What is payout of Baccarat?
+Answer: 
+* Winning players bets receive payout odds of 1 to 1 (even money).
+* Winning bankers bets receive payout odds of 1 to 1 (even money). However, a commission equal to 5% of the win amount is deducted automatically.
+* Winning tie bets receive payout odds of 8 for 1. If there is a tie, bets on the bankers or players are returned to the Player.
+* Winning player pair / banker pair bets receive payout odds of 11 to 1. Player / banker first and second hand have to make a pair in order to win.
+
+
+Question: List the odds for each betting option in Baccarat.
+Answer: Below are the odds for each betting option in Baccarat:
+* Player Bet: Pays 1 to 1, standard odds.
+* Banker Bet: Also pays 1 to 1, but a 5% commission is automatically deducted from the winning amount.
+* Tie Bet: Pays 8 to 1.
+* Player Pair / Banker Pair Bet: Pays 11 to 1. The first two cards dealt to either the Player or Banker must form a pair for a win.
+
+
+Question: What is payout of Non-Commission Baccarat?
+Answer:
+* Winning Player bets receive payout odds of 1 to 1 (even money).
+* Winning Banker bets receive payout odds of 1 to 1 (even money) except in the event when the Banker wins on Six Points.
+* Winning Banker bets with the Banker wins on Six Points receive payout odds of 1 to 2 (in such an event, only 50% of the amount placed on the Banker will be paid).
+* Winning Tie bets receive payout odds of 8 for 1. If there is a tie, bets on the bankers or players are returned to the Player.
+* Winning Player Pair / Banker Pair bets receive payout odds of 11 to 1. The Player / Banker first and second hand has to make a pair in order to win.
+
+Question: List the odds for each betting option in Non-Commission Baccarat.
+Answer: The odds for each betting option in Non-Commission Baccarat are as follows:
+* Player: 1 to 1
+* Banker:
+  - Regular win: 1 to 1
+  - Banker wins on Six Points: 1 to 2, but pays only 50% of the placed bet
+* Tie: 8 to 1 (if it's a tie, bets on Banker or Player are returned)
+* Player Pair: 11 to 1
+* Banker Pair: 11 to 1
+
+
+Question: What is Live Baccarat Terms?
+Answer: 
+* Players/Bankers : The terms players and bankers are the names given to two hands of cards that are dealt from the shoe during each round of play. The Player may bet on either the player's hand or the banker's hand. The Player may also bet on a tie.
+* Natural : A natural hand is a two-card hand totalling eight or nine. The highest possible hand is a natural nine, which occurs when the first two cards drawn for either the bankers hand or the players hand total nine. The second highest hand is a natural eight. If a natural is drawn, this is an automatic winning hand and is called a natural winner. Neither of the hands will receive a third card when a natural is drawn.
+* Tie : If both hands have the same value, a tie hand is the result.
+* Player Pair or Banker Pair : The first two cards of either the Player or the Banker hand form a pair (for example 8, 8 or K, K).
+* Non-Commission Baccarat : A version of Baccarat where bets placed on the Banker shall receive payout odds of 1 to 1 except in the event when the Banker wins on Six Points (in such an event, only 50% of the amount bet on the Banker will be paid).
+
+
+Question: How are the card values calculated in baccarat? 
+Q: What are the rules for the card values in baccarat?
+Answer: 
+* All cards except for Tens, Picture Cards, (Jacks, Queens and Kings) and Aces, are worth their face value.
+* All Tens and “Picture Cards” are counted as zero.
+* Aces are counted as one.
+
 Question: What is Drawing Rules in baccarat?
 Answer: There are no optional drawing rules in this game. Whether cards are drawn or not is determined according to the rules provided below. These rules are called the "Drawing Rules" or "Tableau", and are identical to those used in all of the major casinos of America, Europe and Asia.
 The decision to draw a third card for the players hand is made automatically according to standard casino rules as below.
@@ -427,8 +534,8 @@ Q: In baccarat, if the player has an Ace and a King, and the banker has a 3 and 
 Q: In baccarat, if the player has an Ace and a 9, and the banker has a Jack and a 3, how will the outcome be handled?
 Q: In baccarat, if the player has a 2 and a 3, and the banker has a Queen and an Ace, how will the outcome be handled?
 Answer: In specific situations, the player (also known as 'player' or 'punto') and the banker (also known as 'bank' or 'banco') may be required to draw a third card in Baccarat. These rules are based on the total value of the first two cards dealt to the player and banker. The specific rules are as follows:
-If the player's initial two-card total is between 0 and 6, a third card may be drawn based on specific rules.
-If the player's initial two-card total is 7, 8, or 9, no third card will be drawn for the player.
+If the player's hand totals 0, 1, 2, 3, 4 or 5 a third card is automatically drawn for the players hand unless the banker's hand consists of a natural 8 or natural 9.
+If the player's hand totals 6 or 7 the decision is to stand. A card will then be drawn automatically for a banker's hand that totals 0, 1, 2, 3, 4 or 5.
 If a third card is drawn for the players hand, the decision to draw a third card for the bankers hand is made automatically according to standard casino rules as below.
 
 |Total of First Two Cards |Draw when the players third card is |Stand when the players third card is
@@ -455,4 +562,82 @@ Dragon Tiger involves simple betting where players wager on which card has a hig
 * Game Pace and Complexity:
 Baccarat games might be slower-paced and more intricate due to involving more rules and variations.
 Dragon Tiger typically has a faster pace and is simpler as it only involves comparing the values of two cards.
+
+Question: What is Pair Bets in Baccarat?
+Answer: Live Baccarat pair bet game rules are almost the same as traditional baccarat, the difference is you can also bet on player pair / banker pair as well as player / banker wins. Player / banker first and second hand have to make a pair in order to win.
+Payout is 11 to 1.
+
+Question: What is Burn Card?
+Answer: In Baccarat, a "Burn Card" refers to a card removed from the top of the deck before the start of each game. This card is not used in that specific round and is discarded or "burned." This practice is implemented to prevent cheating or any potential impact on the game, ensuring fairness and randomness in the round. The Burn Card is meant to enhance the integrity of the game, ensuring reliability and fairness in the gameplay.
+
+
+Question: Will a Burn Card be used in Baccarat?
+Answer: The dealer does not perform burn card between the games.
+
+Question: When will reshuffles occur in baccarat?
+Answer: The Operator reserves the rights to reshuffle the particular decks of cards if any human or non-human errors occur during cards shuffling.
+
+Question: What are the rules regarding electronic malfunctions in Baccarat?
+Answer: 
+* The card is scanned by the dealer and the result will be displayed on the Players' computer screen. If any card fails to scan, the dealer will re-scan the card in order to display the result to the Players.
+* Any failure of the Players' equipment including but not limited to network connection or computer problems, will not void the game result. Players can check their own bet history on the Report section.
+* Any Operator system malfunction and / or hardware failure during Live Baccarat will void the play and the particular table will be closed.
+
+Question: How is a failed card scan handled by the dealer in Baccarat?
+Answer: The card is scanned by the dealer and the result will be displayed on the Players' computer screen. If any card fails to scan, the dealer will re-scan the card in order to display the result to the Players.
+
+
+Question: What happens if a player loses internet connection during a Baccarat game?
+Answer: Any failure of the Players' equipment including but not limited to network connection or computer problems, will not void the game result. Players can check their own bet history on the Report section.
+
+Question: What happens if there's a system failure in Baccarat?
+Answer: Any Operator system malfunction and / or hardware failure during Live Baccarat will void the play and the particular table will be closed.
+
+Question: What happens in Live Baccarat if there are network connection issues?
+Answer: Any problem with the players' devices will not affect the game result.
+
+Question: What action will be taken if the scan result fails to display on the player's computer screen in Live Baccarat?
+Answer: The dealer will rescan the card to display the result on the player's computer screen.
+
+Question: What occurs in Live Baccarat in case of an operator system malfunction or hardware failure?
+Answer: The game becomes void, and the particular table will be closed.
+
+
+Question: In the event of two or more cards being dealt simultaneously by accident during a round of baccarat, what will happen?
+Answer: The current round will be aborted, all bets will be returned, and the particular shoe will be replaced with a new shoe.
+
+Question: What will happen if any cards are revealed during shuffling?
+Answer: The particular shoe will be replaced, and the dealer will shuffle a new set of cards.
+
+Question: What will happen if any cards fall off the table?
+Answer: The current round will be aborted, and the particular shoe will be replaced with a new shoe.
+
+Question: What happens if the dealer deals an extra card after the current game is finished?
+Answer: The current game result will be considered valid, and the particular shoe will be replaced with a new shoe.
+
+Question: Who will handle a card being placed in the wrong position?
+Question: If a card is placed in the wrong position, how will it be handled?
+Answer: The supervisor will correct the card position according to the computer screen (correct position).
+
+Question: If the dealer deals an additional card after the current game ends, how will the outcome be handled?
+Answer: If the dealer deals an extra card after the current game is finished, the current game result will be considered valid, and the particular shoe will be replaced with a new shoe.
+
+Question: The process of making a complaint in Baccarat?
+Q: How to Complaint?
+Answer: If a Player wishes to make a complaint or dispute a game result, they must provide SBOBET Casino, the date and time of playing, Table ID, dealer's name and Round number at the time of contacting SBOBET Casino. Failure to do so will result in the complaint being rejected by SBOBET Casino. Video image of card dealing is kept for 24 hours. Players must address their complaint regarding the dispute within 24 hour of the dispute occurring. Any complaints submitted after 24 hours will be rejected by SBOBET Casino without further explanation.
+
+Question: What actions will SBOBET Casino take if a player raises a complaint regarding Baccarat after 24 hours?
+Answer: SBOBET Casino will reject the complaint without further explanation.
+
+Question: Within what time frame should a player raise a dispute complaint regarding Baccarat?
+Answer: Players must address their complaint within 24 hours of the dispute occurring.
+
+Question: How long does SBOBET Casino keep the video image of a Baccarat game?
+Answer: SBOBET Casino keeps the video image of card dealing for 24 hours.
+
+Question: What information does a player need to provide if they wish to complain about the result of a Baccarat game?
+Answer: Players must provide the date and time of playing, Table ID, dealer's name, and Round number at the time of contacting SBOBET Casino.
+
+Question: What happens if a player fails to provide the necessary information related to a Baccarat game when filing a complaint?
+Answer: The complaint will be rejected by SBOBET Casino.
 
