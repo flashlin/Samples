@@ -146,6 +146,7 @@ The game is presented to the Player with a live person dealing the cards on scre
 
 
 Question: What is the player return rate in Live Baccarat?
+Q: in baccarat, How much rate may return to me?
 Answer: The theoretical return to player of this game is 98.41%.
 Over a long period of time, the game is likely to average a return to the Player of 98.48% of the total bets made.
 
@@ -368,6 +369,7 @@ Answer: Generally, Non-Commission Baccarat tends to be more advantageous for pla
 
 Question: The maximum bet amount in Baccarat is how much?
 Question: The minimum bet amount in Baccarat is how much?
+Q: In Baccarat, What is the maximum bet for the table?
 Answer: The maximum and minimum bet limits will only be displayed within the Bet Limits menu in the gaming table after the Player has sit on the table.
 
 Question: What is Player Pair in Baccarat?
@@ -660,3 +662,41 @@ Answer: Betting on a {{bet_name}} usually pays {{odds}}:1, so if there's a {{bet
   {% endfor %}
 {% endfor %}
 :EndTemplate
+
+
+Question: In Baccarat, which bet option wins when a draw happens.
+Answer: In Baccarat, when a draw (tie) occurs, neither the banker nor the player bets win. The tie bet wins when there's a tie outcome in the game.
+
+Question: Can explain how to play SBO Live Baccarat
+Answer: SBO Live Baccarat follows the standard Baccarat rules but is played in a live casino environment online. Here's a general guide:
+* Placing Bets:
+Once you join the live game, you'll have a limited time to place your bets. You can bet on the Player, Banker, or Tie (Egalité).
+* Dealing Cards:
+The dealer will deal two cards for the Player and two cards for the Banker according to specific drawing rules.
+If either the Player or Banker achieves a natural win (an initial hand totaling 8 or 9), the game ends, and the winning hand is declared.
+* Drawing Additional Cards:
+If neither the Player nor the Banker has a natural win, additional cards may be drawn based on specific rules. Usually, the Player goes first, followed by the Banker (if necessary), depending on the total value of the initial two cards.
+* Determining the Winner:
+The hand closest to a total of 9 wins. Face cards and tens count as zero, and other cards are worth their face value.
+If the Player's hand is closer to 9, the Player bet wins. If the Banker's hand is closer, the Banker bet wins. If both hands have the same total, it's a Tie bet win (but ties are less common and pay out more).
+
+
+Question: How can I win dragon Bonus?
+Answer: Dragon Bonus is a type of bet in Baccarat typically associated with wins by either the Player or the Banker. To win at Dragon Bonus, here are some strategies:
+* Understanding the Rules: Familiarize yourself with the rules of Dragon Bonus. This bet depends on the number of wins by the Player or the Banker and determines the payout. Understanding when and how much you win is crucial for strategy.
+* Consider Dragon and Tiger: These refer to the Player and the Banker. When betting on either side, observe and understand the game flow to see which side has more winning hands. Sometimes, one side might dominate in terms of wins, affecting your betting decisions.
+* Luck and Chance: While strategies are prudent, the ultimate outcome still relies on luck. Baccarat is a game of chance, so luck remains a factor in winning Dragon Bonus.
+
+
+Question: In Baccarat, who draws a card first
+Answer: In Baccarat, whether the player or the banker draws a card first depends on specific rules:
+If the initial two cards of either the player or the banker total 8 or 9 (called a "natural"), no further cards are drawn.
+If the player's initial two cards total 5 or less, the player draws an additional card.
+If the player does not draw, the banker decides whether to draw based on their own hand or based on the third card's conditions. The banker's drawing rules are more complex and vary based on different rulesets.
+
+Question: In Baccarat, what's the difference between natural win and non-natural win
+Answer: The difference between a natural win and a non-natural win in Baccarat lies in the nature of the game's outcomes:
+A natural win occurs when either the player or the banker's initial two cards total 8 or 9. In this case, no additional cards are drawn. If one side has a natural hand, the hands are compared, and the higher value wins directly.
+A non-natural win refers to not achieving an 8 or 9 in the initial two cards. At this point, the game proceeds with drawing cards based on specific rules to determine whether additional cards are drawn. Ultimately, the hands' total values are compared, and the higher total wins.
+In essence, a natural win determines the outcome from the initial two cards, while a non-natural win involves further card drawing to decide the final outcome.
+

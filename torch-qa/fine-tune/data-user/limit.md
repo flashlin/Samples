@@ -69,3 +69,10 @@ Answer: Roulette offers various betting options, including single numbers, odd o
 
 Question: What part of Sic Bo do you like?
 Answer: I don't have personal preferences or inclinations. Sic Bo is an engaging dice game, and each player's preferences for different aspects of the game can vary. Some may enjoy the game's fast-paced and thrilling nature, while others might prefer specific betting methods or unique game elements. Everyone's preference for Sic Bo can be different.
+
+
+
+Question: In Baccarat, Is there a minimum bet limit? if yes, give me the minimum bet limit by currency
+Answer: In Baccarat, there's usually a set minimum bet limit determined by the casino or a specific table. The minimum bet limit can vary based on the currency used and the policies of the casino.
+The maximum and minimum bet limits will only be displayed within the Bet Limits menu in the gaming table after the Player has sit on the table.
+

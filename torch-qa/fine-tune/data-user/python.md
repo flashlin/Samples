@@ -144,4 +144,3 @@ Question: What are 'permutations' and 'combinations'? What's the difference?
 Answer: 'Permutations' refer to situations where different orders of elements are considered distinct. On the other hand, 'combinations' refer to cases where we only care about which elements are chosen, not the order in which they are chosen.
 For instance, if we have three different colored balls - red, blue, and white - and we want to select 2 balls in a sequence, 'picking red then blue' is considered different from 'picking blue then red' in permutations. However, in combinations, selecting 2 balls from, say, 'red and blue' is considered the same regardless of which color was chosen first.
 
-
