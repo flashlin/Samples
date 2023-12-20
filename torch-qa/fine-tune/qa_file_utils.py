@@ -2,6 +2,7 @@ import json
 import os
 import re
 from jinja2 import Environment
+from itertools import combinations
 
 """
 Q: How are you
@@ -215,6 +216,68 @@ def compute_fn(expr: str):
 def mul_fn(a1, b1):
     return a1 * b1
 
+def baccarat_card_value_fn(cards: list[str]) -> int:
+    cards_dict = {
+        'a': 1,
+        'ace': 1,
+        '2': 2,
+        '3': 3,
+        '4': 4,
+        '5': 5,
+        '6': 6,
+        '7': 7,
+        '8': 8,
+        '9': 9,
+        'j': 0,
+        'q': 0,
+        'k': 0,
+        'jack': 0,
+        'queen': 0,
+        'king': 0,
+    }
+    value = 0
+    for card in cards:
+        card = card.lower()
+        if card not in cards_dict:
+            continue
+        value += cards_dict[card]
+    return value % 10
+
+
+def list_to_combinations_dict(a_list):
+    keys = [chr(i) for i in range(48, 58)] + [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)]
+    if len(keys) < len(a_list):
+        raise ValueError(f"list size > keys")
+    a_dict = {}
+    for value in a_list:
+        key = keys.pop(0)
+        a_dict[key] = value
+    return a_dict
+
+def combinations_fn(items: list[str], n: int):
+    combinations_dict = list_to_combinations_dict(items)
+    keys = "".join(key for key in combinations_dict.keys())
+    results = list(combinations(keys,n))
+    new_results = []
+    for items in results:
+        new_list = []
+        for elem in list(items):
+            value = combinations_dict[elem]
+            new_list.append(value)
+        new_results.append(new_list)
+    return new_results
+
+def render_template(template_content: str):
+    env = Environment()
+    env.globals['compute'] = compute_fn
+    env.globals['mul'] = mul_fn
+    env.globals['baccarat_card_value'] = baccarat_card_value_fn
+    # {{ custom_function(3, 5) }}
+    template = env.from_string(template_content)
+    template_output = template.render()
+    return template_output
+
+
 class TemplateReadState:
     def __init__(self, context: QuestionAnswerContext, template: str):
         self.context = context
@@ -230,12 +293,7 @@ class TemplateReadState:
 
     def flush_buffer(self):
         template_content = self.buffer.strip()
-        env = Environment()
-        env.globals['compute'] = compute_fn
-        env.globals['mul'] = mul_fn
-        # {{ custom_function(3, 5) }}
-        template = env.from_string(template_content)
-        template_output = template.render()
+        template_output = render_template(template_content)
         inner_qa = QuestionAnswerContext()
         lines = template_output.splitlines()
         for line in lines:
