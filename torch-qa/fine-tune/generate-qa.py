@@ -196,13 +196,11 @@ if __name__ == '__main__':
             convert_qa_md_file_to_train_jsonl(file, qa_jsonl)
         else:
             convert_qa_md_file_to_train_jsonl(file, qa_jsonl, 'a')
-    # clean_files("./data")
-    # user_data = "./data-user/qa.txt"
     llm_qa_data = './results/llm-qa.md'
     convert_qa_md_file_to_train_jsonl(llm_qa_data, qa_jsonl, 'a')
 
     convert_train_jsonl_to_json(qa_jsonl)
 
-    #convert_qa_md_file_to_train_jsonl("./data-user/baccarat.md", qa_jsonl)
+    # convert_qa_md_file_to_train_jsonl("./data-user/baccarat.md", qa_jsonl)
     convert_train_jsonl_to_csv(qa_jsonl)
 

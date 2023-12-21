@@ -243,6 +243,50 @@ def baccarat_card_value_fn(cards: list[str]) -> int:
         value += cards_dict[card]
     return value % 10
 
+def who_win_fn(name1, point1, name2, point2, win_message, tie_message):
+    if point1 > point2:
+        return win_message.format(name=name1)
+    if point1 < point2:
+        return win_message.format(name=name2)
+    return tie_message
+
+def dragon_baccarat_win_odds_fn(bet_name, name1, point1, name2, point2, win_message, tie_message, lose_message):
+    winner = who_win_fn(name1, point1, name2, point2, "{name}", tie_message)
+    difference = abs(point1 - point2)
+    if point1 == 8 or point1 == 9:
+        if difference != 0:
+            odds = "1 to 1"
+            result = "Natural Win"
+            return win_message.format(winner=winner, result=result, odds=odds)
+        if difference == 0:
+            odds = "Push"
+            result = "Natural Tie"
+            return tie_message.format(result=result, odds=odds)
+    if difference == 9:
+        odds = "1 to 30"
+        result = "9 points difference"
+        return win_message.format(winner=winner, result=result, odds=odds)
+    if difference == 8:
+        odds = "1 to 10"
+        result = "8 points difference"
+        return win_message.format(winner=winner, result=result, odds=odds)
+    if difference == 7:
+        odds = "1 to 6"
+        result = "7 points difference"
+        return win_message.format(winner=winner, result=result, odds=odds)
+    if difference == 6:
+        odds = "1 to 4"
+        result = "6 points difference"
+        return win_message.format(winner=winner, result=result, odds=odds)
+    if difference == 5:
+        odds = "1 to 2"
+        result = "5 points difference"
+        return win_message.format(winner=winner, result=result, odds=odds)
+    if difference == 4:
+        odds = "1 to 1"
+        result = "4 points difference"
+        return win_message.format(winner=winner, result=result, odds=odds)
+    return lose_message
 
 def list_to_combinations_dict(a_list):
     keys = [chr(i) for i in range(48, 58)] + [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)]
@@ -272,9 +316,13 @@ def render_template(template_content: str):
     env.globals['compute'] = compute_fn
     env.globals['mul'] = mul_fn
     env.globals['baccarat_card_value'] = baccarat_card_value_fn
+    env.globals['who_win'] = who_win_fn
     # {{ custom_function(3, 5) }}
-    template = env.from_string(template_content)
-    template_output = template.render()
+    try:
+        template = env.from_string(template_content)
+        template_output = template.render()
+    except:
+        raise ValueError(f"ERROR: {template_content}")
     return template_output
 
 

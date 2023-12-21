@@ -14,6 +14,7 @@ Answer: The Dragon Bonus payout in Baccarat varies based on different scenarios:
 * Natural Win (8 or 9): Pays 1:1
 * Non-Natural Win (3 points difference or more): Up to 30:1
 
+
 Question: what is double bet button?
 Answer: DOUBLE bet button will enable player to double up all the unconfirmed bets which have been placed on the table. Any bet which has been placed and confirmed will not be doubled.
 
@@ -257,6 +258,45 @@ Answer:
 * All other result: Lose
 
 
+Question: In baccarat, what are the odds for a result with a 7-point difference?
+Answer: Covers any result where the difference is 7 points. Pays 1 to 6.
+
+
+Template: {% set names=[(9, 30), (8, 10), (7, 6), (6, 4), (5, 2), (4, 1)] %}
+{% for point, odds in names %}
+Question: In baccarat, what are the odds for a result with a {{point}}-point difference?
+Answer: Covers any Non-natural result where the difference is {{point}} points. Pays 1 to {{odds}}.
+{% endfor %}
+:EndTemplate
+
+Template: {% set points=[3, 2, 1] %}
+{% for point in points %}
+Question: In baccarat, what are the odds for a result with a {{point}}-point difference?
+Answer: Covers any Non-natural result where the difference is {{point}} points. The Player loses.
+{% endfor %}
+:EndTemplate
+
+Question: My bet on Fortune Six, with the result being Banker wins with 3 cards totaling 6, what are the odds?
+Answer: The odds for this bet are 1 to 20.
+
+Question: My bet on Fortune Six, with the result being Banker wins with 2 cards totaling 6, what are the odds?
+Answer: The odds for this bet are 1 to 12.
+
+Template: {% set points=[9, 8, 7, 5, 4, 3, 2, 1] %}
+{% for point in points %}
+Question: My bet on Fortune Six, with the result being Banker wins with 3 cards totaling {{point}}, what are the odds?
+Answer: The Player loses.
+{% endfor %}
+:EndTemplate
+
+Template: {% set points=[9, 8, 7, 5, 4, 3, 2, 1] %}
+{% for point in points %}
+Question: My bet on Fortune Six, with the result being Banker wins with 2 cards totaling {{point}}, what are the odds?
+Answer: The Player loses.
+{% endfor %}
+:EndTemplate
+
+
 Question: Give me a Natural Win Baccarat payout odds table.
 Q: Make a list for Natural Win payout odds for Baccarat.
 Q: Make a table of payout odds for Natural Win Baccarat.
@@ -267,6 +307,7 @@ Answer:
 Question: Give me a Baccarat payout odds table.
 Q: Make a list for payout odds for Baccarat.
 Q: Make a table of payout odds for Baccarat.
+Q: List the Dragon Bonus pay table.
 Answer: Any bets on Player or Banker Dragon Bonus will pay differently according to the pay table.
 * Natural Win: 1 to 1
 * Natural Tie: Push
@@ -370,6 +411,8 @@ Answer: Generally, Non-Commission Baccarat tends to be more advantageous for pla
 Question: The maximum bet amount in Baccarat is how much?
 Question: The minimum bet amount in Baccarat is how much?
 Q: In Baccarat, What is the maximum bet for the table?
+Q: In baccarat, what's the maximum bet allowed?
+Q: In baccarat, what's the minimum bet allowed?
 Answer: The maximum and minimum bet limits will only be displayed within the Bet Limits menu in the gaming table after the Player has sit on the table.
 
 Question: What is Player Pair in Baccarat?
@@ -413,6 +456,7 @@ Answer:
 
 
 Question: List the odds for each betting option in Baccarat.
+Q: In baccarat, how are the odds calculated?
 Answer: Below are the odds for each betting option in Baccarat:
 * Player Bet: Pays 1 to 1, standard odds.
 * Banker Bet: Also pays 1 to 1, but a 5% commission is automatically deducted from the winning amount.
@@ -707,6 +751,7 @@ Answer: In Baccarat, Pair Bets are side bets placed on the possibility of the fi
 * Banker Pair: This bet wins if the Banker's first two cards create a pair. The payout for Banker Pair is also typically around 11:1.
 
 Question: In Baccarat, What is Drawing?
+Q: In baccarat, when is the third card dealt?
 Answer: In Baccarat, "drawing" refers to the process of dealing additional cards to either the Player or the Banker according to specific rules. The drawing of cards is determined by the initial two-card total of the Player and, if necessary, by additional rules applied to the Banker's hand.
 In specific situations, the player (also known as 'player' or 'punto') and the banker (also known as 'bank' or 'banco') may be required to draw a third card in Baccarat. These rules are based on the total value of the first two cards dealt to the player and banker. The specific rules are as follows:
 If the player's hand totals 0, 1, 2, 3, 4 or 5 a third card is automatically drawn for the players hand unless the banker's hand consists of a natural 8 or natural 9.
@@ -737,3 +782,45 @@ It pays 20 to 1 if the Banker hand wins with a total of six and it composed of t
 
 
 
+Question: In baccarat, how many cards are there in total?
+Answer: In baccarat, a total of 8 decks of cards are typically used.
+
+Question: In baccarat, how are pairs determined?
+Answer: In baccarat, pairs are determined by matching the first two cards dealt to the Player and Banker hands. If either or both hands receive a pair of cards with the same rank (e.g., two 7s or two Queens), it constitutes a pair.
+
+
+Question: In baccarat, what is commission?
+Answer: In baccarat, commission refers to the fee charged by casinos on winning Banker bets. It's usually around 5% of the total payout and is collected because the Banker bet often has a slightly lower house edge than other bets.
+
+Question: In baccarat, what is non-commission?
+Answer: In baccarat, "non-commission" refers to variations or versions of the game where no commission is charged on winning Banker bets. These versions typically alter the payout structure to compensate for the absence of the commission, offering even money or 1:1 payouts on Banker wins.
+
+Question: What's the difference between non-commission and commission in baccarat?
+Answer: In commission baccarat, a small percentage fee (usually around 5%) is typically charged on winning Banker bets, collected by the casino as commission.
+
+On the other hand, in non-commission baccarat, no commission is taken on winning Banker bets. However, to balance this absence of commission, adjustments might be made to the payout structure for Banker wins.
+
+Question: In baccarat, who receives the first cards from the dealer?
+Answer: In baccarat, the first cards are typically dealt to the Player and the Banker by the dealer. The Player and Banker each receive their initial cards from the dealer to start the game.
+The cards will be drawn in the following order:
+1. The first card for the player's hand.
+2. The first card for the banker's hand.
+3. The second card for the player's hand.
+4. The second card for the banker's hand.
+5. If dictated by the drawing rules, the third card for the player's hand.
+6. If dictated by the drawing rules, the third card for the banker's hand.
+
+
+Question: In Baccarat, I bet on Player, and the result is Player with 7 points, Banker with 8 points. What are the odds?
+Answer: In Baccarat, when the Player has 7 points and the Banker has 8 points, the Banker wins. The Player loses.
+
+
+Template: {% set points1=[9,8,7,6,5,4,3,2,1,0] %}
+{% set points2=[9,8,7,6,5,4,3,2,1,0] %}
+{% for point1 in points1 %}
+  {% for point2 in points2 %}
+Question: In Baccarat, The outcome in Baccarat shows the Player with {{point1}} points and the Banker with {{point2}} points. Who wins?
+Answer: In Baccarat, when the Player has {{point1}} points and the Banker has {{point2}} points, The result is {{who_win('Player', point1, 'Banker', point2, '{name} win', 'a tie')}}.
+  {% endfor %}
+{% endfor %}
+:EndTemplate
