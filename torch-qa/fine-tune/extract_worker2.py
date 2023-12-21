@@ -1,6 +1,6 @@
 import os
 from io_utils import query_sub_files
-from langchain_lit import load_markdown_documents
+from langchain_lit import load_markdown_documents, load_markdown_document, split_documents_to_splits
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import argparse
 from llama_cpp import Llama
@@ -164,10 +164,16 @@ if __name__ == '__main__':
             os.remove(output_llm_qa_file)
 
     for idx, file in enumerate(query_sub_files('./data', ['.txt', '.md'])):
-        content = get_file_content(file)
-        print(f"process {file}")
-        append_qa_data(f'# {file}', output_llm_qa_file)
-        generate_qa_data(llm, content=content, output_llm_qa_file=output_llm_qa_file)
+        # content = get_file_content(file)
+        doc = load_markdown_document(file)
+        doc_splits = split_documents_to_splits(doc)
+        print(f"{file} {len(doc_splits)=}")
+        for split in doc_splits:
+            content = split['page_content']
+            print(f"process {file}")
+            append_qa_data(f'# {file}', output_llm_qa_file)
+            generate_qa_data(llm, content=content, output_llm_qa_file=output_llm_qa_file)
+
         shutil.move(file, './data-processed/')
 
     qa_dict = {}

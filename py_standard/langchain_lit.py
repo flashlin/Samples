@@ -14,6 +14,8 @@ from langchain.chains import ConversationalRetrievalChain, RetrievalQA
 from langchain.vectorstores import FAISS
 from langchain.schema.vectorstore import VectorStore
 
+from io_utils import split_file_path
+
 
 def load_llm_model_with_callback_handler(model_name: str, callback_handler=None):
     if callback_handler is None:
@@ -56,6 +58,34 @@ def load_txt_documents(txt_path: str):
 def load_markdown_documents(data_path: str):
     md_loader = DirectoryLoader(data_path, glob='*.md', loader_cls=UnstructuredMarkdownLoader)
     return md_loader.load()
+
+
+def load_markdown_document(md_file: str):
+    md_path, name, _ = split_file_path(md_file)
+    md_filename = f"{name}.md"
+    md_loader = DirectoryLoader(md_path, glob=md_filename, loader_cls=UnstructuredMarkdownLoader)
+    return md_loader.load()
+
+
+def split_documents(docs):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=35)
+    all_splits = text_splitter.split_documents(docs)
+    return all_splits
+
+
+def convert_docs_to_splits(docs):
+    all_docs = []
+    for doc in docs:
+        all_docs.append({
+            'page_content': doc.page_content,
+            'source': doc.metadata['source']
+        })
+    return all_docs
+
+
+def split_documents_to_splits(docs):
+    docs = split_documents(docs)
+    return convert_docs_to_splits(docs)
 
 
 class LlmEmbedding:

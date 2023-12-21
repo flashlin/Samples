@@ -22,12 +22,47 @@ Question: what is the payout if banker wins with 2 cards in Fortune Six?
 Answer: In Fortune Six, if the Banker wins with a two-card hand, it typically pays 1:1.
 
 Question: What is Fortune Six?
+Q: What is Fortune Six in Baccarat?
 Answer: Fortune Six is one of the side bet in Live Baccarat. 
 The bet will be paid if the Banker hand wins with a total of six. 
 It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.
 * Banker wins with 3 cards totaling 6: 20 to 1.
 * Banker wins with 2 cards totaling 6: 12 to 1.
 * All other result: Lose
+
+Question: What happens if the Banker hand with two cards totaling 0 in Baccarat?
+Answer: When the Banker has a total of 0 with two cards, they draw a third card. However, if the Player has a total of 8 or 9 with two cards, the Banker does not draw another card.
+
+Question: What happens if the Banker hand with two cards totaling 1 in Baccarat?
+Answer: When the Banker has a total of 1 with two cards, they draw a third card. However, if the Player has a total of 8 or 9 with two cards, the Banker does not draw another card.
+
+Question: What happens if the Banker hand with two cards totaling 2 in Baccarat?
+Answer: When the Banker has a total of 2 with two cards, they draw a third card. However, if the Player has a total of 8 or 9 with two cards, the Banker does not draw another card.
+
+Question: What happens if the Banker hand with two cards totaling three in Baccarat?
+Q: What happens if the Banker hand with two cards totaling 3 in Baccarat?
+Answer: When the Banker has a total of 3 with two cards, they draw a third card. However, if the Player draws a card totaling 8, the Banker does not draw another card.
+
+Question: What happens if the Banker hand with two cards totaling four in Baccarat?
+Q: What happens if the Banker hand with two cards totaling 4 in Baccarat?
+Answer: When the Banker has a total of 4 with two cards and the Player draws a third card with a total of 2 to 7, the Banker will draw a third card.
+
+Question: What happens if the Banker hand with two cards totaling five in Baccarat?
+Q: What happens if the Banker hand with two cards totaling 5 in Baccarat?
+Answer: When the Banker has a total of 5 with two cards and the Player draws a third card with a total of 4 to 7, the Banker will draw a third card.
+
+Question: What happens if the Banker hand with two cards totaling six in Baccarat?
+Q: What happens if the Banker hand with two cards totaling 6 in Baccarat?
+Answer: When the Banker has a total of 6 with two cards and the Player draws a third card with a total of 6 or 7, the Banker will draw a third card.
+
+Question: What happens if the Banker hand with two cards totaling 7 in Baccarat?
+Answer: When the Banker has a total of 7 with two cards, does not draw another card.
+
+Question: What happens if the Banker hand with two cards totaling 8 in Baccarat?
+Answer: When the Banker has a total of 8 with two cards, does not draw another card.
+
+Question: What happens if the Banker hand with two cards totaling 9 in Baccarat?
+Answer: When the Banker has a total of 9 with two cards, does not draw another card.
 
 Question: What are the differences between Fortune Six and Baccarat?
 Answer: Fortune Six is a variant of Baccarat, primarily distinguished by its odds and specific game rules.
@@ -37,6 +72,9 @@ It pays 20 to 1 if the Banker hand wins with a total of six and it composed of t
 * Banker wins with 3 cards totaling 6: 20 to 1.
 * Banker wins with 2 cards totaling 6: 12 to 1.
 * All other result: Lose 
+
+Question: What are the Tiger wagers?
+Answer: In Tiger Baccarat, the Tiger wager is a special bet typically representing the 'Player' side. When players choose to bet on 'Tiger' in a game of Baccarat, they're essentially supporting the Player side to win that round.
 
 Question: What is Tiger Baccarat?
 Answer: Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
@@ -104,8 +142,20 @@ Question: what is the payout if i bet on fortun six bet option in live baccarat.
 Answer: The payout for the Fortune Six bet option in live baccarat, when the Banker wins with a two-card hand, is usually 20:1. 
 
 Question: Explain Twin Tiger Pair
+Q: What is the Dragon Bonus in Baccarat?
 Answer: Dragon bonus is one of the side bet in Live Baccarat game that pays when the chosen hand has a natural win or when the chosen hand wins by at least 4 points difference (non-natural).
 The highest payout is 30 to 1 which is for non-natural that wins by 9 points difference.
+
+Question: What is a non-natural win in Baccarat?
+Answer: In Baccarat, a non-natural win refers to a winning hand that isn't a natural. A natural win occurs when the first two cards dealt to either the Player or the Banker total 8 or 9. If neither the Player nor the Banker achieves a natural win, the game proceeds, and additional cards might be drawn according to specific drawing rules.
+
+A non-natural win occurs when one side's final hand value is closer to 9 than the other but hasn't achieved an initial total of 8 or 9 with the first two cards. For instance, if the Player's or Banker's hand totals 6 or 7 at the end of the round and is higher than the opposing hand, it would result in a non-natural win for that side.
+
+
+Question: What are tie bets in Baccarat?
+Answer: In Baccarat, a tie bet refers to wagering on both the Player and Banker hands ending up with the same total points. If you bet on a tie and the final result is a tie between the two hands, you'll receive higher odds. However, ties are relatively rare, so this type of bet usually comes with higher payout odds.
+
+
 
 Question: what's different between big tiger and small tiger?
 Answer: The main difference between Big Tiger and Small Tiger lies in the conditions required for a win and the corresponding payout odds:
@@ -824,3 +874,7 @@ Answer: In Baccarat, when the Player has {{point1}} points and the Banker has {{
   {% endfor %}
 {% endfor %}
 :EndTemplate
+
+
+Question: What are winning and losing bets in Baccarat?
+Answer: In baccarat, winning and losing bets depend on the outcome of the wager you placed. If the side you bet on emerges as the winner, you'll receive corresponding winnings. However, if the side you bet on loses, your wager is lost. There are primarily three possible bets in baccarat: Player, Banker, and Tie. Betting on the Player means that if the Player wins, you'll receive a payout of even money. Betting on the Banker and the Banker wins will usually yield close to even money, minus a commission in some cases. Betting on a Tie, if the result is indeed a tie, offers higher odds, but this outcome is usually the least frequent.
