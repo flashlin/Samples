@@ -957,9 +957,9 @@ In summary, losing in Live Baccarat occurs when the hand you wager on doesn't ha
 
 
 Question: How are cards dealt in Baccarat?
+Q: In Baccarat, Under what circumstances is a third round of card dealing initiated?
 Answer: In Baccarat, cards are dealt in a predetermined and fixed style, with the Player and Banker both receiving two cards each according to specific drawing rules.
 First, two cards are dealt to both the Player and the Banker, these being the primary participants in the game.
-
 Checking for the need to draw a third card: Based on specific rules, it's determined whether the Player or the Banker needs to draw a third card. These rules depend on the total point value of the Player or Banker hands.
 
 If the total point value of the Player's or the Banker's hand is 8 or 9 (a natural): No third card is drawn, and the hand is considered a natural, winning the round.
@@ -978,6 +978,22 @@ For a total of 7 from the initial two cards, the Banker does not draw a third ca
 For a total of 8 or 9 (a natural), the Banker does not draw a third card.
 
 The dealing process is straightforward and strictly governed by these rules, and players are not involved in or able to influence the dealing process.
+
+
+Question: In baccarat, when does the banker draw a third card if the player has received a third card?
+Answer: In baccarat, the banker will draw a third card under the following conditions:
+* If the banker's total hand value is 0 to 2, the banker must draw a third card.
+* When the banker's hand value is 3 and the player's third card is not an 8, the banker draws a third card.
+* If the banker's hand value is 4 and the player's third card is between 2 and 7, the banker draws a third card.
+* When the banker's hand value is 5 and the player's third card is between 4 and 7, the banker draws a third card.
+* If the banker's hand value is 6 and the player's third card is a 6 or 7, the banker draws a third card.
+If none of these conditions are met, the banker stands and does not draw a third card.
+
+Question: In baccarat, what are the rules for the banker if the player doesn't draw a third card?
+Answer: If the player does not draw a third card, the banker follows these rules:
+* If the banker's total hand value is 0 to 5, the banker must draw a third card.
+* If the banker's total hand value is 6 or 7, the banker does not draw a third card.
+These rules determine whether the banker needs to draw a third card and when the banker stops drawing.
 
 
 Question: What are the different types of hands in Live Baccarat?
