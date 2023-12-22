@@ -83,15 +83,19 @@ Question: How to Play Tiger?
 Answer: To play Tiger, simply place a bet in the Tiger betting area of the layout. All bets must be placed before any cards are dealt, and if the banker wins with a score total of six, you win. The payout odds are dependent on how many cards the Banker has when the hand is complete. If the Banker has two cards, this is known as a “Two Card Tiger” and the payout odds are 12 to 1. If the Banker has three cards, this is known as a “Three Card Tiger” and the payout odds are 20 to 1.
 
 Question: How to Play Big Tiger?
+Q: What are the betting rules for Big Tiger bets?
 Answer: To play Big Tiger, simply place a bet in the Big Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly three cards, you win. The payout odds for winning with a score total of six and exactly three cards are 50 to 1.
 
 Question: How to Play Small Tiger?
+Q: What are the betting rules for Small Tiger bets?
 Answer: To play Small Tiger, simply place a bet in the Small Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly two cards, you win. The payout odds for winning with a score total of six and exactly two cards are 22 to 1.
 
 Question: How to Play Tiger Tie?
+Q: What are the betting rules for Tiger Tie bets?
 Answer: To play Tiger Tie, simply place a bet in the Tiger Tie betting area of the layout. All bets must be placed before any cards are dealt. If the result is a Tie with a total of six, you win. The payout odds for winning with a Tie and a total of six are 35 to 1.
 
 Question: How to Play Tiger Pair?
+Q: What are the betting rules for Tiger Pair bets?
 Answer: The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
 
 Question: What is payout of Tiger Baccarat?
@@ -174,6 +178,7 @@ Answer: SBOTOP typically offers various betting options in live baccarat, includ
 * Fortune Six: Betting on the banker winning with a total point of six using two cards.
 
 Question: What is Tiger Baccarat?
+Q: How to play Tiger Baccarat?
 Answer: Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. 
 The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. 
 Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
@@ -680,8 +685,8 @@ Answer:
 * Any Operator system malfunction and / or hardware failure during Live Baccarat will void the play and the particular table will be closed.
 
 Question: How is a failed card scan handled by the dealer in Baccarat?
+Q: What happens if a card fails to scan in Live Baccarat?
 Answer: The card is scanned by the dealer and the result will be displayed on the Players' computer screen. If any card fails to scan, the dealer will re-scan the card in order to display the result to the Players.
-
 
 Question: What happens if a player loses internet connection during a Baccarat game?
 Answer: Any failure of the Players' equipment including but not limited to network connection or computer problems, will not void the game result. Players can check their own bet history on the Report section.
@@ -698,9 +703,8 @@ Answer: The dealer will rescan the card to display the result on the player's co
 Question: What occurs in Live Baccarat in case of an operator system malfunction or hardware failure?
 Answer: The game becomes void, and the particular table will be closed.
 
-
-Question: In the event of two or more cards being dealt simultaneously by accident during a round of baccarat, what will happen?
-Answer: The current round will be aborted, all bets will be returned, and the particular shoe will be replaced with a new shoe.
+Question: What happens if two or more cards are dealt simultaneously in Live Baccarat?
+Answer: In the event of two or more cards are dealt simultaneously by accident, the current round will be aborted, all bets will be returned and the particular shoe will be replaced with a new shoe.
 
 Question: What will happen if any cards are revealed during shuffling?
 Answer: The particular shoe will be replaced, and the dealer will shuffle a new set of cards.
@@ -878,3 +882,67 @@ Answer: In Baccarat, when the Player has {{point1}} points and the Banker has {{
 
 Question: What are winning and losing bets in Baccarat?
 Answer: In baccarat, winning and losing bets depend on the outcome of the wager you placed. If the side you bet on emerges as the winner, you'll receive corresponding winnings. However, if the side you bet on loses, your wager is lost. There are primarily three possible bets in baccarat: Player, Banker, and Tie. Betting on the Player means that if the Player wins, you'll receive a payout of even money. Betting on the Banker and the Banker wins will usually yield close to even money, minus a commission in some cases. Betting on a Tie, if the result is indeed a tie, offers higher odds, but this outcome is usually the least frequent.
+
+Question: What is a Two Card Tiger?
+Answer: A "Two Card Tiger" typically refers to a hand in Baccarat where the Player's or Banker's hand consists of a total of 8 or 9 points using only two cards. It signifies an instant win without needing to draw additional cards. In essence, it's a natural win achieved with just two cards, resulting in victory for the side with the higher total, either the Player or the Banker, without requiring further draws or actions.
+
+Question: What is a Three Card Tiger?
+Answer: A "Three Card Tiger" in Baccarat refers to a hand where either the Player or the Banker achieves a total of 8 points after drawing a third card. It signifies winning with a three-card hand, specifically totaling 8 points, and it's considered a favorable outcome in the game.
+
+Question: In Baccarat, What is a Tie with a total of six?
+Answer: In Baccarat, a tie with a total of six occurs when both the Player's and the Banker's hands have the same total points of six.
+
+Question: What is the minimum number of cards required to play Small Tiger?
+Answer: Small Tiger is a variation of Baccarat where a minimum of 6 cards is required to play. This variation is played with fewer cards compared to traditional Baccarat, creating a faster-paced game with different odds and strategies. The reduced number of cards alters the gameplay dynamics and odds, offering players a unique and quicker Baccarat experience.
+
+Question: What is Twin Tiger Pair?
+Answer: A "Twin Tiger Pair" refers to a situation in baccarat where both the player's and the banker's first two cards form a pair with matching numbers or pictures. This means that both the player's and the banker's initial two cards are either a pair (like two 8s) or cards with identical pictures (such as two Kings).
+When the first two cards for both the player and the banker result in a Twin Tiger Pair, according to the game rules, the payout odds are 100 to 1. 
+
+Question: What is the house edge for Tiger Pair bets?
+Answer: In the game of baccarat, the house edge for Tiger Pair bets varies depending on different casinos and game rules. Generally, the house edge for Tiger Pair bets tends to be higher than standard banker or player bets.
+To accurately determine the house edge for Tiger Pair bets at a specific casino, it's best to review the gaming rules of that casino or directly inquire with the casino staff for accuracy.
+
+Question: What is the difference between Player and Banker hand in Baccarat?
+Answer: In Baccarat, the Player hand and the Banker hand represent two distinct positions where players can choose to place their bets. The primary differences between them are as follows:
+* Player Hand: Players have the option to bet on this hand. Both the Player and the Banker hands receive two cards each. In certain situations, a third card might be dealt based on specific rules.
+* Banker Hand: The Banker hand doesn't necessarily represent the casino or the actual banker but is another position available for betting. Similar to the Player hand, the Banker hand receives two cards and might receive a third card based on specific rules.
+
+Question: What is the difference between Player pair and Banker pair bets in Baccarat?
+Answer: In baccarat, "Player Pair" and "Banker Pair" are two distinct betting options, and their main differences are:
+* Player Pair: This is a bet placed in an area designated for the Player hand, predicting whether the first two cards dealt to the Player hand will form a pair. If the Player hand's initial two cards create a pair, the bet wins.
+* Banker Pair: Similar to the Player Pair, this is a bet placed in an area designated for the Banker hand, predicting whether the first two cards dealt to the Banker hand will form a pair. If the Banker hand's initial two cards create a pair, the bet wins.
+In essence, both bets involve predicting whether the initial two cards of the respective hands will form a pair. The difference lies in where the bet is placed—one is for the Player hand, and the other is for the Banker hand. 
+
+Question: What is the difference between Player and Banker first and second hand in Baccarat?
+Answer: In Baccarat, the distinction between the "Player first and second hand" and the "Banker first and second hand" lies in the sequence of cards dealt and the betting options available:
+* Player First and Second Hand: This refers to the cards dealt to the Player hand. The Player hand receives two initial cards, and in certain cases, a third card might be dealt based on specific game rules. Players can place bets on the Player hand's outcome or side bets like Player Pair on the first two cards or the overall outcome including potential third cards.
+* Banker First and Second Hand: This represents the cards dealt to the Banker hand. Similar to the Player hand, the Banker hand receives two initial cards and may receive a third card based on specific game rules. Bets can be placed on the Banker hand's outcome or side bets like Banker Pair based on the first two cards or the overall outcome considering potential third cards.
+Both the Player and Banker hands receive their initial cards, and subsequent actions (like drawing a third card) might occur according to predefined rules based on the total value of the initial two cards. The difference mainly lies in which hand a player chooses to bet on and whether they predict specific outcomes for the first two cards or the overall outcome of the hand, potentially including a third card.
+
+
+Question: What is Non-Commission Baccarat?
+Answer: Non-Commission Baccarat, also known as "No Commission Baccarat," is a variation of the traditional Baccarat game commonly found in some casinos. In standard Baccarat games, a 5% commission is typically charged on winning Banker bets. However, in Non-Commission Baccarat, the Banker bet winning payout is adjusted to eliminate the commission.
+In Non-Commission Baccarat:
+When the Banker hand wins with a total of 6, it pays 50% of the bet (instead of the regular 1:1 payout).
+When the Banker hand wins with a total of 7, it also pays 50% of the bet.
+If the Banker hand wins with any other total, it pays even money, similar to the Player hand's payout.
+This variation aims to attract players by removing the commission, making it seem more favorable. However, the adjusted payouts on specific Banker hand totals slightly alter the odds and house edge compared to the standard commission-based Baccarat game.
+
+Question: What is Non-Commission?
+Answer: In Baccarat, "Non-Commission" refers to variants where the traditional commission charged on specific bets (like the Banker bet) is removed or adjusted to provide players with different payout structures, often to attract more players by eliminating the perceived commission cost.
+
+Question: How do you win in Live Baccarat?
+Answer: In Live Baccarat, winning the game depends on the following scenarios:
+* Player Hand Wins: When the total points of the Player Hand exceed those of the Banker Hand and are close to 9. If the total points of the Player Hand are 8 or 9 (also known as a natural), it's considered a win for the Player Hand.
+* Banker Hand Wins: When the total points of the Banker Hand exceed those of the Player Hand and are close to 9. If the total points of the Banker Hand are 8 or 9 (also known as a natural), it's considered a win for the Banker Hand.
+* Tie: If the total points of both the Player Hand and the Banker Hand are the same, it's called a tie. Usually, the payout for a tie is higher, but it's relatively rare.
+In Live Baccarat, players can bet on the Player Hand winning, the Banker Hand winning, or a tie, and the corresponding payouts are determined based on the game's outcome. To win the game, your bet choice needs to align with the actual result of the game.
+
+Question: How do you lose in Live Baccarat?
+Answer: In Live Baccarat, losing occurs based on the following conditions:
+* Banker Hand Wins: If you bet on the Player Hand and the Banker Hand's total points exceed those of the Player Hand and are closer to 9, your bet on the Player Hand loses.
+* Player Hand Wins: If you bet on the Banker Hand and the Player Hand's total points exceed those of the Banker Hand and are closer to 9, your bet on the Banker Hand loses.
+* Tie: If you bet on either the Player Hand or the Banker Hand, and the game ends in a tie, your bet on the specific hand loses. However, in some cases, casinos may offer a push or refund for tie bets.
+In summary, losing in Live Baccarat occurs when the hand you wager on doesn't have a higher total point value than the opposing hand or if you bet on a specific hand that results in a tie.
+

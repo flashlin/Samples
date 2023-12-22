@@ -201,6 +201,6 @@ if __name__ == '__main__':
 
     convert_train_jsonl_to_json(qa_jsonl)
 
-    # convert_qa_md_file_to_train_jsonl("./data-user/baccarat.md", qa_jsonl)
+    #convert_qa_md_file_to_train_jsonl("./data-user/baccarat-cards.md", qa_jsonl)
     convert_train_jsonl_to_csv(qa_jsonl)
 

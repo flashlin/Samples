@@ -216,6 +216,9 @@ def compute_fn(expr: str):
 def mul_fn(a1, b1):
     return a1 * b1
 
+def show_list_fn(a_list):
+    return ', '.join(a_list)
+
 def baccarat_card_value_fn(cards: list[str]) -> int:
     cards_dict = {
         'a': 1,
@@ -242,6 +245,21 @@ def baccarat_card_value_fn(cards: list[str]) -> int:
             continue
         value += cards_dict[card]
     return value % 10
+
+def baccarat_2cards_result_next_step_fn(player_cards, banker_cards):
+    player_value = baccarat_card_value_fn(player_cards)
+    banker_value = baccarat_card_value_fn(banker_cards)
+    if 0 <= player_value <= 5:
+        return f"The Player has a total of {player_value} points with two cards. According to the rules of baccarat, when the Player's total points range from 0 to 5, the Player must draw one additional card."
+    if (player_value == 8 or player_value == 9) and player_value > banker_value:
+        return f"The Player has a total of {player_value} points with two cards. The Player's two cards total 8 or 9 points, known as a 'natural', resulting in an immediate win for that round."
+    if (player_value == 8 or player_value == 9) and player_value == banker_value:
+        return f"Because both the Player and the Banker have the same point total of {player_value}, this situation is referred to as a tie."
+    if (player_value == 8 or player_value == 9) and player_value < banker_value:
+        return f"The Player and the Banker both have two cards. The total sum of the Player's cards is {player_value} points, and the total sum of the Banker's cards is {banker_value} points. According to the rules of Baccarat, the side closer to 9 points wins, therefore, the Banker wins."
+    if banker_value == 8 or banker_value == 9:
+        return f"The Player and the Banker both have two cards. The total sum of the Player's cards is {player_value} points, and the total sum of the Banker's cards is {banker_value} points. According to the rules of Baccarat, the side closer to 9 points wins, therefore, the Banker wins."
+    return f"The Player has a total of {player_value} points with two cards. The player's hand total is 6 points or higher, and the player does not need to draw another card."
 
 def who_win_fn(name1, point1, name2, point2, win_message, tie_message):
     if point1 > point2:
@@ -317,6 +335,8 @@ def render_template(template_content: str):
     env.globals['mul'] = mul_fn
     env.globals['baccarat_card_value'] = baccarat_card_value_fn
     env.globals['who_win'] = who_win_fn
+    env.globals['show_list'] = show_list_fn
+    env.globals['baccarat_2cards_result_next_step'] = baccarat_2cards_result_next_step_fn
     # {{ custom_function(3, 5) }}
     try:
         template = env.from_string(template_content)
