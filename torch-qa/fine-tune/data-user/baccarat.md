@@ -1026,3 +1026,8 @@ In Baccarat, the card values are calculated as follows:
 * Cards 2 through 9 are worth their face value in points, e.g., 2 is worth 2 points, 9 is worth 9 points.
 * 10s, Jacks, Queens, and Kings are worth 0 points.
 For example, if you have an 8 and a Queen, the total value of the hand is 8 (8 points) + 0 (Queen is 0 points) = 8 points
+
+
+Question: In Baccarat, What determines the outcome if neither the player nor the banker needs to draw a third card?
+Answer: If neither the player nor the banker needs to draw a third card, the winner is determined by the total points in their hands. The side with the higher total points wins. In case of a tie in points, it's a standoff.
+
