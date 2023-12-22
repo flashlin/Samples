@@ -73,6 +73,15 @@ It pays 20 to 1 if the Banker hand wins with a total of six and it composed of t
 * Banker wins with 2 cards totaling 6: 12 to 1.
 * All other result: Lose 
 
+Question: Are there any common terms in Baccarat that novice players should understand?
+Answer: Sure, here are some common terms in Baccarat that can be helpful for beginners:
+* Banker: One of the betting sides, referring to the side where bets can be placed to win the round.
+* Player: One of the betting sides, referring to the side where bets can be placed to win the round against the Banker.
+* Tie: Predicting that the final points of both the Player and Banker will be equal, resulting in a tie.
+* Natural: Refers to a total of 8 or 9 points from the first two cards dealt to either the Player or Banker.
+* Roadmap: A chart or record that tracks past game results, used to observe historical trends.
+* Drawing: In specific situations, either the Player or Banker will receive a third card to get closer to a total point value of 9.
+
 Question: What are the Tiger wagers?
 Answer: In Tiger Baccarat, the Tiger wager is a special bet typically representing the 'Player' side. When players choose to bet on 'Tiger' in a game of Baccarat, they're essentially supporting the Player side to win that round.
 
@@ -554,6 +563,7 @@ Answer:
 * Aces are counted as one.
 
 Question: What is Drawing Rules in baccarat?
+Q: How is the third card dealt in Baccarat, and are there any special rules or circumstances?
 Answer: There are no optional drawing rules in this game. Whether cards are drawn or not is determined according to the rules provided below. These rules are called the "Drawing Rules" or "Tableau", and are identical to those used in all of the major casinos of America, Europe and Asia.
 The decision to draw a third card for the players hand is made automatically according to standard casino rules as below.
 * Total of First Two Cards: 0,1,2,3,4,5. DRAW a third card unless BANKER has a NATURAL.
