@@ -99,6 +99,7 @@ Q: What are the betting rules for Tiger Pair bets?
 Answer: The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
 
 Question: What is payout of Tiger Baccarat?
+Q: List the betting options in Tiger Baccarat.
 Answer: 
 * Tiger: Banker wins with a total score of six.
   - Two Card Tiger: Odds are 12 to 1 when the Banker has two cards.
@@ -174,7 +175,6 @@ Answer: SBOTOP typically offers various betting options in live baccarat, includ
 * Tie Bet: Betting that the player and banker will tie.
 * Pair Bet: Betting that the first two cards dealt to either the player or banker will form a pair.
 * Dragon Bonus: Betting on the side bet based on the point difference between the winning hand.
-* Big/Small: Betting on the total number of cards dealt between player and banker.
 * Fortune Six: Betting on the banker winning with a total point of six using two cards.
 
 Question: What is Tiger Baccarat?
@@ -362,7 +362,6 @@ Answer:
 Question: Give me a Baccarat payout odds table.
 Q: Make a list for payout odds for Baccarat.
 Q: Make a table of payout odds for Baccarat.
-Q: List the Dragon Bonus pay table.
 Answer: Any bets on Player or Banker Dragon Bonus will pay differently according to the pay table.
 * Natural Win: 1 to 1
 * Natural Tie: Push
@@ -946,3 +945,58 @@ Answer: In Live Baccarat, losing occurs based on the following conditions:
 * Tie: If you bet on either the Player Hand or the Banker Hand, and the game ends in a tie, your bet on the specific hand loses. However, in some cases, casinos may offer a push or refund for tie bets.
 In summary, losing in Live Baccarat occurs when the hand you wager on doesn't have a higher total point value than the opposing hand or if you bet on a specific hand that results in a tie.
 
+
+Question: How are cards dealt in Baccarat?
+Answer: In Baccarat, cards are dealt in a predetermined and fixed style, with the Player and Banker both receiving two cards each according to specific drawing rules.
+First, two cards are dealt to both the Player and the Banker, these being the primary participants in the game.
+
+Checking for the need to draw a third card: Based on specific rules, it's determined whether the Player or the Banker needs to draw a third card. These rules depend on the total point value of the Player or Banker hands.
+
+If the total point value of the Player's or the Banker's hand is 8 or 9 (a natural): No third card is drawn, and the hand is considered a natural, winning the round.
+* Player's drawing rules:
+For a total of 0, 1, 2, 3, 4, or 5 from the initial two cards, the Player draws a third card.
+For a total of 6 or 7 from the initial two cards, the Player does not draw a third card.
+For a total of 8 or 9 (a natural), the Player does not draw a third card.
+
+* Banker's drawing rules:
+For a total of 0, 1, or 2 from the initial two cards, the Banker draws a third card unless the Player has a natural.
+For a total of 3 from the initial two cards, the Banker draws a third card unless the Player's third card is an 8.
+For a total of 4 from the initial two cards, the Banker draws a third card unless the Player's third card is a 2 to 7.
+For a total of 5 from the initial two cards, the Banker draws a third card unless the Player's third card is a 4 to 7.
+For a total of 6 from the initial two cards, the Banker draws a third card unless the Player's third card is a 6 or 7.
+For a total of 7 from the initial two cards, the Banker does not draw a third card.
+For a total of 8 or 9 (a natural), the Banker does not draw a third card.
+
+The dealing process is straightforward and strictly governed by these rules, and players are not involved in or able to influence the dealing process.
+
+
+Question: What are the different types of hands in Live Baccarat?
+Answer: In Live Baccarat, the different types of hands are:
+* Player Hand: This refers to the hand dealt to the player. Players can place bets on the Player Hand, predicting its victory over the Banker Hand or a tie outcome.
+* Banker Hand: This represents the hand dealt to the banker. Players can place bets on the Banker Hand, anticipating its win against the Player Hand or a tie.
+* Tie: It occurs when the total points of both the Player Hand and the Banker Hand are the same. Players can place bets specifically on a tie outcome between the Player and Banker hands.
+These are the primary hands involved in Live Baccarat, and players can place bets on the outcome of these hands in the game.
+
+Question: What are the basic rules of Baccarat? Are there any common gaming rules?
+Answer: Baccarat has several basic rules:
+* Betting Options: Baccarat has three betting options: 'Banker,' 'Player,' and 'Tie.'
+* Game Objective: The objective is to predict which side's card combination is closest to nine points. Cards 2-9 retain their face value, A is worth 1 point, and 10, J, Q, K are worth 0 points. If the total points exceed 9, only the digit in the ones place is considered.
+* Dealing Rules: The game starts by dealing two cards to the 'Banker' and 'Player,' with a possibility of dealing a third card based on specific rules.
+* Drawing Rules: If the 'Player' or 'Banker' has a total point value of 8 or 9, it's called a natural hand, and no more cards are drawn. If the total points range between 0 and 5, the 'Player' draws a third card. The drawing rules for the 'Banker' are slightly more complex and depend on whether the 'Player' drew a card and the 'Banker's' total point value.
+* Determining the Winner: The side closest to nine points wins. If both sides have the same point value, it's a tie. Players who bet on the winning side receive corresponding winnings
+
+Question: What are the dealing rules in Baccarat, and how are the points of the hands calculated?
+Answer: Answer: In baccarat, the first cards are typically dealt to the Player and the Banker by the dealer. The Player and Banker each receive their initial cards from the dealer to start the game.
+The cards will be drawn in the following order:
+1. The first card for the player's hand.
+2. The first card for the banker's hand.
+3. The second card for the player's hand.
+4. The second card for the banker's hand.
+5. If dictated by the drawing rules, the third card for the player's hand.
+6. If dictated by the drawing rules, the third card for the banker's hand.
+
+In Baccarat, the card values are calculated as follows:
+* Aces are worth 1 point.
+* Cards 2 through 9 are worth their face value in points, e.g., 2 is worth 2 points, 9 is worth 9 points.
+* 10s, Jacks, Queens, and Kings are worth 0 points.
+For example, if you have an 8 and a Queen, the total value of the hand is 8 (8 points) + 0 (Queen is 0 points) = 8 points
