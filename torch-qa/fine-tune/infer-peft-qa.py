@@ -164,8 +164,15 @@ def ask(user_input):
 
 def ask_qa(user_input):
     resp = rag_chain.invoke(user_input)
+    print(f"{resp=}")
+    doc = resp['context'][0]
+    print(f"{doc=}")
+    page_content = doc.page_content
+    source = doc.metadata['source']
+    answer = resp['text']
     #answer = resp['result']
-    return resp
+    print(f"{source=}")
+    return answer
 
 
 print(f"load {model_name} done")
