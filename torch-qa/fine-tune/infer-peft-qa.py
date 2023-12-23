@@ -106,7 +106,10 @@ pipe = pipeline(
 prompt_template = """
 ### [INST] 
 Instruction: Answer the question based on your 
-fantasy football knowledge. Here is context to help:
+gaming knowledge. 
+If the answer cannot be found from the context, try to find the answer from your knowledge. 
+If still unable to find the answer, respond with 'I don't know'.
+Here is context to help:
 
 {context}
 
