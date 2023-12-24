@@ -151,20 +151,6 @@ rag_chain = (
 )
 
 
-# def ask(user_input):
-#     prompt = prompt_template.format(user_input=user_input)
-#     encoding = tokenizer(prompt, return_tensors="pt").to(device)
-#
-#     outputs = model.generate(
-#         input_ids=encoding.input_ids,
-#         attention_mask=encoding.attention_mask,
-#         generation_config=generation_config
-#     )
-#
-#     resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
-#     return resp
-
-
 def ask_qa(user_input):
     resp = rag_chain.invoke(user_input)
     doc = resp['context'][0]
@@ -173,6 +159,27 @@ def ask_qa(user_input):
     answer = resp['text']
     print(f"{source=}")
     return answer
+
+
+def ask_llm(user_input):
+   prompt_template2 = """
+[INST]    
+{context}
+[/INST]
+"""
+   prompt = prompt_template2.format(context=user_input)
+   encoding = tokenizer(prompt, return_tensors="pt").to(device)
+
+   outputs = model.generate(
+        input_ids=encoding.input_ids,
+        attention_mask=encoding.attention_mask,
+        generation_config=generation_config
+   )
+
+   resp = tokenizer.decode(outputs[0], skip_special_tokens=True)
+   answer = resp.replace(prompt, "")
+   # answer = answer.strip().replace("### ANSWER:\n", "")
+   return answer
 
 
 print(f"load {model_name} done")
