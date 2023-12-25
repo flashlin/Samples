@@ -248,3 +248,5 @@ A: No, only one side can win per round.
 Q: Who are the parties involved in card dealing in Baccarat?
 A: The player and the banker are the two parties.
 
+Q: What is the end goal of the tiger baccarat?
+A: The end goal in Tiger Baccarat, similar to traditional baccarat variations, is to predict the hand that will have a higher total value—either the Tiger (similar to the Banker) or the Dragon (similar to the Player). Players place bets on either the Tiger or Dragon hand, aiming to predict the winning side accurately. The ultimate objective is to correctly guess which hand will have a higher total point value and win the round.
