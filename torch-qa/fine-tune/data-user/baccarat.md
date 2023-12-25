@@ -451,6 +451,7 @@ Answer:
 * All cards except for Tens, Picture Cards, (Jacks, Queens and Kings) and Aces, are worth their face value.
 * All Tens and “Picture Cards” are counted as zero.
 * Aces are counted as one.
+Add the face values together, and if the total is greater than 9, subtract 10 repeatedly until it's less than or equal to 9.
 
 Question: What is Drawing Rules in baccarat?
 Q: How is the third card dealt in Baccarat, and are there any special rules or circumstances?
@@ -977,3 +978,23 @@ Answer: If neither draws a card, the side with the higher total points wins.
 Question: In Baccarat, does the prolonged duration of the game affect the chances of winning?
 Answer: Each round in Baccarat is independent of previous rounds; the game's outcome primarily relies on luck.
 
+Q: How many cards can be dealt at most to either side in Baccarat?
+A: Only a maximum of three cards can be dealt to either side.
+
+Q: Can the point value of cards in Baccarat exceed 9?
+A: No, if it exceeds 9, subtract 10 to recompute the point value.
+
+Question: What happens in Baccarat if both hands have the same point value?
+Answer: If both the player's and banker's hands in Baccarat have the same total point value, it results in a "tie" or "standoff." In this situation, neither the player nor the banker wins or loses. When a tie occurs, bets placed on the player or banker are typically returned to the respective bettors, and bets on a tie itself are paid out according to the established odds, usually at 8 to 1, depending on the house rules.
+
+Q: What are the odds for a player win in Baccarat?
+A: 1 to 1
+
+Q: What are the odds for a banker win in Baccarat?
+A: 1 to 1, minus 5% commission.
+
+Q: What are the odds for a Banker Pair in Baccarat?
+A: 11 to 1
+
+Q: How many decks of cards are used in Baccarat?
+A: 8 decks, totaling 416 cards.

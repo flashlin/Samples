@@ -236,4 +236,15 @@ A: 22:1
 Question: What is the minimum number of cards required to play Small Tiger?
 Answer: Small Tiger is a variation of Baccarat where a minimum of 6 cards is required to play. This variation is played with fewer cards compared to traditional Baccarat, creating a faster-paced game with different odds and strategies. The reduced number of cards alters the gameplay dynamics and odds, offering players a unique and quicker Baccarat experience.
 
+Q: What are the conditions for winning a Dragon Bonus bet?
+A: Natural win or win by a margin of 4 points or more on the chosen side.
+
+Q: What is the minimum payout ratio for Dragon Bonus in Baccarat?
+A: 1 to 1
+
+Q: Can both the player and the banker win at the same time in Baccarat?
+A: No, only one side can win per round.
+
+Q: Who are the parties involved in card dealing in Baccarat?
+A: The player and the banker are the two parties.
 
