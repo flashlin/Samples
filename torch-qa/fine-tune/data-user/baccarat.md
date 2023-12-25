@@ -23,12 +23,39 @@ Answer: In Fortune Six, if the Banker wins with a two-card hand, it typically pa
 
 Question: What is Fortune Six?
 Q: What is Fortune Six in Baccarat?
+Q: What is Fortune Six in Live Baccarat?
+Q: What are the rules for Fortune Six in Live Baccarat?
+Q: What are the rules for Fortune Six in Baccarat?
 Answer: Fortune Six is one of the side bet in Live Baccarat. 
 The bet will be paid if the Banker hand wins with a total of six. 
 It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.
 * Banker wins with 3 cards totaling 6: 20 to 1.
 * Banker wins with 2 cards totaling 6: 12 to 1.
 * All other result: Lose
+
+Q: What is the payout for Fortune Six?
+A: It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.
+* Banker wins with 3 cards totaling 6: 20 to 1.
+* Banker wins with 2 cards totaling 6: 12 to 1.
+* All other result: Lose
+
+Q: Is Fortune Six only paid if the Banker hand wins with a total of six?
+A: Yes, the Fortune Six side bet in Baccarat is generally paid out only when the Banker's hand wins with a total point count of exactly six. If the Banker wins with any other total count or if the Player hand wins, the Fortune Six side bet typically loses. This specific side bet is contingent upon the Banker's hand achieving a total point count of six for it to pay out.
+
+Question: Is Fortune Six paid differently depending on the number of cards used to make the total of six?
+Answer: Yes, Fortune Six will be paid differently depending on the number of cards used to make the total of six. If the Banker hand wins with a total of six and composed of three cards, it will pay 20 to 1. If the Banker hand wins with a total of six and composed of two cards, it will pay 12 to 1.
+
+Question: What is the payout for Fortune Six if the Banker hand wins with a total of six and composed of two cards?
+Answer: The payout for Fortune Six if the Banker hand wins with a total of six and composed of two cards is 12 to 1.
+
+Question: What is the payout for Fortune Six if the Banker hand wins with a total of six and composed of three cards?
+Answer: The payout for Fortune Six if the Banker hand wins with a total of six and composed of three cards is 20 to 1.
+
+Question: What is the payout for Fortune Six if the Banker hand does not win with a total of six?
+Answer: Fortune Six will not be paid if the Banker hand does not win with a total of six.
+
+Q: What is a sign at the table in Baccarat?
+Answer: A sign at the table in Baccarat indicates that a player must have a Baccarat wager on the Player's Hand, Banker's Hand or Tie in order to place a Tiger wager.
 
 Question: What happens if the Banker hand with two cards totaling 0 in Baccarat?
 Answer: When the Banker has a total of 0 with two cards, they draw a third card. However, if the Player has a total of 8 or 9 with two cards, the Banker does not draw another card.

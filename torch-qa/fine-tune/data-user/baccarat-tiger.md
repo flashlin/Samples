@@ -44,6 +44,23 @@ Q: What are the betting rules for Tiger Pair bets?
 Answer: The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
 
 
+Q: What are the odds for winning the Tiger Pair wager?
+A: "Tiger Pair" has three scenarios:
+Single Tiger Pair - Only one side forms a pair with their initial two cards, paying out at 4:1 odds.
+Double Tiger Pair - Both sides form a pair with their initial two cards, paying out at 20:1 odds.
+Twin Tiger Pair - Both sides have similar point counts or patterns in their initial pairs, paying out at 100:1 odds.
+
+
+Question: What is the objective of the game Big Tiger?
+Answer: The objective of the game Big Tiger is to place a bet in the Big Tiger betting area of the layout before any cards are dealt, and if the banker wins with a score total of six and has exactly three cards, you win.
+
+Question: How does the combination of Tiger Pair, Banker Pairs, and Player pairs wagers work?
+Answer: The combination of Tiger Pair, Banker Pairs, and Player pairs wagers is a bet where a bettor must place all bets in the Tiger Pair betting area of the layout before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, the bettor wins.
+
+Question: How does a bettor place bets in the Tiger Pair betting area of the layout?
+Answer: A bettor places bets in the Tiger Pair betting area of the layout by placing their bet on the designated spot. All bets must be placed before any cards are dealt.
+
+
 Question: what's different between big tiger and small tiger?
 Answer: The main difference between Big Tiger and Small Tiger lies in the conditions required for a win and the corresponding payout odds:
 * Big Tiger: This bet wins if the banker wins with a score total of six and has exactly three cards. The payout odds for this specific scenario are 50 to 1.
@@ -109,6 +126,7 @@ Answer: Odds are 12 to 1 for a Two Card Tiger and 20 to 1 for a Three Card Tiger
 Question: What is payout of Tiger Baccarat?
 Q: List the betting options in Tiger Baccarat.
 Q: List the betting options and odds for Tiger Baccarat.
+Q: What is the Dragon Bonus pay table?
 Answer: 
 * Tiger: Banker wins with a total score of six.
   - Two Card Tiger: Odds are 12 to 1 when the Banker has two cards.
@@ -121,6 +139,32 @@ Answer:
     - Single Tiger Pair: Odds are 4 to 1 if only one hand has a pair on their first two cards.
     - Double Tiger Pair: Odds are 20 to 1 if both hands have a pair on their first two cards.
     - Twin Tiger Pair: Odds are 100 to 1 if both hands' pairs have matching numbers or pictures.
+
+
+Q: What are the payouts for Baccarat side bets?
+A: 
+* Fortune Six: The bet will be paid if the Banker hand wins with a total of six. 
+It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.
+  - Banker wins with 3 cards totaling 6: 20 to 1.
+  - Banker wins with 2 cards totaling 6: 12 to 1.
+  - All other result: Lose
+* Tiger: Banker wins with a total score of six.
+  - Two Card Tiger: Odds are 12 to 1 when the Banker has two cards.
+  - Three Card Tiger: Odds are 20 to 1 when the Banker has three cards.
+* Big Tiger: Banker wins with a total score of six and exactly three cards. Payout Odds: 50 to 1 for a total score of six and exactly three cards.
+* Small Tiger: If the banker wins with a score total of six and has exactly two cards, you win. The payout odds for winning with a score total of six and exactly two cards are 22 to 1.
+* Tiger Tie: Tie with a total of six. Payout Odds: 35 to 1 for a Tie with a total of six.
+* Tiger Pair: Player's or Banker's first two cards are a pair.
+  Payout Odds:
+    - Single Tiger Pair: Odds are 4 to 1 if only one hand has a pair on their first two cards.
+    - Double Tiger Pair: Odds are 20 to 1 if both hands have a pair on their first two cards.
+    - Twin Tiger Pair: Odds are 100 to 1 if both hands' pairs have matching numbers or pictures.
+
+
+Q: How do I win in tiger baccarat?
+A: In Tiger Baccarat, winning involves predicting which hand will have a higher total points value. Placing bets on the Tiger or Dragon positions, you win if your chosen hand has a higher point total.     
+
+
 
 Q: What are the payout odds if the Banker wins with a score total of 6 and two cards?
 A: If the Banker wins with a score total of 6 and two cards, known as a "Two Card Tiger", the payout odds are 12 to 1.
