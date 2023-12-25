@@ -75,6 +75,8 @@ Answer: I don't have personal preferences or inclinations. Sic Bo is an engaging
 Question: In Baccarat, Is there a minimum bet limit? if yes, give me the minimum bet limit by currency
 Q: What is the minimum bet limits for Baccarat?
 Q: What is the maximum bet limits for Baccarat?
-Answer: In Baccarat, there's usually a set minimum bet limit determined by the casino or a specific table. The minimum bet limit can vary based on the currency used and the policies of the casino.
+Q: Are there rules limiting the betting amounts in Tiger Baccarat?
+Answer: There's usually a set minimum bet limit determined by the casino or a specific table. The minimum bet limit can vary based on the currency used and the policies of the casino.
 The maximum and minimum bet limits will only be displayed within the Bet Limits menu in the gaming table after the Player has sit on the table.
+
 

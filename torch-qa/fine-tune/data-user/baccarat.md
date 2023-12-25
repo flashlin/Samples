@@ -557,6 +557,7 @@ Answer:
 
 Question: How are the card values calculated in baccarat? 
 Q: What are the rules for the card values in baccarat?
+Q: What method is used to calculate points in Baccarat?
 Answer: 
 * All cards except for Tens, Picture Cards, (Jacks, Queens and Kings) and Aces, are worth their face value.
 * All Tens and “Picture Cards” are counted as zero.
@@ -979,6 +980,42 @@ For a total of 8 or 9 (a natural), the Banker does not draw a third card.
 
 The dealing process is straightforward and strictly governed by these rules, and players are not involved in or able to influence the dealing process.
 
+Question: If the total points in the Banker's hand are 0, can a third card be drawn?
+Answer: There are drawing rules, but it depends on the Player's hand to determine if a third card can be drawn.
+For a total of 0, 1, or 2 from the initial two cards, the Banker draws a third card unless the Player has a natural.
+
+Question: If the total points in the Banker's hand are 1, can a third card be drawn?
+Answer: There are drawing rules, but it depends on the Player's hand to determine if a third card can be drawn.
+For a total of 0, 1, or 2 from the initial two cards, the Banker draws a third card unless the Player has a natural.
+
+Question: If the total points in the Banker's hand are 2, can a third card be drawn?
+Answer: There are drawing rules, but it depends on the Player's hand to determine if a third card can be drawn.
+For a total of 0, 1, or 2 from the initial two cards, the Banker draws a third card unless the Player has a natural.
+
+Question: If the total points in the Banker's hand are 3, can a third card be drawn?
+Answer: There are drawing rules, but it depends on the Player's hand to determine if a third card can be drawn.
+For a total of 3 from the initial two cards, the Banker draws a third card unless the Player's third card is an 8.
+
+Question: If the total points in the Banker's hand are 4, can a third card be drawn?
+Answer: There are drawing rules, but it depends on the Player's hand to determine if a third card can be drawn.
+For a total of 4 from the initial two cards, the Banker draws a third card unless the Player's third card is a 2 to 7.
+
+Question: If the total points in the Banker's hand are 5, can a third card be drawn?
+Answer: There are drawing rules, but it depends on the Player's hand to determine if a third card can be drawn.
+For a total of 5 from the initial two cards, the Banker draws a third card unless the Player's third card is a 4 to 7.
+
+Question: If the total points in the Banker's hand are 6, can a third card be drawn?
+Answer: There are drawing rules, but it depends on the Player's hand to determine if a third card can be drawn.
+For a total of 6 from the initial two cards, the Banker draws a third card unless the Player's third card is a 6 or 7.
+
+Question: If the total points in the Banker's hand are 7, can a third card be drawn?
+Answer: There are drawing rules, For a total of 7 from the initial two cards, the Banker does not draw a third card.
+
+Question: If the total points in the Banker's hand are 8, can a third card be drawn?
+Answer: For a total of 8 or 9 (a natural), the Banker does not draw a third card.
+
+Question: If the total points in the Banker's hand are 9, can a third card be drawn?
+Answer: For a total of 8 or 9 (a natural), the Banker does not draw a third card.
 
 Question: In baccarat, when does the banker draw a third card if the player has received a third card?
 Answer: In baccarat, the banker will draw a third card under the following conditions:
@@ -1012,6 +1049,7 @@ Answer: Baccarat has several basic rules:
 * Determining the Winner: The side closest to nine points wins. If both sides have the same point value, it's a tie. Players who bet on the winning side receive corresponding winnings
 
 Question: What are the dealing rules in Baccarat, and how are the points of the hands calculated?
+Q: What is the dealing sequence in Baccarat? How are cards distributed between the banker and the player?
 Answer: Answer: In baccarat, the first cards are typically dealt to the Player and the Banker by the dealer. The Player and Banker each receive their initial cards from the dealer to start the game.
 The cards will be drawn in the following order:
 1. The first card for the player's hand.
@@ -1030,4 +1068,39 @@ For example, if you have an 8 and a Queen, the total value of the hand is 8 (8 p
 
 Question: In Baccarat, What determines the outcome if neither the player nor the banker needs to draw a third card?
 Answer: If neither the player nor the banker needs to draw a third card, the winner is determined by the total points in their hands. The side with the higher total points wins. In case of a tie in points, it's a standoff.
+
+Question: Are there specific commission rules or commissions in the game?
+Answer: In certain cases, a commission of around 5% might be charged when the banker wins.
+
+Question: Why do bankers sometimes charge a certain commission in Baccarat?
+Answer: Bankers charge a commission when betting on the banker's win as per the specified percentage.
+
+Question: What are "following" and "contrarian" bets in Baccarat? What are some different betting strategies?
+Answer: "Following" involves consistently betting the same amount, while "contrarian" involves alternating bets between banker and player, each with distinct strategies and risks.
+
+Question: How is the profit calculated for a "Tie Bet" in Baccarat? Is it a recommended betting option?
+Answer: The profit for a "Tie Bet" is usually 8:1, but due to lower odds of winning, it's not commonly recommended as a betting option.
+
+Question: Are there rules in Baccarat mentioning what a natural win is? How is it determined?
+Answer: A natural win refers to a total point value of 8 or 9 with the initial two cards. When the Player or Banker achieves a natural win, the game ends immediately.
+
+query: What is a "Tie" in Baccarat? What happens when there's a Tie?
+Answer: "Tie" is a side bet in Baccarat, predicting that the Player and Banker hands will have the same total points. If the Player and Banker hands have the same total points, it's called a Tie, and the side bet wins. Typically, the Tie side bet has odds of 8:1, and if the Tie bet wins, the payout is usually higher than the standard bets.
+
+Question: In Baccarat, At what point, in terms of card count, can't the Banker or Player draw additional cards anymore?
+Answer: The Banker or Player cannot draw additional cards when their total point value is 8 or 9.
+
+
+Question: What does "Three-in-a-Row Big Road" mean in Baccarat?
+Answer: Three-in-a-Row Big Road refers to consecutive wins for the same side (Banker or Player) over three rounds.
+
+
+Question: What does "Natural 8" and "Natural 9" mean in Baccarat?
+Answer: Natural 8 or 9 refers to the initial two cards totaling 8 or 9. This signifies a "natural win" and requires no additional cards.
+
+Question: In Baccarat, When neither the Banker nor the Player draws a third card, who wins?
+Answer: If neither draws a card, the side with the higher total points wins.
+
+Question: In Baccarat, does the prolonged duration of the game affect the chances of winning?
+Answer: Each round in Baccarat is independent of previous rounds; the game's outcome primarily relies on luck.
 
