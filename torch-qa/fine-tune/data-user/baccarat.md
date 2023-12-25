@@ -998,3 +998,6 @@ A: 11 to 1
 
 Q: How many decks of cards are used in Baccarat?
 A: 8 decks, totaling 416 cards.
+
+Q: In baccarat, what is called a push?
+A: In baccarat, 'push' refers to a tie. This situation occurs when the banker and the player have the same total points in their hands, resulting in neither a win nor a loss, and the player's bet is returned. This term indicates that there's neither a victory nor a defeat between the player and the banker.
