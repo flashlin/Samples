@@ -82,69 +82,10 @@ Answer: Sure, here are some common terms in Baccarat that can be helpful for beg
 * Roadmap: A chart or record that tracks past game results, used to observe historical trends.
 * Drawing: In specific situations, either the Player or Banker will receive a third card to get closer to a total point value of 9.
 
-Question: What are the Tiger wagers?
-Answer: In Tiger Baccarat, the Tiger wager is a special bet typically representing the 'Player' side. When players choose to bet on 'Tiger' in a game of Baccarat, they're essentially supporting the Player side to win that round.
-
-Question: What is Tiger Baccarat?
-Answer: Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
-
-Question: How to Play Tiger?
-Answer: To play Tiger, simply place a bet in the Tiger betting area of the layout. All bets must be placed before any cards are dealt, and if the banker wins with a score total of six, you win. The payout odds are dependent on how many cards the Banker has when the hand is complete. If the Banker has two cards, this is known as a “Two Card Tiger” and the payout odds are 12 to 1. If the Banker has three cards, this is known as a “Three Card Tiger” and the payout odds are 20 to 1.
-
-Question: How to Play Big Tiger?
-Q: What are the betting rules for Big Tiger bets?
-Answer: To play Big Tiger, simply place a bet in the Big Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly three cards, you win. The payout odds for winning with a score total of six and exactly three cards are 50 to 1.
-
-Question: How to Play Small Tiger?
-Q: What are the betting rules for Small Tiger bets?
-Answer: To play Small Tiger, simply place a bet in the Small Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly two cards, you win. The payout odds for winning with a score total of six and exactly two cards are 22 to 1.
-
-Question: How to Play Tiger Tie?
-Q: What are the betting rules for Tiger Tie bets?
-Answer: To play Tiger Tie, simply place a bet in the Tiger Tie betting area of the layout. All bets must be placed before any cards are dealt. If the result is a Tie with a total of six, you win. The payout odds for winning with a Tie and a total of six are 35 to 1.
-
-Question: How to Play Tiger Pair?
-Q: What are the betting rules for Tiger Pair bets?
-Answer: The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
-
-Question: What's the winning condition for the Tiger bet?
-Answer: The banker wins with a total score of six.
-
-Question: How do you place a Big Tiger bet on the Baccarat table?
-Answer: Place your bet in the Big Tiger betting area.
-
-Question: What are the odds for winning with a total score of six and exactly three cards on a Big Tiger bet?
-Answer: The odds are 50 to 1.
-
-Question: What is the winning condition for a Tiger Pair bet?
-Answer: Player's or Banker's first two cards need to be a pair.
-
-Question: What are the payout odds for a Tiger Tie bet?
-Answer: The odds are 35 to 1 for a Tie with a total of six.
-
-Question: How do you win a Small Tiger bet?
-Answer: Banker wins with a total score of six and exactly two cards.
-
-Question: What are the winning conditions and corresponding odds for a Tiger Pair bet?
-Answer: Odds are 4 to 1 for a Single Tiger Pair, 20 to 1 for a Double Tiger Pair, and 100 to 1 for a Twin Tiger Pair.
-
-Question: What are the payout odds for a Tiger Tie bet?
-Answer: The odds are 35 to 1 for a Tie with a total of six.
-
-Question: How do you place a Tiger bet?
-Answer: Place your bet in the Tiger betting area.
-
-Question: What are the two different winning conditions and their corresponding odds for a Tiger bet?
-Answer: Odds are 12 to 1 for a Two Card Tiger and 20 to 1 for a Three Card Tiger.
-
 
 Question: what is the payout if i bet on fortun six bet option in live baccarat. and result is banker win with 2 cards.
 Answer: The payout for the Fortune Six bet option in live baccarat, when the Banker wins with a two-card hand, is usually 20:1. 
 
-Question: Explain Twin Tiger Pair
-Q: What is the Dragon Bonus in Baccarat?
-Answer: Dragon bonus is one of the side bet in Live Baccarat game that pays when the chosen hand has a natural win or when the chosen hand wins by at least 4 points difference (non-natural).
-The highest payout is 30 to 1 which is for non-natural that wins by 9 points difference.
 
 Question: What is a non-natural win in Baccarat?
 Answer: In Baccarat, a non-natural win refers to a winning hand that isn't a natural. A natural win occurs when the first two cards dealt to either the Player or the Banker total 8 or 9. If neither the Player nor the Banker achieves a natural win, the game proceeds, and additional cards might be drawn according to specific drawing rules.
@@ -156,12 +97,6 @@ Question: What are tie bets in Baccarat?
 Answer: In Baccarat, a tie bet refers to wagering on both the Player and Banker hands ending up with the same total points. If you bet on a tie and the final result is a tie between the two hands, you'll receive higher odds. However, ties are relatively rare, so this type of bet usually comes with higher payout odds.
 
 
-
-Question: what's different between big tiger and small tiger?
-Answer: The main difference between Big Tiger and Small Tiger lies in the conditions required for a win and the corresponding payout odds:
-* Big Tiger: This bet wins if the banker wins with a score total of six and has exactly three cards. The payout odds for this specific scenario are 50 to 1.
-* Small Tiger: This bet wins if the banker wins with a score total of six and has exactly two cards. The payout odds for this condition are 22 to 1.
-
 Question: what's bet options sbotop offer in live baccarat?
 Question: what's bet options in live baccarat?
 Answer: SBOTOP typically offers various betting options in live baccarat, including:
@@ -171,25 +106,6 @@ Answer: SBOTOP typically offers various betting options in live baccarat, includ
 * Pair Bet: Betting that the first two cards dealt to either the player or banker will form a pair.
 * Dragon Bonus: Betting on the side bet based on the point difference between the winning hand.
 * Fortune Six: Betting on the banker winning with a total point of six using two cards.
-
-Question: What is Tiger Baccarat?
-Q: How to play Tiger Baccarat?
-Answer: Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. 
-The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. 
-Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
-
-Question: What's bet options sbotop offer in Tiger Baccarat?
-Answer: In Tiger Baccarat, SBOTOP offers five optional wagers:
-* Tiger: simply place a bet in the Tiger betting area of the layout. 
-If the banker wins with a score total of six, you win. The payout odds are dependent on how many cards the Banker has when the hand is complete. If the Banker has two cards, this is known as a “Two Card Tiger” and the payout odds are 12 to 1. If the Banker has three cards, this is known as a “Three Card Tiger” and the payout odds are 20 to 1.
-* Big Tiger: simply place a bet in the Big Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly three cards, you win. The payout odds for winning with a score total of six and exactly three cards are 50 to 1.
-* Small Tiger: simply place a bet in the Small Tiger betting area of the layout.
-If the banker wins with a score total of six and has exactly two cards, you win. The payout odds for winning with a score total of six and exactly two cards are 22 to 1.
-* Tiger Tie: simply place a bet in the Tiger Tie betting area of the layout.
- If the result is a Tie with a total of six, you win. The payout odds for winning with a Tie and a total of six are 35 to 1.
-* Tiger Pair: The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
-
-QuestionByPrevTodoList: What is {key} in Tiger Baccarat?
 
 Question: Introduction to Live Dealer Baccarat
 Answer: The objective of the game is to bet on whichever of two hands, the player's hand or the banker's hand, that the Player thinks will have a point value closest to 9. The Player can also bet on a tie.
@@ -271,7 +187,6 @@ Answer: By continuously subtracting 10 until the value is less than or equal to 
 
 Question: In baccarat, what method is used when the combined value of cards exceeds nine?
 Answer: The method involves repeatedly subtracting 10 until the value is less than or equal to 9.
-
 
 
 Question: What impact does a tie bet have on the baccarat game?
@@ -483,18 +398,6 @@ Answer:
 * Player Pair or Banker Pair : The first two cards of either the Player or the Banker hand form a pair (for example 8, 8 or K, K).
 * Natural : A natural hand is a two-card hand totalling eight or nine. The highest possible hand is a natural nine, which occurs when the first two cards drawn for either the bankers hand or the players hand total nine. The second highest hand is a natural eight. If a natural is drawn, this is an automatic winning hand and is called a natural winner. Neither of the hands will receive a third card when a natural is drawn.
 * Non-Commission Baccarat : A version of Baccarat where bets placed on the Banker shall receive payout odds of 1 to 1 except in the event when the Banker wins on Six Points (in such an event, only 50% of the amount bet on the Banker will be paid).
-
-Question: Provide an example of playing Tiger Pair.
-Answer: If the Player hand has two queens as their first two cards and the Banker hand does not have a pair on their first two cards, this is a Single Tiger Pair and pays 4 to 1. If the Banker hand has two nines as their first two cards and the Player hand does not have a pair on their first two cards, this is also a Single Tiger Pair and pays 4 to 1. If the Player hand has two Kings as their first two cards and the Banker hand has two Eights as their first two cards, this is a Double Tiger Pair and pays 20 to 1. If the Player hand has two Jacks as their first two cards and the Banker hand also has two Jacks as their first two cards, this is a Twin Tiger Pair and pays 100 to 1.
-
-Question: Under what circumstances does a "Single Tiger Pair" occur? 
-Answer: When the Player hand has two queens and the Banker hand doesn't have a pair, or when the Banker hand has two nines and the Player hand doesn't have a pair.
-
-Question: How is a "Double Tiger Pair" formed? 
-Answer: When the Player hand has two kings and the Banker hand has two eights.
-
-Question: What conditions lead to a "Twin Tiger Pair"? 
-Answer: When both the Player and Banker hands have two jacks each.
 
 Question: What is payout of Baccarat?
 Answer: 
@@ -879,17 +782,9 @@ Answer: In Baccarat, when the Player has {{point1}} points and the Banker has {{
 Question: What are winning and losing bets in Baccarat?
 Answer: In baccarat, winning and losing bets depend on the outcome of the wager you placed. If the side you bet on emerges as the winner, you'll receive corresponding winnings. However, if the side you bet on loses, your wager is lost. There are primarily three possible bets in baccarat: Player, Banker, and Tie. Betting on the Player means that if the Player wins, you'll receive a payout of even money. Betting on the Banker and the Banker wins will usually yield close to even money, minus a commission in some cases. Betting on a Tie, if the result is indeed a tie, offers higher odds, but this outcome is usually the least frequent.
 
-Question: What is a Two Card Tiger?
-Answer: A "Two Card Tiger" typically refers to a hand in Baccarat where the Player's or Banker's hand consists of a total of 8 or 9 points using only two cards. It signifies an instant win without needing to draw additional cards. In essence, it's a natural win achieved with just two cards, resulting in victory for the side with the higher total, either the Player or the Banker, without requiring further draws or actions.
-
-Question: What is a Three Card Tiger?
-Answer: A "Three Card Tiger" in Baccarat refers to a hand where either the Player or the Banker achieves a total of 8 points after drawing a third card. It signifies winning with a three-card hand, specifically totaling 8 points, and it's considered a favorable outcome in the game.
 
 Question: In Baccarat, What is a Tie with a total of six?
 Answer: In Baccarat, a tie with a total of six occurs when both the Player's and the Banker's hands have the same total points of six.
-
-Question: What is the minimum number of cards required to play Small Tiger?
-Answer: Small Tiger is a variation of Baccarat where a minimum of 6 cards is required to play. This variation is played with fewer cards compared to traditional Baccarat, creating a faster-paced game with different odds and strategies. The reduced number of cards alters the gameplay dynamics and odds, offering players a unique and quicker Baccarat experience.
 
 Question: What is the difference between Player and Banker hand in Baccarat?
 Answer: In Baccarat, the Player hand and the Banker hand represent two distinct positions where players can choose to place their bets. The primary differences between them are as follows:
