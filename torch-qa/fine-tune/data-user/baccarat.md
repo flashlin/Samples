@@ -107,20 +107,6 @@ Question: How to Play Tiger Pair?
 Q: What are the betting rules for Tiger Pair bets?
 Answer: The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
 
-Question: What is payout of Tiger Baccarat?
-Q: List the betting options in Tiger Baccarat.
-Answer: 
-* Tiger: Banker wins with a total score of six.
-  - Two Card Tiger: Odds are 12 to 1 when the Banker has two cards.
-  - Three Card Tiger: Odds are 20 to 1 when the Banker has three cards.
-* Big Tiger: Banker wins with a total score of six and exactly three cards. Payout Odds: 50 to 1 for a total score of six and exactly three cards.
-* Tiger Tie: Tie with a total of six. Payout Odds: 35 to 1 for a Tie with a total of six.
-* Tiger Pair: Player's or Banker's first two cards are a pair.
-  Payout Odds:
-    - Single Tiger Pair: Odds are 4 to 1 if only one hand has a pair on their first two cards.
-    - Double Tiger Pair: Odds are 20 to 1 if both hands have a pair on their first two cards.
-    - Twin Tiger Pair: Odds are 100 to 1 if both hands' pairs have matching numbers or pictures.
-
 Question: What's the winning condition for the Tiger bet?
 Answer: The banker wins with a total score of six.
 
@@ -904,14 +890,6 @@ Answer: In Baccarat, a tie with a total of six occurs when both the Player's and
 
 Question: What is the minimum number of cards required to play Small Tiger?
 Answer: Small Tiger is a variation of Baccarat where a minimum of 6 cards is required to play. This variation is played with fewer cards compared to traditional Baccarat, creating a faster-paced game with different odds and strategies. The reduced number of cards alters the gameplay dynamics and odds, offering players a unique and quicker Baccarat experience.
-
-Question: What is Twin Tiger Pair?
-Answer: A "Twin Tiger Pair" refers to a situation in baccarat where both the player's and the banker's first two cards form a pair with matching numbers or pictures. This means that both the player's and the banker's initial two cards are either a pair (like two 8s) or cards with identical pictures (such as two Kings).
-When the first two cards for both the player and the banker result in a Twin Tiger Pair, according to the game rules, the payout odds are 100 to 1. 
-
-Question: What is the house edge for Tiger Pair bets?
-Answer: In the game of baccarat, the house edge for Tiger Pair bets varies depending on different casinos and game rules. Generally, the house edge for Tiger Pair bets tends to be higher than standard banker or player bets.
-To accurately determine the house edge for Tiger Pair bets at a specific casino, it's best to review the gaming rules of that casino or directly inquire with the casino staff for accuracy.
 
 Question: What is the difference between Player and Banker hand in Baccarat?
 Answer: In Baccarat, the Player hand and the Banker hand represent two distinct positions where players can choose to place their bets. The primary differences between them are as follows:
