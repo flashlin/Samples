@@ -35,6 +35,10 @@ def pdf_to_markdown(pdf_file):
             text = page.extract_text()
             markdown_content = markdown2.markdown(text)
             md_file.write(markdown_content)
+            md_file.write("\n")
+            md_file.flush()
+            # md_file.write(text)
+            # md_file.flush()
 
 
 def get_file_content(file: str):
@@ -196,8 +200,11 @@ if __name__ == '__main__':
         shutil.move(file, './data-processed/')
 
     qa_dict = {}
-    for question, answer in query_qa_file(output_llm_qa_file, is_single=True):
-        qa_dict[question] = answer
+    with open(f"./results/llm-qa-1.md", 'w') as f:
+        for question, answer in query_qa_file(output_llm_qa_file, is_single=True):
+            qa_dict[question] = answer
+            f.write(f"Question: {question}\r\n")
+            f.write(f"Answer: {answer}\r\n")
 
     with open(f"./results/llm-qa.md", 'w') as f:
         for question, answer in qa_dict.items():
