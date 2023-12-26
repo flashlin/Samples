@@ -32,6 +32,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain.schema.runnable import RunnablePassthrough
 
+from pdf_utils import load_pdf_documents_from_directory
+
 config = load_finetune_config()
 device = "cuda"
 EMB_MODEL = "bge-base-en"
@@ -39,7 +41,9 @@ EMB_MODEL = "bge-base-en"
 
 def load_vector_store():
     print("loading data")
-    docs = load_markdown_documents("./data")
+    md_docs = load_markdown_documents("./data")
+    pdf_docs = load_pdf_documents_from_directory('./data')
+    docs = pdf_docs + md_docs
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=35)
     all_splits = text_splitter.split_documents(docs)
     llm_embedding = LlmEmbedding(f"../models/{EMB_MODEL}")
@@ -59,39 +63,12 @@ model_name = config['model_name']
 base_model = f"../models/{model_name}"
 peft_model_id = f"./outputs/{model_name}-qlora"
 
-
-# if not os.path.exists(f"{peft_model_id}/adapter_config.json"):
-#     peft_model_id = None
-#
-# bnb_config = BitsAndBytesConfig(
-#     load_in_4bit=True,
-#     bnb_4bit_use_double_quant=True,
-#     bnb_4bit_quant_type="nf4",
-#     bnb_4bit_compute_dtype=torch.bfloat16
-# )
-#
-# model = AutoModelForCausalLM.from_pretrained(
-#     base_model,
-#     # return_dict=True,
-#     quantization_config=bnb_config,
-#     device_map="auto",
-#     # trust_remote_code=True,
-#     local_files_only=True,
-# )
-# model.load_adapter(peft_model_id)
-#
-# tokenizer = AutoTokenizer.from_pretrained(base_model)
-# tokenizer.pad_token = tokenizer.eos_token
-#
-# # model = PeftModel.from_pretrained(model, PEFT_MODEL)
-#
-
 model, tokenizer = load_peft_model(base_model, peft_model_id)
 
 generation_config = model.generation_config
-generation_config.max_new_tokens = 4096
+generation_config.max_new_tokens = 1024
 generation_config.temperature = 0.01  # 0.7
-generation_config.top_p = 2
+generation_config.top_p = 0.9
 generation_config.do_sample = True
 generation_config.num_return_sequences = 1
 generation_config.pad_token_id = tokenizer.eos_token_id
@@ -117,6 +94,21 @@ prompt_template = """
 Instruction: Answer the question based on your gaming knowledge. 
 If the answer cannot be found from the context, try to find the answer from your knowledge. 
 If still unable to find the answer, respond with 'I don't know.'.
+Here is context to help:
+
+{context}
+
+### QUESTION:
+{question} 
+
+[/INST]
+"""
+
+
+prompt_template = """
+### [INST] 
+Instruction: Answer the question based on your gaming knowledge. 
+If the answer cannot be found from the context, respond with 'I don't know.'.
 Here is context to help:
 
 {context}

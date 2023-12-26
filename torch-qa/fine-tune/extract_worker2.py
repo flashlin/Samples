@@ -1,5 +1,5 @@
 import os
-from io_utils import query_sub_files
+from io_utils import query_sub_files, split_file_path
 from langchain_lit import load_markdown_documents, load_markdown_document, split_documents_to_splits
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import argparse
@@ -11,7 +11,8 @@ from finetune_lit import load_peft_model, ask_llama2_instruction_prompt, get_fin
 from qa_file_utils import query_qa_file
 import shutil
 from extract_worker2_utils import ParagraphsContext
-
+import PyPDF2
+import markdown2
 
 MODEL_NAME = "Mistral-7B-Instruct-v0.1"
 
@@ -21,6 +22,20 @@ def get_args():
     parser.add_argument('-w', action='store_true', default=False, help='override output')
     args = parser.parse_args()
     return args
+
+
+def pdf_to_markdown(pdf_file):
+    path, filename, _ = split_file_path(pdf_file)
+    target_md_file = f"{path}/{filename}.md"
+    pdf = PyPDF2.PdfReader(pdf_file)
+
+    with open(target_md_file, "w", encoding="utf-8") as md_file:
+        for page_num in range(len(pdf.pages)):
+            page = pdf.pages[page_num]
+            text = page.extract_text()
+            markdown_content = markdown2.markdown(text)
+            md_file.write(markdown_content)
+
 
 def get_file_content(file: str):
     with open(file, 'r', encoding='utf-8') as f:
@@ -151,6 +166,10 @@ def generate_qa_data(llm, content: str, output_llm_qa_file):
 
 if __name__ == '__main__':
     args = get_args()
+
+    for file in query_sub_files('./data', ['.pdf']):
+        print(f"convert {file} to md file")
+        pdf_to_markdown(file)
 
     start_time = time.time()
     llm = LLM()
