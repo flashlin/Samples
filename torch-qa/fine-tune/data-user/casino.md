@@ -215,14 +215,6 @@ Answer: This wager is that the total number of cards dealt in a round will be 4.
 Q: How are points calculated in Baccarat?
 Answer: In poker, the points closest to nine or exactly nine win. Cards 10, J, Q, K are considered as 0 points. When the total points of two number cards exceed ten, only the digit in the unit place is considered. For instance, 15 points are seen as 5 points, and 10 points are considered as 0 points. An ACE is counted as one point, while number cards, except for 10, are calculated based on their face value.
 
-Q: What are the betting options available in Baccarat?
-Answer: In Baccarat, there are three main betting options:
-* Banker Bet: This is a bet that the Banker's hand will win. The Banker hand has a slight edge over the Player hand, so this bet is the most popular option.
-* Player Bet: This is a bet that the Player's hand will win. 
-* Tie Bet: This is a bet that both hands will tie.
-
-In addition to these three main bets, there are also a number of side bets available in Baccarat. These side bets are based on specific outcomes of the game, such as whether the winning hand will be a pair or a natural (a hand that totals 8 or 9 with the first two cards dealt). Side bets are generally considered to be more risky than the main bets, but they can also offer higher payouts.
-
 Q: Interpreting the Big Road
 Answer: The Big Eye Boy road, also known as the Baccarat Big Eye Road, is what is known as a derived road, as it interprets the information from the Big Road. It shows players whether there have been discernible patterns from the shoe so far or if the results have been random.
 
@@ -247,9 +239,6 @@ Q: What is Natural Win in Baccarat?
 Q: What is Non-natural Win in Baccarat?
 Answer: A natural hand is a two-card hand totalling eight or nine. The highest possible hand is a natural nine, which occurs when the first two cards drawn for either the bankers hand or the players hand total nine. The second highest hand is a natural eight. If a natural is drawn, this is an automatic winning hand and is called a natural winner. Neither of the hands will receive a third card when a natural is drawn.
 
-Q: What is Fortune Six?
-Answer: Fortune Six is one of the side bet in Live Baccarat. The bet will be paid if the Banker hand wins with a total of six. It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.
-
 Q: What is rule of Fortune Six?
 Answer: 
 * Banker wins with 3 cards totaling 6, SBO payout players at a rate of 20:1
@@ -266,24 +255,6 @@ Answer: 'Fortune Six' is an additional wager in baccarat, typically betting on w
 
 Question: Demo of Fortune Six
 Answer: Sorry, as an AI text-based assistant, I cannot physically demonstrate the gameplay of baccarat. However, 'Fortune Six' is an additional wager available for players to bet on whether the banker will win with a total point count of six. If the banker's total point count is six, the 'Fortune Six' bet pays out at specific odds, often around 20:1. This bet is separate from the main bets on 'Player,' 'Banker,' or 'Tie' and is an additional option available to players in certain versions or casinos offering this side bet in baccarat.
-
-Q: What is Tiger Baccarat?
-Ansewer: Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
-
-Q: How to Play Tiger?
-Answer: To play Tiger, simply place a bet in the Tiger betting area of the layout. All bets must be placed before any cards are dealt, and if the banker wins with a score total of six, you win. The payout odds are dependent on how many cards the Banker has when the hand is complete. If the Banker has two cards, this is known as a “Two Card Tiger” and the payout odds are 12 to 1. If the Banker has three cards, this is known as a “Three Card Tiger” and the payout odds are 20 to 1.
-
-Q: How to Play Big Tiger?
-Answer: To play Big Tiger, simply place a bet in the Big Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly three cards, you win. The payout odds for winning with a score total of six and exactly three cards are 50 to 1.
-
-Q: How to Play Small Tiger?
-Answer: To play Small Tiger, simply place a bet in the Small Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly two cards, you win. The payout odds for winning with a score total of six and exactly two cards are 22 to 1.
-
-Q: How to Play Tiger Tie?
-Answer: To play Tiger Tie, simply place a bet in the Tiger Tie betting area of the layout. All bets must be placed before any cards are dealt. If the result is a Tie with a total of six, you win. The payout odds for winning with a Tie and a total of six are 35 to 1.
-
-Q: How to Play Tiger Pair?
-The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
 
 Q: Show an example of playing Tiger Pair.
 Answer: For example; If the Player hand has two queens as their first two cards and the Banker hand does not have a pair on their first two cards, this is a Single Tiger Pair and pays 4 to 1. If the Banker hand has two nines as their first two cards and the Player hand does not have a pair on their first two cards, this is also a Single Tiger Pair and pays 4 to 1. If the Player hand has two Kings as their first two cards and the Banker hand has two Eights as their first two cards, this is a Double Tiger Pair and pays 20 to 1. If the Player hand has two Jacks as their first two cards and the Banker hand also has two Jacks as their first two cards, this is a Twin Tiger Pair and pays 100 to 1.

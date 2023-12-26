@@ -150,3 +150,11 @@ Answer:
 ```bash
 pip install your-package-name --upgrade requires
 ```
+
+
+Q: How to remove downloaded files from huggingface_hub
+A: 
+```bash
+pip install huggingface_hub["cli"]
+huggingface-cli delete-cache
+```
