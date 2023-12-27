@@ -158,3 +158,33 @@ A:
 pip install huggingface_hub["cli"]
 huggingface-cli delete-cache
 ```
+
+Q: How to resolve "create_tensor: tensor 'blk.0.ffn_gate.weight' not found"?
+A: You need to use the llama.cpp fork with mixtral support https://github.com/ggerganov/llama.cpp/tree/mixtral
+```bash
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+make
+```
+
+
+Q: How to install OpenBlas and llama-cpp-python? 
+A: following commands are used to install
+```bash
+sudo apt-get update
+sudo apt-get install -y gfortran
+
+sudo apt-get install -y libopenblas-dev
+git clone https://github.com/xianyi/OpenBLAS.git
+cd OpenBLAS
+make FC=gfortran
+sudo make PREFIX=/usr/local install
+cd ..
+rm -rf OpenBLAS
+
+# review openblas version
+grep OPENBLAS_VERSION /usr/local/include/openblas_config.h
+
+# force install llama-cpp-python 
+LLAMA_CUBLAS=1 CMAKE_ARGS=-DLLAMA_CUBLAS=on FORCE_CMAKE=1 pip install llama-cpp-python --no-cache-dir --force-reinstall --verbose
+```
