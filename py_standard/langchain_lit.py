@@ -67,8 +67,8 @@ def load_markdown_document(md_file: str):
     return md_loader.load()
 
 
-def split_documents(docs):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=35)
+def split_documents(docs, chunk_size=1000):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=35)
     all_splits = text_splitter.split_documents(docs)
     return all_splits
 
