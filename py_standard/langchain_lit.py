@@ -15,6 +15,7 @@ from langchain.vectorstores import FAISS
 from langchain.schema.vectorstore import VectorStore
 
 from io_utils import split_file_path
+from pdf_utils import load_pdf_documents_from_directory
 
 
 def load_llm_model_with_callback_handler(model_name: str, callback_handler=None):
@@ -134,7 +135,6 @@ def create_parent_document_retriever(vector_store: VectorStore):
     return big_chunks_retriever
 
 
-
 class FaissRetrieval:
     def __init__(self, llm_embedding: LlmEmbedding):
         self.llm_embedding = llm_embedding
@@ -204,4 +204,11 @@ class StreamDisplayHandler(BaseCallbackHandler):
             raise ValueError(f"Invalid display_method: {display_function}")
 
 
-
+def load_all_documents(doc_path, chunk_size=500):
+    txts = load_markdown_documents(doc_path)
+    pdfs = load_pdf_documents_from_directory(doc_path)
+    all_docs = txts + pdfs
+    docs = split_documents(all_docs, chunk_size)
+    for idx, doc in enumerate(docs):
+        doc.metadata['doc_id'] = idx + 1
+    return docs
