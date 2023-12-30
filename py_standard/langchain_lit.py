@@ -13,7 +13,7 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain, RetrievalQA
 from langchain.vectorstores import FAISS
 from langchain.schema.vectorstore import VectorStore
-
+from langchain.vectorstores import Chroma
 from io_utils import split_file_path
 from pdf_utils import load_pdf_documents_from_directory
 
@@ -212,3 +212,16 @@ def load_all_documents(doc_path, chunk_size=500):
     for idx, doc in enumerate(docs):
         doc.metadata['doc_id'] = idx + 1
     return docs
+
+
+def create_chroma_vectorstore(embedding, collection_name, persist_directory=None):
+    vector_store = Chroma(
+        collection_name=collection_name,
+        persist_directory=persist_directory,
+        embedding_function=embedding,
+        collection_metadata={
+            "hnsw:space": "cosine",
+            "hnsw:search_ef": 100
+        }
+    )
+    return vector_store
