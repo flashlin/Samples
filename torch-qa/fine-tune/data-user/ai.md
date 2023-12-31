@@ -164,3 +164,13 @@ inputs = tokenizer(text, return_tensors="pt")
 outputs = model.generate(**inputs, max_new_tokens=20)
 print(tokenizer.decode(outputs[0], skip_special_tokens=True))
 ```
+
+Question: How to remove downloaded models from huggingface?
+Answer: Use
+```bash
+pip install huggingface_hub["cli"]
+```
+Then
+```bash
+huggingface-cli delete-cache
+```
