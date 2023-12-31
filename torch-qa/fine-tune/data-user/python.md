@@ -24,6 +24,13 @@ pip install -r ./requirements.txt
 python ./main.py -csv -html
 ```
 
+Question: How do I uninstall packages based on a requirement.txt file using pip?
+Answer: Run 
+```bash
+pip uninstall -r ./requirements.txt -y
+```
+
+
 Question: How to create password for jupyter?
 Answer: 
 ```bash
