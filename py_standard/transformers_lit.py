@@ -1,5 +1,7 @@
 import logging
 from typing import Any
+
+import torch
 import transformers
 from transformers import (
     AutoModelForCausalLM,
@@ -31,3 +33,13 @@ def load_pretrained_tokenizer(model_path: str):
         model_path,
         use_fast=False,
     )
+
+
+def create_nf4_model_config():
+    nf4_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_compute_dtype=torch.bfloat16,
+    )
+    return nf4_config

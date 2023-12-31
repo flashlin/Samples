@@ -225,3 +225,5 @@ def create_chroma_vectorstore(embedding, collection_name, persist_directory=None
         }
     )
     return vector_store
+
+
