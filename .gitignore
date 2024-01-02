@@ -36,6 +36,7 @@ torch-qa/demo1/qdrant_storage
 .cache/
 .ipynb_checkpoints/
 download/
+download2/
 .ipynb_checkpoints/
 models/
 data/
