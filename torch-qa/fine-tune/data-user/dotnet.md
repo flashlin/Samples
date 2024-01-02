@@ -255,11 +255,9 @@ var apiVersion = HttpContext.GetRequestedApiVersion();
 return Ok(new { version = apiVersion.ToString("F") });
 ```
 
----
-Question: How to install gRPC tool in alpine image?
-Answer:
 
-If you face the following error message.
+Question: How to install gRPC tool in alpine image?
+Answer: If you face the following error message.
 ```
 error msg: The specified task executable "/root/.nuget/packages/grpc.tools/2.45.0/tools/linux_x64/protoc" could not be run. 
 System.ComponentModel.Win32Exception (2): An error occurred trying to start process
@@ -324,6 +322,7 @@ ENV PATH="${PATH}:/opt/dotnetcore-tools/"
 ENTRYPOINT ["dotnet", "YourProject.dll"]
 ```
 
+
 Question: On building dotnet core image to compile dll in below line, we keep getting error.
 The error messages are as below
 ```
@@ -333,7 +332,7 @@ Determining projects to restore...
 /usr/share/dotnet/sdk/3.1.300/Sdks/Microsoft.NET.Sdk/targets/Microsoft.PackageDependencyResolution.targets(234,5): error MSB4018: NuGet.Packaging.Core.PackagingException: Unable to find fallback package folder 'C:\Program Files\dotnet\sdk\NuGetFallbackFolder'. [/app/YourProject/YourProject.csproj]
 /usr/share/dotnet/sdk/3.1.300/Sdks/Microsoft.NET.Sdk/targets/Microsoft.PackageDependencyResolution.targets(234,5): error MSB4018:    at NuGet.Packaging.FallbackPackagePathResolver..ctor(String userPackageFolder, IEnumerable`1 fallbackPackageFolders) [/app/YourProject/YourProject.csproj]
 ...
-Q: The "ResolvePackageAssets" task failed unexpectedly.
+Question: The "ResolvePackageAssets" task failed unexpectedly.
 ```
 Answer:
 Modify `.dockerignore` file at the same folder as your dockerfile to solve this issue 
@@ -347,6 +346,8 @@ Modify `.dockerignore` file at the same folder as your dockerfile to solve this 
 .Microsoft.DotNet.ImageBuilder
 ``` 
 
+
+
 Question: What is AOT?
 Q: What are the advantages of AOT?
 Q: What functionalities does AOT offer?
@@ -357,4 +358,113 @@ Answer: "AOT" stands for "Ahead-Of-Time" and serves the following primary functi
 * Lower Memory Footprint: AOT doesn't consume resources needed for compilation during runtime, leading to lower resource consumption.
 * Earlier Error Detection and Enhanced Security: Pre-compilation enables the early detection of certain template errors during compilation, avoiding the need to discover them while executing on the client-side.
 * Higher Resistance to Reverse Engineering: AOT compiles programs into machine code, and most language-level structures are not retained, making it more challenging to decipher.
+
+
+
+Question: What is .NET Core Globalization Invariant Mode?
+Answer: The globalization invariant mode - new in .NET Core 2.0 - enables you to remove application dependencies on globalization data and globalization behavior. 
+The drawback of running in the invariant mode is applications will get poor globalization support. 
+The following scenarios are affected when the invariant mode is enabled.
+* Cultures and culture data
+* String casing
+* String sorting and searching
+* Sort keys
+* String Normalization
+* Internationalized Domain Names (IDN) support
+* Time Zone display name on Linux
+
+
+
+
+Question: When enabling ".NET Core Globalization Invariant Mode" what impact does it have on Cultures and culture data?
+Answer: When enabling the invariant mode, all cultures behave like the invariant culture. The invariant culture has the following characteristics:
+* Culture names (English, native display, ISO, language names) will return invariant names. For instance, when requesting culture native name, you will get "Invariant Language (Invariant Country)".
+* All cultures LCID will have value 0x1000 (which means Custom Locale ID). The exception is the invariant cultures which will still have 0x7F.
+* All culture parents will be invariant. In other word, there will not be any neutral cultures by default but the apps can still create a culture like "en".
+* The application can still create any culture (e.g. "en-US") but all the culture data will still be driven from the Invariant culture. Also, the culture name used to create the culture should conform to BCP 47 specs.
+* All Date/Time formatting and parsing will use fixed date and time patterns. For example, the short date will be "MM/dd/yyyy" regardless of the culture used. Applications having old formatted date/time strings may not be able to parse such strings without using ParseExact.
+* Numbers will always be formatted as the invariant culture. For example, decimal point will always be formatted as ".". Number strings previously formatted with cultures that have different symbols will fail parsing.
+* All cultures will have currency symbol as "¤"
+* Culture enumeration will always return a list with one culture which is the invariant culture.
+
+
+
+Question: When enabling ".NET Core Globalization Invariant Mode" what impact does it have on String casing?
+Answer: 
+* String casing (ToUpper and ToLower) will be performed for the ASCII range only. Requests to case code points outside that range will not be performed, however no exception will be thrown. In other words, casing will only be performed for character range ['a'..'z'].
+* Turkish I casing will not be supported when using Turkish cultures.
+
+
+
+Question: When enabling ".NET Core Globalization Invariant Mode" what impact does it have on String sorting and searching?
+Answer: String operations like Compare, IndexOf and LastIndexOf are always performed as ordinal and not linguistic operations regardless of the string comparing options passed to the APIs.
+The ignore case string sorting option is supported but only for the ASCII range as mentioned previously.
+For example, the following comparison will resolve to being unequal:
+* 'i', compared to
+* Turkish I '\u0130', given
+* Turkish culture, using
+* CompareOptions.Ignorecase
+However, the following comparison will resolve to being equal:
+* 'i', compared to
+* 'I', using
+* CompareOptions.Ignorecase
+It is worth noticing that all other sort comparison options (for example, ignore symbols, ignore space, Katakana, Hiragana) will have no effect in the invariant mode (they are ignored).
+
+
+
+
+Question: When enabling ".NET Core Globalization Invariant Mode" what impact does it have on Sort keys?
+Answer: Sort keys are used mostly when indexing some data (for example, database indexing). When generating sort keys of 2 strings and comparing the sort keys the results should hold the exact same results as if comparing the original 2 strings. In the invariant mode, sort keys will be generated according to ordinal comparison while respecting ignore casing options.
+
+
+
+
+Question: When enabling "".NET Core Globalization Invariant Mode" what impact does it have on String normalization?
+Answer: String normalization normalizes a string into some form (for example, composed, decomposed forms). Normalization data is required to perform these operations, which isn't available in invariant mode. In this mode, all strings are considered as already normalized, per the following behavior:
+* If the app requested to normalize any string, the original string is returned without modification.
+* If the app asked if any string is normalized, the return value will always be true.
+
+
+
+
+Question: When enabling ".NET Core Globalization Invariant Mode" what impact does it have on Internationalized Domain Names (IDN) support?
+Answer: Internationalized Domain Names require globalization data to perform conversion to ASCII or Unicode forms, which isn't available in the invariant mode. In this mode, IDN functionality has the following behavior:
+* IDN support doesn't conform to the latest standard.
+* IDN support will be incorrect if the input IDN string is not normalized since normalization is not supported in invariant mode.
+* Some basic IDN strings will still produce correct values.
+
+
+
+Question: When enabling ".NET Core Globalization Invariant Mode" what impact does it have on Time zone display name in Linux?
+Answer: When running on Linux, ICU is used to get the time zone display name. In invariant mode, the standard time zone names are returned instead.
+
+
+
+Question How to enable the ".NET Core Globalization Invariant Mode"?
+Answer: Applications can enable the invariant mode by either of the following:
+* in project file:
+```xml
+<PropertyGroup>
+    <InvariantGlobalization>true</InvariantGlobalization>
+</PropertyGroup>
+```
+* in runtimeconfig.json file:
+```json
+{
+    "runtimeOptions": {
+        "configProperties": {
+            "System.Globalization.Invariant": true
+        }
+    }
+}
+```
+* setting environment variable value DOTNET_SYSTEM_GLOBALIZATION_INVARIANT to true or 1.
+
+Note: value set in project file or runtimeconfig.json has higher priority than the environment variable.
+
+
+Question: Why might '.NET Core Globalization Invariant Mode' fail to activate?
+Answer: The framework will depend on the OS for the globalization support.
+On Linux, if the ICU package is not installed, the application will fail to start.
+
 
