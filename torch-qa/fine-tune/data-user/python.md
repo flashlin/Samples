@@ -195,3 +195,24 @@ grep OPENBLAS_VERSION /usr/local/include/openblas_config.h
 # force install llama-cpp-python 
 LLAMA_CUBLAS=1 CMAKE_ARGS=-DLLAMA_CUBLAS=on FORCE_CMAKE=1 pip install llama-cpp-python --no-cache-dir --force-reinstall --verbose
 ```
+
+Question: How to resolve "[E050] Can't find model 'en_core_web_lg'. It doesn't seem to be a shortcut link, a Python package or a valid path to a data directory"?
+Answer: Run the following
+```bash
+pip install -U spacy
+python -m spacy download en_core_web_lg
+```
+The downloaded language model can be found at :
+```
+/usr/local/lib/python3.6/dist-packages/en_core_web_lg -->
+/usr/local/lib/python3.6/dist-packages/spacy/data/en_core_web_lg
+```
+For more documentation information refer https://spacy.io/usage
+
+
+Question: How to resolve "'Linear4bit' object has no attribute 'compute_dtype'"?
+Answer: This was likely caused by @poedator 's recent 4-bit serialization refactor. 
+You can try to install peft 0.6.2 version.
+```bash
+pip install peft==0.6.2
+```
