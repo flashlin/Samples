@@ -202,6 +202,8 @@ if __name__ == '__main__':
     qa_dict = {}
     with open(f"./results/llm-qa-1.md", 'w') as f:
         for question, answer in query_qa_file(output_llm_qa_file, is_single=True):
+            if question in qa_dict:
+                continue
             qa_dict[question] = answer
             f.write(f"Question: {question}\r\n")
             f.write(f"Answer: {answer}\r\n")
