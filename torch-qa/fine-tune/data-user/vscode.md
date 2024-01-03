@@ -32,3 +32,10 @@ You can increase randomness by moving the mouse within the blank area.
 After generation, you will see the content of the public and private keys. 
 In the PuTTYgen window, click on 'Save private key' to save the private key in .pem format. 
 Ensure you select an appropriate storage path and name.
+
+Question: How to setup PYTHONPATH for local Jupyter Notebook in VSCode?
+Answer: Create "env" file in your project root path.
+```
+PATHONPATH = '/home/ubuntu/myproject'
+```
+Then restart VSCode.
