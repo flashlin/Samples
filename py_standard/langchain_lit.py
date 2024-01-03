@@ -68,8 +68,8 @@ def load_markdown_document(md_file: str):
     return md_loader.load()
 
 
-def split_documents(docs, chunk_size=1000):
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=35)
+def split_documents(docs, chunk_size=1000, chunk_overlap=35):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     all_splits = text_splitter.split_documents(docs)
     return all_splits
 
@@ -204,11 +204,11 @@ class StreamDisplayHandler(BaseCallbackHandler):
             raise ValueError(f"Invalid display_method: {display_function}")
 
 
-def load_all_documents(doc_path, chunk_size=500):
+def load_all_documents(doc_path, chunk_size=500, chunk_overlap=35):
     txts = load_markdown_documents(doc_path)
     pdfs = load_pdf_documents_from_directory(doc_path)
     all_docs = txts + pdfs
-    docs = split_documents(all_docs, chunk_size)
+    docs = split_documents(all_docs, chunk_size, chunk_overlap)
     for idx, doc in enumerate(docs):
         doc.metadata['doc_id'] = idx + 1
     return docs

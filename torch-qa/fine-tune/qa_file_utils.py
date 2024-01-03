@@ -3,6 +3,7 @@ import os
 import re
 from jinja2 import Environment
 from itertools import combinations
+from py_standard.data_utils import combinations_fn
 
 """
 Q: How are you
@@ -306,28 +307,28 @@ def dragon_baccarat_win_odds_fn(bet_name, name1, point1, name2, point2, win_mess
         return win_message.format(winner=winner, result=result, odds=odds)
     return lose_message
 
-def list_to_combinations_dict(a_list):
-    keys = [chr(i) for i in range(48, 58)] + [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)]
-    if len(keys) < len(a_list):
-        raise ValueError(f"list size > keys")
-    a_dict = {}
-    for value in a_list:
-        key = keys.pop(0)
-        a_dict[key] = value
-    return a_dict
-
-def combinations_fn(items: list[str], n: int):
-    combinations_dict = list_to_combinations_dict(items)
-    keys = "".join(key for key in combinations_dict.keys())
-    results = list(combinations(keys,n))
-    new_results = []
-    for items in results:
-        new_list = []
-        for elem in list(items):
-            value = combinations_dict[elem]
-            new_list.append(value)
-        new_results.append(new_list)
-    return new_results
+# def list_to_combinations_dict(a_list):
+#     keys = [chr(i) for i in range(48, 58)] + [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)]
+#     if len(keys) < len(a_list):
+#         raise ValueError(f"list size > keys")
+#     a_dict = {}
+#     for value in a_list:
+#         key = keys.pop(0)
+#         a_dict[key] = value
+#     return a_dict
+#
+# def combinations_fn(items: list[str], n: int):
+#     combinations_dict = list_to_combinations_dict(items)
+#     keys = "".join(key for key in combinations_dict.keys())
+#     results = list(combinations(keys,n))
+#     new_results = []
+#     for items in results:
+#         new_list = []
+#         for elem in list(items):
+#             value = combinations_dict[elem]
+#             new_list.append(value)
+#         new_results.append(new_list)
+#     return new_results
 
 def render_template(template_content: str):
     env = Environment()

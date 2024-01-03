@@ -4,6 +4,7 @@ import json
 from typing import TypeVar, Generator, Union, Callable
 from itertools import zip_longest
 import hashlib
+from itertools import combinations
 
 T = TypeVar('T')
 T1 = TypeVar('T1')
@@ -123,3 +124,26 @@ def check_password_hashes(password: str, hashed_text: str):
     if hash_password(password) == hashed_text:
         return True
     return False
+
+def list_to_combinations_dict(a_list):
+    keys = [chr(i) for i in range(48, 58)] + [chr(i) for i in range(65, 91)] + [chr(i) for i in range(97, 123)]
+    if len(keys) < len(a_list):
+        raise ValueError(f"list size > keys")
+    a_dict = {}
+    for value in a_list:
+        key = keys.pop(0)
+        a_dict[key] = value
+    return a_dict
+
+def combinations_fn(items: list[str], n: int):
+    combinations_dict = list_to_combinations_dict(items)
+    keys = "".join(key for key in combinations_dict.keys())
+    results = list(combinations(keys,n))
+    new_results = []
+    for items in results:
+        new_list = []
+        for elem in list(items):
+            value = combinations_dict[elem]
+            new_list.append(value)
+        new_results.append(new_list)
+    return new_results
