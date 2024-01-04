@@ -3,7 +3,7 @@ import os
 import re
 from jinja2 import Environment
 from itertools import combinations
-from py_standard.data_utils import combinations_fn
+from data_utils import combinations_fn
 
 """
 Q: How are you
@@ -47,7 +47,7 @@ class QuestionAnswerContext:
         self.yield_fn = None
 
     def read_line(self, line: str):
-        if line.startswith('#'):
+        if line.startswith('###'):
             return
         self.read_state.read_line(line)
 
@@ -455,7 +455,10 @@ def query_qa_file(file: str, is_single: bool=False):
     for questions, answers in qa.question_answer_list:
         for question in questions:
             for answer in answers:
-                yield question.strip(), answer.strip()
+                new_answer = answer.strip()
+                new_answer = new_answer.replace('@Question:', 'Question:')
+                new_answer = new_answer.replace('@Answer:', 'Answer:')
+                yield question.strip(), new_answer
 
 
 def convert_qa_md_file_to_train_jsonl(md_file, jsonl_file, mode:str = "w"):
