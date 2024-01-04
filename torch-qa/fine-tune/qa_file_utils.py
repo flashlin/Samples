@@ -47,7 +47,7 @@ class QuestionAnswerContext:
         self.yield_fn = None
 
     def read_line(self, line: str):
-        if line.startswith('###'):
+        if line.startswith('---'):
             return
         self.read_state.read_line(line)
 
