@@ -24,6 +24,7 @@ The game is presented to the Player with a live person dealing the cards on scre
 
 
 
+
 Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
 # Participation Instructions and Bet Options
 To place a bet, the Player moves the cursor to the pictures of the chips in the lower-right corner of the game window and left-click the chip value that they want to use. The Player then moves the cursor to the Betting Area on the table layout marked as players or bankers, tie or pair, then left-clicks to place their bets. The chip will automatically appear in the betting box, with the total value of the bet written alongside. The bet amount will also appear at the bottom of the window.
@@ -101,6 +102,7 @@ If both hands have the same point value, that game is a tie and neither side win
 
 
 
+
 Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
 Some common Baccarat terms are provided below, complete with explanations.
 
@@ -171,6 +173,7 @@ For any specific game rules please refer to in game help page.
 @Answer: The payout for a 4 points difference is 1:1 in Live Dealer Baccarat's Player or Banker Dragon Bonus.
 @Question: For which results is it considered a Loss in Live Dealer Baccarat's Player or Banker Dragon Bonus?
 @Answer: For all other results, it's considered a Loss in Live Dealer Baccarat's Player or Banker Dragon Bonus.
+
 
 
 
@@ -272,6 +275,7 @@ Answer:
 
 
 
+
 Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
 # Tiger Baccarat
 Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
@@ -285,6 +289,7 @@ Answer:
 * Small Tiger
 * Tiger Tie
 * Tiger Pair
+
 
 
 
@@ -334,6 +339,7 @@ Answer:
 
 
 
+
 Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
 # How to Play Small Tiger
 To play Small Tiger, simply place a bet in the Small Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly two cards, you win. The payout odds for winning with a score total of six and exactly two cards are 22 to 1.
@@ -361,6 +367,7 @@ Answer:
 @Answer: If the result is a Tie with a total of six, you win.
 @Question: What are the odds for Tiger Tie in Live Dealer Baccarat?
 @Answer: The payout odds for winning with a Tie and a total of six are 35 to 1.
+
 
 
 
@@ -396,12 +403,14 @@ If the pairs in both hands have a matching number or matching picture card, then
 
 
 
+
 Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
 # Payout Odds
 Payouts are determined at standard odds that you will find to be identical to those used in all of the major Casinos of America, Europe and Asia.
 Answer:
 @Question: The odds in Live Dealer Dealer are based on which standard?
 @Answer: Payouts are determined at standard odds that you will find to be identical to those used in all of the major Casinos of America, Europe and Asia.
+
 
 
 
@@ -445,6 +454,7 @@ Winning player pair / banker pair bets receive payout odds of 11 to 1. Player / 
 
 
 
+
 Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
 # Non-Commission Baccarat
 Winning Player bets receive payout odds of 1 to 1 (even money).
@@ -479,6 +489,7 @@ Winning Banker bets with the Banker wins on Six Points receive payout odds of 1 
 @Answer: Winning Player Pair / Banker Pair bets receive payout odds of 11 to 1. The Player / Banker first and second hand has to make a pair in order to win.
 @Question: In Live Dealer Non-Commission Baccarat, what are the odds for betting on the Banker Pair?
 @Answer: Winning Player Pair / Banker Pair bets receive payout odds of 11 to 1. The Player / Banker first and second hand has to make a pair in order to win.
+
 
 
 
@@ -656,6 +667,7 @@ Answer:
 
 
 
+
 Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
 # Reshuffles
 The Operator reserves the rights to reshuffle the particular decks of cards if any human or non-human errors occur during cards shuffling.
@@ -753,4 +765,168 @@ Answer:
 @Answer: If a Player wishes to make a complaint or dispute a game result, they must provide SBOBET Casino, the date and time of playing, Table ID, dealer's name and Round number at the time of contacting SBOBET Casino. Failure to do so will result in the complaint being rejected by SBOBET Casino. Video image of card dealing is kept for 24 hours. Players must address their complaint regarding the dispute within 24 hour of the dispute occurring. Any complaints submitted after 24 hours will be rejected by SBOBET Casino without further explanation.
 @Question: In live dealer baccarat, if I have a dispute about the game result after 24 hours, how can I make a complaint?
 @Answer: Players must address their complaint regarding the dispute within 24 hour of the dispute occurring. Any complaints submitted after 24 hours will be rejected by SBOBET Casino without further explanation.
+
+
+
+
+
+
+
+
+Question: The following content contains information about 'Roulette'. Extract the content into Q&A data.
+# Roulette
+The objective of the game is to predict where the ball will come to rest in the spinning wheel. There are 37 individually numbered sections in the wheel, labeled with the numbers 0-36. Bets can be placed on any one of these 37 numbers or on various groups of numbers displayed on the table.
+
+So, try betting on your lucky numbers and give it a spin!
+
+Over a long period of time, the game is likely to average a return to the player of 97.30% of the total bets made.
+Note: Potential wins above the maximum payout per bet allowed will be capped and this will adversely affect your %RTP. The amount will depend on your currency and stake selection.
+Answer:
+@Question: What is Roulette?
+@Answer: The objective of the game is to predict where the ball will come to rest in the spinning wheel. There are 37 individually numbered sections in the wheel, labeled with the numbers 0-36. Bets can be placed on any one of these 37 numbers or on various groups of numbers displayed on the table.
+
+So, try betting on your lucky numbers and give it a spin!
+@Question: In Roulette, what is the return to the player?
+@Answer: Over a long period of time, the game is likely to average a return to the player of 97.30% of the total bets made.
+Note: Potential wins above the maximum payout per bet allowed will be capped and this will adversely affect your %RTP. The amount will depend on your currency and stake selection.
+
+
+
+
+
+
+
+
+
+Question: The following content contains information about 'Roulette'. Extract the content into Q&A data.
+# How to Play
+When playing Roulette, you can place more than one bet on the table for each spin of the wheel, with different amounts bet in several different positions. For example, you could bet on number 21 and on various other numbers that are adjacent to number 21 on the table, on all the BLACK numbers, on all the ODD numbers, and on the THIRD DOZEN numbers. When the ball falls into a number, some of these bets win, and some lose. The secret is to win more than you lose!
+Answer: 
+@Question: How to play Roulette?
+@Answer: When playing Roulette, you can place more than one bet on the table for each spin of the wheel, with different amounts bet in several different positions. For example, you could bet on number 21 and on various other numbers that are adjacent to number 21 on the table, on all the BLACK numbers, on all the ODD numbers, and on the THIRD DOZEN numbers. When the ball falls into a number, some of these bets win, and some lose. The secret is to win more than you lose!
+
+
+
+
+
+
+
+
+
+
+Question: The following content contains information about 'Roulette'. Extract the content into Q&A data.
+# Bet Options
+The Table is laid out in a 12x3 grid that includes all of the 36 RED and BLACK numbers that appear on the wheel, together with 0 at the top of the layout. You can place chips in any of the betting positions as described below.
+
+|Bet Option |Description |Example |
+|--|--|--|
+|Straight-Up |A STRAIGHT-UP bet is a bet on ONE selected number winning. There are 37 possible STRAIGHT-UP bets. The bet is placed within the square of any specific number. If the ball comes to rest in that number in the wheel, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses. |Straight-Up: 23 |
+|Split |A SPLIT bet is a bet on one of TWO selected numbers winning. There are 60 possible split bets. The numbers must be adjacent on the TABLE layout, and not on a diagonal. The bet is placed on a line that borders the squares of any two adjacent numbers. If the ball comes to rest in either of the two numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses. |Split: 4, 5 |
+|Street |A STREET bet is a bet on one of THREE selected numbers winning. There are 12 possible STREET bets. The numbers must lie in a row across the TABLE layout. The bet is placed on the line to the left of the row of numbers. If the ball comes to rest in any of these three numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses. |Street: 22, 23, 24 |
+|Corner |A CORNER bet is a bet on one of FOUR selected numbers winning. There are 22 possible CORNER bets. The numbers must share one corner on the TABLE layout. The bet is placed at the intersection of all four numbers. If the ball comes to rest in any of these four numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses. |Corner: 7, 8, 10, 11 |
+|Zero Section |A ZERO SECTION bet is a bet on one of FOUR particular numbers winning. There is only 1 ZERO SECTION bet. These numbers are 0, 1, 2, 3. The bet is placed at the left intersection of all four numbers. If the ball comes to rest in any of these four numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses. |Zero Section: 0, 1, 2, 3 |
+|Zero Corner |A ZERO CORNER bet is a bet on one of THREE particular numbers winning. There are two ZERO CORNER bets. These are 0, 1, 2, and 0, 2, 3. The bet is placed at the intersection of all three numbers. If the ball comes to rest in any of these three numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses. |Zero Corner: 0, 1, 2 |
+|Six Line |A SIX LINE bet is a bet on one of SIX selected numbers winning. There are 11 possible SIX LINE bets. The numbers must lie in two adjacent rows across the TABLE layout. The bet is placed on the line to the left and between the two rows of numbers. If the ball comes to rest in any of these six numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses. |Six Line: 13, 14, 15, 16, 17, 18 |
+|Column |A COLUMN bet is a bet on one of TWELVE selected numbers winning. There are 3 possible COLUMN bets. The numbers must all lie in one of the three columns down the TABLE layout. The bet is placed in the box provided at the bottom of the layout. If the ball comes to rest in any of these twelve numbers, this bet wins. For any other number in the wheel, this bet loses. |Column: first |
+|Dozen |A DOZEN bet is a bet on one of TWELVE selected numbers winning. There are 3 possible DOZEN bets. The numbers must all lie in one of the three DOZENS regions on the TABLE layout. The bet is placed in the box provided to the left of the layout. If the ball comes to rest in any of these twelve numbers, this bet wins. For any other number in the wheel, this bet loses. |1st 12, 2nd 12, 3rd 12 |
+|Even Chance |An EVEN CHANCE bet is a bet on one of EIGHTEEN selected numbers winning. There are 6 possible EVEN CHANCE bets. The bet is placed in the box provided to the left of the layout. If the ball comes to rest in:<br>Any number between 1 and 18, the 1-18 bet wins.<br>Any EVEN number, the EVEN bet wins.<br>Any RED number, the RED bet wins.<br>Any BLACK number, the BLACK bet wins.<br>Any ODD number, the ODD bet wins.<br>Any number between 19 and 36, the 19-36 bet wins.<br>In any other event, these bets lose. |1-18, EVEN, RED, BLACK, ODD, 19-36 |
+Answer:
+@Question: What are the betting options in Roulette?
+@Answer: The betting options in Roulette include: 
+Straight-Up, Split, Street, Corner, Zero Section, Zero Corner, Six Line, Column, Dozen, Even Chance.
+@Question: What is the Straight-Up betting option in Roulette?
+@Answer: A STRAIGHT-UP bet is a bet on ONE selected number winning. There are 37 possible STRAIGHT-UP bets. The bet is placed within the square of any specific number. If the ball comes to rest in that number in the wheel, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+@Question: What is the Split betting option in Roulette?
+@Answer: A SPLIT bet is a bet on one of TWO selected numbers winning. There are 60 possible split bets. The numbers must be adjacent on the TABLE layout, and not on a diagonal. The bet is placed on a line that borders the squares of any two adjacent numbers. If the ball comes to rest in either of the two numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+@Question: What is the Street betting option in Roulette?
+@Answer: A STREET bet is a bet on one of THREE selected numbers winning. There are 12 possible STREET bets. The numbers must lie in a row across the TABLE layout. The bet is placed on the line to the left of the row of numbers. If the ball comes to rest in any of these three numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+@Question: What is the Corner betting option in Roulette?
+@Answer: A CORNER bet is a bet on one of FOUR selected numbers winning. There are 22 possible CORNER bets. The numbers must share one corner on the TABLE layout. The bet is placed at the intersection of all four numbers. If the ball comes to rest in any of these four numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+@Question: What is the Zero Section betting option in Roulette?
+@Answer: A ZERO SECTION bet is a bet on one of FOUR particular numbers winning. There is only 1 ZERO SECTION bet. These numbers are 0, 1, 2, 3. The bet is placed at the left intersection of all four numbers. If the ball comes to rest in any of these four numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+@Question: What is the Zero Corner betting option in Roulette?
+@Answer: A ZERO CORNER bet is a bet on one of THREE particular numbers winning. There are two ZERO CORNER bets. These are 0, 1, 2, and 0, 2, 3. The bet is placed at the intersection of all three numbers. If the ball comes to rest in any of these three numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+@Question: What is the Six Line betting option in Roulette?
+@Answer: A SIX LINE bet is a bet on one of SIX selected numbers winning. There are 11 possible SIX LINE bets. The numbers must lie in two adjacent rows across the TABLE layout. The bet is placed on the line to the left and between the two rows of numbers. If the ball comes to rest in any of these six numbers, this bet wins. If the ball comes to rest in any other number in the wheel, this bet loses.
+@Question: What is the Column betting option in Roulette?
+@Answer: A COLUMN bet is a bet on one of TWELVE selected numbers winning. There are 3 possible COLUMN bets. The numbers must all lie in one of the three columns down the TABLE layout. The bet is placed in the box provided at the bottom of the layout. If the ball comes to rest in any of these twelve numbers, this bet wins. For any other number in the wheel, this bet loses.
+@Question: What is the Dozen betting option in Roulette?
+@Answer: A DOZEN bet is a bet on one of TWELVE selected numbers winning. There are 3 possible DOZEN bets. The numbers must all lie in one of the three DOZENS regions on the TABLE layout. The bet is placed in the box provided to the left of the layout. If the ball comes to rest in any of these twelve numbers, this bet wins. For any other number in the wheel, this bet loses.
+@Question: What is the Even Chance betting option in Roulette?
+@Answer: An EVEN CHANCE bet is a bet on one of EIGHTEEN selected numbers winning. There are 6 possible EVEN CHANCE bets. The bet is placed in the box provided to the left of the layout. If the ball comes to rest in:
+* Any number between 1 and 18, the 1-18 bet wins.
+* Any EVEN number, the EVEN bet wins.
+* Any RED number, the RED bet wins.
+* Any BLACK number, the BLACK bet wins.
+* Any ODD number, the ODD bet wins.
+* Any number between 19 and 36, the 19-36 bet wins.
+* In any other event, these bets lose. 
+
+
+
+
+
+
+
+
+Question: The following content contains information about 'Roulette'. Extract the content into Q&A data.
+# Payout Odds
+
+|Type of Bet |Description |Payout Odds |
+|--|--|--|
+|Outside Bets | | |
+|Red |Covers any RED number. |1 to 1 |
+|Black |Covers any BLACK number. |1 to 1 |
+|Even |Covers any EVEN number. |1 to 1 |
+|Odd |Covers any ODD number. |1 to 1 |
+|Low |Covers numbers 1-18. |1 to 1 |
+|High |Covers numbers 19-36. |1 to 1 |
+|First Dozen |Covers numbers 1-12. |2 to 1 |
+|Second Dozen |Covers numbers 13-24. |2 to 1 |
+|Third Dozen |Covers numbers 25-36. |2 to 1 |
+|Column |Covers 12 numbers in any of the 3 COLUMNS. |2 to 1 |
+|Inside Bets | | |
+|Straight-Up |Covers any single number including 0. |35 to 1 |
+|Split |Covers any 2 adjacent numbers on the table. |17 to 1 |
+|Street |Covers any 3 numbers in a line across the table. |11 to 1 |
+|Corner |Covers any 4 adjacent numbers on the table. |8 to 1 |
+|Six Line |Covers any block of 6 adjacent numbers on the table. |5 to 1 |
+|Zero Section |Covers a bet on one of FOUR particular numbers winning. There is only 1 ZERO SECTION bet. These numbers are 0, 1, 2, 3. |8 to 1 |
+|Zero Corner |Covers a bet on one of THREE particular numbers winning. There are two ZERO CORNER bets. These are 0, 1, 2, and 0, 2, 3. |11 to 1 |
+Answer:
+@Question: In Roulette, what are the odds for betting on Red?
+@Answer: Covers any RED number. The odds are 1 to 1.
+@Question: In Roulette, what are the odds for betting on Black?
+@Answer: Covers any BLACK number. The odds are 1 to 1.
+@Question: In Roulette, whhat are the odds for betting on Even?
+@Answer: Covers any EVEN number. The odds are 1 to 1.
+@Question: In Roulette, whhat are the odds for betting on Odd?
+@Answer: Covers any ODD number. The odds are 1 to 1.
+@Question: In Roulette, whhat are the odds for betting on Low?
+@Answer: Covers numbers 1-18. The odds are 1 to 1.
+@Question: In Roulette, what are the odds for betting on High?
+@Answer: Covers numbers 19-36. The odds are 1 to 1.
+@Question: In Roulette, what are the odds for betting on First Dozen?
+@Answer: Covers numbers 1-12. The odds are 2 to 1.
+@Question: In Roulette, what are the odds for betting on Second Dozen?
+@Answer: Covers numbers 13-24. The odds are 2 to 1.
+@Question: In Roulette, what are the odds for betting on Third Dozen?
+@Answer: Covers numbers 25-36. The odds are 2 to 1.
+@Question: In Roulette, what are the odds for betting on Column?
+@Answer: Covers 12 numbers in any of the 3 COLUMNS. The odds are 2 to 1.
+@Question: In Roulette, what are the odds for betting on Straight-Up?
+@Answer: Covers any single number including 0. The odds are 35 to 1.
+@Question: In Roulette, what are the odds for betting on Split?
+@Answer: Covers any 2 adjacent numbers on the table. The odds are 17 to 1.
+@Question: In Roulette, what are the odds for betting on Street?
+@Answer: Covers any 3 numbers in a line across the table. The odds are 11 to 1.
+@Question: In Roulette, what are the odds for betting on Corner?
+@Answer: Covers any 4 adjacent numbers on the table. The odds are 8 to 1.
+@Question: In Roulette, what are the odds for betting on Six Line?
+@Answer: Covers any block of 6 adjacent numbers on the table. The odds are 5 to 1.
+@Question: In Roulette, what are the odds for betting on Zero Section?
+@Answer: Covers a bet on one of FOUR particular numbers winning. There is only 1 ZERO SECTION bet. These numbers are 0, 1, 2, 3. The odds are 8 to 1.
+@Question: In Roulette, what are the odds for betting on Zero Corner?
+@Answer: Covers a bet on one of THREE particular numbers winning. There are two ZERO CORNER bets. These are 0, 1, 2, and 0, 2, 3. The odds are 11 to 1.
+
 
