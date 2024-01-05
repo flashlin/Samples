@@ -998,3 +998,24 @@ For example, we say:
 
 
 
+Question: Extract the content into Q&A data.
+# Forfeit amount calculation
+If user want to withdraw before they reach target turnover. User can cancel it manually from withdraw page by forfeiting bonus.
+Or system will cancel promotions when user’s balance already lower the min bet limit, or even reach 0.
+
+the rule is
+1. If you’re winning, the winning is from bonus; If you’re losing, the losing is from your balance.
+2. need to return bonus.
+3. minimal balance is 0.
+Answer:
+@Question: How is the Forfeit amount calculated?
+@Answer: If a user wishes to withdraw before reaching the target turnover, they can manually cancel it through the withdrawal page by forfeiting the bonus. Alternatively, the system will cancel promotions when the user's balance falls below the minimum bet limit or reaches 0.
+The rules are:
+1. If you win, the winnings come from the bonus; if you lose, the losses are deducted from your balance.
+2. The bonus amount needs to be returned.
+3. The minimum balance is 0
+
+
+
+
+
