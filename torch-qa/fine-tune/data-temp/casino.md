@@ -301,11 +301,6 @@ If a third card is drawn for the players hand, the decision to draw a third card
 |7 |Stand  |
 |8, 9 |Stand(Natural) |
 
-Q: What are the differences between 'Live Baccarat' and 'Live Speed Baccarat'?
-Answer: The difference between 'Live Baccarat' and 'Live Speed Baccarat' lies in the game's speed and pace. Essentially, 'Live Speed Baccarat' is a variant of 'Live Baccarat' designed for a faster-paced game. In 'Live Speed Baccarat,' the dealer reveals cards more swiftly(20 secs), and players have shorter betting times, making the entire game process quicker. This variant typically attracts players looking for swift gameplay and more rounds.
-
-Q: How long is the betting time in Live Speed Baccarat?
-Answer: The betting time for Live Speed Baccarat is 20 seconds.
 
 Q: What is SBO Live Dragon Tiger?
 Answer: The objective of the game is to bet on whichever of the two hands, the Dragon's hand or the Tiger's hand that the Player thinks will have the highest card value. The Player can also bet on Tie. Dealer will draw one card for the Dragon's hand and one card for the Tiger's hand. No additional cards will be drawn for each hand.

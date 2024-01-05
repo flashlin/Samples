@@ -135,26 +135,6 @@ Answer:
 @Answer: Dragon bonus is one of the side bet in Live Baccarat game that pays when the chosen hand has a natural win or when the chosen hand wins by at least 4 points difference (non-natural).
 @Question: In Live Dealer Baccarat, what is the highest payout for Dragon Bonus?
 @Answer: The highest payout is 30 to 1 which is for non-natural that wins by 9 points difference.
-@Question: In Live Dealer Baccarat, what are the odds for Dragon Bonus when betting on Player or Banker?
-@Answer: In Live Dealer Baccarat, Any bets on Player or Banker Dragon Bonus will pay differently according to the pay table.
-
-|Natural Win |Payout |
-|--|--|
-|Natural Win |1:1 |
-|Natural Tie |Push |
-|All other result |Lose |
-
-|Non-natural Win |Payout |
-|--|--|
-|9 points difference |30:1 |
-|8 points difference |10:1 |
-|7 points difference |6:1 |
-|6 points difference |4:1 |
-|5 points difference |2:1 |
-|4 points difference |1:1 |
-|All other result |Lose |
-
-For any specific game rules please refer to in game help page.
 @Question: What is the payout for a Natural Win in the context of bets on Live Dealer Baccarat's Player or Banker Dragon Bonus?
 @Answer: The payout for a Natural Win is 1:1 in Live Dealer Baccarat's Player or Banker Dragon Bonus.
 @Question: What is the outcome when there is a Natural Tie in Live Dealer Baccarat's Player or Banker Dragon Bonus?
@@ -200,24 +180,6 @@ Any bets on Player or Banker Dragon Bonus will pay differently according to the 
 |4 points difference |1:1 |
 |All other result |Lose |
 Answer:
-@Question: In Live Dealer Baccarat, what are the odds for Dragon Bonus when betting on Player or Banker?
-@Answer: In Live Dealer Baccarat, Any bets on Player or Banker Dragon Bonus will pay differently according to the pay table.
-
-|Natural Win |Payout |
-|--|--|
-|Natural Win |1:1 |
-|Natural Tie |Push |
-|All other result |Lose |
-
-|Non-natural Win |Payout |
-|--|--|
-|9 points difference |30:1 |
-|8 points difference |10:1 |
-|7 points difference |6:1 |
-|6 points difference |4:1 |
-|5 points difference |2:1 |
-|4 points difference |1:1 |
-|All other result |Lose |
 @Question: What is the payout for a Natural Win in the context of bets on Live Dealer Baccarat's Player or Banker Dragon Bonus?
 @Answer: The payout for a Natural Win is 1:1 in Live Dealer Baccarat's Player or Banker Dragon Bonus.
 @Question: What is the outcome when there is a Natural Tie in Live Dealer Baccarat's Player or Banker Dragon Bonus?
@@ -430,13 +392,10 @@ Winning player pair / banker pair bets receive payout odds of 11 to 1. Player / 
 Answer: 
 @Question: In Live Dealer Baccarat, what are the odds for Baccarat?
 @Answer: 
-Winning players bets receive payout odds of 1 to 1 (even money).
-
-Winning bankers bets receive payout odds of 1 to 1 (even money). However, a commission equal to 5% of the win amount is deducted automatically.
-
-Winning tie bets receive payout odds of 8 for 1. If there is a tie, bets on the bankers or players are returned to the Player.
-
-Winning player pair / banker pair bets receive payout odds of 11 to 1. Player / banker first and second hand have to make a pair in order to win.
+* Winning players bets receive payout odds of 1 to 1 (even money).
+* Winning bankers bets receive payout odds of 1 to 1 (even money). However, a commission equal to 5% of the win amount is deducted automatically.
+* Winning tie bets receive payout odds of 8 for 1. If there is a tie, bets on the bankers or players are returned to the Player.
+* Winning player pair / banker pair bets receive payout odds of 11 to 1. Player / banker first and second hand have to make a pair in order to win.
 @Question: In Live Dealer Baccarat, what are the odds for betting on the Player?
 @Answer: Winning players bets receive payout odds of 1 to 1 (even money).
 @Question: In Live Dealer Baccarat, what are the odds for betting on the Banker?
@@ -468,21 +427,18 @@ Winning Tie bets receive payout odds of 8 for 1. If there is a tie, bets on the 
 Winning Player Pair / Banker Pair bets receive payout odds of 11 to 1. The Player / Banker first and second hand has to make a pair in order to win.
 Answer:
 @Question: In Live Dealer Baccarat, what are the odds for Non-Commission Baccarat?
-@Answer: Winning Player bets receive payout odds of 1 to 1 (even money).
-
-Winning Banker bets receive payout odds of 1 to 1 (even money) except in the event when the Banker wins on Six Points.
-
-Winning Banker bets with the Banker wins on Six Points receive payout odds of 1 to 2 (in such an event, only 50% of the amount placed on the Banker will be paid).
-
-Winning Tie bets receive payout odds of 8 for 1. If there is a tie, bets on the bankers or players are returned to the Player.
-
-Winning Player Pair / Banker Pair bets receive payout odds of 11 to 1. The Player / Banker first and second hand has to make a pair in order to win.
+@Answer: 
+* Winning Player bets receive payout odds of 1 to 1 (even money).
+* Winning Banker bets receive payout odds of 1 to 1 (even money) except in the event when the Banker wins on Six Points.
+* Winning Banker bets with the Banker wins on Six Points receive payout odds of 1 to 2 (in such an event, only 50% of the amount placed on the Banker will be paid).
+* Winning Tie bets receive payout odds of 8 for 1. If there is a tie, bets on the bankers or players are returned to the Player.
+* Winning Player Pair / Banker Pair bets receive payout odds of 11 to 1. The Player / Banker first and second hand has to make a pair in order to win.
 @Question: In Live Dealer Non-Commission Baccarat, what are the odds for betting on the Player?
 @Answer: Winning Player bets receive payout odds of 1 to 1 (even money).
 @Question: In Live Dealer Non-Commission Baccarat, what are the odds for betting on the Banker?
-@Answer: Winning Banker bets receive payout odds of 1 to 1 (even money) except in the event when the Banker wins on Six Points.
-
-Winning Banker bets with the Banker wins on Six Points receive payout odds of 1 to 2 (in such an event, only 50% of the amount placed on the Banker will be paid).
+@Answer: 
+* Winning Banker bets receive payout odds of 1 to 1 (even money) except in the event when the Banker wins on Six Points.
+* Winning Banker bets with the Banker wins on Six Points receive payout odds of 1 to 2 (in such an event, only 50% of the amount placed on the Banker will be paid).
 @Question: In Live Dealer Non-Commission Baccarat, what are the odds for betting on the Tie?
 @Answer: Winning Tie bets receive payout odds of 8 for 1. If there is a tie, bets on the bankers or players are returned to the Player.
 @Question: In Live Dealer Non-Commission Baccarat, what are the odds for betting on the Player Pair?
@@ -531,14 +487,11 @@ Question: The following content contains information about 'Live Dealer Baccarat
 * Non-Commission Baccarat : A version of Baccarat where bets placed on the Banker shall receive payout odds of 1 to 1 except in the event when the Banker wins on Six Points (in such an event, only 50% of the amount bet on the Banker will be paid).
 Answer:
 @Question: What are the terms used in Live Dealer Baccarat?
-@Answer: * Players/Bankers : The terms players and bankers are the names given to two hands of cards that are dealt from the shoe during each round of play. The Player may bet on either the player's hand or the banker's hand. The Player may also bet on a tie.
-
+@Answer: 
+* Players/Bankers : The terms players and bankers are the names given to two hands of cards that are dealt from the shoe during each round of play. The Player may bet on either the player's hand or the banker's hand. The Player may also bet on a tie.
 * Natural : A natural hand is a two-card hand totalling eight or nine. The highest possible hand is a natural nine, which occurs when the first two cards drawn for either the bankers hand or the players hand total nine. The second highest hand is a natural eight. If a natural is drawn, this is an automatic winning hand and is called a natural winner. Neither of the hands will receive a third card when a natural is drawn.
-
 * Tie : If both hands have the same value, a tie hand is the result.
-
 * Player Pair or Banker Pair : The first two cards of either the Player or the Banker hand form a pair (for example 8, 8 or K, K).
-
 * Non-Commission Baccarat : A version of Baccarat where bets placed on the Banker shall receive payout odds of 1 to 1 except in the event when the Banker wins on Six Points (in such an event, only 50% of the amount bet on the Banker will be paid).
 @Question: In Live Dealer Baccarat, What is Players/Bankers?
 @Answer: The terms players and bankers are the names given to two hands of cards that are dealt from the shoe during each round of play. The Player may bet on either the player's hand or the banker's hand. The Player may also bet on a tie.
@@ -928,5 +881,120 @@ Answer:
 @Answer: Covers a bet on one of FOUR particular numbers winning. There is only 1 ZERO SECTION bet. These numbers are 0, 1, 2, 3. The odds are 8 to 1.
 @Question: In Roulette, what are the odds for betting on Zero Corner?
 @Answer: Covers a bet on one of THREE particular numbers winning. There are two ZERO CORNER bets. These are 0, 1, 2, and 0, 2, 3. The odds are 11 to 1.
+
+
+
+
+
+
+
+Question: The following content contains information about 'Daily Mission'. Extract the content into Q&A data.
+# Target audience
+currently MNL b2c users.
+Answer:
+@Question: Who is the target audience for the Daily Mission?
+@Answer: The current target audience for the Daily Mission is MNL B2C users.
+
+
+
+
+
+Question: The following content contains information about 'Daily Mission'. Extract the content into Q&A data.
+# Opt-in
+new user → when register during event, you’re in.
+old user → opt in automatically when you first enter the event page.
+Answer:
+@Question: What are the conditions for a user to opt-in for the Daily Mission?
+@Answer: 
+For new users, participation occurs upon registering during the event.
+For existing users, opting in happens automatically when you first visit the event page.
+
+
+
+
+
+Question: The following content contains information about 'Daily Mission'. Extract the content into Q&A data.
+# Consecutive reward
+If user achieve any rewards consecutively for over n days, user can get a special reward.
+This is currently processed by marketing team manually based on report we generate.
+Answer:
+@Question: What is the Consecutive reward for the Daily Mission?
+@Answer: If user achieve any rewards consecutively for over n days, user can get a special reward.
+This is currently processed by marketing team manually based on report we generate.
+
+
+
+
+
+Question: The following content contains information about 'Daily Mission'. Extract the content into Q&A data.
+# Rules
+There will be one to many missions everyday (GMT -4)
+once user reach target turnover, user can get a voucher.
+Answer:
+@Question: What are the rules for participating in the Daily Mission?
+@Answer: There will be one to many missions everyday (GMT -4).
+once user reach target turnover, user can get a voucher.
+
+
+
+
+
+Question: The following content contains information about 'Deposit Bonus'. Extract the content into Q&A data.
+# Opt-in
+several ways to opt in this promotion.
+1. Register with promotion code.
+2. Enroll by banner cta.
+3. Choose bonus on payment page
+Answer:
+@Question: The conditions for the opt-in Deposit Bonus are what?
+@Answer: There are multiple ways to participate in this promotion.
+1. Register using the promotion code.
+2. Enroll through the banner's call-to-action.
+3. Select the bonus on the payment page.
+
+
+
+
+
+
+Question: The following content contains information about 'Deposit Bonus'. Extract the content into Q&A data.
+# Turnover vs Rollover
+these two terms are very similar.
+Turnover focus on the amount while Rollover emphasize the multiple times.
+
+For instance, we say
+* Normal user has 3x rollover (read as “three times rollover”) to reach before they do a withdraw. 
+  - MNL 1x now, with auto withdraw.
+  - IOM 3x.
+    - deposit 100,   3x  => 300 turnover
+    - bet 100, win 120,  =>  +100 turnover
+    - bet 50, lose =>    +150 turnover   (lose → turnover = 3x stake )
+    - bet 20, lose 
+
+* For rebate, user has to reach at least 1,000,000 VND turnover.
+* Ranking promotion rank user base on their turnover.
+* the lower rollover we limit, the easier user win money from us.
+Answer:
+@Question: What are the differences between Turnover and Rollover in Deposit Bonus?
+@Answer:
+These two terms are very similar. Turnover focuses on the amount while Rollover emphasizes the frequency.
+
+For example, we say:
+* A regular user needs a 3x rollover (read as “three times rollover”) before they can withdraw.
+  - MNL user is currently at 1x with automatic withdrawals.
+  - IOM user is at 3x.
+    - Deposit 100, 3x => 300 turnover
+    - Bet 100, win 120 => +100 turnover
+    - Bet 50, lose => +150 turnover (loss → turnover = 3x stake)
+    - Bet 20, lose
+
+* For rebate, users need to achieve at least a 1,000,000 VND turnover.
+* Promotional rankings are based on user turnover.
+* The lower the rollover limit we set, the easier it is for users to win money from us.
+
+
+
+
+
 
 
