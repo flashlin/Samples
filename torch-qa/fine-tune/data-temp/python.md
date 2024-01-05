@@ -216,3 +216,14 @@ You can try to install peft 0.6.2 version.
 ```bash
 pip install peft==0.6.2
 ```
+
+
+Question: ImportError: libcudart.so.11.0: cannot open shared object file: No such file or directory
+Answer: 
+I solved this error with 
+```
+pip install xformers==0.0.22
+```
+xformers==0.0.22 requires nvidia-cuda-runtime-cu11==11.7.99 and etc.
+Unfortunately it uninstall PyTorch2.1.0(originally installed)
+but my code is working!

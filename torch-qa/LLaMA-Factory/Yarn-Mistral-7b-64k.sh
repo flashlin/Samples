@@ -1,16 +1,14 @@
-MODEL_ID=meta_llama-2-7b-chat-hf
-MODEL_ID=NousResearch_llama-2-7b-chat-hf
-MODEL_ID=Mistral-7B-Instruct-v0.1
+MODEL_ID=Yarn-Mistral-7b-64k
 #CHECKPOINT=/checkpoint-50
 CHECKPOINT=
 DATASET=qa
 NUM_TRAIN_EPOCHS=20
-TRAIN_BATCH_SIZE=5
+TRAIN_BATCH_SIZE=2
 GRADIENT_ACCUMULATION_STEPS=12
-SAVE_STEPS=20
+SAVE_STEPS=10
 #LORA_TARGET=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj
-LORA_RANK=8
 LORA_TARGET=q_proj,k_proj,v_proj,o_proj,gate_proj,up_proj,down_proj,lm_head
+LORA_RANK=8
 #LORA_RANK=64
 LEARNING_RATE=1e-4
 

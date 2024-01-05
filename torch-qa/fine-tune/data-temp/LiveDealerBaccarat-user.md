@@ -1,12 +1,14 @@
-Question: What are the differences between 'Live Baccarat' and 'Live Speed Baccarat'?
-Answer: The difference between 'Live Baccarat' and 'Live Speed Baccarat' lies in the game's speed and pace. Essentially, 'Live Speed Baccarat' is a variant of 'Live Baccarat' designed for a faster-paced game. In 'Live Speed Baccarat,' the dealer reveals cards more swiftly(20 secs), and players have shorter betting times, making the entire game process quicker. This variant typically attracts players looking for swift gameplay and more rounds.
-
-
-
-
-Question: How long is the betting time in Live Speed Baccarat?
-Answer: The betting time for Live Speed Baccarat is 20 seconds.
-
-
+Question: List all the odds for the Tiger bets in Baccarat.
+Answer: Tiger Baccarat betting options:
+* Tiger Bet: If the banker wins with a 6, the following odds apply:
+  - Two-card Tiger: 12 to 1
+  - Three-card Tiger: 20 to 1
+* Big Tiger Bet: If the banker wins with three cards totaling 6, the odds are 50 to 1.
+* Small Tiger Bet: If the banker wins with two cards totaling 6, the odds are 22 to 1.
+* Tiger Tie Bet: If it's a tie and the total is 6, the odds are 35 to 1.
+* Tiger Pair Bet: If either the player's or banker's first two cards form a pair, the following odds apply:
+  - Single Tiger Pair: 4 to 1
+  - Double Tiger Pair: 20 to 1
+  - Twin Tiger Pair: 100 to 1
 
 
