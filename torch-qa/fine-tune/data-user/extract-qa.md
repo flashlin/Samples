@@ -1,4 +1,4 @@
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Introduction to Live Dealer Baccarat
 
 The objective of the game is to bet on whichever of two hands, the player's hand or the banker's hand, that the Player thinks will have a point value closest to 9. The Player can also bet on a tie.
@@ -23,9 +23,31 @@ The game is presented to the Player with a live person dealing the cards on scre
 
 
 
+Question: extract_qa_prompt(Live Baccarat)
+There are no values greater than nine in the game of baccarat. 
+All card values are recalculated when the combined value of two or more cards is greater than nine. 
+This new card value is determined by subtracting ten from the combined card value every time it reaches a number greater than nine. 
+Below are a few examples of this equation.
+4 + 2 + 6 = 2
+5 + 6 + 8 = 9
+7 + 3 = 0
+10 + 10 + 10 = 0
+Answer:
+@Question: How are the card values calculated in Live Dealer Baccarat?
+@Answer: There are no values greater than nine in the game of baccarat.
+All card values are recalculated when the combined value of two or more cards is greater than nine. 
+This new card value is determined by subtracting ten from the combined card value every time it reaches a number greater than nine. 
+Below are a few examples of this equation.
+4 + 2 + 6 = 2
+5 + 6 + 8 = 9
+7 + 3 = 0
+10 + 10 + 10 = 0
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+
+
+
+Question: extract_qa_prompt(Live Baccarat)
 # Participation Instructions and Bet Options
 To place a bet, the Player moves the cursor to the pictures of the chips in the lower-right corner of the game window and left-click the chip value that they want to use. The Player then moves the cursor to the Betting Area on the table layout marked as players or bankers, tie or pair, then left-clicks to place their bets. The chip will automatically appear in the betting box, with the total value of the bet written alongside. The bet amount will also appear at the bottom of the window.
 
@@ -103,7 +125,7 @@ If both hands have the same point value, that game is a tie and neither side win
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 Some common Baccarat terms are provided below, complete with explanations.
 
 # Dragon Bonus
@@ -161,7 +183,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 Any bets on Player or Banker Dragon Bonus will pay differently according to the pay table.
 
 |Natural Win | |
@@ -209,7 +231,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Fortune Six
 
 Fortune Six is one of the side bet in Live Baccarat. The bet will be paid if the Banker hand wins with a total of six. It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.
@@ -238,7 +260,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Tiger Baccarat
 Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
 Answer:
@@ -258,7 +280,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # How to Play Tiger
 To play Tiger, simply place a bet in the Tiger betting area of the layout. All bets must be placed before any cards are dealt, and if the banker wins with a score total of six, you win. The payout odds are dependent on how many cards the Banker has when the hand is complete. If the Banker has two cards, this is known as a “Two Card Tiger” and the payout odds are 12 to 1. If the Banker has three cards, this is known as a “Three Card Tiger” and the payout odds are 20 to 1.
 Answer: 
@@ -285,7 +307,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # How to Play Big Tiger
 To play Big Tiger, simply place a bet in the Big Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly three cards, you win. The payout odds for winning with a score total of six and exactly three cards are 50 to 1.
 Answer:
@@ -302,7 +324,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # How to Play Small Tiger
 To play Small Tiger, simply place a bet in the Small Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly two cards, you win. The payout odds for winning with a score total of six and exactly two cards are 22 to 1.
 Answer:
@@ -319,7 +341,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # How to Play Tiger Tie
 To play Tiger Tie, simply place a bet in the Tiger Tie betting area of the layout. All bets must be placed before any cards are dealt. If the result is a Tie with a total of six, you win. The payout odds for winning with a Tie and a total of six are 35 to 1.
 Answer:
@@ -336,7 +358,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # How to Play Tiger Pair
 The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
 
@@ -358,6 +380,18 @@ If the pairs in both hands have a matching number or matching picture card, then
 @Answer: If both hands have a pair on their first two cards, this is known as a "Double Tiger Pair" and the odds are 20 to 1.
 @Question: In Live Dealer Baccarat, what are the odds for a "Twin Tiger Pair"  if both hands have pairs with matching numbers or matching picture cards?
 @Answer: If the pairs in both hands have a matching number or matching picture card, then this is known as a "Twin Tiger Pair" and the odds are 100 to 1.
+@Question: In Live Dealer Baccarat, what are the odds for the Tiger betting options? 
+@Answer: Tiger betting options:
+* Tiger Bet: If the banker wins with a 6, the following odds apply:
+  - Two-card Tiger: 12 to 1
+  - Three-card Tiger: 20 to 1
+* Big Tiger Bet: If the banker wins with three cards totaling 6, the odds are 50 to 1.
+* Small Tiger Bet: If the banker wins with two cards totaling 6, the odds are 22 to 1.
+* Tiger Tie Bet: If it's a tie and the total is 6, the odds are 35 to 1.
+* Tiger Pair Bet: If either the player's or banker's first two cards form a pair, the following odds apply:
+  - Single Tiger Pair: 4 to 1
+  - Double Tiger Pair: 20 to 1
+  - Twin Tiger Pair: 100 to 1
 
 
 
@@ -365,8 +399,7 @@ If the pairs in both hands have a matching number or matching picture card, then
 
 
 
-
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Payout Odds
 Payouts are determined at standard odds that you will find to be identical to those used in all of the major Casinos of America, Europe and Asia.
 Answer:
@@ -380,7 +413,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Baccarat
 Winning players bets receive payout odds of 1 to 1 (even money).
 
@@ -414,7 +447,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Non-Commission Baccarat
 Winning Player bets receive payout odds of 1 to 1 (even money).
 
@@ -454,7 +487,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Maximum and Minimum bets
 The maximum and minimum bet limits will only be displayed within the Bet Limits menu in the gaming table after the Player has sit on the table.
 Answer:
@@ -474,7 +507,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Live Baccarat Terms
 * Players/Bankers : The terms players and bankers are the names given to two hands of cards that are dealt from the shoe during each round of play. The Player may bet on either the player's hand or the banker's hand. The Player may also bet on a tie.
 
@@ -513,7 +546,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Card Values
 All cards except for Tens, Picture Cards, (Jacks, Queens and Kings) and Aces, are worth their face value.
 
@@ -542,7 +575,7 @@ Aces are counted as one.
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Drawing Rules
 
 There are no optional drawing rules in this game. Whether cards are drawn or not is determined according to the rules provided below. These rules are called the "Drawing Rules" or "Tableau", and are identical to those used in all of the major casinos of America, Europe and Asia.
@@ -609,7 +642,7 @@ For a total of 8 or 9 (a natural), the Banker does not draw a third card.
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # No Burn Card
 The dealer does not perform burn card between the games.
 Answer:
@@ -621,7 +654,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Reshuffles
 The Operator reserves the rights to reshuffle the particular decks of cards if any human or non-human errors occur during cards shuffling.
 Answer:
@@ -633,7 +666,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Pair Bets
 All bets are confirmed and taken into Players' account once the CONFIRM button is clicked.
 
@@ -656,7 +689,7 @@ Payout is 11 to 1.
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Electronic Malfunctions
 
 The card is scanned by the dealer and the result will be displayed on the Players' computer screen. If any card fails to scan, the dealer will re-scan the card in order to display the result to the Players.
@@ -679,7 +712,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Physical Malfunctions
 
 In the event of two or more cards are dealt simultaneously by accident, the current round will be aborted, all bets will be returned and the particular shoe will be replaced with a new shoe.
@@ -709,7 +742,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Live Dealer Baccarat'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Live Baccarat)
 # Complaints
 
 If a Player wishes to make a complaint or dispute a game result, they must provide SBOBET Casino, the date and time of playing, Table ID, dealer's name and Round number at the time of contacting SBOBET Casino. Failure to do so will result in the complaint being rejected by SBOBET Casino. Video image of card dealing is kept for 24 hours. Players must address their complaint regarding the dispute within 24 hour of the dispute occurring. Any complaints submitted after 24 hours will be rejected by SBOBET Casino without further explanation.
@@ -726,7 +759,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Roulette'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Roulette)
 # Roulette
 The objective of the game is to predict where the ball will come to rest in the spinning wheel. There are 37 individually numbered sections in the wheel, labeled with the numbers 0-36. Bets can be placed on any one of these 37 numbers or on various groups of numbers displayed on the table.
 
@@ -751,7 +784,7 @@ Note: Potential wins above the maximum payout per bet allowed will be capped and
 
 
 
-Question: The following content contains information about 'Roulette'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Roulette)
 # How to Play
 When playing Roulette, you can place more than one bet on the table for each spin of the wheel, with different amounts bet in several different positions. For example, you could bet on number 21 and on various other numbers that are adjacent to number 21 on the table, on all the BLACK numbers, on all the ODD numbers, and on the THIRD DOZEN numbers. When the ball falls into a number, some of these bets win, and some lose. The secret is to win more than you lose!
 Answer: 
@@ -767,7 +800,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Roulette'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Roulette)
 # Bet Options
 The Table is laid out in a 12x3 grid that includes all of the 36 RED and BLACK numbers that appear on the wheel, together with 0 at the top of the layout. You can place chips in any of the betting positions as described below.
 
@@ -822,7 +855,7 @@ Straight-Up, Split, Street, Corner, Zero Section, Zero Corner, Six Line, Column,
 
 
 
-Question: The following content contains information about 'Roulette'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Roulette)
 # Payout Odds
 
 |Type of Bet |Description |Payout Odds |
@@ -888,7 +921,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Daily Mission'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Daily Mission)
 # Target audience
 currently MNL b2c users.
 Answer:
@@ -899,7 +932,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Daily Mission'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Daily Mission)
 # Opt-in
 new user → when register during event, you’re in.
 old user → opt in automatically when you first enter the event page.
@@ -913,7 +946,7 @@ For existing users, opting in happens automatically when you first visit the eve
 
 
 
-Question: The following content contains information about 'Daily Mission'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Daily Mission)
 # Consecutive reward
 If user achieve any rewards consecutively for over n days, user can get a special reward.
 This is currently processed by marketing team manually based on report we generate.
@@ -926,7 +959,7 @@ This is currently processed by marketing team manually based on report we genera
 
 
 
-Question: The following content contains information about 'Daily Mission'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Daily Mission)
 # Rules
 There will be one to many missions everyday (GMT -4)
 once user reach target turnover, user can get a voucher.
@@ -939,7 +972,7 @@ once user reach target turnover, user can get a voucher.
 
 
 
-Question: The following content contains information about 'Deposit Bonus'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Deposit Bonus)
 # Opt-in
 several ways to opt in this promotion.
 1. Register with promotion code.
@@ -957,7 +990,7 @@ Answer:
 
 
 
-Question: The following content contains information about 'Deposit Bonus'. Extract the content into Q&A data.
+Question: extract_qa_prompt(Deposit Bonus)
 # Turnover vs Rollover
 these two terms are very similar.
 Turnover focus on the amount while Rollover emphasize the multiple times.
@@ -998,7 +1031,7 @@ For example, we say:
 
 
 
-Question: Extract the content into Q&A data.
+Question: extract_qa_prompt()
 # Forfeit amount calculation
 If user want to withdraw before they reach target turnover. User can cancel it manually from withdraw page by forfeiting bonus.
 Or system will cancel promotions when user’s balance already lower the min bet limit, or even reach 0.

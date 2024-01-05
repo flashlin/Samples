@@ -9,8 +9,6 @@ Answer: Over a long period of time, the game is likely to average a return to th
 ----------
 Question: In Live Dealer Baccarat, How do I place a bet?
 Answer: To place a bet, the Player moves the cursor to the pictures of the chips in the lower-right corner of the game window and left-click the chip value that they want to use. The Player then moves the cursor to the Betting Area on the table layout marked as players or bankers, tie or pair, then left-clicks to place their bets. The chip will automatically appear in the betting box, with the total value of the bet written alongside. The bet amount will also appear at the bottom of the window. 
-Question: In Live Dealer Baccarat, What are the options for betting?
-Answer: Each left-click will increase the bet value by one chip of the same value, up to the maximum bet for that table. If the Player wants to use a different chip value of this bet, they must move the cursor back to the pictures of the chips at the lower-right corner of the game window on the screen and left-click on the new chip value that they want to use.
 ----------
 Question: In Live Dealer Baccarat, How do I place bets?
 Answer: Players must place their bets before the Betting Timer at the centre of the game window expires. Betting is not allowed once the Betting Timer has expired.
@@ -85,9 +83,6 @@ Answer: The payout is 2:1
 
 Question: What is the payout for a 4 points difference in Live Dealer Baccarat's Player or Banker Dragon Bonus?
 Answer: The payout is 1:1
-
-Question: For all specific game rules related to Live Dealer Baccarat's Dragon Bonus, where can I find more information?
-Answer: For any specific game rules please refer to in game help page.
 ----------
 Question: What is Fortune Six in Live Dealer Baccarat?
 Answer: Fortune Six is one of the side bet in Live Baccarat. The bet will be paid if the Banker hand wins with a total of six. It pays 20 to 1 if the Banker hand wins with a total of six and it composed of three cards, and 12 to 1 if composed of two cards.

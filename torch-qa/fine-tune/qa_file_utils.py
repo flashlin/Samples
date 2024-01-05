@@ -210,6 +210,8 @@ class QuestionByPrevTodoListReadState:
         self.context.output_question_answer()
         self.context.read_state = QuestionAnswerReadyState(self.context)
 
+def extract_qa_prompt_fn(title):
+    return f"The following content pertains to '{title}', Extract information into Q&A, ensuring answers are sourced from the following content."
 
 def compute_fn(expr: str):
     return eval(expr)
@@ -332,6 +334,7 @@ def dragon_baccarat_win_odds_fn(bet_name, name1, point1, name2, point2, win_mess
 
 def render_template(template_content: str):
     env = Environment()
+    env.globals['extract_qa_prompt'] = extract_qa_prompt_fn
     env.globals['compute'] = compute_fn
     env.globals['mul'] = mul_fn
     env.globals['baccarat_card_value'] = baccarat_card_value_fn
@@ -443,6 +446,22 @@ class SingleAnswerReadState:
         self.context.read_state = QuestionAnswerReadyState(self.context)
 
 
+def replace_extract_qa_prompt_template(old_prompt, replace_pattern, instruction_template, non_title_instruction):
+    pattern = re.compile(replace_pattern)
+    matches = pattern.finditer(old_prompt)
+    new_prompt = old_prompt
+    for match in matches:
+        old_instruction = match.group()
+        title = match.group(1)
+        if title == "":
+            new_instruction = non_title_instruction
+        else:
+            new_instruction = instruction_template.format(title=title)
+        new_prompt = new_prompt.replace(old_instruction, new_instruction)
+        return new_prompt
+    return old_prompt
+
+
 def query_qa_file(file: str, is_single: bool=False):
     if os.path.exists(file) is False:
         return
@@ -452,9 +471,16 @@ def query_qa_file(file: str, is_single: bool=False):
             # line = line.strip()
             qa.read_line(line)
         qa.flush()
+
+    extract_qa_prompt = """The following content pertains to "{title}", Extract information into Q&A, ensuring answers are sourced from the following content."""
+    extract_qa_prompt_no_title = """Extract below information into Q&A, ensuring answers are sourced from the following content."""
     for questions, answers in qa.question_answer_list:
         for question in questions:
             for answer in answers:
+                question = replace_extract_qa_prompt_template(question,
+                                                              replace_pattern=r'extract_qa_prompt\((.*)\)',
+                                                              instruction_template=extract_qa_prompt,
+                                                              non_title_instruction=extract_qa_prompt_no_title)
                 new_answer = answer.strip()
                 new_answer = new_answer.replace('@Question:', 'Question:')
                 new_answer = new_answer.replace('@Answer:', 'Answer:')
