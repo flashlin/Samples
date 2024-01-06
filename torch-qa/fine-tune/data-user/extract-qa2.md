@@ -1,4 +1,4 @@
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Introduction to Live Dealer Baccarat
 
@@ -24,7 +24,7 @@ The game is presented to the Player with a live person dealing the cards on scre
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 There are no values greater than nine in the game of baccarat. 
 All card values are recalculated when the combined value of two or more cards is greater than nine. 
@@ -49,7 +49,7 @@ Below are a few examples of this equation.
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Participation Instructions and Bet Options
 To place a bet, the Player moves the cursor to the pictures of the chips in the lower-right corner of the game window and left-click the chip value that they want to use. The Player then moves the cursor to the Betting Area on the table layout marked as players or bankers, tie or pair, then left-clicks to place their bets. The chip will automatically appear in the betting box, with the total value of the bet written alongside. The bet amount will also appear at the bottom of the window.
@@ -128,7 +128,7 @@ If both hands have the same point value, that game is a tie and neither side win
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 Some common Baccarat terms are provided below, complete with explanations.
 
@@ -187,7 +187,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 Any bets on Player or Banker Dragon Bonus will pay differently according to the pay table.
 
@@ -236,7 +236,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Fortune Six
 
@@ -266,7 +266,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Tiger Baccarat
 Tiger Baccarat is a set of up to 5 optional wagers that may be used on a Baccarat table in conjunction with any of the existing optional wagers. The 5 Tiger wagers are known as “Tiger”, “Big Tiger”, “Small Tiger”, “Tiger Tie” and “Tiger Pair”. Please note that the casino may limit the placement of any or all of the Tiger wagers to those players who also have a Baccarat wager on the Player’s Hand, Banker’s Hand or Tie and will display a sign at the table when this applies.
@@ -287,7 +287,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # How to Play Tiger
 To play Tiger, simply place a bet in the Tiger betting area of the layout. All bets must be placed before any cards are dealt, and if the banker wins with a score total of six, you win. The payout odds are dependent on how many cards the Banker has when the hand is complete. If the Banker has two cards, this is known as a “Two Card Tiger” and the payout odds are 12 to 1. If the Banker has three cards, this is known as a “Three Card Tiger” and the payout odds are 20 to 1.
@@ -315,7 +315,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # How to Play Big Tiger
 To play Big Tiger, simply place a bet in the Big Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly three cards, you win. The payout odds for winning with a score total of six and exactly three cards are 50 to 1.
@@ -333,7 +333,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # How to Play Small Tiger
 To play Small Tiger, simply place a bet in the Small Tiger betting area of the layout. All bets must be placed before any cards are dealt. If the banker wins with a score total of six and has exactly two cards, you win. The payout odds for winning with a score total of six and exactly two cards are 22 to 1.
@@ -351,7 +351,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # How to Play Tiger Tie
 To play Tiger Tie, simply place a bet in the Tiger Tie betting area of the layout. All bets must be placed before any cards are dealt. If the result is a Tie with a total of six, you win. The payout odds for winning with a Tie and a total of six are 35 to 1.
@@ -369,7 +369,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # How to Play Tiger Pair
 The Tiger Pair wager is similar to the Banker Pairs and Player pairs wagers, but they are combined into one bet. Simply place a bet in the Tiger Pair betting area of the layout. All bets must be placed before any cards are dealt. If either or both of the Player’s and Banker’s hands first two cards are a pair, you win. If only one of the hands has a pair on their first two cards, this is known as a “Single Tiger Pair” and the odds paid are 4 to 1. If both hands have a pair on their first two cards, this is known as a “Double Tiger Pair” and the odds are 20 to 1. If the pairs in both hands have a matching number or matching picture card, then this is known as a “Twin Tiger Pair” and the odds are 100 to 1.
@@ -411,7 +411,7 @@ If the pairs in both hands have a matching number or matching picture card, then
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Payout Odds
 Payouts are determined at standard odds that you will find to be identical to those used in all of the major Casinos of America, Europe and Asia.
@@ -426,7 +426,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Baccarat
 Winning players bets receive payout odds of 1 to 1 (even money).
@@ -461,7 +461,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Non-Commission Baccarat
 Winning Player bets receive payout odds of 1 to 1 (even money).
@@ -502,7 +502,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Maximum and Minimum bets
 The maximum and minimum bet limits will only be displayed within the Bet Limits menu in the gaming table after the Player has sit on the table.
@@ -523,7 +523,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Live Baccarat Terms
 * Players/Bankers : The terms players and bankers are the names given to two hands of cards that are dealt from the shoe during each round of play. The Player may bet on either the player's hand or the banker's hand. The Player may also bet on a tie.
@@ -563,7 +563,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Card Values
 All cards except for Tens, Picture Cards, (Jacks, Queens and Kings) and Aces, are worth their face value.
@@ -593,7 +593,7 @@ Aces are counted as one.
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Drawing Rules
 
@@ -661,7 +661,7 @@ For a total of 8 or 9 (a natural), the Banker does not draw a third card.
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # No Burn Card
 The dealer does not perform burn card between the games.
@@ -674,7 +674,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Reshuffles
 The Operator reserves the rights to reshuffle the particular decks of cards if any human or non-human errors occur during cards shuffling.
@@ -687,7 +687,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Pair Bets
 All bets are confirmed and taken into Players' account once the CONFIRM button is clicked.
@@ -711,7 +711,7 @@ Payout is 11 to 1.
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Electronic Malfunctions
 
@@ -735,7 +735,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Physical Malfunctions
 
@@ -766,7 +766,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Live Baccarat)
+Instruction: @extract_qa_prompt('Live Baccarat')
 Question:
 # Complaints
 
@@ -783,7 +783,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Roulette)
+Instruction: @extract_qa_prompt('Roulette')
 Question:
 # Roulette
 The objective of the game is to predict where the ball will come to rest in the spinning wheel. There are 37 individually numbered sections in the wheel, labeled with the numbers 0-36. Bets can be placed on any one of these 37 numbers or on various groups of numbers displayed on the table.
@@ -809,7 +809,7 @@ Note: Potential wins above the maximum payout per bet allowed will be capped and
 
 
 
-Instruction: extract_qa_prompt(Roulette)
+Instruction: @extract_qa_prompt('Roulette')
 Question:
 # How to Play
 When playing Roulette, you can place more than one bet on the table for each spin of the wheel, with different amounts bet in several different positions. For example, you could bet on number 21 and on various other numbers that are adjacent to number 21 on the table, on all the BLACK numbers, on all the ODD numbers, and on the THIRD DOZEN numbers. When the ball falls into a number, some of these bets win, and some lose. The secret is to win more than you lose!
@@ -826,7 +826,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Roulette)
+Instruction: @extract_qa_prompt('Roulette')
 Question:
 # Bet Options
 The Table is laid out in a 12x3 grid that includes all of the 36 RED and BLACK numbers that appear on the wheel, together with 0 at the top of the layout. You can place chips in any of the betting positions as described below.
@@ -882,7 +882,7 @@ Straight-Up, Split, Street, Corner, Zero Section, Zero Corner, Six Line, Column,
 
 
 
-Instruction: extract_qa_prompt(Roulette)
+Instruction: @extract_qa_prompt('Roulette')
 Question:
 # Payout Odds
 
@@ -949,7 +949,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Daily Mission)
+Instruction: @extract_qa_prompt('Daily Mission')
 Question:
 # Target audience
 currently MNL b2c users.
@@ -961,7 +961,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Daily Mission)
+Instruction: @extract_qa_prompt('Daily Mission')
 Question:
 # Opt-in
 new user → when register during event, you’re in.
@@ -976,7 +976,7 @@ For existing users, opting in happens automatically when you first visit the eve
 
 
 
-Instruction: extract_qa_prompt(Daily Mission)
+Instruction: @extract_qa_prompt('Daily Mission')
 Question:
 # Consecutive reward
 If user achieve any rewards consecutively for over n days, user can get a special reward.
@@ -990,7 +990,7 @@ This is currently processed by marketing team manually based on report we genera
 
 
 
-Instruction: extract_qa_prompt(Daily Mission)
+Instruction: @extract_qa_prompt('Daily Mission')
 Question:
 # Rules
 There will be one to many missions everyday (GMT -4)
@@ -1004,7 +1004,7 @@ once user reach target turnover, user can get a voucher.
 
 
 
-Instruction: extract_qa_prompt(Deposit Bonus)
+Instruction: @extract_qa_prompt('Deposit Bonus')
 Question:
 # Opt-in
 several ways to opt in this promotion.
@@ -1023,7 +1023,7 @@ Answer:
 
 
 
-Instruction: extract_qa_prompt(Deposit Bonus)
+Instruction: @extract_qa_prompt('Deposit Bonus')
 Question:
 # Turnover vs Rollover
 these two terms are very similar.
@@ -1035,7 +1035,7 @@ For instance, we say
   - IOM 3x.
     - deposit 100,   3x  => 300 turnover
     - bet 100, win 120,  =>  +100 turnover
-    - bet 50, lose =>    +150 turnover   (lose → turnover = 3x stake )
+    - bet 50, lose =>    +150 turnover   (lose → turnover = 3x stake)
     - bet 20, lose 
 
 * For rebate, user has to reach at least 1,000,000 VND turnover.
@@ -1064,7 +1064,7 @@ For example, we say:
 
 
 
-Instruction: extract_qa_prompt()
+Instruction: @extract_qa_prompt()
 Question:
 # Forfeit amount calculation
 If user want to withdraw before they reach target turnover. User can cancel it manually from withdraw page by forfeiting bonus.

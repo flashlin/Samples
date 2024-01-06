@@ -8,6 +8,30 @@ def load_jsonl_dataset(jsonl_files):
     return load_dataset('json', data_files=jsonl_files, cache_dir='data_cache')
 
 
+def eval_in_text(text, func_name, user_fn=None):
+    fn_pattern = re.compile("@(" + func_name + r"\(.*\)" +")")
+    matches = fn_pattern.finditer(text)
+    new_text = text
+    for match in matches:
+        fn_text = match.group(1)
+        if user_fn:
+            local_dict = {func_name: user_fn}
+            result = eval(fn_text, {}, local_dict)
+        else:
+            result = eval(fn_text)
+        new_text = new_text.replace('@' + fn_text, result)
+        return new_text
+    return text
+
+
+def extract_qa_prompt(title=None):
+    if title:
+        prompt = """The following content pertains to "{title}", Extract information into Q&A, ensuring 
+        answers are sourced from the following content."""
+        return prompt.format(title=title)
+    return """Extract below information into Q&A, ensuring answers are sourced from the following content."""
+
+
 def should_flush_data(match_label, prev_label):
     if 'Instruction' == match_label and prev_label == 'Answer':
         return True
@@ -20,6 +44,7 @@ def replace_escape_string(text):
     text = text.replace('@Instruction:', 'Instruction:')
     text = text.replace('@Question:', 'Question:')
     text = text.replace('@Answer:', 'Answer:')
+    text = eval_in_text(text, "extract_qa_prompt")
     return text
 
 
