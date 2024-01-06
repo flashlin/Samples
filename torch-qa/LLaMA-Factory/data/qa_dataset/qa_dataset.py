@@ -7,7 +7,7 @@ _DESCRIPTION = "An QA of dataset."
 _CITATION = ""
 _HOMEPAGE = ""
 _LICENSE = ""
-_URL = "qa-2.jsonl"
+_URL = "qa-3.jsonl"
 
 
 class QADataset(datasets.GeneratorBasedBuilder):
