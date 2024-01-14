@@ -10,3 +10,8 @@ export CUDA_HOME=/usr/local/cuda
 export PATH=${CUDA_HOME}/bin:${PATH}
 export LD_LIBRARY_PATH=${CUDA_HOME}/lib64:$LD_LIBRARY_PATH
 source ~/.bashrc
+
+#export BNB_CUDA_VERSION=117
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/tim/local/cuda-11.7
+export BNB_CUDA_VERSION=121
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/tim/local/cuda-12.1
