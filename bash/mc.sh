@@ -7,6 +7,7 @@ if [ $# -lt 1 ]; then
    conda env list
    echo "Usage: $0 <arg1>"
    echo "i        :install torch env"
+   echo "b <name> :switch env <name>"
    echo "n <name> :creaate new env <name>"
    echo "cuda     :install cuda"
    exit 0
@@ -30,6 +31,15 @@ if [ "n" == "$action" ]; then
     conda activate $name
     exit
 fi
+
+
+if [ "b" == "$action" ]; then
+    name=$2
+    echo "switch $name env"
+    conda activate $name
+    exit
+fi
+
 
 
 if [ "cuda" == "$action" ]; then
