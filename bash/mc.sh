@@ -4,9 +4,11 @@ set -e
 
 if [ $# -lt 1 ]; then
    nvidia-smi
+   conda env list
    echo "Usage: $0 <arg1>"
-   echo "i    :install torch env"
-   echo "cuda :install cuda"
+   echo "i        :install torch env"
+   echo "n <name> :creaate new env <name>"
+   echo "cuda     :install cuda"
    exit 0
 fi
 
@@ -19,6 +21,16 @@ if [ "i" == "$action" ]; then
     # conda install conda=23.7.3
     exit
 fi
+
+
+if [ "n" == "$action" ]; then
+    name=$2
+    echo "create $name env"
+    conda create -n $name python=3.10
+    conda activate $name
+    exit
+fi
+
 
 if [ "cuda" == "$action" ]; then
     echo "install torch"
