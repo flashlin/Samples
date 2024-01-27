@@ -49,3 +49,4 @@ torch-qa/ipy/seamless_communication/
 torch-qa/fine-tune/data-processed/
 cache/
 results/
+qdrant_storage/
