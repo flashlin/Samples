@@ -50,3 +50,4 @@ torch-qa/fine-tune/data-processed/
 cache/
 results/
 qdrant_storage/
+db_data/
