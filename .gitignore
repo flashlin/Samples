@@ -51,3 +51,4 @@ cache/
 results/
 qdrant_storage/
 db_data/
+cache_dir/
