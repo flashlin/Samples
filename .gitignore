@@ -52,3 +52,5 @@ results/
 qdrant_storage/
 db_data/
 cache_dir/
+bash/nvim-linux64
+bash/cuda_12.2.2_535.104.05_linux.run
