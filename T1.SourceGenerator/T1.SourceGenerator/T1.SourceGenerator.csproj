@@ -10,7 +10,7 @@
     <PackageLicenseUrl>MIT</PackageLicenseUrl>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <LangVersion>11</LangVersion>
-    <PackageVersion>1.0.3</PackageVersion>
+    <PackageVersion>1.0.5</PackageVersion>
     <IsRoslynComponent>true</IsRoslynComponent>
     <PackageReleaseNotes>add SourceGenerator in project</PackageReleaseNotes>
     <PackageLicense>https://opensource.org/licenses/MIT</PackageLicense>
