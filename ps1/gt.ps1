@@ -46,6 +46,25 @@ if( "mtb" -eq $action )
     return
 }
 
+if( "frf" -eq $action)
+{
+    $folder = $arg1
+    $answer = Read-Host "強迫刪除 git repo $folder 整個資料夾, 包含歷史紀錄 (yes/no)?"
+    if ($answer -ne "yes") {
+        return
+    }
+    Info "強迫刪除整個 $folder 資料夾包含歷史紀錄..."
+    InvokeCmd "git filter-branch --force --index-filter 'git rm --cached -r --ignore-unmatch $folder/' --prune-empty --tag-name-filter cat -- --all"
+    InvokeCmd "git push origin master --force --tags"
+
+    Remove-Item -Recurse -Force .\.git\refs\original\
+    InvokeCmd "git reflog expire --expire=now --all"
+    InvokeCmd "git gc --prune=now"
+    InvokeCmd "git gc --aggressive --prune=now"
+    return
+}
+
+
 if( "r" -eq $action ) {
     Info "復原上一個提交"
     InvokeCmd "git reset --hard HEAD~1"
@@ -289,6 +308,7 @@ Write-Host "c <branch name>    :checkout branch, if branch name is empty, checko
 Write-Host "cl                 :clean untrack files"
 Write-Host "df                 :diff 上下比對"
 Write-Host "dff                :diff horizontal 左右比對"
+Write-Host "frf <folder>       :force remove folder (include history) in git repo"
 Write-Host "h <hash>           :show hash info"
 Write-Host "init               :init and add default .gitignore"
 Write-Host "info               :顯示目前專案的 Git 倉庫所佔用的檔案空間"
