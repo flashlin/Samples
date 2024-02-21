@@ -8,7 +8,7 @@ public class UserDto
 {
     public string Name { get; set; } = string.Empty;
     public float Level { get; set; }
-    public float Price { get; }
+    public float Price { get; set; }
     public DateTime Birth { get; set; }
 
     public IQueryable<UserEntity> Test(MyDbContext db, string name)
@@ -21,7 +21,7 @@ public class UserDto
 
 public class MyDbContext : DbContext
 {
-    public DbSet<UserEntity> Users { get; set; }
+    public DbSet<UserEntity> Users { get; set; } = null!;
 
     [LinqExpressionCompile]
     private static readonly Func<MyDbContext, int, IQueryable<UserEntity>> GetUserByIdInternal =

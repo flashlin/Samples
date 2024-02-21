@@ -63,7 +63,7 @@ public class AutoMapperGenerator : ISourceGenerator
                     select tb1.Name;
 
                 sourceBuilder.WriteLine(
-                    $@"public static {toClassFullName} {toMethodName}(this {fromClassFullName} source)");
+                    $@"public static {toClassFullName} {toMethodName}(this {fromClassFullName} source, Action<{fromClassFullName}, {toClassFullName}>? assignFn=null)");
                 sourceBuilder.WriteLine("{");
                 sourceBuilder.Indent++;
                 sourceBuilder.WriteLine($"var target = new {toClassFullName}();");
@@ -71,6 +71,7 @@ public class AutoMapperGenerator : ISourceGenerator
                 {
                     sourceBuilder.WriteLine($@"target.{propertyName} = source.{propertyName};");
                 }
+                sourceBuilder.WriteLine("assignFn?.Invoke(source, target);");
                 sourceBuilder.WriteLine("return target;");
                 sourceBuilder.Indent--;
                 sourceBuilder.WriteLine("}");
