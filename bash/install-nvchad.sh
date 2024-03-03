@@ -41,3 +41,5 @@ git clone https://github.com/NvChad/NvChad ~/.config/nvim --depth 1
 NVCHAD_EXAMPLE_CONFIG=n nvim +'hi NormalFloat guibg=#1e222a' +PackerSync
 
 
+echo "~/.config/nvim/lua/plugins/init.lua"
+echo "~/.config/nvim/lua/custom/plugins.lua"
