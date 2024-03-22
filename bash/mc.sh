@@ -1,4 +1,4 @@
-#!/bin/bash
+# !/bin/bash
 # set exit when exception
 set -e
 
@@ -35,8 +35,9 @@ fi
 
 if [ "b" == "$action" ]; then
     name=$2
-    echo "switch $name env"
-    conda activate $name
+    echo "switch to $name env"
+    eval "$(conda shell.bash activate $name)"
+    #source ~/miniconda3/etc/profile.d/conda.sh
     exit
 fi
 
