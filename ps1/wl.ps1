@@ -43,6 +43,17 @@ if ( 'b' -eq $action ) {
     return
 }
 
+
+if ( 'r' -eq $action ) {
+    $name = AskWslNames
+    if ( "" -eq $name ) {
+        return
+    }
+    InvokeCmd "wsl --shutdown $name"
+    InvokeCmd "wsl -d $name"
+    return
+}
+
 if ( 'bb' -eq $action ) {
     $name = AskWslNames
     if ( "" -eq $name ) {
@@ -108,6 +119,7 @@ Write-Host ""
 Write-Host "i  :install Ubuntu-22.04"
 Write-Host "s  :stop"
 Write-Host "b  :run and enter"
+Write-Host "r  :restart and enter"
 Write-Host "bb :run and enter directly"
 Write-Host "rm :delete"
 Write-Host "net:add WSL listen ports"
