@@ -1,7 +1,8 @@
 param(
    [string]$action,
    [string]$arg0,
-   [string]$arg1
+   [string]$arg1,
+   [string]$arg2
 )
 Import-Module "$($env:psm1HOME)/common.psm1" -Force
 
@@ -126,6 +127,20 @@ if( "cp" -eq $action ) {
    return
 }
 
+if( "ct" -eq $action ) {
+   $source = $arg0
+   $id = $arg1
+   $target = $arg2
+   if( $null -eq $id ) {
+      Write-Host "ct yourLocalFile <pod-id> /usr/xxx"
+      return
+   }
+
+   $podName = GetPodNameFromSelected $id
+   InvokeK8s "cp $($source) $($state.namespace)/$($podName):$($target)"
+   return
+}
+
 if( "ls" -eq $action ) {
    $id = $arg0
    if( $null -eq $id ) {
@@ -162,7 +177,7 @@ if( "f" -eq $action ) {
   return
 }
 
-if( "l" -eq $action ) {
+if( "logs" -eq $action ) {
    $id = $arg0
    $pattern = $arg1
    $myFilter = {
@@ -179,3 +194,4 @@ if( "l" -eq $action ) {
    }
    return
 }
+
