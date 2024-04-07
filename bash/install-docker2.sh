@@ -16,8 +16,9 @@ sudo service docker start
 sudo usermod -aG docker $USER
 newgrp docker
 
+sudo apt-get install -y nvidia-docker2
 
-echo "sudo vim /etc/wsl.conf"
-echo "添加下面內容"
-echo "[boot]"
-echo 'command="service docker start"'
+# echo "sudo vim /etc/wsl.conf"
+# echo "添加下面內容"
+# echo "[boot]"
+# echo 'command="service docker start"'
