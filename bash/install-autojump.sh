@@ -1,6 +1,6 @@
-sudo apt-get -y install autojump
+sudo apt install autojump
 echo '. /usr/share/autojump/autojump.sh'>>~/.bashrc
-
+echo ""
 echo 'j --purge  去除不存在的路徑'
 echo 'j --stat   顯示路徑的使用次數'
 echo 'j -i 增加權重'
