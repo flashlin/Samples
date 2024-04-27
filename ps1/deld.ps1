@@ -8,5 +8,6 @@ if( "" -eq $folder ) {
     return
 }
 
+Write-Host "Deleting $folder files..."
 Remove-Item -Path "$($folder)*" -Recurse #-Force
 
