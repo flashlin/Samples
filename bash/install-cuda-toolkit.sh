@@ -13,7 +13,10 @@ cuda="cuda-12.2"
 #wget https://developer.download.nvidia.com/compute/cuda/11.4.0/local_installers/cuda_11.4.0_470.42.01_linux.run
 #sudo sh cuda_11.4.0_470.42.01_linux.run
 
-wget https://developer.download.nvidia.com/compute/cuda/12.2.2/local_installers/cuda_12.2.2_535.104.05_linux.run
+if [ ! -f "cuda_12.2.2_535.104.05_linux.run" ]; then
+   echo "Downloading"
+   wget https://developer.download.nvidia.com/compute/cuda/12.2.2/local_installers/cuda_12.2.2_535.104.05_linux.run
+fi
 sudo sh cuda_12.2.2_535.104.05_linux.run
 
 # for WSL2
