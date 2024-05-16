@@ -1,0 +1,143 @@
+" https://github.com/JetBrains/ideavim/wiki/IdeaVim-Plugins
+let mapleader=" "
+set number relativenumber
+set history=200
+set showcmd
+set scrolloff=5
+" Do incremental searching.
+set incsearch
+
+
+""" Plugins  --------------------------------
+" Install IdeaVim-EasyMotion and AceJump plugins.
+" https://github.com/AlexPl291/IdeaVim-EasyMotion#supported-commands
+Plug 'vim-easymotion'
+set easymotion
+map <leader>f <Plug>(easymotion-s)
+map <leader>e <Plug>(easymotion-f)
+
+
+""" surround --------------------------------
+" https://github.com/tpope/vim-surround/blob/master/doc/surround.txt
+" Old text                  Command     New text ~
+" "Hello *world!"           ds"         Hello world!
+" [123+4*56]/2              cs])        (123+456)/2
+" "Look ma, I'm *HTML!"     cs"<q>      <q>Look ma, I'm HTML!</q>
+" if *x>3 {                 ysW(        if ( x>3 ) {
+" my $str = *whee!;         vllllS'     my $str = 'whee!';
+" * 代表游標位置
+Plug 'vim-surround'
+set surround
+
+
+""" multiple-cursors -----------------------
+" v 模式選幾行, 再按下 <A-n> 即可進入多游標模式
+" 在你喜歡的 單字上 輸入 mc, 即可標記, 自動到下一個單字, 如果要跳過mx, 往前跳mp
+Plug 'vim-multiple-cursors'
+set multiple-cursors
+"nmap <S-C-a> <Plug>AllWholeOccurrences
+"xmap <S-C-a> <Plug>AllWholeOccurrences
+"nmap <S-C-n> <Plug>AllOccurrences
+"xmap <S-C-n> <Plug>AllOccurrences
+map mc <A-n>
+map mx <A-x>
+map mp <A-p>
+
+
+""" -------------------------------------------
+" 在 V 模式下, 輸入 gc 即可註解
+" 在 V 模式下, 輸入 gcc 即可反註解
+Plug 'vim-commentary'
+set commentary
+
+
+""" -------------------------------------------
+" daa 刪除參數
+" cia 更改內部參數
+" via 選擇內部參數
+Plug 'vim-scripts/argtextobj.vim'
+set argtextobj
+let g:argtextobj_pairs="[:],(:),<:>"
+
+
+
+""" Plugin settings -------------------------
+Plug 'kana/vim-textobj-entire'
+set textobj-entire
+
+
+""" -----------------------------------------
+" 在 V 模式下, 可按 <leader>r 將highlight text替換為 register 1 的內容 
+" "2gr 替換為 register 2 的內容 
+set ReplaceWithRegister
+nmap <Leader>r  <Plug>ReplaceWithRegisterOperator
+nmap <Leader>rr <Plug>ReplaceWithRegisterLine
+xmap <Leader>r  <Plug>ReplaceWithRegisterVisual
+
+
+""" -------------------------------------------
+" Tom "The Dev" McDonald (a Vim)
+" 上面內容在 "The Dev" 中, 輸入 cxi" 
+" 然後去 (a Vim) 中, 輸入 cxi)
+" 就會交換內容變成下面內容
+" Tom "a Vim" McDonald (The Dev)
+set exchange
+nmap cx <Plug>(Exchange)
+xmap X <Plug>(Exchange)
+nmap cxc <Plug>(ExchangeClear)
+nmap cxx <Plug>(ExchangeLine)
+
+
+
+" <C-n> seems to me as a better solution than <M-n>,
+" but we should finally support vim-visual-multi because vim-multiple-cursors is deprecated now
+" map <C-n> <Plug>NextWholeOccurrence
+
+
+
+"" -- Suggested options --
+" Show a few lines of context around the cursor. Note that this makes the
+" text scroll if you mouse-click near the start or end of the window.
+
+
+" Don't use Ex mode, use Q for formatting.
+" map Q gq
+
+" --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
+
+" Highlight copied text
+" Plug 'machakann/vim-highlightedyank'
+" Commentary plugin
+" Plug 'tpope/vim-commentary'
+
+
+"" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
+"" Map \r to the Reformat Code action
+"map \r <Action>(ReformatCode)
+
+"" Map <leader>d to start debug
+"map <leader>d <Action>(Debug)
+
+"" Map \b to toggle the breakpoint on the current line
+"map \b <Action>(ToggleLineBreakpoint)
+
+
+""" 
+" 無干擾模式, 請先設定 Advanced Settings -> Left margin in distraction free mode: -1 改為 0
+" 第一次使用的時候, 你會發現左邊沒有顯示行號, 可以用滑鼠移到左邊點擊右鍵, 選取 Appearance -> Show Line Number 顯示行號
+nnoremap <C-z> :action ToggleDistractionFreeMode<CR>
+" 垂直切割視窗
+nnoremap <C-\> :action SplitVertically<CR>
+nnoremap <C--> :action SplitHorizontally<CR>
+nnoremap <C-m> :action MoveEditorToOppositeTabGroup<CR>
+sethandler <C-j> a:vim
+sethandler <C-k> a:vim
+nnoremap <C-j> <c-w>j
+nnoremap <C-k> <c-w>k
+nnoremap <C-h> <c-w>h
+nnoremap <C-l> <c-w>l
+nnoremap <TAB> :action PreviousTab<CR>
+nnoremap <s-TAB> :action NextTab<CR>
+" 開新的視窗編輯程式碼
+nnoremap <Leader>e :action EditSourceInNewWindow<CR>
+nnoremap <Leader>n :action NextWindow<CR>
