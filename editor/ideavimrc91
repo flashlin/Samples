@@ -1,0 +1,140 @@
+"在一般模式下輸入 :actionlist 可以列出對應的熱鍵
+set relativenumber number
+set number
+set clipboard=unnamedplus,unnamed,ideaput " integrate with system clipboard
+
+"[Basic]
+:mapclear
+
+"設定前贅詞
+let mapleader="z"
+
+"載入vim設定檔
+nmap <leader>so :source ~\.ideavimrc <CR>
+
+" 參考 https://github.com/JetBrains/ideavim/wiki/Emulated-plugins
+" 安裝套件
+Plug 'tpope/vim-surround'
+" Plug 'preservim/nerdtree'
+
+"nmap <F1> ztmay?[<CR>`ap?void<CR>w
+"imap <F1> <Esc>ztmay?[<CR>`ap?void<CR>w
+
+" AceJump
+"map <Space> :action AceAction<CR>
+map <Space> <Action>(AceAction)
+" 跳到位置並且進入高亮度
+map vv ma:action AceTargetAction<CR>
+" 跳到哪一行的開頭或尾巴
+map gl :action AceLineAction<CR>
+
+"map <leader>v ma<Space>
+
+
+"設定搜尋時高亮顯示
+set incsearch
+"設定搜尋後高亮顯示
+set hlsearch
+"清除高亮搜尋
+nnoremap <leader>sc :nohlsearch<CR>
+inoremap <leader>sc <Esc>:nohlsearch<CR>
+
+"複製目前單字到寄存器 o
+"nnoremap <leader>y mo"+yiw"ayiw
+
+noremap jh 9jzz
+noremap jk 9kzz
+
+"":function Replace(pattern, new_str)
+"":  echo "Replace all '". a:pattern ."' to '". a:new_str ."'"
+"":  exe ":%s/" . a:pattern . "/" . a:new_str . "/gc"
+"":endfunction
+
+" 將 highlight 記錄到 register 0
+noremap <leader>0 "0y
+" 搜尋 register 0 內容來的並取代字串 (zr後要按快一點)
+noremap <leader>r :%s/<C-r>0//gc<left><left><left>
+noremap <leader>riw viwy:%s/<C-r>0//gc<left><left><left>
+
+
+" 標記 word 並加上 雙引號
+nmap "iw viw"ac""<Esc><left>"ap
+nmap 'iw viw'ac''<Esc><left>'ap
+
+" 刪除 %
+nmap <leader>d% my%x`yx
+
+" [Jump]
+nmap zn :action ReSharperGotoPrevErrorInSolution<CR>
+nmap ze :action GotoNextError<CR>
+nmap zE :action GotoPreviousError<CR>
+
+" :nmap ,m :action FileStructurePopup<CR>
+" 跳到定義
+nmap zf :action GotoDeclaration<CR>
+nmap zF :action RdParameterDeclarationNavigationAction<CR>
+imap zf <Esc>:action GotoDeclaration<CR>
+imap zF <Esc>:action RdParameterDeclarationNavigationAction<CR>
+vmap zkc :action CommentByLineComment<CR>
+imap zkc :action CommentByLineComment<CR>
+
+" 移動 line 程式碼上下
+map <A-Up> :action MoveLineUp<CR>:action VimAutoIndentLines<CR>
+imap <A-Up> <Esc>:action MoveLineUp<CR>:action VimAutoIndentLines<CR>
+map <A-Down> :action MoveLineDown<CR>:action VimAutoIndentLines<CR>
+imap <A-Down> <Esc>:action MoveLineDown<CR>:action VimAutoIndentLines<CR>
+
+" 清除 mark
+map zdm :delm!<CR>:delm A-Z<CR>
+map zm :maks<CR>
+
+" 關閉其他的 Tab Editor
+map <A-F4> :action CloseAllToTheLeft<CR> :action CloseAllToTheRight<CR><Esc>
+imap <A-F4> <Esc>:action CloseAllToTheLeft<CR> :action CloseAllToTheRight<CR><Esc>
+
+" add 註解
+map <C-k><C-c> :action CommentByLineComment<CR>
+imap <C-k><C-c> :action CommentByLineComment<CR>
+
+map zmz :action ReformatCode<CR>
+nmap [ :action MethodUp<CR>
+nmap ] :action MethodDown<CR>
+nmap [[ ?class<CR>:action MethodDown<CR>
+map <A-[> :action MoveStatementUp<CR>
+map <A-]> :action MoveStatementDown<CR>
+
+" "
+map <leader>rl :action RiderUnitTestRunSolutionAction<CR>
+map <leader>rt mT:action RiderUnitTestRunContextAction<CR>
+
+" Reshaper 功能
+vmap <leader>rm :action ExtractMethod<CR>
+vmap <leader>rv <Esc>:action IntroduceVariable<CR>
+vmap <leader>rp <Esc>:action IntroduceParameter<CR>
+nmap <leader>ri :action Inline<CR>
+imap <leader>ri <Esc>:action Inline<CR>
+map <leader>gd :action GotoTypeDeclaration<CR>
+
+" 搭配 F2 & mm 複製上一個方法
+" 移動到上一個方法"
+map mm ma:action MethodUp<CR>
+map mp kV`ay`ap]
+
+"====================
+" F3 標記開始, 跳到某一個地方, 然後 zd 刪除
+map <F3> ma:action AceAction<CR>
+" 高亮度標記
+map <leader>v v'a
+map <leader>c v'a"ac
+map <leader>y v'a"ay
+map <leader>d v'ad
+" 按下 F3 先標記開始, 然後快速移動到任何地方, 再按下 z" 之後即可自動從開始到結束位置到加上 雙引號
+nmap <leader>" my`xv`y"yc""<Esc><left>"yp
+" 先標記 x 然後快速移動到任何地方按下 z" 之後即可自動從 z 位置到最後位置加上 ()
+nmap <leader>( my`xv`y"yc()<Esc><left>"yp
+"====================
+
+nmap <leader>0 "0c
+nmap <leader>p "0p
+
+nmap <leader>U viwU

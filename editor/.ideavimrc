@@ -4,9 +4,21 @@ set number relativenumber
 set history=200
 set showcmd
 set scrolloff=5
-" Do incremental searching.
-set incsearch
+" integrate with system clipboard
+set clipboard=unnamedplus,unnamed,ideaput 
 
+" 設定搜尋時高亮顯示
+set incsearch
+" 設定搜尋後高亮顯示
+set hlsearch
+"清除高亮搜尋
+nnoremap <leader>sc :nohlsearch<CR>
+inoremap <leader>sc <Esc>:nohlsearch<CR>
+
+sethandler <C-c> a:vim 
+sethandler <C-n> a:vim
+sethandler <C-j> a:vim
+sethandler <C-k> a:vim
 
 """ Highlight copied text -------------------
 Plug 'machakann/vim-highlightedyank'
@@ -111,7 +123,6 @@ nmap cxx <Plug>(ExchangeLine)
 """ -------------------------------------------
 Plug 'preservim/nerdtree'
 set NERDTree
-sethandler <C-n> a:vim
 map <C-n> :NERDTree<CR>
 
 
@@ -123,8 +134,6 @@ nnoremap <C-w> :action ToggleDistractionFreeMode<CR>
 nnoremap <C-\> :action SplitVertically<CR>
 nnoremap <C--> :action SplitHorizontally<CR>
 nnoremap <C-m> :action MoveEditorToOppositeTabGroup<CR>
-sethandler <C-j> a:vim
-sethandler <C-k> a:vim
 nnoremap <C-j> <c-w>j
 nnoremap <C-k> <c-w>k
 nnoremap <C-h> <c-w>h
@@ -138,7 +147,7 @@ nnoremap <Leader>n :action NextWindow<CR>
 
 nnoremap <A-k> 20k
 nnoremap <A-j> 20j
-
+nnoremap <A-w> :action CloseAllEditorsButActive<CR>
 
 "" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
 "" Map \r to the Reformat Code action
@@ -148,3 +157,36 @@ map <leader>d <Action>(Debug)
 "" Map \b to toggle the breakpoint on the current line
 map \b <Action>(ToggleLineBreakpoint)
 
+
+
+" add 註解
+map <C-k><C-c> :action CommentByLineComment<CR>
+imap <C-k><C-c> :action CommentByLineComment<CR>
+map zmz :action ReformatCode<CR>
+nmap [ :action MethodUp<CR>
+nmap ] :action MethodDown<CR>
+nmap [[ ?class<CR>:action MethodDown<CR>
+map <A-[> :action MoveStatementUp<CR>
+map <A-]> :action MoveStatementDown<CR>
+
+" 移動 line 程式碼上下
+map <A-Up> :action MoveLineUp<CR>:action VimAutoIndentLines<CR>
+imap <A-Up> <Esc>:action MoveLineUp<CR>:action VimAutoIndentLines<CR>
+map <A-Down> :action MoveLineDown<CR>:action VimAutoIndentLines<CR>
+imap <A-Down> <Esc>:action MoveLineDown<CR>:action VimAutoIndentLines<CR>
+
+" 跳到錯誤的地方
+nmap zn :action ReSharperGotoPrevErrorInSolution<CR>
+nmap ze :action GotoNextError<CR>
+nmap zE :action GotoPreviousError<CR>
+
+" 標記 word 並加上 雙引號
+nmap "iw viw"ac""<Esc><left>"ap
+nmap 'iw viw'ac''<Esc><left>'ap
+
+" 刪除 %
+nmap <leader>d% my%x`yx
+
+" 滾動
+noremap jh 9jzz
+noremap jk 9kzz
