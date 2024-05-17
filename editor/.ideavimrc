@@ -8,6 +8,11 @@ set scrolloff=5
 set incsearch
 
 
+""" Highlight copied text -------------------
+Plug 'machakann/vim-highlightedyank'
+
+
+
 """ Plugins  --------------------------------
 " Install IdeaVim-EasyMotion and AceJump plugins.
 " https://github.com/AlexPl291/IdeaVim-EasyMotion#supported-commands
@@ -44,9 +49,10 @@ map mx <A-x>
 map mp <A-p>
 
 
-""" -------------------------------------------
+""" Commentary plugin -------------------------------------------
 " 在 V 模式下, 輸入 gc 即可註解
 " 在 V 模式下, 輸入 gcc 即可反註解
+" Plug 'tpope/vim-commentary'
 Plug 'vim-commentary'
 set commentary
 
@@ -64,6 +70,8 @@ let g:argtextobj_pairs="[:],(:),<:>"
 """ Plugin settings -------------------------
 Plug 'kana/vim-textobj-entire'
 set textobj-entire
+"nnoremap ae	<Plug>(textobj-entire-a)
+"nnoremap ie	<Plug>(textobj-entire-i)
 
 
 """ -----------------------------------------
@@ -94,38 +102,17 @@ nmap cxx <Plug>(ExchangeLine)
 " map <C-n> <Plug>NextWholeOccurrence
 
 
-
 "" -- Suggested options --
 " Show a few lines of context around the cursor. Note that this makes the
 " text scroll if you mouse-click near the start or end of the window.
-
-
 " Don't use Ex mode, use Q for formatting.
 " map Q gq
-
-" --- Enable IdeaVim plugins https://jb.gg/ideavim-plugins
-
-" Highlight copied text
-" Plug 'machakann/vim-highlightedyank'
-" Commentary plugin
-" Plug 'tpope/vim-commentary'
-
-
-"" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
-"" Map \r to the Reformat Code action
-"map \r <Action>(ReformatCode)
-
-"" Map <leader>d to start debug
-"map <leader>d <Action>(Debug)
-
-"" Map \b to toggle the breakpoint on the current line
-"map \b <Action>(ToggleLineBreakpoint)
 
 
 """ 
 " 無干擾模式, 請先設定 Advanced Settings -> Left margin in distraction free mode: -1 改為 0
 " 第一次使用的時候, 你會發現左邊沒有顯示行號, 可以用滑鼠移到左邊點擊右鍵, 選取 Appearance -> Show Line Number 顯示行號
-nnoremap <C-z> :action ToggleDistractionFreeMode<CR>
+nnoremap <C-w> :action ToggleDistractionFreeMode<CR>
 " 垂直切割視窗
 nnoremap <C-\> :action SplitVertically<CR>
 nnoremap <C--> :action SplitHorizontally<CR>
@@ -141,3 +128,17 @@ nnoremap <s-TAB> :action NextTab<CR>
 " 開新的視窗編輯程式碼
 nnoremap <Leader>e :action EditSourceInNewWindow<CR>
 nnoremap <Leader>n :action NextWindow<CR>
+
+
+nnoremap <A-k> 20k
+nnoremap <A-j> 20j
+
+
+"" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
+"" Map \r to the Reformat Code action
+map \r <Action>(ReformatCode)
+"" Map <leader>d to start debug
+map <leader>d <Action>(Debug)
+"" Map \b to toggle the breakpoint on the current line
+map \b <Action>(ToggleLineBreakpoint)
+
