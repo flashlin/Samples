@@ -108,6 +108,12 @@ nmap cxx <Plug>(ExchangeLine)
 " Don't use Ex mode, use Q for formatting.
 " map Q gq
 
+""" -------------------------------------------
+Plug 'preservim/nerdtree'
+set NERDTree
+sethandler <C-n> a:vim
+map <C-n> :NERDTree<CR>
+
 
 """ 
 " 無干擾模式, 請先設定 Advanced Settings -> Left margin in distraction free mode: -1 改為 0
