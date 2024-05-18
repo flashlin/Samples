@@ -5,7 +5,8 @@ set history=200
 set showcmd
 set scrolloff=5
 " integrate with system clipboard
-set clipboard=unnamedplus,unnamed,ideaput 
+"set clipboard=unnamedplus,unnamed,ideaput
+set clipboard+=unnamed
 
 " 設定搜尋時高亮顯示
 set incsearch
@@ -190,3 +191,35 @@ nmap <leader>d% my%x`yx
 " 滾動
 noremap jh 9jzz
 noremap jk 9kzz
+
+
+
+
+function! CopyPrevCSharpMethod()
+  " 1. 保存当前光标位置
+  normal! ma
+  
+  " 2. 移动到上一个方法的开始
+  " 假设方法定义以关键字 'void' 开始
+  let l:pattern = '^\s*\(public\|private\|protected\|internal\)\?\s*\(async\s\)\?\(void\|[a-zA-Z_][a-zA-Z0-9_<>]*\)\s*[a-zA-Z_][a-zA-Z0-9_]*\s*(.*)$'
+  let l:method_line = search(l:pattern, 'bW')
+  
+  " 3. 向上移动一行
+  if l:method_line != 0
+    normal! k
+  endif
+  
+  " 4. 标记当前位置到位置 A
+  normal! V'a
+  
+  " 5. 复制内容到寄存器 0
+  normal! "0y
+  
+  " 6. 粘贴内容
+  normal! "0P
+  
+  " 7. 移动光标回到位置 A
+  normal! `a
+endfunction
+
+nnoremap <leader>cp :call CopyPrevCSharpMethod()<CR>
