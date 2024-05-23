@@ -5,7 +5,13 @@ if [ $# -ne 1 ]; then
    exit 1
 fi
 
-file="$1"
+file_url="$1"
 # https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
 
-wget -c $file
+file=$(basename "$file_url")
+if [ -f "$file" ]; then
+  echo "$file already exists, skipping download."
+  exit 0
+fi
+
+wget -c $file_url
