@@ -1,5 +1,7 @@
 ver="$1"
 
+# sudo apt -y install docker.io
+
 if [ -z "$ver" ]; then
     echo "開始安裝 Cuda 時，一定要把虛擬機的硬体驅動程式安裝好，請執行 nvidia-smi，看到畫面才可繼續安裝 Cuda。"
     nvidia-smi

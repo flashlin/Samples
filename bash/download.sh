@@ -14,4 +14,5 @@ if [ -f "$file" ]; then
   exit 0
 fi
 
-wget -c $file_url
+wget -e use_proxy=yes -e http_proxy=http://127.0.0.1:8080 -c $file_url
+#wget -c $file_url
