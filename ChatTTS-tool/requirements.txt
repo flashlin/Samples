@@ -1,3 +1,10 @@
 moviepy==1.0.3
 #pydantic==2.7.4
 pydub==0.25.1
+ChatTTS
+omegaconf
+vocos
+vector_quantize_pytorch
+waitress
+transformers~=4.41.1
+IPython
