@@ -2,7 +2,7 @@
 marp: true
 theme: uncover
 class: invert
-paginate: true
+paginate: false
 ---
 # 2024 AI
 
@@ -76,9 +76,35 @@ paginate: true
 
 ---
 
+### 文字接龍的答案是
+
 # 明明白色就有我的最愛... 
 
-### AI 的原理就是預測下一個字的文字接龍....
 ---
 
-# Demo Video 
+# 解釋 GPT 原理 Video 
+
+----
+
+# 為什麼要有私有 AI ?
+
+### 因為我們不想讓別人知道自己有個秘密
+
+---
+
+# Demo
+
+### 將資料庫Schema 轉為 DTO
+
+---
+
+# Demo
+
+### Alisha 的不為人知的才能是什麼?
+
+---
+
+Alisha 從國小就開始練單輪車, 現在會騎單輪車, 只是我不知道厲害到甚麼程度? 有厲害到能騎單輪車走鋼索的境界嗎? 可以考慮與她進行更深入的交流，或詢問她的親近朋友和家人。
+
+---
+# END
