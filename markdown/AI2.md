@@ -174,6 +174,11 @@ M3 版的 MacBook Air 更強調綠色製造，也是 Apple 首款採用 50% 再�
 
 ---
 
+Q: MacBook Air 有幾公斤?
+Q: MacBook Air 的螢幕解析度是多少?
+
+---
+
 # 第二代 AI
 * 可以在網站頁面上輸入問題
 * 可以即時補充QA
