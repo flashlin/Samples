@@ -108,7 +108,20 @@ paginate: false
 
 # Demo
 
-### 將資料庫 Schema 轉為 DTO
+### 將資料庫 Schema
+```sql
+CREATE TABLE [dbo].[BankAccount] (
+    [custid]      INT            NOT NULL,
+    [username]    NVARCHAR (50)  NULL,
+    [type]        INT            NULL,
+    [description] NVARCHAR (150) NULL,
+    [currency]    INT            NULL,
+    [tstamp]      ROWVERSION     NULL,
+    PRIMARY KEY CLUSTERED ([custid] ASC)
+);
+
+```
+將上面轉為 C# DTO Class
 
 ---
 
