@@ -220,7 +220,7 @@ M3 版的 MacBook Air 更強調綠色製造，也是 Apple 首款採用 50% 再�
 ---
 
 Q: MacBook Air 有幾公斤?
-Q: MacBook Air 的螢幕解析度是多少?
+Q: MacBook Air 的視訊攝影機是多少P ?
 
 ---
 
