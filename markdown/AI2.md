@@ -94,14 +94,8 @@ paginate: false
 
 ---
 
-### 
-
-<img src="AI2-images/2024-06-18_162103.jpg" />
-
-
----
-
 ### Astro 第一版
+* 只支援英文
 * 只能在 windows command 視窗下輸入問題
 * 最後考試測驗獲得 60 分(考10題, 答對6題, 錯4題)
 * 每當有新的問題要再訓練一次
@@ -118,6 +112,7 @@ paginate: false
 ---
 
 ### Astro 第二版
+* ~~只支援英文~~
 * ~~只能在 windows command 視窗下輸入問題~~ 
 
 ---
