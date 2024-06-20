@@ -77,7 +77,7 @@ paginate: false
 
 ---
 
-# 解釋 GPT 原理 Video 
+# 解釋 GPT 原理 (Video) 
 
 ----
 
@@ -154,7 +154,8 @@ Alisha 從國小就開始練單輪車, 現在會騎單輪車, 只是我不知道
 
 ---
 
-# Add QA Demo
+~~每當有新的問題要再訓練一次~~
+# Add QA Demo 
 
 ---
 
