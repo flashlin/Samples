@@ -1,13 +1,19 @@
-mkdir -p ~/bin
-cp setup-files/win32yank.exe ~/bin/
-chmod +x ~/bin/win32yank.exe
-if grep -q 'export PATH=.*\$HOME/bin' ~/.bashrc; then
-    echo "$HOME/bin already in PATH. No changes made."
-else
-    # 如果沒有找到，添加新的 export PATH 行
-    echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
-    echo "Added $HOME/bin to PATH in ~/.bashrc"
-fi
+# mkdir -p ~/bin
+# cp setup-files/win32yank.exe ~/bin/
+# chmod +x ~/bin/win32yank.exe
+# if grep -q 'export PATH=.*\$HOME/bin' ~/.bashrc; then
+#     echo "$HOME/bin already in PATH. No changes made."
+# else
+#     # 如果沒有找到，添加新的 export PATH 行
+#     echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc
+#     echo "Added $HOME/bin to PATH in ~/.bashrc"
+# fi
+
+
+curl -sLo/tmp/clipboard-provider https://github.com/nullchilly/clipboard-provider/releases/latest/download/clipboard-provider
+sudo mv /tmp/clipboard-provider /usr/local/bin/
+sudo chmod +x /usr/local/bin/clipboard-provider
+
 
 
 git clone https://github.com/neovim/neovim.git
@@ -25,6 +31,7 @@ git clone https://github.com/NvChad/starter ~/.config/nvim && nvim
 
 echo "複製自訂的按鍵綁定設定"
 cp nvchad-files/mappings.lua ~/.config/nvim/lua/mappings.lua
+cp nvchad-files/init.lua ~/.config/nvim/init.lua
 
 echo "安裝 Telescope 的 live_grep 功能所需的依賴"
 sudo apt-get install ripgrep
