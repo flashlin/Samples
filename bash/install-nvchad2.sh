@@ -9,6 +9,13 @@
 #     echo "Added $HOME/bin to PATH in ~/.bashrc"
 # fi
 
+##########
+echo "install neovim ..."
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+sudo rm -rf /opt/nvim
+sudo tar -C /opt -xzf nvim-linux64.tar.gz
+
+
 sudo apt update
 sudo apt install ninja-build
 
