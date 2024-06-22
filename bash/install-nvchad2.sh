@@ -52,16 +52,4 @@ sudo cp -r runtime /usr/local/share/nvim
 cd ..
 
 
-rm -rf ~/.local/share/nvim
-rm -rf ~/.config/nvim
-git clone https://github.com/NvChad/starter ~/.config/nvim && nvim
-
-echo "複製自訂的按鍵綁定設定"
-cp nvchad-files/mappings.lua ~/.config/nvim/lua/mappings.lua
-cp nvchad-files/init.lua ~/.config/nvim/init.lua
-
-echo "安裝 Telescope 的 live_grep 功能所需的依賴"
-sudo apt-get install ripgrep
-
-echo "如果你想修改 init 可按照下面指令"
-echo "nvim ~/.config/nvim/init.lua"
+./install-nvchad-config.sh
