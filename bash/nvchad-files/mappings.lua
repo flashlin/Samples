@@ -8,7 +8,13 @@ map("n", "<C-p>",
     function( )
         require( 'telescope.builtin'). find_files({
             cwd = vim.fn. expand('%:p:h'),
-            hidden = true
+            hidden = true,
+            file_ignore_patterns = {
+                ".*/.git/",
+                ".*/node_modules/",
+                ".*/bin/",
+                ".*/obj/",
+            }
         })
     end,
     { desc = "Find files in current directory" }
