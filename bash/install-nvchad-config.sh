@@ -1,7 +1,6 @@
 echo "複製自訂的按鍵綁定設定"
 cp nvchad-files/init.lua ~/.config/nvim/init.lua
-cp nvchad-files/mappings.lua ~/.config/nvim/lua/mappings.lua
-cp -r nvchad-files/plugins ~/.config/nvim/lua/plugins
+cp -r nvchad-files/lua ~/.config/nvim
 
 echo "安裝 Telescope 的 live_grep 功能所需的依賴"
 sudo apt-get install ripgrep
