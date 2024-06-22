@@ -1,18 +1,19 @@
 vim.g.base46_cache = vim.fn.stdpath "data" .. "/nvchad/base46/"
 vim.g.mapleader = " "
 vim.wo.relativenumber = true
--- vim.g.clipboard = {
---     name = 'clipboard-provider',
---     copy = {
---       ['+'] = 'clipboard-provider copy',
---       ['*'] = 'clipboard-provider copy',
---     },
---     paste = {
---       ['+'] = 'clipboard-provider paste',
---       ['*'] = 'clipboard-provider paste',
---     },
---     cache_enabled = 1,
--- }
+
+vim.g.clipboard = {
+    name = 'clipboard-provider',
+    copy = {
+      ['+'] = 'clip.exe',
+      ['*'] = 'clip.exe',
+    },
+    paste = {
+      ['+'] = 'nvim_paste',
+      ['*'] = 'nvim_paste',
+    },
+    cache_enabled = true,
+}
 
 
 -- bootstrap lazy and all plugins
