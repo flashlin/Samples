@@ -15,8 +15,24 @@ return {
     end,
   },
   {
+    "rlane/pounce.nvim",
+    lazy = false,
+    config = function()
+      require'pounce'.setup{
+        accept_keys = "JFKDLSAHGNUVRBYTMICEOXWPQZ",
+        accept_best_key = "<enter>",
+        multi_window = true,
+        debug = false,
+      }
+    end,
+  },
+  {
     "williamboman/mason.nvim",
     opts = require "custom.configs.mason",
+  },
+  {
+    "folke/which-key.nvim",
+    opts = require "custom.configs.whichkey",
   },
 
   -- These are some examples, uncomment them if you want to see them work!
