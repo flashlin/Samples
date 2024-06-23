@@ -20,7 +20,7 @@ map("n", "<C-p>",
     { desc = "Find files in current directory" }
 )
 
-map( "n", "<C-t>", 
+map("n", "<C-t>", 
     function()
         require('telescope.builtin'). live_grep({
             cwd = vim.fn. expand ('%:p:h'),
@@ -32,3 +32,11 @@ map( "n", "<C-t>",
 )
 
 map({"n", "v", "i", "c"}, "<C-c>", [["+y]], { desc = "Copy to system clipboard" })
+
+
+map("n", "<leader>tt", "<cmd> :tabnew <CR>", { desc = "New tab space" })
+--["<leader>tp"] = { "<cmd> :tabprev <CR>", "Go prev tab space" },
+--["<leader>tn"] = { "<cmd> :tabnext <CR>", "Go next tab space" },
+
+
+require "pounce-mappings"

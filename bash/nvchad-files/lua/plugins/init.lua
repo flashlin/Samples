@@ -27,6 +27,10 @@ return {
     end,
   },
   {
+    "mg979/vim-visual-multi",
+    lazy = false,
+  },
+  {
     "williamboman/mason.nvim",
     opts = require "custom.configs.mason",
   },
