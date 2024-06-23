@@ -37,6 +37,7 @@ else
     echo 'export PATH="${HOME}/.config/lsp/lua-language-server/bin:${PATH}"' >> ~/.bashrc
     echo "Added lua-language-server/bin to PATH in ~/.bashrc"
 fi
+cd ..
 
 # curl -sLo/tmp/clipboard-provider https://github.com/nullchilly/clipboard-provider/releases/latest/download/clipboard-provider
 # sudo mv /tmp/clipboard-provider /usr/local/bin/
