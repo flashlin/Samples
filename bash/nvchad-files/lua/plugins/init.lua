@@ -14,6 +14,10 @@ return {
       return require("custom.configs.nvim-surround").setup()
     end,
   },
+  {
+    "williamboman/mason.nvim",
+    opts = require "custom.configs.mason",
+  },
 
   -- These are some examples, uncomment them if you want to see them work!
   -- {
