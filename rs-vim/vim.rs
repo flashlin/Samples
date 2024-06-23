@@ -1,16 +1,6 @@
-struct LineBuffer {
-    width: u32,
-}
+mod linebuffer;
 
-impl LineBuffer {
-    fn new(width: u32) -> LineBuffer {
-        LineBuffer { width }
-    }
-
-    fn area(&self) -> u32 {
-        self.width
-    }
-}
+use linebuffer::LineBuffer;
 
 fn main() {
     let line1 = LineBuffer::new(30);
