@@ -6,6 +6,14 @@ return {
       require "configs.conform"
     end,
   },
+  {
+    "kylechui/nvim-surround",
+    version = "*", -- Use for stability; omit to use `main` branch for the latest features
+    event = "VeryLazy",
+    config = function()
+      return require("custom.configs.nvim-surround").setup()
+    end,
+  },
 
   -- These are some examples, uncomment them if you want to see them work!
   -- {
