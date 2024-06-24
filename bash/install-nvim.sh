@@ -5,5 +5,8 @@ set -e
 tar xzvf nvim-linux64.tar.gz
 sudo cp nvim-linux64/bin/nvim /usr/local/bin -r
 rm ./nvim-linux64.tar.gz
-pip3 install pynvim
+#pip3 install pynvim
+
+
+cp -r neovim-files/ ~/.config/nvim/
 echo "done"
