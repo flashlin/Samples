@@ -223,6 +223,16 @@ Q: MacBook Air 的視訊攝影機是多少P ?
 
 ---
 
+我昨天把一篇 Member Status 文章整個丟進去....
+
+---
+
+Q: Member Status = 0x100 是甚麼意思?
+Q: Member Status = 1024 是甚麼意思?
+Q: 表示 Closed By Company, Member Status 的 value 是多少?
+
+---
+
 # 總結: Astro 第二版
 * 可以在網站頁面上輸入中英問題
 * 對於不知道的問題, 能夠回答我不知道
