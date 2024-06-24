@@ -45,6 +45,7 @@ return {
         }),
         -- sources for autocompletion
         sources = cmp.config.sources({
+          { name = "nvim_lsp"}, -- 當有 lsp server 時，使用其提供的 autocompletion  
           { name = "luasnip" }, -- snippets
           { name = "buffer" }, -- text within current buffer
           { name = "path" }, -- file system paths
