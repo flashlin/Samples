@@ -26,6 +26,7 @@ fi
 #rm ./nvim-linux64.tar.gz
 #pip3 install pynvim
 
-mkdir -p ~/.config
+rm -rf ~/.config/nvim/
+mkdir -p ~/.config/nvim
 cp -r neovim-files/* ~/.config/nvim/
 echo "done"
