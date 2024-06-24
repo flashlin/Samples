@@ -27,5 +27,5 @@ fi
 #pip3 install pynvim
 
 mkdir -p ~/.config
-cp -r neovim-files/ ~/.config/nvim/
+cp -r neovim-files/* ~/.config/nvim/
 echo "done"
