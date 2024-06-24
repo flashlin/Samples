@@ -1,3 +1,4 @@
+-- https://www.josean.com/posts/how-to-setup-neovim-2024
 -- 當建立 lspconfig.lua , 就得去修改 nvim-cmp.lua 並進行以下變更以將 lsp 新增為完成來源(在 `sources = cmp.config.sources` 地方)
 return {
     "neovim/nvim-lspconfig",
