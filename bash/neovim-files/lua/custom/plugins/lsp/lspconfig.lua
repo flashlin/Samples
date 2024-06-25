@@ -79,12 +79,75 @@ return {
         local hl = "DiagnosticSign" .. type
         vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
       end
-  
+
+      local home = os.getenv("HOME")
+      local util = require 'lspconfig.util'
+      local function get_typescript_server_path(root_dir)
+        local global_ts = home .. '/flash/.npm/lib/node_modules/typescript/lib'
+        -- Alternative location if installed as root:
+        -- local global_ts = '/usr/local/lib/node_modules/typescript/lib'
+        local found_ts = ''
+        local function check_dir(path)
+          found_ts =  util.path.join(path, 'node_modules', 'typescript', 'lib')
+          if util.path.exists(found_ts) then
+            return path
+          end
+        end
+        if util.search_ancestors(root_dir, check_dir) then
+          return found_ts
+        else
+          return global_ts
+        end
+      end
+
       mason_lspconfig.setup_handlers({
         -- default handler for installed servers
         function(server_name)
-          lspconfig[server_name].setup({
+          -- lspconfig[server_name].setup({
+          --   capabilities = capabilities,
+          -- })
+          local server_config = {}
+          -- if require("neoconf").get(server_name .. ".disable") then
+          --   return
+          -- end
+          if server_name == "tsserver" then
+            server_config.init_options = {
+              plugins = {{
+                  name = "@vue/typescript-plugin",
+                  location = home .. "/.local/share/pnpm/global/5/node_modules/@vue/typescript-plugin",
+                  languages = { "javascript", "typescript", "vue" },
+                }
+              },
+            }
+            server_config.filetypes = { 'vue', 'typescript', 'javascript' }
+          end
+          -- if server_name == "volar" then
+          --   server_config.init_options = {
+          --     typescript = {
+          --       tsdk = home .. '/.local/share/pnpm/global/5/node_modules/typescript/lib',
+          --     }
+          --   }
+          --   server_config.filetypes = { 'vue', 'typescript', 'javascript' }
+          --   return
+          -- end
+          lspconfig[server_name].setup(server_config)
+        end,
+        ["volar"] = function()
+          lspconfig["volar"].setup({
             capabilities = capabilities,
+            filetypes = { "typescript", "javascript", "javascriptreact", "typescriptreact", "vue", "json" },
+            init_options = {
+              typescript = {
+                --tsdk = vim.fn.expand("$HOME/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib")
+                tsdk = vim.fn.expand(home .. "/.local/share/nvim/mason/packages/typescript-language-server/node_modules/typescript/lib")
+              },
+              vue = {
+                hybridMode = true, -- 啟用混合模式，可以更好地處理 .vue 文件
+              },
+            },
+            on_new_config = function(new_config, new_root_dir)
+              new_config.init_options.typescript.tsdk = get_typescript_server_path(new_root_dir)
+            end,
           })
         end,
         ["svelte"] = function()
