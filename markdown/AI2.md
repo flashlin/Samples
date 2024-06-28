@@ -94,7 +94,7 @@ paginate: false
 
 ---
 
-### Astro 第一版
+### Astro
 * 只支援英文
 * 只能在 windows command 視窗下輸入問題
 * 最後考試測驗獲得 60 分(考10題, 答對6題, 錯4題)
@@ -112,7 +112,7 @@ paginate: false
 
 ---
 
-### Astro 第二版
+### Astro 2.0
 * ~~只支援英文~~
 * ~~只能在 windows command 視窗下輸入問題~~ 
 
@@ -135,7 +135,7 @@ CREATE TABLE [dbo].[BankAccount] (
 
 ---
 
-### Astro 第二版
+### Astro 2.0
 * ~~最後考試測驗獲得 60 分(考10題, 答對6題, 錯4題)~~ 
 
 ---
@@ -150,7 +150,7 @@ Alisha 從國小就開始練單輪車, 現在會騎單輪車, 只是我不知道
 
 ---
 
-### Astro 第二版
+### Astro 2.0
 * ~~每當有新的問題要再訓練一次~~
 
 ---
@@ -162,7 +162,7 @@ Alisha 從國小就開始練單輪車, 現在會騎單輪車, 只是我不知道
 
 ---
 
-### Astro 第二版的特殊才能是甚麼?
+### Astro 2.0的特殊才能是甚麼?
 
 ---
 
@@ -233,7 +233,7 @@ Q: 表示 Closed By Company, Member Status 的 value 是多少?
 
 ---
 
-# 總結: Astro 第二版
+# 總結: Astro 2.0
 * 可以在網站頁面上輸入中英問題
 * 對於不知道的問題, 能夠回答我不知道
 * 可以即時補充QA
@@ -252,4 +252,4 @@ Q: 表示 Closed By Company, Member Status 的 value 是多少?
 
 # END
 
-下一版....我將加上特殊才能!?
+下一版....
