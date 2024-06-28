@@ -31,3 +31,8 @@ keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer
 
 keymap.set("n", "<A-k>", "30k", { desc = "scroll up" }) -- split window horizontally
 keymap.set("n", "<A-j>", "30j", { desc = "scroll down" }) -- split window horizontally
+
+keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc="Go to previous [D]iagnostic message" })
+keymap.set("n", "]d", vim.diagnostic.goto_next, { desc="Go to next [D]iagnostic message" })
+keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc="Show Diagnostic [E]rror message" })
+keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc="Open Diagnostic [Q]uickfix" })
