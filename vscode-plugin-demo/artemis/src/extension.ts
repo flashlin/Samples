@@ -1,9 +1,13 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { EditorEx } from './editorEx';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
+
+let customPreviewPanel: vscode.WebviewPanel | undefined = undefined;
+
 export function activate(context: vscode.ExtensionContext) {
 
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -24,6 +28,8 @@ export function activate(context: vscode.ExtensionContext) {
 	let disposable2 = vscode.commands.registerCommand('artemis.provideIntelliSense', async () => {
         const editor = vscode.window.activeTextEditor;
         if (editor) {
+            const editorEx = new EditorEx(editor);
+
             const document = editor.document;
 			const documentText = document.getText();
             const position = editor.selection.active;
@@ -37,9 +43,39 @@ export function activate(context: vscode.ExtensionContext) {
             if (suggestions.length > 0) {
                 const selected = await vscode.window.showQuickPick(suggestions, { placeHolder: 'Select an IntelliSense suggestion' });
                 if (selected) {
-                    editor.edit(editBuilder => {
-                        editBuilder.insert(position, selected);
-                    });
+                    // editor.edit(editBuilder => {
+                    //     editBuilder.insert(position, selected);
+                    // });
+
+                    //editorEx.insertTextAtNextLine(selected);
+                    customPreviewPanel = editorEx.outputToPreview(customPreviewPanel, 'sql', 'test', `<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Preview</title>
+</head>
+<body>
+    <h1>Custom Preview Window</h1>
+    ${lineText}
+    <button onclick="sendMessage()">Click me</button>
+
+    <script>
+        const vscode = acquireVsCodeApi();
+
+        function sendMessage() {
+            const text = document.getElementById('multitext').value;
+            vscode.postMessage({
+                command: 'alert',
+                text: text
+            });
+        }
+    </script>
+</body>
+</html>`);
+editorEx.showPanel(customPreviewPanel);
+                        // customPreviewPanel.onDidDispose(() => {
+                        //     customPreviewPanel = undefined;
+                        // });
                 }
             }
         }
