@@ -99,3 +99,29 @@ class MemoryPredictor(nn.Module):
     
     def index_to_word(self, index):
         return chr(index)
+    
+    def predict_word(self, text):
+        def generate_word(start_text, next_char):
+            buffer = '' + next_char
+            current_text = start_text + next_char
+            while True:
+                char = self.predict(current_text)[0]
+                if char == ' ' or ord(char) == 0:
+                    return buffer
+                current_text += char
+                buffer += char
+                if len(buffer) > 45:  # 防止無限循環
+                    return buffer
+
+        top_3_words = []
+        for char in self.predict(text):
+            word = generate_word(text, char)
+            top_3_words.append(word)
+        return top_3_words
+        
+        
+if __name__ == '__main__':
+    model = MemoryPredictor()
+    words = model.predict_word("Hello")
+    for word in words:
+        print(f"{word=}")
