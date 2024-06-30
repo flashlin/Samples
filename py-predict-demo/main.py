@@ -21,7 +21,8 @@ class MemoryPredictor(nn.Module):
         self.memory.add(text, next_word)
     
     def train_on_memory(self, batch_size=32, epochs=1):
-        memory_items = self.memory.get_all_items()
+        memory_items = list(self.memory.get_all_items())
+        print(f"{memory_items=}")
         
         if len(memory_items) < batch_size:
             print("Not enough data in memory to train.")
@@ -123,8 +124,10 @@ class MemoryPredictor(nn.Module):
 
 def split_text_to_words_list(text):
     # 使用正則表達式分割文本
-    pattern = r'(\s+|[^\s\u4e00-\u9fff]+|[\u4e00-\u9fff])'
-    return re.findall(pattern, text)
+    #pattern = r'(\s+|[^\s\u4e00-\u9fff]+|[\u4e00-\u9fff])'
+    #return re.findall(pattern, text)
+    pattern = r'(\s+|[^\s\u4e00-\u9fff]|[\u4e00-\u9fff])'
+    return [item for item in re.findall(pattern, text) if item]
 
 
 def words_list_to_nextword_pairwise(arr):
@@ -133,16 +136,29 @@ def words_list_to_nextword_pairwise(arr):
         yield (result, arr[i+1])
         result += arr[i+1]
 
+def split_by_separator(text):
+    return text.split("---")
         
 if __name__ == '__main__':
-    # 測試函數
-    test_text = "hello world 你好"
-    result = split_text_to_words_list(test_text)
-    for (text, next_word) in words_list_to_nextword_pairwise(result):
-        print(f"{text=} {next_word=}")
-
-
     model = MemoryPredictor()
+    # 測試函數
+    test_text = """
+from tb1 in Customer
+select tb1.name
+---
+from tb2 in Employee
+select tb2.id, tb2.name
+    """
+
+    for text_paragrah in split_by_separator(test_text):
+        words = split_text_to_words_list(text_paragrah.strip())
+        for (text, next_word) in words_list_to_nextword_pairwise(words):
+            print(f"{text=} {next_word=}")
+            model.add_to_memory(text, next_word)
+
+    model.train_on_memory()
+    model.load_weights("outputs/memory.pt")
+
     words = model.predict_word("Hello")
     for word in words:
         print(f"{word=}")
