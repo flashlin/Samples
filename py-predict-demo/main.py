@@ -53,11 +53,9 @@ class MemoryPredictor(nn.Module):
                 
                 output = self(input_tensor)
 
-                print(f"{output.shape=}")
-                print(f"{target_tensor.shape=}")
                 # 重塑輸出和目標
-                output = output.view(-1, output.size(-1))  # 形狀: (batch_size * sequence_length, vocab_size)
-                target_tensor = target_tensor.view(-1) 
+                #output = output.view(-1, output.size(-1))  # 形狀: (batch_size * sequence_length, vocab_size)
+                #target_tensor = target_tensor.view(-1) 
                 
                 loss = self.criterion(output, target_tensor)
                 
@@ -91,7 +89,9 @@ class MemoryPredictor(nn.Module):
         x = x.transpose(0, 1)  # 形狀: (sequence_length, batch_size, embed_size)
         output = self.transformer(x)  # 形狀: (sequence_length, batch_size, embed_size)
         output = output.transpose(0, 1)  # 形狀: (batch_size, sequence_length, embed_size)
-        return self.fc(output)  # 形狀: (batch_size, sequence_length, vocab_size)
+        #return self.fc(output)  # 形狀: (batch_size, sequence_length, vocab_size)
+        output = self.fc(output[:, -1, :])  # 只使用最後一個時間步，形狀: (batch_size, vocab_size)
+        return output
     
     def predict(self, text):
         self.eval()  # Set the model to evaluation mode
