@@ -4,6 +4,7 @@ import torch.optim as optim
 import re
 from utils import MemoryDict
 
+
 class MemoryPredictor(nn.Module):
     def __init__(self, vocab_size=256, embed_size=1024, nhead=4, num_layers=8):
         super(MemoryPredictor, self).__init__()
@@ -22,7 +23,7 @@ class MemoryPredictor(nn.Module):
     
     def train_on_memory(self, batch_size=32, epochs=1):
         memory_items = list(self.memory.get_all_items())
-        print(f"{memory_items=}")
+        #print(f"{memory_items=}")
         
         if len(memory_items) < batch_size:
             print("Not enough data in memory to train.")
@@ -34,19 +35,30 @@ class MemoryPredictor(nn.Module):
             
             for i in range(0, len(memory_items), batch_size):
                 batch = memory_items[i:i+batch_size]
+                #print(f"{batch=}")
                 
                 input_texts = [item[0] for item in batch]
                 next_words = [item[1] for item in batch]
-                
-                input_indices = [self.text_to_index(text) for text in input_texts]
+
+                # 找出最長序列的長度
+                max_length = max(len(self.text_to_index(text)) for text in input_texts)
+                # 填充或截斷序列至相同長度
+                input_indices = [self.pad_or_truncate(self.text_to_index(text), max_length) for text in input_texts]
                 target_indices = [self.word_to_index(word) for word in next_words]
-                
+
                 input_tensor = torch.tensor(input_indices)
                 target_tensor = torch.tensor(target_indices)
                 
                 self.optimizer.zero_grad()
                 
                 output = self(input_tensor)
+
+                print(f"{output.shape=}")
+                print(f"{target_tensor.shape=}")
+                # 重塑輸出和目標
+                output = output.view(-1, output.size(-1))  # 形狀: (batch_size * sequence_length, vocab_size)
+                target_tensor = target_tensor.view(-1) 
+                
                 loss = self.criterion(output, target_tensor)
                 
                 loss.backward()
@@ -58,6 +70,14 @@ class MemoryPredictor(nn.Module):
             avg_loss = total_loss / batches
             print(f"Epoch {epoch+1}/{epochs}, Average Loss: {avg_loss:.4f}")
         self.save_weights('outputs/memory.pt')
+
+    def pad_or_truncate(self, sequence, target_length):
+        if len(sequence) > target_length:
+            return sequence[:target_length]
+        elif len(sequence) < target_length:
+            return sequence + [0] * (target_length - len(sequence))  # 假設 0 是填充值
+        else:
+            return sequence
         
     def save_weights(self, filename):
         torch.save(self.state_dict(), filename)
@@ -67,10 +87,11 @@ class MemoryPredictor(nn.Module):
         self.load_state_dict(torch.load(filename))
     
     def forward(self, x):
-        x = self.embedding(x)
-        x = x.unsqueeze(1)  # Add sequence length dimension
-        output = self.transformer(x)
-        return self.fc(output[-1])
+        x = self.embedding(x)  # 形狀: (batch_size, sequence_length, embed_size)
+        x = x.transpose(0, 1)  # 形狀: (sequence_length, batch_size, embed_size)
+        output = self.transformer(x)  # 形狀: (sequence_length, batch_size, embed_size)
+        output = output.transpose(0, 1)  # 形狀: (batch_size, sequence_length, embed_size)
+        return self.fc(output)  # 形狀: (batch_size, sequence_length, vocab_size)
     
     def predict(self, text):
         self.eval()  # Set the model to evaluation mode
