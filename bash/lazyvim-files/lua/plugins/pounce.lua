@@ -1,4 +1,4 @@
-return  {
+return {
     "rlane/pounce.nvim",
     lazy = false,
     config = function()
@@ -9,4 +9,4 @@ return  {
         debug = false,
       }
     end,
-  } 
+}
