@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+import re
 from utils import MemoryDict
 
 class MemoryPredictor(nn.Module):
@@ -119,8 +120,27 @@ class MemoryPredictor(nn.Module):
             top_3_words.append(word)
         return top_3_words
         
+
+def split_text(text):
+    # 使用正則表達式分割文本
+    pattern = r'(\s+|[^\s\u4e00-\u9fff]+|[\u4e00-\u9fff])'
+    return re.findall(pattern, text)
+
+
+def pairwise_yield(arr):
+    result = arr[0]
+    for i in range(len(arr) - 1):
+        yield (result, arr[i+1])
+        result += arr[i+1]
+
         
 if __name__ == '__main__':
+    # 測試函數
+    test_text = "hello world 你好"
+    result = split_text(test_text)
+    for (text, next_word) in pairwise_yield(result):
+        print(f"{text=} {next_word=}")
+
     model = MemoryPredictor()
     words = model.predict_word("Hello")
     for word in words:
