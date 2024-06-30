@@ -1,11 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from collections import OrderedDict
-import random
+from utils import MemoryDict
 
 class MemoryPredictor(nn.Module):
-    def __init__(self, vocab_size, embed_size, nhead, num_layers, memory_size=10*1024*1024):
+    def __init__(self, vocab_size=256, embed_size=1024, nhead=4, num_layers=8):
         super(MemoryPredictor, self).__init__()
         self.embedding = nn.Embedding(vocab_size, embed_size)
         self.transformer = nn.TransformerEncoder(
@@ -13,37 +12,23 @@ class MemoryPredictor(nn.Module):
             num_layers=num_layers
         )
         self.fc = nn.Linear(embed_size, vocab_size)
-        self.memory = OrderedDict()
-        self.memory_size = memory_size
-        self.current_size = 0
-        
+        self.memory = MemoryDict(100)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = optim.Adam(self.parameters(), lr=0.001)
     
     def add_to_memory(self, text, next_word):
-        key = (text, next_word)
-        if key in self.memory:
-            del self.memory[key]
-        
-        while self.current_size + len(str(key)) > self.memory_size and self.memory:
-            _, size = self.memory.popitem(last=False)
-            self.current_size -= size
-        
-        self.memory[key] = len(str(key))
-        self.current_size += self.memory[key]
-        self.memory.move_to_end(key)
+        self.memory.add(text, next_word)
     
     def train_on_memory(self, batch_size=32, epochs=1):
-        if len(self.memory) < batch_size:
+        memory_items = self.memory.get_all_items()
+        
+        if len(memory_items) < batch_size:
             print("Not enough data in memory to train.")
             return
-        
+
         for epoch in range(epochs):
             total_loss = 0
             batches = 0
-            
-            memory_items = list(self.memory.keys())
-            random.shuffle(memory_items)
             
             for i in range(0, len(memory_items), batch_size):
                 batch = memory_items[i:i+batch_size]
@@ -70,6 +55,14 @@ class MemoryPredictor(nn.Module):
             
             avg_loss = total_loss / batches
             print(f"Epoch {epoch+1}/{epochs}, Average Loss: {avg_loss:.4f}")
+        self.save_weights('outputs/memory.pt')
+        
+    def save_weights(self, filename):
+        torch.save(self.state_dict(), filename)
+        print(f"Model weights saved to {filename}")
+
+    def load_weights(self, filename):
+        self.load_state_dict(torch.load(filename))
     
     def forward(self, x):
         x = self.embedding(x)
@@ -83,23 +76,26 @@ class MemoryPredictor(nn.Module):
             input_indices = self.text_to_index(text)
             input_tensor = torch.tensor([input_indices])
             
-            output = self(input_tensor)
+            # 改變輸入張量的形狀
+            input_tensor = input_tensor.transpose(0, 1)  # 將形狀從 (1, seq_len) 變為 (seq_len, 1)
+            
+            x = self.embedding(input_tensor)
+            # 不需要再使用 unsqueeze，因為現在已經是正確的形狀了
+            output = self.transformer(x)
+            output = self.fc(output[-1])  # 只取最後一個時間步的輸出
             probs = torch.softmax(output, dim=-1)
             
             _, top_indices = torch.topk(probs[0], 3)
             top_3 = [self.index_to_word(idx.item()) for idx in top_indices]
         
-        self.train()  # Set the model back to training mode
+        self.train()
         return top_3
     
     def text_to_index(self, text):
-        # 這個方法應該被實現來將文本轉換為token索引
-        pass
+        return [ord(char) for char in text]
     
     def word_to_index(self, word):
-        # 這個方法應該被實現來將單詞轉換為其索引
-        pass
+        return ord(word)
     
     def index_to_word(self, index):
-        # 這個方法應該被實現來將索引轉換回單詞
-        pass
+        return chr(index)

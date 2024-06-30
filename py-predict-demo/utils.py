@@ -46,9 +46,11 @@ class MemoryDict:
         return str(list(self.memory.keys()))
 
     def get_all_items(self):
-        return [
-            (k, v.get_all_values()) for k, v in list(self.memory.items())
-        ]
+        for k, v in list(self.memory.items()):
+            sub_values = v.get_all_values()
+            for value in sub_values:
+                yield k, value
     
     def get_all_values(self):
         return list(self.memory.values())
+    
