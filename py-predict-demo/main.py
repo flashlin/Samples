@@ -121,13 +121,13 @@ class MemoryPredictor(nn.Module):
         return top_3_words
         
 
-def split_text(text):
+def split_text_to_words_list(text):
     # 使用正則表達式分割文本
     pattern = r'(\s+|[^\s\u4e00-\u9fff]+|[\u4e00-\u9fff])'
     return re.findall(pattern, text)
 
 
-def pairwise_yield(arr):
+def words_list_to_nextword_pairwise(arr):
     result = arr[0]
     for i in range(len(arr) - 1):
         yield (result, arr[i+1])
@@ -137,9 +137,10 @@ def pairwise_yield(arr):
 if __name__ == '__main__':
     # 測試函數
     test_text = "hello world 你好"
-    result = split_text(test_text)
-    for (text, next_word) in pairwise_yield(result):
+    result = split_text_to_words_list(test_text)
+    for (text, next_word) in words_list_to_nextword_pairwise(result):
         print(f"{text=} {next_word=}")
+
 
     model = MemoryPredictor()
     words = model.predict_word("Hello")
