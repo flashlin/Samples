@@ -24,6 +24,7 @@ params_refine_text = {
     'prompt': '[oral_0][laugh_0][break_6]'
 }
 
+
 # 最長 30 s
 inputs_text = """
 The driver posted on Breaking News Commune that a few days ago, 
@@ -37,7 +38,14 @@ This is premeditated crime,
 the bus is not a charity institution.
     """.replace(",", "[uv_break],").replace(";", "[uv_break][laugh]")
 
-texts = inputs_text.split("\n")
+
+with open('./read.txt', 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+    texts = []
+    for line in lines:
+        line = line.replace(",", "[uv_break]").replace(";", "[uv_break][laugh]")
+        line = line.replace("\n", "[uv_break]")
+        texts.append(line)
 
 # 生成语音
 # wavs = chat.infer(texts, use_decoder=True)
