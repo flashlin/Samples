@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -21,7 +22,7 @@ class MemoryPredictor(nn.Module):
     def add_to_memory(self, text, next_word):
         self.memory.add(text, next_word)
     
-    def train_on_memory(self, batch_size=32, epochs=1):
+    def train_on_memory(self, batch_size=32, epochs=10):
         memory_items = list(self.memory.get_all_items())
         #print(f"{memory_items=}")
         
@@ -177,9 +178,10 @@ select tb2.id, tb2.name
             print(f"{text=} {next_word=}")
             model.add_to_memory(text, next_word)
 
+    if os.path.exists('outputs/memory.pt'):
+        model.load_weights("outputs/memory.pt")
     model.train_on_memory()
-    model.load_weights("outputs/memory.pt")
 
-    words = model.predict_word("Hello")
+    words = model.predict_word("from tb1 in ")
     for word in words:
         print(f"{word=}")
