@@ -152,6 +152,13 @@ return {
     end,
   },
 
+  -- {
+  --   "terrortylor/nvim-comment",
+  --   config = function()
+  --     require('nvim_comment').setup()
+  --   end,  
+  -- },
+
   -- the opts function can also be used to change the default opts:
   {
     "nvim-lualine/lualine.nvim",
@@ -187,6 +194,7 @@ return {
         "shellcheck",
         "shfmt",
         "flake8",
+        "pyright"
       },
     },
   },
