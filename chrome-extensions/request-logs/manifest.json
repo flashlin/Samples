@@ -4,8 +4,7 @@
     "version": "1.0",
     "description": "Logs HTTP POST/GET requests",
     "permissions": [
-        "webRequest",
-        "declarativeNetRequest"
+        "webRequest"
     ],
     "host_permissions": [
         "https://www.blogger.com/",
@@ -15,25 +14,6 @@
         "service_worker": "background.js",
         "type": "module"
     },
-    "web_accessible_resources": [
-        {
-            "resources": [
-                "images/*"
-            ],
-            "matches": [
-                "*://*/*"
-            ]
-        },
-        {
-            "resources": [
-                "style/extension.css",
-                "script/extension.js"
-            ],
-            "matches": [
-                "https://example.com/*"
-            ]
-        }
-    ],
     "content_scripts": [
         {
             "matches": [
