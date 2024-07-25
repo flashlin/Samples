@@ -74,6 +74,14 @@ def post_tts(line, audio_file):
     return response.json()
 
 
+def delete_files(folder):
+    for item in os.listdir(folder):
+        item_path = os.path.join(folder, item)
+        if os.path.isfile(item_path):
+            os.remove(item_path)
+
+
+delete_files("./outputs/")
 for idx, line in read_text("read.txt"):
     print(f"{line}")
     if line=='':
