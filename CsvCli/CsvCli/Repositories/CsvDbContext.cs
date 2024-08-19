@@ -29,6 +29,7 @@ public class CsvDbContext : DbContext
 
         if (!IsTableExists(tableName))
         {
+            Console.WriteLine($"Create Table {tableName}");
             CreateTable(dataTable, tableName);
         }
 
@@ -41,7 +42,7 @@ public class CsvDbContext : DbContext
     {
         var connection = Database.GetDbConnection();
         var q1 = connection.Query(sqlCode)
-            .Select(x => (IDictionary<string, object>) x)
+            .Select(x => (IDictionary<string, object>)x)
             .ToArray();
 
         var maxLength = GetMaxLength(q1);
@@ -55,6 +56,7 @@ public class CsvDbContext : DbContext
                 Console.WriteLine(titleLine);
                 first = false;
             }
+
             var line = string.Join(" ",
                 dict.Select(x => $"{x.Value}".ToBig5FixLenString(maxLength[x.Key])));
             Console.WriteLine(line);
@@ -107,6 +109,7 @@ public class CsvDbContext : DbContext
             newDataTable.Columns.Add(column);
         }
 
+        Console.WriteLine($"AdjustDataTable {dataTable.Rows.Count}");
         foreach (DataRow row in dataTable.Rows)
         {
             var newRow = newDataTable.NewRow();
@@ -122,7 +125,15 @@ public class CsvDbContext : DbContext
                 if (newColumn.DataType == typeof(decimal))
                 {
                     value = value.Replace(",", "");
-                    newRow[newColumn] = value.ChangeType(newColumn.DataType);
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        newRow[newColumn] = 0m;
+                    }
+                    else
+                    {
+                        newRow[newColumn] = value.ChangeType(newColumn.DataType);
+                    }
+
                     continue;
                 }
 
@@ -181,6 +192,16 @@ public class CsvDbContext : DbContext
         var dataTable = new DataTable();
         dataTable.Load(dr);
         dataTable.TableName = tableName;
+
+        foreach (DataColumn column in dataTable.Columns)
+        {
+            column.ColumnName = column.ColumnName.Replace(" ", "");
+            column.ColumnName = column.ColumnName.Replace("(", "");
+            column.ColumnName = column.ColumnName.Replace(")", "");
+        }
+        
+        
+        Console.WriteLine("Load CSV to DataTable");
         return dataTable;
     }
 
@@ -219,7 +240,7 @@ public class CsvDbContext : DbContext
     public bool IsTableExists(string tableName)
     {
         var sql = @"SELECT 1 FROM sqlite_master WHERE type='table' AND name=@tableName";
-        var result = QueryRaw<long>(sql, new {tableName}).FirstOrDefault();
+        var result = QueryRaw<long>(sql, new { tableName }).FirstOrDefault();
         return result != 0;
     }
 
@@ -236,17 +257,17 @@ public class CsvDbContext : DbContext
         }
     }*/
 
-    protected IEnumerable<T> QueryRaw<T>(string sql, object? queryParameter = null)
+    private IEnumerable<T> QueryRaw<T>(string sql, object? queryParameter = null)
         where T : new()
     {
         var connection = Database.GetDbConnection();
         var q1 = connection.Query(sql, queryParameter);
 
         var dapperList = q1.ToList();
-        var dictList = dapperList.Select(x => (IDictionary<string, object>) x);
+        var dictList = dapperList.Select(x => (IDictionary<string, object>)x);
         if (!typeof(T).IsClass)
         {
-            return dictList.Select(x => (T) x.First().Value);
+            return dictList.Select(x => (T)x.First().Value);
         }
 
         return dictList.Select(x => x.ConvertToObject<T>());
