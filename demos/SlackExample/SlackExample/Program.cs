@@ -14,20 +14,29 @@ var config = JsonSerializer.Deserialize<SlackConfig>(file, new JsonSerializerOpt
 var client = new SlackApiClient(config.Token);
 
 var supportChannelId = "CGSP5TB6E";
-var oldest = new DateTime(2024, 8, 27).ToUnixTimeSeconds();
-var latest = new DateTime(2024, 8, 28).ToUnixTimeSeconds();
+var today = DateTime.Now;
+var yesterday = today.AddDays(-1).Date;
+var twoDaysAgo = yesterday.AddDays(-2).Date;
+var oldest = twoDaysAgo.ToUnixTimeSeconds();
+var latest = yesterday.ToUnixTimeSeconds();
 
 
 var response = await client.Conversations.History(
     supportChannelId,
     latest.ToString(),
     oldest.ToString(),
-    inclusive: false,
-    limit: 100
+    inclusive: true,
+    limit: 100,
+    includeAllMetadata: true
 );
 
 foreach (var message in response.Messages)
 {
-    Console.WriteLine($"User: {message.User}, Text: {message.Text}, Timestamp: {message.Ts}");
+    var userName = message.User;
+    if (string.IsNullOrEmpty(message.User))
+    {
+        var userInfo = await client.Users.Info(message.User);
+        userName = userInfo.Profile.DisplayName ?? userInfo.Profile.RealName;
+    }
+    Console.WriteLine($"User: {userName}, Text: {message.Text}, Timestamp: {message.Ts}");
 }
-Console.ReadKey();
