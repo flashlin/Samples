@@ -2,8 +2,11 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
+using SlackExample;
 using SlackNet;
 using SlackNet.WebApi;
+using T1.Standard.Extensions;
 
 Console.WriteLine("Hello, World!");
 var file = System.IO.File.ReadAllText("d:/demo/configs/slack-robot.json");
@@ -11,32 +14,24 @@ var config = JsonSerializer.Deserialize<SlackConfig>(file, new JsonSerializerOpt
 {
     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 })!;
-var client = new SlackApiClient(config.Token);
+var client = new SlackClient(Options.Create(config));
 
 var supportChannelId = "CGSP5TB6E";
 var today = DateTime.Now;
 var yesterday = today.AddDays(-1).Date;
 var twoDaysAgo = yesterday.AddDays(-2).Date;
-var oldest = twoDaysAgo.ToUnixTimeSeconds();
-var latest = yesterday.ToUnixTimeSeconds();
-
-
-var response = await client.Conversations.History(
-    supportChannelId,
-    latest.ToString(),
-    oldest.ToString(),
-    inclusive: true,
-    limit: 100,
-    includeAllMetadata: true
-);
-
-foreach (var message in response.Messages)
+var dateRange = new DateTimeRange
 {
-    var userName = message.User;
-    if (string.IsNullOrEmpty(message.User))
+    Start = twoDaysAgo,
+    End = yesterday
+};
+
+var response = await client.GetHistoryAsync(supportChannelId, dateRange).ToListAsync();
+foreach (var item in response)
+{
+    Console.WriteLine($"  {item.Time.ToDisplayString()} {item.User.Name}: {item.Text}");
+    foreach (var threadMessage in item.ThreadMessages)
     {
-        var userInfo = await client.Users.Info(message.User);
-        userName = userInfo.Profile.DisplayName ?? userInfo.Profile.RealName;
+        Console.WriteLine($"  {threadMessage.Time.ToDisplayString()} {threadMessage.User.Name}: {threadMessage.Text}");
     }
-    Console.WriteLine($"User: {userName}, Text: {message.Text}, Timestamp: {message.Ts}");
 }
