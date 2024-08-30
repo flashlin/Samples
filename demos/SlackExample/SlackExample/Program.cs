@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
@@ -26,12 +27,19 @@ var dateRange = new DateTimeRange
     End = yesterday
 };
 
+await using var logFile = new FileStream("d:/demo/1.txt", FileMode.Create);
+await using var writer = new StreamWriter(logFile, Encoding.UTF8); 
 var response = await client.GetHistoryAsync(supportChannelId, dateRange).ToListAsync();
 foreach (var item in response)
 {
-    Console.WriteLine($"  {item.Time.ToDisplayString()} {item.User.Name}: {item.Text}");
+    var message = $"[{item.Time.ToDisplayString()}] {item.User.Name}: {item.Text}";
+    Console.WriteLine(message);
+    writer.WriteLine(message);
     foreach (var threadMessage in item.ThreadMessages)
     {
-        Console.WriteLine($"  {threadMessage.Time.ToDisplayString()} {threadMessage.User.Name}: {threadMessage.Text}");
+        var subMessage = $"  [{threadMessage.Time.ToDisplayString()}] {threadMessage.User.Name}: {threadMessage.Text}";
+        Console.WriteLine(subMessage);
+        writer.WriteLine(subMessage);
     }
 }
+writer.Flush();
