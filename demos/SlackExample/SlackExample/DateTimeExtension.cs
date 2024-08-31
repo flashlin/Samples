@@ -33,7 +33,6 @@ public static class DateTimeExtension
         {
             return DateTime.UnixEpoch;
         }
-        
         var parts = slackTs.Split('.');
         var seconds = long.Parse(parts[0]);
         var dateTime = DateTimeOffset.FromUnixTimeSeconds(seconds).UtcDateTime;
@@ -42,6 +41,6 @@ public static class DateTimeExtension
             var milliseconds = int.Parse(parts[1].PadRight(3, '0').Substring(0, 3));
             dateTime = dateTime.AddMilliseconds(milliseconds);
         }
-        return dateTime;
+        return dateTime.ToLocalTime();
     }
 }

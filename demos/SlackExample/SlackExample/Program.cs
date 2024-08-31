@@ -18,14 +18,7 @@ var config = JsonSerializer.Deserialize<SlackConfig>(file, new JsonSerializerOpt
 var client = new SlackClient(Options.Create(config));
 
 var supportChannelId = "CGSP5TB6E";
-var today = DateTime.Now;
-var yesterday = today.AddDays(-1).Date;
-var twoDaysAgo = yesterday.AddDays(-2).Date;
-var dateRange = new DateTimeRange
-{
-    Start = twoDaysAgo,
-    End = yesterday
-};
+var dateRange = DateTimeRange.Day(DateTime.Today.AddDays(-1));
 
 await using var logFile = new FileStream("d:/demo/1.txt", FileMode.Create);
 await using var writer = new StreamWriter(logFile, Encoding.UTF8); 
