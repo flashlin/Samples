@@ -15,14 +15,14 @@ public class SlackClient : ISlackClient
         _client = new SlackApiClient(config.Value.Token);
     }
 
-    public async Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs getHistoryArgs)
+    public async Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs args)
     {
         var count = 0;
-        var currentRange = getHistoryArgs.Range;
+        var currentRange = args.Range;
         var result = new Dictionary<Guid, SlackHistoryItem>();
-        while (count < getHistoryArgs.Limit)
+        while (count < args.Limit)
         {
-            var subResult = await InternalGetHistoryAsync(getHistoryArgs.ChannelId, currentRange);
+            var subResult = await InternalGetHistoryAsync(args.ChannelId, currentRange);
             if (subResult.Count == 0)
             {
                 break;
@@ -32,10 +32,14 @@ public class SlackClient : ISlackClient
                 result[item.Id] = item;
             }
             count += subResult.Count;
+            if (subResult.Count < args.Limit)
+            {
+                break;
+            }
             currentRange = new DateTimeRange
             {
                 Start = subResult[^1].Time,
-                End = getHistoryArgs.Range.End
+                End = args.Range.End
             };
         }
         return result.Values.ToList();

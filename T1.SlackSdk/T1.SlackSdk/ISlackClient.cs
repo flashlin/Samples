@@ -4,6 +4,6 @@ namespace T1.SlackSdk;
 
 public interface ISlackClient
 {
-    Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs getHistoryArgs );
+    Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs args );
     Task<SlackUser> GetUserInfoAsync(string userId);
 }

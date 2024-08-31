@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlackExample", "SlackExample\SlackExample.csproj", "{AD04CBFC-90CB-4264-B585-CF6B26E101E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T1.SlackSdk", "..\..\T1.SlackSdk\T1.SlackSdk\T1.SlackSdk.csproj", "{7D70352B-D220-49F3-8BF1-2E708D46718C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{AD04CBFC-90CB-4264-B585-CF6B26E101E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD04CBFC-90CB-4264-B585-CF6B26E101E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD04CBFC-90CB-4264-B585-CF6B26E101E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D70352B-D220-49F3-8BF1-2E708D46718C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D70352B-D220-49F3-8BF1-2E708D46718C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D70352B-D220-49F3-8BF1-2E708D46718C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D70352B-D220-49F3-8BF1-2E708D46718C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

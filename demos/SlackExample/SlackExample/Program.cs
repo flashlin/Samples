@@ -4,9 +4,10 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
-using SlackExample;
 using SlackNet;
 using SlackNet.WebApi;
+using T1.SlackSdk;
+using T1.Standard.Common;
 using T1.Standard.Extensions;
 
 Console.WriteLine("Hello, World!");
@@ -22,7 +23,10 @@ var dateRange = DateTimeRange.Day(DateTime.Today.AddDays(-1));
 
 await using var logFile = new FileStream("d:/demo/1.txt", FileMode.Create);
 await using var writer = new StreamWriter(logFile, Encoding.UTF8); 
-var response = await client.GetHistoryAsync(supportChannelId, dateRange);
+var response = await client.GetHistoryAsync(new GetHistoryArgs{
+    ChannelId = supportChannelId, 
+    Range = dateRange
+});
 foreach (var item in response)
 {
     var message = $"[{item.Time.ToDisplayString()}] {item.User.Name}: {item.Text}";
@@ -36,3 +40,4 @@ foreach (var item in response)
     }
 }
 writer.Flush();
+Console.WriteLine("Done");

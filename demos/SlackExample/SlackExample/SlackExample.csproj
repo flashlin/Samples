@@ -11,8 +11,10 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.0-preview.7.24405.7" />
-      <PackageReference Include="SlackNet" Version="0.13.2" />
-      <PackageReference Include="T1.Standard" Version="1.0.80" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\T1.SlackSdk\T1.SlackSdk\T1.SlackSdk.csproj" />
     </ItemGroup>
 
 </Project>
