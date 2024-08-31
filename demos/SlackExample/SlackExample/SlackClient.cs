@@ -16,7 +16,7 @@ public class SlackClient : ISlackClient
         _client = new SlackApiClient(config.Value.Token);
     }
 
-    public async IAsyncEnumerable<SlackHistoryItem> GetHistoryAsync(string channelId, DateTimeRange range)
+    public async Task<List<SlackHistoryItem>> GetHistoryAsync(string channelId, DateTimeRange range)
     {
         var oldest = range.Start.ToSlackTs();
         var latest = range.End.ToSlackTs();
@@ -29,17 +29,23 @@ public class SlackClient : ISlackClient
             includeAllMetadata: true
         );
 
+        var result = new List<SlackHistoryItem>();
         foreach (var message in response.Messages)
         {
             var userInfo = await GetUserInfoAsync(message.User);
-            yield return new SlackHistoryItem
+            var item = new SlackHistoryItem
             {
                 User = userInfo,
                 Text = message.Text,
                 Time = message.Ts.SlackTsToDateTime(),
                 ThreadMessages = await GetThreadMessagesAsync(channelId, message.ThreadTs).ToListAsync()
             };
+            item.ThreadMessages.Sort((a, b) => a.Time.CompareTo(b.Time));
+            result.Add(item);
         }
+        
+        result.Sort((a, b) => a.Time.CompareTo(b.Time));
+        return result;
     }
 
     public async Task<SlackUser> GetUserInfoAsync(string userId)

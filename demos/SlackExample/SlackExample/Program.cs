@@ -29,7 +29,7 @@ var dateRange = new DateTimeRange
 
 await using var logFile = new FileStream("d:/demo/1.txt", FileMode.Create);
 await using var writer = new StreamWriter(logFile, Encoding.UTF8); 
-var response = await client.GetHistoryAsync(supportChannelId, dateRange).ToListAsync();
+var response = await client.GetHistoryAsync(supportChannelId, dateRange);
 foreach (var item in response)
 {
     var message = $"[{item.Time.ToDisplayString()}] {item.User.Name}: {item.Text}";
@@ -37,7 +37,7 @@ foreach (var item in response)
     writer.WriteLine(message);
     foreach (var threadMessage in item.ThreadMessages)
     {
-        var subMessage = $"  [{threadMessage.Time.ToDisplayString()}] {threadMessage.User.Name}: {threadMessage.Text}";
+        var subMessage = $"   +[{threadMessage.Time.ToDisplayString()}] {threadMessage.User.Name}: {threadMessage.Text}";
         Console.WriteLine(subMessage);
         writer.WriteLine(subMessage);
     }
