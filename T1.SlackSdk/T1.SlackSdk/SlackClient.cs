@@ -83,14 +83,9 @@ public class SlackClient : ISlackClient
     public async Task<SlackUser> GetUserInfoAsync(string userId)
     {
         var result = await _methodCache.WithCacheAsync(
-            () => InternalGetUserInfoAsync(userId)!,
-            cacheKey: GetFullname(nameof(GetUserInfoAsync)));
-        return result!;
-    }
-
-    private string GetFullname(string methodName)
-    {
-        return $"{nameof(SlackClient)}::{methodName}";
+            async () => await InternalGetUserInfoAsync(userId),
+            cacheKey: nameof(GetUserInfoAsync));
+        return result ?? SlackUser.Empty;
     }
 
     private async IAsyncEnumerable<SlackMessage> GetThreadMessagesAsync(string channelId, string messageThreadTs)
