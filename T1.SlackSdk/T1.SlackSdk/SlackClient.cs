@@ -84,7 +84,7 @@ public class SlackClient : ISlackClient
     {
         var result = await _methodCache.WithCacheAsync(
             async () => await InternalGetUserInfoAsync(userId),
-            cacheKey: nameof(GetUserInfoAsync));
+            cacheKey: $"{nameof(GetUserInfoAsync)}_{userId}");
         return result ?? SlackUser.Empty;
     }
 
