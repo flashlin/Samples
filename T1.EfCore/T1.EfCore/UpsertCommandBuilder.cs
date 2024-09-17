@@ -29,7 +29,9 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var fullTableName = GetFullTableName(sqlGenerator);
 
         var properties = _entityType.GetProperties().ToList();
+        
         var dataSqlRawProperties = CreateDataSqlRawProperties(properties).ToList();
+        
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var createMemoryTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);
         var sourceColumns = CreateSourceColumns(dataSqlRawProperties);
@@ -43,7 +45,6 @@ ON ({matchCondition})
 WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({sourceColumns});";
-
 
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
         var values = CreateDataDbParameters(dbCommand, dataSqlRawProperties)
@@ -132,7 +133,7 @@ WHEN NOT MATCHED THEN
         var matchExpressions = GenerateMatchCondition(_matchExpression)
             .Select(x => x.Name)
             .ToList();
-        return string.Join("", matchExpressions.Select(x => $"target.{x} = source.{x}"));
+        return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));
     }
 
     private string CreateMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
@@ -174,14 +175,22 @@ WHEN NOT MATCHED THEN
                 throw new InvalidOperationException("UnknownProperty, memberExp.Member.Name");
             return [property];
         }
-
-
-        // if (matchExpression.Body is MemberExpression memberExpression)
-        // {
-        //     var propertyInfo = (PropertyInfo)memberExpression.Member;
-        //     var columnName = _entityType.FindProperty(propertyInfo.Name).GetColumnName();
-        //     return $"{sqlGenerator.DelimitIdentifier(columnName)} = @{propertyInfo.Name}";
-        // }
+        
+        if (matchExpression.Body is NewExpression newExpression)
+        {
+            var joinColumns = new List<IProperty>();
+            foreach (var expression in newExpression.Arguments)
+            {
+                var arg = (MemberExpression)expression;
+                if (arg is not { Member: PropertyInfo } || typeof(TEntity) != arg.Expression?.Type)
+                    throw new InvalidOperationException("MatchColumns Have To Be Properties Of The EntityClass");
+                var property = _entityType.FindProperty(arg.Member.Name);
+                if (property == null)
+                    throw new InvalidOperationException($"UnknownProperty {arg.Member.Name}");
+                joinColumns.Add(property);
+            }
+            return joinColumns;
+        }
 
         throw new ArgumentException("Unsupported where expression");
     }

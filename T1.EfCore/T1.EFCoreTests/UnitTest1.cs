@@ -38,6 +38,42 @@ public class Tests
 
 
     [Test]
+    public void DataExistsOn2()
+    {
+        GivenCreateCustomerTable();
+        _db.Customer.Add(new CustomerEntity
+        {
+            Id = 1,
+            Name = "flash"
+        });
+
+        
+        _db.Upsert(new CustomerEntity
+        {
+            Id = 1,
+            Name = "flash"
+        }, new CustomerEntity
+        {
+            Id = 2,
+            Name = "jack"
+        }).On(x => new {x.Id, x.Name}) 
+            .Execute();
+
+        var customers = _db.Customer.ToArray();
+        customers.Should().BeEquivalentTo([
+            new CustomerEntity
+            {
+                Id = 1,
+                Name = "flash"
+            },
+            new CustomerEntity
+            {
+                Id = 2,
+                Name = "jack"
+            }
+        ]);
+    }
+    [Test]
     public void DataExists()
     {
         GivenCreateCustomerTable();
@@ -72,6 +108,9 @@ public class Tests
             }
         ]);
     }
+
+
+
 
     private void WhenUpsert(params CustomerEntity[] entity)
     {
