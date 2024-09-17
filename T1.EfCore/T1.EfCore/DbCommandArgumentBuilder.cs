@@ -17,7 +17,7 @@ public class DbCommandArgumentBuilder
         _relationalTypeMappingSource = dbContext.GetService<IRelationalTypeMappingSource>();
     }
 
-    public DbParameter CreateDbParameter(int startArgumentIndex, ConstantValue constantValue)
+    public DbParameter CreateDbParameter(ConstantValue constantValue)
     {
         RelationalTypeMapping? relationalTypeMapping = null;
 
@@ -32,7 +32,7 @@ public class DbCommandArgumentBuilder
         }
 
 
-        var dbParameterName = $"@p{startArgumentIndex + constantValue.ArgumentIndex}";
+        var dbParameterName = $"@p{constantValue.ArgumentIndex}";
 
         var dbParameter = relationalTypeMapping?.CreateParameter(_dbCommand, dbParameterName, constantValue.Value);
         if (dbParameter == null)

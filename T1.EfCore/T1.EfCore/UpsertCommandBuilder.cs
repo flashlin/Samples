@@ -9,20 +9,6 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace T1.EfCore;
 
-public static class UpsertExtension
-{
-    public static UpsertCommandBuilder<TEntity> Upsert<TEntity>(this DbContext dbContext, params TEntity[] entities)
-        where TEntity : class
-    {
-        var entityType = dbContext.GetService<IModel>().FindEntityType(typeof(TEntity))
-                         ?? (entities.Length == 0
-                             ? null
-                             : dbContext.GetService<IModel>().FindEntityType(entities.First().GetType()))
-                         ?? throw new InvalidOperationException();
-        return new UpsertCommandBuilder<TEntity>(dbContext, entityType, entities);
-    }
-}
-
 public class UpsertCommandBuilder<TEntity> where TEntity : class
 {
     private readonly DbContext _dbContext;
@@ -45,12 +31,12 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var properties = _entityType.GetProperties().ToList();
         var dataSqlRawProperties = CreateDataSqlRawProperties(properties).ToList();
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
-        var createMemTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);
+        var createMemoryTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);
         var sourceColumns = CreateSourceColumns(dataSqlRawProperties);
 
         var matchCondition = CreateMatchCondition();
 
-        var mergeSql2 = $@"{createMemTableSql}
+        var mergeSql = $@"{createMemoryTableSql}
 MERGE INTO {fullTableName} AS target
 USING #TempMemoryTable AS source
 ON ({matchCondition})
@@ -60,10 +46,9 @@ WHEN NOT MATCHED THEN
 
 
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
-
-        var values = CreateDbParameters(dbCommand, dataSqlRawProperties[0])
+        var values = CreateDataDbParameters(dbCommand, dataSqlRawProperties)
             .ToList();
-        _dbContext.Database.ExecuteSqlRaw(mergeSql2, values);
+        _dbContext.Database.ExecuteSqlRaw(mergeSql, values);
     }
 
     public UpsertCommandBuilder<TEntity> On(Expression<Func<TEntity, object>> matchExpression)
@@ -72,6 +57,17 @@ WHEN NOT MATCHED THEN
         return this;
     }
 
+    private IEnumerable<DbParameter> CreateDataDbParameters(DbCommand dbCommand, List<List<SqlRawProperty>> dataSqlRawProperties)
+    {
+        foreach (var entitySqlRawProperties in dataSqlRawProperties)
+        {
+            var dbParameters = CreateDbParameters(dbCommand, entitySqlRawProperties);
+            foreach (var dbParameter in dbParameters)
+            {
+                yield return dbParameter;
+            }
+        }
+    }
 
     private IEnumerable<List<SqlRawProperty>> CreateDataSqlRawProperties(List<IProperty> properties)
     {
@@ -88,25 +84,13 @@ WHEN NOT MATCHED THEN
         }
     }
 
-    private IEnumerable<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> rawProperties)
+    private List<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> entitySqlRawProperties)
     {
-        var properties = rawProperties.Select(x => x.Property).ToList();
-        var startArgumentIndex = 0;
-        foreach (var entity in _entityList)
+        return entitySqlRawProperties.Select(x =>
         {
-            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
-            var dbParameters = entityRawProperties.Select(x =>
-            {
-                var dbCommandArgumentBuilder = new DbCommandArgumentBuilder(_dbContext, dbCommand);
-                return dbCommandArgumentBuilder.CreateDbParameter(startArgumentIndex, x.Value);
-            }).ToList();
-            foreach (var dbParameter in dbParameters)
-            {
-                yield return dbParameter;
-            }
-
-            startArgumentIndex += properties.Count;
-        }
+            var dbCommandArgumentBuilder = new DbCommandArgumentBuilder(_dbContext, dbCommand);
+            return dbCommandArgumentBuilder.CreateDbParameter(x.Value);
+        }).ToList();
     }
 
     private static string CreateInsertColumns(ISqlGenerationHelper sqlGenerator, List<IProperty> properties)
