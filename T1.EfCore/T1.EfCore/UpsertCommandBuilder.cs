@@ -43,11 +43,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     public void Execute()
     {
         var sqlGenerator = _dbContext.GetService<ISqlGenerationHelper>();
-
-        var tableName = _entityType.GetTableName() ??
-                        _entityType.GetDefaultTableName() ?? _entityType.GetType().Name;
-        var schema = _entityType.GetSchema();
-        var fullTableName = sqlGenerator.DelimitIdentifier(tableName, schema);
+        var fullTableName = GetFullTableName(sqlGenerator);
 
         var properties = _entityType.GetProperties().ToList();
         var rawProperties = GetSqlRawProperties(properties).ToList();
@@ -69,17 +65,20 @@ WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({insertValues});";
 
-        // var parameters = new Dictionary<string, object>();
-        // foreach (var property in properties)
-        // {
-        //     parameters.Add($"@{property.Name}", property.GetGetter().GetClrValue(_entity) ?? DBNull.Value);
-        // }
-
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
         
         var values = CreateDbParameters(dbCommand, rawProperties)
             .ToList();
         _dbContext.Database.ExecuteSqlRaw(mergeSql, values);
+    }
+
+    private string GetFullTableName(ISqlGenerationHelper sqlGenerator)
+    {
+        var tableName = _entityType.GetTableName() ??
+                        _entityType.GetDefaultTableName() ?? _entityType.GetType().Name;
+        var schema = _entityType.GetSchema();
+        var fullTableName = sqlGenerator.DelimitIdentifier(tableName, schema);
+        return fullTableName;
     }
 
     private IEnumerable<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> rawProperties)
