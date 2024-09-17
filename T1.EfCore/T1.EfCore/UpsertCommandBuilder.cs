@@ -26,8 +26,8 @@ public static class UpsertExtension
 public class UpsertCommandBuilder<TEntity> where TEntity : class
 {
     private readonly DbContext _dbContext;
-    private readonly IEntityType _entityType;
     private readonly TEntity[] _entityList;
+    private readonly IEntityType _entityType;
     private Expression<Func<TEntity, object>>? _matchExpression;
 
     public UpsertCommandBuilder(DbContext dbContext, IEntityType entityType, params TEntity[] entities)
@@ -35,12 +35,6 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         _dbContext = dbContext;
         _entityType = entityType;
         _entityList = entities;
-    }
-
-    public UpsertCommandBuilder<TEntity> On(Expression<Func<TEntity, object>> matchExpression)
-    {
-        _matchExpression = matchExpression;
-        return this;
     }
 
     public void Execute()
@@ -83,16 +77,52 @@ WHEN NOT MATCHED THEN
         _dbContext.Database.ExecuteSqlRaw(mergeSql2, values);
     }
 
+    public UpsertCommandBuilder<TEntity> On(Expression<Func<TEntity, object>> matchExpression)
+    {
+        _matchExpression = matchExpression;
+        return this;
+    }
+
+
+    private IEnumerable<List<SqlRawProperty>> CreateDataSqlRawProperties(List<IProperty> properties)
+    {
+        var startArgumentIndex = 0;
+        foreach (var entity in _entityList)
+        {
+            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
+            foreach (var sqlRawProperty in entityRawProperties)
+            {
+                sqlRawProperty.Value.ArgumentIndex += startArgumentIndex; 
+            }
+            startArgumentIndex += properties.Count;
+            yield return entityRawProperties;
+        }
+    }
+
+
+    private IEnumerable<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> rawProperties)
+    {
+        var properties = rawProperties.Select(x => x.Property).ToList();
+        var startArgumentIndex = 0;
+        foreach (var entity in _entityList)
+        {
+            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
+            var dbParameters = entityRawProperties.Select(x =>
+            {
+                var dbCommandArgumentBuilder = new DbCommandArgumentBuilder(_dbContext, dbCommand);
+                return dbCommandArgumentBuilder.CreateDbParameter(startArgumentIndex, x.Value);
+            }).ToList();
+            foreach (var dbParameter in dbParameters)
+            {
+                yield return dbParameter;
+            }
+            startArgumentIndex += properties.Count;
+        }
+    }
+
     private static string CreateInsertColumns(ISqlGenerationHelper sqlGenerator, List<IProperty> properties)
     {
         return string.Join(", ", properties.Select(p => sqlGenerator.DelimitIdentifier(p.GetColumnName())));
-    }
-
-    private string CreateMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
-    {
-        var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties[0])});";
-        var insertMemTableSql = CreateInsertIntoMemoryTableSql(insertColumns, dataSqlRawProperties);
-        return createMemTableSql + "\n" + insertMemTableSql;
     }
 
     private string CreateInsertIntoMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
@@ -118,60 +148,16 @@ WHEN NOT MATCHED THEN
         return string.Join(", ", rawProperties.Select(x => $"@p{x.Value.ArgumentIndex}"));
     }
 
+    private string CreateMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
+    {
+        var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties[0])});";
+        var insertMemTableSql = CreateInsertIntoMemoryTableSql(insertColumns, dataSqlRawProperties);
+        return createMemTableSql + "\n" + insertMemTableSql;
+    }
+
     private static string CreateTableColumnsTypes(List<SqlRawProperty> rawProperties)
     {
         return string.Join(", ", rawProperties.Select(x => $"[{x.PropertyName}] {x.Value.GetColumnType()}"));
-    }
-
-    private string GetFullTableName(ISqlGenerationHelper sqlGenerator)
-    {
-        var tableName = _entityType.GetTableName() ??
-                        _entityType.GetDefaultTableName() ?? _entityType.GetType().Name;
-        var schema = _entityType.GetSchema();
-        var fullTableName = sqlGenerator.DelimitIdentifier(tableName, schema);
-        return fullTableName;
-    }
-    
-    
-    private IEnumerable<List<SqlRawProperty>> CreateDataSqlRawProperties(List<IProperty> properties)
-    {
-        var startArgumentIndex = 0;
-        foreach (var entity in _entityList)
-        {
-            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
-            foreach (var sqlRawProperty in entityRawProperties)
-            {
-                sqlRawProperty.Value.ArgumentIndex += startArgumentIndex; 
-            }
-            startArgumentIndex += properties.Count;
-            yield return entityRawProperties;
-        }
-    }
-    
-
-    private IEnumerable<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> rawProperties)
-    {
-        var properties = rawProperties.Select(x => x.Property).ToList();
-        var startArgumentIndex = 0;
-        foreach (var entity in _entityList)
-        {
-            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
-            var dbParameters = entityRawProperties.Select(x =>
-            {
-                var dbCommandArgumentBuilder = new DbCommandArgumentBuilder(_dbContext, dbCommand);
-                return dbCommandArgumentBuilder.CreateDbParameter(startArgumentIndex, x.Value);
-            }).ToList();
-            foreach (var dbParameter in dbParameters)
-            {
-                yield return dbParameter;
-            }
-            startArgumentIndex += properties.Count;
-        }
-    }
-
-    private IEnumerable<SqlRawProperty> GetSqlRawProperties(List<IProperty> properties, TEntity entity)
-    {
-        return properties.Select((p, index) => p.GetSqlRawProperty(index, entity));
     }
 
     private List<IProperty> GenerateMatchCondition(Expression<Func<TEntity, object>> matchExpression)
@@ -206,5 +192,19 @@ WHEN NOT MATCHED THEN
         // }
 
         throw new ArgumentException("Unsupported where expression");
+    }
+
+    private string GetFullTableName(ISqlGenerationHelper sqlGenerator)
+    {
+        var tableName = _entityType.GetTableName() ??
+                        _entityType.GetDefaultTableName() ?? _entityType.GetType().Name;
+        var schema = _entityType.GetSchema();
+        var fullTableName = sqlGenerator.DelimitIdentifier(tableName, schema);
+        return fullTableName;
+    }
+
+    private IEnumerable<SqlRawProperty> GetSqlRawProperties(List<IProperty> properties, TEntity entity)
+    {
+        return properties.Select((p, index) => p.GetSqlRawProperty(index, entity));
     }
 }
