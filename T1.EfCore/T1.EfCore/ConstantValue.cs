@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace T1.EfCore;
@@ -6,7 +7,7 @@ namespace T1.EfCore;
 public class ConstantValue : IKnownValue
 {
     public object? Value { get; set; }
-    public IProperty? Property { get; set; }
+    public required IProperty Property { get; set; }
     public MemberInfo? MemberInfo { get; set; }
     public int ArgumentIndex { get; set; }
 
@@ -18,5 +19,10 @@ public class ConstantValue : IKnownValue
     public IEnumerable<PropertyValue> GetPropertyValues()
     {
         return Array.Empty<PropertyValue>();
+    }
+
+    public string GetColumnType()
+    {
+        return Property.GetColumnType();
     }
 }

@@ -18,15 +18,18 @@ public static class EntityPropertiesExtensions
                 defaultSql = property.GetDefaultValueSql();
         }
 
-        var value = new ConstantValue{
-            Value = rawValue, 
+        var value = new ConstantValue
+        {
             Property = property,
+            Value = rawValue, 
             ArgumentIndex = argumentIndex,
         };
+        
         var allowInsert = property.ValueGenerated == ValueGenerated.Never ||
                           property.GetAfterSaveBehavior() == PropertySaveBehavior.Save;
         return new SqlRawProperty
         {
+            Property = property,
             PropertyName = property.Name,
             ColumnName = columnName, 
             Value = value, 

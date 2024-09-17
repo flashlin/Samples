@@ -3,7 +3,8 @@ using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using T1.EfCore;
+
+namespace T1.EfCore;
 
 public class DbCommandArgumentBuilder
 {
@@ -15,21 +16,23 @@ public class DbCommandArgumentBuilder
         _dbCommand = dbCommand;
         _relationalTypeMappingSource = dbContext.GetService<IRelationalTypeMappingSource>();
     }
-    
-    public DbParameter CreateDbParameter(ConstantValue constantValue)
+
+    public DbParameter CreateDbParameter(int startArgumentIndex, ConstantValue constantValue)
     {
         RelationalTypeMapping? relationalTypeMapping = null;
 
-        if (constantValue.Property != null)
-        {
-            relationalTypeMapping = _relationalTypeMappingSource.FindMapping(constantValue.Property);
-        }
-        else if (constantValue.MemberInfo != null)
+
+        if (constantValue.MemberInfo != null)
         {
             relationalTypeMapping = _relationalTypeMappingSource.FindMapping(constantValue.MemberInfo);
         }
-        
-        var dbParameterName = $"@p{constantValue.ArgumentIndex}";
+        else
+        {
+            relationalTypeMapping = _relationalTypeMappingSource.FindMapping(constantValue.Property);
+        }
+
+
+        var dbParameterName = $"@p{startArgumentIndex + constantValue.ArgumentIndex}";
 
         var dbParameter = relationalTypeMapping?.CreateParameter(_dbCommand, dbParameterName, constantValue.Value);
         if (dbParameter == null)
@@ -39,6 +42,7 @@ public class DbCommandArgumentBuilder
             dbParameter.Value = constantValue.Value;
             dbParameter.ParameterName = dbParameterName;
         }
+
         return dbParameter;
     }
 }

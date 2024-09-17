@@ -51,13 +51,12 @@ public class Tests
         {
             Id = 1,
             Name = "flash"
-        });
-
-        WhenUpsert(new CustomerEntity
+        }, new CustomerEntity
         {
             Id = 2,
             Name = "jack"
         });
+
 
         var customers = _db.Customer.ToArray();
         customers.Should().BeEquivalentTo([
@@ -74,7 +73,7 @@ public class Tests
         ]);
     }
 
-    private void WhenUpsert(CustomerEntity entity)
+    private void WhenUpsert(params CustomerEntity[] entity)
     {
         _db.Upsert(entity).On(x => x.Id)
             .Execute();
