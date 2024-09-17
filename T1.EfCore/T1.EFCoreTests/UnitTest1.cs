@@ -15,16 +15,16 @@ public class Tests
     }
 
     [Test]
-    public void Test1()
+    public void Empty()
     {
         GivenCreateCustomerTable();
 
-        _db.Upsert(new CustomerEntity
-        {
-            Id = 1,
-            Name = "flash"
-        }).On(x => x.Id)
-            .Execute();
+        WhenUpsert(
+            new CustomerEntity
+            {
+                Id = 1,
+                Name = "flash"
+            });
 
         var customers = _db.Customer.ToArray();
         customers.Should().BeEquivalentTo([
@@ -34,6 +34,50 @@ public class Tests
                 Name = "flash"
             }
         ]);
+    }
+
+
+    [Test]
+    public void DataExists()
+    {
+        GivenCreateCustomerTable();
+        _db.Customer.Add(new CustomerEntity
+        {
+            Id = 1,
+            Name = "flash"
+        });
+
+        WhenUpsert(new CustomerEntity
+        {
+            Id = 1,
+            Name = "flash"
+        });
+
+        WhenUpsert(new CustomerEntity
+        {
+            Id = 2,
+            Name = "jack"
+        });
+
+        var customers = _db.Customer.ToArray();
+        customers.Should().BeEquivalentTo([
+            new CustomerEntity
+            {
+                Id = 1,
+                Name = "flash"
+            },
+            new CustomerEntity
+            {
+                Id = 2,
+                Name = "jack"
+            }
+        ]);
+    }
+
+    private void WhenUpsert(CustomerEntity entity)
+    {
+        _db.Upsert(entity).On(x => x.Id)
+            .Execute();
     }
 
     private void GivenCreateCustomerTable()
