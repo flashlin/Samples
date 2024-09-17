@@ -46,10 +46,11 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var fullTableName = GetFullTableName(sqlGenerator);
 
         var properties = _entityType.GetProperties().ToList();
-        var rawProperties = GetSqlRawProperties(properties).ToList();
 
         var insertColumns =
              string.Join(", ", properties.Select(p => sqlGenerator.DelimitIdentifier(p.GetColumnName())));
+        
+        var rawProperties = GetSqlRawProperties(properties, _entity).ToList();
         var insertValues = string.Join(", ", rawProperties.Select(x=> $"@p{x.Value.ArgumentIndex}"));
         var matchExpressions = GenerateMatchCondition(_matchExpression)
             .Select(x => x.Name)
@@ -90,14 +91,9 @@ WHEN NOT MATCHED THEN
         });
     }
 
-    private IEnumerable<SqlRawProperty> GetSqlRawProperties(List<IProperty> properties)
+    private IEnumerable<SqlRawProperty> GetSqlRawProperties(List<IProperty> properties, TEntity entity)
     {
-        return properties.Select((p, index) =>
-        {
-            var item = p.GetSqlRawProperty(_entity);
-            item.Value.ArgumentIndex = index;
-            return item;
-        });
+        return properties.Select((p, index) => p.GetSqlRawProperty(index, entity));
     }
 
     private List<IProperty> GenerateMatchCondition(Expression<Func<TEntity, object>> matchExpression)

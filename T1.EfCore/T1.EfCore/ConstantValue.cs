@@ -5,16 +5,9 @@ namespace T1.EfCore;
 
 public class ConstantValue : IKnownValue
 {
-    public ConstantValue(object? value, IProperty? property = null, MemberInfo? memberInfo = null)
-    {
-        Value = value;
-        Property = property;
-        MemberInfo = memberInfo;
-    }
-
-    public object? Value { get; }
-    public IProperty? Property { get; }
-    public MemberInfo? MemberInfo { get; }
+    public object? Value { get; set; }
+    public IProperty? Property { get; set; }
+    public MemberInfo? MemberInfo { get; set; }
     public int ArgumentIndex { get; set; }
 
     public IEnumerable<ConstantValue> GetConstantValues()
