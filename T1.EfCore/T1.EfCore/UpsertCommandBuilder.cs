@@ -43,28 +43,17 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var fullTableName = GetFullTableName(sqlGenerator);
 
         var properties = _entityType.GetProperties().ToList();
-        var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var dataSqlRawProperties = CreateDataSqlRawProperties(properties).ToList();
-        
-        var rawProperties = dataSqlRawProperties[0];
+        var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var createMemTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);
-        var sourceColumns = string.Join(", ", rawProperties.Select(x => $"source.[{x.ColumnName}]"));
+        var sourceColumns = CreateSourceColumns(dataSqlRawProperties);
 
-        if (_matchExpression == null)
-        {
-            throw new InvalidOperationException("On Method IsRequired");
-        }
-
-        var matchExpressions = GenerateMatchCondition(_matchExpression)
-            .Select(x => x.Name)
-            .ToList();
-
-        var onCondition = string.Join("", matchExpressions.Select(x => $"target.{x} = source.{x}"));
+        var matchCondition = CreateMatchCondition();
 
         var mergeSql2 = $@"{createMemTableSql}
 MERGE INTO {fullTableName} AS target
 USING #TempMemoryTable AS source
-ON ({onCondition})
+ON ({matchCondition})
 WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({sourceColumns});";
@@ -72,7 +61,7 @@ WHEN NOT MATCHED THEN
 
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
 
-        var values = CreateDbParameters(dbCommand, rawProperties)
+        var values = CreateDbParameters(dbCommand, dataSqlRawProperties[0])
             .ToList();
         _dbContext.Database.ExecuteSqlRaw(mergeSql2, values);
     }
@@ -92,13 +81,12 @@ WHEN NOT MATCHED THEN
             var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
             foreach (var sqlRawProperty in entityRawProperties)
             {
-                sqlRawProperty.Value.ArgumentIndex += startArgumentIndex; 
+                sqlRawProperty.Value.ArgumentIndex += startArgumentIndex;
             }
             startArgumentIndex += properties.Count;
             yield return entityRawProperties;
         }
     }
-
 
     private IEnumerable<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> rawProperties)
     {
@@ -116,6 +104,7 @@ WHEN NOT MATCHED THEN
             {
                 yield return dbParameter;
             }
+
             startArgumentIndex += properties.Count;
         }
     }
@@ -134,6 +123,7 @@ WHEN NOT MATCHED THEN
                 CreateInsertIntoMemoryTableValueSql(entityRawProperties, insertColumns);
             sql.AppendLine(insertIntoMemoryTableValue);
         }
+
         return sql.ToString();
     }
 
@@ -148,11 +138,29 @@ WHEN NOT MATCHED THEN
         return string.Join(", ", rawProperties.Select(x => $"@p{x.Value.ArgumentIndex}"));
     }
 
+    private string CreateMatchCondition()
+    {
+        if (_matchExpression == null)
+        {
+            throw new InvalidOperationException("On Method IsRequired");
+        }
+
+        var matchExpressions = GenerateMatchCondition(_matchExpression)
+            .Select(x => x.Name)
+            .ToList();
+        return string.Join("", matchExpressions.Select(x => $"target.{x} = source.{x}"));
+    }
+
     private string CreateMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties[0])});";
         var insertMemTableSql = CreateInsertIntoMemoryTableSql(insertColumns, dataSqlRawProperties);
         return createMemTableSql + "\n" + insertMemTableSql;
+    }
+
+    private static string CreateSourceColumns(List<List<SqlRawProperty>> dataSqlRawProperties)
+    {
+        return string.Join(", ", dataSqlRawProperties[0].Select(x => $"source.[{x.ColumnName}]"));
     }
 
     private static string CreateTableColumnsTypes(List<SqlRawProperty> rawProperties)
