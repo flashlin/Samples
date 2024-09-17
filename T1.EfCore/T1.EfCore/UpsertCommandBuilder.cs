@@ -50,8 +50,10 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
 
         var properties = _entityType.GetProperties().ToList();
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
-        var rawProperties = GetSqlRawProperties(properties, _entityList[0]).ToList();
-        var createMemTableSql = CreateMemoryTableSql(rawProperties, insertColumns);
+        var dataSqlRawProperties = CreateDataSqlRawProperties(properties).ToList();
+        
+        var rawProperties = dataSqlRawProperties[0];
+        var createMemTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);
         var sourceColumns = string.Join(", ", rawProperties.Select(x => $"source.[{x.ColumnName}]"));
 
         if (_matchExpression == null)
@@ -86,40 +88,34 @@ WHEN NOT MATCHED THEN
         return string.Join(", ", properties.Select(p => sqlGenerator.DelimitIdentifier(p.GetColumnName())));
     }
 
-    private string CreateMemoryTableSql(List<SqlRawProperty> rawProperties, string insertColumns)
+    private string CreateMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
     {
-        var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(rawProperties)});";
-        var insertMemTableSql = CreateInsertIntoMemoryTableSql(rawProperties, insertColumns);
+        var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties[0])});";
+        var insertMemTableSql = CreateInsertIntoMemoryTableSql(insertColumns, dataSqlRawProperties);
         return createMemTableSql + "\n" + insertMemTableSql;
     }
 
-    private string CreateInsertIntoMemoryTableSql(List<SqlRawProperty> rawProperties, string insertColumns)
+    private string CreateInsertIntoMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         var sql = new StringBuilder();
-        var startArgumentIndex = 0;
-        var properties = rawProperties.Select(p => p.Property).ToList();
-        foreach (var entity in _entityList)
+        foreach (var entityRawProperties in dataSqlRawProperties)
         {
-            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
             var insertIntoMemoryTableValue =
-                CreateInsertIntoMemoryTableValueSql(entityRawProperties, insertColumns, startArgumentIndex);
-            startArgumentIndex += entityRawProperties.Count;
+                CreateInsertIntoMemoryTableValueSql(entityRawProperties, insertColumns);
             sql.AppendLine(insertIntoMemoryTableValue);
         }
-
         return sql.ToString();
     }
 
-    private static string CreateInsertIntoMemoryTableValueSql(List<SqlRawProperty> rawProperties, string insertColumns,
-        int startArgumentIndex)
+    private static string CreateInsertIntoMemoryTableValueSql(List<SqlRawProperty> rawProperties, string insertColumns)
     {
-        var insertValues = CreateInsertValues(startArgumentIndex, rawProperties);
+        var insertValues = CreateInsertValues(rawProperties);
         return $@"INSERT INTO #TempMemoryTable ({insertColumns}) VALUES ({insertValues});";
     }
 
-    private static string CreateInsertValues(int startArgumentIndex, List<SqlRawProperty> rawProperties)
+    private static string CreateInsertValues(List<SqlRawProperty> rawProperties)
     {
-        return string.Join(", ", rawProperties.Select(x => $"@p{x.Value.ArgumentIndex + startArgumentIndex}"));
+        return string.Join(", ", rawProperties.Select(x => $"@p{x.Value.ArgumentIndex}"));
     }
 
     private static string CreateTableColumnsTypes(List<SqlRawProperty> rawProperties)
@@ -136,6 +132,21 @@ WHEN NOT MATCHED THEN
         return fullTableName;
     }
     
+    
+    private IEnumerable<List<SqlRawProperty>> CreateDataSqlRawProperties(List<IProperty> properties)
+    {
+        var startArgumentIndex = 0;
+        foreach (var entity in _entityList)
+        {
+            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
+            foreach (var sqlRawProperty in entityRawProperties)
+            {
+                sqlRawProperty.Value.ArgumentIndex += startArgumentIndex; 
+            }
+            startArgumentIndex += properties.Count;
+            yield return entityRawProperties;
+        }
+    }
     
 
     private IEnumerable<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> rawProperties)
