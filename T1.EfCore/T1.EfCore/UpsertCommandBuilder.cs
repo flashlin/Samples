@@ -31,20 +31,9 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var properties = _entityType.GetProperties().ToList();
         
         var dataSqlRawProperties = CreateDataSqlRawProperties(properties).ToList();
-        
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
-        var createMemoryTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);
-        var sourceColumns = CreateSourceColumns(dataSqlRawProperties);
-
-        var matchCondition = CreateMatchCondition();
-
-        var mergeSql = $@"{createMemoryTableSql}
-MERGE INTO {fullTableName} AS target
-USING #TempMemoryTable AS source
-ON ({matchCondition})
-WHEN NOT MATCHED THEN
-    INSERT ({insertColumns})
-    VALUES ({sourceColumns});";
+        
+        var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, dataSqlRawProperties);
 
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
         var values = CreateDataDbParameters(dbCommand, dataSqlRawProperties)
@@ -141,6 +130,22 @@ WHEN NOT MATCHED THEN
         var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties[0])});";
         var insertMemTableSql = CreateInsertIntoMemoryTableSql(insertColumns, dataSqlRawProperties);
         return createMemTableSql + "\n" + insertMemTableSql;
+    }
+
+    private string CreateMergeDataSql(string fullTableName, string insertColumns,
+        List<List<SqlRawProperty>> dataSqlRawProperties)
+    {
+        var createMemoryTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);
+        var sourceColumns = CreateSourceColumns(dataSqlRawProperties);
+        var matchCondition = CreateMatchCondition();
+        var mergeSql = $@"{createMemoryTableSql}
+MERGE INTO {fullTableName} AS target
+USING #TempMemoryTable AS source
+ON ({matchCondition})
+WHEN NOT MATCHED THEN
+    INSERT ({insertColumns})
+    VALUES ({sourceColumns});";
+        return mergeSql;
     }
 
     private static string CreateSourceColumns(List<List<SqlRawProperty>> dataSqlRawProperties)
