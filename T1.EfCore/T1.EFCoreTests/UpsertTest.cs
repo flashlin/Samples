@@ -111,6 +111,40 @@ public class UpsertTest
     }
 
 
+    [Test]
+    public void UpsertArray()
+    {
+        GivenCreateCustomerTable();
+        _db.Customer.Add(new CustomerEntity
+        {
+            Id = 1,
+            Name = "flash"
+        });
+
+        WhenUpsert([new CustomerEntity
+        {
+            Id = 1,
+            Name = "flash"
+        }, new CustomerEntity
+        {
+            Id = 2,
+            Name = "jack"
+        }]);
+
+        var customers = _db.Customer.ToArray();
+        customers.Should().BeEquivalentTo([
+            new CustomerEntity
+            {
+                Id = 1,
+                Name = "flash"
+            },
+            new CustomerEntity
+            {
+                Id = 2,
+                Name = "jack"
+            }
+        ]);
+    }
 
 
     private void WhenUpsert(params CustomerEntity[] entity)

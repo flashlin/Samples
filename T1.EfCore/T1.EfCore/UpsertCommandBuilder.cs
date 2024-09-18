@@ -29,7 +29,6 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var fullTableName = GetFullTableName(sqlGenerator);
 
         var properties = _entityType.GetProperties().ToList();
-        
         var dataSqlRawProperties = CreateDataSqlRawProperties(properties).ToList();
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         
