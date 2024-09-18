@@ -41,6 +41,15 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         _dbContext.Database.ExecuteSqlRaw(mergeSql, values);
     }
 
+    private string CreateMergeDataSql(string fullTableName, string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
+    {
+        if (dataSqlRawProperties.Count == 1)
+        {
+            return CreateMergeSingleDataSql(fullTableName, insertColumns, dataSqlRawProperties[0]);
+        }
+        return CreateMergeMultipleDataSql(fullTableName, insertColumns, dataSqlRawProperties);
+    }
+
     public UpsertCommandBuilder<TEntity> On(Expression<Func<TEntity, object>> matchExpression)
     {
         _matchExpression = matchExpression;
@@ -131,8 +140,23 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var insertMemTableSql = CreateInsertIntoMemoryTableSql(insertColumns, dataSqlRawProperties);
         return createMemTableSql + "\n" + insertMemTableSql;
     }
+    
+    private string CreateMergeSingleDataSql(string fullTableName, string insertColumns,
+        List<SqlRawProperty> dataSqlRawProperties)
+    {
+        var matchCondition = CreateMatchCondition();
+        var insertValues = string.Join(", ", dataSqlRawProperties.Select(x=> $"@p{x.Value.ArgumentIndex}"));
+        var mergeSql = $@"
+MERGE INTO {fullTableName} AS target
+USING (SELECT {insertValues}) AS source({insertColumns}) 
+ON ({matchCondition})
+WHEN NOT MATCHED THEN
+    INSERT ({insertColumns})
+    VALUES ({insertValues});";
+        return mergeSql;
+    }
 
-    private string CreateMergeDataSql(string fullTableName, string insertColumns,
+    private string CreateMergeMultipleDataSql(string fullTableName, string insertColumns,
         List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         var createMemoryTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);

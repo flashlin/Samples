@@ -4,7 +4,7 @@ using T1.EfCore;
 
 namespace T1.EFCoreTests;
 
-public class Tests
+public class UpsertTest
 {
     private TestDbContext _db;
 
@@ -73,6 +73,7 @@ public class Tests
             }
         ]);
     }
+    
     [Test]
     public void DataExists()
     {
