@@ -33,3 +33,18 @@ _db.Upsert(entityArray)
     .On(x => x.Id)
     .Execute();
 ```
+
+Here are examples for Upsert a single record with multiple keys:
+```csharp
+var entityArray = [
+    new Entity
+    {
+        Id = 1,
+        Name = "John"
+    },
+];
+
+_db.Upsert(entityArray)
+    .On(x => new {x.Id, x.Name})
+    .Execute();
+```

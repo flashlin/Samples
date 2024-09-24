@@ -4,6 +4,11 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>Extension Entity Framework Core</Title>
+        <Description>The purpose of this library is to extend or support the functionality of Entity Framework.
+</Description>
+        <Version>1.0.1</Version>
     </PropertyGroup>
 
     <ItemGroup>
