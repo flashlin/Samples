@@ -27,7 +27,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     public void Execute()
     {
         var sqlGenerator = _dbContext.GetService<ISqlGenerationHelper>();
-        var fullTableName = GetFullTableName(sqlGenerator);
+        var fullTableName = sqlGenerator.GetFullTableName(_entityType);
 
         var properties = _entityType.GetProperties().ToList();
         var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, _entityList)
@@ -209,12 +209,15 @@ WHEN NOT MATCHED THEN
 
         throw new ArgumentException("Unsupported where expression");
     }
+}
 
-    private string GetFullTableName(ISqlGenerationHelper sqlGenerator)
+public static class SqlGenerationHelperExtensions
+{
+    public static string GetFullTableName(this ISqlGenerationHelper sqlGenerator, IEntityType entityType)
     {
-        var tableName = _entityType.GetTableName() ??
-                        _entityType.GetDefaultTableName() ?? _entityType.GetType().Name;
-        var schema = _entityType.GetSchema();
+        var tableName = entityType.GetTableName() ??
+                        entityType.GetDefaultTableName() ?? entityType.GetType().Name;
+        var schema = entityType.GetSchema();
         var fullTableName = sqlGenerator.DelimitIdentifier(tableName, schema);
         return fullTableName;
     }

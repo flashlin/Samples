@@ -2,7 +2,9 @@ using System.Data;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace T1.EfCore;
 
@@ -11,20 +13,34 @@ public class BulkInserter<TEntity>
 {
     private readonly DbContext _dbContext;
     private readonly EntityPropertyExtractor _entityPropertyExtractor = new ();
-    private readonly IEntityType _entityType;
-    private List<SqlColumnProperty> _properties;
+    private IEntityType? _entityType;
+    private List<SqlColumnProperty> _properties = [];
+    private readonly IEnumerable<TEntity> _entities;
+    private string _tableName;
 
-    public BulkInserter(DbContext dbContext, IEntityType entityType)
+    public BulkInserter(DbContext dbContext, IEnumerable<TEntity> entities)
     {
+        _entities = entities;
         _dbContext = dbContext;
-        _entityType = entityType;
-        Initialize();
     }
 
-    public void BulkInsert(List<TEntity> entities, string tableName)
+    public BulkInserter<TEntity> Into(string tableName)
     {
+        _tableName = tableName;
+        return this;
+    }
+
+    public void Execute()
+    {
+        var entityList = _entities.ToList();
+        if (string.IsNullOrEmpty(_tableName))
+        {
+            var sqlGenerator = _dbContext.GetService<ISqlGenerationHelper>();
+            var entityType = ExtractEntityType(entityList[0]);
+            _tableName = sqlGenerator.GetFullTableName(entityType);
+        }
         var properties = _properties.Select(x => x.Property).ToList();
-        var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, entities)
+        var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, entityList)
             .ToList();
 
         var dataTable = new DataTable();
@@ -44,8 +60,10 @@ public class BulkInserter<TEntity>
         }
         
         var connection = _dbContext.Database.GetDbConnection();
+        if(connection.State != ConnectionState.Open)
+            connection.Open();
         using var bulkCopy = new SqlBulkCopy((SqlConnection)connection, SqlBulkCopyOptions.Default, null);
-        bulkCopy.DestinationTableName = tableName;
+        bulkCopy.DestinationTableName = _tableName;
         foreach (var column in _properties)
         {
             bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
@@ -53,8 +71,13 @@ public class BulkInserter<TEntity>
         bulkCopy.WriteToServer(dataTable);
     }
 
-    private void Initialize()
+    private IEntityType ExtractEntityType(TEntity entity)
     {
+        if (_entityType != null)
+        {
+            return _entityType;
+        }
+        _entityType = _dbContext.GetEntityType(entity);
         _properties = _entityType.GetProperties().Select(x =>
             new SqlColumnProperty()
             {
@@ -62,5 +85,6 @@ public class BulkInserter<TEntity>
                 ColumnName = x.GetColumnName(),
                 AllowInsert = x.IsAllowInsert()
             }).ToList();
+        return _entityType;
     }
 }
