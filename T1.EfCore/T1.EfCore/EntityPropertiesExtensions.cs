@@ -5,7 +5,7 @@ namespace T1.EfCore;
 
 public static class EntityPropertiesExtensions
 {
-    public  static SqlRawProperty GetSqlRawProperty<T>(this IProperty property, int argumentIndex, T entity)
+    public static SqlRawProperty GetSqlRawProperty<T>(this IProperty property, int argumentIndex, T entity)
     {
         var columnName = property.GetColumnName();
         var rawValue = property.PropertyInfo?.GetValue(entity);
@@ -21,20 +21,26 @@ public static class EntityPropertiesExtensions
         var value = new ConstantValue
         {
             Property = property,
-            Value = rawValue, 
+            Value = rawValue,
             ArgumentIndex = argumentIndex,
         };
-        
+
         var allowInsert = property.ValueGenerated == ValueGenerated.Never ||
                           property.GetAfterSaveBehavior() == PropertySaveBehavior.Save;
         return new SqlRawProperty
         {
             Property = property,
             PropertyName = property.Name,
-            ColumnName = columnName, 
-            Value = value, 
-            DefaultSql = defaultSql, 
+            ColumnName = columnName,
+            DataValue = value,
+            DefaultSql = defaultSql,
             AllowInsert = allowInsert
         };
+    }
+    
+    public static bool IsAllowInsert(this IProperty property)
+    {
+        return property.ValueGenerated == ValueGenerated.Never ||
+               property.GetAfterSaveBehavior() == PropertySaveBehavior.Save;
     }
 }

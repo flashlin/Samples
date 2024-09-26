@@ -15,6 +15,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private readonly TEntity[] _entityList;
     private readonly IEntityType _entityType;
     private Expression<Func<TEntity, object>>? _matchExpression;
+    private readonly EntityPropertyExtractor _entityPropertyExtractor = new (); 
 
     public UpsertCommandBuilder(DbContext dbContext, IEntityType entityType, params TEntity[] entities)
     {
@@ -29,7 +30,8 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var fullTableName = GetFullTableName(sqlGenerator);
 
         var properties = _entityType.GetProperties().ToList();
-        var dataSqlRawProperties = CreateDataSqlRawProperties(properties).ToList();
+        var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, _entityList)
+            .ToList();
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, dataSqlRawProperties);
@@ -58,27 +60,12 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         }
     }
 
-    private IEnumerable<List<SqlRawProperty>> CreateDataSqlRawProperties(List<IProperty> properties)
-    {
-        var startArgumentIndex = 0;
-        foreach (var entity in _entityList)
-        {
-            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
-            foreach (var sqlRawProperty in entityRawProperties)
-            {
-                sqlRawProperty.Value.ArgumentIndex += startArgumentIndex;
-            }
-            startArgumentIndex += properties.Count;
-            yield return entityRawProperties;
-        }
-    }
-
     private List<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> entitySqlRawProperties)
     {
         return entitySqlRawProperties.Select(x =>
         {
             var dbCommandArgumentBuilder = new DbCommandArgumentBuilder(_dbContext, dbCommand);
-            return dbCommandArgumentBuilder.CreateDbParameter(x.Value);
+            return dbCommandArgumentBuilder.CreateDbParameter(x.DataValue);
         }).ToList();
     }
 
@@ -108,7 +95,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
 
     private static string CreateInsertValues(List<SqlRawProperty> rawProperties)
     {
-        return string.Join(", ", rawProperties.Select(x => $"@p{x.Value.ArgumentIndex}"));
+        return string.Join(", ", rawProperties.Select(x => $"@p{x.DataValue.ArgumentIndex}"));
     }
 
     private string CreateMatchCondition()
@@ -160,7 +147,7 @@ WHEN NOT MATCHED THEN
         List<SqlRawProperty> dataSqlRawProperties)
     {
         var matchCondition = CreateMatchCondition();
-        var insertValues = string.Join(", ", dataSqlRawProperties.Select(x=> $"@p{x.Value.ArgumentIndex}"));
+        var insertValues = string.Join(", ", dataSqlRawProperties.Select(x=> $"@p{x.DataValue.ArgumentIndex}"));
         var mergeSql = $@"
 MERGE INTO {fullTableName} AS target
 USING (SELECT {insertValues}) AS source({insertColumns}) 
@@ -178,7 +165,7 @@ WHEN NOT MATCHED THEN
 
     private static string CreateTableColumnsTypes(List<SqlRawProperty> rawProperties)
     {
-        return string.Join(", ", rawProperties.Select(x => $"[{x.PropertyName}] {x.Value.GetColumnType()}"));
+        return string.Join(", ", rawProperties.Select(x => $"[{x.PropertyName}] {x.DataValue.GetColumnType()}"));
     }
 
     private List<IProperty> GenerateMatchCondition(Expression<Func<TEntity, object>> matchExpression)
@@ -231,8 +218,26 @@ WHEN NOT MATCHED THEN
         var fullTableName = sqlGenerator.DelimitIdentifier(tableName, schema);
         return fullTableName;
     }
+}
 
-    private IEnumerable<SqlRawProperty> GetSqlRawProperties(List<IProperty> properties, TEntity entity)
+public class EntityPropertyExtractor
+{
+    public IEnumerable<List<SqlRawProperty>> CreateDataSqlRawProperties<TEntity>(List<IProperty> properties, IEnumerable<TEntity> entities)
+    {
+        var startArgumentIndex = 0;
+        foreach (var entity in entities)
+        {
+            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
+            foreach (var sqlRawProperty in entityRawProperties)
+            {
+                sqlRawProperty.DataValue.ArgumentIndex += startArgumentIndex;
+            }
+            startArgumentIndex += properties.Count;
+            yield return entityRawProperties;
+        }
+    }
+
+    private IEnumerable<SqlRawProperty> GetSqlRawProperties<TEntity>(List<IProperty> properties, TEntity entity)
     {
         return properties.Select((p, index) => p.GetSqlRawProperty(index, entity));
     }
