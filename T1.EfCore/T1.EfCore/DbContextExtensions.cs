@@ -22,7 +22,7 @@ public static class DbContextExtensions
         return entityType;
     }
 
-    public static BulkInserter<TEntity> UpsertRange<TEntity>(this DbContext dbContext, IEnumerable<TEntity> entities)
+    public static BulkInserter<TEntity> BulkInsert<TEntity>(this DbContext dbContext, IEnumerable<TEntity> entities)
         where TEntity : class
     {
         return new BulkInserter<TEntity>(dbContext, entities); 

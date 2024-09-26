@@ -36,7 +36,7 @@ public class UpsertTest
                 Name = "Mark",
             }
         };
-        _db.UpsertRange(data)
+        _db.BulkInsert(data)
             .Execute();
         
         var customers = _db.Customer.ToArray();
