@@ -12,22 +12,16 @@ public class BulkInserter<TEntity>
     where TEntity : class
 {
     private readonly DbContext _dbContext;
+    private readonly IEnumerable<TEntity> _entities;
     private readonly EntityPropertyExtractor _entityPropertyExtractor = new ();
     private IEntityType? _entityType;
     private List<SqlColumnProperty> _properties = [];
-    private readonly IEnumerable<TEntity> _entities;
     private string _tableName;
 
     public BulkInserter(DbContext dbContext, IEnumerable<TEntity> entities)
     {
         _entities = entities;
         _dbContext = dbContext;
-    }
-
-    public BulkInserter<TEntity> Into(string tableName)
-    {
-        _tableName = tableName;
-        return this;
     }
 
     public void Execute()
@@ -43,12 +37,7 @@ public class BulkInserter<TEntity>
         var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, entityList)
             .ToList();
 
-        var dataTable = new DataTable();
-        foreach (var column in _properties)
-        {
-            var dataColumn = new DataColumn(column.ColumnName, column.Property.ClrType); 
-            dataTable.Columns.Add(dataColumn);
-        }
+        var dataTable = CreateDataTable();
         foreach (var entity in dataSqlRawProperties)
         {
             var row = dataTable.NewRow();
@@ -69,6 +58,24 @@ public class BulkInserter<TEntity>
             bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
         }
         bulkCopy.WriteToServer(dataTable);
+    }
+
+    public BulkInserter<TEntity> Into(string tableName)
+    {
+        _tableName = tableName;
+        return this;
+    }
+
+    private DataTable CreateDataTable()
+    {
+        var dataTable = new DataTable();
+        foreach (var column in _properties)
+        {
+            var dataColumn = new DataColumn(column.ColumnName, column.Property.ClrType); 
+            dataTable.Columns.Add(dataColumn);
+        }
+
+        return dataTable;
     }
 
     private IEntityType ExtractEntityType(TEntity entity)
