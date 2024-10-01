@@ -1,7 +1,33 @@
+using System.Text;
+
 namespace T1.EfCore;
 
 public static class SqlRawPropertyListExtensions
 {
+    public static string CreateInsertIntoMemTempTableSql(this List<List<SqlRawProperty>> dataSqlRawPropertiesRows,
+        string insertColumns)
+    {
+        var sql = new StringBuilder();
+        foreach (var entityRawProperties in dataSqlRawPropertiesRows)
+        {
+            var insertRowIntoMemTempTableSql = entityRawProperties.CreateInsertRowIntoMemTempTableSql(insertColumns);
+            sql.AppendLine(insertRowIntoMemTempTableSql);
+        }
+
+        return sql.ToString();
+    }
+
+    public static string CreateInsertRowIntoMemTempTableSql(this List<SqlRawProperty> rawProperties, string insertColumns)
+    {
+        var insertValues = rawProperties.CreateInsertValuesSql();
+        return $@"INSERT INTO #TempMemoryTable ({insertColumns}) VALUES ({insertValues});";
+    }
+
+    public static string CreateInsertValuesSql(this List<SqlRawProperty> rawProperties)
+    {
+        return string.Join(", ", rawProperties.Select(x => $"@p{x.DataValue.ArgumentIndex}"));
+    }
+
     public static string CreateMemTableSql(this List<SqlRawProperty> dataSqlRawProperties)
     {
         return $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties)});";

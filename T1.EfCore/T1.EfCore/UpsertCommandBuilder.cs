@@ -74,30 +74,6 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         return string.Join(", ", properties.Select(p => sqlGenerator.DelimitIdentifier(p.GetColumnName())));
     }
 
-    private string CreateInsertIntoMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
-    {
-        var sql = new StringBuilder();
-        foreach (var entityRawProperties in dataSqlRawProperties)
-        {
-            var insertIntoMemoryTableValue =
-                CreateInsertIntoMemoryTableValueSql(entityRawProperties, insertColumns);
-            sql.AppendLine(insertIntoMemoryTableValue);
-        }
-
-        return sql.ToString();
-    }
-
-    private static string CreateInsertIntoMemoryTableValueSql(List<SqlRawProperty> rawProperties, string insertColumns)
-    {
-        var insertValues = CreateInsertValues(rawProperties);
-        return $@"INSERT INTO #TempMemoryTable ({insertColumns}) VALUES ({insertValues});";
-    }
-
-    private static string CreateInsertValues(List<SqlRawProperty> rawProperties)
-    {
-        return string.Join(", ", rawProperties.Select(x => $"@p{x.DataValue.ArgumentIndex}"));
-    }
-
     private string CreateMatchCondition()
     {
         if (_matchExpression == null)
@@ -114,7 +90,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private string CreateAndInsertMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawPropertiesRows)
     {
         var createMemTableSql = dataSqlRawPropertiesRows[0].CreateMemTableSql();
-        var insertMemTableSql = CreateInsertIntoMemTempTableSql(insertColumns, dataSqlRawPropertiesRows);
+        var insertMemTableSql = dataSqlRawPropertiesRows.CreateInsertIntoMemTempTableSql(insertColumns);
         return createMemTableSql + "\n" + insertMemTableSql;
     }
 
