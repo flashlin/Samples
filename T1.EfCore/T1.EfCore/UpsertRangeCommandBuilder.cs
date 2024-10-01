@@ -64,7 +64,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
 
     private string CreateMergeDataSql(string fullTableName, string insertColumns, List<SqlRawProperty> row)
     {
-        var sourceColumns = CreateSourceColumns(row);
+        var sourceColumns = row.CreateSourceColumns();
         var matchCondition = CreateMatchCondition();
         var mergeSql = $@"MERGE INTO {fullTableName} AS target
 USING #TempMemoryTable AS source
@@ -73,10 +73,5 @@ WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({sourceColumns});";
         return mergeSql;
-    }
-
-    private static string CreateSourceColumns(List<SqlRawProperty> sqlRawProperties)
-    {
-        return string.Join(", ", sqlRawProperties.Select(x => $"source.[{x.ColumnName}]"));
     }
 }
