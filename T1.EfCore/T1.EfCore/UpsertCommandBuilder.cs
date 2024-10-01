@@ -174,38 +174,3 @@ WHEN NOT MATCHED THEN
         throw new ArgumentException("Unsupported where expression");
     }
 }
-
-public static class SqlGenerationHelperExtensions
-{
-    public static string GetFullTableName(this ISqlGenerationHelper sqlGenerator, IEntityType entityType)
-    {
-        var tableName = entityType.GetTableName() ??
-                        entityType.GetDefaultTableName() ?? entityType.GetType().Name;
-        var schema = entityType.GetSchema();
-        var fullTableName = sqlGenerator.DelimitIdentifier(tableName, schema);
-        return fullTableName;
-    }
-}
-
-public class EntityPropertyExtractor
-{
-    public IEnumerable<List<SqlRawProperty>> CreateDataSqlRawProperties<TEntity>(List<IProperty> properties, IEnumerable<TEntity> entities)
-    {
-        var startArgumentIndex = 0;
-        foreach (var entity in entities)
-        {
-            var entityRawProperties = GetSqlRawProperties(properties, entity).ToList();
-            foreach (var sqlRawProperty in entityRawProperties)
-            {
-                sqlRawProperty.DataValue.ArgumentIndex += startArgumentIndex;
-            }
-            startArgumentIndex += properties.Count;
-            yield return entityRawProperties;
-        }
-    }
-
-    private IEnumerable<SqlRawProperty> GetSqlRawProperties<TEntity>(List<IProperty> properties, TEntity entity)
-    {
-        return properties.Select((p, index) => p.GetSqlRawProperty(index, entity));
-    }
-}
