@@ -111,10 +111,10 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));
     }
 
-    private string CreateAndInsertMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
+    private string CreateAndInsertMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawPropertiesRows)
     {
-        var createMemTableSql = dataSqlRawProperties[0].CreateMemTableSql();
-        var insertMemTableSql = CreateInsertIntoMemTempTableSql(insertColumns, dataSqlRawProperties);
+        var createMemTableSql = dataSqlRawPropertiesRows[0].CreateMemTableSql();
+        var insertMemTableSql = CreateInsertIntoMemTempTableSql(insertColumns, dataSqlRawPropertiesRows);
         return createMemTableSql + "\n" + insertMemTableSql;
     }
 
