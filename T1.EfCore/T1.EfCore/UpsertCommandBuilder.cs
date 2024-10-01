@@ -113,9 +113,14 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
 
     private string CreateAndInsertMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
     {
-        var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties[0])});";
+        var createMemTableSql = CreateMemTableSql(dataSqlRawProperties[0]);
         var insertMemTableSql = CreateInsertIntoMemTempTableSql(insertColumns, dataSqlRawProperties);
         return createMemTableSql + "\n" + insertMemTableSql;
+    }
+
+    private static string CreateMemTableSql(List<SqlRawProperty> dataSqlRawProperties)
+    {
+        return $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties)});";
     }
 
     private string CreateMergeDataSql(string fullTableName, string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
