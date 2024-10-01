@@ -2,7 +2,7 @@ using System.Text;
 
 namespace T1.EfCore;
 
-public static class SqlRawPropertyListExtensions
+public static class MemTempTableSqlHelper
 {
     public static string CreateInsertIntoMemTempTableSql(this List<List<SqlRawProperty>> dataSqlRawPropertiesRows,
         string insertColumns)
