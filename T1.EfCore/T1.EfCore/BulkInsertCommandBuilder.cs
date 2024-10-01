@@ -16,7 +16,7 @@ public class BulkInsertCommandBuilder<TEntity>
     private readonly EntityPropertyExtractor _entityPropertyExtractor = new ();
     private IEntityType? _entityType;
     private List<SqlColumnProperty> _properties = [];
-    private string _tableName;
+    private string _tableName = string.Empty;
 
     public BulkInsertCommandBuilder(DbContext dbContext, IEnumerable<TEntity> entities)
     {

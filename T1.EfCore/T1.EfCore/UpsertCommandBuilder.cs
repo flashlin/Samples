@@ -113,14 +113,9 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
 
     private string CreateAndInsertMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
     {
-        var createMemTableSql = CreateMemTableSql(dataSqlRawProperties[0]);
+        var createMemTableSql = dataSqlRawProperties[0].CreateMemTableSql();
         var insertMemTableSql = CreateInsertIntoMemTempTableSql(insertColumns, dataSqlRawProperties);
         return createMemTableSql + "\n" + insertMemTableSql;
-    }
-
-    private static string CreateMemTableSql(List<SqlRawProperty> dataSqlRawProperties)
-    {
-        return $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties)});";
     }
 
     private string CreateMergeDataSql(string fullTableName, string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
@@ -166,11 +161,6 @@ WHEN NOT MATCHED THEN
     private static string CreateSourceColumns(List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         return string.Join(", ", dataSqlRawProperties[0].Select(x => $"source.[{x.ColumnName}]"));
-    }
-
-    private static string CreateTableColumnsTypes(List<SqlRawProperty> rawProperties)
-    {
-        return string.Join(", ", rawProperties.Select(x => $"[{x.PropertyName}] {x.DataValue.GetColumnType()}"));
     }
 
     private List<IProperty> GenerateMatchCondition(Expression<Func<TEntity, object>> matchExpression)
