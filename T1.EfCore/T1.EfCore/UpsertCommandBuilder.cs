@@ -74,7 +74,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         return string.Join(", ", properties.Select(p => sqlGenerator.DelimitIdentifier(p.GetColumnName())));
     }
 
-    private string CreateInsertIntoMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
+    private string CreateInsertIntoMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         var sql = new StringBuilder();
         foreach (var entityRawProperties in dataSqlRawProperties)
@@ -111,10 +111,10 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));
     }
 
-    private string CreateMemoryTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
+    private string CreateMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties[0])});";
-        var insertMemTableSql = CreateInsertIntoMemoryTableSql(insertColumns, dataSqlRawProperties);
+        var insertMemTableSql = CreateInsertIntoMemTempTableSql(insertColumns, dataSqlRawProperties);
         return createMemTableSql + "\n" + insertMemTableSql;
     }
 
@@ -130,10 +130,10 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private string CreateMergeMultipleDataSql(string fullTableName, string insertColumns,
         List<List<SqlRawProperty>> dataSqlRawProperties)
     {
-        var createMemoryTableSql = CreateMemoryTableSql(insertColumns, dataSqlRawProperties);
+        var createMemTempTableSql = CreateMemTempTableSql(insertColumns, dataSqlRawProperties);
         var sourceColumns = CreateSourceColumns(dataSqlRawProperties);
         var matchCondition = CreateMatchCondition();
-        var mergeSql = $@"{createMemoryTableSql}
+        var mergeSql = $@"{createMemTempTableSql}
 MERGE INTO {fullTableName} AS target
 USING #TempMemoryTable AS source
 ON ({matchCondition})
