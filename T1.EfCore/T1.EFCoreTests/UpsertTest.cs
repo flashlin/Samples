@@ -15,7 +15,7 @@ public class UpsertTest
     }
 
     [Test]
-    public void UpsertRange()
+    public void BulkInsertRange()
     {
         GivenCreateCustomerTable();
         var data = new List<CustomerEntity>()

@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace T1.EfCore;
 
-public class BulkInserter<TEntity>
+public class BulkInsertCommandBuilder<TEntity>
     where TEntity : class
 {
     private readonly DbContext _dbContext;
@@ -18,7 +18,7 @@ public class BulkInserter<TEntity>
     private List<SqlColumnProperty> _properties = [];
     private string _tableName;
 
-    public BulkInserter(DbContext dbContext, IEnumerable<TEntity> entities)
+    public BulkInsertCommandBuilder(DbContext dbContext, IEnumerable<TEntity> entities)
     {
         _entities = entities;
         _dbContext = dbContext;
@@ -60,7 +60,7 @@ public class BulkInserter<TEntity>
         bulkCopy.WriteToServer(dataTable);
     }
 
-    public BulkInserter<TEntity> Into(string tableName)
+    public BulkInsertCommandBuilder<TEntity> Into(string tableName)
     {
         _tableName = tableName;
         return this;
