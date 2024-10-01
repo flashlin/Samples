@@ -33,9 +33,19 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var dataSqlRawProperties = _entityPropertyExtractor.GetSqlRawProperties(properties, _entities[0])
             .ToList();
+        
+        var createTempMemTableSql = dataSqlRawProperties.CreateMemTableSql();
+        
+        
+        
+        
+        
+        
+        _dbContext.Database.ExecuteSqlRaw(createTempMemTableSql);
 
-        var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, dataSqlRawProperties);
+        _bulkInsertCommandBuilder.Into("#TempMemoryTable").Execute();
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
+        var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, dataSqlRawProperties);
         _dbContext.Database.ExecuteSqlRaw(mergeSql);
     }
 

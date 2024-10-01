@@ -14,4 +14,9 @@ public static class SqlGenerationHelperExtensions
         var fullTableName = sqlGenerator.DelimitIdentifier(tableName, schema);
         return fullTableName;
     }
+
+    public static string CreateSourceColumns(this List<SqlRawProperty> sqlRawProperties)
+    {
+        return string.Join(", ", sqlRawProperties.Select(x => $"source.[{x.ColumnName}]"));
+    }
 }

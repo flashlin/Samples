@@ -13,6 +13,61 @@ public class UpsertTest
     {
         _db = new TestDbContext();
     }
+    
+    
+    [Test]
+    public void UpsertRange()
+    {
+        GivenCreateCustomerTable();
+        var existedData = new List<CustomerEntity>()
+        {
+            new()
+            {
+                Id = 2,
+                Name = "Jack",
+            },
+        };
+        var insertData = new List<CustomerEntity>()
+        {
+            new()
+            {
+                Id = 1,
+                Name = "Flash",
+            },
+            new()
+            {
+                Id = 2,
+                Name = "Jack",
+            },
+            new()
+            {
+                Id = 3,
+                Name = "Mark",
+            }
+        };
+        _db.UpsertRange(insertData)
+            .On(x=>x.Id)
+            .Execute();
+        
+        var customers = _db.Customer.ToArray();
+        customers.Should().BeEquivalentTo([
+            new CustomerEntity
+            {
+                Id = 1,
+                Name = "Flash"
+            },
+            new CustomerEntity
+            {
+                Id = 2,
+                Name = "Jack"
+            },
+            new CustomerEntity
+            {
+                Id = 3,
+                Name = "Mark"
+            }
+        ]);
+    }
 
     [Test]
     public void BulkInsertRange()

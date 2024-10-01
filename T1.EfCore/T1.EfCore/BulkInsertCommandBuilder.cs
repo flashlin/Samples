@@ -37,16 +37,8 @@ public class BulkInsertCommandBuilder<TEntity>
         var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, entityList)
             .ToList();
 
-        var dataTable = CreateDataTable();
-        foreach (var entity in dataSqlRawProperties)
-        {
-            var row = dataTable.NewRow();
-            foreach (var prop in entity)
-            {
-                row[prop.ColumnName] = prop.DataValue.Value;
-            }
-            dataTable.Rows.Add(row);
-        }
+        var dataTable = _properties.CreateDataTable();
+        dataTable.AddData(dataSqlRawProperties);
         
         var connection = _dbContext.Database.GetDbConnection();
         if(connection.State != ConnectionState.Open)
@@ -64,18 +56,6 @@ public class BulkInsertCommandBuilder<TEntity>
     {
         _tableName = tableName;
         return this;
-    }
-
-    private DataTable CreateDataTable()
-    {
-        var dataTable = new DataTable();
-        foreach (var column in _properties)
-        {
-            var dataColumn = new DataColumn(column.ColumnName, column.Property.ClrType); 
-            dataTable.Columns.Add(dataColumn);
-        }
-
-        return dataTable;
     }
 
     private IEntityType ExtractEntityType(TEntity entity)

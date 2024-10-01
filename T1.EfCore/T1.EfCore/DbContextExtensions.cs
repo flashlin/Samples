@@ -27,4 +27,12 @@ public static class DbContextExtensions
         var entityType = dbContext.GetEntityType(entities[0]);
         return new UpsertCommandBuilder<TEntity>(dbContext, entityType, entities);
     }
+    
+    public static UpsertRangeCommandBuilder<TEntity> UpsertRange<TEntity>(this DbContext dbContext, IEnumerable<TEntity> entities)
+        where TEntity : class
+    {
+        var rows = entities.ToList(); 
+        var entityType = dbContext.GetEntityType(rows[0]);
+        return new UpsertRangeCommandBuilder<TEntity>(dbContext, entityType, rows);
+    }
 }
