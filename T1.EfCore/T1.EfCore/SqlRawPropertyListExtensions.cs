@@ -37,4 +37,12 @@ public static class SqlRawPropertyListExtensions
     {
         return string.Join(", ", rawProperties.Select(x => $"[{x.PropertyName}] {x.DataValue.GetColumnType()}"));
     }
+
+    public static string CreateAndInsertMemTempTableSql(this List<List<SqlRawProperty>> dataSqlRawPropertiesRows,
+        string insertColumns)
+    {
+        var createMemTableSql = dataSqlRawPropertiesRows[0].CreateMemTableSql();
+        var insertMemTableSql = dataSqlRawPropertiesRows.CreateInsertIntoMemTempTableSql(insertColumns);
+        return createMemTableSql + "\n" + insertMemTableSql;
+    }
 }
