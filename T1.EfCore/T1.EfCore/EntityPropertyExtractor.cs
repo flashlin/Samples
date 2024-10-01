@@ -19,7 +19,7 @@ public class EntityPropertyExtractor
         }
     }
 
-    private IEnumerable<SqlRawProperty> GetSqlRawProperties<TEntity>(List<IProperty> properties, TEntity entity)
+    public IEnumerable<SqlRawProperty> GetSqlRawProperties<TEntity>(List<IProperty> properties, TEntity entity)
     {
         return properties.Select((p, index) => p.GetSqlRawProperty(index, entity));
     }
