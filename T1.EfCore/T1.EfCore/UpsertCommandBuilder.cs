@@ -111,7 +111,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));
     }
 
-    private string CreateMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
+    private string CreateAndInsertMemTempTableSql(string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         var createMemTableSql = $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties[0])});";
         var insertMemTableSql = CreateInsertIntoMemTempTableSql(insertColumns, dataSqlRawProperties);
@@ -130,7 +130,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private string CreateMergeMultipleDataSql(string fullTableName, string insertColumns,
         List<List<SqlRawProperty>> dataSqlRawProperties)
     {
-        var createMemTempTableSql = CreateMemTempTableSql(insertColumns, dataSqlRawProperties);
+        var createMemTempTableSql = CreateAndInsertMemTempTableSql(insertColumns, dataSqlRawProperties);
         var sourceColumns = CreateSourceColumns(dataSqlRawProperties);
         var matchCondition = CreateMatchCondition();
         var mergeSql = $@"{createMemTempTableSql}
