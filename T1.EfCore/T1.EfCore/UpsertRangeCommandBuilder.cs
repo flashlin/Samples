@@ -1,4 +1,6 @@
+using System.Data;
 using System.Linq.Expressions;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -31,22 +33,35 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
 
         var properties = _entityType.GetProperties().ToList();
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
-        var dataSqlRawProperties = _entityPropertyExtractor.GetSqlRawProperties(properties, _entities[0])
+        var rowSqlRawProperties = _entityPropertyExtractor.GetSqlRawProperties(properties, _entities[0])
             .ToList();
         
-        var createTempMemTableSql = dataSqlRawProperties.CreateMemTableSql();
         
+        var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, _entities)
+            .ToList();
+        var dataTable = _entityPropertyExtractor.GetSqlColumnProperties(_entityType).CreateDataTable();
+        dataTable.AddData(dataSqlRawProperties);
+        var connection = _dbContext.Database.GetDbConnection();
+        if(connection.State != ConnectionState.Open)
+            connection.Open();
         
+        using var dbCommand = connection.CreateCommand();
+        var createTempMemTableSql = rowSqlRawProperties.CreateMemTableSql();
+        dbCommand.CommandText = createTempMemTableSql;
+        dbCommand.ExecuteNonQuery();
         
+        using var bulkCopy = new SqlBulkCopy((SqlConnection)connection, SqlBulkCopyOptions.Default, null);
+        bulkCopy.DestinationTableName = "#TempMemoryTable";
+        foreach (var column in rowSqlRawProperties)
+        {
+            bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
+        }
+        bulkCopy.WriteToServer(dataTable);
         
-        
-        
-        _dbContext.Database.ExecuteSqlRaw(createTempMemTableSql);
-
-        _bulkInsertCommandBuilder.Into("#TempMemoryTable").Execute();
-        using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
-        var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, dataSqlRawProperties);
-        _dbContext.Database.ExecuteSqlRaw(mergeSql);
+        using var dbCommand2 = connection.CreateCommand();
+        var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, rowSqlRawProperties);
+        dbCommand2.CommandText = mergeSql;
+        dbCommand2.ExecuteNonQuery();
     }
 
     public UpsertRangeCommandBuilder<TEntity> On(Expression<Func<TEntity, object>> matchExpression)

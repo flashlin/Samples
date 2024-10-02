@@ -27,6 +27,10 @@ public class UpsertTest
                 Name = "Jack",
             },
         };
+
+        _db.Customer.AddRange(existedData);
+        _db.SaveChanges();
+        
         var insertData = new List<CustomerEntity>()
         {
             new()
