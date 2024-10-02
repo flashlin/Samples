@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.Common;
 using System.Linq.Expressions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -10,13 +11,13 @@ namespace T1.EfCore;
 
 public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
 {
-    private readonly DbContext _dbContext;
-    private readonly IEntityType _entityType;
-    private Expression<Func<TEntity, object>>? _matchExpression;
     private readonly BulkInsertCommandBuilder<TEntity> _bulkInsertCommandBuilder;
+    private readonly DbContext _dbContext;
     private readonly List<TEntity> _entities;
     private readonly EntityPropertyExtractor _entityPropertyExtractor = new();
+    private readonly IEntityType _entityType;
     private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
+    private Expression<Func<TEntity, object>>? _matchExpression;
 
     public UpsertRangeCommandBuilder(DbContext dbContext, IEntityType entityType, IEnumerable<TEntity> entities)
     {
@@ -36,15 +37,13 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var rowSqlRawProperties = _entityPropertyExtractor.GetSqlRawProperties(properties, _entities[0])
             .ToList();
         
-        
         var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, _entities)
             .ToList();
         var dataTable = _entityPropertyExtractor.GetSqlColumnProperties(_entityType).CreateDataTable();
         dataTable.AddData(dataSqlRawProperties);
-        var connection = _dbContext.Database.GetDbConnection();
-        if(connection.State != ConnectionState.Open)
-            connection.Open();
         
+        var connection = OpenDbConnection();
+
         using var dbCommand = connection.CreateCommand();
         var createTempMemTableSql = rowSqlRawProperties.CreateMemTableSql();
         dbCommand.CommandText = createTempMemTableSql;
@@ -98,5 +97,13 @@ WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({sourceColumns});";
         return mergeSql;
+    }
+
+    private DbConnection OpenDbConnection()
+    {
+        var connection = _dbContext.Database.GetDbConnection();
+        if(connection.State != ConnectionState.Open)
+            connection.Open();
+        return connection;
     }
 }
