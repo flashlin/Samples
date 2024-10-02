@@ -40,7 +40,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
             .ToList();
         
         var connection = OpenDbConnection();
-        ExecuteDbCommand(connection, rowSqlRawProperties.CreateMemTableSql());
+        ExecuteDbCommand(connection, rowSqlRawProperties.CreateMemTableSql("#TempMemoryTable"));
 
         var dataTable = _entityPropertyExtractor.GetSqlColumnProperties(_entityType).CreateDataTable();
         dataTable.AddData(sqlRawRows);

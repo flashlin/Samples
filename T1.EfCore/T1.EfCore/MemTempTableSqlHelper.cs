@@ -28,9 +28,9 @@ public static class MemTempTableSqlHelper
         return string.Join(", ", rawProperties.Select(x => $"@p{x.DataValue.ArgumentIndex}"));
     }
 
-    public static string CreateMemTableSql(this List<SqlRawProperty> dataSqlRawProperties)
+    public static string CreateMemTableSql(this List<SqlRawProperty> dataSqlRawProperties, string tableName)
     {
-        return $"CREATE TABLE #TempMemoryTable ({CreateTableColumnsTypes(dataSqlRawProperties)});";
+        return $"CREATE TABLE {tableName} ({CreateTableColumnsTypes(dataSqlRawProperties)});";
     }
 
     private static string CreateTableColumnsTypes(List<SqlRawProperty> rawProperties)
@@ -41,7 +41,7 @@ public static class MemTempTableSqlHelper
     public static string CreateAndInsertMemTempTableSql(this List<List<SqlRawProperty>> dataSqlRawPropertiesRows,
         string insertColumns)
     {
-        var createMemTableSql = dataSqlRawPropertiesRows[0].CreateMemTableSql();
+        var createMemTableSql = dataSqlRawPropertiesRows[0].CreateMemTableSql("#TempMemoryTable");
         var insertMemTableSql = dataSqlRawPropertiesRows.CreateInsertIntoMemTempTableSql(insertColumns);
         return createMemTableSql + "\n" + insertMemTableSql;
     }
