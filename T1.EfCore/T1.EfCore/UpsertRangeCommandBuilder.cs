@@ -9,6 +9,14 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace T1.EfCore;
 
+public class SqlBuilder
+{
+    public string CreateColumns(string tableName, List<SqlRawProperty> rowProperties)
+    {
+        return string.Join(", ", rowProperties.Select(x => $"[{tableName}].[{x.ColumnName}]"));
+    }
+}
+
 public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
 {
     private readonly BulkInsertCommandBuilder<TEntity> _bulkInsertCommandBuilder;
@@ -18,6 +26,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
     private readonly IEntityType _entityType;
     private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
     private Expression<Func<TEntity, object>>? _matchExpression;
+    private readonly SqlBuilder _sqlBuilder = new();
 
     public UpsertRangeCommandBuilder(DbContext dbContext, IEntityType entityType, IEnumerable<TEntity> entities)
     {
@@ -85,9 +94,9 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));
     }
 
-    private string CreateMergeDataSql(string fullTableName, string insertColumns, List<SqlRawProperty> row)
+    private string CreateMergeDataSql(string fullTableName, string insertColumns, List<SqlRawProperty> rowProperties)
     {
-        var sourceColumns = row.CreateSourceColumns();
+        var sourceColumns = _sqlBuilder.CreateColumns("source", rowProperties);
         var matchCondition = CreateMatchCondition();
         var mergeSql = $@"MERGE INTO {fullTableName} AS target
 USING #TempMemoryTable AS source

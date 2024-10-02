@@ -16,6 +16,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private readonly IEntityType _entityType;
     private Expression<Func<TEntity, object>>? _matchExpression;
     private readonly EntityPropertyExtractor _entityPropertyExtractor = new (); 
+    private readonly SqlBuilder _sqlBuilder = new (); 
 
     public UpsertCommandBuilder(DbContext dbContext, IEntityType entityType, params TEntity[] entities)
     {
@@ -100,7 +101,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         var createMemTempTableSql = dataSqlRawProperties.CreateAndInsertMemTempTableSql(insertColumns);
-        var sourceColumns = CreateSourceColumns(dataSqlRawProperties);
+        var sourceColumns = _sqlBuilder.CreateColumns("source", dataSqlRawProperties[0]);
         var matchCondition = CreateMatchCondition();
         var mergeSql = $@"{createMemTempTableSql}
 MERGE INTO {fullTableName} AS target
@@ -125,11 +126,6 @@ WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({insertValues});";
         return mergeSql;
-    }
-
-    private static string CreateSourceColumns(List<List<SqlRawProperty>> dataSqlRawProperties)
-    {
-        return string.Join(", ", dataSqlRawProperties[0].Select(x => $"source.[{x.ColumnName}]"));
     }
 
     private List<IProperty> GenerateMatchCondition(Expression<Func<TEntity, object>> matchExpression)
