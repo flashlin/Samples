@@ -1,6 +1,5 @@
 using System.Data.Common;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -17,6 +16,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private Expression<Func<TEntity, object>>? _matchExpression;
     private readonly EntityPropertyExtractor _entityPropertyExtractor = new (); 
     private readonly SqlBuilder _sqlBuilder = new (); 
+    private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
 
     public UpsertCommandBuilder(DbContext dbContext, IEntityType entityType, params TEntity[] entities)
     {
@@ -82,7 +82,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
             throw new InvalidOperationException("On Method IsRequired");
         }
 
-        var matchExpressions = GenerateMatchCondition(_matchExpression)
+        var matchExpressions = _entityTypeMatchConditionGenerator.GenerateMatchCondition(_entityType, _matchExpression)
             .Select(x => x.Name)
             .ToList();
         return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));
@@ -114,10 +114,10 @@ WHEN NOT MATCHED THEN
     }
 
     private string CreateMergeSingleDataSql(string fullTableName, string insertColumns,
-        List<SqlRawProperty> dataSqlRawProperties)
+        List<SqlRawProperty> rowProperties)
     {
         var matchCondition = CreateMatchCondition();
-        var insertValues = string.Join(", ", dataSqlRawProperties.Select(x=> $"@p{x.DataValue.ArgumentIndex}"));
+        var insertValues = string.Join(", ", rowProperties.Select(x=> $"@p{x.DataValue.ArgumentIndex}"));
         var mergeSql = $@"
 MERGE INTO {fullTableName} AS target
 USING (SELECT {insertValues}) AS source({insertColumns}) 
@@ -126,47 +126,5 @@ WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({insertValues});";
         return mergeSql;
-    }
-
-    private List<IProperty> GenerateMatchCondition(Expression<Func<TEntity, object>> matchExpression)
-    {
-        if (matchExpression.Body is MemberExpression memberExpression)
-        {
-            if (typeof(TEntity) != memberExpression.Expression?.Type || memberExpression.Member is not PropertyInfo)
-                throw new InvalidOperationException("MatchColumnsHaveToBePropertiesOfTheTEntityClass");
-            var property = _entityType.FindProperty(memberExpression.Member.Name);
-            if (property == null)
-                throw new InvalidOperationException("UnknownProperty memberExpression.Member.Name");
-            return [property];
-        }
-
-        if (matchExpression.Body is UnaryExpression unaryExpression)
-        {
-            if (unaryExpression.Operand is not MemberExpression memberExp || memberExp.Member is not PropertyInfo ||
-                typeof(TEntity) != memberExp.Expression?.Type)
-                throw new InvalidOperationException("MatchColumnsHaveToBePropertiesOfTheTEntityClass");
-            var property = _entityType.FindProperty(memberExp.Member.Name);
-            if (property == null)
-                throw new InvalidOperationException("UnknownProperty, memberExp.Member.Name");
-            return [property];
-        }
-        
-        if (matchExpression.Body is NewExpression newExpression)
-        {
-            var joinColumns = new List<IProperty>();
-            foreach (var expression in newExpression.Arguments)
-            {
-                var arg = (MemberExpression)expression;
-                if (arg is not { Member: PropertyInfo } || typeof(TEntity) != arg.Expression?.Type)
-                    throw new InvalidOperationException("MatchColumns Have To Be Properties Of The EntityClass");
-                var property = _entityType.FindProperty(arg.Member.Name);
-                if (property == null)
-                    throw new InvalidOperationException($"UnknownProperty {arg.Member.Name}");
-                joinColumns.Add(property);
-            }
-            return joinColumns;
-        }
-
-        throw new ArgumentException("Unsupported where expression");
     }
 }
