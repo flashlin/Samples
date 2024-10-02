@@ -5,7 +5,7 @@ namespace T1.EfCore;
 
 public class EntityPropertyExtractor
 {
-    public IEnumerable<List<SqlRawProperty>> CreateDataSqlRawProperties<TEntity>(List<IProperty> properties, IEnumerable<TEntity> entities)
+    public IEnumerable<List<SqlRawProperty>> CreateSqlRawData<TEntity>(List<IProperty> properties, IEnumerable<TEntity> entities)
     {
         var startArgumentIndex = 0;
         foreach (var entity in entities)

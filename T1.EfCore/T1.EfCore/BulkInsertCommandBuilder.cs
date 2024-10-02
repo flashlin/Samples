@@ -34,7 +34,7 @@ public class BulkInsertCommandBuilder<TEntity>
             _tableName = sqlGenerator.GetFullTableName(entityType);
         }
         var properties = _properties.Select(x => x.Property).ToList();
-        var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, entityList)
+        var dataSqlRawProperties = _entityPropertyExtractor.CreateSqlRawData(properties, entityList)
             .ToList();
 
         var dataTable = _properties.CreateDataTable();

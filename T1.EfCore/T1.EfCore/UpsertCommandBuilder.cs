@@ -31,14 +31,14 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var fullTableName = sqlGenerator.GetFullTableName(_entityType);
 
         var properties = _entityType.GetProperties().ToList();
-        var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, _entityList)
+        var sqlRawData = _entityPropertyExtractor.CreateSqlRawData(properties, _entityList)
             .ToList();
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         
-        var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, dataSqlRawProperties);
+        var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, sqlRawData);
 
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
-        var values = CreateDataDbParameters(dbCommand, dataSqlRawProperties)
+        var values = CreateDataDbParameters(dbCommand, sqlRawData)
             .ToList();
         _dbContext.Database.ExecuteSqlRaw(mergeSql, values);
     }

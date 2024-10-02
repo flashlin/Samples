@@ -45,7 +45,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var rowSqlRawProperties = _entityPropertyExtractor.GetSqlRawProperties(properties, _entities[0])
             .ToList();
-        var sqlRawRows = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, _entities)
+        var sqlRawRows = _entityPropertyExtractor.CreateSqlRawData(properties, _entities)
             .ToList();
         
         var connection = OpenDbConnection();
