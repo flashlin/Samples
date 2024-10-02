@@ -53,6 +53,10 @@ public class UpsertTest
             .On(x=>x.Id)
             .Execute();
         
+        _db.UpsertRange(insertData)
+            .On(x=>x.Id)
+            .Execute();
+        
         var customers = _db.Customer.ToArray();
         customers.Should().BeEquivalentTo([
             new CustomerEntity

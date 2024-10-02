@@ -60,7 +60,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         
         using var dbCommand2 = connection.CreateCommand();
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, rowSqlRawProperties);
-        dbCommand2.CommandText = mergeSql;
+        dbCommand2.CommandText = mergeSql + "; DROP TABLE #TempMemoryTable;";
         dbCommand2.ExecuteNonQuery();
     }
 
