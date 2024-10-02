@@ -36,37 +36,36 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var rowSqlRawProperties = _entityPropertyExtractor.GetSqlRawProperties(properties, _entities[0])
             .ToList();
-        
-        var dataSqlRawProperties = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, _entities)
+        var sqlRawRows = _entityPropertyExtractor.CreateDataSqlRawProperties(properties, _entities)
             .ToList();
-        var dataTable = _entityPropertyExtractor.GetSqlColumnProperties(_entityType).CreateDataTable();
-        dataTable.AddData(dataSqlRawProperties);
         
         var connection = OpenDbConnection();
+        ExecuteDbCommand(connection, rowSqlRawProperties.CreateMemTableSql());
 
-        using var dbCommand = connection.CreateCommand();
-        var createTempMemTableSql = rowSqlRawProperties.CreateMemTableSql();
-        dbCommand.CommandText = createTempMemTableSql;
-        dbCommand.ExecuteNonQuery();
-        
-        using var bulkCopy = new SqlBulkCopy((SqlConnection)connection, SqlBulkCopyOptions.Default, null);
-        bulkCopy.DestinationTableName = "#TempMemoryTable";
-        foreach (var column in rowSqlRawProperties)
-        {
-            bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
-        }
-        bulkCopy.WriteToServer(dataTable);
-        
-        using var dbCommand2 = connection.CreateCommand();
+        var dataTable = _entityPropertyExtractor.GetSqlColumnProperties(_entityType).CreateDataTable();
+        dataTable.AddData(sqlRawRows);
+        BulkWriteTable(connection, rowSqlRawProperties, dataTable, "#TempMemoryTable");
+
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, rowSqlRawProperties);
-        dbCommand2.CommandText = mergeSql + "; DROP TABLE #TempMemoryTable;";
-        dbCommand2.ExecuteNonQuery();
+        var sql = mergeSql + "; DROP TABLE #TempMemoryTable;";
+        ExecuteDbCommand(connection, sql);
     }
 
     public UpsertRangeCommandBuilder<TEntity> On(Expression<Func<TEntity, object>> matchExpression)
     {
         _matchExpression = matchExpression;
         return this;
+    }
+
+    private static void BulkWriteTable(DbConnection connection, List<SqlRawProperty> rowSqlRawProperties, DataTable dataTable, string targetTable)
+    {
+        using var bulkCopy = new SqlBulkCopy((SqlConnection)connection, SqlBulkCopyOptions.Default, null);
+        bulkCopy.DestinationTableName = targetTable;
+        foreach (var column in rowSqlRawProperties)
+        {
+            bulkCopy.ColumnMappings.Add(column.ColumnName, column.ColumnName);
+        }
+        bulkCopy.WriteToServer(dataTable);
     }
 
     private static string CreateInsertColumns(ISqlGenerationHelper sqlGenerator, List<IProperty> properties)
@@ -97,6 +96,13 @@ WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({sourceColumns});";
         return mergeSql;
+    }
+
+    private static void ExecuteDbCommand(DbConnection connection, string sql)
+    {
+        using var dbCommand = connection.CreateCommand();
+        dbCommand.CommandText = sql;
+        dbCommand.ExecuteNonQuery();
     }
 
     private DbConnection OpenDbConnection()
