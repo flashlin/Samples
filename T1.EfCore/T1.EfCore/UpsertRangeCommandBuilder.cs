@@ -37,9 +37,9 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var rowSqlRawProperties = _sqlRawPropertyBuilder.GetSqlRawProperties(properties, _entities[0])
             .ToList();
         
-        var connection = OpenDbConnection();
+        var connection = _dbContext.OpenDbConnection();
         var memTempTableName = "#TempMemoryTable";
-        ExecuteDbCommand(connection, rowSqlRawProperties.CreateMemTableSql(memTempTableName));
+        connection.ExecuteDbCommand(rowSqlRawProperties.CreateMemTableSql(memTempTableName));
 
         var dataTable = CreateDataTable(properties);
         BulkWriteTable(connection, rowSqlRawProperties, dataTable, memTempTableName);
@@ -47,7 +47,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, rowSqlRawProperties);
         var sql = mergeSql + $"; DROP TABLE {memTempTableName};";
-        ExecuteDbCommand(connection, sql);
+        connection.ExecuteDbCommand(sql);
     }
 
     private DataTable CreateDataTable(List<IProperty> properties)
@@ -104,20 +104,5 @@ WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({sourceColumns});";
         return mergeSql;
-    }
-
-    private static void ExecuteDbCommand(DbConnection connection, string sql)
-    {
-        using var dbCommand = connection.CreateCommand();
-        dbCommand.CommandText = sql;
-        dbCommand.ExecuteNonQuery();
-    }
-
-    private DbConnection OpenDbConnection()
-    {
-        var connection = _dbContext.Database.GetDbConnection();
-        if(connection.State != ConnectionState.Open)
-            connection.Open();
-        return connection;
     }
 }
