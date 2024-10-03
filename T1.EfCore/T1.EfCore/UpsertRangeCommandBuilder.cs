@@ -22,7 +22,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
     private readonly BulkInsertCommandBuilder<TEntity> _bulkInsertCommandBuilder;
     private readonly DbContext _dbContext;
     private readonly List<TEntity> _entities;
-    private readonly EntityPropertyExtractor _entityPropertyExtractor = new();
+    private readonly SqlRawPropertyExtractor _sqlRawPropertyExtractor = new();
     private readonly IEntityType _entityType;
     private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
     private Expression<Func<TEntity, object>>? _matchExpression;
@@ -43,15 +43,15 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
 
         var properties = _entityType.GetProperties().ToList();
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
-        var rowSqlRawProperties = _entityPropertyExtractor.GetSqlRawProperties(properties, _entities[0])
+        var rowSqlRawProperties = _sqlRawPropertyExtractor.GetSqlRawProperties(properties, _entities[0])
             .ToList();
-        var sqlRawRows = _entityPropertyExtractor.CreateSqlRawData(properties, _entities)
+        var sqlRawRows = _sqlRawPropertyExtractor.CreateSqlRawData(properties, _entities)
             .ToList();
         
         var connection = OpenDbConnection();
         ExecuteDbCommand(connection, rowSqlRawProperties.CreateMemTableSql("#TempMemoryTable"));
 
-        var dataTable = _entityPropertyExtractor.GetSqlColumnProperties(_entityType).CreateDataTable();
+        var dataTable = _sqlRawPropertyExtractor.GetSqlColumnProperties(_entityType).CreateDataTable();
         dataTable.AddData(sqlRawRows);
         BulkWriteTable(connection, rowSqlRawProperties, dataTable, "#TempMemoryTable");
 

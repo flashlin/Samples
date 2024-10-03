@@ -11,10 +11,10 @@ namespace T1.EfCore;
 public class UpsertCommandBuilder<TEntity> where TEntity : class
 {
     private readonly DbContext _dbContext;
-    private readonly TEntity[] _entityList;
+    private readonly TEntity[] _entityArray;
     private readonly IEntityType _entityType;
     private Expression<Func<TEntity, object>>? _matchExpression;
-    private readonly EntityPropertyExtractor _entityPropertyExtractor = new (); 
+    private readonly SqlRawPropertyExtractor _sqlRawPropertyExtractor = new (); 
     private readonly SqlBuilder _sqlBuilder = new (); 
     private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
 
@@ -22,7 +22,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     {
         _dbContext = dbContext;
         _entityType = entityType;
-        _entityList = entities;
+        _entityArray = entities;
     }
 
     public void Execute()
@@ -31,7 +31,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var fullTableName = sqlGenerator.GetFullTableName(_entityType);
 
         var properties = _entityType.GetProperties().ToList();
-        var sqlRawData = _entityPropertyExtractor.CreateSqlRawData(properties, _entityList)
+        var sqlRawData = _sqlRawPropertyExtractor.CreateSqlRawData(properties, _entityArray)
             .ToList();
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         
