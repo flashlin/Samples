@@ -45,20 +45,26 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var rowSqlRawProperties = _sqlRawPropertyBuilder.GetSqlRawProperties(properties, _entities[0])
             .ToList();
-        var sqlRawRows = _sqlRawPropertyBuilder.CreateSqlRawData(properties, _entities)
-            .ToList();
         
         var connection = OpenDbConnection();
         var memTempTableName = "#TempMemoryTable";
         ExecuteDbCommand(connection, rowSqlRawProperties.CreateMemTableSql(memTempTableName));
 
-        var dataTable = _sqlRawPropertyBuilder.GetSqlColumnProperties(_entityType).CreateDataTable();
-        dataTable.AddData(sqlRawRows);
+        var dataTable = CreateDataTable(properties);
         BulkWriteTable(connection, rowSqlRawProperties, dataTable, memTempTableName);
 
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, rowSqlRawProperties);
         var sql = mergeSql + $"; DROP TABLE {memTempTableName};";
         ExecuteDbCommand(connection, sql);
+    }
+
+    private DataTable CreateDataTable(List<IProperty> properties)
+    {
+        var sqlRawRows = _sqlRawPropertyBuilder.CreateSqlRawData(properties, _entities)
+            .ToList();
+        var dataTable = _sqlRawPropertyBuilder.GetSqlColumnProperties(_entityType).CreateDataTable();
+        dataTable.AddData(sqlRawRows);
+        return dataTable;
     }
 
     public UpsertRangeCommandBuilder<TEntity> On(Expression<Func<TEntity, object>> matchExpression)
