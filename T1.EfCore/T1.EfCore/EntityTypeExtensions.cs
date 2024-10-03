@@ -6,7 +6,7 @@ namespace T1.EfCore;
 
 public static class EntityTypeExtensions
 {
-    public static List<IProperty> GenerateMatchCondition<TEntity>(this IEntityType entityType,
+    public static List<IProperty> GetMatchConditionProperties<TEntity>(this IEntityType entityType,
         Expression<Func<TEntity, object>> matchExpression)
         where TEntity : class
     {

@@ -77,7 +77,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
             throw new InvalidOperationException("On Method IsRequired");
         }
 
-        var matchExpressions = _entityType.GenerateMatchCondition(_matchExpression)
+        var matchExpressions = _entityType.GetMatchConditionProperties(_matchExpression)
             .Select(x => x.Name)
             .ToList();
         return string.Join(" and ", matchExpressions.Select(x => $"target.[{x}] = source.[{x}]"));
