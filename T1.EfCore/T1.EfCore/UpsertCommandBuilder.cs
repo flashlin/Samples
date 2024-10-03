@@ -13,10 +13,10 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private readonly DbContext _dbContext;
     private readonly TEntity[] _entityArray;
     private readonly IEntityType _entityType;
-    private Expression<Func<TEntity, object>>? _matchExpression;
-    private readonly SqlRawPropertyBuilder _sqlRawPropertyBuilder = new (); 
-    private readonly SqlBuilder _sqlBuilder = new (); 
     private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
+    private readonly SqlBuilder _sqlBuilder = new ();
+    private readonly SqlRawPropertyBuilder _sqlRawPropertyBuilder = new ();
+    private Expression<Func<TEntity, object>>? _matchExpression;
 
     public UpsertCommandBuilder(DbContext dbContext, IEntityType entityType, params TEntity[] entities)
     {
