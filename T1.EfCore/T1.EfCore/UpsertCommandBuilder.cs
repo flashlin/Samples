@@ -38,7 +38,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, sqlRawData);
 
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
-        var values = CreateDataDbParameters(dbCommand, sqlRawData)
+        var values = CreateDataDbParameters(_dbContext, dbCommand, sqlRawData)
             .ToList();
         _dbContext.Database.ExecuteSqlRaw(mergeSql, values);
     }
@@ -49,11 +49,12 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         return this;
     }
 
-    private IEnumerable<DbParameter> CreateDataDbParameters(DbCommand dbCommand, List<List<SqlRawProperty>> dataSqlRawProperties)
+    private IEnumerable<DbParameter> CreateDataDbParameters(DbContext dbContext, DbCommand dbCommand,
+        List<List<SqlRawProperty>> dataSqlRawProperties)
     {
         foreach (var entitySqlRawProperties in dataSqlRawProperties)
         {
-            var dbParameters = CreateDbParameters(dbCommand, entitySqlRawProperties);
+            var dbParameters = CreateDbParameters(dbContext, dbCommand, entitySqlRawProperties);
             foreach (var dbParameter in dbParameters)
             {
                 yield return dbParameter;
@@ -61,11 +62,12 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         }
     }
 
-    private List<DbParameter> CreateDbParameters(DbCommand dbCommand, List<SqlRawProperty> entitySqlRawProperties)
+    private List<DbParameter> CreateDbParameters(DbContext dbContext, DbCommand dbCommand,
+        List<SqlRawProperty> entitySqlRawProperties)
     {
         return entitySqlRawProperties.Select(x =>
         {
-            var dbCommandArgumentBuilder = new DbCommandArgumentBuilder(_dbContext, dbCommand);
+            var dbCommandArgumentBuilder = new DbCommandArgumentBuilder(dbContext, dbCommand);
             return dbCommandArgumentBuilder.CreateDbParameter(x.DataValue);
         }).ToList();
     }
