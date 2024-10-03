@@ -42,7 +42,6 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var fullTableName = sqlGenerator.GetFullTableName(_entityType);
 
         var properties = _entityType.GetProperties().ToList();
-        var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var rowSqlRawProperties = _sqlRawPropertyBuilder.GetSqlRawProperties(properties, _entities[0])
             .ToList();
         
@@ -53,6 +52,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var dataTable = CreateDataTable(properties);
         BulkWriteTable(connection, rowSqlRawProperties, dataTable, memTempTableName);
 
+        var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, rowSqlRawProperties);
         var sql = mergeSql + $"; DROP TABLE {memTempTableName};";
         ExecuteDbCommand(connection, sql);
