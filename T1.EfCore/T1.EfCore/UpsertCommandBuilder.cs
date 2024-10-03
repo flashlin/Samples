@@ -13,7 +13,6 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private readonly DbContext _dbContext;
     private readonly TEntity[] _entityArray;
     private readonly IEntityType _entityType;
-    private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
     private readonly SqlBuilder _sqlBuilder = new ();
     private readonly SqlRawPropertyBuilder _sqlRawPropertyBuilder = new ();
     private Expression<Func<TEntity, object>>? _matchExpression;
@@ -78,7 +77,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
             throw new InvalidOperationException("On Method IsRequired");
         }
 
-        var matchExpressions = _entityTypeMatchConditionGenerator.GenerateMatchCondition(_entityType, _matchExpression)
+        var matchExpressions = _entityType.GenerateMatchCondition(_matchExpression)
             .Select(x => x.Name)
             .ToList();
         return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));

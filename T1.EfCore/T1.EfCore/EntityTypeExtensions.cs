@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace T1.EfCore;
 
-public class EntityTypeMatchConditionGenerator<TEntity> 
-    where TEntity : class
+public static class EntityTypeExtensions
 {
-    public List<IProperty> GenerateMatchCondition(IEntityType entityType,
+    public static List<IProperty> GenerateMatchCondition<TEntity>(this IEntityType entityType,
         Expression<Func<TEntity, object>> matchExpression)
+        where TEntity : class
     {
         if (matchExpression.Body is MemberExpression memberExpression)
         {

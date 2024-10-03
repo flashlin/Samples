@@ -15,7 +15,6 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
     private readonly List<TEntity> _entities;
     private readonly SqlRawPropertyBuilder _sqlRawPropertyBuilder = new();
     private readonly IEntityType _entityType;
-    private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
     private Expression<Func<TEntity, object>>? _matchExpression;
     private readonly SqlBuilder _sqlBuilder = new();
 
@@ -85,7 +84,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         {
             throw new InvalidOperationException("On Method IsRequired");
         }
-        var matchExpressions = _entityTypeMatchConditionGenerator.GenerateMatchCondition(_entityType, _matchExpression)
+        var matchExpressions = _entityType.GenerateMatchCondition(_matchExpression)
             .Select(x => x.Name)
             .ToList();
         return string.Join(" and ", matchExpressions.Select(x => $"target.[{x}] = source.[{x}]"));
