@@ -80,7 +80,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var matchExpressions = _entityType.GenerateMatchCondition(_matchExpression)
             .Select(x => x.Name)
             .ToList();
-        return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));
+        return string.Join(" and ", matchExpressions.Select(x => $"target.[{x}] = source.[{x}]"));
     }
 
     private string CreateMergeDataSql(string fullTableName, string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
