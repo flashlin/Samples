@@ -14,7 +14,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     private readonly TEntity[] _entityArray;
     private readonly IEntityType _entityType;
     private Expression<Func<TEntity, object>>? _matchExpression;
-    private readonly SqlRawPropertyExtractor _sqlRawPropertyExtractor = new (); 
+    private readonly SqlRawPropertyBuilder _sqlRawPropertyBuilder = new (); 
     private readonly SqlBuilder _sqlBuilder = new (); 
     private readonly EntityTypeMatchConditionGenerator<TEntity> _entityTypeMatchConditionGenerator = new();
 
@@ -31,7 +31,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var fullTableName = sqlGenerator.GetFullTableName(_entityType);
 
         var rowProperties = _entityType.GetProperties().ToList();
-        var sqlRawData = _sqlRawPropertyExtractor.CreateSqlRawData(rowProperties, _entityArray)
+        var sqlRawData = _sqlRawPropertyBuilder.CreateSqlRawData(rowProperties, _entityArray)
             .ToList();
         var insertColumns = sqlGenerator.CreateInsertColumnsSql(rowProperties);
         

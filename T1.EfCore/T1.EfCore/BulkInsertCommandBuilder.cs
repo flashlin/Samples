@@ -13,7 +13,7 @@ public class BulkInsertCommandBuilder<TEntity>
 {
     private readonly DbContext _dbContext;
     private readonly IEnumerable<TEntity> _entities;
-    private readonly SqlRawPropertyExtractor _sqlRawPropertyExtractor = new ();
+    private readonly SqlRawPropertyBuilder _sqlRawPropertyBuilder = new ();
     private IEntityType? _entityType;
     private List<SqlColumnProperty> _properties = [];
     private string _tableName = string.Empty;
@@ -34,7 +34,7 @@ public class BulkInsertCommandBuilder<TEntity>
             _tableName = sqlGenerator.GetFullTableName(entityType);
         }
         var rowProperties = _properties.Select(x => x.Property).ToList();
-        var dataSqlRawProperties = _sqlRawPropertyExtractor.CreateSqlRawData(rowProperties, entityList)
+        var dataSqlRawProperties = _sqlRawPropertyBuilder.CreateSqlRawData(rowProperties, entityList)
             .ToList();
 
         var dataTable = _properties.CreateDataTable();

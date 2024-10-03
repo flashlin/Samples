@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace T1.EfCore;
 
-public class SqlRawPropertyExtractor
+public class SqlRawPropertyBuilder
 {
     public IEnumerable<List<SqlRawProperty>> CreateSqlRawData<TEntity>(List<IProperty> rowProperties, IEnumerable<TEntity> entities)
     {
@@ -35,4 +35,5 @@ public class SqlRawPropertyExtractor
                 AllowInsert = x.IsAllowInsert()
             }).ToList();
     }
+    
 }
