@@ -49,14 +49,15 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
             .ToList();
         
         var connection = OpenDbConnection();
-        ExecuteDbCommand(connection, rowSqlRawProperties.CreateMemTableSql("#TempMemoryTable"));
+        var memTempTableName = "#TempMemoryTable";
+        ExecuteDbCommand(connection, rowSqlRawProperties.CreateMemTableSql(memTempTableName));
 
         var dataTable = _sqlRawPropertyBuilder.GetSqlColumnProperties(_entityType).CreateDataTable();
         dataTable.AddData(sqlRawRows);
-        BulkWriteTable(connection, rowSqlRawProperties, dataTable, "#TempMemoryTable");
+        BulkWriteTable(connection, rowSqlRawProperties, dataTable, memTempTableName);
 
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, rowSqlRawProperties);
-        var sql = mergeSql + "; DROP TABLE #TempMemoryTable;";
+        var sql = mergeSql + $"; DROP TABLE {memTempTableName};";
         ExecuteDbCommand(connection, sql);
     }
 
