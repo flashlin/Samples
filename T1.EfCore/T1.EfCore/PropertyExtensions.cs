@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace T1.EfCore;
 
-public static class EntityPropertiesExtensions
+public static class PropertyExtensions
 {
     public static SqlRawProperty GetSqlRawProperty<T>(this IProperty property, int argumentIndex, T entity)
     {
