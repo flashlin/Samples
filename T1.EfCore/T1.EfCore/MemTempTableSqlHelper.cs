@@ -10,17 +10,17 @@ public static class MemTempTableSqlHelper
         var sql = new StringBuilder();
         foreach (var entityRawProperties in dataSqlRawPropertiesRows)
         {
-            var insertRowIntoMemTempTableSql = entityRawProperties.CreateInsertRowIntoMemTempTableSql(insertColumns);
+            var insertRowIntoMemTempTableSql = entityRawProperties.CreateInsertRowIntoMemTempTableSql(insertColumns, "#TempMemoryTable");
             sql.AppendLine(insertRowIntoMemTempTableSql);
         }
 
         return sql.ToString();
     }
 
-    public static string CreateInsertRowIntoMemTempTableSql(this List<SqlRawProperty> rawProperties, string insertColumns)
+    public static string CreateInsertRowIntoMemTempTableSql(this List<SqlRawProperty> rawProperties, string insertColumns, string tableName)
     {
         var insertValues = rawProperties.CreateInsertValuesSql();
-        return $@"INSERT INTO #TempMemoryTable ({insertColumns}) VALUES ({insertValues});";
+        return $@"INSERT INTO {tableName} ({insertColumns}) VALUES ({insertValues});";
     }
 
     public static string CreateInsertValuesSql(this List<SqlRawProperty> rawProperties)
