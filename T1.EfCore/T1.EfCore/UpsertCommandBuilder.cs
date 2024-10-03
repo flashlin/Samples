@@ -70,17 +70,13 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         }).ToList();
     }
 
-    private string CreateMatchCondition()
+    private string CreateMatchConditionSql()
     {
         if (_matchExpression == null)
         {
             throw new InvalidOperationException("On Method IsRequired");
         }
-
-        var matchExpressions = _entityType.GetMatchConditionProperties(_matchExpression)
-            .Select(x => x.Name)
-            .ToList();
-        return string.Join(" and ", matchExpressions.Select(x => $"target.[{x}] = source.[{x}]"));
+        return _sqlBuilder.CreateMatchConditionSql(_entityType, _matchExpression);
     }
 
     private string CreateMergeDataSql(string fullTableName, string insertColumns, List<List<SqlRawProperty>> dataSqlRawProperties)
@@ -97,7 +93,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
     {
         var createMemTempTableSql = dataSqlRawProperties.CreateAndInsertMemTempTableSql(insertColumns);
         var sourceColumns = _sqlBuilder.CreateColumns("source", dataSqlRawProperties[0]);
-        var matchCondition = CreateMatchCondition();
+        var matchCondition = CreateMatchConditionSql();
         var mergeSql = $@"{createMemTempTableSql}
 MERGE INTO {fullTableName} AS target
 USING #TempMemoryTable AS source
@@ -111,7 +107,7 @@ WHEN NOT MATCHED THEN
     private string CreateMergeSingleDataSql(string fullTableName, string insertColumns,
         List<SqlRawProperty> rowProperties)
     {
-        var matchCondition = CreateMatchCondition();
+        var matchCondition = CreateMatchConditionSql();
         var insertValues = string.Join(", ", rowProperties.Select(x=> $"@p{x.DataValue.ArgumentIndex}"));
         var mergeSql = $@"
 MERGE INTO {fullTableName} AS target
