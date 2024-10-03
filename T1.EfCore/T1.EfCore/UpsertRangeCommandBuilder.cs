@@ -11,7 +11,6 @@ namespace T1.EfCore;
 
 public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
 {
-    private readonly BulkInsertCommandBuilder<TEntity> _bulkInsertCommandBuilder;
     private readonly DbContext _dbContext;
     private readonly List<TEntity> _entities;
     private readonly SqlRawPropertyBuilder _sqlRawPropertyBuilder = new();
@@ -25,7 +24,6 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         _dbContext = dbContext;
         _entityType = entityType;
         _entities = entities.ToList();
-        _bulkInsertCommandBuilder = new BulkInsertCommandBuilder<TEntity>(dbContext, _entities);
     }
 
     public void Execute()
@@ -90,7 +88,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         var matchExpressions = _entityTypeMatchConditionGenerator.GenerateMatchCondition(_entityType, _matchExpression)
             .Select(x => x.Name)
             .ToList();
-        return string.Join(" and ", matchExpressions.Select(x => $"target.{x} = source.{x}"));
+        return string.Join(" and ", matchExpressions.Select(x => $"target.[{x}] = source.[{x}]"));
     }
 
     private string CreateMergeDataSql(string fullTableName, string insertColumns, List<SqlRawProperty> rowProperties)
