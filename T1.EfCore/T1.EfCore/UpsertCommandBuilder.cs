@@ -34,6 +34,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var sqlRawData = _sqlRawPropertyBuilder.CreateSqlRawData(rowProperties, _entityArray)
             .ToList();
         var insertColumns = sqlGenerator.CreateInsertColumnsSql(rowProperties);
+        
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, sqlRawData);
 
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
