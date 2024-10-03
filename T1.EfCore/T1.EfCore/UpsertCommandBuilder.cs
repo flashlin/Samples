@@ -30,10 +30,10 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         var sqlGenerator = _dbContext.GetService<ISqlGenerationHelper>();
         var fullTableName = sqlGenerator.GetFullTableName(_entityType);
 
-        var properties = _entityType.GetProperties().ToList();
-        var sqlRawData = _sqlRawPropertyExtractor.CreateSqlRawData(properties, _entityArray)
+        var rowProperties = _entityType.GetProperties().ToList();
+        var sqlRawData = _sqlRawPropertyExtractor.CreateSqlRawData(rowProperties, _entityArray)
             .ToList();
-        var insertColumns = CreateInsertColumns(sqlGenerator, properties);
+        var insertColumns = sqlGenerator.CreateInsertColumnsSql(rowProperties);
         
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, sqlRawData);
 
@@ -68,11 +68,6 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
             var dbCommandArgumentBuilder = new DbCommandArgumentBuilder(_dbContext, dbCommand);
             return dbCommandArgumentBuilder.CreateDbParameter(x.DataValue);
         }).ToList();
-    }
-
-    private static string CreateInsertColumns(ISqlGenerationHelper sqlGenerator, List<IProperty> properties)
-    {
-        return string.Join(", ", properties.Select(p => sqlGenerator.DelimitIdentifier(p.GetColumnName())));
     }
 
     private string CreateMatchCondition()
