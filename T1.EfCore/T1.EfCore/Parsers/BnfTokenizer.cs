@@ -11,7 +11,7 @@ public class BnfTokenizer
         _matchSpanHandlers = 
         [
             Digit().Plus(),
-            new MatchSpanStringHandler("::="),
+            String("::="),
         ];
     }
 
@@ -33,14 +33,10 @@ public class BnfTokenizer
         }
         return results;
     }
-    
-    private int SkipWhitespace(ReadOnlySpan<char> input, int index)
+
+    private MatchSpanDigitHandler Digit()
     {
-        while (index < input.Length && char.IsWhiteSpace(input[index]))
-        {
-            index++;
-        }
-        return index;
+        return new MatchSpanDigitHandler();
     }
 
     private MatchSpan MatchRules(ReadOnlySpan<char> input, int index)
@@ -56,8 +52,17 @@ public class BnfTokenizer
         return MatchSpan.Empty;
     }
 
-    private MatchSpanDigitHandler Digit()
+    private int SkipWhitespace(ReadOnlySpan<char> input, int index)
     {
-        return new MatchSpanDigitHandler();
+        while (index < input.Length && char.IsWhiteSpace(input[index]))
+        {
+            index++;
+        }
+        return index;
+    }
+
+    private MatchSpanStringHandler String(string pattern)
+    {
+        return new MatchSpanStringHandler(pattern);
     }
 }
