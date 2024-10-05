@@ -47,6 +47,21 @@ public class BnfTokenizerTest
         ]);
     }
     
+    
+    [Test]
+    public void _String()
+    {
+        var matches = WhenExtractMatches("_A_1");
+        matches.Should().BeEquivalentTo([
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0, 
+                Value = "_A_1"
+            }
+        ]);
+    }
+    
     [Test]
     public void String()
     {

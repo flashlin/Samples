@@ -1,6 +1,6 @@
 namespace T1.EfCore.Parsers.MatchSpanHandlerModule;
 
-public class MatchSpanStringHandler : IMatchSpanHandler 
+public class MatchSpanStringHandler : IMatchSpanHandler
 {
     private readonly string _pattern;
     private readonly MatchSpanCharHandler[] _handlers;

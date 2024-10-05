@@ -11,4 +11,14 @@ public static class MatchSpanHandlerExtensions
     {
         return new MatchSpanConcatHandler(handler, nextHandler);
     }
+    
+    public static MatchSpanOrHandler Or(this IMatchSpanHandler handler, IMatchSpanHandler nextHandler)
+    {
+        return new MatchSpanOrHandler(handler, nextHandler);
+    }
+    
+    public static MatchSpanMoreHandler More(this IMatchSpanHandler handler)
+    {
+        return new MatchSpanMoreHandler(handler);
+    }
 }
