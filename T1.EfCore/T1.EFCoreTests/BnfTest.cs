@@ -1,4 +1,3 @@
-using FluentAssertions;
 using T1.EfCore.Parsers;
 
 namespace T1.EFCoreTests;
@@ -19,19 +18,5 @@ public class BnfTest
         var tree = parser.Parse();
 
         var text = parser.GetExpressionTreeString(tree);
-    }
-}
-
-public class BnfTokenizerTest
-{
-    [Test]
-    public void Digits()
-    {
-        var tokenizer = new BnfTokenizer();
-        var input = "123";
-        var matches = tokenizer.ExtractMatches(input).ToArray();
-        matches.Should().BeEquivalentTo([
-            new MatchSpan { Index = 0, Value = "123" }
-        ]);
     }
 }

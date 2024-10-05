@@ -12,6 +12,7 @@ public class BnfTokenizer
             MatchDigits
         ]; 
     }
+    
 
     public List<MatchSpan> ExtractMatches(string input)
     {
