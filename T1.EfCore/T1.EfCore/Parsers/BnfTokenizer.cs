@@ -1,18 +1,19 @@
+using T1.EfCore.Parsers.MatchSpanHandlerModule;
+
 namespace T1.EfCore.Parsers;
 
 public class BnfTokenizer
 {
-    delegate MatchSpan MatchSpanFunc(ReadOnlySpan<char> input, int index);
-    private readonly MatchSpanFunc[] _matchSpanFuncs;
+    private readonly IMatchSpanHandler[] _matchSpanHandlers;
 
     public BnfTokenizer()
     {
-        _matchSpanFuncs =
+        _matchSpanHandlers = 
         [
-            MatchDigits
-        ]; 
+            Digit().Plus(),
+            new MatchSpanStringHandler("::="),
+        ];
     }
-    
 
     public List<MatchSpan> ExtractMatches(string input)
     {
@@ -22,15 +23,7 @@ public class BnfTokenizer
         while (index < inputSpan.Length)
         {
             index = SkipWhitespace(inputSpan, index);
-            var match = MatchSpan.Empty;
-            foreach (var matchSpanFunc in _matchSpanFuncs)
-            {
-                match = matchSpanFunc(inputSpan, index);
-                if (match.Success)
-                {
-                    break;
-                }
-            }
+            var match = MatchRules(inputSpan, index);
             if (!match.Success)
             {
                 throw new Exception($"Unexpected text '{inputSpan.Slice(index).ToString()}' at position {index}");
@@ -50,21 +43,21 @@ public class BnfTokenizer
         return index;
     }
 
-    private MatchSpan MatchDigits(ReadOnlySpan<char> input, int index)
+    private MatchSpan MatchRules(ReadOnlySpan<char> input, int index)
     {
-        if (!char.IsDigit(input[index]))
+        foreach (var matchSpanHandler in _matchSpanHandlers)
         {
-            return MatchSpan.Empty;
+            var match = matchSpanHandler.Match(input, index);
+            if (match.Success)
+            {
+                return match;
+            }
         }
-        var start = index;
-        while (index < input.Length && char.IsDigit(input[index]))
-        {
-            index++;
-        }
-        return new MatchSpan
-        {
-            Index = start, 
-            Value = input.Slice(start, index - start).ToString()
-        };
+        return MatchSpan.Empty;
+    }
+
+    private MatchSpanDigitHandler Digit()
+    {
+        return new MatchSpanDigitHandler();
     }
 }
