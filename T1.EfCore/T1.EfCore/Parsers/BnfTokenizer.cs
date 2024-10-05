@@ -13,6 +13,7 @@ public class BnfTokenizer
             Digit().Plus(),
             String("::="),
             String("<").Concat(Not(">").Plus()).Concat(String(">")),
+            String("|"),
         ];
     }
 

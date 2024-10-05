@@ -32,6 +32,20 @@ public class BnfTokenizerTest
             }
         ]);
     }
+    
+    [Test]
+    public void Or()
+    {
+        var matches = WhenExtractMatches("|");
+        matches.Should().BeEquivalentTo([
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0, 
+                Value = "|"
+            }
+        ]);
+    }
 
     private static MatchSpan[] WhenExtractMatches(string input)
     {
