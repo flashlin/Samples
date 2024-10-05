@@ -5,7 +5,7 @@ namespace T1.EfCore.Parsers;
 
 public class BnfExpression
 {
-    public BnfExpression(string type, string value = null)
+    public BnfExpression(string type, string value = "")
     {
         Type = type;
         Value = value;
@@ -28,6 +28,18 @@ public class BnfParser
         this.position = 0;
     }
 
+    public string GetExpressionTreeString(BnfExpression expr, int indent=0)
+    {
+        var text = new StringBuilder();
+        text.AppendLine($"{new string(' ', indent)}{expr.Type}: {expr.Value}");
+        foreach (var child in expr.Children)
+        {
+            var subText = GetExpressionTreeString(child, indent + 2);
+            text.AppendLine(subText);
+        }
+        return text.ToString();
+    }
+
     public BnfExpression Parse()
     {
         var root = new BnfExpression("Grammar");
@@ -35,23 +47,26 @@ public class BnfParser
         {
             root.Children.Add(ParseRule());
         }
-
         return root;
     }
 
-    private BnfExpression ParseRule()
+    private void Consume(string expected)
     {
+        if (input.Substring(position, expected.Length) != expected)
+            throw new Exception($"Expected '{expected}'");
+        position += expected.Length;
         SkipWhitespace();
-        var rule = new BnfExpression("Rule");
-        rule.Children.Add(ParseNonTerminal());
-        Consume("::=");
-        rule.Children.Add(ParseExpression());
-        return rule;
     }
 
-    private BnfExpression ParseNonTerminal()
+    private string ConsumeRegex(string pattern)
     {
-        return new BnfExpression("NonTerminal", ConsumeRegex(@"<[^>]+>"));
+        SkipWhitespace();
+        var match = Regex.Match(input.Substring(position), $"^{pattern}");
+        if (!match.Success)
+            throw new Exception($"Expected pattern '{pattern}'");
+        position += match.Length;
+        SkipWhitespace();
+        return match.Value;
     }
 
     private BnfExpression ParseExpression()
@@ -68,22 +83,6 @@ public class BnfParser
         }
 
         return expression;
-    }
-
-    private BnfExpression ParseTerm()
-    {
-        var term = ParseFactor();
-        while (Peek("*"))
-        {
-            Consume("*");
-            var right = ParseFactor();
-            term = new BnfExpression("Multiplication", "*")
-            {
-                Children = { term, right }
-            };
-        }
-
-        return term;
     }
 
     private BnfExpression ParseFactor()
@@ -107,6 +106,37 @@ public class BnfParser
         {
             throw new Exception("Unexpected token in factor");
         }
+    }
+
+    private BnfExpression ParseNonTerminal()
+    {
+        return new BnfExpression("NonTerminal", ConsumeRegex(@"<[^>]+>"));
+    }
+
+    private BnfExpression ParseRule()
+    {
+        SkipWhitespace();
+        var rule = new BnfExpression("Rule");
+        rule.Children.Add(ParseNonTerminal());
+        Consume("::=");
+        rule.Children.Add(ParseExpression());
+        return rule;
+    }
+
+    private BnfExpression ParseTerm()
+    {
+        var term = ParseFactor();
+        while (Peek("*"))
+        {
+            Consume("*");
+            var right = ParseFactor();
+            term = new BnfExpression("Multiplication", "*")
+            {
+                Children = { term, right }
+            };
+        }
+
+        return term;
     }
 
     private BnfExpression ParseTerminal()
@@ -137,24 +167,6 @@ public class BnfParser
         return terminal;
     }
 
-    private void Consume(string expected)
-    {
-        if (input.Substring(position, expected.Length) != expected)
-            throw new Exception($"Expected '{expected}'");
-        position += expected.Length;
-        SkipWhitespace();
-    }
-
-    private string ConsumeRegex(string pattern)
-    {
-        var match = Regex.Match(input.Substring(position), $"^{pattern}");
-        if (!match.Success)
-            throw new Exception($"Expected pattern '{pattern}'");
-        position += match.Length;
-        SkipWhitespace();
-        return match.Value;
-    }
-
     private bool Peek(string s)
     {
         return position < input.Length && input.Substring(position).StartsWith(s);
@@ -164,17 +176,9 @@ public class BnfParser
     {
         while (position < input.Length && char.IsWhiteSpace(input[position]))
             position++;
-    }
-    
-    public string GetExpressionTreeString(BnfExpression expr, int indent=0)
-    {
-        var text = new StringBuilder();
-        text.AppendLine($"{new string(' ', indent)}{expr.Type}: {expr.Value}");
-        foreach (var child in expr.Children)
-        {
-            var subText = GetExpressionTreeString(child, indent + 2);
-            text.AppendLine(subText);
-        }
-        return text.ToString();
+        while (position < input.Length && input[position]=='\r')
+            position++;
+        while (position < input.Length && input[position]=='\n')
+            position++;
     }
 }
