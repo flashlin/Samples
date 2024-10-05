@@ -13,6 +13,15 @@ public class BnfTokenizerTest
             new MatchSpan { Index = 0, Value = "123" }
         ]);
     }
+    
+    [Test]
+    public void RuleEqual()
+    {
+        var matches = WhenExtractMatches("::=");
+        matches.Should().BeEquivalentTo([
+            new MatchSpan { Index = 0, Value = "::=" }
+        ]);
+    }
 
     private static MatchSpan[] WhenExtractMatches(string input)
     {
