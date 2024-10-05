@@ -75,6 +75,35 @@ public class BnfTokenizerTest
             }
         ]);
     }
+    
+    [Test]
+    public void LBracket()
+    {
+        var matches = WhenExtractMatches("(");
+        matches.Should().BeEquivalentTo([
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0, 
+                Value = "("
+            }
+        ]);
+    }
+    
+    
+    [Test]
+    public void RBracket()
+    {
+        var matches = WhenExtractMatches(")");
+        matches.Should().BeEquivalentTo([
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0, 
+                Value = ")"
+            }
+        ]);
+    }
 
     private static MatchSpan[] WhenExtractMatches(string input)
     {

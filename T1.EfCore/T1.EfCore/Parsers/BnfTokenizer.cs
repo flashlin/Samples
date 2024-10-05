@@ -14,6 +14,8 @@ public class BnfTokenizer
             String("::="),
             String("<").Concat(Not(">").Plus()).Concat(String(">")),
             String("|"),
+            String("("),
+            String(")"),
             Letter().Or(String("_")).Plus().Concat(Letter().Or(String("_")).Or(Digit()).More()),
         ];
     }
