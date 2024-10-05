@@ -1,10 +1,17 @@
 namespace T1.EfCore.Parsers.MatchSpanHandlerModule;
 
-public class MatchSpanDigitHandler : IMatchSpanHandler 
+public class MatchSpanCharFuncHandler : IMatchSpanHandler 
 {
+    private readonly Func<char, bool> _isChar;
+
+    public MatchSpanCharFuncHandler(Func<char, bool> isChar)
+    {
+        _isChar = isChar;
+    }
+    
     public MatchSpan Match(ReadOnlySpan<char> input, int index)
     {
-        if (!char.IsDigit(input[index]))
+        if (!_isChar(input[index]))
         {
             return new MatchSpan
             {
@@ -13,13 +20,11 @@ public class MatchSpanDigitHandler : IMatchSpanHandler
                 Value = input.Slice(index, 1).ToString()
             };
         } 
-        var start = index;
-        index++;
         return new MatchSpan
         {
             Success = true,
-            Index = start, 
-            Value = input.Slice(start, index - start).ToString()
+            Index = index, 
+            Value = input.Slice(index, 1).ToString()
         };
     }
 }

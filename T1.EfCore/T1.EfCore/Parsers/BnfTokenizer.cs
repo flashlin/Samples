@@ -41,9 +41,14 @@ public class BnfTokenizer
         return results;
     }
 
-    private MatchSpanDigitHandler Digit()
+    private MatchSpanCharFuncHandler Digit()
     {
-        return new MatchSpanDigitHandler();
+        return new MatchSpanCharFuncHandler(char.IsDigit);
+    }
+    
+    private MatchSpanCharFuncHandler Letter()
+    {
+        return new MatchSpanCharFuncHandler(char.IsLetter);
     }
 
     private MatchSpan MatchRules(ReadOnlySpan<char> input, int index)

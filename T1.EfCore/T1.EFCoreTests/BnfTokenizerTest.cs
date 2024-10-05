@@ -46,6 +46,20 @@ public class BnfTokenizerTest
             }
         ]);
     }
+    
+    [Test]
+    public void String()
+    {
+        var matches = WhenExtractMatches("ABC_123_DEF");
+        matches.Should().BeEquivalentTo([
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0, 
+                Value = "ABC_123_DEF"
+            }
+        ]);
+    }
 
     private static MatchSpan[] WhenExtractMatches(string input)
     {
