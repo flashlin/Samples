@@ -2,9 +2,9 @@ namespace T1.EfCore.Parsers.MatchSpanHandlerModule;
 
 public class MatchSpanNotHandler : IMatchSpanHandler
 {
-    private readonly MatchSpanStringHandler _handler;
+    private readonly IMatchSpanHandler _handler;
 
-    public MatchSpanNotHandler(MatchSpanStringHandler handler)
+    public MatchSpanNotHandler(IMatchSpanHandler handler)
     {
         _handler = handler;
     }

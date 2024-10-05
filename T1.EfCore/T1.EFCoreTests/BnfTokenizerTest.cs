@@ -76,6 +76,22 @@ public class BnfTokenizerTest
         ]);
     }
     
+    
+    [Test]
+    public void QuotesString()
+    {
+        var matches = WhenExtractMatches("\"ABC\\\"123\"");
+        matches.Should().BeEquivalentTo([
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0, 
+                Value = "\"ABC\\\"123\""
+            }
+        ]);
+    }
+    
+    
     [Test]
     public void LBracket()
     {

@@ -18,7 +18,6 @@ public class MatchSpanConcatHandler : IMatchSpanHandler
         {
             return match;
         }
-
         var nextMatch = _nextHandler.Match(input, match.Index + match.Value.Length);
         if (!nextMatch.Success)
         {

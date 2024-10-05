@@ -25,7 +25,7 @@ public class MatchSpanMoreHandler : IMatchSpanHandler
         do
         {
             index += match.Value.Length;
-            if( index >= input.Length)
+            if( index == start || index >= input.Length)
             {
                 break;
             }

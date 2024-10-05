@@ -23,11 +23,20 @@ public class MatchSpanOrHandler : IMatchSpanHandler
         {
             return match2;
         }
+        if(match1.Value.Length > match2.Value.Length)
+        {
+            return new MatchSpan
+            {
+                Success = false,
+                Index = index,
+                Value = match1.Value
+            };
+        }
         return new MatchSpan
         {
             Success = false,
             Index = index,
-            Value = match1.Value + match2.Value
+            Value = match2.Value
         };
     }
 }

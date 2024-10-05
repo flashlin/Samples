@@ -18,16 +18,18 @@ public class MatchSpanStringHandler : IMatchSpanHandler
     public MatchSpan Match(ReadOnlySpan<char> input, int index)
     {
         var start = index;
+        var count = 0;
         foreach (var handler in _handlers)
         {
             var match = handler.Match(input, index);
+            count++;
             if (!match.Success)
             {
                 return new MatchSpan
                 {
                     Success = false,
                     Index = start,
-                    Value = input.Slice(start, index - start).ToString()
+                    Value = input.Slice(start, count).ToString()
                 };
             }
             index++;
@@ -36,7 +38,7 @@ public class MatchSpanStringHandler : IMatchSpanHandler
         {
             Success = true,
             Index = start, 
-            Value = input.Slice(start, index - start).ToString()
+            Value = input.Slice(start, count).ToString()
         };
     }
 }

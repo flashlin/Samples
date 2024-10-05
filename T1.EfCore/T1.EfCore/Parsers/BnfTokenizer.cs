@@ -10,8 +10,11 @@ public class BnfTokenizer
     {
         _matchSpanHandlers = 
         [
-            Digit().Plus(),
+            Char('"').Concat(
+                String("\\\"").Or(Not("\"")).More()
+                ).Concat(Char('"')),
             String("::="),
+            Digit().Plus(),
             String("<").Concat(Not(">").Plus()).Concat(String(">")),
             String("|"),
             String("("),
@@ -23,6 +26,11 @@ public class BnfTokenizer
     private MatchSpanNotHandler Not(string pattern)
     {
         return new MatchSpanNotHandler(String(pattern));
+    }
+    
+    private MatchSpanNotHandler Not(IMatchSpanHandler pattern)
+    {
+        return new MatchSpanNotHandler(pattern);
     }
 
     public List<MatchSpan> ExtractMatches(string input)
@@ -84,5 +92,10 @@ public class BnfTokenizer
     private MatchSpanStringHandler String(string pattern)
     {
         return new MatchSpanStringHandler(pattern);
+    }
+    
+    private MatchSpanCharHandler Char(char pattern)
+    {
+        return new MatchSpanCharHandler(pattern);
     }
 }
