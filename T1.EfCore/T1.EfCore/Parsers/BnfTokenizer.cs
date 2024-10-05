@@ -12,7 +12,13 @@ public class BnfTokenizer
         [
             Digit().Plus(),
             String("::="),
+            String("<").Concat(Not(">").Plus()).Concat(String(">")),
         ];
+    }
+
+    private MatchSpanNotHandler Not(string pattern)
+    {
+        return new MatchSpanNotHandler(String(pattern));
     }
 
     public List<MatchSpan> ExtractMatches(string input)
@@ -49,7 +55,12 @@ public class BnfTokenizer
                 return match;
             }
         }
-        return MatchSpan.Empty;
+        return new MatchSpan
+        {
+            Success = false,
+            Index = index,
+            Value = string.Empty
+        };
     }
 
     private int SkipWhitespace(ReadOnlySpan<char> input, int index)

@@ -15,7 +15,7 @@ public class MatchSpanPlusHandler : IMatchSpanHandler
         var match = _matcher.Match(input, index);
         if (!match.Success)
         {
-            return MatchSpan.Empty;
+            return match;
         }
         do
         {
@@ -28,6 +28,7 @@ public class MatchSpanPlusHandler : IMatchSpanHandler
         }while (match.Success);
         return new MatchSpan
         {
+            Success = true,
             Index = start, 
             Value = input.Slice(start, index - start).ToString()
         };

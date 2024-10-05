@@ -10,7 +10,12 @@ public class BnfTokenizerTest
     {
         var matches = WhenExtractMatches("123");
         matches.Should().BeEquivalentTo([
-            new MatchSpan { Index = 0, Value = "123" }
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0, 
+                Value = "123"
+            }
         ]);
     }
     
@@ -19,7 +24,12 @@ public class BnfTokenizerTest
     {
         var matches = WhenExtractMatches("::=");
         matches.Should().BeEquivalentTo([
-            new MatchSpan { Index = 0, Value = "::=" }
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0, 
+                Value = "::="
+            }
         ]);
     }
 

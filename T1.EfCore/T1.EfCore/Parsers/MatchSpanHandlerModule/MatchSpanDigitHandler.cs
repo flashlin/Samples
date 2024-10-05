@@ -6,12 +6,18 @@ public class MatchSpanDigitHandler : IMatchSpanHandler
     {
         if (!char.IsDigit(input[index]))
         {
-            return MatchSpan.Empty;
+            return new MatchSpan
+            {
+                Success = false,
+                Index = index,
+                Value = input.Slice(index, 1).ToString()
+            };
         } 
         var start = index;
         index++;
         return new MatchSpan
         {
+            Success = true,
             Index = start, 
             Value = input.Slice(start, index - start).ToString()
         };

@@ -1,30 +1,31 @@
 namespace T1.EfCore.Parsers.MatchSpanHandlerModule;
 
-public class MatchSpanCharHandler : IMatchSpanHandler
+public class MatchSpanNotHandler : IMatchSpanHandler
 {
-    private readonly char _ch;
+    private readonly MatchSpanStringHandler _handler;
 
-    public MatchSpanCharHandler(char ch)
+    public MatchSpanNotHandler(MatchSpanStringHandler handler)
     {
-        _ch = ch;
+        _handler = handler;
     }
 
     public MatchSpan Match(ReadOnlySpan<char> input, int index)
     {
-        if (input[index] != _ch)
+        var match = _handler.Match(input, index);
+        if (match.Success)
         {
             return new MatchSpan
             {
                 Success = false,
                 Index = index,
-                Value = input.Slice(index, 1).ToString()
+                Value = match.Value
             };
         }
         return new MatchSpan
         {
             Success = true,
             Index = index,
-            Value = input.Slice(index, 1).ToString()
+            Value = match.Value
         };
     }
 }

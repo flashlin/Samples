@@ -6,4 +6,9 @@ public static class MatchSpanHandlerExtensions
     {
         return new MatchSpanPlusHandler(handler);
     }
+
+    public static MatchSpanConcatHandler Concat(this IMatchSpanHandler handler, IMatchSpanHandler nextHandler)
+    {
+        return new MatchSpanConcatHandler(handler, nextHandler);
+    }
 }

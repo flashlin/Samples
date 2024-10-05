@@ -23,12 +23,18 @@ public class MatchSpanStringHandler : IMatchSpanHandler
             var match = handler.Match(input, index);
             if (!match.Success)
             {
-                return MatchSpan.Empty;
+                return new MatchSpan
+                {
+                    Success = false,
+                    Index = start,
+                    Value = input.Slice(start, index - start).ToString()
+                };
             }
             index++;
         }
         return new MatchSpan
         {
+            Success = true,
             Index = start, 
             Value = input.Slice(start, index - start).ToString()
         };
