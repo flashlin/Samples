@@ -48,3 +48,11 @@ _db.Upsert(entityArray)
     .On(x => new {x.Id, x.Name})
     .Execute();
 ```
+
+Here are examples for Upsert large records:
+```csharp
+_db.UpsertRange(entityArray)
+    .On(x => x.Id)
+    .Execute();
+```
+
