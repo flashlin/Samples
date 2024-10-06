@@ -24,7 +24,7 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         _entityArray = entities;
     }
 
-    public void Execute()
+    public int Execute()
     {
         var sqlGenerator = _dbContext.GetService<ISqlGenerationHelper>();
 
@@ -38,7 +38,17 @@ public class UpsertCommandBuilder<TEntity> where TEntity : class
         using var dbCommand = _dbContext.Database.GetDbConnection().CreateCommand();
         var values = CreateDataDbParameters(_dbContext, dbCommand, sqlRawData)
             .ToList();
-        _dbContext.Database.ExecuteSqlRaw(mergeSql, values);
+        dbCommand.Connection?.Open();
+        dbCommand.CommandText = mergeSql;
+        dbCommand.Parameters.AddRange(values.ToArray());
+        using var reader = dbCommand.ExecuteReader();
+        var effectedRowCount = 0;
+        if (reader.Read())
+        {
+            effectedRowCount = reader.GetInt32(0);
+        }
+        return effectedRowCount;
+        //return _dbContext.Database.ExecuteSqlRaw(mergeSql, values);
     }
 
     public UpsertCommandBuilder<TEntity> On(Expression<Func<TEntity, object>> matchExpression)
@@ -101,7 +111,7 @@ ON ({matchCondition})
 WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
     VALUES ({sourceColumns});
-SELECT @@ROWCOUNT AS TotalAffectedRows;";
+SELECT @@ROWCOUNT AS InsertedRows;";
         return mergeSql;
     }
 

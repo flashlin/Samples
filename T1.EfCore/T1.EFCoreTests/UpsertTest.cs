@@ -128,12 +128,14 @@ public class UpsertTest
     public void Empty()
     {
         GivenCreateCustomerTable();
-        WhenUpsert(
+        var effectedCount = WhenUpsert(
             new CustomerEntity
             {
                 Id = 1,
                 Name = "flash"
             });
+        
+        effectedCount.Should().Be(1);
 
         var customers = _db.Customer.ToArray();
         customers.Should().BeEquivalentTo([
@@ -155,9 +157,9 @@ public class UpsertTest
             Id = 1,
             Name = "flash"
         });
+        _db.SaveChanges();
 
-        
-        _db.Upsert(new CustomerEntity
+        var effectedCount = _db.Upsert(new CustomerEntity
         {
             Id = 1,
             Name = "flash"
@@ -167,8 +169,10 @@ public class UpsertTest
             Name = "jack"
         }).On(x => new {x.Id, x.Name}) 
             .Execute();
+        
+        effectedCount.Should().Be(1);
 
-        var customers = _db.Customer.ToArray();
+        var customers = _db.Customer.AsNoTracking().ToArray();
         customers.Should().BeEquivalentTo([
             new CustomerEntity
             {
@@ -256,9 +260,9 @@ public class UpsertTest
     }
 
 
-    private void WhenUpsert(params CustomerEntity[] entity)
+    private int WhenUpsert(params CustomerEntity[] entity)
     {
-        _db.Upsert(entity).On(x => x.Id)
+        return _db.Upsert(entity).On(x => x.Id)
             .Execute();
     }
 
