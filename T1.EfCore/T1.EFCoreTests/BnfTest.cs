@@ -16,7 +16,72 @@ public class BnfTest
 
         var parser = new BnfParser(bnfGrammar);
         var tree = parser.Parse();
-
         var text = parser.GetExpressionTreeString(tree);
+        
+        var visitor = new TsqlBnfVisitor();
+        var tsql = tree.Accept(visitor);
+    }
+    
+    [Test]
+    public void LinqSyntax()
+    {
+        string bnfGrammar = @"
+<linq_query> ::= ""from"" <range_variable> ""in"" <source> 
+                 {<join_clause>}
+                 {<where_clause>}
+                 {<group_by_clause>}
+                 {<order_by_clause>}
+                 ""select"" <projection>
+
+<range_variable> ::= <identifier>
+
+<source> ::= <expression>
+
+<join_clause> ::= ""join"" <range_variable> ""in"" <source> ""on"" <key_selector> ""equals"" <key_selector> 
+                  {<join_clause>}
+
+<where_clause> ::= ""where"" <condition>
+
+<group_by_clause> ::= ""group"" <projection> ""by"" <key_selector>
+
+<order_by_clause> ::= ""orderby"" <order_specifier> {"","" <order_specifier>}
+
+<order_specifier> ::= <key_selector> [""ascending"" | ""descending""]
+
+<projection> ::= <identifier> | ""new"" ""{"" <projection_list> ""}""
+
+<projection_list> ::= <projection_item> {"","" <projection_item>}
+
+<projection_item> ::= <expression> [""as"" <alias>]
+
+<key_selector> ::= <expression>
+
+<condition> ::= <expression>
+
+<expression> ::= <term> {<operator> <term>}
+
+<term> ::= <identifier> | <value> | <method_call> | <lambda_expression> | ""("" <expression> "")""
+
+<operator> ::= ""=="" | ""!="" | ""<"" | "">"" | ""<="" | "">="" | ""&&"" | ""||""
+
+<value> ::= <string_literal> | <numeric_literal>
+
+<method_call> ::= <identifier> ""("" <argument_list> "")""
+
+<lambda_expression> ::= ""("" <parameter_list> "")"" ""=>"" <expression>
+
+<parameter_list> ::= <identifier> {"","" <identifier>}
+
+<argument_list> ::= <expression> {"","" <expression>}
+
+<identifier> ::= {<letter>} {<letter> | <digit> | ""_""}
+";
+
+        var parser = new BnfParser(bnfGrammar);
+        var tree = parser.Parse();
+        var text = parser.GetExpressionTreeString(tree);
+        
+        var visitor = new TsqlBnfVisitor();
+        var tsql = tree.Accept(visitor);
     }
 }

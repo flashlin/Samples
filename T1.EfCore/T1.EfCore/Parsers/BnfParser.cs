@@ -3,18 +3,46 @@ using System.Text.RegularExpressions;
 
 namespace T1.EfCore.Parsers;
 
-public class BnfExpression
+public interface IBnfVisitor
 {
-    public BnfExpression(string type, string value = "")
+    string Visit(BnfExpression expression);
+}
+
+public class TsqlBnfVisitor : IBnfVisitor
+{
+    public string Visit(BnfExpression expression)
     {
-        Type = type;
-        Value = value;
-        Children = new List<BnfExpression>();
+        // 假設 BnfExpression 的 Type 包含類型：SELECT, COLUMN, FROM, WHERE 等
+        // 並且根據類型返回不同的 SQL 片段
+        string result = expression.Type switch
+        {
+            "SELECT" => "SELECT " + VisitChildren(expression),
+            "COLUMN" => expression.Value, // COLUMN 直接返回值
+            "FROM" => "FROM " + VisitChildren(expression),
+            "WHERE" => "WHERE " + VisitChildren(expression),
+            _ => expression.Value // 默認返回表示式值
+        };
+        
+        return result;
     }
 
-    public string Type { get; set; }
-    public string Value { get; set; }
-    public List<BnfExpression> Children { get; set; }
+    private string VisitChildren(BnfExpression expression)
+    {
+        // 遞迴遍歷 Children，拼接 SQL 片段
+        return string.Join(" ", expression.Children.Select(child => Visit(child)));
+    }
+}
+
+public class BnfExpression(string type, string value = "")
+{
+    public string Type { get; set; } = type;
+    public string Value { get; set; } = value;
+    public List<BnfExpression> Children { get; set; } = new();
+    
+    public string Accept(IBnfVisitor visitor)
+    {
+        return visitor.Visit(this);
+    }
 }
 
 public class BnfParser
@@ -69,7 +97,6 @@ public class BnfParser
     private BnfExpression ParseExpression()
     {
         return ParseOrExpression();
-        //return ParseAdditionExpression();
     }
     
     private BnfExpression ParseOrExpression()

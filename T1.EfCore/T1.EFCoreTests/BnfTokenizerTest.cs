@@ -6,20 +6,6 @@ namespace T1.EFCoreTests;
 public class BnfTokenizerTest
 {
     [Test]
-    public void Digits()
-    {
-        var matches = WhenExtractMatches("123");
-        matches.Should().BeEquivalentTo([
-            new MatchSpan
-            {
-                Success = true,
-                Index = 0,
-                Value = "123"
-            }
-        ]);
-    }
-
-    [Test]
     public void RuleEqual()
     {
         var matches = WhenExtractMatches("::=");
@@ -46,36 +32,6 @@ public class BnfTokenizerTest
             }
         ]);
     }
-
-
-    [Test]
-    public void _String()
-    {
-        var matches = WhenExtractMatches("_A_1");
-        matches.Should().BeEquivalentTo([
-            new MatchSpan
-            {
-                Success = true,
-                Index = 0,
-                Value = "_A_1"
-            }
-        ]);
-    }
-
-    [Test]
-    public void String()
-    {
-        var matches = WhenExtractMatches("ABC_123_DEF");
-        matches.Should().BeEquivalentTo([
-            new MatchSpan
-            {
-                Success = true,
-                Index = 0,
-                Value = "ABC_123_DEF"
-            }
-        ]);
-    }
-
 
     [Test]
     public void QuotesString()
@@ -124,7 +80,7 @@ public class BnfTokenizerTest
     [Test]
     public void Rule()
     {
-        var matches = WhenExtractMatches("<rule1> ::= 1");
+        var matches = WhenExtractMatches("<rule1> ::= \"1\"");
         matches.Should().BeEquivalentTo([
             new MatchSpan
             {
@@ -142,7 +98,7 @@ public class BnfTokenizerTest
             {
                 Success = true,
                 Index = 12,
-                Value = "1"
+                Value = "\"1\""
             },
         ]);
     }

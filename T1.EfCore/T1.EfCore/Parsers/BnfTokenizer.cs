@@ -14,16 +14,16 @@ public class BnfTokenizer
                 String("\\\"").Or(Not("\"")).More()
             ).Concat(Char('"')),
             String("::="),
-            Digit().Plus(),
             String("<").Concat(Not(">").Plus()).Concat(String(">")),
             String("|"),
             String("("),
             String(")"),
-            String("+"),
-            String("-"),
-            String("*"),
-            String("/"),
-            Letter().Or(String("_")).Plus().Concat(Letter().Or(String("_")).Or(Digit()).More()),
+            String("{"),    //表示重複出現的元素（零次或多次）。
+            String("}"),
+            String("["),    //表示可選的元素（零次或一次）
+            String("["),
+            //Digit().Plus(),
+            //Letter().Or(String("_")).Plus().Concat(Letter().Or(String("_")).Or(Digit()).More()),
         ];
     }
 
