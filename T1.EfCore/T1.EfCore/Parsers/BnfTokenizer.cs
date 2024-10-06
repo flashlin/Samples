@@ -8,17 +8,21 @@ public class BnfTokenizer
 
     public BnfTokenizer()
     {
-        _matchSpanHandlers = 
+        _matchSpanHandlers =
         [
             Char('"').Concat(
                 String("\\\"").Or(Not("\"")).More()
-                ).Concat(Char('"')),
+            ).Concat(Char('"')),
             String("::="),
             Digit().Plus(),
             String("<").Concat(Not(">").Plus()).Concat(String(">")),
             String("|"),
             String("("),
             String(")"),
+            String("+"),
+            String("-"),
+            String("*"),
+            String("/"),
             Letter().Or(String("_")).Plus().Concat(Letter().Or(String("_")).Or(Digit()).More()),
         ];
     }
@@ -27,7 +31,7 @@ public class BnfTokenizer
     {
         return new MatchSpanNotHandler(String(pattern));
     }
-    
+
     private MatchSpanNotHandler Not(IMatchSpanHandler pattern)
     {
         return new MatchSpanNotHandler(pattern);
@@ -41,14 +45,21 @@ public class BnfTokenizer
         while (index < inputSpan.Length)
         {
             index = SkipWhitespace(inputSpan, index);
+            if (index >= inputSpan.Length)
+            {
+                break;
+            }
+
             var match = MatchRules(inputSpan, index);
             if (!match.Success)
             {
                 throw new Exception($"Unexpected text '{inputSpan.Slice(index).ToString()}' at position {index}");
             }
+
             results.Add(match);
             index = match.Index + match.Value.Length;
         }
+
         return results;
     }
 
@@ -56,7 +67,7 @@ public class BnfTokenizer
     {
         return new MatchSpanCharFuncHandler(char.IsDigit);
     }
-    
+
     private MatchSpanCharFuncHandler Letter()
     {
         return new MatchSpanCharFuncHandler(char.IsLetter);
@@ -72,6 +83,7 @@ public class BnfTokenizer
                 return match;
             }
         }
+
         return new MatchSpan
         {
             Success = false,
@@ -86,6 +98,7 @@ public class BnfTokenizer
         {
             index++;
         }
+
         return index;
     }
 
@@ -93,7 +106,7 @@ public class BnfTokenizer
     {
         return new MatchSpanStringHandler(pattern);
     }
-    
+
     private MatchSpanCharHandler Char(char pattern)
     {
         return new MatchSpanCharHandler(pattern);
