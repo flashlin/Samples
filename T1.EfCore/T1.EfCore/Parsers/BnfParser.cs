@@ -3,33 +3,51 @@ using System.Text.RegularExpressions;
 
 namespace T1.EfCore.Parsers;
 
-public interface IBnfVisitor
+public interface IBnfExpressionVisitor
 {
-    string Visit(BnfExpression expression);
+    void Visit(BnfExpression expression);
 }
 
-public class TsqlBnfVisitor : IBnfVisitor
+public class LinqExpressionExpressionVisitor : IBnfExpressionVisitor
 {
-    public string Visit(BnfExpression expression)
+    private StringBuilder _result;
+
+    public LinqExpressionExpressionVisitor()
     {
-        // 假設 BnfExpression 的 Type 包含類型：SELECT, COLUMN, FROM, WHERE 等
-        // 並且根據類型返回不同的 SQL 片段
-        string result = expression.Type switch
-        {
-            "SELECT" => "SELECT " + VisitChildren(expression),
-            "COLUMN" => expression.Value, // COLUMN 直接返回值
-            "FROM" => "FROM " + VisitChildren(expression),
-            "WHERE" => "WHERE " + VisitChildren(expression),
-            _ => expression.Value // 默認返回表示式值
-        };
-        
-        return result;
+        _result = new StringBuilder();
     }
 
-    private string VisitChildren(BnfExpression expression)
+    public void Visit(BnfExpression expression)
     {
-        // 遞迴遍歷 Children，拼接 SQL 片段
-        return string.Join(" ", expression.Children.Select(child => Visit(child)));
+        switch (expression.Type)
+        {
+            case "From":
+                _result.Append($"from {expression.Value} ");
+                break;
+            case "Select":
+                _result.Append($"select {expression.Value} ");
+                break;
+            case "Join":
+                _result.Append($"join {expression.Value} ");
+                break;
+            case "Where":
+                _result.Append($"where {expression.Value} ");
+                break;
+            case "GroupBy":
+                _result.Append($"group by {expression.Value} ");
+                break;
+            case "OrderBy":
+                _result.Append($"orderby {expression.Value} ");
+                break;
+            default:
+                _result.Append($"/* Unrecognized Type: {expression.Type} */ ");
+                break;
+        }
+    }
+
+    public string GetResult()
+    {
+        return _result.ToString().Trim(); // 返回最终结果并去除多余空格
     }
 }
 
@@ -39,9 +57,13 @@ public class BnfExpression(string type, string value = "")
     public string Value { get; set; } = value;
     public List<BnfExpression> Children { get; set; } = new();
     
-    public string Accept(IBnfVisitor visitor)
+    public void Accept(IBnfExpressionVisitor expressionVisitor)
     {
-        return visitor.Visit(this);
+        expressionVisitor.Visit(this);
+        foreach (var child in Children)
+        {
+            child.Accept(expressionVisitor); // 遞迴訪問子節點
+        }
     }
 }
 
