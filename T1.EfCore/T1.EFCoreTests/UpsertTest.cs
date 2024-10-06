@@ -49,13 +49,18 @@ public class UpsertTest
                 Name = "Mark",
             }
         };
-        _db.UpsertRange(insertData)
+        
+        var effectedCount1 = _db.UpsertRange(insertData)
             .On(x=>x.Id)
             .Execute();
         
-        _db.UpsertRange(insertData)
+        effectedCount1.Should().Be(2);
+        
+        var effectedCount2 = _db.UpsertRange(insertData)
             .On(x=>x.Id)
             .Execute();
+        
+        effectedCount2.Should().Be(0);
         
         var customers = _db.Customer.ToArray();
         customers.Should().BeEquivalentTo([

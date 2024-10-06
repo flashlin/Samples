@@ -25,7 +25,7 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
         _entities = entities.ToList();
     }
 
-    public void Execute()
+    public int Execute()
     {
         var sqlGenerator = _dbContext.GetService<ISqlGenerationHelper>();
         var fullTableName = sqlGenerator.GetFullTableName(_entityType);
@@ -43,8 +43,8 @@ public class UpsertRangeCommandBuilder<TEntity> where TEntity : class
 
         var insertColumns = CreateInsertColumns(sqlGenerator, properties);
         var mergeSql = CreateMergeDataSql(fullTableName, insertColumns, rowSqlRawProperties);
-        var sql = mergeSql + $"; DROP TABLE {memTempTableName};";
-        ExecuteDbCommand(connection, sql);
+        var sql = mergeSql + "; SELECT @@ROWCOUNT AS InsertedRows;" + $"; DROP TABLE {memTempTableName};";
+        return ExecuteDbCommand(connection, sql);
     }
 
     private DataTable CreateDataTable(List<IProperty> properties)
@@ -100,11 +100,17 @@ WHEN NOT MATCHED THEN
         return mergeSql;
     }
 
-    private static void ExecuteDbCommand(DbConnection connection, string sql)
+    private static int ExecuteDbCommand(DbConnection connection, string sql)
     {
         using var dbCommand = connection.CreateCommand();
         dbCommand.CommandText = sql;
-        dbCommand.ExecuteNonQuery();
+        //dbCommand.ExecuteNonQuery();
+        var scalar = dbCommand.ExecuteScalar();
+        if (scalar == null)
+        {
+            return 0;
+        }
+        return (int)scalar;
     }
 
     private DbConnection OpenDbConnection()
