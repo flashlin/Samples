@@ -21,7 +21,7 @@ public class BnfTokenizer
             String("{"),    //表示重複出現的元素（零次或多次）。
             String("}"),
             String("["),    //表示可選的元素（零次或一次）
-            String("["),
+            String("]"),
             //Digit().Plus(),
             //Letter().Or(String("_")).Plus().Concat(Letter().Or(String("_")).Or(Digit()).More()),
         ];

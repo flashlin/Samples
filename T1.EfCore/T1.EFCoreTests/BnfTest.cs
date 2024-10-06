@@ -75,9 +75,9 @@ public class BnfTest
 
         var parser = new BnfParser(bnfGrammar);
         var tree = parser.Parse();
-        var text = parser.GetExpressionTreeString(tree);
         
-        var visitor = new TsqlBnfExpressionVisitor();
+        var visitor = new LinqExpressionExpressionVisitor();
         tree.Accept(visitor);
+        var text = visitor.GetResult();
     }
 }
