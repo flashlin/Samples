@@ -100,7 +100,8 @@ USING #TempMemoryTable AS source
 ON ({matchCondition})
 WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
-    VALUES ({sourceColumns});";
+    VALUES ({sourceColumns});
+SELECT @@ROWCOUNT AS TotalAffectedRows;";
         return mergeSql;
     }
 
@@ -115,7 +116,8 @@ USING (SELECT {insertValues}) AS source({insertColumns})
 ON ({matchCondition})
 WHEN NOT MATCHED THEN
     INSERT ({insertColumns})
-    VALUES ({insertValues});";
+    VALUES ({insertValues});
+SELECT @@ROWCOUNT AS TotalAffectedRows;";
         return mergeSql;
     }
 }
