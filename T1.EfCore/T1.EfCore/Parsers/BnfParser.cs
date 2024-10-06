@@ -147,7 +147,11 @@ public class BnfParser
         }
         if (Peek("\""))
         {
-            return ParseTerminal();
+            return ParseStringTerminal();
+        }
+        if (IsNumber())
+        {
+            return ParseNumberTerminal();
         }
         throw new Exception("Unexpected token in factor");
     }
@@ -166,7 +170,7 @@ public class BnfParser
         return rule;
     }
 
-    private BnfExpression ParseTerminal()
+    private BnfExpression ParseStringTerminal()
     {
         var terminal = new BnfExpression("Terminal");
         if(!_tokens[_position].Value.StartsWith("\""))
@@ -181,6 +185,19 @@ public class BnfParser
         _position++;
         return terminal;
     }
+    
+    private BnfExpression ParseNumberTerminal()
+    {
+        var terminal = new BnfExpression("Terminal");
+        var value = _tokens[_position].Value;
+        if(!decimal.TryParse(value, out _))
+        {
+            throw new Exception("Unterminated number literal");
+        }
+        terminal.Value = value;
+        _position++;
+        return terminal;
+    }
 
     private bool HasMore()
     {
@@ -190,5 +207,11 @@ public class BnfParser
     private bool Peek(string s)
     {
         return HasMore() && _tokens[_position].Value.StartsWith(s);
+    }
+
+    private bool IsNumber()
+    {
+        var value = _tokens[_position].Value;
+        return decimal.TryParse(value, out _);
     }
 }
