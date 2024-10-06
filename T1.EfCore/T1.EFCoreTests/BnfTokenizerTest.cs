@@ -13,12 +13,12 @@ public class BnfTokenizerTest
             new MatchSpan
             {
                 Success = true,
-                Index = 0, 
+                Index = 0,
                 Value = "123"
             }
         ]);
     }
-    
+
     [Test]
     public void RuleEqual()
     {
@@ -27,12 +27,12 @@ public class BnfTokenizerTest
             new MatchSpan
             {
                 Success = true,
-                Index = 0, 
+                Index = 0,
                 Value = "::="
             }
         ]);
     }
-    
+
     [Test]
     public void Or()
     {
@@ -41,13 +41,13 @@ public class BnfTokenizerTest
             new MatchSpan
             {
                 Success = true,
-                Index = 0, 
+                Index = 0,
                 Value = "|"
             }
         ]);
     }
-    
-    
+
+
     [Test]
     public void _String()
     {
@@ -56,12 +56,12 @@ public class BnfTokenizerTest
             new MatchSpan
             {
                 Success = true,
-                Index = 0, 
+                Index = 0,
                 Value = "_A_1"
             }
         ]);
     }
-    
+
     [Test]
     public void String()
     {
@@ -70,13 +70,13 @@ public class BnfTokenizerTest
             new MatchSpan
             {
                 Success = true,
-                Index = 0, 
+                Index = 0,
                 Value = "ABC_123_DEF"
             }
         ]);
     }
-    
-    
+
+
     [Test]
     public void QuotesString()
     {
@@ -85,13 +85,13 @@ public class BnfTokenizerTest
             new MatchSpan
             {
                 Success = true,
-                Index = 0, 
+                Index = 0,
                 Value = "\"ABC\\\"123\""
             }
         ]);
     }
-    
-    
+
+
     [Test]
     public void LBracket()
     {
@@ -100,13 +100,13 @@ public class BnfTokenizerTest
             new MatchSpan
             {
                 Success = true,
-                Index = 0, 
+                Index = 0,
                 Value = "("
             }
         ]);
     }
-    
-    
+
+
     [Test]
     public void RBracket()
     {
@@ -115,9 +115,35 @@ public class BnfTokenizerTest
             new MatchSpan
             {
                 Success = true,
-                Index = 0, 
+                Index = 0,
                 Value = ")"
             }
+        ]);
+    }
+
+    [Test]
+    public void Rule()
+    {
+        var matches = WhenExtractMatches("<rule1> ::= 1");
+        matches.Should().BeEquivalentTo([
+            new MatchSpan
+            {
+                Success = true,
+                Index = 0,
+                Value = "<rule1>"
+            },
+            new MatchSpan
+            {
+                Success = true,
+                Index = 8,
+                Value = "::="
+            },
+            new MatchSpan
+            {
+                Success = true,
+                Index = 12,
+                Value = "1"
+            },
         ]);
     }
 
