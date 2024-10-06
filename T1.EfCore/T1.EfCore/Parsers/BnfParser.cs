@@ -65,14 +65,50 @@ public class BnfParser
         _position++;
         return match.Value;
     }
-
+    
     private BnfExpression ParseExpression()
     {
-        var expression = ParseMultiTerm();
+        return ParseOrExpression();
+        //return ParseAdditionExpression();
+    }
+    
+    private BnfExpression ParseOrExpression()
+    {
+        var expression = ParseAndExpression();
+        while (Peek("|"))
+        {
+            Consume("|");
+            var right = ParseAndExpression();
+            expression = new BnfExpression("Or", "|")
+            {
+                Children = { expression, right }
+            };
+        }
+        return expression;
+    }
+    
+    private BnfExpression ParseAndExpression()
+    {
+        var expression = ParseAdditionExpression();
+        while (Peek("&"))
+        {
+            Consume("&");
+            var right = ParseAdditionExpression();
+            expression = new BnfExpression("And", "&")
+            {
+                Children = { expression, right }
+            };
+        }
+        return expression;
+    }
+
+    private BnfExpression ParseAdditionExpression()
+    {
+        var expression = ParseMultiplicationTerm();
         while (Peek("+"))
         {
             Consume("+");
-            var right = ParseMultiTerm();
+            var right = ParseMultiplicationTerm();
             expression = new BnfExpression("Addition", "+")
             {
                 Children = { expression, right }
@@ -81,7 +117,7 @@ public class BnfParser
         return expression;
     }
     
-    private BnfExpression ParseMultiTerm()
+    private BnfExpression ParseMultiplicationTerm()
     {
         var term = ParseFactor();
         while (Peek("*"))
