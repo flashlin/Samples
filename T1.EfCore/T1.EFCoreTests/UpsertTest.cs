@@ -16,6 +16,28 @@ public class UpsertTest
     
     
     [Test]
+    public void UpsertLargeRange()
+    {
+        GivenCreateCustomerTable();
+        var insertData = new List<CustomerEntity>();
+        for (var i = 0; i < 4000; i++)
+        {
+            insertData.Add(new CustomerEntity
+            {
+                Id = i+1,
+                Name = $"Customer{i}"
+            });
+        }
+        
+        var effectedCount1 = _db.UpsertRange(insertData)
+            .On(x=>x.Id)
+            .Execute();
+        
+        effectedCount1.Should().Be(4000);
+    }
+    
+    
+    [Test]
     public void UpsertRange()
     {
         GivenCreateCustomerTable();
