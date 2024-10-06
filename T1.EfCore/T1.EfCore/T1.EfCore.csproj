@@ -7,8 +7,9 @@
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <Title>Extension Entity Framework Core</Title>
         <Description>The purpose of this library is to extend or support the functionality of Entity Framework.</Description>
-        <Version>1.0.2</Version>
+        <Version>1.0.3</Version>
         <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+        <PackageReleaseNotes>add UpsertRange and  return effected Rows Count</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
