@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Folder Include="AntlrTsql\" />
+    <Folder Include="BnfCollection\" />
   </ItemGroup>
 
 </Project>
