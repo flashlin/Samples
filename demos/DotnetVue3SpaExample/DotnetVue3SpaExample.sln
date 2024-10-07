@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotnetVue3SpaExample", "DotnetVue3SpaExample\DotnetVue3SpaExample.csproj", "{D29A164F-1B84-40A6-9688-CCBE24815835}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D29A164F-1B84-40A6-9688-CCBE24815835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D29A164F-1B84-40A6-9688-CCBE24815835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D29A164F-1B84-40A6-9688-CCBE24815835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D29A164F-1B84-40A6-9688-CCBE24815835}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
