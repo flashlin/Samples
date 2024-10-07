@@ -1,6 +1,6 @@
 using T1.ParserKit.BnfCollection;
 
-namespace T1.EFCoreTests;
+namespace ParserKitTests.BnfTests;
 
 public class BnfTest
 {
@@ -13,7 +13,7 @@ public class BnfTest
 <factor> ::= ( <expr> ) | <number>
 <number> ::= ""0"" | ""1"" | ""2"" | ""3"" | ""4"" | ""5"" | ""6"" | ""7"" | ""8"" | ""9""
 ";
-        var parser = new BnfParser(bnfGrammar);
+        var parser = new BnfParser1(bnfGrammar);
         var tree = parser.Parse();
         var text = parser.GetExpressionTreeString(tree);
     }
@@ -73,7 +73,7 @@ public class BnfTest
 <identifier> ::= {<letter>} {<letter> | <digit> | ""_""}
 ";
 
-        var parser = new BnfParser(bnfGrammar);
+        var parser = new BnfParser1(bnfGrammar);
         var tree = parser.Parse();
         
         var visitor = new LinqExpressionExpressionVisitor();

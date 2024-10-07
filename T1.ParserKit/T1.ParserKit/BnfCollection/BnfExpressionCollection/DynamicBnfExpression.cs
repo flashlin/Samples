@@ -1,47 +1,47 @@
-﻿namespace T1.ParserKit.BnfCollection.DynamicBnfExpressionCollection;
+﻿namespace T1.ParserKit.BnfCollection.BnfExpressionCollection;
 
-public interface IDynamicBnfExpression
+public interface IBnfExpression
 {
 }
 
-public class BnfIdentifier : IDynamicBnfExpression
+public class BnfIdentifier : IBnfExpression
 {
     public string Name { get; set; } = string.Empty;
 }
 
-public class BnfLiteral : IDynamicBnfExpression
+public class BnfLiteral : IBnfExpression
 {
     public string Value { get; set; } = string.Empty; 
 }
 
-public class BnfBinaryExpression : IDynamicBnfExpression
+public class BnfBinaryExpression : IBnfExpression
 {
-    public required IDynamicBnfExpression Left { get; set; }
+    public required IBnfExpression Left { get; set; }
     public string Operator { get; set; } = string.Empty; 
-    public required IDynamicBnfExpression Right { get; set; }
+    public required IBnfExpression Right { get; set; }
 }
 
-public class BnfGroup : IDynamicBnfExpression
+public class BnfGroup : IBnfExpression
 {
-    public required IDynamicBnfExpression InnerExpression { get; set; }
+    public required IBnfExpression InnerExpression { get; set; }
 }
 
-public class BnfRule : IDynamicBnfExpression
+public class BnfRule : IBnfExpression
 {
     public string RuleName { get; set; } = string.Empty;
-    public List<IDynamicBnfExpression> Expressions { get; set; } = [];
+    public List<IBnfExpression> Expressions { get; set; } = [];
 }
 
 
-public class DynamicBnfParser
+public class BnfParser
 {
     private readonly List<MatchSpan> _tokens;
     private int _position;
 
-    public DynamicBnfParser(List<MatchSpan> tokens)
+    public BnfParser(List<MatchSpan> tokens)
     {
-        this._tokens = tokens;
-        this._position = 0;
+        _tokens = tokens;
+        _position = 0;
     }
 
     private MatchSpan? CurrentToken => 
@@ -87,7 +87,7 @@ public class DynamicBnfParser
         throw new Exception("Expected literal.");
     }
 
-    private IDynamicBnfExpression ParseExpression()
+    private IBnfExpression ParseExpression()
     {
         var left = ParseTerm();
         while (CurrentToken != null)
@@ -105,7 +105,7 @@ public class DynamicBnfParser
         return left;
     }
 
-    private IDynamicBnfExpression ParseTerm()
+    private IBnfExpression ParseTerm()
     {
         if (CurrentToken != null)
         {
@@ -132,9 +132,6 @@ public class DynamicBnfParser
 
     private bool IsIdentifier(string? token) => !string.IsNullOrEmpty(token) && char.IsLetter(token[0]);
     private bool IsLiteral(string? token) => !string.IsNullOrEmpty(token) && char.IsDigit(token[0]);
-    private bool IsOperator(string token) => token == "==" || token == "!=" || token == "<" || token == ">" || token == "<=" || token == ">=";
-
-    // 解析 BNF 規則
     public BnfRule ParseBnfRule()
     {
         var rule = new BnfRule

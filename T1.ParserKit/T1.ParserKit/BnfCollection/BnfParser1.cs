@@ -5,7 +5,7 @@ namespace T1.ParserKit.BnfCollection;
 
 public interface IBnfExpressionVisitor
 {
-    void Visit(BnfExpression expression);
+    void Visit(BnfExpression1 expression1);
 }
 
 public class LinqExpressionExpressionVisitor : IBnfExpressionVisitor
@@ -17,30 +17,30 @@ public class LinqExpressionExpressionVisitor : IBnfExpressionVisitor
         _result = new StringBuilder();
     }
 
-    public void Visit(BnfExpression expression)
+    public void Visit(BnfExpression1 expression1)
     {
-        switch (expression.Type)
+        switch (expression1.Type)
         {
             case "From":
-                _result.Append($"from {expression.Value} ");
+                _result.Append($"from {expression1.Value} ");
                 break;
             case "Select":
-                _result.Append($"select {expression.Value} ");
+                _result.Append($"select {expression1.Value} ");
                 break;
             case "Join":
-                _result.Append($"join {expression.Value} ");
+                _result.Append($"join {expression1.Value} ");
                 break;
             case "Where":
-                _result.Append($"where {expression.Value} ");
+                _result.Append($"where {expression1.Value} ");
                 break;
             case "GroupBy":
-                _result.Append($"group by {expression.Value} ");
+                _result.Append($"group by {expression1.Value} ");
                 break;
             case "OrderBy":
-                _result.Append($"orderby {expression.Value} ");
+                _result.Append($"orderby {expression1.Value} ");
                 break;
             default:
-                _result.Append($"/* Unrecognized Type: {expression.Type} */ ");
+                _result.Append($"/* Unrecognized Type: {expression1.Type} */ ");
                 break;
         }
     }
@@ -51,11 +51,11 @@ public class LinqExpressionExpressionVisitor : IBnfExpressionVisitor
     }
 }
 
-public class BnfExpression(string type, string value = "")
+public class BnfExpression1(string type, string value = "")
 {
     public string Type { get; set; } = type;
     public string Value { get; set; } = value;
-    public List<BnfExpression> Children { get; set; } = new();
+    public List<BnfExpression1> Children { get; set; } = new();
     
     public void Accept(IBnfExpressionVisitor expressionVisitor)
     {
@@ -67,18 +67,18 @@ public class BnfExpression(string type, string value = "")
     }
 }
 
-public class BnfParser
+public class BnfParser1
 {
     private List<MatchSpan> _tokens;
     private int _position = 0;
 
-    public BnfParser(string input)
+    public BnfParser1(string input)
     {
         var tokenizer = new BnfTokenizer();
         _tokens = tokenizer.ExtractMatches(input);
     }
 
-    public string GetExpressionTreeString(BnfExpression expr, int indent=0)
+    public string GetExpressionTreeString(BnfExpression1 expr, int indent=0)
     {
         var text = new StringBuilder();
         text.AppendLine($"{new string(' ', indent)}{expr.Type}: {expr.Value}");
@@ -90,9 +90,9 @@ public class BnfParser
         return text.ToString();
     }
 
-    public BnfExpression Parse()
+    public BnfExpression1 Parse()
     {
-        var root = new BnfExpression("Grammar");
+        var root = new BnfExpression1("Grammar");
         while (_position < _tokens.Count)
         {
             root.Children.Add(ParseRule());
@@ -116,19 +116,19 @@ public class BnfParser
         return match.Value;
     }
     
-    private BnfExpression ParseExpression()
+    private BnfExpression1 ParseExpression()
     {
         return ParseOrExpression();
     }
     
-    private BnfExpression ParseOrExpression()
+    private BnfExpression1 ParseOrExpression()
     {
         var expression = ParseAndExpression();
         while (Peek("|"))
         {
             Consume("|");
             var right = ParseAndExpression();
-            expression = new BnfExpression("Or", "|")
+            expression = new BnfExpression1("Or", "|")
             {
                 Children = { expression, right }
             };
@@ -136,14 +136,14 @@ public class BnfParser
         return expression;
     }
     
-    private BnfExpression ParseAndExpression()
+    private BnfExpression1 ParseAndExpression()
     {
         var expression = ParseAdditionExpression();
         while (Peek("&"))
         {
             Consume("&");
             var right = ParseAdditionExpression();
-            expression = new BnfExpression("And", "&")
+            expression = new BnfExpression1("And", "&")
             {
                 Children = { expression, right }
             };
@@ -151,14 +151,14 @@ public class BnfParser
         return expression;
     }
 
-    private BnfExpression ParseAdditionExpression()
+    private BnfExpression1 ParseAdditionExpression()
     {
         var expression = ParseMultiplicationTerm();
         while (Peek("+"))
         {
             Consume("+");
             var right = ParseMultiplicationTerm();
-            expression = new BnfExpression("Addition", "+")
+            expression = new BnfExpression1("Addition", "+")
             {
                 Children = { expression, right }
             };
@@ -166,14 +166,14 @@ public class BnfParser
         return expression;
     }
     
-    private BnfExpression ParseMultiplicationTerm()
+    private BnfExpression1 ParseMultiplicationTerm()
     {
         var term = ParseFactor();
         while (Peek("*"))
         {
             Consume("*");
             var right = ParseFactor();
-            term = new BnfExpression("Multiplication", "*")
+            term = new BnfExpression1("Multiplication", "*")
             {
                 Children = { term, right }
             };
@@ -181,7 +181,7 @@ public class BnfParser
         return term;
     }
 
-    private BnfExpression ParseFactor()
+    private BnfExpression1 ParseFactor()
     {
         if (Peek("("))
         {
@@ -205,23 +205,23 @@ public class BnfParser
         throw new Exception("Unexpected token in factor");
     }
 
-    private BnfExpression ParseNonTerminal()
+    private BnfExpression1 ParseNonTerminal()
     {
-        return new BnfExpression("NonTerminal", ConsumeRegex(@"<[^>]+>"));
+        return new BnfExpression1("NonTerminal", ConsumeRegex(@"<[^>]+>"));
     }
 
-    private BnfExpression ParseRule()
+    private BnfExpression1 ParseRule()
     {
-        var rule = new BnfExpression("Rule");
+        var rule = new BnfExpression1("Rule");
         rule.Children.Add(ParseNonTerminal());
         Consume("::=");
         rule.Children.Add(ParseExpression());
         return rule;
     }
 
-    private BnfExpression ParseStringTerminal()
+    private BnfExpression1 ParseStringTerminal()
     {
-        var terminal = new BnfExpression("Terminal");
+        var terminal = new BnfExpression1("Terminal");
         if(!_tokens[_position].Value.StartsWith("\""))
         {
             throw new Exception("Unterminated string literal");
@@ -235,9 +235,9 @@ public class BnfParser
         return terminal;
     }
     
-    private BnfExpression ParseNumberTerminal()
+    private BnfExpression1 ParseNumberTerminal()
     {
-        var terminal = new BnfExpression("Terminal");
+        var terminal = new BnfExpression1("Terminal");
         var value = _tokens[_position].Value;
         if(!decimal.TryParse(value, out _))
         {
