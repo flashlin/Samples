@@ -1,6 +1,6 @@
-using T1.EfCore.Parsers.MatchSpanHandlerModule;
+using T1.ParserKit.BnfCollection.MatchSpanHandlerModule;
 
-namespace T1.EfCore.Parsers;
+namespace T1.ParserKit.BnfCollection;
 
 public class BnfTokenizer
 {

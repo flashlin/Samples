@@ -1,4 +1,4 @@
-namespace T1.EfCore.Parsers;
+namespace T1.ParserKit.BnfCollection;
 
 public struct MatchSpan
 {

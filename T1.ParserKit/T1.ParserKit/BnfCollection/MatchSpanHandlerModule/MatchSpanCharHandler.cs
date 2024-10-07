@@ -1,4 +1,4 @@
-namespace T1.EfCore.Parsers.MatchSpanHandlerModule;
+namespace T1.ParserKit.BnfCollection.MatchSpanHandlerModule;
 
 public class MatchSpanCharHandler : IMatchSpanHandler
 {

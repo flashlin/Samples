@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace T1.EfCore.Parsers;
+namespace T1.ParserKit.BnfCollection;
 
 public interface IBnfExpressionVisitor
 {

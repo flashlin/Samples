@@ -1,4 +1,4 @@
-using T1.EfCore.Parsers;
+using T1.ParserKit.BnfCollection;
 
 namespace T1.EFCoreTests;
 
