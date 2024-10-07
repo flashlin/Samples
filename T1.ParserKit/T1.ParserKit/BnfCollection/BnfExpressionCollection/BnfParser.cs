@@ -1,46 +1,14 @@
 ﻿namespace T1.ParserKit.BnfCollection.BnfExpressionCollection;
 
-public interface IBnfExpression
-{
-}
-
-public class BnfIdentifier : IBnfExpression
-{
-    public string Name { get; set; } = string.Empty;
-}
-
-public class BnfLiteral : IBnfExpression
-{
-    public string Value { get; set; } = string.Empty; 
-}
-
-public class BnfBinaryExpression : IBnfExpression
-{
-    public required IBnfExpression Left { get; set; }
-    public string Operator { get; set; } = string.Empty; 
-    public required IBnfExpression Right { get; set; }
-}
-
-public class BnfGroup : IBnfExpression
-{
-    public required IBnfExpression InnerExpression { get; set; }
-}
-
-public class BnfRule : IBnfExpression
-{
-    public string RuleName { get; set; } = string.Empty;
-    public List<IBnfExpression> Expressions { get; set; } = [];
-}
-
-
 public class BnfParser
 {
     private readonly List<MatchSpan> _tokens;
     private int _position;
 
-    public BnfParser(List<MatchSpan> tokens)
+    public BnfParser(string bnf)
     {
-        _tokens = tokens;
+        var tokenizer = new BnfTokenizer();
+        _tokens = tokenizer.ExtractMatches(bnf);
         _position = 0;
     }
 
