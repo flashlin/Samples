@@ -116,4 +116,11 @@ public class BnfParser
         }
         return rule;
     }
+    public IEnumerable<BnfRule> Parse()
+    {
+        while (CurrentToken != null)
+        {
+            yield return ParseBnfRule();
+        }
+    }
 }

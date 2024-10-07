@@ -1,4 +1,5 @@
 using T1.ParserKit.BnfCollection;
+using T1.ParserKit.BnfCollection.BnfExpressionCollection;
 
 namespace ParserKitTests.BnfTests;
 
@@ -13,9 +14,8 @@ public class BnfTest
 <factor> ::= ( <expr> ) | <number>
 <number> ::= ""0"" | ""1"" | ""2"" | ""3"" | ""4"" | ""5"" | ""6"" | ""7"" | ""8"" | ""9""
 ";
-        var parser = new BnfParser1(bnfGrammar);
-        var tree = parser.Parse();
-        var text = parser.GetExpressionTreeString(tree);
+        var parser = new BnfParser(bnfGrammar);
+        var tree = parser.Parse().ToList();
     }
     
     [Test]
