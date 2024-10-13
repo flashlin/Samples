@@ -12,55 +12,118 @@ public class BnfParser
         _position = 0;
     }
 
-    private MatchSpan? CurrentToken => 
-        _position < _tokens.Count ? _tokens[_position] : null;
+    private MatchSpan CurrentToken => _tokens[_position];
 
     private void AdvanceToken() => _position++;
 
+    private bool IsEof()
+    {
+        return _position >= _tokens.Count;
+    }
+
     private bool Match(string value)
     {
-        if (CurrentToken?.Value == value)
+        if (IsEof())
+        {
+            return false;
+        }
+
+        if (CurrentToken.Value == value)
         {
             AdvanceToken();
             return true;
         }
+
         return false;
+    }
+
+    private BnfRuleIdentifier ParseRuleIdentifier()
+    {
+        if (IsEof())
+        {
+            throw new Exception("Expected rule identifier.");
+        }
+
+        var identifier = new BnfRuleIdentifier
+        {
+            Name = CurrentToken.Value
+        };
+        AdvanceToken();
+        return identifier;
     }
 
     private BnfIdentifier ParseIdentifier()
     {
-        if (CurrentToken != null)
+        if (!IsEof())
         {
             var identifier = new BnfIdentifier
             {
-                Name = CurrentToken.Value.Value
+                Name = CurrentToken.Value
             };
             AdvanceToken();
             return identifier;
         }
+
         throw new Exception("Expected identifier.");
+    }
+
+    private BnfString ParseString()
+    {
+        var bnfText = new BnfString
+        {
+            Text = CurrentToken.Value
+        };
+        AdvanceToken();
+        return bnfText;
     }
 
     private BnfLiteral ParseLiteral()
     {
-        if (CurrentToken != null)
+        if (!IsEof())
         {
             var literal = new BnfLiteral
             {
-                Value = CurrentToken.Value.Value
+                Value = CurrentToken.Value
             };
             AdvanceToken();
             return literal;
         }
+
         throw new Exception("Expected literal.");
     }
 
     private IBnfExpression ParseExpression()
     {
         var left = ParseTerm();
-        while (CurrentToken != null)
+        while (!IsEof())
         {
-            var operatorToken = CurrentToken.Value;
+            var operatorToken = CurrentToken;
+
+            if (operatorToken.Value == ";")
+            {
+                AdvanceToken();
+                break;
+            }
+            
+            if (Match(")"))
+            {
+                return left;
+            }
+
+            if (operatorToken.Value != "|")
+            {
+                if (left is BnfConcatExpression concat)
+                {
+                    concat.Items.Add(ParseExpression());
+                    return concat;
+                }
+
+                return new BnfConcatExpression
+                {
+                    Items = [left, ParseExpression()],
+                };
+            }
+
             AdvanceToken();
             var right = ParseTerm();
             left = new BnfBinaryExpression
@@ -70,57 +133,83 @@ public class BnfParser
                 Right = right
             };
         }
+
         return left;
     }
 
     private IBnfExpression ParseTerm()
     {
-        if (CurrentToken != null)
+        if (IsString(CurrentToken.Value))
         {
-            if (IsIdentifier(CurrentToken?.Value))
-            {
-                return ParseIdentifier();
-            }
-            if (IsLiteral(CurrentToken?.Value))
-            {
-                return ParseLiteral();
-            }
-            if (Match("("))
-            {
-                var innerExpression = ParseExpression();
-                Match(")");
-                return new BnfGroup
-                {
-                    InnerExpression = innerExpression
-                };
-            }
+            return ParseString();
         }
-        throw new Exception("Unexpected term.");
+
+        if (IsRuleIdentifier(CurrentToken.Value))
+        {
+            return ParseRuleIdentifier();
+        }
+
+        if (IsIdentifier(CurrentToken.Value))
+        {
+            return ParseIdentifier();
+        }
+
+        if (IsLiteral(CurrentToken.Value))
+        {
+            return ParseLiteral();
+        }
+
+        if (Match("("))
+        {
+            var innerExpression = ParseExpression();
+            Match(")");
+            return new BnfGroup
+            {
+                InnerExpression = innerExpression
+            };
+        }
+
+        throw new Exception($"Unexpected term. {CurrentToken.Value}");
     }
 
-    private bool IsIdentifier(string? token) => !string.IsNullOrEmpty(token) && char.IsLetter(token[0]);
-    private bool IsLiteral(string? token) => !string.IsNullOrEmpty(token) && char.IsDigit(token[0]);
+    private bool IsIdentifier(string token) => !string.IsNullOrEmpty(token) && char.IsLetter(token[0]);
+    private bool IsLiteral(string token) => !string.IsNullOrEmpty(token) && char.IsDigit(token[0]);
+
+    private bool IsRuleIdentifier(string token) =>
+        !string.IsNullOrEmpty(token) && token.StartsWith("<") && token.EndsWith(">");
+
+    private bool IsString(string token) =>
+        !string.IsNullOrEmpty(token) && token.StartsWith("\"") && token.EndsWith("\"");
+
     public BnfRule ParseBnfRule()
     {
         var rule = new BnfRule
         {
             RuleName = ParseIdentifier().Name
         };
-        while (CurrentToken != null)
+        Match("::=");
+        while (!IsEof())
         {
             rule.Expressions.Add(ParseExpression());
-            if (CurrentToken == null || !Match("|"))
+            if (!Match("|"))
             {
                 break;
             }
         }
+
         return rule;
     }
+
     public IEnumerable<BnfRule> Parse()
     {
-        while (CurrentToken != null)
+        while (!IsEof())
         {
             yield return ParseBnfRule();
         }
     }
+}
+
+public class BnfConcatExpression : IBnfExpression
+{
+    public List<IBnfExpression> Items { get; set; } = [];
 }
