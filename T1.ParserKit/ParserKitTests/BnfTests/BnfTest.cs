@@ -73,11 +73,11 @@ public class BnfTest
 <identifier> ::= {<letter>} {<letter> | <digit> | ""_""}
 ";
 
-        var parser = new BnfParser1(bnfGrammar);
+        var parser = new BnfParser(bnfGrammar);
         var tree = parser.Parse();
         
-        var visitor = new LinqExpressionExpressionVisitor();
-        tree.Accept(visitor);
-        var text = visitor.GetResult();
+        //var visitor = new LinqExpressionExpressionVisitor();
+        //tree.Accept(visitor);
+        //var text = visitor.GetResult();
     }
 }
