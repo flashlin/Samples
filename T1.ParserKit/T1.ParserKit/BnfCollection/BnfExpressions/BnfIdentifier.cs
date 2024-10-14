@@ -1,4 +1,4 @@
-﻿namespace T1.ParserKit.BnfCollection.BnfExpressionCollection;
+﻿namespace T1.ParserKit.BnfCollection.BnfExpressions;
 
 public class BnfIdentifier : IBnfExpression
 {

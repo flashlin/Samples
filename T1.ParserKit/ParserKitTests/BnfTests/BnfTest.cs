@@ -1,5 +1,5 @@
 using T1.ParserKit.BnfCollection;
-using T1.ParserKit.BnfCollection.BnfExpressionCollection;
+using T1.ParserKit.BnfCollection.BnfExpressions;
 
 namespace ParserKitTests.BnfTests;
 
