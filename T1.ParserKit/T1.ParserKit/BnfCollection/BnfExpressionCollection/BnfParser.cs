@@ -14,7 +14,7 @@ public class BnfParser
 
     private MatchSpan CurrentToken => _tokens[_position];
 
-    private void AdvanceToken() => _position++;
+    private void ConsumeToken() => _position++;
 
     private bool IsEof()
     {
@@ -30,7 +30,7 @@ public class BnfParser
 
         if (CurrentToken.Value == value)
         {
-            AdvanceToken();
+            ConsumeToken();
             return true;
         }
 
@@ -43,12 +43,11 @@ public class BnfParser
         {
             throw new Exception("Expected rule identifier.");
         }
-
         var identifier = new BnfRuleIdentifier
         {
             Name = CurrentToken.Value
         };
-        AdvanceToken();
+        ConsumeToken();
         return identifier;
     }
 
@@ -60,7 +59,7 @@ public class BnfParser
             {
                 Name = CurrentToken.Value
             };
-            AdvanceToken();
+            ConsumeToken();
             return identifier;
         }
 
@@ -73,7 +72,7 @@ public class BnfParser
         {
             Text = CurrentToken.Value
         };
-        AdvanceToken();
+        ConsumeToken();
         return bnfText;
     }
 
@@ -85,7 +84,7 @@ public class BnfParser
             {
                 Value = CurrentToken.Value
             };
-            AdvanceToken();
+            ConsumeToken();
             return literal;
         }
 
@@ -101,7 +100,7 @@ public class BnfParser
 
             if (operatorToken.Value == ";")
             {
-                AdvanceToken();
+                ConsumeToken();
                 break;
             }
             
@@ -124,7 +123,7 @@ public class BnfParser
                 };
             }
 
-            AdvanceToken();
+            ConsumeToken();
             var right = ParseTerm();
             left = new BnfBinaryExpression
             {
@@ -207,9 +206,4 @@ public class BnfParser
             yield return ParseBnfRule();
         }
     }
-}
-
-public class BnfConcatExpression : IBnfExpression
-{
-    public List<IBnfExpression> Items { get; set; } = [];
 }
