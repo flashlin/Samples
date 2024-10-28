@@ -15,34 +15,35 @@ public class SlackClient : ISlackClient
         _client = new SlackApiClient(config.Value.Token);
     }
 
-    public async Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs args)
+    public Task<List<SlackHistoryItem>> GetHistoryAsync(GetHistoryArgs args)
     {
-        var count = 0;
-        var currentRange = args.Range;
-        var result = new Dictionary<Guid, SlackHistoryItem>();
-        while (count < args.Limit)
-        {
-            var subResult = await InternalGetHistoryAsync(args.ChannelId, currentRange);
-            if (subResult.Count == 0)
-            {
-                break;
-            }
-            foreach (var item in subResult)
-            {
-                result[item.Id] = item;
-            }
-            count += subResult.Count;
-            if (subResult.Count < args.Limit)
-            {
-                break;
-            }
-            currentRange = new DateTimeRange
-            {
-                Start = subResult[^1].Time,
-                End = args.Range.End
-            };
-        }
-        return result.Values.ToList();
+        return InternalGetHistoryAsync(args.ChannelId, args.Range);
+        // var count = 0;
+        // var currentRange = args.Range;
+        // var result = new Dictionary<Guid, SlackHistoryItem>();
+        // while (count < args.Limit)
+        // {
+        //     var subResult = await InternalGetHistoryAsync(args.ChannelId, currentRange);
+        //     if (subResult.Count == 0)
+        //     {
+        //         break;
+        //     }
+        //     foreach (var item in subResult)
+        //     {
+        //         result[item.Id] = item;
+        //     }
+        //     count += subResult.Count;
+        //     if (subResult.Count < args.Limit)
+        //     {
+        //         break;
+        //     }
+        //     currentRange = new DateTimeRange
+        //     {
+        //         Start = subResult[^1].Time,
+        //         End = args.Range.End
+        //     };
+        // }
+        // return result.Values.ToList();
     }
 
     private async Task<List<SlackHistoryItem>> InternalGetHistoryAsync(string channelId, DateTimeRange range)
