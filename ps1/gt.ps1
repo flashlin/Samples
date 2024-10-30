@@ -1,6 +1,7 @@
 param(
     [string]$action,
-    [string]$arg1
+    [string]$arg1,
+    [string]$arg2
 )
 
 # $env:psm1Home = "D:\OneDriveCode\psm1"
@@ -95,6 +96,23 @@ if( "u" -eq $action ) {
     return
 }
 
+if( "uf" -eq $action ){
+    $hashId = $arg1
+    if( "" -eq $hashId ) {
+        Write-Host "Please input hash id"
+        return
+    }
+    $file = $arg2
+    if( "" -eq $file ) {
+        Write-Host "Please input file name"
+        return
+    }
+    Write-Host "針對指定 commit $hashId 的特定檔案進行 revert"
+    InvokeCmd "git checkout $hashId^ -- $file"
+    InvokeCmd "git status"
+    InvokeCmd "git commit -m ""Revert $file to $hashId version"""
+    return
+}
 
 if( "uc" -eq $action ) {
     InvokeCmd "git reset HEAD~1"
@@ -117,6 +135,13 @@ if( "h" -eq $action ) {
 if( "l" -eq $action ) {
     # 簡短 log
     InvokeCmd 'git log --pretty=format:"%h - %an, %cd : %s"'
+    return
+}
+
+if( "lf" -eq $action ){
+    Write-Host "只列出該 commit 中變更的檔案名稱，而不顯示內容變更細節"
+    $hashId = $arg1
+    InvokeCmd "git diff-tree --no-commit-id --name-only -r $hashId"
     return
 }
 
@@ -314,6 +339,7 @@ Write-Host "init               :init and add default .gitignore"
 Write-Host "info               :顯示目前專案的 Git 倉庫所佔用的檔案空間"
 Write-Host "l                  :show short log"
 Write-Host "ll                 :show long log"
+Write-Host "lf <hash>          :show hash changed files 只列出該 commit 中變更的檔案名稱，而不顯示內容變更細節"
 Write-Host "r                  :undo previous action"
 Write-Host "rm <file>          :remove file in commited file"
 Write-Host "rd <folder>        :remove add folder in git"
@@ -331,4 +357,5 @@ Write-Host "stp                :stash pop"
 Write-Host "stc                :stash clear"               
 Write-Host "u [file]           :undo uncommitted files and clean"
 Write-Host "uc                 :abort commit files"
+Write-Host "uf <hashId> <file> :revert commit file for hashId (針對指定 commit 的特定檔案進行 revert)"
 Write-Host "plm                :pull all submodules"
