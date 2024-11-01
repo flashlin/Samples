@@ -4,8 +4,8 @@ namespace SqlSharpLit;
 
 public class DynamicDbContext : DbContext
 {
-    public DynamicDbContext(DbContextOptions<DynamicDbContext>? options) 
-        : base(options ?? CreateDbContextOptions(null)) 
+    public DynamicDbContext(DbContextOptions<DynamicDbContext>? options)
+        : base(options ?? CreateDbContextOptions(null))
     {
     }
 
@@ -16,6 +16,50 @@ public class DynamicDbContext : DbContext
             .UseSqlServer(connectionString)
             .Options;
         return options;
+    }
+
+    public List<Dictionary<string, string>> ExportTableData(string tableName)
+    {
+        var fields = GetTableSchema(tableName);
+        string? accumulator = null;
+        var key = fields.First(x => x.IsPk);
+        var result = new List<Dictionary<string, string>>(); 
+        do
+        {
+            var data = GetSelectTop1000TableDataSql(tableName, fields, accumulator);
+            if (data.Count == 0)
+            {
+                break;
+            }
+            result.AddRange(data);
+            accumulator = data.Last()[key.Name];
+        } while (true);
+        return result;
+    }
+    
+    private List<Dictionary<string, string>> GetSelectTop1000TableDataSql(string tableName, List<TableSchemaEntity> fields,
+        string? accumulator)
+    {
+        var fieldNames = string.Join(",", fields.Select(x => x.Name));
+        var key = fields.First(x => x.IsPk);
+        var idKeyName = key.Name;
+        string sql;
+        if (IsStringType(key)) 
+        {
+            accumulator ??= string.Empty;
+            sql = $@"SELECT TOP 1000 {fieldNames} FROM {tableName} WHERE {idKeyName} > '{accumulator}'";
+        }
+        else
+        {
+            accumulator ??= "0";
+            sql = $@"SELECT TOP 1000 {fieldNames} FROM {tableName} WHERE {idKeyName} > {accumulator}";
+        }
+        return Database.SqlQueryRaw<Dictionary<string, string>>(sql).ToList();
+    }
+
+    private static bool IsStringType(TableSchemaEntity key)
+    {
+        return key.Type.ToLower().StartsWith("varchar") || key.Type.ToLower().StartsWith("nvarchar");
     }
 
     public List<TableSchemaEntity> GetTableSchema(string tableName)
