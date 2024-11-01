@@ -8,7 +8,7 @@ docker-compose up --build -d
 docker-compose ps
 
 # 取得測試服務的容器 ID
-container_id=$(docker-compose ps -q sqlsharp-sql-sharp-tests-1)
+container_id=$(docker-compose ps -q sql-sharp-tests)
 echo "測試服務容器 ID: $container_id"
 
 # 檢查容器執行狀態，並等待測試完成

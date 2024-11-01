@@ -10,6 +10,7 @@
       
   sql-sharp-tests:
     image: sql-sharp-tests
+    container_name: sql-sharp-tests
     build:
       context: .
       dockerfile: SqlSharpTests/Dockerfile
