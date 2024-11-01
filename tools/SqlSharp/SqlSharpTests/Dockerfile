@@ -10,4 +10,5 @@ COPY . .
 RUN dotnet build "SqlSharpTests/SqlSharpTests.csproj" -c $BUILD_CONFIGURATION -o /app
 
 WORKDIR /app
-ENTRYPOINT ["dotnet", "test", "--logger:trx;LogFileName=TestResults.trx", "SqlSharpTests.dll"]
+# ENTRYPOINT ["dotnet", "test", "--logger:trx;LogFileName=TestResults.trx", "SqlSharpTests.dll"]
+CMD ["sh", "-c", "dotnet test --logger:trx;LogFileName=TestResults.trx SqlSharpTests.dll && tail -f /dev/null"]

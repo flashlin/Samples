@@ -3,8 +3,13 @@
 # 啟動 Docker Compose 並以背景模式運行
 docker-compose up --build -d
 
+#echo "等待服務啟動..."
+#sleep 5
+docker-compose ps
+
 # 取得測試服務的容器 ID
-container_id=$(docker-compose ps -q nunit-sql-sharp-tests)
+container_id=$(docker-compose ps -q sqlsharp-sql-sharp-tests-1)
+echo "測試服務容器 ID: $container_id"
 
 # 檢查容器執行狀態，並等待測試完成
 echo "等待測試完成..."
