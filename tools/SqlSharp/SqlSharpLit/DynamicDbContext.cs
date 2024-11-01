@@ -8,14 +8,20 @@ public class DynamicDbContext : DbContext
         : base(options ?? CreateDbContextOptions(null))
     {
     }
+    
+    public static DbContextOptions<DynamicDbContext> CreateInMemoryDbContextOptions()
+    {
+        return new DbContextOptionsBuilder<DynamicDbContext>()
+            .UseInMemoryDatabase("InMemoryDb")
+            .Options;
+    }
 
     public static DbContextOptions<DynamicDbContext> CreateDbContextOptions(string? connectionString)
     {
         connectionString ??= @".\\SQLExpress;Integrated Security=true;";
-        var options = new DbContextOptionsBuilder<DynamicDbContext>()
+        return new DbContextOptionsBuilder<DynamicDbContext>()
             .UseSqlServer(connectionString)
             .Options;
-        return options;
     }
 
     public List<Dictionary<string, string>> ExportTableData(string tableName)
@@ -26,7 +32,7 @@ public class DynamicDbContext : DbContext
         var result = new List<Dictionary<string, string>>(); 
         do
         {
-            var data = GetSelectTop1000TableDataSql(tableName, fields, accumulator);
+            var data = GetTopNTableData(1000, tableName, fields, accumulator);
             if (data.Count == 0)
             {
                 break;
@@ -36,8 +42,9 @@ public class DynamicDbContext : DbContext
         } while (true);
         return result;
     }
-    
-    private List<Dictionary<string, string>> GetSelectTop1000TableDataSql(string tableName, List<TableSchemaEntity> fields,
+
+    public List<Dictionary<string, string>> GetTopNTableData(int topCount, string tableName,
+        List<TableSchemaEntity> fields,
         string? accumulator)
     {
         var fieldNames = string.Join(",", fields.Select(x => x.Name));
@@ -47,12 +54,12 @@ public class DynamicDbContext : DbContext
         if (IsStringType(key)) 
         {
             accumulator ??= string.Empty;
-            sql = $@"SELECT TOP 1000 {fieldNames} FROM {tableName} WHERE {idKeyName} > '{accumulator}'";
+            sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > '{accumulator}'";
         }
         else
         {
             accumulator ??= "0";
-            sql = $@"SELECT TOP 1000 {fieldNames} FROM {tableName} WHERE {idKeyName} > {accumulator}";
+            sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > {accumulator}";
         }
         return Database.SqlQueryRaw<Dictionary<string, string>>(sql).ToList();
     }
