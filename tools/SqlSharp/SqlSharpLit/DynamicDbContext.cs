@@ -18,7 +18,13 @@ public class DynamicDbContext : DbContext
         return options;
     }
 
-    public string GetTableSchemaSql(string tableName)
+    public List<TableSchemaEntity> GetTableSchema(string tableName)
+    {
+        return Database.SqlQueryRaw<TableSchemaEntity>(GetTableSchemaSql(tableName))
+            .ToList();
+    }
+
+    private string GetTableSchemaSql(string tableName)
     {
         return $@"""
 SELECT 
@@ -59,4 +65,12 @@ ORDER BY
     c.ORDINAL_POSITION;
 """;
     }
+}
+
+public class TableSchemaEntity
+{
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public bool IsNull { get; set; }
+    public bool IsPk { get; set; }
 }
