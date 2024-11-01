@@ -7,7 +7,7 @@ COPY ["SqlSharpLit/SqlSharpLit.csproj", "SqlSharpLit/"]
 RUN dotnet restore "SqlSharpTests/SqlSharpTests.csproj"
 COPY . .
 
-RUN dotnet build "SqlSharpTests.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "SqlSharpTests/SqlSharpTests.csproj" -c $BUILD_CONFIGURATION -o /app
 
-WORKDIR /app/SqlSharpTests
-ENTRYPOINT ["dotnet", "test", "--no-build", "--logger:trx;LogFileName=TestResults.trx", "SqlSharpTests.dll"]
+WORKDIR /app
+ENTRYPOINT ["dotnet", "test", "--logger:trx;LogFileName=TestResults.trx", "SqlSharpTests.dll"]
