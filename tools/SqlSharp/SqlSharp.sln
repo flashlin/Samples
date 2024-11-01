@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlSharp", "SqlSharp\SqlSha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlSharpLit", "SqlSharpLit\SqlSharpLit.csproj", "{FFF0EB4A-9B4C-4EB9-8105-F2B62E4911F0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlSharpTests", "SqlSharpTests\SqlSharpTests.csproj", "{9774B1AC-630F-4DF6-B5EB-678EAC57F761}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{FFF0EB4A-9B4C-4EB9-8105-F2B62E4911F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FFF0EB4A-9B4C-4EB9-8105-F2B62E4911F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FFF0EB4A-9B4C-4EB9-8105-F2B62E4911F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9774B1AC-630F-4DF6-B5EB-678EAC57F761}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9774B1AC-630F-4DF6-B5EB-678EAC57F761}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9774B1AC-630F-4DF6-B5EB-678EAC57F761}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9774B1AC-630F-4DF6-B5EB-678EAC57F761}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
