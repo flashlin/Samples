@@ -1,0 +1,6 @@
+﻿services:
+  sql-sharp-tests:
+    image: sql-sharp-tests
+    build:
+      context: .
+      dockerfile: SqlSharpTests/Dockerfile
