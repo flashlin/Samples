@@ -1,30 +1,46 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using SqlSharpLit;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Hosting;
 
 namespace SqlSharpTests;
 
 public class Tests
 {
+    private IHost _host;
+    private IServiceProvider _serviceProvider;
+    private IConfiguration _configuration;
     private DynamicDbContext _db;
 
     [SetUp]
     public void Setup()
     {
-        _db = new DynamicDbContext(DynamicDbContext.CreateInMemoryDbContextOptions());
-        _db.Database.ExecuteSql($"""
-                                 CREATE TABLE [dbo].[Customer] (
-                                     [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                                     [Name] NVARCHAR(50) NOT NULL,
-                                     [Email] NVARCHAR(50) NOT NULL
-                                 )
-                                 """);
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
+        
+        var builder = Host.CreateApplicationBuilder();
+        var services = builder.Services;
+
+        _configuration = new ConfigurationBuilder()
+            .SetBasePath(TestContext.CurrentContext.TestDirectory)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
+            .Build();
+
+        services.AddSingleton(_configuration);
+        services.Configure<DbConfig>(_configuration.GetSection("ConnectionStrings"));
+        _host = builder.Build();
+        _serviceProvider = _host.Services;
+
+        _db = _serviceProvider.GetRequiredService<DynamicDbContext>();
         _db.Database.ExecuteSql($"""
                                  INSERT INTO [dbo].[Customer] ([Name], [Email]) VALUES ('John Doe', 'test1@mail.com')
                                  INSERT INTO [dbo].[Customer] ([Name], [Email]) VALUES ('Mary', 'test2@mail.com')
                                  """);
     }
-
+    
     [Test]
     public void Test1()
     {

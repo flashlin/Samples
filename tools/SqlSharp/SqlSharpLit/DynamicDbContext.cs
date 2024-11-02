@@ -1,11 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace SqlSharpLit;
 
 public class DynamicDbContext : DbContext
 {
-    public DynamicDbContext(DbContextOptions<DynamicDbContext>? options)
-        : base(options ?? CreateDbContextOptions(null))
+    public DynamicDbContext(DbContextOptions<DynamicDbContext> options)
+        : base(options)
     {
     }
     
@@ -14,6 +15,11 @@ public class DynamicDbContext : DbContext
         return new DbContextOptionsBuilder<DynamicDbContext>()
             .UseInMemoryDatabase("InMemoryDb")
             .Options;
+    }
+
+    public static DbContextOptions<DynamicDbContext> CreateDbContextOptions(IOptions<DbConfig> config)
+    {
+        return CreateDbContextOptions(config.Value.DbServer);
     }
 
     public static DbContextOptions<DynamicDbContext> CreateDbContextOptions(string? connectionString)

@@ -1,16 +1,30 @@
 ﻿services:
+  # sql-server-db:
+  #   image: mcr.microsoft.com/mssql/server:2022-latest
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - MSSQL_SA_PASSWORD=YourPassword123
+  #     - MSSQL_PID=Express
+  #   ports:
+  #     - "1433:1433" 
+
   sql-server-db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    build: ./SqlServer
+    container_name: sql-server-db
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=YourPassword123
       - MSSQL_PID=Express
     ports:
-      - "1433:1433" 
-      
+      - "14330:1433"
+
   sql-sharp-tests:
-    image: sql-sharp-tests
-    container_name: sql-sharp-tests
-    build:
-      context: .
-      dockerfile: SqlSharpTests/Dockerfile
+     image: sql-sharp-tests
+     container_name: sql-sharp-tests
+     environment:
+       - ASPNETCORE_ENVIRONMENT=Docker
+     build:
+       context: .
+       dockerfile: SqlSharpTests/Dockerfile
+     depends_on:
+       - sql-server-db
