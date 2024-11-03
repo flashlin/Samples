@@ -12,7 +12,7 @@ public class DynamicDbContext : DbContext
         : base(options)
     {
     }
-    
+
     public static DbContextOptions<DynamicDbContext> CreateInMemoryDbContextOptions()
     {
         return new DbContextOptionsBuilder<DynamicDbContext>()
@@ -37,8 +37,8 @@ public class DynamicDbContext : DbContext
     {
         var fields = GetTableSchema(tableName);
         string? accumulator = null;
-        var key = fields.First(x => x.IsPk == 1);
-        var result = new List<Dictionary<string, string>>(); 
+        var key = fields.First(x => x.IsPk);
+        var result = new List<Dictionary<string, string>>();
         do
         {
             var data = GetTopNTableData(1000, tableName, fields, accumulator);
@@ -46,9 +46,11 @@ public class DynamicDbContext : DbContext
             {
                 break;
             }
+
             result.AddRange(data);
             accumulator = data.Last()[key.Name];
         } while (true);
+
         return result;
     }
 
@@ -57,10 +59,10 @@ public class DynamicDbContext : DbContext
         string? accumulator)
     {
         var fieldNames = string.Join(",", fields.Select(x => x.Name));
-        var key = fields.First(x => x.IsPk == 1);
+        var key = fields.First(x => x.IsPk);
         var idKeyName = key.Name;
         string sql;
-        if (IsStringType(key)) 
+        if (IsStringType(key))
         {
             accumulator ??= string.Empty;
             sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > '{accumulator}'";
@@ -70,6 +72,7 @@ public class DynamicDbContext : DbContext
             accumulator ??= "0";
             sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > {accumulator}";
         }
+
         //return Database.SqlQueryRaw<Dictionary<string, string>>(sql).ToList();
         return QueryRawSql(sql).ToList();
     }
@@ -77,8 +80,13 @@ public class DynamicDbContext : DbContext
     public List<T> QueryRawSql<T>(string sql)
     {
         var dbConnection = Database.GetDbConnection();
-        dbConnection.Open();
-        return dbConnection.Query<T>(sql).ToList();
+        if (dbConnection.State != ConnectionState.Open)
+        {
+            dbConnection.Open();
+        }
+
+        return dbConnection.Query<T>(sql)
+            .ToList();
         return Database.SqlQueryRaw<T>(sql)
             .ToList();
     }
@@ -86,17 +94,22 @@ public class DynamicDbContext : DbContext
     public List<Dictionary<string, string>> QueryRawSql(string sql)
     {
         var dbConnection = Database.GetDbConnection();
-        dbConnection.Open();
+        if (dbConnection.State != ConnectionState.Open)
+        {
+            dbConnection.Open();
+        }
         var result = dbConnection.Query(sql)
             .AsList()
-            .ConvertAll(row => {
+            .ConvertAll(row =>
+            {
                 var dictionary = new Dictionary<string, string>();
                 foreach (var property in (IDictionary<string, object>)row)
                 {
                     dictionary[property.Key] = $"{property.Value}";
                 }
+
                 return dictionary;
-            }); 
+            });
         return result;
     }
 
@@ -104,13 +117,10 @@ public class DynamicDbContext : DbContext
     {
         return key.DataType.ToLower().StartsWith("varchar") || key.DataType.ToLower().StartsWith("nvarchar");
     }
-    
-    
 
     public List<TableSchemaEntity> GetTableSchema(string tableName)
     {
-        return Database.SqlQueryRaw<TableSchemaEntity>(GetTableSchemaSql(tableName))
-            .ToList();
+        return QueryRawSql<TableSchemaEntity>(GetTableSchemaSql(tableName));
     }
 
     private string GetTableSchemaSql(string tableName)
@@ -161,6 +171,6 @@ public class TableSchemaEntity
 {
     public string Name { get; set; } = string.Empty;
     public string DataType { get; set; } = string.Empty;
-    public int IsNull { get; set; }
-    public int IsPk { get; set; }
+    public bool IsNull { get; set; }
+    public bool IsPk { get; set; }
 }

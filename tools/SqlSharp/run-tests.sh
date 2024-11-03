@@ -30,6 +30,9 @@ if [[ -f "./TestResults.trx" ]]; then
 else
     echo "測試未能成功執行或無法生成測試報告。"
     docker logs sql-server-db
+    echo ""
+    echo ""
+    echo ""
     echo "------------------------------------------------------------------"
     docker logs sql-sharp-tests
 fi

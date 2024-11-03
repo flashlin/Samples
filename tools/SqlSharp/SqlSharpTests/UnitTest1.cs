@@ -43,6 +43,35 @@ public class Tests
     }
     
     [Test]
+    public void GetCustomerTableSchema()
+    {
+        var fields = _db.GetTableSchema("Customer");
+        fields.Should().BeEquivalentTo([
+            new TableSchemaEntity
+            {
+                Name = "Id",
+                DataType = "int",
+                IsNull = false,
+                IsPk = true
+            },
+            new TableSchemaEntity
+            {
+                Name = "Name",
+                DataType = "nvarchar",
+                IsNull = false,
+                IsPk = false
+            },
+            new TableSchemaEntity
+            {
+                Name = "Email",
+                DataType = "varchar",
+                IsNull = false,
+                IsPk = false
+            },
+        ]);
+    }
+    
+    [Test]
     public void Test1()
     {
         var fields = _db.GetTableSchema("Customer");
