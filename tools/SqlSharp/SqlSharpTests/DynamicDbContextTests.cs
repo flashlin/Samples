@@ -16,11 +16,104 @@ namespace SqlSharpTests;
 [TestFixture]
 public class DynamicDbContextTests
 {
-    private IHost _host;
-    private IServiceProvider _serviceProvider;
     private IConfiguration _configuration;
     private DynamicDbContext _db;
+    private IHost _host;
     private ILogger<DynamicDbContextTests> _logger;
+    private IServiceProvider _serviceProvider;
+
+    [Test]
+    public void GetCustomerTableSchema()
+    {
+        var fields = _db.GetTableSchema("Customer");
+        fields.Should().BeEquivalentTo([
+            new TableSchemaEntity
+            {
+                Name = "Id",
+                DataType = "int",
+                IsNull = false,
+                IsPk = true
+            },
+            new TableSchemaEntity
+            {
+                Name = "Name",
+                DataType = "nvarchar",
+                IsNull = false,
+                IsPk = false
+            },
+            new TableSchemaEntity
+            {
+                Name = "Email",
+                DataType = "varchar",
+                IsNull = false,
+                IsPk = false
+            },
+        ]);
+    }
+
+    [Test]
+    public void GetTopNTableData()
+    {
+        var fields = _db.GetTableSchema("Customer");
+
+        var data = _db.GetTopNTableData(1, "Customer", fields, null);
+        _logger.LogInformation("GetTopNTableData: {data}", Serialize(data));
+        data.Should().BeEquivalentTo([
+            new Dictionary<string, string>()
+            {
+                ["Id"] = "1",
+                ["Name"] = "John Doe",
+                ["Email"] = "test1@mail.com"
+            }
+        ]);
+    }
+
+    [Test]
+    public void GetTopNTableData2()
+    {
+        var fields = _db.GetTableSchema("Customer");
+
+        var data = _db.GetTopNTableData(1, "Customer", fields, null);
+        _logger.LogInformation("data1: {data}", Serialize(data));
+        data.Should().BeEquivalentTo([
+            new Dictionary<string, string>()
+            {
+                ["Id"] = "1",
+                ["Name"] = "John Doe",
+                ["Email"] = "test1@mail.com"
+            }
+        ]);
+        
+        var nextAccumulator = data.Last()["Id"];
+        data = _db.GetTopNTableData(1, "Customer", fields, nextAccumulator);
+        _logger.LogInformation("data2: {data}", Serialize(data)); 
+        data.Should().BeEquivalentTo([
+            new Dictionary<string, string>()
+            {
+                ["Id"] = "2",
+                ["Name"] = "Mary",
+                ["Email"] = "test2@mail.com"
+            }
+        ]);
+    }
+
+    private string Serialize(Dictionary<string, string> dict)
+    {
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new DictionaryJsonConverter<string,string>());
+        return JsonSerializer.Serialize(dict, options);
+    }
+
+    private string Serialize(IEnumerable<Dictionary<string, string>> dictList)
+    {
+        var sb = new StringBuilder();
+        foreach (var item in dictList)
+        {
+            sb.AppendLine(Serialize(item));
+        }
+
+        return sb.ToString();
+    }
 
     [OneTimeSetUp]
     public void Setup()
@@ -55,98 +148,5 @@ public class DynamicDbContextTests
                                  INSERT INTO [dbo].[Customer] ([Name], [Email]) VALUES ('John Doe', 'test1@mail.com')
                                  INSERT INTO [dbo].[Customer] ([Name], [Email]) VALUES ('Mary', 'test2@mail.com')
                                  """);
-    }
-    
-    [Test]
-    public void GetCustomerTableSchema()
-    {
-        var fields = _db.GetTableSchema("Customer");
-        fields.Should().BeEquivalentTo([
-            new TableSchemaEntity
-            {
-                Name = "Id",
-                DataType = "int",
-                IsNull = false,
-                IsPk = true
-            },
-            new TableSchemaEntity
-            {
-                Name = "Name",
-                DataType = "nvarchar",
-                IsNull = false,
-                IsPk = false
-            },
-            new TableSchemaEntity
-            {
-                Name = "Email",
-                DataType = "varchar",
-                IsNull = false,
-                IsPk = false
-            },
-        ]);
-    }
-
-    private string Serialize(Dictionary<string, string> dict)
-    {
-        var options = new JsonSerializerOptions();
-        options.Converters.Add(new DictionaryJsonConverter<string,string>());
-        return JsonSerializer.Serialize(dict, options);
-    }
-
-    private string Serialize(IEnumerable<Dictionary<string, string>> dictList)
-    {
-        var sb = new StringBuilder();
-        foreach (var item in dictList)
-        {
-            sb.AppendLine(Serialize(item));
-        }
-
-        return sb.ToString();
-    }
-    
-    [Test]
-    public void GetTopNTableData()
-    {
-        var fields = _db.GetTableSchema("Customer");
-
-        var data = _db.GetTopNTableData(1, "Customer", fields, null);
-        _logger.LogInformation("GetTopNTableData: {data}", Serialize(data));
-        data.Should().BeEquivalentTo([
-            new Dictionary<string, string>()
-            {
-                ["Id"] = "1",
-                ["Name"] = "John Doe",
-                ["Email"] = "test1@mail.com"
-            }
-        ]);
-    }
-    
-    [Test]
-    public void GetTopNTableData2()
-    {
-        var fields = _db.GetTableSchema("Customer");
-
-        var data = _db.GetTopNTableData(1, "Customer", fields, null);
-        _logger.LogInformation("data1: {data}", Serialize(data));
-        data.Should().BeEquivalentTo([
-            new Dictionary<string, string>()
-            {
-                ["Id"] = "1",
-                ["Name"] = "John Doe",
-                ["Email"] = "test1@mail.com"
-            }
-        ]);
-        
-        var nextAccumulator = data.Last()["Id"];
-        data = _db.GetTopNTableData(1, "Customer", fields, nextAccumulator);
-        _logger.LogInformation("data2: {data}", Serialize(data)); 
-        data.Should().BeEquivalentTo([
-            new Dictionary<string, string>()
-            {
-                ["Id"] = "2",
-                ["Name"] = "Mary",
-                ["Email"] = "test2@mail.com"
-            }
-        ]);
     }
 }
