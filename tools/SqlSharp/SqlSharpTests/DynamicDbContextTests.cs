@@ -97,6 +97,26 @@ public class DynamicDbContextTests
         ]);
     }
 
+    [Test]
+    public void ExportTableData()
+    {
+        var data = _db.ExportTableData("Customer");
+        data.Should().BeEquivalentTo([
+            new Dictionary<string, string>()
+            {
+                ["Id"] = "1",
+                ["Name"] = "John Doe",
+                ["Email"] = "test1@mail.com"
+            },
+            new Dictionary<string, string>()
+            {
+                ["Id"] = "2",
+                ["Name"] = "Mary",
+                ["Email"] = "test2@mail.com"
+            }
+        ]);
+    }
+
     private string Serialize(Dictionary<string, string> dict)
     {
         var options = new JsonSerializerOptions();
