@@ -21,21 +21,20 @@ echo "等待測試完成..."
 docker wait "$container_id"
 
 # 將測試報告從容器中複製出來
-docker cp "$container_id":/app/TestResults.trx ./TestResults.trx
+# docker cp "$container_id":/app/TestResults.trx ./TestResults.trx
+docker logs sql-sharp-tests > ./TestResults.trx
 
 # 確認測試結果是否存在
 if [[ -f "./TestResults.trx" ]]; then
     echo "測試已完成，結果儲存在 TestResults.trx"
-    cat ./TestResults.trx
 else
     echo "測試未能成功執行或無法生成測試報告。"
     docker logs sql-server-db
-    echo ""
-    echo ""
-    echo ""
     echo "------------------------------------------------------------------"
-    docker logs sql-sharp-tests
+    docker logs sql-sharp-tests > ./TestResults.trx
 fi
+
+./show-trx.sh
 
 # 停止並刪除容器
 docker-compose down
