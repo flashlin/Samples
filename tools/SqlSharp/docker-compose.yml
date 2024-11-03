@@ -13,10 +13,14 @@
     container_name: sql-server-db
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourPassword123
+      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd
       - MSSQL_PID=Express
     ports:
       - "14330:1433"
+    volumes:
+      - /home/flash/mssql:/var/opt/mssql/data
+    networks:
+      - app-network
 
   sql-sharp-tests:
      image: sql-sharp-tests
@@ -28,3 +32,9 @@
        dockerfile: SqlSharpTests/Dockerfile
      depends_on:
        - sql-server-db
+     networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
