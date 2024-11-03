@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Data;
+using Dapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace SqlSharpLit;
@@ -34,7 +37,7 @@ public class DynamicDbContext : DbContext
     {
         var fields = GetTableSchema(tableName);
         string? accumulator = null;
-        var key = fields.First(x => x.IsPk);
+        var key = fields.First(x => x.IsPk == 1);
         var result = new List<Dictionary<string, string>>(); 
         do
         {
@@ -54,7 +57,7 @@ public class DynamicDbContext : DbContext
         string? accumulator)
     {
         var fieldNames = string.Join(",", fields.Select(x => x.Name));
-        var key = fields.First(x => x.IsPk);
+        var key = fields.First(x => x.IsPk == 1);
         var idKeyName = key.Name;
         string sql;
         if (IsStringType(key)) 
@@ -67,13 +70,42 @@ public class DynamicDbContext : DbContext
             accumulator ??= "0";
             sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > {accumulator}";
         }
-        return Database.SqlQueryRaw<Dictionary<string, string>>(sql).ToList();
+        //return Database.SqlQueryRaw<Dictionary<string, string>>(sql).ToList();
+        return QueryRawSql(sql).ToList();
+    }
+
+    public List<T> QueryRawSql<T>(string sql)
+    {
+        var dbConnection = Database.GetDbConnection();
+        dbConnection.Open();
+        return dbConnection.Query<T>(sql).ToList();
+        return Database.SqlQueryRaw<T>(sql)
+            .ToList();
+    }
+
+    public List<Dictionary<string, string>> QueryRawSql(string sql)
+    {
+        var dbConnection = Database.GetDbConnection();
+        dbConnection.Open();
+        var result = dbConnection.Query(sql)
+            .AsList()
+            .ConvertAll(row => {
+                var dictionary = new Dictionary<string, string>();
+                foreach (var property in (IDictionary<string, object>)row)
+                {
+                    dictionary[property.Key] = $"{property.Value}";
+                }
+                return dictionary;
+            }); 
+        return result;
     }
 
     private static bool IsStringType(TableSchemaEntity key)
     {
-        return key.Type.ToLower().StartsWith("varchar") || key.Type.ToLower().StartsWith("nvarchar");
+        return key.DataType.ToLower().StartsWith("varchar") || key.DataType.ToLower().StartsWith("nvarchar");
     }
+    
+    
 
     public List<TableSchemaEntity> GetTableSchema(string tableName)
     {
@@ -83,9 +115,10 @@ public class DynamicDbContext : DbContext
 
     private string GetTableSchemaSql(string tableName)
     {
-        return $@"""
+        return $@"
 SELECT 
     c.COLUMN_NAME AS [Name],
+    c.DATA_TYPE AS [DataType],
     CASE 
         WHEN c.DATA_TYPE IN ('char', 'varchar', 'nchar', 'nvarchar') 
             THEN c.DATA_TYPE + '(' + 
@@ -100,12 +133,12 @@ SELECT
         ELSE c.DATA_TYPE
     END AS [Type],
     CASE 
-        WHEN c.IS_NULLABLE = 'YES' THEN 'NULL'
-        ELSE 'NOT NULL'
+        WHEN c.IS_NULLABLE = 'YES' THEN 1
+        ELSE 0
     END AS [IsNull],
     CASE 
-        WHEN pk.COLUMN_NAME IS NOT NULL THEN 'YES'
-        ELSE 'NO'
+        WHEN pk.COLUMN_NAME IS NOT NULL THEN 1
+        ELSE 0
     END AS [IsPK]
 FROM 
     INFORMATION_SCHEMA.COLUMNS c
@@ -120,14 +153,14 @@ WHERE
     c.TABLE_NAME = '{tableName}'
 ORDER BY 
     c.ORDINAL_POSITION;
-""";
+";
     }
 }
 
 public class TableSchemaEntity
 {
     public string Name { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public bool IsNull { get; set; }
-    public bool IsPk { get; set; }
+    public string DataType { get; set; } = string.Empty;
+    public int IsNull { get; set; }
+    public int IsPk { get; set; }
 }

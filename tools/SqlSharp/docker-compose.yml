@@ -17,8 +17,8 @@
       - MSSQL_PID=Express
     ports:
       - "14330:1433"
-    volumes:
-      - /home/flash/mssql:/var/opt/mssql/data
+    #volumes:
+    #  - /home/flash/mssql:/var/opt/mssql/data
     networks:
       - app-network
 

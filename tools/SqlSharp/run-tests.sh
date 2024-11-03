@@ -1,4 +1,9 @@
 #!/bin/bash
+sudo chown -R 10001:10001 /home/flash/mssql
+sudo chmod -R 777 /home/flash/mssql
+
+docker rm -f sql-server-db
+docker-compose down
 
 # 啟動 Docker Compose 並以背景模式運行
 docker-compose up --build -d
@@ -6,8 +11,6 @@ docker-compose up --build -d
 #echo "等待服務啟動..."
 #sleep 5
 docker-compose ps
-
-docker logs sql-server-db
 
 # 取得測試服務的容器 ID
 container_id=$(docker-compose ps -q sql-sharp-tests)
@@ -26,6 +29,8 @@ if [[ -f "./TestResults.trx" ]]; then
     cat ./TestResults.trx
 else
     echo "測試未能成功執行或無法生成測試報告。"
+    docker logs sql-server-db
+    echo "------------------------------------------------------------------"
     docker logs sql-sharp-tests
 fi
 

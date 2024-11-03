@@ -19,11 +19,11 @@ for i in {30..0}; do
     sleep 1
 done
 
-# 執行初始化腳本
+echo "執行初始化腳本"
 sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -C -i /usr/src/app/init.sql
 
 #docker exec -it sql-server-db /bin/bash
 #cat /usr/src/app/entrypoint.log
 
-# 保持容器運行
+echo "保持容器運行"
 wait
