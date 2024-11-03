@@ -22,7 +22,7 @@ public class DynamicDbContextTests
     private DynamicDbContext _db;
     private ILogger<DynamicDbContextTests> _logger;
 
-    [SetUp]
+    [OneTimeSetUp]
     public void Setup()
     {
         var loggerFactory = LoggerFactory.Create(builder => 
