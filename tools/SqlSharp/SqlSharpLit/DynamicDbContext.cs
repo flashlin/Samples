@@ -2,15 +2,18 @@
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace SqlSharpLit;
 
 public class DynamicDbContext : DbContext
 {
-    public DynamicDbContext(DbContextOptions<DynamicDbContext> options)
+    private ILogger<DynamicDbContext> _logger;
+    public DynamicDbContext(DbContextOptions<DynamicDbContext> options, ILogger<DynamicDbContext> logger)
         : base(options)
     {
+        _logger = logger;
     }
 
     public static DbContextOptions<DynamicDbContext> CreateInMemoryDbContextOptions()
@@ -65,15 +68,15 @@ public class DynamicDbContext : DbContext
         if (IsStringType(key))
         {
             accumulator ??= string.Empty;
-            sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > '{accumulator}'";
+            sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > '{accumulator}' ORDER BY {idKeyName}";
         }
         else
         {
             accumulator ??= "0";
-            sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > {accumulator}";
+            sql = $@"SELECT TOP {topCount} {fieldNames} FROM {tableName} WHERE {idKeyName} > {accumulator} ORDER BY {idKeyName}";
         }
 
-        //return Database.SqlQueryRaw<Dictionary<string, string>>(sql).ToList();
+        _logger.LogInformation("Executing SQL: {sql}", sql);
         return QueryRawSql(sql).ToList();
     }
 

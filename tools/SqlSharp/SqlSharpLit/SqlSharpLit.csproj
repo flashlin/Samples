@@ -14,6 +14,7 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+      <PackageReference Include="T1.Standard" Version="1.0.81" />
     </ItemGroup>
 
 </Project>

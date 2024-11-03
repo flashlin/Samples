@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using SqlSharpLit;
@@ -5,19 +7,31 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using T1.Standard.Serialization;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SqlSharpTests;
 
-public class Tests
+[TestFixture]
+public class DynamicDbContextTests
 {
     private IHost _host;
     private IServiceProvider _serviceProvider;
     private IConfiguration _configuration;
     private DynamicDbContext _db;
+    private ILogger<DynamicDbContextTests> _logger;
 
     [SetUp]
     public void Setup()
     {
+        var loggerFactory = LoggerFactory.Create(builder => 
+        {
+            builder.AddConsole()
+                .AddDebug(); 
+        });
+        _logger = loggerFactory.CreateLogger<DynamicDbContextTests>();
+        
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
         _configuration = new ConfigurationBuilder()
             .SetBasePath(TestContext.CurrentContext.TestDirectory)
@@ -36,6 +50,7 @@ public class Tests
         _serviceProvider = _host.Services;
 
         _db = _serviceProvider.GetRequiredService<DynamicDbContext>();
+        _db.Database.ExecuteSql($"""DELETE FROM [dbo].[Customer]""");
         _db.Database.ExecuteSql($"""
                                  INSERT INTO [dbo].[Customer] ([Name], [Email]) VALUES ('John Doe', 'test1@mail.com')
                                  INSERT INTO [dbo].[Customer] ([Name], [Email]) VALUES ('Mary', 'test2@mail.com')
@@ -70,6 +85,24 @@ public class Tests
             },
         ]);
     }
+
+    private string Serialize(Dictionary<string, string> dict)
+    {
+        var options = new JsonSerializerOptions();
+        options.Converters.Add(new DictionaryJsonConverter<string,string>());
+        return JsonSerializer.Serialize(dict, options);
+    }
+
+    private string Serialize(IEnumerable<Dictionary<string, string>> dictList)
+    {
+        var sb = new StringBuilder();
+        foreach (var item in dictList)
+        {
+            sb.AppendLine(Serialize(item));
+        }
+
+        return sb.ToString();
+    }
     
     [Test]
     public void GetTopNTableData()
@@ -77,6 +110,7 @@ public class Tests
         var fields = _db.GetTableSchema("Customer");
 
         var data = _db.GetTopNTableData(1, "Customer", fields, null);
+        _logger.LogInformation("GetTopNTableData: {data}", Serialize(data));
         data.Should().BeEquivalentTo([
             new Dictionary<string, string>()
             {
@@ -93,6 +127,7 @@ public class Tests
         var fields = _db.GetTableSchema("Customer");
 
         var data = _db.GetTopNTableData(1, "Customer", fields, null);
+        _logger.LogInformation("data1: {data}", Serialize(data));
         data.Should().BeEquivalentTo([
             new Dictionary<string, string>()
             {
@@ -104,6 +139,7 @@ public class Tests
         
         var nextAccumulator = data.Last()["Id"];
         data = _db.GetTopNTableData(1, "Customer", fields, nextAccumulator);
+        _logger.LogInformation("data2: {data}", Serialize(data)); 
         data.Should().BeEquivalentTo([
             new Dictionary<string, string>()
             {

@@ -3,13 +3,14 @@ sudo chown -R 10001:10001 /home/flash/mssql
 sudo chmod -R 777 /home/flash/mssql
 
 docker rm -f sql-server-db
+docker rmi -f sql-server-db
 docker-compose down
 
 # 啟動 Docker Compose 並以背景模式運行
 docker-compose up --build -d
 
 #echo "等待服務啟動..."
-#sleep 5
+sleep 5
 docker-compose ps
 
 # 取得測試服務的容器 ID
