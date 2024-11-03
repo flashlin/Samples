@@ -72,21 +72,10 @@ public class Tests
     }
     
     [Test]
-    public void Test1()
+    public void GetTopNTableData()
     {
         var fields = _db.GetTableSchema("Customer");
 
-        // var data1 = _db.QueryRawSql<CustomerEntity>("select Name, Email from Customer");
-        // data1.Should().BeEquivalentTo([
-        //     new Dictionary<string, string>()
-        //     {
-        //         ["Id"] = "1",
-        //         ["Name"] = "John Doe",
-        //         ["Email"] = "test1@mail.com"
-        //     }
-        // ]);
-        
-        
         var data = _db.GetTopNTableData(1, "Customer", fields, null);
         data.Should().BeEquivalentTo([
             new Dictionary<string, string>()
@@ -97,10 +86,31 @@ public class Tests
             }
         ]);
     }
-}
+    
+    [Test]
+    public void GetTopNTableData2()
+    {
+        var fields = _db.GetTableSchema("Customer");
 
-public class CustomerEntity
-{
-    public string Name { get; set; }
-    public string Email { get; set; }
+        var data = _db.GetTopNTableData(1, "Customer", fields, null);
+        data.Should().BeEquivalentTo([
+            new Dictionary<string, string>()
+            {
+                ["Id"] = "1",
+                ["Name"] = "John Doe",
+                ["Email"] = "test1@mail.com"
+            }
+        ]);
+        
+        var nextAccumulator = data.Last()["Id"];
+        data = _db.GetTopNTableData(1, "Customer", fields, nextAccumulator);
+        data.Should().BeEquivalentTo([
+            new Dictionary<string, string>()
+            {
+                ["Id"] = "2",
+                ["Name"] = "Mary",
+                ["Email"] = "test2@mail.com"
+            }
+        ]);
+    }
 }
