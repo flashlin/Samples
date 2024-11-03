@@ -19,18 +19,19 @@ public class Tests
     public void Setup()
     {
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-        
-        var builder = Host.CreateApplicationBuilder();
-        var services = builder.Services;
-
         _configuration = new ConfigurationBuilder()
             .SetBasePath(TestContext.CurrentContext.TestDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
             .Build();
-
+        
+        var builder = Host.CreateApplicationBuilder();
+        var services = builder.Services;
+        
         services.AddSingleton(_configuration);
         services.Configure<DbConfig>(_configuration.GetSection("ConnectionStrings"));
+        services.AddDbContextPool<DynamicDbContext>(options => options.UseSqlServer(_configuration.GetConnectionString("DbServer")));
+        
         _host = builder.Build();
         _serviceProvider = _host.Services;
 
