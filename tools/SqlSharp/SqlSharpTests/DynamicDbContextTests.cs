@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using SqlSharpLit.Common;
+using SqlSharpLit.Shared;
 using T1.Standard.Serialization;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -149,10 +150,7 @@ public class DynamicDbContextTests
         new AppSettings().LoadFile(TestContext.CurrentContext.TestDirectory);
         var builder = Host.CreateApplicationBuilder();
         var services = builder.Services;
-        
-        services.AddSingleton(_configuration);
-        services.Configure<DbConfig>(_configuration.GetSection("ConnectionStrings"));
-        services.AddDbContextPool<DynamicDbContext>(options => options.UseSqlServer(_configuration.GetConnectionString("DbServer")));
+        services.AddSqlSharpServices(_configuration);
         
         _host = builder.Build();
         _serviceProvider = _host.Services;
