@@ -29,11 +29,11 @@
 
     <ItemGroup>
       <None Remove="appsettings.Docker.json" />
-      <Content Include="appsettings.Docker.json">
+      <Content Include="appSettings.Docker.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <None Remove="appsettings.json" />
-      <Content Include="appsettings.json">
+      <Content Include="appSettings.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>

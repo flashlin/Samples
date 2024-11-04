@@ -1,4 +1,7 @@
 using System.Globalization;
+using System.Text;
+using CsvHelper;
+using CsvHelper.Configuration;
 using SqlSharp.CommandPattern;
 using SqlSharpLit;
 
@@ -22,9 +25,25 @@ public class ExtractTableDataCommand : ICommand<SqlSharpOptions>
             await Next.SafeExecuteAsync(options);
             return;
         }
-        CsvHelper.Configuration.CsvConfiguration csvConfig = new(CultureInfo.InvariantCulture)
+
+        var sourceTable = options.Input;
+        var targetCsvFile = options.Output;
+        var records = _db.ExportTableData(sourceTable);
+        var csvWriter = new CCsvWriter();
+        await csvWriter.WriteRecordsAsync(records, targetCsvFile);
+    }
+}
+
+public class CCsvWriter
+{
+    public async Task WriteRecordsAsync<T>(IEnumerable<T> records, string outputCsvFile)
+    {
+        var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
             HasHeaderRecord = true
         };
+        await using var writer = new StreamWriter(outputCsvFile, Encoding.UTF8, new FileStreamOptions());
+        await using var csv = new CsvWriter(writer, csvConfig);
+        await csv.WriteRecordsAsync(records);
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SqlSharpLit.Common;
 using T1.Standard.Serialization;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
@@ -144,14 +145,8 @@ public class DynamicDbContextTests
                 .AddDebug(); 
         });
         _logger = loggerFactory.CreateLogger<DynamicDbContextTests>();
-        
-        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development";
-        _configuration = new ConfigurationBuilder()
-            .SetBasePath(TestContext.CurrentContext.TestDirectory)
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
-            .Build();
-        
+
+        new AppSettings().LoadFile(TestContext.CurrentContext.TestDirectory);
         var builder = Host.CreateApplicationBuilder();
         var services = builder.Services;
         
