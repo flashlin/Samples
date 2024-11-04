@@ -19,6 +19,7 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
       <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+      <PackageReference Include="Sprache" Version="2.3.1" />
       <PackageReference Include="T1.Standard" Version="1.0.81" />
     </ItemGroup>
 
