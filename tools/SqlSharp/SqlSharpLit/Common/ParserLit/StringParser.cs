@@ -1,3 +1,5 @@
+using T1.Standard.DesignPatterns;
+
 namespace SqlSharpLit.Common.ParserLit;
 
 public class StringParser
@@ -6,55 +8,39 @@ public class StringParser
     private int _position;
     private Stack<int> _parsingContext = new();
     private string _previousWord = string.Empty;
-    
+
     public StringParser(string text)
     {
-        _text = text; 
+        _text = text;
         _position = 0;
     }
 
     protected bool TryMatchKeyword(string keyword)
     {
-        if (!PeekKeyword(keyword)) return false;
-        var word = "";
-        while (!IsEnd() && IsWordChar(PeekChar()))
-        {
-            word += NextChar();
-        }
-        _previousWord = word;
+        var peek = PeekKeyword();
+        if (peek.Word != keyword.ToUpper()) return false;
+        _previousWord = peek.Word;
+        _position = peek.Offset + peek.Length;
         return true;
     }
 
-    protected bool PeekKeyword(string keyword)
+    protected TextSpan PeekKeyword()
     {
         SkipWhitespace();
         var tempPosition = _position;
-        var keywordUpper = keyword.ToUpper();
         var word = "";
-
-        // 收集完整的單詞
         while (tempPosition < _text.Length && IsWordChar(_text[tempPosition]))
         {
             word += _text[tempPosition];
             tempPosition++;
         }
 
-        // 檢查是否完全匹配（大小寫不敏感）
-        if (word.ToUpper() == keywordUpper)
+        return new TextSpan
         {
-            // 確保後面是空白字符或特殊字符
-            if (tempPosition >= _text.Length || 
-                char.IsWhiteSpace(_text[tempPosition]) || 
-                _text[tempPosition] == '(' || 
-                _text[tempPosition] == ')' || 
-                _text[tempPosition] == ',' ||
-                _text[tempPosition] == '.')
-            {
-                return true;
-            }
-        }
-
-        return false;
+            Word = word,
+            Offset = _position,
+            Length = tempPosition - _position
+        };
     }
 
     protected void Match(string expected)
@@ -76,6 +62,7 @@ public class StringParser
         {
             result += NextChar();
         }
+
         return result;
     }
 
@@ -116,6 +103,13 @@ public class StringParser
     }
 }
 
+public class TextSpan
+{
+    public string Word { get; set; } = string.Empty;
+    public int Offset { get; set; }
+    public int Length { get; set; }
+}
+
 public interface ISqlExpression
 {
 }
@@ -123,15 +117,22 @@ public interface ISqlExpression
 public class ColumnDefinition : ISqlExpression
 {
     public string ColumnName { get; set; } = string.Empty;
-    public string DataType { get; set; } = string.Empty; 
+    public string DataType { get; set; } = string.Empty;
     public bool IsPrimaryKey { get; set; }
     public bool IsAutoIncrement { get; set; }
 }
 
 public class CreateTableStatement : ISqlExpression
 {
-    public string TableName { get; set; } = string.Empty; 
+    public string TableName { get; set; } = string.Empty;
     public List<ColumnDefinition> Columns { get; set; } = [];
+}
+
+public class ParseError : Exception
+{
+    public ParseError(string message) : base(message)
+    {
+    }
 }
 
 public class SqlParser : StringParser
@@ -139,14 +140,15 @@ public class SqlParser : StringParser
     public SqlParser(string text) : base(text)
     {
     }
-    
-    public CreateTableStatement ParseCreateTableStatement()
+
+    public Either<CreateTableStatement, ParseError> ParseCreateTableStatement()
     {
-        if( !(TryMatchKeyword("CREATE") && TryMatchKeyword("TABLE")) )
+        if (!(TryMatchKeyword("CREATE") && TryMatchKeyword("TABLE")))
         {
-            throw new Exception("Expected CREATE TABLE");
+            return new Either<CreateTableStatement, ParseError>(
+                new ParseError($"Expected CREATE TABLE, but got {PreviousWord()} {PeekKeyword().Word}"));
         }
 
-        return new CreateTableStatement();
+        return new Either<CreateTableStatement, ParseError>(new CreateTableStatement());
     }
 }
