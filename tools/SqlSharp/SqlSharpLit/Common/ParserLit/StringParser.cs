@@ -15,6 +15,41 @@ public class StringParser
         _position = 0;
     }
 
+    protected TextSpan ReadNumber()
+    {
+        SkipWhitespace();
+        var offset = _position;
+        var ch = PeekChar();
+        if (!char.IsDigit(ch) && ch != '-')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+
+        var word = "";
+        while (!IsEnd())
+        {
+            ch = NextChar();
+            if (!char.IsDigit(ch))
+            {
+                _position--;
+                break;
+            }
+            word += ch;
+        }
+
+        return new TextSpan()
+        {
+            Word = word,
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
+
     protected bool TryMatchKeyword(string keyword)
     {
         var peek = PeekKeyword();
@@ -23,7 +58,27 @@ public class StringParser
         _position = peek.Offset + peek.Length;
         return true;
     }
+    
+    protected bool TryMatch(string keyword)
+    {
+        SkipWhitespace();
+        var tempPosition = _position;
+        var word = "";
+        while (word.Length < keyword.Length)
+        {
+            word += _text[tempPosition];
+            tempPosition++;
+        }
+        if (word != keyword)
+        {
+            return false;
+        }
+        _previousWord = keyword;
+        _position = tempPosition;
+        return true;
+    }
 
+    
     protected TextSpan PeekKeyword()
     {
         SkipWhitespace();
@@ -55,16 +110,92 @@ public class StringParser
         }
     }
 
-    protected string ReadUntil(Func<char, bool> predicate)
+    protected TextSpan ReadUntil(Func<char, bool> predicate)
     {
+        var offset = _position;
         var result = "";
         while (!IsEnd() && !predicate(PeekChar()))
         {
             result += NextChar();
         }
 
-        return result;
+        return new TextSpan()
+        {
+            Word = result,
+            Offset = offset,
+            Length = _position - offset
+        };
     }
+    
+    
+    protected TextSpan ReadIdentifier()
+    {
+        SkipWhitespace();
+        var offset = _position;
+        var ch = PeekChar();
+        if (!char.IsLetter(ch) && ch != '_')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        var identifier = "";
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            if (!IsWordChar(c))
+            {
+                _position--;
+                break;
+            }
+            identifier += c;
+        }
+        return new TextSpan()
+        {
+            Word = identifier,
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
+
+    protected TextSpan ReadQuotedIdentifier()
+    {
+        var quoteChar = PeekChar();
+        if (quoteChar != '"' && quoteChar != '[' && quoteChar != '`')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+
+        var offset = _position;
+        var closeChar = quoteChar == '[' ? ']' : quoteChar;
+        var identifier = quoteChar.ToString();
+        NextChar();
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            identifier += c;
+            if (c == closeChar)
+            {
+                break;
+            }
+        }
+
+        return new TextSpan()
+        {
+            Word = identifier,
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
+
 
     protected bool IsEnd()
     {
@@ -103,13 +234,6 @@ public class StringParser
     }
 }
 
-public class TextSpan
-{
-    public string Word { get; set; } = string.Empty;
-    public int Offset { get; set; }
-    public int Length { get; set; }
-}
-
 public interface ISqlExpression
 {
 }
@@ -120,6 +244,8 @@ public class ColumnDefinition : ISqlExpression
     public string DataType { get; set; } = string.Empty;
     public bool IsPrimaryKey { get; set; }
     public bool IsAutoIncrement { get; set; }
+    public int Size { get; set; }
+    public int Scale { get; set; }
 }
 
 public class CreateTableStatement : ISqlExpression
@@ -149,6 +275,64 @@ public class SqlParser : StringParser
                 new ParseError($"Expected CREATE TABLE, but got {PreviousWord()} {PeekKeyword().Word}"));
         }
 
-        return new Either<CreateTableStatement, ParseError>(new CreateTableStatement());
+        var tableName = ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
+        Match("(");
+
+        var columns = new List<ColumnDefinition>();
+        do
+        {
+            var item = ReadIdentifier();
+            if (item.Length == 0)
+            {
+                return new Either<CreateTableStatement, ParseError>(
+                    new ParseError($"Expected column name, but got {PeekKeyword().Word}"));
+            }
+
+            var column = new ColumnDefinition()
+            {
+                ColumnName = item.Word,
+            };
+            
+            column.DataType = ReadIdentifier().Word;
+            var dataLength1 = string.Empty;
+            var dataLength2 = string.Empty;
+            if (TryMatch("("))
+            {
+                dataLength1 = ReadNumber().Word;
+                dataLength2 = string.Empty;
+                if (PeekChar() == ',')
+                {
+                    NextChar();
+                    dataLength2 = ReadNumber().Word;
+                }
+                Match(")");
+            }
+
+            if (!string.IsNullOrEmpty(dataLength1))
+            {
+                column.Size = int.Parse(dataLength1);
+            }
+            
+            if (!string.IsNullOrEmpty(dataLength2))
+            {
+                column.Scale = int.Parse(dataLength2);
+            }
+            
+            columns.Add(column);
+            if (PeekChar() != ',')
+            {
+                break;
+            }
+            NextChar();
+        } while (!IsEnd());
+
+        return new Either<CreateTableStatement, ParseError>(new CreateTableStatement()
+        {
+            TableName = tableName.Word,
+            Columns = columns
+        });
     }
+
+
+    
 }
