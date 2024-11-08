@@ -8,13 +8,15 @@ $workPath = (Get-Location).Path
 
 $excludeFolders = @(
    "/node_modules",
+   "/debug",
    "/bin",
    "/obj",
    "/dist",
    "/.git",
    "/.vs",
    "/packages",
-   "/.deploy"
+   "/.deploy",
+   "/cache"
 )
 
 function MatchExcludeFolders {
