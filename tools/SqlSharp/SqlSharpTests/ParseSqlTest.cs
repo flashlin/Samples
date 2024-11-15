@@ -65,7 +65,7 @@ public class ParseSqlTest
                 {
                     FieldName = "Id",
                 },
-                Operator = "=", 
+                Operation = "=", 
                 Right = new SqlIntValueExpression
                 {
                     Value = 1

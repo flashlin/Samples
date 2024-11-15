@@ -12,75 +12,50 @@ public class StringParser
         _position = 0;
     }
 
-    public TextSpan ReadNumber()
+    public string GetRemainingText()
+    {
+        if (IsEnd())
+        {
+            return string.Empty;
+        }
+        return _text.Substring(_position);
+    }
+
+
+    public bool IsEnd()
+    {
+        return _position >= _text.Length;
+    }
+
+    public bool IsWordChar(char c)
+    {
+        return char.IsLetterOrDigit(c) || c == '_' || c == '@' || c == '#' || c == '$';
+    }
+
+    public void Match(string expected)
     {
         SkipWhitespace();
-        var offset = _position;
-        var ch = PeekChar();
-        if (!char.IsDigit(ch) && ch != '-')
+        foreach (char c in expected)
         {
-            return new TextSpan()
+            if (IsEnd() || char.ToUpper(NextChar()) != char.ToUpper(c))
             {
-                Word = string.Empty,
-                Offset = _position,
-                Length = 0
-            };
-        }
-
-        var word = "";
-        while (!IsEnd())
-        {
-            ch = NextChar();
-            if (!char.IsDigit(ch))
-            {
-                _position--;
-                break;
+                throw new Exception($"Expected '{expected}' at position {_position}, but found different content");
             }
-            word += ch;
         }
-
-        return new TextSpan()
-        {
-            Word = word,
-            Offset = offset,
-            Length = _position - offset
-        };
     }
 
-    public bool TryMatchKeyword(string keyword)
+    public char NextChar()
     {
-        var peek = PeekKeyword();
-        if (peek.Word != keyword.ToUpper()) return false;
-        _previousWord = peek;
-        _position = peek.Offset + peek.Length;
-        return true;
+        if (IsEnd()) return '\0';
+        return _text[_position++];
     }
 
-    public bool TryMatch(string keyword)
+    public char PeekChar()
     {
+        if (IsEnd()) return '\0';
         SkipWhitespace();
-        var tempPosition = _position;
-        var word = "";
-        while (word.Length < keyword.Length)
-        {
-            word += _text[tempPosition];
-            tempPosition++;
-        }
-        if (word != keyword)
-        {
-            return false;
-        }
-
-        _previousWord = new TextSpan
-        {
-            Word = keyword,
-            Offset = _position,
-            Length = keyword.Length
-        };
-        _position = tempPosition;
-        return true;
+        return _text[_position];
     }
-
 
     public TextSpan PeekKeyword()
     {
@@ -101,43 +76,9 @@ public class StringParser
         };
     }
 
-    public void Match(string expected)
+    public TextSpan PreviousWord()
     {
-        SkipWhitespace();
-        foreach (char c in expected)
-        {
-            if (IsEnd() || char.ToUpper(NextChar()) != char.ToUpper(c))
-            {
-                throw new Exception($"Expected '{expected}' at position {_position}, but found different content");
-            }
-        }
-    }
-
-    public TextSpan ReadUntil(Func<char, bool> predicate)
-    {
-        var offset = _position;
-        var result = "";
-        while (!IsEnd() && !predicate(PeekChar()))
-        {
-            result += NextChar();
-        }
-
-        return new TextSpan()
-        {
-            Word = result,
-            Offset = offset,
-            Length = _position - offset
-        };
-    }
-
-    public bool Try(Func<TextSpan> readFunc, out TextSpan textSpan)
-    {
-        textSpan = readFunc();
-        if (textSpan.Length == 0)
-        {
-            return false;
-        }
-        return true;
+        return _previousWord;
     }
 
     public TextSpan ReadIdentifier()
@@ -168,6 +109,41 @@ public class StringParser
         return new TextSpan()
         {
             Word = identifier,
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
+
+    public TextSpan ReadNumber()
+    {
+        SkipWhitespace();
+        var offset = _position;
+        var ch = PeekChar();
+        if (!char.IsDigit(ch) && ch != '-')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+
+        var word = "";
+        while (!IsEnd())
+        {
+            ch = NextChar();
+            if (!char.IsDigit(ch))
+            {
+                _position--;
+                break;
+            }
+            word += ch;
+        }
+
+        return new TextSpan()
+        {
+            Word = word,
             Offset = offset,
             Length = _position - offset
         };
@@ -208,23 +184,54 @@ public class StringParser
         };
     }
 
-
-    public bool IsEnd()
+    public TextSpan ReadSymbol()
     {
-        return _position >= _text.Length;
-    }
-
-    public char PeekChar()
-    {
-        if (IsEnd()) return '\0';
         SkipWhitespace();
-        return _text[_position];
+        var offset = _position;
+        var ch = PeekChar();
+        if (char.IsLetter(ch) && ch != '_')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        var symbol = "";
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            if (IsWordChar(c))
+            {
+                _position--;
+                break;
+            }
+            symbol += c;
+        }
+        return new TextSpan()
+        {
+            Word = symbol,
+            Offset = offset,
+            Length = _position - offset
+        };
     }
 
-    public char NextChar()
+    public TextSpan ReadUntil(Func<char, bool> predicate)
     {
-        if (IsEnd()) return '\0';
-        return _text[_position++];
+        var offset = _position;
+        var result = "";
+        while (!IsEnd() && !predicate(PeekChar()))
+        {
+            result += NextChar();
+        }
+
+        return new TextSpan()
+        {
+            Word = result,
+            Offset = offset,
+            Length = _position - offset
+        };
     }
 
     public void SkipWhitespace()
@@ -235,20 +242,53 @@ public class StringParser
         }
     }
 
-    public TextSpan PreviousWord()
+    public bool Try(Func<TextSpan> readFunc, out TextSpan textSpan)
     {
-        return _previousWord;
+        textSpan = readFunc();
+        if (textSpan.Length == 0)
+        {
+            return false;
+        }
+        return true;
     }
 
-    public bool IsWordChar(char c)
+    public bool TryMatch(string keyword)
     {
-        return char.IsLetterOrDigit(c) || c == '_' || c == '@' || c == '#' || c == '$';
+        SkipWhitespace();
+        var tempPosition = _position;
+        var word = "";
+        while (word.Length < keyword.Length)
+        {
+            word += _text[tempPosition];
+            tempPosition++;
+        }
+        if (word != keyword)
+        {
+            return false;
+        }
+
+        _previousWord = new TextSpan
+        {
+            Word = keyword,
+            Offset = _position,
+            Length = keyword.Length
+        };
+        _position = tempPosition;
+        return true;
+    }
+
+    public bool TryMatchKeyword(string keyword)
+    {
+        var peek = PeekKeyword();
+        if (peek.Word != keyword.ToUpper()) return false;
+        _previousWord = peek;
+        _position = peek.Offset + peek.Length;
+        return true;
     }
 }
 
 public interface ISqlExpression
-{
-}
+{}
 
 public class ColumnDefinition : ISqlExpression
 {
@@ -272,8 +312,7 @@ public class SelectColumn : ISelectColumnExpression
 }
 
 public interface ISelectColumnExpression
-{
-}
+{}
 
 
 public class SelectFrom : ISelectFromExpression
@@ -282,13 +321,12 @@ public class SelectFrom : ISelectFromExpression
 }
 
 public interface ISelectFromExpression
-{
-}
+{}
 
 public class SqlWhereExpression : ISqlWhereExpression 
 {
     public ISqlExpression Left { get; set; }
-    public string Operator { get; set; } = string.Empty;
+    public string Operation { get; set; } = string.Empty;
     public ISqlExpression Right { get; set; }
 }
 
@@ -303,8 +341,7 @@ public class SqlIntValueExpression : ISqlExpression
 }
 
 public interface ISqlWhereExpression
-{
-}
+{}
 
 public class SelectStatement : ISqlExpression
 {
