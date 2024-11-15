@@ -74,10 +74,14 @@ public class ParseSqlTest
         });
     }
 
-    private static void ThenSqlStatement(Either<ISqlExpression, ParseError> rc, ISqlExpression expectedSqlStatement)
+    private static void ThenSqlStatement<T>(Either<ISqlExpression, ParseError> rc, T expectedSqlStatement)
+        where T : ISqlExpression 
     {
-        rc.Match(statement=>
-                statement.Should().BeEquivalentTo(expectedSqlStatement),
+        rc.Switch(statement =>
+            {
+                var castedStatement = (T)statement;
+                castedStatement.Should().BeEquivalentTo(expectedSqlStatement);
+            },
             error=>throw error 
         );
     }
