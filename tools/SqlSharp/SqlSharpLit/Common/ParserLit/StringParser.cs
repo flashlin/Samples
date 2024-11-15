@@ -4,10 +4,10 @@ namespace SqlSharpLit.Common.ParserLit;
 
 public class StringParser
 {
-    private string _text;
+    private readonly string _text;
     private int _position;
     private Stack<int> _parsingContext = new();
-    private string _previousWord = string.Empty;
+    private TextSpan _previousWord = new();
 
     public StringParser(string text)
     {
@@ -54,7 +54,7 @@ public class StringParser
     {
         var peek = PeekKeyword();
         if (peek.Word != keyword.ToUpper()) return false;
-        _previousWord = peek.Word;
+        _previousWord = peek;
         _position = peek.Offset + peek.Length;
         return true;
     }
@@ -73,7 +73,13 @@ public class StringParser
         {
             return false;
         }
-        _previousWord = keyword;
+
+        _previousWord = new TextSpan
+        {
+            Word = keyword,
+            Offset = _position,
+            Length = keyword.Length
+        };
         _position = tempPosition;
         return true;
     }
@@ -223,7 +229,7 @@ public class StringParser
         }
     }
 
-    protected string PreviousWord()
+    protected TextSpan PreviousWord()
     {
         return _previousWord;
     }
@@ -272,7 +278,7 @@ public class SqlParser : StringParser
         if (!(TryMatchKeyword("CREATE") && TryMatchKeyword("TABLE")))
         {
             return new Either<CreateTableStatement, ParseError>(
-                new ParseError($"Expected CREATE TABLE, but got {PreviousWord()} {PeekKeyword().Word}"));
+                new ParseError($"Expected CREATE TABLE, but got {PreviousWord().Word} {PeekKeyword().Word}"));
         }
 
         var tableName = ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
