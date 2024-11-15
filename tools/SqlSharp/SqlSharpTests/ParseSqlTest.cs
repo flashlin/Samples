@@ -74,7 +74,7 @@ public class ParseSqlTest
         });
     }
 
-    private static void ThenSqlStatement(Either<CreateTableStatement, ParseError> rc, ISqlExpression expectedSqlStatement)
+    private static void ThenSqlStatement(Either<ISqlExpression, ParseError> rc, ISqlExpression expectedSqlStatement)
     {
         rc.Match(statement=>
                 statement.Should().BeEquivalentTo(expectedSqlStatement),
@@ -82,7 +82,7 @@ public class ParseSqlTest
         );
     }
 
-    private static Either<CreateTableStatement, ParseError> ParseSql(string sql)
+    private static Either<ISqlExpression, ParseError> ParseSql(string sql)
     {
         var p = new SqlParser(sql);
         var rc = p.ParseCreateTableStatement();
