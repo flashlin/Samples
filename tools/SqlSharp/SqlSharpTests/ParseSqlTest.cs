@@ -89,7 +89,7 @@ public class ParseSqlTest
     private static Either<ISqlExpression, ParseError> ParseSql(string sql)
     {
         var p = new SqlParser(sql);
-        var rc = p.ParseCreateTableStatement();
+        var rc = p.Parse();
         return rc;
     }
 }

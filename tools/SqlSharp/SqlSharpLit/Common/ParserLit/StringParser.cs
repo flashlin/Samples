@@ -130,6 +130,15 @@ public class StringParser
         };
     }
 
+    public bool Try(Func<TextSpan> readFunc, out TextSpan textSpan)
+    {
+        textSpan = readFunc();
+        if (textSpan.Length == 0)
+        {
+            return false;
+        }
+        return true;
+    }
 
     public TextSpan ReadIdentifier()
     {

@@ -47,8 +47,34 @@ public class SqlParser
             return new Either<ISqlExpression, ParseError>(
                 new ParseError($"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}"));
         }
+        
+        var columns = new List<ISelectColumnExpression>();
+        do
+        {
+            if (_text.Try(_text.ReadIdentifier, out var fieldName))
+            {
+                columns.Add(new SelectColumn()
+                {
+                    ColumnName = fieldName.Word
+                });
+            }
+            else
+            {
+                throw new ParseError("Expected column name"); 
+            }
+            if (_text.PeekChar() != ',')
+            {
+                break;
+            }
+            _text.NextChar();
+        }while (!_text.IsEnd());
 
-        return new Either<ISqlExpression, ParseError>(new SelectStatement());
+
+        var selectStatement = new SelectStatement
+        {
+            Columns = columns
+        };
+        return new Either<ISqlExpression, ParseError>(selectStatement);
     }
 
     public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
