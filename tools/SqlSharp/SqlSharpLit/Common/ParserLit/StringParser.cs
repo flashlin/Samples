@@ -256,3 +256,50 @@ public class CreateTableStatement : ISqlExpression
     public string TableName { get; set; } = string.Empty;
     public List<ColumnDefinition> Columns { get; set; } = [];
 }
+
+public class SelectColumn : ISelectColumnExpression
+{
+    public string ColumnName { get; set; } = string.Empty;
+}
+
+public interface ISelectColumnExpression
+{
+}
+
+
+public class SelectFrom : ISelectFromExpression
+{
+    public string FromTableName { get; set; } = string.Empty;
+}
+
+public interface ISelectFromExpression
+{
+}
+
+public class SqlWhereExpression : ISqlWhereExpression 
+{
+    public ISqlExpression Left { get; set; }
+    public string Operator { get; set; } = string.Empty;
+    public ISqlExpression Right { get; set; }
+}
+
+public class SqlFieldExpression : ISqlExpression
+{
+    public string FieldName { get; set; } = string.Empty;
+}
+
+public class SqlIntValueExpression : ISqlExpression
+{
+    public int Value { get; set; }
+}
+
+public interface ISqlWhereExpression
+{
+}
+
+public class SelectStatement : ISqlExpression
+{
+    public List<ISelectColumnExpression> Columns { get; set; } = [];
+    public ISelectFromExpression From { get; set; } = new SelectFrom();
+    public ISqlWhereExpression Where { get; set; }
+}

@@ -9,7 +9,7 @@ public class ParseSqlTest
 {
 
     [Test]
-    public void Test()
+    public void CreateTable()
     {
         var sql = $"""
                   CREATE TABLE Persons (
@@ -34,6 +34,43 @@ public class ParseSqlTest
                 new ColumnDefinition { ColumnName = "Address", DataType = "varchar", Size = 255 },
                 new ColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = 10, Scale = 3 }
             ]
+        });
+    }
+    
+    [Test]
+    public void Select()
+    {
+        var sql = $"""
+                   SELECT Id, Name 
+                   FROM Persons
+                   WHERE Id = 1;
+                   """;
+        
+        var rc = ParseSql(sql);
+        
+        ThenSqlStatement(rc, new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn() { ColumnName = "Id" },
+                new SelectColumn() { ColumnName = "Name" },
+            ],
+            From = new SelectFrom
+            {
+                FromTableName = "Persons"
+            },
+            Where = new SqlWhereExpression
+            {
+                Left = new SqlFieldExpression
+                {
+                    FieldName = "Id",
+                },
+                Operator = "=", 
+                Right = new SqlIntValueExpression
+                {
+                    Value = 1
+                }
+            }
         });
     }
 
