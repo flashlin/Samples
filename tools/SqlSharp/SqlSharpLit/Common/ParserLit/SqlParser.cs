@@ -150,7 +150,16 @@ public class SqlParser
 
     public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr)
     {
-        return ParseHelper.Try(parseFunc, out sqlExpr);
+        ISqlExpression localSqlExpr = new SqlEmptyExpression();
+        var rc = parseFunc();
+        var success = rc.Match(left =>
+            {
+                localSqlExpr = left;
+                return true;
+            },
+            right => false);
+        sqlExpr = localSqlExpr;
+        return success;
     }
 
     private ColumnDefinition ParseDataDeColumnDefinition(TextSpan item)
@@ -229,32 +238,4 @@ public class SqlParser
 
         throw new ParseError("Expected Int");
     }
-}
-
-public class SqlIdentity
-{
-    public static SqlIdentity Default => new();
-    public int Seed { get; set; }
-    public int Increment { get; set; }
-}
-
-public static class ParseHelper
-{
-    public static bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr)
-    {
-        ISqlExpression localSqlExpr = new SqlEmptyExpression();
-        var rc = parseFunc();
-        var success = rc.Match(left =>
-            {
-                localSqlExpr = left;
-                return true;
-            },
-            right => false);
-        sqlExpr = localSqlExpr;
-        return success;
-    }
-}
-
-public class SqlEmptyExpression : ISqlExpression
-{
 }
