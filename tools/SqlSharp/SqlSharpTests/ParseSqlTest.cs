@@ -16,7 +16,7 @@ public class ParseSqlTest
                    LastName varchar(50),
                    Money decimal(10,3),
                    [name] [int] IDENTITY(1,1) NOT NULL,
-                   cname [int] NULL
+                   cname [int] NULL,
                    );
                    """;
 

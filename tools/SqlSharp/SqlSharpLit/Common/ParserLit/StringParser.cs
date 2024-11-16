@@ -11,6 +11,8 @@ public class StringParser
         _text = text;
         _position = 0;
     }
+    
+    public int Position => _position;
 
     public string GetRemainingText()
     {

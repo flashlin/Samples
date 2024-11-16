@@ -13,8 +13,7 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> Parse()
     {
-        var error = ParseError.Empty;
-        if (Try(ParseCreateTableStatement, out var sqlCreateTableExpr, out error))
+        if (Try(ParseCreateTableStatement, out var sqlCreateTableExpr, out var error))
         {
             return new Either<ISqlExpression, ParseError>(sqlCreateTableExpr);
         }
@@ -24,29 +23,41 @@ public class SqlParser
             return new Either<ISqlExpression, ParseError>(error);
         }
 
-        if (Try(ParseSelectStatement, out var sqlSelectExpr,out error))
+        if (Try(ParseSelectStatement, out var sqlSelectExpr, out error))
         {
             return new Either<ISqlExpression, ParseError>(sqlSelectExpr);
         }
-        
+
         if (!error.IsStart)
         {
             return new Either<ISqlExpression, ParseError>(error);
         }
 
-        return new Either<ISqlExpression, ParseError>(new ParseError("Unknown statement"));
+        return CreateStartParseError("Unknown statement");
+    }
+
+    private Either<ISqlExpression, ParseError> CreateParseError(string message)
+    {
+        return new Either<ISqlExpression, ParseError>(new ParseError(message)
+        {
+            Offset = _text.Position
+        });
+    }
+
+    private Either<ISqlExpression, ParseError> CreateStartParseError(string message)
+    {
+        return new Either<ISqlExpression, ParseError>(new ParseError(message)
+        {
+            Offset = _text.Position,
+            IsStart = true
+        });
     }
 
     public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
     {
         if (!(_text.TryMatchKeyword("CREATE") && _text.TryMatchKeyword("TABLE")))
         {
-            return new Either<ISqlExpression, ParseError>(
-                new ParseError(
-                    $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}")
-                {
-                    IsStart = true
-                });
+            return CreateStartParseError($"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
         }
 
         var tableName = _text.ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
@@ -58,8 +69,7 @@ public class SqlParser
             var item = _text.ReadSqlIdentifier();
             if (item.Length == 0)
             {
-                return new Either<ISqlExpression, ParseError>(
-                    new ParseError($"Expected column name, but got {_text.PeekKeyword().Word}"));
+                return CreateParseError($"Expected column name, but got {_text.PeekKeyword().Word}");
             }
 
             var column = ParseDataDeColumnDefinition(item);
@@ -83,15 +93,17 @@ public class SqlParser
 
     private bool ParseDeclareNullable()
     {
-        if(_text.TryMatch("NOT"))
+        if (_text.TryMatch("NOT"))
         {
             _text.Match("NULL");
             return false;
         }
-        if(_text.TryMatch("NULL"))
+
+        if (_text.TryMatch("NULL"))
         {
             return true;
         }
+
         return false;
     }
 
@@ -101,6 +113,7 @@ public class SqlParser
         {
             return SqlIdentity.Default;
         }
+
         var sqlIdentity = new SqlIdentity
         {
             Seed = 1,
@@ -113,6 +126,7 @@ public class SqlParser
             sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
             _text.Match(")");
         }
+
         return sqlIdentity;
     }
 
@@ -120,11 +134,7 @@ public class SqlParser
     {
         if (!_text.TryMatchKeyword("SELECT"))
         {
-            return new Either<ISqlExpression, ParseError>(
-                new ParseError($"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}")
-                {
-                    IsStart = true
-                });
+            return CreateStartParseError($"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
         }
 
         var columns = new List<ISelectColumnExpression>();
@@ -180,7 +190,8 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(selectStatement);
     }
 
-    public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr, out ParseError error)
+    public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr,
+        out ParseError error)
     {
         ISqlExpression localSqlExpr = new SqlEmptyExpression();
         var localError = ParseError.Empty;
@@ -264,7 +275,7 @@ public class SqlParser
 
     private ISqlExpression ParseValue()
     {
-        if (Try(ParseIntValue, out var number,out _))
+        if (Try(ParseIntValue, out var number, out _))
         {
             return number;
         }

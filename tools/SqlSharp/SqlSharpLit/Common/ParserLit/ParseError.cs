@@ -7,4 +7,5 @@ public class ParseError : Exception
     {
     }
     public bool IsStart { get; set; }
+    public int Offset { get; set; }
 }
