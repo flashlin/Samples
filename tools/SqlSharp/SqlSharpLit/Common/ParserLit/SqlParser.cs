@@ -36,23 +36,6 @@ public class SqlParser
         return CreateStartParseError("Unknown statement");
     }
 
-    private Either<ISqlExpression, ParseError> CreateParseError(string message)
-    {
-        return new Either<ISqlExpression, ParseError>(new ParseError(message)
-        {
-            Offset = _text.Position
-        });
-    }
-
-    private Either<ISqlExpression, ParseError> CreateStartParseError(string message)
-    {
-        return new Either<ISqlExpression, ParseError>(new ParseError(message)
-        {
-            Offset = _text.Position,
-            IsStart = true
-        });
-    }
-
     public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
     {
         if (!(_text.TryMatchKeyword("CREATE") && _text.TryMatchKeyword("TABLE")))
@@ -89,45 +72,6 @@ public class SqlParser
             TableName = tableName.Word,
             Columns = columns
         });
-    }
-
-    private bool ParseDeclareNullable()
-    {
-        if (_text.TryMatch("NOT"))
-        {
-            _text.Match("NULL");
-            return false;
-        }
-
-        if (_text.TryMatch("NULL"))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private SqlIdentity ParseSqlIdentity()
-    {
-        if (!_text.TryMatch("IDENTITY"))
-        {
-            return SqlIdentity.Default;
-        }
-
-        var sqlIdentity = new SqlIdentity
-        {
-            Seed = 1,
-            Increment = 1
-        };
-        if (_text.TryMatch("("))
-        {
-            sqlIdentity.Seed = int.Parse(_text.ReadNumber().Word);
-            _text.Match(",");
-            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
-            _text.Match(")");
-        }
-
-        return sqlIdentity;
     }
 
     public Either<ISqlExpression, ParseError> ParseSelectStatement()
@@ -211,6 +155,23 @@ public class SqlParser
         return success;
     }
 
+    private Either<ISqlExpression, ParseError> CreateParseError(string message)
+    {
+        return new Either<ISqlExpression, ParseError>(new ParseError(message)
+        {
+            Offset = _text.Position
+        });
+    }
+
+    private Either<ISqlExpression, ParseError> CreateStartParseError(string message)
+    {
+        return new Either<ISqlExpression, ParseError>(new ParseError(message)
+        {
+            Offset = _text.Position,
+            IsStart = true
+        });
+    }
+
     private ColumnDefinition ParseDataDeColumnDefinition(TextSpan item)
     {
         var column = new ColumnDefinition
@@ -247,6 +208,22 @@ public class SqlParser
         return column;
     }
 
+    private bool ParseDeclareNullable()
+    {
+        if (_text.TryMatch("NOT"))
+        {
+            _text.Match("NULL");
+            return false;
+        }
+
+        if (_text.TryMatch("NULL"))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     private Either<ISqlExpression, ParseError> ParseIntValue()
     {
         if (_text.Try(_text.ReadNumber, out var number))
@@ -258,6 +235,29 @@ public class SqlParser
         }
 
         return new Either<ISqlExpression, ParseError>(new ParseError("Expected Int"));
+    }
+
+    private SqlIdentity ParseSqlIdentity()
+    {
+        if (!_text.TryMatch("IDENTITY"))
+        {
+            return SqlIdentity.Default;
+        }
+
+        var sqlIdentity = new SqlIdentity
+        {
+            Seed = 1,
+            Increment = 1
+        };
+        if (_text.TryMatch("("))
+        {
+            sqlIdentity.Seed = int.Parse(_text.ReadNumber().Word);
+            _text.Match(",");
+            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
+            _text.Match(")");
+        }
+
+        return sqlIdentity;
     }
 
     private Either<ISqlExpression, ParseError> ParseTableName()
