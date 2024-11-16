@@ -48,37 +48,7 @@ public class SqlParser
                     new ParseError($"Expected column name, but got {_text.PeekKeyword().Word}"));
             }
 
-            var column = new ColumnDefinition()
-            {
-                ColumnName = item.Word,
-            };
-
-            column.DataType = _text.ReadSqlIdentifier().Word;
-            var dataLength1 = string.Empty;
-            var dataLength2 = string.Empty;
-            if (_text.TryMatch("("))
-            {
-                dataLength1 = _text.ReadNumber().Word;
-                dataLength2 = string.Empty;
-                if (_text.PeekChar() == ',')
-                {
-                    _text.NextChar();
-                    dataLength2 = _text.ReadNumber().Word;
-                }
-
-                _text.Match(")");
-            }
-
-            if (!string.IsNullOrEmpty(dataLength1))
-            {
-                column.Size = int.Parse(dataLength1);
-            }
-
-            if (!string.IsNullOrEmpty(dataLength2))
-            {
-                column.Scale = int.Parse(dataLength2);
-            }
-
+            var column = ParseDataDeColumnDefinition(item);
             columns.Add(column);
             if (_text.PeekChar() != ',')
             {
@@ -158,6 +128,42 @@ public class SqlParser
     public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr)
     {
         return ParseHelper.Try(parseFunc, out sqlExpr);
+    }
+
+    private ColumnDefinition ParseDataDeColumnDefinition(TextSpan item)
+    {
+        var column = new ColumnDefinition
+        {
+            ColumnName = item.Word,
+            DataType = _text.ReadSqlIdentifier().Word
+        };
+
+        var dataLength1 = string.Empty;
+        var dataLength2 = string.Empty;
+        if (_text.TryMatch("("))
+        {
+            dataLength1 = _text.ReadNumber().Word;
+            dataLength2 = string.Empty;
+            if (_text.PeekChar() == ',')
+            {
+                _text.NextChar();
+                dataLength2 = _text.ReadNumber().Word;
+            }
+
+            _text.Match(")");
+        }
+
+        if (!string.IsNullOrEmpty(dataLength1))
+        {
+            column.Size = int.Parse(dataLength1);
+        }
+
+        if (!string.IsNullOrEmpty(dataLength2))
+        {
+            column.Scale = int.Parse(dataLength2);
+        }
+
+        return column;
     }
 
     private Either<ISqlExpression,ParseError> ParseIntValue()
