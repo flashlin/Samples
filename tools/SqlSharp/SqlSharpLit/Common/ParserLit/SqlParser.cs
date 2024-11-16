@@ -19,7 +19,7 @@ public class SqlConstraint
 public class SqlColumnIndex
 {
     public string ColumnName { get; set; } = string.Empty;
-    public string AscDesc { get; set; } = "ASC"; 
+    public string AscDesc { get; set; } = "ASC";
 }
 
 public class SqlToggle
