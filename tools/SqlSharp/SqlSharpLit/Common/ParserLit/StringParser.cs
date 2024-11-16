@@ -51,6 +51,83 @@ public class StringParser
             }
         }
     }
+    
+    public TextSpan ReadSqlDoubleComment()
+    {
+        var startPosition = _position;
+        if (Try(ReadSymbol, out var openSymbol))
+        {
+            if (openSymbol.Word == "/*")
+            {
+                _position = startPosition;
+                ReadUntil("*/");
+                NextString(2);
+                return new TextSpan
+                {
+                    Word = _text.Substring(startPosition, _position - startPosition),
+                    Offset = startPosition,
+                    Length = _position - startPosition
+                };
+            }
+        }
+        _position = startPosition;
+        return new TextSpan
+        {
+            Word = string.Empty,
+            Offset = startPosition,
+            Length = 0
+        };
+    }
+
+    public void SkipSqlComment()
+    {
+        SkipSqlDoubleComment();
+        SkipSqlSingleComment();
+    }
+    
+    public void SkipSqlDoubleComment()
+    {
+        var startPosition = _position;
+        if (Try(ReadSymbol, out var openSymbol))
+        {
+            if (openSymbol.Word == "/*")
+            {
+                _position = startPosition;
+                ReadSqlDoubleComment();
+                return;
+            }
+        }
+        _position = startPosition;
+    }
+
+    public void SkipSqlSingleComment()
+    {
+        var startPosition = _position;
+        if (Try(ReadSymbol, out var openSymbol))
+        {
+            if (openSymbol.Word == "--")
+            {
+                _position = startPosition;
+                ReadSqlSingleComment();
+                return;
+            }
+        }
+        _position = startPosition;
+    }
+
+    public TextSpan ReadSqlSingleComment()
+    {
+        var startPosition = _position;
+        NextChar();
+        NextChar();
+        ReadUntil(c => c == '\n');
+        return new TextSpan()
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
+        };
+    }
 
     public TextSpan ReadUntilRightParenthesis()
     {
@@ -86,6 +163,22 @@ public class StringParser
             Offset = startPosition,
             Length = 0
         };
+    }
+    
+    public string PeekString(int length)
+    {
+        if (IsEnd()) return string.Empty;
+        var remainLength = _text.Length - _position;
+        var readLength = Math.Min(length, remainLength);
+        return _text.Substring(_position, readLength);
+    }
+    
+    public string NextString(int length)
+    {
+        if (IsEnd()) return string.Empty;
+        var text = PeekString(length);
+        _position += text.Length;
+        return text;
     }
 
     public char NextChar()
@@ -355,6 +448,22 @@ public class StringParser
             result += NextChar();
         }
 
+        return new TextSpan()
+        {
+            Word = result,
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
+    
+    public TextSpan ReadUntil(string text)
+    {
+        var offset = _position;
+        var result = "";
+        while (!IsEnd() && PeekString(text.Length)!=text)
+        {
+            result += NextChar();
+        }
         return new TextSpan()
         {
             Word = result,

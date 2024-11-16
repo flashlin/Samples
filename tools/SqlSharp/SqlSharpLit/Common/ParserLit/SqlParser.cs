@@ -83,9 +83,11 @@ public class SqlParser
                     });
             }
 
-            var column = ParseDataDeColumnDefinition(item);
+            var column = ParseColumnDefinition(item);
+            
+            _text.SkipSqlComment();
+            
             column.Identity = ParseSqlIdentity();
-
             ParseColumnConstraints(column);
 
             columns.Add(column);
@@ -367,7 +369,7 @@ public class SqlParser
         });
     }
 
-    private ColumnDefinition ParseDataDeColumnDefinition(TextSpan item)
+    private ColumnDefinition ParseColumnDefinition(TextSpan item)
     {
         var column = new ColumnDefinition
         {
@@ -386,7 +388,6 @@ public class SqlParser
                 _text.NextChar();
                 dataLength2 = _text.ReadNumber().Word;
             }
-
             _text.Match(")");
         }
 
