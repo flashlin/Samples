@@ -17,6 +17,7 @@ public class ParseSqlTest
                    Money decimal(10,3),
                    [name] [int] IDENTITY(1,1) NOT NULL,
                    cname [int] NULL,
+                   [rid] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL, 
                    CONSTRAINT [PK_AcceptedBets] PRIMARY KEY CLUSTERED 
                      (
                    	    [MatchResultID] ASC
@@ -48,6 +49,16 @@ public class ParseSqlTest
                     ColumnName = "cname", DataType = "[int]",
                     IsNullable = true,
                 },
+                new ColumnDefinition
+                {
+                    ColumnName = "[rid]", DataType = "[int]",
+                    Identity = new SqlIdentity()
+                    {
+                        Seed = 1,
+                        Increment = 1,
+                    },
+                    NotForReplication = true,
+                }
             ],
             Constraints = [
                 new SqlConstraint

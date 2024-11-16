@@ -10,4 +10,5 @@ public class ColumnDefinition : ISqlExpression
     public int Scale { get; set; }
     public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
     public bool IsNullable { get; set; }
+    public bool NotForReplication { get; set; }
 }

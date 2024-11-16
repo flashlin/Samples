@@ -72,6 +72,7 @@ public class SqlParser
             {
                 break;
             }
+
             var item = _text.ReadSqlIdentifier();
             if (item.Length == 0)
             {
@@ -84,7 +85,27 @@ public class SqlParser
 
             var column = ParseDataDeColumnDefinition(item);
             column.Identity = ParseSqlIdentity();
-            column.IsNullable = ParseDeclareNullable();
+
+            do
+            {
+                if (_text.TryMatches("NOT", "FOR", "REPLICATION"))
+                {
+                    column.NotForReplication = true;
+                    continue;
+                }
+                if (_text.TryMatches("NOT", "NULL"))
+                {
+                    column.IsNullable = false;
+                    continue;
+                }
+                if (_text.TryMatches("NULL"))
+                {
+                    column.IsNullable = true;
+                    continue;
+                }
+                break;
+            } while (true);
+
             columns.Add(column);
             if (_text.PeekChar() != ',')
             {
