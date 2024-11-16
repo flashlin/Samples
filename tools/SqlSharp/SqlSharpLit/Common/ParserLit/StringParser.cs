@@ -52,6 +52,42 @@ public class StringParser
         }
     }
 
+    public TextSpan ReadUntilRightParenthesis()
+    {
+        var startPosition = _position;
+        var openParenthesis = 0;
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            if (c == '(')
+            {
+                openParenthesis++;
+                continue;
+            }
+            if (c == ')')
+            {
+                openParenthesis--;
+                if (openParenthesis == -1)
+                {
+                    _position--;
+                    return new TextSpan()
+                    {
+                        Word = _text.Substring(startPosition, _position - startPosition),
+                        Offset = startPosition,
+                        Length = _position - startPosition
+                    };
+                }
+            }
+        }
+        _position = startPosition;
+        return new TextSpan()
+        {
+            Word = string.Empty,
+            Offset = startPosition,
+            Length = 0
+        };
+    }
+
     public char NextChar()
     {
         if (IsEnd()) return '\0';

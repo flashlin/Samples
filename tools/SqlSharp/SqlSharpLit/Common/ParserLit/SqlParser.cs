@@ -86,25 +86,7 @@ public class SqlParser
             var column = ParseDataDeColumnDefinition(item);
             column.Identity = ParseSqlIdentity();
 
-            do
-            {
-                if (_text.TryMatches("NOT", "FOR", "REPLICATION"))
-                {
-                    column.NotForReplication = true;
-                    continue;
-                }
-                if (_text.TryMatches("NOT", "NULL"))
-                {
-                    column.IsNullable = false;
-                    continue;
-                }
-                if (_text.TryMatches("NULL"))
-                {
-                    column.IsNullable = true;
-                    continue;
-                }
-                break;
-            } while (true);
+            ParseColumnConstraints(column);
 
             columns.Add(column);
             if (_text.PeekChar() != ',')
@@ -116,6 +98,46 @@ public class SqlParser
         } while (!_text.IsEnd());
 
         return new Either<List<ColumnDefinition>, ParseError>(columns);
+    }
+
+    private void ParseColumnConstraints(ColumnDefinition column)
+    {
+        do
+        {
+            if (_text.TryMatch(ConstraintKeyword))
+            {
+                var constraintName = _text.ReadSqlIdentifier();
+                if (_text.TryMatch("DEFAULT"))
+                {
+                    _text.Match("(");
+                    var defaultValue = _text.ReadUntilRightParenthesis();
+                    _text.Match(")");
+                    column.Constraints.Add(new SqlConstraintDefault
+                    {
+                        ConstraintName = constraintName.Word,
+                        Value = defaultValue.Word
+                    });
+                    continue;
+                }
+                throw new ParseError("Expect Constraint DEFAULT");
+            }
+            if (_text.TryMatches("NOT", "FOR", "REPLICATION"))
+            {
+                column.NotForReplication = true;
+                continue;
+            }
+            if (_text.TryMatches("NOT", "NULL"))
+            {
+                column.IsNullable = false;
+                continue;
+            }
+            if (_text.TryMatches("NULL"))
+            {
+                column.IsNullable = true;
+                continue;
+            }
+            break;
+        } while (true);
     }
 
     public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
@@ -142,7 +164,7 @@ public class SqlParser
 
         createTableStatement.Columns = rc.LeftValue;
 
-        var constraint = ParseConstraint();
+        var constraint = ParseTableConstraint();
         if (constraint.IsRight)
         {
             return CreateParseError(constraint.RightValue.Message);
@@ -156,7 +178,7 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(createTableStatement);
     }
 
-    private Either<SqlConstraint?, ParseError> ParseConstraint()
+    private Either<SqlConstraint?, ParseError> ParseTableConstraint()
     {
         if (!_text.TryMatch(ConstraintKeyword))
         {
@@ -381,22 +403,6 @@ public class SqlParser
         return column;
     }
 
-    private bool ParseDeclareNullable()
-    {
-        if (_text.TryMatch("NOT"))
-        {
-            _text.Match("NULL");
-            return false;
-        }
-
-        if (_text.TryMatch("NULL"))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     private Either<ISqlExpression, ParseError> ParseIntValue()
     {
         if (_text.Try(_text.ReadNumber, out var number))
@@ -460,4 +466,14 @@ public class SqlParser
 
         throw new ParseError("Expected Int");
     }
+}
+
+public interface ISqlConstraint
+{
+}
+
+public class SqlConstraintDefault : ISqlConstraint
+{
+    public string ConstraintName { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
 }

@@ -18,6 +18,7 @@ public class ParseSqlTest
                    [name] [int] IDENTITY(1,1) NOT NULL,
                    cname [int] NULL,
                    [rid] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL, 
+                   [DailyTotalRaw]  DECIMAL (19, 6) CONSTRAINT [DF_CheckSum] DEFAULT ((0)) NOT NULL,
                    CONSTRAINT [PK_AcceptedBets] PRIMARY KEY CLUSTERED 
                      (
                    	    [MatchResultID] ASC
@@ -58,6 +59,19 @@ public class ParseSqlTest
                         Increment = 1,
                     },
                     NotForReplication = true,
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[DailyTotalRaw]", DataType = "DECIMAL",
+                    Size = 19,
+                    Scale = 6,
+                    Constraints = [
+                        new SqlConstraintDefault
+                        {
+                            ConstraintName = "[DF_CheckSum]",
+                            Value = "(0)",
+                        }
+                    ]
                 }
             ],
             Constraints = [
