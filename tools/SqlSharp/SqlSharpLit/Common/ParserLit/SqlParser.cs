@@ -2,6 +2,32 @@ using T1.Standard.DesignPatterns;
 
 namespace SqlSharpLit.Common.ParserLit;
 
+//CONSTRAINT [PK_AcceptedBets] PRIMARY KEY CLUSTERED 
+//(
+//   [MatchResultID] ASC
+//) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
+public class SqlConstraint
+{
+    public string ConstraintName { get; set; } = string.Empty;
+    public string ConstraintType { get; set; } = string.Empty;
+    public string Clustered { get; set; } = string.Empty;
+    public List<SqlColumnIndex> Columns { get; set; } = [];
+    public List<SqlToggle> WithToggles { get; set; } = [];
+    public string On { get; set; } = string.Empty;
+}
+
+public class SqlColumnIndex
+{
+    public string ColumnName { get; set; } = string.Empty;
+    public string AscDesc { get; set; } = "ASC"; 
+}
+
+public class SqlToggle
+{
+    public string ToggleName { get; set; } = string.Empty;
+    public string ToggleValue { get; set; } = string.Empty;
+}
+
 public class SqlParser
 {
     private readonly StringParser _text;
@@ -36,25 +62,20 @@ public class SqlParser
         return CreateStartParseError("Unknown statement");
     }
 
-    public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
+    public Either<List<ColumnDefinition>, ParseError> ParseCreateTableColumns()
     {
-        if (!(_text.TryMatchKeyword("CREATE") && _text.TryMatchKeyword("TABLE")))
-        {
-            return CreateStartParseError($"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
-        }
-
-        var tableName = _text.ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
-        _text.Match("(");
-
         var columns = new List<ColumnDefinition>();
         do
         {
             var item = _text.ReadSqlIdentifier();
             if (item.Length == 0)
             {
-                return CreateParseError($"Expected column name, but got {_text.PeekKeyword().Word}");
+                return new Either<List<ColumnDefinition>, ParseError>(
+                    new ParseError($"Expected column name, but got {_text.PeekKeyword().Word}")
+                    {
+                        Offset = _text.Position
+                    });
             }
-
             var column = ParseDataDeColumnDefinition(item);
             column.Identity = ParseSqlIdentity();
             column.IsNullable = ParseDeclareNullable();
@@ -66,12 +87,30 @@ public class SqlParser
 
             _text.NextChar();
         } while (!_text.IsEnd());
+        return new Either<List<ColumnDefinition>, ParseError>(columns);
+    }
 
-        return new Either<ISqlExpression, ParseError>(new CreateTableStatement()
+    public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
+    {
+        if (!(_text.TryMatchKeyword("CREATE") && _text.TryMatchKeyword("TABLE")))
+        {
+            return CreateStartParseError($"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
+        }
+
+        var tableName = _text.ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
+        _text.Match("(");
+
+        var createTableStatement = new CreateTableStatement()
         {
             TableName = tableName.Word,
-            Columns = columns
-        });
+        };
+        var rc = ParseCreateTableColumns();
+        if(rc.IsRight)
+        {
+            return CreateParseError(rc.RightValue.Message);
+        }
+        createTableStatement.Columns = rc.LeftValue;
+        return new Either<ISqlExpression, ParseError>(createTableStatement);
     }
 
     public Either<ISqlExpression, ParseError> ParseSelectStatement()
