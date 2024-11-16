@@ -8,4 +8,5 @@ public class ColumnDefinition : ISqlExpression
     public bool IsAutoIncrement { get; set; }
     public int Size { get; set; }
     public int Scale { get; set; }
+    public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
 }

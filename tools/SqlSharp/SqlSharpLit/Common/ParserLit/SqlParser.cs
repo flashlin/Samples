@@ -49,6 +49,7 @@ public class SqlParser
             }
 
             var column = ParseDataDeColumnDefinition(item);
+            column.Identity = ParseSqlIdentity();
             columns.Add(column);
             if (_text.PeekChar() != ',')
             {
@@ -63,6 +64,27 @@ public class SqlParser
             TableName = tableName.Word,
             Columns = columns
         });
+    }
+
+    private SqlIdentity ParseSqlIdentity()
+    {
+        if (!_text.TryMatch("IDENTITY"))
+        {
+            return SqlIdentity.Default;
+        }
+        var sqlIdentity = new SqlIdentity
+        {
+            Seed = 1,
+            Increment = 1
+        };
+        if (_text.TryMatch("("))
+        {
+            sqlIdentity.Seed = int.Parse(_text.ReadNumber().Word);
+            _text.Match(",");
+            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
+            _text.Match(")");
+        }
+        return sqlIdentity;
     }
 
     public Either<ISqlExpression, ParseError> ParseSelectStatement()
@@ -109,19 +131,20 @@ public class SqlParser
                 FromTableName = tableName
             };
         }
-        
+
         if (_text.TryMatchKeyword("WHERE"))
         {
             var left = ParseValue();
             var operation = _text.ReadSymbol().Word;
-            var right= ParseValue();
+            var right = ParseValue();
             selectStatement.Where = new SqlWhereExpression()
             {
                 Left = left,
                 Operation = operation,
                 Right = right
-            };   
+            };
         }
+
         return new Either<ISqlExpression, ParseError>(selectStatement);
     }
 
@@ -166,7 +189,7 @@ public class SqlParser
         return column;
     }
 
-    private Either<ISqlExpression,ParseError> ParseIntValue()
+    private Either<ISqlExpression, ParseError> ParseIntValue()
     {
         if (_text.Try(_text.ReadNumber, out var number))
         {
@@ -175,10 +198,11 @@ public class SqlParser
                 Value = int.Parse(number.Word)
             });
         }
-        return new Either<ISqlExpression,ParseError>(new ParseError("Expected Int"));
+
+        return new Either<ISqlExpression, ParseError>(new ParseError("Expected Int"));
     }
 
-    private Either<ISqlExpression,ParseError> ParseTableName()
+    private Either<ISqlExpression, ParseError> ParseTableName()
     {
         if (_text.Try(_text.ReadIdentifier, out var fieldName))
         {
@@ -187,6 +211,7 @@ public class SqlParser
                 FieldName = fieldName.Word
             });
         }
+
         return new Either<ISqlExpression, ParseError>(new ParseError("Expected field name"));
     }
 
@@ -196,12 +221,21 @@ public class SqlParser
         {
             return number;
         }
-        if(Try(ParseTableName, out var tableName))
+
+        if (Try(ParseTableName, out var tableName))
         {
             return tableName;
         }
+
         throw new ParseError("Expected Int");
     }
+}
+
+public class SqlIdentity
+{
+    public static SqlIdentity Default => new();
+    public int Seed { get; set; }
+    public int Increment { get; set; }
 }
 
 public static class ParseHelper
@@ -222,4 +256,5 @@ public static class ParseHelper
 }
 
 public class SqlEmptyExpression : ISqlExpression
-{}
+{
+}

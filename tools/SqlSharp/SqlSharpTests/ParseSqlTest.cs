@@ -7,21 +7,20 @@ namespace SqlSharpTests;
 [TestFixture]
 public class ParseSqlTest
 {
-
     [Test]
     public void CreateTable()
     {
         var sql = $"""
-                  CREATE TABLE Persons (
-                  id int,
-                  LastName varchar(50),
-                  Money decimal(10,3),
-                  [name] [int] IDENTITY(1,1) NOT NULL
-                  );
-                  """;
-        
+                   CREATE TABLE Persons (
+                   id int,
+                   LastName varchar(50),
+                   Money decimal(10,3),
+                   [name] [int] IDENTITY(1,1) NOT NULL
+                   );
+                   """;
+
         var rc = ParseSql(sql);
-        
+
         ThenSqlStatement(rc, new CreateTableStatement
         {
             TableName = "Persons",
@@ -30,11 +29,19 @@ public class ParseSqlTest
                 new ColumnDefinition { ColumnName = "id", DataType = "int" },
                 new ColumnDefinition { ColumnName = "LastName", DataType = "varchar", Size = 50 },
                 new ColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = 10, Scale = 3 },
-                new ColumnDefinition { ColumnName = "[name]", DataType = "[int]", },
+                new ColumnDefinition
+                {
+                    ColumnName = "[name]", DataType = "[int]",
+                    Identity = new SqlIdentity()
+                    {
+                        Seed = 1,
+                        Increment = 1,
+                    }
+                },
             ]
         });
     }
-    
+
     [Test]
     public void Select()
     {
@@ -43,9 +50,9 @@ public class ParseSqlTest
                    FROM Persons
                    WHERE Id = 1;
                    """;
-        
+
         var rc = ParseSql(sql);
-        
+
         ThenSqlStatement(rc, new SelectStatement
         {
             Columns =
@@ -63,7 +70,7 @@ public class ParseSqlTest
                 {
                     FieldName = "Id",
                 },
-                Operation = "=", 
+                Operation = "=",
                 Right = new SqlIntValueExpression
                 {
                     Value = 1
@@ -73,14 +80,14 @@ public class ParseSqlTest
     }
 
     private static void ThenSqlStatement<T>(Either<ISqlExpression, ParseError> rc, T expectedSqlStatement)
-        where T : ISqlExpression 
+        where T : ISqlExpression
     {
         rc.Switch(statement =>
             {
                 var castedStatement = (T)statement;
                 castedStatement.Should().BeEquivalentTo(expectedSqlStatement);
             },
-            error=>throw error 
+            error => throw error
         );
     }
 
