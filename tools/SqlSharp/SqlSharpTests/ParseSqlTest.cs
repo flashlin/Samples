@@ -13,11 +13,10 @@ public class ParseSqlTest
     {
         var sql = $"""
                   CREATE TABLE Persons (
-                  PersonID int,
+                  id int,
                   LastName varchar(50),
-                  FirstName varchar(25),
-                  Address varchar(255),
-                  Money decimal(10,3)
+                  Money decimal(10,3),
+                  [name] [int] IDENTITY(1,1) NOT NULL
                   );
                   """;
         
@@ -28,10 +27,8 @@ public class ParseSqlTest
             TableName = "Persons",
             Columns =
             [
-                new ColumnDefinition { ColumnName = "PersonID", DataType = "int" },
+                new ColumnDefinition { ColumnName = "id", DataType = "int" },
                 new ColumnDefinition { ColumnName = "LastName", DataType = "varchar", Size = 50 },
-                new ColumnDefinition { ColumnName = "FirstName", DataType = "varchar", Size = 25 },
-                new ColumnDefinition { ColumnName = "Address", DataType = "varchar", Size = 255 },
                 new ColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = 10, Scale = 3 }
             ]
         });
