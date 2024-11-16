@@ -76,6 +76,7 @@ public class SqlParser
                         Offset = _text.Position
                     });
             }
+
             var column = ParseDataDeColumnDefinition(item);
             column.Identity = ParseSqlIdentity();
             column.IsNullable = ParseDeclareNullable();
@@ -87,6 +88,7 @@ public class SqlParser
 
             _text.NextChar();
         } while (!_text.IsEnd());
+
         return new Either<List<ColumnDefinition>, ParseError>(columns);
     }
 
@@ -94,7 +96,8 @@ public class SqlParser
     {
         if (!(_text.TryMatchKeyword("CREATE") && _text.TryMatchKeyword("TABLE")))
         {
-            return CreateStartParseError($"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
+            return CreateStartParseError(
+                $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
         }
 
         var tableName = _text.ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
@@ -104,20 +107,124 @@ public class SqlParser
         {
             TableName = tableName.Word,
         };
+
         var rc = ParseCreateTableColumns();
-        if(rc.IsRight)
+        if (rc.IsRight)
         {
             return CreateParseError(rc.RightValue.Message);
         }
+
         createTableStatement.Columns = rc.LeftValue;
+        
+        var constraint = ParseConstraint();
+        if (constraint.IsRight)
+        {
+            return CreateParseError(constraint.RightValue.Message);
+        }
+
+        if (constraint is { IsLeft: true, Left: not null })
+        {
+            createTableStatement.Constraints.Add(constraint.Left);
+        }
+
         return new Either<ISqlExpression, ParseError>(createTableStatement);
+    }
+
+    private Either<SqlConstraint?, ParseError> ParseConstraint()
+    {
+        if (!_text.TryMatch("CONSTRAINT"))
+        {
+            return new Either<SqlConstraint?, ParseError>(default(SqlConstraint));
+        }
+
+        var sqlConstraint = new SqlConstraint
+        {
+            ConstraintName = _text.ReadSqlIdentifier().Word
+        };
+        var constraintType = _text.ReadIdentifier().Word;
+        if (constraintType.ToUpper() == "PRIMARY")
+        {
+            sqlConstraint.ConstraintType = "PRIMARY KEY";
+            _text.Match("KEY");
+        }
+        else if (constraintType.ToUpper() == "FOREIGN")
+        {
+            sqlConstraint.ConstraintType = "FOREIGN KEY";
+            _text.Match("KEY");
+        }
+        else
+        {
+            return new Either<SqlConstraint?, ParseError>(
+                new ParseError($"Expected PRIMARY KEY or FOREIGN KEY, but got {constraintType}"));
+        }
+
+        if (_text.TryMatch("CLUSTERED"))
+        {
+            sqlConstraint.Clustered = "CLUSTERED";
+        }
+
+        _text.Match("(");
+        var indexColumns = new List<SqlColumnIndex>();
+        do
+        {
+            var indexColumn = new SqlColumnIndex();
+            indexColumn.ColumnName = _text.ReadSqlIdentifier().Word;
+            if (_text.TryMatch("ASC"))
+            {
+                indexColumn.AscDesc = "ASC";
+            }
+            else if (_text.TryMatch("DESC"))
+            {
+                indexColumn.AscDesc = "DESC";
+            }
+
+            indexColumns.Add(indexColumn);
+            if (_text.PeekChar() != ',')
+            {
+                break;
+            }
+
+            _text.NextChar();
+        } while (!_text.IsEnd());
+
+        _text.Match(")");
+        sqlConstraint.Columns = indexColumns;
+        if (_text.TryMatch("WITH"))
+        {
+            _text.Match("(");
+            var toggles = new List<SqlToggle>();
+            do
+            {
+                var toggle = new SqlToggle();
+                toggle.ToggleName = _text.ReadSqlIdentifier().Word;
+                _text.Match("=");
+                toggle.ToggleValue = _text.ReadSqlIdentifier().Word;
+                toggles.Add(toggle);
+                if (_text.PeekChar() != ',')
+                {
+                    break;
+                }
+
+                _text.NextChar();
+            } while (!_text.IsEnd());
+
+            _text.Match(")");
+            sqlConstraint.WithToggles = toggles;
+        }
+
+        if (_text.TryMatch("ON"))
+        {
+            sqlConstraint.On = _text.ReadSqlIdentifier().Word;
+        }
+        return new Either<SqlConstraint?, ParseError>(sqlConstraint);
     }
 
     public Either<ISqlExpression, ParseError> ParseSelectStatement()
     {
         if (!_text.TryMatchKeyword("SELECT"))
         {
-            return CreateStartParseError($"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
+            return CreateStartParseError(
+                $"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
         }
 
         var columns = new List<ISelectColumnExpression>();
