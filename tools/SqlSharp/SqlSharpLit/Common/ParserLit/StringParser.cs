@@ -11,7 +11,7 @@ public class StringParser
         _text = text;
         _position = 0;
     }
-    
+
     public int Position => _position;
 
     public string GetRemainingText()
@@ -20,6 +20,7 @@ public class StringParser
         {
             return string.Empty;
         }
+
         return _text.Substring(_position);
     }
 
@@ -27,6 +28,11 @@ public class StringParser
     public bool IsEnd()
     {
         return _position >= _text.Length;
+    }
+
+    public bool IsPeekIdentifier(string word)
+    {
+        return PeekIdentifier(word).Length != 0;
     }
 
     public bool IsWordChar(char c)
@@ -59,6 +65,28 @@ public class StringParser
         return _text[_position];
     }
 
+    public TextSpan PeekIdentifier(string word)
+    {
+        SkipWhitespace();
+        var tempPosition = _position;
+        if (Try(ReadIdentifier, out var identifier))
+        {
+            _position = tempPosition;
+            if (identifier.Word == word)
+            {
+                return identifier;
+            }
+        }
+
+        _position = tempPosition;
+        return new TextSpan
+        {
+            Word = string.Empty,
+            Offset = _position,
+            Length = 0
+        };
+    }
+
     public TextSpan PeekKeyword()
     {
         SkipWhitespace();
@@ -83,6 +111,41 @@ public class StringParser
         return _previousWord;
     }
 
+    public TextSpan ReadFullQuotedIdentifier()
+    {
+        var quoteChar = PeekChar();
+        if (quoteChar != '"' && quoteChar != '[' && quoteChar != '`')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+
+        var offset = _position;
+        ReadQuotedIdentifier();
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            if (c != '.')
+            {
+                _position--;
+                break;
+            }
+
+            ReadQuotedIdentifier();
+        }
+
+        return new TextSpan()
+        {
+            Word = _text.Substring(offset, _position - offset),
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
+
     public TextSpan ReadIdentifier()
     {
         SkipWhitespace();
@@ -97,6 +160,7 @@ public class StringParser
                 Length = 0
             };
         }
+
         var identifier = "";
         while (!IsEnd())
         {
@@ -106,8 +170,10 @@ public class StringParser
                 _position--;
                 break;
             }
+
             identifier += c;
         }
+
         return new TextSpan()
         {
             Word = identifier,
@@ -140,6 +206,7 @@ public class StringParser
                 _position--;
                 break;
             }
+
             word += ch;
         }
 
@@ -151,58 +218,6 @@ public class StringParser
         };
     }
 
-    public TextSpan ReadSqlIdentifier()
-    {
-        if(Try(ReadIdentifier, out var identifier))
-        {
-            return identifier;
-        }
-        if(Try(ReadFullQuotedIdentifier, out var fullQuotedIdentifier))
-        {
-            return fullQuotedIdentifier;
-        }
-        return new TextSpan
-        {
-            Word = string.Empty,
-            Offset = _position,
-            Length = 0
-        };
-    }
-
-    public TextSpan ReadFullQuotedIdentifier()
-    {
-        var quoteChar = PeekChar();
-        if (quoteChar != '"' && quoteChar != '[' && quoteChar != '`')
-        {
-            return new TextSpan()
-            {
-                Word = string.Empty,
-                Offset = _position,
-                Length = 0
-            };
-        }
-        
-        var offset = _position;
-        ReadQuotedIdentifier();
-        while (!IsEnd())
-        {
-            var c = NextChar();
-            if (c != '.')
-            {
-                _position--;
-                break;
-            }
-            ReadQuotedIdentifier();
-        }
-        
-        return new TextSpan()
-        {
-            Word = _text.Substring(offset, _position - offset),
-            Offset = offset,
-            Length = _position - offset
-        };
-    }
-    
 
     public TextSpan ReadQuotedIdentifier()
     {
@@ -239,6 +254,26 @@ public class StringParser
         };
     }
 
+    public TextSpan ReadSqlIdentifier()
+    {
+        if (Try(ReadIdentifier, out var identifier))
+        {
+            return identifier;
+        }
+
+        if (Try(ReadFullQuotedIdentifier, out var fullQuotedIdentifier))
+        {
+            return fullQuotedIdentifier;
+        }
+
+        return new TextSpan
+        {
+            Word = string.Empty,
+            Offset = _position,
+            Length = 0
+        };
+    }
+
     public TextSpan ReadSymbol()
     {
         SkipWhitespace();
@@ -253,6 +288,7 @@ public class StringParser
                 Length = 0
             };
         }
+
         var symbol = "";
         while (!IsEnd())
         {
@@ -262,8 +298,10 @@ public class StringParser
                 _position--;
                 break;
             }
+
             symbol += c;
         }
+
         return new TextSpan()
         {
             Word = symbol,
@@ -304,6 +342,7 @@ public class StringParser
         {
             return false;
         }
+
         return true;
     }
 
@@ -312,11 +351,12 @@ public class StringParser
         SkipWhitespace();
         var tempPosition = _position;
         var word = "";
-        while (word.Length < keyword.Length)
+        while (tempPosition < _text.Length && word.Length < keyword.Length)
         {
             word += _text[tempPosition];
             tempPosition++;
         }
+
         if (word != keyword)
         {
             return false;

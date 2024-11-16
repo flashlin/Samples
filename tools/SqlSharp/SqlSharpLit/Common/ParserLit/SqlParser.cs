@@ -30,6 +30,7 @@ public class SqlToggle
 
 public class SqlParser
 {
+    private const string ConstraintKeyword = "CONSTRAINT";
     private readonly StringParser _text;
 
     public SqlParser(string text)
@@ -67,6 +68,10 @@ public class SqlParser
         var columns = new List<ColumnDefinition>();
         do
         {
+            if (_text.IsPeekIdentifier(ConstraintKeyword))
+            {
+                break;
+            }
             var item = _text.ReadSqlIdentifier();
             if (item.Length == 0)
             {
@@ -115,7 +120,7 @@ public class SqlParser
         }
 
         createTableStatement.Columns = rc.LeftValue;
-        
+
         var constraint = ParseConstraint();
         if (constraint.IsRight)
         {
@@ -132,7 +137,7 @@ public class SqlParser
 
     private Either<SqlConstraint?, ParseError> ParseConstraint()
     {
-        if (!_text.TryMatch("CONSTRAINT"))
+        if (!_text.TryMatch(ConstraintKeyword))
         {
             return new Either<SqlConstraint?, ParseError>(default(SqlConstraint));
         }
@@ -216,6 +221,7 @@ public class SqlParser
         {
             sqlConstraint.On = _text.ReadSqlIdentifier().Word;
         }
+
         return new Either<SqlConstraint?, ParseError>(sqlConstraint);
     }
 
