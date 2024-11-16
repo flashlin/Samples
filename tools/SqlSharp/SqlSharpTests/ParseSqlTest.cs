@@ -15,7 +15,8 @@ public class ParseSqlTest
                    id int,
                    LastName varchar(50),
                    Money decimal(10,3),
-                   [name] [int] IDENTITY(1,1) NOT NULL
+                   [name] [int] IDENTITY(1,1) NOT NULL,
+                   cname [int] NULL
                    );
                    """;
 
@@ -36,7 +37,12 @@ public class ParseSqlTest
                     {
                         Seed = 1,
                         Increment = 1,
-                    }
+                    },
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "cname", DataType = "[int]",
+                    IsNullable = true,
                 },
             ]
         });

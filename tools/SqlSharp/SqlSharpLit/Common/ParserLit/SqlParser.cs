@@ -13,14 +13,25 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> Parse()
     {
-        if (Try(ParseCreateTableStatement, out var sqlCreateTableExpr))
+        var error = ParseError.Empty;
+        if (Try(ParseCreateTableStatement, out var sqlCreateTableExpr, out error))
         {
             return new Either<ISqlExpression, ParseError>(sqlCreateTableExpr);
         }
 
-        if (Try(ParseSelectStatement, out var sqlSelectExpr))
+        if (!error.IsStart)
+        {
+            return new Either<ISqlExpression, ParseError>(error);
+        }
+
+        if (Try(ParseSelectStatement, out var sqlSelectExpr,out error))
         {
             return new Either<ISqlExpression, ParseError>(sqlSelectExpr);
+        }
+        
+        if (!error.IsStart)
+        {
+            return new Either<ISqlExpression, ParseError>(error);
         }
 
         return new Either<ISqlExpression, ParseError>(new ParseError("Unknown statement"));
@@ -32,7 +43,10 @@ public class SqlParser
         {
             return new Either<ISqlExpression, ParseError>(
                 new ParseError(
-                    $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}"));
+                    $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}")
+                {
+                    IsStart = true
+                });
         }
 
         var tableName = _text.ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
@@ -50,6 +64,7 @@ public class SqlParser
 
             var column = ParseDataDeColumnDefinition(item);
             column.Identity = ParseSqlIdentity();
+            column.IsNullable = ParseDeclareNullable();
             columns.Add(column);
             if (_text.PeekChar() != ',')
             {
@@ -64,6 +79,20 @@ public class SqlParser
             TableName = tableName.Word,
             Columns = columns
         });
+    }
+
+    private bool ParseDeclareNullable()
+    {
+        if(_text.TryMatch("NOT"))
+        {
+            _text.Match("NULL");
+            return false;
+        }
+        if(_text.TryMatch("NULL"))
+        {
+            return true;
+        }
+        return false;
     }
 
     private SqlIdentity ParseSqlIdentity()
@@ -92,7 +121,10 @@ public class SqlParser
         if (!_text.TryMatchKeyword("SELECT"))
         {
             return new Either<ISqlExpression, ParseError>(
-                new ParseError($"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}"));
+                new ParseError($"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}")
+                {
+                    IsStart = true
+                });
         }
 
         var columns = new List<ISelectColumnExpression>();
@@ -148,17 +180,23 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(selectStatement);
     }
 
-    public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr)
+    public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr, out ParseError error)
     {
         ISqlExpression localSqlExpr = new SqlEmptyExpression();
+        var localError = ParseError.Empty;
         var rc = parseFunc();
         var success = rc.Match(left =>
             {
                 localSqlExpr = left;
                 return true;
             },
-            right => false);
+            right =>
+            {
+                localError = right;
+                return false;
+            });
         sqlExpr = localSqlExpr;
+        error = localError;
         return success;
     }
 
@@ -226,12 +264,12 @@ public class SqlParser
 
     private ISqlExpression ParseValue()
     {
-        if (Try(ParseIntValue, out var number))
+        if (Try(ParseIntValue, out var number,out _))
         {
             return number;
         }
 
-        if (Try(ParseTableName, out var tableName))
+        if (Try(ParseTableName, out var tableName, out _))
         {
             return tableName;
         }

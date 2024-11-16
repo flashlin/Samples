@@ -9,4 +9,5 @@ public class ColumnDefinition : ISqlExpression
     public int Size { get; set; }
     public int Scale { get; set; }
     public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
+    public bool IsNullable { get; set; }
 }
