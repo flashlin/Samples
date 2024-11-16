@@ -41,7 +41,7 @@ public class SqlParser
         var columns = new List<ColumnDefinition>();
         do
         {
-            var item = _text.ReadIdentifier();
+            var item = _text.ReadSqlIdentifier();
             if (item.Length == 0)
             {
                 return new Either<ISqlExpression, ParseError>(
@@ -53,7 +53,7 @@ public class SqlParser
                 ColumnName = item.Word,
             };
 
-            column.DataType = _text.ReadIdentifier().Word;
+            column.DataType = _text.ReadSqlIdentifier().Word;
             var dataLength1 = string.Empty;
             var dataLength2 = string.Empty;
             if (_text.TryMatch("("))

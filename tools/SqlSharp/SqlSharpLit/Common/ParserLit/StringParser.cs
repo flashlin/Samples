@@ -149,6 +149,59 @@ public class StringParser
         };
     }
 
+    public TextSpan ReadSqlIdentifier()
+    {
+        if(Try(ReadIdentifier, out var identifier))
+        {
+            return identifier;
+        }
+        if(Try(ReadFullQuotedIdentifier, out var fullQuotedIdentifier))
+        {
+            return fullQuotedIdentifier;
+        }
+        return new TextSpan
+        {
+            Word = string.Empty,
+            Offset = _position,
+            Length = 0
+        };
+    }
+
+    public TextSpan ReadFullQuotedIdentifier()
+    {
+        var quoteChar = PeekChar();
+        if (quoteChar != '"' && quoteChar != '[' && quoteChar != '`')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        
+        var offset = _position;
+        ReadQuotedIdentifier();
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            if (c != '.')
+            {
+                _position--;
+                break;
+            }
+            ReadQuotedIdentifier();
+        }
+        
+        return new TextSpan()
+        {
+            Word = _text.Substring(offset, _position - offset),
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
+    
+
     public TextSpan ReadQuotedIdentifier()
     {
         var quoteChar = PeekChar();
