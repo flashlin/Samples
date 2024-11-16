@@ -51,140 +51,19 @@ public class StringParser
             }
         }
     }
-    
-    public TextSpan ReadSqlDoubleComment()
+
+    public char NextChar()
     {
-        var startPosition = _position;
-        if (Try(ReadSymbol, out var openSymbol))
-        {
-            if (openSymbol.Word == "/*")
-            {
-                _position = startPosition;
-                ReadUntil("*/");
-                NextString(2);
-                return new TextSpan
-                {
-                    Word = _text.Substring(startPosition, _position - startPosition),
-                    Offset = startPosition,
-                    Length = _position - startPosition
-                };
-            }
-        }
-        _position = startPosition;
-        return new TextSpan
-        {
-            Word = string.Empty,
-            Offset = startPosition,
-            Length = 0
-        };
+        if (IsEnd()) return '\0';
+        return _text[_position++];
     }
 
-    public void SkipSqlComment()
-    {
-        SkipSqlDoubleComment();
-        SkipSqlSingleComment();
-    }
-    
-    public void SkipSqlDoubleComment()
-    {
-        var startPosition = _position;
-        if (Try(ReadSymbol, out var openSymbol))
-        {
-            if (openSymbol.Word == "/*")
-            {
-                _position = startPosition;
-                ReadSqlDoubleComment();
-                return;
-            }
-        }
-        _position = startPosition;
-    }
-
-    public void SkipSqlSingleComment()
-    {
-        var startPosition = _position;
-        if (Try(ReadSymbol, out var openSymbol))
-        {
-            if (openSymbol.Word == "--")
-            {
-                _position = startPosition;
-                ReadSqlSingleComment();
-                return;
-            }
-        }
-        _position = startPosition;
-    }
-
-    public TextSpan ReadSqlSingleComment()
-    {
-        var startPosition = _position;
-        NextChar();
-        NextChar();
-        ReadUntil(c => c == '\n');
-        return new TextSpan()
-        {
-            Word = _text.Substring(startPosition, _position - startPosition),
-            Offset = startPosition,
-            Length = _position - startPosition
-        };
-    }
-
-    public TextSpan ReadUntilRightParenthesis()
-    {
-        var startPosition = _position;
-        var openParenthesis = 0;
-        while (!IsEnd())
-        {
-            var c = NextChar();
-            if (c == '(')
-            {
-                openParenthesis++;
-                continue;
-            }
-            if (c == ')')
-            {
-                openParenthesis--;
-                if (openParenthesis == -1)
-                {
-                    _position--;
-                    return new TextSpan()
-                    {
-                        Word = _text.Substring(startPosition, _position - startPosition),
-                        Offset = startPosition,
-                        Length = _position - startPosition
-                    };
-                }
-            }
-        }
-        _position = startPosition;
-        return new TextSpan()
-        {
-            Word = string.Empty,
-            Offset = startPosition,
-            Length = 0
-        };
-    }
-    
-    public string PeekString(int length)
-    {
-        if (IsEnd()) return string.Empty;
-        var remainLength = _text.Length - _position;
-        var readLength = Math.Min(length, remainLength);
-        return _text.Substring(_position, readLength);
-    }
-    
     public string NextString(int length)
     {
         if (IsEnd()) return string.Empty;
         var text = PeekString(length);
         _position += text.Length;
         return text;
-    }
-
-    public char NextChar()
-    {
-        if (IsEnd()) return '\0';
-        return _text[_position++];
     }
 
     public char PeekChar()
@@ -233,6 +112,14 @@ public class StringParser
             Offset = _position,
             Length = tempPosition - _position
         };
+    }
+
+    public string PeekString(int length)
+    {
+        if (IsEnd()) return string.Empty;
+        var remainLength = _text.Length - _position;
+        var readLength = Math.Min(length, remainLength);
+        return _text.Substring(_position, readLength);
     }
 
     public TextSpan PreviousWord()
@@ -383,6 +270,33 @@ public class StringParser
         };
     }
 
+    public TextSpan ReadSqlDoubleComment()
+    {
+        var startPosition = _position;
+        if (Try(ReadSymbol, out var openSymbol))
+        {
+            if (openSymbol.Word == "/*")
+            {
+                _position = startPosition;
+                ReadUntil("*/");
+                NextString(2);
+                return new TextSpan
+                {
+                    Word = _text.Substring(startPosition, _position - startPosition),
+                    Offset = startPosition,
+                    Length = _position - startPosition
+                };
+            }
+        }
+        _position = startPosition;
+        return new TextSpan
+        {
+            Word = string.Empty,
+            Offset = startPosition,
+            Length = 0
+        };
+    }
+
     public TextSpan ReadSqlIdentifier()
     {
         if (Try(ReadIdentifier, out var identifier))
@@ -400,6 +314,20 @@ public class StringParser
             Word = string.Empty,
             Offset = _position,
             Length = 0
+        };
+    }
+
+    public TextSpan ReadSqlSingleComment()
+    {
+        var startPosition = _position;
+        NextChar();
+        NextChar();
+        ReadUntil(c => c == '\n');
+        return new TextSpan()
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
         };
     }
 
@@ -455,7 +383,7 @@ public class StringParser
             Length = _position - offset
         };
     }
-    
+
     public TextSpan ReadUntil(string text)
     {
         var offset = _position;
@@ -470,6 +398,78 @@ public class StringParser
             Offset = offset,
             Length = _position - offset
         };
+    }
+
+    public TextSpan ReadUntilRightParenthesis()
+    {
+        var startPosition = _position;
+        var openParenthesis = 0;
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            if (c == '(')
+            {
+                openParenthesis++;
+                continue;
+            }
+            if (c == ')')
+            {
+                openParenthesis--;
+                if (openParenthesis == -1)
+                {
+                    _position--;
+                    return new TextSpan()
+                    {
+                        Word = _text.Substring(startPosition, _position - startPosition),
+                        Offset = startPosition,
+                        Length = _position - startPosition
+                    };
+                }
+            }
+        }
+        _position = startPosition;
+        return new TextSpan()
+        {
+            Word = string.Empty,
+            Offset = startPosition,
+            Length = 0
+        };
+    }
+
+    public void SkipSqlComment()
+    {
+        SkipSqlDoubleComment();
+        SkipSqlSingleComment();
+    }
+
+    public void SkipSqlDoubleComment()
+    {
+        var startPosition = _position;
+        if (Try(ReadSymbol, out var openSymbol))
+        {
+            if (openSymbol.Word == "/*")
+            {
+                _position = startPosition;
+                ReadSqlDoubleComment();
+                return;
+            }
+        }
+        _position = startPosition;
+    }
+
+    public void SkipSqlSingleComment()
+    {
+        var startPosition = _position;
+        if (Try(ReadSymbol, out var openSymbol))
+        {
+            if (openSymbol.Word == "--")
+            {
+                _position = startPosition;
+                ReadSqlSingleComment();
+                return;
+            }
+        }
+        _position = startPosition;
     }
 
     public void SkipWhitespace()
@@ -488,21 +488,6 @@ public class StringParser
             return false;
         }
 
-        return true;
-    }
-    
-    public bool TryMatches(params string[] keywords)
-    {
-        SkipWhitespace();
-        var tempPosition = _position;
-        foreach (var keyword in keywords)
-        {
-            if (!TryMatch(keyword))
-            {
-                _position = tempPosition;
-                return false;
-            }
-        }
         return true;
     }
 
@@ -529,6 +514,21 @@ public class StringParser
             Length = keyword.Length
         };
         _position = tempPosition;
+        return true;
+    }
+
+    public bool TryMatches(params string[] keywords)
+    {
+        SkipWhitespace();
+        var tempPosition = _position;
+        foreach (var keyword in keywords)
+        {
+            if (!TryMatch(keyword))
+            {
+                _position = tempPosition;
+                return false;
+            }
+        }
         return true;
     }
 
