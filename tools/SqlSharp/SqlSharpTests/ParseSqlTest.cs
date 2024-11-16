@@ -16,7 +16,11 @@ public class ParseSqlTest
                    LastName varchar(50),
                    Money decimal(10,3),
                    [name] [int] IDENTITY(1,1) NOT NULL,
-                   cname [int] NULL
+                   cname [int] NULL,
+                   CONSTRAINT [PK_AcceptedBets] PRIMARY KEY CLUSTERED 
+                     (
+                   	    [MatchResultID] ASC
+                     ) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
                    );
                    """;
 
@@ -44,6 +48,49 @@ public class ParseSqlTest
                     ColumnName = "cname", DataType = "[int]",
                     IsNullable = true,
                 },
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "[PK_AcceptedBets]",
+                    ConstraintType = "PRIMARY KEY",
+                    Clustered = "CLUSTERED",
+                    Columns = [
+                        new SqlColumnConstraint
+                        {
+                            ColumnName = "[MatchResultID]",
+                            Order = "ASC"
+                        }
+                    ],
+                    WithToggles = [
+                        new SqlWithToggle
+                        {
+                            ToggleName = "PAD_INDEX",
+                            Value = "OFF"
+                        },
+                        new SqlWithToggle
+                        {
+                            ToggleName = "STATISTICS_NORECOMPUTE",
+                            Value = "OFF"
+                        },
+                        new SqlWithToggle
+                        {
+                            ToggleName = "IGNORE_DUP_KEY",
+                            Value = "OFF"
+                        },
+                        new SqlWithToggle
+                        {
+                            ToggleName = "ALLOW_ROW_LOCKS",
+                            Value = "ON"
+                        },
+                        new SqlWithToggle
+                        {
+                            ToggleName = "ALLOW_PAGE_LOCKS",
+                            Value = "ON"
+                        }
+                    ],
+                    On = "[PRIMARY]"
+                }
             ]
         });
     }

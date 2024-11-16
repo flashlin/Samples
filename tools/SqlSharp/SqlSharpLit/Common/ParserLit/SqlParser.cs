@@ -11,21 +11,21 @@ public class SqlConstraint
     public string ConstraintName { get; set; } = string.Empty;
     public string ConstraintType { get; set; } = string.Empty;
     public string Clustered { get; set; } = string.Empty;
-    public List<SqlColumnIndex> Columns { get; set; } = [];
-    public List<SqlToggle> WithToggles { get; set; } = [];
+    public List<SqlColumnConstraint> Columns { get; set; } = [];
+    public List<SqlWithToggle> WithToggles { get; set; } = [];
     public string On { get; set; } = string.Empty;
 }
 
-public class SqlColumnIndex
+public class SqlColumnConstraint
 {
     public string ColumnName { get; set; } = string.Empty;
-    public string AscDesc { get; set; } = "ASC";
+    public string Order { get; set; } = "ASC";
 }
 
-public class SqlToggle
+public class SqlWithToggle
 {
     public string ToggleName { get; set; } = string.Empty;
-    public string ToggleValue { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
 }
 
 public class SqlParser
@@ -169,18 +169,18 @@ public class SqlParser
         }
 
         _text.Match("(");
-        var indexColumns = new List<SqlColumnIndex>();
+        var indexColumns = new List<SqlColumnConstraint>();
         do
         {
-            var indexColumn = new SqlColumnIndex();
+            var indexColumn = new SqlColumnConstraint();
             indexColumn.ColumnName = _text.ReadSqlIdentifier().Word;
             if (_text.TryMatch("ASC"))
             {
-                indexColumn.AscDesc = "ASC";
+                indexColumn.Order = "ASC";
             }
             else if (_text.TryMatch("DESC"))
             {
-                indexColumn.AscDesc = "DESC";
+                indexColumn.Order = "DESC";
             }
 
             indexColumns.Add(indexColumn);
@@ -197,13 +197,13 @@ public class SqlParser
         if (_text.TryMatch("WITH"))
         {
             _text.Match("(");
-            var toggles = new List<SqlToggle>();
+            var toggles = new List<SqlWithToggle>();
             do
             {
-                var toggle = new SqlToggle();
+                var toggle = new SqlWithToggle();
                 toggle.ToggleName = _text.ReadSqlIdentifier().Word;
                 _text.Match("=");
-                toggle.ToggleValue = _text.ReadSqlIdentifier().Word;
+                toggle.Value = _text.ReadSqlIdentifier().Word;
                 toggles.Add(toggle);
                 if (_text.PeekChar() != ',')
                 {
