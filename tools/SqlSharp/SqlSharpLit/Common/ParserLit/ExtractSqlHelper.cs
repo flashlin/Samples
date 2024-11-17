@@ -5,6 +5,10 @@ namespace SqlSharpLit.Common.ParserLit;
 
 public class ExtractSqlHelper
 {
+    private string[] databaseFolder = [
+        "\\Consus.Info\\",
+    ];
+    
     public IEnumerable<string> GetSqlFiles(string folder)
     {
         var files = Directory.GetFiles(folder, "*.sql");
@@ -21,16 +25,36 @@ public class ExtractSqlHelper
             }
         }
     }
+
+    private string GetDatabaseNameFromPath(string path)
+    {
+        foreach(var dbPath in databaseFolder)
+        {
+            var idx = path.IndexOf(dbPath, StringComparison.Ordinal);
+            if(idx==-1){
+                continue;
+            }
+            var startIdx = idx + dbPath.Length;
+            var endIdx = path.Substring(startIdx).IndexOf("\\", StringComparison.Ordinal);
+            if(endIdx == -1){
+                return path.Substring(startIdx);
+            }
+            return path.Substring(startIdx, endIdx);
+        }
+        return string.Empty;
+    }
     
     public IEnumerable<SqlFile> GetSqlContentsFromFolder(string folder)
     {
         foreach (var sqlFile in GetSqlFiles(folder))
         {
             var sql = File.ReadAllText(sqlFile);
+            Console.WriteLine($"{sqlFile}");
             yield return new SqlFile
             {
                 FileName = sqlFile,
                 Sql = sql,
+                DatabaseName = GetDatabaseNameFromPath(sqlFile),
                 CreateTables = ExtractAllCreateTableFromText(sql).ToList(), 
             };
         }
@@ -43,7 +67,12 @@ public class ExtractSqlHelper
         var writer = new StreamWriter(fileStream, Encoding.UTF8);
         foreach (var sqlFile in GetSqlContentsFromFolder(folder))
         {
+            if(sqlFile.CreateTables.Count == 0)
+            {
+                continue;
+            }
             writer.WriteLine($"-- {sqlFile.FileName}");
+            writer.WriteLine($"-- Database: {sqlFile.DatabaseName}");
             foreach (var createTable in sqlFile.CreateTables)
             {
                 writer.WriteLine(createTable);
@@ -79,7 +108,7 @@ public class ExtractSqlHelper
         {
             return (string.Empty, string.Empty);
         }
-        var createTableSql = truncatedText.Substring(0, createTableEnd);   
+        var createTableSql = truncatedText.Substring(0, createTableEnd + 1);   
         var remainingText = truncatedText.Substring(createTableEnd);
         return (createTableSql, remainingText); 
     }
@@ -103,7 +132,7 @@ public class ExtractSqlHelper
             else if(c == ')')
             {
                 openParenthesisCount--;
-                if(openParenthesisCount == -1)
+                if(openParenthesisCount == 0)
                 {
                     return offset;
                 }
@@ -134,6 +163,10 @@ public class ExtractSqlHelper
     
     private static string FindPreviousLineContent(string text, int offset)
     {
+        if( offset == 0)
+        {
+            return string.Empty;
+        }
         var lastNewLineIndex = text.LastIndexOf('\n', offset - 1);
         if (lastNewLineIndex >= 0)
         {
@@ -153,4 +186,5 @@ public class SqlFile
     public string FileName { get; set; } = string.Empty;
     public string Sql { get; set; } = string.Empty;
     public List<string> CreateTables { get; set; } = [];
+    public string DatabaseName { get; set; } = string.Empty;
 }
