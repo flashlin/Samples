@@ -503,7 +503,7 @@ public class StringParser
             tempPosition++;
         }
 
-        if (!string.Equals(word, keyword, StringComparison.InvariantCultureIgnoreCase))
+        if (!string.Equals(word, keyword, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
