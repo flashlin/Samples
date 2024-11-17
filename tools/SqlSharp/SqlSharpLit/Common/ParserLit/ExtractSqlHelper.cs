@@ -3,12 +3,20 @@ using System.Text.RegularExpressions;
 
 namespace SqlSharpLit.Common.ParserLit;
 
+public interface IDatabaseNameProvider
+{
+    string GetDatabaseNameFromPath(string path);
+}
+
 public class ExtractSqlHelper
 {
-    private string[] databaseFolder = [
-        "\\Consus.Info\\",
-    ];
-    
+    IDatabaseNameProvider _databaseNameProvider;
+
+    public ExtractSqlHelper(IDatabaseNameProvider databaseNameProvider)
+    {
+        _databaseNameProvider = databaseNameProvider;
+    }
+
     public IEnumerable<string> GetSqlFiles(string folder)
     {
         var files = Directory.GetFiles(folder, "*.sql");
@@ -26,24 +34,6 @@ public class ExtractSqlHelper
         }
     }
 
-    private string GetDatabaseNameFromPath(string path)
-    {
-        foreach(var dbPath in databaseFolder)
-        {
-            var idx = path.IndexOf(dbPath, StringComparison.Ordinal);
-            if(idx==-1){
-                continue;
-            }
-            var startIdx = idx + dbPath.Length;
-            var endIdx = path.Substring(startIdx).IndexOf("\\", StringComparison.Ordinal);
-            if(endIdx == -1){
-                return path.Substring(startIdx);
-            }
-            return path.Substring(startIdx, endIdx);
-        }
-        return string.Empty;
-    }
-    
     public IEnumerable<SqlFile> GetSqlContentsFromFolder(string folder)
     {
         foreach (var sqlFile in GetSqlFiles(folder))
@@ -54,7 +44,7 @@ public class ExtractSqlHelper
             {
                 FileName = sqlFile,
                 Sql = sql,
-                DatabaseName = GetDatabaseNameFromPath(sqlFile),
+                DatabaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFile),
                 CreateTables = ExtractAllCreateTableFromText(sql).ToList(), 
             };
         }
