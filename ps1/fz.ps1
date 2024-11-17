@@ -124,6 +124,7 @@ $search_list | ForEach-Object {
 # 輸出選擇的結果
 if ($null -ne $selected) {
     Write-Host "Selected file: $selected"
+    Set-Location $selected
 } else {
     Write-Host "No selection made."
 }
