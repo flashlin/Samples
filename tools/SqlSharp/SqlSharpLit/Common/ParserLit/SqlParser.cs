@@ -2,33 +2,6 @@ using T1.Standard.DesignPatterns;
 
 namespace SqlSharpLit.Common.ParserLit;
 
-
-//CONSTRAINT [PK_AcceptedBets] PRIMARY KEY CLUSTERED 
-//(
-//   [MatchResultID] ASC
-//) WITH (PAD_INDEX  = OFF, STATISTICS_NORECOMPUTE  = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS  = ON, ALLOW_PAGE_LOCKS  = ON) ON [PRIMARY]
-public class SqlConstraint
-{
-    public string ConstraintName { get; set; } = string.Empty;
-    public string ConstraintType { get; set; } = string.Empty;
-    public string Clustered { get; set; } = string.Empty;
-    public List<SqlColumnConstraint> Columns { get; set; } = [];
-    public List<SqlWithToggle> WithToggles { get; set; } = [];
-    public string On { get; set; } = string.Empty;
-}
-
-public class SqlColumnConstraint
-{
-    public string ColumnName { get; set; } = string.Empty;
-    public string Order { get; set; } = "ASC";
-}
-
-public class SqlWithToggle
-{
-    public string ToggleName { get; set; } = string.Empty;
-    public string Value { get; set; } = string.Empty;
-}
-
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
