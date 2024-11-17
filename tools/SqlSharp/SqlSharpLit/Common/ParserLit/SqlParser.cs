@@ -2,6 +2,7 @@ using T1.Standard.DesignPatterns;
 
 namespace SqlSharpLit.Common.ParserLit;
 
+
 //CONSTRAINT [PK_AcceptedBets] PRIMARY KEY CLUSTERED 
 //(
 //   [MatchResultID] ASC
@@ -88,7 +89,10 @@ public class SqlParser
             _text.SkipSqlComment();
             
             column.Identity = ParseSqlIdentity();
-            ParseColumnConstraints(column);
+            if (ParseColumnConstraints(column) is var error && error != ParseError.Empty)
+            {
+                return new Either<List<ColumnDefinition>, ParseError>(error);
+            }
 
             columns.Add(column);
             if (_text.PeekChar() != ',')
@@ -102,7 +106,7 @@ public class SqlParser
         return new Either<List<ColumnDefinition>, ParseError>(columns);
     }
 
-    private void ParseColumnConstraints(ColumnDefinition column)
+    private ParseError ParseColumnConstraints(ColumnDefinition column)
     {
         do
         {
@@ -121,7 +125,7 @@ public class SqlParser
                     });
                     continue;
                 }
-                throw new ParseError("Expect Constraint DEFAULT");
+                return new ParseError("Expect Constraint DEFAULT");
             }
             if (_text.TryMatches("NOT", "FOR", "REPLICATION"))
             {
@@ -140,6 +144,7 @@ public class SqlParser
             }
             break;
         } while (true);
+        return ParseError.Empty;
     }
 
     public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
@@ -290,7 +295,7 @@ public class SqlParser
             }
             else
             {
-                throw new ParseError("Expected column name");
+                return CreateParseError("Expected column name");
             }
 
             if (_text.PeekChar() != ',')
@@ -317,14 +322,22 @@ public class SqlParser
 
         if (_text.TryMatchKeyword("WHERE"))
         {
-            var left = ParseValue();
+            var leftExpr = ParseValue();
+            if (leftExpr.IsRight)
+            {
+                return CreateParseError(leftExpr.RightValue.Message);
+            }
             var operation = _text.ReadSymbol().Word;
-            var right = ParseValue();
+            var rightExpr = ParseValue();
+            if (rightExpr.IsRight)
+            {
+                return CreateParseError(rightExpr.RightValue.Message);
+            }
             selectStatement.Where = new SqlWhereExpression()
             {
-                Left = left,
+                Left = leftExpr.LeftValue,
                 Operation = operation,
-                Right = right
+                Right = rightExpr.LeftValue
             };
         }
 
@@ -453,19 +466,19 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(new ParseError("Expected field name"));
     }
 
-    private ISqlExpression ParseValue()
+    private Either<ISqlExpression, ParseError> ParseValue()
     {
         if (Try(ParseIntValue, out var number, out _))
         {
-            return number;
+            return new Either<ISqlExpression, ParseError>(number);
         }
 
         if (Try(ParseTableName, out var tableName, out _))
         {
-            return tableName;
+            return new Either<ISqlExpression, ParseError>(tableName);
         }
-
-        throw new ParseError("Expected Int");
+        
+        return CreateParseError("Expected Int or Field");
     }
 }
 
