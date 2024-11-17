@@ -5,7 +5,6 @@ namespace SqlSharp;
 
 public class ExtractCreateTableSqlFromFolderCommand : ICommand<SqlSharpOptions>
 {
-    
     public ICommand<SqlSharpOptions>? Next { get; set; }
     public async Task ExecuteAsync(SqlSharpOptions args)
     {

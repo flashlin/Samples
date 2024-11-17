@@ -93,7 +93,7 @@ public class ExtractSqlHelper
         }
         var offset = openParenthesisIndex + 1;
         var openParenthesisCount = 1;
-        while(startOffset < truncatedText.Length)
+        while(offset < truncatedText.Length)
         {
             var c = truncatedText[offset];
             if(c =='(')
