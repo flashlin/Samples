@@ -12,28 +12,39 @@ public class SqlParser
         _text = new StringParser(text);
     }
 
+    private bool TryStart(Func<Either<ISqlExpression,ParseError>> parseFunc, out Either<ISqlExpression, ParseError> result)
+    {
+        if (Try(parseFunc, out var sqlCreateTableExpr, out var error))
+        {
+            result = new Either<ISqlExpression, ParseError>(sqlCreateTableExpr);
+            return true;
+        }
+        if (!error.IsStart)
+        {
+            result = new Either<ISqlExpression, ParseError>(error);
+            return true;
+        }
+        result = new Either<ISqlExpression, ParseError>(error);
+        return false;
+    }
+
     public Either<ISqlExpression, ParseError> Parse()
     {
-        if (Try(ParseCreateTableStatement, out var sqlCreateTableExpr, out var error))
+        if (TryStart(ParseCreateTableStatement, out var createTableResult))
         {
-            return new Either<ISqlExpression, ParseError>(sqlCreateTableExpr);
+            return createTableResult;
         }
 
-        if (!error.IsStart)
+        if (TryStart(ParseSelectStatement, out var selectResult))
         {
-            return new Either<ISqlExpression, ParseError>(error);
+            return selectResult;
         }
-
-        if (Try(ParseSelectStatement, out var sqlSelectExpr, out error))
+        
+        if(TryStart(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
         {
-            return new Either<ISqlExpression, ParseError>(sqlSelectExpr);
+            return execSpAddExtendedPropertyResult;
         }
-
-        if (!error.IsStart)
-        {
-            return new Either<ISqlExpression, ParseError>(error);
-        }
-
+        
         return CreateStartParseError("Unknown statement");
     }
 
