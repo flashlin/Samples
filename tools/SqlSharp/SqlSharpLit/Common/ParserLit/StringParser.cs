@@ -95,7 +95,7 @@ public class StringParser
         };
     }
 
-    public TextSpan PeekKeyword()
+    public TextSpan PeekWord()
     {
         SkipWhitespace();
         var tempPosition = _position;
@@ -490,6 +490,33 @@ public class StringParser
 
         return true;
     }
+    
+    
+    public bool TryMatchIgnoreCase(string keyword)
+    {
+        SkipWhitespace();
+        var tempPosition = _position;
+        var word = "";
+        while (tempPosition < _text.Length && word.Length < keyword.Length)
+        {
+            word += _text[tempPosition];
+            tempPosition++;
+        }
+
+        if (!string.Equals(word, keyword, StringComparison.InvariantCultureIgnoreCase))
+        {
+            return false;
+        }
+
+        _previousWord = new TextSpan
+        {
+            Word = keyword,
+            Offset = _position,
+            Length = keyword.Length
+        };
+        _position = tempPosition;
+        return true;
+    }
 
     public bool TryMatch(string keyword)
     {
@@ -531,10 +558,25 @@ public class StringParser
         }
         return true;
     }
-
-    public bool TryMatchKeyword(string keyword)
+    
+    public bool TryMatchesIgnoreCase(params string[] keywords)
     {
-        var peek = PeekKeyword();
+        SkipWhitespace();
+        var tempPosition = _position;
+        foreach (var keyword in keywords)
+        {
+            if (!TryMatchIgnoreCase(keyword))
+            {
+                _position = tempPosition;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public bool TryMatchIgnoreCaseKeyword(string keyword)
+    {
+        var peek = PeekWord();
         if (peek.Word != keyword.ToUpper()) return false;
         _previousWord = peek;
         _position = peek.Offset + peek.Length;

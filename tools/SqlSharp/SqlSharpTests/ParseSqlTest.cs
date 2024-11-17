@@ -22,7 +22,17 @@ public class ParseSqlTest
         
         var rc = ParseSql(sql);
         
-        ThenSqlStatement(rc, new SqlSpAddExtendedProperty());
+        ThenSqlStatement(rc, new SqlSpAddExtendedProperty()
+        {
+            Name = "MS_Description",
+            Value = "hello",
+            Level0Type = "SCHEMA",
+            Level0Name = "dbo",
+            Level1Type = "TABLE",
+            Level1Name = "customer",
+            Level2Type = "COLUMN",
+            Level2Name = "addr",
+        });
     }
     
     [Test]

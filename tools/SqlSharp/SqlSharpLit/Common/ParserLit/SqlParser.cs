@@ -50,7 +50,7 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> ParseExecSpAddExtendedProperty()
     {
-        if (!_text.TryMatches("EXEC", "SP_AddExtendedProperty"))
+        if (!_text.TryMatchesIgnoreCase("EXEC", "SP_AddExtendedProperty"))
         {
             return CreateStartParseError("Expected EXEC SP_AddExtendedProperty");
         }
@@ -72,7 +72,7 @@ public class SqlParser
             if (item.Length == 0)
             {
                 return new Either<List<ColumnDefinition>, ParseError>(
-                    new ParseError($"Expected column name, but got {_text.PeekKeyword().Word}")
+                    new ParseError($"Expected column name, but got {_text.PeekWord().Word}")
                     {
                         Offset = _text.Position
                     });
@@ -102,10 +102,10 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
     {
-        if (!(_text.TryMatchKeyword("CREATE") && _text.TryMatchKeyword("TABLE")))
+        if (!(_text.TryMatchIgnoreCaseKeyword("CREATE") && _text.TryMatchIgnoreCaseKeyword("TABLE")))
         {
             return CreateStartParseError(
-                $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
+                $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekWord().Word}");
         }
 
         var tableName = _text.ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
@@ -140,10 +140,10 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> ParseSelectStatement()
     {
-        if (!_text.TryMatchKeyword("SELECT"))
+        if (!_text.TryMatchIgnoreCaseKeyword("SELECT"))
         {
             return CreateStartParseError(
-                $"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekKeyword().Word}");
+                $"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekWord().Word}");
         }
 
         var columns = new List<ISelectColumnExpression>();
@@ -174,7 +174,7 @@ public class SqlParser
             Columns = columns
         };
 
-        if (_text.TryMatchKeyword("FROM"))
+        if (_text.TryMatchIgnoreCaseKeyword("FROM"))
         {
             var tableName = _text.ReadIdentifier().Word;
             selectStatement.From = new SelectFrom()
@@ -183,7 +183,7 @@ public class SqlParser
             };
         }
 
-        if (_text.TryMatchKeyword("WHERE"))
+        if (_text.TryMatchIgnoreCaseKeyword("WHERE"))
         {
             var leftExpr = ParseValue();
             if (leftExpr.IsRight)
