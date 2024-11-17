@@ -32,7 +32,7 @@ function search_folder {
     )
     # 建立命令字串
     $command = "es.exe /ad -s `"$searchTerm`""
-    # Write-Host $command
+    Write-Host $command
     $file_list = Invoke-Expression $command
     
     #$result = es.exe /ad -s `"$searchTerm`" !folder:.git !folder:.idea
@@ -82,7 +82,7 @@ function filter_list {
     return $result
 }
 
-Write-Host $search_list
+Write-Host "Fast jump to location: $search_list"
 
 $count = 0
 $selected = $null
@@ -98,7 +98,6 @@ $search_list | ForEach-Object {
             return
         }
         # show_list -file_list $file_list
-        return
     } 
     
     if ( $count -eq $search_list.Count ) {
@@ -126,5 +125,5 @@ if ($null -ne $selected) {
     Write-Host "Selected file: $selected"
     Set-Location $selected
 } else {
-    Write-Host "No selection made."
+    Write-Host "Not found any folder."
 }
