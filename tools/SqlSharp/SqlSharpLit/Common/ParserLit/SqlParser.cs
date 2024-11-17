@@ -37,6 +37,16 @@ public class SqlParser
         return CreateStartParseError("Unknown statement");
     }
 
+    public Either<ISqlExpression, ParseError> ParseExecSpAddExtendedProperty()
+    {
+        if (!_text.TryMatches("EXEC", "SP_AddExtendedProperty"))
+        {
+            return CreateStartParseError("Expected EXEC SP_AddExtendedProperty");
+        }
+
+        return new Either<ISqlExpression, ParseError>(new SqlSpAddExtendedProperty());
+    }
+
     public Either<List<ColumnDefinition>, ParseError> ParseCreateTableColumns()
     {
         var columns = new List<ColumnDefinition>();
@@ -453,13 +463,4 @@ public class SqlParser
         
         return CreateParseError("Expected Int or Field");
     }
-}
-
-public interface ISqlConstraint
-{}
-
-public class SqlConstraintDefault : ISqlConstraint
-{
-    public string ConstraintName { get; set; } = string.Empty;
-    public string Value { get; set; } = string.Empty;
 }
