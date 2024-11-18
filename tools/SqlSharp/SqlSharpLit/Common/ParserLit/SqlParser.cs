@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using T1.Standard.DesignPatterns;
 
 namespace SqlSharpLit.Common.ParserLit;
@@ -55,7 +56,21 @@ public class SqlParser
             return CreateStartParseError("Expected EXEC SP_AddExtendedProperty");
         }
 
-        return new Either<ISqlExpression, ParseError>(new SqlSpAddExtendedProperty());
+        if (!_text.Try(_text.ReadSqlIdentifier, out var name))
+        {
+            return CreateParseError($"Expected @name, but got {_text.PreviousWord().Word}");
+        }
+        _text.Match("=");
+        if (!_text.Try(_text.ReadQuotedIdentifier, out var nameValue))
+        {
+            return CreateParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
+        }
+
+
+        var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty();
+        sqlSpAddExtendedProperty.Name = name.Word;
+        sqlSpAddExtendedProperty.Value = nameValue.Word;
+        return new Either<ISqlExpression, ParseError>(sqlSpAddExtendedProperty);
     }
 
     public Either<List<ColumnDefinition>, ParseError> ParseCreateTableColumns()

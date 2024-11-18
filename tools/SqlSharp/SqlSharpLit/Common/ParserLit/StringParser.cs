@@ -161,13 +161,13 @@ public class StringParser
             Length = _position - offset
         };
     }
-
+    
     public TextSpan ReadIdentifier()
     {
         SkipWhitespace();
         var offset = _position;
         var ch = PeekChar();
-        if (!char.IsLetter(ch) && ch != '_')
+        if (!char.IsLetter(ch) && ch != '_' && ch != '@' && ch != '#' && ch != '$')
         {
             return new TextSpan()
             {
@@ -188,6 +188,16 @@ public class StringParser
             }
 
             identifier += c;
+        }
+
+        if (identifier.Length == 1)
+        {
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
         }
 
         return new TextSpan()
