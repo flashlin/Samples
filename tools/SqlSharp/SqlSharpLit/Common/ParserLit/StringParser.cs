@@ -69,7 +69,7 @@ public class StringParser
         return _text[_position++];
     }
 
-    public string NextString(int length)
+    public ReadOnlySpan<char> NextString(int length)
     {
         if (IsEnd()) return string.Empty;
         var text = PeekString(length);
@@ -131,12 +131,13 @@ public class StringParser
         };
     }
 
-    public string PeekString(int length)
+    public ReadOnlySpan<char> PeekString(int length)
     {
         if (IsEnd()) return string.Empty;
         var remainLength = _text.Length - _position;
         var readLength = Math.Min(length, remainLength);
-        return _text.Substring(_position, readLength);
+        //return _text.Substring(_position, readLength);
+        return _text.AsSpan(_position, readLength);
     }
 
     public TextSpan PreviousWord()
@@ -440,14 +441,13 @@ public class StringParser
     public TextSpan ReadUntil(Func<char, bool> predicate)
     {
         var offset = _position;
-        var result = "";
         while (!IsEnd() && !predicate(Peek()))
         {
-            result += NextChar();
+            NextChar();
         }
         return new TextSpan()
         {
-            Word = result,
+            Word = _text.Substring(offset, _position - offset),
             Offset = offset,
             Length = _position - offset
         };
@@ -456,15 +456,13 @@ public class StringParser
     public TextSpan ReadUntil(string text)
     {
         var offset = _position;
-        var result = "";
         while (!IsEnd() && PeekString(text.Length) != text)
         {
-            result += NextChar();
+            NextChar();
         }
-
         return new TextSpan()
         {
-            Word = result,
+            Word = _text.Substring(offset, _position - offset),
             Offset = offset,
             Length = _position - offset
         };
