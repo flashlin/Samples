@@ -61,12 +61,11 @@ public class SqlParser
             return CreateParseError($"Expected @name, but got {_text.PreviousWord().Word}");
         }
         _text.Match("=");
-        if (!_text.Try(_text.ReadQuotedIdentifier, out var nameValue))
+        if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
         {
             return CreateParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
         }
-
-
+        
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty();
         sqlSpAddExtendedProperty.Name = name.Word;
         sqlSpAddExtendedProperty.Value = nameValue.Word;

@@ -161,7 +161,7 @@ public class StringParser
             Length = _position - offset
         };
     }
-    
+
     public TextSpan ReadIdentifier()
     {
         SkipWhitespace();
@@ -244,6 +244,48 @@ public class StringParser
         };
     }
 
+    public TextSpan ReadSqlQuotedString()
+    {
+        var quoteChar = PeekChar();
+        if (quoteChar != '\'' && quoteChar != '"' && quoteChar != '`' && quoteChar != 'N')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+
+        var offset = _position;
+        var startChar = NextChar();
+        if (startChar == 'N')
+        {
+            quoteChar = NextChar();
+        }
+
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            if (c == quoteChar && PeekChar() == quoteChar)
+            {
+                NextChar();
+                continue;
+            }
+
+            if (c == quoteChar)
+            {
+                break;
+            }
+        }
+
+        return new TextSpan()
+        {
+            Word = _text.Substring(offset, _position - offset),
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
 
     public TextSpan ReadQuotedIdentifier()
     {
@@ -298,6 +340,7 @@ public class StringParser
                 };
             }
         }
+
         _position = startPosition;
         return new TextSpan
         {
@@ -398,10 +441,11 @@ public class StringParser
     {
         var offset = _position;
         var result = "";
-        while (!IsEnd() && PeekString(text.Length)!=text)
+        while (!IsEnd() && PeekString(text.Length) != text)
         {
             result += NextChar();
         }
+
         return new TextSpan()
         {
             Word = result,
@@ -422,6 +466,7 @@ public class StringParser
                 openParenthesis++;
                 continue;
             }
+
             if (c == ')')
             {
                 openParenthesis--;
@@ -437,6 +482,7 @@ public class StringParser
                 }
             }
         }
+
         _position = startPosition;
         return new TextSpan()
         {
@@ -464,6 +510,7 @@ public class StringParser
                 return;
             }
         }
+
         _position = startPosition;
     }
 
@@ -479,6 +526,7 @@ public class StringParser
                 return;
             }
         }
+
         _position = startPosition;
     }
 
@@ -500,8 +548,8 @@ public class StringParser
 
         return true;
     }
-    
-    
+
+
     public bool TryMatchIgnoreCase(string keyword)
     {
         SkipWhitespace();
@@ -566,9 +614,10 @@ public class StringParser
                 return false;
             }
         }
+
         return true;
     }
-    
+
     public bool TryMatchesIgnoreCase(params string[] keywords)
     {
         SkipWhitespace();
@@ -581,6 +630,7 @@ public class StringParser
                 return false;
             }
         }
+
         return true;
     }
 
