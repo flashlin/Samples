@@ -65,15 +65,22 @@ public class SqlParser
         }
         Match(",");
         
-        if(TryMatchParameterAssignValue("@value", out var valueParameter))
+        if(!TryMatchParameterAssignValue("@value", out var valueParameter))
         {
             return CreateStartParseError(valueParameter.RightValue.Message);
         }
         Match(",");
 
-        if(TryMatchParameterAssignValue("@level0type", out var level0TypeParameter))
+        if(!TryMatchParameterAssignValue("@level0type", out var level0TypeParameter))
         {
             return CreateStartParseError(level0TypeParameter.RightValue.Message);
+        }
+
+        Match(",");
+        
+        if(!TryMatchParameterAssignValue("@level0name", out var level0NameParameter))
+        {
+            return CreateStartParseError(level0NameParameter.RightValue.Message);
         }
 
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty
@@ -81,6 +88,7 @@ public class SqlParser
             Name = nameParameter.LeftValue.Value,
             Value = valueParameter.LeftValue.Value,
             Level0Type = level0TypeParameter.LeftValue.Value,
+            Level0Name = level0NameParameter.LeftValue.Value,
         };
         return new Either<ISqlExpression, ParseError>(sqlSpAddExtendedProperty);
     }

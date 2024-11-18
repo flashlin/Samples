@@ -278,15 +278,15 @@ public class StringParser
         var startChar = ReadChar();
         if (startChar == 'N')
         {
-            quoteChar = ReadChar();
+            quoteChar = NextChar();
         }
 
         while (!IsEnd())
         {
-            var c = ReadChar();
-            if (c == quoteChar && PeekChar() == quoteChar)
+            var c = NextChar();
+            if (c == quoteChar && Peek() == quoteChar)
             {
-                ReadChar();
+                NextChar();
                 continue;
             }
 
@@ -393,6 +393,7 @@ public class StringParser
         ReadChar();
         ReadChar();
         ReadUntil(c => c == '\n');
+        NextChar();
         return new TextSpan()
         {
             Word = _text.Substring(startPosition, _position - startPosition),
