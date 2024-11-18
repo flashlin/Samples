@@ -10,15 +10,17 @@ public class ParseSqlTest
     [Test]
     public void AddExtendedProperty()
     {
-        var sql = $"EXEC sp_addextendedproperty" +
-                  $"@name = N'MS_Description',        -- 屬性名稱（固定為 MS_Description 用於說明）" +
-                  $"@value = N'hello',                -- 說明內容" +
-                  $"@level0type = N'SCHEMA',          -- 第 1 級目標類型" +
-                  $"@level0name = N'dbo',             -- 第 1 級名稱（預設 schema）" +
-                  $"@level1type = N'TABLE',           -- 第 2 級目標類型" +
-                  $"@level1name = N'customer',        -- 第 2 級名稱（資料表名稱）" +
-                  $"@level2type = N'COLUMN',          -- 第 3 級目標類型" +
-                  $"@level2name = N'addr';            -- 第 3 級名稱（欄位名稱";
+        var sql = $"""
+                  EXEC sp_addextendedproperty
+                  @name = N'MS_Description',        -- 屬性名稱（固定為 MS_Description 用於說明）
+                  @value = N'hello',                -- 說明內容 
+                  @level0type = N'SCHEMA',          -- 第 1 級目標類型
+                  @level0name = N'dbo',             -- 第 1 級名稱（預設 schema）
+                  @level1type = N'TABLE',           -- 第 2 級目標類型
+                  @level1name = N'customer',        -- 第 2 級名稱（資料表名稱）
+                  @level2type = N'COLUMN',          -- 第 3 級目標類型
+                  @level2name = N'addr';            -- 第 3 級名稱（欄位名稱)
+                  """;
         
         var rc = ParseSql(sql);
         

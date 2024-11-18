@@ -12,7 +12,11 @@ public class StringParser
         _position = 0;
     }
 
-    public int Position => _position;
+    public int Position
+    {
+        get => _position;
+        set => _position = value;
+    }
 
     public string GetRemainingText()
     {
@@ -45,13 +49,20 @@ public class StringParser
         SkipWhitespace();
         foreach (char c in expected)
         {
-            if (IsEnd() || char.ToUpper(NextChar()) != char.ToUpper(c))
+            if (IsEnd() || char.ToUpper(ReadChar()) != char.ToUpper(c))
             {
                 throw new Exception($"Expected '{expected}' at position {_position}, but found different content");
             }
         }
     }
 
+    public char ReadChar()
+    {
+        if (IsEnd()) return '\0';
+        SkipWhitespace();
+        return _text[_position++];
+    }
+    
     public char NextChar()
     {
         if (IsEnd()) return '\0';
@@ -70,6 +81,12 @@ public class StringParser
     {
         if (IsEnd()) return '\0';
         SkipWhitespace();
+        return _text[_position];
+    }
+    
+    public char Peek()
+    {
+        if (IsEnd()) return '\0';
         return _text[_position];
     }
 
@@ -226,7 +243,7 @@ public class StringParser
         var word = "";
         while (!IsEnd())
         {
-            ch = NextChar();
+            ch = ReadChar();
             if (!char.IsDigit(ch))
             {
                 _position--;
@@ -258,18 +275,18 @@ public class StringParser
         }
 
         var offset = _position;
-        var startChar = NextChar();
+        var startChar = ReadChar();
         if (startChar == 'N')
         {
-            quoteChar = NextChar();
+            quoteChar = ReadChar();
         }
 
         while (!IsEnd())
         {
-            var c = NextChar();
+            var c = ReadChar();
             if (c == quoteChar && PeekChar() == quoteChar)
             {
-                NextChar();
+                ReadChar();
                 continue;
             }
 
@@ -303,10 +320,10 @@ public class StringParser
         var offset = _position;
         var closeChar = quoteChar == '[' ? ']' : quoteChar;
         var identifier = quoteChar.ToString();
-        NextChar();
+        ReadChar();
         while (!IsEnd())
         {
-            var c = NextChar();
+            var c = ReadChar();
             identifier += c;
             if (c == closeChar)
             {
@@ -373,8 +390,8 @@ public class StringParser
     public TextSpan ReadSqlSingleComment()
     {
         var startPosition = _position;
-        NextChar();
-        NextChar();
+        ReadChar();
+        ReadChar();
         ReadUntil(c => c == '\n');
         return new TextSpan()
         {
@@ -402,13 +419,12 @@ public class StringParser
         var symbol = "";
         while (!IsEnd())
         {
-            var c = NextChar();
-            if (IsWordChar(c))
+            var c = ReadChar();
+            if (IsWordChar(c) || char.IsWhiteSpace(c))
             {
                 _position--;
                 break;
             }
-
             symbol += c;
         }
 
@@ -424,11 +440,10 @@ public class StringParser
     {
         var offset = _position;
         var result = "";
-        while (!IsEnd() && !predicate(PeekChar()))
+        while (!IsEnd() && !predicate(Peek()))
         {
             result += NextChar();
         }
-
         return new TextSpan()
         {
             Word = result,
@@ -443,7 +458,7 @@ public class StringParser
         var result = "";
         while (!IsEnd() && PeekString(text.Length) != text)
         {
-            result += NextChar();
+            result += ReadChar();
         }
 
         return new TextSpan()
@@ -460,7 +475,7 @@ public class StringParser
         var openParenthesis = 0;
         while (!IsEnd())
         {
-            var c = NextChar();
+            var c = ReadChar();
             if (c == '(')
             {
                 openParenthesis++;
@@ -492,13 +507,14 @@ public class StringParser
         };
     }
 
-    public void SkipSqlComment()
+    public bool SkipSqlComment()
     {
-        SkipSqlDoubleComment();
-        SkipSqlSingleComment();
+        var isSkipSqlDoubleComment = SkipSqlDoubleComment();
+        var isSkipSqlSingleComment = SkipSqlSingleComment();
+        return isSkipSqlDoubleComment || isSkipSqlSingleComment;
     }
 
-    public void SkipSqlDoubleComment()
+    public bool SkipSqlDoubleComment()
     {
         var startPosition = _position;
         if (Try(ReadSymbol, out var openSymbol))
@@ -507,14 +523,14 @@ public class StringParser
             {
                 _position = startPosition;
                 ReadSqlDoubleComment();
-                return;
+                return true;
             }
         }
-
         _position = startPosition;
+        return false;
     }
 
-    public void SkipSqlSingleComment()
+    public bool SkipSqlSingleComment()
     {
         var startPosition = _position;
         if (Try(ReadSymbol, out var openSymbol))
@@ -523,19 +539,22 @@ public class StringParser
             {
                 _position = startPosition;
                 ReadSqlSingleComment();
-                return;
+                return true;
             }
         }
-
         _position = startPosition;
+        return false;
     }
 
-    public void SkipWhitespace()
+    public bool SkipWhitespace()
     {
+        var isSkip = false;
         while (!IsEnd() && char.IsWhiteSpace(_text[_position]))
         {
             _position++;
+            isSkip = true;
         }
+        return isSkip;
     }
 
     public bool Try(Func<TextSpan> readFunc, out TextSpan textSpan)

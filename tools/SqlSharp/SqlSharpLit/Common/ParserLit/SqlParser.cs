@@ -13,18 +13,21 @@ public class SqlParser
         _text = new StringParser(text);
     }
 
-    private bool TryStart(Func<Either<ISqlExpression,ParseError>> parseFunc, out Either<ISqlExpression, ParseError> result)
+    private bool TryStart(Func<Either<ISqlExpression, ParseError>> parseFunc,
+        out Either<ISqlExpression, ParseError> result)
     {
         if (Try(parseFunc, out var sqlCreateTableExpr, out var error))
         {
             result = new Either<ISqlExpression, ParseError>(sqlCreateTableExpr);
             return true;
         }
+
         if (!error.IsStart)
         {
             result = new Either<ISqlExpression, ParseError>(error);
             return true;
         }
+
         result = new Either<ISqlExpression, ParseError>(error);
         return false;
     }
@@ -40,12 +43,12 @@ public class SqlParser
         {
             return selectResult;
         }
-        
-        if(TryStart(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
+
+        if (TryStart(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
         {
             return execSpAddExtendedPropertyResult;
         }
-        
+
         return CreateStartParseError("Unknown statement");
     }
 
@@ -56,20 +59,99 @@ public class SqlParser
             return CreateStartParseError("Expected EXEC SP_AddExtendedProperty");
         }
 
+        if (!TryMatchParameterAssignValue("@name", out var nameParameter))
+        {
+            return CreateStartParseError(nameParameter.RightValue.Message);
+        }
+        Match(",");
+        
+        if(TryMatchParameterAssignValue("@value", out var valueParameter))
+        {
+            return CreateStartParseError(valueParameter.RightValue.Message);
+        }
+        Match(",");
+
+        if(TryMatchParameterAssignValue("@level0type", out var level0TypeParameter))
+        {
+            return CreateStartParseError(level0TypeParameter.RightValue.Message);
+        }
+
+        var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty
+        {
+            Name = nameParameter.LeftValue.Value,
+            Value = valueParameter.LeftValue.Value,
+            Level0Type = level0TypeParameter.LeftValue.Value,
+        };
+        return new Either<ISqlExpression, ParseError>(sqlSpAddExtendedProperty);
+    }
+    
+    private void Match(string expected)
+    {
+        SkipWhiteSpace();
+        _text.Match(expected);
+    }
+
+    private bool TryMatchParameterAssignValue(string parameterName, out Either<SqlParameterValue, ParseError> result)
+    {
+        var startPosition = _text.Position;
+        if (!TryParameterAssignValue(out result))
+        {
+            return false;
+        }
+
+        if (!string.Equals(result.LeftValue.Name, parameterName, StringComparison.OrdinalIgnoreCase))
+        {
+            _text.Position = startPosition;
+            result = new Either<SqlParameterValue, ParseError>(
+                new ParseError($"Expected {parameterName}, but got {result.LeftValue.Name}")
+                {
+                    Offset = startPosition
+                });
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool TryParameterAssignValue(out Either<SqlParameterValue, ParseError> result)
+    {
+        SkipWhiteSpace();
         if (!_text.Try(_text.ReadSqlIdentifier, out var name))
         {
-            return CreateParseError($"Expected @name, but got {_text.PreviousWord().Word}");
+            result = new Either<SqlParameterValue, ParseError>(
+                new ParseError($"Expected @name, but got {_text.PreviousWord().Word}"));
+            return false;
         }
+
         _text.Match("=");
+        
         if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
         {
-            return CreateParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
+            result = new Either<SqlParameterValue, ParseError>(
+                new ParseError($"Expected @name value, but got {_text.PreviousWord().Word}"));
+            return false;
         }
-        
-        var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty();
-        sqlSpAddExtendedProperty.Name = name.Word;
-        sqlSpAddExtendedProperty.Value = nameValue.Word;
-        return new Either<ISqlExpression, ParseError>(sqlSpAddExtendedProperty);
+
+        result = new Either<SqlParameterValue, ParseError>(new SqlParameterValue
+        {
+            Name = name.Word,
+            Value = nameValue.Word
+        });
+        return true;
+    }
+    
+    private void SkipWhiteSpace()
+    {
+        while (true)
+        {
+            var isSkip1 = _text.SkipWhitespace();
+            var isSkip2 = _text.SkipSqlComment();
+            var isSkip = isSkip1 || isSkip2;
+            if (!isSkip)
+            {
+                break;
+            }
+        }
     }
 
     public Either<List<ColumnDefinition>, ParseError> ParseCreateTableColumns()
@@ -93,9 +175,9 @@ public class SqlParser
             }
 
             var column = ParseColumnDefinition(item);
-            
+
             _text.SkipSqlComment();
-            
+
             column.Identity = ParseSqlIdentity();
             if (ParseColumnConstraints(column) is var error && error != ParseError.Empty)
             {
@@ -108,7 +190,7 @@ public class SqlParser
                 break;
             }
 
-            _text.NextChar();
+            _text.ReadChar();
         } while (!_text.IsEnd());
 
         return new Either<List<ColumnDefinition>, ParseError>(columns);
@@ -122,7 +204,7 @@ public class SqlParser
                 $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekWord().Word}");
         }
 
-        var tableName = _text.ReadUntil(c => char.IsWhiteSpace(c) || c == '(');
+        var tableName = _text.ReadSqlIdentifier();
         _text.Match("(");
 
         var createTableStatement = new CreateTableStatement()
@@ -180,7 +262,7 @@ public class SqlParser
                 break;
             }
 
-            _text.NextChar();
+            _text.ReadChar();
         } while (!_text.IsEnd());
 
         var selectStatement = new SelectStatement
@@ -204,12 +286,14 @@ public class SqlParser
             {
                 return CreateParseError(leftExpr.RightValue.Message);
             }
+
             var operation = _text.ReadSymbol().Word;
             var rightExpr = ParseValue();
             if (rightExpr.IsRight)
             {
                 return CreateParseError(rightExpr.RightValue.Message);
             }
+
             selectStatement.Where = new SqlWhereExpression()
             {
                 Left = leftExpr.LeftValue,
@@ -278,25 +362,31 @@ public class SqlParser
                     });
                     continue;
                 }
+
                 return new ParseError("Expect Constraint DEFAULT");
             }
+
             if (_text.TryMatches("NOT", "FOR", "REPLICATION"))
             {
                 column.NotForReplication = true;
                 continue;
             }
+
             if (_text.TryMatches("NOT", "NULL"))
             {
                 column.IsNullable = false;
                 continue;
             }
+
             if (_text.TryMatches("NULL"))
             {
                 column.IsNullable = true;
                 continue;
             }
+
             break;
         } while (true);
+
         return ParseError.Empty;
     }
 
@@ -316,9 +406,10 @@ public class SqlParser
             dataLength2 = string.Empty;
             if (_text.PeekChar() == ',')
             {
-                _text.NextChar();
+                _text.ReadChar();
                 dataLength2 = _text.ReadNumber().Word;
             }
+
             _text.Match(")");
         }
 
@@ -425,7 +516,7 @@ public class SqlParser
                 break;
             }
 
-            _text.NextChar();
+            _text.ReadChar();
         } while (!_text.IsEnd());
 
         _text.Match(")");
@@ -446,7 +537,7 @@ public class SqlParser
                     break;
                 }
 
-                _text.NextChar();
+                _text.ReadChar();
             } while (!_text.IsEnd());
 
             _text.Match(")");
@@ -485,7 +576,13 @@ public class SqlParser
         {
             return new Either<ISqlExpression, ParseError>(tableName);
         }
-        
+
         return CreateParseError("Expected Int or Field");
     }
+}
+
+public class SqlParameterValue : ISqlExpression
+{
+    public string Name { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
 }
