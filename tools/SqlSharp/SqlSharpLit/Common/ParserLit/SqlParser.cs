@@ -110,6 +110,8 @@ public class SqlParser
             createTableStatement.Constraints.Add(constraint.Left);
         }
 
+        SkipStatementEnd();
+
         return new Either<ISqlExpression, ParseError>(createTableStatement);
     }
 
@@ -167,6 +169,7 @@ public class SqlParser
             return CreateStartParseError(level2NameParameter.RightValue.Message);
         }
 
+        SkipStatementEnd();
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty
         {
             Name = nameParameter.LeftValue.Value,
@@ -249,7 +252,17 @@ public class SqlParser
             };
         }
 
+        SkipStatementEnd();
         return new Either<ISqlExpression, ParseError>(selectStatement);
+    }
+
+    public void SkipStatementEnd()
+    {
+        var ch = _text.PeekChar();
+        if (ch == ';')
+        {
+            _text.ReadChar();
+        }
     }
 
     public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr,
