@@ -62,7 +62,7 @@ public class StringParser
         if (IsEnd()) return '\0';
         return _text[_position++];
     }
-    
+
     public char NextChar()
     {
         if (IsEnd()) return '\0';
@@ -83,7 +83,7 @@ public class StringParser
         if (IsEnd()) return '\0';
         return _text[_position];
     }
-    
+
     public char Peek()
     {
         if (IsEnd()) return '\0';
@@ -116,16 +116,14 @@ public class StringParser
     {
         SkipWhitespace();
         var tempPosition = _position;
-        var word = "";
         while (tempPosition < _text.Length && IsWordChar(_text[tempPosition]))
         {
-            word += _text[tempPosition];
             tempPosition++;
         }
 
         return new TextSpan
         {
-            Word = word,
+            Word = _text.Substring(_position, tempPosition - _position),
             Offset = _position,
             Length = tempPosition - _position
         };
@@ -427,6 +425,7 @@ public class StringParser
                 _position--;
                 break;
             }
+
             symbol += c;
         }
 
@@ -445,6 +444,7 @@ public class StringParser
         {
             NextChar();
         }
+
         return new TextSpan()
         {
             Word = _text.Substring(offset, _position - offset),
@@ -460,6 +460,7 @@ public class StringParser
         {
             NextChar();
         }
+
         return new TextSpan()
         {
             Word = _text.Substring(offset, _position - offset),
@@ -525,6 +526,7 @@ public class StringParser
                 return true;
             }
         }
+
         _position = startPosition;
         return false;
     }
@@ -541,6 +543,7 @@ public class StringParser
                 return true;
             }
         }
+
         _position = startPosition;
         return false;
     }
@@ -553,6 +556,7 @@ public class StringParser
             _position++;
             isSkip = true;
         }
+
         return isSkip;
     }
 
