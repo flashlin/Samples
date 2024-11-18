@@ -33,6 +33,48 @@ public class SqlParser
         return CreateStartParseError("Unknown statement");
     }
 
+    public IEnumerable<ISqlExpression> Extract()
+    {
+        while(!_text.IsEnd())
+        {
+            var rc = Parse();
+            if(rc.IsLeft)
+            {
+                yield return rc.LeftValue;
+            }
+            else
+            {
+                SkipWhiteSpace();
+                ReadNonWhiteSpace();
+            }
+        }
+    }
+
+    private void ReadNonWhiteSpace()
+    {
+        var sqlIdentifier = _text.ReadSqlIdentifier();
+        if (sqlIdentifier.Length > 0)
+        {
+            return;
+        }
+        var sqlString = _text.ReadSqlQuotedString();
+        if (sqlString.Length > 0)
+        {
+            return;
+        }
+        var sqlNumber = _text.ReadNumber();
+        if (sqlNumber.Length > 0)
+        {
+            return;
+        }
+        var sqlSymbol = _text.ReadSymbol();
+        if (sqlSymbol.Length > 0)
+        {
+            return;
+        }
+        _text.ReadChar();
+    }
+
     public Either<List<ColumnDefinition>, ParseError> ParseCreateTableColumns()
     {
         var columns = new List<ColumnDefinition>();

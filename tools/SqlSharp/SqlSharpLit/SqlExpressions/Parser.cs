@@ -70,11 +70,3 @@ public class SqlCreateTableGrammar : ISqlParserProvider
 public class SqlCreateTable
 {
 }
-
-public static class SqlParser
-{
-    public static SqlCreateTable ParseCreateTable(string text)
-    {
-        return new SqlCreateTableGrammar().CreateTableStatement.Parse(text);
-    }
-}

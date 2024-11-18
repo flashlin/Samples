@@ -40,6 +40,7 @@ public class ExtractSqlHelper
         {
             var sql = File.ReadAllText(sqlFile);
             Console.WriteLine($"{sqlFile}");
+            var sqlExpressions = new SqlParser(sql).Extract().ToList();
             yield return new SqlFile
             {
                 FileName = sqlFile,
