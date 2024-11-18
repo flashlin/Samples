@@ -79,8 +79,8 @@ public class StringParser
 
     public char PeekChar()
     {
-        if (IsEnd()) return '\0';
         SkipWhitespace();
+        if (IsEnd()) return '\0';
         return _text[_position];
     }
     

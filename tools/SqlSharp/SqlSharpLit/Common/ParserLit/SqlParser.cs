@@ -131,7 +131,10 @@ public class SqlParser
         }
 
         var tableName = _text.ReadSqlIdentifier();
-        _text.Match("(");
+        if (!_text.TryMatch("("))
+        {
+            return CreateParseError("Expected (");
+        }
 
         var createTableStatement = new CreateTableStatement()
         {
@@ -155,6 +158,11 @@ public class SqlParser
         if (constraint is { IsLeft: true, Left: not null })
         {
             createTableStatement.Constraints.Add(constraint.Left);
+        }
+
+        if (!_text.TryMatch(")"))
+        {
+            return CreateParseError("Expected )");
         }
 
         SkipStatementEnd();
@@ -480,7 +488,7 @@ public class SqlParser
         };
         if (_text.TryMatch("("))
         {
-            sqlIdentity.Seed = int.Parse(_text.ReadNumber().Word);
+            sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
             _text.Match(",");
             sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
             _text.Match(")");
