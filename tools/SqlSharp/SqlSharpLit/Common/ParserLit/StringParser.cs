@@ -58,8 +58,8 @@ public class StringParser
 
     public char ReadChar()
     {
-        if (IsEnd()) return '\0';
         SkipWhitespace();
+        if (IsEnd()) return '\0';
         return _text[_position++];
     }
     
@@ -459,7 +459,7 @@ public class StringParser
         var result = "";
         while (!IsEnd() && PeekString(text.Length) != text)
         {
-            result += ReadChar();
+            result += NextChar();
         }
 
         return new TextSpan()

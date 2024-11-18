@@ -1,3 +1,5 @@
+using T1.Standard.IO;
+
 namespace SqlSharpLit.Common.ParserLit;
 
 public class SqlConstraint
@@ -8,4 +10,32 @@ public class SqlConstraint
     public List<SqlColumnConstraint> Columns { get; set; } = [];
     public List<SqlWithToggle> WithToggles { get; set; } = [];
     public string On { get; set; } = string.Empty;
+
+    public string ToSql()
+    {
+        var sb = new IndentStringBuilder();
+        sb.Write($"CONSTRAINT {ConstraintName} {ConstraintType}");
+        if (!string.IsNullOrEmpty(Clustered))
+        {
+            sb.Write($" {Clustered}");
+        }
+        if (Columns.Count > 0)
+        {
+            sb.Write(" (");
+            sb.Write(string.Join(", ", Columns.Select(c => c.ToSql())));
+            sb.Write(")");
+        }
+        if (WithToggles.Count > 0)
+        {
+            sb.Write(" WITH (");
+            sb.Write(string.Join(", ", WithToggles.Select(t => t.ToSql())));
+            sb.Write(")");
+        }
+        if (!string.IsNullOrEmpty(On))
+        {
+            sb.Write($" ON {On}");
+        }
+
+        return sb.ToString();
+    }
 }

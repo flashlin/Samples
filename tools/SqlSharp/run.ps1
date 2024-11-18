@@ -1,2 +1,2 @@
-#.\SqlSharp\bin\Debug\net8.0\SqlSharp.exe -v extractCreateTableSql -i D:\VDisk\MyGitHub\SQL -o outputs
-.\SqlSharp\bin\Debug\net8.0\SqlSharp.exe -v extractCreateTableSql -i D:\coredev_tw\DbProjects -o outputs
+.\SqlSharp\bin\Debug\net8.0\SqlSharp.exe -v extractCreateTableSql -i D:\VDisk\MyGitHub\SQL -o outputs
+#.\SqlSharp\bin\Debug\net8.0\SqlSharp.exe -v extractCreateTableSql -i D:\coredev_tw\DbProjects -o outputs

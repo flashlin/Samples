@@ -46,7 +46,8 @@ public class ExtractSqlHelper
                 FileName = sqlFile,
                 Sql = sql,
                 DatabaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFile),
-                CreateTables = ExtractAllCreateTableFromText(sql).ToList(), 
+                CreateTables = ExtractAllCreateTableFromText(sql).ToList(),
+                SqlExpressions = sqlExpressions 
             };
         }
     }
@@ -68,6 +69,11 @@ public class ExtractSqlHelper
             {
                 writer.WriteLine(createTable);
                 writer.WriteLine("\n\n\n");
+            }
+
+            foreach (var sqlExpression in sqlFile.SqlExpressions)
+            {
+                writer.WriteLine(sqlExpression.ToSql());
             }
             writer.Flush();
         }
@@ -178,4 +184,5 @@ public class SqlFile
     public string Sql { get; set; } = string.Empty;
     public List<string> CreateTables { get; set; } = [];
     public string DatabaseName { get; set; } = string.Empty;
+    public List<ISqlExpression> SqlExpressions { get; set; } = [];
 }

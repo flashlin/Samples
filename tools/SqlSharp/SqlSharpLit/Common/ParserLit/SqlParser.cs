@@ -95,10 +95,15 @@ public class SqlParser
                     });
             }
 
-            var column = ParseColumnDefinition(item);
+            var columnDefinition = ParseColumnDefinition(item);
+            if (columnDefinition.IsRight)
+            {
+                return new Either<List<ColumnDefinition>, ParseError>(columnDefinition.RightValue);
+            }
 
             _text.SkipSqlComment();
 
+            var column = columnDefinition.LeftValue;
             column.Identity = ParseSqlIdentity();
             if (ParseColumnConstraints(column) is var error && error != ParseError.Empty)
             {
@@ -360,9 +365,16 @@ public class SqlParser
                 var constraintName = _text.ReadSqlIdentifier();
                 if (_text.TryMatch("DEFAULT"))
                 {
-                    _text.Match("(");
-                    var defaultValue = _text.ReadUntilRightParenthesis();
-                    _text.Match(")");
+                    TextSpan defaultValue;
+                    if (_text.TryMatch("("))
+                    {
+                        defaultValue = _text.ReadUntilRightParenthesis();
+                        _text.Match(")");
+                    }
+                    else
+                    {
+                        defaultValue = _text.ReadNumber();
+                    }
                     column.Constraints.Add(new SqlConstraintDefault
                     {
                         ConstraintName = constraintName.Word,
@@ -398,7 +410,7 @@ public class SqlParser
         return ParseError.Empty;
     }
 
-    private ColumnDefinition ParseColumnDefinition(TextSpan item)
+    private Either<ColumnDefinition, ParseError> ParseColumnDefinition(TextSpan item)
     {
         var column = new ColumnDefinition
         {
@@ -418,7 +430,14 @@ public class SqlParser
                 dataLength2 = _text.ReadNumber().Word;
             }
 
-            _text.Match(")");
+            if (!_text.TryMatch(")"))
+            {
+                return new Either<ColumnDefinition, ParseError>(
+                    new ParseError("Expected )")
+                    {
+                        Offset = _text.Position
+                    });
+            }
         }
 
         if (!string.IsNullOrEmpty(dataLength1))
@@ -431,7 +450,7 @@ public class SqlParser
             column.Scale = int.Parse(dataLength2);
         }
 
-        return column;
+        return new Either<ColumnDefinition, ParseError>(column);
     }
 
     private Either<ISqlExpression, ParseError> ParseIntValue()
@@ -470,11 +489,11 @@ public class SqlParser
         return sqlIdentity;
     }
 
-    private Either<SqlConstraint?, ParseError> ParseTableConstraint()
+    private Either<SqlConstraint, ParseError> ParseTableConstraint()
     {
         if (!_text.TryMatch(ConstraintKeyword))
         {
-            return new Either<SqlConstraint?, ParseError>(default(SqlConstraint));
+            return new Either<SqlConstraint, ParseError>(default(SqlConstraint));
         }
 
         var sqlConstraint = new SqlConstraint
@@ -494,7 +513,7 @@ public class SqlParser
         }
         else
         {
-            return new Either<SqlConstraint?, ParseError>(
+            return new Either<SqlConstraint, ParseError>(
                 new ParseError($"Expected PRIMARY KEY or FOREIGN KEY, but got {constraintType}"));
         }
 
@@ -503,7 +522,13 @@ public class SqlParser
             sqlConstraint.Clustered = "CLUSTERED";
         }
 
-        _text.Match("(");
+        if (_text.TryMatch("("))
+        {
+            return new Either<SqlConstraint, ParseError>(new ParseError("Expected (")
+            {
+                Offset = _text.Position
+            });
+        }
         var indexColumns = new List<SqlColumnConstraint>();
         do
         {
@@ -527,7 +552,14 @@ public class SqlParser
             _text.ReadChar();
         } while (!_text.IsEnd());
 
-        _text.Match(")");
+        if (!_text.TryMatch(")"))
+        {
+            return new Either<SqlConstraint, ParseError>(new ParseError("Expected )")
+            {
+                Offset = _text.Position
+            });
+        }
+        
         sqlConstraint.Columns = indexColumns;
         if (_text.TryMatch("WITH"))
         {
@@ -548,7 +580,13 @@ public class SqlParser
                 _text.ReadChar();
             } while (!_text.IsEnd());
 
-            _text.Match(")");
+            if (!_text.TryMatch(")") )
+            {
+                return new Either<SqlConstraint, ParseError>(new ParseError("Expected )")
+                {
+                    Offset = _text.Position
+                });
+            }
             sqlConstraint.WithToggles = toggles;
         }
 
@@ -557,7 +595,7 @@ public class SqlParser
             sqlConstraint.On = _text.ReadSqlIdentifier().Word;
         }
 
-        return new Either<SqlConstraint?, ParseError>(sqlConstraint);
+        return new Either<SqlConstraint, ParseError>(sqlConstraint);
     }
 
     private Either<ISqlExpression, ParseError> ParseTableName()
@@ -675,4 +713,8 @@ public class SqlParameterValue : ISqlExpression
 {
     public string Name { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
+    public string ToSql()
+    {
+        return $@"{Name}={Value}";
+    }
 }
