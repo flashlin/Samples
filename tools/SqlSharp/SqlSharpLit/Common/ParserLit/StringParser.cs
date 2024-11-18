@@ -193,7 +193,6 @@ public class StringParser
             };
         }
 
-        var identifier = "";
         while (!IsEnd())
         {
             var c = NextChar();
@@ -202,10 +201,9 @@ public class StringParser
                 _position--;
                 break;
             }
-
-            identifier += c;
         }
-
+        
+        var identifier = _text.Substring(offset, _position - offset);
         if (identifier.Length == 1)
         {
             return new TextSpan
