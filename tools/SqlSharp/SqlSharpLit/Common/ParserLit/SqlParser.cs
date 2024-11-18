@@ -501,7 +501,10 @@ public class SqlParser
     {
         if (!_text.TryMatch(ConstraintKeyword))
         {
-            return new Either<SqlConstraint, ParseError>(default(SqlConstraint));
+            return new Either<SqlConstraint, ParseError>(new ParseError("Expected CONSTRAINT")
+            {
+                Offset = _text.Position
+            });
         }
 
         var sqlConstraint = new SqlConstraint
@@ -530,7 +533,7 @@ public class SqlParser
             sqlConstraint.Clustered = "CLUSTERED";
         }
 
-        if (_text.TryMatch("("))
+        if (!_text.TryMatch("("))
         {
             return new Either<SqlConstraint, ParseError>(new ParseError("Expected (")
             {
