@@ -19,21 +19,21 @@ public class ParseSqlTest
                   @level1type = N'TABLE',           -- 第 2 級目標類型
                   @level1name = N'customer',        -- 第 2 級名稱（資料表名稱）
                   @level2type = N'COLUMN',          -- 第 3 級目標類型
-                  @level2name = N'addr';            -- 第 3 級名稱（欄位名稱)
+                  @level2name = 'addr';            -- 第 3 級名稱（欄位名稱)
                   """;
         
         var rc = ParseSql(sql);
         
         ThenSqlStatement(rc, new SqlSpAddExtendedProperty()
         {
-            Name = "MS_Description",
-            Value = "hello",
-            Level0Type = "SCHEMA",
-            Level0Name = "dbo",
-            Level1Type = "TABLE",
-            Level1Name = "customer",
-            Level2Type = "COLUMN",
-            Level2Name = "addr",
+            Name = "N'MS_Description'",
+            Value = "N'hello'",
+            Level0Type = "N'SCHEMA'",
+            Level0Name = "N'dbo'",
+            Level1Type = "N'TABLE'",
+            Level1Name = "N'customer'",
+            Level2Type = "N'COLUMN'",
+            Level2Name = "'addr'",
         });
     }
     

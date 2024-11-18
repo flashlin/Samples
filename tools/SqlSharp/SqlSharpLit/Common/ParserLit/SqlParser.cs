@@ -63,24 +63,47 @@ public class SqlParser
         {
             return CreateStartParseError(nameParameter.RightValue.Message);
         }
-        Match(",");
+        MatchString(",");
         
         if(!TryMatchParameterAssignValue("@value", out var valueParameter))
         {
             return CreateStartParseError(valueParameter.RightValue.Message);
         }
-        Match(",");
+        MatchString(",");
 
         if(!TryMatchParameterAssignValue("@level0type", out var level0TypeParameter))
         {
             return CreateStartParseError(level0TypeParameter.RightValue.Message);
         }
-
-        Match(",");
+        MatchString(",");
         
         if(!TryMatchParameterAssignValue("@level0name", out var level0NameParameter))
         {
             return CreateStartParseError(level0NameParameter.RightValue.Message);
+        }
+        MatchString(",");
+        
+        if(!TryMatchParameterAssignValue("@level1type", out var level1TypeParameter))
+        {
+            return CreateStartParseError(level1TypeParameter.RightValue.Message);
+        }
+        MatchString(",");
+        
+        if(!TryMatchParameterAssignValue("@level1name", out var level1NameParameter))
+        {
+            return CreateStartParseError(level1NameParameter.RightValue.Message);
+        }
+        MatchString(",");
+        
+        if(!TryMatchParameterAssignValue("@level2type", out var level2TypeParameter))
+        {
+            return CreateStartParseError(level2TypeParameter.RightValue.Message);
+        }
+        MatchString(",");
+        
+        if(!TryMatchParameterAssignValue("@level2name", out var level2NameParameter))
+        {
+            return CreateStartParseError(level2NameParameter.RightValue.Message);
         }
 
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty
@@ -89,11 +112,15 @@ public class SqlParser
             Value = valueParameter.LeftValue.Value,
             Level0Type = level0TypeParameter.LeftValue.Value,
             Level0Name = level0NameParameter.LeftValue.Value,
+            Level1Type = level1TypeParameter.LeftValue.Value,
+            Level1Name = level1NameParameter.LeftValue.Value,
+            Level2Type = level2TypeParameter.LeftValue.Value,
+            Level2Name = level2NameParameter.LeftValue.Value
         };
         return new Either<ISqlExpression, ParseError>(sqlSpAddExtendedProperty);
     }
     
-    private void Match(string expected)
+    private void MatchString(string expected)
     {
         SkipWhiteSpace();
         _text.Match(expected);
