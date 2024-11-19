@@ -154,11 +154,7 @@ public class SqlParser
             {
                 return CreateParseError(tableConstraint.RightValue.Message);
             }
-
-            if (tableConstraint is { IsLeft: true, Left: not null })
-            {
-                createTableStatement.Constraints.Add(tableConstraint.Left);
-            }
+            createTableStatement.Constraints.Add(tableConstraint.LeftValue);
         }
 
         if (!_text.TryMatch(")"))
