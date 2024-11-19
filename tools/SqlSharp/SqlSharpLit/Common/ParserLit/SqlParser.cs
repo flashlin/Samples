@@ -635,16 +635,16 @@ public class SqlParser
             var toggles = new List<SqlWithToggle>();
             do
             {
-                var toggle = new SqlWithToggle();
-                toggle.ToggleName = _text.ReadSqlIdentifier().Word;
-                _text.Match("=");
-                toggle.Value = _text.ReadSqlIdentifier().Word;
-                toggles.Add(toggle);
+                var toggleResult = ParseWithToggle();
+                if (toggleResult.IsRight)
+                {
+                    return new Either<ISqlExpression, ParseError>(toggleResult.RightValue);
+                }
+                toggles.Add(toggleResult.LeftValue);
                 if (_text.PeekChar() != ',')
                 {
                     break;
                 }
-
                 _text.ReadChar();
             } while (!_text.IsEnd());
 
@@ -664,6 +664,24 @@ public class SqlParser
         }
 
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
+    }
+    
+    private Either<SqlWithToggle, ParseError> ParseWithToggle()
+    {
+        var toggle = new SqlWithToggle
+        {
+            ToggleName = _text.ReadSqlIdentifier().Word
+        };
+        _text.Match("=");
+
+        if (_text.Try(_text.ReadNumber, out var number))
+        {
+            toggle.Value = number.Word;
+            return new Either<SqlWithToggle, ParseError>(toggle);
+        }
+        
+        toggle.Value = _text.ReadSqlIdentifier().Word;
+        return new Either<SqlWithToggle, ParseError>(toggle);
     }
 
     private Either<ISqlExpression, ParseError> ParseTableName()
