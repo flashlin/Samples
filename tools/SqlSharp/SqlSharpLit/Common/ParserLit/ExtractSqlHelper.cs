@@ -72,6 +72,7 @@ public class ExtractSqlHelper
 
             writer.WriteLine($"-- {sqlFile.FileName}");
             writer.WriteLine($"-- Database: {sqlFile.DatabaseName}");
+            writer.WriteLine($"-- Total Create Tables: {sqlFile.CreateTables.Count}");
             // foreach (var createTable in sqlFile.CreateTables)
             // {
             //     writer.WriteLine(createTable);
