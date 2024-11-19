@@ -36,6 +36,29 @@ public class ParseSqlTest
             Level2Name = "'addr'",
         });
     }
+
+    [Test]
+    public void Test()
+    {
+        var sql = $"""
+                   CREATE TABLE [dbo].[UserTracking]
+                   (
+                   	[Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                   	[LogTime] DATETIME NOT NULL CONSTRAINT [DF_UserTracking_LogTime]  DEFAULT (getdate()),
+                   	[GtmCode] varchar(30) NULL,
+                   	[Category] varchar(40) NULL,
+                   	[EventName] varchar(40) NULL,
+                   	[Action] varchar(40) NULL,
+                   	[Label]  varchar(40) NULL,
+                   	[Area] varchar(50) NULL,
+                   	[Device] varchar(40) NULL,
+                   	[BrandType] varchar(20) NULL,
+                   	[Extra] nvarchar(4000) NULL
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.IsLeft.Should().Be(true);
+    }
     
     [Test]
     public void CreateTable()

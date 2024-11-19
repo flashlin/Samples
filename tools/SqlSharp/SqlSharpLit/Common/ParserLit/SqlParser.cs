@@ -147,13 +147,12 @@ public class SqlParser
         }
 
         createTableStatement.Columns = rc.LeftValue;
-
+        
         var constraint = ParseTableConstraint();
         if (constraint.IsRight)
         {
             return CreateParseError(constraint.RightValue.Message);
         }
-
         if (constraint is { IsLeft: true, Left: not null })
         {
             createTableStatement.Constraints.Add(constraint.Left);
