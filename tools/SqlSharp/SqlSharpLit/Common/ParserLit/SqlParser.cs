@@ -104,7 +104,6 @@ public class SqlParser
             _text.SkipSqlComment();
 
             var column = columnDefinition.LeftValue;
-            column.Identity = ParseSqlIdentity();
             if (ParseColumnConstraints(column) is var error && error != ParseError.Empty)
             {
                 return new Either<List<ColumnDefinition>, ParseError>(error);
@@ -368,6 +367,15 @@ public class SqlParser
     {
         do
         {
+            if(TryParseSqlIdentity(column, out var identityResult))
+            {
+                if (identityResult.IsRight)
+                {
+                    return identityResult.RightValue;
+                }
+                continue;
+            }
+            
             if (_text.TryMatch(ConstraintKeyword))
             {
                 var constraintName = _text.ReadSqlIdentifier();
@@ -474,13 +482,13 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(new ParseError("Expected Int"));
     }
 
-    private SqlIdentity ParseSqlIdentity()
+    private bool TryParseSqlIdentity(ColumnDefinition column, out Either<ColumnDefinition, ParseError> result)
     {
         if (!_text.TryMatch("IDENTITY"))
         {
-            return SqlIdentity.Default;
+            result = new Either<ColumnDefinition, ParseError>(column);
+            return false;
         }
-
         var sqlIdentity = new SqlIdentity
         {
             Seed = 1,
@@ -493,8 +501,9 @@ public class SqlParser
             sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
             _text.Match(")");
         }
-
-        return sqlIdentity;
+        column.Identity = sqlIdentity; 
+        result = new Either<ColumnDefinition, ParseError>(column);
+        return true;
     }
 
     private Either<SqlConstraint, ParseError> ParseTableConstraint()
