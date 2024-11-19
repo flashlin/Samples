@@ -46,6 +46,7 @@ public class ParseSqlTest
                    LastName varchar(50),
                    Money decimal(10,3),
                    [name] [int] IDENTITY(1,1) NOT NULL,
+                   [name2] [int] NOT NULL IDENTITY(1,1),
                    cname [int] NULL,
                    [rid] [int] IDENTITY(1,1) NOT FOR REPLICATION NOT NULL, 
                    [DailyTotalRaw]  DECIMAL (19, 6) CONSTRAINT [DF_CheckSum] DEFAULT ((0)) NOT NULL,
@@ -69,7 +70,16 @@ public class ParseSqlTest
                 new ColumnDefinition
                 {
                     ColumnName = "[name]", DataType = "[int]",
-                    Identity = new SqlIdentity()
+                    Identity = new SqlIdentity
+                    {
+                        Seed = 1,
+                        Increment = 1,
+                    },
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[name2]", DataType = "[int]",
+                    Identity = new SqlIdentity
                     {
                         Seed = 1,
                         Increment = 1,
