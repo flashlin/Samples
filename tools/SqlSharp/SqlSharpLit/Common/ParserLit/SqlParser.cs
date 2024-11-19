@@ -379,11 +379,24 @@ public class SqlParser
         {
             defaultValue = _text.ReadUntilRightParenthesis();
             _text.Match(")");
+            return new Either<TextSpan, ParseError>(defaultValue);
         }
-        else
+
+        if (_text.Try(_text.ReadSqlIdentifier, out var funcName))
         {
-            defaultValue = _text.ReadNumber();
+            _text.Match("(");
+            var funcArgs = _text.ReadUntilRightParenthesis();
+            _text.Match(")");
+            defaultValue = new TextSpan
+            {
+                Word = $"{funcName.Word}({funcArgs.Word})",
+                Offset = funcName.Offset,
+                Length = funcName.Length + funcArgs.Length + 2
+            };
+            return new Either<TextSpan, ParseError>(defaultValue);
         }
+        
+        defaultValue = _text.ReadNumber();
         return new Either<TextSpan, ParseError>(defaultValue);
     }
 
@@ -405,7 +418,11 @@ public class SqlParser
                 }
                 continue;
             }
-            
+
+            // if (Try(ParseDefaultValue, out var defaultValue))
+            // {
+            //     
+            // }
             
             
             if (_text.TryMatch(ConstraintKeyword))
