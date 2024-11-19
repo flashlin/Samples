@@ -52,32 +52,6 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
-    public void TableConstraintWithoutOn()
-    {
-        var sql = $"""
-                   CREATE TABLE [dbo].[CashSettled] (
-                       [custid] INT NOT NULL,
-                       CONSTRAINT [PK_CashSettled] PRIMARY KEY CLUSTERED ([custid] ASC) WITH (FILLFACTOR = 85)
-                   );
-                   """;
-        var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
-    }
-    
-    [Test]
-    public void DefaultNull()
-    {
-        var sql = $"""
-                   CREATE TABLE [Banner]
-                   (
-                   [BannerType] INT DEFAULT NULL 
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
-    }
-
-    [Test]
     public void CreateTable()
     {
         var sql = $"""
@@ -212,6 +186,32 @@ public class ParseCreateTableSqlTest
                 }
             ]
         });
+    }
+
+    [Test]
+    public void DefaultNull()
+    {
+        var sql = $"""
+                   CREATE TABLE [Banner]
+                   (
+                   [BannerType] INT DEFAULT NULL 
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
+    }
+
+    [Test]
+    public void TableConstraintWithoutOn()
+    {
+        var sql = $"""
+                   CREATE TABLE [dbo].[CashSettled] (
+                       [custid] INT NOT NULL,
+                       CONSTRAINT [PK_CashSettled] PRIMARY KEY CLUSTERED ([custid] ASC) WITH (FILLFACTOR = 85)
+                   );
+                   """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
     }
 
     [Test]
