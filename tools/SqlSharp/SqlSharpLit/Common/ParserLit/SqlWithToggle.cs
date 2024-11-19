@@ -7,6 +7,6 @@ public class SqlWithToggle
 
     public string ToSql()
     {
-        return $"{ToggleName} {Value}";
+        return $"{ToggleName}={Value}";
     }
 }
