@@ -63,6 +63,19 @@ public class ParseCreateTableSqlTest
         var rc = ParseSql(sql);
         rc.Right.Should().Be(null);
     }
+    
+    [Test]
+    public void DefaultNull()
+    {
+        var sql = $"""
+                   CREATE TABLE [Banner]
+                   (
+                   [BannerType] INT DEFAULT NULL 
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
+    }
 
     [Test]
     public void CreateTable()

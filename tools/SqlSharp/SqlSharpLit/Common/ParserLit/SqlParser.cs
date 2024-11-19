@@ -35,10 +35,10 @@ public class SqlParser
 
     public IEnumerable<ISqlExpression> Extract()
     {
-        while(!_text.IsEnd())
+        while (!_text.IsEnd())
         {
             var rc = Parse();
-            if(rc.IsLeft)
+            if (rc.IsLeft)
             {
                 yield return rc.LeftValue;
             }
@@ -57,21 +57,25 @@ public class SqlParser
         {
             return;
         }
+
         var sqlString = _text.ReadSqlQuotedString();
         if (sqlString.Length > 0)
         {
             return;
         }
+
         var sqlNumber = _text.ReadNumber();
         if (sqlNumber.Length > 0)
         {
             return;
         }
+
         var sqlSymbol = _text.ReadSymbol();
         if (sqlSymbol.Length > 0)
         {
             return;
         }
+
         _text.ReadChar();
     }
 
@@ -154,6 +158,7 @@ public class SqlParser
             {
                 return CreateParseError(tableConstraint.RightValue.Message);
             }
+
             createTableStatement.Constraints.Add(tableConstraint.LeftValue);
         }
 
@@ -178,45 +183,52 @@ public class SqlParser
         {
             return CreateStartParseError(nameParameter.RightValue.Message);
         }
+
         MatchString(",");
-        
-        if(!TryMatchParameterAssignValue("@value", out var valueParameter))
+
+        if (!TryMatchParameterAssignValue("@value", out var valueParameter))
         {
             return CreateStartParseError(valueParameter.RightValue.Message);
         }
+
         MatchString(",");
 
-        if(!TryMatchParameterAssignValue("@level0type", out var level0TypeParameter))
+        if (!TryMatchParameterAssignValue("@level0type", out var level0TypeParameter))
         {
             return CreateStartParseError(level0TypeParameter.RightValue.Message);
         }
+
         MatchString(",");
-        
-        if(!TryMatchParameterAssignValue("@level0name", out var level0NameParameter))
+
+        if (!TryMatchParameterAssignValue("@level0name", out var level0NameParameter))
         {
             return CreateStartParseError(level0NameParameter.RightValue.Message);
         }
+
         MatchString(",");
-        
-        if(!TryMatchParameterAssignValue("@level1type", out var level1TypeParameter))
+
+        if (!TryMatchParameterAssignValue("@level1type", out var level1TypeParameter))
         {
             return CreateStartParseError(level1TypeParameter.RightValue.Message);
         }
+
         MatchString(",");
-        
-        if(!TryMatchParameterAssignValue("@level1name", out var level1NameParameter))
+
+        if (!TryMatchParameterAssignValue("@level1name", out var level1NameParameter))
         {
             return CreateStartParseError(level1NameParameter.RightValue.Message);
         }
+
         MatchString(",");
-        
-        if(!TryMatchParameterAssignValue("@level2type", out var level2TypeParameter))
+
+        if (!TryMatchParameterAssignValue("@level2type", out var level2TypeParameter))
         {
             return CreateStartParseError(level2TypeParameter.RightValue.Message);
         }
+
         MatchString(",");
-        
-        if(!TryMatchParameterAssignValue("@level2name", out var level2NameParameter))
+
+        if (!TryMatchParameterAssignValue("@level2name", out var level2NameParameter))
         {
             return CreateStartParseError(level2NameParameter.RightValue.Message);
         }
@@ -317,9 +329,9 @@ public class SqlParser
         }
     }
 
-    public bool Try<T>(Func<Either<T, ParseError>> parseFunc, out Either<T,ParseError> result)
+    public bool Try<T>(Func<Either<T, ParseError>> parseFunc, out Either<T, ParseError> result)
     {
-        var localResult = new Either<T, ParseError>(new ParseError("Unknown")); 
+        var localResult = new Either<T, ParseError>(new ParseError("Unknown"));
         var rc = parseFunc();
         var success = rc.Match(left =>
             {
@@ -334,7 +346,7 @@ public class SqlParser
         result = localResult;
         return success;
     }
-    
+
     private Either<ISqlExpression, ParseError> CreateParseError(string message)
     {
         return CreateParseError<ISqlExpression>(message);
@@ -369,13 +381,20 @@ public class SqlParser
         {
             return CreateParseError<TextSpan>("Expected DEFAULT");
         }
-        
+
         TextSpan defaultValue;
         if (_text.TryMatch("("))
         {
             defaultValue = _text.ReadUntilRightParenthesis();
             _text.Match(")");
             return new Either<TextSpan, ParseError>(defaultValue);
+        }
+
+        var nullValue = _text.PeekIdentifier("NULL");
+        if (nullValue.Length > 0)
+        {
+            _text.ReadIdentifier();
+            return new Either<TextSpan, ParseError>(nullValue);
         }
 
         if (_text.Try(_text.ReadSqlIdentifier, out var funcName))
@@ -391,7 +410,7 @@ public class SqlParser
             };
             return new Either<TextSpan, ParseError>(defaultValue);
         }
-        
+
         defaultValue = _text.ReadNumber();
         return new Either<TextSpan, ParseError>(defaultValue);
     }
@@ -400,18 +419,19 @@ public class SqlParser
     {
         do
         {
-            if(_text.TryMatches("PRIMARY", "KEY"))
+            if (_text.TryMatches("PRIMARY", "KEY"))
             {
                 column.IsPrimaryKey = true;
                 continue;
             }
-            
-            if(TryParseSqlIdentity(column, out var identityResult))
+
+            if (TryParseSqlIdentity(column, out var identityResult))
             {
                 if (identityResult.IsRight)
                 {
                     return identityResult.RightValue;
                 }
+
                 continue;
             }
 
@@ -421,6 +441,7 @@ public class SqlParser
                 {
                     return identityResult.RightValue;
                 }
+
                 column.Constraints.Add(new SqlConstraintDefault
                 {
                     ConstraintName = "[DEFAULT]",
@@ -428,17 +449,18 @@ public class SqlParser
                 });
                 continue;
             }
-            
+
             if (_text.TryMatch(ConstraintKeyword))
             {
                 var constraintName = _text.ReadSqlIdentifier();
-                
+
                 if (Try(ParseDefaultValue, out var constraintDefaultValue))
                 {
                     if (identityResult.IsRight)
                     {
                         return identityResult.RightValue;
                     }
+
                     column.Constraints.Add(new SqlConstraintDefault
                     {
                         ConstraintName = constraintName.Word,
@@ -537,6 +559,7 @@ public class SqlParser
             result = new Either<ColumnDefinition, ParseError>(column);
             return false;
         }
+
         var sqlIdentity = new SqlIdentity
         {
             Seed = 1,
@@ -549,7 +572,8 @@ public class SqlParser
             sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
             _text.Match(")");
         }
-        column.Identity = sqlIdentity; 
+
+        column.Identity = sqlIdentity;
         result = new Either<ColumnDefinition, ParseError>(column);
         return true;
     }
@@ -597,6 +621,7 @@ public class SqlParser
                 Offset = _text.Position
             });
         }
+
         var indexColumns = new List<SqlColumnConstraint>();
         do
         {
@@ -627,7 +652,7 @@ public class SqlParser
                 Offset = _text.Position
             });
         }
-        
+
         sqlConstraint.Columns = indexColumns;
         if (_text.TryMatch("WITH"))
         {
@@ -640,21 +665,24 @@ public class SqlParser
                 {
                     return new Either<ISqlExpression, ParseError>(toggleResult.RightValue);
                 }
+
                 toggles.Add(toggleResult.LeftValue);
                 if (_text.PeekChar() != ',')
                 {
                     break;
                 }
+
                 _text.ReadChar();
             } while (!_text.IsEnd());
 
-            if (!_text.TryMatch(")") )
+            if (!_text.TryMatch(")"))
             {
                 return new Either<ISqlExpression, ParseError>(new ParseError("Expected )")
                 {
                     Offset = _text.Position
                 });
             }
+
             sqlConstraint.WithToggles = toggles;
         }
 
@@ -665,7 +693,7 @@ public class SqlParser
 
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
     }
-    
+
     private Either<SqlWithToggle, ParseError> ParseWithToggle()
     {
         var toggle = new SqlWithToggle
@@ -679,7 +707,7 @@ public class SqlParser
             toggle.Value = number.Word;
             return new Either<SqlWithToggle, ParseError>(toggle);
         }
-        
+
         toggle.Value = _text.ReadSqlIdentifier().Word;
         return new Either<SqlWithToggle, ParseError>(toggle);
     }
@@ -759,7 +787,7 @@ public class SqlParser
         }
 
         _text.Match("=");
-        
+
         if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
         {
             result = new Either<SqlParameterValue, ParseError>(
