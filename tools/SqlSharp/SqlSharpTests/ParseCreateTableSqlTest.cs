@@ -56,7 +56,7 @@ public class ParseCreateTableSqlTest
     {
         var sql = $"""
                    CREATE TABLE [dbo].[CashSettled] (
-                       [custid]              INT             NOT NULL,
+                       [custid] INT NOT NULL,
                        CONSTRAINT [PK_CashSettled] PRIMARY KEY CLUSTERED ([custid] ASC) WITH (FILLFACTOR = 85)
                    );
                    """;

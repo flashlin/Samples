@@ -437,22 +437,16 @@ public class SqlParser
             {
                 var constraintName = _text.ReadSqlIdentifier();
                 
-                if (_text.TryMatch("DEFAULT"))
+                if (Try(ParseDefaultValue, out var constraintDefaultValue))
                 {
-                    TextSpan defaultValue;
-                    if (_text.TryMatch("("))
+                    if (identityResult.IsRight)
                     {
-                        defaultValue = _text.ReadUntilRightParenthesis();
-                        _text.Match(")");
-                    }
-                    else
-                    {
-                        defaultValue = _text.ReadNumber();
+                        return identityResult.RightValue;
                     }
                     column.Constraints.Add(new SqlConstraintDefault
                     {
                         ConstraintName = constraintName.Word,
-                        Value = defaultValue.Word
+                        Value = constraintDefaultValue.LeftValue.Word
                     });
                     continue;
                 }
