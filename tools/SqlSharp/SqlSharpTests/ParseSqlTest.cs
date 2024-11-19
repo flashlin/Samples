@@ -57,7 +57,7 @@ public class ParseSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.IsLeft.Should().Be(true);
+        rc.Right.Should().Be(null);
     }
     
     [Test]
