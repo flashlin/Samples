@@ -321,18 +321,18 @@ public class SqlParser
         }
     }
 
-    public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out Either<ISqlExpression,ParseError> result)
+    public bool Try<T>(Func<Either<T, ParseError>> parseFunc, out Either<T,ParseError> result)
     {
-        var localResult = new Either<ISqlExpression, ParseError>(new ParseError("Unknown")); 
+        var localResult = new Either<T, ParseError>(new ParseError("Unknown")); 
         var rc = parseFunc();
         var success = rc.Match(left =>
             {
-                localResult = new Either<ISqlExpression, ParseError>(left);
+                localResult = new Either<T, ParseError>(left);
                 return true;
             },
             right =>
             {
-                localResult = new Either<ISqlExpression, ParseError>(right);
+                localResult = new Either<T, ParseError>(right);
                 return false;
             });
         result = localResult;
