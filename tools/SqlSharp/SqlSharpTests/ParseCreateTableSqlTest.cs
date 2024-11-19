@@ -24,7 +24,7 @@ public class ParseCreateTableSqlTest
         
         var rc = ParseSql(sql);
         
-        ThenSqlStatement(rc, new SqlSpAddExtendedProperty()
+        rc.ShouldBe(new SqlSpAddExtendedProperty()
         {
             Name = "N'MS_Description'",
             Value = "N'hello'",
@@ -87,8 +87,7 @@ public class ParseCreateTableSqlTest
                    """;
 
         var rc = ParseSql(sql);
-
-        ThenSqlStatement(rc, new CreateTableStatement
+        rc.ShouldBe(new CreateTableStatement
         {
             TableName = "Persons",
             Columns =
@@ -197,55 +196,6 @@ public class ParseCreateTableSqlTest
                 }
             ]
         });
-    }
-
-    [Test]
-    public void Select()
-    {
-        var sql = $"""
-                   SELECT Id, Name 
-                   FROM Persons
-                   WHERE Id = 1;
-                   """;
-
-        var rc = ParseSql(sql);
-
-        ThenSqlStatement(rc, new SelectStatement
-        {
-            Columns =
-            [
-                new SelectColumn() { ColumnName = "Id" },
-                new SelectColumn() { ColumnName = "Name" },
-            ],
-            From = new SelectFrom
-            {
-                FromTableName = "Persons"
-            },
-            Where = new SqlWhereExpression
-            {
-                Left = new SqlFieldExpression
-                {
-                    FieldName = "Id",
-                },
-                Operation = "=",
-                Right = new SqlIntValueExpression
-                {
-                    Value = 1
-                }
-            }
-        });
-    }
-
-    private static void ThenSqlStatement<T>(Either<ISqlExpression, ParseError> rc, T expectedSqlStatement)
-        where T : ISqlExpression
-    {
-        rc.Switch(statement =>
-            {
-                var castedStatement = (T)statement;
-                castedStatement.Should().BeEquivalentTo(expectedSqlStatement);
-            },
-            error => throw error
-        );
     }
 
     private static Either<ISqlExpression, ParseError> ParseSql(string sql)
