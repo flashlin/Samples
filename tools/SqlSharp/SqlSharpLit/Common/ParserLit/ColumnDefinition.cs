@@ -21,7 +21,7 @@ public class ColumnDefinition : ISqlExpression
         if (Size > 0)
         {
             sql.Write("(");
-            sql.Write($"({Size}");
+            sql.Write($"{Size}");
             if (Scale > 0)
             {
                 sql.Write($", {Scale}");

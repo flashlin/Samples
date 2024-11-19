@@ -65,7 +65,7 @@ public class ExtractSqlHelper
         };
         foreach (var sqlFile in GetSqlContentsFromFolder(folder))
         {
-            if (sqlFile.SqlExpressions.Count == 0)
+            if (sqlFile.CreateTables.Count == 0)
             {
                 continue;
             }
