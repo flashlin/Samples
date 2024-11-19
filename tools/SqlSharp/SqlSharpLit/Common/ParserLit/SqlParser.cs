@@ -419,11 +419,19 @@ public class SqlParser
                 continue;
             }
 
-            // if (Try(ParseDefaultValue, out var defaultValue))
-            // {
-            //     
-            // }
-            
+            if (Try(ParseDefaultValue, out var nonConstraintDefaultValue))
+            {
+                if (identityResult.IsRight)
+                {
+                    return identityResult.RightValue;
+                }
+                column.Constraints.Add(new SqlConstraintDefault
+                {
+                    ConstraintName = "[DEFAULT]",
+                    Value = nonConstraintDefaultValue.LeftValue.Word
+                });
+                continue;
+            }
             
             if (_text.TryMatch(ConstraintKeyword))
             {
