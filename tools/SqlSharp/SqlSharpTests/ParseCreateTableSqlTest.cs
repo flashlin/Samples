@@ -11,19 +11,19 @@ public class ParseCreateTableSqlTest
     public void AddExtendedProperty()
     {
         var sql = $"""
-                  EXEC sp_addextendedproperty
-                  @name = N'MS_Description',        -- 屬性名稱（固定為 MS_Description 用於說明）
-                  @value = N'hello',                -- 說明內容 
-                  @level0type = N'SCHEMA',          -- 第 1 級目標類型
-                  @level0name = N'dbo',             -- 第 1 級名稱（預設 schema）
-                  @level1type = N'TABLE',           -- 第 2 級目標類型
-                  @level1name = N'customer',        -- 第 2 級名稱（資料表名稱）
-                  @level2type = N'COLUMN',          -- 第 3 級目標類型
-                  @level2name = 'addr';            -- 第 3 級名稱（欄位名稱)
-                  """;
-        
+                   EXEC sp_addextendedproperty
+                   @name = N'MS_Description',        -- 屬性名稱（固定為 MS_Description 用於說明）
+                   @value = N'hello',                -- 說明內容 
+                   @level0type = N'SCHEMA',          -- 第 1 級目標類型
+                   @level0name = N'dbo',             -- 第 1 級名稱（預設 schema）
+                   @level1type = N'TABLE',           -- 第 2 級目標類型
+                   @level1name = N'customer',        -- 第 2 級名稱（資料表名稱）
+                   @level2type = N'COLUMN',          -- 第 3 級目標類型
+                   @level2name = 'addr';            -- 第 3 級名稱（欄位名稱)
+                   """;
+
         var rc = ParseSql(sql);
-        
+
         rc.ShouldBe(new SqlSpAddExtendedProperty()
         {
             Name = "N'MS_Description'",
@@ -46,6 +46,19 @@ public class ParseCreateTableSqlTest
                    	[Id] INT NOT NULL IDENTITY, 
                    	[CreatedOn] DATETIME NOT NULL DEFAULT GetDate()
                    )
+                   """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
+    }
+
+    [Test]
+    public void TableConstraintWithoutOn()
+    {
+        var sql = $"""
+                   CREATE TABLE [dbo].[CashSettled] (
+                       [custid]              INT             NOT NULL,
+                       CONSTRAINT [PK_CashSettled] PRIMARY KEY CLUSTERED ([custid] ASC) WITH (FILLFACTOR = 85)
+                   );
                    """;
         var rc = ParseSql(sql);
         rc.Right.Should().Be(null);
@@ -84,7 +97,7 @@ public class ParseCreateTableSqlTest
                     ColumnName = "[Id]",
                     IsPrimaryKey = true,
                     DataType = "BIGINT",
-                    Identity = new SqlIdentity{ Seed = 1, Increment = 1 },
+                    Identity = new SqlIdentity { Seed = 1, Increment = 1 },
                     IsNullable = false,
                     NotForReplication = false,
                     Constraints = [],
@@ -129,7 +142,8 @@ public class ParseCreateTableSqlTest
                     ColumnName = "[DailyTotalRaw]", DataType = "DECIMAL",
                     Size = 19,
                     Scale = 6,
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintDefault
                         {
                             ConstraintName = "[DF_CheckSum]",
@@ -138,20 +152,23 @@ public class ParseCreateTableSqlTest
                     ]
                 }
             ],
-            Constraints = [
+            Constraints =
+            [
                 new SqlConstraint
                 {
                     ConstraintName = "[PK_AcceptedBets]",
                     ConstraintType = "PRIMARY KEY",
                     Clustered = "CLUSTERED",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlColumnConstraint
                         {
                             ColumnName = "[MatchResultID]",
                             Order = "ASC"
                         }
                     ],
-                    WithToggles = [
+                    WithToggles =
+                    [
                         new SqlWithToggle
                         {
                             ToggleName = "PAD_INDEX",
