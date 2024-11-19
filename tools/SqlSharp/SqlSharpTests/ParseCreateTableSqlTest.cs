@@ -52,20 +52,6 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
-    public void WithoutConstraint()
-    {
-        var sql = $"""
-                   CREATE TABLE [dbo].[UserTracking]
-                   (
-                   	[Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                   	[Extra] nvarchar(4000) NULL
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
-    }
-    
-    [Test]
     public void CreateTable()
     {
         var sql = $"""
@@ -196,6 +182,20 @@ public class ParseCreateTableSqlTest
                 }
             ]
         });
+    }
+
+    [Test]
+    public void WithoutConstraint()
+    {
+        var sql = $"""
+                   CREATE TABLE [dbo].[UserTracking]
+                   (
+                   	[Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                   	[Extra] nvarchar(4000) NULL
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
     }
 
     private static Either<ISqlExpression, ParseError> ParseSql(string sql)
