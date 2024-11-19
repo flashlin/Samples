@@ -43,6 +43,7 @@ public class ParseSqlTest
         var sql = $"""
                    CREATE TABLE Persons (
                    id int,
+                   [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
                    LastName varchar(50),
                    Money decimal(10,3),
                    [name] [int] IDENTITY(1,1) NOT NULL,
@@ -65,6 +66,16 @@ public class ParseSqlTest
             Columns =
             [
                 new ColumnDefinition { ColumnName = "id", DataType = "int" },
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    IsPrimaryKey = true,
+                    DataType = "BIGINT",
+                    Identity = new SqlIdentity{ Seed = 1, Increment = 1 },
+                    IsNullable = false,
+                    NotForReplication = false,
+                    Constraints = [],
+                },
                 new ColumnDefinition { ColumnName = "LastName", DataType = "varchar", Size = 50 },
                 new ColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = 10, Scale = 3 },
                 new ColumnDefinition

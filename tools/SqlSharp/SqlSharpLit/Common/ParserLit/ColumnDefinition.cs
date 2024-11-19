@@ -11,6 +11,7 @@ public class ColumnDefinition : ISqlExpression
     public bool IsNullable { get; set; }
     public bool NotForReplication { get; set; }
     public List<ISqlConstraint> Constraints { get; set; } = [];
+    public bool IsPrimaryKey { get; set; }
 
     public string ToSql()
     {
@@ -44,6 +45,11 @@ public class ColumnDefinition : ISqlExpression
         if (NotForReplication)
         {
             sql.Write(" NOT FOR REPLICATION");
+        }
+
+        if (IsPrimaryKey)
+        {
+            sql.Write(" PRIMARY KEY");
         }
         if (Constraints.Count > 0)
         {

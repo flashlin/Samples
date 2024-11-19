@@ -95,7 +95,7 @@ public class SqlParser
                     });
             }
 
-            var columnDefinition = ParseColumnDefinition(item);
+            var columnDefinition = ParseColumnTypeDefinition(item);
             if (columnDefinition.IsRight)
             {
                 return new Either<List<ColumnDefinition>, ParseError>(columnDefinition.RightValue);
@@ -367,6 +367,12 @@ public class SqlParser
     {
         do
         {
+            if(_text.TryMatches("PRIMARY", "KEY"))
+            {
+                column.IsPrimaryKey = true;
+                continue;
+            }
+            
             if(TryParseSqlIdentity(column, out var identityResult))
             {
                 if (identityResult.IsRight)
@@ -426,7 +432,7 @@ public class SqlParser
         return ParseError.Empty;
     }
 
-    private Either<ColumnDefinition, ParseError> ParseColumnDefinition(TextSpan item)
+    private Either<ColumnDefinition, ParseError> ParseColumnTypeDefinition(TextSpan item)
     {
         var column = new ColumnDefinition
         {
