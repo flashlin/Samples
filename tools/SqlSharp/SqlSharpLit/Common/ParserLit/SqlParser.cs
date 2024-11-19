@@ -436,6 +436,7 @@ public class SqlParser
             if (_text.TryMatch(ConstraintKeyword))
             {
                 var constraintName = _text.ReadSqlIdentifier();
+                
                 if (_text.TryMatch("DEFAULT"))
                 {
                     TextSpan defaultValue;

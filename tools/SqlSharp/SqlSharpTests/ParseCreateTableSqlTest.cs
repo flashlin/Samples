@@ -5,7 +5,7 @@ using T1.Standard.DesignPatterns;
 namespace SqlSharpTests;
 
 [TestFixture]
-public class ParseSqlTest
+public class ParseCreateTableSqlTest
 {
     [Test]
     public void AddExtendedProperty()
@@ -38,7 +38,7 @@ public class ParseSqlTest
     }
 
     [Test]
-    public void Test()
+    public void ColumnDefaultValueWithoutConstraint()
     {
         var sql = $"""
                    CREATE TABLE [dbo].[VipBetSetting]
@@ -52,7 +52,7 @@ public class ParseSqlTest
     }
 
     [Test]
-    public void CreateTableWithoutConstraint()
+    public void WithoutConstraint()
     {
         var sql = $"""
                    CREATE TABLE [dbo].[UserTracking]
