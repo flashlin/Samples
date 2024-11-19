@@ -8,6 +8,7 @@ function exclude_file_list {
     $exclude_list = @(
         "Program Files\", "Program Files (x86)\", "ProgramData\", 
         "Windows\", "AppData\Local\", "RECYCLE.BIN\",
+        ".Continue\",
         ".git\", ".idea\", "node_modules\", ".deploy_git\",
         ".nuget\", ".vscode\", ".vs\")
     # 過濾 $input_list 中不包含任何 $exclude_list 中元素的項目
