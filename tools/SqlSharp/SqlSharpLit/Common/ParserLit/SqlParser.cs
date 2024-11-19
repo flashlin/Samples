@@ -84,6 +84,7 @@ public class SqlParser
         var columns = new List<ColumnDefinition>();
         do
         {
+            SkipWhiteSpace();
             if (_text.IsPeekIdentifier(ConstraintKeyword))
             {
                 break;

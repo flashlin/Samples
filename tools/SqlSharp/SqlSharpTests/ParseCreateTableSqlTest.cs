@@ -38,6 +38,21 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void ColumnCommentColumn()
+    {
+        var sql = $"""
+                  create table #tmp1
+                  (              
+                    [id] int NOT NULL,  
+                    -- comment --  
+                    uid int
+                  )               
+                  """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
+    }
+
+    [Test]
     public void LowerCaseCreateTable()
     {
         var sql = $"""
