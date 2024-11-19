@@ -2,8 +2,9 @@ using T1.Standard.IO;
 
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlConstraint
+public class SqlConstraint : ISqlConstraint, ISqlExpression 
 {
+    public SqlType SqlType => SqlType.Constraint;
     public string ConstraintName { get; set; } = string.Empty;
     public string ConstraintType { get; set; } = string.Empty;
     public string Clustered { get; set; } = string.Empty;

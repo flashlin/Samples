@@ -9,7 +9,8 @@ public enum SqlType
     Field,
     IntValue,
     ParameterValue,
-    AddExtendedProperty
+    AddExtendedProperty,
+    Constraint
 }
 
 public interface ISqlExpression

@@ -147,15 +147,18 @@ public class SqlParser
         }
 
         createTableStatement.Columns = rc.LeftValue;
-        
-        var constraint = ParseTableConstraint();
-        if (constraint.IsRight)
+
+        if (Try(ParseTableConstraint, out var tableConstraint))
         {
-            return CreateParseError(constraint.RightValue.Message);
-        }
-        if (constraint is { IsLeft: true, Left: not null })
-        {
-            createTableStatement.Constraints.Add(constraint.Left);
+            if (tableConstraint.IsRight)
+            {
+                return CreateParseError(tableConstraint.RightValue.Message);
+            }
+
+            if (tableConstraint is { IsLeft: true, Left: not null })
+            {
+                createTableStatement.Constraints.Add(tableConstraint.Left);
+            }
         }
 
         if (!_text.TryMatch(")"))
@@ -508,11 +511,11 @@ public class SqlParser
         return true;
     }
 
-    private Either<SqlConstraint, ParseError> ParseTableConstraint()
+    private Either<ISqlExpression, ParseError> ParseTableConstraint()
     {
         if (!_text.TryMatch(ConstraintKeyword))
         {
-            return new Either<SqlConstraint, ParseError>(new ParseError("Expected CONSTRAINT")
+            return new Either<ISqlExpression, ParseError>(new ParseError("Expected CONSTRAINT")
             {
                 Offset = _text.Position
             });
@@ -535,7 +538,7 @@ public class SqlParser
         }
         else
         {
-            return new Either<SqlConstraint, ParseError>(
+            return new Either<ISqlExpression, ParseError>(
                 new ParseError($"Expected PRIMARY KEY or FOREIGN KEY, but got {constraintType}"));
         }
 
@@ -546,7 +549,7 @@ public class SqlParser
 
         if (!_text.TryMatch("("))
         {
-            return new Either<SqlConstraint, ParseError>(new ParseError("Expected (")
+            return new Either<ISqlExpression, ParseError>(new ParseError("Expected (")
             {
                 Offset = _text.Position
             });
@@ -576,7 +579,7 @@ public class SqlParser
 
         if (!_text.TryMatch(")"))
         {
-            return new Either<SqlConstraint, ParseError>(new ParseError("Expected )")
+            return new Either<ISqlExpression, ParseError>(new ParseError("Expected )")
             {
                 Offset = _text.Position
             });
@@ -604,7 +607,7 @@ public class SqlParser
 
             if (!_text.TryMatch(")") )
             {
-                return new Either<SqlConstraint, ParseError>(new ParseError("Expected )")
+                return new Either<ISqlExpression, ParseError>(new ParseError("Expected )")
                 {
                     Offset = _text.Position
                 });
@@ -617,7 +620,7 @@ public class SqlParser
             sqlConstraint.On = _text.ReadSqlIdentifier().Word;
         }
 
-        return new Either<SqlConstraint, ParseError>(sqlConstraint);
+        return new Either<ISqlExpression, ParseError>(sqlConstraint);
     }
 
     private Either<ISqlExpression, ParseError> ParseTableName()
