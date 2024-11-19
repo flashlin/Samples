@@ -338,10 +338,15 @@ public class SqlParser
         result = localResult;
         return success;
     }
-
+    
     private Either<ISqlExpression, ParseError> CreateParseError(string message)
     {
-        return new Either<ISqlExpression, ParseError>(new ParseError(message)
+        return CreateParseError<ISqlExpression>(message);
+    }
+
+    private Either<T, ParseError> CreateParseError<T>(string message)
+    {
+        return new Either<T, ParseError>(new ParseError(message)
         {
             Offset = _text.Position
         });
@@ -362,6 +367,26 @@ public class SqlParser
         _text.Match(expected);
     }
 
+    private Either<TextSpan, ParseError> ParseDefaultValue()
+    {
+        if (!_text.TryMatch("DEFAULT"))
+        {
+            return CreateParseError<TextSpan>("Expected DEFAULT");
+        }
+        
+        TextSpan defaultValue;
+        if (_text.TryMatch("("))
+        {
+            defaultValue = _text.ReadUntilRightParenthesis();
+            _text.Match(")");
+        }
+        else
+        {
+            defaultValue = _text.ReadNumber();
+        }
+        return new Either<TextSpan, ParseError>(defaultValue);
+    }
+
     private ParseError ParseColumnConstraints(ColumnDefinition column)
     {
         do
@@ -380,6 +405,8 @@ public class SqlParser
                 }
                 continue;
             }
+            
+            
             
             if (_text.TryMatch(ConstraintKeyword))
             {
