@@ -38,6 +38,18 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void LowerCaseCreateTable()
+    {
+        var sql = $"""
+                   create table #CustIdList (  
+                    CustID int
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
+    }
+
+    [Test]
     public void ColumnDefaultValueWithoutConstraint()
     {
         var sql = $"""

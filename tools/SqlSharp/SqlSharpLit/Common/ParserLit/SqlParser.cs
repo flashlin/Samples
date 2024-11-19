@@ -127,7 +127,7 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
     {
-        if (!(_text.TryMatchIgnoreCaseKeyword("CREATE") && _text.TryMatchIgnoreCaseKeyword("TABLE")))
+        if (!_text.TryMatchesIgnoreCase("CREATE", "TABLE"))
         {
             return CreateStartParseError(
                 $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekWord().Word}");
