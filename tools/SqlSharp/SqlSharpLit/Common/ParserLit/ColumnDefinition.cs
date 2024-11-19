@@ -2,6 +2,7 @@ namespace SqlSharpLit.Common.ParserLit;
 
 public class ColumnDefinition : ISqlExpression
 {
+    public SqlType SqlType => SqlType.ColumnDefinition;
     public string ColumnName { get; set; } = string.Empty;
     public string DataType { get; set; } = string.Empty;
     public int Size { get; set; }

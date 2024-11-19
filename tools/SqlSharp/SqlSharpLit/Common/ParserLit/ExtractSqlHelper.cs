@@ -24,6 +24,7 @@ public class ExtractSqlHelper
         {
             yield return file;
         }
+
         var subFolders = Directory.GetDirectories(folder);
         foreach (var subFolder in subFolders)
         {
@@ -47,34 +48,46 @@ public class ExtractSqlHelper
                 Sql = sql,
                 DatabaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFile),
                 CreateTables = ExtractAllCreateTableFromText(sql).ToList(),
-                SqlExpressions = sqlExpressions 
+                SqlExpressions = sqlExpressions
             };
         }
     }
-    
+
     public void WriteCreateTablesFromFolder(string folder, string outputFolder)
     {
         var createTablesFile = Path.Combine(outputFolder, "CreateTables.sql");
         using var fileStream = new FileStream(createTablesFile, FileMode.Create);
         var writer = new StreamWriter(fileStream, Encoding.UTF8);
+        var sqlTypes = new[]
+        {
+            SqlType.CreateTable,
+            SqlType.AddExtendedProperty
+        };
         foreach (var sqlFile in GetSqlContentsFromFolder(folder))
         {
-            if(sqlFile.CreateTables.Count == 0)
+            if (sqlFile.SqlExpressions.Count == 0)
             {
                 continue;
             }
+
             writer.WriteLine($"-- {sqlFile.FileName}");
             writer.WriteLine($"-- Database: {sqlFile.DatabaseName}");
-            foreach (var createTable in sqlFile.CreateTables)
-            {
-                writer.WriteLine(createTable);
-                writer.WriteLine("\n\n\n");
-            }
+            // foreach (var createTable in sqlFile.CreateTables)
+            // {
+            //     writer.WriteLine(createTable);
+            //     writer.WriteLine("\n\n\n");
+            // }
 
             foreach (var sqlExpression in sqlFile.SqlExpressions)
             {
+                if (!sqlTypes.Contains(sqlExpression.SqlType))
+                {
+                    continue;
+                }
+
                 writer.WriteLine(sqlExpression.ToSql());
             }
+
             writer.Flush();
         }
     }
@@ -88,6 +101,7 @@ public class ExtractSqlHelper
             {
                 break;
             }
+
             yield return createTableSql;
             text = remainingText;
         } while (true);
@@ -100,14 +114,16 @@ public class ExtractSqlHelper
         {
             return (string.Empty, string.Empty);
         }
+
         var createTableEnd = FindCreateTableEnd(truncatedText, length);
         if (createTableEnd < 0)
         {
             return (string.Empty, string.Empty);
         }
-        var createTableSql = truncatedText.Substring(0, createTableEnd + 1);   
+
+        var createTableSql = truncatedText.Substring(0, createTableEnd + 1);
         var remainingText = truncatedText.Substring(createTableEnd);
-        return (createTableSql, remainingText); 
+        return (createTableSql, remainingText);
     }
 
     private int FindCreateTableEnd(string truncatedText, int startOffset)
@@ -117,25 +133,28 @@ public class ExtractSqlHelper
         {
             return -1;
         }
+
         var offset = openParenthesisIndex + 1;
         var openParenthesisCount = 1;
-        while(offset < truncatedText.Length)
+        while (offset < truncatedText.Length)
         {
             var c = truncatedText[offset];
-            if(c =='(')
+            if (c == '(')
             {
                 openParenthesisCount++;
             }
-            else if(c == ')')
+            else if (c == ')')
             {
                 openParenthesisCount--;
-                if(openParenthesisCount == 0)
+                if (openParenthesisCount == 0)
                 {
                     return offset;
                 }
             }
+
             offset++;
         }
+
         return -1;
     }
 
@@ -153,22 +172,26 @@ public class ExtractSqlHelper
             {
                 return (string.Empty, 0);
             }
+
             return (text.Substring(offset), match.Value.Length);
         }
+
         return (string.Empty, 0);
     }
-    
+
     private static string FindPreviousLineContent(string text, int offset)
     {
-        if( offset == 0)
+        if (offset == 0)
         {
             return string.Empty;
         }
+
         var lastNewLineIndex = text.LastIndexOf('\n', offset - 1);
         if (lastNewLineIndex >= 0)
         {
             return text.Substring(lastNewLineIndex + 1);
         }
+
         return string.Empty;
     }
 
