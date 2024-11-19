@@ -318,24 +318,21 @@ public class SqlParser
         }
     }
 
-    public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out ISqlExpression sqlExpr,
-        out ParseError error)
+    public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out Either<ISqlExpression,ParseError> result)
     {
-        ISqlExpression localSqlExpr = new SqlEmptyExpression();
-        var localError = ParseError.Empty;
+        var localResult = new Either<ISqlExpression, ParseError>(new ParseError("Unknown")); 
         var rc = parseFunc();
         var success = rc.Match(left =>
             {
-                localSqlExpr = left;
+                localResult = new Either<ISqlExpression, ParseError>(left);
                 return true;
             },
             right =>
             {
-                localError = right;
+                localResult = new Either<ISqlExpression, ParseError>(right);
                 return false;
             });
-        sqlExpr = localSqlExpr;
-        error = localError;
+        result = localResult;
         return success;
     }
 
@@ -638,14 +635,14 @@ public class SqlParser
 
     private Either<ISqlExpression, ParseError> ParseValue()
     {
-        if (Try(ParseIntValue, out var number, out _))
+        if (Try(ParseIntValue, out var number))
         {
-            return new Either<ISqlExpression, ParseError>(number);
+            return number;
         }
 
-        if (Try(ParseTableName, out var tableName, out _))
+        if (Try(ParseTableName, out var tableName))
         {
-            return new Either<ISqlExpression, ParseError>(tableName);
+            return tableName;
         }
 
         return CreateParseError("Expected Int or Field");
@@ -717,12 +714,13 @@ public class SqlParser
     private bool TryStart(Func<Either<ISqlExpression, ParseError>> parseFunc,
         out Either<ISqlExpression, ParseError> result)
     {
-        if (Try(parseFunc, out var sqlCreateTableExpr, out var error))
+        if (Try(parseFunc, out var parseResult))
         {
-            result = new Either<ISqlExpression, ParseError>(sqlCreateTableExpr);
+            result = parseResult;
             return true;
         }
 
+        var error = parseResult.RightValue;
         if (!error.IsStart)
         {
             result = new Either<ISqlExpression, ParseError>(error);
