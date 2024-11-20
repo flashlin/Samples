@@ -532,11 +532,17 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(new ParseError("Expected Int"));
     }
 
-    private List<T> ParseParenthesesWithComma<T>(Func<T> parseElemFn)
+    private Either<List<T>, ParseError> ParseParenthesesWithComma<T>(Func<Either<T, ParseError>> parseElemFn)
     {
-        _text.Match("(");
+        if (!_text.TryMatch("("))
+        {
+            return CreateParseError<List<T>>("Expected (");
+        }
         var elements = ParseWithComma(parseElemFn);
-        _text.Match(")");
+        if (_text.TryMatch(")"))
+        {
+            return CreateParseError<List<T>>("Expected )");
+        }
         return elements;
     }
 
@@ -553,12 +559,12 @@ public class SqlParser
             var uniqueColumns = ParseParenthesesWithComma(() =>
             {
                 var uniqueColumn = _text.ReadSqlIdentifier();
-                return uniqueColumn.Word;
+                return ParseResult(uniqueColumn.Word);
             });
-            return new Either<ISqlExpression, ParseError>(new SqlConstraintUnique
+            return ParseResult(uniqueColumns, ISqlExpression (x) => new SqlConstraintUnique
             {
                 ConstraintName = constraintName,
-                Columns = uniqueColumns
+                Columns = x
             });
         }
 
@@ -609,13 +615,13 @@ public class SqlParser
             {
                 indexColumn.Order = "DESC";
             }
-        
+
             indexColumns.Add(indexColumn);
             if (_text.PeekChar() != ',')
             {
                 break;
             }
-        
+
             _text.ReadChar();
         } while (!_text.IsEnd());
 
@@ -668,6 +674,20 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
     }
 
+    private Either<T,ParseError> ParseResult<T>(T result)
+    {
+        return new Either<T, ParseError>(result);
+    }
+    
+    private Either<T2 ,ParseError> ParseResult<T1, T2>(Either<T1,ParseError> result, Func<T1, T2> toResult)
+    {
+        if (result.IsLeft)
+        {
+            return new Either<T2, ParseError>(toResult(result.LeftValue));
+        }
+        return new Either<T2, ParseError>(result.RightValue);
+    }
+
     private Either<ISqlExpression, ParseError> ParseTableName()
     {
         if (_text.Try(_text.ReadIdentifier, out var fieldName))
@@ -696,13 +716,18 @@ public class SqlParser
         return CreateParseError("Expected Int or Field");
     }
 
-    private List<T> ParseWithComma<T>(Func<T> parseElemFn)
+    private Either<List<T>, ParseError> ParseWithComma<T>(Func<Either<T, ParseError>> parseElemFn)
     {
         var elements = new List<T>();
         do
         {
             var elem = parseElemFn();
-            elements.Add(elem);
+            if (elem.IsRight)
+            {
+                return new Either<List<T>, ParseError>(elem.RightValue);
+            }
+
+            elements.Add(elem.LeftValue);
             if (_text.PeekChar() != ',')
             {
                 break;
@@ -711,7 +736,7 @@ public class SqlParser
             _text.ReadChar();
         } while (!_text.IsEnd());
 
-        return elements;
+        return new Either<List<T>, ParseError>(elements);
     }
 
     private Either<SqlWithToggle, ParseError> ParseWithToggle()
