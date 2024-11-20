@@ -544,10 +544,7 @@ public class SqlParser
     {
         if (!_text.TryMatch(ConstraintKeyword))
         {
-            return new Either<ISqlExpression, ParseError>(new ParseError("Expected CONSTRAINT")
-            {
-                Offset = _text.Position
-            });
+            return CreateParseError("Expected CONSTRAINT");
         }
 
         var constraintName = _text.ReadSqlIdentifier().Word;
@@ -564,7 +561,6 @@ public class SqlParser
                 Columns = uniqueColumns
             });
         }
-
 
         var sqlConstraint = new SqlConstraint
         {
