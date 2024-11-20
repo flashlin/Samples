@@ -611,8 +611,10 @@ public class SqlParser
 
         var indexColumnsResult = ParseParenthesesWithComma(() =>
         {
-            var indexColumn = new SqlColumnConstraint();
-            indexColumn.ColumnName = _text.ReadSqlIdentifier().Word;
+            var indexColumn = new SqlColumnConstraint
+            {
+                ColumnName = _text.ReadSqlIdentifier().Word
+            };
             if (TryMatchKeyword("ASC"))
             {
                 indexColumn.Order = "ASC";
