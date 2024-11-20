@@ -601,21 +601,12 @@ public class SqlParser
         if (_text.TryMatchIgnoreCaseKeyword("UNIQUE"))
         {
             _text.Match("(");
-            var uniqueColumns = new List<string>();
-            do
+            var uniqueColumns= ParseWithComma(() =>
             {
                 var uniqueColumn = _text.ReadSqlIdentifier();
-                uniqueColumns.Add(uniqueColumn.Word);
-                if (_text.PeekChar() != ',')
-                {
-                    break;
-                }
-
-                _text.ReadChar();
-            } while (!_text.IsEnd());
-
+                return uniqueColumn.Word;
+            });
             _text.Match(")");
-
             return new Either<ISqlExpression, ParseError>(new SqlConstraintUnique
             {
                 ConstraintName = constraintName,
