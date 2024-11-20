@@ -420,6 +420,28 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void ColumnName1Len()
+    {
+        var sql = $"""
+                   Create table #tb  (        
+                     R float  
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement
+        {
+            TableName = "#tb",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "R",
+                    DataType = "float",
+                }
+            ],
+        });
+    }
+
+    [Test]
     public void UniqueNonClustered()
     {
         var sql = $"""

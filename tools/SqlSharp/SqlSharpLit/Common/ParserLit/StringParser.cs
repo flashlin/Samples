@@ -202,14 +202,15 @@ public class StringParser
                 break;
             }
         }
-        
+
+        var identifyPrev = new[] { "@", "#", "$" };
         var identifier = _text.Substring(offset, _position - offset);
-        if (identifier.Length == 1)
+        if ( identifyPrev.Contains(identifier))
         {
             return new TextSpan
             {
                 Word = string.Empty,
-                Offset = _position,
+                Offset = offset,
                 Length = 0
             };
         }
