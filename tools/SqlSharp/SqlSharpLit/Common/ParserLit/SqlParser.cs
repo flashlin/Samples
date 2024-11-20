@@ -569,8 +569,12 @@ public class SqlParser
         {
             return CreateParseError("Expected CONSTRAINT");
         }
-
+        
         var constraintName = _text.ReadSqlIdentifier().Word;
+        var sqlConstraint = new SqlConstraint
+        {
+            ConstraintName = constraintName
+        };
         if (TryMatchKeyword("UNIQUE"))
         {
             var uniqueColumns = ParseParenthesesWithComma(() =>
@@ -578,17 +582,12 @@ public class SqlParser
                 var uniqueColumn = _text.ReadSqlIdentifier();
                 return ParseResult(uniqueColumn.Word);
             });
-            return ParseResult<ISqlExpression>(new SqlConstraintUnique
+            if (uniqueColumns.IsRight)
             {
-                ConstraintName = constraintName,
-                Columns = uniqueColumns.LeftValue
-            });
+                return RaiseParseError(uniqueColumns.RightValue);
+            }
         }
         
-        var sqlConstraint = new SqlConstraint
-        {
-            ConstraintName = constraintName
-        };
         if (TryMatchesKeyword("PRIMARY", "KEY"))
         {
             sqlConstraint.ConstraintType = "PRIMARY KEY";
@@ -623,6 +622,7 @@ public class SqlParser
             }
             return ParseResult(indexColumn);
         });
+        
         if (indexColumnsResult.IsRight)
         {
             return RaiseParseError(indexColumnsResult.RightValue);
@@ -865,17 +865,5 @@ public class SqlParser
 
         result = new Either<ISqlExpression, ParseError>(error);
         return false;
-    }
-}
-
-public class SqlConstraintUnique : ISqlConstraint
-{
-    public string ConstraintName { get; set; } = string.Empty;
-    public List<string> Columns { get; set; } = [];
-    public SqlType SqlType { get; } = SqlType.ConstraintUnique;
-
-    public string ToSql()
-    {
-        return $"CONSTRAINT {ConstraintName} UNIQUE ({string.Join(", ", Columns)})";
     }
 }

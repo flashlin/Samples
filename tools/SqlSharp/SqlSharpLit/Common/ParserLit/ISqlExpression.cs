@@ -11,7 +11,6 @@ public enum SqlType
     ParameterValue,
     AddExtendedProperty,
     Constraint,
-    ConstraintUnique,
     ConstraintDefault
 }
 
