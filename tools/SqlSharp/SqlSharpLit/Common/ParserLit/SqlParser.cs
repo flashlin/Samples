@@ -25,8 +25,6 @@ public class SqlParser
             else
             {
                 _text.ReadUntil(c => c == '\n');
-                //SkipWhiteSpace();
-                //ReadNonWhiteSpace();
             }
         }
     }
@@ -100,7 +98,7 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
     {
-        if (!_text.TryMatchesIgnoreCase("CREATE", "TABLE"))
+        if (!TryMatchesKeyword("CREATE", "TABLE"))
         {
             return CreateStartParseError(
                 $"Expected CREATE TABLE, but got {_text.PreviousWord().Word} {_text.PeekWord().Word}");
@@ -147,7 +145,7 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> ParseExecSpAddExtendedProperty()
     {
-        if (!_text.TryMatchesIgnoreCase("EXEC", "SP_AddExtendedProperty"))
+        if (!TryMatchesKeyword("EXEC", "SP_AddExtendedProperty"))
         {
             return CreateStartParseError("Expected EXEC SP_AddExtendedProperty");
         }
@@ -223,7 +221,7 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> ParseSelectStatement()
     {
-        if (!_text.TryMatchIgnoreCaseKeyword("SELECT"))
+        if (!TryMatchKeyword("SELECT"))
         {
             return CreateStartParseError(
                 $"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekWord().Word}");
@@ -257,7 +255,7 @@ public class SqlParser
             Columns = columns
         };
 
-        if (_text.TryMatchIgnoreCaseKeyword("FROM"))
+        if (TryMatchKeyword("FROM"))
         {
             var tableName = _text.ReadIdentifier().Word;
             selectStatement.From = new SelectFrom()
@@ -266,7 +264,7 @@ public class SqlParser
             };
         }
 
-        if (_text.TryMatchIgnoreCaseKeyword("WHERE"))
+        if (TryMatchKeyword("WHERE"))
         {
             var leftExpr = ParseValue();
             if (leftExpr.IsRight)
