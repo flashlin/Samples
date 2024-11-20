@@ -60,7 +60,19 @@ public class ParseCreateTableSqlTest
                   ) 
                   """;
         var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "#tmp",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "AuditCount",
+                    DataType = "nvarchar",
+                    Size = "MAX"
+                }
+            ]
+        });
     }
 
     [Test]
@@ -75,7 +87,24 @@ public class ParseCreateTableSqlTest
                   )               
                   """;
         var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "#tmp1",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "int",
+                    IsNullable = false
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "uid",
+                    DataType = "int"
+                }
+            ]
+        });
     }
 
     [Test]
