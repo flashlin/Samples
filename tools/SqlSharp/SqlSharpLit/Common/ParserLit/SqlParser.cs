@@ -540,8 +540,11 @@ public class SqlParser
         {
             return CreateParseError<List<T>>("Expected (");
         }
-
         var elements = ParseWithComma(parseElemFn);
+        if (elements.IsRight)
+        {
+            return RaiseParseError<List<T>>(elements.RightValue);
+        }
         if (!_text.TryMatch(")"))
         {
             return CreateParseError<List<T>>("Expected )");
@@ -731,6 +734,11 @@ public class SqlParser
     private Either<ISqlExpression, ParseError> RaiseParseError(ParseError innerError)
     {
         return new Either<ISqlExpression, ParseError>(innerError);
+    }
+    
+    private Either<T, ParseError> RaiseParseError<T>(ParseError innerError)
+    {
+        return new Either<T, ParseError>(innerError);
     }
 
     private void ReadNonWhiteSpace()
