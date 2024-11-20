@@ -38,6 +38,18 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void DefinitionDataMax()
+    {
+        var sql =$"""
+                  CREATE TABLE #tmp(
+                  	 AuditCount nvarchar(max)
+                  ) 
+                  """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
+    }
+
+    [Test]
     public void ColumnCommentColumn()
     {
         var sql = $"""

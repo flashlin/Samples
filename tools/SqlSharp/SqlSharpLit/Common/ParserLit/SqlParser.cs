@@ -44,8 +44,9 @@ public class SqlParser
             }
             else
             {
-                SkipWhiteSpace();
-                ReadNonWhiteSpace();
+                _text.ReadUntil(c => c == '\n');
+                //SkipWhiteSpace();
+                //ReadNonWhiteSpace();
             }
         }
     }
@@ -76,7 +77,7 @@ public class SqlParser
             return;
         }
 
-        _text.ReadChar();
+        _text.NextChar();
     }
 
     public Either<List<ColumnDefinition>, ParseError> ParseCreateTableColumns()
@@ -165,7 +166,7 @@ public class SqlParser
 
         if (!_text.TryMatch(")"))
         {
-            return CreateParseError("Expected )");
+            return CreateParseError("ParseCreateTableStatement Expected )");
         }
 
         SkipStatementEnd();
