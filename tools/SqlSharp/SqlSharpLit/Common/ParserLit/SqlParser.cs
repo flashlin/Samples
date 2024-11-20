@@ -642,7 +642,7 @@ public class SqlParser
             sqlConstraint.WithToggles = togglesResult.LeftValue;
         }
 
-        if (_text.TryMatch("ON"))
+        if (TryMatchKeyword("ON"))
         {
             sqlConstraint.On = _text.ReadSqlIdentifier().Word;
         }
