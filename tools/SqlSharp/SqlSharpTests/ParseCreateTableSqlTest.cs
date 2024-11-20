@@ -251,7 +251,25 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "[Banner]",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "[BannerType]",
+                    DataType = "INT",
+                    Constraints = [
+                        new SqlConstraintDefault
+                        {
+                            ConstraintName = "DEFAULT",
+                            Value = "NULL"
+                        }
+                    ]
+                }
+            ]
+        });
     }
 
     [Test]
