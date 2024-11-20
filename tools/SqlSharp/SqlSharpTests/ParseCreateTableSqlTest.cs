@@ -38,78 +38,6 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
-    public void ConstraintUnique()
-    {
-        var sql = $"""
-                   CREATE TABLE $tmp
-                   (
-                       [IsUat] BIT NOT NULL,
-                       CONSTRAINT UC_1 UNIQUE (KeyName,Lang)
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
-        {
-            TableName = "$tmp",
-            Columns =
-            [
-                new ColumnDefinition
-                {
-                    ColumnName = "[IsUat]",
-                    DataType = "BIT",
-                    IsNullable = false
-                }
-            ],
-            Constraints =
-            [
-                new SqlConstraint
-                {
-                    ConstraintName = "UC_1",
-                    ConstraintType = "UNIQUE",
-                    Clustered = "",
-                    Columns =
-                    [
-                        new SqlConstraintColumn
-                        {
-                            ColumnName = "KeyName",
-                            Order = ""
-                        },
-                        new SqlConstraintColumn
-                        {
-                            ColumnName = "Lang",
-                            Order = ""
-                        }
-                    ]
-                }
-            ]
-        });
-    }
-
-    [Test]
-    public void DefinitionDataMax()
-    {
-        var sql =$"""
-                  CREATE TABLE #tmp(
-                  	 AuditCount nvarchar(max)
-                  ) 
-                  """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
-        {
-            TableName = "#tmp",
-            Columns =
-            [
-                new ColumnDefinition
-                {
-                    ColumnName = "AuditCount",
-                    DataType = "nvarchar",
-                    Size = "MAX"
-                }
-            ]
-        });
-    }
-
-    [Test]
     public void ColumnCommentColumn()
     {
         var sql = $"""
@@ -135,29 +63,6 @@ public class ParseCreateTableSqlTest
                 new ColumnDefinition
                 {
                     ColumnName = "uid",
-                    DataType = "int"
-                }
-            ]
-        });
-    }
-
-    [Test]
-    public void LowerCaseCreateTable()
-    {
-        var sql = $"""
-                   create table #CustIdList (  
-                    CustID int
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
-        {
-            TableName = "#CustIdList",
-            Columns =
-            [
-                new ColumnDefinition
-                {
-                    ColumnName = "CustID",
                     DataType = "int"
                 }
             ]
@@ -198,6 +103,76 @@ public class ParseCreateTableSqlTest
                         {
                             ConstraintName = "DEFAULT",
                             Value = "GetDate()"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void ColumnName1Len()
+    {
+        var sql = $"""
+                   Create table #tb  (        
+                     R float  
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement
+        {
+            TableName = "#tb",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "R",
+                    DataType = "float",
+                }
+            ],
+        });
+    }
+
+    [Test]
+    public void ConstraintUnique()
+    {
+        var sql = $"""
+                   CREATE TABLE $tmp
+                   (
+                       [IsUat] BIT NOT NULL,
+                       CONSTRAINT UC_1 UNIQUE (KeyName,Lang)
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "$tmp",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "[IsUat]",
+                    DataType = "BIT",
+                    IsNullable = false
+                }
+            ],
+            Constraints =
+            [
+                new SqlConstraint
+                {
+                    ConstraintName = "UC_1",
+                    ConstraintType = "UNIQUE",
+                    Clustered = "",
+                    Columns =
+                    [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "KeyName",
+                            Order = ""
+                        },
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "Lang",
+                            Order = ""
                         }
                     ]
                 }
@@ -374,6 +349,105 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void DefinitionDataMax()
+    {
+        var sql =$"""
+                  CREATE TABLE #tmp(
+                  	 AuditCount nvarchar(max)
+                  ) 
+                  """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "#tmp",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "AuditCount",
+                    DataType = "nvarchar",
+                    Size = "MAX"
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void LowerCaseCreateTable()
+    {
+        var sql = $"""
+                   create table #CustIdList (  
+                    CustID int
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "#CustIdList",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "CustID",
+                    DataType = "int"
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void MultipleTableConstraints()
+    {
+        var sql = $"""
+                   CREATE TABLE #tb1 (
+                       [id] INT,
+                       CONSTRAINT [PK_1] PRIMARY KEY CLUSTERED ([id] ASC),
+                       CONSTRAINT [UQ_1] UNIQUE NONCLUSTERED ([name] ASC)
+                   );
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement
+        {
+            TableName = "#tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "INT",
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "[PK_1]",
+                    ConstraintType = "PRIMARY KEY",
+                    Clustered = "CLUSTERED",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[id]",
+                            Order = "ASC"
+                        }
+                    ],
+                },
+                new SqlConstraint
+                {
+                    ConstraintName = "[UQ_1]",
+                    ConstraintType = "UNIQUE",
+                    Clustered = "NONCLUSTERED",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[name]",
+                            Order = "ASC"
+                        }
+                    ],
+                }
+            ] 
+        });
+    }
+
+    [Test]
     public void TableConstraintWithoutOn()
     {
         var sql = $"""
@@ -465,80 +539,6 @@ public class ParseCreateTableSqlTest
                     On = "[PRIMARY]"
                 }
             ]
-        });
-    }
-
-    [Test]
-    public void MultipleTableConstraints()
-    {
-        var sql = $"""
-                   CREATE TABLE #tb1 (
-                       [id] INT,
-                       CONSTRAINT [PK_1] PRIMARY KEY CLUSTERED ([id] ASC),
-                       CONSTRAINT [UQ_1] UNIQUE NONCLUSTERED ([name] ASC)
-                   );
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
-        {
-            TableName = "#tb1",
-            Columns = [
-                new ColumnDefinition
-                {
-                    ColumnName = "[id]",
-                    DataType = "INT",
-                }
-            ],
-            Constraints = [
-                new SqlConstraint
-                {
-                    ConstraintName = "[PK_1]",
-                    ConstraintType = "PRIMARY KEY",
-                    Clustered = "CLUSTERED",
-                    Columns = [
-                        new SqlConstraintColumn
-                        {
-                            ColumnName = "[id]",
-                            Order = "ASC"
-                        }
-                    ],
-                },
-                new SqlConstraint
-                {
-                    ConstraintName = "[UQ_1]",
-                    ConstraintType = "UNIQUE",
-                    Clustered = "NONCLUSTERED",
-                    Columns = [
-                        new SqlConstraintColumn
-                        {
-                            ColumnName = "[name]",
-                            Order = "ASC"
-                        }
-                    ],
-                }
-            ] 
-        });
-    }
-
-    [Test]
-    public void ColumnName1Len()
-    {
-        var sql = $"""
-                   Create table #tb  (        
-                     R float  
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
-        {
-            TableName = "#tb",
-            Columns = [
-                new ColumnDefinition
-                {
-                    ColumnName = "R",
-                    DataType = "float",
-                }
-            ],
         });
     }
 

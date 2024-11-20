@@ -6,12 +6,13 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
-    private readonly StringParser _text;
 
     private static string[] SqlKeywords =
     [
         "CONSTRAINT", "PRIMARY", "KEY", "UNIQUE"
     ];
+
+    private readonly StringParser _text;
 
     public SqlParser(string text)
     {
