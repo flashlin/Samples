@@ -241,13 +241,12 @@ public class StringParser
         var word = "";
         while (!IsEnd())
         {
-            ch = ReadChar();
+            ch = NextChar();
             if (!char.IsDigit(ch))
             {
                 _position--;
                 break;
             }
-
             word += ch;
         }
 
@@ -321,7 +320,7 @@ public class StringParser
         ReadChar();
         while (!IsEnd())
         {
-            var c = ReadChar();
+            var c = NextChar();
             identifier += c;
             if (c == closeChar)
             {
