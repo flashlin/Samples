@@ -112,7 +112,34 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "[dbo].[VipBetSetting]",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "INT",
+                    IsNullable = false,
+                    Identity = new SqlIdentity{ Seed = 1, Increment = 1 },
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[CreatedOn]",
+                    DataType = "DATETIME",
+                    IsNullable = false,
+                    Constraints =
+                    [
+                        new SqlConstraintDefault
+                        {
+                            ConstraintName = "DEFAULT",
+                            Value = "GetDate()"
+                        }
+                    ]
+                }
+            ]
+        });
     }
 
     [Test]
