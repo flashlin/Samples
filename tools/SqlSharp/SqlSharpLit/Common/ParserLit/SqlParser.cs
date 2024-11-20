@@ -599,7 +599,7 @@ public class SqlParser
             return CreateParseError($"Expected PRIMARY KEY or FOREIGN KEY, but got {_text.PeekWord().Word}");
         }
         
-        if (_text.TryMatch("CLUSTERED"))
+        if (TryMatchKeyword("CLUSTERED"))
         {
             sqlConstraint.Clustered = "CLUSTERED";
         }
@@ -617,11 +617,11 @@ public class SqlParser
         {
             var indexColumn = new SqlColumnConstraint();
             indexColumn.ColumnName = _text.ReadSqlIdentifier().Word;
-            if (_text.TryMatch("ASC"))
+            if (TryMatchKeyword("ASC"))
             {
                 indexColumn.Order = "ASC";
             }
-            else if (_text.TryMatch("DESC"))
+            else if (TryMatchKeyword("DESC"))
             {
                 indexColumn.Order = "DESC";
             }
