@@ -48,7 +48,41 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "$tmp",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "[IsUat]",
+                    DataType = "BIT",
+                    IsNullable = false
+                }
+            ],
+            Constraints =
+            [
+                new SqlConstraint
+                {
+                    ConstraintName = "UC_1",
+                    ConstraintType = "UNIQUE",
+                    Clustered = "",
+                    Columns =
+                    [
+                        new SqlColumnConstraint
+                        {
+                            ColumnName = "KeyName",
+                            Order = ""
+                        },
+                        new SqlColumnConstraint
+                        {
+                            ColumnName = "Lang",
+                            Order = ""
+                        }
+                    ]
+                }
+            ]
+        });
     }
 
     [Test]
