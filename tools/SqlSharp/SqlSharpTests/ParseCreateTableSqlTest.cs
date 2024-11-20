@@ -330,6 +330,52 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void UniqueNonClustered()
+    {
+        var sql = $"""
+                   CREATE TABLE #tmp
+                   (
+                       [id] NVARCHAR (50) NULL,
+                       CONSTRAINT [UQ_1] UNIQUE NONCLUSTERED ([ID] ASC, [Project] ASC)
+                   );
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement
+        {
+            TableName = "#tmp",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "NVARCHAR",
+                    Size = "50",
+                    IsNullable = true
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "[UQ_1]",
+                    ConstraintType = "UNIQUE",
+                    Clustered = "NONCLUSTERED",
+                    Columns = [
+                        new SqlColumnConstraint
+                        {
+                            ColumnName = "[ID]",
+                            Order = "ASC"
+                        },
+                        new SqlColumnConstraint
+                        {
+                            ColumnName = "[Project]",
+                            Order = "ASC"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void WithoutConstraint()
     {
         var sql = $"""
