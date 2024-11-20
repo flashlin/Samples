@@ -613,8 +613,9 @@ public class SqlParser
 
                 _text.ReadChar();
             } while (!_text.IsEnd());
+
             _text.Match(")");
-            
+
             return new Either<ISqlExpression, ParseError>(new SqlConstraintUnique
             {
                 ConstraintName = constraintName,
@@ -727,6 +728,22 @@ public class SqlParser
         }
 
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
+    }
+
+    private List<T> ParseWithComma<T>(Func<T> parseElemFn)
+    {
+        var elements = new List<T>();
+        do
+        {
+            var elem = parseElemFn();
+            elements.Add(elem);
+            if (_text.PeekChar() != ',')
+            {
+                break;
+            }
+            _text.ReadChar();
+        } while (!_text.IsEnd());
+        return elements;
     }
 
     private Either<SqlWithToggle, ParseError> ParseWithToggle()
