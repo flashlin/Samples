@@ -580,10 +580,10 @@ public class SqlParser
                 var uniqueColumn = _text.ReadSqlIdentifier();
                 return ParseResult(uniqueColumn.Word);
             });
-            return ParseResult(uniqueColumns, ISqlExpression (x) => new SqlConstraintUnique
+            return ParseResult<ISqlExpression>(new SqlConstraintUnique
             {
                 ConstraintName = constraintName,
-                Columns = x
+                Columns = uniqueColumns.LeftValue
             });
         }
         
