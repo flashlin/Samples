@@ -87,7 +87,18 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "#CustIdList",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "CustID",
+                    DataType = "int"
+                }
+            ]
+        });
     }
 
     [Test]
