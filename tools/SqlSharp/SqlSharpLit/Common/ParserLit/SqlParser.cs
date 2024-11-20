@@ -581,28 +581,24 @@ public class SqlParser
                 Columns = x
             });
         }
-
+        
         var sqlConstraint = new SqlConstraint
         {
             ConstraintName = constraintName
         };
-        var constraintType = _text.ReadIdentifier().Word;
-        if (constraintType.ToUpper() == "PRIMARY")
+        if (TryMatchesKeyword("PRIMARY", "KEY"))
         {
             sqlConstraint.ConstraintType = "PRIMARY KEY";
-            _text.Match("KEY");
         }
-        else if (constraintType.ToUpper() == "FOREIGN")
+        else if(TryMatchesKeyword("FOREIGN", "KEY"))
         {
             sqlConstraint.ConstraintType = "FOREIGN KEY";
-            _text.Match("KEY");
         }
         else
         {
-            return new Either<ISqlExpression, ParseError>(
-                new ParseError($"Expected PRIMARY KEY or FOREIGN KEY, but got {constraintType}"));
+            return CreateParseError($"Expected PRIMARY KEY or FOREIGN KEY, but got {_text.PeekWord().Word}");
         }
-
+        
         if (_text.TryMatch("CLUSTERED"))
         {
             sqlConstraint.Clustered = "CLUSTERED";
@@ -804,6 +800,12 @@ public class SqlParser
     {
         SkipWhiteSpace();
         return _text.TryMatchIgnoreCaseKeyword(expected);
+    }
+    
+    private bool TryMatchesKeyword(params string[] keywords)
+    {
+        SkipWhiteSpace();
+        return _text.TryMatchesIgnoreCase(keywords);
     }
 
     private bool TryMatchParameterAssignValue(string parameterName, out Either<SqlParameterValue, ParseError> result)
