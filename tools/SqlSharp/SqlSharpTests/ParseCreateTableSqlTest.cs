@@ -420,6 +420,55 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void TableConstraintPrimaryKeyWithOnPrimary()
+    {
+        var sql = $"""
+                   CREATE TABLE #tb1(
+                   	[Id] int,
+                   PRIMARY KEY CLUSTERED 
+                   (
+                   	[Id] ASC
+                   )WITH (PAD_INDEX = OFF) ON [PRIMARY]
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement
+        {
+            TableName = "#tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "int",
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "DEFAULT",
+                    ConstraintType = "PRIMARY KEY",
+                    Clustered = "CLUSTERED",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[Id]",
+                            Order = "ASC" 
+                        }
+                    ],
+                    WithToggles = [
+                        new SqlWithToggle
+                        {
+                            ToggleName = "PAD_INDEX",
+                            Value = "OFF"
+                        }
+                    ],
+                    On = "[PRIMARY]"
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void MultipleTableConstraints()
     {
         var sql = $"""
