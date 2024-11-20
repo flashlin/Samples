@@ -125,11 +125,6 @@ public class SqlParser
 
         if (Try(ParseTableConstraint, out var tableConstraint))
         {
-            if (tableConstraint.IsRight)
-            {
-                return CreateParseError(tableConstraint.RightValue.Message);
-            }
-
             createTableStatement.Constraints.Add(tableConstraint.LeftValue);
         }
 
@@ -529,7 +524,7 @@ public class SqlParser
 
         return new Either<ISqlExpression, ParseError>(new ParseError("Expected Int"));
     }
-
+    
     private Either<List<T>, ParseError> ParseParenthesesWithComma<T>(Func<Either<T, ParseError>> parseElemFn)
     {
         if (!_text.TryMatch("("))
@@ -542,7 +537,6 @@ public class SqlParser
         {
             return CreateParseError<List<T>>("Expected )");
         }
-
         return elements;
     }
 
@@ -676,7 +670,7 @@ public class SqlParser
         return CreateParseError("Expected Int or Field");
     }
 
-    private Either<List<T>, ParseError> ParseWithComma<T>(Func<Either<T, ParseError>> parseElemFn)
+    private Either<List<T>, ParseError> ParseWithComma<T>(Func<Either<T?, ParseError>> parseElemFn)
     {
         var elements = new List<T>();
         do
@@ -686,13 +680,15 @@ public class SqlParser
             {
                 return new Either<List<T>, ParseError>(elem.RightValue);
             }
-
-            elements.Add(elem.LeftValue);
+            if (elem.Left == null)
+            {
+                break;
+            }
+            elements.Add(elem.Left);
             if (_text.PeekChar() != ',')
             {
                 break;
             }
-
             _text.ReadChar();
         } while (!_text.IsEnd());
 

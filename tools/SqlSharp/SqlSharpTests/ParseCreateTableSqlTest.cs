@@ -420,6 +420,58 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void MultipleTableConstraints()
+    {
+        var sql = $"""
+                   CREATE TABLE #tb1 (
+                       [id] INT
+                       CONSTRAINT [PK_1] PRIMARY KEY CLUSTERED ([id] ASC),
+                       CONSTRAINT [UQ_1] UNIQUE NONCLUSTERED ([name] ASC)
+                   );
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement
+        {
+            TableName = "#tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "INT",
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "[PK_1]",
+                    ConstraintType = "PRIMARY KEY",
+                    Clustered = "CLUSTERED",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[id]",
+                            Order = "ASC"
+                        }
+                    ],
+                },
+                new SqlConstraint
+                {
+                    ConstraintName = "[UQ_1]",
+                    ConstraintType = "UNIQUE",
+                    Clustered = "NONCLUSTERED",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[name]",
+                            Order = "ASC"
+                        }
+                    ],
+                }
+            ] 
+        });
+    }
+
+    [Test]
     public void ColumnName1Len()
     {
         var sql = $"""
