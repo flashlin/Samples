@@ -38,6 +38,20 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void ConstraintUnique()
+    {
+        var sql = $"""
+                   CREATE TABLE $tmp
+                   (
+                       [IsUat] BIT NOT NULL,
+                       CONSTRAINT UC_1 UNIQUE (KeyName,Lang)
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.Right.Should().Be(null);
+    }
+
+    [Test]
     public void DefinitionDataMax()
     {
         var sql =$"""

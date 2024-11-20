@@ -597,9 +597,35 @@ public class SqlParser
             });
         }
 
+        var constraintName = _text.ReadSqlIdentifier().Word;
+        if (_text.TryMatchIgnoreCaseKeyword("UNIQUE"))
+        {
+            _text.Match("(");
+            var uniqueColumns = new List<string>();
+            do
+            {
+                var uniqueColumn = _text.ReadSqlIdentifier();
+                uniqueColumns.Add(uniqueColumn.Word);
+                if (_text.PeekChar() != ',')
+                {
+                    break;
+                }
+
+                _text.ReadChar();
+            } while (!_text.IsEnd());
+            _text.Match(")");
+            
+            return new Either<ISqlExpression, ParseError>(new SqlConstraintUnique
+            {
+                ConstraintName = constraintName,
+                Columns = uniqueColumns
+            });
+        }
+
+
         var sqlConstraint = new SqlConstraint
         {
-            ConstraintName = _text.ReadSqlIdentifier().Word
+            ConstraintName = constraintName
         };
         var constraintType = _text.ReadIdentifier().Word;
         if (constraintType.ToUpper() == "PRIMARY")
@@ -830,5 +856,17 @@ public class SqlParser
 
         result = new Either<ISqlExpression, ParseError>(error);
         return false;
+    }
+}
+
+public class SqlConstraintUnique : ISqlConstraint
+{
+    public SqlType SqlType { get; } = SqlType.ConstraintUnique;
+    public string ConstraintName { get; set; } = string.Empty;
+    public List<string> Columns { get; set; } = [];
+
+    public string ToSql()
+    {
+        return $"CONSTRAINT {ConstraintName} UNIQUE ({string.Join(", ", Columns)})";
     }
 }
