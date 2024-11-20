@@ -319,6 +319,11 @@ public class SqlParser
         result = localResult;
         return success;
     }
+    
+    private Either<ISqlExpression, ParseError> RaiseParseError(ParseError innerError)
+    {
+        return new Either<ISqlExpression, ParseError>(innerError);
+    }
 
     private Either<ISqlExpression, ParseError> CreateParseError(string message)
     {
@@ -539,7 +544,7 @@ public class SqlParser
             return CreateParseError<List<T>>("Expected (");
         }
         var elements = ParseWithComma(parseElemFn);
-        if (_text.TryMatch(")"))
+        if (!_text.TryMatch(")"))
         {
             return CreateParseError<List<T>>("Expected )");
         }
@@ -604,16 +609,7 @@ public class SqlParser
             sqlConstraint.Clustered = "CLUSTERED";
         }
 
-        if (!_text.TryMatch("("))
-        {
-            return new Either<ISqlExpression, ParseError>(new ParseError("Expected (")
-            {
-                Offset = _text.Position
-            });
-        }
-
-        var indexColumns = new List<SqlColumnConstraint>();
-        do
+        var indexColumnsResult = ParseParenthesesWithComma(() =>
         {
             var indexColumn = new SqlColumnConstraint();
             indexColumn.ColumnName = _text.ReadSqlIdentifier().Word;
@@ -625,24 +621,14 @@ public class SqlParser
             {
                 indexColumn.Order = "DESC";
             }
-
-            indexColumns.Add(indexColumn);
-            if (_text.PeekChar() != ',')
-            {
-                break;
-            }
-
-            _text.ReadChar();
-        } while (!_text.IsEnd());
-
-        if (!_text.TryMatch(")"))
+            return ParseResult(indexColumn);
+        });
+        if (indexColumnsResult.IsRight)
         {
-            return new Either<ISqlExpression, ParseError>(new ParseError("Expected )")
-            {
-                Offset = _text.Position
-            });
+            return RaiseParseError(indexColumnsResult.RightValue);
         }
 
+        var indexColumns = indexColumnsResult.LeftValue;
         sqlConstraint.Columns = indexColumns;
         if (_text.TryMatch("WITH"))
         {
