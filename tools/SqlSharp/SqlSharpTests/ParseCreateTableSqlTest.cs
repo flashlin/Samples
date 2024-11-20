@@ -448,6 +448,52 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void TableConstraintUniqueNonClustered()
+    {
+        var sql = $"""
+                   CREATE TABLE #tmp
+                   (
+                       [id] NVARCHAR (50) NULL,
+                       CONSTRAINT [UQ_1] UNIQUE NONCLUSTERED ([ID] ASC, [Project] ASC)
+                   );
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement
+        {
+            TableName = "#tmp",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "NVARCHAR",
+                    Size = "50",
+                    IsNullable = true
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "[UQ_1]",
+                    ConstraintType = "UNIQUE",
+                    Clustered = "NONCLUSTERED",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[ID]",
+                            Order = "ASC"
+                        },
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[Project]",
+                            Order = "ASC"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void TableConstraintWithoutOn()
     {
         var sql = $"""
@@ -537,52 +583,6 @@ public class ParseCreateTableSqlTest
                         }
                     ],
                     On = "[PRIMARY]"
-                }
-            ]
-        });
-    }
-
-    [Test]
-    public void TableConstraintUniqueNonClustered()
-    {
-        var sql = $"""
-                   CREATE TABLE #tmp
-                   (
-                       [id] NVARCHAR (50) NULL,
-                       CONSTRAINT [UQ_1] UNIQUE NONCLUSTERED ([ID] ASC, [Project] ASC)
-                   );
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
-        {
-            TableName = "#tmp",
-            Columns = [
-                new ColumnDefinition
-                {
-                    ColumnName = "[id]",
-                    DataType = "NVARCHAR",
-                    Size = "50",
-                    IsNullable = true
-                }
-            ],
-            Constraints = [
-                new SqlConstraint
-                {
-                    ConstraintName = "[UQ_1]",
-                    ConstraintType = "UNIQUE",
-                    Clustered = "NONCLUSTERED",
-                    Columns = [
-                        new SqlConstraintColumn
-                        {
-                            ColumnName = "[ID]",
-                            Order = "ASC"
-                        },
-                        new SqlConstraintColumn
-                        {
-                            ColumnName = "[Project]",
-                            Order = "ASC"
-                        }
-                    ]
                 }
             ]
         });
