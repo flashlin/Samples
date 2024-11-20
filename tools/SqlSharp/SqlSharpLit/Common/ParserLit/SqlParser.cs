@@ -609,13 +609,13 @@ public class SqlParser
             {
                 indexColumn.Order = "DESC";
             }
-
+        
             indexColumns.Add(indexColumn);
             if (_text.PeekChar() != ',')
             {
                 break;
             }
-
+        
             _text.ReadChar();
         } while (!_text.IsEnd());
 
