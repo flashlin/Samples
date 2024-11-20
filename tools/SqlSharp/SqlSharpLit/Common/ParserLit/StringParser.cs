@@ -38,6 +38,18 @@ public class StringParser
     {
         return PeekIdentifier(word).Length != 0;
     }
+    
+    public bool IsPeekIdentifiers(params string[] words)
+    {
+        foreach (var word in words)
+        {
+            if (IsPeekIdentifier(word))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public bool IsWordChar(char c)
     {

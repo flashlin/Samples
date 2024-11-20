@@ -420,7 +420,7 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
-    public void TableConstraintPrimaryKeyWithOnPrimary()
+    public void TablePrimaryKeyWithOnPrimary()
     {
         var sql = $"""
                    CREATE TABLE #tb1(

@@ -8,6 +8,11 @@ public class SqlParser
     private const string ConstraintKeyword = "CONSTRAINT";
     private readonly StringParser _text;
 
+    private static string[] SqlKeywords =
+    [
+        "CONSTRAINT", "PRIMARY", "KEY", "UNIQUE"
+    ];
+
     public SqlParser(string text)
     {
         _text = new StringParser(text);
@@ -55,7 +60,7 @@ public class SqlParser
         do
         {
             SkipWhiteSpace();
-            if (_text.IsPeekIdentifier(ConstraintKeyword))
+            if (_text.IsPeekIdentifiers(SqlKeywords))
             {
                 break;
             }
@@ -123,19 +128,15 @@ public class SqlParser
 
         createTableStatement.Columns = rc.LeftValue;
 
-        var tableConstraints = ParseWithComma(() =>
+        if (_text.PeekChar() != ')')
         {
-            if (!TryPeekKeyword(ConstraintKeyword))
+            var tableConstraints = ParseWithComma(ParseTableConstraint);
+            if (tableConstraints.IsRight)
             {
-                return RaiseParseError(ParseError.Empty);
+                return RaiseParseError(tableConstraints.RightValue);
             }
-            return ParseTableConstraint();
-        });
-        if (tableConstraints.IsRight)
-        {
-            return RaiseParseError(tableConstraints.RightValue);
+            createTableStatement.Constraints = tableConstraints.LeftValue;
         }
-        createTableStatement.Constraints = tableConstraints.LeftValue;
 
         if (!_text.TryMatch(")"))
         {
@@ -540,15 +541,18 @@ public class SqlParser
         {
             return CreateParseError<List<T>>("Expected (");
         }
+
         var elements = ParseWithComma(parseElemFn);
         if (elements.IsRight)
         {
             return RaiseParseError<List<T>>(elements.RightValue);
         }
+
         if (!_text.TryMatch(")"))
         {
             return CreateParseError<List<T>>("Expected )");
         }
+
         return elements;
     }
 
@@ -569,12 +573,16 @@ public class SqlParser
 
     private Either<ISqlExpression, ParseError> ParseTableConstraint()
     {
-        if (!TryMatchKeyword(ConstraintKeyword))
+        // if (!TryMatchKeyword(ConstraintKeyword))
+        // {
+        //     return CreateParseError("Expected CONSTRAINT");
+        // }
+        var constraintName = "DEFAULT";
+        if (TryMatchKeyword(ConstraintKeyword))
         {
-            return CreateParseError("Expected CONSTRAINT");
+            constraintName = _text.ReadSqlIdentifier().Word;
         }
 
-        var constraintName = _text.ReadSqlIdentifier().Word;
         var sqlConstraint = new SqlConstraint
         {
             ConstraintName = constraintName
@@ -598,10 +606,12 @@ public class SqlParser
                 if (TryMatchKeyword("ASC"))
                 {
                     order = "ASC";
-                } else if (TryMatchKeyword("DESC"))
+                }
+                else if (TryMatchKeyword("DESC"))
                 {
                     order = "DESC";
                 }
+
                 return ParseResult(new SqlConstraintColumn
                 {
                     ColumnName = columnName.Word,
@@ -643,6 +653,7 @@ public class SqlParser
             {
                 return RaiseParseError(togglesResult.RightValue);
             }
+
             sqlConstraint.WithToggles = togglesResult.LeftValue;
         }
 
@@ -694,13 +705,16 @@ public class SqlParser
                 {
                     break;
                 }
+
                 return new Either<List<T>, ParseError>(elem.RightValue);
             }
+
             elements.Add(elem.LeftValue);
             if (_text.PeekChar() != ',')
             {
                 break;
             }
+
             _text.ReadChar();
         } while (!_text.IsEnd());
 
