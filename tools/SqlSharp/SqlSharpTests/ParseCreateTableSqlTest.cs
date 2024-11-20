@@ -69,12 +69,12 @@ public class ParseCreateTableSqlTest
                     Clustered = "",
                     Columns =
                     [
-                        new SqlColumnConstraint
+                        new SqlConstraintColumn
                         {
                             ColumnName = "KeyName",
                             Order = ""
                         },
-                        new SqlColumnConstraint
+                        new SqlConstraintColumn
                         {
                             ColumnName = "Lang",
                             Order = ""
@@ -302,7 +302,7 @@ public class ParseCreateTableSqlTest
                     Clustered = "CLUSTERED",
                     Columns =
                     [
-                        new SqlColumnConstraint
+                        new SqlConstraintColumn
                         {
                             ColumnName = "[MatchResultID]",
                             Order = "ASC"
@@ -401,7 +401,7 @@ public class ParseCreateTableSqlTest
                     ConstraintType = "PRIMARY KEY",
                     Clustered = "CLUSTERED",
                     Columns = [
-                        new SqlColumnConstraint
+                        new SqlConstraintColumn
                         {
                             ColumnName = "[custid]",
                             Order = "ASC"
@@ -449,12 +449,12 @@ public class ParseCreateTableSqlTest
                     ConstraintType = "UNIQUE",
                     Clustered = "NONCLUSTERED",
                     Columns = [
-                        new SqlColumnConstraint
+                        new SqlConstraintColumn
                         {
                             ColumnName = "[ID]",
                             Order = "ASC"
                         },
-                        new SqlColumnConstraint
+                        new SqlConstraintColumn
                         {
                             ColumnName = "[Project]",
                             Order = "ASC"

@@ -339,7 +339,7 @@ public class StringParser
     public TextSpan ReadSqlDoubleComment()
     {
         var startPosition = _position;
-        if (Try(ReadSymbol, out var openSymbol))
+        if (Try(ReadSymbols, out var openSymbol))
         {
             if (openSymbol.Word == "/*")
             {
@@ -399,7 +399,28 @@ public class StringParser
         };
     }
 
-    public TextSpan ReadSymbol()
+    public bool PeekMatchSymbol(string symbol)
+    {
+        var tempPosition = _position;
+        var isSymbol = ReadString(symbol.Length).Word == symbol;
+        _position = tempPosition;
+        return isSymbol;
+    }
+
+    public TextSpan ReadString(int length)
+    {
+        length = Math.Min(length, _text.Length - _position);
+        var span = new TextSpan
+        {
+            Word = _text.Substring(_position, length),
+            Offset = _position,
+            Length = length
+        };
+        _position += length;
+        return span;
+    }
+
+    public TextSpan ReadSymbols()
     {
         SkipWhitespace();
         var offset = _position;
@@ -417,7 +438,7 @@ public class StringParser
         var symbol = "";
         while (!IsEnd())
         {
-            var c = ReadChar();
+            var c = NextChar();
             if (IsWordChar(c) || char.IsWhiteSpace(c))
             {
                 _position--;
@@ -515,7 +536,7 @@ public class StringParser
     public bool SkipSqlDoubleComment()
     {
         var startPosition = _position;
-        if (Try(ReadSymbol, out var openSymbol))
+        if (Try(ReadSymbols, out var openSymbol))
         {
             if (openSymbol.Word == "/*")
             {
@@ -532,7 +553,7 @@ public class StringParser
     public bool SkipSqlSingleComment()
     {
         var startPosition = _position;
-        if (Try(ReadSymbol, out var openSymbol))
+        if (Try(ReadSymbols, out var openSymbol))
         {
             if (openSymbol.Word == "--")
             {

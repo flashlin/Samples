@@ -1,6 +1,6 @@
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlColumnConstraint
+public class SqlConstraintColumn
 {
     public string ColumnName { get; set; } = string.Empty;
     public string Order { get; set; } = string.Empty;

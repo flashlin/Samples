@@ -272,7 +272,7 @@ public class SqlParser
                 return CreateParseError(leftExpr.RightValue.Message);
             }
 
-            var operation = _text.ReadSymbol().Word;
+            var operation = _text.ReadSymbols().Word;
             var rightExpr = ParseValue();
             if (rightExpr.IsRight)
             {
@@ -317,7 +317,7 @@ public class SqlParser
         result = localResult;
         return success;
     }
-    
+
     private Either<ISqlExpression, ParseError> RaiseParseError(ParseError innerError)
     {
         return new Either<ISqlExpression, ParseError>(innerError);
@@ -541,25 +541,28 @@ public class SqlParser
         {
             return CreateParseError<List<T>>("Expected (");
         }
+
         var elements = ParseWithComma(parseElemFn);
         if (!_text.TryMatch(")"))
         {
             return CreateParseError<List<T>>("Expected )");
         }
+
         return elements;
     }
 
-    private Either<T,ParseError> ParseResult<T>(T result)
+    private Either<T, ParseError> ParseResult<T>(T result)
     {
         return new Either<T, ParseError>(result);
     }
 
-    private Either<T2 ,ParseError> ParseResult<T1, T2>(Either<T1,ParseError> result, Func<T1, T2> toResult)
+    private Either<T2, ParseError> ParseResult<T1, T2>(Either<T1, ParseError> result, Func<T1, T2> toResult)
     {
         if (result.IsLeft)
         {
             return new Either<T2, ParseError>(toResult(result.LeftValue));
         }
+
         return new Either<T2, ParseError>(result.RightValue);
     }
 
@@ -569,67 +572,69 @@ public class SqlParser
         {
             return CreateParseError("Expected CONSTRAINT");
         }
-        
+
         var constraintName = _text.ReadSqlIdentifier().Word;
         var sqlConstraint = new SqlConstraint
         {
             ConstraintName = constraintName
         };
-        if (TryMatchKeyword("UNIQUE"))
+
+        if (TryMatchPrimaryKeyOrUnique(sqlConstraint))
         {
+            if (TryMatchKeyword("CLUSTERED"))
+            {
+                sqlConstraint.Clustered = "CLUSTERED";
+            }
+            else if (TryMatchesKeyword("NONCLUSTERED"))
+            {
+                sqlConstraint.Clustered = "NONCLUSTERED";
+            }
+
             var uniqueColumns = ParseParenthesesWithComma(() =>
             {
-                var uniqueColumn = _text.ReadSqlIdentifier();
-                return ParseResult(uniqueColumn.Word);
+                var columnName = _text.ReadSqlIdentifier();
+                var order = string.Empty;
+                if (TryMatchKeyword("ASC"))
+                {
+                    order = "ASC";
+                } else if (TryMatchKeyword("DESC"))
+                {
+                    order = "DESC";
+                }
+                return ParseResult(new SqlConstraintColumn
+                {
+                    ColumnName = columnName.Word,
+                    Order = order,
+                });
             });
             if (uniqueColumns.IsRight)
             {
                 return RaiseParseError(uniqueColumns.RightValue);
             }
+
+            sqlConstraint.Columns = uniqueColumns.LeftValue;
         }
-        
-        if (TryMatchesKeyword("PRIMARY", "KEY"))
-        {
-            sqlConstraint.ConstraintType = "PRIMARY KEY";
-        }
-        else if(TryMatchesKeyword("FOREIGN", "KEY"))
+
+        if (TryMatchesKeyword("FOREIGN", "KEY"))
         {
             sqlConstraint.ConstraintType = "FOREIGN KEY";
-        }
-        else
-        {
-            return CreateParseError($"Expected PRIMARY KEY or FOREIGN KEY, but got {_text.PeekWord().Word}");
-        }
-        
-        if (TryMatchKeyword("CLUSTERED"))
-        {
-            sqlConstraint.Clustered = "CLUSTERED";
+            var uniqueColumns = ParseParenthesesWithComma(() =>
+            {
+                var uniqueColumn = _text.ReadSqlIdentifier();
+                return ParseResult(new SqlConstraintColumn
+                {
+                    ColumnName = uniqueColumn.Word,
+                    Order = string.Empty,
+                });
+            });
+            if (uniqueColumns.IsRight)
+            {
+                return RaiseParseError(uniqueColumns.RightValue);
+            }
+
+            sqlConstraint.Columns = uniqueColumns.LeftValue;
         }
 
-        var indexColumnsResult = ParseParenthesesWithComma(() =>
-        {
-            var indexColumn = new SqlColumnConstraint
-            {
-                ColumnName = _text.ReadSqlIdentifier().Word
-            };
-            if (TryMatchKeyword("ASC"))
-            {
-                indexColumn.Order = "ASC";
-            }
-            else if (TryMatchKeyword("DESC"))
-            {
-                indexColumn.Order = "DESC";
-            }
-            return ParseResult(indexColumn);
-        });
-        
-        if (indexColumnsResult.IsRight)
-        {
-            return RaiseParseError(indexColumnsResult.RightValue);
-        }
-
-        var indexColumns = indexColumnsResult.LeftValue;
-        sqlConstraint.Columns = indexColumns;
         if (TryMatchKeyword("WITH"))
         {
             var togglesResult = ParseParenthesesWithComma(ParseWithToggle);
@@ -637,6 +642,7 @@ public class SqlParser
             {
                 return RaiseParseError(togglesResult.RightValue);
             }
+
             sqlConstraint.WithToggles = togglesResult.LeftValue;
         }
 
@@ -646,6 +652,29 @@ public class SqlParser
         }
 
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
+    }
+
+    private bool TryMatchPrimaryKeyOrUnique(SqlConstraint sqlConstraint)
+    {
+        if (TryMatchKeyword("UNIQUE"))
+        {
+            sqlConstraint.ConstraintType = "UNIQUE";
+            return true;
+        }
+
+        if (TryMatchesKeyword("PRIMARY", "KEY"))
+        {
+            sqlConstraint.ConstraintType = "PRIMARY KEY";
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool PeekMatchSymbol(string symbol)
+    {
+        SkipWhiteSpace();
+        return _text.PeekMatchSymbol(symbol);
     }
 
     private Either<ISqlExpression, ParseError> ParseTableName()
@@ -737,7 +766,7 @@ public class SqlParser
             return;
         }
 
-        var sqlSymbol = _text.ReadSymbol();
+        var sqlSymbol = _text.ReadSymbols();
         if (sqlSymbol.Length > 0)
         {
             return;
@@ -765,7 +794,7 @@ public class SqlParser
         SkipWhiteSpace();
         return _text.TryMatchIgnoreCaseKeyword(expected);
     }
-    
+
     private bool TryMatchesKeyword(params string[] keywords)
     {
         SkipWhiteSpace();
