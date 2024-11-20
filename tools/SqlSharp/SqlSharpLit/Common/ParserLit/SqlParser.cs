@@ -13,26 +13,6 @@ public class SqlParser
         _text = new StringParser(text);
     }
 
-    public Either<ISqlExpression, ParseError> Parse()
-    {
-        if (TryStart(ParseCreateTableStatement, out var createTableResult))
-        {
-            return createTableResult;
-        }
-
-        if (TryStart(ParseSelectStatement, out var selectResult))
-        {
-            return selectResult;
-        }
-
-        if (TryStart(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
-        {
-            return execSpAddExtendedPropertyResult;
-        }
-
-        return CreateStartParseError("Unknown statement");
-    }
-
     public IEnumerable<ISqlExpression> Extract()
     {
         while (!_text.IsEnd())
@@ -51,33 +31,24 @@ public class SqlParser
         }
     }
 
-    private void ReadNonWhiteSpace()
+    public Either<ISqlExpression, ParseError> Parse()
     {
-        var sqlIdentifier = _text.ReadSqlIdentifier();
-        if (sqlIdentifier.Length > 0)
+        if (TryStart(ParseCreateTableStatement, out var createTableResult))
         {
-            return;
+            return createTableResult;
         }
 
-        var sqlString = _text.ReadSqlQuotedString();
-        if (sqlString.Length > 0)
+        if (TryStart(ParseSelectStatement, out var selectResult))
         {
-            return;
+            return selectResult;
         }
 
-        var sqlNumber = _text.ReadNumber();
-        if (sqlNumber.Length > 0)
+        if (TryStart(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
         {
-            return;
+            return execSpAddExtendedPropertyResult;
         }
 
-        var sqlSymbol = _text.ReadSymbol();
-        if (sqlSymbol.Length > 0)
-        {
-            return;
-        }
-
-        _text.NextChar();
+        return CreateStartParseError("Unknown statement");
     }
 
     public Either<List<ColumnDefinition>, ParseError> ParseCreateTableColumns()
@@ -377,46 +348,6 @@ public class SqlParser
         _text.Match(expected);
     }
 
-    private Either<TextSpan, ParseError> ParseDefaultValue()
-    {
-        if (!_text.TryMatch("DEFAULT"))
-        {
-            return CreateParseError<TextSpan>("Expected DEFAULT");
-        }
-
-        TextSpan defaultValue;
-        if (_text.TryMatch("("))
-        {
-            defaultValue = _text.ReadUntilRightParenthesis();
-            _text.Match(")");
-            return new Either<TextSpan, ParseError>(defaultValue);
-        }
-
-        var nullValue = _text.PeekIdentifier("NULL");
-        if (nullValue.Length > 0)
-        {
-            _text.ReadIdentifier();
-            return new Either<TextSpan, ParseError>(nullValue);
-        }
-
-        if (_text.Try(_text.ReadSqlIdentifier, out var funcName))
-        {
-            _text.Match("(");
-            var funcArgs = _text.ReadUntilRightParenthesis();
-            _text.Match(")");
-            defaultValue = new TextSpan
-            {
-                Word = $"{funcName.Word}({funcArgs.Word})",
-                Offset = funcName.Offset,
-                Length = funcName.Length + funcArgs.Length + 2
-            };
-            return new Either<TextSpan, ParseError>(defaultValue);
-        }
-
-        defaultValue = _text.ReadNumber();
-        return new Either<TextSpan, ParseError>(defaultValue);
-    }
-
     private ParseError ParseColumnConstraints(ColumnDefinition column)
     {
         do
@@ -548,6 +479,46 @@ public class SqlParser
         return new Either<ColumnDefinition, ParseError>(column);
     }
 
+    private Either<TextSpan, ParseError> ParseDefaultValue()
+    {
+        if (!_text.TryMatch("DEFAULT"))
+        {
+            return CreateParseError<TextSpan>("Expected DEFAULT");
+        }
+
+        TextSpan defaultValue;
+        if (_text.TryMatch("("))
+        {
+            defaultValue = _text.ReadUntilRightParenthesis();
+            _text.Match(")");
+            return new Either<TextSpan, ParseError>(defaultValue);
+        }
+
+        var nullValue = _text.PeekIdentifier("NULL");
+        if (nullValue.Length > 0)
+        {
+            _text.ReadIdentifier();
+            return new Either<TextSpan, ParseError>(nullValue);
+        }
+
+        if (_text.Try(_text.ReadSqlIdentifier, out var funcName))
+        {
+            _text.Match("(");
+            var funcArgs = _text.ReadUntilRightParenthesis();
+            _text.Match(")");
+            defaultValue = new TextSpan
+            {
+                Word = $"{funcName.Word}({funcArgs.Word})",
+                Offset = funcName.Offset,
+                Length = funcName.Length + funcArgs.Length + 2
+            };
+            return new Either<TextSpan, ParseError>(defaultValue);
+        }
+
+        defaultValue = _text.ReadNumber();
+        return new Either<TextSpan, ParseError>(defaultValue);
+    }
+
     private Either<ISqlExpression, ParseError> ParseIntValue()
     {
         if (_text.Try(_text.ReadNumber, out var number))
@@ -561,30 +532,12 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(new ParseError("Expected Int"));
     }
 
-    private bool TryParseSqlIdentity(ColumnDefinition column, out Either<ColumnDefinition, ParseError> result)
+    private List<T> ParseParenthesesWithComma<T>(Func<T> parseElemFn)
     {
-        if (!_text.TryMatch("IDENTITY"))
-        {
-            result = new Either<ColumnDefinition, ParseError>(column);
-            return false;
-        }
-
-        var sqlIdentity = new SqlIdentity
-        {
-            Seed = 1,
-            Increment = 1
-        };
-        if (_text.TryMatch("("))
-        {
-            sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
-            _text.Match(",");
-            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
-            _text.Match(")");
-        }
-
-        column.Identity = sqlIdentity;
-        result = new Either<ColumnDefinition, ParseError>(column);
-        return true;
+        _text.Match("(");
+        var elements = ParseWithComma(parseElemFn);
+        _text.Match(")");
+        return elements;
     }
 
     private Either<ISqlExpression, ParseError> ParseTableConstraint()
@@ -719,12 +672,32 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
     }
 
-    private List<T> ParseParenthesesWithComma<T>(Func<T> parseElemFn)
+    private Either<ISqlExpression, ParseError> ParseTableName()
     {
-        _text.Match("(");
-        var elements = ParseWithComma(parseElemFn);
-        _text.Match(")");
-        return elements;
+        if (_text.Try(_text.ReadIdentifier, out var fieldName))
+        {
+            return new Either<ISqlExpression, ParseError>(new SqlFieldExpression()
+            {
+                FieldName = fieldName.Word
+            });
+        }
+
+        return new Either<ISqlExpression, ParseError>(new ParseError("Expected field name"));
+    }
+
+    private Either<ISqlExpression, ParseError> ParseValue()
+    {
+        if (Try(ParseIntValue, out var number))
+        {
+            return number;
+        }
+
+        if (Try(ParseTableName, out var tableName))
+        {
+            return tableName;
+        }
+
+        return CreateParseError("Expected Int or Field");
     }
 
     private List<T> ParseWithComma<T>(Func<T> parseElemFn)
@@ -763,32 +736,33 @@ public class SqlParser
         return new Either<SqlWithToggle, ParseError>(toggle);
     }
 
-    private Either<ISqlExpression, ParseError> ParseTableName()
+    private void ReadNonWhiteSpace()
     {
-        if (_text.Try(_text.ReadIdentifier, out var fieldName))
+        var sqlIdentifier = _text.ReadSqlIdentifier();
+        if (sqlIdentifier.Length > 0)
         {
-            return new Either<ISqlExpression, ParseError>(new SqlFieldExpression()
-            {
-                FieldName = fieldName.Word
-            });
+            return;
         }
 
-        return new Either<ISqlExpression, ParseError>(new ParseError("Expected field name"));
-    }
-
-    private Either<ISqlExpression, ParseError> ParseValue()
-    {
-        if (Try(ParseIntValue, out var number))
+        var sqlString = _text.ReadSqlQuotedString();
+        if (sqlString.Length > 0)
         {
-            return number;
+            return;
         }
 
-        if (Try(ParseTableName, out var tableName))
+        var sqlNumber = _text.ReadNumber();
+        if (sqlNumber.Length > 0)
         {
-            return tableName;
+            return;
         }
 
-        return CreateParseError("Expected Int or Field");
+        var sqlSymbol = _text.ReadSymbol();
+        if (sqlSymbol.Length > 0)
+        {
+            return;
+        }
+
+        _text.NextChar();
     }
 
     private void SkipWhiteSpace()
@@ -854,6 +828,32 @@ public class SqlParser
         return true;
     }
 
+    private bool TryParseSqlIdentity(ColumnDefinition column, out Either<ColumnDefinition, ParseError> result)
+    {
+        if (!_text.TryMatch("IDENTITY"))
+        {
+            result = new Either<ColumnDefinition, ParseError>(column);
+            return false;
+        }
+
+        var sqlIdentity = new SqlIdentity
+        {
+            Seed = 1,
+            Increment = 1
+        };
+        if (_text.TryMatch("("))
+        {
+            sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
+            _text.Match(",");
+            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
+            _text.Match(")");
+        }
+
+        column.Identity = sqlIdentity;
+        result = new Either<ColumnDefinition, ParseError>(column);
+        return true;
+    }
+
     private bool TryStart(Func<Either<ISqlExpression, ParseError>> parseFunc,
         out Either<ISqlExpression, ParseError> result)
     {
@@ -877,9 +877,9 @@ public class SqlParser
 
 public class SqlConstraintUnique : ISqlConstraint
 {
-    public SqlType SqlType { get; } = SqlType.ConstraintUnique;
     public string ConstraintName { get; set; } = string.Empty;
     public List<string> Columns { get; set; } = [];
+    public SqlType SqlType { get; } = SqlType.ConstraintUnique;
 
     public string ToSql()
     {
