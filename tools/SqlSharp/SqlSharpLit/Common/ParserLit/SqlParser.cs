@@ -318,11 +318,6 @@ public class SqlParser
         return success;
     }
 
-    private Either<ISqlExpression, ParseError> RaiseParseError(ParseError innerError)
-    {
-        return new Either<ISqlExpression, ParseError>(innerError);
-    }
-
     private Either<ISqlExpression, ParseError> CreateParseError(string message)
     {
         return CreateParseError<ISqlExpression>(message);
@@ -653,29 +648,6 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
     }
 
-    private bool TryMatchPrimaryKeyOrUnique(SqlConstraint sqlConstraint)
-    {
-        if (TryMatchKeyword("UNIQUE"))
-        {
-            sqlConstraint.ConstraintType = "UNIQUE";
-            return true;
-        }
-
-        if (TryMatchesKeyword("PRIMARY", "KEY"))
-        {
-            sqlConstraint.ConstraintType = "PRIMARY KEY";
-            return true;
-        }
-
-        return false;
-    }
-
-    private bool PeekMatchSymbol(string symbol)
-    {
-        SkipWhiteSpace();
-        return _text.PeekMatchSymbol(symbol);
-    }
-
     private Either<ISqlExpression, ParseError> ParseTableName()
     {
         if (_text.Try(_text.ReadIdentifier, out var fieldName))
@@ -745,6 +717,17 @@ public class SqlParser
         return new Either<SqlWithToggle, ParseError>(toggle);
     }
 
+    private bool PeekMatchSymbol(string symbol)
+    {
+        SkipWhiteSpace();
+        return _text.PeekMatchSymbol(symbol);
+    }
+
+    private Either<ISqlExpression, ParseError> RaiseParseError(ParseError innerError)
+    {
+        return new Either<ISqlExpression, ParseError>(innerError);
+    }
+
     private void ReadNonWhiteSpace()
     {
         var sqlIdentifier = _text.ReadSqlIdentifier();
@@ -788,16 +771,16 @@ public class SqlParser
         }
     }
 
-    private bool TryMatchKeyword(string expected)
-    {
-        SkipWhiteSpace();
-        return _text.TryMatchIgnoreCaseKeyword(expected);
-    }
-
     private bool TryMatchesKeyword(params string[] keywords)
     {
         SkipWhiteSpace();
         return _text.TryMatchesIgnoreCase(keywords);
+    }
+
+    private bool TryMatchKeyword(string expected)
+    {
+        SkipWhiteSpace();
+        return _text.TryMatchIgnoreCaseKeyword(expected);
     }
 
     private bool TryMatchParameterAssignValue(string parameterName, out Either<SqlParameterValue, ParseError> result)
@@ -820,6 +803,23 @@ public class SqlParser
         }
 
         return true;
+    }
+
+    private bool TryMatchPrimaryKeyOrUnique(SqlConstraint sqlConstraint)
+    {
+        if (TryMatchKeyword("UNIQUE"))
+        {
+            sqlConstraint.ConstraintType = "UNIQUE";
+            return true;
+        }
+
+        if (TryMatchesKeyword("PRIMARY", "KEY"))
+        {
+            sqlConstraint.ConstraintType = "PRIMARY KEY";
+            return true;
+        }
+
+        return false;
     }
 
     private bool TryParameterAssignValue(out Either<SqlParameterValue, ParseError> result)
