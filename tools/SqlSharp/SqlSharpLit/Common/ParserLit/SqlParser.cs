@@ -545,6 +545,12 @@ public class SqlParser
         }
         return elements;
     }
+    
+    private bool TryMatchKeyword(string expected)
+    {
+        SkipWhiteSpace();
+        return _text.TryMatchIgnoreCaseKeyword(expected);
+    }
 
     private Either<ISqlExpression, ParseError> ParseTableConstraint()
     {
@@ -554,7 +560,7 @@ public class SqlParser
         }
 
         var constraintName = _text.ReadSqlIdentifier().Word;
-        if (_text.TryMatchIgnoreCaseKeyword("UNIQUE"))
+        if (TryMatchKeyword("UNIQUE"))
         {
             var uniqueColumns = ParseParenthesesWithComma(() =>
             {
