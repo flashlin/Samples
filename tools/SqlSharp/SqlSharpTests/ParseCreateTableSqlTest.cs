@@ -293,7 +293,40 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
+        rc.ShouldBe(new CreateTableStatement
+        {
+            TableName = "[dbo].[CashSettled]",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[custid]",
+                    DataType = "INT",
+                    IsNullable = false
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "[PK_CashSettled]",
+                    ConstraintType = "PRIMARY KEY",
+                    Clustered = "CLUSTERED",
+                    Columns = [
+                        new SqlColumnConstraint
+                        {
+                            ColumnName = "[custid]",
+                            Order = "ASC"
+                        }
+                    ],
+                    WithToggles = [
+                        new SqlWithToggle
+                        {
+                            ToggleName = "FILLFACTOR",
+                            Value = "85"
+                        }
+                    ]
+                }
+            ]
+        });
     }
 
     [Test]
