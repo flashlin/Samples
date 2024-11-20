@@ -340,7 +340,31 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.Right.Should().Be(null);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "[dbo].[UserTracking]",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "BIGINT",
+                    Identity = new SqlIdentity
+                    {
+                        Seed = 1,
+                        Increment = 1
+                    },
+                    IsPrimaryKey = true,
+                    IsNullable = false
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[Extra]",
+                    DataType = "nvarchar",
+                    Size = "4000",
+                    IsNullable = true
+                }
+            ]
+        });
     }
 
     private static Either<ISqlExpression, ParseError> ParseSql(string sql)
