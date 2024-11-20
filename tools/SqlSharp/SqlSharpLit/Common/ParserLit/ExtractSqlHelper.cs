@@ -76,6 +76,7 @@ public class ExtractSqlHelper
 
             if (sqlFile.CreateTables.Count > 0 && sqlFile.SqlExpressions.Count == 0)
             {
+                writer.WriteLine("-- No other SQL expressions found");
                 writer.WriteLine("/*");
                 writer.WriteLine(sqlFile.CreateTables[0]);
                 writer.WriteLine("*/");

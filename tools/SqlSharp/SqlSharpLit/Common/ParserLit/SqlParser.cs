@@ -357,7 +357,7 @@ public class SqlParser
     {
         do
         {
-            if (_text.TryMatches("PRIMARY", "KEY"))
+            if (TryMatchesKeyword("PRIMARY", "KEY"))
             {
                 column.IsPrimaryKey = true;
                 continue;
@@ -410,19 +410,19 @@ public class SqlParser
                 return new ParseError("Expect Constraint DEFAULT");
             }
 
-            if (_text.TryMatches("NOT", "FOR", "REPLICATION"))
+            if (TryMatchesKeyword("NOT", "FOR", "REPLICATION"))
             {
                 column.NotForReplication = true;
                 continue;
             }
 
-            if (_text.TryMatches("NOT", "NULL"))
+            if (TryMatchesKeyword("NOT", "NULL"))
             {
                 column.IsNullable = false;
                 continue;
             }
 
-            if (_text.TryMatches("NULL"))
+            if (TryMatchesKeyword("NULL"))
             {
                 column.IsNullable = true;
                 continue;
@@ -486,7 +486,7 @@ public class SqlParser
 
     private Either<TextSpan, ParseError> ParseDefaultValue()
     {
-        if (!_text.TryMatch("DEFAULT"))
+        if (!TryMatchKeyword("DEFAULT"))
         {
             return CreateParseError<TextSpan>("Expected DEFAULT");
         }
