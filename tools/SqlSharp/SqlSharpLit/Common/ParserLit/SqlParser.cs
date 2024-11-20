@@ -545,16 +545,24 @@ public class SqlParser
         }
         return elements;
     }
-    
-    private bool TryMatchKeyword(string expected)
+
+    private Either<T,ParseError> ParseResult<T>(T result)
     {
-        SkipWhiteSpace();
-        return _text.TryMatchIgnoreCaseKeyword(expected);
+        return new Either<T, ParseError>(result);
+    }
+
+    private Either<T2 ,ParseError> ParseResult<T1, T2>(Either<T1,ParseError> result, Func<T1, T2> toResult)
+    {
+        if (result.IsLeft)
+        {
+            return new Either<T2, ParseError>(toResult(result.LeftValue));
+        }
+        return new Either<T2, ParseError>(result.RightValue);
     }
 
     private Either<ISqlExpression, ParseError> ParseTableConstraint()
     {
-        if (!_text.TryMatch(ConstraintKeyword))
+        if (!TryMatchKeyword(ConstraintKeyword))
         {
             return CreateParseError("Expected CONSTRAINT");
         }
@@ -680,20 +688,6 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
     }
 
-    private Either<T,ParseError> ParseResult<T>(T result)
-    {
-        return new Either<T, ParseError>(result);
-    }
-    
-    private Either<T2 ,ParseError> ParseResult<T1, T2>(Either<T1,ParseError> result, Func<T1, T2> toResult)
-    {
-        if (result.IsLeft)
-        {
-            return new Either<T2, ParseError>(toResult(result.LeftValue));
-        }
-        return new Either<T2, ParseError>(result.RightValue);
-    }
-
     private Either<ISqlExpression, ParseError> ParseTableName()
     {
         if (_text.Try(_text.ReadIdentifier, out var fieldName))
@@ -804,6 +798,12 @@ public class SqlParser
                 break;
             }
         }
+    }
+
+    private bool TryMatchKeyword(string expected)
+    {
+        SkipWhiteSpace();
+        return _text.TryMatchIgnoreCaseKeyword(expected);
     }
 
     private bool TryMatchParameterAssignValue(string parameterName, out Either<SqlParameterValue, ParseError> result)
