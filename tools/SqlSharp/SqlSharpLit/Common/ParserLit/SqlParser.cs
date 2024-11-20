@@ -123,10 +123,15 @@ public class SqlParser
 
         createTableStatement.Columns = rc.LeftValue;
 
-        if (Try(ParseTableConstraint, out var tableConstraint))
+        var tableConstraints = ParseWithComma(() =>
         {
-            createTableStatement.Constraints.Add(tableConstraint.LeftValue);
-        }
+            if (!TryPeekKeyword(ConstraintKeyword))
+            {
+                return RaiseParseError(ParseError.Empty);
+            }
+            return ParseTableConstraint();
+        });
+        createTableStatement.Constraints = tableConstraints.LeftValue;
 
         if (!_text.TryMatch(")"))
         {
@@ -670,7 +675,7 @@ public class SqlParser
         return CreateParseError("Expected Int or Field");
     }
 
-    private Either<List<T>, ParseError> ParseWithComma<T>(Func<Either<T?, ParseError>> parseElemFn)
+    private Either<List<T>, ParseError> ParseWithComma<T>(Func<Either<T, ParseError>> parseElemFn)
     {
         var elements = new List<T>();
         do
@@ -678,13 +683,13 @@ public class SqlParser
             var elem = parseElemFn();
             if (elem.IsRight)
             {
+                if (elem.RightValue == ParseError.Empty)
+                {
+                    break;
+                }
                 return new Either<List<T>, ParseError>(elem.RightValue);
             }
-            if (elem.Left == null)
-            {
-                break;
-            }
-            elements.Add(elem.Left);
+            elements.Add(elem.LeftValue);
             if (_text.PeekChar() != ',')
             {
                 break;
@@ -777,6 +782,15 @@ public class SqlParser
     {
         SkipWhiteSpace();
         return _text.TryMatchIgnoreCaseKeyword(expected);
+    }
+    
+    private bool TryPeekKeyword(string expected)
+    {
+        SkipWhiteSpace();
+        var tmpPosition = _text.Position;
+        var isSuccess = _text.TryMatchIgnoreCaseKeyword(expected);
+        _text.Position = tmpPosition;
+        return isSuccess;
     }
 
     private bool TryMatchParameterAssignValue(string parameterName, out Either<SqlParameterValue, ParseError> result)

@@ -424,7 +424,7 @@ public class ParseCreateTableSqlTest
     {
         var sql = $"""
                    CREATE TABLE #tb1 (
-                       [id] INT
+                       [id] INT,
                        CONSTRAINT [PK_1] PRIMARY KEY CLUSTERED ([id] ASC),
                        CONSTRAINT [UQ_1] UNIQUE NONCLUSTERED ([name] ASC)
                    );
