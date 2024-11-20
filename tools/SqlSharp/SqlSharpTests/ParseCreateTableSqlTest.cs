@@ -543,7 +543,7 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
-    public void UniqueNonClustered()
+    public void TableConstraintUniqueNonClustered()
     {
         var sql = $"""
                    CREATE TABLE #tmp
@@ -589,7 +589,7 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
-    public void WithoutConstraint()
+    public void WithoutTableConstraint()
     {
         var sql = $"""
                    CREATE TABLE [dbo].[UserTracking]
