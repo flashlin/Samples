@@ -632,33 +632,12 @@ public class SqlParser
         sqlConstraint.Columns = indexColumns;
         if (TryMatchKeyword("WITH"))
         {
-            _text.Match("(");
-            var toggles = new List<SqlWithToggle>();
-            do
+            var togglesResult = ParseParenthesesWithComma(ParseWithToggle);
+            if (togglesResult.IsRight)
             {
-                var toggleResult = ParseWithToggle();
-                if (toggleResult.IsRight)
-                {
-                    return new Either<ISqlExpression, ParseError>(toggleResult.RightValue);
-                }
-
-                toggles.Add(toggleResult.LeftValue);
-                if (_text.PeekChar() != ',')
-                {
-                    break;
-                }
-
-                _text.ReadChar();
-            } while (!_text.IsEnd());
-            if (!_text.TryMatch(")"))
-            {
-                return new Either<ISqlExpression, ParseError>(new ParseError("Expected )")
-                {
-                    Offset = _text.Position
-                });
+                return RaiseParseError(togglesResult.RightValue);
             }
-
-            sqlConstraint.WithToggles = toggles;
+            sqlConstraint.WithToggles = togglesResult.LeftValue;
         }
 
         if (_text.TryMatch("ON"))
