@@ -630,7 +630,7 @@ public class SqlParser
 
         var indexColumns = indexColumnsResult.LeftValue;
         sqlConstraint.Columns = indexColumns;
-        if (_text.TryMatch("WITH"))
+        if (TryMatchKeyword("WITH"))
         {
             _text.Match("(");
             var toggles = new List<SqlWithToggle>();
@@ -650,7 +650,6 @@ public class SqlParser
 
                 _text.ReadChar();
             } while (!_text.IsEnd());
-
             if (!_text.TryMatch(")"))
             {
                 return new Either<ISqlExpression, ParseError>(new ParseError("Expected )")
