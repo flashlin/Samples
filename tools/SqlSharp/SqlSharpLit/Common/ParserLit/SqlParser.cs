@@ -533,7 +533,7 @@ public class SqlParser
 
         return new Either<ISqlExpression, ParseError>(new ParseError("Expected Int"));
     }
-    
+
     private Either<List<T>, ParseError> ParseParenthesesWithComma<T>(Func<Either<T, ParseError>> parseElemFn)
     {
         if (!_text.TryMatch("("))
@@ -735,7 +735,7 @@ public class SqlParser
     {
         return new Either<ISqlExpression, ParseError>(innerError);
     }
-    
+
     private Either<T, ParseError> RaiseParseError<T>(ParseError innerError)
     {
         return new Either<T, ParseError>(innerError);
@@ -794,15 +794,6 @@ public class SqlParser
     {
         SkipWhiteSpace();
         return _text.TryMatchIgnoreCaseKeyword(expected);
-    }
-    
-    private bool TryPeekKeyword(string expected)
-    {
-        SkipWhiteSpace();
-        var tmpPosition = _text.Position;
-        var isSuccess = _text.TryMatchIgnoreCaseKeyword(expected);
-        _text.Position = tmpPosition;
-        return isSuccess;
     }
 
     private bool TryMatchParameterAssignValue(string parameterName, out Either<SqlParameterValue, ParseError> result)
@@ -895,6 +886,15 @@ public class SqlParser
         column.Identity = sqlIdentity;
         result = new Either<ColumnDefinition, ParseError>(column);
         return true;
+    }
+
+    private bool TryPeekKeyword(string expected)
+    {
+        SkipWhiteSpace();
+        var tmpPosition = _text.Position;
+        var isSuccess = _text.TryMatchIgnoreCaseKeyword(expected);
+        _text.Position = tmpPosition;
+        return isSuccess;
     }
 
     private bool TryStart(Func<Either<ISqlExpression, ParseError>> parseFunc,
