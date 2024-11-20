@@ -131,6 +131,10 @@ public class SqlParser
             }
             return ParseTableConstraint();
         });
+        if (tableConstraints.IsRight)
+        {
+            return RaiseParseError(tableConstraints.RightValue);
+        }
         createTableStatement.Constraints = tableConstraints.LeftValue;
 
         if (!_text.TryMatch(")"))
