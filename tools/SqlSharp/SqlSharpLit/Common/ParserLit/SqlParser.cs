@@ -600,13 +600,11 @@ public class SqlParser
         var constraintName = _text.ReadSqlIdentifier().Word;
         if (_text.TryMatchIgnoreCaseKeyword("UNIQUE"))
         {
-            _text.Match("(");
-            var uniqueColumns= ParseWithComma(() =>
+            var uniqueColumns = ParseParenthesesWithComma(() =>
             {
                 var uniqueColumn = _text.ReadSqlIdentifier();
                 return uniqueColumn.Word;
             });
-            _text.Match(")");
             return new Either<ISqlExpression, ParseError>(new SqlConstraintUnique
             {
                 ConstraintName = constraintName,
@@ -721,6 +719,14 @@ public class SqlParser
         return new Either<ISqlExpression, ParseError>(sqlConstraint);
     }
 
+    private List<T> ParseParenthesesWithComma<T>(Func<T> parseElemFn)
+    {
+        _text.Match("(");
+        var elements = ParseWithComma(parseElemFn);
+        _text.Match(")");
+        return elements;
+    }
+
     private List<T> ParseWithComma<T>(Func<T> parseElemFn)
     {
         var elements = new List<T>();
@@ -732,8 +738,10 @@ public class SqlParser
             {
                 break;
             }
+
             _text.ReadChar();
         } while (!_text.IsEnd());
+
         return elements;
     }
 
