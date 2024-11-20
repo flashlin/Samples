@@ -128,8 +128,8 @@ public class ParseCreateTableSqlTest
                     NotForReplication = false,
                     Constraints = [],
                 },
-                new ColumnDefinition { ColumnName = "LastName", DataType = "varchar", Size = 50 },
-                new ColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = 10, Scale = 3 },
+                new ColumnDefinition { ColumnName = "LastName", DataType = "varchar", Size = "50" },
+                new ColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = "10", Scale = 3 },
                 new ColumnDefinition
                 {
                     ColumnName = "[name]", DataType = "[int]",
@@ -166,7 +166,7 @@ public class ParseCreateTableSqlTest
                 new ColumnDefinition
                 {
                     ColumnName = "[DailyTotalRaw]", DataType = "DECIMAL",
-                    Size = 19,
+                    Size = "19",
                     Scale = 6,
                     Constraints =
                     [

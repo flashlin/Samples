@@ -657,7 +657,7 @@ public class StringParser
     public bool TryMatchIgnoreCaseKeyword(string keyword)
     {
         var peek = PeekWord();
-        if (peek.Word != keyword.ToUpper()) return false;
+        if (!string.Equals(peek.Word, keyword, StringComparison.OrdinalIgnoreCase)) return false;
         _previousWord = peek;
         _position = peek.Offset + peek.Length;
         return true;

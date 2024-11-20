@@ -498,11 +498,11 @@ public class SqlParser
         return ParseError.Empty;
     }
 
-    private Either<ColumnDefinition, ParseError> ParseColumnTypeDefinition(TextSpan item)
+    private Either<ColumnDefinition, ParseError> ParseColumnTypeDefinition(TextSpan columnNameSpan)
     {
         var column = new ColumnDefinition
         {
-            ColumnName = item.Word,
+            ColumnName = columnNameSpan.Word,
             DataType = _text.ReadSqlIdentifier().Word
         };
 
@@ -510,6 +510,13 @@ public class SqlParser
         var dataLength2 = string.Empty;
         if (_text.TryMatch("("))
         {
+            if (_text.TryMatchIgnoreCaseKeyword("MAX"))
+            {
+                column.Size = "MAX";
+                _text.Match(")");
+                return new Either<ColumnDefinition, ParseError>(column);
+            }
+
             dataLength1 = _text.ReadNumber().Word;
             dataLength2 = string.Empty;
             if (_text.PeekChar() == ',')
@@ -530,7 +537,7 @@ public class SqlParser
 
         if (!string.IsNullOrEmpty(dataLength1))
         {
-            column.Size = int.Parse(dataLength1);
+            column.Size = dataLength1;
         }
 
         if (!string.IsNullOrEmpty(dataLength2))
