@@ -642,7 +642,6 @@ public class SqlParser
             {
                 return RaiseParseError(togglesResult.RightValue);
             }
-
             sqlConstraint.WithToggles = togglesResult.LeftValue;
         }
 
