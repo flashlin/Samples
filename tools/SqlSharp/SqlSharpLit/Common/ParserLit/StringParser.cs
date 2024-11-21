@@ -146,7 +146,6 @@ public class StringParser
         if (IsEnd()) return string.Empty;
         var remainLength = _text.Length - _position;
         var readLength = Math.Min(length, remainLength);
-        //return _text.Substring(_position, readLength);
         return _text.AsSpan(_position, readLength);
     }
 
@@ -355,7 +354,6 @@ public class StringParser
         {
             if (openSymbol.Word == "/*")
             {
-                _position = startPosition;
                 ReadUntil("*/");
                 NextString(2);
                 return new TextSpan
@@ -487,7 +485,7 @@ public class StringParser
     public TextSpan ReadUntil(string text)
     {
         var offset = _position;
-        while (!IsEnd() && PeekString(text.Length) != text)
+        while (!IsEnd() && PeekString(text.Length).ToString() != text)
         {
             NextChar();
         }
@@ -593,12 +591,13 @@ public class StringParser
 
     public bool Try(Func<TextSpan> readFunc, out TextSpan textSpan)
     {
+        var startPosition = _position; 
         textSpan = readFunc();
         if (textSpan.Length == 0)
         {
+            _position = startPosition;
             return false;
         }
-
         return true;
     }
 
