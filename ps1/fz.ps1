@@ -95,6 +95,10 @@ $search_list | ForEach-Object {
         # 呼叫搜尋
         # Write-Host "呼叫搜尋 $searchTerm"
         $file_list = search_folder -searchTerm $searchTerm
+        if( "string" -eq "$($file_list.GetType())" ) {
+            $selected = $file_list
+            return
+        }
         if( $file_list.Count -eq 0 ) {
             return
         }
