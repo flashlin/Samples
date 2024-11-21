@@ -8,10 +8,24 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1
+                   (
+                   	[Id] INT NOT NULL CONSTRAINT [pk1] PRIMARY KEY NONCLUSTERED ([Id] ASC) WITH (FILLFACTOR = 90) IDENTITY, 
+                    [name] NVARCHAR(50) NULL, 
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.RightValue.Should().BeEquivalentTo(ParseError.Empty);
+    }
+    
+    [Test]
     public void LastFieldNoCommaAndTableConstraint()
     {
         var sql = $"""
-                   CREATE TABLE [dbo].[BankGroupBankInfo](
+                   CREATE TABLE tb1(
                    	[Id] int 
                    PRIMARY KEY CLUSTERED 
                    (
@@ -20,7 +34,40 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.IsRight.Should().BeFalse();
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "int",
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "DEFAULT",
+                    ConstraintType = "PRIMARY KEY",
+                    Clustered = "CLUSTERED",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[Id]",
+                            Order = "ASC" 
+                        }
+                    ],
+                    WithToggles = [
+                        new SqlWithToggle
+                        {
+                            ToggleName = "PAD_INDEX",
+                            Value = "OFF"
+                        }
+                    ],
+                    On = "[PRIMARY]"
+                }
+            ]
+        });
     }
 
     [Test]
