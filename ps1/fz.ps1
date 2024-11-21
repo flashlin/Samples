@@ -33,7 +33,7 @@ function search_folder {
     )
     # 建立命令字串
     $command = "es.exe /ad -s `"$searchTerm`""
-    Write-Host $command
+    # Write-Host $command
     $file_list = Invoke-Expression $command
     
     if( $null -eq $file_list ) {
@@ -95,7 +95,7 @@ $search_list | ForEach-Object {
     $searchTerm = $_
     if (-not $file_list) {
         # 呼叫搜尋
-        Write-Host "呼叫搜尋 $searchTerm"
+        # Write-Host "搜尋 $searchTerm"
         $file_list = search_folder -searchTerm $searchTerm
         if( $file_list -eq $null ) {
             $file_list = @()
