@@ -7,6 +7,21 @@ namespace SqlSharpTests;
 [TestFixture]
 public class ParseCreateTableSqlTest
 {
+    [Test]
+    public void LastFieldNoCommaAndTableConstraint()
+    {
+        var sql = $"""
+                   CREATE TABLE [dbo].[BankGroupBankInfo](
+                   	[Id] int 
+                   PRIMARY KEY CLUSTERED 
+                   (
+                   	[Id] ASC
+                   )WITH (PAD_INDEX = OFF) ON [PRIMARY]
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.IsRight.Should().BeFalse();
+    }
 
     [Test]
     public void ColumnCommentColumn()
@@ -341,30 +356,6 @@ public class ParseCreateTableSqlTest
                 }
             ]
         });
-    }
-
-    [Test]
-    public void METHOD()
-    {
-        var sql = $"""
-                       /*declare all the ddl statement on top*/  
-                       create table #tempBetTrans  (        
-                           TransID bigint  ,    MatchResultId int,    
-                           CustID int, Actual_Stake float,    
-                           APositionTaking float, MPositionTaking float, SPositionTaking float,    
-                           Status nvarchar(10), StatusWinLost tinyint,       
-                           WinLost float, AWinLost float, MWinLost float, SWinLost float,        
-                           PlayerComm float, Comm float, AComm float, SComm float,      
-                           BetStatus int,  
-                           --Group Bet 98 --  
-                           recommend int, mrecommend int, srecommend int,   
-                           winlostdate smalldatetime, currency int,  
-                           username nvarchar(50),  
-                           ActualRate decimal(12,8)   
-                       )    
-                   """;
-        var p = new SqlParser(sql).Extract().ToList();
-
     }
 
     [Test]
