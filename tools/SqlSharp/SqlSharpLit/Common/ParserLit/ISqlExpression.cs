@@ -11,7 +11,8 @@ public enum SqlType
     ParameterValue,
     AddExtendedProperty,
     Constraint,
-    ConstraintDefault
+    ConstraintDefault,
+    String
 }
 
 public interface ISqlExpression

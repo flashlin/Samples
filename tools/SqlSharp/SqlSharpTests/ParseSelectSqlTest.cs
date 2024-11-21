@@ -50,7 +50,7 @@ public class ParseSelectSqlTest
                 Operation = "=",
                 Right = new SqlIntValueExpression
                 {
-                    Value = 1
+                    Value = "1"
                 }
             }
         });

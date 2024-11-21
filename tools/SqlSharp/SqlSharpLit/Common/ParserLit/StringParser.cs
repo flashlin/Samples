@@ -429,6 +429,14 @@ public class StringParser
         _position += length;
         return span;
     }
+    
+    public TextSpan Peek(Func<TextSpan> readFunc)
+    {
+        var tempPosition = _position;
+        var textSpan = readFunc();
+        _position = tempPosition;
+        return textSpan;
+    } 
 
     public TextSpan ReadSymbols()
     {

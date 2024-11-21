@@ -163,11 +163,10 @@ public class SqlParser
         {
             return RaiseParseError<ISqlExpression>(parameters.RightValue);
         }
-        if(parameters.LeftValue.Length != 8)
+        if(parameters.LeftValue.First().Count != 8)
         {
             return RaiseParseError("Expected 8 parameters");
         }
-
         var p = parameters.LeftValue.First();
 
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty
@@ -494,7 +493,7 @@ public class SqlParser
                 Value = number.Word
             });
         }
-        return RaiseParseError<ISqlExpression>("Expected Int");
+        return ParseResult<ISqlExpression>();
     }
 
     private Either<List<T>[], ParseError> ParseParenthesesWithComma<T>(Func<Either<T[], ParseError>> parseElemFn)
@@ -640,8 +639,7 @@ public class SqlParser
                 FieldName = fieldName.Word
             });
         }
-
-        return RaiseParseError("Expected field name");
+        return ParseResult<ISqlExpression>();
     }
 
     private Either<ISqlExpression[], ParseError> ParseValue()
@@ -650,13 +648,21 @@ public class SqlParser
         {
             return number;
         }
+        
+        if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
+        {
+            return ParseResult<ISqlExpression>(new SqlStringValue
+            {
+                Value = quotedString.Word
+            });
+        }
 
         if (Try(ParseTableName, out var tableName))
         {
             return tableName;
         }
-
-        return RaiseParseError("Expected Int or Field");
+        
+        return ParseResult<ISqlExpression>();
     }
 
     private Either<List<T>[], ParseError> ParseWithComma<T>(Func<Either<T[], ParseError>> parseElemFn)
@@ -794,24 +800,6 @@ public class SqlParser
         return _text.TryMatchIgnoreCaseKeyword(expected);
     }
 
-    private bool TryMatchParameterAssignValue(string parameterName, out Either<SqlParameterValue, ParseError> result)
-    {
-        var startPosition = _text.Position;
-        if (!TryParameterAssignValue(out result))
-        {
-            return false;
-        }
-
-        if (!string.Equals(result.LeftValue.Name, parameterName, StringComparison.OrdinalIgnoreCase))
-        {
-            _text.Position = startPosition;
-            result = CreateParseError<SqlParameterValue>("Expected {parameterName}, but got {result.LeftValue.Name}");
-            return false;
-        }
-
-        return true;
-    }
-
     private bool TryMatchPrimaryKeyOrUnique(SqlConstraint sqlConstraint)
     {
         if (TryMatchKeyword("UNIQUE"))
@@ -856,22 +844,27 @@ public class SqlParser
     {
         SkipWhiteSpace();
         var startPosition = _text.Position;
-        var valueExpr = ParseValue();
-        if (valueExpr.IsRight)
+        var valueResult = ParseValue();
+        if (valueResult.IsRight)
         {
             _text.Position = startPosition;
-            return RaiseParseError<SqlParameterValue>(valueExpr.RightValue);
+            return RaiseParseError<SqlParameterValue>(valueResult.RightValue);
         }
-        
-        if(valueExpr.LeftValue.Length == 0)
+        if(valueResult.LeftValue.Length == 0)
         {
+            return ParseResult<SqlParameterValue>();
+        }
+
+        if (_text.Peek(_text.ReadSymbols).Word == "=")
+        {
+            _text.Position = startPosition;
             return ParseResult<SqlParameterValue>();
         }
         
         return ParseResult(new SqlParameterValue
         {
             Name = string.Empty,
-            Value = ((ISqlValue)valueExpr.LeftValue.First()).Value
+            Value = ((ISqlValue)valueResult.LeftValue.First()).Value
         });
     }
 
@@ -955,5 +948,15 @@ public class SqlParser
         }
         result = new Either<ISqlExpression, ParseError>(ParseError.Empty);
         return false;
+    }
+}
+
+public class SqlStringValue : ISqlValue, ISqlExpression
+{
+    public SqlType SqlType { get; } = SqlType.String;
+    public string Value { get; set; } = string.Empty;
+    public string ToSql()
+    {
+        return $"{Value}";
     }
 }

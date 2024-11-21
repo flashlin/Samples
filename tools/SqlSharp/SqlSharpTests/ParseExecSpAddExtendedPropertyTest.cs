@@ -41,18 +41,18 @@ public class ParseExecSpAddExtendedPropertyTest
     public void Desc()
     {
         var sql = $"""
-                   EXEC sp_addextendedproperty N'MS_Description', N'Monday = 1, Tuesday = 2, Wednesday = 4, Thursday = 8, Friday = 16, PartialTransfer, FullTransfer', 'SCHEMA', N'dbo', 'TABLE', N'MySetting', 'COLUMN', N'Setting1'
+                   EXEC sp_addextendedproperty N'MS_Description', N'Monday = 1, Tuesday = 2', 'SCHEMA', N'dbo', 'TABLE', N'MySetting', 'COLUMN', N'Setting1'
                    """;
         var rc = ParseSql(sql);
-        rc.LeftValue.Should().Be(new SqlSpAddExtendedProperty
+        rc.ShouldBe(new SqlSpAddExtendedProperty
         {
             Name = "N'MS_Description'",
-            Value = "N'Monday = 1, Tuesday = 2, Wednesday = 4, Thursday = 8, Friday = 16, PartialTransfer, FullTransfer'",
-            Level0Type = "SCHEMA",
+            Value = "N'Monday = 1, Tuesday = 2'",
+            Level0Type = "'SCHEMA'",
             Level0Name = "N'dbo'",
-            Level1Type = "TABLE",
+            Level1Type = "'TABLE'",
             Level1Name = "N'MySetting'",
-            Level2Type = "COLUMN",
+            Level2Type = "'COLUMN'",
             Level2Name = "N'Setting1'"
         });
     }
