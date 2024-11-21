@@ -207,7 +207,7 @@ public class ExtractSqlHelper
             return text.Substring(lastNewLineIndex + 1);
         }
 
-        return string.Empty;
+        return text;
     }
 
     private static bool ContainsComment(string lineContent)
