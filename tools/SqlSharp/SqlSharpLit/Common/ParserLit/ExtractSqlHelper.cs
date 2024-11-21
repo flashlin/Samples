@@ -76,11 +76,11 @@ public class ExtractSqlHelper
 
             writer.WriteLine($"-- {sqlFile.FileName}");
             writer.WriteLine($"-- Database: {sqlFile.DatabaseName}");
-            writer.WriteLine($"-- Total Create Tables: {sqlFile.CreateTables.Count}");
-            writer.WriteLine($"-- SqlExpression: {createTableSqlExpressions.Count}");
 
             if (sqlFile.CreateTables.Count != createTableSqlExpressions.Count)
             {
+                writer.WriteLine($"-- Total Create Tables: {sqlFile.CreateTables.Count}");
+                writer.WriteLine($"-- SqlExpression: {createTableSqlExpressions.Count}");
                 writer.WriteLine("-- No other SQL expressions found");
                 var startIndex = Math.Min(sqlFile.CreateTables.Count, createTableSqlExpressions.Count);
                 writer.WriteLine("/*");
