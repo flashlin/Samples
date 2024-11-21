@@ -36,8 +36,10 @@ function search_folder {
     Write-Host $command
     $file_list = Invoke-Expression $command
     
-    #$result = es.exe /ad -s `"$searchTerm`" !folder:.git !folder:.idea
-    #$file_list = $result -split '\r?\n' | Where-Object {$_}
+    if( $null -eq $file_list ) {
+        return @()
+    }
+
     $file_list = exclude_file_list -input_list $file_list
     return $file_list
 }
@@ -93,8 +95,13 @@ $search_list | ForEach-Object {
     $searchTerm = $_
     if (-not $file_list) {
         # 呼叫搜尋
-        # Write-Host "呼叫搜尋 $searchTerm"
+        Write-Host "呼叫搜尋 $searchTerm"
         $file_list = search_folder -searchTerm $searchTerm
+        if( $file_list -eq $null ) {
+            $file_list = @()
+            $selected = $null
+            return
+        }
         if( "string" -eq "$($file_list.GetType())" ) {
             $selected = $file_list
             return
@@ -103,8 +110,8 @@ $search_list | ForEach-Object {
             return
         }
         # show_list -file_list $file_list
-    } 
-    
+    }
+
     if ( $count -eq $search_list.Count ) {
         # 最後一個
         # Write-Host "最後過濾 $searchTerm"
