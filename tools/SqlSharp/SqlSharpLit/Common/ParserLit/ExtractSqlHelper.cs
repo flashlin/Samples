@@ -212,7 +212,7 @@ public class ExtractSqlHelper
 
     private static bool ContainsComment(string lineContent)
     {
-        return lineContent.StartsWith("--") || lineContent.Contains("/*");
+        return lineContent.Contains("--") || lineContent.Contains("/*");
     }
 }
 
