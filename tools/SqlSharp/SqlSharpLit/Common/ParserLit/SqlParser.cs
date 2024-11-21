@@ -235,12 +235,20 @@ public class SqlParser
             {
                 return RaiseParseError(leftExpr.RightValue);
             }
+            if (leftExpr.LeftValue.Length == 0)
+            {
+                return RaiseParseError<ISqlExpression>("Expected left expression");
+            }
 
             var operation = _text.ReadSymbols().Word;
             var rightExpr = ParseValue();
             if (rightExpr.IsRight)
             {
                 return RaiseParseError(rightExpr.RightValue);
+            }
+            if (rightExpr.LeftValue.Length == 0)
+            {
+                return RaiseParseError<ISqlExpression>("Expected right expression");
             }
 
             selectStatement.Where = new SqlWhereExpression()
