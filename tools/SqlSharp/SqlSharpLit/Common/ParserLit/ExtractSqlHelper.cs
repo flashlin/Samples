@@ -69,16 +69,28 @@ public class ExtractSqlHelper
             {
                 continue;
             }
+            
+            var createTableSqlExpressions = sqlFile.SqlExpressions
+                .Where(x => x.SqlType == SqlType.CreateTable)
+                .ToList();
 
             writer.WriteLine($"-- {sqlFile.FileName}");
             writer.WriteLine($"-- Database: {sqlFile.DatabaseName}");
             writer.WriteLine($"-- Total Create Tables: {sqlFile.CreateTables.Count}");
+            writer.WriteLine($"-- SqlExpression: {createTableSqlExpressions.Count}");
 
-            if (sqlFile.CreateTables.Count > 0 && sqlFile.SqlExpressions.Count == 0)
+            if (sqlFile.CreateTables.Count != createTableSqlExpressions.Count)
             {
                 writer.WriteLine("-- No other SQL expressions found");
+                var startIndex = Math.Min(sqlFile.CreateTables.Count, createTableSqlExpressions.Count);
                 writer.WriteLine("/*");
-                writer.WriteLine(sqlFile.CreateTables[0]);
+                for(var i = startIndex; i < sqlFile.CreateTables.Count; i++)
+                {
+                    writer.WriteLine(sqlFile.CreateTables[i]);
+                    writer.WriteLine();
+                    writer.WriteLine();
+                    writer.WriteLine();
+                }
                 writer.WriteLine("*/");
             }
             // foreach (var createTable in sqlFile.CreateTables)
@@ -87,16 +99,10 @@ public class ExtractSqlHelper
             //     writer.WriteLine("\n\n\n");
             // }
 
-            foreach (var sqlExpression in sqlFile.SqlExpressions)
+            foreach (var sqlExpression in createTableSqlExpressions)
             {
-                if (!sqlTypes.Contains(sqlExpression.SqlType))
-                {
-                    continue;
-                }
-
                 writer.WriteLine(sqlExpression.ToSql());
             }
-
             writer.Flush();
         }
     }
