@@ -154,71 +154,32 @@ public class SqlParser
             return CreateStartParseError("Expected EXEC SP_AddExtendedProperty");
         }
 
-        if (!TryMatchParameterAssignValue("@name", out var nameParameter))
+        var parameters = ParseWithComma(() =>
         {
-            return CreateStartParseError(nameParameter.RightValue.Message);
+            var parameter = ParseParameterValueOrAssignValue();
+            return parameter;
+        });
+        if (parameters.IsRight)
+        {
+            return RaiseParseError<ISqlExpression>(parameters.RightValue);
+        }
+        if(parameters.LeftValue.Length != 8)
+        {
+            return RaiseParseError("Expected 8 parameters");
         }
 
-        MatchString(",");
+        var p = parameters.LeftValue.First();
 
-        if (!TryMatchParameterAssignValue("@value", out var valueParameter))
-        {
-            return CreateStartParseError(valueParameter.RightValue.Message);
-        }
-
-        MatchString(",");
-
-        if (!TryMatchParameterAssignValue("@level0type", out var level0TypeParameter))
-        {
-            return CreateStartParseError(level0TypeParameter.RightValue.Message);
-        }
-
-        MatchString(",");
-
-        if (!TryMatchParameterAssignValue("@level0name", out var level0NameParameter))
-        {
-            return CreateStartParseError(level0NameParameter.RightValue.Message);
-        }
-
-        MatchString(",");
-
-        if (!TryMatchParameterAssignValue("@level1type", out var level1TypeParameter))
-        {
-            return CreateStartParseError(level1TypeParameter.RightValue.Message);
-        }
-
-        MatchString(",");
-
-        if (!TryMatchParameterAssignValue("@level1name", out var level1NameParameter))
-        {
-            return CreateStartParseError(level1NameParameter.RightValue.Message);
-        }
-
-        MatchString(",");
-
-        if (!TryMatchParameterAssignValue("@level2type", out var level2TypeParameter))
-        {
-            return CreateStartParseError(level2TypeParameter.RightValue.Message);
-        }
-
-        MatchString(",");
-
-        if (!TryMatchParameterAssignValue("@level2name", out var level2NameParameter))
-        {
-            return CreateStartParseError(level2NameParameter.RightValue.Message);
-        }
-
-        SkipStatementEnd();
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty
         {
-            Name = nameParameter.LeftValue.Value,
-            Value = valueParameter.LeftValue.Value,
-            Level0Type = level0TypeParameter.LeftValue.Value,
-            Level0Name = level0NameParameter.LeftValue.Value,
-            Level1Type = level1TypeParameter.LeftValue.Value,
-            Level1Name = level1NameParameter.LeftValue.Value,
-            Level2Type = level2TypeParameter.LeftValue.Value,
-            Level2Name = level2NameParameter.LeftValue.Value
+            Name = p[0].Value,
+            Value = p[1].Value,
+            Level0Type = p[2].Value,
+            Level0Name = p[3].Value,
+            Level1Type = p[4].Value,
+            Level1Name = p[5].Value,
+            Level2Type = p[6].Value,
+            Level2Name = p[7].Value
         };
         return ParseResult<ISqlExpression>(sqlSpAddExtendedProperty);
     }
@@ -530,11 +491,10 @@ public class SqlParser
         {
             return ParseResult<ISqlExpression>(new SqlIntValueExpression
             {
-                Value = int.Parse(number.Word)
+                Value = number.Word
             });
         }
-
-        return RaiseParseError(new ParseError("Expected Int"));
+        return RaiseParseError<ISqlExpression>("Expected Int");
     }
 
     private Either<List<T>[], ParseError> ParseParenthesesWithComma<T>(Func<Either<T[], ParseError>> parseElemFn)
@@ -845,11 +805,7 @@ public class SqlParser
         if (!string.Equals(result.LeftValue.Name, parameterName, StringComparison.OrdinalIgnoreCase))
         {
             _text.Position = startPosition;
-            result = new Either<SqlParameterValue, ParseError>(
-                new ParseError($"Expected {parameterName}, but got {result.LeftValue.Name}")
-                {
-                    Offset = startPosition
-                });
+            result = CreateParseError<SqlParameterValue>("Expected {parameterName}, but got {result.LeftValue.Name}");
             return false;
         }
 
@@ -872,32 +828,76 @@ public class SqlParser
 
         return false;
     }
+    
+    private Either<SqlParameterValue[], ParseError> ParseParameterValueOrAssignValue()
+    {
+        var rc1 = ParseParameterValue();
+        if (rc1.IsRight)
+        {
+            return RaiseParseError<SqlParameterValue>(rc1.RightValue);
+        }
+        if (rc1.IsLeft && rc1.LeftValue.Length != 0)
+        {
+            return rc1;
+        }
+        var rc2 = ParseParameterAssignValue();
+        if (rc2.IsRight)
+        {
+            return RaiseParseError<SqlParameterValue>(rc2.RightValue);
+        }
+        if (rc2.IsLeft && rc2.LeftValue.Length != 0)
+        {
+            return rc2;
+        }
+        return ParseResult<SqlParameterValue>();
+    }
+    
+    private Either<SqlParameterValue[], ParseError> ParseParameterValue()
+    {
+        SkipWhiteSpace();
+        var startPosition = _text.Position;
+        var valueExpr = ParseValue();
+        if (valueExpr.IsRight)
+        {
+            _text.Position = startPosition;
+            return RaiseParseError<SqlParameterValue>(valueExpr.RightValue);
+        }
+        
+        if(valueExpr.LeftValue.Length == 0)
+        {
+            return ParseResult<SqlParameterValue>();
+        }
+        
+        return ParseResult(new SqlParameterValue
+        {
+            Name = string.Empty,
+            Value = ((ISqlValue)valueExpr.LeftValue.First()).Value
+        });
+    }
 
-    private bool TryParameterAssignValue(out Either<SqlParameterValue, ParseError> result)
+    private Either<SqlParameterValue[], ParseError> ParseParameterAssignValue()
     {
         SkipWhiteSpace();
         if (!_text.Try(_text.ReadSqlIdentifier, out var name))
         {
-            result = new Either<SqlParameterValue, ParseError>(
-                new ParseError($"Expected @name, but got {_text.PreviousWord().Word}"));
-            return false;
+            return ParseResult<SqlParameterValue>();
         }
 
-        _text.Match("=");
+        if (!_text.TryMatch("="))
+        {
+            return RaiseParseError<SqlParameterValue>("Expected =");
+        }
 
         if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
         {
-            result = new Either<SqlParameterValue, ParseError>(
-                new ParseError($"Expected @name value, but got {_text.PreviousWord().Word}"));
-            return false;
+            return RaiseParseError<SqlParameterValue>($"Expected @name value, but got {_text.PreviousWord().Word}");
         }
 
-        result = new Either<SqlParameterValue, ParseError>(new SqlParameterValue
+        return ParseResult(new SqlParameterValue
         {
             Name = name.Word,
             Value = nameValue.Word
         });
-        return true;
     }
 
     private bool TryParseSqlIdentity(ColumnDefinition column, out Either<ColumnDefinition, ParseError> result)
