@@ -18,7 +18,48 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.RightValue.Should().BeEquivalentTo(ParseError.Empty);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "INT",
+                    IsNullable = false,
+                    Constraints = [
+                        new SqlConstraint
+                        {
+                            ConstraintName = "[pk1]",
+                            ConstraintType = "PRIMARY KEY",
+                            Clustered = "NONCLUSTERED",
+                            Columns = [
+                                new SqlConstraintColumn
+                                {
+                                    ColumnName = "[Id]",
+                                    Order = "ASC"
+                                }
+                            ],
+                            WithToggles = [
+                                new SqlWithToggle
+                                {
+                                    ToggleName = "FILLFACTOR",
+                                    Value = "90"
+                                }
+                            ],
+                            Identity = new SqlIdentity()
+                        }
+                    ]
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[name]",
+                    DataType = "NVARCHAR",
+                    Size = "50",
+                    IsNullable = true
+                }
+            ]
+        });
     }
     
     [Test]

@@ -11,6 +11,7 @@ public class SqlConstraint : ISqlConstraint, ISqlExpression
     public List<SqlConstraintColumn> Columns { get; set; } = [];
     public List<SqlWithToggle> WithToggles { get; set; } = [];
     public string On { get; set; } = string.Empty;
+    public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
 
     public string ToSql()
     {
@@ -32,11 +33,14 @@ public class SqlConstraint : ISqlConstraint, ISqlExpression
             sb.Write(string.Join(", ", WithToggles.Select(t => t.ToSql())));
             sb.Write(")");
         }
+        if(Identity != SqlIdentity.Default)
+        {
+            sb.Write($" {Identity.ToSql()}");
+        }
         if (!string.IsNullOrEmpty(On))
         {
             sb.Write($" ON {On}");
         }
-
         return sb.ToString();
     }
 }
