@@ -136,7 +136,6 @@ public class SqlParser
             {
                 return RaiseParseError(tableConstraints.RightValue);
             }
-
             createTableStatement.Constraints = tableConstraints.LeftValue.First();
         }
 
@@ -338,15 +337,23 @@ public class SqlParser
                 continue;
             }
 
-            if (TryParseSqlIdentity(column, out var identityResult))
+            if (Try(ParseIdentity, out var identityResult))
             {
                 if (identityResult.IsRight)
                 {
                     return identityResult.RightValue;
                 }
-
-                continue;
+                column.Identity = identityResult.LeftValue.First();
             }
+
+            // if (TryParseSqlIdentity(column, out var identityResult))
+            // {
+            //     if (identityResult.IsRight)
+            //     {
+            //         return identityResult.RightValue;
+            //     }
+            //     continue;
+            // }
 
             if (Try(ParseDefaultValue, out var nonConstraintDefaultValue))
             {
@@ -359,6 +366,7 @@ public class SqlParser
                 continue;
             }
 
+            var constraintStartPosition = _text.Position;
             if (_text.TryMatch(ConstraintKeyword))
             {
                 var constraintName = _text.ReadSqlIdentifier();
@@ -375,6 +383,17 @@ public class SqlParser
                         Value = constraintDefaultValue.LeftValue.First().Value
                     });
                     continue;
+                }
+                _text.Position = constraintStartPosition;
+                var columnConstraint = ParseTableConstraint();
+                if (columnConstraint.IsRight)
+                {
+                    return columnConstraint.RightValue;
+                }
+                if(columnConstraint.LeftValue.Length != 0)
+                {
+                    var t = columnConstraint.LeftValue.First();
+                    column.Constraints.Add((SqlConstraint)t);
                 }
 
                 return new ParseError("Expect Constraint DEFAULT");
@@ -605,7 +624,7 @@ public class SqlParser
             });
             if (uniqueColumns.IsRight)
             {
-                return RaiseParseError(uniqueColumns.RightValue);
+                return RaiseParseError<ISqlExpression>(uniqueColumns.RightValue);
             }
 
             sqlConstraint.Columns = uniqueColumns.LeftValue.First();
@@ -616,7 +635,7 @@ public class SqlParser
             var togglesResult = ParseParenthesesWithComma(ParseWithToggle);
             if (togglesResult.IsRight)
             {
-                return RaiseParseError(togglesResult.RightValue);
+                return RaiseParseError<ISqlExpression>(togglesResult.RightValue);
             }
 
             sqlConstraint.WithToggles = togglesResult.LeftValue.First();
@@ -625,6 +644,15 @@ public class SqlParser
         if (TryMatchKeyword("ON"))
         {
             sqlConstraint.On = _text.ReadSqlIdentifier().Word;
+        }
+
+        if (Try(ParseIdentity, out var identityResult))
+        {
+            if (identityResult.IsRight)
+            {
+                return RaiseParseError<ISqlExpression>(identityResult.RightValue);
+            }
+            sqlConstraint.Identity = identityResult.LeftValue.First();
         }
 
         return ParseResult<ISqlExpression>(sqlConstraint);
@@ -1003,6 +1031,27 @@ public class SqlParser
             Name = name.Word,
             Value = nameValue.Word
         });
+    }
+
+    private Either<SqlIdentity[], ParseError> ParseIdentity()
+    {
+        if (!_text.TryMatch("IDENTITY"))
+        {
+            return ParseResult<SqlIdentity>();
+        }
+        var sqlIdentity = new SqlIdentity
+        {
+            Seed = 1,
+            Increment = 1
+        };
+        if (_text.TryMatch("("))
+        {
+            sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
+            _text.Match(",");
+            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
+            _text.Match(")");
+        }
+        return ParseResult(sqlIdentity);
     }
 
     private bool TryParseSqlIdentity(ColumnDefinition column, out Either<ColumnDefinition, ParseError> result)

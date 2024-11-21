@@ -8,13 +8,13 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
-    public void METHOD()
+    public void ColumnConstraintWithIdentity()
     {
         var sql = $"""
                    CREATE TABLE tb1
                    (
                    	[Id] INT NOT NULL CONSTRAINT [pk1] PRIMARY KEY NONCLUSTERED ([Id] ASC) WITH (FILLFACTOR = 90) IDENTITY, 
-                    [name] NVARCHAR(50) NULL, 
+                    [name] NVARCHAR(50) NULL 
                    )
                    """;
         var rc = ParseSql(sql);
