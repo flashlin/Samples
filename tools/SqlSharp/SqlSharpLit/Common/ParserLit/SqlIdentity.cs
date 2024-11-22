@@ -1,10 +1,12 @@
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlIdentity
+public class SqlIdentity : ISqlExpression 
 {
+    public SqlType SqlType { get; } = SqlType.Identity;
     public static SqlIdentity Default => new();
     public long Seed { get; set; }
     public int Increment { get; set; }
+
 
     public string ToSql()
     {

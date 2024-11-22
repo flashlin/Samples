@@ -10,7 +10,7 @@ public class ColumnDefinition : ISqlExpression
     public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
     public bool IsNullable { get; set; }
     public bool NotForReplication { get; set; }
-    public List<ISqlConstraint> Constraints { get; set; } = [];
+    public List<ISqlExpression> Constraints { get; set; } = [];
     public bool IsPrimaryKey { get; set; }
 
     public string ToSql()

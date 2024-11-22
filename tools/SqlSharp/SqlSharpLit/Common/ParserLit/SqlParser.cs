@@ -37,26 +37,26 @@ public class SqlParser
 
     public Either<ISqlExpression, ParseError> Parse()
     {
-        if (TryStart(ParseCreateTableStatement, out var createTableResult))
+        if (Try(ParseCreateTableStatement, out var createTableResult))
         {
             return createTableResult;
         }
 
-        if (TryStart(ParseSelectStatement, out var selectResult))
+        if (Try(ParseSelectStatement, out var selectResult))
         {
             return selectResult;
         }
 
-        if (TryStart(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
+        if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
         {
             return execSpAddExtendedPropertyResult;
         }
 
-        return new Either<ISqlExpression, ParseError>(new ParseError("Unknown statement"));
+        return RaiseParseError("Unknown statement");
     }
 
 
-    public Either<ColumnDefinition[], ParseError> ParseCreateTableColumns()
+    public Either<SqlCollectionExpression, ParseError> ParseCreateTableColumns()
     {
         var columns = new List<ColumnDefinition>();
         do
@@ -70,21 +70,20 @@ public class SqlParser
             var item = _text.ReadSqlIdentifier();
             if (item.Length == 0)
             {
-                return RaiseParseError<ColumnDefinition>($"Expected column name, but got {_text.PeekWord().Word}");
+                return EmptyCollectionResult();
             }
 
             var columnDefinition = ParseColumnTypeDefinition(item);
             if (columnDefinition.IsRight)
             {
-                return RaiseParseError<ColumnDefinition>(columnDefinition.RightValue);
+                return RaiseParseError<SqlCollectionExpression>(columnDefinition.RightValue);
             }
-
-            if (columnDefinition.LeftValue.Length == 0)
+            if (columnDefinition.LeftValue == SqlNoneExpression.Default)
             {
-                return RaiseParseError<ColumnDefinition>("Expected column definition");
+                return RaiseParseError<SqlCollectionExpression>("Expected column definition");
             }
 
-            var column = columnDefinition.LeftValue.First();
+            var column = (ColumnDefinition)columnDefinition.LeftValue;
             ParseColumnConstraints(column);
             columns.Add(column);
             if (_text.PeekChar() != ',')
@@ -95,14 +94,19 @@ public class SqlParser
             _text.ReadChar();
         } while (!_text.IsEnd());
 
-        return ParseResult<ColumnDefinition>(columns);
+        return ParseResult(columns);
     }
 
-    public Either<ISqlExpression[], ParseError> ParseCreateTableStatement()
+    private Either<SqlCollectionExpression, ParseError> EmptyCollectionResult()
+    {
+        return new Either<SqlCollectionExpression, ParseError>(new SqlCollectionExpression());
+    }
+
+    public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
     {
         if (!TryMatchesKeyword("CREATE", "TABLE"))
         {
-            return ParseResult<ISqlExpression>();
+            return NoneResult();
         }
 
         var tableName = _text.ReadSqlIdentifier();
@@ -122,12 +126,12 @@ public class SqlParser
             return RaiseParseError(tableColumnsResult.RightValue);
         }
 
-        if (tableColumnsResult.LeftValue.Length == 0)
+        if (tableColumnsResult.LeftValue.SqlType == SqlType.None)
         {
             return RaiseParseError("Expected column definition");
         }
 
-        createTableStatement.Columns = tableColumnsResult.LeftValue.ToList();
+        createTableStatement.Columns = tableColumnsResult.LeftValue.ToList<ColumnDefinition>();
 
         if (_text.PeekChar() != ')')
         {
@@ -136,7 +140,7 @@ public class SqlParser
             {
                 return RaiseParseError(tableConstraints.RightValue);
             }
-            createTableStatement.Constraints = tableConstraints.LeftValue.First();
+            createTableStatement.Constraints = tableConstraints.LeftValue.Items;
         }
 
         if (!_text.TryMatch(")"))
@@ -149,29 +153,24 @@ public class SqlParser
         return ParseResult<ISqlExpression>(createTableStatement);
     }
 
-    public Either<ISqlExpression[], ParseError> ParseExecSpAddExtendedProperty()
+    public Either<ISqlExpression, ParseError> ParseExecSpAddExtendedProperty()
     {
         if (!TryMatchesKeyword("EXEC", "SP_AddExtendedProperty"))
         {
-            return CreateStartParseError("Expected EXEC SP_AddExtendedProperty");
+            return NoneResult();
         }
 
-        var parameters = ParseWithComma(() =>
-        {
-            var parameter = ParseParameterValueOrAssignValue();
-            return parameter;
-        });
+        var parameters = ParseWithComma(ParseParameterValueOrAssignValue);
         if (parameters.IsRight)
         {
-            return RaiseParseError<ISqlExpression>(parameters.RightValue);
+            return RaiseParseError(parameters.RightValue);
         }
-
-        if (parameters.LeftValue.First().Count != 8)
+        if (parameters.LeftValue.Items.Count != 8)
         {
             return RaiseParseError("Expected 8 parameters");
         }
 
-        var p = parameters.LeftValue.First();
+        var p = parameters.LeftValue.ToList<SqlParameterValue>();
 
         var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty
         {
@@ -187,12 +186,11 @@ public class SqlParser
         return ParseResult<ISqlExpression>(sqlSpAddExtendedProperty);
     }
 
-    public Either<ISqlExpression[], ParseError> ParseSelectStatement()
+    public Either<ISqlExpression, ParseError> ParseSelectStatement()
     {
         if (!TryMatchKeyword("SELECT"))
         {
-            return CreateStartParseError(
-                $"Expected SELECT, but got {_text.PreviousWord().Word} {_text.PeekWord().Word}");
+            return NoneResult();
         }
 
         var columns = new List<ISelectColumnExpression>();
@@ -239,10 +237,9 @@ public class SqlParser
             {
                 return RaiseParseError(leftExpr.RightValue);
             }
-
-            if (leftExpr.LeftValue.Length == 0)
+            if (leftExpr.LeftValue.SqlType == SqlType.None)
             {
-                return RaiseParseError<ISqlExpression>("Expected left expression");
+                return RaiseParseError("Expected left expression");
             }
 
             var operation = _text.ReadSymbols().Word;
@@ -251,22 +248,21 @@ public class SqlParser
             {
                 return RaiseParseError(rightExpr.RightValue);
             }
-
-            if (rightExpr.LeftValue.Length == 0)
+            if (rightExpr.LeftValue.SqlType == SqlType.None)
             {
-                return RaiseParseError<ISqlExpression>("Expected right expression");
+                return RaiseParseError("Expected right expression");
             }
 
             selectStatement.Where = new SqlWhereExpression()
             {
-                Left = leftExpr.LeftValue.First(),
+                Left = leftExpr.LeftValue,
                 Operation = operation,
-                Right = rightExpr.LeftValue.First()
+                Right = rightExpr.LeftValue
             };
         }
 
         SkipStatementEnd();
-        return ParseResult<ISqlExpression>(selectStatement);
+        return ParseResult(selectStatement);
     }
 
     public void SkipStatementEnd()
@@ -278,7 +274,7 @@ public class SqlParser
         }
     }
 
-    public bool Try<T>(Func<Either<T[], ParseError>> parseFunc, out Either<T[], ParseError> result)
+    public bool Try(Func<Either<ISqlExpression, ParseError>> parseFunc, out Either<ISqlExpression, ParseError> result)
     {
         var localResult = parseFunc();
         if (localResult.IsRight)
@@ -287,7 +283,7 @@ public class SqlParser
             return true;
         }
 
-        if (localResult.LeftValue.Length == 0)
+        if (localResult.LeftValue == SqlNoneExpression.Default)
         {
             result = localResult;
             return false;
@@ -297,30 +293,13 @@ public class SqlParser
         return true;
     }
 
-    private Either<T, ParseError> CreateParseError<T>(string message)
-    {
-        return new Either<T, ParseError>(new ParseError(message)
-        {
-            Offset = _text.Position
-        });
-    }
-
-    private Either<ISqlExpression[], ParseError> CreateStartParseError(string message)
-    {
-        return new Either<ISqlExpression[], ParseError>(new ParseError(message)
-        {
-            Offset = _text.Position,
-            IsStart = true
-        });
-    }
-
     private void MatchString(string expected)
     {
         SkipWhiteSpace();
         _text.Match(expected);
     }
 
-    private ParseError ParseColumnConstraints(ColumnDefinition column)
+    private Either<ColumnDefinition, ParseError> ParseColumnConstraints(ColumnDefinition column)
     {
         do
         {
@@ -341,28 +320,18 @@ public class SqlParser
             {
                 if (identityResult.IsRight)
                 {
-                    return identityResult.RightValue;
+                    return RaiseParseError<ColumnDefinition>(identityResult.RightValue);
                 }
-                column.Identity = identityResult.LeftValue.First();
+                column.Identity = (SqlIdentity)identityResult.LeftValue;
             }
-
-            // if (TryParseSqlIdentity(column, out var identityResult))
-            // {
-            //     if (identityResult.IsRight)
-            //     {
-            //         return identityResult.RightValue;
-            //     }
-            //     continue;
-            // }
 
             if (Try(ParseDefaultValue, out var nonConstraintDefaultValue))
             {
                 if (identityResult.IsRight)
                 {
-                    return identityResult.RightValue;
+                    return RaiseParseError<ColumnDefinition>(identityResult.RightValue);
                 }
-
-                column.Constraints.Add(nonConstraintDefaultValue.LeftValue.First());
+                column.Constraints.Add((SqlConstraint)nonConstraintDefaultValue.LeftValue);
                 continue;
             }
 
@@ -374,29 +343,25 @@ public class SqlParser
                 {
                     if (identityResult.IsRight)
                     {
-                        return identityResult.RightValue;
+                        return RaiseParseError<ColumnDefinition>(identityResult.RightValue);
                     }
-
-                    column.Constraints.Add(new SqlConstraintDefault
-                    {
-                        ConstraintName = constraintName.Word,
-                        Value = constraintDefaultValue.LeftValue.First().Value
-                    });
+                    var subConstraint = (SqlConstraint)constraintDefaultValue.LeftValue;
+                    subConstraint.ConstraintName = constraintName.Word;
+                    column.Constraints.Add(subConstraint);
                     continue;
                 }
                 _text.Position = constraintStartPosition;
                 var columnConstraint = ParseTableConstraint();
                 if (columnConstraint.IsRight)
                 {
-                    return columnConstraint.RightValue;
+                    return RaiseParseError<ColumnDefinition>(columnConstraint.RightValue);
                 }
-                if(columnConstraint.LeftValue.Length != 0)
+                if(columnConstraint.LeftValue.SqlType != SqlType.None)
                 {
-                    var t = columnConstraint.LeftValue.First();
-                    column.Constraints.Add((SqlConstraint)t);
+                    var t = (SqlConstraint)columnConstraint.LeftValue;
+                    column.Constraints.Add(t);
                 }
-
-                return new ParseError("Expect Constraint DEFAULT");
+                return RaiseParseError<ColumnDefinition>("Expect Constraint DEFAULT");
             }
 
             if (TryMatchesKeyword("NOT", "FOR", "REPLICATION"))
@@ -420,10 +385,10 @@ public class SqlParser
             break;
         } while (true);
 
-        return ParseError.Empty;
+        return CreateParseResult(column);
     }
 
-    private Either<ColumnDefinition[], ParseError> ParseColumnTypeDefinition(TextSpan columnNameSpan)
+    private Either<ISqlExpression, ParseError> ParseColumnTypeDefinition(TextSpan columnNameSpan)
     {
         var column = new ColumnDefinition
         {
@@ -452,7 +417,7 @@ public class SqlParser
 
             if (!_text.TryMatch(")"))
             {
-                return RaiseParseError<ColumnDefinition>("Expected )");
+                return RaiseParseError("Expected )");
             }
         }
 
@@ -469,11 +434,11 @@ public class SqlParser
         return ParseResult(column);
     }
 
-    private Either<SqlConstraintDefault[], ParseError> ParseDefaultValue()
+    private Either<ISqlExpression, ParseError> ParseDefaultValue()
     {
         if (!TryMatchKeyword("DEFAULT"))
         {
-            return ParseResult<SqlConstraintDefault>();
+            return NoneResult();
         }
 
         TextSpan defaultValue;
@@ -481,10 +446,10 @@ public class SqlParser
         {
             defaultValue = _text.ReadUntilRightParenthesis();
             _text.Match(")");
-            return ParseResult(new SqlConstraintDefault
+            return ParseResult(new SqlConstraint
             {
-                ConstraintName = "[DEFAULT]",
-                Value = defaultValue.Word
+                ConstraintName = string.Empty,
+                DefaultValue = defaultValue.Word
             });
         }
 
@@ -492,10 +457,10 @@ public class SqlParser
         if (nullValue.Length > 0)
         {
             _text.ReadIdentifier();
-            return ParseResult(new SqlConstraintDefault
+            return ParseResult(new SqlConstraint
             {
-                ConstraintName = "[DEFAULT]",
-                Value = nullValue.Word
+                ConstraintName = string.Empty,
+                DefaultValue = nullValue.Word
             });
         }
 
@@ -510,68 +475,77 @@ public class SqlParser
                 Offset = funcName.Offset,
                 Length = funcName.Length + funcArgs.Length + 2
             };
-            return ParseResult(new SqlConstraintDefault
+            return ParseResult(new SqlConstraint
             {
-                ConstraintName = "[DEFAULT]",
-                Value = defaultValue.Word,
+                ConstraintName = string.Empty,
+                DefaultValue = defaultValue.Word,
             });
         }
 
         defaultValue = _text.ReadNumber();
-        return ParseResult(new SqlConstraintDefault
+        return ParseResult(new SqlConstraint
         {
-            ConstraintName = "[DEFAULT]",
-            Value = defaultValue.Word,
+            ConstraintName = string.Empty,
+            DefaultValue = defaultValue.Word,
         });
     }
 
-    private Either<ISqlExpression[], ParseError> ParseIntValue()
+    private Either<ISqlExpression, ParseError> ParseIntValue()
     {
         if (_text.Try(_text.ReadNumber, out var number))
         {
-            return ParseResult<ISqlExpression>(new SqlIntValueExpression
+            return ParseResult(new SqlIntValueExpression
             {
                 Value = number.Word
             });
         }
-
-        return ParseResult<ISqlExpression>();
+        return NoneResult();
     }
 
-    private Either<List<T>[], ParseError> ParseParenthesesWithComma<T>(Func<Either<T[], ParseError>> parseElemFn)
+    private Either<SqlCollectionExpression, ParseError> ParseParenthesesWithComma<T>(Func<Either<T, ParseError>> parseElemFn)
+        where T: ISqlExpression 
     {
         if (!_text.TryMatch("("))
         {
-            return RaiseParseError<List<T>>("Expected (");
+            return RaiseParseError<SqlCollectionExpression>("Expected (");
         }
 
         var elements = ParseWithComma(parseElemFn);
         if (elements.IsRight)
         {
-            return RaiseParseError<List<T>>(elements.RightValue);
+            return RaiseParseError<SqlCollectionExpression>(elements.RightValue);
         }
 
         if (!_text.TryMatch(")"))
         {
-            return RaiseParseError<List<T>>("Expected )");
+            return RaiseParseError<SqlCollectionExpression>("Expected )");
         }
 
         return elements;
     }
-
-    private Either<T[], ParseError> ParseResult<T>(IEnumerable<T> result)
+    
+    private Either<SqlCollectionExpression, ParseError> ParseResult<T>(IEnumerable<T> result)
     {
-        return new Either<T[], ParseError>(result.ToArray());
+        return new Either<SqlCollectionExpression, ParseError>(new SqlCollectionExpression()
+        {
+            Items = result.Cast<ISqlExpression>().ToList()
+        });
     }
 
-    private Either<T[], ParseError> ParseResult<T>(T result)
+    private Either<T, ParseError> CreateParseResult<T>(T result)
     {
-        return new Either<T[], ParseError>([result]);
+        return new Either<T, ParseError>(result);
+    }
+    
+    private Either<ISqlExpression, ParseError> ParseResult<T>(T result)
+        where T : ISqlExpression 
+    {
+        return new Either<ISqlExpression, ParseError>(result);
     }
 
-    private Either<T[], ParseError> ParseResult<T>()
+    private Either<ISqlExpression, ParseError> NoneResult()
     {
-        return new Either<T[], ParseError>([]);
+        return new Either<ISqlExpression, ParseError>(SqlNoneExpression.Default);
     }
 
     private Either<T2, ParseError> ParseResult<T1, T2>(Either<T1, ParseError> result, Func<T1, T2> toResult)
@@ -584,9 +558,9 @@ public class SqlParser
         return new Either<T2, ParseError>(result.RightValue);
     }
 
-    private Either<ISqlExpression[], ParseError> ParseTableConstraint()
+    private Either<ISqlExpression, ParseError> ParseTableConstraint()
     {
-        var constraintName = "DEFAULT";
+        var constraintName = string.Empty;
         if (TryMatchKeyword(ConstraintKeyword))
         {
             constraintName = _text.ReadSqlIdentifier().Word;
@@ -600,11 +574,11 @@ public class SqlParser
         var primaryKeyOrUnique = ParsePrimaryKeyOrUnique();
         if (primaryKeyOrUnique.IsRight)
         {
-            return RaiseParseError<ISqlExpression>(primaryKeyOrUnique.RightValue);
+            return RaiseParseError(primaryKeyOrUnique.RightValue);
         }
-        if (primaryKeyOrUnique.IsLeft && primaryKeyOrUnique.LeftValue.Length != 0)
+        if (primaryKeyOrUnique.IsLeft && primaryKeyOrUnique.LeftValue.SqlType != SqlType.None)
         {
-            var subConstraint = primaryKeyOrUnique.LeftValue.First();
+            var subConstraint = (SqlConstraint)primaryKeyOrUnique.LeftValue;
             sqlConstraint.ConstraintType = subConstraint.ConstraintType;
             sqlConstraint.Clustered = subConstraint.Clustered;
             sqlConstraint.Columns = subConstraint.Columns;
@@ -624,10 +598,9 @@ public class SqlParser
             });
             if (uniqueColumns.IsRight)
             {
-                return RaiseParseError<ISqlExpression>(uniqueColumns.RightValue);
+                return RaiseParseError(uniqueColumns.RightValue);
             }
-
-            sqlConstraint.Columns = uniqueColumns.LeftValue.First();
+            sqlConstraint.Columns = uniqueColumns.LeftValue.ToList<SqlConstraintColumn>();
         }
 
         if (TryMatchKeyword("WITH"))
@@ -635,10 +608,9 @@ public class SqlParser
             var togglesResult = ParseParenthesesWithComma(ParseWithToggle);
             if (togglesResult.IsRight)
             {
-                return RaiseParseError<ISqlExpression>(togglesResult.RightValue);
+                return RaiseParseError(togglesResult.RightValue);
             }
-
-            sqlConstraint.WithToggles = togglesResult.LeftValue.First();
+            sqlConstraint.WithToggles = togglesResult.LeftValue.ToList<SqlToggle>();
         }
 
         if (TryMatchKeyword("ON"))
@@ -650,25 +622,32 @@ public class SqlParser
         {
             if (identityResult.IsRight)
             {
-                return RaiseParseError<ISqlExpression>(identityResult.RightValue);
+                return RaiseParseError(identityResult.RightValue);
             }
-            sqlConstraint.Identity = identityResult.LeftValue.First();
+            sqlConstraint.Identity = (SqlIdentity)identityResult.LeftValue;
         }
 
-        return ParseResult<ISqlExpression>(sqlConstraint);
+        return ParseResult(sqlConstraint);
     }
 
-    private Either<SqlConstraint[], ParseError> ParsePrimaryKeyOrUnique()
+    private Either<ISqlExpression, ParseError> ParsePrimaryKeyOrUnique()
     {
         var sqlConstraint = new SqlConstraint();
-        sqlConstraint.ConstraintType = Optional(OrFn(ParsePrimaryKey, ParseUnique)) ?? string.Empty;
+        var primaryKeyOrUniqueToken = Optional(Or(Keywords("PRIMARY", "KEY"), Keywords("UNIQUE")));
+        if( primaryKeyOrUniqueToken.SqlType != SqlType.None )
+        {
+            sqlConstraint.ConstraintType = ((SqlToken)primaryKeyOrUniqueToken).Value;
+        }
         if (string.IsNullOrEmpty(sqlConstraint.ConstraintType))
         {
-            return ParseResult<SqlConstraint>();
+            return NoneResult();
         }
 
-        sqlConstraint.Clustered =
-            Optional(OrFn(ParseKeywords("CLUSTERED"), ParseKeywords("NONCLUSTERED"))) ?? string.Empty;
+        var clusteredToken = Optional(Or(Keywords("CLUSTERED"), Keywords("NONCLUSTERED")));
+        if (clusteredToken != SqlNoneExpression.Default)
+        {
+            sqlConstraint.Clustered = ((SqlToken)clusteredToken).Value;
+        }
         var uniqueColumns = ParseParenthesesWithComma(() =>
         {
             var columnName = _text.ReadSqlIdentifier();
@@ -681,7 +660,6 @@ public class SqlParser
             {
                 order = "DESC";
             }
-
             return ParseResult(new SqlConstraintColumn
             {
                 ColumnName = columnName.Word,
@@ -690,37 +668,35 @@ public class SqlParser
         });
         if (uniqueColumns.IsRight)
         {
-            return RaiseParseError<SqlConstraint>(uniqueColumns.RightValue);
+            return RaiseParseError(uniqueColumns.RightValue);
         }
-        sqlConstraint.Columns = uniqueColumns.LeftValue.First();
+        sqlConstraint.Columns = uniqueColumns.LeftValue.ToList<SqlConstraintColumn>();
         return ParseResult(sqlConstraint);
     }
 
-    private T? Optional<T>(Func<Either<T[], ParseError>> parseFn)
+    private ISqlExpression Optional(Func<Either<ISqlExpression, ParseError>> parseFn)
     {
         var result = parseFn();
-        if (result.IsLeft && result.LeftValue.Length != 0)
+        if (result.IsLeft && result.LeftValue.SqlType != SqlType.None)
         {
-            return result.LeftValue.First();
+            return result.LeftValue;
         }
-
-        return default;
+        return SqlNoneExpression.Default;
     }
 
-    private Either<ISqlExpression[], ParseError> ParseTableName()
+    private Either<ISqlExpression, ParseError> ParseTableName()
     {
         if (_text.Try(_text.ReadIdentifier, out var fieldName))
         {
-            return ParseResult<ISqlExpression>(new SqlFieldExpression()
+            return ParseResult(new SqlFieldExpression()
             {
                 FieldName = fieldName.Word
             });
         }
-
-        return ParseResult<ISqlExpression>();
+        return NoneResult();
     }
 
-    private Either<ISqlExpression[], ParseError> ParseValue()
+    private Either<ISqlExpression, ParseError> ParseValue()
     {
         if (Try(ParseIntValue, out var number))
         {
@@ -740,26 +716,26 @@ public class SqlParser
             return tableName;
         }
 
-        return ParseResult<ISqlExpression>();
+        return NoneResult();
     }
 
-    private Either<List<T>[], ParseError> ParseWithComma<T>(Func<Either<T[], ParseError>> parseElemFn)
+    private Either<SqlCollectionExpression, ParseError> ParseWithComma<T>(Func<Either<T, ParseError>> parseElemFn)
+        where T : ISqlExpression 
     {
         var elements = new List<T>();
         do
         {
             var elem = parseElemFn();
-            if (elem.IsLeft && elem.LeftValue.Length == 0)
+            if (elem is { IsLeft: true, LeftValue.SqlType: SqlType.None })
             {
                 break;
             }
 
             if (elem.IsRight)
             {
-                return RaiseParseError<List<T>>(elem.RightValue);
+                return RaiseParseError<SqlCollectionExpression>(elem.RightValue);
             }
-
-            elements.Add(elem.LeftValue.First());
+            elements.Add(elem.LeftValue);
             if (_text.PeekChar() != ',')
             {
                 break;
@@ -771,13 +747,26 @@ public class SqlParser
         return ParseResult(elements);
     }
 
-    private Either<SqlWithToggle[], ParseError> ParseWithToggle()
+    private Either<ISqlExpression, ParseError> ParseWithToggle()
     {
-        var toggle = new SqlWithToggle
+        var startPosition = _text.Position;
+        var toggleName = _text.ReadSqlIdentifier();
+        if (toggleName.Length == 0)
         {
-            ToggleName = _text.ReadSqlIdentifier().Word
+            _text.Position = startPosition;
+            return NoneResult();   
+        }
+        
+        var toggle = new SqlToggle
+        {
+            ToggleName = toggleName.Word
         };
-        _text.Match("=");
+
+        if (!_text.TryMatch("="))
+        {
+            _text.Position = startPosition;
+            return RaiseParseError("Expected toggleName =");
+        }
 
         if (_text.Try(_text.ReadNumber, out var number))
         {
@@ -795,32 +784,30 @@ public class SqlParser
         return _text.PeekMatchSymbol(symbol);
     }
 
-    private Either<ISqlExpression[], ParseError> RaiseParseError(ParseError innerError)
+    private Either<ISqlExpression, ParseError> RaiseParseError(ParseError innerError)
     {
-        return new Either<ISqlExpression[], ParseError>(innerError);
+        return new Either<ISqlExpression, ParseError>(innerError);
     }
 
-    private Either<ISqlExpression[], ParseError> RaiseParseError(string error)
+    private Either<ISqlExpression, ParseError> RaiseParseError(string error)
     {
-        return new Either<ISqlExpression[], ParseError>(new ParseError(error)
+        return new Either<ISqlExpression, ParseError>(new ParseError(error)
         {
-            IsStart = false,
             Offset = _text.Position
         });
     }
 
-    private Either<T[], ParseError> RaiseParseError<T>(string error)
+    private Either<T, ParseError> RaiseParseError<T>(string error)
     {
-        return new Either<T[], ParseError>(new ParseError(error)
+        return new Either<T, ParseError>(new ParseError(error)
         {
-            IsStart = false,
             Offset = _text.Position
         });
     }
 
-    private Either<T[], ParseError> RaiseParseError<T>(ParseError innerError)
+    private Either<T, ParseError> RaiseParseError<T>(ParseError innerError)
     {
-        return new Either<T[], ParseError>(innerError);
+        return new Either<T, ParseError>(innerError);
     }
 
     private void ReadNonWhiteSpace()
@@ -878,61 +865,43 @@ public class SqlParser
         return _text.TryMatchIgnoreCaseKeyword(expected);
     }
 
-    private Func<Either<string[], ParseError>> ParseKeywords(params string[] keywords)
+
+    private Func<Either<ISqlExpression, ParseError>> Keywords(params string[] keywords)
+    {
+        return () => ParseKeywords(keywords);
+    }
+
+    private Either<ISqlExpression, ParseError> ParseKeywords(params string[] keywords)
+    {
+        if (TryMatchesKeyword(keywords))
+        {
+            return ParseResult(new SqlToken
+            {
+                Value= string.Join(" ", keywords) 
+            });
+        }
+        return NoneResult();
+    }
+    
+    private Func<Either<ISqlExpression, ParseError>> Or(params Func<Either<ISqlExpression, ParseError>>[] parseFnList)
     {
         return () =>
         {
-            if (TryMatchesKeyword(keywords))
+            foreach (var parseFn in parseFnList)
             {
-                return ParseResult<string>(string.Join(" ", keywords));
-            }
+                var rc = parseFn();
+                if (rc.IsLeft && rc.LeftValue.SqlType != SqlType.None)
+                {
+                    return rc;
+                }
 
-            return ParseResult<string>();
+                if (rc.IsRight)
+                {
+                    return rc;
+                }
+            }
+            return NoneResult();
         };
-    }
-
-    private Either<string[], ParseError> ParsePrimaryKey()
-    {
-        if (TryMatchesKeyword("PRIMARY", "KEY"))
-        {
-            return ParseResult<string>("PRIMARY KEY");
-        }
-
-        return ParseResult<string>();
-    }
-
-    private Either<string[], ParseError> ParseUnique()
-    {
-        if (TryMatchKeyword("UNIQUE"))
-        {
-            return ParseResult<string>("UNIQUE");
-        }
-
-        return ParseResult<string>();
-    }
-
-    private Func<Either<T[], ParseError>> OrFn<T>(params Func<Either<T[], ParseError>>[] parseFnList)
-    {
-        return () => Or(parseFnList);
-    }
-
-    private Either<T[], ParseError> Or<T>(params Func<Either<T[], ParseError>>[] parseFnList)
-    {
-        foreach (var parseFn in parseFnList)
-        {
-            var rc = parseFn();
-            if (rc.IsLeft && rc.LeftValue.Length != 0)
-            {
-                return rc;
-            }
-
-            if (rc.IsRight)
-            {
-                return rc;
-            }
-        }
-
-        return ParseResult<T>();
     }
 
     private bool TryMatchPrimaryKeyOrUnique(SqlConstraint sqlConstraint)
@@ -952,15 +921,14 @@ public class SqlParser
         return false;
     }
 
-    private Either<SqlParameterValue[], ParseError> ParseParameterValueOrAssignValue()
+    private Either<ISqlExpression, ParseError> ParseParameterValueOrAssignValue()
     {
         var rc1 = ParseParameterValue();
         if (rc1.IsRight)
         {
-            return RaiseParseError<SqlParameterValue>(rc1.RightValue);
+            return RaiseParseError(rc1.RightValue);
         }
-
-        if (rc1.IsLeft && rc1.LeftValue.Length != 0)
+        if (rc1.IsLeft && rc1.LeftValue.SqlType != SqlType.None)
         {
             return rc1;
         }
@@ -968,18 +936,18 @@ public class SqlParser
         var rc2 = ParseParameterAssignValue();
         if (rc2.IsRight)
         {
-            return RaiseParseError<SqlParameterValue>(rc2.RightValue);
+            return RaiseParseError(rc2.RightValue);
         }
 
-        if (rc2.IsLeft && rc2.LeftValue.Length != 0)
+        if (rc2.IsLeft && rc2.LeftValue.SqlType != SqlType.None)
         {
             return rc2;
         }
 
-        return ParseResult<SqlParameterValue>();
+        return NoneResult();
     }
 
-    private Either<SqlParameterValue[], ParseError> ParseParameterValue()
+    private Either<ISqlExpression, ParseError> ParseParameterValue()
     {
         SkipWhiteSpace();
         var startPosition = _text.Position;
@@ -987,45 +955,42 @@ public class SqlParser
         if (valueResult.IsRight)
         {
             _text.Position = startPosition;
-            return RaiseParseError<SqlParameterValue>(valueResult.RightValue);
+            return RaiseParseError(valueResult.RightValue);
         }
-
-        if (valueResult.LeftValue.Length == 0)
+        if (valueResult.LeftValue.SqlType == SqlType.None)
         {
-            return ParseResult<SqlParameterValue>();
+            return NoneResult();
         }
 
         if (_text.Peek(_text.ReadSymbols).Word == "=")
         {
             _text.Position = startPosition;
-            return ParseResult<SqlParameterValue>();
+            return NoneResult();
         }
 
         return ParseResult(new SqlParameterValue
         {
             Name = string.Empty,
-            Value = ((ISqlValue)valueResult.LeftValue.First()).Value
+            Value = ((ISqlValue)valueResult.LeftValue).Value
         });
     }
 
-    private Either<SqlParameterValue[], ParseError> ParseParameterAssignValue()
+    private Either<ISqlExpression, ParseError> ParseParameterAssignValue()
     {
         SkipWhiteSpace();
         if (!_text.Try(_text.ReadSqlIdentifier, out var name))
         {
-            return ParseResult<SqlParameterValue>();
+            return NoneResult();
         }
-
         if (!_text.TryMatch("="))
         {
-            return RaiseParseError<SqlParameterValue>("Expected =");
+            return RaiseParseError("Expected =");
         }
 
         if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
         {
-            return RaiseParseError<SqlParameterValue>($"Expected @name value, but got {_text.PreviousWord().Word}");
+            return RaiseParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
         }
-
         return ParseResult(new SqlParameterValue
         {
             Name = name.Word,
@@ -1033,11 +998,11 @@ public class SqlParser
         });
     }
 
-    private Either<SqlIdentity[], ParseError> ParseIdentity()
+    private Either<ISqlExpression, ParseError> ParseIdentity()
     {
         if (!_text.TryMatch("IDENTITY"))
         {
-            return ParseResult<SqlIdentity>();
+            return NoneResult();
         }
         var sqlIdentity = new SqlIdentity
         {
@@ -1087,31 +1052,6 @@ public class SqlParser
         var isSuccess = _text.TryMatchIgnoreCaseKeyword(expected);
         _text.Position = tmpPosition;
         return isSuccess;
-    }
-
-    private bool TryStart(Func<Either<ISqlExpression[], ParseError>> parseFunc,
-        out Either<ISqlExpression, ParseError> result)
-    {
-        if (Try(parseFunc, out var parseResult))
-        {
-            if (parseResult is { IsRight: true, RightValue.IsStart: true })
-            {
-                result = new Either<ISqlExpression, ParseError>(parseResult.RightValue);
-                return false;
-            }
-
-            if (parseResult.IsRight)
-            {
-                result = new Either<ISqlExpression, ParseError>(parseResult.RightValue);
-                return true;
-            }
-
-            result = new Either<ISqlExpression, ParseError>(parseResult.LeftValue.First());
-            return true;
-        }
-
-        result = new Either<ISqlExpression, ParseError>(ParseError.Empty);
-        return false;
     }
 }
 

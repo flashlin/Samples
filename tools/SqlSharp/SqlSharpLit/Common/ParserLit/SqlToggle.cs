@@ -1,9 +1,11 @@
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlWithToggle
+public class SqlToggle : ISqlExpression
 {
+    public SqlType SqlType { get; } = SqlType.WithToggle;
     public string ToggleName { get; set; } = string.Empty;
     public string Value { get; set; } = string.Empty;
+
 
     public string ToSql()
     {

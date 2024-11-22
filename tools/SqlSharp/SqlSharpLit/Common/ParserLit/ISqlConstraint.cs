@@ -1,5 +1,5 @@
 namespace SqlSharpLit.Common.ParserLit;
 
-public interface ISqlConstraint : ISqlExpression
+public interface ISqlConstraint 
 {
 }

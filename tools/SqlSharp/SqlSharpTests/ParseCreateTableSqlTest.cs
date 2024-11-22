@@ -41,7 +41,7 @@ public class ParseCreateTableSqlTest
                                 }
                             ],
                             WithToggles = [
-                                new SqlWithToggle
+                                new SqlToggle
                                 {
                                     ToggleName = "FILLFACTOR",
                                     Value = "90"
@@ -99,7 +99,7 @@ public class ParseCreateTableSqlTest
                         }
                     ],
                     WithToggles = [
-                        new SqlWithToggle
+                        new SqlToggle
                         {
                             ToggleName = "PAD_INDEX",
                             Value = "OFF"
@@ -173,10 +173,9 @@ public class ParseCreateTableSqlTest
                     IsNullable = false,
                     Constraints =
                     [
-                        new SqlConstraintDefault
+                        new SqlConstraint
                         {
-                            ConstraintName = "DEFAULT",
-                            Value = "GetDate()"
+                            DefaultValue = "GetDate()"
                         }
                     ]
                 }
@@ -334,10 +333,10 @@ public class ParseCreateTableSqlTest
                     Scale = 6,
                     Constraints =
                     [
-                        new SqlConstraintDefault
+                        new SqlConstraint
                         {
                             ConstraintName = "[DF_CheckSum]",
-                            Value = "(0)",
+                            DefaultValue = "(0)",
                         }
                     ]
                 }
@@ -359,27 +358,27 @@ public class ParseCreateTableSqlTest
                     ],
                     WithToggles =
                     [
-                        new SqlWithToggle
+                        new SqlToggle
                         {
                             ToggleName = "PAD_INDEX",
                             Value = "OFF"
                         },
-                        new SqlWithToggle
+                        new SqlToggle
                         {
                             ToggleName = "STATISTICS_NORECOMPUTE",
                             Value = "OFF"
                         },
-                        new SqlWithToggle
+                        new SqlToggle
                         {
                             ToggleName = "IGNORE_DUP_KEY",
                             Value = "OFF"
                         },
-                        new SqlWithToggle
+                        new SqlToggle
                         {
                             ToggleName = "ALLOW_ROW_LOCKS",
                             Value = "ON"
                         },
-                        new SqlWithToggle
+                        new SqlToggle
                         {
                             ToggleName = "ALLOW_PAGE_LOCKS",
                             Value = "ON"
@@ -411,10 +410,10 @@ public class ParseCreateTableSqlTest
                     ColumnName = "[BannerType]",
                     DataType = "INT",
                     Constraints = [
-                        new SqlConstraintDefault
+                        new SqlConstraint
                         {
                             ConstraintName = "DEFAULT",
-                            Value = "NULL"
+                            DefaultValue = "NULL"
                         }
                     ]
                 }
@@ -602,7 +601,7 @@ public class ParseCreateTableSqlTest
                         }
                     ],
                     WithToggles = [
-                        new SqlWithToggle
+                        new SqlToggle
                         {
                             ToggleName = "FILLFACTOR",
                             Value = "85"
@@ -650,7 +649,7 @@ public class ParseCreateTableSqlTest
                         }
                     ],
                     WithToggles = [
-                        new SqlWithToggle
+                        new SqlToggle
                         {
                             ToggleName = "PAD_INDEX",
                             Value = "OFF"
