@@ -24,9 +24,9 @@ public class SqlParser
         while (!_text.IsEnd())
         {
             var rc = Parse();
-            if (rc.IsLeft)
+            if (rc.HasResult)
             {
-                yield return rc.LeftValue;
+                yield return rc.Result;
             }
             else
             {
@@ -35,7 +35,7 @@ public class SqlParser
         }
     }
 
-    public Either<ISqlExpression, ParseError> Parse()
+    public ParseResult Parse()
     {
         if (Try(ParseCreateTableStatement, out var createTableResult))
         {
@@ -102,7 +102,7 @@ public class SqlParser
         return new Either<SqlCollectionExpression, ParseError>(new SqlCollectionExpression());
     }
 
-    public Either<ISqlExpression, ParseError> ParseCreateTableStatement()
+    public ParseResult ParseCreateTableStatement()
     {
         if (!TryMatchesKeyword("CREATE", "TABLE"))
         {
@@ -532,10 +532,10 @@ public class SqlParser
         });
     }
     
-    private Either<ISqlExpression, ParseError> CreateParseResult<T>(T result)
+    private ParseResult CreateParseResult<T>(T result)
         where T : ISqlExpression 
     {
-        return new Either<ISqlExpression, ParseError>(result);
+        return new ParseResult(result);
     }
     
     private Either<T, ParseError> ToParseResult<T>(T result)
@@ -543,9 +543,9 @@ public class SqlParser
         return new Either<T, ParseError>(result);
     }
     
-    private Either<ISqlExpression, ParseError> NoneResult()
+    private ParseResult NoneResult()
     {
-        return new Either<ISqlExpression, ParseError>(SqlNoneExpression.Default);
+        return new ParseResult(SqlNoneExpression.Default);
     }
 
     private Either<ISqlExpression, ParseError> ParseTableConstraint()
@@ -774,30 +774,17 @@ public class SqlParser
         return _text.PeekMatchSymbol(symbol);
     }
 
-    private Either<ISqlExpression, ParseError> RaiseParseError(ParseError innerError)
+    private ParseResult RaiseParseError(string error)
     {
-        return new Either<ISqlExpression, ParseError>(innerError);
-    }
-
-    private Either<ISqlExpression, ParseError> RaiseParseError(string error)
-    {
-        return new Either<ISqlExpression, ParseError>(new ParseError(error)
+        return new ParseResult(new ParseError(error)
         {
             Offset = _text.Position
         });
     }
 
-    private Either<T, ParseError> RaiseParseError<T>(string error)
+    private ParseResult RaiseParseError(ParseError innerError)
     {
-        return new Either<T, ParseError>(new ParseError(error)
-        {
-            Offset = _text.Position
-        });
-    }
-
-    private Either<T, ParseError> RaiseParseError<T>(ParseError innerError)
-    {
-        return new Either<T, ParseError>(innerError);
+        return new ParseResult(innerError);
     }
 
     private void ReadNonWhiteSpace()
@@ -1045,8 +1032,22 @@ public class SqlParser
     }
 }
 
-// public class ParseResult
-// {
-//     public ISqlExpression Result { get; set; } = SqlNoneExpression.Default;
-//     public ParseError Error { get; set; } = ParseError.Empty;
-// }
+public class ParseResult
+{
+    public ParseResult(ISqlExpression result)
+    {
+        HasResult = true;
+        Result = result; 
+    }
+
+    public ParseResult(ParseError error)
+    {
+        HasError = true;
+        Error = error;
+    }
+    
+    public ISqlExpression Result { get; set; } = SqlNoneExpression.Default;
+    public bool HasResult { get; set; }
+    public ParseError Error { get; set; } = ParseError.Empty;
+    public bool HasError { get; set; }
+}
