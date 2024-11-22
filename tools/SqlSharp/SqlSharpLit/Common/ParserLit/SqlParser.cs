@@ -5,12 +5,6 @@ namespace SqlSharpLit.Common.ParserLit;
 
 public class SqlParser
 {
-    public static ParseResult<ISqlExpression> Parse(string sql)
-    {
-        var p = new SqlParser(sql);
-        return p.Parse();
-    }
-
     private const string ConstraintKeyword = "CONSTRAINT";
 
     private static string[] SqlKeywords =
@@ -39,6 +33,12 @@ public class SqlParser
                 _text.ReadUntil(c => c == '\n');
             }
         }
+    }
+
+    public static ParseResult<ISqlExpression> Parse(string sql)
+    {
+        var p = new SqlParser(sql);
+        return p.Parse();
     }
 
     public ParseResult<ISqlExpression> Parse()
@@ -108,11 +108,6 @@ public class SqlParser
         } while (!_text.IsEnd());
 
         return CreateCollectionParseResult(columns);
-    }
-
-    private ParseResult<SqlCollectionExpression> EmptyCollectionResult()
-    {
-        return new ParseResult<SqlCollectionExpression>(new SqlCollectionExpression());
     }
 
     public ParseResult<ISqlExpression> ParseCreateTableStatement()
@@ -316,10 +311,73 @@ public class SqlParser
         return true;
     }
 
+    private ParseResult<SqlCollectionExpression> CreateCollectionParseResult<T>(IEnumerable<T> result)
+    {
+        return new ParseResult<SqlCollectionExpression>(new SqlCollectionExpression()
+        {
+            Items = result.Cast<ISqlExpression>().ToList()
+        });
+    }
+
+    private ParseResult<ISqlExpression> CreateParseResult<T>(T result)
+        where T : ISqlExpression
+    {
+        return new ParseResult<ISqlExpression>(result);
+    }
+
+    private ParseResult<SqlCollectionExpression> EmptyCollectionResult()
+    {
+        return new ParseResult<SqlCollectionExpression>(new SqlCollectionExpression());
+    }
+
+
+    private Func<ParseResult<ISqlExpression>> Keywords(params string[] keywords)
+    {
+        return () => ParseKeywords(keywords);
+    }
+
     private void MatchString(string expected)
     {
         SkipWhiteSpace();
         _text.Match(expected);
+    }
+
+    private ParseResult<ISqlExpression> NoneResult()
+    {
+        return new ParseResult<ISqlExpression>(SqlNoneExpression.Default);
+    }
+
+    private ISqlExpression Optional(Func<ParseResult<ISqlExpression>> parseFn)
+    {
+        var result = parseFn();
+        if (result.HasResult && result.Result.SqlType != SqlType.None)
+        {
+            return result.Result;
+        }
+
+        return SqlNoneExpression.Default;
+    }
+
+    private Func<ParseResult<ISqlExpression>> Or(params Func<ParseResult<ISqlExpression>>[] parseFnList)
+    {
+        return () =>
+        {
+            foreach (var parseFn in parseFnList)
+            {
+                var rc = parseFn();
+                if (rc.HasResult && rc.Result.SqlType != SqlType.None)
+                {
+                    return rc;
+                }
+
+                if (rc.HasError)
+                {
+                    return rc;
+                }
+            }
+
+            return NoneResult();
+        };
     }
 
     private ParseResult<ColumnDefinition> ParseColumnConstraints(ColumnDefinition column)
@@ -539,6 +597,29 @@ public class SqlParser
         });
     }
 
+    private ParseResult<ISqlExpression> ParseIdentity()
+    {
+        if (!_text.TryMatch("IDENTITY"))
+        {
+            return NoneResult();
+        }
+
+        var sqlIdentity = new SqlIdentity
+        {
+            Seed = 1,
+            Increment = 1
+        };
+        if (_text.TryMatch("("))
+        {
+            sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
+            _text.Match(",");
+            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
+            _text.Match(")");
+        }
+
+        return CreateParseResult(sqlIdentity);
+    }
+
     private ParseResult<ISqlExpression> ParseIntValue()
     {
         if (_text.Try(_text.ReadNumber, out var number))
@@ -547,6 +628,100 @@ public class SqlParser
             {
                 Value = number.Word
             });
+        }
+
+        return NoneResult();
+    }
+
+    private ParseResult<ISqlExpression> ParseKeywords(params string[] keywords)
+    {
+        if (TryMatchesKeyword(keywords))
+        {
+            return CreateParseResult(new SqlToken
+            {
+                Value = string.Join(" ", keywords)
+            });
+        }
+
+        return NoneResult();
+    }
+
+    private ParseResult<ISqlExpression> ParseParameterAssignValue()
+    {
+        SkipWhiteSpace();
+        if (!_text.Try(_text.ReadSqlIdentifier, out var name))
+        {
+            return NoneResult();
+        }
+
+        if (!_text.TryMatch("="))
+        {
+            return RaiseParseError("Expected =");
+        }
+
+        if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
+        {
+            return RaiseParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
+        }
+
+        return CreateParseResult(new SqlParameterValue
+        {
+            Name = name.Word,
+            Value = nameValue.Word
+        });
+    }
+
+    private ParseResult<ISqlExpression> ParseParameterValue()
+    {
+        SkipWhiteSpace();
+        var startPosition = _text.Position;
+        var valueResult = ParseValue();
+        if (valueResult.HasError)
+        {
+            _text.Position = startPosition;
+            return RaiseParseError(valueResult.Error);
+        }
+
+        if (valueResult.Result.SqlType == SqlType.None)
+        {
+            return NoneResult();
+        }
+
+        if (_text.Peek(_text.ReadSymbols).Word == "=")
+        {
+            _text.Position = startPosition;
+            return NoneResult();
+        }
+
+        return CreateParseResult(new SqlParameterValue
+        {
+            Name = string.Empty,
+            Value = ((ISqlValue)valueResult.Result).Value
+        });
+    }
+
+    private ParseResult<ISqlExpression> ParseParameterValueOrAssignValue()
+    {
+        var rc1 = ParseParameterValue();
+        if (rc1.HasError)
+        {
+            return RaiseParseError(rc1.Error);
+        }
+
+        if (rc1.HasResult && rc1.Result.SqlType != SqlType.None)
+        {
+            return rc1;
+        }
+
+        var rc2 = ParseParameterAssignValue();
+        if (rc2.HasError)
+        {
+            return RaiseParseError(rc2.Error);
+        }
+
+        if (rc2.HasResult && rc2.Result.SqlType != SqlType.None)
+        {
+            return rc2;
         }
 
         return NoneResult();
@@ -574,28 +749,52 @@ public class SqlParser
         return elements;
     }
 
-    private ParseResult<SqlCollectionExpression> CreateCollectionParseResult<T>(IEnumerable<T> result)
+    private ParseResult<ISqlExpression> ParsePrimaryKeyOrUnique()
     {
-        return new ParseResult<SqlCollectionExpression>(new SqlCollectionExpression()
+        var sqlConstraint = new SqlConstraint();
+        var primaryKeyOrUniqueToken = Optional(Or(Keywords("PRIMARY", "KEY"), Keywords("UNIQUE")));
+        if (primaryKeyOrUniqueToken.SqlType != SqlType.None)
         {
-            Items = result.Cast<ISqlExpression>().ToList()
+            sqlConstraint.ConstraintType = ((SqlToken)primaryKeyOrUniqueToken).Value;
+        }
+
+        if (string.IsNullOrEmpty(sqlConstraint.ConstraintType))
+        {
+            return NoneResult();
+        }
+
+        var clusteredToken = Optional(Or(Keywords("CLUSTERED"), Keywords("NONCLUSTERED")));
+        if (clusteredToken != SqlNoneExpression.Default)
+        {
+            sqlConstraint.Clustered = ((SqlToken)clusteredToken).Value;
+        }
+
+        var uniqueColumns = ParseParenthesesWithComma(() =>
+        {
+            var columnName = _text.ReadSqlIdentifier();
+            var order = string.Empty;
+            if (TryMatchKeyword("ASC"))
+            {
+                order = "ASC";
+            }
+            else if (TryMatchKeyword("DESC"))
+            {
+                order = "DESC";
+            }
+
+            return CreateParseResult(new SqlConstraintColumn
+            {
+                ColumnName = columnName.Word,
+                Order = order,
+            });
         });
-    }
+        if (uniqueColumns.HasError)
+        {
+            return RaiseParseError(uniqueColumns.Error);
+        }
 
-    private ParseResult<ISqlExpression> CreateParseResult<T>(T result)
-        where T : ISqlExpression
-    {
-        return new ParseResult<ISqlExpression>(result);
-    }
-
-    private ParseResult<T> ToParseResult<T>(T result)
-    {
-        return new ParseResult<T>(result);
-    }
-
-    private ParseResult<ISqlExpression> NoneResult()
-    {
-        return new ParseResult<ISqlExpression>(SqlNoneExpression.Default);
+        sqlConstraint.Columns = uniqueColumns.Result.ToList<SqlConstraintColumn>();
+        return CreateParseResult(sqlConstraint);
     }
 
     private ParseResult<ISqlExpression> ParseTableConstraint()
@@ -683,65 +882,6 @@ public class SqlParser
         }
 
         return CreateParseResult(sqlConstraint);
-    }
-
-    private ParseResult<ISqlExpression> ParsePrimaryKeyOrUnique()
-    {
-        var sqlConstraint = new SqlConstraint();
-        var primaryKeyOrUniqueToken = Optional(Or(Keywords("PRIMARY", "KEY"), Keywords("UNIQUE")));
-        if (primaryKeyOrUniqueToken.SqlType != SqlType.None)
-        {
-            sqlConstraint.ConstraintType = ((SqlToken)primaryKeyOrUniqueToken).Value;
-        }
-
-        if (string.IsNullOrEmpty(sqlConstraint.ConstraintType))
-        {
-            return NoneResult();
-        }
-
-        var clusteredToken = Optional(Or(Keywords("CLUSTERED"), Keywords("NONCLUSTERED")));
-        if (clusteredToken != SqlNoneExpression.Default)
-        {
-            sqlConstraint.Clustered = ((SqlToken)clusteredToken).Value;
-        }
-
-        var uniqueColumns = ParseParenthesesWithComma(() =>
-        {
-            var columnName = _text.ReadSqlIdentifier();
-            var order = string.Empty;
-            if (TryMatchKeyword("ASC"))
-            {
-                order = "ASC";
-            }
-            else if (TryMatchKeyword("DESC"))
-            {
-                order = "DESC";
-            }
-
-            return CreateParseResult(new SqlConstraintColumn
-            {
-                ColumnName = columnName.Word,
-                Order = order,
-            });
-        });
-        if (uniqueColumns.HasError)
-        {
-            return RaiseParseError(uniqueColumns.Error);
-        }
-
-        sqlConstraint.Columns = uniqueColumns.Result.ToList<SqlConstraintColumn>();
-        return CreateParseResult(sqlConstraint);
-    }
-
-    private ISqlExpression Optional(Func<ParseResult<ISqlExpression>> parseFn)
-    {
-        var result = parseFn();
-        if (result.HasResult && result.Result.SqlType != SqlType.None)
-        {
-            return result.Result;
-        }
-
-        return SqlNoneExpression.Default;
     }
 
     private ParseResult<ISqlExpression> ParseTableName()
@@ -915,6 +1055,11 @@ public class SqlParser
         }
     }
 
+    private ParseResult<T> ToParseResult<T>(T result)
+    {
+        return new ParseResult<T>(result);
+    }
+
     private bool TryMatchesKeyword(params string[] keywords)
     {
         SkipWhiteSpace();
@@ -925,47 +1070,6 @@ public class SqlParser
     {
         SkipWhiteSpace();
         return _text.TryMatchIgnoreCaseKeyword(expected);
-    }
-
-
-    private Func<ParseResult<ISqlExpression>> Keywords(params string[] keywords)
-    {
-        return () => ParseKeywords(keywords);
-    }
-
-    private ParseResult<ISqlExpression> ParseKeywords(params string[] keywords)
-    {
-        if (TryMatchesKeyword(keywords))
-        {
-            return CreateParseResult(new SqlToken
-            {
-                Value = string.Join(" ", keywords)
-            });
-        }
-
-        return NoneResult();
-    }
-
-    private Func<ParseResult<ISqlExpression>> Or(params Func<ParseResult<ISqlExpression>>[] parseFnList)
-    {
-        return () =>
-        {
-            foreach (var parseFn in parseFnList)
-            {
-                var rc = parseFn();
-                if (rc.HasResult && rc.Result.SqlType != SqlType.None)
-                {
-                    return rc;
-                }
-
-                if (rc.HasError)
-                {
-                    return rc;
-                }
-            }
-
-            return NoneResult();
-        };
     }
 
     private bool TryMatchPrimaryKeyOrUnique(SqlConstraint sqlConstraint)
@@ -983,110 +1087,6 @@ public class SqlParser
         }
 
         return false;
-    }
-
-    private ParseResult<ISqlExpression> ParseParameterValueOrAssignValue()
-    {
-        var rc1 = ParseParameterValue();
-        if (rc1.HasError)
-        {
-            return RaiseParseError(rc1.Error);
-        }
-
-        if (rc1.HasResult && rc1.Result.SqlType != SqlType.None)
-        {
-            return rc1;
-        }
-
-        var rc2 = ParseParameterAssignValue();
-        if (rc2.HasError)
-        {
-            return RaiseParseError(rc2.Error);
-        }
-
-        if (rc2.HasResult && rc2.Result.SqlType != SqlType.None)
-        {
-            return rc2;
-        }
-
-        return NoneResult();
-    }
-
-    private ParseResult<ISqlExpression> ParseParameterValue()
-    {
-        SkipWhiteSpace();
-        var startPosition = _text.Position;
-        var valueResult = ParseValue();
-        if (valueResult.HasError)
-        {
-            _text.Position = startPosition;
-            return RaiseParseError(valueResult.Error);
-        }
-
-        if (valueResult.Result.SqlType == SqlType.None)
-        {
-            return NoneResult();
-        }
-
-        if (_text.Peek(_text.ReadSymbols).Word == "=")
-        {
-            _text.Position = startPosition;
-            return NoneResult();
-        }
-
-        return CreateParseResult(new SqlParameterValue
-        {
-            Name = string.Empty,
-            Value = ((ISqlValue)valueResult.Result).Value
-        });
-    }
-
-    private ParseResult<ISqlExpression> ParseParameterAssignValue()
-    {
-        SkipWhiteSpace();
-        if (!_text.Try(_text.ReadSqlIdentifier, out var name))
-        {
-            return NoneResult();
-        }
-
-        if (!_text.TryMatch("="))
-        {
-            return RaiseParseError("Expected =");
-        }
-
-        if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
-        {
-            return RaiseParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
-        }
-
-        return CreateParseResult(new SqlParameterValue
-        {
-            Name = name.Word,
-            Value = nameValue.Word
-        });
-    }
-
-    private ParseResult<ISqlExpression> ParseIdentity()
-    {
-        if (!_text.TryMatch("IDENTITY"))
-        {
-            return NoneResult();
-        }
-
-        var sqlIdentity = new SqlIdentity
-        {
-            Seed = 1,
-            Increment = 1
-        };
-        if (_text.TryMatch("("))
-        {
-            sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
-            _text.Match(",");
-            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
-            _text.Match(")");
-        }
-
-        return CreateParseResult(sqlIdentity);
     }
 
     private bool TryParseSqlIdentity(ColumnDefinition column, out Either<ColumnDefinition, ParseError> result)
