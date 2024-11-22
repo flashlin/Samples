@@ -38,7 +38,7 @@ public class StringParser
     {
         return PeekIdentifier(word).Length != 0;
     }
-    
+
     public bool IsPeekIdentifiers(params string[] words)
     {
         foreach (var word in words)
@@ -68,13 +68,6 @@ public class StringParser
         }
     }
 
-    public char ReadChar()
-    {
-        SkipWhitespace();
-        if (IsEnd()) return '\0';
-        return _text[_position++];
-    }
-
     public char NextChar()
     {
         if (IsEnd()) return '\0';
@@ -89,15 +82,23 @@ public class StringParser
         return text;
     }
 
-    public char PeekChar()
+    public char Peek()
     {
-        SkipWhitespace();
         if (IsEnd()) return '\0';
         return _text[_position];
     }
 
-    public char Peek()
+    public TextSpan Peek(Func<TextSpan> readFunc)
     {
+        var tempPosition = _position;
+        var textSpan = readFunc();
+        _position = tempPosition;
+        return textSpan;
+    }
+
+    public char PeekChar()
+    {
+        SkipWhitespace();
         if (IsEnd()) return '\0';
         return _text[_position];
     }
@@ -124,6 +125,22 @@ public class StringParser
         };
     }
 
+    public bool PeekMatchSymbol(string symbol)
+    {
+        var tempPosition = _position;
+        var isSymbol = ReadString(symbol.Length).Word == symbol;
+        _position = tempPosition;
+        return isSymbol;
+    }
+
+    public ReadOnlySpan<char> PeekString(int length)
+    {
+        if (IsEnd()) return string.Empty;
+        var remainLength = _text.Length - _position;
+        var readLength = Math.Min(length, remainLength);
+        return _text.AsSpan(_position, readLength);
+    }
+
     public TextSpan PeekWord()
     {
         SkipWhitespace();
@@ -141,35 +158,16 @@ public class StringParser
         };
     }
 
-    public ReadOnlySpan<char> PeekString(int length)
-    {
-        if (IsEnd()) return string.Empty;
-        var remainLength = _text.Length - _position;
-        var readLength = Math.Min(length, remainLength);
-        return _text.AsSpan(_position, readLength);
-    }
-
     public TextSpan PreviousWord()
     {
         return _previousWord;
     }
 
-    private TextSpan Or(params Func<TextSpan>[] readFnList)
+    public char ReadChar()
     {
-        foreach (var readFn in readFnList)
-        {
-            var textSpan = readFn();
-            if (textSpan.Length != 0)
-            {
-                return textSpan;
-            }
-        }
-        return new TextSpan()
-        {
-            Word = string.Empty,
-            Offset = _position,
-            Length = 0
-        };
+        SkipWhitespace();
+        if (IsEnd()) return '\0';
+        return _text[_position++];
     }
 
     public TextSpan ReadFullQuotedIdentifier()
@@ -290,75 +288,6 @@ public class StringParser
         };
     }
 
-    public TextSpan ReadSqlDate()
-    {
-        var startPosition = _position;
-        var year = ReadNumber();
-        NextChar();
-        var month = ReadNumber();
-        NextChar();
-        var day = ReadNumber();
-        if( year.Length ==0 || month.Length == 0 || day.Length == 0)
-        {
-            _position = startPosition;
-            return new TextSpan
-            {
-                Word = string.Empty,
-                Offset = startPosition,
-                Length = 0
-            };
-        }
-        return new TextSpan()
-        {
-            Word = _text.Substring(startPosition, _position - startPosition),
-            Offset = startPosition,
-            Length = _position - startPosition
-        };
-    }
-
-    public TextSpan ReadSqlQuotedString()
-    {
-        var quoteChar = PeekChar();
-        if (quoteChar != '\'' && quoteChar != '"' && quoteChar != '`' && quoteChar != 'N')
-        {
-            return new TextSpan()
-            {
-                Word = string.Empty,
-                Offset = _position,
-                Length = 0
-            };
-        }
-
-        var offset = _position;
-        var startChar = ReadChar();
-        if (startChar == 'N')
-        {
-            quoteChar = NextChar();
-        }
-
-        while (!IsEnd())
-        {
-            var c = NextChar();
-            if (c == quoteChar && Peek() == quoteChar)
-            {
-                NextChar();
-                continue;
-            }
-
-            if (c == quoteChar)
-            {
-                break;
-            }
-        }
-
-        return new TextSpan()
-        {
-            Word = _text.Substring(offset, _position - offset),
-            Offset = offset,
-            Length = _position - offset
-        };
-    }
-
     public TextSpan ReadQuotedIdentifier()
     {
         var quoteChar = PeekChar();
@@ -391,6 +320,32 @@ public class StringParser
             Word = identifier,
             Offset = offset,
             Length = _position - offset
+        };
+    }
+
+    public TextSpan ReadSqlDate()
+    {
+        var startPosition = _position;
+        var year = ReadNumber();
+        NextChar();
+        var month = ReadNumber();
+        NextChar();
+        var day = ReadNumber();
+        if( year.Length ==0 || month.Length == 0 || day.Length == 0)
+        {
+            _position = startPosition;
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = startPosition,
+                Length = 0
+            };
+        }
+        return new TextSpan()
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
         };
     }
 
@@ -441,6 +396,49 @@ public class StringParser
         };
     }
 
+    public TextSpan ReadSqlQuotedString()
+    {
+        var quoteChar = PeekChar();
+        if (quoteChar != '\'' && quoteChar != '"' && quoteChar != '`' && quoteChar != 'N')
+        {
+            return new TextSpan()
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+
+        var offset = _position;
+        var startChar = ReadChar();
+        if (startChar == 'N')
+        {
+            quoteChar = NextChar();
+        }
+
+        while (!IsEnd())
+        {
+            var c = NextChar();
+            if (c == quoteChar && Peek() == quoteChar)
+            {
+                NextChar();
+                continue;
+            }
+
+            if (c == quoteChar)
+            {
+                break;
+            }
+        }
+
+        return new TextSpan()
+        {
+            Word = _text.Substring(offset, _position - offset),
+            Offset = offset,
+            Length = _position - offset
+        };
+    }
+
     public TextSpan ReadSqlSingleComment()
     {
         var startPosition = _position;
@@ -456,14 +454,6 @@ public class StringParser
         };
     }
 
-    public bool PeekMatchSymbol(string symbol)
-    {
-        var tempPosition = _position;
-        var isSymbol = ReadString(symbol.Length).Word == symbol;
-        _position = tempPosition;
-        return isSymbol;
-    }
-
     public TextSpan ReadString(int length)
     {
         length = Math.Min(length, _text.Length - _position);
@@ -476,14 +466,6 @@ public class StringParser
         _position += length;
         return span;
     }
-    
-    public TextSpan Peek(Func<TextSpan> readFunc)
-    {
-        var tempPosition = _position;
-        var textSpan = readFunc();
-        _position = tempPosition;
-        return textSpan;
-    } 
 
     public TextSpan ReadSymbols()
     {
@@ -656,33 +638,6 @@ public class StringParser
         return true;
     }
 
-
-    public bool TryMatchIgnoreCase(string keyword)
-    {
-        SkipWhitespace();
-        var tempPosition = _position;
-        var word = "";
-        while (tempPosition < _text.Length && word.Length < keyword.Length)
-        {
-            word += _text[tempPosition];
-            tempPosition++;
-        }
-
-        if (!string.Equals(word, keyword, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        _previousWord = new TextSpan
-        {
-            Word = keyword,
-            Offset = _position,
-            Length = keyword.Length
-        };
-        _position = tempPosition;
-        return true;
-    }
-
     public bool TryMatch(string keyword)
     {
         SkipWhitespace();
@@ -741,6 +696,33 @@ public class StringParser
         return true;
     }
 
+
+    public bool TryMatchIgnoreCase(string keyword)
+    {
+        SkipWhitespace();
+        var tempPosition = _position;
+        var word = "";
+        while (tempPosition < _text.Length && word.Length < keyword.Length)
+        {
+            word += _text[tempPosition];
+            tempPosition++;
+        }
+
+        if (!string.Equals(word, keyword, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        _previousWord = new TextSpan
+        {
+            Word = keyword,
+            Offset = _position,
+            Length = keyword.Length
+        };
+        _position = tempPosition;
+        return true;
+    }
+
     public bool TryMatchIgnoreCaseKeyword(string keyword)
     {
         var peek = PeekWord();
@@ -748,5 +730,23 @@ public class StringParser
         _previousWord = peek;
         _position = peek.Offset + peek.Length;
         return true;
+    }
+
+    private TextSpan Or(params Func<TextSpan>[] readFnList)
+    {
+        foreach (var readFn in readFnList)
+        {
+            var textSpan = readFn();
+            if (textSpan.Length != 0)
+            {
+                return textSpan;
+            }
+        }
+        return new TextSpan()
+        {
+            Word = string.Empty,
+            Offset = _position,
+            Length = 0
+        };
     }
 }
