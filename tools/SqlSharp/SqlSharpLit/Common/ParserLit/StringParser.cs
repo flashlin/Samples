@@ -154,38 +154,59 @@ public class StringParser
         return _previousWord;
     }
 
-    public TextSpan ReadFullQuotedIdentifier()
+    private TextSpan Or(params Func<TextSpan>[] readFnList)
     {
-        var quoteChar = PeekChar();
-        if (quoteChar != '"' && quoteChar != '[' && quoteChar != '`')
+        foreach (var readFn in readFnList)
         {
-            return new TextSpan()
+            var textSpan = readFn();
+            if (textSpan.Length != 0)
             {
-                Word = string.Empty,
-                Offset = _position,
-                Length = 0
-            };
-        }
-
-        var offset = _position;
-        ReadQuotedIdentifier();
-        while (!IsEnd())
-        {
-            var c = NextChar();
-            if (c != '.')
-            {
-                _position--;
-                break;
+                return textSpan;
             }
-
-            ReadQuotedIdentifier();
         }
-
         return new TextSpan()
         {
-            Word = _text.Substring(offset, _position - offset),
-            Offset = offset,
-            Length = _position - offset
+            Word = string.Empty,
+            Offset = _position,
+            Length = 0
+        };
+    }
+
+    public TextSpan ReadFullQuotedIdentifier()
+    {
+        SkipWhitespace();
+        var startPosition = _position;
+        var count = 0;
+        while(!IsEnd())
+        {
+            var identifier = Or(ReadIdentifier, ReadQuotedIdentifier);
+            if (identifier.Length == 0)
+            {
+                if (count == 0)
+                {
+                    return new TextSpan
+                    {
+                        Word = string.Empty,
+                        Offset = startPosition,
+                        Length = 0
+                    };
+                }
+                break;
+            }
+            count++;
+            
+            var dot = Peek();
+            if(dot!='.')
+            {
+                break;
+            }
+            NextChar();
+        }
+        return new TextSpan
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
         };
     }
 

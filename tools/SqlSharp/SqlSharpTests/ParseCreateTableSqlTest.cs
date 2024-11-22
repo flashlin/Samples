@@ -8,6 +8,28 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void SqlIdentifierName()
+    {
+        var sql = $"""
+                   CREATE TABLE [dbo].db1 (
+                       [id] int 
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "[dbo].db1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "int"
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void LastColumnAllowComma()
     {
         var sql = $"""
