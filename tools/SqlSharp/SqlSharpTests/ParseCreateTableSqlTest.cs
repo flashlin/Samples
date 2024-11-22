@@ -8,36 +8,6 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
-    public void DefaultDate()
-    {
-        var sql = $"""
-                   CREATE TABLE tb1
-                   (
-                       [day] DATETIME NOT NULL DEFAULT 2019-01-01 
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
-        {
-            TableName = "tb1",
-            Columns = [
-                new ColumnDefinition
-                {
-                    ColumnName = "[day]",
-                    DataType = "DATETIME",
-                    IsNullable = false,
-                    Constraints = [
-                        new SqlConstraint
-                        {
-                            DefaultValue = "2019-01-01"
-                        }
-                    ]
-                }
-            ]
-        });
-    }
-    
-    [Test]
     public void Column_Unique_Column()
     {
         var sql = $"""
@@ -91,72 +61,7 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
-    [Test]
-    public void Default_EmptyString()
-    {
-        var sql = $"""
-                   CREATE TABLE tb1
-                   (
-                   	[id] VARCHAR(3) NOT NULL CONSTRAINT [DF_1] DEFAULT ''
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
-        {
-            TableName = "tb1",
-            Columns = [
-                new ColumnDefinition
-                {
-                    ColumnName = "[id]",
-                    DataType = "VARCHAR",
-                    Size = "3",
-                    IsNullable = false,
-                    Constraints = [
-                        new SqlConstraint
-                        {
-                            ConstraintName = "[DF_1]",
-                            DefaultValue = "''"
-                        }
-                    ]
-                }
-            ]
-        });
-    }
-    
-    [Test]
-    public void FieldNotNull_Identity_PrimaryKey()
-    {
-        var sql = $"""
-                   CREATE TABLE tb1 (
-                   	[Id]		INT				NOT NULL IDENTITY(1,1) PRIMARY KEY,
-                   	[LoginName]	NVARCHAR (50)   NULL
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
-        {
-            TableName = "tb1",
-            Columns = [
-                new ColumnDefinition
-                {
-                    ColumnName = "[Id]",
-                    DataType = "INT",
-                    IsNullable = false,
-                    Identity = new SqlIdentity { Seed = 1, Increment = 1 },
-                    IsPrimaryKey = true
-                },
-                new ColumnDefinition
-                {
-                    ColumnName = "[LoginName]",
-                    DataType = "NVARCHAR",
-                    Size = "50",
-                    IsNullable = true
-                }
-            ]
-        });
-    }
-    
+
     [Test]
     public void ColumnCommentColumn()
     {
@@ -492,6 +397,68 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void Default_EmptyString()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1
+                   (
+                   	[id] VARCHAR(3) NOT NULL CONSTRAINT [DF_1] DEFAULT ''
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "VARCHAR",
+                    Size = "3",
+                    IsNullable = false,
+                    Constraints = [
+                        new SqlConstraint
+                        {
+                            ConstraintName = "[DF_1]",
+                            DefaultValue = "''"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void DefaultDateWithoutQuoted()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1
+                   (
+                       [day] DATETIME NOT NULL DEFAULT 2019-01-01 
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[day]",
+                    DataType = "DATETIME",
+                    IsNullable = false,
+                    Constraints = [
+                        new SqlConstraint
+                        {
+                            DefaultValue = "2019-01-01"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void DefaultNull()
     {
         var sql = $"""
@@ -541,6 +508,39 @@ public class ParseCreateTableSqlTest
                     ColumnName = "AuditCount",
                     DataType = "nvarchar",
                     Size = "MAX"
+                }
+            ]
+        });
+    }
+
+    [Test]
+    public void FieldNotNull_Identity_PrimaryKey()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1 (
+                   	[Id]		INT				NOT NULL IDENTITY(1,1) PRIMARY KEY,
+                   	[LoginName]	NVARCHAR (50)   NULL
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "INT",
+                    IsNullable = false,
+                    Identity = new SqlIdentity { Seed = 1, Increment = 1 },
+                    IsPrimaryKey = true
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[LoginName]",
+                    DataType = "NVARCHAR",
+                    Size = "50",
+                    IsNullable = true
                 }
             ]
         });
