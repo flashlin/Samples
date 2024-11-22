@@ -542,7 +542,7 @@ public class ParseCreateTableSqlTest
             Constraints = [
                 new SqlConstraint
                 {
-                    ConstraintName = "DEFAULT",
+                    ConstraintName = "",
                     ConstraintType = "PRIMARY KEY",
                     Clustered = "CLUSTERED",
                     Columns = [
@@ -758,7 +758,7 @@ public class ParseCreateTableSqlTest
             Constraints = [
                 new SqlConstraint
                 {
-                    ConstraintName = "DEFAULT",
+                    ConstraintName = "",
                     ConstraintType = "PRIMARY KEY",
                     Clustered = "CLUSTERED",
                     Columns = [
