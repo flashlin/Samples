@@ -40,14 +40,15 @@ public class ExtractSqlHelper
         foreach (var sqlFile in GetSqlFiles(folder))
         {
             var sql = File.ReadAllText(sqlFile);
-            Console.WriteLine($"{sqlFile}");
             var sqlExpressions = new SqlParser(sql).Extract().ToList();
+            Console.WriteLine($"{sqlFile} = {sqlExpressions.Count}");
+            var createTableSqls = ExtractAllCreateTableFromText(sql).ToList();
             yield return new SqlFile
             {
                 FileName = sqlFile,
                 Sql = sql,
                 DatabaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFile),
-                CreateTables = ExtractAllCreateTableFromText(sql).ToList(),
+                CreateTables = createTableSqls,
                 SqlExpressions = sqlExpressions
             };
         }

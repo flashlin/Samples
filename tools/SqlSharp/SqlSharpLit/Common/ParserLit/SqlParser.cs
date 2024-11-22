@@ -332,13 +332,13 @@ public class SqlParser
                 continue;
             }
 
-            if (Try(ParseDefaultValue, out var nonConstraintDefaultValue))
+            if (Try(ParseDefaultValue, out var defaultValue))
             {
                 if (identityResult.HasError)
                 {
                     return RaiseParseError<ColumnDefinition>(identityResult.Error);
                 }
-                column.Constraints.Add((SqlConstraint)nonConstraintDefaultValue.Result);
+                column.Constraints.Add((SqlConstraint)defaultValue.Result);
                 continue;
             }
 
@@ -486,6 +486,15 @@ public class SqlParser
             {
                 ConstraintName = string.Empty,
                 DefaultValue = defaultValue.Word,
+            });
+        }
+        
+        if(_text.Try(_text.ReadSqlQuotedString, out var quotedString))
+        {
+            return CreateParseResult(new SqlConstraint
+            {
+                ConstraintName = string.Empty,
+                DefaultValue = quotedString.Word,
             });
         }
 

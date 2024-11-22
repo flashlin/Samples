@@ -8,6 +8,38 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void Default_EmptyString()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1
+                   (
+                   	[id] VARCHAR(3) NOT NULL CONSTRAINT [DF_1] DEFAULT ''
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "VARCHAR",
+                    Size = "3",
+                    IsNullable = false,
+                    Constraints = [
+                        new SqlConstraint
+                        {
+                            ConstraintName = "[DF_1]",
+                            DefaultValue = "''"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void FieldNotNull_Identity_PrimaryKey()
     {
         var sql = $"""
