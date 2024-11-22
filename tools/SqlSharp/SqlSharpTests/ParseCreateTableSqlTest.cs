@@ -8,6 +8,39 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void FieldNotNull_Identity_PrimaryKey()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1 (
+                   	[Id]		INT				NOT NULL IDENTITY(1,1) PRIMARY KEY,
+                   	[LoginName]	NVARCHAR (50)   NULL
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "INT",
+                    IsNullable = false,
+                    Identity = new SqlIdentity { Seed = 1, Increment = 1 },
+                    IsPrimaryKey = true
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[LoginName]",
+                    DataType = "NVARCHAR",
+                    Size = "50",
+                    IsNullable = true
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void ColumnCommentColumn()
     {
         var sql = $"""

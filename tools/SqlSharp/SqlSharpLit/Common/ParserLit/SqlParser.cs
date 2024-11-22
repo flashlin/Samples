@@ -84,7 +84,7 @@ public class SqlParser
             {
                 return RaiseParseError<SqlCollectionExpression>(columnDefinition.Error);
             }
-            if (columnDefinition.Result == SqlNoneExpression.Default)
+            if (columnDefinition.Result.SqlType == SqlType.None)
             {
                 return RaiseParseError<SqlCollectionExpression>("Expected column definition");
             }
@@ -329,6 +329,7 @@ public class SqlParser
                     return RaiseParseError<ColumnDefinition>(identityResult.Error);
                 }
                 column.Identity = (SqlIdentity)identityResult.Result;
+                continue;
             }
 
             if (Try(ParseDefaultValue, out var nonConstraintDefaultValue))
