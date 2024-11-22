@@ -9,18 +9,3 @@ public class SqlNoneExpression : ISqlExpression
         return string.Empty;
     }
 }
-
-public class SqlCollectionExpression : ISqlExpression
-{
-    public SqlType SqlType => SqlType.Collection;
-    public List<ISqlExpression> Items { get; set; } = [];
-
-    public List<T> ToList<T>()
-    {
-        return Items.Cast<T>().ToList();
-    }
-    public string ToSql()
-    {
-        return string.Empty;
-    }
-}
