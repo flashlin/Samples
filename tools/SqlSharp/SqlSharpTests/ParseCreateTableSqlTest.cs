@@ -8,6 +8,36 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void DefaultDate()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1
+                   (
+                       [day] DATETIME NOT NULL DEFAULT 2019-01-01 
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[day]",
+                    DataType = "DATETIME",
+                    IsNullable = false,
+                    Constraints = [
+                        new SqlConstraint
+                        {
+                            DefaultValue = "2019-01-01"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Column_Unique_Column()
     {
         var sql = $"""

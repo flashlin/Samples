@@ -269,6 +269,32 @@ public class StringParser
         };
     }
 
+    public TextSpan ReadSqlDate()
+    {
+        var startPosition = _position;
+        var year = ReadNumber();
+        NextChar();
+        var month = ReadNumber();
+        NextChar();
+        var day = ReadNumber();
+        if( year.Length ==0 || month.Length == 0 || day.Length == 0)
+        {
+            _position = startPosition;
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = startPosition,
+                Length = 0
+            };
+        }
+        return new TextSpan()
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
+        };
+    }
+
     public TextSpan ReadSqlQuotedString()
     {
         var quoteChar = PeekChar();

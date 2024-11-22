@@ -134,10 +134,6 @@ public class SqlParser
             {
                 return RaiseParseError(tableColumnsResult.Error);
             }
-            // if (tableColumnsResult.Result.SqlType == SqlType.None)
-            // {
-            //     return RaiseParseError("Expected column definition");
-            // }
             var tableColumns = tableColumnsResult.Result.ToList<ColumnDefinition>();
             if (tableColumns.Count > 0)
             {
@@ -517,6 +513,15 @@ public class SqlParser
             {
                 ConstraintName = string.Empty,
                 DefaultValue = quotedString.Word,
+            });
+        }
+        
+        if(_text.Try(_text.ReadSqlDate, out var date))
+        {
+            return CreateParseResult(new SqlConstraint
+            {
+                ConstraintName = string.Empty,
+                DefaultValue = date.Word,
             });
         }
 
