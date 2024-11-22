@@ -56,11 +56,10 @@ public class ParseSelectSqlTest
         });
     }
     
-    private static Either<ISqlExpression, ParseError> ParseSql(string sql)
+    private static ParseResult<ISqlExpression> ParseSql(string sql)
     {
         var p = new SqlParser(sql);
-        var rc = p.Parse();
-        return rc;
+        return p.Parse();
     }
 
 }

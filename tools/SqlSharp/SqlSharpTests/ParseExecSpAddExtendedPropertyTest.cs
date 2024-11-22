@@ -57,11 +57,9 @@ public class ParseExecSpAddExtendedPropertyTest
         });
     }
     
-    private static Either<ISqlExpression, ParseError> ParseSql(string sql)
+    private static ParseResult<ISqlExpression> ParseSql(string sql)
     {
-        var p = new SqlParser(sql);
-        var rc = p.Parse();
-        return rc;
+        return SqlParser.Parse(sql);
     }
 
 }

@@ -61,7 +61,12 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
+
+    private ParseResult<ISqlExpression> ParseSql(string sql)
+    {
+        return SqlParser.Parse(sql);
+    }
+
     [Test]
     public void LastFieldNoCommaAndTableConstraint()
     {
@@ -697,12 +702,5 @@ public class ParseCreateTableSqlTest
                 }
             ]
         });
-    }
-
-    private static Either<ISqlExpression, ParseError> ParseSql(string sql)
-    {
-        var p = new SqlParser(sql);
-        var rc = p.Parse();
-        return rc;
     }
 }

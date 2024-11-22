@@ -6,15 +6,15 @@ namespace SqlSharpTests;
 
 public static class TestHelper
 {
-    public static void ShouldBe<T>(this Either<ISqlExpression, ParseError> rc, T expectedSqlStatement)
+    public static void ShouldBe<T>(this ParseResult<ISqlExpression> rc, T expectedSqlStatement)
         where T : ISqlExpression
     {
-        rc.Switch(statement =>
-            {
-                var castedStatement = (T)statement;
-                castedStatement.Should().BeEquivalentTo(expectedSqlStatement);
-            },
-            error => throw error
-        );
+        if (rc.HasError)
+        {
+            throw new Exception(rc.Error.Message);
+        }
+        
+        var castedStatement = (T)rc.Result;
+        castedStatement.Should().BeEquivalentTo(expectedSqlStatement);
     }
 }
