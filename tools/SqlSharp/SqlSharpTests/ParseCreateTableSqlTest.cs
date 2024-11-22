@@ -8,6 +8,61 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void Column_Unique_Column()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1(
+                   [Id]    VARCHAR (30) NOT NULL, 
+                    CONSTRAINT [U1] UNIQUE(ExternalRefNo) ,
+                    [Id2]  VARCHAR(50)  NULL CONSTRAINT [D1]  DEFAULT (N'0')
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "VARCHAR",
+                    Size = "30",
+                    IsNullable = false
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id2]",
+                    DataType = "VARCHAR",
+                    Size = "50",
+                    IsNullable = true,
+                    Constraints = [
+                        new SqlConstraint
+                        {
+                            ConstraintName = "[D1]",
+                            DefaultValue = "N'0'"
+                        }
+                    ]
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "[U1]",
+                    ConstraintType = "UNIQUE",
+                    Clustered = "",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "ExternalRefNo",
+                            Order = ""
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Default_EmptyString()
     {
         var sql = $"""
