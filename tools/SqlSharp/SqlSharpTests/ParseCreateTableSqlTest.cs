@@ -8,6 +8,38 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void ColumnCommentColumn()
+    {
+        var sql = $"""
+                  create table #tmp1
+                  (              
+                    [id] int NOT NULL,  
+                    -- comment --  
+                    uid int
+                  )               
+                  """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "#tmp1",
+            Columns =
+            [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "int",
+                    IsNullable = false
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "uid",
+                    DataType = "int"
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void ColumnConstraintWithIdentity()
     {
         var sql = $"""
@@ -57,92 +89,6 @@ public class ParseCreateTableSqlTest
                     DataType = "NVARCHAR",
                     Size = "50",
                     IsNullable = true
-                }
-            ]
-        });
-    }
-
-    private ParseResult<ISqlExpression> ParseSql(string sql)
-    {
-        return SqlParser.Parse(sql);
-    }
-
-    [Test]
-    public void LastFieldNoCommaAndTableConstraint()
-    {
-        var sql = $"""
-                   CREATE TABLE tb1(
-                   	[Id] int 
-                   PRIMARY KEY CLUSTERED 
-                   (
-                   	[Id] ASC
-                   )WITH (PAD_INDEX = OFF) ON [PRIMARY]
-                   )
-                   """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
-        {
-            TableName = "tb1",
-            Columns = [
-                new ColumnDefinition
-                {
-                    ColumnName = "[Id]",
-                    DataType = "int",
-                }
-            ],
-            Constraints = [
-                new SqlConstraint
-                {
-                    ConstraintName = "DEFAULT",
-                    ConstraintType = "PRIMARY KEY",
-                    Clustered = "CLUSTERED",
-                    Columns = [
-                        new SqlConstraintColumn
-                        {
-                            ColumnName = "[Id]",
-                            Order = "ASC" 
-                        }
-                    ],
-                    WithToggles = [
-                        new SqlToggle
-                        {
-                            ToggleName = "PAD_INDEX",
-                            Value = "OFF"
-                        }
-                    ],
-                    On = "[PRIMARY]"
-                }
-            ]
-        });
-    }
-
-    [Test]
-    public void ColumnCommentColumn()
-    {
-        var sql = $"""
-                  create table #tmp1
-                  (              
-                    [id] int NOT NULL,  
-                    -- comment --  
-                    uid int
-                  )               
-                  """;
-        var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
-        {
-            TableName = "#tmp1",
-            Columns =
-            [
-                new ColumnDefinition
-                {
-                    ColumnName = "[id]",
-                    DataType = "int",
-                    IsNullable = false
-                },
-                new ColumnDefinition
-                {
-                    ColumnName = "uid",
-                    DataType = "int"
                 }
             ]
         });
@@ -451,6 +397,55 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
+    public void LastFieldNoCommaAndTableConstraint()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1(
+                   	[Id] int 
+                   PRIMARY KEY CLUSTERED 
+                   (
+                   	[Id] ASC
+                   )WITH (PAD_INDEX = OFF) ON [PRIMARY]
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[Id]",
+                    DataType = "int",
+                }
+            ],
+            Constraints = [
+                new SqlConstraint
+                {
+                    ConstraintName = "DEFAULT",
+                    ConstraintType = "PRIMARY KEY",
+                    Clustered = "CLUSTERED",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[Id]",
+                            Order = "ASC" 
+                        }
+                    ],
+                    WithToggles = [
+                        new SqlToggle
+                        {
+                            ToggleName = "PAD_INDEX",
+                            Value = "OFF"
+                        }
+                    ],
+                    On = "[PRIMARY]"
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void LowerCaseCreateTable()
     {
         var sql = $"""
@@ -702,5 +697,10 @@ public class ParseCreateTableSqlTest
                 }
             ]
         });
+    }
+
+    private ParseResult<ISqlExpression> ParseSql(string sql)
+    {
+        return SqlParser.Parse(sql);
     }
 }

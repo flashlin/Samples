@@ -55,6 +55,11 @@ public class ExtractSqlHelper
 
     public void WriteCreateTablesFromFolder(string folder, string outputFolder)
     {
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+        
         var createTablesFile = Path.Combine(outputFolder, "CreateTables.sql");
         using var fileStream = new FileStream(createTablesFile, FileMode.Create);
         var writer = new StreamWriter(fileStream, Encoding.UTF8);
