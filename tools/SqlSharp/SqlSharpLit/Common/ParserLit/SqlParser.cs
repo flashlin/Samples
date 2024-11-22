@@ -99,6 +99,12 @@ public class SqlParser
             }
 
             _text.ReadChar();
+            
+            // 怪異的 SQL 語法: 允許逗號後面沒有東西 遇到 ) 直接結束 
+            if (_text.PeekChar() == ')')
+            {
+                break;
+            }
         } while (!_text.IsEnd());
 
         return CreateCollectionParseResult(columns);

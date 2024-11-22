@@ -8,6 +8,42 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void LastColumnAllowComma()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1(
+                       [id] NVARCHAR(50),
+                       [name] varchar(10) Default GetDate(),  
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "NVARCHAR",
+                    Size = "50"
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[name]",
+                    DataType = "varchar",
+                    Size = "10",
+                    Constraints = [
+                        new SqlConstraint
+                        {
+                            DefaultValue = "GetDate()"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Column_Unique_Column()
     {
         var sql = $"""
@@ -429,7 +465,8 @@ public class ParseCreateTableSqlTest
     }
 
     [Test]
-    public void DefaultDateWithoutQuoted()
+    public void DefaultDateWithoutQuoted
+        ()
     {
         var sql = $"""
                    CREATE TABLE tb1
