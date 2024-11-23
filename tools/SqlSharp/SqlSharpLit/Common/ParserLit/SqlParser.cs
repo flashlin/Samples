@@ -159,7 +159,7 @@ public class SqlParser
             break;
         }
 
-        if (!_text.TryMatch(")"))
+        if (!TryMatch(")"))
         {
             return RaiseParseError("ParseCreateTableStatement Expected )");
         }
@@ -229,10 +229,10 @@ public class SqlParser
         }
 
         var refColumn = string.Empty;
-        if (_text.TryMatch("("))
+        if (TryMatch("("))
         {
             refColumn = _text.ReadSqlIdentifier().Word;
-            if (!_text.TryMatch(")"))
+            if (!TryMatch(")"))
             {
                 return RaiseParseError("Expected )");
             }
@@ -510,7 +510,7 @@ public class SqlParser
             }
 
             var constraintStartPosition = _text.Position;
-            if (_text.TryMatch(ConstraintKeyword))
+            if (TryMatch(ConstraintKeyword))
             {
                 var constraintName = _text.ReadSqlIdentifier();
                 if (Try(ParseDefaultValue, out var constraintDefaultValue))
@@ -598,7 +598,7 @@ public class SqlParser
 
         var dataLength1 = string.Empty;
         var dataLength2 = string.Empty;
-        if (_text.TryMatch("("))
+        if (TryMatch("("))
         {
             if (_text.TryMatchIgnoreCaseKeyword("MAX"))
             {
@@ -615,7 +615,7 @@ public class SqlParser
                 dataLength2 = _text.ReadNumber().Word;
             }
 
-            if (!_text.TryMatch(")"))
+            if (!TryMatch(")"))
             {
                 return RaiseParseError("Expected )");
             }
@@ -642,7 +642,7 @@ public class SqlParser
         }
 
         TextSpan defaultValue;
-        if (_text.TryMatch("("))
+        if (TryMatch("("))
         {
             defaultValue = _text.ReadUntilRightParenthesis();
             _text.Match(")");
@@ -729,7 +729,7 @@ public class SqlParser
             Seed = 1,
             Increment = 1
         };
-        if (_text.TryMatch("("))
+        if (TryMatch("("))
         {
             sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
             _text.Match(",");
@@ -851,7 +851,7 @@ public class SqlParser
     private ParseResult<SqlCollectionExpression> ParseParenthesesWithComma<T>(Func<ParseResult<T>> parseElemFn)
         where T : ISqlExpression
     {
-        if (!_text.TryMatch("("))
+        if (!TryMatch("("))
         {
             return RaiseParseError<SqlCollectionExpression>("Expected (");
         }
@@ -862,7 +862,7 @@ public class SqlParser
             return RaiseParseError<SqlCollectionExpression>(elements.Error);
         }
 
-        if (!_text.TryMatch(")"))
+        if (!TryMatch(")"))
         {
             return RaiseParseError<SqlCollectionExpression>("Expected )");
         }
