@@ -61,96 +61,6 @@ public class SqlParser
         return RaiseParseError("Unknown statement");
     }
 
-    public ParseResult<ISqlExpression> ParseForeignKeyExpression()
-    {
-        if (!TryMatchKeywords("FOREIGN", "KEY"))
-        {
-            return NoneResult();
-        }
-
-        var columnsResult = ParseColumnsAscDesc();
-        if (columnsResult.HasError)
-        {
-            return RaiseParseError(columnsResult.Error);
-        }
-        var columns = columnsResult.Result.ToList<SqlConstraintColumn>();
-
-        if (!TryMatchKeyword("REFERENCES"))
-        {
-            return RaiseParseError("Expected REFERENCES");
-        }
-
-        var tableName = _text.ReadSqlIdentifier();
-        if (tableName.Length == 0)
-        {
-            return RaiseParseError("Expected reference table name");
-        }
-
-        var refColumn = string.Empty;
-        if (_text.TryMatch("("))
-        {
-            refColumn = _text.ReadSqlIdentifier().Word;
-            if (!_text.TryMatch(")"))
-            {
-                return RaiseParseError("Expected )");
-            }
-        }
-
-        var onDelete = ReferentialAction.NoAction;
-        if (TryMatchKeywords("ON", "DELETE"))
-        {
-            var rc= ParseReferentialAction();
-            if (rc.HasError)
-            {
-                return RaiseParseError(rc.Error);
-            }
-            onDelete = rc.Result;
-        }
-        var onUpdate = ReferentialAction.NoAction;
-        
-        if(TryMatchKeywords("ON", "UPDATE"))
-        {
-            var rc = ParseReferentialAction();
-            if (rc.HasError)
-            {
-                return RaiseParseError(rc.Error);
-            }
-            onUpdate = rc.Result;
-        }
-        
-        var notForReplication = TryMatchKeywords("NOT", "FOR", "REPLICATION");
-        return CreateParseResult(new SqlConstraintForeignKey
-        {
-            Columns = columns,
-            ReferencedTableName = tableName.Word,
-            RefColumn = refColumn,
-            OnDeleteAction = onDelete,
-            OnUpdateAction = onUpdate,
-            NotForReplication = notForReplication,
-        });
-    }
-
-    private ParseResult<ReferentialAction> ParseReferentialAction()
-    {
-        var result = One(Keywords("NO", "ACTION"), Keywords("CASCADE"), Keywords("SET", "NULL"),
-            Keywords("SET", "DEFAULT"))();
-        if (result.HasError)
-        {
-            return RaiseParseError<ReferentialAction>(result.Error);
-        }
-
-        var token = (SqlToken)result.Result;
-        var action = token.Value.ToUpper() switch
-        {
-            "NO ACTION" => ReferentialAction.NoAction,
-            "CASCADE" => ReferentialAction.Cascade,
-            "SET NULL" => ReferentialAction.SetNull,
-            "SET DEFAULT" => ReferentialAction.SetDefault,
-            _ => ReferentialAction.NoAction
-        };
-        return new ParseResult<ReferentialAction>(action);
-    }
-
 
     public ParseResult<SqlCollectionExpression> ParseCreateTableColumns()
     {
@@ -291,6 +201,75 @@ public class SqlParser
             Level2Name = p[7].Value
         };
         return CreateParseResult(sqlSpAddExtendedProperty);
+    }
+
+    public ParseResult<ISqlExpression> ParseForeignKeyExpression()
+    {
+        if (!TryMatchKeywords("FOREIGN", "KEY"))
+        {
+            return NoneResult();
+        }
+
+        var columnsResult = ParseColumnsAscDesc();
+        if (columnsResult.HasError)
+        {
+            return RaiseParseError(columnsResult.Error);
+        }
+        var columns = columnsResult.Result.ToList<SqlConstraintColumn>();
+
+        if (!TryMatchKeyword("REFERENCES"))
+        {
+            return RaiseParseError("Expected REFERENCES");
+        }
+
+        var tableName = _text.ReadSqlIdentifier();
+        if (tableName.Length == 0)
+        {
+            return RaiseParseError("Expected reference table name");
+        }
+
+        var refColumn = string.Empty;
+        if (_text.TryMatch("("))
+        {
+            refColumn = _text.ReadSqlIdentifier().Word;
+            if (!_text.TryMatch(")"))
+            {
+                return RaiseParseError("Expected )");
+            }
+        }
+
+        var onDelete = ReferentialAction.NoAction;
+        if (TryMatchKeywords("ON", "DELETE"))
+        {
+            var rc= ParseReferentialAction();
+            if (rc.HasError)
+            {
+                return RaiseParseError(rc.Error);
+            }
+            onDelete = rc.Result;
+        }
+        var onUpdate = ReferentialAction.NoAction;
+        
+        if(TryMatchKeywords("ON", "UPDATE"))
+        {
+            var rc = ParseReferentialAction();
+            if (rc.HasError)
+            {
+                return RaiseParseError(rc.Error);
+            }
+            onUpdate = rc.Result;
+        }
+        
+        var notForReplication = TryMatchKeywords("NOT", "FOR", "REPLICATION");
+        return CreateParseResult(new SqlConstraintForeignKey
+        {
+            Columns = columns,
+            ReferencedTableName = tableName.Word,
+            RefColumn = refColumn,
+            OnDeleteAction = onDelete,
+            OnUpdateAction = onUpdate,
+            NotForReplication = notForReplication,
+        });
     }
 
     public ParseResult<ISqlExpression> ParseSelectStatement()
@@ -438,6 +417,25 @@ public class SqlParser
         return new ParseResult<ISqlExpression>(SqlNoneExpression.Default);
     }
 
+    private Func<ParseResult<ISqlExpression>> One(params Func<ParseResult<ISqlExpression>>[] parseFnList)
+    {
+        return () =>
+        {
+            var rc = Or(parseFnList)();
+            if (rc.Result.SqlType != SqlType.None)
+            {
+                return rc;
+            }
+
+            if (rc.HasError)
+            {
+                return rc;
+            }
+
+            return RaiseParseError("Expected one of the options");
+        };
+    }
+
     private ISqlExpression Optional(Func<ParseResult<ISqlExpression>> parseFn)
     {
         var result = parseFn();
@@ -468,25 +466,6 @@ public class SqlParser
             }
 
             return NoneResult();
-        };
-    }
-
-    private Func<ParseResult<ISqlExpression>> One(params Func<ParseResult<ISqlExpression>>[] parseFnList)
-    {
-        return () =>
-        {
-            var rc = Or(parseFnList)();
-            if (rc.Result.SqlType != SqlType.None)
-            {
-                return rc;
-            }
-
-            if (rc.HasError)
-            {
-                return rc;
-            }
-
-            return RaiseParseError("Expected one of the options");
         };
     }
 
@@ -585,6 +564,29 @@ public class SqlParser
         } while (true);
 
         return ToParseResult(column);
+    }
+
+    private ParseResult<SqlCollectionExpression> ParseColumnsAscDesc()
+    {
+        var columns = ParseParenthesesWithComma(() =>
+        {
+            var columnName = _text.ReadSqlIdentifier();
+            var order = string.Empty;
+            if (TryMatchKeyword("ASC"))
+            {
+                order = "ASC";
+            }
+            else if (TryMatchKeyword("DESC"))
+            {
+                order = "DESC";
+            }
+            return CreateParseResult(new SqlConstraintColumn
+            {
+                ColumnName = columnName.Word,
+                Order = order,
+            });
+        });
+        return columns;
     }
 
     private ParseResult<ISqlExpression> ParseColumnTypeDefinition(TextSpan columnNameSpan)
@@ -888,62 +890,6 @@ public class SqlParser
         return CreateParseResult(sqlConstraint);
     }
 
-    private ParseResult<SqlCollectionExpression> ParseColumnsAscDesc()
-    {
-        var columns = ParseParenthesesWithComma(() =>
-        {
-            var columnName = _text.ReadSqlIdentifier();
-            var order = string.Empty;
-            if (TryMatchKeyword("ASC"))
-            {
-                order = "ASC";
-            }
-            else if (TryMatchKeyword("DESC"))
-            {
-                order = "DESC";
-            }
-            return CreateParseResult(new SqlConstraintColumn
-            {
-                ColumnName = columnName.Word,
-                Order = order,
-            });
-        });
-        return columns;
-    }
-
-    private ParseResult<ISqlExpression> ParseTableConstraint()
-    {
-        var constraintName = string.Empty;
-        if (TryMatchKeyword(ConstraintKeyword))
-        {
-            constraintName = _text.ReadSqlIdentifier().Word;
-        }
-        
-        var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpression();
-        if (tablePrimaryKeyOrUniqueExpr.HasError)
-        {
-            return RaiseParseError(tablePrimaryKeyOrUniqueExpr.Error);
-        }
-        if (tablePrimaryKeyOrUniqueExpr.Result.SqlType != SqlType.None)
-        {
-            ((SqlConstraintPrimaryKeyOrUnique)tablePrimaryKeyOrUniqueExpr.Result).ConstraintName = constraintName;
-            return tablePrimaryKeyOrUniqueExpr;
-        }
-        
-        var tableForeignKeyExpr = ParseForeignKeyExpression();
-        if (tableForeignKeyExpr.HasError)
-        {
-            RaiseParseError(tableForeignKeyExpr.Error);
-        }
-        if(tableForeignKeyExpr.Result.SqlType != SqlType.None)
-        {
-            ((SqlConstraintForeignKey)tableForeignKeyExpr.Result).ConstraintName = constraintName;
-            return tableForeignKeyExpr;
-        }
-        
-        return NoneResult();
-    }
-
     private ParseResult<ISqlExpression> ParsePrimaryKeyOrUniqueExpression()
     {
         var primaryKeyOrUnique = ParsePrimaryKeyOrUnique();
@@ -997,6 +943,60 @@ public class SqlParser
             return NoneResult();
         }
         return CreateParseResult(sqlConstraint);
+    }
+
+    private ParseResult<ReferentialAction> ParseReferentialAction()
+    {
+        var result = One(Keywords("NO", "ACTION"), Keywords("CASCADE"), Keywords("SET", "NULL"),
+            Keywords("SET", "DEFAULT"))();
+        if (result.HasError)
+        {
+            return RaiseParseError<ReferentialAction>(result.Error);
+        }
+
+        var token = (SqlToken)result.Result;
+        var action = token.Value.ToUpper() switch
+        {
+            "NO ACTION" => ReferentialAction.NoAction,
+            "CASCADE" => ReferentialAction.Cascade,
+            "SET NULL" => ReferentialAction.SetNull,
+            "SET DEFAULT" => ReferentialAction.SetDefault,
+            _ => ReferentialAction.NoAction
+        };
+        return new ParseResult<ReferentialAction>(action);
+    }
+
+    private ParseResult<ISqlExpression> ParseTableConstraint()
+    {
+        var constraintName = string.Empty;
+        if (TryMatchKeyword(ConstraintKeyword))
+        {
+            constraintName = _text.ReadSqlIdentifier().Word;
+        }
+        
+        var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpression();
+        if (tablePrimaryKeyOrUniqueExpr.HasError)
+        {
+            return RaiseParseError(tablePrimaryKeyOrUniqueExpr.Error);
+        }
+        if (tablePrimaryKeyOrUniqueExpr.Result.SqlType != SqlType.None)
+        {
+            ((SqlConstraintPrimaryKeyOrUnique)tablePrimaryKeyOrUniqueExpr.Result).ConstraintName = constraintName;
+            return tablePrimaryKeyOrUniqueExpr;
+        }
+        
+        var tableForeignKeyExpr = ParseForeignKeyExpression();
+        if (tableForeignKeyExpr.HasError)
+        {
+            RaiseParseError(tableForeignKeyExpr.Error);
+        }
+        if(tableForeignKeyExpr.Result.SqlType != SqlType.None)
+        {
+            ((SqlConstraintForeignKey)tableForeignKeyExpr.Result).ConstraintName = constraintName;
+            return tableForeignKeyExpr;
+        }
+        
+        return NoneResult();
     }
 
     private ParseResult<ISqlExpression> ParseTableName()
@@ -1185,16 +1185,16 @@ public class SqlParser
         return new ParseResult<T>(result);
     }
 
-    private bool TryMatchKeywords(params string[] keywords)
-    {
-        SkipWhiteSpace();
-        return _text.TryMatchesIgnoreCase(keywords);
-    }
-
     private bool TryMatchKeyword(string expected)
     {
         SkipWhiteSpace();
         return _text.TryMatchIgnoreCaseKeyword(expected);
+    }
+
+    private bool TryMatchKeywords(params string[] keywords)
+    {
+        SkipWhiteSpace();
+        return _text.TryMatchesIgnoreCase(keywords);
     }
 
     private bool TryMatchPrimaryKeyOrUnique(SqlConstraintPrimaryKeyOrUnique sqlConstraintPrimaryKeyOrUnique)
