@@ -68,7 +68,10 @@ public class SqlParser
         do
         {
             SkipWhiteSpace();
-            if (_text.IsPeekIdentifiers(SqlKeywords))
+
+            // 一開始就定義這些 關鍵字表示不是 column  
+            if (IsAny(PeekKeywords("CONSTRAINT"), PeekKeywords("PRIMARY", "KEY"), PeekKeywords("UNIQUE"),
+                    PeekKeywords("FOREIGN", "KEY")))
             {
                 break;
             }
@@ -400,6 +403,16 @@ public class SqlParser
         return new ParseResult<SqlCollectionExpression>(new SqlCollectionExpression());
     }
 
+    private Func<ParseResult<ISqlExpression>> PeekKeywords(params string[] keywords)
+    {
+        return () =>
+        {
+            var startPosition = _text.Position;
+            var result = ParseKeywords(keywords);
+            _text.Position = startPosition;
+            return result;
+        };
+    }
 
     private Func<ParseResult<ISqlExpression>> Keywords(params string[] keywords)
     {
@@ -445,6 +458,16 @@ public class SqlParser
         }
 
         return SqlNoneExpression.Default;
+    }
+
+    private bool IsAny(params Func<ParseResult<ISqlExpression>>[] parseFnList)
+    {
+        var span = Or(parseFnList)();
+        if (span.HasError)
+        {
+            return false;
+        }
+        return span.Result.SqlType != SqlType.None;
     }
 
     private Func<ParseResult<ISqlExpression>> Or(params Func<ParseResult<ISqlExpression>>[] parseFnList)

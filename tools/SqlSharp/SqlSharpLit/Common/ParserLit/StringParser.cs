@@ -34,22 +34,35 @@ public class StringParser
         return _position >= _text.Length;
     }
 
-    public bool IsPeekIdentifier(string word)
+    // public bool IsPeekIdentifier(string word)
+    // {
+    //     return PeekIdentifier(word).Length != 0;
+    // }
+    //
+    // public bool IsPeekIdentifiers(params string[] words)
+    // {
+    //     foreach (var word in words)
+    //     {
+    //         if (IsPeekIdentifier(word))
+    //         {
+    //             return true;
+    //         }
+    //     }
+    //
+    //     return false;
+    // }
+
+    public bool IsPeekIgnoreCase(Func<TextSpan> readFn, string expected)
     {
-        return PeekIdentifier(word).Length != 0;
+        var startPosition = _position;
+        var textSpan = readFn();
+        _position = startPosition;
+        return IsSameIgnoreCase(textSpan.Word, expected);
     }
 
-    public bool IsPeekIdentifiers(params string[] words)
+    private static bool IsSameIgnoreCase(string word1, string word2)
     {
-        foreach (var word in words)
-        {
-            if (IsPeekIdentifier(word))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return string.Equals(word1, word2, StringComparison.OrdinalIgnoreCase);
     }
 
     public bool IsWordChar(char c)
