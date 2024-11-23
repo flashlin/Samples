@@ -48,8 +48,9 @@ public class ParseSelectSqlTest
                     FieldName = "Id",
                 },
                 Operation = "=",
-                Right = new SqlIntValueExpression
+                Right = new SqlValue
                 {
+                    SqlType = SqlType.IntValue,
                     Value = "1"
                 }
             }

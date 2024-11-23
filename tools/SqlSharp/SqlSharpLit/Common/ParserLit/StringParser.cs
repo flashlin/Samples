@@ -48,6 +48,7 @@ public class StringParser
                 return true;
             }
         }
+
         return false;
     }
 
@@ -175,7 +176,7 @@ public class StringParser
         SkipWhitespace();
         var startPosition = _position;
         var prevToken = TextSpan.None;
-        while(!IsEnd())
+        while (!IsEnd())
         {
             var identifier = Or(ReadIdentifier, ReadQuotedIdentifier);
             if (identifier.Length == 0)
@@ -189,13 +190,16 @@ public class StringParser
                         Length = 0
                     };
                 }
+
                 break;
             }
+
             prevToken = identifier;
-            if(PeekNext()!='.')
+            if (PeekNext() != '.')
             {
                 break;
             }
+
             var dot = NextChar();
             prevToken = new TextSpan()
             {
@@ -204,11 +208,13 @@ public class StringParser
                 Length = 1
             };
         }
+
         var lastPosition = _position;
-        if(prevToken.Word == ".")
+        if (prevToken.Word == ".")
         {
             lastPosition = prevToken.Offset;
         }
+
         return new TextSpan
         {
             Word = _text.Substring(startPosition, lastPosition - startPosition),
@@ -244,7 +250,7 @@ public class StringParser
 
         var identifyPrev = new[] { "@", "#", "$" };
         var identifier = _text.Substring(offset, _position - offset);
-        if ( identifyPrev.Contains(identifier))
+        if (identifyPrev.Contains(identifier))
         {
             return new TextSpan
             {
@@ -259,6 +265,39 @@ public class StringParser
             Word = identifier,
             Offset = offset,
             Length = _position - offset
+        };
+    }
+
+    public TextSpan ReadFloat()
+    {
+        SkipWhitespace();
+        var startOffset = _position;
+        if (!Try(ReadNumber, out var number))
+        {
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        var dot = NextChar();
+        if (dot != '.')
+        {
+            _position = startOffset;
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        ReadNumber();
+        return new TextSpan
+        {
+            Word = _text.Substring(startOffset, _position - startOffset),
+            Offset = startOffset,
+            Length = _position - startOffset
         };
     }
 
@@ -289,7 +328,7 @@ public class StringParser
 
         return new TextSpan()
         {
-            Word = _text.Substring(startOffset, _position-startOffset),
+            Word = _text.Substring(startOffset, _position - startOffset),
             Offset = startOffset,
             Length = _position - startOffset
         };
@@ -338,7 +377,7 @@ public class StringParser
         var month = ReadNumber();
         NextChar();
         var day = ReadNumber();
-        if( year.Length ==0 || month.Length == 0 || day.Length == 0)
+        if (year.Length == 0 || month.Length == 0 || day.Length == 0)
         {
             _position = startPosition;
             return new TextSpan
@@ -348,6 +387,7 @@ public class StringParser
                 Length = 0
             };
         }
+
         return new TextSpan()
         {
             Word = _text.Substring(startPosition, _position - startPosition),
@@ -635,13 +675,14 @@ public class StringParser
 
     public bool Try(Func<TextSpan> readFunc, out TextSpan textSpan)
     {
-        var startPosition = _position; 
+        var startPosition = _position;
         textSpan = readFunc();
         if (textSpan.Length == 0)
         {
             _position = startPosition;
             return false;
         }
+
         return true;
     }
 
@@ -749,6 +790,7 @@ public class StringParser
                 return textSpan;
             }
         }
+
         return new TextSpan()
         {
             Word = string.Empty,

@@ -699,6 +699,15 @@ public class SqlParser
                 DefaultValue = date.Word,
             });
         }
+        
+        if(_text.Try(_text.ReadFloat, out var floatNumber))
+        {
+            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            {
+                ConstraintName = string.Empty,
+                DefaultValue = floatNumber.Word,
+            });
+        } 
 
         defaultValue = _text.ReadNumber();
         return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
@@ -735,8 +744,9 @@ public class SqlParser
     {
         if (_text.Try(_text.ReadNumber, out var number))
         {
-            return CreateParseResult(new SqlIntValueExpression
+            return CreateParseResult(new SqlValue
             {
+                SqlType = SqlType.IntValue,
                 Value = number.Word
             });
         }
@@ -1001,6 +1011,14 @@ public class SqlParser
 
     private ParseResult<ISqlExpression> ParseValue()
     {
+        if(_text.Try(_text.ReadFloat, out var floatNumber))
+        {
+            return CreateParseResult(new SqlValue
+            {
+                Value = floatNumber.Word
+            });
+        }
+        
         if (Try(ParseIntValue, out var number))
         {
             return number;
@@ -1008,7 +1026,7 @@ public class SqlParser
 
         if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
         {
-            return CreateParseResult(new SqlStringValue
+            return CreateParseResult(new SqlValue
             {
                 Value = quotedString.Word
             });
@@ -1235,24 +1253,4 @@ public class SqlParser
         _text.Position = tmpPosition;
         return isSuccess;
     }
-}
-
-public class ParseResult<T>
-{
-    public ParseResult(T result)
-    {
-        HasResult = true;
-        Result = result;
-    }
-
-    public ParseResult(ParseError error)
-    {
-        HasError = true;
-        Error = error;
-    }
-
-    public T Result { get; set; }
-    public bool HasResult { get; set; }
-    public ParseError Error { get; set; } = ParseError.Empty;
-    public bool HasError { get; set; }
 }
