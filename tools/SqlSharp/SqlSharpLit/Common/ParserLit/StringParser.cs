@@ -265,9 +265,9 @@ public class StringParser
     public TextSpan ReadNumber()
     {
         SkipWhitespace();
-        var offset = _position;
+        var startOffset = _position;
         var ch = PeekChar();
-        if (!char.IsDigit(ch) && ch != '-')
+        if (!char.IsDigit(ch))
         {
             return new TextSpan()
             {
@@ -277,7 +277,6 @@ public class StringParser
             };
         }
 
-        var word = "";
         while (!IsEnd())
         {
             ch = NextChar();
@@ -286,14 +285,13 @@ public class StringParser
                 _position--;
                 break;
             }
-            word += ch;
         }
 
         return new TextSpan()
         {
-            Word = word,
-            Offset = offset,
-            Length = _position - offset
+            Word = _text.Substring(startOffset, _position-startOffset),
+            Offset = startOffset,
+            Length = _position - startOffset
         };
     }
 
