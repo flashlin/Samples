@@ -30,4 +30,20 @@ public class StringParserTest
         var token = new StringParser(text).ReadFullQuotedIdentifier();
         token.Word.Should().Be("[dbo].tb1");
     }
+
+    [Test]
+    public void ReadSymbols()
+    {
+        var text = "/*123*/";
+        var token = new StringParser(text).ReadSymbols();
+        token.Word.Should().Be("/*");
+    }
+    
+    [Test]
+    public void ReadStarComment()
+    {
+        var text = "/*123*/abc";
+        var token = new StringParser(text).ReadDoubleComment();
+        token.Word.Should().Be("/*123*/");
+    }
 }

@@ -8,6 +8,38 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void CreateTableName_Comment_Fields()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1 -- comment
+                   (
+                       [id] int, /* Identify transfer in OL */     
+                       [name] DECIMAL (19,6) NOT NULL
+                   );
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "int"
+                },
+                new ColumnDefinition
+                {
+                    ColumnName = "[name]",
+                    DataType = "DECIMAL",
+                    Size = "19",
+                    Scale = 6,
+                    IsNullable = false
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void DefaultFloat()
     {
         var sql = $"""

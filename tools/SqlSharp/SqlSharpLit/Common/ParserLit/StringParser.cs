@@ -396,7 +396,7 @@ public class StringParser
         };
     }
 
-    public TextSpan ReadSqlDoubleComment()
+    public TextSpan ReadDoubleComment()
     {
         var startPosition = _position;
         if (Try(ReadSymbols, out var openSymbol))
@@ -635,7 +635,7 @@ public class StringParser
             if (openSymbol.Word == "/*")
             {
                 _position = startPosition;
-                ReadSqlDoubleComment();
+                ReadDoubleComment();
                 return true;
             }
         }

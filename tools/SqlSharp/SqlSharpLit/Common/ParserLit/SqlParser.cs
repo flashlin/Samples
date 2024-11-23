@@ -118,7 +118,7 @@ public class SqlParser
         }
 
         var tableName = _text.ReadSqlIdentifier();
-        if (!_text.TryMatch("("))
+        if (!TryMatch("("))
         {
             return RaiseParseError("Expected (");
         }
@@ -167,6 +167,12 @@ public class SqlParser
         SkipStatementEnd();
 
         return CreateParseResult(createTableStatement);
+    }
+
+    private bool TryMatch(string expected)
+    {
+        SkipWhiteSpace();
+        return _text.TryMatch(expected);
     }
 
     public ParseResult<ISqlExpression> ParseExecSpAddExtendedProperty()
