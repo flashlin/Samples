@@ -535,8 +535,7 @@ public class SqlParser
 
                 if (columnConstraint.Result.SqlType != SqlType.None)
                 {
-                    var t = (SqlConstraintPrimaryKeyOrUnique)columnConstraint.Result;
-                    column.Constraints.Add(t);
+                    column.Constraints.Add(columnConstraint.Result);
                 }
 
                 return RaiseParseError<ColumnDefinition>("Expect Constraint DEFAULT");
@@ -892,22 +891,17 @@ public class SqlParser
 
     private ParseResult<ISqlExpression> ParsePrimaryKeyOrUniqueExpression()
     {
-        var primaryKeyOrUnique = ParsePrimaryKeyOrUnique();
-        if (primaryKeyOrUnique.HasError)
+        var primaryKeyOrUniqueResult = ParsePrimaryKeyOrUnique();
+        if (primaryKeyOrUniqueResult.HasError)
         {
-            return RaiseParseError(primaryKeyOrUnique.Error);
+            return primaryKeyOrUniqueResult;
+        }
+        if (primaryKeyOrUniqueResult.Result.SqlType == SqlType.None)
+        {
+            return NoneResult();
         }
         
-        var sqlConstraint = new SqlConstraintPrimaryKeyOrUnique();
-        var hasSetting = false;
-        if (primaryKeyOrUnique.Result.SqlType != SqlType.None)
-        {
-            var subConstraint = (SqlConstraintPrimaryKeyOrUnique)primaryKeyOrUnique.Result;
-            sqlConstraint.ConstraintType = subConstraint.ConstraintType;
-            sqlConstraint.Clustered = subConstraint.Clustered;
-            sqlConstraint.Columns = subConstraint.Columns;
-            hasSetting = true;
-        }
+        var sqlConstraint = (SqlConstraintPrimaryKeyOrUnique)primaryKeyOrUniqueResult.Result;
 
         if (TryMatchKeyword("WITH"))
         {
@@ -918,13 +912,11 @@ public class SqlParser
             }
 
             sqlConstraint.WithToggles = togglesResult.Result.ToList<SqlToggle>();
-            hasSetting = true;
         }
 
         if (TryMatchKeyword("ON"))
         {
             sqlConstraint.On = _text.ReadSqlIdentifier().Word;
-            hasSetting = true;
         }
 
         if (Try(ParseIdentity, out var identityResult))
@@ -935,13 +927,8 @@ public class SqlParser
             }
 
             sqlConstraint.Identity = (SqlIdentity)identityResult.Result;
-            hasSetting = true;
         }
 
-        if (!hasSetting)
-        {
-            return NoneResult();
-        }
         return CreateParseResult(sqlConstraint);
     }
 
