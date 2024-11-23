@@ -169,12 +169,6 @@ public class SqlParser
         return CreateParseResult(createTableStatement);
     }
 
-    private bool TryMatch(string expected)
-    {
-        SkipWhiteSpace();
-        return _text.TryMatch(expected);
-    }
-
     public ParseResult<ISqlExpression> ParseExecSpAddExtendedProperty()
     {
         if (!TryMatchKeywords("EXEC", "SP_AddExtendedProperty"))
@@ -1194,6 +1188,12 @@ public class SqlParser
     private ParseResult<T> ToParseResult<T>(T result)
     {
         return new ParseResult<T>(result);
+    }
+
+    private bool TryMatch(string expected)
+    {
+        SkipWhiteSpace();
+        return _text.TryMatch(expected);
     }
 
     private bool TryMatchKeyword(string expected)
