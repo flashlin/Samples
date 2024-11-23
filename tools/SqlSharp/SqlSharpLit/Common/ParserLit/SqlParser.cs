@@ -914,12 +914,21 @@ public class SqlParser
     private ParseResult<ISqlExpression> ParseTableConstraint()
     {
         var constraintName = string.Empty;
-        var hasSetting = false;
         if (TryMatchKeyword(ConstraintKeyword))
         {
             constraintName = _text.ReadSqlIdentifier().Word;
         }
         
+        var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpr();
+        if (tablePrimaryKeyOrUniqueExpr.HasError)
+        {
+            return RaiseParseError(tablePrimaryKeyOrUniqueExpr.Error);
+        }
+        if (tablePrimaryKeyOrUniqueExpr.Result.SqlType != SqlType.None)
+        {
+            ((SqlConstraintPrimaryKeyOrUnique)tablePrimaryKeyOrUniqueExpr.Result).ConstraintName = constraintName;
+            return tablePrimaryKeyOrUniqueExpr;
+        }
         
         var tableForeignKeyExpr = ParseTableForeignKeyExpression();
         if (tableForeignKeyExpr.HasError)
@@ -932,18 +941,20 @@ public class SqlParser
             return tableForeignKeyExpr;
         }
         
+        return NoneResult();
+    }
 
-        var sqlConstraint = new SqlConstraintPrimaryKeyOrUnique
-        {
-            ConstraintName = constraintName
-        };
-
+    private ParseResult<ISqlExpression> ParsePrimaryKeyOrUniqueExpr()
+    {
         var primaryKeyOrUnique = ParsePrimaryKeyOrUnique();
         if (primaryKeyOrUnique.HasError)
         {
             return RaiseParseError(primaryKeyOrUnique.Error);
         }
-        if (primaryKeyOrUnique.HasResult && primaryKeyOrUnique.Result.SqlType != SqlType.None)
+        
+        var sqlConstraint = new SqlConstraintPrimaryKeyOrUnique();
+        var hasSetting = false;
+        if (primaryKeyOrUnique.Result.SqlType != SqlType.None)
         {
             var subConstraint = (SqlConstraintPrimaryKeyOrUnique)primaryKeyOrUnique.Result;
             sqlConstraint.ConstraintType = subConstraint.ConstraintType;
@@ -985,7 +996,6 @@ public class SqlParser
         {
             return NoneResult();
         }
-
         return CreateParseResult(sqlConstraint);
     }
 
