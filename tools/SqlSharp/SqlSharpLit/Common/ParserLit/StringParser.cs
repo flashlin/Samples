@@ -174,13 +174,13 @@ public class StringParser
     {
         SkipWhitespace();
         var startPosition = _position;
-        var count = 0;
+        var prevToken = TextSpan.None;
         while(!IsEnd())
         {
             var identifier = Or(ReadIdentifier, ReadQuotedIdentifier);
             if (identifier.Length == 0)
             {
-                if (count == 0)
+                if (prevToken == TextSpan.None)
                 {
                     return new TextSpan
                     {
@@ -191,20 +191,29 @@ public class StringParser
                 }
                 break;
             }
-            count++;
-            
-            var dot = Peek();
-            if(dot!='.')
+            prevToken = identifier;
+            if(Peek()!='.')
             {
                 break;
             }
-            NextChar();
+            var dot = NextChar();
+            prevToken = new TextSpan()
+            {
+                Word = dot.ToString(),
+                Offset = _position - 1,
+                Length = 1
+            };
+        }
+        var lastPosition = _position;
+        if(prevToken.Word == ".")
+        {
+            lastPosition = prevToken.Offset;
         }
         return new TextSpan
         {
-            Word = _text.Substring(startPosition, _position - startPosition),
+            Word = _text.Substring(startPosition, lastPosition - startPosition),
             Offset = startPosition,
-            Length = _position - startPosition
+            Length = lastPosition - startPosition
         };
     }
 
