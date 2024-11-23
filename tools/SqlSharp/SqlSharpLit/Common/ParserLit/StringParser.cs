@@ -82,7 +82,7 @@ public class StringParser
         return text;
     }
 
-    public char Peek()
+    public char PeekNext()
     {
         if (IsEnd()) return '\0';
         return _text[_position];
@@ -192,7 +192,7 @@ public class StringParser
                 break;
             }
             prevToken = identifier;
-            if(Peek()!='.')
+            if(PeekNext()!='.')
             {
                 break;
             }
@@ -428,7 +428,7 @@ public class StringParser
         while (!IsEnd())
         {
             var c = NextChar();
-            if (c == quoteChar && Peek() == quoteChar)
+            if (c == quoteChar && PeekNext() == quoteChar)
             {
                 NextChar();
                 continue;
@@ -515,7 +515,7 @@ public class StringParser
     public TextSpan ReadUntil(Func<char, bool> predicate)
     {
         var offset = _position;
-        while (!IsEnd() && !predicate(Peek()))
+        while (!IsEnd() && !predicate(PeekNext()))
         {
             NextChar();
         }
