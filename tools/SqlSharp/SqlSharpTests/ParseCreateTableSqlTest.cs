@@ -20,7 +20,7 @@ public class ParseCreateTableSqlTest
         {
             TableName = "tb1",
             Constraints = [
-                new SqlTableForeignKeyExpression
+                new SqlConstraintForeignKey
                 {
                     ConstraintName = "[FK1]",
                     Columns = [

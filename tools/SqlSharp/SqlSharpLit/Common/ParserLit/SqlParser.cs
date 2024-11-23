@@ -119,7 +119,7 @@ public class SqlParser
         }
         
         var notForReplication = TryMatchKeywords("NOT", "FOR", "REPLICATION");
-        return CreateParseResult(new SqlTableForeignKeyExpression
+        return CreateParseResult(new SqlConstraintForeignKey
         {
             Columns = columns,
             ReferencedTableName = tableName.Word,
@@ -937,7 +937,7 @@ public class SqlParser
         }
         if(tableForeignKeyExpr.Result.SqlType != SqlType.None)
         {
-            ((SqlTableForeignKeyExpression)tableForeignKeyExpr.Result).ConstraintName = constraintName;
+            ((SqlConstraintForeignKey)tableForeignKeyExpr.Result).ConstraintName = constraintName;
             return tableForeignKeyExpr;
         }
         

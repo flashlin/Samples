@@ -25,7 +25,7 @@ public static class ReferentialActionExtensions
     }
 }
 
-public class SqlTableForeignKeyExpression : ISqlExpression
+public class SqlConstraintForeignKey : ISqlExpression
 {
     public string ConstraintName { get; set; } = string.Empty;
     public SqlType SqlType { get; }= SqlType.TableForeignKey;
