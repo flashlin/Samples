@@ -34,24 +34,6 @@ public class StringParser
         return _position >= _text.Length;
     }
 
-    // public bool IsPeekIdentifier(string word)
-    // {
-    //     return PeekIdentifier(word).Length != 0;
-    // }
-    //
-    // public bool IsPeekIdentifiers(params string[] words)
-    // {
-    //     foreach (var word in words)
-    //     {
-    //         if (IsPeekIdentifier(word))
-    //         {
-    //             return true;
-    //         }
-    //     }
-    //
-    //     return false;
-    // }
-
     public bool IsPeekIgnoreCase(Func<TextSpan> readFn, string expected)
     {
         var startPosition = _position;
