@@ -83,12 +83,6 @@ public class StringParser
         return text;
     }
 
-    public char PeekNext()
-    {
-        if (IsEnd()) return '\0';
-        return _text[_position];
-    }
-
     public TextSpan Peek(Func<TextSpan> readFunc)
     {
         var tempPosition = _position;
@@ -134,6 +128,12 @@ public class StringParser
         return isSymbol;
     }
 
+    public char PeekNext()
+    {
+        if (IsEnd()) return '\0';
+        return _text[_position];
+    }
+
     public ReadOnlySpan<char> PeekString(int length)
     {
         if (IsEnd()) return string.Empty;
@@ -169,6 +169,66 @@ public class StringParser
         SkipWhitespace();
         if (IsEnd()) return '\0';
         return _text[_position++];
+    }
+
+    public TextSpan ReadDoubleComment()
+    {
+        var startPosition = _position;
+        if (Try(ReadSymbols, out var openSymbol))
+        {
+            if (openSymbol.Word == "/*")
+            {
+                ReadUntil("*/");
+                NextString(2);
+                return new TextSpan
+                {
+                    Word = _text.Substring(startPosition, _position - startPosition),
+                    Offset = startPosition,
+                    Length = _position - startPosition
+                };
+            }
+        }
+
+        _position = startPosition;
+        return new TextSpan
+        {
+            Word = string.Empty,
+            Offset = startPosition,
+            Length = 0
+        };
+    }
+
+    public TextSpan ReadFloat()
+    {
+        SkipWhitespace();
+        var startOffset = _position;
+        if (!Try(ReadInt, out var number))
+        {
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        var dot = NextChar();
+        if (dot != '.')
+        {
+            _position = startOffset;
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        ReadInt();
+        return new TextSpan
+        {
+            Word = _text.Substring(startOffset, _position - startOffset),
+            Offset = startOffset,
+            Length = _position - startOffset
+        };
     }
 
     public TextSpan ReadFullQuotedIdentifier()
@@ -268,39 +328,6 @@ public class StringParser
         };
     }
 
-    public TextSpan ReadFloat()
-    {
-        SkipWhitespace();
-        var startOffset = _position;
-        if (!Try(ReadInt, out var number))
-        {
-            return new TextSpan
-            {
-                Word = string.Empty,
-                Offset = _position,
-                Length = 0
-            };
-        }
-        var dot = NextChar();
-        if (dot != '.')
-        {
-            _position = startOffset;
-            return new TextSpan
-            {
-                Word = string.Empty,
-                Offset = _position,
-                Length = 0
-            };
-        }
-        ReadInt();
-        return new TextSpan
-        {
-            Word = _text.Substring(startOffset, _position - startOffset),
-            Offset = startOffset,
-            Length = _position - startOffset
-        };
-    }
-
     public TextSpan ReadInt()
     {
         SkipWhitespace();
@@ -331,6 +358,39 @@ public class StringParser
             Word = _text.Substring(startOffset, _position - startOffset),
             Offset = startOffset,
             Length = _position - startOffset
+        };
+    }
+
+    public TextSpan ReadNegativeNumber()
+    {
+        SkipWhitespace();
+        if (PeekNext() != '-')
+        {
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        var startPosition = _position;
+        NextChar();
+        var floatNumber = ReadFloat();
+        if (floatNumber.Length != 0)
+        {
+            return new TextSpan
+            {
+                Word = _text.Substring(startPosition, _position - startPosition),
+                Offset = startPosition,
+                Length = 0
+            };
+        }
+        ReadInt();
+        return new TextSpan
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
         };
     }
 
@@ -389,66 +449,6 @@ public class StringParser
         }
 
         return new TextSpan()
-        {
-            Word = _text.Substring(startPosition, _position - startPosition),
-            Offset = startPosition,
-            Length = _position - startPosition
-        };
-    }
-
-    public TextSpan ReadDoubleComment()
-    {
-        var startPosition = _position;
-        if (Try(ReadSymbols, out var openSymbol))
-        {
-            if (openSymbol.Word == "/*")
-            {
-                ReadUntil("*/");
-                NextString(2);
-                return new TextSpan
-                {
-                    Word = _text.Substring(startPosition, _position - startPosition),
-                    Offset = startPosition,
-                    Length = _position - startPosition
-                };
-            }
-        }
-
-        _position = startPosition;
-        return new TextSpan
-        {
-            Word = string.Empty,
-            Offset = startPosition,
-            Length = 0
-        };
-    }
-
-    public TextSpan ReadNegativeNumber()
-    {
-        SkipWhitespace();
-        if (PeekNext() != '-')
-        {
-            return new TextSpan
-            {
-                Word = string.Empty,
-                Offset = _position,
-                Length = 0
-            };
-        }
-        var startPosition = _position;
-        NextChar();
-        var floatNumber = ReadFloat();
-        if (floatNumber.Length != 0)
-        {
-            return new TextSpan
-            {
-                Word = _text.Substring(startPosition, _position - startPosition),
-                Offset = startPosition,
-                Length = 0
-            };
-        }
-        ReadInt();
-        return new TextSpan
         {
             Word = _text.Substring(startPosition, _position - startPosition),
             Offset = startPosition,
