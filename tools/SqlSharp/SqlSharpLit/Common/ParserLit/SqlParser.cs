@@ -61,7 +61,7 @@ public class SqlParser
         return RaiseParseError("Unknown statement");
     }
 
-    public ParseResult<ISqlExpression> ParseTableForeignKeyExpression()
+    public ParseResult<ISqlExpression> ParseForeignKeyExpression()
     {
         if (!TryMatchKeywords("FOREIGN", "KEY"))
         {
@@ -919,7 +919,7 @@ public class SqlParser
             constraintName = _text.ReadSqlIdentifier().Word;
         }
         
-        var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpr();
+        var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpression();
         if (tablePrimaryKeyOrUniqueExpr.HasError)
         {
             return RaiseParseError(tablePrimaryKeyOrUniqueExpr.Error);
@@ -930,7 +930,7 @@ public class SqlParser
             return tablePrimaryKeyOrUniqueExpr;
         }
         
-        var tableForeignKeyExpr = ParseTableForeignKeyExpression();
+        var tableForeignKeyExpr = ParseForeignKeyExpression();
         if (tableForeignKeyExpr.HasError)
         {
             RaiseParseError(tableForeignKeyExpr.Error);
@@ -944,7 +944,7 @@ public class SqlParser
         return NoneResult();
     }
 
-    private ParseResult<ISqlExpression> ParsePrimaryKeyOrUniqueExpr()
+    private ParseResult<ISqlExpression> ParsePrimaryKeyOrUniqueExpression()
     {
         var primaryKeyOrUnique = ParsePrimaryKeyOrUnique();
         if (primaryKeyOrUnique.HasError)
