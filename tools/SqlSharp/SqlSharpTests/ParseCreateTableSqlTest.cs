@@ -8,6 +8,37 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void DefaultFloat()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1(
+                      [id] DECIMAL(18, 2) NOT NULL DEFAULT 0.0 
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "DECIMAL",
+                    Size = "18",
+                    Scale = 2,
+                    IsNullable = false,
+                    Constraints = [
+                        new SqlConstraintPrimaryKeyOrUnique
+                        {
+                            DefaultValue = "0.0"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void TableForeignKeyReferences()
     {
         var sql = $"""
