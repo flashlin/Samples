@@ -8,6 +8,36 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void computed_column_definition()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1 (
+                       [id] INT,
+                       [PartitionHash]  AS ([id]%(10)) PERSISTED NOT NULL
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "INT"
+                },
+                new SqlComputedColumnDefinition
+                {
+                    ColumnName = "[PartitionHash]",
+                    Expression = "([id]%(10))",
+                    IsPersisted = true,
+                    IsNotNull = true
+                }
+            ],
+        });
+    }
+    
+    [Test]
     public void DefaultNegativeNumber()
     {
         var sql = $"""

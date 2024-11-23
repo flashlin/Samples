@@ -1,5 +1,5 @@
+using System.Text;
 using System.Text.RegularExpressions;
-using T1.Standard.DesignPatterns;
 
 namespace SqlSharpLit.Common.ParserLit;
 
@@ -64,7 +64,7 @@ public class SqlParser
 
     public ParseResult<SqlCollectionExpression> ParseCreateTableColumns()
     {
-        var columns = new List<ColumnDefinition>();
+        var columns = new List<ISqlExpression>();
         do
         {
             SkipWhiteSpace();
@@ -76,31 +76,50 @@ public class SqlParser
                 break;
             }
 
-            var item = _text.ReadSqlIdentifier();
-            if (item.Length == 0)
-            {
-                return EmptyCollectionResult();
-            }
+            // var computedColumnDefinition = ParseComputedColumnDefinition();
+            // if (computedColumnDefinition.HasError)
+            // {
+            //     return RaiseParseError<SqlCollectionExpression>(computedColumnDefinition.Error);
+            // }
+            // if (computedColumnDefinition.Result.SqlType != SqlType.None)
+            // {
+            //     columns.Add(computedColumnDefinition.Result);
+            // }
 
-            var columnDefinition = ParseColumnTypeDefinition(item);
+            // var item = _text.ReadSqlIdentifier();
+            // if (item.Length == 0)
+            // {
+            //     return EmptyCollectionResult();
+            // }
+            //
+            // var columnDefinition = ParseColumnTypeDefinition(item);
+            // if (columnDefinition.HasError)
+            // {
+            //     return RaiseParseError<SqlCollectionExpression>(columnDefinition.Error);
+            // }
+            //
+            // if (columnDefinition.Result.SqlType == SqlType.None)
+            // {
+            //     return RaiseParseError<SqlCollectionExpression>("Expected column definition");
+            // }
+            // var column = (ColumnDefinition)columnDefinition.Result;
+            //ParseColumnConstraints(column);
+            //columns.Add(column);
+
+            var columnDefinition = Or(ParseComputedColumnDefinition, ParseColumnDefinition)();
             if (columnDefinition.HasError)
             {
                 return RaiseParseError<SqlCollectionExpression>(columnDefinition.Error);
             }
-
-            if (columnDefinition.Result.SqlType == SqlType.None)
+            if(columnDefinition.Result.SqlType != SqlType.None)
             {
-                return RaiseParseError<SqlCollectionExpression>("Expected column definition");
+                columns.Add(columnDefinition.Result);
             }
-
-            var column = (ColumnDefinition)columnDefinition.Result;
-            ParseColumnConstraints(column);
-            columns.Add(column);
+            
             if (_text.PeekChar() != ',')
             {
                 break;
             }
-
             _text.ReadChar();
 
             // 怪異的 SQL 語法: 允許逗號後面沒有東西 遇到 ) 直接結束 
@@ -111,6 +130,34 @@ public class SqlParser
         } while (!_text.IsEnd());
 
         return CreateCollectionParseResult(columns);
+    }
+
+    private ParseResult<ISqlExpression> ParseColumnDefinition()
+    {
+        var startPosition = _text.Position;
+        if (!TryReadSqlIdentifier(out var columnNameSpan))
+        {
+            return NoneResult();
+        }
+        
+        var columnDefinition = ParseColumnTypeDefinition(columnNameSpan);
+        if (columnDefinition.HasError)
+        {
+            return RaiseParseError(columnDefinition.Error);
+        }
+
+        if (columnDefinition.Result.SqlType == SqlType.None)
+        {
+            _text.Position = startPosition;
+            return NoneResult();
+        }
+
+        var c = ParseColumnConstraints((ColumnDefinition)columnDefinition.Result);
+        if (c.HasError)
+        {
+            return RaiseParseError(c.Error);
+        }
+        return CreateParseResult(columnDefinition.Result);
     }
 
     public ParseResult<ISqlExpression> ParseCreateTableStatement()
@@ -139,7 +186,7 @@ public class SqlParser
                 return RaiseParseError(tableColumnsResult.Error);
             }
 
-            var tableColumns = tableColumnsResult.Result.ToList<ColumnDefinition>();
+            var tableColumns = tableColumnsResult.Result.Items;
             if (tableColumns.Count > 0)
             {
                 createTableStatement.Columns.AddRange(tableColumns);
@@ -218,6 +265,7 @@ public class SqlParser
         {
             return RaiseParseError(columnsResult.Error);
         }
+
         var columns = columnsResult.Result.ToList<SqlConstraintColumn>();
 
         if (!TryMatchKeyword("REFERENCES"))
@@ -244,25 +292,28 @@ public class SqlParser
         var onDelete = ReferentialAction.NoAction;
         if (TryMatchKeywords("ON", "DELETE"))
         {
-            var rc= ParseReferentialAction();
+            var rc = ParseReferentialAction();
             if (rc.HasError)
             {
                 return RaiseParseError(rc.Error);
             }
+
             onDelete = rc.Result;
         }
+
         var onUpdate = ReferentialAction.NoAction;
-        
-        if(TryMatchKeywords("ON", "UPDATE"))
+
+        if (TryMatchKeywords("ON", "UPDATE"))
         {
             var rc = ParseReferentialAction();
             if (rc.HasError)
             {
                 return RaiseParseError(rc.Error);
             }
+
             onUpdate = rc.Result;
         }
-        
+
         var notForReplication = TryMatchKeywords("NOT", "FOR", "REPLICATION");
         return CreateParseResult(new SqlConstraintForeignKey
         {
@@ -467,6 +518,7 @@ public class SqlParser
         {
             return false;
         }
+
         return span.Result.SqlType != SqlType.None;
     }
 
@@ -492,8 +544,90 @@ public class SqlParser
         };
     }
 
-    private ParseResult<ColumnDefinition> ParseColumnConstraints(ColumnDefinition column)
+    /*
+     * <computed_column_definition> ::=
+column_name AS computed_column_expression
+[ PERSISTED [ NOT NULL ] ]
+[
+    [ CONSTRAINT constraint_name ]
+    { PRIMARY KEY | UNIQUE }
+        [ CLUSTERED | NONCLUSTERED ]
+        [
+            WITH FILLFACTOR = fillfactor
+          | WITH ( <index_option> [ ,... n ] )
+        ]
+        [ ON { partition_scheme_name ( partition_column_name )
+        | filegroup | "default" } ]
+
+    | [ FOREIGN KEY ]
+        REFERENCES referenced_table_name [ ( ref_column ) ]
+        [ ON DELETE { NO ACTION | CASCADE } ]
+        [ ON UPDATE { NO ACTION } ]
+        [ NOT FOR REPLICATION ]
+
+    | CHECK [ NOT FOR REPLICATION ] ( logical_expression )
+]
+     */
+    private ParseResult<ISqlExpression> ParseComputedColumnDefinition()
     {
+        var startPosition = _text.Position;
+        if (!TryReadSqlIdentifier(out var columnNameSpan))
+        {
+            return NoneResult();
+        }
+
+        if (!TryMatchKeyword("AS"))
+        {
+            _text.Position = startPosition;
+            return NoneResult();
+        }
+
+        if (!TryMatch("("))
+        {
+            _text.Position = startPosition;
+            return RaiseParseError("Expected (");
+        }
+
+        var computedColumnExpressionSpan = _text.ReadUntilRightParenthesis();
+
+        if (!TryMatch(")"))
+        {
+            _text.Position = startPosition;
+            return RaiseParseError("Expected )");
+        }
+
+        var persist = TryMatchKeyword("PERSISTED");
+        var notNull = TryMatchKeywords("NOT", "NULL");
+
+        return CreateParseResult(new SqlComputedColumnDefinition
+        {
+            ColumnName = columnNameSpan.Word,
+            Expression = computedColumnExpressionSpan.Word,
+            IsPersisted = persist,
+            IsNotNull = notNull
+        });
+    }
+
+    private bool TryReadSqlIdentifier(out TextSpan result)
+    {
+        SkipWhiteSpace();
+        return _text.Try(_text.ReadSqlIdentifier, out result);
+    }
+    
+    private TextSpan ReadSqlIdentifier()
+    {
+        SkipWhiteSpace();
+        return _text.ReadSqlIdentifier();
+    }
+
+    private ParseResult<ISqlExpression> ParseColumnConstraints(ColumnDefinition column)
+    {
+        var comma = PeekKeywords(",")();
+        if(comma.HasResult && comma.Result.SqlType != SqlType.None)
+        {
+            return NoneResult();
+        }
+            
         do
         {
             var startPosition = _text.Position;
@@ -514,7 +648,7 @@ public class SqlParser
             {
                 if (identityResult.HasError)
                 {
-                    return RaiseParseError<ColumnDefinition>(identityResult.Error);
+                    return RaiseParseError(identityResult.Error);
                 }
 
                 column.Identity = (SqlIdentity)identityResult.Result;
@@ -525,7 +659,7 @@ public class SqlParser
             {
                 if (identityResult.HasError)
                 {
-                    return RaiseParseError<ColumnDefinition>(identityResult.Error);
+                    return RaiseParseError(identityResult.Error);
                 }
 
                 column.Constraints.Add((SqlConstraintPrimaryKeyOrUnique)defaultValue.Result);
@@ -540,7 +674,7 @@ public class SqlParser
                 {
                     if (identityResult.HasError)
                     {
-                        return RaiseParseError<ColumnDefinition>(identityResult.Error);
+                        return RaiseParseError(identityResult.Error);
                     }
 
                     var subConstraint = (SqlConstraintPrimaryKeyOrUnique)constraintDefaultValue.Result;
@@ -553,15 +687,14 @@ public class SqlParser
                 var columnConstraint = ParseTableConstraint();
                 if (columnConstraint.HasError)
                 {
-                    return RaiseParseError<ColumnDefinition>(columnConstraint.Error);
+                    return RaiseParseError(columnConstraint.Error);
                 }
 
-                if (columnConstraint.Result.SqlType != SqlType.None)
+                if (columnConstraint.Result.SqlType == SqlType.None)
                 {
-                    column.Constraints.Add(columnConstraint.Result);
+                    return RaiseParseError("Expect Constraint DEFAULT");
                 }
-
-                return RaiseParseError<ColumnDefinition>("Expect Constraint DEFAULT");
+                column.Constraints.Add(columnConstraint.Result);
             }
 
             if (TryMatchKeywords("NOT", "FOR", "REPLICATION"))
@@ -585,7 +718,7 @@ public class SqlParser
             break;
         } while (true);
 
-        return ToParseResult(column);
+        return CreateParseResult(column);
     }
 
     private ParseResult<SqlCollectionExpression> ParseColumnsAscDesc()
@@ -602,6 +735,7 @@ public class SqlParser
             {
                 order = "DESC";
             }
+
             return CreateParseResult(new SqlConstraintColumn
             {
                 ColumnName = columnName.Word,
@@ -616,7 +750,7 @@ public class SqlParser
         var column = new ColumnDefinition
         {
             ColumnName = columnNameSpan.Word,
-            DataType = _text.ReadSqlIdentifier().Word
+            DataType = ReadSqlIdentifier().Word
         };
 
         var dataLength1 = string.Empty;
@@ -722,8 +856,8 @@ public class SqlParser
                 DefaultValue = date.Word,
             });
         }
-        
-        if(_text.Try(_text.ReadNegativeNumber, out var negativeNumber))
+
+        if (_text.Try(_text.ReadNegativeNumber, out var negativeNumber))
         {
             return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
             {
@@ -731,15 +865,15 @@ public class SqlParser
                 DefaultValue = negativeNumber.Word,
             });
         }
-        
-        if(_text.Try(_text.ReadFloat, out var floatNumber))
+
+        if (_text.Try(_text.ReadFloat, out var floatNumber))
         {
             return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
             {
                 ConstraintName = string.Empty,
                 DefaultValue = floatNumber.Word,
             });
-        } 
+        }
 
         defaultValue = _text.ReadInt();
         return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
@@ -927,6 +1061,7 @@ public class SqlParser
         {
             return RaiseParseError(columnsResult.Error);
         }
+
         sqlConstraint.Columns = columnsResult.Result.ToList<SqlConstraintColumn>();
         return CreateParseResult(sqlConstraint);
     }
@@ -938,11 +1073,12 @@ public class SqlParser
         {
             return primaryKeyOrUniqueResult;
         }
+
         if (primaryKeyOrUniqueResult.Result.SqlType == SqlType.None)
         {
             return NoneResult();
         }
-        
+
         var sqlConstraint = (SqlConstraintPrimaryKeyOrUnique)primaryKeyOrUniqueResult.Result;
 
         if (TryMatchKeyword("WITH"))
@@ -1002,29 +1138,31 @@ public class SqlParser
         {
             constraintName = _text.ReadSqlIdentifier().Word;
         }
-        
+
         var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpression();
         if (tablePrimaryKeyOrUniqueExpr.HasError)
         {
             return RaiseParseError(tablePrimaryKeyOrUniqueExpr.Error);
         }
+
         if (tablePrimaryKeyOrUniqueExpr.Result.SqlType != SqlType.None)
         {
             ((SqlConstraintPrimaryKeyOrUnique)tablePrimaryKeyOrUniqueExpr.Result).ConstraintName = constraintName;
             return tablePrimaryKeyOrUniqueExpr;
         }
-        
+
         var tableForeignKeyExpr = ParseForeignKeyExpression();
         if (tableForeignKeyExpr.HasError)
         {
             RaiseParseError(tableForeignKeyExpr.Error);
         }
-        if(tableForeignKeyExpr.Result.SqlType != SqlType.None)
+
+        if (tableForeignKeyExpr.Result.SqlType != SqlType.None)
         {
             ((SqlConstraintForeignKey)tableForeignKeyExpr.Result).ConstraintName = constraintName;
             return tableForeignKeyExpr;
         }
-        
+
         return NoneResult();
     }
 
@@ -1043,14 +1181,14 @@ public class SqlParser
 
     private ParseResult<ISqlExpression> ParseValue()
     {
-        if(_text.Try(_text.ReadFloat, out var floatNumber))
+        if (_text.Try(_text.ReadFloat, out var floatNumber))
         {
             return CreateParseResult(new SqlValue
             {
                 Value = floatNumber.Word
             });
         }
-        
+
         if (Try(ParseIntValue, out var number))
         {
             return number;
@@ -1132,27 +1270,11 @@ public class SqlParser
         return CreateParseResult(toggle);
     }
 
-    private bool PeekMatchSymbol(string symbol)
-    {
-        SkipWhiteSpace();
-        return _text.PeekMatchSymbol(symbol);
-    }
-
     private ParseResult<ISqlExpression> RaiseParseError(string error)
     {
         return new ParseResult<ISqlExpression>(new ParseError(error)
         {
             Offset = _text.Position
-        });
-    }
-
-    private ParseResult<ISqlExpression> RaiseParseError(string error, int startOffset)
-    {
-        var errorPosition = _text.Position;
-        _text.Position = startOffset;
-        return new ParseResult<ISqlExpression>(new ParseError(error)
-        {
-            Offset = errorPosition
         });
     }
 
@@ -1172,35 +1294,6 @@ public class SqlParser
         {
             Offset = _text.Position
         });
-    }
-
-    private void ReadNonWhiteSpace()
-    {
-        var sqlIdentifier = _text.ReadSqlIdentifier();
-        if (sqlIdentifier.Length > 0)
-        {
-            return;
-        }
-
-        var sqlString = _text.ReadSqlQuotedString();
-        if (sqlString.Length > 0)
-        {
-            return;
-        }
-
-        var sqlNumber = _text.ReadInt();
-        if (sqlNumber.Length > 0)
-        {
-            return;
-        }
-
-        var sqlSymbol = _text.ReadSymbols();
-        if (sqlSymbol.Length > 0)
-        {
-            return;
-        }
-
-        _text.NextChar();
     }
 
     private void SkipWhiteSpace()
@@ -1240,49 +1333,6 @@ public class SqlParser
         return _text.TryMatchesIgnoreCase(keywords);
     }
 
-    private bool TryMatchPrimaryKeyOrUnique(SqlConstraintPrimaryKeyOrUnique sqlConstraintPrimaryKeyOrUnique)
-    {
-        if (TryMatchKeyword("UNIQUE"))
-        {
-            sqlConstraintPrimaryKeyOrUnique.ConstraintType = "UNIQUE";
-            return true;
-        }
-
-        if (TryMatchKeywords("PRIMARY", "KEY"))
-        {
-            sqlConstraintPrimaryKeyOrUnique.ConstraintType = "PRIMARY KEY";
-            return true;
-        }
-
-        return false;
-    }
-
-    private bool TryParseSqlIdentity(ColumnDefinition column, out Either<ColumnDefinition, ParseError> result)
-    {
-        if (!_text.TryMatch("IDENTITY"))
-        {
-            result = new Either<ColumnDefinition, ParseError>(column);
-            return false;
-        }
-
-        var sqlIdentity = new SqlIdentity
-        {
-            Seed = 1,
-            Increment = 1
-        };
-        if (_text.TryMatch("("))
-        {
-            sqlIdentity.Seed = long.Parse(_text.ReadInt().Word);
-            _text.Match(",");
-            sqlIdentity.Increment = int.Parse(_text.ReadInt().Word);
-            _text.Match(")");
-        }
-
-        column.Identity = sqlIdentity;
-        result = new Either<ColumnDefinition, ParseError>(column);
-        return true;
-    }
-
     private bool TryPeekKeyword(string expected)
     {
         SkipWhiteSpace();
@@ -1290,5 +1340,31 @@ public class SqlParser
         var isSuccess = _text.TryMatchIgnoreCaseKeyword(expected);
         _text.Position = tmpPosition;
         return isSuccess;
+    }
+}
+
+public class SqlComputedColumnDefinition : ISqlExpression
+{
+    public SqlType SqlType { get; } = SqlType.ComputedColumn;
+    public string ColumnName { get; set; } = string.Empty;
+    public string Expression { get; set; } = string.Empty;
+    public bool IsPersisted { get; set; } = false;
+    public bool IsNotNull { get; set; } = false;
+
+    public string ToSql()
+    {
+        var sql = new StringBuilder();
+        sql.Append($"{ColumnName} AS {Expression}");
+        if (IsPersisted)
+        {
+            sql.Append(" PERSISTED");
+        }
+
+        if (IsNotNull)
+        {
+            sql.Append(" NOT NULL");
+        }
+
+        return sql.ToString();
     }
 }
