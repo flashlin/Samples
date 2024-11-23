@@ -879,31 +879,12 @@ public class SqlParser
             sqlConstraint.Clustered = ((SqlToken)clusteredToken).Value;
         }
 
-        var uniqueColumns = ParseParenthesesWithComma(() =>
+        var columnsResult = ParseColumnsAscDesc();
+        if (columnsResult.HasError)
         {
-            var columnName = _text.ReadSqlIdentifier();
-            var order = string.Empty;
-            if (TryMatchKeyword("ASC"))
-            {
-                order = "ASC";
-            }
-            else if (TryMatchKeyword("DESC"))
-            {
-                order = "DESC";
-            }
-
-            return CreateParseResult(new SqlConstraintColumn
-            {
-                ColumnName = columnName.Word,
-                Order = order,
-            });
-        });
-        if (uniqueColumns.HasError)
-        {
-            return RaiseParseError(uniqueColumns.Error);
+            return RaiseParseError(columnsResult.Error);
         }
-
-        sqlConstraint.Columns = uniqueColumns.Result.ToList<SqlConstraintColumn>();
+        sqlConstraint.Columns = columnsResult.Result.ToList<SqlConstraintColumn>();
         return CreateParseResult(sqlConstraint);
     }
 
