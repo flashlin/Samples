@@ -15,5 +15,6 @@ public enum SqlType
     String,
     Identity,
     WithToggle,
-    Token
+    Token,
+    TableForeignKey
 }

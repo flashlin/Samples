@@ -8,6 +8,36 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void TableForeignKeyReferences()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1 (
+                   CONSTRAINT [FK1] FOREIGN KEY ([Id]) REFERENCES tb2 ([id2])
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Constraints = [
+                new SqlTableForeignKeyExpression
+                {
+                    ConstraintName = "[FK1]",
+                    Columns = [
+                        new SqlConstraintColumn
+                        {
+                            ColumnName = "[Id]",
+                            Order = ""
+                        }
+                    ],
+                    ReferencedTableName = "tb2",
+                    RefColumn = "[id2]"
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void SqlIdentifierName()
     {
         var sql = $"""
@@ -55,7 +85,7 @@ public class ParseCreateTableSqlTest
                     DataType = "varchar",
                     Size = "10",
                     Constraints = [
-                        new SqlConstraint
+                        new SqlConstraintPrimaryKeyOrUnique
                         {
                             DefaultValue = "GetDate()"
                         }
@@ -94,7 +124,7 @@ public class ParseCreateTableSqlTest
                     Size = "50",
                     IsNullable = true,
                     Constraints = [
-                        new SqlConstraint
+                        new SqlConstraintPrimaryKeyOrUnique
                         {
                             ConstraintName = "[D1]",
                             DefaultValue = "N'0'"
@@ -103,7 +133,7 @@ public class ParseCreateTableSqlTest
                 }
             ],
             Constraints = [
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[U1]",
                     ConstraintType = "UNIQUE",
@@ -173,7 +203,7 @@ public class ParseCreateTableSqlTest
                     DataType = "INT",
                     IsNullable = false,
                     Constraints = [
-                        new SqlConstraint
+                        new SqlConstraintPrimaryKeyOrUnique
                         {
                             ConstraintName = "[pk1]",
                             ConstraintType = "PRIMARY KEY",
@@ -237,7 +267,7 @@ public class ParseCreateTableSqlTest
                     IsNullable = false,
                     Constraints =
                     [
-                        new SqlConstraint
+                        new SqlConstraintPrimaryKeyOrUnique
                         {
                             DefaultValue = "GetDate()"
                         }
@@ -294,7 +324,7 @@ public class ParseCreateTableSqlTest
             ],
             Constraints =
             [
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "UC_1",
                     ConstraintType = "UNIQUE",
@@ -397,7 +427,7 @@ public class ParseCreateTableSqlTest
                     Scale = 6,
                     Constraints =
                     [
-                        new SqlConstraint
+                        new SqlConstraintPrimaryKeyOrUnique
                         {
                             ConstraintName = "[DF_CheckSum]",
                             DefaultValue = "(0)",
@@ -407,7 +437,7 @@ public class ParseCreateTableSqlTest
             ],
             Constraints =
             [
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[PK_AcceptedBets]",
                     ConstraintType = "PRIMARY KEY",
@@ -475,7 +505,7 @@ public class ParseCreateTableSqlTest
                     Size = "3",
                     IsNullable = false,
                     Constraints = [
-                        new SqlConstraint
+                        new SqlConstraintPrimaryKeyOrUnique
                         {
                             ConstraintName = "[DF_1]",
                             DefaultValue = "''"
@@ -507,7 +537,7 @@ public class ParseCreateTableSqlTest
                     DataType = "DATETIME",
                     IsNullable = false,
                     Constraints = [
-                        new SqlConstraint
+                        new SqlConstraintPrimaryKeyOrUnique
                         {
                             DefaultValue = "2019-01-01"
                         }
@@ -537,7 +567,7 @@ public class ParseCreateTableSqlTest
                     ColumnName = "[BannerType]",
                     DataType = "INT",
                     Constraints = [
-                        new SqlConstraint
+                        new SqlConstraintPrimaryKeyOrUnique
                         {
                             ConstraintName = "DEFAULT",
                             DefaultValue = "NULL"
@@ -629,7 +659,7 @@ public class ParseCreateTableSqlTest
                 }
             ],
             Constraints = [
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "",
                     ConstraintType = "PRIMARY KEY",
@@ -699,7 +729,7 @@ public class ParseCreateTableSqlTest
                 }
             ],
             Constraints = [
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[PK_1]",
                     ConstraintType = "PRIMARY KEY",
@@ -712,7 +742,7 @@ public class ParseCreateTableSqlTest
                         }
                     ],
                 },
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[UQ_1]",
                     ConstraintType = "UNIQUE",
@@ -753,7 +783,7 @@ public class ParseCreateTableSqlTest
                 }
             ],
             Constraints = [
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[UQ_1]",
                     ConstraintType = "UNIQUE",
@@ -797,7 +827,7 @@ public class ParseCreateTableSqlTest
                 }
             ],
             Constraints = [
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[PK_CashSettled]",
                     ConstraintType = "PRIMARY KEY",
@@ -845,7 +875,7 @@ public class ParseCreateTableSqlTest
                 }
             ],
             Constraints = [
-                new SqlConstraint
+                new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "",
                     ConstraintType = "PRIMARY KEY",
