@@ -425,14 +425,14 @@ public class StringParser
 
     public TextSpan ReadSqlIdentifier()
     {
-        if (Try(ReadIdentifier, out var identifier))
-        {
-            return identifier;
-        }
-
         if (Try(ReadFullQuotedIdentifier, out var fullQuotedIdentifier))
         {
             return fullQuotedIdentifier;
+        }
+        
+        if (Try(ReadIdentifier, out var identifier))
+        {
+            return identifier;
         }
 
         return new TextSpan
