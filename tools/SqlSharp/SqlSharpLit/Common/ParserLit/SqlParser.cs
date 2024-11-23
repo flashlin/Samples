@@ -952,29 +952,6 @@ public class SqlParser
             hasSetting = true;
         }
 
-        
-
-        if (TryMatchKeywords("FOREIGN", "KEY"))
-        {
-            sqlConstraint.ConstraintType = "FOREIGN KEY";
-            var uniqueColumns = ParseParenthesesWithComma(() =>
-            {
-                var uniqueColumn = _text.ReadSqlIdentifier();
-                return CreateParseResult(new SqlConstraintColumn
-                {
-                    ColumnName = uniqueColumn.Word,
-                    Order = string.Empty,
-                });
-            });
-            if (uniqueColumns.HasError)
-            {
-                return RaiseParseError(uniqueColumns.Error);
-            }
-
-            sqlConstraint.Columns = uniqueColumns.Result.ToList<SqlConstraintColumn>();
-            hasSetting = true;
-        }
-
         if (TryMatchKeyword("WITH"))
         {
             var togglesResult = ParseParenthesesWithComma(ParseWithToggle);
