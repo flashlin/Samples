@@ -8,6 +8,36 @@ namespace SqlSharpTests;
 public class ParseCreateTableSqlTest
 {
     [Test]
+    public void DefaultNegativeNumber()
+    {
+        var sql = $"""
+                   CREATE TABLE tb1
+                   (
+                       [id] INT NOT NULL DEFAULT -1
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new CreateTableStatement()
+        {
+            TableName = "tb1",
+            Columns = [
+                new ColumnDefinition
+                {
+                    ColumnName = "[id]",
+                    DataType = "INT",
+                    IsNullable = false,
+                    Constraints = [
+                        new SqlConstraintPrimaryKeyOrUnique
+                        {
+                            DefaultValue = "-1"
+                        }
+                    ]
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void SchemaName_dot_TableName()
     {
         var sql = $"""

@@ -607,12 +607,12 @@ public class SqlParser
                 return CreateParseResult(column);
             }
 
-            dataLength1 = _text.ReadNumber().Word;
+            dataLength1 = _text.ReadInt().Word;
             dataLength2 = string.Empty;
             if (_text.PeekChar() == ',')
             {
                 _text.ReadChar();
-                dataLength2 = _text.ReadNumber().Word;
+                dataLength2 = _text.ReadInt().Word;
             }
 
             if (!TryMatch(")"))
@@ -700,6 +700,15 @@ public class SqlParser
             });
         }
         
+        if(_text.Try(_text.ReadNegativeNumber, out var negativeNumber))
+        {
+            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            {
+                ConstraintName = string.Empty,
+                DefaultValue = negativeNumber.Word,
+            });
+        }
+        
         if(_text.Try(_text.ReadFloat, out var floatNumber))
         {
             return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
@@ -709,7 +718,7 @@ public class SqlParser
             });
         } 
 
-        defaultValue = _text.ReadNumber();
+        defaultValue = _text.ReadInt();
         return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
         {
             ConstraintName = string.Empty,
@@ -731,9 +740,9 @@ public class SqlParser
         };
         if (TryMatch("("))
         {
-            sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
+            sqlIdentity.Seed = long.Parse(_text.ReadInt().Word);
             _text.Match(",");
-            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
+            sqlIdentity.Increment = int.Parse(_text.ReadInt().Word);
             _text.Match(")");
         }
 
@@ -742,7 +751,7 @@ public class SqlParser
 
     private ParseResult<ISqlExpression> ParseIntValue()
     {
-        if (_text.Try(_text.ReadNumber, out var number))
+        if (_text.Try(_text.ReadInt, out var number))
         {
             return CreateParseResult(new SqlValue
             {
@@ -1090,7 +1099,7 @@ public class SqlParser
             return RaiseParseError("Expected toggleName =");
         }
 
-        if (_text.Try(_text.ReadNumber, out var number))
+        if (_text.Try(_text.ReadInt, out var number))
         {
             toggle.Value = number.Word;
             return CreateParseResult(toggle);
@@ -1156,7 +1165,7 @@ public class SqlParser
             return;
         }
 
-        var sqlNumber = _text.ReadNumber();
+        var sqlNumber = _text.ReadInt();
         if (sqlNumber.Length > 0)
         {
             return;
@@ -1240,9 +1249,9 @@ public class SqlParser
         };
         if (_text.TryMatch("("))
         {
-            sqlIdentity.Seed = long.Parse(_text.ReadNumber().Word);
+            sqlIdentity.Seed = long.Parse(_text.ReadInt().Word);
             _text.Match(",");
-            sqlIdentity.Increment = int.Parse(_text.ReadNumber().Word);
+            sqlIdentity.Increment = int.Parse(_text.ReadInt().Word);
             _text.Match(")");
         }
 

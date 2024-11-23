@@ -272,7 +272,7 @@ public class StringParser
     {
         SkipWhitespace();
         var startOffset = _position;
-        if (!Try(ReadNumber, out var number))
+        if (!Try(ReadInt, out var number))
         {
             return new TextSpan
             {
@@ -292,7 +292,7 @@ public class StringParser
                 Length = 0
             };
         }
-        ReadNumber();
+        ReadInt();
         return new TextSpan
         {
             Word = _text.Substring(startOffset, _position - startOffset),
@@ -301,7 +301,7 @@ public class StringParser
         };
     }
 
-    public TextSpan ReadNumber()
+    public TextSpan ReadInt()
     {
         SkipWhitespace();
         var startOffset = _position;
@@ -372,11 +372,11 @@ public class StringParser
     public TextSpan ReadSqlDate()
     {
         var startPosition = _position;
-        var year = ReadNumber();
+        var year = ReadInt();
         NextChar();
-        var month = ReadNumber();
+        var month = ReadInt();
         NextChar();
-        var day = ReadNumber();
+        var day = ReadInt();
         if (year.Length == 0 || month.Length == 0 || day.Length == 0)
         {
             _position = startPosition;
@@ -420,6 +420,39 @@ public class StringParser
             Word = string.Empty,
             Offset = startPosition,
             Length = 0
+        };
+    }
+
+    public TextSpan ReadNegativeNumber()
+    {
+        SkipWhitespace();
+        if (PeekNext() != '-')
+        {
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        var startPosition = _position;
+        NextChar();
+        var floatNumber = ReadFloat();
+        if (floatNumber.Length != 0)
+        {
+            return new TextSpan
+            {
+                Word = _text.Substring(startPosition, _position - startPosition),
+                Offset = startPosition,
+                Length = 0
+            };
+        }
+        ReadInt();
+        return new TextSpan
+        {
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
         };
     }
 
