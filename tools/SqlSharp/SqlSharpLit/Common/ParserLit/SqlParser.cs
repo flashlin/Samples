@@ -1059,14 +1059,13 @@ column_name AS computed_column_expression
             sqlConstraint.On = ReadSqlIdentifier().Word;
         }
 
-        if (Try(ParseIdentity, out var identityResult))
+        if (Try(ParseIdentity, out var identitySpan))
         {
-            if (identityResult.HasError)
+            if (identitySpan.HasError)
             {
-                return identityResult.Error;
+                return identitySpan.Error;
             }
-
-            sqlConstraint.Identity = identityResult.ResultValue;
+            sqlConstraint.Identity = identitySpan.ResultValue;
         }
 
         return CreateParseResult(sqlConstraint);
