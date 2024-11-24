@@ -385,6 +385,12 @@ public class SqlParser
         return new ParseResult<T>(result);
     }
 
+    private T? GetResult<T>(Func<ParseResult<T>> parseFn)
+    {
+        var result = parseFn();
+        return result.Result;
+    }
+
     private bool IsAny<T>(params Func<ParseResult<T>>[] parseFnList)
     {
         var span = Or(parseFnList)();
@@ -440,12 +446,6 @@ public class SqlParser
 
             return CreateParseError("Expected one of the options");
         };
-    }
-
-    private T? Optional<T>(Func<ParseResult<T>> parseFn)
-    {
-        var result = parseFn();
-        return result.Result;
     }
 
     private Func<ParseResult<T>> Or<T>(params Func<IParseResult>[] parseFnList)
@@ -1004,7 +1004,7 @@ column_name AS computed_column_expression
     private ParseResult<SqlConstraintPrimaryKeyOrUnique> ParsePrimaryKeyOrUnique()
     {
         var sqlConstraint = new SqlConstraintPrimaryKeyOrUnique();
-        var primaryKeyOrUniqueToken = Optional(Or(Keywords("PRIMARY", "KEY"), Keywords("UNIQUE")));
+        var primaryKeyOrUniqueToken = GetResult(Or(Keywords("PRIMARY", "KEY"), Keywords("UNIQUE")));
         if (primaryKeyOrUniqueToken != null)
         {
             sqlConstraint.ConstraintType = primaryKeyOrUniqueToken.Value;
@@ -1015,7 +1015,7 @@ column_name AS computed_column_expression
             return NoneResult<SqlConstraintPrimaryKeyOrUnique>();
         }
 
-        var clusteredToken = Optional(Or(Keywords("CLUSTERED"), Keywords("NONCLUSTERED")));
+        var clusteredToken = GetResult(Or(Keywords("CLUSTERED"), Keywords("NONCLUSTERED")));
         if (clusteredToken != null)
         {
             sqlConstraint.Clustered = clusteredToken.Value;
