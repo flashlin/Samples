@@ -16,5 +16,7 @@ public enum SqlType
     Token,
     TableForeignKey,
     ComputedColumn,
-    ConstraintDefaultValue
+    ConstraintDefaultValue,
+    DataType,
+    DataSize,
 }
