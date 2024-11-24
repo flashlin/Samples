@@ -57,7 +57,7 @@ public class ParseCreateTableSqlTest
                     DataType = "INT",
                     IsNullable = false,
                     Constraints = [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             DefaultValue = "-1"
                         }
@@ -143,7 +143,7 @@ public class ParseCreateTableSqlTest
                     Scale = 2,
                     IsNullable = false,
                     Constraints = [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             DefaultValue = "0.0"
                         }
@@ -231,7 +231,7 @@ public class ParseCreateTableSqlTest
                     DataType = "varchar",
                     Size = "10",
                     Constraints = [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             DefaultValue = "GetDate()"
                         }
@@ -270,7 +270,7 @@ public class ParseCreateTableSqlTest
                     Size = "50",
                     IsNullable = true,
                     Constraints = [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             ConstraintName = "[D1]",
                             DefaultValue = "N'0'"
@@ -413,7 +413,7 @@ public class ParseCreateTableSqlTest
                     IsNullable = false,
                     Constraints =
                     [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             DefaultValue = "GetDate()"
                         }
@@ -573,7 +573,7 @@ public class ParseCreateTableSqlTest
                     Scale = 6,
                     Constraints =
                     [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             ConstraintName = "[DF_CheckSum]",
                             DefaultValue = "(0)",
@@ -651,7 +651,7 @@ public class ParseCreateTableSqlTest
                     Size = "3",
                     IsNullable = false,
                     Constraints = [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             ConstraintName = "[DF_1]",
                             DefaultValue = "''"
@@ -683,7 +683,7 @@ public class ParseCreateTableSqlTest
                     DataType = "DATETIME",
                     IsNullable = false,
                     Constraints = [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             DefaultValue = "2019-01-01"
                         }
@@ -713,7 +713,7 @@ public class ParseCreateTableSqlTest
                     ColumnName = "[BannerType]",
                     DataType = "INT",
                     Constraints = [
-                        new SqlConstraintPrimaryKeyOrUnique
+                        new SqlConstraintDefaultValue
                         {
                             ConstraintName = "DEFAULT",
                             DefaultValue = "NULL"

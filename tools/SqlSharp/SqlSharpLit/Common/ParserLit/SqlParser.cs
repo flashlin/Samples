@@ -757,11 +757,11 @@ column_name AS computed_column_expression
         });
     }
 
-    private ParseResult<SqlConstraintPrimaryKeyOrUnique> ParseDefaultValue()
+    private ParseResult<SqlConstraintDefaultValue> ParseDefaultValue()
     {
         if (!TryMatchKeyword("DEFAULT"))
         {
-            return NoneResult<SqlConstraintPrimaryKeyOrUnique>();
+            return NoneResult<SqlConstraintDefaultValue>();
         }
 
         TextSpan defaultValue;
@@ -769,7 +769,7 @@ column_name AS computed_column_expression
         {
             defaultValue = _text.ReadUntilRightParenthesis();
             _text.Match(")");
-            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            return CreateParseResult(new SqlConstraintDefaultValue
             {
                 ConstraintName = string.Empty,
                 DefaultValue = defaultValue.Word
@@ -780,7 +780,7 @@ column_name AS computed_column_expression
         if (nullValue.Length > 0)
         {
             _text.ReadIdentifier();
-            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            return CreateParseResult(new SqlConstraintDefaultValue
             {
                 ConstraintName = string.Empty,
                 DefaultValue = nullValue.Word
@@ -798,7 +798,7 @@ column_name AS computed_column_expression
                 Offset = funcName.Offset,
                 Length = funcName.Length + funcArgs.Length + 2
             };
-            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            return CreateParseResult(new SqlConstraintDefaultValue
             {
                 ConstraintName = string.Empty,
                 DefaultValue = defaultValue.Word,
@@ -807,7 +807,7 @@ column_name AS computed_column_expression
 
         if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
         {
-            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            return CreateParseResult(new SqlConstraintDefaultValue
             {
                 ConstraintName = string.Empty,
                 DefaultValue = quotedString.Word,
@@ -816,7 +816,7 @@ column_name AS computed_column_expression
 
         if (_text.Try(_text.ReadSqlDate, out var date))
         {
-            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            return CreateParseResult(new SqlConstraintDefaultValue
             {
                 ConstraintName = string.Empty,
                 DefaultValue = date.Word,
@@ -825,7 +825,7 @@ column_name AS computed_column_expression
 
         if (_text.Try(_text.ReadNegativeNumber, out var negativeNumber))
         {
-            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            return CreateParseResult(new SqlConstraintDefaultValue
             {
                 ConstraintName = string.Empty,
                 DefaultValue = negativeNumber.Word,
@@ -834,7 +834,7 @@ column_name AS computed_column_expression
 
         if (_text.Try(_text.ReadFloat, out var floatNumber))
         {
-            return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+            return CreateParseResult(new SqlConstraintDefaultValue
             {
                 ConstraintName = string.Empty,
                 DefaultValue = floatNumber.Word,
@@ -842,7 +842,7 @@ column_name AS computed_column_expression
         }
 
         defaultValue = _text.ReadInt();
-        return CreateParseResult(new SqlConstraintPrimaryKeyOrUnique
+        return CreateParseResult(new SqlConstraintDefaultValue
         {
             ConstraintName = string.Empty,
             DefaultValue = defaultValue.Word,
@@ -1291,5 +1291,17 @@ column_name AS computed_column_expression
     {
         SkipWhiteSpace();
         return _text.Try(_text.ReadSqlIdentifier, out result);
+    }
+}
+
+public class SqlConstraintDefaultValue : ISqlConstraint
+{
+    public SqlType SqlType { get; } = SqlType.ConstraintDefaultValue;
+    public string ConstraintName { get; set; } = string.Empty;
+    public string DefaultValue { get; set; }= string.Empty;
+
+    public string ToSql()
+    {
+        return $"DEFAULT {DefaultValue}";
     }
 }

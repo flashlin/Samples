@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using T1.Standard.Collections.Generics;
 
 namespace SqlSharpLit.Common.ParserLit;
 
@@ -35,6 +36,47 @@ public class ExtractSqlHelper
         }
     }
 
+    public void GenerateRagFiles(string sqlFolder)
+    {
+        var databaseDescriptionMdFile = Path.Combine("outputs", "DatabaseDesc.md");
+        using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
+        var databaseDict =
+            new EnsureKeyDictionary<string, DatabaseDescription>(key => new DatabaseDescription { DatabaseName = key });
+        foreach (var sqlFileContent in GetSqlContentsFromFolder(sqlFolder))
+        {
+            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
+            var createTables = sqlFileContent.SqlExpressions
+                .Where(x => x.SqlType == SqlType.CreateTable)
+                .Cast<CreateTableStatement>()
+                .ToList();
+            foreach (var createTable in createTables)
+            {
+                var columns = createTable.Columns
+                    .Where(x => x.SqlType == SqlType.ColumnDefinition)
+                    .Cast<ColumnDefinition>()
+                    .ToList();
+                var table = new TableDescription()
+                {
+                    TableName = createTable.TableName,
+                    Columns = columns.Select(x=>new ColumnDescription()
+                    {
+                        ColumnName = x.ColumnName,
+                        DataType = x.DataType,
+                        IsNullable = x.IsNullable,
+                        IsIdentity = IsIdentity(x.Identity),
+                        // DefaultValue = x.Constraints.Where(x=>x.SqlType==SqlType.Constraint)
+                        //Description = x.Description
+                    }).ToList()
+                };
+            }
+        }
+    }
+
+    private bool IsIdentity(SqlIdentity sqlIdentity)
+    {
+        return sqlIdentity.Increment > 0;
+    }
+
     public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(string folder)
     {
         foreach (var sqlFileContent in GetSqlContentsFromFolder(folder))
@@ -49,7 +91,7 @@ public class ExtractSqlHelper
             };
         }
     }
-    
+
     public IEnumerable<SqlFileContent> GetSqlContentsFromFolder(string folder)
     {
         foreach (var sqlFile in GetSqlFiles(folder))
@@ -71,7 +113,7 @@ public class ExtractSqlHelper
         {
             return;
         }
-        
+
         var createTablesFile = Path.Combine(outputFolder, "CreateTables.sql");
         using var writer = CreateStreamWriter(createTablesFile);
         var sqlTypes = new[]
@@ -85,7 +127,7 @@ public class ExtractSqlHelper
             {
                 continue;
             }
-            
+
             var createTableSqlExpressions = sqlFile.File.SqlExpressions
                 .Where(x => x.SqlType == SqlType.CreateTable)
                 .ToList();
@@ -100,13 +142,14 @@ public class ExtractSqlHelper
                 writer.WriteLine("-- No other SQL expressions found");
                 var startIndex = Math.Min(sqlFile.CreateTables.Count, createTableSqlExpressions.Count);
                 writer.WriteLine("/*");
-                for(var i = startIndex; i < sqlFile.CreateTables.Count; i++)
+                for (var i = startIndex; i < sqlFile.CreateTables.Count; i++)
                 {
                     writer.WriteLine(sqlFile.CreateTables[i]);
                     writer.WriteLine();
                     writer.WriteLine();
                     writer.WriteLine();
                 }
+
                 writer.WriteLine("*/");
             }
             // foreach (var createTable in sqlFile.CreateTables)
@@ -119,6 +162,7 @@ public class ExtractSqlHelper
             {
                 writer.WriteLine(sqlExpression.ToSql());
             }
+
             writer.Flush();
         }
     }
@@ -239,9 +283,31 @@ public class ExtractSqlHelper
     }
 }
 
+public class DatabaseDescription
+{
+    public string DatabaseName { get; set; } = string.Empty;
+    public List<TableDescription> Tables { get; set; } = [];
+}
+
+public class TableDescription
+{
+    public string TableName { get; set; } = string.Empty;
+    public List<ColumnDescription> Columns { get; set; } = [];
+}
+
+public class ColumnDescription
+{
+    public string ColumnName { get; set; } = string.Empty;
+    public string DataType { get; set; } = string.Empty;
+    public bool IsNullable { get; set; }
+    public bool IsIdentity { get; set; }
+    public string DefaultValue { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+}
+
 public class SqlFileContent
 {
-    public  static SqlFileContent Empty => new();
+    public static SqlFileContent Empty => new();
     public string FileName { get; set; } = string.Empty;
     public string Sql { get; set; } = string.Empty;
     public List<ISqlExpression> SqlExpressions { get; set; } = [];
@@ -249,7 +315,7 @@ public class SqlFileContent
 
 public class SqlCreateTablesSqlFiles
 {
-    public SqlFileContent File { get; set; } = SqlFileContent.Empty; 
+    public SqlFileContent File { get; set; } = SqlFileContent.Empty;
     public List<string> CreateTables { get; set; } = [];
     public string DatabaseName { get; set; } = string.Empty;
 }

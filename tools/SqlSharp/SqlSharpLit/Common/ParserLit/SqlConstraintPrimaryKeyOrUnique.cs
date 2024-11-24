@@ -12,7 +12,6 @@ public class SqlConstraintPrimaryKeyOrUnique : ISqlConstraint
     public List<SqlToggle> WithToggles { get; set; } = [];
     public string On { get; set; } = string.Empty;
     public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
-    public string DefaultValue { get; set; } = string.Empty;
 
     public string ToSql()
     {
@@ -48,10 +47,6 @@ public class SqlConstraintPrimaryKeyOrUnique : ISqlConstraint
         if (!string.IsNullOrEmpty(On))
         {
             sb.Write($" ON {On}");
-        }
-        if (!string.IsNullOrEmpty(DefaultValue))
-        {
-            sb.Write($" DEFAULT {DefaultValue}");
         }
         return sb.ToString();
     }

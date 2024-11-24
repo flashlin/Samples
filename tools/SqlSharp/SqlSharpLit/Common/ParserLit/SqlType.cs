@@ -15,5 +15,6 @@ public enum SqlType
     WithToggle,
     Token,
     TableForeignKey,
-    ComputedColumn
+    ComputedColumn,
+    ConstraintDefaultValue
 }
