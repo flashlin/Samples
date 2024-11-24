@@ -7,7 +7,8 @@ public class CustomDatabaseNameProvider : IDatabaseNameProvider
 {
     public string GetDatabaseNameFromPath(string path)
     {
-        return GetNthDirectoryName(path, 3);
+        //return GetNthDirectoryName(path, 3);
+        return GetNthDirectoryName(path, 6);
         Env.Load();
         var databaseFolders = Env.GetString("DATABASE_FOLDERS").Split("\n");
         foreach(var dbPath in databaseFolders)

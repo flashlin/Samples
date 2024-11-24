@@ -86,51 +86,68 @@ public class ExtractSqlHelper
             .Where(x => x.Tables.Count > 0)
             .ToList();
 
-        GenerateDatabasesJsonFile(databaseDescriptions, Path.Combine("outputs", "Databases.json"));
+        databaseDescriptions = databaseDescriptions.GroupBy(x => x.DatabaseName)
+            .Select(x => new DatabaseDescription()
+            {
+                DatabaseName = x.Key,
+                Tables = x.SelectMany(y => y.Tables).ToList()
+            })
+            .OrderBy(x=>x.DatabaseName)
+            .ToList();
+        
 
-        var databaseDescriptionMdFile = Path.Combine("outputs", "DatabaseDesc.md");
-        using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
-        writer.WriteLine(
-            "The following is a detailed description of all databases and table structures of Titan Company.");
+        GenerateDatabasesJsonFile(databaseDescriptions, Path.Combine("outputs", "Databases.json"));
+        //writer.WriteLine("The following is a detailed description of all databases and table structures of Titan Company.");
         foreach (var database in databaseDescriptions)
         {
-            foreach (var table in database.Tables)
+            WriteAllTableDescriptions(database);
+        }
+    }
+
+    private static void WriteAllTableDescriptions(DatabaseDescription database)
+    {
+        var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-{database.DatabaseName}-Desc.md");
+        using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
+        foreach (var table in database.Tables)
+        {
+            WriteTableDescription(writer, database.DatabaseName, table);
+        }
+        writer.Flush();
+    }
+
+    private static void WriteTableDescription(StreamWriter writer, string databaseName, TableDescription table)
+    {
+        writer.WriteLine($"Database Name: {databaseName}");
+        writer.WriteLine(
+            $"The following is a detailed description of all column structures in the {table.TableName} table.");
+        foreach (var column in table.Columns)
+        {
+            writer.Write($"{column.ColumnName} {column.DataType}");
+            if (column.IsNullable)
             {
-                writer.WriteLine($"Database Name: {database.DatabaseName}");
-                writer.WriteLine(
-                    $"The following is a detailed description of all column structures in the {table.TableName} table.");
-                foreach (var column in table.Columns)
-                {
-                    writer.Write($"{column.ColumnName} {column.DataType}");
-                    if (column.IsNullable)
-                    {
-                        writer.Write($" ,is Nullable");
-                    }
-
-                    if (column.IsIdentity)
-                    {
-                        writer.Write($" ,is Identity");
-                    }
-
-                    if (column.DefaultValue != string.Empty)
-                    {
-                        writer.Write($" ,Default Value: {column.DefaultValue}");
-                    }
-
-                    if (!string.IsNullOrEmpty(column.Description.Trim()))
-                    {
-                        writer.Write($" ,Description: {column.Description}");
-                    }
-
-                    writer.WriteLine();
-                }
-
-                writer.WriteLine();
-                writer.WriteLine();
+                writer.Write($" ,is Nullable");
             }
+
+            if (column.IsIdentity)
+            {
+                writer.Write($" ,is Identity");
+            }
+
+            if (column.DefaultValue != string.Empty)
+            {
+                writer.Write($" ,Default Value: {column.DefaultValue}");
+            }
+
+            if (!string.IsNullOrEmpty(column.Description.Trim()))
+            {
+                writer.Write($" ,Description: {column.Description}");
+            }
+
+            writer.WriteLine();
         }
 
-        writer.Flush();
+        writer.WriteLine();
+        writer.WriteLine();
     }
 
     private void GenerateDatabasesJsonFile(List<DatabaseDescription> databaseDescriptions, string outputJsonFile)
@@ -147,7 +164,7 @@ public class ExtractSqlHelper
     {
         foreach (var sqlFileContent in sqlContents)
         {
-            Console.WriteLine($"{sqlFileContent.FileName} = {sqlFileContent.SqlExpressions.Count}");
+            Console.WriteLine($"{sqlFileContent.FileName}");
             var createTablesSql = ExtractAllCreateTableFromText(sqlFileContent.Sql).ToList();
             yield return new SqlCreateTablesSqlFiles
             {
