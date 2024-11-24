@@ -1068,7 +1068,7 @@ column_name AS computed_column_expression
             sqlConstraint.Identity = identitySpan.ResultValue;
         }
 
-        return CreateParseResult(sqlConstraint);
+        return sqlConstraint;
     }
 
     private ParseResult<ReferentialAction> ParseReferentialAction()
