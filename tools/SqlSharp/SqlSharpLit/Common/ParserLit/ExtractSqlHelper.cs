@@ -85,34 +85,49 @@ public class ExtractSqlHelper
             .ToList();
         var databaseDescriptionMdFile = Path.Combine("outputs", "DatabaseDesc.md");
         using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
-        writer.WriteLine("The following is a detailed description of all databases and table structures of Titan Company.");
+        writer.WriteLine(
+            "The following is a detailed description of all databases and table structures of Titan Company.");
         foreach (var database in databaseDescriptions)
         {
             foreach (var table in database.Tables)
             {
                 writer.WriteLine($"Database Name: {database.DatabaseName}");
-                writer.WriteLine($"The following is a detailed description of all column structures in the {table.TableName} table.");
+                writer.WriteLine(
+                    $"The following is a detailed description of all column structures in the {table.TableName} table.");
                 foreach (var column in table.Columns)
                 {
-                    writer.Write($"{column.ColumnName} {column.DataType} Nullable: {column.IsNullable}, Identity: {column.IsIdentity}");
+                    writer.Write($"{column.ColumnName} {column.DataType}");
+                    if (column.IsNullable)
+                    {
+                        writer.Write($" ,is Nullable");
+                    }
+                    if (column.IsIdentity)
+                    {
+                        writer.Write($" ,is Identity");
+                    }
                     if (column.DefaultValue != string.Empty)
                     {
-                        writer.Write($" Default Value: {column.DefaultValue}");
+                        writer.Write($" ,Default Value: {column.DefaultValue}");
                     }
-                    if(column.DefaultValue != string.Empty)
+
+                    if (!string.IsNullOrEmpty(column.Description.Trim()))
                     {
-                        writer.Write($" Description: {column.Description}");
+                        writer.Write($" ,Description: {column.Description}");
                     }
+
                     writer.WriteLine();
                 }
+
                 writer.WriteLine();
                 writer.WriteLine();
             }
         }
+
         writer.Flush();
     }
 
-    public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(IEnumerable<SqlFileContent> sqlContents)
+    public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(
+        IEnumerable<SqlFileContent> sqlContents)
     {
         foreach (var sqlFileContent in sqlContents)
         {
@@ -228,7 +243,8 @@ public class ExtractSqlHelper
         return lineContent.Contains("--") || lineContent.Contains("/*");
     }
 
-    private ColumnDescription CreateColumnDescription(string tableName, SqlColumnDefinition column, List<ISqlExpression> allSqlExpressions)
+    private ColumnDescription CreateColumnDescription(string tableName, SqlColumnDefinition column,
+        List<ISqlExpression> allSqlExpressions)
     {
         return new ColumnDescription()
         {
@@ -236,14 +252,15 @@ public class ExtractSqlHelper
             DataType = column.DataType,
             IsNullable = column.IsNullable,
             IsIdentity = IsIdentity(column.Identity),
-            DefaultValue = column.Constraints.Where(x=>x.SqlType==SqlType.ConstraintDefaultValue)
+            DefaultValue = column.Constraints.Where(x => x.SqlType == SqlType.ConstraintDefaultValue)
                 .Cast<SqlConstraintDefaultValue>()
-                .Select(x=>x.DefaultValue)
+                .Select(x => x.DefaultValue)
                 .FirstOrDefault(string.Empty),
             Description = allSqlExpressions
                 .Where(x => x.SqlType == SqlType.AddExtendedProperty)
                 .Cast<SqlSpAddExtendedProperty>()
-                .Where(x=> x.Name.Contains("MS_Description") && x.Level1Name == tableName && x.Level2Name == column.ColumnName)
+                .Where(x => x.Name.Contains("MS_Description") && x.Level1Name == tableName &&
+                            x.Level2Name == column.ColumnName)
                 .Select(x => x.Value)
                 .FirstOrDefault(string.Empty)
         };
@@ -265,6 +282,7 @@ public class ExtractSqlHelper
             var table = CreateTableDescription(createTable, sqlFileContent.SqlExpressions);
             database.Tables.Add(table);
         }
+
         return database;
     }
 
@@ -275,7 +293,8 @@ public class ExtractSqlHelper
         return writer;
     }
 
-    private TableDescription CreateTableDescription(SqlCreateTableStatement createTable, List<ISqlExpression> allSqlExpressions)
+    private TableDescription CreateTableDescription(SqlCreateTableStatement createTable,
+        List<ISqlExpression> allSqlExpressions)
     {
         var tableName = createTable.TableName;
         var columns = createTable.Columns
@@ -285,7 +304,7 @@ public class ExtractSqlHelper
         var table = new TableDescription()
         {
             TableName = createTable.TableName,
-            Columns = columns.Select(x=>CreateColumnDescription(tableName, x, allSqlExpressions)).ToList()
+            Columns = columns.Select(x => CreateColumnDescription(tableName, x, allSqlExpressions)).ToList()
         };
         return table;
     }
