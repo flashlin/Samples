@@ -401,11 +401,6 @@ public class SqlParser
         _text.Match(expected);
     }
 
-    private ParseResult<ISqlExpression> NoneResult()
-    {
-        return new ParseResult<ISqlExpression>(default(ISqlExpression));
-    }
-
     private ParseResult<T> NoneResult<T>()
     {
         return new ParseResult<T>(default(T));
