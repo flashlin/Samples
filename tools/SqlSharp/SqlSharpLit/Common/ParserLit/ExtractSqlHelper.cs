@@ -48,9 +48,11 @@ public class ExtractSqlHelper
             var createTables = sqlFileContent.SqlExpressions
                 .Where(x => x.SqlType == SqlType.CreateTable)
                 .Cast<SqlCreateTableStatement>()
+                .Where(x => x.TableName.StartsWith())
                 .ToList();
             foreach (var createTable in createTables)
             {
+                var tableName = createTable.TableName;
                 var columns = createTable.Columns
                     .Where(x => x.SqlType == SqlType.ColumnDefinition)
                     .Cast<SqlColumnDefinition>()
@@ -58,18 +60,32 @@ public class ExtractSqlHelper
                 var table = new TableDescription()
                 {
                     TableName = createTable.TableName,
-                    Columns = columns.Select(x=>new ColumnDescription()
-                    {
-                        ColumnName = x.ColumnName,
-                        DataType = x.DataType,
-                        IsNullable = x.IsNullable,
-                        IsIdentity = IsIdentity(x.Identity),
-                        // DefaultValue = x.Constraints.Where(x=>x.SqlType==SqlType.Constraint)
-                        //Description = x.Description
-                    }).ToList()
+                    Columns = columns.Select(x=>ToColumnDescription(sqlFileContent, tableName, x)).ToList()
                 };
+                databaseDict[databaseName].Tables.Add(table);
             }
         }
+    }
+
+    private ColumnDescription ToColumnDescription(SqlFileContent sqlFileContent, string tableName, SqlColumnDefinition column)
+    {
+        return new ColumnDescription()
+        {
+            ColumnName = column.ColumnName,
+            DataType = column.DataType,
+            IsNullable = column.IsNullable,
+            IsIdentity = IsIdentity(column.Identity),
+            DefaultValue = column.Constraints.Where(x=>x.SqlType==SqlType.ConstraintDefaultValue)
+                .Cast<SqlConstraintDefaultValue>()
+                .Select(x=>x.DefaultValue)
+                .FirstOrDefault(string.Empty),
+            Description = sqlFileContent.SqlExpressions
+                .Where(x => x.SqlType == SqlType.AddExtendedProperty)
+                .Cast<SqlSpAddExtendedProperty>()
+                .Where(x=> x.Name.Contains("MS_Description") && x.Level1Name == tableName && x.Level2Name == column.ColumnName)
+                .Select(x => x.Value)
+                .FirstOrDefault(string.Empty)
+        };
     }
 
     private bool IsIdentity(SqlIdentity sqlIdentity)
