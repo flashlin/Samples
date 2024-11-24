@@ -1092,7 +1092,7 @@ column_name AS computed_column_expression
         var constraintName = string.Empty;
         if (TryMatchKeyword(ConstraintKeyword))
         {
-            constraintName = _text.ReadSqlIdentifier().Word;
+            constraintName = ReadSqlIdentifier().Word;
         }
 
         var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpression();
