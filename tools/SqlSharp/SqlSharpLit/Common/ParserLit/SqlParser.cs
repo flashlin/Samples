@@ -18,7 +18,7 @@ public class SqlParser
         while (!_text.IsEnd())
         {
             var rc = Parse();
-            if (rc.HasResult)
+            if (rc.HasValue)
             {
                 yield return rc.ResultValue;
             }

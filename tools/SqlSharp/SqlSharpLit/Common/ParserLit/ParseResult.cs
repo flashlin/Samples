@@ -63,6 +63,20 @@ public class ParseResult<T> : IParseResult
     }
 
     public bool HasResult { get; set; }
+
+    public bool HasValue
+    {
+        get
+        {
+            if(HasResult)
+            {
+                return Result != null;
+            }
+
+            return false;
+        }
+    }
+
     public ParseError Error { get; set; } = ParseError.Empty;
     public bool HasError { get; set; }
 }
