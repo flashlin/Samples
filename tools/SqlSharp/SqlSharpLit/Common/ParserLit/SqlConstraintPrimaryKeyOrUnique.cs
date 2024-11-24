@@ -2,7 +2,7 @@ using T1.Standard.IO;
 
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlConstraintPrimaryKeyOrUnique : ISqlExpression 
+public class SqlConstraintPrimaryKeyOrUnique : ISqlConstraint
 {
     public SqlType SqlType => SqlType.Constraint;
     public string ConstraintName { get; set; } = string.Empty;
