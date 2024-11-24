@@ -1110,7 +1110,7 @@ column_name AS computed_column_expression
         var tableForeignKeyExpr = ParseForeignKeyExpression();
         if (tableForeignKeyExpr.HasError)
         {
-            RaiseParseError(tableForeignKeyExpr.Error);
+            return RaiseParseError(tableForeignKeyExpr.Error);
         }
 
         if (tableForeignKeyExpr.Result!=null)
