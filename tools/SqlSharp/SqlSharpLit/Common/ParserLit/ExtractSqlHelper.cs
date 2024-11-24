@@ -101,15 +101,25 @@ public class ExtractSqlHelper
         foreach (var database in databaseDescriptions)
         {
             WriteAllTableDescriptions(database);
-            WriteAllDatabaseTable(database);
+            WriteAllDatabaseTableNames(database);
         }
 
-        using var writer = new StreamWriter(Path.Combine("outputs", $"Database-TableNames-Desc.md"), false, Encoding.UTF8);
+        WriteDatabaseTableNamesDesc(databaseDescriptions);
+    }
+
+    private static void WriteDatabaseTableNamesDesc(List<DatabaseDescription> databaseDescriptions)
+    {
+        using var writer = CreateWriter("Database-TableNames-Desc.md");
         foreach (var database in databaseDescriptions)
         {
             WriteDatabaseTableNamesTo(database, writer);
         }
         writer.Flush();
+    }
+
+    private static StreamWriter CreateWriter(string filename)
+    {
+        return new StreamWriter(Path.Combine("outputs", filename), false, Encoding.UTF8);
     }
 
     private static void WriteAllTableDescriptions(DatabaseDescription database)
@@ -123,7 +133,7 @@ public class ExtractSqlHelper
         writer.Flush();
     }
     
-    private static void WriteAllDatabaseTable(DatabaseDescription database)
+    private static void WriteAllDatabaseTableNames(DatabaseDescription database)
     {
         var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-Tables-{database.DatabaseName}-Desc.md");
         using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
