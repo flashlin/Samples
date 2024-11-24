@@ -1021,14 +1021,13 @@ column_name AS computed_column_expression
             sqlConstraint.Clustered = clusteredToken.Value;
         }
 
-        var columnsResult = ParseColumnsAscDesc();
-        if (columnsResult.HasError)
+        var columnsSpan = ParseColumnsAscDesc();
+        if (columnsSpan.HasError)
         {
-            return columnsResult.Error;
+            return columnsSpan.Error;
         }
-
-        sqlConstraint.Columns = columnsResult.ResultValue;
-        return CreateParseResult(sqlConstraint);
+        sqlConstraint.Columns = columnsSpan.ResultValue;
+        return sqlConstraint;
     }
 
     private ParseResult<SqlConstraintPrimaryKeyOrUnique> ParsePrimaryKeyOrUniqueExpression()
