@@ -35,20 +35,31 @@ public class ExtractSqlHelper
         }
     }
 
-    public IEnumerable<SqlFile> GetSqlContentsFromFolder(string folder)
+    public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(string folder)
+    {
+        foreach (var sqlFileContent in GetSqlContentsFromFolder(folder))
+        {
+            Console.WriteLine($"{sqlFileContent.FileName} = {sqlFileContent.SqlExpressions.Count}");
+            var createTablesSql = ExtractAllCreateTableFromText(sqlFileContent.Sql).ToList();
+            yield return new SqlCreateTablesSqlFiles
+            {
+                File = sqlFileContent,
+                DatabaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName),
+                CreateTables = createTablesSql,
+            };
+        }
+    }
+    
+    public IEnumerable<SqlFileContent> GetSqlContentsFromFolder(string folder)
     {
         foreach (var sqlFile in GetSqlFiles(folder))
         {
             var sql = File.ReadAllText(sqlFile);
             var sqlExpressions = new SqlParser(sql).Extract().ToList();
-            Console.WriteLine($"{sqlFile} = {sqlExpressions.Count}");
-            var createTableSqls = ExtractAllCreateTableFromText(sql).ToList();
-            yield return new SqlFile
+            yield return new SqlFileContent
             {
                 FileName = sqlFile,
                 Sql = sql,
-                DatabaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFile),
-                CreateTables = createTableSqls,
                 SqlExpressions = sqlExpressions
             };
         }
@@ -62,25 +73,24 @@ public class ExtractSqlHelper
         }
         
         var createTablesFile = Path.Combine(outputFolder, "CreateTables.sql");
-        using var fileStream = new FileStream(createTablesFile, FileMode.Create);
-        var writer = new StreamWriter(fileStream, Encoding.UTF8);
+        using var writer = CreateStreamWriter(createTablesFile);
         var sqlTypes = new[]
         {
             SqlType.CreateTable,
             SqlType.AddExtendedProperty
         };
-        foreach (var sqlFile in GetSqlContentsFromFolder(folder))
+        foreach (var sqlFile in GetCreateCreateTableSqlFromFolder(folder))
         {
             if (sqlFile.CreateTables.Count == 0)
             {
                 continue;
             }
             
-            var createTableSqlExpressions = sqlFile.SqlExpressions
+            var createTableSqlExpressions = sqlFile.File.SqlExpressions
                 .Where(x => x.SqlType == SqlType.CreateTable)
                 .ToList();
 
-            writer.WriteLine($"-- {sqlFile.FileName}");
+            writer.WriteLine($"-- {sqlFile.File.FileName}");
             writer.WriteLine($"-- Database: {sqlFile.DatabaseName}");
 
             if (sqlFile.CreateTables.Count != createTableSqlExpressions.Count)
@@ -111,6 +121,13 @@ public class ExtractSqlHelper
             }
             writer.Flush();
         }
+    }
+
+    private static StreamWriter CreateStreamWriter(string createTablesFile)
+    {
+        var fileStream = new FileStream(createTablesFile, FileMode.Create);
+        var writer = new StreamWriter(fileStream, Encoding.UTF8);
+        return writer;
     }
 
     public IEnumerable<string> ExtractAllCreateTableFromText(string text)
@@ -222,11 +239,17 @@ public class ExtractSqlHelper
     }
 }
 
-public class SqlFile
+public class SqlFileContent
 {
+    public  static SqlFileContent Empty => new();
     public string FileName { get; set; } = string.Empty;
     public string Sql { get; set; } = string.Empty;
+    public List<ISqlExpression> SqlExpressions { get; set; } = [];
+}
+
+public class SqlCreateTablesSqlFiles
+{
+    public SqlFileContent File { get; set; } = SqlFileContent.Empty; 
     public List<string> CreateTables { get; set; } = [];
     public string DatabaseName { get; set; } = string.Empty;
-    public List<ISqlExpression> SqlExpressions { get; set; } = [];
 }
