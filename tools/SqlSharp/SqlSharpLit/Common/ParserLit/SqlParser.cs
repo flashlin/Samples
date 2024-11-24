@@ -1033,19 +1033,17 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlConstraintPrimaryKeyOrUnique> ParsePrimaryKeyOrUniqueExpression()
     {
-        var primaryKeyOrUniqueResult = ParsePrimaryKeyOrUnique();
-        if (primaryKeyOrUniqueResult.HasError)
+        var primaryKeyOrUniqueSpan = ParsePrimaryKeyOrUnique();
+        if (primaryKeyOrUniqueSpan.HasError)
         {
-            return primaryKeyOrUniqueResult;
+            return primaryKeyOrUniqueSpan;
         }
-
-        if (primaryKeyOrUniqueResult.Result == null)
+        if (primaryKeyOrUniqueSpan.Result == null)
         {
             return NoneResult<SqlConstraintPrimaryKeyOrUnique>();
         }
 
-        var sqlConstraint = primaryKeyOrUniqueResult.ResultValue;
-
+        var sqlConstraint = primaryKeyOrUniqueSpan.ResultValue;
         if (TryMatchKeyword("WITH"))
         {
             var togglesResult = ParseParenthesesWithComma(ParseWithToggle);
