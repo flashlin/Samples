@@ -1072,15 +1072,15 @@ column_name AS computed_column_expression
 
     private ParseResult<ReferentialAction> ParseReferentialAction()
     {
-        var result = One(Keywords("NO", "ACTION"), Keywords("CASCADE"), Keywords("SET", "NULL"),
+        var actionTokenSpan = One(Keywords("NO", "ACTION"), Keywords("CASCADE"), Keywords("SET", "NULL"),
             Keywords("SET", "DEFAULT"))();
-        if (result.HasError)
+        if (actionTokenSpan.HasError)
         {
-            return result.Error;
+            return actionTokenSpan.Error;
         }
 
-        var token = result.ResultValue;
-        var action = token.Value.ToUpper() switch
+        var actionToken = actionTokenSpan.ResultValue;
+        var action = actionToken.Value.ToUpper() switch
         {
             "NO ACTION" => ReferentialAction.NoAction,
             "CASCADE" => ReferentialAction.Cascade,
