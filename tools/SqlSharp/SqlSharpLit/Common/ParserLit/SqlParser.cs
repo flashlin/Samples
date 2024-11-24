@@ -52,7 +52,7 @@ public class SqlParser
             return execSpAddExtendedPropertyResult.Result;
         }
 
-        return RaiseParseError("Unknown statement");
+        return CreateParseError("Unknown statement");
     }
 
 
@@ -133,7 +133,7 @@ public class SqlParser
         var tableName = _text.ReadSqlIdentifier();
         if (!TryMatch("("))
         {
-            return RaiseParseError("Expected (");
+            return CreateParseError("Expected (");
         }
 
         var createTableStatement = new CreateTableStatement()
@@ -174,7 +174,7 @@ public class SqlParser
 
         if (!TryMatch(")"))
         {
-            return RaiseParseError("ParseCreateTableStatement Expected )");
+            return CreateParseError("ParseCreateTableStatement Expected )");
         }
 
         SkipStatementEnd();
@@ -196,7 +196,7 @@ public class SqlParser
         }
         if (parameters.ResultValue.Count != 8)
         {
-            return RaiseParseError("Expected 8 parameters");
+            return CreateParseError("Expected 8 parameters");
         }
 
         var p = parameters.ResultValue;
@@ -230,13 +230,13 @@ public class SqlParser
         var columns = columnsResult.ResultValue;
         if (!TryMatchKeyword("REFERENCES"))
         {
-            return RaiseParseError("Expected REFERENCES");
+            return CreateParseError("Expected REFERENCES");
         }
 
         var tableName = _text.ReadSqlIdentifier();
         if (tableName.Length == 0)
         {
-            return RaiseParseError("Expected reference table name");
+            return CreateParseError("Expected reference table name");
         }
 
         var refColumn = string.Empty;
@@ -245,7 +245,7 @@ public class SqlParser
             refColumn = _text.ReadSqlIdentifier().Word;
             if (!TryMatch(")"))
             {
-                return RaiseParseError("Expected )");
+                return CreateParseError("Expected )");
             }
         }
 
@@ -305,7 +305,7 @@ public class SqlParser
             }
             else
             {
-                return RaiseParseError("Expected column name");
+                return CreateParseError("Expected column name");
             }
 
             if (_text.PeekChar() != ',')
@@ -339,7 +339,7 @@ public class SqlParser
             }
             if (leftExpr.Result==null)
             {
-                return RaiseParseError("Expected left expression");
+                return CreateParseError("Expected left expression");
             }
 
             var operation = _text.ReadSymbols().Word;
@@ -350,7 +350,7 @@ public class SqlParser
             }
             if (rightExpr.Result==null)
             {
-                return RaiseParseError("Expected right expression");
+                return CreateParseError("Expected right expression");
             }
 
             selectStatement.Where = new SqlWhereExpression()
@@ -443,7 +443,7 @@ public class SqlParser
             {
                 return rc;
             }
-            return RaiseParseError("Expected one of the options");
+            return CreateParseError("Expected one of the options");
         };
     }
 
@@ -546,7 +546,7 @@ column_name AS computed_column_expression
         if (!TryMatch("("))
         {
             _text.Position = startPosition;
-            return RaiseParseError("Expected (");
+            return CreateParseError("Expected (");
         }
 
         var computedColumnExpressionSpan = _text.ReadUntilRightParenthesis();
@@ -554,7 +554,7 @@ column_name AS computed_column_expression
         if (!TryMatch(")"))
         {
             _text.Position = startPosition;
-            return RaiseParseError("Expected )");
+            return CreateParseError("Expected )");
         }
 
         var persist = TryMatchKeyword("PERSISTED");
@@ -651,7 +651,7 @@ column_name AS computed_column_expression
 
                 if (columnConstraint.Result==null)
                 {
-                    return RaiseParseError("Expect Constraint DEFAULT");
+                    return CreateParseError("Expect Constraint DEFAULT");
                 }
                 column.Constraints.Add(columnConstraint.Result);
             }
@@ -733,7 +733,7 @@ column_name AS computed_column_expression
 
             if (!TryMatch(")"))
             {
-                return RaiseParseError("Expected )");
+                return CreateParseError("Expected )");
             }
         }
 
@@ -901,12 +901,12 @@ column_name AS computed_column_expression
 
         if (!_text.TryMatch("="))
         {
-            return RaiseParseError("Expected =");
+            return CreateParseError("Expected =");
         }
 
         if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
         {
-            return RaiseParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
+            return CreateParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
         }
 
         return CreateParseResult(new SqlParameterValue
@@ -976,7 +976,7 @@ column_name AS computed_column_expression
     {
         if (!TryMatch("("))
         {
-            return RaiseParseError("Expected (");
+            return CreateParseError("Expected (");
         }
 
         var elements = ParseWithComma(parseElemFn);
@@ -987,7 +987,7 @@ column_name AS computed_column_expression
 
         if (!TryMatch(")"))
         {
-            return RaiseParseError("Expected )");
+            return CreateParseError("Expected )");
         }
 
         return elements;
@@ -1210,7 +1210,7 @@ column_name AS computed_column_expression
         if (!_text.TryMatch("="))
         {
             _text.Position = startPosition;
-            return RaiseParseError("Expected toggleName =");
+            return CreateParseError("Expected toggleName =");
         }
 
         if (_text.Try(_text.ReadInt, out var number))
@@ -1223,7 +1223,7 @@ column_name AS computed_column_expression
         return CreateParseResult(toggle);
     }
 
-    private ParseError RaiseParseError(string error)
+    private ParseError CreateParseError(string error)
     {
         return new ParseError(error)
         {
