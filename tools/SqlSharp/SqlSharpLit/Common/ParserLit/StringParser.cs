@@ -518,7 +518,7 @@ public class StringParser
     {
         var startPosition = _position;
         ReadChar();
-        ReadChar();
+        NextChar();
         ReadUntil(c => c == '\n');
         NextChar();
         return new TextSpan()
