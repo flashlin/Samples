@@ -104,7 +104,19 @@ public class ExtractSqlHelper
             WriteAllDatabaseTableNames(database);
         }
 
+        WriteDatabaseNamesDesc(databaseDescriptions);
         WriteDatabaseTableNamesDesc(databaseDescriptions);
+    }
+
+    private void WriteDatabaseNamesDesc(List<DatabaseDescription> databaseDescriptions)
+    {
+        using var writer = CreateWriter("Database-Names-Desc.md");
+        writer.WriteLine("The following is a list of database lists:");
+        foreach (var database in databaseDescriptions)
+        {
+            writer.WriteLine($"{database.DatabaseName}");
+        }
+        writer.Flush();
     }
 
     private static void WriteDatabaseTableNamesDesc(List<DatabaseDescription> databaseDescriptions)
