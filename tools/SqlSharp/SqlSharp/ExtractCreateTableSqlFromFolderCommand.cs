@@ -18,5 +18,6 @@ public class ExtractCreateTableSqlFromFolderCommand : ICommand<SqlSharpOptions>
         var outputFolder = args.Output;
         var extractSqlHelper = new ExtractSqlHelper(new CustomDatabaseNameProvider());
         extractSqlHelper.WriteCreateTablesFromFolder(sourceFolder, outputFolder);
+        extractSqlHelper.GenerateRagFiles(sourceFolder);
     }
 }

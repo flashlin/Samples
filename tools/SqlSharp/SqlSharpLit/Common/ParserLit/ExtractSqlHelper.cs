@@ -11,91 +11,100 @@ public interface IDatabaseNameProvider
 
 public class ExtractSqlHelper
 {
-    IDatabaseNameProvider _databaseNameProvider;
+    private readonly IDatabaseNameProvider _databaseNameProvider;
 
     public ExtractSqlHelper(IDatabaseNameProvider databaseNameProvider)
     {
         _databaseNameProvider = databaseNameProvider;
     }
 
-    public IEnumerable<string> GetSqlFiles(string folder)
+    public IEnumerable<string> ExtractAllCreateTableFromText(string text)
     {
-        var files = Directory.GetFiles(folder, "*.sql");
-        foreach (var file in files)
+        do
         {
-            yield return file;
+            var (createTableSql, remainingText) = ExtractCreateTableFromText(text);
+            if (string.IsNullOrEmpty(createTableSql))
+            {
+                break;
+            }
+
+            yield return createTableSql;
+            text = remainingText;
+        } while (true);
+    }
+
+    public (string createTableSql, string remainingText) ExtractCreateTableFromText(string text)
+    {
+        var (truncatedText, length) = FindCreateTableStart(text);
+        if (length == 0)
+        {
+            return (string.Empty, string.Empty);
         }
 
-        var subFolders = Directory.GetDirectories(folder);
-        foreach (var subFolder in subFolders)
+        var createTableEnd = FindCreateTableEnd(truncatedText, length);
+        if (createTableEnd < 0)
         {
-            foreach (var file in GetSqlFiles(subFolder))
-            {
-                yield return file;
-            }
+            return (string.Empty, string.Empty);
         }
+
+        var createTableSql = truncatedText.Substring(0, createTableEnd + 1);
+        var remainingText = truncatedText.Substring(createTableEnd);
+        return (createTableSql, remainingText);
+    }
+
+
+    public (string truncatedText, int length) FindCreateTableStart(string text)
+    {
+        var pattern = @"\bCREATE\s+TABLE\b";
+        var regex = new Regex(pattern, RegexOptions.IgnoreCase);
+        var match = regex.Match(text);
+        if (match.Success)
+        {
+            var offset = match.Index;
+            var prevLineContent = FindPreviousLineContent(text, offset);
+            if (ContainsComment(prevLineContent))
+            {
+                return (string.Empty, 0);
+            }
+
+            return (text.Substring(offset), match.Value.Length);
+        }
+
+        return (string.Empty, 0);
     }
 
     public void GenerateRagFiles(string sqlFolder)
     {
+        var sqlFileContents = GetSqlContentsFromFolder(sqlFolder);
+        GenerateRagFilesFromSqlContents(sqlFileContents);
+    }
+
+    public void GenerateRagFilesFromSqlContents(IEnumerable<SqlFileContent> sqlFileContents)
+    {
+        var databaseDescriptions = ExtractDatabaseDescriptions(sqlFileContents)
+            .ToList();
         var databaseDescriptionMdFile = Path.Combine("outputs", "DatabaseDesc.md");
         using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
-        var databaseDict =
-            new EnsureKeyDictionary<string, DatabaseDescription>(key => new DatabaseDescription { DatabaseName = key });
-        foreach (var sqlFileContent in GetSqlContentsFromFolder(sqlFolder))
+        writer.WriteLine("The following is a detailed description of all databases and table structures of Titan Company.");
+        foreach (var database in databaseDescriptions)
         {
-            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            var createTables = sqlFileContent.SqlExpressions
-                .Where(x => x.SqlType == SqlType.CreateTable)
-                .Cast<SqlCreateTableStatement>()
-                .Where(x => x.TableName.StartsWith())
-                .ToList();
-            foreach (var createTable in createTables)
+            foreach (var table in database.Tables)
             {
-                var tableName = createTable.TableName;
-                var columns = createTable.Columns
-                    .Where(x => x.SqlType == SqlType.ColumnDefinition)
-                    .Cast<SqlColumnDefinition>()
-                    .ToList();
-                var table = new TableDescription()
+                writer.WriteLine($"Database Name: {database.DatabaseName}");
+                writer.WriteLine($"Table Name: {table.TableName}");
+                foreach (var column in table.Columns)
                 {
-                    TableName = createTable.TableName,
-                    Columns = columns.Select(x=>ToColumnDescription(sqlFileContent, tableName, x)).ToList()
-                };
-                databaseDict[databaseName].Tables.Add(table);
+                    writer.WriteLine($"Column Name: {column.ColumnName}, Data Type: {column.DataType}, Nullable: {column.IsNullable}, Identity: {column.IsIdentity}, Default Value: {column.DefaultValue}, Description: {column.Description}");
+                }
+                writer.WriteLine();
             }
         }
+        writer.Flush();
     }
 
-    private ColumnDescription ToColumnDescription(SqlFileContent sqlFileContent, string tableName, SqlColumnDefinition column)
+    public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(IEnumerable<SqlFileContent> sqlContents)
     {
-        return new ColumnDescription()
-        {
-            ColumnName = column.ColumnName,
-            DataType = column.DataType,
-            IsNullable = column.IsNullable,
-            IsIdentity = IsIdentity(column.Identity),
-            DefaultValue = column.Constraints.Where(x=>x.SqlType==SqlType.ConstraintDefaultValue)
-                .Cast<SqlConstraintDefaultValue>()
-                .Select(x=>x.DefaultValue)
-                .FirstOrDefault(string.Empty),
-            Description = sqlFileContent.SqlExpressions
-                .Where(x => x.SqlType == SqlType.AddExtendedProperty)
-                .Cast<SqlSpAddExtendedProperty>()
-                .Where(x=> x.Name.Contains("MS_Description") && x.Level1Name == tableName && x.Level2Name == column.ColumnName)
-                .Select(x => x.Value)
-                .FirstOrDefault(string.Empty)
-        };
-    }
-
-    private bool IsIdentity(SqlIdentity sqlIdentity)
-    {
-        return sqlIdentity.Increment > 0;
-    }
-
-    public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(string folder)
-    {
-        foreach (var sqlFileContent in GetSqlContentsFromFolder(folder))
+        foreach (var sqlFileContent in sqlContents)
         {
             Console.WriteLine($"{sqlFileContent.FileName} = {sqlFileContent.SqlExpressions.Count}");
             var createTablesSql = ExtractAllCreateTableFromText(sqlFileContent.Sql).ToList();
@@ -123,6 +132,24 @@ public class ExtractSqlHelper
         }
     }
 
+    public IEnumerable<string> GetSqlFiles(string folder)
+    {
+        var files = Directory.GetFiles(folder, "*.sql");
+        foreach (var file in files)
+        {
+            yield return file;
+        }
+
+        var subFolders = Directory.GetDirectories(folder);
+        foreach (var subFolder in subFolders)
+        {
+            foreach (var file in GetSqlFiles(subFolder))
+            {
+                yield return file;
+            }
+        }
+    }
+
     public void WriteCreateTablesFromFolder(string folder, string outputFolder)
     {
         if (!Directory.Exists(folder))
@@ -130,14 +157,10 @@ public class ExtractSqlHelper
             return;
         }
 
-        var createTablesFile = Path.Combine(outputFolder, "CreateTables.sql");
-        using var writer = CreateStreamWriter(createTablesFile);
-        var sqlTypes = new[]
-        {
-            SqlType.CreateTable,
-            SqlType.AddExtendedProperty
-        };
-        foreach (var sqlFile in GetCreateCreateTableSqlFromFolder(folder))
+        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "CreateTables.sql"));
+        var sqlFileContents = GetSqlContentsFromFolder(folder);
+        var sqlCreateTables = GetCreateCreateTableSqlFromFolder(sqlFileContents);
+        foreach (var sqlFile in sqlCreateTables)
         {
             if (sqlFile.CreateTables.Count == 0)
             {
@@ -183,6 +206,51 @@ public class ExtractSqlHelper
         }
     }
 
+    private static bool ContainsComment(string lineContent)
+    {
+        return lineContent.Contains("--") || lineContent.Contains("/*");
+    }
+
+    private ColumnDescription CreateColumnDescription(string tableName, SqlColumnDefinition column, List<ISqlExpression> allSqlExpressions)
+    {
+        return new ColumnDescription()
+        {
+            ColumnName = column.ColumnName,
+            DataType = column.DataType,
+            IsNullable = column.IsNullable,
+            IsIdentity = IsIdentity(column.Identity),
+            DefaultValue = column.Constraints.Where(x=>x.SqlType==SqlType.ConstraintDefaultValue)
+                .Cast<SqlConstraintDefaultValue>()
+                .Select(x=>x.DefaultValue)
+                .FirstOrDefault(string.Empty),
+            Description = allSqlExpressions
+                .Where(x => x.SqlType == SqlType.AddExtendedProperty)
+                .Cast<SqlSpAddExtendedProperty>()
+                .Where(x=> x.Name.Contains("MS_Description") && x.Level1Name == tableName && x.Level2Name == column.ColumnName)
+                .Select(x => x.Value)
+                .FirstOrDefault(string.Empty)
+        };
+    }
+
+    private DatabaseDescription CreateDatabaseDescription(string databaseName, SqlFileContent sqlFileContent)
+    {
+        var database = new DatabaseDescription
+        {
+            DatabaseName = databaseName
+        };
+        var createTables = sqlFileContent.SqlExpressions
+            .Where(x => x.SqlType == SqlType.CreateTable)
+            .Cast<SqlCreateTableStatement>()
+            .Where(x => StartsWithValidChar(x.TableName))
+            .ToList();
+        foreach (var createTable in createTables)
+        {
+            var table = CreateTableDescription(createTable, sqlFileContent.SqlExpressions);
+            database.Tables.Add(table);
+        }
+        return database;
+    }
+
     private static StreamWriter CreateStreamWriter(string createTablesFile)
     {
         var fileStream = new FileStream(createTablesFile, FileMode.Create);
@@ -190,38 +258,28 @@ public class ExtractSqlHelper
         return writer;
     }
 
-    public IEnumerable<string> ExtractAllCreateTableFromText(string text)
+    private TableDescription CreateTableDescription(SqlCreateTableStatement createTable, List<ISqlExpression> allSqlExpressions)
     {
-        do
+        var tableName = createTable.TableName;
+        var columns = createTable.Columns
+            .Where(x => x.SqlType == SqlType.ColumnDefinition)
+            .Cast<SqlColumnDefinition>()
+            .ToList();
+        var table = new TableDescription()
         {
-            var (createTableSql, remainingText) = ExtractCreateTableFromText(text);
-            if (string.IsNullOrEmpty(createTableSql))
-            {
-                break;
-            }
-
-            yield return createTableSql;
-            text = remainingText;
-        } while (true);
+            TableName = createTable.TableName,
+            Columns = columns.Select(x=>CreateColumnDescription(tableName, x, allSqlExpressions)).ToList()
+        };
+        return table;
     }
 
-    public (string createTableSql, string remainingText) ExtractCreateTableFromText(string text)
+    private IEnumerable<DatabaseDescription> ExtractDatabaseDescriptions(IEnumerable<SqlFileContent> sqlContents)
     {
-        var (truncatedText, length) = FindCreateTableStart(text);
-        if (length == 0)
+        foreach (var sqlFileContent in sqlContents)
         {
-            return (string.Empty, string.Empty);
+            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
+            yield return CreateDatabaseDescription(databaseName, sqlFileContent);
         }
-
-        var createTableEnd = FindCreateTableEnd(truncatedText, length);
-        if (createTableEnd < 0)
-        {
-            return (string.Empty, string.Empty);
-        }
-
-        var createTableSql = truncatedText.Substring(0, createTableEnd + 1);
-        var remainingText = truncatedText.Substring(createTableEnd);
-        return (createTableSql, remainingText);
     }
 
     private int FindCreateTableEnd(string truncatedText, int startOffset)
@@ -256,27 +314,6 @@ public class ExtractSqlHelper
         return -1;
     }
 
-
-    public (string truncatedText, int length) FindCreateTableStart(string text)
-    {
-        var pattern = @"\bCREATE\s+TABLE\b";
-        var regex = new Regex(pattern, RegexOptions.IgnoreCase);
-        var match = regex.Match(text);
-        if (match.Success)
-        {
-            var offset = match.Index;
-            var prevLineContent = FindPreviousLineContent(text, offset);
-            if (ContainsComment(prevLineContent))
-            {
-                return (string.Empty, 0);
-            }
-
-            return (text.Substring(offset), match.Value.Length);
-        }
-
-        return (string.Empty, 0);
-    }
-
     private static string FindPreviousLineContent(string text, int offset)
     {
         if (offset == 0)
@@ -293,9 +330,14 @@ public class ExtractSqlHelper
         return text;
     }
 
-    private static bool ContainsComment(string lineContent)
+    private bool IsIdentity(SqlIdentity sqlIdentity)
     {
-        return lineContent.Contains("--") || lineContent.Contains("/*");
+        return sqlIdentity.Increment > 0;
+    }
+
+    bool StartsWithValidChar(string text)
+    {
+        return !string.IsNullOrEmpty(text) && (char.IsLetter(text[0]) || text[0] == '_' || text[0] == '[');
     }
 }
 
