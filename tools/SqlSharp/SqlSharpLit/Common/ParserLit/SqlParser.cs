@@ -411,11 +411,11 @@ public class SqlParser
         return () =>
         {
             var rc = Or(parseFnList)();
-            if (rc.Result!=null)
+            if (rc.HasError)
             {
                 return rc;
             }
-            if (rc.HasError)
+            if (rc.Result!=null)
             {
                 return rc;
             }
