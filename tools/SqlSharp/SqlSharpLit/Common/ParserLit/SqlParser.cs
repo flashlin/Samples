@@ -1091,7 +1091,7 @@ column_name AS computed_column_expression
         return new ParseResult<ReferentialAction>(action);
     }
 
-    private ParseResult<ISqlExpression> ParseTableConstraint()
+    private ParseResult<ISqlConstraint> ParseTableConstraint()
     {
         var constraintName = string.Empty;
         if (TryMatchKeyword(ConstraintKeyword))
@@ -1123,7 +1123,7 @@ column_name AS computed_column_expression
             return tableForeignKeyExpr.Result;
         }
 
-        return NoneResult<ISqlExpression>();
+        return NoneResult<ISqlConstraint>();
     }
 
     private ParseResult<SqlFieldExpression> ParseTableName()
