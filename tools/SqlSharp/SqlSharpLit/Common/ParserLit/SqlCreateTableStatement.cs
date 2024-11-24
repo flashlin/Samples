@@ -2,7 +2,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace SqlSharpLit.Common.ParserLit;
 
-public class CreateTableStatement : ISqlExpression
+public class SqlCreateTableStatement : ISqlExpression
 {
     public SqlType SqlType => SqlType.CreateTable;
     public string TableName { get; set; } = string.Empty;

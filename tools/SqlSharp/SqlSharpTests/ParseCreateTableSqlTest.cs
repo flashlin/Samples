@@ -17,11 +17,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "INT"
@@ -47,11 +47,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "INT",
@@ -77,11 +77,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
+        rc.ShouldBe(new SqlCreateTableStatement
         {
             TableName = "dbo.tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "id",
                     DataType = "int"
@@ -101,16 +101,16 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "int"
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[name]",
                     DataType = "DECIMAL",
@@ -131,11 +131,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "DECIMAL",
@@ -162,7 +162,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Constraints = [
@@ -192,11 +192,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "[dbo].db1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "int"
@@ -215,17 +215,17 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "NVARCHAR",
                     Size = "50"
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[name]",
                     DataType = "varchar",
@@ -252,18 +252,18 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "VARCHAR",
                     Size = "30",
                     IsNullable = false
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id2]",
                     DataType = "VARCHAR",
@@ -308,18 +308,18 @@ public class ParseCreateTableSqlTest
                   )               
                   """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "#tmp1",
             Columns =
             [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "int",
                     IsNullable = false
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "uid",
                     DataType = "int"
@@ -339,11 +339,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "INT",
@@ -372,7 +372,7 @@ public class ParseCreateTableSqlTest
                         }
                     ]
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[name]",
                     DataType = "NVARCHAR",
@@ -394,19 +394,19 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "[dbo].[VipBetSetting]",
             Columns =
             [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "INT",
                     IsNullable = false,
                     Identity = new SqlIdentity{ Seed = 1, Increment = 1 },
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[CreatedOn]",
                     DataType = "DATETIME",
@@ -432,11 +432,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
+        rc.ShouldBe(new SqlCreateTableStatement
         {
             TableName = "#tb",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "R",
                     DataType = "float",
@@ -456,12 +456,12 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "$tmp",
             Columns =
             [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[IsUat]",
                     DataType = "BIT",
@@ -515,13 +515,13 @@ public class ParseCreateTableSqlTest
                    """;
 
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
+        rc.ShouldBe(new SqlCreateTableStatement
         {
             TableName = "Persons",
             Columns =
             [
-                new ColumnDefinition { ColumnName = "id", DataType = "int" },
-                new ColumnDefinition
+                new SqlColumnDefinition { ColumnName = "id", DataType = "int" },
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     IsPrimaryKey = true,
@@ -531,9 +531,9 @@ public class ParseCreateTableSqlTest
                     NotForReplication = false,
                     Constraints = [],
                 },
-                new ColumnDefinition { ColumnName = "LastName", DataType = "varchar", Size = "50" },
-                new ColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = "10", Scale = 3 },
-                new ColumnDefinition
+                new SqlColumnDefinition { ColumnName = "LastName", DataType = "varchar", Size = "50" },
+                new SqlColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = "10", Scale = 3 },
+                new SqlColumnDefinition
                 {
                     ColumnName = "[name]", DataType = "[int]",
                     Identity = new SqlIdentity
@@ -542,7 +542,7 @@ public class ParseCreateTableSqlTest
                         Increment = 1,
                     },
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[name2]", DataType = "[int]",
                     Identity = new SqlIdentity
@@ -551,12 +551,12 @@ public class ParseCreateTableSqlTest
                         Increment = 1,
                     },
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "cname", DataType = "[int]",
                     IsNullable = true,
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[rid]", DataType = "[int]",
                     Identity = new SqlIdentity()
@@ -566,7 +566,7 @@ public class ParseCreateTableSqlTest
                     },
                     NotForReplication = true,
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[DailyTotalRaw]", DataType = "DECIMAL",
                     Size = "19",
@@ -640,11 +640,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "VARCHAR",
@@ -673,11 +673,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[day]",
                     DataType = "DATETIME",
@@ -703,12 +703,12 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "[Banner]",
             Columns =
             [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[BannerType]",
                     DataType = "INT",
@@ -733,12 +733,12 @@ public class ParseCreateTableSqlTest
                   ) 
                   """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "#tmp",
             Columns =
             [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "AuditCount",
                     DataType = "nvarchar",
@@ -758,11 +758,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "INT",
@@ -770,7 +770,7 @@ public class ParseCreateTableSqlTest
                     Identity = new SqlIdentity { Seed = 1, Increment = 1 },
                     IsPrimaryKey = true
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[LoginName]",
                     DataType = "NVARCHAR",
@@ -794,11 +794,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "int",
@@ -839,12 +839,12 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "#CustIdList",
             Columns =
             [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "CustID",
                     DataType = "int"
@@ -864,11 +864,11 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
+        rc.ShouldBe(new SqlCreateTableStatement
         {
             TableName = "#tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "INT",
@@ -916,11 +916,11 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
+        rc.ShouldBe(new SqlCreateTableStatement
         {
             TableName = "#tmp",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "NVARCHAR",
@@ -961,11 +961,11 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
+        rc.ShouldBe(new SqlCreateTableStatement
         {
             TableName = "[dbo].[CashSettled]",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[custid]",
                     DataType = "INT",
@@ -1010,11 +1010,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement
+        rc.ShouldBe(new SqlCreateTableStatement
         {
             TableName = "#tb1",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "int",
@@ -1057,11 +1057,11 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new CreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableStatement()
         {
             TableName = "[dbo].[UserTracking]",
             Columns = [
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "BIGINT",
@@ -1073,7 +1073,7 @@ public class ParseCreateTableSqlTest
                     IsPrimaryKey = true,
                     IsNullable = false
                 },
-                new ColumnDefinition
+                new SqlColumnDefinition
                 {
                     ColumnName = "[Extra]",
                     DataType = "nvarchar",

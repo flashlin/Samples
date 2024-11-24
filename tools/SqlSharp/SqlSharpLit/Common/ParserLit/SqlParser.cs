@@ -98,11 +98,11 @@ public class SqlParser
         return CreateParseResult(columns);
     }
 
-    public ParseResult<CreateTableStatement> ParseCreateTableStatement()
+    public ParseResult<SqlCreateTableStatement> ParseCreateTableStatement()
     {
         if (!TryMatchKeywords("CREATE", "TABLE"))
         {
-            return NoneResult<CreateTableStatement>();
+            return NoneResult<SqlCreateTableStatement>();
         }
 
         var tableName = _text.ReadSqlIdentifier();
@@ -111,7 +111,7 @@ public class SqlParser
             return CreateParseError("Expected (");
         }
 
-        var createTableStatement = new CreateTableStatement()
+        var createTableStatement = new SqlCreateTableStatement()
         {
             TableName = tableName.Word,
         };
@@ -493,11 +493,11 @@ public class SqlParser
         };
     }
 
-    private ParseResult<ColumnDefinition> ParseColumnConstraints(ColumnDefinition column)
+    private ParseResult<SqlColumnDefinition> ParseColumnConstraints(SqlColumnDefinition sqlColumn)
     {
         if (IsPeekKeywords(","))
         {
-            return NoneResult<ColumnDefinition>();
+            return NoneResult<SqlColumnDefinition>();
         }
 
         do
@@ -512,7 +512,7 @@ public class SqlParser
                     break;
                 }
 
-                column.IsPrimaryKey = true;
+                sqlColumn.IsPrimaryKey = true;
                 continue;
             }
 
@@ -523,7 +523,7 @@ public class SqlParser
                     return identityResult.Error;
                 }
 
-                column.Identity = identityResult.ResultValue;
+                sqlColumn.Identity = identityResult.ResultValue;
                 continue;
             }
 
@@ -534,7 +534,7 @@ public class SqlParser
                     return identityResult.Error;
                 }
 
-                column.Constraints.Add(defaultValue.ResultValue);
+                sqlColumn.Constraints.Add(defaultValue.ResultValue);
                 continue;
             }
 
@@ -551,7 +551,7 @@ public class SqlParser
 
                     var subConstraint = constraintDefaultValue.ResultValue;
                     subConstraint.ConstraintName = constraintName.Word;
-                    column.Constraints.Add(subConstraint);
+                    sqlColumn.Constraints.Add(subConstraint);
                     continue;
                 }
 
@@ -567,39 +567,39 @@ public class SqlParser
                     return CreateParseError("Expect Constraint DEFAULT");
                 }
 
-                column.Constraints.Add(columnConstraint.Result);
+                sqlColumn.Constraints.Add(columnConstraint.Result);
             }
 
             if (TryMatchKeywords("NOT", "FOR", "REPLICATION"))
             {
-                column.NotForReplication = true;
+                sqlColumn.NotForReplication = true;
                 continue;
             }
 
             if (TryMatchKeywords("NOT", "NULL"))
             {
-                column.IsNullable = false;
+                sqlColumn.IsNullable = false;
                 continue;
             }
 
             if (TryMatchKeywords("NULL"))
             {
-                column.IsNullable = true;
+                sqlColumn.IsNullable = true;
                 continue;
             }
 
             break;
         } while (true);
 
-        return CreateParseResult(column);
+        return CreateParseResult(sqlColumn);
     }
 
-    private ParseResult<ColumnDefinition> ParseColumnDefinition()
+    private ParseResult<SqlColumnDefinition> ParseColumnDefinition()
     {
         var startPosition = _text.Position;
         if (!TryReadSqlIdentifier(out var columnNameSpan))
         {
-            return NoneResult<ColumnDefinition>();
+            return NoneResult<SqlColumnDefinition>();
         }
 
         var columnDefinition = ParseColumnTypeDefinition(columnNameSpan);
@@ -611,7 +611,7 @@ public class SqlParser
         if (columnDefinition.Result == null)
         {
             _text.Position = startPosition;
-            return NoneResult<ColumnDefinition>();
+            return NoneResult<SqlColumnDefinition>();
         }
 
         var c = ParseColumnConstraints(columnDefinition.Result);
@@ -647,9 +647,9 @@ public class SqlParser
         return columns;
     }
 
-    private ParseResult<ColumnDefinition> ParseColumnTypeDefinition(TextSpan columnNameSpan)
+    private ParseResult<SqlColumnDefinition> ParseColumnTypeDefinition(TextSpan columnNameSpan)
     {
-        var column = new ColumnDefinition
+        var column = new SqlColumnDefinition
         {
             ColumnName = columnNameSpan.Word,
             DataType = ReadSqlIdentifier().Word

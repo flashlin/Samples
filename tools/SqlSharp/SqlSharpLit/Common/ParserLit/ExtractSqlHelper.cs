@@ -47,13 +47,13 @@ public class ExtractSqlHelper
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
             var createTables = sqlFileContent.SqlExpressions
                 .Where(x => x.SqlType == SqlType.CreateTable)
-                .Cast<CreateTableStatement>()
+                .Cast<SqlCreateTableStatement>()
                 .ToList();
             foreach (var createTable in createTables)
             {
                 var columns = createTable.Columns
                     .Where(x => x.SqlType == SqlType.ColumnDefinition)
-                    .Cast<ColumnDefinition>()
+                    .Cast<SqlColumnDefinition>()
                     .ToList();
                 var table = new TableDescription()
                 {
