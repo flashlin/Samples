@@ -616,7 +616,7 @@ public class StringParser
         var openParenthesis = 0;
         while (!IsEnd())
         {
-            var c = ReadChar();
+            var c = NextChar();
             if (c == '(')
             {
                 openParenthesis++;
