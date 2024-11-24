@@ -1036,7 +1036,7 @@ column_name AS computed_column_expression
         var primaryKeyOrUniqueSpan = ParsePrimaryKeyOrUnique();
         if (primaryKeyOrUniqueSpan.HasError)
         {
-            return primaryKeyOrUniqueSpan;
+            return primaryKeyOrUniqueSpan.Error;
         }
         if (primaryKeyOrUniqueSpan.Result == null)
         {
@@ -1046,18 +1046,17 @@ column_name AS computed_column_expression
         var sqlConstraint = primaryKeyOrUniqueSpan.ResultValue;
         if (TryMatchKeyword("WITH"))
         {
-            var togglesResult = ParseParenthesesWithComma(ParseWithToggle);
-            if (togglesResult.HasError)
+            var togglesSpan = ParseParenthesesWithComma(ParseWithToggle);
+            if (togglesSpan.HasError)
             {
-                return togglesResult.Error;
+                return togglesSpan.Error;
             }
-
-            sqlConstraint.WithToggles = togglesResult.ResultValue;
+            sqlConstraint.WithToggles = togglesSpan.ResultValue;
         }
 
         if (TryMatchKeyword("ON"))
         {
-            sqlConstraint.On = _text.ReadSqlIdentifier().Word;
+            sqlConstraint.On = ReadSqlIdentifier().Word;
         }
 
         if (Try(ParseIdentity, out var identityResult))
