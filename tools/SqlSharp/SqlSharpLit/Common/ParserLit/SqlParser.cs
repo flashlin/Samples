@@ -73,7 +73,7 @@ public class SqlParser
             var columnDefinition = Or<ISqlExpression>(ParseComputedColumnDefinition, ParseColumnDefinition)();
             if (columnDefinition.HasError)
             {
-                return RaiseParseError<List<ISqlExpression>>(columnDefinition.Error);
+                return columnDefinition.Error;
             }
             if(columnDefinition.Result!=null)
             {
@@ -107,7 +107,7 @@ public class SqlParser
         var columnDefinition = ParseColumnTypeDefinition(columnNameSpan);
         if (columnDefinition.HasError)
         {
-            return RaiseParseError<ColumnDefinition>(columnDefinition.Error);
+            return columnDefinition.Error;
         }
         if (columnDefinition.Result==null)
         {
@@ -118,7 +118,7 @@ public class SqlParser
         var c = ParseColumnConstraints(columnDefinition.Result);
         if (c.HasError)
         {
-            return RaiseParseError<ColumnDefinition>(c.Error);
+            return c.Error;
         }
         return CreateParseResult(columnDefinition.ResultValue);
     }
@@ -133,7 +133,7 @@ public class SqlParser
         var tableName = _text.ReadSqlIdentifier();
         if (!TryMatch("("))
         {
-            return RaiseParseError<CreateTableStatement>("Expected (");
+            return RaiseParseError("Expected (");
         }
 
         var createTableStatement = new CreateTableStatement()
@@ -146,7 +146,7 @@ public class SqlParser
             var tableColumnsResult = ParseCreateTableColumns();
             if (tableColumnsResult.HasError)
             {
-                return RaiseParseError<CreateTableStatement>(tableColumnsResult.Error);
+                return tableColumnsResult.Error;
             }
 
             var tableColumns = tableColumnsResult.ResultValue;
@@ -159,7 +159,7 @@ public class SqlParser
             var tableConstraintsResult = ParseWithComma(ParseTableConstraint);
             if (tableConstraintsResult.HasError)
             {
-                return RaiseParseError<CreateTableStatement>(tableConstraintsResult.Error);
+                return tableConstraintsResult.Error;
             }
 
             var tableConstraints = tableConstraintsResult.ResultValue;
@@ -174,7 +174,7 @@ public class SqlParser
 
         if (!TryMatch(")"))
         {
-            return RaiseParseError<CreateTableStatement>("ParseCreateTableStatement Expected )");
+            return RaiseParseError("ParseCreateTableStatement Expected )");
         }
 
         SkipStatementEnd();
@@ -192,11 +192,11 @@ public class SqlParser
         var parameters = ParseWithComma(ParseParameterValueOrAssignValue);
         if (parameters.HasError)
         {
-            return RaiseParseError<SqlSpAddExtendedProperty>(parameters.Error);
+            return parameters.Error;
         }
         if (parameters.ResultValue.Count != 8)
         {
-            return RaiseParseError<SqlSpAddExtendedProperty>("Expected 8 parameters");
+            return RaiseParseError("Expected 8 parameters");
         }
 
         var p = parameters.ResultValue;
@@ -225,18 +225,18 @@ public class SqlParser
         var columnsResult = ParseColumnsAscDesc();
         if (columnsResult.HasError)
         {
-            return RaiseParseError<SqlConstraintForeignKey>(columnsResult.Error);
+            return columnsResult.Error;
         }
         var columns = columnsResult.ResultValue;
         if (!TryMatchKeyword("REFERENCES"))
         {
-            return RaiseParseError<SqlConstraintForeignKey>("Expected REFERENCES");
+            return RaiseParseError("Expected REFERENCES");
         }
 
         var tableName = _text.ReadSqlIdentifier();
         if (tableName.Length == 0)
         {
-            return RaiseParseError<SqlConstraintForeignKey>("Expected reference table name");
+            return RaiseParseError("Expected reference table name");
         }
 
         var refColumn = string.Empty;
@@ -245,7 +245,7 @@ public class SqlParser
             refColumn = _text.ReadSqlIdentifier().Word;
             if (!TryMatch(")"))
             {
-                return RaiseParseError<SqlConstraintForeignKey>("Expected )");
+                return RaiseParseError("Expected )");
             }
         }
 
@@ -255,7 +255,7 @@ public class SqlParser
             var rc = ParseReferentialAction();
             if (rc.HasError)
             {
-                return RaiseParseError<SqlConstraintForeignKey>(rc.Error);
+                return rc.Error;
             }
 
             onDelete = rc.Result;
@@ -268,7 +268,7 @@ public class SqlParser
             var rc = ParseReferentialAction();
             if (rc.HasError)
             {
-                return RaiseParseError<SqlConstraintForeignKey>(rc.Error);
+                return rc.Error;
             }
 
             onUpdate = rc.Result;
@@ -305,7 +305,7 @@ public class SqlParser
             }
             else
             {
-                return RaiseParseError<SelectStatement>("Expected column name");
+                return RaiseParseError("Expected column name");
             }
 
             if (_text.PeekChar() != ',')
@@ -335,22 +335,22 @@ public class SqlParser
             var leftExpr = ParseValue();
             if (leftExpr.HasError)
             {
-                return RaiseParseError<SelectStatement>(leftExpr.Error);
+                return leftExpr.Error;
             }
             if (leftExpr.Result==null)
             {
-                return RaiseParseError<SelectStatement>("Expected left expression");
+                return RaiseParseError("Expected left expression");
             }
 
             var operation = _text.ReadSymbols().Word;
             var rightExpr = ParseValue();
             if (rightExpr.HasError)
             {
-                return RaiseParseError<SelectStatement>(rightExpr.Error);
+                return rightExpr.Error;
             }
             if (rightExpr.Result==null)
             {
-                return RaiseParseError<SelectStatement>("Expected right expression");
+                return RaiseParseError("Expected right expression");
             }
 
             selectStatement.Where = new SqlWhereExpression()
@@ -443,7 +443,7 @@ public class SqlParser
             {
                 return rc;
             }
-            return RaiseParseError<T>("Expected one of the options");
+            return RaiseParseError("Expected one of the options");
         };
     }
 
@@ -473,7 +473,7 @@ public class SqlParser
                 var rc = parseFn();
                 if (rc.HasError)
                 {
-                    return RaiseParseError<T>(rc.Error);
+                    return rc.Error;
                 }
                 if (rc is { HasResult: true, Object: not null })
                 {
@@ -494,7 +494,7 @@ public class SqlParser
                 var rc = parseFn();
                 if (rc.HasError)
                 {
-                    return RaiseParseError<T>(rc.Error);
+                    return rc.Error;
                 }
                 if (rc is { HasResult: true, Object: not null })
                 {
@@ -546,7 +546,7 @@ column_name AS computed_column_expression
         if (!TryMatch("("))
         {
             _text.Position = startPosition;
-            return RaiseParseError<SqlComputedColumnDefinition>("Expected (");
+            return RaiseParseError("Expected (");
         }
 
         var computedColumnExpressionSpan = _text.ReadUntilRightParenthesis();
@@ -554,7 +554,7 @@ column_name AS computed_column_expression
         if (!TryMatch(")"))
         {
             _text.Position = startPosition;
-            return RaiseParseError<SqlComputedColumnDefinition>("Expected )");
+            return RaiseParseError("Expected )");
         }
 
         var persist = TryMatchKeyword("PERSISTED");
@@ -609,7 +609,7 @@ column_name AS computed_column_expression
             {
                 if (identityResult.HasError)
                 {
-                    return RaiseParseError<ColumnDefinition>(identityResult.Error);
+                    return identityResult.Error;
                 }
                 column.Identity = identityResult.ResultValue;
                 continue;
@@ -619,7 +619,7 @@ column_name AS computed_column_expression
             {
                 if (identityResult.HasError)
                 {
-                    return RaiseParseError<ColumnDefinition>(identityResult.Error);
+                    return identityResult.Error;
                 }
                 column.Constraints.Add(defaultValue.ResultValue);
                 continue;
@@ -633,7 +633,7 @@ column_name AS computed_column_expression
                 {
                     if (identityResult.HasError)
                     {
-                        return RaiseParseError<ColumnDefinition>(identityResult.Error);
+                        return identityResult.Error;
                     }
 
                     var subConstraint = constraintDefaultValue.ResultValue;
@@ -646,12 +646,12 @@ column_name AS computed_column_expression
                 var columnConstraint = ParseTableConstraint();
                 if (columnConstraint.HasError)
                 {
-                    return RaiseParseError<ColumnDefinition>(columnConstraint.Error);
+                    return columnConstraint.Error;
                 }
 
                 if (columnConstraint.Result==null)
                 {
-                    return RaiseParseError<ColumnDefinition>("Expect Constraint DEFAULT");
+                    return RaiseParseError("Expect Constraint DEFAULT");
                 }
                 column.Constraints.Add(columnConstraint.Result);
             }
@@ -733,7 +733,7 @@ column_name AS computed_column_expression
 
             if (!TryMatch(")"))
             {
-                return RaiseParseError<ColumnDefinition>("Expected )");
+                return RaiseParseError("Expected )");
             }
         }
 
@@ -901,12 +901,12 @@ column_name AS computed_column_expression
 
         if (!_text.TryMatch("="))
         {
-            return RaiseParseError<SqlParameterValue>("Expected =");
+            return RaiseParseError("Expected =");
         }
 
         if (!_text.Try(_text.ReadSqlQuotedString, out var nameValue))
         {
-            return RaiseParseError<SqlParameterValue>($"Expected @name value, but got {_text.PreviousWord().Word}");
+            return RaiseParseError($"Expected @name value, but got {_text.PreviousWord().Word}");
         }
 
         return CreateParseResult(new SqlParameterValue
@@ -924,7 +924,7 @@ column_name AS computed_column_expression
         if (valueResult.HasError)
         {
             _text.Position = startPosition;
-            return RaiseParseError<SqlParameterValue>(valueResult.Error);
+            return valueResult.Error;
         }
 
         if (valueResult.Result==null)
@@ -950,7 +950,7 @@ column_name AS computed_column_expression
         var rc1 = ParseParameterValue();
         if (rc1.HasError)
         {
-            return RaiseParseError<SqlParameterValue>(rc1.Error);
+            return rc1.Error;
         }
 
         if (rc1.HasResult && rc1.Result!=null)
@@ -961,7 +961,7 @@ column_name AS computed_column_expression
         var rc2 = ParseParameterAssignValue();
         if (rc2.HasError)
         {
-            return RaiseParseError<SqlParameterValue>(rc2.Error);
+            return rc2.Error;
         }
 
         if (rc2.HasResult && rc2.Result!=null)
@@ -976,18 +976,18 @@ column_name AS computed_column_expression
     {
         if (!TryMatch("("))
         {
-            return RaiseParseError<List<T>>("Expected (");
+            return RaiseParseError("Expected (");
         }
 
         var elements = ParseWithComma(parseElemFn);
         if (elements.HasError)
         {
-            return RaiseParseError<List<T>>(elements.Error);
+            return elements.Error;
         }
 
         if (!TryMatch(")"))
         {
-            return RaiseParseError<List<T>>("Expected )");
+            return RaiseParseError("Expected )");
         }
 
         return elements;
@@ -1016,7 +1016,7 @@ column_name AS computed_column_expression
         var columnsResult = ParseColumnsAscDesc();
         if (columnsResult.HasError)
         {
-            return RaiseParseError<SqlConstraintPrimaryKeyOrUnique>(columnsResult.Error);
+            return columnsResult.Error;
         }
 
         sqlConstraint.Columns = columnsResult.ResultValue;
@@ -1043,7 +1043,7 @@ column_name AS computed_column_expression
             var togglesResult = ParseParenthesesWithComma(ParseWithToggle);
             if (togglesResult.HasError)
             {
-                return RaiseParseError<SqlConstraintPrimaryKeyOrUnique>(togglesResult.Error);
+                return togglesResult.Error;
             }
             sqlConstraint.WithToggles = togglesResult.ResultValue;
         }
@@ -1057,7 +1057,7 @@ column_name AS computed_column_expression
         {
             if (identityResult.HasError)
             {
-                return RaiseParseError<SqlConstraintPrimaryKeyOrUnique>(identityResult.Error);
+                return identityResult.Error;
             }
 
             sqlConstraint.Identity = identityResult.ResultValue;
@@ -1072,7 +1072,7 @@ column_name AS computed_column_expression
             Keywords("SET", "DEFAULT"))();
         if (result.HasError)
         {
-            return RaiseParseError<ReferentialAction>(result.Error);
+            return result.Error;
         }
 
         var token = result.ResultValue;
@@ -1179,7 +1179,7 @@ column_name AS computed_column_expression
 
             if (elem.HasError)
             {
-                return RaiseParseError<List<T>>(elem.Error);
+                return elem.Error;
             }
             elements.Add(elem.ResultValue);
             if (_text.PeekChar() != ',')
@@ -1210,7 +1210,7 @@ column_name AS computed_column_expression
         if (!_text.TryMatch("="))
         {
             _text.Position = startPosition;
-            return RaiseParseError<SqlToggle>("Expected toggleName =");
+            return RaiseParseError("Expected toggleName =");
         }
 
         if (_text.Try(_text.ReadInt, out var number))
@@ -1230,20 +1230,6 @@ column_name AS computed_column_expression
             Offset = _text.Position
         };
     }
-
-    private ParseResult<T> RaiseParseError<T>(ParseError innerError)
-    {
-        return new ParseResult<T>(innerError);
-    }
-
-    private ParseResult<T> RaiseParseError<T>(string error)
-    {
-        return new ParseResult<T>(new ParseError(error)
-        {
-            Offset = _text.Position
-        });
-    }
-
     private void SkipWhiteSpace()
     {
         while (true)
