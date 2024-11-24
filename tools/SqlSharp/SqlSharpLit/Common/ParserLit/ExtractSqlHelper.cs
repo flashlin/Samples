@@ -158,7 +158,14 @@ public class ExtractSqlHelper
         }
 
         using var writer = CreateStreamWriter(Path.Combine(outputFolder, "CreateTables.sql"));
-        var sqlFileContents = GetSqlContentsFromFolder(folder);
+        var sqlFileContents = GetSqlContentsFromFolder(folder)
+            .ToList();
+        WriteCreateTablesTo(sqlFileContents, writer);
+        GenerateRagFilesFromSqlContents(sqlFileContents);
+    }
+
+    private void WriteCreateTablesTo(IEnumerable<SqlFileContent> sqlFileContents, StreamWriter writer)
+    {
         var sqlCreateTables = GetCreateCreateTableSqlFromFolder(sqlFileContents);
         foreach (var sqlFile in sqlCreateTables)
         {
