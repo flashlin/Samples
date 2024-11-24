@@ -463,7 +463,7 @@ public class SqlParser
                 }
                 if (rc is { HasResult: true, Object: not null })
                 {
-                    return CreateParseResult(rc.ResultValue);
+                    return rc.ResultValue;
                 }
             }
             return NoneResult<T>();
