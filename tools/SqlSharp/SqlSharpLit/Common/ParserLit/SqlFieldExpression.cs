@@ -1,6 +1,6 @@
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlFieldExpression : ISqlValue, ISqlExpression
+public class SqlFieldExpression : ISqlValue
 {
     public SqlType SqlType => SqlType.Field;
     public string FieldName { get; set; } = string.Empty;

@@ -2,8 +2,6 @@ namespace SqlSharpLit.Common.ParserLit;
 
 public enum SqlType
 {
-    None,
-    Collection,
     CreateTable,
     Select,
     ColumnDefinition,

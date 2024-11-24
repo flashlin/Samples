@@ -1,6 +1,6 @@
 namespace SqlSharpLit.Common.ParserLit;
 
-public interface ISqlValue 
+public interface ISqlValue: ISqlExpression
 {
     string Value { get; }
 } 
