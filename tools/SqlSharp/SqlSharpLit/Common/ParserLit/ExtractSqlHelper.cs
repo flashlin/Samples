@@ -118,8 +118,7 @@ public class ExtractSqlHelper
     private static void WriteTableDescription(StreamWriter writer, string databaseName, TableDescription table)
     {
         writer.WriteLine($"Database Name: {databaseName}");
-        writer.WriteLine(
-            $"The following is a detailed description of all column structures in the {table.TableName} table.");
+        writer.WriteLine($"Table Name: {table.TableName}");
         foreach (var column in table.Columns)
         {
             writer.Write($"{column.ColumnName} {column.DataType}");
@@ -140,7 +139,7 @@ public class ExtractSqlHelper
 
             if (!string.IsNullOrEmpty(column.Description.Trim()))
             {
-                writer.Write($" ,Description: {column.Description}");
+                writer.Write($" -- {column.Description}");
             }
 
             writer.WriteLine();
