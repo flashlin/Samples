@@ -91,11 +91,21 @@ public class ExtractSqlHelper
             foreach (var table in database.Tables)
             {
                 writer.WriteLine($"Database Name: {database.DatabaseName}");
-                writer.WriteLine($"Table Name: {table.TableName}");
+                writer.WriteLine($"The following is a detailed description of all column structures in the {table.TableName} table.");
                 foreach (var column in table.Columns)
                 {
-                    writer.WriteLine($"Column Name: {column.ColumnName}, Data Type: {column.DataType}, Nullable: {column.IsNullable}, Identity: {column.IsIdentity}, Default Value: {column.DefaultValue}, Description: {column.Description}");
+                    writer.Write($"{column.ColumnName} {column.DataType} Nullable: {column.IsNullable}, Identity: {column.IsIdentity}");
+                    if (column.DefaultValue != string.Empty)
+                    {
+                        writer.Write($" Default Value: {column.DefaultValue}");
+                    }
+                    if(column.DefaultValue != string.Empty)
+                    {
+                        writer.Write($" Description: {column.Description}");
+                    }
+                    writer.WriteLine();
                 }
+                writer.WriteLine();
                 writer.WriteLine();
             }
         }
