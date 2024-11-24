@@ -597,7 +597,7 @@ public class StringParser
     public TextSpan ReadUntil(string text)
     {
         var offset = _position;
-        while (!IsEnd() && PeekString(text.Length).ToString() != text)
+        while (!IsEnd() && !PeekString(text.Length).SequenceEqual(text))
         {
             NextChar();
         }
