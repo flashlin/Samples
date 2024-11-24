@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using T1.Standard.Collections.Generics;
 
@@ -82,7 +83,11 @@ public class ExtractSqlHelper
     public void GenerateRagFilesFromSqlContents(IEnumerable<SqlFileContent> sqlFileContents)
     {
         var databaseDescriptions = ExtractDatabaseDescriptions(sqlFileContents)
+            .Where(x => x.Tables.Count > 0)
             .ToList();
+
+        GenerateDatabasesJsonFile(databaseDescriptions, Path.Combine("outputs", "Databases.json"));
+
         var databaseDescriptionMdFile = Path.Combine("outputs", "DatabaseDesc.md");
         using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
         writer.WriteLine(
@@ -101,10 +106,12 @@ public class ExtractSqlHelper
                     {
                         writer.Write($" ,is Nullable");
                     }
+
                     if (column.IsIdentity)
                     {
                         writer.Write($" ,is Identity");
                     }
+
                     if (column.DefaultValue != string.Empty)
                     {
                         writer.Write($" ,Default Value: {column.DefaultValue}");
@@ -124,6 +131,15 @@ public class ExtractSqlHelper
         }
 
         writer.Flush();
+    }
+
+    private void GenerateDatabasesJsonFile(List<DatabaseDescription> databaseDescriptions, string outputJsonFile)
+    {
+        var json = JsonSerializer.Serialize(databaseDescriptions, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+        File.WriteAllText(outputJsonFile, json);
     }
 
     public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(
