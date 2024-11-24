@@ -96,33 +96,6 @@ public class SqlParser
         return CreateParseResult(columns);
     }
 
-    private ParseResult<ColumnDefinition> ParseColumnDefinition()
-    {
-        var startPosition = _text.Position;
-        if (!TryReadSqlIdentifier(out var columnNameSpan))
-        {
-            return NoneResult<ColumnDefinition>();
-        }
-        
-        var columnDefinition = ParseColumnTypeDefinition(columnNameSpan);
-        if (columnDefinition.HasError)
-        {
-            return columnDefinition.Error;
-        }
-        if (columnDefinition.Result==null)
-        {
-            _text.Position = startPosition;
-            return NoneResult<ColumnDefinition>();
-        }
-
-        var c = ParseColumnConstraints(columnDefinition.Result);
-        if (c.HasError)
-        {
-            return c.Error;
-        }
-        return CreateParseResult(columnDefinition.ResultValue);
-    }
-
     public ParseResult<CreateTableStatement> ParseCreateTableStatement()
     {
         if (!TryMatchKeywords("CREATE", "TABLE"))
@@ -393,20 +366,28 @@ public class SqlParser
         return true;
     }
 
+    private ParseError CreateParseError(string error)
+    {
+        return new ParseError(error)
+        {
+            Offset = _text.Position
+        };
+    }
+
     private ParseResult<T> CreateParseResult<T>(T result)
     {
         return new ParseResult<T>(result);
     }
 
-    private Func<ParseResult<SqlToken>> PeekKeywords(params string[] keywords)
+    private bool IsAny<T>(params Func<ParseResult<T>>[] parseFnList)
     {
-        return () =>
+        var span = Or(parseFnList)();
+        if (span.HasError)
         {
-            var startPosition = _text.Position;
-            var result = ParseKeywords(keywords);
-            _text.Position = startPosition;
-            return result;
-        };
+            return false;
+        }
+
+        return span.Result != null;
     }
 
     private Func<ParseResult<SqlToken>> Keywords(params string[] keywords)
@@ -424,7 +405,7 @@ public class SqlParser
     {
         return new ParseResult<ISqlExpression>(default(ISqlExpression));
     }
-    
+
     private ParseResult<T> NoneResult<T>()
     {
         return new ParseResult<T>(default(T));
@@ -453,17 +434,6 @@ public class SqlParser
         return result.Result;
     }
 
-    private bool IsAny<T>(params Func<ParseResult<T>>[] parseFnList)
-    {
-        var span = Or(parseFnList)();
-        if (span.HasError)
-        {
-            return false;
-        }
-
-        return span.Result != null;
-    }
-
     private Func<ParseResult<T>> Or<T>(params Func<IParseResult>[] parseFnList)
     {
         return () =>
@@ -483,8 +453,8 @@ public class SqlParser
             return NoneResult<T>();
         };
     }
-    
-    
+
+
     private Func<ParseResult<T>> Or<T>(params Func<ParseResult<T>>[] parseFnList)
     {
         return () =>
@@ -503,82 +473,6 @@ public class SqlParser
             }
             return NoneResult<T>();
         };
-    }
-
-    /*
-     * <computed_column_definition> ::=
-column_name AS computed_column_expression
-[ PERSISTED [ NOT NULL ] ]
-[
-    [ CONSTRAINT constraint_name ]
-    { PRIMARY KEY | UNIQUE }
-        [ CLUSTERED | NONCLUSTERED ]
-        [
-            WITH FILLFACTOR = fillfactor
-          | WITH ( <index_option> [ ,... n ] )
-        ]
-        [ ON { partition_scheme_name ( partition_column_name )
-        | filegroup | "default" } ]
-
-    | [ FOREIGN KEY ]
-        REFERENCES referenced_table_name [ ( ref_column ) ]
-        [ ON DELETE { NO ACTION | CASCADE } ]
-        [ ON UPDATE { NO ACTION } ]
-        [ NOT FOR REPLICATION ]
-
-    | CHECK [ NOT FOR REPLICATION ] ( logical_expression )
-]
-     */
-    private ParseResult<SqlComputedColumnDefinition> ParseComputedColumnDefinition()
-    {
-        var startPosition = _text.Position;
-        if (!TryReadSqlIdentifier(out var columnNameSpan))
-        {
-            return NoneResult<SqlComputedColumnDefinition>();
-        }
-
-        if (!TryMatchKeyword("AS"))
-        {
-            _text.Position = startPosition;
-            return NoneResult<SqlComputedColumnDefinition>();
-        }
-
-        if (!TryMatch("("))
-        {
-            _text.Position = startPosition;
-            return CreateParseError("Expected (");
-        }
-
-        var computedColumnExpressionSpan = _text.ReadUntilRightParenthesis();
-
-        if (!TryMatch(")"))
-        {
-            _text.Position = startPosition;
-            return CreateParseError("Expected )");
-        }
-
-        var persist = TryMatchKeyword("PERSISTED");
-        var notNull = TryMatchKeywords("NOT", "NULL");
-
-        return CreateParseResult(new SqlComputedColumnDefinition
-        {
-            ColumnName = columnNameSpan.Word,
-            Expression = computedColumnExpressionSpan.Word,
-            IsPersisted = persist,
-            IsNotNull = notNull
-        });
-    }
-
-    private bool TryReadSqlIdentifier(out TextSpan result)
-    {
-        SkipWhiteSpace();
-        return _text.Try(_text.ReadSqlIdentifier, out result);
-    }
-    
-    private TextSpan ReadSqlIdentifier()
-    {
-        SkipWhiteSpace();
-        return _text.ReadSqlIdentifier();
     }
 
     private ParseResult<ColumnDefinition> ParseColumnConstraints(ColumnDefinition column)
@@ -680,6 +574,33 @@ column_name AS computed_column_expression
         return CreateParseResult(column);
     }
 
+    private ParseResult<ColumnDefinition> ParseColumnDefinition()
+    {
+        var startPosition = _text.Position;
+        if (!TryReadSqlIdentifier(out var columnNameSpan))
+        {
+            return NoneResult<ColumnDefinition>();
+        }
+        
+        var columnDefinition = ParseColumnTypeDefinition(columnNameSpan);
+        if (columnDefinition.HasError)
+        {
+            return columnDefinition.Error;
+        }
+        if (columnDefinition.Result==null)
+        {
+            _text.Position = startPosition;
+            return NoneResult<ColumnDefinition>();
+        }
+
+        var c = ParseColumnConstraints(columnDefinition.Result);
+        if (c.HasError)
+        {
+            return c.Error;
+        }
+        return CreateParseResult(columnDefinition.ResultValue);
+    }
+
     private ParseResult<List<SqlConstraintColumn>> ParseColumnsAscDesc()
     {
         var columns = ParseParenthesesWithComma(() =>
@@ -748,6 +669,70 @@ column_name AS computed_column_expression
         }
 
         return CreateParseResult(column);
+    }
+
+    /*
+     * <computed_column_definition> ::=
+column_name AS computed_column_expression
+[ PERSISTED [ NOT NULL ] ]
+[
+    [ CONSTRAINT constraint_name ]
+    { PRIMARY KEY | UNIQUE }
+        [ CLUSTERED | NONCLUSTERED ]
+        [
+            WITH FILLFACTOR = fillfactor
+          | WITH ( <index_option> [ ,... n ] )
+        ]
+        [ ON { partition_scheme_name ( partition_column_name )
+        | filegroup | "default" } ]
+
+    | [ FOREIGN KEY ]
+        REFERENCES referenced_table_name [ ( ref_column ) ]
+        [ ON DELETE { NO ACTION | CASCADE } ]
+        [ ON UPDATE { NO ACTION } ]
+        [ NOT FOR REPLICATION ]
+
+    | CHECK [ NOT FOR REPLICATION ] ( logical_expression )
+]
+     */
+    private ParseResult<SqlComputedColumnDefinition> ParseComputedColumnDefinition()
+    {
+        var startPosition = _text.Position;
+        if (!TryReadSqlIdentifier(out var columnNameSpan))
+        {
+            return NoneResult<SqlComputedColumnDefinition>();
+        }
+
+        if (!TryMatchKeyword("AS"))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlComputedColumnDefinition>();
+        }
+
+        if (!TryMatch("("))
+        {
+            _text.Position = startPosition;
+            return CreateParseError("Expected (");
+        }
+
+        var computedColumnExpressionSpan = _text.ReadUntilRightParenthesis();
+
+        if (!TryMatch(")"))
+        {
+            _text.Position = startPosition;
+            return CreateParseError("Expected )");
+        }
+
+        var persist = TryMatchKeyword("PERSISTED");
+        var notNull = TryMatchKeywords("NOT", "NULL");
+
+        return CreateParseResult(new SqlComputedColumnDefinition
+        {
+            ColumnName = columnNameSpan.Word,
+            Expression = computedColumnExpressionSpan.Word,
+            IsPersisted = persist,
+            IsNotNull = notNull
+        });
     }
 
     private ParseResult<SqlConstraintPrimaryKeyOrUnique> ParseDefaultValue()
@@ -1223,13 +1208,23 @@ column_name AS computed_column_expression
         return CreateParseResult(toggle);
     }
 
-    private ParseError CreateParseError(string error)
+    private Func<ParseResult<SqlToken>> PeekKeywords(params string[] keywords)
     {
-        return new ParseError(error)
+        return () =>
         {
-            Offset = _text.Position
+            var startPosition = _text.Position;
+            var result = ParseKeywords(keywords);
+            _text.Position = startPosition;
+            return result;
         };
     }
+
+    private TextSpan ReadSqlIdentifier()
+    {
+        SkipWhiteSpace();
+        return _text.ReadSqlIdentifier();
+    }
+
     private void SkipWhiteSpace()
     {
         while (true)
@@ -1269,5 +1264,11 @@ column_name AS computed_column_expression
         var isSuccess = _text.TryMatchIgnoreCaseKeyword(expected);
         _text.Position = tmpPosition;
         return isSuccess;
+    }
+
+    private bool TryReadSqlIdentifier(out TextSpan result)
+    {
+        SkipWhiteSpace();
+        return _text.Try(_text.ReadSqlIdentifier, out result);
     }
 }
