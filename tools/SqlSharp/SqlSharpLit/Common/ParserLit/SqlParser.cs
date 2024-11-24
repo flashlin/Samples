@@ -39,17 +39,17 @@ public class SqlParser
     {
         if (Try(ParseCreateTableStatement, out var createTableResult))
         {
-            return ParseResult<ISqlExpression>.From(createTableResult);
+            return createTableResult.Result;
         }
 
         if (Try(ParseSelectStatement, out var selectResult))
         {
-            return ParseResult<ISqlExpression>.From(selectResult);
+            return selectResult.Result;
         }
 
         if (Try(ParseExecSpAddExtendedProperty, out var execSpAddExtendedPropertyResult))
         {
-            return ParseResult<ISqlExpression>.From(execSpAddExtendedPropertyResult);
+            return execSpAddExtendedPropertyResult.Result;
         }
 
         return RaiseParseError("Unknown statement");
@@ -1098,25 +1098,25 @@ column_name AS computed_column_expression
         var tablePrimaryKeyOrUniqueExpr = ParsePrimaryKeyOrUniqueExpression();
         if (tablePrimaryKeyOrUniqueExpr.HasError)
         {
-            return RaiseParseError<ISqlExpression>(tablePrimaryKeyOrUniqueExpr.Error);
+            return tablePrimaryKeyOrUniqueExpr.Error;
         }
 
         if (tablePrimaryKeyOrUniqueExpr.Result != null)
         {
             tablePrimaryKeyOrUniqueExpr.Result.ConstraintName = constraintName;
-            return CreateParseResult<ISqlExpression>(tablePrimaryKeyOrUniqueExpr.Result);
+            return tablePrimaryKeyOrUniqueExpr.Result;
         }
 
         var tableForeignKeyExpr = ParseForeignKeyExpression();
         if (tableForeignKeyExpr.HasError)
         {
-            return RaiseParseError<ISqlExpression>(tableForeignKeyExpr.Error);
+            return tableForeignKeyExpr.Error;
         }
 
         if (tableForeignKeyExpr.Result!=null)
         {
             tableForeignKeyExpr.Result.ConstraintName = constraintName;
-            return CreateParseResult<ISqlExpression>(tableForeignKeyExpr.Result);
+            return tableForeignKeyExpr.Result;
         }
 
         return NoneResult<ISqlExpression>();
@@ -1223,12 +1223,12 @@ column_name AS computed_column_expression
         return CreateParseResult(toggle);
     }
 
-    private ParseResult<ISqlExpression> RaiseParseError(string error)
+    private ParseError RaiseParseError(string error)
     {
-        return new ParseResult<ISqlExpression>(new ParseError(error)
+        return new ParseError(error)
         {
             Offset = _text.Position
-        });
+        };
     }
 
     private ParseResult<T> RaiseParseError<T>(ParseError innerError)

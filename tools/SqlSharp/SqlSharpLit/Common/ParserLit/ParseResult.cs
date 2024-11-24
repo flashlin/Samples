@@ -2,13 +2,24 @@ namespace SqlSharpLit.Common.ParserLit;
 
 public class ParseResult<T> : IParseResult
 {
-    public static ParseResult<T> From<T1>(ParseResult<T1> result)
+    public static implicit operator ParseResult<T>(ParseError error)
     {
-        if (result.HasResult)
+        return new ParseResult<T>(error);
+    }
+    
+    public static implicit operator ParseResult<T>(T? result)
+    {
+        return new ParseResult<T>(result);
+    }
+    
+    public ParseResult<T1> To<T1>()
+        where T1 : class
+    {
+        if (HasError)
         {
-            return new ParseResult<T>((T?)result.Object);
+            return Error;
         }
-        return new ParseResult<T>(result.Error);
+        return new ParseResult<T1>((T1?)Object);
     }
     
     public ParseResult(T? result)
