@@ -1110,7 +1110,7 @@ column_name AS computed_column_expression
         var tableForeignKeyExpr = ParseForeignKeyExpression();
         if (tableForeignKeyExpr.HasError)
         {
-            return RaiseParseError(tableForeignKeyExpr.Error);
+            return RaiseParseError<ISqlExpression>(tableForeignKeyExpr.Error);
         }
 
         if (tableForeignKeyExpr.Result!=null)
@@ -1229,11 +1229,6 @@ column_name AS computed_column_expression
         {
             Offset = _text.Position
         });
-    }
-
-    private ParseResult<ISqlExpression> RaiseParseError(ParseError innerError)
-    {
-        return new ParseResult<ISqlExpression>(innerError);
     }
 
     private ParseResult<T> RaiseParseError<T>(ParseError innerError)
