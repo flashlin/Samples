@@ -851,7 +851,7 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlIdentity> ParseIdentity()
     {
-        if (!_text.TryMatch("IDENTITY"))
+        if (!TryMatch("IDENTITY"))
         {
             return NoneResult<SqlIdentity>();
         }
@@ -1026,6 +1026,7 @@ column_name AS computed_column_expression
         {
             return columnsSpan.Error;
         }
+
         sqlConstraint.Columns = columnsSpan.ResultValue;
         return sqlConstraint;
     }
@@ -1037,6 +1038,7 @@ column_name AS computed_column_expression
         {
             return primaryKeyOrUniqueSpan.Error;
         }
+
         if (primaryKeyOrUniqueSpan.Result == null)
         {
             return NoneResult<SqlConstraintPrimaryKeyOrUnique>();
@@ -1050,6 +1052,7 @@ column_name AS computed_column_expression
             {
                 return togglesSpan.Error;
             }
+
             sqlConstraint.WithToggles = togglesSpan.ResultValue;
         }
 
@@ -1064,6 +1067,7 @@ column_name AS computed_column_expression
             {
                 return identitySpan.Error;
             }
+
             sqlConstraint.Identity = identitySpan.ResultValue;
         }
 
@@ -1298,7 +1302,7 @@ public class SqlConstraintDefaultValue : ISqlConstraint
 {
     public SqlType SqlType { get; } = SqlType.ConstraintDefaultValue;
     public string ConstraintName { get; set; } = string.Empty;
-    public string DefaultValue { get; set; }= string.Empty;
+    public string DefaultValue { get; set; } = string.Empty;
 
     public string ToSql()
     {

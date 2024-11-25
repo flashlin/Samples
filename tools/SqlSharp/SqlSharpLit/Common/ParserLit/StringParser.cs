@@ -710,34 +710,23 @@ public class StringParser
             _position = startPosition;
             return false;
         }
-
+        _previousWord = textSpan;
         return true;
     }
 
     public bool TryMatch(string keyword)
     {
         SkipWhitespace();
-        var tempPosition = _position;
-        var word = "";
-        while (tempPosition < _text.Length && word.Length < keyword.Length)
+        var startPosition = _position;
+        if (Try(() => ReadString(keyword.Length), out var textSpan))
         {
-            word += _text[tempPosition];
-            tempPosition++;
+            if (textSpan.Word == keyword)
+            {
+                return true;
+            }
+            _position = startPosition;   
         }
-
-        if (word != keyword)
-        {
-            return false;
-        }
-
-        _previousWord = new TextSpan
-        {
-            Word = keyword,
-            Offset = _position,
-            Length = keyword.Length
-        };
-        _position = tempPosition;
-        return true;
+        return false;
     }
 
     public bool TryMatches(params string[] keywords)
