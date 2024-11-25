@@ -65,14 +65,6 @@ public class StringParser
         return _text[_position++];
     }
 
-    public ReadOnlySpan<char> NextString(int length)
-    {
-        if (IsEnd()) return string.Empty;
-        var text = PeekString(length);
-        _position += text.Length;
-        return text;
-    }
-
     public TextSpan Peek(Func<TextSpan> readFunc)
     {
         var tempPosition = _position;
@@ -116,14 +108,6 @@ public class StringParser
     {
         if (IsEnd()) return '\0';
         return _text[_position];
-    }
-
-    public ReadOnlySpan<char> PeekString(int length)
-    {
-        if (IsEnd()) return string.Empty;
-        var remainLength = _text.Length - _position;
-        var readLength = Math.Min(length, remainLength);
-        return _text.AsSpan(_position, readLength);
     }
 
     public TextSpan PeekWord()
@@ -776,6 +760,14 @@ public class StringParser
         return string.Equals(word1, word2, StringComparison.OrdinalIgnoreCase);
     }
 
+    private ReadOnlySpan<char> NextString(int length)
+    {
+        if (IsEnd()) return string.Empty;
+        var text = PeekString(length);
+        _position += text.Length;
+        return text;
+    }
+
     private TextSpan Or(params Func<TextSpan>[] readFnList)
     {
         foreach (var readFn in readFnList)
@@ -793,5 +785,16 @@ public class StringParser
             Offset = _position,
             Length = 0
         };
+    }
+
+    private ReadOnlySpan<char> PeekString(int length)
+    {
+        if (IsEnd())
+        {
+            return string.Empty;
+        }
+        var remainLength = _text.Length - _position;
+        var readLength = Math.Min(length, remainLength);
+        return _text.AsSpan(_position, readLength);
     }
 }
