@@ -755,7 +755,6 @@ public class StringParser
         return true;
     }
 
-
     public bool TryMatchIgnoreCase(string keyword)
     {
         SkipWhitespace();
@@ -780,15 +779,6 @@ public class StringParser
             Offset = _position,
             Length = keyword.Length
         };
-        return true;
-    }
-
-    public bool TryMatchIgnoreCaseKeyword(string keyword)
-    {
-        var peek = PeekWord();
-        if (!string.Equals(peek.Word, keyword, StringComparison.OrdinalIgnoreCase)) return false;
-        _previousWord = peek;
-        _position = peek.Offset + peek.Length;
         return true;
     }
 

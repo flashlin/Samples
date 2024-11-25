@@ -659,7 +659,7 @@ public class SqlParser
         var dataLength2 = string.Empty;
         if (TryMatch("("))
         {
-            if (_text.TryMatchIgnoreCaseKeyword("MAX"))
+            if (_text.TryMatchIgnoreCase("MAX"))
             {
                 column.Size = "MAX";
                 _text.Match(")");
@@ -1273,7 +1273,7 @@ column_name AS computed_column_expression
     private bool TryMatchKeyword(string expected)
     {
         SkipWhiteSpace();
-        return _text.TryMatchIgnoreCaseKeyword(expected);
+        return _text.TryMatchIgnoreCase(expected);
     }
 
     private bool TryMatchKeywords(params string[] keywords)
@@ -1286,7 +1286,7 @@ column_name AS computed_column_expression
     {
         SkipWhiteSpace();
         var tmpPosition = _text.Position;
-        var isSuccess = _text.TryMatchIgnoreCaseKeyword(expected);
+        var isSuccess = _text.TryMatchIgnoreCase(expected);
         _text.Position = tmpPosition;
         return isSuccess;
     }
