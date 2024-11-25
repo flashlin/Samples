@@ -759,26 +759,27 @@ public class StringParser
     public bool TryMatchIgnoreCase(string keyword)
     {
         SkipWhitespace();
-        var tempPosition = _position;
-        var word = "";
-        while (tempPosition < _text.Length && word.Length < keyword.Length)
+        var startPosition = _position;
+        var readCount = 0;
+        while (!IsEnd() && readCount < keyword.Length)
         {
-            word += _text[tempPosition];
-            tempPosition++;
+            readCount++;
+            _position++;
         }
 
+        var word = _text.Substring(startPosition, readCount);
         if (!string.Equals(word, keyword, StringComparison.OrdinalIgnoreCase))
         {
+            _position = startPosition;
             return false;
         }
 
         _previousWord = new TextSpan
         {
-            Word = keyword,
+            Word = word,
             Offset = _position,
             Length = keyword.Length
         };
-        _position = tempPosition;
         return true;
     }
 
