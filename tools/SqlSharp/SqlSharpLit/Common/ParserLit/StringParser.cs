@@ -732,32 +732,26 @@ public class StringParser
     public bool TryMatches(params string[] keywords)
     {
         SkipWhitespace();
-        var tempPosition = _position;
         foreach (var keyword in keywords)
         {
             if (!TryMatch(keyword))
             {
-                _position = tempPosition;
                 return false;
             }
         }
-
         return true;
     }
 
     public bool TryMatchesIgnoreCase(params string[] keywords)
     {
         SkipWhitespace();
-        var tempPosition = _position;
         foreach (var keyword in keywords)
         {
             if (!TryMatchIgnoreCase(keyword))
             {
-                _position = tempPosition;
                 return false;
             }
         }
-
         return true;
     }
 
