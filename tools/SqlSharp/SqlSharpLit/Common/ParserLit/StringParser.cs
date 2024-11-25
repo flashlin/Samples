@@ -90,18 +90,12 @@ public class StringParser
 
     public TextSpan PeekIdentifier(string word)
     {
-        SkipWhitespace();
-        var tempPosition = _position;
-        if (Try(ReadIdentifier, out var identifier))
+        var span = Peek(ReadIdentifier);
+        if (span.Word == word)
         {
-            _position = tempPosition;
-            if (identifier.Word == word)
-            {
-                return identifier;
-            }
+            return span;
         }
 
-        _position = tempPosition;
         return new TextSpan
         {
             Word = string.Empty,
