@@ -42,11 +42,6 @@ public class StringParser
         return IsSameIgnoreCase(textSpan.Word, expected);
     }
 
-    private static bool IsSameIgnoreCase(string word1, string word2)
-    {
-        return string.Equals(word1, word2, StringComparison.OrdinalIgnoreCase);
-    }
-
     public bool IsWordChar(char c)
     {
         return char.IsLetterOrDigit(c) || c == '_' || c == '@' || c == '#' || c == '$';
@@ -780,6 +775,11 @@ public class StringParser
             Length = keyword.Length
         };
         return true;
+    }
+
+    private static bool IsSameIgnoreCase(string word1, string word2)
+    {
+        return string.Equals(word1, word2, StringComparison.OrdinalIgnoreCase);
     }
 
     private TextSpan Or(params Func<TextSpan>[] readFnList)
