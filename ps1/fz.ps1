@@ -97,25 +97,32 @@ $search_list | ForEach-Object {
         # 呼叫搜尋
         # Write-Host "搜尋 $searchTerm"
         $file_list = search_folder -searchTerm $searchTerm
+        # Write-Host $file_list.GetType()
         if( $file_list -eq $null ) {
+            # Write-Host "找不到"
             $file_list = @()
             $selected = $null
             return
         }
         if( "string" -eq "$($file_list.GetType())" ) {
+            # Write-Host "只有一個"
             $selected = $file_list
             return
         }
         if( $file_list.Count -eq 0 ) {
             return
         }
-        # show_list -file_list $file_list
+        # 找到很多個 
+        # Write-Host "找到 $($file_list.Count) 個"
+        return
     }
 
     if ( $count -eq $search_list.Count ) {
         # 最後一個
+        # Write-Host $file_list
         # Write-Host "最後過濾 $searchTerm"
         $result = filter_list -input_list $file_list -searchTerm $searchTerm
+        # Write-Host "最後過濾結果 $($result.Count)"
         if( $result.Count -gt 1  ) {
             $selected = show_menu -input_list $result
         }  
