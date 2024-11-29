@@ -3,10 +3,17 @@ using T1.Standard.IO;
 
 namespace SqlSharpLit.Common.ParserLit;
 
+public enum SelectType
+{
+    All,
+    Distinct
+}
+
 public class SelectStatement : ISqlExpression
 {
     public SqlType SqlType => SqlType.Select;
-    public string AllOrDistinct { get; set; } = string.Empty;
+    public SelectType SelectType { get; set; } = SelectType.All; 
+    public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];
     public ISelectFromExpression From { get; set; } = new SelectFrom();
     public ISqlWhereExpression? Where { get; set; }
@@ -15,11 +22,13 @@ public class SelectStatement : ISqlExpression
     {
         var sql = new IndentStringBuilder();
         sql.Write("SELECT");
-        if (!string.IsNullOrEmpty(AllOrDistinct))
-        {
-            sql.Write($" {AllOrDistinct}");
-        }
+        sql.Write($" {SelectType.ToString().ToUpper()}");
         sql.WriteLine();
+        if(Top!=null)
+        {
+            sql.Write(Top.ToSql());
+            sql.WriteLine();
+        }
         sql.Indent++;
         for (var i = 0; i < Columns.Count; i++)
         {

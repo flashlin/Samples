@@ -1,3 +1,5 @@
+using System.Runtime.InteropServices.JavaScript;
+using System.Text;
 using System.Text.RegularExpressions;
 using SqlSharpLit.Common.ParserLit.Expressions;
 
@@ -264,6 +266,32 @@ public class SqlParser
         });
     }
 
+    public ParseResult<SqlTopClause> Parse_TopClause()
+    {
+        if (!TryMatchKeyword("TOP"))
+        {
+            return NoneResult<SqlTopClause>();
+        }
+        var expression = ParseValue();
+        if (expression.HasError)
+        {
+            return expression.Error;
+        }
+        var topClause = new SqlTopClause()
+        {
+            Expression = expression.ResultValue
+        };
+        if (TryMatchKeyword("PERCENT"))
+        {
+            topClause.IsPercent = true;
+        }
+        if(TryMatchKeywords("WITH", "TIES"))
+        {
+            topClause.IsWithTies = true;
+        }
+        return topClause;
+    }
+
     public ParseResult<SelectStatement> ParseSelectStatement()
     {
         if (!TryMatchKeyword("SELECT"))
@@ -273,10 +301,21 @@ public class SqlParser
 
         var selectStatement = new SelectStatement();
         
-        var allOrDistinct = Parse_All_Distinct();
-        if (allOrDistinct is { HasResult: true, Result: not null })
+        var selectTypeClause = Parse_SelectTypeClause();
+        if(selectTypeClause.HasError)
         {
-            selectStatement.AllOrDistinct = allOrDistinct.Result.Value;
+            return selectTypeClause.Error;
+        }
+        selectStatement.SelectType = selectTypeClause.ResultValue;
+        
+        var topClause = Parse_TopClause();
+        if(topClause.HasError)
+        {
+            return topClause.Error;
+        }
+        if(topClause.Result != null)
+        {
+            selectStatement.Top = topClause.Result;
         }
 
         var columns = new List<ISelectColumnExpression>();
@@ -891,9 +930,24 @@ column_name AS computed_column_expression
         return NoneResult<SqlValue>();
     }
 
-    public ParseResult<SqlToken> Parse_All_Distinct()
+    public ParseResult<SelectType> Parse_SelectTypeClause()
     {
-        return Or(Keywords("ALL"), Keywords("DISTINCT"))();
+        var rc = Or(Keywords("ALL"), Keywords("DISTINCT"))();
+        if (rc.HasError)
+        {
+            return rc.Error;
+        }
+        if (rc is not { HasValue: true, Result: not null })
+        {
+            return SelectType.All;
+        }
+        var selectType = rc.Result.Value.ToUpper() switch
+        {
+            "ALL" => SelectType.All,
+            "DISTINCT" => SelectType.Distinct,
+            _ => SelectType.All
+        };
+        return selectType;
     }
 
     private ParseResult<SqlToken> ParseKeywords(params string[] keywords)
@@ -1306,6 +1360,12 @@ column_name AS computed_column_expression
         SkipWhiteSpace();
         return _text.Try(_text.ReadSqlIdentifier, out result);
     }
+    
+    private bool TryReadInt(out TextSpan result)
+    {
+        SkipWhiteSpace();
+        return _text.Try(_text.ReadInt, out result);
+    }
 }
 
 public class SqlConstraintDefaultValue : ISqlConstraint
@@ -1317,5 +1377,27 @@ public class SqlConstraintDefaultValue : ISqlConstraint
     public string ToSql()
     {
         return $"DEFAULT {DefaultValue}";
+    }
+}
+
+public class SqlTopClause : ISqlExpression
+{
+    public SqlType SqlType => SqlType.TopClause;
+    public required ISqlExpression Expression { get; set; }
+    public bool IsPercent { get; set; }
+    public bool IsWithTies { get; set; }
+    public string ToSql()
+    {
+        var sql = new StringBuilder();
+        sql.Append($"TOP {Expression.ToSql()}");
+        if (IsPercent)
+        {
+            sql.Append(" PERCENT");
+        }
+        if(IsWithTies)
+        {
+            sql.Append(" WITH TIES");
+        }
+        return sql.ToString();
     }
 }

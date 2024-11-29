@@ -19,4 +19,5 @@ public enum SqlType
     ConstraintDefaultValue,
     DataType,
     DataSize,
+    TopClause
 }
