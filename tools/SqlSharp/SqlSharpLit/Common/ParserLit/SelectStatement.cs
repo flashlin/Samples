@@ -1,3 +1,4 @@
+using SqlSharpLit.Common.ParserLit.Expressions;
 using T1.Standard.IO;
 
 namespace SqlSharpLit.Common.ParserLit;
@@ -5,13 +6,20 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SelectStatement : ISqlExpression
 {
     public SqlType SqlType => SqlType.Select;
+    public string AllOrDistinct { get; set; } = string.Empty;
     public List<ISelectColumnExpression> Columns { get; set; } = [];
     public ISelectFromExpression From { get; set; } = new SelectFrom();
     public ISqlWhereExpression? Where { get; set; }
+
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
-        sql.WriteLine("SELECT");
+        sql.Write("SELECT");
+        if (!string.IsNullOrEmpty(AllOrDistinct))
+        {
+            sql.Write($" {AllOrDistinct}");
+        }
+        sql.WriteLine();
         sql.Indent++;
         for (var i = 0; i < Columns.Count; i++)
         {

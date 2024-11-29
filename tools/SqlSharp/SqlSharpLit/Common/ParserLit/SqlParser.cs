@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using SqlSharpLit.Common.ParserLit.Expressions;
 
 namespace SqlSharpLit.Common.ParserLit;
 
@@ -270,6 +271,14 @@ public class SqlParser
             return NoneResult<SelectStatement>();
         }
 
+        var selectStatement = new SelectStatement();
+        
+        var allOrDistinct = Parse_All_Distinct();
+        if (allOrDistinct is { HasResult: true, Result: not null })
+        {
+            selectStatement.AllOrDistinct = allOrDistinct.Result.Value;
+        }
+
         var columns = new List<ISelectColumnExpression>();
         do
         {
@@ -292,11 +301,7 @@ public class SqlParser
 
             _text.ReadChar();
         } while (!_text.IsEnd());
-
-        var selectStatement = new SelectStatement
-        {
-            Columns = columns
-        };
+        selectStatement.Columns = columns;
 
         if (TryMatchKeyword("FROM"))
         {
@@ -884,6 +889,11 @@ column_name AS computed_column_expression
         }
 
         return NoneResult<SqlValue>();
+    }
+
+    public ParseResult<SqlToken> Parse_All_Distinct()
+    {
+        return Or(Keywords("ALL"), Keywords("DISTINCT"))();
     }
 
     private ParseResult<SqlToken> ParseKeywords(params string[] keywords)

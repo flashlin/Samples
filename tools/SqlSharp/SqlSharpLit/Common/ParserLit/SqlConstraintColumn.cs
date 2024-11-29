@@ -1,3 +1,5 @@
+using SqlSharpLit.Common.ParserLit.Expressions;
+
 namespace SqlSharpLit.Common.ParserLit;
 
 public class SqlConstraintColumn : ISqlExpression 

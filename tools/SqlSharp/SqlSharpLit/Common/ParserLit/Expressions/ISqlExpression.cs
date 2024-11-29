@@ -1,4 +1,4 @@
-namespace SqlSharpLit.Common.ParserLit;
+namespace SqlSharpLit.Common.ParserLit.Expressions;
 
 public interface ISqlExpression
 {

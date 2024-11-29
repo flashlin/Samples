@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Primitives;
+using SqlSharpLit.Common.ParserLit.Expressions;
 
 namespace SqlSharpLit.Common.ParserLit;
 
