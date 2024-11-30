@@ -318,29 +318,18 @@ public class SqlParser
             selectStatement.Top = topClause.Result;
         }
 
-        var columns = new List<ISelectColumnExpression>();
-        do
+        var columns = ParseWithComma<ISelectColumnExpression>(() =>
         {
             if (_text.Try(_text.ReadIdentifier, out var fieldName))
             {
-                columns.Add(new SelectColumn()
+                return new SelectColumn()
                 {
                     ColumnName = fieldName.Word
-                });
+                };
             }
-            else
-            {
-                return CreateParseError("Expected column name");
-            }
-
-            if (_text.PeekChar() != ',')
-            {
-                break;
-            }
-
-            _text.ReadChar();
-        } while (!_text.IsEnd());
-        selectStatement.Columns = columns;
+            return CreateParseError("Expected column name");
+        });
+        selectStatement.Columns = columns.ResultValue;
 
         if (TryMatchKeyword("FROM"))
         {
