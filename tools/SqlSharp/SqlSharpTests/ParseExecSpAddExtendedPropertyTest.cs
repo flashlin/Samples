@@ -25,7 +25,7 @@ public class ParseExecSpAddExtendedPropertyTest
 
         var rc = ParseSql(sql);
 
-        rc.ShouldBe(new SqlSpAddExtendedProperty()
+        rc.ShouldBe(new SqlSpAddExtendedPropertyExpression()
         {
             Name = "N'MS_Description'",
             Value = "N'hello'",
@@ -45,7 +45,7 @@ public class ParseExecSpAddExtendedPropertyTest
                    EXEC sp_addextendedproperty N'MS_Description', N'Monday = 1, Tuesday = 2', 'SCHEMA', N'dbo', 'TABLE', N'MySetting', 'COLUMN', N'Setting1'
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlSpAddExtendedProperty
+        rc.ShouldBe(new SqlSpAddExtendedPropertyExpression
         {
             Name = "N'MS_Description'",
             Value = "N'Monday = 1, Tuesday = 2'",

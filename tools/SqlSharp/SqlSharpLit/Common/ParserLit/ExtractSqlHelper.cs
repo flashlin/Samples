@@ -342,7 +342,7 @@ public class ExtractSqlHelper
                 .FirstOrDefault(string.Empty),
             Description = allSqlExpressions
                 .Where(x => x.SqlType == SqlType.AddExtendedProperty)
-                .Cast<SqlSpAddExtendedProperty>()
+                .Cast<SqlSpAddExtendedPropertyExpression>()
                 .Where(x => x.Name.Contains("MS_Description") && x.Level1Name == tableName &&
                             x.Level2Name == column.ColumnName)
                 .Select(x => x.Value)

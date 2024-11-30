@@ -1,8 +1,6 @@
-using T1.SqlSharp.Expressions;
+namespace T1.SqlSharp.Expressions;
 
-namespace SqlSharpLit.Common.ParserLit;
-
-public class SqlSpAddExtendedProperty : ISqlExpression
+public class SqlSpAddExtendedPropertyExpression : ISqlExpression
 {
     public SqlType SqlType => SqlType.AddExtendedProperty;
     /// <summary>

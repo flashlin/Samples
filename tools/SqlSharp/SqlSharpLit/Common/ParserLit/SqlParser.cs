@@ -160,11 +160,11 @@ public class SqlParser
         return CreateParseResult(createTableStatement);
     }
 
-    public ParseResult<SqlSpAddExtendedProperty> ParseExecSpAddExtendedProperty()
+    public ParseResult<SqlSpAddExtendedPropertyExpression> ParseExecSpAddExtendedProperty()
     {
         if (!TryMatchKeywords("EXEC", "SP_AddExtendedProperty"))
         {
-            return NoneResult<SqlSpAddExtendedProperty>();
+            return NoneResult<SqlSpAddExtendedPropertyExpression>();
         }
 
         var parameters = ParseWithComma(ParseParameterValueOrAssignValue);
@@ -180,7 +180,7 @@ public class SqlParser
 
         var p = parameters.ResultValue;
 
-        var sqlSpAddExtendedProperty = new SqlSpAddExtendedProperty
+        var sqlSpAddExtendedProperty = new SqlSpAddExtendedPropertyExpression
         {
             Name = p[0].Value,
             Value = p[1].Value,
