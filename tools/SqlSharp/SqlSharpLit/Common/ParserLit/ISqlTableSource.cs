@@ -1,6 +1,6 @@
 namespace SqlSharpLit.Common.ParserLit;
 
-public interface ISelectFromExpression
+public interface ISqlTableSource
 {
     string ToSql();
 }

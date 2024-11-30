@@ -38,9 +38,9 @@ public class ParseSelectSqlTest
                 new SelectColumn() { ColumnName = "Id" },
                 new SelectColumn() { ColumnName = "Name" },
             ],
-            From = new SelectFrom
+            From = new SqlTableSource
             {
-                FromTableName = "Persons"
+                TableName = "Persons"
             },
             Where = new SqlConditionExpression
             {

@@ -28,7 +28,7 @@ public class SelectStatement : ISqlExpression
     public SelectType SelectType { get; set; } = SelectType.All; 
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];
-    public ISelectFromExpression From { get; set; } = new SelectFrom();
+    public ISqlTableSource From { get; set; } = new SqlTableSource();
     public ISqlWhereExpression? Where { get; set; }
 
     public string ToSql()
