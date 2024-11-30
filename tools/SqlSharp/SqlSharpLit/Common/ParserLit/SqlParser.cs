@@ -2,6 +2,7 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Text;
 using System.Text.RegularExpressions;
 using SqlSharpLit.Common.ParserLit.Expressions;
+using T1.SqlSharp.Expressions;
 
 namespace SqlSharpLit.Common.ParserLit;
 

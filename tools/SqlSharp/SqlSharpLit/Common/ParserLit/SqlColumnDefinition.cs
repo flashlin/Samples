@@ -1,5 +1,6 @@
 using System.Text;
 using SqlSharpLit.Common.ParserLit.Expressions;
+using T1.SqlSharp.Expressions;
 
 namespace SqlSharpLit.Common.ParserLit;
 

@@ -12,8 +12,4 @@
         <PackageTags>T1</PackageTags>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="Expressions\" />
-    </ItemGroup>
-
 </Project>

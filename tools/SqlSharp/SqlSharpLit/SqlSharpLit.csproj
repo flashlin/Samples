@@ -23,4 +23,8 @@
       <PackageReference Include="T1.Standard" Version="1.0.83" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\..\T1.SqlSharp\T1.SqlSharp\T1.SqlSharp.csproj" />
+    </ItemGroup>
+
 </Project>

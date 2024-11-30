@@ -1,3 +1,5 @@
+using T1.SqlSharp.Expressions;
+
 namespace SqlSharpLit.Common.ParserLit.Expressions;
 
 public class SqlCreateTableExpression : ISqlExpression
