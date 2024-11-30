@@ -42,7 +42,7 @@ public class ParseSelectSqlTest
             {
                 FromTableName = "Persons"
             },
-            Where = new SqlWhereExpression
+            Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpression
                 {

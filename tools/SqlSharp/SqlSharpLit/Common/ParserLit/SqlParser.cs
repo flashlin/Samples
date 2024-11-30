@@ -365,7 +365,7 @@ public class SqlParser
                 return CreateParseError("Expected right expression");
             }
 
-            selectStatement.Where = new SqlWhereExpression()
+            selectStatement.Where = new SqlConditionExpression()
             {
                 Left = leftExpr.ResultValue,
                 Operation = operation,
