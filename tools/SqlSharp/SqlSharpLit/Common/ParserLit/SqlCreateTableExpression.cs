@@ -3,7 +3,7 @@ using SqlSharpLit.Common.ParserLit.Expressions;
 
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlCreateTableStatement : ISqlExpression
+public class SqlCreateTableExpression : ISqlExpression
 {
     public SqlType SqlType => SqlType.CreateTable;
     public string TableName { get; set; } = string.Empty;

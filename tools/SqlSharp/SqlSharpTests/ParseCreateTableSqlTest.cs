@@ -18,7 +18,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -48,7 +48,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -78,7 +78,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement
+        rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "dbo.tb1",
             Columns = [
@@ -102,7 +102,7 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -132,7 +132,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -163,7 +163,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Constraints = [
@@ -193,7 +193,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "[dbo].db1",
             Columns = [
@@ -216,7 +216,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -253,7 +253,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -309,7 +309,7 @@ public class ParseCreateTableSqlTest
                   )               
                   """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "#tmp1",
             Columns =
@@ -340,7 +340,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -395,7 +395,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "[dbo].[VipBetSetting]",
             Columns =
@@ -433,7 +433,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement
+        rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "#tb",
             Columns = [
@@ -457,7 +457,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "$tmp",
             Columns =
@@ -516,7 +516,7 @@ public class ParseCreateTableSqlTest
                    """;
 
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement
+        rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "Persons",
             Columns =
@@ -641,7 +641,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -674,7 +674,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -704,7 +704,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "[Banner]",
             Columns =
@@ -734,7 +734,7 @@ public class ParseCreateTableSqlTest
                   ) 
                   """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "#tmp",
             Columns =
@@ -759,7 +759,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -795,7 +795,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
             Columns = [
@@ -840,7 +840,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "#CustIdList",
             Columns =
@@ -865,7 +865,7 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement
+        rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "#tb1",
             Columns = [
@@ -917,7 +917,7 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement
+        rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "#tmp",
             Columns = [
@@ -962,7 +962,7 @@ public class ParseCreateTableSqlTest
                    );
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement
+        rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "[dbo].[CashSettled]",
             Columns = [
@@ -1011,7 +1011,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement
+        rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "#tb1",
             Columns = [
@@ -1058,7 +1058,7 @@ public class ParseCreateTableSqlTest
                    )
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SqlCreateTableStatement()
+        rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "[dbo].[UserTracking]",
             Columns = [

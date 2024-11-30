@@ -101,11 +101,11 @@ public class SqlParser
         return CreateParseResult(columns);
     }
 
-    public ParseResult<SqlCreateTableStatement> ParseCreateTableStatement()
+    public ParseResult<SqlCreateTableExpression> ParseCreateTableStatement()
     {
         if (!TryMatchKeywords("CREATE", "TABLE"))
         {
-            return NoneResult<SqlCreateTableStatement>();
+            return NoneResult<SqlCreateTableExpression>();
         }
 
         var tableName = _text.ReadSqlIdentifier();
@@ -114,7 +114,7 @@ public class SqlParser
             return CreateParseError("Expected (");
         }
 
-        var createTableStatement = new SqlCreateTableStatement()
+        var createTableStatement = new SqlCreateTableExpression()
         {
             TableName = tableName.Word,
         };

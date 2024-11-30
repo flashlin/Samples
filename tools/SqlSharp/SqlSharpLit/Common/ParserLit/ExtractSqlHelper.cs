@@ -358,7 +358,7 @@ public class ExtractSqlHelper
         };
         var createTables = sqlFileContent.SqlExpressions
             .Where(x => x.SqlType == SqlType.CreateTable)
-            .Cast<SqlCreateTableStatement>()
+            .Cast<SqlCreateTableExpression>()
             .Where(x => StartsWithValidChar(x.TableName))
             .ToList();
         foreach (var createTable in createTables)
@@ -377,7 +377,7 @@ public class ExtractSqlHelper
         return writer;
     }
 
-    private TableDescription CreateTableDescription(SqlCreateTableStatement createTable,
+    private TableDescription CreateTableDescription(SqlCreateTableExpression createTable,
         List<ISqlExpression> allSqlExpressions)
     {
         var tableName = createTable.TableName;
