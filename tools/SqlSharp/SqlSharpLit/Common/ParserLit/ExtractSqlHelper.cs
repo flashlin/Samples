@@ -110,15 +110,20 @@ public class ExtractSqlHelper
         UpdateTableDescription(databasesDesc, userDatabaseDesc);
 
         SaveDatabasesDescJsonFile(databasesDesc, outputFolder);
+        
+        foreach (var database in databasesDesc)
+        {
+            WriteAllTableDescriptions(database, outputFolder);
+        }
     }
 
     public void GenerateRagFiles(string sqlFolder)
     {
         var sqlFileContents = GetSqlContentsFromFolder(sqlFolder);
-        GenerateRagFilesFromSqlContents(sqlFileContents);
+        GenerateRagFilesFromSqlContents(sqlFileContents, "outputs");
     }
 
-    public void GenerateRagFilesFromSqlContents(IEnumerable<SqlFileContent> sqlFileContents)
+    public void GenerateRagFilesFromSqlContents(IEnumerable<SqlFileContent> sqlFileContents, string outputsFolder)
     {
         var databaseDescriptions = ExtractDatabaseDescriptions(sqlFileContents)
             .Where(x => x.Tables.Count > 0)
@@ -138,7 +143,7 @@ public class ExtractSqlHelper
         //writer.WriteLine("The following is a detailed description of all databases and table structures of Titan Company.");
         foreach (var database in databaseDescriptions)
         {
-            WriteAllTableDescriptions(database);
+            WriteAllTableDescriptions(database,outputsFolder);
             WriteAllDatabaseTableNames(database);
         }
 
@@ -207,7 +212,7 @@ public class ExtractSqlHelper
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
         WriteCreateTablesTo(sqlFileContents, writer);
-        GenerateRagFilesFromSqlContents(sqlFileContents);
+        GenerateRagFilesFromSqlContents(sqlFileContents, outputFolder);
     }
 
     private static bool ContainsComment(string lineContent)
@@ -473,9 +478,9 @@ public class ExtractSqlHelper
         writer.Flush();
     }
 
-    private static void WriteAllTableDescriptions(DatabaseDescription database)
+    private static void WriteAllTableDescriptions(DatabaseDescription database, string outputFolder)
     {
-        var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-{database.DatabaseName}-Desc.md");
+        var databaseDescriptionMdFile = Path.Combine(outputFolder, $"Database-{database.DatabaseName}-Desc.md");
         using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
         foreach (var table in database.Tables)
         {
