@@ -104,6 +104,15 @@ public class ExtractSqlHelper
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
         var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
+
+
+        foreach (var db in databasesDesc)
+        {
+            var tables = db.Tables
+                .Where(x=> !x.TableName.StartsWith("#"))
+                .ToList();
+            db.Tables = tables;
+        }
         
         UpdateDatabaseDescription(databasesDesc, userDatabaseDesc);
 
@@ -472,7 +481,7 @@ public class ExtractSqlHelper
 
     private static void WriteAllDatabaseTableNames(DatabaseDescription database)
     {
-        var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-Tables-{database.DatabaseName}-Desc.md");
+        var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-Tables-{database.DatabaseName}-Desc.txt");
         using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
         WriteDatabaseTableNamesTo(database, writer);
         writer.Flush();
@@ -480,7 +489,7 @@ public class ExtractSqlHelper
 
     private static void WriteAllTableDescriptions(DatabaseDescription database, string outputFolder)
     {
-        var databaseDescriptionMdFile = Path.Combine(outputFolder, $"Database-{database.DatabaseName}-Desc.md");
+        var databaseDescriptionMdFile = Path.Combine(outputFolder, $"Database-{database.DatabaseName}-Desc.txt");
         using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
         foreach (var table in database.Tables)
         {
@@ -540,7 +549,7 @@ public class ExtractSqlHelper
 
     private void WriteDatabaseNamesDesc(List<DatabaseDescription> databaseDescriptions)
     {
-        using var writer = CreateWriter("Database-Names-Desc.md");
+        using var writer = CreateWriter("Database-Names-Desc.txt");
         writer.WriteLine("The following is a list of database lists:");
         foreach (var database in databaseDescriptions)
         {
@@ -551,7 +560,7 @@ public class ExtractSqlHelper
 
     private static void WriteDatabaseTableNamesDesc(List<DatabaseDescription> databaseDescriptions)
     {
-        using var writer = CreateWriter("Database-TableNames-Desc.md");
+        using var writer = CreateWriter("Database-TableNames-Desc.txt");
         foreach (var database in databaseDescriptions)
         {
             WriteDatabaseTableNamesTo(database, writer);
