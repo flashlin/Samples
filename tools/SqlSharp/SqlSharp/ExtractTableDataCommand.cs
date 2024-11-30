@@ -6,6 +6,7 @@ namespace SqlSharp;
 public class ExtractTableDataCommand : ISpecificationAsync<SqlSharpOptions, Task>
 {
     private DynamicDbContext _db;
+    
 
     public ExtractTableDataCommand(DynamicDbContext db)
     {

@@ -1,15 +1,18 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using SqlSharp;
 using SqlSharpLit.Common;
 using SqlSharp.CommandPattern;
 using SqlSharpLit.Shared;
 
-new AppSettings().Load(AppContext.BaseDirectory);
 var builder = Host.CreateApplicationBuilder(args);
+builder.LoadAppSettings();
 builder.AddSerilog();
+
 
 var services = builder.Services;
 services.AddSqlSharpServices(builder.Configuration);
