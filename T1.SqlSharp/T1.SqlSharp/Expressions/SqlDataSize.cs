@@ -1,7 +1,6 @@
-using T1.SqlSharp.Expressions;
 using T1.Standard.IO;
 
-namespace SqlSharpLit.Common.ParserLit;
+namespace T1.SqlSharp.Expressions;
 
 public class SqlDataSize : ISqlExpression
 {

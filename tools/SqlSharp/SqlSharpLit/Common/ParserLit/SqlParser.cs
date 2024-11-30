@@ -1418,18 +1418,6 @@ column_name AS computed_column_expression
     }
 }
 
-public class SqlConstraintDefaultValue : ISqlConstraint
-{
-    public SqlType SqlType { get; } = SqlType.ConstraintDefaultValue;
-    public string ConstraintName { get; set; } = string.Empty;
-    public string DefaultValue { get; set; } = string.Empty;
-
-    public string ToSql()
-    {
-        return $"DEFAULT {DefaultValue}";
-    }
-}
-
 public class SqlTopClause : ISqlExpression
 {
     public SqlType SqlType => SqlType.TopClause;

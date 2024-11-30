@@ -1,6 +1,4 @@
-using T1.SqlSharp.Expressions;
-
-namespace SqlSharpLit.Common.ParserLit;
+namespace T1.SqlSharp.Expressions;
 
 public class SqlToggle : ISqlExpression
 {
