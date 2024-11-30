@@ -277,6 +277,10 @@ public class SqlParser
         {
             return expression.Error;
         }
+        if (expression.Result == null)
+        {
+            return CreateParseError("Expected TOP expression");
+        }
         var topClause = new SqlTopClause()
         {
             Expression = expression.ResultValue
@@ -329,6 +333,10 @@ public class SqlParser
             }
             return CreateParseError("Expected column name");
         });
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
         selectStatement.Columns = columns.ResultValue;
 
         if (TryMatchKeyword("FROM"))
