@@ -48,7 +48,7 @@ public class ParseSelectSqlTest
                 {
                     FieldName = "Id",
                 },
-                Operation = "=",
+                ComparisonOperator = ComparisonOperator.Equal,
                 Right = new SqlValue
                 {
                     SqlType = SqlType.IntValue,

@@ -353,7 +353,12 @@ public class SqlParser
                 return CreateParseError("Expected left expression");
             }
 
-            var operation = _text.ReadSymbols().Word;
+            var operation = Parse_ComparisonOperator();
+            if (operation.HasError)
+            {
+                return operation.Error;
+            }
+            
             var rightExpr = ParseValue();
             if (rightExpr.HasError)
             {
@@ -368,13 +373,69 @@ public class SqlParser
             selectStatement.Where = new SqlConditionExpression()
             {
                 Left = leftExpr.ResultValue,
-                Operation = operation,
+                ComparisonOperator = operation.Result,
                 Right = rightExpr.ResultValue
             };
         }
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
+    }
+
+    private ParseResult<ComparisonOperator> Parse_ComparisonOperator()
+    {
+        var rc = Or(
+            Keywords("LIKE"),
+            Keywords("IN"),
+            Keywords("<>"),
+            Keywords(">="),
+            Keywords("<="),
+            Keywords("="),
+            Keywords(">"),
+            Keywords("<")
+        )();
+        if (rc.HasError)
+        {
+            return rc.Error;
+        }
+        if (rc.Result == null)
+        {
+            return NoneResult<ComparisonOperator>();
+        }
+        var comparisonOperator = rc.Result.Value.ToUpper() switch
+        {
+            "LIKE" => ComparisonOperator.Like,
+            "IN" => ComparisonOperator.In,
+            "<>" => ComparisonOperator.NotEqual,
+            ">=" => ComparisonOperator.GreaterThanOrEqual,
+            "<=" => ComparisonOperator.LessThanOrEqual,
+            "=" => ComparisonOperator.Equal,
+            ">" => ComparisonOperator.GreaterThan,
+            "<" => ComparisonOperator.LessThan,
+            _ => ComparisonOperator.Equal
+        };
+        return comparisonOperator;
+    }
+
+    private ParseResult<LogicalOperator> Parse_LogicalOperator()
+    {
+        var rc = Or(Keywords("AND"), Keywords("OR"), Keywords("NOT"))();
+        if (rc.HasError)
+        {
+            return rc.Error;
+        }
+        if (rc.Result == null)
+        {
+            return NoneResult<LogicalOperator>();
+        }
+        var logicalOperator = rc.Result.Value.ToUpper() switch
+        {
+            "AND" => LogicalOperator.And,
+            "OR" => LogicalOperator.Or,
+            "NOT" => LogicalOperator.Not,
+            _ => LogicalOperator.None
+        };
+        return logicalOperator;
     }
 
     public void SkipStatementEnd()
