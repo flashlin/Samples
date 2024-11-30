@@ -2,7 +2,10 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using T1.SqlSharp.Expressions;
+using T1.SqlSharp.Models;
 using T1.Standard.Collections.Generics;
+using T1.Standard.Serialization;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SqlSharpLit.Common.ParserLit;
 
@@ -14,6 +17,7 @@ public interface IDatabaseNameProvider
 public class ExtractSqlHelper
 {
     private readonly IDatabaseNameProvider _databaseNameProvider;
+    private readonly IJsonSerializer _jsonSerializer = new T1.Standard.Serialization.JsonSerializer();
 
     public ExtractSqlHelper(IDatabaseNameProvider databaseNameProvider)
     {
@@ -258,6 +262,58 @@ public class ExtractSqlHelper
             }
         }
     }
+    
+    public void GenerateDatabasesDescriptionJonsFileFromFolder(string folder, string outputFolder)
+    {
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+
+        var sqlFileContents = GetSqlContentsFromFolder(folder)
+            .ToList();
+        var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
+        var json = _jsonSerializer.Serialize(databasesDesc);
+        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.sql"));
+        writer.Write(json);
+        writer.Flush();
+    }
+
+    private List<DatabaseDescription> GetDatabaseDescriptions(List<SqlFileContent> sqlFileContents)
+    {
+        var databases = new EnsureKeyDictionary<string, DatabaseDescription>(databaseName => new DatabaseDescription()
+        {
+            DatabaseName = databaseName
+        });
+        foreach (var sqlFileContent in sqlFileContents)
+        {
+            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
+            var db = databases[databaseName];
+            var createTablesSql = sqlFileContent.SqlExpressions
+                .Where(x => x.SqlType == SqlType.CreateTable)
+                .Cast<SqlCreateTableExpression>()
+                .ToList();
+            db.Tables.AddRange(createTablesSql.Select(x => CreateTableDescription(x, sqlFileContent.SqlExpressions)));
+            var addExtendedProperties = sqlFileContent.SqlExpressions
+                .Where(x => x.SqlType == SqlType.AddExtendedProperty)
+                .Cast<SqlSpAddExtendedPropertyExpression>()
+                .ToList();
+            foreach (var extendedProperty in addExtendedProperties)
+            {
+                var tableName = extendedProperty.Level1Name;
+                var table = db.Tables.FirstOrDefault(x => x.TableName == tableName);
+                if (table == null)
+                {
+                    continue;
+                }
+                var columnName = extendedProperty.Level2Name;
+                var column = table.Columns.First(x => x.ColumnName == columnName);
+                column.Description = extendedProperty.Value;
+            }
+            databases[databaseName] = db;
+        }
+        return databases.Values.ToList();
+    }
 
     public void WriteCreateTablesFromFolder(string folder, string outputFolder)
     {
@@ -459,28 +515,6 @@ public class ExtractSqlHelper
     {
         return !string.IsNullOrEmpty(text) && (char.IsLetter(text[0]) || text[0] == '_' || text[0] == '[');
     }
-}
-
-public class DatabaseDescription
-{
-    public string DatabaseName { get; set; } = string.Empty;
-    public List<TableDescription> Tables { get; set; } = [];
-}
-
-public class TableDescription
-{
-    public string TableName { get; set; } = string.Empty;
-    public List<ColumnDescription> Columns { get; set; } = [];
-}
-
-public class ColumnDescription
-{
-    public string ColumnName { get; set; } = string.Empty;
-    public string DataType { get; set; } = string.Empty;
-    public bool IsNullable { get; set; }
-    public bool IsIdentity { get; set; }
-    public string DefaultValue { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
 }
 
 public class SqlFileContent

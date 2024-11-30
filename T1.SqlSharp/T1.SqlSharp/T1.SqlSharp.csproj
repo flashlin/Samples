@@ -16,8 +16,4 @@
         <PackageReference Include="T1.Standard" Version="1.0.83" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Models\" />
-    </ItemGroup>
-
 </Project>
