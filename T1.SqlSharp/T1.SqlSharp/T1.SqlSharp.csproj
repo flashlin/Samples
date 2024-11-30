@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="T1.Standard" Version="1.0.83" />
+        <PackageReference Include="YamlDotNet" Version="16.2.0" />
     </ItemGroup>
 
 </Project>

@@ -5,9 +5,23 @@ using T1.SqlSharp.Expressions;
 using T1.SqlSharp.Models;
 using T1.Standard.Collections.Generics;
 using T1.Standard.Serialization;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SqlSharpLit.Common.ParserLit;
+
+public class YamlSerializer
+{
+    private readonly IDeserializer _deserializer = new DeserializerBuilder()
+        .WithNamingConvention(CamelCaseNamingConvention.Instance)
+        .Build();
+
+    public T Deserialize<T>(string yaml)
+    {
+        return _deserializer.Deserialize<T>(yaml);
+    }
+}
 
 public interface IDatabaseNameProvider
 {
@@ -270,14 +284,79 @@ public class ExtractSqlHelper
         {
             return;
         }
-
+        var userDatabaseDesc = GetUserDatabaseDescription(outputFolder);
+        
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
         var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
+        
+        var innerDatabases = databasesDesc.Join(userDatabaseDesc, 
+                db=>db.DatabaseName, 
+                udb=>udb.DatabaseName, 
+                (db, udb)=> new { Database = db, UserDatabase = udb})
+            .ToList();
+        foreach (var desc in innerDatabases)
+        {
+            desc.Database.Description = desc.UserDatabase.Description;
+        }
+        
+        var tables = databasesDesc.SelectMany(x=> x.Tables, (db, table)=> new
+            {
+                db.DatabaseName,
+                Table = table
+            }).ToList();
+        var userTables = userDatabaseDesc.SelectMany(x=> x.Tables, (db, table)=> new
+            {
+                DatabaseName = db.DatabaseName,
+                Table = table
+            }).ToList();
+        var innerTables = tables.Join(userTables, 
+                t=>new { t.DatabaseName, t.Table.TableName}, 
+                ut=>new { ut.DatabaseName, ut.Table.TableName}, 
+                (t, ut)=> new { Table = t.Table, UserTable = ut.Table})
+            .ToList();
+        foreach (var tableDesc in innerTables)
+        {
+            tableDesc.Table.Description = tableDesc.UserTable.Description;
+            
+            var innerColumns = tableDesc.Table.Columns.Join(tableDesc.UserTable.Columns, 
+                c=>c.ColumnName, 
+                uc=>uc.ColumnName, 
+                (c, uc)=> new { Column = c, UserColumn = uc})
+                .ToList();
+            foreach (var columnDesc in innerColumns)
+            {
+                columnDesc.Column.Description = columnDesc.UserColumn.Description;
+            }
+        }
+        
         var json = _jsonSerializer.Serialize(databasesDesc);
         using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.json"));
         writer.Write(json);
         writer.Flush();
+
+        var t = databasesDesc.First();
+        var t2 = t.Tables.First();
+        Console.WriteLine($"{t.DatabaseName} - {t.Description} {t2.TableName}");
+
+        var test = databasesDesc.Where(x => !string.IsNullOrEmpty(x.Description))
+            .ToList();
+        foreach (var d in test)
+        {
+            Console.WriteLine($"{d.DatabaseName} - {d.Description}");
+        }
+    }
+
+    private static List<DatabaseDescription> GetUserDatabaseDescription(string outputFolder)
+    {
+        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "DatabasesDescription.yaml");
+        if (!File.Exists(userDatabaseDescriptionYamlFile))
+        {
+            return [];
+        }
+        var yamlSerializer = new YamlSerializer();
+        var yaml = File.ReadAllText(userDatabaseDescriptionYamlFile);
+        return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
     }
 
     private List<DatabaseDescription> GetDatabaseDescriptions(List<SqlFileContent> sqlFileContents)
