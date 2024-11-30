@@ -99,8 +99,9 @@ public class ExtractSqlHelper
         {
             return;
         }
+
         var userDatabaseDesc = GetUserDatabaseDescription(outputFolder);
-        
+
         var sqlFileContents = GetSqlContentsFromFolder(folder)
             .ToList();
         var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
@@ -109,17 +110,17 @@ public class ExtractSqlHelper
         foreach (var db in databasesDesc)
         {
             var tables = db.Tables
-                .Where(x=> !x.TableName.StartsWith("#"))
+                .Where(x => !x.TableName.StartsWith("#"))
                 .ToList();
             db.Tables = tables;
         }
-        
+
         UpdateDatabaseDescription(databasesDesc, userDatabaseDesc);
 
         UpdateTableDescription(databasesDesc, userDatabaseDesc);
 
         SaveDatabasesDescJsonFile(databasesDesc, outputFolder);
-        
+
         foreach (var database in databasesDesc)
         {
             WriteAllTableDescriptions(database, outputFolder);
@@ -144,15 +145,15 @@ public class ExtractSqlHelper
                 DatabaseName = x.Key,
                 Tables = x.SelectMany(y => y.Tables).ToList()
             })
-            .OrderBy(x=>x.DatabaseName)
+            .OrderBy(x => x.DatabaseName)
             .ToList();
-        
+
 
         GenerateDatabasesJsonFile(databaseDescriptions, Path.Combine("outputs", "Databases.json"));
         //writer.WriteLine("The following is a detailed description of all databases and table structures of Titan Company.");
         foreach (var database in databaseDescriptions)
         {
-            WriteAllTableDescriptions(database,outputsFolder);
+            WriteAllTableDescriptions(database, outputsFolder);
             WriteAllDatabaseTableNames(database);
         }
 
@@ -380,6 +381,7 @@ public class ExtractSqlHelper
             var createTablesSql = sqlFileContent.SqlExpressions
                 .Where(x => x.SqlType == SqlType.CreateTable)
                 .Cast<SqlCreateTableExpression>()
+                .OrderBy(x => x.TableName)
                 .ToList();
             db.Tables.AddRange(createTablesSql.Select(x => CreateTableDescription(x, sqlFileContent.SqlExpressions)));
             var addExtendedProperties = sqlFileContent.SqlExpressions
@@ -394,12 +396,15 @@ public class ExtractSqlHelper
                 {
                     continue;
                 }
+
                 var columnName = extendedProperty.Level2Name;
                 var column = table.Columns.First(x => x.ColumnName == columnName);
                 column.Description = extendedProperty.Value;
             }
+
             databases[databaseName] = db;
         }
+
         return databases.Values.ToList();
     }
 
@@ -410,6 +415,7 @@ public class ExtractSqlHelper
         {
             return [];
         }
+
         var yamlSerializer = new YamlSerializer();
         var yaml = File.ReadAllText(userDatabaseDescriptionYamlFile);
         return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
@@ -433,12 +439,13 @@ public class ExtractSqlHelper
         return !string.IsNullOrEmpty(text) && (char.IsLetter(text[0]) || text[0] == '_' || text[0] == '[');
     }
 
-    private static void UpdateDatabaseDescription(List<DatabaseDescription> databasesDesc, List<DatabaseDescription> userDatabaseDesc)
+    private static void UpdateDatabaseDescription(List<DatabaseDescription> databasesDesc,
+        List<DatabaseDescription> userDatabaseDesc)
     {
-        var innerDatabases = databasesDesc.Join(userDatabaseDesc, 
-                db=>db.DatabaseName, 
-                udb=>udb.DatabaseName, 
-                (db, udb)=> new { Database = db, UserDatabase = udb})
+        var innerDatabases = databasesDesc.Join(userDatabaseDesc,
+                db => db.DatabaseName,
+                udb => udb.DatabaseName,
+                (db, udb) => new { Database = db, UserDatabase = udb })
             .ToList();
         foreach (var desc in innerDatabases)
         {
@@ -446,31 +453,32 @@ public class ExtractSqlHelper
         }
     }
 
-    private static void UpdateTableDescription(List<DatabaseDescription> databasesDesc, List<DatabaseDescription> userDatabaseDesc)
+    private static void UpdateTableDescription(List<DatabaseDescription> databasesDesc,
+        List<DatabaseDescription> userDatabaseDesc)
     {
-        var tables = databasesDesc.SelectMany(x=> x.Tables, (db, table)=> new
+        var tables = databasesDesc.SelectMany(x => x.Tables, (db, table) => new
         {
             db.DatabaseName,
             Table = table
         }).ToList();
-        var userTables = userDatabaseDesc.SelectMany(x=> x.Tables, (db, table)=> new
+        var userTables = userDatabaseDesc.SelectMany(x => x.Tables, (db, table) => new
         {
             DatabaseName = db.DatabaseName,
             Table = table
         }).ToList();
-        var innerTables = tables.Join(userTables, 
-                t=>new { t.DatabaseName, t.Table.TableName}, 
-                ut=>new { ut.DatabaseName, ut.Table.TableName}, 
-                (t, ut)=> new { Table = t.Table, UserTable = ut.Table})
+        var innerTables = tables.Join(userTables,
+                t => new { t.DatabaseName, t.Table.TableName },
+                ut => new { ut.DatabaseName, ut.Table.TableName },
+                (t, ut) => new { Table = t.Table, UserTable = ut.Table })
             .ToList();
         foreach (var tableDesc in innerTables)
         {
             tableDesc.Table.Description = tableDesc.UserTable.Description;
-            
-            var innerColumns = tableDesc.Table.Columns.Join(tableDesc.UserTable.Columns, 
-                    c=>c.ColumnName, 
-                    uc=>uc.ColumnName, 
-                    (c, uc)=> new { Column = c, UserColumn = uc})
+
+            var innerColumns = tableDesc.Table.Columns.Join(tableDesc.UserTable.Columns,
+                    c => c.ColumnName,
+                    uc => uc.ColumnName,
+                    (c, uc) => new { Column = c, UserColumn = uc })
                 .ToList();
             foreach (var columnDesc in innerColumns)
             {
@@ -495,6 +503,7 @@ public class ExtractSqlHelper
         {
             WriteTableDescription(writer, database.DatabaseName, table);
         }
+
         writer.Flush();
     }
 
@@ -555,6 +564,7 @@ public class ExtractSqlHelper
         {
             writer.WriteLine($"{database.DatabaseName}");
         }
+
         writer.Flush();
     }
 
@@ -565,6 +575,7 @@ public class ExtractSqlHelper
         {
             WriteDatabaseTableNamesTo(database, writer);
         }
+
         writer.Flush();
     }
 
@@ -576,6 +587,7 @@ public class ExtractSqlHelper
         {
             writer.WriteLine($"{table.TableName}");
         }
+
         writer.WriteLine();
         writer.WriteLine();
         writer.WriteLine();
@@ -584,7 +596,13 @@ public class ExtractSqlHelper
     private static void WriteTableDescription(StreamWriter writer, string databaseName, TableDescription table)
     {
         writer.WriteLine($"Database Name: {databaseName}");
-        writer.WriteLine($"Table Name: {table.TableName}");
+        writer.Write($"Table Name: {table.TableName}");
+        if (!string.IsNullOrEmpty(table.Description))
+        {
+            writer.Write($" -- {table.Description}");
+        }
+
+        writer.WriteLine();
         foreach (var column in table.Columns)
         {
             writer.Write($"{column.ColumnName} {column.DataType}");
