@@ -1,16 +1,16 @@
 namespace SqlSharp.CommandPattern;
 
-public interface ISpecification<in TArgs, TReturn>
+public interface ISpecificationAsync<in TArgs, TReturn>
 {
     bool IsMatch(TArgs args);
     Task<TReturn> ExecuteAsync(TArgs args);
 }
 
-public class SpecificationEvaluator<TArgs,TReturn>
+public class SpecificationAsyncEvaluator<TArgs,TReturn>
 {
-    private readonly List<ISpecification<TArgs,TReturn>> _rules;
+    private readonly List<ISpecificationAsync<TArgs,TReturn>> _rules;
 
-    public SpecificationEvaluator(IEnumerable<ISpecification<TArgs, TReturn>> rules)
+    public SpecificationAsyncEvaluator(IEnumerable<ISpecificationAsync<TArgs, TReturn>> rules)
     {
         _rules = rules.ToList();
     }

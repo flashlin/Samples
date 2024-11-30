@@ -3,7 +3,7 @@ using SqlSharpLit.Common.ParserLit;
 
 namespace SqlSharp;
 
-public class ExtractCreateTableSqlFromFolderSpecification : ISpecification<SqlSharpOptions, Task>
+public class ExtractCreateTableSqlFromFolderSpecificationAsync : ISpecificationAsync<SqlSharpOptions, Task>
 {
     public bool IsMatch(SqlSharpOptions args)
     {

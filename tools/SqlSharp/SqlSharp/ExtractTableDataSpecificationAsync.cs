@@ -3,11 +3,11 @@ using SqlSharpLit;
 
 namespace SqlSharp;
 
-public class ExtractTableDataSpecification : ISpecification<SqlSharpOptions, Task>
+public class ExtractTableDataSpecificationAsync : ISpecificationAsync<SqlSharpOptions, Task>
 {
     private DynamicDbContext _db;
 
-    public ExtractTableDataSpecification(DynamicDbContext db)
+    public ExtractTableDataSpecificationAsync(DynamicDbContext db)
     {
         _db = db;
     }
