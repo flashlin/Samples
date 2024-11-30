@@ -275,7 +275,7 @@ public class ExtractSqlHelper
             .ToList();
         var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
         var json = _jsonSerializer.Serialize(databasesDesc);
-        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.sql"));
+        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.json"));
         writer.Write(json);
         writer.Flush();
     }
