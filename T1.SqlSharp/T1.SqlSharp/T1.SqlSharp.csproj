@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Title>SqlSharp</Title>
+        <Authors>Mr.Brain</Authors>
+        <Description>Parse TSQL</Description>
+        <PackageLicenseUrl>https://opensource.org/license/MIT</PackageLicenseUrl>
+        <PackageTags>T1</PackageTags>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Folder Include="Expressions\" />
+    </ItemGroup>
+
+</Project>

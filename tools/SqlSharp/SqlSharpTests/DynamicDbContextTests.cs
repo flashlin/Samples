@@ -147,7 +147,7 @@ public class DynamicDbContextTests
         });
         _logger = loggerFactory.CreateLogger<DynamicDbContextTests>();
 
-        new AppSettings().LoadFile(TestContext.CurrentContext.TestDirectory);
+        new AppSettings().Load(TestContext.CurrentContext.TestDirectory);
         var builder = Host.CreateApplicationBuilder();
         var services = builder.Services;
         services.AddSqlSharpServices(_configuration);

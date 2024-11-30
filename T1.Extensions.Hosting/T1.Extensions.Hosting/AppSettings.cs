@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
-namespace SqlSharpLit.Common;
+
+namespace T1.Extensions.Hosting;
 
 public class AppSettings
 {

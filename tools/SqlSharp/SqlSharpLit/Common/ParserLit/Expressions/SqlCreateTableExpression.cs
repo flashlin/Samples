@@ -1,7 +1,4 @@
-using Microsoft.Extensions.Primitives;
-using SqlSharpLit.Common.ParserLit.Expressions;
-
-namespace SqlSharpLit.Common.ParserLit;
+namespace SqlSharpLit.Common.ParserLit.Expressions;
 
 public class SqlCreateTableExpression : ISqlExpression
 {

@@ -9,7 +9,7 @@ using SqlSharpLit;
 using SqlSharpLit.Common.ParserLit;
 using SqlSharpLit.Shared;
 
-new AppSettings().LoadFile(AppContext.BaseDirectory);
+new AppSettings().Load(AppContext.BaseDirectory);
 var builder = Host.CreateApplicationBuilder(args);
 builder.AddSerilog();
 
