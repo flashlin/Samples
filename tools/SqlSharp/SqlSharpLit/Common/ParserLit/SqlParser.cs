@@ -741,6 +741,33 @@ public class SqlParser
         return columns;
     }
 
+    private ParseResult<SqlDataSize> Parse_DataSize()
+    {
+        if (!TryMatch("("))
+        {
+            return NoneResult<SqlDataSize>();
+        }
+        var dataSize = new SqlDataSize();
+        if (_text.TryMatchIgnoreCase("MAX"))
+        {
+            dataSize.Size = "MAX";
+            _text.Match(")");
+            return dataSize;
+        }
+
+        dataSize.Size = _text.ReadInt().Word;
+        if (_text.PeekChar() == ',')
+        {
+           _text.ReadChar();
+           dataSize.Scale = int.Parse(_text.ReadInt().Word);
+        }
+        if (!TryMatch(")"))
+        {
+            return CreateParseError("Expected )");
+        }
+        return dataSize;
+    }
+
     private ParseResult<SqlColumnDefinition> ParseColumnTypeDefinition(TextSpan columnNameSpan)
     {
         var column = new SqlColumnDefinition
@@ -748,42 +775,13 @@ public class SqlParser
             ColumnName = columnNameSpan.Word,
             DataType = ReadSqlIdentifier().Word
         };
-
-        var dataLength1 = string.Empty;
-        var dataLength2 = string.Empty;
-        if (TryMatch("("))
+        
+        var dataSize = Parse_DataSize();
+        if (dataSize.HasError)
         {
-            if (_text.TryMatchIgnoreCase("MAX"))
-            {
-                column.Size = "MAX";
-                _text.Match(")");
-                return CreateParseResult(column);
-            }
-
-            dataLength1 = _text.ReadInt().Word;
-            dataLength2 = string.Empty;
-            if (_text.PeekChar() == ',')
-            {
-                _text.ReadChar();
-                dataLength2 = _text.ReadInt().Word;
-            }
-
-            if (!TryMatch(")"))
-            {
-                return CreateParseError("Expected )");
-            }
+            return dataSize.Error;
         }
-
-        if (!string.IsNullOrEmpty(dataLength1))
-        {
-            column.Size = dataLength1;
-        }
-
-        if (!string.IsNullOrEmpty(dataLength2))
-        {
-            column.Scale = int.Parse(dataLength2);
-        }
-
+        column.DataSize = dataSize.Result;
         return CreateParseResult(column);
     }
 

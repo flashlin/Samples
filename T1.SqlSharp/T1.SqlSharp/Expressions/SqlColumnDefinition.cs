@@ -5,8 +5,7 @@ public class SqlColumnDefinition : ISqlExpression
     public SqlType SqlType => SqlType.ColumnDefinition;
     public string ColumnName { get; set; } = string.Empty;
     public string DataType { get; set; } = string.Empty;
-    public string Size { get; set; } = string.Empty;
-    public int Scale { get; set; }
+    public SqlDataSize? DataSize { get; set; }
     public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
     public bool IsNullable { get; set; }
     public bool NotForReplication { get; set; }
@@ -19,15 +18,9 @@ public class SqlColumnDefinition : ISqlExpression
         sql.Write(ColumnName);
         sql.Write(" ");
         sql.Write(DataType);
-        if (!string.IsNullOrEmpty(Size))
+        if(DataSize != null)
         {
-            sql.Write("(");
-            sql.Write($"{Size}");
-            if (Scale > 0)
-            {
-                sql.Write($", {Scale}");
-            }
-            sql.Write(")");
+            sql.Write(DataSize.ToSql());
         }
         if (Identity != SqlIdentity.Default)
         {

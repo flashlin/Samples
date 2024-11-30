@@ -115,8 +115,11 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[name]",
                     DataType = "DECIMAL",
-                    Size = "19",
-                    Scale = 6,
+                    DataSize = new SqlDataSize()
+                    {
+                        Size = "19",
+                        Scale = 6
+                    },
                     IsNullable = false
                 }
             ]
@@ -140,8 +143,11 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[id]",
                     DataType = "DECIMAL",
-                    Size = "18",
-                    Scale = 2,
+                    DataSize = new SqlDataSize()
+                    {
+                        Size = "18",
+                        Scale = 2,
+                    },
                     IsNullable = false,
                     Constraints = [
                         new SqlConstraintDefaultValue
@@ -224,13 +230,19 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[id]",
                     DataType = "NVARCHAR",
-                    Size = "50"
+                    DataSize = new SqlDataSize
+                    {
+                        Size = "50",
+                    },
                 },
                 new SqlColumnDefinition
                 {
                     ColumnName = "[name]",
                     DataType = "varchar",
-                    Size = "10",
+                    DataSize = new SqlDataSize
+                    {
+                        Size = "10",
+                    },
                     Constraints = [
                         new SqlConstraintDefaultValue
                         {
@@ -261,14 +273,20 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[Id]",
                     DataType = "VARCHAR",
-                    Size = "30",
+                    DataSize = new SqlDataSize
+                    {
+                        Size = "30",
+                    },
                     IsNullable = false
                 },
                 new SqlColumnDefinition
                 {
                     ColumnName = "[Id2]",
                     DataType = "VARCHAR",
-                    Size = "50",
+                    DataSize = new SqlDataSize
+                    {
+                        Size = "50",
+                    },
                     IsNullable = true,
                     Constraints = [
                         new SqlConstraintDefaultValue
@@ -377,7 +395,10 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[name]",
                     DataType = "NVARCHAR",
+                    DataSize = new SqlDataSize
+                        {
                     Size = "50",
+                        },
                     IsNullable = true
                 }
             ]
@@ -532,8 +553,8 @@ public class ParseCreateTableSqlTest
                     NotForReplication = false,
                     Constraints = [],
                 },
-                new SqlColumnDefinition { ColumnName = "LastName", DataType = "varchar", Size = "50" },
-                new SqlColumnDefinition { ColumnName = "Money", DataType = "decimal", Size = "10", Scale = 3 },
+                new SqlColumnDefinition { ColumnName = "LastName", DataType = "varchar", DataSize = new SqlDataSize{ Size = "50"}, },
+                new SqlColumnDefinition { ColumnName = "Money", DataType = "decimal", DataSize = new SqlDataSize(){Size = "10", Scale = 3} },
                 new SqlColumnDefinition
                 {
                     ColumnName = "[name]", DataType = "[int]",
@@ -570,8 +591,9 @@ public class ParseCreateTableSqlTest
                 new SqlColumnDefinition
                 {
                     ColumnName = "[DailyTotalRaw]", DataType = "DECIMAL",
+                    DataSize = new SqlDataSize(){
                     Size = "19",
-                    Scale = 6,
+                    Scale = 6,},
                     Constraints =
                     [
                         new SqlConstraintDefaultValue
@@ -649,7 +671,7 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[id]",
                     DataType = "VARCHAR",
-                    Size = "3",
+                    DataSize = new  SqlDataSize(){Size = "3"},
                     IsNullable = false,
                     Constraints = [
                         new SqlConstraintDefaultValue
@@ -743,7 +765,7 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "AuditCount",
                     DataType = "nvarchar",
-                    Size = "MAX"
+                    DataSize = new SqlDataSize{Size = "MAX"},
                 }
             ]
         });
@@ -775,7 +797,7 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[LoginName]",
                     DataType = "NVARCHAR",
-                    Size = "50",
+                    DataSize = new SqlDataSize(){ Size = "50" },
                     IsNullable = true
                 }
             ]
@@ -925,7 +947,7 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[id]",
                     DataType = "NVARCHAR",
-                    Size = "50",
+                    DataSize = new SqlDataSize(){Size = "50"},
                     IsNullable = true
                 }
             ],
@@ -1078,7 +1100,7 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[Extra]",
                     DataType = "nvarchar",
-                    Size = "4000",
+                    DataSize = new SqlDataSize(){Size = "4000"},
                     IsNullable = true
                 }
             ]
