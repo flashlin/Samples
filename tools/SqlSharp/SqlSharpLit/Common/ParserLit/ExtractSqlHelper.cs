@@ -334,17 +334,6 @@ public class ExtractSqlHelper
         using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.json"));
         writer.Write(json);
         writer.Flush();
-
-        var t = databasesDesc.First();
-        var t2 = t.Tables.First();
-        Console.WriteLine($"{t.DatabaseName} - {t.Description} {t2.TableName}");
-
-        var test = databasesDesc.Where(x => !string.IsNullOrEmpty(x.Description))
-            .ToList();
-        foreach (var d in test)
-        {
-            Console.WriteLine($"{d.DatabaseName} - {d.Description}");
-        }
     }
 
     private static List<DatabaseDescription> GetUserDatabaseDescription(string outputFolder)
