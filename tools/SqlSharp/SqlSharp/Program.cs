@@ -5,8 +5,6 @@ using Microsoft.Extensions.Hosting;
 using SqlSharp;
 using SqlSharpLit.Common;
 using SqlSharp.CommandPattern;
-using SqlSharpLit;
-using SqlSharpLit.Common.ParserLit;
 using SqlSharpLit.Shared;
 
 new AppSettings().Load(AppContext.BaseDirectory);
@@ -15,17 +13,17 @@ builder.AddSerilog();
 
 var services = builder.Services;
 services.AddSqlSharpServices(builder.Configuration);
-services.AddTransient<ExtractTableDataCommand>();
-services.AddTransient<ExtractCreateTableSqlFromFolderCommand>();
+services.AddTransient<ExtractTableDataSpecification>();
+services.AddTransient<ExtractCreateTableSqlFromFolderSpecification>();
 
 var app = builder.Build();
 var serviceProvider = app.Services;
 
 var options = await LineCommandParseHelper.ParseAsync<SqlSharpOptions>(args);
 
-var command = new CommandBuilder<SqlSharpOptions>()
-     .Use(serviceProvider.GetRequiredService<ExtractTableDataCommand>())
-     .Use(serviceProvider.GetRequiredService<ExtractCreateTableSqlFromFolderCommand>())
-     .Build();
-await command.ExecuteAsync(options);
+var command = new SpecificationEvaluator<SqlSharpOptions, Task>([
+     serviceProvider.GetRequiredService<ExtractTableDataSpecification>(),
+     serviceProvider.GetRequiredService<ExtractCreateTableSqlFromFolderSpecification>(),
+]);
+await command.EvaluateAsync(options);
      
