@@ -93,6 +93,25 @@ public class ExtractSqlHelper
         return (string.Empty, 0);
     }
 
+    public void GenerateDatabasesDescriptionJonsFileFromFolder(string folder, string outputFolder)
+    {
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+        var userDatabaseDesc = GetUserDatabaseDescription(outputFolder);
+        
+        var sqlFileContents = GetSqlContentsFromFolder(folder)
+            .ToList();
+        var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
+        
+        UpdateDatabaseDescription(databasesDesc, userDatabaseDesc);
+
+        UpdateTableDescription(databasesDesc, userDatabaseDesc);
+
+        SaveDatabasesDescJsonFile(databasesDesc, outputFolder);
+    }
+
     public void GenerateRagFiles(string sqlFolder)
     {
         var sqlFileContents = GetSqlContentsFromFolder(sqlFolder);
@@ -125,107 +144,6 @@ public class ExtractSqlHelper
 
         WriteDatabaseNamesDesc(databaseDescriptions);
         WriteDatabaseTableNamesDesc(databaseDescriptions);
-    }
-
-    private void WriteDatabaseNamesDesc(List<DatabaseDescription> databaseDescriptions)
-    {
-        using var writer = CreateWriter("Database-Names-Desc.md");
-        writer.WriteLine("The following is a list of database lists:");
-        foreach (var database in databaseDescriptions)
-        {
-            writer.WriteLine($"{database.DatabaseName}");
-        }
-        writer.Flush();
-    }
-
-    private static void WriteDatabaseTableNamesDesc(List<DatabaseDescription> databaseDescriptions)
-    {
-        using var writer = CreateWriter("Database-TableNames-Desc.md");
-        foreach (var database in databaseDescriptions)
-        {
-            WriteDatabaseTableNamesTo(database, writer);
-        }
-        writer.Flush();
-    }
-
-    private static StreamWriter CreateWriter(string filename)
-    {
-        return new StreamWriter(Path.Combine("outputs", filename), false, Encoding.UTF8);
-    }
-
-    private static void WriteAllTableDescriptions(DatabaseDescription database)
-    {
-        var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-{database.DatabaseName}-Desc.md");
-        using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
-        foreach (var table in database.Tables)
-        {
-            WriteTableDescription(writer, database.DatabaseName, table);
-        }
-        writer.Flush();
-    }
-    
-    private static void WriteAllDatabaseTableNames(DatabaseDescription database)
-    {
-        var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-Tables-{database.DatabaseName}-Desc.md");
-        using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
-        WriteDatabaseTableNamesTo(database, writer);
-        writer.Flush();
-    }
-
-    private static void WriteDatabaseTableNamesTo(DatabaseDescription database, StreamWriter writer)
-    {
-        writer.WriteLine($"Database Name: {database.DatabaseName}");
-        writer.WriteLine("Tables:");
-        foreach (var table in database.Tables)
-        {
-            writer.WriteLine($"{table.TableName}");
-        }
-        writer.WriteLine();
-        writer.WriteLine();
-        writer.WriteLine();
-    }
-
-    private static void WriteTableDescription(StreamWriter writer, string databaseName, TableDescription table)
-    {
-        writer.WriteLine($"Database Name: {databaseName}");
-        writer.WriteLine($"Table Name: {table.TableName}");
-        foreach (var column in table.Columns)
-        {
-            writer.Write($"{column.ColumnName} {column.DataType}");
-            if (column.IsNullable)
-            {
-                writer.Write($" ,is Nullable");
-            }
-
-            if (column.IsIdentity)
-            {
-                writer.Write($" ,is Identity");
-            }
-
-            if (column.DefaultValue != string.Empty)
-            {
-                writer.Write($" ,Default Value: {column.DefaultValue}");
-            }
-
-            if (!string.IsNullOrEmpty(column.Description.Trim()))
-            {
-                writer.Write($" -- {column.Description}");
-            }
-
-            writer.WriteLine();
-        }
-
-        writer.WriteLine();
-        writer.WriteLine();
-    }
-
-    private void GenerateDatabasesJsonFile(List<DatabaseDescription> databaseDescriptions, string outputJsonFile)
-    {
-        var json = JsonSerializer.Serialize(databaseDescriptions, new JsonSerializerOptions
-        {
-            WriteIndented = true
-        });
-        File.WriteAllText(outputJsonFile, json);
     }
 
     public IEnumerable<SqlCreateTablesSqlFiles> GetCreateCreateTableSqlFromFolder(
@@ -277,113 +195,6 @@ public class ExtractSqlHelper
             }
         }
     }
-    
-    public void GenerateDatabasesDescriptionJonsFileFromFolder(string folder, string outputFolder)
-    {
-        if (!Directory.Exists(folder))
-        {
-            return;
-        }
-        var userDatabaseDesc = GetUserDatabaseDescription(outputFolder);
-        
-        var sqlFileContents = GetSqlContentsFromFolder(folder)
-            .ToList();
-        var databasesDesc = GetDatabaseDescriptions(sqlFileContents);
-        
-        var innerDatabases = databasesDesc.Join(userDatabaseDesc, 
-                db=>db.DatabaseName, 
-                udb=>udb.DatabaseName, 
-                (db, udb)=> new { Database = db, UserDatabase = udb})
-            .ToList();
-        foreach (var desc in innerDatabases)
-        {
-            desc.Database.Description = desc.UserDatabase.Description;
-        }
-        
-        var tables = databasesDesc.SelectMany(x=> x.Tables, (db, table)=> new
-            {
-                db.DatabaseName,
-                Table = table
-            }).ToList();
-        var userTables = userDatabaseDesc.SelectMany(x=> x.Tables, (db, table)=> new
-            {
-                DatabaseName = db.DatabaseName,
-                Table = table
-            }).ToList();
-        var innerTables = tables.Join(userTables, 
-                t=>new { t.DatabaseName, t.Table.TableName}, 
-                ut=>new { ut.DatabaseName, ut.Table.TableName}, 
-                (t, ut)=> new { Table = t.Table, UserTable = ut.Table})
-            .ToList();
-        foreach (var tableDesc in innerTables)
-        {
-            tableDesc.Table.Description = tableDesc.UserTable.Description;
-            
-            var innerColumns = tableDesc.Table.Columns.Join(tableDesc.UserTable.Columns, 
-                c=>c.ColumnName, 
-                uc=>uc.ColumnName, 
-                (c, uc)=> new { Column = c, UserColumn = uc})
-                .ToList();
-            foreach (var columnDesc in innerColumns)
-            {
-                columnDesc.Column.Description = columnDesc.UserColumn.Description;
-            }
-        }
-        
-        var json = _jsonSerializer.Serialize(databasesDesc);
-        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.json"));
-        writer.Write(json);
-        writer.Flush();
-    }
-
-    private static List<DatabaseDescription> GetUserDatabaseDescription(string outputFolder)
-    {
-        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "DatabasesDescription.yaml");
-        if (!File.Exists(userDatabaseDescriptionYamlFile))
-        {
-            return [];
-        }
-        var yamlSerializer = new YamlSerializer();
-        var yaml = File.ReadAllText(userDatabaseDescriptionYamlFile);
-        return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
-    }
-
-    private List<DatabaseDescription> GetDatabaseDescriptions(List<SqlFileContent> sqlFileContents)
-    {
-        var databases = new EnsureKeyDictionary<string, DatabaseDescription>(databaseName => new DatabaseDescription()
-        {
-            DatabaseName = databaseName
-        });
-        foreach (var sqlFileContent in sqlFileContents)
-        {
-            Console.WriteLine($"Processing {sqlFileContent.FileName}");
-            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
-            var db = databases[databaseName];
-            var createTablesSql = sqlFileContent.SqlExpressions
-                .Where(x => x.SqlType == SqlType.CreateTable)
-                .Cast<SqlCreateTableExpression>()
-                .ToList();
-            db.Tables.AddRange(createTablesSql.Select(x => CreateTableDescription(x, sqlFileContent.SqlExpressions)));
-            var addExtendedProperties = sqlFileContent.SqlExpressions
-                .Where(x => x.SqlType == SqlType.AddExtendedProperty)
-                .Cast<SqlSpAddExtendedPropertyExpression>()
-                .ToList();
-            foreach (var extendedProperty in addExtendedProperties)
-            {
-                var tableName = extendedProperty.Level1Name;
-                var table = db.Tables.FirstOrDefault(x => x.TableName == tableName);
-                if (table == null)
-                {
-                    continue;
-                }
-                var columnName = extendedProperty.Level2Name;
-                var column = table.Columns.First(x => x.ColumnName == columnName);
-                column.Description = extendedProperty.Value;
-            }
-            databases[databaseName] = db;
-        }
-        return databases.Values.ToList();
-    }
 
     public void WriteCreateTablesFromFolder(string folder, string outputFolder)
     {
@@ -397,55 +208,6 @@ public class ExtractSqlHelper
             .ToList();
         WriteCreateTablesTo(sqlFileContents, writer);
         GenerateRagFilesFromSqlContents(sqlFileContents);
-    }
-
-    private void WriteCreateTablesTo(IEnumerable<SqlFileContent> sqlFileContents, StreamWriter writer)
-    {
-        var sqlCreateTables = GetCreateCreateTableSqlFromFolder(sqlFileContents);
-        foreach (var sqlFile in sqlCreateTables)
-        {
-            if (sqlFile.CreateTables.Count == 0)
-            {
-                continue;
-            }
-
-            var createTableSqlExpressions = sqlFile.File.SqlExpressions
-                .Where(x => x.SqlType == SqlType.CreateTable)
-                .ToList();
-
-            writer.WriteLine($"-- {sqlFile.File.FileName}");
-            writer.WriteLine($"-- Database: {sqlFile.DatabaseName}");
-
-            if (sqlFile.CreateTables.Count != createTableSqlExpressions.Count)
-            {
-                writer.WriteLine($"-- Total Create Tables: {sqlFile.CreateTables.Count}");
-                writer.WriteLine($"-- SqlExpression: {createTableSqlExpressions.Count}");
-                writer.WriteLine("-- No other SQL expressions found");
-                var startIndex = Math.Min(sqlFile.CreateTables.Count, createTableSqlExpressions.Count);
-                writer.WriteLine("/*");
-                for (var i = startIndex; i < sqlFile.CreateTables.Count; i++)
-                {
-                    writer.WriteLine(sqlFile.CreateTables[i]);
-                    writer.WriteLine();
-                    writer.WriteLine();
-                    writer.WriteLine();
-                }
-
-                writer.WriteLine("*/");
-            }
-            // foreach (var createTable in sqlFile.CreateTables)
-            // {
-            //     writer.WriteLine(createTable);
-            //     writer.WriteLine("\n\n\n");
-            // }
-
-            foreach (var sqlExpression in createTableSqlExpressions)
-            {
-                writer.WriteLine(sqlExpression.ToSql());
-            }
-
-            writer.Flush();
-        }
     }
 
     private static bool ContainsComment(string lineContent)
@@ -519,6 +281,11 @@ public class ExtractSqlHelper
         return table;
     }
 
+    private static StreamWriter CreateWriter(string filename)
+    {
+        return new StreamWriter(Path.Combine("outputs", filename), false, Encoding.UTF8);
+    }
+
     private IEnumerable<DatabaseDescription> ExtractDatabaseDescriptions(IEnumerable<SqlFileContent> sqlContents)
     {
         foreach (var sqlFileContent in sqlContents)
@@ -576,14 +343,262 @@ public class ExtractSqlHelper
         return text;
     }
 
+    private void GenerateDatabasesJsonFile(List<DatabaseDescription> databaseDescriptions, string outputJsonFile)
+    {
+        var json = JsonSerializer.Serialize(databaseDescriptions, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+        File.WriteAllText(outputJsonFile, json);
+    }
+
+    private List<DatabaseDescription> GetDatabaseDescriptions(List<SqlFileContent> sqlFileContents)
+    {
+        var databases = new EnsureKeyDictionary<string, DatabaseDescription>(databaseName => new DatabaseDescription()
+        {
+            DatabaseName = databaseName
+        });
+        foreach (var sqlFileContent in sqlFileContents)
+        {
+            Console.WriteLine($"Processing {sqlFileContent.FileName}");
+            var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
+            var db = databases[databaseName];
+            var createTablesSql = sqlFileContent.SqlExpressions
+                .Where(x => x.SqlType == SqlType.CreateTable)
+                .Cast<SqlCreateTableExpression>()
+                .ToList();
+            db.Tables.AddRange(createTablesSql.Select(x => CreateTableDescription(x, sqlFileContent.SqlExpressions)));
+            var addExtendedProperties = sqlFileContent.SqlExpressions
+                .Where(x => x.SqlType == SqlType.AddExtendedProperty)
+                .Cast<SqlSpAddExtendedPropertyExpression>()
+                .ToList();
+            foreach (var extendedProperty in addExtendedProperties)
+            {
+                var tableName = extendedProperty.Level1Name;
+                var table = db.Tables.FirstOrDefault(x => x.TableName == tableName);
+                if (table == null)
+                {
+                    continue;
+                }
+                var columnName = extendedProperty.Level2Name;
+                var column = table.Columns.First(x => x.ColumnName == columnName);
+                column.Description = extendedProperty.Value;
+            }
+            databases[databaseName] = db;
+        }
+        return databases.Values.ToList();
+    }
+
+    private static List<DatabaseDescription> GetUserDatabaseDescription(string outputFolder)
+    {
+        var userDatabaseDescriptionYamlFile = Path.Combine(outputFolder, "DatabasesDescription.yaml");
+        if (!File.Exists(userDatabaseDescriptionYamlFile))
+        {
+            return [];
+        }
+        var yamlSerializer = new YamlSerializer();
+        var yaml = File.ReadAllText(userDatabaseDescriptionYamlFile);
+        return yamlSerializer.Deserialize<List<DatabaseDescription>>(yaml);
+    }
+
     private bool IsIdentity(SqlIdentity sqlIdentity)
     {
         return sqlIdentity.Increment > 0;
     }
 
+    private void SaveDatabasesDescJsonFile(List<DatabaseDescription> databasesDesc, string outputFolder)
+    {
+        var json = _jsonSerializer.Serialize(databasesDesc);
+        using var writer = CreateStreamWriter(Path.Combine(outputFolder, "DatabasesDescription.json"));
+        writer.Write(json);
+        writer.Flush();
+    }
+
     bool StartsWithValidChar(string text)
     {
         return !string.IsNullOrEmpty(text) && (char.IsLetter(text[0]) || text[0] == '_' || text[0] == '[');
+    }
+
+    private static void UpdateDatabaseDescription(List<DatabaseDescription> databasesDesc, List<DatabaseDescription> userDatabaseDesc)
+    {
+        var innerDatabases = databasesDesc.Join(userDatabaseDesc, 
+                db=>db.DatabaseName, 
+                udb=>udb.DatabaseName, 
+                (db, udb)=> new { Database = db, UserDatabase = udb})
+            .ToList();
+        foreach (var desc in innerDatabases)
+        {
+            desc.Database.Description = desc.UserDatabase.Description;
+        }
+    }
+
+    private static void UpdateTableDescription(List<DatabaseDescription> databasesDesc, List<DatabaseDescription> userDatabaseDesc)
+    {
+        var tables = databasesDesc.SelectMany(x=> x.Tables, (db, table)=> new
+        {
+            db.DatabaseName,
+            Table = table
+        }).ToList();
+        var userTables = userDatabaseDesc.SelectMany(x=> x.Tables, (db, table)=> new
+        {
+            DatabaseName = db.DatabaseName,
+            Table = table
+        }).ToList();
+        var innerTables = tables.Join(userTables, 
+                t=>new { t.DatabaseName, t.Table.TableName}, 
+                ut=>new { ut.DatabaseName, ut.Table.TableName}, 
+                (t, ut)=> new { Table = t.Table, UserTable = ut.Table})
+            .ToList();
+        foreach (var tableDesc in innerTables)
+        {
+            tableDesc.Table.Description = tableDesc.UserTable.Description;
+            
+            var innerColumns = tableDesc.Table.Columns.Join(tableDesc.UserTable.Columns, 
+                    c=>c.ColumnName, 
+                    uc=>uc.ColumnName, 
+                    (c, uc)=> new { Column = c, UserColumn = uc})
+                .ToList();
+            foreach (var columnDesc in innerColumns)
+            {
+                columnDesc.Column.Description = columnDesc.UserColumn.Description;
+            }
+        }
+    }
+
+    private static void WriteAllDatabaseTableNames(DatabaseDescription database)
+    {
+        var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-Tables-{database.DatabaseName}-Desc.md");
+        using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
+        WriteDatabaseTableNamesTo(database, writer);
+        writer.Flush();
+    }
+
+    private static void WriteAllTableDescriptions(DatabaseDescription database)
+    {
+        var databaseDescriptionMdFile = Path.Combine("outputs", $"Database-{database.DatabaseName}-Desc.md");
+        using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
+        foreach (var table in database.Tables)
+        {
+            WriteTableDescription(writer, database.DatabaseName, table);
+        }
+        writer.Flush();
+    }
+
+    private void WriteCreateTablesTo(IEnumerable<SqlFileContent> sqlFileContents, StreamWriter writer)
+    {
+        var sqlCreateTables = GetCreateCreateTableSqlFromFolder(sqlFileContents);
+        foreach (var sqlFile in sqlCreateTables)
+        {
+            if (sqlFile.CreateTables.Count == 0)
+            {
+                continue;
+            }
+
+            var createTableSqlExpressions = sqlFile.File.SqlExpressions
+                .Where(x => x.SqlType == SqlType.CreateTable)
+                .ToList();
+
+            writer.WriteLine($"-- {sqlFile.File.FileName}");
+            writer.WriteLine($"-- Database: {sqlFile.DatabaseName}");
+
+            if (sqlFile.CreateTables.Count != createTableSqlExpressions.Count)
+            {
+                writer.WriteLine($"-- Total Create Tables: {sqlFile.CreateTables.Count}");
+                writer.WriteLine($"-- SqlExpression: {createTableSqlExpressions.Count}");
+                writer.WriteLine("-- No other SQL expressions found");
+                var startIndex = Math.Min(sqlFile.CreateTables.Count, createTableSqlExpressions.Count);
+                writer.WriteLine("/*");
+                for (var i = startIndex; i < sqlFile.CreateTables.Count; i++)
+                {
+                    writer.WriteLine(sqlFile.CreateTables[i]);
+                    writer.WriteLine();
+                    writer.WriteLine();
+                    writer.WriteLine();
+                }
+
+                writer.WriteLine("*/");
+            }
+            // foreach (var createTable in sqlFile.CreateTables)
+            // {
+            //     writer.WriteLine(createTable);
+            //     writer.WriteLine("\n\n\n");
+            // }
+
+            foreach (var sqlExpression in createTableSqlExpressions)
+            {
+                writer.WriteLine(sqlExpression.ToSql());
+            }
+
+            writer.Flush();
+        }
+    }
+
+    private void WriteDatabaseNamesDesc(List<DatabaseDescription> databaseDescriptions)
+    {
+        using var writer = CreateWriter("Database-Names-Desc.md");
+        writer.WriteLine("The following is a list of database lists:");
+        foreach (var database in databaseDescriptions)
+        {
+            writer.WriteLine($"{database.DatabaseName}");
+        }
+        writer.Flush();
+    }
+
+    private static void WriteDatabaseTableNamesDesc(List<DatabaseDescription> databaseDescriptions)
+    {
+        using var writer = CreateWriter("Database-TableNames-Desc.md");
+        foreach (var database in databaseDescriptions)
+        {
+            WriteDatabaseTableNamesTo(database, writer);
+        }
+        writer.Flush();
+    }
+
+    private static void WriteDatabaseTableNamesTo(DatabaseDescription database, StreamWriter writer)
+    {
+        writer.WriteLine($"Database Name: {database.DatabaseName}");
+        writer.WriteLine("Tables:");
+        foreach (var table in database.Tables)
+        {
+            writer.WriteLine($"{table.TableName}");
+        }
+        writer.WriteLine();
+        writer.WriteLine();
+        writer.WriteLine();
+    }
+
+    private static void WriteTableDescription(StreamWriter writer, string databaseName, TableDescription table)
+    {
+        writer.WriteLine($"Database Name: {databaseName}");
+        writer.WriteLine($"Table Name: {table.TableName}");
+        foreach (var column in table.Columns)
+        {
+            writer.Write($"{column.ColumnName} {column.DataType}");
+            if (column.IsNullable)
+            {
+                writer.Write($" ,is Nullable");
+            }
+
+            if (column.IsIdentity)
+            {
+                writer.Write($" ,is Identity");
+            }
+
+            if (column.DefaultValue != string.Empty)
+            {
+                writer.Write($" ,Default Value: {column.DefaultValue}");
+            }
+
+            if (!string.IsNullOrEmpty(column.Description.Trim()))
+            {
+                writer.Write($" -- {column.Description}");
+            }
+
+            writer.WriteLine();
+        }
+
+        writer.WriteLine();
+        writer.WriteLine();
     }
 }
 
