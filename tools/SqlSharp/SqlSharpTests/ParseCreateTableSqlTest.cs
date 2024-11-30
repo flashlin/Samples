@@ -21,7 +21,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
@@ -37,7 +38,7 @@ public class ParseCreateTableSqlTest
             ],
         });
     }
-    
+
     [Test]
     public void DefaultNegativeNumber()
     {
@@ -51,13 +52,15 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "INT",
                     IsNullable = false,
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintDefaultValue
                         {
                             DefaultValue = "-1"
@@ -67,7 +70,7 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void SchemaName_dot_TableName()
     {
@@ -81,7 +84,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "dbo.tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "id",
@@ -90,7 +94,7 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void CreateTableName_Comment_Fields()
     {
@@ -105,7 +109,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
@@ -125,7 +130,7 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void DefaultFloat()
     {
@@ -138,7 +143,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
@@ -149,7 +155,8 @@ public class ParseCreateTableSqlTest
                         Scale = 2,
                     },
                     IsNullable = false,
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintDefaultValue
                         {
                             DefaultValue = "0.0"
@@ -159,7 +166,7 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void TableForeignKeyReferences()
     {
@@ -172,11 +179,13 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Constraints = [
+            Constraints =
+            [
                 new SqlConstraintForeignKey
                 {
                     ConstraintName = "[FK1]",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlConstraintColumn
                         {
                             ColumnName = "[Id]",
@@ -189,7 +198,7 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void SqlIdentifierName()
     {
@@ -202,7 +211,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "[dbo].db1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
@@ -211,7 +221,7 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void LastColumnAllowComma()
     {
@@ -225,7 +235,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
@@ -243,7 +254,8 @@ public class ParseCreateTableSqlTest
                     {
                         Size = "10",
                     },
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintDefaultValue
                         {
                             DefaultValue = "GetDate()"
@@ -253,7 +265,7 @@ public class ParseCreateTableSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Column_Unique_Column()
     {
@@ -268,7 +280,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
@@ -288,7 +301,8 @@ public class ParseCreateTableSqlTest
                         Size = "50",
                     },
                     IsNullable = true,
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintDefaultValue
                         {
                             ConstraintName = "[D1]",
@@ -297,13 +311,15 @@ public class ParseCreateTableSqlTest
                     ]
                 }
             ],
-            Constraints = [
+            Constraints =
+            [
                 new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[U1]",
                     ConstraintType = "UNIQUE",
                     Clustered = "",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlConstraintColumn
                         {
                             ColumnName = "ExternalRefNo",
@@ -319,13 +335,13 @@ public class ParseCreateTableSqlTest
     public void ColumnCommentColumn()
     {
         var sql = $"""
-                  create table #tmp1
-                  (              
-                    [id] int NOT NULL,  
-                    -- comment --  
-                    uid int
-                  )               
-                  """;
+                   create table #tmp1
+                   (              
+                     [id] int NOT NULL,  
+                     -- comment --  
+                     uid int
+                   )               
+                   """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SqlCreateTableExpression()
         {
@@ -361,26 +377,30 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "INT",
                     IsNullable = false,
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintPrimaryKeyOrUnique
                         {
                             ConstraintName = "[pk1]",
                             ConstraintType = "PRIMARY KEY",
                             Clustered = "NONCLUSTERED",
-                            Columns = [
+                            Columns =
+                            [
                                 new SqlConstraintColumn
                                 {
                                     ColumnName = "[Id]",
                                     Order = "ASC"
                                 }
                             ],
-                            WithToggles = [
+                            WithToggles =
+                            [
                                 new SqlToggle
                                 {
                                     ToggleName = "FILLFACTOR",
@@ -396,9 +416,9 @@ public class ParseCreateTableSqlTest
                     ColumnName = "[name]",
                     DataType = "NVARCHAR",
                     DataSize = new SqlDataSize
-                        {
-                    Size = "50",
-                        },
+                    {
+                        Size = "50",
+                    },
                     IsNullable = true
                 }
             ]
@@ -426,7 +446,7 @@ public class ParseCreateTableSqlTest
                     ColumnName = "[Id]",
                     DataType = "INT",
                     IsNullable = false,
-                    Identity = new SqlIdentity{ Seed = 1, Increment = 1 },
+                    Identity = new SqlIdentity { Seed = 1, Increment = 1 },
                 },
                 new SqlColumnDefinition
                 {
@@ -457,7 +477,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "#tb",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "R",
@@ -553,8 +574,12 @@ public class ParseCreateTableSqlTest
                     NotForReplication = false,
                     Constraints = [],
                 },
-                new SqlColumnDefinition { ColumnName = "LastName", DataType = "varchar", DataSize = new SqlDataSize{ Size = "50"}, },
-                new SqlColumnDefinition { ColumnName = "Money", DataType = "decimal", DataSize = new SqlDataSize(){Size = "10", Scale = 3} },
+                new SqlColumnDefinition
+                    { ColumnName = "LastName", DataType = "varchar", DataSize = new SqlDataSize { Size = "50" }, },
+                new SqlColumnDefinition
+                {
+                    ColumnName = "Money", DataType = "decimal", DataSize = new SqlDataSize() { Size = "10", Scale = 3 }
+                },
                 new SqlColumnDefinition
                 {
                     ColumnName = "[name]", DataType = "[int]",
@@ -591,9 +616,11 @@ public class ParseCreateTableSqlTest
                 new SqlColumnDefinition
                 {
                     ColumnName = "[DailyTotalRaw]", DataType = "DECIMAL",
-                    DataSize = new SqlDataSize(){
-                    Size = "19",
-                    Scale = 6,},
+                    DataSize = new SqlDataSize()
+                    {
+                        Size = "19",
+                        Scale = 6,
+                    },
                     Constraints =
                     [
                         new SqlConstraintDefaultValue
@@ -666,14 +693,16 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "VARCHAR",
-                    DataSize = new  SqlDataSize(){Size = "3"},
+                    DataSize = new SqlDataSize() { Size = "3" },
                     IsNullable = false,
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintDefaultValue
                         {
                             ConstraintName = "[DF_1]",
@@ -699,13 +728,15 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[day]",
                     DataType = "DATETIME",
                     IsNullable = false,
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintDefaultValue
                         {
                             DefaultValue = "2019-01-01"
@@ -735,7 +766,8 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[BannerType]",
                     DataType = "INT",
-                    Constraints = [
+                    Constraints =
+                    [
                         new SqlConstraintDefaultValue
                         {
                             ConstraintName = "DEFAULT",
@@ -750,11 +782,11 @@ public class ParseCreateTableSqlTest
     [Test]
     public void DefinitionDataMax()
     {
-        var sql =$"""
-                  CREATE TABLE #tmp(
-                  	 AuditCount nvarchar(max)
-                  ) 
-                  """;
+        var sql = $"""
+                   CREATE TABLE #tmp(
+                   	 AuditCount nvarchar(max)
+                   ) 
+                   """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SqlCreateTableExpression()
         {
@@ -765,7 +797,7 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "AuditCount",
                     DataType = "nvarchar",
-                    DataSize = new SqlDataSize{Size = "MAX"},
+                    DataSize = new SqlDataSize { Size = "MAX" },
                 }
             ]
         });
@@ -784,7 +816,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
@@ -797,7 +830,7 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[LoginName]",
                     DataType = "NVARCHAR",
-                    DataSize = new SqlDataSize(){ Size = "50" },
+                    DataSize = new SqlDataSize() { Size = "50" },
                     IsNullable = true
                 }
             ]
@@ -820,27 +853,31 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "int",
                 }
             ],
-            Constraints = [
+            Constraints =
+            [
                 new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "",
                     ConstraintType = "PRIMARY KEY",
                     Clustered = "CLUSTERED",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlConstraintColumn
                         {
                             ColumnName = "[Id]",
-                            Order = "ASC" 
+                            Order = "ASC"
                         }
                     ],
-                    WithToggles = [
+                    WithToggles =
+                    [
                         new SqlToggle
                         {
                             ToggleName = "PAD_INDEX",
@@ -890,20 +927,23 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "#tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "INT",
                 }
             ],
-            Constraints = [
+            Constraints =
+            [
                 new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[PK_1]",
                     ConstraintType = "PRIMARY KEY",
                     Clustered = "CLUSTERED",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlConstraintColumn
                         {
                             ColumnName = "[id]",
@@ -916,7 +956,8 @@ public class ParseCreateTableSqlTest
                     ConstraintName = "[UQ_1]",
                     ConstraintType = "UNIQUE",
                     Clustered = "NONCLUSTERED",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlConstraintColumn
                         {
                             ColumnName = "[name]",
@@ -924,7 +965,7 @@ public class ParseCreateTableSqlTest
                         }
                     ],
                 }
-            ] 
+            ]
         });
     }
 
@@ -942,22 +983,25 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "#tmp",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[id]",
                     DataType = "NVARCHAR",
-                    DataSize = new SqlDataSize(){Size = "50"},
+                    DataSize = new SqlDataSize() { Size = "50" },
                     IsNullable = true
                 }
             ],
-            Constraints = [
+            Constraints =
+            [
                 new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[UQ_1]",
                     ConstraintType = "UNIQUE",
                     Clustered = "NONCLUSTERED",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlConstraintColumn
                         {
                             ColumnName = "[ID]",
@@ -987,7 +1031,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "[dbo].[CashSettled]",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[custid]",
@@ -995,20 +1040,23 @@ public class ParseCreateTableSqlTest
                     IsNullable = false
                 }
             ],
-            Constraints = [
+            Constraints =
+            [
                 new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "[PK_CashSettled]",
                     ConstraintType = "PRIMARY KEY",
                     Clustered = "CLUSTERED",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlConstraintColumn
                         {
                             ColumnName = "[custid]",
                             Order = "ASC"
                         }
                     ],
-                    WithToggles = [
+                    WithToggles =
+                    [
                         new SqlToggle
                         {
                             ToggleName = "FILLFACTOR",
@@ -1036,27 +1084,31 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression
         {
             TableName = "#tb1",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
                     DataType = "int",
                 }
             ],
-            Constraints = [
+            Constraints =
+            [
                 new SqlConstraintPrimaryKeyOrUnique
                 {
                     ConstraintName = "",
                     ConstraintType = "PRIMARY KEY",
                     Clustered = "CLUSTERED",
-                    Columns = [
+                    Columns =
+                    [
                         new SqlConstraintColumn
                         {
                             ColumnName = "[Id]",
-                            Order = "ASC" 
+                            Order = "ASC"
                         }
                     ],
-                    WithToggles = [
+                    WithToggles =
+                    [
                         new SqlToggle
                         {
                             ToggleName = "PAD_INDEX",
@@ -1083,7 +1135,8 @@ public class ParseCreateTableSqlTest
         rc.ShouldBe(new SqlCreateTableExpression()
         {
             TableName = "[dbo].[UserTracking]",
-            Columns = [
+            Columns =
+            [
                 new SqlColumnDefinition
                 {
                     ColumnName = "[Id]",
@@ -1100,7 +1153,7 @@ public class ParseCreateTableSqlTest
                 {
                     ColumnName = "[Extra]",
                     DataType = "nvarchar",
-                    DataSize = new SqlDataSize(){Size = "4000"},
+                    DataSize = new SqlDataSize() { Size = "4000" },
                     IsNullable = true
                 }
             ]
