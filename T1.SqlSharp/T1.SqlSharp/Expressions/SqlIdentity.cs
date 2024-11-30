@@ -1,14 +1,11 @@
-using T1.SqlSharp.Expressions;
-
-namespace SqlSharpLit.Common.ParserLit;
+namespace T1.SqlSharp.Expressions;
 
 public class SqlIdentity : ISqlExpression 
 {
-    public SqlType SqlType { get; } = SqlType.Identity;
     public static SqlIdentity Default => new();
+    public SqlType SqlType { get; } = SqlType.Identity;
     public long Seed { get; set; }
     public int Increment { get; set; }
-
 
     public string ToSql()
     {
