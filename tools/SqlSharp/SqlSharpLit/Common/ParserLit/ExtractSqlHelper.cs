@@ -234,6 +234,7 @@ public class ExtractSqlHelper
     {
         foreach (var sqlFile in GetSqlFiles(folder))
         {
+            Console.WriteLine($"Parsing {sqlFile}");
             var sql = File.ReadAllText(sqlFile);
             var sqlExpressions = new SqlParser(sql).Extract().ToList();
             yield return new SqlFileContent
@@ -287,6 +288,7 @@ public class ExtractSqlHelper
         });
         foreach (var sqlFileContent in sqlFileContents)
         {
+            Console.WriteLine($"Processing {sqlFileContent.FileName}");
             var databaseName = _databaseNameProvider.GetDatabaseNameFromPath(sqlFileContent.FileName);
             var db = databases[databaseName];
             var createTablesSql = sqlFileContent.SqlExpressions
