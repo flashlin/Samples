@@ -9,6 +9,19 @@ public enum SelectType
     Distinct
 }
 
+public enum SelectItemType
+{
+    /// <summary>
+    /// Simple column or expression
+    /// </summary>
+    Column,
+
+    /// <summary>
+    /// Nested subquery
+    /// </summary>
+    SubQuery
+}
+
 public class SelectStatement : ISqlExpression
 {
     public SqlType SqlType => SqlType.Select;
