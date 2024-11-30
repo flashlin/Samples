@@ -10,6 +10,8 @@
         <Description>Parse TSQL</Description>
         <PackageLicenseUrl>https://opensource.org/license/MIT</PackageLicenseUrl>
         <PackageTags>T1</PackageTags>
+        <Version>1.0.1</Version>
+        <PackageReleaseNotes>add ToDescriptionText</PackageReleaseNotes>
     </PropertyGroup>
 
     <ItemGroup>
