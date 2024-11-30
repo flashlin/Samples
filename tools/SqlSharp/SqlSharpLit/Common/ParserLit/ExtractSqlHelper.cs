@@ -501,7 +501,7 @@ public class ExtractSqlHelper
         using var writer = new StreamWriter(databaseDescriptionMdFile, false, Encoding.UTF8);
         foreach (var table in database.Tables)
         {
-            WriteTableDescription(writer, database.DatabaseName, table);
+            WriteTableDescription(writer, database, table);
         }
 
         writer.Flush();
@@ -593,9 +593,15 @@ public class ExtractSqlHelper
         writer.WriteLine();
     }
 
-    private static void WriteTableDescription(StreamWriter writer, string databaseName, TableDescription table)
+    private static void WriteTableDescription(StreamWriter writer,
+        DatabaseDescription database, TableDescription table)
     {
-        writer.WriteLine($"Database Name: {databaseName}");
+        writer.Write($"Database Name: {database.DatabaseName}");
+        if (!string.IsNullOrEmpty(database.Description))
+        {
+            writer.Write($" -- {database.Description}");
+        }
+        writer.WriteLine();
         writer.Write($"Table Name: {table.TableName}");
         if (!string.IsNullOrEmpty(table.Description))
         {
