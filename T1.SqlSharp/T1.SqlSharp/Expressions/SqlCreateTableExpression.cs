@@ -1,6 +1,6 @@
-using T1.SqlSharp.Expressions;
+using T1.Standard.IO;
 
-namespace SqlSharpLit.Common.ParserLit.Expressions;
+namespace T1.SqlSharp.Expressions;
 
 public class SqlCreateTableExpression : ISqlExpression
 {
@@ -11,7 +11,7 @@ public class SqlCreateTableExpression : ISqlExpression
 
     public string ToSql()
     {
-        var sql = new T1.Standard.IO.IndentStringBuilder();
+        var sql = new IndentStringBuilder();
         sql.WriteLine($"CREATE TABLE {TableName}");
         sql.WriteLine("(");
         sql.Indent++;

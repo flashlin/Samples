@@ -27,4 +27,8 @@
       <ProjectReference Include="..\..\..\T1.SqlSharp\T1.SqlSharp\T1.SqlSharp.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Common\ParserLit\Expressions\" />
+    </ItemGroup>
+
 </Project>

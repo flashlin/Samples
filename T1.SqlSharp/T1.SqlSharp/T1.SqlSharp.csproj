@@ -12,4 +12,8 @@
         <PackageTags>T1</PackageTags>
     </PropertyGroup>
 
+    <ItemGroup>
+        <PackageReference Include="T1.Standard" Version="1.0.83" />
+    </ItemGroup>
+
 </Project>
