@@ -13,8 +13,8 @@ builder.AddSerilog();
 
 var services = builder.Services;
 services.AddSqlSharpServices(builder.Configuration);
-services.AddTransient<ExtractTableDataSpecificationAsync>();
-services.AddTransient<ExtractCreateTableSqlFromFolderSpecificationAsync>();
+services.AddTransient<ExtractTableDataCommand>();
+services.AddTransient<ExtractCreateTableSqlFromFolderCommand>();
 
 var app = builder.Build();
 var serviceProvider = app.Services;
@@ -22,8 +22,8 @@ var serviceProvider = app.Services;
 var options = await LineCommandParseHelper.ParseAsync<SqlSharpOptions>(args);
 
 var command = new SpecificationAsyncEvaluator<SqlSharpOptions, Task>([
-     serviceProvider.GetRequiredService<ExtractTableDataSpecificationAsync>(),
-     serviceProvider.GetRequiredService<ExtractCreateTableSqlFromFolderSpecificationAsync>(),
+     serviceProvider.GetRequiredService<ExtractTableDataCommand>(),
+     serviceProvider.GetRequiredService<ExtractCreateTableSqlFromFolderCommand>(),
 ]);
 await command.EvaluateAsync(options);
      
