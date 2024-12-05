@@ -5,28 +5,9 @@ using T1.SqlSharp.DatabaseDescriptions;
 using T1.SqlSharp.Expressions;
 using T1.Standard.Collections.Generics;
 using T1.Standard.Serialization;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace SqlSharpLit.Common.ParserLit;
-
-public class YamlSerializer
-{
-    private readonly IDeserializer _deserializer = new DeserializerBuilder()
-        .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        .Build();
-
-    public T Deserialize<T>(string yaml)
-    {
-        return _deserializer.Deserialize<T>(yaml);
-    }
-}
-
-public interface IDatabaseNameProvider
-{
-    string GetDatabaseNameFromPath(string path);
-}
 
 public class ExtractSqlHelper
 {
