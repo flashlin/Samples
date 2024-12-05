@@ -2,7 +2,7 @@ using T1.SqlSharp.Expressions;
 
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlValue : ISqlValue, ISqlExpression
+public class SqlValue : ISqlValue
 {
     public SqlType SqlType { get; set; } = SqlType.String;
     public string Value { get; set; } = string.Empty;

@@ -7,19 +7,64 @@ namespace SqlSharpTests;
 [TestFixture]
 public class ParseSelectSqlTest
 {
-    
     [Test]
-    public void CreateTable()
+    public void Where_FunctionName()
     {
         var sql = $"""
-                   CREATE TABLE [dbo].[B2CRebateHistory]
-                   (
-                       [Id] [INT] NOT NULL IDENTITY(1, 1)
-                   )
+                   select 1
+                   from sys.databases
+                   where name = DB_NAME()
+                   and SUSER_SNAME(owner_sid) = 'sa'
                    """;
-        
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn { ColumnName = "1" },
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "sys.databases",
+            },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpression
+                    {
+                        FieldName = "name",
+                    },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlFunctionExpression
+                    {
+                        FunctionName = "DB_NAME",
+                    }
+                },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlConditionExpression
+                {
+                    Left = new SqlFunctionExpression
+                    {
+                        FunctionName = "SUSER_SNAME",
+                        Parameters =
+                        [
+                            new SqlFieldExpression
+                            {
+                                FieldName = "owner_sid",
+                            }
+                        ]
+                    },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue
+                    {
+                        Value = "sa"
+                    }
+                }
+            }
+        });
     }
-    
+
     [Test]
     public void Select()
     {
@@ -57,11 +102,10 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     private static ParseResult<ISqlExpression> ParseSql(string sql)
     {
         var p = new SqlParser(sql);
         return p.Parse();
     }
-
 }

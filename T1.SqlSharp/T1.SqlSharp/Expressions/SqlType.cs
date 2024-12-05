@@ -21,5 +21,7 @@ public enum SqlType
     Token,
     TopClause,
     JoinCondition,
-    TableSource
+    TableSource,
+    Function,
+    Condition
 }
