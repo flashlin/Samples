@@ -22,7 +22,7 @@ public class ExtractSelectSqlFromFolderCommand : ISpecificationAsync<SqlSharpOpt
         var sourceFolder = args.Input;
         var outputFolder = args.Output;
         var extractSqlHelper = new ExtractSqlHelper(new CustomDatabaseNameProvider());
-
+        extractSqlHelper.ExtractSelectSqlFromFolder(sourceFolder, outputFolder);
         return Task.FromResult(Task.CompletedTask);
     }
 }

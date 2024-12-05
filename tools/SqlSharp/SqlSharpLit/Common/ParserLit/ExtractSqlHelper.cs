@@ -167,7 +167,8 @@ public class ExtractSqlHelper
             var result = sqlParser.ParseSelectStatement();
             if (!result.HasResult)
             {
-                throw new Exception(result.Error.Message);
+                var msg = $"Error parsing {selectSql}\n{result.Error.Message}"; 
+                throw new Exception(msg);
             }
             File.AppendAllText(outputFile, result.ResultValue.ToSql());
         }

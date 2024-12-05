@@ -19,6 +19,7 @@ var services = builder.Services;
 services.AddSqlSharpServices(builder.Configuration);
 services.AddTransient<ExtractTableDataCommand>();
 services.AddTransient<ExtractCreateTableSqlFromFolderCommand>();
+services.AddTransient<ExtractSelectSqlFromFolderCommand>();
 
 var app = builder.Build();
 var serviceProvider = app.Services;
@@ -28,6 +29,7 @@ var options = await LineCommandParseHelper.ParseAsync<SqlSharpOptions>(args);
 var command = new SpecificationAsyncEvaluator<SqlSharpOptions, Task>([
      serviceProvider.GetRequiredService<ExtractTableDataCommand>(),
      serviceProvider.GetRequiredService<ExtractCreateTableSqlFromFolderCommand>(),
+     serviceProvider.GetRequiredService<ExtractSelectSqlFromFolderCommand>()
 ]);
 await command.EvaluateAsync(options);
      
