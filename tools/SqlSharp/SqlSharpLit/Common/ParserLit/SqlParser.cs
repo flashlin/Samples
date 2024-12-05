@@ -324,11 +324,18 @@ public class SqlParser
 
         var columns = ParseWithComma<ISelectColumnExpression>(() =>
         {
-            if (_text.Try(_text.ReadIdentifier, out var fieldName))
+            if (TryReadSqlIdentifier(out var fieldName))
             {
                 return new SelectColumn()
                 {
                     ColumnName = fieldName.Word
+                };
+            }
+            if(TryReadInt(out var intValue))
+            {
+                return new SelectColumn()
+                {
+                    ColumnName = intValue.Word
                 };
             }
             return CreateParseError("Expected column name");
