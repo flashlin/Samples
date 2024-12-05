@@ -1391,10 +1391,12 @@ column_name AS computed_column_expression
         {
             if (TryMatch("("))
             {
+                var parameters = ParseWithComma(ParseValue);
                 MatchString(")");
                 return new SqlFunctionExpression
                 {
                     FunctionName = identifier.Word,
+                    Parameters = parameters.ResultValue!.ToArray()
                 };
             }    
             return new SqlValue
@@ -1410,7 +1412,7 @@ column_name AS computed_column_expression
 
         return NoneResult<ISqlValue>();
     }
-
+    
     private ParseResult<List<T>> ParseWithComma<T>(Func<ParseResult<T>> parseElemFn)
     {
         var elements = new List<T>();
