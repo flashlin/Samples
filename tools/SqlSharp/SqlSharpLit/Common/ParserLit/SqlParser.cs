@@ -1,5 +1,4 @@
 using System.Runtime.InteropServices.JavaScript;
-using System.Text;
 using System.Text.RegularExpressions;
 using T1.SqlSharp.Expressions;
 
@@ -368,7 +367,7 @@ public class SqlParser
                 return CreateParseError("Expected left expression");
             }
 
-            var operation = Parse_ComparisonOperator();
+            var operation = Parse_LogicalOperator();
             if (operation.HasError)
             {
                 return operation.Error;
@@ -385,10 +384,10 @@ public class SqlParser
                 return CreateParseError("Expected right expression");
             }
 
-            selectStatement.Where = new SqlConditionExpression()
+            selectStatement.Where = new SqlSearchCondition()
             {
                 Left = leftExpr.ResultValue,
-                ComparisonOperator = operation.Result,
+                LogicalOperator = operation.Result,
                 Right = rightExpr.ResultValue
             };
         }
@@ -1428,27 +1427,5 @@ column_name AS computed_column_expression
     {
         SkipWhiteSpace();
         return _text.Try(_text.ReadInt, out result);
-    }
-}
-
-public class SqlTopClause : ISqlExpression
-{
-    public SqlType SqlType => SqlType.TopClause;
-    public required ISqlExpression Expression { get; set; }
-    public bool IsPercent { get; set; }
-    public bool IsWithTies { get; set; }
-    public string ToSql()
-    {
-        var sql = new StringBuilder();
-        sql.Append($"TOP {Expression.ToSql()}");
-        if (IsPercent)
-        {
-            sql.Append(" PERCENT");
-        }
-        if(IsWithTies)
-        {
-            sql.Append(" WITH TIES");
-        }
-        return sql.ToString();
     }
 }

@@ -1,26 +1,6 @@
-using T1.SqlSharp.Expressions;
 using T1.Standard.IO;
 
-namespace SqlSharpLit.Common.ParserLit;
-
-public enum SelectType
-{
-    All,
-    Distinct
-}
-
-public enum SelectItemType
-{
-    /// <summary>
-    /// Simple column or expression
-    /// </summary>
-    Column,
-
-    /// <summary>
-    /// Nested subquery
-    /// </summary>
-    SubQuery
-}
+namespace T1.SqlSharp.Expressions;
 
 public class SelectStatement : ISqlExpression
 {
@@ -29,7 +9,7 @@ public class SelectStatement : ISqlExpression
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];
     public ISqlTableSource From { get; set; } = new SqlTableSource();
-    public ISqlWhereExpression? Where { get; set; }
+    public ISqlExpression? Where { get; set; }
 
     public string ToSql()
     {

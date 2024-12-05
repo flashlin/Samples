@@ -27,7 +27,7 @@ public class ParseSelectSqlTest
             {
                 TableName = "sys.databases",
             },
-            Where = new SqlConditionExpression
+            Where = new SqlSearchCondition()
             {
                 Left = new SqlConditionExpression
                 {
@@ -41,7 +41,7 @@ public class ParseSelectSqlTest
                         FunctionName = "DB_NAME",
                     }
                 },
-                ComparisonOperator = ComparisonOperator.Equal,
+                LogicalOperator = LogicalOperator.And,
                 Right = new SqlConditionExpression
                 {
                     Left = new SqlFunctionExpression
