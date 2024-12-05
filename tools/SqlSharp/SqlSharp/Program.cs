@@ -7,6 +7,7 @@ using Serilog;
 using SqlSharp;
 using SqlSharpLit.Common;
 using SqlSharp.CommandPattern;
+using SqlSharp.Commands;
 using SqlSharpLit.Shared;
 
 var builder = Host.CreateApplicationBuilder(args);

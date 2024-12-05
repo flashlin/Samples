@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using SqlSharp.CommandPattern;
 using SqlSharpLit.Common.ParserLit;
 
-namespace SqlSharp;
+namespace SqlSharp.Commands;
 
 public class ExtractCreateTableSqlFromFolderCommand : ISpecificationAsync<SqlSharpOptions, Task>
 {

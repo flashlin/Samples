@@ -1,7 +1,7 @@
 using SqlSharp.CommandPattern;
 using SqlSharpLit;
 
-namespace SqlSharp;
+namespace SqlSharp.Commands;
 
 public class ExtractTableDataCommand : ISpecificationAsync<SqlSharpOptions, Task>
 {
