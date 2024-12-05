@@ -366,16 +366,31 @@ public class SqlParser
 
         if (TryMatchKeyword("WHERE"))
         {
-            var rc = Or<ISqlExpression>(Parse_SearchCondition, Parse_ConditionExpression)();
-            if (rc.HasError)
-            {
-                return rc.Error;
-            }
+            var rc = Parse_WhereExpression();
             selectStatement.Where = rc.ResultValue;
         }
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
+    }
+    
+    private ParseResult<ISqlExpression> Parse_WhereExpression()
+    {
+        var rc = Or<ISqlExpression>(Parse_SearchCondition, Parse_ConditionExpression)();
+        if (rc.HasError)
+        {
+            return rc.Error;
+        }
+        if (Try(Parse_LogicalOperator, out var logicalOperator))
+        {
+            return new SqlSearchCondition
+            {
+                Left = rc.ResultValue,
+                LogicalOperator = logicalOperator.Result!.Value,
+                Right = Parse_WhereExpression().ResultValue
+            };
+        }
+        return rc;
     }
     
     private ParseResult<SqlSearchCondition> Parse_SearchCondition()
