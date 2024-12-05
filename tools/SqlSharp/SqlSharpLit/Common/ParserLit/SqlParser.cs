@@ -1166,11 +1166,11 @@ column_name AS computed_column_expression
             return NoneResult<SqlParameterValue>();
         }
 
-        return CreateParseResult(new SqlParameterValue
+        return new SqlParameterValue
         {
             Name = string.Empty,
             Value = valueResult.ResultValue.Value
-        });
+        };
     }
 
     private ParseResult<SqlParameterValue> ParseParameterValueOrAssignValue()
@@ -1367,28 +1367,45 @@ column_name AS computed_column_expression
     {
         if (_text.Try(_text.ReadFloat, out var floatNumber))
         {
-            return CreateParseResult<ISqlValue>(new SqlValue
+            return new SqlValue
             {
                 Value = floatNumber.Word
-            });
+            };
         }
 
         if (Try(ParseIntValue, out var number))
         {
-            return CreateParseResult<ISqlValue>(number.ResultValue);
+            return number.ResultValue;
         }
-
+        
         if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
         {
-            return CreateParseResult<ISqlValue>(new SqlValue
+            return new SqlValue
             {
                 Value = quotedString.Word
-            });
+            };
+        }
+        
+        
+        if(TryReadSqlIdentifier(out var identifier))
+        {
+            if (TryMatch("("))
+            {
+                MatchString(")");
+                return new SqlFunctionExpression
+                {
+                    FunctionName = identifier.Word,
+                };
+            }    
+            return new SqlValue
+            {
+                Value = identifier.Word
+            };
         }
 
         if (Try(ParseTableName, out var tableName))
         {
-            return CreateParseResult<ISqlValue>(tableName.ResultValue);
+            return tableName.ResultValue;
         }
 
         return NoneResult<ISqlValue>();
