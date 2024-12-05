@@ -439,6 +439,10 @@ public class SqlParser
         var operation = Parse_ComparisonOperator();
         if (operation.HasError)
         {
+            return operation.Error;
+        }
+        if (operation.HasError)
+        {
             _text.Position = startPosition;
             return NoneResult<SqlConditionExpression>();
         }
@@ -457,12 +461,12 @@ public class SqlParser
         return new SqlConditionExpression()
         {
             Left = leftExpr.ResultValue,
-            ComparisonOperator = operation.Result,
+            ComparisonOperator = operation.Result.Value,
             Right = rightExpr.ResultValue
         };
     }
 
-    private ParseResult<ComparisonOperator> Parse_ComparisonOperator()
+    private ParseResult<ComparisonOperator?> Parse_ComparisonOperator()
     {
         var rc = Or(
             Keywords("LIKE"),
@@ -481,7 +485,7 @@ public class SqlParser
 
         if (rc.Result == null)
         {
-            return NoneResult<ComparisonOperator>();
+            return NoneResult<ComparisonOperator?>();
         }
 
         var comparisonOperator = rc.Result.Value.ToUpper() switch
