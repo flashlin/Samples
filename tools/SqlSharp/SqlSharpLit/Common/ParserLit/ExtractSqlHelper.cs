@@ -158,6 +158,35 @@ public class ExtractSqlHelper
         }
     }
 
+    public void ExtractSelectSqlFromFolder(string folder, string outputFile)
+    {
+        File.Delete(outputFile);
+        foreach (var selectSql in ExtractStartSelectSqlString(folder))
+        {
+            var sqlParser = new SqlParser(selectSql);
+            var result = sqlParser.ParseSelectStatement();
+            if (!result.HasResult)
+            {
+                throw new Exception(result.Error.Message);
+            }
+            File.AppendAllText(outputFile, result.ResultValue.ToSql());
+        }
+    }
+
+    private IEnumerable<string> ExtractStartSelectSqlString(string folder)
+    {
+        foreach (var sqlFileContent in GetSqlContentsFromFolder(folder))
+        {
+            var startSelectIndex = sqlFileContent.Sql.IndexOf("SELECT", StringComparison.OrdinalIgnoreCase);
+            if (startSelectIndex < 0)
+            {
+                continue;
+            }
+            var startSelectSql = sqlFileContent.Sql.Substring(startSelectIndex);
+            yield return startSelectSql;
+        }
+    }
+
     public IEnumerable<SqlFileContent> GetSqlContentsFromFolder(string folder)
     {
         foreach (var sqlFile in GetSqlFiles(folder))
