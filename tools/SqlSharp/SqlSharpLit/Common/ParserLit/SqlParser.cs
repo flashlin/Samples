@@ -441,7 +441,7 @@ public class SqlParser
         {
             return operation.Error;
         }
-        if (operation.HasError)
+        if (operation.Result == null)
         {
             _text.Position = startPosition;
             return NoneResult<SqlConditionExpression>();
