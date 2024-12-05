@@ -1386,19 +1386,13 @@ column_name AS computed_column_expression
             };
         }
         
+        if(Try(Parse_FunctionName, out var function))
+        {
+            return function.ResultValue;
+        }
         
         if(TryReadSqlIdentifier(out var identifier))
         {
-            if (TryMatch("("))
-            {
-                var parameters = ParseWithComma(ParseValue);
-                MatchString(")");
-                return new SqlFunctionExpression
-                {
-                    FunctionName = identifier.Word,
-                    Parameters = parameters.ResultValue!.ToArray()
-                };
-            }    
             return new SqlValue
             {
                 Value = identifier.Word
@@ -1411,6 +1405,26 @@ column_name AS computed_column_expression
         }
 
         return NoneResult<ISqlValue>();
+    }
+
+    private ParseResult<SqlFunctionExpression> Parse_FunctionName()
+    {
+        var startPosition = _text.Position;
+        if(TryReadSqlIdentifier(out var identifier))
+        {
+            if (TryMatch("("))
+            {
+                var parameters = ParseWithComma(ParseValue);
+                MatchString(")");
+                return new SqlFunctionExpression
+                {
+                    FunctionName = identifier.Word,
+                    Parameters = parameters.ResultValue!.ToArray()
+                };
+            }    
+        }
+        _text.Position = startPosition;
+        return NoneResult<SqlFunctionExpression>();
     }
     
     private ParseResult<List<T>> ParseWithComma<T>(Func<ParseResult<T>> parseElemFn)
