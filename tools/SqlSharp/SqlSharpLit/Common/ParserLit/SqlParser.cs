@@ -348,7 +348,7 @@ public class SqlParser
 
         if (TryMatchKeyword("FROM"))
         {
-            var tableName = _text.ReadIdentifier().Word;
+            var tableName = ReadSqlIdentifier().Word;
             selectStatement.From = new SqlTableSource()
             {
                 TableName = tableName
