@@ -8,6 +8,34 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void WithNoLock()
+    {
+        var sql = $"""
+                   select id from customer with(nolock)
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [
+                new SelectColumn
+                {
+                    ColumnName = "id",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+                Withs = [
+                    new SqlHint()
+                    {
+                        Name = "nolock",
+                    }
+                ],
+            },
+        });
+    }
+    
+    [Test]
     public void METHOD()
     {
         var sql = $"""
@@ -36,7 +64,17 @@ public class ParseSelectSqlTest
                     }
                 ],
             },
-            Where = null
+            Where = new SqlSearchCondition
+            {
+                Left = new SqlConditionExpression
+                {
+                    Left = null,
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = null
+                },
+                LogicalOperator = LogicalOperator.None,
+                Right = null
+            }
         });
 }
     

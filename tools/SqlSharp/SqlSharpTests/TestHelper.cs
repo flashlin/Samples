@@ -15,7 +15,9 @@ public static class TestHelper
             throw new Exception(rc.Error.Message);
         }
         
-        var castedStatement = (T)rc.Result;
-        castedStatement.Should().BeEquivalentTo(expectedSqlStatement);
+        var castedStatement = (T)rc.ResultValue;
+        castedStatement.Should().BeEquivalentTo(expectedSqlStatement, 
+            options => options.RespectingRuntimeTypes()
+                .WithTracing());
     }
 }

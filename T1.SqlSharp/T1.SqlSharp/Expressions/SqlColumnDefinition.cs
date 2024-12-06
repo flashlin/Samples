@@ -7,7 +7,7 @@ public class SqlColumnDefinition : ISqlExpression
     public string DataType { get; set; } = string.Empty;
     public SqlDataSize? DataSize { get; set; }
     public SqlIdentity Identity { get; set; } = SqlIdentity.Default;
-    public bool IsNullable { get; set; }
+    public bool IsNullable { get; set; } = true;
     public bool NotForReplication { get; set; }
     public List<ISqlExpression> Constraints { get; set; } = [];
     public bool IsPrimaryKey { get; set; }

@@ -770,7 +770,7 @@ public class ParseCreateTableSqlTest
                     [
                         new SqlConstraintDefaultValue
                         {
-                            ConstraintName = "DEFAULT",
+                            ConstraintName = string.Empty,
                             DefaultValue = "NULL"
                         }
                     ]
