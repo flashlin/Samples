@@ -586,7 +586,7 @@ public class ParseCreateTableSqlTest
                 },
                 new SqlColumnDefinition
                 {
-                    ColumnName = "[name]", DataType = "[int]",
+                    ColumnName = "[name]", DataType = "[int]", IsNullable = false,
                     Identity = new SqlIdentity
                     {
                         Seed = 1,
@@ -595,7 +595,7 @@ public class ParseCreateTableSqlTest
                 },
                 new SqlColumnDefinition
                 {
-                    ColumnName = "[name2]", DataType = "[int]",
+                    ColumnName = "[name2]", DataType = "[int]", IsNullable = false,
                     Identity = new SqlIdentity
                     {
                         Seed = 1,
@@ -609,7 +609,7 @@ public class ParseCreateTableSqlTest
                 },
                 new SqlColumnDefinition
                 {
-                    ColumnName = "[rid]", DataType = "[int]",
+                    ColumnName = "[rid]", DataType = "[int]", IsNullable = false,
                     Identity = new SqlIdentity()
                     {
                         Seed = 1,
@@ -619,7 +619,7 @@ public class ParseCreateTableSqlTest
                 },
                 new SqlColumnDefinition
                 {
-                    ColumnName = "[DailyTotalRaw]", DataType = "DECIMAL",
+                    ColumnName = "[DailyTotalRaw]", DataType = "DECIMAL", IsNullable = false,
                     DataSize = new SqlDataSize()
                     {
                         Size = "19",
