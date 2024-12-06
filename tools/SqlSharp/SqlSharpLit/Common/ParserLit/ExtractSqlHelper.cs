@@ -28,7 +28,6 @@ public class ExtractSqlHelper
             {
                 break;
             }
-
             yield return createTableSql;
             text = remainingText;
         } while (true);
@@ -160,7 +159,10 @@ public class ExtractSqlHelper
 
     public void ExtractSelectSqlFromFolder(string folder, string outputFile)
     {
-        File.Delete(outputFile);
+        if (File.Exists(outputFile))
+        {
+            File.Delete(outputFile);
+        }
         foreach (var selectSql in ExtractStartSelectSqlString(folder))
         {
             var sqlParser = new SqlParser(selectSql);
@@ -220,6 +222,10 @@ public class ExtractSqlHelper
 
     public IEnumerable<string> GetSqlFiles(string folder)
     {
+        if (!Directory.Exists(folder))
+        {
+            yield break;
+        }
         var files = Directory.GetFiles(folder, "*.sql");
         foreach (var file in files)
         {
