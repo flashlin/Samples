@@ -402,11 +402,16 @@ public class SqlParser
         }
         if (Try(Parse_LogicalOperator, out var logicalOperator))
         {
+            var rightExprResult = Parse_WhereExpression();
+            if (rightExprResult.HasError)
+            {
+                return rightExprResult.Error; 
+            }
             return new SqlSearchCondition
             {
                 Left = rc.ResultValue,
                 LogicalOperator = logicalOperator.Result!.Value,
-                Right = Parse_WhereExpression().ResultValue
+                Right = rightExprResult.ResultValue
             };
         }
         return rc;
