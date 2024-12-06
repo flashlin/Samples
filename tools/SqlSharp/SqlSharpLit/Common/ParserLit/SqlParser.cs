@@ -358,10 +358,29 @@ public class SqlParser
         if (TryMatchKeyword("FROM"))
         {
             var tableName = ReadSqlIdentifier().Word;
-            selectStatement.From = new SqlTableSource()
+            var tableSource = new SqlTableSource()
             {
                 TableName = tableName
             };
+            if (TryMatchKeyword("WITH"))
+            {
+                MatchString("(");
+                var tableHints = ParseWithComma<SqlHint>(() =>
+                {
+                    var hint = ReadSqlIdentifier().Word;
+                    return new SqlHint()
+                    {
+                        Name = hint
+                    };
+                });
+                if (tableHints.HasError)
+                {
+                    return tableHints.Error;
+                }
+                MatchString(")");
+                tableSource.Withs = tableHints.ResultValue;
+            }
+            selectStatement.From = tableSource;
         }
 
         if (TryMatchKeyword("WHERE"))
