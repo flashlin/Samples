@@ -39,7 +39,7 @@ public class ParseSelectSqlTest
     public void METHOD()
     {
         var sql = $"""
-                   select top (@batchsize) id from customer with(nolock) where matchid = @matchid and bettype < 39 and WinLostDate <> @eventDate
+                   select top (@batchsize) id from customer with(nolock) where matchid = @matchid and matchType < 39 and createDate <> @eventDate
                    """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
@@ -57,12 +57,12 @@ public class ParseSelectSqlTest
             Columns = [
                 new SelectColumn
                 {
-                    ColumnName = "transid",
+                    ColumnName = "id",
                 }
             ],
             From = new SqlTableSource
             {
-                TableName = "bettrans",
+                TableName = "customer",
                 Withs = [
                     new SqlHint()
                     {
@@ -74,12 +74,46 @@ public class ParseSelectSqlTest
             {
                 Left = new SqlConditionExpression
                 {
-                    Left = null,
+                    Left = new SqlFieldExpression
+                    {
+                        FieldName = "matchid"
+                    },
                     ComparisonOperator = ComparisonOperator.Equal,
-                    Right = null
+                    Right = new SqlFieldExpression()
+                    {
+                        FieldName = "@matchid"
+                    }
                 },
-                LogicalOperator = LogicalOperator.None,
-                Right = null
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlSearchCondition
+                {
+                    Left = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpression
+                        {
+                            FieldName = "matchType"
+                        },
+                        ComparisonOperator = ComparisonOperator.LessThan,
+                        Right = new SqlValue
+                        {
+                            SqlType = SqlType.IntValue,
+                            Value = "39"
+                        }
+                    },
+                    LogicalOperator = LogicalOperator.And,
+                    Right = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpression
+                        {
+                            FieldName = "createDate"
+                        },
+                        ComparisonOperator = ComparisonOperator.NotEqual,
+                        Right = new SqlFieldExpression
+                        {
+                            FieldName = "@eventDate"
+                        }
+                    }
+                }
             }
         });
 }
