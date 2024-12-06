@@ -129,7 +129,7 @@ public class ParseSelectSqlTest
                     ComparisonOperator = ComparisonOperator.Equal,
                     Right = new SqlValue
                     {
-                        Value = "sa"
+                        Value = "'sa'"
                     }
                 }
             }
