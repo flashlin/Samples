@@ -1384,6 +1384,20 @@ column_name AS computed_column_expression
 
     private ParseResult<ISqlValue> ParseValue()
     {
+        if (TryMatch("("))
+        {
+            var value = ParseValue();
+            if (value.HasError)
+            {
+                return value.Error;
+            }
+            MatchString(")");
+            return new SqlGroup
+            {
+                Inner = value.ResultValue
+            };
+        }
+
         if (_text.Try(_text.ReadFloat, out var floatNumber))
         {
             return new SqlValue

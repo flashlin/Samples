@@ -25,5 +25,6 @@ public enum SqlType
     Function,
     Condition,
     SearchCondition,
-    Hint
+    Hint,
+    Group
 }

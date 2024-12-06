@@ -39,14 +39,20 @@ public class ParseSelectSqlTest
     public void METHOD()
     {
         var sql = $"""
-                   select top (@batchsize) transid from bettrans with(nolock) where matchid = @matchid and bettype < 39 and WinLostDate <> @eventDate
+                   select top (@batchsize) id from customer with(nolock) where matchid = @matchid and bettype < 39 and WinLostDate <> @eventDate
                    """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
             Top = new SqlTopClause
             {
-                Expression = new SqlValue(),
+                Expression = new SqlGroup
+                {
+                    Inner = new SqlFieldExpression
+                    {
+                        FieldName = "@batchsize",
+                    }
+                },
             },
             Columns = [
                 new SelectColumn
