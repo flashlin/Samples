@@ -151,8 +151,8 @@ public class ParseSelectSqlTest
         {
             Columns =
             [
-                new SelectColumn() { ColumnName = "Id" },
-                new SelectColumn() { ColumnName = "Name" },
+                new SelectColumn { ColumnName = "Id" },
+                new SelectColumn { ColumnName = "Name" },
             ],
             From = new SqlTableSource
             {
