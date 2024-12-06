@@ -26,5 +26,6 @@ public enum SqlType
     Condition,
     SearchCondition,
     Hint,
-    Group
+    Group,
+    Null
 }

@@ -12,5 +12,5 @@ public enum ComparisonOperator
     In,
     Between,
     IsNull,
-    IsNotNull
+    IsNot
 }

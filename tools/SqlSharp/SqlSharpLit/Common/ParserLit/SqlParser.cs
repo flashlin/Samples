@@ -411,7 +411,7 @@ public class SqlParser
             {
                 Left = rc.ResultValue,
                 LogicalOperator = logicalOperator.Result!.Value,
-                Right = rightExprResult.ResultValue
+                Right = rightExprResult.Result
             };
         }
         return rc;
@@ -508,6 +508,7 @@ public class SqlParser
     private ParseResult<ComparisonOperator?> Parse_ComparisonOperator()
     {
         var rc = Or(
+            Keywords("IS", "NOT"),
             Keywords("LIKE"),
             Keywords("IN"),
             Keywords("<>"),
@@ -529,6 +530,7 @@ public class SqlParser
 
         var comparisonOperator = rc.Result.Value.ToUpper() switch
         {
+            "IS NOT" => ComparisonOperator.IsNot,
             "LIKE" => ComparisonOperator.Like,
             "IN" => ComparisonOperator.In,
             "<>" => ComparisonOperator.NotEqual,
@@ -1401,6 +1403,11 @@ column_name AS computed_column_expression
             {
                 Inner = value.ResultValue
             };
+        }
+
+        if (TryMatchKeyword("NULL"))
+        {
+            return new SqlNullValue();
         }
 
         if (_text.Try(_text.ReadFloat, out var floatNumber))

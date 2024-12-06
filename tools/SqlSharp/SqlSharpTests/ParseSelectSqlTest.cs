@@ -8,6 +8,39 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Where_is_not_null()
+    {
+        var sql = $"""
+                   select 1 
+                   from customer
+                   where createDate is not null
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [
+                new SelectColumn
+                {
+                    ColumnName = "1",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+            },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpression
+                {
+                    FieldName = "createDate",
+                },
+                ComparisonOperator = ComparisonOperator.IsNot,
+                Right = new SqlNullValue(),
+            }
+        });
+    }
+    
+    [Test]
     public void WithNoLock()
     {
         var sql = $"""
