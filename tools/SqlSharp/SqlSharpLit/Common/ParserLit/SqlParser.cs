@@ -1412,9 +1412,9 @@ column_name AS computed_column_expression
         
         if(TryReadSqlIdentifier(out var identifier))
         {
-            return new SqlValue
+            return new SqlFieldExpression
             {
-                Value = identifier.Word
+                FieldName = identifier.Word
             };
         }
 
