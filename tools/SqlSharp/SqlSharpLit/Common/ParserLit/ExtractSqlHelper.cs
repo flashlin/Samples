@@ -167,9 +167,10 @@ public class ExtractSqlHelper
             var result = sqlParser.ParseSelectStatement();
             if (!result.HasResult)
             {
-                var msg = $"Error parsing {selectSql}\n{result.Error.Message}"; 
+                var msg = $"Error parsing {selectSql}\n{result.Error.Message}";
                 throw new Exception(msg);
             }
+
             File.AppendAllText(outputFile, result.ResultValue.ToSql());
         }
     }
@@ -178,13 +179,26 @@ public class ExtractSqlHelper
     {
         foreach (var sqlFileContent in GetSqlContentsFromFolder(folder))
         {
-            var startSelectIndex = sqlFileContent.Sql.IndexOf("SELECT", StringComparison.OrdinalIgnoreCase);
-            if (startSelectIndex < 0)
+            foreach (var startSelectSql in ExtractSelectSqlFromText(sqlFileContent.Sql))
             {
-                continue;
+                yield return startSelectSql;
             }
-            var startSelectSql = sqlFileContent.Sql.Substring(startSelectIndex);
-            yield return startSelectSql;
+        }
+    }
+
+    private IEnumerable<string> ExtractSelectSqlFromText(string text)
+    {
+        var select = "SELECT";
+        var startSelectIndex = text.IndexOf(select, StringComparison.OrdinalIgnoreCase);
+        if (startSelectIndex < 0)
+        {
+            yield break;
+        }
+        var startSelectSql = text.Substring(startSelectIndex);
+        yield return startSelectSql;
+        foreach (var subSelectSql in ExtractStartSelectSqlString(startSelectSql.Substring(select.Length)))
+        {
+            yield return subSelectSql;
         }
     }
 
@@ -612,6 +626,7 @@ public class ExtractSqlHelper
         {
             writer.Write($" -- {database.Description}");
         }
+
         writer.WriteLine();
         writer.Write($"Table Name: {table.TableName}");
         if (!string.IsNullOrEmpty(table.Description))

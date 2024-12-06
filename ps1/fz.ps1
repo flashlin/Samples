@@ -33,14 +33,13 @@ function search_folder {
     )
     # 建立命令字串
     $command = "es.exe /ad -s `"$searchTerm`""
-    # Write-Host $command
+    Write-Host $command
     $file_list = Invoke-Expression $command
-    
     if( $null -eq $file_list ) {
         return @()
     }
-
     $file_list = exclude_file_list -input_list $file_list
+    # Write-Host "search found" $file_list.Count
     return $file_list
 }
 
@@ -113,8 +112,7 @@ $search_list | ForEach-Object {
             return
         }
         # 找到很多個 
-        # Write-Host "找到 $($file_list.Count) 個"
-        return
+        Write-Host "找到 $($file_list.Count) 個"
     }
 
     if ( $count -eq $search_list.Count ) {
