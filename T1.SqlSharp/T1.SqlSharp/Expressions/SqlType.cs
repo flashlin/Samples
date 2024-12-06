@@ -24,5 +24,6 @@ public enum SqlType
     TableSource,
     Function,
     Condition,
-    SearchCondition
+    SearchCondition,
+    Hint
 }

@@ -8,6 +8,39 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   select top (@batchsize) transid from bettrans with(nolock) where matchid = @matchid and bettype < 39 and WinLostDate <> @eventDate
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Top = new SqlTopClause
+            {
+                Expression = new SqlValue(),
+            },
+            Columns = [
+                new SelectColumn
+                {
+                    ColumnName = "transid",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "bettrans",
+                Withs = [
+                    new SqlHint()
+                    {
+                        Name = "nolock",
+                    }
+                ],
+            },
+            Where = null
+        });
+}
+    
+    [Test]
     public void Where_FunctionName()
     {
         var sql = $"""
