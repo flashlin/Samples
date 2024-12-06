@@ -407,7 +407,11 @@ public class ParseCreateTableSqlTest
                                     Value = "90"
                                 }
                             ],
-                            Identity = new SqlIdentity()
+                            Identity = new SqlIdentity
+                            {
+                                Seed = 1,
+                                Increment = 1,
+                            }
                         }
                     ]
                 },
