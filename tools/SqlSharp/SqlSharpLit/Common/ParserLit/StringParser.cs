@@ -717,13 +717,13 @@ public class StringParser
         return true;
     }
 
-    public bool TryMatchesIgnoreCase(params string[] keywords)
+    public bool TryKeywordsIgnoreCase(params string[] keywords)
     {
         SkipWhitespace();
         var startPosition = _position;
         foreach (var keyword in keywords)
         {
-            if (!TryMatchIgnoreCase(keyword))
+            if (!TryKeywordIgnoreCase(keyword))
             {
                 _position = startPosition;
                 return false;
@@ -732,7 +732,7 @@ public class StringParser
         return true;
     }
 
-    public bool TryMatchIgnoreCase(string keyword)
+    public bool TryKeywordIgnoreCase(string keyword)
     {
         SkipWhitespace();
         var startPosition = _position;

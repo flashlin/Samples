@@ -102,7 +102,7 @@ public class SqlParser
 
     public ParseResult<SqlCreateTableExpression> ParseCreateTableStatement()
     {
-        if (!TryMatchKeywords("CREATE", "TABLE"))
+        if (!TryKeywords("CREATE", "TABLE"))
         {
             return NoneResult<SqlCreateTableExpression>();
         }
@@ -161,7 +161,7 @@ public class SqlParser
 
     public ParseResult<SqlSpAddExtendedPropertyExpression> ParseExecSpAddExtendedProperty()
     {
-        if (!TryMatchKeywords("EXEC", "SP_AddExtendedProperty"))
+        if (!TryKeywords("EXEC", "SP_AddExtendedProperty"))
         {
             return NoneResult<SqlSpAddExtendedPropertyExpression>();
         }
@@ -195,7 +195,7 @@ public class SqlParser
 
     public ParseResult<SqlConstraintForeignKey> ParseForeignKeyExpression()
     {
-        if (!TryMatchKeywords("FOREIGN", "KEY"))
+        if (!TryKeywords("FOREIGN", "KEY"))
         {
             return NoneResult<SqlConstraintForeignKey>();
         }
@@ -207,7 +207,7 @@ public class SqlParser
         }
 
         var columns = columnsResult.ResultValue;
-        if (!TryMatchKeyword("REFERENCES"))
+        if (!TryKeyword("REFERENCES"))
         {
             return CreateParseError("Expected REFERENCES");
         }
@@ -229,7 +229,7 @@ public class SqlParser
         }
 
         var onDelete = ReferentialAction.NoAction;
-        if (TryMatchKeywords("ON", "DELETE"))
+        if (TryKeywords("ON", "DELETE"))
         {
             var rc = ParseReferentialAction();
             if (rc.HasError)
@@ -242,7 +242,7 @@ public class SqlParser
 
         var onUpdate = ReferentialAction.NoAction;
 
-        if (TryMatchKeywords("ON", "UPDATE"))
+        if (TryKeywords("ON", "UPDATE"))
         {
             var rc = ParseReferentialAction();
             if (rc.HasError)
@@ -253,7 +253,7 @@ public class SqlParser
             onUpdate = rc.Result;
         }
 
-        var notForReplication = TryMatchKeywords("NOT", "FOR", "REPLICATION");
+        var notForReplication = TryKeywords("NOT", "FOR", "REPLICATION");
         return CreateParseResult(new SqlConstraintForeignKey
         {
             Columns = columns,
@@ -267,7 +267,7 @@ public class SqlParser
 
     public ParseResult<SqlTopClause> Parse_TopClause()
     {
-        if (!TryMatchKeyword("TOP"))
+        if (!TryKeyword("TOP"))
         {
             return NoneResult<SqlTopClause>();
         }
@@ -287,12 +287,12 @@ public class SqlParser
         {
             Expression = expression.ResultValue
         };
-        if (TryMatchKeyword("PERCENT"))
+        if (TryKeyword("PERCENT"))
         {
             topClause.IsPercent = true;
         }
 
-        if (TryMatchKeywords("WITH", "TIES"))
+        if (TryKeywords("WITH", "TIES"))
         {
             topClause.IsWithTies = true;
         }
@@ -302,7 +302,7 @@ public class SqlParser
 
     public ParseResult<SelectStatement> ParseSelectStatement()
     {
-        if (!TryMatchKeyword("SELECT"))
+        if (!TryKeyword("SELECT"))
         {
             return NoneResult<SelectStatement>();
         }
@@ -355,14 +355,14 @@ public class SqlParser
 
         selectStatement.Columns = columns.ResultValue;
 
-        if (TryMatchKeyword("FROM"))
+        if (TryKeyword("FROM"))
         {
             var tableName = ReadSqlIdentifier().Word;
             var tableSource = new SqlTableSource()
             {
                 TableName = tableName
             };
-            if (TryMatchKeyword("WITH"))
+            if (TryKeyword("WITH"))
             {
                 MatchString("(");
                 var tableHints = ParseWithComma<SqlHint>(() =>
@@ -383,7 +383,7 @@ public class SqlParser
             selectStatement.From = tableSource;
         }
 
-        if (TryMatchKeyword("WHERE"))
+        if (TryKeyword("WHERE"))
         {
             var rc = Parse_WhereExpression();
             selectStatement.Where = rc.ResultValue;
@@ -743,10 +743,10 @@ public class SqlParser
         do
         {
             var startPosition = _text.Position;
-            if (TryMatchKeywords("PRIMARY", "KEY"))
+            if (TryKeywords("PRIMARY", "KEY"))
             {
                 // 最後一個column 有可能沒有逗號 又寫 Table Constraint 的話會被誤判, 所以要檢查是否有 CLUSTERED 
-                if (TryMatchKeyword("CLUSTERED"))
+                if (TryKeyword("CLUSTERED"))
                 {
                     _text.Position = startPosition;
                     break;
@@ -810,19 +810,19 @@ public class SqlParser
                 sqlColumn.Constraints.Add(columnConstraint.Result);
             }
 
-            if (TryMatchKeywords("NOT", "FOR", "REPLICATION"))
+            if (TryKeywords("NOT", "FOR", "REPLICATION"))
             {
                 sqlColumn.NotForReplication = true;
                 continue;
             }
 
-            if (TryMatchKeywords("NOT", "NULL"))
+            if (TryKeywords("NOT", "NULL"))
             {
                 sqlColumn.IsNullable = false;
                 continue;
             }
 
-            if (TryMatchKeywords("NULL"))
+            if (TryKeywords("NULL"))
             {
                 sqlColumn.IsNullable = true;
                 continue;
@@ -869,11 +869,11 @@ public class SqlParser
         {
             var columnName = _text.ReadSqlIdentifier();
             var order = string.Empty;
-            if (TryMatchKeyword("ASC"))
+            if (TryKeyword("ASC"))
             {
                 order = "ASC";
             }
-            else if (TryMatchKeyword("DESC"))
+            else if (TryKeyword("DESC"))
             {
                 order = "DESC";
             }
@@ -895,7 +895,7 @@ public class SqlParser
         }
 
         var dataSize = new SqlDataSize();
-        if (_text.TryMatchIgnoreCase("MAX"))
+        if (_text.TryKeywordIgnoreCase("MAX"))
         {
             dataSize.Size = "MAX";
             _text.MatchSymbol(")");
@@ -967,7 +967,7 @@ column_name AS computed_column_expression
             return NoneResult<SqlComputedColumnDefinition>();
         }
 
-        if (!TryMatchKeyword("AS"))
+        if (!TryKeyword("AS"))
         {
             _text.Position = startPosition;
             return NoneResult<SqlComputedColumnDefinition>();
@@ -987,8 +987,8 @@ column_name AS computed_column_expression
             return CreateParseError("Expected )");
         }
 
-        var persist = TryMatchKeyword("PERSISTED");
-        var notNull = TryMatchKeywords("NOT", "NULL");
+        var persist = TryKeyword("PERSISTED");
+        var notNull = TryKeywords("NOT", "NULL");
 
         return CreateParseResult(new SqlComputedColumnDefinition
         {
@@ -1001,7 +1001,7 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlConstraintDefaultValue> ParseDefaultValue()
     {
-        if (!TryMatchKeyword("DEFAULT"))
+        if (!TryKeyword("DEFAULT"))
         {
             return NoneResult<SqlConstraintDefaultValue>();
         }
@@ -1152,7 +1152,7 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlToken> ParseKeywords(params string[] keywords)
     {
-        if (TryMatchKeywords(keywords))
+        if (TryKeywords(keywords))
         {
             return CreateParseResult(new SqlToken
             {
@@ -1309,7 +1309,7 @@ column_name AS computed_column_expression
         }
 
         var sqlConstraint = primaryKeyOrUniqueSpan.ResultValue;
-        if (TryMatchKeyword("WITH"))
+        if (TryKeyword("WITH"))
         {
             var togglesSpan = ParseParenthesesWithComma(ParseWithToggle);
             if (togglesSpan.HasError)
@@ -1320,7 +1320,7 @@ column_name AS computed_column_expression
             sqlConstraint.WithToggles = togglesSpan.ResultValue;
         }
 
-        if (TryMatchKeyword("ON"))
+        if (TryKeyword("ON"))
         {
             sqlConstraint.On = ReadSqlIdentifier().Word;
         }
@@ -1362,7 +1362,7 @@ column_name AS computed_column_expression
     private ParseResult<ISqlConstraint> ParseTableConstraint()
     {
         var constraintName = string.Empty;
-        if (TryMatchKeyword(ConstraintKeyword))
+        if (TryKeyword(ConstraintKeyword))
         {
             constraintName = ReadSqlIdentifier().Word;
         }
@@ -1423,7 +1423,7 @@ column_name AS computed_column_expression
             };
         }
 
-        if (TryMatchKeyword("NULL"))
+        if (TryKeyword("NULL"))
         {
             return new SqlNullValue();
         }
@@ -1586,23 +1586,23 @@ column_name AS computed_column_expression
         return _text.TryMatch(expected);
     }
 
-    private bool TryMatchKeyword(string expected)
+    private bool TryKeyword(string expected)
     {
         SkipWhiteSpace();
-        return _text.TryMatchIgnoreCase(expected);
+        return _text.TryKeywordIgnoreCase(expected);
     }
 
-    private bool TryMatchKeywords(params string[] keywords)
+    private bool TryKeywords(params string[] keywords)
     {
         SkipWhiteSpace();
-        return _text.TryMatchesIgnoreCase(keywords);
+        return _text.TryKeywordsIgnoreCase(keywords);
     }
 
     private bool TryPeekKeyword(string expected)
     {
         SkipWhiteSpace();
         var tmpPosition = _text.Position;
-        var isSuccess = _text.TryMatchIgnoreCase(expected);
+        var isSuccess = _text.TryKeywordIgnoreCase(expected);
         _text.Position = tmpPosition;
         return isSuccess;
     }
