@@ -512,12 +512,12 @@ public class SqlParser
             Keywords("IS", "NOT"),
             Keywords("LIKE"),
             Keywords("IN"),
-            Keywords("<>"),
-            Keywords(">="),
-            Keywords("<="),
-            Keywords("="),
-            Keywords(">"),
-            Keywords("<")
+            Symbol("<>"),
+            Symbol(">="),
+            Symbol("<="),
+            Symbol("="),
+            Symbol(">"),
+            Symbol("<")
         )();
         if (rc.HasError)
         {
@@ -640,11 +640,28 @@ public class SqlParser
     {
         return () => ParseKeywords(keywords);
     }
+    
+    private Func<ParseResult<SqlToken>> Symbol(string symbol)
+    {
+        return () =>
+        {
+            SkipWhiteSpace();
+            if (_text.TryMatch(symbol))
+            {
+                return new SqlToken
+                {
+                    Value = symbol
+                };
+            }
+            return NoneResult<SqlToken>();
+        };
+    }
+
 
     private void MatchString(string expected)
     {
         SkipWhiteSpace();
-        _text.Match(expected);
+        _text.MatchSymbol(expected);
     }
 
     private ParseResult<T> NoneResult<T>()
@@ -881,7 +898,7 @@ public class SqlParser
         if (_text.TryMatchIgnoreCase("MAX"))
         {
             dataSize.Size = "MAX";
-            _text.Match(")");
+            _text.MatchSymbol(")");
             return dataSize;
         }
 
@@ -993,7 +1010,7 @@ column_name AS computed_column_expression
         if (TryMatch("("))
         {
             defaultValue = _text.ReadUntilRightParenthesis();
-            _text.Match(")");
+            _text.MatchSymbol(")");
             return CreateParseResult(new SqlConstraintDefaultValue
             {
                 ConstraintName = string.Empty,
@@ -1014,9 +1031,9 @@ column_name AS computed_column_expression
 
         if (_text.Try(_text.ReadSqlIdentifier, out var funcName))
         {
-            _text.Match("(");
+            _text.MatchSymbol("(");
             var funcArgs = _text.ReadUntilRightParenthesis();
-            _text.Match(")");
+            _text.MatchSymbol(")");
             defaultValue = new TextSpan
             {
                 Word = $"{funcName.Word}({funcArgs.Word})",
@@ -1089,9 +1106,9 @@ column_name AS computed_column_expression
         if (TryMatch("("))
         {
             sqlIdentity.Seed = long.Parse(_text.ReadInt().Word);
-            _text.Match(",");
+            _text.MatchSymbol(",");
             sqlIdentity.Increment = int.Parse(_text.ReadInt().Word);
-            _text.Match(")");
+            _text.MatchSymbol(")");
         }
 
         return CreateParseResult(sqlIdentity);

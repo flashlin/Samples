@@ -47,7 +47,7 @@ public class StringParser
         return char.IsLetterOrDigit(c) || c == '_' || c == '@' || c == '#' || c == '$';
     }
 
-    public void Match(string expected)
+    public void MatchSymbol(string expected)
     {
         SkipWhitespace();
         foreach (char c in expected)
