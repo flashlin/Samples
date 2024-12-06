@@ -389,8 +389,49 @@ public class SqlParser
             selectStatement.Where = rc.ResultValue;
         }
 
+        var orderByClause = ParseOrderByClause();
+        if (orderByClause.HasError)
+        {
+            return orderByClause.Error;
+        }
+        selectStatement.OrderBy = orderByClause.Result;
+
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
+    }
+
+    private ParseResult<SqlOrderByClause> ParseOrderByClause()
+    {
+        if (!TryKeywords("ORDER", "BY"))
+        {
+            return NoneResult<SqlOrderByClause>();
+        }
+        var orderByColumns= ParseWithComma<SqlOrderByColumn>(() =>
+        {
+            var column = ReadSqlIdentifier().Word;
+            var order = OrderType.Asc;
+            if (TryKeyword("ASC"))
+            {
+                order = OrderType.Asc;
+            }
+            else if (TryKeyword("DESC"))
+            {
+                order = OrderType.Desc;
+            }
+            return new SqlOrderByColumn
+            {
+                ColumnName = column,
+                Order = order
+            };
+        });
+        if(orderByColumns.HasError)
+        {
+            return orderByColumns.Error;
+        }
+        return new SqlOrderByClause
+        {
+            Columns = orderByColumns.ResultValue
+        };
     }
     
     private ParseResult<ISqlExpression> Parse_WhereExpression()

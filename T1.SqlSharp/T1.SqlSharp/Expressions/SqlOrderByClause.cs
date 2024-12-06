@@ -5,7 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlOrderByClause : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.OrderByClause;
-    public List<ISqlExpression> Columns { get; set; } = [];
+    public List<SqlOrderByColumn> Columns { get; set; } = [];
 
     public string ToSql()
     {
