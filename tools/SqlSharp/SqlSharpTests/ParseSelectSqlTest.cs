@@ -36,7 +36,7 @@ public class ParseSelectSqlTest
     }
     
     [Test]
-    public void METHOD()
+    public void Many_SearchCondition()
     {
         var sql = $"""
                    select top (@batchsize) id from customer with(nolock) where matchid = @matchid and matchType < 39 and createDate <> @eventDate
@@ -116,7 +116,7 @@ public class ParseSelectSqlTest
                 }
             }
         });
-}
+    }
     
     [Test]
     public void Where_FunctionName()
