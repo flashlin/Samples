@@ -749,7 +749,14 @@ public class StringParser
             _position = startPosition;
             return false;
         }
-
+        
+        var nextChar = PeekNext();
+        if (IsWordChar(nextChar))
+        {
+            _position = startPosition;
+            return false;
+        }
+        
         _previousWord = new TextSpan
         {
             Word = word,
