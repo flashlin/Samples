@@ -705,10 +705,12 @@ public class StringParser
     public bool TryMatches(params string[] keywords)
     {
         SkipWhitespace();
+        var startPosition = _position;
         foreach (var keyword in keywords)
         {
             if (!TryMatch(keyword))
             {
+                _position = startPosition;
                 return false;
             }
         }
@@ -718,10 +720,12 @@ public class StringParser
     public bool TryMatchesIgnoreCase(params string[] keywords)
     {
         SkipWhitespace();
+        var startPosition = _position;
         foreach (var keyword in keywords)
         {
             if (!TryMatchIgnoreCase(keyword))
             {
+                _position = startPosition;
                 return false;
             }
         }
