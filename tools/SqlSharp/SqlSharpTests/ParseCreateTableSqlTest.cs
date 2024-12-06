@@ -31,7 +31,7 @@ public class ParseCreateTableSqlTest
                 new SqlComputedColumnDefinition
                 {
                     ColumnName = "[PartitionHash]",
-                    Expression = "([id]%(10))",
+                    Expression = "[id]%(10)",
                     IsPersisted = true,
                     IsNotNull = true
                 }
