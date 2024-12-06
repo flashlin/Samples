@@ -10,6 +10,7 @@ public class SelectStatement : ISqlExpression
     public List<ISelectColumnExpression> Columns { get; set; } = [];
     public ISqlTableSource From { get; set; } = new SqlTableSource();
     public ISqlExpression? Where { get; set; }
+    public SqlOrderByClause? OrderBy { get; set; }
 
     public string ToSql()
     {
@@ -44,6 +45,10 @@ public class SelectStatement : ISqlExpression
             sql.Write(Where.ToSql());
         }
         sql.Indent--;
+        if(OrderBy!=null)
+        {
+            sql.WriteLine(OrderBy.ToSql());
+        }
         return sql.ToString();
     }
 }

@@ -396,6 +396,7 @@ public class SqlParser
     private ParseResult<ISqlExpression> Parse_WhereExpression()
     {
         var rc = Or<ISqlExpression>(Parse_SearchCondition, Parse_ConditionExpression)();
+        //var rc = Or<ISqlExpression>(Parse_ConditionExpression, Parse_SearchCondition)();
         if (rc.HasError)
         {
             return rc.Error;

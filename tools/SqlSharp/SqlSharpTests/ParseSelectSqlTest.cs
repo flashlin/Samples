@@ -8,6 +8,61 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Order_By_DESC()
+    {
+        var sql = $"""
+                   select top 1 UserName 
+                   from customer 
+                   where UserName=@username 
+                   order by LastDate desc
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Top = new SqlTopClause
+            {
+                Expression = new SqlValue
+                {
+                    SqlType = SqlType.IntValue,
+                    Value = "1"
+                }
+            },
+            Columns = [
+                new SelectColumn
+                {
+                    ColumnName = "UserName",
+                }
+            ],
+            From = new SqlTableSource()
+            {
+                TableName = "customer",
+            },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpression
+                {
+                    FieldName = "UserName",
+                },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlFieldExpression
+                {
+                    FieldName = "@username",
+                }
+            },
+            OrderBy = new SqlOrderByClause
+            {
+                Columns = [
+                    new SqlOrderByColumn
+                    {
+                        ColumnName = "LastDate",
+                        Order = OrderType.Desc,
+                    }
+                ]
+            }
+        });
+    }
+    
+    [Test]
     public void Many_SearchCondition()
     {
         var sql = $"""
