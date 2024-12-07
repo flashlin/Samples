@@ -29,5 +29,8 @@ public enum SqlType
     Group,
     Null,
     OrderByClause,
-    OrderByColumn
+    OrderByColumn,
+    Case,
+    CaseWhen,
+    AsExpr
 }

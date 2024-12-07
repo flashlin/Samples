@@ -1465,7 +1465,7 @@ column_name AS computed_column_expression
         return NoneResult<SqlFieldExpression>();
     }
 
-    private ParseResult<ISqlValue> ParseValue()
+    public ParseResult<ISqlValue> ParseValue()
     {
         if (TryMatch("("))
         {

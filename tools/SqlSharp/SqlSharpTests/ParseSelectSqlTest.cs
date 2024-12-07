@@ -1,3 +1,4 @@
+using FluentAssertions;
 using SqlSharpLit.Common.ParserLit;
 using T1.SqlSharp.Expressions;
 using T1.Standard.DesignPatterns;
@@ -5,8 +6,111 @@ using T1.Standard.DesignPatterns;
 namespace SqlSharpTests;
 
 [TestFixture]
+public class ParseSqlValueTest
+{
+    [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   cast(@score1 as nvarchar(3))
+                   """;
+        var sqlParser = new SqlParser(sql);
+        var rc = sqlParser.ParseValue();
+        rc.ResultValue.ShouldBe(new SqlFunctionExpression
+        {
+            FunctionName = "cast",
+            Parameters = [
+                new SqlAsExpr
+                {
+                    Value = new SqlFieldExpression
+                    {
+                        FieldName = "@score1",
+                    },
+                    DataType = new SqlDataType
+                    {
+                        DataTypeName = "nvarchar",
+                        Size = new SqlDataSize()
+                        {
+                            Size = "3",
+                        },
+                    }
+                }
+            ],
+        });
+    }
+}
+
+[TestFixture]
+public class ParseSqlArithmeticTest
+{
+    [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   cast(@score1 as nvarchar(3)) + ':' + cast(@score2 as nvarchar(3)))
+                   """;
+        var sqlParser = new SqlParser(sql);
+        //var rc = sqlParser.ParseArithmeticExpression();
+    }
+}
+    
+
+[TestFixture]
 public class ParseSelectSqlTest
 {
+    [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   select 1 from customer 
+                   where BetOption = 
+                   cast(@finalHomeScore as nvarchar(3)) + ':' + cast(@finalAwayScore as nvarchar(3)))
+                   	 then 0
+                   else	
+                   	1
+                   end
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement()
+        {
+            Columns = [
+                new SelectColumn
+                {
+                    ColumnName = "1",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+            },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpression
+                {
+                   FieldName = "BetOption",
+                },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlCaseExpression
+                {
+                    InputExpr = new SqlFieldExpression
+                    {
+                        FieldName = "BetOption",
+                    },
+                    Whens = [
+                        new SqlCaseWhenExpression
+                        {
+                            WhenExpr = new SqlGroup()
+                            {
+                                Inner = null
+                            },
+                            Then = null
+                        },
+                    ]
+                },
+            }
+        });
+    }
+    
     [Test]
     public void Select_Star()
     {

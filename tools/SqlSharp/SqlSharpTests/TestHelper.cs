@@ -20,4 +20,11 @@ public static class TestHelper
             options => options.RespectingRuntimeTypes()
                 .WithTracing());
     }
+    
+    public static void ShouldBe<T>(this object rc, T expected)
+    {
+        rc.Should().BeEquivalentTo(expected, 
+            options => options.RespectingRuntimeTypes()
+                .WithTracing());
+    }
 }
