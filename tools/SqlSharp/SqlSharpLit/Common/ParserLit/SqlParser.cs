@@ -1817,13 +1817,19 @@ column_name AS computed_column_expression
 
         if (TryMatch("("))
         {
-            var expr = ParseAdditionOrSubtraction();
+            var subExpr = ParseAdditionOrSubtraction();
+            if (subExpr.HasError)
+            {
+                return subExpr.Error;
+            }
             if (!TryMatch(")"))
             {
                 return CreateParseError("InvalidOperationException Mismatched parentheses");
             }
-
-            return expr.To<ISqlExpression>();
+            return new SqlGroup
+            {
+                Inner = subExpr.ResultValue
+            };
         }
 
         return CreateParseError("InvalidOperationException Unexpected value");
