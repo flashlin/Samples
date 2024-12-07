@@ -16,26 +16,34 @@ public class ParseSqlArithmeticTest
         var rc = sqlParser.ParseArithmeticExpr();
         rc.ResultValue.ShouldBe(new SqlArithmeticBinaryExpr
         {
-            Left = new SqlFunctionExpression
+            Left = new SqlArithmeticBinaryExpr
             {
-                FunctionName = "cast",
-                Parameters = [
-                    new SqlAsExpr
-                    {
-                        Instance = new SqlFieldExpression
-                        { 
-                            FieldName  = "@score1"
-                        },
-                        DataType = new SqlDataType()
+                Left = new SqlFunctionExpression
+                {
+                    FunctionName = "cast",
+                    Parameters = [
+                        new SqlAsExpr
                         {
-                            DataTypeName = "nvarchar",
-                            Size = new SqlDataSize()
+                            Instance = new SqlFieldExpression
+                            { 
+                                FieldName  = "@score1"
+                            },
+                            DataType = new SqlDataType()
                             {
-                                Size = "3"
+                                DataTypeName = "nvarchar",
+                                Size = new SqlDataSize()
+                                {
+                                    Size = "3"
+                                }
                             }
                         }
-                    }
-                ],
+                    ],
+                },
+                Operator = "+",
+                Right = new SqlValue
+                {
+                    Value = "':'"
+                }
             },
             Operator = "+",
             Right = new SqlFunctionExpression
@@ -58,7 +66,7 @@ public class ParseSqlArithmeticTest
                         }
                     }
                 ],
-            },
+            }
         });
     }
 }
