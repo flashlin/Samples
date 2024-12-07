@@ -31,7 +31,7 @@ public class ParseSelectSqlTest
     public void Where_cast_plus_cast()
     {
         var sql = $"""
-                   select 1 from customer 
+                   select id from customer 
                    where BetOption = 
                    cast(@a as nvarchar(2)) + ':' + cast(@b as nvarchar(3))
                    """;
@@ -41,7 +41,7 @@ public class ParseSelectSqlTest
             Columns = [
                 new SelectColumn
                 {
-                    ColumnName = "1",
+                    ColumnName = "id",
                 }
             ],
             From = new SqlTableSource
@@ -325,7 +325,14 @@ public class ParseSelectSqlTest
         {
             Columns =
             [
-                new SelectColumn { ColumnName = "1" },
+                new SelectSubQueryColumn
+                {
+                    SubQuery = new SqlValue
+                    {
+                        SqlType = SqlType.IntValue,
+                        Value = "1"
+                    },
+                },
             ],
             From = new SqlTableSource
             {
@@ -381,9 +388,13 @@ public class ParseSelectSqlTest
         rc.ShouldBe(new SelectStatement
         {
             Columns = [
-                new SelectColumn
+                new SelectSubQueryColumn()
                 {
-                    ColumnName = "1",
+                    SubQuery = new SqlValue
+                    {
+                        SqlType = SqlType.IntValue,
+                        Value = "1",
+                    }
                 }
             ],
             From = new SqlTableSource

@@ -410,11 +410,11 @@ public class SqlParser
                 };
             }
 
-            if (TryReadInt(out var intValue))
+            if (Try(ParseValue, out var valueExpr))
             {
-                return new SelectColumn()
+                return new SelectSubQueryColumn
                 {
-                    ColumnName = intValue.Word
+                    SubQuery = valueExpr.ResultValue,
                 };
             }
 
