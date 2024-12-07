@@ -1499,11 +1499,6 @@ column_name AS computed_column_expression
             return number.ResultValue;
         }
         
-        if(Try(Parse_FunctionName, out var function))
-        {
-            return function.ResultValue;
-        }
-        
         if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
         {
             return new SqlValue
@@ -1512,8 +1507,14 @@ column_name AS computed_column_expression
             };
         }
         
+        if(Try(Parse_FunctionName, out var function))
+        {
+            return function.ResultValue;
+        }
+        
         if(TryReadSqlIdentifier(out var identifier))
         {
+            
             return new SqlFieldExpression
             {
                 FieldName = identifier.Word
