@@ -24,7 +24,7 @@ public class ParseSelectSqlTest
             ],
             From = new SqlTableSource
             {
-                TableName = "[TableName]",
+                TableName = "[$(TableName)]",
             }
         });
     }

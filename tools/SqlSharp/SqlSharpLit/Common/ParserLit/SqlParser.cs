@@ -328,26 +328,7 @@ public class SqlParser
             selectStatement.Top = topClause.Result;
         }
 
-        var columns = ParseWithComma<ISelectColumnExpression>(() =>
-        {
-            if (TryReadSqlIdentifier(out var fieldName))
-            {
-                return new SelectColumn()
-                {
-                    ColumnName = fieldName.Word
-                };
-            }
-
-            if (TryReadInt(out var intValue))
-            {
-                return new SelectColumn()
-                {
-                    ColumnName = intValue.Word
-                };
-            }
-
-            return CreateParseError("Expected column name");
-        });
+        var columns = Parse_SelectColumns();
         if (columns.HasError)
         {
             return columns.Error;
@@ -398,6 +379,39 @@ public class SqlParser
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
+    }
+
+    private ParseResult<List<ISelectColumnExpression>> Parse_SelectColumns()
+    {
+        var columns = ParseWithComma<ISelectColumnExpression>(() =>
+        {
+            if (TryMatch("*"))
+            {
+                return new SelectColumn
+                {
+                    ColumnName = "*"
+                };
+            }
+            
+            if (TryReadSqlIdentifier(out var fieldName))
+            {
+                return new SelectColumn()
+                {
+                    ColumnName = fieldName.Word
+                };
+            }
+
+            if (TryReadInt(out var intValue))
+            {
+                return new SelectColumn()
+                {
+                    ColumnName = intValue.Word
+                };
+            }
+
+            return CreateParseError("Expected column name");
+        });
+        return columns;
     }
 
     private ParseResult<SqlOrderByClause> ParseOrderByClause()
