@@ -8,6 +8,28 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_Star()
+    {
+        var sql = $"""
+                   SELECT * FROM [$(TableName)]
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [
+                new SelectColumn
+                {
+                    ColumnName = "*",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "[TableName]",
+            }
+        });
+    }
+    
+    [Test]
     public void Order_By_DESC()
     {
         var sql = $"""
