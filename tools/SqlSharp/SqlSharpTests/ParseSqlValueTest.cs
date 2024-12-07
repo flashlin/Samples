@@ -13,26 +13,20 @@ public class ParseSqlValueTest
                    @score1 as nvarchar(3)
                    """;
         var rc = ParseValue(sql);
-        rc.ResultValue.ShouldBe(new SqlFunctionExpression
+        rc.ResultValue.ShouldBe(new SqlAsExpr
         {
-            FunctionName = "cast",
-            Parameters = [
-                new SqlAsExpr
+            Instance = new SqlFieldExpression
+            {
+                FieldName = "@score1",
+            },
+            DataType = new SqlDataType
+            {
+                DataTypeName = "nvarchar",
+                Size = new SqlDataSize()
                 {
-                    Value = new SqlFieldExpression
-                    {
-                        FieldName = "@score1",
-                    },
-                    DataType = new SqlDataType
-                    {
-                        DataTypeName = "nvarchar",
-                        Size = new SqlDataSize()
-                        {
-                            Size = "3",
-                        },
-                    }
-                }
-            ],
+                    Size = "3",
+                },
+            },   
         });
     }
 
@@ -49,7 +43,7 @@ public class ParseSqlValueTest
             Parameters = [
                 new SqlAsExpr
                 {
-                    Value = new SqlFieldExpression
+                    Instance = new SqlFieldExpression
                     {
                         FieldName = "@score1",
                     },

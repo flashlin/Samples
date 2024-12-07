@@ -975,6 +975,26 @@ public class SqlParser
         return dataSize;
     }
 
+    private ParseResult<SqlDataType> Parse_DataType()
+    {
+        var startPosition = _text.Position;
+        if (!TryReadSqlIdentifier(out var identifier))
+        {
+            return NoneResult<SqlDataType>();
+        }
+        var dataType = Parse_DataSize();
+        if (dataType.HasError)
+        {
+            _text.Position = startPosition;
+            return dataType.Error;
+        }
+        return new SqlDataType()
+        {
+            DataTypeName = identifier.Word,
+            Size = dataType.Result != null ? dataType.ResultValue : new SqlDataSize()
+        };
+    }
+
     private ParseResult<SqlColumnDefinition> ParseColumnTypeDefinition(TextSpan columnNameSpan)
     {
         var column = new SqlColumnDefinition
@@ -1514,6 +1534,18 @@ column_name AS computed_column_expression
         
         if(TryReadSqlIdentifier(out var identifier))
         {
+            if(TryKeyword("AS"))
+            {
+                var dataType = Parse_DataType();
+                return new SqlAsExpr
+                {
+                    Instance = new SqlFieldExpression
+                    {
+                        FieldName = identifier.Word  
+                    },
+                    DataType = dataType.ResultValue
+                };
+            }
             
             return new SqlFieldExpression
             {
