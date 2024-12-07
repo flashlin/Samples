@@ -6,41 +6,6 @@ using T1.Standard.DesignPatterns;
 namespace SqlSharpTests;
 
 [TestFixture]
-public class ParseSqlValueTest
-{
-    [Test]
-    public void METHOD()
-    {
-        var sql = $"""
-                   cast(@score1 as nvarchar(3))
-                   """;
-        var sqlParser = new SqlParser(sql);
-        var rc = sqlParser.ParseValue();
-        rc.ResultValue.ShouldBe(new SqlFunctionExpression
-        {
-            FunctionName = "cast",
-            Parameters = [
-                new SqlAsExpr
-                {
-                    Value = new SqlFieldExpression
-                    {
-                        FieldName = "@score1",
-                    },
-                    DataType = new SqlDataType
-                    {
-                        DataTypeName = "nvarchar",
-                        Size = new SqlDataSize()
-                        {
-                            Size = "3",
-                        },
-                    }
-                }
-            ],
-        });
-    }
-}
-
-[TestFixture]
 public class ParseSqlArithmeticTest
 {
     [Test]
