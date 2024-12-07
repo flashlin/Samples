@@ -197,8 +197,18 @@ public class ExtractSqlHelper
             yield break;
         }
         var startSelectSql = text.Substring(startSelectIndex);
+        var nextChar = startSelectSql[select.Length];
+        if (!char.IsWhiteSpace(nextChar))
+        {
+            var nextSelect = startSelectSql.Substring(select.Length);
+            foreach (var subSelectSql in ExtractSelectSqlFromText(nextSelect))
+            {
+                yield return subSelectSql;
+            }
+            yield break;
+        }
         yield return startSelectSql;
-        foreach (var subSelectSql in ExtractStartSelectSqlString(startSelectSql.Substring(select.Length)))
+        foreach (var subSelectSql in ExtractSelectSqlFromText(startSelectSql.Substring(select.Length)))
         {
             yield return subSelectSql;
         }
