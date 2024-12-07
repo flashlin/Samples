@@ -9,16 +9,12 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
-    public void METHOD()
+    public void Where_cast_plus_cast()
     {
         var sql = $"""
                    select 1 from customer 
                    where BetOption = 
-                   cast(@finalHomeScore as nvarchar(3)) + ':' + cast(@finalAwayScore as nvarchar(3)))
-                   	 then 0
-                   else	
-                   	1
-                   end
+                   cast(@finalHomeScore as nvarchar(3)) + ':' + cast(@finalAwayScore as nvarchar(3))
                    """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement()
