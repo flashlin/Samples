@@ -14,7 +14,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    select 1 from customer 
                    where BetOption = 
-                   cast(@finalHomeScore as nvarchar(3)) + ':' + cast(@finalAwayScore as nvarchar(3))
+                   cast(@a as nvarchar(2)) + ':' + cast(@b as nvarchar(3))
                    """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement()
@@ -36,22 +36,59 @@ public class ParseSelectSqlTest
                    FieldName = "BetOption",
                 },
                 ComparisonOperator = ComparisonOperator.Equal,
-                Right = new SqlCaseExpression
+                Right = new SqlArithmeticBinaryExpr
                 {
-                    InputExpr = new SqlFieldExpression
+                    Left = new SqlArithmeticBinaryExpr()
                     {
-                        FieldName = "BetOption",
-                    },
-                    Whens = [
-                        new SqlCaseWhenExpression
+                        Left = new SqlFunctionExpression()
                         {
-                            WhenExpr = new SqlGroup()
-                            {
-                                Inner = null
-                            },
-                            Then = null
+                            FunctionName = "cast",
+                            Parameters = [
+                                new SqlAsExpr
+                                {
+                                    Instance = new SqlFieldExpression
+                                    {
+                                        FieldName = "@a",
+                                    },
+                                    DataType = new SqlDataType
+                                    {
+                                        DataTypeName = "nvarchar",
+                                        Size = new SqlDataSize
+                                        {
+                                            Size = "2",
+                                        }
+                                    }
+                                }
+                            ]
                         },
-                    ]
+                        Operator = "+",
+                        Right = new SqlValue
+                        {
+                            Value = "':'",
+                        }
+                    },
+                    Operator = "+",
+                    Right = new SqlFunctionExpression
+                    {
+                        FunctionName = "cast",
+                        Parameters = [
+                            new SqlAsExpr
+                            {
+                                Instance = new SqlFieldExpression
+                                {
+                                    FieldName = "@b",
+                                },
+                                DataType = new SqlDataType
+                                {
+                                    DataTypeName = "nvarchar",
+                                    Size = new SqlDataSize
+                                    {
+                                        Size = "3",
+                                    }
+                                }
+                            }
+                        ]
+                    }
                 },
             }
         });

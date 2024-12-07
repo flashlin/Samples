@@ -558,7 +558,7 @@ public class SqlParser
             return NoneResult<SqlConditionExpression>();
         }
 
-        var rightExpr = ParseValue();
+        var rightExpr = ParseArithmeticExpr();
         if (rightExpr.HasError)
         {
             return rightExpr.Error;
