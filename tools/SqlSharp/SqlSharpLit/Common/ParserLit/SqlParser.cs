@@ -367,7 +367,11 @@ public class SqlParser
         if (TryKeyword("WHERE"))
         {
             var rc = Parse_WhereExpression();
-            selectStatement.Where = rc.ResultValue;
+            if(rc.HasError)
+            {
+                return rc.Error;
+            }
+            selectStatement.Where = rc.Result;
         }
 
         var orderByClause = ParseOrderByClause();
