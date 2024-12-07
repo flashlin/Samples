@@ -32,5 +32,6 @@ public enum SqlType
     OrderByColumn,
     Case,
     CaseWhen,
-    AsExpr
+    AsExpr,
+    ArithmeticBinaryExpr,
 }
