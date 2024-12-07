@@ -52,9 +52,14 @@ public class StringParser
         SkipWhitespace();
         foreach (char c in expected)
         {
-            if (IsEnd() || char.ToUpper(NextChar()) != char.ToUpper(c))
+            if (IsEnd())
             {
-                throw new Exception($"Expected '{expected}' at position {_position}, but found different content");
+                throw new Exception($"Expected '{expected}' at position {_position}, but found EOF.");
+            }
+            var nextChar = NextChar();
+            if (nextChar != c)
+            {
+                throw new Exception($"Expected '{expected}' at position {_position}, but found different content '{nextChar}'.");
             }
         }
     }
