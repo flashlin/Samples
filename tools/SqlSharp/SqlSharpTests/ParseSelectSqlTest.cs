@@ -9,6 +9,25 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_field_as()
+    {
+        var sql = $"""
+                   select -1 as [result]
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [
+                new SelectColumn
+                {
+                    ColumnName = "-1",
+                    Alias = "result",
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Where_cast_plus_cast()
     {
         var sql = $"""
