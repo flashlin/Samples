@@ -1240,6 +1240,25 @@ column_name AS computed_column_expression
         return CreateParseResult(sqlIdentity);
     }
 
+    private ParseResult<SqlValue> ParseNumberValue()
+    {
+        var startPosition = _text.Position;
+        var negative = TryMatch("-");
+        var number = Or(ParseFloatValue, ParseIntValue)();
+        if (number.HasError)
+        {
+            _text.Position = startPosition;
+            return number.Error;
+        }
+        if(number.Result == null)
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlValue>();
+        }
+        number.ResultValue.Value = negative ? $"-{number.ResultValue.Value}" : number.ResultValue.Value;
+        return number;
+    }
+
     private ParseResult<SqlValue> ParseFloatValue()
     {
         if (_text.Try(_text.ReadFloat, out var floatNumber))
@@ -1567,14 +1586,9 @@ column_name AS computed_column_expression
             return new SqlNullValue();
         }
         
-        if(Try(ParseFloatValue, out var floatNumber))
+        if(Try(ParseNumberValue, out var numberValue))
         {
-            return floatNumber.ResultValue;
-        }
-
-        if (Try(ParseIntValue, out var number))
-        {
-            return number.ResultValue;
+            return numberValue.ResultValue;
         }
 
         if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
