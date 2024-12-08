@@ -449,6 +449,26 @@ public class SqlParser
                 }
                 column.ResultValue.Alias = aliasName.ResultValue.Value;
             }
+
+            if (TryMatch("="))
+            {
+                var rightExpr = ParseArithmeticExpr();
+                if (rightExpr.HasError)
+                {
+                    return rightExpr.Error;
+                }
+
+                return new SelectSubQueryColumn
+                {
+                    SubQuery = new SqlAssignExpr()
+                    { 
+                        Left = column.ResultValue,
+                        Right = rightExpr.ResultValue,
+                    },
+                    Alias = column.ResultValue.Alias,
+                };
+            }
+            
             return column;
         });
         return columns;

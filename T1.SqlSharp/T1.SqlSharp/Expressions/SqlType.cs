@@ -34,5 +34,7 @@ public enum SqlType
     CaseWhen,
     AsExpr,
     ArithmeticBinaryExpr,
-    AssignExpr
+    AssignExpr,
+    SelectSubQueryColumn,
+    SelectColumn
 }

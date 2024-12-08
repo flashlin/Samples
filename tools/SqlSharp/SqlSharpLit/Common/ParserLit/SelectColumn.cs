@@ -5,9 +5,10 @@ namespace SqlSharpLit.Common.ParserLit;
 
 public class SelectColumn : ISelectColumnExpression
 {
-    public SelectItemType ItemType => SelectItemType.Column;
+    public SqlType SqlType { get; } = SqlType.SelectColumn;
     public string ColumnName { get; set; } = string.Empty;
     public string Alias { get; set; } = string.Empty;
+
     public string ToSql()
     {
         var sql = new StringBuilder();
