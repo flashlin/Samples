@@ -2,10 +2,12 @@ using System.Text;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlValues : ISqlExpression
+public class SqlValues : ISqlValue
 {
     public SqlType SqlType { get; } = SqlType.Values;
-    public List<ISqlExpression> Items { get; set; } = [];
+    public List<ISqlValue> Items { get; set; } = [];
+
+    public string Value => ToSql();
 
     public string ToSql()
     {
@@ -22,4 +24,5 @@ public class SqlValues : ISqlExpression
         sql.Append(")");
         return sql.ToString();
     }
+
 }

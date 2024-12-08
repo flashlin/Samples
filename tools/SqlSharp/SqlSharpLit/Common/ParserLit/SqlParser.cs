@@ -1589,8 +1589,49 @@ column_name AS computed_column_expression
         return NoneResult<SqlFieldExpression>();
     }
 
+    private ParseResult<SqlValues> ParseValues()
+    {
+        var startPosition = _text.Position;
+        if(!TryMatch("("))
+        {
+            return NoneResult<SqlValues>();
+        }
+        var items = ParseWithComma(() =>
+        {
+            var value = ParseValue();
+            if (value.HasError)
+            {
+                return value.Error;
+            }
+            return value;
+        });
+        if (items.HasError)
+        {
+            _text.Position = startPosition;
+            return items.Error;
+        }
+        if (!TryMatch(")"))
+        {
+            return CreateParseError("Expected )");
+        }
+        if(items.ResultValue.Count == 1)
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlValues>();
+        }
+        return new SqlValues
+        {
+            Items = items.ResultValue.ToList()
+        };
+    }
+
     public ParseResult<ISqlValue> ParseValue()
     {
+        if(Try(ParseValues, out var values))
+        {
+            return values.ResultValue;
+        }
+        
         if (TryMatch("("))
         {
             var value = ParseValue();
@@ -1598,7 +1639,6 @@ column_name AS computed_column_expression
             {
                 return value.Error;
             }
-
             MatchString(")");
             return new SqlGroup
             {
