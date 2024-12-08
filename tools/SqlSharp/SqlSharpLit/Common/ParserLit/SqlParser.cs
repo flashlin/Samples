@@ -1646,6 +1646,14 @@ column_name AS computed_column_expression
             };
         }
 
+        if (TryMatch("*"))
+        {
+            return new SqlValue
+            {
+                Value = "*"
+            };
+        }
+
         if (TryKeyword("NULL"))
         {
             return new SqlNullValue();

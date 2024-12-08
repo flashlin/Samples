@@ -9,6 +9,45 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_Field_equal_count_star()
+    {
+        var sql = $"""
+                   select @upper = count(*) 
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [
+                new SelectSubQueryColumn
+                {
+                    SubQuery = new SqlAssignExpr
+                    {
+                        Left = new SelectColumn
+                        {
+                            ColumnName = "@upper",
+                        },
+                        Right = new SqlFunctionExpression
+                        {
+                            FunctionName = "count",
+                            Parameters = [
+                                new SqlValue
+                                {
+                                    Value = "*",
+                                }
+                            ]
+                        }
+                    },
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+            }
+        });
+    }
+    
+    [Test]
     public void Select_field_equal_binaryExpr()
     {
         var sql = $"""
