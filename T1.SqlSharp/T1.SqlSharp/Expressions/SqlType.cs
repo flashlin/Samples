@@ -36,5 +36,6 @@ public enum SqlType
     ArithmeticBinaryExpr,
     AssignExpr,
     SelectSubQueryColumn,
-    SelectColumn
+    SelectColumn,
+    Values
 }

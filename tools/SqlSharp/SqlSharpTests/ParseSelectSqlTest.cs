@@ -54,12 +54,45 @@ public class ParseSelectSqlTest
     public void Where_field_in()
     {
         var sql = $"""
-                   select @a = @a & HREnabled,
+                   select @a
                    from customer 
                    where id in (@b, @c)
                    """;
         var rc = ParseSql(sql);
-        //TODO
+        rc.ShouldBe(new SelectStatement()
+        {
+            Columns = [
+                new SelectColumn
+                {
+                    ColumnName = "@a",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+            },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpression
+                {
+                    FieldName = "id",
+                },
+                ComparisonOperator = ComparisonOperator.In,
+                Right = new SqlValues
+                {
+                    Items = [
+                        new SqlFieldExpression
+                        {
+                            FieldName = "@b",
+                        },
+                        new SqlFieldExpression
+                        {
+                            FieldName = "@c",
+                        },
+                    ]
+                }
+            }
+        });
     }
     
     [Test]
