@@ -23,9 +23,9 @@ public class ParseSelectSqlTest
                 { 
                     SubQuery = new SqlAssignExpr
                     {
-                        Left = new SqlFieldExpression
+                        Left = new SelectColumn
                         {
-                            FieldName = "@a",
+                            ColumnName = "@a",
                         },
                         Right = new SqlArithmeticBinaryExpr
                         {

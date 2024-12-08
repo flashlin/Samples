@@ -431,6 +431,11 @@ public class SqlParser
     {
         var columns = ParseWithComma<ISelectColumnExpression>(() =>
         {
+            if (IsPeekKeywords("FROM"))
+            {
+                return NoneResult<ISelectColumnExpression>();
+            }
+            
             var column = Or<ISelectColumnExpression>(
                 Parse_Column_Star, 
                 Parse_Column_Identifier, 
