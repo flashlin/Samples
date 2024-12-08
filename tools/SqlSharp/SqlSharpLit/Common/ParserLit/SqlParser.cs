@@ -390,35 +390,56 @@ public class SqlParser
         return CreateParseResult(selectStatement);
     }
 
+    private ParseResult<SelectColumn> Parse_Column_Star()
+    {
+        if (TryMatch("*"))
+        {
+            return new SelectColumn
+            {
+                ColumnName = "*"
+            };
+        }
+
+        return NoneResult<SelectColumn>();
+    }
+    
+    private ParseResult<SelectColumn> Parse_Column_Identifier()
+    {
+        if (TryReadSqlIdentifier(out var fieldName))
+        {
+            return new SelectColumn()
+            {
+                ColumnName = fieldName.Word
+            };
+        }
+        return NoneResult<SelectColumn>();
+    }
+    
+    private ParseResult<SelectSubQueryColumn> Parse_Column_SubQuery()
+    {
+        if (Try(ParseValue, out var valueExpr))
+        {
+            return new SelectSubQueryColumn
+            {
+                SubQuery = valueExpr.ResultValue,
+            };
+        }
+        return NoneResult<SelectSubQueryColumn>();
+    }
+
     private ParseResult<List<ISelectColumnExpression>> Parse_SelectColumns()
     {
         var columns = ParseWithComma<ISelectColumnExpression>(() =>
         {
-            if (TryMatch("*"))
+            var column = Or<ISelectColumnExpression>(
+                Parse_Column_Star, 
+                Parse_Column_Identifier, 
+                Parse_Column_SubQuery)();
+            if (column.HasError)
             {
-                return new SelectColumn
-                {
-                    ColumnName = "*"
-                };
+                return column.Error;
             }
-
-            if (TryReadSqlIdentifier(out var fieldName))
-            {
-                return new SelectColumn()
-                {
-                    ColumnName = fieldName.Word
-                };
-            }
-
-            if (Try(ParseValue, out var valueExpr))
-            {
-                return new SelectSubQueryColumn
-                {
-                    SubQuery = valueExpr.ResultValue,
-                };
-            }
-
-            return CreateParseError("Expected column name");
+            return column;
         });
         return columns;
     }
@@ -1728,6 +1749,21 @@ column_name AS computed_column_expression
         return _text.TryMatch(expected);
     }
 
+    private Func<ParseResult<SqlToken>> ParseSymbol(string expected)
+    {
+        return () =>
+        {
+            if(TryMatch(expected))
+            {
+                return new SqlToken
+                {
+                    Value = expected
+                };
+            }
+            return NoneResult<SqlToken>();
+        };
+    }
+
     private bool TryKeyword(string expected)
     {
         SkipWhiteSpace();
@@ -1753,6 +1789,18 @@ column_name AS computed_column_expression
     {
         SkipWhiteSpace();
         return _text.Try(_text.ReadSqlIdentifier, out result);
+    }
+
+    private ParseResult<SqlToken> ParseSqlIdentifier()
+    {
+        if(TryReadSqlIdentifier(out var identifier))
+        {
+            return new SqlToken
+            {
+                Value = identifier.Word
+            };
+        }
+        return NoneResult<SqlToken>();
     }
 
     private bool TryReadInt(out TextSpan result)
