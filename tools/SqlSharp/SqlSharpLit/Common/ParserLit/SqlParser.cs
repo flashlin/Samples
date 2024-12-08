@@ -440,7 +440,7 @@ public class SqlParser
                 return column.Error;
             }
 
-            if (TryMatch("AS"))
+            if (TryKeyword("AS"))
             {
                 var aliasName = ParseSqlIdentifier();
                 if(aliasName.HasError)

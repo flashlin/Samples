@@ -18,10 +18,14 @@ public class ParseSelectSqlTest
         rc.ShouldBe(new SelectStatement
         {
             Columns = [
-                new SelectColumn
+                new SelectSubQueryColumn
                 {
-                    ColumnName = "-1",
-                    Alias = "result",
+                    SubQuery = new SqlValue
+                    {
+                        SqlType = SqlType.IntValue,
+                        Value = "-1",
+                    },
+                    Alias = "[result]",
                 }
             ]
         });
