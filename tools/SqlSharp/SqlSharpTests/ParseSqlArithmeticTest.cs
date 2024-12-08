@@ -7,13 +7,25 @@ namespace SqlSharpTests;
 public class ParseSqlBinaryExprTest
 {
     [Test]
-    public void METHOD()
+    public void A_and_b()
     {
         var sql = $"""
-                   @RCEnabled & RCEnabled
+                   @a & b
                    """;
         var sqlParser = new SqlParser(sql);
-        //var rc = sqlParser.ParseBinaryExpr();
+        var rc = sqlParser.ParseArithmeticExpr();
+        rc.ResultValue.ShouldBe(new SqlArithmeticBinaryExpr
+        {
+            Left = new SqlFieldExpression
+            {
+                FieldName = "@a"
+            },
+            Operator = ArithmeticOperator.BitwiseAnd,
+            Right = new SqlFieldExpression
+            {
+                FieldName = "b"
+            }
+        });
     }
 }
     
