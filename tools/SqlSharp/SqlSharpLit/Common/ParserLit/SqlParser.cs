@@ -439,6 +439,16 @@ public class SqlParser
             {
                 return column.Error;
             }
+
+            if (TryMatch("AS"))
+            {
+                var aliasName = ParseSqlIdentifier();
+                if(aliasName.HasError)
+                {
+                    return aliasName.Error;
+                }
+                column.ResultValue.Alias = aliasName.ResultValue.Value;
+            }
             return column;
         });
         return columns;
@@ -1230,6 +1240,18 @@ column_name AS computed_column_expression
         return CreateParseResult(sqlIdentity);
     }
 
+    private ParseResult<SqlValue> ParseFloatValue()
+    {
+        if (_text.Try(_text.ReadFloat, out var floatNumber))
+        {
+            return new SqlValue
+            {
+                Value = floatNumber.Word
+            };
+        }
+        return NoneResult<SqlValue>();
+    }
+
     private ParseResult<SqlValue> ParseIntValue()
     {
         if (_text.Try(_text.ReadInt, out var number))
@@ -1544,13 +1566,10 @@ column_name AS computed_column_expression
         {
             return new SqlNullValue();
         }
-
-        if (_text.Try(_text.ReadFloat, out var floatNumber))
+        
+        if(Try(ParseFloatValue, out var floatNumber))
         {
-            return new SqlValue
-            {
-                Value = floatNumber.Word
-            };
+            return floatNumber.ResultValue;
         }
 
         if (Try(ParseIntValue, out var number))
