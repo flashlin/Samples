@@ -8,10 +8,50 @@ namespace SqlSharpTests;
 [TestFixture]
 public class ParseSelectSqlTest
 {
-    
-    
     [Test]
     public void Select_field_equal_binaryExpr()
+    {
+        var sql = $"""
+                   select @a = @a & b,
+                   from customer 
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns = [
+                new SelectSubQueryColumn()
+                { 
+                    SubQuery = new SqlAssignExpr
+                    {
+                        Left = new SqlFieldExpression
+                        {
+                            FieldName = "@a",
+                        },
+                        Right = new SqlArithmeticBinaryExpr
+                        {
+                            Left = new SqlValue()
+                            {
+                                SqlType = SqlType.Field,
+                                Value = "@a",
+                            },
+                            Operator = ArithmeticOperator.BitwiseAnd,
+                            Right = new SqlFieldExpression
+                            {
+                                FieldName = "b",
+                            }
+                        }
+                    }
+                },
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+            }
+        });
+    }
+    
+    [Test]
+    public void Where_field_in()
     {
         var sql = $"""
                    select @a = @a & HREnabled,

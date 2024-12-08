@@ -1844,16 +1844,16 @@ column_name AS computed_column_expression
 
     public ParseResult<ISqlExpression> ParseArithmeticExpr()
     {
-        return ParseArithmeticAdditionOrSubtraction();
+        return ParseArithmetic_Step1_AdditionOrSubtraction();
     }
 
-    public ParseResult<ISqlExpression> ParseArithmeticAdditionOrSubtraction()
+    public ParseResult<ISqlExpression> ParseArithmetic_Step1_AdditionOrSubtraction()
     {
-        var left = ParseArithmeticMultiplicationOrDivision();
+        var left = ParseArithmetic_Step2_MultiplicationOrDivision();
         while (PeekSymbolString(1).Equals("+") || PeekSymbolString(1).Equals("-"))
         {
             var op = ReadSymbolString(1);
-            var right = ParseArithmeticMultiplicationOrDivision();
+            var right = ParseArithmetic_Step2_MultiplicationOrDivision();
             left = CreateParseResult(new SqlArithmeticBinaryExpr
             {
                 Left = left.ResultValue,
@@ -1865,13 +1865,13 @@ column_name AS computed_column_expression
         return left;
     }
 
-    public ParseResult<ISqlExpression> ParseArithmeticMultiplicationOrDivision()
+    public ParseResult<ISqlExpression> ParseArithmetic_Step2_MultiplicationOrDivision()
     {
-        var left = ParseArithmeticBitwise();
+        var left = ParseArithmetic_Step3_Bitwise();
         while (PeekSymbolString(1).Equals("*") || PeekSymbolString(1).Equals("/"))
         {
             var op= ReadSymbolString(1);
-            var right = ParseArithmeticBitwise();
+            var right = ParseArithmetic_Step3_Bitwise();
             left = new SqlArithmeticBinaryExpr
             {
                 Left = left.ResultValue,
@@ -1882,13 +1882,13 @@ column_name AS computed_column_expression
         return left;
     }
     
-    public ParseResult<ISqlExpression> ParseArithmeticBitwise()
+    public ParseResult<ISqlExpression> ParseArithmetic_Step3_Bitwise()
     {
-        var left = ParseArithmeticPrimary();
+        var left = ParseArithmetic_Step4_Primary();
         while (PeekSymbolString(1).Equals("&") || PeekSymbolString(1).Equals("|") || PeekSymbolString(1).Equals("^"))
         {
             var op= ReadSymbolString(1);
-            var right = ParseArithmeticPrimary();
+            var right = ParseArithmetic_Step4_Primary();
             left = new SqlArithmeticBinaryExpr
             {
                 Left = left.ResultValue,
@@ -1899,7 +1899,7 @@ column_name AS computed_column_expression
         return left; 
     }
 
-    private ParseResult<ISqlExpression> ParseArithmeticPrimary()
+    private ParseResult<ISqlExpression> ParseArithmetic_Step4_Primary()
     {
         var startPosition = _text.Position;
         if (Try(ParseValue, out var value))
@@ -1915,7 +1915,7 @@ column_name AS computed_column_expression
 
         if (TryMatch("("))
         {
-            var subExpr = ParseArithmeticAdditionOrSubtraction();
+            var subExpr = ParseArithmetic_Step1_AdditionOrSubtraction();
             if (subExpr.HasError)
             {
                 return subExpr.Error;
