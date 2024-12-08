@@ -24,10 +24,13 @@ public class StringParser
         {
             return string.Empty;
         }
-
         return _text.Substring(_position);
     }
 
+    public string GetPreviousText(int offset)
+    {
+        return _text.Substring(offset, _position - offset);
+    }
 
     public bool IsEnd()
     {
