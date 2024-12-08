@@ -4,11 +4,11 @@ public class SqlArithmeticBinaryExpr : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.ArithmeticBinaryExpr;
     public required ISqlExpression Left { get; set; }
-    public string Operator { get; set; } = "+";
+    public ArithmeticOperator Operator { get; set; }
     public required ISqlExpression Right { get; set; }
 
     public string ToSql()
     {
-        return $"{Left.ToSql()} {Operator} {Right.ToSql()}";
+        return $"{Left.ToSql()} {Operator.ToSql()} {Right.ToSql()}";
     }
 }

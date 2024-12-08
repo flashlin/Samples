@@ -1857,7 +1857,7 @@ column_name AS computed_column_expression
             left = CreateParseResult(new SqlArithmeticBinaryExpr
             {
                 Left = left.ResultValue,
-                Operator = op,
+                Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue
             }).To<ISqlExpression>();
         }
@@ -1875,7 +1875,7 @@ column_name AS computed_column_expression
             left = new SqlArithmeticBinaryExpr
             {
                 Left = left.ResultValue,
-                Operator = op,
+                Operator = op.ToArithmeticOperator(),
                 Right = right.ResultValue,
             };
         }

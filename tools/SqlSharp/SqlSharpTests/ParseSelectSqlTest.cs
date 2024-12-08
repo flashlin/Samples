@@ -8,6 +8,20 @@ namespace SqlSharpTests;
 [TestFixture]
 public class ParseSelectSqlTest
 {
+    
+    
+    [Test]
+    public void Select_field_equal_binaryExpr()
+    {
+        var sql = $"""
+                   select @a = @a & HREnabled,
+                   from customer 
+                   where id in (@b, @c)
+                   """;
+        var rc = ParseSql(sql);
+        
+    }
+    
     [Test]
     public void Select_field_as()
     {
@@ -84,13 +98,13 @@ public class ParseSelectSqlTest
                                 }
                             ]
                         },
-                        Operator = "+",
+                        Operator = ArithmeticOperator.Add,
                         Right = new SqlValue
                         {
                             Value = "':'",
                         }
                     },
-                    Operator = "+",
+                    Operator = ArithmeticOperator.Add,
                     Right = new SqlFunctionExpression
                     {
                         FunctionName = "cast",

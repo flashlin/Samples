@@ -4,6 +4,22 @@ using T1.SqlSharp.Expressions;
 namespace SqlSharpTests;
 
 [TestFixture]
+public class ParseSqlBinaryExprTest
+{
+    [Test]
+    public void METHOD()
+    {
+        var sql = $"""
+                   @RCEnabled & RCEnabled
+                   """;
+        var sqlParser = new SqlParser(sql);
+        //var rc = sqlParser.ParseBinaryExpr();
+    }
+}
+    
+
+
+[TestFixture]
 public class ParseSqlArithmeticTest
 {
     [Test]
@@ -39,13 +55,13 @@ public class ParseSqlArithmeticTest
                         }
                     ],
                 },
-                Operator = "+",
+                Operator = ArithmeticOperator.Add,
                 Right = new SqlValue
                 {
                     Value = "':'"
                 }
             },
-            Operator = "+",
+            Operator = ArithmeticOperator.Add,
             Right = new SqlFunctionExpression
             {
                 FunctionName = "cast",
