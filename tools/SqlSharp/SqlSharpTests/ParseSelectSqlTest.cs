@@ -9,6 +9,25 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_Field_Equal_Func_Arithmetic()
+    {
+        var sql = $"""
+                   select @a = round(((@b - @b) * RandomNumber + @d), 0)
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+    }
+    
+    [Test]
+    public void From_Select()
+    {
+        var sql = $"""
+                   select @random = round(((@upper - @lower -1) * RandomNumber + @lower), 0)
+                   from (select RandomNumber from vRandNumber) as d
+                   """;
+    }
+    
+    [Test]
     public void Select_Field_equal_count_star()
     {
         var sql = $"""
