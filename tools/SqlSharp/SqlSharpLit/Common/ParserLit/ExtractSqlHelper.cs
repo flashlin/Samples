@@ -183,8 +183,18 @@ public class ExtractSqlHelper
                 var msg = $"Error parsing {selectSql}\n{result.Error.Message}";
                 throw new Exception(msg);
             }
-            
-            File.AppendAllText(outputFile, result.ResultValue.ToSql());
+
+            try
+            {
+                File.AppendAllText(outputFile, result.ResultValue.ToSql());
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"Error ToSql:\n {JsonSerializer.Serialize(result.ResultValue)}");
+                var sql = sqlParser.GetRemainingText();
+                Console.WriteLine($"Error file {sqlFile}:\n{sql}");
+                throw;
+            }
         }
     }
 
