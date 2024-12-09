@@ -165,14 +165,24 @@ public class ExtractSqlHelper
         }
         foreach (var selectSql in ExtractStartSelectSqlString(folder))
         {
-            var sqlParser = new SqlParser(selectSql);
-            var result = sqlParser.ParseSelectStatement();
+            ParseResult<SelectStatement> result;
+            try
+            {
+                var sqlParser = new SqlParser(selectSql);
+                result = sqlParser.ParseSelectStatement();
+            }
+            catch (Exception)
+            {
+                Console.WriteLine($"Error parsing {selectSql}");
+                throw;
+            }
+
             if (!result.HasResult)
             {
                 var msg = $"Error parsing {selectSql}\n{result.Error.Message}";
                 throw new Exception(msg);
             }
-
+            
             File.AppendAllText(outputFile, result.ResultValue.ToSql());
         }
     }
