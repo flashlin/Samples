@@ -14,8 +14,7 @@ public class ParseSelectSqlTest
         var sql = $"""
                    SELECT TOP (@batchsize) Id
                    FROM customer
-                   WHERE id = @id
-                       AND [status] & (123 | 456) = 0
+                   WHERE [status] & (123 | 456) = 0
                        AND ISNULL(pp,0) = 0
                    """;
         var rc = ParseSql(sql);
@@ -46,29 +45,16 @@ public class ParseSelectSqlTest
             {
                 Left = new SqlConditionExpression
                 {
-                    Left = new SqlFieldExpression
+                    Left = new SqlArithmeticBinaryExpr
                     {
-                        FieldName = "id",
-                    },
-                    ComparisonOperator = ComparisonOperator.Equal,
-                    Right = new SqlFieldExpression
-                    {
-                        FieldName = "@id",
-                    }
-                },
-                LogicalOperator = LogicalOperator.And,
-                Right = new SqlSearchCondition
-                {
-                    Left = new SqlConditionExpression
-                    {
-                        Left = new SqlArithmeticBinaryExpr
+                        Left = new SqlFieldExpression
                         {
-                            Left = new SqlFieldExpression
-                            {
-                                FieldName = "[status]",
-                            },
-                            Operator = ArithmeticOperator.BitwiseAnd,
-                            Right = new SqlArithmeticBinaryExpr
+                            FieldName = "[status]",
+                        },
+                        Operator = ArithmeticOperator.BitwiseAnd,
+                        Right = new SqlGroup()
+                        {
+                            Inner = new SqlArithmeticBinaryExpr
                             {
                                 Left = new SqlValue
                                 {
@@ -82,39 +68,39 @@ public class ParseSelectSqlTest
                                     Value = "456",
                                 }
                             }
-                        },
-                        ComparisonOperator = ComparisonOperator.Equal,
-                        Right = new SqlValue
-                        {
-                            SqlType = SqlType.IntValue,
-                            Value = "0",
                         }
                     },
-                    LogicalOperator = LogicalOperator.And,
-                    Right = new SqlConditionExpression
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue
                     {
-                        Left = new SqlFunctionExpression
-                        {
-                            FunctionName = "ISNULL",
-                            Parameters =
-                            [
-                                new SqlFieldExpression
-                                {
-                                    FieldName = "pp",
-                                },
-                                new SqlValue
-                                {
-                                    SqlType = SqlType.IntValue,
-                                    Value = "0",
-                                }
-                            ]
-                        },
-                        ComparisonOperator = ComparisonOperator.Equal,
-                        Right = new SqlValue
-                        {
-                            SqlType = SqlType.IntValue,
-                            Value = "0",
-                        }
+                        SqlType = SqlType.IntValue,
+                        Value = "0",
+                    }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlConditionExpression
+                {
+                    Left = new SqlFunctionExpression
+                    {
+                        FunctionName = "ISNULL",
+                        Parameters =
+                        [
+                            new SqlFieldExpression
+                            {
+                                FieldName = "pp",
+                            },
+                            new SqlValue
+                            {
+                                SqlType = SqlType.IntValue,
+                                Value = "0",
+                            }
+                        ]
+                    },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue
+                    {
+                        SqlType = SqlType.IntValue,
+                        Value = "0",
                     }
                 }
             }

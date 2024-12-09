@@ -14,7 +14,8 @@ public class SqlSearchCondition : ISqlExpression
         sql.Write(Left.ToSql());
         if (LogicalOperator != LogicalOperator.None)
         {
-            sql.Write(LogicalOperator.ToString().ToUpper());
+            sql.Write(" ");
+            sql.Write(LogicalOperator.ToSql());
             sql.Write(" ");
             sql.Write(Right!.ToSql());
         }

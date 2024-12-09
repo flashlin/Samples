@@ -9,6 +9,6 @@ public class SqlConditionExpression : ISqlExpression
 
     public string ToSql()
     {
-        return $"{Left.ToSql()} {ComparisonOperator.ToString()} {Right.ToSql()}";
+        return $"{Left.ToSql()} {ComparisonOperator.ToSql()} {Right.ToSql()}";
     }
 }

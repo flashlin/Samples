@@ -546,7 +546,7 @@ public class SqlParser
     private ParseResult<SqlSearchCondition> Parse_SearchCondition()
     {
         var startPosition = _text.Position;
-        var leftExpr = ParseValue();
+        var leftExpr = ParseArithmeticExpr();
         if (leftExpr.HasError)
         {
             return leftExpr.Error;
@@ -591,7 +591,7 @@ public class SqlParser
     private ParseResult<SqlConditionExpression> Parse_ConditionExpression()
     {
         var startPosition = _text.Position;
-        var leftExpr = ParseValue();
+        var leftExpr = ParseArithmeticExpr();
         if (leftExpr.HasError)
         {
             return leftExpr.Error;

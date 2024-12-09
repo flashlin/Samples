@@ -34,7 +34,7 @@ public class SelectStatement : ISqlExpression
             sql.WriteLine();
         }
         sql.Indent--;
-        sql.WriteLine("FROM");
+        sql.WriteLine("FROM ");
         sql.Indent++;
         sql.Write(From.ToSql());
         sql.Indent--;
