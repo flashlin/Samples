@@ -1610,9 +1610,12 @@ column_name AS computed_column_expression
             _text.Position = startPosition;
             return items.Error;
         }
-        //TODO: 不一定是出錯
         if (!TryMatch(")"))
         {
+            var nextSymbol = PeekSymbolString(1);
+            _text.Position = startPosition;
+            return NoneResult<SqlValues>();
+            
             return CreateParseError("Expected )");
         }
         if(items.ResultValue.Count <= 1)
@@ -1635,12 +1638,15 @@ column_name AS computed_column_expression
         
         if (TryMatch("("))
         {
-            var value = ParseValue();
+            var value = ParseArithmeticExpr();
             if (value.HasError)
             {
                 return value.Error;
             }
-            MatchString(")");
+            if (!TryMatch(")"))
+            {
+                return CreateParseError("Expected )");
+            }
             return new SqlGroup
             {
                 Inner = value.ResultValue
