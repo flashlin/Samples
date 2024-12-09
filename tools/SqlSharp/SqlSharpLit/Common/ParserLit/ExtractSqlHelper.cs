@@ -166,14 +166,15 @@ public class ExtractSqlHelper
         foreach (var selectSql in ExtractStartSelectSqlString(folder))
         {
             ParseResult<SelectStatement> result;
+            var sqlParser = new SqlParser(selectSql);
             try
             {
-                var sqlParser = new SqlParser(selectSql);
                 result = sqlParser.ParseSelectStatement();
             }
             catch (Exception)
             {
-                Console.WriteLine($"Error parsing:\n{selectSql}");
+                var sql = sqlParser.GetRemainingText();
+                Console.WriteLine($"Error parsing position:\n{sql}");
                 throw;
             }
 

@@ -2017,4 +2017,9 @@ column_name AS computed_column_expression
 
         return CreateParseError("InvalidOperationException Unexpected value");
     }
+
+    public string GetRemainingText()
+    {
+        return _text.GetRemainingText();
+    }
 }
