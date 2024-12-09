@@ -1615,7 +1615,7 @@ column_name AS computed_column_expression
         {
             return CreateParseError("Expected )");
         }
-        if(items.ResultValue.Count == 1)
+        if(items.ResultValue.Count <= 1)
         {
             _text.Position = startPosition;
             return NoneResult<SqlValues>();
