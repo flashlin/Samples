@@ -1733,6 +1733,11 @@ column_name AS computed_column_expression
         var elements = new List<T>();
         do
         {
+            if(PeekSymbolString(1).Equals(")"))
+            {
+                break;
+            }
+            
             var elem = parseElemFn();
             if (elem is { HasResult: true, Result: null })
             {
