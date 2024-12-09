@@ -174,13 +174,14 @@ public class ExtractSqlHelper
             catch (Exception)
             {
                 var sql = sqlParser.GetRemainingText();
-                Console.WriteLine($"Error parsing position {sqlFile}:\n{sql}");
+                Console.WriteLine($"Exception {sqlFile}:\n{sql}");
                 throw;
             }
 
             if (!result.HasResult)
             {
-                var msg = $"Error parsing {sqlFile} \nSQL: {selectSql}\n{result.Error.Message}";
+                var positionSql = sqlParser.GetRemainingText();
+                var msg = $"Error parsing {sqlFile} \nGetRemainingText:\n{positionSql}\nError: {result.Error.Message}";
                 throw new Exception(msg);
             }
 
