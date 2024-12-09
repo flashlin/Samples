@@ -1395,7 +1395,7 @@ column_name AS computed_column_expression
         return new SqlParameterValue
         {
             Name = string.Empty,
-            Value = valueResult.ResultValue.Value
+            Value = valueResult.ResultValue.ToSql()
         };
     }
 
@@ -1598,7 +1598,7 @@ column_name AS computed_column_expression
         }
         var items = ParseWithComma(() =>
         {
-            var value = ParseValue();
+            var value = ParseArithmeticExpr();
             if (value.HasError)
             {
                 return value.Error;
@@ -1610,6 +1610,7 @@ column_name AS computed_column_expression
             _text.Position = startPosition;
             return items.Error;
         }
+        //TODO: 不一定是出錯
         if (!TryMatch(")"))
         {
             return CreateParseError("Expected )");
@@ -1625,7 +1626,7 @@ column_name AS computed_column_expression
         };
     }
 
-    public ParseResult<ISqlValue> ParseValue()
+    public ParseResult<ISqlExpression> ParseValue()
     {
         if(Try(ParseValues, out var values))
         {
@@ -1703,7 +1704,7 @@ column_name AS computed_column_expression
             return tableName.ResultValue;
         }
 
-        return NoneResult<ISqlValue>();
+        return NoneResult<ISqlExpression>();
     }
 
     private ParseResult<SqlFunctionExpression> Parse_FunctionName()
@@ -1713,7 +1714,7 @@ column_name AS computed_column_expression
         {
             if (TryMatch("("))
             {
-                var parameters = ParseWithComma(ParseValue);
+                var parameters = ParseWithComma(ParseArithmeticExpr);
                 MatchString(")");
                 return new SqlFunctionExpression
                 {

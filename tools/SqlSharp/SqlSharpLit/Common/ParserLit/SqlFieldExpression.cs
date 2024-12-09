@@ -2,7 +2,7 @@ using T1.SqlSharp.Expressions;
 
 namespace SqlSharpLit.Common.ParserLit;
 
-public class SqlFieldExpression : ISqlValue
+public class SqlFieldExpression : ISqlExpression
 {
     public SqlType SqlType => SqlType.Field;
     public string FieldName { get; set; } = string.Empty;
@@ -10,5 +10,4 @@ public class SqlFieldExpression : ISqlValue
     {
         return FieldName;
     }
-    public string Value => FieldName;
 }

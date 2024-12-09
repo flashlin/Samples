@@ -2,19 +2,11 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlFunctionExpression : ISqlValue
+public class SqlFunctionExpression : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.Function;
     public string FunctionName { get; set; } =string.Empty;
     public ISqlExpression[] Parameters { get; set; } = [];
-
-    public string Value
-    {
-        get
-        {
-            return $"{FunctionName}({string.Join(", ", Parameters.Select(p => p.ToSql()))})";
-        }
-    }
 
     public string ToSql()
     {

@@ -87,13 +87,12 @@ public class ParseSelectSqlTest
                         },
                         Right = new SqlArithmeticBinaryExpr
                         {
-                            Left = new SqlValue()
+                            Left = new SqlFieldExpression
                             {
-                                SqlType = SqlType.Field,
-                                Value = "@a",
+                                FieldName = "@a",
                             },
                             Operator = ArithmeticOperator.BitwiseAnd,
-                            Right = new SqlFieldExpression
+                            Right = new SqlFieldExpression()
                             {
                                 FieldName = "b",
                             }

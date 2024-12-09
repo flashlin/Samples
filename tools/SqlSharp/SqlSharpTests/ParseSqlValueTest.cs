@@ -60,7 +60,7 @@ public class ParseSqlValueTest
         });
     }
 
-    private static ParseResult<ISqlValue> ParseValue(string sql)
+    private static ParseResult<ISqlExpression> ParseValue(string sql)
     {
         var sqlParser = new SqlParser(sql);
         var rc = sqlParser.ParseValue();
