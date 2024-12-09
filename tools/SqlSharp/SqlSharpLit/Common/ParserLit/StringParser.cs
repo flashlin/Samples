@@ -542,16 +542,16 @@ public class StringParser
         {
             return new TextSpan
             {
-                Word = bracketStr,
+                Word = string.Empty,
                 Offset = startPosition,
-                Length = 1
+                Length = 0
             };
         }
         return new TextSpan
         {
-            Word = string.Empty,
+            Word = bracketStr,
             Offset = startPosition,
-            Length = 0
+            Length = 1
         };
     }
 
@@ -559,7 +559,7 @@ public class StringParser
     {
         SkipWhitespace();
         var startPosition = _position;
-        var symbol = _text.Substring(startPosition, length);
+        var symbol = ReadString(length);
         if (!IsSymbolEnd(PeekNext()))
         {
             return new TextSpan
@@ -569,25 +569,24 @@ public class StringParser
                 Length = 0
             };
         }
-        return new TextSpan
-        {
-            Word = symbol,
-            Offset = startPosition,
-            Length = symbol.Length
-        };
+        return symbol;
     }
     
-    private bool IsSymbolEnd(char symbol)
+    private bool IsSymbolEnd(char symbolEnd)
     {
-        if(symbol == '\0')
+        if(symbolEnd == '\0')
         {
             return true;
         }
-        if (IsWordChar(symbol))
+        if (IsWordChar(symbolEnd))
         {
             return true;
         }
-        return Brackets.Contains(symbol);
+        if (char.IsWhiteSpace(symbolEnd))
+        {
+            return true;
+        }
+        return Brackets.Contains(symbolEnd);
     }
 
     public TextSpan ReadSymbols()

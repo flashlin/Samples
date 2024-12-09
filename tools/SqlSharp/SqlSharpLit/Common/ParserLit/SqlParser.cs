@@ -1612,11 +1612,8 @@ column_name AS computed_column_expression
         }
         if (!TryMatch(")"))
         {
-            var nextSymbol = PeekSymbolString(1);
             _text.Position = startPosition;
             return NoneResult<SqlValues>();
-            
-            return CreateParseError("Expected )");
         }
         if(items.ResultValue.Count <= 1)
         {
@@ -1739,7 +1736,7 @@ column_name AS computed_column_expression
         var elements = new List<T>();
         do
         {
-            if(PeekSymbolString(1).Equals(")"))
+            if(PeekBracket().Equals(")"))
             {
                 break;
             }
@@ -1808,30 +1805,17 @@ column_name AS computed_column_expression
             return result;
         };
     }
+
+    private string PeekBracket()
+    {
+        SkipWhiteSpace();
+        return _text.Peek(() => _text.ReadBracket()).Word;
+    }
     
     private string PeekSymbolString(int length)
     {
         SkipWhiteSpace();
-        var startPosition = _text.Position;
-        var span = _text.ReadString(length);
-        _text.Position = startPosition;
-        return span.Word;
-    }
-
-    private Func<ParseResult<SqlToken>> PeekSymbol(int length)
-    {
-        return () =>
-        {
-            SkipWhiteSpace();
-            var startPosition = _text.Position;
-            var span = _text.ReadString(length);
-            var token = new SqlToken
-            {
-                Value = span.Word
-            };
-            _text.Position = startPosition;
-            return token;
-        };
+        return _text.Peek(() => _text.ReadSymbol(length)).Word;
     }
 
     private string ReadSymbolString(int length)
