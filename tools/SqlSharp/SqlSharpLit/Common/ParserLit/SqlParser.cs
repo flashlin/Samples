@@ -447,7 +447,7 @@ public class SqlParser
 
             if (TryKeyword("AS"))
             {
-                var aliasName = ParseSqlIdentifier();
+                var aliasName = Or(ParseSqlIdentifier, ParseSqlQuotedString)();
                 if(aliasName.HasError)
                 {
                     return aliasName.Error;
@@ -1668,11 +1668,11 @@ column_name AS computed_column_expression
             return numberValue.ResultValue;
         }
 
-        if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
+        if(Try(ParseSqlQuotedString, out var quotedString))
         {
-            return new SqlValue
+            return new SqlValue()
             {
-                Value = quotedString.Word
+                Value = quotedString.ResultValue.Value,
             };
         }
 
@@ -1708,6 +1708,18 @@ column_name AS computed_column_expression
         }
 
         return NoneResult<ISqlExpression>();
+    }
+
+    private ParseResult<SqlToken> ParseSqlQuotedString()
+    {
+        if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
+        {
+            return new SqlToken
+            {
+                Value = quotedString.Word
+            };
+        }
+        return NoneResult<SqlToken>();
     }
 
     private ParseResult<SqlFunctionExpression> Parse_FunctionName()

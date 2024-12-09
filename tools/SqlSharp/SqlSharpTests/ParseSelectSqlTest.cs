@@ -9,6 +9,33 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void select_variable_as_field()
+    {
+        var sql = $"""
+                   select
+                   @a as 'field1',
+                   @b as 'field2'
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    ColumnName = "@a",
+                    Alias = "'field1'",
+                },
+                new SelectColumn
+                {
+                    ColumnName = "@b",
+                    Alias = "'field2'",
+                },
+            ]
+        });
+    }
+    
+    [Test]
     public void Select_with_expr1_and_expr2_and_expr3()
     {
         var sql = $"""
