@@ -5,7 +5,7 @@ public class StringParser
     private readonly string _text;
     private int _position;
     private TextSpan _previousWord = new();
-    private static readonly char[] Rents = ['(', ')', '{', '}', '[', ']'];
+    private static readonly char[] Brackets = ['(', ')', '{', '}', '[', ']'];
 
     public StringParser(string text)
     {
@@ -524,12 +524,43 @@ public class StringParser
         return span;
     }
 
+    public TextSpan ReadBracket()
+    {
+        SkipWhitespace();
+        if (IsEnd())
+        {
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = _position,
+                Length = 0
+            };
+        }
+        var startPosition = _position;
+        var bracketStr = ReadString(1).Word;
+        if (!Brackets.Contains(bracketStr[0]))
+        {
+            return new TextSpan
+            {
+                Word = bracketStr,
+                Offset = startPosition,
+                Length = 1
+            };
+        }
+        return new TextSpan
+        {
+            Word = string.Empty,
+            Offset = startPosition,
+            Length = 0
+        };
+    }
+
     public TextSpan ReadSymbol(int length)
     {
         SkipWhitespace();
         var startPosition = _position;
         var symbol = _text.Substring(startPosition, length);
-        if (!IsRentSymbol(PeekNext()))
+        if (!IsSymbolEnd(PeekNext()))
         {
             return new TextSpan
             {
@@ -546,9 +577,17 @@ public class StringParser
         };
     }
     
-    private bool IsRentSymbol(char symbol)
+    private bool IsSymbolEnd(char symbol)
     {
-        return Rents.Contains(symbol);
+        if(symbol == '\0')
+        {
+            return true;
+        }
+        if (IsWordChar(symbol))
+        {
+            return true;
+        }
+        return Brackets.Contains(symbol);
     }
 
     public TextSpan ReadSymbols()
