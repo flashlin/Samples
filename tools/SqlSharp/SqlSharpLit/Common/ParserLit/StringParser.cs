@@ -5,6 +5,7 @@ public class StringParser
     private readonly string _text;
     private int _position;
     private TextSpan _previousWord = new();
+    private static readonly char[] Rents = ['(', ')', '{', '}', '[', ']'];
 
     public StringParser(string text)
     {
@@ -521,6 +522,33 @@ public class StringParser
         };
         _position += length;
         return span;
+    }
+
+    public TextSpan ReadSymbol(int length)
+    {
+        SkipWhitespace();
+        var startPosition = _position;
+        var symbol = _text.Substring(startPosition, length);
+        if (!IsRentSymbol(PeekNext()))
+        {
+            return new TextSpan
+            {
+                Word = string.Empty,
+                Offset = startPosition,
+                Length = 0
+            };
+        }
+        return new TextSpan
+        {
+            Word = symbol,
+            Offset = startPosition,
+            Length = symbol.Length
+        };
+    }
+    
+    private bool IsRentSymbol(char symbol)
+    {
+        return Rents.Contains(symbol);
     }
 
     public TextSpan ReadSymbols()
