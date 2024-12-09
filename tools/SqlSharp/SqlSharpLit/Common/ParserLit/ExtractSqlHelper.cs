@@ -163,7 +163,7 @@ public class ExtractSqlHelper
         {
             File.Delete(outputFile);
         }
-        foreach (var selectSql in ExtractStartSelectSqlString(folder))
+        foreach (var (sqlFile, selectSql) in ExtractStartSelectSqlString(folder))
         {
             ParseResult<SelectStatement> result;
             var sqlParser = new SqlParser(selectSql);
@@ -174,7 +174,7 @@ public class ExtractSqlHelper
             catch (Exception)
             {
                 var sql = sqlParser.GetRemainingText();
-                Console.WriteLine($"Error parsing position:\n{sql}");
+                Console.WriteLine($"Error parsing position {sqlFile}:\n{sql}");
                 throw;
             }
 
@@ -188,13 +188,13 @@ public class ExtractSqlHelper
         }
     }
 
-    private IEnumerable<string> ExtractStartSelectSqlString(string folder)
+    private IEnumerable<(string FileName, string startSelectSql)> ExtractStartSelectSqlString(string folder)
     {
         foreach (var sqlFile in GetSqlTextFromFolder(folder))
         {
             foreach (var startSelectSql in ExtractSelectSqlFromText(sqlFile.Sql))
             {
-                yield return startSelectSql;
+                yield return (sqlFile.FileName, startSelectSql);
             }
         }
     }
