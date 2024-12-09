@@ -180,7 +180,7 @@ public class ExtractSqlHelper
 
             if (!result.HasResult)
             {
-                var msg = $"Error parsing {selectSql}\n{result.Error.Message}";
+                var msg = $"Error parsing {sqlFile} \nSQL: {selectSql}\n{result.Error.Message}";
                 throw new Exception(msg);
             }
 
