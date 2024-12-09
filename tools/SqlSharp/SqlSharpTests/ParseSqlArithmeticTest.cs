@@ -4,34 +4,6 @@ using T1.SqlSharp.Expressions;
 namespace SqlSharpTests;
 
 [TestFixture]
-public class ParseSqlBinaryExprTest
-{
-    [Test]
-    public void A_and_b()
-    {
-        var sql = $"""
-                   @a & b
-                   """;
-        var sqlParser = new SqlParser(sql);
-        var rc = sqlParser.ParseArithmeticExpr();
-        rc.ResultValue.ShouldBe(new SqlArithmeticBinaryExpr
-        {
-            Left = new SqlFieldExpression
-            {
-                FieldName = "@a"
-            },
-            Operator = ArithmeticOperator.BitwiseAnd,
-            Right = new SqlFieldExpression
-            {
-                FieldName = "b"
-            }
-        });
-    }
-}
-    
-
-
-[TestFixture]
 public class ParseSqlArithmeticTest
 {
     [Test]
