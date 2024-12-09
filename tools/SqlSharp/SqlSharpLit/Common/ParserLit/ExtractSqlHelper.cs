@@ -173,7 +173,7 @@ public class ExtractSqlHelper
             }
             catch (Exception)
             {
-                Console.WriteLine($"Error parsing {selectSql}");
+                Console.WriteLine($"Error parsing:\n{selectSql}");
                 throw;
             }
 
@@ -189,9 +189,9 @@ public class ExtractSqlHelper
 
     private IEnumerable<string> ExtractStartSelectSqlString(string folder)
     {
-        foreach (var sqlFileContent in GetSqlContentsFromFolder(folder))
+        foreach (var sqlFile in GetSqlTextFromFolder(folder))
         {
-            foreach (var startSelectSql in ExtractSelectSqlFromText(sqlFileContent.Sql))
+            foreach (var startSelectSql in ExtractSelectSqlFromText(sqlFile.Sql))
             {
                 yield return startSelectSql;
             }
@@ -221,6 +221,19 @@ public class ExtractSqlHelper
         foreach (var subSelectSql in ExtractSelectSqlFromText(startSelectSql.Substring(select.Length)))
         {
             yield return subSelectSql;
+        }
+    }
+    
+    public IEnumerable<SqlFileContent> GetSqlTextFromFolder(string folder)
+    {
+        foreach (var sqlFile in GetSqlFiles(folder))
+        {
+            var sql = File.ReadAllText(sqlFile);
+            yield return new SqlFileContent
+            {
+                FileName = sqlFile,
+                Sql = sql,
+            };
         }
     }
 
