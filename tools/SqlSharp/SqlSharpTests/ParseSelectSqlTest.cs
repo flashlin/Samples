@@ -9,6 +9,119 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_with_expr1_and_expr2_and_expr3()
+    {
+        var sql = $"""
+                   SELECT TOP (@batchsize) Id
+                   FROM customer
+                   WHERE id = @id
+                       AND [status] & (123 | 456) = 0
+                       AND ISNULL(pp,0) = 0
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Top = new SqlTopClause
+            {
+                Expression = new SqlGroup
+                {
+                    Inner = new SqlFieldExpression
+                    {
+                        FieldName = "@batchsize",
+                    }
+                },
+            },
+            Columns =
+            [
+                new SelectColumn
+                {
+                    ColumnName = "Id",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+            },
+            Where = new SqlSearchCondition
+            {
+                Left = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpression
+                    {
+                        FieldName = "id",
+                    },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlFieldExpression
+                    {
+                        FieldName = "@id",
+                    }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlSearchCondition
+                {
+                    Left = new SqlConditionExpression
+                    {
+                        Left = new SqlArithmeticBinaryExpr
+                        {
+                            Left = new SqlFieldExpression
+                            {
+                                FieldName = "[status]",
+                            },
+                            Operator = ArithmeticOperator.BitwiseAnd,
+                            Right = new SqlArithmeticBinaryExpr
+                            {
+                                Left = new SqlValue
+                                {
+                                    SqlType = SqlType.IntValue,
+                                    Value = "123",
+                                },
+                                Operator = ArithmeticOperator.BitwiseOr,
+                                Right = new SqlValue
+                                {
+                                    SqlType = SqlType.IntValue,
+                                    Value = "456",
+                                }
+                            }
+                        },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlValue
+                        {
+                            SqlType = SqlType.IntValue,
+                            Value = "0",
+                        }
+                    },
+                    LogicalOperator = LogicalOperator.And,
+                    Right = new SqlConditionExpression
+                    {
+                        Left = new SqlFunctionExpression
+                        {
+                            FunctionName = "ISNULL",
+                            Parameters =
+                            [
+                                new SqlFieldExpression
+                                {
+                                    FieldName = "pp",
+                                },
+                                new SqlValue
+                                {
+                                    SqlType = SqlType.IntValue,
+                                    Value = "0",
+                                }
+                            ]
+                        },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlValue
+                        {
+                            SqlType = SqlType.IntValue,
+                            Value = "0",
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    [Test]
     public void Select_Field_Equal_Func_Arithmetic()
     {
         var sql = $"""
@@ -17,7 +130,7 @@ public class ParseSelectSqlTest
                    """;
         var rc = ParseSql(sql);
     }
-    
+
     [Test]
     public void From_Select()
     {
@@ -26,7 +139,7 @@ public class ParseSelectSqlTest
                    from (select RandomNumber from vRandNumber) as d
                    """;
     }
-    
+
     [Test]
     public void Select_Field_equal_count_star()
     {
@@ -37,7 +150,8 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
-            Columns = [
+            Columns =
+            [
                 new SelectSubQueryColumn
                 {
                     SubQuery = new SqlAssignExpr
@@ -49,7 +163,8 @@ public class ParseSelectSqlTest
                         Right = new SqlFunctionExpression
                         {
                             FunctionName = "count",
-                            Parameters = [
+                            Parameters =
+                            [
                                 new SqlValue
                                 {
                                     Value = "*",
@@ -65,7 +180,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Select_field_equal_binaryExpr()
     {
@@ -76,9 +191,10 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
-            Columns = [
+            Columns =
+            [
                 new SelectSubQueryColumn()
-                { 
+                {
                     SubQuery = new SqlAssignExpr
                     {
                         Left = new SelectColumn
@@ -106,7 +222,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Where_field_in()
     {
@@ -118,7 +234,8 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement()
         {
-            Columns = [
+            Columns =
+            [
                 new SelectColumn
                 {
                     ColumnName = "@a",
@@ -137,7 +254,8 @@ public class ParseSelectSqlTest
                 ComparisonOperator = ComparisonOperator.In,
                 Right = new SqlValues
                 {
-                    Items = [
+                    Items =
+                    [
                         new SqlFieldExpression
                         {
                             FieldName = "@b",
@@ -151,7 +269,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Select_field_as()
     {
@@ -161,7 +279,8 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
-            Columns = [
+            Columns =
+            [
                 new SelectSubQueryColumn
                 {
                     SubQuery = new SqlValue
@@ -174,7 +293,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Where_cast_plus_cast()
     {
@@ -186,7 +305,8 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement()
         {
-            Columns = [
+            Columns =
+            [
                 new SelectColumn
                 {
                     ColumnName = "id",
@@ -200,7 +320,7 @@ public class ParseSelectSqlTest
             {
                 Left = new SqlFieldExpression
                 {
-                   FieldName = "BetOption",
+                    FieldName = "BetOption",
                 },
                 ComparisonOperator = ComparisonOperator.Equal,
                 Right = new SqlArithmeticBinaryExpr
@@ -210,7 +330,8 @@ public class ParseSelectSqlTest
                         Left = new SqlFunctionExpression()
                         {
                             FunctionName = "cast",
-                            Parameters = [
+                            Parameters =
+                            [
                                 new SqlAsExpr
                                 {
                                     Instance = new SqlFieldExpression
@@ -238,7 +359,8 @@ public class ParseSelectSqlTest
                     Right = new SqlFunctionExpression
                     {
                         FunctionName = "cast",
-                        Parameters = [
+                        Parameters =
+                        [
                             new SqlAsExpr
                             {
                                 Instance = new SqlFieldExpression
@@ -260,7 +382,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Select_Star()
     {
@@ -270,7 +392,8 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
-            Columns = [
+            Columns =
+            [
                 new SelectColumn
                 {
                     ColumnName = "*",
@@ -282,7 +405,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Order_By_DESC()
     {
@@ -303,7 +426,8 @@ public class ParseSelectSqlTest
                     Value = "1"
                 }
             },
-            Columns = [
+            Columns =
+            [
                 new SelectColumn
                 {
                     ColumnName = "UserName",
@@ -327,7 +451,8 @@ public class ParseSelectSqlTest
             },
             OrderBy = new SqlOrderByClause
             {
-                Columns = [
+                Columns =
+                [
                     new SqlOrderByColumn
                     {
                         ColumnName = "LastDate",
@@ -337,7 +462,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Many_SearchCondition()
     {
@@ -357,7 +482,8 @@ public class ParseSelectSqlTest
                     }
                 },
             },
-            Columns = [
+            Columns =
+            [
                 new SelectColumn
                 {
                     ColumnName = "id",
@@ -366,7 +492,8 @@ public class ParseSelectSqlTest
             From = new SqlTableSource
             {
                 TableName = "customer",
-                Withs = [
+                Withs =
+                [
                     new SqlHint()
                     {
                         Name = "nolock",
@@ -535,7 +662,8 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
-            Columns = [
+            Columns =
+            [
                 new SelectSubQueryColumn()
                 {
                     SubQuery = new SqlValue
@@ -570,7 +698,8 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
-            Columns = [
+            Columns =
+            [
                 new SelectColumn
                 {
                     ColumnName = "id",
@@ -579,7 +708,8 @@ public class ParseSelectSqlTest
             From = new SqlTableSource
             {
                 TableName = "customer",
-                Withs = [
+                Withs =
+                [
                     new SqlHint()
                     {
                         Name = "nolock",
