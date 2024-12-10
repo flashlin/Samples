@@ -58,7 +58,7 @@ public class SqlExpressionJsonConverter : JsonConverter<object>
     {
         if (obj == null || !(obj is ISqlExpression))
         {
-            JsonSerializer.Serialize(writer, obj, options);
+            JsonSerializer.Serialize(writer, obj, obj?.GetType() ?? typeof(object), options);
             return;
         }
 
@@ -72,6 +72,7 @@ public class SqlExpressionJsonConverter : JsonConverter<object>
             var propertyValue = property.GetValue(obj);
             if (propertyValue == null)
             {
+                writer.WriteNullValue();
                 continue;
             }
 
@@ -81,26 +82,27 @@ public class SqlExpressionJsonConverter : JsonConverter<object>
                 continue;
             }
 
-            if (propertyValue is IEnumerable enumerable &&
-                !(propertyValue is string) &&
-                enumerable.Cast<object>().Any(item => item is ISqlExpression))
+            if (propertyValue is IEnumerable enumerable && !(propertyValue is string))
             {
-                writer.WriteStartArray();
-                foreach (var item in enumerable)
+                var array = enumerable.Cast<object>().ToArray();
+                if (array.Any(item => item is ISqlExpression))
                 {
-                    if (item is ISqlExpression sqlExpressionItem)
+                    writer.WriteStartArray();
+                    foreach (var item in array)
                     {
-                        WriteFullObject(writer, sqlExpressionItem, options);
+                        if (item is ISqlExpression sqlExpressionItem)
+                        {
+                            WriteFullObject(writer, sqlExpressionItem, options);
+                        }
+                        else
+                        {
+                            JsonSerializer.Serialize(writer, item, item?.GetType() ?? typeof(object), options);
+                        }
                     }
-                    else
-                    {
-                        //JsonSerializer.Serialize(writer, item, item?.GetType() ?? typeof(object), options);
-                        JsonSerializer.Serialize(writer, item, options);
-                    }
-                }
 
-                writer.WriteEndArray();
-                continue;
+                    writer.WriteEndArray();
+                    continue;
+                }
             }
 
             JsonSerializer.Serialize(writer, propertyValue, property.PropertyType, options);
@@ -118,6 +120,7 @@ public static class JsonSerializerOptionsExtensions
         options.Converters.Add(new SqlExpressionJsonConverter());
         options.Converters.Add(new JsonStringEnumConverter());
         options.WriteIndented = true;
+        options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         return options;
     }
 }
