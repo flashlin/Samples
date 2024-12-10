@@ -12,17 +12,16 @@ public class ParseSelectSqlTest
     [Test]
     public void METHOD()
     {
-        var sql =$"""
-                  select  id
-                  from customer 
-                  where 
-                  		(IsNull(name, 0) <15)and 
-                  		(id1!=0 or id2!=0)
-                  """;
+        var sql = $"""
+                   select  id
+                   from customer 
+                   where 
+                   		(IsNull(name, 0) <15)and 
+                   		(id1!=0 or id2!=0)
+                   """;
         var rc = ParseSql(sql);
-        
     }
-    
+
     [Test]
     public void where_group_func_lessThan_int()
     {
@@ -585,22 +584,22 @@ public class ParseSelectSqlTest
             },
             Where = new SqlSearchCondition
             {
-                Left = new SqlConditionExpression
-                {
-                    Left = new SqlFieldExpression
-                    {
-                        FieldName = "matchid"
-                    },
-                    ComparisonOperator = ComparisonOperator.Equal,
-                    Right = new SqlFieldExpression()
-                    {
-                        FieldName = "@matchid"
-                    }
-                },
-                LogicalOperator = LogicalOperator.And,
-                Right = new SqlSearchCondition
+                Left = new SqlSearchCondition
                 {
                     Left = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpression
+                        {
+                            FieldName = "matchid"
+                        },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpression()
+                        {
+                            FieldName = "@matchid"
+                        }
+                    },
+                    LogicalOperator = LogicalOperator.And,
+                    Right = new SqlConditionExpression
                     {
                         Left = new SqlFieldExpression
                         {
@@ -612,19 +611,19 @@ public class ParseSelectSqlTest
                             SqlType = SqlType.IntValue,
                             Value = "39"
                         }
-                    },
-                    LogicalOperator = LogicalOperator.And,
-                    Right = new SqlConditionExpression
+                    }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpression
                     {
-                        Left = new SqlFieldExpression
-                        {
-                            FieldName = "createDate"
-                        },
-                        ComparisonOperator = ComparisonOperator.NotEqual,
-                        Right = new SqlFieldExpression
-                        {
-                            FieldName = "@eventDate"
-                        }
+                        FieldName = "createDate"
+                    },
+                    ComparisonOperator = ComparisonOperator.NotEqual,
+                    Right = new SqlFieldExpression
+                    {
+                        FieldName = "@eventDate"
                     }
                 }
             }
