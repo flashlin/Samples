@@ -1997,12 +1997,11 @@ column_name AS computed_column_expression
             () => ParseArithmetic_AdditionOrSubtraction(
                 () => ParseArithmetic_MultiplicationOrDivision(
                     () => ParseArithmetic_Bitwise(
-                        ParseArithmetic_Step4_Primary
+                        ParseArithmetic_Primary
                     )
                 )
             )
         );
-        //return ParseArithmetic_Step1_AdditionOrSubtraction();
     }
 
     private ParseResult<ISqlExpression> Parse_ConditionExpr(Func<ParseResult<ISqlExpression>> parseTerm)
@@ -2040,24 +2039,6 @@ column_name AS computed_column_expression
         return left;
     }
 
-    public ParseResult<ISqlExpression> ParseArithmetic_Step1_AdditionOrSubtraction()
-    {
-        var left = ParseArithmetic_Step2_MultiplicationOrDivision();
-        while (PeekSymbolString(1).Equals("+") || PeekSymbolString(1).Equals("-"))
-        {
-            var op = ReadSymbolString(1);
-            var right = ParseArithmetic_Step2_MultiplicationOrDivision();
-            left = CreateParseResult(new SqlArithmeticBinaryExpr
-            {
-                Left = left.ResultValue,
-                Operator = op.ToArithmeticOperator(),
-                Right = right.ResultValue
-            }).To<ISqlExpression>();
-        }
-
-        return left;
-    }
-    
     public ParseResult<ISqlExpression> ParseArithmetic_MultiplicationOrDivision(Func<ParseResult<ISqlExpression>> parseTerm)
     {
         var left = parseTerm();
@@ -2075,40 +2056,6 @@ column_name AS computed_column_expression
         return left;
     }
 
-    public ParseResult<ISqlExpression> ParseArithmetic_Step2_MultiplicationOrDivision()
-    {
-        var left = ParseArithmetic_Step3_Bitwise();
-        while (PeekSymbolString(1).Equals("*") || PeekSymbolString(1).Equals("/"))
-        {
-            var op= ReadSymbolString(1);
-            var right = ParseArithmetic_Step3_Bitwise();
-            left = new SqlArithmeticBinaryExpr
-            {
-                Left = left.ResultValue,
-                Operator = op.ToArithmeticOperator(),
-                Right = right.ResultValue,
-            };
-        }
-        return left;
-    }
-    
-    public ParseResult<ISqlExpression> ParseArithmetic_Step3_Bitwise()
-    {
-        var left = ParseArithmetic_Step4_Primary();
-        while (PeekSymbolString(1).Equals("&") || PeekSymbolString(1).Equals("|") || PeekSymbolString(1).Equals("^"))
-        {
-            var op= ReadSymbolString(1);
-            var right = ParseArithmetic_Step4_Primary();
-            left = new SqlArithmeticBinaryExpr
-            {
-                Left = left.ResultValue,
-                Operator = op.ToArithmeticOperator(),
-                Right = right.ResultValue,
-            };
-        }
-        return left; 
-    }
-    
     public ParseResult<ISqlExpression> ParseArithmetic_Bitwise(Func<ParseResult<ISqlExpression>> parseTerm)
     {
         var left = parseTerm();
@@ -2126,7 +2073,7 @@ column_name AS computed_column_expression
         return left; 
     }
 
-    private ParseResult<ISqlExpression> ParseArithmetic_Step4_Primary()
+    private ParseResult<ISqlExpression> ParseArithmetic_Primary()
     {
         var startPosition = _text.Position;
         if (Try(Parse_Value_As_DataType, out var value))
@@ -2142,7 +2089,7 @@ column_name AS computed_column_expression
 
         if (TryMatch("("))
         {
-            var subExpr = ParseArithmetic_Step1_AdditionOrSubtraction();
+            var subExpr = ParseArithmeticExpr();
             if (subExpr.HasError)
             {
                 return subExpr.Error;
