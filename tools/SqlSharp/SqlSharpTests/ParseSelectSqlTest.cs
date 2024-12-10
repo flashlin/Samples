@@ -17,6 +17,7 @@ public class ParseSelectSqlTest
                    where (IsNull(Status, 0) <15)
                    """;
         var rc = ParseSql(sql);
+        var json = rc.ResultValue.ToSqlJsonString();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
@@ -28,36 +29,39 @@ public class ParseSelectSqlTest
             ],
             From = new SqlTableSource
             {
-                TableName = "customer", 
+                TableName = "customer",
             },
-            Where = new SqlConditionExpression 
+            Where = new SqlGroup()
             {
-                Left = new SqlFunctionExpression
+                Inner = new SqlConditionExpression
                 {
-                    FunctionName = "IsNull",
-                    Parameters =
-                    [
-                        new SqlFieldExpression
-                        {
-                            FieldName = "Status",
-                        },
-                        new SqlValue
-                        {
-                            SqlType = SqlType.IntValue,
-                            Value = "0"
-                        }
-                    ]
-                },
-                ComparisonOperator = ComparisonOperator.LessThan,
-                Right = new SqlValue
-                {
-                    SqlType = SqlType.IntValue,
-                    Value = "15"
+                    Left = new SqlFunctionExpression
+                    {
+                        FunctionName = "IsNull",
+                        Parameters =
+                        [
+                            new SqlFieldExpression
+                            {
+                                FieldName = "Status",
+                            },
+                            new SqlValue
+                            {
+                                SqlType = SqlType.IntValue,
+                                Value = "0"
+                            }
+                        ]
+                    },
+                    ComparisonOperator = ComparisonOperator.LessThan,
+                    Right = new SqlValue
+                    {
+                        SqlType = SqlType.IntValue,
+                        Value = "15"
+                    }
                 }
             }
         });
     }
-    
+
     [Test]
     public void select_variable_as_field()
     {
@@ -84,7 +88,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Select_with_expr1_and_expr2_and_expr3()
     {
