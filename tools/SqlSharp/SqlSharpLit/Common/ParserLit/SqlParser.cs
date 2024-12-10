@@ -528,7 +528,8 @@ public class SqlParser
 
     private ParseResult<ISqlExpression> Parse_WhereExpression()
     {
-        var rc = Or<ISqlExpression>(Parse_SearchCondition, Parse_ConditionExpression)();
+        //var rc = Or<ISqlExpression>(Parse_SearchCondition, Parse_ConditionExpression)();
+        var rc = ParseArithmeticExpr();
         if (rc.HasError)
         {
             return rc.Error;
@@ -1992,7 +1993,33 @@ column_name AS computed_column_expression
 
     public ParseResult<ISqlExpression> ParseArithmeticExpr()
     {
-        return ParseArithmetic_Step1_AdditionOrSubtraction();
+        return ParseArithmetic_AdditionOrSubtraction(
+            () => ParseArithmetic_MultiplicationOrDivision(
+                () => ParseArithmetic_Bitwise(
+                    () => Parse_ConditionExpr(
+                        ParseArithmetic_Step4_Primary
+                    )
+                )
+            )
+        );
+        //return ParseArithmetic_Step1_AdditionOrSubtraction();
+    }
+
+    private ParseResult<ISqlExpression> Parse_ConditionExpr(Func<ParseResult<ISqlExpression>> parseTerm)
+    {
+        var left = parseTerm();
+        while (Try(Parse_ComparisonOperator, out var comparisonOperator))
+        {
+            var op = comparisonOperator.Result!.Value;
+            var right = parseTerm();
+            left = CreateParseResult(new SqlConditionExpression
+            {
+                Left = left.ResultValue,
+                ComparisonOperator = op,
+                Right = right.ResultValue
+            }).To<ISqlExpression>();
+        }
+        return left;
     }
     
     //TODO: Draft
@@ -2030,6 +2057,23 @@ column_name AS computed_column_expression
 
         return left;
     }
+    
+    public ParseResult<ISqlExpression> ParseArithmetic_MultiplicationOrDivision(Func<ParseResult<ISqlExpression>> parseTerm)
+    {
+        var left = parseTerm();
+        while (PeekSymbolString(1).Equals("*") || PeekSymbolString(1).Equals("/"))
+        {
+            var op= ReadSymbolString(1);
+            var right = parseTerm();
+            left = new SqlArithmeticBinaryExpr
+            {
+                Left = left.ResultValue,
+                Operator = op.ToArithmeticOperator(),
+                Right = right.ResultValue,
+            };
+        }
+        return left;
+    }
 
     public ParseResult<ISqlExpression> ParseArithmetic_Step2_MultiplicationOrDivision()
     {
@@ -2055,6 +2099,23 @@ column_name AS computed_column_expression
         {
             var op= ReadSymbolString(1);
             var right = ParseArithmetic_Step4_Primary();
+            left = new SqlArithmeticBinaryExpr
+            {
+                Left = left.ResultValue,
+                Operator = op.ToArithmeticOperator(),
+                Right = right.ResultValue,
+            };
+        }
+        return left; 
+    }
+    
+    public ParseResult<ISqlExpression> ParseArithmetic_Bitwise(Func<ParseResult<ISqlExpression>> parseTerm)
+    {
+        var left = parseTerm();
+        while (PeekSymbolString(1).Equals("&") || PeekSymbolString(1).Equals("|") || PeekSymbolString(1).Equals("^"))
+        {
+            var op= ReadSymbolString(1);
+            var right = parseTerm();
             left = new SqlArithmeticBinaryExpr
             {
                 Left = left.ResultValue,
