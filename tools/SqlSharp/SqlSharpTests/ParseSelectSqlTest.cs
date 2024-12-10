@@ -9,6 +9,55 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void where_group_func_lessThan_int()
+    {
+        var sql = $"""
+                   select id from customer
+                   where (IsNull(Status, 0) <15)
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    ColumnName = "id",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer", 
+            },
+            Where = new SqlConditionExpression 
+            {
+                Left = new SqlFunctionExpression
+                {
+                    FunctionName = "IsNull",
+                    Parameters =
+                    [
+                        new SqlFieldExpression
+                        {
+                            FieldName = "Status",
+                        },
+                        new SqlValue
+                        {
+                            SqlType = SqlType.IntValue,
+                            Value = "0"
+                        }
+                    ]
+                },
+                ComparisonOperator = ComparisonOperator.LessThan,
+                Right = new SqlValue
+                {
+                    SqlType = SqlType.IntValue,
+                    Value = "15"
+                }
+            }
+        });
+    }
+    
+    [Test]
     public void select_variable_as_field()
     {
         var sql = $"""
