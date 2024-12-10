@@ -63,7 +63,7 @@ public class ParseSqlValueTest
     private static ParseResult<ISqlExpression> ParseValue(string sql)
     {
         var sqlParser = new SqlParser(sql);
-        var rc = sqlParser.ParseValue();
+        var rc = sqlParser.Parse_Value_As_DataType();
         return rc;
     }
 }

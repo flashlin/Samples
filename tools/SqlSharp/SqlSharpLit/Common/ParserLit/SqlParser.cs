@@ -273,7 +273,7 @@ public class SqlParser
             return NoneResult<SqlTopClause>();
         }
 
-        var expression = ParseValue();
+        var expression = Parse_Value_As_DataType();
         if (expression.HasError)
         {
             return expression.Error;
@@ -417,8 +417,18 @@ public class SqlParser
     
     private ParseResult<SelectSubQueryColumn> Parse_Column_SubQuery()
     {
-        if (Try(ParseValue, out var valueExpr))
+        if (Try(Parse_Value_As_DataType, out var valueExpr))
         {
+            if (valueExpr.ResultValue.SqlType == SqlType.AsExpr)
+            {
+                var asExpr = (SqlAsExpr)valueExpr.ResultValue;
+                return new SelectSubQueryColumn
+                {
+                    SubQuery = asExpr.Instance,
+                    Alias = asExpr.DataType.DataTypeName,
+                };
+            }
+            
             return new SelectSubQueryColumn
             {
                 SubQuery = valueExpr.ResultValue,
@@ -569,7 +579,7 @@ public class SqlParser
             return NoneResult<SqlSearchCondition>();
         }
 
-        var rightExpr = ParseValue();
+        var rightExpr = Parse_Value_As_DataType();
         if (rightExpr.HasError)
         {
             return rightExpr.Error;
@@ -1374,7 +1384,7 @@ column_name AS computed_column_expression
     {
         SkipWhiteSpace();
         var startPosition = _text.Position;
-        var valueResult = ParseValue();
+        var valueResult = Parse_Value_As_DataType();
         if (valueResult.HasError)
         {
             _text.Position = startPosition;
@@ -1626,7 +1636,30 @@ column_name AS computed_column_expression
         };
     }
 
-    public ParseResult<ISqlExpression> ParseValue()
+    public ParseResult<ISqlExpression> Parse_Value_As_DataType()
+    {
+        var valueExpr= Parse_Value();
+        if(valueExpr.HasError)
+        {
+            return valueExpr.Error;
+        }
+        if(valueExpr.Result == null)
+        {
+            return NoneResult<ISqlExpression>();
+        }
+        if (TryKeyword("AS"))
+        {
+            var dataType = Parse_DataType();
+            return new SqlAsExpr
+            {
+                Instance = valueExpr.ResultValue,
+                DataType = dataType.ResultValue
+            };
+        }
+        return valueExpr;
+    }
+    
+    public ParseResult<ISqlExpression> Parse_Value()
     {
         if(Try(ParseValues, out var values))
         {
@@ -1683,19 +1716,6 @@ column_name AS computed_column_expression
 
         if (TryReadSqlIdentifier(out var identifier))
         {
-            if (TryKeyword("AS"))
-            {
-                var dataType = Parse_DataType();
-                return new SqlAsExpr
-                {
-                    Instance = new SqlFieldExpression
-                    {
-                        FieldName = identifier.Word
-                    },
-                    DataType = dataType.ResultValue
-                };
-            }
-
             return new SqlFieldExpression
             {
                 FieldName = identifier.Word
@@ -1983,7 +2003,7 @@ column_name AS computed_column_expression
     private ParseResult<ISqlExpression> ParseArithmetic_Step4_Primary()
     {
         var startPosition = _text.Position;
-        if (Try(ParseValue, out var value))
+        if (Try(Parse_Value_As_DataType, out var value))
         {
             if (value.HasError)
             {
