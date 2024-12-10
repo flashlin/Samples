@@ -1993,10 +1993,10 @@ column_name AS computed_column_expression
 
     public ParseResult<ISqlExpression> ParseArithmeticExpr()
     {
-        return ParseArithmetic_AdditionOrSubtraction(
-            () => ParseArithmetic_MultiplicationOrDivision(
-                () => ParseArithmetic_Bitwise(
-                    () => Parse_ConditionExpr(
+        return Parse_ConditionExpr(
+            () => ParseArithmetic_AdditionOrSubtraction(
+                () => ParseArithmetic_MultiplicationOrDivision(
+                    () => ParseArithmetic_Bitwise(
                         ParseArithmetic_Step4_Primary
                     )
                 )

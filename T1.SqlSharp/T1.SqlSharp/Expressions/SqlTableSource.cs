@@ -4,10 +4,12 @@ namespace T1.SqlSharp.Expressions;
 
 public class SqlTableSource : ISqlTableSource
 {
+    public SqlType SqlType { get; } = SqlType.TableSource;
     public string TableName { get; set; } = string.Empty;
     public string Alias { get; set; } = string.Empty;
     public JoinCondition? Join { get; set; }
     public List<SqlHint> Withs { get; set; } = [];
+
 
     public string ToSql()
     {

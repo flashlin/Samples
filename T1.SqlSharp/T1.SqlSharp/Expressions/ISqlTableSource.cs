@@ -1,6 +1,5 @@
 namespace T1.SqlSharp.Expressions;
 
-public interface ISqlTableSource
+public interface ISqlTableSource : ISqlExpression
 {
-    string ToSql();
 }
