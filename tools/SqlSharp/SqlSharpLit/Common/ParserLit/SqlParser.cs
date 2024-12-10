@@ -642,6 +642,53 @@ public class SqlParser
             Right = rightExpr.ResultValue
         };
     }
+    
+    // TODO: draft
+    private ParseResult<SqlConditionExpression> Parse_ConditionExpr2<T>(Func<ParseResult<T>> parseTerm)
+        where T : ISqlExpression
+    {
+        var startPosition = _text.Position;
+        var leftExpr = parseTerm();
+        if (leftExpr.HasError)
+        {
+            return leftExpr.Error;
+        }
+
+        if (leftExpr.Result == null)
+        {
+            return CreateParseError("Expected left expression");
+        }
+
+        var operation = Parse_ComparisonOperator();
+        if (operation.HasError)
+        {
+            return operation.Error;
+        }
+
+        if (operation.Result == null)
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlConditionExpression>();
+        }
+
+        var rightExpr = parseTerm();
+        if (rightExpr.HasError)
+        {
+            return rightExpr.Error;
+        }
+
+        if (rightExpr.Result == null)
+        {
+            return CreateParseError("Expected right expression");
+        }
+
+        return new SqlConditionExpression()
+        {
+            Left = leftExpr.ResultValue,
+            ComparisonOperator = operation.Result.Value,
+            Right = rightExpr.ResultValue
+        };
+    }
 
     private ParseResult<ComparisonOperator?> Parse_ComparisonOperator()
     {
@@ -1946,6 +1993,24 @@ column_name AS computed_column_expression
     public ParseResult<ISqlExpression> ParseArithmeticExpr()
     {
         return ParseArithmetic_Step1_AdditionOrSubtraction();
+    }
+    
+    //TODO: Draft
+    public ParseResult<ISqlExpression> ParseArithmetic_AdditionOrSubtraction(Func<ParseResult<ISqlExpression>> parseTerm)
+    {
+        var left = parseTerm();
+        while (PeekSymbolString(1).Equals("+") || PeekSymbolString(1).Equals("-"))
+        {
+            var op = ReadSymbolString(1);
+            var right = parseTerm();
+            left = CreateParseResult(new SqlArithmeticBinaryExpr
+            {
+                Left = left.ResultValue,
+                Operator = op.ToArithmeticOperator(),
+                Right = right.ResultValue
+            }).To<ISqlExpression>();
+        }
+        return left;
     }
 
     public ParseResult<ISqlExpression> ParseArithmetic_Step1_AdditionOrSubtraction()
