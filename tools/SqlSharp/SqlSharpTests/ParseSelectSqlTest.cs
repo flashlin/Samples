@@ -10,6 +10,20 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void METHOD()
+    {
+        var sql =$"""
+                  select  id
+                  from customer 
+                  where 
+                  		(IsNull(name, 0) <15)and 
+                  		(id1!=0 or id2!=0)
+                  """;
+        var rc = ParseSql(sql);
+        
+    }
+    
+    [Test]
     public void where_group_func_lessThan_int()
     {
         var sql = $"""
