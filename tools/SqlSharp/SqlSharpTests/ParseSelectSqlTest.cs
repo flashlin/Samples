@@ -1,6 +1,7 @@
 using FluentAssertions;
 using SqlSharpLit.Common.ParserLit;
 using T1.SqlSharp.Expressions;
+using T1.SqlSharp.Extensions;
 using T1.Standard.DesignPatterns;
 
 namespace SqlSharpTests;
@@ -365,6 +366,7 @@ public class ParseSelectSqlTest
                    cast(@a as nvarchar(2)) + ':' + cast(@b as nvarchar(3))
                    """;
         var rc = ParseSql(sql);
+        var json = rc.ResultValue.ToSqlJsonString();
         rc.ShouldBe(new SelectStatement()
         {
             Columns =
@@ -532,6 +534,7 @@ public class ParseSelectSqlTest
                    select top (@batchsize) id from customer with(nolock) where matchid = @matchid and matchType < 39 and createDate <> @eventDate
                    """;
         var rc = ParseSql(sql);
+        var sqlJson = rc.ResultValue.ToSqlJsonString();
         rc.ShouldBe(new SelectStatement
         {
             Top = new SqlTopClause
