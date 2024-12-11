@@ -27,11 +27,14 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "id",
+                    Field = new SqlFieldExpr()
+                    {
+                        FieldName = "id"
+                    },
                 },
-                new SelectSubQueryColumn
+                new SelectColumn
                 {
-                    SubQuery = new SqlCaseExpr
+                    Field = new SqlCaseExpr
                     {
                         WhenThens =
                         [
@@ -39,7 +42,7 @@ public class ParseSelectSqlTest
                             {
                                 When = new SqlConditionExpression
                                 {
-                                    Left = new SqlFieldExpression
+                                    Left = new SqlFieldExpr
                                     {
                                         FieldName = "id"
                                     },
@@ -101,7 +104,10 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "id",
+                    Field = new SqlFieldExpr
+                    {
+                        FieldName = "id"
+                    },
                 }
             ],
             From = new SqlTableSource
@@ -119,7 +125,7 @@ public class ParseSelectSqlTest
                             FunctionName = "IsNull",
                             Parameters =
                             [
-                                new SqlFieldExpression
+                                new SqlFieldExpr
                                 {
                                     FieldName = "name",
                                 },
@@ -145,7 +151,7 @@ public class ParseSelectSqlTest
                     {
                         Left = new SqlConditionExpression
                         {
-                            Left = new SqlFieldExpression
+                            Left = new SqlFieldExpr
                             {
                                 FieldName = "id1"
                             },
@@ -159,7 +165,7 @@ public class ParseSelectSqlTest
                         LogicalOperator = LogicalOperator.Or,
                         Right = new SqlConditionExpression
                         {
-                            Left = new SqlFieldExpression
+                            Left = new SqlFieldExpr
                             {
                                 FieldName = "id2"
                             },
@@ -191,7 +197,10 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "id",
+                    Field = new SqlFieldExpr()
+                    {
+                        FieldName = "id"
+                    },
                 }
             ],
             From = new SqlTableSource
@@ -207,7 +216,7 @@ public class ParseSelectSqlTest
                         FunctionName = "IsNull",
                         Parameters =
                         [
-                            new SqlFieldExpression
+                            new SqlFieldExpr
                             {
                                 FieldName = "Status",
                             },
@@ -244,12 +253,18 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "@a",
+                    Field = new SqlFieldExpr
+                    {
+                        FieldName = "@a"
+                    },
                     Alias = "'field1'",
                 },
                 new SelectColumn
                 {
-                    ColumnName = "@b",
+                    Field = new SqlFieldExpr
+                    {
+                        FieldName = "@b" 
+                    },
                     Alias = "'field2'",
                 },
             ]
@@ -272,7 +287,7 @@ public class ParseSelectSqlTest
             {
                 Expression = new SqlGroup
                 {
-                    Inner = new SqlFieldExpression
+                    Inner = new SqlFieldExpr
                     {
                         FieldName = "@batchsize",
                     }
@@ -282,7 +297,10 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "Id",
+                    Field = new SqlFieldExpr
+                    {
+                        FieldName = "Id"
+                    },
                 }
             ],
             From = new SqlTableSource
@@ -295,7 +313,7 @@ public class ParseSelectSqlTest
                 {
                     Left = new SqlArithmeticBinaryExpr
                     {
-                        Left = new SqlFieldExpression
+                        Left = new SqlFieldExpr
                         {
                             FieldName = "[status]",
                         },
@@ -333,7 +351,7 @@ public class ParseSelectSqlTest
                         FunctionName = "ISNULL",
                         Parameters =
                         [
-                            new SqlFieldExpression
+                            new SqlFieldExpr
                             {
                                 FieldName = "pp",
                             },
@@ -386,13 +404,13 @@ public class ParseSelectSqlTest
         {
             Columns =
             [
-                new SelectSubQueryColumn
+                new SelectColumn
                 {
-                    SubQuery = new SqlAssignExpr
+                    Field = new SqlAssignExpr
                     {
-                        Left = new SelectColumn
+                        Left = new SqlFieldExpr
                         {
-                            ColumnName = "@upper",
+                           FieldName = "@upper"
                         },
                         Right = new SqlFunctionExpression
                         {
@@ -428,22 +446,22 @@ public class ParseSelectSqlTest
         {
             Columns =
             [
-                new SelectSubQueryColumn()
+                new SelectColumn()
                 {
-                    SubQuery = new SqlAssignExpr
+                    Field = new SqlAssignExpr
                     {
-                        Left = new SelectColumn
+                        Left = new SqlFieldExpr()
                         {
-                            ColumnName = "@a",
+                            FieldName = "@a",
                         },
                         Right = new SqlArithmeticBinaryExpr
                         {
-                            Left = new SqlFieldExpression
+                            Left = new SqlFieldExpr
                             {
                                 FieldName = "@a",
                             },
                             Operator = ArithmeticOperator.BitwiseAnd,
-                            Right = new SqlFieldExpression()
+                            Right = new SqlFieldExpr()
                             {
                                 FieldName = "b",
                             }
@@ -473,7 +491,10 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "@a",
+                    Field = new SqlFieldExpr()
+                    {
+                        FieldName = "@a"
+                    },
                 }
             ],
             From = new SqlTableSource
@@ -482,7 +503,7 @@ public class ParseSelectSqlTest
             },
             Where = new SqlConditionExpression
             {
-                Left = new SqlFieldExpression
+                Left = new SqlFieldExpr
                 {
                     FieldName = "id",
                 },
@@ -491,11 +512,11 @@ public class ParseSelectSqlTest
                 {
                     Items =
                     [
-                        new SqlFieldExpression
+                        new SqlFieldExpr
                         {
                             FieldName = "@b",
                         },
-                        new SqlFieldExpression
+                        new SqlFieldExpr
                         {
                             FieldName = "@c",
                         },
@@ -516,9 +537,9 @@ public class ParseSelectSqlTest
         {
             Columns =
             [
-                new SelectSubQueryColumn
+                new SelectColumn
                 {
-                    SubQuery = new SqlValue
+                    Field = new SqlValue
                     {
                         SqlType = SqlType.IntValue,
                         Value = "-1",
@@ -545,7 +566,10 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "id",
+                    Field = new SqlFieldExpr()
+                    {
+                        FieldName = "id"
+                    },
                 }
             ],
             From = new SqlTableSource
@@ -554,7 +578,7 @@ public class ParseSelectSqlTest
             },
             Where = new SqlConditionExpression
             {
-                Left = new SqlFieldExpression
+                Left = new SqlFieldExpr
                 {
                     FieldName = "BetOption",
                 },
@@ -570,11 +594,11 @@ public class ParseSelectSqlTest
                             [
                                 new SqlAsExpr
                                 {
-                                    Instance = new SqlFieldExpression
+                                    Instance = new SqlFieldExpr
                                     {
                                         FieldName = "@a",
                                     },
-                                    DataType = new SqlDataType
+                                    As = new SqlDataType
                                     {
                                         DataTypeName = "nvarchar",
                                         Size = new SqlDataSize
@@ -599,11 +623,11 @@ public class ParseSelectSqlTest
                         [
                             new SqlAsExpr
                             {
-                                Instance = new SqlFieldExpression
+                                Instance = new SqlFieldExpr
                                 {
                                     FieldName = "@b",
                                 },
-                                DataType = new SqlDataType
+                                As = new SqlDataType
                                 {
                                     DataTypeName = "nvarchar",
                                     Size = new SqlDataSize
@@ -632,7 +656,7 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "*",
+                    Field = new SqlValue(){Value = "*" },
                 }
             ],
             From = new SqlTableSource
@@ -666,7 +690,10 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "UserName",
+                    Field = new SqlFieldExpr()
+                    {
+                        FieldName = "UserName"
+                    },
                 }
             ],
             From = new SqlTableSource()
@@ -675,12 +702,12 @@ public class ParseSelectSqlTest
             },
             Where = new SqlConditionExpression
             {
-                Left = new SqlFieldExpression
+                Left = new SqlFieldExpr
                 {
                     FieldName = "UserName",
                 },
                 ComparisonOperator = ComparisonOperator.Equal,
-                Right = new SqlFieldExpression
+                Right = new SqlFieldExpr
                 {
                     FieldName = "@username",
                 }
@@ -713,7 +740,7 @@ public class ParseSelectSqlTest
             {
                 Expression = new SqlGroup
                 {
-                    Inner = new SqlFieldExpression
+                    Inner = new SqlFieldExpr
                     {
                         FieldName = "@batchsize",
                     }
@@ -723,7 +750,10 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "id",
+                    Field = new SqlFieldExpr()
+                    {
+                        FieldName = "id"
+                    },
                 }
             ],
             From = new SqlTableSource
@@ -743,12 +773,12 @@ public class ParseSelectSqlTest
                 {
                     Left = new SqlConditionExpression
                     {
-                        Left = new SqlFieldExpression
+                        Left = new SqlFieldExpr
                         {
                             FieldName = "matchid"
                         },
                         ComparisonOperator = ComparisonOperator.Equal,
-                        Right = new SqlFieldExpression()
+                        Right = new SqlFieldExpr()
                         {
                             FieldName = "@matchid"
                         }
@@ -756,7 +786,7 @@ public class ParseSelectSqlTest
                     LogicalOperator = LogicalOperator.And,
                     Right = new SqlConditionExpression
                     {
-                        Left = new SqlFieldExpression
+                        Left = new SqlFieldExpr
                         {
                             FieldName = "matchType"
                         },
@@ -771,12 +801,12 @@ public class ParseSelectSqlTest
                 LogicalOperator = LogicalOperator.And,
                 Right = new SqlConditionExpression
                 {
-                    Left = new SqlFieldExpression
+                    Left = new SqlFieldExpr
                     {
                         FieldName = "createDate"
                     },
                     ComparisonOperator = ComparisonOperator.NotEqual,
-                    Right = new SqlFieldExpression
+                    Right = new SqlFieldExpr
                     {
                         FieldName = "@eventDate"
                     }
@@ -800,8 +830,20 @@ public class ParseSelectSqlTest
         {
             Columns =
             [
-                new SelectColumn { ColumnName = "Id" },
-                new SelectColumn { ColumnName = "Name" },
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr
+                    {
+                        FieldName = "Id"
+                    }
+                },
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr()
+                    {
+                        FieldName = "Name"
+                    }
+                },
             ],
             From = new SqlTableSource
             {
@@ -809,7 +851,7 @@ public class ParseSelectSqlTest
             },
             Where = new SqlConditionExpression
             {
-                Left = new SqlFieldExpression
+                Left = new SqlFieldExpr
                 {
                     FieldName = "Id",
                 },
@@ -837,9 +879,9 @@ public class ParseSelectSqlTest
         {
             Columns =
             [
-                new SelectSubQueryColumn
+                new SelectColumn
                 {
-                    SubQuery = new SqlValue
+                    Field = new SqlValue
                     {
                         SqlType = SqlType.IntValue,
                         Value = "1"
@@ -854,7 +896,7 @@ public class ParseSelectSqlTest
             {
                 Left = new SqlConditionExpression
                 {
-                    Left = new SqlFieldExpression
+                    Left = new SqlFieldExpr
                     {
                         FieldName = "name",
                     },
@@ -872,7 +914,7 @@ public class ParseSelectSqlTest
                         FunctionName = "SUSER_SNAME",
                         Parameters =
                         [
-                            new SqlFieldExpression
+                            new SqlFieldExpr
                             {
                                 FieldName = "owner_sid",
                             }
@@ -901,9 +943,9 @@ public class ParseSelectSqlTest
         {
             Columns =
             [
-                new SelectSubQueryColumn()
+                new SelectColumn()
                 {
-                    SubQuery = new SqlValue
+                    Field = new SqlValue
                     {
                         SqlType = SqlType.IntValue,
                         Value = "1",
@@ -916,7 +958,7 @@ public class ParseSelectSqlTest
             },
             Where = new SqlConditionExpression
             {
-                Left = new SqlFieldExpression
+                Left = new SqlFieldExpr
                 {
                     FieldName = "createDate",
                 },
@@ -939,7 +981,10 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    ColumnName = "id",
+                    Field = new SqlFieldExpr
+                    {
+                         FieldName= "id"
+                    },
                 }
             ],
             From = new SqlTableSource

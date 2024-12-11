@@ -15,7 +15,7 @@ public class ParseSqlBinaryExprTest
         var rc = ParseArithemeticExpr(sql);
         rc.ResultValue.ShouldBe(new SqlArithmeticBinaryExpr
         {
-            Left = new SqlFieldExpression
+            Left = new SqlFieldExpr
             {
                 FieldName = "BetStatus"
             },
@@ -49,12 +49,12 @@ public class ParseSqlBinaryExprTest
         var rc = ParseArithemeticExpr(sql);
         rc.ResultValue.ShouldBe(new SqlArithmeticBinaryExpr
         {
-            Left = new SqlFieldExpression
+            Left = new SqlFieldExpr
             {
                 FieldName = "@a"
             },
             Operator = ArithmeticOperator.BitwiseAnd,
-            Right = new SqlFieldExpression
+            Right = new SqlFieldExpr
             {
                 FieldName = "b"
             }

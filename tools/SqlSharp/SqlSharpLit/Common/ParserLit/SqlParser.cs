@@ -184,7 +184,7 @@ public class SqlParser
 
         if (TryReadSqlIdentifier(out var identifier))
         {
-            return new SqlFieldExpression
+            return new SqlFieldExpr
             {
                 FieldName = identifier.Word
             };
@@ -213,11 +213,11 @@ public class SqlParser
 
         if (TryKeyword("AS"))
         {
-            var dataType = Parse_DataType();
+            var dataType = Or<ISqlExpression>(Parse_DataType, ParseSqlQuotedString)();
             return new SqlAsExpr
             {
                 Instance = valueExpr.ResultValue,
-                DataType = dataType.ResultValue
+                As = dataType.ResultValue
             };
         }
 
@@ -743,16 +743,16 @@ public class SqlParser
         };
     }
     
-    private ParseResult<SelectSubQueryColumn> Parse_Column_Arithmetic()
+    private ParseResult<SelectColumn> Parse_Column_Arithmetic()
     {
         if (Try(ParseArithmeticExpr,out var arithmetic))
         {
-            return CreateParseResult(new SelectSubQueryColumn
+            return CreateParseResult(new SelectColumn
             {
-                SubQuery = arithmetic.ResultValue
+                Field = arithmetic.ResultValue
             });
         }
-        return NoneResult<SelectSubQueryColumn>();
+        return NoneResult<SelectColumn>();
     }
 
     private ParseResult<SelectColumn> Parse_Column_Identifier()
@@ -761,7 +761,7 @@ public class SqlParser
         {
             return new SelectColumn()
             {
-                ColumnName = fieldName.Word
+                Field = new SqlValue{Value =fieldName.Word}
             };
         }
 
@@ -854,34 +854,37 @@ public class SqlParser
         {
             return new SelectColumn
             {
-                ColumnName = "*"
+                Field = new SqlValue()
+                {
+                    Value = "*"
+                }
             };
         }
 
         return NoneResult<SelectColumn>();
     }
 
-    private ParseResult<SelectSubQueryColumn> Parse_Column_SubQuery()
+    private ParseResult<SelectColumn> Parse_Column_SubQuery()
     {
         if (Try(Parse_Value_As_DataType, out var valueExpr))
         {
             if (valueExpr.ResultValue.SqlType == SqlType.AsExpr)
             {
                 var asExpr = (SqlAsExpr)valueExpr.ResultValue;
-                return new SelectSubQueryColumn
+                return new SelectColumn
                 {
-                    SubQuery = asExpr.Instance,
-                    Alias = asExpr.DataType.DataTypeName,
+                    Field = asExpr.Instance,
+                    Alias = asExpr.As.ToSql(),
                 };
             }
 
-            return new SelectSubQueryColumn
+            return new SelectColumn
             {
-                SubQuery = valueExpr.ResultValue,
+                Field = valueExpr.ResultValue,
             };
         }
 
-        return NoneResult<SelectSubQueryColumn>();
+        return NoneResult<SelectColumn>();
     }
 
     private ParseResult<ComparisonOperator?> Parse_ComparisonOperator()
@@ -975,7 +978,6 @@ public class SqlParser
 
     private ParseResult<SqlDataType> Parse_DataType()
     {
-        var startPosition = _text.Position;
         if (!TryReadSqlIdentifier(out var identifier))
         {
             return NoneResult<SqlDataType>();
@@ -984,7 +986,6 @@ public class SqlParser
         var dataType = Parse_DataSize();
         if (dataType.HasError)
         {
-            _text.Position = startPosition;
             return dataType.Error;
         }
 
@@ -1075,7 +1076,33 @@ public class SqlParser
             {
                 return column.Error;
             }
-
+            
+            if(column.ResultValue.SqlType == SqlType.SelectColumn)
+            {
+                var selectColumn = (SelectColumn)column.ResultValue;
+                if(selectColumn.Field.SqlType == SqlType.AsExpr)
+                {
+                    var field = (SqlAsExpr)selectColumn.Field;
+                    selectColumn.Field = field.Instance;
+                    selectColumn.Alias = field.As.ToSql();
+                }
+                
+                if(selectColumn.Field.SqlType == SqlType.ComparisonCondition)
+                {
+                    var condition = (SqlConditionExpression)selectColumn.Field;
+                    if(condition.ComparisonOperator == ComparisonOperator.Equal)
+                    {
+                        selectColumn.Field = new SqlAssignExpr()
+                        {
+                            Left = condition.Left,
+                            Right = condition.Right
+                        };
+                    }
+                }
+                
+                return column;
+            }
+            
             if (TryKeyword("AS"))
             {
                 var aliasName = Or(ParseSqlIdentifier, ParseSqlQuotedString)();
@@ -1095,9 +1122,9 @@ public class SqlParser
                     return rightExpr.Error;
                 }
 
-                return new SelectSubQueryColumn
+                return new SelectColumn
                 {
-                    SubQuery = new SqlAssignExpr()
+                    Field = new SqlAssignExpr()
                     {
                         Left = column.ResultValue,
                         Right = rightExpr.ResultValue,
@@ -1820,30 +1847,30 @@ column_name AS computed_column_expression
         return new ParseResult<ReferentialAction>(action);
     }
 
-    private ParseResult<SqlToken> ParseSqlIdentifier()
+    private ParseResult<SqlValue> ParseSqlIdentifier()
     {
         if (TryReadSqlIdentifier(out var identifier))
         {
-            return new SqlToken
+            return new SqlValue
             {
                 Value = identifier.Word
             };
         }
 
-        return NoneResult<SqlToken>();
+        return NoneResult<SqlValue>();
     }
 
-    private ParseResult<SqlToken> ParseSqlQuotedString()
+    private ParseResult<SqlValue> ParseSqlQuotedString()
     {
         if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
         {
-            return new SqlToken
+            return new SqlValue
             {
                 Value = quotedString.Word
             };
         }
 
-        return NoneResult<SqlToken>();
+        return NoneResult<SqlValue>();
     }
 
     private Func<ParseResult<SqlToken>> ParseSymbol(string expected)
@@ -1897,17 +1924,17 @@ column_name AS computed_column_expression
         return NoneResult<ISqlConstraint>();
     }
 
-    private ParseResult<SqlFieldExpression> ParseTableName()
+    private ParseResult<SqlFieldExpr> ParseTableName()
     {
         if (_text.Try(_text.ReadIdentifier, out var fieldName))
         {
-            return CreateParseResult(new SqlFieldExpression()
+            return CreateParseResult(new SqlFieldExpr()
             {
                 FieldName = fieldName.Word
             });
         }
 
-        return NoneResult<SqlFieldExpression>();
+        return NoneResult<SqlFieldExpr>();
     }
 
     private ParseResult<SqlValues> ParseValues()

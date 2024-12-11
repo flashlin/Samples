@@ -15,11 +15,11 @@ public class ParseSqlValueTest
         var rc = ParseValue(sql);
         rc.ResultValue.ShouldBe(new SqlAsExpr
         {
-            Instance = new SqlFieldExpression
+            Instance = new SqlFieldExpr
             {
                 FieldName = "@score1",
             },
-            DataType = new SqlDataType
+            As = new SqlDataType
             {
                 DataTypeName = "nvarchar",
                 Size = new SqlDataSize()
@@ -43,11 +43,11 @@ public class ParseSqlValueTest
             Parameters = [
                 new SqlAsExpr
                 {
-                    Instance = new SqlFieldExpression
+                    Instance = new SqlFieldExpr
                     {
                         FieldName = "@score1",
                     },
-                    DataType = new SqlDataType
+                    As = new SqlDataType
                     {
                         DataTypeName = "nvarchar",
                         Size = new SqlDataSize()

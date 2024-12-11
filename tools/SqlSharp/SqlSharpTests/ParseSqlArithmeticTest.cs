@@ -24,11 +24,11 @@ public class ParseSqlArithmeticTest
                     Parameters = [
                         new SqlAsExpr
                         {
-                            Instance = new SqlFieldExpression
+                            Instance = new SqlFieldExpr
                             { 
                                 FieldName  = "@score1"
                             },
-                            DataType = new SqlDataType()
+                            As = new SqlDataType()
                             {
                                 DataTypeName = "nvarchar",
                                 Size = new SqlDataSize()
@@ -52,11 +52,11 @@ public class ParseSqlArithmeticTest
                 Parameters = [
                     new SqlAsExpr
                     {
-                        Instance = new SqlFieldExpression
+                        Instance = new SqlFieldExpr
                         { 
                             FieldName  = "@score2"
                         },
-                        DataType = new SqlDataType()
+                        As = new SqlDataType()
                         {
                             DataTypeName = "nvarchar",
                             Size = new SqlDataSize()
