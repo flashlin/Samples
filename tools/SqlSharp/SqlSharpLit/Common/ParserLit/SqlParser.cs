@@ -751,6 +751,86 @@ public class SqlParser
         return NoneResult<SelectColumn>();
     }
 
+    private ParseResult<SqlCaseExpression> Parse_CaseExpression()
+    {
+        if (!TryKeyword("CASE"))
+        {
+            return NoneResult<SqlCaseExpression>();
+        }
+        var whenClause = new List<SqlCaseWhenClause>();
+        do
+        {
+            if (!TryKeyword("WHEN"))
+            {
+                break;
+            }
+            var whenExpr = Parse_Case_WhenClause();
+            if (whenExpr.HasError)
+            {
+                return whenExpr.Error;
+            }
+            if(whenExpr.Result == null)
+            {
+                break;
+            }
+            whenClause.Add(whenExpr.ResultValue);
+        } while (true);
+        if(whenClause.Count == 0)
+        {
+            return CreateParseError("Expected WHEN");
+        }
+        
+        ISqlExpression? elseClause = null;
+        if(TryKeyword("ELSE"))
+        {
+            var elseClauseResult = ParseArithmeticExpr();
+            if (elseClauseResult.HasError)
+            {
+                return elseClauseResult.Error;
+            }
+            elseClause = elseClauseResult.ResultValue;
+        }
+
+        if (!TryKeyword("END"))
+        {
+            return CreateParseError("Expected END");
+        }
+        
+        return CreateParseResult(new SqlCaseExpression
+        {
+            Input = null,
+            Whens = whenClause,
+            Else = elseClause
+        });
+    }
+
+    private ParseResult<SqlCaseWhenClause> Parse_Case_WhenClause()
+    {
+        if (!TryKeyword("WHEN"))
+        {
+            return NoneResult<SqlCaseWhenClause>();
+        }
+        var whenExpr = ParseArithmeticExpr();
+        if (whenExpr.HasError)
+        {
+            return whenExpr.Error;
+        }
+        if (!TryKeyword("THEN"))
+        {
+            return CreateParseError("Expected THEN");
+        }
+        var thenExpr = ParseArithmeticExpr();
+        if (thenExpr.HasError)
+        {
+            return thenExpr.Error;
+        }
+        return CreateParseResult(new SqlCaseWhenClause
+        {
+            When = whenExpr.ResultValue,
+            Then = thenExpr.ResultValue
+        });
+    }
+
     private ParseResult<SelectColumn> Parse_Column_Star()
     {
         if (TryMatch("*"))
