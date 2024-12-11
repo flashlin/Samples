@@ -466,11 +466,21 @@ public class StringParser
             };
         }
 
-        var offset = _position;
+        var startPosition = _position;
         var startChar = ReadChar();
         if (startChar == 'N')
         {
             quoteChar = NextChar();
+            if( quoteChar != '\'' && quoteChar != '"' && quoteChar != '`')
+            {
+                _position = startPosition;
+                return new TextSpan
+                {
+                    Word = string.Empty,
+                    Offset = startPosition,
+                    Length = 0
+                };
+            }
         }
 
         while (!IsEnd())
@@ -490,9 +500,9 @@ public class StringParser
 
         return new TextSpan()
         {
-            Word = _text.Substring(offset, _position - offset),
-            Offset = offset,
-            Length = _position - offset
+            Word = _text.Substring(startPosition, _position - startPosition),
+            Offset = startPosition,
+            Length = _position - startPosition
         };
     }
 
