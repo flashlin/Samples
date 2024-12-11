@@ -2,11 +2,11 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlCaseExpression : ISqlExpression
+public class SqlCaseExpr : ISqlExpression
 {
-    public SqlType SqlType { get; } = SqlType.Case;
+    public SqlType SqlType { get; } = SqlType.CaseExpr;
     public ISqlExpression? Input { get; set; }
-    public List<SqlCaseWhenClause> Whens { get; set; } = [];
+    public List<SqlWhenThenClause> WhenThens { get; set; } = [];
     public ISqlExpression? Else { get; set; }
 
     public string ToSql()
@@ -19,7 +19,7 @@ public class SqlCaseExpression : ISqlExpression
         }
         sql.WriteLine();
         sql.Indent++;
-        foreach (var when in Whens)
+        foreach (var when in WhenThens)
         {
             sql.WriteLine(when.ToSql());
         }

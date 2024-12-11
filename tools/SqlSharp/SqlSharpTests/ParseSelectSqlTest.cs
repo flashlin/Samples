@@ -10,6 +10,81 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void select_case()
+    {
+        var sql = $"""
+                   SELECT id,
+                          ( CASE 
+                              WHEN id IN (1, 2) THEN 100
+                              ELSE 200
+                            END ) AS balance
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    ColumnName = "id",
+                },
+                new SelectSubQueryColumn
+                {
+                    SubQuery = new SqlCaseExpr
+                    {
+                        WhenThens =
+                        [
+                            new SqlWhenThenClause
+                            {
+                                When = new SqlConditionExpression
+                                {
+                                    Left = new SqlFieldExpression
+                                    {
+                                        FieldName = "id"
+                                    },
+                                    ComparisonOperator = ComparisonOperator.In,
+                                    Right = new SqlValues
+                                    {
+                                        Items =
+                                        [
+                                            new SqlValue
+                                            {
+                                                SqlType = SqlType.IntValue,
+                                                Value = "1"
+                                            },
+                                            new SqlValue
+                                            {
+                                                SqlType = SqlType.IntValue,
+                                                Value = "2"
+                                            }
+                                        ]
+                                    }
+                                },
+                                Then = new SqlValue
+                                {
+                                    SqlType = SqlType.IntValue,
+                                    Value = "100"
+                                }
+                            }
+                        ],
+                        Else = new SqlValue
+                        {
+                            SqlType = SqlType.IntValue,
+                            Value = "200"
+                        }
+                    },
+                    Alias = "balance"
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer"
+            }
+        });
+    }
+    
+    [Test]
     public void where_group_and_group()
     {
         var sql = $"""

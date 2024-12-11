@@ -171,6 +171,11 @@ public class SqlParser
                 Value = quotedString.ResultValue.Value,
             };
         }
+        
+        if(Try(Parse_CaseExpression, out var caseExpr))
+        {
+            return caseExpr.ResultValue;
+        }
 
         if (Try(Parse_FunctionName, out var function))
         {
@@ -751,13 +756,13 @@ public class SqlParser
         return NoneResult<SelectColumn>();
     }
 
-    private ParseResult<SqlCaseExpression> Parse_CaseExpression()
+    private ParseResult<SqlCaseExpr> Parse_CaseExpression()
     {
         if (!TryKeyword("CASE"))
         {
-            return NoneResult<SqlCaseExpression>();
+            return NoneResult<SqlCaseExpr>();
         }
-        var whenClause = new List<SqlCaseWhenClause>();
+        var whenClause = new List<SqlWhenThenClause>();
         do
         {
             if (!TryKeyword("WHEN"))
@@ -796,19 +801,19 @@ public class SqlParser
             return CreateParseError("Expected END");
         }
         
-        return CreateParseResult(new SqlCaseExpression
+        return CreateParseResult(new SqlCaseExpr
         {
             Input = null,
-            Whens = whenClause,
+            WhenThens = whenClause,
             Else = elseClause
         });
     }
 
-    private ParseResult<SqlCaseWhenClause> Parse_Case_WhenClause()
+    private ParseResult<SqlWhenThenClause> Parse_Case_WhenClause()
     {
         if (!TryKeyword("WHEN"))
         {
-            return NoneResult<SqlCaseWhenClause>();
+            return NoneResult<SqlWhenThenClause>();
         }
         var whenExpr = ParseArithmeticExpr();
         if (whenExpr.HasError)
@@ -824,7 +829,7 @@ public class SqlParser
         {
             return thenExpr.Error;
         }
-        return CreateParseResult(new SqlCaseWhenClause
+        return CreateParseResult(new SqlWhenThenClause
         {
             When = whenExpr.ResultValue,
             Then = thenExpr.ResultValue
