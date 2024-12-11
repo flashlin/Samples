@@ -10,7 +10,7 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
-    public void METHOD()
+    public void where_group_and_group()
     {
         var sql = $"""
                    select  id
@@ -20,6 +20,85 @@ public class ParseSelectSqlTest
                    		(id1!=0 or id2!=0)
                    """;
         var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement()
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    ColumnName = "id",
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+            },
+            Where = new SqlSearchCondition
+            {
+                Left = new SqlGroup
+                {
+                    Inner = new SqlConditionExpression
+                    {
+                        Left = new SqlFunctionExpression
+                        {
+                            FunctionName = "IsNull",
+                            Parameters =
+                            [
+                                new SqlFieldExpression
+                                {
+                                    FieldName = "name",
+                                },
+                                new SqlValue
+                                {
+                                    SqlType = SqlType.IntValue,
+                                    Value = "0"
+                                }
+                            ]
+                        },
+                        ComparisonOperator = ComparisonOperator.LessThan,
+                        Right = new SqlValue
+                        {
+                            SqlType = SqlType.IntValue,
+                            Value = "15"
+                        }
+                    }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlGroup
+                {
+                    Inner = new SqlSearchCondition
+                    {
+                        Left = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpression
+                            {
+                                FieldName = "id1"
+                            },
+                            ComparisonOperator = ComparisonOperator.NotEqual,
+                            Right = new SqlValue
+                            {
+                                SqlType = SqlType.IntValue,
+                                Value = "0"
+                            }
+                        },
+                        LogicalOperator = LogicalOperator.Or,
+                        Right = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpression
+                            {
+                                FieldName = "id2"
+                            },
+                            ComparisonOperator = ComparisonOperator.NotEqual,
+                            Right = new SqlValue
+                            {
+                                SqlType = SqlType.IntValue,
+                                Value = "0"
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     [Test]
