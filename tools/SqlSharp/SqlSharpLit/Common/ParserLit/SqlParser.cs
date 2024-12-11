@@ -742,6 +742,18 @@ public class SqlParser
             return NoneResult<T>();
         };
     }
+    
+    private ParseResult<SelectSubQueryColumn> Parse_Column_Arithmetic()
+    {
+        if (Try(ParseArithmeticExpr,out var arithmetic))
+        {
+            return CreateParseResult(new SelectSubQueryColumn
+            {
+                SubQuery = arithmetic.ResultValue
+            });
+        }
+        return NoneResult<SelectSubQueryColumn>();
+    }
 
     private ParseResult<SelectColumn> Parse_Column_Identifier()
     {
@@ -1056,6 +1068,7 @@ public class SqlParser
 
             var column = Or<ISelectColumnExpression>(
                 Parse_Column_Star,
+                Parse_Column_Arithmetic,
                 Parse_Column_Identifier,
                 Parse_Column_SubQuery)();
             if (column.HasError)

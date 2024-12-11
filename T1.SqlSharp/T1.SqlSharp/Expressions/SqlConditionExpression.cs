@@ -2,7 +2,7 @@ namespace T1.SqlSharp.Expressions;
 
 public class SqlConditionExpression : ISqlExpression 
 {
-    public SqlType SqlType { get; } = SqlType.Condition;
+    public SqlType SqlType { get; } = SqlType.ComparisonCondition;
     public required ISqlExpression Left { get; set; }
     public ComparisonOperator ComparisonOperator { get; set; }
     public required ISqlExpression Right { get; set; }

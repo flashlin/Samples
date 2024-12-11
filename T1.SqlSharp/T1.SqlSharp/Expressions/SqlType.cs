@@ -23,7 +23,7 @@ public enum SqlType
     JoinCondition,
     TableSource,
     Function,
-    Condition,
+    ComparisonCondition,
     SearchCondition,
     Hint,
     Group,

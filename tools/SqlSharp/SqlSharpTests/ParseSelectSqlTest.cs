@@ -423,6 +423,7 @@ public class ParseSelectSqlTest
                    from customer 
                    """;
         var rc = ParseSql(sql);
+        var json = rc.ResultValue.ToSqlJsonString();
         rc.ShouldBe(new SelectStatement
         {
             Columns =
