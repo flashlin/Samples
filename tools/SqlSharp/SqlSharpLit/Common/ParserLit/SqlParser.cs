@@ -949,6 +949,7 @@ public class SqlParser
             Keywords("IS", "NOT"),
             Keywords("LIKE"),
             Keywords("IN"),
+            Keywords("BETWEEN"),
             Symbol("<>"),
             Symbol("!="),
             Symbol(">="),
@@ -967,21 +968,7 @@ public class SqlParser
             return NoneResult<ComparisonOperator?>();
         }
 
-        var comparisonOperator = rc.Result.Value.ToUpper() switch
-        {
-            "IS NOT" => ComparisonOperator.IsNot,
-            "LIKE" => ComparisonOperator.Like,
-            "IN" => ComparisonOperator.In,
-            "<>" => ComparisonOperator.NotEqual,
-            "!=" => ComparisonOperator.NotEqual,
-            ">=" => ComparisonOperator.GreaterThanOrEqual,
-            "<=" => ComparisonOperator.LessThanOrEqual,
-            "=" => ComparisonOperator.Equal,
-            ">" => ComparisonOperator.GreaterThan,
-            "<" => ComparisonOperator.LessThan,
-            _ => ComparisonOperator.Equal
-        };
-        return comparisonOperator;
+        return rc.Result.Value.ToUpper().ToComparisonOperator();
     }
 
     private ParseResult<ISqlExpression> Parse_ConditionExpr(Func<ParseResult<ISqlExpression>> parseTerm)
@@ -990,16 +977,55 @@ public class SqlParser
         while (Try(Parse_ComparisonOperator, out var comparisonOperator))
         {
             var op = comparisonOperator.Result!.Value;
-            var right = parseTerm();
+
+            ISqlExpression? right;
+            switch (op)
+            {
+                case ComparisonOperator.Between:
+                    var betweenValue = Parse_BetweenValue();
+                    if(betweenValue.HasError)
+                    {
+                        return betweenValue.Error;
+                    }
+                    right = betweenValue.ResultValue;
+                    break;
+                default:
+                    right = parseTerm().ResultValue;
+                    break;
+            }
+
             left = CreateParseResult(new SqlConditionExpression
             {
                 Left = left.ResultValue,
                 ComparisonOperator = op,
-                Right = right.ResultValue
+                Right = right
             }).To<ISqlExpression>();
         }
 
         return left;
+    }
+
+    private ParseResult<SqlBetweenValue> Parse_BetweenValue()
+    {
+        var start= Parse_Value();
+        if (start.HasError)
+        {
+            return start.Error;
+        }
+        if (!TryKeyword("AND"))
+        {
+            return CreateParseError("Expected AND");
+        }
+        var end= Parse_Value();
+        if (end.HasError)
+        {
+            return end.Error;
+        }
+        return new SqlBetweenValue
+        {
+            Start = start.ResultValue,
+            End = end.ResultValue
+        };
     }
 
     private ParseResult<SqlDataSize> Parse_DataSize()

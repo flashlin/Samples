@@ -37,5 +37,6 @@ public enum SqlType
     AssignExpr,
     SelectColumn,
     Values,
-    NegativeValue
+    NegativeValue,
+    BetweenValue
 }

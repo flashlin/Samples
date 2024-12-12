@@ -20,4 +20,24 @@ public static class ComparisonOperatorExtensions
             _ => throw new NotImplementedException()
         };
     }
+    
+    public static ComparisonOperator ToComparisonOperator(this string comparisonOperator)
+    {
+        return comparisonOperator switch
+        {
+            "=" => ComparisonOperator.Equal,
+            "<>" => ComparisonOperator.NotEqual,
+            "!=" => ComparisonOperator.NotEqual,
+            ">" => ComparisonOperator.GreaterThan,
+            "<" => ComparisonOperator.LessThan,
+            ">=" => ComparisonOperator.GreaterThanOrEqual,
+            "<=" => ComparisonOperator.LessThanOrEqual,
+            "LIKE" => ComparisonOperator.Like,
+            "IN" => ComparisonOperator.In,
+            "BETWEEN" => ComparisonOperator.Between,
+            "IS NULL" => ComparisonOperator.IsNull,
+            "IS NOT" => ComparisonOperator.IsNot,
+            _ => throw new NotImplementedException()
+        };
+    }
 }

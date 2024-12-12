@@ -10,6 +10,37 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Where_between()
+    {
+        var sql = $"""
+                   select id from customer
+                   where id between 1 and 10
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer" },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "id" },
+                ComparisonOperator = ComparisonOperator.Between,
+                Right = new SqlBetweenValue
+                {
+                    Start = new SqlValue { SqlType = SqlType.IntValue, Value = "1" },
+                    End = new SqlValue { SqlType = SqlType.IntValue, Value = "10" }
+                }
+            }
+        });
+    }
+    
+    [Test]
     public void Case_when_then_negative_number()
     {
         var sql = $"""
