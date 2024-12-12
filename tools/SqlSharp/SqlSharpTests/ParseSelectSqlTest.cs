@@ -38,7 +38,25 @@ public class ParseSelectSqlTest
                    from customer
                    """;
         var rc = ParseSql(sql);
-        rc.HasError.ShouldBe(false);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlGroup
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "e.id" } }],
+                            From = new SqlTableSource { TableName = "emp", Alias = "e" }
+                        }
+                    },
+                    Alias = "id1"
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer" }
+        });
     }
     
     
