@@ -1079,11 +1079,12 @@ public class SqlParser
                 return NoneResult<ISelectColumnExpression>();
             }
 
-            var column = Or<ISelectColumnExpression>(
-                Parse_Column_Star,
-                Parse_Column_Arithmetic,
-                Parse_Column_Identifier,
-                Parse_Column_SubQuery)();
+            // var column = Or<ISelectColumnExpression>(
+            //     Parse_Column_Star,
+            //     Parse_Column_Arithmetic,
+            //     Parse_Column_Identifier,
+            //     Parse_Column_SubQuery)();
+            var column = Parse_Column_Arithmetic().To<ISelectColumnExpression>();
             if (column.HasError)
             {
                 return column.Error;
