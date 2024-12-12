@@ -10,6 +10,39 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void From_table_aliasTableName()
+    {
+        var sql = $"""
+                   select c.id from customer c
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "c.id" }
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer", Alias = "c" }
+        });
+    }
+    
+    [Test]
+    public void Select_other_select_from_table_aliasTableName_aliasFieldName()
+    {
+        var sql = $"""
+                   select 
+                   (select e.id from emp e) as id1 
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.HasError.ShouldBe(false);
+    }
+    
+    
+    [Test]
     public void Where_between()
     {
         var sql = $"""
