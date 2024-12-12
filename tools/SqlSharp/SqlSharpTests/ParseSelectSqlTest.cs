@@ -10,6 +10,48 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void case_has_when()
+    {
+        var sql = $"""
+                   select @id = case id&2 when 2 then 1 else 0 end
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlAssignExpr
+                    {
+                        Left = new SqlFieldExpr { FieldName = "@id" },
+                        Right = new SqlCaseExpr
+                        {
+                            When = new SqlArithmeticBinaryExpr
+                            {
+                                Left = new SqlFieldExpr { FieldName = "id" },
+                                Operator = ArithmeticOperator.BitwiseAnd,
+                                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "2" }
+                            },
+                            WhenThens =
+                            [
+                                new SqlWhenThenClause
+                                {
+                                    When = new SqlValue { SqlType = SqlType.IntValue, Value = "2" },
+                                    Then = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                                }
+                            ],
+                            Else = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
+                        }
+                    }
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer" }
+        });
+    }
+    
+    [Test]
     public void select_case()
     {
         var sql = $"""

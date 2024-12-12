@@ -774,6 +774,18 @@ public class SqlParser
         {
             return NoneResult<SqlCaseExpr>();
         }
+
+        ISqlExpression? whenExpr = null;
+        if (!IsPeekKeywords("WHEN"))
+        {
+            var whenExprRc = ParseArithmeticExpr();
+            if (whenExprRc.HasError)
+            {
+                return whenExprRc.Error;
+            }
+            whenExpr = whenExprRc.ResultValue; 
+        }
+        
         var whenClause = new List<SqlWhenThenClause>();
         do
         {
@@ -781,16 +793,16 @@ public class SqlParser
             {
                 break;
             }
-            var whenExpr = Parse_Case_WhenClause();
-            if (whenExpr.HasError)
+            var whenThenExpr = Parse_Case_WhenClause();
+            if (whenThenExpr.HasError)
             {
-                return whenExpr.Error;
+                return whenThenExpr.Error;
             }
-            if(whenExpr.Result == null)
+            if(whenThenExpr.Result == null)
             {
                 break;
             }
-            whenClause.Add(whenExpr.ResultValue);
+            whenClause.Add(whenThenExpr.ResultValue);
         } while (true);
         if(whenClause.Count == 0)
         {
@@ -815,7 +827,7 @@ public class SqlParser
         
         return CreateParseResult(new SqlCaseExpr
         {
-            Input = null,
+            When = whenExpr,
             WhenThens = whenClause,
             Else = elseClause
         });

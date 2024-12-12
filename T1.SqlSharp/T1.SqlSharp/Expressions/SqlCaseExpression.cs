@@ -5,7 +5,7 @@ namespace T1.SqlSharp.Expressions;
 public class SqlCaseExpr : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.CaseExpr;
-    public ISqlExpression? Input { get; set; }
+    public ISqlExpression? When { get; set; }
     public List<SqlWhenThenClause> WhenThens { get; set; } = [];
     public ISqlExpression? Else { get; set; }
 
@@ -13,9 +13,9 @@ public class SqlCaseExpr : ISqlExpression
     {
         var sql = new IndentStringBuilder();
         sql.Write("CASE");
-        if (Input != null)
+        if (When != null)
         {
-            sql.Write(" " + Input.ToSql());
+            sql.Write(" " + When.ToSql());
         }
         sql.WriteLine();
         sql.Indent++;
