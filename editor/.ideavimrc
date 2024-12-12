@@ -1,4 +1,5 @@
 " https://github.com/JetBrains/ideavim/wiki/IdeaVim-Plugins
+":actionlist 顯示所有的 action
 let mapleader=" "
 set number relativenumber
 set history=200
@@ -70,6 +71,13 @@ Plug 'vim-commentary'
 set commentary
 
 
+"" 顯示 members
+nnoremap zm :action FileStructurePopup<CR>
+
+""
+" 聚焦 test explorer
+nmap zft :action ActivateTestToolWindow<CR>
+
 """ -------------------------------------------
 " daa 刪除參數
 " cia 更改內部參數
@@ -124,7 +132,7 @@ nmap cxx <Plug>(ExchangeLine)
 """ -------------------------------------------
 Plug 'preservim/nerdtree'
 set NERDTree
-map <C-n> :NERDTree<CR>
+map <A-e> :NERDTree<CR>
 
 
 """ 
@@ -164,6 +172,7 @@ map <A-Left> :action GotoLastEditPosition<CR>
 map zc :action CommentByLineComment<CR>
 imap zc :action CommentByLineComment<CR>
 map zmz :action ReformatCode<CR>
+map zrc :action RearrangeCode<CR>
 nmap [ :action MethodUp<CR>
 nmap ] :action MethodDown<CR>
 nmap [[ ?class<CR>:action MethodDown<CR>
@@ -177,7 +186,7 @@ map <A-Down> :action MoveLineDown<CR>:action VimAutoIndentLines<CR>
 imap <A-Down> <Esc>:action MoveLineDown<CR>:action VimAutoIndentLines<CR>
 
 " 跳到錯誤的地方
-nmap zn :action ReSharperGotoPrevErrorInSolution<CR>
+nmap zn :action ReSharperGotoNextErrorInSolution<CR>
 nmap ze :action GotoNextError<CR>
 nmap zE :action GotoPreviousError<CR>
 
@@ -223,4 +232,4 @@ function! CopyPrevCSharpMethod()
 endfunction
 
 nnoremap zcp :call CopyPrevCSharpMethod()<CR>
-
+nnoremap gc :action Git.Commit.Stage<CR>

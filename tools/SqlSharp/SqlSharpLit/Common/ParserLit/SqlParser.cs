@@ -981,7 +981,9 @@ public class SqlParser
             Symbol("<>"),
             Symbol("!="),
             Symbol(">="),
+            SymbolWithNoncontinuous(">="),
             Symbol("<="),
+            SymbolWithNoncontinuous("<="),
             Symbol("="),
             Symbol(">"),
             Symbol("<")
@@ -2202,6 +2204,28 @@ column_name AS computed_column_expression
                 break;
             }
         }
+    }
+    
+    private Func<ParseResult<SqlToken>> SymbolWithNoncontinuous(string symbol)
+    {
+        return () =>
+        {
+            var startPosition = _text.Position;
+            foreach (var symbolChar in symbol)
+            {
+                SkipWhiteSpace();
+                var currentChar = _text.ReadChar();
+                if (currentChar != symbolChar)
+                {
+                    _text.Position = startPosition;
+                    return NoneResult<SqlToken>();
+                }
+            }
+            return new SqlToken
+            {
+                Value = symbol.Replace(" ", "").Replace("\t", "")
+            };
+        };
     }
 
     private Func<ParseResult<SqlToken>> Symbol(string symbol)
