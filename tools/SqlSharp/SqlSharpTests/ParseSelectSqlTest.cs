@@ -37,15 +37,17 @@ public class ParseSelectSqlTest
                 }
             }
         );
-        whenThen0.Then.ShouldBe(new SqlNegativeValue()
-        {
-            Value = new SqlArithmeticBinaryExpr
+        whenThen0.Then.ShouldBe(
+            new SqlArithmeticBinaryExpr
             {
-                Left = new SqlFieldExpr { FieldName = "id" },
+                Left = new SqlNegativeValue()
+                {
+                    Value = new SqlFieldExpr { FieldName = "id" },
+                },
                 Operator = ArithmeticOperator.Multiply,
                 Right = new SqlValue { SqlType = SqlType.IntValue, Value = "100" }
             }
-        });
+        );
     }
 
     [Test]

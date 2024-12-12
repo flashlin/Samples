@@ -124,15 +124,26 @@ public class SqlParser
     {
         if (TryMatch("-"))
         {
-            var value = ParseArithmeticExpr();
-            if (value.HasError)
+            if (Try(Parse_SqlIdentifier, out var identifier) && !IsPeekMatch("("))
             {
-                return value.Error;
+                return new SqlNegativeValue
+                {
+                    Value = new SqlFieldExpr()
+                    {
+                        FieldName = identifier.ResultValue.Value
+                    }
+                };   
+            }
+            
+            var expr = ParseArithmeticExpr();
+            if (expr.HasError)
+            {
+                return expr.Error;
             }
 
             return new SqlNegativeValue
             {
-                Value = value.ResultValue
+                Value = expr.ResultValue
             };
         }
         return NoneResult<SqlNegativeValue>();
@@ -1151,7 +1162,7 @@ public class SqlParser
             
             if (TryKeyword("AS"))
             {
-                var aliasName = Or(ParseSqlIdentifier, ParseSqlQuotedString)();
+                var aliasName = Or(Parse_SqlIdentifier, ParseSqlQuotedString)();
                 if (aliasName.HasError)
                 {
                     return aliasName.Error;
@@ -1893,7 +1904,7 @@ column_name AS computed_column_expression
         return new ParseResult<ReferentialAction>(action);
     }
 
-    private ParseResult<SqlValue> ParseSqlIdentifier()
+    private ParseResult<SqlValue> Parse_SqlIdentifier()
     {
         if (TryReadSqlIdentifier(out var identifier))
         {
@@ -2172,6 +2183,25 @@ column_name AS computed_column_expression
     {
         SkipWhiteSpace();
         return _text.TryMatch(expected);
+    }
+    
+    private bool IsPeekMatch(string expected)
+    {
+        SkipWhiteSpace();
+        var tmpPosition = _text.Position;
+        var isSuccess = _text.TryMatch(expected);
+        _text.Position = tmpPosition;
+        return isSuccess;
+    }
+    
+    private bool IsPeek<T>(Func<ParseResult<T>> parseFn)
+    {
+        SkipWhiteSpace();
+        var tmpPosition = _text.Position;
+        var rc = parseFn(); 
+        var isSuccess = rc.Result != null;
+        _text.Position = tmpPosition;
+        return isSuccess;
     }
 
     private bool TryPeekKeyword(string expected)
