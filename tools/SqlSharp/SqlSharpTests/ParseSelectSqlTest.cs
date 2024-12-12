@@ -10,6 +10,45 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void where_field_in_other_select()
+    {
+        var sql = $"""
+                   select id
+                   from customer
+                   where gid in (select gid from temp)
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer"
+            },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "gid" },
+                ComparisonOperator = ComparisonOperator.In,
+                Right = new SqlGroup
+                {
+                    Inner = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "gid" } }],
+                        From = new SqlTableSource { TableName = "temp" }
+                    }
+                }
+            }
+        });
+    }
+
+
+    [Test]
     public void case_has_when()
     {
         var sql = $"""
@@ -50,7 +89,7 @@ public class ParseSelectSqlTest
             From = new SqlTableSource { TableName = "customer" }
         });
     }
-    
+
     [Test]
     public void select_case()
     {

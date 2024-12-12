@@ -171,6 +171,16 @@ public class SqlParser
                 Value = quotedString.ResultValue.Value,
             };
         }
+
+        if (IsPeekKeywords("SELECT"))
+        {
+            var subSelect = ParseSelectStatement();
+            if(subSelect.HasError)
+            {
+                return subSelect.Error;
+            }
+            return subSelect.ResultValue;
+        }
         
         if(Try(Parse_CaseExpression, out var caseExpr))
         {
