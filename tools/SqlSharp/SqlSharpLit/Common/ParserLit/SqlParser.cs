@@ -613,6 +613,12 @@ public class SqlParser
             {
                 TableName = tableName
             };
+            
+            if(Try(Parse_TableAliasName, out var alias))
+            {
+                tableSource.Alias = alias.ResultValue.Value;
+            }
+            
             if (TryKeyword("WITH"))
             {
                 MatchString("(");
@@ -631,11 +637,6 @@ public class SqlParser
 
                 MatchString(")");
                 tableSource.Withs = tableHints.ResultValue;
-            }
-
-            if(Try(Parse_TableAliasName, out var alias))
-            {
-                tableSource.Alias = alias.ResultValue.Value;
             }
 
             selectStatement.From = tableSource;

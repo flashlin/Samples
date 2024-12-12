@@ -28,6 +28,41 @@ public class ParseSelectSqlTest
             From = new SqlTableSource { TableName = "customer", Alias = "c" }
         });
     }
+
+    [Test]
+    public void Select_select_table_tableAliasName_with()
+    {
+        var sql = $"""
+                   select 
+                   (select id from customer e with(nolock)) as id2
+                   from customer c 
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlGroup
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
+                            From = new SqlTableSource 
+                            { 
+                                TableName = "customer", 
+                                Alias = "e",
+                                Withs = [new SqlHint { Name = "nolock" }]
+                            }
+                        }
+                    },
+                    Alias = "id2"
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer", Alias = "c" }
+        });
+    }
     
     [Test]
     public void Select_other_select_from_table_aliasTableName_aliasFieldName()
