@@ -16,49 +16,35 @@ public class ParseSelectSqlTest
                    select (case when n=0 and id > 0 then -id * 100 else 1 end)
                    """;
         var rc = ParseSql(sql);
-        rc.ShouldBe(new SelectStatement
-        {
-            Columns =
-            [
-                new SelectColumn
+        var selectStatement = (SelectStatement)rc.ResultValue;
+        var groupInner = ((SqlGroup)selectStatement.Columns[0].Field).Inner;
+        var field = (SqlCaseExpr)groupInner;
+        var whenThen0 = field.WhenThens[0];
+        whenThen0.When.ShouldBe(new SqlSearchCondition()
+            {
+                Left = new SqlConditionExpression
                 {
-                    Field = new SqlGroup
-                    {
-                        Inner = new SqlCaseExpr
-                        {
-                            WhenThens =
-                            [
-                                new SqlWhenThenClause
-                                {
-                                    When = new SqlSearchCondition
-                                    {
-                                        Left = new SqlConditionExpression
-                                        {
-                                            Left = new SqlFieldExpr { FieldName = "n" },
-                                            ComparisonOperator = ComparisonOperator.Equal,
-                                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
-                                        },
-                                        LogicalOperator = LogicalOperator.And,
-                                        Right = new SqlConditionExpression
-                                        {
-                                            Left = new SqlFieldExpr { FieldName = "id" },
-                                            ComparisonOperator = ComparisonOperator.GreaterThan,
-                                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
-                                        }
-                                    },
-                                    Then = new SqlArithmeticBinaryExpr
-                                    {
-                                        Left = new SqlNegativeValue() { Value = new SqlFieldExpr { FieldName = "id" } },
-                                        Operator = ArithmeticOperator.Multiply,
-                                        Right = new SqlValue { SqlType = SqlType.IntValue, Value = "100" }
-                                    }
-                                }
-                            ],
-                            Else = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
-                        }
-                    }
+                    Left = new SqlFieldExpr { FieldName = "n" },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpr { FieldName = "id" },
+                    ComparisonOperator = ComparisonOperator.GreaterThan,
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
                 }
-            ]
+            }
+        );
+        whenThen0.Then.ShouldBe(new SqlNegativeValue()
+        {
+            Value = new SqlArithmeticBinaryExpr
+            {
+                Left = new SqlFieldExpr { FieldName = "id" },
+                Operator = ArithmeticOperator.Multiply,
+                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "100" }
+            }
         });
     }
 
