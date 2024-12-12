@@ -10,6 +10,33 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Where_grant_equal()
+    {
+        var sql = $"""
+                   select id from customer
+                   where id > = 1
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer" },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "id" },
+                ComparisonOperator = ComparisonOperator.GreaterThanOrEqual,
+                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+            }
+        });
+    }
+    
+    [Test]
     public void From_table_aliasTableName()
     {
         var sql = $"""
