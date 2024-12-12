@@ -10,6 +10,39 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void select_other_select()
+    {
+        var sql = $"""
+                   SELECT id, 
+                    (SELECT @name) AS name
+                   from customer 
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                },
+                new SelectColumn
+                {
+                    Field = new SqlGroup
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "@name" } }]
+                        }
+                    },
+                    Alias = "name"
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer" }
+        });
+    }
+
+    [Test]
     public void where_field_in_other_select()
     {
         var sql = $"""
