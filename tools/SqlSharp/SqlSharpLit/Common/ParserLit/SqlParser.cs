@@ -268,6 +268,28 @@ public class SqlParser
         return valueExpr;
     }
 
+    private ParseResult<SqlValue> Parse_TableAliasName()
+    {
+        var startPosition = _text.Position;
+        if(Try(Parse_SqlIdentifier, out var alias))
+        {
+            if (IsPeekMatch("("))
+            {
+                _text.Position = startPosition;
+                return NoneResult<SqlValue>();
+            }
+
+            if (alias.ResultValue.Value.ToUpper() == "WHERE")
+            {
+                _text.Position = startPosition;
+                return NoneResult<SqlValue>();
+            }
+            
+            return alias;
+        }
+        return NoneResult<SqlValue>();
+    }
+
     //TODO: Draft
     public ParseResult<ISqlExpression> ParseArithmetic_AdditionOrSubtraction(
         Func<ParseResult<ISqlExpression>> parseTerm)
@@ -609,6 +631,11 @@ public class SqlParser
 
                 MatchString(")");
                 tableSource.Withs = tableHints.ResultValue;
+            }
+
+            if(Try(Parse_TableAliasName, out var alias))
+            {
+                tableSource.Alias = alias.ResultValue.Value;
             }
 
             selectStatement.From = tableSource;
