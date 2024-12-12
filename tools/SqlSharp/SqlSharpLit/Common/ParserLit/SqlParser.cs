@@ -777,7 +777,7 @@ public class SqlParser
         var whenClause = new List<SqlWhenThenClause>();
         do
         {
-            if (!TryKeyword("WHEN"))
+            if (!IsPeekKeywords("WHEN"))
             {
                 break;
             }
