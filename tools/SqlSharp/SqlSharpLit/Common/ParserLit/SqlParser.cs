@@ -119,6 +119,24 @@ public class SqlParser
 
         return CreateParseResult(topClause);
     }
+    
+    private ParseResult<SqlNegativeValue> Parse_NegativeValue()
+    {
+        if (TryMatch("-"))
+        {
+            var value = ParseArithmeticExpr();
+            if (value.HasError)
+            {
+                return value.Error;
+            }
+
+            return new SqlNegativeValue
+            {
+                Value = value.ResultValue
+            };
+        }
+        return NoneResult<SqlNegativeValue>();
+    }
 
     public ParseResult<ISqlExpression> Parse_Value()
     {
@@ -162,6 +180,11 @@ public class SqlParser
         if (Try(ParseNumberValue, out var numberValue))
         {
             return numberValue.ResultValue;
+        }
+        
+        if (Try(Parse_NegativeValue, out var negativeValue))
+        {
+            return negativeValue.ResultValue;
         }
 
         if (Try(ParseSqlQuotedString, out var quotedString))

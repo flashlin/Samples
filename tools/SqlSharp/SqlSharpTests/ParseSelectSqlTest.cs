@@ -10,6 +10,59 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Case_when_then_negative_number()
+    {
+        var sql = $"""
+                   select (case when n=0 and id > 0 then -id * 100 else 1 end)
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlGroup
+                    {
+                        Inner = new SqlCaseExpr
+                        {
+                            WhenThens =
+                            [
+                                new SqlWhenThenClause
+                                {
+                                    When = new SqlSearchCondition
+                                    {
+                                        Left = new SqlConditionExpression
+                                        {
+                                            Left = new SqlFieldExpr { FieldName = "n" },
+                                            ComparisonOperator = ComparisonOperator.Equal,
+                                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
+                                        },
+                                        LogicalOperator = LogicalOperator.And,
+                                        Right = new SqlConditionExpression
+                                        {
+                                            Left = new SqlFieldExpr { FieldName = "id" },
+                                            ComparisonOperator = ComparisonOperator.GreaterThan,
+                                            Right = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
+                                        }
+                                    },
+                                    Then = new SqlArithmeticBinaryExpr
+                                    {
+                                        Left = new SqlNegativeValue() { Value = new SqlFieldExpr { FieldName = "id" } },
+                                        Operator = ArithmeticOperator.Multiply,
+                                        Right = new SqlValue { SqlType = SqlType.IntValue, Value = "100" }
+                                    }
+                                }
+                            ],
+                            Else = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                        }
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void select_other_select()
     {
         var sql = $"""
