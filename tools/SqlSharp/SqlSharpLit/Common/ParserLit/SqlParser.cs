@@ -73,7 +73,7 @@ public class SqlParser
 
         if (rc is not { HasValue: true, Result: not null })
         {
-            return SelectType.All;
+            return CreateParseResult(SelectType.All);
         }
 
         var selectType = rc.Result.Value.ToUpper() switch
@@ -82,7 +82,7 @@ public class SqlParser
             "DISTINCT" => SelectType.Distinct,
             _ => SelectType.All
         };
-        return selectType;
+        return CreateParseResult(selectType);
     }
 
     public ParseResult<SqlTopClause> Parse_TopClause()
@@ -117,7 +117,7 @@ public class SqlParser
             topClause.IsWithTies = true;
         }
 
-        return topClause;
+        return CreateParseResult(topClause);
     }
 
     public ParseResult<ISqlExpression> Parse_Value()
