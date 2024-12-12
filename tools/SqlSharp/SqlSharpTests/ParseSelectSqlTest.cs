@@ -34,47 +34,50 @@ public class ParseSelectSqlTest
                 },
                 new SelectColumn
                 {
-                    Field = new SqlCaseExpr
+                    Field = new SqlGroup
                     {
-                        WhenThens =
-                        [
-                            new SqlWhenThenClause
-                            {
-                                When = new SqlConditionExpression
-                                {
-                                    Left = new SqlFieldExpr
-                                    {
-                                        FieldName = "id"
-                                    },
-                                    ComparisonOperator = ComparisonOperator.In,
-                                    Right = new SqlValues
-                                    {
-                                        Items =
-                                        [
-                                            new SqlValue
-                                            {
-                                                SqlType = SqlType.IntValue,
-                                                Value = "1"
-                                            },
-                                            new SqlValue
-                                            {
-                                                SqlType = SqlType.IntValue,
-                                                Value = "2"
-                                            }
-                                        ]
-                                    }
-                                },
-                                Then = new SqlValue
-                                {
-                                    SqlType = SqlType.IntValue,
-                                    Value = "100"
-                                }
-                            }
-                        ],
-                        Else = new SqlValue
+                        Inner = new SqlCaseExpr
                         {
-                            SqlType = SqlType.IntValue,
-                            Value = "200"
+                            WhenThens =
+                            [
+                                new SqlWhenThenClause
+                                {
+                                    When = new SqlConditionExpression
+                                    {
+                                        Left = new SqlFieldExpr
+                                        {
+                                            FieldName = "id"
+                                        },
+                                        ComparisonOperator = ComparisonOperator.In,
+                                        Right = new SqlValues
+                                        {
+                                            Items =
+                                            [
+                                                new SqlValue
+                                                {
+                                                    SqlType = SqlType.IntValue,
+                                                    Value = "1"
+                                                },
+                                                new SqlValue
+                                                {
+                                                    SqlType = SqlType.IntValue,
+                                                    Value = "2"
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    Then = new SqlValue
+                                    {
+                                        SqlType = SqlType.IntValue,
+                                        Value = "100"
+                                    }
+                                }
+                            ],
+                            Else = new SqlValue
+                            {
+                                SqlType = SqlType.IntValue,
+                                Value = "200"
+                            }
                         }
                     },
                     Alias = "balance"
@@ -86,7 +89,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void where_group_and_group()
     {
@@ -263,7 +266,7 @@ public class ParseSelectSqlTest
                 {
                     Field = new SqlFieldExpr
                     {
-                        FieldName = "@b" 
+                        FieldName = "@b"
                     },
                     Alias = "'field2'",
                 },
@@ -410,7 +413,7 @@ public class ParseSelectSqlTest
                     {
                         Left = new SqlFieldExpr
                         {
-                           FieldName = "@upper"
+                            FieldName = "@upper"
                         },
                         Right = new SqlFunctionExpression
                         {
@@ -656,7 +659,7 @@ public class ParseSelectSqlTest
             [
                 new SelectColumn
                 {
-                    Field = new SqlValue(){Value = "*" },
+                    Field = new SqlValue() { Value = "*" },
                 }
             ],
             From = new SqlTableSource
@@ -983,7 +986,7 @@ public class ParseSelectSqlTest
                 {
                     Field = new SqlFieldExpr
                     {
-                         FieldName= "id"
+                        FieldName = "id"
                     },
                 }
             ],
