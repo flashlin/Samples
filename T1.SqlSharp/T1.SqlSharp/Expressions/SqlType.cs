@@ -43,5 +43,6 @@ public enum SqlType
     Distinct,
     TableHintIndex,
     FuncTableSource,
-    InnerTableSource
+    InnerTableSource,
+    UnionSelect
 }

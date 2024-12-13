@@ -10,6 +10,51 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_Union_Select()
+    {
+        var sql = $"""
+                   select id from customer
+                   union
+                   select id from emp
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Unions =
+            [
+                new SqlUnionSelect
+                {
+                    SelectStatement = new SelectStatement
+                    {
+                        Columns =
+                        [
+                            new SelectColumn
+                            {
+                                Field = new SqlFieldExpr { FieldName = "id" }
+                            }
+                        ],
+                        FromSources =
+                        [
+                            new SqlTableSource { TableName = "emp" }
+                        ]
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void From_select_convert_datatype_field()
     {
         var sql = $"""

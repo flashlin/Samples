@@ -11,6 +11,7 @@ public class SelectStatement : ISqlExpression
     public List<ISqlExpression> FromSources { get; set; } = [];
     public ISqlExpression? Where { get; set; }
     public SqlOrderByClause? OrderBy { get; set; }
+    public List<SqlUnionSelect> Unions { get; set; } = [];
 
     public string ToSql()
     {
@@ -58,6 +59,10 @@ public class SelectStatement : ISqlExpression
         if(OrderBy!=null)
         {
             sql.WriteLine(OrderBy.ToSql());
+        }
+        foreach (var unionSelect in Unions)
+        {
+            sql.WriteLine(unionSelect.ToSql());
         }
         return sql.ToString();
     }

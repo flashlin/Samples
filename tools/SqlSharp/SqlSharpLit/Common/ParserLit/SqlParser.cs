@@ -8,7 +8,7 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
-    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT"];
+    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION"];
 
     private readonly StringParser _text;
 
@@ -600,6 +600,22 @@ public class SqlParser
 
         selectStatement.OrderBy = orderByClause.Result;
 
+
+        do
+        {
+            var unionSelect = Parse_UnionSelect();
+            if (unionSelect.HasError)
+            {
+                return unionSelect.Error;
+            }
+            if(unionSelect.Result == null)
+            {
+                break;
+            }
+            selectStatement.Unions.Add(unionSelect.ResultValue);
+        }while(true);
+        
+
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
     }
@@ -611,6 +627,34 @@ public class SqlParser
         {
             _text.ReadChar();
         }
+    }
+    
+    private ParseResult<SqlUnionSelect> Parse_UnionSelect()
+    {
+        var isAll = false;
+        if (!TryKeywords("UNION", "ALL"))
+        {
+            if(!TryKeywords("UNION"))
+            {
+                return NoneResult<SqlUnionSelect>();
+            }
+        }
+        else
+        {
+            isAll = true;
+        }
+
+        var select = ParseSelectStatement();
+        if (select.HasError)
+        {
+            return select.Error;
+        }
+
+        return new SqlUnionSelect
+        {
+            IsAll = isAll,
+            SelectStatement = select.ResultValue,
+        };
     }
 
     public bool Try<T>(Func<ParseResult<T>> parseFunc, out ParseResult<T> result)
