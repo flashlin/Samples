@@ -10,6 +10,49 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Join_table()
+    {
+        var sql = $"""
+                   select id from customer c 
+                   join [order] o on c.id = o.customerId
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+                Alias = "c",
+                JoinTables =
+                [
+                    new JoinCondition
+                    {
+                        JoinType = JoinType.Inner,
+                        JoinedTable = new SqlTableSource
+                        {
+                            TableName = "[order]",
+                            Alias = "o"
+                        },
+                        OnCondition = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "c.id" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlFieldExpr { FieldName = "o.customerId" }
+                        }
+                    }
+                ]
+            },
+        });
+    }
+
+    [Test]
     public void From_group_select()
     {
         var sql = $"""
@@ -50,7 +93,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Where_id_in_select_from_custom_function()
     {
@@ -68,8 +111,8 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource 
-            { 
+            From = new SqlTableSource
+            {
                 TableName = "customer"
             },
             Where = new SqlConditionExpression
@@ -86,9 +129,10 @@ public class ParseSelectSqlTest
                             Function = new SqlFunctionExpression
                             {
                                 FunctionName = "[dbo].[strSplit]",
-                                Parameters = [
-                                    new SqlFieldExpr { FieldName = "@text" }, 
-                                    new SqlValue{ Value = "','" },
+                                Parameters =
+                                [
+                                    new SqlFieldExpr { FieldName = "@text" },
+                                    new SqlValue { Value = "','" },
                                 ]
                             }
                         }
@@ -97,7 +141,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void With_index()
     {
@@ -115,10 +159,10 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource 
-            { 
+            From = new SqlTableSource
+            {
                 TableName = "customer",
-                Withs = 
+                Withs =
                 [
                     new SqlHint { Name = "nolock" },
                     new SqlTableHintIndex()
@@ -129,7 +173,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Select_hex_value()
     {
