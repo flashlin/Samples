@@ -628,7 +628,7 @@ public class SqlParser
         {
             var fromTableSources = ParseWithComma(() =>
             {
-                var tableSource = Or<ISqlExpression>(Parse_FromTableSourceWithAlias, Parse_JoinTable)();
+                var tableSource = Or<ISqlExpression>(Parse_TableSourceWithAlias, Parse_JoinTableSource)();
                 if (tableSource.HasError)
                 {
                     return tableSource.Error;
@@ -639,7 +639,7 @@ public class SqlParser
             var fromTableSourcesExpr = fromTableSources.ResultValue;
             do
             {
-                var joinTable = Parse_JoinTable();
+                var joinTable = Parse_JoinTableSource();
                 if (joinTable.HasError)
                 {
                     return joinTable.Error;
@@ -677,7 +677,7 @@ public class SqlParser
         return CreateParseResult(selectStatement);
     }
 
-    private ParseResult<ITableSource> Parse_FromTableSourceWithAlias()
+    private ParseResult<ITableSource> Parse_TableSourceWithAlias()
     {
         if(!Try(Parse_FromTableSource, out var tableSource))
         {
@@ -715,7 +715,7 @@ public class SqlParser
         return CreateParseResult(tableSourceExpr);
     }
 
-    private ParseResult<SqlJoinTableCondition> Parse_JoinTable()
+    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()
     {
         if (TryKeywords("INNER", "JOIN"))
         {
@@ -744,7 +744,7 @@ public class SqlParser
     
     private ParseResult<SqlJoinTableCondition> Parse_JoinTableSourceOn()
     {
-        if(!Try(Parse_FromTableSourceWithAlias, out var tableSource))
+        if(!Try(Parse_TableSourceWithAlias, out var tableSource))
         {
             return NoneResult<SqlJoinTableCondition>();
         }
