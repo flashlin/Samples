@@ -626,32 +626,12 @@ public class SqlParser
 
         if (TryKeyword("FROM"))
         {
-            var fromTableSources = ParseWithComma(() =>
+            var tableSources = Parse_FromTableSources();
+            if (tableSources.HasError)
             {
-                var tableSource = Or<ISqlExpression>(Parse_TableSourceWithAlias, Parse_JoinTableSource)();
-                if (tableSource.HasError)
-                {
-                    return tableSource.Error;
-                }
-                return tableSource;
-            });
-            
-            var fromTableSourcesExpr = fromTableSources.ResultValue;
-            do
-            {
-                var joinTable = Parse_JoinTableSource();
-                if (joinTable.HasError)
-                {
-                    return joinTable.Error;
-                }
-                if(joinTable.Result == null)
-                {
-                    break;
-                }
-                fromTableSourcesExpr.Add(joinTable.ResultValue);
-            }while (true);
-            
-            selectStatement.FromSources = fromTableSourcesExpr;
+                return tableSources.Error;
+            }
+            selectStatement.FromSources = tableSources.ResultValue;
         }
 
         if (TryKeyword("WHERE"))
@@ -675,6 +655,34 @@ public class SqlParser
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
+    }
+
+    private ParseResult<List<ISqlExpression>> Parse_FromTableSources()
+    {
+        var fromTableSources = ParseWithComma(() =>
+        {
+            var tableSource = Or<ISqlExpression>(Parse_TableSourceWithAlias, Parse_JoinTableSource)();
+            if (tableSource.HasError)
+            {
+                return tableSource.Error;
+            }
+            return tableSource;
+        });
+        var fromTableSourcesExpr = fromTableSources.ResultValue;
+        do
+        {
+            var joinTable = Parse_JoinTableSource();
+            if (joinTable.HasError)
+            {
+                return joinTable.Error;
+            }
+            if(joinTable.Result == null)
+            {
+                break;
+            }
+            fromTableSourcesExpr.Add(joinTable.ResultValue);
+        }while (true);
+        return CreateParseResult(fromTableSourcesExpr);
     }
 
     private ParseResult<ITableSource> Parse_TableSourceWithAlias()
