@@ -8,7 +8,7 @@ public class SelectStatement : ISqlExpression
     public SelectType SelectType { get; set; } = SelectType.All; 
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];
-    public ISqlTableSource From { get; set; } = new SqlTableSource();
+    public ISqlExpression From { get; set; } = new SqlTableSource();
     public ISqlExpression? Where { get; set; }
     public SqlOrderByClause? OrderBy { get; set; }
 

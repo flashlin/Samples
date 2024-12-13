@@ -2,7 +2,7 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlTableSource : ISqlTableSource
+public class SqlTableSource : ISqlExpression
 {
     public SqlType SqlType { get; } = SqlType.TableSource;
     public string TableName { get; set; } = string.Empty;

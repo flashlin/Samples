@@ -10,6 +10,50 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Where_id_in_select_from_custom_function()
+    {
+        var sql = $"""
+                   SELECT id FROM customer
+                   where id in (select val from [dbo].[strSplit](@text, ','))
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            From = new SqlTableSource 
+            { 
+                TableName = "customer"
+            },
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "id" },
+                ComparisonOperator = ComparisonOperator.In,
+                Right = new SqlGroup
+                {
+                    Inner = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "val" } }],
+                        From = new SqlFunctionExpression()
+                        {
+                            FunctionName = "[dbo].[strSplit]",
+                            Parameters = [
+                                new SqlFieldExpr { FieldName = "@text" }, 
+                                new SqlValue{ Value = "','" },
+                            ]
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    [Test]
     public void With_index()
     {
         var sql = $"""
