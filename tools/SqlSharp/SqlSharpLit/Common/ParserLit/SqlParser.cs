@@ -183,6 +183,19 @@ public class SqlParser
             };
         }
 
+        if (TryKeyword("DISTINCT"))
+        {
+            var value = ParseArithmeticExpr();
+            if(value.HasError)
+            {
+                return value.Error;
+            }
+            return new SqlDistinct()
+            {
+                Value = value.ResultValue
+            };
+        }
+
         if (TryKeyword("NULL"))
         {
             return new SqlNullValue();

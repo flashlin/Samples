@@ -38,5 +38,6 @@ public enum SqlType
     SelectColumn,
     Values,
     NegativeValue,
-    BetweenValue
+    BetweenValue,
+    Distinct
 }

@@ -27,7 +27,15 @@ public class ParseSelectSqlTest
                     Field = new SqlFunctionExpression
                     {
                         FunctionName = "COUNT",
-                        Parameters = [new SqlFieldExpr { FieldName = "DISTINCT id" }]
+                        Parameters = [
+                            new SqlDistinct()
+                            {
+                                Value = new SqlFieldExpr
+                                {
+                                    FieldName = "id"
+                                },
+                            }
+                        ]
                     },
                     Alias = "UserCount"
                 }
