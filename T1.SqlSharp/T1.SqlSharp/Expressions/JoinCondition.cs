@@ -7,9 +7,9 @@ public class JoinCondition : ISqlExpression
     public SqlType SqlType { get; } = SqlType.JoinCondition; 
     public JoinType JoinType { get; set; }
 
-    public TableSource JoinedTable { get; set; }
+    public required TableSource JoinedTable { get; set; }
 
-    public string OnCondition { get; set; }
+    public string OnCondition { get; set; } = string.Empty; 
     public string ToSql()
     {
         var sql = new IndentStringBuilder();
