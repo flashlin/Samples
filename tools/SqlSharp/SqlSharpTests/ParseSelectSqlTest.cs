@@ -10,6 +10,30 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void DbName_dot_dot_tableName()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM mydb..customer
+                   """; 
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "mydb..customer" }
+            ]
+        });
+    }
+    
+    [Test]
     public void Group()
     {
         var sql = $"""
