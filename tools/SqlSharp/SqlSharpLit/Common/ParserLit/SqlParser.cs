@@ -1346,32 +1346,6 @@ public class SqlParser
                 }
             }
 
-            // if (columnExpr.SqlType == SqlType.SelectColumn)
-            // {
-            //     var selectColumn = (SelectColumn)columnExpr;
-            //     if (selectColumn.Field.SqlType == SqlType.AsExpr)
-            //     {
-            //         var field = (SqlAsExpr)selectColumn.Field;
-            //         selectColumn.Field = field.Instance;
-            //         selectColumn.Alias = field.As.ToSql();
-            //     }
-            //
-            //     if (selectColumn.Field.SqlType == SqlType.ComparisonCondition)
-            //     {
-            //         var condition = (SqlConditionExpression)selectColumn.Field;
-            //         if (condition.ComparisonOperator == ComparisonOperator.Equal)
-            //         {
-            //             selectColumn.Field = new SqlAssignExpr()
-            //             {
-            //                 Left = condition.Left,
-            //                 Right = condition.Right
-            //             };
-            //         }
-            //     }
-            //
-            //     return column;
-            // }
-
             if (TryKeyword("AS"))
             {
                 var aliasName = Or(Parse_SqlIdentifier, ParseSqlQuotedString)();
