@@ -10,7 +10,59 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
-    public void Select_count_as_fieldName()
+    public void Where_expr_and_group()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   WHERE id = 1 
+                   AND (@code is null or [code] = @Code)
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer" },
+            Where = new SqlSearchCondition
+            {
+                Left = new SqlConditionExpression
+                {
+                    Left = new SqlFieldExpr { FieldName = "id" },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                },
+                LogicalOperator = LogicalOperator.And,
+                Right = new SqlGroup()
+                {
+                    Inner = new SqlSearchCondition()
+                    {
+                        Left = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "@code" },
+                            ComparisonOperator = ComparisonOperator.Is,
+                            Right = new SqlNullValue()
+                        },
+                        LogicalOperator = LogicalOperator.Or,
+                        Right = new SqlConditionExpression
+                        {
+                            Left = new SqlFieldExpr { FieldName = "[code]" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlFieldExpr { FieldName = "@Code" }
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    [Test]
+    public void Select_count_distinct()
     {
         var sql = $"""
                    SELECT

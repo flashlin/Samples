@@ -11,6 +11,6 @@ public enum ComparisonOperator
     Like,
     In,
     Between,
-    IsNull,
+    Is,
     IsNot
 }

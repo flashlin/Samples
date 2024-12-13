@@ -988,6 +988,7 @@ public class SqlParser
     {
         var rc = Or(
             Keywords("IS", "NOT"),
+            Keywords("IS"),
             Keywords("LIKE"),
             Keywords("IN"),
             Keywords("BETWEEN"),
