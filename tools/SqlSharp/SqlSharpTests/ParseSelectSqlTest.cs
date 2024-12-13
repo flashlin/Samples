@@ -10,6 +10,34 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_count_as_fieldName()
+    {
+        var sql = $"""
+                   SELECT
+                   	 COUNT(DISTINCT id) AS UserCount
+                   FROM customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFunctionExpression
+                    {
+                        FunctionName = "COUNT",
+                        Parameters = [new SqlFieldExpr { FieldName = "DISTINCT id" }]
+                    },
+                    Alias = "UserCount"
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer" }
+        });
+    }
+        
+    
+    [Test]
     public void Where_grant_equal()
     {
         var sql = $"""
