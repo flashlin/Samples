@@ -8,7 +8,7 @@ public class SelectStatement : ISqlExpression
     public SelectType SelectType { get; set; } = SelectType.All; 
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];
-    public ITableSource From { get; set; } = new SqlTableSource();
+    public List<ISqlExpression> FromSources { get; set; } = [];
     public ISqlExpression? Where { get; set; }
     public SqlOrderByClause? OrderBy { get; set; }
 
@@ -34,10 +34,20 @@ public class SelectStatement : ISqlExpression
             sql.WriteLine();
         }
         sql.Indent--;
-        sql.WriteLine("FROM ");
-        sql.Indent++;
-        sql.Write(From.ToSql());
-        sql.Indent--;
+        if (FromSources.Count > 0)
+        {
+            sql.WriteLine("FROM ");
+            sql.Indent++;
+            foreach (var item in FromSources.Select((tableSource, index) => new { tableSource, index }))
+            {
+                sql.Write(item.tableSource.ToSql());
+                if (item.index < FromSources.Count - 1)
+                {
+                    sql.WriteLine(",");
+                }
+            }
+            sql.Indent--;
+        }
         sql.Indent++;
         if(Where!=null)
         {

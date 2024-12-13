@@ -626,24 +626,34 @@ public class SqlParser
 
         if (TryKeyword("FROM"))
         {
-            var tableSource = Parse_FromTableSourceWithAlias();
-            selectStatement.From = tableSource.ResultValue;
+            var fromTableSources = ParseWithComma(() =>
+            {
+                var tableSource = Or<ISqlExpression>(Parse_FromTableSourceWithAlias, Parse_JoinTable)();
+                if (tableSource.HasError)
+                {
+                    return tableSource.Error;
+                }
+                return tableSource;
+            });
+            
+            var fromTableSourcesExpr = fromTableSources.ResultValue;
+            do
+            {
+                var joinTable = Parse_JoinTable();
+                if (joinTable.HasError)
+                {
+                    return joinTable.Error;
+                }
+                if(joinTable.Result == null)
+                {
+                    break;
+                }
+                fromTableSourcesExpr.Add(joinTable.ResultValue);
+            }while (true);
+            
+            selectStatement.FromSources = fromTableSourcesExpr;
         }
 
-        do
-        {
-            var joinTable = Parse_JoinTable();
-            if (joinTable.HasError)
-            {
-                return joinTable.Error;
-            }
-            if(joinTable.Result == null)
-            {
-                break;
-            }
-            selectStatement.From.JoinTables.Add(joinTable.ResultValue);
-        }while (true);
-        
         if (TryKeyword("WHERE"))
         {
             var rc = Parse_WhereExpression();
@@ -709,30 +719,30 @@ public class SqlParser
     {
         if (TryKeywords("INNER", "JOIN"))
         {
-            var tableSource = Parse_JoinTableSource();
+            var tableSource = Parse_JoinTableSourceOn();
             return tableSource.ResultValue;
         }
         if (TryKeywords("JOIN"))
         {
-            var tableSource = Parse_JoinTableSource();
+            var tableSource = Parse_JoinTableSourceOn();
             return tableSource.ResultValue;
         }
         if (TryKeywords("LEFT", "JOIN"))
         {
-            var tableSource = Parse_JoinTableSource().ResultValue;
+            var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Left;
             return tableSource;
         }
         if (TryKeywords("RIGHT", "JOIN"))
         {
-            var tableSource = Parse_JoinTableSource().ResultValue;
+            var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Right;
             return tableSource;
         }
         return NoneResult<SqlJoinTableCondition>();
     }
     
-    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()
+    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSourceOn()
     {
         if(!Try(Parse_FromTableSourceWithAlias, out var tableSource))
         {

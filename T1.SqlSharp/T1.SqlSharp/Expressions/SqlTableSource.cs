@@ -7,7 +7,6 @@ public class SqlTableSource : ITableSource
     public SqlType SqlType { get; } = SqlType.TableSource;
     public string TableName { get; set; } = string.Empty;
     public string Alias { get; set; } = string.Empty;
-    public List<SqlJoinTableCondition> JoinTables { get; set; } = [];
     public List<ISqlExpression> Withs { get; set; } = [];
 
     public string ToSql()
@@ -30,11 +29,6 @@ public class SqlTableSource : ITableSource
                 }
             }
             sql.Write(")");
-        }
-
-        foreach (var join in JoinTables)
-        {
-            sql.Write($" {join.ToSql()}");
         }
         return TableName;
     }

@@ -34,39 +34,42 @@ public class ParseSelectSqlTest
                     }
                 }
             ],
-            From = new SqlInnerTableSource
-            {
-                Inner = new SelectStatement
+            FromSources =
+            [
+                new SqlInnerTableSource
                 {
-                    Columns =
-                    [
-                        new SelectColumn
-                        {
-                            Field = new SqlFieldExpr { FieldName = "id" }
-                        },
-                        new SelectColumn
-                        {
-                            Field = new SqlFunctionExpression
+                    Inner = new SelectStatement
+                    {
+                        Columns =
+                        [
+                            new SelectColumn
                             {
-                                FunctionName = "convert",
-                                Parameters =
-                                [
-                                    new SqlDataType
-                                    {
-                                        DataTypeName = "nvarchar"
-                                    },
-                                    new SqlFieldExpr { FieldName = "customer.refno" }
-                                ]
+                                Field = new SqlFieldExpr { FieldName = "id" }
                             },
-                            Alias = "refno"
-                        }
-                    ],
-                    From = new SqlTableSource { TableName = "customer" }
+                            new SelectColumn
+                            {
+                                Field = new SqlFunctionExpression
+                                {
+                                    FunctionName = "convert",
+                                    Parameters =
+                                    [
+                                        new SqlDataType
+                                        {
+                                            DataTypeName = "nvarchar"
+                                        },
+                                        new SqlFieldExpr { FieldName = "customer.refno" }
+                                    ]
+                                },
+                                Alias = "refno"
+                            }
+                        ],
+                        FromSources = [new SqlTableSource { TableName = "customer" }]
+                    }
                 }
-            }
+            ]
         });
     }
-    
+
     [Test]
     public void InnerJoin()
     {
@@ -76,7 +79,7 @@ public class ParseSelectSqlTest
                    INNER JOIN emp e
                    	ON c.id = e.id
                    	AND c.name = '123'
-                   """; 
+                   """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
@@ -87,42 +90,42 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-                Alias = "c",
-                JoinTables =
-                [
-                    new SqlJoinTableCondition
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Alias = "c",
+                },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Inner,
+                    JoinedTable = new SqlTableSource
                     {
-                        JoinType = JoinType.Inner,
-                        JoinedTable = new SqlTableSource
+                        TableName = "emp",
+                        Alias = "e"
+                    },
+                    OnCondition = new SqlSearchCondition
+                    {
+                        Left = new SqlConditionExpression
                         {
-                            TableName = "emp",
-                            Alias = "e"
+                            Left = new SqlFieldExpr { FieldName = "c.id" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlFieldExpr { FieldName = "e.id" }
                         },
-                        OnCondition = new SqlSearchCondition
+                        LogicalOperator = LogicalOperator.And,
+                        Right = new SqlConditionExpression
                         {
-                            Left = new SqlConditionExpression
-                            {
-                                Left = new SqlFieldExpr { FieldName = "c.id" },
-                                ComparisonOperator = ComparisonOperator.Equal,
-                                Right = new SqlFieldExpr { FieldName = "e.id" }
-                            },
-                            LogicalOperator = LogicalOperator.And,
-                            Right = new SqlConditionExpression
-                            {
-                                Left = new SqlFieldExpr { FieldName = "c.name" },
-                                ComparisonOperator = ComparisonOperator.Equal,
-                                Right = new SqlValue { Value = "'123'" }
-                            }
+                            Left = new SqlFieldExpr { FieldName = "c.name" },
+                            ComparisonOperator = ComparisonOperator.Equal,
+                            Right = new SqlValue { Value = "'123'" }
                         }
                     }
-                ]
-            }
+                }
+            ]
         });
     }
-    
+
     [Test]
     public void Join_table()
     {
@@ -140,29 +143,29 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-                Alias = "c",
-                JoinTables =
-                [
-                    new SqlJoinTableCondition
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Alias = "c",
+                },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Inner,
+                    JoinedTable = new SqlTableSource
                     {
-                        JoinType = JoinType.Inner,
-                        JoinedTable = new SqlTableSource
-                        {
-                            TableName = "[order]",
-                            Alias = "o"
-                        },
-                        OnCondition = new SqlConditionExpression
-                        {
-                            Left = new SqlFieldExpr { FieldName = "c.id" },
-                            ComparisonOperator = ComparisonOperator.Equal,
-                            Right = new SqlFieldExpr { FieldName = "o.customerId" }
-                        }
+                        TableName = "[order]",
+                        Alias = "o"
+                    },
+                    OnCondition = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "c.id" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpr { FieldName = "o.customerId" }
                     }
-                ]
-            },
+                }
+            ],
         });
     }
 
@@ -185,26 +188,32 @@ public class ParseSelectSqlTest
                     }
                 }
             ],
-            From = new SqlInnerTableSource()
-            {
-                Inner = new SelectStatement()
+            FromSources =
+            [
+                new SqlInnerTableSource()
                 {
-                    Columns =
-                    [
-                        new SelectColumn
-                        {
-                            Field = new SqlFieldExpr
-                            {
-                                FieldName = "id"
-                            }
-                        }
-                    ],
-                    From = new SqlTableSource
+                    Inner = new SelectStatement()
                     {
-                        TableName = "emp"
+                        Columns =
+                        [
+                            new SelectColumn
+                            {
+                                Field = new SqlFieldExpr
+                                {
+                                    FieldName = "id"
+                                }
+                            }
+                        ],
+                        FromSources =
+                        [
+                            new SqlTableSource
+                            {
+                                TableName = "emp"
+                            }
+                        ]
                     }
                 }
-            }
+            ]
         });
     }
 
@@ -225,10 +234,13 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer"
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer"
+                }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr { FieldName = "id" },
@@ -238,18 +250,21 @@ public class ParseSelectSqlTest
                     Inner = new SelectStatement
                     {
                         Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "val" } }],
-                        From = new SqlFuncTableSource
-                        {
-                            Function = new SqlFunctionExpression
+                        FromSources =
+                        [
+                            new SqlFuncTableSource
                             {
-                                FunctionName = "[dbo].[strSplit]",
-                                Parameters =
-                                [
-                                    new SqlFieldExpr { FieldName = "@text" },
-                                    new SqlValue { Value = "','" },
-                                ]
+                                Function = new SqlFunctionExpression
+                                {
+                                    FunctionName = "[dbo].[strSplit]",
+                                    Parameters =
+                                    [
+                                        new SqlFieldExpr { FieldName = "@text" },
+                                        new SqlValue { Value = "','" },
+                                    ]
+                                }
                             }
-                        }
+                        ]
                     }
                 }
             }
@@ -273,18 +288,21 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-                Withs =
-                [
-                    new SqlHint { Name = "nolock" },
-                    new SqlTableHintIndex()
-                    {
-                        IndexValues = ["PK_customer"]
-                    }
-                ]
-            }
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Withs =
+                    [
+                        new SqlHint { Name = "nolock" },
+                        new SqlTableHintIndex()
+                        {
+                            IndexValues = ["PK_customer"]
+                        }
+                    ]
+                }
+            ]
         });
     }
 
@@ -335,7 +353,10 @@ public class ParseSelectSqlTest
                     Alias = "id"
                 }
             ],
-            From = new SqlTableSource { TableName = "customer" }
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
         });
     }
 
@@ -358,7 +379,10 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource { TableName = "customer" },
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
             Where = new SqlSearchCondition
             {
                 Left = new SqlConditionExpression
@@ -423,7 +447,10 @@ public class ParseSelectSqlTest
                     Alias = "UserCount"
                 }
             ],
-            From = new SqlTableSource { TableName = "customer" }
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
         });
     }
 
@@ -445,7 +472,10 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource { TableName = "customer" },
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr { FieldName = "id" },
@@ -471,7 +501,10 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "c.id" }
                 }
             ],
-            From = new SqlTableSource { TableName = "customer", Alias = "c" }
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer", Alias = "c" }
+            ]
         });
     }
 
@@ -495,18 +528,24 @@ public class ParseSelectSqlTest
                         Inner = new SelectStatement
                         {
                             Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
-                            From = new SqlTableSource
-                            {
-                                TableName = "customer",
-                                Alias = "e",
-                                Withs = [new SqlHint { Name = "nolock" }]
-                            }
+                            FromSources =
+                            [
+                                new SqlTableSource
+                                {
+                                    TableName = "customer",
+                                    Alias = "e",
+                                    Withs = [new SqlHint { Name = "nolock" }]
+                                }
+                            ]
                         }
                     },
                     Alias = "id2"
                 }
             ],
-            From = new SqlTableSource { TableName = "customer", Alias = "c" }
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer", Alias = "c" }
+            ]
         });
     }
 
@@ -530,13 +569,19 @@ public class ParseSelectSqlTest
                         Inner = new SelectStatement
                         {
                             Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "e.id" } }],
-                            From = new SqlTableSource { TableName = "emp", Alias = "e" }
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "emp", Alias = "e" }
+                            ]
                         }
                     },
                     Alias = "id1"
                 }
             ],
-            From = new SqlTableSource { TableName = "customer" }
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
         });
     }
 
@@ -558,7 +603,10 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource { TableName = "customer" },
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr { FieldName = "id" },
@@ -642,7 +690,10 @@ public class ParseSelectSqlTest
                     Alias = "name"
                 }
             ],
-            From = new SqlTableSource { TableName = "customer" }
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
         });
     }
 
@@ -664,10 +715,13 @@ public class ParseSelectSqlTest
                     Field = new SqlFieldExpr { FieldName = "id" }
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer"
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer"
+                }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr { FieldName = "gid" },
@@ -677,7 +731,10 @@ public class ParseSelectSqlTest
                     Inner = new SelectStatement
                     {
                         Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "gid" } }],
-                        From = new SqlTableSource { TableName = "temp" }
+                        FromSources =
+                        [
+                            new SqlTableSource { TableName = "temp" }
+                        ]
                     }
                 }
             }
@@ -723,7 +780,10 @@ public class ParseSelectSqlTest
                     }
                 }
             ],
-            From = new SqlTableSource { TableName = "customer" }
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
         });
     }
 
@@ -801,10 +861,13 @@ public class ParseSelectSqlTest
                     Alias = "balance"
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer"
-            }
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer"
+                }
+            ]
         });
     }
 
@@ -831,10 +894,13 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                }
+            ],
             Where = new SqlSearchCondition
             {
                 Left = new SqlGroup
@@ -924,10 +990,13 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                }
+            ],
             Where = new SqlGroup()
             {
                 Inner = new SqlConditionExpression
@@ -1024,10 +1093,13 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                }
+            ],
             Where = new SqlSearchCondition
             {
                 Left = new SqlConditionExpression
@@ -1147,10 +1219,13 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-            }
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                }
+            ]
         });
     }
 
@@ -1190,10 +1265,13 @@ public class ParseSelectSqlTest
                     }
                 },
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-            }
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                }
+            ]
         });
     }
 
@@ -1218,10 +1296,13 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr
@@ -1293,10 +1374,13 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr
@@ -1380,10 +1464,13 @@ public class ParseSelectSqlTest
                     Field = new SqlValue() { Value = "*" },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "[$(TableName)]",
-            }
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "[$(TableName)]",
+                }
+            ]
         });
     }
 
@@ -1417,10 +1504,13 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource()
-            {
-                TableName = "customer",
-            },
+            FromSources =
+            [
+                new SqlTableSource()
+                {
+                    TableName = "customer",
+                }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr
@@ -1477,17 +1567,20 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-                Withs =
-                [
-                    new SqlHint()
-                    {
-                        Name = "nolock",
-                    }
-                ],
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Withs =
+                    [
+                        new SqlHint()
+                        {
+                            Name = "nolock",
+                        }
+                    ],
+                }
+            ],
             Where = new SqlSearchCondition
             {
                 Left = new SqlSearchCondition
@@ -1566,10 +1659,13 @@ public class ParseSelectSqlTest
                     }
                 },
             ],
-            From = new SqlTableSource
-            {
-                TableName = "Persons"
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "Persons"
+                }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr
@@ -1609,10 +1705,13 @@ public class ParseSelectSqlTest
                     },
                 },
             ],
-            From = new SqlTableSource
-            {
-                TableName = "sys.databases",
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "sys.databases",
+                }
+            ],
             Where = new SqlSearchCondition()
             {
                 Left = new SqlConditionExpression
@@ -1673,10 +1772,13 @@ public class ParseSelectSqlTest
                     }
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                }
+            ],
             Where = new SqlConditionExpression
             {
                 Left = new SqlFieldExpr
@@ -1708,17 +1810,20 @@ public class ParseSelectSqlTest
                     },
                 }
             ],
-            From = new SqlTableSource
-            {
-                TableName = "customer",
-                Withs =
-                [
-                    new SqlHint()
-                    {
-                        Name = "nolock",
-                    }
-                ],
-            },
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Withs =
+                    [
+                        new SqlHint()
+                        {
+                            Name = "nolock",
+                        }
+                    ],
+                }
+            ],
         });
     }
 
