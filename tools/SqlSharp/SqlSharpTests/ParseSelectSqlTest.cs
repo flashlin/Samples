@@ -10,6 +10,38 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void With_index()
+    {
+        var sql = $"""
+                   select id
+                   from customer with(nolock, INDEX (PK_customer))
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            From = new SqlTableSource 
+            { 
+                TableName = "customer",
+                Withs = 
+                [
+                    new SqlHint { Name = "nolock" },
+                    new SqlTableHintIndex()
+                    {
+                        IndexValues = ["PK_customer"]
+                    }
+                ]
+            }
+        });
+    }
+    
+    [Test]
     public void Select_hex_value()
     {
         var sql = $"""

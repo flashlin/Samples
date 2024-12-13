@@ -40,5 +40,6 @@ public enum SqlType
     Values,
     NegativeValue,
     BetweenValue,
-    Distinct
+    Distinct,
+    TableHintIndex
 }

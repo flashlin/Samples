@@ -119,7 +119,7 @@ public class SqlParser
 
         return CreateParseResult(topClause);
     }
-    
+
     private ParseResult<SqlNegativeValue> Parse_NegativeValue()
     {
         if (TryMatch("-"))
@@ -132,9 +132,9 @@ public class SqlParser
                     {
                         FieldName = identifier.ResultValue.Value
                     }
-                };   
+                };
             }
-            
+
             var expr = ParseArithmeticExpr();
             if (expr.HasError)
             {
@@ -146,6 +146,7 @@ public class SqlParser
                 Value = expr.ResultValue
             };
         }
+
         return NoneResult<SqlNegativeValue>();
     }
 
@@ -186,10 +187,11 @@ public class SqlParser
         if (TryKeyword("DISTINCT"))
         {
             var value = ParseArithmeticExpr();
-            if(value.HasError)
+            if (value.HasError)
             {
                 return value.Error;
             }
+
             return new SqlDistinct()
             {
                 Value = value.ResultValue
@@ -205,7 +207,7 @@ public class SqlParser
         {
             return numberValue.ResultValue;
         }
-        
+
         if (Try(Parse_NegativeValue, out var negativeValue))
         {
             return negativeValue.ResultValue;
@@ -222,14 +224,15 @@ public class SqlParser
         if (IsPeekKeywords("SELECT"))
         {
             var subSelect = ParseSelectStatement();
-            if(subSelect.HasError)
+            if (subSelect.HasError)
             {
                 return subSelect.Error;
             }
+
             return subSelect.ResultValue;
         }
-        
-        if(Try(Parse_CaseExpression, out var caseExpr))
+
+        if (Try(Parse_CaseExpression, out var caseExpr))
         {
             return caseExpr.ResultValue;
         }
@@ -284,7 +287,7 @@ public class SqlParser
     private ParseResult<SqlValue> Parse_TableAliasName()
     {
         var startPosition = _text.Position;
-        if(Try(Parse_SqlIdentifier, out var alias))
+        if (Try(Parse_SqlIdentifier, out var alias))
         {
             if (IsPeekMatch("("))
             {
@@ -297,9 +300,10 @@ public class SqlParser
                 _text.Position = startPosition;
                 return NoneResult<SqlValue>();
             }
-            
+
             return alias;
         }
+
         return NoneResult<SqlValue>();
     }
 
@@ -626,17 +630,21 @@ public class SqlParser
             {
                 TableName = tableName
             };
-            
-            if(Try(Parse_TableAliasName, out var alias))
+
+            if (Try(Parse_TableAliasName, out var alias))
             {
                 tableSource.Alias = alias.ResultValue.Value;
             }
-            
+
             if (TryKeyword("WITH"))
             {
                 MatchString("(");
-                var tableHints = ParseWithComma<SqlHint>(() =>
+                var tableHints = ParseWithComma<ISqlExpression>(() =>
                 {
+                    if(Try(Parse_TableHintIndex, out var tableHintIndex))
+                    {
+                        return tableHintIndex.ResultValue;
+                    }
                     var hint = ReadSqlIdentifier().Word;
                     return new SqlHint()
                     {
@@ -827,16 +835,17 @@ public class SqlParser
             return NoneResult<T>();
         };
     }
-    
+
     private ParseResult<SelectColumn> Parse_Column_Arithmetic()
     {
-        if (Try(ParseArithmeticExpr,out var arithmetic))
+        if (Try(ParseArithmeticExpr, out var arithmetic))
         {
             return CreateParseResult(new SelectColumn
             {
                 Field = arithmetic.ResultValue
             });
         }
+
         return NoneResult<SelectColumn>();
     }
 
@@ -846,7 +855,7 @@ public class SqlParser
         {
             return new SelectColumn()
             {
-                Field = new SqlValue{Value =fieldName.Word}
+                Field = new SqlValue { Value = fieldName.Word }
             };
         }
 
@@ -868,9 +877,10 @@ public class SqlParser
             {
                 return whenExprRc.Error;
             }
-            whenExpr = whenExprRc.ResultValue; 
+
+            whenExpr = whenExprRc.ResultValue;
         }
-        
+
         var whenClause = new List<SqlWhenThenClause>();
         do
         {
@@ -878,30 +888,35 @@ public class SqlParser
             {
                 break;
             }
+
             var whenThenExpr = Parse_Case_WhenClause();
             if (whenThenExpr.HasError)
             {
                 return whenThenExpr.Error;
             }
-            if(whenThenExpr.Result == null)
+
+            if (whenThenExpr.Result == null)
             {
                 break;
             }
+
             whenClause.Add(whenThenExpr.ResultValue);
         } while (true);
-        if(whenClause.Count == 0)
+
+        if (whenClause.Count == 0)
         {
             return CreateParseError("Expected WHEN");
         }
-        
+
         ISqlExpression? elseClause = null;
-        if(TryKeyword("ELSE"))
+        if (TryKeyword("ELSE"))
         {
             var elseClauseResult = ParseArithmeticExpr();
             if (elseClauseResult.HasError)
             {
                 return elseClauseResult.Error;
             }
+
             elseClause = elseClauseResult.ResultValue;
         }
 
@@ -909,7 +924,7 @@ public class SqlParser
         {
             return CreateParseError("Expected END");
         }
-        
+
         return CreateParseResult(new SqlCaseExpr
         {
             When = whenExpr,
@@ -924,20 +939,24 @@ public class SqlParser
         {
             return NoneResult<SqlWhenThenClause>();
         }
+
         var whenExpr = ParseArithmeticExpr();
         if (whenExpr.HasError)
         {
             return whenExpr.Error;
         }
+
         if (!TryKeyword("THEN"))
         {
             return CreateParseError("Expected THEN");
         }
+
         var thenExpr = ParseArithmeticExpr();
         if (thenExpr.HasError)
         {
             return thenExpr.Error;
         }
+
         return CreateParseResult(new SqlWhenThenClause
         {
             When = whenExpr.ResultValue,
@@ -1027,10 +1046,11 @@ public class SqlParser
             {
                 case ComparisonOperator.Between:
                     var betweenValue = Parse_BetweenValue();
-                    if(betweenValue.HasError)
+                    if (betweenValue.HasError)
                     {
                         return betweenValue.Error;
                     }
+
                     right = betweenValue.ResultValue;
                     break;
                 default:
@@ -1051,20 +1071,23 @@ public class SqlParser
 
     private ParseResult<SqlBetweenValue> Parse_BetweenValue()
     {
-        var start= Parse_Value();
+        var start = Parse_Value();
         if (start.HasError)
         {
             return start.Error;
         }
+
         if (!TryKeyword("AND"))
         {
             return CreateParseError("Expected AND");
         }
-        var end= Parse_Value();
+
+        var end = Parse_Value();
         if (end.HasError)
         {
             return end.Error;
         }
+
         return new SqlBetweenValue
         {
             Start = start.ResultValue,
@@ -1203,21 +1226,21 @@ public class SqlParser
             {
                 return column.Error;
             }
-            
-            if(column.ResultValue.SqlType == SqlType.SelectColumn)
+
+            if (column.ResultValue.SqlType == SqlType.SelectColumn)
             {
                 var selectColumn = (SelectColumn)column.ResultValue;
-                if(selectColumn.Field.SqlType == SqlType.AsExpr)
+                if (selectColumn.Field.SqlType == SqlType.AsExpr)
                 {
                     var field = (SqlAsExpr)selectColumn.Field;
                     selectColumn.Field = field.Instance;
                     selectColumn.Alias = field.As.ToSql();
                 }
-                
-                if(selectColumn.Field.SqlType == SqlType.ComparisonCondition)
+
+                if (selectColumn.Field.SqlType == SqlType.ComparisonCondition)
                 {
                     var condition = (SqlConditionExpression)selectColumn.Field;
-                    if(condition.ComparisonOperator == ComparisonOperator.Equal)
+                    if (condition.ComparisonOperator == ComparisonOperator.Equal)
                     {
                         selectColumn.Field = new SqlAssignExpr()
                         {
@@ -1226,10 +1249,10 @@ public class SqlParser
                         };
                     }
                 }
-                
+
                 return column;
             }
-            
+
             if (TryKeyword("AS"))
             {
                 var aliasName = Or(Parse_SqlIdentifier, ParseSqlQuotedString)();
@@ -1692,13 +1715,14 @@ column_name AS computed_column_expression
 
         return CreateParseResult(sqlIdentity);
     }
-    
+
     private ParseResult<SqlValue> ParseHexValue()
     {
         if (!TryMatch("0x"))
         {
             return NoneResult<SqlValue>();
         }
+
         var hexValue = _text.ReadUntil(c => !_text.IsWordChar(c));
         return new SqlValue()
         {
@@ -1734,17 +1758,66 @@ column_name AS computed_column_expression
         return NoneResult<SqlToken>();
     }
 
+    private ParseResult<SqlTableHintIndex> Parse_TableHintIndex()
+    {
+        if (!TryKeyword("INDEX"))
+        {
+            return NoneResult<SqlTableHintIndex>();
+        }
+
+        if (TryMatch("="))
+        {
+            if (!TryMatch("("))
+            {
+                return CreateParseError("Expected (");
+            }
+
+            var indexName = _text.ReadSqlIdentifier();
+            if (!TryMatch(")"))
+            {
+                return CreateParseError("Expected )");
+            }
+
+            return new SqlTableHintIndex()
+            {
+                IndexValues = [indexName.Word]
+            };
+        }
+
+        if (!TryMatch("("))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var indexValues = ParseWithComma<string>(() =>
+        {
+            var indexName = _text.ReadSqlIdentifier();
+            return indexName.Word;
+        });
+
+        if (!TryMatch(")"))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return new SqlTableHintIndex
+        {
+            IndexValues = indexValues.ResultValue
+        };
+    }
+
     private ParseResult<SqlValue> ParseNumberValue()
     {
-        if(Try(ParseHexValue, out var hexValue))
+        if (Try(ParseHexValue, out var hexValue))
         {
             if (hexValue.HasError)
             {
                 return hexValue.Error;
             }
+
             return hexValue;
         }
-        
+
         var startPosition = _text.Position;
         var negative = TryMatch("-");
         var number = Or(ParseFloatValue, ParseIntValue)();
@@ -2242,7 +2315,7 @@ column_name AS computed_column_expression
             }
         }
     }
-    
+
     private Func<ParseResult<SqlToken>> SymbolWithNoncontinuous(string symbol)
     {
         return () =>
@@ -2258,6 +2331,7 @@ column_name AS computed_column_expression
                     return NoneResult<SqlToken>();
                 }
             }
+
             return new SqlToken
             {
                 Value = symbol.Replace(" ", "").Replace("\t", "")
@@ -2299,7 +2373,7 @@ column_name AS computed_column_expression
         SkipWhiteSpace();
         return _text.TryMatch(expected);
     }
-    
+
     private bool IsPeekMatch(string expected)
     {
         SkipWhiteSpace();
@@ -2308,12 +2382,12 @@ column_name AS computed_column_expression
         _text.Position = tmpPosition;
         return isSuccess;
     }
-    
+
     private bool IsPeek<T>(Func<ParseResult<T>> parseFn)
     {
         SkipWhiteSpace();
         var tmpPosition = _text.Position;
-        var rc = parseFn(); 
+        var rc = parseFn();
         var isSuccess = rc.Result != null;
         _text.Position = tmpPosition;
         return isSuccess;
