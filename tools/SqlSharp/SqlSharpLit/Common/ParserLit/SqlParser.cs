@@ -8,7 +8,7 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
-    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION"];
+    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON"];
 
     private readonly StringParser _text;
 

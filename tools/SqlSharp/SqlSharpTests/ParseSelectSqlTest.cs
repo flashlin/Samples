@@ -10,6 +10,89 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_union_select_join_table_on()
+    {
+        var sql = $"""
+                   select id from customer1 c
+                   join emp e on c.date = e.date
+                   union
+                   select id from customer2
+                   join emp2 on emp2.date = c.date
+                   """; 
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer1",
+                    Alias = "c"
+                },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Inner,
+                    JoinedTable = new SqlTableSource
+                    {
+                        TableName = "emp",
+                        Alias = "e"
+                    },
+                    OnCondition = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "c.date" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpr { FieldName = "e.date" }
+                    }
+                }
+            ],
+            Unions =
+            [
+                new SqlUnionSelect
+                {
+                    SelectStatement = new SelectStatement
+                    {
+                        Columns =
+                        [
+                            new SelectColumn
+                            {
+                                Field = new SqlFieldExpr { FieldName = "id" }
+                            }
+                        ],
+                        FromSources =
+                        [
+                            new SqlTableSource
+                            {
+                                TableName = "customer2"
+                            },
+                            new SqlJoinTableCondition
+                            {
+                                JoinType = JoinType.Inner,
+                                JoinedTable = new SqlTableSource
+                                {
+                                    TableName = "emp2"
+                                },
+                                OnCondition = new SqlConditionExpression
+                                {
+                                    Left = new SqlFieldExpr { FieldName = "emp2.date" },
+                                    ComparisonOperator = ComparisonOperator.Equal,
+                                    Right = new SqlFieldExpr { FieldName = "c.date" }
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Select_Union_Select()
     {
         var sql = $"""
