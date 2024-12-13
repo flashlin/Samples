@@ -10,6 +10,64 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void From_select_convert_datatype_field()
+    {
+        var sql = $"""
+                   select *
+                   from (
+                   SELECT
+                   	id,
+                   	convert(nvarchar, customer.refno) refno
+                     FROM customer
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlValue()
+                    {
+                        Value = "*"
+                    }
+                }
+            ],
+            From = new SqlInnerTableSource
+            {
+                Inner = new SelectStatement
+                {
+                    Columns =
+                    [
+                        new SelectColumn
+                        {
+                            Field = new SqlFieldExpr { FieldName = "id" }
+                        },
+                        new SelectColumn
+                        {
+                            Field = new SqlFunctionExpression
+                            {
+                                FunctionName = "convert",
+                                Parameters =
+                                [
+                                    new SqlDataType
+                                    {
+                                        DataTypeName = "nvarchar"
+                                    },
+                                    new SqlFieldExpr { FieldName = "customer.refno" }
+                                ]
+                            },
+                            Alias = "refno"
+                        }
+                    ],
+                    From = new SqlTableSource { TableName = "customer" }
+                }
+            }
+        });
+    }
+    
+    [Test]
     public void InnerJoin()
     {
         var sql = $"""
@@ -1100,7 +1158,7 @@ public class ParseSelectSqlTest
     public void Select_field_equal_binaryExpr()
     {
         var sql = $"""
-                   select @a = @a & b,
+                   select @a = @a & b
                    from customer 
                    """;
         var rc = ParseSql(sql);

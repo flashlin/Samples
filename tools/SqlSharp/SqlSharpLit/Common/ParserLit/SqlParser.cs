@@ -1306,49 +1306,71 @@ public class SqlParser
 
     private ParseResult<List<ISelectColumnExpression>> Parse_SelectColumns()
     {
-        var columns = ParseWithComma<ISelectColumnExpression>(() =>
+        var columns = ParseWithComma(() =>
         {
             if (IsPeekKeywords("FROM"))
             {
                 return NoneResult<ISelectColumnExpression>();
             }
 
-            // var column = Or<ISelectColumnExpression>(
-            //     Parse_Column_Star,
-            //     Parse_Column_Arithmetic,
-            //     Parse_Column_Identifier,
-            //     Parse_Column_SubQuery)();
             var column = Parse_Column_Arithmetic().To<ISelectColumnExpression>();
             if (column.HasError)
             {
                 return column.Error;
             }
+            var columnExpr = column.ResultValue;
 
-            if (column.ResultValue.SqlType == SqlType.SelectColumn)
+            if (columnExpr.Field.SqlType == SqlType.AsExpr)
             {
-                var selectColumn = (SelectColumn)column.ResultValue;
-                if (selectColumn.Field.SqlType == SqlType.AsExpr)
+                var asExpr = (SqlAsExpr)columnExpr.Field;
+                columnExpr = new SelectColumn()
                 {
-                    var field = (SqlAsExpr)selectColumn.Field;
-                    selectColumn.Field = field.Instance;
-                    selectColumn.Alias = field.As.ToSql();
-                }
-
-                if (selectColumn.Field.SqlType == SqlType.ComparisonCondition)
+                    Field = asExpr.Instance,
+                    Alias = asExpr.As.ToSql()
+                };
+            }
+            
+            if(columnExpr.Field.SqlType == SqlType.ComparisonCondition)
+            {
+                var condition = (SqlConditionExpression)columnExpr.Field;
+                if (condition.ComparisonOperator == ComparisonOperator.Equal)
                 {
-                    var condition = (SqlConditionExpression)selectColumn.Field;
-                    if (condition.ComparisonOperator == ComparisonOperator.Equal)
+                    columnExpr = new SelectColumn()
                     {
-                        selectColumn.Field = new SqlAssignExpr()
+                        Field = new SqlAssignExpr()
                         {
                             Left = condition.Left,
                             Right = condition.Right
-                        };
-                    }
+                        }
+                    };
                 }
-
-                return column;
             }
+
+            // if (columnExpr.SqlType == SqlType.SelectColumn)
+            // {
+            //     var selectColumn = (SelectColumn)columnExpr;
+            //     if (selectColumn.Field.SqlType == SqlType.AsExpr)
+            //     {
+            //         var field = (SqlAsExpr)selectColumn.Field;
+            //         selectColumn.Field = field.Instance;
+            //         selectColumn.Alias = field.As.ToSql();
+            //     }
+            //
+            //     if (selectColumn.Field.SqlType == SqlType.ComparisonCondition)
+            //     {
+            //         var condition = (SqlConditionExpression)selectColumn.Field;
+            //         if (condition.ComparisonOperator == ComparisonOperator.Equal)
+            //         {
+            //             selectColumn.Field = new SqlAssignExpr()
+            //             {
+            //                 Left = condition.Left,
+            //                 Right = condition.Right
+            //             };
+            //         }
+            //     }
+            //
+            //     return column;
+            // }
 
             if (TryKeyword("AS"))
             {
@@ -1357,8 +1379,7 @@ public class SqlParser
                 {
                     return aliasName.Error;
                 }
-
-                column.ResultValue.Alias = aliasName.ResultValue.Value;
+                columnExpr.Alias = aliasName.ResultValue.Value;
             }
 
             if (TryMatch("="))
@@ -1373,14 +1394,14 @@ public class SqlParser
                 {
                     Field = new SqlAssignExpr()
                     {
-                        Left = column.ResultValue,
+                        Left = columnExpr,
                         Right = rightExpr.ResultValue,
                     },
-                    Alias = column.ResultValue.Alias,
+                    Alias = columnExpr.Alias,
                 };
             }
 
-            return column;
+            return CreateParseResult(columnExpr);
         });
         return columns;
     }
