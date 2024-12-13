@@ -625,11 +625,12 @@ public class SqlParser
 
         if (TryKeyword("FROM"))
         {
-            var tableName = ReadSqlIdentifier().Word;
-            var tableSource = new SqlTableSource()
-            {
-                TableName = tableName
-            };
+            // var tableName = ReadSqlIdentifier().Word;
+            // var tableSource = new SqlTableSource()
+            // {
+            //     TableName = tableName
+            // };
+            var tableSource = Parse_FromTableSource().ResultValue;
 
             if (Try(Parse_TableAliasName, out var alias))
             {
@@ -641,10 +642,11 @@ public class SqlParser
                 MatchString("(");
                 var tableHints = ParseWithComma<ISqlExpression>(() =>
                 {
-                    if(Try(Parse_TableHintIndex, out var tableHintIndex))
+                    if (Try(Parse_TableHintIndex, out var tableHintIndex))
                     {
                         return tableHintIndex.ResultValue;
                     }
+
                     var hint = ReadSqlIdentifier().Word;
                     return new SqlHint()
                     {
@@ -684,6 +686,25 @@ public class SqlParser
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
+    }
+
+    private ParseResult<ITableSource> Parse_FromTableSource()
+    {
+        if(Try(Parse_FunctionName, out var function))
+        {
+            return new SqlFuncTableSource()
+            {
+                Function = function.ResultValue
+            };
+        }
+        if (Try(Parse_SqlIdentifier, out var tableName))
+        {
+            return new SqlTableSource()
+            {
+                TableName = tableName.ResultValue.Value
+            };
+        }
+        return NoneResult<ITableSource>();
     }
 
     public void SkipStatementEnd()

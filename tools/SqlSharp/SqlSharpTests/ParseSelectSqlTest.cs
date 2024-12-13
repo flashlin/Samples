@@ -39,13 +39,16 @@ public class ParseSelectSqlTest
                     Inner = new SelectStatement
                     {
                         Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "val" } }],
-                        From = new SqlFunctionExpression()
+                        From = new SqlFuncTableSource
                         {
-                            FunctionName = "[dbo].[strSplit]",
-                            Parameters = [
-                                new SqlFieldExpr { FieldName = "@text" }, 
-                                new SqlValue{ Value = "','" },
-                            ]
+                            Function = new SqlFunctionExpression
+                            {
+                                FunctionName = "[dbo].[strSplit]",
+                                Parameters = [
+                                    new SqlFieldExpr { FieldName = "@text" }, 
+                                    new SqlValue{ Value = "','" },
+                                ]
+                            }
                         }
                     }
                 }

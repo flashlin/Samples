@@ -41,5 +41,6 @@ public enum SqlType
     NegativeValue,
     BetweenValue,
     Distinct,
-    TableHintIndex
+    TableHintIndex,
+    FuncTableSource
 }
