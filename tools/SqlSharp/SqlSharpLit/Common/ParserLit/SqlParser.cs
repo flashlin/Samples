@@ -659,6 +659,20 @@ public class SqlParser
 
             selectStatement.From = tableSource;
         }
+
+        do
+        {
+            var joinTable = Parse_JoinTable();
+            if (joinTable.HasError)
+            {
+                return joinTable.Error;
+            }
+            if(joinTable.Result == null)
+            {
+                break;
+            }
+            selectStatement.From.JoinTables.Add(joinTable.ResultValue);
+        }while (true);
         
         if (TryKeyword("WHERE"))
         {
@@ -688,11 +702,51 @@ public class SqlParser
         if (TryKeywords("INNER", "JOIN"))
         {
             var tableSource = Parse_JoinTableSource();
+            return tableSource.ResultValue;
+        }
+        if (TryKeywords("JOIN"))
+        {
+            var tableSource = Parse_JoinTableSource();
+            return tableSource.ResultValue;
+        }
+        if (TryKeywords("LEFT", "JOIN"))
+        {
+            var tableSource = Parse_JoinTableSource().ResultValue;
+            tableSource.JoinType = JoinType.Left;
+            return tableSource;
+        }
+        if (TryKeywords("RIGHT", "JOIN"))
+        {
+            var tableSource = Parse_JoinTableSource().ResultValue;
+            tableSource.JoinType = JoinType.Right;
+            return tableSource;
         }
         return NoneResult<SqlJoinTableCondition>();
     }
     
-    private ParseResult<SqlJoinTableCondition>
+    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()
+    {
+        if(!Try(Parse_FromTableSource, out var tableSource))
+        {
+            return NoneResult<SqlJoinTableCondition>();
+        }
+        
+        if(Try(Parse_TableAliasName, out var aliasName))
+        {
+            tableSource.ResultValue.Alias = aliasName.ResultValue.Value;
+        }
+        
+        if (!TryKeyword("ON"))
+        {
+            return CreateParseError("Expected ON");
+        }
+        var onCondition = ParseArithmeticExpr();
+        return new SqlJoinTableCondition()
+        {
+            JoinedTable = tableSource.ResultValue,
+            OnCondition = onCondition.ResultValue,
+        };
+    }
 
     private ParseResult<ITableSource> Parse_FromTableSource()
     {

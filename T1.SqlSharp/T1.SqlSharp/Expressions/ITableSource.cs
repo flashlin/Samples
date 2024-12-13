@@ -4,4 +4,5 @@ public interface ITableSource : ISqlExpression
 {
     string Alias { get; set; }
     List<ISqlExpression> Withs { get; set; }
+    List<SqlJoinTableCondition> JoinTables { get; set; }
 }
