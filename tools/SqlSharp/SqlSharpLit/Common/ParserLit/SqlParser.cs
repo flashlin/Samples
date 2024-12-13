@@ -690,6 +690,20 @@ public class SqlParser
 
     private ParseResult<ITableSource> Parse_FromTableSource()
     {
+        if (TryMatch("("))
+        {
+            var sub = ParseSelectStatement();
+            if (sub.HasError)
+            {
+                return sub.Error;
+            }
+            MatchString(")");
+            return new SqlInnerTableSource()
+            {
+                Inner = sub.ResultValue
+            };
+        }
+        
         if(Try(Parse_FunctionName, out var function))
         {
             return new SqlFuncTableSource()
