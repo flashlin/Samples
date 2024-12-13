@@ -10,6 +10,62 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void InnerJoin()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer c
+                   INNER JOIN emp e
+                   	ON c.id = e.id
+                   	AND c.name = '123'
+                   """; 
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            From = new SqlTableSource
+            {
+                TableName = "customer",
+                Alias = "c",
+                JoinTables =
+                [
+                    new SqlJoinTableCondition
+                    {
+                        JoinType = JoinType.Inner,
+                        JoinedTable = new SqlTableSource
+                        {
+                            TableName = "emp",
+                            Alias = "e"
+                        },
+                        OnCondition = new SqlSearchCondition
+                        {
+                            Left = new SqlConditionExpression
+                            {
+                                Left = new SqlFieldExpr { FieldName = "c.id" },
+                                ComparisonOperator = ComparisonOperator.Equal,
+                                Right = new SqlFieldExpr { FieldName = "e.id" }
+                            },
+                            LogicalOperator = LogicalOperator.And,
+                            Right = new SqlConditionExpression
+                            {
+                                Left = new SqlFieldExpr { FieldName = "c.name" },
+                                ComparisonOperator = ComparisonOperator.Equal,
+                                Right = new SqlValue { Value = "'123'" }
+                            }
+                        }
+                    }
+                ]
+            }
+        });
+    }
+    
+    [Test]
     public void Join_table()
     {
         var sql = $"""
