@@ -8,7 +8,7 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
-    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON"];
+    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP"];
 
     private readonly StringParser _text;
 
@@ -84,6 +84,25 @@ public class SqlParser
             _ => SelectType.All
         };
         return CreateParseResult(selectType);
+    }
+    
+    private ParseResult<SqlGroupByClause> Parse_GroupByClause()
+    {
+        if (!TryKeywords("GROUP", "BY"))
+        {
+            return NoneResult<SqlGroupByClause>();
+        }
+
+        var groupByColumns = ParseWithComma(Parse_Value);
+        if (groupByColumns.HasError)
+        {
+            return groupByColumns.Error;
+        }
+
+        return CreateParseResult(new SqlGroupByClause
+        {
+            Columns = groupByColumns.ResultValue
+        });
     }
 
     public ParseResult<SqlTopClause> Parse_TopClause()
@@ -591,16 +610,19 @@ public class SqlParser
 
             selectStatement.Where = rc.Result;
         }
+        
+        if (Try(Parse_GroupByClause, out var groupByClause))
+        {
+            selectStatement.GroupBy = groupByClause.Result;
+        }
 
         var orderByClause = ParseOrderByClause();
         if (orderByClause.HasError)
         {
             return orderByClause.Error;
         }
-
         selectStatement.OrderBy = orderByClause.Result;
-
-
+        
         do
         {
             var unionSelect = Parse_UnionSelect();

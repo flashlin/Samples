@@ -44,5 +44,6 @@ public enum SqlType
     TableHintIndex,
     FuncTableSource,
     InnerTableSource,
-    UnionSelect
+    UnionSelect,
+    GroupByClause
 }

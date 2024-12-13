@@ -12,6 +12,7 @@ public class SelectStatement : ISqlExpression
     public ISqlExpression? Where { get; set; }
     public SqlOrderByClause? OrderBy { get; set; }
     public List<SqlUnionSelect> Unions { get; set; } = [];
+    public SqlGroupByClause? GroupBy { get; set; }
 
     public string ToSql()
     {
@@ -56,9 +57,13 @@ public class SelectStatement : ISqlExpression
             sql.Write(Where.ToSql());
         }
         sql.Indent--;
+        if(GroupBy!=null)
+        {
+            sql.WriteLine(" " + GroupBy.ToSql());
+        }
         if(OrderBy!=null)
         {
-            sql.WriteLine(OrderBy.ToSql());
+            sql.WriteLine(" " + OrderBy.ToSql());
         }
         foreach (var unionSelect in Unions)
         {

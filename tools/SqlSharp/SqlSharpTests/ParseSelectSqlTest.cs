@@ -10,7 +10,36 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
-    public void Select_union_select_join_table_on()
+    public void Group()
+    {
+        var sql = $"""
+                   select id from customer group by name
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            GroupBy = new SqlGroupByClause()
+            {
+                Columns = [
+                    new SqlFieldExpr { FieldName = "name" }
+                ]
+            }
+        });
+    }
+    
+    [Test]
+    public void Union_select_join_table_on()
     {
         var sql = $"""
                    select id from customer1 c
