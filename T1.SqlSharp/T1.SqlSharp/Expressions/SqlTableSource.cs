@@ -2,18 +2,6 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public interface ITableSource : ISqlExpression
-{
-    string Alias { get; set; }
-    List<ISqlExpression> Withs { get; set; }
-}
-
-public class SqlFuncTableSource : SqlTableSource
-{
-    public new SqlType SqlType { get; } = SqlType.FuncTableSource;
-    public required SqlFunctionExpression Function { get; set; }
-}
-
 public class SqlTableSource : ITableSource
 {
     public SqlType SqlType { get; } = SqlType.TableSource;
