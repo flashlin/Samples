@@ -8,6 +8,7 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
+    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT"];
 
     private readonly StringParser _text;
 
@@ -1355,6 +1356,13 @@ public class SqlParser
                 }
                 columnExpr.Alias = aliasName.ResultValue.Value;
             }
+            else
+            {
+                if(Try(Parse_SqlIdentifier, out var alias))
+                {
+                    columnExpr.Alias = alias.ResultValue.Value;
+                }
+            }
 
             if (TryMatch("="))
             {
@@ -2503,6 +2511,22 @@ column_name AS computed_column_expression
     private bool TryReadSqlIdentifier(out TextSpan result)
     {
         SkipWhiteSpace();
-        return _text.Try(_text.ReadSqlIdentifier, out result);
+        var startPosition = _text.Position;
+        if (!_text.Try(_text.ReadSqlIdentifier, out result))
+        {
+            return false;
+        }
+        if(ReservedWords.Contains(result.Word.ToUpper()))
+        {
+            _text.Position = startPosition;
+            result = new TextSpan
+            {
+                Word = string.Empty,
+                Offset = startPosition,
+                Length = 0
+            };
+            return false;
+        }
+        return true;
     }
 }
