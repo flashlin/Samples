@@ -121,36 +121,6 @@ public class SqlParser
         return CreateParseResult(topClause);
     }
 
-    private ParseResult<SqlNegativeValue> Parse_NegativeValue()
-    {
-        if (TryMatch("-"))
-        {
-            if (Try(Parse_SqlIdentifier, out var identifier) && !IsPeekMatch("("))
-            {
-                return new SqlNegativeValue
-                {
-                    Value = new SqlFieldExpr()
-                    {
-                        FieldName = identifier.ResultValue.Value
-                    }
-                };
-            }
-
-            var expr = ParseArithmeticExpr();
-            if (expr.HasError)
-            {
-                return expr.Error;
-            }
-
-            return new SqlNegativeValue
-            {
-                Value = expr.ResultValue
-            };
-        }
-
-        return NoneResult<SqlNegativeValue>();
-    }
-
     public ParseResult<ISqlExpression> Parse_Value()
     {
         if (Try(ParseValues, out var values))
@@ -283,29 +253,6 @@ public class SqlParser
         }
 
         return valueExpr;
-    }
-
-    private ParseResult<SqlValue> Parse_TableAliasName()
-    {
-        var startPosition = _text.Position;
-        if (Try(Parse_SqlIdentifier, out var alias))
-        {
-            if (IsPeekMatch("("))
-            {
-                _text.Position = startPosition;
-                return NoneResult<SqlValue>();
-            }
-
-            if (alias.ResultValue.Value.ToUpper() == "WHERE")
-            {
-                _text.Position = startPosition;
-                return NoneResult<SqlValue>();
-            }
-
-            return alias;
-        }
-
-        return NoneResult<SqlValue>();
     }
 
     //TODO: Draft
@@ -657,151 +604,6 @@ public class SqlParser
         return CreateParseResult(selectStatement);
     }
 
-    private ParseResult<List<ISqlExpression>> Parse_FromTableSources()
-    {
-        var fromTableSources = ParseWithComma(() =>
-        {
-            var tableSource = Or<ISqlExpression>(Parse_TableSourceWithAlias, Parse_JoinTableSource)();
-            if (tableSource.HasError)
-            {
-                return tableSource.Error;
-            }
-            return tableSource;
-        });
-        var fromTableSourcesExpr = fromTableSources.ResultValue;
-        do
-        {
-            var joinTable = Parse_JoinTableSource();
-            if (joinTable.HasError)
-            {
-                return joinTable.Error;
-            }
-            if(joinTable.Result == null)
-            {
-                break;
-            }
-            fromTableSourcesExpr.Add(joinTable.ResultValue);
-        }while (true);
-        return CreateParseResult(fromTableSourcesExpr);
-    }
-
-    private ParseResult<ITableSource> Parse_TableSourceWithAlias()
-    {
-        if(!Try(Parse_FromTableSource, out var tableSource))
-        {
-            return NoneResult<ITableSource>();
-        }
-        var tableSourceExpr = tableSource.ResultValue;
-        if (Try(Parse_TableAliasName, out var alias))
-        {
-            tableSourceExpr.Alias = alias.ResultValue.Value;
-        }
-        if (TryKeyword("WITH"))
-        {
-            MatchString("(");
-            var tableHints = ParseWithComma<ISqlExpression>(() =>
-            {
-                if (Try(Parse_TableHintIndex, out var tableHintIndex))
-                {
-                    return tableHintIndex.ResultValue;
-                }
-
-                var hint = ReadSqlIdentifier().Word;
-                return new SqlHint()
-                {
-                    Name = hint
-                };
-            });
-            if (tableHints.HasError)
-            {
-                return tableHints.Error;
-            }
-
-            MatchString(")");
-            tableSourceExpr.Withs = tableHints.ResultValue;
-        }
-        return CreateParseResult(tableSourceExpr);
-    }
-
-    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()
-    {
-        if (TryKeywords("INNER", "JOIN"))
-        {
-            var tableSource = Parse_JoinTableSourceOn();
-            return tableSource.ResultValue;
-        }
-        if (TryKeywords("JOIN"))
-        {
-            var tableSource = Parse_JoinTableSourceOn();
-            return tableSource.ResultValue;
-        }
-        if (TryKeywords("LEFT", "JOIN"))
-        {
-            var tableSource = Parse_JoinTableSourceOn().ResultValue;
-            tableSource.JoinType = JoinType.Left;
-            return tableSource;
-        }
-        if (TryKeywords("RIGHT", "JOIN"))
-        {
-            var tableSource = Parse_JoinTableSourceOn().ResultValue;
-            tableSource.JoinType = JoinType.Right;
-            return tableSource;
-        }
-        return NoneResult<SqlJoinTableCondition>();
-    }
-    
-    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSourceOn()
-    {
-        if(!Try(Parse_TableSourceWithAlias, out var tableSource))
-        {
-            return NoneResult<SqlJoinTableCondition>();
-        }
-        
-        if (!TryKeyword("ON"))
-        {
-            return CreateParseError("Expected ON");
-        }
-        var onCondition = ParseArithmeticExpr();
-        return new SqlJoinTableCondition()
-        {
-            JoinedTable = tableSource.ResultValue,
-            OnCondition = onCondition.ResultValue,
-        };
-    }
-
-    private ParseResult<ITableSource> Parse_FromTableSource()
-    {
-        if (TryMatch("("))
-        {
-            var sub = ParseSelectStatement();
-            if (sub.HasError)
-            {
-                return sub.Error;
-            }
-            MatchString(")");
-            return new SqlInnerTableSource()
-            {
-                Inner = sub.ResultValue
-            };
-        }
-        
-        if(Try(Parse_FunctionName, out var function))
-        {
-            return new SqlFuncTableSource()
-            {
-                Function = function.ResultValue
-            };
-        }
-        if (Try(Parse_SqlIdentifier, out var tableName))
-        {
-            return new SqlTableSource()
-            {
-                TableName = tableName.ResultValue.Value
-            };
-        }
-        return NoneResult<ITableSource>();
-    }
-
     public void SkipStatementEnd()
     {
         var ch = _text.PeekChar();
@@ -860,6 +662,16 @@ public class SqlParser
         return span.Result != null;
     }
 
+    private bool IsPeek<T>(Func<ParseResult<T>> parseFn)
+    {
+        SkipWhiteSpace();
+        var tmpPosition = _text.Position;
+        var rc = parseFn();
+        var isSuccess = rc.Result != null;
+        _text.Position = tmpPosition;
+        return isSuccess;
+    }
+
     private bool IsPeekKeywords(params string[] keywords)
     {
         var keywordsResult = PeekKeywords(keywords)();
@@ -869,6 +681,15 @@ public class SqlParser
         }
 
         return false;
+    }
+
+    private bool IsPeekMatch(string expected)
+    {
+        SkipWhiteSpace();
+        var tmpPosition = _text.Position;
+        var isSuccess = _text.TryMatch(expected);
+        _text.Position = tmpPosition;
+        return isSuccess;
     }
 
     private Func<ParseResult<SqlToken>> Keywords(params string[] keywords)
@@ -886,6 +707,23 @@ public class SqlParser
     private ParseResult<T> NoneResult<T>()
     {
         return new ParseResult<T>(default(T));
+    }
+
+    private SqlFunctionExpression NormalizeFunctionName(SqlFunctionExpression function)
+    {
+        if (function.FunctionName.ToUpper() == "CONVERT")
+        {
+            var p0 = function.Parameters[0];
+            if (p0.SqlType == SqlType.Field)
+            {
+                var field = (SqlFieldExpr)p0;
+                function.Parameters[0] = new SqlDataType
+                {
+                    DataTypeName = field.FieldName
+                };
+            }
+        }
+        return function;
     }
 
     private Func<ParseResult<T>> One<T>(params Func<ParseResult<T>>[] parseFnList)
@@ -952,30 +790,61 @@ public class SqlParser
         };
     }
 
-    private ParseResult<SelectColumn> Parse_Column_Arithmetic()
+    private ParseResult<SqlBetweenValue> Parse_BetweenValue()
     {
-        if (Try(ParseArithmeticExpr, out var arithmetic))
+        var start = Parse_Value();
+        if (start.HasError)
         {
-            return CreateParseResult(new SelectColumn
-            {
-                Field = arithmetic.ResultValue
-            });
+            return start.Error;
         }
 
-        return NoneResult<SelectColumn>();
+        if (!TryKeyword("AND"))
+        {
+            return CreateParseError("Expected AND");
+        }
+
+        var end = Parse_Value();
+        if (end.HasError)
+        {
+            return end.Error;
+        }
+
+        return new SqlBetweenValue
+        {
+            Start = start.ResultValue,
+            End = end.ResultValue
+        };
     }
 
-    private ParseResult<SelectColumn> Parse_Column_Identifier()
+    private ParseResult<SqlWhenThenClause> Parse_Case_WhenClause()
     {
-        if (TryReadSqlIdentifier(out var fieldName))
+        if (!TryKeyword("WHEN"))
         {
-            return new SelectColumn()
-            {
-                Field = new SqlValue { Value = fieldName.Word }
-            };
+            return NoneResult<SqlWhenThenClause>();
         }
 
-        return NoneResult<SelectColumn>();
+        var whenExpr = ParseArithmeticExpr();
+        if (whenExpr.HasError)
+        {
+            return whenExpr.Error;
+        }
+
+        if (!TryKeyword("THEN"))
+        {
+            return CreateParseError("Expected THEN");
+        }
+
+        var thenExpr = ParseArithmeticExpr();
+        if (thenExpr.HasError)
+        {
+            return thenExpr.Error;
+        }
+
+        return CreateParseResult(new SqlWhenThenClause
+        {
+            When = whenExpr.ResultValue,
+            Then = thenExpr.ResultValue
+        });
     }
 
     private ParseResult<SqlCaseExpr> Parse_CaseExpression()
@@ -1049,35 +918,30 @@ public class SqlParser
         });
     }
 
-    private ParseResult<SqlWhenThenClause> Parse_Case_WhenClause()
+    private ParseResult<SelectColumn> Parse_Column_Arithmetic()
     {
-        if (!TryKeyword("WHEN"))
+        if (Try(ParseArithmeticExpr, out var arithmetic))
         {
-            return NoneResult<SqlWhenThenClause>();
+            return CreateParseResult(new SelectColumn
+            {
+                Field = arithmetic.ResultValue
+            });
         }
 
-        var whenExpr = ParseArithmeticExpr();
-        if (whenExpr.HasError)
+        return NoneResult<SelectColumn>();
+    }
+
+    private ParseResult<SelectColumn> Parse_Column_Identifier()
+    {
+        if (TryReadSqlIdentifier(out var fieldName))
         {
-            return whenExpr.Error;
+            return new SelectColumn()
+            {
+                Field = new SqlValue { Value = fieldName.Word }
+            };
         }
 
-        if (!TryKeyword("THEN"))
-        {
-            return CreateParseError("Expected THEN");
-        }
-
-        var thenExpr = ParseArithmeticExpr();
-        if (thenExpr.HasError)
-        {
-            return thenExpr.Error;
-        }
-
-        return CreateParseResult(new SqlWhenThenClause
-        {
-            When = whenExpr.ResultValue,
-            Then = thenExpr.ResultValue
-        });
+        return NoneResult<SelectColumn>();
     }
 
     private ParseResult<SelectColumn> Parse_Column_Star()
@@ -1185,32 +1049,6 @@ public class SqlParser
         return left;
     }
 
-    private ParseResult<SqlBetweenValue> Parse_BetweenValue()
-    {
-        var start = Parse_Value();
-        if (start.HasError)
-        {
-            return start.Error;
-        }
-
-        if (!TryKeyword("AND"))
-        {
-            return CreateParseError("Expected AND");
-        }
-
-        var end = Parse_Value();
-        if (end.HasError)
-        {
-            return end.Error;
-        }
-
-        return new SqlBetweenValue
-        {
-            Start = start.ResultValue,
-            End = end.ResultValue
-        };
-    }
-
     private ParseResult<SqlDataSize> Parse_DataSize()
     {
         if (!TryMatch("("))
@@ -1261,6 +1099,67 @@ public class SqlParser
         };
     }
 
+    private ParseResult<ITableSource> Parse_FromTableSource()
+    {
+        if (TryMatch("("))
+        {
+            var sub = ParseSelectStatement();
+            if (sub.HasError)
+            {
+                return sub.Error;
+            }
+            MatchString(")");
+            return new SqlInnerTableSource()
+            {
+                Inner = sub.ResultValue
+            };
+        }
+        
+        if(Try(Parse_FunctionName, out var function))
+        {
+            return new SqlFuncTableSource()
+            {
+                Function = function.ResultValue
+            };
+        }
+        if (Try(Parse_SqlIdentifier, out var tableName))
+        {
+            return new SqlTableSource()
+            {
+                TableName = tableName.ResultValue.Value
+            };
+        }
+        return NoneResult<ITableSource>();
+    }
+
+    private ParseResult<List<ISqlExpression>> Parse_FromTableSources()
+    {
+        var fromTableSources = ParseWithComma(() =>
+        {
+            var tableSource = Or<ISqlExpression>(Parse_TableSourceWithAlias, Parse_JoinTableSource)();
+            if (tableSource.HasError)
+            {
+                return tableSource.Error;
+            }
+            return tableSource;
+        });
+        var fromTableSourcesExpr = fromTableSources.ResultValue;
+        do
+        {
+            var joinTable = Parse_JoinTableSource();
+            if (joinTable.HasError)
+            {
+                return joinTable.Error;
+            }
+            if(joinTable.Result == null)
+            {
+                break;
+            }
+            fromTableSourcesExpr.Add(joinTable.ResultValue);
+        }while (true);
+        return CreateParseResult(fromTableSourcesExpr);
+    }
+
     private ParseResult<SqlFunctionExpression> Parse_FunctionName()
     {
         var startPosition = _text.Position;
@@ -1283,22 +1182,51 @@ public class SqlParser
         _text.Position = startPosition;
         return NoneResult<SqlFunctionExpression>();
     }
-    
-    private SqlFunctionExpression NormalizeFunctionName(SqlFunctionExpression function)
+
+    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()
     {
-        if (function.FunctionName.ToUpper() == "CONVERT")
+        if (TryKeywords("INNER", "JOIN"))
         {
-            var p0 = function.Parameters[0];
-            if (p0.SqlType == SqlType.Field)
-            {
-                var field = (SqlFieldExpr)p0;
-                function.Parameters[0] = new SqlDataType
-                {
-                    DataTypeName = field.FieldName
-                };
-            }
+            var tableSource = Parse_JoinTableSourceOn();
+            return tableSource.ResultValue;
         }
-        return function;
+        if (TryKeywords("JOIN"))
+        {
+            var tableSource = Parse_JoinTableSourceOn();
+            return tableSource.ResultValue;
+        }
+        if (TryKeywords("LEFT", "JOIN"))
+        {
+            var tableSource = Parse_JoinTableSourceOn().ResultValue;
+            tableSource.JoinType = JoinType.Left;
+            return tableSource;
+        }
+        if (TryKeywords("RIGHT", "JOIN"))
+        {
+            var tableSource = Parse_JoinTableSourceOn().ResultValue;
+            tableSource.JoinType = JoinType.Right;
+            return tableSource;
+        }
+        return NoneResult<SqlJoinTableCondition>();
+    }
+
+    private ParseResult<SqlJoinTableCondition> Parse_JoinTableSourceOn()
+    {
+        if(!Try(Parse_TableSourceWithAlias, out var tableSource))
+        {
+            return NoneResult<SqlJoinTableCondition>();
+        }
+        
+        if (!TryKeyword("ON"))
+        {
+            return CreateParseError("Expected ON");
+        }
+        var onCondition = ParseArithmeticExpr();
+        return new SqlJoinTableCondition()
+        {
+            JoinedTable = tableSource.ResultValue,
+            OnCondition = onCondition.ResultValue,
+        };
     }
 
     private ParseResult<LogicalOperator?> Parse_LogicalOperator()
@@ -1322,6 +1250,36 @@ public class SqlParser
             _ => LogicalOperator.None
         };
         return logicalOperator;
+    }
+
+    private ParseResult<SqlNegativeValue> Parse_NegativeValue()
+    {
+        if (TryMatch("-"))
+        {
+            if (Try(Parse_SqlIdentifier, out var identifier) && !IsPeekMatch("("))
+            {
+                return new SqlNegativeValue
+                {
+                    Value = new SqlFieldExpr()
+                    {
+                        FieldName = identifier.ResultValue.Value
+                    }
+                };
+            }
+
+            var expr = ParseArithmeticExpr();
+            if (expr.HasError)
+            {
+                return expr.Error;
+            }
+
+            return new SqlNegativeValue
+            {
+                Value = expr.ResultValue
+            };
+        }
+
+        return NoneResult<SqlNegativeValue>();
     }
 
     private ParseResult<ISqlExpression> Parse_SearchCondition(Func<ParseResult<ISqlExpression>> parseTerm)
@@ -1423,6 +1381,128 @@ public class SqlParser
             return CreateParseResult(columnExpr);
         });
         return columns;
+    }
+
+    private ParseResult<SqlValue> Parse_SqlIdentifier()
+    {
+        if (TryReadSqlIdentifier(out var identifier))
+        {
+            return new SqlValue
+            {
+                Value = identifier.Word
+            };
+        }
+
+        return NoneResult<SqlValue>();
+    }
+
+    private ParseResult<SqlValue> Parse_TableAliasName()
+    {
+        var startPosition = _text.Position;
+        if (Try(Parse_SqlIdentifier, out var alias))
+        {
+            if (IsPeekMatch("("))
+            {
+                _text.Position = startPosition;
+                return NoneResult<SqlValue>();
+            }
+
+            if (alias.ResultValue.Value.ToUpper() == "WHERE")
+            {
+                _text.Position = startPosition;
+                return NoneResult<SqlValue>();
+            }
+
+            return alias;
+        }
+
+        return NoneResult<SqlValue>();
+    }
+
+    private ParseResult<SqlTableHintIndex> Parse_TableHintIndex()
+    {
+        if (!TryKeyword("INDEX"))
+        {
+            return NoneResult<SqlTableHintIndex>();
+        }
+
+        if (TryMatch("="))
+        {
+            if (!TryMatch("("))
+            {
+                return CreateParseError("Expected (");
+            }
+
+            var indexName = _text.ReadSqlIdentifier();
+            if (!TryMatch(")"))
+            {
+                return CreateParseError("Expected )");
+            }
+
+            return new SqlTableHintIndex()
+            {
+                IndexValues = [indexName.Word]
+            };
+        }
+
+        if (!TryMatch("("))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var indexValues = ParseWithComma<string>(() =>
+        {
+            var indexName = _text.ReadSqlIdentifier();
+            return indexName.Word;
+        });
+
+        if (!TryMatch(")"))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return new SqlTableHintIndex
+        {
+            IndexValues = indexValues.ResultValue
+        };
+    }
+
+    private ParseResult<ITableSource> Parse_TableSourceWithAlias()
+    {
+        if(!Try(Parse_FromTableSource, out var tableSource))
+        {
+            return NoneResult<ITableSource>();
+        }
+        var tableSourceExpr = tableSource.ResultValue;
+        if (Try(Parse_TableAliasName, out var alias))
+        {
+            tableSourceExpr.Alias = alias.ResultValue.Value;
+        }
+        if (TryKeyword("WITH"))
+        {
+            MatchString("(");
+            var tableHints = ParseWithComma<ISqlExpression>(() =>
+            {
+                if (Try(Parse_TableHintIndex, out var tableHintIndex))
+                {
+                    return tableHintIndex.ResultValue;
+                }
+
+                var hint = ReadSqlIdentifier().Word;
+                return new SqlHint()
+                {
+                    Name = hint
+                };
+            });
+            if (tableHints.HasError)
+            {
+                return tableHints.Error;
+            }
+
+            MatchString(")");
+            tableSourceExpr.Withs = tableHints.ResultValue;
+        }
+        return CreateParseResult(tableSourceExpr);
     }
 
     private ParseResult<ISqlExpression> Parse_WhereExpression()
@@ -1830,6 +1910,21 @@ column_name AS computed_column_expression
         return NoneResult<SqlValue>();
     }
 
+    private ParseResult<SqlValue> ParseHexValue()
+    {
+        if (!TryMatch("0x"))
+        {
+            return NoneResult<SqlValue>();
+        }
+
+        var hexValue = _text.ReadUntil(c => !_text.IsWordChar(c));
+        return new SqlValue()
+        {
+            SqlType = SqlType.HexValue,
+            Value = "0x" + hexValue.Word
+        };
+    }
+
     private ParseResult<SqlIdentity> ParseIdentity()
     {
         if (!TryMatch("IDENTITY"))
@@ -1851,21 +1946,6 @@ column_name AS computed_column_expression
         }
 
         return CreateParseResult(sqlIdentity);
-    }
-
-    private ParseResult<SqlValue> ParseHexValue()
-    {
-        if (!TryMatch("0x"))
-        {
-            return NoneResult<SqlValue>();
-        }
-
-        var hexValue = _text.ReadUntil(c => !_text.IsWordChar(c));
-        return new SqlValue()
-        {
-            SqlType = SqlType.HexValue,
-            Value = "0x" + hexValue.Word
-        };
     }
 
     private ParseResult<SqlValue> ParseIntValue()
@@ -1893,54 +1973,6 @@ column_name AS computed_column_expression
         }
 
         return NoneResult<SqlToken>();
-    }
-
-    private ParseResult<SqlTableHintIndex> Parse_TableHintIndex()
-    {
-        if (!TryKeyword("INDEX"))
-        {
-            return NoneResult<SqlTableHintIndex>();
-        }
-
-        if (TryMatch("="))
-        {
-            if (!TryMatch("("))
-            {
-                return CreateParseError("Expected (");
-            }
-
-            var indexName = _text.ReadSqlIdentifier();
-            if (!TryMatch(")"))
-            {
-                return CreateParseError("Expected )");
-            }
-
-            return new SqlTableHintIndex()
-            {
-                IndexValues = [indexName.Word]
-            };
-        }
-
-        if (!TryMatch("("))
-        {
-            return CreateParseError("Expected (");
-        }
-
-        var indexValues = ParseWithComma<string>(() =>
-        {
-            var indexName = _text.ReadSqlIdentifier();
-            return indexName.Word;
-        });
-
-        if (!TryMatch(")"))
-        {
-            return CreateParseError("Expected )");
-        }
-
-        return new SqlTableHintIndex
-        {
-            IndexValues = indexValues.ResultValue
-        };
     }
 
     private ParseResult<SqlValue> ParseNumberValue()
@@ -2207,19 +2239,6 @@ column_name AS computed_column_expression
         return new ParseResult<ReferentialAction>(action);
     }
 
-    private ParseResult<SqlValue> Parse_SqlIdentifier()
-    {
-        if (TryReadSqlIdentifier(out var identifier))
-        {
-            return new SqlValue
-            {
-                Value = identifier.Word
-            };
-        }
-
-        return NoneResult<SqlValue>();
-    }
-
     private ParseResult<SqlValue> ParseSqlQuotedString()
     {
         if (_text.Try(_text.ReadSqlQuotedString, out var quotedString))
@@ -2453,6 +2472,23 @@ column_name AS computed_column_expression
         }
     }
 
+    private Func<ParseResult<SqlToken>> Symbol(string symbol)
+    {
+        return () =>
+        {
+            SkipWhiteSpace();
+            if (_text.TryMatch(symbol))
+            {
+                return new SqlToken
+                {
+                    Value = symbol
+                };
+            }
+
+            return NoneResult<SqlToken>();
+        };
+    }
+
     private Func<ParseResult<SqlToken>> SymbolWithNoncontinuous(string symbol)
     {
         return () =>
@@ -2476,23 +2512,6 @@ column_name AS computed_column_expression
         };
     }
 
-    private Func<ParseResult<SqlToken>> Symbol(string symbol)
-    {
-        return () =>
-        {
-            SkipWhiteSpace();
-            if (_text.TryMatch(symbol))
-            {
-                return new SqlToken
-                {
-                    Value = symbol
-                };
-            }
-
-            return NoneResult<SqlToken>();
-        };
-    }
-
     private bool TryKeyword(string expected)
     {
         SkipWhiteSpace();
@@ -2509,25 +2528,6 @@ column_name AS computed_column_expression
     {
         SkipWhiteSpace();
         return _text.TryMatch(expected);
-    }
-
-    private bool IsPeekMatch(string expected)
-    {
-        SkipWhiteSpace();
-        var tmpPosition = _text.Position;
-        var isSuccess = _text.TryMatch(expected);
-        _text.Position = tmpPosition;
-        return isSuccess;
-    }
-
-    private bool IsPeek<T>(Func<ParseResult<T>> parseFn)
-    {
-        SkipWhiteSpace();
-        var tmpPosition = _text.Position;
-        var rc = parseFn();
-        var isSuccess = rc.Result != null;
-        _text.Position = tmpPosition;
-        return isSuccess;
     }
 
     private bool TryPeekKeyword(string expected)
