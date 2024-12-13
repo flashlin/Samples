@@ -625,11 +625,6 @@ public class SqlParser
 
         if (TryKeyword("FROM"))
         {
-            // var tableName = ReadSqlIdentifier().Word;
-            // var tableSource = new SqlTableSource()
-            // {
-            //     TableName = tableName
-            // };
             var tableSource = Parse_FromTableSource().ResultValue;
 
             if (Try(Parse_TableAliasName, out var alias))
