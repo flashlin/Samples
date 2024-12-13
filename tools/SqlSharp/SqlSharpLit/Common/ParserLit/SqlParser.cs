@@ -1252,16 +1252,35 @@ public class SqlParser
             {
                 var parameters = ParseWithComma(ParseArithmeticExpr);
                 MatchString(")");
-                return new SqlFunctionExpression
+                var function = new SqlFunctionExpression
                 {
                     FunctionName = identifier.Word,
                     Parameters = parameters.ResultValue!.ToArray()
                 };
+                function = NormalizeFunctionName(function);
+                return function;
             }
         }
 
         _text.Position = startPosition;
         return NoneResult<SqlFunctionExpression>();
+    }
+    
+    private SqlFunctionExpression NormalizeFunctionName(SqlFunctionExpression function)
+    {
+        if (function.FunctionName.ToUpper() == "CONVERT")
+        {
+            var p0 = function.Parameters[0];
+            if (p0.SqlType == SqlType.Field)
+            {
+                var field = (SqlFieldExpr)p0;
+                function.Parameters[0] = new SqlDataType
+                {
+                    DataTypeName = field.FieldName
+                };
+            }
+        }
+        return function;
     }
 
     private ParseResult<LogicalOperator?> Parse_LogicalOperator()
