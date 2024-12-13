@@ -78,6 +78,12 @@ nnoremap zm :action FileStructurePopup<CR>
 " 聚焦 test explorer
 nmap zft :action ActivateTestToolWindow<CR>
 
+" 單元測試
+nmap zt :action RiderUnitTestRunContextAction<CR>
+nmap ztd :action RiderUnitTestDebugContextAction<CR>
+" 打開單元測試視窗
+nmap zte :action RiderUnitTestFocusExplorerAction<CR>
+
 """ -------------------------------------------
 " daa 刪除參數
 " cia 更改內部參數
