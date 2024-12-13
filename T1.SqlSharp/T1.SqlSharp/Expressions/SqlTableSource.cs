@@ -7,7 +7,7 @@ public class SqlTableSource : ITableSource
     public SqlType SqlType { get; } = SqlType.TableSource;
     public string TableName { get; set; } = string.Empty;
     public string Alias { get; set; } = string.Empty;
-    public List<JoinCondition> JoinTables { get; set; } = [];
+    public List<SqlJoinTableCondition> JoinTables { get; set; } = [];
     public List<ISqlExpression> Withs { get; set; } = [];
 
     public string ToSql()

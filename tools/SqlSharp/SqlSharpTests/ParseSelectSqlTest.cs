@@ -32,7 +32,7 @@ public class ParseSelectSqlTest
                 Alias = "c",
                 JoinTables =
                 [
-                    new JoinCondition
+                    new SqlJoinTableCondition
                     {
                         JoinType = JoinType.Inner,
                         JoinedTable = new SqlTableSource

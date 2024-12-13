@@ -659,7 +659,7 @@ public class SqlParser
 
             selectStatement.From = tableSource;
         }
-
+        
         if (TryKeyword("WHERE"))
         {
             var rc = Parse_WhereExpression();
@@ -682,6 +682,17 @@ public class SqlParser
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
     }
+
+    private ParseResult<SqlJoinTableCondition> Parse_JoinTable()
+    {
+        if (TryKeywords("INNER", "JOIN"))
+        {
+            var tableSource = Parse_JoinTableSource();
+        }
+        return NoneResult<SqlJoinTableCondition>();
+    }
+    
+    private ParseResult<SqlJoinTableCondition>
 
     private ParseResult<ITableSource> Parse_FromTableSource()
     {

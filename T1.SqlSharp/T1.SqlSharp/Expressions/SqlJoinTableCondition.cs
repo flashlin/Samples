@@ -2,7 +2,7 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class JoinCondition : ISqlExpression 
+public class SqlJoinTableCondition : ISqlExpression 
 {
     public SqlType SqlType { get; } = SqlType.JoinCondition; 
     public JoinType JoinType { get; set; } = JoinType.Inner;
