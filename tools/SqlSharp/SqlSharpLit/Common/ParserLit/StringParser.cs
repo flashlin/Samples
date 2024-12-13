@@ -108,7 +108,7 @@ public class StringParser
     public bool PeekMatchSymbol(string symbol)
     {
         var tempPosition = _position;
-        var isSymbol = ReadText(symbol.Length).Word == symbol;
+        var isSymbol = NextText(symbol.Length).Word == symbol;
         _position = tempPosition;
         return isSymbol;
     }
@@ -156,7 +156,7 @@ public class StringParser
             if (openSymbol.Word == "/*")
             {
                 ReadUntil("*/");
-                ReadText(2);
+                NextText(2);
                 return new TextSpan
                 {
                     Word = _text.Substring(startPosition, _position - startPosition),
@@ -232,10 +232,10 @@ public class StringParser
             }
 
             prevToken = identifier;
-            var dotdot = Peek(()=>ReadText(2));
+            var dotdot = Peek(()=>NextText(2));
             if(dotdot.Word == "..")
             {
-                ReadText(2);
+                NextText(2);
                 prevToken = new TextSpan
                 {
                     Word = dotdot.Word,
@@ -534,7 +534,7 @@ public class StringParser
         };
     }
 
-    public TextSpan ReadText(int length)
+    public TextSpan NextText(int length)
     {
         length = Math.Min(length, _text.Length - _position);
         var span = new TextSpan
@@ -560,7 +560,7 @@ public class StringParser
             };
         }
         var startPosition = _position;
-        var bracketStr = ReadText(1).Word;
+        var bracketStr = NextText(1).Word;
         if (!Brackets.Contains(bracketStr[0]))
         {
             return new TextSpan
@@ -582,7 +582,7 @@ public class StringParser
     {
         SkipWhitespace();
         var startPosition = _position;
-        var symbol = ReadText(length);
+        var symbol = NextText(length);
         if (!IsSymbolEnd(PeekNext()))
         {
             return new TextSpan
@@ -788,7 +788,7 @@ public class StringParser
     {
         SkipWhitespace();
         var startPosition = _position;
-        if (Try(() => ReadText(keyword.Length), out var textSpan))
+        if (Try(() => NextText(keyword.Length), out var textSpan))
         {
             if (textSpan.Word == keyword)
             {
