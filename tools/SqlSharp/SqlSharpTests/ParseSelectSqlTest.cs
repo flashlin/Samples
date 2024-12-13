@@ -10,6 +10,57 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_hex_value()
+    {
+        var sql = $"""
+                   select 
+                   ( CASE 
+                   WHEN r = 0 THEN ( id & 0xFF00 )
+                   END ) AS id
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlGroup
+                    {
+                        Inner = new SqlCaseExpr
+                        {
+                            WhenThens =
+                            [
+                                new SqlWhenThenClause
+                                {
+                                    When = new SqlConditionExpression
+                                    {
+                                        Left = new SqlFieldExpr { FieldName = "r" },
+                                        ComparisonOperator = ComparisonOperator.Equal,
+                                        Right = new SqlValue { SqlType = SqlType.IntValue, Value = "0" }
+                                    },
+                                    Then = new SqlGroup()
+                                    {
+                                        Inner = new SqlArithmeticBinaryExpr
+                                        {
+                                            Left = new SqlFieldExpr { FieldName = "id" },
+                                            Operator = ArithmeticOperator.BitwiseAnd,
+                                            Right = new SqlValue { SqlType = SqlType.HexValue, Value = "0xFF00" }
+                                        },
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    Alias = "id"
+                }
+            ],
+            From = new SqlTableSource { TableName = "customer" }
+        });
+    }
+
+    [Test]
     public void Where_expr_and_group()
     {
         var sql = $"""
@@ -60,7 +111,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Select_count_distinct()
     {
@@ -79,7 +130,8 @@ public class ParseSelectSqlTest
                     Field = new SqlFunctionExpression
                     {
                         FunctionName = "COUNT",
-                        Parameters = [
+                        Parameters =
+                        [
                             new SqlDistinct()
                             {
                                 Value = new SqlFieldExpr
@@ -95,8 +147,8 @@ public class ParseSelectSqlTest
             From = new SqlTableSource { TableName = "customer" }
         });
     }
-        
-    
+
+
     [Test]
     public void Where_grant_equal()
     {
@@ -123,7 +175,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void From_table_aliasTableName()
     {
@@ -164,9 +216,9 @@ public class ParseSelectSqlTest
                         Inner = new SelectStatement
                         {
                             Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "id" } }],
-                            From = new SqlTableSource 
-                            { 
-                                TableName = "customer", 
+                            From = new SqlTableSource
+                            {
+                                TableName = "customer",
                                 Alias = "e",
                                 Withs = [new SqlHint { Name = "nolock" }]
                             }
@@ -178,7 +230,7 @@ public class ParseSelectSqlTest
             From = new SqlTableSource { TableName = "customer", Alias = "c" }
         });
     }
-    
+
     [Test]
     public void Select_other_select_from_table_aliasTableName_aliasFieldName()
     {
@@ -208,8 +260,8 @@ public class ParseSelectSqlTest
             From = new SqlTableSource { TableName = "customer" }
         });
     }
-    
-    
+
+
     [Test]
     public void Where_between()
     {
@@ -240,7 +292,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Case_when_then_negative_number()
     {

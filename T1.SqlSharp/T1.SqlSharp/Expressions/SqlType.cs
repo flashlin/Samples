@@ -15,6 +15,7 @@ public enum SqlType
     Select,
     Field,
     IntValue,
+    HexValue,
     ParameterValue,
     AddExtendedProperty,
     String,

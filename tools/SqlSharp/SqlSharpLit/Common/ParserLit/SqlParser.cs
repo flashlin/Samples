@@ -1692,6 +1692,20 @@ column_name AS computed_column_expression
 
         return CreateParseResult(sqlIdentity);
     }
+    
+    private ParseResult<SqlValue> ParseHexValue()
+    {
+        if (!TryMatch("0x"))
+        {
+            return NoneResult<SqlValue>();
+        }
+        var hexValue = _text.ReadUntil(c => !_text.IsWordChar(c));
+        return new SqlValue()
+        {
+            SqlType = SqlType.HexValue,
+            Value = "0x" + hexValue.Word
+        };
+    }
 
     private ParseResult<SqlValue> ParseIntValue()
     {
@@ -1722,6 +1736,15 @@ column_name AS computed_column_expression
 
     private ParseResult<SqlValue> ParseNumberValue()
     {
+        if(Try(ParseHexValue, out var hexValue))
+        {
+            if (hexValue.HasError)
+            {
+                return hexValue.Error;
+            }
+            return hexValue;
+        }
+        
         var startPosition = _text.Position;
         var negative = TryMatch("-");
         var number = Or(ParseFloatValue, ParseIntValue)();
