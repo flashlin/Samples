@@ -42,5 +42,6 @@ public enum SqlType
     BetweenValue,
     Distinct,
     TableHintIndex,
-    FuncTableSource
+    FuncTableSource,
+    InnerTableSource
 }

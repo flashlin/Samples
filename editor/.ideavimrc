@@ -83,6 +83,7 @@ nmap zt :action RiderUnitTestRunContextAction<CR>
 nmap ztd :action RiderUnitTestDebugContextAction<CR>
 " 打開單元測試視窗
 nmap zte :action RiderUnitTestFocusExplorerAction<CR>
+nmap zvf :action HideAllWindows<CR>
 
 """ -------------------------------------------
 " daa 刪除參數

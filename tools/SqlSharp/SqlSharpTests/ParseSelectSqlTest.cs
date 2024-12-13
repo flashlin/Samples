@@ -10,6 +10,48 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void From_group_select()
+    {
+        var sql = $"""
+                   select id from (select id from emp)
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement()
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr
+                    {
+                        FieldName = "id"
+                    }
+                }
+            ],
+            From = new SqlInnerTableSource()
+            {
+                Inner = new SelectStatement()
+                {
+                    Columns =
+                    [
+                        new SelectColumn
+                        {
+                            Field = new SqlFieldExpr
+                            {
+                                FieldName = "id"
+                            }
+                        }
+                    ],
+                    From = new SqlTableSource
+                    {
+                        TableName = "emp"
+                    }
+                }
+            }
+        });
+    }
+    
+    [Test]
     public void Where_id_in_select_from_custom_function()
     {
         var sql = $"""
