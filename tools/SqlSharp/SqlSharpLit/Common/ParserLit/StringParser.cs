@@ -156,7 +156,7 @@ public class StringParser
             if (openSymbol.Word == "/*")
             {
                 ReadUntil("*/");
-                NextString(2);
+                ReadText(2);
                 return new TextSpan
                 {
                     Word = _text.Substring(startPosition, _position - startPosition),
@@ -866,14 +866,6 @@ public class StringParser
     private static bool IsSameIgnoreCase(string word1, string word2)
     {
         return string.Equals(word1, word2, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private ReadOnlySpan<char> NextString(int length)
-    {
-        if (IsEnd()) return string.Empty;
-        var text = PeekString(length);
-        _position += text.Length;
-        return text;
     }
 
     private TextSpan Or(params Func<TextSpan>[] readFnList)
