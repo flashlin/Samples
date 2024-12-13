@@ -2520,7 +2520,7 @@ column_name AS computed_column_expression
     private string ReadSymbolString(int length)
     {
         SkipWhiteSpace();
-        var span = _text.ReadString(length);
+        var span = _text.ReadText(length);
         return span.Word;
     }
 

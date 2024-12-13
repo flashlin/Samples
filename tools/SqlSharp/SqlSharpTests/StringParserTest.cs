@@ -30,6 +30,15 @@ public class StringParserTest
         var token = new StringParser(text).ReadFullQuotedIdentifier();
         token.Word.Should().Be("[dbo].tb1");
     }
+    
+    
+    [Test]
+    public void Read_dot_dot_identifier()
+    {
+        var text = "[db]..field abc";
+        var token = new StringParser(text).ReadFullQuotedIdentifier();
+        token.Word.Should().Be("[db]..field");
+    }
 
     [Test]
     public void ReadSymbols()

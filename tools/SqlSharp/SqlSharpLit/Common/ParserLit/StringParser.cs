@@ -108,7 +108,7 @@ public class StringParser
     public bool PeekMatchSymbol(string symbol)
     {
         var tempPosition = _position;
-        var isSymbol = ReadString(symbol.Length).Word == symbol;
+        var isSymbol = ReadText(symbol.Length).Word == symbol;
         _position = tempPosition;
         return isSymbol;
     }
@@ -232,6 +232,19 @@ public class StringParser
             }
 
             prevToken = identifier;
+            var dotdot = Peek(()=>ReadText(2));
+            if(dotdot.Word == "..")
+            {
+                ReadText(2);
+                prevToken = new TextSpan
+                {
+                    Word = dotdot.Word,
+                    Offset = dotdot.Offset,
+                    Length = 2
+                };
+                continue;
+            }
+            
             if (PeekNext() != '.')
             {
                 break;
@@ -521,7 +534,7 @@ public class StringParser
         };
     }
 
-    public TextSpan ReadString(int length)
+    public TextSpan ReadText(int length)
     {
         length = Math.Min(length, _text.Length - _position);
         var span = new TextSpan
@@ -547,7 +560,7 @@ public class StringParser
             };
         }
         var startPosition = _position;
-        var bracketStr = ReadString(1).Word;
+        var bracketStr = ReadText(1).Word;
         if (!Brackets.Contains(bracketStr[0]))
         {
             return new TextSpan
@@ -569,7 +582,7 @@ public class StringParser
     {
         SkipWhitespace();
         var startPosition = _position;
-        var symbol = ReadString(length);
+        var symbol = ReadText(length);
         if (!IsSymbolEnd(PeekNext()))
         {
             return new TextSpan
@@ -775,7 +788,7 @@ public class StringParser
     {
         SkipWhitespace();
         var startPosition = _position;
-        if (Try(() => ReadString(keyword.Length), out var textSpan))
+        if (Try(() => ReadText(keyword.Length), out var textSpan))
         {
             if (textSpan.Word == keyword)
             {
