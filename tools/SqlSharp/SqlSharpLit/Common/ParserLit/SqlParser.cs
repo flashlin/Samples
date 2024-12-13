@@ -625,39 +625,8 @@ public class SqlParser
 
         if (TryKeyword("FROM"))
         {
-            var tableSource = Parse_FromTableSource().ResultValue;
-
-            if (Try(Parse_TableAliasName, out var alias))
-            {
-                tableSource.Alias = alias.ResultValue.Value;
-            }
-
-            if (TryKeyword("WITH"))
-            {
-                MatchString("(");
-                var tableHints = ParseWithComma<ISqlExpression>(() =>
-                {
-                    if (Try(Parse_TableHintIndex, out var tableHintIndex))
-                    {
-                        return tableHintIndex.ResultValue;
-                    }
-
-                    var hint = ReadSqlIdentifier().Word;
-                    return new SqlHint()
-                    {
-                        Name = hint
-                    };
-                });
-                if (tableHints.HasError)
-                {
-                    return tableHints.Error;
-                }
-
-                MatchString(")");
-                tableSource.Withs = tableHints.ResultValue;
-            }
-
-            selectStatement.From = tableSource;
+            var tableSource = Parse_FromTableSourceWithAlias();
+            selectStatement.From = tableSource.ResultValue;
         }
 
         do
@@ -697,6 +666,44 @@ public class SqlParser
         return CreateParseResult(selectStatement);
     }
 
+    private ParseResult<ITableSource> Parse_FromTableSourceWithAlias()
+    {
+        if(!Try(Parse_FromTableSource, out var tableSource))
+        {
+            return NoneResult<ITableSource>();
+        }
+        var tableSourceExpr = tableSource.ResultValue;
+        if (Try(Parse_TableAliasName, out var alias))
+        {
+            tableSourceExpr.Alias = alias.ResultValue.Value;
+        }
+        if (TryKeyword("WITH"))
+        {
+            MatchString("(");
+            var tableHints = ParseWithComma<ISqlExpression>(() =>
+            {
+                if (Try(Parse_TableHintIndex, out var tableHintIndex))
+                {
+                    return tableHintIndex.ResultValue;
+                }
+
+                var hint = ReadSqlIdentifier().Word;
+                return new SqlHint()
+                {
+                    Name = hint
+                };
+            });
+            if (tableHints.HasError)
+            {
+                return tableHints.Error;
+            }
+
+            MatchString(")");
+            tableSourceExpr.Withs = tableHints.ResultValue;
+        }
+        return CreateParseResult(tableSourceExpr);
+    }
+
     private ParseResult<SqlJoinTableCondition> Parse_JoinTable()
     {
         if (TryKeywords("INNER", "JOIN"))
@@ -726,14 +733,9 @@ public class SqlParser
     
     private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()
     {
-        if(!Try(Parse_FromTableSource, out var tableSource))
+        if(!Try(Parse_FromTableSourceWithAlias, out var tableSource))
         {
             return NoneResult<SqlJoinTableCondition>();
-        }
-        
-        if(Try(Parse_TableAliasName, out var aliasName))
-        {
-            tableSource.ResultValue.Alias = aliasName.ResultValue.Value;
         }
         
         if (!TryKeyword("ON"))
