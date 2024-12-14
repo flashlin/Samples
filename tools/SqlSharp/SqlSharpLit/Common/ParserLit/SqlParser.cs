@@ -773,6 +773,7 @@ public class SqlParser
 
     private ParseResult<SqlRankClause> ParseRankClause()
     {
+        var startPosition = _text.Position;
         if (!TryKeyword("RANK"))
         {
             return NoneResult<SqlRankClause>();
@@ -780,7 +781,8 @@ public class SqlParser
 
         if (!TryMatch("()"))
         {
-            return CreateParseError("Expected ()");
+            _text.Position = startPosition;
+            return NoneResult<SqlRankClause>();
         }
 
         if (!TryKeyword("OVER"))
