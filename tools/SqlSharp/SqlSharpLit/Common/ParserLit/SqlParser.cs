@@ -284,7 +284,6 @@ public class SqlParser
         return valueExpr;
     }
 
-    //TODO: Draft
     public ParseResult<ISqlExpression> ParseArithmetic_AdditionOrSubtraction(
         Func<ParseResult<ISqlExpression>> parseTerm)
     {
