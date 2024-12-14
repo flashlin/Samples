@@ -24,7 +24,7 @@ public class ParseSelectSqlTest
                 {
                     Field = new SqlUnaryExpr
                     {
-                        Op = UnaryOperator.BitwiseNot,
+                        Operator = UnaryOperator.BitwiseNot,
                         Operand = new SqlFieldExpr { FieldName = "id" }
                     }
                 }

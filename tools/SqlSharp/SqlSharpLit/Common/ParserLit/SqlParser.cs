@@ -93,7 +93,7 @@ public class SqlParser
             return NoneResult<SqlGroupByClause>();
         }
 
-        var groupByColumns = ParseWithComma(Parse_Value);
+        var groupByColumns = ParseWithComma(ParseValue);
         if (groupByColumns.HasError)
         {
             return groupByColumns.Error;
@@ -140,9 +140,9 @@ public class SqlParser
         return CreateParseResult(topClause);
     }
 
-    public ParseResult<ISqlExpression> Parse_Value()
+    public ParseResult<ISqlExpression> ParseValue()
     {
-        if (Try(ParseValues, out var values))
+        if (Try(Parse_Values, out var values))
         {
             return values.ResultValue;
         }
@@ -164,6 +164,11 @@ public class SqlParser
             {
                 Inner = value.ResultValue
             };
+        }
+        
+        if (Try(Parse_UnaryExpr, out var unaryExpr))
+        {
+            return unaryExpr.ResultValue;
         }
 
         if (TryMatch("*"))
@@ -250,7 +255,7 @@ public class SqlParser
 
     public ParseResult<ISqlExpression> Parse_Value_As_DataType()
     {
-        var valueExpr = Parse_Value();
+        var valueExpr = ParseValue();
         if (valueExpr.HasError)
         {
             return valueExpr.Error;
@@ -738,6 +743,24 @@ public class SqlParser
         return isSuccess;
     }
 
+    private ParseResult<SqlUnaryExpr> Parse_UnaryExpr()
+    {
+        if(TryMatch("~"))
+        {
+            var expr = ParseArithmeticExpr();
+            if (expr.HasError)
+            {
+                return expr.Error;
+            }
+            return new SqlUnaryExpr
+            {
+                Operator = UnaryOperator.BitwiseNot,
+                Operand = expr.ResultValue
+            };
+        }
+        return NoneResult<SqlUnaryExpr>();
+    }
+
     private bool IsPeekKeywords(params string[] keywords)
     {
         var keywordsResult = PeekKeywords(keywords)();
@@ -858,7 +881,7 @@ public class SqlParser
 
     private ParseResult<SqlBetweenValue> Parse_BetweenValue()
     {
-        var start = Parse_Value();
+        var start = ParseValue();
         if (start.HasError)
         {
             return start.Error;
@@ -869,7 +892,7 @@ public class SqlParser
             return CreateParseError("Expected AND");
         }
 
-        var end = Parse_Value();
+        var end = ParseValue();
         if (end.HasError)
         {
             return end.Error;
@@ -2382,7 +2405,7 @@ column_name AS computed_column_expression
         return NoneResult<SqlFieldExpr>();
     }
 
-    private ParseResult<SqlValues> ParseValues()
+    private ParseResult<SqlValues> Parse_Values()
     {
         var startPosition = _text.Position;
         if (!TryMatch("("))
