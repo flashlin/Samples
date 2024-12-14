@@ -60,18 +60,10 @@ public class ParseSelectSqlTest
     }
     
     [Test]
-    public void Case_when_functionCall()
+    public void From_functionCall()
     {
         var sql = $"""
-                   select
-                       case id
-                           when @id1 then   
-                               case when ( @score >= cast(left(@team,1) as int) ) then 1         
-                               else -1         
-                               end
-                           else 0
-                       end as R
-                   from customer
+                   select rank, val from strSplit(@arrCustID, ',')
                    """;
         var rc = ParseSql(sql);
         

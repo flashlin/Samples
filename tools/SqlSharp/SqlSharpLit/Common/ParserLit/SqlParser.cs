@@ -1508,7 +1508,7 @@ public class SqlParser
                 }
             }
     
-            if (Try(ParseAliasExpr, out var alias))
+            if (!IsPeekKeywords("FROM") && Try(ParseAliasExpr, out var alias))
             {
                 columnExpr.Alias = alias.ResultValue.Name;
                 
@@ -1554,7 +1554,7 @@ public class SqlParser
             };
         }
 
-        if (Try(Parse_SqlIdentifier, out var aliasName2))
+        if (Try(Parse_SqlIdentifierNonReservedWord, out var aliasName2))
         {
             return new SqlAliasExpr
             {
@@ -1563,6 +1563,15 @@ public class SqlParser
         }
 
         return NoneResult<SqlAliasExpr>();
+    }
+    
+    private ParseResult<SqlValue> Parse_SqlIdentifierNonReservedWord()
+    {
+        if (Try(() => Parse_SqlIdentifierExclude(ReservedWords), out var identifier))
+        {
+            return identifier;
+        }
+        return NoneResult<SqlValue>();
     }
 
     private ParseResult<SqlValue> Parse_SqlIdentifier()
@@ -1577,6 +1586,25 @@ public class SqlParser
 
         return NoneResult<SqlValue>();
     }
+    
+    private ParseResult<SqlValue> Parse_SqlIdentifierExclude(string[] reservedWords)
+    {
+        var startPosition = _text.Position;
+        if (!TryReadSqlIdentifier(out var identifier))
+        {
+            return NoneResult<SqlValue>();
+        }
+        if (reservedWords.Contains(identifier.Word.ToUpper()))
+        {
+            _text.Position = startPosition;
+            return NoneResult<SqlValue>();
+        }
+        return CreateParseResult(new SqlValue()
+        {
+            Value = identifier.Word
+        });
+    }
+    
 
     private ParseResult<SqlTableHintIndex> Parse_TableHintIndex()
     {
@@ -1625,6 +1653,18 @@ public class SqlParser
             IndexValues = indexValues.ResultValue
         };
     }
+    
+    private bool IsAnyPeekKeyword(params string[] keywords)
+    {
+        foreach (var keyword in keywords)
+        {
+            if (IsPeekKeywords(keyword))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private ParseResult<ITableSource> Parse_TableSourceWithHints()
     {
@@ -1638,7 +1678,6 @@ public class SqlParser
         if (Try(ParseAliasExpr, out var aliasExpr))
         {
             tableSourceExpr.Alias = aliasExpr.ResultValue.Name;
-            
         }
 
         if (TryKeyword("WITH"))
@@ -2718,17 +2757,17 @@ column_name AS computed_column_expression
             return false;
         }
 
-        if (ReservedWords.Contains(result.Word.ToUpper()))
-        {
-            _text.Position = startPosition;
-            result = new TextSpan
-            {
-                Word = string.Empty,
-                Offset = startPosition,
-                Length = 0
-            };
-            return false;
-        }
+        // if (ReservedWords.Contains(result.Word.ToUpper()))
+        // {
+        //     _text.Position = startPosition;
+        //     result = new TextSpan
+        //     {
+        //         Word = string.Empty,
+        //         Offset = startPosition,
+        //         Length = 0
+        //     };
+        //     return false;
+        // }
 
         return true;
     }
