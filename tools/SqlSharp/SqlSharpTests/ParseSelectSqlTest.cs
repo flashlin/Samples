@@ -10,6 +10,74 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Where_cast_left_as_int()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   where 2 >= cast(left(id,1) as int)
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlValue { SqlType = SqlType.IntValue, Value = "2" },
+                ComparisonOperator = ComparisonOperator.GreaterThanOrEqual,
+                Right = new SqlFunctionExpression
+                {
+                    FunctionName = "cast",
+                    Parameters =
+                    [
+                        new SqlAsExpr
+                        {
+                            Instance = new SqlFunctionExpression
+                            {
+                                FunctionName = "left",
+                                Parameters =
+                                [
+                                    new SqlFieldExpr { FieldName = "id" },
+                                    new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+                                ]
+                            },
+                            As = new SqlDataType { DataTypeName = "int" }
+                        }
+                    ]
+                }
+            }
+        });
+    }
+    
+    [Test]
+    public void Case_when_functionCall()
+    {
+        var sql = $"""
+                   select
+                       case id
+                           when @id1 then   
+                               case when ( @score >= cast(left(@team,1) as int) ) then 1         
+                               else -1         
+                               end
+                           else 0
+                       end as R
+                   from customer
+                   """;
+        var rc = ParseSql(sql);
+        
+    }
+    
+    [Test]
     public void From_group_select_t_dot_star()
     {
         var sql = $"""

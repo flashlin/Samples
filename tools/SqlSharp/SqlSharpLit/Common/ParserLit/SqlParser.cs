@@ -237,7 +237,7 @@ public class SqlParser
             return rankClause.ResultValue;
         }
 
-        if (Try(Parse_FunctionName, out var function))
+        if (Try(ParseFunctionCall, out var function))
         {
             return function.ResultValue;
         }
@@ -1271,7 +1271,7 @@ public class SqlParser
             };
         }
 
-        if (Try(Parse_FunctionName, out var function))
+        if (Try(ParseFunctionCall, out var function))
         {
             return new SqlFuncTableSource()
             {
@@ -1321,10 +1321,10 @@ public class SqlParser
         return CreateParseResult(tableSourcesExpr);
     }
 
-    private ParseResult<SqlFunctionExpression> Parse_FunctionName()
+    private ParseResult<SqlFunctionExpression> ParseFunctionCall()
     {
         var startPosition = _text.Position;
-        if (TryReadSqlIdentifier(out var identifier))
+        if (TryReadSqlFunctionName(out var identifier))
         {
             if (TryMatch("("))
             {
@@ -1339,7 +1339,6 @@ public class SqlParser
                 return function;
             }
         }
-
         _text.Position = startPosition;
         return NoneResult<SqlFunctionExpression>();
     }
@@ -2709,7 +2708,7 @@ column_name AS computed_column_expression
         SkipWhiteSpace();
         return _text.Try(_text.ReadInt, out result);
     }
-
+    
     private bool TryReadSqlIdentifier(out TextSpan result)
     {
         SkipWhiteSpace();
@@ -2731,6 +2730,16 @@ column_name AS computed_column_expression
             return false;
         }
 
+        return true;
+    }
+
+    private bool TryReadSqlFunctionName(out TextSpan result)
+    {
+        SkipWhiteSpace();
+        if (!_text.Try(_text.ReadSqlIdentifier, out result))
+        {
+            return false;
+        }
         return true;
     }
 }
