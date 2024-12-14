@@ -852,7 +852,7 @@ public class SqlParser
     }
 
 
-    private void MatchString(string expected)
+    private void MatchSymbol(string expected)
     {
         SkipWhiteSpace();
         _text.MatchSymbol(expected);
@@ -1264,7 +1264,7 @@ public class SqlParser
                 return sub.Error;
             }
 
-            MatchString(")");
+            MatchSymbol(")");
             return new SqlInnerTableSource()
             {
                 Inner = sub.ResultValue
@@ -1329,7 +1329,7 @@ public class SqlParser
             if (TryMatch("("))
             {
                 var parameters = ParseWithComma(ParseArithmeticExpr);
-                MatchString(")");
+                MatchSymbol(")");
                 var function = new SqlFunctionExpression
                 {
                     FunctionName = identifier.Word,
@@ -1644,7 +1644,7 @@ public class SqlParser
 
         if (TryKeyword("WITH"))
         {
-            MatchString("(");
+            MatchSymbol("(");
             var tableHints = ParseWithComma<ISqlExpression>(() =>
             {
                 if (Try(Parse_TableHintIndex, out var tableHintIndex))
@@ -1663,7 +1663,7 @@ public class SqlParser
                 return tableHints.Error;
             }
 
-            MatchString(")");
+            MatchSymbol(")");
             tableSourceExpr.Withs = tableHints.ResultValue;
         }
         

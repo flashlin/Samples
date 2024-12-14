@@ -609,6 +609,10 @@ public class StringParser
         {
             return true;
         }
+        if (symbolEnd == '\'')
+        {
+            return true;
+        }
         return Brackets.Contains(symbolEnd);
     }
 
