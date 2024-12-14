@@ -1510,7 +1510,6 @@ public class SqlParser
                 }
             }
     
-            //TODO:
             if (Try(ParseAliasExpr, out var alias))
             {
                 columnExpr.Alias = alias.ResultValue.Name;
