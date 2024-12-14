@@ -20,6 +20,28 @@ public class ParseSelectSqlTest
                    ) c
                    """;
         var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlInnerTableSource
+                {
+                    Inner = new SelectStatement
+                    {
+                        Columns = [new SelectColumn { Field = new SqlFieldExpr { FieldName = "e.*" } }],
+                        FromSources = [new SqlTableSource { TableName = "emp", Alias = "e" }]
+                    },
+                    Alias = "c"
+                }
+            ]
+        });
     }
     
     [Test]
