@@ -10,6 +10,17 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Function_arithmetic_p2()
+    {
+        var sql = $"""
+                   select id
+                   from customer c
+                   where CHARINDEX(','+convert(nvarchar(3), p.tid) +',', c.id) > 0 
+                   """;
+        var rc = ParseSql(sql);
+    }
+    
+    [Test]
     public void From_table_as_name_with_noLock()
     {
         var sql = $"""
