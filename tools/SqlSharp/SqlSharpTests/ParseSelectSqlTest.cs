@@ -60,13 +60,35 @@ public class ParseSelectSqlTest
     }
     
     [Test]
-    public void From_functionCall()
+    public void Select_rank_from_functionCall()
     {
         var sql = $"""
-                   select rank, val from strSplit(@arrCustID, ',')
+                   select rank, val from strSplit(@text, ',')
                    """;
         var rc = ParseSql(sql);
-        
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "rank" } },
+                new SelectColumn { Field = new SqlFieldExpr { FieldName = "val" } }
+            ],
+            FromSources =
+            [
+                new SqlFuncTableSource
+                {
+                    Function = new SqlFunctionExpression
+                    {
+                        FunctionName = "strSplit",
+                        Parameters =
+                        [
+                            new SqlFieldExpr { FieldName = "@text" },
+                            new SqlValue { Value = "','" }
+                        ]
+                    }
+                }
+            ]
+        });
     }
     
     [Test]
