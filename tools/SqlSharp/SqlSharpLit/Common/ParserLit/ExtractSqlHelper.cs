@@ -209,6 +209,22 @@ public class ExtractSqlHelper
             }
         }
     }
+    
+    private string GetPreviousLine(string text, int offset)
+    {
+        var lastNewLineIndex = text.LastIndexOf('\n', offset - 1);
+        if (lastNewLineIndex < 0)
+        {
+            return string.Empty;
+        }
+        var line = text.Substring(lastNewLineIndex + 1, offset - lastNewLineIndex - 1);
+        return line;
+    }
+
+    private bool IsCommentLine(string line)
+    {
+        return line.StartsWith("/*") || line.StartsWith("--");
+    }
 
     private IEnumerable<string> ExtractSelectSqlFromText(string text)
     {
@@ -218,6 +234,13 @@ public class ExtractSqlHelper
         {
             yield break;
         }
+        
+        var previousLine = GetPreviousLine(text, startSelectIndex);
+        if (IsCommentLine(previousLine))
+        {
+            yield break;
+        }
+        
         var startSelectSql = text.Substring(startSelectIndex);
         var nextChar = startSelectSql[select.Length];
         if (!char.IsWhiteSpace(nextChar))
