@@ -86,14 +86,14 @@ public class SqlParser
         return CreateParseResult(selectType);
     }
     
-    private ParseResult<SqlGroupByClause> Parse_GroupByClause()
+    private ParseResult<SqlGroupByClause> ParseGroupByClause()
     {
         if (!TryKeywords("GROUP", "BY"))
         {
             return NoneResult<SqlGroupByClause>();
         }
 
-        var groupByColumns = ParseWithComma(ParseValue);
+        var groupByColumns = ParseWithComma(ParseArithmeticExpr);
         if (groupByColumns.HasError)
         {
             return groupByColumns.Error;
@@ -621,7 +621,7 @@ public class SqlParser
             selectStatement.Where = rc.Result;
         }
         
-        if (Try(Parse_GroupByClause, out var groupByClause))
+        if (Try(ParseGroupByClause, out var groupByClause))
         {
             selectStatement.GroupBy = groupByClause.Result;
         }

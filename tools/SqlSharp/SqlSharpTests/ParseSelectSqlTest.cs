@@ -10,6 +10,39 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void GroupBy_field_and_number()
+    {
+        var sql = $"""
+                   select id from customer
+                   group by id&256
+                   """; 
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SqlSelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            GroupBy = new SqlGroupByClause
+            {
+                Columns = [new SqlArithmeticBinaryExpr
+                {
+                    Left = new SqlFieldExpr { FieldName = "id" },
+                    Operator = ArithmeticOperator.BitwiseAnd,
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "256" }
+                }]
+            }
+        });
+    }
+    
+    [Test]
     public void Rank_Partition()
     {
         var sql = $"""
