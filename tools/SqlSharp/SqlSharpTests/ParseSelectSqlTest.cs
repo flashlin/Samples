@@ -10,6 +10,35 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void From_table_as_name_with_noLock()
+    {
+        var sql = $"""
+                   SELECT id
+                   from customer as c with(nolock)       
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SqlSelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource
+                {
+                    TableName = "customer",
+                    Alias = "c",
+                    Withs = [new SqlHint { Name = "nolock" }]
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void GroupBy_field_and_number()
     {
         var sql = $"""

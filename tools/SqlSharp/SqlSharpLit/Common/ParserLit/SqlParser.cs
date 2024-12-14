@@ -8,7 +8,7 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
-    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP"];
+    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", "WHERE"];
 
     private readonly StringParser _text;
 
@@ -85,7 +85,7 @@ public class SqlParser
         };
         return CreateParseResult(selectType);
     }
-    
+
     private ParseResult<SqlGroupByClause> ParseGroupByClause()
     {
         if (!TryKeywords("GROUP", "BY"))
@@ -165,7 +165,7 @@ public class SqlParser
                 Inner = value.ResultValue
             };
         }
-        
+
         if (Try(ParseUnaryExpr, out var unaryExpr))
         {
             return unaryExpr.ResultValue;
@@ -607,6 +607,7 @@ public class SqlParser
             {
                 return tableSources.Error;
             }
+
             selectStatement.FromSources = tableSources.ResultValue;
         }
 
@@ -620,7 +621,7 @@ public class SqlParser
 
             selectStatement.Where = rc.Result;
         }
-        
+
         if (Try(ParseGroupByClause, out var groupByClause))
         {
             selectStatement.GroupBy = groupByClause.Result;
@@ -631,8 +632,9 @@ public class SqlParser
         {
             return orderByClause.Error;
         }
+
         selectStatement.OrderBy = orderByClause.Result;
-        
+
         do
         {
             var unionSelect = Parse_UnionSelect();
@@ -640,13 +642,15 @@ public class SqlParser
             {
                 return unionSelect.Error;
             }
-            if(unionSelect.Result == null)
+
+            if (unionSelect.Result == null)
             {
                 break;
             }
+
             selectStatement.Unions.Add(unionSelect.ResultValue);
-        }while(true);
-        
+        } while (true);
+
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
@@ -660,13 +664,13 @@ public class SqlParser
             _text.ReadChar();
         }
     }
-    
+
     private ParseResult<SqlUnionSelect> Parse_UnionSelect()
     {
         var isAll = false;
         if (!TryKeywords("UNION", "ALL"))
         {
-            if(!TryKeywords("UNION"))
+            if (!TryKeywords("UNION"))
             {
                 return NoneResult<SqlUnionSelect>();
             }
@@ -750,19 +754,21 @@ public class SqlParser
 
     private ParseResult<SqlUnaryExpr> ParseUnaryExpr()
     {
-        if(TryMatch("~"))
+        if (TryMatch("~"))
         {
             var expr = ParseArithmeticExpr();
             if (expr.HasError)
             {
                 return expr.Error;
             }
+
             return new SqlUnaryExpr
             {
                 Operator = UnaryOperator.BitwiseNot,
                 Operand = expr.ResultValue
             };
         }
+
         return NoneResult<SqlUnaryExpr>();
     }
 
@@ -772,31 +778,36 @@ public class SqlParser
         {
             return NoneResult<SqlRankClause>();
         }
-        if(!TryMatch("()"))
+
+        if (!TryMatch("()"))
         {
             return CreateParseError("Expected ()");
         }
+
         if (!TryKeyword("OVER"))
         {
             return CreateParseError("Expected OVER");
         }
+
         if (!TryMatch("("))
         {
             return CreateParseError("Expected (");
         }
+
         var partitionBy = ParsePartitionBy().Result;
         var orderBy = ParseOrderByClause().ResultValue;
         if (!TryMatch(")"))
         {
             return CreateParseError("Expected )");
         }
+
         return new SqlRankClause
         {
             PartitionBy = partitionBy,
             OrderBy = orderBy
         };
     }
-    
+
     private ParseResult<SqlPartitionByClause> ParsePartitionBy()
     {
         if (!TryKeywords("PARTITION", "BY"))
@@ -867,6 +878,7 @@ public class SqlParser
                 };
             }
         }
+
         return function;
     }
 
@@ -1252,20 +1264,22 @@ public class SqlParser
             {
                 return sub.Error;
             }
+
             MatchString(")");
             return new SqlInnerTableSource()
             {
                 Inner = sub.ResultValue
             };
         }
-        
-        if(Try(Parse_FunctionName, out var function))
+
+        if (Try(Parse_FunctionName, out var function))
         {
             return new SqlFuncTableSource()
             {
                 Function = function.ResultValue
             };
         }
+
         if (Try(Parse_SqlIdentifier, out var tableName))
         {
             return new SqlTableSource()
@@ -1273,6 +1287,7 @@ public class SqlParser
                 TableName = tableName.ResultValue.Value
             };
         }
+
         return NoneResult<ITableSource>();
     }
 
@@ -1280,14 +1295,14 @@ public class SqlParser
     {
         var fromTableSources = ParseWithComma(() =>
         {
-            var tableSource = Or<ISqlExpression>(Parse_TableSourceWithAlias, Parse_JoinTableSource)();
+            var tableSource = Or<ISqlExpression>(Parse_TableSourceWithHints, Parse_JoinTableSource)();
             if (tableSource.HasError)
             {
                 return tableSource.Error;
             }
             return tableSource;
         });
-        var fromTableSourcesExpr = fromTableSources.ResultValue;
+        var tableSourcesExpr = fromTableSources.ResultValue;
         do
         {
             var joinTable = Parse_JoinTableSource();
@@ -1295,13 +1310,16 @@ public class SqlParser
             {
                 return joinTable.Error;
             }
-            if(joinTable.Result == null)
+
+            if (joinTable.Result == null)
             {
                 break;
             }
-            fromTableSourcesExpr.Add(joinTable.ResultValue);
-        }while (true);
-        return CreateParseResult(fromTableSourcesExpr);
+
+            tableSourcesExpr.Add(joinTable.ResultValue);
+        } while (true);
+
+        return CreateParseResult(tableSourcesExpr);
     }
 
     private ParseResult<SqlFunctionExpression> Parse_FunctionName()
@@ -1334,37 +1352,42 @@ public class SqlParser
             var tableSource = Parse_JoinTableSourceOn();
             return tableSource.ResultValue;
         }
+
         if (TryKeywords("JOIN"))
         {
             var tableSource = Parse_JoinTableSourceOn();
             return tableSource.ResultValue;
         }
+
         if (TryKeywords("LEFT", "JOIN"))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Left;
             return tableSource;
         }
+
         if (TryKeywords("RIGHT", "JOIN"))
         {
             var tableSource = Parse_JoinTableSourceOn().ResultValue;
             tableSource.JoinType = JoinType.Right;
             return tableSource;
         }
+
         return NoneResult<SqlJoinTableCondition>();
     }
 
     private ParseResult<SqlJoinTableCondition> Parse_JoinTableSourceOn()
     {
-        if(!Try(Parse_TableSourceWithAlias, out var tableSource))
+        if (!Try(Parse_TableSourceWithHints, out var tableSource))
         {
             return NoneResult<SqlJoinTableCondition>();
         }
-        
+
         if (!TryKeyword("ON"))
         {
             return CreateParseError("Expected ON");
         }
+
         var onCondition = ParseArithmeticExpr();
         return new SqlJoinTableCondition()
         {
@@ -1458,6 +1481,7 @@ public class SqlParser
             {
                 return column.Error;
             }
+
             var columnExpr = column.ResultValue;
 
             if (columnExpr.Field.SqlType == SqlType.AsExpr)
@@ -1469,8 +1493,8 @@ public class SqlParser
                     Alias = asExpr.As.ToSql()
                 };
             }
-            
-            if(columnExpr.Field.SqlType == SqlType.ComparisonCondition)
+
+            if (columnExpr.Field.SqlType == SqlType.ComparisonCondition)
             {
                 var condition = (SqlConditionExpression)columnExpr.Field;
                 if (condition.ComparisonOperator == ComparisonOperator.Equal)
@@ -1485,22 +1509,12 @@ public class SqlParser
                     };
                 }
             }
-
-            if (TryKeyword("AS"))
+    
+            //TODO:
+            if (Try(ParseAliasExpr, out var alias))
             {
-                var aliasName = Or(Parse_SqlIdentifier, ParseSqlQuotedString)();
-                if (aliasName.HasError)
-                {
-                    return aliasName.Error;
-                }
-                columnExpr.Alias = aliasName.ResultValue.Value;
-            }
-            else
-            {
-                if(Try(Parse_SqlIdentifier, out var alias))
-                {
-                    columnExpr.Alias = alias.ResultValue.Value;
-                }
+                columnExpr.Alias = alias.ResultValue.Name;
+                
             }
 
             if (TryMatch("="))
@@ -1527,6 +1541,33 @@ public class SqlParser
         return columns;
     }
 
+    private ParseResult<SqlAliasExpr> ParseAliasExpr()
+    {
+        if (TryKeyword("AS"))
+        {
+            var aliasName = Or(Parse_SqlIdentifier, ParseSqlQuotedString)();
+            if (aliasName.HasError)
+            {
+                return aliasName.Error;
+            }
+
+            return new SqlAliasExpr()
+            {
+                Name = aliasName.ResultValue.Value
+            };
+        }
+
+        if (Try(Parse_SqlIdentifier, out var aliasName2))
+        {
+            return new SqlAliasExpr
+            {
+                Name = aliasName2.ResultValue.Value
+            };
+        }
+
+        return NoneResult<SqlAliasExpr>();
+    }
+
     private ParseResult<SqlValue> Parse_SqlIdentifier()
     {
         if (TryReadSqlIdentifier(out var identifier))
@@ -1535,29 +1576,6 @@ public class SqlParser
             {
                 Value = identifier.Word
             };
-        }
-
-        return NoneResult<SqlValue>();
-    }
-
-    private ParseResult<SqlValue> Parse_TableAliasName()
-    {
-        var startPosition = _text.Position;
-        if (Try(Parse_SqlIdentifier, out var alias))
-        {
-            if (IsPeekMatch("("))
-            {
-                _text.Position = startPosition;
-                return NoneResult<SqlValue>();
-            }
-
-            if (alias.ResultValue.Value.ToUpper() == "WHERE")
-            {
-                _text.Position = startPosition;
-                return NoneResult<SqlValue>();
-            }
-
-            return alias;
         }
 
         return NoneResult<SqlValue>();
@@ -1611,17 +1629,21 @@ public class SqlParser
         };
     }
 
-    private ParseResult<ITableSource> Parse_TableSourceWithAlias()
+    private ParseResult<ITableSource> Parse_TableSourceWithHints()
     {
-        if(!Try(Parse_FromTableSource, out var tableSource))
+        if (!Try(Parse_FromTableSource, out var tableSource))
         {
             return NoneResult<ITableSource>();
         }
+
         var tableSourceExpr = tableSource.ResultValue;
-        if (Try(Parse_TableAliasName, out var alias))
+
+        if (Try(ParseAliasExpr, out var aliasExpr))
         {
-            tableSourceExpr.Alias = alias.ResultValue.Value;
+            tableSourceExpr.Alias = aliasExpr.ResultValue.Name;
+            
         }
+
         if (TryKeyword("WITH"))
         {
             MatchString("(");
@@ -1646,6 +1668,7 @@ public class SqlParser
             MatchString(")");
             tableSourceExpr.Withs = tableHints.ResultValue;
         }
+        
         return CreateParseResult(tableSourceExpr);
     }
 
@@ -2697,7 +2720,8 @@ column_name AS computed_column_expression
         {
             return false;
         }
-        if(ReservedWords.Contains(result.Word.ToUpper()))
+
+        if (ReservedWords.Contains(result.Word.ToUpper()))
         {
             _text.Position = startPosition;
             result = new TextSpan
@@ -2708,6 +2732,7 @@ column_name AS computed_column_expression
             };
             return false;
         }
+
         return true;
     }
 }

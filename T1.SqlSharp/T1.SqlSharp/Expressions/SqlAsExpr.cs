@@ -11,3 +11,13 @@ public class SqlAsExpr : ISqlExpression
         return $"{Instance.ToSql()} as {As.ToSql()}";
     }
 }
+
+public class SqlAliasExpr : ISqlExpression
+{
+    public SqlType SqlType { get; } = SqlType.AliasExpr;
+    public required string Name { get; set; } = string.Empty;
+    public string ToSql()
+    {
+        return $"AS {Name}";
+    }
+}

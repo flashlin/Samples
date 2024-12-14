@@ -48,5 +48,6 @@ public enum SqlType
     GroupByClause,
     UnaryExpression,
     RankClause,
-    PartitionBy
+    PartitionBy,
+    AliasExpr
 }
