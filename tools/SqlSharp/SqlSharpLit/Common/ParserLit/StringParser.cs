@@ -245,6 +245,12 @@ public class StringParser
                 continue;
             }
             
+            if(dotdot.Word == ".*")
+            {
+                NextText(2);
+                break;
+            }
+            
             if (PeekNext() != '.')
             {
                 break;

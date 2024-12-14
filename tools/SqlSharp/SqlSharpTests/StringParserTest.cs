@@ -30,7 +30,14 @@ public class StringParserTest
         var token = new StringParser(text).ReadFullQuotedIdentifier();
         token.Word.Should().Be("[dbo].tb1");
     }
-    
+
+    [Test]
+    public void Read_table_dot_star()
+    {
+        var text = "table.* abc";
+        var token = new StringParser(text).ReadFullQuotedIdentifier();
+        token.Word.Should().Be("table.*");
+    }
     
     [Test]
     public void Read_dot_dot_identifier()

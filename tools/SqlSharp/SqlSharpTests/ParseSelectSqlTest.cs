@@ -10,6 +10,19 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void From_group_select_t_dot_star()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM (
+                       SELECT e.*
+                       FROM emp e
+                   ) c
+                   """;
+        var rc = ParseSql(sql);
+    }
+    
+    [Test]
     public void Function_arithmetic_p2()
     {
         var sql = $"""
