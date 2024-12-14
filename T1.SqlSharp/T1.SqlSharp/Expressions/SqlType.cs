@@ -45,5 +45,6 @@ public enum SqlType
     FuncTableSource,
     InnerTableSource,
     UnionSelect,
-    GroupByClause
+    GroupByClause,
+    UnaryExpression
 }

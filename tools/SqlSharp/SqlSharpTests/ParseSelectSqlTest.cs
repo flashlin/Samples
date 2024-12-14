@@ -10,6 +10,33 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Select_not_field()
+    {
+        var sql = $"""
+                   select ~id from customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlUnaryExpr
+                    {
+                        Op = UnaryOperator.BitwiseNot,
+                        Operand = new SqlFieldExpr { FieldName = "id" }
+                    }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+    
+    [Test]
     public void DbName_dot_dot_tableName()
     {
         var sql = $"""
