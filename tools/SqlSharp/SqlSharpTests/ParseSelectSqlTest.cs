@@ -10,6 +10,42 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Rank_Partition()
+    {
+        var sql = $"""
+                   SELECT
+                   	Rank() OVER (PARTITION BY id ORDER BY id) AS Row
+                   FROM customer
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlRankClause
+                    {
+                        PartitionBy = new SqlPartitionByClause
+                        {
+                            Columns = [new SqlFieldExpr { FieldName = "id" }]
+                        },
+                        OrderBy = new SqlOrderByClause
+                        {
+                            Columns = [new SqlOrderColumn() { ColumnName = "id" }]
+                        },
+                    },
+                    Alias = "Row"
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ]
+        });
+    }
+    
+    [Test]
     public void Select_not_field()
     {
         var sql = $"""
@@ -1735,7 +1771,7 @@ public class ParseSelectSqlTest
             {
                 Columns =
                 [
-                    new SqlOrderByColumn
+                    new SqlOrderColumn
                     {
                         ColumnName = "LastDate",
                         Order = OrderType.Desc,

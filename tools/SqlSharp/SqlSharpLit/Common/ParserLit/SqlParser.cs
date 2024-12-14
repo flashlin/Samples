@@ -797,11 +797,11 @@ public class SqlParser
         };
     }
     
-    private ParseResult<SqlPartitionBy> ParsePartitionBy()
+    private ParseResult<SqlPartitionByClause> ParsePartitionBy()
     {
         if (!TryKeywords("PARTITION", "BY"))
         {
-            return NoneResult<SqlPartitionBy>();
+            return NoneResult<SqlPartitionByClause>();
         }
 
         var columns = ParseWithComma(ParseValue);
@@ -810,7 +810,7 @@ public class SqlParser
             return columns.Error;
         }
 
-        return CreateParseResult(new SqlPartitionBy
+        return CreateParseResult(new SqlPartitionByClause
         {
             Columns = columns.ResultValue
         });
@@ -2157,7 +2157,7 @@ column_name AS computed_column_expression
             return NoneResult<SqlOrderByClause>();
         }
 
-        var orderByColumns = ParseWithComma<SqlOrderByColumn>(() =>
+        var orderByColumns = ParseWithComma<SqlOrderColumn>(() =>
         {
             var column = ReadSqlIdentifier().Word;
             var order = OrderType.Asc;
@@ -2170,7 +2170,7 @@ column_name AS computed_column_expression
                 order = OrderType.Desc;
             }
 
-            return new SqlOrderByColumn
+            return new SqlOrderColumn
             {
                 ColumnName = column,
                 Order = order

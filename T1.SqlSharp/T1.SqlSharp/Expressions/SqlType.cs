@@ -30,7 +30,7 @@ public enum SqlType
     Group,
     Null,
     OrderByClause,
-    OrderByColumn,
+    OrderColumn,
     CaseClause,
     WhenThen,
     AsExpr,
