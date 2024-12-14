@@ -166,7 +166,7 @@ public class SqlParser
             };
         }
         
-        if (Try(Parse_UnaryExpr, out var unaryExpr))
+        if (Try(ParseUnaryExpr, out var unaryExpr))
         {
             return unaryExpr.ResultValue;
         }
@@ -227,9 +227,14 @@ public class SqlParser
             return subSelect.ResultValue;
         }
 
-        if (Try(Parse_CaseExpression, out var caseExpr))
+        if (Try(ParseCaseClause, out var caseExpr))
         {
             return caseExpr.ResultValue;
+        }
+
+        if (Try(ParseRankClause, out var rankClause))
+        {
+            return rankClause.ResultValue;
         }
 
         if (Try(Parse_FunctionName, out var function))
@@ -743,7 +748,7 @@ public class SqlParser
         return isSuccess;
     }
 
-    private ParseResult<SqlUnaryExpr> Parse_UnaryExpr()
+    private ParseResult<SqlUnaryExpr> ParseUnaryExpr()
     {
         if(TryMatch("~"))
         {
@@ -759,6 +764,56 @@ public class SqlParser
             };
         }
         return NoneResult<SqlUnaryExpr>();
+    }
+
+    private ParseResult<SqlRankClause> ParseRankClause()
+    {
+        if (!TryKeyword("RANK"))
+        {
+            return NoneResult<SqlRankClause>();
+        }
+        if(!TryMatch("()"))
+        {
+            return CreateParseError("Expected ()");
+        }
+        if (!TryKeyword("OVER"))
+        {
+            return CreateParseError("Expected OVER");
+        }
+        if (!TryMatch("("))
+        {
+            return CreateParseError("Expected (");
+        }
+        var partitionBy = ParsePartitionBy().Result;
+        var orderBy = ParseOrderByClause().ResultValue;
+        if (!TryMatch(")"))
+        {
+            return CreateParseError("Expected )");
+        }
+        return new SqlRankClause
+        {
+            PartitionBy = partitionBy,
+            OrderBy = orderBy
+        };
+    }
+    
+    private ParseResult<SqlPartitionBy> ParsePartitionBy()
+    {
+        if (!TryKeywords("PARTITION", "BY"))
+        {
+            return NoneResult<SqlPartitionBy>();
+        }
+
+        var columns = ParseWithComma(ParseValue);
+        if (columns.HasError)
+        {
+            return columns.Error;
+        }
+
+        return CreateParseResult(new SqlPartitionBy
+        {
+            Columns = columns.ResultValue
+        });
     }
 
     private bool IsPeekKeywords(params string[] keywords)
@@ -936,11 +991,11 @@ public class SqlParser
         });
     }
 
-    private ParseResult<SqlCaseExpr> Parse_CaseExpression()
+    private ParseResult<SqlCaseCaluse> ParseCaseClause()
     {
         if (!TryKeyword("CASE"))
         {
-            return NoneResult<SqlCaseExpr>();
+            return NoneResult<SqlCaseCaluse>();
         }
 
         ISqlExpression? whenExpr = null;
@@ -999,7 +1054,7 @@ public class SqlParser
             return CreateParseError("Expected END");
         }
 
-        return CreateParseResult(new SqlCaseExpr
+        return CreateParseResult(new SqlCaseCaluse
         {
             When = whenExpr,
             WhenThens = whenClause,

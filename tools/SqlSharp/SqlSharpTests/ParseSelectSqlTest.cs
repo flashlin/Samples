@@ -533,7 +533,7 @@ public class ParseSelectSqlTest
                 {
                     Field = new SqlGroup
                     {
-                        Inner = new SqlCaseExpr
+                        Inner = new SqlCaseCaluse
                         {
                             WhenThens =
                             [
@@ -837,7 +837,7 @@ public class ParseSelectSqlTest
         var rc = ParseSql(sql);
         var selectStatement = (SelectStatement)rc.ResultValue;
         var groupInner = ((SqlGroup)selectStatement.Columns[0].Field).Inner;
-        var field = (SqlCaseExpr)groupInner;
+        var field = (SqlCaseCaluse)groupInner;
         var whenThen0 = field.WhenThens[0];
         whenThen0.When.ShouldBe(new SqlSearchCondition()
             {
@@ -967,7 +967,7 @@ public class ParseSelectSqlTest
                     Field = new SqlAssignExpr
                     {
                         Left = new SqlFieldExpr { FieldName = "@id" },
-                        Right = new SqlCaseExpr
+                        Right = new SqlCaseCaluse
                         {
                             When = new SqlArithmeticBinaryExpr
                             {
@@ -1022,7 +1022,7 @@ public class ParseSelectSqlTest
                 {
                     Field = new SqlGroup
                     {
-                        Inner = new SqlCaseExpr
+                        Inner = new SqlCaseCaluse
                         {
                             WhenThens =
                             [

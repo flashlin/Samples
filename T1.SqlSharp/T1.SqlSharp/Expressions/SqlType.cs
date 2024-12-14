@@ -31,7 +31,7 @@ public enum SqlType
     Null,
     OrderByClause,
     OrderByColumn,
-    CaseExpr,
+    CaseClause,
     WhenThen,
     AsExpr,
     ArithmeticBinaryExpr,
@@ -46,5 +46,7 @@ public enum SqlType
     InnerTableSource,
     UnionSelect,
     GroupByClause,
-    UnaryExpression
+    UnaryExpression,
+    RankClause,
+    PartitionBy
 }
