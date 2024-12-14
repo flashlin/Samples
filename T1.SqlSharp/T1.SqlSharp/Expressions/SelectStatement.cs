@@ -2,7 +2,7 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlSelectStatement : ISqlExpression
+public class SelectStatement : ISqlExpression
 {
     public SqlType SqlType => SqlType.Select;
     public SelectType SelectType { get; set; } = SelectType.All; 

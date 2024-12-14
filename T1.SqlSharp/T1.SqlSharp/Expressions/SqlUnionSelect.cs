@@ -6,7 +6,7 @@ public class SqlUnionSelect : ISqlExpression
 {
     public SqlType SqlType => SqlType.UnionSelect;
     public bool IsAll { get; set; } = false;
-    public required SqlSelectStatement SqlSelectStatement { get; set; }
+    public required SelectStatement SelectStatement { get; set; }
 
     public string ToSql()
     {
@@ -16,7 +16,7 @@ public class SqlUnionSelect : ISqlExpression
         {
             sql.Write("ALL ");
         }
-        sql.Write(SqlSelectStatement.ToSql());
+        sql.Write(SelectStatement.ToSql());
         return sql.ToString();
     }
 }

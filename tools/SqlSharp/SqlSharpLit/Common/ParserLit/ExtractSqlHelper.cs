@@ -165,7 +165,7 @@ public class ExtractSqlHelper
         }
         foreach (var (sqlFile, selectSql) in ExtractStartSelectSqlString(folder))
         {
-            ParseResult<SqlSelectStatement> result;
+            ParseResult<SelectStatement> result;
             var sqlParser = new SqlParser(selectSql);
             try
             {

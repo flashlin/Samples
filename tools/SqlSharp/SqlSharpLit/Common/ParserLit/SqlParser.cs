@@ -563,14 +563,14 @@ public class SqlParser
         });
     }
 
-    public ParseResult<SqlSelectStatement> ParseSelectStatement()
+    public ParseResult<SelectStatement> ParseSelectStatement()
     {
         if (!TryKeyword("SELECT"))
         {
-            return NoneResult<SqlSelectStatement>();
+            return NoneResult<SelectStatement>();
         }
 
-        var selectStatement = new SqlSelectStatement();
+        var selectStatement = new SelectStatement();
 
         var selectTypeClause = Parse_SelectTypeClause();
         if (selectTypeClause.HasError)
@@ -688,7 +688,7 @@ public class SqlParser
         return new SqlUnionSelect
         {
             IsAll = isAll,
-            SqlSelectStatement = select.ResultValue,
+            SelectStatement = select.ResultValue,
         };
     }
 
