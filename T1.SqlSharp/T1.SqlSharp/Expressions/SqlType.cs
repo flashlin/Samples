@@ -49,5 +49,6 @@ public enum SqlType
     UnaryExpression,
     RankClause,
     PartitionBy,
-    AliasExpr
+    AliasExpr,
+    Unpivot
 }

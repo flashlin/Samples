@@ -8,7 +8,7 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
-    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", "WHERE"];
+    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", "WHERE", "UNPIVOT"];
 
     private readonly StringParser _text;
 
@@ -609,6 +609,11 @@ public class SqlParser
 
             selectStatement.FromSources = tableSources.ResultValue;
         }
+        
+        if (Try(ParseUnpivotClause, out var unpivotClause))
+        {
+            selectStatement.FromSources.Add(unpivotClause.ResultValue);
+        }
 
         if (TryKeyword("WHERE"))
         {
@@ -641,6 +646,55 @@ public class SqlParser
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
+    }
+    
+    private ParseResult<SqlUnpivotClause> ParseUnpivotClause()
+    {
+        if (!TryKeywords("UNPIVOT"))
+        {
+            return NoneResult<SqlUnpivotClause>();
+        }
+        if(!TryMatch("("))
+        {
+            return CreateParseError("Expected (");
+        }
+        
+        var newColumn = ParseValue();
+        if (newColumn.HasError)
+        {
+            return newColumn.Error;
+        }
+        
+        if (!TryKeyword("FOR"))
+        {
+            return CreateParseError("Expected FOR");
+        }
+        var forSource = ParseValue();
+        if (forSource.HasError)
+        {
+            return forSource.Error;
+        }
+        
+        if (!TryKeyword("IN"))
+        {
+            return CreateParseError("Expected IN");
+        }
+        var inColumns = ParseParenthesesWithComma(ParseValue);
+        
+        if(!TryMatch(")"))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        var alias = ParseAliasExpr();
+        
+        return CreateParseResult(new SqlUnpivotClause
+        {
+            NewColumn = newColumn.ResultValue,
+            ForSource = forSource.ResultValue,
+            InColumns = inColumns.ResultValue,
+            AliasName = alias.ResultValue.Name  
+        });
     }
 
     private ParseResult<List<SqlUnionSelect>> ParseUnionSelectClauseList()

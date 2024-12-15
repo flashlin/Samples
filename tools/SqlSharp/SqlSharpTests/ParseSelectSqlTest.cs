@@ -10,6 +10,42 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Unpivot()
+    {
+        var sql = $"""
+                   select id from customer
+                   UNPIVOT (id FOR allcols IN (id,rid,mid) ) up
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" },
+                new SqlUnpivotClause
+                {
+                    NewColumn = new SqlFieldExpr { FieldName = "id" },
+                    ForSource = new SqlFieldExpr { FieldName = "allcols" },
+                    InColumns =
+                    [
+                        new SqlFieldExpr { FieldName = "id" },
+                        new SqlFieldExpr { FieldName = "rid" },
+                        new SqlFieldExpr { FieldName = "mid" }
+                    ],
+                    AliasName = "up"
+                }
+            ]
+        });
+    }
+    
+    [Test]
     public void Union_group_select()
     {
         var sql = $"""
