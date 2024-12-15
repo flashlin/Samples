@@ -6,7 +6,7 @@ public class SqlUnionSelect : ISqlExpression
 {
     public SqlType SqlType => SqlType.UnionSelect;
     public bool IsAll { get; set; } = false;
-    public required SelectStatement SelectStatement { get; set; }
+    public required ISqlExpression SelectStatement { get; set; }
 
     public string ToSql()
     {

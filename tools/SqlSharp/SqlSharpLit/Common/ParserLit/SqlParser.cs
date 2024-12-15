@@ -634,6 +634,34 @@ public class SqlParser
 
         selectStatement.OrderBy = orderByClause.Result;
 
+        if(Try(ParseUnionSelectClauseList, out var unionSelectClauseList))
+        {
+            selectStatement.Unions = unionSelectClauseList.ResultValue;
+        }
+        // do
+        // {
+        //     var unionSelect = Parse_UnionSelect();
+        //     if (unionSelect.HasError)
+        //     {
+        //         return unionSelect.Error;
+        //     }
+        //
+        //     if (unionSelect.Result == null)
+        //     {
+        //         break;
+        //     }
+        //
+        //     selectStatement.Unions.Add(unionSelect.ResultValue);
+        // } while (true);
+
+
+        SkipStatementEnd();
+        return CreateParseResult(selectStatement);
+    }
+
+    private ParseResult<List<SqlUnionSelect>> ParseUnionSelectClauseList()
+    {
+        var unionSelectList = new List<SqlUnionSelect>();
         do
         {
             var unionSelect = Parse_UnionSelect();
@@ -641,18 +669,13 @@ public class SqlParser
             {
                 return unionSelect.Error;
             }
-
             if (unionSelect.Result == null)
             {
                 break;
             }
-
-            selectStatement.Unions.Add(unionSelect.ResultValue);
+            unionSelectList.Add(unionSelect.ResultValue);
         } while (true);
-
-
-        SkipStatementEnd();
-        return CreateParseResult(selectStatement);
+        return CreateParseResult(unionSelectList);
     }
 
     public void SkipStatementEnd()
@@ -678,8 +701,8 @@ public class SqlParser
         {
             isAll = true;
         }
-
-        var select = ParseSelectStatement();
+        
+        var select = ParseGroupOr(ParseSelectStatement);
         if (select.HasError)
         {
             return select.Error;
@@ -690,6 +713,25 @@ public class SqlParser
             IsAll = isAll,
             SelectStatement = select.ResultValue,
         };
+    }
+
+    private ParseResult<ISqlExpression> ParseGroupOr<T>(Func<ParseResult<T>> parseFn)
+        where T : ISqlExpression
+    {
+        if (TryMatch("("))
+        {
+            var inner = parseFn();
+            if (inner.HasError)
+            {
+                return inner.Error;
+            }
+            MatchSymbol(")");
+            return new SqlGroup()
+            {
+                Inner = inner.ResultValue
+            };
+        }
+        return parseFn().To<ISqlExpression>();
     }
 
     public bool Try<T>(Func<ParseResult<T>> parseFunc, out ParseResult<T> result)

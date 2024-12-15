@@ -10,6 +10,55 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Union_group_select()
+    {
+        var sql = $"""
+                   select id from customer
+                   union (
+                   	select id from emp
+                   )
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Unions =
+            [
+                new SqlUnionSelect
+                {
+                    SelectStatement = new SqlGroup()
+                    {
+                        Inner = new SelectStatement
+                        {
+                            Columns =
+                            [
+                                new SelectColumn
+                                {
+                                    Field = new SqlFieldExpr { FieldName = "id" }
+                                }
+                            ],
+                            FromSources =
+                            [
+                                new SqlTableSource { TableName = "emp" }
+                            ]
+                        }
+                    }
+                }
+            ]
+        });
+    }
+
+    [Test]
     public void Where_cast_left_as_int()
     {
         var sql = $"""
@@ -58,7 +107,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Select_rank_from_functionCall()
     {
@@ -90,7 +139,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void From_group_select_t_dot_star()
     {
@@ -125,7 +174,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Function_arithmetic_p2()
     {
@@ -136,7 +185,7 @@ public class ParseSelectSqlTest
                    """;
         var rc = ParseSql(sql);
     }
-    
+
     [Test]
     public void From_table_as_name_with_noLock()
     {
@@ -165,14 +214,14 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void GroupBy_field_and_number()
     {
         var sql = $"""
                    select id from customer
                    group by id&256
-                   """; 
+                   """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
@@ -189,16 +238,19 @@ public class ParseSelectSqlTest
             ],
             GroupBy = new SqlGroupByClause
             {
-                Columns = [new SqlArithmeticBinaryExpr
-                {
-                    Left = new SqlFieldExpr { FieldName = "id" },
-                    Operator = ArithmeticOperator.BitwiseAnd,
-                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "256" }
-                }]
+                Columns =
+                [
+                    new SqlArithmeticBinaryExpr
+                    {
+                        Left = new SqlFieldExpr { FieldName = "id" },
+                        Operator = ArithmeticOperator.BitwiseAnd,
+                        Right = new SqlValue { SqlType = SqlType.IntValue, Value = "256" }
+                    }
+                ]
             }
         });
     }
-    
+
     [Test]
     public void Rank_Partition()
     {
@@ -234,7 +286,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Select_not_field()
     {
@@ -261,14 +313,14 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void DbName_dot_dot_tableName()
     {
         var sql = $"""
                    SELECT id
                    FROM mydb..customer
-                   """; 
+                   """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
@@ -285,7 +337,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Group()
     {
@@ -308,13 +360,14 @@ public class ParseSelectSqlTest
             ],
             GroupBy = new SqlGroupByClause()
             {
-                Columns = [
+                Columns =
+                [
                     new SqlFieldExpr { FieldName = "name" }
                 ]
             }
         });
     }
-    
+
     [Test]
     public void Union_select_join_table_on()
     {
@@ -324,7 +377,7 @@ public class ParseSelectSqlTest
                    union
                    select id from customer2
                    join emp2 on emp2.date = c.date
-                   """; 
+                   """;
         var rc = ParseSql(sql);
         rc.ShouldBe(new SelectStatement
         {
@@ -397,7 +450,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Select_Union_Select()
     {
