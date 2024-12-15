@@ -1206,7 +1206,7 @@ public class SqlParser
 
     private ParseResult<SqlCaseCaluse> ParseCaseClause()
     {
-        if (!TryKeyword("CASE", out _))
+        if (!TryKeyword("CASE", out var startSpan))
         {
             return NoneResult<SqlCaseCaluse>();
         }
@@ -1269,6 +1269,7 @@ public class SqlParser
 
         return CreateParseResult(new SqlCaseCaluse
         {
+            Span = _text.CreateTextSpan(startSpan),
             When = whenExpr,
             WhenThens = whenClause,
             Else = elseClause
@@ -2679,8 +2680,8 @@ column_name AS computed_column_expression
         {
             return new SqlValue
             {
+                Span = quotedString,
                 Value = quotedString.Word,
-                Span = quotedString
             };
         }
 

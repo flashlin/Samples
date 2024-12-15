@@ -943,4 +943,14 @@ public class StringParser
         var readLength = Math.Min(length, remainLength);
         return _text.AsSpan(_position, readLength);
     }
+
+    public TextSpan CreateTextSpan(TextSpan startSpan)
+    {
+        return new TextSpan
+        {
+            Word = _text.Substring(startSpan.Offset, _position - startSpan.Offset),
+            Offset = startSpan.Offset,
+            Length = _position - startSpan.Offset
+        };
+    }
 }
