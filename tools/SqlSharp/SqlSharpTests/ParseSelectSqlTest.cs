@@ -10,6 +10,51 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void Having()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   WHERE id=1
+                   HAVING COUNT(1) = 2 
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            Where = new SqlConditionExpression
+            {
+                Left = new SqlFieldExpr { FieldName = "id" },
+                ComparisonOperator = ComparisonOperator.Equal,
+                Right = new SqlValue { SqlType = SqlType.IntValue, Value = "1" }
+            },
+            Having = new SqlHavingClause()
+            {
+                Condition = new SqlConditionExpression
+                {
+                    Left = new SqlFunctionExpression
+                    {
+                        FunctionName = "COUNT",
+                        Parameters = [new SqlValue { SqlType = SqlType.IntValue, Value = "1" }]
+                    },
+                    ComparisonOperator = ComparisonOperator.Equal,
+                    Right = new SqlValue { SqlType = SqlType.IntValue, Value = "2" }
+                }
+            }
+        });
+    }
+    
+    [Test]
     public void Over_syntax()
     {
         var sql = $"""

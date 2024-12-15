@@ -687,6 +687,11 @@ public class SqlParser
         {
             selectStatement.Unions = unionSelectClauseList.ResultValue;
         }
+        
+        if(Try(ParseHavingClause, out var havingClause))
+        {
+            selectStatement.Having = havingClause.Result;
+        }
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
@@ -1638,6 +1643,24 @@ public class SqlParser
 
         _text.Position = startPosition;
         return NoneResult<SqlFunctionExpression>();
+    }
+
+    private ParseResult<SqlHavingClause> ParseHavingClause()
+    {
+        if(!TryKeywords(["HAVING"], out var startSpan))
+        {
+            return NoneResult<SqlHavingClause>();
+        }
+        var searchCondition = ParseArithmeticExpr();
+        if(searchCondition.HasError)
+        {
+            return searchCondition.Error;
+        }
+        return new SqlHavingClause
+        {
+            Span = _text.CreateSpan(startSpan),
+            Condition = searchCondition.ResultValue
+        };
     }
 
     private ParseResult<SqlJoinTableCondition> Parse_JoinTableSource()

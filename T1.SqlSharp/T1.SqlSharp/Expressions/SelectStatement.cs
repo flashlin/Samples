@@ -15,6 +15,7 @@ public class SelectStatement : ISqlExpression
     public SqlOrderByClause? OrderBy { get; set; }
     public List<SqlUnionSelect> Unions { get; set; } = [];
     public SqlGroupByClause? GroupBy { get; set; }
+    public SqlHavingClause? Having { get; set; }
 
     public string ToSql()
     {
@@ -75,6 +76,11 @@ public class SelectStatement : ISqlExpression
         foreach (var unionSelect in Unions)
         {
             sql.WriteLine(unionSelect.ToSql());
+        }
+        if(Having!=null)
+        {
+            sql.WriteLine("HAVING ");
+            sql.Write(Having.ToSql());
         }
         return sql.ToString();
     }
