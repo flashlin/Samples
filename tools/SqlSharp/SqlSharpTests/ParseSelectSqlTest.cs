@@ -53,6 +53,42 @@ public class ParseSelectSqlTest
             ]
         });
     }
+
+    [Test]
+    public void Left_outer_join()
+    {
+        var sql = $"""
+                   select id 
+                   from customer c
+                   left outer join emp e on e.id = c.id  
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer", Alias = "c" },
+                new SqlJoinTableCondition
+                {
+                    JoinType = JoinType.Left,
+                    JoinedTable = new SqlTableSource { TableName = "emp", Alias = "e" },
+                    OnCondition = new SqlConditionExpression
+                    {
+                        Left = new SqlFieldExpr { FieldName = "e.id" },
+                        ComparisonOperator = ComparisonOperator.Equal,
+                        Right = new SqlFieldExpr { FieldName = "c.id" }
+                    }
+                }
+            ]
+        });
+    }
     
     [Test]
     public void Right_outer_join()
