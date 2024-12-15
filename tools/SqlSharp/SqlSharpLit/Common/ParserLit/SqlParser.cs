@@ -8,7 +8,7 @@ namespace SqlSharpLit.Common.ParserLit;
 public class SqlParser
 {
     private const string ConstraintKeyword = "CONSTRAINT";
-    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", "WHERE", "UNPIVOT"];
+    private static readonly string[] ReservedWords = ["FROM", "SELECT", "JOIN", "LEFT", "UNION", "ON", "GROUP", "WITH", "WHERE", "UNPIVOT", "FOR"];
 
     private readonly StringParser _text;
 
@@ -606,8 +606,12 @@ public class SqlParser
             {
                 return tableSources.Error;
             }
-
             selectStatement.FromSources = tableSources.ResultValue;
+            
+            if(Try(ParseForXmlClause, out var forXmlClause))
+            {
+                selectStatement.ForXml = forXmlClause.ResultValue;
+            }
         }
         
         if (Try(ParseUnpivotClause, out var unpivotClause))
@@ -695,6 +699,35 @@ public class SqlParser
             InColumns = inColumns.ResultValue,
             AliasName = alias.ResultValue.Name  
         });
+    }
+    
+    private ParseResult<SqlForXmlClause> ParseForXmlClause()
+    {
+        if (!TryKeywords("FOR", "XML"))
+        {
+            return NoneResult<SqlForXmlClause>();
+        }
+        
+        var mode = Or(Keywords("AUTO"), Keywords("RAW"), Keywords("EXPLICIT"), Keywords("PATH"))();
+        if (mode.Result == null)
+        {
+            return CreateParseError("Expected AUTO, RAW, EXPLICIT, PATH");
+        }
+        var xmlType = Enum.Parse<ForXmlType>(mode.ResultValue.Value, true);
+        var forXmlClause = new SqlForXmlClause
+        {
+            XmlType = xmlType,
+        };
+        if (xmlType == ForXmlType.Path)
+        {
+            if (!TryMatch("("))
+            {
+                return CreateParseError("Expected (");
+            }
+            forXmlClause.Path = Parse_QuotedString().ResultValue.Value;
+            MatchSymbol(")");
+        }
+        return forXmlClause;
     }
 
     private ParseResult<List<SqlUnionSelect>> ParseUnionSelectClauseList()
@@ -2828,6 +2861,20 @@ column_name AS computed_column_expression
     {
         SkipWhiteSpace();
         return _text.Try(_text.ReadInt, out result);
+    }
+
+    private ParseResult<SqlValue> Parse_QuotedString()
+    {
+        SkipWhiteSpace();
+        var token = _text.ReadSqlQuotedString();
+        if (token.Length == 0)
+        {
+            return NoneResult<SqlValue>();
+        }
+        return new SqlValue
+        {
+            Value = token.Word
+        };
     }
     
     private bool TryReadSqlIdentifier(out TextSpan result)

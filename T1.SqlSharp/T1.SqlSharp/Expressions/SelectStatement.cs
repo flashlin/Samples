@@ -9,6 +9,7 @@ public class SelectStatement : ISqlExpression
     public SqlTopClause? Top { get; set; }
     public List<ISelectColumnExpression> Columns { get; set; } = [];
     public List<ISqlExpression> FromSources { get; set; } = [];
+    public SqlForXmlClause? ForXml { get; set; }
     public ISqlExpression? Where { get; set; }
     public SqlOrderByClause? OrderBy { get; set; }
     public List<SqlUnionSelect> Unions { get; set; } = [];
@@ -49,6 +50,11 @@ public class SelectStatement : ISqlExpression
                 }
             }
             sql.Indent--;
+            
+            if(ForXml!=null)
+            {
+                sql.WriteLine(ForXml.ToSql());
+            }
         }
         sql.Indent++;
         if(Where!=null)

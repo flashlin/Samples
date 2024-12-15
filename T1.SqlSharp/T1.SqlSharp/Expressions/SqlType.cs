@@ -50,5 +50,6 @@ public enum SqlType
     RankClause,
     PartitionBy,
     AliasExpr,
-    UnpivotClause
+    UnpivotClause,
+    ForXmlClause
 }
