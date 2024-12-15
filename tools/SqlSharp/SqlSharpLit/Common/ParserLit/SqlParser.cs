@@ -1452,6 +1452,23 @@ public class SqlParser
             return tableSource;
         });
         var tableSourcesExpr = fromTableSources.ResultValue;
+        
+        var joinTableSources = Parse_JoinTableSources();
+        if (joinTableSources.HasError)
+        {
+            return joinTableSources.Error;
+        }
+        if (joinTableSources.Result != null)
+        {
+            tableSourcesExpr.AddRange(joinTableSources.ResultValue);
+        }
+
+        return CreateParseResult(tableSourcesExpr);
+    }
+
+    private ParseResult<List<SqlJoinTableCondition>> Parse_JoinTableSources()
+    {
+        var joinTableSources = new List<SqlJoinTableCondition>();
         do
         {
             var joinTable = Parse_JoinTableSource();
@@ -1459,16 +1476,13 @@ public class SqlParser
             {
                 return joinTable.Error;
             }
-
             if (joinTable.Result == null)
             {
                 break;
             }
-
-            tableSourcesExpr.Add(joinTable.ResultValue);
+            joinTableSources.Add(joinTable.ResultValue);
         } while (true);
-
-        return CreateParseResult(tableSourcesExpr);
+        return joinTableSources;
     }
 
     private ParseResult<SqlFunctionExpression> ParseFunctionCall()

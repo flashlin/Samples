@@ -72,18 +72,21 @@ set commentary
 
 
 "" 顯示 members
-nnoremap zm :action FileStructurePopup<CR>
+nnoremap zmm :action FileStructurePopup<CR>
 
 ""
 " 聚焦 test explorer
 nmap zft :action ActivateTestToolWindow<CR>
 
 " 單元測試
-nmap zt :action RiderUnitTestRunContextAction<CR>
-nmap ztd :action RiderUnitTestDebugContextAction<CR>
+nmap zrt :action RiderUnitTestRunContextAction<CR>
+nmap zdt :action RiderUnitTestDebugContextAction<CR>
 " 打開單元測試視窗
-nmap zte :action RiderUnitTestFocusExplorerAction<CR>
+nmap zot :action RiderUnitTestFocusExplorerAction<CR>
 nmap zvf :action HideAllWindows<CR>
+
+" 重新 rearrange code layout
+nmap zmc :action RearrangeCode<CR>
 
 """ -------------------------------------------
 " daa 刪除參數
@@ -161,9 +164,9 @@ nnoremap <Leader>e :action EditSourceInNewWindow<CR>
 nnoremap <Leader>n :action NextWindow<CR>
 
 
-nnoremap <A-u> 20k
-nnoremap <A-d> 20j
-nnoremap <A-w> :action CloseAllEditorsButActive<CR>
+nnoremap zk 20k
+nnoremap zj 20j
+nnoremap zw :action CloseAllEditorsButActive<CR>
 
 "" -- Map IDE actions to IdeaVim -- https://jb.gg/abva4t
 "" Map \r to the Reformat Code action
