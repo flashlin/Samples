@@ -34,6 +34,11 @@ public class StringParser
     {
         return _text.Substring(offset, _position - offset);
     }
+    
+    public string GetText(int startOffset, int endOffset)
+    {
+        return _text.Substring(startOffset, endOffset - startOffset);
+    }
 
     public bool IsEnd()
     {
@@ -846,15 +851,10 @@ public class StringParser
         var startPosition = _position;
         foreach (var keyword in keywords)
         {
-            if (!TryKeywordIgnoreCase(keyword))
+            if (!TryKeywordIgnoreCase(keyword, out _))
             {
                 _position = startPosition;
-                textSpan = new TextSpan
-                {
-                    Word = string.Empty,
-                    Offset = startPosition,
-                    Length = 0
-                };
+                textSpan = TextSpan.Empty(startPosition);
                 return false;
             }
         }
@@ -867,7 +867,7 @@ public class StringParser
         return true;
     }
 
-    public bool TryKeywordIgnoreCase(string keyword)
+    public bool TryKeywordIgnoreCase(string keyword, out TextSpan textSpan)
     {
         SkipWhitespace();
         var startPosition = _position;
@@ -881,6 +881,7 @@ public class StringParser
         var word = _text.Substring(startPosition, readCount);
         if (!string.Equals(word, keyword, StringComparison.OrdinalIgnoreCase))
         {
+            textSpan = TextSpan.Empty(startPosition);
             _position = startPosition;
             return false;
         }
@@ -889,6 +890,7 @@ public class StringParser
         if (IsWordChar(nextChar))
         {
             _position = startPosition;
+            textSpan = TextSpan.Empty(startPosition);
             return false;
         }
         
@@ -897,6 +899,12 @@ public class StringParser
             Word = word,
             Offset = _position,
             Length = keyword.Length
+        };
+        textSpan = new TextSpan
+        {
+            Word = word,
+            Offset = startPosition,
+            Length = readCount
         };
         return true;
     }

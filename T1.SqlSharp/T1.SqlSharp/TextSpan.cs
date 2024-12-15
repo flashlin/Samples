@@ -15,4 +15,13 @@ public class TextSpan
             Length = closeSpan.Offset + closeSpan.Length - textSpan.Offset
         };
     }
+
+    public static TextSpan Empty(int startPosition)
+    {
+        return new TextSpan()
+        {
+            Offset = startPosition,
+            Length = 0
+        };
+    }
 }
