@@ -10,6 +10,41 @@ namespace SqlSharpTests;
 public class ParseSelectSqlTest
 {
     [Test]
+    public void ForXmlAuto()
+    {
+        var sql = $"""
+                   SELECT id
+                   FROM customer
+                   for xml auto, ROOT('customer')
+                   """;
+        var rc = ParseSql(sql);
+        rc.ShouldBe(new SelectStatement
+        {
+            Columns =
+            [
+                new SelectColumn
+                {
+                    Field = new SqlFieldExpr { FieldName = "id" }
+                }
+            ],
+            FromSources =
+            [
+                new SqlTableSource { TableName = "customer" }
+            ],
+            ForXml = new SqlForXmlAutoClause
+            {
+                CommonDirectives =
+                [
+                    new SqlForXmlRootDirective
+                    {
+                        RootName = new SqlValue { Value = "'customer'" }
+                    }
+                ]
+            }
+        });
+    }
+
+    [Test]
     public void ForXmlPath()
     {
         var sql = $"""
@@ -36,7 +71,7 @@ public class ParseSelectSqlTest
             }
         });
     }
-    
+
     [Test]
     public void Unpivot()
     {
@@ -72,7 +107,7 @@ public class ParseSelectSqlTest
             ]
         });
     }
-    
+
     [Test]
     public void Union_group_select()
     {

@@ -2,11 +2,34 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlForXmlPathClause : ISqlExpression
+public interface ISqlForXmlClause : ISqlExpression
+{
+    List<SqlForXmlRootDirective> CommonDirectives { get; set; }
+}
+
+public class SqlForXmlAutoClause : ISqlForXmlClause
+{
+    public SqlType SqlType { get; } = SqlType.ForXmlAutoClause;
+    public List<SqlForXmlRootDirective> CommonDirectives { get; set; } = [];
+
+    public string ToSql()
+    {
+        var sql = new IndentStringBuilder();
+        sql.Write("FOR XML AUTO");
+        if(CommonDirectives.Count>0)
+        {
+            sql.Write(" ");
+            sql.Write(string.Join(",", CommonDirectives.Select(x => x.ToSql())));
+        }
+        return sql.ToString();
+    }
+}
+
+public class SqlForXmlPathClause : ISqlForXmlClause
 {
     public SqlType SqlType { get; } = SqlType.ForXmlPathClause;
     public string? PathName { get; set; }
-    public List<ISqlExpression> CommonDirectives { get; set; } = [];
+    public List<SqlForXmlRootDirective> CommonDirectives { get; set; } = [];
 
     public string ToSql()
     {
@@ -18,7 +41,11 @@ public class SqlForXmlPathClause : ISqlExpression
             sql.Write(PathName);
             sql.Write(")");
         }
-        sql.Write(string.Join(",", CommonDirectives.Select(x => x.ToSql())));
+        if(CommonDirectives.Count>0)
+        {
+            sql.Write(",");
+            sql.Write(string.Join(",", CommonDirectives.Select(x => x.ToSql())));
+        }
         return sql.ToString();
     }
 }

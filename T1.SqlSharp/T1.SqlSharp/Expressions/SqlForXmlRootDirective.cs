@@ -2,9 +2,11 @@ using T1.Standard.IO;
 
 namespace T1.SqlSharp.Expressions;
 
-public class SqlForXmlRootDirective
+public class SqlForXmlRootDirective : ISqlExpression
 {
+    public SqlType SqlType { get; } = SqlType.ForXmlRootDirective;
     public ISqlExpression? RootName { get; set; }
+
     public string ToSql()
     {
         var sql = new IndentStringBuilder();

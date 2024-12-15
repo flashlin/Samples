@@ -608,7 +608,7 @@ public class SqlParser
             }
             selectStatement.FromSources = tableSources.ResultValue;
             
-            if(Try(ParseForXmlPathClause, out var forXmlClause))
+            if(Try(ParseForXmlClause, out var forXmlClause))
             {
                 selectStatement.ForXml = forXmlClause.ResultValue;
             }
@@ -650,6 +650,19 @@ public class SqlParser
 
         SkipStatementEnd();
         return CreateParseResult(selectStatement);
+    }
+
+    private ParseResult<ISqlForXmlClause> ParseForXmlClause()
+    {
+        if(Try(ParseForXmlPathClause, out var forXmlPathClause))
+        {
+            return forXmlPathClause.ResultValue;
+        }
+        if(Try(ParseForXmlAutoClause, out var forXmlAutoClause))
+        {
+            return forXmlAutoClause.ResultValue;
+        }
+        return NoneResult<ISqlForXmlClause>();
     }
     
     private ParseResult<SqlUnpivotClause> ParseUnpivotClause()
@@ -714,8 +727,42 @@ public class SqlParser
             forXmlClause.PathName = Parse_QuotedString().ResultValue.Value;
             MatchSymbol(")");
         }
-
+        forXmlClause.CommonDirectives = Parse_ForXmlRootDirectives();
         return forXmlClause;
+    }
+    
+    private ParseResult<SqlForXmlAutoClause> ParseForXmlAutoClause()
+    {
+        if (!TryKeywords("FOR", "XML", "AUTO"))
+        {
+            return NoneResult<SqlForXmlAutoClause>();
+        }
+        var forXmlClause = new SqlForXmlAutoClause();
+        forXmlClause.CommonDirectives = Parse_ForXmlRootDirectives();
+        return forXmlClause;
+    }
+    
+    private List<SqlForXmlRootDirective> Parse_ForXmlRootDirectives()
+    {
+        var directives = new List<SqlForXmlRootDirective>();
+        if (!TryMatch(","))
+        {
+            return directives;
+        }
+        var elements = ParseWithComma(() =>
+        {
+            if (TryKeyword("ROOT"))
+            {
+                var rootName = ParseWithParentheses(ParseValue);
+                return new SqlForXmlRootDirective
+                {
+                    RootName = rootName.ResultValue
+                };
+            }
+            return NoneResult<SqlForXmlRootDirective>();
+        });
+        directives.AddRange(elements.ResultValue);
+        return directives;
     }
 
     private ParseResult<List<SqlUnionSelect>> ParseUnionSelectClauseList()
@@ -2428,6 +2475,28 @@ column_name AS computed_column_expression
         }
 
         return NoneResult<SqlParameterValue>();
+    }
+    
+    
+    private ParseResult<T> ParseWithParentheses<T>(Func<ParseResult<T>> parseElemFn)
+    {
+        if (!TryMatch("("))
+        {
+            return CreateParseError("Expected (");
+        }
+
+        var inner = parseElemFn();
+        if (inner.HasError)
+        {
+            return inner.Error;
+        }
+
+        if (!TryMatch(")"))
+        {
+            return CreateParseError("Expected )");
+        }
+
+        return inner;
     }
 
     private ParseResult<List<T>> ParseParenthesesWithComma<T>(Func<ParseResult<T>> parseElemFn)
